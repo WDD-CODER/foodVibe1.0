@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   signal,
   computed,
+  effect,
   OnInit,
   OnDestroy,
   WritableSignal
@@ -166,6 +167,13 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       { urlParam: 'lowStock', signal: this.lowStockOnly_, serializer: BooleanParam },
       { urlParam: 'nutrition', signal: this.nutritionFilter_, serializer: StringParam }
     ])
+
+    // Pagination (plan 304 M3): jump back to page 1 whenever the filtered/sorted result
+    // set changes, so a search/filter doesn't strand the user on a now-irrelevant page.
+    effect(() => {
+      this.filteredProductIds_()
+      this.currentPage_.set(1)
+    })
   }
 
   ngOnInit(): void {
@@ -339,6 +347,31 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       }
     })
   )
+
+  // Pagination (plan 304 M3) — see recipe-book-list.component.ts for the full rationale
+  // (cdk-virtual-scroll is incompatible with the shared .c-list-row display:contents grid).
+  protected readonly PAGE_SIZE = 50
+  protected readonly currentPage_ = signal(1)
+  protected readonly totalPages_ = computed(() => Math.max(1, Math.ceil(this.displayRows_().length / this.PAGE_SIZE)))
+  protected readonly displayPage_ = computed(() => Math.min(this.currentPage_(), this.totalPages_()))
+  protected readonly pagedRows_ = computed(() => {
+    const start = (this.displayPage_() - 1) * this.PAGE_SIZE
+    return this.displayRows_().slice(start, start + this.PAGE_SIZE)
+  })
+  protected readonly pageIndicatorText_ = computed(() =>
+    this.translationService
+      .translate('page_indicator')
+      .replace('{n}', String(this.displayPage_()))
+      .replace('{m}', String(this.totalPages_()))
+  )
+
+  protected goToPrevPage(): void {
+    this.currentPage_.update((p) => Math.max(1, p - 1))
+  }
+
+  protected goToNextPage(): void {
+    this.currentPage_.update((p) => Math.min(this.totalPages_(), p + 1))
+  }
 
   private compareProducts(a: Product, b: Product, field: SortField): number {
     const hebrewCompare = (aStr: string, bStr: string) => (aStr || '').localeCompare(bStr || '', 'he')

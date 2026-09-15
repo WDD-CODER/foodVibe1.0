@@ -121,7 +121,7 @@
         }
       </div>
     }
-    @for (row of displayRows_(); track row.product._id) {
+    @for (row of pagedRows_(); track row.product._id) {
       <div
         class="product-grid-row c-list-row"
         [class.row--invalid]="row.validationStatus === 'invalid'"
@@ -236,6 +236,22 @@
             (toggle)="selection.toggle(row.product._id)"
           />
         </div>
+      </div>
+    }
+    @if (totalPages_() > 1) {
+      <div class="c-pagination-controls">
+        <button type="button" class="c-btn-ghost--sm" [disabled]="displayPage_() === 1" (click)="goToPrevPage()">
+          {{ 'page_previous' | translatePipe }}
+        </button>
+        <span>{{ pageIndicatorText_() }}</span>
+        <button
+          type="button"
+          class="c-btn-ghost--sm"
+          [disabled]="displayPage_() === totalPages_()"
+          (click)="goToNextPage()"
+        >
+          {{ 'page_next' | translatePipe }}
+        </button>
       </div>
     }
   </ng-container>

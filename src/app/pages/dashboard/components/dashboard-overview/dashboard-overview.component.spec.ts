@@ -9,6 +9,8 @@ import { DashboardOverviewComponent } from './dashboard-overview.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { RecipeDataService } from '@services/recipe-data.service'
+import { DishDataService } from '@services/dish-data.service'
 import { ActivityLogService, ActivityEntry, ActivityAction, ActivityEntityType } from '@services/activity-log.service'
 import { UserService } from '@services/user.service'
 import { TranslationService } from '@services/translation.service'
@@ -24,6 +26,8 @@ describe('DashboardOverviewComponent', () => {
   let mockRecipes: WritableSignal<Recipe[]>
   let mockLowStock: WritableSignal<Product[]>
   let mockIsLoggedIn: WritableSignal<boolean>
+  let mockRecipeData: jasmine.SpyObj<Pick<RecipeDataService, 'getCount'>>
+  let mockDishData: jasmine.SpyObj<Pick<DishDataService, 'getCount'>>
 
   const makeEntry = (overrides: Partial<ActivityEntry> = {}): ActivityEntry => ({
     id: 'e1',
@@ -53,6 +57,13 @@ describe('DashboardOverviewComponent', () => {
       lowStockProducts_: mockLowStock.asReadonly()
     }
 
+    // totalRecipes_/unapprovedCount_ come from the lightweight /count endpoint now
+    // (plan 304 M2), not kitchenState.recipes_() — default to 0 like a fresh signal.
+    mockRecipeData = jasmine.createSpyObj('RecipeDataService', ['getCount'])
+    mockRecipeData.getCount.and.resolveTo(0)
+    mockDishData = jasmine.createSpyObj('DishDataService', ['getCount'])
+    mockDishData.getCount.and.resolveTo(0)
+
     const mockTranslation = jasmine.createSpyObj('TranslationService', [
       'translate',
       'resolveUnit',
@@ -69,6 +80,8 @@ describe('DashboardOverviewComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: KitchenStateService, useValue: mockKitchenState },
+        { provide: RecipeDataService, useValue: mockRecipeData },
+        { provide: DishDataService, useValue: mockDishData },
         { provide: ActivityLogService, useValue: mockActivityLog },
         { provide: UserService, useValue: { isLoggedIn: mockIsLoggedIn } },
         { provide: Router, useValue: mockRouter },
@@ -104,11 +117,17 @@ describe('DashboardOverviewComponent', () => {
     expect(kpiVal.nativeElement.textContent.trim()).toBe('3')
   })
 
-  it('should reflect totalRecipes_ from signal', () => {
-    fixture.detectChanges()
-    mockRecipes.set([{} as Recipe, {} as Recipe])
-    fixture.detectChanges()
-    const kpiVal = fixture.debugElement.query(By.css('[data-testid="kpi-total-recipes"] .kpi-value'))
+  it('should reflect totalRecipes_ from the /count endpoint', async () => {
+    // totalRecipes_ is fetched once in the constructor (plan 304 M2) — configure the
+    // spy's resolved value before creating a fresh instance, not after.
+    mockRecipeData.getCount.and.resolveTo(1)
+    mockDishData.getCount.and.resolveTo(1)
+    const freshFixture = TestBed.createComponent(DashboardOverviewComponent)
+    freshFixture.componentRef.setInput('activeTab', 'overview')
+    freshFixture.detectChanges()
+    await freshFixture.whenStable()
+    freshFixture.detectChanges()
+    const kpiVal = freshFixture.debugElement.query(By.css('[data-testid="kpi-total-recipes"] .kpi-value'))
     expect(kpiVal.nativeElement.textContent.trim()).toBe('2')
   })
 
@@ -120,15 +139,15 @@ describe('DashboardOverviewComponent', () => {
     expect(kpiVal.nativeElement.textContent.trim()).toBe('1')
   })
 
-  it('should count unapproved recipes', () => {
-    fixture.detectChanges()
-    mockRecipes.set([
-      { is_approved_: false } as unknown as Recipe,
-      { is_approved_: false } as unknown as Recipe,
-      { is_approved_: true } as unknown as Recipe
-    ])
-    fixture.detectChanges()
-    const kpiVal = fixture.debugElement.query(By.css('[data-testid="kpi-unapproved"] .kpi-value'))
+  it('should count unapproved recipes via the /count endpoint', async () => {
+    mockRecipeData.getCount.and.callFake((filter?: string) => Promise.resolve(filter === 'unapproved' ? 1 : 2))
+    mockDishData.getCount.and.callFake((filter?: string) => Promise.resolve(filter === 'unapproved' ? 1 : 1))
+    const freshFixture = TestBed.createComponent(DashboardOverviewComponent)
+    freshFixture.componentRef.setInput('activeTab', 'overview')
+    freshFixture.detectChanges()
+    await freshFixture.whenStable()
+    freshFixture.detectChanges()
+    const kpiVal = freshFixture.debugElement.query(By.css('[data-testid="kpi-unapproved"] .kpi-value'))
     expect(kpiVal.nativeElement.textContent.trim()).toBe('2')
   })
 

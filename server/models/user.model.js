@@ -10,6 +10,9 @@ const userSchema = new Schema(
     passwordHash: { type: String, default: null },
     failedAttempts: { type: Number, default: 0 },
     lockedUntil: { type: Number, default: null },
+    // Master version (server/services/master-version.js) this user was last synced against.
+    // POST /refresh skips syncMasterToUser when this already matches the current version.
+    lastSyncedMasterVersion: { type: Number, default: 0 },
   },
   { timestamps: false }
 );

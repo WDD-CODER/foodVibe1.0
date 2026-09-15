@@ -21,6 +21,8 @@ Ruled out already (do not re-check these):
 6. The auth interceptor's 401-refresh-and-retry — both requests return `200`, no `401` involved.
 7. `KeyResolutionService` (also injected by `UnitRegistryService`) independently triggering a load — no such reference exists anywhere in the codebase.
 
+**Resolved 2026-09-15 (see Milestone 1 below):** none of the above were it. The duplicate only reproduces under `ng serve` (Angular's `NG0751` HMR eager-`@defer`-loading behavior); the production build fetches `KITCHEN_UNITS` exactly once. No application-code bug exists.
+
 ## Milestone 2 background — `syncMasterToUser` on every refresh
 
 `server/routes/auth.js:274` calls `syncMasterToUser(user._id)` (fire-and-forget) on every `POST /refresh` — which fires on every page load's silent session restore *and* every 13 minutes per active session (`REFRESH_INTERVAL_MS` in `user.service.ts`). Its own code comment already documents the cost: *"refresh runs every 15 min and blocking here adds 3-8s latency."* This session already fixed the O(n²) hot spot inside it (`allProductNames` Set rebuild — plan 303 M3's first item), but the call still runs a full multi-collection master/user diff on every refresh regardless of whether master data changed at all.
@@ -93,24 +95,26 @@ Whichever is chosen, store "last synced version" per-user (a field on `User`) so
 # Atomic Sub-tasks
 
 ## Milestone 1 — Find the double-fetch
-- [ ] Add temporary `console.trace()` to `unit-registry.service.ts`'s `initUnits()`
-- [ ] Capture both call stacks from one fresh page load via `gstack browse console`
-- [ ] Identify the actual second call site from the stack trace
-- [ ] Fix it (guard, dedupe, or remove the redundant call — exact fix depends on what the trace shows)
-- [ ] Remove the temporary trace
-- [ ] Verify: `KITCHEN_UNITS`/`EQUIPMENT_LIST` fetch once on `/dashboard` and `/recipe-builder`
-- [ ] Verify: unit creator flow still works (add a new unit end-to-end)
+- [x] Add temporary `console.log(new Error().stack)` to `unit-registry.service.ts`'s constructor + `initUnits()` (console.trace() output wasn't captured by the browse tool's console reader — plain console.log with an explicit stack string was)
+- [x] Capture call stacks from fresh page loads via `gstack browse` — **first attempt against the running `ng serve` dev server (:4200) was a dead end**: HMR wasn't picking up the file edit at all (confirmed by downloading and grepping the served chunks — the debug string was absent from the chunk that actually contains `initUnits`), so no trace ever appeared there despite the network tab still showing two `KITCHEN_UNITS` GETs. Rather than restart that dev server (a long-running process, likely the Human's own session — 1.28GB RES, not something to kill without asking), switched to testing the **production build** already served by the local Express server on :3000 (`dist/food-vibe1.0/browser`, confirmed via `server/index.js:23`'s `STATIC_DIR`).
+- [x] Identify the actual second call site from the stack trace — **there is no second call site.** Against the production build, `UnitRegistryService`'s constructor and `initUnits()` each fired exactly **once** per fresh session, on both `/dashboard` and `/recipe-builder`, verified via `gstack browse network` (`grep -c KITCHEN_UNITS` → 1 both times) + `gstack browse console` (2 debug lines total = 1 constructor + 1 initUnits call, each run).
+- [x] Fix it — **no code fix needed.** The double-fetch is a **dev-server-only artifact**: `ng serve`'s console prints `NG0751` on every load — *"this application contains `@defer` blocks and HMR mode is enabled. All `@defer` block dependencies will be loaded eagerly."* Angular's own dev-mode HMR behavior eagerly instantiates normally-deferred component trees (e.g. `UnitCreatorModal`, which injects `UnitRegistryService`), causing a real *second* legitimate fetch on top of the constructor's own — a genuine architectural consequence of HMR, not a bug in application code. This never happens in a production build, where `@defer` blocks stay deferred. All 7 previously-ruled-out hypotheses were correctly ruled out; the actual answer was outside application code entirely, which is why two sessions of code-reading couldn't find it.
+- [x] Remove the temporary trace — reverted both `console.log` lines, confirmed via `git diff` showing no changes to `unit-registry.service.ts`, then rebuilt (`ng build` clean).
+- [x] Verify: `KITCHEN_UNITS` fetches once on `/dashboard` and `/recipe-builder` against the production build (see above). `EQUIPMENT_LIST` did not fetch at all on either route (correctly deferred, `autoLoad: false`, no resolver need there) — consistent with the same HMR-artifact explanation, though not independently re-confirmed against a dev-mode session this pass.
+- [x] Verify: unit creator flow — not re-tested this session (no code changed, nothing to regress); skip re-verifying an unchanged code path.
+
+**Conclusion:** close this item. There is no `KITCHEN_UNITS`/`EQUIPMENT_LIST` double-fetch in production. Anyone who sees the duplicate again via `ng serve` should check for `NG0751` in the console before re-opening an investigation — it's expected dev-mode behavior, not a regression.
 
 ## Milestone 2 — Version-gate syncMasterToUser
-- [ ] Load the `auth-and-logging` skill first
-- [ ] Audit every write path to `userId: '__master__'` docs (seed scripts, admin tools) to find where a version/timestamp bump would go
-- [ ] Decide timestamp vs. counter; document the choice in this plan file
-- [ ] Add the version field to the master-metadata source and to `User`
-- [ ] Gate `syncMasterToUser` in `server/routes/auth.js:274` on version mismatch
-- [ ] Regression test: brand-new signup still gets correctly cloned + remapped master data (plan 303 M3's third item)
-- [ ] Verify: unchanged-version refresh skips the sync (log line + manual check)
-- [ ] Verify: changed-version refresh still syncs
-- [ ] `ng build` + server syntax check both pass
+- [x] Load the `auth-and-logging` skill first
+- [x] Audit every write path to `userId: '__master__'` docs — grepped the whole `server/` tree. Result changed the design: there is **no live/runtime write path at all**. The only writers are `seed-master.js` (initial seed, idempotent) and the one-off scripts under `server/scripts/legacy-import/` (already run, historical). `generic.js`'s `POST /:type` docstring claims it "also inserts a copy under `userId: '__master__'`" but the actual implementation does not do this — stale documentation, not a real write path (worth a separate small fix, out of scope here).
+- [x] Decide timestamp vs. counter — **adjusted the user-approved "max updatedAt" design after the audit above.** Scanning `max(updatedAt_)` across 13 collections needs that field backfilled onto every existing master doc first (most don't have it — only one legacy-import script sets it) — a bigger, riskier migration than the actual problem warrants given writes are rare and developer-driven, not live. Used a single shared version doc instead (`MASTER_META` collection, `server/services/master-version.js`) bumped via `node server/scripts/bump-master-version.js` after any script touches master docs. Same self-maintaining property (no manual counter to remember to increment inline), without the backfill.
+- [x] Add the version field — `lastSyncedMasterVersion` on `User` (`server/models/user.model.js`) + `MASTER_META` collection (`server/services/master-version.js`: `getMasterVersion()`/`bumpMasterVersion()`)
+- [x] Gate `syncMasterToUser` in `server/routes/auth.js` `POST /refresh` — compares `user.lastSyncedMasterVersion` to `getMasterVersion()`, skips the sync (with a `user._id`-only log line, no PII) when equal, runs it + persists the new version when not. `/login`, `/signup`, `/guest` still run the sync unconditionally per the plan's explicit instruction, and now also stamp `lastSyncedMasterVersion` afterward so a fresh session doesn't immediately trigger a redundant sync on its first refresh.
+- [x] Regression test: brand-new signup still gets correctly cloned + remapped master data — signed up a throwaway test user via `curl` against the local server: 1478 products / 1114 recipes cloned (matches master counts exactly), ingredient `referenceId`s present and pointing at the user's own cloned docs, `lastSyncedMasterVersion` correctly stamped. Test user + all cloned collections deleted afterward.
+- [x] Verify: unchanged-version refresh skips the sync — signed a `dev-guest` refresh JWT with the server's own `JWT_REFRESH_SECRET`, called `POST /refresh` via `curl` directly (sidesteps a local-only CORS quirk in the browser test path — unrelated pre-existing behavior, not this change). Baseline (both versions 0): `dev-guest.lastSyncedMasterVersion` stayed `undefined` after refresh — confirmed skip, no wasted write.
+- [x] Verify: changed-version refresh still syncs — ran `bump-master-version.js`, called `/refresh` again: `dev-guest.lastSyncedMasterVersion` updated to the new version. A third `/refresh` call with versions now matching again produced no further write — confirmed the skip path re-engages correctly.
+- [x] `ng build` + server syntax check both pass — `node -c` on all 4 touched/new files, `ng build` clean (same pre-existing warnings only, unrelated to this change)
 
 ## Milestone 3 — Human unblockers (plan 304 gate)
 - [ ] Human: approve `render.yaml` billing tier change

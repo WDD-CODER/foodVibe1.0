@@ -74,10 +74,10 @@ Dedicated lightweight count endpoints (`GET /api/v1/data/:type/count?filter=...`
 - [x] Verify per the Verification section above (build, curl, live typeahead behavior, no regression on inventory/recipe-book, no keystroke-spam requests)
 
 ## Milestone 2 (separate, larger — scope its own plan once Milestone 1 is validated)
-- [ ] Design faceted server-side search/pagination for `inventory-product-list` and `recipe-book-list` (out of scope for this plan's execution — placeholder so it isn't lost)
+- [ ] Carved out to `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md` (2026-09-15) — design faceted server-side search/pagination for `inventory-product-list` and `recipe-book-list`. Gated on plan 304's milestones per that plan's own note; see plan 310's Prerequisite Gate.
 
 ## Milestone 3 (small, independent)
-- [ ] Add lightweight count endpoint(s) so dashboard stats don't require the full array
+- [x] Add lightweight count endpoint(s) so dashboard stats don't require the full array — `GET /api/v1/data/:type/count?filter=lowStock|unapproved` added to `server/routes/generic.js`, mirroring `kitchen-state.service.ts`'s `lowStockProducts_`/`dashboard-overview.component.ts`'s `unapprovedCount_` filters exactly. Verified via `ng build` + live curl against `dev-guest`'s real data (PRODUCT_LIST count=1478, lowStock=0; RECIPE_LIST count=1114/unapproved=1114; DISH_LIST count=1002/unapproved=1002; unknown-filter and wrong-type-filter both return 400). `dashboard-overview.component.ts` intentionally NOT rewired to use it — per this plan's own note, that's harmless-but-pointless until Milestone 2 reduces how often the full collection is loaded anyway; wiring now would add network latency for zero benefit.
 
 ## Milestone 4 (small, independent, lower priority)
 - [ ] Investigate collapsing `UserService._reloadDataServices()`'s post-login re-fetch with each service's constructor-time load so a fresh session does one full fetch instead of two

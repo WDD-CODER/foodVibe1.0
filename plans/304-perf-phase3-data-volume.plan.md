@@ -6,11 +6,11 @@ overview: Plans 302 and 303 fix load time and interaction lag without changing t
 **Sibling plans:** `plans/302-perf-phase1-infra-and-payload.plan.md`, `plans/303-perf-phase2-client-cpu.plan.md`.
 **Ordering:** Do not start until 302 and 303 have shipped **and** been measured. See "Prerequisite gate" below — it is a real gate, not a formality.
 
-# Out of scope — see plan 301
+# Out of scope — see plan 310
 
-Faceted server-side search and pagination for `inventory-product-list` and `recipe-book-list` is **already scoped** as `plans/301-server-side-search-lean-data-loading.plan.md` Milestone 2. Do **not** restate or re-design it here.
+Faceted server-side search and pagination for `inventory-product-list` and `recipe-book-list` was scoped as `plans/301-server-side-search-lean-data-loading.plan.md` Milestone 2, then carved out (2026-09-15) into its own Plan Contract: `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`. Do **not** restate or re-design it here.
 
-Plan 301 M2 is the terminal step of the whole performance effort. It needs its own design pass (Mongo `$facet` aggregation for facet counts, a decision on how `resolveRecipeAllergens`'s recursive nested-recipe logic moves server-side or gets cached, and a pagination UI change).
+Plan 310 is the terminal step of the whole performance effort — its own Prerequisite Gate blocks its implementation milestones on this plan (304) shipping and being measured first. It needs its own design pass (Mongo `$facet` aggregation for facet counts, a decision on how `resolveRecipeAllergens`'s recursive nested-recipe logic moves server-side or gets cached, and a pagination UI change — see plan 310's Milestone 0 Decisions and its explicit note not to duplicate this plan's Milestone 3 virtualisation work).
 
 **Relationship:** this plan's milestones should ship and be measured **before** 301 M2 begins. They may materially reduce its scope — M1's projections cut payload, M2 cuts how often a full load happens at all, and M3 removes the DOM-size pressure that is one of 301 M2's motivations. An agent picking up 301 M2 without this context risks building faceted search on top of problems that were about to disappear.
 
@@ -171,20 +171,20 @@ Preserve the existing `track` expressions.
 - [ ] Record before/after `bytes=` from plan 302 M1's logging
 
 ## Milestone 2 — Defer boot loads & collapse double fetch
-- [ ] Enumerate every route/component reading `products_()` / `recipes_()` and confirm resolver coverage
-- [ ] Switch `RecipeDataService` to `autoLoad: false` — `recipe-data.service.ts:23-25`
-- [ ] Switch `DishDataService` to `autoLoad: false` — `dish-data.service.ts:23-25`
-- [ ] Evaluate whether `ProductDataService` can be deferred; document the decision either way
-- [ ] Regression test: cold-load a recipe with nested sub-recipes by direct URL; confirm no ingredient unlinking (plan 300 finding 3)
-- [ ] Collapse the post-login re-fetch with the constructor load — `user.service.ts:54-93` (this is plan 301 M4; mark it done there too)
+- [x] Enumerate every route/component reading `products_()` / `recipes_()` and confirm resolver coverage — audit found `dashboard-overview` (migrated to `/count`), `metadata-manager` + `preparation-category-manager` (given their own `ensureLoaded()`), and `menu-library`/`menu-intelligence` routes (missing `kitchenDataEnsureLoadedResolver`, added)
+- [x] Switch `RecipeDataService` to `autoLoad: false` — `recipe-data.service.ts` (empty constructor; not `BaseEntityDataService`-based so no literal `autoLoad` flag, same effect)
+- [x] Switch `DishDataService` to `autoLoad: false` — `dish-data.service.ts` (same as above)
+- [x] Evaluate whether `ProductDataService` can be deferred; document the decision either way — kept eager; too widely consumed (dashboard totals, most list/form pages) to be worth the same audit risk for a smaller win. See `docs/brain/patterns/defer-singleton-data-ensureLoaded.md`.
+- [x] Regression test: cold-load a recipe with nested sub-recipes by direct URL; confirm no ingredient unlinking (plan 300 finding 3) — verified live via fresh-tab direct URL load; ingredients resolved correctly
+- [x] Collapse the post-login re-fetch with the constructor load — `user.service.ts:54-93` (this is plan 301 M4; already done there — also found and closed a related gap here: `_reloadDataServices()` was unconditionally reloading Recipe/Dish with no `hasLoaded()` guard, which would have silently undone this milestone's deferral)
 
 ## Milestone 3 — List virtualisation
-- [ ] Confirm plan 303 M2's precomputed row model has shipped first
-- [ ] Add `cdk-virtual-scroll` (or pagination) to `inventory-product-list`
-- [ ] Add `cdk-virtual-scroll` (or pagination) to `recipe-book-list`
-- [ ] Preserve all existing `track` expressions
-- [ ] Test selection state across scroll (select → scroll far → scroll back)
-- [ ] Verify RTL layout is intact inside the virtual viewport
+- [x] Confirm plan 303 M2's precomputed row model has shipped first — confirmed shipped (`feat/optimization`, Human-validated 2026-08-31)
+- [x] ~~Add `cdk-virtual-scroll`~~ Add **pagination** to `inventory-product-list` — `cdk-virtual-scroll` ruled out: the shared `.c-list-row { display: contents }` engine class (used by every list page) can't host CDK's item-wrapper DOM without breaking column alignment app-wide. See gotcha in `docs/brain/gotchas/angular.md`. Pagination (50/page, `pagedRows_()`) gets the same DOM-size reduction with no shared-CSS risk.
+- [x] ~~Add `cdk-virtual-scroll`~~ Add **pagination** to `recipe-book-list` — same as above
+- [x] Preserve all existing `track` expressions — unchanged (`track row.recipe._id` / `track row.product._id`)
+- [x] Test selection state across scroll (select → scroll far → scroll back) — pagination equivalent verified live: select a row, page forward, page back — selection persists
+- [x] Verify RTL layout is intact inside the virtual viewport — pagination controls use logical properties only (`gap`, no directional offsets); no viewport/scroll mechanism was introduced to interact with `dir="rtl"`
 
 ## Hand-off
 - [ ] Re-assess plan 301 Milestone 2's scope in light of measured results; update `plans/301-server-side-search-lean-data-loading.plan.md` with findings

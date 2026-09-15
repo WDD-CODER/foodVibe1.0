@@ -109,6 +109,21 @@ export class HttpStorageAdapter {
   }
 
   /**
+   * Lightweight count (plan 301 M3 / 304 M2) — for dashboard stats that don't need
+   * the full collection loaded. Mirrors the server's `filter=lowStock|unapproved`.
+   */
+  async count(entityType: string, filter?: string): Promise<number> {
+    const params = filter ? `?${new URLSearchParams({ filter }).toString()}` : ''
+    const { count } = await firstValueFrom(
+      this.http.get<{ count: number }>(`${this.base}/api/v1/data/${entityType}/count${params}`, {
+        headers: this.headers(),
+        withCredentials: true
+      })
+    )
+    return count
+  }
+
+  /**
    * Deletes many entities by _id in one request (user-scoped on the server).
    */
   async deleteBulk(entityType: string, ids: string[]): Promise<void> {

@@ -977,6 +977,24 @@ textarea.c-input {
   background: var(--bg-warning-soft);
 }
 
+/* ---- Engine: Pagination controls (plan 304 M3) — row-count reduction for large
+   .c-list-row/.c-list-body-cell grids where cdk-virtual-scroll's item wrapper would
+   break the flat display:contents column layout. Spans the full table-body grid. ---- */
+.c-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: 1 / -1;
+  gap: var(--space-4);
+
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+
+  padding-block: var(--space-3);
+  border-block-start: 1px solid var(--border-default);
+}
+
 /* ---- Engine: Visually Hidden (accessibility) ---- */
 .visually-hidden {
   position: absolute;

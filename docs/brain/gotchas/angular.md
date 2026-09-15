@@ -133,3 +133,23 @@ async reloadFromStorage(): Promise<void> {
 }
 ```
 This preserves normal force-refresh behavior for the common case (called long after the initial load finished, `loadPromise_` is null) while closing the one narrow window — `injector.get()` on a not-yet-constructed service — where it actually races. Applied across `base-entity-data.service.ts`, `product-data.service.ts`, `recipe-data.service.ts`, `dish-data.service.ts`, `menu-event-data.service.ts`, `menu-section-categories.service.ts`, `preparation-registry.service.ts`, and `metadata-registry.service.ts` (plans 301 M4).
+
+---
+
+## Dev-mode "double-fetch" that isn't: HMR eagerly loads `@defer` blocks
+
+**What hurt:** `KITCHEN_UNITS`/`EQUIPMENT_LIST` appeared to fetch twice on every page load under `ng serve`, surviving two separate investigation sessions and seven ruled-out code-level hypotheses (see plan 309 M1). The duplicate looked exactly like [[Login reload bypasses deferred constructor load]] — a service's own constructor load racing `_reloadDataServices()`'s unconditional `reloadFromStorage()` — but wasn't.
+
+**Why the obvious fix is wrong:** `ng serve`'s console prints `NG0751` on every load once the app has `@defer` blocks: *"this application contains `@defer` blocks and HMR mode is enabled. All `@defer` block dependencies will be loaded eagerly."* That's not advisory text — it means normally-deferred component trees (modals, etc.) actually instantiate eagerly in dev mode, pulling in whatever services their constructors inject, on top of the constructor-time load that already ran. Chasing this as an application-code bug (race-guard logic, injection order, resolver coverage) burns time on something that was never reachable from the served code.
+
+**What to do instead:** Before investigating any dev-mode-only fetch duplication, check the console for `NG0751`. If present, reproduce against a production build first (`ng build`, serve `dist/*/browser` — this repo's local Express server already does, at `:3000`) before touching any application code. If the duplicate doesn't reproduce there, it isn't a bug — stop.
+
+---
+
+## `cdk-virtual-scroll` is incompatible with the shared `.c-list-row` grid
+
+**What hurt:** Plan 304 M3 called for adding `cdk-virtual-scroll` to `recipe-book-list` and `inventory-product-list` to cut rendered DOM nodes on large catalogs (2,000+ rows). Implementing it as literally specified would have silently misaligned every column on both pages, and on every other list page sharing the same engine class (`equipment-list`, `supplier-list`, `venue-list`, `menu-library-list`).
+
+**Why the obvious fix is wrong:** Every list row uses `.c-list-row { display: contents; }` (`src/styles.scss`) — the row itself generates no box; its cells (`.c-list-body-cell`) become direct children of `.table-body`'s own CSS Grid (`grid-template-columns: var(--list-grid)`), which is what keeps columns pixel-aligned with the header across variable-height rows. `cdk-virtual-scroll-viewport`'s `*cdkVirtualFor` wraps each rendered item in its own real DOM element (`.cdk-virtual-scroll-content-wrapper` + per-item wrapper) — a box that can't be `display: contents` without breaking CDK's own positioning — so the cells would nest one level deeper than the header's grid expects, misaligning every column. `content-visibility: auto` has the identical problem: it needs the element it's applied to have a principal box, and `.c-list-row` deliberately has none.
+
+**What to do instead:** For this row architecture, use pagination instead of virtualization — slice the already-computed row array (see `displayRows_()` → `pagedRows_()` in `recipe-book-list.component.ts` / `inventory-product-list.component.ts`) to ~50 rows and add Prev/Next controls (`.c-pagination-controls` engine class, `grid-column: 1 / -1` to span the row grid). Same DOM-size win, zero risk to the shared engine class. If virtualization is ever revisited, it requires first converting `.c-list-row` to a real per-row grid (`display: grid; grid-template-columns: var(--list-grid)`) with matching visual QA across every page that uses it — not a drop-in on one component.

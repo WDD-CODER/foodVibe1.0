@@ -178,6 +178,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       })
     })
 
+    // Pagination (plan 304 M3): jump back to page 1 whenever the filtered/sorted result
+    // set changes, so a search/filter doesn't strand the user on a now-irrelevant page.
+    effect(() => {
+      this.filteredRecipeIds_()
+      this.currentPage_.set(1)
+    })
+
     // Reset expanded allergen/labels cells when user lands on recipe-book list (e.g. navigates back).
     const events = this.router.events
     if (events) {
@@ -446,6 +453,36 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       cost: this.getRecipeCost(recipe)
     }))
   )
+
+  // Pagination (plan 304 M3) — this list has no virtualisation-compatible row/cell markup
+  // (shared .c-list-row engine class uses `display: contents` so its cells flow directly
+  // into the table-body grid; cdk-virtual-scroll's item wrapper would break that column
+  // alignment across every list page using the same shared class). Slicing displayRows_()
+  // to a page gets the same DOM-size win — fewer rendered grid cells — without touching
+  // the shared engine CSS at all.
+  protected readonly PAGE_SIZE = 50
+  protected readonly currentPage_ = signal(1)
+  protected readonly totalPages_ = computed(() => Math.max(1, Math.ceil(this.displayRows_().length / this.PAGE_SIZE)))
+  /** Clamped so an out-of-range page (e.g. after a filter shrinks the result set) self-corrects. */
+  protected readonly displayPage_ = computed(() => Math.min(this.currentPage_(), this.totalPages_()))
+  protected readonly pagedRows_ = computed(() => {
+    const start = (this.displayPage_() - 1) * this.PAGE_SIZE
+    return this.displayRows_().slice(start, start + this.PAGE_SIZE)
+  })
+  protected readonly pageIndicatorText_ = computed(() =>
+    this.translationService
+      .translate('page_indicator')
+      .replace('{n}', String(this.displayPage_()))
+      .replace('{m}', String(this.totalPages_()))
+  )
+
+  protected goToPrevPage(): void {
+    this.currentPage_.update((p) => Math.max(1, p - 1))
+  }
+
+  protected goToNextPage(): void {
+    this.currentPage_.update((p) => Math.min(this.totalPages_(), p + 1))
+  }
 
   protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0)
 

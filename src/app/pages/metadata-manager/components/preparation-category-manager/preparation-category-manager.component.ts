@@ -3,6 +3,8 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { RecipeDataService } from '@services/recipe-data.service'
+import { DishDataService } from '@services/dish-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
@@ -21,6 +23,8 @@ import { AuthModalService } from '@services/auth-modal.service'
 export class PreparationCategoryManagerComponent implements OnInit {
   private readonly prepRegistry = inject(PreparationRegistryService)
   private readonly kitchenState = inject(KitchenStateService)
+  private readonly recipeData = inject(RecipeDataService)
+  private readonly dishData = inject(DishDataService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
@@ -33,6 +37,10 @@ export class PreparationCategoryManagerComponent implements OnInit {
 
   ngOnInit(): void {
     void this.prepRegistry.ensureLoaded()
+    // countRecipesUsingCategory() reads kitchenState.recipes_(), which is now deferred
+    // (plan 304 M2) — this page isn't reached via a resolver that guarantees it.
+    void this.recipeData.ensureLoaded()
+    void this.dishData.ensureLoaded()
   }
 
   private requireSignIn(): boolean {

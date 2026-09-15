@@ -149,7 +149,11 @@ export const routes: Routes = [
   {
     path: 'menu-library',
     loadComponent: () => import('@pages/menu-library/menu-library.page').then(m => m.MenuLibraryPage),
-    resolve: { menuEventsLoaded: menuEventsEnsureLoadedResolver },
+    resolve: {
+      menuEventsLoaded: menuEventsEnsureLoadedResolver,
+      // ai-menu-modal (opened from this page) reads recipes_()/dishes_() — plan 304 M2.
+      kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
+    },
   },
   {
     path: 'menu-intelligence',
@@ -159,6 +163,8 @@ export const routes: Routes = [
     resolve: {
       menuEventsLoaded: menuEventsEnsureLoadedResolver,
       sectionCategoriesLoaded: menuSectionCategoriesEnsureLoadedResolver,
+      // Page reads recipes_()/dishes_()/products_() directly for menu authoring — plan 304 M2.
+      kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
     },
   },
   {
@@ -169,6 +175,7 @@ export const routes: Routes = [
     resolve: {
       menuEventsLoaded: menuEventsEnsureLoadedResolver,
       sectionCategoriesLoaded: menuSectionCategoriesEnsureLoadedResolver,
+      kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
     },
   },
   {
