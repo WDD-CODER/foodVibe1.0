@@ -22,7 +22,7 @@
 - [x] `recipe-builder.page.scss` — deleted 11 dead blocks + hand-located `.icon-btn` (679→513 lines)
 - [x] 11 single-class-orphan component `.scss` files — all done
 - [x] `ng build` — pass, no new warnings; global styles.css 34,095→30,376 bytes (−10.9%)
-- [ ] Manual click-through: cook view, recipe builder, AI recipe modal, inventory/recipe-book empty states, trash, approve stamp, auth modal — no visual change (needs Human/browser verification)
+- [x] Manual click-through: cook view, recipe builder, AI recipe modal, inventory/recipe-book empty states, trash, approve stamp, auth modal — no visual change. Session spot-checked cook view + recipe-book list via gstack `/browse` (clean, no regressions) before the browse daemon destabilized mid-session; Human completed the remaining areas (recipe builder, AI modal, approve stamp, trash, empty states, auth modal) manually and confirmed all clean. Human-validated 2026-09-14.
 - [x] `git diff --stat` — confirmed zero `.ts`/`.html` touched
 
 #### Addendum — follow-up dead-CSS finds (resolves the 2 discrepancies above)
