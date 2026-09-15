@@ -167,12 +167,14 @@ app.use((err, req, res, _next) => {
 // Start
 // ---------------------------------------------------------------------------
 connectDb()
-  .then(() => seedMasterData())
   .then(() => {
     app.listen(PORT, () => {
       console.log(`foodVibe server listening on port ${PORT} (boot ${Date.now() - BOOT_START}ms)`);
       console.log(`CORS origins: ${ALLOWED_ORIGINS.join(', ')}`);
     });
+    // Runs after listen() so cold-start latency isn't gated on it — idempotent
+    // near-instant no-op on any already-seeded DB (see seed-master.js).
+    seedMasterData().catch(err => console.error('[seed-master] failed:', err.message));
   })
   .catch(err => {
     console.error('Failed to connect to MongoDB:', err.message);

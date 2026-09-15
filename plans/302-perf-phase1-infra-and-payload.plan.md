@@ -220,7 +220,7 @@ const { Workbook } = await import('exceljs')
 - [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
 - [ ] Human: verify Atlas cluster region matches Render service region; report findings
 - [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
-- [ ] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:125-131`
+- [x] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:169-179`. `app.listen()` now fires immediately after `connectDb()`; `seedMasterData()` runs in the background afterward (fire-and-forget with its own `.catch`), no longer gating first byte. `ng build` clean, server boots and reaches `listen()` with no new errors. Human-validated 2026-09-15.
 - [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
 
 ## Milestone 3 — Static asset cache headers
