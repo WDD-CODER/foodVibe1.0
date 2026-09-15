@@ -158,6 +158,21 @@ export class StorageService {
   }
 
   /**
+   * Lightweight count (plan 301 M3 / 304 M2) — avoids loading the full collection just
+   * to show a dashboard badge. filter mirrors the server's generic.js semantics exactly:
+   * 'lowStock' (PRODUCT_LIST, min_stock_level_ > 0) or 'unapproved' (RECIPE_LIST/DISH_LIST,
+   * is_approved_ !== true) — see kitchen-state.service.ts's lowStockProducts_ and
+   * dashboard-overview.component.ts's prior unapprovedCount_ computed for the source of truth.
+   */
+  async count(entityType: string, filter?: 'lowStock' | 'unapproved'): Promise<number> {
+    if (environment.useBackend) return this.httpAdapter.count(entityType, filter)
+    const all = await this.query<Record<string, unknown>>(entityType, 0)
+    if (filter === 'lowStock') return all.filter((e) => Number(e['min_stock_level_'] ?? 0) > 0).length
+    if (filter === 'unapproved') return all.filter((e) => e['is_approved_'] !== true).length
+    return all.length
+  }
+
+  /**
    * Backend: DELETE /:type/bulk with { ids }.
    * localStorage: remove matching ids from the array and save.
    */

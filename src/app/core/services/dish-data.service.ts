@@ -22,13 +22,18 @@ export class DishDataService {
   private loaded_ = false
   private loadPromise_: Promise<void> | null = null
 
-  constructor() {
-    void this.ensureLoaded()
-  }
+  // Deferred: load on ensureLoaded() via kitchenDataEnsureLoadedResolver (recipe-builder,
+  // recipe-book, cook, menu-library, menu-intelligence routes) — see plan 304 M2.
+  constructor() {}
 
   /** True after at least one successful (or attempted) hydrate. */
   hasLoaded(): boolean {
     return this.loaded_
+  }
+
+  /** Lightweight count — does not require the full collection to be loaded (plan 304 M2). */
+  async getCount(filter?: 'unapproved'): Promise<number> {
+    return this.storage.count(ENTITY, filter)
   }
 
   /** Loads from storage once. Safe to call repeatedly — concurrent callers share one promise. */

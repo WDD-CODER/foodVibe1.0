@@ -17,6 +17,8 @@ import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { ProductDataService } from '@services/product-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { RecipeDataService } from '@services/recipe-data.service'
+import { DishDataService } from '@services/dish-data.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { LucideAngularModule } from 'lucide-angular'
@@ -60,6 +62,8 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   private translationKeyModal = inject(TranslationKeyModalService)
   private labelCreationModal = inject(LabelCreationModalService)
   private kitchenState = inject(KitchenStateService)
+  private recipeData = inject(RecipeDataService)
+  private dishData = inject(DishDataService)
   private menuEventData = inject(MenuEventDataService)
   private addItemModal = inject(AddItemModalService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
@@ -68,6 +72,10 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
+    // recipes_()/dishes_() (label-in-use check) are deferred — plan 304 M2. This page
+    // isn't reached via a route resolver that guarantees them, so load here.
+    void this.recipeData.ensureLoaded()
+    void this.dishData.ensureLoaded()
   }
 
   ngAfterViewInit(): void {

@@ -4,6 +4,8 @@ import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { RecipeDataService } from '@services/recipe-data.service'
+import { DishDataService } from '@services/dish-data.service'
 import { UserService } from '@services/user.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ActivityLogService, ActivityEntry } from '@services/activity-log.service'
@@ -24,6 +26,8 @@ export class DashboardOverviewComponent {
   readonly tabChange = output<DashboardTab>()
 
   private readonly kitchenState = inject(KitchenStateService)
+  private readonly recipeData = inject(RecipeDataService)
+  private readonly dishData = inject(DishDataService)
   private readonly router = inject(Router)
   private readonly activityLog = inject(ActivityLogService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
@@ -34,20 +38,27 @@ export class DashboardOverviewComponent {
     left: number
   } | null>(null)
 
+  // Recipe/dish counts via the lightweight /count endpoint (plan 301 M3 / 304 M2) — RecipeDataService
+  // and DishDataService are now deferred, so reading kitchenState.recipes_() here would force a full
+  // collection load (or show 0) just for these two badges.
+  protected readonly totalRecipes_ = signal(0)
+  protected readonly unapprovedCount_ = signal(0)
+
   constructor() {
     // Sync in-memory signal when dashboard opens (e.g. after navigating here)
     this.activityLog.syncFromStorage()
+
+    void Promise.all([this.recipeData.getCount(), this.dishData.getCount()]).then(([recipes, dishes]) =>
+      this.totalRecipes_.set(recipes + dishes)
+    )
+    void Promise.all([this.recipeData.getCount('unapproved'), this.dishData.getCount('unapproved')]).then(
+      ([recipes, dishes]) => this.unapprovedCount_.set(recipes + dishes)
+    )
   }
 
   protected readonly totalProducts_ = computed(() => this.kitchenState.products_().length)
 
-  protected readonly totalRecipes_ = computed(() => this.kitchenState.recipes_().length)
-
   protected readonly lowStockCount_ = computed(() => this.kitchenState.lowStockProducts_().length)
-
-  protected readonly unapprovedCount_ = computed(() => {
-    return this.kitchenState.recipes_().filter((r) => !r.is_approved_).length
-  })
 
   /** Recent activity: read directly from localStorage so the list always reflects current storage (not in-memory cache). */
   protected getRecentActivity(): ActivityEntry[] {

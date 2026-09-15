@@ -156,7 +156,7 @@
         }
       </div>
     }
-    @for (row of displayRows_(); track row.recipe._id) {
+    @for (row of pagedRows_(); track row.recipe._id) {
       <div
         class="recipe-grid-row c-list-row"
         (click)="onRowClick(row.recipe, $event)"
@@ -327,6 +327,22 @@
             (toggle)="selection.toggle(row.recipe._id)"
           />
         </div>
+      </div>
+    }
+    @if (totalPages_() > 1) {
+      <div class="c-pagination-controls">
+        <button type="button" class="c-btn-ghost--sm" [disabled]="displayPage_() === 1" (click)="goToPrevPage()">
+          {{ 'page_previous' | translatePipe }}
+        </button>
+        <span>{{ pageIndicatorText_() }}</span>
+        <button
+          type="button"
+          class="c-btn-ghost--sm"
+          [disabled]="displayPage_() === totalPages_()"
+          (click)="goToNextPage()"
+        >
+          {{ 'page_next' | translatePipe }}
+        </button>
       </div>
     }
   </ng-container>

@@ -155,6 +155,9 @@ export class PreparationRegistryService {
     oldCategory: string,
     newCategory: string
   ): Promise<void> {
+    // DishDataService is deferred (plan 304 M2) — this admin flow isn't necessarily
+    // reached from a route that gates it, so ensure it's hydrated before reading.
+    await this.dishDataService.ensureLoaded()
     const nameLower = preparationName.toLowerCase()
     const dishes = this.dishDataService.allDishes_()
     for (const dish of dishes) {

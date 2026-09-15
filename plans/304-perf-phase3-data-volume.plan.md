@@ -171,20 +171,20 @@ Preserve the existing `track` expressions.
 - [ ] Record before/after `bytes=` from plan 302 M1's logging
 
 ## Milestone 2 — Defer boot loads & collapse double fetch
-- [ ] Enumerate every route/component reading `products_()` / `recipes_()` and confirm resolver coverage
-- [ ] Switch `RecipeDataService` to `autoLoad: false` — `recipe-data.service.ts:23-25`
-- [ ] Switch `DishDataService` to `autoLoad: false` — `dish-data.service.ts:23-25`
-- [ ] Evaluate whether `ProductDataService` can be deferred; document the decision either way
-- [ ] Regression test: cold-load a recipe with nested sub-recipes by direct URL; confirm no ingredient unlinking (plan 300 finding 3)
-- [ ] Collapse the post-login re-fetch with the constructor load — `user.service.ts:54-93` (this is plan 301 M4; mark it done there too)
+- [x] Enumerate every route/component reading `products_()` / `recipes_()` and confirm resolver coverage — audit found `dashboard-overview` (migrated to `/count`), `metadata-manager` + `preparation-category-manager` (given their own `ensureLoaded()`), and `menu-library`/`menu-intelligence` routes (missing `kitchenDataEnsureLoadedResolver`, added)
+- [x] Switch `RecipeDataService` to `autoLoad: false` — `recipe-data.service.ts` (empty constructor; not `BaseEntityDataService`-based so no literal `autoLoad` flag, same effect)
+- [x] Switch `DishDataService` to `autoLoad: false` — `dish-data.service.ts` (same as above)
+- [x] Evaluate whether `ProductDataService` can be deferred; document the decision either way — kept eager; too widely consumed (dashboard totals, most list/form pages) to be worth the same audit risk for a smaller win. See `docs/brain/patterns/defer-singleton-data-ensureLoaded.md`.
+- [x] Regression test: cold-load a recipe with nested sub-recipes by direct URL; confirm no ingredient unlinking (plan 300 finding 3) — verified live via fresh-tab direct URL load; ingredients resolved correctly
+- [x] Collapse the post-login re-fetch with the constructor load — `user.service.ts:54-93` (this is plan 301 M4; already done there — also found and closed a related gap here: `_reloadDataServices()` was unconditionally reloading Recipe/Dish with no `hasLoaded()` guard, which would have silently undone this milestone's deferral)
 
 ## Milestone 3 — List virtualisation
-- [ ] Confirm plan 303 M2's precomputed row model has shipped first
-- [ ] Add `cdk-virtual-scroll` (or pagination) to `inventory-product-list`
-- [ ] Add `cdk-virtual-scroll` (or pagination) to `recipe-book-list`
-- [ ] Preserve all existing `track` expressions
-- [ ] Test selection state across scroll (select → scroll far → scroll back)
-- [ ] Verify RTL layout is intact inside the virtual viewport
+- [x] Confirm plan 303 M2's precomputed row model has shipped first — confirmed shipped (`feat/optimization`, Human-validated 2026-08-31)
+- [x] ~~Add `cdk-virtual-scroll`~~ Add **pagination** to `inventory-product-list` — `cdk-virtual-scroll` ruled out: the shared `.c-list-row { display: contents }` engine class (used by every list page) can't host CDK's item-wrapper DOM without breaking column alignment app-wide. See gotcha in `docs/brain/gotchas/angular.md`. Pagination (50/page, `pagedRows_()`) gets the same DOM-size reduction with no shared-CSS risk.
+- [x] ~~Add `cdk-virtual-scroll`~~ Add **pagination** to `recipe-book-list` — same as above
+- [x] Preserve all existing `track` expressions — unchanged (`track row.recipe._id` / `track row.product._id`)
+- [x] Test selection state across scroll (select → scroll far → scroll back) — pagination equivalent verified live: select a row, page forward, page back — selection persists
+- [x] Verify RTL layout is intact inside the virtual viewport — pagination controls use logical properties only (`gap`, no directional offsets); no viewport/scroll mechanism was introduced to interact with `dir="rtl"`
 
 ## Hand-off
 - [ ] Re-assess plan 301 Milestone 2's scope in light of measured results; update `plans/301-server-side-search-lean-data-loading.plan.md` with findings

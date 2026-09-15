@@ -62,10 +62,20 @@ export class UserService {
         import('./metadata-registry.service').then((m) =>
           this.injector.get(m.MetadataRegistryService).reloadFromStorage()
         ),
-        import('./recipe-data.service').then((m) => this.injector.get(m.RecipeDataService).reloadFromStorage()),
-        import('./dish-data.service').then((m) => this.injector.get(m.DishDataService).reloadFromStorage()),
         import('./supplier-data.service').then((m) => this.injector.get(m.SupplierDataService).reloadFromStorage()),
         // Deferred services: only rehydrate if already loaded this session (avoid bootstrap GETs).
+        // RecipeDataService/DishDataService joined this group in plan 304 M2 — they used to
+        // auto-load in their own constructor, so unconditional reloadFromStorage() here was
+        // harmless; now that they're deferred, doing it unconditionally would re-introduce the
+        // exact bootstrap-time RECIPE_LIST/DISH_LIST fetch M2 removes.
+        import('./recipe-data.service').then((m) => {
+          const s = this.injector.get(m.RecipeDataService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
+        import('./dish-data.service').then((m) => {
+          const s = this.injector.get(m.DishDataService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
         import('./equipment-data.service').then((m) => {
           const s = this.injector.get(m.EquipmentDataService)
           return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()

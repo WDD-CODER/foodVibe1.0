@@ -12,7 +12,7 @@ Many `providedIn: 'root'` data services call `loadInitialData()` (or equivalent)
 4. **Wire the owning surface** — route `ResolveFn` on the earliest lazy route that needs the data, and/or `ensureLoaded()` in dashboard-embedded components that mount behind `@if (tab)`.
 5. **Gate login reload** — `UserService._reloadDataServices()` must call `reloadFromStorage()` on deferred services only when `hasLoaded()` is true (same pattern as venues / menu-events).
 
-Keep Recipe / Dish / Product / Supplier / UnitRegistry / MetadataRegistry eager unless a future audit proves otherwise. Do not change demo-loader / backup — they use `reloadFromStorage()` after explicit user actions.
+Recipe / Dish were audited and deferred in plan 304 M2 (2026-09-15) — the consumers that read them outside a resolver-gated route (dashboard-overview's counts, metadata-manager's label-in-use check, preparation-category-manager's category-usage check) were migrated to the lightweight `/count` endpoint or given their own `ensureLoaded()` call. Keep Product / Supplier / UnitRegistry / MetadataRegistry eager unless a future audit proves otherwise — Product in particular is the most widely consumed and was deliberately left alone. Do not change demo-loader / backup — they use `reloadFromStorage()` after explicit user actions.
 
 ## When to use
 
