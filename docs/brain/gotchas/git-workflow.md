@@ -116,3 +116,13 @@ CSS/HTML would have wasted time chasing a bug that doesn't exist in the worktree
 worktree, confirm which port/URL they're actually viewing before touching code again.
 `netstat -ano | findstr LISTENING` (or `git worktree list`) surfaces other dev servers that might
 be serving a different branch's stale code on a similar-looking URL.
+
+---
+
+## `todo.md`'s "not merged, no PR opened yet" can be stale — verify with `merge-base`, don't just open the PR
+
+**What hurt:** Plan 308's todo.md entry said the dead-CSS-purge branch (`chore/dead-css-purge-plan-308`) was "committed and pushed... not merged, no PR opened yet." Trusting that note, `gh pr create` was run straight away — it failed with "No commits between main and chore/dead-css-purge-plan-308." The branch's tip commit was already an ancestor of `main` (confirmed via `git merge-base --is-ancestor <sha> origin/main`), evidently swept in through an unrelated merge (likely `feat/optimization`/PR #192) without that branch's own PR ever getting tracked back into `todo.md`.
+
+**Why the obvious fix is wrong:** Assuming the todo.md/plan-file note is ground truth and opening the PR anyway wastes a round-trip and produces a confusing GitHub API error that looks like an auth or scope problem rather than a stale-tracking problem.
+
+**What to do instead:** Before opening a PR for a branch that a todo/plan file claims is "unmerged," run `git merge-base --is-ancestor <branch-tip> origin/main` first. If it prints true, the branch is already merged — no PR to open, fix the stale tracking note instead (and consider deleting the now-redundant branch/worktree).
