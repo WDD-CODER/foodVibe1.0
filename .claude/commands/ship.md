@@ -16,12 +16,14 @@ Invoking `/ship` authorizes commit of this chat’s files after explicit **Y** (
 | Flag | Behavior |
 |------|----------|
 | `/ship` | Auto-detect lane (Phase 0), then run that lane's pipeline; wait for **Y** unless the lane is ULTRA-TRIVIAL |
-| `/ship fast` | Force FAST lane regardless of auto-classification — Human is asserting the diff is safe to skip full review/brain-mining for |
-| `/ship regular` | Force REGULAR lane regardless of auto-classification — today's full pipeline, no shortcuts |
+| `/ship fast` | Does **not** change classification or review depth — Phase 0 still classifies for real (same as bare `/ship`), Phase 2 still reviews at whatever depth that classification calls for. The only change: Phase 4 and Phase 4.5 collapse into **one** approval (commit + push + PR + merge together) instead of two separate stops, whichever lane Phase 0 landed on. A genuine review finding still stops and asks — this removes redundant re-confirmation, not judgment calls. See Phase 4. |
+| `/ship regular` | Force REGULAR lane regardless of auto-classification — today's full pipeline, no shortcuts. (Forcing *more* scrutiny is always a safe override; this is unchanged.) |
 | `/ship --yes` | Show confirmation block then commit without waiting (still runs review unless skipped) |
 | `/ship --skip-review "reason"` | Bypass Phase 2 entirely; **reason required**; log `[review-skipped: {reason}]` in the commit message body. No silent skip. |
 
-Flags compose: `/ship fast --yes` is valid.
+Flags compose: `/ship fast --yes` means "one combined approval, and don't even wait for it" —
+assuming Phase 1-3 came back clean, this goes straight through to merge on one shot. Chat
+phrase "ship fast" is equivalent to typing `/ship fast`.
 
 ---
 
@@ -42,7 +44,7 @@ Classify the this-chat diff (same file set Phase 3 will stage — working tree �
 - **FAST** → ≤3 files changed, ≤40 lines changed, no sensitive-path match, and not already ULTRA-TRIVIAL.
 - **REGULAR** → everything else. This is the default whenever the diff doesn't clearly qualify — when in doubt, run the full pipeline.
 
-`/ship fast` / `/ship regular` override the classification outright (skip this Phase's logic, go straight to the forced lane). Bare `/ship` always classifies.
+`/ship regular` overrides the classification outright (skip this Phase's logic, always take the full REGULAR-scrutiny path) — a Human asserting *more* caution is always safe to honor immediately. `/ship fast` does **not** override classification — Phase 0 always classifies for real when `fast` is passed, exactly like bare `/ship`; see Phase 4 for what `fast` actually changes (approval cadence, not review depth). Bare `/ship` always classifies.
 
 Announce the pick before continuing, e.g. `Lane: FAST (2 files, 14 lines, no sensitive paths)` or `Lane: REGULAR (touches server/routes/ai.js)` — the Human should always know which pipeline is about to run and why, even when nothing stops for approval.
 
@@ -63,7 +65,15 @@ node scripts/plan-ledger-check.mjs
 ## Phase 2 — Review (unless `--skip-review "reason"`, or Lane = FAST / ULTRA-TRIVIAL)
 
 **Lane = REGULAR:**
-1. Invoke `/review` (read `.claude/commands/review.md` and execute it).
+1. Invoke `/review` by **reading `.claude/commands/review.md` and executing it inline** — do
+   **not** call it via the Skill tool by name (`skill: "review"`). The plain name "review" is
+   ambiguous with a gstack-vendored skill of the same name at `~/.claude/skills/review/`,
+   which is a much heavier multi-agent Review Army (telemetry, onboarding prompts, specialist
+   subagent dispatch, Codex integration) — the Skill tool has been observed resolving to that
+   one instead of this project's lightweight, judgment-only review, burning many times the
+   tokens for no extra safety. Same collision risk applies to any other command name that
+   might shadow a gstack skill (e.g. `browse`) — when a command file says "read X and execute
+   it," read the file directly, don't route through Skill-tool name resolution.
 2. On `REVIEW: PASS` → continue.
 3. On `ISSUES FOUND` → fix the listed issues → re-run `/review` **exactly once**.
 4. If still `ISSUES FOUND` → **stop**. Do not commit. Present remaining issues to the user.
@@ -104,11 +114,13 @@ git rev-parse HEAD
 
 ## Phase 4 — Commit + push (UNCONDITIONAL approval gate)
 
-**Lane = REGULAR:** unchanged below — one Y here for commit, a separate gate at Phase 4.5 for merge.
+**Without the `fast` flag:**
 
-**Lane = FAST:** same tree, same required HOW TO VALIDATE section, but the single Y answers commit + push + (PR creation if feature-complete) + (merge if eligible) all at once. The Approve line accepts any Phase 4.5 reply token directly (`Y`, `merge`, `later`, `open-pr-only`, `abort`) instead of waiting for a second stop — Phase 0 already bounded the blast radius, so there's nothing a second round-trip would catch that the first one wouldn't. Phase 4.5's actions still happen, just triggered by this same answer instead of a follow-up prompt.
+- **Lane = REGULAR:** unchanged — one Y here for commit, a separate gate at Phase 4.5 for merge.
+- **Lane = FAST** (naturally classified by Phase 0, no flag needed): same tree, same required HOW TO VALIDATE section, but the single Y answers commit + push + (PR creation if feature-complete) + (merge if eligible) all at once. The Approve line accepts any Phase 4.5 reply token directly (`Y`, `merge`, `later`, `open-pr-only`, `abort`) instead of waiting for a second stop. Phase 4.5's actions still happen, just triggered by this same answer instead of a follow-up prompt. This was already true before the `fast` flag existed and still is — a diff that's naturally small and safe gets this for free.
+- **Lane = ULTRA-TRIVIAL:** skip the interactive gate entirely. Commit + push happen automatically (checkpoint only — by definition an ultra-trivial diff is docs/handoff-only, never feature-complete, so no PR is proposed). Immediately after acting, print the same tree block as a receipt, tagged `[auto-approved: ultra-trivial]`, so the Human sees exactly what happened and can revert via normal git tooling if it was wrong to auto-proceed. HOW TO VALIDATE becomes the one-line "no user-visible effect" form, since ultra-trivial diffs never touch application code.
 
-**Lane = ULTRA-TRIVIAL:** skip the interactive gate entirely. Commit + push happen automatically (checkpoint only — by definition an ultra-trivial diff is docs/handoff-only, never feature-complete, so no PR is proposed). Immediately after acting, print the same tree block as a receipt, tagged `[auto-approved: ultra-trivial]`, so the Human sees exactly what happened and can revert via normal git tooling if it was wrong to auto-proceed. HOW TO VALIDATE becomes the one-line "no user-visible effect" form, since ultra-trivial diffs never touch application code.
+**With the `fast` flag (any lane Phase 0 lands on, including REGULAR):** same tree, same required HOW TO VALIDATE section, but the single reply answers commit + push + (PR creation if feature-complete) + (merge if eligible) all at once — identical mechanics to the natural Lane=FAST case above, just available on demand regardless of what Phase 0 classified. The Approve line accepts any Phase 4.5 reply token directly (`Y`, `merge`, `later`, `open-pr-only`, `abort`) instead of waiting for a second stop; Phase 4.5's actions happen off this same reply. This changes *how many times* the Human is asked to bless the result — it does not change what Phase 1 (build) or Phase 2 (review, at whatever depth Phase 0's real classification called for) already checked. If Phase 2 stopped with an unresolved finding, this paragraph is never reached — the `fast` flag doesn't touch that gate.
 
 Present a visual tree, then **wait for explicit "Y"** (unless `--yes`, or Lane = ULTRA-TRIVIAL):
 
@@ -234,7 +246,7 @@ Never commit to `main`. Never force-push. Never amend after push.
 
 ## Phase 4.5 — Merge Gate (mandatory after successful push)
 
-**Lane = FAST:** this phase's decision already happened at Phase 4 (combined single Y) — nothing to wait for here, just execute the reply that was given there. **Lane = REGULAR / ULTRA-TRIVIAL (checkpoint):** unchanged below.
+**`fast` flag was passed, or Lane naturally classified FAST/ULTRA-TRIVIAL:** this phase's decision already happened at Phase 4 (combined single reply) — nothing to wait for here, just execute the reply that was given there, regardless of which lane Phase 0 classified. **Otherwise (Lane = REGULAR, `fast` not passed):** unchanged below, waits here separately.
 
 Follow `docs/agent/standards-git.md` → **Post-push Merge Gate**. Copy the combined MERGE GATE + BRAIN CAPTURE visual block exactly; wait for Human reply. Do not skip because a PR URL was already printed.
 
