@@ -18,14 +18,14 @@ Initial pass left `server/scripts/legacy-import/source-data/fullDATA_utf8.sql` t
 
 ## Atomic Sub-tasks
 
-- [ ] (done, awaiting validation) Grep for hardcoded references: `grep -rn "scrape_test\|fullDATA_utf8" tools/ server/ scripts/ package.json .github/`. If any hit is a hardcoded path (not a CLI arg), stop and report before deleting. — confirmed all 4 `DEFAULT_SQL_PATH` hits take a `--sql-path=` override; `sql-parser.js` takes a `filePath` param; `config.py`'s `OUTPUT_DIR` is computed, not hardcoded to `scrape_test/`.
-- [ ] (done, awaiting validation) In `.gitignore`, replace the per-filename list at lines 72–80 with directory-level rules: `tools/catalog-seeder/output/*` and `tools/catalog-seeder/dumps/`. Kept `!tools/catalog-seeder/output/.gitkeep` and the existing `seed-products.json` intentional-commit exception via negation rules.
-- [ ] (done, awaiting validation) Added `server/scripts/legacy-import/source-data/*.sql` to `.gitignore` with a comment citing the plan 300 closure.
-- [ ] (done, awaiting validation) Include `tools/catalog-seeder/logging.log` in the gitignore rules (also generated).
-- [ ] (done, awaiting validation) `git rm -r --cached tools/catalog-seeder/output tools/catalog-seeder/dumps tools/catalog-seeder/logging.log` (111 files) and `git rm --cached .../fullDATA_utf8.sql`. Files stay on disk locally; they stop being tracked.
-- [ ] (done, awaiting validation) `server/scripts/legacy-import/source-data/README.md` — rewritten: no longer tracked, why (plan 300 closure), and how to restore it for a re-import/re-audit.
-- [ ] (done, awaiting validation) Ran `ng build` (pass, same pre-existing warnings) and `cd server && node -e "require('./index.js')"` (Mongo connects, no missing-path errors) again with the `.sql` removed.
-- [ ] (done, awaiting validation) Reported final before/after `git ls-files | wc -l` (1566 → 1454, drop of 112) — see chat.
+- [x] Grep for hardcoded references: `grep -rn "scrape_test\|fullDATA_utf8" tools/ server/ scripts/ package.json .github/`. If any hit is a hardcoded path (not a CLI arg), stop and report before deleting. — confirmed all 4 `DEFAULT_SQL_PATH` hits take a `--sql-path=` override; `sql-parser.js` takes a `filePath` param; `config.py`'s `OUTPUT_DIR` is computed, not hardcoded to `scrape_test/`. Human-validated 2026-09-15.
+- [x] In `.gitignore`, replace the per-filename list at lines 72–80 with directory-level rules: `tools/catalog-seeder/output/*` and `tools/catalog-seeder/dumps/`. Kept `!tools/catalog-seeder/output/.gitkeep` and the existing `seed-products.json` intentional-commit exception via negation rules. Human-validated 2026-09-15.
+- [x] Added `server/scripts/legacy-import/source-data/*.sql` to `.gitignore` with a comment citing the plan 300 closure. Human-validated 2026-09-15.
+- [x] Include `tools/catalog-seeder/logging.log` in the gitignore rules (also generated). Human-validated 2026-09-15.
+- [x] `git rm -r --cached tools/catalog-seeder/output tools/catalog-seeder/dumps tools/catalog-seeder/logging.log` (111 files) and `git rm --cached .../fullDATA_utf8.sql`. Files stay on disk locally; they stop being tracked. `.gitkeep` re-added to the index per the negation rule. Human-validated 2026-09-15.
+- [x] `server/scripts/legacy-import/source-data/README.md` — rewritten: no longer tracked, why (plan 300 closure), and how to restore it for a re-import/re-audit. Human-validated 2026-09-15.
+- [x] Ran `ng build` (pass, same pre-existing warnings) and `cd server && node -e "require('./index.js')"` (Mongo connects, no missing-path errors) again with the `.sql` removed. Human-validated 2026-09-15.
+- [x] Reported final before/after `git ls-files | wc -l` (1570 → 1458, drop of 112). Human-validated 2026-09-15.
 
 ## Rules
 
