@@ -6,11 +6,11 @@ overview: Plans 302 and 303 fix load time and interaction lag without changing t
 **Sibling plans:** `plans/302-perf-phase1-infra-and-payload.plan.md`, `plans/303-perf-phase2-client-cpu.plan.md`.
 **Ordering:** Do not start until 302 and 303 have shipped **and** been measured. See "Prerequisite gate" below — it is a real gate, not a formality.
 
-# Out of scope — see plan 301
+# Out of scope — see plan 310
 
-Faceted server-side search and pagination for `inventory-product-list` and `recipe-book-list` is **already scoped** as `plans/301-server-side-search-lean-data-loading.plan.md` Milestone 2. Do **not** restate or re-design it here.
+Faceted server-side search and pagination for `inventory-product-list` and `recipe-book-list` was scoped as `plans/301-server-side-search-lean-data-loading.plan.md` Milestone 2, then carved out (2026-09-15) into its own Plan Contract: `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`. Do **not** restate or re-design it here.
 
-Plan 301 M2 is the terminal step of the whole performance effort. It needs its own design pass (Mongo `$facet` aggregation for facet counts, a decision on how `resolveRecipeAllergens`'s recursive nested-recipe logic moves server-side or gets cached, and a pagination UI change).
+Plan 310 is the terminal step of the whole performance effort — its own Prerequisite Gate blocks its implementation milestones on this plan (304) shipping and being measured first. It needs its own design pass (Mongo `$facet` aggregation for facet counts, a decision on how `resolveRecipeAllergens`'s recursive nested-recipe logic moves server-side or gets cached, and a pagination UI change — see plan 310's Milestone 0 Decisions and its explicit note not to duplicate this plan's Milestone 3 virtualisation work).
 
 **Relationship:** this plan's milestones should ship and be measured **before** 301 M2 begins. They may materially reduce its scope — M1's projections cut payload, M2 cuts how often a full load happens at all, and M3 removes the DOM-size pressure that is one of 301 M2's motivations. An agent picking up 301 M2 without this context risks building faceted search on top of problems that were about to disappear.
 

@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const User = require('../models/user.model');
 const { cloneMasterDataToUser } = require('../services/clone-master');
 const { syncMasterToUser } = require('../services/sync-master');
+const { getMasterVersion } = require('../services/master-version');
 
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -148,6 +149,8 @@ router.post('/signup', signupLimiter, async (req, res) => {
     await User.create({ _id, name, email, imgUrl: imgUrl || '', passwordHash });
 
     await cloneMasterDataToUser(_id);
+    const masterVersion = await getMasterVersion();
+    await User.updateOne({ _id }, { lastSyncedMasterVersion: masterVersion });
 
     const token = jwt.sign({ userId: _id, name, role: 'user' }, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
     const refreshToken = jwt.sign({ userId: _id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
@@ -224,6 +227,8 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     try {
       await syncMasterToUser(user._id);
+      const masterVersion = await getMasterVersion();
+      await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
     } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }
 
     const publicUser = { _id: user._id, name: user.name, email: user.email, imgUrl: user.imgUrl, role: user.role || 'user' };
@@ -270,8 +275,21 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     });
 
     // Fire-and-forget — do not block the token response on sync.
-    // Login awaits sync; refresh runs every 15 min and blocking here adds 3-8s latency.
-    syncMasterToUser(user._id).catch(syncErr => console.error('[auth/refresh] sync error:', syncErr.message));
+    // Login awaits sync; refresh runs every 13 min and blocking here adds 3-8s latency.
+    // Version-gated (plan 309 M2): master docs are only ever written by seed-master.js or a
+    // manually-run legacy-import/fix script (see master-version.js) — never by a live user
+    // flow — so most refreshes have nothing to sync. Skip the full multi-collection diff
+    // when this user's last-synced version already matches the current one.
+    getMasterVersion()
+      .then(async (masterVersion) => {
+        if ((user.lastSyncedMasterVersion || 0) === masterVersion) {
+          console.log(`[auth/refresh] sync skipped (up to date): user=${user._id}`);
+          return;
+        }
+        await syncMasterToUser(user._id);
+        await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
+      })
+      .catch(syncErr => console.error('[auth/refresh] sync error:', syncErr.message));
 
     return res.json({ token });
   } catch (err) {
@@ -332,6 +350,8 @@ router.post('/guest', async (req, res) => {
 
     try {
       await syncMasterToUser('dev-guest');
+      const masterVersion = await getMasterVersion();
+      await User.updateOne({ _id: 'dev-guest' }, { lastSyncedMasterVersion: masterVersion });
     } catch (syncErr) { console.error('[auth/guest] sync error:', syncErr.message); }
 
     return res.json({

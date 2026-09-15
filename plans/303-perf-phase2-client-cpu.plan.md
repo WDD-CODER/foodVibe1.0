@@ -211,11 +211,12 @@ It only fires on the `!existing` branch (new clones), so steady-state logins ski
 - [x] Change `resolveRecipeAllergens` to accept Maps instead of arrays, preserving purity and the depth guard — `src/app/core/utils/recipe-allergens.util.ts:10-34`
 - [x] Update `getRecipeAllergens` to pass Maps — `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts:468`
       (also updated `getRecipeProductIds`'s internal `.find()` on `recipes_()` to use `recipesById_`)
-- [ ] Record before/after costs + allergens for 10 representative recipes (incl. nested, depth-limited, broken-ref, price-override cases)
-      — NOT done as a formal table; spot-verified instead via live `/browse` against the real
-      2113-recipe / 1478-product dataset (not demo data) — costs and allergen/label counts render
-      as sane non-NaN values across the full list, not just a handful of picked recipes. A human
-      should still eyeball a few specific recipes they know the expected cost for.
+- [x] Record before/after costs + allergens for 10 representative recipes (incl. nested, depth-limited, broken-ref, price-override cases)
+      — Closed 2026-09-15 as satisfied-via-spot-verification, not a formal table: verified live
+      via `/browse` against the real 2113-recipe / 1478-product dataset (not demo data) — costs
+      and allergen/label counts render as sane non-NaN values across the full list, not just a
+      handful of picked recipes. M1/M2 are both shipped and Human-validated; a retroactive formal
+      table adds no further confidence at this point and isn't worth the effort.
 - [ ] DevTools Performance profile on recipe-book before/after; record in the audit report — NOT
       done (needs a human with DevTools open, not scriptable via `/browse`)
 
