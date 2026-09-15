@@ -11,51 +11,6 @@
 
 - [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
-### Plan 308 — Dead CSS Purge: Orphan Component Classes And Engine Blocks (`plans/308-dead-css-purge-orphan-classes.plan.md`)
-
-> SCSS-only session (session 2 of a 3-session split); zero `.ts`/`.html` edits by rule.
-> Human-validated 2026-08-26. Code is committed and pushed to `chore/dead-css-purge-plan-308` — **not merged**, no PR opened yet (the one item below is still open).
-
-- [x] `src/styles.scss` — deleted 14 dead `.c-*` engine blocks + trimmed `.c-table-wrap` from line-21 doc comment (2118→1878 lines)
-- [x] `ai-recipe-modal.component.scss` — split compound selector (kept `.ai-prompt-panel`); deleted 23 dead blocks (kept `.ai-draft-preview`) (590→383 lines)
-- [x] `cook-view.page.scss` — deleted 15 dead blocks + hand-located `.cv-timer-icon` (1694→1532 lines)
-- [x] `recipe-builder.page.scss` — deleted 11 dead blocks + hand-located `.icon-btn` (679→513 lines)
-- [x] 11 single-class-orphan component `.scss` files — all done
-- [x] `ng build` — pass, no new warnings; global styles.css 34,095→30,376 bytes (−10.9%)
-- [x] Manual click-through: cook view, recipe builder, AI recipe modal, inventory/recipe-book empty states, trash, approve stamp, auth modal — no visual change. Session spot-checked cook view + recipe-book list via gstack `/browse` (clean, no regressions) before the browse daemon destabilized mid-session; Human completed the remaining areas (recipe builder, AI modal, approve stamp, trash, empty states, auth modal) manually and confirmed all clean. Human-validated 2026-09-14.
-- [x] `git diff --stat` — confirmed zero `.ts`/`.html` touched
-
-#### Addendum — follow-up dead-CSS finds (resolves the 2 discrepancies above)
-
-- [x] `recipe-builder.page.scss` — removed both `.section-desc` refs, `.export-bar-label`, `.recipe-name-input`; `.qty-btn` was already gone from the original pass (490 lines)
-- [x] `recipe-workflow.component.scss` — removed `.icon-muted`, `.quantity-controls`, `.qty-btn` (+2 dead media-query overrides)
-- [x] `cook-view.page.scss` — removed second `.cv-phone-swap-hint`
-- [x] **KEPT — do not delete.** `unit-creator.component.scss` `.custom-select-wrap` — looked dead, but compiled dist output proves Angular leaves `:has()` arguments unscoped, so this rule reaches into child `<app-custom-select>`'s internal `.open` state. Live. Reverted after deleting-then-checking.
-- [x] **KEPT — do not delete.** `recipe-book-list.component.scss` `.header-actions` — is an `::ng-deep` rule reaching into child `<app-list-shell>` (renders `.header-actions` at line 22). Live. Never deleted.
-- [x] `menu-library-list.component.scss` — removed `.date-range-inputs`
-- [x] `product-form.component.scss` — removed `.form-input--no-focus-ring`, simplified the `:not()` it lived in
-- [x] Confirmed via `dist` output + explicit `::ng-deep`/`:has()` checks — 2 of 7 addendum targets were false positives from the "grep owning component's own html/ts" method; see plan 308 for the full explanation
-
-#### Second addendum — recipe-workflow.component.scss, corrected 4-point check
-
-- [x] `.category-option-item`, `.inline-category-picker-wrapper`, `.amount-value` — all passed the 4-point check, all deleted (484→456 lines)
-- [x] `rating-stars.component.scss` — added the requested comment (not a deletion)
-- [x] Confirmed do-not-touch list untouched + bonus-verified the original `.checklist-export-wrap` deletion (session 2) was safe despite `export-toolbar-overlay`'s `ViewEncapsulation.None`
-- [x] `ng build` pass, no new warnings; `git diff --stat -- '*.ts' '*.html'` empty
-
-### Plan 307 — Purge Committed Scrape Artifacts And Legacy SQL (`plans/307-purge-committed-scrape-artifacts.plan.md`)
-
-> Scope restored 2026-08-23: plan 300's closing sweep confirmed 0 remaining mismatches, so Human approved untracking `fullDATA_utf8.sql` too (full scope, not reduced).
-> **NOT marking these `[x]` on 2026-08-26 despite the "(done, awaiting validation)" label below — verified against the live repo and the core action was never actually applied.** `git ls-files` still shows all 111 `tools/catalog-seeder/output|dumps` files and `fullDATA_utf8.sql` tracked. Only the `.gitignore` + README text edits are real and are committed/pushed to `chore/purge-scrape-artifacts-prep-plan-307` (unmerged, no PR — genuinely incomplete). The `git rm -r --cached` step below still needs to actually run.
-
-- [ ] Grep for hardcoded references: `scrape_test`/`fullDATA_utf8` across `tools/ server/ scripts/ package.json .github/`; confirmed all overridable via `--sql-path=`, no hardcoding
-- [x] `.gitignore`: replaced per-filename list (lines 72-80) with directory-level rules `tools/catalog-seeder/output/*` and `tools/catalog-seeder/dumps/`; kept `!tools/catalog-seeder/output/.gitkeep` and the `seed-products.json` intentional-commit exception
-- [x] `.gitignore`: included `tools/catalog-seeder/logging.log` and `server/scripts/legacy-import/source-data/*.sql`
-- [ ] `git rm -r --cached` the output/dumps dirs + `logging.log` (111 files) and `fullDATA_utf8.sql` — **not actually run yet**, files are still tracked
-- [x] `server/scripts/legacy-import/source-data/README.md`: rewritten — no longer tracked, why, and how to restore for a re-import/re-audit
-- [ ] Re-verified: `ng build` + `cd server && node -e "require('./index.js')"` with the `.sql` also removed — both clean
-- [ ] Reported final before/after `git ls-files | wc -l` (1566 → 1454, -112) — not yet true, still ~1568
-
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
