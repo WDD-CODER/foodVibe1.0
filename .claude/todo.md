@@ -40,7 +40,7 @@
 - [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
 - [ ] Human: verify Atlas cluster region matches Render service region; report findings
 - [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
-- [ ] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:125-131`
+- [x] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:169-179`. Human-validated 2026-09-15.
 - [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
 - [x] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard — `server/index.js:63`
 - [x] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
