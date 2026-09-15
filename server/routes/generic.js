@@ -143,6 +143,40 @@ router.get('/:type/search', optionalToken, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /api/v1/data/:type/count?filter=lowStock|unapproved
+// Lightweight count so dashboard stats don't need the full collection loaded
+// (plan 301, Milestone 3). Mirrors kitchen-state.service.ts's lowStockProducts_
+// (min_stock_level_ > 0) and dashboard-overview.component.ts's unapprovedCount_
+// (is_approved_ !== true) filters exactly, so a future client switch-over can't drift.
+// Must be registered before GET /:type/:id so "count" is never swallowed as an :id.
+// ---------------------------------------------------------------------------
+router.get('/:type/count', optionalToken, async (req, res) => {
+  try {
+    const userId = req.user ? req.user.userId : '__master__';
+    const filter = { userId, _userDeleted: { $ne: true } };
+    const filterName = req.query.filter;
+    if (filterName === 'lowStock') {
+      if (req.params.type !== 'PRODUCT_LIST') {
+        return res.status(400).json({ error: 'filter=lowStock is only valid for PRODUCT_LIST' });
+      }
+      filter.min_stock_level_ = { $gt: 0 };
+    } else if (filterName === 'unapproved') {
+      if (req.params.type !== 'RECIPE_LIST' && req.params.type !== 'DISH_LIST') {
+        return res.status(400).json({ error: 'filter=unapproved is only valid for RECIPE_LIST or DISH_LIST' });
+      }
+      filter.is_approved_ = { $ne: true };
+    } else if (filterName) {
+      return res.status(400).json({ error: `Unknown filter: ${filterName}` });
+    }
+    const count = await col(req.params.type).countDocuments(filter);
+    res.json({ count });
+  } catch (err) {
+    console.error('[data/count]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // GET /api/v1/data/:type/:id
 // Authenticated → returns one document by _id scoped to the user.
 // Anonymous → returns one document by _id from __master__.

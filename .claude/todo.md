@@ -22,7 +22,8 @@
 - [x] Refactor `ingredient-search.component.ts` to debounce + call the new search endpoint instead of filtering `KitchenStateService.products_()`/`recipes_()` in full
 - [x] Refactor `recipe-book-list.component.ts`'s `filteredProductsForIngredientSearch_` the same way
 - [x] Verify: build, curl the new endpoint, live typeahead behavior, no regression on inventory/recipe-book, no keystroke-spam requests
-- [ ] (Milestone 2/3 — see plan file; not started, lower priority, scope separately)
+- [x] Milestone 3 — dashboard count endpoint (`GET /:type/count?filter=lowStock|unapproved`) added to `server/routes/generic.js`; `ng build` + live curl verified against real `dev-guest` data. Dashboard component intentionally not rewired — per plan note, only becomes a real win once Milestone 2 lands.
+- [ ] Milestone 2 — faceted server-side search/pagination for `inventory-product-list` + `recipe-book-list`; needs its own design pass — see plan file, not started
 - [x] Milestone 4 — collapse `UserService._reloadDataServices()`'s post-login re-fetch with each service's constructor-time load: done in `feat/optimization` — `reloadFromStorage()` now awaits an in-flight load instead of racing a duplicate one (`base-entity-data.service.ts`, `product-data.service.ts`, `recipe-data.service.ts`, `dish-data.service.ts`, `menu-event-data.service.ts`, `menu-section-categories.service.ts`, `preparation-registry.service.ts`, `metadata-registry.service.ts`). Verified via network capture: PRODUCT_LIST/RECIPE_LIST/DISH_LIST/etc. each fetch exactly once per page load, down from twice (~5MB/page deduped). Human-validated 2026-08-31.
 
 ### Plan 302 — Perf Phase 1: Infrastructure & Boot Payload (`plans/302-perf-phase1-infra-and-payload.plan.md`)
