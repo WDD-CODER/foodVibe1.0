@@ -61,7 +61,7 @@
 - [x] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
 - [x] Convert `menu-export.service.ts:8` and `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
 - [x] Propagate resulting `async` signature changes through `export.service.ts` and its 3 consumers
-- [ ] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages
+- [x] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages — verified 2026-09-16 (overnight auto-solve session) via `/browse`: cook-view, recipe-builder, and menu-intelligence each produce a valid `.xlsx` blob, no console errors. Details in `plans/302-perf-phase1-infra-and-payload.plan.md` M4.
 - [x] Re-confirm `food-compos-logo.png` (1.88 MB) is unreferenced; delete if so
 - [x] Convert `recipe_placeholder.png` (1.27 MB) to WebP or inline SVG — update `recipe-header.component.ts:133`
 - [x] Convert both approve-stamp PNGs to WebP — update `approve-stamp.component.ts:20,22` — done in `feat/optimization` via the already-running headless Chromium's canvas API (no new dependency). 161,418→54,616 bytes and 177,305→64,924 bytes. Human-validated 2026-08-31.

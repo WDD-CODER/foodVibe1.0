@@ -235,7 +235,7 @@ const { Workbook } = await import('exceljs')
 - [x] Convert `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
 - [x] Propagate any resulting `async` signature changes through `export.service.ts` and its three consumers (`cook-view.page.ts:82`, `menu-intelligence.page.ts:102`, `recipe-builder.page.ts:114`)
 - [x] Re-measure `dist/` total JS and record before/after in the audit report
-- [ ] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages
+- [x] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages — verified 2026-09-16 via `/browse` against `ng serve` (local-storage mode, port 4201): created a test recipe + test menu event in-browser, then triggered export on cook-view (`/cook/:id` — recipe info, shopping list, cooking steps), recipe-builder (`/recipe-builder/:id` — recipe info via the FAB export toolbar), and menu-intelligence (`/menu-intelligence` — menu shopping list). Hooked `URL.createObjectURL` to capture each generated blob: all produced non-empty `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` blobs (6.7-7.2 KB range), no console errors. Confirms the M4 dynamic-`import('exceljs')` + async signature propagation works end-to-end on all three consumers.
 
 ## Milestone 5 — Image compression
 - [x] Re-confirm `food-compos-logo.png` is unreferenced across `src/`, `public/`, `index.html`; delete if so
