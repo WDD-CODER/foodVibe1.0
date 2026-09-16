@@ -171,7 +171,7 @@ From plan 305's M3 (shell) and M7 (Menu Intelligence touch floor):
 
 ## M9 — Product form
 
-- [ ] Task 17: field grouping/spacing pass against the design's product form fields — remember it's a full page here (plan 305 decision 1), not the design's modal
+- [x] Task 17: field grouping/spacing pass against the design's product form fields — remember it's a full page here (plan 305 decision 1), not the design's modal. Compared against the design's modal reference (`.interface-design/source/Inventory.dc.html:396-456`); token values already matched (label style, spacing, radius, glass background). Real gap: plain `<input>` elements duplicated `.c-input`'s styling locally in `product-form.component.scss` instead of composing the shared engine class. Added `class="c-input"` to all 8 plain text/number inputs, deleted the redundant duplicate block. `ng build` clean; visual QA via gstack browse confirms no regression across main form + expanded purchase-unit/waste-yield/min-stock/expiry sections.
 
 ## M10 — Menu Intelligence visual pass
 
