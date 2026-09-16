@@ -69,7 +69,11 @@ A full manual audit was already run this session (6 parallel Explore agents cove
 
 ## Addendum — approved follow-up action (same session, after report presented)
 
-Human reviewed the report and explicitly approved removing the two zero-reference packages. `npm uninstall @angular-eslint/builder @angular/platform-browser-dynamic` — `ng build` re-verified clean afterward, same pre-existing warnings, no new ones, bundle size unchanged (as expected — neither package shipped to the client bundle). Everything else in the report (consolidation candidates, the two uncertain packages, 39 unused exports, the two server migration scripts) remains untouched, pending individual Human decisions.
+Human reviewed the report and explicitly approved removing the two zero-reference packages. `npm uninstall @angular-eslint/builder @angular/platform-browser-dynamic` — `ng build` re-verified clean afterward, same pre-existing warnings, no new ones, bundle size unchanged (as expected — neither package shipped to the client bundle).
+
+**Correction (caught by CI, same session):** `@angular/platform-browser-dynamic` was a false negative from all three detection methods (manual grep, `depcheck`, `knip`) — it's only imported by Karma's build-time-generated test entry file (`ng-virtual-main.js`), never by any real source file, so none of the file-scanning checks could see it. `gh pr checks --watch` on PR #197 caught it (`test` job failed: `Module not found: @angular/platform-browser-dynamic/testing`). Reinstated at `^19.2.21`; `ng test` (311/311) and `ng build` reverified locally before pushing the fix. Net result: only `@angular-eslint/builder` was actually removed. Report corrected with this lesson for future audits on this repo.
+
+Everything else in the report (consolidation candidates, the two uncertain packages, 39 unused exports, the two server migration scripts) remains untouched, pending individual Human decisions.
 
 ## Rules
 

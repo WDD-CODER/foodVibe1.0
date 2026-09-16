@@ -38,6 +38,7 @@
     "@angular/core": "^19.2.21",
     "@angular/forms": "^19.2.21",
     "@angular/platform-browser": "^19.2.21",
+    "@angular/platform-browser-dynamic": "^19.2.21",
     "@angular/router": "^19.2.21",
     "exceljs": "^4.4.0",
     "lucide-angular": "^0.563.0",

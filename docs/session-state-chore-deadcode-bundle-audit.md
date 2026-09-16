@@ -9,8 +9,9 @@ chore/deadcode-bundle-audit
 ## Session Summary
 - Ran a full dead-code/bundle-size audit (6 parallel manual Explore agents over `core/`, `pages/`, `shared/`+`appRoot/`, `server/`, npm dependencies, and the Render build pipeline) — conclusion: no whole-file dead code exists anywhere in the app.
 - Persisted `plans/311-deadcode-bundle-audit.plan.md`, added `knip` + `depcheck` tooling (`knip.json`, `audit:deadcode` npm script), ran both plus a production-build budget check, and merged everything into `.claude/techdebt-reports/techdebt-2026-09-16.md`.
-- Per Human approval after reviewing the report, removed the two npm packages confirmed to have zero references anywhere in the repo: `@angular-eslint/builder`, `@angular/platform-browser-dynamic`.
-- Shipped fast lane (forced to REGULAR review by the `package.json`/`package-lock.json` sensitive-path match) — build gate, `/review` (PASS), manifest check all clean.
+- Per Human approval after reviewing the report, removed the two npm packages the audit flagged as zero-reference: `@angular-eslint/builder`, `@angular/platform-browser-dynamic`.
+- Shipped fast lane (forced to REGULAR review by the `package.json`/`package-lock.json` sensitive-path match) — build gate, `/review` (PASS), manifest check all clean, PR #197 opened.
+- CI's `test` check failed on PR #197: `@angular/platform-browser-dynamic` turned out to be a false negative from all 3 detection methods (manual grep, `depcheck`, `knip`) — it's only imported by Karma's build-time-generated test entry file, never by real source. Reinstated at `^19.2.21`, `ng test` (311/311) + `ng build` reverified locally, report/plan/archive corrected, fix pushed.
 
 ## Files Modified
 ```
