@@ -44,6 +44,7 @@ import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
 import { GlobalSpecificModalService } from '@services/global-specific-modal.service'
 import { SupplierModalService } from '@services/supplier-modal.service'
 import { RestoreChoiceModalService } from '@services/restore-choice-modal.service'
+import { AuthModalService } from '@services/auth-modal.service'
 
 @Component({
   selector: 'app-root',
@@ -95,6 +96,7 @@ export class AppComponent {
   protected readonly globalSpecificModal = inject(GlobalSpecificModalService)
   protected readonly supplierModal = inject(SupplierModalService)
   protected readonly restoreChoiceModal = inject(RestoreChoiceModalService)
+  protected readonly authModal = inject(AuthModalService)
 
   protected isRouteLoading = signal(false)
   protected isDataReloading_ = this.userService.isDataReloading_

@@ -113,6 +113,7 @@ const corsOptions = {
   },
   credentials: true,
   optionsSuccessStatus: 204,
+  maxAge: 86400,
 }
 
 // Respond 204 to OPTIONS preflights on every route before they reach handlers.

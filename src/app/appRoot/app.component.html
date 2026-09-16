@@ -33,7 +33,7 @@
   <app-global-specific-modal />
 }
 
-<!-- Eager: confirm + auth used early in typical sessions -->
+<!-- Eager: confirm used early in typical sessions. Auth moved to @defer with prefetch-on-idle below (plan 312) — kept the chunk warm without paying its ~61.5kB in the initial bundle. -->
 <app-confirm-modal />
 @defer (when supplierModal.isOpen()) {
   <app-supplier-modal />
@@ -51,4 +51,6 @@
   <app-restore-choice-modal />
 }
 <app-hero-fab />
-<app-auth-modal />
+@defer (when authModal.isOpen(); prefetch on idle) {
+  <app-auth-modal />
+}

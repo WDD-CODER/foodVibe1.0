@@ -11,6 +11,18 @@
 
 - [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
+### Plan 312 — Performance Quick Wins: Defer Auth Modal, Missing Indexes, CORS Preflight Cache (`plans/312-perf-quickwins-defer-index-cors.plan.md`)
+
+> Persisted 2026-09-16. From a fresh 4-angle perf audit this session (zoneless CD, server queries, bundle composition, asset delivery) — this plan is the low-risk/high-impact subset. Zoneless CD, service worker, image lazy-loading, and font `@import`→`<link>` deferred to future plans.
+
+- [x] `app.component.html`/`.ts` — defer `auth-modal` with `prefetch on idle` (~61.5kB off initial bundle, resolves the original "used early" eager-loading concern via prefetch instead of discarding it)
+- [x] `server/db.js` — add `{userId:1, min_stock_level_:1}` index on `PRODUCT_LIST`
+- [x] `server/db.js` — add `{userId:1, is_approved_:1}` index on `RECIPE_LIST`/`DISH_LIST`
+- [x] `server/db.js` — add `{userId:1, 'ingredients_.referenceId':1}` index on `RECIPE_LIST`/`DISH_LIST`
+- [x] `server/index.js` — add `maxAge: 86400` to `corsOptions`
+- [x] Verify: `ng build` bundle size (593.77→532.36kB), `ng test` full suite (311/311), auth-modal chunk-split confirmed via build output (no live `/browse` available this session)
+- [x] Addendum: `loading="lazy"` on venue-card-photo + approve-stamp images, font `@import`→`<link>` swap — build/test reverified
+
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
@@ -120,7 +132,7 @@
 - [ ] ~~M6 Task 14 — Venue Detail~~ — **superseded**; done via `/design-port` (`06-venues.port-spec.md`, Human-validated there)
 - [ ] ~~M7 Task 15 — Cook View~~ — **superseded** by `/design-port`
 - [ ] ~~M8 Task 16 — Metadata Manager~~ — **superseded** by `/design-port`
-- [ ] M9 Task 17 — Product form (still open — no `/design-port` screen covers this)
+- [x] M9 Task 17 — Product form — composed `.c-input` engine class on all plain inputs instead of duplicating its styles locally in `product-form.component.scss`; `ng build` clean, visual QA via gstack browse confirmed no regression. Human-validated 2026-09-16.
 - [ ] ~~M10 Tasks 18-19 — Menu Intelligence visual pass~~ — **superseded** by `/design-port`
 - [ ] ~~M11 Tasks 20-21 — Recipe Builder~~ — **superseded** by `/design-port`
 - [ ] M12 Tasks 22-25 — cross-screen QA: all 13 screens, 3 breakpoints, RTL, dark-mode-scope check, `ng build` clean (deferred — revisit once `/design-port` registry shows all screens `done`)
