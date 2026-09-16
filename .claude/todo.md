@@ -15,12 +15,13 @@
 
 > Persisted 2026-09-16. From a fresh 4-angle perf audit this session (zoneless CD, server queries, bundle composition, asset delivery) — this plan is the low-risk/high-impact subset. Zoneless CD, service worker, image lazy-loading, and font `@import`→`<link>` deferred to future plans.
 
-- [ ] `app.component.html`/`.ts` — defer `auth-modal` with `prefetch on idle` (~61.5kB off initial bundle, resolves the original "used early" eager-loading concern via prefetch instead of discarding it)
-- [ ] `server/db.js` — add `{userId:1, min_stock_level_:1}` index on `PRODUCT_LIST`
-- [ ] `server/db.js` — add `{userId:1, is_approved_:1}` index on `RECIPE_LIST`/`DISH_LIST`
-- [ ] `server/db.js` — add `{userId:1, 'ingredients_.referenceId':1}` index on `RECIPE_LIST`/`DISH_LIST`
-- [ ] `server/index.js` — add `maxAge: 86400` to `corsOptions`
-- [ ] Verify: `ng build` bundle size, `ng test` full suite, manual auth-modal open check
+- [x] `app.component.html`/`.ts` — defer `auth-modal` with `prefetch on idle` (~61.5kB off initial bundle, resolves the original "used early" eager-loading concern via prefetch instead of discarding it)
+- [x] `server/db.js` — add `{userId:1, min_stock_level_:1}` index on `PRODUCT_LIST`
+- [x] `server/db.js` — add `{userId:1, is_approved_:1}` index on `RECIPE_LIST`/`DISH_LIST`
+- [x] `server/db.js` — add `{userId:1, 'ingredients_.referenceId':1}` index on `RECIPE_LIST`/`DISH_LIST`
+- [x] `server/index.js` — add `maxAge: 86400` to `corsOptions`
+- [x] Verify: `ng build` bundle size (593.77→532.36kB), `ng test` full suite (311/311), auth-modal chunk-split confirmed via build output (no live `/browse` available this session)
+- [x] Addendum: `loading="lazy"` on venue-card-photo + approve-stamp images, font `@import`→`<link>` swap — build/test reverified
 
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
