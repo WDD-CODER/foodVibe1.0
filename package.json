@@ -23,6 +23,7 @@
     "deploy:gh-pages": "npm run build:gh-pages && npx gh-pages -d dist/food-vibe1.0/browser",
     "lint": "eslint --no-error-on-unmatched-pattern \"src/app/**/*.{ts,html}\"",
     "lint:fix": "eslint --fix --no-error-on-unmatched-pattern \"src/app/**/*.{ts,html}\"",
+    "audit:deadcode": "knip && depcheck && depcheck server",
     "prepare": "husky"
   },
   "private": true,
@@ -47,7 +48,6 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^19.2.19",
-    "@angular-eslint/builder": "^19.8.1",
     "@angular-eslint/eslint-plugin": "^19.8.1",
     "@angular-eslint/eslint-plugin-template": "^19.8.1",
     "@angular-eslint/template-parser": "^19.8.1",
@@ -58,6 +58,7 @@
     "@typescript-eslint/eslint-plugin": "^8.63.0",
     "@typescript-eslint/parser": "^8.63.0",
     "autoprefixer": "^10.4.24",
+    "depcheck": "^1.4.7",
     "eslint": "^9.39.5",
     "gh-pages": "^6.3.0",
     "husky": "^9.1.7",
@@ -67,6 +68,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "knip": "^6.35.1",
     "lint-staged": "^17.0.8",
     "postcss": "^8.5.6",
     "prettier": "^3.9.5",
