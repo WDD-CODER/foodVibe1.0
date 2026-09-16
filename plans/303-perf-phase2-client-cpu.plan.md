@@ -235,12 +235,18 @@ It only fires on the `!existing` branch (new clones), so steady-state logins ski
       already use, so display and sort order can't diverge — `inventory-product-list.component.ts:338-348`
 - [x] Verify all `track` expressions still track stable entity `_id`, not wrapper identity — both
       loops track `row.recipe._id` / `row.product._id`
-- [ ] Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush`
-      — NOT done, deliberately out of scope for this pass (see plan's own note: this was already
-      flagged as secondary once M1/M2 land, since the per-row cost was the actual driver)
+- [x] Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush`
+      — done in `feat/optimization`, 28 components across 8 commits, each individually traced for
+      signal-safety (not batch-applied); `grep -rL "ChangeDetectionStrategy.OnPush" src/app
+      --include="*.component.ts"` returns empty. Human-validated 2026-08-31 (see `.claude/todo.md:66`).
+      Supersedes this file's earlier "deliberately out of scope" note — done later, in a different branch.
 
 ## Milestone 3 — sync-master frequency & Set hoist
-- [ ] Hoist the `allProductNames` Set construction above the master loop — `server/services/sync-master.js:273-274`
+- [x] Hoist the `allProductNames` Set construction above the master loop — `server/services/sync-master.js:234-252`
+      — done in `feat/optimization`: was rebuilt once per master PRODUCT_LIST doc needing an insert
+      check (up to ~1500x per sync run); now built once, above `for (const master of masterDocs)`.
+      Static verification only (no live timing — shared backend's Mongo needs credentials this
+      session doesn't have). Human-validated 2026-08-31 (see `.claude/todo.md:67`).
 - [ ] Remove `syncMasterToUser` from `POST /refresh` (or implement the `masterDataVersion` gate) — `server/routes/auth.js:274`
 - [ ] Decide and document which of the two approaches was taken, and why
 - [ ] Regression test: brand-new account signup receives correctly cloned + remapped master data

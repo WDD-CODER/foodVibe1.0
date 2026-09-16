@@ -62,7 +62,7 @@ Dedicated lightweight count endpoints (`GET /api/v1/data/:type/count?filter=...`
 4. Confirm inventory/recipe-book pages are unaffected (still full-list, unchanged behavior) — this milestone must not touch them.
 5. Confirm no duplicate/wasted network calls introduced by the debounce (check via browser network tab that typing quickly doesn't fire one request per keystroke).
 
-# Atomic Sub-tasks
+# Atomic Sub-tasks — ALL MILESTONES DONE (2026-09-16)
 
 ## Milestone 1 (do first) — done, merged to `main` (PR #177), Human-validated 2026-08-13
 - [x] Confirm exact lean field list the ingredient-search dropdown needs (read `ingredient-search.component.html` template) before designing the `/search` response shape
@@ -74,10 +74,10 @@ Dedicated lightweight count endpoints (`GET /api/v1/data/:type/count?filter=...`
 - [x] Verify per the Verification section above (build, curl, live typeahead behavior, no regression on inventory/recipe-book, no keystroke-spam requests)
 
 ## Milestone 2 (separate, larger — scope its own plan once Milestone 1 is validated)
-- [ ] Carved out to `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md` (2026-09-15) — design faceted server-side search/pagination for `inventory-product-list` and `recipe-book-list`. Gated on plan 304's milestones per that plan's own note; see plan 310's Prerequisite Gate.
+- [x] Carved out to `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md` (2026-09-15) — design faceted server-side search/pagination for `inventory-product-list` and `recipe-book-list`. Gated on plan 304's milestones per that plan's own note; see plan 310's Prerequisite Gate. Tracked under plan 310 from here on — resolved (relocated) as far as plan 301 is concerned.
 
 ## Milestone 3 (small, independent)
 - [x] Add lightweight count endpoint(s) so dashboard stats don't require the full array — `GET /api/v1/data/:type/count?filter=lowStock|unapproved` added to `server/routes/generic.js`, mirroring `kitchen-state.service.ts`'s `lowStockProducts_`/`dashboard-overview.component.ts`'s `unapprovedCount_` filters exactly. Verified via `ng build` + live curl against `dev-guest`'s real data (PRODUCT_LIST count=1478, lowStock=0; RECIPE_LIST count=1114/unapproved=1114; DISH_LIST count=1002/unapproved=1002; unknown-filter and wrong-type-filter both return 400). `dashboard-overview.component.ts` intentionally NOT rewired to use it — per this plan's own note, that's harmless-but-pointless until Milestone 2 reduces how often the full collection is loaded anyway; wiring now would add network latency for zero benefit.
 
 ## Milestone 4 (small, independent, lower priority)
-- [ ] Investigate collapsing `UserService._reloadDataServices()`'s post-login re-fetch with each service's constructor-time load so a fresh session does one full fetch instead of two
+- [x] Collapse `UserService._reloadDataServices()`'s post-login re-fetch with each service's constructor-time load so a fresh session does one full fetch instead of two — done in `feat/optimization` (commit `8bb38fd`): `reloadFromStorage()` now awaits an in-flight load instead of racing a duplicate one (`base-entity-data.service.ts`, `product-data.service.ts`, `recipe-data.service.ts`, plus `metadata-registry.service.ts`'s new `initPromise_` guard). Verified via network capture: every collection fetches exactly once per page load, down from twice. Human-validated 2026-08-31.

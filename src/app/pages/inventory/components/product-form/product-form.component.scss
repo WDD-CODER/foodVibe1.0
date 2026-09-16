@@ -4,7 +4,7 @@
 
 :host {
   display: block;
-  padding: 1.5rem;
+  padding: var(--space-6);
 }
 
 .product-form-container {
@@ -23,9 +23,9 @@
 .form-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-6);
   background: var(--bg-glass-strong);
-  padding: 2rem;
+  padding: var(--space-8);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-modal);
@@ -34,22 +34,22 @@
 
   .form-header {
     display: block;
-    margin-block-end: 1.25rem;
-    padding-block-end: 1rem;
+    margin-block-end: var(--space-5);
+    padding-block-end: var(--space-4);
     border-block-end: 1px solid var(--border-default);
     text-align: center;
 
     .form-header__title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 0 0 0.25rem 0;
+      font-size: var(--fs-xl);
+      font-weight: var(--fw-bold);
+      margin: 0 0 var(--space-1) 0;
       color: var(--color-text-main);
     }
 
     .subtitle {
       color: var(--color-text-muted);
-      margin-block-start: 0.25rem;
-      font-size: 0.875rem;
+      margin-block-start: var(--space-1);
+      font-size: var(--fs-base);
     }
   }
 
@@ -59,7 +59,7 @@
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     grid-auto-flow: dense;
     // grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.5rem;
+    gap: var(--space-4);
 
     .section-header {
       width: fit-content;
@@ -94,7 +94,7 @@
       &.border-top {
         background: var(--color-primary-soft);
         border-radius: var(--radius-md);
-        padding: 1.25rem;
+        padding: var(--space-5);
       }
 
       .section-header {
@@ -109,12 +109,12 @@
 
     &.product-info {
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 1.5rem;
+      gap: var(--space-4);
     }
 
     &.border-top {
       border-block-start: 1px solid var(--border-default);
-      padding-block-start: 1.5rem;
+      padding-block-start: var(--space-6);
     }
   }
 
@@ -122,7 +122,7 @@
   .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-2);
 
     label {
       place-content: baseline;
@@ -131,8 +131,7 @@
       color: var(--color-text-muted);
       text-transform: uppercase;
       letter-spacing: var(--tracking-wide);
-      height: 24px;
-      text-align: center;
+      height: var(--space-6);
 
       &.danger-label {
         color: var(--color-danger);
@@ -200,10 +199,10 @@
   }
 
   .scaling-box {
-    margin-block-end: 1rem;
+    margin-block-end: var(--space-4);
 
     background: var(--bg-glass);
-    padding: 1.25rem;
+    padding: var(--space-5);
     border-radius: var(--radius-md);
     border: 1px dashed var(--border-default);
     /* No backdrop-filter: creates stacking context and hides custom-select dropdown behind next row */
@@ -231,21 +230,21 @@
 
     .error-message-row {
       color: var(--color-danger);
-      font-size: 0.75rem;
-      margin-block-start: 0.5rem;
+      font-size: var(--fs-xs);
+      margin-block-start: var(--space-2);
       display: flex;
       align-items: center;
-      gap: 0.25rem;
-      font-weight: 500;
+      gap: var(--space-1);
+      font-weight: var(--fw-medium);
     }
 
     .price-override-wrapper {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 0.5rem;
-      margin-inline-end: 1rem;
-      padding-inline-end: 0.5rem;
+      gap: var(--space-2);
+      margin-inline-end: var(--space-4);
+      padding-inline-end: var(--space-2);
       border-inline-end: 1px solid var(--border-default);
 
       .price-override-label {
@@ -284,8 +283,8 @@
       display: grid;
       grid-template-columns: minmax(90px, 9rem) auto minmax(90px, 1fr) minmax(auto, 12rem) min-content;
       align-items: center;
-      gap: 0.75rem;
-      margin-block-start: 0.5rem;
+      gap: var(--space-3);
+      margin-block-start: var(--space-2);
       overflow: visible;
 
       // Fix 4a: app-custom-select min-width only; grid column handles the max
@@ -332,9 +331,9 @@
   .form-actions {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: var(--space-4);
     border-block-start: 1px solid var(--border-default);
-    padding-block-start: 1.5rem;
+    padding-block-start: var(--space-6);
 
     // Fix 6: back and submit buttons always share equal width
     button {
@@ -365,8 +364,9 @@
     .collapsible-field__header {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 0.75rem;
+      gap: var(--space-2);
+      padding-block: var(--space-2);
+      padding-inline: var(--space-3);
       border: 1px solid var(--border-strong);
       border-radius: var(--radius-sm);
       cursor: pointer;
@@ -398,7 +398,7 @@
     .collapsible-field__content {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: var(--space-2);
 
       &--hidden {
         display: none !important;
@@ -409,7 +409,7 @@
         display: flex;
         place-content: baseline;
         align-items: center;
-        gap: 0.5rem;
+        gap: var(--space-2);
         flex-direction: row-reverse;
       }
     }
@@ -447,7 +447,7 @@
     }
 
     .form-container {
-      padding: 1.25rem;
+      padding: var(--space-5);
     }
 
     .form-container .form-section,
@@ -456,7 +456,7 @@
     }
 
     .form-actions {
-      gap: 0.75rem;
+      gap: var(--space-3);
     }
   }
 }
@@ -482,7 +482,7 @@
 
 // ---- Inline label text ----
 .label-text {
-  font-weight: 500;
+  font-weight: var(--fw-medium);
 
   color: var(--color-text-main);
 }
@@ -492,16 +492,16 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
 
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 // ---- Helper text under inputs ----
 .helper-text {
-  font-size: 0.75rem;
+  font-size: var(--fs-xs);
 
   color: var(--color-text-muted);
 
-  margin-block-start: 0.25rem;
+  margin-block-start: var(--space-1);
 }
 
 // ---- Cost impact alert ----
@@ -510,8 +510,8 @@
   align-items: center;
   justify-content: space-between;
 
-  margin-block-start: 1rem;
-  padding: 0.75rem;
+  margin-block-start: var(--space-4);
+  padding: var(--space-3);
 
   background: var(--bg-success);
 
@@ -519,15 +519,15 @@
   border-radius: var(--radius-md);
 
   .cost-alert__label {
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: var(--fs-base);
+    font-weight: var(--fw-medium);
 
     color: var(--text-success);
   }
 
   .cost-alert__value {
-    font-size: 1.125rem;
-    font-weight: 700;
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
 
     color: var(--text-success);
   }

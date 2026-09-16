@@ -171,7 +171,7 @@ From plan 305's M3 (shell) and M7 (Menu Intelligence touch floor):
 
 ## M9 — Product form
 
-- [ ] Task 17: field grouping/spacing pass against the design's product form fields — remember it's a full page here (plan 305 decision 1), not the design's modal
+- [ ] Task 17: field grouping/spacing pass against the design's product form fields — remember it's a full page here (plan 305 decision 1), not the design's modal. Implemented 2026-09-15, awaiting Human validation: no dedicated Product-form screen exists in `.interface-design/source/`; the design's field grouping/spacing is expressed in `Inventory.dc.html`'s add/edit-product modal (lines 397-457) — micro-label above each field (`--fs-xs`/`--fw-semibold`/uppercase/`--tracking-wide`, `margin-bottom: --space-2`), fields spaced `--space-4` apart, 2-col grids at `--space-4` gap. Applied to `product-form.component.scss`: tightened `.form-section` gap 1.5rem→`var(--space-4)` (was 50% looser than the design), removed the `text-align: center` on field labels (design uses block/start-aligned micro-labels, not centered), and replaced ~40 hardcoded rem/px values with the matching `--space-*`/`--fs-*`/`--fw-*` tokens throughout (header, scaling-box, collapsible fields, two-col-grid, cost-impact-alert). No template/`.ts` changes — CSS/template-presentation only, per plan's Backend Impact note. Verified via `/browse`: desktop/tablet/mobile screenshots, expanded waste/yield collapsible (2-col grid), RTL label alignment now `text-align: start` (was `center`). `ng build` clean.
 
 ## M10 — Menu Intelligence visual pass
 

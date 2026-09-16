@@ -240,5 +240,5 @@ const { Workbook } = await import('exceljs')
 ## Milestone 5 — Image compression
 - [x] Re-confirm `food-compos-logo.png` is unreferenced across `src/`, `public/`, `index.html`; delete if so
 - [x] Convert `recipe_placeholder.png` to WebP at display dimensions (or replace with inline SVG / CSS gradient) — update `recipe-header.component.ts:133`
-- [ ] Convert `stamp-approved.png` and `stamp-not-approved.png` to WebP — update `approve-stamp.component.ts:20,22`
+- [x] Convert `stamp-approved.png` and `stamp-not-approved.png` to WebP — update `approve-stamp.component.ts:20,22` — done in `feat/optimization` via the already-running headless Chromium's canvas API (no new dependency): 161,418→54,616 B and 177,305→64,924 B. `.png` originals removed, component now references `.webp` directly. Human-validated 2026-08-31 (see `.claude/todo.md:55`); supersedes the "Deferred" note in `reports/performance-audit-2026-08-13.md:437-452`, which predates this work.
 - [ ] Visual regression check on recipe-builder placeholder and both approve-stamp states
