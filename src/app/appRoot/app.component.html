@@ -54,3 +54,6 @@
 @defer (when authModal.isOpen(); prefetch on idle) {
   <app-auth-modal />
 }
+@defer (when appUpdate.updateAvailable_()) {
+  <app-update-banner />
+}

@@ -3,6 +3,7 @@ import { AppComponent } from './app.component'
 import { provideRouter } from '@angular/router'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { provideServiceWorker } from '@angular/service-worker'
 import { HeaderComponent } from '../core/components/header/header.component'
 import { UserMsg } from 'src/app/core/components/user-msg/user-msg.component'
 import { UserMsgService } from '@services/user-msg.service'
@@ -38,6 +39,8 @@ describe('AppComponent', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
+        // enabled: false registers a working no-op SwUpdate for DI without a real service worker.
+        provideServiceWorker('ngsw-worker.js', { enabled: false }),
         { provide: UserMsgService, useValue: mockUserMsgService },
         { provide: UnitRegistryService, useValue: mockUnitRegistry },
         { provide: ConversionService, useValue: {} }

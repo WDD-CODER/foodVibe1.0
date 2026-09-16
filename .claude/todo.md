@@ -11,17 +11,17 @@
 
 - [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
-### Plan 312 — Performance Quick Wins: Defer Auth Modal, Missing Indexes, CORS Preflight Cache (`plans/312-perf-quickwins-defer-index-cors.plan.md`)
+### Plan 313 — PWA Service Worker for App-Shell Caching (`plans/313-pwa-service-worker-app-shell-caching.plan.md`)
 
-> Persisted 2026-09-16. From a fresh 4-angle perf audit this session (zoneless CD, server queries, bundle composition, asset delivery) — this plan is the low-risk/high-impact subset. Zoneless CD, service worker, image lazy-loading, and font `@import`→`<link>` deferred to future plans.
+> Persisted 2026-09-16. Biggest remaining item from this session's perf audit — no `@angular/service-worker` existed at all. Includes an update-detect + reload-prompt safety net (`app-update.service.ts` + `update-banner`) so a deploy never leaves a user stuck on a stale cached build.
 
-- [x] `app.component.html`/`.ts` — defer `auth-modal` with `prefetch on idle` (~61.5kB off initial bundle, resolves the original "used early" eager-loading concern via prefetch instead of discarding it)
-- [x] `server/db.js` — add `{userId:1, min_stock_level_:1}` index on `PRODUCT_LIST`
-- [x] `server/db.js` — add `{userId:1, is_approved_:1}` index on `RECIPE_LIST`/`DISH_LIST`
-- [x] `server/db.js` — add `{userId:1, 'ingredients_.referenceId':1}` index on `RECIPE_LIST`/`DISH_LIST`
-- [x] `server/index.js` — add `maxAge: 86400` to `corsOptions`
-- [x] Verify: `ng build` bundle size (593.77→532.36kB), `ng test` full suite (311/311), auth-modal chunk-split confirmed via build output (no live `/browse` available this session)
-- [x] Addendum: `loading="lazy"` on venue-card-photo + approve-stamp images, font `@import`→`<link>` swap — build/test reverified
+- [x] `ng add @angular/pwa` + pin `@angular/service-worker@19.2.21` to match installed core (same peer-version issue as plan 312's `platform-browser-dynamic`)
+- [x] Clean up schematic output to repo conventions (no semicolons, `environment.production` gate instead of `isDevMode()`, restored trailing newline)
+- [x] `app-update.service.ts` + `update-banner` component — `@defer`-gated update-available reload prompt
+- [x] 2 new dictionary keys (`update_available`, `reload_now`)
+- [x] Fix `app.component.spec.ts` — add `provideServiceWorker(..., { enabled: false })` to TestBed (3 specs were failing on `NullInjectorError: No provider for SwUpdate`)
+- [x] Verify: `ng build` (538.63kB, `ngsw.json`/`ngsw-worker.js`/`manifest.webmanifest` generated), `ng test` (311/311)
+- [ ] **Not yet done — needs a real deploy:** confirm SW actually registers, repeat-visit speed improves, update banner + reload work on a fresh deploy, and no CSP console errors block registration (no live `/browse` tooling available this session)
 
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 

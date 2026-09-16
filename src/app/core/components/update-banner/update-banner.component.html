@@ -1,0 +1,8 @@
+@if (appUpdate.updateAvailable_()) {
+  <div class="update-banner" role="status">
+    <p>{{ 'update_available' | translatePipe }}</p>
+    <button type="button" class="update-banner-btn" (click)="reload()">
+      {{ 'reload_now' | translatePipe }}
+    </button>
+  </div>
+}
