@@ -156,6 +156,16 @@ This preserves normal force-refresh behavior for the common case (called long af
 
 ---
 
+## Empty `environment.apiUrl` makes `url.startsWith(apiUrl)` match everything
+
+**What hurt:** `auth.interceptor.ts` decided whether a request was "our own backend" (and so should get the `Authorization` header) via `req.url.startsWith(environment.apiUrl) || req.url.startsWith(environment.authApiUrl)`. `environment.prod.ts` — the config `npm run build:render` actually uses — sets both to `''` for same-origin deployment. `''.startsWith('')` is always `true`, so on that build *every* request matched, including the direct browser→Cloudinary image-upload POST. Cloudinary's CORS policy rejects the `Authorization` header on that endpoint, so the browser silently killed the upload — and the calling components swallowed the error, so it just looked like uploads didn't work on Render, with no console signal pointing at the interceptor. Local dev and the remote/staging build have non-empty `apiUrl`, so neither reproduced it.
+
+**Why the obvious fix is wrong:** Requiring `environment.apiUrl` to be non-empty before calling `startsWith` "fixes" the false-positive but reintroduces the opposite bug — on the very deployment that has an empty `apiUrl` *because* the API is same-origin, own-backend calls (relative URLs like `/api/v1/...`) would then wrongly fail the check and never get authenticated. The real defect is testing an absolute, cross-origin URL against a base string that can legitimately be `''`.
+
+**What to do instead:** When "own backend" can mean same-origin with an intentionally empty base URL, don't rely on `url.startsWith(baseUrl)` alone. Check whether the request URL is relative (no `http(s)://` scheme) first — relative always means same-origin, so it's ours regardless of what `apiUrl` is configured to. Only fall back to `startsWith` matching against a *non-empty* configured base when the URL is absolute (third-party). See `src/app/core/interceptors/auth.interceptor.ts`'s `isAbsolute` check.
+
+---
+
 ## Recipe-builder's five export popovers share one accessible name
 
 **What hurt:** While visually verifying Plan 302's export flow via `/browse` on `recipe-builder`, an accessible-name query for the download button (translated text "ייצוא") matched more than one element on the page. `recipe-builder.page.html`'s five `.view-export-wrap` blocks (recipe-info, shopping-list, cooking-steps, dish-checklist, all-together — lines ~13-106) each render a `.view-export-option` "download" button whose only label is the literal `'export'` translatePipe key, identical across all five — only the sibling `lucide-icon` differs.
