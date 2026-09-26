@@ -134,6 +134,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private initialRecipeSnapshot_: string | null = null
   /** Original recipe_type when the record was loaded — used to detect type-change saves. */
   private initialRecipeType_: 'dish' | 'preparation' | null = null
+  /** TEMPORARY (dev-process-only, see chat 2026-09-26): source master doc's _id, if any. */
+  private masterId_: string | null = null
   /** Tracks the recipe_type → name re-validation subscription so it doesn't stack on component reuse. */
   private recipeTypeRevalidationSub_?: Subscription
 
@@ -609,6 +611,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeType_.set(isDish ? 'dish' : 'preparation')
     // Record the original type so save gates can detect type-change and prompt the user.
     this.initialRecipeType_ = isDish ? 'dish' : 'preparation'
+    this.masterId_ = recipe._masterId ?? null
   }
 
   //GETTERS
@@ -1102,6 +1105,21 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       }
     }
 
+    // TEMPORARY (dev-process-only, see chat 2026-09-26): editing a recipe cloned
+    // from a shared master asks whether the change should also apply to that
+    // master (everyone) or stay on this user's own copy. Open to any signed-in
+    // user right now — see server/routes/generic.js push-to-master route header.
+    let pushToMasterAfterSave = false
+    if (this.recipeId_() && this.masterId_) {
+      const result = await this.confirmModal_.openTernary('push_to_master_message', {
+        headerKey: 'push_to_master_header',
+        saveLabel: 'push_to_master_save_me',
+        saveButtonLabel: 'push_to_master_save_everyone'
+      })
+      if (result === 'cancel') return
+      pushToMasterAfterSave = result === 'save'
+    }
+
     const navigateOnSuccess = options?.navigateOnSuccess !== false
     this.saving.setSaving(true)
     const recipe = this.buildRecipeFromForm()
@@ -1110,6 +1128,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.state_.saveRecipe(recipe).subscribe({
       next: (saved) => {
         this.saving.setSaving(false)
+        if (pushToMasterAfterSave) {
+          const isDish = saved.recipe_type_ === 'dish'
+          const pushOp$ = isDish
+            ? this.dishDataService_.pushToMaster(saved._id)
+            : this.recipeDataService_.pushToMaster(saved._id)
+          pushOp$.catch(() => this.userMsg_.onSetErrorMsg(this.translation_.translate('push_to_master_error')))
+        }
         if (navigateOnSuccess) {
           this.isSubmitted = true
           this.resetToNewForm_()

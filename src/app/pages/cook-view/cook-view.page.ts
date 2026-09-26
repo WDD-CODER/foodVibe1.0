@@ -248,7 +248,14 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   protected isDish_ = computed(() => {
     const r = this.recipe_()
-    return !!(r?.recipe_type_ === 'dish' || (r?.prep_items_?.length ?? 0) > 0 || (r?.prep_categories_?.length ?? 0) > 0)
+    if (!r) return false
+    // recipe_type_ is the authoritative signal (it's what actually determines
+    // DISH_LIST vs RECIPE_LIST storage). Only fall back to inferring from
+    // prep_items_/prep_categories_ for documents old enough to predate that
+    // field — otherwise stray leftover prep fields on a RECIPE_LIST document
+    // would wrongly route it to the dish (mise-en-place) rendering branch.
+    if (r.recipe_type_ != null) return r.recipe_type_ === 'dish'
+    return (r.prep_items_?.length ?? 0) > 0 || (r.prep_categories_?.length ?? 0) > 0
   })
 
   protected cookViewStepOpts_ = computed((): QuantityStepOptions | undefined => {

@@ -170,6 +170,22 @@ export class HttpStorageAdapter {
     )
   }
 
+  /**
+   * TEMPORARY (dev-process-only, see chat 2026-09-26): pushes the caller's own
+   * saved copy onto its linked __master__ document so the change reaches every
+   * user on next sync. Open to any signed-in user for now — restrict/remove
+   * once this dev pass is done.
+   */
+  async pushToMaster(entityType: string, entityId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.put<unknown>(
+        `${this.base}/api/v1/data/${entityType}/${entityId}/push-to-master`,
+        {},
+        { headers: this.headers(), withCredentials: true }
+      )
+    )
+  }
+
   /** Removes one entity by id. */
   async remove(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
