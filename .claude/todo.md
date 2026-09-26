@@ -2,6 +2,7 @@
 
 > Rearranged 2026-07-21 per [`.claude/reports/todo-ledger-relevance-audit-2026-07-21.md`](reports/todo-ledger-relevance-audit-2026-07-21.md).
 > Checkboxes are **unchanged** — decide per group: execute / mark done / prune / keep.
+> **2026-09-16 (overnight):** `/auto-solve` running unattended in worktree `../foodVibe1.0-wt-auto-solve` on branch `feat/auto-solve-overnight`, self-approving each plan (no Human present). See that branch's `OVERNIGHT-REPORT.md` for what landed — nothing pushed/merged without Human review.
 
 ---
 
@@ -21,7 +22,7 @@
 - [x] 2 new dictionary keys (`update_available`, `reload_now`)
 - [x] Fix `app.component.spec.ts` — add `provideServiceWorker(..., { enabled: false })` to TestBed (3 specs were failing on `NullInjectorError: No provider for SwUpdate`)
 - [x] Verify: `ng build` (538.63kB, `ngsw.json`/`ngsw-worker.js`/`manifest.webmanifest` generated), `ng test` (311/311)
-- [ ] **Not yet done — needs a real deploy:** confirm SW actually registers, repeat-visit speed improves, update banner + reload work on a fresh deploy, and no CSP console errors block registration (no live `/browse` tooling available this session)
+- [x] Confirm SW actually registers, repeat-visit speed improves, and no CSP console errors block registration — verified live 2026-09-23 via `/browse` against `https://foodvibe.onrender.com`: `navigator.serviceWorker.getRegistrations()` shows an active registration controlling the page (`ngsw-worker.js`), repeat-load asset requests returned in 5-46ms (served from SW cache), zero console errors. Update-banner reload-prompt flow itself remains unverified live (needs an actual version-to-version deploy transition to trigger, not reproducible from a single snapshot) — code path already exists (`app-update.service.ts` + `update-banner`) and was reviewed, not exercised end-to-end.
 
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
