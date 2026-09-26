@@ -243,11 +243,21 @@ function buildImport(raw, opts = {}) {
         continue;
       }
 
+      // tblRecipeProducts.quantity is null for ~2.3% of rows (older rows never
+      // backfilled onto that column) — the real value survives in whichever
+      // of Gram/Liter/Unit matches the row's own measureUnit. Only fall back
+      // to those when quantity itself is null; never second-guess a quantity
+      // that's actually set (Gram/Liter/Unit can be stale once quantity is).
+      const amount = ing.quantity ?? ing.Gram ?? ing.Liter ?? ing.Unit ?? 0;
+      if (ing.quantity == null && amount === 0) {
+        warnings.push(`Recipe ${row.recipeNo} line ${ing.recipeLine}: quantity, Gram, Liter, and Unit all null — defaulted to 0`);
+      }
+
       ingredients_.push({
         _id: idFactory(),
         referenceId,
         type: isSubRecipe ? 'recipe' : 'product',
-        amount_: ing.quantity ?? 0,
+        amount_: amount,
         unit_: unitKey || 'gram',
       });
 
@@ -259,7 +269,7 @@ function buildImport(raw, opts = {}) {
         prepItemRows.push({
           preparation_name,
           category_name: (subCat && subCat.hebrew) || FALLBACK_PREP_CATEGORY,
-          quantity: ing.quantity ?? 0,
+          quantity: amount,
           unit: unitKey || 'gram',
         });
       }

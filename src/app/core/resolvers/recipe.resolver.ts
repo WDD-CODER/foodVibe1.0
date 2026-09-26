@@ -18,10 +18,10 @@ export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) =
 
   // Check in-memory stores first — avoids unnecessary 404 network calls when
   // navigating within the app (stores already populated by service constructors).
-  const inMemoryRecipe = recipeDataService.allRecipes_().find(r => r._id === id)
+  const inMemoryRecipe = recipeDataService.allRecipes_().find((r) => r._id === id)
   if (inMemoryRecipe) return inMemoryRecipe
 
-  const inMemoryDish = dishDataService.allDishes_().find(d => d._id === id)
+  const inMemoryDish = dishDataService.allDishes_().find((d) => d._id === id)
   if (inMemoryDish) return inMemoryDish
 
   // In-memory miss (page refresh / direct URL) — use ID prefix to route to the
@@ -41,11 +41,27 @@ export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) =
   }
 
   if (isDish) {
-    try { return await dishDataService.getDishById(id) } catch { return notFound() }
+    try {
+      return await dishDataService.getDishById(id)
+    } catch {
+      try {
+        return await recipeDataService.getRecipeById(id)
+      } catch {
+        return notFound()
+      }
+    }
   }
 
   if (isRecipe) {
-    try { return await recipeDataService.getRecipeById(id) } catch { return notFound() }
+    try {
+      return await recipeDataService.getRecipeById(id)
+    } catch {
+      try {
+        return await dishDataService.getDishById(id)
+      } catch {
+        return notFound()
+      }
+    }
   }
 
   // Unknown prefix (user-created ObjectId) — try recipe first, then dish.
