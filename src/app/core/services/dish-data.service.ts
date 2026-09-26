@@ -117,6 +117,11 @@ export class DishDataService {
     }
   }
 
+  /** TEMPORARY (dev-process-only, see chat 2026-09-26). */
+  async pushToMaster(dishId: string): Promise<void> {
+    return this.storage.pushToMaster(ENTITY, dishId)
+  }
+
   async updateDish(dish: Recipe): Promise<Recipe> {
     try {
       const existing = await this.storage.get<Recipe>(ENTITY, dish._id).catch(() => null)

@@ -81,6 +81,14 @@ export class StorageService {
     return entityToSave
   }
 
+  /**
+   * TEMPORARY (dev-process-only, see chat 2026-09-26). No-op in localStorage mode
+   * (no master/clone concept there) — backend-only.
+   */
+  async pushToMaster(entityType: string, entityId: string): Promise<void> {
+    if (environment.useBackend) return this.httpAdapter.pushToMaster(entityType, entityId)
+  }
+
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
     if (environment.useBackend) return this.httpAdapter.put<T>(entityType, updatedEntity)
     const entities = await this.query<T>(entityType, 0)

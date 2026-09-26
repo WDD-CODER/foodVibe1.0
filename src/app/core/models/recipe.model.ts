@@ -45,6 +45,8 @@ export interface Recipe {
   is_approved_: boolean
   /** 'dish' | 'preparation' - determines storage (DISH_LIST vs RECIPE_LIST) */
   recipe_type_?: 'dish' | 'preparation'
+  /** Source master doc's _id, if this recipe was cloned from one (see server clone-master/sync-master). */
+  _masterId?: string
   version_history_?: string[]
   /** For recipe_type === 'dish': flat prep list */
   prep_items_?: FlatPrepItem[]
