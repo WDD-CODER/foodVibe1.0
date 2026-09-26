@@ -11,8 +11,12 @@
  *
  * Re-parses tblProducts from the SQL dump, takes every row with a plausible
  * nonzero nutrition value (excluding the one fake sequential row), and
- * $sets `Product.nutrition_per_100g_` on the matching PRODUCT_LIST docs by
- * `_legacyProductId`. Note: the source also has a `colesterol` (cholesterol)
+ * $sets `Product.nutrition_per_100g` on the matching PRODUCT_LIST docs by
+ * `_legacyProductId`. (This script originally wrote the field as
+ * `nutrition_per_100g_` — trailing underscore — which the Product model and
+ * every UI consumer never read; that run's already-written docs are migrated
+ * to the correct field name by the cleanup step at the end of this script.)
+ * Note: the source also has a `colesterol` (cholesterol)
  * column, but `NutritionPer100g` (src/app/core/models/product.model.ts) has
  * no matching field — cholesterol values are intentionally NOT carried over
  * here rather than growing the model as a side effect of a data-repair script.
@@ -84,7 +88,7 @@ async function run({ write, sqlPath }) {
 
   // ---- Pass 1: __master__ PRODUCT_LIST -----------------------------------
   const masterProducts = await db.collection('PRODUCT_LIST')
-    .find({ userId: '__master__', _legacyProductId: { $exists: true }, nutrition_per_100g_: { $exists: false } })
+    .find({ userId: '__master__', _legacyProductId: { $exists: true }, nutrition_per_100g: { $exists: false } })
     .project({ _id: 1, _legacyProductId: 1, name_hebrew: 1 })
     .toArray();
 
@@ -93,7 +97,7 @@ async function run({ write, sqlPath }) {
   for (const p of masterProducts) {
     const nutrition = nutritionByLegacyId.get(p._legacyProductId);
     if (!nutrition) continue;
-    masterOps.push({ _id: p._id, nutrition_per_100g_: nutrition });
+    masterOps.push({ _id: p._id, nutrition_per_100g: nutrition });
     masterIdToNutrition.set(String(p._id), nutrition);
   }
   console.log(`[backfill-product-nutrition] __master__: ${write === 'local' ? 'backfilling' : 'would backfill'} ${masterOps.length} product(s).`);
@@ -101,7 +105,7 @@ async function run({ write, sqlPath }) {
   if (write === 'local' && masterOps.length > 0) {
     await db.collection('PRODUCT_LIST').bulkWrite(
       masterOps.map(op => ({
-        updateOne: { filter: { _id: op._id }, update: { $set: { nutrition_per_100g_: op.nutrition_per_100g_ } } },
+        updateOne: { filter: { _id: op._id }, update: { $set: { nutrition_per_100g: op.nutrition_per_100g } } },
       })),
       { ordered: false }
     );
@@ -113,7 +117,7 @@ async function run({ write, sqlPath }) {
 
   for (const userId of userIds) {
     const userProducts = await db.collection('PRODUCT_LIST')
-      .find({ userId, _masterId: { $ne: null }, nutrition_per_100g_: { $exists: false } })
+      .find({ userId, _masterId: { $ne: null }, nutrition_per_100g: { $exists: false } })
       .project({ _id: 1, _masterId: 1 })
       .toArray();
 
@@ -121,13 +125,13 @@ async function run({ write, sqlPath }) {
     for (const p of userProducts) {
       const nutrition = masterIdToNutrition.get(String(p._masterId));
       if (!nutrition) continue;
-      userOps.push({ _id: p._id, nutrition_per_100g_: nutrition });
+      userOps.push({ _id: p._id, nutrition_per_100g: nutrition });
     }
 
     if (write === 'local' && userOps.length > 0) {
       await db.collection('PRODUCT_LIST').bulkWrite(
         userOps.map(op => ({
-          updateOne: { filter: { _id: op._id }, update: { $set: { nutrition_per_100g_: op.nutrition_per_100g_ } } },
+          updateOne: { filter: { _id: op._id }, update: { $set: { nutrition_per_100g: op.nutrition_per_100g } } },
         })),
         { ordered: false }
       );
@@ -141,6 +145,16 @@ async function run({ write, sqlPath }) {
   console.log(`\n[backfill-product-nutrition] Total: master ${masterOps.length}, per-user ${totalUserUpdated} product(s) ${write === 'local' ? 'backfilled' : 'would be backfilled'}.`);
   if (write !== 'local') {
     console.log('[backfill-product-nutrition] Dry run — no writes made. Re-run with --write=local to apply.');
+  }
+
+  // ---- Cleanup: remove the stale wrong-named field from a prior run -------
+  // (this script originally wrote `nutrition_per_100g_`, which nothing reads —
+  // now that the correctly-named field is (re)populated above, drop the dead one.)
+  const staleFilter = { nutrition_per_100g_: { $exists: true } };
+  const staleCount = await db.collection('PRODUCT_LIST').countDocuments(staleFilter);
+  console.log(`[backfill-product-nutrition] Stale 'nutrition_per_100g_' field present on ${staleCount} doc(s) — ${write === 'local' ? 'removing' : 'would remove'}.`);
+  if (write === 'local' && staleCount > 0) {
+    await db.collection('PRODUCT_LIST').updateMany(staleFilter, { $unset: { nutrition_per_100g_: '' } });
   }
 
   await mongoose.disconnect();

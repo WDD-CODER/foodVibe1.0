@@ -1,14 +1,16 @@
 'use strict';
 /**
  * repair-dish-prep-items.js — corrects `prep_items_`/`prep_categories_` for
- * already-imported dishes to match the fixed derivation in `lib/transform.js`
- * (plan 300 Finding 5): a dish's מיזאנפלס list must include every ingredient
- * line — sub-recipes AND plain products — not just sub-recipe components.
- * `backfill-dish-prep-items.js` (the earlier repair, still correct for what it
- * did) only filled in dishes that had NO prep_items_ at all, using the old
- * sub-recipe-only rule; this script REPLACES prep_items_/prep_categories_ on
- * every already-imported dish, regardless of whether it already has data, so
- * previously-backfilled dishes get corrected too, not just previously-blank ones.
+ * already-imported dishes to match the current derivation in `lib/transform.js`
+ * (plan 314): a dish's מיזאנפלס list comes from its tblInstructions rows — what
+ * the old FoodComposer app showed in its "צ'ק ליסט" panel — one prep row per
+ * non-empty line, quantity 0. It is NOT derived from the dish's ingredient
+ * lines; plan 300 Finding 5, which said otherwise, is retracted.
+ *
+ * This script REPLACES prep_items_/prep_categories_ on every already-imported
+ * dish, regardless of whether it already has data, so dishes filled in by the
+ * two earlier (wrong) repairs get corrected too — including being emptied,
+ * for the 137 dishes whose source has no checklist rows at all.
  *
  * Source of truth: re-parses the SQL dump fresh and runs the real `buildImport()`
  * — the exact same function the real import and `verify-against-source.js` use —
@@ -22,7 +24,9 @@
  *      corrected master doc) — copies the corrected master's prep_items_/
  *      prep_categories_ onto the user's own copy, so already-cloned per-user
  *      data is corrected too, not just master (which by itself would only fix
- *      future syncs).
+ *      future syncs). Clones marked `_userModified: true` are skipped: this
+ *      script replaces a prep list wholesale, so without that guard it would
+ *      destroy a mise-en-place the user edited by hand.
  *
  * Usage:
  *   node server/scripts/legacy-import/repair-dish-prep-items.js [--write=local] [--sql-path=PATH]
@@ -110,7 +114,7 @@ async function run({ write, sqlPath }) {
   let totalUserCorrected = 0;
   for (const userId of userIds) {
     const userDishes = await db.collection('DISH_LIST')
-      .find({ userId, _masterId: { $ne: null } })
+      .find({ userId, _masterId: { $ne: null }, _userModified: { $ne: true } })
       .project({ _id: 1, _masterId: 1, prep_items_: 1, prep_categories_: 1 })
       .toArray();
 

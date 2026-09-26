@@ -9,9 +9,13 @@
     <div class="c-modal-body">
       <div class="c-input-stack full-width">
         <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
-        <input id="name_hebrew" type="text" formControlName="name_hebrew"
+        <input
+          id="name_hebrew"
+          type="text"
+          formControlName="name_hebrew"
           [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null" />
+          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null"
+        />
         @if (supplierForm_.get('name_hebrew')?.errors?.['duplicateName'] && supplierForm_.get('name_hebrew')?.touched) {
           <span class="form-error">{{ 'duplicate_supplier_name' | translatePipe }}</span>
         }
@@ -22,6 +26,10 @@
       <div class="c-input-stack full-width">
         <label for="contact_person_">{{ 'contact_person' | translatePipe }}</label>
         <input id="contact_person_" type="text" formControlName="contact_person_" />
+      </div>
+      <div class="c-input-stack full-width">
+        <label for="phone_">{{ 'phone' | translatePipe }}</label>
+        <input id="phone_" type="text" formControlName="phone_" />
       </div>
       <div class="c-input-stack full-width">
         <label>{{ 'delivery_days' | translatePipe }}</label>
@@ -70,10 +78,17 @@
       <div class="form-section">
         <div class="form-group">
           <label for="name_hebrew_page">{{ 'name' | translatePipe }}</label>
-          <input id="name_hebrew_page" type="text" formControlName="name_hebrew" class="c-input"
+          <input
+            id="name_hebrew_page"
+            type="text"
+            formControlName="name_hebrew"
+            class="c-input"
             [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-            [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null" />
-          @if (supplierForm_.get('name_hebrew')?.errors?.['duplicateName'] && supplierForm_.get('name_hebrew')?.touched) {
+            [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null"
+          />
+          @if (
+            supplierForm_.get('name_hebrew')?.errors?.['duplicateName'] && supplierForm_.get('name_hebrew')?.touched
+          ) {
             <span class="form-error">{{ 'duplicate_supplier_name' | translatePipe }}</span>
           }
           @if (validationErrors_()['name_hebrew']) {
@@ -83,6 +98,10 @@
         <div class="form-group">
           <label for="contact_person_page">{{ 'contact_person' | translatePipe }}</label>
           <input id="contact_person_page" type="text" formControlName="contact_person_" class="c-input" />
+        </div>
+        <div class="form-group">
+          <label for="phone_page">{{ 'phone' | translatePipe }}</label>
+          <input id="phone_page" type="text" formControlName="phone_" class="c-input" />
         </div>
         <div class="form-group">
           <label>{{ 'delivery_days' | translatePipe }}</label>

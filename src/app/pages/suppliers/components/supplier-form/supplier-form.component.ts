@@ -7,7 +7,7 @@ import {
   input,
   OnInit,
   output,
-  signal,
+  signal
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
@@ -33,7 +33,7 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
   imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './supplier-form.component.html',
   styleUrl: './supplier-form.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SupplierFormComponent implements OnInit {
   embeddedInDashboard = input<boolean>(false)
@@ -75,8 +75,9 @@ export class SupplierFormComponent implements OnInit {
         this.supplierForm_.patchValue({
           name_hebrew: '',
           contact_person_: '',
+          phone_: '',
           min_order_mov_: 0,
-          lead_time_days_: 0,
+          lead_time_days_: 0
         })
         const daysArray = this.supplierForm_.get('delivery_days_') as FormArray
         if (daysArray?.controls?.length === 7) {
@@ -102,25 +103,27 @@ export class SupplierFormComponent implements OnInit {
   }
 
   private buildForm(): void {
-    const daysArray = this.fb.array(
-      Array.from({ length: 7 }, () => this.fb.control(false))
-    )
+    const daysArray = this.fb.array(Array.from({ length: 7 }, () => this.fb.control(false)))
     this.supplierForm_ = this.fb.group({
-      name_hebrew: ['', [
-        Validators.required,
-        duplicateEntityNameValidator(
-          () => this.supplierData.allSuppliers_(),
-          () => {
-            if (!this.isEditMode_()) return null
-            if (this.embeddedInDashboard()) return this.supplierToEdit()?._id ?? null
-            return (this.route.snapshot.data['supplier'] as Supplier)?._id ?? null
-          }
-        ),
-      ]],
+      name_hebrew: [
+        '',
+        [
+          Validators.required,
+          duplicateEntityNameValidator(
+            () => this.supplierData.allSuppliers_(),
+            () => {
+              if (!this.isEditMode_()) return null
+              if (this.embeddedInDashboard()) return this.supplierToEdit()?._id ?? null
+              return (this.route.snapshot.data['supplier'] as Supplier)?._id ?? null
+            }
+          )
+        ]
+      ],
       contact_person_: [''],
+      phone_: [''],
       delivery_days_: daysArray,
       min_order_mov_: [0, [Validators.required, Validators.min(0)]],
-      lead_time_days_: [0, [Validators.required, Validators.min(0)]],
+      lead_time_days_: [0, [Validators.required, Validators.min(0)]]
     })
   }
 
@@ -133,8 +136,9 @@ export class SupplierFormComponent implements OnInit {
     this.supplierForm_.patchValue({
       name_hebrew: s.name_hebrew ?? '',
       contact_person_: s.contact_person_ ?? '',
+      phone_: s.phone_ ?? '',
       min_order_mov_: s.min_order_mov_ ?? 0,
-      lead_time_days_: s.lead_time_days_ ?? 0,
+      lead_time_days_: s.lead_time_days_ ?? 0
     })
   }
 
@@ -162,13 +166,16 @@ export class SupplierFormComponent implements OnInit {
     const payload = {
       name_hebrew: raw.name_hebrew,
       contact_person_: raw.contact_person_ || undefined,
+      phone_: raw.phone_ || undefined,
       delivery_days_,
       min_order_mov_: Number(raw.min_order_mov_) || 0,
-      lead_time_days_: Number(raw.lead_time_days_) || 0,
+      lead_time_days_: Number(raw.lead_time_days_) || 0
     }
     this.saving.setSaving(true)
     if (this.isEditMode_()) {
-      const supplier = this.embeddedInDashboard() ? (this.supplierToEdit() ?? undefined) : (this.route.snapshot.data['supplier'] as Supplier)
+      const supplier = this.embeddedInDashboard()
+        ? (this.supplierToEdit() ?? undefined)
+        : (this.route.snapshot.data['supplier'] as Supplier)
       if (!supplier) {
         this.saving.setSaving(false)
         return

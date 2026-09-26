@@ -12,6 +12,28 @@
 
 - [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
+### Plan 315 — Multi-measure yields + `neto_confirmed_` (`plans/315-yield-multi-measure-conversions.plan.md`)
+
+> Implemented and applied to local Mongo 2026-09-26; awaiting Human validation.
+
+- [x] `lib/transform.js` — yield derived from all source measures (`dbTotalGram→gram`, `dbTotalLiter→ml`, `dbTotalUnit→unit`, `noOfDishes→dish`); `measureUnit` no longer consulted (it is `2` on all 2,093 rows); `yield_conversions_[0]` is now the primary, per the recipe-builder's own contract
+- [x] `lib/transform.js` — sets `neto_confirmed_: true` on a recovered yield, stopping the header effect overwriting the net yield with the gross ingredient sum
+- [x] `repair-recipe-yields.js` (new) — master + per-user passes, skips `_userModified: true`
+- [x] Applied: master 2,092 docs, per-user 4,183; 1,905 gained a selectable unit; 960 unit relabels; 423 dishes moved from a gram figure to their portion count
+- [x] Verified: 0 yield mismatches on `__master__`/`yYYGl`; recipeNo 1620 shows `םרג 850` + `הנמ 1`; parent line holds at ₪10.59; `ng build` passes
+- [x] Atlas/production NOT touched — local only
+
+### Plan 314 — Dish mise-en-place from the legacy checklist (`plans/314-dish-mise-en-place-checklist-import-fix.plan.md`)
+
+> Supersedes plan 300 Finding 5. Implemented and applied to local Mongo 2026-09-26; awaiting Human validation.
+
+- [x] `lib/transform.js` — dish `prep_items_`/`prep_categories_` derived from `tblInstructions` (split on newlines, `quantity: 0`, `unit: 'gram'`, empty category) instead of copied ingredient lines; retracted plan-300 comment replaced
+- [x] `repair-dish-prep-items.js` — `_userModified: { $ne: true }` guard on the per-user pass + corrected docstring
+- [x] `backfill-dish-prep-items.js` — marked superseded, do not re-run
+- [x] Applied `repair-dish-prep-items.js --write=local`: master 849 + per-user 1,697 dishes; 5,754 → 3,952 prep rows, 137 dishes intentionally empty
+- [x] Verified: `verify-against-source.js` clean on prep fields for `__master__`/`dev-guest`/`yYYGl`; recipeNo 1317 spot-checked in the browser; `ng build` passes
+- [x] Atlas/production has NOT been touched — local only
+
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
@@ -180,3 +202,53 @@
 | `execute 291` | Start Plan 291 (recreate plan file if missing) |
 | `verify mobile` | Run mobile re-audits + TRIAGE updates |
 | `drop §4 item N` | Remove that Maybe plan after your call |
+
+## PreCompact signal dump (2026-09-26T15:05:15Z)
+
+Open unchecked items at compact time:
+- [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
+- [ ] Milestone 2 — carved out to Plan 310 (below) — see `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`
+- [ ] Deploy; collect ~24h of real-use numbers from Render logs
+- [ ] Record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section
+- [ ] Confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise
+- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
+- [ ] Human: verify Atlas cluster region matches Render service region; report findings
+- [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
+- [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
+- [ ] Verify a fresh deploy is still picked up by a returning browser (guards the fallback caching bug)
+- [ ] Prerequisite gate — confirm 302 M1/M2 + 303 M1/M2 shipped and re-measured; reduce or drop scope if no longer justified — **bypassed 2026-09-15 for M2/M3 only**: live user report ("really really slow, locally even more") is itself real-world evidence the formal deploy-and-measure step was meant to provide; M1 (below) was explicitly NOT started, since it still needs the gate
+- [ ] M1 — List projections on `GET /:type` mirroring `SEARCH_PROJECTIONS` — `server/routes/generic.js:45-77,82-86`
+- [ ] M1 — Verify edit flows fetch full documents so a lean list doc cannot round-trip through a save and erase fields
+- [ ] Hand-off — re-assess plan 301 M2's scope against measured results
+- [ ] M3 — Human unblockers for plan 304's Prerequisite Gate (billing tier, Atlas region check, Mongo tier check, canonical Render service, deploy + collect logs)
+- [ ] Prerequisite gate — confirm plan 304 M1/M2/M3 shipped + measured; re-scope if 304 M3 already solves pagination
+- [ ] Milestone 0 — Decisions (Human): facet-count strategy, allergens resolution strategy (denormalize / `$graphLookup` / punt), ingredient-containment index, pagination ownership vs plan 304 M3, search UX (prefix vs substring), favorites storage shape
+- [ ] Milestone 1 — Low-risk facets + pagination skeleton (Category/Supplier/product-Allergens/low-stock/invalid/incomplete/nutrition for inventory; Type/Approved/Station/Labels/date-range for recipe-book)
+- [ ] Milestone 2 — Allergens facet for recipe-book (recursive nested-recipe resolution — highest-risk piece, per Decision 2)
+- [ ] Milestone 3 — Ingredient-containment filter for recipe-book
+- [ ] Milestone 4 — Client rewire (`inventory-product-list.component.ts`, `recipe-book-list.component.ts`) + pagination UI wiring
+- [ ] Milestone 5 — Cross-screen verification (facet parity, RTL, selection/bulk-edit/inline-edit regressions, `ng build`)
+- [ ] ~~M0 Tasks 1-4 — screenshot diff catalog~~ — **superseded**; each `/design-port` session's Inventory 3 does this per-screen instead
+- [ ] ~~M1 Tasks 5-6 — shared `.c-*` engine class updates~~ — **superseded**; folded into each `/design-port` session's Inventory 3
+- [ ] ~~M2 Tasks 7-8 — shell/nav remainder~~ — **superseded** by `/design-port`
+- [ ] ~~M3 Tasks 9-11 — list-shell chassis pass (Inventory, Recipe Book, Suppliers, Equipment, Menu Library, Venues, Trash)~~ — **superseded**; each screen ported individually via `/design-port`
+- [ ] ~~M4 Task 12 — Venues new-data field styling~~ — **superseded**; done via `/design-port` (`06-venues.port-spec.md`, Human-validated there)
+- [ ] ~~M5 Task 13 — Dashboard~~ — **superseded**; done via `/design-port` (`01-dashboard.port-spec.md`, Human-validated there)
+- [ ] ~~M6 Task 14 — Venue Detail~~ — **superseded**; done via `/design-port` (`06-venues.port-spec.md`, Human-validated there)
+- [ ] ~~M7 Task 15 — Cook View~~ — **superseded** by `/design-port`
+- [ ] ~~M8 Task 16 — Metadata Manager~~ — **superseded** by `/design-port`
+- [ ] ~~M10 Tasks 18-19 — Menu Intelligence visual pass~~ — **superseded** by `/design-port`
+- [ ] ~~M11 Tasks 20-21 — Recipe Builder~~ — **superseded** by `/design-port`
+- [ ] M12 Tasks 22-25 — cross-screen QA: all 13 screens, 3 breakpoints, RTL, dark-mode-scope check, `ng build` clean (deferred — revisit once `/design-port` registry shows all screens `done`)
+- [ ] Decide chat placement (sidebar / floating button / dedicated Assistant page)
+- [ ] Decide first use case (dictation → recipe and/or create menu for N people)
+- [ ] Decide backend approach for Gemini API key (proxy / serverless / existing API)
+- [ ] Decide language (Hebrew / English / both) for prompts and bot replies
+- [ ] Decide confirmation pattern (open edit screen with draft vs inline draft in chat vs both)
+- [ ] Write designated implementation plan once clarifications are set
+
+Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
+
+### Unresolved signals detected at compact time
+
+{"parentUuid":"10494c06-a6ee-4a01-b6bd-9293cce2d3c5","isSidechain":false,"attachment":{"type":"prompt_snapshot","systemPrompt":["\nYou are an interactive agent that helps users according to your \"Output Style\", which describes how you should respond to user queries. Use the instructions below and 

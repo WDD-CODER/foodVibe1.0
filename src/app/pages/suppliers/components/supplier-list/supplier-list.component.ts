@@ -234,6 +234,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     this.editForm_ = this.fb.group({
       name_hebrew: ['', [Validators.required]],
       contact_person_: [''],
+      phone_: [''],
       delivery_days_: daysArray,
       min_order_mov_: [0, [Validators.required, Validators.min(0)]],
       lead_time_days_: [0, [Validators.required, Validators.min(0)]]
@@ -253,6 +254,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     this.editForm_.patchValue({
       name_hebrew: s.name_hebrew ?? '',
       contact_person_: s.contact_person_ ?? '',
+      phone_: s.phone_ ?? '',
       min_order_mov_: s.min_order_mov_ ?? 0,
       lead_time_days_: s.lead_time_days_ ?? 0
     })
@@ -330,6 +332,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       const payload: Partial<Supplier> = {
         name_hebrew: raw.name_hebrew,
         contact_person_: raw.contact_person_ || undefined,
+        phone_: raw.phone_ || undefined,
         delivery_days_,
         min_order_mov_: Number(raw.min_order_mov_) || 0,
         lead_time_days_: Number(raw.lead_time_days_) || 0
