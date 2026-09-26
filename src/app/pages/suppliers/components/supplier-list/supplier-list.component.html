@@ -62,6 +62,9 @@
       <div class="col-contact c-grid-header-cell" carouselHeaderColumn label="contact_person" role="presentation">
         {{ 'contact_person' | translatePipe }}
       </div>
+      <div class="col-phone c-grid-header-cell" carouselHeaderColumn label="phone" role="presentation">
+        {{ 'phone' | translatePipe }}
+      </div>
       <div class="col-delivery c-grid-header-cell" carouselHeaderColumn label="delivery_days" role="presentation">
         {{ 'delivery_days' | translatePipe }}
       </div>
@@ -111,6 +114,9 @@
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
           <div class="col-contact c-list-body-cell" cellCarouselSlide [label]="'contact_person' | translatePipe">
             {{ item.contact_person_ ?? '—' }}
+          </div>
+          <div class="col-phone c-list-body-cell" cellCarouselSlide [label]="'phone' | translatePipe">
+            {{ item.phone_ ?? '—' }}
           </div>
           <div class="col-delivery c-list-body-cell" cellCarouselSlide [label]="'delivery_days' | translatePipe">
             {{ deliveryDaysDisplay(item.delivery_days_) }}
@@ -193,6 +199,10 @@
         <div class="inline-edit-field">
           <label for="inline-supplier-contact">{{ 'contact_person' | translatePipe }}</label>
           <input id="inline-supplier-contact" type="text" formControlName="contact_person_" class="c-input" />
+        </div>
+        <div class="inline-edit-field">
+          <label for="inline-supplier-phone">{{ 'phone' | translatePipe }}</label>
+          <input id="inline-supplier-phone" type="text" formControlName="phone_" class="c-input" />
         </div>
         <div class="inline-edit-field">
           <label for="inline-supplier-min">{{ 'min_order' | translatePipe }}</label>

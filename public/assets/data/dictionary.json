@@ -788,6 +788,8 @@
     "low_stock": "מלאי נמוך",
     "supplier_list": "רשימת ספקים",
     "contact_person": "איש קשר",
+    "phone": "טלפון",
+    "phone2": "טלפון נוסף",
     "linked_products": "מוצרים מקושרים",
     "all_ingredients_ready": "הכל מוכן ✓",
     "mark_step_done": "סיימתי שלב זה",

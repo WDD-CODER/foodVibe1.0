@@ -13,14 +13,15 @@
  *     whether plausible nutrition data exists (recomputed from tblProducts
  *     the same way backfill-product-nutrition.js does — transform.js itself
  *     never carries nutrition, that's intentionally backfill-only).
- *   - Recipes/dishes: ingredients_ line-by-line — count, type
- *     (product/recipe), resolved ingredient name, amount_, unit_ — compared
- *     by position (both sides are sorted by the source recipeLine order).
- *     Note: referenceId values themselves are NOT compared — every run
- *     allocates fresh ids on the "expected" side, so only resolved names are
- *     meaningful.
+ *   - Recipes/dishes: yield_amount_/yield_unit_/yield_conversions_, plus
+ *     ingredients_ line-by-line — count, type (product/recipe), resolved
+ *     ingredient name, amount_, unit_ — compared by position (both sides are
+ *     sorted by the source recipeLine order). Note: referenceId values
+ *     themselves are NOT compared — every run allocates fresh ids on the
+ *     "expected" side, so only resolved names are meaningful.
  *   - Dishes: prep_items_ count + each item's preparation_name/quantity/unit,
  *     same positional comparison.
+ *   - Suppliers: name, phone_, phone2_.
  *
  * Usage:
  *   node server/scripts/legacy-import/verify-against-source.js [--sql-path=PATH] [--user=<userId>] [--verbose]
@@ -183,8 +184,12 @@ async function run({ sqlPath, user, verbose }) {
       report.missingSuppliers.push(`legacySupplierCode ${legacyCode} (${exp.name_hebrew}): not found in ${scopeLabel}`);
       continue;
     }
-    if (act.name_hebrew !== exp.name_hebrew) {
-      report.supplierMismatches.push(`${exp.name_hebrew} (legacySupplierCode ${legacyCode}): name: expected "${exp.name_hebrew}", actual "${act.name_hebrew}"`);
+    const supplierIssues = [];
+    if (act.name_hebrew !== exp.name_hebrew) supplierIssues.push(`name: expected "${exp.name_hebrew}", actual "${act.name_hebrew}"`);
+    if ((act.phone_ ?? undefined) !== (exp.phone_ ?? undefined)) supplierIssues.push(`phone_: expected "${exp.phone_}", actual "${act.phone_}"`);
+    if ((act.phone2_ ?? undefined) !== (exp.phone2_ ?? undefined)) supplierIssues.push(`phone2_: expected "${exp.phone2_}", actual "${act.phone2_}"`);
+    if (supplierIssues.length) {
+      report.supplierMismatches.push(`${exp.name_hebrew} (legacySupplierCode ${legacyCode}): ${supplierIssues.join('; ')}`);
     }
   }
 
@@ -218,7 +223,7 @@ async function run({ sqlPath, user, verbose }) {
     const actualHasSource = (act.sources_ ?? []).length > 0;
     if (expectedHasSource !== actualHasSource) issues.push(`source presence: expected ${expectedHasSource}, actual ${actualHasSource}`);
     const expectedNutrition = nutritionByLegacyId.has(legacyId);
-    const actualNutrition = act.nutrition_per_100g_ != null;
+    const actualNutrition = act.nutrition_per_100g != null;
     if (expectedNutrition !== actualNutrition) issues.push(`nutrition presence: expected ${expectedNutrition}, actual ${actualNutrition}`);
     if (issues.length) report.productMismatches.push(`${exp.name_hebrew} (legacyProductId ${legacyId}): ${issues.join('; ')}`);
   }
@@ -232,6 +237,11 @@ async function run({ sqlPath, user, verbose }) {
     }
     const issues = [];
     if (act.name_hebrew !== exp.name_hebrew) issues.push(`name: expected "${exp.name_hebrew}", actual "${act.name_hebrew}"`);
+    if (act.yield_amount_ !== exp.yield_amount_) issues.push(`yield_amount_: expected ${exp.yield_amount_}, actual ${act.yield_amount_}`);
+    if (act.yield_unit_ !== exp.yield_unit_) issues.push(`yield_unit_: expected "${exp.yield_unit_}", actual "${act.yield_unit_}"`);
+    const expConv = JSON.stringify(exp.yield_conversions_ ?? null);
+    const actConv = JSON.stringify(act.yield_conversions_ ?? null);
+    if (expConv !== actConv) issues.push(`yield_conversions_: expected ${expConv}, actual ${actConv}`);
 
     const expIngredients = exp.ingredients_ ?? [];
     const actIngredients = act.ingredients_ ?? [];
