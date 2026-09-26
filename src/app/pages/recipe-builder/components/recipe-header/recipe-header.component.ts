@@ -16,6 +16,7 @@ import { ClickOutSideDirective } from '@directives/click-out-side'
 import { take } from 'rxjs/operators'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { CloudinaryService } from '@services/cloudinary.service'
+import { UserMsgService } from '@services/user-msg.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { TranslationService } from '@services/translation.service'
@@ -75,6 +76,7 @@ export class RecipeHeaderComponent {
   private cdr = inject(ChangeDetectorRef)
   private confirmModal = inject(ConfirmModalService)
   private cloudinary = inject(CloudinaryService)
+  private userMsg = inject(UserMsgService)
 
   // INPUTS
   form = input.required<FormGroup>()
@@ -324,7 +326,10 @@ export class RecipeHeaderComponent {
           this.imageChange.emit(url)
           this.uploadingImage_.set(false)
         },
-        error: () => this.uploadingImage_.set(false)
+        error: () => {
+          this.uploadingImage_.set(false)
+          this.userMsg.onSetErrorMsg(this.translationService.translate('image_upload_failed'))
+        }
       })
   }
 }

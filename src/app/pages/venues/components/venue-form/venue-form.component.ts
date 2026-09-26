@@ -171,7 +171,10 @@ export class VenueFormComponent implements OnInit {
           this.photoUrl_.set(url)
           this.uploadingPhoto_.set(false)
         },
-        error: () => this.uploadingPhoto_.set(false)
+        error: () => {
+          this.uploadingPhoto_.set(false)
+          this.userMsg.onSetErrorMsg(this.translation.translate('image_upload_failed'))
+        }
       })
   }
 

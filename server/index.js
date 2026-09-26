@@ -35,8 +35,12 @@ app.use(helmet({
       styleSrc:       ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc:        ["'self'", "https://fonts.gstatic.com"],
       // blob: needed for Excel/image export (FileReader → Blob → URL.createObjectURL)
-      imgSrc:         ["'self'", "data:", "blob:"],
-      connectSrc:     ["'self'"],
+      // res.cloudinary.com serves uploaded recipe/venue/profile images (CloudinaryService)
+      imgSrc:         ["'self'", "data:", "blob:", "https://res.cloudinary.com"],
+      // api.cloudinary.com: direct browser upload (CloudinaryService.upload) — without this,
+      // the browser blocks the request itself before it ever leaves (connect-src violation),
+      // independent of whatever CORS headers Cloudinary's response carries.
+      connectSrc:     ["'self'", "https://api.cloudinary.com"],
       objectSrc:      ["'none'"],
       frameSrc:       ["'none'"],
       upgradeInsecureRequests: [],

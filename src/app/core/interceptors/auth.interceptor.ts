@@ -36,7 +36,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Only our own backend should ever see this token — third-party APIs called directly
   // from the browser (e.g. CloudinaryService's direct upload) must never get it, and
   // sending it cross-origin triggers a CORS preflight that provider won't allow anyway.
-  const isOwnBackendRequest = req.url.startsWith(environment.apiUrl) || req.url.startsWith(environment.authApiUrl)
+  // Same-origin deployments (e.g. Render) set apiUrl/authApiUrl to '' — '' .startsWith('')
+  // is always true, so an empty base can't be used to test absolute third-party URLs
+  // treat any relative request as our own backend instead.
+  const isAbsolute = /^https?:\/\//i.test(req.url)
+  const isOwnBackendRequest = isAbsolute
+    ? (!!environment.apiUrl && req.url.startsWith(environment.apiUrl)) ||
+      (!!environment.authApiUrl && req.url.startsWith(environment.authApiUrl))
+    : true
   const token = userService.getToken()
   const outgoing = token && isOwnBackendRequest ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req
 
