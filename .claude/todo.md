@@ -12,18 +12,6 @@
 
 - [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
-### Plan 313 — PWA Service Worker for App-Shell Caching (`plans/313-pwa-service-worker-app-shell-caching.plan.md`)
-
-> Persisted 2026-09-16. Biggest remaining item from this session's perf audit — no `@angular/service-worker` existed at all. Includes an update-detect + reload-prompt safety net (`app-update.service.ts` + `update-banner`) so a deploy never leaves a user stuck on a stale cached build.
-
-- [x] `ng add @angular/pwa` + pin `@angular/service-worker@19.2.21` to match installed core (same peer-version issue as plan 312's `platform-browser-dynamic`)
-- [x] Clean up schematic output to repo conventions (no semicolons, `environment.production` gate instead of `isDevMode()`, restored trailing newline)
-- [x] `app-update.service.ts` + `update-banner` component — `@defer`-gated update-available reload prompt
-- [x] 2 new dictionary keys (`update_available`, `reload_now`)
-- [x] Fix `app.component.spec.ts` — add `provideServiceWorker(..., { enabled: false })` to TestBed (3 specs were failing on `NullInjectorError: No provider for SwUpdate`)
-- [x] Verify: `ng build` (538.63kB, `ngsw.json`/`ngsw-worker.js`/`manifest.webmanifest` generated), `ng test` (311/311)
-- [x] Confirm SW actually registers, repeat-visit speed improves, and no CSP console errors block registration — verified live 2026-09-23 via `/browse` against `https://foodvibe.onrender.com`: `navigator.serviceWorker.getRegistrations()` shows an active registration controlling the page (`ngsw-worker.js`), repeat-load asset requests returned in 5-46ms (served from SW cache), zero console errors. Update-banner reload-prompt flow itself remains unverified live (needs an actual version-to-version deploy transition to trigger, not reproducible from a single snapshot) — code path already exists (`app-update.service.ts` + `update-banner`) and was reviewed, not exercised end-to-end.
-
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
