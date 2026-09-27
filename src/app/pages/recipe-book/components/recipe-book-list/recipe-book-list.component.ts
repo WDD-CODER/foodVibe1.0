@@ -52,7 +52,8 @@ import {
   NullableStringParam,
   FilterRecordParam,
   StringArrayParam,
-  BooleanParam
+  BooleanParam,
+  NumberParam
 } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util'
@@ -159,7 +160,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: NullableStringParam },
       { urlParam: 'dateTo', signal: this.dateTo_, serializer: NullableStringParam },
       { urlParam: 'dateByUpdated', signal: this.dateIncludeByUpdated_, serializer: BooleanParam },
-      { urlParam: 'favorites', signal: this.showFavoritesOnly_, serializer: BooleanParam }
+      { urlParam: 'favorites', signal: this.showFavoritesOnly_, serializer: BooleanParam },
+      { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
 
     // Expand any filter category that has selected values (e.g. when opened via URL like ?filters=Approved:false).
@@ -180,8 +182,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
     // Pagination (plan 304 M3): jump back to page 1 whenever the filtered/sorted result
     // set changes, so a search/filter doesn't strand the user on a now-irrelevant page.
+    // Skips its first run so a page restored from the URL/session (e.g. navigating back
+    // from a recipe) isn't immediately stomped back to 1.
+    let skipFirstPageReset = true
     effect(() => {
       this.filteredRecipeIds_()
+      if (skipFirstPageReset) {
+        skipFirstPageReset = false
+        return
+      }
       this.currentPage_.set(1)
     })
 
