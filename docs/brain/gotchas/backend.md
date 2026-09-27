@@ -189,3 +189,11 @@ been killed by it.
 **Why the obvious fix is wrong:** Trusting the column *name* and the existence of a lookup table. A mapping with six entries implies six values occur; verify that before building on it. Equally, do not "fix" it by picking the unit that makes one sample look right — the avocado prep and the beef stock disagree about which column is authoritative.
 
 **What to do instead:** Before deriving anything from a legacy enum or unit column, check its actual cardinality across the whole dump (`{"2": 2093}` ends the discussion), and sanity-check every numeric column's *magnitude distribution* against real-world plausibility, not its name. Derive the unit from which sibling column the value actually matches. Where the old app rendered the field, its UI label beats the schema's column name as evidence.
+
+## An app-required field the source never had will pass every migration audit and still break every save
+
+**What hurt:** `PUT /api/v1/data/:type/:id` rejects any recipe whose linked ingredients lack a `nameSnapshot`. The legacy importer never wrote one, because `nameSnapshot` is not a legacy column — it is a field *this app* requires. All 1,082 imported recipes were therefore impossible to save from the UI: changing a rating, toggling approval, any edit at all returned HTTP 400. Every migration audit passed the whole time, because every audit compared Mongo against the SQL source, and the SQL source has nothing to say about a field it never contained.
+
+**Why the obvious fix is wrong:** Treating it as a save bug and loosening the validation. The validation is correct — the snapshot exists so a recipe stays readable when a referenced product is deleted. The defect is upstream: the migration produced documents that satisfy the source but violate the application's own contract.
+
+**What to do instead:** When specifying a migration, enumerate the destination's *required* fields as well as the source's columns, and check the imported documents against the write path that will actually be used on them. A source-fidelity audit answers "did we carry everything across", never "is what we wrote usable". Cheapest concrete check: after any import, issue a real round-trip write against one migrated document through the same API the UI calls.

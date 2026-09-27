@@ -203,6 +203,14 @@ function buildImport(raw, opts = {}) {
   const ingredientsByRecipeNo = groupBy(raw.recipeProductsRaw, 'recipeNo');
   const stepsByRecipeNo = groupBy(raw.instructionsRaw, 'recipeNo');
 
+  // Name lookups for ingredient nameSnapshot. PUT /api/v1/data/:type/:id
+  // REJECTS any recipe whose linked ingredients lack one, so a recipe imported
+  // without it cannot be saved from the app at all — not even to change a
+  // rating. Keyed by raw sqlRecipeNo/product id rather than the output arrays,
+  // so a line resolves regardless of declaration order.
+  const finalNameByRecipeNo = new Map(shells.map(s => [s.row.recipeNo, s.finalName]));
+  const productNameBySqlId = new Map(raw.productsRaw.map(r => [r.product, (r.productName || '').trim()]));
+
   let droppedIngredients = 0;
 
   const recipes = [];
@@ -252,12 +260,20 @@ function buildImport(raw, opts = {}) {
         warnings.push(`Recipe ${row.recipeNo} line ${ing.recipeLine}: quantity, Gram, Liter, and Unit all null/zero — defaulted to 0`);
       }
 
+      const nameSnapshot = isSubRecipe
+        ? (finalNameByRecipeNo.get(ing.product) || '')
+        : (productNameBySqlId.get(ing.product) || '');
+      if (!nameSnapshot) {
+        warnings.push(`Recipe ${row.recipeNo} line ${ing.recipeLine}: could not resolve a name for ${isSubRecipe ? 'sub-recipe' : 'product'} ${ing.product} — nameSnapshot left empty`);
+      }
+
       ingredients_.push({
         _id: idFactory(),
         referenceId,
         type: isSubRecipe ? 'recipe' : 'product',
         amount_: amount,
         unit_: unitKey || 'gram',
+        nameSnapshot,
       });
     }
 

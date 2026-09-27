@@ -33,6 +33,8 @@ function parseArgs(argv) {
   const args = {};
   for (const arg of argv.slice(2)) {
     if (arg === '--write=local') args.write = 'local';
+    else if (arg === '--write=atlas') args.write = 'atlas';
+    else if (arg.startsWith('--target=')) args.target = arg.slice('--target='.length);
     else if (arg.startsWith('--sql-path=')) args.sqlPath = arg.slice('--sql-path='.length);
     else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -45,9 +47,10 @@ function buildPhones(row) {
   return (phone_ || phone2_) ? { phone_, phone2_ } : null;
 }
 
-async function run({ write, sqlPath }) {
-  const uri = process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error('MONGO_LOCAL_URI is not set in server/.env');
+async function run({ write, target: args_target, sqlPath }) {
+  const target = write || args_target || 'local';
+  const uri = target === 'atlas' ? process.env.MONGO_URI : process.env.MONGO_LOCAL_URI;
+  if (!uri) throw new Error(`${target === 'atlas' ? 'MONGO_URI' : 'MONGO_LOCAL_URI'} is not set in server/.env`);
 
   const text = readSqlDumpAsUtf8(sqlPath || DEFAULT_SQL_PATH);
   const suppliersRaw = extractInserts(text, 'tblSuppliers');
@@ -62,7 +65,7 @@ async function run({ write, sqlPath }) {
   // any log line mentioning one, which is the right default for this file.
   console.log(`[backfill-supplier-phones] Source: ${suppliersRaw.length} suppliers, ${phonesByLegacyCode.size} with a contact number on record.`);
 
-  console.log('[backfill-supplier-phones] Connecting to local ...');
+  console.log('[backfill-supplier-phones] Connecting ...');
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 8000 });
   const db = mongoose.connection.db;
 
@@ -80,9 +83,9 @@ async function run({ write, sqlPath }) {
     masterOps.push({ _id: s._id, ...phones });
     masterIdToPhones.set(String(s._id), phones);
   }
-  console.log(`[backfill-supplier-phones] __master__: ${write === 'local' ? 'backfilling' : 'would backfill'} ${masterOps.length} supplier(s).`);
+  console.log(`[backfill-supplier-phones] __master__: ${write ? 'backfilling' : 'would backfill'} ${masterOps.length} supplier(s).`);
 
-  if (write === 'local' && masterOps.length > 0) {
+  if (write && masterOps.length > 0) {
     await db.collection('KITCHEN_SUPPLIERS').bulkWrite(
       masterOps.map(op => ({
         updateOne: { filter: { _id: op._id }, update: { $set: { phone_: op.phone_, phone2_: op.phone2_ } } },
@@ -108,7 +111,7 @@ async function run({ write, sqlPath }) {
       userOps.push({ _id: s._id, ...phones });
     }
 
-    if (write === 'local' && userOps.length > 0) {
+    if (write && userOps.length > 0) {
       await db.collection('KITCHEN_SUPPLIERS').bulkWrite(
         userOps.map(op => ({
           updateOne: { filter: { _id: op._id }, update: { $set: { phone_: op.phone_, phone2_: op.phone2_ } } },
@@ -117,13 +120,13 @@ async function run({ write, sqlPath }) {
       );
     }
     if (userOps.length > 0) {
-      console.log(`[backfill-supplier-phones]   ${userId}: ${write === 'local' ? 'backfilled' : 'would backfill'} ${userOps.length} supplier(s).`);
+      console.log(`[backfill-supplier-phones]   ${userId}: ${write ? 'backfilled' : 'would backfill'} ${userOps.length} supplier(s).`);
     }
     totalUserUpdated += userOps.length;
   }
 
-  console.log(`\n[backfill-supplier-phones] Total: master ${masterOps.length}, per-user ${totalUserUpdated} supplier(s) ${write === 'local' ? 'backfilled' : 'would be backfilled'}.`);
-  if (write !== 'local') {
+  console.log(`\n[backfill-supplier-phones] Total: master ${masterOps.length}, per-user ${totalUserUpdated} supplier(s) ${write ? 'backfilled' : 'would be backfilled'}.`);
+  if (!write) {
     console.log('[backfill-supplier-phones] Dry run — no writes made. Re-run with --write=local to apply.');
   }
 

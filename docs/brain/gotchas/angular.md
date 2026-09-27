@@ -181,3 +181,11 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** Hardening the loader against a non-conforming row 0 treats the symptom. The array is not a list of *alternatives to* the primary; index 0 **is** the primary, and indices 1..n are the alternates. Any writer that does not honour that — importer, repair script, seeder — is producing a document the app will silently corrupt on the next save.
 
 **What to do instead:** Any code writing `yield_conversions_` must emit the primary first: `[{amount: yield_amount_, unit: yield_unit_}, ...others]`, with no duplicate unit in the list (`amountInRecipeYieldUnit` resolves via `.find()`, so a second entry for the same unit is dead). Separately, set `neto_confirmed_: true` on any recipe whose yield is a real recorded net figure — otherwise `recipe-header.component.ts:140-146` auto-syncs the yield to the gross sum of the ingredient weights on open and persists the gross value on save.
+
+## A dirty-check built from the form group silently ignores every signal the save path writes
+
+**What hurt:** `getRecipeSnapshotForComparison()` in the recipe builder serialises `recipeForm_.getRawValue()` to decide whether anything changed. But `buildRecipeFromForm()` also persists four signals that the form group never holds — `rating_`, `is_approved_`, `neto_confirmed_` and `imageUrl_`. Only `imageUrl_` had been mirrored into the snapshot. So changing just the rating left the snapshot byte-identical, `hasUnsavedChanges()` returned false, and leaving the page discarded the edit without ever prompting.
+
+**Why the obvious fix is wrong:** Reaching for `recipeForm_.dirty`. The form is genuinely not dirty — no control changed. The mismatch is that the save payload is assembled from two sources (form + signals) while the change detection reads only one.
+
+**What to do instead:** Derive the dirty-check from the same function that builds the save payload, or treat "every field the save writes must appear in the snapshot" as an invariant enforced at review time. In a signals codebase this class of bug recurs whenever state migrates out of a form group into a signal and the comparison is not moved with it — the symptom is always silent data loss on navigate-away, never an error.

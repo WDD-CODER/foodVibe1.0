@@ -19,6 +19,7 @@ import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TranslationService } from '@services/translation.service'
+import { MasterPushService } from '@services/master-push.service'
 import { ExportService } from '@services/export.service'
 import type { ExportPayload } from '../../core/utils/export.util'
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component'
@@ -84,6 +85,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly userMsg = inject(UserMsgService)
   private readonly authModal = inject(AuthModalService)
   private readonly translation = inject(TranslationService)
+  private readonly masterPush = inject(MasterPushService)
   private readonly heroFab = inject(HeroFabService)
   private readonly recipeFormService = inject(RecipeFormService)
   private readonly el = inject(ElementRef)
@@ -556,15 +558,32 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.buildWorkflowFormFromRecipe(recipe)
   }
 
-  protected saveEdits(): void {
+  protected async saveEdits(): Promise<void> {
     this.applyWorkflowFormToRecipe()
-    this.confirmModal.open('save_changes', { saveLabel: 'save_changes' }).then((confirmed) => {
+    const pending = this.recipe_()
+    if (!pending) return
+
+    // A recipe cloned from a shared master asks whether the edit applies to
+    // everyone or stays on this user's own copy — same prompt the recipe
+    // builder shows. Without it, saving here silently sets _userModified and
+    // opts this recipe out of every future master update (sync-master Rule 3).
+    let pushToMasterAfterSave = false
+    if (pending._masterId) {
+      const scope = await this.masterPush.askScope(pending)
+      if (scope === 'cancel') return
+      pushToMasterAfterSave = scope === 'everyone'
+    } else {
+      const confirmed = await this.confirmModal.open('save_changes', { saveLabel: 'save_changes' })
       if (!confirmed) return
+    }
+
+    {
       const recipe = this.recipe_()
       if (!recipe) return
       this.saving.setSaving(true)
       this.kitchenState.saveRecipe(recipe).subscribe({
-        next: () => {
+        next: (saved) => {
+          if (pushToMasterAfterSave) this.masterPush.pushToMaster(saved ?? recipe)
           this.originalRecipe_.set(null)
           this.editMode_.set(false)
           this.saving.setSaving(false)
@@ -573,7 +592,7 @@ export class CookViewPage implements OnInit, OnDestroy {
           this.saving.setSaving(false)
         }
       })
-    })
+    }
   }
 
   protected undoEdits(): void {
@@ -600,12 +619,17 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.saveRecipeWithToggledApproval()
   }
 
-  private saveRecipeWithToggledApproval(): void {
+  private async saveRecipeWithToggledApproval(): Promise<void> {
     const recipe = this.recipe_()
     if (!recipe) return
+    // Approval is shared recipe content, not a personal flag — so it asks the
+    // same question every other content save asks.
+    const scope = await this.masterPush.askScope(recipe)
+    if (scope === 'cancel') return
     this.saving.setSaving(true)
     this.kitchenState.saveRecipe({ ...recipe, is_approved_: !recipe.is_approved_ }).subscribe({
       next: (saved) => {
+        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
         this.recipe_.set(saved)
         this.originalRecipe_.set(null)
         this.editMode_.set(false)
@@ -621,12 +645,18 @@ export class CookViewPage implements OnInit, OnDestroy {
     })
   }
 
-  protected onRatingChange(value: number): void {
+  protected async onRatingChange(value: number): Promise<void> {
     const recipe = this.recipe_()
     if (!recipe) return
+    const scope = await this.masterPush.askScope(recipe)
+    if (scope === 'cancel') return
     const updated = { ...recipe, rating_: value }
     this.recipe_.set(updated)
-    this.kitchenState.saveRecipe(updated).subscribe()
+    this.kitchenState.saveRecipe(updated).subscribe({
+      next: (saved) => {
+        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
+      }
+    })
   }
 
   protected async onExportInfo(): Promise<void> {

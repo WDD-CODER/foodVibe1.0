@@ -12,6 +12,22 @@
 
 - [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
+### Plans 316-317 — Full SQL→Mongo migration completion (`plans/316-…`, `plans/317-…`)
+
+> Executed 2026-09-27 on BOTH local and Atlas; awaiting Human validation.
+
+- [x] `plans/317-sql-to-mongo-migration-spec.md` — field-by-field spec for all 26 source tables; the independent authority the transform can no longer be its own check against
+- [x] `audit-against-spec.js` (new) — derives expectations from the spec, never from `buildImport()`; zero findings on Atlas, 3 real user edits on local
+- [x] `cost-cross-check.js` (new) — §7a outside signal; 854 recipes, no clustering at any power of ten, rules out systemic unit error
+- [x] `db-backup.js`, `reset-user-from-master.js` (new) — JSON snapshots (no mongodump on this box) + clone reset/orphan sweep
+- [x] Atlas rollout complete — orphan sweep 7,752, quantities 10,732+1,532, prep-items 911, yields 2,093, nutrition 33, phones 25, config
+- [x] Local: orphan sweep 2,855; dev-guest reset and re-cloned from corrected master
+- [x] New scope delivered: `cholesterol_mg` on the product model + import; `MASTER_META/legacy-config` (laborCost 30, vatPercent 16)
+- [x] Category images dropped — the 38 legacy categories are unregistered bare strings, nothing to attach an image to
+- [x] `push-to-master`: resets the caller's `_userModified` (else you publish to everyone and freeze yourself out) + type allowlist
+- [x] cook-view `saveEdits` now shows the same save-for-me / save-for-everyone prompt as recipe-builder
+- [x] `ng build` passes
+
 ### Plan 315 — Multi-measure yields + `neto_confirmed_` (`plans/315-yield-multi-measure-conversions.plan.md`)
 
 > Implemented and applied to local Mongo 2026-09-26; awaiting Human validation.

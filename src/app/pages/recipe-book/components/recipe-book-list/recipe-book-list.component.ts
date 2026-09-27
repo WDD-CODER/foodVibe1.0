@@ -30,6 +30,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { Recipe } from '@models/recipe.model'
+import { MasterPushService } from '@services/master-push.service'
 import { Product } from '@models/product.model'
 import { VersionEntityType } from '@services/version-history.service'
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
@@ -99,6 +100,7 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected readonly kitchenState = inject(KitchenStateService)
+  private readonly masterPush = inject(MasterPushService)
   private readonly productData = inject(ProductDataService)
   private readonly router = inject(Router)
   private readonly recipeCostService = inject(RecipeCostService)
@@ -616,8 +618,14 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected onRatingChange(recipe: Recipe, value: number): void {
-    this.kitchenState.saveRecipe({ ...recipe, rating_: value }).subscribe()
+  protected async onRatingChange(recipe: Recipe, value: number): Promise<void> {
+    const scope = await this.masterPush.askScope(recipe)
+    if (scope === 'cancel') return
+    this.kitchenState.saveRecipe({ ...recipe, rating_: value }).subscribe({
+      next: (saved) => {
+        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
+      }
+    })
   }
 
   protected onCarouselHeaderChange(index: number): void {
@@ -847,12 +855,19 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     })
   }
 
-  protected onBulkEdit(event: { field: string; value: string; ids: string[] }): void {
+  protected async onBulkEdit(event: { field: string; value: string; ids: string[] }): Promise<void> {
     const field = event.field as RecipeBulkField
     const recipes = this.kitchenState.recipes_()
-    for (const id of event.ids) {
-      const recipe = recipes.find((r) => r._id === id)
-      if (!recipe) continue
+    const targets = event.ids.map((id) => recipes.find((r) => r._id === id)).filter((r): r is Recipe => !!r)
+    if (!targets.length) return
+
+    // Labels and recipe type are shared content, so the scope question applies
+    // — but asked ONCE for the whole selection, not once per item. Passing the
+    // first master-linked recipe is enough: askScope only inspects _masterId.
+    const scope = await this.masterPush.askScope(targets.find((r) => r._masterId))
+    if (scope === 'cancel') return
+
+    for (const recipe of targets) {
       let updated: Recipe
       if (field === 'labels_') {
         const current = recipe.labels_ ?? []
@@ -861,7 +876,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       } else {
         updated = { ...recipe, recipe_type_: event.value as 'dish' | 'preparation' }
       }
-      this.kitchenState.saveRecipe(updated).subscribe({ next: () => {}, error: () => {} })
+      this.kitchenState.saveRecipe(updated).subscribe({
+        next: (saved) => {
+          if (scope === 'everyone' && saved._masterId) this.masterPush.pushToMaster(saved)
+        },
+        error: () => {}
+      })
     }
   }
 
@@ -893,9 +913,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     })
   }
 
-  protected onToggleApproval(recipe: Recipe): void {
+  protected async onToggleApproval(recipe: Recipe): Promise<void> {
+    const scope = await this.masterPush.askScope(recipe)
+    if (scope === 'cancel') return
     const updated = { ...recipe, is_approved_: !recipe.is_approved_ }
-    this.kitchenState.saveRecipe(updated).subscribe()
+    this.kitchenState.saveRecipe(updated).subscribe({
+      next: (saved) => {
+        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
+      }
+    })
   }
 
   protected onToggleFavorite(recipe: Recipe): void {

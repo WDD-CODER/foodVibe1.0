@@ -47,6 +47,8 @@ function parseArgs(argv) {
   const args = {};
   for (const arg of argv.slice(2)) {
     if (arg === '--write=local') args.write = 'local';
+    else if (arg === '--write=atlas') args.write = 'atlas';
+    else if (arg.startsWith('--target=')) args.target = arg.slice('--target='.length);
     else if (arg === '--verbose') args.verbose = true;
     else if (arg.startsWith('--sql-path=')) args.sqlPath = arg.slice('--sql-path='.length);
     else throw new Error(`Unknown argument: ${arg}`);
@@ -77,9 +79,10 @@ function differs(actual, expected) {
     || !sameJson(actual.yield_conversions_, expected.yield_conversions_);
 }
 
-async function run({ write, sqlPath, verbose }) {
-  const uri = process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error('MONGO_LOCAL_URI is not set in server/.env');
+async function run({ write, target: args_target, sqlPath, verbose }) {
+  const target = write || args_target || 'local';
+  const uri = target === 'atlas' ? process.env.MONGO_URI : process.env.MONGO_LOCAL_URI;
+  if (!uri) throw new Error(`${target === 'atlas' ? 'MONGO_URI' : 'MONGO_LOCAL_URI'} is not set in server/.env`);
 
   console.log('[repair-recipe-yields] Re-parsing SQL dump fresh ...');
   const text = readSqlDumpAsUtf8(sqlPath || DEFAULT_SQL_PATH);
@@ -96,7 +99,7 @@ async function run({ write, sqlPath, verbose }) {
   );
   console.log(`[repair-recipe-yields] Expected: ${expected.recipes.length} recipes, ${expected.dishes.length} dishes.`);
 
-  console.log('[repair-recipe-yields] Connecting to local ...');
+  console.log('[repair-recipe-yields] Connecting ...');
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 15000 });
   const db = mongoose.connection.db;
 
@@ -141,7 +144,7 @@ async function run({ write, sqlPath, verbose }) {
     console.log(`[repair-recipe-yields] __master__ ${collName}: ${docs.length} legacy doc(s), ${write ? 'correcting' : 'would correct'} ${ops.length}.`);
     masterOps += ops.length;
 
-    if (write === 'local' && ops.length > 0) {
+    if (write && ops.length > 0) {
       await col.bulkWrite(
         ops.map(op => ({
           updateOne: {
@@ -176,7 +179,7 @@ async function run({ write, sqlPath, verbose }) {
         ops.push({ _id: doc._id, ...want });
       }
 
-      if (write === 'local' && ops.length > 0) {
+      if (write && ops.length > 0) {
         await col.bulkWrite(
           ops.map(op => ({
             updateOne: {
@@ -208,7 +211,7 @@ async function run({ write, sqlPath, verbose }) {
   console.log(`\n[repair-recipe-yields] finalQuantity dropped in favour of dbTotalGram: ${orphan.length} row(s)`);
   for (const w of orphan) console.log('  ' + w);
 
-  if (write !== 'local') {
+  if (!write) {
     console.log('\n[repair-recipe-yields] Dry run — no writes made. Re-run with --write=local to apply.');
   }
 
