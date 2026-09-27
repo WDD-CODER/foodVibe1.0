@@ -19,9 +19,10 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | user.model.ts | User/session | User |
 | msg.model.ts | User message / toast | Msg |
 | label.model.ts | Label definitions for UI | LabelDefinition, LABEL_COLOR_PALETTE |
-| filter-category.model.ts | Sidebar/list filter groups | FilterCategory |
-| filter-option.model.ts | Filter checkbox option | FilterOption |
-| units.enum.ts | Kitchen unit string union | KitchenUnit |
+| admin-user.model.ts | Admin user entity | AdminUser |
+| ai-menu-draft.model.ts | AI-drafted menu + match types | AiMenuDraft, AiMenuSectionDraft, AiMenuDishDraft, AiMenuPatch, MatchedMenu, MatchedSection, MatchedDish |
+| ai-product-draft.model.ts | AI-drafted product | AiProductDraft, AiProductPatch |
+| parsed-result.model.ts | Parsed recipe/dish import result | ParsedResult, ParsedResultType, ParsedRecipe, ParsedDish, ParsedIngredient, ParsedStep |
 
 ## Architecture Context
 
@@ -43,9 +44,10 @@ Models are the type layer for `core/services` and `pages/`. Product and recipe m
 
 ## Recent Changes
 
+- 2026-09-27 (nightly-maintenance): Removed `filter-category.model.ts`, `filter-option.model.ts`, `units.enum.ts` — no longer present in the repo (stale doc entries). Added 4 undocumented files that do exist on disk: `admin-user.model.ts`, `ai-menu-draft.model.ts`, `ai-product-draft.model.ts`, `parsed-result.model.ts`.
 - 2026-03-22: Aligned exports with code (label, KitchenUnit); removed inaccurate "recipe/ sub-models" wording.
 - 2026-03-22: Removed unused empty `recipe/recipe.module.ts` (no references).
 
 ---
-*Last updated: 2026-03-22*
+*Last updated: 2026-09-27*
 *Updated by: breadcrumb-navigator*
