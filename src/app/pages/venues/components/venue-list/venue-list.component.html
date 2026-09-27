@@ -88,7 +88,7 @@
 
         <div class="venue-card-media" [attr.data-env]="item.environment_type_">
           @if (item.photo_url_) {
-            <img [src]="item.photo_url_" class="venue-card-photo" alt="" />
+            <img [src]="item.photo_url_" class="venue-card-photo" alt="" loading="lazy" />
           } @else {
             <lucide-icon name="map-pin" [size]="28"></lucide-icon>
           }

@@ -94,6 +94,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
 import { environment } from '../environments/environment'
 import { catchError, of, switchMap } from 'rxjs'
+import { provideServiceWorker } from '@angular/service-worker'
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -214,7 +215,14 @@ export const appConfig: ApplicationConfig = {
         Sun,
         SlidersVertical
       })
-    )
+    ),
+    // Registered only in production builds — never in ng serve, matching the rest of the app's
+    // environment.production gating convention. registerWhenStable:30000 defers registration
+    // until the app is idle so it never competes with the first load's real data fetches.
+    provideServiceWorker('ngsw-worker.js', {
+      enabled: environment.production,
+      registrationStrategy: 'registerWhenStable:30000'
+    })
   ]
 }
 

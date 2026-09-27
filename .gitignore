@@ -103,6 +103,10 @@ mine-progress.ps1
 !.interface-design/source/assets/*.png
 !.interface-design/source/uploads/*.png
 
+# PWA manifest icons (plan 313) — real deliverables referenced by manifest.webmanifest,
+# not stray screenshots. Without this they'd never deploy and the manifest would 404 them.
+!public/icons/*.png
+
 # System files
 .DS_Store
 Thumbs.db

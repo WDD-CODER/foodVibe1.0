@@ -59,6 +59,16 @@ export const NullableBooleanParam: ParamSerializer<boolean | null> = {
   }
 }
 
+export const NumberParam: ParamSerializer<number> = {
+  toUrl: (v) => (v > 1 ? String(v) : null),
+  fromUrl: (r) => {
+    const n = Number(r)
+    return Number.isFinite(n) && n > 0 ? Math.floor(n) : 1
+  },
+  toSession: (v) => v,
+  fromSession: (r) => (typeof r === 'number' && r > 0 ? Math.floor(r) : 1)
+}
+
 export const StringArrayParam: ParamSerializer<string[]> = {
   toUrl: (v) => (v.length ? v.join(',') : null),
   fromUrl: (r) => (r ? r.split(',').filter(Boolean) : []),

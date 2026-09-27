@@ -44,6 +44,9 @@ import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
 import { GlobalSpecificModalService } from '@services/global-specific-modal.service'
 import { SupplierModalService } from '@services/supplier-modal.service'
 import { RestoreChoiceModalService } from '@services/restore-choice-modal.service'
+import { AuthModalService } from '@services/auth-modal.service'
+import { AppUpdateService } from '@services/app-update.service'
+import { UpdateBannerComponent } from '../core/components/update-banner/update-banner.component'
 
 @Component({
   selector: 'app-root',
@@ -68,7 +71,8 @@ import { RestoreChoiceModalService } from '@services/restore-choice-modal.servic
     SupplierModalComponent,
     AiRecipeModalComponent,
     AiMenuModalComponent,
-    AiProductModalComponent
+    AiProductModalComponent,
+    UpdateBannerComponent
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -95,6 +99,8 @@ export class AppComponent {
   protected readonly globalSpecificModal = inject(GlobalSpecificModalService)
   protected readonly supplierModal = inject(SupplierModalService)
   protected readonly restoreChoiceModal = inject(RestoreChoiceModalService)
+  protected readonly authModal = inject(AuthModalService)
+  protected readonly appUpdate = inject(AppUpdateService)
 
   protected isRouteLoading = signal(false)
   protected isDataReloading_ = this.userService.isDataReloading_

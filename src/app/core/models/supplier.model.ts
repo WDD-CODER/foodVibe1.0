@@ -2,6 +2,8 @@ export interface Supplier {
   _id: string
   name_hebrew: string
   contact_person_?: string
+  phone_?: string
+  phone2_?: string
   delivery_days_: number[]
   min_order_mov_: number
   lead_time_days_: number

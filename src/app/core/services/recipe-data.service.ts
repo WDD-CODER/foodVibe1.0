@@ -127,6 +127,11 @@ export class RecipeDataService {
     }
   }
 
+  /** TEMPORARY (dev-process-only, see chat 2026-09-26). */
+  async pushToMaster(recipeId: string): Promise<void> {
+    return this.storage.pushToMaster(ENTITY, recipeId)
+  }
+
   async updateRecipe(recipe: Recipe): Promise<Recipe> {
     try {
       const existing = await this.storage.get<Recipe>(ENTITY, recipe._id).catch(() => null)

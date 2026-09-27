@@ -1,5 +1,10 @@
 'use strict';
 /**
+ * SUPERSEDED — do not run. This script derives a dish's מיזאנפלס list from its
+ * ingredient lines, which plan 314 established is the wrong source: the list
+ * comes from tblInstructions (the old app's "צ'ק ליסט" panel). Kept only as the
+ * record of an earlier repair. `repair-dish-prep-items.js` is the current path.
+ *
  * backfill-dish-prep-items.js — one-time data repair for the legacy
  * FoodComposer import: transform.js never derived `prep_items_`/
  * `prep_categories_` (the "mise en place" fields the recipe-builder dish

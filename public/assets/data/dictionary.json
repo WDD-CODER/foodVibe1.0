@@ -331,6 +331,11 @@
     "type_change_to_dish_message": "אתה עומד לשנות פריט זה ממתכון למנה. לאחר השמירה הפריט יועבר לרשימת המנות. האם אתה בטוח?",
     "type_change_to_preparation_header": "שינוי למתכון",
     "type_change_to_preparation_message": "אתה עומד לשנות פריט זה ממנה למתכון. לאחר השמירה הפריט יועבר לרשימת המתכונים. האם אתה בטוח?",
+    "push_to_master_header": "שמירת השינוי",
+    "push_to_master_message": "פריט זה מבוסס על מתכון-אב משותף. האם לשמור את השינוי רק עבורך, או לעדכן את מתכון-האב עבור כל המשתמשים?",
+    "push_to_master_save_me": "שמור רק לי",
+    "push_to_master_save_everyone": "עדכן לכולם",
+    "push_to_master_error": "שגיאה בעדכון מתכון-האב",
     "confirm": "אשר",
     "save_recipe": "שמור מתכון",
     "save_dish": "שמור מנה",
@@ -783,6 +788,8 @@
     "low_stock": "מלאי נמוך",
     "supplier_list": "רשימת ספקים",
     "contact_person": "איש קשר",
+    "phone": "טלפון",
+    "phone2": "טלפון נוסף",
     "linked_products": "מוצרים מקושרים",
     "all_ingredients_ready": "הכל מוכן ✓",
     "mark_step_done": "סיימתי שלב זה",
@@ -909,6 +916,8 @@
     "cakes_cookies_tarts": "עוגות, עוגיות וטארטים",
     "sweet_creams_custards_mousse": "קרמים מתוקים, קרם אנגלז ומוס",
     "bread_focaccia_savory_baking": "לחם, פוקאצ׳ה ואפייה מלוחה",
-    "soups_up": "שדרוג מרקים"
+    "soups_up": "שדרוג מרקים",
+    "update_available": "גרסה חדשה זמינה",
+    "reload_now": "רענן עכשיו"
   }
 }

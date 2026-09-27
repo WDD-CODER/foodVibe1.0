@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { verifyToken, optionalToken } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
+const { bumpMasterVersion } = require('../services/master-version');
 
 const router = Router();
 
@@ -272,6 +273,72 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error('[data/put]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// PUT /api/v1/data/:type/:id/push-to-master
+//
+// TEMPORARY, dev-process-only route (see chat 2026-09-26): pushes the calling
+// user's own saved copy onto its linked __master__ document, then bumps the
+// master version so every other user picks it up on next login/refresh via
+// syncMasterToUser. Deliberately open to ANY signed-in user right now (no
+// role check) — restrict to role: 'admin' (see permanentlyDeleteRecipe for
+// the pattern) or remove entirely once this dev pass is done; master docs
+// are otherwise never written by a live user-facing flow (see
+// services/master-version.js's header comment).
+// ---------------------------------------------------------------------------
+router.put('/:type/:id/push-to-master', verifyToken, async (req, res) => {
+  try {
+    const existing = await col(req.params.type).findOne({
+      _id: req.params.id,
+      userId: req.user.userId,
+      _userDeleted: { $ne: true },
+    });
+    if (!existing) {
+      return res.status(404).json({ error: `Cannot push, item ${req.params.id} does not exist` });
+    }
+    // _masterId / referenceId are read back out of Mongo, but they originally
+    // entered through a client-supplied body (POST's `_id`, PUT's `ingredients_`),
+    // neither of which type-checks them. An object like { $ne: null } stored there
+    // earlier would become a query *operator* rather than a value below — so
+    // require plain strings before using either one in a selector.
+    if (typeof existing._masterId !== 'string') {
+      return res.status(400).json({ error: 'This item has no linked master recipe to update' });
+    }
+
+    // Reverse-remap ingredient referenceIds: this user's clone points at their own
+    // product/sub-recipe ids — the master doc needs the corresponding master ids.
+    // Best-effort: if a referenced doc has no _masterId (user's own custom item,
+    // never itself pushed to master), leave the referenceId as-is.
+    const ingredients = Array.isArray(existing.ingredients_) ? existing.ingredients_ : [];
+    const ingredients_ = await Promise.all(
+      ingredients.map(async (ing) => {
+        if (typeof ing.referenceId !== 'string' || !ing.referenceId) return ing;
+        const lookupTypes = ing.type === 'recipe' ? ['RECIPE_LIST', 'DISH_LIST'] : ['PRODUCT_LIST'];
+        for (const t of lookupTypes) {
+          const ref = await col(t).findOne(
+            { _id: ing.referenceId, userId: req.user.userId },
+            { projection: { _masterId: 1 } }
+          );
+          if (ref) {
+            return { ...ing, referenceId: typeof ref._masterId === 'string' ? ref._masterId : ing.referenceId };
+          }
+        }
+        return ing;
+      })
+    );
+
+    const { userId: _u, _masterId: _m, _userModified: _um, _id: _i, ...safeBody } = existing;
+    await col(req.params.type).updateOne(
+      { _id: existing._masterId, userId: '__master__' },
+      { $set: { ...safeBody, ingredients_ } }
+    );
+    await bumpMasterVersion();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[data/push-to-master]', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
