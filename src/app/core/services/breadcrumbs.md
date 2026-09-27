@@ -48,6 +48,23 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | hero-fab.service.ts | Floating action button state per route | HeroFabService |
 | export.service.ts | Data export orchestration | ExportService |
 | global-error.handler.ts | Angular ErrorHandler implementation | GlobalErrorHandler |
+| base-entity-data.service.ts | Shared CRUD base for entity data services | BaseEntityDataService\<T\> |
+| ai-recipe-draft.service.ts | AI-drafted recipe staging | AiRecipeDraftService |
+| app-update.service.ts | App update/reload prompt | AppUpdateService |
+| cloudinary.service.ts | Image upload to Cloudinary | CloudinaryService |
+| equipment-category-registry.service.ts | Equipment category registry | EquipmentCategoryRegistryService |
+| excel-workbook.util.ts | Excel export style constants | XLSX_MIME, EXCEL_TEAL, EXCEL_HEADER_GRAY, EXCEL_SUBTITLE_GRAY, EXCEL_BORDER_THIN, EXCEL_BORDER_MEDIUM |
+| gemini.service.ts | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
+| gemini-shots.service.ts | Gemini image/shot capture flow | GeminiShotsService |
+| http-storage.adapter.ts | HTTP-backed storage adapter | HttpStorageAdapter |
+| master-push.service.ts | Push local entity to master/global | MasterPushService |
+| menu-event-type.service.ts | Menu event type registry | MenuEventTypeService |
+| menu-export.service.ts | Menu export orchestration | MenuExportService |
+| quick-edit-product-modal.service.ts | Quick-edit product modal orchestration | QuickEditProductModalService |
+| recipe-export.service.ts | Recipe export orchestration | RecipeExportService |
+| server-heartbeat.service.ts | Server availability heartbeat | ServerHeartbeatService |
+| user-admin.service.ts | User admin management | UserAdminService |
+| loading.service.ts | Global loading indicator state | LoadingService |
 
 ## Architecture Context
 
@@ -71,10 +88,11 @@ Services live under `core/` and are injected into pages and shared UI. Data serv
 
 ## Recent Changes
 
+- 2026-09-27 (nightly-maintenance): Synced 18 files that existed on disk but were undocumented — `base-entity-data.service.ts`, `ai-recipe-draft.service.ts`, `app-update.service.ts`, `cloudinary.service.ts`, `equipment-category-registry.service.ts`, `excel-workbook.util.ts`, `gemini.service.ts`, `gemini-shots.service.ts`, `http-storage.adapter.ts`, `loading.service.ts`, `master-push.service.ts`, `menu-event-type.service.ts`, `menu-export.service.ts`, `quick-edit-product-modal.service.ts`, `recipe-export.service.ts`, `server-heartbeat.service.ts`, `user-admin.service.ts`.
 - 2026-08-24: Removed `demo-loader.service.ts` (`DemoLoaderService`) and `backup.service.ts` (`BackupService`) — dead UI features purged from the Metadata Manager page. `BACKUP_ENTITY_TYPES` and its always-on `backup_<key>` mirror-write in `async-storage.service.ts` are unrelated always-on infrastructure and were kept.
 - 2026-03-22: Synced file list with repo (auth, export, backup, logging, key-resolution, menu-section-categories, modals, global error handler).
 - 2026-03-22: Removed unused commented `ingredient.service.ts` stub (no imports).
 
 ---
-*Last updated: 2026-08-24*
+*Last updated: 2026-09-27*
 *Updated by: breadcrumb-navigator*

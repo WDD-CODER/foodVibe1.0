@@ -6,6 +6,18 @@
 
 ---
 
+## Tech Debt (from `/nightly-maintenance` 2026-09-27)
+
+> Full plan: `plans/318-nightly-maintenance-followups-2026-09-27.plan.md`. Full audit: `.claude/techdebt-reports/techdebt-2026-09-27.md`.
+
+- [ ] `auth.interceptor.ts` — `BehaviorSubject` used for refresh-token gate; hard rule says signals only
+- [ ] `nutrition-badge.component.ts:46` — legacy `@Input()` decorator, unresolved since `techdebt-2026-04-20.md`
+- [ ] 2 stray trailing semicolons (`quick-add-product-modal.component.ts:121`, `menu-library-list.component.ts:197`)
+- [ ] 24-file refactor-candidate backlog (>300 lines each) — triage, top 3 are 1200+ lines
+- [ ] 2 unnecessary `?? []` NG8102 warnings (`venue-detail`/`venue-list` templates)
+
+---
+
 ## 1. EXECUTE — real unfinished work
 
 > Audit says: do these.

@@ -10,10 +10,14 @@ Reusable standalone components, modals, and list/table primitives used across pa
 |---------------|---------|-------------|
 | add-item-modal/ | Generic add-item flow | AddItemModalComponent |
 | add-equipment-modal/ | Add equipment dialog | AddEquipmentModalComponent |
+| ai-menu-modal/ | AI-drafted menu modal + service | AiMenuModalComponent, AiMenuModalService |
+| ai-product-modal/ | AI-drafted product modal + service | AiProductModalComponent, AiProductModalService |
+| ai-recipe-modal/ | AI-drafted recipe modal + service | AiRecipeModalComponent, AiRecipeModalService |
 | approve-stamp/ | Approval stamp UI | ApproveStampComponent |
 | carousel-header/ | Table carousel header row | CarouselHeaderComponent, CarouselHeaderColumnDirective |
 | cell-carousel/ | Carousel cells / slides | CellCarouselComponent, CellCarouselSlideDirective |
 | change-popover/ | Inline change preview popover | ChangePopoverComponent |
+| chip-search-dropdown/ | Searchable chip-select dropdown | ChipSearchDropdownComponent |
 | confirm-modal/ | Confirm/cancel | ConfirmModalComponent |
 | counter/ | Numeric counter control | CounterComponent |
 | custom-multi-select/ | Multi-select CVA | CustomMultiSelectComponent |
@@ -27,14 +31,20 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | list-selection/ | Row selection + `ListSelectionState` | ListRowCheckboxComponent, ListSelectionState |
 | list-shell/ | Reusable list/table shell | ListShellComponent |
 | loader/ | Loading indicator | LoaderComponent |
+| nutrition-badge/ | Per-100g nutrition badge/tooltip | NutritionBadgeComponent |
 | quick-add-product-modal/ | Quick add product | QuickAddProductModalComponent |
+| quick-edit-product-modal/ | Quick edit product modal | QuickEditProductModalComponent |
+| quick-edit-product-panel/ | Quick edit product inline panel | QuickEditProductPanelComponent |
+| rating-stars/ | Star rating control | RatingStarsComponent, StarState |
 | restore-choice-modal/ | Restore from trash | RestoreChoiceModalComponent |
+| row-actions-menu/ | Per-row actions menu | RowActionsMenuComponent |
 | scaling-chip/ | Recipe scaling chip | ScalingChipComponent |
 | scrollable-dropdown/ | Scrollable dropdown | ScrollableDropdownComponent |
 | selection-bar/ | Bulk selection bar | SelectionBarComponent |
 | supplier-modal/ | Supplier picker | SupplierModalComponent |
 | translation-key-modal/ | Hebrew → English key | TranslationKeyModalComponent |
 | unit-creator/ | Unit registry editor | UnitCreatorModal |
+| venue-link-chip/ | Venue link chip | VenueLinkChipComponent |
 | version-history-panel/ | Version history UI | VersionHistoryPanelComponent |
 
 ## Architecture Context
@@ -58,8 +68,9 @@ Shared between pages (inventory, recipe-builder, metadata-manager, menu flows, e
 
 ## Recent Changes
 
+- 2026-09-27 (nightly-maintenance): Synced 10 dirs that existed on disk but were undocumented — `ai-menu-modal/`, `ai-product-modal/`, `ai-recipe-modal/`, `chip-search-dropdown/`, `nutrition-badge/`, `quick-edit-product-modal/`, `quick-edit-product-panel/`, `rating-stars/`, `row-actions-menu/`, `venue-link-chip/`.
 - 2026-03-22: Full directory sync (list shell, export, loader, supplier/quick-add modals, selection primitives, etc.).
 
 ---
-*Last updated: 2026-03-22*
+*Last updated: 2026-09-27*
 *Updated by: breadcrumb-navigator*
