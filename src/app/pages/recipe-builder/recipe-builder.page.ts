@@ -46,6 +46,7 @@ import { Recipe } from '@models/recipe.model'
 import type { Equipment } from '@models/equipment.model'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
+import { MasterPushService } from '@services/master-push.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { RecipeFormService } from './services/recipe-form.service'
 import { DishDataService } from '@services/dish-data.service'
@@ -106,6 +107,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly equipmentData_ = inject(EquipmentDataService)
   private readonly addEquipmentModal_ = inject(AddEquipmentModalService)
   private readonly metadataRegistry_ = inject(MetadataRegistryService)
+  private readonly masterPush_ = inject(MasterPushService)
   private readonly recipeDataService_ = inject(RecipeDataService)
   private readonly dishDataService_ = inject(DishDataService)
   private readonly recipeFormService_ = inject(RecipeFormService)
@@ -706,13 +708,21 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       return false
     }
 
+    // Same scope question saveRecipe() asks. This is the leave-the-page guard's
+    // save path, and without it an edit made on the way out silently lands on
+    // the user's own copy only — and sets _userModified, excluding that recipe
+    // from every future master update.
+    const scope = await this.masterPush_.askScope({ _masterId: this.masterId_ ?? undefined })
+    if (scope === 'cancel') return false
+
     this.saving.setSaving(true)
     const recipe = this.buildRecipeFromForm()
     recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe)
 
     return new Promise<boolean>((resolve) => {
       this.state_.saveRecipe(recipe).subscribe({
-        next: () => {
+        next: (saved) => {
+          if (scope === 'everyone' && saved) this.masterPush_.pushToMaster(saved)
           this.saving.setSaving(false)
           this.isSubmitted = true
           resolve(true)
@@ -796,7 +806,14 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       ingredients: ingNorm,
       workflow_items: workflowNorm,
       logistics_baseline: baselineNorm,
-      imageUrl_: this.recipeImageUrl_() ?? null
+      // Signal-backed state that buildRecipeFromForm() persists but the form
+      // group never holds. Anything saved from a signal has to be mirrored
+      // here or the dirty check cannot see it: changing only the rating left
+      // the snapshot identical, so leaving the page never prompted to save.
+      imageUrl_: this.recipeImageUrl_() ?? null,
+      rating_: this.recipeRating_(),
+      is_approved_: this.isApproved_(),
+      neto_confirmed_: this.netoConfirmed_()
     }
     return JSON.stringify(normalized)
   }
@@ -1111,13 +1128,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     // user right now — see server/routes/generic.js push-to-master route header.
     let pushToMasterAfterSave = false
     if (this.recipeId_() && this.masterId_) {
-      const result = await this.confirmModal_.openTernary('push_to_master_message', {
-        headerKey: 'push_to_master_header',
-        saveLabel: 'push_to_master_save_me',
-        saveButtonLabel: 'push_to_master_save_everyone'
-      })
-      if (result === 'cancel') return
-      pushToMasterAfterSave = result === 'save'
+      const scope = await this.masterPush_.askScope({ _masterId: this.masterId_ })
+      if (scope === 'cancel') return
+      pushToMasterAfterSave = scope === 'everyone'
     }
 
     const navigateOnSuccess = options?.navigateOnSuccess !== false
@@ -1128,13 +1141,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.state_.saveRecipe(recipe).subscribe({
       next: (saved) => {
         this.saving.setSaving(false)
-        if (pushToMasterAfterSave) {
-          const isDish = saved.recipe_type_ === 'dish'
-          const pushOp$ = isDish
-            ? this.dishDataService_.pushToMaster(saved._id)
-            : this.recipeDataService_.pushToMaster(saved._id)
-          pushOp$.catch(() => this.userMsg_.onSetErrorMsg(this.translation_.translate('push_to_master_error')))
-        }
+        if (pushToMasterAfterSave) this.masterPush_.pushToMaster(saved)
         if (navigateOnSuccess) {
           this.isSubmitted = true
           this.resetToNewForm_()

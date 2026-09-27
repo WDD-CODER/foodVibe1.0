@@ -280,17 +280,30 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
 // ---------------------------------------------------------------------------
 // PUT /api/v1/data/:type/:id/push-to-master
 //
-// TEMPORARY, dev-process-only route (see chat 2026-09-26): pushes the calling
-// user's own saved copy onto its linked __master__ document, then bumps the
-// master version so every other user picks it up on next login/refresh via
-// syncMasterToUser. Deliberately open to ANY signed-in user right now (no
-// role check) — restrict to role: 'admin' (see permanentlyDeleteRecipe for
-// the pattern) or remove entirely once this dev pass is done; master docs
-// are otherwise never written by a live user-facing flow (see
-// services/master-version.js's header comment).
+// Pushes the calling user's own saved copy onto its linked __master__
+// document, then bumps the master version so every other user picks it up on
+// next login/refresh via syncMasterToUser.
+//
+// DELIBERATELY OPEN TO ANY SIGNED-IN USER. An automated security review flags
+// this as privilege escalation, and it is: any authenticated account can
+// rewrite the shared catalogue for everyone. The Human has accepted that
+// explicitly for the current single-operator development phase, on condition
+// the UI always confirms "this changes it for everybody" before calling it.
+// To lock it down later, uncomment the guard below — that is the whole change.
+//
+//   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' })
+//
 // ---------------------------------------------------------------------------
+
+// Only entities that are actually cloned from master can be pushed back to it.
+// Without this, :type is attacker-controlled and reaches col() unchecked.
+const PUSHABLE_TYPES = new Set(['RECIPE_LIST', 'DISH_LIST', 'PRODUCT_LIST', 'KITCHEN_SUPPLIERS', 'EQUIPMENT_LIST']);
+
 router.put('/:type/:id/push-to-master', verifyToken, async (req, res) => {
   try {
+    if (!PUSHABLE_TYPES.has(req.params.type)) {
+      return res.status(400).json({ error: `Type ${req.params.type} cannot be pushed to master` });
+    }
     const existing = await col(req.params.type).findOne({
       _id: req.params.id,
       userId: req.user.userId,
@@ -335,6 +348,17 @@ router.put('/:type/:id/push-to-master', verifyToken, async (req, res) => {
       { _id: existing._masterId, userId: '__master__' },
       { $set: { ...safeBody, ingredients_ } }
     );
+
+    // Clear the caller's own _userModified flag. A normal PUT sets it to true,
+    // and sync-master's Rule 3 then skips that clone forever — so without this
+    // the user would publish their change to everyone and simultaneously opt
+    // themselves out of every future master update. Their copy already matches
+    // master, so letting Rule 2 manage it again is both safe and correct.
+    await col(req.params.type).updateOne(
+      { _id: req.params.id, userId: req.user.userId },
+      { $set: { _userModified: false } }
+    );
+
     await bumpMasterVersion();
     res.json({ ok: true });
   } catch (err) {

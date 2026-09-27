@@ -4,31 +4,26 @@
 chore/plan-306-m9-product-form-restyle
 
 ## Date
-2026-09-16
+2026-09-27
 
 ## Session Summary
-- Closed out plan 301 (server-side search & lean data loading): all 4 milestones done, moved to new `plans/archive/` (first completed-plan archive — no prior convention existed), its fully-`[x]` `.claude/todo.md` section rolled into `.claude/todo-archive/011.md` via `scripts/todo-archive.mjs`.
-- Backfilled stale checkboxes in plan 302 (M5 approve-stamp WebP) and plan 303 (M2 OnPush sweep, M3 sync-master Set hoist) to match already-Human-validated `feat/optimization` work (2026-08-31) that the plan files hadn't caught up to.
-- Plan 306 M9 Task 17: product-form field grouping/spacing pass — `product-form.component.scss` now uses `--space-4` section gaps and `--space-*`/`--fs-*`/`--fw-*` tokens instead of ~40 hardcoded values, labels start-aligned (was centered) to match the design + RTL. Verified via `/browse` desktop/tablet/mobile; `ng build` clean.
-- Bundled into one commit at Human's explicit request ("grab all the changes in the worktree and commit them, I want a clean worktree") despite `session-manifest-ship.py` flagging overlaps with other worktrees on `.claude/todo.md`/`plans/301`/`plans/302` — Human confirmed proceeding was fine.
+- Completed the legacy FoodComposer→Mongo migration on **both** local and Atlas. `audit-against-spec.js` reports clean on both; the only remaining entry is one deliberately-rejected sodium value.
+- Wrote `plans/317` — the field-by-field spec that had been missing. Every prior bug came from an assumption inside `transform.js` with nothing external to check it against; the new audit derives expectations from the spec and never calls `buildImport()`.
+- Found and fixed the reason **no legacy recipe could be saved at all**: `PUT` requires `nameSnapshot` on linked ingredients and the importer never wrote one. 1,082 recipes returned HTTP 400 on any edit. Backfilled 26,962 lines local / 27,214 Atlas.
+- Extended the save-scope prompt from 1 path to 9, behind a single `MasterPushService`, and fixed the dirty-check that ignored every signal the save path writes.
 
 ## Files Modified
-```
- .claude/todo-archive/011.md                                          | 17 +++
- .claude/todo.md                                                      | 15 ---
- plans/302-perf-phase1-infra-and-payload.plan.md                      |  2 +-
- plans/303-perf-phase2-client-cpu.plan.md                             | 14 ++-
- plans/306-visual-restyling-ui-refactor-design-language.plan.md       |  2 +-
- plans/{ => archive}/301-server-side-search-lean-data-loading.plan.md |  6 +-
- .../product-form/product-form.component.scss                        | 92 +++++++++-----------
-```
+3 commits: `10524cd7` spec + audit tooling · `d0f560f3` importer fixes · `ef55a498` save-scope feature.
+20 files (11 modified, 9 new) across `plans/`, `server/scripts/`, `server/routes/`, `src/app/`, `docs/brain/`.
 
 ## Commit
-21026b9 — chore(plans): archive plan 301, sync perf-plan checkboxes, restyle product-form spacing
+ef55a498
 
 ## PR
-N/A (checkpoint commit, no PR opened — housekeeping bundled onto this branch at Human's request)
+see Next Steps
 
 ## Next Steps
-- Plan 306 M9 has more tasks beyond Task 17 (Product form) — remaining M9 items and M10 (Menu Intelligence visual pass) still open.
-- Other worktrees (`chore/ship-fast-single-approval`, `chore/todo-archive-plan-308`, `feat/dashboard-counts-sync-versioning`, `feat/session-20260915`) had pending uncommitted overlaps on `.claude/todo.md`/plan files at the time of this ship — worth checking those sessions don't collide when they next commit.
+- **PR #206** (`fix/list-page-persistence`) is still open and green — the pagination commit orphaned when PR #205 merged at an older head.
+- Atlas repairs are applied; backups at `foodvibe-db-backups/{local,atlas}-2026-09-27T05-57-*`.
+- Known source-side ceiling, not defects: 48 ingredient lines reference nothing, 454 products (36%) have no price, 69 sub-recipe lines recorded only one measure.
+- `push-to-master` is open to any signed-in user by explicit decision; the admin guard is one commented line in `server/routes/generic.js`.
