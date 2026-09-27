@@ -43,7 +43,8 @@ import {
   StringParam,
   NullableStringParam,
   FilterRecordParam,
-  BooleanParam
+  BooleanParam,
+  NumberParam
 } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
@@ -165,13 +166,21 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
       { urlParam: 'filters', signal: this.activeFilters_, serializer: FilterRecordParam },
       { urlParam: 'lowStock', signal: this.lowStockOnly_, serializer: BooleanParam },
-      { urlParam: 'nutrition', signal: this.nutritionFilter_, serializer: StringParam }
+      { urlParam: 'nutrition', signal: this.nutritionFilter_, serializer: StringParam },
+      { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
 
     // Pagination (plan 304 M3): jump back to page 1 whenever the filtered/sorted result
     // set changes, so a search/filter doesn't strand the user on a now-irrelevant page.
+    // Skips its first run so a page restored from the URL/session (e.g. navigating back
+    // from a product) isn't immediately stomped back to 1.
+    let skipFirstPageReset = true
     effect(() => {
       this.filteredProductIds_()
+      if (skipFirstPageReset) {
+        skipFirstPageReset = false
+        return
+      }
       this.currentPage_.set(1)
     })
   }
