@@ -183,3 +183,23 @@ once after the initial `git add`.
 **Why the obvious fix is wrong:** Assuming "`/review`" or "`/browse`" in a project command's prose means "call the Skill tool with that name" treats plain-name resolution as unambiguous. It isn't, once a plugin/vendored skill directory (`~/.claude/skills/<name>/`) happens to share a name with a project's own `.claude/commands/<name>.md`. The Skill tool picked the vendored one both times observed.
 
 **What to do instead:** When a command file's instruction is "read `<path>` and execute it" (an explicit file path), read that file directly with the Read tool and follow it inline — do not route through `Skill({skill: "<name>"})`. Reserve Skill-tool invocation by name for skills that are genuinely meant to run that way (no project file the instruction is pointing you at instead). If a vendored skill's own preamble pulls in unrelated ceremony (onboarding prompts, telemetry, auto-commits to CLAUDE.md) that the task at hand didn't ask for, it's reasonable to do the substantive work directly and skip the ceremony rather than execute it wholesale.
+
+---
+
+## `RemoteTrigger` rejects sub-hourly cron and silently attaches every connected MCP connector
+
+**What hurt:** Setting up an unattended nightly-maintenance routine, a `*/30 * * * *` cron (30-minute retry cadence, so a fire blocked by a usage cap gets retried soon after) was rejected outright: "Minimum interval is 1 hour." Separately, creating the routine with no `mcp_connections` field in the body still attached all 4 of the account's connected MCP connectors (Gmail, Google Drive, Claude Docs, Claude Code Remote) to the new routine.
+
+**Why the obvious fix is wrong:** Omitting `mcp_connections` reads as "no connectors," but the API defaults to attaching everything already connected at the account level — an unattended nightly code-maintenance job ends up with mailbox/Drive access it never asked for and never needed.
+
+**What to do instead:** Build sub-hourly retry semantics around an hourly cron (comma-separated UTC hours, e.g. `0 23,0,1,2,3 * * *` for a multi-hour local window) plus an idempotency marker file the prompt checks first, so only the first successful fire in a night does real work and every later fire that night is a cheap no-op. After creating any `RemoteTrigger` routine, always follow up with `action: "update", body: {clear_mcp_connections: true}` unless the task genuinely needs a specific connector — then pass only that one explicitly.
+
+---
+
+## `RemoteTrigger` cloud routines clone from GitHub, not the local working tree
+
+**What hurt:** A routine invoking a newly-added `.claude/commands/*.md` slash command failed on its first real run — the cloud session clones the repo fresh from the `git_repository` source's default branch, so a command file that only existed locally, uncommitted, on an unpushed feature branch wasn't there yet. The run correctly reported the missing file and refused to improvise a substitute, but the routine was otherwise fully configured and looked ready.
+
+**Why the obvious fix is wrong:** Writing and reviewing a new command file locally, then wiring up the schedule, feels like "done" — but the routine's `sources[].git_repository` has no visibility into local, uncommitted, or unpushed branch state; it only ever sees what's actually merged to the branch it reads.
+
+**What to do instead:** Before trusting a scheduled routine that invokes a repo-local command or skill, get that file merged into the branch the routine's `git_repository` source actually reads (normally `main`), then fire a manual `RemoteTrigger` `run` to confirm it resolves and behaves correctly before relying on the schedule unattended.

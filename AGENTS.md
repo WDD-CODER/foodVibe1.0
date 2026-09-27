@@ -64,8 +64,8 @@ Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validati
 | Before workflows that touch dev server / browser / database | `.claude/skills/preflight/SKILL.md` |
 | User says "save the plan" / "save plan" / confirm plan persist, **or** pastes a Plan Contract / big plan to execute | `.claude/skills/save-plan/SKILL.md` (+ `scripts/plan-name-similarity.mjs`) |
 | Brief execution adds a new stage / review fallout task | Append `[ ]` to parent `plans/….plan.md` Atomic Sub-tasks + `.claude/todo.md` before doing the work |
-| End of session, before PR, after large features, or "audit tech debt" | `.claude/skills/techdebt/SKILL.md` |
-| After significant features/components/services, or before a PR | `.claude/skills/update-docs/SKILL.md` |
+| Before PR, or "audit tech debt" | `.claude/skills/techdebt/SKILL.md` |
+| Before a PR | `.claude/skills/update-docs/SKILL.md` |
 | User says "setup worktree" / "new worktree" (on-demand only) | `.claude/skills/worktree-setup/SKILL.md` |
 | List available skills | `.claude/commands/skills.md` |
 | List available commands | `.claude/commands/commands.md` |
