@@ -6,13 +6,14 @@ export interface NutritionPer100g {
   fat_g?: number
   fiber_g?: number
   sodium_g?: number
+  cholesterol_mg?: number
 }
 
 export interface PurchaseOption_ {
   unit_symbol_: string
   conversion_rate_: number
   price_override_?: number
-  uom?:string
+  uom?: string
 }
 
 /** One supplier's offering of this product — price per base_unit. */

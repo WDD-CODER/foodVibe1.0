@@ -49,6 +49,8 @@ function parseArgs(argv) {
   const args = {};
   for (const arg of argv.slice(2)) {
     if (arg === '--write=local') args.write = 'local';
+    else if (arg === '--write=atlas') args.write = 'atlas';
+    else if (arg.startsWith('--target=')) args.target = arg.slice('--target='.length);
     else if (arg.startsWith('--sql-path=')) args.sqlPath = arg.slice('--sql-path='.length);
     else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -59,9 +61,10 @@ function sameArrayJson(a, b) {
   return JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
 }
 
-async function run({ write, sqlPath }) {
-  const uri = process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error('MONGO_LOCAL_URI is not set in server/.env');
+async function run({ write, target: args_target, sqlPath }) {
+  const target = write || args_target || 'local';
+  const uri = target === 'atlas' ? process.env.MONGO_URI : process.env.MONGO_LOCAL_URI;
+  if (!uri) throw new Error(`${target === 'atlas' ? 'MONGO_URI' : 'MONGO_LOCAL_URI'} is not set in server/.env`);
 
   console.log('[repair-dish-prep-items] Re-parsing SQL dump fresh ...');
   const text = readSqlDumpAsUtf8(sqlPath || DEFAULT_SQL_PATH);
@@ -76,7 +79,7 @@ async function run({ write, sqlPath }) {
   const expectedByLegacyNo = new Map(expected.dishes.map(d => [d._legacyRecipeNo, d]));
   console.log(`[repair-dish-prep-items] Expected: ${expected.dishes.length} dishes from source.`);
 
-  console.log('[repair-dish-prep-items] Connecting to local ...');
+  console.log('[repair-dish-prep-items] Connecting ...');
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 8000 });
   const db = mongoose.connection.db;
 
@@ -96,9 +99,9 @@ async function run({ write, sqlPath }) {
     if (sameArrayJson(dish.prep_items_, fields.prep_items_) && sameArrayJson(dish.prep_categories_, fields.prep_categories_)) continue;
     masterOps.push({ _id: dish._id, ...fields });
   }
-  console.log(`[repair-dish-prep-items] __master__: ${masterDishes.length} legacy dish(es), ${write === 'local' ? 'correcting' : 'would correct'} ${masterOps.length}.`);
+  console.log(`[repair-dish-prep-items] __master__: ${masterDishes.length} legacy dish(es), ${write ? 'correcting' : 'would correct'} ${masterOps.length}.`);
 
-  if (write === 'local' && masterOps.length > 0) {
+  if (write && masterOps.length > 0) {
     await db.collection('DISH_LIST').bulkWrite(
       masterOps.map(op => ({
         updateOne: { filter: { _id: op._id }, update: { $set: { prep_items_: op.prep_items_, prep_categories_: op.prep_categories_ } } },
@@ -126,7 +129,7 @@ async function run({ write, sqlPath }) {
       userOps.push({ _id: dish._id, ...fields });
     }
 
-    if (write === 'local' && userOps.length > 0) {
+    if (write && userOps.length > 0) {
       await db.collection('DISH_LIST').bulkWrite(
         userOps.map(op => ({
           updateOne: { filter: { _id: op._id }, update: { $set: { prep_items_: op.prep_items_, prep_categories_: op.prep_categories_ } } },
@@ -135,13 +138,13 @@ async function run({ write, sqlPath }) {
       );
     }
     if (userOps.length > 0) {
-      console.log(`[repair-dish-prep-items]   ${userId}: ${write === 'local' ? 'corrected' : 'would correct'} ${userOps.length} of ${userDishes.length} dish(es).`);
+      console.log(`[repair-dish-prep-items]   ${userId}: ${write ? 'corrected' : 'would correct'} ${userOps.length} of ${userDishes.length} dish(es).`);
     }
     totalUserCorrected += userOps.length;
   }
 
-  console.log(`\n[repair-dish-prep-items] Total: master ${masterOps.length}, per-user ${totalUserCorrected} dish(es) ${write === 'local' ? 'corrected' : 'would be corrected'}.`);
-  if (write !== 'local') {
+  console.log(`\n[repair-dish-prep-items] Total: master ${masterOps.length}, per-user ${totalUserCorrected} dish(es) ${write ? 'corrected' : 'would be corrected'}.`);
+  if (!write) {
     console.log('[repair-dish-prep-items] Dry run — no writes made. Re-run with --write=local to apply.');
   }
 

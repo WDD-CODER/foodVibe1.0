@@ -16,10 +16,14 @@
  * `nutrition_per_100g_` — trailing underscore — which the Product model and
  * every UI consumer never read; that run's already-written docs are migrated
  * to the correct field name by the cleanup step at the end of this script.)
- * Note: the source also has a `colesterol` (cholesterol)
- * column, but `NutritionPer100g` (src/app/core/models/product.model.ts) has
- * no matching field — cholesterol values are intentionally NOT carried over
- * here rather than growing the model as a side effect of a data-repair script.
+ * Cholesterol IS carried over as of plan 317, into the new
+ * `nutrition_per_100g.cholesterol_mg` field (the source column is misspelled
+ * `colesterol`). It was excluded originally only because the model had no
+ * field for it; the Human has since asked for every real value to migrate, so
+ * the field was added deliberately rather than as a script side effect.
+ *
+ * Nutrition values at or above 100,000 mg/100g are rejected as impossible —
+ * more than 100% of the mass they sit in. One row trips it (see MAX_NUTRITION_MG).
  *
  * Runs in two passes, master first (so future syncs to *new* users inherit
  * this automatically), then already-cloned per-user products missing it.
@@ -44,6 +48,8 @@ function parseArgs(argv) {
   const args = {};
   for (const arg of argv.slice(2)) {
     if (arg === '--write=local') args.write = 'local';
+    else if (arg === '--write=atlas') args.write = 'atlas';
+    else if (arg.startsWith('--target=')) args.target = arg.slice('--target='.length);
     else if (arg.startsWith('--sql-path=')) args.sqlPath = arg.slice('--sql-path='.length);
     else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -55,40 +61,66 @@ function isFakeTestRow(row) {
   return row.calories === 1 && row.protein === 2 && row.carbohydrate === 3 && row.fat === 4 && row.Sodium === 5 && row.colesterol === 6;
 }
 
-function buildNutrition(row) {
+// A nutrient cannot exceed the mass it sits in: >100,000 mg per 100g is more
+// than 100% by weight. Exactly one row trips this — אבקת אפיה (baking powder)
+// at 158,000 mg sodium, where real baking powder is ~11,000, so it reads as a
+// 10x entry error. Plan 317 §7: reject the impossible value, keep the rest.
+// The other 22 sodium readings check out against real-world figures (egg yolk
+// 48mg exactly, wakame 872 vs ~870), so the column itself is sound.
+const MAX_NUTRITION_MG = 100000;
+
+function buildNutrition(row, onRejected) {
   const n = {};
   if (row.calories) n.energy_kcal = row.calories;
   if (row.protein) n.protein_g = row.protein;
   if (row.carbohydrate) n.carbs_g = row.carbohydrate;
   if (row.fat) n.fat_g = row.fat;
   // Source Sodium is in mg (e.g. egg yolk: 48 ≈ real-world 48mg/100g); model field is grams.
-  if (row.Sodium) n.sodium_g = row.Sodium / 1000;
+  if (row.Sodium) {
+    if (row.Sodium >= MAX_NUTRITION_MG) onRejected?.(`product ${row.product} (${row.productName}): sodium ${row.Sodium} mg/100g exceeds 100% by mass — rejected`);
+    else n.sodium_g = row.Sodium / 1000;
+  }
+  // Source column is misspelled `colesterol`; already in mg/100g, and the model
+  // field keeps mg rather than converting, since that is how cholesterol is
+  // conventionally read on a label.
+  if (row.colesterol) {
+    if (row.colesterol >= MAX_NUTRITION_MG) onRejected?.(`product ${row.product} (${row.productName}): cholesterol ${row.colesterol} mg/100g exceeds 100% by mass — rejected`);
+    else n.cholesterol_mg = row.colesterol;
+  }
   return Object.keys(n).length > 0 ? n : null;
 }
 
-async function run({ write, sqlPath }) {
-  const uri = process.env.MONGO_LOCAL_URI;
-  if (!uri) throw new Error('MONGO_LOCAL_URI is not set in server/.env');
+async function run({ write, target: args_target, sqlPath }) {
+  const target = write || args_target || 'local';
+  const uri = target === 'atlas' ? process.env.MONGO_URI : process.env.MONGO_LOCAL_URI;
+  if (!uri) throw new Error(`${target === 'atlas' ? 'MONGO_URI' : 'MONGO_LOCAL_URI'} is not set in server/.env`);
 
   const text = readSqlDumpAsUtf8(sqlPath || DEFAULT_SQL_PATH);
   const productsRaw = extractInserts(text, 'tblProducts');
 
   const nutritionByLegacyId = new Map(); // legacyProductId -> NutritionPer100g
+  const rejected = [];
   let skippedFake = 0;
   for (const row of productsRaw) {
     if (isFakeTestRow(row)) { skippedFake++; continue; }
-    const nutrition = buildNutrition(row);
+    const nutrition = buildNutrition(row, msg => rejected.push(msg));
     if (nutrition) nutritionByLegacyId.set(row.product, nutrition);
   }
   console.log(`[backfill-product-nutrition] Source: ${productsRaw.length} products, ${nutritionByLegacyId.size} with plausible nutrition data (${skippedFake} fake test row skipped).`);
+  const withChol = [...nutritionByLegacyId.values()].filter(n => n.cholesterol_mg != null).length;
+  console.log(`[backfill-product-nutrition] of those, ${withChol} carry cholesterol_mg.`);
+  if (rejected.length) {
+    console.log(`[backfill-product-nutrition] ${rejected.length} value(s) rejected as physically impossible:`);
+    for (const r of rejected) console.log(`  - ${r}`);
+  }
 
-  console.log('[backfill-product-nutrition] Connecting to local ...');
+  console.log('[backfill-product-nutrition] Connecting ...');
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 8000 });
   const db = mongoose.connection.db;
 
   // ---- Pass 1: __master__ PRODUCT_LIST -----------------------------------
   const masterProducts = await db.collection('PRODUCT_LIST')
-    .find({ userId: '__master__', _legacyProductId: { $exists: true }, nutrition_per_100g: { $exists: false } })
+    .find({ userId: '__master__', _legacyProductId: { $exists: true } })
     .project({ _id: 1, _legacyProductId: 1, name_hebrew: 1 })
     .toArray();
 
@@ -100,9 +132,9 @@ async function run({ write, sqlPath }) {
     masterOps.push({ _id: p._id, nutrition_per_100g: nutrition });
     masterIdToNutrition.set(String(p._id), nutrition);
   }
-  console.log(`[backfill-product-nutrition] __master__: ${write === 'local' ? 'backfilling' : 'would backfill'} ${masterOps.length} product(s).`);
+  console.log(`[backfill-product-nutrition] __master__: ${write ? 'backfilling' : 'would backfill'} ${masterOps.length} product(s).`);
 
-  if (write === 'local' && masterOps.length > 0) {
+  if (write && masterOps.length > 0) {
     await db.collection('PRODUCT_LIST').bulkWrite(
       masterOps.map(op => ({
         updateOne: { filter: { _id: op._id }, update: { $set: { nutrition_per_100g: op.nutrition_per_100g } } },
@@ -117,7 +149,7 @@ async function run({ write, sqlPath }) {
 
   for (const userId of userIds) {
     const userProducts = await db.collection('PRODUCT_LIST')
-      .find({ userId, _masterId: { $ne: null }, nutrition_per_100g: { $exists: false } })
+      .find({ userId, _masterId: { $ne: null } })
       .project({ _id: 1, _masterId: 1 })
       .toArray();
 
@@ -128,7 +160,7 @@ async function run({ write, sqlPath }) {
       userOps.push({ _id: p._id, nutrition_per_100g: nutrition });
     }
 
-    if (write === 'local' && userOps.length > 0) {
+    if (write && userOps.length > 0) {
       await db.collection('PRODUCT_LIST').bulkWrite(
         userOps.map(op => ({
           updateOne: { filter: { _id: op._id }, update: { $set: { nutrition_per_100g: op.nutrition_per_100g } } },
@@ -137,13 +169,13 @@ async function run({ write, sqlPath }) {
       );
     }
     if (userOps.length > 0) {
-      console.log(`[backfill-product-nutrition]   ${userId}: ${write === 'local' ? 'backfilled' : 'would backfill'} ${userOps.length} product(s).`);
+      console.log(`[backfill-product-nutrition]   ${userId}: ${write ? 'backfilled' : 'would backfill'} ${userOps.length} product(s).`);
     }
     totalUserUpdated += userOps.length;
   }
 
-  console.log(`\n[backfill-product-nutrition] Total: master ${masterOps.length}, per-user ${totalUserUpdated} product(s) ${write === 'local' ? 'backfilled' : 'would be backfilled'}.`);
-  if (write !== 'local') {
+  console.log(`\n[backfill-product-nutrition] Total: master ${masterOps.length}, per-user ${totalUserUpdated} product(s) ${write ? 'backfilled' : 'would be backfilled'}.`);
+  if (!write) {
     console.log('[backfill-product-nutrition] Dry run — no writes made. Re-run with --write=local to apply.');
   }
 
@@ -152,8 +184,8 @@ async function run({ write, sqlPath }) {
   // now that the correctly-named field is (re)populated above, drop the dead one.)
   const staleFilter = { nutrition_per_100g_: { $exists: true } };
   const staleCount = await db.collection('PRODUCT_LIST').countDocuments(staleFilter);
-  console.log(`[backfill-product-nutrition] Stale 'nutrition_per_100g_' field present on ${staleCount} doc(s) — ${write === 'local' ? 'removing' : 'would remove'}.`);
-  if (write === 'local' && staleCount > 0) {
+  console.log(`[backfill-product-nutrition] Stale 'nutrition_per_100g_' field present on ${staleCount} doc(s) — ${write ? 'removing' : 'would remove'}.`);
+  if (write && staleCount > 0) {
     await db.collection('PRODUCT_LIST').updateMany(staleFilter, { $unset: { nutrition_per_100g_: '' } });
   }
 
