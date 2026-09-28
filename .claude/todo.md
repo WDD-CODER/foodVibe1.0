@@ -14,6 +14,8 @@
 - [ ] `nutrition-badge.component.ts:46` — legacy `@Input()` decorator, unresolved since `techdebt-2026-04-20.md`
 - [ ] 2 stray trailing semicolons (`quick-add-product-modal.component.ts:121`, `menu-library-list.component.ts:197`)
 - [ ] 24-file refactor-candidate backlog (>300 lines each) — triage, top 3 are 1200+ lines
+  - [x] `cook-view.page.ts` — triaged + split 2026-09-28: timer/stopwatch + export/preview extracted to component-scoped services (`src/app/pages/cook-view/services/`), 1201 → 979 lines; `ng build` clean; branch `chore/cook-view-service-split`; Human-validated. Full detail: `plans/318-nightly-maintenance-followups-2026-09-27.plan.md`.
+  - [ ] `menu-intelligence.page.ts` (1413) / `recipe-builder.page.ts` (1394) / remaining ~21-file backlog — not yet triaged
 - [ ] 2 unnecessary `?? []` NG8102 warnings (`venue-detail`/`venue-list` templates)
 
 ---
@@ -24,43 +26,12 @@
 
 - [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
-### Plans 316-317 — Full SQL→Mongo migration completion (`plans/316-…`, `plans/317-…`)
+### Plan 319 — Label Audit Report, read-only (`plans/319-label-audit-report.plan.md`) — Human-validated 2026-09-28
 
-> Executed 2026-09-27 on BOTH local and Atlas; awaiting Human validation.
-
-- [x] `plans/317-sql-to-mongo-migration-spec.md` — field-by-field spec for all 26 source tables; the independent authority the transform can no longer be its own check against
-- [x] `audit-against-spec.js` (new) — derives expectations from the spec, never from `buildImport()`; zero findings on Atlas, 3 real user edits on local
-- [x] `cost-cross-check.js` (new) — §7a outside signal; 854 recipes, no clustering at any power of ten, rules out systemic unit error
-- [x] `db-backup.js`, `reset-user-from-master.js` (new) — JSON snapshots (no mongodump on this box) + clone reset/orphan sweep
-- [x] Atlas rollout complete — orphan sweep 7,752, quantities 10,732+1,532, prep-items 911, yields 2,093, nutrition 33, phones 25, config
-- [x] Local: orphan sweep 2,855; dev-guest reset and re-cloned from corrected master
-- [x] New scope delivered: `cholesterol_mg` on the product model + import; `MASTER_META/legacy-config` (laborCost 30, vatPercent 16)
-- [x] Category images dropped — the 38 legacy categories are unregistered bare strings, nothing to attach an image to
-- [x] `push-to-master`: resets the caller's `_userModified` (else you publish to everyone and freeze yourself out) + type allowlist
-- [x] cook-view `saveEdits` now shows the same save-for-me / save-for-everyone prompt as recipe-builder
-- [x] `ng build` passes
-
-### Plan 315 — Multi-measure yields + `neto_confirmed_` (`plans/315-yield-multi-measure-conversions.plan.md`)
-
-> Implemented and applied to local Mongo 2026-09-26; awaiting Human validation.
-
-- [x] `lib/transform.js` — yield derived from all source measures (`dbTotalGram→gram`, `dbTotalLiter→ml`, `dbTotalUnit→unit`, `noOfDishes→dish`); `measureUnit` no longer consulted (it is `2` on all 2,093 rows); `yield_conversions_[0]` is now the primary, per the recipe-builder's own contract
-- [x] `lib/transform.js` — sets `neto_confirmed_: true` on a recovered yield, stopping the header effect overwriting the net yield with the gross ingredient sum
-- [x] `repair-recipe-yields.js` (new) — master + per-user passes, skips `_userModified: true`
-- [x] Applied: master 2,092 docs, per-user 4,183; 1,905 gained a selectable unit; 960 unit relabels; 423 dishes moved from a gram figure to their portion count
-- [x] Verified: 0 yield mismatches on `__master__`/`yYYGl`; recipeNo 1620 shows `םרג 850` + `הנמ 1`; parent line holds at ₪10.59; `ng build` passes
-- [x] Atlas/production NOT touched — local only
-
-### Plan 314 — Dish mise-en-place from the legacy checklist (`plans/314-dish-mise-en-place-checklist-import-fix.plan.md`)
-
-> Supersedes plan 300 Finding 5. Implemented and applied to local Mongo 2026-09-26; awaiting Human validation.
-
-- [x] `lib/transform.js` — dish `prep_items_`/`prep_categories_` derived from `tblInstructions` (split on newlines, `quantity: 0`, `unit: 'gram'`, empty category) instead of copied ingredient lines; retracted plan-300 comment replaced
-- [x] `repair-dish-prep-items.js` — `_userModified: { $ne: true }` guard on the per-user pass + corrected docstring
-- [x] `backfill-dish-prep-items.js` — marked superseded, do not re-run
-- [x] Applied `repair-dish-prep-items.js --write=local`: master 849 + per-user 1,697 dishes; 5,754 → 3,952 prep rows, 137 dishes intentionally empty
-- [x] Verified: `verify-against-source.js` clean on prep fields for `__master__`/`dev-guest`/`yYYGl`; recipeNo 1317 spot-checked in the browser; `ng build` passes
-- [x] Atlas/production has NOT been touched — local only
+- [x] A1: Read `label.model.ts`, `metadata-registry.service.ts`, `recipe-form.service.ts`, `recipe-header.component.ts`, `recipe-book-list.component.ts`, `translation.service.ts`, `server/constants/cloneable-types.js`; confirm or refute the stated label-drop mechanism, report findings first. Confirmed, plus found `buildRecipeFromForm` (save path) uses exact-key-only matching vs `normalizeLabelKeys` (load path)'s exact-or-translation matching — asymmetry not in the original brief.
+- [x] A2: Write `scripts/audit-labels.mjs` (read-only, Sections A–E: registry, usage, classification, merge clusters, orphan evidence). Includes DNS SRV fallback (public resolver) for environments where the local resolver refuses direct SRV queries.
+- [x] A3: Run `node scripts/audit-labels.mjs --remote`, generate `.claude/reports/label-audit/report.md` + `data.json`. Ran against `cluster0.objqrlt.mongodb.net` (Human-confirmed as the live app's DB).
+- [x] A4: Post 10-line summary + report.md to Human. Stop — no fixes this session. 80 distinct label strings, 8392 orphan occurrences, 9 merge clusters; `dairy_prep` (25/user, orphan) clusters with `dairy` (registered, canonical) + `dairy_sauce`. `.claude/reports/label-audit/` is not `.gitignore`d — would be committed if staged.
 
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
