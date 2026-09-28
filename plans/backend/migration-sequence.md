@@ -109,7 +109,7 @@ Existing `_id` values are preserved exactly, so no Angular code needs to change.
 1. Confirm Atlas seeding is complete for all active users (run Phase 2 for each).
 2. Update `src/environments/environment.prod.ts`:
    ```typescript
-   apiUrl: 'https://foodvibe-api.onrender.com',  // real Render URL
+   apiUrl: 'https://foodvibe1-0-1-frankfurt.onrender.com',  // current Render URL (Frankfurt, cut over 2026-09-27; historically foodvibe-api/foodvibe were never/no-longer real)
    useBackend: true,
    useBackendAuth: true,
    ```
