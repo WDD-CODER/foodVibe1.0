@@ -13,7 +13,11 @@ Full audit: `.claude/techdebt-reports/techdebt-2026-09-27.md`. Two items are rea
 - [ ] `src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts:121` — remove stray trailing semicolon.
 - [ ] `src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.ts:197` — remove stray trailing semicolon.
 - [ ] Bundle budget: initial bundle is 39.17 kB over its 500 kB budget (down from 93.77 kB over on 2026-09-16 — improving, not blocking). Revisit if it keeps climbing.
-- [ ] Refactor-candidate backlog (24 files >300 lines, full-project sweep): triage which of the top offenders (`menu-intelligence.page.ts` 1413 lines, `recipe-builder.page.ts` 1394, `cook-view.page.ts` 1201) are worth a deliberate split. Not a nightly drive-by — needs a dedicated session.
+- [ ] Refactor-candidate backlog (24 files >300 lines, full-project sweep): triage which of the top offenders (`menu-intelligence.page.ts` 1413 lines, `recipe-builder.page.ts` 1394, ~~`cook-view.page.ts` 1201~~) are worth a deliberate split. Not a nightly drive-by — needs a dedicated session.
+  - [x] `cook-view.page.ts` — triaged 2026-09-28: timer/stopwatch + export/preview flows (no coupling to the recipe/scaling/edit-mode signals) extracted to component-scoped `CookTimerService`/`CookViewExportService` in `src/app/pages/cook-view/services/`; page dropped 1201 → 979 lines. Scaling/edit-mode/workflow-form (~600+ lines) deliberately left in place — all wired through the same `recipe_`/`scaleFactor_`/`isDish_` signals, splitting would relocate coupling not remove it. Branch `chore/cook-view-service-split`, `ng build` clean. Human-validated 2026-09-28.
+  - [ ] `menu-intelligence.page.ts` (1413 lines) — not yet triaged
+  - [ ] `recipe-builder.page.ts` (1394 lines) — not yet triaged
+  - [ ] Remaining ~21 files in the >300-line backlog — not yet triaged
 - [ ] `venue-detail.component.html:45` / `venue-list.component.html:119` — remove unnecessary `?? []` (NG8102 warning; `available_infrastructure_` is never null/undefined per its type).
 
 ## Notes
