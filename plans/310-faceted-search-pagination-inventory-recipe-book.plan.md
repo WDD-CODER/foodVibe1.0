@@ -1,5 +1,43 @@
 # Plan 310 — Faceted Server-Side Search & Pagination for Inventory + Recipe Book
 
+## STATUS: ABANDONED 2026-09-27 — do not re-attempt without reading this first
+
+A full implementation (all 6 milestones: server-side faceted/paginated endpoints for both
+screens, a `$graphLookup`-based Mongo view for recursive allergens resolution, ingredient-
+containment filter, and a full client rewire of both `inventory-product-list` and
+`recipe-book-list`) was built and verified against a **local** copy of the data — 0 mismatches
+on full-population checks. It was never tested against the real (Atlas, free-tier) database
+before the Human tried it live. That live test found it made the app **badly worse**, and the
+Human had it fully reverted (server + client + this plan's own documentation) rather than
+patched. Recorded here so nobody rebuilds this the same way:
+
+1. **The allergens `$graphLookup` was too expensive to run on every single page load/navigation
+   of recipe-book**, against the real free-tier Atlas cluster — first load took nearly a minute.
+   It re-resolved allergens recursively across the *entire* catalog (2,116 items) on every
+   request, not just once. Fast against a local Mongo copy; not fast against real, shared-CPU
+   Atlas. **This is an architecture problem, not a bug** — computing this per-request at all was
+   the wrong call for this database tier. A future attempt would need to not recompute it on
+   every page view (e.g. only when the allergens facet is actually opened/used, or cached/
+   invalidated rather than live-computed).
+2. **Debounced fetches weren't cancellable** (`switchMap` over a `Promise`-returning call don't
+   actually abort the underlying HTTP request) — under real latency, clicking through pages
+   quickly queued up multiple slow requests that landed out of order (page 2's results arriving,
+   then immediately page 3's from an earlier click). Masked entirely by the fast local database
+   used during development; only showed up against the real one.
+3. **A real, unrelated-to-speed bug**: inventory's "reset to page 1 when results change" logic
+   fired on *every* page navigation in the new server-driven mode (since moving pages itself
+   produces a new result object), so clicking to page 2 immediately snapped back to page 1. This
+   one was a straightforward implementation mistake, independent of the performance problem —
+   worth remembering even though the whole approach was dropped: don't tie a "results changed,
+   go back to page 1" effect to a signal that pagination itself also updates.
+
+**Decision:** dropped, not fixed. The app worked fine before this plan was attempted, and
+inventory/recipe-book performance was not the most urgent problem. If this is ever revisited, it
+needs: (a) the allergens facet redesigned so it isn't recomputed on every request, (b) every
+milestone tested against the real database incrementally, not just a local copy, with the Human
+able to check each piece before the next is built, and (c) the page-reset bug above fixed as part
+of a fresh implementation, not inherited.
+
 overview: Carves out `plans/301-server-side-search-lean-data-loading.plan.md` Milestone 2 into its own Plan Contract, per that plan's own note ("needs its own design pass... scope it as its own plan once Milestone 1's pattern is proven out") and per `plans/304-perf-phase3-data-volume.plan.md`'s framing of this work as "the terminal step of the whole performance effort." No code changes in this plan yet — this is the design pass plan 301 M2 asked for, plus a persisted Prerequisite Gate so an agent doesn't start it before its own dependencies have shipped.
 
 # Relationship to plans 301, 303, 304 — read before touching this plan

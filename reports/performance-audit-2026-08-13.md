@@ -377,6 +377,74 @@ Update 2026-08-17: `PERF_LOG=1` is now declared in `render.yaml`, so the `[data/
 will start flowing on the next deploy. It is a **temporary** diagnostic — set it to `"0"` or
 remove the entry once the 24h sample is captured.
 
+### Update 2026-09-27 — real production numbers collected
+
+Render logs reviewed for Sep 26 08:02 through Sep 27 03:20 (~31h, real usage, not synthetic).
+
+**Cold starts — hypothesis confirmed.** The `boot NNNNms` line appeared **10 times** in that
+window, spaced roughly 1-3h apart during normal daytime use (08:02, 10:46, 13:49, 21:57 on
+Sep 26; 08:13, 10:26, 12:46, 13:16, 15:09, 15:17 on Sep 27) — i.e. the free-tier 15-min idle
+suspend is triggering repeatedly during business hours, exactly as the audit predicted.
+Boot duration itself is **6.8-7.5s**, consistently — much better than the original 50-90s
+estimate, because the M2 sub-task moving `seedMasterData()` to after `app.listen()` (already
+shipped, see Atomic Sub-tasks) is doing its job. The remaining cost is Node/Express startup +
+the initial Atlas connection, not seeding.
+
+**`/api/v1/data/*` response times — the three big collections dominate, and it's Mongo, not
+serialize.** From paired morgan `:response-time` + `[data/query]` lines:
+
+| Collection | docs | bytes | mongo= range | serialize= |
+| --- | --- | --- | --- | --- |
+| RECIPE_LIST | 1118 | 1.7-2.6 MB | 2.0s-4.4s (p50 ~3.2s) | 100-400ms |
+| DISH_LIST | 1018 | 2.45-2.7 MB | 2.8s-4.4s (p50 ~3.4s) | 100-200ms |
+| PRODUCT_LIST | 1561 | 765-769 KB | 1.3s-4.9s (p50 ~1.9s) | 5-100ms |
+
+Every small reference collection (KITCHEN_*, MENU_TYPES, EQUIPMENT_LIST, ≤128 docs) is
+148-500ms normally, but on several occasions **every** collection in a batch — including
+2-doc ones like MENU_TYPES and KITCHEN_CATEGORIES — spiked to 1.2-3.5s simultaneously. That
+pattern (uniform spike across unrelated small queries) looks like Atlas connection
+re-establishment or a cross-region hop, not query cost — worth checking under M2's "confirm
+Atlas region matches Render region" task before spending effort on query optimization.
+
+**Conclusion for M2:** cold starts are real and frequent — proceed with M2, do not
+re-prioritise away from it.
+
+### Update 2026-09-27 (cont'd) — Render/Atlas region check, service inventory, billing decision
+
+**Region mismatch confirmed.** Render service `foodvibe` runs in **Oregon (US West)**
+(Settings → Region, not user-editable in place — Render only lets you set region at
+creation). The Atlas cluster is in **Belgium (europe-west1)**. Every query pays a real
+US↔EU round trip on top of query time — this is very likely the cause of the "every
+collection spikes at once, even 2-doc ones" pattern from the first observation batch:
+that's network/connection cost, not query cost.
+
+**Correction to my earlier phrasing:** the fix is moving the **Render service**, not the
+Atlas cluster — Atlas is already well-placed in Belgium, close to Israel. Render doesn't
+offer a Belgium region; the closest Render region to Atlas (and to Israel) is **Frankfurt**.
+Since Render won't let an existing service change region in place, actually fixing this
+means standing up a **new** free-tier Render service in Frankfurt, verifying it works, then
+repointing `environment.gh-pages.ts` / DNS at it and retiring the Oregon one — a real
+production cutover with brief downtime risk, still $0 (Frankfurt is available on Render's
+free tier), but **not done here** — needs the Human to decide whether to schedule that
+cutover, same as any other production DNS/service change.
+
+**Atlas tier:** confirmed M0 (free) — intentional, no change wanted. Nothing to fix here.
+
+**Render service inventory:** only **one** service exists in the account — `foodvibe`
+(Oregon, Node, Deployed). There is no `foodvibe-api` service. The `foodvibe-api.onrender.com`
+URL in `src/environments/environment.remote.ts` does not point at a real deployed backend —
+it's a stale local-dev-only config for `ng serve -c remote` (see the pre-existing
+`foodvibe-remote-naming-collision` note). Production (`environment.gh-pages.ts`,
+`render.yaml`) already correctly targets `foodvibe.onrender.com`. So there is only one
+cold-start surface in production, not two — simpler than the original audit feared.
+
+**Billing:** Human has declined the `starter` plan upgrade (cost). `render.yaml:5` stays on
+`plan: free`. This is final, not pending — do not re-raise the free→starter change unless
+the Human brings it up.
+
+Byte sizes for the three big collections match the original audit's estimates closely — no
+surprise there; this is unshrunk payload volume feeding plan 304's phase.
+
 ---
 
 ## Observed (plan 302 Milestones 3-5)

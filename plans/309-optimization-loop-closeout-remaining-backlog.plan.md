@@ -77,13 +77,13 @@ Whichever is chosen, store "last synced version" per-user (a field on `User`) so
 
 # Milestone 3 — Human unblockers for plan 304 (no agent action possible)
 
-- [ ] Human: approve billing change — `render.yaml:5` `plan: free` → `plan: starter`
-- [ ] Human: verify Atlas cluster region matches Render service region; report findings
-- [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
-- [ ] Human: determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
-- [ ] Human: deploy plan 302 M1's instrumentation; collect ~24h of real-use numbers from Render logs
-- [ ] Human or agent (once logs exist): record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section
-- [ ] Human or agent (once logs exist): confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise plan 302 M2
+- [x] Human: approve billing change — `render.yaml:5` `plan: free` → `plan: starter` — **declined 2026-09-27, final** (budget constraint). Staying on `free`.
+- [x] Human: verify Atlas cluster region matches Render service region; report findings — **mismatch confirmed 2026-09-27**: Render Oregon vs Atlas Belgium. See `plans/302-…` M2 and `reports/performance-audit-2026-08-13.md`.
+- [x] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings — confirmed M0, intentional.
+- [x] Human: determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical — only `foodvibe` exists; `foodvibe-api` is a stale local-dev config, not a real service.
+- [x] Human: deploy plan 302 M1's instrumentation; collect ~24h of real-use numbers from Render logs — collected 2026-09-27 from ~31h of Sep 26-27 production logs.
+- [x] Human or agent (once logs exist): record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section — done, see that file's 2026-09-27 updates.
+- [x] Human or agent (once logs exist): confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise plan 302 M2 — confirmed occurring (10 boots/31h); proceed with M2.
 
 # Verification (whole plan)
 
@@ -117,13 +117,13 @@ Whichever is chosen, store "last synced version" per-user (a field on `User`) so
 - [x] `ng build` + server syntax check both pass — `node -c` on all 4 touched/new files, `ng build` clean (same pre-existing warnings only, unrelated to this change)
 
 ## Milestone 3 — Human unblockers (plan 304 gate)
-- [ ] Human: approve `render.yaml` billing tier change
-- [ ] Human: verify Atlas region vs. Render region
-- [ ] Human: check `MONGO_URI` cluster tier
-- [ ] Human: determine canonical Render service (`foodvibe` vs `foodvibe-api`)
-- [ ] Human: deploy plan 302 M1 instrumentation, collect ~24h of logs
-- [ ] Record observed numbers in `reports/performance-audit-2026-08-13.md`
-- [ ] Confirm or disprove cold starts during business hours from the logs
+- [x] Human: approve `render.yaml` billing tier change — declined 2026-09-27, final.
+- [x] Human: verify Atlas region vs. Render region — mismatch confirmed (Oregon vs Belgium).
+- [x] Human: check `MONGO_URI` cluster tier — confirmed M0, intentional.
+- [x] Human: determine canonical Render service (`foodvibe` vs `foodvibe-api`) — only `foodvibe` is real.
+- [x] Human: deploy plan 302 M1 instrumentation, collect ~24h of logs — done 2026-09-27.
+- [x] Record observed numbers in `reports/performance-audit-2026-08-13.md` — done.
+- [x] Confirm or disprove cold starts during business hours from the logs — confirmed occurring.
 
 ## Hand-off
-- [ ] Once Milestone 3 is fully checked, re-open `plans/304-perf-phase3-data-volume.plan.md` and confirm its Prerequisite Gate — begin its M1 (list projections)
+- [ ] Milestone 3 is now fully checked (2026-09-27) — `plans/304-perf-phase3-data-volume.plan.md`'s Prerequisite Gate can be re-opened and its M1 (list projections) started whenever picked up. Not started in this session.

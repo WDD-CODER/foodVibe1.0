@@ -97,7 +97,7 @@ function isTodoFooterLine(lines, i) {
   for (let j = i + 1; j < Math.min(i + 5, lines.length); j++) {
     if (/Completed entries are in/i.test(lines[j])) return true
     if (/Completed plan sections live in/i.test(lines[j])) return true
-    if (/^### Plan\b/.test(lines[j])) return false
+    if (/^### Plans?\b/.test(lines[j])) return false
     if (/^## /.test(lines[j])) return false
   }
   return false
@@ -111,7 +111,7 @@ function splitPlanSections(text) {
   const lines = text.split(/\r?\n/)
   const sectionStarts = []
   for (let i = 0; i < lines.length; i++) {
-    if (/^### Plan\b/.test(lines[i])) sectionStarts.push(i)
+    if (/^### Plans?\b/.test(lines[i])) sectionStarts.push(i)
   }
 
   if (!sectionStarts.length) {

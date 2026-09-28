@@ -1,6 +1,9 @@
 services:
+  # NOTE: the live service (foodvibe1-0-1-frankfurt) was created manually via the Render
+  # dashboard, not from this Blueprint, so it does not auto-sync with this file. Any change
+  # here (build/start command, env vars) must be manually mirrored on that service too.
   - type: web
-    name: foodvibe
+    name: foodvibe1-0-1-frankfurt
     runtime: node
     plan: free
     buildCommand: npm ci --include=dev && npm install --prefix server && npm run build:render
@@ -25,4 +28,4 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: ALLOWED_ORIGIN
-        value: https://foodvibe.onrender.com,http://localhost:4200
+        value: https://foodvibe1-0-1-frankfurt.onrender.com,https://wdd-coder.github.io,http://localhost:4200

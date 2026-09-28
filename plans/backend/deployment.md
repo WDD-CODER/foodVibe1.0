@@ -1,5 +1,14 @@
 # foodVibe Backend — Free-Tier Deployment Plan
 
+> **Superseded topology note (2026-09-27):** this doc describes an early split setup (separate
+> `foodvibe-api` service with `Root Directory: server`, frontend built/updated separately). The
+> live deploy now uses `render.yaml` at the repo root: a single combined service
+> (`foodvibe1-0-1-frankfurt`, Frankfurt region) that builds the Angular app and serves it
+> same-origin alongside the API (`npm run build:render` / `node server/index.js`). Hostnames below
+> are corrected to the current service, but treat the build/start-command and "Root Directory"
+> steps in Section 2 as historical, not something to follow verbatim — see `render.yaml` for the
+> actual current build/start commands.
+
 ## Overview
 
 | Service | Provider | Plan | Cost |
@@ -31,7 +40,7 @@
 1. Create account at [render.com](https://render.com).
 2. New → **Web Service** → connect GitHub repo (`WDD-CODER/foodVibe1.0`).
 3. Configure the service:
-   - **Name:** `foodvibe-api`
+   - **Name:** `foodvibe1-0-1-frankfurt` (current; historically `foodvibe-api`/`foodvibe`)
    - **Root Directory:** `server`
    - **Runtime:** Node
    - **Build command:** `npm install`
@@ -47,7 +56,7 @@
    | `NODE_ENV` | `production` |
 
 5. Deploy → wait for green "Live" status.
-6. Copy the service URL (e.g. `https://foodvibe-api.onrender.com`).
+6. Copy the service URL (currently `https://foodvibe1-0-1-frankfurt.onrender.com`).
 
 ### Cold-start caveat
 The Render free tier spins down after 15 minutes of inactivity. The first request after sleep takes ~30 s. This is acceptable for the current user base (6 users). If it becomes annoying, a free uptime-monitor ping (e.g. UptimeRobot, 5-minute interval) keeps the service warm.
@@ -59,8 +68,8 @@ The Render free tier spins down after 15 minutes of inactivity. The first reques
 1. Open `src/environments/environment.prod.ts`.
 2. Replace `your-render-url.onrender.com` with the actual Render service URL:
    ```typescript
-   apiUrl: 'https://foodvibe-api.onrender.com',
-   authApiUrl: 'https://foodvibe-api.onrender.com',
+   apiUrl: 'https://foodvibe1-0-1-frankfurt.onrender.com',
+   authApiUrl: 'https://foodvibe1-0-1-frankfurt.onrender.com',
    ```
 3. Build and deploy:
    ```bash
@@ -72,7 +81,7 @@ The Render free tier spins down after 15 minutes of inactivity. The first reques
 
 ## 4. Post-Deploy Smoke Tests
 
-- `GET https://foodvibe-api.onrender.com/api/health` → `{ "ok": true }`
+- `GET https://foodvibe1-0-1-frankfurt.onrender.com/api/health` → `{ "ok": true }`
 - `POST /api/auth/signup` with valid body → `{ token, user }`
 - `POST /api/auth/login` with same credentials → `{ token, user }`
 - `POST /api/data/PRODUCT_LIST` with `Authorization: Bearer <token>` → `201`

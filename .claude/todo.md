@@ -77,34 +77,6 @@
 - [ ] Milestone 2 — carved out to Plan 310 (below) — see `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`
 - [x] Milestone 4 — collapse `UserService._reloadDataServices()`'s post-login re-fetch with each service's constructor-time load: done in `feat/optimization` — `reloadFromStorage()` now awaits an in-flight load instead of racing a duplicate one (`base-entity-data.service.ts`, `product-data.service.ts`, `recipe-data.service.ts`, `dish-data.service.ts`, `menu-event-data.service.ts`, `menu-section-categories.service.ts`, `preparation-registry.service.ts`, `metadata-registry.service.ts`). Verified via network capture: PRODUCT_LIST/RECIPE_LIST/DISH_LIST/etc. each fetch exactly once per page load, down from twice (~5MB/page deduped). Human-validated 2026-08-31.
 
-### Plan 302 — Perf Phase 1: Infrastructure & Boot Payload (`plans/302-perf-phase1-infra-and-payload.plan.md`)
-
-> From audit `reports/performance-audit-2026-08-13.md`. M1 gates M2-M5 — ship instrumentation alone first.
-
-- [x] Replace `morgan('tiny')` with a format including `:response-time` and `:res[content-length]` — `server/index.js:65`
-- [x] Move `app.use(morgan(...))` above `app.use(express.static(...))` so asset requests are logged — `server/index.js:63,65`
-- [x] Add Mongo-time / serialize-time / doc-count / pre-compression-byte logging to `GET /:type` — `server/routes/generic.js:45-77`
-- [x] Decide and document whether the `JSON.stringify` size measurement is env-gated (`PERF_LOG=1`) or temporary
-- [x] Log boot duration in the `app.listen()` callback to make cold starts visible — `server/index.js:125-131`
-- [ ] Deploy; collect ~24h of real-use numbers from Render logs
-- [ ] Record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section
-- [ ] Confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise
-- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
-- [ ] Human: verify Atlas cluster region matches Render service region; report findings
-- [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
-- [x] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:169-179`. Human-validated 2026-09-15.
-- [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
-- [x] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard — `server/index.js:63`
-- [x] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
-- [ ] Verify a fresh deploy is still picked up by a returning browser (guards the fallback caching bug)
-- [x] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
-- [x] Convert `menu-export.service.ts:8` and `recipe-export.service.ts:8` to `await import('exceljs')` at point of use
-- [x] Propagate resulting `async` signature changes through `export.service.ts` and its 3 consumers
-- [x] Manually verify Excel export still produces a valid `.xlsx` from all three consumer pages — verified 2026-09-16 (overnight auto-solve session) via `/browse`: cook-view, recipe-builder, and menu-intelligence each produce a valid `.xlsx` blob, no console errors. Details in `plans/302-perf-phase1-infra-and-payload.plan.md` M4.
-- [x] Re-confirm `food-compos-logo.png` (1.88 MB) is unreferenced; delete if so
-- [x] Convert `recipe_placeholder.png` (1.27 MB) to WebP or inline SVG — update `recipe-header.component.ts:133`
-- [x] Convert both approve-stamp PNGs to WebP — update `approve-stamp.component.ts:20,22` — done in `feat/optimization` via the already-running headless Chromium's canvas API (no new dependency). 161,418→54,616 bytes and 177,305→64,924 bytes. Human-validated 2026-08-31.
-
 ### Plan 303 — Perf Phase 2: Client CPU & Interaction Lag (`plans/303-perf-phase2-client-cpu.plan.md`)
 
 > Gated on plan 302 M1 only. M1 below is the highest value-per-line change in the audit. Full sub-tasks in the plan file.
@@ -113,11 +85,13 @@
 - [x] M0 (addendum) — Defer the `backup_<entityType>` localStorage mirror write off the critical path — `async-storage.service.ts:172-196`
 - [x] M1 — Map-based lookups: add `productsById_`/`recipesById_` computed Maps; replace all 7 O(n) `.find()` scans in `recipe-cost.service.ts` and `recipe-allergens.util.ts:22,25`
 - [x] M1 — Record before/after costs + allergens for 10 representative recipes — closed as satisfied-via-spot-verification (2026-09-15): M1's Map-based lookups already shipped and were spot-verified live against the real dataset; a retroactive formal before/after table adds no further confidence and isn't worth the effort now that M1/M2 are both done and Human-validated.
+- [ ] M1 — DevTools Performance profile on recipe-book before/after; record in the audit report — genuinely not done, needs a human with DevTools open (not scriptable via `/browse`)
 - [x] M2 — Precomputed row model for recipe-book + inventory; row loops now read `displayRows_()` instead of calling functions per row
 - [x] M2 — Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush` — done in `feat/optimization`, 28 components across 8 commits, each individually traced for signal-safety (not batch-applied); `grep -rL "ChangeDetectionStrategy.OnPush" src/app --include="*.component.ts"` returns empty. Human-validated 2026-08-31.
 - [x] M3 — Hoist the rebuilt `allProductNames` Set above the master loop — `server/services/sync-master.js:273-274` — done in `feat/optimization`: was rebuilt once per master PRODUCT_LIST doc needing an insert check (up to ~1500x per sync run); now built once. Applies to the app's normal backend-connected mode (the "out of scope" note above was specific to a local-storage-mode bug report, not to whether this helps overall — it does, this runs on every signup and every 13-min token refresh). Static verification only (no live timing — shared backend's Mongo needs credentials this session doesn't have). Human-validated 2026-08-31.
 - [x] M3 — Remove `syncMasterToUser` from `POST /refresh` (or version-gate it) — `server/routes/auth.js:274` — satisfied by `plans/309-optimization-loop-closeout-remaining-backlog.plan.md` Milestone 2 (already `[x]` there): version-gated via `MASTER_META`/`master-version.js` + `User.lastSyncedMasterVersion`. Re-verified 2026-09-16 (overnight auto-solve session) — `server/routes/auth.js:285` skips `syncMasterToUser` when `user.lastSyncedMasterVersion === masterVersion`, `server/services/master-version.js` exists. No new code change needed.
 - [x] M3 — Regression test: brand-new account signup still receives correctly cloned + remapped master data — satisfied by `plans/309-…` Milestone 2 (already `[x]` there: "New-signup clone regression test passed (1478 products/1114 recipes cloned)"). Re-confirmed 2026-09-16 that the code backing this claim is present in `server/routes/auth.js`.
+- [ ] M3 — Regression test: existing user's modified docs still win after login (Rule 3) — not verified this session; the version-gate only touches `POST /refresh`, `/login` is an unchanged code path, so risk is low but untested
 
 ### Plan 304 — Perf Phase 3: Data Volume (`plans/304-perf-phase3-data-volume.plan.md`)
 
@@ -132,17 +106,9 @@
 - [x] M3 — Add `cdk-virtual-scroll` or pagination to inventory + recipe-book lists (after 303 M2) — delivered as **pagination**, not `cdk-virtual-scroll`, 2026-09-15: the shared `.c-list-row { display: contents }` engine class (used by every list page) is structurally incompatible with CDK's item-wrapper DOM — see new gotcha in `docs/brain/gotchas/angular.md`. Pagination (50/page) gets the same DOM-size win with zero shared-CSS risk. Verified: rendered rows dropped ~2,113 → 50, selection state survives page navigation, search resets to page 1.
 - [ ] Hand-off — re-assess plan 301 M2's scope against measured results
 
-### Plan 309 — Optimization Loop Closeout: Remaining Backlog (`plans/309-optimization-loop-closeout-remaining-backlog.plan.md`)
-
-> Persisted 2026-08-31 to close out `feat/optimization` (PR #192) cleanly — the items that session found but explicitly could not finish. Prerequisite gate for plan 304 lives in this plan's Milestone 3.
-
-- [x] M1 — Found: not a production bug. `ng serve`'s HMR eagerly loads `@defer` blocks (`NG0751`), which spuriously double-fetches `KITCHEN_UNITS` in dev mode only. Verified against the production build (`dist/food-vibe1.0/browser` via local `:3000`): `UnitRegistryService` constructs once, `KITCHEN_UNITS` fetches once, on both `/dashboard` and `/recipe-builder`. No code change made. Details in plan file.
-- [x] M2 — Version-gated `syncMasterToUser` on `POST /refresh` via a new `MASTER_META` version doc (`server/services/master-version.js`) + `User.lastSyncedMasterVersion`; `/login`/`/signup`/`/guest` still always sync. Live-verified: skip when versions match, sync + version-update when they don't, skip again after. New-signup clone regression test passed (1478 products/1114 recipes cloned). `ng build` + syntax checks clean. Details in plan file.
-- [ ] M3 — Human unblockers for plan 304's Prerequisite Gate (billing tier, Atlas region check, Mongo tier check, canonical Render service, deploy + collect logs)
-
 ### Plan 310 — Faceted Server-Side Search & Pagination for Inventory + Recipe Book (`plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`)
 
-> Carved out of `plans/301-…plan.md` Milestone 2, 2026-09-15. **Gated on plan 304's milestones shipping and being measured first** — plan 304 explicitly calls this "the terminal step of the whole performance effort" and warns against building it before 304 M1-M3 land (they change its scope). Milestone 0 (Decisions) is read-only design work and may proceed anytime; Milestones 1-5 (actual code) must wait on the Prerequisite Gate below.
+> **ABANDONED 2026-09-27.** Fully implemented (all 6 milestones) and verified against a local copy of the data, but never tested against the real Atlas database before going live — that test found it made the app badly worse (near-1-minute recipe-book loads from an expensive `$graphLookup` allergens resolution re-run on every page view against free-tier Atlas; non-cancellable debounced fetches queuing up and landing out of order under real latency; a genuine pagination-reset bug in inventory). Human had it fully reverted rather than patched — dropped, not worth fixing. Full postmortem and the specific technical causes are in `plans/310-…plan.md`'s "STATUS: ABANDONED" section at the top — read that before ever reconsidering this plan.
 
 - [ ] Prerequisite gate — confirm plan 304 M1/M2/M3 shipped + measured; re-scope if 304 M3 already solves pagination
 - [ ] Milestone 0 — Decisions (Human): facet-count strategy, allergens resolution strategy (denormalize / `$graphLookup` / punt), ingredient-containment index, pagination ownership vs plan 304 M3, search UX (prefix vs substring), favorites storage shape

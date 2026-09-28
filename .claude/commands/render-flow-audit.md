@@ -20,7 +20,7 @@ Invoke the Render flow audit persona to run the full render-flow audit against t
 1. Probe Render URL with cold-start tolerance:
    ```bash
    for i in $(seq 1 12); do
-     code=$(curl -s -o /dev/null -w "%{http_code}" https://foodvibe.onrender.com)
+     code=$(curl -s -o /dev/null -w "%{http_code}" https://foodvibe1-0-1-frankfurt.onrender.com)
      if [ "$code" = "200" ]; then break; fi
      sleep 5
    done
@@ -83,7 +83,7 @@ For each flow in the filtered catalog:
 ```markdown
 # <slug> â€” Render Flow Audit
 Run: <ISO date>
-Target: https://foodvibe.onrender.com
+Target: https://foodvibe1-0-1-frankfurt.onrender.com
 Viewport: 1366Ã—768
 Severity counts: Critical <TBD> Â· Major <TBD> Â· Minor <TBD>
 API errors: <TBD> Â· Console errors: <TBD>
@@ -108,7 +108,7 @@ Credentials: <CREDS or "signup-mode">
 ## Your Task
 1. Set viewport 1366x768 via $B viewport 1366x768
 2. If flow is signup/login: perform auth actions, save creds on success (email: renderaudit+<YYYYMMDD>@foodvibe.test)
-3. Navigate to https://foodvibe.onrender.com<route>
+3. Navigate to https://foodvibe1-0-1-frankfurt.onrender.com<route>
 4. Execute the interactions with assigned F-probes
 5. After every save/delete: run $B network â€” flag 4xx/5xx (exclude expected recipeâ†’dish resolver 404s)
 6. After every state change: run $B console â€” flag exceptions and unhandled rejections
@@ -126,7 +126,7 @@ Credentials: <CREDS or "signup-mode">
 Return a JSON summary: {"slug":"...","critical":N,"major":N,"minor":N,"apiErrors":N,"consoleErrors":N,"screenshots":N}
 
 Use $B=~/.claude/skills/gstack/browse/dist/browse for all browser operations.
-Target: https://foodvibe.onrender.com â€” never localhost.
+Target: https://foodvibe1-0-1-frankfurt.onrender.com â€” never localhost.
 Never modify src/, server/, or any app code.
 Never retry on auth-state-mutating failures â€” a failed save is evidence.
 ```
@@ -142,7 +142,7 @@ Format:
 ```markdown
 # Render Audit Index
 **Last full run:** <ISO date>
-**Target:** https://foodvibe.onrender.com
+**Target:** https://foodvibe1-0-1-frankfurt.onrender.com
 **Viewport:** 1366Ã—768
 
 | Flow | Last run | Critical | Major | Minor | API errs | Console errs | Report |
@@ -162,4 +162,4 @@ Print the Render flow audit's standard output block (from persona file).
 - If a flow fails mid-run (e.g. 500 error), record it as a **critical** defect in that flow's report and continue to the next flow.
 - If cold start exceeds 60s, abort â€” do not mask a dead service as a passed audit.
 - Never signup with a real user email. Always use `renderaudit+<YYYYMMDD>@foodvibe.test`.
-- Never use localhost or the dev server â€” always `https://foodvibe.onrender.com`.
+- Never use localhost or the dev server â€” always `https://foodvibe1-0-1-frankfurt.onrender.com`.

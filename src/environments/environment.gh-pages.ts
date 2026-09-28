@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
   localDev: false,
-  apiUrl: 'https://foodvibe.onrender.com',
-  authApiUrl: 'https://foodvibe.onrender.com',
+  apiUrl: 'https://foodvibe1-0-1-frankfurt.onrender.com',
+  authApiUrl: 'https://foodvibe1-0-1-frankfurt.onrender.com',
   useBackendAuth: true,
   useBackend: true,
   autoLoginGuest: false,

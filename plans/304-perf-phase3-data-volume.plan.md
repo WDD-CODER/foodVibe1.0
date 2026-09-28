@@ -156,10 +156,10 @@ Preserve the existing `track` expressions.
 # Atomic Sub-tasks
 
 ## Prerequisite gate
-- [ ] Confirm plan 302 M1 instrumentation is deployed and "Observed" numbers exist in the audit report
-- [ ] Confirm plan 302 M2 is resolved (tier upgraded, or cold starts disproven)
-- [ ] Confirm plan 303 M1-M2 have shipped
-- [ ] Re-measure and confirm payload/parse cost still justifies this plan; reduce or drop scope if not
+- [x] Confirm plan 302 M1 instrumentation is deployed and "Observed" numbers exist in the audit report — done 2026-09-27, plan 302 fully archived.
+- [x] Confirm plan 302 M2 is resolved (tier upgraded, or cold starts disproven) — resolved (not upgraded — billing declined, final; region mismatch found and a separate Frankfurt migration is in progress).
+- [x] Confirm plan 303 M1-M2 have shipped — shipped and Human-validated 2026-08-31.
+- [x] Re-measure and confirm payload/parse cost still justifies this plan; reduce or drop scope if not — confirmed still justified: real production logs (2026-09-27) show PRODUCT_LIST/RECIPE_LIST/DISH_LIST at 765KB-2.7MB each with 1.3-4.9s Mongo time, independent of the now-fixed network/region issue. See `reports/performance-audit-2026-08-13.md` "Update 2026-09-27".
 
 ## Milestone 1 — List projections
 - [ ] Audit which components read `steps_`, `nutrition_per_100g`, `logistics_` and whether they have a detail-fetch path

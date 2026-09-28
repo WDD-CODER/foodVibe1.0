@@ -212,22 +212,22 @@ const { Workbook } = await import('exceljs')
 - [x] Add Mongo-time / serialize-time / doc-count / pre-compression-byte logging to `GET /:type` — `server/routes/generic.js:45-77`
 - [x] Decide and document whether the `JSON.stringify` size measurement is env-gated (`PERF_LOG=1`) or temporary
 - [x] Log boot duration in the `app.listen()` callback to make cold starts visible — `server/index.js:125-131`
-- [ ] Deploy; collect ~24h of real-use numbers from Render logs
-- [ ] Record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section, replacing estimates
+- [x] Deploy; collect ~24h of real-use numbers from Render logs — collected 2026-09-27 from ~31h of Sep 26-27 production logs
+- [x] Record observed numbers in `reports/performance-audit-2026-08-13.md` under a new "Observed" section, replacing estimates — see "Update 2026-09-27 — real production numbers collected" in that file
 
 ## Milestone 2 — Render tier & cold starts (needs M1 numbers + Human billing approval)
-- [ ] Confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise
-- [ ] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5`
-- [ ] Human: verify Atlas cluster region matches Render service region; report findings
-- [ ] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings
+- [x] Confirm from M1 logs whether cold starts actually occur during business hours — if not, stop and re-prioritise — **confirmed 2026-09-27**: 10 cold-start boots in ~31h of Sep 26-27 logs, spaced 1-3h apart during normal daytime use. Proceed with M2, do not re-prioritise.
+- [x] Human: approve billing change; set `plan: free` → `plan: starter` in `render.yaml:5` — **declined 2026-09-27, final.** Staying on `free`; do not re-raise.
+- [x] Human: verify Atlas cluster region matches Render service region; report findings — **mismatch confirmed 2026-09-27**: Render `foodvibe` is Oregon (US West); Atlas cluster is Belgium (europe-west1). Real fix is moving the Render service (not Atlas) to Frankfurt, but Render doesn't support in-place region change — would need a new service + cutover. Not started; needs a separate Human go/no-go given production DNS risk. See `reports/performance-audit-2026-08-13.md` "Update 2026-09-27 (cont'd)".
+- [x] Human: check whether `MONGO_URI` points at an M0 free cluster; report findings — confirmed M0 (free), intentional, no change wanted.
 - [x] Move `seedMasterData()` to run after `app.listen()` — `server/index.js:169-179`. `app.listen()` now fires immediately after `connectDb()`; `seedMasterData()` runs in the background afterward (fire-and-forget with its own `.catch`), no longer gating first byte. `ng build` clean, server boots and reaches `listen()` with no new errors. Human-validated 2026-09-15.
-- [ ] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical
+- [x] Determine whether both `foodvibe` and `foodvibe-api` Render services exist; document which is canonical — **only `foodvibe` exists** (Oregon, Node, Deployed). `foodvibe-api.onrender.com` in `environment.remote.ts` is not a real deployed service; it's a stale local-dev-only config (see `foodvibe-remote-naming-collision`). Production already correctly uses `foodvibe.onrender.com` — one cold-start surface, not two.
 
 ## Milestone 3 — Static asset cache headers
 - [x] Add `maxAge: '1y'`, `immutable: true`, and the `index.html` → `no-cache` `setHeaders` guard to `express.static` — `server/index.js:63`
 - [x] Set `Cache-Control: no-cache` on the SPA fallback `res.sendFile(index.html)` — `server/index.js:103-108`
-- [ ] Verify repeat loads serve hashed assets from disk cache with zero network rows
-- [ ] Verify a fresh deploy is still picked up by a returning browser (guards the fallback caching bug)
+- [x] Verify repeat loads serve hashed assets from disk cache with zero network rows — verified 2026-08-17 against real `dist/`: hashed assets return `Cache-Control: public, max-age=31536000, immutable`. See `reports/performance-audit-2026-08-13.md` "M3 — cache headers verified".
+- [x] Verify a fresh deploy is still picked up by a returning browser (guards the fallback caching bug) — verified same pass: `/`, `/recipe-book` (SPA fallback), and `/index.html` all return `Cache-Control: no-cache`, so the fallback bug the plan warned about does not occur.
 
 ## Milestone 4 — Bundle diet
 - [x] Remove `withPreloading(PreloadAllModules)` and its now-unused import — `src/app/app.config.ts:4,96`
@@ -241,4 +241,4 @@ const { Workbook } = await import('exceljs')
 - [x] Re-confirm `food-compos-logo.png` is unreferenced across `src/`, `public/`, `index.html`; delete if so
 - [x] Convert `recipe_placeholder.png` to WebP at display dimensions (or replace with inline SVG / CSS gradient) — update `recipe-header.component.ts:133`
 - [x] Convert `stamp-approved.png` and `stamp-not-approved.png` to WebP — update `approve-stamp.component.ts:20,22` — done in `feat/optimization` via the already-running headless Chromium's canvas API (no new dependency): 161,418→54,616 B and 177,305→64,924 B. `.png` originals removed, component now references `.webp` directly. Human-validated 2026-08-31 (see `.claude/todo.md:55`); supersedes the "Deferred" note in `reports/performance-audit-2026-08-13.md:437-452`, which predates this work.
-- [ ] Visual regression check on recipe-builder placeholder and both approve-stamp states
+- [x] Visual regression check on recipe-builder placeholder and both approve-stamp states — placeholder verified 2026-08-17 in-browser (`naturalWidth/Height = 120x120`, renders 118×118, `complete = true`, no console errors — see audit report M5 section); stamps verified as part of their WebP conversion, Human-validated 2026-08-31.

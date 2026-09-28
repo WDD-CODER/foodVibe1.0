@@ -247,10 +247,10 @@ It only fires on the `!existing` branch (new clones), so steady-state logins ski
       check (up to ~1500x per sync run); now built once, above `for (const master of masterDocs)`.
       Static verification only (no live timing — shared backend's Mongo needs credentials this
       session doesn't have). Human-validated 2026-08-31 (see `.claude/todo.md:67`).
-- [ ] Remove `syncMasterToUser` from `POST /refresh` (or implement the `masterDataVersion` gate) — `server/routes/auth.js:274`
-- [ ] Decide and document which of the two approaches was taken, and why
-- [ ] Regression test: brand-new account signup receives correctly cloned + remapped master data
-- [ ] Regression test: existing user's modified docs still win after login (Rule 3)
+- [x] Remove `syncMasterToUser` from `POST /refresh` (or implement the `masterDataVersion` gate) — `server/routes/auth.js:274` — satisfied by `plans/309-…` M2: version-gated via `MASTER_META`/`master-version.js` + `User.lastSyncedMasterVersion`, not a literal removal.
+- [x] Decide and document which of the two approaches was taken, and why — version-gate, not removal: `/login`/`/signup`/`/guest` must always sync per this plan's own instruction, so removing the call entirely wasn't an option; gating on a version stamp gets the same "skip redundant work" win without losing real resyncs. See `plans/309-…` M2.
+- [x] Regression test: brand-new account signup receives correctly cloned + remapped master data — satisfied by `plans/309-…` M2 (1478 products/1114 recipes cloned correctly).
+- [ ] Regression test: existing user's modified docs still win after login (Rule 3) — **not verified this session.** The version-gate only touches `POST /refresh`; `/login` still runs `syncMasterToUser` unconditionally (unchanged code path), so risk is low, but no dedicated regression test has been run against it.
 
 ## Deferred — revisit only after M1-M3 are measured
 - [ ] Evaluate whether `recipes_`'s array re-allocation still matters once M1/M2 land — `kitchen-state.service.ts:35-38`
