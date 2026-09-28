@@ -78,7 +78,18 @@ export class TabChipsComponent {
   protected readonly chips_ = computed<readonly TabChip[]>(() => {
     const path = this.currentUrl_().split('?')[0]
     const group = GROUP_BY_PATH_PREFIX.find(([prefix]) => path.startsWith(prefix))?.[1]
-    return group ? CHIPS_BY_GROUP[group] : []
+    if (!group) return []
+    const chips = CHIPS_BY_GROUP[group]
+    if (group !== 'recipes') return chips
+
+    // On a specific recipe's builder/cook page, carry its id across the two chips so
+    // switching between them stays on the same recipe instead of dropping to the bare
+    // "/recipe-builder" (new recipe) or "/cook" (last-viewed recipe) routes.
+    const openRecipeId = path.match(/^\/(?:recipe-builder|cook)\/([^/]+)$/)?.[1]
+    if (!openRecipeId) return chips
+    return chips.map((chip) =>
+      chip.id === 'recipe-builder' || chip.id === 'cook-view' ? { ...chip, path: `${chip.path}/${openRecipeId}` } : chip
+    )
   })
 
   constructor() {
