@@ -111,8 +111,13 @@
   display: grid;
   grid-template-rows: auto auto auto auto 1fr;
 
-  height: calc(100vh - 6rem);
-  height: calc(100dvh - 6rem);
+  // 6rem only covered the top nav; it ignored the tab-chips row and this container's
+  // own margin/padding, so the shell was consistently ~89px taller than the viewport,
+  // forcing outer-page scroll instead of the intended internal per-pane scrolling.
+  // Measured overhead: top nav + tab-chips + .cook-view-container's margin-block (both
+  // sides) + padding-bottom ≈ 185px — rounded up slightly for safety.
+  height: calc(100vh - 11.75rem);
+  height: calc(100dvh - 11.75rem);
   overflow: hidden;
 
   &.edit-mode {
@@ -676,14 +681,18 @@
   -webkit-backdrop-filter: var(--blur-glass);
 }
 
-.cv-ing-pane {
+.cv-ing-pane,
+.cv-step-pane {
   position: relative;
   display: flex;
   flex-direction: column;
-  order: 1;
 
   min-height: 0;
   overflow: hidden;
+}
+
+.cv-ing-pane {
+  order: 1;
 }
 
 .cv-ing-pane-header,
@@ -967,6 +976,14 @@
 
   border: 1px solid var(--cv-panel-border);
   border-radius: var(--radius-lg);
+
+  // Flex items shrink by default — once .cv-step-body has a real bounded height (see
+  // .cv-shell above), a recipe with enough steps to exceed that height was getting each
+  // card squeezed below its own content size instead of scrolling, and overflow:hidden
+  // below then clipped the squeezed-out instruction text. flex-shrink: 0 keeps every
+  // card at its full natural (text-driven) height; .cv-step-body's overflow-y: auto
+  // handles anything past the visible area by scrolling instead of shrinking cards.
+  flex-shrink: 0;
 
   overflow: hidden;
   transition:

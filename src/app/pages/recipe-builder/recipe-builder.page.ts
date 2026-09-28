@@ -513,12 +513,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       { labelKey: 'ai_recipe_edit', icon: 'sparkles', run: () => this.onAiEditClick() },
       { labelKey: 'export', icon: 'printer', run: () => this.openExportFromHeroFab() }
     ]
-    const id = this.recipeId_()
-    if (id) {
+    if (this.recipeId_()) {
       actions.push({
         labelKey: 'cook_view',
         icon: 'cooking-pot',
-        run: () => this.router_.navigate(['/cook', id])
+        run: () => this.goToCookFromHeroFab()
       })
     }
     this.heroFab_.setPageActions(actions, 'replace')
