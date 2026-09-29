@@ -42,6 +42,7 @@ const COLLECTIONS = [
   { name: 'KITCHEN_CATEGORIES',       userData: true,  cloneable: true,  backup: true,  searchable: false },
   { name: 'KITCHEN_ALLERGENS',        userData: true,  cloneable: true,  backup: true,  searchable: false },
   { name: 'KITCHEN_LABELS',           userData: true,  cloneable: true,  backup: true,  searchable: false },
+  { name: 'KITCHEN_COURSES',          userData: true,  cloneable: true,  backup: true,  searchable: false },
   { name: 'MENU_TYPES',               userData: true,  cloneable: true,  backup: true,  searchable: false },
   // MENU_EVENT_TYPES / EQUIPMENT_CUSTOM_CATEGORIES: drift found in Plan 321 Phase 1
   // Reality Check — present in ALL_USER_ENTITY_TYPES but missing from CLONEABLE_TYPES

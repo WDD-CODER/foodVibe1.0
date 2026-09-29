@@ -145,11 +145,39 @@ const CONFLICT_RESOLUTIONS = new Map([
   [['גלייז', 'רוטב'].sort().join('|'), 'גלייז']
 ])
 
+const LABEL_COLOR_PALETTE = [
+  '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
+  '#8B5CF6', '#EC4899', '#14B8A6', '#F97316',
+  '#6366F1', '#84CC16', '#06B6D4', '#78716C'
+]
+
 const client = new MongoClient(uri)
 
 async function main() {
   await client.connect()
   const db = client.db()
+
+  // ── Step 0: seed KITCHEN_COURSES for every userId that has a KITCHEN_LABELS doc ──
+  // Mirrors the client-side lazy-seed in metadata-registry.service.ts, needed here because
+  // that seed only fires when each user actually logs into the app — this makes the course
+  // dropdown work immediately for users who haven't opened the app since this shipped.
+  const labelDocs = await db.collection('KITCHEN_LABELS').find({}).toArray()
+  const courseDocs = await db.collection('KITCHEN_COURSES').find({}).toArray()
+  const seededUserIds = new Set(courseDocs.map((d) => d.userId))
+  const registrySeeds = [] // { userId }
+  for (const doc of labelDocs) {
+    if (seededUserIds.has(doc.userId)) continue
+    seededUserIds.add(doc.userId)
+    registrySeeds.push({ userId: doc.userId })
+  }
+  console.log(`\n[course-registry] ${registrySeeds.length} userId(s) missing a KITCHEN_COURSES doc: ${registrySeeds.map((r) => r.userId).join(', ') || '(none)'}`)
+  if (WRITE) {
+    for (const { userId } of registrySeeds) {
+      const items = [...COURSE_STRINGS].map((key, i) => ({ key, color: LABEL_COLOR_PALETTE[i % LABEL_COLOR_PALETTE.length] }))
+      await db.collection('KITCHEN_COURSES').insertOne({ userId, items })
+    }
+    if (registrySeeds.length > 0) console.log(`[write] Seeded KITCHEN_COURSES for ${registrySeeds.length} userId(s).`)
+  }
 
   const collections = ['RECIPE_LIST', 'DISH_LIST']
   const resolved = [] // { collection, docId, _id, userId, name, course, removedFrom: {labels_, autoLabels_} }
