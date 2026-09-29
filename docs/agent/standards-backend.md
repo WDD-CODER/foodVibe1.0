@@ -126,3 +126,37 @@ Every implementation plan that touches persisted data **MUST** include a `## Bac
 
 If the answer to all three is "no impact", write `## Backend Impact — None` explicitly. This makes the decision visible rather than assumed.
 
+---
+
+## 7 — Backup & Restore
+
+Before any destructive data operation (a legacy re-import, a bulk repair, a schema migration),
+take a full snapshot with `server/scripts/db-backup.js`, and prove it's actually usable with
+`server/scripts/db-restore.js` — a snapshot that's never been restored is not a rollback path,
+it's a hope. `mongodump`/`mongorestore` are not installed; these two scripts are the only way
+back on this project (Atlas is on the free M0 tier, which has no point-in-time restore).
+
+```powershell
+# Full JSON snapshot (Extended JSON — dates/ObjectIds/Decimal128 survive the round trip).
+# Written OUTSIDE the repo by default (../foodvibe-db-backups/<target>-<timestamp>/) —
+# a snapshot contains real user data and must never be committed.
+node server/scripts/db-backup.js --target=local
+node server/scripts/db-backup.js --target=atlas   # read-only against Atlas — still confirm the masked host with the Human first
+
+# Restore a snapshot into a named SCRATCH database — never over the source. Refuses to run
+# if --db matches the source database name, and refuses to restore into a database that
+# already has collections in it. Prints a per-collection document-count comparison against
+# the snapshot's _manifest.json and exits non-zero on any mismatch.
+node server/scripts/db-restore.js --target=local --dir="<snapshot dir>" --db=foodvibe_scratch_<label>
+```
+
+Drop the scratch database manually when done (`db.dropDatabase()` via `mongosh` or the driver) —
+the restore script deliberately leaves it in place for inspection rather than auto-cleaning.
+Note: the app's own DB user may not hold `dropDatabase`/`dropCollection` privileges outside its
+primary database (least-privilege by design) — if so, drop the scratch DB with an admin-scoped
+connection instead.
+
+`db-backup.js` filters out Mongo's internal `system.*` namespaces (e.g. `system.views`, which
+`RECIPE_BOOK_VIEW` — an actual DB view — causes to appear in `listCollections()`); reading them
+needs privileges the app DB user doesn't have and they hold no user data of their own.
+

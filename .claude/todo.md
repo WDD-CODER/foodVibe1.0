@@ -26,12 +26,25 @@
 
 - [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
-### Plan 319 — Label Audit Report, read-only (`plans/319-label-audit-report.plan.md`) — Human-validated 2026-09-28
+### Plan 321 — Professional Foundation Refactor (`plans/321-professional-foundation-refactor.plan.md`)
 
-- [x] A1: Read `label.model.ts`, `metadata-registry.service.ts`, `recipe-form.service.ts`, `recipe-header.component.ts`, `recipe-book-list.component.ts`, `translation.service.ts`, `server/constants/cloneable-types.js`; confirm or refute the stated label-drop mechanism, report findings first. Confirmed, plus found `buildRecipeFromForm` (save path) uses exact-key-only matching vs `normalizeLabelKeys` (load path)'s exact-or-translation matching — asymmetry not in the original brief.
-- [x] A2: Write `scripts/audit-labels.mjs` (read-only, Sections A–E: registry, usage, classification, merge clusters, orphan evidence). Includes DNS SRV fallback (public resolver) for environments where the local resolver refuses direct SRV queries.
-- [x] A3: Run `node scripts/audit-labels.mjs --remote`, generate `.claude/reports/label-audit/report.md` + `data.json`. Ran against `cluster0.objqrlt.mongodb.net` (Human-confirmed as the live app's DB).
-- [x] A4: Post 10-line summary + report.md to Human. Stop — no fixes this session. 80 distinct label strings, 8392 orphan occurrences, 9 merge clusters; `dairy_prep` (25/user, orphan) clusters with `dairy` (registered, canonical) + `dairy_sauce`. `.claude/reports/label-audit/` is not `.gitignore`d — would be committed if staged.
+> Phase 0 done, Human-validated 2026-09-29 (branch `chore/foundation-p0-safety-net`). Phase 1 next — its own Step 0 Reality Check required before starting. Parallel-session note: Plan 320 (recipe course field + labels, `feat/recipe-labels-course-field` in worktree `foodVibe1.0-wt-recipe-labels`) is separate, unrelated work — no file overlap so far.
+
+- [x] P0.0 Reality Check → `docs/session-state-foundation-refactor.md` + Human go
+- [x] P0.1 Consolidate backup + add restore-to-scratch; drill local + Atlas — found & fixed a `system.views` crash bug in `db-backup.js` along the way; both drills verified 0 mismatches
+- [x] P0.2 Server test harness (vitest + mongodb-memory-server + supertest)
+- [x] P0.3 Characterization tests: generic.js, sync-master.js, push-to-master — 42 tests, all passing
+- [x] P0.4 CI `server-tests` job
+- [x] P0.5 ADR 0008
+- [ ] P1.0–P1.8 Single sources of truth & dead paths (collections registry, one `newId()`, remove localStorage mode, retire whole-collection replace, rate limits, docs drift, `PERF_LOG` off, stale branches)
+- [ ] P2a.0–P2a.6 Shared Zod schema package, observe-mode validation
+- [ ] P2b.0–P2b.5 v2 migration: rename + `schemaVersion` + enforce (Gates G1/G2)
+- [ ] P3.0–P3.5 Unified taxonomy store (`taxonomyTerms` + `TaxonomyStore`)
+- [ ] P4.0–P4.6 Course/protein/labels split + menu sections → course (Gate G3)
+- [ ] P5.0–P5.8 Shared master + per-user overrides; admin-only push + dedicated modal
+- [ ] P6.0–P6.4 One soft-delete model + `userPrefs`
+- [ ] P7a–P7f Hygiene: god-file decomposition, service base adoption, script archive, CI hardening, logging, plan 301 remainder
+- [ ] P8.1–P8.5 Governance: ADRs 0009–0013, standards docs, lint guards, re-audit
 
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 

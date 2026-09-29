@@ -66,7 +66,13 @@ async function run({ target, out }) {
 
   fs.mkdirSync(outDir, { recursive: true });
 
-  const collections = (await db.listCollections().toArray()).map(c => c.name).sort();
+  // Mongo always lists internal `system.*` namespaces (e.g. `system.views`) alongside
+  // real collections, but reading them requires privileges the app DB user doesn't have
+  // and they hold no user data — skip them.
+  const collections = (await db.listCollections().toArray())
+    .map(c => c.name)
+    .filter(name => !name.startsWith('system.'))
+    .sort();
   const manifest = { target, database: db.databaseName, takenAt: new Date().toISOString(), collections: {} };
   let grandTotal = 0;
 
