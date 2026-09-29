@@ -142,12 +142,29 @@ ranking behind the fix order.
 | --- | --- | --- |
 | PreToolUse (Edit\|Write\|MultiEdit) | `scripts/branch-guard.sh` | **blocks writes on `main`** |
 | PreToolUse (Edit\|Write\|MultiEdit) | `scripts/plan-write-guard.sh` | gates **new** `plans/*.plan.md` writes: runs similarity check; denies when similar plans exist unless `.claude/.plan-write-ack` names the target; existing-plan edits always allowed |
-| SessionStart (startup) | `scripts/session-startup.sh` | loads previous session-state; sets `.claude/.session-state-path` save target |
-| PostToolUse (Edit\|Write) | `scripts/session-manifest-hook.py` | records this-session file touches (multi-worktree staging safety) |
+| SessionStart (startup) | `scripts/session-startup.sh` | loads previous session-state; sets `.claude/.session-state-path` save target; **two-slot parallel detection** (below) |
+| PostToolUse (Edit\|Write) | `scripts/session-manifest-hook.py` | records this-session file touches (multi-worktree staging safety); refreshes this slot's liveness heartbeat |
 | PreCompact | `scripts/pre-compact-todo-append.sh` + `scripts/pre-compact-reminder.sh` | dumps open signals/todos before compaction |
-| Stop | `scripts/handoff-check.sh` | handoff completeness check at turn end |
+| Stop | `scripts/handoff-check.sh` | handoff completeness check at turn end; releases this slot's liveness lock |
 
-**Cursor runs none of these hooks.** Its equivalent enforcement is advisory `.mdc` rules + the shared pre-commit hooks.
+**Cursor runs none of these hooks.** Its equivalent enforcement is advisory `.mdc` rules + the shared pre-commit hooks. This
+also means the two-slot parallel system below has **no visibility into concurrent Cursor sessions** — it only detects
+collisions between Claude Code sessions.
+
+### Two-slot parallel session system
+
+Steady state: exactly two working locations — the main repo and one persistent sibling
+worktree at `../foodVibe1.0-wt-parallel` (path recorded in each slot's
+`.claude/.parallel-slot-a` / `.claude/.parallel-slot-b`). Each slot has a liveness lock at
+`.claude/.session-lock` (fresh = heartbeat within 45 min, refreshed on every Edit/Write,
+released on Stop). When `session-startup.sh` finds its own slot's lock already fresh (a
+live session already owns this directory), it checks the other slot: if free, it calls
+`scripts/claim-parallel-slot.sh` (fast-forwards to latest `main`, runs `npm install` only
+if `package-lock.json` changed, skips port scanning/`.env` copy/doc-sync entirely) and
+tells the new session to work there instead; if the other slot is also busy or dirty, it
+tells the session to ask the human rather than auto-provisioning a third worktree. See
+`scripts/session-lock.sh` for the lock helpers and the `worktree-setup` skill note on when
+a genuine third worktree is still appropriate.
 
 ### Workflow scripts (shared, `scripts/`)
 

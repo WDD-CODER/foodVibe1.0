@@ -12,6 +12,15 @@
 # Hook type: Stop
 # Timeout: 10s
 
+# Release this slot's liveness lock unconditionally, before any of the checks below
+# (which have early exits) — two-slot parallel session system.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CURRENT_TOPLEVEL="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [ -n "$CURRENT_TOPLEVEL" ]; then
+  source "$SCRIPT_DIR/session-lock.sh"
+  release_lock "$CURRENT_TOPLEVEL"
+fi
+
 if [ -n "$SESSION_STATE_PATH" ]; then
   SESSION_STATE="$SESSION_STATE_PATH"
 elif [ -f ".claude/.session-state-path" ]; then

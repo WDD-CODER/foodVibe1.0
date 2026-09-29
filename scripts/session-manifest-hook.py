@@ -8,6 +8,8 @@ import sys
 import os
 import json
 import subprocess
+import time
+from datetime import datetime, timezone
 
 
 def main():
@@ -70,6 +72,23 @@ def main():
     if rel_path not in existing:
         with open(manifest_path, 'a', encoding='utf-8') as f:
             f.write(rel_path + '\n')
+
+    # Refresh this slot's liveness heartbeat (two-slot parallel session system) —
+    # only if it's already been claimed as a slot (lock file exists).
+    lock_path = os.path.join(root_norm, '.claude', '.session-lock')
+    if os.path.exists(lock_path):
+        now = datetime.now(timezone.utc)
+        try:
+            with open(lock_path, encoding='utf-8') as f:
+                claimed_at = json.load(f).get('claimed_at', now.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        except Exception:
+            claimed_at = now.strftime('%Y-%m-%dT%H:%M:%SZ')
+        with open(lock_path, 'w', encoding='utf-8') as f:
+            json.dump({
+                'claimed_at': claimed_at,
+                'heartbeat': now.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'heartbeat_epoch': int(time.time()),
+            }, f)
 
 
 if __name__ == '__main__':

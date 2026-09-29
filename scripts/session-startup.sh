@@ -12,6 +12,68 @@
 # Hook type: SessionStart (matcher: "startup")
 # Timeout: 10s
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/session-lock.sh"
+
+# --- Two-slot parallel session detection (Plan: two-slot-parallel-sessions) ---
+CURRENT="$(git rev-parse --show-toplevel 2>/dev/null)"
+OTHER=""
+if [ -f "$CURRENT/.claude/.parallel-slot-b" ]; then
+  OTHER="$(cat "$CURRENT/.claude/.parallel-slot-b")"
+elif [ -f "$CURRENT/.claude/.parallel-slot-a" ]; then
+  OTHER="$(cat "$CURRENT/.claude/.parallel-slot-a")"
+fi
+
+if [ -n "$OTHER" ]; then
+  if lock_is_fresh "$CURRENT"; then
+    # Collision: another live session already owns this directory.
+    if lock_is_fresh "$OTHER"; then
+      cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "decision": {
+      "additionalContext": "PARALLEL-SLOT: Both parallel slots are currently busy ($CURRENT and $OTHER each have a live session). Do not auto-provision a third worktree - ask the human how to proceed (wait, work read-only, or manually run the worktree-setup skill for a temporary third worktree)."
+    }
+  }
+}
+EOF
+      exit 0
+    fi
+
+    CLAIM_OUTPUT="$("$SCRIPT_DIR/claim-parallel-slot.sh" "$OTHER" 2>&1)"
+    CLAIM_STATUS=$?
+    if [ "$CLAIM_STATUS" -ne 0 ]; then
+      cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "decision": {
+      "additionalContext": "PARALLEL-SLOT: This directory ($CURRENT) is busy with another live session, and the other slot ($OTHER) could not be auto-refreshed ($CLAIM_OUTPUT). Ask the human how to proceed rather than working here or forcing a refresh."
+    }
+  }
+}
+EOF
+      exit 0
+    fi
+
+    cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "decision": {
+      "additionalContext": "PARALLEL-SLOT: This directory ($CURRENT) is busy with another live session. This session must work exclusively under $OTHER for its remaining work - cd there for every Bash command and use absolute paths under it for Edit/Write, never touch $CURRENT. It has just been fast-forwarded to latest main ($CLAIM_OUTPUT). Tell the user at the start of your first reply that you switched to the second parallel worktree and why."
+    }
+  }
+}
+EOF
+    exit 0
+  fi
+
+  claim_lock "$CURRENT"
+fi
+# --- end two-slot parallel session detection ---
+
 if [ -n "$SESSION_STATE_PATH" ]; then
   SESSION_STATE="$SESSION_STATE_PATH"
   SAVE_PATH="$SESSION_STATE_PATH"
