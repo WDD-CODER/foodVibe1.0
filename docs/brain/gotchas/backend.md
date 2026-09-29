@@ -205,3 +205,13 @@ been killed by it.
 **Why the obvious fix is wrong:** Trusting "0 mismatches across the full population" as sufficient verification. That number answers correctness, not performance — a local Mongo instance has no meaningful latency and effectively unlimited CPU headroom compared to a real free-tier Atlas cluster, so an expensive per-request operation can look completely fine in every local test and still be the actual bottleneck in production.
 
 **What to do instead:** For any new work whose risk is *performance* against a real deployment target (not just logical correctness) — new aggregation pipelines, anything recomputed per-request — get it in front of the Human against the real database early and incrementally, one milestone at a time, before building the rest on top of it. If that isn't possible in-session, say so explicitly in the handoff as the specific named risk ("verified for correctness locally; performance against Atlas is untested") rather than folding it into a generic "not live-tested" caveat alongside UI-only risks.
+
+---
+
+## Mongo `listCollections()` silently includes `system.*` namespaces the app DB user can't read
+
+**What hurt:** `server/scripts/db-backup.js` looked like it was working — it printed a clean per-collection line for all 29-30 real collections, in order — but crashed with `not authorized on foodvibe to execute command { find: "system.views"... }` right after the last one, before ever writing `_manifest.json`. Every prior "backup" taken with this script was silently incomplete: the JSON files were all on disk, but with no manifest, `db-restore.js` (Plan 321 Phase 0) couldn't verify anything against it — and a human skimming the console output for "N collections written" would reasonably have assumed it finished.
+
+**Why the obvious fix is wrong:** The bug isn't in *reading* `system.views` (that call correctly fails — the app DB user has no privilege on it) — it's that `db.listCollections().toArray()` enumerates `system.views` as an ordinary collection name in the first place, indistinguishable from a real one until you `find()` it. Filtering by `{ type: 'collection' }` in the `listCollections` call doesn't help either: MongoDB reports `system.views` with `type: 'collection'`, not `type: 'view'` — only the view itself (`RECIPE_BOOK_VIEW`) correctly reports `type: 'view'`.
+
+**What to do instead:** Filter out any `listCollections()` name starting with `system.` before iterating — `db-backup.js` now does `.filter(name => !name.startsWith('system.'))`. Any other script walking `db.listCollections()` over a database containing a Mongo *view* (this project has exactly one, `RECIPE_BOOK_VIEW`) needs the same filter, or it hits the identical crash the moment it tries to read every listed name.

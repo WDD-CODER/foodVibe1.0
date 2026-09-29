@@ -111,6 +111,22 @@ jobs:
       - name: Unit tests
         run: npx ng test --watch=false --browsers=ChromeHeadless
 
+  server-tests:
+    needs: changes
+    if: needs.changes.outputs.run-gates == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - name: Install
+        run: npm ci --prefix server
+      - name: Server tests
+        run: npm test --prefix server
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:
@@ -123,7 +139,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   ci:
-    needs: [changes, lint, build, test, gitleaks]
+    needs: [changes, lint, build, test, server-tests, gitleaks]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -150,6 +166,10 @@ jobs:
             fi
             if [[ "${{ needs.test.result }}" != "success" ]]; then
               echo "test failed: ${{ needs.test.result }}"
+              exit 1
+            fi
+            if [[ "${{ needs.server-tests.result }}" != "success" ]]; then
+              echo "server-tests failed: ${{ needs.server-tests.result }}"
               exit 1
             fi
             echo "All quality gates passed"
