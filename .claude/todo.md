@@ -70,6 +70,32 @@
 - [ ] Stage 4 — New items created as shared from the start (`POST .../create-shared`, admin-only)
 - [ ] Stage 5 — Non-destructive delete propagation (`PUT .../remove-from-master`, master-only removal, no cascade to existing users)
 
+### Plan 320 — Recipe Labels Fix + Course/Category Field (`plans/320-recipe-labels-fix-course-category-field.plan.md`) — active in worktree `../foodVibe1.0-wt-recipe-labels`, branch `feat/recipe-labels-course-field`
+
+> Scope correction 2026-09-29: only 5 of the audit's 9 clusters are genuine duplicates (dairy, vegan, marinade, asian, sipur_shel_ochel); the other 4 (meat/salads/soups/dessert) are course strings mis-clustered by the audit script's fuzzy matching — deferred to Milestone 2, not merged in Milestone 1. See plan file's Milestone 1 header for full detail.
+
+**Milestone 1 — Merge duplicate dietary labels (5 confirmed clusters only)**
+- [ ] M1.1: Read `.claude/reports/label-audit/data.json` Section D — extract the 5 confirmed clusters (dairy, vegan, marinade, asian, sipur_shel_ochel), canonical keys, orphan members, full affected-recipe lists
+- [ ] M1.2: Confirm/register each canonical key in `KITCHEN_LABELS` for every affected `userId` (incl. `__master__`)
+- [ ] M1.3: Write `scripts/merge-labels.mjs` (dry-run default, `--write` to mutate; scoped to the 5 clusters only) — replace orphan members with canonical key, dedupe, log mutations
+- [ ] M1.4: Dry-run local → Human confirms host → `--remote` dry-run → review log → `--write --remote`
+- [ ] M1.5: Fix `normalizeLabelKeys`/`buildRecipeFromForm` asymmetry in `recipe-form.service.ts` (save path should accept translation-dictionary fallback like load path)
+- [ ] M1.6: Re-run `scripts/audit-labels.mjs --remote` — confirm 0 orphans in the 5 merged clusters (the other 4 clusters still showing orphans here is expected, not a regression)
+
+**Milestone 2 — Recipe course/category field**
+- [ ] M2.1: Add `course_?: string` to `Recipe` interface in `recipe.model.ts`
+- [ ] M2.2: Add `KITCHEN_COURSES` registry to `metadata-registry.service.ts` (mirror `KITCHEN_LABELS` pattern; do not touch `KITCHEN_CATEGORIES`)
+- [ ] M2.3: Seed `DEFAULT_COURSES` for `__master__` from non-dietary-duplicate orphan strings in `.claude/reports/label-audit/data.json`, including the 4 course-like clusters' members kept as distinct strings (not merged)
+- [ ] M2.4: `recipe-builder.page.ts` — add `course: ['']` to `recipeForm_` (sole approved exception to file freeze)
+- [ ] M2.5: `recipe-form.service.ts` — course handling in `patchFormFromRecipe`/`buildRecipeFromForm`
+- [ ] M2.6: `recipe-header.component.ts`/`.html` — single-select course dropdown bound to `metadataRegistry.courses_()`
+- [ ] M2.7: Metadata manager — "Courses" CRUD card (mirror labels card)
+- [ ] M2.8: `recipe-book-list.component.ts` — surface `course_` in list/filter sidebar
+- [ ] M2.9: `dictionary.json` — Hebrew translation entries for seeded course strings
+- [ ] M2.10: Write `scripts/migrate-labels-to-courses.mjs` (dry-run default) — move course-like strings from `labels_`/`autoLabels_` to `course_`; multi-match conflicts go to a Human-review list, never auto-picked
+- [ ] M2.11: Dry-run local → Human resolves conflicts → `--remote` dry-run → `--write --remote`
+- [ ] M2.12: Re-run `scripts/audit-labels.mjs --remote` — confirm 0 course-like strings remain in `labels_`/`autoLabels_`
+
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.

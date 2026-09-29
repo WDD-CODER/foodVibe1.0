@@ -43,8 +43,12 @@ export class RecipeFormService {
 
   /** Requires at least one ingredient with product/recipe selected or unlinked name, and quantity > 0. */
   recipeFormValidator(control: AbstractControl): ValidationErrors | null {
-    const ingredients = (control.get('ingredients')?.value || []) as { referenceId?: string; amount_net?: number | string; name_hebrew?: string }[]
-    const hasValid = ingredients.some(ing => {
+    const ingredients = (control.get('ingredients')?.value || []) as {
+      referenceId?: string
+      amount_net?: number | string
+      name_hebrew?: string
+    }[]
+    const hasValid = ingredients.some((ing) => {
       const amt = ing.amount_net
       const num = typeof amt === 'number' ? amt : Number(amt)
       const hasAmount = amt != null && amt !== '' && !isNaN(num) && num > 0
@@ -107,15 +111,17 @@ export class RecipeFormService {
       phase_: [entry?.phase_ ?? 'both'],
       is_critical_: [entry?.is_critical_ ?? true],
       notes_: [entry?.notes_ ?? ''],
-      name_hebrew_: [entry?.name_hebrew_ ?? ''],
+      name_hebrew_: [entry?.name_hebrew_ ?? '']
     })
   }
 
   // ─── Pure Helpers ─────────────────────────────────────────────────
 
-  getPrepRowsFromRecipe(recipe: Recipe): { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] {
+  getPrepRowsFromRecipe(
+    recipe: Recipe
+  ): { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] {
     if (recipe.prep_items_?.length) {
-      return recipe.prep_items_.map(p => ({
+      return recipe.prep_items_.map((p) => ({
         preparation_name: p.preparation_name,
         category_name: p.category_name,
         main_category_name: p.main_category_name ?? p.category_name,
@@ -124,9 +130,15 @@ export class RecipeFormService {
       }))
     }
     if (recipe.prep_categories_?.length) {
-      const rows: { preparation_name: string; category_name: string; main_category_name: string; quantity: number; unit: string }[] = []
-      recipe.prep_categories_.forEach(cat => {
-        ;(cat.items ?? []).forEach(it => {
+      const rows: {
+        preparation_name: string
+        category_name: string
+        main_category_name: string
+        quantity: number
+        unit: string
+      }[] = []
+      recipe.prep_categories_.forEach((cat) => {
+        ;(cat.items ?? []).forEach((it) => {
           rows.push({
             preparation_name: it.item_name,
             category_name: cat.category_name,
@@ -144,16 +156,16 @@ export class RecipeFormService {
   /** Normalize label keys: map Hebrew or orphan keys to current registry keys so dropdown filter works. */
   normalizeLabelKeys(rawLabels: string[]): string[] {
     if (!rawLabels?.length) return []
-    const registryKeys = new Set(this.metadataRegistry.allLabels_().map(def => def.key))
+    const registryKeys = new Set(this.metadataRegistry.allLabels_().map((def) => def.key))
     return rawLabels
-      .map(label => {
+      .map((label) => {
         const trimmed = (label ?? '').trim()
         if (!trimmed) return null
         if (registryKeys.has(trimmed)) return trimmed
         const labelDisplay = this.translation.translate(trimmed)
-        const match = this.metadataRegistry.allLabels_().find(
-          def => this.translation.translate(def.key) === labelDisplay
-        )
+        const match = this.metadataRegistry
+          .allLabels_()
+          .find((def) => this.translation.translate(def.key) === labelDisplay)
         return match ? match.key : null
       })
       .filter((k): k is string => k != null)
@@ -165,18 +177,28 @@ export class RecipeFormService {
     const raw = form.getRawValue() as Record<string, unknown>
     const isDish = raw['recipe_type'] === 'dish'
 
-    type IngRow = { referenceId?: string; item_type?: string; amount_net?: number; unit?: string; total_cost?: number; nameSnapshot?: string; name_hebrew?: string }
+    type IngRow = {
+      referenceId?: string
+      item_type?: string
+      amount_net?: number
+      unit?: string
+      total_cost?: number
+      nameSnapshot?: string
+      name_hebrew?: string
+    }
     const rawIngredients = (raw['ingredients'] || []) as IngRow[]
     const ingredients: Ingredient[] = rawIngredients
-      .filter(ing => {
+      .filter((ing) => {
         if (ing?.referenceId) return true
         if (ing?.name_hebrew?.trim() && (ing.amount_net ?? 0) > 0) return true
         return false
       })
-      .map(ing => ({
+      .map((ing) => ({
         _id: 'ing_' + Math.random().toString(36).slice(2, 9),
         ...(ing.referenceId ? { referenceId: ing.referenceId } : {}),
-        ...(ing.referenceId ? { type: (ing.item_type === 'recipe' ? 'recipe' : 'product') as 'product' | 'recipe' } : {}),
+        ...(ing.referenceId
+          ? { type: (ing.item_type === 'recipe' ? 'recipe' : 'product') as 'product' | 'recipe' }
+          : {}),
         amount_: ing.amount_net ?? 0,
         unit_: ing.unit ?? '',
         calculatedCost_: ing.referenceId ? (ing.total_cost ?? 0) : 0,
@@ -188,12 +210,18 @@ export class RecipeFormService {
     let prepCategories: PrepCategory[] | undefined
 
     if (isDish) {
-      type PrepRow = { preparation_name?: string; category_name?: string; main_category_name?: string; quantity?: number | string; unit?: string }
+      type PrepRow = {
+        preparation_name?: string
+        category_name?: string
+        main_category_name?: string
+        quantity?: number | string
+        unit?: string
+      }
       const rows = (raw['workflow_items'] || []) as PrepRow[]
       prepItems = rows
-        .filter(r => !!r?.preparation_name?.trim())
-        .map(r => {
-          const qty = typeof r.quantity === 'number' ? r.quantity : (Number(r.quantity) || 1)
+        .filter((r) => !!r?.preparation_name?.trim())
+        .map((r) => {
+          const qty = typeof r.quantity === 'number' ? r.quantity : Number(r.quantity) || 1
           const item: FlatPrepItem = {
             preparation_name: r.preparation_name ?? '',
             category_name: r.category_name ?? '',
@@ -207,20 +235,20 @@ export class RecipeFormService {
         })
 
       const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>()
-      prepItems.forEach(p => {
+      prepItems.forEach((p) => {
         const list = byCategory.get(p.category_name) ?? []
         list.push({ item_name: p.preparation_name, unit: p.unit, quantity: p.quantity })
         byCategory.set(p.category_name, list)
       })
       prepCategories = Array.from(byCategory.entries()).map(([category_name, items]) => ({
         category_name,
-        items: items.map(it => ({ item_name: it.item_name, unit: it.unit }))
+        items: items.map((it) => ({ item_name: it.item_name, unit: it.unit }))
       }))
     } else {
       type StepRow = { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }
       const stepRows = (raw['workflow_items'] || []) as StepRow[]
       stepRows
-        .filter(s => !!s?.instruction?.trim())
+        .filter((s) => !!s?.instruction?.trim())
         .forEach((step, i) => {
           steps.push({
             order_: step?.order ?? i + 1,
@@ -236,12 +264,11 @@ export class RecipeFormService {
     const yieldAmount = isDish ? ((raw['serving_portions'] as number) ?? 1) : (yieldConv?.amount ?? 0)
     const yieldUnit = isDish ? 'מנה' : (yieldConv?.unit ?? 'gram')
     const yieldConversions = yieldConvRows
-      .filter(r => r?.unit != null && r.unit !== '')
-      .map(r => ({ amount: Number(r?.amount ?? 0), unit: String(r.unit) }))
+      .filter((r) => r?.unit != null && r.unit !== '')
+      .map((r) => ({ amount: Number(r?.amount ?? 0), unit: String(r.unit) }))
 
     const rawLabels = (raw['labels'] as string[] | undefined) ?? []
-    const validKeys = new Set(this.metadataRegistry.allLabels_().map(def => def.key))
-    const labels = rawLabels.filter(k => validKeys.has((k ?? '').trim()))
+    const labels = this.normalizeLabelKeys(rawLabels)
 
     return {
       _id: (recipeId ?? '') as string,
@@ -258,16 +285,35 @@ export class RecipeFormService {
       ...(prepItems && prepItems.length > 0 && { prep_items_: prepItems }),
       ...(prepCategories && prepCategories.length > 0 && { prep_categories_: prepCategories }),
       ...(() => {
-        const baselineRaw = (raw['logistics'] as { baseline_?: { equipment_id_: string; quantity_: number; phase_: string; is_critical_: boolean; notes_?: string }[] })?.baseline_ ?? []
+        const baselineRaw =
+          (
+            raw['logistics'] as {
+              baseline_?: {
+                equipment_id_: string
+                quantity_: number
+                phase_: string
+                is_critical_: boolean
+                notes_?: string
+              }[]
+            }
+          )?.baseline_ ?? []
         const baseline = baselineRaw
           .filter((r: { equipment_id_?: string }) => !!r?.equipment_id_)
-          .map((r: { equipment_id_: string; quantity_: number; phase_: string; is_critical_: boolean; notes_?: string }) => ({
-            equipment_id_: r.equipment_id_,
-            quantity_: Number(r.quantity_),
-            phase_: (r.phase_ || 'both') as EquipmentPhase,
-            is_critical_: !!r.is_critical_,
-            notes_: r.notes_ || undefined
-          }))
+          .map(
+            (r: {
+              equipment_id_: string
+              quantity_: number
+              phase_: string
+              is_critical_: boolean
+              notes_?: string
+            }) => ({
+              equipment_id_: r.equipment_id_,
+              quantity_: Number(r.quantity_),
+              phase_: (r.phase_ || 'both') as EquipmentPhase,
+              is_critical_: !!r.is_critical_,
+              notes_: r.notes_ || undefined
+            })
+          )
         return baseline.length > 0 ? { logistics_: { baseline_: baseline } } : {}
       })()
     }
@@ -280,14 +326,17 @@ export class RecipeFormService {
   patchFormFromRecipe(form: FormGroup, recipe: Recipe): void {
     const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
     const normalizedLabels = this.normalizeLabelKeys(recipe.labels_ ?? [])
-    form.patchValue({
-      name_hebrew: recipe.name_hebrew,
-      recipe_type: isDish ? 'dish' : 'preparation',
-      serving_portions: isDish ? recipe.yield_amount_ : 1,
-      total_weight_g: 0,
-      total_cost: 0,
-      labels: normalizedLabels
-    }, { emitEvent: false })
+    form.patchValue(
+      {
+        name_hebrew: recipe.name_hebrew,
+        recipe_type: isDish ? 'dish' : 'preparation',
+        serving_portions: isDish ? recipe.yield_amount_ : 1,
+        total_weight_g: 0,
+        total_cost: 0,
+        labels: normalizedLabels
+      },
+      { emitEvent: false }
+    )
 
     const yieldArr = form.get('yield_conversions') as FormArray
     const conversions = recipe.yield_conversions_?.length
@@ -305,9 +354,10 @@ export class RecipeFormService {
 
     const ingredientsArr = form.get('ingredients') as FormArray
     ingredientsArr.clear()
-    recipe.ingredients_.forEach(ing => {
-      let item = this.state.products_().find(p => p._id === ing.referenceId)
-        ?? this.state.recipes_().find(r => r._id === ing.referenceId)
+    recipe.ingredients_.forEach((ing) => {
+      let item =
+        this.state.products_().find((p) => p._id === ing.referenceId) ??
+        this.state.recipes_().find((r) => r._id === ing.referenceId)
       let resolvedRefId = ing.referenceId
       let resolvedType = ing.type
       // Auto-repair by nameSnapshot: covers two cases —
@@ -315,8 +365,9 @@ export class RecipeFormService {
       //   B) referenceId is set but product was deleted/replaced (orphaned reference)
       // In both cases, if nameSnapshot matches a current product/recipe name, restore the link.
       if (!item && ing.nameSnapshot) {
-        const byName = this.state.products_().find(p => p.name_hebrew === ing.nameSnapshot)
-          ?? this.state.recipes_().find(r => r.name_hebrew === ing.nameSnapshot)
+        const byName =
+          this.state.products_().find((p) => p.name_hebrew === ing.nameSnapshot) ??
+          this.state.recipes_().find((r) => r.name_hebrew === ing.nameSnapshot)
         if (byName) {
           item = byName
           resolvedRefId = byName._id
@@ -340,7 +391,15 @@ export class RecipeFormService {
         : null
 
       ingredientsArr.push(
-        this.createIngredientGroup(itemForGroup as { _id: string; name_hebrew: string; item_type_: string; base_unit_: string; yield_percentage?: number } | null)
+        this.createIngredientGroup(
+          itemForGroup as {
+            _id: string
+            name_hebrew: string
+            item_type_: string
+            base_unit_: string
+            yield_percentage?: number
+          } | null
+        )
       )
       const lastGroup = ingredientsArr.at(ingredientsArr.length - 1)
       lastGroup.patchValue({
@@ -359,7 +418,7 @@ export class RecipeFormService {
     if (isDish) {
       const prepRows = this.getPrepRowsFromRecipe(recipe)
       if (prepRows.length > 0) {
-        prepRows.forEach(row => workflowArr.push(this.createPrepItemRow(row)))
+        prepRows.forEach((row) => workflowArr.push(this.createPrepItemRow(row)))
       } else {
         workflowArr.push(this.createPrepItemRow())
       }
@@ -378,7 +437,7 @@ export class RecipeFormService {
     if (recipe.logistics_?.baseline_?.length) {
       const logisticsArr = (form.get('logistics') as FormGroup)?.get('baseline_') as FormArray
       logisticsArr.clear()
-      recipe.logistics_.baseline_.forEach(entry => logisticsArr.push(this.createBaselineRow(entry)))
+      recipe.logistics_.baseline_.forEach((entry) => logisticsArr.push(this.createBaselineRow(entry)))
     }
   }
 
@@ -386,18 +445,17 @@ export class RecipeFormService {
 
   /** Compute auto-applied labels from recipe ingredients (product categories + allergens). */
   computeAutoLabels(recipe: Recipe): string[] {
-    const productIds = recipe.ingredients_
-      .filter(ing => ing.type === 'product')
-      .map(ing => ing.referenceId)
-    const products = this.state.products_().filter(p => productIds.includes(p._id))
+    const productIds = recipe.ingredients_.filter((ing) => ing.type === 'product').map((ing) => ing.referenceId)
+    const products = this.state.products_().filter((p) => productIds.includes(p._id))
     const triggerSet = new Set<string>()
-    products.forEach(p => {
-      ;(p.categories_ ?? []).forEach(c => triggerSet.add(c))
-      ;(p.allergens_ ?? []).forEach(a => triggerSet.add(a))
+    products.forEach((p) => {
+      ;(p.categories_ ?? []).forEach((c) => triggerSet.add(c))
+      ;(p.allergens_ ?? []).forEach((a) => triggerSet.add(a))
     })
-    return this.metadataRegistry.allLabels_()
-      .filter(def => def.autoTriggers?.some(t => triggerSet.has(t)))
-      .map(def => def.key)
+    return this.metadataRegistry
+      .allLabels_()
+      .filter((def) => def.autoTriggers?.some((t) => triggerSet.has(t)))
+      .map((def) => def.key)
   }
 
   // ─── Weight / Volume ─────────────────────────────────────────────
@@ -411,7 +469,13 @@ export class RecipeFormService {
     unconvertibleForVolume: string[]
   } {
     const raw = form.getRawValue() as {
-      ingredients?: { amount_net?: number; unit?: string; referenceId?: string; item_type?: string; name_hebrew?: string }[]
+      ingredients?: {
+        amount_net?: number
+        unit?: string
+        referenceId?: string
+        item_type?: string
+        name_hebrew?: string
+      }[]
     }
     const rows = raw?.ingredients || []
     const totalWeightG = Math.round(this.recipeCost.computeTotalWeightG(rows))

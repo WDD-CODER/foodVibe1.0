@@ -1,11 +1,11 @@
 # Label Audit Report
 
-Generated: 2026-09-28T15:59:39.248Z
+Generated: 2026-09-29T05:25:52.878Z
 Mode: remote — env var `MONGO_URI`, host `cluster0.objqrlt.mongodb.net`
 
 ## Section A — Registry (KITCHEN_LABELS)
 
-### userId: `__master__` (11 labels)
+### userId: `__master__` (12 labels)
 
 | key | color | autoTriggers |
 | --- | --- | --- |
@@ -20,24 +20,9 @@ Mode: remote — env var `MONGO_URI`, host `cluster0.objqrlt.mongodb.net`
 | sipur_shel_ochel | #EC4899 |  |
 | dessert | #A855F7 |  |
 | dairy | #38BDF8 |  |
+| marinade | #14B8A6 |  |
 
-### userId: `UMyJP` (11 labels)
-
-| key | color | autoTriggers |
-| --- | --- | --- |
-| vegetarian | #10B981 |  |
-| vegan | #84CC16 |  |
-| gluten_free | #06B6D4 |  |
-| fish | #3B82F6 | fish |
-| gluten | #F59E0B | gluten |
-| sesame | #F97316 | sesame |
-| meat | #EF4444 | meat |
-| asian | #8B5CF6 |  |
-| sipur_shel_ochel | #EC4899 |  |
-| dessert | #A855F7 |  |
-| dairy | #38BDF8 |  |
-
-### userId: `8EEgK` (11 labels)
+### userId: `UMyJP` (12 labels)
 
 | key | color | autoTriggers |
 | --- | --- | --- |
@@ -52,8 +37,9 @@ Mode: remote — env var `MONGO_URI`, host `cluster0.objqrlt.mongodb.net`
 | sipur_shel_ochel | #EC4899 |  |
 | dessert | #A855F7 |  |
 | dairy | #38BDF8 |  |
+| marinade | #14B8A6 |  |
 
-### userId: `xf2Is` (11 labels)
+### userId: `8EEgK` (12 labels)
 
 | key | color | autoTriggers |
 | --- | --- | --- |
@@ -68,6 +54,24 @@ Mode: remote — env var `MONGO_URI`, host `cluster0.objqrlt.mongodb.net`
 | sipur_shel_ochel | #EC4899 |  |
 | dessert | #A855F7 |  |
 | dairy | #38BDF8 |  |
+| marinade | #14B8A6 |  |
+
+### userId: `xf2Is` (12 labels)
+
+| key | color | autoTriggers |
+| --- | --- | --- |
+| vegetarian | #10B981 |  |
+| vegan | #84CC16 |  |
+| gluten_free | #06B6D4 |  |
+| fish | #3B82F6 | fish |
+| gluten | #F59E0B | gluten |
+| sesame | #F97316 | sesame |
+| meat | #EF4444 | meat |
+| asian | #8B5CF6 |  |
+| sipur_shel_ochel | #EC4899 |  |
+| dessert | #A855F7 |  |
+| dairy | #38BDF8 |  |
+| marinade | #14B8A6 |  |
 
 ## Section B — Usage
 
@@ -85,6 +89,7 @@ Mode: remote — env var `MONGO_URI`, host `cluster0.objqrlt.mongodb.net`
 | desserts | labels_ | 280 | __master__, UMyJP, 8EEgK, xf2Is | |
 | charcuterie_meat_mass_meat_preps | labels_ | 276 | __master__, UMyJP, 8EEgK, xf2Is | |
 | vinaigrettes_mayonnaise_emulsion | labels_ | 240 | __master__, UMyJP, 8EEgK, xf2Is | |
+| dairy | labels_ | 228 | __master__, UMyJP, 8EEgK, xf2Is | |
 | sorbet_ice_cream_granita | labels_ | 216 | __master__, UMyJP, 8EEgK, xf2Is | |
 | salty_baking_doughs | labels_ | 208 | __master__, UMyJP, 8EEgK, xf2Is | |
 | starter_vegetarian | labels_ | 200 | __master__, UMyJP, 8EEgK, xf2Is | |
@@ -95,6 +100,7 @@ Mode: remote — env var `MONGO_URI`, host `cluster0.objqrlt.mongodb.net`
 | vegetables_snacks_add_ons | labels_ | 152 | __master__, UMyJP, 8EEgK, xf2Is | |
 | soups_stocks_cooking_liquids | labels_ | 152 | __master__, UMyJP, 8EEgK, xf2Is | |
 | jams_sweet_preps_syrup | labels_ | 148 | __master__, UMyJP, 8EEgK, xf2Is | |
+| sipur_shel_ochel | labels_ | 140 | __master__, UMyJP, 8EEgK, xf2Is | |
 | sweet_baking_doughs | labels_ | 140 | __master__, UMyJP, 8EEgK, xf2Is | |
 | pastry_sweets | labels_ | 132 | __master__, UMyJP, 8EEgK, xf2Is | |
 | soups_up | labels_ | 132 | __master__, UMyJP, 8EEgK, xf2Is | |
@@ -102,12 +108,9 @@ Mode: remote — env var `MONGO_URI`, host `cluster0.objqrlt.mongodb.net`
 | soups | labels_ | 124 | __master__, UMyJP, 8EEgK, xf2Is | |
 | trash_category | labels_ | 120 | __master__, UMyJP, 8EEgK, xf2Is | |
 | starter_meat | labels_ | 120 | __master__, UMyJP, 8EEgK, xf2Is | |
-| sipur_shel_ochel | labels_ | 116 | __master__, UMyJP, 8EEgK, xf2Is | |
 | main_seafood | labels_ | 116 | __master__, UMyJP, 8EEgK, xf2Is | |
 | sweet_creams_custards_mousse | labels_ | 108 | __master__, UMyJP, 8EEgK, xf2Is | |
-| dairy_prep | labels_ | 100 | __master__, UMyJP, 8EEgK, xf2Is | |
 | conversions_and_techniques | labels_ | 100 | __master__, UMyJP, 8EEgK, xf2Is | |
-| dairy_sauce | labels_ | 96 | __master__, UMyJP, 8EEgK, xf2Is | |
 | grains_side_dish | labels_ | 96 | __master__, UMyJP, 8EEgK, xf2Is | |
 | fish_shellfish_sauce | labels_ | 92 | __master__, UMyJP, 8EEgK, xf2Is | |
 | fermentation_curing_pickling | labels_ | 88 | __master__, UMyJP, 8EEgK, xf2Is | |
@@ -117,38 +120,33 @@ Mode: remote — env var `MONGO_URI`, host `cluster0.objqrlt.mongodb.net`
 | ideas_preparations | labels_ | 68 | __master__, UMyJP, 8EEgK, xf2Is | |
 | oils_and_infusions | labels_ | 56 | __master__, UMyJP, 8EEgK, xf2Is | |
 | main_dish_vegetarian | labels_ | 56 | __master__, UMyJP, 8EEgK, xf2Is | |
+| vegan | labels_ | 52 | __master__, UMyJP, 8EEgK, xf2Is | |
 | meat | autoLabels_, labels_ | 52 | __master__, UMyJP, 8EEgK, xf2Is | |
 | salads_fresh_side_dish | labels_ | 52 | __master__, UMyJP, 8EEgK, xf2Is | |
 | cakes_cookies_tarts | labels_ | 52 | __master__, UMyJP, 8EEgK, xf2Is | |
 | starter_chicken | labels_ | 48 | __master__, UMyJP, 8EEgK, xf2Is | |
 | special_main_for_boss | labels_ | 48 | __master__, UMyJP, 8EEgK, xf2Is | |
-| vegan | labels_ | 44 | __master__, UMyJP, 8EEgK, xf2Is | |
+| marinade | labels_ | 44 | __master__, UMyJP, 8EEgK, xf2Is | |
 | legume_side_dish | labels_ | 44 | __master__, UMyJP, 8EEgK, xf2Is | |
-| marinade | labels_ | 36 | __master__, UMyJP, 8EEgK, xf2Is | |
 | side_dish | labels_ | 36 | __master__, UMyJP, 8EEgK, xf2Is | |
 | dan_and_adi_cooking_from_the_orchard | labels_ | 32 | __master__, UMyJP, 8EEgK, xf2Is | |
 | dessert | labels_ | 32 | __master__, UMyJP, 8EEgK, xf2Is | |
-| dairy | labels_ | 32 | __master__, UMyJP, 8EEgK, xf2Is | |
 | vegetarian | labels_ | 28 | __master__, UMyJP, 8EEgK, xf2Is | |
 | amuse_bouche | labels_ | 28 | __master__, UMyJP, 8EEgK, xf2Is | |
-| סיפור של אוכל | labels_ | 24 | __master__, UMyJP, 8EEgK, xf2Is | |
+| asian | labels_ | 24 | __master__, UMyJP, 8EEgK, xf2Is | |
 | sesame | autoLabels_ | 20 | __master__, UMyJP, 8EEgK, xf2Is | |
 | foams_hot_cold | labels_ | 20 | __master__, UMyJP, 8EEgK, xf2Is | |
 | salad_sauce | labels_ | 20 | __master__, UMyJP, 8EEgK, xf2Is | |
 | starter | labels_ | 20 | __master__, UMyJP, 8EEgK, xf2Is | |
 | special_starter_for_boss | labels_ | 20 | __master__, UMyJP, 8EEgK, xf2Is | |
-| אסייתי | labels_ | 16 | __master__, UMyJP, 8EEgK, xf2Is | |
 | sweet_sauce | labels_ | 16 | __master__, UMyJP, 8EEgK, xf2Is | |
 | bakery | labels_ | 16 | __master__, UMyJP, 8EEgK, xf2Is | |
 | ideas_dishes | labels_ | 12 | __master__, UMyJP, 8EEgK, xf2Is | |
-| טבעוני | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
 | צמחוני | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
 | סלט | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
-| מרינדה | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
 | רוטב | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
 | גלייז | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
 | fish | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
-| asian | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
 | pork_dish | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
 | pre_dessert | labels_ | 8 | __master__, UMyJP, 8EEgK, xf2Is | |
 | special_for_boss | labels_ | 4 | __master__, UMyJP, 8EEgK, xf2Is | |
@@ -158,7 +156,7 @@ Other top-level array-of-string fields flagged across RECIPE_LIST/DISH_LIST docs
 
 ## Section C — Classification
 
-Counts (in recipe-occurrences, not distinct strings): registered=340, registered-via-translation=0, registered-other-user=0, orphan=8392
+Counts (in recipe-occurrences, not distinct strings): registered=628, registered-via-translation=0, registered-other-user=0, orphan=8104
 
 | string | userId | classification | recipe count |
 | --- | --- | --- | --- |
@@ -210,6 +208,10 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | vinaigrettes_mayonnaise_emulsion | UMyJP | orphan | 60 |
 | vinaigrettes_mayonnaise_emulsion | 8EEgK | orphan | 60 |
 | vinaigrettes_mayonnaise_emulsion | xf2Is | orphan | 60 |
+| dairy | __master__ | registered | 57 |
+| dairy | UMyJP | registered | 57 |
+| dairy | 8EEgK | registered | 57 |
+| dairy | xf2Is | registered | 57 |
 | sorbet_ice_cream_granita | __master__ | orphan | 54 |
 | sorbet_ice_cream_granita | UMyJP | orphan | 54 |
 | sorbet_ice_cream_granita | 8EEgK | orphan | 54 |
@@ -250,6 +252,10 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | jams_sweet_preps_syrup | UMyJP | orphan | 37 |
 | jams_sweet_preps_syrup | 8EEgK | orphan | 37 |
 | jams_sweet_preps_syrup | xf2Is | orphan | 37 |
+| sipur_shel_ochel | __master__ | registered | 35 |
+| sipur_shel_ochel | UMyJP | registered | 35 |
+| sipur_shel_ochel | 8EEgK | registered | 35 |
+| sipur_shel_ochel | xf2Is | registered | 35 |
 | sweet_baking_doughs | __master__ | orphan | 35 |
 | sweet_baking_doughs | UMyJP | orphan | 35 |
 | sweet_baking_doughs | 8EEgK | orphan | 35 |
@@ -278,10 +284,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | starter_meat | UMyJP | orphan | 30 |
 | starter_meat | 8EEgK | orphan | 30 |
 | starter_meat | xf2Is | orphan | 30 |
-| sipur_shel_ochel | __master__ | registered | 29 |
-| sipur_shel_ochel | UMyJP | registered | 29 |
-| sipur_shel_ochel | 8EEgK | registered | 29 |
-| sipur_shel_ochel | xf2Is | registered | 29 |
 | main_seafood | __master__ | orphan | 29 |
 | main_seafood | UMyJP | orphan | 29 |
 | main_seafood | 8EEgK | orphan | 29 |
@@ -290,18 +292,10 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | sweet_creams_custards_mousse | UMyJP | orphan | 27 |
 | sweet_creams_custards_mousse | 8EEgK | orphan | 27 |
 | sweet_creams_custards_mousse | xf2Is | orphan | 27 |
-| dairy_prep | __master__ | orphan | 25 |
-| dairy_prep | UMyJP | orphan | 25 |
-| dairy_prep | 8EEgK | orphan | 25 |
-| dairy_prep | xf2Is | orphan | 25 |
 | conversions_and_techniques | __master__ | orphan | 25 |
 | conversions_and_techniques | UMyJP | orphan | 25 |
 | conversions_and_techniques | 8EEgK | orphan | 25 |
 | conversions_and_techniques | xf2Is | orphan | 25 |
-| dairy_sauce | __master__ | orphan | 24 |
-| dairy_sauce | UMyJP | orphan | 24 |
-| dairy_sauce | 8EEgK | orphan | 24 |
-| dairy_sauce | xf2Is | orphan | 24 |
 | grains_side_dish | __master__ | orphan | 24 |
 | grains_side_dish | UMyJP | orphan | 24 |
 | grains_side_dish | 8EEgK | orphan | 24 |
@@ -338,6 +332,10 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | main_dish_vegetarian | UMyJP | orphan | 14 |
 | main_dish_vegetarian | 8EEgK | orphan | 14 |
 | main_dish_vegetarian | xf2Is | orphan | 14 |
+| vegan | __master__ | registered | 13 |
+| vegan | UMyJP | registered | 13 |
+| vegan | 8EEgK | registered | 13 |
+| vegan | xf2Is | registered | 13 |
 | meat | __master__ | registered | 13 |
 | meat | UMyJP | registered | 13 |
 | meat | 8EEgK | registered | 13 |
@@ -358,18 +356,14 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | special_main_for_boss | UMyJP | orphan | 12 |
 | special_main_for_boss | 8EEgK | orphan | 12 |
 | special_main_for_boss | xf2Is | orphan | 12 |
-| vegan | __master__ | registered | 11 |
-| vegan | UMyJP | registered | 11 |
-| vegan | 8EEgK | registered | 11 |
-| vegan | xf2Is | registered | 11 |
+| marinade | __master__ | registered | 11 |
+| marinade | UMyJP | registered | 11 |
+| marinade | 8EEgK | registered | 11 |
+| marinade | xf2Is | registered | 11 |
 | legume_side_dish | __master__ | orphan | 11 |
 | legume_side_dish | UMyJP | orphan | 11 |
 | legume_side_dish | 8EEgK | orphan | 11 |
 | legume_side_dish | xf2Is | orphan | 11 |
-| marinade | __master__ | orphan | 9 |
-| marinade | UMyJP | orphan | 9 |
-| marinade | 8EEgK | orphan | 9 |
-| marinade | xf2Is | orphan | 9 |
 | side_dish | __master__ | orphan | 9 |
 | side_dish | UMyJP | orphan | 9 |
 | side_dish | 8EEgK | orphan | 9 |
@@ -382,10 +376,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | dessert | UMyJP | registered | 8 |
 | dessert | 8EEgK | registered | 8 |
 | dessert | xf2Is | registered | 8 |
-| dairy | __master__ | registered | 8 |
-| dairy | UMyJP | registered | 8 |
-| dairy | 8EEgK | registered | 8 |
-| dairy | xf2Is | registered | 8 |
 | vegetarian | __master__ | registered | 7 |
 | vegetarian | UMyJP | registered | 7 |
 | vegetarian | 8EEgK | registered | 7 |
@@ -394,10 +384,10 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | amuse_bouche | UMyJP | orphan | 7 |
 | amuse_bouche | 8EEgK | orphan | 7 |
 | amuse_bouche | xf2Is | orphan | 7 |
-| סיפור של אוכל | __master__ | orphan | 6 |
-| סיפור של אוכל | UMyJP | orphan | 6 |
-| סיפור של אוכל | 8EEgK | orphan | 6 |
-| סיפור של אוכל | xf2Is | orphan | 6 |
+| asian | __master__ | registered | 6 |
+| asian | UMyJP | registered | 6 |
+| asian | 8EEgK | registered | 6 |
+| asian | xf2Is | registered | 6 |
 | sesame | __master__ | registered | 5 |
 | sesame | UMyJP | registered | 5 |
 | sesame | 8EEgK | registered | 5 |
@@ -418,10 +408,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | special_starter_for_boss | UMyJP | orphan | 5 |
 | special_starter_for_boss | 8EEgK | orphan | 5 |
 | special_starter_for_boss | xf2Is | orphan | 5 |
-| אסייתי | __master__ | orphan | 4 |
-| אסייתי | UMyJP | orphan | 4 |
-| אסייתי | 8EEgK | orphan | 4 |
-| אסייתי | xf2Is | orphan | 4 |
 | sweet_sauce | __master__ | orphan | 4 |
 | sweet_sauce | UMyJP | orphan | 4 |
 | sweet_sauce | 8EEgK | orphan | 4 |
@@ -434,10 +420,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | ideas_dishes | UMyJP | orphan | 3 |
 | ideas_dishes | 8EEgK | orphan | 3 |
 | ideas_dishes | xf2Is | orphan | 3 |
-| טבעוני | __master__ | orphan | 2 |
-| טבעוני | UMyJP | orphan | 2 |
-| טבעוני | 8EEgK | orphan | 2 |
-| טבעוני | xf2Is | orphan | 2 |
 | צמחוני | __master__ | orphan | 2 |
 | צמחוני | UMyJP | orphan | 2 |
 | צמחוני | 8EEgK | orphan | 2 |
@@ -446,10 +428,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | סלט | UMyJP | orphan | 2 |
 | סלט | 8EEgK | orphan | 2 |
 | סלט | xf2Is | orphan | 2 |
-| מרינדה | __master__ | orphan | 2 |
-| מרינדה | UMyJP | orphan | 2 |
-| מרינדה | 8EEgK | orphan | 2 |
-| מרינדה | xf2Is | orphan | 2 |
 | רוטב | __master__ | orphan | 2 |
 | רוטב | UMyJP | orphan | 2 |
 | רוטב | 8EEgK | orphan | 2 |
@@ -462,10 +440,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | fish | UMyJP | registered | 2 |
 | fish | 8EEgK | registered | 2 |
 | fish | xf2Is | registered | 2 |
-| asian | __master__ | registered | 2 |
-| asian | UMyJP | registered | 2 |
-| asian | 8EEgK | registered | 2 |
-| asian | xf2Is | registered | 2 |
 | pork_dish | __master__ | orphan | 2 |
 | pork_dish | UMyJP | orphan | 2 |
 | pork_dish | 8EEgK | orphan | 2 |
@@ -487,14 +461,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 
 | string | userId | sample recipes |
 | --- | --- | --- |
-| סיפור של אוכל | __master__ | רוטב לסלט איטריות (`UqU5Hp6v`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`248ZZPK2`, RECIPE_LIST, labels_); גלייז קוריאני (`DqlZXZZ0`, RECIPE_LIST, labels_) |
-| סיפור של אוכל | UMyJP | רוטב לסלט איטריות (`Z6970`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`hoTRi`, RECIPE_LIST, labels_); גלייז קוריאני (`To5bv`, RECIPE_LIST, labels_) |
-| סיפור של אוכל | 8EEgK | רוטב לסלט איטריות (`2zjs3`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`m7KWh`, RECIPE_LIST, labels_); גלייז קוריאני (`MO4H5`, RECIPE_LIST, labels_) |
-| סיפור של אוכל | xf2Is | רוטב לסלט איטריות (`XWEbA`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`Mfo3s`, RECIPE_LIST, labels_); גלייז קוריאני (`zn8QR`, RECIPE_LIST, labels_) |
-| טבעוני | __master__ | רוטב לסלט איטריות (`UqU5Hp6v`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`TSfHc2M6`, RECIPE_LIST, labels_) |
-| טבעוני | UMyJP | רוטב לסלט איטריות (`Z6970`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`XJcpq`, RECIPE_LIST, labels_) |
-| טבעוני | 8EEgK | רוטב לסלט איטריות (`2zjs3`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`jPX9A`, RECIPE_LIST, labels_) |
-| טבעוני | xf2Is | רוטב לסלט איטריות (`XWEbA`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`8m4E4`, RECIPE_LIST, labels_) |
 | צמחוני | __master__ | רוטב לסלט איטריות (`UqU5Hp6v`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`TSfHc2M6`, RECIPE_LIST, labels_) |
 | צמחוני | UMyJP | רוטב לסלט איטריות (`Z6970`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`XJcpq`, RECIPE_LIST, labels_) |
 | צמחוני | 8EEgK | רוטב לסלט איטריות (`2zjs3`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`jPX9A`, RECIPE_LIST, labels_) |
@@ -503,14 +469,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | סלט | UMyJP | רוטב לסלט איטריות (`Z6970`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`XJcpq`, RECIPE_LIST, labels_) |
 | סלט | 8EEgK | רוטב לסלט איטריות (`2zjs3`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`jPX9A`, RECIPE_LIST, labels_) |
 | סלט | xf2Is | רוטב לסלט איטריות (`XWEbA`, RECIPE_LIST, labels_); רוטב לסלט איטריות (`8m4E4`, RECIPE_LIST, labels_) |
-| מרינדה | __master__ | משרה לפרגית בולגוגית (`248ZZPK2`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`FkqqUjjX`, RECIPE_LIST, labels_) |
-| מרינדה | UMyJP | משרה לפרגית בולגוגית (`hoTRi`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`V4Lr2`, RECIPE_LIST, labels_) |
-| מרינדה | 8EEgK | משרה לפרגית בולגוגית (`m7KWh`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`39Vuj`, RECIPE_LIST, labels_) |
-| מרינדה | xf2Is | משרה לפרגית בולגוגית (`Mfo3s`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`ulzGV`, RECIPE_LIST, labels_) |
-| אסייתי | __master__ | משרה לפרגית בולגוגית (`248ZZPK2`, RECIPE_LIST, labels_); גלייז קוריאני (`DqlZXZZ0`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`FkqqUjjX`, RECIPE_LIST, labels_) |
-| אסייתי | UMyJP | משרה לפרגית בולגוגית (`hoTRi`, RECIPE_LIST, labels_); גלייז קוריאני (`To5bv`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`V4Lr2`, RECIPE_LIST, labels_) |
-| אסייתי | 8EEgK | משרה לפרגית בולגוגית (`m7KWh`, RECIPE_LIST, labels_); גלייז קוריאני (`MO4H5`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`39Vuj`, RECIPE_LIST, labels_) |
-| אסייתי | xf2Is | משרה לפרגית בולגוגית (`Mfo3s`, RECIPE_LIST, labels_); גלייז קוריאני (`zn8QR`, RECIPE_LIST, labels_); משרה לפרגית בולגוגית (`ulzGV`, RECIPE_LIST, labels_) |
 | רוטב | __master__ | גלייז קוריאני (`DqlZXZZ0`, RECIPE_LIST, labels_); גלייז קוריאני (`dRcubomz`, RECIPE_LIST, labels_) |
 | רוטב | UMyJP | גלייז קוריאני (`To5bv`, RECIPE_LIST, labels_); גלייז קוריאני (`gvmKD`, RECIPE_LIST, labels_) |
 | רוטב | 8EEgK | גלייז קוריאני (`MO4H5`, RECIPE_LIST, labels_); גלייז קוריאני (`1MMH7`, RECIPE_LIST, labels_) |
@@ -523,10 +481,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | spreads_dips_salty_creams | UMyJP | טפנד זיתים (`bTt4I`, RECIPE_LIST, labels_); מיונז קנוי מטובל (`F6t67`, RECIPE_LIST, labels_); מטבל שמנת צילי ורידקשן גזר רק לבדוק (`V82hc`, RECIPE_LIST, labels_) |
 | spreads_dips_salty_creams | 8EEgK | טפנד זיתים (`5ne2T`, RECIPE_LIST, labels_); מיונז קנוי מטובל (`W0aSw`, RECIPE_LIST, labels_); מטבל שמנת צילי ורידקשן גזר רק לבדוק (`bc4zX`, RECIPE_LIST, labels_) |
 | spreads_dips_salty_creams | xf2Is | טפנד זיתים (`OCynZ`, RECIPE_LIST, labels_); מיונז קנוי מטובל (`TQE8y`, RECIPE_LIST, labels_); מטבל שמנת צילי ורידקשן גזר רק לבדוק (`0mTwd`, RECIPE_LIST, labels_) |
-| dairy_prep | __master__ | גבינת שום שמיר (`Ppcj1w08`, RECIPE_LIST, labels_); תערובת גבינות (`wthfZKwW`, RECIPE_LIST, labels_); קרם וואסבי ושמנת חמוצה (`5mJGFCSx`, RECIPE_LIST, labels_) |
-| dairy_prep | UMyJP | גבינת שום שמיר (`bdPtb`, RECIPE_LIST, labels_); תערובת גבינות (`cdgSJ`, RECIPE_LIST, labels_); קרם וואסבי ושמנת חמוצה (`y41tg`, RECIPE_LIST, labels_) |
-| dairy_prep | 8EEgK | גבינת שום שמיר (`S7gzh`, RECIPE_LIST, labels_); תערובת גבינות (`LbNFR`, RECIPE_LIST, labels_); קרם וואסבי ושמנת חמוצה (`hwPSb`, RECIPE_LIST, labels_) |
-| dairy_prep | xf2Is | גבינת שום שמיר (`qs2jX`, RECIPE_LIST, labels_); תערובת גבינות (`oQCsD`, RECIPE_LIST, labels_); קרם וואסבי ושמנת חמוצה (`endri`, RECIPE_LIST, labels_) |
 | vegetables_snacks_add_ons | __master__ | נאצוס (`n2GDBGzV`, RECIPE_LIST, labels_); חמוצים (`swhbUxiu`, RECIPE_LIST, labels_); שום קונפי (`DCpxeuYT`, RECIPE_LIST, labels_) |
 | vegetables_snacks_add_ons | UMyJP | נאצוס (`cMv6A`, RECIPE_LIST, labels_); חמוצים (`WD0VG`, RECIPE_LIST, labels_); שום קונפי (`XfN9i`, RECIPE_LIST, labels_) |
 | vegetables_snacks_add_ons | 8EEgK | נאצוס (`j1bJ8`, RECIPE_LIST, labels_); חמוצים (`QAOCP`, RECIPE_LIST, labels_); שום קונפי (`muii1`, RECIPE_LIST, labels_) |
@@ -607,10 +561,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | cakes_cookies_tarts | UMyJP | פאגדרי (`DzkIq`, RECIPE_LIST, labels_); מסה שוקולד טופי ומרנג שוויצרי לטארט (`BjzKB`, RECIPE_LIST, labels_); עוגת ספוג שומשום שחור במיקרו של יוסי שיטרית (`Sa0zg`, RECIPE_LIST, labels_) |
 | cakes_cookies_tarts | 8EEgK | פאגדרי (`uVyuS`, RECIPE_LIST, labels_); מסה שוקולד טופי ומרנג שוויצרי לטארט (`kAIMa`, RECIPE_LIST, labels_); עוגת ספוג שומשום שחור במיקרו של יוסי שיטרית (`brcD7`, RECIPE_LIST, labels_) |
 | cakes_cookies_tarts | xf2Is | פאגדרי (`0zMNL`, RECIPE_LIST, labels_); מסה שוקולד טופי ומרנג שוויצרי לטארט (`fWW4t`, RECIPE_LIST, labels_); עוגת ספוג שומשום שחור במיקרו של יוסי שיטרית (`hgq05`, RECIPE_LIST, labels_) |
-| marinade | __master__ | מרינדה חרדל דבש יין שום ועשבים לעוף (`7rRUW9Qu`, RECIPE_LIST, labels_); מרינדה מיסו לבן וסאקה (`lRjx1lK9`, RECIPE_LIST, labels_); מרינדה עשבי תיבול ירוקה (`Cn3HkB7w`, RECIPE_LIST, labels_) |
-| marinade | UMyJP | מרינדה חרדל דבש יין שום ועשבים לעוף (`h8mut`, RECIPE_LIST, labels_); מרינדה מיסו לבן וסאקה (`DNnOL`, RECIPE_LIST, labels_); מרינדה עשבי תיבול ירוקה (`bVnDq`, RECIPE_LIST, labels_) |
-| marinade | 8EEgK | מרינדה חרדל דבש יין שום ועשבים לעוף (`wMUTk`, RECIPE_LIST, labels_); מרינדה מיסו לבן וסאקה (`RZl4U`, RECIPE_LIST, labels_); מרינדה עשבי תיבול ירוקה (`GDES8`, RECIPE_LIST, labels_) |
-| marinade | xf2Is | מרינדה חרדל דבש יין שום ועשבים לעוף (`LQZfC`, RECIPE_LIST, labels_); מרינדה מיסו לבן וסאקה (`guhZp`, RECIPE_LIST, labels_); מרינדה עשבי תיבול ירוקה (`YwwJl`, RECIPE_LIST, labels_) |
 | fish_shellfish_sauce | __master__ | רוטב דלעות וציר דגים (`bm1Gv0Hh`, RECIPE_LIST, labels_); רוטב שרימפס קארי מנגו וחלב קוקוס (`eAdotkUD`, RECIPE_LIST, labels_); רוטב שום לימון וציר דגים (`5cTroTly`, RECIPE_LIST, labels_) |
 | fish_shellfish_sauce | UMyJP | רוטב דלעות וציר דגים (`5fVa3`, RECIPE_LIST, labels_); רוטב שרימפס קארי מנגו וחלב קוקוס (`2iSxe`, RECIPE_LIST, labels_); רוטב שום לימון וציר דגים (`NJJcn`, RECIPE_LIST, labels_) |
 | fish_shellfish_sauce | 8EEgK | רוטב דלעות וציר דגים (`PHfwD`, RECIPE_LIST, labels_); רוטב שרימפס קארי מנגו וחלב קוקוס (`PKnU0`, RECIPE_LIST, labels_); רוטב שום לימון וציר דגים (`tBKz6`, RECIPE_LIST, labels_) |
@@ -619,10 +569,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | pasta_prep | UMyJP | ניוקי (`TaqtF`, RECIPE_LIST, labels_); בצק פסטה 40 חלמונים (`qPs17`, RECIPE_LIST, labels_); בצק פסטה קלאסי טסט (`sxT5g`, RECIPE_LIST, labels_) |
 | pasta_prep | 8EEgK | ניוקי (`SnlTI`, RECIPE_LIST, labels_); בצק פסטה 40 חלמונים (`U0XVj`, RECIPE_LIST, labels_); בצק פסטה קלאסי טסט (`bOqR4`, RECIPE_LIST, labels_) |
 | pasta_prep | xf2Is | ניוקי (`71uGQ`, RECIPE_LIST, labels_); בצק פסטה 40 חלמונים (`CDK64`, RECIPE_LIST, labels_); בצק פסטה קלאסי טסט (`5JGfg`, RECIPE_LIST, labels_) |
-| dairy_sauce | __master__ | רוטב חמאת עגבניות שרי (`8XRsbd3R`, RECIPE_LIST, labels_); רוטב אלפרדו (`ZjQRcKGR`, RECIPE_LIST, labels_); רוטב קרם וואסבי חם (`MHIQQSs5`, RECIPE_LIST, labels_) |
-| dairy_sauce | UMyJP | רוטב חמאת עגבניות שרי (`eyjmF`, RECIPE_LIST, labels_); רוטב אלפרדו (`0zO8K`, RECIPE_LIST, labels_); רוטב קרם וואסבי חם (`GUUKm`, RECIPE_LIST, labels_) |
-| dairy_sauce | 8EEgK | רוטב חמאת עגבניות שרי (`Ql3Uu`, RECIPE_LIST, labels_); רוטב אלפרדו (`Atj9y`, RECIPE_LIST, labels_); רוטב קרם וואסבי חם (`xbRsO`, RECIPE_LIST, labels_) |
-| dairy_sauce | xf2Is | רוטב חמאת עגבניות שרי (`dULku`, RECIPE_LIST, labels_); רוטב אלפרדו (`kpOuv`, RECIPE_LIST, labels_); רוטב קרם וואסבי חם (`TgRGI`, RECIPE_LIST, labels_) |
 | sweet_sauce | __master__ | טופי קרמל מלוח ודבש (`UyaxaYiR`, RECIPE_LIST, labels_); אנגלייז בראנר (`NuPdQYki`, RECIPE_LIST, labels_); סירופ קראמל מי זהר ומי ורדים (`4bkuAunO`, RECIPE_LIST, labels_) |
 | sweet_sauce | UMyJP | טופי קרמל מלוח ודבש (`EI5Vm`, RECIPE_LIST, labels_); אנגלייז בראנר (`IZ3jc`, RECIPE_LIST, labels_); סירופ קראמל מי זהר ומי ורדים (`hig7t`, RECIPE_LIST, labels_) |
 | sweet_sauce | 8EEgK | טופי קרמל מלוח ודבש (`ljLQl`, RECIPE_LIST, labels_); אנגלייז בראנר (`JgbcB`, RECIPE_LIST, labels_); סירופ קראמל מי זהר ומי ורדים (`WUZem`, RECIPE_LIST, labels_) |
@@ -780,11 +726,6 @@ Counts (in recipe-occurrences, not distinct strings): registered=340, registered
 | salads | salads (280), vegetable_side_dish (176), starch_side_dish (124), grains_side_dish (96), salads_fresh_side_dish (52), legume_side_dish (44), side_dish (36) | 0 |
 | soups_stocks_cooking_liquids | soups_stocks_cooking_liquids (152), soups_up (132), soups (124) | 0 |
 | dessert | desserts (280), dessert (32, registered), pre_dessert (8) | 0 |
-| dairy | dairy_prep (100), dairy_sauce (96), dairy (32, registered) | 0 |
-| sipur_shel_ochel | sipur_shel_ochel (116, registered), סיפור של אוכל (24) | 0 |
-| vegan | vegan (44, registered), טבעוני (8) | 0 |
-| marinade | marinade (36), מרינדה (8) | 0 |
-| asian | אסייתי (16), asian (8, registered) | 0 |
 
 ## Section E — Orphan evidence vs autoTriggers
 
@@ -916,18 +857,10 @@ Counted only `type === 'product'` ingredients, resolved against `PRODUCT_LIST` s
 | sweet_creams_custards_mousse | UMyJP | 1 | 27 |
 | sweet_creams_custards_mousse | 8EEgK | 1 | 27 |
 | sweet_creams_custards_mousse | xf2Is | 1 | 27 |
-| dairy_prep | __master__ | 0 | 25 |
 | conversions_and_techniques | __master__ | 0 | 25 |
-| dairy_prep | UMyJP | 0 | 25 |
 | conversions_and_techniques | UMyJP | 0 | 25 |
-| dairy_prep | 8EEgK | 0 | 25 |
 | conversions_and_techniques | 8EEgK | 0 | 25 |
-| dairy_prep | xf2Is | 0 | 25 |
 | conversions_and_techniques | xf2Is | 0 | 25 |
-| dairy_sauce | __master__ | 0 | 24 |
-| dairy_sauce | UMyJP | 0 | 24 |
-| dairy_sauce | 8EEgK | 0 | 24 |
-| dairy_sauce | xf2Is | 0 | 24 |
 | grains_side_dish | __master__ | 2 | 24 |
 | grains_side_dish | UMyJP | 2 | 24 |
 | grains_side_dish | 8EEgK | 2 | 24 |
@@ -984,10 +917,6 @@ Counted only `type === 'product'` ingredients, resolved against `PRODUCT_LIST` s
 | legume_side_dish | UMyJP | 0 | 11 |
 | legume_side_dish | 8EEgK | 0 | 11 |
 | legume_side_dish | xf2Is | 0 | 11 |
-| marinade | __master__ | 0 | 9 |
-| marinade | UMyJP | 0 | 9 |
-| marinade | 8EEgK | 0 | 9 |
-| marinade | xf2Is | 0 | 9 |
 | side_dish | __master__ | 0 | 9 |
 | side_dish | UMyJP | 0 | 9 |
 | side_dish | 8EEgK | 0 | 9 |
@@ -1000,10 +929,6 @@ Counted only `type === 'product'` ingredients, resolved against `PRODUCT_LIST` s
 | amuse_bouche | UMyJP | 0 | 7 |
 | amuse_bouche | 8EEgK | 0 | 7 |
 | amuse_bouche | xf2Is | 0 | 7 |
-| סיפור של אוכל | __master__ | 6 | 6 |
-| סיפור של אוכל | UMyJP | 6 | 6 |
-| סיפור של אוכל | 8EEgK | 6 | 6 |
-| סיפור של אוכל | xf2Is | 6 | 6 |
 | foams_hot_cold | __master__ | 0 | 5 |
 | salad_sauce | __master__ | 2 | 5 |
 | foams_hot_cold | UMyJP | 0 | 5 |
@@ -1020,13 +945,9 @@ Counted only `type === 'product'` ingredients, resolved against `PRODUCT_LIST` s
 | special_starter_for_boss | 8EEgK | 0 | 5 |
 | starter | xf2Is | 0 | 5 |
 | special_starter_for_boss | xf2Is | 0 | 5 |
-| אסייתי | __master__ | 4 | 4 |
 | sweet_sauce | __master__ | 0 | 4 |
-| אסייתי | UMyJP | 4 | 4 |
 | sweet_sauce | UMyJP | 0 | 4 |
-| אסייתי | 8EEgK | 4 | 4 |
 | sweet_sauce | 8EEgK | 0 | 4 |
-| אסייתי | xf2Is | 4 | 4 |
 | sweet_sauce | xf2Is | 0 | 4 |
 | bakery | __master__ | 0 | 4 |
 | bakery | UMyJP | 0 | 4 |
@@ -1036,28 +957,20 @@ Counted only `type === 'product'` ingredients, resolved against `PRODUCT_LIST` s
 | ideas_dishes | UMyJP | 0 | 3 |
 | ideas_dishes | 8EEgK | 0 | 3 |
 | ideas_dishes | xf2Is | 0 | 3 |
-| טבעוני | __master__ | 2 | 2 |
 | צמחוני | __master__ | 2 | 2 |
 | סלט | __master__ | 2 | 2 |
-| מרינדה | __master__ | 2 | 2 |
 | רוטב | __master__ | 2 | 2 |
 | גלייז | __master__ | 2 | 2 |
-| טבעוני | UMyJP | 2 | 2 |
 | צמחוני | UMyJP | 2 | 2 |
 | סלט | UMyJP | 2 | 2 |
-| מרינדה | UMyJP | 2 | 2 |
 | רוטב | UMyJP | 2 | 2 |
 | גלייז | UMyJP | 2 | 2 |
-| טבעוני | 8EEgK | 2 | 2 |
 | צמחוני | 8EEgK | 2 | 2 |
 | סלט | 8EEgK | 2 | 2 |
-| מרינדה | 8EEgK | 2 | 2 |
 | רוטב | 8EEgK | 2 | 2 |
 | גלייז | 8EEgK | 2 | 2 |
-| טבעוני | xf2Is | 2 | 2 |
 | צמחוני | xf2Is | 2 | 2 |
 | סלט | xf2Is | 2 | 2 |
-| מרינדה | xf2Is | 2 | 2 |
 | רוטב | xf2Is | 2 | 2 |
 | גלייז | xf2Is | 2 | 2 |
 | pork_dish | __master__ | 0 | 2 |
@@ -1081,4 +994,4 @@ Counted only `type === 'product'` ingredients, resolved against `PRODUCT_LIST` s
 
 | string | fields | count | userIds |
 | --- | --- | --- | --- |
-| dairy | labels_ | 32 | __master__, UMyJP, 8EEgK, xf2Is |
+| dairy | labels_ | 228 | __master__, UMyJP, 8EEgK, xf2Is |
