@@ -96,6 +96,28 @@
 - [ ] M2.11: Dry-run local → Human resolves conflicts → `--remote` dry-run → `--write --remote`
 - [ ] M2.12: Re-run `scripts/audit-labels.mjs --remote` — confirm 0 course-like strings remain in `labels_`/`autoLabels_`
 
+**Follow-up (post-M2, Human-tested 2026-09-29) — landed as a separate commit, not a new milestone:**
+- [x] Course dropdown "clear to none" option + cascade-delete-with-confirm for in-use labels/courses (mirrors `renameMenuType`'s confirm+cascade shape) — committed
+- [x] Bug: `getRecipeSnapshotForComparison()` never tracked `course_`, so changing only the course didn't mark the form dirty — fixed
+- [x] Bug: metadata-manager's `onAddLabel` discarded the already-typed input text instead of prefilling the creation modal — fixed
+- [ ] Bug: course `app-custom-select` dropdown option sometimes needs ~2-3 clicks to register a selection — reproduced, root cause not yet pinned (shared `CustomSelectComponent`, not obviously course-specific); deferred, not a data-correctness issue
+
+### Plan 322 — Metadata Rename-in-Place with Cascade Update (`plans/322-metadata-rename-in-place-cascade-update.plan.md`)
+
+> Follow-up to Plan 320: fixing a typo in a label/course/category/allergen today requires delete+recreate+manually-reassign even with cascade-delete. Mirrors the existing `renameMenuType`/`updateServingTypeForAll` pattern. Units explicitly out of scope (riskier, affects conversions elsewhere).
+
+**Milestone 1 — Registry rename + cascade methods (no UI yet)**
+- [ ] M1.1: `metadata-registry.service.ts` — `renameLabel`/`renameCourse`/`renameCategory`/`renameAllergen`, mirroring `renameMenuType`'s collision-check + persist + signal-update shape
+- [ ] M1.2: `kitchen-state.service.ts` — rename-capable variants of `cascadeClearLabelFromAll`/`cascadeClearCourseFromAll` (reuse `applyCascadeUpdate`)
+- [ ] M1.3: `kitchen-state.service.ts` — new `cascadeRenameCategoryForAll`/`cascadeRenameAllergenForAll` (product-side, via `productDataService.updateProduct` directly + activity/version-history logging)
+- [ ] M1.4: `TranslationKeyModalService.open()` — add optional `englishKey_` prefill (backward compatible)
+- [ ] M1.5: `LabelCreationModalService` — add edit-mode prefill if not already supported
+
+**Milestone 2 — Wire up the UI**
+- [ ] M2.1: Metadata Manager cards — edit/pencil action per pill alongside delete
+- [ ] M2.2: `metadata-manager.page.component.ts` — `onRenameMetadata(item, type)`: open the right modal prefilled, confirm with affected count, cascade, success toast
+- [ ] M2.3: Reject rename-to-existing-key before opening the confirm dialog
+
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
