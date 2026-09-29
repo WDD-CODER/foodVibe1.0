@@ -20,8 +20,6 @@ import { UserMsgService } from '@services/user-msg.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { MasterPushService } from '@services/master-push.service'
-import { ExportService } from '@services/export.service'
-import type { ExportPayload } from '../../core/utils/export.util'
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component'
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component'
 import { FormsModule } from '@angular/forms'
@@ -35,6 +33,8 @@ import { filter, take } from 'rxjs'
 import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
 import { ScrollIndicatorsDirective } from 'src/app/core/directives/scroll-indicators.directive'
+import { CookTimerService } from './services/cook-timer.service'
+import { CookViewExportService } from './services/cook-view-export.service'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -65,6 +65,7 @@ const MULTIPLIER_CHIPS = [
     RatingStarsComponent,
     ScrollIndicatorsDirective
   ],
+  providers: [CookTimerService, CookViewExportService],
   templateUrl: './cook-view.page.html',
   styleUrl: './cook-view.page.scss'
 })
@@ -80,7 +81,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly kitchenState = inject(KitchenStateService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly unitRegistry = inject(UnitRegistryService)
-  private readonly exportService = inject(ExportService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly userMsg = inject(UserMsgService)
   private readonly authModal = inject(AuthModalService)
@@ -89,6 +89,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly heroFab = inject(HeroFabService)
   private readonly recipeFormService = inject(RecipeFormService)
   private readonly el = inject(ElementRef)
+  protected readonly cookTimer = inject(CookTimerService)
+  protected readonly cookExport = inject(CookViewExportService)
 
   // ---- SIGNALS & CONSTANTS ----
   protected recipe_ = signal<Recipe | null>(null)
@@ -117,13 +119,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Current value in the inline amount input for the row in setting state. */
   protected settingByIngredientAmount_ = signal<number>(0)
 
-  /** Payload for export preview popup (null = closed). */
-  protected exportPreviewPayload_ = signal<ExportPayload | null>(null)
-  /** Which export type is shown in preview (so we know what to run on Export click). */
-  private exportPreviewType_: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | null = null
-  /** Floating export bar expanded. */
-  protected exportBarExpanded_ = signal<boolean>(false)
-
   /** Phone layout: which pane appears on top. Default: ingredients first. */
   protected phoneFirstPane_ = signal<'ingredients' | 'steps'>('ingredients')
 
@@ -143,26 +138,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected stepDoneSet_ = signal<Set<number>>(new Set())
   /** Index of the step currently "peeked" (expanded preview without being active). */
   protected peekedStepIndex_ = signal<number | null>(null)
-  /** Which step card has an active countdown timer (null = none). */
-  protected activeTimerStepIndex_ = signal<number | null>(null)
-  /** Current countdown value in seconds. */
-  protected timerSecondsLeft_ = signal<number>(0)
-  /** Interval handle for the countdown timer — not a signal, just for cleanup. */
-  private timerIntervalId_: ReturnType<typeof setInterval> | null = null
-
-  // ---- COOK TIMER INPUT SIGNALS ----
-  protected timerInputExpandedIndex_ = signal<number | null>(null)
-  protected timerCustomInput_ = signal<string>('')
-
-  // ---- STOPWATCH SIGNALS ----
-  protected stopwatchStepIndex_ = signal<number | null>(null)
-  protected stopwatchSecondsElapsed_ = signal<number>(0)
-  protected stopwatchPaused_ = signal<boolean>(false)
-  private stopwatchIntervalId_: ReturnType<typeof setInterval> | null = null
   private scrollTimeoutId: ReturnType<typeof setTimeout> | null = null
-
-  /** Step index whose countdown just finished (null = none). Cleared by dismissTimerDone(). */
-  protected timerFinishedStepIndex_ = signal<number | null>(null)
 
   /** Multiplier chip definitions exposed to template. */
   protected readonly multiplierChips = MULTIPLIER_CHIPS
@@ -301,28 +277,6 @@ export class CookViewPage implements OnInit, OnDestroy {
     return Math.round((this.stepDoneSet_().size / total) * 100)
   })
 
-  /** Formatted timer display (m:ss under 1h, h:mm:ss at 1h+). */
-  protected timerDisplay_ = computed(() => {
-    const s = this.timerSecondsLeft_()
-    const h = Math.floor(s / 3600)
-    const m = Math.floor((s % 3600) / 60)
-    const sec = s % 60
-    return h > 0
-      ? `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
-      : `${m}:${sec.toString().padStart(2, '0')}`
-  })
-
-  /** Formatted stopwatch display (count-up, same format as timerDisplay_). */
-  protected stopwatchDisplay_ = computed(() => {
-    const s = this.stopwatchSecondsElapsed_()
-    const h = Math.floor(s / 3600)
-    const m = Math.floor((s % 3600) / 60)
-    const sec = s % 60
-    return h > 0
-      ? `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`
-      : `${m}:${sec.toString().padStart(2, '0')}`
-  })
-
   protected get workflowFormArray(): FormArray {
     return this.workflowParentForm_.get('workflow_items') as FormArray
   }
@@ -339,7 +293,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       )
       .subscribe((e) => {
         if (!e.url.startsWith('/cook')) {
-          this.closeAllExportOverlays()
+          this.cookExport.closeAllExportOverlays()
         }
       })
     const recipe = this.route.snapshot.data['recipe'] as Recipe | null
@@ -349,7 +303,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       this.stepDoneSet_.set(new Set())
       this.checkedIngredients_.set(new Set())
       this.peekedStepIndex_.set(null)
-      this.cancelTimer()
+      this.cookTimer.cancelTimer()
       this.selectedUnit_.set(recipe.yield_unit_ || 'unit')
       this.cookViewState.setLastViewedRecipeId(recipe._id)
       const base = recipe.yield_amount_ ?? 1
@@ -363,18 +317,9 @@ export class CookViewPage implements OnInit, OnDestroy {
     }
   }
 
-  /** Close export bar and preview so state is clean when user navigates away. */
-  private closeAllExportOverlays(): void {
-    this.exportBarExpanded_.set(false)
-    this.exportPreviewPayload_.set(null)
-    this.exportPreviewType_ = null
-  }
-
   ngOnDestroy(): void {
-    this.cancelTimer()
-    this.closeAllExportOverlays()
+    this.cookExport.closeAllExportOverlays()
     this.heroFab.clearPageActions()
-    if (this.stopwatchIntervalId_ !== null) clearInterval(this.stopwatchIntervalId_)
     if (this.scrollTimeoutId !== null) {
       clearTimeout(this.scrollTimeoutId)
       this.scrollTimeoutId = null
@@ -660,96 +605,47 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected async onExportInfo(): Promise<void> {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (recipe) await this.exportService.exportRecipeInfo(recipe, qty)
+    await this.cookExport.onExportInfo(this.recipe_(), this.targetQuantity_())
   }
 
   protected async onExportShoppingList(): Promise<void> {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (recipe) await this.exportService.exportShoppingList(recipe, qty)
+    await this.cookExport.onExportShoppingList(this.recipe_(), this.targetQuantity_())
   }
 
   protected onViewRecipeInfo(): void {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (!recipe) return
-    const payload = this.exportService.getRecipeInfoPreviewPayload(recipe, qty)
-    this.exportPreviewType_ = 'recipe-info'
-    this.exportPreviewPayload_.set(payload)
-    this.exportBarExpanded_.set(false)
+    this.cookExport.onViewRecipeInfo(this.recipe_(), this.targetQuantity_())
   }
 
   protected onViewShoppingList(): void {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (!recipe) return
-    const payload = this.exportService.getShoppingListPreviewPayload(recipe, qty)
-    this.exportPreviewType_ = 'shopping-list'
-    this.exportPreviewPayload_.set(payload)
-    this.exportBarExpanded_.set(false)
+    this.cookExport.onViewShoppingList(this.recipe_(), this.targetQuantity_())
   }
 
   protected onExportPreviewClose(): void {
-    this.exportPreviewPayload_.set(null)
-    this.exportPreviewType_ = null
+    this.cookExport.onExportPreviewClose()
   }
 
   protected async onExportFromPreview(): Promise<void> {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (!recipe || !this.exportPreviewType_) return
-    if (this.exportPreviewType_ === 'recipe-info') {
-      await this.exportService.exportRecipeInfo(recipe, qty)
-    } else if (this.exportPreviewType_ === 'shopping-list') {
-      await this.exportService.exportShoppingList(recipe, qty)
-    } else if (this.exportPreviewType_ === 'cooking-steps') {
-      await this.exportService.exportCookingSteps(recipe, qty)
-    } else if (this.exportPreviewType_ === 'dish-checklist') {
-      await this.exportService.exportDishChecklist(recipe, qty)
-    }
-    this.onExportPreviewClose()
+    await this.cookExport.onExportFromPreview(this.recipe_(), this.targetQuantity_())
   }
 
   protected onPrintFromPreview(): void {
-    window.print()
+    this.cookExport.onPrintFromPreview()
   }
 
   protected onViewCookingSteps(): void {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (!recipe) return
-    const payload = this.exportService.getCookingStepsPreviewPayload(recipe, qty)
-    this.exportPreviewType_ = 'cooking-steps'
-    this.exportPreviewPayload_.set(payload)
-    this.exportBarExpanded_.set(false)
+    this.cookExport.onViewCookingSteps(this.recipe_(), this.targetQuantity_())
   }
 
   protected onViewDishChecklist(): void {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (!recipe) return
-    const payload = this.exportService.getDishChecklistPreviewPayload(recipe, qty)
-    this.exportPreviewType_ = 'dish-checklist'
-    this.exportPreviewPayload_.set(payload)
-    this.exportBarExpanded_.set(false)
+    this.cookExport.onViewDishChecklist(this.recipe_(), this.targetQuantity_())
   }
 
   protected async onExportCookingSteps(): Promise<void> {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (recipe) await this.exportService.exportCookingSteps(recipe, qty)
+    await this.cookExport.onExportCookingSteps(this.recipe_(), this.targetQuantity_())
   }
 
   protected async onExportDishChecklist(): Promise<void> {
-    const recipe = this.recipe_()
-    const qty = this.targetQuantity_()
-    if (recipe) await this.exportService.exportDishChecklist(recipe, qty)
-  }
-
-  protected toggleExportBar(): void {
-    this.exportBarExpanded_.update((v: boolean) => !v)
+    await this.cookExport.onExportDishChecklist(this.recipe_(), this.targetQuantity_())
   }
 
   protected toggleTheme(): void {
@@ -910,124 +806,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected toggleStepPeek(index: number): void {
     if (index === this.activeStepIndex_()) return
     this.peekedStepIndex_.set(this.peekedStepIndex_() === index ? null : index)
-  }
-
-  /** Start a countdown timer on a step card. */
-  protected startTimer(stepIndex: number, totalSeconds: number): void {
-    if (this.timerIntervalId_ !== null) {
-      clearInterval(this.timerIntervalId_)
-    }
-    this.timerFinishedStepIndex_.set(null)
-    this.activeTimerStepIndex_.set(stepIndex)
-    this.timerSecondsLeft_.set(totalSeconds)
-    this.timerIntervalId_ = setInterval(() => {
-      this.timerSecondsLeft_.update((s) => s - 1)
-      if (this.timerSecondsLeft_() <= 0) {
-        clearInterval(this.timerIntervalId_!)
-        this.timerIntervalId_ = null
-        this.timerFinishedStepIndex_.set(this.activeTimerStepIndex_())
-        this.activeTimerStepIndex_.set(null)
-        this.timerSecondsLeft_.set(0)
-      }
-    }, 1000)
-  }
-
-  /** Cancel the active countdown timer. */
-  protected cancelTimer(): void {
-    if (this.timerIntervalId_ !== null) {
-      clearInterval(this.timerIntervalId_)
-      this.timerIntervalId_ = null
-    }
-    this.activeTimerStepIndex_.set(null)
-    this.timerFinishedStepIndex_.set(null)
-    this.timerSecondsLeft_.set(0)
-  }
-
-  /** Dismiss the timer-done alert for a finished step. */
-  protected dismissTimerDone(): void {
-    this.timerFinishedStepIndex_.set(null)
-  }
-  /** Expand the h:mm input for a step, pre-filling with the step's preset cooking time. */
-  protected expandTimerInput(stepIndex: number, presetMinutes: number): void {
-    const h = Math.floor(presetMinutes / 60)
-    const m = presetMinutes % 60
-    this.timerCustomInput_.set(h > 0 ? `${h}:${m.toString().padStart(2, '0')}` : `${presetMinutes}`)
-    this.timerInputExpandedIndex_.set(stepIndex)
-  }
-
-  /** Parse the h:mm input and start the countdown timer. */
-  protected confirmTimerInput(stepIndex: number): void {
-    const raw = this.timerCustomInput_().trim()
-    let totalMinutes = 0
-    if (raw.includes(':')) {
-      const parts = raw.split(':')
-      const h = parseInt(parts[0], 10) || 0
-      const m = parseInt(parts[1], 10) || 0
-      totalMinutes = h * 60 + m
-    } else {
-      totalMinutes = parseInt(raw, 10) || 0
-    }
-    if (totalMinutes > 0) {
-      this.startTimer(stepIndex, totalMinutes)
-    }
-    this.timerInputExpandedIndex_.set(null)
-    this.timerCustomInput_.set('')
-  }
-
-  /** Dismiss the h:mm input without starting a timer. */
-  protected cancelTimerInput(): void {
-    this.timerInputExpandedIndex_.set(null)
-    this.timerCustomInput_.set('')
-  }
-
-  /** Start a count-up stopwatch on a step card. */
-  protected startStopwatch(stepIndex: number): void {
-    if (this.stopwatchIntervalId_ !== null) {
-      clearInterval(this.stopwatchIntervalId_)
-    }
-    this.stopwatchStepIndex_.set(stepIndex)
-    this.stopwatchSecondsElapsed_.set(0)
-    this.stopwatchPaused_.set(false)
-    this.stopwatchIntervalId_ = setInterval(() => {
-      this.stopwatchSecondsElapsed_.update((s) => s + 1)
-    }, 1000)
-  }
-
-  /** Pause the running stopwatch. */
-  protected pauseStopwatch(): void {
-    if (this.stopwatchIntervalId_ !== null) {
-      clearInterval(this.stopwatchIntervalId_)
-      this.stopwatchIntervalId_ = null
-    }
-    this.stopwatchPaused_.set(true)
-  }
-
-  /** Resume a paused stopwatch from where it left off. */
-  protected resumeStopwatch(): void {
-    this.stopwatchPaused_.set(false)
-    this.stopwatchIntervalId_ = setInterval(() => {
-      this.stopwatchSecondsElapsed_.update((s) => s + 1)
-    }, 1000)
-  }
-
-  /** Toggle pause/resume on the active stopwatch. */
-  protected toggleStopwatch(): void {
-    if (this.stopwatchPaused_()) {
-      this.resumeStopwatch()
-    } else {
-      this.pauseStopwatch()
-    }
-  }
-
-  /** Close and reset the active stopwatch. */
-  protected stopStopwatch(): void {
-    if (this.stopwatchIntervalId_ !== null) {
-      clearInterval(this.stopwatchIntervalId_)
-      this.stopwatchIntervalId_ = null
-    }
-    this.stopwatchStepIndex_.set(null)
-    this.stopwatchSecondsElapsed_.set(0)
-    this.stopwatchPaused_.set(false)
   }
 
   protected onEdit(): void {

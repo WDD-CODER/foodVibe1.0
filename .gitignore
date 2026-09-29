@@ -128,6 +128,11 @@ apply-*.js
 # Render audit credentials (local only)
 .claude/reports/render-audit/.credentials.json
 
+# Label audit — raw production DB dump (recipe names, internal user ids); regenerate
+# locally with scripts/audit-labels.mjs instead of committing it. report.md (summary
+# tables/counts only) still gets tracked.
+.claude/reports/label-audit/data.json
+
 # Session manifests — per-session runtime state, never commit
 .claude/sessions/
 

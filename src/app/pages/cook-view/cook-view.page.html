@@ -66,10 +66,15 @@
             (ratingChange)="onRatingChange($event)"
           />
         </div>
-        @if (activeTimerStepIndex_() !== null) {
-        <div class="cv-hero-timer" [class.cv-hero-timer--alert]="timerFinishedStepIndex_() === activeTimerStepIndex_()">
-          <span class="cv-hero-timer-label">{{ 'step' | translatePipe }} {{ activeTimerStepIndex_()! + 1 }}</span>
-          <span class="cv-hero-timer-value">{{ timerDisplay_() }}</span>
+        @if (cookTimer.activeTimerStepIndex_() !== null) {
+        <div
+          class="cv-hero-timer"
+          [class.cv-hero-timer--alert]="cookTimer.timerFinishedStepIndex_() === cookTimer.activeTimerStepIndex_()"
+        >
+          <span class="cv-hero-timer-label"
+            >{{ 'step' | translatePipe }} {{ cookTimer.activeTimerStepIndex_()! + 1 }}</span
+          >
+          <span class="cv-hero-timer-value">{{ cookTimer.timerDisplay_() }}</span>
         </div>
         }
       </div>
@@ -123,8 +128,8 @@
         <lucide-icon name="pencil" [size]="18"></lucide-icon>
         {{ 'edit' | translatePipe }}
       </button>
-      <div class="export-bar-wrap" (mouseleave)="exportBarExpanded_.set(false)">
-        <div class="export-bar-actions" [class.expanded]="exportBarExpanded_()">
+      <div class="export-bar-wrap" (mouseleave)="cookExport.exportBarExpanded_.set(false)">
+        <div class="export-bar-actions" [class.expanded]="cookExport.exportBarExpanded_()">
           <span class="export-bar-label">{{ 'export_recipe_info' | translatePipe }}</span>
           <button
             type="button"
@@ -200,9 +205,9 @@
         <button
           type="button"
           class="edit-btn export-bar-main"
-          (click)="toggleExportBar()"
+          (click)="cookExport.toggleExportBar()"
           [attr.aria-label]="'export' | translatePipe"
-          [attr.aria-expanded]="exportBarExpanded_()"
+          [attr.aria-expanded]="cookExport.exportBarExpanded_()"
         >
           <lucide-icon name="download" [size]="18"></lucide-icon>
           {{ 'export' | translatePipe }}
@@ -537,20 +542,24 @@
               <p>{{ step.instruction_ }}</p>
               <!-- Timer/stopwatch pills sit under the step text (mirrors mockup's timerBtnLabel placement) -->
               <div class="cv-step-tools-row">
-                @if ((step.cooking_time_secs_ ?? 0) > 0) { @if (activeTimerStepIndex_() === si) {
-                <button type="button" class="cv-step-tool-btn" (click)="cancelTimer()">
-                  ⏱ {{ timerDisplay_() }} ⏸
+                @if ((step.cooking_time_secs_ ?? 0) > 0) { @if (cookTimer.activeTimerStepIndex_() === si) {
+                <button type="button" class="cv-step-tool-btn" (click)="cookTimer.cancelTimer()">
+                  ⏱ {{ cookTimer.timerDisplay_() }} ⏸
                 </button>
                 } @else {
-                <button type="button" class="cv-step-tool-btn" (click)="startTimer(si, step.cooking_time_secs_!)">
+                <button
+                  type="button"
+                  class="cv-step-tool-btn"
+                  (click)="cookTimer.startTimer(si, step.cooking_time_secs_!)"
+                >
                   ⏱ {{ 'timer_start' | translatePipe }}
                 </button>
-                } } @if (stopwatchStepIndex_() === si) {
-                <button type="button" class="cv-step-tool-btn" (click)="toggleStopwatch()">
-                  ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
+                } } @if (cookTimer.stopwatchStepIndex_() === si) {
+                <button type="button" class="cv-step-tool-btn" (click)="cookTimer.toggleStopwatch()">
+                  ⌚ {{ cookTimer.stopwatchDisplay_() }} {{ cookTimer.stopwatchPaused_() ? '▶' : '⏸' }}
                 </button>
                 } @else {
-                <button type="button" class="cv-step-tool-btn" (click)="startStopwatch(si)">
+                <button type="button" class="cv-step-tool-btn" (click)="cookTimer.startStopwatch(si)">
                   ⌚ {{ 'stopwatch' | translatePipe }}
                 </button>
                 }
@@ -564,22 +573,22 @@
           <!-- DONE step -->
           <div
             class="cv-step-card cv-step-card--done"
-            [class.cv-step-card--timer-alert]="timerFinishedStepIndex_() === si"
+            [class.cv-step-card--timer-alert]="cookTimer.timerFinishedStepIndex_() === si"
             [attr.data-step-index]="si"
           >
             <div class="cv-step-card-head">
               <span class="cv-step-num cv-step-num--done">✓</span>
               <span class="cv-step-done-label">{{ 'step_done_label' | translatePipe }}</span>
               <!-- Finished timer alert on done step -->
-              @if (timerFinishedStepIndex_() === si) {
-              <span class="cv-step-timer-pill cv-step-timer-pill--alert" (click)="dismissTimerDone()">
+              @if (cookTimer.timerFinishedStepIndex_() === si) {
+              <span class="cv-step-timer-pill cv-step-timer-pill--alert" (click)="cookTimer.dismissTimerDone()">
                 ⏱ {{ 'timer_done' | translatePipe }} ✕
               </span>
               }
               <!-- Running stopwatch on done step -->
-              @if (stopwatchStepIndex_() === si) {
-              <span class="cv-step-timer-pill" (click)="toggleStopwatch()">
-                ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
+              @if (cookTimer.stopwatchStepIndex_() === si) {
+              <span class="cv-step-timer-pill" (click)="cookTimer.toggleStopwatch()">
+                ⌚ {{ cookTimer.stopwatchDisplay_() }} {{ cookTimer.stopwatchPaused_() ? '▶' : '⏸' }}
               </span>
               }
               <!-- Undo done -->
@@ -598,22 +607,22 @@
           <!-- PENDING step — tap anywhere to jump to this step -->
           <div
             class="cv-step-card cv-step-card--pending"
-            [class.cv-step-card--timer-alert]="timerFinishedStepIndex_() === si"
+            [class.cv-step-card--timer-alert]="cookTimer.timerFinishedStepIndex_() === si"
             [attr.data-step-index]="si"
             (click)="setActiveStep(si)"
           >
             <div class="cv-step-card-head">
               <span class="cv-step-num">{{ si + 1 }}</span>
               <!-- Finished timer alert -->
-              @if (timerFinishedStepIndex_() === si) {
-              <span class="cv-step-timer-pill cv-step-timer-pill--alert" (click)="dismissTimerDone()">
+              @if (cookTimer.timerFinishedStepIndex_() === si) {
+              <span class="cv-step-timer-pill cv-step-timer-pill--alert" (click)="cookTimer.dismissTimerDone()">
                 ⏱ {{ 'timer_done' | translatePipe }} ✕
               </span>
               }
               <!-- Running stopwatch on pending step -->
-              @if (stopwatchStepIndex_() === si) {
-              <span class="cv-step-timer-pill" (click)="toggleStopwatch()">
-                ⌚ {{ stopwatchDisplay_() }} {{ stopwatchPaused_() ? '▶' : '⏸' }}
+              @if (cookTimer.stopwatchStepIndex_() === si) {
+              <span class="cv-step-timer-pill" (click)="cookTimer.toggleStopwatch()">
+                ⌚ {{ cookTimer.stopwatchDisplay_() }} {{ cookTimer.stopwatchPaused_() ? '▶' : '⏸' }}
               </span>
               }
             </div>
@@ -654,7 +663,7 @@
   </div>
   }
   <app-export-preview
-    [payload]="exportPreviewPayload_()"
+    [payload]="cookExport.exportPreviewPayload_()"
     (exportClick)="onExportFromPreview()"
     (printClick)="onPrintFromPreview()"
     (close)="onExportPreviewClose()"
