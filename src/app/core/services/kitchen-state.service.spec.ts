@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { provideHttpClient } from '@angular/common/http'
 import { KitchenStateService } from './kitchen-state.service'
 import { ProductDataService } from './product-data.service'
 import { RecipeDataService } from './recipe-data.service'
@@ -40,22 +42,19 @@ describe('KitchenStateService', () => {
     mockAllItemsSignal.set([])
     mockRecipesSignal.set([])
 
-    const iSpy = jasmine.createSpyObj('ProductDataService',
-      ['addProduct', 'updateProduct', 'deleteProduct'],
-      { allProducts_: mockAllItemsSignal }
-    )
+    const iSpy = jasmine.createSpyObj('ProductDataService', ['addProduct', 'updateProduct', 'deleteProduct'], {
+      allProducts_: mockAllItemsSignal
+    })
     iSpy.allProducts_ = mockAllItemsSignal
 
-    const rSpy = jasmine.createSpyObj('RecipeDataService',
-      ['addRecipe', 'updateRecipe', 'getRecipeById'],
-      { allRecipes_: mockRecipesSignal }
-    )
+    const rSpy = jasmine.createSpyObj('RecipeDataService', ['addRecipe', 'updateRecipe', 'getRecipeById'], {
+      allRecipes_: mockRecipesSignal
+    })
     rSpy.allRecipes_ = mockRecipesSignal
 
-    const dSpy = jasmine.createSpyObj('DishDataService',
-      ['addDish', 'updateDish', 'getDishById'],
-      { allDishes_: mockDishesSignal }
-    )
+    const dSpy = jasmine.createSpyObj('DishDataService', ['addDish', 'updateDish', 'getDishById'], {
+      allDishes_: mockDishesSignal
+    })
     dSpy.allDishes_ = mockDishesSignal
 
     const uSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
@@ -73,6 +72,8 @@ describe('KitchenStateService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         KitchenStateService,
         { provide: ProductDataService, useValue: iSpy },
         { provide: RecipeDataService, useValue: rSpy },
@@ -104,7 +105,6 @@ describe('KitchenStateService', () => {
 
       expect(service.products_().length).toBe(1)
       expect(service.products_()[0].name_hebrew).toBe('Tomato')
-
     })
   })
 
@@ -137,7 +137,6 @@ describe('KitchenStateService', () => {
         done()
       })
     })
-
 
     it('should throw error and show message if deleting non-existent product', (done) => {
       mockAllItemsSignal.set([])
@@ -203,14 +202,25 @@ describe('KitchenStateService', () => {
   describe('Direct State Updates', () => {
     it('should sync recipes_ from RecipeDataService and DishDataService', () => {
       const recipe: Recipe = {
-        _id: 'r1', name_hebrew: 'Hummus',
-        ingredients_: [], steps_: [], yield_amount_: 1, yield_unit_: 'portion',
-        default_station_: '', is_approved_: true
+        _id: 'r1',
+        name_hebrew: 'Hummus',
+        ingredients_: [],
+        steps_: [],
+        yield_amount_: 1,
+        yield_unit_: 'portion',
+        default_station_: '',
+        is_approved_: true
       }
       const dish: Recipe = {
-        _id: 'd1', name_hebrew: 'Salad', prep_items_: [],
-        ingredients_: [], steps_: [], yield_amount_: 1, yield_unit_: 'portion',
-        default_station_: '', is_approved_: true
+        _id: 'd1',
+        name_hebrew: 'Salad',
+        prep_items_: [],
+        ingredients_: [],
+        steps_: [],
+        yield_amount_: 1,
+        yield_unit_: 'portion',
+        default_station_: '',
+        is_approved_: true
       }
       mockRecipesSignal.set([recipe])
       mockDishesSignal.set([dish])
@@ -228,7 +238,7 @@ describe('KitchenStateService', () => {
       } as Omit<Supplier, '_id'>
       const saved = await service.addSupplier(supplierInput)
       expect(saved._id).toBeDefined()
-      expect(service.suppliers_().some(s => s.name_hebrew === 'Osem')).toBe(true)
+      expect(service.suppliers_().some((s) => s.name_hebrew === 'Osem')).toBe(true)
     })
   })
 })

@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { provideHttpClient } from '@angular/common/http'
 import { ReactiveFormsModule } from '@angular/forms'
 import { ProductFormComponent } from './product-form.component'
 import { ConversionService } from '@services/conversion.service'
@@ -73,6 +75,8 @@ describe('ProductFormComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ProductFormComponent, ReactiveFormsModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: Router, useValue: mockRouter },
         { provide: ConversionService, useValue: mockConversionService },
         { provide: UnitRegistryService, useValue: mockUnitRegistry },

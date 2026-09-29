@@ -7,6 +7,7 @@ import { KeyResolutionService } from './key-resolution.service'
 import { LoggingService } from './logging.service'
 import { LoadingService } from './loading.service'
 import { DishDataService } from './dish-data.service'
+import { newId } from '../utils/id.util'
 import type { FlatPrepItem, PrepCategory } from '../models/recipe.model'
 
 const STORAGE_KEY = 'KITCHEN_PREPARATIONS'
@@ -108,7 +109,7 @@ export class PreparationRegistryService {
 
   /** Persist a single registry doc. Assigns _id if missing (e.g. after demo load) so future put() works. */
   private async persistDoc(payload: PreparationRegistryDoc): Promise<void> {
-    const id = payload._id ?? this.storageService.makeId()
+    const id = payload._id ?? newId()
     await this.storageService.replaceAll(STORAGE_KEY, [{ ...payload, _id: id }])
   }
 

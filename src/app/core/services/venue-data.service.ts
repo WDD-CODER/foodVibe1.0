@@ -85,7 +85,7 @@ export class VenueDataService extends BaseEntityDataService<VenueProfile> {
 
   async getTrashVenues(): Promise<(VenueProfile & { deletedAt: number })[]> {
     try {
-      return this.storage.query<VenueProfile & { deletedAt: number }>(TRASH_KEY, 0)
+      return this.storage.query<VenueProfile & { deletedAt: number }>(TRASH_KEY)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({
@@ -99,7 +99,7 @@ export class VenueDataService extends BaseEntityDataService<VenueProfile> {
 
   async restoreVenue(_id: string): Promise<VenueProfile> {
     try {
-      const trash = await this.storage.query<VenueProfile & { deletedAt: number }>(TRASH_KEY, 0)
+      const trash = await this.storage.query<VenueProfile & { deletedAt: number }>(TRASH_KEY)
       const found = trash.find((v) => v._id === _id)
       if (!found) throw new Error(`Venue ${_id} not found in trash`)
       const { deletedAt: _, ...item } = found

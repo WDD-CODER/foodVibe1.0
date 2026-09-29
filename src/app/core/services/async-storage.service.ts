@@ -1,168 +1,71 @@
 import { Injectable, inject } from '@angular/core'
-import { ACTIVITY_STORAGE_KEY } from './activity-log.service'
-import { environment } from '../../../environments/environment'
 import { HttpStorageAdapter } from './http-storage.adapter'
-import { filterOptionsByStartsWith } from '../utils/filter-starts-with.util'
 
 export type EntityId = {
   _id: string
 }
 
-/** Thrown when localStorage.setItem fails (quota exceeded, private mode, disabled). */
-export const STORAGE_ERROR_MESSAGE = 'Storage failed: quota or access denied'
-
-/** Max time a deferred backup write can be starved by requestIdleCallback before it's forced to run. */
-const BACKUP_WRITE_MAX_DELAY_MS = 2000
-
-/** Entity types that are mirrored to backup_<key> after every successful save. */
-export const BACKUP_ENTITY_TYPES = new Set<string>([
-  'PRODUCT_LIST',
-  'RECIPE_LIST',
-  'DISH_LIST',
-  'KITCHEN_SUPPLIERS',
-  'EQUIPMENT_LIST',
-  'VENUE_PROFILES',
-  'MENU_EVENT_LIST',
-  'TRASH_RECIPES',
-  'TRASH_DISHES',
-  'TRASH_PRODUCTS',
-  'TRASH_EQUIPMENT',
-  'TRASH_VENUES',
-  'TRASH_MENU_EVENTS',
-  'VERSION_HISTORY',
-  ACTIVITY_STORAGE_KEY,
-  'KITCHEN_UNITS',
-  'KITCHEN_PREPARATIONS',
-  'KITCHEN_CATEGORIES',
-  'KITCHEN_ALLERGENS',
-  'KITCHEN_LABELS',
-  'MENU_TYPES',
-  'MENU_SECTION_CATEGORIES'
-])
-
+/**
+ * Thin facade over HttpStorageAdapter. Plan 321 Phase 1 removed the localStorage
+ * fallback mode (useBackend/useBackendAuth flags, the backup_<key> mirror, and the
+ * artificial query() delay) — every method now delegates to the backend unconditionally.
+ * Kept as its own class (rather than inlining HttpStorageAdapter everywhere) so data
+ * services have one stable injection point.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
-  /** Injected unconditionally so Angular's DI graph is stable.
-   *  Only used at runtime when environment.useBackend is true. */
   private httpAdapter = inject(HttpStorageAdapter)
 
-  async query<T>(entityType: string, delay = 100): Promise<T[]> {
-    if (environment.useBackend) return this.httpAdapter.query<T>(entityType, delay)
-    let entities: T[] = []
-    try {
-      const raw = localStorage.getItem(entityType) || 'null'
-      const parsed = JSON.parse(raw)
-      entities = Array.isArray(parsed) ? parsed : parsed ? [parsed] : []
-    } catch {
-      entities = []
-    }
-    if (delay) {
-      return new Promise((resolve) => setTimeout(resolve, delay, entities))
-    }
-    return entities
+  async query<T>(entityType: string): Promise<T[]> {
+    return this.httpAdapter.query<T>(entityType)
   }
 
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
-    if (environment.useBackend) return this.httpAdapter.get<T>(entityType, entityId)
-    const entities = await this.query<T>(entityType)
-    const entity = entities.find((entity) => entity._id === entityId)
-    if (!entity) throw new Error(`Cannot get, Item ${entityId} of type: ${entityType} does not exist`)
-    return entity
+    return this.httpAdapter.get<T>(entityType, entityId)
   }
 
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
-    if (environment.useBackend) return this.httpAdapter.post<T>(entityType, newEntity)
-    const entityToSave = { ...newEntity, _id: this.makeId() }
-    const entities = await this.query<T & EntityId>(entityType, 0)
-    entities.push(entityToSave)
-    this._save(entityType, entities)
-    return entityToSave
+    return this.httpAdapter.post<T>(entityType, newEntity)
   }
 
   /**
-   * TEMPORARY (dev-process-only, see chat 2026-09-26). No-op in localStorage mode
-   * (no master/clone concept there) — backend-only.
+   * TEMPORARY (dev-process-only, see chat 2026-09-26).
    */
   async pushToMaster(entityType: string, entityId: string): Promise<void> {
-    if (environment.useBackend) return this.httpAdapter.pushToMaster(entityType, entityId)
+    return this.httpAdapter.pushToMaster(entityType, entityId)
   }
 
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
-    if (environment.useBackend) return this.httpAdapter.put<T>(entityType, updatedEntity)
-    const entities = await this.query<T>(entityType, 0)
-    const idx = entities.findIndex((entity) => entity._id === updatedEntity._id)
-    if (idx === -1) throw new Error(`Cannot update, product ${updatedEntity._id} does not exist`)
-
-    entities[idx] = updatedEntity
-    this._save(entityType, entities)
-    return updatedEntity
+    return this.httpAdapter.put<T>(entityType, updatedEntity)
   }
 
   async remove(entityType: string, entityId: string): Promise<void> {
-    if (environment.useBackend) return this.httpAdapter.remove(entityType, entityId)
-    const entities = await this.query<EntityId>(entityType, 0)
-    const idx = entities.findIndex((entity) => entity._id === entityId)
-    if (idx !== -1) {
-      entities.splice(idx, 1)
-      this._save(entityType, entities)
-    } else {
-      throw new Error(`Cannot remove, product ${entityId} of type: ${entityType} does not exist`)
-    }
+    return this.httpAdapter.remove(entityType, entityId)
   }
 
-  public makeId(length = 5): string {
-    let txt = ''
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    for (let i = 0; i < length; i++) {
-      txt += possible.charAt(Math.floor(Math.random() * possible.length))
-    }
-    return txt
-  }
-
-  /** Append an entity (e.g. with existing _id) to a list and save. Use delay 0 to avoid artificial delay. */
+  /** Appends an entity that already has an _id (e.g. restoring from trash). */
   async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
-    if (environment.useBackend) return this.httpAdapter.appendExisting<T>(entityType, entity)
-    const list = await this.query<T>(entityType, 0)
-    list.push(entity)
-    this._save(entityType, list)
+    return this.httpAdapter.appendExisting<T>(entityType, entity)
   }
 
-  /** Replace the entire list for an entity type (e.g. trash list after remove). */
+  /** Replaces the entire collection for an entity type (e.g. trash clear-all, a registry save). */
   async replaceAll<T>(entityType: string, entities: T[]): Promise<void> {
-    if (environment.useBackend) return this.httpAdapter.replaceAll<T>(entityType, entities)
-    this._save(entityType, entities)
+    return this.httpAdapter.replaceAll<T>(entityType, entities)
   }
 
-  /**
-   * Backend: GET with filterEntityType/filterEntityId query params.
-   * localStorage: filters the in-memory array (small-scale path).
-   */
   async queryFiltered<T extends { entityType?: string; entityId?: string }>(
     entityType: string,
     filterEntityType: string,
     filterEntityId: string
   ): Promise<T[]> {
-    if (environment.useBackend) {
-      return this.httpAdapter.queryFiltered<T>(entityType, filterEntityType, filterEntityId)
-    }
-    const all = await this.query<T>(entityType, 0)
-    return all.filter((e) => e.entityType === filterEntityType && e.entityId === filterEntityId)
+    return this.httpAdapter.queryFiltered<T>(entityType, filterEntityType, filterEntityId)
   }
 
-  /**
-   * Lean prefix-match typeahead search (plan 301, Milestone 1).
-   * Backend: GET /:type/search?q=&limit= — server does the prefix match, returns a
-   * lean projection only.
-   * localStorage: filters the full in-memory array with the same "starts with" +
-   * script semantics the typeahead components used to apply themselves, so behaviour
-   * is unchanged in dev/demo mode.
-   */
+  /** Lean prefix-match typeahead search (plan 301, Milestone 1). */
   async search<T extends { name_hebrew?: string }>(entityType: string, q: string, limit = 25): Promise<T[]> {
-    if (environment.useBackend) return this.httpAdapter.search<T>(entityType, q, limit)
-    const all = await this.query<T>(entityType, 0)
-    return filterOptionsByStartsWith(all, q, (item) => (item.name_hebrew ?? '').trim()).slice(0, limit)
+    return this.httpAdapter.search<T>(entityType, q, limit)
   }
 
   /**
@@ -173,90 +76,10 @@ export class StorageService {
    * dashboard-overview.component.ts's prior unapprovedCount_ computed for the source of truth.
    */
   async count(entityType: string, filter?: 'lowStock' | 'unapproved'): Promise<number> {
-    if (environment.useBackend) return this.httpAdapter.count(entityType, filter)
-    const all = await this.query<Record<string, unknown>>(entityType, 0)
-    if (filter === 'lowStock') return all.filter((e) => Number(e['min_stock_level_'] ?? 0) > 0).length
-    if (filter === 'unapproved') return all.filter((e) => e['is_approved_'] !== true).length
-    return all.length
+    return this.httpAdapter.count(entityType, filter)
   }
 
-  /**
-   * Backend: DELETE /:type/bulk with { ids }.
-   * localStorage: remove matching ids from the array and save.
-   */
   async deleteBulk(entityType: string, ids: string[]): Promise<void> {
-    if (environment.useBackend) return this.httpAdapter.deleteBulk(entityType, ids)
-    if (ids.length === 0) return
-    const idSet = new Set(ids)
-    const list = await this.query<EntityId>(entityType, 0)
-    this._save(
-      entityType,
-      list.filter((e) => !idSet.has(e._id))
-    )
-  }
-
-  /** entityType -> latest entities awaiting a deferred backup write. One pending write per
-   *  entityType at a time — a burst of saves (e.g. bulk delete) coalesces onto whichever
-   *  write is already scheduled instead of queueing a full re-stringify per save. */
-  private readonly pendingBackups_ = new Map<string, unknown[]>()
-  private backupFlushListenerAttached_ = false
-
-  private _save<T>(entityType: string, entities: T[]): void {
-    try {
-      localStorage.setItem(entityType, JSON.stringify(entities))
-    } catch {
-      throw new Error(STORAGE_ERROR_MESSAGE)
-    }
-    if (BACKUP_ENTITY_TYPES.has(entityType)) {
-      // Off the critical path (plan 303 addendum): the backup mirror is a second full-array
-      // JSON.stringify + setItem, which scales with the whole collection's size, not the one
-      // row that changed. Scheduling it after the current task lets the UI update (and the
-      // caller's Promise resolve) without waiting on that second stringify.
-      this._scheduleBackupWrite(entityType, entities)
-    }
-  }
-
-  private _scheduleBackupWrite<T>(entityType: string, entities: T[]): void {
-    const alreadyScheduled = this.pendingBackups_.has(entityType)
-    this.pendingBackups_.set(entityType, entities)
-    this._ensureBackupFlushOnUnload()
-    // A callback is already queued for this entityType — it'll pick up this newer payload
-    // when it fires, so a second save arriving before then shouldn't schedule a second write.
-    if (alreadyScheduled) return
-
-    const flush = () => this._flushBackup(entityType)
-    const ric = (globalThis as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number })
-      .requestIdleCallback
-    if (typeof ric === 'function') {
-      // Bounded timeout: a busy main thread with no idle periods would otherwise starve this
-      // callback indefinitely, drifting the backup mirror further from the main key.
-      ric(flush, { timeout: BACKUP_WRITE_MAX_DELAY_MS })
-    } else {
-      setTimeout(flush, 0)
-    }
-  }
-
-  private _flushBackup(entityType: string): void {
-    const entities = this.pendingBackups_.get(entityType)
-    if (entities === undefined) return
-    this.pendingBackups_.delete(entityType)
-    try {
-      localStorage.setItem(`backup_${entityType}`, JSON.stringify(entities))
-    } catch {
-      // Backup write failed; main save already succeeded — log only, do not fail
-    }
-  }
-
-  /** Synchronously flush any still-pending backup writes before the tab closes/reloads, so a
-   *  deferred write can't get silently dropped in the window between the main save and the
-   *  idle callback firing. */
-  private _ensureBackupFlushOnUnload(): void {
-    if (this.backupFlushListenerAttached_ || typeof window === 'undefined') return
-    this.backupFlushListenerAttached_ = true
-    window.addEventListener('pagehide', () => {
-      for (const entityType of Array.from(this.pendingBackups_.keys())) {
-        this._flushBackup(entityType)
-      }
-    })
+    return this.httpAdapter.deleteBulk(entityType, ids)
   }
 }

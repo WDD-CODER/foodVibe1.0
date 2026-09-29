@@ -32,13 +32,15 @@ If a Reality Check shows a step is already done, **do not redo it**. Mark it `[x
 | D3 | **Taxonomy → `course` (single) + `protein` (single) + `labels` (freeform only). Menu sections reference `course`.** | `labels` stops carrying structure. Menu section names stop being free text (Phase 4). |
 | D4 | **Naming → rename persisted fields to one convention during the schema migration.** | camelCase, no trailing `_` in persisted data. Done in the same migration that introduces `schemaVersion` (Phase 2b). |
 
-## Decision gates (not yet decided — ask at the named phase, don't assume)
+## Decision gates
 
-| Gate | Question | Ask at | Architect recommendation |
-|---|---|---|---|
-| G1 | Merge `RECIPE_LIST` + `DISH_LIST` into one `recipes` collection with `kind: 'dish' \| 'preparation'`? They share one schema, and the split doubles services, trash collections and sub-recipe reference logic. | Phase 2b Step 0 | Yes, in the same v2 migration |
-| G2 | Rename collections from localStorage-era `SCREAMING_CASE` to camelCase (`PRODUCT_LIST` → `products`)? | Phase 2b Step 0 | Yes if G1 = yes (same migration); otherwise defer |
-| G3 | Kosher status (`meat` / `dairy` / `pareve`) as its **own** axis, separate from `protein`? `dairy_prep` and `dairy_sauce` in the legacy data suggest it matters. | Phase 4 Step 0 | Yes, as `kosherType`, because it's orthogonal to protein |
+> G1–G3 decided by the Human 2026-09-29 (batched ahead of Phase 1, before their named "ask at" phase, at the Human's request). G4/G5 remain open — ask at Phase 4 as planned.
+
+| Gate | Question | Ask at | Architect recommendation | **Decision** |
+|---|---|---|---|---|
+| G1 | Merge `RECIPE_LIST` + `DISH_LIST` into one `recipes` collection with `kind: 'dish' \| 'preparation'`? They share one schema, and the split doubles services, trash collections and sub-recipe reference logic. | Phase 2b Step 0 | Yes, in the same v2 migration | **YES — merge** (2026-09-29) |
+| G2 | Rename collections from localStorage-era `SCREAMING_CASE` to camelCase (`PRODUCT_LIST` → `products`)? | Phase 2b Step 0 | Yes if G1 = yes (same migration); otherwise defer | **YES — rename** (2026-09-29) |
+| G3 | Kosher status (`meat` / `dairy` / `pareve`) as its **own** axis, separate from `protein`? `dairy_prep` and `dairy_sauce` in the legacy data suggest it matters. | Phase 4 Step 0 | Yes, as `kosherType`, because it's orthogonal to protein | **YES — separate `kosherType`** (2026-09-29) |
 | G4 | Legacy categories "ideas (preparations/dishes)" (keys 56/57): are they really a **workflow status** (idea → draft → approved) rather than a label? | Phase 4 mapping review | Model as `status` alongside `isApproved`, or keep as a label for now |
 | G5 | Preparation-family legacy categories (sauces, doughs, stocks, 2–16, 63, 68–77): labels, or the existing preparation-category registry? | Phase 4 mapping review | Keep as labels in this plan (no behavior change) |
 
@@ -566,15 +568,15 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 - [ ] P0.5 ADR 0008 (`docs/brain/decisions/0008-professional-foundation-refactor.md`)
 
 ### Phase 1 — Single sources of truth & dead paths
-- [ ] P1.0 Reality Check + Human go
-- [ ] P1.1 `server/constants/collections.js` + derived lists + client backup list; reconcile drift
-- [ ] P1.2 Single `newId()` (server + client); server-generated `_id` on POST
-- [ ] P1.3 Remove localStorage mode, `useBackend` flags, `delay` (`async-storage.service.ts`, `src/environments/*.ts`, `angular.json`)
-- [ ] P1.4 Retire/restrict `PUT /:type` whole-collection replace (`generic.js`, `replaceAll` callers)
-- [ ] P1.5 Rate limits on `/api/v1/data` writes and `/api/v1/ai` (`server/index.js`)
-- [ ] P1.6 Fix docs drift (`standards-backend.md §5`) + stale `imageUrl_` comment
-- [ ] P1.7 `render.yaml` `PERF_LOG: "0"` + Human dashboard mirror
-- [ ] P1.8 Stale remote branch list → Human-approved deletions only
+- [x] P1.0 Reality Check + Human go
+- [x] P1.1 `server/constants/collections.js` + derived lists + client backup list; reconcile drift — also fixed a real drift bug (MENU_EVENT_TYPES/EQUIPMENT_CUSTOM_CATEGORIES missing from CLONEABLE_TYPES/BACKUP_ENTITY_TYPES)
+- [x] P1.2 Single `newId()` (server + client); server-generated `_id` on POST — client-supplied `_id` still honored when present (appendExisting/trash-restore depends on it, found during implementation)
+- [x] P1.3 Remove localStorage mode, `useBackend` flags, `delay` — also removed the now-dead `backup_<key>` localStorage mirror (no confirmation available; safest default given it's meaningless without localStorage mode)
+- [x] P1.4 Retire/restrict `PUT /:type` whole-collection replace — restricted to `REPLACEABLE_TYPES` (registries actually in use + TRASH_*/VERSION_HISTORY, broader than originally assumed per Reality Check)
+- [x] P1.5 Rate limits on `/api/v1/data` writes (300/15min) and `/api/v1/ai` (20/15min per user)
+- [x] P1.6 Fix docs drift (`standards-backend.md §5`, `standards-security.md §9`) + stale `imageUrl_` comment
+- [x] P1.7 `render.yaml` `PERF_LOG: "0"` — **Human action still open:** mirror in the Render dashboard (file doesn't auto-sync to the live service)
+- [ ] P1.8 Stale remote branch list gathered (65 branches, 60+ days, no open PR — `gh-pages` excluded, it's the deploy target) — **awaiting Human approval before any deletion**
 
 ### Phase 2a — Shared Zod (observe)
 - [ ] P2a.0 Reality Check + Human go

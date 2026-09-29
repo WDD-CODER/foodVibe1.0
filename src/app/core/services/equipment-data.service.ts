@@ -110,7 +110,7 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
 
   async getTrashEquipment(): Promise<(Equipment & { deletedAt: number })[]> {
     try {
-      return this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY, 0)
+      return this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({
@@ -124,7 +124,7 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
 
   async restoreEquipment(_id: string): Promise<Equipment> {
     try {
-      const trash = await this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY, 0)
+      const trash = await this.storage.query<Equipment & { deletedAt: number }>(TRASH_KEY)
       const found = trash.find((e) => e._id === _id)
       if (!found) throw new Error(`Equipment ${_id} not found in trash`)
       const { deletedAt: _, ...item } = found

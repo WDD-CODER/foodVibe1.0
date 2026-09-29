@@ -41,6 +41,8 @@ Current branch (`fix/render-env-vars-and-gitignore`) has unpushed commits ahead 
 
 **STATUS: Human gave explicit go (chat, 2026-09-29) to proceed continuously through the plan without per-step confirmation, except for actual Atlas writes/migrations and architectural decision gates (G1–G5), which still get flagged.**
 
+**Gates G1/G2/G3 decided 2026-09-29 (batched ahead of schedule, at Human's request):** all three YES (merge recipes/dishes, rename collections, separate `kosherType`). Recorded in the plan file's Decision gates table. G4/G5 remain open for Phase 4.
+
 ---
 
 ## Phase 0 — Execution log (2026-09-29)
@@ -62,3 +64,49 @@ Branch: `chore/foundation-p0-safety-net` (created from `fix/render-env-vars-and-
 
 ### Status: Phase 0 done-when criteria fully met.
 Two scratch DBs left in place for inspection (`foodvibe_scratch_p0drill`, `foodvibe_scratch_atlas_p0drill`) — drop manually via an admin-scoped connection when convenient; not urgent.
+
+---
+
+## Phase 1 — Reality Check (2026-09-29)
+
+Branch: `chore/foundation-p1-single-source-of-truth` (from `origin/main` post-Phase-0-merge, `248cb17d`).
+
+### 1. Commits since Phase 0 merge
+None — this Reality Check runs immediately after.
+
+### 2. Open branches/PRs
+`gh pr list --state open` → none.
+
+### 3. Ledger / session-state / newer plans
+`.claude/todo.md` Plan 321 entry is current (Phase 0 done, Phase 1 next). No competing work.
+
+### 4. Assumed current state → live verification
+
+| Assumption | Status | Evidence |
+|---|---|---|
+| Collection lists in 4 places (3 server constants files + client `BACKUP_ENTITY_TYPES`) | ✅ still true | `server/constants/{all-user-entity-types,cloneable-types,searchable-entity-types}.js` + `async-storage.service.ts` |
+| `makeId` defined in generic.js, sync-master.js, async-storage.service.ts (3 places) | ⚠️ changed — more places | Actually 6 server-side standalone functions (`auth.js`, `generic.js`, `clone-master.js`, `seed-master.js`, `sync-master.js`, `legacy-import/lib/transform.js`) + 1 client-side **method** (`AsyncStorageService.makeId()`, not a standalone function — `grep "function makeId"` misses it). Adjustment: `newId()` consolidation covers all 6 server call sites except `legacy-import/` (v1-only, retired in Phase 2b Step 4 — not touched). |
+| `PUT /:type` (whole-collection replace) called only by `preparation-registry.service.ts` | ⚠️ changed — much broader usage | 6 services call `storage.replaceAll(...)`: `preparation-registry.service.ts` (registry, as assumed) **and** `dish-data`, `equipment-data`, `product-data`, `recipe-data`, `venue-data`, `version-history` services — all for **TRASH_\* clear-all / restore-all**, not registry replacement. Adjustment: restrict the endpoint to registry **and** TRASH_\*/VERSION_HISTORY collections, not registries only — both categories are transitional (registries → Phase 3, TRASH_\* → Phase 6). |
+| `environment.ts` has `useBackend: false` / `useBackendAuth: false` | ✅ still true | |
+| Rate limiting only in `auth.js` | ✅ still true | |
+| `render.yaml` `PERF_LOG: "1"`, plan 302 closed | ✅ still true | plan 302 fully archived, M1 sample collected 2026-09-27 |
+| `standards-backend.md §5` drift (doc says auth-only, code allows anonymous master reads) | ✅ still true — resolved | Human decided: keep anonymous reads (batched question this session), just fix the doc |
+| `recipe.model.ts` stale `imageUrl_` comment | ✅ still true | |
+
+**STATUS: proceeding directly into Phase 1 implementation (Low risk, no Atlas) per the Human's "run till the plan is done" instruction.**
+
+---
+
+## Phase 1 — Execution log (2026-09-29)
+
+Branch: `chore/foundation-p1-single-source-of-truth` (from `origin/main` post-Phase-0-merge).
+
+- **P1.1:** `server/constants/collections.js` is now the single registry; the 3 old constants files re-export from it. Found and fixed a real drift: `MENU_EVENT_TYPES`/`EQUIPMENT_CUSTOM_CATEGORIES` were in `ALL_USER_ENTITY_TYPES` but missing from `CLONEABLE_TYPES`/`BACKUP_ENTITY_TYPES` — added to both. Added `scripts/check-backup-entity-types.mjs` (`npm run lint:backup-entity-types`) to catch future drift — not yet wired into CI (matches the pre-existing gap on `lint:icons`/`lint:no-native-select`, didn't expand scope to fix that too).
+- **P1.2:** `server/utils/id.js` (`newId()`, `crypto.randomUUID()`) replaces 5 duplicated `makeId()` implementations (auth.js, generic.js, clone-master.js, seed-master.js, sync-master.js). `src/app/core/utils/id.util.ts` is the client equivalent, used by `preparation-registry.service.ts`. **Mid-implementation finding:** the plan's "client-supplied `_id` is ignored for new docs" would have broken `HttpStorageAdapter.appendExisting()` (trash restore), which posts through the same `POST /:type` route and depends on the server honoring its `_id`. Adjusted: server generates `_id` only when the body omits one; a supplied one is still honored.
+- **P1.3:** Removed `StorageService`'s entire localStorage fallback (now a thin facade over `HttpStorageAdapter`), the `useBackend`/`useBackendAuth` flags from all 5 environment files, the `delay` param from `query()`, and the `backup_<key>` mirror (`BACKUP_ENTITY_TYPES`'s localStorage consumer — the mechanism is meaningless without localStorage mode; no live confirmation available, removing is the safer default over keeping dead code). `environment.ts` (plain `ng serve`) now matches `environment.local.ts`. **Real regression found and fixed:** `UserService`'s constructor previously gated its silent-refresh HTTP call behind `useBackendAuth`; removing that gate means it now *always* touches `HttpClient` on construction — correct for prod, but broke 5 spec files (23 test failures) that constructed real `UserService`/`KitchenStateService`/etc. without providing `HttpClient` in tests. Fixed by adding `provideHttpClient()` + `provideHttpClientTesting()` to each (matches the existing pattern already used in `dashboard.page.spec.ts`). Also deleted now-dead fake-guest-login/fake-localStorage-signup code paths in `auth-modal.component.ts` and `user.service.ts` — this is the exact "fake auth" behavior the `worktree-dev-server-needs-local-config` memory warned about; it can no longer happen.
+- **P1.4:** `PUT /:type` (whole-collection replace) restricted to a `REPLACEABLE_TYPES` allowlist. **Reality Check correction:** the plan assumed only `preparation-registry.service.ts` used this; actually 6 services use it for `TRASH_*`/`VERSION_HISTORY` clear-all/restore-all/trim. Allowlist = `KITCHEN_PREPARATIONS` + all `TRASH_*` + `VERSION_HISTORY`.
+- **P1.5:** `dataWriteLimiter` (300/15min, writes only) on `/api/v1/data`; `aiLimiter` (20/15min, keyed by `userId`) on all 11 `/api/v1/ai` write routes.
+- **P1.6:** Fixed `standards-backend.md §5` and `standards-security.md §9` — both incorrectly claimed all reads require a JWT; corrected to describe the real, intentional `optionalToken` behavior (Human confirmed this session: keep anonymous master-data reads). Fixed stale `imageUrl_` "Base64 data-URL" comment (images are on Cloudinary).
+- **P1.7:** `render.yaml` `PERF_LOG` → `"0"` (plan 302's sample was collected 2026-09-27, confirmed closed). **Open Human action:** mirror in the Render dashboard — the file doesn't auto-sync to the live service.
+- **P1.8:** Gathered 65 remote branches with no commits in 60+ days and no open PR (full list not reproduced here — see git). Excluded `gh-pages` from candidates (it's the GitHub Pages deploy target, not stale). **No deletions made — awaiting explicit Human approval of which (if any) to delete**, per the plan's own rule.
+- **Verification:** `npm test --prefix server` → 49/49 pass. `ng build` → clean (same pre-existing warnings only). `ng test` → 309/309 pass (after fixing the HttpClient regression above). Live browser click-through (create/edit/delete a product/recipe/menu event on `dev:local`) **not done** — flagging explicitly rather than claiming it.

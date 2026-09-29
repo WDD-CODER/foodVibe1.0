@@ -1,28 +1,5 @@
-const ALL_USER_ENTITY_TYPES = [
-  'PRODUCT_LIST',
-  'RECIPE_LIST',
-  'DISH_LIST',
-  'KITCHEN_SUPPLIERS',
-  'EQUIPMENT_LIST',
-  'VENUE_PROFILES',
-  'MENU_EVENT_LIST',
-  'TRASH_RECIPES',
-  'TRASH_DISHES',
-  'TRASH_PRODUCTS',
-  'TRASH_EQUIPMENT',
-  'TRASH_VENUES',
-  'TRASH_MENU_EVENTS',
-  'VERSION_HISTORY',
-  'activity_log',
-  'KITCHEN_UNITS',
-  'KITCHEN_PREPARATIONS',
-  'KITCHEN_CATEGORIES',
-  'KITCHEN_ALLERGENS',
-  'KITCHEN_LABELS',
-  'MENU_TYPES',
-  'MENU_EVENT_TYPES',
-  'MENU_SECTION_CATEGORIES',
-  'EQUIPMENT_CUSTOM_CATEGORIES',
-]
+// Derived from server/constants/collections.js — the single source of truth.
+// Kept as its own file/export so existing call sites don't need to change.
+const { ALL_USER_ENTITY_TYPES } = require('./collections')
 
 module.exports = { ALL_USER_ENTITY_TYPES }
