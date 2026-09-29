@@ -261,7 +261,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       Type: 'type',
       Allergens: 'allergens',
       Approved: 'approved',
-      Station: 'station'
+      Station: 'station',
+      Course: 'course'
     }
     return map[internalName] ?? internalName.toLowerCase()
   }
@@ -314,6 +315,9 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
       const station = (recipe.default_station_ || '').trim() || '_none'
       bump('Station', station)
+
+      const course = (recipe.course_ || '').trim() || '_none'
+      bump('Course', course)
     })
 
     // Always show both Approved options (כן/לא), even at 0, so the sidebar can show
@@ -330,6 +334,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const optionLabel = (name: string, value: string): string => {
       if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no'
       if (name === 'Station' && value === '_none') return 'no_station'
+      if (name === 'Course' && value === '_none') return 'no_course'
       return value
     }
 
@@ -395,6 +400,9 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
           } else if (category === 'Station') {
             const st = (recipe.default_station_ || '').trim() || '_none'
             recipeValues = [st]
+          } else if (category === 'Course') {
+            const c = (recipe.course_ || '').trim() || '_none'
+            recipeValues = [c]
           }
           return selectedValues.some((v) => recipeValues.includes(v))
         })

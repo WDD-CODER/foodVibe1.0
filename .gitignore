@@ -150,6 +150,7 @@ apply-*.js
 # tables/counts only) still gets tracked.
 .claude/reports/label-audit/data.json
 .claude/reports/label-audit/merge-log-*.json
+.claude/reports/label-audit/migrate-courses-log-*.json
 
 # Session manifests — per-session runtime state, never commit
 .claude/sessions/

@@ -30,7 +30,18 @@ export class TranslationService {
   public async loadGlobalDictionary(): Promise<void> {
     try {
       const jsonPath = 'assets/data/dictionary.json'
-      const baseData = await firstValueFrom(this.http.get<{ units?: Record<string, string>; categories?: Record<string, string>; section_categories?: Record<string, string>; allergens?: Record<string, string>; actions?: Record<string, string>; preparation_categories?: Record<string, string>; export_headers?: Record<string, string>; general?: Record<string, string> }>(jsonPath))
+      const baseData = await firstValueFrom(
+        this.http.get<{
+          units?: Record<string, string>
+          categories?: Record<string, string>
+          section_categories?: Record<string, string>
+          allergens?: Record<string, string>
+          actions?: Record<string, string>
+          preparation_categories?: Record<string, string>
+          export_headers?: Record<string, string>
+          general?: Record<string, string>
+        }>(jsonPath)
+      )
 
       const baseFlattened = {
         ...(baseData.units ?? {}),
@@ -44,16 +55,19 @@ export class TranslationService {
       }
 
       const localData = localStorage.getItem('DICTIONARY_CACHE')
-      const existingCache = localData ? JSON.parse(localData) as Record<string, string> : {}
+      const existingCache = localData ? (JSON.parse(localData) as Record<string, string>) : {}
 
       const finalDict = { ...baseFlattened, ...existingCache }
 
       const sortedFinalDict = Object.keys(finalDict)
         .sort()
-        .reduce((acc, k) => {
-          acc[k] = finalDict[k]
-          return acc
-        }, {} as Record<string, string>)
+        .reduce(
+          (acc, k) => {
+            acc[k] = finalDict[k]
+            return acc
+          },
+          {} as Record<string, string>
+        )
 
       this.masterDict.set(sortedFinalDict)
       this.reverseMap.set(this.buildReverseMap(sortedFinalDict))
@@ -61,11 +75,22 @@ export class TranslationService {
       try {
         localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(sortedFinalDict))
       } catch (err) {
-        this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or access)', context: { err } })
+        this.logging.warn({
+          event: 'translation.cache.write_failed',
+          message: 'Dictionary cache write failed (quota or access)',
+          context: { err }
+        })
       }
-      this.logging.info({ event: 'translation.dictionary.loaded', message: 'Full hybrid dictionary cached to localStorage' })
+      this.logging.info({
+        event: 'translation.dictionary.loaded',
+        message: 'Full hybrid dictionary cached to localStorage'
+      })
     } catch (err) {
-      this.logging.error({ event: 'translation.dictionary.load_error', message: 'Dictionary load error', context: { err } })
+      this.logging.error({
+        event: 'translation.dictionary.load_error',
+        message: 'Dictionary load error',
+        context: { err }
+      })
     }
   }
 
@@ -74,7 +99,7 @@ export class TranslationService {
   private updateInternalDictionaries(key: string, label: string): void {
     const normalizedKey = key.trim().toLowerCase()
 
-    this.masterDict.update(prev => ({
+    this.masterDict.update((prev) => ({
       ...prev,
       [normalizedKey]: label.trim()
     }))
@@ -85,7 +110,11 @@ export class TranslationService {
     try {
       localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(cache))
     } catch (err) {
-      this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or access)', context: { err } })
+      this.logging.warn({
+        event: 'translation.cache.write_failed',
+        message: 'Dictionary cache write failed (quota or access)',
+        context: { err }
+      })
     }
   }
 
@@ -93,25 +122,36 @@ export class TranslationService {
     const normalizedKey = key.trim().toLowerCase().replace(/\s+/g, '_')
     const sanitizedLabel = label.trim()
 
-    this.masterDict.update(prev => {
+    this.masterDict.update((prev) => {
       const newDict = { ...prev, [normalizedKey]: sanitizedLabel }
 
       const sortedDict = Object.keys(newDict)
         .sort()
-        .reduce((acc, k) => {
-          acc[k] = newDict[k]
-          return acc
-        }, {} as Record<string, string>)
+        .reduce(
+          (acc, k) => {
+            acc[k] = newDict[k]
+            return acc
+          },
+          {} as Record<string, string>
+        )
 
       try {
         localStorage.setItem('DICTIONARY_CACHE', JSON.stringify(sortedDict))
       } catch (err) {
-        this.logging.warn({ event: 'translation.cache.write_failed', message: 'Dictionary cache write failed (quota or access)', context: { err } })
+        this.logging.warn({
+          event: 'translation.cache.write_failed',
+          message: 'Dictionary cache write failed (quota or access)',
+          context: { err }
+        })
       }
       return sortedDict
     })
-    this.reverseMap.update(prev => ({ ...prev, [sanitizedLabel]: normalizedKey }))
-    this.logging.info({ event: 'translation.dictionary.updated', message: 'Dictionary entry updated', context: { key: normalizedKey } })
+    this.reverseMap.update((prev) => ({ ...prev, [sanitizedLabel]: normalizedKey }))
+    this.logging.info({
+      event: 'translation.dictionary.updated',
+      message: 'Dictionary entry updated',
+      context: { key: normalizedKey }
+    })
   }
 
   /** Resolve Hebrew user input to canonical key (units). Returns null if no match so caller can prompt for English key. */
@@ -128,6 +168,12 @@ export class TranslationService {
 
   /** Resolve Hebrew user input to canonical key (allergens). Returns null if no match. */
   resolveAllergen(input: string): string | null {
+    const t = (input ?? '').trim()
+    return t ? (this.reverseMap()[t] ?? null) : null
+  }
+
+  /** Resolve Hebrew user input to canonical key (recipe course/category). Returns null if no match. */
+  resolveCourse(input: string): string | null {
     const t = (input ?? '').trim()
     return t ? (this.reverseMap()[t] ?? null) : null
   }
@@ -211,7 +257,11 @@ export class TranslationService {
 
     const sanitizedKey = englishKey.trim().toLowerCase().replace(/\s+/g, '_')
     this.updateDictionary(sanitizedKey, hebrewLabel)
-    this.logging.info({ event: 'translation.entry.created', message: 'Dictionary entry created', context: { key: sanitizedKey } })
+    this.logging.info({
+      event: 'translation.entry.created',
+      message: 'Dictionary entry created',
+      context: { key: sanitizedKey }
+    })
     return sanitizedKey
   }
 
@@ -227,7 +277,6 @@ export class TranslationService {
     this.updateDictionary(key, label)
     this.logging.info({ event: 'translation.entry.created', message: 'Dictionary entry created', context: { key } })
   }
-
 
   // --- GETTERS ---
   // getMasterDict() {

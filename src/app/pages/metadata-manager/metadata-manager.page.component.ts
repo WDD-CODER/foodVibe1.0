@@ -35,7 +35,7 @@ import { PreparationCategoryManagerComponent } from './components/preparation-ca
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
 
-type MetadataType = 'category' | 'allergen' | 'unit' | 'label'
+type MetadataType = 'category' | 'allergen' | 'unit' | 'label' | 'course'
 @Component({
   selector: 'app-metadata-manager',
   standalone: true,
@@ -96,6 +96,8 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   allCategories_ = this.metadataRegistry.allCategories_
   allLabels_ = this.metadataRegistry.allLabels_
   allLabelKeys_ = computed(() => this.allLabels_().map((l) => l.key))
+  allCourses_ = this.metadataRegistry.courses_
+  allCourseKeys_ = computed(() => this.allCourses_().map((c) => c.key))
   allMenuTypes_ = this.metadataRegistry.allMenuTypes_
   protected editingMenuTypeKey_ = signal<string | null>(null)
   protected editingMenuTypeFields_ = signal<DishFieldKey[]>([])
@@ -112,6 +114,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     { id: 'mm-sec-category', labelKey: 'metadata_product_categories_title' },
     { id: 'mm-sec-allergen', labelKey: 'metadata_global_allergens_title' },
     { id: 'mm-sec-label', labelKey: 'metadata_recipe_labels_title' },
+    { id: 'mm-sec-course', labelKey: 'metadata_recipe_courses_title' },
     { id: 'mm-sec-menu-type', labelKey: 'metadata_menu_types_title' },
     { id: 'mm-sec-preparation', labelKey: 'metadata_prep_categories' },
     { id: 'mm-sec-section', labelKey: 'metadata_section_categories_title' },
@@ -170,6 +173,10 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     return this.metadataRegistry.getLabelColor(key)
   }
 
+  protected getCourseColor(key: string): string {
+    return this.allCourses_().find((c) => c.key === key)?.color ?? '#78716C'
+  }
+
   isSystemUnit(unitKey: string): boolean {
     return unitKey in SYSTEM_UNITS
   }
@@ -216,13 +223,19 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     const resolveMap: Record<string, () => string | null> = {
       category: () => this.translationService.resolveCategory(sanitizedHebrew),
       allergen: () => this.translationService.resolveAllergen(sanitizedHebrew),
-      unit: () => this.translationService.resolveUnit(sanitizedHebrew)
+      unit: () => this.translationService.resolveUnit(sanitizedHebrew),
+      course: () => this.translationService.resolveCourse(sanitizedHebrew)
     }
     let englishKey = resolveMap[type]?.() ?? null
     let resolvedHebrew = sanitizedHebrew
 
     if (!englishKey) {
-      const contextMap = { category: 'category' as const, allergen: 'allergen' as const, unit: 'unit' as const }
+      const contextMap = {
+        category: 'category' as const,
+        allergen: 'allergen' as const,
+        unit: 'unit' as const,
+        course: 'generic' as const
+      }
       const result = await this.translationKeyModal.open(sanitizedHebrew, contextMap[type])
       if (!isTranslationKeyResult(result)) return
       englishKey = result.englishKey
@@ -273,6 +286,11 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
         isUsed = recipes.some((r) => (r.labels_ ?? []).includes(item) || (r.autoLabels_ ?? []).includes(item))
         break
       }
+      case 'course': {
+        const recipes = this.kitchenState.recipes_()
+        isUsed = recipes.some((r) => r.course_ === item)
+        break
+      }
     }
 
     // 2. BLOCK DELETION IF IN USE
@@ -281,9 +299,10 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
         unit: 'היחידה',
         allergen: 'האלרגן',
         category: 'הקטגוריה',
-        label: 'התווית'
+        label: 'התווית',
+        course: 'סוג המנה'
       }
-      const where = type === 'label' ? 'במתכונים' : 'במלאי'
+      const where = type === 'label' || type === 'course' ? 'במתכונים' : 'במלאי'
       this.userMsgService.onSetErrorMsg(
         `לא ניתן למחוק את ${typeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש ${where}`
       )
@@ -304,6 +323,9 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
           break
         case 'label':
           await this.metadataRegistry.deleteLabel(item)
+          break
+        case 'course':
+          await this.metadataRegistry.deleteCourse(item)
           break
       }
       this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה')
@@ -328,6 +350,9 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
       case 'label':
         await this.metadataRegistry.registerLabel(key, this.metadataRegistry.getLabelColor(key) || '#78716C', [])
         break
+      case 'course':
+        await this.metadataRegistry.registerCourse(key)
+        break
     }
   }
 
@@ -341,6 +366,8 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
         return this.allCategories_()
       case 'label':
         return this.allLabelKeys_()
+      case 'course':
+        return this.allCourseKeys_()
       default:
         return []
     }

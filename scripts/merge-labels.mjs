@@ -1,11 +1,14 @@
 /**
  * Merge duplicate dietary label strings (Plan 320 Milestone 1).
  *
- * Scope: only the 5 clusters confirmed as genuine same-concept duplicates
+ * Scope: only clusters confirmed as genuine same-concept duplicates
  * (see plans/320-recipe-labels-fix-course-category-field.plan.md Milestone 1
  * scope-correction note). The other 4 audit clusters (meat/salads/soups/dessert)
  * are course strings mis-clustered by audit-labels.mjs's fuzzy matching and are
- * explicitly NOT touched here — they're Milestone 2's job.
+ * explicitly NOT touched here — they're Milestone 2's job. A 6th genuine dup
+ * (vegetarian/צמחוני, confirmed via dictionary.json's own translation entry)
+ * was found buried inside that same mis-clustered "meat" blob while preparing
+ * Milestone 2's course seed list — added here rather than left half-fixed.
  *
  * For each cluster, orphan member strings in labels_/autoLabels_ are rewritten
  * to the canonical key (array deduped after rewrite). Canonical keys missing
@@ -81,7 +84,8 @@ const CLUSTERS = [
   { canonical: 'vegan', orphans: ['טבעוני'] },
   { canonical: 'marinade', orphans: ['מרינדה'] },
   { canonical: 'asian', orphans: ['אסייתי'] },
-  { canonical: 'sipur_shel_ochel', orphans: ['סיפור של אוכל'] }
+  { canonical: 'sipur_shel_ochel', orphans: ['סיפור של אוכל'] },
+  { canonical: 'vegetarian', orphans: ['צמחוני'] }
 ]
 
 const ORPHAN_TO_CANONICAL = new Map()

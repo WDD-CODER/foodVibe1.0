@@ -231,6 +231,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       total_weight_g: [0],
       total_cost: [0],
       labels: [[] as string[]],
+      course: [''],
       logistics: this.fb.group({
         baseline_: this.fb.array([])
       })

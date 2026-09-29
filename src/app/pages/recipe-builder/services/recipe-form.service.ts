@@ -270,6 +270,9 @@ export class RecipeFormService {
     const rawLabels = (raw['labels'] as string[] | undefined) ?? []
     const labels = this.normalizeLabelKeys(rawLabels)
 
+    const rawCourse = ((raw['course'] as string | undefined) ?? '').trim()
+    const course = this.metadataRegistry.courses_().some((c) => c.key === rawCourse) ? rawCourse : ''
+
     return {
       _id: (recipeId ?? '') as string,
       name_hebrew: (raw['name_hebrew'] as string)?.trim() ?? '',
@@ -282,6 +285,7 @@ export class RecipeFormService {
       is_approved_: isApproved,
       recipe_type_: isDish ? 'dish' : 'preparation',
       labels_: labels,
+      course_: course,
       ...(prepItems && prepItems.length > 0 && { prep_items_: prepItems }),
       ...(prepCategories && prepCategories.length > 0 && { prep_categories_: prepCategories }),
       ...(() => {
@@ -333,7 +337,8 @@ export class RecipeFormService {
         serving_portions: isDish ? recipe.yield_amount_ : 1,
         total_weight_g: 0,
         total_cost: 0,
-        labels: normalizedLabels
+        labels: normalizedLabels,
+        course: recipe.course_ ?? ''
       },
       { emitEvent: false }
     )
