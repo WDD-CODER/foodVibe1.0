@@ -10,6 +10,12 @@ description: On-demand provisioning of a git worktree for isolated multi-agent o
 
 > **Not automatic.** Only invoke on explicit user request or (retired coordinator) orchestration.
 
+> **Routine two-session parallel work no longer needs this skill.** A persistent second
+> worktree (`../foodVibe1.0-wt-parallel`) is auto-claimed and fast-forwarded to `main` by
+> `scripts/session-startup.sh` + `scripts/claim-parallel-slot.sh` whenever a new session
+> detects the main repo is already occupied by a live session. Use this skill only for a
+> genuine ad hoc **third** worktree, or one-off isolation outside the two-slot system.
+
 **Worktree Rules (inline â€” no guide read required):**
 - Target directory must be outside the main repo: `../<project>-wt-<feature>`
 - Branch naming: `feat/<name>` â€” always branch from `main`
