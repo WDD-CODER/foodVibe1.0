@@ -58,9 +58,12 @@ testem.log
 .worktree-root
 .worktree-port
 
-# Session-state PPID scratch / legacy numbered handoffs (local only — never re-add)
+# Legacy PID-suffixed handoff files (docs/session-state-<branch>-<PID>.md) are retired
+# (Plan 295) — nothing generates them anymore, so no ignore rule is needed. The old
+# docs/session-state-*-[0-9]*.md pattern was too broad and hid legit
+# docs/session-state-<branch>.md files whose branch name ends in digits (e.g. the
+# feat/session-YYYYMMDD placeholder). Do not re-add that pattern.
 # Stable handoff is docs/session-state-${BRANCH}.md (no trailing -PID)
-docs/session-state-*-[0-9]*.md
 
 # Environment & secrets (never commit)
 .env

@@ -13,8 +13,16 @@ services:
         value: production
       - key: PORT
         value: 10000
+      # Not read anywhere in server/ code (server uses JWT_ACCESS_SECRET / JWT_REFRESH_SECRET
+      # below) — kept only because it's already set on the live service; harmless if unused.
       - key: JWT_SECRET
         generateValue: true
+      # Required — server/middleware/auth.js, server/routes/auth.js. Set in Render dashboard.
+      - key: JWT_ACCESS_SECRET
+        sync: false
+      # Required — server/db.js throws and the process exits at startup without this.
+      - key: JWT_REFRESH_SECRET
+        sync: false
       - key: MONGO_URI
         sync: false
       # TEMPORARY diagnostic (plan 302 M1). Enables the [data/query] doc-count/byte-count/
