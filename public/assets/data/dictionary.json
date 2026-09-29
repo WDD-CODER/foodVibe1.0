@@ -506,6 +506,8 @@
     "activity_field_steps_count": "מספר שלבים",
     "activity_field_yield": "תפוקה",
     "activity_field_prep_items": "הכנות",
+    "activity_field_course": "סוג מנה",
+    "activity_field_labels": "תוויות",
     "unsaved_changes_confirm": "יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?",
     "approve_stamp_unsaved_confirm": "יש שינויים שלא נשמרו. לשמור ולעדכן אישור?",
     "leave_without_saving": "יציאה בלי לשמור",

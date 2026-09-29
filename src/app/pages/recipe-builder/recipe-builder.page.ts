@@ -802,6 +802,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       recipe_type: (raw?.['recipe_type'] ?? 'preparation').toString(),
       serving_portions: Number(raw?.['serving_portions'] ?? 1),
       labels: normalizedLabels,
+      course: (raw?.['course'] ?? '').toString(),
       yield_conversions: yieldNorm,
       ingredients: ingNorm,
       workflow_items: workflowNorm,

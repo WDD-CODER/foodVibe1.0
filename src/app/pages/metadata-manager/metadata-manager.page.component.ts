@@ -188,8 +188,8 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   //   this.unitRegistry.registerUnit(name.trim(), 1)
   // }
 
-  async onAddLabel(): Promise<void> {
-    const result = await this.labelCreationModal.open()
+  async onAddLabel(prefillHebrew?: string): Promise<void> {
+    const result = await this.labelCreationModal.open(prefillHebrew)
     if (!result?.key || !result?.hebrewLabel) return
     try {
       this.translationService.updateDictionary(result.key, result.hebrewLabel)
@@ -204,7 +204,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   async onAddMetadata(hebrewLabel: string, type: MetadataType, inputElement: HTMLInputElement) {
     if (!this.requireSignIn()) return
     if (type === 'label') {
-      await this.onAddLabel()
+      await this.onAddLabel(hebrewLabel)
       return
     }
     const sanitizedHebrew = hebrewLabel.trim()
@@ -263,12 +263,55 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   }
 
   //DELETE
+  private readonly metadataTypeNames: Record<MetadataType, string> = {
+    unit: 'היחידה',
+    allergen: 'האלרגן',
+    category: 'הקטגוריה',
+    label: 'התווית',
+    course: 'סוג המנה'
+  }
+
   async onRemoveMetadata(item: string, type: MetadataType) {
     if (!this.requireSignIn()) return
+
+    // label/course: cascade-clear from recipes/dishes on confirm, instead of hard-blocking.
+    if (type === 'label' || type === 'course') {
+      const recipes = this.kitchenState.recipes_()
+      const affected =
+        type === 'label'
+          ? recipes.filter((r) => (r.labels_ ?? []).includes(item) || (r.autoLabels_ ?? []).includes(item))
+          : recipes.filter((r) => r.course_ === item)
+
+      if (affected.length > 0) {
+        const confirmed = await this.confirmModal.open(
+          `מחיקת ${this.metadataTypeNames[type]} "${this.translationService.translate(item)}" תעדכן ${affected.length} מתכונים/מנות ותסיר אותה מכולם. להמשיך?`,
+          { variant: 'danger' }
+        )
+        if (!confirmed) return
+        try {
+          const updatedCount =
+            type === 'label'
+              ? await this.kitchenState.cascadeClearLabelFromAll(item)
+              : await this.kitchenState.cascadeClearCourseFromAll(item)
+          if (type === 'label') await this.metadataRegistry.deleteLabel(item)
+          else await this.metadataRegistry.deleteCourse(item)
+          this.userMsgService.onSetSuccessMsg(`נמחק בהצלחה ועודכנו ${updatedCount} מתכונים/מנות`)
+        } catch (err) {
+          this.logging.error({
+            event: 'crud.metadata.cascade_delete_error',
+            message: `Failed to cascade-delete ${type}`,
+            context: { err }
+          })
+          this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת')
+        }
+        return
+      }
+      // Not in use — fall through to the shared plain-delete block below.
+    }
+
+    // 1. DYNAMIC USAGE CHECK (category/allergen/unit only — label/course handled above)
     const allProducts = this.productData.allProducts_()
     let isUsed = false
-
-    // 1. DYNAMIC USAGE CHECK
     switch (type) {
       case 'unit':
         isUsed = allProducts.some(
@@ -281,30 +324,12 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
       case 'category':
         isUsed = allProducts.some((p) => (p.categories_ ?? []).includes(item))
         break
-      case 'label': {
-        const recipes = this.kitchenState.recipes_()
-        isUsed = recipes.some((r) => (r.labels_ ?? []).includes(item) || (r.autoLabels_ ?? []).includes(item))
-        break
-      }
-      case 'course': {
-        const recipes = this.kitchenState.recipes_()
-        isUsed = recipes.some((r) => r.course_ === item)
-        break
-      }
     }
 
     // 2. BLOCK DELETION IF IN USE
     if (isUsed) {
-      const typeNames: Record<MetadataType, string> = {
-        unit: 'היחידה',
-        allergen: 'האלרגן',
-        category: 'הקטגוריה',
-        label: 'התווית',
-        course: 'סוג המנה'
-      }
-      const where = type === 'label' || type === 'course' ? 'במתכונים' : 'במלאי'
       this.userMsgService.onSetErrorMsg(
-        `לא ניתן למחוק את ${typeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש ${where}`
+        `לא ניתן למחוק את ${this.metadataTypeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש במלאי`
       )
       return
     }

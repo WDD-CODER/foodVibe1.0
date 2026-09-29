@@ -461,7 +461,89 @@ export class KitchenStateService {
         to: String(next.prep_items_?.length ?? 0)
       })
     }
+    if ((prev.course_ ?? '') !== (next.course_ ?? '')) {
+      changes.push({
+        field: 'course',
+        label: 'activity_field_course',
+        from: prev.course_ || 'no_course',
+        to: next.course_ || 'no_course'
+      })
+    }
+    const prevLabels = [...(prev.labels_ ?? [])].sort()
+    const nextLabels = [...(next.labels_ ?? [])].sort()
+    if (prevLabels.join(',') !== nextLabels.join(',')) {
+      changes.push({
+        field: 'labels',
+        label: 'activity_field_labels',
+        from: prevLabels.join(', '),
+        to: nextLabels.join(', ')
+      })
+    }
     return changes
+  }
+
+  /** Shared by cascadeClear*FromAll: applies one doc's update via the raw per-collection
+   *  update method (not saveRecipe(), which would fire one toast per affected doc for a bulk
+   *  cascade) while still recording activity-log + version-history entries, matching what
+   *  saveRecipe does minus the toast. */
+  private async applyCascadeUpdate(previous: Recipe, updated: Recipe): Promise<void> {
+    const isDish =
+      previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.prep_categories_?.length)
+    const saved = isDish
+      ? await this.dishDataService.updateDish(updated)
+      : await this.recipeDataService.updateRecipe(updated)
+    const changes = this.buildRecipeChanges(previous, saved)
+    this.activityLogService.recordActivity({
+      action: 'updated',
+      entityType: isDish ? 'dish' : 'recipe',
+      entityId: saved._id,
+      entityName: saved.name_hebrew,
+      changes
+    })
+    try {
+      await this.versionHistoryService.addVersion({
+        entityType: isDish ? 'dish' : 'recipe',
+        entityId: previous._id,
+        entityName: previous.name_hebrew,
+        snapshot: previous,
+        changes
+      })
+    } catch (err) {
+      this.logging.error({
+        event: 'crud.versionHistory.addVersion_fireAndForget_error',
+        message: 'Version history write failed after cascade update',
+        context: { err }
+      })
+    }
+  }
+
+  /** Cascade-clear a deleted label key from every recipe/dish that references it — both the
+   *  manual labels_ array and the auto-computed autoLabels_ array (a label surviving in
+   *  autoLabels_ after its registry entry is gone would reintroduce the orphan-label bug
+   *  fixed in plan 320). Returns the number of items updated. */
+  async cascadeClearLabelFromAll(labelKey: string): Promise<number> {
+    const affected = this.recipes_().filter(
+      (r) => (r.labels_ ?? []).includes(labelKey) || (r.autoLabels_ ?? []).includes(labelKey)
+    )
+    for (const recipe of affected) {
+      const updated: Recipe = {
+        ...recipe,
+        labels_: (recipe.labels_ ?? []).filter((l) => l !== labelKey),
+        autoLabels_: (recipe.autoLabels_ ?? []).filter((l) => l !== labelKey)
+      }
+      await this.applyCascadeUpdate(recipe, updated)
+    }
+    return affected.length
+  }
+
+  /** Cascade-clear a deleted course key back to '' (the existing "no course" sentinel) on
+   *  every recipe/dish that has it set. Returns the number of items updated. */
+  async cascadeClearCourseFromAll(courseKey: string): Promise<number> {
+    const affected = this.recipes_().filter((r) => r.course_ === courseKey)
+    for (const recipe of affected) {
+      await this.applyCascadeUpdate(recipe, { ...recipe, course_: '' })
+    }
+    return affected.length
   }
 
   // SUPPLIER CRUD

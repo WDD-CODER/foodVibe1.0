@@ -201,9 +201,10 @@ export class RecipeHeaderComponent {
   })
 
   // COURSE
-  protected courseSelectOptions_ = computed(() =>
-    this.metadataRegistry.courses_().map((c) => ({ value: c.key, label: c.key }))
-  )
+  protected courseSelectOptions_ = computed(() => [
+    { value: '', label: 'no_course' },
+    ...this.metadataRegistry.courses_().map((c) => ({ value: c.key, label: c.key }))
+  ])
 
   protected get courseControl(): FormControl<string> {
     return this.form().get('course') as FormControl<string>
