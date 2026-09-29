@@ -457,6 +457,15 @@ async function main() {
   console.log(`Data written: ${resolve(outDir, 'data.json')}`)
 }
 
+/** Redacts any embedded connection-string credentials before an error ever reaches a log. */
+function redactCredentials(err) {
+  const message = err instanceof Error ? err.message : String(err)
+  return message.replace(/:\/\/[^@/\s]+@/g, '://<redacted>@')
+}
+
 main()
-  .catch(err => { console.error(err); process.exit(1) })
+  .catch(err => {
+    console.error(`[audit-labels] FAILED: ${redactCredentials(err)}`)
+    process.exit(1)
+  })
   .finally(() => client.close())
