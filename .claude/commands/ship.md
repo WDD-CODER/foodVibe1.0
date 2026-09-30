@@ -16,10 +16,12 @@ Invoking `/ship` authorizes commit of this chat’s files after explicit **Y** (
 | Flag | Behavior |
 |------|----------|
 | `/ship` | Auto-detect lane (Phase 0), then run that lane's pipeline; wait for **Y** unless the lane is ULTRA-TRIVIAL |
-| `/ship fast` | Does **not** change classification or review depth — Phase 0 still classifies for real (same as bare `/ship`), Phase 2 still reviews at whatever depth that classification calls for. The only change: Phase 4 and Phase 4.5 collapse into **one** approval (commit + push + PR + merge together) instead of two separate stops, whichever lane Phase 0 landed on. A genuine review finding still stops and asks — this removes redundant re-confirmation, not judgment calls. See Phase 4. |
+| `/ship fast` | Collapses Phase 4 and Phase 4.5 into one approval — see below |
 | `/ship regular` | Force REGULAR lane regardless of auto-classification — today's full pipeline, no shortcuts. (Forcing *more* scrutiny is always a safe override; this is unchanged.) |
 | `/ship --yes` | Show confirmation block then commit without waiting (still runs review unless skipped) |
 | `/ship --skip-review "reason"` | Bypass Phase 2 entirely; **reason required**; log `[review-skipped: {reason}]` in the commit message body. No silent skip. |
+
+**`/ship fast`** (or a diff Phase 0 naturally classifies FAST/ULTRA-TRIVIAL, which already gets this for free): collapses Phase 4 and Phase 4.5 into **one** approval. The single reply (`Y`, `merge`, `later`, `open-pr-only`, or `abort`) answers commit + push + PR creation (if feature-complete) + merge (if eligible) all at once, instead of two separate stops. It does **not** change lane classification or review depth — Phase 0 still classifies for real, Phase 2 still reviews at whatever depth that classification calls for, and a genuine review finding still stops and asks; this removes redundant re-confirmation, not judgment calls. Available on demand for any lane, including REGULAR — unlike `/ship regular`, it never overrides classification.
 
 Flags compose: `/ship fast --yes` means "one combined approval, and don't even wait for it" —
 assuming Phase 1-3 came back clean, this goes straight through to merge on one shot. Chat
@@ -51,20 +53,7 @@ node scripts/plan-ledger-check.mjs
 
 ## Phase 2 — Review (unless `--skip-review "reason"`, or Lane = FAST / ULTRA-TRIVIAL)
 
-**Lane = REGULAR:**
-1. Invoke `/review` by **reading `.claude/commands/review.md` and executing it inline** — do
-   **not** call it via the Skill tool by name (`skill: "review"`). The plain name "review" is
-   ambiguous with a gstack-vendored skill of the same name at `~/.claude/skills/review/`,
-   which is a much heavier multi-agent Review Army (telemetry, onboarding prompts, specialist
-   subagent dispatch, Codex integration) — the Skill tool has been observed resolving to that
-   one instead of this project's lightweight, judgment-only review, burning many times the
-   tokens for no extra safety. Same collision risk applies to any other command name that
-   might shadow a gstack skill (e.g. `browse`) — when a command file says "read X and execute
-   it," read the file directly, don't route through Skill-tool name resolution.
-2. On `REVIEW: PASS` → continue.
-3. On `ISSUES FOUND` → fix the listed issues → re-run `/review` **exactly once**.
-4. If still `ISSUES FOUND` → **stop**. Do not commit. Present remaining issues to the user.
-5. Retry cap is hard: one fix-and-recheck cycle only. Never loop indefinitely.
+**Lane = REGULAR:** Read `docs/agent/ship-regular.md` → "Phase 2 — REGULAR review procedure" and follow it.
 
 **Lane = FAST or ULTRA-TRIVIAL:** skip the full `/review` invocation — Phase 0 already established the diff is small and touches no sensitive path, which is what `/review` would mostly be checking for anyway. Instead:
 - Run `npx eslint --fix` (cheap, already expected proactively per CLAUDE.md enforcement).
@@ -100,13 +89,9 @@ This compares current branch + HEAD against the baseline `ship-prep.mjs` recorde
 
 ## Phase 4 — Commit + push (UNCONDITIONAL approval gate)
 
-**Without the `fast` flag:**
-
-- **Lane = REGULAR:** unchanged — one Y here for commit, a separate gate at Phase 4.5 for merge.
-- **Lane = FAST** (naturally classified by Phase 0, no flag needed): same tree, same required HOW TO VALIDATE section, but the single Y answers commit + push + (PR creation if feature-complete) + (merge if eligible) all at once. The Approve line accepts any Phase 4.5 reply token directly (`Y`, `merge`, `later`, `open-pr-only`, `abort`) instead of waiting for a second stop. Phase 4.5's actions still happen, just triggered by this same answer instead of a follow-up prompt. This was already true before the `fast` flag existed and still is — a diff that's naturally small and safe gets this for free.
-- **Lane = ULTRA-TRIVIAL:** skip the interactive gate entirely. Commit + push happen automatically (checkpoint only — by definition an ultra-trivial diff is docs/handoff-only, never feature-complete, so no PR is proposed). Immediately after acting, print the same tree block as a receipt, tagged `[auto-approved: ultra-trivial]`, so the Human sees exactly what happened and can revert via normal git tooling if it was wrong to auto-proceed. HOW TO VALIDATE becomes the one-line "no user-visible effect" form, since ultra-trivial diffs never touch application code.
-
-**With the `fast` flag (any lane Phase 0 lands on, including REGULAR):** same tree, same required HOW TO VALIDATE section, but the single reply answers commit + push + (PR creation if feature-complete) + (merge if eligible) all at once — identical mechanics to the natural Lane=FAST case above, just available on demand regardless of what Phase 0 classified. The Approve line accepts any Phase 4.5 reply token directly (`Y`, `merge`, `later`, `open-pr-only`, `abort`) instead of waiting for a second stop; Phase 4.5's actions happen off this same reply. This changes *how many times* the Human is asked to bless the result — it does not change what Phase 1 (build) or Phase 2 (review, at whatever depth Phase 0's real classification called for) already checked. If Phase 2 stopped with an unresolved finding, this paragraph is never reached — the `fast` flag doesn't touch that gate.
+- **Lane = REGULAR, `fast` not passed:** one Y here for commit, a separate gate at Phase 4.5 for merge.
+- **Lane = FAST or ULTRA-TRIVIAL, or `fast` passed on any lane:** see Flags → `/ship fast` above — the single reply here also answers Phase 4.5.
+- **Lane = ULTRA-TRIVIAL specifically:** skip the interactive gate entirely. Commit + push happen automatically (checkpoint only — by definition an ultra-trivial diff is docs/handoff-only, never feature-complete, so no PR is proposed). Immediately after acting, print the same tree block as a receipt, tagged `[auto-approved: ultra-trivial]`, so the Human sees exactly what happened and can revert via normal git tooling if it was wrong to auto-proceed. HOW TO VALIDATE becomes the one-line "no user-visible effect" form, since ultra-trivial diffs never touch application code.
 
 Present a visual tree, then **wait for explicit "Y"** (unless `--yes`, or Lane = ULTRA-TRIVIAL):
 
@@ -146,13 +131,7 @@ When a brain entry is proposed, print each entry's **full draft body** in a fenc
 
 **Lane = FAST or ULTRA-TRIVIAL:** skip the extraction/mining procedure by default — a 2-3 file, sub-40-line diff rarely produced a durable pattern/gotcha/decision worth mining `sessions/*.md` for, and that mining pass is one of the slower parts of `/ship`. Exception: run it anyway if the diff itself touches `docs/brain/**`, or the Human says "check brain" / "brain capture" in the ship-time message. Omit the brain block from the tree entirely rather than running the full procedure to conclude nothing's there.
 
-**Lane = REGULAR:** unchanged — follow `docs/agent/brain-capture.md`: run the extraction procedure (mine `sessions/YYYY-MM-DD.md` Decisions / review findings — not the diff alone), pick the artifact type(s), draft the full body per the required shape, then run the usefulness gate.
-
-- **Required shapes** — Pattern: Problem / Solution / When to use. Gotcha: What hurt / Why the obvious fix is wrong / What to do instead. Decision: Context / Decision / Consequences (ADR, next number). Templates: `docs/brain/patterns/_TEMPLATE.md`, `docs/brain/decisions/_TEMPLATE.md`.
-- **One-liner-only proposals are forbidden** — a title that restates the commit subject is not an entry. No draft body that fills the shape → nothing durable → omit the block entirely (the common case for chores).
-- **Split when both apply** — a pattern (happy path) and its paired gotcha (the trap that looked like success) are two lines + two fenced drafts, cross-linked.
-
-This rides the existing `Approve? (Y / edit list / abort)` answer — there is no separate Y/N for the brain entry. Say `no brain` / `skip brain` alongside `Y` to opt out for this ship, or "edit list" to revise it (treat it like any other stageable item). On approval, write each approved draft **verbatim** to its `docs/brain/` file (for a gotcha: append to the matching `gotchas/<domain>.md` per the routing table in `docs/brain/gotchas.md`; new file under `patterns/`; new numbered file for `decisions/`) and stage it alongside the rest. See `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`.
+**Lane = REGULAR:** Read `docs/agent/ship-regular.md` → "Brain-entry capture — REGULAR procedure" and follow it — including "How a proposed brain entry gets approved" whenever a brain entry is proposed on any lane.
 
 ### Semantic branch rename ((semantic rename rules))
 
@@ -174,57 +153,19 @@ Approve **Y** (or `--yes`) **is** Human validation of the job. Then:
 7. Push only if Human asked (“push” / “ship and push”): `git push -u origin HEAD`. **Lane = FAST / ULTRA-TRIVIAL:** push is implied by the single Y (or auto-approve) — no separate "push" keyword needed, since Phase 0 already bounded what this diff can touch.
 8. **Commit-vs-PR judgment** (before any `gh pr create`) — see below. Never open a PR silently.
 
-**Recovery only:** If a prior ship already committed/pushed the job without todos (agent bug or mid-flight rule change), immediately mark matching `[x]` and push a tiny follow-up commit on the same branch — do not leave checkboxes open.
+**Recovery only:** Read `docs/agent/ship-recovery.md` → "Recovery only" and follow it.
 
 ### Commit-vs-PR judgment
 
-Decide whether this ship is a **feature-complete** commit (push + propose PR) or a **milestone/checkpoint** commit (push only, no PR). Do **not** infer “open PR if applicable.”
+Lane = REGULAR, or the PR path is reached → Read `docs/agent/ship-regular.md` → "Commit-vs-PR judgment" and "After opening a PR" and follow them.
 
-**Manual override (check first):** If the user’s ship-time message explicitly says e.g. “open a PR” / “create a PR” → treat as feature-complete and propose a PR. If it says e.g. “just commit” / “checkpoint” / “no PR” → treat as checkpoint; commit + push only, no PR. Skip the brief/ad-hoc check below when an override is present.
-
-**Otherwise — brief used this session** (brief file referenced in conversation or `.claude/todo.md`):
-
-1. Compare the session diff against that brief’s **Done when** list.
-2. **All criteria met** → feature-complete → run `node scripts/brain-review-check.mjs --scope=full` (advisory only — findings never block the PR, just get reported), then proceed to propose PR (`gh pr create` on a feature branch, existing flow).
-3. **Not all criteria met** → milestone/checkpoint → commit + push to the branch only; **do not** propose a PR; **do not** run the `--scope=full` brain check (checkpoint commits only get the CI `--scope=dead-refs` pass). In the ship summary state explicitly: `Milestone commit — brief not yet complete, no PR proposed`. Then **Phase 4.5** with the CHECKPOINT banner.
-
-**Otherwise — no brief this session** (ad-hoc work, no Done-when to check):
-
-- Do **not** default to opening a PR.
-- Ask once, single-select style: `Is this feature-complete (open a PR) or a checkpoint (push only)?`
-- Follow the user’s answer; do not assume either path.
-
-**Hard rule:** Never open a PR without either (a) the brief’s Done-when fully met, or (b) explicit user instruction (override or ad-hoc answer).
-
-### After opening a PR (feature-complete path only)
-
-After opening the PR, run `gh pr checks --watch` once. If any check fails, offer the user: run the fix loop now (`docs/agent/pr-check-fix-loop.md`) or leave it. Do not auto-run without asking.
+**Hard rule (stays here — applies to every lane):** Never open a PR without either (a) the brief's Done-when fully met, or (b) explicit user instruction (override or ad-hoc answer).
 
 Then proceed to **Phase 4.5 — Merge Gate** (mandatory).
 
-### Push conflict guard
+### Push rejected or merge fails
 
-If push is rejected (non-fast-forward):
-```bash
-git fetch origin
-git log --oneline HEAD..origin/{branch}
-git diff --stat HEAD...origin/{branch}
-```
-Present choices: (a) rebase (b) merge (c) abort — wait for user choice. On conflicts during rebase/merge: list files, stop, instruct resolve then re-run `/ship`.
-
-If renamed after remote had the old name:
-```bash
-git push origin --delete {old_name}
-git push -u origin {new_name}
-```
-
-### PR merge fallback
-
-If `gh pr merge --merge --delete-branch` fails due to dirty local tree, fall back to:
-```bash
-gh pr merge {pr_number} --merge --auto
-```
-Do not stash/commit unrelated dirty files to unblock merge.
+Push rejected or merge fails → Read `docs/agent/ship-recovery.md` and follow it.
 
 Never commit to `main`. Never force-push. Never amend after push.
 
@@ -232,18 +173,9 @@ Never commit to `main`. Never force-push. Never amend after push.
 
 ## Phase 4.5 — Merge Gate (mandatory after successful push)
 
-**`fast` flag was passed, or Lane naturally classified FAST/ULTRA-TRIVIAL:** this phase's decision already happened at Phase 4 (combined single reply) — nothing to wait for here, just execute the reply that was given there, regardless of which lane Phase 0 classified. **Otherwise (Lane = REGULAR, `fast` not passed):** unchanged below, waits here separately.
+**`fast` flag was passed, or Lane naturally classified FAST/ULTRA-TRIVIAL:** this phase's decision already happened at Phase 4 (combined single reply) — nothing to wait for here, just execute the reply that was given there, regardless of which lane Phase 0 classified.
 
-Follow `docs/agent/standards-git.md` → **Post-push Merge Gate**. Copy the combined MERGE GATE + BRAIN CAPTURE visual block exactly; wait for Human reply. Do not skip because a PR URL was already printed.
-
-- **Feature-complete / PR path:** show MERGE GATE + Brain capture. On `merge` → create PR if missing, then `gh pr merge --merge --delete-branch` (use PR merge fallback above if dirty tree). On `later` → stop with PR in Next Steps. On `open-pr-only` → ensure PR exists, do not merge.
-- **Checkpoint / milestone path:** show CHECKPOINT — DO NOT MERGE YET (+ Brain capture when durable). Do not offer merge.
-- **Brain re-show:** If Phase 4 skipped the brain block (ad-hoc commit/push, deferred, or nothing staged then) but something durable happened in the session, **re-show** the Brain capture proposal here — per `docs/agent/brain-capture.md`: banner line = path + one-line title, full draft body in a fenced block below the banner, usefulness gate already passed. Omit only when nothing durable.
-- **Brain capture auto-writes on the gate reply** (per `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`) — no separate `brain approve` token, matching how Phase 4 already rides `Y`:
-  - `merge` / `later` / `open-pr-only` → write the approved fenced draft verbatim (append gotcha, new pattern file, or new `decisions/NNNN-*.md`) first, then do the reply's normal action (commit + push to the PR branch when possible; tiny follow-up PR if already merged).
-  - `no brain` / `skip brain` (combined with any of the above) → explicit no-op on the brain write only; the gate reply's other action still happens.
-  - `brain edit …` → revise draft, re-show banner, wait again before writing.
-  - Combine freely (e.g. `merge`, `merge, no brain`, `later, brain edit …`).
+**Otherwise (Lane = REGULAR, `fast` not passed):** Read `docs/agent/ship-regular.md` → "Phase 4.5 — Merge Gate (REGULAR procedure)" and follow it.
 
 Never auto-merge without Human `merge` / clear `Y`.
 
