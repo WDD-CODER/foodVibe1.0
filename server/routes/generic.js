@@ -1,13 +1,27 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
 const { verifyToken, optionalToken } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
 const { bumpMasterVersion } = require('../services/master-version');
+const { newId: makeId } = require('../utils/id');
 
 const router = Router();
 
 // Write routes (POST/PUT/DELETE) require a valid JWT. Reads are public.
+
+// Plan 321 Phase 1 — moderate rate limit on writes (POST/PUT/DELETE); reads (GET) are
+// skipped since master-catalog/search reads are meant to be cheap and frequent.
+const dataWriteLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.method === 'GET',
+  message: { error: 'Too many requests, please try again later' },
+});
+router.use(dataWriteLimiter);
 
 // Only known user-data entity types may be read/written through the generic data API.
 // Everything else (auth's signed-users-db/users, ai.js's GEMINI_SHOTS/GEMINI_USAGE,
@@ -27,14 +41,6 @@ router.use('/:type', (req, res, next) => {
  */
 function col(type) {
   return mongoose.connection.db.collection(type);
-}
-
-/** Ensures a string _id exists on the entity, generating one if missing. */
-function makeId(length = 5) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let id = '';
-  for (let i = 0; i < length; i++) id += chars[Math.floor(Math.random() * chars.length)];
-  return id;
 }
 
 // ---------------------------------------------------------------------------
@@ -204,27 +210,25 @@ router.get('/:type/:id', optionalToken, async (req, res) => {
 // POST /api/v1/data/:type
 // Inserts a new document stamped with the authenticated user's id.
 //
-// For PRODUCT_LIST: performs name-based collision detection against __master__.
-// If a master product with the same name exists, merges the new source data
-// into the existing product (silent merge) instead of creating a duplicate.
-//
-// For all types: also inserts a copy under userId: '__master__' so additions
-// propagate to all users on next sync/login.
+// The server generates `_id` when the body omits one (Plan 321 Phase 1 —
+// HttpStorageAdapter.post() no longer sends a client-picked id for a genuinely
+// new entity; use the `_id` on the returned doc, not one picked beforehand).
+// A client-supplied `_id` IS still honored when present — HttpStorageAdapter's
+// appendExisting() (trash restore, and anything re-appending a doc that must
+// keep its original id/references) relies on this and posts through this same
+// route. Existing ids are never rewritten either way.
 // ---------------------------------------------------------------------------
 router.post('/:type', verifyToken, async (req, res) => {
   try {
-    const entity = req.body;
-    if (!entity._id) {
-      return res.status(400).json({ error: '_id is required in the request body' });
-    }
-
     const entityType = req.params.type;
-    const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = entity;
+    const { _id: clientId, userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = req.body;
+    const _id = typeof clientId === 'string' && clientId ? clientId : makeId();
 
     const doc = {
       ...safeEntity,
+      _id,
       userId: req.user.userId,
-      _masterId: safeEntity._id,
+      _masterId: _id,
       _userModified: false,
     };
 
@@ -421,9 +425,25 @@ async function replaceCollectionFallback(type, userId, docs) {
 // run atomically via replaceCollection() so a mid-request failure/crash can never leave
 // the user with a partially-deleted or empty collection.
 // Body must be an array of entity objects. Each must have _id.
+//
+// Restricted (Plan 321 Phase 1) to the specific collections that actually still need
+// atomic whole-collection replace today: the one remaining single-doc-array registry
+// (KITCHEN_PREPARATIONS — the rest move to TaxonomyStore in Phase 3) and TRASH_*/
+// VERSION_HISTORY clear-all/restore-all/trim flows. Every real entity-data collection
+// (PRODUCT_LIST, RECIPE_LIST, ...) must go through per-document POST/PUT/DELETE —
+// wiping a user's whole catalog in one call was never an intended use of this route.
 // ---------------------------------------------------------------------------
+const REPLACEABLE_TYPES = new Set([
+  'KITCHEN_PREPARATIONS',
+  'TRASH_RECIPES', 'TRASH_DISHES', 'TRASH_PRODUCTS', 'TRASH_EQUIPMENT', 'TRASH_VENUES', 'TRASH_MENU_EVENTS',
+  'VERSION_HISTORY',
+]);
+
 router.put('/:type', verifyToken, async (req, res) => {
   try {
+    if (!REPLACEABLE_TYPES.has(req.params.type)) {
+      return res.status(400).json({ error: `Whole-collection replace is not permitted for ${req.params.type}` });
+    }
     if (req.headers['x-confirm-replace'] !== 'true') {
       return res.status(400).json({ error: 'X-Confirm-Replace: true header is required for bulk replace' });
     }

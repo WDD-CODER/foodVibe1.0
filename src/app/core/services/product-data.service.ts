@@ -239,7 +239,7 @@ export class ProductDataService {
 
   async getTrashProducts(): Promise<(Product & { deletedAt: number })[]> {
     try {
-      const raw = await this.storage.query<Record<string, unknown>>(TRASH_KEY, 0)
+      const raw = await this.storage.query<Record<string, unknown>>(TRASH_KEY)
       return raw.map((row) => this.normalizeTrashProduct(row as Partial<Product> & { deletedAt: number }))
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err

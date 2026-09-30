@@ -93,9 +93,9 @@ All agents read file contents, localStorage data, recipe names, product descript
 
 These rules apply to the Express server (`server/`) and are non-negotiable for production:
 
-9. **Authenticated Reads**: ALL API routes including GET must require a valid JWT. Unauthenticated reads are not permitted — `router.use(verifyToken)` must come before all route handlers in `generic.js`.
+9. **Reads on `/api/v1/data` are intentionally optional-auth** (`optionalToken` middleware, not `verifyToken`): authenticated → the caller's own documents; anonymous → `__master__` (shared catalog) documents. Confirmed as a deliberate product decision 2026-09-29 (Plan 321 Phase 1) — this corrects an earlier, incorrect version of this rule that claimed all reads require a JWT, which never matched `generic.js`. Every write route (`POST`/`PUT`/`DELETE`) still requires a valid JWT via `verifyToken`.
 10. **JWT Expiry**: Access tokens must expire in ≤ 15 minutes. Refresh tokens (30d) must be stored as httpOnly cookies — never in localStorage or sessionStorage.
-11. **Rate Limiting**: `/api/v1/auth/login` must be rate-limited to 10 req/15min/IP. `/api/v1/auth/signup` must be rate-limited to 5 req/1h/IP. Use `express-rate-limit`.
+11. **Rate Limiting**: `/api/v1/auth/login` must be rate-limited to 10 req/15min/IP. `/api/v1/auth/signup` must be rate-limited to 5 req/1h/IP. `/api/v1/data` writes (POST/PUT/DELETE) must be rate-limited (300 req/15min). `/api/v1/ai` must be rate-limited per authenticated user, not per IP (20 req/15min/userId — Gemini calls cost real money). Use `express-rate-limit`.
 12. **Account Lockout**: After 5 consecutive failed login attempts, the account must be locked for 15 minutes (`lockedUntil` field in user document). Reset on successful login.
 13. **replaceAll Guard**: `PUT /api/v1/data/:type` (no id) requires `X-Confirm-Replace: true` header. Missing header returns 400. Angular `HttpStorageAdapter.replaceAll()` must set this header.
 14. **Server Logging**: All requests must be logged (method, URL, status, duration) via `morgan`. Never log request/response bodies. Use `console.error` for errors with event context only — no stack traces to client in production.

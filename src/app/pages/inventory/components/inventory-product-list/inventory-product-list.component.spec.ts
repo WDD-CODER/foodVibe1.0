@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { provideHttpClient } from '@angular/common/http'
 import { InventoryProductListComponent } from './inventory-product-list.component'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { Router, ActivatedRoute } from '@angular/router'
@@ -63,6 +65,8 @@ describe('InventoryProductListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [InventoryProductListComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: KitchenStateService, useValue: mockKitchenState },
         { provide: Router, useValue: mockRouter },
         {

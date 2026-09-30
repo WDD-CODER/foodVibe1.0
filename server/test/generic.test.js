@@ -143,12 +143,15 @@ describe('GET /api/v1/data/:type/count', () => {
 });
 
 describe('POST /api/v1/data/:type', () => {
-  it('CHARACTERIZATION: requires _id in the body', async () => {
+  it('Plan 321 Phase 1: server generates _id when the body omits one', async () => {
     const res = await request(app)
       .post('/api/v1/data/PRODUCT_LIST')
       .set('Authorization', `Bearer ${tokenA()}`)
       .send({ name_hebrew: 'no id' });
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(201);
+    expect(typeof res.body._id).toBe('string');
+    expect(res.body._id.length).toBeGreaterThan(0);
+    expect(res.body._masterId).toBe(res.body._id); // self-referential, same as the client-id path
   });
 
   it('CHARACTERIZATION: stamps userId from the token, sets _masterId to the client id, _userModified false', async () => {
@@ -160,6 +163,15 @@ describe('POST /api/v1/data/:type', () => {
     expect(res.body.userId).toBe('userA');
     expect(res.body._masterId).toBe('p1');
     expect(res.body._userModified).toBe(false);
+  });
+
+  it('Plan 321 Phase 1: a client-supplied _id is still honored (appendExisting / trash-restore relies on this)', async () => {
+    const res = await request(app)
+      .post('/api/v1/data/TRASH_PRODUCTS')
+      .set('Authorization', `Bearer ${tokenA()}`)
+      .send({ _id: 'restored-1', name_hebrew: 'x' });
+    expect(res.status).toBe(201);
+    expect(res.body._id).toBe('restored-1');
   });
 
   it('CHARACTERIZATION: duplicate _id for the same collection returns 409', async () => {
@@ -291,29 +303,38 @@ describe('DELETE /api/v1/data/:type/bulk', () => {
 });
 
 describe('PUT /api/v1/data/:type (whole-collection replace)', () => {
-  it('CHARACTERIZATION: requires the X-Confirm-Replace header', async () => {
+  it('Plan 321 Phase 1: rejects a type not on the REPLACEABLE_TYPES allowlist', async () => {
     const res = await request(app)
-      .put('/api/v1/data/KITCHEN_UNITS')
+      .put('/api/v1/data/PRODUCT_LIST')
+      .set('Authorization', `Bearer ${tokenA()}`)
+      .set('X-Confirm-Replace', 'true')
+      .send([{ _id: 'p1' }]);
+    expect(res.status).toBe(400);
+  });
+
+  it('CHARACTERIZATION: requires the X-Confirm-Replace header (on an allowlisted type)', async () => {
+    const res = await request(app)
+      .put('/api/v1/data/KITCHEN_PREPARATIONS')
       .set('Authorization', `Bearer ${tokenA()}`)
       .send([{ _id: 'u1' }]);
     expect(res.status).toBe(400);
   });
 
   it('CHARACTERIZATION: replaces the caller\'s entire collection, reassigns a colliding id', async () => {
-    await testDb().collection('KITCHEN_UNITS').insertMany([
+    await testDb().collection('KITCHEN_PREPARATIONS').insertMany([
       { _id: 'old1', userId: 'userA' },
       { _id: 'taken', userId: 'userB' },
     ]);
     const res = await request(app)
-      .put('/api/v1/data/KITCHEN_UNITS')
+      .put('/api/v1/data/KITCHEN_PREPARATIONS')
       .set('Authorization', `Bearer ${tokenA()}`)
       .set('X-Confirm-Replace', 'true')
       .send([{ _id: 'taken', name_hebrew: 'x' }]);
     expect(res.status).toBe(200);
-    const mine = await testDb().collection('KITCHEN_UNITS').find({ userId: 'userA' }).toArray();
+    const mine = await testDb().collection('KITCHEN_PREPARATIONS').find({ userId: 'userA' }).toArray();
     expect(mine).toHaveLength(1);
     expect(mine[0]._id).not.toBe('taken'); // reassigned — 'taken' still belongs to userB
-    const othersStillIntact = await testDb().collection('KITCHEN_UNITS').findOne({ _id: 'taken', userId: 'userB' });
+    const othersStillIntact = await testDb().collection('KITCHEN_PREPARATIONS').findOne({ _id: 'taken', userId: 'userB' });
     expect(othersStillIntact).not.toBeNull();
   });
 });

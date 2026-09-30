@@ -27,12 +27,12 @@ export interface ActivityEntry {
   changes?: ActivityChange[]
 }
 
-/** localStorage key for activity log; also used in backup/restore (BACKUP_ENTITY_TYPES). */
+/** localStorage key for activity log. */
 export const ACTIVITY_STORAGE_KEY = 'activity_log'
 const MAX_ACTIVITY_ENTRIES = 100
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class ActivityLogService {
   private readonly activityLogInternal_ = signal<ActivityEntry[]>(this.hydrateFromStorage())
@@ -52,16 +52,14 @@ export class ActivityLogService {
    */
   getRecentEntriesFromStorage(maxItems = 10): ActivityEntry[] {
     const entries = this.hydrateFromStorage()
-    return [...entries]
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, maxItems)
+    return [...entries].sort((a, b) => b.timestamp - a.timestamp).slice(0, maxItems)
   }
 
   recordActivity(entry: Omit<ActivityEntry, 'id' | 'timestamp'>): void {
     const nextEntry: ActivityEntry = {
       ...entry,
       id: `${entry.entityType}-${entry.entityId || 'new'}-${Date.now()}`,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     }
 
     const current = this.activityLogInternal_()
@@ -91,4 +89,3 @@ export class ActivityLogService {
     }
   }
 }
-

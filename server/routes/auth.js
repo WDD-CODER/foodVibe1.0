@@ -6,6 +6,7 @@ const User = require('../models/user.model');
 const { cloneMasterDataToUser } = require('../services/clone-master');
 const { syncMasterToUser } = require('../services/sync-master');
 const { getMasterVersion } = require('../services/master-version');
+const { newId } = require('../utils/id');
 
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -44,16 +45,6 @@ const refreshLimiter = rateLimit({
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/**
- * Generates a 5-char alphanumeric ID.
- */
-function makeId(length = 5) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let id = '';
-  for (let i = 0; i < length; i++) id += chars[Math.floor(Math.random() * chars.length)];
-  return id;
-}
 
 /**
  * True for Mongo/Mongoose connectivity failures (unreachable cluster, IP not allow-listed,
@@ -145,7 +136,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
       return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' });
     }
     const passwordHash = password;
-    const _id = makeId();
+    const _id = newId();
     await User.create({ _id, name, email, imgUrl: imgUrl || '', passwordHash });
 
     await cloneMasterDataToUser(_id);

@@ -28,7 +28,7 @@
 
 ### Plan 321 — Professional Foundation Refactor (`plans/321-professional-foundation-refactor.plan.md`)
 
-> Phase 0 done, Human-validated 2026-09-29 (branch `chore/foundation-p0-safety-net`). Phase 1 next — its own Step 0 Reality Check required before starting. Parallel-session note: Plan 320 (recipe course field + labels, `feat/recipe-labels-course-field` in worktree `foodVibe1.0-wt-recipe-labels`) is separate, unrelated work — no file overlap so far.
+> Phase 1 done 2026-09-29 (branch `chore/foundation-p1-single-source-of-truth`), pending Human validation. Phase 2a next — its own Step 0 Reality Check required before starting. Parallel-session note: Plan 320 (recipe course field + labels, `feat/recipe-labels-course-field` in worktree `foodVibe1.0-wt-recipe-labels`) is separate, unrelated work — no file overlap so far.
 
 - [x] P0.0 Reality Check → `docs/session-state-foundation-refactor.md` + Human go
 - [x] P0.1 Consolidate backup + add restore-to-scratch; drill local + Atlas — found & fixed a `system.views` crash bug in `db-backup.js` along the way; both drills verified 0 mismatches
@@ -36,7 +36,15 @@
 - [x] P0.3 Characterization tests: generic.js, sync-master.js, push-to-master — 42 tests, all passing
 - [x] P0.4 CI `server-tests` job
 - [x] P0.5 ADR 0008
-- [ ] P1.0–P1.8 Single sources of truth & dead paths (collections registry, one `newId()`, remove localStorage mode, retire whole-collection replace, rate limits, docs drift, `PERF_LOG` off, stale branches)
+- [x] P1.0 Reality Check + Human go
+- [x] P1.1 Collections registry — also fixed a real drift bug (2 collections missing from CLONEABLE_TYPES/BACKUP_ENTITY_TYPES)
+- [x] P1.2 Single `newId()` server+client; server-generated `_id` on POST (client id still honored when given — appendExisting/trash-restore needs it)
+- [x] P1.3 Removed localStorage mode + `useBackend` flags + `delay` param + the now-dead `backup_<key>` mirror — surfaced and fixed a real bug along the way: `UserService`'s constructor now always attempts silent refresh, needing `HttpClient` unconditionally; fixed 5 specs that broke
+- [x] P1.4 Restricted whole-collection replace to `REPLACEABLE_TYPES` (broader than assumed — TRASH_*/VERSION_HISTORY use it too, not just registries)
+- [x] P1.5 Rate limits: `/api/v1/data` writes 300/15min, `/api/v1/ai` 20/15min per user
+- [x] P1.6 Fixed docs drift (`standards-backend.md §5`, `standards-security.md §9`) + stale `imageUrl_` comment
+- [x] P1.7 `render.yaml` `PERF_LOG: "0"` — **Human action open:** mirror in Render dashboard
+- [ ] P1.8 Stale branch list gathered (65 branches, `gh-pages` excluded) — **awaiting Human approval before deleting any**
 - [ ] P2a.0–P2a.6 Shared Zod schema package, observe-mode validation
 - [ ] P2b.0–P2b.5 v2 migration: rename + `schemaVersion` + enforce (Gates G1/G2)
 - [ ] P3.0–P3.5 Unified taxonomy store (`taxonomyTerms` + `TaxonomyStore`)

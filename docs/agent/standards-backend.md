@@ -98,16 +98,29 @@ When modifying an existing feature:
 
 ## 5 — Backend API Contract
 
-All routes require `Authorization: Bearer <token>` (see `standards-security.md §9` — authenticated reads, no public endpoints).
+Write routes (`POST`/`PUT`/`DELETE`) require `Authorization: Bearer <token>`. `GET` reads
+are intentionally public/optional-auth (`optionalToken` middleware): an authenticated
+request returns the caller's own documents; an anonymous request returns `__master__`
+(shared catalog) documents. This is a deliberate product decision (confirmed 2026-09-29,
+Plan 321 Phase 1) — not the drift it used to look like against an earlier, incorrect
+version of this section (and of `standards-security.md §9`, corrected the same day).
 
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/v1/data/:type` | List all — mirrors `StorageService.query()` |
-| `GET` | `/api/v1/data/:type/:id` | Get one — mirrors `StorageService.get()` |
-| `POST` | `/api/v1/data/:type` | Create (body must include `_id`) |
-| `PUT` | `/api/v1/data/:type/:id` | Replace one — mirrors `StorageService.put()` |
-| `PUT` | `/api/v1/data/:type` | Replace all (requires `X-Confirm-Replace: true` header) |
-| `DELETE` | `/api/v1/data/:type/:id` | Remove one |
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/v1/data/:type` | optional | List all — authed: own docs; anonymous: `__master__` docs |
+| `GET` | `/api/v1/data/:type/:id` | optional | Get one — same auth split as above |
+| `GET` | `/api/v1/data/:type/search` | optional | Lean prefix-match typeahead, `SEARCHABLE_ENTITY_TYPES` only |
+| `GET` | `/api/v1/data/:type/count` | optional | Lightweight count, `filter=lowStock\|unapproved` |
+| `POST` | `/api/v1/data/:type` | required | Create. Server generates `_id` unless the body already supplies one (Plan 321 Phase 1 — a client-supplied id is still honored, e.g. `appendExisting`/trash-restore) |
+| `PUT` | `/api/v1/data/:type/:id` | required | Replace one — mirrors `StorageService.put()` |
+| `PUT` | `/api/v1/data/:type/:id/push-to-master` | required | **Deliberately open to any signed-in user for now** — see the route's own doc comment in `generic.js` |
+| `PUT` | `/api/v1/data/:type` | required | Replace all (requires `X-Confirm-Replace: true` header) — restricted (Plan 321 Phase 1) to `REPLACEABLE_TYPES` in `generic.js`, not every entity type |
+| `DELETE` | `/api/v1/data/:type/bulk` | required | Remove many by id |
+| `DELETE` | `/api/v1/data/:type/:id` | required | Remove one |
+
+Plan 321 Phase 1 also added rate limiting: a moderate write limit on `/api/v1/data`
+(300 req/15 min, writes only) and a strict per-user limit on `/api/v1/ai` (20 req/15 min,
+keyed by `userId`) — see `dataWriteLimiter` in `generic.js` and `aiLimiter` in `ai.js`.
 
 > Allowlist guard: only types in `ALL_USER_ENTITY_TYPES` (`server/constants/all-user-entity-types.js`) are reachable through the generic router — everything else, including `signed-users-db`, `users` (auth router only), and `GEMINI_SHOTS`/`GEMINI_USAGE` (`ai.js` only), returns `403`. Adding a new entity type means adding it to `ALL_USER_ENTITY_TYPES` first.
 

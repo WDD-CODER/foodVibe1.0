@@ -1,4 +1,6 @@
 import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { provideHttpClient } from '@angular/common/http'
 import { PreparationRegistryService } from './preparation-registry.service'
 import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
@@ -10,15 +12,17 @@ describe('PreparationRegistryService', () => {
   let storageSpy: jasmine.SpyObj<StorageService>
 
   beforeEach(fakeAsync(() => {
-    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post', 'replaceAll', 'makeId'])
+    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post', 'replaceAll'])
     storageSpy.query.and.returnValue(Promise.resolve([]))
     storageSpy.put.and.returnValue(Promise.resolve({ _id: 'p1' }))
     storageSpy.post.and.returnValue(Promise.resolve({ _id: 'p1', categories: [], preparations: [] }))
     storageSpy.replaceAll.and.returnValue(Promise.resolve())
-    storageSpy.makeId.and.returnValue('p1')
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
-    const translationSpy = jasmine.createSpyObj('TranslationService', ['updateDictionary', 'resolvePreparationCategory'])
+    const translationSpy = jasmine.createSpyObj('TranslationService', [
+      'updateDictionary',
+      'resolvePreparationCategory'
+    ])
     translationSpy.resolvePreparationCategory.and.returnValue('מטבח')
     const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
     keyResolutionSpy.ensureKeyForContext.and.callFake((v: string) =>
@@ -27,6 +31,8 @@ describe('PreparationRegistryService', () => {
 
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         PreparationRegistryService,
         { provide: StorageService, useValue: storageSpy },
         { provide: UserMsgService, useValue: userMsgSpy },
@@ -54,9 +60,7 @@ describe('PreparationRegistryService', () => {
   }))
 
   it('should register a preparation and persist', fakeAsync(() => {
-    storageSpy.query.and.returnValue(
-      Promise.resolve([{ _id: 'p1', categories: ['מטבח'], preparations: [] }])
-    )
+    storageSpy.query.and.returnValue(Promise.resolve([{ _id: 'p1', categories: ['מטבח'], preparations: [] }]))
     service.registerPreparation('רוטב עגבניות', 'מטבח')
     flush()
     expect(service.allPreparations_().length).toBe(1)

@@ -49,7 +49,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(outgoing).pipe(
     catchError((err: HttpErrorResponse) => {
-      if (err.status === 401 && environment.useBackendAuth) {
+      if (err.status === 401) {
         // Do not attempt refresh for auth endpoints themselves — avoids infinite loop.
         // /login 401 means bad credentials — just propagate; no session to clear.
         // /refresh 401 means the refresh token is gone/expired — session truly dead, sign out.

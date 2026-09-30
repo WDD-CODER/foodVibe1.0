@@ -8,7 +8,6 @@ import { ActivityChange } from './activity-log.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
 import { ProductDataService } from './product-data.service'
-import { environment } from '../../../environments/environment'
 
 export type VersionEntityType = 'recipe' | 'dish' | 'product'
 
@@ -34,13 +33,17 @@ export class VersionHistoryService {
 
   async getVersions(entityType: VersionEntityType, entityId: string): Promise<VersionEntry[]> {
     try {
-      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0)
+      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY)
       return all
-        .filter(e => e.entityType === entityType && e.entityId === entityId)
+        .filter((e) => e.entityType === entityType && e.entityId === entityId)
         .sort((a, b) => b.versionAt - a.versionAt)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.versionHistory.getVersions_error', message: 'Failed to get versions', context: { err } })
+      this.logging.error({
+        event: 'crud.versionHistory.getVersions_error',
+        message: 'Failed to get versions',
+        context: { err }
+      })
       throw err
     }
   }
@@ -51,13 +54,17 @@ export class VersionHistoryService {
     versionAt: number
   ): Promise<VersionEntry | null> {
     try {
-      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0)
-      return all.find(
-        e => e.entityType === entityType && e.entityId === entityId && e.versionAt === versionAt
-      ) ?? null
+      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY)
+      return (
+        all.find((e) => e.entityType === entityType && e.entityId === entityId && e.versionAt === versionAt) ?? null
+      )
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.versionHistory.getVersionEntry_error', message: 'Failed to get version entry', context: { err } })
+      this.logging.error({
+        event: 'crud.versionHistory.getVersionEntry_error',
+        message: 'Failed to get version entry',
+        context: { err }
+      })
       throw err
     }
   }
@@ -66,59 +73,38 @@ export class VersionHistoryService {
     try {
       const full: VersionEntry = { ...entry, versionAt: Date.now() }
 
-      // Backend: post one doc + trim only this entity's overflow (no full-collection rewrite).
-      if (environment.useBackend) {
-        await this.storage.post(VERSION_STORAGE_KEY, full)
-        const entityVersions = await this.storage.queryFiltered<VersionEntry & EntityId>(
-          VERSION_STORAGE_KEY,
-          entry.entityType,
-          entry.entityId
-        )
-        if (entityVersions.length > MAX_VERSIONS_PER_ENTITY) {
-          const overflowIds = entityVersions
-            .slice()
-            .sort((a, b) => a.versionAt - b.versionAt)
-            .slice(0, entityVersions.length - MAX_VERSIONS_PER_ENTITY)
-            .map(e => e._id)
-          if (overflowIds.length > 0) {
-            await this.storage.deleteBulk(VERSION_STORAGE_KEY, overflowIds)
-          }
+      // Post one doc + trim only this entity's overflow (no full-collection rewrite).
+      await this.storage.post(VERSION_STORAGE_KEY, full)
+      const entityVersions = await this.storage.queryFiltered<VersionEntry & EntityId>(
+        VERSION_STORAGE_KEY,
+        entry.entityType,
+        entry.entityId
+      )
+      if (entityVersions.length > MAX_VERSIONS_PER_ENTITY) {
+        const overflowIds = entityVersions
+          .slice()
+          .sort((a, b) => a.versionAt - b.versionAt)
+          .slice(0, entityVersions.length - MAX_VERSIONS_PER_ENTITY)
+          .map((e) => e._id)
+        if (overflowIds.length > 0) {
+          await this.storage.deleteBulk(VERSION_STORAGE_KEY, overflowIds)
         }
-        return
       }
-
-      // localStorage: full-array trim remains fine at small scale.
-      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0)
-      all.push(full)
-      const byEntity = new Map<string, VersionEntry[]>()
-      for (const e of all) {
-        const key = `${e.entityType}:${e.entityId}`
-        if (!byEntity.has(key)) byEntity.set(key, [])
-        byEntity.get(key)!.push(e)
-      }
-      const trimmed: VersionEntry[] = []
-      for (const arr of byEntity.values()) {
-        const sorted = arr.sort((a, b) => b.versionAt - a.versionAt)
-        trimmed.push(...sorted.slice(0, MAX_VERSIONS_PER_ENTITY))
-      }
-      await this.storage.replaceAll(VERSION_STORAGE_KEY, trimmed)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.versionHistory.addVersion_error', message: 'Failed to add version', context: { err } })
+      this.logging.error({
+        event: 'crud.versionHistory.addVersion_error',
+        message: 'Failed to add version',
+        context: { err }
+      })
       throw err
     }
   }
 
-  async restoreVersion(
-    entityType: VersionEntityType,
-    entityId: string,
-    versionAt: number
-  ): Promise<void> {
+  async restoreVersion(entityType: VersionEntityType, entityId: string, versionAt: number): Promise<void> {
     try {
-      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY, 0)
-      const entry = all.find(
-        e => e.entityType === entityType && e.entityId === entityId && e.versionAt === versionAt
-      )
+      const all = await this.storage.query<VersionEntry>(VERSION_STORAGE_KEY)
+      const entry = all.find((e) => e.entityType === entityType && e.entityId === entityId && e.versionAt === versionAt)
       if (!entry) throw new Error('Version not found')
       const snapshot = entry.snapshot
 
@@ -131,7 +117,11 @@ export class VersionHistoryService {
       }
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.versionHistory.restoreVersion_error', message: 'Failed to restore version', context: { err } })
+      this.logging.error({
+        event: 'crud.versionHistory.restoreVersion_error',
+        message: 'Failed to restore version',
+        context: { err }
+      })
       throw err
     }
   }
@@ -140,11 +130,7 @@ export class VersionHistoryService {
    * Create a new recipe/dish from a version snapshot (new _id, name with copy suffix).
    * Does not modify the current entity. Use for "Add as new" restore choice.
    */
-  async addVersionAsNewRecipe(
-    entityType: VersionEntityType,
-    entityId: string,
-    versionAt: number
-  ): Promise<Recipe> {
+  async addVersionAsNewRecipe(entityType: VersionEntityType, entityId: string, versionAt: number): Promise<Recipe> {
     const entry = await this.getVersionEntry(entityType, entityId, versionAt)
     if (!entry) throw new Error('Version not found')
     const snapshot = entry.snapshot
@@ -157,7 +143,7 @@ export class VersionHistoryService {
     const newRecipe: Omit<Recipe, '_id'> = {
       ...rest,
       name_hebrew: copyName,
-      recipe_type_: recipe.recipe_type_ ?? (entityType === 'dish' ? 'dish' : 'preparation'),
+      recipe_type_: recipe.recipe_type_ ?? (entityType === 'dish' ? 'dish' : 'preparation')
     }
     if (entityType === 'dish') {
       return this.dishData.addDish(newRecipe)

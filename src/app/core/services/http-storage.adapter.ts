@@ -22,22 +22,21 @@ type EntityId = { _id: string }
 const TOKEN_KEY = 'fv_token'
 
 /**
- * HTTP adapter that mirrors the full StorageService interface.
- * Delegates every operation to the REST API instead of localStorage.
+ * HTTP adapter that implements the StorageService interface — every operation
+ * goes to the REST API. StorageService (async-storage.service.ts) is a thin
+ * facade over this class (Plan 321 Phase 1 removed the old localStorage fallback
+ * mode, so there is no longer a runtime choice between the two).
  *
- * Drop-in replacement: StorageService injects this when environment.useBackend is true.
- * No data-service files need to change — only StorageService's delegation logic.
- *
- * HttpClient is resolved lazily so constructing StorageService in unit tests
- * (environment.useBackend === false) does not require an HttpClient provider.
+ * HttpClient is resolved lazily via Injector so constructing this service doesn't
+ * force an HttpClient provider on every consumer at construction time.
  *
  * Endpoints:
  *   query        → GET    /api/v1/data/:entityType
  *   get          → GET    /api/v1/data/:entityType/:id
- *   post         → POST   /api/v1/data/:entityType        (body includes _id assigned here)
+ *   post         → POST   /api/v1/data/:entityType        (server assigns _id unless the body already has one — see generic.js)
  *   put          → PUT    /api/v1/data/:entityType/:id
  *   remove       → DELETE /api/v1/data/:entityType/:id
- *   appendExisting → POST /api/v1/data/:entityType        (body already has _id)
+ *   appendExisting → POST /api/v1/data/:entityType        (body already has _id — server honors it, e.g. trash restore)
  *   replaceAll   → PUT    /api/v1/data/:entityType        (body is full array, no :id segment)
  *   queryFiltered → GET   /api/v1/data/:entityType?filterEntityType=&filterEntityId=
  *   deleteBulk   → DELETE /api/v1/data/:entityType/bulk   (body: { ids })
@@ -65,12 +64,8 @@ export class HttpStorageAdapter {
   // Public interface — matches StorageService exactly
   // ---------------------------------------------------------------------------
 
-  /**
-   * Returns all entities of a given type.
-   * The delay parameter is accepted for interface compatibility but ignored
-   * (HTTP latency already provides natural async delay).
-   */
-  async query<T>(entityType: string, _delay = 100): Promise<T[]> {
+  /** Returns all entities of a given type. */
+  async query<T>(entityType: string): Promise<T[]> {
     return firstValueFrom(
       this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}`, { headers: this.headers(), withCredentials: true })
     )
@@ -147,13 +142,13 @@ export class HttpStorageAdapter {
   }
 
   /**
-   * Creates a new entity. Assigns a fresh _id via makeId() before sending,
-   * matching the behaviour of StorageService.post().
+   * Creates a new entity. The server assigns `_id` (Plan 321 Phase 1 — a single
+   * server-side id generator replaces the old client-picked-id convention).
+   * Use the `_id` on the resolved doc, not one picked beforehand.
    */
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
-    const entityWithId = { ...(newEntity as object), _id: this.makeId() } as T & EntityId
     return firstValueFrom(
-      this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, entityWithId, {
+      this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, newEntity, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -194,20 +189,6 @@ export class HttpStorageAdapter {
         withCredentials: true
       })
     )
-  }
-
-  /**
-   * 5-char alphanumeric ID generator — identical to StorageService.makeId().
-   * Existing localStorage _id values are also 5-char alphanumeric, so IDs
-   * generated here are format-compatible for migration purposes.
-   */
-  makeId(length = 5): string {
-    let txt = ''
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    for (let i = 0; i < length; i++) {
-      txt += possible.charAt(Math.floor(Math.random() * possible.length))
-    }
-    return txt
   }
 
   /**

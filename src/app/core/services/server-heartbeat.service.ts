@@ -28,7 +28,7 @@ export class ServerHeartbeatService {
   }
 
   start(): void {
-    if (this.started_ || !environment.useBackend) return
+    if (this.started_) return
     this.started_ = true
     this.handleVisibility_()
     document.addEventListener('visibilitychange', this.onVisibility_)

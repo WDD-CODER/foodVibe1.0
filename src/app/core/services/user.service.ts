@@ -3,20 +3,15 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { User } from '../models/user.model'
 import { catchError, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs'
 import { UserMsgService } from './user-msg.service'
-import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
-import { hashPassword, verifyPassword } from '../utils/auth-crypto'
+import { hashPassword } from '../utils/auth-crypto'
 import { environment } from '../../../environments/environment'
 
-const SIGNED_USERS = 'signed-users-db'
 const SESSION_USER_KEY = 'loggedInUser'
 const TOKEN_KEY = 'fv_token'
 
 /** 13 minutes — access token expires at 15m; refresh early to avoid 401s mid-session. */
 const REFRESH_INTERVAL_MS = 13 * 60 * 1000
-
-/** Stored record may include password hash; never expose hash to session or client. */
-type StoredUser = User & { passwordHash?: string }
 
 export interface LoginCredentials {
   name: string
@@ -26,7 +21,6 @@ export interface LoginCredentials {
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private userMsgService = inject(UserMsgService)
-  private storageService = inject(StorageService)
   private logging = inject(LoggingService)
   private injector = inject(Injector)
 
@@ -105,16 +99,14 @@ export class UserService {
   constructor() {
     // Attempt silent session restore on page reload.
     // If the httpOnly refresh cookie is still valid, this issues a new access token.
-    if (environment.useBackendAuth) {
-      this.refreshToken().subscribe({
-        next: () => {},
-        error: () => {
-          // Refresh failed (cookie expired or absent) — clear any stale session state.
-          this._saveUserLocal(null)
-          this.clearToken()
-        }
-      })
-    }
+    this.refreshToken().subscribe({
+      next: () => {},
+      error: () => {
+        // Refresh failed (cookie expired or absent) — clear any stale session state.
+        this._saveUserLocal(null)
+        this.clearToken()
+      }
+    })
   }
 
   // -------------------------------------------------------------------------
@@ -219,54 +211,25 @@ export class UserService {
   // -------------------------------------------------------------------------
 
   public signup(newUser: User, password: string) {
-    if (environment.useBackendAuth) {
-      return from(hashPassword(password)).pipe(
-        switchMap((hashedPassword) => this.callBackendSignup(newUser, hashedPassword)),
-        tap(({ token, user }) => {
-          this.storeToken(token)
-          this._saveUserLocal(user)
-          this._startRefreshTimer()
-          this._reloadDataServices()
-          this.logging.info({ event: 'auth.signup', message: 'Signup success', context: { userId: user._id } })
-        }),
-        map(({ user }) => user),
-        catchError((err: HttpErrorResponse) => {
-          const body = err.error?.error
-          if (body === 'USERNAME_TAKEN') return throwError(() => new Error('USERNAME_TAKEN'))
-          if (body === 'EMAIL_TAKEN') return throwError(() => new Error('EMAIL_TAKEN'))
-          if (body === 'INVALID_USERNAME') return throwError(() => new Error('INVALID_USERNAME'))
-          if (body === 'INVALID_EMAIL') return throwError(() => new Error('INVALID_EMAIL'))
-          // Anything unrecognized (DB_UNAVAILABLE, network failure, etc.) is a real server
-          // problem — never assume it means the username is taken.
-          return throwError(() => new Error('SERVER_ERROR'))
-        })
-      )
-    }
-
-    return from(this.storageService.query<StoredUser>(SIGNED_USERS)).pipe(
-      map((users) => users.find((u) => u.name === newUser.name)),
-      switchMap((existing) =>
-        existing
-          ? throwError(() => new Error('USERNAME_TAKEN'))
-          : from(hashPassword(password)).pipe(
-              switchMap((passwordHash) =>
-                from(
-                  this.storageService.post(SIGNED_USERS, {
-                    name: newUser.name,
-                    email: newUser.email,
-                    imgUrl: newUser.imgUrl,
-                    role: (newUser.role ?? 'user') as 'admin' | 'user',
-                    passwordHash
-                  } as StoredUser)
-                )
-              )
-            )
-      ),
-      tap((stored) => {
-        const user = this._toUser(stored)
-        this.userMsgService.onSetSuccessMsg('Signup Successfully ')
+    return from(hashPassword(password)).pipe(
+      switchMap((hashedPassword) => this.callBackendSignup(newUser, hashedPassword)),
+      tap(({ token, user }) => {
+        this.storeToken(token)
         this._saveUserLocal(user)
+        this._startRefreshTimer()
+        this._reloadDataServices()
         this.logging.info({ event: 'auth.signup', message: 'Signup success', context: { userId: user._id } })
+      }),
+      map(({ user }) => user),
+      catchError((err: HttpErrorResponse) => {
+        const body = err.error?.error
+        if (body === 'USERNAME_TAKEN') return throwError(() => new Error('USERNAME_TAKEN'))
+        if (body === 'EMAIL_TAKEN') return throwError(() => new Error('EMAIL_TAKEN'))
+        if (body === 'INVALID_USERNAME') return throwError(() => new Error('INVALID_USERNAME'))
+        if (body === 'INVALID_EMAIL') return throwError(() => new Error('INVALID_EMAIL'))
+        // Anything unrecognized (DB_UNAVAILABLE, network failure, etc.) is a real server
+        // problem — never assume it means the username is taken.
+        return throwError(() => new Error('SERVER_ERROR'))
       })
     )
   }
@@ -279,9 +242,7 @@ export class UserService {
         this._saveUserLocal(null)
         this.clearToken()
         this._reloadDataServices()
-        if (environment.useBackendAuth) {
-          this.callBackendLogout().subscribe({ error: () => {} })
-        }
+        this.callBackendLogout().subscribe({ error: () => {} })
         this.logging.info({ event: 'auth.logout', message: 'Logout', context: userId ? { userId } : undefined })
       })
     )
@@ -290,63 +251,26 @@ export class UserService {
   public login(credentials: LoginCredentials) {
     const { name, password } = credentials
 
-    if (environment.useBackendAuth) {
-      return this.callBackendLogin(name, password).pipe(
-        tap(({ token, user }) => {
-          this.storeToken(token)
-          this._saveUserLocal(user)
-          this._startRefreshTimer()
-          this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
-          this._reloadDataServices()
-        }),
-        map(({ user }) => user),
-        catchError((err: HttpErrorResponse) => {
-          if (err.status === 423) return throwError(() => new Error('ACCOUNT_LOCKED'))
-          if (err.status === 429) return throwError(() => new Error('RATE_LIMITED'))
-          if (err.error?.error === 'USER_NOT_FOUND' || err.status === 401) {
-            return throwError(() => new Error('USER_NOT_FOUND'))
-          }
-          // Anything unrecognized (DB_UNAVAILABLE, network failure, etc.) is a real server
-          // problem — never assume it means invalid credentials.
-          return throwError(() => new Error('SERVER_ERROR'))
-        })
-      )
-    }
-
-    return from(this.storageService.query<StoredUser>(SIGNED_USERS)).pipe(
-      map((users) => users.find((u) => u.name === name)),
-      switchMap((stored) => {
-        if (!stored) {
-          this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: user not found', context: {} })
+    return this.callBackendLogin(name, password).pipe(
+      tap(({ token, user }) => {
+        this.storeToken(token)
+        this._saveUserLocal(user)
+        this._startRefreshTimer()
+        this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
+        this._reloadDataServices()
+      }),
+      map(({ user }) => user),
+      catchError((err: HttpErrorResponse) => {
+        if (err.status === 423) return throwError(() => new Error('ACCOUNT_LOCKED'))
+        if (err.status === 429) return throwError(() => new Error('RATE_LIMITED'))
+        if (err.error?.error === 'USER_NOT_FOUND' || err.status === 401) {
           return throwError(() => new Error('USER_NOT_FOUND'))
         }
-        if (!stored.passwordHash) {
-          this.logging.warn({
-            event: 'auth.login.failure',
-            message: 'Login failed: no password hash on record',
-            context: {}
-          })
-          return throwError(() => new Error('USER_NOT_FOUND'))
-        }
-        return from(verifyPassword(password, stored.passwordHash)).pipe(
-          switchMap((ok) => {
-            if (!ok) {
-              this.logging.warn({ event: 'auth.login.failure', message: 'Login failed: invalid password', context: {} })
-              return throwError(() => new Error('USER_NOT_FOUND'))
-            }
-            const user = this._toUser(stored)
-            this._saveUserLocal(user)
-            this.logging.info({ event: 'auth.login', message: 'Login success', context: { userId: user._id } })
-            this._reloadDataServices()
-            return of(user)
-          })
-        )
+        // Anything unrecognized (DB_UNAVAILABLE, network failure, etc.) is a real server
+        // problem — never assume it means invalid credentials.
+        return throwError(() => new Error('SERVER_ERROR'))
       })
     )
-  }
-
-  private _toUser(stored: StoredUser): User {
-    return { _id: stored._id, name: stored.name, email: stored.email, imgUrl: stored.imgUrl, role: stored.role }
   }
 
   _saveUserLocal(user: User | null): void {

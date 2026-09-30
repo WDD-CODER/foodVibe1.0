@@ -68,7 +68,7 @@ export interface Recipe {
   hiddenBy?: string[]
   /** List of user _ids who have favorited this recipe/dish */
   favoritedBy_?: string[]
-  /** Base64 data-URL of the recipe photo, set by user upload in recipe-builder. */
+  /** Cloudinary URL of the recipe photo, set by user upload in recipe-builder (see cloudinary.service.ts). */
   imageUrl_?: string
   /** User-assigned rating (1–5 stars). Optional; absent means unrated. */
   rating_?: number

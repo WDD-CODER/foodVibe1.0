@@ -219,7 +219,7 @@ export class RecipeDataService {
 
   async getTrashRecipes(): Promise<(Recipe & { deletedAt: number })[]> {
     try {
-      return this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
+      return this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({
@@ -233,7 +233,7 @@ export class RecipeDataService {
 
   async restoreRecipe(_id: string): Promise<Recipe> {
     try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
+      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
       const item = trash.find((r) => r._id === _id)
       if (!item) throw new Error(`Recipe ${_id} not found in trash`)
       const { deletedAt: _, ...recipe } = item
@@ -251,7 +251,7 @@ export class RecipeDataService {
 
   async disposeRecipe(_id: string): Promise<void> {
     try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
+      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
       const rest = trash.filter((r) => r._id !== _id)
       if (rest.length === trash.length) throw new Error(`Recipe ${_id} not found in trash`)
       await this.storage.replaceAll(TRASH_KEY, rest)
@@ -264,7 +264,7 @@ export class RecipeDataService {
 
   async restoreAllRecipes(): Promise<Recipe[]> {
     try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY, 0)
+      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
       const restored: Recipe[] = []
       for (const item of trash) {
         const { deletedAt: _, ...recipe } = item

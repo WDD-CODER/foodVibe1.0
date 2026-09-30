@@ -1,7 +1,23 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
 const { verifyToken } = require('../middleware/auth');
 const dns = require('node:dns').promises;
+
+// Plan 321 Phase 1 — strict per-user limit on the Gemini-backed AI routes (they cost
+// real money per call). Keyed by userId, not IP, since verifyToken has already run by
+// the time this middleware executes on each route below — a shared office/NAT IP must
+// not throttle every user on it together. Independent of the shared 1,000/day global
+// GEMINI_USAGE counter further down this file (that one caps total spend; this one
+// caps how fast any single account can burn through it).
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.user?.userId || req.ip,
+  message: { error: 'Too many AI requests, please try again later' },
+});
 
 const PRIVATE_IP_RANGES = [
   /^127\./,
@@ -453,7 +469,7 @@ function respondFromRecipeResult(res, result) {
 // Requires a valid JWT — prevents unauthenticated use of the API quota.
 // ---------------------------------------------------------------------------
 
-router.post('/generate', verifyToken, async (req, res) => {
+router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -535,7 +551,7 @@ If type is "dish", return:
   }
 }`;
 
-router.post('/parse-text', verifyToken, async (req, res) => {
+router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -647,7 +663,7 @@ Format:
   }
 }`;
 
-router.post('/patch-recipe', verifyToken, async (req, res) => {
+router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -805,7 +821,7 @@ function validateMenuDraft(menu) {
   return errors;
 }
 
-router.post('/generate-menu', verifyToken, async (req, res) => {
+router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -919,7 +935,7 @@ Format:
   }
 }`;
 
-router.post('/patch-menu', verifyToken, async (req, res) => {
+router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1036,7 +1052,7 @@ function validateProductDraft(product) {
   return errors;
 }
 
-router.post('/generate-product', verifyToken, async (req, res) => {
+router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1142,7 +1158,7 @@ Format:
   }
 }`;
 
-router.post('/patch-product', verifyToken, async (req, res) => {
+router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1219,7 +1235,7 @@ router.post('/patch-product', verifyToken, async (req, res) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-router.post('/generate-from-image', verifyToken, async (req, res) => {
+router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1294,7 +1310,7 @@ function extractTextFromHtml(html) {
   return stripped.slice(0, 8000);
 }
 
-router.post('/generate-from-url', verifyToken, async (req, res) => {
+router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
@@ -1363,7 +1379,7 @@ router.post('/generate-from-url', verifyToken, async (req, res) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-router.post('/shots', verifyToken, async (req, res) => {
+router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
   const { prompt, draft, status, source } = req.body;
 
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
@@ -1406,7 +1422,7 @@ router.post('/shots', verifyToken, async (req, res) => {
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
-router.post('/save-menu-shot', verifyToken, async (req, res) => {
+router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
   const { prompt, menu } = req.body;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
     return res.status(400).json({ error: 'prompt is required' });

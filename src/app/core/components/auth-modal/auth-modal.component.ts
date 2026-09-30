@@ -186,18 +186,13 @@ export class AuthModalComponent {
 
   protected loginAsGuest(): void {
     this.errorKey.set(null)
-    if (environment.useBackendAuth) {
-      this.userService.loginAsGuestBackend().subscribe({
-        next: () => this._onSuccess(),
-        error: () => {
-          this._reset()
-          this.modalService.close()
-        }
-      })
-      return
-    }
-    this.userService._saveUserLocal({ _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin' })
-    this._onSuccess()
+    this.userService.loginAsGuestBackend().subscribe({
+      next: () => this._onSuccess(),
+      error: () => {
+        this._reset()
+        this.modalService.close()
+      }
+    })
   }
 
   protected onClose(): void {

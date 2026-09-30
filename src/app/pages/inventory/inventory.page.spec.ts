@@ -1,4 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
+import { provideHttpClient } from '@angular/common/http'
 import { InventoryPage } from './inventory.page'
 import { provideRouter, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
@@ -9,7 +11,7 @@ describe('InventoryPage', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [InventoryPage],
-      providers: [provideRouter([])]
+      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents()
 
     fixture = TestBed.createComponent(InventoryPage)
