@@ -4,7 +4,7 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 
 ## Hard rules
 
-- Never write on `main`. Work only on `feature/`, `fix/`, or `chore/` branches.
+- Never write on `main` — except the Planner committing `plans/*.plan.md` and `.claude/todo.md`. All code goes through a `feature/`, `fix/`, or `chore/` branch (Worker slots use `feat/NNN-<slug>`).
 - `ng build` must pass before any commit.
 - Signals only: `signal()`, `computed()`, trailing underscore for private state. No `BehaviorSubject`.
 - `inject()` for DI — never constructor injection.
@@ -18,7 +18,8 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 - Browser interaction goes through gstack `/browse` — never raw Playwright MCP directly.
 - Compaction: when a context-full warning appears, state open signals/todos in chat first, then prefer `/compact focus on <current job + open signals>`. Between unrelated tasks prefer `/clear` + session-state reload over `/compact`.
 - **Job validation (all agents):** A job is **not done** until the Human validates it. Never self-mark todos. Full procedure: `docs/agent/job-validation.md`. Fully-done plan sections leave `.claude/todo.md` via `node scripts/todo-archive.mjs` into `.claude/todo-archive/NNN.md` (max 300 lines); see that doc’s Todo archive volumes section.
-- **Plan Contracts (all agents):** A pasted/approved big plan must be persisted under `plans/` via `.claude/skills/save-plan/SKILL.md` before milestone execution. Run `node scripts/plan-name-similarity.mjs --name="…"` first — ask rewrite/save-as-new/cancel **only** when similar name hits exist. Mid-brief new tasks must be appended to that plan’s Atomic Sub-tasks and `.claude/todo.md`.
+- **Plan Contracts (all agents):** A pasted/approved big plan must be persisted under `plans/` via `.claude/skills/save-plan/SKILL.md` before milestone execution. Run `node scripts/plan-name-similarity.mjs --name="…"` first — ask rewrite/save-as-new/cancel **only** when similar name hits exist. Mid-brief new tasks must be appended to that plan’s Atomic Sub-tasks (and `.claude/todo.md` — Planner only, see Planner-Worker bullet below).
+- **Planner-Worker workflow:** The Planner (main folder, on `main`) writes and pushes `plans/*.plan.md` + `.claude/todo.md` directly. A Worker (one of 3 permanent slots — `wt-1`=4201/3001, `wt-2`=4202/3002, `wt-3`=4203/3003, `main`=4200/3000 unchanged) claims a plan via "execute plan NNN" and may modify only that plan's `## Read-Write Scope`; anything else — STOP, tell the Human the file, exact change, and why, wait for `approved: <path>`, then append it to the scope block (enforced by `scripts/scope-guard.sh` + the `/ship` scope gate). Hotspots `src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts` are append-only for every plan — add, never rewrite or remove an existing entry, without escalating the same way. Workers never write `.claude/todo.md`. `git push --no-verify` to `main` is human-only. Full detail: `docs/brain/decisions/0009-planner-worker-worktrees.md`.
 
 ## Job validation (all agents)
 
@@ -66,7 +67,8 @@ Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validati
 | Brief execution adds a new stage / review fallout task | Append `[ ]` to parent `plans/….plan.md` Atomic Sub-tasks + `.claude/todo.md` before doing the work |
 | Before PR, or "audit tech debt" | `.claude/skills/techdebt/SKILL.md` |
 | Before a PR | `.claude/skills/update-docs/SKILL.md` |
-| User says "setup worktree" / "new worktree" (on-demand only) | `.claude/skills/worktree-setup/SKILL.md` |
+| User says "execute plan NNN" / "take plan NNN" inside a `wt-N` slot | `.claude/commands/take-plan.md` |
+| User says "setup worktree" / "new worktree" (one-time slot init only — not per-plan) | `.claude/skills/worktree-setup/SKILL.md` |
 | List available skills | `.claude/commands/skills.md` |
 | List available commands | `.claude/commands/commands.md` |
 | Finishing a feature | `/ship` (Phase 0 auto-classifies the diff into FAST / ULTRA-TRIVIAL / REGULAR and announces which lane it's running — force with `/ship fast` or `/ship regular`; `--skip-review "reason"` still works standalone; commits are PR'd only when feature-complete; milestone commits push without a PR). After any successful push off `main`, the Post-push Merge Gate in `docs/agent/standards-git.md` is mandatory — including Brain capture proposal (not `/ship`-only; auto-writes on the gate reply, see `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`). |

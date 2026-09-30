@@ -24,7 +24,30 @@ Claude Code / Cursor may plan when the Human Director explicitly overrides).
 3. Output: a Plan Contract under `plans/NNN-slug.plan.md` with numbered milestones
    and a Verify command per milestone. Persist with save-plan (never invent a
    parallel naming scheme).
-4. User approves the plan → Contractor executes one milestone at a time → `/review-it`.
+4. User approves the plan → save via the Planner protocol below → say "execute plan NNN"
+   in a free `wt-N` slot to start work (`.claude/commands/take-plan.md`) → `/review-it`.
+
+## Planner protocol (pushing to `main`)
+
+Only the Planner (main folder, checked out on `main`) runs this. It is the one place code
+review docs allow a direct push to `main` — restricted to `plans/*.plan.md` and
+`.claude/todo.md` by `scripts/branch-guard.sh` and `.husky/pre-push`.
+
+1. Main must be clean and on `main`: `git status --porcelain` empty, `git branch
+   --show-current` = `main`. Otherwise STOP and ask the Human. Then `git pull --ff-only`.
+2. Run `node scripts/todo-query.mjs sync --merged`, then `node scripts/todo-archive.mjs`,
+   then `node scripts/lib/slot.mjs --list` to see current slot occupancy.
+3. Ask: "Will this plan run in parallel with other active plans?" If yes, run
+   `node scripts/scope-check.mjs --overlap --plan=<path>` — it must report `OVERLAP: none`
+   before saving; a real overlap means narrowing the `## Read-Write Scope` first.
+4. Save via `.claude/skills/save-plan/SKILL.md`, with `Snapshot:` filled in (current
+   `origin/main` SHA) and `Status: draft`.
+5. `git add` only the plan file and `.claude/todo.md` (never `-A`), then commit and push
+   to `main` directly.
+6. End with: `Plan NNN pushed. Open a free slot and say: execute plan NNN.`
+
+A Claude.ai Architect only drafts the plan body — Claude Code in the main folder is what
+saves it (assigns `NNN`, runs the ledger sync), commits, and pushes.
 
 ## Notes
 

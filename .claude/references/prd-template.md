@@ -1,11 +1,47 @@
 # Plan XXX — [Feature Name]
 
+Status: draft | active | done
+Snapshot: [origin/main SHA at save time — filled by save-plan]
+
 ## Problem Statement
 [What problem does this solve for the user?]
 
 ## Goals & Success Criteria
 - Primary: [measurable outcome]
 - Success: [how we know it's done]
+
+## Execution Mode
+- Parallel: yes | no — will this run alongside other active plans?
+- Concurrent plans: [list, if parallel: yes]
+- Isolated DB: no | yes — yes only when this plan migrates or reshapes data
+
+## Read-Write Scope
+
+Always allowed regardless of the list below: this plan file itself, its own
+`docs/session-state-<branch>.md`, `.claude/sessions/**`, `.worktree-*`, and the append-only
+hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
+— add to them, never rewrite or remove an existing entry without escalating).
+
+```scope
+[one glob per line, prefer folder globs; # for comments]
+```
+
+## Read Scope
+
+Entire repo. Analysis and architectural suggestions are expected.
+
+## Escalation Protocol
+
+Thinking outside the box is expected; writing outside it requires explicit consent. If a
+Worker needs a file outside the `## Read-Write Scope` above: STOP, tell the Human the file,
+the exact change, and why it can't be done in-scope; wait for `approved: <path>`; then
+append the path to the scope block above and retry.
+
+## Step 0 — Reality Check
+
+Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check the listed commits
+by symbol (do not re-run the whole reality check from scratch), then STOP for a go before
+touching any milestone.
 
 ## User Stories
 - As a chef, I want [goal] so that [benefit]

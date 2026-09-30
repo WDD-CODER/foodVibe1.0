@@ -70,35 +70,6 @@
 - [ ] Stage 4 — New items created as shared from the start (`POST .../create-shared`, admin-only)
 - [ ] Stage 5 — Non-destructive delete propagation (`PUT .../remove-from-master`, master-only removal, no cascade to existing users)
 
-### Plan 323 — Todo Query Script and Trimmed Session Injection (`plans/323-todo-query-trimmed-session-injection.plan.md`)
-
-> Saved 2026-09-30. First of a 3-part sequence (this plan → Brief B1 → Brief B2), each executed and Human-validated in order.
-
-- [x] 1. Move parser functions from `todo-archive.mjs` into new `scripts/lib/todo-parse.mjs`; `--dry-run` output must stay byte-identical
-- [x] 2. Create `scripts/todo-query.mjs` with `next` / `open` / `sweep` / `mark` / `append` subcommands + `--json`
-- [x] 3. Trim `scripts/session-startup.sh` line 105 SessionStart injection to Summary/Next Steps/Commit, capped at 1,500 chars
-- [x] 4. Rewire consumers (`auto-solve.md`, `sweep-stale-todos.md`, `done.md`, `ship.md` "On approval" step 1, `save-plan` Phase 1) to use `todo-query`
-- [x] 5. Add `"todo"` script to `package.json`
-
-### Plan 324 — Ship Prep and Write Session State Scripts (`plans/324-ship-prep-and-write-session-state-scripts.plan.md`)
-
-> Saved 2026-09-30. Second of a 3-part sequence (Plan 323 merged → this plan → Brief B2), each executed and Human-validated in order.
-
-- [x] 1. Create `scripts/ship-prep.mjs` (lane classification, baseline check, secret-path flags, todo-query integration)
-- [x] 2. Create `scripts/write-session-state.mjs` (session-state schema writer)
-- [x] 3. Wire `ship.md` Phase 0 / Phase 3 / Phase 5 to the new scripts
-- [x] 4. Add exclude pathspecs + stat-only summary for noisy paths in `review.md`'s diff filter
-
-### Plan 325 — Ship.md Core and On-Demand File Split (`plans/325-ship-md-core-and-on-demand-split.plan.md`)
-
-> Saved 2026-09-30 (retroactively — save-plan step was skipped before execution). Third of a 3-part sequence (Plan 323 merged → Plan 324 merged → this plan).
-
-- [x] 1. Create `docs/agent/ship-regular.md` (Phase 2/Brain-entry/Commit-vs-PR/After-opening-PR/Phase 4.5 REGULAR content, moved verbatim)
-- [x] 2. Create `docs/agent/ship-recovery.md` (Recovery only/Push conflict guard/PR merge fallback, moved verbatim)
-- [x] 3. Rewrite `ship.md` core with routing lines to the split files
-- [x] 4. Compress duplicated fast-flag explanation into one paragraph in Flags
-- [x] 5. Check `AGENTS.md` line 72 for moved section names (none found, no change needed)
-
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
@@ -279,7 +250,6 @@ Open unchecked items at compact time:
 - [ ] Write designated implementation plan once clarifications are set
 
 Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
-
 
 ## PreCompact signal dump (2026-09-30T11:09:15Z)
 

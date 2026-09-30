@@ -159,7 +159,7 @@
 .trash-item-actions {
   display: flex;
   gap: 0.35rem;
-  margin-inline-end: auto;
+  margin-inline-end: 40%;
 }
 
 .btn-item {
@@ -273,10 +273,14 @@
     align-items: stretch;
     gap: 0.5rem;
 
+    .trash-item-name {
+      flex: 1;
+    }
+
     .trash-item-actions {
       display: flex;
       gap: 0.25rem;
-      justify-content: flex-end;
+      justify-content: space-between;
     }
   }
 }

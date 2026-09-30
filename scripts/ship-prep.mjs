@@ -15,6 +15,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { execFileSync } from 'child_process'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+import { isSlot, listSlots } from './lib/slot.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
@@ -24,6 +25,10 @@ const BASELINE_PATH = join(repoRoot, '.claude', '.ship-baseline')
 const SENSITIVE_PATHS_RE = /auth|crypto|guard|interceptor|security|payment|migration|schema|\.env|server\/routes|package(-lock)?\.json|\.github\/workflows|\.claude\/(settings|commands\/ship)\./
 const ULTRA_TRIVIAL_RE = /docs\/session-state-.*\.md|\.claude\/todo\.md|CHANGELOG\.md|docs\/.*\.md/
 const SECRET_PATH_RE = /(^|\/)\.env|\.pem$|\.key$|secret/i
+// Planner admin-bypass shape (plan 326) — a diff entirely inside this is
+// always ULTRA-TRIVIAL, evaluated before SENSITIVE_PATHS_RE so a plan named
+// e.g. "…-migration-spec.plan.md" doesn't get bumped to REGULAR.
+const PLAN_ONLY_RE = /^plans\/[^/]+\.plan\.md$|^\.claude\/todo\.md$/
 
 function parseArgs(argv) {
   const out = {}
@@ -104,6 +109,21 @@ function getManifestOverlaps(branch) {
   }
 }
 
+function hasActiveSiblingSlot() {
+  return listSlots().some(s => !s.detached)
+}
+
+function scopeDiffReport() {
+  try {
+    execFileSync('node', ['scripts/scope-check.mjs', '--diff=origin/main'], { cwd: repoRoot, encoding: 'utf8' })
+    return { scope: 'ok', files: [] }
+  } catch (e) {
+    const out = String(e.stdout || '')
+    const files = out.split(/\r?\n/).map(l => l.trim()).filter(l => l && l !== 'SCOPE: out')
+    return { scope: 'out', files }
+  }
+}
+
 function parseStatusPaths() {
   // --untracked-files=all: don't collapse a brand-new directory into one
   // "?? dir/" line — list each untracked file individually (e.g. a new
@@ -171,11 +191,16 @@ function classify() {
   const sensitiveMatches = thisChatFiles.filter(f => SENSITIVE_PATHS_RE.test(f))
   const secretPaths = thisChatFiles.filter(f => SECRET_PATH_RE.test(f))
 
+  const allPlanOnly = fileCount > 0 && thisChatFiles.every(f => PLAN_ONLY_RE.test(f))
+
   let lane
   let laneReason
   if (mode === 'regular') {
     lane = 'REGULAR'
     laneReason = 'forced via --mode regular'
+  } else if (allPlanOnly) {
+    lane = 'ULTRA-TRIVIAL'
+    laneReason = `${fileCount} file(s), plan/todo only`
   } else if (sensitiveMatches.length) {
     lane = 'REGULAR'
     laneReason = `touches ${sensitiveMatches[0]}`
@@ -193,7 +218,13 @@ function classify() {
   }
 
   const wtCount = worktreeCount()
-  const manifestOverlap = wtCount > 1 ? getManifestOverlaps(branch) : { no_manifest: noManifest, files: [...thisChatFiles], overlaps: [] }
+  const inSlot = isSlot()
+  const scopeReport = inSlot ? scopeDiffReport() : null
+  const manifestOverlap = inSlot
+    ? { no_manifest: noManifest, files: [...thisChatFiles], overlaps: [] }
+    : hasActiveSiblingSlot()
+      ? getManifestOverlaps(branch)
+      : { no_manifest: noManifest, files: [...thisChatFiles], overlaps: [] }
 
   const branchPlanMatch = branch.match(/(\d{3,4})/)
   let planTodos = null
@@ -224,6 +255,8 @@ function classify() {
     secretPaths,
     worktreeCount: wtCount,
     overlaps: manifestOverlap.overlaps || [],
+    scope: scopeReport ? scopeReport.scope : null,
+    scopeFiles: scopeReport ? scopeReport.files : [],
     planTodos
   }
 }
@@ -245,14 +278,22 @@ function checkBaselineReport() {
   }
 
   const wtCount = worktreeCount()
-  const manifestOverlap = wtCount > 1 ? getManifestOverlaps(branch) : getManifestFiles(branch) === null
-    ? { no_manifest: true, files: [], overlaps: [] }
-    : { no_manifest: false, files: [...getManifestFiles(branch)], overlaps: [] }
+  const inSlot = isSlot()
+  const scopeReport = inSlot ? scopeDiffReport() : null
+  const manifestOverlap = inSlot
+    ? { no_manifest: false, files: [], overlaps: [] }
+    : hasActiveSiblingSlot()
+      ? getManifestOverlaps(branch)
+      : getManifestFiles(branch) === null
+        ? { no_manifest: true, files: [], overlaps: [] }
+        : { no_manifest: false, files: [...getManifestFiles(branch)], overlaps: [] }
 
   return {
     status,
     branch,
     head,
+    scope: scopeReport ? scopeReport.scope : null,
+    scopeFiles: scopeReport ? scopeReport.files : [],
     baselineBranch: baseline ? baseline.branch : null,
     baselineHead: baseline ? baseline.head : null,
     worktreeCount: wtCount,
@@ -277,6 +318,10 @@ if (checkBaseline) {
       console.log(`  overlaps: ${report.overlaps.length}`)
       for (const o of report.overlaps) console.log(`    - ${o.branch}: ${o.files.join(', ')}`)
     }
+    if (report.scope) {
+      console.log(`  scope: ${report.scope}`)
+      for (const f of report.scopeFiles) console.log(`    - ${f}`)
+    }
   }
 } else {
   const report = classify()
@@ -288,6 +333,10 @@ if (checkBaseline) {
     if (report.overlaps.length) {
       console.log(`  overlaps: ${report.overlaps.length}`)
       for (const o of report.overlaps) console.log(`    - ${o.branch}: ${o.files.join(', ')}`)
+    }
+    if (report.scope) {
+      console.log(`  scope: ${report.scope}`)
+      for (const f of report.scopeFiles) console.log(`    - ${f}`)
     }
     if (report.secretPaths.length) {
       console.log(`  SECRET-SHAPED PATHS — do not stage: ${report.secretPaths.join(', ')}`)

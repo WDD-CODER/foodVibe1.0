@@ -15,10 +15,10 @@ import { readFileSync, writeFileSync, existsSync } from 'fs'
 import { execFileSync } from 'child_process'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+import { resolveSessionStatePath } from './session-state-path.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
-const SESSION_STATE_PATH_POINTER = join(repoRoot, '.claude', '.session-state-path')
 
 function parseArgs(argv) {
   const out = {}
@@ -55,18 +55,10 @@ function git(cmdArgs) {
   }
 }
 
-function sanitizeBranch(branch) {
-  return branch.replace(/[^a-zA-Z0-9]/g, '-') || 'main'
-}
-
 function resolveTargetPath() {
-  if (existsSync(SESSION_STATE_PATH_POINTER)) {
-    const pointed = readFileSync(SESSION_STATE_PATH_POINTER, 'utf8').replace(/\r?\n+$/, '').trim()
-    if (pointed) return join(repoRoot, pointed)
-  }
-  const branch = sanitizeBranch(git(['branch', '--show-current']))
-  const branchPath = join(repoRoot, 'docs', `session-state-${branch}.md`)
-  return branchPath
+  const resolved = resolveSessionStatePath()
+  if (resolved === 'NONE') fail('resolved session-state path is NONE (detached HEAD in an idle slot) — nothing to write')
+  return join(repoRoot, resolved)
 }
 
 function toBullets(raw) {

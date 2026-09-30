@@ -140,42 +140,67 @@ ranking behind the fix order.
 
 | Event | Script | Effect |
 | --- | --- | --- |
-| PreToolUse (Edit\|Write\|MultiEdit) | `scripts/branch-guard.sh` | **blocks writes on `main`** |
+| PreToolUse (Edit\|Write\|MultiEdit) | `scripts/branch-guard.sh` | **blocks writes on `main`**, except the Planner's `plans/*.plan.md` / `.claude/todo.md` admin-bypass |
 | PreToolUse (Edit\|Write\|MultiEdit) | `scripts/plan-write-guard.sh` | gates **new** `plans/*.plan.md` writes: runs similarity check; denies when similar plans exist unless `.claude/.plan-write-ack` names the target; existing-plan edits always allowed |
-| SessionStart (startup) | `scripts/session-startup.sh` | loads previous session-state; sets `.claude/.session-state-path` save target; **two-slot parallel detection** (below) |
+| PreToolUse (Edit\|Write\|MultiEdit) | `scripts/scope-guard.sh` | inside a `wt-N` slot with an active plan, denies a write outside that plan's `## Read-Write Scope` (`SCOPE_GUARD:` message); silent allow outside a slot, in an idle slot, or on an internal check failure — the `/ship` scope gate is the backstop |
+| SessionStart (startup) | `scripts/session-startup.sh` | loads previous session-state; sets `.claude/.session-state-path` save target; injects `PLANNER:` / `WORKER: plan=…` / `IDLE SLOT:` via `scripts/lib/slot.mjs --describe` (see slot model below) |
 | PostToolUse (Edit\|Write) | `scripts/session-manifest-hook.py` | records this-session file touches (multi-worktree staging safety); refreshes this slot's liveness heartbeat |
 | PreCompact | `scripts/pre-compact-todo-append.sh` + `scripts/pre-compact-reminder.sh` | dumps open signals/todos before compaction |
 | Stop | `scripts/handoff-check.sh` | handoff completeness check at turn end; releases this slot's liveness lock |
 
-**Cursor runs none of these hooks.** Its equivalent enforcement is advisory `.mdc` rules + the shared pre-commit hooks. This
-also means the two-slot parallel system below has **no visibility into concurrent Cursor sessions** — it only detects
-collisions between Claude Code sessions.
+**Cursor runs none of these hooks.** Its equivalent enforcement is advisory `.mdc` rules + the shared pre-commit/pre-push
+hooks below — the `/ship` scope gate and `.husky/pre-push` are what make scope enforcement hold for Cursor too, since it
+has no PreToolUse hook of its own.
 
-### Two-slot parallel session system
+### Git hooks (`.husky/`, shared by both agents)
 
-Steady state: exactly two working locations — the main repo and one persistent sibling
-worktree at `../foodVibe1.0-wt-parallel` (path recorded in each slot's
-`.claude/.parallel-slot-a` / `.claude/.parallel-slot-b`). Each slot has a liveness lock at
-`.claude/.session-lock` (fresh = heartbeat within 45 min, refreshed on every Edit/Write,
-released on Stop). When `session-startup.sh` finds its own slot's lock already fresh (a
-live session already owns this directory), it checks the other slot: if free, it calls
-`scripts/claim-parallel-slot.sh` (fast-forwards to latest `main`, runs `npm install` only
-if `package-lock.json` changed, skips port scanning/`.env` copy/doc-sync entirely) and
-tells the new session to work there instead; if the other slot is also busy or dirty, it
-tells the session to ask the human rather than auto-provisioning a third worktree. See
-`scripts/session-lock.sh` for the lock helpers and the `worktree-setup` skill note on when
-a genuine third worktree is still appropriate.
+| Hook | Effect |
+| --- | --- |
+| `pre-commit` | `lint-staged`, no-semi/secret-scan/security-grep, `plan-ledger-check.mjs` |
+| `pre-push` | On a push whose remote ref is `refs/heads/main`: diffs the pushed range and exits 1 unless every file matches `plans/<name>.plan.md` or `.claude/todo.md` — the Planner's admin-bypass shape. Other branches pass untouched. Human-only override: `git push --no-verify`. |
+
+### Planner-Worker slot model (plan 326 — replaces the retired two-slot system)
+
+3 permanent worktrees, fixed ports, no auto-claim:
+
+| Slot | Frontend | Backend |
+| --- | --- | --- |
+| `main` (Planner) | 4200 | 3000 |
+| `wt-1` | 4201 | 3001 |
+| `wt-2` | 4202 | 3002 |
+| `wt-3` | 4203 | 3003 |
+
+- **Planner** (main folder, on `main`): plans only. Writes and pushes `plans/*.plan.md` +
+  `.claude/todo.md` directly — the admin-bypass restricted by `branch-guard.sh` +
+  `.husky/pre-push`.
+- **Worker** (a `wt-N` slot): says "execute plan NNN" → `scripts/take-plan.mjs` (see
+  `.claude/commands/take-plan.md`) claims the slot — safety checks (dirty tree, busy slot,
+  plan must exist on `origin/main`), branch `feat/NNN-<slug>`, conditional `npm install`,
+  generated `src/environments/environment.slot.ts`, port/PID-safe server spawn (`ng serve
+  -c slot --port 420N`, backend with `PORT=300N`/`ALLOWED_ORIGIN`), optional isolated
+  per-slot Mongo database (`foodvibe_wtN`), then reports `scope-check.mjs --drift` so the
+  Worker knows whether to run the plan's Step 0 reality check before starting milestones.
+- Idle slots are always detached at `origin/main`, never on `main`. Releasing a slot
+  (taking a new plan into it) only happens once its current branch is merged.
+- Liveness lock (`.claude/.session-lock`, `scripts/session-lock.sh`) is claimed by
+  `take-plan.mjs` and released by `handoff-check.sh` on `Stop` — same file format as
+  before, no separate two-slot pairing logic left to maintain.
 
 ### Workflow scripts (shared, `scripts/`)
 
 | Script | Called by |
 | --- | --- |
 | `plan-name-similarity.mjs` | save-plan Phase 0 (both agents), `plan-write-guard.sh` |
-| `session-manifest-ship.py` | `/ship` Phase 3 (worktree count > 1) — or a branch/HEAD-drift check when ≤1 worktree, same phase |
+| `session-manifest-ship.py` | `/ship` Phase 3, outside a slot, only when another slot is on a live (non-detached) branch — otherwise skipped in favor of `scope-check.mjs` |
 | `brain-review-check.mjs` | `/ship` feature-complete path (advisory) |
 | `brain-capture-comment.mjs` | PR sticky brain-capture comment |
 | `pre-commit-no-semi.mjs`, `pre-commit-secret-scan.mjs`, `pre-commit-security-grep.mjs` | pre-commit hooks (source of truth for enforcement per `AGENTS.md`) |
 | `prune-merged-worktrees.sh`, `prune-old-sessions.sh` | `/cleanup` |
+| `lib/slot.mjs` | `session-startup.sh` (`--describe`), `scope-check.mjs`, `ship-prep.mjs`, `take-plan.mjs`; `--list` for the Planner protocol |
+| `session-state-path.mjs` | `session-startup.sh`, `handoff-check.sh`, `write-session-state.mjs` — one resolver, no duplicated logic |
+| `scope-check.mjs` | `scope-guard.sh` (`--file`), `ship-prep.mjs` (`--diff`), the Planner protocol (`--overlap`), `take-plan.mjs` + `take-plan.md` (`--drift`) |
+| `take-plan.mjs` | "execute plan NNN" / "take plan NNN" (`.claude/commands/take-plan.md`) |
+| `todo-query.mjs sync --plan NNN` / `sync --merged` | the Planner protocol (`.claude/commands/plan.md`), after a `feat/NNN-*` branch merges |
 
 Data-repair scripts (not workflow): `backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `fix-duplicate-names.mjs`, `link-users-to-master.mjs`, `migrate-to-master.mjs`, `promote-guest-to-master.js`, `push-master-to-atlas.js`, `repair-recipe-references.mjs`, `trim-demo-data.mjs`, `check-lucide-icons.mjs`, `check-no-native-select.mjs`, `remove-trailing-semicolons.mjs`, `log-server.js`.
 

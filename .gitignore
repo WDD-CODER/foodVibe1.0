@@ -45,6 +45,11 @@ testem.log
 .worktree-port
 # Worktree remote cleanup breadcrumb (processed by github-sync on next main session)
 .worktree-cleanup
+# Planner-Worker slot state (plan 326) — per-slot, never shared across machines
+# (.worktree-root and .worktree-port are already ignored below)
+.worktree-plan
+.claude/.slot-pids
+src/environments/environment.slot.ts
 
 # Claude Code local config (never commit)
 .claude/settings.local.json
@@ -56,6 +61,7 @@ testem.log
 .claude/.parallel-slot-a
 .claude/.parallel-slot-b
 .claude/.last-npm-install-hash
+.claude/.last-npm-install-hash-server
 .worktree-root
 .worktree-port
 

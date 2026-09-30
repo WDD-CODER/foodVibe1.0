@@ -83,6 +83,17 @@
                 }
               ]
             },
+            "slot": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.slot.ts"
+                }
+              ]
+            },
             "remote": {
               "optimization": false,
               "extractLicenses": false,
@@ -163,6 +174,9 @@
             },
             "local": {
               "buildTarget": "foodVibe1.0:build:local"
+            },
+            "slot": {
+              "buildTarget": "foodVibe1.0:build:slot"
             },
             "remote": {
               "buildTarget": "foodVibe1.0:build:remote"

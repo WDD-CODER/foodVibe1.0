@@ -76,6 +76,11 @@
             "type": "command",
             "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/plan-write-guard.sh\"",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/scope-guard.sh\"",
+            "timeout": 10
           }
         ]
       }

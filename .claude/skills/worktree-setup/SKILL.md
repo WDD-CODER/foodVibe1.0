@@ -1,74 +1,72 @@
-﻿---
+---
 name: worktree-setup
-description: On-demand provisioning of a git worktree for isolated multi-agent or parallel work. NOT automatic â€” invoke only when explicitly needed.
+description: One-time provisioning of the 3 permanent Planner-Worker slots (wt-1..3). Not automatic — invoke only when a slot is missing or being (re)initialized.
 ---
 
 # Skill: worktree-setup
-**Model Guidance:** Use Haiku/Flash for Phases 1 and 2. Use Sonnet for Phase 3 only.
+**Model Guidance:** Use Haiku/Flash throughout — this is mechanical.
 
-**Trigger:** User says "setup worktree", "new worktree", or (retired coordinator) orchestrates parallel task execution.
+**Trigger:** User says "setup worktree" or "new worktree" (on-demand only).
 
-> **Not automatic.** Only invoke on explicit user request or (retired coordinator) orchestration.
+> **Not the take-plan flow.** Starting work on a plan is "execute plan NNN" / "take plan
+> NNN" (see `.claude/commands/take-plan.md`), which reuses an already-initialized slot.
+> This skill only creates the 3 permanent slots the first time, or repairs a missing one.
 
-> **Routine two-session parallel work no longer needs this skill.** A persistent second
-> worktree (`../foodVibe1.0-wt-parallel`) is auto-claimed and fast-forwarded to `main` by
-> `scripts/session-startup.sh` + `scripts/claim-parallel-slot.sh` whenever a new session
-> detects the main repo is already occupied by a live session. Use this skill only for a
-> genuine ad hoc **third** worktree, or one-off isolation outside the two-slot system.
+## What this does
 
-**Worktree Rules (inline â€” no guide read required):**
-- Target directory must be outside the main repo: `../<project>-wt-<feature>`
-- Branch naming: `feat/<name>` â€” always branch from `main`
-- Port allocation: start at 4201, retry up to 5 candidates, hard stop if all occupied
-- Always write `.worktree-root` (points to main repo) and `.worktree-port` (assigned port)
-- Copy `.env` silently â€” skip without error if missing
-- Never run `git checkout main` from inside a worktree
+Ensures `../foodVibe1.0-wt-1`, `../foodVibe1.0-wt-2` and `../foodVibe1.0-wt-3` exist as git
+worktrees, each detached at `origin/main`, each with its own `.worktree-root` /
+`.worktree-port`, dependencies installed, and `server/.env` copied. It starts no servers —
+`scripts/take-plan.mjs` does that when a plan is actually taken.
 
 ---
 
-## Phase 1: Destination Audit 
+## Phase 1 — Migrate the legacy parallel worktree (one-time)
 
-**Prune First:** Run `git worktree prune` to clear stale refs before anything else.
+If `../foodVibe1.0-wt-parallel` exists:
 
-**Path Resolution:** Identify the target directory outside the main repo (`../<project>-wt-<feature>`).
+1. Remove the one known disposable artifact before the cleanliness check:
+   `../foodVibe1.0-wt-parallel/.claude/dev-server.log` (a log file the retired
+   `claim-parallel-slot.sh` wrote on every claim — not real work, safe to delete).
+2. `git -C ../foodVibe1.0-wt-parallel status --porcelain` — if anything remains, **stop and
+   report** the dirty/unpushed state to the Human; do not touch the worktree further.
+3. If clean: `git worktree move ../foodVibe1.0-wt-parallel ../foodVibe1.0-wt-1`.
 
-**Conflict Check:** Ensure the target path doesn't already exist or contain a stale git link.
-
-**Port Allocation:** Find next available port starting from 4201.
-```bash
-netstat -ano -p tcp | findstr ":<PORT>"
-```
-Retry up to 5 candidates. Hard stop if all 5 are occupied â€” report to user.
+If `../foodVibe1.0-wt-parallel` does not exist, skip this phase.
 
 ---
 
-## Phase 2: Worktree Creation 
+## Phase 2 — Create missing slots
 
-**Git Command:**
+For each of `wt-1`, `wt-2`, `wt-3` whose directory does not already exist:
+
 ```bash
-git worktree add -b feat/<name> <path> main
+git worktree add --detach ../foodVibe1.0-wt-<N> origin/main
 ```
 
-**Dependencies:** Run `npm install` inside the new worktree to ensure it is runnable.
-
-**Metadata Write:** Create `.worktree-root` pointing to the main repository path. Write `.worktree-port` with the assigned port number.
-
-**Env Copy:** Copy `.env` to the new worktree root â€” silent skip if `.env` is missing.
+Idle slots are always detached at `origin/main` — never on `main`, never on a branch.
 
 ---
 
-## Phase 3: Environment Initialization 
+## Phase 3 — Provision each slot
 
-**Context Transfer:** Copy relevant active `plans/` entries and current `.claude/todo.md` state for the sub-task into the worktree.
+For every slot directory (existing after Phase 1, or just created in Phase 2):
 
-**Breadcrumb Sync:** Run `update-docs` skill within the new worktree to activate navigation maps.
-
-**Todo Update:** Mark the task as active in the main repo's `.claude/todo.md` with the worktree path noted.
+1. `npm install` at the slot root and inside `server/`.
+2. Write `.worktree-root` (absolute path back to the main repo) and `.worktree-port` (the
+   slot's frontend port — `420N` for `wt-N`, matching the port map in `AGENTS.md`).
+3. Copy `server/.env` from the main repo into the slot's `server/.env` — silent skip if
+   missing. (This repo only has `server/.env`; there is no root `.env` to copy.)
+4. Start no servers — `take-plan.mjs` starts the backend and `ng serve -c slot` when a plan
+   is actually taken.
 
 ---
 
 ## Completion Gate
 
-Output: `"Worktree created at [path] on port [port]. Branch feat/[name] is active and linked."`
+Output one line per slot:
+```
+wt-N: <created | migrated | already present> — deps installed, .env copied
+```
 
-Update the main repo's `.claude/todo.md` to reflect the task is now active in the worktree.
+Then: `3 slots ready. In a free slot, say "execute plan NNN" to start work.`

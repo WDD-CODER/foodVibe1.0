@@ -81,7 +81,8 @@ Order is hard (see `.claude/commands/ship.md` Phase 4 On approval):
 
 0. Show **HOW TO VALIDATE** in the Phase 4 approval tree (before Approve?)
 1. Human **Y**
-2. Mark matching todos / plan Atomic Sub-tasks `[x]`
+2. Mark matching todos / plan Atomic Sub-tasks `[x]` — inside a `wt-N` slot, plan file only,
+   never `.claude/todo.md` (see `.claude/commands/ship.md` Phase 4 "On approval" step 1)
 3. Stage with the job (+ brain if any)
 4. Commit → push if asked
 
@@ -149,8 +150,13 @@ Mark only items that clearly match **this** validated job (milestone ID, files t
 If during a brief you discover work that was not in the parent plan (review fallout, extra stage, Human-added scope):
 
 1. **Before** doing that work, append a new `[ ]` item under Atomic Sub-tasks in the parent `plans/….plan.md` (and a milestone row if needed).
-2. Mirror the same `[ ]` into `.claude/todo.md` under that Plan section.
-3. Only then execute. On later Human validation, mark both places `[x]`.
+2. **Worker (inside a `wt-N` slot):** stop there — append to the plan file **only**. Never
+   write `.claude/todo.md`; it is Planner-owned, and `todo-query.mjs sync --merged` picks
+   up the plan's checkboxes once the branch merges.
+   **Planner (main folder, on `main`):** also mirror the same `[ ]` into `.claude/todo.md`
+   under that Plan section, as before.
+3. Only then execute. On later Human validation, mark `[x]`: Worker → plan file only;
+   Planner → both places.
 
 Do not leave new stages only in chat or only in a session brief.
 
