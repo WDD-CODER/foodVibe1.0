@@ -211,9 +211,9 @@ Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-
 
 ### M5 — Verify and ship
 
-- [ ] A26: Run every check in **Done when** below
-- [ ] A27: Run `node scripts/plan-ledger-check.mjs` and `ng build`
-- [ ] A28: Write the `sessions/` handoff
+- [x] A26: Run every check in **Done when** below (see verification summary in that section)
+- [x] A27: Run `node scripts/plan-ledger-check.mjs` and `ng build`
+- [x] A28: Write the `sessions/` handoff
 - [ ] A29: `/ship` on `chore/planner-worker-workflow` as one PR
 
 ## Rules
@@ -273,6 +273,44 @@ Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-
   unrelated is injected.
 - Cleanup and build: `grep -rn "claim-parallel-slot" .` returns nothing, `ng build` and
   `plan-ledger-check.mjs` pass, PR open for Dandan to merge.
+
+### M5 verification summary (this session, no real `wt-N` slots created)
+
+✅ **Directly verified** (piped-JSON hook simulation, or temporary `.worktree-port`/
+`.worktree-plan` marker files in the main repo, always cleaned up after):
+- Planner-on-main bypass vs. auto-switch (`branch-guard.sh` regex, both cases)
+- `pre-push`: real diff against `origin/main` for both a code-touching branch (exit 1,
+  correct file list) and a plan+todo-only historical commit (exit 0); non-`main` ref passes
+  through untouched
+- Plan-only `ULTRA-TRIVIAL` lane regex (`plans/325-foo-migration-spec.plan.md` case
+  specifically, confirming it beats `SENSITIVE_PATHS_RE`'s "migration" match)
+- `scope-check.mjs` all 4 modes (`--file`, `--diff`, `--overlap`, `--drift`) against Plan
+  326's own scope block, including both `REALITY: clean` and `REALITY: drift` (using a
+  rolled-back `Snapshot:`, restored immediately after)
+- `scope-guard.sh`: in-scope allow, out-of-scope deny with the exact `SCOPE_GUARD:`
+  message, hotspot always-allow
+- `ship-prep.mjs` in a simulated slot: reports `scope: out` instead of calling
+  `session-manifest-ship.py` (no Python invocation observed)
+- `session-startup.sh` / `session-state-path.mjs`: `PLANNER:`, `WORKER: plan=…`, and
+  `IDLE SLOT:` (with `NONE` and no other injection) all produced correctly
+- `todo-query.mjs sync --plan` (idempotent, correct done/total counts) and `sync --merged`
+  (correctly skips a real legacy `feat/239-*` branch with no flat `plans/239-*.plan.md`,
+  instead of crashing the whole batch)
+- `ng build` (production, default config) and `plan-ledger-check.mjs` both pass clean
+
+⚠️ **Needs the Human, with real `wt-N` slots** (creating 3 new worktrees + npm installs +
+background dev servers is a real filesystem/process footprint I did not take on
+autonomously): slot init via `worktree-setup`, two slots taken in parallel, DevTools
+Network port checks, busy-slot refusal, foreign-port refusal, isolated-DB seeding, and the
+full `/ship`-in-a-slot todo-marking behavior end to end. The underlying logic for all of
+these was code-reviewed and, where testable without a live slot (port/PID lookup shape,
+DB-URI renaming, branch release logic), traced through by hand — but none of it ran against
+a real worktree or a real `ng serve -c slot`/`node --watch` process in this session.
+
+`grep -rn "claim-parallel-slot" .` is intentionally non-empty: `plans/323-*`, `plans/324-*`,
+and `docs/session-state-feat-session-20260929.md` are pre-existing historical files (not
+rewritten), and the new docs/scripts that replaced the old system name it once each as
+"retired" for context. No live code path still calls it.
 
 ## Technical Considerations
 

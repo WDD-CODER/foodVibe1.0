@@ -244,9 +244,9 @@
 - [x] A23: `README_WORKFLOW.md` — rewrite Roles + Day-to-day loop (plan → push → "execute plan NNN" in a free slot → back to Planner → `/review-it` then `/ship` (PR) → Dandan merges → slot releases on next take); keep cost routing
 - [x] A24: `docs/agent/workflow-map.md` — replace two-slot section with the slot model + port map; update hook rows for `scope-guard.sh` and `.husky/pre-push`; add rows for `take-plan.mjs`, `scope-check.mjs`, `lib/slot.mjs`, `session-state-path.mjs`, `todo-query sync`
 - [x] A25: New ADR `docs/brain/decisions/0009-planner-worker-worktrees.md` (per M0, next number is `0009`) from `_TEMPLATE.md` — supersedes the two-slot system; direct `main` pushes for plans/todo via the admin bypass restricted by `branch-guard.sh`/pre-push; 3 permanent slots, manual take, lazy release; per-slot ports, shared DB by default / isolated on opt-in; append-only hotspots; conditional reality check; scope gate replaces manifest overlap in slots; `/ship` gate is the guarantee since Cursor has no hooks; mechanical steps live in scripts
-- [ ] A26: Run every check in **Done when** below
-- [ ] A27: Run `node scripts/plan-ledger-check.mjs` and `ng build`
-- [ ] A28: Write the `sessions/` handoff
+- [x] A26: Run every check in **Done when** below (see verification summary in that section)
+- [x] A27: Run `node scripts/plan-ledger-check.mjs` and `ng build`
+- [x] A28: Write the `sessions/` handoff
 - [ ] A29: `/ship` on `chore/planner-worker-workflow` as one PR
 ## Where things live
 
