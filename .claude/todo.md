@@ -217,6 +217,38 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
+### Plan 326 — Planner–Worker Workflow (`plans/326-planner-worker-workflow.plan.md`)
+- [x] M0 — Reality check (complete, no blockers; B2 merged, C not merged — see plan file)
+- [ ] M1 A1 — `scripts/lib/slot.mjs`
+- [ ] M1 A2 — `scripts/session-state-path.mjs`
+- [ ] M1 A3 — rewire session-startup.sh/handoff-check.sh/write-session-state.mjs to session-state-path.mjs
+- [ ] M1 A4 — `scripts/scope-check.mjs`
+- [ ] M1 A5 — `todo-query.mjs sync --plan`/`sync --merged`
+- [ ] M2 A6 — `branch-guard.sh` stdin + plan-file main exception
+- [ ] M2 A7 — `scripts/scope-guard.sh` PreToolUse hook
+- [ ] M2 A8 — `.husky/pre-push` main-branch gate
+- [ ] M2 A9 — `ship-prep.mjs` plan-only lane + scope-check in slots
+- [ ] M2 A10 — ship.md/ship-regular.md scope-out STOP + rebase + on-approval mark
+- [ ] M3 A11 — `angular.json` slot configuration
+- [ ] M3 A12 — rewrite worktree-setup SKILL.md as slot init
+- [ ] M3 A13 — `scripts/take-plan.mjs`
+- [ ] M3 A14 — `.claude/commands/take-plan.md`
+- [ ] M3 A15 — `session-startup.sh` slot-aware injection
+- [ ] M3 A16 — delete `claim-parallel-slot.sh`
+- [ ] M3 A17 — `.gitignore` slot artifacts
+- [ ] M4 A18 — `prd-template.md` Status/Scope/Escalation sections
+- [ ] M4 A19 — `.claude/commands/plan.md` Planner protocol
+- [ ] M4 A20 — `save-plan/SKILL.md` Planner-only main writes
+- [ ] M4 A21 — `docs/agent/job-validation.md` Worker-only-marks-plan-file
+- [ ] M4 A22 — `AGENTS.md` hard rule + Planner-Worker bullet
+- [ ] M4 A23 — `README_WORKFLOW.md` roles + day-to-day loop
+- [ ] M4 A24 — `docs/agent/workflow-map.md` slot model
+- [ ] M4 A25 — ADR `0009-planner-worker-worktrees.md`
+- [ ] M5 A26 — run all Done-when checks
+- [ ] M5 A27 — `plan-ledger-check.mjs` + `ng build`
+- [ ] M5 A28 — sessions/ handoff
+- [ ] M5 A29 — `/ship` as one PR
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
