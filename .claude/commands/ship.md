@@ -76,14 +76,25 @@ If `--skip-review "reason"` was provided explicitly (independent of lane):
 node scripts/ship-prep.mjs --check-baseline
 ```
 
-This compares current branch + HEAD against the baseline `ship-prep.mjs` recorded at Phase 0, and re-checks manifest overlaps when the worktree count is > 1:
+This compares current branch + HEAD against the baseline `ship-prep.mjs` recorded at Phase 0. Inside a wt-N slot it re-checks the plan's Read-Write Scope instead of manifest overlaps; outside a slot it re-checks manifest overlaps only when another slot is on a live (non-detached) branch:
 
 - **`BRANCH_CHANGED`** → **STOP**. Something else switched HEAD in this shared working directory mid-ship. Show the Human both branch names; do not stage or commit until they confirm which branch is intended.
 - **`HEAD_MOVED`** (new commits landed, not made by this session) → treat as a same-directory overlap signal: re-run `git status --short` fresh (don't reuse an earlier snapshot from this conversation), re-`Read` any file about to be staged immediately before `git add` rather than trusting an earlier in-session read, and note in the ship summary that concurrent commits were detected on this branch.
-- **`OK`** → proceed with normal this-chat-file staging.
+- **`scope: out`** (in a wt-N slot, touching files outside the plan's Read-Write Scope) → **STOP**. List the out-of-scope files. Ask the Human: `approved: <path>` (append the path(s) to the plan's `## Read-Write Scope` block and continue) or revert those specific files. Never silently commit them.
+- **`OK`** (and `scope: ok` when in a slot) → proceed with normal this-chat-file staging.
 - **Non-empty `overlaps`** → honor overlap stops (same rules as before: non-empty overlaps → STOP; `no_manifest` → do not `git add -A`; prefer this-chat files).
 - Either path: stage only this-chat dirty paths (tool write/edit history ∩ `git status --short`). Never `git add -A` unless Human overrode scope.
 - Flag secrets / `.env` — never stage them.
+
+Before Phase 4, sync with `origin/main`:
+
+```bash
+git fetch origin
+git rebase origin/main
+```
+
+- A conflict where both sides only *added to* an append-only hotspot (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`) → resolve by keeping both sides (union), then `git rebase --continue`.
+- Any other conflict → **STOP**. Show the Human the conflicting files; do not resolve unilaterally.
 
 ---
 
@@ -144,7 +155,10 @@ If on `feat/session-*`:
 
 Approve **Y** (or `--yes`) **is** Human validation of the job. Then:
 
-1. **Todo sync (mandatory when items match)** — Do not Read .claude/todo.md in full. Run `node scripts/todo-query.mjs open` (add `--plan NNN` when known) to find matches, then `node scripts/todo-query.mjs mark --line N[,N…]` on the matching lines (and update the plan's Atomic Sub-tasks the same way); then run `node scripts/todo-archive.mjs` to move any fully-`[x]` plan sections into `.claude/todo-archive/NNN.md` volumes (max 300 lines; rolls automatically). Never invent completion for work not in this ship. Never skip with “Contractor does not mark.” If nothing matches → note `Todo: no matching open items — skipped` and continue.
+1. **Todo sync (mandatory when items match)**
+   - **In a wt-N slot:** mark the matching item(s) `[x]` in the plan file's own `## Atomic Sub-tasks` **only**. Do **not** run `todo-query.mjs mark` and do **not** run `todo-archive.mjs` — `.claude/todo.md` is Planner-owned; the Planner's `todo-query.mjs sync --merged` picks up this plan's checkboxes once the branch merges.
+   - **Outside a slot (Planner / main):** Do not Read .claude/todo.md in full. Run `node scripts/todo-query.mjs open` (add `--plan NNN` when known) to find matches, then `node scripts/todo-query.mjs mark --line N[,N…]` on the matching lines (and update the plan's Atomic Sub-tasks the same way); then run `node scripts/todo-archive.mjs` to move any fully-`[x]` plan sections into `.claude/todo-archive/NNN.md` volumes (max 300 lines; rolls automatically).
+   - Never invent completion for work not in this ship. Never skip with “Contractor does not mark.” If nothing matches → note `Todo: no matching open items — skipped` and continue.
 2. **Write brain drafts** (if proposed and not dropped via edit list) — verbatim to `docs/brain/**` as above.
 3. **`git add` only listed paths** — include the todo/plan/brain paths just updated. Happy path = **one commit** with job + todos (+ brain). Do **not** commit the job first and leave todos for a later push.
 4. **`git commit`** (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable)

@@ -45,10 +45,11 @@ src/environments/environment.slot.ts
 
 Findings (see session record for full detail):
 - Snapshot moved `f9bcfcc3` → `30f5ed2e` (4 commits, none blocking).
-- **B2 merged**: `.claude/commands/ship.md` is now a 240-line core file; Phase 3/4/
-  "On approval" content that M2 needs to edit now lives in `docs/agent/ship-regular.md`
-  (and/or `docs/agent/ship-recovery.md`) — M2 must target the right file, not assume it's
-  all still in core `ship.md`.
+- **B2 merged**: `.claude/commands/ship.md` is now a 240-line core file. Only Phase 2
+  (REGULAR review), REGULAR brain-capture, commit-vs-PR judgment and Phase 4.5 (REGULAR)
+  moved to `docs/agent/ship-regular.md` — **Phase 3 (manifest check) and "On approval"
+  stayed in core `ship.md`** (confirmed by reading the actual file, not inferred from the
+  commit message), so M2's edits land there, not in ship-regular.md.
 - **C (techdebt-scan.mjs) not merged** — no impact on this plan.
 - No open PRs overlap this work.
 - `../foodVibe1.0-wt-parallel` exists but is **not clean**: untracked `.claude/dev-server.log`,
@@ -98,30 +99,29 @@ only if already in `package-lock.json`).
 
 ### M2 — Enforcement
 
-- [ ] A6: `scripts/branch-guard.sh` — read stdin with `plan-write-guard.sh`'s timeout
+- [x] A6: `scripts/branch-guard.sh` — read stdin with `plan-write-guard.sh`'s timeout
       pattern; on `main`, allow without switching when path matches
       `^plans/[^/]+\.plan\.md$|^\.claude/todo\.md$`; otherwise keep auto-switch (including
       empty stdin)
-- [ ] A7: New `scripts/scope-guard.sh` (PreToolUse, valid JSON) — silent allow when not a
+- [x] A7: New `scripts/scope-guard.sh` (PreToolUse, valid JSON) — silent allow when not a
       slot or no `.worktree-plan`; else run `scope-check.mjs --file=<path>`; deny with the
       `SCOPE_GUARD:` message on exit 1; allow with `SCOPE_GUARD: check failed (<reason>)`
       on internal error. Register in `.claude/settings.json` after `plan-write-guard.sh`,
       `"timeout": 10`
-- [ ] A8: New `.husky/pre-push` — for stdin lines with remote ref `refs/heads/main`, diff
+- [x] A8: New `.husky/pre-push` — for stdin lines with remote ref `refs/heads/main`, diff
       `<remote_sha>..<local_sha>` (`origin/main` when remote SHA is all zeros); exit 1 if
       any file falls outside `^plans/[^/]+\.plan\.md$|^\.claude/todo\.md$` with the
       `--no-verify is human-only` message; other branches pass untouched
-- [ ] A9: `scripts/ship-prep.mjs` — plan-only lane check before `SENSITIVE_PATHS_RE`;
+- [x] A9: `scripts/ship-prep.mjs` — plan-only lane check before `SENSITIVE_PATHS_RE`;
       replace both `worktreeCount() > 1` triggers per M0 findings (in-slot: `scope-check.mjs
       --diff=origin/main` instead of manifest overlaps; outside slots: overlaps only when
       `listSlots()` shows a non-detached slot); `--check-baseline` re-reports the scope
       line in a slot
-- [ ] A10: Update `.claude/commands/ship.md` **and** `docs/agent/ship-regular.md` (per M0
-      finding — Phase 3/4/"On approval" content lives there now): scope-out hard STOP in
-      Phase 3; `git fetch && git rebase origin/main` before Phase 4 (add/add conflicts in
-      hotspots keep both sides, anything else escalates); "On approval" step 1 marks only
-      the plan file's Atomic Sub-tasks in a slot, skipping `todo-query` mark /
-      `todo-archive.mjs`
+- [x] A10: Update `.claude/commands/ship.md` core (Phase 3/"On approval" stayed there —
+      see corrected M0 finding above): scope-out hard STOP in Phase 3; `git fetch && git
+      rebase origin/main` before Phase 4 (add/add conflicts in hotspots keep both sides,
+      anything else escalates); "On approval" step 1 marks only the plan file's Atomic
+      Sub-tasks in a slot, skipping `todo-query` mark / `todo-archive.mjs`
 
 ### M3 — Three permanent slots, per-slot ports, "execute plan"
 
