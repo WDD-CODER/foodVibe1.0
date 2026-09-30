@@ -172,36 +172,36 @@ Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-
 
 ### M4 — Methodology docs (compact — these load every session)
 
-- [ ] A18: `.claude/references/prd-template.md` — after `## Goals & Success Criteria`, add
+- [x] A18: `.claude/references/prd-template.md` — after `## Goals & Success Criteria`, add
       `Status:`/`Snapshot:`, `## Execution Mode`, `## Read-Write Scope` (fenced block +
       always-allowed line), `## Read Scope`, `## Escalation Protocol`, `Step 0 — Reality
       Check`
-- [ ] A19: `.claude/commands/plan.md` — Planner protocol: main clean + `git pull
+- [x] A19: `.claude/commands/plan.md` — Planner protocol: main clean + `git pull
       --ff-only`; `todo-query.mjs sync --merged` + `todo-archive.mjs` +
       `lib/slot.mjs --list`; ask about parallel execution → `scope-check.mjs --overlap`
       must report `OVERLAP: none`; save via save-plan with `Snapshot:` filled; `git add`
       only the plan file + `.claude/todo.md`, commit, push to `main`; end with "Plan NNN
       pushed. Open a free slot and say: execute plan NNN."
-- [ ] A20: `.claude/skills/save-plan/SKILL.md` — Phase 1: only the Planner (main, on
+- [x] A20: `.claude/skills/save-plan/SKILL.md` — Phase 1: only the Planner (main, on
       `main`) assigns `NNN`/runs `todo-query append`; Phase 3: on `main`, commit only the
       plan file + `todo.md`; Phase 4: Workers append/mark `[x]` in their plan file only,
       never `todo.md`
-- [ ] A21: `docs/agent/job-validation.md` — same Worker-only-marks-plan-file rule
-- [ ] A22: `AGENTS.md` — Hard rule becomes "Never write on `main` — except the Planner
+- [x] A21: `docs/agent/job-validation.md` — same Worker-only-marks-plan-file rule
+- [x] A22: `AGENTS.md` — Hard rule becomes "Never write on `main` — except the Planner
       committing `plans/*.plan.md` and `.claude/todo.md`"; add one compact
       Planner–Worker bullet (Golden Rule + escalation; append-only hotspots
       `src/styles.scss`, `public/assets/data/dictionary.json` (M0's confirmed real path),
       `src/app/app.routes.ts`; 3-slot port map; Workers never write `.claude/todo.md`;
       `--no-verify` is human-only); trigger rows for "execute/take plan NNN" →
       `take-plan.md`, worktree-setup → one-time slot init only
-- [ ] A23: `README_WORKFLOW.md` — rewrite Roles + Day-to-day loop (plan → push → "execute
+- [x] A23: `README_WORKFLOW.md` — rewrite Roles + Day-to-day loop (plan → push → "execute
       plan NNN" in a free slot → back to Planner → `/review-it` then `/ship` (PR) →
       Dandan merges → slot releases on next take); keep cost routing
-- [ ] A24: `docs/agent/workflow-map.md` — replace two-slot section with the slot model +
+- [x] A24: `docs/agent/workflow-map.md` — replace two-slot section with the slot model +
       port map; update hook rows for `scope-guard.sh` and `.husky/pre-push`; add rows for
       `take-plan.mjs`, `scope-check.mjs`, `lib/slot.mjs`, `session-state-path.mjs`,
       `todo-query sync`
-- [ ] A25: New ADR `docs/brain/decisions/0009-planner-worker-worktrees.md` (per M0, next
+- [x] A25: New ADR `docs/brain/decisions/0009-planner-worker-worktrees.md` (per M0, next
       number is `0009`) from `_TEMPLATE.md` — supersedes the two-slot system; direct
       `main` pushes for plans/todo via the admin bypass restricted by
       `branch-guard.sh`/pre-push; 3 permanent slots, manual take, lazy release; per-slot

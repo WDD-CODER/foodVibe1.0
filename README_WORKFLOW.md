@@ -2,14 +2,14 @@
 
 Historical cutover record: [`PRD-three-agent-cutover.md`](PRD-three-agent-cutover.md) (2026-07-08).
 
-## Roles
+## Roles (Planner-Worker workflow — see `docs/brain/decisions/0009-planner-worker-worktrees.md`)
 
-| Role | Where | Pool | Job |
-|---|---|---|---|
-| **Architect** | Claude.ai | A (flat) | Plans. Writes Plan Contracts in `/plans/[feature]_v[N].md`. Never touches the repo. |
-| **Contractor** | Cursor | B (workhorse) | Executes ONE milestone from an approved plan. Stops. Writes `/sessions/[date].md`. |
-| **Reviewer** | Claude Code CLI | C (premium) | `/review-it` only by default. Reports. Never silently fixes. |
-| **Human Director** | You | — | Carries plans across the gap. Commits by default. Marks milestones `[x]` after verify. |
+| Role | Where | Job |
+|---|---|---|
+| **Planner** | Main folder, checked out on `main` | Plans. Writes and pushes Plan Contracts (`plans/NNN-slug.plan.md`) + `.claude/todo.md` directly to `main` — the one admin-bypass write, enforced by `scripts/branch-guard.sh` + `.husky/pre-push`. |
+| **Worker** | One of 3 permanent slots — `wt-1` (4201/3001), `wt-2` (4202/3002), `wt-3` (4203/3003) | Claims a plan via "execute plan NNN", executes its milestones on `feat/NNN-<slug>`, may write only inside that plan's `## Read-Write Scope`. |
+| **Reviewer** | `/review-it` (either tool) | Report-only by default. Never silently fixes. |
+| **Human Director (Dandan)** | You | Assigns plans to slots, approves ships/merges, the only `--no-verify` override. |
 
 ## Role flexibility / cost routing
 
@@ -30,12 +30,11 @@ Rules of thumb:
 
 ## Day-to-day loop
 
-1. Architect produces / updates Plan Contract → save under `/plans/`
-2. Human pastes Execute prompt into Cursor for Milestone N only
-3. Cursor stops + writes `/sessions/YYYY-MM-DD.md`
-4. Human runs `/review-it` in Claude Code
-5. On APPROVE: Human runs verify, commits, marks milestone done
-6. Repeat for next milestone
+1. Plan in the main folder → push (`.claude/commands/plan.md` Planner protocol).
+2. In a free slot, say "execute plan NNN" (`.claude/commands/take-plan.md`).
+3. Worker executes the plan's milestones, then `/review-it`, then `/ship` (PR).
+4. Dandan merges the PR; the slot releases automatically the next time it's taken.
+5. Back to the Planner for the next plan.
 
 ## Authoritative files
 

@@ -75,6 +75,10 @@ Reply: rewrite existing | save as new | cancel
 
 ## Phase 1: Ledger Sync
 
+**Planner-only.** This phase (NNN assignment + `.claude/todo.md` append) runs only for the
+Planner — main folder, checked out on `main`. A Worker inside a `wt-N` slot never assigns a
+new `NNN` and never touches `.claude/todo.md`; see Phase 4 for what a Worker does instead.
+
 Do not Read .claude/todo.md in full.
 
 **Todo Update:** Extract `# Atomic Sub-tasks` (or equivalent checklist), write it to a temp file, and run `node scripts/todo-query.mjs append --from <file>` to insert it under `### Plan NNN — <Title>` before `.claude/todo.md`'s footers.
@@ -115,6 +119,12 @@ Do not Read .claude/todo.md in full.
 
 Never write under `~/.cursor/plans/`.
 
+**Commit (Planner, on `main`, only):** `git add` only the plan file and `.claude/todo.md`
+(never `-A`), then commit. This is the Planner's admin-bypass write to `main` — see
+`AGENTS.md`'s Planner-Worker bullet, enforced by `scripts/branch-guard.sh` and
+`.husky/pre-push`. A Worker saving mid-brief inside a `wt-N` slot does not commit here —
+its commit happens at `/ship` time on its `feat/NNN-*` branch, plan file only (Phase 4).
+
 ---
 
 ## Phase 4: Brief / mid-flight sync (ongoing — not only at save)
@@ -122,8 +132,17 @@ Never write under `~/.cursor/plans/`.
 After the plan is saved, **any agent** executing a brief from it must keep the plan file live:
 
 1. Brief must name its **parent plan path** (e.g. `plans/290-….plan.md`).
-2. If review fail / fallout / Human adds a stage → **append** a new `[ ]` Atomic Sub-task (and milestone row if needed) to that plan file **and** `.claude/todo.md` **before** doing the new work.
-3. On Human validation (`done` / ship Y) → mark matching plan + ledger items `[x]` (see `docs/agent/job-validation.md`).
+2. If review fail / fallout / Human adds a stage → **append** a new `[ ]` Atomic Sub-task
+   (and milestone row if needed) **before** doing the new work.
+   - **Worker (inside a `wt-N` slot):** append to the plan file **only**. Never touch
+     `.claude/todo.md` — it is Planner-owned; the Planner's `todo-query.mjs sync --merged`
+     picks this up once the branch merges.
+   - **Planner (main folder, on `main`):** append to the plan file **and**
+     `.claude/todo.md`, as before.
+3. On Human validation (`done` / ship Y) → mark the matching item(s) `[x]`.
+   - **Worker:** mark `[x]` in the plan file's own Atomic Sub-tasks only.
+   - **Planner:** mark `[x]` in both the plan file and `.claude/todo.md` (see
+     `docs/agent/job-validation.md`).
 
 ---
 
