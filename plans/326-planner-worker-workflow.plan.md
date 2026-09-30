@@ -214,7 +214,7 @@ Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-
 - [x] A26: Run every check in **Done when** below (see verification summary in that section)
 - [x] A27: Run `node scripts/plan-ledger-check.mjs` and `ng build`
 - [x] A28: Write the `sessions/` handoff
-- [ ] A29: `/ship` on `chore/planner-worker-workflow` as one PR
+- [x] A29: `/ship` on `chore/planner-worker-workflow` as one PR
 
 ## Rules
 
