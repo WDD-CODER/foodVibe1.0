@@ -51,6 +51,7 @@ testem.log
 .claude/worktrees/
 .claude/.plan-write-ack
 .claude/.session-state-path
+.claude/.ship-baseline
 .claude/.session-lock
 .claude/.parallel-slot-a
 .claude/.parallel-slot-b
