@@ -9,12 +9,16 @@ Standalone review command. Used by `/ship` Phase 2 and invokable alone.
 
 ## What to read
 
-1. Current diff against the base branch:
+1. Current diff against the base branch, excluding noisy generated/report paths (keep `dictionary.json`):
    ```bash
    git fetch origin main 2>/dev/null || true
-   git diff origin/main...HEAD
+   git diff origin/main...HEAD -- . ':(exclude)package-lock.json' ':(exclude).claude/reports/**' ':(exclude).claude/todo-archive/**' ':(exclude).claude/techdebt-reports/**'
    # fallback if origin/main missing:
-   git diff main...HEAD
+   git diff main...HEAD -- . ':(exclude)package-lock.json' ':(exclude).claude/reports/**' ':(exclude).claude/todo-archive/**' ':(exclude).claude/techdebt-reports/**'
+   ```
+   Then show what changed in the excluded paths without the hunks, so the reviewer knows they moved:
+   ```bash
+   git diff origin/main...HEAD --stat -- package-lock.json .claude/reports .claude/todo-archive .claude/techdebt-reports
    ```
    Also include unstaged/staged working-tree changes relevant to this session.
 2. `docs/agent/standards-security.md`

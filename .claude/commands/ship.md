@@ -31,20 +31,7 @@ phrase "ship fast" is equivalent to typing `/ship fast`.
 
 Runs first, before the build gate. This is what makes `/ship` fast for small changes without cutting corners on risky ones — it decides how much of the pipeline below actually executes, it doesn't remove any phase's *existence*.
 
-```bash
-git status --short
-git diff --stat
-git diff --cached --stat
-```
-
-Classify the this-chat diff (same file set Phase 3 will stage — working tree ∩ staged) by file count, total lines changed (insertions + deletions), and touched paths:
-
-- **SENSITIVE_PATHS** (any match forces REGULAR, no matter how small the diff): paths matching `auth|crypto|guard|interceptor|security|payment|migration|schema|\.env|server/routes|package(-lock)?\.json|\.github/workflows|\.claude/(settings|commands/ship)\.`. These are the places where a small diff can still be a big risk.
-- **ULTRA-TRIVIAL** → exactly 1 file changed, ≤10 lines changed, and the file matches `docs/session-state-.*\.md | \.claude/todo\.md | CHANGELOG\.md | docs/.*\.md` (pure handoff/doc content, nothing executable). No sensitive-path match.
-- **FAST** → ≤3 files changed, ≤40 lines changed, no sensitive-path match, and not already ULTRA-TRIVIAL.
-- **REGULAR** → everything else. This is the default whenever the diff doesn't clearly qualify — when in doubt, run the full pipeline.
-
-`/ship regular` overrides the classification outright (skip this Phase's logic, always take the full REGULAR-scrutiny path) — a Human asserting *more* caution is always safe to honor immediately. `/ship fast` does **not** override classification — Phase 0 always classifies for real when `fast` is passed, exactly like bare `/ship`; see Phase 4 for what `fast` actually changes (approval cadence, not review depth). Bare `/ship` always classifies.
+Run `node scripts/ship-prep.mjs` (`--mode regular` for `/ship regular`); the script is the source of truth for thresholds.
 
 Announce the pick before continuing, e.g. `Lane: FAST (2 files, 14 lines, no sensitive paths)` or `Lane: REGULAR (touches server/routes/ai.js)` — the Human should always know which pipeline is about to run and why, even when nothing stops for approval.
 
@@ -94,19 +81,18 @@ If `--skip-review "reason"` was provided explicitly (independent of lane):
 
 ## Phase 3 — Manifest check (staleness-aware, not worktree-count-only)
 
-`git worktree list` alone misses same-directory concurrent sessions (two agents/tools sharing one working tree, no separate worktree) — see `docs/brain/gotchas/agent-workflow.md` "Same-directory concurrent session breaks the plans/ numbering scan". Check both:
+`git worktree list` alone misses same-directory concurrent sessions (two agents/tools sharing one working tree, no separate worktree) — see `docs/brain/gotchas/agent-workflow.md` "Same-directory concurrent session breaks the plans/ numbering scan". Run:
 
 ```bash
-git worktree list | wc -l
-git branch --show-current
-git rev-parse HEAD
+node scripts/ship-prep.mjs --check-baseline
 ```
 
-- **If worktree count > 1** → run `python3 scripts/session-manifest-ship.py` and honor overlap stops (same rules as before: non-empty overlaps → STOP; `no_manifest` → do not `git add -A`; prefer this-chat files).
-- **If worktree count ≤ 1** → compare current branch + HEAD against this ship invocation's baseline (branch + HEAD sha noted when `/ship` started, e.g. at Phase 1):
-  - **Branch changed** → **STOP**. Something else switched HEAD in this shared working directory mid-ship. Show the Human both branch names; do not stage or commit until they confirm which branch is intended.
-  - **HEAD moved but branch unchanged** (new commits landed, not made by this session) → treat as a same-directory overlap signal: re-run `git status --short` fresh (don't reuse an earlier snapshot from this conversation), re-`Read` any file about to be staged immediately before `git add` rather than trusting an earlier in-session read, and note in the ship summary that concurrent commits were detected on this branch.
-  - **Neither changed** → proceed with normal this-chat-file staging.
+This compares current branch + HEAD against the baseline `ship-prep.mjs` recorded at Phase 0, and re-checks manifest overlaps when the worktree count is > 1:
+
+- **`BRANCH_CHANGED`** → **STOP**. Something else switched HEAD in this shared working directory mid-ship. Show the Human both branch names; do not stage or commit until they confirm which branch is intended.
+- **`HEAD_MOVED`** (new commits landed, not made by this session) → treat as a same-directory overlap signal: re-run `git status --short` fresh (don't reuse an earlier snapshot from this conversation), re-`Read` any file about to be staged immediately before `git add` rather than trusting an earlier in-session read, and note in the ship summary that concurrent commits were detected on this branch.
+- **`OK`** → proceed with normal this-chat-file staging.
+- **Non-empty `overlaps`** → honor overlap stops (same rules as before: non-empty overlaps → STOP; `no_manifest` → do not `git add -A`; prefer this-chat files).
 - Either path: stage only this-chat dirty paths (tool write/edit history ∩ `git status --short`). Never `git add -A` unless Human overrode scope.
 - Flag secrets / `.env` — never stage them.
 
@@ -268,39 +254,10 @@ Never auto-merge without Human `merge` / clear `Y`.
 Runs as **On approval step 5** — after `git commit`, **before** push. Do not defer until after Merge Gate.
 
 1. Read save target from `.claude/.session-state-path` (local pointer; gitignored). Fallback: `docs/session-state-${BRANCH}.md` then `docs/session-state.md`.
-2. **Stable path only:** write `docs/session-state-${BRANCH}.md` (no PPID suffix). Never write a new `docs/session-state-*-{pid}.md` for ship.
-3. Count files changed this session (this-chat stage list / commits):
-   - **If ≤1 file changed** → **append one line** (date + sha + summary) under the existing sections. Keep required schema sections intact: `## Session Summary`, `## Next Steps`.
-   - **If >1 file changed** → **full rewrite** with schema:
-
-```markdown
-# Session State
-
-## Branch
-{branch_name}
-
-## Date
-{YYYY-MM-DD}
-
-## Session Summary
-{2–4 bullets}
-
-## Files Modified
-{git diff --stat for this session}
-
-## Commit
-{sha or none}
-
-## PR
-{url or N/A}
-
-## Next Steps
-{first open todo + open session items}
-```
-
-4. `git add` the stable session-state file (and only that handoff path).
-5. `git commit --amend --no-edit` — allowed here because HEAD is the ship commit just created by this agent and has **not** been pushed yet. Do **not** amend if already pushed.
-6. Continue On approval (rename → push → PR judgment).
+2. Run `node scripts/write-session-state.mjs --summary "<2–4 bullets>" --next "<first open todo + open session items>" [--pr <url>]`. It resolves the stable branch-canonical path itself (no PPID suffix), counts files changed against `origin/main...HEAD`, and either appends one line (≤1 file changed) or does a full rewrite (>1 file changed) with the `## Branch` / `## Date` / `## Session Summary` / `## Files Modified` / `## Commit` / `## PR` / `## Next Steps` schema.
+3. `git add` the stable session-state file (and only that handoff path).
+4. `git commit --amend --no-edit` — allowed here because HEAD is the ship commit just created by this agent and has **not** been pushed yet. Do **not** amend if already pushed.
+5. Continue On approval (rename → push → PR judgment).
 
 Do not change the resume/read path used by `scripts/session-startup.sh`.
 `.claude/.session-state-path` must remain **untracked** (gitignored).
