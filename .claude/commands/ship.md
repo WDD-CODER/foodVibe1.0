@@ -179,7 +179,7 @@ If on `feat/session-*`:
 
 Approve **Y** (or `--yes`) **is** Human validation of the job. Then:
 
-1. **Todo sync (mandatory when items match)** — Mark matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]`; then run `node scripts/todo-archive.mjs` to move any fully-`[x]` plan sections into `.claude/todo-archive/NNN.md` volumes (max 300 lines; rolls automatically). Never invent completion for work not in this ship. Never skip with “Contractor does not mark.” If nothing matches → note `Todo: no matching open items — skipped` and continue.
+1. **Todo sync (mandatory when items match)** — Do not Read .claude/todo.md in full. Run `node scripts/todo-query.mjs open` (add `--plan NNN` when known) to find matches, then `node scripts/todo-query.mjs mark --line N[,N…]` on the matching lines (and update the plan's Atomic Sub-tasks the same way); then run `node scripts/todo-archive.mjs` to move any fully-`[x]` plan sections into `.claude/todo-archive/NNN.md` volumes (max 300 lines; rolls automatically). Never invent completion for work not in this ship. Never skip with “Contractor does not mark.” If nothing matches → note `Todo: no matching open items — skipped` and continue.
 2. **Write brain drafts** (if proposed and not dropped via edit list) — verbatim to `docs/brain/**` as above.
 3. **`git add` only listed paths** — include the todo/plan/brain paths just updated. Happy path = **one commit** with job + todos (+ brain). Do **not** commit the job first and leave todos for a later push.
 4. **`git commit`** (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable)

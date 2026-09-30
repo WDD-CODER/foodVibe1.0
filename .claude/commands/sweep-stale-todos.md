@@ -12,25 +12,17 @@ Scan `todo.md` for plan sections where all items are `[x]` and no safety excepti
 
 ## Steps
 
-### Step 1 — Read
-Read `.claude/todo.md` in full.
+Do not Read .claude/todo.md in full.
 
-### Step 2 — Identify all-`[x]` sections
-Identify plan sections where every item is `[x]` (no open `[ ]` items remain).
-
-### Step 2b — Deferred item filter
-From the all-`[x]` sections, remove any section that contains the text `(deferred)`, `(skipped)`, or `[~]`. Add these to the **Sections Kept** report with reason: "contains deferred items."
-
-### Step 3 — Precise git verification
-For each remaining candidate section, run in order:
+### Step 1 — Sweep
+Run:
 ```bash
-git log --oneline | grep -i "<plan-keyword>"        # any commit ref
-gh pr list --state merged --search "<plan-keyword>" # merged PR
+node scripts/todo-query.mjs sweep
 ```
-If **neither** returns results → flag as "unverifiable" and exclude from the archive proposal. Add to **Sections Kept** with reason: "all [x] but no git verification found — manual review needed."
+This identifies all-`[x]` plan sections (excluding any containing `(deferred)`, `(skipped)`, or `[~]` — reported as "contains deferred items"), then verifies each remaining candidate against `git log --oneline -i --grep=<plan number>` and, if `gh` is available, `gh pr list --state merged --search <plan number>`. Each candidate comes back marked `verified` or `unverifiable`.
 
 ### Step 4 — Archive via script
-If Step 3 left any **unverifiable** candidates, stop and report them under Sections Kept — do **not** run the script until the Human confirms.
+If Step 1's sweep marked any candidate **unverifiable**, stop and report them under Sections Kept — do **not** run the script until the Human confirms.
 
 Otherwise run:
 
