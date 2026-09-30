@@ -20,7 +20,28 @@ all mechanical steps live in `.mjs` scripts that print a few lines.
 - Success: every item in **Done when** (below) passes, `ng build` and
   `scripts/plan-ledger-check.mjs` are clean, and the branch ships as one PR.
 
-## M0 — Reality check (mandatory, no writes) — COMPLETE
+## Read-Write Scope
+
+This is the tooling/methodology plan itself, so its scope is intentionally broad — it is
+the one plan expected to touch process files across the repo.
+
+```scope
+scripts/**
+.claude/**
+.husky/**
+docs/agent/**
+docs/brain/decisions/**
+.claude/references/**
+angular.json
+.gitignore
+AGENTS.md
+README_WORKFLOW.md
+src/environments/environment.slot.ts
+```
+
+## Atomic Sub-tasks
+
+### M0 — Reality check (mandatory, no writes) — COMPLETE
 
 Findings (see session record for full detail):
 - Snapshot moved `f9bcfcc3` → `30f5ed2e` (4 commits, none blocking).
@@ -47,36 +68,36 @@ Findings (see session record for full detail):
 Unrelated open todo backlog (Plans 321, 322, 301, 303, 304, 310, 306, 122, 248) exists but
 is out of scope for this plan and was not touched.
 
-## M1 — Shared libraries and query scripts
+- [x] M0 complete — no blockers, findings folded into M1-M4 tasks below
+
+### M1 — Shared libraries and query scripts
 
 Node ESM, single quotes, no semicolons, no new dependencies (use `picomatch`/`minimatch`
 only if already in `package-lock.json`).
 
-### Atomic Sub-tasks
-- [ ] A1: New `scripts/lib/slot.mjs` — `isSlot()`, `slotNumber()`, `ports()` (`{fe, be}`),
+- [x] A1: New `scripts/lib/slot.mjs` — `isSlot()`, `slotNumber()`, `ports()` (`{fe, be}`),
       `activePlanPath()` (from `.worktree-plan` or null), `listSlots()`
-- [ ] A2: New `scripts/session-state-path.mjs` — resolves one path via
+- [x] A2: New `scripts/session-state-path.mjs` — resolves one path via
       `SESSION_STATE_PATH` env → `.claude/.session-state-path` →
       `docs/session-state-<branch>.md`; falls back to `docs/session-state.md` only outside
       a slot; prints `NONE` and exits 0 in a slot with no branch file
-- [ ] A3: Rewire `scripts/session-startup.sh`, `scripts/handoff-check.sh`,
+- [x] A3: Rewire `scripts/session-startup.sh`, `scripts/handoff-check.sh`,
       `scripts/write-session-state.mjs` to resolve paths through `session-state-path.mjs`
       (no duplicated resolution logic)
-- [ ] A4: New `scripts/scope-check.mjs` — parses `## Read-Write Scope` fenced ` ```scope `
+- [x] A4: New `scripts/scope-check.mjs` — parses `## Read-Write Scope` fenced ` ```scope `
       block (one glob per line, `#` comments); always-allowed: plan file,
       `docs/session-state-<branch>.md`, `.claude/sessions/**`, `.worktree-*`, hotspots
       (append-only, M4). Modes: `--file=<p>`, `--diff=<base>`, `--overlap --plan=<p>`,
       `--drift` (against `Snapshot:`, excluding the plan file, via `:(glob)` pathspecs).
       Plan defaults to `slot.activePlanPath()`; missing plan/scope block → exit 1
-- [ ] A5: `scripts/todo-query.mjs` — add `sync --plan NNN` (rebuild that plan's
+- [x] A5: `scripts/todo-query.mjs` — add `sync --plan NNN` (rebuild that plan's
       `### Plan NNN` section from its `## Atomic Sub-tasks` checkboxes via
       `lib/todo-parse.mjs`, creating the section if missing; print
       `TODO_QUERY: sync plan NNN (x/y done)`) and `sync --merged` (sync every plan whose
       `feat/NNN-*` branch merged into `origin/main` since last sync); update usage header
 
-## M2 — Enforcement
+### M2 — Enforcement
 
-### Atomic Sub-tasks
 - [ ] A6: `scripts/branch-guard.sh` — read stdin with `plan-write-guard.sh`'s timeout
       pattern; on `main`, allow without switching when path matches
       `^plans/[^/]+\.plan\.md$|^\.claude/todo\.md$`; otherwise keep auto-switch (including
@@ -102,11 +123,10 @@ only if already in `package-lock.json`).
       the plan file's Atomic Sub-tasks in a slot, skipping `todo-query` mark /
       `todo-archive.mjs`
 
-## M3 — Three permanent slots, per-slot ports, "execute plan"
+### M3 — Three permanent slots, per-slot ports, "execute plan"
 
 Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-3` 4203/3003.
 
-### Atomic Sub-tasks
 - [ ] A11: `angular.json` — add a `slot` configuration to both `build` and `serve`,
       copying `local` but swapping in `src/environments/environment.slot.ts` (generated,
       gitignored); default `ng build` unaffected
@@ -141,9 +161,8 @@ Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-
 - [ ] A17: `.gitignore` — add `.worktree-root`, `.worktree-port`, `.worktree-plan`,
       `.claude/.slot-pids`, `src/environments/environment.slot.ts`
 
-## M4 — Methodology docs (compact — these load every session)
+### M4 — Methodology docs (compact — these load every session)
 
-### Atomic Sub-tasks
 - [ ] A18: `.claude/references/prd-template.md` — after `## Goals & Success Criteria`, add
       `Status:`/`Snapshot:`, `## Execution Mode`, `## Read-Write Scope` (fenced block +
       always-allowed line), `## Read Scope`, `## Escalation Protocol`, `Step 0 — Reality
@@ -181,9 +200,8 @@ Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-
       reality check; scope gate replaces manifest overlap in slots; `/ship` gate is the
       guarantee since Cursor has no hooks; mechanical steps live in scripts
 
-## M5 — Verify and ship
+### M5 — Verify and ship
 
-### Atomic Sub-tasks
 - [ ] A26: Run every check in **Done when** below
 - [ ] A27: Run `node scripts/plan-ledger-check.mjs` and `ng build`
 - [ ] A28: Write the `sessions/` handoff

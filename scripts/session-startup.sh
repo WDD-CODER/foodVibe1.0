@@ -74,32 +74,33 @@ EOF
 fi
 # --- end two-slot parallel session detection ---
 
-if [ -n "$SESSION_STATE_PATH" ]; then
-  SESSION_STATE="$SESSION_STATE_PATH"
-  SAVE_PATH="$SESSION_STATE_PATH"
-else
-  BRANCH=$(git branch --show-current 2>/dev/null | sed 's/[^a-zA-Z0-9]/-/g')
-  BRANCH="${BRANCH:-main}"
+# Resolved once, the same way for session-startup.sh, handoff-check.sh and
+# write-session-state.mjs — see scripts/session-state-path.mjs.
+RESOLVED=$(node "$SCRIPT_DIR/session-state-path.mjs" 2>/dev/null)
 
-  # Stable per-branch handoff (committed on /ship amend-before-push)
-  SAVE_PATH="docs/session-state-${BRANCH}.md"
-
-  # Local pointer only — gitignored (Plan 295)
-  mkdir -p .claude
-  echo "$SAVE_PATH" > .claude/.session-state-path
-
-  # Prefer branch-canonical; fall back to newest legacy PPID file, then global
-  if [ -f "$SAVE_PATH" ]; then
-    SESSION_STATE="$SAVE_PATH"
-  else
-    LATEST=$(ls -t docs/session-state-${BRANCH}-*.md 2>/dev/null | head -1)
-    if [ -n "$LATEST" ]; then
-      SESSION_STATE="$LATEST"
-    else
-      SESSION_STATE="docs/session-state.md"
-    fi
-  fi
+if [ "$RESOLVED" = "NONE" ]; then
+  cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "decision": {
+      "additionalContext": "IDLE SLOT: ask Dandan which plan to execute."
+    }
+  }
+}
+EOF
+  exit 0
 fi
+
+SAVE_PATH="$RESOLVED"
+SESSION_STATE="$RESOLVED"
+
+# Local pointer only — gitignored (Plan 295)
+mkdir -p .claude
+echo "$SAVE_PATH" > .claude/.session-state-path
+
+BRANCH=$(git branch --show-current 2>/dev/null)
+BRANCH="${BRANCH:-main}"
 
 if [ -f "$SESSION_STATE" ]; then
   # Do not Read .claude/todo.md in full. Only Session Summary / Next Steps / Commit

@@ -21,21 +21,11 @@ if [ -n "$CURRENT_TOPLEVEL" ]; then
   release_lock "$CURRENT_TOPLEVEL"
 fi
 
-if [ -n "$SESSION_STATE_PATH" ]; then
-  SESSION_STATE="$SESSION_STATE_PATH"
-elif [ -f ".claude/.session-state-path" ]; then
-  SESSION_STATE=$(cat ".claude/.session-state-path")
-else
-  BRANCH=$(git branch --show-current 2>/dev/null | sed 's/[^a-zA-Z0-9]/-/g')
-  BRANCH_FILE="docs/session-state-${BRANCH}.md"
-  if [ -n "$BRANCH" ] && [ -f "$BRANCH_FILE" ]; then
-    SESSION_STATE="$BRANCH_FILE"
-  else
-    SESSION_STATE="docs/session-state.md"
-  fi
-fi
+# Resolved the same way session-startup.sh and write-session-state.mjs do —
+# see scripts/session-state-path.mjs.
+SESSION_STATE=$(node "$SCRIPT_DIR/session-state-path.mjs" 2>/dev/null)
 
-if [ ! -f "$SESSION_STATE" ]; then
+if [ "$SESSION_STATE" = "NONE" ] || [ -z "$SESSION_STATE" ] || [ ! -f "$SESSION_STATE" ]; then
   exit 0
 fi
 
