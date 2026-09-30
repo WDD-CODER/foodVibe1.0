@@ -75,11 +75,13 @@ Reply: rewrite existing | save as new | cancel
 
 ## Phase 1: Ledger Sync
 
-**Todo Update:** Extract `# Atomic Sub-tasks` (or equivalent checklist) and append/update `.claude/todo.md` under `### Plan NNN — <Title>`.
+Do not Read .claude/todo.md in full.
+
+**Todo Update:** Extract `# Atomic Sub-tasks` (or equivalent checklist), write it to a temp file, and run `node scripts/todo-query.mjs append --from <file>` to insert it under `### Plan NNN — <Title>` before `.claude/todo.md`'s footers.
 
 **Sub-task Formatting:** Every task `[ ]` with target file(s) when known.
 
-**State Verification:** If unrelated open tasks exist → surface them before proceeding.
+**State Verification:** Run `node scripts/todo-query.mjs open` — if unrelated open tasks exist → surface them before proceeding.
 
 **Numbering (save as new only):** List `plans/` → `NNN = highest + 1`. Collision guard:
 

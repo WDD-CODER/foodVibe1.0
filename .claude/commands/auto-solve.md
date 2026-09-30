@@ -13,10 +13,10 @@ Autonomous workflow that processes plans from `todo.md` one by one.
 
 ## Phase 0 â€” Find Next Plan
 
-1. Read `.claude/todo.md`
-2. Find the first plan section with unchecked `[ ]` items
-3. Extract the plan file path from the header (e.g., `plans/219-recipe-header-photo-picker.plan.md`)
-4. If no incomplete plans found â†’ report "All plans complete" and stop
+Do not Read .claude/todo.md in full.
+
+1. Run `node scripts/todo-query.mjs next` â€” prints the first plan section with unchecked `[ ]` items, its plan file path (e.g., `plans/219-recipe-header-photo-picker.plan.md`), and each open item with its line number
+2. If it reports no open plan sections â†’ report "All plans complete" and stop
 
 ---
 

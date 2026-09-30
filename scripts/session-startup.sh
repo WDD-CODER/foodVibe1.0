@@ -102,13 +102,28 @@ else
 fi
 
 if [ -f "$SESSION_STATE" ]; then
-  CONTENT=$(cat "$SESSION_STATE")
+  # Do not Read .claude/todo.md in full. Only Session Summary / Next Steps / Commit
+  # are injected here, capped at 1500 chars — full session-state stays on disk.
+  CONTENT=$(awk '
+    /^## Session Summary/ { flag=1 }
+    /^## Next Steps/ { flag=1 }
+    /^## Commit/ { flag=1 }
+    /^## / && $0 !~ /^## Session Summary/ && $0 !~ /^## Next Steps/ && $0 !~ /^## Commit/ { flag=0 }
+    flag { print }
+  ' "$SESSION_STATE")
+
+  if [ -z "$CONTENT" ]; then
+    CONTENT=$(head -c 1500 "$SESSION_STATE")
+  else
+    CONTENT=$(printf '%s' "$CONTENT" | head -c 1500)
+  fi
+
   cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
     "decision": {
-      "additionalContext": "Previous session state loaded from: $SESSION_STATE\\n$CONTENT\\n\\n---\\nSESSION SAVE TARGET: $SAVE_PATH\\nWhen ending this session, write session-state to the path above (not docs/session-state.md directly). The pointer file .claude/.session-state-path is local-only (gitignored)."
+      "additionalContext": "Previous session state loaded from: $SESSION_STATE\\n$CONTENT\\n\\nFull file: $SESSION_STATE — read only if needed.\\n\\n---\\nSESSION SAVE TARGET: $SAVE_PATH\\nWhen ending this session, write session-state to the path above (not docs/session-state.md directly). The pointer file .claude/.session-state-path is local-only (gitignored)."
     }
   }
 }

@@ -70,6 +70,16 @@
 - [ ] Stage 4 — New items created as shared from the start (`POST .../create-shared`, admin-only)
 - [ ] Stage 5 — Non-destructive delete propagation (`PUT .../remove-from-master`, master-only removal, no cascade to existing users)
 
+### Plan 323 — Todo Query Script and Trimmed Session Injection (`plans/323-todo-query-trimmed-session-injection.plan.md`)
+
+> Saved 2026-09-30. First of a 3-part sequence (this plan → Brief B1 → Brief B2), each executed and Human-validated in order.
+
+- [x] 1. Move parser functions from `todo-archive.mjs` into new `scripts/lib/todo-parse.mjs`; `--dry-run` output must stay byte-identical
+- [x] 2. Create `scripts/todo-query.mjs` with `next` / `open` / `sweep` / `mark` / `append` subcommands + `--json`
+- [x] 3. Trim `scripts/session-startup.sh` line 105 SessionStart injection to Summary/Next Steps/Commit, capped at 1,500 chars
+- [x] 4. Rewire consumers (`auto-solve.md`, `sweep-stale-todos.md`, `done.md`, `ship.md` "On approval" step 1, `save-plan` Phase 1) to use `todo-query`
+- [x] 5. Add `"todo"` script to `package.json`
+
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
@@ -251,3 +261,64 @@ Open unchecked items at compact time:
 
 Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
 
+
+## PreCompact signal dump (2026-09-30T11:09:15Z)
+
+Open unchecked items at compact time:
+- [ ] `auth.interceptor.ts` — `BehaviorSubject` used for refresh-token gate; hard rule says signals only
+- [ ] `nutrition-badge.component.ts:46` — legacy `@Input()` decorator, unresolved since `techdebt-2026-04-20.md`
+- [ ] 2 stray trailing semicolons (`quick-add-product-modal.component.ts:121`, `menu-library-list.component.ts:197`)
+- [ ] 24-file refactor-candidate backlog (>300 lines each) — triage, top 3 are 1200+ lines
+  - [ ] `menu-intelligence.page.ts` (1413) / `recipe-builder.page.ts` (1394) / remaining ~21-file backlog — not yet triaged
+- [ ] 2 unnecessary `?? []` NG8102 warnings (`venue-detail`/`venue-list` templates)
+- [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
+- [ ] P1.8 Stale branch list gathered (65 branches, `gh-pages` excluded) — **awaiting Human approval before deleting any**
+- [ ] P2a.0–P2a.6 Shared Zod schema package, observe-mode validation
+- [ ] P2b.0–P2b.5 v2 migration: rename + `schemaVersion` + enforce (Gates G1/G2)
+- [ ] P3.0–P3.5 Unified taxonomy store (`taxonomyTerms` + `TaxonomyStore`)
+- [ ] P4.0–P4.6 Course/protein/labels split + menu sections → course (Gate G3)
+- [ ] P5.0–P5.8 Shared master + per-user overrides; admin-only push + dedicated modal
+- [ ] P6.0–P6.4 One soft-delete model + `userPrefs`
+- [ ] P7a–P7f Hygiene: god-file decomposition, service base adoption, script archive, CI hardening, logging, plan 301 remainder
+- [ ] P8.1–P8.5 Governance: ADRs 0009–0013, standards docs, lint guards, re-audit
+- [ ] Stage 1 — Foundation: `isAdmin_` signal on `UserService` + migrate ad hoc copies; gate `push-to-master` route with `requireAdmin`; `askScope()` short-circuits to `'me'` for non-admins
+- [ ] Stage 2 — Wire existing server support (Products, Equipment, Suppliers): `_masterId` field + `pushToMaster()` + save-flow wiring
+- [ ] Stage 3 — Extend to Venues, Menu Events, and 9 taxonomy/registry collections (labels, categories, allergens, units, menu types, menu event types, menu section categories, equipment custom categories, preparations)
+- [ ] Stage 4 — New items created as shared from the start (`POST .../create-shared`, admin-only)
+- [ ] Stage 5 — Non-destructive delete propagation (`PUT .../remove-from-master`, master-only removal, no cascade to existing users)
+- [ ] 1. Move parser functions from `todo-archive.mjs` into new `scripts/lib/todo-parse.mjs`; `--dry-run` output must stay byte-identical
+- [ ] 2. Create `scripts/todo-query.mjs` with `next` / `open` / `sweep` / `mark` / `append` subcommands + `--json`
+- [ ] 3. Trim `scripts/session-startup.sh` line 105 SessionStart injection to Summary/Next Steps/Commit, capped at 1,500 chars
+- [ ] 4. Rewire consumers (`auto-solve.md`, `sweep-stale-todos.md`, `done.md`, `ship.md` "On approval" step 1, `save-plan` Phase 1) to use `todo-query`
+- [ ] 5. Add `"todo"` script to `package.json`
+- [ ] Milestone 2 — carved out to Plan 310 (below) — see `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`
+- [ ] M1 — DevTools Performance profile on recipe-book before/after; record in the audit report — genuinely not done, needs a human with DevTools open (not scriptable via `/browse`)
+- [ ] M3 — Regression test: existing user's modified docs still win after login (Rule 3) — not verified this session; the version-gate only touches `POST /refresh`, `/login` is an unchanged code path, so risk is low but untested
+- [ ] Prerequisite gate — confirm 302 M1/M2 + 303 M1/M2 shipped and re-measured; reduce or drop scope if no longer justified — **bypassed 2026-09-15 for M2/M3 only**: live user report ("really really slow, locally even more") is itself real-world evidence the formal deploy-and-measure step was meant to provide; M1 (below) was explicitly NOT started, since it still needs the gate
+- [ ] M1 — List projections on `GET /:type` mirroring `SEARCH_PROJECTIONS` — `server/routes/generic.js:45-77,82-86`
+- [ ] M1 — Verify edit flows fetch full documents so a lean list doc cannot round-trip through a save and erase fields
+- [ ] Hand-off — re-assess plan 301 M2's scope against measured results
+- [ ] Prerequisite gate — confirm plan 304 M1/M2/M3 shipped + measured; re-scope if 304 M3 already solves pagination
+- [ ] Milestone 0 — Decisions (Human): facet-count strategy, allergens resolution strategy (denormalize / `$graphLookup` / punt), ingredient-containment index, pagination ownership vs plan 304 M3, search UX (prefix vs substring), favorites storage shape
+- [ ] Milestone 1 — Low-risk facets + pagination skeleton (Category/Supplier/product-Allergens/low-stock/invalid/incomplete/nutrition for inventory; Type/Approved/Station/Labels/date-range for recipe-book)
+- [ ] Milestone 2 — Allergens facet for recipe-book (recursive nested-recipe resolution — highest-risk piece, per Decision 2)
+- [ ] Milestone 3 — Ingredient-containment filter for recipe-book
+- [ ] Milestone 4 — Client rewire (`inventory-product-list.component.ts`, `recipe-book-list.component.ts`) + pagination UI wiring
+- [ ] Milestone 5 — Cross-screen verification (facet parity, RTL, selection/bulk-edit/inline-edit regressions, `ng build`)
+
+Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
+
+### Unresolved signals detected at compact time
+
+{"parentUuid":"8454aff1-8c20-4ed8-b4e3-cde280d5137d","isSidechain":false,"attachment":{"type":"prompt_snapshot","systemPrompt":["\nYou are an interactive agent that helps users according to your \"Output Style\", which describes how you should respond to user queries. Use the instructions below and 
+{"parentUuid":"13cc007c-4f4e-405b-a4d0-033ab891580b","isSidechain":false,"promptId":"1938fbeb-094b-4f84-90de-2d23cea4bd8c","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01Pt2hV2MiNDvwxmg1qne46H","type":"tool_result","content":"1\t# Active Tasks\n2\t\n3\t> Rearranged 2026-07
+{"parentUuid":"a4b9ed04-6508-45c2-840a-75d3a882b525","isSidechain":false,"attachment":{"type":"edited_text_file","filename":"C:\\coding projects\\Cursor\\foodVibe1.0\\.claude\\todo.md","snippet":"1\t# Active Tasks\n2\t\n3\t> Rearranged 2026-07-21 per [`.claude/reports/todo-ledger-relevance-audit-202
+{"parentUuid":"b5809822-989b-4325-81a0-87c049f949d5","isSidechain":false,"promptId":"7c48473c-0f78-4859-93e6-0390cffc5f90","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01GG3kQDwrqsGRrGez8JezGN","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"90c57207-ebfd-4a05-a176-48cb72f8f95f","isSidechain":false,"attachment":{"type":"edited_text_file","filename":"C:\\coding projects\\Cursor\\foodVibe1.0\\.claude\\todo.md","snippet":"1\t# Active Tasks\n2\t\n3\t> Rearranged 2026-07-21 per [`.claude/reports/todo-ledger-relevance-audit-202
+{"parentUuid":"211a16c1-bd8e-4c4d-887c-716ff4664bd4","isSidechain":false,"promptId":"7c48473c-0f78-4859-93e6-0390cffc5f90","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01BbFAmsXLfBuUxDJD4Lpeiz","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"0ea075d6-f3ba-4b0d-85db-e0939c57bdd1","isSidechain":false,"promptId":"40af95e7-685c-4c72-8218-8b8fdce683e9","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01XV2Y6otYMdAUfTsmrmp1nL","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"d813fe25-f9ea-4578-95c1-c1ca4c780467","isSidechain":false,"promptId":"40af95e7-685c-4c72-8218-8b8fdce683e9","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01BqkCRDfu3DtZGh1rF6p1cP","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"aa0f80ee-f2bc-444b-882c-48211e2ae745","isSidechain":false,"promptId":"6a936c08-5112-4afe-9c96-a1851402c2ca","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01GcmAQh5nTffDP7NjhwXAvf","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"e54380f9-28a2-4deb-81fa-eb74eebd5080","isSidechain":false,"promptId":"6a936c08-5112-4afe-9c96-a1851402c2ca","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_015C59mzDsHcBtg3bTThvVZT","type":"tool_result","content":"36\t### Plan 320 — Recipe Labels Fix + Course
+{"parentUuid":"86fbea21-d2f6-4fa9-9550-d0dd64b9399e","isSidechain":false,"promptId":"6a936c08-5112-4afe-9c96-a1851402c2ca","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01UHwihAuBcK1nQUrEzBB8DA","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"883a53c5-6cf8-4c77-9fcc-467d57449383","isSidechain":false,"attachment":{"type":"prompt_snapshot","systemPrompt":["\nYou are an interactive agent that helps users according to your \"Output Style\", which describes how you should respond to user queries. Use the instructions below and 
