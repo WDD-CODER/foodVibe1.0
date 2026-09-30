@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# session-lock.sh — liveness lock helpers for the two-slot parallel session system.
-# Sourced by session-startup.sh, session-manifest-hook.py's shell fallback caller,
-# handoff-check.sh, and claim-parallel-slot.sh. Not meant to be run directly.
+# session-lock.sh — liveness lock helpers, used by the Planner-Worker slot model.
+# Sourced by session-manifest-hook.py's shell fallback caller, handoff-check.sh
+# (release_lock), and take-plan.mjs (claim_lock, via Git Bash). Not meant to be
+# run directly.
 
 STALE_MINUTES="${STALE_MINUTES:-45}"
 

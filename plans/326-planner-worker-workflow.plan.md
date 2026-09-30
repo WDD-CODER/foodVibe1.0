@@ -127,16 +127,16 @@ only if already in `package-lock.json`).
 
 Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-3` 4203/3003.
 
-- [ ] A11: `angular.json` — add a `slot` configuration to both `build` and `serve`,
+- [x] A11: `angular.json` — add a `slot` configuration to both `build` and `serve`,
       copying `local` but swapping in `src/environments/environment.slot.ts` (generated,
       gitignored); default `ng build` unaffected
-- [ ] A12: Rewrite `.claude/skills/worktree-setup/SKILL.md` as one-time slot init: move
+- [x] A12: Rewrite `.claude/skills/worktree-setup/SKILL.md` as one-time slot init: move
       `../foodVibe1.0-wt-parallel` to `-wt-1` only if clean (per M0, it currently has an
       untracked `.claude/dev-server.log` — decide whether to ignore/clean that file or
       report-and-stop); create missing slots detached at `origin/main`; `npm install`
       root + `server/`; write `.worktree-root`/`.worktree-port`; copy `server/.env` only
       (per M0, no root `.env` exists); start no servers
-- [ ] A13: New `scripts/take-plan.mjs <NNN>` (ports `claim-parallel-slot.sh` logic):
+- [x] A13: New `scripts/take-plan.mjs <NNN>` (ports `claim-parallel-slot.sh` logic):
       slot-only guard; refuse on uncommitted/untracked non-ignored files; release a merged
       `feat/*` branch or refuse naming the holding plan; fetch + refuse if
       `plans/NNN-*.plan.md` isn't on `origin/main`; `git switch -c feat/NNN-<slug>
@@ -149,17 +149,26 @@ Port map: `main` 4200/3000 (unchanged), `wt-1` 4201/3001, `wt-2` 4202/3002, `wt-
       when `Isolated DB: yes`; `claim_lock` via `session-lock.sh` or a ported helper in
       `lib/slot.mjs`; print `OK plan=NNN branch=... fe=420N be=300N db=shared|foodvibe_wtN`
       followed by `scope-check.mjs --drift`
-- [ ] A14: New `.claude/commands/take-plan.md` — run the script; stop on exit 1; on
+- [x] A14: New `.claude/commands/take-plan.md` — run the script; stop on exit 1; on
       `REALITY: clean` execute milestones with no report; on `REALITY: drift` run the
       plan's Step 0 on the listed commits only, then STOP for a go
-- [ ] A15: `scripts/session-startup.sh` — replace the two-slot block (no auto-claim) using
+- [x] A15: `scripts/session-startup.sh` — replace the two-slot block (no auto-claim) using
       `node scripts/lib/slot.mjs --describe` (new small CLI entry); inject `PLANNER:` /
       `WORKER: plan=<path>` / `IDLE SLOT:` per slot state; keep the 1,500-char trimmed
       injection fed by `session-state-path.mjs`, nothing injected when it prints `NONE`
-- [ ] A16: Delete `scripts/claim-parallel-slot.sh` after porting; `grep -rn
-      "claim-parallel-slot\|parallel-slot" .` returns nothing
-- [ ] A17: `.gitignore` — add `.worktree-root`, `.worktree-port`, `.worktree-plan`,
-      `.claude/.slot-pids`, `src/environments/environment.slot.ts`
+- [x] A16: Delete `scripts/claim-parallel-slot.sh` after porting. Live references gone;
+      remaining hits are intentional history (`plans/323-*`, `plans/324-*`,
+      `docs/session-state-feat-session-20260929.md` — pre-existing, not rewritten) and
+      explicit "retired"/"the old two-slot system" mentions in the new docs/scripts that
+      replaced it. `docs/agent/workflow-map.md`'s own two-slot section is still pending —
+      that's M4 A24.
+- [x] A17: `.gitignore` — added `.worktree-plan`, `.claude/.slot-pids`,
+      `.claude/.last-npm-install-hash-server`, `src/environments/environment.slot.ts`
+      (`.worktree-root`/`.worktree-port` were already ignored). Kept
+      `.claude/.parallel-slot-a`/`-b` ignored rather than removing them — this very
+      session's own SessionStart hook (pre-M3 code) had already written a stray
+      `.claude/.parallel-slot-b`, proving old markers can still exist on disk even though
+      nothing new writes them; safer to keep the ignore rule than let one become trackable.
 
 ### M4 — Methodology docs (compact — these load every session)
 
