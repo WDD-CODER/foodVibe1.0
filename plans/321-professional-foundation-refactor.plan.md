@@ -27,7 +27,7 @@ If a Reality Check shows a step is already done, **do not redo it**. Mark it `[x
 
 | # | Decision | Consequence |
 |---|---|---|
-| D1 | **Tenancy → Shared master + per-user overrides.** Push-to-master becomes **admin-only**, behind a **dedicated confirmation modal**. | Per-user full catalog copies, clone-on-signup, sync-on-login, ID remapping, and `_userModified` all go away (Phase 5). |
+| D1 | **Tenancy → Shared master + per-user overrides.** Push-to-master becomes **admin-only**, behind a **dedicated confirmation modal**. | Per-user full catalog copies, clone-on-signup, sync-on-login, ID remapping, and `_userModified` all go away (Phase 5). Near-term incremental version of the admin-only push gate (built on the *current* clone/`_masterId` architecture, not the override model) is `plans/322-admin-master-push-expansion.plan.md` — see Phase 5 note below. |
 | D2 | **Validation → Zod, one shared schema package for client + server.** | Client TS types are *inferred* from Zod, so client and server can't drift. The server validates every write (Phase 2). |
 | D3 | **Taxonomy → `course` (single) + `protein` (single) + `labels` (freeform only). Menu sections reference `course`.** | `labels` stops carrying structure. Menu section names stop being free text (Phase 4). |
 | D4 | **Naming → rename persisted fields to one convention during the schema migration.** | camelCase, no trailing `_` in persisted data. Done in the same migration that introduces `schemaVersion` (Phase 2b). |
@@ -433,6 +433,18 @@ Give recipes first-class `course` and `protein` fields (plus `kosherType` if G3 
 
 ## Phase 5 — Shared master + per-user overrides
 
+> **Relationship to Plan 322** (`plans/322-admin-master-push-expansion.plan.md`, saved
+> 2026-09-30): Plan 322 is the near-term, lower-risk version of this same "admin decides
+> what's shared" goal — it works **within** the current clone/`_masterId`/sync-master
+> architecture (extends the existing `PUSHABLE_TYPES` allowlist + `askScope()` ternary to
+> every entity/taxonomy type, admin-gates it, adds create-shared and non-destructive
+> delete-from-master). This Phase 5 is the **later, full replacement** of that same
+> architecture (override model, no cloning, `entity-repo.js`). Do not re-derive Plan 322's
+> per-entity inventory or design here — when Phase 5 starts, its Step 0 Reality Check must
+> read Plan 322's state first and treat its shipped stages as the thing being migrated
+> onto the override model (P5.6's migration + P5.7's removal absorb whatever Plan 322 already
+> built, rather than Phase 5 re-solving "which entity types need this" from scratch).
+
 ### Goal
 Replace copy-per-user with one master catalog plus per-user overrides and user-owned docs. Make push-to-master **admin-only** with a **dedicated** confirmation modal.
 
@@ -613,6 +625,7 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 - [ ] P4.6 `computeAutoLabels` guard + protein suggestions
 
 ### Phase 5 — Shared master
+> See "Relationship to Plan 322" note above — P5.0's Reality Check must read `plans/322-admin-master-push-expansion.plan.md`'s progress first.
 - [ ] P5.0 Reality Check + user-account inventory
 - [ ] P5.1 `docs/brain/patterns/master-override-model.md` → Human approval
 - [ ] P5.2 `server/repositories/entity-repo.js` + route rewiring

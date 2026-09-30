@@ -54,6 +54,22 @@
 - [ ] P7a–P7f Hygiene: god-file decomposition, service base adoption, script archive, CI hardening, logging, plan 301 remainder
 - [ ] P8.1–P8.5 Governance: ADRs 0009–0013, standards docs, lint guards, re-audit
 
+### Plan 322 — Admin Master-Push Expansion (`plans/322-admin-master-push-expansion.plan.md`)
+
+> Saved 2026-09-30, not yet started. **Related to Plan 321's Phase 5** ("Shared master +
+> per-user overrides; admin-only push + dedicated modal") but NOT a duplicate: Plan 322
+> is the near-term incremental version built on the *current* clone/`_masterId`/sync-master
+> architecture; Plan 321 Phase 5 is the later full replacement of that architecture
+> (override model, no cloning). Plan 321's Phase 5 section now cross-references this plan
+> so its Reality Check absorbs Plan 322's shipped state instead of re-deriving it. Safe to
+> execute Plan 322 now — Plan 321 Phase 5 will migrate its output when that phase starts.
+
+- [ ] Stage 1 — Foundation: `isAdmin_` signal on `UserService` + migrate ad hoc copies; gate `push-to-master` route with `requireAdmin`; `askScope()` short-circuits to `'me'` for non-admins
+- [ ] Stage 2 — Wire existing server support (Products, Equipment, Suppliers): `_masterId` field + `pushToMaster()` + save-flow wiring
+- [ ] Stage 3 — Extend to Venues, Menu Events, and 9 taxonomy/registry collections (labels, categories, allergens, units, menu types, menu event types, menu section categories, equipment custom categories, preparations)
+- [ ] Stage 4 — New items created as shared from the start (`POST .../create-shared`, admin-only)
+- [ ] Stage 5 — Non-destructive delete propagation (`PUT .../remove-from-master`, master-only removal, no cascade to existing users)
+
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
@@ -235,6 +251,3 @@ Open unchecked items at compact time:
 
 Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
 
-### Unresolved signals detected at compact time
-
-{"parentUuid":"10494c06-a6ee-4a01-b6bd-9293cce2d3c5","isSidechain":false,"attachment":{"type":"prompt_snapshot","systemPrompt":["\nYou are an interactive agent that helps users according to your \"Output Style\", which describes how you should respond to user queries. Use the instructions below and 
