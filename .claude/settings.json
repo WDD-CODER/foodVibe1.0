@@ -1,7 +1,4 @@
 {
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
-  },
   "permissions": {
     "defaultMode": "plan",
     "allow": [
@@ -113,11 +110,6 @@
       {
         "matcher": "",
         "hooks": [
-          {
-            "type": "command",
-            "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/pre-compact-todo-append.sh\"",
-            "timeout": 5
-          },
           {
             "type": "command",
             "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/pre-compact-reminder.sh\"",

@@ -76,4 +76,4 @@ agent evaluates against.
 Output: `Session: .claude/sessions/{session-id}`
 
 This line threads the brief through the session lifecycle — picked up by `/ship`
-and `/evaluate-me` (legacy /ship automation is gone).
+(legacy /ship automation is gone).

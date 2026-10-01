@@ -30,18 +30,6 @@ See `README_WORKFLOW.md` and `CLAUDE.md`.
 
 ---
 
-## Flows â€” Testing & Audit
-
-| Command | What it does |
-|---------|-------------|
-| `/test-pr-review-merge` | Full Test â†’ PR â†’ Review â†’ Merge (trunk merge) pipeline |
-| `/test-template` | Score a fix template against its fixture corpus |
-| `/adversarial-template` | Generate adversarial test cases to stress-test a fix template |
-| `/mobile-flow-audit` | Walk mobile flows at 375Ã—812 RTL, stress-test layout |
-| `/render-flow-audit` | Walk the live Render deployment for functional bugs |
-
----
-
 ## Flows â€” Session Lifecycle
 
 | Command | What it does |
@@ -49,7 +37,6 @@ See `README_WORKFLOW.md` and `CLAUDE.md`.
 | `/ship` | Session end â€” build gate, this-chat file tree + Verify bullets, agent commits (`--yes` skips wait) |
 | `/done` | Validate a finished chat job â€” close-out ask, then mark matching todos `[x]` |
 | `/brief` | Capture or generate a session brief |
-| `/evaluate-me` | Agent session retrospective â€” grades the session |
 
 ---
 
@@ -57,7 +44,6 @@ See `README_WORKFLOW.md` and `CLAUDE.md`.
 
 | Command | What it does |
 |---------|-------------|
-| `/brief-detect` | Manually invoke brief-detection gate |
 | `/cleanup` | Session & worktree pruning â€” removes stale branches and worktrees |
 | `/sweep-stale-todos` | Find and close todos that are no longer relevant |
 | `/done` | Chat-path job validation (also listed under Session Lifecycle) |

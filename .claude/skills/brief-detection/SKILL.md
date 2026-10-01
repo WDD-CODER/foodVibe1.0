@@ -71,7 +71,6 @@ c. Discussion only — no execution
 
 ## Override
 
-`/brief-detect` or `/gate-brief` forces the gate even below threshold.
 If Plan Contract shape also matches, still route to save-plan (shape check wins).
 
 ## What this skill does NOT do

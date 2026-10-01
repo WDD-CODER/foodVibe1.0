@@ -13,7 +13,7 @@ Show all registered skills with trigger patterns and file locations.
 2. Print the **Current registry** table below as-is.
 3. Optional freshness (one cheap check only):
    - `Glob` `.claude/skills/*/SKILL.md` under the repo `.claude/skills/` only (ignore `claude-workflow-sdk/` and other trees).
-   - Compare the skill-dir name set to the `File` column paths (e.g. `add-recipe` from `.claude/skills/add-recipe/SKILL.md`).
+   - Compare the skill-dir name set to the `File` column paths (e.g. `cssLayer` from `.claude/skills/cssLayer/SKILL.md`).
    - **Exclude retired dirs** even if present on disk: `mp-search`, `nightly-audit`, `worktree-session-end`, `execute-debugging`.
    - If active sets match → done (print table; no further reads).
    - If sets differ → run **Refresh path** once, then print the rebuilt table.
@@ -34,16 +34,13 @@ Show all registered skills with trigger patterns and file locations.
 
 | Trigger | File | Scope |
 | --- | --- | --- |
-| User adds a recipe or dish from an image, URL, or raw text | `.claude/skills/add-recipe/SKILL.md` | SHARED |
 | Before creating or refactoring an Angular Pipe or Directive | `.claude/skills/angular-pipe-logic/SKILL.md` | SHARED |
 | Before creating or refactoring any Angular component class | `.claude/skills/angularComponentStructure/SKILL.md` | SHARED |
 | Touching auth guards, interceptors, user services, HTTP CRUD, or protected access | `.claude/skills/auth-and-logging/SKILL.md` | SHARED |
 | Implementing or refactoring hashing/encryption/tokens in `auth-crypto.ts` | `.claude/skills/auth-crypto/SKILL.md` | SHARED |
 | New `pages/<x>/` or top-level subtree; structural changes; after `update-docs` | `.claude/skills/breadcrumb-navigator/SKILL.md` | SHARED |
 | First message has 3+ brief markers (`## Goal`, `## Steps`, `## Done when`, …) | `.claude/skills/brief-detection/SKILL.md` | CC |
-| Mid-task checkpoint before context exhaustion (`/checkpoint`) | `.claude/skills/context-management/SKILL.md` | SHARED |
 | Before creating or editing any `.scss` / `.css` in `src/` | `.claude/skills/cssLayer/SKILL.md` | SHARED |
-| User says deploy / publish app / GitHub Pages (explicit only) | `.claude/skills/deploy-github-pages/SKILL.md` | SHARED |
 | After a hacky fix, before a "not ideal" PR, or when duplicate/special-case logic appears | `.claude/skills/elegant-fix/SKILL.md` | SHARED |
 | Session start or after time away (once per calendar day) | `.claude/skills/github-sync/SKILL.md` | SHARED |
 | Before workflows that touch dev server / browser / database | `.claude/skills/preflight/SKILL.md` | SHARED |
