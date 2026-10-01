@@ -121,11 +121,31 @@ Do not Read .claude/todo.md in full.
 Never write under `~/.cursor/plans/`. `Snapshot:` — fill with the current `origin/main` SHA
 only if the draft left it empty; never overwrite a SHA the Architect already filled in.
 
+**Pre-commit branch check (Planner only):** Run `git branch --show-current` immediately
+before committing. If it is not `main` (or `master`) — e.g. `branch-guard.sh` mis-fired and
+auto-switched to a `feat/session-*` branch — STOP before committing: `git checkout main`
+first, so the commit lands directly on `main`. Do not commit on a stray branch and fix it
+after; catch it here.
+
 **Commit (Planner, on `main`, only):** `git add` only the plan file and `.claude/todo.md`
 (never `-A`), then commit. This is the Planner's admin-bypass write to `main` — see
 `AGENTS.md`'s Planner-Worker bullet, enforced by `scripts/branch-guard.sh` and
 `.husky/pre-push`. A Worker saving mid-brief inside a `wt-N` slot does not commit here —
 its commit happens at `/ship` time on its `feat/NNN-*` branch, plan file only (Phase 4).
+
+**Push + Verify (Planner only, mandatory — do this before telling the Human the plan is
+ready):**
+
+1. `git push origin main`. If the push is blocked (permission prompt, rejected, or any
+   non-zero exit) — STOP. Do not tell the Human to execute the plan yet; surface the
+   blocker and ask for a decision first. A Worker's `take-plan.mjs` only reads
+   `origin/main`, so an unpushed plan fails silently in the worktree instead of here where
+   it's cheap to fix.
+2. After a successful push, confirm it actually landed: `git fetch origin --quiet` then
+   `git ls-tree origin/main --name-only -- plans/<NNN>-<slug>.plan.md` must print the path
+   (non-empty). If empty, the push did not do what it looked like — STOP and investigate
+   before announcing done.
+3. Only once both checks pass does the Completion Gate's "Plan NNN pushed" line become true.
 
 ---
 
