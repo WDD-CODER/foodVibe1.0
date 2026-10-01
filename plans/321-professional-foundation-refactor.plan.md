@@ -602,13 +602,28 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 - [x] P2a.6 `src/app/core/models/v2/*` inferred types + type test
 
 ### Phase 2b — v2 migration + enforce
-- [ ] P2b.0 Reality Check + G1/G2 answers + maintenance window
-- [ ] P2b.1 `server/migrations/0001-v2-schema.js` (dry run → Human → local write → verify → Atlas)
-- [ ] P2b.x Clean stray keys found in 2a inventory: `ingredients_` on 36 local PRODUCT_LIST docs (not on Atlas); `steps_[].cooking_time_minutes_` on 4 Atlas RECIPE_LIST docs (old name of `cooking_time_secs_`) — Human decides rename vs drop
-- [ ] P2b.2 Validator → enforce; server code/tests to v2
-- [ ] P2b.3 Client switched to inferred types; delete legacy interfaces; growth-frozen net-zero check
-- [ ] P2b.4 Legacy scripts marked v1-only
-- [ ] P2b.5 Deploy runbook + Render dashboard check
+- [x] P2b.0a G1 = keep `recipes` + `dishes` separate (no `kind`), G2 = rename 7 collections — decided by Human 2026-10-01 (see Decision gates)
+- [ ] P2b.0b Reality Check at the start of the next session (`git fetch`, open PRs, parallel branches that touch `src/app` or `server/`) + Human confirms the maintenance window
+- [x] P2b.1a `server/migrations/0001-v2-schema.js` written: dry run / `--write=yes` / `--verify=yes`, copies into new collections, old ones kept as rollback; tombstone schema; `shared/schemas` updated (commit db7463be)
+- [x] P2b.1b Local: backup `foodvibe-db-backups/local-2026-10-01T12-12-26`, write, verify OK 2026-10-01 (7 new collections exist locally; app does not read them yet)
+- [ ] P2b.1c Atlas dry run again right before the window (data changes), then Atlas backup → `--write=yes` → `--verify=yes` — Human confirms host
+- [ ] P2b.x Stray keys from the 2a inventory: `ingredients_` on 36 local products is dropped in v2 (old collection keeps it); `steps_[].cooking_time_minutes_` (4 Atlas recipes) is kept as deprecated `cookingTimeMinutes` — Human decides rename-vs-convert later
+- [ ] P2b.2 Server cutover to v2 (one PR with P2b.3):
+  - [ ] P2b.2a `server/constants/collections.js`: the 7 entries use the new names (products, recipes, dishes, suppliers, equipment, venues, menuEvents); trash + KITCHEN_* names unchanged; `COLLECTION_RENAMES` is the one source (re-export from `shared/schemas`)
+  - [ ] P2b.2b Stored-field renames across `server/db.js`, `routes/{generic,auth,admin,ai}.js`, `services/{clone-master,sync-master,seed-master,master-version}.js`: `userId`→`ownerId`, `_masterId`→`masterId`, `_userModified`→`userModified`, `_userDeleted`→`userDeleted`; `'__master__'` stays as an `ownerId` value; add/verify indexes on the new collections
+  - [ ] P2b.2c `server/middleware/validate.js`: observe → enforce (400 + Zod issues), no v1 upgrade on the hot path; `schemaVersion < 2` → 409 "needs migration"; tombstones allowed
+  - [ ] P2b.2d seed-master / clone-master / sync-master write v2 docs (so signup and login keep working on v2 data)
+  - [ ] P2b.2e Server tests moved to v2 names; fix the 8 stale `push-to-master` tests (they expect 400 but Plan 322 added `requireAdmin`) — needs `approved:` for the test file if outside scope
+- [ ] P2b.3 Client cutover to v2 (compiler-driven; one PR with P2b.2):
+  - [ ] P2b.3a Entity-type strings (`PRODUCT_LIST` etc., ~11 files in `src/app`) → new collection names; storage/HTTP adapters use them
+  - [ ] P2b.3b Replace `src/app/core/models/*.ts` interfaces with the `core/models/v2` inferred types, then fix every compile error; recipe `recipeType: 'preparation'` → `'recipe'`; no `recipe_type_`/`kind`
+  - [ ] P2b.3c Growth-frozen files: renames only, zero net new lines (check with `git diff --stat`)
+  - [ ] P2b.3d `dictionary.json` keys that embed old field names — list any, change none without asking
+  - [ ] P2b.3e Fix the 26 stale client specs (RecipeHeader / MetadataManagerPage / TranslationKeyModal / one InventoryProductList: mocks missing `courses_`) — needs `approved:` for those spec paths
+  - [ ] P2b.3f `ng build` + `ng test` + server tests all green
+- [ ] P2b.4 `server/scripts/legacy-import/*` marked v1-only (header comment + early exit against v2 data)
+- [ ] P2b.5 Deploy runbook in `docs/session-state-foundation-refactor.md`: Atlas backup → Atlas dry run → Human go → write → verify → deploy → smoke; rollback = restore backup + redeploy previous commit; Human confirms Render build command runs `build:schemas` (`build:render` already does)
+- [ ] P2b.6 HOW TO VALIDATE (Human): login, recipe edit + save, dish with sub-recipe, menu event build, export, trash restore; `validate-all.js` against Atlas → 0 violations; every doc `schemaVersion: 2`
 
 ### Phase 3 — Taxonomy store
 - [ ] P3.0 Reality Check + Human go
