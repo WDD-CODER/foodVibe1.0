@@ -7,7 +7,7 @@ import {
   signal,
   AfterViewInit,
   ViewChild,
-  ElementRef,
+  ElementRef
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
@@ -15,11 +15,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
-import {
-  Equipment,
-  EquipmentCategory,
-  ScalingRule,
-} from '@models/equipment.model'
+import { Equipment, EquipmentCategory, ScalingRule } from '@models/equipment.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -34,16 +30,23 @@ const CATEGORIES: EquipmentCategory[] = [
   'container',
   'packaging',
   'infrastructure',
-  'consumable',
+  'consumable'
 ]
 
 @Component({
   selector: 'app-equipment-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    CustomSelectComponent
+  ],
   templateUrl: './equipment-form.component.html',
   styleUrl: './equipment-form.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EquipmentFormComponent implements OnInit, AfterViewInit {
   @ViewChild('nameInput') private nameInputRef?: ElementRef<HTMLInputElement>
@@ -84,46 +87,46 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
 
   private buildForm(): void {
     this.equipmentForm_ = this.fb.group({
-      name_hebrew: ['', [Validators.required]],
-      category_: ['tool', [Validators.required]],
-      owned_quantity_: [1, [Validators.required, Validators.min(0)]],
-      is_consumable_: [false],
-      notes_: [''],
+      nameHebrew: ['', [Validators.required]],
+      category: ['tool', [Validators.required]],
+      ownedQuantity: [1, [Validators.required, Validators.min(0)]],
+      isConsumable: [false],
+      notes: [''],
       scaling_enabled_: [false],
-      per_guests_: [25, [Validators.min(1)]],
-      min_quantity_: [1, [Validators.min(0)]],
-      max_quantity_: [null as number | null],
+      perGuests: [25, [Validators.min(1)]],
+      minQuantity: [1, [Validators.min(0)]],
+      maxQuantity: [null as number | null]
     })
   }
 
   private hydrateForm(e: Equipment): void {
     this.equipmentForm_.patchValue({
-      name_hebrew: e.name_hebrew ?? '',
-      category_: e.category_ ?? 'tool',
-      owned_quantity_: e.owned_quantity_ ?? 0,
-      is_consumable_: e.is_consumable_ ?? false,
-      notes_: e.notes_ ?? '',
-      scaling_enabled_: !!e.scaling_rule_,
-      per_guests_: e.scaling_rule_?.per_guests_ ?? 25,
-      min_quantity_: e.scaling_rule_?.min_quantity_ ?? 1,
-      max_quantity_: e.scaling_rule_?.max_quantity_ ?? null,
+      nameHebrew: e.nameHebrew ?? '',
+      category: e.category ?? 'tool',
+      ownedQuantity: e.ownedQuantity ?? 0,
+      isConsumable: e.isConsumable ?? false,
+      notes: e.notes ?? '',
+      scaling_enabled_: !!e.scalingRule,
+      perGuests: e.scalingRule?.perGuests ?? 25,
+      minQuantity: e.scalingRule?.minQuantity ?? 1,
+      maxQuantity: e.scalingRule?.maxQuantity ?? null
     })
   }
 
   private patchScalingDefaults(): void {
     this.equipmentForm_.patchValue({
       scaling_enabled_: false,
-      per_guests_: 25,
-      min_quantity_: 1,
-      max_quantity_: null,
+      perGuests: 25,
+      minQuantity: 1,
+      maxQuantity: null
     })
   }
 
   private validateForm_(): boolean {
     const errors: Record<string, string> = {}
     const val = this.equipmentForm_.getRawValue()
-    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required'
-    if (!val.category_?.trim()) errors['category_'] = 'field_category_required'
+    if (!val.nameHebrew?.trim()) errors['nameHebrew'] = 'field_name_required'
+    if (!val.category?.trim()) errors['category'] = 'field_category_required'
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
   }
@@ -136,51 +139,54 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
     }
     if (this.equipmentForm_.invalid) return
     await this.saving.withSaving(async () => {
-    try {
-      const v = this.equipmentForm_.getRawValue()
-      const now = new Date().toISOString()
-      const scalingRule: ScalingRule | undefined = v.scaling_enabled_
-        ? {
-            per_guests_: Number(v.per_guests_),
-            min_quantity_: Number(v.min_quantity_),
-            max_quantity_: v.max_quantity_ != null && v.max_quantity_ !== '' ? Number(v.max_quantity_) : undefined,
-          }
-        : undefined
+      try {
+        const v = this.equipmentForm_.getRawValue()
+        const now = Date.now()
+        const scalingRule: ScalingRule | undefined = v.scaling_enabled_
+          ? {
+              perGuests: Number(v.perGuests),
+              minQuantity: Number(v.minQuantity),
+              maxQuantity: v.maxQuantity != null && v.maxQuantity !== '' ? Number(v.maxQuantity) : undefined
+            }
+          : undefined
 
-      if (this.isEditMode_()) {
-        const equipment = this.route.snapshot.data['equipment'] as Equipment
-        const updated: Equipment = {
-          ...equipment,
-          name_hebrew: v.name_hebrew,
-          category_: v.category_,
-          owned_quantity_: Number(v.owned_quantity_),
-          is_consumable_: !!v.is_consumable_,
-          notes_: v.notes_ ?? undefined,
-          scaling_rule_: scalingRule,
-          updated_at_: now,
+        if (this.isEditMode_()) {
+          const equipment = this.route.snapshot.data['equipment'] as Equipment
+          const updated: Equipment = {
+            ...equipment,
+            nameHebrew: v.nameHebrew,
+            category: v.category,
+            ownedQuantity: Number(v.ownedQuantity),
+            isConsumable: !!v.isConsumable,
+            notes: v.notes ?? undefined,
+            scalingRule: scalingRule,
+            updatedAt: now
+          }
+          await this.equipmentData.updateEquipment(updated)
+        } else {
+          await this.equipmentData.addEquipment({
+            nameHebrew: v.nameHebrew,
+            category: v.category,
+            ownedQuantity: Number(v.ownedQuantity),
+            scalingRule: scalingRule,
+            isConsumable: !!v.isConsumable,
+            notes: v.notes || undefined,
+            createdAt: now,
+            updatedAt: now
+          })
         }
-        await this.equipmentData.updateEquipment(updated)
-      } else {
-        await this.equipmentData.addEquipment({
-          name_hebrew: v.name_hebrew,
-          category_: v.category_,
-          owned_quantity_: Number(v.owned_quantity_),
-          scaling_rule_: scalingRule,
-          is_consumable_: !!v.is_consumable_,
-          notes_: v.notes_ || undefined,
-          created_at_: now,
-          updated_at_: now,
-        })
+        const listPath = this.router.url.startsWith('/inventory/equipment')
+          ? ['/inventory/equipment']
+          : ['/equipment/list']
+        this.router.navigate(listPath)
+      } catch (err) {
+        this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
+        const msg =
+          err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
+            ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
+            : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
+        this.userMsg.onSetErrorMsg(msg)
       }
-      const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list']
-      this.router.navigate(listPath)
-    } catch (err) {
-      this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
-      const msg = err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
-        ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
-        : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
-      this.userMsg.onSetErrorMsg(msg)
-    }
     })
   }
 

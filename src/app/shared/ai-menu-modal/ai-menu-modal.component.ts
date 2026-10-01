@@ -37,7 +37,7 @@ export class AiMenuModalComponent implements OnInit {
   protected readonly userResolutions_ = signal<Map<string, string | 'skip'>>(new Map())
 
   // Edit mode
-  protected readonly instruction_ = signal('')
+  protected readonly instruction = signal('')
   protected readonly patch_ = signal<Record<string, unknown> | null>(null)
 
   // Shared
@@ -65,21 +65,21 @@ export class AiMenuModalComponent implements OnInit {
     const current = this.modalService.getEditContext()
     if (!patch || !current) return []
     const entries: { label: string; from: string; to: string }[] = []
-    if ('name_' in patch) entries.push({ label: 'שם', from: current.name_ || '—', to: String(patch['name_'] ?? '—') })
-    if ('event_type_' in patch)
-      entries.push({ label: 'סוג אירוע', from: current.event_type_ || '—', to: String(patch['event_type_'] ?? '—') })
-    if ('guest_count_' in patch)
-      entries.push({ label: 'אורחים', from: String(current.guest_count_), to: String(patch['guest_count_'] ?? '—') })
-    if ('serving_type_' in patch) {
+    if ('name' in patch) entries.push({ label: 'שם', from: current.name || '—', to: String(patch['name'] ?? '—') })
+    if ('eventType' in patch)
+      entries.push({ label: 'סוג אירוע', from: current.eventType || '—', to: String(patch['eventType'] ?? '—') })
+    if ('guestCount' in patch)
+      entries.push({ label: 'אורחים', from: String(current.guestCount), to: String(patch['guestCount'] ?? '—') })
+    if ('servingType' in patch) {
       const fmt = (k: unknown) => AiMenuModalComponent.SERVING_TYPE_LABELS[String(k)] ?? String(k)
-      entries.push({ label: 'סגנון הגשה', from: fmt(current.serving_type_), to: fmt(patch['serving_type_']) })
+      entries.push({ label: 'סגנון הגשה', from: fmt(current.servingType), to: fmt(patch['servingType']) })
     }
-    if ('event_date_' in patch)
-      entries.push({ label: 'תאריך', from: current.event_date_ ?? '—', to: String(patch['event_date_'] ?? '—') })
-    if ('sections_' in patch) {
-      const newSections = patch['sections_'] as { category: string; items: unknown[] }[] | undefined
+    if ('eventDate' in patch)
+      entries.push({ label: 'תאריך', from: current.eventDate ?? '—', to: String(patch['eventDate'] ?? '—') })
+    if ('sections' in patch) {
+      const newSections = patch['sections'] as { category: string; items: unknown[] }[] | undefined
       const count = Array.isArray(newSections) ? newSections.length : 0
-      entries.push({ label: 'סעיפים', from: String(current.sections_.length), to: String(count) })
+      entries.push({ label: 'סעיפים', from: String(current.sections.length), to: String(count) })
     }
     return entries
   })
@@ -118,15 +118,15 @@ export class AiMenuModalComponent implements OnInit {
 
   private buildMatchedMenu_(draft: AiMenuDraft): MatchedMenu {
     const recipes = this.kitchenState_.recipes_()
-    const sections: MatchedSection[] = draft.sections_.map((section, _si) => {
+    const sections: MatchedSection[] = draft.sections.map((section, _si) => {
       const items: MatchedDish[] = section.items.map((dish) => {
-        const { bestMatch, candidates, status } = matchRecipeName(dish.name_hebrew, recipes)
+        const { bestMatch, candidates, status } = matchRecipeName(dish.nameHebrew, recipes)
         return {
-          name_hebrew: dish.name_hebrew,
+          nameHebrew: dish.nameHebrew,
           status,
           recipeId: status === 'matched' ? (bestMatch?.recipeId ?? null) : null,
           candidates,
-          predictedTakeRate: dish.predicted_take_rate_,
+          predictedTakeRate: dish.predictedTakeRate,
           servingPortions: dish.serving_portions,
           sellPrice: dish.sell_price
         }
@@ -134,11 +134,11 @@ export class AiMenuModalComponent implements OnInit {
       return { category: section.category, items }
     })
     return {
-      name_: draft.name_,
-      event_type_: draft.event_type_,
-      event_date_: draft.event_date_,
-      serving_type_: draft.serving_type_,
-      guest_count_: draft.guest_count_,
+      name: draft.name,
+      eventType: draft.eventType,
+      eventDate: draft.eventDate,
+      servingType: draft.servingType,
+      guestCount: draft.guestCount,
       sections
     }
   }
@@ -178,7 +178,7 @@ export class AiMenuModalComponent implements OnInit {
     this.status_.set('sending')
     this.errorKey_.set('ai_menu_error')
     try {
-      const changes = await this.gemini_.patchMenu(currentMenu, this.instruction_())
+      const changes = await this.gemini_.patchMenu(currentMenu, this.instruction())
       this.patch_.set(changes as Record<string, unknown>)
       this.status_.set('done')
     } catch (err) {
@@ -200,7 +200,7 @@ export class AiMenuModalComponent implements OnInit {
     if (!patch) return
     this.modalService.deliverPatch(patch)
     this.patch_.set(null)
-    this.instruction_.set('')
+    this.instruction.set('')
     this.status_.set('idle')
   }
 
@@ -235,7 +235,7 @@ export class AiMenuModalComponent implements OnInit {
     this.draft_.set(null)
     this.matched_.set(null)
     this.userResolutions_.set(new Map())
-    this.instruction_.set('')
+    this.instruction.set('')
     this.patch_.set(null)
     this.loading_.set(false)
     this.status_.set('idle')

@@ -5,7 +5,7 @@ import { LoggingService } from './logging.service'
 import { LoadingService } from './loading.service'
 import { MenuEvent } from '@models/menu-event.model'
 
-const ENTITY = 'MENU_EVENT_LIST'
+const ENTITY = 'menuEvents'
 const TRASH_KEY = 'TRASH_MENU_EVENTS'
 
 @Injectable({ providedIn: 'root' })
@@ -132,8 +132,8 @@ export class MenuEventDataService {
     const { _id: _, ...rest } = source
     const cloned: Omit<MenuEvent, '_id'> = {
       ...rest,
-      name_: `${source.name_} (Copy)`,
-      created_from_template_id_: source._id
+      name: `${source.name} (Copy)`,
+      createdFromTemplateId: source._id
     }
     return this.addMenuEvent(cloned)
   }
@@ -142,9 +142,9 @@ export class MenuEventDataService {
   async updateServingTypeForAll(oldServingType: string, newServingType: string): Promise<void> {
     if (oldServingType === newServingType) return
     const events = this.eventsStore_()
-    const toUpdate = events.filter((e) => e.serving_type_ === oldServingType)
+    const toUpdate = events.filter((e) => e.servingType === oldServingType)
     for (const event of toUpdate) {
-      await this.updateMenuEvent({ ...event, serving_type_: newServingType })
+      await this.updateMenuEvent({ ...event, servingType: newServingType })
     }
   }
 }

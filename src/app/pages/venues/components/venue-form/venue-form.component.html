@@ -1,7 +1,7 @@
 <div class="venue-form-container" dir="rtl">
   <header class="form-header">
     @if (isEditMode_()) {
-      <h2>{{ 'edit' | translatePipe }}: {{ venueForm_.get('name_hebrew')?.value }}</h2>
+      <h2>{{ 'edit' | translatePipe }}: {{ venueForm_.get('nameHebrew')?.value }}</h2>
     } @else {
       <h2>{{ 'add_venue' | translatePipe }}</h2>
     }
@@ -28,60 +28,60 @@
     <div class="form-section">
       <div class="form-group form-group--active">
         <label class="active-toggle">
-          <input type="checkbox" formControlName="active_" />
+          <input type="checkbox" formControlName="active" />
           <span>{{ 'venue_active' | translatePipe }}</span>
         </label>
       </div>
       <div class="form-group">
-        <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
+        <label for="nameHebrew">{{ 'name' | translatePipe }}</label>
         <input
-          id="name_hebrew"
+          id="nameHebrew"
           type="text"
-          formControlName="name_hebrew"
+          formControlName="nameHebrew"
           class="c-input"
-          [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null"
+          [class.c-input--invalid]="validationErrors_()['nameHebrew']"
+          [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
         />
-        @if (venueForm_.get('name_hebrew')?.errors?.['duplicateName'] && venueForm_.get('name_hebrew')?.touched) {
+        @if (venueForm_.get('nameHebrew')?.errors?.['duplicateName'] && venueForm_.get('nameHebrew')?.touched) {
           <span class="form-error">{{ 'duplicate_venue_name' | translatePipe }}</span>
         }
-        @if (validationErrors_()['name_hebrew']) {
+        @if (validationErrors_()['nameHebrew']) {
           <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
         }
       </div>
       <div class="form-group">
-        <label for="environment_type_">{{ 'environment_type' | translatePipe }}</label>
+        <label for="environmentType">{{ 'environment_type' | translatePipe }}</label>
         <app-custom-select
-          triggerId="environment_type_"
-          formControlName="environment_type_"
+          triggerId="environmentType"
+          formControlName="environmentType"
           [options]="envOptions"
           [placeholder]="'environment_type'"
           [typeToFilter]="true"
         />
       </div>
       <div class="form-group">
-        <label for="notes_">{{ 'notes' | translatePipe }}</label>
-        <textarea id="notes_" formControlName="notes_" rows="2" class="c-input"></textarea>
+        <label for="notes">{{ 'notes' | translatePipe }}</label>
+        <textarea id="notes" formControlName="notes" rows="2" class="c-input"></textarea>
       </div>
       <div class="form-group">
-        <label for="address_">{{ 'address' | translatePipe }}</label>
-        <input id="address_" type="text" formControlName="address_" class="c-input" />
+        <label for="address">{{ 'address' | translatePipe }}</label>
+        <input id="address" type="text" formControlName="address" class="c-input" />
       </div>
       <div class="form-group">
-        <label for="capacity_">{{ 'capacity' | translatePipe }}</label>
-        <input id="capacity_" type="number" formControlName="capacity_" min="0" class="c-input" />
+        <label for="capacity">{{ 'capacity' | translatePipe }}</label>
+        <input id="capacity" type="number" formControlName="capacity" min="0" class="c-input" />
       </div>
       <div class="form-group">
-        <label for="contact_name_">{{ 'contact_name' | translatePipe }}</label>
-        <input id="contact_name_" type="text" formControlName="contact_name_" class="c-input" />
+        <label for="contactName">{{ 'contact_name' | translatePipe }}</label>
+        <input id="contactName" type="text" formControlName="contactName" class="c-input" />
       </div>
       <div class="form-group">
-        <label for="contact_phone_">{{ 'contact_phone' | translatePipe }}</label>
-        <input id="contact_phone_" type="tel" formControlName="contact_phone_" class="c-input" />
+        <label for="contactPhone">{{ 'contact_phone' | translatePipe }}</label>
+        <input id="contactPhone" type="tel" formControlName="contactPhone" class="c-input" />
       </div>
     </div>
 
-    <div class="form-section infra-section" formArrayName="operating_hours_">
+    <div class="form-section infra-section" formArrayName="operatingHours">
       <div class="infra-header">
         <h3>{{ 'operating_hours' | translatePipe }}</h3>
         <button type="button" class="c-btn-ghost" (click)="addHoursRow()">
@@ -91,8 +91,8 @@
       </div>
       @for (ctrl of hoursArray.controls; track $index; let i = $index) {
         <div class="infra-row" [formGroupName]="i">
-          <input type="text" formControlName="days_" [placeholder]="'days' | translatePipe" class="c-input" />
-          <input type="text" formControlName="time_" [placeholder]="'time' | translatePipe" class="c-input" />
+          <input type="text" formControlName="days" [placeholder]="'days' | translatePipe" class="c-input" />
+          <input type="text" formControlName="time" [placeholder]="'time' | translatePipe" class="c-input" />
           <button
             type="button"
             class="btn-icon"
@@ -105,7 +105,7 @@
       }
     </div>
 
-    <div class="form-section infra-section" formArrayName="available_infrastructure_">
+    <div class="form-section infra-section" formArrayName="availableInfrastructure">
       <div class="infra-header">
         <h3>{{ 'available_infrastructure' | translatePipe }}</h3>
         <button type="button" class="c-btn-ghost" (click)="addInfraRow()">
@@ -116,13 +116,13 @@
       @for (ctrl of infraArray.controls; track $index; let i = $index) {
         <div class="infra-row" [formGroupName]="i">
           <app-custom-select
-            formControlName="equipment_id_"
+            formControlName="equipmentId"
             [options]="equipmentOptions_()"
             [placeholder]="'choose_equipment'"
             [typeToFilter]="true"
             [translateLabels]="false"
           />
-          <input type="number" formControlName="available_quantity_" min="0" placeholder="0" />
+          <input type="number" formControlName="availableQuantity" min="0" placeholder="0" />
           <button
             type="button"
             class="btn-icon"

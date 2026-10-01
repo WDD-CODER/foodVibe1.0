@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { VenueProfile } from '../models/venue.model'
 import { BaseEntityDataService } from './base-entity-data.service'
 
-const ENTITY = 'VENUE_PROFILES'
+const ENTITY = 'venues'
 const TRASH_KEY = 'TRASH_VENUES'
 
 @Injectable({ providedIn: 'root' })
@@ -27,10 +27,10 @@ export class VenueDataService extends BaseEntityDataService<VenueProfile> {
 
   async addVenue(newItem: Omit<VenueProfile, '_id'>): Promise<VenueProfile> {
     try {
-      const now = new Date().toISOString()
+      const now = Date.now()
       const withTimestamp = {
         ...newItem,
-        created_at_: newItem.created_at_ ?? now
+        createdAt: newItem.createdAt ?? now
       }
       const saved = await this.storage.post<VenueProfile>(ENTITY, withTimestamp as VenueProfile)
       this.updateItems((list) => [...list, saved])

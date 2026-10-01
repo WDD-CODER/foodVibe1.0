@@ -10,7 +10,8 @@
       (focus)="showResults_.set(true); highlightedIndex_.set(-1)"
       (keydown)="onSearchKeydown($event)"
       (keydown.tab)="onSearchTab($event)"
-      [placeholder]="'search_product_or_recipe' | translatePipe" />
+      [placeholder]="'search_product_or_recipe' | translatePipe"
+    />
   </div>
 
   @if (showResults_() && searchQuery_().trim().length > 0) {
@@ -24,11 +25,14 @@
             [class.highlighted]="highlightedIndex_() === i"
             (click)="selectItem(item)"
             (keydown)="onResultItemKeydown($event, i)"
-            class="result-item">
-            <span class="item-name">{{ item.name_hebrew }}</span>
-            <span class="type-pill"
-                  [class.recipe]="item.item_type_ === 'recipe'"
-                  [class.product]="item.item_type_ !== 'recipe'">
+            class="result-item"
+          >
+            <span class="item-name">{{ item.nameHebrew }}</span>
+            <span
+              class="type-pill"
+              [class.recipe]="item.item_type_ === 'recipe'"
+              [class.product]="item.item_type_ !== 'recipe'"
+            >
               {{ (item.item_type_ === 'recipe' ? 'recipe' : 'product') | translatePipe }}
             </span>
           </li>
@@ -41,7 +45,8 @@
           [class.result-item--add]="true"
           class="result-item"
           (click)="addNewProduct()"
-          (keydown)="onAddItemKeydown($event)">
+          (keydown)="onAddItemKeydown($event)"
+        >
           <span class="c-add-new-icon">
             <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
           </span>

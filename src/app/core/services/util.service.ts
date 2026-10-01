@@ -2,10 +2,9 @@ import { Injectable } from '@angular/core'
 import { Product } from '@models/product.model'
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class UtilService {
-
   makeId(length: number = 6): string {
     let result = ''
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
@@ -21,16 +20,16 @@ export class UtilService {
   getEmptyProduct(): Product {
     return {
       _id: '',
-      name_hebrew: '',
-      categories_: [],
-      sources_: [],
-      base_unit_: 'gram',
-      purchase_options_: [],
-      yield_factor_: 1,
-      allergens_: [],
-      min_stock_level_: 0,
-      expiry_days_default_: 0,
-      updatedAt: new Date().toISOString()
+      nameHebrew: '',
+      categories: [],
+      sources: [],
+      baseUnit: 'gram',
+      purchaseOptions: [],
+      yieldFactor: 1,
+      allergens: [],
+      minStockLevel: 0,
+      expiryDaysDefault: 0,
+      updatedAt: Date.now()
     }
   }
 }

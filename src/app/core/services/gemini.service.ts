@@ -9,7 +9,7 @@ import type { AiMenuDraft, AiMenuPatch } from '@models/ai-menu-draft.model'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 
 export interface AiRecipePatch {
-  name_hebrew?: string
+  nameHebrew?: string
   yield_amount?: number
   yield_unit?: string
   ingredients?: { name: string; amount: number; unit: string }[]
@@ -31,7 +31,7 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
       // Only retry on network-level failures (no response at all).
       if (err instanceof HttpErrorResponse) throw err
       if (attempt < MAX_RETRIES) {
-        await new Promise(r => setTimeout(r, RETRY_DELAY_MS))
+        await new Promise((r) => setTimeout(r, RETRY_DELAY_MS))
       }
     }
   }
@@ -47,9 +47,7 @@ export class GeminiService {
     if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
 
     const data = await withRetry(() =>
-      firstValueFrom(
-        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate`, { prompt })
-      )
+      firstValueFrom(this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate`, { prompt }))
     )
     incrementGeminiUsage()
     return data.recipe
@@ -57,11 +55,8 @@ export class GeminiService {
 
   parseText(rawText: string): Observable<ParsedResult> {
     if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-    return this.http_.post<{ result: ParsedResult }>(
-      `${this.authBase_}/api/v1/ai/parse-text`,
-      { rawText }
-    ).pipe(
-      map(res => {
+    return this.http_.post<{ result: ParsedResult }>(`${this.authBase_}/api/v1/ai/parse-text`, { rawText }).pipe(
+      map((res) => {
         incrementGeminiUsage()
         return res.result
       })
@@ -86,7 +81,7 @@ export class GeminiService {
       firstValueFrom(
         this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-image`, {
           imageBase64,
-          mimeType: file.type,
+          mimeType: file.type
         })
       )
     )
@@ -111,7 +106,10 @@ export class GeminiService {
 
     const data = await withRetry(() =>
       firstValueFrom(
-        this.http_.post<{ changes: AiRecipePatch }>(`${this.authBase_}/api/v1/ai/patch-recipe`, { currentRecipe, instruction })
+        this.http_.post<{ changes: AiRecipePatch }>(`${this.authBase_}/api/v1/ai/patch-recipe`, {
+          currentRecipe,
+          instruction
+        })
       )
     )
     incrementGeminiUsage()
@@ -122,18 +120,14 @@ export class GeminiService {
     if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
 
     const data = await withRetry(() =>
-      firstValueFrom(
-        this.http_.post<{ menu: AiMenuDraft }>(`${this.authBase_}/api/v1/ai/generate-menu`, { rawText })
-      )
+      firstValueFrom(this.http_.post<{ menu: AiMenuDraft }>(`${this.authBase_}/api/v1/ai/generate-menu`, { rawText }))
     )
     incrementGeminiUsage()
     return data.menu
   }
 
   async saveMenuShot(prompt: string, menu: AiMenuDraft): Promise<void> {
-    await firstValueFrom(
-      this.http_.post(`${this.authBase_}/api/v1/ai/save-menu-shot`, { prompt, menu })
-    )
+    await firstValueFrom(this.http_.post(`${this.authBase_}/api/v1/ai/save-menu-shot`, { prompt, menu }))
   }
 
   async patchMenu(currentMenu: AiMenuDraft, instruction: string): Promise<AiMenuPatch> {
@@ -141,7 +135,10 @@ export class GeminiService {
 
     const data = await withRetry(() =>
       firstValueFrom(
-        this.http_.post<{ changes: AiMenuPatch }>(`${this.authBase_}/api/v1/ai/patch-menu`, { currentMenu, instruction })
+        this.http_.post<{ changes: AiMenuPatch }>(`${this.authBase_}/api/v1/ai/patch-menu`, {
+          currentMenu,
+          instruction
+        })
       )
     )
     incrementGeminiUsage()
@@ -165,7 +162,10 @@ export class GeminiService {
 
     const data = await withRetry(() =>
       firstValueFrom(
-        this.http_.post<{ changes: AiProductPatch }>(`${this.authBase_}/api/v1/ai/patch-product`, { currentProduct, instruction })
+        this.http_.post<{ changes: AiProductPatch }>(`${this.authBase_}/api/v1/ai/patch-product`, {
+          currentProduct,
+          instruction
+        })
       )
     )
     incrementGeminiUsage()

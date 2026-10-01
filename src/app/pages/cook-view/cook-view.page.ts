@@ -157,7 +157,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected yieldUnitOptions_ = computed(() => {
     const recipe = this.recipe_()
     if (!recipe) return []
-    const convs = recipe.yield_conversions_?.length ? recipe.yield_conversions_ : null
+    const convs = recipe.yieldConversions?.length ? recipe.yieldConversions : null
     let opts: { value: string; label: string }[]
     if (convs?.length) {
       const seen = new Set<string>()
@@ -165,7 +165,7 @@ export class CookViewPage implements OnInit, OnDestroy {
         .filter((c) => c?.unit && !seen.has(c.unit) && (seen.add(c.unit), true))
         .map((c) => ({ value: c.unit, label: c.unit }))
     } else {
-      const u = recipe.yield_unit_ || 'unit'
+      const u = recipe.yieldUnit || 'unit'
       opts = [{ value: u, label: u }]
     }
     return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }]
@@ -174,11 +174,11 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected convertedYieldAmount_ = computed(() => {
     const recipe = this.recipe_()
     if (!recipe) return 1
-    const baseAmount = recipe.yield_amount_ ?? 1
-    const baseUnit = recipe.yield_unit_ ?? 'unit'
+    const baseAmount = recipe.yieldAmount ?? 1
+    const baseUnit = recipe.yieldUnit ?? 'unit'
     const selUnit = this.selectedUnit_() || baseUnit
     if (baseUnit === selUnit) return baseAmount
-    const convs = recipe.yield_conversions_
+    const convs = recipe.yieldConversions
     if (convs?.length) {
       const entry = convs.find((c) => c?.unit === selUnit)
       if (entry != null) return entry.amount
@@ -213,12 +213,12 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected scaledCost_ = computed(() => {
     const recipe = this.recipe_()
     const factor = this.scaleFactor_()
-    if (!recipe?.ingredients_?.length) return 0
+    if (!recipe?.ingredients?.length) return 0
     const scaledRecipe: Recipe = {
       ...recipe,
-      ingredients_: recipe.ingredients_.map((ing) => ({
+      ingredients: recipe.ingredients.map((ing) => ({
         ...ing,
-        amount_: (ing.amount_ ?? 0) * factor
+        amount: (ing.amount ?? 0) * factor
       }))
     }
     return this.recipeCostService.computeRecipeCost(scaledRecipe)
@@ -227,13 +227,13 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected isDish_ = computed(() => {
     const r = this.recipe_()
     if (!r) return false
-    // recipe_type_ is the authoritative signal (it's what actually determines
-    // DISH_LIST vs RECIPE_LIST storage). Only fall back to inferring from
-    // prep_items_/prep_categories_ for documents old enough to predate that
-    // field — otherwise stray leftover prep fields on a RECIPE_LIST document
+    // recipeType is the authoritative signal (it's what actually determines
+    // dishes vs recipes storage). Only fall back to inferring from
+    // prepItems/prepCategories for documents old enough to predate that
+    // field — otherwise stray leftover prep fields on a recipes document
     // would wrongly route it to the dish (mise-en-place) rendering branch.
-    if (r.recipe_type_ != null) return r.recipe_type_ === 'dish'
-    return (r.prep_items_?.length ?? 0) > 0 || (r.prep_categories_?.length ?? 0) > 0
+    if (r.recipeType != null) return r.recipeType === 'dish'
+    return (r.prepItems?.length ?? 0) > 0 || (r.prepCategories?.length ?? 0) > 0
   })
 
   protected cookViewStepOpts_ = computed((): QuantityStepOptions | undefined => {
@@ -246,18 +246,18 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected completedStepCount_ = computed(() => this.stepDoneSet_().size)
 
   /** Total step count for the current recipe. */
-  protected totalStepCount_ = computed(() => this.recipe_()?.steps_?.length ?? 0)
+  protected totalStepCount_ = computed(() => this.recipe_()?.steps?.length ?? 0)
 
   // ---- FOCUS MODE COMPUTED SIGNALS ----
   /** True when all ingredients have been checked off. */
   protected allIngredientsChecked_ = computed(
-    () => this.checkedIngredients_().size >= (this.recipe_()?.ingredients_?.length ?? 0)
+    () => this.checkedIngredients_().size >= (this.recipe_()?.ingredients?.length ?? 0)
   )
 
   /** Progress object for ingredient check-off (done/total). */
   protected ingredientCheckProgress_ = computed(() => ({
     done: this.checkedIngredients_().size,
-    total: this.recipe_()?.ingredients_?.length ?? 0
+    total: this.recipe_()?.ingredients?.length ?? 0
   }))
 
   /** True when all steps have been marked done. */
@@ -267,12 +267,12 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (this.isDish_()) {
       return this.stepDoneSet_().size >= this.scaledPrep_().length && this.scaledPrep_().length > 0
     }
-    return this.stepDoneSet_().size >= (recipe.steps_?.length ?? 0) && (recipe.steps_?.length ?? 0) > 0
+    return this.stepDoneSet_().size >= (recipe.steps?.length ?? 0) && (recipe.steps?.length ?? 0) > 0
   })
 
   /** Step/prep-item completion percent, 0–100 — drives the hero progress bar. */
   protected heroProgressPct_ = computed(() => {
-    const total = this.isDish_() ? this.scaledPrep_().length : (this.recipe_()?.steps_?.length ?? 0)
+    const total = this.isDish_() ? this.scaledPrep_().length : (this.recipe_()?.steps?.length ?? 0)
     if (total === 0) return 0
     return Math.round((this.stepDoneSet_().size / total) * 100)
   })
@@ -304,9 +304,9 @@ export class CookViewPage implements OnInit, OnDestroy {
       this.checkedIngredients_.set(new Set())
       this.peekedStepIndex_.set(null)
       this.cookTimer.cancelTimer()
-      this.selectedUnit_.set(recipe.yield_unit_ || 'unit')
+      this.selectedUnit_.set(recipe.yieldUnit || 'unit')
       this.cookViewState.setLastViewedRecipeId(recipe._id)
-      const base = recipe.yield_amount_ ?? 1
+      const base = recipe.yieldAmount ?? 1
       this.targetQuantity_.set(base)
     } else {
       const lastId = this.cookViewState.lastRecipeId()
@@ -327,9 +327,9 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected setQuantity(value: number): void {
-    const num = value != null && !Number.isNaN(value) ? Number(value) : (this.recipe_()?.yield_amount_ ?? 1)
+    const num = value != null && !Number.isNaN(value) ? Number(value) : (this.recipe_()?.yieldAmount ?? 1)
     const recipe = this.recipe_()
-    const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01
+    const min = recipe?.yieldUnit === 'dish' ? 1 : 0.01
     this.targetQuantity_.set(Math.max(min, num))
     this.scaleByIngredientIndex_.set(null)
     this.scaleByIngredientAmount_.set(null)
@@ -368,7 +368,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       const newYield = this.convertedYieldAmount_()
       const newQty = newYield > 0 ? batches * newYield : this.targetQuantity_()
       const recipe = this.recipe_()
-      const min = recipe?.yield_unit_ === 'dish' ? 1 : 0.01
+      const min = recipe?.yieldUnit === 'dish' ? 1 : 0.01
       this.targetQuantity_.set(Math.max(min, newQty))
     }
     this.scaleByIngredientIndex_.set(null)
@@ -449,8 +449,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     const amount = Number(userAmount)
     if (!Number.isFinite(amount) || amount <= 0) return
     const recipe = this.recipe_()
-    if (!recipe?.ingredients_?.[index]) return
-    const baseAmount = recipe.ingredients_[index].amount_ ?? 0
+    if (!recipe?.ingredients?.[index]) return
+    const baseAmount = recipe.ingredients[index].amount ?? 0
     if (baseAmount <= 0) return
     this.confirmModal.open('scale_recipe_confirm', { saveLabel: 'convert' }).then((confirmed) => {
       if (!confirmed) return
@@ -464,11 +464,11 @@ export class CookViewPage implements OnInit, OnDestroy {
     const amount = Number(userAmount)
     if (!Number.isFinite(amount) || amount <= 0) return
     const recipe = this.recipe_()
-    if (!recipe?.ingredients_?.[index]) return
-    const baseAmount = recipe.ingredients_[index].amount_ ?? 0
+    if (!recipe?.ingredients?.[index]) return
+    const baseAmount = recipe.ingredients[index].amount ?? 0
     if (baseAmount <= 0) return
     const factor = amount / baseAmount
-    const yieldAmount = recipe.yield_amount_ ?? 1
+    const yieldAmount = recipe.yieldAmount ?? 1
     this.targetQuantity_.set(yieldAmount * factor)
     this.scaleByIngredientIndex_.set(index)
     this.scaleByIngredientAmount_.set(amount)
@@ -477,7 +477,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Exit special scaled view: reset to recipe base yield. */
   protected resetToFullRecipe(): void {
     const recipe = this.recipe_()
-    const base = recipe?.yield_amount_ ?? 1
+    const base = recipe?.yieldAmount ?? 1
     this.targetQuantity_.set(base)
     this.scaleByIngredientIndex_.set(null)
     this.scaleByIngredientAmount_.set(null)
@@ -572,7 +572,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     const scope = await this.masterPush.askScope(recipe)
     if (scope === 'cancel') return
     this.saving.setSaving(true)
-    this.kitchenState.saveRecipe({ ...recipe, is_approved_: !recipe.is_approved_ }).subscribe({
+    this.kitchenState.saveRecipe({ ...recipe, isApproved: !recipe.isApproved }).subscribe({
       next: (saved) => {
         if (scope === 'everyone') this.masterPush.pushToMaster(saved)
         this.recipe_.set(saved)
@@ -580,7 +580,7 @@ export class CookViewPage implements OnInit, OnDestroy {
         this.editMode_.set(false)
         this.saving.setSaving(false)
         this.userMsg.onSetSuccessMsg(
-          this.translation.translate(saved.is_approved_ ? 'approval_success' : 'unapproval_success')
+          this.translation.translate(saved.isApproved ? 'approval_success' : 'unapproval_success')
         )
       },
       error: () => {
@@ -595,7 +595,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (!recipe) return
     const scope = await this.masterPush.askScope(recipe)
     if (scope === 'cancel') return
-    const updated = { ...recipe, rating_: value }
+    const updated = { ...recipe, rating: value }
     this.recipe_.set(updated)
     this.kitchenState.saveRecipe(updated).subscribe({
       next: (saved) => {
@@ -673,13 +673,13 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected setIngredientAmount(index: number, scaledAmount: number): void {
     const recipe = this.recipe_()
     const factor = this.scaleFactor_()
-    if (!recipe?.ingredients_?.length || factor <= 0) return
+    if (!recipe?.ingredients?.length || factor <= 0) return
     const base = Math.max(0, scaledAmount) / factor
     this.recipe_.update((r) => {
       if (!r) return r
       return {
         ...r,
-        ingredients_: r.ingredients_.map((ing, i) => (i === index ? { ...ing, amount_: base } : ing))
+        ingredients: r.ingredients.map((ing, i) => (i === index ? { ...ing, amount: base } : ing))
       }
     })
   }
@@ -696,26 +696,26 @@ export class CookViewPage implements OnInit, OnDestroy {
       if (!r) return r
       return {
         ...r,
-        ingredients_: r.ingredients_.map((ing, i) => (i === index ? { ...ing, unit_: unit } : ing))
+        ingredients: r.ingredients.map((ing, i) => (i === index ? { ...ing, unit: unit } : ing))
       }
     })
   }
 
   protected replaceIngredient(
     index: number,
-    item: { _id: string; item_type_?: string; name_hebrew?: string; base_unit_?: string; yield_unit_?: string }
+    item: { _id: string; item_type_?: string; nameHebrew?: string; baseUnit?: string; yieldUnit?: string }
   ): void {
     const recipe = this.recipe_()
-    if (!recipe?.ingredients_?.[index]) return
+    if (!recipe?.ingredients?.[index]) return
     const type = item.item_type_ === 'recipe' ? ('recipe' as const) : ('product' as const)
-    const unit = item.base_unit_ ?? (item as { yield_unit_?: string }).yield_unit_ ?? 'unit'
-    const current = recipe.ingredients_[index]
+    const unit = item.baseUnit ?? (item as { yieldUnit?: string }).yieldUnit ?? 'unit'
+    const current = recipe.ingredients[index]
     this.recipe_.update((r) => {
       if (!r) return r
       return {
         ...r,
-        ingredients_: r.ingredients_.map((ing, i) =>
-          i === index ? { ...current, referenceId: item._id, type, unit_: unit } : ing
+        ingredients: r.ingredients.map((ing, i) =>
+          i === index ? { ...current, referenceId: item._id, type, unit: unit } : ing
         )
       }
     })
@@ -726,7 +726,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       if (!r) return r
       return {
         ...r,
-        ingredients_: r.ingredients_.filter((_, i) => i !== index)
+        ingredients: r.ingredients.filter((_, i) => i !== index)
       }
     })
   }
@@ -734,10 +734,10 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected ingredientChanged(index: number): boolean {
     const orig = this.originalRecipe_()
     const current = this.recipe_()
-    if (!orig?.ingredients_?.length || !current?.ingredients_?.[index]) return false
-    const o = orig.ingredients_[index]
-    const c = current.ingredients_[index]
-    return o.amount_ !== c.amount_ || o.unit_ !== c.unit_ || o.referenceId !== c.referenceId
+    if (!orig?.ingredients?.length || !current?.ingredients?.[index]) return false
+    const o = orig.ingredients[index]
+    const c = current.ingredients[index]
+    return o.amount !== c.amount || o.unit !== c.unit || o.referenceId !== c.referenceId
   }
 
   /** Toggle check-off state for ingredient row at index (view mode only, session-only). */
@@ -763,7 +763,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       return next
     })
     const recipe = this.recipe_()
-    const steps = this.isDish_() ? this.scaledPrep_() : (recipe?.steps_ ?? [])
+    const steps = this.isDish_() ? this.scaledPrep_() : (recipe?.steps ?? [])
     const doneSet = this.stepDoneSet_()
     for (let i = index + 1; i < steps.length; i++) {
       if (!doneSet.has(i)) {
@@ -861,8 +861,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     const arr = this.workflowFormArray
     const controls = arr.controls as FormGroup[]
     const sorted = [...controls].sort((a, b) => {
-      const catA = (a.get('category_name')?.value ?? '') as string
-      const catB = (b.get('category_name')?.value ?? '') as string
+      const catA = (a.get('categoryName')?.value ?? '') as string
+      const catB = (b.get('categoryName')?.value ?? '') as string
       return catA.localeCompare(catB)
     })
     arr.clear()
@@ -885,15 +885,15 @@ export class CookViewPage implements OnInit, OnDestroy {
         arr.push(this.recipeFormService.createPrepItemRow())
       }
     } else {
-      const steps = recipe.steps_ ?? []
+      const steps = recipe.steps ?? []
       if (steps.length > 0) {
         steps.forEach((step, i) => {
-          const group = this.recipeFormService.createStepGroup(step.order_ ?? i + 1)
+          const group = this.recipeFormService.createStepGroup(step.order ?? i + 1)
           group.get('instruction')?.addValidators(Validators.required)
           group.patchValue({
-            instruction: step.instruction_ ?? '',
-            labor_time: step.labor_time_minutes_ ?? 0,
-            cooking_time: step.cooking_time_secs_ ?? 0
+            instruction: step.instruction ?? '',
+            labor_time: step.laborTimeMinutes ?? 0,
+            cooking_time: step.cookingTimeSecs ?? 0
           })
           arr.push(group)
         })
@@ -911,44 +911,44 @@ export class CookViewPage implements OnInit, OnDestroy {
     const isDish = this.isDish_()
     if (isDish) {
       const prepItems: FlatPrepItem[] = (raw || [])
-        .filter((r: { preparation_name?: string }) => !!r?.preparation_name?.trim())
+        .filter((r: { preparationName?: string }) => !!r?.preparationName?.trim())
         .map(
           (r: {
-            preparation_name?: string
-            category_name?: string
-            main_category_name?: string
+            preparationName?: string
+            categoryName?: string
+            mainCategoryName?: string
             quantity?: number | string
             unit?: string
           }) => {
             const qty = typeof r.quantity === 'number' ? r.quantity : Number(r.quantity) || 1
             const item: FlatPrepItem = {
-              preparation_name: r.preparation_name ?? '',
-              category_name: r.category_name ?? '',
+              preparationName: r.preparationName ?? '',
+              categoryName: r.categoryName ?? '',
               quantity: qty,
               unit: r.unit ?? 'unit'
             }
-            if (r.main_category_name !== undefined && r.main_category_name !== '') {
-              item.main_category_name = r.main_category_name
+            if (r.mainCategoryName !== undefined && r.mainCategoryName !== '') {
+              item.mainCategoryName = r.mainCategoryName
             }
             return item
           }
         )
-      const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>()
+      const byCategory = new Map<string, { itemName: string; unit: string; quantity?: number }[]>()
       prepItems.forEach((p) => {
-        const list = byCategory.get(p.category_name) ?? []
-        list.push({ item_name: p.preparation_name, unit: p.unit, quantity: p.quantity })
-        byCategory.set(p.category_name, list)
+        const list = byCategory.get(p.categoryName) ?? []
+        list.push({ itemName: p.preparationName, unit: p.unit, quantity: p.quantity })
+        byCategory.set(p.categoryName, list)
       })
-      const prepCategories: PrepCategory[] = Array.from(byCategory.entries()).map(([category_name, items]) => ({
-        category_name,
-        items: items.map((it) => ({ item_name: it.item_name, unit: it.unit }))
+      const prepCategories: PrepCategory[] = Array.from(byCategory.entries()).map(([categoryName, items]) => ({
+        categoryName,
+        items: items.map((it) => ({ itemName: it.itemName, unit: it.unit }))
       }))
       this.recipe_.update(
         (r) =>
           ({
             ...r,
-            prep_items_: prepItems,
-            prep_categories_: prepCategories
+            prepItems: prepItems,
+            prepCategories: prepCategories
           }) as Recipe
       )
     } else {
@@ -956,13 +956,13 @@ export class CookViewPage implements OnInit, OnDestroy {
         .filter((s: { instruction?: string }) => !!s?.instruction?.trim())
         .map(
           (step: { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }, i: number) => ({
-            order_: step?.order ?? i + 1,
-            instruction_: step?.instruction ?? '',
-            labor_time_minutes_: step?.labor_time ?? 0,
-            cooking_time_secs_: step?.cooking_time ?? 0
+            order: step?.order ?? i + 1,
+            instruction: step?.instruction ?? '',
+            laborTimeMinutes: step?.labor_time ?? 0,
+            cookingTimeSecs: step?.cooking_time ?? 0
           })
         )
-      this.recipe_.update((r) => ({ ...r, steps_: steps.length ? steps : [] }) as Recipe)
+      this.recipe_.update((r) => ({ ...r, steps: steps.length ? steps : [] }) as Recipe)
     }
   }
 

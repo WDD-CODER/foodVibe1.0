@@ -3,7 +3,7 @@ import { duplicateNameValidator, duplicateEntityNameValidator } from './item.val
 import { Product } from '@models/product.model'
 
 describe('duplicateNameValidator', () => {
-  const products = [{ _id: 'p1', name_hebrew: 'Tomato' }] as Product[]
+  const products = [{ _id: 'p1', nameHebrew: 'Tomato' }] as Product[]
   const productsSignal = () => products
 
   it('should return error if name exists and ID is different', () => {
@@ -32,7 +32,7 @@ describe('duplicateNameValidator', () => {
 })
 
 describe('duplicateEntityNameValidator', () => {
-  const items = [{ _id: 'v1', name_hebrew: 'Tel Aviv' }]
+  const items = [{ _id: 'v1', nameHebrew: 'Tel Aviv' }]
   const itemsSignal = () => items
 
   it('should return error if name exists and ID is different', () => {

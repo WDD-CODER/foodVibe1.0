@@ -1,12 +1,12 @@
 export interface Supplier {
   _id: string
-  name_hebrew: string
-  contact_person_?: string
-  phone_?: string
-  phone2_?: string
-  delivery_days_: number[]
-  min_order_mov_: number
-  lead_time_days_: number
-  supplier_logo_url_?: string
-  last_updated_?: Date
+  nameHebrew: string
+  contactPerson?: string
+  phone?: string
+  phone2?: string
+  deliveryDays: number[]
+  minOrderMov: number
+  leadTimeDays: number
+  supplierLogoUrl?: string
+  updatedAt?: number
 }

@@ -33,10 +33,10 @@ export class PreparationRegistryService {
   private readonly loading_ = inject(LoadingService)
   private readonly dishDataService = inject(DishDataService)
 
-  private categories_ = signal<string[]>([])
+  private categories = signal<string[]>([])
   private preparations_ = signal<PreparationEntry[]>([])
 
-  readonly preparationCategories_ = this.categories_.asReadonly()
+  readonly preparationCategories_ = this.categories.asReadonly()
   readonly allPreparations_ = this.preparations_.asReadonly()
 
   private loaded_ = false
@@ -92,7 +92,7 @@ export class PreparationRegistryService {
       const registries = await this.loading_.track(this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY))
       const doc = registries[0]
       if (doc?.categories?.length !== undefined) {
-        this.categories_.set(doc.categories)
+        this.categories.set(doc.categories)
       }
       if (doc?.preparations?.length !== undefined) {
         this.preparations_.set(doc.preparations)
@@ -118,10 +118,10 @@ export class PreparationRegistryService {
     const key = englishKey.trim().toLowerCase().replace(/\s+/g, '_')
     const label = hebrewLabel.trim()
     if (!key) return
-    if (this.categories_().includes(key)) return
+    if (this.categories().includes(key)) return
 
     this.translationService.updateDictionary(key, label)
-    const updated = [...this.categories_(), key]
+    const updated = [...this.categories(), key]
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
       const doc = registries[0]
@@ -134,7 +134,7 @@ export class PreparationRegistryService {
       } else {
         await this.persistDoc(payload)
       }
-      this.categories_.set(updated)
+      this.categories.set(updated)
       this.userMsgService.onSetSuccessMsg(`הקטגוריה "${label}" נוספה בהצלחה`)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
@@ -149,7 +149,7 @@ export class PreparationRegistryService {
 
   /**
    * Updates all dishes that contain this preparation with the old category to use the new category.
-   * Only DISH_LIST is updated (per plan 165 recommendation).
+   * Only dishes is updated (per plan 165 recommendation).
    */
   private async propagateCategoryToDishes(
     preparationName: string,
@@ -162,39 +162,39 @@ export class PreparationRegistryService {
     const nameLower = preparationName.toLowerCase()
     const dishes = this.dishDataService.allDishes_()
     for (const dish of dishes) {
-      const items = dish.prep_items_
+      const items = dish.prepItems
       if (!items?.length) continue
       let changed = false
       const updatedItems: FlatPrepItem[] = items.map((p) => {
         const match =
-          p.preparation_name.trim().toLowerCase() === nameLower && (p.category_name?.trim() ?? '') === oldCategory
+          p.preparationName.trim().toLowerCase() === nameLower && (p.categoryName?.trim() ?? '') === oldCategory
         if (!match) return p
         changed = true
         return {
           ...p,
-          category_name: newCategory,
-          ...(p.main_category_name !== undefined && { main_category_name: newCategory })
+          categoryName: newCategory,
+          ...(p.mainCategoryName !== undefined && { mainCategoryName: newCategory })
         }
       })
       if (!changed) continue
-      const byCategory = new Map<string, { item_name: string; unit: string; quantity?: number }[]>()
+      const byCategory = new Map<string, { itemName: string; unit: string; quantity?: number }[]>()
       updatedItems.forEach((p) => {
-        const list = byCategory.get(p.category_name) ?? []
+        const list = byCategory.get(p.categoryName) ?? []
         list.push({
-          item_name: p.preparation_name,
+          itemName: p.preparationName,
           unit: p.unit,
           quantity: p.quantity
         })
-        byCategory.set(p.category_name, list)
+        byCategory.set(p.categoryName, list)
       })
-      const prepCategories: PrepCategory[] = Array.from(byCategory.entries()).map(([category_name, items]) => ({
-        category_name,
-        items: items.map((it) => ({ item_name: it.item_name, unit: it.unit }))
+      const prepCategories: PrepCategory[] = Array.from(byCategory.entries()).map(([categoryName, items]) => ({
+        categoryName,
+        items: items.map((it) => ({ itemName: it.itemName, unit: it.unit }))
       }))
       await this.dishDataService.updateDish({
         ...dish,
-        prep_items_: updatedItems,
-        prep_categories_: prepCategories
+        prepItems: updatedItems,
+        prepCategories: prepCategories
       })
     }
   }
@@ -226,7 +226,7 @@ export class PreparationRegistryService {
       const doc = registries[0]
       const payload: PreparationRegistryDoc = doc
         ? { ...doc, preparations: updated }
-        : { categories: this.categories_(), preparations: updated }
+        : { categories: this.categories(), preparations: updated }
 
       if (doc?._id) {
         await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
@@ -255,8 +255,8 @@ export class PreparationRegistryService {
 
   async deleteCategory(key: string): Promise<void> {
     const trimmed = key.trim().toLowerCase()
-    const updated = this.categories_().filter((c) => c !== trimmed)
-    if (updated.length === this.categories_().length) return
+    const updated = this.categories().filter((c) => c !== trimmed)
+    if (updated.length === this.categories().length) return
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
       const doc = registries[0]
@@ -268,7 +268,7 @@ export class PreparationRegistryService {
       } else {
         await this.persistDoc(payload)
       }
-      this.categories_.set(updated)
+      this.categories.set(updated)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה')
@@ -283,7 +283,7 @@ export class PreparationRegistryService {
   async renameCategory(oldKey: string, newKey: string, newLabel: string): Promise<void> {
     const sanitizedNew = newKey.trim().toLowerCase().replace(/\s+/g, '_')
     if (!sanitizedNew || sanitizedNew === oldKey) return
-    const updatedCats = this.categories_().map((c) => (c === oldKey ? sanitizedNew : c))
+    const updatedCats = this.categories().map((c) => (c === oldKey ? sanitizedNew : c))
     const updatedPreps = this.preparations_().map((p) => (p.category === oldKey ? { ...p, category: sanitizedNew } : p))
     try {
       const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
@@ -296,7 +296,7 @@ export class PreparationRegistryService {
       } else {
         await this.persistDoc(payload)
       }
-      this.categories_.set(updatedCats)
+      this.categories.set(updatedCats)
       this.preparations_.set(updatedPreps)
       this.translationService.updateDictionary(sanitizedNew, newLabel.trim())
     } catch (err) {
@@ -317,7 +317,7 @@ export class PreparationRegistryService {
 
     const key = await this.keyResolution.ensureKeyForContext(sanitizedCategory, 'preparation_category')
     if (sanitizedCategory && !key) return
-    const cats = this.categories_()
+    const cats = this.categories()
     const categoryExists = key != null && cats.includes(key)
     if (!categoryExists && key) {
       await this.registerCategory(key, sanitizedCategory)
@@ -335,7 +335,7 @@ export class PreparationRegistryService {
       const doc = registries[0]
       const payload: PreparationRegistryDoc = doc
         ? { ...doc, preparations: updated }
-        : { categories: this.categories_(), preparations: updated }
+        : { categories: this.categories(), preparations: updated }
 
       if (doc?._id) {
         await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })

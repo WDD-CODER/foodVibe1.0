@@ -1,7 +1,7 @@
 <div class="equipment-form-container" dir="rtl">
   <header class="form-header">
     @if (isEditMode_()) {
-      <h2>{{ 'edit' | translatePipe }}: {{ equipmentForm_.get('name_hebrew')?.value }}</h2>
+      <h2>{{ 'edit' | translatePipe }}: {{ equipmentForm_.get('nameHebrew')?.value }}</h2>
     } @else {
       <h2>{{ 'add_equipment' | translatePipe }}</h2>
     }
@@ -10,40 +10,47 @@
   <form [formGroup]="equipmentForm_" (ngSubmit)="onSubmit()" class="form-body">
     <div class="form-section">
       <div class="form-group">
-        <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
-        <input #nameInput id="name_hebrew" type="text" formControlName="name_hebrew" class="c-input"
-          [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null" />
-        @if (validationErrors_()['name_hebrew']) {
+        <label for="nameHebrew">{{ 'name' | translatePipe }}</label>
+        <input
+          #nameInput
+          id="nameHebrew"
+          type="text"
+          formControlName="nameHebrew"
+          class="c-input"
+          [class.c-input--invalid]="validationErrors_()['nameHebrew']"
+          [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
+        />
+        @if (validationErrors_()['nameHebrew']) {
           <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
         }
       </div>
       <div class="form-group">
-        <label for="category_">{{ 'category' | translatePipe }}</label>
+        <label for="category">{{ 'category' | translatePipe }}</label>
         <app-custom-select
-          triggerId="category_"
-          formControlName="category_"
+          triggerId="category"
+          formControlName="category"
           [options]="categoryOptions"
           placeholder="category"
           [typeToFilter]="true"
-          [class.c-input--invalid]="validationErrors_()['category_']" />
-        @if (validationErrors_()['category_']) {
+          [class.c-input--invalid]="validationErrors_()['category']"
+        />
+        @if (validationErrors_()['category']) {
           <span class="c-field-error">{{ 'field_category_required' | translatePipe }}</span>
         }
       </div>
       <div class="form-group">
-        <label for="owned_quantity_">{{ 'owned_quantity' | translatePipe }}</label>
-        <input id="owned_quantity_" type="number" formControlName="owned_quantity_" min="0" class="c-input" />
+        <label for="ownedQuantity">{{ 'owned_quantity' | translatePipe }}</label>
+        <input id="ownedQuantity" type="number" formControlName="ownedQuantity" min="0" class="c-input" />
       </div>
       <div class="form-group checkbox-group">
         <label>
-          <input type="checkbox" formControlName="is_consumable_" />
+          <input type="checkbox" formControlName="isConsumable" />
           {{ 'is_consumable' | translatePipe }}
         </label>
       </div>
       <div class="form-group">
-        <label for="notes_">{{ 'notes' | translatePipe }}</label>
-        <textarea id="notes_" formControlName="notes_" rows="2" class="c-input"></textarea>
+        <label for="notes">{{ 'notes' | translatePipe }}</label>
+        <textarea id="notes" formControlName="notes" rows="2" class="c-input"></textarea>
       </div>
     </div>
 
@@ -58,16 +65,23 @@
       @if (equipmentForm_.get('scaling_enabled_')?.value) {
         <div class="scaling-fields">
           <div class="form-group">
-            <label for="per_guests_">{{ 'per_guests' | translatePipe }}</label>
-            <input id="per_guests_" type="number" formControlName="per_guests_" min="1" class="c-input" />
+            <label for="perGuests">{{ 'per_guests' | translatePipe }}</label>
+            <input id="perGuests" type="number" formControlName="perGuests" min="1" class="c-input" />
           </div>
           <div class="form-group">
-            <label for="min_quantity_">{{ 'min_quantity' | translatePipe }}</label>
-            <input id="min_quantity_" type="number" formControlName="min_quantity_" min="0" class="c-input" />
+            <label for="minQuantity">{{ 'min_quantity' | translatePipe }}</label>
+            <input id="minQuantity" type="number" formControlName="minQuantity" min="0" class="c-input" />
           </div>
           <div class="form-group">
-            <label for="max_quantity_">{{ 'max_quantity' | translatePipe }}</label>
-            <input id="max_quantity_" type="number" formControlName="max_quantity_" min="0" placeholder="—" class="c-input" />
+            <label for="maxQuantity">{{ 'max_quantity' | translatePipe }}</label>
+            <input
+              id="maxQuantity"
+              type="number"
+              formControlName="maxQuantity"
+              min="0"
+              placeholder="—"
+              class="c-input"
+            />
           </div>
         </div>
       }

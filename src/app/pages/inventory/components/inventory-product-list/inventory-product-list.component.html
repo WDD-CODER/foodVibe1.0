@@ -163,9 +163,9 @@
               </span>
             </span>
           }
-          {{ row.product.name_hebrew }}
-          @if (row.product.nutrition_per_100g) {
-            <app-nutrition-badge [nutrition]="row.product.nutrition_per_100g"></app-nutrition-badge>
+          {{ row.product.nameHebrew }}
+          @if (row.product.nutritionPer100g) {
+            <app-nutrition-badge [nutrition]="row.product.nutritionPer100g"></app-nutrition-badge>
           }
         </div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
@@ -173,7 +173,7 @@
             {{ row.category || '—' }}
           </div>
           <div class="col-allergens c-list-body-cell" cellCarouselSlide [label]="'allergens' | translatePipe">
-            @if (row.product.allergens_.length) {
+            @if (row.product.allergens.length) {
               <div
                 class="allergen-btn-wrapper"
                 [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === row.product._id"
@@ -181,11 +181,11 @@
               >
                 <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(row.product._id)">
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
-                  {{ row.product.allergens_.length }}
+                  {{ row.product.allergens.length }}
                 </button>
                 @if (allergenExpandAll_() || allergenPopoverProductId_() === row.product._id) {
                   <div class="allergen-expanded dense-grid">
-                    @for (a of row.product.allergens_; track a) {
+                    @for (a of row.product.allergens; track a) {
                       <span class="allergen-pill">{{ a | translatePipe }}</span>
                     }
                   </div>
@@ -199,7 +199,7 @@
             {{ row.supplierNames || '—' }}
           </div>
         </app-cell-carousel>
-        <div class="col-unit c-list-body-cell" role="cell">{{ row.product.base_unit_ | translatePipe }}</div>
+        <div class="col-unit c-list-body-cell" role="cell">{{ row.product.baseUnit | translatePipe }}</div>
         <div class="col-price col-price-readonly c-list-body-cell" role="cell">
           <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
           <span class="price-suffix">₪</span>

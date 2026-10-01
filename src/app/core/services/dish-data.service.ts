@@ -6,7 +6,7 @@ import { LoggingService } from './logging.service'
 import { LoadingService } from './loading.service'
 import { Recipe, PrepCategory } from '../models/recipe.model'
 
-const ENTITY = 'DISH_LIST'
+const ENTITY = 'dishes'
 const TRASH_KEY = 'TRASH_DISHES'
 
 @Injectable({ providedIn: 'root' })
@@ -65,11 +65,11 @@ export class DishDataService {
     this.loaded_ = true
   }
 
-  /** Normalize legacy mise_categories_ into prep_categories_ when loading from storage. */
+  /** Normalize legacy mise_categories_ into prepCategories when loading from storage. */
   private normalizeDish(d: Recipe & { mise_categories_?: PrepCategory[] }): Recipe {
-    if (d.mise_categories_?.length && !d.prep_categories_?.length) {
+    if (d.mise_categories_?.length && !d.prepCategories?.length) {
       const { mise_categories_, ...rest } = d
-      return { ...rest, prep_categories_: mise_categories_ }
+      return { ...rest, prepCategories: mise_categories_ }
     }
     const { mise_categories_: _m, ...rest } = d
     return rest as Recipe
@@ -103,8 +103,8 @@ export class DishDataService {
       const userId = this.userService.user_()?._id
       const toCreate = {
         ...newDish,
-        addedAt_: now,
-        updatedAt_: now,
+        createdAt: now,
+        updatedAt: now,
         ...(userId ? { createdBy: userId } : {})
       } as Recipe
       const saved = await this.storage.post<Recipe>(ENTITY, toCreate)
@@ -141,8 +141,8 @@ export class DishDataService {
       const existing = await this.storage.get<Recipe>(ENTITY, dish._id).catch(() => null)
       const toSave: Recipe = {
         ...dish,
-        addedAt_: dish.addedAt_ ?? existing?.addedAt_,
-        updatedAt_: Date.now(),
+        createdAt: dish.createdAt ?? existing?.createdAt,
+        updatedAt: Date.now(),
         createdBy: existing?.createdBy ?? dish.createdBy,
         hiddenBy: existing?.hiddenBy ?? dish.hiddenBy
       }

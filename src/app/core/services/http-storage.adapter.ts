@@ -22,6 +22,24 @@ type EntityId = { _id: string }
 const TOKEN_KEY = 'fv_token'
 
 /**
+ * recipes and dishes share one v2 schema and carry no kind field — the collection says which
+ * they are (Plan 321 G1). The client still uses recipeType in memory, so it is attached when
+ * reading and stripped when writing (the strict server schema would reject it).
+ */
+const RECIPE_TYPE_BY_COLLECTION: Record<string, 'dish' | 'preparation'> = { recipes: 'preparation', dishes: 'dish' }
+
+function fromServer<T>(entityType: string, doc: T): T {
+  const recipeType = RECIPE_TYPE_BY_COLLECTION[entityType]
+  return recipeType && doc && typeof doc === 'object' ? ({ ...doc, recipeType } as T) : doc
+}
+
+function toServer<T>(entityType: string, doc: T): T {
+  if (!(entityType in RECIPE_TYPE_BY_COLLECTION) || !doc || typeof doc !== 'object') return doc
+  const { recipeType: _recipeType, ...rest } = doc as T & { recipeType?: unknown }
+  return rest as T
+}
+
+/**
  * HTTP adapter that implements the StorageService interface — every operation
  * goes to the REST API. StorageService (async-storage.service.ts) is a thin
  * facade over this class (Plan 321 Phase 1 removed the old localStorage fallback
@@ -66,9 +84,10 @@ export class HttpStorageAdapter {
 
   /** Returns all entities of a given type. */
   async query<T>(entityType: string): Promise<T[]> {
-    return firstValueFrom(
+    const docs = await firstValueFrom(
       this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}`, { headers: this.headers(), withCredentials: true })
     )
+    return docs.map((d) => fromServer(entityType, d))
   }
 
   /**
@@ -133,12 +152,13 @@ export class HttpStorageAdapter {
 
   /** Returns one entity by id. Throws if not found (404 → HttpErrorResponse). */
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
-    return firstValueFrom(
+    const doc = await firstValueFrom(
       this.http.get<T>(`${this.base}/api/v1/data/${entityType}/${entityId}`, {
         headers: this.headers(),
         withCredentials: true
       })
     )
+    return fromServer(entityType, doc)
   }
 
   /**
@@ -147,22 +167,28 @@ export class HttpStorageAdapter {
    * Use the `_id` on the resolved doc, not one picked beforehand.
    */
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
-    return firstValueFrom(
-      this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, newEntity, {
+    const saved = await firstValueFrom(
+      this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, toServer(entityType, newEntity), {
         headers: this.headers(),
         withCredentials: true
       })
     )
+    return fromServer(entityType, saved)
   }
 
   /** Updates one entity. Uses updatedEntity._id as the path parameter. */
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
-    return firstValueFrom(
-      this.http.put<T>(`${this.base}/api/v1/data/${entityType}/${updatedEntity._id}`, updatedEntity, {
-        headers: this.headers(),
-        withCredentials: true
-      })
+    const saved = await firstValueFrom(
+      this.http.put<T>(
+        `${this.base}/api/v1/data/${entityType}/${updatedEntity._id}`,
+        toServer(entityType, updatedEntity),
+        {
+          headers: this.headers(),
+          withCredentials: true
+        }
+      )
     )
+    return fromServer(entityType, saved)
   }
 
   /**
@@ -278,7 +304,7 @@ export class HttpStorageAdapter {
   async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
     await firstValueFrom(
       this.http
-        .post<unknown>(`${this.base}/api/v1/data/${entityType}`, entity, {
+        .post<unknown>(`${this.base}/api/v1/data/${entityType}`, toServer(entityType, entity), {
           headers: this.headers(),
           withCredentials: true
         })

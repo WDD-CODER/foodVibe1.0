@@ -8,8 +8,8 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 
 /**
  * design-port session 6 — write side of the venue↔menu association (Venues.dc.html's
- * "N תפריטים משויכים" / VenueDetail.dc.html's associated-menus card). `MenuEvent.logistics_.
- * venue_profile_id_` already exists on the model but nothing anywhere sets it; this is the
+ * "N תפריטים משויכים" / VenueDetail.dc.html's associated-menus card). `MenuEvent.logistics.
+ * venueProfileId` already exists on the model but nothing anywhere sets it; this is the
  * first writer. Self-contained by design: menu-intelligence.page.ts is growth-frozen (never
  * add lines), so this component owns its own data-service injections, its own persistence
  * call, and its own styling — the host page only places one `<app-venue-link-chip>` tag.
@@ -33,7 +33,7 @@ export class VenueLinkChipComponent {
   protected readonly venueControl_ = new FormControl<string | null>(null)
 
   protected readonly venueOptions_ = computed(() =>
-    this.venueData.allVenues_().map((v) => ({ value: v._id, label: v.name_hebrew }))
+    this.venueData.allVenues_().map((v) => ({ value: v._id, label: v.nameHebrew }))
   )
 
   private readonly currentEvent_ = computed(
@@ -47,7 +47,7 @@ export class VenueLinkChipComponent {
     // Keep the picker in sync when the host page switches to a different event (or loads
     // one already linked to a venue) — emitEvent:false so this never re-triggers a save.
     effect(() => {
-      const linkedId = this.currentEvent_()?.logistics_?.venue_profile_id_ ?? null
+      const linkedId = this.currentEvent_()?.logistics?.venueProfileId ?? null
       this.venueControl_.setValue(linkedId, { emitEvent: false })
     })
 
@@ -63,11 +63,11 @@ export class VenueLinkChipComponent {
     if (venueId && !venue) return
     await this.menuEventData.updateMenuEvent({
       ...event,
-      logistics_: {
-        environment_type_: venue?.environment_type_ ?? event.logistics_?.environment_type_ ?? 'outdoor_field',
-        venue_profile_id_: venueId ?? undefined,
-        resolved_items_: event.logistics_?.resolved_items_ ?? [],
-        manual_overrides_: event.logistics_?.manual_overrides_
+      logistics: {
+        environmentType: venue?.environmentType ?? event.logistics?.environmentType ?? 'outdoor_field',
+        venueProfileId: venueId ?? undefined,
+        resolvedItems: event.logistics?.resolvedItems ?? [],
+        manualOverrides: event.logistics?.manualOverrides
       }
     })
   }

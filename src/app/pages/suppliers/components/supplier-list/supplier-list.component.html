@@ -109,20 +109,20 @@
         (keydown.enter)="toggleRowEdit(item)"
         (keydown.space)="$event.preventDefault(); toggleRowEdit(item)"
       >
-        <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
-        <div class="col-min-order c-list-body-cell" role="cell">{{ item.min_order_mov_ }}</div>
+        <div class="col-name c-list-body-cell" role="cell">{{ item.nameHebrew }}</div>
+        <div class="col-min-order c-list-body-cell" role="cell">{{ item.minOrderMov }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
           <div class="col-contact c-list-body-cell" cellCarouselSlide [label]="'contact_person' | translatePipe">
-            {{ item.contact_person_ ?? '—' }}
+            {{ item.contactPerson ?? '—' }}
           </div>
           <div class="col-phone c-list-body-cell" cellCarouselSlide [label]="'phone' | translatePipe">
-            {{ item.phone_ ?? '—' }}
+            {{ item.phone ?? '—' }}
           </div>
           <div class="col-delivery c-list-body-cell" cellCarouselSlide [label]="'delivery_days' | translatePipe">
-            {{ deliveryDaysDisplay(item.delivery_days_) }}
+            {{ deliveryDaysDisplay(item.deliveryDays) }}
           </div>
           <div class="col-lead c-list-body-cell" cellCarouselSlide [label]="'lead_time' | translatePipe">
-            {{ item.lead_time_days_ }}
+            {{ item.leadTimeDays }}
           </div>
           <div class="col-linked c-list-body-cell" cellCarouselSlide [label]="'linked_products' | translatePipe">
             {{ linkedProductCount_(item._id) }}
@@ -188,34 +188,34 @@
   }
 
   <ng-template #panelBody let-item="item">
-    <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.name_hebrew }}</h3>
+    <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.nameHebrew }}</h3>
 
     <div class="inline-edit-section">
       <div class="inline-edit-grid">
         <div class="inline-edit-field">
           <label for="inline-supplier-name">{{ 'name' | translatePipe }}</label>
-          <input id="inline-supplier-name" type="text" formControlName="name_hebrew" class="c-input" />
+          <input id="inline-supplier-name" type="text" formControlName="nameHebrew" class="c-input" />
         </div>
         <div class="inline-edit-field">
           <label for="inline-supplier-contact">{{ 'contact_person' | translatePipe }}</label>
-          <input id="inline-supplier-contact" type="text" formControlName="contact_person_" class="c-input" />
+          <input id="inline-supplier-contact" type="text" formControlName="contactPerson" class="c-input" />
         </div>
         <div class="inline-edit-field">
           <label for="inline-supplier-phone">{{ 'phone' | translatePipe }}</label>
-          <input id="inline-supplier-phone" type="text" formControlName="phone_" class="c-input" />
+          <input id="inline-supplier-phone" type="text" formControlName="phone" class="c-input" />
         </div>
         <div class="inline-edit-field">
           <label for="inline-supplier-min">{{ 'min_order' | translatePipe }}</label>
-          <input id="inline-supplier-min" type="number" formControlName="min_order_mov_" min="0" class="c-input" />
+          <input id="inline-supplier-min" type="number" formControlName="minOrderMov" min="0" class="c-input" />
         </div>
         <div class="inline-edit-field">
           <label for="inline-supplier-lead">{{ 'lead_time' | translatePipe }}</label>
-          <input id="inline-supplier-lead" type="number" formControlName="lead_time_days_" min="0" class="c-input" />
+          <input id="inline-supplier-lead" type="number" formControlName="leadTimeDays" min="0" class="c-input" />
         </div>
       </div>
       <div class="inline-edit-checkboxes">
         <span class="inline-edit-check-label">{{ 'delivery_days' | translatePipe }}</span>
-        <div class="inline-edit-days-wrap" formArrayName="delivery_days_">
+        <div class="inline-edit-days-wrap" formArrayName="deliveryDays">
           @for (ctrl of deliveryDaysArray.controls; track $index) {
             <label class="inline-edit-check">
               <input type="checkbox" [formControlName]="$index" />

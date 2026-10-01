@@ -6,7 +6,7 @@ import {
   computed,
   viewChild,
   effect,
-  ElementRef,
+  ElementRef
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
@@ -30,7 +30,7 @@ import { GeminiService } from '@services/gemini.service'
   imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent, LoaderComponent],
   templateUrl: './quick-add-product-modal.component.html',
   styleUrl: './quick-add-product-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class QuickAddProductModalComponent {
   private readonly modalService = inject(QuickAddProductModalService)
@@ -44,11 +44,11 @@ export class QuickAddProductModalComponent {
   protected isOpen_ = this.modalService.isOpen_
   protected config = this.modalService.config
 
-  protected name_ = signal('')
+  protected name = signal('')
   protected baseUnit_ = signal('gram')
   protected expanded_ = signal(false)
   protected buyPrice_ = signal(0)
-  protected category_ = signal('')
+  protected category = signal('')
   protected yieldFactor_ = signal(1)
   protected selectedAllergens_ = signal<Set<string>>(new Set())
   protected minStock_ = signal(0)
@@ -67,34 +67,28 @@ export class QuickAddProductModalComponent {
   protected saveBtnRef = viewChild<ElementRef<HTMLButtonElement>>('saveBtnEl')
 
   protected unitKeys_ = this.unitRegistry.allUnitKeys_
-  protected categories_ = this.metadataRegistry.allCategories_
-  protected allergens_ = this.metadataRegistry.allAllergens_
+  protected categories = this.metadataRegistry.allCategories_
+  protected allergens = this.metadataRegistry.allAllergens_
 
   protected baseUnitOptions_ = computed(() => {
     const keys = this.unitKeys_()
-    return [
-      ...keys.map((k) => ({ value: k, label: k })),
-      { value: '__add_unit__', label: 'add_new_unit' },
-    ]
+    return [...keys.map((k) => ({ value: k, label: k })), { value: '__add_unit__', label: 'add_new_unit' }]
   })
 
   protected categoryOptions_ = computed(() => {
-    const cats = this.categories_()
-    return [
-      ...cats.map((c) => ({ value: c, label: c })),
-      { value: '__add_category__', label: 'add_new_category' },
-    ]
+    const cats = this.categories()
+    return [...cats.map((c) => ({ value: c, label: c })), { value: '__add_category__', label: 'add_new_category' }]
   })
 
   constructor() {
     effect(() => {
       const cfg = this.modalService.config()
       if (cfg) {
-        this.name_.set(cfg.prefillName)
+        this.name.set(cfg.prefillName)
         this.baseUnit_.set('gram')
         this.expanded_.set(false)
         this.buyPrice_.set(0)
-        this.category_.set('')
+        this.category.set('')
         this.yieldFactor_.set(1)
         this.selectedAllergens_.set(new Set())
         this.minStock_.set(0)
@@ -118,8 +112,8 @@ export class QuickAddProductModalComponent {
 
   /** Accepts either an ElementRef or a native HTMLElement (template ref). */
   protected advanceFocus(ref: ElementRef<HTMLElement> | HTMLElement | null | undefined): void {
-    const el = ref && 'nativeElement' in ref ? ref.nativeElement : ref;
-    (el as HTMLElement)?.focus()
+    const el = ref && 'nativeElement' in ref ? ref.nativeElement : ref
+    ;(el as HTMLElement)?.focus()
   }
 
   /** After select change: advance focus to next field. */
@@ -131,23 +125,23 @@ export class QuickAddProductModalComponent {
     if (val === '__add_category__') {
       const newCategory = await this.addItemModal.open({
         title: 'add_new_category',
-        label: 'category_name',
-        placeholder: 'category_name',
+        label: 'categoryName',
+        placeholder: 'categoryName',
         saveLabel: 'save_category'
       })
       if (newCategory) {
         const key = await this.metadataRegistry.registerCategory(newCategory)
         if (key) {
-          this.category_.set(key)
+          this.category.set(key)
           this.onSelectChange(this.getNextFocusAfterCategory())
         } else {
-          this.category_.set('')
+          this.category.set('')
         }
       } else {
-        this.category_.set('')
+        this.category.set('')
       }
     } else {
-      this.category_.set(val)
+      this.category.set(val)
       this.onSelectChange(this.getNextFocusAfterCategory())
     }
   }
@@ -202,7 +196,7 @@ export class QuickAddProductModalComponent {
     this.nameError_.set('')
     this.unitError_.set('')
 
-    const name = this.name_().trim()
+    const name = this.name().trim()
     const baseUnit = this.baseUnit_().trim()
     if (!name) {
       this.nameError_.set('field_name_required')
@@ -216,18 +210,18 @@ export class QuickAddProductModalComponent {
 
     this.isSubmitting_.set(true)
 
-    const category = this.category_().trim()
+    const category = this.category().trim()
     const price = Math.max(0, Number(this.buyPrice_()) || 0)
     const product: Omit<Product, '_id'> = {
-      name_hebrew: name,
-      base_unit_: baseUnit,
-      sources_: price > 0 ? [{ supplierId: '', price, addedAt: Date.now() }] : [],
-      purchase_options_: [],
-      categories_: category ? [category] : [],
-      yield_factor_: Number(this.yieldFactor_()) || 1,
-      allergens_: Array.from(this.selectedAllergens_()),
-      min_stock_level_: Number(this.minStock_()) || 0,
-      expiry_days_default_: Number(this.expiryDays_()) || 0,
+      nameHebrew: name,
+      baseUnit: baseUnit,
+      sources: price > 0 ? [{ supplierId: '', price, addedAt: Date.now() }] : [],
+      purchaseOptions: [],
+      categories: category ? [category] : [],
+      yieldFactor: Number(this.yieldFactor_()) || 1,
+      allergens: Array.from(this.selectedAllergens_()),
+      minStockLevel: Number(this.minStock_()) || 0,
+      expiryDaysDefault: Number(this.expiryDays_()) || 0
     }
 
     this.productData.addProduct(product).then(
@@ -243,16 +237,16 @@ export class QuickAddProductModalComponent {
   }
 
   protected async onAiFill(): Promise<void> {
-    const name = this.name_().trim()
+    const name = this.name().trim()
     if (!name || this.aiLoading_()) return
     this.aiLoading_.set(true)
     this.aiError_.set(false)
     try {
       const draft = await this.gemini_.generateProduct(name)
-      if (draft.base_unit_) this.baseUnit_.set(draft.base_unit_)
-      if (draft.categories_?.length) this.category_.set(draft.categories_[0])
-      if (draft.allergens_?.length) this.selectedAllergens_.set(new Set(draft.allergens_))
-      if (draft.yield_factor_ && draft.yield_factor_ !== 1) this.yieldFactor_.set(draft.yield_factor_)
+      if (draft.baseUnit) this.baseUnit_.set(draft.baseUnit)
+      if (draft.categories?.length) this.category.set(draft.categories[0])
+      if (draft.allergens?.length) this.selectedAllergens_.set(new Set(draft.allergens))
+      if (draft.yieldFactor && draft.yieldFactor !== 1) this.yieldFactor_.set(draft.yieldFactor)
       this.expanded_.set(true)
     } catch {
       this.aiError_.set(true)

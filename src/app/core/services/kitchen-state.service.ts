@@ -49,13 +49,13 @@ export class KitchenStateService {
   isDrawerOpen_ = signal<boolean>(false)
 
   // COMPUTED SIGNALS
-  lowStockProducts_ = computed(() => this.products_().filter((p) => p.min_stock_level_ > 0))
+  lowStockProducts_ = computed(() => this.products_().filter((p) => p.minStockLevel > 0))
 
   saveProduct(product: Product): Observable<Product> {
     const isUpdate = !!(product._id && product._id.trim() !== '')
 
     const isDuplicate = this.products_().some(
-      (p) => p.name_hebrew.trim() === product.name_hebrew.trim() && p._id !== product._id
+      (p) => p.nameHebrew.trim() === product.nameHebrew.trim() && p._id !== product._id
     )
 
     if (isDuplicate) {
@@ -74,7 +74,7 @@ export class KitchenStateService {
             action: 'updated',
             entityType: 'product',
             entityId: product._id,
-            entityName: product.name_hebrew,
+            entityName: product.nameHebrew,
             changes
           })
           if (previous) {
@@ -82,7 +82,7 @@ export class KitchenStateService {
               .addVersion({
                 entityType: 'product',
                 entityId: previous._id,
-                entityName: previous.name_hebrew,
+                entityName: previous.nameHebrew,
                 snapshot: previous,
                 changes
               })
@@ -110,7 +110,7 @@ export class KitchenStateService {
             action: 'created',
             entityType: 'product',
             entityId: saved._id,
-            entityName: saved.name_hebrew,
+            entityName: saved.nameHebrew,
             changes: []
           })
         }),
@@ -127,12 +127,12 @@ export class KitchenStateService {
   private buildProductChanges(prev: Product, next: Product): ActivityChange[] {
     const changes: ActivityChange[] = []
 
-    if (prev.name_hebrew !== next.name_hebrew) {
+    if (prev.nameHebrew !== next.nameHebrew) {
       changes.push({
         field: 'name',
         label: 'activity_field_name',
-        from: prev.name_hebrew,
-        to: next.name_hebrew
+        from: prev.nameHebrew,
+        to: next.nameHebrew
       })
     }
     const prevPrice = getEffectivePrice(prev)
@@ -145,12 +145,12 @@ export class KitchenStateService {
         to: `${nextPrice} ₪`
       })
     }
-    if (prev.base_unit_ !== next.base_unit_) {
+    if (prev.baseUnit !== next.baseUnit) {
       changes.push({
         field: 'unit',
         label: 'activity_field_unit',
-        from: prev.base_unit_,
-        to: next.base_unit_
+        from: prev.baseUnit,
+        to: next.baseUnit
       })
     }
     const prevSupp = getSupplierIds(prev).slice().sort().join(',')
@@ -163,8 +163,8 @@ export class KitchenStateService {
         to: nextSupp || undefined
       })
     }
-    const prevCat = (prev.categories_ ?? []).slice().sort().join(',')
-    const nextCat = (next.categories_ ?? []).slice().sort().join(',')
+    const prevCat = (prev.categories ?? []).slice().sort().join(',')
+    const nextCat = (next.categories ?? []).slice().sort().join(',')
     if (prevCat !== nextCat) {
       changes.push({
         field: 'category',
@@ -173,8 +173,8 @@ export class KitchenStateService {
         to: nextCat || undefined
       })
     }
-    const prevAll = (prev.allergens_ ?? []).slice().sort().join(',')
-    const nextAll = (next.allergens_ ?? []).slice().sort().join(',')
+    const prevAll = (prev.allergens ?? []).slice().sort().join(',')
+    const nextAll = (next.allergens ?? []).slice().sort().join(',')
     if (prevAll !== nextAll) {
       changes.push({
         field: 'allergens',
@@ -183,45 +183,45 @@ export class KitchenStateService {
         to: nextAll || undefined
       })
     }
-    if ((prev.min_stock_level_ ?? 0) !== (next.min_stock_level_ ?? 0)) {
+    if ((prev.minStockLevel ?? 0) !== (next.minStockLevel ?? 0)) {
       changes.push({
         field: 'min_stock_level',
         label: 'activity_field_min_stock',
-        from: String(prev.min_stock_level_ ?? 0),
-        to: String(next.min_stock_level_ ?? 0)
+        from: String(prev.minStockLevel ?? 0),
+        to: String(next.minStockLevel ?? 0)
       })
     }
-    if ((prev.expiry_days_default_ ?? 0) !== (next.expiry_days_default_ ?? 0)) {
+    if ((prev.expiryDaysDefault ?? 0) !== (next.expiryDaysDefault ?? 0)) {
       changes.push({
         field: 'expiry_days_default',
         label: 'activity_field_expiry_days',
-        from: String(prev.expiry_days_default_ ?? 0),
-        to: String(next.expiry_days_default_ ?? 0)
+        from: String(prev.expiryDaysDefault ?? 0),
+        to: String(next.expiryDaysDefault ?? 0)
       })
     }
-    if (Math.abs((prev.yield_factor_ ?? 1) - (next.yield_factor_ ?? 1)) > 0.001) {
+    if (Math.abs((prev.yieldFactor ?? 1) - (next.yieldFactor ?? 1)) > 0.001) {
       changes.push({
         field: 'yield_factor',
         label: 'activity_field_yield_factor',
-        from: String(prev.yield_factor_ ?? 1),
-        to: String(next.yield_factor_ ?? 1)
+        from: String(prev.yieldFactor ?? 1),
+        to: String(next.yieldFactor ?? 1)
       })
     }
-    if ((prev.purchase_options_?.length ?? 0) !== (next.purchase_options_?.length ?? 0)) {
-      const prevUnits = (prev.purchase_options_ ?? []).map((o) => o.unit_symbol_).join(', ')
-      const nextUnits = (next.purchase_options_ ?? []).map((o) => o.unit_symbol_).join(', ')
+    if ((prev.purchaseOptions?.length ?? 0) !== (next.purchaseOptions?.length ?? 0)) {
+      const prevUnits = (prev.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
+      const nextUnits = (next.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
       changes.push({
         field: 'purchase_options',
         label: 'activity_field_purchase_options',
         from: prevUnits || undefined,
         to: nextUnits || undefined
       })
-    } else if ((prev.purchase_options_?.length ?? 0) > 0) {
-      const prevOpts = JSON.stringify(prev.purchase_options_ ?? [])
-      const nextOpts = JSON.stringify(next.purchase_options_ ?? [])
+    } else if ((prev.purchaseOptions?.length ?? 0) > 0) {
+      const prevOpts = JSON.stringify(prev.purchaseOptions ?? [])
+      const nextOpts = JSON.stringify(next.purchaseOptions ?? [])
       if (prevOpts !== nextOpts) {
-        const prevUnits = (prev.purchase_options_ ?? []).map((o) => o.unit_symbol_).join(', ')
-        const nextUnits = (next.purchase_options_ ?? []).map((o) => o.unit_symbol_).join(', ')
+        const prevUnits = (prev.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
+        const nextUnits = (next.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
         changes.push({
           field: 'purchase_options',
           label: 'activity_field_purchase_options',
@@ -235,7 +235,7 @@ export class KitchenStateService {
 
   deleteProduct(_id: string): Observable<void> {
     const existing = this.products_().find((p) => p._id === _id)
-    const entityName = existing?.name_hebrew ?? _id
+    const entityName = existing?.nameHebrew ?? _id
 
     return of(null).pipe(
       switchMap(() => {
@@ -263,7 +263,7 @@ export class KitchenStateService {
 
   // RECIPE / DISH CRUD
   deleteRecipe(recipe: Recipe): Observable<void> {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
+    const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
     const operation$ = isDish
       ? from(this.dishDataService.deleteDish(recipe._id))
       : from(this.recipeDataService.deleteRecipe(recipe._id))
@@ -276,7 +276,7 @@ export class KitchenStateService {
           action: 'deleted',
           entityType: isDish ? 'dish' : 'recipe',
           entityId: recipe._id,
-          entityName: recipe.name_hebrew
+          entityName: recipe.nameHebrew
         })
       }),
       catchError(() => {
@@ -288,7 +288,7 @@ export class KitchenStateService {
   }
 
   hideRecipe(recipe: Recipe): Observable<Recipe> {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
+    const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
     const operation$ = isDish
       ? from(this.dishDataService.hideDish(recipe._id))
       : from(this.recipeDataService.hideRecipe(recipe._id))
@@ -308,7 +308,7 @@ export class KitchenStateService {
     const user = this.userService.user_()
     if (!user) return throwError(() => new Error('NOT_AUTHENTICATED'))
     if (user.role !== 'admin') return throwError(() => new Error('NOT_AUTHORIZED'))
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
+    const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
     const operation$ = isDish
       ? from(this.dishDataService.permanentlyDeleteDish(recipe._id))
       : from(this.recipeDataService.permanentlyDeleteRecipe(recipe._id))
@@ -319,7 +319,7 @@ export class KitchenStateService {
           action: 'deleted',
           entityType: isDish ? 'dish' : 'recipe',
           entityId: recipe._id,
-          entityName: recipe.name_hebrew
+          entityName: recipe.nameHebrew
         })
       }),
       catchError(() => {
@@ -330,11 +330,11 @@ export class KitchenStateService {
   }
 
   saveRecipe(recipe: Recipe): Observable<Recipe> {
-    const isDish = recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
+    const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
     const isUpdate = !!(recipe._id && recipe._id.trim() !== '')
     const previous = isUpdate ? this.recipes_().find((r) => r._id === recipe._id) : null
     const previousIsDish = previous
-      ? previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.prep_categories_?.length)
+      ? previous.recipeType === 'dish' || !!(previous.prepItems?.length || previous.prepCategories?.length)
       : false
     const typeChanged = isUpdate && !!previous && previousIsDish !== isDish
     const entityType = isDish ? ('dish' as const) : ('recipe' as const)
@@ -382,7 +382,7 @@ export class KitchenStateService {
           action: typeChanged ? 'created' : isUpdate ? 'updated' : 'created',
           entityType: isDish ? 'dish' : 'recipe',
           entityId: saved._id,
-          entityName: saved.name_hebrew,
+          entityName: saved.nameHebrew,
           changes
         })
         if (isUpdate && previous) {
@@ -390,7 +390,7 @@ export class KitchenStateService {
             .addVersion({
               entityType: typeChanged ? previousEntityType : entityType,
               entityId: previous._id,
-              entityName: previous.name_hebrew,
+              entityName: previous.nameHebrew,
               snapshot: previous,
               changes: this.buildRecipeChanges(previous, recipe)
             })
@@ -418,59 +418,56 @@ export class KitchenStateService {
   private buildRecipeChanges(prev: Recipe, next: Recipe): ActivityChange[] {
     const changes: ActivityChange[] = []
 
-    if (prev.name_hebrew !== next.name_hebrew) {
+    if (prev.nameHebrew !== next.nameHebrew) {
       changes.push({
         field: 'name',
         label: 'activity_field_name',
-        from: prev.name_hebrew,
-        to: next.name_hebrew
+        from: prev.nameHebrew,
+        to: next.nameHebrew
       })
     }
-    if ((prev.ingredients_?.length ?? 0) !== (next.ingredients_?.length ?? 0)) {
+    if ((prev.ingredients?.length ?? 0) !== (next.ingredients?.length ?? 0)) {
       changes.push({
         field: 'ingredients_count',
         label: 'activity_field_ingredients_count',
-        from: String(prev.ingredients_?.length ?? 0),
-        to: String(next.ingredients_?.length ?? 0)
+        from: String(prev.ingredients?.length ?? 0),
+        to: String(next.ingredients?.length ?? 0)
       })
     }
-    if ((prev.steps_?.length ?? 0) !== (next.steps_?.length ?? 0)) {
+    if ((prev.steps?.length ?? 0) !== (next.steps?.length ?? 0)) {
       changes.push({
         field: 'steps_count',
         label: 'activity_field_steps_count',
-        from: String(prev.steps_?.length ?? 0),
-        to: String(next.steps_?.length ?? 0)
+        from: String(prev.steps?.length ?? 0),
+        to: String(next.steps?.length ?? 0)
       })
     }
-    if (
-      (prev.yield_amount_ ?? 0) !== (next.yield_amount_ ?? 0) ||
-      (prev.yield_unit_ ?? '') !== (next.yield_unit_ ?? '')
-    ) {
+    if ((prev.yieldAmount ?? 0) !== (next.yieldAmount ?? 0) || (prev.yieldUnit ?? '') !== (next.yieldUnit ?? '')) {
       changes.push({
         field: 'yield',
         label: 'activity_field_yield',
-        from: `${prev.yield_amount_ ?? 0} ${prev.yield_unit_ ?? ''}`.trim(),
-        to: `${next.yield_amount_ ?? 0} ${next.yield_unit_ ?? ''}`.trim()
+        from: `${prev.yieldAmount ?? 0} ${prev.yieldUnit ?? ''}`.trim(),
+        to: `${next.yieldAmount ?? 0} ${next.yieldUnit ?? ''}`.trim()
       })
     }
-    if ((prev.prep_items_?.length ?? 0) !== (next.prep_items_?.length ?? 0)) {
+    if ((prev.prepItems?.length ?? 0) !== (next.prepItems?.length ?? 0)) {
       changes.push({
         field: 'prep_items',
         label: 'activity_field_prep_items',
-        from: String(prev.prep_items_?.length ?? 0),
-        to: String(next.prep_items_?.length ?? 0)
+        from: String(prev.prepItems?.length ?? 0),
+        to: String(next.prepItems?.length ?? 0)
       })
     }
-    if ((prev.course_ ?? '') !== (next.course_ ?? '')) {
+    if ((prev.course ?? '') !== (next.course ?? '')) {
       changes.push({
         field: 'course',
         label: 'activity_field_course',
-        from: prev.course_ || 'no_course',
-        to: next.course_ || 'no_course'
+        from: prev.course || 'no_course',
+        to: next.course || 'no_course'
       })
     }
-    const prevLabels = [...(prev.labels_ ?? [])].sort()
-    const nextLabels = [...(next.labels_ ?? [])].sort()
+    const prevLabels = [...(prev.labels ?? [])].sort()
+    const nextLabels = [...(next.labels ?? [])].sort()
     if (prevLabels.join(',') !== nextLabels.join(',')) {
       changes.push({
         field: 'labels',
@@ -487,8 +484,7 @@ export class KitchenStateService {
    *  cascade) while still recording activity-log + version-history entries, matching what
    *  saveRecipe does minus the toast. */
   private async applyCascadeUpdate(previous: Recipe, updated: Recipe): Promise<void> {
-    const isDish =
-      previous.recipe_type_ === 'dish' || !!(previous.prep_items_?.length || previous.prep_categories_?.length)
+    const isDish = previous.recipeType === 'dish' || !!(previous.prepItems?.length || previous.prepCategories?.length)
     const saved = isDish
       ? await this.dishDataService.updateDish(updated)
       : await this.recipeDataService.updateRecipe(updated)
@@ -497,14 +493,14 @@ export class KitchenStateService {
       action: 'updated',
       entityType: isDish ? 'dish' : 'recipe',
       entityId: saved._id,
-      entityName: saved.name_hebrew,
+      entityName: saved.nameHebrew,
       changes
     })
     try {
       await this.versionHistoryService.addVersion({
         entityType: isDish ? 'dish' : 'recipe',
         entityId: previous._id,
-        entityName: previous.name_hebrew,
+        entityName: previous.nameHebrew,
         snapshot: previous,
         changes
       })
@@ -518,18 +514,18 @@ export class KitchenStateService {
   }
 
   /** Cascade-clear a deleted label key from every recipe/dish that references it — both the
-   *  manual labels_ array and the auto-computed autoLabels_ array (a label surviving in
-   *  autoLabels_ after its registry entry is gone would reintroduce the orphan-label bug
+   *  manual labels array and the auto-computed autoLabels array (a label surviving in
+   *  autoLabels after its registry entry is gone would reintroduce the orphan-label bug
    *  fixed in plan 320). Returns the number of items updated. */
   async cascadeClearLabelFromAll(labelKey: string): Promise<number> {
     const affected = this.recipes_().filter(
-      (r) => (r.labels_ ?? []).includes(labelKey) || (r.autoLabels_ ?? []).includes(labelKey)
+      (r) => (r.labels ?? []).includes(labelKey) || (r.autoLabels ?? []).includes(labelKey)
     )
     for (const recipe of affected) {
       const updated: Recipe = {
         ...recipe,
-        labels_: (recipe.labels_ ?? []).filter((l) => l !== labelKey),
-        autoLabels_: (recipe.autoLabels_ ?? []).filter((l) => l !== labelKey)
+        labels: (recipe.labels ?? []).filter((l) => l !== labelKey),
+        autoLabels: (recipe.autoLabels ?? []).filter((l) => l !== labelKey)
       }
       await this.applyCascadeUpdate(recipe, updated)
     }
@@ -539,26 +535,26 @@ export class KitchenStateService {
   /** Cascade-clear a deleted course key back to '' (the existing "no course" sentinel) on
    *  every recipe/dish that has it set. Returns the number of items updated. */
   async cascadeClearCourseFromAll(courseKey: string): Promise<number> {
-    const affected = this.recipes_().filter((r) => r.course_ === courseKey)
+    const affected = this.recipes_().filter((r) => r.course === courseKey)
     for (const recipe of affected) {
-      await this.applyCascadeUpdate(recipe, { ...recipe, course_: '' })
+      await this.applyCascadeUpdate(recipe, { ...recipe, course: '' })
     }
     return affected.length
   }
 
-  /** Cascade-rename a label key across every recipe/dish that references it (both labels_
-   *  and autoLabels_), so fixing a typo doesn't require delete + recreate + manual re-tag.
+  /** Cascade-rename a label key across every recipe/dish that references it (both labels
+   *  and autoLabels), so fixing a typo doesn't require delete + recreate + manual re-tag.
    *  Returns the number of items updated. */
   async cascadeRenameLabelForAll(oldKey: string, newKey: string): Promise<number> {
     const affected = this.recipes_().filter(
-      (r) => (r.labels_ ?? []).includes(oldKey) || (r.autoLabels_ ?? []).includes(oldKey)
+      (r) => (r.labels ?? []).includes(oldKey) || (r.autoLabels ?? []).includes(oldKey)
     )
     for (const recipe of affected) {
       const rename = (arr: string[]) => [...new Set(arr.map((l) => (l === oldKey ? newKey : l)))]
       const updated: Recipe = {
         ...recipe,
-        labels_: rename(recipe.labels_ ?? []),
-        autoLabels_: rename(recipe.autoLabels_ ?? [])
+        labels: rename(recipe.labels ?? []),
+        autoLabels: rename(recipe.autoLabels ?? [])
       }
       await this.applyCascadeUpdate(recipe, updated)
     }
@@ -568,9 +564,9 @@ export class KitchenStateService {
   /** Cascade-rename a course key across every recipe/dish that has it set. Returns the
    *  number of items updated. */
   async cascadeRenameCourseForAll(oldKey: string, newKey: string): Promise<number> {
-    const affected = this.recipes_().filter((r) => r.course_ === oldKey)
+    const affected = this.recipes_().filter((r) => r.course === oldKey)
     for (const recipe of affected) {
-      await this.applyCascadeUpdate(recipe, { ...recipe, course_: newKey })
+      await this.applyCascadeUpdate(recipe, { ...recipe, course: newKey })
     }
     return affected.length
   }
@@ -583,11 +579,11 @@ export class KitchenStateService {
    *  covers the current user's own data — the cross-user "everyone" sweep is a separate,
    *  server-side operation (ProductDataService.purgeIngredientEverywhere). */
   async cascadeRemoveIngredientForAll(productId: string): Promise<number> {
-    const affected = this.recipes_().filter((r) => (r.ingredients_ ?? []).some((i) => i.referenceId === productId))
+    const affected = this.recipes_().filter((r) => (r.ingredients ?? []).some((i) => i.referenceId === productId))
     for (const recipe of affected) {
       const updated: Recipe = {
         ...recipe,
-        ingredients_: (recipe.ingredients_ ?? []).filter((i) => i.referenceId !== productId)
+        ingredients: (recipe.ingredients ?? []).filter((i) => i.referenceId !== productId)
       }
       await this.applyCascadeUpdate(recipe, updated)
     }
@@ -605,14 +601,14 @@ export class KitchenStateService {
       action: 'updated',
       entityType: 'product',
       entityId: updated._id,
-      entityName: updated.name_hebrew,
+      entityName: updated.nameHebrew,
       changes
     })
     try {
       await this.versionHistoryService.addVersion({
         entityType: 'product',
         entityId: previous._id,
-        entityName: previous.name_hebrew,
+        entityName: previous.nameHebrew,
         snapshot: previous,
         changes
       })
@@ -628,11 +624,11 @@ export class KitchenStateService {
   /** Cascade-rename a category key across every product that references it. Returns the
    *  number of products updated. */
   async cascadeRenameCategoryForAll(oldKey: string, newKey: string): Promise<number> {
-    const affected = this.products_().filter((p) => (p.categories_ ?? []).includes(oldKey))
+    const affected = this.products_().filter((p) => (p.categories ?? []).includes(oldKey))
     for (const product of affected) {
       const updated: Product = {
         ...product,
-        categories_: [...new Set((product.categories_ ?? []).map((c) => (c === oldKey ? newKey : c)))]
+        categories: [...new Set((product.categories ?? []).map((c) => (c === oldKey ? newKey : c)))]
       }
       await this.applyProductCascadeUpdate(product, updated)
     }
@@ -642,11 +638,11 @@ export class KitchenStateService {
   /** Cascade-rename an allergen key across every product that references it. Returns the
    *  number of products updated. */
   async cascadeRenameAllergenForAll(oldKey: string, newKey: string): Promise<number> {
-    const affected = this.products_().filter((p) => (p.allergens_ ?? []).includes(oldKey))
+    const affected = this.products_().filter((p) => (p.allergens ?? []).includes(oldKey))
     for (const product of affected) {
       const updated: Product = {
         ...product,
-        allergens_: [...new Set((product.allergens_ ?? []).map((a) => (a === oldKey ? newKey : a)))]
+        allergens: [...new Set((product.allergens ?? []).map((a) => (a === oldKey ? newKey : a)))]
       }
       await this.applyProductCascadeUpdate(product, updated)
     }

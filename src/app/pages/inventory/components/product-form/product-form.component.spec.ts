@@ -31,7 +31,7 @@ describe('ProductFormComponent', () => {
   const mockAllergens = signal(['gluten', 'peanuts'])
   const mockUnitKeys = signal(['ק"ג', 'גרם'])
   const mockIsCreatorOpen = signal(false) // Add this signal mock
-  const mockSuppliersSignal = signal<{ _id: string; name_hebrew: string }[]>([])
+  const mockSuppliersSignal = signal<{ _id: string; nameHebrew: string }[]>([])
   beforeEach(async () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate'])
     mockConversionService = jasmine.createSpyObj('ConversionService', [
@@ -61,15 +61,15 @@ describe('ProductFormComponent', () => {
     const mockUtil = jasmine.createSpyObj('UtilService', ['getEmptyProduct'])
     mockUtil.getEmptyProduct.and.returnValue({
       _id: '',
-      name_hebrew: '',
-      base_unit_: 'gram',
-      categories_: [],
-      sources_: [],
-      purchase_options_: [],
-      yield_factor_: 1,
-      allergens_: [],
-      min_stock_level_: 0,
-      expiry_days_default_: 0
+      nameHebrew: '',
+      baseUnit: 'gram',
+      categories: [],
+      sources: [],
+      purchaseOptions: [],
+      yieldFactor: 1,
+      allergens: [],
+      minStockLevel: 0,
+      expiryDaysDefault: 0
     } as Product)
 
     await TestBed.configureTestingModule({
@@ -113,7 +113,7 @@ describe('ProductFormComponent', () => {
       const wasteCtrl = component['productForm_'].get('waste_percent_')
       wasteCtrl?.setValue(20)
 
-      expect(component['productForm_'].get('yield_factor_')?.value).toBe(0.8)
+      expect(component['productForm_'].get('yieldFactor')?.value).toBe(0.8)
     })
   })
 
@@ -122,7 +122,7 @@ describe('ProductFormComponent', () => {
       // Set initial form state
       component['productForm_'].patchValue({
         buy_price_global_: 100,
-        yield_factor_: 0.8
+        yieldFactor: 0.8
       })
 
       tick() // Let valueChanges stream through toSignal
@@ -148,17 +148,17 @@ describe('ProductFormComponent', () => {
       const firstRow = options.at(0)
 
       // 4. Trigger unit change - this calls getConversion and getSuggestedPurchasePrice
-      firstRow.get('unit_symbol_')?.setValue('kg')
+      firstRow.get('unitSymbol')?.setValue('kg')
 
-      // 5. Assert — conversion_rate_ = base units per 1 purchase unit; kg/kg => 1
-      expect(firstRow.get('conversion_rate_')?.value).toBe(1)
-      expect(firstRow.get('price_override_')?.value).toBe(10000)
+      // 5. Assert — conversionRate = base units per 1 purchase unit; kg/kg => 1
+      expect(firstRow.get('conversionRate')?.value).toBe(1)
+      expect(firstRow.get('priceOverride')?.value).toBe(10000)
     })
   })
 
   describe('Allergen Management', () => {
     it('should toggle allergens in the form control', () => {
-      const ctrl = component['productForm_'].get('allergens_')
+      const ctrl = component['productForm_'].get('allergens')
       ;(component as any).toggleAllergen('gluten')
       expect(ctrl?.value).toContain('gluten')
       ;(component as any).toggleAllergen('gluten')

@@ -312,18 +312,18 @@ export class RecipeWorkflowComponent {
 
   onPreparationSelected(entry: PreparationEntry, group: FormGroup): void {
     group.patchValue({
-      preparation_name: entry.name,
-      category_name: entry.category,
-      main_category_name: entry.category
+      preparationName: entry.name,
+      categoryName: entry.category,
+      mainCategoryName: entry.category
     })
     this.editingPreparationNameAtRow_.set(null)
   }
 
   clearPreparation(group: FormGroup): void {
     group.patchValue({
-      preparation_name: '',
-      category_name: '',
-      main_category_name: ''
+      preparationName: '',
+      categoryName: '',
+      mainCategoryName: ''
     })
   }
 
@@ -331,23 +331,23 @@ export class RecipeWorkflowComponent {
     if (value === '__add_new__') {
       const result = await this.translationKeyModal_.open('', 'category')
       if (!isTranslationKeyResult(result) || !result.englishKey?.trim() || !result.hebrewLabel?.trim()) {
-        group.patchValue({ category_name: '' })
+        group.patchValue({ categoryName: '' })
         return
       }
       await this.prepRegistry_.registerCategory(result.englishKey, result.hebrewLabel)
-      group.patchValue({ category_name: result.englishKey })
+      group.patchValue({ categoryName: result.englishKey })
       return
     }
 
-    const preparationName = (group.get('preparation_name')?.value ?? '') as string
-    const mainCategory = (group.get('main_category_name')?.value ?? '') as string
+    const preparationName = (group.get('preparationName')?.value ?? '') as string
+    const mainCategory = (group.get('mainCategoryName')?.value ?? '') as string
 
     if (!preparationName || !mainCategory) {
-      group.patchValue({ category_name: value })
+      group.patchValue({ categoryName: value })
       return
     }
     if (value === mainCategory) {
-      group.patchValue({ category_name: value })
+      group.patchValue({ categoryName: value })
       return
     }
 
@@ -358,15 +358,15 @@ export class RecipeWorkflowComponent {
     })
 
     if (choice === 'global') {
-      const onRevert = () => group.patchValue({ category_name: mainCategory, main_category_name: mainCategory })
+      const onRevert = () => group.patchValue({ categoryName: mainCategory, mainCategoryName: mainCategory })
       await this.prepRegistry_.updatePreparationCategory(preparationName, mainCategory, value, {
         onRevert
       })
-      group.patchValue({ category_name: value, main_category_name: value })
+      group.patchValue({ categoryName: value, mainCategoryName: value })
     } else if (choice === 'specific') {
-      group.patchValue({ category_name: value })
+      group.patchValue({ categoryName: value })
     } else {
-      group.patchValue({ category_name: mainCategory })
+      group.patchValue({ categoryName: mainCategory })
     }
   }
 

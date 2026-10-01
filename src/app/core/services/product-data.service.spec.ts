@@ -7,32 +7,32 @@ describe('ProductDataService', () => {
   let service: ProductDataService
   let storageSpy: jasmine.SpyObj<StorageService>
 
-  const ENTITY = 'PRODUCT_LIST'
+  const ENTITY = 'products'
 
   const mockProducts: Product[] = [
     {
       _id: '1',
-      name_hebrew: 'Tomato',
-      categories_: ['Veg'],
-      sources_: [],
-      allergens_: ['dairy'],
-      base_unit_: 'gram',
-      purchase_options_: [],
-      yield_factor_: 1,
-      min_stock_level_: 0,
-      expiry_days_default_: 0
+      nameHebrew: 'Tomato',
+      categories: ['Veg'],
+      sources: [],
+      allergens: ['dairy'],
+      baseUnit: 'gram',
+      purchaseOptions: [],
+      yieldFactor: 1,
+      minStockLevel: 0,
+      expiryDaysDefault: 0
     } as Product,
     {
       _id: '2',
-      name_hebrew: 'Cucumber',
-      categories_: ['Veg'],
-      sources_: [],
-      allergens_: ['dairy'],
-      base_unit_: 'gram',
-      purchase_options_: [],
-      yield_factor_: 1,
-      min_stock_level_: 0,
-      expiry_days_default_: 0
+      nameHebrew: 'Cucumber',
+      categories: ['Veg'],
+      sources: [],
+      allergens: ['dairy'],
+      baseUnit: 'gram',
+      purchaseOptions: [],
+      yieldFactor: 1,
+      minStockLevel: 0,
+      expiryDaysDefault: 0
     } as Product
   ]
 
@@ -57,8 +57,8 @@ describe('ProductDataService', () => {
   it('should be created and load initial data', () => {
     expect(service).toBeTruthy()
     expect(service.allProducts_().length).toBe(mockProducts.length)
-    expect(service.allProducts_()[0].name_hebrew).toBe('Tomato')
-    expect(service.allProducts_()[0].categories_).toEqual(['Veg'])
+    expect(service.allProducts_()[0].nameHebrew).toBe('Tomato')
+    expect(service.allProducts_()[0].categories).toEqual(['Veg'])
     expect(storageSpy.query).toHaveBeenCalledWith(ENTITY)
   })
 
@@ -76,8 +76,8 @@ describe('ProductDataService', () => {
     it('should update an existing product in the signal', fakeAsync(() => {
       const updatedProduct = {
         ...mockProducts[0],
-        name_hebrew: 'Rotten Tomato',
-        categories_: ['Veg'],
+        nameHebrew: 'Rotten Tomato',
+        categories: ['Veg'],
         supplierIds_: []
       } as Product
       storageSpy.get.and.returnValue(Promise.resolve(mockProducts[0]))
@@ -87,7 +87,7 @@ describe('ProductDataService', () => {
       tick()
 
       const result = service.allProducts_().find((p) => p._id === '1')
-      expect(result?.name_hebrew).toBe('Rotten Tomato')
+      expect(result?.nameHebrew).toBe('Rotten Tomato')
     }))
 
     it('should delete a product and remove it from the signal', fakeAsync(() => {

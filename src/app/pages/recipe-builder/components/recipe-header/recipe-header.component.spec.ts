@@ -26,7 +26,7 @@ describe('RecipeHeaderComponent', () => {
       recipe_type: [type],
       serving_portions: [overrides.serving_portions ?? 1],
       yield_conversions: conversions,
-      name_hebrew: [''],
+      nameHebrew: [''],
       total_weight_g: [0],
       labels: [[] as string[]],
       course: ['']

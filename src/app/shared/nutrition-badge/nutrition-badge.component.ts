@@ -27,9 +27,9 @@ interface TooltipRow {
 
 const MACRO_COLORS: Record<string, string> = {
   protein: '#3b82f6',
-  carbs:   '#f59e0b',
-  fat:     '#ef4444',
-  fiber:   '#10b981',
+  carbs: '#f59e0b',
+  fat: '#ef4444',
+  fiber: '#10b981'
 }
 
 @Component({
@@ -38,7 +38,7 @@ const MACRO_COLORS: Record<string, string> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, LucideAngularModule],
   templateUrl: './nutrition-badge.component.html',
-  styleUrl: './nutrition-badge.component.scss',
+  styleUrl: './nutrition-badge.component.scss'
 })
 export class NutritionBadgeComponent {
   private readonly elRef_ = inject(ElementRef)
@@ -62,23 +62,23 @@ export class NutritionBadgeComponent {
     const halfW = TOOLTIP_W / 2
 
     const centerX_cb = rect.left + rect.width / 2 - cbRect.left
-    const clampedX  = Math.max(halfW, Math.min(cbRect.width - halfW, centerX_cb))
+    const clampedX = Math.max(halfW, Math.min(cbRect.width - halfW, centerX_cb))
 
     // Flip to below when the badge is too close to the containing block's top edge
-    const below = (rect.top - cbRect.top) < TOOLTIP_EST_HEIGHT + 8
+    const below = rect.top - cbRect.top < TOOLTIP_EST_HEIGHT + 8
     this.isBelow_.set(below)
 
     if (!below) {
       this.tooltipStyle_.set({
         bottom: `${cbRect.bottom - rect.top + 8}px`,
-        top:    'auto',
-        left:   `${clampedX}px`,
+        top: 'auto',
+        left: `${clampedX}px`
       })
     } else {
       this.tooltipStyle_.set({
-        top:    `${rect.bottom - cbRect.top + 8}px`,
+        top: `${rect.bottom - cbRect.top + 8}px`,
         bottom: 'auto',
-        left:   `${clampedX}px`,
+        left: `${clampedX}px`
       })
     }
   }
@@ -92,11 +92,10 @@ export class NutritionBadgeComponent {
       const cs = getComputedStyle(el)
       if (
         (cs.containerType && cs.containerType !== 'normal') ||
-        (cs.transform     && cs.transform     !== 'none')   ||
-        (cs.filter        && cs.filter        !== 'none')   ||
-        (cs.perspective   && cs.perspective   !== 'none')   ||
-        cs.willChange.split(',').some(p =>
-          ['transform', 'filter', 'perspective'].includes(p.trim()))
+        (cs.transform && cs.transform !== 'none') ||
+        (cs.filter && cs.filter !== 'none') ||
+        (cs.perspective && cs.perspective !== 'none') ||
+        cs.willChange.split(',').some((p) => ['transform', 'filter', 'perspective'].includes(p.trim()))
       ) {
         return el.getBoundingClientRect()
       }
@@ -109,10 +108,10 @@ export class NutritionBadgeComponent {
     const n = this.nutrition
     if (!n) return null
     const scores: Record<string, number> = {
-      protein: (n.protein_g ?? 0) * 4,
-      carbs:   (n.carbs_g ?? 0) * 4,
-      fat:     (n.fat_g ?? 0) * 9,
-      fiber:   (n.fiber_g ?? 0) * 2,
+      protein: (n.proteinG ?? 0) * 4,
+      carbs: (n.carbsG ?? 0) * 4,
+      fat: (n.fatG ?? 0) * 9,
+      fiber: (n.fiberG ?? 0) * 2
     }
     const total = Object.values(scores).reduce((a, b) => a + b, 0)
     if (total === 0) return null
@@ -124,10 +123,10 @@ export class NutritionBadgeComponent {
     const n = this.nutrition
     if (!n) return []
     const vals: Record<string, number> = {
-      protein: (n.protein_g ?? 0) * 4,
-      carbs:   (n.carbs_g ?? 0) * 4,
-      fat:     (n.fat_g ?? 0) * 9,
-      fiber:   (n.fiber_g ?? 0) * 2,
+      protein: (n.proteinG ?? 0) * 4,
+      carbs: (n.carbsG ?? 0) * 4,
+      fat: (n.fatG ?? 0) * 9,
+      fiber: (n.fiberG ?? 0) * 2
     }
     const total = Object.values(vals).reduce((a, b) => a + b, 0)
     if (total === 0) return []
@@ -137,10 +136,10 @@ export class NutritionBadgeComponent {
   }
 
   get legendItems(): LegendItem[] {
-    return this.macroSegments.map(seg => ({
+    return this.macroSegments.map((seg) => ({
       ...seg,
       iconType: seg.key === 'fat' ? 'fat-svg' : 'lucide',
-      iconName: { protein: 'dumbbell', carbs: 'wheat', fiber: 'leaf' }[seg.key],
+      iconName: { protein: 'dumbbell', carbs: 'wheat', fiber: 'leaf' }[seg.key]
     }))
   }
 
@@ -148,13 +147,81 @@ export class NutritionBadgeComponent {
     const n = this.nutrition
     if (!n) return []
     const candidates: (TooltipRow | null)[] = [
-      n.energy_kcal != null ? { key: 'calories', label: 'קלוריות',     value: n.energy_kcal, unit: 'קק"ל', iconType: 'lucide', iconName: 'flame',    iconColor: '#f97316', sub: false } : null,
-      n.protein_g  != null ? { key: 'protein',  label: 'חלבון',        value: n.protein_g,   unit: 'ג',    iconType: 'lucide', iconName: 'dumbbell', iconColor: '#3b82f6', sub: false } : null,
-      n.carbs_g    != null ? { key: 'carbs',    label: 'פחמימות',      value: n.carbs_g,     unit: 'ג',    iconType: 'lucide', iconName: 'wheat',    iconColor: '#f59e0b', sub: false } : null,
-      n.sugars_g   != null ? { key: 'sugars',   label: 'מהם סוכרים',  value: n.sugars_g,    unit: 'ג',    iconType: 'lucide', iconName: 'candy',    iconColor: '#f59e0b', sub: true  } : null,
-      n.fat_g      != null ? { key: 'fat',      label: 'שומן',         value: n.fat_g,       unit: 'ג',    iconType: 'fat-svg',                       iconColor: '#ef4444', sub: false } : null,
-      n.fiber_g    != null ? { key: 'fiber',    label: 'סיבים',        value: n.fiber_g,     unit: 'ג',    iconType: 'lucide', iconName: 'leaf',     iconColor: '#10b981', sub: false } : null,
-      n.sodium_g   != null ? { key: 'sodium',   label: 'נתרן',         value: n.sodium_g * 1000, unit: 'מג', iconType: 'lucide', iconName: 'waves',    iconColor: '#64748b', sub: false } : null,
+      n.energyKcal != null
+        ? {
+            key: 'calories',
+            label: 'קלוריות',
+            value: n.energyKcal,
+            unit: 'קק"ל',
+            iconType: 'lucide',
+            iconName: 'flame',
+            iconColor: '#f97316',
+            sub: false
+          }
+        : null,
+      n.proteinG != null
+        ? {
+            key: 'protein',
+            label: 'חלבון',
+            value: n.proteinG,
+            unit: 'ג',
+            iconType: 'lucide',
+            iconName: 'dumbbell',
+            iconColor: '#3b82f6',
+            sub: false
+          }
+        : null,
+      n.carbsG != null
+        ? {
+            key: 'carbs',
+            label: 'פחמימות',
+            value: n.carbsG,
+            unit: 'ג',
+            iconType: 'lucide',
+            iconName: 'wheat',
+            iconColor: '#f59e0b',
+            sub: false
+          }
+        : null,
+      n.sugarsG != null
+        ? {
+            key: 'sugars',
+            label: 'מהם סוכרים',
+            value: n.sugarsG,
+            unit: 'ג',
+            iconType: 'lucide',
+            iconName: 'candy',
+            iconColor: '#f59e0b',
+            sub: true
+          }
+        : null,
+      n.fatG != null
+        ? { key: 'fat', label: 'שומן', value: n.fatG, unit: 'ג', iconType: 'fat-svg', iconColor: '#ef4444', sub: false }
+        : null,
+      n.fiberG != null
+        ? {
+            key: 'fiber',
+            label: 'סיבים',
+            value: n.fiberG,
+            unit: 'ג',
+            iconType: 'lucide',
+            iconName: 'leaf',
+            iconColor: '#10b981',
+            sub: false
+          }
+        : null,
+      n.sodiumG != null
+        ? {
+            key: 'sodium',
+            label: 'נתרן',
+            value: n.sodiumG * 1000,
+            unit: 'מג',
+            iconType: 'lucide',
+            iconName: 'waves',
+            iconColor: '#64748b',
+            sub: false
+          }
+        : null
     ]
     return candidates.filter((r): r is TooltipRow => r !== null)
   }

@@ -10,13 +10,7 @@ import type { ScalingService } from './scaling.service'
 import type { RecipeCostService } from './recipe-cost.service'
 import type { TranslationService } from './translation.service'
 import { Recipe, RecipeStep } from '@models/recipe.model'
-import {
-  exportDateStr,
-  heHeader,
-  heUnit,
-  roundExportNumber,
-  type RecipeSheetBlock,
-} from '../utils/export.util'
+import { exportDateStr, heHeader, heUnit, roundExportNumber, type RecipeSheetBlock } from '../utils/export.util'
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -108,7 +102,7 @@ export function styleExcelColumnHeader(ws: Worksheet, rowNum: number, numCols: n
       top: EXCEL_BORDER_THIN,
       left: EXCEL_BORDER_THIN,
       bottom: EXCEL_BORDER_THIN,
-      right: EXCEL_BORDER_THIN,
+      right: EXCEL_BORDER_THIN
     }
   }
 }
@@ -121,7 +115,7 @@ export function styleExcelDataRowBorders(ws: Worksheet, rowNum: number, numCols:
       top: EXCEL_BORDER_THIN,
       left: EXCEL_BORDER_THIN,
       bottom: EXCEL_BORDER_THIN,
-      right: EXCEL_BORDER_THIN,
+      right: EXCEL_BORDER_THIN
     }
   }
   row.alignment = { wrapText: true, vertical: 'top', horizontal: 'right' }
@@ -143,12 +137,7 @@ export function styleExcelBlankRow(ws: Worksheet, rowNum: number): void {
 }
 
 /** Apply bold (medium) border around the perimeter of a block. */
-export function styleExcelBlockBorder(
-  ws: Worksheet,
-  startRow: number,
-  endRow: number,
-  numCols: number
-): void {
+export function styleExcelBlockBorder(ws: Worksheet, startRow: number, endRow: number, numCols: number): void {
   for (let c = 1; c <= numCols; c++) {
     const topCell = ws.getCell(startRow, c)
     topCell.border = { ...topCell.border, top: EXCEL_BORDER_MEDIUM }
@@ -172,24 +161,22 @@ export function heCategoryLabel(translation: TranslationService, cat: string | u
 
 /** Build recipe-sheet block (header, yield, instructions, prep time). Plan 108. */
 export function buildRecipeSheetBlock(recipe: Recipe, quantity: number): RecipeSheetBlock {
-  const steps = (recipe.steps_ ?? []) as RecipeStep[]
+  const steps = (recipe.steps ?? []) as RecipeStep[]
   const isDish =
-    recipe.recipe_type_ === 'dish' ||
-    (recipe.prep_items_?.length ?? 0) > 0 ||
-    (recipe.prep_categories_?.length ?? 0) > 0
+    recipe.recipeType === 'dish' || (recipe.prepItems?.length ?? 0) > 0 || (recipe.prepCategories?.length ?? 0) > 0
   const preparationInstructions = isDish
     ? steps.length
-      ? steps.map(s => (s.instruction_ ?? '').trim()).filter(Boolean)
+      ? steps.map((s) => (s.instruction ?? '').trim()).filter(Boolean)
       : []
-    : steps.map(s => (s.instruction_ ?? '').trim()).filter(Boolean)
-  const preparationTime = steps.reduce((sum, s) => sum + (s.labor_time_minutes_ ?? 0), 0)
+    : steps.map((s) => (s.instruction ?? '').trim()).filter(Boolean)
+  const preparationTime = steps.reduce((sum, s) => sum + (s.laborTimeMinutes ?? 0), 0)
   return {
     date: exportDateStr(),
-    recipeName: recipe.name_hebrew ?? '',
+    recipeName: recipe.nameHebrew ?? '',
     yieldQty: quantity,
-    yieldUnit: heUnit(recipe.yield_unit_ ?? 'unit'),
+    yieldUnit: heUnit(recipe.yieldUnit ?? 'unit'),
     preparationInstructions,
-    preparationTime,
+    preparationTime
   }
 }
 
@@ -204,7 +191,7 @@ export function fillRecipeSheetWorksheet(
   const scaledIngredients = deps.scaling.getScaledIngredients(recipe, factor)
   const scaledRecipe: Recipe = {
     ...recipe,
-    ingredients_: (recipe.ingredients_ ?? []).map(ing => ({ ...ing, amount_: (ing.amount_ ?? 0) * factor })),
+    ingredients: (recipe.ingredients ?? []).map((ing) => ({ ...ing, amount: (ing.amount ?? 0) * factor }))
   }
   const sheetBlock = buildRecipeSheetBlock(recipe, quantity)
   const numCols = 4
@@ -229,7 +216,7 @@ export function fillRecipeSheetWorksheet(
   ws.addRow([heHeader('ingredients_header'), heHeader('amount'), heHeader('unit'), heHeader('unit_price')])
   styleExcelColumnHeader(ws, rowNum++, numCols)
   scaledIngredients.forEach((row, i) => {
-    const ing = scaledRecipe.ingredients_[i]
+    const ing = scaledRecipe.ingredients[i]
     const cost = ing ? deps.recipeCost.getCostForIngredient(ing) : 0
     const unitPrice = row.amount > 0 ? cost / row.amount : 0
     ws.addRow([row.name, roundExportNumber(row.amount), heUnit(row.unit), roundExportNumber(unitPrice)])
@@ -241,7 +228,7 @@ export function fillRecipeSheetWorksheet(
   ws.addRow([heHeader('preparation_instructions')])
   styleExcelSubtitle(ws, rowNum++, numCols)
   if (sheetBlock.preparationInstructions.length) {
-    sheetBlock.preparationInstructions.forEach(line => {
+    sheetBlock.preparationInstructions.forEach((line) => {
       ws.addRow([line])
       styleDataRow(ws, rowNum++)
     })

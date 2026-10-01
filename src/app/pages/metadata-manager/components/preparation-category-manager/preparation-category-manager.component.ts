@@ -32,7 +32,7 @@ export class PreparationCategoryManagerComponent implements OnInit {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
 
-  protected readonly categories_ = this.prepRegistry.preparationCategories_
+  protected readonly categories = this.prepRegistry.preparationCategories_
   protected readonly editingKey_ = signal<string | null>(null)
 
   ngOnInit(): void {
@@ -55,8 +55,8 @@ export class PreparationCategoryManagerComponent implements OnInit {
       .recipes_()
       .filter(
         (r) =>
-          (r.prep_items_ ?? []).some((p) => p.category_name === key) ||
-          (r.prep_categories_ ?? []).some((c) => c.category_name === key)
+          (r.prepItems ?? []).some((p) => p.categoryName === key) ||
+          (r.prepCategories ?? []).some((c) => c.categoryName === key)
       ).length
   }
 
@@ -65,7 +65,7 @@ export class PreparationCategoryManagerComponent implements OnInit {
     const sanitized = hebrewLabel.trim()
     if (!sanitized) return
 
-    const existingLabels = this.categories_().map((k) => this.translation.translate(k))
+    const existingLabels = this.categories().map((k) => this.translation.translate(k))
     if (existingLabels.includes(sanitized)) {
       this.userMsg.onSetErrorMsg(this.translation.translate('metadata_category_exists'))
       return
@@ -73,7 +73,7 @@ export class PreparationCategoryManagerComponent implements OnInit {
 
     const existingKey = this.translation.resolvePreparationCategory(sanitized)
     if (existingKey) {
-      if (this.categories_().includes(existingKey)) {
+      if (this.categories().includes(existingKey)) {
         this.userMsg.onSetErrorMsg(this.translation.translate('metadata_category_exists'))
         return
       }

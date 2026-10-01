@@ -40,9 +40,9 @@
     </nav>
 
     <!-- Hero: recipe photo + gradient scrim + name + prep progress (mirrors .cv-hero) -->
-    <div class="cv-hero" [class.cv-hero--photo]="!!recipe.imageUrl_">
-      @if (recipe.imageUrl_) {
-      <img class="cv-hero-img" [src]="recipe.imageUrl_" [alt]="recipe.name_hebrew" />
+    <div class="cv-hero" [class.cv-hero--photo]="!!recipe.imageUrl">
+      @if (recipe.imageUrl) {
+      <img class="cv-hero-img" [src]="recipe.imageUrl" [alt]="recipe.nameHebrew" />
       } @else {
       <div class="cv-hero-placeholder" aria-hidden="true">
         <lucide-icon name="image" [size]="32"></lucide-icon>
@@ -52,15 +52,15 @@
       <div class="cv-hero-top">
         <div class="cv-hero-info">
           <div class="cv-hero-badges">
-            @if (recipe.is_approved_) {
+            @if (recipe.isApproved) {
             <span class="cv-hero-badge cv-hero-badge--approved">✓ {{ 'approved' | translatePipe }}</span>
             } @if (scaledCost_() > 0) {
             <span class="cv-hero-badge">₪{{ scaledCost_() | number:'1.0-0' }}</span>
             }
           </div>
-          <h1 class="cv-hero-title">{{ recipe.name_hebrew }}</h1>
+          <h1 class="cv-hero-title">{{ recipe.nameHebrew }}</h1>
           <app-rating-stars
-            [value]="recipe.rating_ ?? 0"
+            [value]="recipe.rating ?? 0"
             [readonly]="!isLoggedIn()"
             size="sm"
             (ratingChange)="onRatingChange($event)"
@@ -293,7 +293,7 @@
               [typeToFilter]="true"
             >
             </app-custom-select>
-            @if (recipe.yield_unit_ !== selectedUnit_()) {
+            @if (recipe.yieldUnit !== selectedUnit_()) {
             <span class="conversion-badge"> ×{{ scaleFactor_() | number:'1.2-2' }} </span>
             }
           </div>
@@ -462,7 +462,7 @@
             {{ isDish_() ? ('prep_list_mise_en_place' | translatePipe) : ('prep_workflow' | translatePipe) }}
           </span>
           <span class="cv-step-counter"
-            >{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : recipe.steps_.length }}</span
+            >{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : recipe.steps.length }}</span
           >
         </div>
 
@@ -530,8 +530,8 @@
           <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
           } } @else {
           <!-- Recipe mode: steps as cards -->
-          @if (recipe.steps_ && recipe.steps_.length) { @for (step of recipe.steps_; track step.order_; let si = $index)
-          { @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+          @if (recipe.steps && recipe.steps.length) { @for (step of recipe.steps; track step.order; let si = $index) {
+          @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
           <!-- ACTIVE step -->
           <div class="cv-step-card cv-step-card--active" [attr.data-step-index]="si">
             <div class="cv-step-card-head">
@@ -539,10 +539,10 @@
               <span class="cv-step-active-label">פעיל עכשיו</span>
             </div>
             <div class="cv-step-card-body">
-              <p>{{ step.instruction_ }}</p>
+              <p>{{ step.instruction }}</p>
               <!-- Timer/stopwatch pills sit under the step text (mirrors mockup's timerBtnLabel placement) -->
               <div class="cv-step-tools-row">
-                @if ((step.cooking_time_secs_ ?? 0) > 0) { @if (cookTimer.activeTimerStepIndex_() === si) {
+                @if ((step.cookingTimeSecs ?? 0) > 0) { @if (cookTimer.activeTimerStepIndex_() === si) {
                 <button type="button" class="cv-step-tool-btn" (click)="cookTimer.cancelTimer()">
                   ⏱ {{ cookTimer.timerDisplay_() }} ⏸
                 </button>
@@ -550,7 +550,7 @@
                 <button
                   type="button"
                   class="cv-step-tool-btn"
-                  (click)="cookTimer.startTimer(si, step.cooking_time_secs_!)"
+                  (click)="cookTimer.startTimer(si, step.cookingTimeSecs!)"
                 >
                   ⏱ {{ 'timer_start' | translatePipe }}
                 </button>
@@ -600,7 +600,7 @@
               >
             </div>
             <div class="cv-step-card-body">
-              <p>{{ step.instruction_ }}</p>
+              <p>{{ step.instruction }}</p>
             </div>
           </div>
           } @else {
@@ -627,7 +627,7 @@
               }
             </div>
             <div class="cv-step-card-body">
-              <p>{{ step.instruction_ }}</p>
+              <p>{{ step.instruction }}</p>
             </div>
           </div>
           } } } @else {
@@ -645,7 +645,7 @@
       </div>
     </div>
   </div>
-  <app-approve-stamp [approved]="recipe.is_approved_" [disabled]="isSaving_()" (approve)="onApproveStamp()" />
+  <app-approve-stamp [approved]="recipe.isApproved" [disabled]="isSaving_()" (approve)="onApproveStamp()" />
   } @else {
   <!-- Enhanced empty state: friendly icon, CTA, recent recipe quick-picks -->
   <div class="cook-view-empty">

@@ -17,26 +17,26 @@ export class ProductAiFlowService {
 
     // Register and apply categories
     const knownCategories = new Set(this.metadataRegistry_.allCategories_())
-    for (const category of draft.categories_) {
+    for (const category of draft.categories) {
       if (!knownCategories.has(category)) {
         await this.metadataRegistry_.registerCategory(category)
       }
     }
-    this.form_.get('categories_')?.patchValue(draft.categories_)
+    this.form_.get('categories')?.patchValue(draft.categories)
 
     // Register and apply allergens
-    for (const allergen of draft.allergens_) {
+    for (const allergen of draft.allergens) {
       await this.metadataRegistry_.registerAllergen(allergen)
     }
-    this.form_.get('allergens_')?.patchValue(draft.allergens_)
+    this.form_.get('allergens')?.patchValue(draft.allergens)
 
-    // Patch scalar fields (productName is the form control name for name_hebrew)
+    // Patch scalar fields (productName is the form control name for nameHebrew)
     this.form_.patchValue({
-      productName: draft.name_hebrew,
-      base_unit_: draft.base_unit_,
-      yield_factor_: draft.yield_factor_,
-      min_stock_level_: draft.min_stock_level_,
-      expiry_days_default_: draft.expiry_days_default_,
+      productName: draft.nameHebrew,
+      baseUnit: draft.baseUnit,
+      yieldFactor: draft.yieldFactor,
+      minStockLevel: draft.minStockLevel,
+      expiryDaysDefault: draft.expiryDaysDefault
     })
   }
 
@@ -44,13 +44,13 @@ export class ProductAiFlowService {
     if (!this.form_) return
 
     const current: AiProductDraft = {
-      name_hebrew: this.form_.get('productName')?.value ?? '',
-      base_unit_: this.form_.get('base_unit_')?.value ?? '',
-      categories_: this.form_.get('categories_')?.value ?? [],
-      allergens_: this.form_.get('allergens_')?.value ?? [],
-      yield_factor_: this.form_.get('yield_factor_')?.value ?? 1,
-      min_stock_level_: this.form_.get('min_stock_level_')?.value ?? 0,
-      expiry_days_default_: this.form_.get('expiry_days_default_')?.value ?? 0,
+      nameHebrew: this.form_.get('productName')?.value ?? '',
+      baseUnit: this.form_.get('baseUnit')?.value ?? '',
+      categories: this.form_.get('categories')?.value ?? [],
+      allergens: this.form_.get('allergens')?.value ?? [],
+      yieldFactor: this.form_.get('yieldFactor')?.value ?? 1,
+      minStockLevel: this.form_.get('minStockLevel')?.value ?? 0,
+      expiryDaysDefault: this.form_.get('expiryDaysDefault')?.value ?? 0
     }
 
     await this.applyDraft({ ...current, ...patch })

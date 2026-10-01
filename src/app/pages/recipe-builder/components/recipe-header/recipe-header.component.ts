@@ -154,8 +154,8 @@ export class RecipeHeaderComponent {
   validate(): boolean {
     const errors: Record<string, string> = {}
     const f = this.form()
-    const name = (f.get('name_hebrew')?.value ?? '').toString().trim()
-    if (!name) errors['name_hebrew'] = 'field_name_required'
+    const name = (f.get('nameHebrew')?.value ?? '').toString().trim()
+    if (!name) errors['nameHebrew'] = 'field_name_required'
     const yieldAmount = this.yield.primaryAmount_()
     if (!yieldAmount || yieldAmount <= 0) errors['yield_amount'] = 'field_amount_required'
     const yieldUnit = this.yield.primaryUnitLabel_()

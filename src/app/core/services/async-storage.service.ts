@@ -101,15 +101,15 @@ export class StorageService {
   }
 
   /** Lean prefix-match typeahead search (plan 301, Milestone 1). */
-  async search<T extends { name_hebrew?: string }>(entityType: string, q: string, limit = 25): Promise<T[]> {
+  async search<T extends { nameHebrew?: string }>(entityType: string, q: string, limit = 25): Promise<T[]> {
     return this.httpAdapter.search<T>(entityType, q, limit)
   }
 
   /**
    * Lightweight count (plan 301 M3 / 304 M2) — avoids loading the full collection just
    * to show a dashboard badge. filter mirrors the server's generic.js semantics exactly:
-   * 'lowStock' (PRODUCT_LIST, min_stock_level_ > 0) or 'unapproved' (RECIPE_LIST/DISH_LIST,
-   * is_approved_ !== true) — see kitchen-state.service.ts's lowStockProducts_ and
+   * 'lowStock' (products, minStockLevel > 0) or 'unapproved' (recipes/dishes,
+   * isApproved !== true) — see kitchen-state.service.ts's lowStockProducts_ and
    * dashboard-overview.component.ts's prior unapprovedCount_ computed for the source of truth.
    */
   async count(entityType: string, filter?: 'lowStock' | 'unapproved'): Promise<number> {

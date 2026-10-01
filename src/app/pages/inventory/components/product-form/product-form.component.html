@@ -4,7 +4,7 @@
       @if (isEditMode_()) {
         <h2 class="form-header__title">
           {{ 'edit_product_title' | translatePipe }}:
-          {{ productForm_.get('productName')?.value ?? initialProduct_()?.name_hebrew ?? '' }}
+          {{ productForm_.get('productName')?.value ?? initialProduct_()?.nameHebrew ?? '' }}
         </h2>
       } @else {
         <h2 class="form-header__title">{{ 'add_product_inventory_title' | translatePipe }}</h2>
@@ -44,7 +44,7 @@
         }
       </div>
 
-      <div class="form-group" [class.c-input--invalid]="validationErrors_()['categories_']">
+      <div class="form-group" [class.c-input--invalid]="validationErrors_()['categories']">
         <label class="label-row collapsible-field__label-with-icon">
           <lucide-icon name="tags" class="icon-xs icon-muted"></lucide-icon>
           {{ 'category' | translatePipe }}
@@ -61,7 +61,7 @@
           (remove)="removeCategory($event)"
           (addNew)="openAddNewCategory()"
         />
-        @if (validationErrors_()['categories_']) {
+        @if (validationErrors_()['categories']) {
           <span class="c-field-error">{{ 'field_category_required' | translatePipe }}</span>
         }
       </div>
@@ -89,21 +89,21 @@
       <div class="form-group">
         <label>{{ 'base_unit' | translatePipe }}</label>
         <app-custom-select
-          formControlName="base_unit_"
+          formControlName="baseUnit"
           [options]="baseUnitOptions_()"
           placeholder="choose_unit"
           [typeToFilter]="true"
           [addNewValue]="'NEW_UNIT'"
-          [class.c-input--invalid]="validationErrors_()['base_unit_']"
+          [class.c-input--invalid]="validationErrors_()['baseUnit']"
           (valueChange)="onBaseUnitValueChange($event)"
         />
-        @if (validationErrors_()['base_unit_']) {
+        @if (validationErrors_()['baseUnit']) {
           <span class="c-field-error">{{ 'field_unit_required' | translatePipe }}</span>
         }
       </div>
     </div>
 
-    <div class="form-section form-section--purchase border-top" formArrayName="purchase_options_">
+    <div class="form-section form-section--purchase border-top" formArrayName="purchaseOptions">
       <label class="section-header">
         <button type="button" class="c-btn-ghost" (click)="addPurchaseOption()">
           <lucide-icon name="plus" class="icon-xs"></lucide-icon> {{ 'add_purchase_unit' | translatePipe }}
@@ -119,12 +119,10 @@
         <div class="scaling-row">
           <div
             class="input-wrapper"
-            [class.field-error]="
-              option.get('unit_symbol_')?.invalid && (option.get('unit_symbol_')?.dirty || isSubmitted)
-            "
+            [class.field-error]="option.get('unitSymbol')?.invalid && (option.get('unitSymbol')?.dirty || isSubmitted)"
           >
             <app-custom-select
-              formControlName="unit_symbol_"
+              formControlName="unitSymbol"
               [options]="unitSymbolOptions_()"
               placeholder="choose_unit"
               [typeToFilter]="true"
@@ -136,14 +134,14 @@
           <div
             class="input-wrapper"
             [class.field-error]="
-              option.get('conversion_rate_')?.invalid && (option.get('conversion_rate_')?.dirty || isSubmitted)
+              option.get('conversionRate')?.invalid && (option.get('conversionRate')?.dirty || isSubmitted)
             "
           >
             <label class="label-row">
               <span class="math-text">=</span>
               <input
                 type="number"
-                formControlName="conversion_rate_"
+                formControlName="conversionRate"
                 [placeholder]="'quantity' | translatePipe"
                 [attr.aria-label]="'quantity' | translatePipe"
                 step="any"
@@ -163,7 +161,7 @@
               <app-custom-select
                 formControlName="uom"
                 [options]="uomOptions_()"
-                [placeholder]="productForm_.get('base_unit_')?.value || 'compare_to_unit'"
+                [placeholder]="productForm_.get('baseUnit')?.value || 'compare_to_unit'"
                 [typeToFilter]="true"
                 [addNewValue]="'NEW_UNIT'"
                 (valueChange)="onUomValueChange($event, idx)"
@@ -184,7 +182,7 @@
             @if (option.get('show_special_price_')?.value) {
               <input
                 type="number"
-                formControlName="price_override_"
+                formControlName="priceOverride"
                 [placeholder]="'price' | translatePipe"
                 class="override-input c-input"
                 step="0.01"
@@ -326,7 +324,7 @@
                   class="yield-factor-input c-input"
                   SelectOnFocus
                   type="number"
-                  formControlName="yield_factor_"
+                  formControlName="yieldFactor"
                   step="0.001"
                   placeholder="1.00"
                   min="0"
@@ -364,7 +362,7 @@
             <lucide-icon name="package" class="icon-xs icon-muted"></lucide-icon>
             {{ 'min_stock_level' | translatePipe }}
           </label>
-          <input type="number" formControlName="min_stock_level_" min="0" placeholder="0" class="c-input" />
+          <input type="number" formControlName="minStockLevel" min="0" placeholder="0" class="c-input" />
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
@@ -390,7 +388,7 @@
             <lucide-icon name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>
             {{ 'expiry_days_default' | translatePipe }}
           </label>
-          <input type="number" formControlName="expiry_days_default_" min="0" placeholder="0" class="c-input" />
+          <input type="number" formControlName="expiryDaysDefault" min="0" placeholder="0" class="c-input" />
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"

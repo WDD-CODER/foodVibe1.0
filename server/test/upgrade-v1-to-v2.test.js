@@ -74,12 +74,12 @@ describe('upgradeV1toV2', () => {
     expect(doc.logistics.baseline[0]).toMatchObject({ equipmentId: 'e1', isCritical: true })
   })
 
-  it('renames menu item recipe type preparation -> recipe', () => {
+  it('keeps menu item recipeType values (dish | preparation) — UI vocabulary rename is deferred', () => {
     const { doc } = upgradeV1toV2('MENU_EVENT_LIST', {
       _id: 'm1', userId: 'u1', name_: 'x', event_type_: 't', serving_type_: 's', guest_count_: 1,
       sections_: [{ _id: 's1', name_: 'a', sort_order_: 0, items_: [{ recipe_id_: 'r', recipe_type_: 'preparation', predicted_take_rate_: 1, derived_portions_: 1 }] }],
     })
-    expect(doc.sections[0].items[0].recipeType).toBe('recipe')
+    expect(doc.sections[0].items[0].recipeType).toBe('preparation')
   })
 
   it('reports every key the field map does not cover (never silently drops)', () => {

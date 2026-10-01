@@ -1,5 +1,4 @@
 <div class="workflow-container" dir="rtl" [formGroup]="$any(workflowFormArray().parent)">
-
   @if (type() === 'preparation') {
     <div class="workflow-grid" formArrayName="workflow_items">
       <div class="grid-header">
@@ -30,29 +29,34 @@
                 SelectOnFocus
                 textareaAutoGrow
                 placeholder="{{ 'instruction_placeholder' | translatePipe }}"
-                (keydown.enter)="onInstructionEnter($event)"></textarea>
+                (keydown.enter)="onInstructionEnter($event)"
+              ></textarea>
             </div>
 
             <!-- Left: timer + cook time + delete -->
             <div class="col-step-actions">
               <!-- clock icon = labor time (admin analytics) -->
-              <button type="button"
+              <button
+                type="button"
                 class="timer-toggle-btn"
                 [class.timer-active]="isTimerOpen(i)"
                 [class.timer-has-value]="!isTimerOpen(i) && (group.get('labor_time')?.value ?? 0) > 0"
                 (click)="toggleTimer(i)"
                 [attr.aria-label]="'labor_time_minutes' | translatePipe"
-                tabindex="-1">
+                tabindex="-1"
+              >
                 <lucide-icon name="clock" class="wf-icon"></lucide-icon>
               </button>
               <!-- timer icon = cooking time (countdown) -->
-              <button type="button"
+              <button
+                type="button"
                 class="timer-toggle-btn"
                 [class.timer-active]="isCookTimeOpen(i)"
                 [class.timer-has-value]="!isCookTimeOpen(i) && (group.get('cooking_time')?.value ?? 0) > 0"
                 (click)="toggleCookTime(i)"
                 [attr.aria-label]="'cooking_time_minutes' | translatePipe"
-                tabindex="-1">
+                tabindex="-1"
+              >
                 <lucide-icon name="timer" class="wf-icon"></lucide-icon>
               </button>
               <button type="button" (click)="removeItem.emit(i)" class="c-icon-btn danger step-delete-btn">
@@ -93,14 +97,10 @@
                       (focus)="enterLaborTimeEdit(i, group.get('labor_time')?.value ?? 0)"
                       tabindex="0"
                       role="button"
-                    >{{ formatMinutesToClock(group.get('labor_time')?.value ?? 0) }}</span>
+                      >{{ formatMinutesToClock(group.get('labor_time')?.value ?? 0) }}</span
+                    >
                   }
-                  <button
-                    type="button"
-                    class="counter-btn plus"
-                    (click)="incrementLaborTime(group)"
-                    tabindex="-1"
-                  >
+                  <button type="button" class="counter-btn plus" (click)="incrementLaborTime(group)" tabindex="-1">
                     <lucide-icon name="plus" class="wf-icon"></lucide-icon>
                   </button>
                 </div>
@@ -140,14 +140,10 @@
                       (focus)="enterCookTimeEdit(i, group.get('cooking_time')?.value ?? 0)"
                       tabindex="0"
                       role="button"
-                    >{{ formatSecsToHms(group.get('cooking_time')?.value ?? 0) }}</span>
+                      >{{ formatSecsToHms(group.get('cooking_time')?.value ?? 0) }}</span
+                    >
                   }
-                  <button
-                    type="button"
-                    class="counter-btn plus"
-                    (click)="incrementCookTime(group)"
-                    tabindex="-1"
-                  >
+                  <button type="button" class="counter-btn plus" (click)="incrementCookTime(group)" tabindex="-1">
                     <lucide-icon name="plus" class="wf-icon"></lucide-icon>
                   </button>
                 </div>
@@ -162,9 +158,8 @@
         {{ 'add_prep_stage' | translatePipe }}
       </button>
     </div>
-  }
 
-  @else {
+  } @else {
     <div class="prep-flat-grid" formArrayName="workflow_items">
       <div class="grid-header prep-grid-header">
         <div class="col-drag"></div>
@@ -185,22 +180,29 @@
               <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
             </div>
             <div class="col-prep-name">
-              @if (!group.get('preparation_name')?.value || editingPreparationNameAtRow_() === i) {
+              @if (!group.get('preparationName')?.value || editingPreparationNameAtRow_() === i) {
                 <app-preparation-search
-                  [selectedCategory]="group.get('category_name')?.value ?? ''"
+                  [selectedCategory]="group.get('categoryName')?.value ?? ''"
                   [focusTrigger]="focusRowAt()"
                   [rowIndex]="i"
-                  [initialQuery]="editingPreparationNameAtRow_() === i ? (group.get('preparation_name')?.value ?? '') : ''"
+                  [initialQuery]="
+                    editingPreparationNameAtRow_() === i ? (group.get('preparationName')?.value ?? '') : ''
+                  "
                   (preparationSelected)="onPreparationSelected($event, group)"
                   (preparationAdded)="onPreparationSelected($event, group)"
-                  (focusDone)="focusRowDone.emit()">
+                  (focusDone)="focusRowDone.emit()"
+                >
                 </app-preparation-search>
               } @else {
-                <div class="selected-item-display" role="button" tabindex="0"
+                <div
+                  class="selected-item-display"
+                  role="button"
+                  tabindex="0"
                   (click)="editingPreparationNameAtRow_.set(i)"
                   (keydown.enter)="editingPreparationNameAtRow_.set(i)"
-                  (keydown.space)="$event.preventDefault(); editingPreparationNameAtRow_.set(i)">
-                  <span class="item-text">{{ group.get('preparation_name')?.value }}</span>
+                  (keydown.space)="$event.preventDefault(); editingPreparationNameAtRow_.set(i)"
+                >
+                  <span class="item-text">{{ group.get('preparationName')?.value }}</span>
                   <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearPreparation(group)">
                     <lucide-icon name="x" [size]="14"></lucide-icon>
                   </button>
@@ -210,20 +212,22 @@
 
             <div class="col-prep-category">
               <app-custom-select
-                formControlName="category_name"
+                formControlName="categoryName"
                 class="grid-select category-select"
                 [options]="categoryOptionsForGroup()"
                 placeholder="choose_category"
                 [typeToFilter]="true"
                 [addNewValue]="'__add_new__'"
-                (valueChange)="onCategoryChange(group, $event)" />
+                (valueChange)="onCategoryChange(group, $event)"
+              />
             </div>
 
             <div class="col-prep-qty">
               <app-counter
                 [value]="group.get('quantity')?.value ?? 0"
                 [min]="0"
-                (valueChange)="onPrepQtyChange(group, $event)" />
+                (valueChange)="onPrepQtyChange(group, $event)"
+              />
             </div>
 
             <div class="col-prep-unit">
@@ -234,7 +238,8 @@
                 placeholder="unit"
                 [typeToFilter]="true"
                 [addNewValue]="'__add_unit__'"
-                (valueChange)="onUnitChange(group, $event)" />
+                (valueChange)="onUnitChange(group, $event)"
+              />
             </div>
 
             <div class="col-prep-actions">

@@ -19,9 +19,13 @@ describe('ExportService', () => {
   beforeEach(() => {
     productsSignal.set([])
     recipesSignal.set([])
-    scalingSpy = jasmine.createSpyObj('ScalingService', ['getScaleFactor', 'getScaledIngredients', 'getScaledPrepItems'])
+    scalingSpy = jasmine.createSpyObj('ScalingService', [
+      'getScaleFactor',
+      'getScaledIngredients',
+      'getScaledPrepItems'
+    ])
     scalingSpy.getScaleFactor.and.callFake((recipe: Recipe, targetQty: number) => {
-      const base = recipe.yield_amount_ ?? 1
+      const base = recipe.yieldAmount ?? 1
       return base > 0 ? targetQty / base : 1
     })
     scalingSpy.getScaledIngredients.and.returnValue([])
@@ -29,7 +33,7 @@ describe('ExportService', () => {
 
     const kitchenSpy = jasmine.createSpyObj('KitchenStateService', [], {
       products_: productsSignal,
-      recipes_: recipesSignal,
+      recipes_: recipesSignal
     })
     const costSpy = jasmine.createSpyObj('RecipeCostService', ['getCostForIngredient', 'computeRecipeCost'])
     costSpy.getCostForIngredient.and.returnValue(0)
@@ -43,8 +47,8 @@ describe('ExportService', () => {
         { provide: KitchenStateService, useValue: kitchenSpy },
         { provide: ScalingService, useValue: scalingSpy },
         { provide: RecipeCostService, useValue: costSpy },
-        { provide: TranslationService, useValue: translationSpy },
-      ],
+        { provide: TranslationService, useValue: translationSpy }
+      ]
     })
     service = TestBed.inject(ExportService)
   })
@@ -53,13 +57,13 @@ describe('ExportService', () => {
     it('should call getScaleFactor and getScaledIngredients with recipe and correct factor', async () => {
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Test Recipe',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
-        steps_: [],
-        yield_amount_: 2,
-        yield_unit_: 'unit',
-        default_station_: '',
-        is_approved_: false,
+        nameHebrew: 'Test Recipe',
+        ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 100, unit: 'gram' }],
+        steps: [],
+        yieldAmount: 2,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
       }
       await service.exportShoppingList(recipe, 4)
 
@@ -70,30 +74,30 @@ describe('ExportService', () => {
     it('should use kitchen state products and recipes for category resolution', () => {
       const product: Product = {
         _id: 'p1',
-        name_hebrew: 'Flour',
-        base_unit_: 'gram',
-        sources_: [],
-        purchase_options_: [],
-        categories_: ['Dry'],
-        yield_factor_: 1,
-        allergens_: [],
-        min_stock_level_: 0,
-        expiry_days_default_: 0,
+        nameHebrew: 'Flour',
+        baseUnit: 'gram',
+        sources: [],
+        purchaseOptions: [],
+        categories: ['Dry'],
+        yieldFactor: 1,
+        allergens: [],
+        minStockLevel: 0,
+        expiryDaysDefault: 0
       }
       productsSignal.set([product])
       scalingSpy.getScaledIngredients.and.returnValue([
-        { name: 'Flour', amount: 200, unit: 'gram', availableUnits: [], referenceId: 'p1', type: 'product' },
+        { name: 'Flour', amount: 200, unit: 'gram', availableUnits: [], referenceId: 'p1', type: 'product' }
       ] as ScaledIngredientRow[])
 
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Test',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
-        steps_: [],
-        yield_amount_: 2,
-        yield_unit_: 'unit',
-        default_station_: '',
-        is_approved_: false,
+        nameHebrew: 'Test',
+        ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 100, unit: 'gram' }],
+        steps: [],
+        yieldAmount: 2,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
       }
       expect(() => service.exportShoppingList(recipe, 4)).not.toThrow()
       expect(scalingSpy.getScaledIngredients).toHaveBeenCalledWith(recipe, 2)
@@ -101,53 +105,53 @@ describe('ExportService', () => {
   })
 
   describe('exportMenuShoppingList', () => {
-    it('should call getScaledIngredients per dish with factor = derived_portions_ / yield_amount_', async () => {
+    it('should call getScaledIngredients per dish with factor = derivedPortions / yieldAmount', async () => {
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Dish',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
-        steps_: [],
-        yield_amount_: 10,
-        yield_unit_: 'unit',
-        default_station_: '',
-        is_approved_: false,
+        nameHebrew: 'Dish',
+        ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 100, unit: 'gram' }],
+        steps: [],
+        yieldAmount: 10,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
       }
       const product: Product = {
         _id: 'p1',
-        name_hebrew: 'Flour',
-        base_unit_: 'gram',
-        sources_: [],
-        purchase_options_: [],
-        categories_: ['Dry'],
-        yield_factor_: 1,
-        allergens_: [],
-        min_stock_level_: 0,
-        expiry_days_default_: 0,
+        nameHebrew: 'Flour',
+        baseUnit: 'gram',
+        sources: [],
+        purchaseOptions: [],
+        categories: ['Dry'],
+        yieldFactor: 1,
+        allergens: [],
+        minStockLevel: 0,
+        expiryDaysDefault: 0
       }
       scalingSpy.getScaledIngredients.and.returnValue([
-        { name: 'Flour', amount: 0, unit: 'gram', availableUnits: [], referenceId: 'p1', type: 'product' },
+        { name: 'Flour', amount: 0, unit: 'gram', availableUnits: [], referenceId: 'p1', type: 'product' }
       ] as ScaledIngredientRow[])
 
       const menu: MenuEvent = {
         _id: 'm1',
-        name_: 'Menu',
-        event_type_: '',
-        event_date_: '',
-        serving_type_: 'plated_course',
-        guest_count_: 5,
-        sections_: [
+        name: 'Menu',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 5,
+        sections: [
           {
             _id: 's1',
-            name_: 'Main',
-            sort_order_: 1,
-            items_: [
-              { recipe_id_: 'r1', recipe_type_: 'dish', predicted_take_rate_: 0, derived_portions_: 20, serving_portions_: 1 },
-              { recipe_id_: 'r1', recipe_type_: 'dish', predicted_take_rate_: 0, derived_portions_: 5, serving_portions_: 0.5 },
-            ],
-          },
+            name: 'Main',
+            sortOrder: 1,
+            items: [
+              { recipeId: 'r1', recipeType: 'dish', predictedTakeRate: 0, derivedPortions: 20, servingPortions: 1 },
+              { recipeId: 'r1', recipeType: 'dish', predictedTakeRate: 0, derivedPortions: 5, servingPortions: 0.5 }
+            ]
+          }
         ],
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
+        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
       }
       await service.exportMenuShoppingList(menu, [recipe], [product])
 
@@ -159,33 +163,33 @@ describe('ExportService', () => {
     it('should skip items with no recipe or no ingredients', async () => {
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Dish',
-        ingredients_: [],
-        steps_: [],
-        yield_amount_: 1,
-        yield_unit_: 'unit',
-        default_station_: '',
-        is_approved_: false,
+        nameHebrew: 'Dish',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
       }
       const menu: MenuEvent = {
         _id: 'm1',
-        name_: 'Menu',
-        event_type_: '',
-        event_date_: '',
-        serving_type_: 'plated_course',
-        guest_count_: 2,
-        sections_: [
+        name: 'Menu',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 2,
+        sections: [
           {
             _id: 's1',
-            name_: 'Main',
-            sort_order_: 1,
-            items_: [
-              { recipe_id_: 'r1', recipe_type_: 'dish', predicted_take_rate_: 0, derived_portions_: 2, serving_portions_: 1 },
-            ],
-          },
+            name: 'Main',
+            sortOrder: 1,
+            items: [
+              { recipeId: 'r1', recipeType: 'dish', predictedTakeRate: 0, derivedPortions: 2, servingPortions: 1 }
+            ]
+          }
         ],
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' },
+        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
       }
       await service.exportMenuShoppingList(menu, [recipe], [])
       expect(scalingSpy.getScaledIngredients).not.toHaveBeenCalled()
@@ -196,16 +200,16 @@ describe('ExportService', () => {
     it('should return payload with recipeSheet, recipeSheetLabels, and ingredients section', () => {
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Test Recipe',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
-        steps_: [{ order_: 1, instruction_: 'Mix', labor_time_minutes_: 10 }],
-        yield_amount_: 2,
-        yield_unit_: 'unit',
-        default_station_: '',
-        is_approved_: false,
+        nameHebrew: 'Test Recipe',
+        ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 100, unit: 'gram' }],
+        steps: [{ order: 1, instruction: 'Mix', laborTimeMinutes: 10 }],
+        yieldAmount: 2,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
       }
       scalingSpy.getScaledIngredients.and.returnValue([
-        { name: 'Flour', amount: 200, unit: 'gram', availableUnits: [], referenceId: 'p1', type: 'product' },
+        { name: 'Flour', amount: 200, unit: 'gram', availableUnits: [], referenceId: 'p1', type: 'product' }
       ] as ScaledIngredientRow[])
 
       const payload = service.getRecipeInfoPreviewPayload(recipe, 4)
@@ -224,13 +228,13 @@ describe('ExportService', () => {
     it('should export recipe info without throwing (single sheet)', async () => {
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Test',
-        ingredients_: [],
-        steps_: [],
-        yield_amount_: 1,
-        yield_unit_: 'unit',
-        default_station_: '',
-        is_approved_: false,
+        nameHebrew: 'Test',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
       }
       await service.exportRecipeInfo(recipe, 1)
       expect(scalingSpy.getScaleFactor).toHaveBeenCalledWith(recipe, 1)

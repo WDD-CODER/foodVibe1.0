@@ -27,15 +27,15 @@ describe('KitchenStateService', () => {
 
   const createMockProduct = (_id: string): Product => ({
     _id,
-    name_hebrew: 'מוצר בדיקה',
-    categories_: ['Dry'],
-    sources_: [{ supplierId: 's1', price: 10, addedAt: Date.now() }],
-    purchase_options_: [],
-    base_unit_: 'gram',
-    yield_factor_: 1,
-    allergens_: [],
-    min_stock_level_: 0,
-    expiry_days_default_: 3
+    nameHebrew: 'מוצר בדיקה',
+    categories: ['Dry'],
+    sources: [{ supplierId: 's1', price: 10, addedAt: Date.now() }],
+    purchaseOptions: [],
+    baseUnit: 'gram',
+    yieldFactor: 1,
+    allergens: [],
+    minStockLevel: 0,
+    expiryDaysDefault: 3
   })
 
   beforeEach(() => {
@@ -95,8 +95,8 @@ describe('KitchenStateService', () => {
     it('should sync products_ signal when ProductDataService signal updates', () => {
       const mockRawItem = {
         _id: 'p1',
-        name_hebrew: 'Tomato',
-        categories_: ['Veg']
+        nameHebrew: 'Tomato',
+        categories: ['Veg']
       } as any
 
       // Update signal and trigger Angular effects
@@ -104,7 +104,7 @@ describe('KitchenStateService', () => {
       TestBed.flushEffects()
 
       expect(service.products_().length).toBe(1)
-      expect(service.products_()[0].name_hebrew).toBe('Tomato')
+      expect(service.products_()[0].nameHebrew).toBe('Tomato')
     })
   })
 
@@ -157,13 +157,13 @@ describe('KitchenStateService', () => {
     it('should call addRecipe for preparation and show success message', (done) => {
       const recipe = {
         _id: '',
-        name_hebrew: 'Hummus',
-        ingredients_: [],
-        steps_: [],
-        yield_amount_: 1,
-        yield_unit_: 'portion',
-        default_station_: '',
-        is_approved_: true
+        nameHebrew: 'Hummus',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'portion',
+        defaultStation: '',
+        isApproved: true
       } as Recipe
       recipeDataSpy.addRecipe.and.returnValue(Promise.resolve({ ...recipe, _id: 'r1' }))
 
@@ -178,14 +178,14 @@ describe('KitchenStateService', () => {
     it('should call addDish for dish and show success message', (done) => {
       const dish = {
         _id: '',
-        name_hebrew: 'Salad',
-        ingredients_: [],
-        steps_: [],
-        yield_amount_: 1,
-        yield_unit_: 'מנה',
-        default_station_: '',
-        is_approved_: true,
-        prep_items_: [{ preparation_name: 'Chopped lettuce', category_name: 'veg', quantity: 1, unit: 'unit' }]
+        nameHebrew: 'Salad',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'מנה',
+        defaultStation: '',
+        isApproved: true,
+        prepItems: [{ preparationName: 'Chopped lettuce', categoryName: 'veg', quantity: 1, unit: 'unit' }]
       } as Recipe
       const dishDataSpy = TestBed.inject(DishDataService) as jasmine.SpyObj<DishDataService>
       dishDataSpy.addDish.and.returnValue(Promise.resolve({ ...dish, _id: 'd1' }))
@@ -203,24 +203,24 @@ describe('KitchenStateService', () => {
     it('should sync recipes_ from RecipeDataService and DishDataService', () => {
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Hummus',
-        ingredients_: [],
-        steps_: [],
-        yield_amount_: 1,
-        yield_unit_: 'portion',
-        default_station_: '',
-        is_approved_: true
+        nameHebrew: 'Hummus',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'portion',
+        defaultStation: '',
+        isApproved: true
       }
       const dish: Recipe = {
         _id: 'd1',
-        name_hebrew: 'Salad',
-        prep_items_: [],
-        ingredients_: [],
-        steps_: [],
-        yield_amount_: 1,
-        yield_unit_: 'portion',
-        default_station_: '',
-        is_approved_: true
+        nameHebrew: 'Salad',
+        prepItems: [],
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'portion',
+        defaultStation: '',
+        isApproved: true
       }
       mockRecipesSignal.set([recipe])
       mockDishesSignal.set([dish])
@@ -231,14 +231,14 @@ describe('KitchenStateService', () => {
 
     it('should update suppliers_ signal with valid type conversion', async () => {
       const supplierInput = {
-        name_hebrew: 'Osem',
-        delivery_days_: [1],
-        min_order_mov_: 100,
-        lead_time_days_: 1
+        nameHebrew: 'Osem',
+        deliveryDays: [1],
+        minOrderMov: 100,
+        leadTimeDays: 1
       } as Omit<Supplier, '_id'>
       const saved = await service.addSupplier(supplierInput)
       expect(saved._id).toBeDefined()
-      expect(service.suppliers_().some((s) => s.name_hebrew === 'Osem')).toBe(true)
+      expect(service.suppliers_().some((s) => s.nameHebrew === 'Osem')).toBe(true)
     })
   })
 })

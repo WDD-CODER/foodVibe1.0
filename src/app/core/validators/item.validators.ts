@@ -9,16 +9,14 @@ export function duplicateNameValidator(
     const val = control.value?.trim().toLowerCase()
     if (!val) return null
 
-    const id = typeof currentId === 'function' ? currentId() : currentId ?? null
-    const isDuplicate = productsSignal().some(
-      p => p.name_hebrew.trim().toLowerCase() === val && p._id !== id
-    )
+    const id = typeof currentId === 'function' ? currentId() : (currentId ?? null)
+    const isDuplicate = productsSignal().some((p) => p.nameHebrew.trim().toLowerCase() === val && p._id !== id)
 
     return isDuplicate ? { duplicateName: true } : null
   }
 }
 
-export function duplicateEntityNameValidator<T extends { name_hebrew: string; _id: string }>(
+export function duplicateEntityNameValidator<T extends { nameHebrew: string; _id: string }>(
   itemsSignal: () => T[],
   currentId?: string | null | (() => string | null)
 ): ValidatorFn {
@@ -26,10 +24,8 @@ export function duplicateEntityNameValidator<T extends { name_hebrew: string; _i
     const val = control.value?.trim().toLowerCase()
     if (!val) return null
 
-    const id = typeof currentId === 'function' ? currentId() : currentId ?? null
-    const isDuplicate = itemsSignal().some(
-      item => item.name_hebrew.trim().toLowerCase() === val && item._id !== id
-    )
+    const id = typeof currentId === 'function' ? currentId() : (currentId ?? null)
+    const isDuplicate = itemsSignal().some((item) => item.nameHebrew.trim().toLowerCase() === val && item._id !== id)
 
     return isDuplicate ? { duplicateName: true } : null
   }

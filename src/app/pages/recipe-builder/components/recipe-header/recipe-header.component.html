@@ -29,23 +29,23 @@
 
       <div class="recipe-name-wrap">
         <input
-          formControlName="name_hebrew"
+          formControlName="nameHebrew"
           [placeholder]="
             ((yield.currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder')
               | translatePipe) + '...'
           "
           class="recipe-name-input"
-          [class.has-error]="form().get('name_hebrew')?.invalid && form().get('name_hebrew')?.touched"
-          [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null"
+          [class.has-error]="form().get('nameHebrew')?.invalid && form().get('nameHebrew')?.touched"
+          [class.c-input--invalid]="validationErrors_()['nameHebrew']"
+          [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
         />
-        @if (form().get('name_hebrew')?.errors?.['duplicateName'] && form().get('name_hebrew')?.touched) {
+        @if (form().get('nameHebrew')?.errors?.['duplicateName'] && form().get('nameHebrew')?.touched) {
           <span class="name-error-msg">{{
             (yield.currentRecipeTypeDisplay_() === 'dish' ? 'duplicate_dish_name' : 'duplicate_recipe_name')
               | translatePipe
           }}</span>
         }
-        @if (validationErrors_()['name_hebrew']) {
+        @if (validationErrors_()['nameHebrew']) {
           <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
         }
       </div>

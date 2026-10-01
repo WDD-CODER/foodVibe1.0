@@ -25,11 +25,6 @@ export function toEpoch(value: unknown): unknown {
   return value
 }
 
-/** v1 called a recipe a "preparation"; v2 vocabulary is recipe / dish. */
-function preparationToRecipe(value: unknown): unknown {
-  return value === 'preparation' ? 'recipe' : value
-}
-
 /**
  * Master/clone + ownership bookkeeping keeps its v1 names through Phase 2b on purpose (Human-visible
  * deviation from D4, decided 2026-10-01): userId, _masterId, _userModified, _userDeleted are used
@@ -250,7 +245,7 @@ const MENU_EVENT: KeyMap = {
         to: 'items',
         each: {
           recipe_id_: 'recipeId',
-          recipe_type_: { to: 'recipeType', fn: preparationToRecipe },
+          recipe_type_: 'recipeType',
           predicted_take_rate_: 'predictedTakeRate',
           derived_portions_: 'derivedPortions',
           sell_price_: 'sellPrice',

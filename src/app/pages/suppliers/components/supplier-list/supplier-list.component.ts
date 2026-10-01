@@ -45,7 +45,7 @@ import { getSupplierIds } from '@utils/product-source.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 const DAY_LABELS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
-type SupplierBulkField = 'delivery_days_' | 'lead_time_days_'
+type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
 
 @Component({
   selector: 'app-supplier-list',
@@ -117,13 +117,13 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected editableFields_: BulkEditableField[] = [
     {
-      key: 'delivery_days_',
+      key: 'deliveryDays',
       label: 'delivery_days',
       options: DAY_LABELS.map((label, i) => ({ value: String(i), label })),
       multi: true
     },
     {
-      key: 'lead_time_days_',
+      key: 'leadTimeDays',
       label: 'lead_time',
       options: ['1', '2', '3', '5', '7', '10', '14', '21', '30'].map((d) => ({ value: d, label: d })),
       multi: false
@@ -187,17 +187,16 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     if (search) {
       list = list.filter(
         (s) =>
-          (s.name_hebrew ?? '').toLowerCase().includes(search) ||
-          (s.contact_person_ ?? '').toLowerCase().includes(search)
+          (s.nameHebrew ?? '').toLowerCase().includes(search) || (s.contactPerson ?? '').toLowerCase().includes(search)
       )
     }
     if (days.size > 0) {
-      list = list.filter((s) => (s.delivery_days_ ?? []).some((d) => days.has(d)))
+      list = list.filter((s) => (s.deliveryDays ?? []).some((d) => days.has(d)))
     }
     if (linkedOnly) {
       list = list.filter((s) => this.linkedProductCount_(s._id) > 0)
     }
-    return [...list].sort((a, b) => (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he'))
+    return [...list].sort((a, b) => (a.nameHebrew ?? '').localeCompare(b.nameHebrew ?? '', 'he'))
   })
 
   /** Visible supplier IDs for header select-all. */
@@ -232,31 +231,31 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   private buildEditForm(): void {
     const daysArray = this.fb.array(Array.from({ length: 7 }, () => this.fb.control(false)))
     this.editForm_ = this.fb.group({
-      name_hebrew: ['', [Validators.required]],
-      contact_person_: [''],
-      phone_: [''],
-      delivery_days_: daysArray,
-      min_order_mov_: [0, [Validators.required, Validators.min(0)]],
-      lead_time_days_: [0, [Validators.required, Validators.min(0)]]
+      nameHebrew: ['', [Validators.required]],
+      contactPerson: [''],
+      phone: [''],
+      deliveryDays: daysArray,
+      minOrderMov: [0, [Validators.required, Validators.min(0)]],
+      leadTimeDays: [0, [Validators.required, Validators.min(0)]]
     })
   }
 
   protected get deliveryDaysArray(): FormArray {
-    return this.editForm_?.get('delivery_days_') as FormArray
+    return this.editForm_?.get('deliveryDays') as FormArray
   }
 
   private hydrateEditForm(s: Supplier): void {
-    const days = s.delivery_days_ ?? []
+    const days = s.deliveryDays ?? []
     const dayControls = this.deliveryDaysArray
     for (let i = 0; i < 7; i++) {
       dayControls.at(i).setValue(days.includes(i))
     }
     this.editForm_.patchValue({
-      name_hebrew: s.name_hebrew ?? '',
-      contact_person_: s.contact_person_ ?? '',
-      phone_: s.phone_ ?? '',
-      min_order_mov_: s.min_order_mov_ ?? 0,
-      lead_time_days_: s.lead_time_days_ ?? 0
+      nameHebrew: s.nameHebrew ?? '',
+      contactPerson: s.contactPerson ?? '',
+      phone: s.phone ?? '',
+      minOrderMov: s.minOrderMov ?? 0,
+      leadTimeDays: s.leadTimeDays ?? 0
     })
   }
 
@@ -325,17 +324,17 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     this.isSavingEdit_.set(true)
     try {
       const raw = this.editForm_.getRawValue()
-      const delivery_days_: number[] = []
+      const deliveryDays: number[] = []
       this.deliveryDaysArray.controls.forEach((c, i) => {
-        if (c.value) delivery_days_.push(i)
+        if (c.value) deliveryDays.push(i)
       })
       const payload: Partial<Supplier> = {
-        name_hebrew: raw.name_hebrew,
-        contact_person_: raw.contact_person_ || undefined,
-        phone_: raw.phone_ || undefined,
-        delivery_days_,
-        min_order_mov_: Number(raw.min_order_mov_) || 0,
-        lead_time_days_: Number(raw.lead_time_days_) || 0
+        nameHebrew: raw.nameHebrew,
+        contactPerson: raw.contactPerson || undefined,
+        phone: raw.phone || undefined,
+        deliveryDays,
+        minOrderMov: Number(raw.minOrderMov) || 0,
+        leadTimeDays: Number(raw.leadTimeDays) || 0
       }
       await this.supplierData.updateSupplier({ ...supplier, ...payload })
       return true
@@ -387,7 +386,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     if (count > 0) {
       if (!(await this.confirmModal.open('supplier_in_use_cannot_delete', { variant: 'warning' }))) return
     } else if (
-      !(await this.confirmModal.open('למחוק את הספק "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' }))
+      !(await this.confirmModal.open('למחוק את הספק "' + (item.nameHebrew ?? '') + '"?', { variant: 'danger' }))
     )
       return
     this.deletingId_.set(item._id)
@@ -424,13 +423,13 @@ export class SupplierListComponent implements OnInit, OnDestroy {
       const supplier = suppliers.find((s) => s._id === id)
       if (!supplier) continue
       let updated: Supplier
-      if (field === 'delivery_days_') {
+      if (field === 'deliveryDays') {
         const day = parseInt(event.value, 10)
-        const current = supplier.delivery_days_ ?? []
+        const current = supplier.deliveryDays ?? []
         if (current.includes(day)) continue
-        updated = { ...supplier, delivery_days_: [...current, day] }
+        updated = { ...supplier, deliveryDays: [...current, day] }
       } else {
-        updated = { ...supplier, lead_time_days_: parseInt(event.value, 10) }
+        updated = { ...supplier, leadTimeDays: parseInt(event.value, 10) }
       }
       void this.supplierData.updateSupplier(updated)
     }

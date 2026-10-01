@@ -26,7 +26,7 @@ export class SectionCategoryManagerComponent implements OnInit {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
 
-  protected readonly categories_ = this.sectionCategories.sectionCategories_
+  protected readonly categories = this.sectionCategories.sectionCategories_
   protected readonly editingName_ = signal<string | null>(null)
 
   ngOnInit(): void {
@@ -42,7 +42,7 @@ export class SectionCategoryManagerComponent implements OnInit {
   }
 
   private countMenuEventsUsingSection(name: string): number {
-    return this.menuEventData.allMenuEvents_().filter((e) => (e.sections_ ?? []).some((s) => s.name_ === name)).length
+    return this.menuEventData.allMenuEvents_().filter((e) => (e.sections ?? []).some((s) => s.name === name)).length
   }
 
   async onAdd(value: string, inputEl: HTMLInputElement): Promise<void> {
@@ -50,7 +50,7 @@ export class SectionCategoryManagerComponent implements OnInit {
     const trimmed = value.trim()
     if (!trimmed) return
 
-    if (this.categories_().includes(trimmed)) {
+    if (this.categories().includes(trimmed)) {
       this.userMsg.onSetErrorMsg(this.translation.translate('metadata_section_exists'))
       return
     }
@@ -108,10 +108,10 @@ export class SectionCategoryManagerComponent implements OnInit {
   private async updateMenuEventSections(oldName: string, newName: string): Promise<void> {
     const events = this.menuEventData.allMenuEvents_()
     for (const event of events) {
-      const hasMatch = (event.sections_ ?? []).some((s) => s.name_ === oldName)
+      const hasMatch = (event.sections ?? []).some((s) => s.name === oldName)
       if (!hasMatch) continue
-      const updatedSections = event.sections_.map((s) => (s.name_ === oldName ? { ...s, name_: newName } : s))
-      await this.menuEventData.updateMenuEvent({ ...event, sections_: updatedSections })
+      const updatedSections = event.sections.map((s) => (s.name === oldName ? { ...s, name: newName } : s))
+      await this.menuEventData.updateMenuEvent({ ...event, sections: updatedSections })
     }
   }
 }

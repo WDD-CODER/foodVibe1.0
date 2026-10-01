@@ -325,8 +325,8 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
       const recipes = this.kitchenState.recipes_()
       const affected =
         type === 'label'
-          ? recipes.filter((r) => (r.labels_ ?? []).includes(item) || (r.autoLabels_ ?? []).includes(item))
-          : recipes.filter((r) => r.course_ === item)
+          ? recipes.filter((r) => (r.labels ?? []).includes(item) || (r.autoLabels ?? []).includes(item))
+          : recipes.filter((r) => r.course === item)
 
       if (affected.length > 0) {
         const confirmed = await this.confirmModal.open(
@@ -378,14 +378,14 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     switch (type) {
       case 'unit':
         isUsed = allProducts.some(
-          (p) => p.base_unit_ === item || p.purchase_options_?.some((opt) => opt.unit_symbol_ === item)
+          (p) => p.baseUnit === item || p.purchaseOptions?.some((opt) => opt.unitSymbol === item)
         )
         break
       case 'allergen':
-        isUsed = allProducts.some((p) => p.allergens_?.includes(item))
+        isUsed = allProducts.some((p) => p.allergens?.includes(item))
         break
       case 'category':
-        isUsed = allProducts.some((p) => (p.categories_ ?? []).includes(item))
+        isUsed = allProducts.some((p) => (p.categories ?? []).includes(item))
         break
     }
 
@@ -463,16 +463,16 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     if (type === 'label') {
       return this.kitchenState
         .recipes_()
-        .filter((r) => (r.labels_ ?? []).includes(key) || (r.autoLabels_ ?? []).includes(key)).length
+        .filter((r) => (r.labels ?? []).includes(key) || (r.autoLabels ?? []).includes(key)).length
     }
     if (type === 'course') {
-      return this.kitchenState.recipes_().filter((r) => r.course_ === key).length
+      return this.kitchenState.recipes_().filter((r) => r.course === key).length
     }
     if (type === 'category') {
-      return this.productData.allProducts_().filter((p) => (p.categories_ ?? []).includes(key)).length
+      return this.productData.allProducts_().filter((p) => (p.categories ?? []).includes(key)).length
     }
     if (type === 'allergen') {
-      return this.productData.allProducts_().filter((p) => (p.allergens_ ?? []).includes(key)).length
+      return this.productData.allProducts_().filter((p) => (p.allergens ?? []).includes(key)).length
     }
     return 0
   }
@@ -737,7 +737,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
 
   async onRemoveMenuType(key: string): Promise<void> {
     if (!this.requireSignIn()) return
-    const isUsed = this.menuEventData.allMenuEvents_().some((e) => e.serving_type_ === key)
+    const isUsed = this.menuEventData.allMenuEvents_().some((e) => e.servingType === key)
     if (isUsed) {
       this.userMsgService.onSetErrorMsg(`לא ניתן למחוק: סוג התפריט "${key}" בשימוש בתפריטים שמורים`)
       return

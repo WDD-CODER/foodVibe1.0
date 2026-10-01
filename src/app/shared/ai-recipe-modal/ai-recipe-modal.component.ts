@@ -50,7 +50,7 @@ export class AiRecipeModalComponent implements OnInit {
   protected readonly draft_ = signal<AiRecipeDraft | null>(null)
 
   // Edit mode
-  protected readonly instruction_ = signal('')
+  protected readonly instruction = signal('')
   protected readonly patch_ = signal<AiRecipePatch | null>(null)
 
   // Shot quality warnings
@@ -74,7 +74,7 @@ export class AiRecipeModalComponent implements OnInit {
     const p = this.patch_()
     if (!p) return []
     const items: string[] = []
-    if (p.name_hebrew !== undefined) items.push(`שם: ${p.name_hebrew}`)
+    if (p.nameHebrew !== undefined) items.push(`שם: ${p.nameHebrew}`)
     if (p.ingredients !== undefined) items.push(`מרכיבים: ${p.ingredients.length} פריטים`)
     if (p.steps !== undefined) items.push(`שלבים: ${p.steps.length} שלבים`)
     if (p.yield_amount !== undefined || p.yield_unit !== undefined) {
@@ -287,7 +287,7 @@ export class AiRecipeModalComponent implements OnInit {
     this.loading_.set(true)
     this.status_.set('sending')
     try {
-      const patch = await this.gemini.patchRecipe(currentRecipe, this.instruction_())
+      const patch = await this.gemini.patchRecipe(currentRecipe, this.instruction())
       this.patch_.set(patch)
       this.status_.set('done')
     } catch (err) {
@@ -309,7 +309,7 @@ export class AiRecipeModalComponent implements OnInit {
     if (!patch) return
     this.modalService.deliverPatch(patch)
     this.patch_.set(null)
-    this.instruction_.set('')
+    this.instruction.set('')
     this.status_.set('idle')
   }
 
@@ -335,7 +335,7 @@ export class AiRecipeModalComponent implements OnInit {
     this.awaitingWarningConfirm_.set(false)
     this.pendingApprovedDraft_.set(null)
     this.prompt_.set('')
-    this.instruction_.set('')
+    this.instruction.set('')
     this.imageFile_.set(null)
     this.imagePreviewUrl_.set(null)
     this.urlInput_.set('')

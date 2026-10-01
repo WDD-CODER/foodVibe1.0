@@ -86,37 +86,37 @@
           <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
 
-        <div class="venue-card-media" [attr.data-env]="item.environment_type_">
-          @if (item.photo_url_) {
-            <img [src]="item.photo_url_" class="venue-card-photo" alt="" loading="lazy" />
+        <div class="venue-card-media" [attr.data-env]="item.environmentType">
+          @if (item.photoUrl) {
+            <img [src]="item.photoUrl" class="venue-card-photo" alt="" loading="lazy" />
           } @else {
             <lucide-icon name="map-pin" [size]="28"></lucide-icon>
           }
-          <span class="venue-status-pill" [class.venue-status-pill--inactive]="item.active_ === false">
+          <span class="venue-status-pill" [class.venue-status-pill--inactive]="item.active === false">
             <span class="venue-status-dot"></span>
-            {{ (item.active_ === false ? 'venue_inactive' : 'venue_active') | translatePipe }}
+            {{ (item.active === false ? 'venue_inactive' : 'venue_active') | translatePipe }}
           </span>
         </div>
 
         <div class="venue-card-body">
-          <h3 class="venue-card-name">{{ item.name_hebrew }}</h3>
-          @if (item.address_) {
+          <h3 class="venue-card-name">{{ item.nameHebrew }}</h3>
+          @if (item.address) {
             <p class="venue-card-address">
               <lucide-icon name="map-pin" [size]="14"></lucide-icon>
-              {{ item.address_ }}
+              {{ item.address }}
             </p>
           }
           <div class="venue-card-meta">
-            <span class="venue-env-chip">{{ item.environment_type_ | translatePipe }}</span>
-            @if (item.capacity_) {
+            <span class="venue-env-chip">{{ item.environmentType | translatePipe }}</span>
+            @if (item.capacity) {
               <span class="venue-capacity">
                 <lucide-icon name="users" [size]="14"></lucide-icon>
-                {{ item.capacity_ }}
+                {{ item.capacity }}
               </span>
             }
             <span class="venue-infra-count">
               <lucide-icon name="package" [size]="14"></lucide-icon>
-              {{ (item.available_infrastructure_ ?? []).length }}
+              {{ (item.availableInfrastructure ?? []).length }}
             </span>
           </div>
         </div>

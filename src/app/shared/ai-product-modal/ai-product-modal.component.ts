@@ -13,7 +13,18 @@ import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.mo
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 
-const CANONICAL_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit', 'tablespoon', 'teaspoon', 'cup', 'pinch', 'portion'] as const
+const CANONICAL_UNITS = [
+  'gram',
+  'ml',
+  'kg',
+  'liter',
+  'unit',
+  'tablespoon',
+  'teaspoon',
+  'cup',
+  'pinch',
+  'portion'
+] as const
 
 @Component({
   selector: 'app-ai-product-modal',
@@ -21,7 +32,7 @@ const CANONICAL_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit', 'tablespoon', 'tea
   imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './ai-product-modal.component.html',
   styleUrl: './ai-product-modal.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AiProductModalComponent implements OnInit {
   protected readonly modalService = inject(AiProductModalService)
@@ -38,7 +49,7 @@ export class AiProductModalComponent implements OnInit {
   protected readonly draft_ = signal<AiProductDraft | null>(null)
 
   // Edit mode
-  protected readonly instruction_ = signal('')
+  protected readonly instruction = signal('')
   protected readonly patch_ = signal<AiProductPatch | null>(null)
 
   // Shared
@@ -59,13 +70,36 @@ export class AiProductModalComponent implements OnInit {
     const current = this.modalService.getEditContext()
     if (!patch || !current) return []
     const entries: { label: string; from: string; to: string }[] = []
-    if ('name_hebrew' in patch) entries.push({ label: 'שם', from: current.name_hebrew ?? '—', to: String(patch.name_hebrew ?? '—') })
-    if ('base_unit_' in patch) entries.push({ label: 'יחידת בסיס', from: current.base_unit_ ?? '—', to: String(patch.base_unit_ ?? '—') })
-    if ('yield_factor_' in patch) entries.push({ label: 'יחידת תפוקה', from: String(current.yield_factor_), to: String(patch.yield_factor_ ?? '—') })
-    if ('categories_' in patch) entries.push({ label: 'קטגוריות', from: current.categories_.join(', ') || '—', to: (patch.categories_ ?? []).join(', ') || '—' })
-    if ('allergens_' in patch) entries.push({ label: 'אלרגנים', from: current.allergens_.join(', ') || '—', to: (patch.allergens_ ?? []).join(', ') || '—' })
-    if ('min_stock_level_' in patch) entries.push({ label: 'מינימום מלאי', from: String(current.min_stock_level_), to: String(patch.min_stock_level_ ?? '—') })
-    if ('expiry_days_default_' in patch) entries.push({ label: 'ימי תפוגה', from: String(current.expiry_days_default_), to: String(patch.expiry_days_default_ ?? '—') })
+    if ('nameHebrew' in patch)
+      entries.push({ label: 'שם', from: current.nameHebrew ?? '—', to: String(patch.nameHebrew ?? '—') })
+    if ('baseUnit' in patch)
+      entries.push({ label: 'יחידת בסיס', from: current.baseUnit ?? '—', to: String(patch.baseUnit ?? '—') })
+    if ('yieldFactor' in patch)
+      entries.push({ label: 'יחידת תפוקה', from: String(current.yieldFactor), to: String(patch.yieldFactor ?? '—') })
+    if ('categories' in patch)
+      entries.push({
+        label: 'קטגוריות',
+        from: current.categories.join(', ') || '—',
+        to: (patch.categories ?? []).join(', ') || '—'
+      })
+    if ('allergens' in patch)
+      entries.push({
+        label: 'אלרגנים',
+        from: current.allergens.join(', ') || '—',
+        to: (patch.allergens ?? []).join(', ') || '—'
+      })
+    if ('minStockLevel' in patch)
+      entries.push({
+        label: 'מינימום מלאי',
+        from: String(current.minStockLevel),
+        to: String(patch.minStockLevel ?? '—')
+      })
+    if ('expiryDaysDefault' in patch)
+      entries.push({
+        label: 'ימי תפוגה',
+        from: String(current.expiryDaysDefault),
+        to: String(patch.expiryDaysDefault ?? '—')
+      })
     return entries
   })
 
@@ -81,29 +115,29 @@ export class AiProductModalComponent implements OnInit {
   // ─── Draft editing ───────────────────────────────────────────────
 
   protected setDraftField<K extends keyof AiProductDraft>(key: K, value: AiProductDraft[K]): void {
-    this.draft_.update(d => d ? { ...d, [key]: value } : d)
+    this.draft_.update((d) => (d ? { ...d, [key]: value } : d))
   }
 
   protected addCategory(): void {
     const cat = this.newCategory_().trim()
     if (!cat) return
-    this.draft_.update(d => d && !d.categories_.includes(cat) ? { ...d, categories_: [...d.categories_, cat] } : d)
+    this.draft_.update((d) => (d && !d.categories.includes(cat) ? { ...d, categories: [...d.categories, cat] } : d))
     this.newCategory_.set('')
   }
 
   protected removeCategory(cat: string): void {
-    this.draft_.update(d => d ? { ...d, categories_: d.categories_.filter(c => c !== cat) } : d)
+    this.draft_.update((d) => (d ? { ...d, categories: d.categories.filter((c) => c !== cat) } : d))
   }
 
   protected addAllergen(): void {
     const al = this.newAllergen_().trim()
     if (!al) return
-    this.draft_.update(d => d && !d.allergens_.includes(al) ? { ...d, allergens_: [...d.allergens_, al] } : d)
+    this.draft_.update((d) => (d && !d.allergens.includes(al) ? { ...d, allergens: [...d.allergens, al] } : d))
     this.newAllergen_.set('')
   }
 
   protected removeAllergen(al: string): void {
-    this.draft_.update(d => d ? { ...d, allergens_: d.allergens_.filter(a => a !== al) } : d)
+    this.draft_.update((d) => (d ? { ...d, allergens: d.allergens.filter((a) => a !== al) } : d))
   }
 
   // ─── Create mode ─────────────────────────────────────────────────
@@ -149,7 +183,7 @@ export class AiProductModalComponent implements OnInit {
     this.status_.set('sending')
     this.errorKey_.set('ai_product_error')
     try {
-      const changes = await this.gemini_.patchProduct(currentProduct, this.instruction_())
+      const changes = await this.gemini_.patchProduct(currentProduct, this.instruction())
       this.patch_.set(changes)
       this.status_.set('done')
     } catch (err) {
@@ -171,7 +205,7 @@ export class AiProductModalComponent implements OnInit {
     if (!patch) return
     this.modalService.deliverPatch(patch)
     this.patch_.set(null)
-    this.instruction_.set('')
+    this.instruction.set('')
     this.status_.set('idle')
   }
 
@@ -204,7 +238,7 @@ export class AiProductModalComponent implements OnInit {
     this.draft_.set(null)
     this.newCategory_.set('')
     this.newAllergen_.set('')
-    this.instruction_.set('')
+    this.instruction.set('')
     this.patch_.set(null)
     this.loading_.set(false)
     this.status_.set('idle')

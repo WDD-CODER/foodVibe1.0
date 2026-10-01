@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { Supplier } from '@models/supplier.model'
 import { BaseEntityDataService } from './base-entity-data.service'
 
-const ENTITY = 'KITCHEN_SUPPLIERS'
+const ENTITY = 'suppliers'
 
 @Injectable({ providedIn: 'root' })
 export class SupplierDataService extends BaseEntityDataService<Supplier> {

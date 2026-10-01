@@ -115,7 +115,7 @@ export class RecipeIngredientsTableComponent {
   get existingIngredientNames(): string[] {
     return this.ingredientGroups
       .filter((g) => g.get('referenceId')?.value)
-      .map((g) => (g.get('name_hebrew')?.value ?? '').toString().trim())
+      .map((g) => (g.get('nameHebrew')?.value ?? '').toString().trim())
       .filter(Boolean)
   }
 
@@ -157,21 +157,21 @@ export class RecipeIngredientsTableComponent {
 
   /** Create a stub product from the unlinked ingredient name, link it, then open Quick-Edit panel. */
   protected onUnlinkedBadgeClick(group: FormGroup, index: number): void {
-    const name = ((group.get('name_hebrew')?.value as string) ?? '').trim()
+    const name = ((group.get('nameHebrew')?.value as string) ?? '').trim()
     if (!name) return
     const stub: Omit<Product, '_id'> = {
-      name_hebrew: name,
-      base_unit_: 'gram',
-      sources_: [],
-      purchase_options_: [],
-      categories_: [],
-      yield_factor_: 1,
-      allergens_: [],
-      min_stock_level_: 0,
-      expiry_days_default_: 0
+      nameHebrew: name,
+      baseUnit: 'gram',
+      sources: [],
+      purchaseOptions: [],
+      categories: [],
+      yieldFactor: 1,
+      allergens: [],
+      minStockLevel: 0,
+      expiryDaysDefault: 0
     }
     void this.productDataService.addProduct(stub).then((saved) => {
-      group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.name_hebrew })
+      group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.nameHebrew })
       this.onQuickEditBadgeClick(group, index, 'incomplete')
     })
   }
@@ -215,7 +215,7 @@ export class RecipeIngredientsTableComponent {
   getExcludeNamesForRow(rowIndex: number): string[] {
     return this.ingredientGroups
       .filter((g, i) => i !== rowIndex && g.get('referenceId')?.value)
-      .map((g) => (g.get('name_hebrew')?.value ?? '').toString().trim())
+      .map((g) => (g.get('nameHebrew')?.value ?? '').toString().trim())
       .filter(Boolean)
   }
 
@@ -225,7 +225,7 @@ export class RecipeIngredientsTableComponent {
     if (!item || (item as { item_type_?: string }).item_type_ !== 'product') return false
     const prod = item as Product
     const unit = group.get('unit')?.value
-    return prod.purchase_options_?.some((o) => o.unit_symbol_ === unit) ?? false
+    return prod.purchaseOptions?.some((o) => o.unitSymbol === unit) ?? false
   }
 
   incrementAmount(group: FormGroup, index: number): void {
@@ -274,13 +274,13 @@ export class RecipeIngredientsTableComponent {
     const index = this.ingredientGroups.indexOf(group)
     const isEditingName = this.editingNameAtRow_() === index
     const product = item.item_type_ === 'product' ? (item as Product) : null
-    const hasPurchaseOptions = product?.purchase_options_?.length
+    const hasPurchaseOptions = product?.purchaseOptions?.length
     const unit = hasPurchaseOptions
-      ? (product!.purchase_options_![0].unit_symbol_ ?? product!.base_unit_ ?? '')
-      : 'base_unit_' in item
-        ? (item.base_unit_ ?? '')
-        : 'yield_unit_' in item
-          ? (item.yield_unit_ ?? '')
+      ? (product!.purchaseOptions![0].unitSymbol ?? product!.baseUnit ?? '')
+      : 'baseUnit' in item
+        ? (item.baseUnit ?? '')
+        : 'yieldUnit' in item
+          ? (item.yieldUnit ?? '')
           : ''
     const amount_net = isEditingName
       ? (group.get('amount_net')?.value ?? (hasPurchaseOptions ? 1 : 0))
@@ -288,8 +288,8 @@ export class RecipeIngredientsTableComponent {
         ? 1
         : 0
     group.patchValue({
-      name_hebrew: item.name_hebrew,
-      nameSnapshot: item.name_hebrew,
+      nameHebrew: item.nameHebrew,
+      nameSnapshot: item.nameHebrew,
       referenceId: item._id,
       item_type: item.item_type_,
       unit,
@@ -349,7 +349,7 @@ export class RecipeIngredientsTableComponent {
   clearIngredient(group: FormGroup): void {
     group.patchValue({
       referenceId: null,
-      name_hebrew: '',
+      nameHebrew: '',
       item_type: null,
       amount_net: null,
       unit: 'gram'
@@ -364,9 +364,9 @@ export class RecipeIngredientsTableComponent {
     if (refId) {
       const pool = type === 'recipe' ? this.kitchenStateService.recipes_() : this.kitchenStateService.products_()
       const found = pool.find((x) => x._id === refId)
-      if (found?.name_hebrew) return found.name_hebrew
+      if (found?.nameHebrew) return found.nameHebrew
     }
-    return (group.get('name_hebrew')?.value || group.get('nameSnapshot')?.value || '') as string
+    return (group.get('nameHebrew')?.value || group.get('nameSnapshot')?.value || '') as string
   }
 
   getItemMetadata(group: FormGroup) {
@@ -395,7 +395,7 @@ export class RecipeIngredientsTableComponent {
 
   /** True when the row has a name but no referenceId (draft/unlinked ingredient). */
   isUnlinkedRow(group: FormGroup): boolean {
-    return !!group.get('name_hebrew')?.value?.trim() && !group.get('referenceId')?.value
+    return !!group.get('nameHebrew')?.value?.trim() && !group.get('referenceId')?.value
   }
 
   /** True when any ingredient row is unlinked (has name but no referenceId). */
@@ -444,22 +444,22 @@ export class RecipeIngredientsTableComponent {
       lineCost = amountInYieldUnit * costPerUnit
     } else {
       const prod = item as Product & { calculated_cost_per_unit?: number }
-      const unitOption = prod.purchase_options_?.find((o) => o.unit_symbol_ === selectedUnit)
+      const unitOption = prod.purchaseOptions?.find((o) => o.unitSymbol === selectedUnit)
       const effectivePrice = getEffectivePrice(prod)
 
       if (unitOption) {
-        if (unitOption.price_override_ != null && unitOption.price_override_ > 0) {
-          lineCost = netAmount * unitOption.price_override_
+        if (unitOption.priceOverride != null && unitOption.priceOverride > 0) {
+          lineCost = netAmount * unitOption.priceOverride
         } else {
-          const normalizedAmount = netAmount * (unitOption.conversion_rate_ || 1)
-          const yieldFactor = prod.yield_factor_ || 1
+          const normalizedAmount = netAmount * (unitOption.conversionRate || 1)
+          const yieldFactor = prod.yieldFactor || 1
           lineCost = (normalizedAmount / yieldFactor) * effectivePrice
         }
       } else {
-        // Selected unit not in purchase_options_ (e.g. base unit or custom like כפית): convert to product base unit.
+        // Selected unit not in purchaseOptions (e.g. base unit or custom like כפית): convert to product base unit.
         const price = effectivePrice || prod.calculated_cost_per_unit || 0
-        const yieldFactor = prod.yield_factor_ || 1
-        const baseUnit = prod.base_unit_ || 'gram'
+        const yieldFactor = prod.yieldFactor || 1
+        const baseUnit = prod.baseUnit || 'gram'
         const amountG = this.recipeCostService.convertToBaseUnits(netAmount, selectedUnit)
         const baseGPerUnit = this.recipeCostService.convertToBaseUnits(1, baseUnit) || 1
         const amountInBaseUnit = amountG / baseGPerUnit
@@ -493,27 +493,27 @@ export class RecipeIngredientsTableComponent {
 
     const units = new Set<string>()
     const meta = item as {
-      base_unit_?: string
-      purchase_options_?: { unit_symbol_?: string }[]
-      unit_options_?: { unit_symbol_?: string }[]
-      yield_unit_?: string
-      yield_conversions_?: { amount: number; unit: string }[]
+      baseUnit?: string
+      purchaseOptions?: { unitSymbol?: string }[]
+      unit_options_?: { unitSymbol?: string }[]
+      yieldUnit?: string
+      yieldConversions?: { amount: number; unit: string }[]
     }
 
-    if (meta.base_unit_) units.add(meta.base_unit_)
-    if (meta.purchase_options_?.length) {
-      meta.purchase_options_.forEach((o) => {
-        if (o.unit_symbol_) units.add(o.unit_symbol_)
+    if (meta.baseUnit) units.add(meta.baseUnit)
+    if (meta.purchaseOptions?.length) {
+      meta.purchaseOptions.forEach((o) => {
+        if (o.unitSymbol) units.add(o.unitSymbol)
       })
     }
     if (meta.unit_options_?.length) {
       meta.unit_options_.forEach((o) => {
-        if (o.unit_symbol_) units.add(o.unit_symbol_)
+        if (o.unitSymbol) units.add(o.unitSymbol)
       })
     }
-    if (meta.yield_unit_) units.add(meta.yield_unit_)
-    if (meta.yield_conversions_?.length) {
-      meta.yield_conversions_.forEach((c) => {
+    if (meta.yieldUnit) units.add(meta.yieldUnit)
+    if (meta.yieldConversions?.length) {
+      meta.yieldConversions.forEach((c) => {
         if (c?.unit) units.add(c.unit)
       })
     }
@@ -537,7 +537,7 @@ export class RecipeIngredientsTableComponent {
       group.get('unit')?.setValue('')
       const product =
         group.get('item_type')?.value === 'product' ? (this.getItemMetadata(group) as Product | undefined) : undefined
-      const existingSymbols = product?.purchase_options_?.map((o) => o.unit_symbol_) ?? []
+      const existingSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
       setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols }), 0)
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         const setUnitAndUpdate = (): void => {
@@ -547,21 +547,21 @@ export class RecipeIngredientsTableComponent {
         if (group.get('item_type')?.value === 'product') {
           const prod = this.getItemMetadata(group) as Product | undefined
           if (prod && prod._id) {
-            const existing = prod.purchase_options_?.some((o) => o.unit_symbol_ === newUnit)
+            const existing = prod.purchaseOptions?.some((o) => o.unitSymbol === newUnit)
             if (!existing) {
-              const baseFactor = this.unitRegistry.getConversion(prod.base_unit_) || 1
+              const baseFactor = this.unitRegistry.getConversion(prod.baseUnit) || 1
               const unitFactor = this.unitRegistry.getConversion(newUnit) || 1
-              // conversion_rate_ = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
-              const conversion_rate_ = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
+              // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
+              const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
               const newOption = {
-                unit_symbol_: newUnit,
-                conversion_rate_,
-                uom: prod.base_unit_,
-                price_override_: 0
+                unitSymbol: newUnit,
+                conversionRate,
+                uom: prod.baseUnit,
+                priceOverride: 0
               }
               const updated: Product = {
                 ...prod,
-                purchase_options_: [...(prod.purchase_options_ ?? []), newOption]
+                purchaseOptions: [...(prod.purchaseOptions ?? []), newOption]
               }
               this.kitchenStateService.saveProduct(updated).subscribe({
                 next: () => setUnitAndUpdate(),
@@ -588,7 +588,7 @@ export class RecipeIngredientsTableComponent {
     }
 
     const item = this.getItemMetadata(group)
-    const yieldValue = (item as Product)?.yield_factor_ ?? 1
+    const yieldValue = (item as Product)?.yieldFactor ?? 1
     return net / yieldValue
   }
 }

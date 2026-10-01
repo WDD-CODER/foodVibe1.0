@@ -25,7 +25,9 @@ describe('MetadataRegistryService', () => {
         return Promise.resolve([{ _id: 'c1', items: ['vegetables', 'dairy', 'meat', 'dry', 'fish'] }])
       }
       if (entity === 'KITCHEN_ALLERGENS') {
-        return Promise.resolve([{ _id: 'a1', items: ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk solids', 'sesame'] }])
+        return Promise.resolve([
+          { _id: 'a1', items: ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk solids', 'sesame'] }
+        ])
       }
       return Promise.resolve([])
     })
@@ -34,7 +36,11 @@ describe('MetadataRegistryService', () => {
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     const loggingSpy = jasmine.createSpyObj('LoggingService', ['error', 'warn', 'info'])
-    const translationSpy = jasmine.createSpyObj('TranslationService', ['translate', 'validateKeyForHebrew', 'resolveAllergen'])
+    const translationSpy = jasmine.createSpyObj('TranslationService', [
+      'translate',
+      'validateKeyForHebrew',
+      'resolveAllergen'
+    ])
     translationSpy.validateKeyForHebrew.and.returnValue({ valid: true })
     translationSpy.resolveAllergen.and.callFake((s: string) => s?.trim().toLowerCase().replace(/\s+/g, '_') ?? null)
     const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
@@ -83,10 +89,10 @@ describe('MetadataRegistryService', () => {
   describe('Async Logic: purgeGlobalUnit', () => {
     it('should update all products using the purged unit to the English "grams" key', fakeAsync(() => {
       // LOGIC CHANGE: Standardized English keys for units [cite: 407, 413]
-      const productA = { _id: '1', name_hebrew: 'קמח', base_unit_: 'kg' } as Product
-      const productB = { _id: '2', name_hebrew: 'מלח', base_unit_: 'kg' } as Product
-      const productC = { _id: '3', name_hebrew: 'מים', base_unit_: 'liter' } as Product
-      
+      const productA = { _id: '1', nameHebrew: 'קמח', baseUnit: 'kg' } as Product
+      const productB = { _id: '2', nameHebrew: 'מלח', baseUnit: 'kg' } as Product
+      const productC = { _id: '3', nameHebrew: 'מים', baseUnit: 'liter' } as Product
+
       mockProductsSignal.set([productA, productB, productC])
       productDataSpy.updateProduct.and.returnValue(Promise.resolve())
 
@@ -96,13 +102,13 @@ describe('MetadataRegistryService', () => {
 
       // Only the 2 products with 'kg' should have been updated
       expect(productDataSpy.updateProduct).toHaveBeenCalledTimes(2)
-      
+
       // LOGIC CHANGE: Verify fallback uses the standardized English 'gram' [cite: 407]
       expect(productDataSpy.updateProduct).toHaveBeenCalledWith(
-        jasmine.objectContaining({ _id: '1', base_unit_: 'gram' })
+        jasmine.objectContaining({ _id: '1', baseUnit: 'gram' })
       )
       expect(productDataSpy.updateProduct).toHaveBeenCalledWith(
-        jasmine.objectContaining({ _id: '2', base_unit_: 'gram' })
+        jasmine.objectContaining({ _id: '2', baseUnit: 'gram' })
       )
     }))
   })

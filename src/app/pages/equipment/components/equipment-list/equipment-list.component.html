@@ -113,21 +113,21 @@
         (keydown.enter)="toggleRowEdit(item)"
         (keydown.space)="$event.preventDefault(); toggleRowEdit(item)"
       >
-        <div class="col-name c-list-body-cell" role="cell">{{ item.name_hebrew }}</div>
+        <div class="col-name c-list-body-cell" role="cell">{{ item.nameHebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
           <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">
-            {{ item.category_ | translatePipe }}
+            {{ item.category | translatePipe }}
           </div>
           <div class="col-owned c-list-body-cell" cellCarouselSlide [label]="'owned_quantity' | translatePipe">
-            {{ item.owned_quantity_ }}
+            {{ item.ownedQuantity }}
           </div>
           <div class="col-consumable c-list-body-cell" cellCarouselSlide [label]="'is_consumable' | translatePipe">
-            <span class="consumable-chip" [class.consumable-chip--yes]="item.is_consumable_">
-              {{ item.is_consumable_ ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}
+            <span class="consumable-chip" [class.consumable-chip--yes]="item.isConsumable">
+              {{ item.isConsumable ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}
             </span>
           </div>
           <div class="col-scaling c-list-body-cell" cellCarouselSlide [label]="'scaling_rule' | translatePipe">
-            {{ scalingSummary(item.scaling_rule_) }}
+            {{ scalingSummary(item.scalingRule) }}
           </div>
         </app-cell-carousel>
         <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
@@ -194,19 +194,19 @@
          never reached these formControlName inputs (NG01050 at runtime), even though the DOM
          nesting looked right. See [[ng-template-outlet-form-group]]. -->
     <ng-container [formGroup]="editForm_">
-      <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.name_hebrew }}</h3>
+      <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.nameHebrew }}</h3>
 
       <div class="inline-edit-section">
         <div class="inline-edit-grid">
           <div class="inline-edit-field">
             <label for="inline-name">{{ 'name' | translatePipe }}</label>
-            <input id="inline-name" type="text" formControlName="name_hebrew" class="c-input" />
+            <input id="inline-name" type="text" formControlName="nameHebrew" class="c-input" />
           </div>
           <div class="inline-edit-field">
             <label for="inline-category">{{ 'category' | translatePipe }}</label>
             <app-custom-select
               triggerId="inline-category"
-              formControlName="category_"
+              formControlName="category"
               [options]="categoryOptions()"
               placeholder="category"
               [typeToFilter]="true"
@@ -216,12 +216,12 @@
           </div>
           <div class="inline-edit-field">
             <label for="inline-owned">{{ 'owned_quantity' | translatePipe }}</label>
-            <input id="inline-owned" type="number" formControlName="owned_quantity_" min="0" class="c-input" />
+            <input id="inline-owned" type="number" formControlName="ownedQuantity" min="0" class="c-input" />
           </div>
         </div>
         <div class="inline-edit-checkboxes">
           <label class="inline-edit-check">
-            <input type="checkbox" formControlName="is_consumable_" />
+            <input type="checkbox" formControlName="isConsumable" />
             <span>{{ 'is_consumable' | translatePipe }}</span>
           </label>
           <label class="inline-edit-check">
@@ -231,7 +231,7 @@
         </div>
         <div class="inline-edit-field inline-edit-notes">
           <label for="inline-notes">{{ 'notes' | translatePipe }}</label>
-          <textarea id="inline-notes" formControlName="notes_" rows="2" class="c-input"></textarea>
+          <textarea id="inline-notes" formControlName="notes" rows="2" class="c-input"></textarea>
         </div>
       </div>
 
@@ -241,18 +241,18 @@
           <div class="inline-edit-grid inline-edit-scaling-grid">
             <div class="inline-edit-field">
               <label for="inline-per-guests">{{ 'per_guests' | translatePipe }}</label>
-              <input id="inline-per-guests" type="number" formControlName="per_guests_" min="1" class="c-input" />
+              <input id="inline-per-guests" type="number" formControlName="perGuests" min="1" class="c-input" />
             </div>
             <div class="inline-edit-field">
               <label for="inline-min-qty">{{ 'min_quantity' | translatePipe }}</label>
-              <input id="inline-min-qty" type="number" formControlName="min_quantity_" min="0" class="c-input" />
+              <input id="inline-min-qty" type="number" formControlName="minQuantity" min="0" class="c-input" />
             </div>
             <div class="inline-edit-field">
               <label for="inline-max-qty">{{ 'max_quantity' | translatePipe }}</label>
               <input
                 id="inline-max-qty"
                 type="number"
-                formControlName="max_quantity_"
+                formControlName="maxQuantity"
                 min="0"
                 placeholder="—"
                 class="c-input"

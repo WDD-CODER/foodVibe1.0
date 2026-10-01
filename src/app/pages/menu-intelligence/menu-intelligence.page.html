@@ -192,49 +192,49 @@
             <button
               type="button"
               class="event-chip"
-              id="menu-focus-event_type_"
+              id="menu-focus-eventType"
               [attr.aria-expanded]="eventTypeDropdownOpen_()"
               (click)="openEventTypeDropdown()"
-              (keydown)="onMetaKeydown('event_type_', $event)"
+              (keydown)="onMetaKeydown('eventType', $event)"
             >
-              {{ ((form_.value.event_type_ ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
+              {{ ((form_.value.eventType ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
             </button>
             }
           </div>
           <span class="event-chip-sep">·</span>
           <app-custom-select
-            triggerId="menu-focus-serving_type_"
-            formControlName="serving_type_"
+            triggerId="menu-focus-servingType"
+            formControlName="servingType"
             [options]="servingTypeOptions_()"
             [placeholder]="'menu_serving_style'"
             [typeToFilter]="true"
             class="event-chip-select"
-            (keydown)="onMetaKeydown('serving_type_', $event)"
+            (keydown)="onMetaKeydown('servingType', $event)"
           />
         </div>
 
         <!-- Menu title -->
         <input
-          id="menu-focus-name_"
+          id="menu-focus-name"
           type="text"
           class="menu-title-input"
-          formControlName="name_"
+          formControlName="name"
           [attr.aria-label]="'menu_name_placeholder' | translatePipe"
           placeholder="שם האירוע..."
-          (keydown)="onMetaKeydown('name_', $event)"
+          (keydown)="onMetaKeydown('name', $event)"
         />
 
         <!-- Meta line: guests · date -->
         <div class="event-meta-line">
           <span class="event-meta-chip event-meta-chip--guests">
             <input
-              id="menu-focus-guest_count_"
+              id="menu-focus-guestCount"
               type="number"
               class="guest-chip-input"
-              formControlName="guest_count_"
+              formControlName="guestCount"
               min="0"
               [attr.aria-label]="'menu_guests' | translatePipe"
-              (keydown)="onMetaKeydown('guest_count_', $event)"
+              (keydown)="onMetaKeydown('guestCount', $event)"
             />
             {{ 'menu_guests' | translatePipe }}
           </span>
@@ -251,10 +251,10 @@
           >
             <span class="meta-date-display">{{ getEventDateDisplay() || ('menu_no_date' | translatePipe) }}</span>
             <input
-              id="menu-focus-event_date_"
+              id="menu-focus-eventDate"
               type="date"
               class="meta-date-input"
-              formControlName="event_date_"
+              formControlName="eventDate"
               (keydown)="onDateKeydown($event)"
             />
           </span>
@@ -266,7 +266,7 @@
         <div class="info-menu-divider">✦</div>
 
         <!-- Sections: category looks like plain text; dropdown only on click -->
-        <div class="sections-area" formArrayName="sections_">
+        <div class="sections-area" formArrayName="sections">
           @for (section of sectionsArray.controls; track section.get('_id')?.value; let sectionIndex = $index) {
           <div class="menu-section" [formGroupName]="sectionIndex">
             @if (sectionIndex > 0) {
@@ -330,7 +330,7 @@
                 (click)="openSectionSearch(sectionIndex)"
                 (keydown.space)="$event.preventDefault(); openSectionSearch(sectionIndex)"
               >
-                {{ ((section.get('name_')?.value ?? '') | translatePipe) || ('menu_section_placeholder' | translatePipe)
+                {{ ((section.get('name')?.value ?? '') | translatePipe) || ('menu_section_placeholder' | translatePipe)
                 }}
               </button>
               }
@@ -339,7 +339,7 @@
               </button>
             </div>
 
-            <div class="dish-list" formArrayName="items_">
+            <div class="dish-list" formArrayName="items">
               @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
               <app-menu-dish-row
                 [itemGroup]="item"
@@ -351,7 +351,7 @@
                 [highlightedIndex]="getDishSearchHighlightedIndex(sectionIndex, itemIndex)"
                 [isMetaExpanded]="isDishMetaExpanded(sectionIndex, itemIndex)"
                 [editingDishField]="editingDishField_()"
-                [servingType]="form_.value.serving_type_ || 'plated_course'"
+                [servingType]="form_.value.servingType || 'plated_course'"
                 [guestCount]="getGuestCount()"
                 [piecesPerPerson]="getPiecesPerPerson()"
                 (remove)="removeItem(sectionIndex, itemIndex)"

@@ -15,8 +15,8 @@ export class EquipmentCategoryRegistryService {
   private readonly storage = inject(StorageService)
   private readonly logging = inject(LoggingService)
 
-  private categories_ = signal<string[]>([])
-  readonly customCategories_ = this.categories_.asReadonly()
+  private categories = signal<string[]>([])
+  readonly customCategories_ = this.categories.asReadonly()
 
   constructor() {
     this.load().catch(() => {})
@@ -31,18 +31,22 @@ export class EquipmentCategoryRegistryService {
       const docs = await this.storage.query<EquipmentCustomCategoriesDoc>(STORAGE_KEY)
       const doc = docs[0]
       if (Array.isArray(doc?.items) && doc.items.length > 0) {
-        this.categories_.set([...doc.items])
+        this.categories.set([...doc.items])
       }
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.equipmentCategories.load_error', message: 'Failed to load equipment custom categories', context: { err } })
+      this.logging.error({
+        event: 'crud.equipmentCategories.load_error',
+        message: 'Failed to load equipment custom categories',
+        context: { err }
+      })
     }
   }
 
   async addCategory(key: string): Promise<void> {
     const trimmed = key.trim()
-    if (!trimmed || this.categories_().includes(trimmed)) return
-    await this.persist([...this.categories_(), trimmed])
+    if (!trimmed || this.categories().includes(trimmed)) return
+    await this.persist([...this.categories(), trimmed])
   }
 
   private async persist(items: string[]): Promise<void> {
@@ -54,11 +58,15 @@ export class EquipmentCategoryRegistryService {
       } else {
         await this.storage.post(STORAGE_KEY, { items })
       }
-      this.categories_.set(items)
+      this.categories.set(items)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.equipmentCategories.persist_error', message: 'Failed to persist equipment custom categories', context: { err } })
-      this.categories_.set(items)
+      this.logging.error({
+        event: 'crud.equipmentCategories.persist_error',
+        message: 'Failed to persist equipment custom categories',
+        context: { err }
+      })
+      this.categories.set(items)
     }
   }
 }

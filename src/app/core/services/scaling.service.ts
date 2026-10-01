@@ -21,7 +21,7 @@ export interface ScaledPrepRow {
   name: string
   amount: number
   unit: string
-  category_name?: string
+  categoryName?: string
 }
 
 @Injectable({ providedIn: 'root' })
@@ -33,7 +33,7 @@ export class ScalingService {
    * Guard against zero yield.
    */
   getScaleFactor(recipe: Recipe, targetQuantity: number): number {
-    const base = recipe.yield_amount_ ?? 1
+    const base = recipe.yieldAmount ?? 1
     if (base <= 0) return 1
     return targetQuantity / base
   }
@@ -42,7 +42,7 @@ export class ScalingService {
    * Scaled ingredients with display names from KitchenState.
    */
   getScaledIngredients(recipe: Recipe, factor: number): ScaledIngredientRow[] {
-    const ingredients = recipe.ingredients_ ?? []
+    const ingredients = recipe.ingredients ?? []
     const products = this.kitchenState_.products_()
     const recipes = this.kitchenState_.recipes_()
 
@@ -50,9 +50,9 @@ export class ScalingService {
       if (!ing.referenceId) {
         return {
           name: ing.nameSnapshot || '(ללא שם)',
-          amount: (ing.amount_ ?? 0) * factor,
-          unit: ing.unit_ ?? '',
-          availableUnits: [ing.unit_ ?? ''],
+          amount: (ing.amount ?? 0) * factor,
+          unit: ing.unit ?? '',
+          availableUnits: [ing.unit ?? ''],
           isUnlinked: true
         }
       }
@@ -63,12 +63,12 @@ export class ScalingService {
       // When referenceId is set but the product/recipe no longer exists in state
       // (orphaned reference — e.g. product deleted or DB reset), fall back to
       // nameSnapshot and mark as unlinked so the UI can style it appropriately.
-      const name = (item as { name_hebrew?: string } | undefined)?.name_hebrew ?? ing.nameSnapshot ?? ''
-      const units = this.getAvailableUnitsForIngredient(item, ing.unit_ ?? '')
+      const name = (item as { nameHebrew?: string } | undefined)?.nameHebrew ?? ing.nameSnapshot ?? ''
+      const units = this.getAvailableUnitsForIngredient(item, ing.unit ?? '')
       return {
         name,
-        amount: (ing.amount_ ?? 0) * factor,
-        unit: ing.unit_ ?? '',
+        amount: (ing.amount ?? 0) * factor,
+        unit: ing.unit ?? '',
         availableUnits: units,
         referenceId: ing.referenceId,
         type: ing.type,
@@ -82,51 +82,51 @@ export class ScalingService {
     if (currentUnit) units.add(currentUnit)
     if (!item) return Array.from(units)
     const meta = item as {
-      base_unit_?: string
-      purchase_options_?: { unit_symbol_?: string }[]
-      unit_options_?: { unit_symbol_?: string }[]
-      yield_unit_?: string
+      baseUnit?: string
+      purchaseOptions?: { unitSymbol?: string }[]
+      unit_options_?: { unitSymbol?: string }[]
+      yieldUnit?: string
     }
-    if (meta.base_unit_) units.add(meta.base_unit_)
-    if (meta.purchase_options_?.length) {
-      meta.purchase_options_.forEach((o) => {
-        if (o.unit_symbol_) units.add(o.unit_symbol_)
+    if (meta.baseUnit) units.add(meta.baseUnit)
+    if (meta.purchaseOptions?.length) {
+      meta.purchaseOptions.forEach((o) => {
+        if (o.unitSymbol) units.add(o.unitSymbol)
       })
     }
     if (meta.unit_options_?.length) {
       meta.unit_options_.forEach((o) => {
-        if (o.unit_symbol_) units.add(o.unit_symbol_)
+        if (o.unitSymbol) units.add(o.unitSymbol)
       })
     }
-    if (meta.yield_unit_) units.add(meta.yield_unit_)
+    if (meta.yieldUnit) units.add(meta.yieldUnit)
     return Array.from(units)
   }
 
   /**
-   * Scaled prep items for dishes (prep_items_ and prep_categories_).
+   * Scaled prep items for dishes (prepItems and prepCategories).
    */
   getScaledPrepItems(recipe: Recipe, factor: number): ScaledPrepRow[] {
     const rows: ScaledPrepRow[] = []
 
-    if (recipe.prep_items_?.length) {
-      recipe.prep_items_.forEach((p) => {
+    if (recipe.prepItems?.length) {
+      recipe.prepItems.forEach((p) => {
         rows.push({
-          name: p.preparation_name,
+          name: p.preparationName,
           amount: (p.quantity ?? 0) * factor,
           unit: p.unit ?? 'unit',
-          category_name: p.category_name
+          categoryName: p.categoryName
         })
       })
     }
 
-    if (recipe.prep_categories_?.length) {
-      recipe.prep_categories_.forEach((cat: PrepCategory) => {
+    if (recipe.prepCategories?.length) {
+      recipe.prepCategories.forEach((cat: PrepCategory) => {
         ;(cat.items ?? []).forEach((it) => {
           rows.push({
-            name: it.item_name,
+            name: it.itemName,
             amount: (it.quantity ?? 0) * factor,
             unit: it.unit ?? 'unit',
-            category_name: cat.category_name
+            categoryName: cat.categoryName
           })
         })
       })

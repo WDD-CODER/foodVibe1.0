@@ -1,7 +1,6 @@
 @if (modalService.isOpen()) {
   <div class="c-modal-overlay" (click)="onClose()">
     <div class="c-modal-card ai-product-modal-card" dir="rtl" (click)="$event.stopPropagation()">
-
       <div class="ai-product-header">
         <h2 class="ai-product-title">
           {{ (modalService.mode() === 'edit' ? 'ai_product_title_edit' : 'ai_product_title_create') | translatePipe }}
@@ -28,16 +27,18 @@
               class="ai-product-textarea"
               dir="auto"
               [placeholder]="'ai_product_instruction_placeholder' | translatePipe"
-              [value]="instruction_()"
-              (input)="instruction_.set($any($event.target).value)"
+              [value]="instruction()"
+              (input)="instruction.set($any($event.target).value)"
               rows="4"
               [disabled]="status_() === 'sending'"
             ></textarea>
 
             @if (status_() !== 'idle') {
-              <div class="ai-product-status-bar"
-                   [class.ai-product-status--sending]="status_() === 'sending'"
-                   [class.ai-product-status--error]="status_() === 'error'">
+              <div
+                class="ai-product-status-bar"
+                [class.ai-product-status--sending]="status_() === 'sending'"
+                [class.ai-product-status--error]="status_() === 'error'"
+              >
                 @if (status_() === 'sending') {
                   <app-loader size="small" [inline]="true" />
                   <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
@@ -50,8 +51,15 @@
 
             <div class="ai-product-footer">
               <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
-              <button type="button" class="c-btn-primary" (click)="onEdit()" [disabled]="loading_() || !instruction_().trim()">
-                @if (loading_()) { <app-loader size="small" [inline]="true" /> }
+              <button
+                type="button"
+                class="c-btn-primary"
+                (click)="onEdit()"
+                [disabled]="loading_() || !instruction().trim()"
+              >
+                @if (loading_()) {
+                  <app-loader size="small" [inline]="true" />
+                }
                 {{ 'ai_product_generate' | translatePipe }}
               </button>
             </div>
@@ -73,8 +81,12 @@
               }
             </ul>
             <div class="ai-product-footer">
-              <button type="button" class="c-btn-ghost" (click)="onEditAgain()">{{ 'ai_product_generate_again' | translatePipe }}</button>
-              <button type="button" class="c-btn-primary" (click)="onApplyPatch()">{{ 'ai_product_apply' | translatePipe }}</button>
+              <button type="button" class="c-btn-ghost" (click)="onEditAgain()">
+                {{ 'ai_product_generate_again' | translatePipe }}
+              </button>
+              <button type="button" class="c-btn-primary" (click)="onApplyPatch()">
+                {{ 'ai_product_apply' | translatePipe }}
+              </button>
             </div>
           </div>
         }
@@ -93,9 +105,11 @@
             ></textarea>
 
             @if (status_() !== 'idle') {
-              <div class="ai-product-status-bar"
-                   [class.ai-product-status--sending]="status_() === 'sending'"
-                   [class.ai-product-status--error]="status_() === 'error'">
+              <div
+                class="ai-product-status-bar"
+                [class.ai-product-status--sending]="status_() === 'sending'"
+                [class.ai-product-status--error]="status_() === 'error'"
+              >
                 @if (status_() === 'sending') {
                   <app-loader size="small" [inline]="true" />
                   <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
@@ -108,8 +122,15 @@
 
             <div class="ai-product-footer">
               <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
-              <button type="button" class="c-btn-primary" (click)="onGenerate()" [disabled]="loading_() || !prompt_().trim()">
-                @if (loading_()) { <app-loader size="small" [inline]="true" /> }
+              <button
+                type="button"
+                class="c-btn-primary"
+                (click)="onGenerate()"
+                [disabled]="loading_() || !prompt_().trim()"
+              >
+                @if (loading_()) {
+                  <app-loader size="small" [inline]="true" />
+                }
                 {{ 'ai_product_generate' | translatePipe }}
               </button>
             </div>
@@ -117,14 +138,13 @@
         } @else {
           <!-- Draft editor — editable before applying -->
           <div class="ai-product-editor">
-
             <!-- Name -->
             <div class="editor-field">
               <label class="editor-label">שם המוצר</label>
               <input
                 class="c-input"
-                [value]="draft_()!.name_hebrew"
-                (input)="setDraftField('name_hebrew', $any($event.target).value)"
+                [value]="draft_()!.nameHebrew"
+                (input)="setDraftField('nameHebrew', $any($event.target).value)"
                 dir="rtl"
               />
             </div>
@@ -134,9 +154,10 @@
               <label class="editor-label">{{ 'ai_product_base_unit_label' | translatePipe }}</label>
               <select
                 class="c-input editor-select"
-                [value]="draft_()!.base_unit_"
-                (change)="setDraftField('base_unit_', $any($event.target).value)"
-                dir="ltr">
+                [value]="draft_()!.baseUnit"
+                (change)="setDraftField('baseUnit', $any($event.target).value)"
+                dir="ltr"
+              >
                 @for (unit of CANONICAL_UNITS; track unit) {
                   <option [value]="unit">{{ unit }}</option>
                 }
@@ -153,10 +174,10 @@
                   min="0"
                   max="1"
                   step="0.01"
-                  [value]="draft_()!.yield_factor_"
-                  (input)="setDraftField('yield_factor_', +$any($event.target).value)"
+                  [value]="draft_()!.yieldFactor"
+                  (input)="setDraftField('yieldFactor', +$any($event.target).value)"
                 />
-                <span class="editor-num-hint">{{ (draft_()!.yield_factor_ * 100).toFixed(0) }}%</span>
+                <span class="editor-num-hint">{{ (draft_()!.yieldFactor * 100).toFixed(0) }}%</span>
               </div>
             </div>
 
@@ -168,8 +189,8 @@
                   class="c-input editor-num-input"
                   type="number"
                   min="0"
-                  [value]="draft_()!.min_stock_level_"
-                  (input)="setDraftField('min_stock_level_', +$any($event.target).value)"
+                  [value]="draft_()!.minStockLevel"
+                  (input)="setDraftField('minStockLevel', +$any($event.target).value)"
                 />
               </div>
               <div class="editor-field editor-field--half">
@@ -178,8 +199,8 @@
                   class="c-input editor-num-input"
                   type="number"
                   min="0"
-                  [value]="draft_()!.expiry_days_default_"
-                  (input)="setDraftField('expiry_days_default_', +$any($event.target).value)"
+                  [value]="draft_()!.expiryDaysDefault"
+                  (input)="setDraftField('expiryDaysDefault', +$any($event.target).value)"
                 />
               </div>
             </div>
@@ -188,7 +209,7 @@
             <div class="editor-field">
               <label class="editor-label">{{ 'ai_product_categories_label' | translatePipe }}</label>
               <div class="editor-chips-row">
-                @for (cat of draft_()!.categories_; track cat) {
+                @for (cat of draft_()!.categories; track cat) {
                   <span class="ai-product-chip">
                     {{ cat }}
                     <button type="button" class="chip-remove" (click)="removeCategory(cat)">×</button>
@@ -214,7 +235,7 @@
             <div class="editor-field">
               <label class="editor-label">{{ 'ai_product_allergens_label' | translatePipe }}</label>
               <div class="editor-chips-row">
-                @for (al of draft_()!.allergens_; track al) {
+                @for (al of draft_()!.allergens; track al) {
                   <span class="ai-product-chip ai-product-chip--allergen">
                     {{ al }}
                     <button type="button" class="chip-remove" (click)="removeAllergen(al)">×</button>
@@ -237,13 +258,16 @@
             </div>
 
             <div class="ai-product-footer">
-              <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">{{ 'ai_product_generate_again' | translatePipe }}</button>
-              <button type="button" class="c-btn-primary" (click)="onApply()">{{ 'ai_product_apply' | translatePipe }}</button>
+              <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
+                {{ 'ai_product_generate_again' | translatePipe }}
+              </button>
+              <button type="button" class="c-btn-primary" (click)="onApply()">
+                {{ 'ai_product_apply' | translatePipe }}
+              </button>
             </div>
           </div>
         }
       }
-
     </div>
   </div>
 }

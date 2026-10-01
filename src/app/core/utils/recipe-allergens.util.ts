@@ -16,13 +16,13 @@ export function resolveRecipeAllergens(
   maxDepth = MAX_ALLERGEN_RECURSION,
   depth = 0
 ): string[] {
-  if (depth >= maxDepth || !recipe?.ingredients_?.length) return []
+  if (depth >= maxDepth || !recipe?.ingredients?.length) return []
   const set = new Set<string>()
 
-  for (const ing of recipe.ingredients_) {
+  for (const ing of recipe.ingredients) {
     if (ing.type === 'product') {
       const product = ing.referenceId ? productsById.get(ing.referenceId) : undefined
-      ;(product?.allergens_ || []).forEach((a) => set.add(a))
+      ;(product?.allergens || []).forEach((a) => set.add(a))
     } else if (ing.type === 'recipe') {
       const subRecipe = ing.referenceId ? recipesById.get(ing.referenceId) : undefined
       if (subRecipe) {

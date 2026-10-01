@@ -64,7 +64,7 @@ import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.c
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating'
-type RecipeBulkField = 'labels_' | 'recipe_type_'
+type RecipeBulkField = 'labels' | 'recipeType'
 
 /** Ingredient-filter typeahead search (plan 301, Milestone 1) — same tuning as ingredient-search.component.ts. */
 const INGREDIENT_SEARCH_LIMIT = 25
@@ -232,13 +232,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected editableFields_ = computed<BulkEditableField[]>(() => [
     {
-      key: 'labels_',
+      key: 'labels',
       label: 'labels',
       options: this.metadataRegistry.allLabels_().map((l) => ({ value: l.key, label: l.key })),
       multi: true
     },
     {
-      key: 'recipe_type_',
+      key: 'recipeType',
       label: 'recipe_type',
       options: [
         { value: 'dish', label: 'dish' },
@@ -268,7 +268,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected getAllRecipeLabels(recipe: Recipe): string[] {
-    return [...new Set([...(recipe.labels_ ?? []), ...(recipe.autoLabels_ ?? [])])]
+    return [...new Set([...(recipe.labels ?? []), ...(recipe.autoLabels ?? [])])]
   }
 
   /** Resolves label color by registry key, or by display text (e.g. Hebrew) when recipe stores translated value. */
@@ -311,12 +311,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       if (recipeLabels.length > 0) recipeLabels.forEach((l) => bump('Labels', l))
       else bump('Labels', 'no_label')
 
-      bump('Approved', recipe.is_approved_ ? 'true' : 'false')
+      bump('Approved', recipe.isApproved ? 'true' : 'false')
 
-      const station = (recipe.default_station_ || '').trim() || '_none'
+      const station = (recipe.defaultStation || '').trim() || '_none'
       bump('Station', station)
 
-      const course = (recipe.course_ || '').trim() || '_none'
+      const course = (recipe.course || '').trim() || '_none'
       bump('Course', course)
     })
 
@@ -396,12 +396,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
             const labels = this.getAllRecipeLabels(recipe)
             recipeValues = labels.length > 0 ? labels : ['no_label']
           } else if (category === 'Approved') {
-            recipeValues = [recipe.is_approved_ ? 'true' : 'false']
+            recipeValues = [recipe.isApproved ? 'true' : 'false']
           } else if (category === 'Station') {
-            const st = (recipe.default_station_ || '').trim() || '_none'
+            const st = (recipe.defaultStation || '').trim() || '_none'
             recipeValues = [st]
           } else if (category === 'Course') {
-            const c = (recipe.course_ || '').trim() || '_none'
+            const c = (recipe.course || '').trim() || '_none'
             recipeValues = [c]
           }
           return selectedValues.some((v) => recipeValues.includes(v))
@@ -414,7 +414,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
 
     if (search) {
-      recipes = recipes.filter((r) => (r.name_hebrew ?? '').toLowerCase().includes(search))
+      recipes = recipes.filter((r) => (r.nameHebrew ?? '').toLowerCase().includes(search))
     }
 
     const dateFrom = this.dateFrom_()
@@ -429,15 +429,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
           if (toMs != null && ts > toMs) return false
           return true
         }
-        const createdInRange = inRange(recipe.addedAt_ ?? 0)
-        const updatedInRange = includeByUpdated && inRange(recipe.updatedAt_ ?? 0)
+        const createdInRange = inRange(recipe.createdAt ?? 0)
+        const updatedInRange = includeByUpdated && inRange(recipe.updatedAt ?? 0)
         return createdInRange || updatedInRange
       })
     }
 
     if (this.showFavoritesOnly_()) {
       const uid = this.currentUserId_()
-      recipes = uid ? recipes.filter((r) => (r.favoritedBy_ ?? []).includes(uid)) : []
+      recipes = uid ? recipes.filter((r) => (r.favoritedBy ?? []).includes(uid)) : []
     }
 
     if (sortBy) {
@@ -508,7 +508,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
     const uid = this.currentUserId_()
     if (!uid) return false
-    return (recipe.favoritedBy_ ?? []).includes(uid)
+    return (recipe.favoritedBy ?? []).includes(uid)
   }
 
   protected activeCostTooltipRecipe_ = computed(() => {
@@ -522,7 +522,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   })
 
   protected isRecipeDish(recipe: Recipe): boolean {
-    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
+    return recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
   }
 
   protected getRecipeAllergens(recipe: Recipe): string[] {
@@ -562,8 +562,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected getRecipeYieldDescription(recipe: Recipe): string {
-    const amount = recipe.yield_amount_ ?? 1
-    const unit = recipe.yield_unit_ ? this.translationService.translate(recipe.yield_unit_) : ''
+    const amount = recipe.yieldAmount ?? 1
+    const unit = recipe.yieldUnit ? this.translationService.translate(recipe.yieldUnit) : ''
     return `${amount} ${unit}`.trim() || String(amount)
   }
 
@@ -574,10 +574,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   private getRecipeProductIds(recipe: Recipe, depth = 0): Set<string> {
-    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients_?.length) return new Set()
+    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients?.length) return new Set()
     const set = new Set<string>()
     const recipesById = this.kitchenState.recipesById_()
-    for (const ing of recipe.ingredients_) {
+    for (const ing of recipe.ingredients) {
       if (!ing.referenceId) continue
       if (ing.type === 'product') {
         set.add(ing.referenceId)
@@ -593,7 +593,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const hebrewCompare = (x: string, y: string) => (x || '').localeCompare(y || '', 'he')
     switch (field) {
       case 'name':
-        return hebrewCompare(a.name_hebrew || '', b.name_hebrew || '')
+        return hebrewCompare(a.nameHebrew || '', b.nameHebrew || '')
       case 'type': {
         const aType = this.isRecipeDish(a) ? 'dish' : 'preparation'
         const bType = this.isRecipeDish(b) ? 'dish' : 'preparation'
@@ -616,11 +616,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
         return hebrewCompare(aVal, bVal)
       }
       case 'dateAdded':
-        return (a.addedAt_ ?? 0) - (b.addedAt_ ?? 0)
+        return (a.createdAt ?? 0) - (b.createdAt ?? 0)
       case 'dateUpdated':
-        return (a.updatedAt_ ?? 0) - (b.updatedAt_ ?? 0)
+        return (a.updatedAt ?? 0) - (b.updatedAt ?? 0)
       case 'rating':
-        return (a.rating_ ?? 0) - (b.rating_ ?? 0)
+        return (a.rating ?? 0) - (b.rating ?? 0)
       default:
         return 0
     }
@@ -629,7 +629,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected async onRatingChange(recipe: Recipe, value: number): Promise<void> {
     const scope = await this.masterPush.askScope(recipe)
     if (scope === 'cancel') return
-    this.kitchenState.saveRecipe({ ...recipe, rating_: value }).subscribe({
+    this.kitchenState.saveRecipe({ ...recipe, rating: value }).subscribe({
       next: (saved) => {
         if (scope === 'everyone') this.masterPush.pushToMaster(saved)
       }
@@ -777,7 +777,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected openHistory(recipe: Recipe): void {
     const entityType: VersionEntityType = this.isRecipeDish(recipe) ? 'dish' : 'recipe'
-    this.historyFor_.set({ entityType, entityId: recipe._id, entityName: recipe.name_hebrew })
+    this.historyFor_.set({ entityType, entityId: recipe._id, entityName: recipe.nameHebrew })
   }
 
   protected closeHistory(): void {
@@ -883,12 +883,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
     for (const recipe of targets) {
       let updated: Recipe
-      if (field === 'labels_') {
-        const current = recipe.labels_ ?? []
+      if (field === 'labels') {
+        const current = recipe.labels ?? []
         if (current.includes(event.value)) continue
-        updated = { ...recipe, labels_: [...current, event.value] }
+        updated = { ...recipe, labels: [...current, event.value] }
       } else {
-        updated = { ...recipe, recipe_type_: event.value as 'dish' | 'preparation' }
+        updated = { ...recipe, recipeType: event.value as 'dish' | 'preparation' }
       }
       this.kitchenState.saveRecipe(updated).subscribe({
         next: (saved) => {
@@ -923,8 +923,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const copyOf = this.translationService.translate('copy_of')
     const clone = JSON.parse(JSON.stringify(recipe)) as Recipe
     delete (clone as { _id?: string })._id
-    clone.name_hebrew = `${copyOf} ${recipe.name_hebrew}`.trim()
-    clone.is_approved_ = false
+    clone.nameHebrew = `${copyOf} ${recipe.nameHebrew}`.trim()
+    clone.isApproved = false
     this.duplicatingId_.set(recipe._id)
     this.kitchenState.saveRecipe(clone).subscribe({
       next: () => {
@@ -939,7 +939,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected async onToggleApproval(recipe: Recipe): Promise<void> {
     const scope = await this.masterPush.askScope(recipe)
     if (scope === 'cancel') return
-    const updated = { ...recipe, is_approved_: !recipe.is_approved_ }
+    const updated = { ...recipe, isApproved: !recipe.isApproved }
     this.kitchenState.saveRecipe(updated).subscribe({
       next: (saved) => {
         if (scope === 'everyone') this.masterPush.pushToMaster(saved)
@@ -950,10 +950,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected onToggleFavorite(recipe: Recipe): void {
     const uid = this.currentUserId_()
     if (!uid) return
-    const current = recipe.favoritedBy_ ?? []
+    const current = recipe.favoritedBy ?? []
     const updated: Recipe = {
       ...recipe,
-      favoritedBy_: current.includes(uid) ? current.filter((id) => id !== uid) : [...current, uid]
+      favoritedBy: current.includes(uid) ? current.filter((id) => id !== uid) : [...current, uid]
     }
     this.kitchenState.saveRecipe(updated).subscribe()
   }
