@@ -128,8 +128,22 @@ export class RecipeDataService {
   }
 
   /** TEMPORARY (dev-process-only, see chat 2026-09-26). */
-  async pushToMaster(recipeId: string): Promise<void> {
+  async pushToMaster(recipeId: string): Promise<{ masterId: string }> {
     return this.storage.pushToMaster(ENTITY, recipeId)
+  }
+
+  /** Plan 322 bugfix: keep the local store's _masterId in sync with what the
+   *  server just resolved it to (see product-data.service.ts's patchMasterId
+   *  for the full reasoning — same fix, recipe side). */
+  patchMasterId(id: string, masterId: string): void {
+    this.recipesStore_.update((recipes) =>
+      recipes.map((r) => (r._id === id ? { ...r, _masterId: masterId, _userModified: false } : r))
+    )
+  }
+
+  /** Mirror of pushToMaster for the delete path (Plan 322 M6). */
+  async deleteFromMaster(recipeId: string): Promise<void> {
+    return this.storage.deleteFromMaster(ENTITY, recipeId)
   }
 
   async updateRecipe(recipe: Recipe): Promise<Recipe> {

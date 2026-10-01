@@ -273,6 +273,16 @@
                   <lucide-icon name="lock" [size]="14"></lucide-icon>
                 </span>
               } @else if (type !== 'unit' || !isSystemUnit(item)) {
+                @if (type !== 'unit') {
+                  <button
+                    class="c-icon-btn"
+                    (click)="onRenameMetadata(item, type)"
+                    [disabled]="!isLoggedIn()"
+                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : ('rename' | translatePipe)"
+                  >
+                    <lucide-icon name="pencil" [size]="type === 'allergen' ? 14 : 16"></lucide-icon>
+                  </button>
+                }
                 <button
                   class="c-icon-btn danger"
                   (click)="onRemoveMetadata(item, type)"

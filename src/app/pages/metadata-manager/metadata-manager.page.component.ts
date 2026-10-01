@@ -66,7 +66,9 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   private dishData = inject(DishDataService)
   private menuEventData = inject(MenuEventDataService)
   private addItemModal = inject(AddItemModalService)
-  protected readonly isLoggedIn = inject(UserService).isLoggedIn
+  private readonly userService = inject(UserService)
+  protected readonly isLoggedIn = this.userService.isLoggedIn
+  protected readonly isAdmin = computed(() => this.userService.user_()?.role === 'admin')
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
 
@@ -191,10 +193,32 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   async onAddLabel(prefillHebrew?: string): Promise<void> {
     const result = await this.labelCreationModal.open(prefillHebrew)
     if (!result?.key || !result?.hebrewLabel) return
+    const scope = await this.resolvePushScope('label')
+    if (!scope) return
     try {
-      this.translationService.updateDictionary(result.key, result.hebrewLabel)
+      this.translationService.updateDictionary(result.key, result.hebrewLabel, scope)
       await this.metadataRegistry.registerLabel(result.key, result.color, result.autoTriggers)
-      this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
+      let pushFailed = false
+      if (scope === 'everyone') {
+        await this.metadataRegistry
+          .pushRegistryRenameToMaster('label', result.key, result.key, {
+            color: result.color,
+            autoTriggers: result.autoTriggers
+          })
+          .catch((err) => {
+            pushFailed = true
+            this.logging.error({
+              event: 'crud.metadata.push_registry_rename_error',
+              message: 'Push new label to master failed',
+              context: { err }
+            })
+          })
+      }
+      if (pushFailed) {
+        this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
+      } else {
+        this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
+      }
     } catch (err) {
       this.logging.error({ event: 'metadata.sync_error', message: 'Metadata sync error (add label)', context: { err } })
       this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים')
@@ -228,19 +252,26 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     }
     let englishKey = resolveMap[type]?.() ?? null
     let resolvedHebrew = sanitizedHebrew
+    let isNewDictionaryEntry = false
 
     if (!englishKey) {
       const contextMap = {
         category: 'category' as const,
         allergen: 'allergen' as const,
         unit: 'unit' as const,
-        course: 'generic' as const
+        course: 'category' as const
       }
       const result = await this.translationKeyModal.open(sanitizedHebrew, contextMap[type])
       if (!isTranslationKeyResult(result)) return
       englishKey = result.englishKey
       resolvedHebrew = result.hebrewLabel
-      this.translationService.updateDictionary(englishKey, resolvedHebrew)
+      isNewDictionaryEntry = true
+    }
+
+    const scope = await this.resolvePushScope(type)
+    if (!scope) return
+    if (isNewDictionaryEntry) {
+      this.translationService.updateDictionary(englishKey, resolvedHebrew, scope)
     }
 
     // --- LAYER 3: EXECUTION ---
@@ -250,8 +281,23 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
       } else {
         await this.registerInService(englishKey, type)
       }
+      let pushFailed = false
+      if (scope === 'everyone' && (type === 'course' || type === 'category' || type === 'allergen')) {
+        await this.metadataRegistry.pushRegistryRenameToMaster(type, englishKey, englishKey).catch((err) => {
+          pushFailed = true
+          this.logging.error({
+            event: 'crud.metadata.push_registry_rename_error',
+            message: 'Push new item to master failed',
+            context: { err }
+          })
+        })
+      }
       inputElement.value = ''
-      this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
+      if (pushFailed) {
+        this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
+      } else {
+        this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
+      }
     } catch (err) {
       this.logging.error({
         event: 'metadata.sync_error',
@@ -288,6 +334,8 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
           { variant: 'danger' }
         )
         if (!confirmed) return
+        const scope = await this.resolvePushScope(type)
+        if (!scope) return
         try {
           const updatedCount =
             type === 'label'
@@ -295,7 +343,22 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
               : await this.kitchenState.cascadeClearCourseFromAll(item)
           if (type === 'label') await this.metadataRegistry.deleteLabel(item)
           else await this.metadataRegistry.deleteCourse(item)
-          this.userMsgService.onSetSuccessMsg(`נמחק בהצלחה ועודכנו ${updatedCount} מתכונים/מנות`)
+          let pushFailed = false
+          if (scope === 'everyone') {
+            await this.metadataRegistry.pushRegistryDeleteToMaster(type, item).catch((err) => {
+              pushFailed = true
+              this.logging.error({
+                event: 'crud.metadata.push_registry_delete_error',
+                message: `Push ${type} delete to master failed`,
+                context: { err }
+              })
+            })
+          }
+          if (pushFailed) {
+            this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
+          } else {
+            this.userMsgService.onSetSuccessMsg(`נמחק בהצלחה ועודכנו ${updatedCount} מתכונים/מנות`)
+          }
         } catch (err) {
           this.logging.error({
             event: 'crud.metadata.cascade_delete_error',
@@ -335,6 +398,8 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     }
 
     // 3. EXECUTION
+    const scope = await this.resolvePushScope(type)
+    if (!scope) return
     try {
       switch (type) {
         case 'unit':
@@ -353,10 +418,227 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
           await this.metadataRegistry.deleteCourse(item)
           break
       }
-      this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה')
+      let pushFailed = false
+      if (scope === 'everyone' && type !== 'unit') {
+        await this.metadataRegistry.pushRegistryDeleteToMaster(type, item).catch((err) => {
+          pushFailed = true
+          this.logging.error({
+            event: 'crud.metadata.push_registry_delete_error',
+            message: `Push ${type} delete to master failed`,
+            context: { err }
+          })
+        })
+      }
+      if (pushFailed) {
+        this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
+      } else {
+        this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה')
+      }
     } catch (err) {
       this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } })
       this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת')
+    }
+  }
+
+  //RENAME (plan 322) — fix a typo in place instead of delete + recreate + manually re-tag
+  // every recipe/product. category/allergen/course share the Hebrew+English key modal
+  // label reuses its own creation modal so color/autoTriggers can be corrected too; unit is
+  // out of scope (riskier — affects cost/conversion calculations elsewhere).
+  private registryHasKey(type: MetadataType, key: string): boolean {
+    switch (type) {
+      case 'label':
+        return this.allLabelKeys_().includes(key)
+      case 'course':
+        return this.allCourseKeys_().includes(key)
+      case 'category':
+        return this.allCategories_().includes(key)
+      case 'allergen':
+        return this.allAllergens_().includes(key)
+      default:
+        return false
+    }
+  }
+
+  private getAffectedCount(type: MetadataType, key: string): number {
+    if (type === 'label') {
+      return this.kitchenState
+        .recipes_()
+        .filter((r) => (r.labels_ ?? []).includes(key) || (r.autoLabels_ ?? []).includes(key)).length
+    }
+    if (type === 'course') {
+      return this.kitchenState.recipes_().filter((r) => r.course_ === key).length
+    }
+    if (type === 'category') {
+      return this.productData.allProducts_().filter((p) => (p.categories_ ?? []).includes(key)).length
+    }
+    if (type === 'allergen') {
+      return this.productData.allProducts_().filter((p) => (p.allergens_ ?? []).includes(key)).length
+    }
+    return 0
+  }
+
+  private async cascadeRename(type: MetadataType, oldKey: string, newKey: string): Promise<number> {
+    switch (type) {
+      case 'label':
+        return this.kitchenState.cascadeRenameLabelForAll(oldKey, newKey)
+      case 'course':
+        return this.kitchenState.cascadeRenameCourseForAll(oldKey, newKey)
+      case 'category':
+        return this.kitchenState.cascadeRenameCategoryForAll(oldKey, newKey)
+      case 'allergen':
+        return this.kitchenState.cascadeRenameAllergenForAll(oldKey, newKey)
+      default:
+        return 0
+    }
+  }
+
+  private async registryRename(type: MetadataType, oldKey: string, newKey: string): Promise<void> {
+    switch (type) {
+      case 'label':
+        return this.metadataRegistry.renameLabel(oldKey, newKey)
+      case 'course':
+        return this.metadataRegistry.renameCourse(oldKey, newKey)
+      case 'category':
+        return this.metadataRegistry.renameCategory(oldKey, newKey)
+      case 'allergen':
+        return this.metadataRegistry.renameAllergen(oldKey, newKey)
+    }
+  }
+
+  /** Plan 322 M4: admins choose whether an edit (rename OR a Hebrew-only text fix) also
+   *  publishes to everyone (registry key -> __master__, Hebrew label -> the shared global
+   *  dictionary doc) or stays on their own account. Non-admins (and category/allergen/course/
+   *  label are the only eligible types) always get 'me' silently — no prompt shown.
+   *  Returns null if the admin cancels out of the prompt. */
+  private async resolvePushScope(type: MetadataType): Promise<'me' | 'everyone' | null> {
+    if (!this.isAdmin() || !(type === 'label' || type === 'course' || type === 'category' || type === 'allergen')) {
+      return 'me'
+    }
+    const scope = await this.confirmModal.openTernary(
+      this.translationService.translate('push_registry_master_message'),
+      {
+        headerKey: 'push_to_master_header',
+        saveLabel: 'push_to_master_save_me',
+        saveButtonLabel: 'push_to_master_save_everyone'
+      }
+    )
+    if (scope === 'cancel') return null
+    return scope === 'save' ? 'everyone' : 'me'
+  }
+
+  /** Confirm (only when items are affected) + cascade-rename, for category/course/allergen/label. */
+  private async confirmAndCascadeRename(
+    type: MetadataType,
+    oldKey: string,
+    newKey: string,
+    scope: 'me' | 'everyone'
+  ): Promise<boolean> {
+    if (this.registryHasKey(type, newKey)) {
+      this.userMsgService.onSetErrorMsg(`${this.metadataTypeNames[type]} "${newKey}" כבר קיים`)
+      return false
+    }
+    const affected = this.getAffectedCount(type, oldKey)
+    if (affected > 0) {
+      const confirmed = await this.confirmModal.open(
+        `שינוי שם ${this.metadataTypeNames[type]} "${this.translationService.translate(oldKey)}" יעדכן ${affected} פריטים. להמשיך?`
+      )
+      if (!confirmed) return false
+    }
+
+    try {
+      await this.cascadeRename(type, oldKey, newKey)
+      await this.registryRename(type, oldKey, newKey)
+      let pushFailed = false
+      if (
+        scope === 'everyone' &&
+        (type === 'label' || type === 'course' || type === 'category' || type === 'allergen')
+      ) {
+        const itemData =
+          type === 'label'
+            ? (({ color, autoTriggers }) => ({ color, autoTriggers }))(
+                this.allLabels_().find((l) => l.key === newKey) ?? { color: undefined, autoTriggers: undefined }
+              )
+            : type === 'course'
+              ? { color: this.allCourses_().find((c) => c.key === newKey)?.color }
+              : undefined
+        await this.metadataRegistry.pushRegistryRenameToMaster(type, oldKey, newKey, itemData).catch((err) => {
+          pushFailed = true
+          this.logging.error({
+            event: 'crud.metadata.push_registry_rename_error',
+            message: 'Push registry rename to master failed',
+            context: { err }
+          })
+        })
+      }
+      if (pushFailed) {
+        this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
+      } else {
+        this.userMsgService.onSetSuccessMsg(
+          affected > 0 ? `שונה בהצלחה ועודכנו ${affected} פריטים` : 'השינוי בוצע בהצלחה'
+        )
+      }
+      return true
+    } catch (err) {
+      this.logging.error({
+        event: 'crud.metadata.cascade_rename_error',
+        message: `Failed to cascade-rename ${type}`,
+        context: { err }
+      })
+      this.userMsgService.onSetErrorMsg('שגיאה בביצוע השינוי מול השרת')
+      return false
+    }
+  }
+
+  async onRenameMetadata(item: string, type: MetadataType): Promise<void> {
+    if (!this.requireSignIn()) return
+
+    if (type === 'label') {
+      const existing = this.allLabels_().find((l) => l.key === item)
+      const result = await this.labelCreationModal.open(
+        this.translationService.translate(item),
+        existing
+          ? { englishKey: existing.key, color: existing.color, autoTriggers: existing.autoTriggers ?? [] }
+          : undefined
+      )
+      if (!result?.key) return
+      const existingTriggers = [...(existing?.autoTriggers ?? [])].sort().join(',')
+      const resultTriggers = [...(result.autoTriggers ?? [])].sort().join(',')
+      const unchanged =
+        result.key === item &&
+        result.hebrewLabel === this.translationService.translate(item) &&
+        result.color === existing?.color &&
+        resultTriggers === existingTriggers
+      if (unchanged) return
+      const scope = await this.resolvePushScope('label')
+      if (!scope) return
+      if (result.key !== item) {
+        const ok = await this.confirmAndCascadeRename('label', item, result.key, scope)
+        if (!ok) return
+      }
+      this.translationService.updateDictionary(result.key, result.hebrewLabel, scope)
+      await this.metadataRegistry.updateLabel(result.key, { color: result.color, autoTriggers: result.autoTriggers })
+      return
+    }
+
+    if (type === 'course' || type === 'category' || type === 'allergen') {
+      const contextMap = { course: 'category' as const, category: 'category' as const, allergen: 'allergen' as const }
+      const result = await this.translationKeyModal.open(
+        this.translationService.translate(item),
+        contextMap[type],
+        item
+      )
+      if (!isTranslationKeyResult(result)) return
+      if (result.englishKey === item && result.hebrewLabel === this.translationService.translate(item)) return
+      const scope = await this.resolvePushScope(type)
+      if (!scope) return
+      if (result.englishKey === item) {
+        this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)
+        this.userMsgService.onSetSuccessMsg('העדכון בוצע בהצלחה')
+        return
+      }
+      const ok = await this.confirmAndCascadeRename(type, item, result.englishKey, scope)
+      if (!ok) return
+      this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)
     }
   }
 

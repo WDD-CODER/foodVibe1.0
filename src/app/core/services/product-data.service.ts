@@ -122,7 +122,9 @@ export class ProductDataService {
       name_english: legacy.name_english,
       seeded_: legacy.seeded_,
       allergen_source_: legacy.allergen_source_,
-      nutrition_per_100g: legacy.nutrition_per_100g
+      nutrition_per_100g: legacy.nutrition_per_100g,
+      _masterId: legacy._masterId,
+      _userModified: legacy._userModified
     }
   }
 
@@ -235,6 +237,37 @@ export class ProductDataService {
       this.logging.error({ event: 'crud.product.delete_error', message: 'Failed to delete product', context: { err } })
       throw err
     }
+  }
+
+  /** Plan 322 M9: publishes an already-saved product to __master__, same shape as
+   *  RecipeDataService/DishDataService.pushToMaster. */
+  async pushToMaster(productId: string): Promise<{ masterId: string }> {
+    return this.storage.pushToMaster(ENTITY, productId)
+  }
+
+  /** Plan 322 bugfix: the server re-points a pushed doc's own _masterId to the
+   *  resolved master id (see push-to-master route), but the local store never
+   *  learned about it — so a delete right after a push still saw the OLD
+   *  _masterId (or none) and silently skipped the admin ternary. Call this
+   *  after pushToMaster resolves to keep the in-memory copy in sync. */
+  patchMasterId(id: string, masterId: string): void {
+    this.ProductsStore_.update((products) =>
+      products.map((p) => (p._id === id ? { ...p, _masterId: masterId, _userModified: false } : p))
+    )
+  }
+
+  /** Mirror of pushToMaster for the delete path (Plan 322 M6/M8): removes the
+   *  caller's linked __master__ copy so future/unsynced users stop receiving it. */
+  async deleteFromMaster(productId: string): Promise<void> {
+    return this.storage.deleteFromMaster(ENTITY, productId)
+  }
+
+  /** Plan 322 M8: after deleteFromMaster, also strips this product's ingredient line
+   *  from every OTHER user's own recipes/dishes that reference their own cloned copy
+   *  of the same shared product. Explicitly Human-requested, dev-only, higher-risk
+   *  than deleteFromMaster — reaches into other users' own documents. */
+  async purgeIngredientEverywhere(productId: string): Promise<void> {
+    return this.storage.purgeProductIngredientEverywhere(ENTITY, productId)
   }
 
   async getTrashProducts(): Promise<(Product & { deletedAt: number })[]> {

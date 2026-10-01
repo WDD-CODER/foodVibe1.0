@@ -51,7 +51,7 @@ export class KitchenStateService {
   // COMPUTED SIGNALS
   lowStockProducts_ = computed(() => this.products_().filter((p) => p.min_stock_level_ > 0))
 
-  saveProduct(product: Product): Observable<void> {
+  saveProduct(product: Product): Observable<Product> {
     const isUpdate = !!(product._id && product._id.trim() !== '')
 
     const isDuplicate = this.products_().some(
@@ -95,7 +95,7 @@ export class KitchenStateService {
               })
           }
         }),
-        map(() => undefined as void),
+        map(() => product),
         catchError((err) => {
           this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר')
           return throwError(() => err)
@@ -114,7 +114,7 @@ export class KitchenStateService {
             changes: []
           })
         }),
-        map(() => undefined as void),
+        map((saved) => saved),
         catchError((err) => {
           this.userMsgService.onSetErrorMsg('שגיאה בהוספת המוצר')
           return throwError(() => err)
@@ -542,6 +542,113 @@ export class KitchenStateService {
     const affected = this.recipes_().filter((r) => r.course_ === courseKey)
     for (const recipe of affected) {
       await this.applyCascadeUpdate(recipe, { ...recipe, course_: '' })
+    }
+    return affected.length
+  }
+
+  /** Cascade-rename a label key across every recipe/dish that references it (both labels_
+   *  and autoLabels_), so fixing a typo doesn't require delete + recreate + manual re-tag.
+   *  Returns the number of items updated. */
+  async cascadeRenameLabelForAll(oldKey: string, newKey: string): Promise<number> {
+    const affected = this.recipes_().filter(
+      (r) => (r.labels_ ?? []).includes(oldKey) || (r.autoLabels_ ?? []).includes(oldKey)
+    )
+    for (const recipe of affected) {
+      const rename = (arr: string[]) => [...new Set(arr.map((l) => (l === oldKey ? newKey : l)))]
+      const updated: Recipe = {
+        ...recipe,
+        labels_: rename(recipe.labels_ ?? []),
+        autoLabels_: rename(recipe.autoLabels_ ?? [])
+      }
+      await this.applyCascadeUpdate(recipe, updated)
+    }
+    return affected.length
+  }
+
+  /** Cascade-rename a course key across every recipe/dish that has it set. Returns the
+   *  number of items updated. */
+  async cascadeRenameCourseForAll(oldKey: string, newKey: string): Promise<number> {
+    const affected = this.recipes_().filter((r) => r.course_ === oldKey)
+    for (const recipe of affected) {
+      await this.applyCascadeUpdate(recipe, { ...recipe, course_: newKey })
+    }
+    return affected.length
+  }
+
+  /** Plan 322 M8: cascade-remove a deleted product's ingredient line from every one of the
+   *  CURRENT user's own recipes/dishes that reference it. Pulls the row out entirely rather
+   *  than nulling its referenceId — a referenceless ingredient row is itself an invalid/
+   *  blocking row (see recipe-ingredients-table.component.ts's isBlockingRow), so leaving one
+   *  behind would just trade one bug for another. Returns the number of items updated. Only
+   *  covers the current user's own data — the cross-user "everyone" sweep is a separate,
+   *  server-side operation (ProductDataService.purgeIngredientEverywhere). */
+  async cascadeRemoveIngredientForAll(productId: string): Promise<number> {
+    const affected = this.recipes_().filter((r) => (r.ingredients_ ?? []).some((i) => i.referenceId === productId))
+    for (const recipe of affected) {
+      const updated: Recipe = {
+        ...recipe,
+        ingredients_: (recipe.ingredients_ ?? []).filter((i) => i.referenceId !== productId)
+      }
+      await this.applyCascadeUpdate(recipe, updated)
+    }
+    return affected.length
+  }
+
+  /** Shared by cascadeRenameCategoryForAll/cascadeRenameAllergenForAll: applies one product's
+   *  update via the raw update method (not saveProduct(), which would fire one toast per
+   *  affected product for a bulk cascade) while still recording activity-log + version-history
+   *  entries, matching what saveProduct does minus the toast. */
+  private async applyProductCascadeUpdate(previous: Product, updated: Product): Promise<void> {
+    await this.productDataService.updateProduct(updated)
+    const changes = this.buildProductChanges(previous, updated)
+    this.activityLogService.recordActivity({
+      action: 'updated',
+      entityType: 'product',
+      entityId: updated._id,
+      entityName: updated.name_hebrew,
+      changes
+    })
+    try {
+      await this.versionHistoryService.addVersion({
+        entityType: 'product',
+        entityId: previous._id,
+        entityName: previous.name_hebrew,
+        snapshot: previous,
+        changes
+      })
+    } catch (err) {
+      this.logging.error({
+        event: 'crud.versionHistory.addVersion_fireAndForget_error',
+        message: 'Version history write failed after product cascade update',
+        context: { err }
+      })
+    }
+  }
+
+  /** Cascade-rename a category key across every product that references it. Returns the
+   *  number of products updated. */
+  async cascadeRenameCategoryForAll(oldKey: string, newKey: string): Promise<number> {
+    const affected = this.products_().filter((p) => (p.categories_ ?? []).includes(oldKey))
+    for (const product of affected) {
+      const updated: Product = {
+        ...product,
+        categories_: [...new Set((product.categories_ ?? []).map((c) => (c === oldKey ? newKey : c)))]
+      }
+      await this.applyProductCascadeUpdate(product, updated)
+    }
+    return affected.length
+  }
+
+  /** Cascade-rename an allergen key across every product that references it. Returns the
+   *  number of products updated. */
+  async cascadeRenameAllergenForAll(oldKey: string, newKey: string): Promise<number> {
+    const affected = this.products_().filter((p) => (p.allergens_ ?? []).includes(oldKey))
+    for (const product of affected) {
+      const updated: Product = {
+        ...product,
+        allergens_: [...new Set((product.allergens_ ?? []).map((a) => (a === oldKey ? newKey : a)))]
+      }
+      await this.applyProductCascadeUpdate(product, updated)
     }
     return affected.length
   }

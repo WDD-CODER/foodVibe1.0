@@ -118,6 +118,90 @@
 - [ ] M2.2: `metadata-manager.page.component.ts` — `onRenameMetadata(item, type)`: open the right modal prefilled, confirm with affected count, cascade, success toast
 - [ ] M2.3: Reject rename-to-existing-key before opening the confirm dialog
 
+**Milestone 3 — Admin master-push for registry renames (added 2026-09-30) — Human-validated 2026-09-30 except M3.3 (see M3.7)**
+- [x] M3.1: `registry-rename-master` server route + client plumbing chain
+- [x] M3.2: Admin-only ternary (me/everyone/cancel) in `confirmAndCascadeRename` — Human-validated
+- [x] M3.3: Fix false "key in use" collision on rename (`excludeKey` missing from label-creation-modal's own validation path) — Human validated the false-positive is gone, but flagged a real gap it exposed, see M3.7
+- [x] M3.5: Fix unconditional success toast masking a failed master-push — Human-validated
+- [x] M3.6: Remove "continue without saving" button leaking into course/category/allergen modal — Human-validated
+- [x] M3.7 (added 2026-09-30, round 3): Fixed `TranslationService.validateKeyForHebrew` — now rejects a Hebrew label already used by a *different* key ("name already taken"), while still excluding the item's own key/label during rename. `ng build` clean; live UI check still needed from Human (frontend wasn't running for this pass).
+
+**Milestone 4 — Server-side Hebrew dictionary sync (added 2026-09-30) — Human-validated 2026-09-30**
+- [x] M4.1: `DICTIONARY_OVERRIDES` collection (per-user personal overrides)
+- [x] M4.2: `__global__` pseudo-user doc + GET/PUT routes (admin-only write)
+- [x] M4.3: `TranslationService` loads+merges dictionary.json → global → personal (localStorage becomes cache only, not source of truth)
+- [x] M4.4: `updateDictionary(key, label, scope)` persists server-side per scope
+- [x] M4.5: Wire admin ternary's me/everyone choice into `updateDictionary`'s scope
+- [x] M4.6: Extend the key-unchanged/Hebrew-only-edit fast path to also offer the ternary (bug 4 from 2026-09-30 test round) — Human-validated
+
+**Milestone 5 — "Everyone" upsert fixes + extend to ADD + recipe create (added 2026-09-30, 2nd round) — Human-validated 2026-09-30**
+- [x] M5.1: `registry-rename-master` upserts (add to master) instead of 404ing when the item is new
+- [x] M5.2: `push-to-master` (recipe/dish/product route) — same upsert fix, was silently no-op'ing
+- [x] M5.3: No-op rename guard — skip prompt+save entirely when nothing changed
+- [x] M5.4: Admin ternary extended to ADD flows (label/course/category/allergen) — Human-validated
+- [x] M5.5: `recipe-builder.page.ts` — admin's brand-new recipe now also asks me/everyone on first save — Human-validated
+- [x] M5.6: `push-to-master` — fixed a real 500 (E11000 duplicate key) on first push of a self-linked doc; now inserts master copy under a fresh `_id` instead of reusing the caller's own — Human-validated (everyone-save no longer errors)
+
+**Milestone 6 — Admin "delete for everyone" on recipes/dishes (added 2026-09-30, round 3) — Human-validated 2026-09-30**
+- [x] M6.1: Found delete handler (client `kitchen-state.service.ts`/`recipe-book-list.component.ts`, server trash-based, no master involvement before this)
+- [x] M6.2: Same "just me / everyone" ternary now asked on delete (`MasterPushService.askDeleteScope`, wired into all 3 delete call sites) — prompts based on `_masterId` presence, same convention as the existing save-time ternary (not admin-gated — flag if a stricter gate is wanted)
+- [x] M6.3: "Everyone" moves the master's linked copy to `TRASH_RECIPES`/`TRASH_DISHES` under `__master__` — new server route `PUT /:type/:id/delete-from-master`, no new flag field
+- [x] M6.4: "Just me" unchanged
+- [x] M6.5: Verified via direct API + DB check — master copy moved to trash and gone from the live collection, caller's own copy untouched. `ng build` clean.
+
+**Milestone 7 — Recipe-builder save robustness fixes (added 2026-09-30, round 3)**
+- [x] M7.1: Investigated, not a bug — `saveRecipe()` already shows a red inline message + global toast + auto-scroll when an ingredient row is blocking; couldn't reproduce a truly silent case (both product-creation paths in the app require a base unit). No code change.
+- [x] M7.2: Investigated, not a bug — the "dead button" is actually `בונה מתכונים` (Recipe Builder), the active half of a 2-tab toggle with `מצב בישול` (Cook Mode); confirmed live by switching tabs. Misread at a glance as a broken duplicate save button. Nothing removed.
+
+**Milestone 8 — Product delete: in-use warning + count + admin everyone-cascade (added 2026-09-30, round 4) — implemented, not verified/Human-validated**
+- [x] M8.1: Investigated — today's product delete has zero in-use awareness; hard-succeeds and leaves dangling ingredient references behind (invalid/blocking rows). Only `onDeleteProduct` (single-item) changed, not bulk-delete.
+- [x] M8.2: Affected-count confirm added before deleting an in-use product
+- [x] M8.3: `KitchenStateService.cascadeRemoveIngredientForAll(productId)` — pulls the ingredient line entirely, reuses `applyCascadeUpdate`
+- [x] M8.4: `askDeleteScope(product)` now asked when the product has a `_masterId`; `Product` model gained `_masterId?`/`_userModified?` (previously untyped)
+- [x] M8.5: "Just me" unchanged scope
+- [x] M8.6: `delete-from-master` extended to `PRODUCT_LIST`. Confirmed clones get a fresh `_id` per user at signup (not the master's), so added new route `PUT /:type/:id/purge-ingredient-everywhere` (`PRODUCT_LIST` only) — two-hop resolution via `_masterId` then per-user `$pull` on `RECIPE_LIST`/`DISH_LIST`
+- [x] M8.7: Not run — Human explicitly asked to skip live/API verification and not create test data for this one; `ng build` clean is the hand-off bar. Human will test directly in the app.
+
+**Milestone 9 — Admin push-to-everyone on new product creation + recipe push carries its new products along (added 2026-09-30, round 5) — Human-validated 2026-09-30 ("m9 all good here")**
+- [x] M9.1: Found — `product-form.component.ts`'s `saveAndWait()` (both create+edit); quick-add-product modal is a separate fast-entry path, deliberately not prompted (see M9.2)
+- [x] M9.2: Admin ternary added to `product-form.component.ts` (same `askScope`/`forcePrompt` pattern as brand-new recipes); quick-add-product modal left as-is, relies on M9.3
+- [x] M9.3: `push-to-master` route refactored into recursive `pushDocToMasterRecursive` — any never-pushed referenced product/sub-recipe now gets pushed as a dependency instead of leaving an unresolvable local id behind; `saveProduct()` return type changed `void` → `Product` to get the new `_id` (checked all 5 call sites, backward compatible)
+- [x] M9.4: Not run — Human's standing instruction, no test data created this session; `ng build` clean + `node --check` on the server file is the hand-off bar
+
+**Milestone 10 — Admin ternary + master push on label/course/category/allergen DELETE (added 2026-09-30, round 5)**
+- [x] M10.1: `onRemoveMetadata` now calls `resolvePushScope(type)` before executing, in both the in-use cascade branch and the not-in-use plain-delete branch — cancel aborts the whole delete
+- [x] M10.2: New `PUT /:type/registry-delete-master` route — removes key from `__master__`'s registry doc + bulk-strips from every other user's own data in one `updateMany` per collection (no per-user two-hop needed, key is shared literally unlike product `_id`s)
+- [x] M10.3: Decided by Human 2026-09-30 — yes, aggressive cross-user removal, same as Milestone 8's products
+- [ ] M10.4: Not run — standing instruction to skip live verification; `ng build` + `node --check` clean. Human will test in the app.
+
+**Milestone 11 — Bulk multi-select product delete gets Milestone 8's warning + ternary (added 2026-09-30, round 5)**
+- [x] M11.1: `onBulkDeleteSelected` computes in-use count per selected product, cascades the ingredient removal, asks ONE combined ternary for the whole batch (not per-product)
+- [x] M11.2: Combined confirm copy summarizing total affected across the selection; falls back to the plain old copy when nothing selected is in use
+- [x] M11.3: Not run — Human's standing instruction to skip live verification/test data; `ng build` clean is the hand-off bar
+
+**Milestone 12 — `_masterId` never patched into local client state after push-to-master (found during round 5 testing)**
+- [x] M12.1: `push-to-master` route response now returns `{ ok: true, masterId: resolvedMasterId }` instead of just `{ ok: true }`
+- [x] M12.2: `master-push.service.ts`'s `pushToMaster`/`pushProductToMaster` now patch the resolved `masterId` into local state via `.then()` instead of discarding it
+- [x] M12.3: New `patchMasterId(id, masterId)` method on `product-data.service.ts`/`recipe-data.service.ts`/`dish-data.service.ts`
+- [x] M12.4: `node --check` + `ng build --configuration=local` both clean
+- [x] M12.5: Live end-to-end verified in browser (self-validated per Human's request): create product → push to everyone → same-session delete → "just me/everyone" ternary now correctly appears and completes (caveat: didn't exercise the cross-user purge path — see M13)
+
+**Milestone 13 — `purge-ingredient-everywhere` doesn't actually strip the dangling ingredient from other users (found round 6, NOT YET FIXED)**
+- [ ] M13.1: Need backend terminal log for `[data/purge-ingredient-everywhere]` (or add temp logging of otherClones.length + updateMany matchedCount) — masterId chains all check out in DB, client calls are confirmed sent, URL construction is correct; the actual server-side failure point is still unknown
+- [ ] M13.2: Root-cause once visible
+- [ ] M13.3: Fix + verify a non-admin user's RECIPE_LIST/DISH_LIST loses the dangling ref; confirm with Human whether "everyone" should also delete from other users' own PRODUCT_LIST (broader than original M8 scope)
+- [ ] M13.4: Sanity-check whether M10's registry-delete-master shares the same root cause
+
+### Plan 323 — Metadata Registry Single Source of Truth (`plans/323-metadata-registry-single-source-of-truth.plan.md`)
+
+> Two disconnected seed paths (server clone-from-`__master__` at signup, vs. a client-side hardcoded-default fallback when a user's own doc is empty) let `__master__` silently fall behind real usage for KITCHEN_CATEGORIES/ALLERGENS/COURSES/MENU_TYPES — courses was the extreme case (63 vs 2), found + manually patched 2026-09-30 during Plan 322 testing. Plan-only for now; not started.
+
+**Milestone 1 — Backfill + remove the client-side fallback**
+- [ ] M1.1: `server/scripts/seed-master-registries.mjs` — one-off backfill script (local + Atlas)
+- [ ] M1.2: `metadata-registry.service.ts` `initMetadata()` — remove client-side default-seed branches for categories/allergens/courses/menu-types
+- [ ] M1.3: Delete the now-dead `DEFAULT_CATEGORIES`/`DEFAULT_ALLERGENS`/`DEFAULT_COURSES`/`defaultMenuTypes` constants
+- [ ] M1.4: Confirm `clone-master.js` reliably clones these 4 types before removing the client-side safety net
+
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.

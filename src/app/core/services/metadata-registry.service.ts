@@ -376,6 +376,29 @@ export class MetadataRegistryService {
     }
   }
 
+  async renameLabel(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
+    if (this.labels_().some((l) => l.key === trimmed)) {
+      this.userMsgService.onSetErrorMsg(`התווית "${trimmed}" כבר קיימת`)
+      return
+    }
+    const current = this.labels_()
+    const idx = current.findIndex((l) => l.key === oldKey)
+    if (idx === -1) return
+    const updated = current.slice()
+    updated[idx] = { ...updated[idx], key: trimmed }
+    try {
+      await this.persistRegistry('KITCHEN_LABELS', updated)
+      this.labels_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`התווית שונתה ל-"${trimmed}"`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם התווית')
+      this.logging.error({ event: 'crud.metadata.label.rename_error', message: 'Label rename error', context: { err } })
+    }
+  }
+
   /** Reload courses from storage (e.g. after demo data load). */
   async reloadCoursesFromStorage(): Promise<void> {
     try {
@@ -423,6 +446,33 @@ export class MetadataRegistryService {
       this.logging.error({
         event: 'crud.metadata.course.delete_error',
         message: 'Course delete error',
+        context: { err }
+      })
+    }
+  }
+
+  async renameCourse(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
+    if (this.courseDefs_().some((c) => c.key === trimmed)) {
+      this.userMsgService.onSetErrorMsg(`סוג המנה "${trimmed}" כבר קיים`)
+      return
+    }
+    const current = this.courseDefs_()
+    const idx = current.findIndex((c) => c.key === oldKey)
+    if (idx === -1) return
+    const updated = current.slice()
+    updated[idx] = { ...updated[idx], key: trimmed }
+    try {
+      await this.persistRegistry('KITCHEN_COURSES', updated)
+      this.courseDefs_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`סוג המנה שונה ל-"${trimmed}"`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם סוג המנה')
+      this.logging.error({
+        event: 'crud.metadata.course.rename_error',
+        message: 'Course rename error',
         context: { err }
       })
     }
@@ -496,6 +546,93 @@ export class MetadataRegistryService {
       this.logging.error({
         event: 'crud.metadata.category.delete_error',
         message: 'Category delete error',
+        context: { err }
+      })
+    }
+  }
+
+  async renameCategory(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
+    if (this.categories_().includes(trimmed)) {
+      this.userMsgService.onSetErrorMsg(`הקטגוריה "${trimmed}" כבר קיימת`)
+      return
+    }
+    const current = this.categories_()
+    if (!current.includes(oldKey)) return
+    const updated = current.map((c) => (c === oldKey ? trimmed : c))
+    try {
+      await this.persistRegistry('KITCHEN_CATEGORIES', updated)
+      this.categories_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`הקטגוריה שונתה ל-"${trimmed}"`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם הקטגוריה')
+      this.logging.error({
+        event: 'crud.metadata.category.rename_error',
+        message: 'Category rename error',
+        context: { err }
+      })
+    }
+  }
+
+  /** Plan 322 (+ M4 fix, 2026-09-30): pushes this item into __master__'s own registry doc —
+   *  renames it in place if master already has `oldKey`, otherwise ADDS it as a new entry
+   *  (upsert). The plain rename-only version silently 404'd for any label/course the admin
+   *  created themselves and never pushed before, which is the common case, not an edge case —
+   *  "save for everyone" must work for a brand-new item too, not just a correction to one
+   *  master already had. `itemData` carries color/autoTriggers for the object-shaped registries
+   *  (label/course) so a first-time add doesn't lose them; category/allergen are plain strings. */
+  async pushRegistryRenameToMaster(
+    type: 'label' | 'course' | 'category' | 'allergen',
+    oldKey: string,
+    newKey: string,
+    itemData?: { color?: string; autoTriggers?: string[] }
+  ): Promise<void> {
+    const entityType = {
+      label: 'KITCHEN_LABELS',
+      course: 'KITCHEN_COURSES',
+      category: 'KITCHEN_CATEGORIES',
+      allergen: 'KITCHEN_ALLERGENS'
+    }[type]
+    await this.storageService.pushRegistryRenameToMaster(entityType, oldKey, newKey, itemData)
+  }
+
+  /** Plan 322 M10: mirror of pushRegistryRenameToMaster above, for DELETE. Removes `key` from
+   *  __master__'s own registry doc, then (per Human's explicit 2026-09-30 decision, same class
+   *  of cross-user operation as M8's purgeProductIngredientEverywhere) also strips it from every
+   *  OTHER user's own recipes/dishes/products. Dev-only, deliberate exception — see the server
+   *  route's own comment. */
+  async pushRegistryDeleteToMaster(type: 'label' | 'course' | 'category' | 'allergen', key: string): Promise<void> {
+    const entityType = {
+      label: 'KITCHEN_LABELS',
+      course: 'KITCHEN_COURSES',
+      category: 'KITCHEN_CATEGORIES',
+      allergen: 'KITCHEN_ALLERGENS'
+    }[type]
+    await this.storageService.pushRegistryDeleteToMaster(entityType, key)
+  }
+
+  async renameAllergen(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
+    if (this.allergens_().includes(trimmed)) {
+      this.userMsgService.onSetErrorMsg(`האלרגן "${trimmed}" כבר קיים`)
+      return
+    }
+    const current = this.allergens_()
+    if (!current.includes(oldKey)) return
+    const updated = current.map((a) => (a === oldKey ? trimmed : a))
+    try {
+      await this.persistRegistry('KITCHEN_ALLERGENS', updated)
+      this.allergens_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`האלרגן שונה ל-"${trimmed}"`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם האלרגן')
+      this.logging.error({
+        event: 'crud.metadata.allergen.rename_error',
+        message: 'Allergen rename error',
         context: { err }
       })
     }

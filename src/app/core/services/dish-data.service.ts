@@ -118,8 +118,22 @@ export class DishDataService {
   }
 
   /** TEMPORARY (dev-process-only, see chat 2026-09-26). */
-  async pushToMaster(dishId: string): Promise<void> {
+  async pushToMaster(dishId: string): Promise<{ masterId: string }> {
     return this.storage.pushToMaster(ENTITY, dishId)
+  }
+
+  /** Plan 322 bugfix: keep the local store's _masterId in sync with what the
+   *  server just resolved it to (see product-data.service.ts's patchMasterId
+   *  for the full reasoning — same fix, dish side). */
+  patchMasterId(id: string, masterId: string): void {
+    this.dishesStore_.update((dishes) =>
+      dishes.map((d) => (d._id === id ? { ...d, _masterId: masterId, _userModified: false } : d))
+    )
+  }
+
+  /** Mirror of pushToMaster for the delete path (Plan 322 M6). */
+  async deleteFromMaster(dishId: string): Promise<void> {
+    return this.storage.deleteFromMaster(ENTITY, dishId)
   }
 
   async updateDish(dish: Recipe): Promise<Recipe> {

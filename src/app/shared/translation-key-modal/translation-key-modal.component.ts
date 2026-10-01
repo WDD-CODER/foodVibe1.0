@@ -38,7 +38,7 @@ export class TranslationKeyModalComponent {
   constructor() {
     effect(() => {
       if (this.isOpen_()) {
-        this.englishKey_.set('')
+        this.englishKey_.set(untracked(() => this.modalService.englishKeyPrefill_()))
         this.validationError_.set(null)
       }
     })
@@ -79,7 +79,7 @@ export class TranslationKeyModalComponent {
     const hebrew = this.hebrewLabel_().trim()
     if (!key || !hebrew) return
 
-    const validation = this.modalService.validateKeyForHebrew(key, hebrew)
+    const validation = this.modalService.validateKeyForHebrew(key, hebrew, this.modalService.englishKeyPrefill_())
     if (!validation.valid) {
       this.validationError_.set(validation.error ?? null)
       return

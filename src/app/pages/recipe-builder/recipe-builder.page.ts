@@ -68,6 +68,7 @@ import { ExportPreviewComponent } from '../../shared/export-preview/export-previ
 import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overlay/export-toolbar-overlay.component'
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { UserService } from '@services/user.service'
 import { RecipeAiFlowService } from './services/recipe-ai-flow.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
@@ -117,6 +118,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly confirmModal_ = inject(ConfirmModalService)
   private readonly heroFab_ = inject(HeroFabService)
   private readonly aiFlow_ = inject(RecipeAiFlowService)
+  private readonly userService_ = inject(UserService)
+  private readonly isAdmin_ = computed(() => this.userService_.user_()?.role === 'admin')
 
   // CHILD REFS
   private readonly recipeHeaderRef_ = viewChild(RecipeHeaderComponent)
@@ -711,8 +714,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     // Same scope question saveRecipe() asks. This is the leave-the-page guard's
     // save path, and without it an edit made on the way out silently lands on
     // the user's own copy only — and sets _userModified, excluding that recipe
-    // from every future master update.
-    const scope = await this.masterPush_.askScope({ _masterId: this.masterId_ ?? undefined })
+    // from every future master update. forcePrompt mirrors saveRecipe()'s own
+    // isNewRecipe-by-admin case (2026-09-30).
+    const isNewRecipeOnLeave = !this.recipeId_()
+    const scope = await this.masterPush_.askScope(
+      { _masterId: this.masterId_ ?? undefined },
+      isNewRecipeOnLeave && this.isAdmin_()
+    )
     if (scope === 'cancel') return false
 
     this.saving.setSaving(true)
@@ -1128,8 +1136,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     // master (everyone) or stay on this user's own copy. Open to any signed-in
     // user right now — see server/routes/generic.js push-to-master route header.
     let pushToMasterAfterSave = false
-    if (this.recipeId_() && this.masterId_) {
-      const scope = await this.masterPush_.askScope({ _masterId: this.masterId_ })
+    const isNewRecipe = !this.recipeId_()
+    if ((this.recipeId_() && this.masterId_) || (isNewRecipe && this.isAdmin_())) {
+      const scope = await this.masterPush_.askScope({ _masterId: this.masterId_ ?? undefined }, isNewRecipe)
       if (scope === 'cancel') return
       pushToMasterAfterSave = scope === 'everyone'
     }

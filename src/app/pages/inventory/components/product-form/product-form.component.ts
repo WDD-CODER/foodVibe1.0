@@ -55,6 +55,8 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 import { ProductAiFlowService } from 'src/app/pages/inventory/services/product-ai-flow.service'
 import type { AiProductDraft } from '@models/ai-product-draft.model'
+import { UserService } from '@services/user.service'
+import { MasterPushService } from '@services/master-push.service'
 
 interface ProductFormValue {
   buy_price_global_?: number
@@ -107,8 +109,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   private readonly logging = inject(LoggingService)
   private readonly aiProductModal_ = inject(AiProductModalService)
   private readonly productAiFlow_ = inject(ProductAiFlowService)
+  private readonly userService_ = inject(UserService)
+  private readonly masterPush_ = inject(MasterPushService)
 
   unitRegistry = inject(UnitRegistryService)
+  private readonly isAdmin_ = computed(() => this.userService_.user_()?.role === 'admin')
 
   protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_())
   protected readonly suppliers_ = computed(() => this.kitchenStateService.suppliers_())
@@ -910,13 +915,25 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       purchase_options_: purchaseOptions
     }
 
+    // Plan 322 M9: same admin "just me / everyone" prompt already asked for
+    // brand-new recipes — a brand-new product has no _masterId client-side yet
+    // (server only assigns one at insert), so forcePrompt covers that case.
+    const isNewProduct = !this.curProduct_()?._id
+    let pushToMasterAfterSave = false
+    if ((productToSave._masterId && !isNewProduct) || (isNewProduct && this.isAdmin_())) {
+      const scope = await this.masterPush_.askScope({ _masterId: productToSave._masterId }, isNewProduct)
+      if (scope === 'cancel') return false
+      pushToMasterAfterSave = scope === 'everyone'
+    }
+
     this.saving.setSaving(true)
     return new Promise<boolean>((resolve) => {
       this.kitchenStateService.saveProduct(productToSave).subscribe({
-        next: () => {
+        next: (saved) => {
           this.saving.setSaving(false)
           this.validationErrors_.set({})
           this.isSubmitted = true
+          if (pushToMasterAfterSave) this.masterPush_.pushProductToMaster(saved)
           resolve(true)
         },
         error: () => {

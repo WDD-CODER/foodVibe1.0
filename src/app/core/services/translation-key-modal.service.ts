@@ -19,10 +19,18 @@ export class TranslationKeyModalService {
   isOpen_ = signal(false)
   hebrewLabel_ = signal('')
   context_ = signal<'category' | 'allergen' | 'supplier' | 'unit' | 'generic'>('generic')
+  /** Prefill for the English-key field — used by rename flows (plan 322) to edit an
+   *  existing key in place instead of always starting blank like the add flow. */
+  englishKeyPrefill_ = signal('')
 
-  open(hebrewLabel: string = '', context: 'category' | 'allergen' | 'supplier' | 'unit' | 'generic' = 'generic'): Promise<TranslationKeyModalResult> {
+  open(
+    hebrewLabel: string = '',
+    context: 'category' | 'allergen' | 'supplier' | 'unit' | 'generic' = 'generic',
+    englishKeyPrefill: string = ''
+  ): Promise<TranslationKeyModalResult> {
     this.hebrewLabel_.set(hebrewLabel.trim())
     this.context_.set(context)
+    this.englishKeyPrefill_.set(englishKeyPrefill.trim())
     this.isOpen_.set(true)
     return firstValueFrom(this.resultSubject)
   }
@@ -30,7 +38,7 @@ export class TranslationKeyModalService {
   save(englishKey: string, hebrewLabel: string): void {
     const sanitizedKey = sanitizeKey(englishKey)
     const label = hebrewLabel.trim()
-    const validation = this.translationService.validateKeyForHebrew(sanitizedKey, label)
+    const validation = this.translationService.validateKeyForHebrew(sanitizedKey, label, this.englishKeyPrefill_())
     if (!validation.valid) {
       return
     }
@@ -53,13 +61,14 @@ export class TranslationKeyModalService {
     this.isOpen_.set(false)
     this.hebrewLabel_.set('')
     this.context_.set('generic')
+    this.englishKeyPrefill_.set('')
   }
 
   validateKey(key: string): { valid: boolean; error?: string } {
     return this.translationService.validateEnglishKey(key)
   }
 
-  validateKeyForHebrew(key: string, hebrewLabel: string): { valid: boolean; error?: string } {
-    return this.translationService.validateKeyForHebrew(key, hebrewLabel)
+  validateKeyForHebrew(key: string, hebrewLabel: string, excludeKey?: string): { valid: boolean; error?: string } {
+    return this.translationService.validateKeyForHebrew(key, hebrewLabel, excludeKey)
   }
 }
