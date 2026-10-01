@@ -28,7 +28,8 @@ describe('RecipeHeaderComponent', () => {
       yield_conversions: conversions,
       name_hebrew: [''],
       total_weight_g: [0],
-      labels: [[] as string[]]
+      labels: [[] as string[]],
+      course: ['']
     })
   }
 
@@ -43,7 +44,8 @@ describe('RecipeHeaderComponent', () => {
       allLabels_: signal([
         { key: 'vegan', color: '#10B981' },
         { key: 'gluten-free', color: '#F59E0B' }
-      ])
+      ]),
+      courses_: signal<{ key: string; color: string }[]>([])
     })
     const labelCreationModalSpy = jasmine.createSpyObj('LabelCreationModalService', ['open'])
     labelCreationModalSpy.open.and.returnValue(Promise.resolve(null))

@@ -20,6 +20,7 @@ describe('MetadataManagerPageComponent', () => {
   const mockAllergens = signal(['gluten', 'nuts'])
   const mockCategories = signal(['vegetables', 'meat'])
   const mockLabels = signal([{ key: 'label1', color: '#ccc' }])
+  const mockCourses = signal<{ key: string; color: string }[]>([])
   const mockMenuTypes = signal<{ key: string }[]>([])
   const mockProducts = signal([])
 
@@ -35,6 +36,7 @@ describe('MetadataManagerPageComponent', () => {
       allAllergens_: mockAllergens,
       allCategories_: mockCategories,
       allLabels_: mockLabels,
+      courses_: mockCourses,
       allMenuTypes_: mockMenuTypes
     })
     metadataRegistrySpy.getLabelColor.and.returnValue('#999')
@@ -79,20 +81,22 @@ describe('MetadataManagerPageComponent', () => {
     'mm-sec-category',
     'mm-sec-allergen',
     'mm-sec-label',
+    'mm-sec-course',
     'mm-sec-menu-type',
     'mm-sec-preparation',
     'mm-sec-section',
     'mm-sec-user'
   ]
 
-  it('should render exactly 8 jump-nav tabs in page order', () => {
+  it('should render exactly 9 jump-nav tabs in page order', () => {
     const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))
-    expect(tabs.length).toBe(8)
+    expect(tabs.length).toBe(9)
     expect(tabs.map((t) => t.nativeElement.textContent.trim())).toEqual([
       'metadata_units_and_conversions_title',
       'metadata_product_categories_title',
       'metadata_global_allergens_title',
       'metadata_recipe_labels_title',
+      'metadata_recipe_courses_title',
       'metadata_menu_types_title',
       'metadata_prep_categories',
       'metadata_section_categories_title',
@@ -100,7 +104,7 @@ describe('MetadataManagerPageComponent', () => {
     ])
   })
 
-  it('should give each of the 8 sections a matching stable id', () => {
+  it('should give each of the 9 sections a matching stable id', () => {
     for (const id of JUMP_SECTION_IDS) {
       expect(fixture.debugElement.query(By.css(`#${id}`)))
         .withContext(id)
@@ -115,7 +119,7 @@ describe('MetadataManagerPageComponent', () => {
   })
 
   it('should bring the target section to the front (order 0) when its jump-nav tab is clicked, without disturbing the others', () => {
-    const tab = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))[4] // Menu Types
+    const tab = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))[5] // Menu Types
     tab.nativeElement.click()
     fixture.detectChanges()
 
@@ -123,17 +127,17 @@ describe('MetadataManagerPageComponent', () => {
     expect(tab.nativeElement.classList.contains('active')).toBeTrue()
     // Everyone else keeps their natural relative order.
     expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('1')
-    expect(fixture.debugElement.query(By.css('#mm-sec-user')).nativeElement.style.order).toBe('8')
+    expect(fixture.debugElement.query(By.css('#mm-sec-user')).nativeElement.style.order).toBe('9')
   })
 
   it('should swap directly to a different section when its tab is clicked while another is front', () => {
     const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))
-    tabs[4].nativeElement.click() // Menu Types
+    tabs[5].nativeElement.click() // Menu Types
     fixture.detectChanges()
     tabs[0].nativeElement.click() // Units
     fixture.detectChanges()
 
-    expect(fixture.debugElement.query(By.css('#mm-sec-menu-type')).nativeElement.style.order).toBe('5')
+    expect(fixture.debugElement.query(By.css('#mm-sec-menu-type')).nativeElement.style.order).toBe('6')
     expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('0')
   })
 

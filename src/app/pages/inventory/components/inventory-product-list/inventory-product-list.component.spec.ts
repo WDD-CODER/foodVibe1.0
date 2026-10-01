@@ -57,9 +57,10 @@ describe('InventoryProductListComponent', () => {
     const mockKitchenState = {
       products_: mockProductsSignal,
       suppliers_: mockSuppliersSignal,
+      recipes_: signal([]),
       suppliersById_: computed(() => new Map(mockSuppliersSignal().map((s) => [s._id, s]))),
       deleteProduct: jasmine.createSpy('deleteProduct'),
-      saveProduct: jasmine.createSpy('saveProduct').and.returnValue({ subscribe: () => {} })
+      saveProduct: jasmine.createSpy('saveProduct').and.returnValue(of(undefined))
     }
 
     await TestBed.configureTestingModule({
@@ -130,7 +131,7 @@ describe('InventoryProductListComponent', () => {
     const confirmModal = TestBed.inject(ConfirmModalService)
     ;(confirmModal.open as jasmine.Spy).and.returnValue(Promise.resolve(true))
     const stateService = TestBed.inject(KitchenStateService)
-    ;(stateService.deleteProduct as jasmine.Spy).and.returnValue({ subscribe: () => {} })
+    ;(stateService.deleteProduct as jasmine.Spy).and.returnValue(of(undefined))
 
     await (component as any).onDeleteProduct('1')
     expect(stateService.deleteProduct).toHaveBeenCalledWith('1')
