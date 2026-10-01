@@ -24,7 +24,7 @@
 
 > Audit says: do these.
 
-- [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
+- [x] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
 
 ### Plan 321 — Professional Foundation Refactor (`plans/321-professional-foundation-refactor.plan.md`)
 
@@ -308,6 +308,19 @@
 - [ ] Update all remaining `TranslationService` injection sites to `VocabularyService`
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
+
+### Plan 328 — Workflow Kit Extraction, Phase 1: Audit & Manifest (`plans/328-workflow-kit-extraction-phase-1-audit-manifest.plan.md`)
+
+- [ ] A1: `git fetch origin`. Generate the raw inventory file list from the roots (and exclusions), and write the pending-branch report.
+- [ ] A2: Write `scripts/kit-manifest-check.mjs` first, against an empty `manifest.json`. It must list everything as unclassified.
+- [ ] A3: Classify `.claude/**` (commands, skills, agents, references, instructions, prompts, workflows, `settings.json`): tier, action, params, refs, notes.
+- [ ] A4: Classify `scripts/**`, `.husky/**`, `.github/workflows/**` and the root config files.
+- [ ] A5: Classify `.cursor/**`, `docs/agent/**`, `docs/brain/**` (as files), `_shared/**`, `.vscode/**`, `AGENTS.md`, `CLAUDE.md` and `README_WORKFLOW.md`.
+- [ ] A6: Build `parameters.md` from all `params[]`, plus the reference map, and record the blockers in the summary.
+- [ ] A7: Lessons triage: all gotcha entries across the 5 domain files, all ADRs, and all patterns.
+- [ ] A8: Write the ADR (next free number after rebase).
+- [ ] A9: Write the `manifest.md` summary. Run both checker modes until they are green, then run the build.
+- [ ] A10: STOP. Hand Dandan the two `[human]` reviews. Apply re-verdicts if requested, then `/ship`.
 
 ## Where things live
 
