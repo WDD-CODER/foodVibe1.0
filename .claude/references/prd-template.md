@@ -1,7 +1,7 @@
 # Plan XXX — [Feature Name]
 
 Status: draft | active | done
-Snapshot: [origin/main SHA at save time — filled by save-plan]
+Snapshot: [origin/main SHA the plan was verified against — leave filled in if the Architect already set it; save-plan only fills this when empty, never overwrites]
 
 ## Problem Statement
 [What problem does this solve for the user?]

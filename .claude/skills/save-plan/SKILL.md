@@ -118,7 +118,8 @@ Do not Read .claude/todo.md in full.
 - rewrite → overwrite the existing plan path Human confirmed
 - save as new → write `plans/<NNN>-<slug>.plan.md` (after `.claude/.plan-write-ack` if the write-guard may block)
 
-Never write under `~/.cursor/plans/`.
+Never write under `~/.cursor/plans/`. `Snapshot:` — fill with the current `origin/main` SHA
+only if the draft left it empty; never overwrite a SHA the Architect already filled in.
 
 **Commit (Planner, on `main`, only):** `git add` only the plan file and `.claude/todo.md`
 (never `-A`), then commit. This is the Planner's admin-bypass write to `main` — see
@@ -154,5 +155,10 @@ Output:
 ```text
 Plan saved: plans/<NNN>-<slug>.plan.md
 Ledger updated. Similarity: <none | rewrite | save-as-new>
-Ready to execute Task 1: [Task Name].
 ```
+
+Then the last line depends on who saved it:
+
+- **Planner (main folder, on `main`):** `Plan NNN pushed. Open a free slot and say: execute plan NNN.`
+  The Planner never starts execution itself, even for a one-milestone plan.
+- **Worker (inside a `wt-N` slot) or anywhere else:** `Ready to execute Task 1: [Task Name].`
