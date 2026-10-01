@@ -58,7 +58,7 @@ function npmInstallIfChanged(dir, hashFileName) {
   const oldHash = existsSync(hashPath) ? readFileSync(hashPath, 'utf8').trim() : null
   if (newHash === oldHash) return false
 
-  execFileSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['install'], { cwd: dir, stdio: 'ignore' })
+  execFileSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['install'], { cwd: dir, stdio: 'ignore', shell: process.platform === 'win32' })
   mkdirSync(dirname(hashPath), { recursive: true })
   writeFileSync(hashPath, newHash)
   return true
@@ -236,6 +236,7 @@ for (const [label, port, isBackend] of [['be', bePort, true], ['fe', fePort, fal
     }
     child = spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', 'dev:local'], {
       cwd: join(repoRoot, 'server'),
+      shell: process.platform === 'win32',
       env,
       detached: true,
       stdio: ['ignore', logFd, logFd]
@@ -243,6 +244,7 @@ for (const [label, port, isBackend] of [['be', bePort, true], ['fe', fePort, fal
   } else {
     child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['ng', 'serve', '-c', 'slot', '--port', String(fePort)], {
       cwd: repoRoot,
+      shell: process.platform === 'win32',
       detached: true,
       stdio: ['ignore', logFd, logFd]
     })
