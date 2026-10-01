@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('backfill-product-nutrition.js');
 /**
  * backfill-product-nutrition.js — one-time data repair for the legacy
  * FoodComposer import: the import excluded ALL nutrition data as "placeholder

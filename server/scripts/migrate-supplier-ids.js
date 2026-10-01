@@ -1,4 +1,5 @@
 'use strict';
+require('../utils/v1-only-guard')('migrate-supplier-ids.js');
 /**
  * migrate-supplier-ids.js
  * One-time fix: remaps supplierIds_ and sources_[].supplierId in cloned products

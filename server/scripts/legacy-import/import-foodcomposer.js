@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('import-foodcomposer.js');
 /**
  * import-foodcomposer.js — one-time migration of the legacy FoodComposer
  * (MS SQL Server) product/recipe/dish catalog into FoodVibe's MongoDB

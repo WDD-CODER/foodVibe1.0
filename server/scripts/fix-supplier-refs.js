@@ -1,4 +1,5 @@
 'use strict';
+require('../utils/v1-only-guard')('fix-supplier-refs.js');
 const mongoose = require('mongoose');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '../.env') });

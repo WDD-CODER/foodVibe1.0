@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('cost-cross-check.js');
 /**
  * cost-cross-check.js — plan 317 §7a. READ-ONLY.
  *

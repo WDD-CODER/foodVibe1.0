@@ -1,8 +1,13 @@
 import { recipeSchema } from '@schemas/entities'
 import { upgradeV1toV2 } from '@schemas/upgrade/upgrade'
 import type { Recipe } from './index'
+import { v2ConformsToClient } from './conformance'
 
 describe('v2 inferred types', () => {
+  it('client view interfaces conform to the schema types', () => {
+    expect(v2ConformsToClient.length).toBe(6)
+  })
+
   it('upgradeV1toV2 output parses into the inferred Recipe type', () => {
     const { doc } = upgradeV1toV2('DISH_LIST', {
       _id: 'r1',

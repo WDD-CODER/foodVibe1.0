@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('repair-dish-prep-items.js');
 /**
  * repair-dish-prep-items.js — corrects `prep_items_`/`prep_categories_` for
  * already-imported dishes to match the current derivation in `lib/transform.js`
