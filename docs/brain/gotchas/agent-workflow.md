@@ -226,3 +226,22 @@ once after the initial `git add`.
 **Why the obvious fix is wrong:** `.trim()` looks like the safe, idiomatic way to clean up command output, but applied to the *whole* multi-line `git status` output it only touches the very first and very last line — and the first line of `git status --short` starts with a status code where a leading space is semantically significant (unstaged vs staged). The bug only manifests on that one specific line, so a spot-check on a diff where the first file happens to be staged (`M ` or `A ` instead of ` M`) looks completely correct while the untracked-modified case silently corrupts.
 
 **What to do instead:** When parsing `git status --short` output in a script, trim only the trailing newline (`.replace(/\r?\n+$/, '')`), never the whole string with `.trim()`. Always pass `--untracked-files=all` when counting or listing changed files, or a brand-new directory with multiple files inside collapses to one `?? dir/` entry and undercounts.
+
+---
+
+## New branch-naming convention colliding with pre-existing branches of the same shape
+
+**What hurt:** `todo-query.mjs sync --merged` matched any branch named `feat/NNN-slug` as
+belonging to the new Planner-Worker convention, then hard-failed the *entire batch* when a
+real, years-old merged branch (`feat/239-ai-recipe-product-match-unit-seed`, predating this
+convention) had no matching flat `plans/239-*.plan.md`.
+
+**Why the obvious fix is wrong:** Failing loudly on a missing plan lookup is the right
+instinct in isolation — but a *batch* scan across many branches needs a different failure
+mode per candidate. A missing match for one item in a broad scan isn't evidence of
+corruption; it's evidence that item predates the convention the scan is looking for.
+
+**What to do instead:** When a script scans a broad set (all branches, all files) for
+candidates matching a *new* convention, treat "no match" per-candidate as a silent skip —
+reserve `fail()`/exit-1 for when a *specific, deliberately-named* target is missing (e.g.
+`sync --plan NNN`, where `NNN` was typed on purpose).
