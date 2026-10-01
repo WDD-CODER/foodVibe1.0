@@ -3,7 +3,7 @@
  *
  * Reads demo JSON files from public/assets/data/ and inserts them as
  * userId: '__master__' documents. Idempotent — skips if master data
- * already exists (checks PRODUCT_LIST for any __master__ doc).
+ * already exists (checks products for any __master__ doc).
  *
  * Called once from server/index.js after MongoDB connects.
  */
@@ -23,16 +23,16 @@ const ASSETS_DIR = path.resolve(__dirname, '..', '..', 'public', 'assets', 'data
  * Only types that have a demo JSON file are seeded.
  */
 const DEMO_FILE_MAP = {
-  PRODUCT_LIST:             'demo-products.json',
-  RECIPE_LIST:              'demo-recipes.json',
-  DISH_LIST:                'demo-dishes.json',
-  KITCHEN_SUPPLIERS:        'demo-suppliers.json',
-  EQUIPMENT_LIST:           'demo-equipment.json',
-  VENUE_PROFILES:           'demo-venues.json',
+  products:             'demo-products.json',
+  recipes:              'demo-recipes.json',
+  dishes:                'demo-dishes.json',
+  suppliers:        'demo-suppliers.json',
+  equipment:           'demo-equipment.json',
+  venues:           'demo-venues.json',
   KITCHEN_PREPARATIONS:     'demo-kitchen-preparations.json',
   KITCHEN_LABELS:           'demo-labels.json',
   MENU_SECTION_CATEGORIES:  'demo-section-categories.json',
-  MENU_EVENT_LIST:          'demo-menu-events.json',
+  menuEvents:          'demo-menu-events.json',
 };
 
 /**
@@ -54,26 +54,40 @@ function readDemoFile(filename) {
   }
 }
 
+const { upgradeV1toV2 } = require('../generated/schemas/upgrade/upgrade');
+const { COLLECTION_RENAMES } = require('../generated/schemas/field-map.v1-to-v2');
+
+/** v1-shaped demo entity -> v2 document (timestamps default to now, like the migration). */
+function upgradeDemoEntity(entityType, entity) {
+  const legacyName = Object.keys(COLLECTION_RENAMES).find(k => COLLECTION_RENAMES[k] === entityType);
+  if (!legacyName) return entity;
+  const { doc } = upgradeV1toV2(legacyName, entity);
+  const now = Date.now();
+  if (doc.createdAt === undefined) doc.createdAt = now;
+  if (doc.updatedAt === undefined) doc.updatedAt = doc.createdAt;
+  return doc;
+}
+
 /**
  * Seeds master data from demo JSON files into MongoDB.
- * Idempotent — skips entirely if any __master__ doc exists in PRODUCT_LIST.
+ * Idempotent — skips entirely if any __master__ doc exists in products.
  *
  * @returns {Promise<number>} total documents seeded (0 if skipped)
  */
 async function seedMasterData() {
   const db = mongoose.connection.db;
 
-  // Ordering guard: PRODUCT_LIST must appear before RECIPE_LIST/DISH_LIST so the
+  // Ordering guard: products must appear before recipes/dishes so the
   // productIdMap is fully built before ingredient referenceIds are remapped.
-  const _pidx = CLONEABLE_TYPES.indexOf('PRODUCT_LIST');
-  const _ridx = CLONEABLE_TYPES.indexOf('RECIPE_LIST');
-  const _didx = CLONEABLE_TYPES.indexOf('DISH_LIST');
+  const _pidx = CLONEABLE_TYPES.indexOf('products');
+  const _ridx = CLONEABLE_TYPES.indexOf('recipes');
+  const _didx = CLONEABLE_TYPES.indexOf('dishes');
   if (_pidx === -1 || _ridx === -1 || _pidx > _ridx || (_didx !== -1 && _pidx > _didx)) {
-    throw new Error('[seed-master] CLONEABLE_TYPES ordering violation: PRODUCT_LIST must precede RECIPE_LIST and DISH_LIST');
+    throw new Error('[seed-master] CLONEABLE_TYPES ordering violation: products must precede recipes and dishes');
   }
 
   // Idempotency check: if master products already exist, skip
-  const existing = await db.collection('PRODUCT_LIST').findOne({ userId: '__master__' });
+  const existing = await db.collection('products').findOne({ userId: '__master__' });
   if (existing) {
     console.log('[seed-master] Master data already exists — skipping.');
     return 0;
@@ -84,8 +98,8 @@ async function seedMasterData() {
   console.log('[seed-master] Assets dir exists:', fs.existsSync(ASSETS_DIR));
   let totalSeeded = 0;
 
-  // Pass 1: build an originalId → newMasterId map for PRODUCT_LIST so that
-  // RECIPE_LIST / DISH_LIST ingredient referenceIds can be remapped in Pass 2.
+  // Pass 1: build an originalId → newMasterId map for products so that
+  // recipes / dishes ingredient referenceIds can be remapped in Pass 2.
   const productIdMap = new Map(); // originalId → newMasterId
 
   for (const entityType of CLONEABLE_TYPES) {
@@ -98,12 +112,14 @@ async function seedMasterData() {
     const docs = entities.map(entity => {
       // Always generate a fresh _id to avoid collisions with any existing user data.
       const newId = makeId();
-      if (entityType === 'PRODUCT_LIST') {
+      if (entityType === 'products') {
         productIdMap.set(String(entity._id), newId);
       }
 
+      // Demo JSON files are still v1-shaped — upgrade each to the v2 document shape.
+      const upgraded = upgradeDemoEntity(entityType, entity);
       const doc = {
-        ...entity,
+        ...upgraded,
         _id: newId,
         userId: '__master__',
         _masterId: null,
@@ -111,8 +127,8 @@ async function seedMasterData() {
       };
 
       // Remap ingredient referenceIds so they point to the new master product IDs
-      if ((entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') && Array.isArray(doc.ingredients_)) {
-        doc.ingredients_ = doc.ingredients_.map(ing => {
+      if ((entityType === 'recipes' || entityType === 'dishes') && Array.isArray(doc.ingredients)) {
+        doc.ingredients = doc.ingredients.map(ing => {
           if (!ing.referenceId) return ing;
           const remapped = productIdMap.get(String(ing.referenceId));
           return remapped ? { ...ing, referenceId: remapped } : ing;
@@ -120,8 +136,8 @@ async function seedMasterData() {
       }
 
       // Normalized name for product collision detection
-      if (entityType === 'PRODUCT_LIST' && doc.name_hebrew) {
-        doc.name_hebrew_normalized = (doc.name_hebrew || '').trim().replace(/\s+/g, ' ').toLowerCase();
+      if (entityType === 'products' && doc.nameHebrew) {
+        doc.nameHebrewNormalized = (doc.nameHebrew || '').trim().replace(/\s+/g, ' ').toLowerCase();
       }
 
       return doc;

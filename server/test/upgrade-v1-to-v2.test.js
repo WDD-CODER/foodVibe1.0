@@ -52,9 +52,9 @@ describe('upgradeV1toV2', () => {
     expect(unmapped).toEqual([])
     expect(doc).toMatchObject({
       _id: 'p1',
-      ownerId: 'u1',
-      masterId: 'p1',
-      userModified: false,
+      userId: 'u1',
+      _masterId: 'p1',
+      _userModified: false,
       nameHebrew: 'עגבניה',
       baseUnit: 'kg',
       createdAt: 1700000000000,

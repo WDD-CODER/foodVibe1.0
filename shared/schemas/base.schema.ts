@@ -4,7 +4,7 @@ import { z } from 'zod'
 export const baseDocShape = {
   _id: z.string().min(1),
   schemaVersion: z.literal(2),
-  ownerId: z.string().min(1),
+  userId: z.string().min(1),
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().optional(),
@@ -19,8 +19,8 @@ export const baseDocShape = {
 export const tombstoneSchema = z.strictObject({
   _id: z.string().min(1),
   schemaVersion: z.literal(2),
-  ownerId: z.string().min(1),
-  masterId: z.string().optional(),
-  userModified: z.boolean().optional(),
-  userDeleted: z.literal(true)
+  userId: z.string().min(1),
+  _masterId: z.string().optional(),
+  _userModified: z.boolean().optional(),
+  _userDeleted: z.literal(true)
 })

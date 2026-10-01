@@ -39,7 +39,7 @@ describe('server/constants/collections.js', () => {
     expect(BACKUP_ENTITY_TYPES).toEqual(COLLECTIONS.filter(c => c.backup).map(c => c.name));
   });
 
-  it('KITCHEN_SUPPLIERS precedes PRODUCT_LIST in CLONEABLE_TYPES (supplierIdMap ordering)', () => {
-    expect(CLONEABLE_TYPES.indexOf('KITCHEN_SUPPLIERS')).toBeLessThan(CLONEABLE_TYPES.indexOf('PRODUCT_LIST'));
+  it('suppliers precedes products in CLONEABLE_TYPES (supplierIdMap ordering)', () => {
+    expect(CLONEABLE_TYPES.indexOf('suppliers')).toBeLessThan(CLONEABLE_TYPES.indexOf('products'));
   });
 });

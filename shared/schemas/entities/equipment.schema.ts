@@ -14,7 +14,7 @@ export const equipmentSchema = z.strictObject({
   isConsumable: z.boolean(),
   tags: z.array(z.string()).optional(),
   notes: z.string().optional(),
-  masterId: z.string().optional(),
-  userModified: z.boolean().optional(),
-  userDeleted: z.boolean().optional()
+  _masterId: z.string().optional(),
+  _userModified: z.boolean().optional(),
+  _userDeleted: z.boolean().optional()
 })

@@ -30,12 +30,19 @@ function preparationToRecipe(value: unknown): unknown {
   return value === 'preparation' ? 'recipe' : value
 }
 
+/**
+ * Master/clone + ownership bookkeeping keeps its v1 names through Phase 2b on purpose (Human-visible
+ * deviation from D4, decided 2026-10-01): userId, _masterId, _userModified, _userDeleted are used
+ * identically by all 24 collections and by the clone/sync/push-to-master machinery that Phase 5
+ * deletes. Renaming them for 7 collections now would mean a mixed-name server layer that is thrown
+ * away (Phase 5) or redone (Phase 6) later.
+ */
 const COMMON: KeyMap = {
   _id: '_id',
-  userId: 'ownerId',
-  _masterId: 'masterId',
-  _userModified: 'userModified',
-  _userDeleted: 'userDeleted'
+  userId: 'userId',
+  _masterId: '_masterId',
+  _userModified: '_userModified',
+  _userDeleted: '_userDeleted'
 }
 
 const INGREDIENT: KeyMap = {

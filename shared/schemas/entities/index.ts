@@ -9,15 +9,15 @@ import { venueSchema } from './venue.schema'
 export * from './common.schema'
 export { equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }
 
-/** Collections that have a v2 schema in Phase 2a. Registries/trash/logs follow in later phases. */
+/** v2 collection name -> schema (Plan 321 G2 names). Registries/trash/logs follow in later phases. */
 export const SCHEMA_BY_COLLECTION = {
-  PRODUCT_LIST: productSchema,
-  RECIPE_LIST: recipeSchema,
-  DISH_LIST: recipeSchema,
-  EQUIPMENT_LIST: equipmentSchema,
-  KITCHEN_SUPPLIERS: supplierSchema,
-  VENUE_PROFILES: venueSchema,
-  MENU_EVENT_LIST: menuEventSchema
+  products: productSchema,
+  recipes: recipeSchema,
+  dishes: recipeSchema,
+  suppliers: supplierSchema,
+  equipment: equipmentSchema,
+  venues: venueSchema,
+  menuEvents: menuEventSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION

@@ -22,13 +22,13 @@
  */
 const COLLECTIONS = [
   // name                         userData cloneable backup searchable
-  { name: 'KITCHEN_SUPPLIERS',        userData: true,  cloneable: true,  backup: true,  searchable: false }, // must precede PRODUCT_LIST in CLONEABLE_TYPES order so supplierIdMap is ready
-  { name: 'PRODUCT_LIST',             userData: true,  cloneable: true,  backup: true,  searchable: true },
-  { name: 'RECIPE_LIST',              userData: true,  cloneable: true,  backup: true,  searchable: true },
-  { name: 'DISH_LIST',                userData: true,  cloneable: true,  backup: true,  searchable: true },
-  { name: 'EQUIPMENT_LIST',           userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'VENUE_PROFILES',           userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'MENU_EVENT_LIST',          userData: true,  cloneable: true,  backup: true,  searchable: false },
+  { name: 'suppliers',        userData: true,  cloneable: true,  backup: true,  searchable: false }, // must precede products in CLONEABLE_TYPES order so supplierIdMap is ready
+  { name: 'products',             userData: true,  cloneable: true,  backup: true,  searchable: true },
+  { name: 'recipes',              userData: true,  cloneable: true,  backup: true,  searchable: true },
+  { name: 'dishes',                userData: true,  cloneable: true,  backup: true,  searchable: true },
+  { name: 'equipment',           userData: true,  cloneable: true,  backup: true,  searchable: false },
+  { name: 'venues',           userData: true,  cloneable: true,  backup: true,  searchable: false },
+  { name: 'menuEvents',          userData: true,  cloneable: true,  backup: true,  searchable: false },
   { name: 'TRASH_RECIPES',            userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'TRASH_DISHES',             userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'TRASH_PRODUCTS',           userData: true,  cloneable: false, backup: true,  searchable: false },

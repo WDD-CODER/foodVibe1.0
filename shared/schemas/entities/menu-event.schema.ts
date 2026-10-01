@@ -35,7 +35,7 @@ export const menuEventSchema = z.strictObject({
   cuisineTags: z.array(z.string()).optional(),
   createdFromTemplateId: z.string().optional(),
   logistics: eventLogisticsSchema.optional(),
-  masterId: z.string().optional(),
-  userModified: z.boolean().optional(),
-  userDeleted: z.boolean().optional()
+  _masterId: z.string().optional(),
+  _userModified: z.boolean().optional(),
+  _userDeleted: z.boolean().optional()
 })

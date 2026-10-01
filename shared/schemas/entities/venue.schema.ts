@@ -18,7 +18,7 @@ export const venueSchema = z.strictObject({
   operatingHours: z.array(z.strictObject({ days: z.string(), time: z.string() })).optional(),
   active: z.boolean().optional(),
   photoUrl: z.string().optional(),
-  masterId: z.string().optional(),
-  userModified: z.boolean().optional(),
-  userDeleted: z.boolean().optional()
+  _masterId: z.string().optional(),
+  _userModified: z.boolean().optional(),
+  _userDeleted: z.boolean().optional()
 })

@@ -1,30 +1,18 @@
 'use strict';
 /**
- * Plan 321 Phase 2a — OBSERVE-mode schema validation for POST/PUT /api/v1/data/:type.
- * Logs a structured warning per violation and always calls next(): nothing is rejected
- * and nothing is modified. Phase 2b flips this to enforce.
+ * Plan 321 Phase 2b — ENFORCE-mode schema validation for the generic data API.
+ * `checkStoredDoc` validates the exact document that is about to be stored (v2 shape, server
+ * stamps already applied) for the collections that have a v2 schema; every other collection
+ * passes through untouched until its own phase. Violations become a 400 with Zod issues.
  */
 
-const { hasSchema, checkDoc } = require('../utils/schema-check');
+const { hasSchema, parseV2 } = require('../utils/schema-check');
 
-function validateObserve(req, _res, next) {
-  try {
-    const type = req.params.type;
-    if (hasSchema(type) && req.body && typeof req.body === 'object') {
-      // Validate the document as it will be stored: the server stamps userId and (on POST) _id.
-      const candidate = { ...req.body, userId: req.user.userId };
-      if (req.params.id) candidate._id = req.params.id;
-      if (!candidate._id) candidate._id = '(server-generated)';
-      const { unmapped, issues } = checkDoc(type, candidate);
-      if (unmapped.length || issues.length) {
-        console.warn('[schema-observe]', JSON.stringify({ type, id: candidate._id, unmapped, issues }));
-      }
-    }
-  } catch (err) {
-    // Observe mode must never break a write.
-    console.warn('[schema-observe] check failed:', err.message);
-  }
-  next();
+/** @returns {{ ok: boolean, issues: { path: string, code: string, message: string }[] }} */
+function checkStoredDoc(type, doc) {
+  if (!hasSchema(type)) return { ok: true, issues: [] };
+  const { success, issues } = parseV2(type, doc);
+  return { ok: success, issues };
 }
 
-module.exports = { validateObserve };
+module.exports = { checkStoredDoc };

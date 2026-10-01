@@ -609,11 +609,11 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 - [ ] P2b.1c Atlas dry run again right before the window (data changes), then Atlas backup → `--write=yes` → `--verify=yes` — Human confirms host
 - [ ] P2b.x Stray keys from the 2a inventory: `ingredients_` on 36 local products is dropped in v2 (old collection keeps it); `steps_[].cooking_time_minutes_` (4 Atlas recipes) is kept as deprecated `cookingTimeMinutes` — Human decides rename-vs-convert later
 - [ ] P2b.2 Server cutover to v2 (one PR with P2b.3):
-  - [ ] P2b.2a `server/constants/collections.js`: the 7 entries use the new names (products, recipes, dishes, suppliers, equipment, venues, menuEvents); trash + KITCHEN_* names unchanged; `COLLECTION_RENAMES` is the one source (re-export from `shared/schemas`)
-  - [ ] P2b.2b Stored-field renames across `server/db.js`, `routes/{generic,auth,admin,ai}.js`, `services/{clone-master,sync-master,seed-master,master-version}.js`: `userId`→`ownerId`, `_masterId`→`masterId`, `_userModified`→`userModified`, `_userDeleted`→`userDeleted`; `'__master__'` stays as an `ownerId` value; add/verify indexes on the new collections
-  - [ ] P2b.2c `server/middleware/validate.js`: observe → enforce (400 + Zod issues), no v1 upgrade on the hot path; `schemaVersion < 2` → 409 "needs migration"; tombstones allowed
-  - [ ] P2b.2d seed-master / clone-master / sync-master write v2 docs (so signup and login keep working on v2 data)
-  - [ ] P2b.2e Server tests moved to v2 names; fix the 8 stale `push-to-master` tests (they expect 400 but Plan 322 added `requireAdmin`) — needs `approved:` for the test file if outside scope
+  - [x] P2b.2a `server/constants/collections.js`: the 7 entries use the new names (products, recipes, dishes, suppliers, equipment, venues, menuEvents); trash + KITCHEN_* names unchanged; `COLLECTION_RENAMES` is the one source (re-export from `shared/schemas`)
+  - [x] P2b.2b (DEVIATION from D4, 2026-10-01: the master/ownership fields `userId`, `_masterId`, `_userModified`, `_userDeleted` KEEP their names until Phases 5/6 delete or redesign them; only domain fields + collection names are renamed) Stored-field renames across `server/db.js`, `routes/{generic,auth,admin,ai}.js`, `services/{clone-master,sync-master,seed-master,master-version}.js`: `userId`→`ownerId`, `_masterId`→`masterId`, `_userModified`→`userModified`, `_userDeleted`→`userDeleted`; `'__master__'` stays as an `ownerId` value; add/verify indexes on the new collections
+  - [x] P2b.2c `server/middleware/validate.js`: observe → enforce (400 + Zod issues), no v1 upgrade on the hot path; `schemaVersion < 2` → 409 "needs migration"; tombstones allowed
+  - [x] P2b.2d seed-master / clone-master / sync-master write v2 docs (so signup and login keep working on v2 data)
+  - [x] P2b.2e Server tests moved to v2 names (63/63 green); the 8 stale `push-to-master` tests (they expect 400 but Plan 322 added `requireAdmin`) — needs `approved:` for the test file if outside scope
 - [ ] P2b.3 Client cutover to v2 (compiler-driven; one PR with P2b.2):
   - [ ] P2b.3a Entity-type strings (`PRODUCT_LIST` etc., ~11 files in `src/app`) → new collection names; storage/HTTP adapters use them
   - [ ] P2b.3b Replace `src/app/core/models/*.ts` interfaces with the `core/models/v2` inferred types, then fix every compile error; recipe `recipeType: 'preparation'` → `'recipe'`; no `recipe_type_`/`kind`
@@ -621,6 +621,9 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
   - [ ] P2b.3d `dictionary.json` keys that embed old field names — list any, change none without asking
   - [ ] P2b.3e Fix the 26 stale client specs (RecipeHeader / MetadataManagerPage / TranslationKeyModal / one InventoryProductList: mocks missing `courses_`) — needs `approved:` for those spec paths
   - [ ] P2b.3f `ng build` + `ng test` + server tests all green
+  - [ ] P2b.2f `server/routes/ai.js` AI draft DTOs (recipe/product/menu drafts) stay v1-shaped for now (they are prompts + validators, not stored docs); the client maps draft → v2 entity when adopting a draft. Phase 4 reworks ai.js anyway
+  - [ ] P2b.2g Non-legacy scripts with hardcoded old names (`server/scripts/fix-supplier-refs.js`, `migrate-supplier-ids.js`, `reset-user-from-master.js`): update or mark v1-only
+- [ ] P2b.1d TRASH_* (6 collections) and VERSION_HISTORY hold v1-shaped docs and keep their names: upgrade them in place (same `upgradeV1toV2` + cleanup, backup first, verify) — otherwise trash-restore and version-restore break after the cutover. Check what VERSION_HISTORY stores before deciding
 - [ ] P2b.4 `server/scripts/legacy-import/*` marked v1-only (header comment + early exit against v2 data)
 - [ ] P2b.5 Deploy runbook in `docs/session-state-foundation-refactor.md`: Atlas backup → Atlas dry run → Human go → write → verify → deploy → smoke; rollback = restore backup + redeploy previous commit; Human confirms Render build command runs `build:schemas` (`build:render` already does)
 - [ ] P2b.6 HOW TO VALIDATE (Human): login, recipe edit + save, dish with sub-recipe, menu event build, export, trash restore; `validate-all.js` against Atlas → 0 violations; every doc `schemaVersion: 2`

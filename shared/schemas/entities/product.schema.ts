@@ -41,7 +41,7 @@ export const productSchema = z.strictObject({
   legacyProductId: z.number().optional(),
   /** search helper written by seed/import */
   nameHebrewNormalized: z.string().optional(),
-  masterId: z.string().optional(),
-  userModified: z.boolean().optional(),
-  userDeleted: z.boolean().optional()
+  _masterId: z.string().optional(),
+  _userModified: z.boolean().optional(),
+  _userDeleted: z.boolean().optional()
 })
