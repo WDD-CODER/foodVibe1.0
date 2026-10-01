@@ -1,10 +1,8 @@
 'use strict';
 /**
- * CHARACTERIZATION: current behavior of PUT /:type/:id/push-to-master in
- * server/routes/generic.js. Deliberately open to any signed-in user today (the
- * admin guard is commented out — see the route's own doc comment); Plan 321
- * Phase 5 makes this admin-only behind a dedicated confirmation modal. This test
- * locks in today's behavior as the regression oracle for that change.
+ * CHARACTERIZATION: behavior of PUT /:type/:id/push-to-master in
+ * server/routes/generic.js. Admin-only (requireAdmin) since Plan 322; a non-admin
+ * caller gets 403.
  */
 
 const request = require('supertest');
@@ -30,11 +28,13 @@ beforeEach(async () => {
   );
 });
 
-const USER_A = { userId: 'userA', role: 'user' };
+// push-to-master is admin-only since Plan 322 (requireAdmin); userA is the admin caller.
+const USER_A = { userId: 'userA', role: 'admin' };
 const tokenA = () => signTestToken(USER_A);
+const tokenPlain = () => signTestToken({ userId: 'userA', role: 'user' });
 
 describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
-  it('CHARACTERIZATION: a plain non-admin user can push (admin guard is currently commented out)', async () => {
+  it('a plain non-admin user is rejected with 403 (admin-only since Plan 322)', async () => {
     await testDb().collection('PRODUCT_LIST').insertOne({
       _id: 'm1', userId: '__master__', name_hebrew: 'old master value',
     });
@@ -43,8 +43,8 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
     });
     const res = await request(app)
       .put('/api/v1/data/PRODUCT_LIST/u1/push-to-master')
-      .set('Authorization', `Bearer ${tokenA()}`);
-    expect(res.status).toBe(200);
+      .set('Authorization', `Bearer ${tokenPlain()}`);
+    expect(res.status).toBe(403);
   });
 
   it('CHARACTERIZATION: pushing overwrites the linked master document\'s content', async () => {
