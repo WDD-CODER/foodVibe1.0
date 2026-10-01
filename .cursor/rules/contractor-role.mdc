@@ -21,7 +21,7 @@ Stack conventions, security rules, and Plan Contract persistence live in `AGENTS
 
 1. Execute ONE milestone at a time from the named plan file, then STOP.
 2. Job validation: `AGENTS.md` **Job validation** + `docs/agent/job-validation.md`. Never
-   self-mark. On ship Y: mark → stage with job → commit → push. On chat finish / milestone STOP:
+   self-mark `[human]`/untagged items (`[auto]` items are agent-verified with evidence). On ship Y: mark → stage with job → commit → push. On chat finish / milestone STOP:
    HOW TO VALIDATE then the JOB DONE close-out ask; `/done` for the chat-only path.
 3. Never start the next milestone without explicit instruction.
 4. Never modify architecture, models, or public interfaces beyond what the plan declares (unless

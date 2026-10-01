@@ -14,7 +14,7 @@ Do not Read .claude/todo.md in full.
 
 1. Identify the job just completed (this chat / Human-named task).
 2. Run `node scripts/todo-query.mjs open` (add `--plan NNN` when the job maps to a known plan) and find matching open `[ ]` items — and the plan's Atomic Sub-tasks (same IDs when present).
-3. Print the close-out block (HOW TO VALIDATE first, then JOB DONE) and **wait** (unless the Human’s invoking message already contains a validation phrase: `done` / `mark done` / `mark it` / `verified` / `approved` / `LGTM for this job`):
+3. Read the plan's Done-when tags (`job-validation.md` Path B). **All `[auto]`:** run each check, print the `VERIFIED BY AGENT` block (raw command + output), mark with `node scripts/todo-query.mjs mark --line N[,N…] --auto-verified` (plan file only inside a `wt-N` slot), run step 4's archive, and **do not wait**. **Any `[human]`/untagged item:** print `VERIFIED BY AGENT` on top (if any `[auto]`), then the close-out block (HOW TO VALIDATE listing only the `[human]` items, then JOB DONE) and **wait** (unless the Human’s invoking message already contains a validation phrase: `done` / `mark done` / `mark it` / `verified` / `approved` / `LGTM for this job`):
 
 ```text
 HOW TO VALIDATE
@@ -40,7 +40,7 @@ Bullet rules: `docs/agent/job-validation.md` → **HOW TO VALIDATE checklist**. 
 
 ## Hard rules
 
-- Never self-mark without Human validation.
+- Never self-mark `[human]` or untagged items without Human validation.
 - Never invent completion for unrelated open todos.
 - Never show JOB DONE without HOW TO VALIDATE above it.
 - `/ship` Approve **Y** remains the formal path (todos in the same ship commit). Use `/done` when there is no ship.

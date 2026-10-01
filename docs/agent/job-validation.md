@@ -7,7 +7,11 @@
 
 ## Core rule
 
-A job is **not done** until the **Human validates** it. Agents never self-approve.
+A job is **done** when every Done-when item is validated. `[auto]` items are validated by agent evidence (Tier 1). `[human]` or untagged items are validated only by the Human. Agents never promote an item to `[auto]`; only the plan author tags it. Tag syntax: `.claude/skills/save-plan/SKILL.md` Plan Rules. Rationale: `docs/brain/decisions/0014-validation-gate-tiers.md`.
+
+Plans with no tags behave exactly as before: everything is `[human]`.
+
+The table below applies to `[human]` and untagged items:
 
 | Validation (counts) | Does **not** count |
 | --- | --- |
@@ -53,6 +57,8 @@ If a session brief exists (e.g. `.claude/sessions/…/brief.md`), prepend its Su
 
 ### Optional agent verify
 
+(For `[auto]` items this runs automatically — see **Tier 1 — auto-verified** below. The rest of this section is the opt-in `verify` reply for `[human]` items.)
+
 After the checklist is shown, the Human may reply `verify`. Then the agent walks each item:
 
 - Pass → mark ✓
@@ -75,6 +81,24 @@ Do **not** ask “verify / I’ll check?” at task start — the checklist is u
 
 ---
 
+## Tier 1 — auto-verified
+
+Runs automatically, without a `verify` reply, for `[auto]` Done-when items only. An item is `[auto]` when its expected output is exact: an exact string, an exit code, a byte-identical diff, `ng build` or a test suite passing, or deterministic CLI output.
+
+- Evidence is raw: the exact command, then its actual output, exit code, or diff hash. No paraphrase.
+- An item that fails verification, or cannot be verified, falls back to `[human]` with a ⚠ and a reason.
+- Never tag or re-tag an item `[auto]` yourself.
+
+```text
+VERIFIED BY AGENT
+- ✓ [auto] {item} — `{command}` → {output / exit code}
+- ⚠ [auto→human] {item} — {reason it could not be verified}
+```
+
+Mark matching todos with `node scripts/todo-query.mjs mark --line N[,N…] --auto-verified` (flips `[ ]` to `[x]`, appends `(auto-verified)`). `todo-archive.mjs` skip rules are unaffected.
+
+---
+
 ## Path A — Formal ship (commit / push)
 
 Order is hard (see `.claude/commands/ship.md` Phase 4 On approval):
@@ -88,11 +112,21 @@ Order is hard (see `.claude/commands/ship.md` Phase 4 On approval):
 
 One commit. No second push just for checkboxes.
 
+**All items `[auto]`:** the `VERIFIED BY AGENT` block replaces HOW TO VALIDATE in the Phase 4 tree. **Y** is still required, but it now means commit/push consent only. Todos marked on ship **Y** get no `(auto-verified)` suffix. With any `[human]` item, **Y** also counts as Human validation of those items.
+
 ---
 
 ## Path B — Chat / small job (no ship, maybe no PR)
 
-When the agent finishes a requested job and is **not** immediately entering `/ship`:
+When the agent finishes a requested job and is **not** immediately entering `/ship`, pick the case by the plan's Done-when tags:
+
+| Case | What the agent does |
+| --- | --- |
+| **All `[auto]`, all pass** | Print the `VERIFIED BY AGENT` block. Mark matching todos with `todo-query mark --line … --auto-verified`. Do **not** print the JOB DONE ask; the job finishes without a wait. |
+| **Any `[human]` item** | Print the full close-out block: `VERIFIED BY AGENT` on top (the `[auto]` items), then HOW TO VALIDATE listing **only** the `[human]` items, then JOB DONE. Wait. |
+| **No plan, or untagged items** | Unchanged: the close-out block below, then wait. |
+
+For the last two cases:
 
 1. **Must** end the turn with the close-out block below (do not skip).
 2. Wait for Human reply.
@@ -120,7 +154,7 @@ Reply: done  |  not yet  |  verify  |  edit list
 
 If the job has no user-visible effect, replace the bullet list with one line under HOW TO VALIDATE explaining what changed and why no click-test is needed — still show the block.
 
-Never show the JOB DONE ask without HOW TO VALIDATE above it.
+Never show the JOB DONE ask without HOW TO VALIDATE above it (or `VERIFIED BY AGENT` for an all-`[auto]` job, which has no JOB DONE ask).
 
 If no todo/plan items match, still show the block with:
 
