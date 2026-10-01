@@ -1,6 +1,6 @@
 # Plan 328 — Workflow Kit Extraction, Phase 1: Audit & Manifest
 
-Status:
+Status: active
 Snapshot: a4f396dda2f35a315505293e2414513b30d20ec7
 
 ## Problem Statement
@@ -57,7 +57,8 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 ```scope
 docs/workflow-kit/**
 scripts/kit-manifest-check.mjs
-docs/brain/decisions/*-workflow-kit-extraction.md   # one new ADR; next free number at commit time
+# one new ADR; next free number at commit time
+docs/brain/decisions/*-workflow-kit-extraction.md
 ```
 
 ## Read Scope
@@ -183,16 +184,16 @@ Note for this plan: drift inside the inventory roots only means re-classifying t
 - N/A. No app UI and no dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: `git fetch origin`. Generate the raw inventory file list from the roots (and exclusions), and write the pending-branch report.
-- [ ] A2: Write `scripts/kit-manifest-check.mjs` first, against an empty `manifest.json`. It must list everything as unclassified.
-- [ ] A3: Classify `.claude/**` (commands, skills, agents, references, instructions, prompts, workflows, `settings.json`): tier, action, params, refs, notes.
-- [ ] A4: Classify `scripts/**`, `.husky/**`, `.github/workflows/**` and the root config files.
-- [ ] A5: Classify `.cursor/**`, `docs/agent/**`, `docs/brain/**` (as files), `_shared/**`, `.vscode/**`, `AGENTS.md`, `CLAUDE.md` and `README_WORKFLOW.md`.
-- [ ] A6: Build `parameters.md` from all `params[]`, plus the reference map, and record the blockers in the summary.
-- [ ] A7: Lessons triage: all gotcha entries across the 5 domain files, all ADRs, and all patterns.
-- [ ] A8: Write the ADR (next free number after rebase).
-- [ ] A9: Write the `manifest.md` summary. Run both checker modes until they are green, then run the build.
-- [ ] A10: STOP. Hand Dandan the two `[human]` reviews. Apply re-verdicts if requested, then `/ship`.
+- [x] A1: `git fetch origin`. Generate the raw inventory file list from the roots (and exclusions), and write the pending-branch report.
+- [x] A2: Write `scripts/kit-manifest-check.mjs` first, against an empty `manifest.json`. It must list everything as unclassified.
+- [x] A3: Classify `.claude/**` (commands, skills, agents, references, instructions, prompts, workflows, `settings.json`): tier, action, params, refs, notes.
+- [x] A4: Classify `scripts/**`, `.husky/**`, `.github/workflows/**` and the root config files.
+- [x] A5: Classify `.cursor/**`, `docs/agent/**`, `docs/brain/**` (as files), `_shared/**`, `.vscode/**`, `AGENTS.md`, `CLAUDE.md` and `README_WORKFLOW.md`.
+- [x] A6: Build `parameters.md` from all `params[]`, plus the reference map, and record the blockers in the summary.
+- [x] A7: Lessons triage: all gotcha entries across the 5 domain files, all ADRs, and all patterns.
+- [x] A8: Write the ADR (next free number after rebase).
+- [x] A9: Write the `manifest.md` summary. Run both checker modes until they are green, then run the build.
+- [x] A10: STOP. Hand Dandan the two `[human]` reviews. Apply re-verdicts if requested, then `/ship`.
 
 ## Technical Considerations
 - **Dependencies:** none at runtime. The checker uses Node built-ins only (`fs`, `path`, `child_process` for git).

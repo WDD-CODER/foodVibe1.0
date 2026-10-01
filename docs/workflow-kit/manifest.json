@@ -1,0 +1,4200 @@
+{
+  "version": 1,
+  "excluded": [
+    {
+      "path": ".husky/_/**",
+      "reason": "husky-generated shim dir (has its own .gitignore); recreated by `husky` on install"
+    },
+    {
+      "path": ".claude/sessions/**",
+      "reason": "per-session runtime history"
+    },
+    {
+      "path": ".claude/reports/**",
+      "reason": "generated reports (project history)"
+    },
+    {
+      "path": ".claude/audits/**",
+      "reason": "one-off audit write-ups (project history)"
+    },
+    {
+      "path": ".claude/techdebt-reports/**",
+      "reason": "rolling techdebt reports (project history)"
+    },
+    {
+      "path": ".claude/todo-archive/**",
+      "reason": "archived todo volumes (project history)"
+    },
+    {
+      "path": ".claude/todo.md",
+      "reason": "live project todo list (project data; Planner-owned)"
+    },
+    {
+      "path": ".claude/todo-archive.md",
+      "reason": "legacy archived todos (project data)"
+    },
+    {
+      "path": "plans/**",
+      "reason": "FoodVibe plans (project history); all 5 kit plans live here by decision"
+    },
+    {
+      "path": "docs/session-state-*.md",
+      "reason": "per-branch session state (runtime data)"
+    },
+    {
+      "path": ".cursor/*.log",
+      "reason": "Cursor debug logs (runtime data)"
+    }
+  ],
+  "entries": [
+    {
+      "path": "_shared/current-state.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/app/app.routes.ts"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/routes/ai.js"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/services/kitchen-state.service.ts"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [
+        "plans/close-obsolete-plan288-task11_v1.md",
+        "server/routes/ai.js",
+        "src/app/app.routes.ts",
+        "src/app/core/services/kitchen-state.service.ts"
+      ],
+      "notes": "Current-state stub naming FoodVibe key files (`app.routes.ts`, `kitchen-state.service.ts`, `server/routes/ai.js`). Naming collision: `_shared/` (workflow docs) vs 321's `shared/` (code schemas)."
+    },
+    {
+      "path": "_shared/tech-stack.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.lint",
+          "strings": [
+            "ng lint"
+          ]
+        },
+        {
+          "key": "deploy.dbHost",
+          "strings": [
+            "atlas"
+          ]
+        },
+        {
+          "key": "deploy.host",
+          "strings": [
+            "render"
+          ]
+        },
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/styles.scss",
+            "public/assets/data/dictionary.json"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/shared/"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "project.uiLocale",
+          "strings": [
+            "hebrew"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "express",
+            "mongodb"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        },
+        {
+          "key": "stack.stateRules",
+          "strings": [
+            "signals only",
+            "signal("
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        ".cursor/rules/contractor-role.mdc",
+        "CLAUDE.md",
+        "package.json",
+        "public/assets/data/dictionary.json",
+        "src/app/shared/",
+        "src/styles.scss"
+      ],
+      "notes": "Authoritative tech-stack doc (Angular 19, Express, Mongo Atlas, Render, Hebrew RTL). Becomes the pack-filled file: stack pack supplies content, core only requires the file exists."
+    },
+    {
+      "path": ".claude/agents/git-agent.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [],
+      "notes": "Diff + commit-message prep agent; only the title says \"FoodVibe 1.0\"."
+    },
+    {
+      "path": ".claude/commands/auto-solve.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.lint",
+          "strings": [
+            "ng lint"
+          ]
+        },
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/styles.scss",
+            "app.routes.ts"
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4200"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        },
+        {
+          "key": "tools.browser",
+          "strings": [
+            "/browse",
+            "gstack"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/agents/git-agent.md",
+        ".claude/settings.json",
+        ".claude/todo.md",
+        "scripts/todo-archive.mjs",
+        "scripts/todo-query.mjs",
+        "src/styles.scss"
+      ],
+      "notes": "Autonomous plan executor. Hardcodes `ng build`/`ng lint` (-> commands.build/lint), gstack `/browse` + Playwright fallback (tools.browser), `.worktree-port` fallback 4200, a UI-detection gate on `*.component.html/ts/scss` globs (Angular layout), `app.routes.ts`, `src/styles.scss`. Contains mojibake (`â€”`) — encoding damage, record only."
+    },
+    {
+      "path": ".claude/commands/brief.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/sessions/",
+        ".claude/skills/save-plan/SKILL.md",
+        ".claude/todo.md"
+      ],
+      "notes": "Session brief capture; generic."
+    },
+    {
+      "path": ".claude/commands/cleanup.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/sessions/",
+        "docs/session-state.md",
+        "scripts/prune-merged-worktrees.sh",
+        "scripts/prune-old-sessions.sh"
+      ],
+      "notes": "Dry-run + confirm wrapper over prune-merged-worktrees.sh and prune-old-sessions.sh."
+    },
+    {
+      "path": ".claude/commands/commands.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/auto-solve.md",
+        ".claude/commands/brief.md",
+        ".claude/commands/cleanup.md",
+        ".claude/commands/docs-refresh.md",
+        ".claude/commands/done.md",
+        ".claude/commands/end-session.md",
+        ".claude/commands/feat.md",
+        ".claude/commands/fix-pr-checks.md",
+        ".claude/commands/fix.md",
+        ".claude/commands/plan.md",
+        ".claude/commands/refactor.md",
+        ".claude/commands/review-it.md",
+        ".claude/commands/review.md",
+        ".claude/commands/security.md",
+        ".claude/commands/ship.md",
+        ".claude/commands/skills.md",
+        ".claude/commands/sweep-stale-todos.md",
+        ".claude/commands/tune-workflow.md"
+      ],
+      "notes": "Command index. One row says \"angular/domain rules\" for /refactor. Index must be regenerated per kit install."
+    },
+    {
+      "path": ".claude/commands/design-port.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".interface-design/divergences.md",
+        ".interface-design/source/",
+        ".interface-design/source/Dashboard.dc.html",
+        ".interface-design/source/MANIFEST.md",
+        ".interface-design/source/assets/stamp-approved.png",
+        ".interface-design/system.md",
+        "AGENTS.md",
+        "_claude-data/design-migration/ACTION-LIST.md",
+        "_claude-data/design-migration/gap-analysis.md",
+        "_claude-data/design-migration/screens/",
+        "_claude-data/design-migration/screens/01-dashboard.port-spec.md",
+        "_claude-data/design-migration/screens/_registry.md",
+        "src/app/",
+        "src/app/pages/",
+        "src/app/pages/dashboard/",
+        "src/app/shared/",
+        "src/app/shared/approve-stamp/",
+        "src/styles.scss"
+      ],
+      "notes": "FoodVibe design-port handoff (\"session 1 of ~11\"): FoodVibe screens, 71 `.c-*` engines, Hebrew. Likely stale/finished one-off — verify before phase 5."
+    },
+    {
+      "path": ".claude/commands/docs-refresh.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/skills/update-docs/SKILL.md"
+      ],
+      "notes": "Refreshes docs after structural changes; names Angular components/services and `ng build`."
+    },
+    {
+      "path": ".claude/commands/done.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "docs/agent/job-validation.md",
+        "scripts/todo-archive.mjs",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "Job-validation close-out; mentions wt-N slot mechanics."
+    },
+    {
+      "path": ".claude/commands/end-session.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/ship.md"
+      ],
+      "notes": "Alias for /ship."
+    },
+    {
+      "path": ".claude/commands/feat.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.lint",
+          "strings": [
+            "ng lint"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".cursor/rules/contractor-role.mdc",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "_shared/tech-stack.md",
+        "docs/agent/standards-angular.md",
+        "docs/agent/standards-domain.md"
+      ],
+      "notes": "Feature path: loads standards-angular + standards-domain (-> stack pack standards doc + project domain doc), `ng build`/`ng lint`."
+    },
+    {
+      "path": ".claude/commands/fix-pr-checks.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/agent/pr-check-fix-loop.md"
+      ],
+      "notes": "Thin pointer to docs/agent/pr-check-fix-loop.md."
+    },
+    {
+      "path": ".claude/commands/fix.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.lint",
+          "strings": [
+            "ng lint"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "mongodb"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        "CLAUDE.md",
+        "docs/agent/",
+        "docs/agent/standards-angular.md",
+        "docs/agent/standards-backend.md",
+        "docs/agent/standards-domain.md",
+        "docs/agent/standards-security.md"
+      ],
+      "notes": "Bug-fix path: routing table points at standards-angular/domain + `cssLayer` skill; mentions MongoDB data bugs; `ng build`/`ng lint`."
+    },
+    {
+      "path": ".claude/commands/plan.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/take-plan.md",
+        ".claude/references/hld-template.md",
+        ".claude/references/prd-template.md",
+        ".claude/skills/save-plan/SKILL.md",
+        ".claude/todo.md",
+        ".husky/pre-push",
+        "_shared/current-state.md",
+        "_shared/tech-stack.md",
+        "docs/agent/",
+        "scripts/branch-guard.sh",
+        "scripts/free-merged-slots.mjs",
+        "scripts/lib/slot.mjs",
+        "scripts/scope-check.mjs",
+        "scripts/todo-archive.mjs",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "Planner path; names the `wt-N` slots."
+    },
+    {
+      "path": ".claude/commands/refactor.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.lint",
+          "strings": [
+            "ng lint"
+          ]
+        },
+        {
+          "key": "commands.test",
+          "strings": [
+            "ng test"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/agent/standards-angular.md"
+      ],
+      "notes": "Refactor path: standards-angular, cssLayer, `ng build`/`ng lint`/`ng test`, `.scss` rule."
+    },
+    {
+      "path": ".claude/commands/review-it.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.lint",
+          "strings": [
+            "ng lint"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/middleware"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "docs/agent/job-validation.md",
+        "server/middleware/"
+      ],
+      "notes": "Reviewer protocol titled \"(FoodVibe)\"; verify command `ng lint`; security-sensitive trigger lists `server/middleware`."
+    },
+    {
+      "path": ".claude/commands/review.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/reports/",
+        ".claude/techdebt-reports/",
+        ".claude/todo-archive/",
+        "docs/agent/",
+        "docs/agent/conventions.md",
+        "docs/agent/standards-security.md",
+        "package-lock.json"
+      ],
+      "notes": "Diff review; keeps `dictionary.json` in diff scope (project.i18nFile)."
+    },
+    {
+      "path": ".claude/commands/security.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "tools.browser",
+          "strings": [
+            "gstack"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "docs/agent/standards-security.md"
+      ],
+      "notes": "Security review; recommends gstack `/cso`."
+    },
+    {
+      "path": ".claude/commands/ship.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npx eslint"
+          ]
+        },
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/styles.scss",
+            "app.routes.ts"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "docs/agent/job-validation.md",
+        "docs/agent/ship-recovery.md",
+        "docs/agent/ship-regular.md",
+        "docs/brain/",
+        "docs/brain/gotchas/agent-workflow.md",
+        "docs/session-state.md",
+        "scripts/plan-ledger-check.mjs",
+        "scripts/session-startup.sh",
+        "scripts/ship-prep.mjs",
+        "scripts/write-session-state.mjs",
+        "src/styles.scss"
+      ],
+      "notes": "Session-end pipeline (largest coupling surface): `ng build` (commands.build), wt-N scope gate, hotspot union-merge rule listing `src/styles.scss`/`dictionary.json`/`app.routes.ts` (paths.hotspots), `origin/main`. Source of truth for ship-prep.mjs thresholds."
+    },
+    {
+      "path": ".claude/commands/skills.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/",
+        ".claude/skills/",
+        "AGENTS.md"
+      ],
+      "notes": "Prints AGENTS.md skill-trigger table (AGENTS.md is the source of truth)."
+    },
+    {
+      "path": ".claude/commands/sweep-stale-todos.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        "scripts/todo-archive.mjs",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "Archives fully-done todo sections via todo-archive.mjs. STALE-REF: cites `session-end.mdc`, which does not exist in `.cursor/rules/`."
+    },
+    {
+      "path": ".claude/commands/take-plan.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "slots.bePorts",
+          "strings": [
+            "300n"
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "420n"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/skills/worktree-setup/SKILL.md",
+        "AGENTS.md",
+        "scripts/scope-guard.sh",
+        "scripts/ship-prep.mjs",
+        "scripts/take-plan.mjs"
+      ],
+      "notes": "Claims a slot; names FoodVibe DB label `foodvibe_wtN` and ports `420N`/`300N`."
+    },
+    {
+      "path": ".claude/commands/tune-workflow.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/settings.json",
+        "AGENTS.md"
+      ],
+      "notes": "Usage-driven workflow-trim proposals (report only). Uses Claude Code /insights and /usage."
+    },
+    {
+      "path": ".claude/instructions/validation-checklist.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/agent/job-validation.md"
+      ],
+      "notes": "Generic validation checklist."
+    },
+    {
+      "path": ".claude/prompts/deploy-angular-github.md",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npm ci",
+            "npm run build"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        "dist/food-vibe1.0/browser/"
+      ],
+      "notes": "GitHub Pages deploy prompt for \"foodVibe1.0\" Angular SPA (`--base-href`). Likely stale: project now deploys to Render (see deploy.host)."
+    },
+    {
+      "path": ".claude/references/hld-template.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        }
+      ],
+      "refs": [],
+      "notes": "High-level-design template; one `dictionary.json` placeholder line."
+    },
+    {
+      "path": ".claude/references/prd-template.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/styles.scss",
+            "public/assets/data/dictionary.json",
+            "src/app/app.routes.ts"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        },
+        {
+          "key": "project.uiLocale",
+          "strings": [
+            "hebrew"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        "public/assets/data/dictionary.json",
+        "src/app/app.routes.ts",
+        "src/styles.scss"
+      ],
+      "notes": "PRD template; lists FoodVibe hotspots, Hebrew considerations and dictionary keys. STALE-REF [.claude/rules/domain.md] not on disk."
+    },
+    {
+      "path": ".claude/references/tab-orders.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Keyboard tab order for FoodVibe pages (Recipe Builder etc.)."
+    },
+    {
+      "path": ".claude/settings.json",
+      "tier": "core",
+      "action": "split",
+      "params": [
+        {
+          "key": "hooks.projectRoot",
+          "strings": [
+            "c:/coding projects"
+          ]
+        },
+        {
+          "key": "hooks.shellPath",
+          "strings": [
+            "c:/program files/git"
+          ]
+        },
+        {
+          "key": "hooks.userHome",
+          "strings": [
+            "danwe"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [
+        "scripts/branch-guard.sh",
+        "scripts/handoff-check.sh",
+        "scripts/plan-write-guard.sh",
+        "scripts/pre-compact-reminder.sh",
+        "scripts/scope-guard.sh",
+        "scripts/session-manifest-hook.py",
+        "scripts/session-startup.sh"
+      ],
+      "notes": "Generic: hook wiring (PreToolUse branch/plan-write/scope guards, SessionStart startup, PreCompact reminder, Stop handoff check) and deny list. FoodVibe/machine-specific: lines ~5-12 `permissions.allow` with absolute `C:/coding projects/Cursor/foodVibe1.0/**` and `C:/Users/danwe/...` paths; every hook `command` hardcodes `C:/Program Files/Git/bin/bash.exe`. Phase 4 emits this file with `${CLAUDE_PROJECT_DIR}` and `hooks.shellPath` only."
+    },
+    {
+      "path": ".claude/skills/angular-pipe-logic/SKILL.md",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/brain/",
+        "docs/brain/index.md"
+      ],
+      "notes": "Wholly Angular pipe/directive logic. React equivalent: hooks/selectors purity skill."
+    },
+    {
+      "path": ".claude/skills/angularComponentStructure/SKILL.md",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        "src/styles.scss"
+      ],
+      "notes": "Angular component section ordering, `.c-*`/`src/styles.scss` rules, Lucide registration in `app.config.ts` (the last two are FoodVibe conventions — consider moving to project)."
+    },
+    {
+      "path": ".claude/skills/auth-and-logging/SKILL.md",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "app.routes.ts"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/brain/",
+        "docs/brain/index.md"
+      ],
+      "notes": "Auth guard / interceptor / logging audit; names `app.routes.ts`. Spans client (Angular) and server (Express) — phase 3 may split into two packs."
+    },
+    {
+      "path": ".claude/skills/auth-crypto/SKILL.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "Bound to `src/app/core/auth-crypto.ts` (FoodVibe file). Pairs with security grep + CI gate."
+    },
+    {
+      "path": ".claude/skills/breadcrumb-navigator/SKILL.md",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [],
+      "refs": [],
+      "notes": "Maintains `breadcrumbs.md` at \"major seams\"; seam definitions live in standards-angular.md (src/app layout). React pack must redefine seams."
+    },
+    {
+      "path": ".claude/skills/brief-detection/SKILL.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/plan.md",
+        ".claude/skills/save-plan/SKILL.md",
+        "docs/brain/"
+      ],
+      "notes": "Brief gate; one wt-N sentence."
+    },
+    {
+      "path": ".claude/skills/cssLayer/SKILL.md",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "src/app/shared/",
+        "src/styles.scss"
+      ],
+      "notes": "Wholly the FoodVibe CSS architecture (`.c-*` engines in `src/styles.scss`, tokens, scss variables). Could be `project`; kept pack:angular because other Angular+SCSS apps can adopt it."
+    },
+    {
+      "path": ".claude/skills/elegant-fix/SKILL.md",
+      "tier": "core",
+      "action": "split",
+      "params": [
+        {
+          "key": "commands.test",
+          "strings": [
+            "ng test"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/services/util.service.ts"
+          ]
+        },
+        {
+          "key": "stack.stateRules",
+          "strings": [
+            "signal("
+          ]
+        }
+      ],
+      "refs": [
+        "docs/brain/",
+        "docs/brain/index.md",
+        "src/app/core/services/util.service.ts"
+      ],
+      "notes": "Generic: refine-a-working-fix procedure. Angular part: BehaviorSubject->signal() bullet (line 15), \"State Check\" signal wording (34), `ng test` (64), `src/app/core/services/util.service.ts` as extraction target (18, 46)."
+    },
+    {
+      "path": ".claude/skills/github-sync/SKILL.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        "notes/github-sync/",
+        "notes/session-handoffs/"
+      ],
+      "notes": "Daily GitHub sync; generic."
+    },
+    {
+      "path": ".claude/skills/preflight/SKILL.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "\"main\""
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4200"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "mongodb"
+          ]
+        },
+        {
+          "key": "tools.browser",
+          "strings": [
+            "gstack",
+            "/browse"
+          ]
+        }
+      ],
+      "refs": [],
+      "notes": "Pre-flight: dev server on `.worktree-port` fallback 4200, `mongosh` ping, gstack binary check. Each probe is stack/tool specific -> list of probes in kit.config."
+    },
+    {
+      "path": ".claude/skills/save-plan/SKILL.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        ".husky/pre-push",
+        "AGENTS.md",
+        "docs/agent/job-validation.md",
+        "scripts/branch-guard.sh",
+        "scripts/plan-name-similarity.mjs",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "Plan persistence; `ng build`-style done-when examples (line 37) and wt-N Worker/Planner rules."
+    },
+    {
+      "path": ".claude/skills/techdebt/SKILL.md",
+      "tier": "core",
+      "action": "split",
+      "params": [
+        {
+          "key": "commands.test",
+          "strings": [
+            "ng test"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/"
+          ]
+        },
+        {
+          "key": "stack.stateRules",
+          "strings": [
+            "signal("
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/techdebt-reports/",
+        ".claude/todo.md",
+        "docs/brain/",
+        "docs/brain/index.md",
+        "src/app/"
+      ],
+      "notes": "Generic debt audit. Angular-only: BehaviorSubject flag (12), `ng test` (143), full-project scope `src/app/` (43)."
+    },
+    {
+      "path": ".claude/skills/update-docs/SKILL.md",
+      "tier": "core",
+      "action": "split",
+      "params": [
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/",
+            "src/app/shared/",
+            "src/app/pages/"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/agent/standards-angular.md",
+        "src/app/core/",
+        "src/app/pages/",
+        "src/app/shared/"
+      ],
+      "notes": "Generic doc-refresh flow; FoodVibe/Angular: description names foodVibe 1.0, seam folders `src/app/core|shared|pages`, defers to standards-angular.md."
+    },
+    {
+      "path": ".claude/skills/worktree-setup/SKILL.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.dev",
+          "strings": [
+            "ng serve"
+          ]
+        },
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npm install"
+          ]
+        },
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/.env",
+            "server/"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "420n"
+          ]
+        },
+        {
+          "key": "slots.folderSuffix",
+          "strings": [
+            "-wt-1",
+            "-wt-2",
+            "-wt-3"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-1",
+            "wt-2",
+            "wt-3",
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/take-plan.md",
+        "AGENTS.md",
+        "scripts/take-plan.mjs",
+        "server/.env"
+      ],
+      "notes": "One-time slot provisioning. Hardcodes `../foodVibe1.0-wt-N` folder names (slots.folderSuffix), `foodVibe1.0-wt-parallel` migration (FoodVibe-only history), ports `420N`, `ng serve -c slot`, `server/.env` copy (paths.serverRoot)."
+    },
+    {
+      "path": ".claude/workflows/deploy.yml",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npm ci",
+            "npm run build"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [
+        "dist/food-vibe1.0/browser/"
+      ],
+      "notes": "GitHub Pages deploy workflow for foodVibe1.0 (`--base-href /foodVibe1.0/`). Sits under `.claude/workflows/`, NOT `.github/workflows/`, so GitHub never runs it. Likely stale."
+    },
+    {
+      "path": ".cursor/commands/brief.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/brief.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/cleanup.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/cleanup.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/commit-github.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/agents/git-agent.md"
+      ],
+      "notes": "Redirect alias to git-agent (duplicate of git.md) — candidate to drop in the kit."
+    },
+    {
+      "path": ".cursor/commands/docs-refresh.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/docs-refresh.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/done.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/done.md",
+        "docs/agent/job-validation.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/feat.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/feat.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/fix-pr-checks.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/agent/pr-check-fix-loop.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/fix.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/fix.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/git.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/agents/git-agent.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/plan.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/plan.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/refactor.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/refactor.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/review-it.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/review-it.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/review.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/review.md",
+        "docs/agent/"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/security.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/security.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/ship.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/ship.md",
+        "docs/agent/standards-git.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/commands/sweep-stale-todos.md",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/sweep-stale-todos.md",
+        ".claude/todo.md"
+      ],
+      "notes": "Thin wrapper: points at the matching `.claude/commands/` file."
+    },
+    {
+      "path": ".cursor/mcp.json",
+      "tier": "layer:cursor",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "tools.browser",
+          "strings": [
+            "@playwright/mcp@latest"
+          ]
+        }
+      ],
+      "refs": [],
+      "notes": "Cursor MCP list: playwright (`@playwright/mcp@latest`) + github. AGENTS.md says browser work must go through gstack /browse, never raw Playwright MCP — conflict to resolve in phase 3 (tools.browser)."
+    },
+    {
+      "path": ".cursor/rules/angular-component-structure.mdc",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/angularComponentStructure/SKILL.md",
+        "docs/agent/conventions.md"
+      ],
+      "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
+    },
+    {
+      "path": ".cursor/rules/angular-pipe-logic-must-use-skill.mdc",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/angular-pipe-logic/SKILL.md"
+      ],
+      "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
+    },
+    {
+      "path": ".cursor/rules/auth-and-logging-must-use-skill.mdc",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/middleware/**",
+            "server/routes/auth.js"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/guards/**",
+            "src/app/core/interceptors/**"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/skills/auth-and-logging/SKILL.md",
+        "docs/agent/standards-security.md",
+        "server/routes/auth.js"
+      ],
+      "notes": "Glob list enumerates project paths from both stacks (`server/middleware`, `server/routes/auth.js`, `src/app/core/guards|interceptors`)."
+    },
+    {
+      "path": ".cursor/rules/auth-crypto-must-use-skill.mdc",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/skills/auth-crypto/SKILL.md"
+      ],
+      "notes": "Rule bound to a FoodVibe-only standard/skill (translation + dictionary.json, Lucide icon registry, auth-crypto.ts)."
+    },
+    {
+      "path": ".cursor/rules/brain-memory-session-start.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        "docs/brain/",
+        "docs/brain/index.md",
+        "docs/session-state.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/breadcrumb-navigator-must-use-skill.mdc",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/breadcrumb-navigator/SKILL.md"
+      ],
+      "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
+    },
+    {
+      "path": ".cursor/rules/brief-detection-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/brief-detection/SKILL.md",
+        "docs/agent/workflow-map.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/contractor-role.mdc",
+      "tier": "layer:cursor",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.lint",
+          "strings": [
+            "ng lint"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/agents/git-agent.md",
+        ".cursor/rules/save-plan-must-use-skill.mdc",
+        "AGENTS.md",
+        "docs/agent/job-validation.md",
+        "docs/agent/standards-git.md"
+      ],
+      "notes": "Contractor protocol; `ng lint` before review (commands.lint). Defers to `_shared/tech-stack.md`."
+    },
+    {
+      "path": ".cursor/rules/core-angular.mdc",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/agent/conventions.md",
+        "docs/agent/standards-angular.md"
+      ],
+      "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
+    },
+    {
+      "path": ".cursor/rules/elegant-fix-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/elegant-fix/SKILL.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/git-commit-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/agents/git-agent.md",
+        "docs/agent/brain-capture.md",
+        "docs/agent/standards-git.md",
+        "docs/brain/decisions/0006-auto-write-brain-capture-by-default.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/github-sync-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/settings.json",
+        ".claude/skills/github-sync/SKILL.md",
+        "docs/agent/workflow-map.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/lucide-icons-must-register-in-app-config.mdc",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/agent/standards-domain.md"
+      ],
+      "notes": "Rule bound to a FoodVibe-only standard/skill (translation + dictionary.json, Lucide icon registry, auth-crypto.ts)."
+    },
+    {
+      "path": ".cursor/rules/preflight-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/preflight/SKILL.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/save-plan-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/save-plan/SKILL.md",
+        ".claude/todo.md",
+        "scripts/plan-name-similarity.mjs"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/scss-styling-must-use-cssLayer.mdc",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/cssLayer/SKILL.md",
+        "docs/agent/conventions.md"
+      ],
+      "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
+    },
+    {
+      "path": ".cursor/rules/security.mdc",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/middleware/**",
+            "server/routes/auth.js"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/guards/**",
+            "src/app/core/interceptors/**"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/agent/standards-security.md",
+        "server/routes/auth.js"
+      ],
+      "notes": "Glob list enumerates project paths from both stacks (`server/middleware`, `server/routes/auth.js`, `src/app/core/guards|interceptors`)."
+    },
+    {
+      "path": ".cursor/rules/techdebt-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/techdebt/SKILL.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/translation.mdc",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/agent/conventions.md",
+        "docs/agent/standards-domain.md",
+        "public/assets/data/dictionary.json"
+      ],
+      "notes": "Rule bound to a FoodVibe-only standard/skill (translation + dictionary.json, Lucide icon registry, auth-crypto.ts)."
+    },
+    {
+      "path": ".cursor/rules/update-docs-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/update-docs/SKILL.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".cursor/rules/worktree-setup-must-use-skill.mdc",
+      "tier": "layer:cursor",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/worktree-setup/SKILL.md"
+      ],
+      "notes": "Generic Cursor rule pointing at a core skill/doc."
+    },
+    {
+      "path": ".editorconfig",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Stack-neutral formatting defaults."
+    },
+    {
+      "path": ".gitattributes",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Line-ending / diff attributes; stack-neutral."
+    },
+    {
+      "path": ".github/workflows/brain-capture-reminder.yml",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "scripts/brain-capture-comment.mjs",
+        "scripts/brain-review-check.mjs"
+      ],
+      "notes": "PR brain-capture reminder."
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "tier": "core",
+      "action": "split",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build",
+            "npx ng build"
+          ]
+        },
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npm ci",
+            "npm run lint",
+            "npx ng"
+          ]
+        },
+        {
+          "key": "commands.test",
+          "strings": [
+            "ng test",
+            "npx ng test --watch=false --browsers=ChromeHeadless"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/package-lock.json"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".angular/cache/",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "package-lock.json",
+        "server/package-lock.json"
+      ],
+      "notes": "Generic: checkout/node setup, secret scan, lint, server install. Angular: `.angular/cache` caching, `npx ng build`, `npx ng test --watch=false --browsers=ChromeHeadless`, `server/package-lock.json` cache path. Job split by stack in phase 3."
+    },
+    {
+      "path": ".github/workflows/security.yml",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npm ci"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md"
+      ],
+      "notes": "npm-audit + secret-scan; only comments name Angular (blocked `@angular/*` findings). `--omit=dev` policy is ADR 0005."
+    },
+    {
+      "path": ".gitignore",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "deploy.host",
+          "strings": [
+            "render"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/node_modules",
+            "server/scripts/legacy-import/source-data/readme.md",
+            "server/scripts/legacy-import/source-data/*.sql"
+          ]
+        },
+        {
+          "key": "paths.slotEnvFile",
+          "strings": [
+            "src/environments/environment.slot.ts"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "mongodb"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        },
+        {
+          "key": "tools.browser",
+          "strings": [
+            "gstack"
+          ]
+        }
+      ],
+      "refs": [
+        ".angular/cache/",
+        ".claude/.last-npm-install-hash",
+        ".claude/.parallel-slot-a",
+        ".claude/.ship-baseline",
+        ".claude/sessions/",
+        ".interface-design/source/",
+        ".vscode/extensions.json",
+        ".vscode/launch.json",
+        ".vscode/settings.json",
+        ".vscode/tasks.json",
+        "README.md",
+        "entities.json",
+        "scripts/audit-labels.mjs",
+        "server/node_modules/",
+        "server/scripts/legacy-import/source-data/README.md",
+        "tools/catalog-seeder/output/.gitkeep"
+      ],
+      "notes": "Generic base (node, env, logs, `.worktree-*`, `.claude/sessions`) plus FoodVibe/Angular lines: `.angular/cache`, `.gstack/`, Render audit creds, local Mongo (:27018), `server/node_modules`, `src/environments/environment.slot.ts`, legacy-import data. Split in phase 2: generic base = core fragment, Angular lines = pack:angular fragment, rest stays."
+    },
+    {
+      "path": ".gitleaksignore",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/commands/review.md"
+      ],
+      "notes": "Fingerprint allowlist of known false positives in FoodVibe history (commit hashes); meaningless in another repo."
+    },
+    {
+      "path": ".husky/pre-commit",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.lintStaged",
+          "strings": [
+            "npx lint-staged"
+          ]
+        },
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npx lint-staged"
+          ]
+        }
+      ],
+      "refs": [
+        "scripts/plan-ledger-check.mjs",
+        "scripts/pre-commit-no-semi.mjs",
+        "scripts/pre-commit-secret-scan.mjs",
+        "scripts/pre-commit-security-grep.mjs"
+      ],
+      "notes": "Runs lint-staged, no-semi, secret-scan, security-grep, plan-ledger-check. no-semi + security-grep are pack:angular; installer must emit only the hooks whose scripts shipped."
+    },
+    {
+      "path": ".husky/pre-push",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main",
+            "refs/heads/main"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "AGENTS.md"
+      ],
+      "notes": "Planner-Worker guard: push to `refs/heads/main` may only touch `plans/*.plan.md` + `.claude/todo.md` (git.mainBranch)."
+    },
+    {
+      "path": ".lintstagedrc.mjs",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/app/app.routes.ts"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/app.config.ts",
+            "src/app/",
+            "src/app/**/*.",
+            "src/app/**/*.{ts,html,scss}"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        "src/app/",
+        "src/app/app.config.ts",
+        "src/app/app.routes.ts",
+        "src/main.ts"
+      ],
+      "notes": "Globs `src/app/**/*.{ts,html,scss}` and bootstrap-file exclusions are Angular layout. React equivalent: different globs/eslint config, same lint-staged wiring."
+    },
+    {
+      "path": ".mcp.json",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "hooks.shellPath",
+          "strings": [
+            "cmd /c npx"
+          ]
+        }
+      ],
+      "refs": [],
+      "notes": "Claude Code MCP list: only the `github` server (token via ${GITHUB_MCP_TOKEN}, `cmd /c npx` = Windows-only launcher). Generic structure; installer should emit per-OS launcher."
+    },
+    {
+      "path": ".nvmrc",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [],
+      "refs": [],
+      "notes": "Node version pin; value is per-project."
+    },
+    {
+      "path": ".prettierrc.json",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [],
+      "refs": [],
+      "notes": "Style choices (single quotes, no semicolons) are the FoodVibe convention that the `no-semi` hook enforces; ship as a default the project may change."
+    },
+    {
+      "path": ".vscode/extensions.json",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Recommends `angular.ng-template`."
+    },
+    {
+      "path": ".vscode/launch.json",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.dev",
+          "strings": [
+            "ng serve"
+          ]
+        },
+        {
+          "key": "commands.test",
+          "strings": [
+            "ng test"
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4200"
+          ]
+        }
+      ],
+      "refs": [],
+      "notes": "`ng serve` / `ng test` configs on `http://localhost:4200/`."
+    },
+    {
+      "path": ".vscode/settings.json",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Excludes `worktree-*` folders from watcher/search (workflow-related, stack-neutral)."
+    },
+    {
+      "path": ".vscode/tasks.json",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [],
+      "refs": [],
+      "notes": "npm tasks `start` and `test` (commands.dev/test) with an Angular-CLI-specific problem-matcher end pattern (\"bundle generation complete\"). React equivalent: same tasks, different matcher."
+    },
+    {
+      "path": "AGENTS.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/styles.scss",
+            "app.routes.ts"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/routes/ai.js"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "project.uiLocale",
+          "strings": [
+            "hebrew"
+          ]
+        },
+        {
+          "key": "slots.bePorts",
+          "strings": [
+            "3001",
+            "3002",
+            "3003",
+            "3000"
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4201",
+            "4202",
+            "4203",
+            "4200"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-1",
+            "wt-2",
+            "wt-3",
+            "wt-n"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        },
+        {
+          "key": "stack.stateRules",
+          "strings": [
+            "signals only",
+            "signal("
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        },
+        {
+          "key": "tools.browser",
+          "strings": [
+            "gstack",
+            "/browse"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/skills.md",
+        ".claude/commands/take-plan.md",
+        ".claude/skills/angular-pipe-logic/SKILL.md",
+        ".claude/skills/angularComponentStructure/SKILL.md",
+        ".claude/skills/auth-and-logging/SKILL.md",
+        ".claude/skills/auth-crypto/SKILL.md",
+        ".claude/skills/breadcrumb-navigator/SKILL.md",
+        ".claude/skills/cssLayer/SKILL.md",
+        ".claude/skills/elegant-fix/SKILL.md",
+        ".claude/skills/github-sync/SKILL.md",
+        ".claude/skills/preflight/SKILL.md",
+        ".claude/skills/save-plan/SKILL.md",
+        ".claude/skills/techdebt/SKILL.md",
+        ".claude/skills/update-docs/SKILL.md",
+        ".claude/skills/worktree-setup/SKILL.md",
+        ".claude/todo.md",
+        "_shared/tech-stack.md",
+        "docs/agent/brain-capture.md",
+        "docs/agent/conventions.md",
+        "docs/agent/job-validation.md",
+        "docs/agent/pr-check-fix-loop.md",
+        "docs/agent/standards-angular.md",
+        "docs/agent/standards-backend.md",
+        "docs/agent/standards-domain.md",
+        "docs/agent/standards-git.md",
+        "docs/agent/standards-security.md",
+        "docs/brain/",
+        "docs/brain/decisions/",
+        "docs/brain/decisions/0009-planner-worker-worktrees.md",
+        "docs/brain/gotchas.md",
+        "docs/brain/index.md",
+        "scripts/plan-name-similarity.mjs",
+        "server/routes/ai.js",
+        "src/styles.scss"
+      ],
+      "notes": "Generic skeleton + FoodVibe content. Core rules (branch/main guard, `ng build`-style build gate -> commands.build, inject/signals are Angular PACK rules, secrets, job validation, Plan Contracts, Planner-Worker, compaction, skill-trigger table, standards index) split by section: Hard-rules bullets for signals/inject/input()/output()/logical CSS/`.c-*`/no any/quotes/Gemini proxy/Hebrew+dictionary belong to pack:angular + project; the rest is core. Phase 4 ships a skeleton with placeholders for ports (slots.fePorts/bePorts), hotspots (paths.hotspots), browser tool (tools.browser)."
+    },
+    {
+      "path": "CLAUDE.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/agents/",
+        ".claude/settings.json",
+        "AGENTS.md",
+        "scripts/branch-guard.sh",
+        "scripts/session-startup.sh"
+      ],
+      "notes": "Skeleton: title + `@AGENTS.md` import + Claude-only addendum (branch guard, hooks, subagents, \"Yes chef!\" gate). Only the title names FoodVibe. The Yes-chef gate is a user-preference quirk — decide in phase 2 whether it is core or opt-in."
+    },
+    {
+      "path": "docs/agent/brain-capture.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "AGENTS.md",
+        "docs/agent/",
+        "docs/brain/",
+        "docs/brain/decisions/_TEMPLATE.md",
+        "docs/brain/gotchas.md",
+        "docs/brain/gotchas/",
+        "docs/brain/patterns/_TEMPLATE.md"
+      ],
+      "notes": "Brain-capture procedure; stack-neutral."
+    },
+    {
+      "path": "docs/agent/conventions.md",
+      "tier": "pack:angular",
+      "action": "split",
+      "params": [
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/styles.scss",
+            "public/assets/data/dictionary.json"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/services/",
+            "src/app/shared/",
+            "app.config.ts"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        },
+        {
+          "key": "project.uiLocale",
+          "strings": [
+            "hebrew"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        },
+        {
+          "key": "stack.stateRules",
+          "strings": [
+            "signals only",
+            "signal("
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        "public/assets/data/dictionary.json",
+        "src/app/core/services/",
+        "src/app/shared/",
+        "src/styles.scss"
+      ],
+      "notes": "Generic convention-loading index vs Angular/SCSS/translation specifics (`src/app/core/services/`, `src/app/shared/`, Hebrew, `dictionary.json`, `app.config.ts`)."
+    },
+    {
+      "path": "docs/agent/job-validation.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/done.md",
+        ".claude/commands/ship.md",
+        ".claude/sessions/",
+        ".claude/skills/save-plan/SKILL.md",
+        ".claude/todo-archive/",
+        ".claude/todo.md",
+        "AGENTS.md",
+        "docs/brain/decisions/0014-validation-gate-tiers.md",
+        "scripts/plan-name-similarity.mjs",
+        "scripts/todo-archive.mjs",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "Job validation (ADR 0014). `ng build` example and wt-N mechanics for todo marking."
+    },
+    {
+      "path": "docs/agent/pr-check-fix-loop.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npx eslint",
+            "npx ng"
+          ]
+        }
+      ],
+      "refs": [
+        ".github/workflows/ci.yml",
+        ".github/workflows/security.yml",
+        "AGENTS.md",
+        "docs/agent/conventions.md"
+      ],
+      "notes": "PR check fix loop; `ng build` and npm commands in the loop."
+    },
+    {
+      "path": "docs/agent/ship-recovery.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/commands/ship.md"
+      ],
+      "notes": "Ship recovery steps; stack-neutral."
+    },
+    {
+      "path": "docs/agent/ship-regular.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "tools.browser",
+          "strings": [
+            "gstack"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/review.md",
+        ".claude/commands/ship.md",
+        ".claude/todo.md",
+        "docs/agent/brain-capture.md",
+        "docs/agent/pr-check-fix-loop.md",
+        "docs/agent/ship-recovery.md",
+        "docs/agent/standards-git.md",
+        "docs/brain/",
+        "docs/brain/decisions/0006-auto-write-brain-capture-by-default.md",
+        "docs/brain/decisions/_TEMPLATE.md",
+        "docs/brain/gotchas.md",
+        "docs/brain/gotchas/agent-workflow.md",
+        "docs/brain/patterns/_TEMPLATE.md",
+        "scripts/brain-review-check.mjs"
+      ],
+      "notes": "REGULAR-lane ship; gstack browse QA references."
+    },
+    {
+      "path": "docs/agent/standards-angular.md",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "src/app/",
+        "src/app/core/",
+        "src/app/core/services/",
+        "src/app/core/services/util.service.ts",
+        "src/app/shared/",
+        "src/styles.scss"
+      ],
+      "notes": "Angular standards (seams, components, CSS layers, signals)."
+    },
+    {
+      "path": "docs/agent/standards-backend.md",
+      "tier": "pack:node-express",
+      "action": "split",
+      "params": [
+        {
+          "key": "deploy.dbHost",
+          "strings": [
+            "atlas"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/**",
+            "server/routes/generic.js",
+            "server/routes/",
+            "server/constants/all-user-entity-types.js",
+            "server/scripts/db-backup.js",
+            "server/scripts/db-restore.js"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/services/async-storage.service.ts",
+            "src/app/core/models/"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "express",
+            "mongoose",
+            "mongodb",
+            "mongo"
+          ]
+        }
+      ],
+      "refs": [
+        "server/constants/all-user-entity-types.js",
+        "server/routes/",
+        "server/routes/generic.js",
+        "server/scripts/db-backup.js",
+        "server/scripts/db-restore.js",
+        "src/app/core/models/",
+        "src/app/core/services/async-storage.service.ts"
+      ],
+      "notes": "Express/Mongo backend contract. Generic: entity-type + persistence rules. FoodVibe: Atlas notes, `server/constants/all-user-entity-types.js`, db-backup/restore scripts, `async-storage.service.ts`."
+    },
+    {
+      "path": "docs/agent/standards-domain.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "public/assets/data/dictionary.json",
+        "src/app/app.config.ts",
+        "src/app/shared/"
+      ],
+      "notes": "FoodVibe domain: translation keys, Hebrew canonical values, Lucide icons, ingredient ledger."
+    },
+    {
+      "path": "docs/agent/standards-git.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.lint",
+          "strings": [
+            "ng lint"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/agents/git-agent.md",
+        ".claude/commands/ship.md",
+        ".claude/todo.md",
+        "AGENTS.md",
+        "docs/agent/brain-capture.md",
+        "docs/agent/job-validation.md",
+        "docs/brain/",
+        "docs/brain/gotchas.md"
+      ],
+      "notes": "Git/PR/merge-gate rules; `ng build`/`ng lint` as pre-commit gates."
+    },
+    {
+      "path": "docs/agent/standards-security.md",
+      "tier": "core",
+      "action": "split",
+      "params": [
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/middleware/**",
+            "server/routes/auth.js",
+            "server/"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/guards/**",
+            "src/app/core/interceptors/**"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "express"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/security-go-live.md",
+        "server/routes/auth.js"
+      ],
+      "notes": "Generic security checklist vs Angular (guards/interceptors, `src/app/core/*`) and Express (`server/middleware`, `server/routes/auth.js`) sections -> split across core + both packs."
+    },
+    {
+      "path": "docs/agent/workflow-map.md",
+      "tier": "core",
+      "action": "split",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "commands.dev",
+          "strings": [
+            "ng serve"
+          ]
+        },
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npm install"
+          ]
+        },
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "refs/heads/main",
+            "origin/main"
+          ]
+        },
+        {
+          "key": "paths.slotEnvFile",
+          "strings": [
+            "src/environments/environment.slot.ts"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "slots.bePorts",
+          "strings": [
+            "3000",
+            "3001",
+            "3002",
+            "3003",
+            "300n"
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4200",
+            "4201",
+            "4202",
+            "4203",
+            "420n"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n",
+            "wt-1",
+            "wt-2",
+            "wt-3"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "mongo"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/",
+        ".claude/commands/plan.md",
+        ".claude/commands/ship.md",
+        ".claude/commands/take-plan.md",
+        ".claude/references/prd-template.md",
+        ".claude/reports/cursor-claude-parity-audit.md",
+        ".claude/sessions/",
+        ".claude/settings.json",
+        ".claude/todo-archive.md",
+        ".claude/todo.md",
+        ".cursor/commands/",
+        ".cursor/rules/contractor-role.mdc",
+        ".husky/pre-commit",
+        ".husky/pre-push",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "_shared/tech-stack.md",
+        "docs/agent/",
+        "docs/agent/job-validation.md",
+        "docs/agent/pr-check-fix-loop.md",
+        "docs/brain/",
+        "docs/brain/index.md",
+        "plans/1-100/",
+        "plans/nightly-audit-implementation.plan.md",
+        "plans/tofix.md_verification_report_b26bdf9a.plan.md",
+        "scripts/brain-review-check.mjs",
+        "scripts/branch-guard.sh",
+        "scripts/handoff-check.sh",
+        "scripts/lib/slot.mjs",
+        "scripts/plan-ledger-check.mjs",
+        "scripts/plan-name-similarity.mjs",
+        "scripts/plan-write-guard.sh",
+        "scripts/pre-compact-reminder.sh",
+        "scripts/prune-merged-worktrees.sh",
+        "scripts/prune-old-sessions.sh",
+        "scripts/scope-guard.sh",
+        "scripts/session-lock.sh",
+        "scripts/session-manifest-hook.py",
+        "scripts/session-manifest-ship.py",
+        "scripts/session-startup.sh",
+        "scripts/take-plan.mjs"
+      ],
+      "notes": "Workflow diagram/table. Generic pipeline vs FoodVibe ports (3000-3003/4200-4203), Angular layout, `environment.slot.ts`, Mongo. 335 lines — largest single split."
+    },
+    {
+      "path": "docs/brain/decisions/_TEMPLATE.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/agent/brain-capture.md"
+      ],
+      "notes": "ADR template."
+    },
+    {
+      "path": "docs/brain/decisions/0001-lean-native-workflow.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "AGENTS.md"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0002-file-based-memory-over-tool-memory.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/brain/",
+        "scripts/brain-review-check.mjs"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0003-auto-evoke-brain-on-pr.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/brain/"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0004-full-draft-brain-proposals.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/agent/brain-capture.md"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0005-scope-npm-audit-to-production-deps.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        ".github/workflows/security.yml",
+        "docs/brain/gotchas/ci.md"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0006-auto-write-brain-capture-by-default.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/agent/brain-capture.md"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0007-ship-fast-decouples-approval-from-classification.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/commands/ship.md",
+        "server/routes/auth.js"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0008-professional-foundation-refactor.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        "AGENTS.md",
+        "docs/session-state-foundation-refactor.md",
+        "plans/321-professional-foundation-refactor.plan.md",
+        "server/routes/generic.js",
+        "server/scripts/legacy-import/",
+        "src/app/"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0009-planner-worker-worktrees.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        ".husky/pre-push",
+        "public/assets/data/dictionary.json",
+        "scripts/branch-guard.sh",
+        "scripts/lib/slot.mjs",
+        "scripts/scope-guard.sh",
+        "scripts/session-startup.sh",
+        "scripts/take-plan.mjs",
+        "src/app/app.routes.ts",
+        "src/styles.scss"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0014-validation-gate-tiers.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/decisions/0015-workflow-kit-extraction.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "docs/brain/",
+        "docs/workflow-kit/manifest.json",
+        "scripts/kit-manifest-check.mjs",
+        "scripts/scope-guard.sh"
+      ],
+      "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/glossary.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/shared/",
+            "app.config.ts"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        },
+        {
+          "key": "project.uiLocale",
+          "strings": [
+            "hebrew"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "docs/agent/standards-backend.md",
+        "docs/brain/",
+        "docs/session-state.md",
+        "src/app/shared/"
+      ],
+      "notes": "Glossary skeleton; FoodVibe/Hebrew terms."
+    },
+    {
+      "path": "docs/brain/gotchas.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "commands.build",
+          "strings": [
+            "ng build"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "angular.json",
+        "docs/agent/brain-capture.md",
+        "docs/brain/gotchas/",
+        "docs/brain/gotchas/agent-workflow.md",
+        "docs/brain/gotchas/angular.md",
+        "docs/brain/gotchas/backend.md",
+        "docs/brain/gotchas/ci.md",
+        "docs/brain/gotchas/git-workflow.md",
+        "docs/brain/how-it-works.md",
+        "docs/brain/index.md",
+        "src/app/"
+      ],
+      "notes": "Index of domain gotcha files; copy structure, drop entries. Lists Angular terms in descriptions."
+    },
+    {
+      "path": "docs/brain/gotchas/agent-workflow.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/commands/",
+        ".claude/commands/plan.md",
+        ".claude/commands/review.md",
+        ".claude/commands/ship.md",
+        ".claude/instructions/validation-checklist.md",
+        ".claude/sessions/",
+        ".claude/settings.json",
+        ".claude/skills/",
+        ".claude/skills/save-plan/SKILL.md",
+        ".claude/todo.md",
+        ".cursor/rules/save-plan-must-use-skill.mdc",
+        ".github/workflows/",
+        ".husky/pre-commit",
+        "CLAUDE.md",
+        "README.md",
+        "docs/agent/job-validation.md",
+        "docs/agent/workflow-map.md",
+        "docs/brain/",
+        "docs/brain/gotchas.md",
+        "docs/brain/gotchas/",
+        "docs/session-state.md",
+        "docs/workflow-kit/",
+        "plans/320-recipe-labels-fix-course-category-field.plan.md",
+        "scripts/brain-review-check.mjs",
+        "scripts/lib/",
+        "scripts/plan-ledger-check.mjs",
+        "scripts/plan-name-similarity.mjs",
+        "scripts/plan-write-guard.sh",
+        "scripts/prune-old-sessions.sh",
+        "scripts/ship-prep.mjs",
+        "scripts/take-plan.mjs",
+        "scripts/todo-archive.mjs",
+        "src/styles.scss",
+        "tools/catalog-seeder/"
+      ],
+      "notes": "FoodVibe gotcha file; each `##` entry has a verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/gotchas/angular.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "angular.json",
+        "docs/agent/conventions.md",
+        "docs/brain/gotchas.md",
+        "src/app/",
+        "src/app/core/components/tab-chips/tab-chips.component.ts",
+        "src/app/core/interceptors/auth.interceptor.ts",
+        "src/styles.scss"
+      ],
+      "notes": "FoodVibe gotcha file; each `##` entry has a verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/gotchas/backend.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "AGENTS.md",
+        "angular.json",
+        "docs/agent/standards-security.md",
+        "docs/brain/gotchas.md",
+        "docs/brain/gotchas/",
+        "package.json",
+        "public/assets/data/dictionary.json",
+        "server/.env",
+        "server/index.js",
+        "server/package.json",
+        "server/routes/ai.js",
+        "server/routes/generic.js",
+        "server/scripts/bump-master-version.js",
+        "server/scripts/db-backup.js",
+        "server/services/master-version.js",
+        "src/app/core/services/logging.service.ts"
+      ],
+      "notes": "FoodVibe gotcha file; each `##` entry has a verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/gotchas/ci.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        ".github/workflows/security.yml",
+        "angular.json",
+        "docs/brain/gotchas.md"
+      ],
+      "notes": "FoodVibe gotcha file; each `##` entry has a verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/gotchas/git-workflow.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/commands/ship.md",
+        ".claude/skills/worktree-setup/SKILL.md",
+        ".claude/todo.md",
+        "docs/brain/gotchas.md",
+        "scripts/prune-merged-worktrees.sh",
+        "server/db.js",
+        "server/index.js",
+        "src/app/app.config.ts"
+      ],
+      "notes": "FoodVibe gotcha file; each `##` entry has a verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/how-it-works.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        },
+        {
+          "key": "stack.stateRules",
+          "strings": [
+            "signals only"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "AGENTS.md",
+        "docs/agent/",
+        "docs/agent/brain-capture.md",
+        "docs/brain/",
+        "docs/brain/decisions/_TEMPLATE.md",
+        "docs/brain/gotchas/angular.md",
+        "docs/brain/patterns/_TEMPLATE.md",
+        "docs/session-state.md",
+        "notes/session-handoffs/"
+      ],
+      "notes": "Visual tour of the brain system; FoodVibe-named but mechanism is generic. STALE-REF [docs/brain/patterns/defer-singleton-data.md] not on disk."
+    },
+    {
+      "path": "docs/brain/index.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "AGENTS.md",
+        "docs/agent/brain-capture.md",
+        "docs/agent/standards-git.md",
+        "docs/brain/",
+        "docs/brain/decisions/_TEMPLATE.md",
+        "docs/brain/gotchas.md",
+        "docs/brain/patterns/_TEMPLATE.md",
+        "docs/session-state.md",
+        "scripts/brain-review-check.mjs"
+      ],
+      "notes": "Brain index skeleton."
+    },
+    {
+      "path": "docs/brain/patterns/_TEMPLATE.md",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/agent/brain-capture.md"
+      ],
+      "notes": "Pattern template."
+    },
+    {
+      "path": "docs/brain/patterns/atomic-bulk-replace-with-standalone-fallback.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/routes/generic.js"
+      ],
+      "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/patterns/defer-singleton-data-ensureLoaded.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/patterns/gemini-backend-proxy.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "AGENTS.md",
+        "server/routes/ai.js"
+      ],
+      "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/patterns/global-loading-feedback-via-loadingservice.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "src/app/core/services/loading.service.ts"
+      ],
+      "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/patterns/how-to-validate-on-job-gate.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "AGENTS.md",
+        "docs/agent/job-validation.md"
+      ],
+      "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/patterns/signals-only-state.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "AGENTS.md",
+        "docs/agent/conventions.md",
+        "docs/agent/standards-angular.md"
+      ],
+      "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/patterns/split-catalog-scan-from-filter-decoration.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "reports/performance-audit-2026-08-13.md",
+        "src/app/core/utils/filter-category-counts.util.ts"
+      ],
+      "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/patterns/tombstone-soft-delete.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/agent/standards-backend.md"
+      ],
+      "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
+    },
+    {
+      "path": "docs/brain/projectbrief.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "deploy.dbHost",
+          "strings": [
+            "atlas"
+          ]
+        },
+        {
+          "key": "deploy.host",
+          "strings": [
+            "render"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/routes/ai.js"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "project.uiLocale",
+          "strings": [
+            "hebrew"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "express",
+            "mongoose",
+            "mongodb"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "AGENTS.md",
+        "docs/agent/standards-backend.md",
+        "docs/session-state.md",
+        "server/routes/ai.js"
+      ],
+      "notes": "Project brief skeleton; all content is FoodVibe (stack, Hebrew, Render, Atlas)."
+    },
+    {
+      "path": "eslint.config.mjs",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/**"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/**/*.ts",
+            "src/app/**/*.html",
+            "src/app/**/*.spec.ts",
+            "server/**"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        "tsconfig.json"
+      ],
+      "notes": "Angular-eslint rule set + `src/app/**` and `server/**` globs. React pack would swap plugins/globs."
+    },
+    {
+      "path": "knip.json",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/app/app.routes.ts"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/app.config.ts",
+            "src/app/**/*.ts",
+            "src/app/app.routes.ts"
+          ]
+        }
+      ],
+      "refs": [
+        "src/app/app.config.ts",
+        "src/app/app.routes.ts"
+      ],
+      "notes": "Dead-code config with Angular entry points (`app.config.ts`, `app.routes.ts`). Generic tool, stack-specific entries."
+    },
+    {
+      "path": "package.json",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "dist/food-vibe1.0/browser/",
+        "scripts/backup-before-repair.mjs",
+        "scripts/check-backup-entity-types.mjs",
+        "scripts/check-lucide-icons.mjs",
+        "scripts/check-no-native-select.mjs",
+        "scripts/diagnose-broken-refs.mjs",
+        "scripts/log-server.js",
+        "scripts/repair-recipe-references.mjs",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "Project manifest. Workflow-called scripts (catalogue -> parameters.md): build, build:render, build:schemas (321), start/dev:local, dev:remote, test, lint, e2e, lint:icons, lint:no-native-select, lint:backup-entity-types. `dev:local` is invoked by scripts/take-plan.mjs."
+    },
+    {
+      "path": "README_WORKFLOW.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "slots.bePorts",
+          "strings": [
+            "3001",
+            "3002",
+            "3003"
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4201",
+            "4202",
+            "4203"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-1",
+            "wt-2",
+            "wt-3"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/plan.md",
+        ".claude/commands/review-it.md",
+        ".claude/commands/take-plan.md",
+        ".claude/todo.md",
+        ".cursor/rules/contractor-role.mdc",
+        ".husky/pre-push",
+        "CLAUDE.md",
+        "_shared/current-state.md",
+        "_shared/tech-stack.md",
+        "docs/brain/decisions/0009-planner-worker-worktrees.md",
+        "scripts/branch-guard.sh"
+      ],
+      "notes": "Workflow manual (Planner/Worker/Reviewer). Hardcodes slot ports and `wt-N` names. STALE: line ~43 cites `.claude/rules/{angular,security,domain,backend}.md`, which do not exist (path-scoped standards now live in `.cursor/rules/*.mdc` + `docs/agent/standards-*.md`). Fix belongs to its own plan."
+    },
+    {
+      "path": "scripts/audit-labels.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/backup-before-repair.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/brain-capture-comment.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/agent/brain-capture.md",
+        "docs/brain/decisions/0006-auto-write-brain-capture-by-default.md",
+        "docs/brain/index.md"
+      ],
+      "notes": "Posts brain-capture PR comment."
+    },
+    {
+      "path": "scripts/brain-review-check.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "'main'"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/routes/ai.js"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/core/services/logging.service.ts"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/brain/",
+        "docs/brain/decisions/",
+        "server/routes/ai.js",
+        "src/app/core/services/logging.service.ts"
+      ],
+      "notes": "REF_PATTERN accepts extensions ts|html|scss|js|mjs|json|md|py|sh and comments cite FoodVibe paths (`logging.service.ts`, `server/routes/ai.js`) — extension list -> config."
+    },
+    {
+      "path": "scripts/branch-guard.sh",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "\"main\""
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "AGENTS.md"
+      ],
+      "notes": "Blocks writes on main; worktree-aware. Only a comment names wt-N; `main` branch name hardcoded (git.mainBranch)."
+    },
+    {
+      "path": "scripts/check-backup-entity-types.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/constants/collections.js",
+        "src/app/core/services/async-storage.service.ts"
+      ],
+      "notes": "Compares `server/constants/collections.js` with client `async-storage.service.ts` (FoodVibe data model)."
+    },
+    {
+      "path": "scripts/check-lucide-icons.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Parses `LucideAngularModule.pick()` in `app.config.ts`; FoodVibe icon policy (`npm run lint:icons`)."
+    },
+    {
+      "path": "scripts/check-no-native-select.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Bans native `<select>` in favour of `app-custom-select` (FoodVibe UI rule; `npm run lint:no-native-select`)."
+    },
+    {
+      "path": "scripts/diagnose-broken-refs.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/fix-duplicate-names.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/free-merged-slots.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main",
+            "'main'"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        "plans/326-planner-worker-workflow.plan.md"
+      ],
+      "notes": "Detaches merged wt-N slots; `origin/main`, slot naming."
+    },
+    {
+      "path": "scripts/handoff-check.sh",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/session-state.md",
+        "scripts/session-state-path.mjs"
+      ],
+      "notes": "Stop-hook handoff reminder."
+    },
+    {
+      "path": "scripts/kit-manifest-check.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "deploy.dbHost",
+          "strings": [
+            "atlas"
+          ]
+        },
+        {
+          "key": "deploy.host",
+          "strings": [
+            "render"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/package.json"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "express"
+          ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        },
+        {
+          "key": "tools.browser",
+          "strings": [
+            "gstack",
+            "/browse"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/agents/",
+        ".claude/commands/",
+        ".claude/instructions/",
+        ".claude/prompts/",
+        ".claude/references/",
+        ".claude/settings.json",
+        ".claude/skills/",
+        ".claude/workflows/",
+        ".cursor/commands/",
+        ".cursor/mcp.json",
+        ".cursor/rules/",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README_WORKFLOW.md",
+        "docs/agent/",
+        "docs/brain/",
+        "docs/brain/decisions/",
+        "docs/brain/gotchas/",
+        "docs/brain/patterns/",
+        "docs/workflow-kit/lessons-triage.md",
+        "docs/workflow-kit/manifest.json",
+        "knip.json",
+        "package.json",
+        "plans/328-workflow-kit-extraction-phase-1-audit-manifest.plan.md",
+        "server/package.json"
+      ],
+      "notes": "This plan's checker. Its COUPLING term list and inventory roots are themselves the kit config (coupling terms, inventory roots) — phase 5 reuses it for drift."
+    },
+    {
+      "path": "scripts/lib/slot.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "slots.bePorts",
+          "strings": [
+            "300n",
+            "3000"
+          ]
+        },
+        {
+          "key": "slots.count",
+          "strings": [
+            "wt-1..3"
+          ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "420n",
+            "4200"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-1",
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        "plans/326-planner-worker-workflow.plan.md"
+      ],
+      "notes": "Slot detection: folder-name `wt-N`, ports `4200+N` / `3000+N` (slots.nameFormat, slots.fePorts, slots.bePorts, slots.count)."
+    },
+    {
+      "path": "scripts/lib/todo-parse.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo.md"
+      ],
+      "notes": "Todo parsing helper."
+    },
+    {
+      "path": "scripts/link-users-to-master.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/log-server.js",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Local logging server (FoodVibe dev tool)."
+    },
+    {
+      "path": "scripts/merge-labels.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json",
+        "plans/320-recipe-labels-fix-course-category-field.plan.md"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/migrate-labels-to-courses.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/migrate-to-master.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/plan-ledger-check.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        "plans/1-100/",
+        "plans/100-200/"
+      ],
+      "notes": "Plan ledger consistency check (pre-commit)."
+    },
+    {
+      "path": "scripts/plan-name-similarity.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Plan-name collision check used by save-plan."
+    },
+    {
+      "path": "scripts/plan-write-guard.sh",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/save-plan/SKILL.md",
+        ".claude/todo.md",
+        "scripts/plan-name-similarity.mjs"
+      ],
+      "notes": "PreToolUse guard for plans/ writes; uses `plans/` convention (kit constant)."
+    },
+    {
+      "path": "scripts/pre-commit-no-semi.mjs",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/app/app.routes.ts"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app",
+            "src/app/app.config.ts",
+            "src/app/",
+            "src/main.ts"
+          ]
+        }
+      ],
+      "refs": [
+        "src/app/",
+        "src/app/app.config.ts",
+        "src/app/app.routes.ts",
+        "src/main.ts"
+      ],
+      "notes": "Strips trailing semicolons in staged `src/app/**/*.ts` excluding `src/main.ts`, `app.config.ts`, `app.routes.ts`. TS style rule + Angular layout."
+    },
+    {
+      "path": "scripts/pre-commit-secret-scan.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "package-lock.json"
+      ],
+      "notes": "Secret-shape scan. Includes a Gemini/Google key regex (generic enough to keep)."
+    },
+    {
+      "path": "scripts/pre-commit-security-grep.mjs",
+      "tier": "pack:angular",
+      "action": "split",
+      "params": [
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
+        }
+      ],
+      "refs": [
+        ".interface-design/source/"
+      ],
+      "notes": "Generic: staged-file PII-in-logs scan. Angular-specific: `[innerHTML]` without DomSanitizer, `LoggingService` name; FoodVibe-specific: `.interface-design/source/` exclusion (lines 13-17). Called from `.husky/pre-commit`."
+    },
+    {
+      "path": "scripts/pre-compact-reminder.sh",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "PreCompact reminder."
+    },
+    {
+      "path": "scripts/promote-guest-to-master.js",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/.env",
+        "server/node_modules/dotenv/",
+        "server/node_modules/mongoose/"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/prune-merged-worktrees.sh",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [],
+      "refs": [],
+      "notes": "Prunes merged worktrees; branch/slot naming + `origin/main`."
+    },
+    {
+      "path": "scripts/prune-old-sessions.sh",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/sessions/"
+      ],
+      "notes": "Prunes `.claude/sessions`."
+    },
+    {
+      "path": "scripts/push-master-to-atlas.js",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/.env",
+        "server/node_modules/dotenv/",
+        "server/node_modules/mongoose/"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/remove-trailing-semicolons.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "src/app/",
+        "src/app/app.config.ts",
+        "src/app/app.routes.ts",
+        "src/main.ts"
+      ],
+      "notes": "One-shot sweep companion to no-semi hook; hardcodes `src/app`. Candidate to drop."
+    },
+    {
+      "path": "scripts/repair-recipe-references.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/scope-check.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "paths.hotspots",
+          "strings": [
+            "src/styles.scss",
+            "public/assets/data/dictionary.json",
+            "src/app/app.routes.ts"
+          ]
+        },
+        {
+          "key": "project.i18nFile",
+          "strings": [
+            "dictionary.json"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        "plans/326-planner-worker-workflow.plan.md",
+        "public/assets/data/dictionary.json",
+        "src/app/app.routes.ts",
+        "src/styles.scss"
+      ],
+      "notes": "Read-Write-Scope + drift check. HOTSPOTS constant hardcodes `src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts` (lines 30-34) -> paths.hotspots."
+    },
+    {
+      "path": "scripts/scope-guard.sh",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [],
+      "notes": "PreToolUse scope guard; wt-N slot detection via `.worktree-port` / `.worktree-plan`."
+    },
+    {
+      "path": "scripts/session-lock.sh",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Session lock."
+    },
+    {
+      "path": "scripts/session-manifest-hook.py",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/sessions/"
+      ],
+      "notes": "Session manifest PostToolUse hook (python)."
+    },
+    {
+      "path": "scripts/session-manifest-ship.py",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Session manifest at ship (python)."
+    },
+    {
+      "path": "scripts/session-startup.sh",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo.md",
+        "docs/session-state.md",
+        "scripts/session-state-path.mjs"
+      ],
+      "notes": "SessionStart hook; no stack terms found."
+    },
+    {
+      "path": "scripts/session-state-path.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/session-state.md",
+        "plans/326-planner-worker-workflow.plan.md"
+      ],
+      "notes": "Resolves docs/session-state-<branch>.md path."
+    },
+    {
+      "path": "scripts/ship-prep.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "security.sensitivePaths",
+          "strings": [
+            "server\\/routes",
+            "package(-lock)?\\.json",
+            "\\.github\\/workflows",
+            "\\.claude\\/(settings|commands\\/ship)\\."
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/ship.md",
+        "plans/324-ship-prep-and-write-session-state-scripts.plan.md",
+        "scripts/lib/",
+        "scripts/scope-check.mjs",
+        "scripts/session-manifest-ship.py",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "Lane classifier. SENSITIVE_PATHS_RE (line ~27) hardcodes `server\\/routes`, `package(-lock)?.json`, `.github/workflows`, `.claude/(settings|commands/ship)` and auth/crypto/guard/interceptor words -> security.sensitivePaths. ULTRA_TRIVIAL_RE treats `docs/*.md` as trivial. Escaped slashes defeat the checker's term scan, so these are recorded by hand."
+    },
+    {
+      "path": "scripts/take-plan.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.dbBackup",
+          "strings": [
+            "server/scripts/db-backup.js",
+            "server/scripts/db-restore.js"
+          ]
+        },
+        {
+          "key": "commands.devLocal",
+          "strings": [
+            "npm run dev:local"
+          ]
+        },
+        {
+          "key": "commands.npm",
+          "strings": [
+            "npm install"
+          ]
+        },
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        },
+        {
+          "key": "hooks.shellPath",
+          "strings": [
+            "c:/program files/git",
+            "C:/Program Files/Git/bin/bash.exe"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/scripts/db-backup.js",
+            "server/scripts/db-restore.js"
+          ]
+        },
+        {
+          "key": "paths.slotEnvFile",
+          "strings": [
+            "src/environments/environment.slot.ts",
+            "ng serve -c slot"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        },
+        {
+          "key": "slots.count",
+          "strings": [
+            "3"
+          ]
+        },
+        {
+          "key": "slots.dbNameFormat",
+          "strings": [
+            "foodvibe_wt${n}",
+            "foodvibe-db-backups"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        "package-lock.json",
+        "plans/326-planner-worker-workflow.plan.md",
+        "scripts/scope-check.mjs",
+        "server/scripts/db-backup.js",
+        "server/scripts/db-restore.js"
+      ],
+      "notes": "Slot claim. Hardcodes Git Bash path (line 21), `npm run dev:local` (237), DB names `foodvibe_wt${n}` (235/260), backup dir `foodvibe-db-backups` (115), `server/scripts/db-backup.js`/`db-restore.js` (117/122), `src/environments/environment.slot.ts` (72), `ng serve -c slot`. 321 pending change: Windows `shell` fix."
+    },
+    {
+      "path": "scripts/todo-archive.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo-archive.md",
+        ".claude/todo.md"
+      ],
+      "notes": "Archives done plan sections to todo-archive volumes."
+    },
+    {
+      "path": "scripts/todo-query.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "plans/1-100/",
+        "plans/100-200/",
+        "plans/200-300/"
+      ],
+      "notes": "Todo query/mark helper."
+    },
+    {
+      "path": "scripts/trim-demo-data.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "package.json"
+      ],
+      "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
+    },
+    {
+      "path": "scripts/write-session-state.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/commands/ship.md",
+        "plans/324-ship-prep-and-write-session-state-scripts.plan.md"
+      ],
+      "notes": "Writes session state."
+    },
+    {
+      "path": "server/package.json",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Backend manifest. Workflow-called scripts: `dev:local` (invoked by scripts/take-plan.mjs), `test`. NOTE (see memory): server `dev:remote` points at Atlas while root `dev:remote` points at Render — name collision, separate plan."
+    }
+  ]
+}

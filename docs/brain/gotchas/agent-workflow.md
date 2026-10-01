@@ -267,3 +267,11 @@ the path differently, or routing through a wrapper script that still shells out 
 of a shell command that names `.github` — e.g. `fs.readdirSync`/`fs.statSync` walks instead
 of `ls`/`find`. Dedicated tools (Glob/Grep/Read) over a `.github/**` path are unaffected;
 only the Bash tool's command text triggers it.
+
+## An inline `# comment` after a glob in a plan's `scope` block silently makes that glob match nothing
+
+**What hurt:** Plan 328's scope block had `docs/brain/decisions/*-workflow-kit-extraction.md   # one new ADR`. `scripts/scope-check.mjs` only drops lines that *start* with `#`, so the glob included the trailing comment text. `ship-prep` reported `scope: out` for the plan's own ADR.
+
+**Why the obvious fix is wrong:** Widening the glob or approving the path hides the cause, and every later Worker hits the same trap.
+
+**What to do instead:** Put comments on their own `#` line above the glob. Never put them after it.
