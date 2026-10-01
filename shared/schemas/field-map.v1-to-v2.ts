@@ -25,6 +25,11 @@ export function toEpoch(value: unknown): unknown {
   return value
 }
 
+/** v1 called a recipe a "preparation"; v2 vocabulary is recipe / dish. */
+function preparationToRecipe(value: unknown): unknown {
+  return value === 'preparation' ? 'recipe' : value
+}
+
 const COMMON: KeyMap = {
   _id: '_id',
   userId: 'ownerId',
@@ -123,6 +128,7 @@ const RECIPE: KeyMap = {
       instruction_: 'instruction',
       labor_time_minutes_: 'laborTimeMinutes',
       cooking_time_secs_: 'cookingTimeSecs',
+      cooking_time_minutes_: 'cookingTimeMinutes',
       video_url_: 'videoUrl'
     }
   },
@@ -131,7 +137,7 @@ const RECIPE: KeyMap = {
   yield_conversions_: { to: 'yieldConversions', each: { amount: 'amount', unit: 'unit' } },
   default_station_: 'defaultStation',
   is_approved_: 'isApproved',
-  recipe_type_: 'kind',
+  recipe_type_: null, // implied by the collection (recipes / dishes) since G1 = keep separate
   version_history_: 'versionHistory',
   prep_items_: {
     to: 'prepItems',
@@ -237,7 +243,7 @@ const MENU_EVENT: KeyMap = {
         to: 'items',
         each: {
           recipe_id_: 'recipeId',
-          recipe_type_: 'recipeType',
+          recipe_type_: { to: 'recipeType', fn: preparationToRecipe },
           predicted_take_rate_: 'predictedTakeRate',
           derived_portions_: 'derivedPortions',
           sell_price_: 'sellPrice',
@@ -272,8 +278,13 @@ export const FIELD_MAP_V1_TO_V2: Record<string, KeyMap> = {
   MENU_EVENT_LIST: MENU_EVENT
 }
 
-/** `kind` implied by the collection when a v1 recipe doc has no `recipe_type_`. */
-export const IMPLIED_KIND: Record<string, 'dish' | 'preparation'> = {
-  RECIPE_LIST: 'preparation',
-  DISH_LIST: 'dish'
+/** v1 collection name → v2 collection name (Plan 321 G2). Trash and KITCHEN_* registries keep theirs until Phases 6 / 3. */
+export const COLLECTION_RENAMES: Record<string, string> = {
+  PRODUCT_LIST: 'products',
+  RECIPE_LIST: 'recipes',
+  DISH_LIST: 'dishes',
+  KITCHEN_SUPPLIERS: 'suppliers',
+  EQUIPMENT_LIST: 'equipment',
+  VENUE_PROFILES: 'venues',
+  MENU_EVENT_LIST: 'menuEvents'
 }

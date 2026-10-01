@@ -16,7 +16,7 @@ export const menuEventSchema = z.strictObject({
     sortOrder: z.number(),
     items: z.array(z.strictObject({
       recipeId: z.string(),
-      recipeType: z.enum(['dish', 'preparation']),
+      recipeType: z.enum(['dish', 'recipe']),
       predictedTakeRate: z.number(),
       derivedPortions: z.number(),
       sellPrice: z.number().optional(),

@@ -4,8 +4,6 @@ import { dishLogisticsSchema, ingredientSchema } from './common.schema'
 
 export const recipeSchema = z.strictObject({
   ...baseDocShape,
-  /** v1: `recipe_type_` (optional there; implied by the collection DISH_LIST / RECIPE_LIST). */
-  kind: z.enum(['dish', 'preparation']),
   nameHebrew: z.string(),
   ingredients: z.array(ingredientSchema),
   steps: z.array(z.strictObject({
@@ -13,6 +11,8 @@ export const recipeSchema = z.strictObject({
     instruction: z.string(),
     laborTimeMinutes: z.number(),
     cookingTimeSecs: z.number().optional(),
+    /** @deprecated old name seen on 4 Atlas recipes; kept so no step data is lost (rename vs convert is a later call) */
+    cookingTimeMinutes: z.number().optional(),
     videoUrl: z.string().optional()
   })),
   yieldAmount: z.number(),

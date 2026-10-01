@@ -66,13 +66,20 @@ describe('upgradeV1toV2', () => {
     expect(doc).not.toHaveProperty('supplierIds_')
   })
 
-  it('maps nested recipe keys and implies kind from the collection', () => {
-    const asPrep = upgradeV1toV2('RECIPE_LIST', V1_RECIPE).doc
-    const asDish = upgradeV1toV2('DISH_LIST', V1_RECIPE).doc
-    expect(asPrep.kind).toBe('preparation')
-    expect(asDish.kind).toBe('dish')
-    expect(asPrep.ingredients[0]).toMatchObject({ amount: 2, unit: 'kg' })
-    expect(asPrep.logistics.baseline[0]).toMatchObject({ equipmentId: 'e1', isCritical: true })
+  it('maps nested recipe keys and drops recipe_type_ (the collection says which it is)', () => {
+    const doc = upgradeV1toV2('RECIPE_LIST', { ...V1_RECIPE, recipe_type_: 'preparation' }).doc
+    expect(doc).not.toHaveProperty('kind')
+    expect(doc).not.toHaveProperty('recipe_type_')
+    expect(doc.ingredients[0]).toMatchObject({ amount: 2, unit: 'kg' })
+    expect(doc.logistics.baseline[0]).toMatchObject({ equipmentId: 'e1', isCritical: true })
+  })
+
+  it('renames menu item recipe type preparation -> recipe', () => {
+    const { doc } = upgradeV1toV2('MENU_EVENT_LIST', {
+      _id: 'm1', userId: 'u1', name_: 'x', event_type_: 't', serving_type_: 's', guest_count_: 1,
+      sections_: [{ _id: 's1', name_: 'a', sort_order_: 0, items_: [{ recipe_id_: 'r', recipe_type_: 'preparation', predicted_take_rate_: 1, derived_portions_: 1 }] }],
+    })
+    expect(doc.sections[0].items[0].recipeType).toBe('recipe')
   })
 
   it('reports every key the field map does not cover (never silently drops)', () => {

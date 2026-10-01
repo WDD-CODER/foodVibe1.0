@@ -21,7 +21,6 @@ describe('v2 inferred types', () => {
     expect(parsed.success).toBe(true)
     if (parsed.success) {
       const recipe: Recipe = parsed.data
-      expect(recipe.kind).toBe('dish')
       expect(recipe.schemaVersion).toBe(2)
     }
   })

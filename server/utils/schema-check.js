@@ -8,10 +8,18 @@
 
 const { upgradeV1toV2 } = require('../generated/schemas/upgrade/upgrade');
 const { SCHEMA_BY_COLLECTION } = require('../generated/schemas/entities');
+const { tombstoneSchema } = require('../generated/schemas/base.schema');
 
 /** True when the collection has a v2 schema in Phase 2a. */
 function hasSchema(type) {
   return Object.prototype.hasOwnProperty.call(SCHEMA_BY_COLLECTION, type);
+}
+
+/** Parses an already-upgraded v2 doc: a valid entity, or a valid deletion tombstone. */
+function parseV2(type, upgraded) {
+  const parsed = SCHEMA_BY_COLLECTION[type].safeParse(upgraded);
+  if (parsed.success || tombstoneSchema.safeParse(upgraded).success) return { success: true, issues: [] };
+  return { success: false, issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) };
 }
 
 /**
@@ -20,11 +28,7 @@ function hasSchema(type) {
  */
 function checkDoc(type, doc) {
   const { doc: upgraded, unmapped } = upgradeV1toV2(type, doc);
-  const parsed = SCHEMA_BY_COLLECTION[type].safeParse(upgraded);
-  const issues = parsed.success
-    ? []
-    : parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message }));
-  return { unmapped, issues };
+  return { unmapped, issues: parseV2(type, upgraded).issues };
 }
 
-module.exports = { hasSchema, checkDoc };
+module.exports = { hasSchema, checkDoc, parseV2 };

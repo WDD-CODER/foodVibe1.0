@@ -1,4 +1,4 @@
-import { FIELD_MAP_V1_TO_V2, IMPLIED_KIND, type KeyMap } from '../field-map.v1-to-v2'
+import { FIELD_MAP_V1_TO_V2, type KeyMap } from '../field-map.v1-to-v2'
 
 export interface UpgradeResult {
   doc: Record<string, unknown>
@@ -45,8 +45,6 @@ export function upgradeV1toV2(type: string, doc: Record<string, unknown>): Upgra
   if (!map) return { doc, unmapped: [] }
   const unmapped: string[] = []
   const out = applyMap(doc, map, '', unmapped)
-  const implied = IMPLIED_KIND[type]
-  if (implied && out['kind'] === undefined) out['kind'] = implied
   out['schemaVersion'] = 2
   return { doc: out, unmapped }
 }

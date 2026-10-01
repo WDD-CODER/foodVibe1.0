@@ -10,3 +10,17 @@ export const baseDocShape = {
   deletedAt: z.number().optional(),
   deletedBy: z.string().optional()
 }
+
+/**
+ * A per-user deletion marker (`_userDeleted: true`): a stub left behind when a user deletes a
+ * master-cloned document, so sync-master doesn't re-clone it. Carries no entity data.
+ * Goes away with the clone/sync model in Phase 5 / Phase 6.
+ */
+export const tombstoneSchema = z.strictObject({
+  _id: z.string().min(1),
+  schemaVersion: z.literal(2),
+  ownerId: z.string().min(1),
+  masterId: z.string().optional(),
+  userModified: z.boolean().optional(),
+  userDeleted: z.literal(true)
+})
