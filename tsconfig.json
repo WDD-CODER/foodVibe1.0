@@ -17,6 +17,9 @@
       "@pages/*": [
         "src/app/pages/*"
       ],
+      "@schemas/*": [
+        "shared/schemas/*"
+      ],
       "@utils/*": [
         "src/app/core/utils/*"
       ],

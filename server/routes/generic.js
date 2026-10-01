@@ -6,6 +6,7 @@ const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
 const { bumpMasterVersion } = require('../services/master-version');
 const { newId: makeId } = require('../utils/id');
+const { validateObserve } = require('../middleware/validate');
 
 const router = Router();
 
@@ -235,7 +236,7 @@ router.get('/:type/:id', optionalToken, async (req, res) => {
 // keep its original id/references) relies on this and posts through this same
 // route. Existing ids are never rewritten either way.
 // ---------------------------------------------------------------------------
-router.post('/:type', verifyToken, async (req, res) => {
+router.post('/:type', verifyToken, validateObserve, async (req, res) => {
   try {
     const entityType = req.params.type;
     const { _id: clientId, userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = req.body;
@@ -440,7 +441,7 @@ router.put('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
 // Updates one document. Preserves userId, _masterId; sets _userModified: true.
 // Strips reserved fields from req.body to prevent userId/master spoofing.
 // ---------------------------------------------------------------------------
-router.put('/:type/:id', verifyToken, async (req, res) => {
+router.put('/:type/:id', verifyToken, validateObserve, async (req, res) => {
   try {
     // A2: nameSnapshot enforcement — every linked ingredient must carry a nameSnapshot
     // so the recipe remains readable if the product is later deleted or the DB is reset.

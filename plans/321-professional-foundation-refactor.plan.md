@@ -589,21 +589,22 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 - [x] P1.4 Retire/restrict `PUT /:type` whole-collection replace — restricted to `REPLACEABLE_TYPES` (registries actually in use + TRASH_*/VERSION_HISTORY, broader than originally assumed per Reality Check)
 - [x] P1.5 Rate limits on `/api/v1/data` writes (300/15min) and `/api/v1/ai` (20/15min per user)
 - [x] P1.6 Fix docs drift (`standards-backend.md §5`, `standards-security.md §9`) + stale `imageUrl_` comment
-- [x] P1.7 `render.yaml` `PERF_LOG: "0"` — **Human action still open:** mirror in the Render dashboard (file doesn't auto-sync to the live service)
-- [ ] P1.8 Stale remote branch list gathered (65 branches, 60+ days, no open PR — `gh-pages` excluded, it's the deploy target) — **awaiting Human approval before any deletion**
+- [x] P1.7 `render.yaml` `PERF_LOG: "0"` — Render dashboard mirror **done by Human 2026-10-01**
+- [x] P1.8 Stale remote branch list gathered (65 branches, 60+ days, no open PR — `gh-pages` excluded, it's the deploy target) — 66 merged branches deleted by Human 2026-10-01; remaining session/claude/audit branches left for a later cleanup
 
 ### Phase 2a — Shared Zod (observe)
-- [ ] P2a.0 Reality Check + Human go
-- [ ] P2a.1 `shared/schemas/` + `build:schemas` + wiring into build/dev/test scripts
-- [ ] P2a.2 v2 entity schemas (`shared/schemas/entities/*.schema.ts`)
-- [ ] P2a.3 `server/migrations/tools/field-inventory.js` run (local + Atlas) → `field-map.v1-to-v2.ts`
-- [ ] P2a.4 `upgradeV1toV2` + fixture tests
-- [ ] P2a.5 `server/middleware/validate.js` (observe) + `server/migrations/tools/validate-all.js` report → Human
-- [ ] P2a.6 `src/app/core/models/v2/*` inferred types + type test
+- [x] P2a.0 Reality Check + Human go
+- [x] P2a.1 `shared/schemas/` + `build:schemas` + wiring into build/dev/test scripts
+- [x] P2a.2 v2 entity schemas (`shared/schemas/entities/*.schema.ts`)
+- [x] P2a.3 `server/migrations/tools/field-inventory.js` run (local + Atlas) → `field-map.v1-to-v2.ts`
+- [x] P2a.4 `upgradeV1toV2` + fixture tests
+- [x] P2a.5 `server/middleware/validate.js` (observe) + `server/migrations/tools/validate-all.js` report → Human — Atlas run done 2026-10-01: violation classes below sent to Human; unmapped keys deferred to P2b.x
+- [x] P2a.6 `src/app/core/models/v2/*` inferred types + type test
 
 ### Phase 2b — v2 migration + enforce
 - [ ] P2b.0 Reality Check + G1/G2 answers + maintenance window
 - [ ] P2b.1 `server/migrations/0001-v2-schema.js` (dry run → Human → local write → verify → Atlas)
+- [ ] P2b.x Clean stray keys found in 2a inventory: `ingredients_` on 36 local PRODUCT_LIST docs (not on Atlas); `steps_[].cooking_time_minutes_` on 4 Atlas RECIPE_LIST docs (old name of `cooking_time_secs_`) — Human decides rename vs drop
 - [ ] P2b.2 Validator → enforce; server code/tests to v2
 - [ ] P2b.3 Client switched to inferred types; delete legacy interfaces; growth-frozen net-zero check
 - [ ] P2b.4 Legacy scripts marked v1-only
