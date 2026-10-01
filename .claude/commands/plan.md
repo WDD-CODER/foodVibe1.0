@@ -36,7 +36,9 @@ review docs allow a direct push to `main` — restricted to `plans/*.plan.md` an
 1. Main must be clean and on `main`: `git status --porcelain` empty, `git branch
    --show-current` = `main`. Otherwise STOP and ask the Human. Then `git pull --ff-only`.
 2. Run `node scripts/todo-query.mjs sync --merged`, then `node scripts/todo-archive.mjs`,
-   then `node scripts/lib/slot.mjs --list` to see current slot occupancy.
+   then `node scripts/free-merged-slots.mjs` (detaches any `wt-N` whose branch already
+   merged into `origin/main` back to idle), then `node scripts/lib/slot.mjs --list` to see
+   current slot occupancy.
 3. Ask: "Will this plan run in parallel with other active plans?" If yes, run
    `node scripts/scope-check.mjs --overlap --plan=<path>` — it must report `OVERLAP: none`
    before saving; a real overlap means narrowing the `## Read-Write Scope` first.
