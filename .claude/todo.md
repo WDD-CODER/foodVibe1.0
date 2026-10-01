@@ -311,3 +311,72 @@ Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this
 {"parentUuid":"e54380f9-28a2-4deb-81fa-eb74eebd5080","isSidechain":false,"promptId":"6a936c08-5112-4afe-9c96-a1851402c2ca","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_015C59mzDsHcBtg3bTThvVZT","type":"tool_result","content":"36\t### Plan 320 — Recipe Labels Fix + Course
 {"parentUuid":"86fbea21-d2f6-4fa9-9550-d0dd64b9399e","isSidechain":false,"promptId":"6a936c08-5112-4afe-9c96-a1851402c2ca","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01UHwihAuBcK1nQUrEzBB8DA","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
 {"parentUuid":"883a53c5-6cf8-4c77-9fcc-467d57449383","isSidechain":false,"attachment":{"type":"prompt_snapshot","systemPrompt":["\nYou are an interactive agent that helps users according to your \"Output Style\", which describes how you should respond to user queries. Use the instructions below and 
+
+## PreCompact signal dump (2026-10-01T03:31:41Z)
+
+Open unchecked items at compact time:
+- [ ] `auth.interceptor.ts` — `BehaviorSubject` used for refresh-token gate; hard rule says signals only
+- [ ] `nutrition-badge.component.ts:46` — legacy `@Input()` decorator, unresolved since `techdebt-2026-04-20.md`
+- [ ] 2 stray trailing semicolons (`quick-add-product-modal.component.ts:121`, `menu-library-list.component.ts:197`)
+- [ ] 24-file refactor-candidate backlog (>300 lines each) — triage, top 3 are 1200+ lines
+  - [ ] `menu-intelligence.page.ts` (1413) / `recipe-builder.page.ts` (1394) / remaining ~21-file backlog — not yet triaged
+- [ ] 2 unnecessary `?? []` NG8102 warnings (`venue-detail`/`venue-list` templates)
+- [ ] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
+- [ ] P1.8 Stale branch list gathered (65 branches, `gh-pages` excluded) — **awaiting Human approval before deleting any**
+- [ ] P2a.0–P2a.6 Shared Zod schema package, observe-mode validation
+- [ ] P2b.0–P2b.5 v2 migration: rename + `schemaVersion` + enforce (Gates G1/G2)
+- [ ] P3.0–P3.5 Unified taxonomy store (`taxonomyTerms` + `TaxonomyStore`)
+- [ ] P4.0–P4.6 Course/protein/labels split + menu sections → course (Gate G3)
+- [ ] P5.0–P5.8 Shared master + per-user overrides; admin-only push + dedicated modal
+- [ ] P6.0–P6.4 One soft-delete model + `userPrefs`
+- [ ] P7a–P7f Hygiene: god-file decomposition, service base adoption, script archive, CI hardening, logging, plan 301 remainder
+- [ ] P8.1–P8.5 Governance: ADRs 0009–0013, standards docs, lint guards, re-audit
+- [ ] Stage 1 — Foundation: `isAdmin_` signal on `UserService` + migrate ad hoc copies; gate `push-to-master` route with `requireAdmin`; `askScope()` short-circuits to `'me'` for non-admins
+- [ ] Stage 2 — Wire existing server support (Products, Equipment, Suppliers): `_masterId` field + `pushToMaster()` + save-flow wiring
+- [ ] Stage 3 — Extend to Venues, Menu Events, and 9 taxonomy/registry collections (labels, categories, allergens, units, menu types, menu event types, menu section categories, equipment custom categories, preparations)
+- [ ] Stage 4 — New items created as shared from the start (`POST .../create-shared`, admin-only)
+- [ ] Stage 5 — Non-destructive delete propagation (`PUT .../remove-from-master`, master-only removal, no cascade to existing users)
+- [ ] Milestone 2 — carved out to Plan 310 (below) — see `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`
+- [ ] M1 — DevTools Performance profile on recipe-book before/after; record in the audit report — genuinely not done, needs a human with DevTools open (not scriptable via `/browse`)
+- [ ] M3 — Regression test: existing user's modified docs still win after login (Rule 3) — not verified this session; the version-gate only touches `POST /refresh`, `/login` is an unchanged code path, so risk is low but untested
+- [ ] Prerequisite gate — confirm 302 M1/M2 + 303 M1/M2 shipped and re-measured; reduce or drop scope if no longer justified — **bypassed 2026-09-15 for M2/M3 only**: live user report ("really really slow, locally even more") is itself real-world evidence the formal deploy-and-measure step was meant to provide; M1 (below) was explicitly NOT started, since it still needs the gate
+- [ ] M1 — List projections on `GET /:type` mirroring `SEARCH_PROJECTIONS` — `server/routes/generic.js:45-77,82-86`
+- [ ] M1 — Verify edit flows fetch full documents so a lean list doc cannot round-trip through a save and erase fields
+- [ ] Hand-off — re-assess plan 301 M2's scope against measured results
+- [ ] Prerequisite gate — confirm plan 304 M1/M2/M3 shipped + measured; re-scope if 304 M3 already solves pagination
+- [ ] Milestone 0 — Decisions (Human): facet-count strategy, allergens resolution strategy (denormalize / `$graphLookup` / punt), ingredient-containment index, pagination ownership vs plan 304 M3, search UX (prefix vs substring), favorites storage shape
+- [ ] Milestone 1 — Low-risk facets + pagination skeleton (Category/Supplier/product-Allergens/low-stock/invalid/incomplete/nutrition for inventory; Type/Approved/Station/Labels/date-range for recipe-book)
+- [ ] Milestone 2 — Allergens facet for recipe-book (recursive nested-recipe resolution — highest-risk piece, per Decision 2)
+- [ ] Milestone 3 — Ingredient-containment filter for recipe-book
+- [ ] Milestone 4 — Client rewire (`inventory-product-list.component.ts`, `recipe-book-list.component.ts`) + pagination UI wiring
+- [ ] Milestone 5 — Cross-screen verification (facet parity, RTL, selection/bulk-edit/inline-edit regressions, `ng build`)
+- [ ] ~~M0 Tasks 1-4 — screenshot diff catalog~~ — **superseded**; each `/design-port` session's Inventory 3 does this per-screen instead
+- [ ] ~~M1 Tasks 5-6 — shared `.c-*` engine class updates~~ — **superseded**; folded into each `/design-port` session's Inventory 3
+- [ ] ~~M2 Tasks 7-8 — shell/nav remainder~~ — **superseded** by `/design-port`
+- [ ] ~~M3 Tasks 9-11 — list-shell chassis pass (Inventory, Recipe Book, Suppliers, Equipment, Menu Library, Venues, Trash)~~ — **superseded**; each screen ported individually via `/design-port`
+- [ ] ~~M4 Task 12 — Venues new-data field styling~~ — **superseded**; done via `/design-port` (`06-venues.port-spec.md`, Human-validated there)
+
+Unresolved tool signals: re-add any pending Verify/Fail/blocker notes under this heading after compact if still open.
+
+### Unresolved signals detected at compact time
+
+{"parentUuid":"211a16c1-bd8e-4c4d-887c-716ff4664bd4","isSidechain":false,"promptId":"7c48473c-0f78-4859-93e6-0390cffc5f90","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01BbFAmsXLfBuUxDJD4Lpeiz","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"0ea075d6-f3ba-4b0d-85db-e0939c57bdd1","isSidechain":false,"promptId":"40af95e7-685c-4c72-8218-8b8fdce683e9","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01XV2Y6otYMdAUfTsmrmp1nL","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"d813fe25-f9ea-4578-95c1-c1ca4c780467","isSidechain":false,"promptId":"40af95e7-685c-4c72-8218-8b8fdce683e9","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01BqkCRDfu3DtZGh1rF6p1cP","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"aa0f80ee-f2bc-444b-882c-48211e2ae745","isSidechain":false,"promptId":"6a936c08-5112-4afe-9c96-a1851402c2ca","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01GcmAQh5nTffDP7NjhwXAvf","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"e54380f9-28a2-4deb-81fa-eb74eebd5080","isSidechain":false,"promptId":"6a936c08-5112-4afe-9c96-a1851402c2ca","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_015C59mzDsHcBtg3bTThvVZT","type":"tool_result","content":"36\t### Plan 320 — Recipe Labels Fix + Course
+{"parentUuid":"86fbea21-d2f6-4fa9-9550-d0dd64b9399e","isSidechain":false,"promptId":"6a936c08-5112-4afe-9c96-a1851402c2ca","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01UHwihAuBcK1nQUrEzBB8DA","type":"tool_result","content":"husky - DEPRECATED\n\nPlease remove the followi
+{"parentUuid":"883a53c5-6cf8-4c77-9fcc-467d57449383","isSidechain":false,"attachment":{"type":"prompt_snapshot","systemPrompt":["\nYou are an interactive agent that helps users according to your \"Output Style\", which describes how you should respond to user queries. Use the instructions below and 
+{"parentUuid":"b974d053-3a11-4f36-bfaf-2b7d2192aad1","isSidechain":false,"promptId":"6ed27e17-b581-41ff-ac1c-e609283d7409","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_019jBqS87dpqXMCEDKKcfGTb","type":"tool_result","content":"1\t# Active Tasks\n2\t\n3\t> Rearranged 2026-07
+{"parentUuid":"0d9a26a8-50e1-460f-9e23-229f726c609f","isSidechain":false,"attachment":{"type":"prompt_snapshot","systemPrompt":["\nYou are an interactive agent that helps users according to your \"Output Style\", which describes how you should respond to user queries. Use the instructions below and 
+{"parentUuid":"228c19a2-7ec0-427e-aa04-fd2d4dd82809","isSidechain":false,"message":{"model":"claude-sonnet-5","id":"msg_011CfZgbGKy6jQptTGFPk3js","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01NWKXGw9jQo8pKWoWHpeDHa","name":"Edit","input":{"replace_all":false,"file_p
+{"parentUuid":"9694cfdb-3f6e-49e9-a56a-e56244c5d689","isSidechain":false,"promptId":"b8312e5b-d1fa-468d-9584-3dac06440a08","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01NWKXGw9jQo8pKWoWHpeDHa","type":"tool_result","content":"The file C:\\coding projects\\Cursor\\foodVibe1
+{"parentUuid":"18c348c9-3727-4fb9-a1ba-2870fb261a34","isSidechain":false,"message":{"model":"claude-sonnet-5","id":"msg_011CfZodZkb3QoRZ3C5Uz4zy","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01JYGDt52k1sRK9UnkpB8YJ7","name":"Edit","input":{"replace_all":false,"file_p
+{"parentUuid":"dcf7d315-f385-4821-952c-c0bdc959b37f","isSidechain":false,"promptId":"30c79680-f210-4df9-a1a2-57116d197944","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01JYGDt52k1sRK9UnkpB8YJ7","type":"tool_result","content":"The file C:\\coding projects\\Cursor\\foodVibe1
+{"parentUuid":"dcdff9b1-6be4-4665-ab91-8b7a0962e1fc","isSidechain":false,"message":{"model":"claude-sonnet-5","id":"msg_011CfZr72Jk8wWDdd51LcJEF","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01UjXPb1fmFgkboCpxNnoDT5","name":"Edit","input":{"replace_all":false,"file_p
+{"parentUuid":"46ce7224-e726-4228-84c5-412771b847f1","isSidechain":false,"promptId":"e09d6e0e-b32d-4202-b5df-a2172f1b23e7","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01UjXPb1fmFgkboCpxNnoDT5","type":"tool_result","content":"The file C:\\coding projects\\Cursor\\foodVibe1
+{"parentUuid":"9d8242bd-ef4b-48f9-b510-5873422dc347","isSidechain":false,"promptId":"d915b3d6-5b94-47f4-86a9-62ea057f249e","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01SbqqgET3QYJGJHXjSDiEcD","type":"tool_result","content":"The file C:\\coding projects\\Cursor\\foodVibe1
+{"parentUuid":"46262602-0b95-4435-9e38-2a3c643bae42","isSidechain":false,"promptId":"d915b3d6-5b94-47f4-86a9-62ea057f249e","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_014rZoDyFSLt8UWhxbnzP2yV","type":"tool_result","content":"The file C:\\coding projects\\Cursor\\foodVibe1
+{"parentUuid":"e4ad2257-f296-42eb-95ce-65d7c6d71c52","isSidechain":false,"message":{"model":"claude-sonnet-5","id":"msg_011CfZrPvMY8Hi1n8rjmfZ4N","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_01W53sYFqW9dvD8DmRQvrb9Y","name":"Edit","input":{"replace_all":false,"file_p
+{"parentUuid":"165445d2-da9d-45ec-a6a1-37609cd30654","isSidechain":false,"promptId":"d915b3d6-5b94-47f4-86a9-62ea057f249e","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01W53sYFqW9dvD8DmRQvrb9Y","type":"tool_result","content":"The file C:\\coding projects\\Cursor\\foodVibe1
+{"parentUuid":"3ae52870-cc0b-4e37-8d50-9d4a313e7852","isSidechain":false,"promptId":"8ffeb0e6-0ef3-4ac8-83b5-79f0e83d9895","type":"user","message":{"role":"user","content":[{"tool_use_id":"toolu_01YA4JMRyUoWgDWNhJLUrNz5","type":"tool_result","content":[{"type":"text","text":"[\n  \"ɵgetDependencies
