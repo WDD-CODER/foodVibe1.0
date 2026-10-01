@@ -1968,3 +1968,10 @@ textarea.c-input {
     break-inside: avoid;
   }
 }
+
+@media print {
+  /* Empty "search a dish" rows are editing placeholders, never part of the printed menu. */
+  .dish-search-wrap {
+    display: none !important;
+  }
+}

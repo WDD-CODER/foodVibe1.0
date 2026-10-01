@@ -122,6 +122,8 @@ export class ScalingService {
     if (recipe.prepCategories?.length) {
       recipe.prepCategories.forEach((cat: PrepCategory) => {
         ;(cat.items ?? []).forEach((it) => {
+          // prepItems and prepCategories can describe the same step; list it once
+          if (rows.some((r) => r.name === it.itemName && (r.categoryName ?? '') === (cat.categoryName ?? ''))) return
           rows.push({
             name: it.itemName,
             amount: (it.quantity ?? 0) * factor,

@@ -181,6 +181,9 @@ export class RecipeAiFlowService {
     }
 
     if (patch.yield_amount !== undefined || patch.yield_unit !== undefined) {
+      if (isDish && patch.yield_amount !== undefined) {
+        recipeForm.patchValue({ serving_portions: patch.yield_amount }, { emitEvent: false })
+      }
       const primary = this.yieldConversionsArray.at(0)
       if (primary) {
         if (patch.yield_amount !== undefined) primary.patchValue({ amount: patch.yield_amount }, { emitEvent: false })

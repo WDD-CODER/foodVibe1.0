@@ -156,7 +156,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly translation = inject(TranslationService)
   protected readonly form_ = this.fb.group({
     name: [''],
-    eventType: ['', Validators.required],
+    eventType: [''],
     eventDate: [new Date().toISOString().slice(0, 10)],
     servingType: ['plated_course' as ServingType, Validators.required],
     guestCount: [50, [Validators.required, Validators.min(0)]],

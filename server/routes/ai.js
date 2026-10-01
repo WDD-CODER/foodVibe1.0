@@ -627,7 +627,7 @@ Do NOT include fields that were not mentioned or implied by the instruction.
 
 ### Field keys you may include in the patch:
 - "nameHebrew" — string: new recipe name
-- "yield_amount" — number: new yield amount
+- "yield_amount" — number: new yield amount = the total the recipe makes (e.g. "יוצא 10 מנות" -> 10). NEVER an ingredient quantity (100 גרם חמאה is not a yield)
 - "yield_unit" — string: canonical unit key (gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion)
 - "ingredients" — array: FULL replacement array [ { name, amount, unit } ] — only if user asked to change ingredients
 - "steps" — array: FULL replacement string array [ "step text", ... ] — only if user asked to change steps/instructions
@@ -636,7 +636,7 @@ Do NOT include fields that were not mentioned or implied by the instruction.
 ### Decision rules:
 - If user says "only add steps" / "add preparation steps" / "create the instructions" → include ONLY "steps"
 - If user says "change the name to X" → include ONLY "nameHebrew"
-- If user pastes a full recipe text → extract all fields and include all of them
+- If user pastes a full recipe text → extract all fields and include all of them: nameHebrew, yield_amount, yield_unit, EVERY ingredient (with its amount and unit) and every step
 - If ambiguous, prefer minimal changes — only include what is clearly requested
 - Include "equipment" ONLY when the user explicitly mentions tools, equipment, kitchen gear, or utensils — do not infer equipment from steps
 
