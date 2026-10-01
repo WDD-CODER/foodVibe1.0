@@ -322,6 +322,18 @@
 - [ ] A9: Write the `manifest.md` summary. Run both checker modes until they are green, then run the build.
 - [ ] A10: STOP. Hand Dandan the two `[human]` reviews. Apply re-verdicts if requested, then `/ship`.
 
+### Plan 329 — Workflow Kit Extraction, Phase 2: Core Scaffold (`plans/329-workflow-kit-extraction-phase-2-core-scaffold.plan.md`)
+
+- [ ] B0: Verify the Prerequisites gate — plan 321's `take-plan.mjs` Windows `shell` fix is merged to FoodVibe `main`. If not, STOP and tell the Human.
+- [ ] B1: Create `../ai-workflow-kit` (fresh `git init`), baseline `README.md`, `.gitignore`, empty `core/` tree.
+- [ ] B2: Write `kit.config.json` with all 38 `parameters.md` keys plus `docs.domainStandards` and `paths.sharedDocs`, placeholder values only.
+- [ ] B3: Write `scripts/kit-extract.mjs` (FoodVibe-side, reads `manifest.json`, writes into the kit repo path) applying `copy`/`parameterize` for every `tier: core` row; run it.
+- [ ] B4: Hand-fix the 7 `split` core files (generic half only) and the 7 blocker files per the Blockers table's proposed-fix column.
+- [ ] B5: Write the kit repo's framework-name-leak CI check; get it green against the extracted `core/`.
+- [ ] B6: Extend `scripts/kit-extract.mjs` (or add a sibling check) with a coverage report confirming all 77 core rows landed.
+- [ ] B7: Record the kit repo's location in `docs/workflow-kit/manifest.md`.
+- [ ] B8: STOP. Hand Dandan the two `[human]` reviews (kit.config.json keys; kit repo name/location). Apply changes if requested, then `/ship` on the FoodVibe side only — the kit repo stays local, no remote, until Dandan says otherwise.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
