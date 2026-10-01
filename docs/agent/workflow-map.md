@@ -18,7 +18,7 @@
 | Reviewer | Claude Code via `/review-it` | Checks milestone vs Plan Contract. Report-only, never fixes, never commits |
 | Shipping agent | Whichever agent runs `/ship` | Build gate → review → commit approval → merge gate → brain capture |
 
-Rule: **a job is never done until the Human validates it** (`docs/agent/job-validation.md`).
+Rule: **a job is never done until every Done-when item is validated** — `[auto]` by agent evidence, `[human]`/untagged by the Human (`docs/agent/job-validation.md`).
 
 ---
 
@@ -59,7 +59,7 @@ Cursor rule files (10 original + 1 role rule + 12 skill-enforcement rules added 
 | `/brief-detect` | forces the brief-detection gate (skill) below threshold | user message | — |
 | `/review-it` | Reviewer protocol | newest `sessions/*.md`, parent plan in `plans/`, milestone files | verdict in chat only (never `[x]`, never commits) |
 | `/ship` | Phase 0 classifies FAST/ULTRA-TRIVIAL/REGULAR first (`/ship fast`\|`regular` overrides); REGULAR invokes `/review`; runs `scripts/session-manifest-ship.py` (multi-worktree), `scripts/brain-review-check.mjs --scope=full` (feature-complete path) | `.claude/.session-state-path`, brief Done-when | commit; marks `.claude/todo.md` + plan `[x]`; `docs/brain/**` (auto-writes on `Y`, unless `no brain`; skipped by default on FAST/ULTRA-TRIVIAL); session-state file |
-| `/done` | job-validation Path B close-out | `.claude/todo.md`, parent plan | marks `[x]` on Human confirm |
+| `/done` | job-validation Path B close-out | `.claude/todo.md`, parent plan | marks `[x]` on Human confirm (or Tier 1 evidence for all-`[auto]`) |
 | `/review` | standalone review pass (used by `/ship` Phase 2) | session diff | report only |
 | `/end-session` | alias territory of `/ship` ("wrap up") | — | — |
 
@@ -251,7 +251,7 @@ Human describes feature
   → mid-flight scope change (review fallout / Human adds stage):
       [gate] append [ ] to parent plan Atomic Sub-tasks + .claude/todo.md BEFORE doing the work
       (save-plan Phase 4 + job-validation "Plan file sync")
-  → Human validation → next milestone or /ship
+  → validation (Human done / ship Y / Tier 1 evidence) → next milestone or /ship
 ```
 
 ### F3 — Ship pipeline (`/ship`)
@@ -325,7 +325,7 @@ save-plan    --runs-->     plan-name-similarity.mjs; --writes--> plans/*, .claud
 plan-write-guard.sh --gates--> Write/Edit on plans/*.plan.md; --runs--> plan-name-similarity.mjs
 branch-guard.sh     --gates--> all Write/Edit (blocks main)
 brief-detection     --gates--> structured pasted briefs; --routes--> /feat | discussion
-job-validation      --gates--> marking any [x]; --requires--> Human done / ship Y
+job-validation      --gates--> marking any [x]; --requires--> Human done / ship Y / Tier 1 evidence
 brain-capture.md    --gates--> any docs/brain write (shown, then auto-writes; "no brain" opts out)
 standards-git.md    --gates--> post-push (Merge Gate, mandatory)
 pre-commit hooks    --gate--> every commit (no-semi, secret-scan, security-grep, plan-ledger-check) [shared with Cursor]

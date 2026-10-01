@@ -132,7 +132,14 @@ HOW TO VALIDATE
 Approve? (Y / edit list / abort)
 ~~~
 
-**HOW TO VALIDATE:** Mandatory before Approve? — plain-language action → expected result bullets per `docs/agent/job-validation.md`. Include happy path and any edge/failure rules this ship introduced. If no user-visible effect, one line explaining why no click-test is needed. Never omit the section.
+When **every** Done-when item is `[auto]`, replace the HOW TO VALIDATE block with:
+
+~~~text
+VERIFIED BY AGENT
+  - ✓ [auto] {item} — `{command}` → {output / exit code}
+~~~
+
+**HOW TO VALIDATE:** Mandatory before Approve? — plain-language action → expected result bullets per `docs/agent/job-validation.md`. Include happy path and any edge/failure rules this ship introduced. If no user-visible effect, one line explaining why no click-test is needed. Mandatory for `[human]`/untagged items; all-`[auto]` jobs show VERIFIED BY AGENT instead. Never omit both.
 
 **Todo lines in the tree:** If matching open todos exist for this job, list the todo/plan paths above *before* Y (still `[ ]` on disk). On **Y**, mark them `[x]` and stage them in the **same** commit as the job — Human must not need a second push just for checkboxes. Chat-only jobs (no ship): use `docs/agent/job-validation.md` Path B / `/done`.
 
@@ -153,7 +160,7 @@ If on `feat/session-*`:
 
 ### On approval (order is hard — do not reorder)
 
-Approve **Y** (or `--yes`) **is** Human validation of the job. Then:
+Approve **Y** (or `--yes`) is commit/push consent, and it also counts as Human validation of any `[human]` items. Then:
 
 1. **Todo sync (mandatory when items match)**
    - **In a wt-N slot:** mark the matching item(s) `[x]` in the plan file's own `## Atomic Sub-tasks` **only**. Do **not** run `todo-query.mjs mark` and do **not** run `todo-archive.mjs` — `.claude/todo.md` is Planner-owned; the Planner's `todo-query.mjs sync --merged` picks up this plan's checkboxes once the branch merges.

@@ -17,13 +17,16 @@ Single source of truth for hard rules, conventions, and skill triggers. Claude C
 - Hebrew UI strings always through `translatePipe` + `dictionary.json`.
 - Browser interaction goes through gstack `/browse` — never raw Playwright MCP directly.
 - Compaction: when a context-full warning appears, state open signals/todos in chat first, then prefer `/compact focus on <current job + open signals>`. Between unrelated tasks prefer `/clear` + session-state reload over `/compact`.
-- **Job validation (all agents):** A job is **not done** until the Human validates it. Never self-mark todos. Full procedure: `docs/agent/job-validation.md`. Fully-done plan sections leave `.claude/todo.md` via `node scripts/todo-archive.mjs` into `.claude/todo-archive/NNN.md` (max 300 lines); see that doc’s Todo archive volumes section.
+- **Job validation (all agents):** A job is not done until every Done-when item is validated. `[auto]` items by agent evidence, `[human]`/untagged by the Human. Never self-mark `[human]` items. Full procedure: `docs/agent/job-validation.md`. Fully-done plan sections leave `.claude/todo.md` via `node scripts/todo-archive.mjs` into `.claude/todo-archive/NNN.md` (max 300 lines); see that doc’s Todo archive volumes section.
 - **Plan Contracts (all agents):** A pasted/approved big plan must be persisted under `plans/` via `.claude/skills/save-plan/SKILL.md` before milestone execution. Run `node scripts/plan-name-similarity.mjs --name="…"` first — ask rewrite/save-as-new/cancel **only** when similar name hits exist. Mid-brief new tasks must be appended to that plan’s Atomic Sub-tasks (and `.claude/todo.md` — Planner only, see Planner-Worker bullet below).
 - **Planner-Worker workflow:** The Planner (main folder, on `main`) writes and pushes `plans/*.plan.md` + `.claude/todo.md` directly. A Worker (one of 3 permanent slots — `wt-1`=4201/3001, `wt-2`=4202/3002, `wt-3`=4203/3003, `main`=4200/3000 unchanged) claims a plan via "execute plan NNN" and may modify only that plan's `## Read-Write Scope`; anything else — STOP, tell the Human the file, exact change, and why, wait for `approved: <path>`, then append it to the scope block (enforced by `scripts/scope-guard.sh` + the `/ship` scope gate). Hotspots `src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts` are append-only for every plan — add, never rewrite or remove an existing entry, without escalating the same way. Workers never write `.claude/todo.md`. `git push --no-verify` to `main` is human-only. Full detail: `docs/brain/decisions/0009-planner-worker-worktrees.md`.
 
 ## Job validation (all agents)
 
-A requested job stays open until Human validation. Mid-milestone STOP for review is unchanged.
+A requested job stays open until every Done-when item is validated. Mid-milestone STOP for review is unchanged.
+
+**Tier 1 — `[auto]`:** exact-output criteria (exit code, exact string, byte-identical diff, `ng build`/tests) are self-verified; the agent prints `VERIFIED BY AGENT` with raw command + output and marks the todo itself (`todo-query mark --auto-verified`). Only the plan author tags `[auto]`.
+**Tier 2 — `[human]` / untagged:** hard Human gate, exactly as below. `/ship` Y is commit/push consent in every case.
 
 **Validation (counts):** `/ship` Approve **Y** / `--yes`; chat `done` / `mark done` / `mark it` / `verified` / `approved` / `LGTM for this job`; `/done` then confirm.  
 **Does not count:** `thanks` / `ok` / `cool` / silence / CI green alone.
@@ -41,7 +44,7 @@ Matched todos (still [ ]):
 Reply: done  |  not yet  |  verify  |  edit list
 ```
 
-Never show the JOB DONE ask without HOW TO VALIDATE above it (or a one-line “no user-visible effect” note). Full bullet rules: `docs/agent/job-validation.md`.
+Never show the JOB DONE ask without HOW TO VALIDATE above it (or a one-line “no user-visible effect” note, or `VERIFIED BY AGENT` for an all-`[auto]` job). Full bullet rules: `docs/agent/job-validation.md`.
 
 **On validation:** MUST mark matching `.claude/todo.md` / plan Atomic Sub-tasks `[x]`.  
 **On `/ship` Y:** mark → stage with job → commit → push (one commit; see ship Phase 4). Ship Phase 4 must also show HOW TO VALIDATE before Approve **Y**.  

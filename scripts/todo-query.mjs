@@ -8,7 +8,7 @@
  *   node scripts/todo-query.mjs next
  *   node scripts/todo-query.mjs open [--plan NNN]
  *   node scripts/todo-query.mjs sweep
- *   node scripts/todo-query.mjs mark --line N[,N…]
+ *   node scripts/todo-query.mjs mark --line N[,N…] [--auto-verified]
  *   node scripts/todo-query.mjs append --from <file>
  *   node scripts/todo-query.mjs sync --plan NNN
  *   node scripts/todo-query.mjs sync --merged
@@ -237,6 +237,7 @@ function cmdMark() {
   for (const n of targets) {
     const idx = n - 1
     lines[idx] = lines[idx].replace('[ ]', '[x]')
+    if (args['auto-verified']) lines[idx] = `${lines[idx].trimEnd()} (auto-verified)`
     changed.push({ line: n, text: lines[idx].trim() })
   }
 

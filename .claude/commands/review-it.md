@@ -42,4 +42,4 @@ APPROVE | RETURN TO CURSOR | ESCALATE TO ARCHITECT
 - ...
 ```
 
-6. STOP. Do **not** mark the milestone `[x]` in this review pass (review ≠ validation of the delivered job). Do not commit. After Human validates via `/ship` Approve **Y** (or explicit mark-done), the shipping agent marks matching todos — see `AGENTS.md`.
+6. STOP. Do **not** mark the milestone `[x]` in this review pass (review ≠ validation of the delivered job). Do not commit. After validation per `docs/agent/job-validation.md` (`/ship` Approve **Y**, explicit mark-done, or Tier 1 evidence for `[auto]` items), the shipping agent marks matching todos — see `AGENTS.md`.
