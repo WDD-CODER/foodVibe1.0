@@ -50,32 +50,45 @@ NORM=$(printf '%s' "$FILE_PATH" | tr '\\' '/')
 # A file outside this REPO (e.g. in a sibling wt-N worktree) is never on
 # `main` and has no guard of its own to borrow — skip entirely rather than
 # switching THIS repo's branch for an edit that happened somewhere else.
+#
+# This also computes REL_PATH (repo-relative, forward-slashed) because the
+# Write/Edit tools always pass an ABSOLUTE file_path. Matching the plans/
+# and .claude/todo.md bypass patterns against the raw NORM (still absolute)
+# never matches, so the Planner admin bypass below silently never fires and
+# every plan save force-switches off main. Match REL_PATH instead.
+REL_PATH="$NORM"
 if [[ -n "$FILE_PATH" ]]; then
-  INSIDE_REPO=$(REPO_PATH="$REPO" FILE_PATH_INPUT="$FILE_PATH" python - <<'PY'
+  READ_RESULT=$(REPO_PATH="$REPO" FILE_PATH_INPUT="$FILE_PATH" python - <<'PY'
 import os
 repo = os.environ.get("REPO_PATH", "")
 path = os.environ.get("FILE_PATH_INPUT", "")
 try:
     repo_n = os.path.normcase(os.path.normpath(os.path.abspath(repo)))
-    path_n = os.path.normcase(os.path.normpath(os.path.abspath(path)))
-    inside = path_n == repo_n or path_n.startswith(repo_n + os.sep)
+    path_abs = path if os.path.isabs(path) else os.path.join(repo, path)
+    path_n = os.path.normcase(os.path.normpath(os.path.abspath(path_abs)))
+    if path_n == repo_n or path_n.startswith(repo_n + os.sep):
+        rel = os.path.relpath(path_n, repo_n).replace(os.sep, "/")
+        print("1|" + rel)
+    else:
+        print("0|")
 except Exception:
-    inside = True
-print("1" if inside else "0")
+    print("1|")
 PY
   )
+  INSIDE_REPO="${READ_RESULT%%|*}"
   if [[ "$INSIDE_REPO" == "0" ]]; then
     printf '{"permission":"allow","agent_message":"BRANCH_GUARD: %s is outside this worktree - no branch action taken."}\n' "$NORM"
     exit 0
   fi
+  REL_PATH="${READ_RESULT#*|}"
 fi
 
 CURRENT=$(git -C "$REPO" branch --show-current 2>/dev/null)
 MSG=""
 
 if [[ "$CURRENT" == "main" || "$CURRENT" == "master" ]]; then
-  if [[ "$NORM" =~ ^plans/[^/]+\.plan\.md$ ]] || [[ "$NORM" == ".claude/todo.md" ]]; then
-    printf '{"permission":"allow","agent_message":"BRANCH_GUARD: Planner admin bypass - %s stays on main."}\n' "$NORM"
+  if [[ "$REL_PATH" =~ ^plans/[^/]+\.plan\.md$ ]] || [[ "$REL_PATH" == ".claude/todo.md" ]]; then
+    printf '{"permission":"allow","agent_message":"BRANCH_GUARD: Planner admin bypass - %s stays on main."}\n' "$REL_PATH"
     exit 0
   fi
 
