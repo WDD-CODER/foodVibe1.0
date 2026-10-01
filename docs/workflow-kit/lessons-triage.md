@@ -8,7 +8,7 @@ Entries are **not** rewritten here; phase 3 does that.
 - **stay** — FoodVibe-only; remains in FoodVibe's brain.
 - Destination: `core` | `pack:angular` | `pack:node-express` (`-` for stay).
 
-**Totals:** 83 entries — 49 transfer, 21 generalize, 13 stay.
+**Totals:** 84 entries — 50 transfer, 21 generalize, 13 stay.
 Verify: `node scripts/kit-manifest-check.mjs --lessons`.
 
 | source | title | verdict | destination | draft lesson (generalize only) / why stay |
@@ -31,6 +31,7 @@ Verify: `node scripts/kit-manifest-check.mjs --lessons`.
 | docs/brain/gotchas/agent-workflow.md | Naive git-status parsing silently drops path characters and undercounts new directories | transfer | core |  |
 | docs/brain/gotchas/agent-workflow.md | New branch-naming convention colliding with pre-existing branches of the same shape | generalize | core | Pick a branch-naming scheme only after listing existing branches of the same shape; a new prefix/pattern must not collide with refs already in use. |
 | docs/brain/gotchas/agent-workflow.md | Bash commands that merely mention `.github` get refused outright | transfer | core |  |
+| docs/brain/gotchas/agent-workflow.md | An inline `# comment` after a glob in a plan's `scope` block silently makes that glob match nothing | transfer | core |  |
 | docs/brain/gotchas/angular.md | Login reload bypasses deferred constructor load | stay | - | FoodVibe auth + KitchenState deferred-load specifics |
 | docs/brain/gotchas/angular.md | Unregistered Lucide icon aborts list `@for` CD | stay | - | Lucide icon registry is a FoodVibe library choice |
 | docs/brain/gotchas/angular.md | Gating a user action on a fire-and-forget side-write silently breaks it for some users | generalize | pack:angular | Never gate a user action on an un-awaited background write; either await it or decouple so the action works for users whose write has not landed. |
