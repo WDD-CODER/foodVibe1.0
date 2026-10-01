@@ -1,5 +1,7 @@
 # Plan 321 — Professional Foundation Refactor: Shared Master, Zod Schemas, Unified Taxonomy
 
+Status: active
+
 > **Save instructions for the agent:** persisted via `.claude/skills/save-plan/SKILL.md`. Expected to be `320` when written, but `feat/recipe-labels-course-field` had already claimed 320 (commits reference "plan 320 M1"/"M2") with no `plans/320-*.plan.md` file on disk — so this plan is `321`.
 
 overview: Move FoodVibe's data layer to the same professional grade as its workflow layer. The Architecture Audit (2026-09-29) found a disciplined process (AGENTS.md, ADRs, Plan Contracts, job validation, CI with lint/build/tests/gitleaks/Semgrep) sitting on a data layer that grew by patch: a schemaless `data/:type` pipe where the client decides document shape, a copy-the-whole-catalog-per-user tenancy model, 10+ single-doc "registries" with hand-rolled CRUD, compound concepts welded into `labels_` strings, three soft-delete mechanisms, four naming conventions in persisted fields, and zero server tests. This plan fixes these at the source, in 9 sequential phases. Each phase is one or more briefs, and each ends in `/ship` plus Human validation.
