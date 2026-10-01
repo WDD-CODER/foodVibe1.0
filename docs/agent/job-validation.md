@@ -105,8 +105,10 @@ Order is hard (see `.claude/commands/ship.md` Phase 4 On approval):
 
 0. Show **HOW TO VALIDATE** in the Phase 4 approval tree (before Approve?)
 1. Human **Y**
-2. Mark matching todos / plan Atomic Sub-tasks `[x]` — inside a `wt-N` slot, plan file only,
-   never `.claude/todo.md` (see `.claude/commands/ship.md` Phase 4 "On approval" step 1)
+2. Mark matching todos / plan Atomic Sub-tasks `[x]`:
+   - **Inside a `wt-N` slot:** mark `[x]` in the plan file's own Atomic Sub-tasks only. Never run `todo-query.mjs mark` or `todo-archive.mjs` — `.claude/todo.md` is Planner-owned; `todo-query.mjs sync --merged` picks up this plan's checkboxes once the branch merges.
+   - **Outside a slot (Planner/main):** do not Read `.claude/todo.md` in full. Run `node scripts/todo-query.mjs open` (add `--plan NNN` when known), then `node scripts/todo-query.mjs mark --line N[,N…]` on matches (and the plan's Atomic Sub-tasks the same way); then `node scripts/todo-archive.mjs` to move fully-`[x]` plan sections into `.claude/todo-archive/NNN.md` volumes.
+   - Never invent completion for work not in this ship. Never skip with "Contractor does not mark." No match → note `Todo: no matching open items — skipped`.
 3. Stage with the job (+ brain if any)
 4. Commit → push if asked
 
@@ -176,6 +178,8 @@ Human (or agent after finishing work) may run `/done` → follow `.claude/comman
 ## Matching todos
 
 Mark only items that clearly match **this** validated job (milestone ID, files touched, or Human-named task). Never invent completion for unrelated open checkboxes.
+
+Whichever agent is present when validation lands marks the todo itself — never skip with "Contractor does not mark."
 
 ---
 

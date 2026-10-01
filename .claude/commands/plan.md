@@ -40,8 +40,12 @@ review docs allow a direct push to `main` — restricted to `plans/*.plan.md` an
 3. Ask: "Will this plan run in parallel with other active plans?" If yes, run
    `node scripts/scope-check.mjs --overlap --plan=<path>` — it must report `OVERLAP: none`
    before saving; a real overlap means narrowing the `## Read-Write Scope` first.
-4. Save via `.claude/skills/save-plan/SKILL.md`, with `Snapshot:` filled in (current
-   `origin/main` SHA) and `Status: draft`.
+4. Save via `.claude/skills/save-plan/SKILL.md` with `Status: draft`. Leave `Snapshot:` as
+   the Architect wrote it (the SHA they verified the plan against) — only fill it with the
+   current `origin/main` SHA if the draft left it empty. Never overwrite an already-filled
+   `Snapshot:`; that value is what `scope-check.mjs --drift` diffs against at take-plan time,
+   and overwriting it to "now" would hide drift between when the plan was written and when
+   it was saved.
 5. `git add` only the plan file and `.claude/todo.md` (never `-A`), then commit and push
    to `main` directly.
 6. End with: `Plan NNN pushed. Open a free slot and say: execute plan NNN.`

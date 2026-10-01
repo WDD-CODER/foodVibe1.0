@@ -18,13 +18,21 @@ Treat it as a **Plan Contract** (not a brief) when any of these are true:
 - Contains `## Milestones` or `## Atomic Sub-tasks` (case-insensitive heading match)
 - H1 matches `# Plan …` or contains `Plan Contract`
 
-On Plan Contract shape:
+On Plan Contract shape, check `git branch --show-current`:
 
-```
-Detected Plan Contract — routing to save-plan
-```
+- **On `main` (Planner):**
+  ```
+  Detected Plan Contract — routing to the Planner protocol
+  ```
+  Hand off to `.claude/commands/plan.md` **Planner protocol**, steps 1–6 (pull, todo sync,
+  overlap check, save-plan, commit, push) — not save-plan alone. The Planner never starts
+  execution itself; it ends on step 6's message.
+- **Inside a `wt-N` slot (Worker, mid-brief plan save):**
+  ```
+  Detected Plan Contract — routing to save-plan
+  ```
+  Hand off to `.claude/skills/save-plan/SKILL.md` **Phase 0** directly.
 
-Hand off immediately to `.claude/skills/save-plan/SKILL.md` **Phase 0**.
 Do **not** show the a/b/c brief gate. Do **not** write plan files here — save-plan does.
 
 ### Brief H2 markers (only if Plan Contract shape did NOT match)
