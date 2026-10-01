@@ -24,6 +24,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component'
+import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.component'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
 import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util'
@@ -57,6 +58,7 @@ const IMAGE_PLACEHOLDER_SVG =
     ClickOutSideDirective,
     TranslatePipe,
     CustomMultiSelectComponent,
+    CustomSelectComponent,
     ScalingChipComponent,
     ScrollIndicatorsDirective,
     RatingStarsComponent
@@ -197,6 +199,16 @@ export class RecipeHeaderComponent {
     const auto = this.autoLabels()
     return manual.length > 0 || auto.length > 0
   })
+
+  // COURSE
+  protected courseSelectOptions_ = computed(() => [
+    { value: '', label: 'no_course' },
+    ...this.metadataRegistry.courses_().map((c) => ({ value: c.key, label: c.key }))
+  ])
+
+  protected get courseControl(): FormControl<string> {
+    return this.form().get('course') as FormControl<string>
+  }
 
   // WRAPPERS — CDR / output handling
 

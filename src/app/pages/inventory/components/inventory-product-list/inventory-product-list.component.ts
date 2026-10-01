@@ -11,6 +11,7 @@ import {
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
+import { firstValueFrom } from 'rxjs'
 import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 
@@ -24,6 +25,7 @@ import { Product } from '@models/product.model'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { TranslationService } from '@services/translation.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { MasterPushService } from '@services/master-push.service'
 import { UserService } from '@services/user.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
@@ -98,6 +100,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   private readonly heroFab = inject(HeroFabService)
   private readonly translationService = inject(TranslationService)
   private readonly confirmModal = inject(ConfirmModalService)
+  private readonly masterPush_ = inject(MasterPushService)
   private readonly equipmentData = inject(EquipmentDataService)
   private readonly userMsg = inject(UserMsgService)
   protected readonly unitRegistry = inject(UnitRegistryService)
@@ -534,24 +537,78 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   // DELETE
   protected async onDeleteProduct(_id: string): Promise<void> {
-    if (!(await this.confirmModal.open('האם אתה בטוח שברצונך למחוק חומר גלם זה?', { variant: 'danger' }))) return
+    const product = this.kitchenStateService.products_().find((p) => p._id === _id)
+    const affected = this.kitchenStateService
+      .recipes_()
+      .filter((r) => (r.ingredients_ ?? []).some((i) => i.referenceId === _id))
+
+    const confirmMessage =
+      affected.length > 0
+        ? `חומר הגלם הזה בשימוש ב-${affected.length} מתכונים/מנות. מחיקה תסיר אותו מכולם. להמשיך?`
+        : 'האם אתה בטוח שברצונך למחוק חומר גלם זה?'
+    if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
+
+    const scope = await this.masterPush_.askDeleteScope(product ?? null)
+    if (scope === 'cancel') return
+
     this.deletingId_.set(_id)
-    this.kitchenStateService.deleteProduct(_id).subscribe({
-      next: () => {
-        this.deletingId_.set(null)
-      },
-      error: () => {
-        this.deletingId_.set(null)
+    try {
+      if (affected.length > 0) {
+        await this.kitchenStateService.cascadeRemoveIngredientForAll(_id)
       }
-    })
+      await firstValueFrom(this.kitchenStateService.deleteProduct(_id))
+      if (scope === 'everyone' && product?._masterId) {
+        this.masterPush_.deleteProductFromMaster(product)
+        this.masterPush_.purgeProductIngredientEverywhere(product)
+      }
+    } catch {
+      // Swallow — kitchenStateService.deleteProduct already surfaces its own error toast.
+    } finally {
+      this.deletingId_.set(null)
+    }
   }
 
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
-    if (!(await this.confirmModal.open(`למחוק ${ids.length} מוצרים?`, { variant: 'danger' }))) return
-    ids.forEach((id) => {
-      this.kitchenStateService.deleteProduct(id).subscribe({ next: () => {}, error: () => {} })
-    })
+
+    const productsById = new Map(this.kitchenStateService.products_().map((p) => [p._id, p]))
+    const recipes = this.kitchenStateService.recipes_()
+    const affectedByProduct = new Map<string, number>()
+    let totalAffected = 0
+    for (const id of ids) {
+      const count = recipes.filter((r) => (r.ingredients_ ?? []).some((i) => i.referenceId === id)).length
+      if (count > 0) {
+        affectedByProduct.set(id, count)
+        totalAffected += count
+      }
+    }
+    const inUseCount = affectedByProduct.size
+
+    const confirmMessage =
+      inUseCount > 0
+        ? `${inUseCount} מתוך ${ids.length} המוצרים שנבחרו בשימוש ב-${totalAffected} מתכונים/מנות בסך הכל. מחיקה תסיר אותם מכולם. להמשיך?`
+        : `למחוק ${ids.length} מוצרים?`
+    if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
+
+    const masterLinkedProduct = ids.map((id) => productsById.get(id)).find((p) => p?._masterId)
+    const scope = await this.masterPush_.askDeleteScope(masterLinkedProduct ?? null)
+    if (scope === 'cancel') return
+
+    for (const id of ids) {
+      const product = productsById.get(id)
+      try {
+        if (affectedByProduct.has(id)) {
+          await this.kitchenStateService.cascadeRemoveIngredientForAll(id)
+        }
+        await firstValueFrom(this.kitchenStateService.deleteProduct(id))
+        if (scope === 'everyone' && product?._masterId) {
+          this.masterPush_.deleteProductFromMaster(product)
+          this.masterPush_.purgeProductIngredientEverywhere(product)
+        }
+      } catch {
+        // Swallow — kitchenStateService.deleteProduct already surfaces its own error toast.
+      }
+    }
     this.selection.clear()
   }
 

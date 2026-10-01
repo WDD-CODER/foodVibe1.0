@@ -51,4 +51,10 @@ export interface Product {
   supplierIds_?: string[]
   /** Nutritional data per 100g — populated by catalog seeder (Open Food Facts) */
   nutrition_per_100g?: NutritionPer100g
+  /** Set at signup-time clone (points to __master__'s original _id) or after a manual
+   *  push-to-master (Plan 322). Absent for a product that's never been linked to master. */
+  _masterId?: string
+  /** Set to false right after a save that matches master (so sync-master's Rule 2 can still
+   *  manage it); true once the user's own edit diverges from master. */
+  _userModified?: boolean
 }

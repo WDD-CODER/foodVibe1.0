@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, computed, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, computed, signal, effect, untracked } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { ClickOutSideDirective } from '@directives/click-out-side'
@@ -24,6 +24,17 @@ export class LabelCreationModalComponent {
 
   protected readonly palette = LABEL_COLOR_PALETTE
 
+  protected readonly titleKey_ = computed(() => (this.modal.originalKey_() ? 'edit_label' : 'add_new_label'))
+
+  constructor() {
+    effect(() => {
+      if (this.modal.isOpen_()) {
+        this.englishKey_.set(untracked(() => this.modal.englishKey_()))
+        this.validationError_.set(null)
+      }
+    })
+  }
+
   protected triggerOptions_ = computed(() => {
     const categories = this.metadataRegistry.allCategories_().map((c) => ({ value: c, type: 'category' as const }))
     const allergens = this.metadataRegistry.allAllergens_().map((a) => ({ value: a, type: 'allergen' as const }))
@@ -42,7 +53,7 @@ export class LabelCreationModalComponent {
     const key = this.englishKey_().trim().toLowerCase().replace(/\s+/g, '_')
     const hebrew = this.modal.hebrewLabel_().trim()
     if (!key || !hebrew) return
-    const validation = this.modal.validateKey(key)
+    const validation = this.modal.validateKey(key, hebrew)
     if (!validation.valid) {
       this.validationError_.set(validation.error ?? null)
       return

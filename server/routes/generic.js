@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
-const { verifyToken, optionalToken } = require('../middleware/auth');
+const { verifyToken, optionalToken, requireAdmin } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
 const { bumpMasterVersion } = require('../services/master-version');
@@ -184,6 +184,23 @@ router.get('/:type/count', optionalToken, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /api/v1/data/DICTIONARY_OVERRIDES/global
+// Plan 322 M4 — see the matching PUT route further below for the full comment.
+// Defined here, BEFORE the generic `GET /:type/:id` below, which would otherwise
+// treat "global" as an :id and swallow this route (same Express route-ordering
+// hazard documented at registry-rename-master further down).
+// ---------------------------------------------------------------------------
+router.get('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
+  try {
+    const doc = await col('DICTIONARY_OVERRIDES').findOne({ userId: '__global__' });
+    res.json({ items: doc?.items ?? {} });
+  } catch (err) {
+    console.error('[data/dictionary-global-get]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // GET /api/v1/data/:type/:id
 // Authenticated → returns one document by _id scoped to the user.
 // Anonymous → returns one document by _id from __master__.
@@ -239,6 +256,181 @@ router.post('/:type', verifyToken, async (req, res) => {
       return res.status(409).json({ error: 'Entity already exists' });
     }
     console.error('[data/post]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// PUT /api/v1/data/:type/registry-rename-master
+//
+// Plan 322: renames a key in-place inside __master__'s own metadata registry
+// doc (KITCHEN_LABELS/COURSES items are {key,...} objects; CATEGORIES/ALLERGENS
+// items are plain strings), then bumps the master version. Only corrects the
+// template for future signups and this caller's own already-cascaded copy —
+// it does NOT retroactively rename the key in other existing users' own
+// registries or their recipes/products, same limitation push-to-master below
+// already has for recipes (Rule 3 / additive-only sync).
+//
+// Defined BEFORE the generic `PUT /:type/:id` route below — Express matches
+// top-to-bottom, and `/:type/:id` would otherwise swallow this by treating
+// "registry-rename-master" as the :id.
+//
+// DELIBERATELY OPEN TO ANY SIGNED-IN USER, same tradeoff and same "Human has
+// accepted this for the current single-operator phase" as push-to-master
+// below — the client UI is what gates this behind an admin-only prompt
+// (metadata-manager.page.component.ts's onRenameMetadata). To lock it down
+// here too, uncomment:
+//
+//   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' })
+//
+// ---------------------------------------------------------------------------
+const REGISTRY_RENAME_PUSHABLE_TYPES = new Set(['KITCHEN_LABELS', 'KITCHEN_COURSES', 'KITCHEN_CATEGORIES', 'KITCHEN_ALLERGENS']);
+const REGISTRY_OBJECT_ITEM_TYPES = new Set(['KITCHEN_LABELS', 'KITCHEN_COURSES']);
+
+router.put('/:type/registry-rename-master', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    if (!REGISTRY_RENAME_PUSHABLE_TYPES.has(req.params.type)) {
+      return res.status(400).json({ error: `Type ${req.params.type} has no master registry to rename` });
+    }
+    const { oldKey, newKey, itemData } = req.body || {};
+    if (typeof oldKey !== 'string' || typeof newKey !== 'string' || !oldKey.trim() || !newKey.trim()) {
+      return res.status(400).json({ error: 'oldKey and newKey are required strings' });
+    }
+    const isObjectType = REGISTRY_OBJECT_ITEM_TYPES.has(req.params.type);
+    const result = isObjectType
+      ? await col(req.params.type).updateOne(
+          { userId: '__master__', 'items.key': oldKey },
+          { $set: { 'items.$.key': newKey } }
+        )
+      : await col(req.params.type).updateOne(
+          { userId: '__master__' },
+          { $set: { 'items.$[elem]': newKey } },
+          { arrayFilters: [{ elem: oldKey }] }
+        );
+    // 2026-09-30 fix: `oldKey` not found in master is the COMMON case, not an edge case — it's
+    // every label/course/category/allergen an admin created themselves and is now pushing to
+    // everyone for the first time. Rather than 404 (which silently discarded the whole "save for
+    // everyone" choice — the admin's own copy still saved, but nothing ever reached master),
+    // add it as a new master entry instead, guarding against a duplicate if `newKey` is
+    // somehow already there.
+    if (result.matchedCount === 0) {
+      const already = isObjectType
+        ? await col(req.params.type).findOne({ userId: '__master__', 'items.key': newKey })
+        : await col(req.params.type).findOne({ userId: '__master__', items: newKey });
+      if (!already) {
+        const newItem = isObjectType
+          ? req.params.type === 'KITCHEN_LABELS'
+            ? { key: newKey, color: itemData?.color || '#78716C', autoTriggers: itemData?.autoTriggers ?? [] }
+            : { key: newKey, color: itemData?.color || '#78716C' }
+          : newKey;
+        await col(req.params.type).updateOne(
+          { userId: '__master__' },
+          { $push: { items: newItem } },
+          { upsert: true }
+        );
+      }
+    }
+    await bumpMasterVersion();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[data/registry-rename-master]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// PUT /api/v1/data/:type/registry-delete-master
+//
+// Plan 322 M10. Mirror of registry-rename-master above, for DELETE. Removes
+// `key` from __master__'s own registry doc (labels/courses/categories/
+// allergens only), then — Human-explicitly-requested, 2026-09-30, dev-only,
+// same class of cross-user exception as purge-ingredient-everywhere further
+// down — ALSO strips this key from every OTHER user's own recipes/dishes/
+// products, not just the shared registry template. Unlike products (which
+// get a fresh _id per user clone, needing a _masterId-based two-hop lookup),
+// a label/course/category/allergen key IS the shared identifier across every
+// user's own registry doc verbatim, so this is a single direct bulk update,
+// no per-user resolution needed.
+//
+// Defined BEFORE the generic `PUT /:type/:id` route below for the same
+// Express route-ordering reason as registry-rename-master above.
+// ---------------------------------------------------------------------------
+router.put('/:type/registry-delete-master', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    if (!REGISTRY_RENAME_PUSHABLE_TYPES.has(req.params.type)) {
+      return res.status(400).json({ error: `Type ${req.params.type} has no master registry to delete from` });
+    }
+    const { key } = req.body || {};
+    if (typeof key !== 'string' || !key.trim()) {
+      return res.status(400).json({ error: 'key is required' });
+    }
+
+    const isObjectType = REGISTRY_OBJECT_ITEM_TYPES.has(req.params.type);
+    await col(req.params.type).updateOne(
+      { userId: '__master__' },
+      isObjectType ? { $pull: { items: { key } } } : { $pull: { items: key } }
+    );
+    await bumpMasterVersion();
+
+    if (req.params.type === 'KITCHEN_LABELS') {
+      await Promise.all(
+        ['RECIPE_LIST', 'DISH_LIST'].map((t) =>
+          col(t).updateMany({ userId: { $ne: '__master__' } }, { $pull: { labels_: key, autoLabels_: key } })
+        )
+      );
+    } else if (req.params.type === 'KITCHEN_COURSES') {
+      await Promise.all(
+        ['RECIPE_LIST', 'DISH_LIST'].map((t) =>
+          col(t).updateMany({ userId: { $ne: '__master__' }, course_: key }, { $set: { course_: '' } })
+        )
+      );
+    } else if (req.params.type === 'KITCHEN_CATEGORIES') {
+      await col('PRODUCT_LIST').updateMany({ userId: { $ne: '__master__' } }, { $pull: { categories_: key } });
+    } else if (req.params.type === 'KITCHEN_ALLERGENS') {
+      await col('PRODUCT_LIST').updateMany({ userId: { $ne: '__master__' } }, { $pull: { allergens_: key } });
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[data/registry-delete-master]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// PUT /api/v1/data/DICTIONARY_OVERRIDES/global
+//
+// Plan 322 M4: the shared Hebrew-dictionary override layer every client merges
+// in at runtime (dictionary.json base -> this global doc -> the caller's own
+// personal DICTIONARY_OVERRIDES doc, read through the normal GET /:type route).
+// Stored as a single doc under the reserved pseudo-user '__global__', same
+// idiom as '__master__' elsewhere in this file — but unlike '__master__' (a
+// signup-time clone template), this doc is read live by every request, so a
+// write here reaches every existing user immediately, not just future signups.
+// The matching GET is defined earlier, above, next to GET /:type/:id — Express
+// route-ordering requires it there (see that route's own comment).
+//
+// Defined BEFORE the generic `PUT /:type/:id` route below for the same
+// Express route-ordering reason as registry-rename-master above.
+// ---------------------------------------------------------------------------
+router.put('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    const { key, hebrewLabel } = req.body || {};
+    if (typeof key !== 'string' || typeof hebrewLabel !== 'string' || !key.trim() || !hebrewLabel.trim()) {
+      return res.status(400).json({ error: 'key and hebrewLabel are required strings' });
+    }
+    const normalizedKey = key.trim().toLowerCase();
+    await col('DICTIONARY_OVERRIDES').updateOne(
+      { userId: '__global__' },
+      { $set: { [`items.${normalizedKey}`]: hebrewLabel.trim() } },
+      { upsert: true }
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[data/dictionary-global-put]', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -303,70 +495,231 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
 // Without this, :type is attacker-controlled and reaches col() unchecked.
 const PUSHABLE_TYPES = new Set(['RECIPE_LIST', 'DISH_LIST', 'PRODUCT_LIST', 'KITCHEN_SUPPLIERS', 'EQUIPMENT_LIST']);
 
-router.put('/:type/:id/push-to-master', verifyToken, async (req, res) => {
+// Plan 322 M9: pushes one doc to __master__, recursively pushing along any
+// referenced RECIPE_LIST/DISH_LIST/PRODUCT_LIST ingredient that has never
+// itself been pushed — otherwise a recipe pushed to everyone could arrive
+// for other users with an ingredient row pointing at a referenceId that only
+// ever existed in the pushing user's own account (a brand-new product they
+// never separately pushed). `visited` guards against a circular sub-recipe
+// reference recursing forever; a doc already in it is left as-is rather than
+// re-pushed. Returns the resolved __master__ _id, or null if the doc isn't
+// the caller's own (or doesn't exist) — callers treat null as "leave as-is".
+async function pushDocToMasterRecursive(type, id, userId, visited) {
+  const key = `${type}:${id}`;
+  if (visited.has(key)) return null;
+  visited.add(key);
+
+  const existing = await col(type).findOne({ _id: id, userId, _userDeleted: { $ne: true } });
+  if (!existing) return null;
+  if (typeof existing._masterId !== 'string') return null;
+
+  const ingredients = Array.isArray(existing.ingredients_) ? existing.ingredients_ : [];
+  const ingredients_ = await Promise.all(
+    ingredients.map(async (ing) => {
+      if (typeof ing.referenceId !== 'string' || !ing.referenceId) return ing;
+      const lookupTypes = ing.type === 'recipe' ? ['RECIPE_LIST', 'DISH_LIST'] : ['PRODUCT_LIST'];
+      for (const t of lookupTypes) {
+        const ref = await col(t).findOne(
+          { _id: ing.referenceId, userId },
+          { projection: { _masterId: 1, _id: 1 } }
+        );
+        if (!ref) continue;
+        if (typeof ref._masterId === 'string' && ref._masterId !== ref._id) {
+          // Already linked to a real, previously-pushed master doc.
+          return { ...ing, referenceId: ref._masterId };
+        }
+        // Never pushed (self-linked or missing _masterId) — push it now so the
+        // master copy doesn't end up with a referenceId nobody else can resolve.
+        const pushedId = await pushDocToMasterRecursive(t, ref._id, userId, visited);
+        return { ...ing, referenceId: pushedId ?? ing.referenceId };
+      }
+      return ing;
+    })
+  );
+
+  const { userId: _u, _masterId: _m, _userModified: _um, _id: _i, ...safeBody } = existing;
+  // 2026-09-30 fix (take 2): every new doc self-links (_masterId = its own _id, see POST
+  // above). A naive upsert with that same _id fails — `_id` is uniquely indexed across the
+  // WHOLE collection regardless of userId, and that exact _id is already taken by the
+  // caller's own document. The first push for a self-linked doc must INSERT the master copy
+  // under a FRESH _id, then re-point the caller's own _masterId at it (same shape a
+  // clone-at-signup doc already has: _id and _masterId differing, _masterId pointing at the
+  // real shared document). Only a doc that was already itself cloned FROM an existing master
+  // item (_masterId !== _id) can go straight to update.
+  const isFirstPush = existing._masterId === existing._id;
+  let resolvedMasterId = existing._masterId;
+  if (isFirstPush) {
+    resolvedMasterId = makeId();
+    await col(type).insertOne({
+      ...safeBody,
+      ingredients_,
+      _id: resolvedMasterId,
+      userId: '__master__',
+      _masterId: resolvedMasterId,
+      _userModified: false
+    });
+  } else {
+    const result = await col(type).updateOne(
+      { _id: resolvedMasterId, userId: '__master__' },
+      { $set: { ...safeBody, ingredients_ } }
+    );
+    if (result.matchedCount === 0) return null;
+  }
+
+  // Re-point the caller's own doc at the (possibly newly-created) master _id and clear
+  // _userModified. A normal PUT sets _userModified true, and sync-master's Rule 3 then skips
+  // that clone forever — so without this the user would publish their change to everyone and
+  // simultaneously opt themselves out of every future master update. Their copy already
+  // matches master, so letting Rule 2 manage it again is both safe and correct.
+  await col(type).updateOne({ _id: id, userId }, { $set: { _masterId: resolvedMasterId, _userModified: false } });
+
+  return resolvedMasterId;
+}
+
+router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, res) => {
   try {
     if (!PUSHABLE_TYPES.has(req.params.type)) {
       return res.status(400).json({ error: `Type ${req.params.type} cannot be pushed to master` });
-    }
-    const existing = await col(req.params.type).findOne({
-      _id: req.params.id,
-      userId: req.user.userId,
-      _userDeleted: { $ne: true },
-    });
-    if (!existing) {
-      return res.status(404).json({ error: `Cannot push, item ${req.params.id} does not exist` });
     }
     // _masterId / referenceId are read back out of Mongo, but they originally
     // entered through a client-supplied body (POST's `_id`, PUT's `ingredients_`),
     // neither of which type-checks them. An object like { $ne: null } stored there
     // earlier would become a query *operator* rather than a value below — so
-    // require plain strings before using either one in a selector.
-    if (typeof existing._masterId !== 'string') {
+    // require plain strings before using either one in a selector. Checked once
+    // up front here (pushDocToMasterRecursive re-checks internally too, for the
+    // recursive calls it makes on referenced products/sub-recipes).
+    const preCheck = await col(req.params.type).findOne(
+      { _id: req.params.id, userId: req.user.userId, _userDeleted: { $ne: true } },
+      { projection: { _masterId: 1 } }
+    );
+    if (!preCheck) {
+      return res.status(404).json({ error: `Cannot push, item ${req.params.id} does not exist` });
+    }
+    if (typeof preCheck._masterId !== 'string') {
       return res.status(400).json({ error: 'This item has no linked master recipe to update' });
     }
 
-    // Reverse-remap ingredient referenceIds: this user's clone points at their own
-    // product/sub-recipe ids — the master doc needs the corresponding master ids.
-    // Best-effort: if a referenced doc has no _masterId (user's own custom item,
-    // never itself pushed to master), leave the referenceId as-is.
-    const ingredients = Array.isArray(existing.ingredients_) ? existing.ingredients_ : [];
-    const ingredients_ = await Promise.all(
-      ingredients.map(async (ing) => {
-        if (typeof ing.referenceId !== 'string' || !ing.referenceId) return ing;
-        const lookupTypes = ing.type === 'recipe' ? ['RECIPE_LIST', 'DISH_LIST'] : ['PRODUCT_LIST'];
-        for (const t of lookupTypes) {
-          const ref = await col(t).findOne(
-            { _id: ing.referenceId, userId: req.user.userId },
-            { projection: { _masterId: 1 } }
-          );
-          if (ref) {
-            return { ...ing, referenceId: typeof ref._masterId === 'string' ? ref._masterId : ing.referenceId };
-          }
-        }
-        return ing;
-      })
+    const resolvedMasterId = await pushDocToMasterRecursive(
+      req.params.type,
+      req.params.id,
+      req.user.userId,
+      new Set()
     );
-
-    const { userId: _u, _masterId: _m, _userModified: _um, _id: _i, ...safeBody } = existing;
-    await col(req.params.type).updateOne(
-      { _id: existing._masterId, userId: '__master__' },
-      { $set: { ...safeBody, ingredients_ } }
-    );
-
-    // Clear the caller's own _userModified flag. A normal PUT sets it to true,
-    // and sync-master's Rule 3 then skips that clone forever — so without this
-    // the user would publish their change to everyone and simultaneously opt
-    // themselves out of every future master update. Their copy already matches
-    // master, so letting Rule 2 manage it again is both safe and correct.
-    await col(req.params.type).updateOne(
-      { _id: req.params.id, userId: req.user.userId },
-      { $set: { _userModified: false } }
-    );
+    if (!resolvedMasterId) {
+      return res.status(404).json({ error: 'Linked master document no longer exists' });
+    }
 
     await bumpMasterVersion();
-    res.json({ ok: true });
+    res.json({ ok: true, masterId: resolvedMasterId });
   } catch (err) {
     console.error('[data/push-to-master]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// PUT /api/v1/data/:type/:id/delete-from-master
+//
+// Mirror of push-to-master for the delete path (Plan 322 M6). Removes the
+// __master__ copy linked to the caller's own doc (via _masterId) so future/
+// unsynced signups stop receiving it. Does NOT touch other users' already-
+// cloned copies of this recipe/dish, and does NOT delete the caller's own
+// doc either — that still goes through the normal DELETE /:type/:id route;
+// this is only the "also retire it from the shared list" half of the choice.
+// Recipes/dishes only (categories/allergens/etc. have no per-item trash
+// concept the way RECIPE_LIST/DISH_LIST do). Same open-to-any-signed-in-user
+// tradeoff as push-to-master, for the same reason.
+// ---------------------------------------------------------------------------
+const DELETABLE_FROM_MASTER_TYPES = new Set(['RECIPE_LIST', 'DISH_LIST', 'PRODUCT_LIST']);
+const MASTER_TRASH_KEY = { RECIPE_LIST: 'TRASH_RECIPES', DISH_LIST: 'TRASH_DISHES', PRODUCT_LIST: 'TRASH_PRODUCTS' };
+
+router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    if (!DELETABLE_FROM_MASTER_TYPES.has(req.params.type)) {
+      return res.status(400).json({ error: `Type ${req.params.type} cannot be removed from master` });
+    }
+    const existing = await col(req.params.type).findOne({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
+    if (!existing) {
+      return res.status(404).json({ error: `Item ${req.params.id} not found` });
+    }
+    if (typeof existing._masterId !== 'string') {
+      return res.status(400).json({ error: 'This item has no linked master copy to remove' });
+    }
+
+    const masterDoc = await col(req.params.type).findOne({ _id: existing._masterId, userId: '__master__' });
+    if (masterDoc) {
+      const trashKey = MASTER_TRASH_KEY[req.params.type];
+      await col(trashKey).insertOne({ ...masterDoc, deletedAt: Date.now() });
+      await col(req.params.type).deleteOne({ _id: existing._masterId, userId: '__master__' });
+      await bumpMasterVersion();
+    }
+    // masterDoc already gone (e.g. removed by a previous call) — treat as success, nothing to do.
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[data/delete-from-master]', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// PUT /api/v1/data/:type/:id/purge-ingredient-everywhere
+//
+// Plan 322 M8. PRODUCT_LIST only. Explicitly Human-requested, dev-only,
+// higher-risk than delete-from-master above: strips this product's ingredient
+// line out of every OTHER user's own RECIPE_LIST/DISH_LIST docs, not just the
+// shared __master__ copy. Nothing else in this codebase reaches into another
+// user's own documents from one user's action — this is a deliberate,
+// explicitly-requested exception for local development use, not a general
+// pattern to reuse elsewhere.
+//
+// Each user's own product clone gets its OWN _id at signup (clone-master.js
+// generates a fresh _id per user, linked back via _masterId) — so "the same
+// product" across users is identified by _masterId, and each affected user's
+// recipes/dishes are pulled using THAT user's own product _id, never the
+// caller's _id directly.
+// ---------------------------------------------------------------------------
+const PURGE_EVERYWHERE_TYPES = new Set(['PRODUCT_LIST']);
+
+router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    if (!PURGE_EVERYWHERE_TYPES.has(req.params.type)) {
+      return res.status(400).json({ error: `Type ${req.params.type} does not support purge-ingredient-everywhere` });
+    }
+    const existing = await col(req.params.type).findOne({
+      _id: req.params.id,
+      userId: req.user.userId,
+    });
+    if (!existing) {
+      return res.status(404).json({ error: `Item ${req.params.id} not found` });
+    }
+    if (typeof existing._masterId !== 'string') {
+      // Nothing shared to trace other users' clones back to — nothing to purge.
+      return res.json({ ok: true, usersAffected: 0 });
+    }
+
+    const otherClones = await col('PRODUCT_LIST')
+      .find({ _masterId: existing._masterId, userId: { $nin: ['__master__', req.user.userId] } })
+      .project({ _id: 1, userId: 1 })
+      .toArray();
+
+    await Promise.all(
+      otherClones.flatMap((clone) =>
+        ['RECIPE_LIST', 'DISH_LIST'].map((ingredientType) =>
+          col(ingredientType).updateMany(
+            { userId: clone.userId, 'ingredients_.referenceId': clone._id },
+            { $pull: { ingredients_: { referenceId: clone._id } } }
+          )
+        )
+      )
+    );
+
+    res.json({ ok: true, usersAffected: otherClones.length });
+  } catch (err) {
+    console.error('[data/purge-ingredient-everywhere]', err);
     res.status(500).json({ error: 'Server error' });
   }
 });

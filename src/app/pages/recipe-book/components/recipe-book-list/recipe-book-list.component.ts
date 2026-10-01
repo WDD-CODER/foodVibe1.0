@@ -261,7 +261,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       Type: 'type',
       Allergens: 'allergens',
       Approved: 'approved',
-      Station: 'station'
+      Station: 'station',
+      Course: 'course'
     }
     return map[internalName] ?? internalName.toLowerCase()
   }
@@ -314,6 +315,9 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
       const station = (recipe.default_station_ || '').trim() || '_none'
       bump('Station', station)
+
+      const course = (recipe.course_ || '').trim() || '_none'
+      bump('Course', course)
     })
 
     // Always show both Approved options (כן/לא), even at 0, so the sidebar can show
@@ -330,6 +334,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     const optionLabel = (name: string, value: string): string => {
       if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no'
       if (name === 'Station' && value === '_none') return 'no_station'
+      if (name === 'Course' && value === '_none') return 'no_course'
       return value
     }
 
@@ -395,6 +400,9 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
           } else if (category === 'Station') {
             const st = (recipe.default_station_ || '').trim() || '_none'
             recipeValues = [st]
+          } else if (category === 'Course') {
+            const c = (recipe.course_ || '').trim() || '_none'
+            recipeValues = [c]
           }
           return selectedValues.some((v) => recipeValues.includes(v))
         })
@@ -805,10 +813,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected async onDeleteRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
     if (!(await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' }))) return
+    const scope = await this.masterPush.askDeleteScope(recipe)
+    if (scope === 'cancel') return
     this.deletingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
       next: () => {
         this.deletingId_.set(null)
+        if (scope === 'everyone') this.masterPush.deleteFromMaster(recipe)
       },
       error: () => {
         this.deletingId_.set(null)
@@ -844,10 +855,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected async onRemoveRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
     if (!(await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' }))) return
+    const scope = await this.masterPush.askDeleteScope(recipe)
+    if (scope === 'cancel') return
     this.removingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
       next: () => {
         this.removingId_.set(null)
+        if (scope === 'everyone') this.masterPush.deleteFromMaster(recipe)
       },
       error: () => {
         this.removingId_.set(null)
@@ -890,8 +904,17 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     if (!this.requireAuthService.requireAuth()) return
     if (!(await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' }))) return
     const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''))
+    // Asked once for the whole selection, matching onBulkEdit's shape — passing the
+    // first master-linked recipe is enough since askDeleteScope only inspects _masterId.
+    const scope = await this.masterPush.askDeleteScope(recipes.find((r) => r._masterId))
+    if (scope === 'cancel') return
     recipes.forEach((recipe) => {
-      this.kitchenState.deleteRecipe(recipe).subscribe({ next: () => {}, error: () => {} })
+      this.kitchenState.deleteRecipe(recipe).subscribe({
+        next: () => {
+          if (scope === 'everyone' && recipe._masterId) this.masterPush.deleteFromMaster(recipe)
+        },
+        error: () => {}
+      })
     })
     this.selection.clear()
   }

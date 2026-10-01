@@ -43,6 +43,7 @@ testem.log
 
 # Worktree port assignment
 .worktree-port
+.worktree-root
 # Worktree remote cleanup breadcrumb (processed by github-sync on next main session)
 .worktree-cleanup
 # Planner-Worker slot state (plan 326) — per-slot, never shared across machines
@@ -148,6 +149,8 @@ apply-*.js
 # locally with scripts/audit-labels.mjs instead of committing it. report.md (summary
 # tables/counts only) still gets tracked.
 .claude/reports/label-audit/data.json
+.claude/reports/label-audit/merge-log-*.json
+.claude/reports/label-audit/migrate-courses-log-*.json
 
 # Session manifests — per-session runtime state, never commit
 .claude/sessions/

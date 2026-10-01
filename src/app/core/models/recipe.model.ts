@@ -56,6 +56,8 @@ export interface Recipe {
   logistics_?: DishLogistics
   /** User-chosen labels (keys from label registry) */
   labels_?: string[]
+  /** Single-select course/category (key from course registry) */
+  course_?: string
   /** Auto-applied labels from ingredient categories/allergens (computed on save) */
   autoLabels_?: string[]
   /** Epoch ms when the recipe/dish was first added (set on create, preserved on update) */

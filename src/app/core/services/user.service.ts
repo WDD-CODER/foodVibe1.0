@@ -89,7 +89,11 @@ export class UserService {
         import('./preparation-registry.service').then((m) => {
           const s = this.injector.get(m.PreparationRegistryService)
           return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
-        })
+        }),
+        // Plan 322 M4: the dictionary's global/personal server overrides are fetched once at
+        // APP_INITIALIZER time (before login, so unauthenticated) — refresh here so a login
+        // mid-session picks up this user's actual overrides without a full page reload.
+        import('./translation.service').then((m) => this.injector.get(m.TranslationService).loadGlobalDictionary())
       ])
     } finally {
       this._isDataReloading_.set(false)

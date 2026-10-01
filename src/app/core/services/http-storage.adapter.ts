@@ -171,11 +171,91 @@ export class HttpStorageAdapter {
    * user on next sync. Open to any signed-in user for now — restrict/remove
    * once this dev pass is done.
    */
-  async pushToMaster(entityType: string, entityId: string): Promise<void> {
-    await firstValueFrom(
-      this.http.put<unknown>(
+  async pushToMaster(entityType: string, entityId: string): Promise<{ masterId: string }> {
+    return firstValueFrom(
+      this.http.put<{ ok: boolean; masterId: string }>(
         `${this.base}/api/v1/data/${entityType}/${entityId}/push-to-master`,
         {},
+        { headers: this.headers(), withCredentials: true }
+      )
+    )
+  }
+
+  /** Mirror of pushToMaster for the delete path: removes the caller's linked
+   *  __master__ copy so future/unsynced users stop receiving it. */
+  async deleteFromMaster(entityType: string, entityId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.put<unknown>(
+        `${this.base}/api/v1/data/${entityType}/${entityId}/delete-from-master`,
+        {},
+        { headers: this.headers(), withCredentials: true }
+      )
+    )
+  }
+
+  /** Plan 322 M8: strips a deleted product's ingredient line from every OTHER user's
+   *  own recipes/dishes that reference their own cloned copy of the same shared
+   *  product. Products only, dev-only, Human-requested — reaches into other users'
+   *  own documents, unlike deleteFromMaster above. */
+  async purgeProductIngredientEverywhere(entityType: string, entityId: string): Promise<void> {
+    await firstValueFrom(
+      this.http.put<unknown>(
+        `${this.base}/api/v1/data/${entityType}/${entityId}/purge-ingredient-everywhere`,
+        {},
+        { headers: this.headers(), withCredentials: true }
+      )
+    )
+  }
+
+  /** Plan 322: renames (or adds, if `oldKey` isn't already in master) a key in __master__'s own
+   *  registry doc, so future signups get it too. Same open-to-any-signed-in-user tradeoff as
+   *  pushToMaster above. */
+  async pushRegistryRenameToMaster(
+    entityType: string,
+    oldKey: string,
+    newKey: string,
+    itemData?: { color?: string; autoTriggers?: string[] }
+  ): Promise<void> {
+    await firstValueFrom(
+      this.http.put<unknown>(
+        `${this.base}/api/v1/data/${entityType}/registry-rename-master`,
+        { oldKey, newKey, itemData },
+        { headers: this.headers(), withCredentials: true }
+      )
+    )
+  }
+
+  /** Plan 322 M10: mirror of pushRegistryRenameToMaster above, for DELETE. Removes `key` from
+   *  __master__'s own registry doc, and — same dev-only, Human-requested cross-user exception as
+   *  purgeProductIngredientEverywhere above — also strips it from every other user's own
+   *  recipes/dishes/products. */
+  async pushRegistryDeleteToMaster(entityType: string, key: string): Promise<void> {
+    await firstValueFrom(
+      this.http.put<unknown>(
+        `${this.base}/api/v1/data/${entityType}/registry-delete-master`,
+        { key },
+        { headers: this.headers(), withCredentials: true }
+      )
+    )
+  }
+
+  /** Plan 322 M4: the shared '__global__' Hebrew-dictionary override layer (admin-writable, everyone reads). */
+  async getGlobalDictionaryOverrides(): Promise<Record<string, string>> {
+    const { items } = await firstValueFrom(
+      this.http.get<{ items: Record<string, string> }>(`${this.base}/api/v1/data/DICTIONARY_OVERRIDES/global`, {
+        headers: this.headers(),
+        withCredentials: true
+      })
+    )
+    return items
+  }
+
+  /** Plan 322 M4: admin-only — upserts one key/label pair into the shared global override doc. */
+  async putGlobalDictionaryOverride(key: string, hebrewLabel: string): Promise<void> {
+    await firstValueFrom(
+      this.http.put<unknown>(
+        `${this.base}/api/v1/data/DICTIONARY_OVERRIDES/global`,
+        { key, hebrewLabel },
         { headers: this.headers(), withCredentials: true }
       )
     )

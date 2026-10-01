@@ -1,23 +1,32 @@
 @if (modal.isOpen_()) {
   <div class="c-modal-overlay" (click)="resetAndClose()">
-    <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
-      <h3>{{ 'add_new_label' | translatePipe }}</h3>
+    <div
+      class="c-modal-card c-modal-card--md"
+      dir="rtl"
+      (click)="$event.stopPropagation()"
+      (clickOutside)="resetAndClose()"
+    >
+      <h3>{{ titleKey_() | translatePipe }}</h3>
 
       <div class="c-modal-body">
         <div class="c-input-stack full-width">
           <label>{{ 'label_name_hebrew' | translatePipe }}</label>
-          <input type="text"
-                 [ngModel]="modal.hebrewLabel_()"
-                 (ngModelChange)="modal.hebrewLabel_.set($event)"
-                 [placeholder]="'label_name_example_placeholder' | translatePipe" />
+          <input
+            type="text"
+            [ngModel]="modal.hebrewLabel_()"
+            (ngModelChange)="modal.hebrewLabel_.set($event)"
+            [placeholder]="'label_name_example_placeholder' | translatePipe"
+          />
         </div>
         <div class="c-input-stack full-width">
           <label>{{ 'english_key_example_label' | translatePipe }}</label>
-          <input type="text"
-                 [ngModel]="englishKey_()"
-                 (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
-                 placeholder="dairy"
-                 (keydown.enter)="save()" />
+          <input
+            type="text"
+            [ngModel]="englishKey_()"
+            (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
+            placeholder="dairy"
+            (keydown.enter)="save()"
+          />
           @if (validationError_()) {
             <span class="label-creation-validation-error">{{ validationError_() }}</span>
           }
@@ -26,11 +35,13 @@
           <label>{{ 'label_color' | translatePipe }}</label>
           <div class="color-swatches">
             @for (c of palette; track c) {
-              <button type="button"
-                      class="color-swatch"
-                      [style.background-color]="c"
-                      [class.selected]="modal.selectedColor_() === c"
-                      (click)="selectColor(c)">
+              <button
+                type="button"
+                class="color-swatch"
+                [style.background-color]="c"
+                [class.selected]="modal.selectedColor_() === c"
+                (click)="selectColor(c)"
+              >
                 @if (modal.selectedColor_() === c) {
                   <span class="check" aria-hidden="true">✓</span>
                 }
@@ -43,9 +54,7 @@
           <div class="trigger-checklist">
             @for (opt of triggerOptions_(); track opt.value) {
               <label class="trigger-option">
-                <input type="checkbox"
-                       [checked]="isTriggerSelected(opt.value)"
-                       (change)="toggleTrigger(opt.value)" />
+                <input type="checkbox" [checked]="isTriggerSelected(opt.value)" (change)="toggleTrigger(opt.value)" />
                 <span>{{ opt.value | translatePipe }}</span>
               </label>
             }
@@ -58,9 +67,12 @@
 
       <div class="c-modal-actions">
         <button type="button" class="c-btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
-        <button type="button" class="c-btn-primary"
-                (click)="save()"
-                [disabled]="!englishKey_().trim() || !modal.hebrewLabel_().trim()">
+        <button
+          type="button"
+          class="c-btn-primary"
+          (click)="save()"
+          [disabled]="!englishKey_().trim() || !modal.hebrewLabel_().trim()"
+        >
           {{ 'save_label' | translatePipe }}
         </button>
       </div>

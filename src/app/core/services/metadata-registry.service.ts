@@ -6,7 +6,8 @@ import { StorageService, type EntityId } from './async-storage.service'
 import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
-import type { LabelDefinition } from '@models/label.model'
+import { LABEL_COLOR_PALETTE, type LabelDefinition } from '@models/label.model'
+import type { CourseDefinition } from '@models/course.model'
 import { type MenuTypeDefinition, type DishFieldKey, DEFAULT_DISH_FIELDS } from '@models/menu-event.model'
 
 /** Single-document registry shape returned by storage for metadata keys. */
@@ -17,6 +18,78 @@ interface RegistryDoc<T> {
 
 /** Payload for put/post (must extend EntityId). */
 type RegistryPayload<T> = EntityId & { items: T[] }
+
+/**
+ * Course/category strings seeded on first load, per userId. Sourced from Plan 319's live
+ * label audit (.claude/reports/label-audit/data.json) — every distinct orphan string that
+ * was NOT one of the genuine dietary-label duplicates merged in Plan 320 Milestone 1.
+ * Kept as-is (no course x protein-type split) per product decision.
+ */
+const DEFAULT_COURSES = [
+  'amuse_bouche',
+  'bakery',
+  'bread_focaccia_savory_baking',
+  'cakes_cookies_tarts',
+  'charcuterie_meat_mass_meat_preps',
+  'conversions_and_techniques',
+  'dan_and_adi_cooking_from_the_orchard',
+  'dan_and_adi_dishes_from_the_orchard',
+  'desserts',
+  'fermentation_curing_pickling',
+  'fish_shellfish_sauce',
+  'foams_hot_cold',
+  'general_preps',
+  'grains_side_dish',
+  'ideas_dishes',
+  'ideas_preparations',
+  'jams_sweet_preps_syrup',
+  'legume_side_dish',
+  'main_dish_chicken',
+  'main_dish_fish',
+  'main_dish_meat',
+  'main_dish_vegetarian',
+  'main_seafood',
+  'meat_sauce',
+  'oils_and_infusions',
+  'pasta_dish',
+  'pasta_prep',
+  'pastry_sweets',
+  'pork_dish',
+  'powders_spice_mixes_dry_preps',
+  'pre_dessert',
+  'salad_sauce',
+  'salads',
+  'salads_fresh_side_dish',
+  'salty_baking_doughs',
+  'sauces_cold_hot_savory',
+  'side_dish',
+  'sorbet_ice_cream_granita',
+  'soups',
+  'soups_stocks_cooking_liquids',
+  'soups_up',
+  'special_for_boss',
+  'special_main_for_boss',
+  'special_starter_for_boss',
+  'spreads_dips_salty_creams',
+  'starch_side_dish',
+  'starter',
+  'starter_chicken',
+  'starter_fish',
+  'starter_meat',
+  'starter_seafood',
+  'starter_vegetarian',
+  'stews_cookery',
+  'sweet_baking_doughs',
+  'sweet_creams_custards_mousse',
+  'sweet_sauce',
+  'trash_category',
+  'vegetable_side_dish',
+  'vegetables_snacks_add_ons',
+  'vinaigrettes_mayonnaise_emulsion',
+  'גלייז',
+  'סלט',
+  'רוטב'
+]
 
 @Injectable({ providedIn: 'root' })
 export class MetadataRegistryService {
@@ -31,12 +104,14 @@ export class MetadataRegistryService {
   private categories_ = signal<string[]>([])
   private allergens_ = signal<string[]>([])
   private labels_ = signal<LabelDefinition[]>([])
+  private courseDefs_ = signal<CourseDefinition[]>([])
   private menuTypes_ = signal<MenuTypeDefinition[]>([])
 
   //PUBLIC SIGNALS
   public allCategories_ = this.categories_.asReadonly()
   public allAllergens_ = this.allergens_.asReadonly()
   public allLabels_ = this.labels_.asReadonly()
+  public courses_ = this.courseDefs_.asReadonly()
   public allMenuTypes_ = this.menuTypes_.asReadonly()
 
   private initPromise_: Promise<void> | null = null
@@ -112,7 +187,21 @@ export class MetadataRegistryService {
       // 3. Fetch Labels (recipe labels with color + optional auto-triggers)
       await this.reloadLabelsFromStorage()
 
-      // 4. Fetch Menu Types (serving-style config with dish-row fields)
+      // 4. Fetch Courses (recipe course/category, single-select) — seed defaults if empty
+      const courseRegistry = await this.storageService.query<RegistryDoc<CourseDefinition>>('KITCHEN_COURSES')
+      const existingCourses = courseRegistry[0]?.items ?? []
+      if (existingCourses.length === 0) {
+        const seeded = DEFAULT_COURSES.map((key, i) => ({
+          key,
+          color: LABEL_COLOR_PALETTE[i % LABEL_COLOR_PALETTE.length]
+        }))
+        await this.persistRegistry('KITCHEN_COURSES', seeded)
+        this.courseDefs_.set(seeded)
+      } else {
+        this.courseDefs_.set(existingCourses)
+      }
+
+      // 5. Fetch Menu Types (serving-style config with dish-row fields)
       const defaultMenuTypes: MenuTypeDefinition[] = [
         { key: 'buffet_family', fields: [...DEFAULT_DISH_FIELDS] },
         { key: 'plated_course', fields: [...DEFAULT_DISH_FIELDS] },
@@ -287,6 +376,108 @@ export class MetadataRegistryService {
     }
   }
 
+  async renameLabel(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
+    if (this.labels_().some((l) => l.key === trimmed)) {
+      this.userMsgService.onSetErrorMsg(`התווית "${trimmed}" כבר קיימת`)
+      return
+    }
+    const current = this.labels_()
+    const idx = current.findIndex((l) => l.key === oldKey)
+    if (idx === -1) return
+    const updated = current.slice()
+    updated[idx] = { ...updated[idx], key: trimmed }
+    try {
+      await this.persistRegistry('KITCHEN_LABELS', updated)
+      this.labels_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`התווית שונתה ל-"${trimmed}"`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם התווית')
+      this.logging.error({ event: 'crud.metadata.label.rename_error', message: 'Label rename error', context: { err } })
+    }
+  }
+
+  /** Reload courses from storage (e.g. after demo data load). */
+  async reloadCoursesFromStorage(): Promise<void> {
+    try {
+      const courseRegistry = await this.storageService.query<RegistryDoc<CourseDefinition>>('KITCHEN_COURSES')
+      const items = courseRegistry[0]?.items ?? []
+      this.courseDefs_.set(Array.isArray(items) ? items : [])
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.logging.error({
+        event: 'crud.metadata.courses.hydrate_error',
+        message: 'Failed to load courses',
+        context: { err }
+      })
+    }
+  }
+
+  async registerCourse(name: string): Promise<void> {
+    const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'course')
+    if (!keyToUse) return
+    const sanitized = keyToUse.trim()
+    if (!sanitized || this.courseDefs_().some((c) => c.key === sanitized)) return
+    const usedColors = new Set(this.courseDefs_().map((c) => c.color))
+    const color = LABEL_COLOR_PALETTE.find((c) => !usedColors.has(c)) ?? LABEL_COLOR_PALETTE[0]
+    const updated = [...this.courseDefs_(), { key: sanitized, color }]
+    try {
+      await this.persistRegistry('KITCHEN_COURSES', updated)
+      this.courseDefs_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`סוג מנה "${sanitized}" נוסף בהצלחה`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשמירת סוג המנה')
+      this.logging.error({ event: 'crud.metadata.course.save_error', message: 'Course save error', context: { err } })
+    }
+  }
+
+  async deleteCourse(key: string): Promise<void> {
+    const updated = this.courseDefs_().filter((c) => c.key !== key)
+    try {
+      await this.persistRegistry('KITCHEN_COURSES', updated)
+      this.courseDefs_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`סוג מנה ${key} נמחק בהצלחה`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקת סוג המנה')
+      this.logging.error({
+        event: 'crud.metadata.course.delete_error',
+        message: 'Course delete error',
+        context: { err }
+      })
+    }
+  }
+
+  async renameCourse(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
+    if (this.courseDefs_().some((c) => c.key === trimmed)) {
+      this.userMsgService.onSetErrorMsg(`סוג המנה "${trimmed}" כבר קיים`)
+      return
+    }
+    const current = this.courseDefs_()
+    const idx = current.findIndex((c) => c.key === oldKey)
+    if (idx === -1) return
+    const updated = current.slice()
+    updated[idx] = { ...updated[idx], key: trimmed }
+    try {
+      await this.persistRegistry('KITCHEN_COURSES', updated)
+      this.courseDefs_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`סוג המנה שונה ל-"${trimmed}"`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם סוג המנה')
+      this.logging.error({
+        event: 'crud.metadata.course.rename_error',
+        message: 'Course rename error',
+        context: { err }
+      })
+    }
+  }
+
   async purgeGlobalUnit(unitSymbol: string): Promise<void> {
     const affectedProducts = this.productDataService.allProducts_().filter((p) => p.base_unit_ === unitSymbol)
 
@@ -355,6 +546,93 @@ export class MetadataRegistryService {
       this.logging.error({
         event: 'crud.metadata.category.delete_error',
         message: 'Category delete error',
+        context: { err }
+      })
+    }
+  }
+
+  async renameCategory(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
+    if (this.categories_().includes(trimmed)) {
+      this.userMsgService.onSetErrorMsg(`הקטגוריה "${trimmed}" כבר קיימת`)
+      return
+    }
+    const current = this.categories_()
+    if (!current.includes(oldKey)) return
+    const updated = current.map((c) => (c === oldKey ? trimmed : c))
+    try {
+      await this.persistRegistry('KITCHEN_CATEGORIES', updated)
+      this.categories_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`הקטגוריה שונתה ל-"${trimmed}"`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם הקטגוריה')
+      this.logging.error({
+        event: 'crud.metadata.category.rename_error',
+        message: 'Category rename error',
+        context: { err }
+      })
+    }
+  }
+
+  /** Plan 322 (+ M4 fix, 2026-09-30): pushes this item into __master__'s own registry doc —
+   *  renames it in place if master already has `oldKey`, otherwise ADDS it as a new entry
+   *  (upsert). The plain rename-only version silently 404'd for any label/course the admin
+   *  created themselves and never pushed before, which is the common case, not an edge case —
+   *  "save for everyone" must work for a brand-new item too, not just a correction to one
+   *  master already had. `itemData` carries color/autoTriggers for the object-shaped registries
+   *  (label/course) so a first-time add doesn't lose them; category/allergen are plain strings. */
+  async pushRegistryRenameToMaster(
+    type: 'label' | 'course' | 'category' | 'allergen',
+    oldKey: string,
+    newKey: string,
+    itemData?: { color?: string; autoTriggers?: string[] }
+  ): Promise<void> {
+    const entityType = {
+      label: 'KITCHEN_LABELS',
+      course: 'KITCHEN_COURSES',
+      category: 'KITCHEN_CATEGORIES',
+      allergen: 'KITCHEN_ALLERGENS'
+    }[type]
+    await this.storageService.pushRegistryRenameToMaster(entityType, oldKey, newKey, itemData)
+  }
+
+  /** Plan 322 M10: mirror of pushRegistryRenameToMaster above, for DELETE. Removes `key` from
+   *  __master__'s own registry doc, then (per Human's explicit 2026-09-30 decision, same class
+   *  of cross-user operation as M8's purgeProductIngredientEverywhere) also strips it from every
+   *  OTHER user's own recipes/dishes/products. Dev-only, deliberate exception — see the server
+   *  route's own comment. */
+  async pushRegistryDeleteToMaster(type: 'label' | 'course' | 'category' | 'allergen', key: string): Promise<void> {
+    const entityType = {
+      label: 'KITCHEN_LABELS',
+      course: 'KITCHEN_COURSES',
+      category: 'KITCHEN_CATEGORIES',
+      allergen: 'KITCHEN_ALLERGENS'
+    }[type]
+    await this.storageService.pushRegistryDeleteToMaster(entityType, key)
+  }
+
+  async renameAllergen(oldKey: string, newKey: string): Promise<void> {
+    const trimmed = newKey.trim()
+    if (!trimmed || trimmed === oldKey) return
+    if (this.allergens_().includes(trimmed)) {
+      this.userMsgService.onSetErrorMsg(`האלרגן "${trimmed}" כבר קיים`)
+      return
+    }
+    const current = this.allergens_()
+    if (!current.includes(oldKey)) return
+    const updated = current.map((a) => (a === oldKey ? trimmed : a))
+    try {
+      await this.persistRegistry('KITCHEN_ALLERGENS', updated)
+      this.allergens_.set(updated)
+      this.userMsgService.onSetSuccessMsg(`האלרגן שונה ל-"${trimmed}"`)
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.userMsgService.onSetErrorMsg('שגיאה בשינוי שם האלרגן')
+      this.logging.error({
+        event: 'crud.metadata.allergen.rename_error',
+        message: 'Allergen rename error',
         context: { err }
       })
     }

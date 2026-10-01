@@ -1,175 +1,221 @@
 <div class="header-dashboard-container" [formGroup]="form()" dir="rtl">
-    <div class="image-square" [class.is-readonly]="readonlyMode()">
-        <label class="img-upload-label">
-            <img [src]="imageUrl() || placeholderPath" class="header-img" alt="" />
-            @if (!imageUrl()) {
-                <span class="img-upload-prompt">
-                    <lucide-icon name="camera" [size]="20" />
-                </span>
-            }
-            @if (!readonlyMode()) {
-                <span class="img-upload-hover-overlay">
-                    <lucide-icon name="camera" [size]="18" />
-                </span>
-                <input type="file" accept="image/*" class="img-file-input" (change)="onImageSelected($event)" />
-            }
-        </label>
+  <div class="image-square" [class.is-readonly]="readonlyMode()">
+    <label class="img-upload-label">
+      <img [src]="imageUrl() || placeholderPath" class="header-img" alt="" />
+      @if (!imageUrl()) {
+        <span class="img-upload-prompt">
+          <lucide-icon name="camera" [size]="20" />
+        </span>
+      }
+      @if (!readonlyMode()) {
+        <span class="img-upload-hover-overlay">
+          <lucide-icon name="camera" [size]="18" />
+        </span>
+        <input type="file" accept="image/*" class="img-file-input" (change)="onImageSelected($event)" />
+      }
+    </label>
+  </div>
+
+  <div class="center-controls">
+    <div class="top-row">
+      <button
+        type="button"
+        (click)="toggleTypeWrapper()"
+        class="type-toggle-btn"
+        [class.dish-mode]="yield.currentRecipeTypeDisplay_() === 'dish'"
+      >
+        {{ yield.currentRecipeTypeDisplay_() | translatePipe }}
+      </button>
+
+      <div class="recipe-name-wrap">
+        <input
+          formControlName="name_hebrew"
+          [placeholder]="
+            ((yield.currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder')
+              | translatePipe) + '...'
+          "
+          class="recipe-name-input"
+          [class.has-error]="form().get('name_hebrew')?.invalid && form().get('name_hebrew')?.touched"
+          [class.c-input--invalid]="validationErrors_()['name_hebrew']"
+          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null"
+        />
+        @if (form().get('name_hebrew')?.errors?.['duplicateName'] && form().get('name_hebrew')?.touched) {
+          <span class="name-error-msg">{{
+            (yield.currentRecipeTypeDisplay_() === 'dish' ? 'duplicate_dish_name' : 'duplicate_recipe_name')
+              | translatePipe
+          }}</span>
+        }
+        @if (validationErrors_()['name_hebrew']) {
+          <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
+        }
+      </div>
     </div>
 
-    <div class="center-controls">
-        <div class="top-row">
-            <button type="button"
-                (click)="toggleTypeWrapper()"
-                class="type-toggle-btn"
-                [class.dish-mode]="yield.currentRecipeTypeDisplay_() === 'dish'">
-                {{ yield.currentRecipeTypeDisplay_() | translatePipe }}
-            </button>
+    <app-rating-stars
+      class="header-rating"
+      [value]="rating()"
+      [readonly]="readonlyMode()"
+      size="md"
+      (ratingChange)="ratingChange.emit($event)"
+    />
 
-            <div class="recipe-name-wrap">
-                <input formControlName="name_hebrew"
-                    [placeholder]="((yield.currentRecipeTypeDisplay_() === 'dish' ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe) + '...'"
-                    class="recipe-name-input"
-                    [class.has-error]="form().get('name_hebrew')?.invalid && form().get('name_hebrew')?.touched"
-                    [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-                    [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null" />
-                @if (form().get('name_hebrew')?.errors?.['duplicateName'] && form().get('name_hebrew')?.touched) {
-                    <span class="name-error-msg">{{ (yield.currentRecipeTypeDisplay_() === 'dish' ? 'duplicate_dish_name' : 'duplicate_recipe_name') | translatePipe }}</span>
-                }
-                @if (validationErrors_()['name_hebrew']) {
-                    <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
-                }
-            </div>
+    <div class="scaling-dock-grid">
+      <div
+        class="primary-chip-wrapper"
+        [class.c-input--invalid]="validationErrors_()['yield_amount'] || validationErrors_()['yield_unit']"
+      >
+        <app-scaling-chip
+          variant="primary"
+          [value]="yield.primaryAmount_()"
+          [unit]="yield.primaryUnitLabel_()"
+          [unitOptions]="yield.primaryUnitOptions_()"
+          [minAmount]="yield.currentRecipeTypeDisplay_() === 'dish' ? 1 : 0"
+          [stepOptions]="{ unit: yield.primaryUnitLabel_() }"
+          (valueChange)="onPrimaryAmountChange($event)"
+          (unitChange)="onPrimaryUnitChange($event)"
+          (createUnit)="onCreateUnit()"
+        />
+        @if (yield.currentRecipeTypeDisplay_() !== 'dish' && yield.yieldDiffersFromComputed_()) {
+          <button
+            type="button"
+            class="yield-sync-badge"
+            (click)="yield.resetManualOverride(); $event.stopPropagation()"
+            [title]="'yield_sync_to_total' | translatePipe"
+          >
+            <lucide-icon name="refresh-cw" [size]="12"></lucide-icon>
+          </button>
+        }
+        @if (yield.currentRecipeTypeDisplay_() === 'dish' && yield.isManualOverride_() && savedPortions() !== null) {
+          <button
+            type="button"
+            class="yield-sync-badge"
+            (click)="onResetDishToSaved(); $event.stopPropagation()"
+            [title]="'dish_reset_to_saved' | translatePipe"
+          >
+            <lucide-icon name="refresh-cw" [size]="12"></lucide-icon>
+          </button>
+        }
+        @if (validationErrors_()['yield_amount']) {
+          <span class="c-field-error">{{ 'field_amount_required' | translatePipe }}</span>
+        }
+        @if (validationErrors_()['yield_unit']) {
+          <span class="c-field-error">{{ 'field_unit_required' | translatePipe }}</span>
+        }
+      </div>
+
+      <div class="add-unit-wrapper">
+        <button type="button" class="add-custom-chip" (click)="yield.addSecondaryChipWithDefault()">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+        </button>
+      </div>
+
+      @if (yield.secondaryConversions.length > 0) {
+        <div class="secondary-units-container">
+          @for (group of yield.secondaryConversions; track $index; let chipIdx = $index) {
+            <app-scaling-chip
+              variant="secondary"
+              [value]="group.get('amount')?.value ?? 0"
+              [unit]="group.get('unit')?.value ?? ''"
+              [unitOptions]="yield.getSecondaryUnitOptions(chipIdx)"
+              [showRemove]="true"
+              [stepOptions]="{ unit: group.get('unit')?.value }"
+              (valueChange)="yield.onSecondaryScalingChipAmountChange(chipIdx, $event)"
+              (unitChange)="changeSecondaryUnitWrapper(chipIdx, $event)"
+              (createUnit)="onCreateUnit(chipIdx)"
+              (remove)="yield.removeSecondaryUnit(chipIdx)"
+            />
+          }
         </div>
-
-        <app-rating-stars
-            class="header-rating"
-            [value]="rating()"
-            [readonly]="readonlyMode()"
-            size="md"
-            (ratingChange)="ratingChange.emit($event)" />
-
-        <div class="scaling-dock-grid">
-            <div class="primary-chip-wrapper" [class.c-input--invalid]="validationErrors_()['yield_amount'] || validationErrors_()['yield_unit']">
-                <app-scaling-chip
-                    variant="primary"
-                    [value]="yield.primaryAmount_()"
-                    [unit]="yield.primaryUnitLabel_()"
-                    [unitOptions]="yield.primaryUnitOptions_()"
-                    [minAmount]="yield.currentRecipeTypeDisplay_() === 'dish' ? 1 : 0"
-                    [stepOptions]="{ unit: yield.primaryUnitLabel_() }"
-                    (valueChange)="onPrimaryAmountChange($event)"
-                    (unitChange)="onPrimaryUnitChange($event)"
-                    (createUnit)="onCreateUnit()" />
-                @if (yield.currentRecipeTypeDisplay_() !== 'dish' && yield.yieldDiffersFromComputed_()) {
-                    <button type="button" class="yield-sync-badge"
-                        (click)="yield.resetManualOverride(); $event.stopPropagation()"
-                        [title]="'yield_sync_to_total' | translatePipe">
-                        <lucide-icon name="refresh-cw" [size]="12"></lucide-icon>
-                    </button>
-                }
-                @if (yield.currentRecipeTypeDisplay_() === 'dish' && yield.isManualOverride_() && savedPortions() !== null) {
-                    <button type="button" class="yield-sync-badge"
-                        (click)="onResetDishToSaved(); $event.stopPropagation()"
-                        [title]="'dish_reset_to_saved' | translatePipe">
-                        <lucide-icon name="refresh-cw" [size]="12"></lucide-icon>
-                    </button>
-                }
-                @if (validationErrors_()['yield_amount']) {
-                    <span class="c-field-error">{{ 'field_amount_required' | translatePipe }}</span>
-                }
-                @if (validationErrors_()['yield_unit']) {
-                    <span class="c-field-error">{{ 'field_unit_required' | translatePipe }}</span>
-                }
-            </div>
-
-            <div class="add-unit-wrapper">
-                <button type="button" class="add-custom-chip" (click)="yield.addSecondaryChipWithDefault()">
-                    <lucide-icon name="plus" [size]="16"></lucide-icon>
-                </button>
-            </div>
-
-            @if (yield.secondaryConversions.length > 0) {
-            <div class="secondary-units-container">
-                @for (group of yield.secondaryConversions; track $index; let chipIdx = $index) {
-                <app-scaling-chip
-                    variant="secondary"
-                    [value]="group.get('amount')?.value ?? 0"
-                    [unit]="group.get('unit')?.value ?? ''"
-                    [unitOptions]="yield.getSecondaryUnitOptions(chipIdx)"
-                    [showRemove]="true"
-                    [stepOptions]="{ unit: group.get('unit')?.value }"
-                    (valueChange)="yield.onSecondaryScalingChipAmountChange(chipIdx, $event)"
-                    (unitChange)="changeSecondaryUnitWrapper(chipIdx, $event)"
-                    (createUnit)="onCreateUnit(chipIdx)"
-                    (remove)="yield.removeSecondaryUnit(chipIdx)" />
-                }
-            </div>
-            }
-        </div>
-
-        <app-custom-multi-select
-            class="labels-container"
-            [formControl]="labelsControl"
-            [options]="labelMultiSelectOptions_()"
-            [readonlyChips]="autoLabels()"
-            placeholder="labels"
-            addNewValue="__add_label__"
-            variant="chip"
-            [searchable]="true"
-            [maxHeight]="200"
-            triggerTitle="labels"
-            [clearable]="hasAnyLabelsInContainer_()"
-            (cleared)="clearAllManualLabels()"
-            (addNewChosen)="openCreateLabel($event)" />
+      }
     </div>
 
-    <div class="metrics-square">
-        <div class="metric-group">
-            <span class="label">{{ 'cost' | translatePipe }}</span>
-            <span class="value">₪{{ currentCost() | number:'1.2-2' }}</span>
-        </div>
-        <div class="divider"></div>
-        <div class="metric-group metric-group-weight-volume" (click)="toggleMetricsDisplayMode()"
-            (clickOutside)="closeMetricsNotice()"
-            (mouseenter)="onMetricsNoticeZoneEnter()" (mouseleave)="onMetricsNoticeZoneLeave()">
-            <span class="label">{{ metricsDisplayMode_() === 'weight' ? ('weight' | translatePipe) : ('volume' | translatePipe) }}</span>
-            <span class="value">
-                @if (metricsDisplayMode_() === 'weight') {
-                    {{ totalBrutoWeightG() | number:'1.0-0' }}g
-                } @else {
-                    @if (totalVolumeL() >= 1) {
-                        {{ totalVolumeL() | number:'1.2-2' }} L
-                    } @else {
-                        {{ totalVolumeMl() | number:'1.0-0' }} ml
-                    }
-                }
-            </span>
-            @if (showMetricsNoticeIcon_()) {
-                <span class="metrics-notice-wrap" (click)="$event.stopPropagation(); toggleMetricsNotice()">
-                    <lucide-icon name="alert-circle" class="metrics-notice-icon" [size]="16" [title]="'items_not_convertible' | translatePipe"></lucide-icon>
-                </span>
-                @if (metricsNoticeOpen_()) {
-                    <div class="metrics-notice-floating" (click)="$event.stopPropagation()"
-                        (mouseenter)="onMetricsNoticeZoneEnter()" (mouseleave)="onMetricsNoticeZoneLeave()">
-                        <p class="metrics-notice-title">{{ 'not_convertible' | translatePipe }}</p>
-                        <div class="metrics-notice-list-wrap">
-                            <div class="metrics-notice-list" scrollIndicators>
-                                @for (name of unconvertibleNamesFiltered_(); track name) {
-                                    <div class="metrics-notice-item">{{ name }}</div>
-                                }
-                            </div>
-                            <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--top" aria-hidden="true"></div>
-                            <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--bottom" aria-hidden="true"></div>
-                            <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--top" aria-hidden="true">
-                                <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-                            </div>
-                            <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--bottom" aria-hidden="true">
-                                <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
+    <app-custom-multi-select
+      class="labels-container"
+      [formControl]="labelsControl"
+      [options]="labelMultiSelectOptions_()"
+      [readonlyChips]="autoLabels()"
+      placeholder="labels"
+      addNewValue="__add_label__"
+      variant="chip"
+      [searchable]="true"
+      [maxHeight]="200"
+      triggerTitle="labels"
+      [clearable]="hasAnyLabelsInContainer_()"
+      (cleared)="clearAllManualLabels()"
+      (addNewChosen)="openCreateLabel($event)"
+    />
+
+    <app-custom-select
+      class="course-select"
+      triggerId="course"
+      [formControl]="courseControl"
+      [options]="courseSelectOptions_()"
+      placeholder="course"
+    />
+  </div>
+
+  <div class="metrics-square">
+    <div class="metric-group">
+      <span class="label">{{ 'cost' | translatePipe }}</span>
+      <span class="value">₪{{ currentCost() | number: '1.2-2' }}</span>
     </div>
+    <div class="divider"></div>
+    <div
+      class="metric-group metric-group-weight-volume"
+      (click)="toggleMetricsDisplayMode()"
+      (clickOutside)="closeMetricsNotice()"
+      (mouseenter)="onMetricsNoticeZoneEnter()"
+      (mouseleave)="onMetricsNoticeZoneLeave()"
+    >
+      <span class="label">{{
+        metricsDisplayMode_() === 'weight' ? ('weight' | translatePipe) : ('volume' | translatePipe)
+      }}</span>
+      <span class="value">
+        @if (metricsDisplayMode_() === 'weight') {
+          {{ totalBrutoWeightG() | number: '1.0-0' }}g
+        } @else {
+          @if (totalVolumeL() >= 1) {
+            {{ totalVolumeL() | number: '1.2-2' }} L
+          } @else {
+            {{ totalVolumeMl() | number: '1.0-0' }} ml
+          }
+        }
+      </span>
+      @if (showMetricsNoticeIcon_()) {
+        <span class="metrics-notice-wrap" (click)="$event.stopPropagation(); toggleMetricsNotice()">
+          <lucide-icon
+            name="alert-circle"
+            class="metrics-notice-icon"
+            [size]="16"
+            [title]="'items_not_convertible' | translatePipe"
+          ></lucide-icon>
+        </span>
+        @if (metricsNoticeOpen_()) {
+          <div
+            class="metrics-notice-floating"
+            (click)="$event.stopPropagation()"
+            (mouseenter)="onMetricsNoticeZoneEnter()"
+            (mouseleave)="onMetricsNoticeZoneLeave()"
+          >
+            <p class="metrics-notice-title">{{ 'not_convertible' | translatePipe }}</p>
+            <div class="metrics-notice-list-wrap">
+              <div class="metrics-notice-list" scrollIndicators>
+                @for (name of unconvertibleNamesFiltered_(); track name) {
+                  <div class="metrics-notice-item">{{ name }}</div>
+                }
+              </div>
+              <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--top" aria-hidden="true"></div>
+              <div class="metrics-notice-scroll-zone metrics-notice-scroll-zone--bottom" aria-hidden="true"></div>
+              <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--top" aria-hidden="true">
+                <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+              </div>
+              <div class="metrics-notice-scroll-indicator metrics-notice-scroll-indicator--bottom" aria-hidden="true">
+                <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    </div>
+  </div>
 </div>

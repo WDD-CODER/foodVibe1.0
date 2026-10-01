@@ -4,13 +4,7 @@ import { TranslationKeyModalService, isTranslationKeyResult } from './translatio
 import { sanitizeKey } from '../utils/sanitize-key.util'
 
 export type KeyResolutionContext =
-  | 'category'
-  | 'allergen'
-  | 'unit'
-  | 'supplier'
-  | 'generic'
-  | 'preparation_category'
-  | 'section_category'
+  'category' | 'allergen' | 'unit' | 'supplier' | 'generic' | 'preparation_category' | 'section_category' | 'course'
 
 const HEBREW_SCRIPT = /[\u0590-\u05FF]/
 
@@ -58,14 +52,15 @@ export class KeyResolutionService {
         return this.translation.resolvePreparationCategory(trimmed)
       case 'section_category':
         return this.translation.resolveSectionCategory(trimmed)
+      case 'course':
+        return this.translation.resolveCourse(trimmed)
       default:
         return this.translation.resolveCategory(trimmed)
     }
   }
 
   private toModalContext(context: KeyResolutionContext): 'category' | 'allergen' | 'supplier' | 'unit' | 'generic' {
-    if (context === 'preparation_category' || context === 'section_category') return 'category'
+    if (context === 'preparation_category' || context === 'section_category' || context === 'course') return 'category'
     return context
   }
-
 }
