@@ -55,15 +55,12 @@ Never skip with “Contractor does not mark.” Detail: `docs/agent/job-validati
 
 | Trigger | File |
 | --- | --- |
-| User adds a recipe or dish from an image, URL, or raw text | `.claude/skills/add-recipe/SKILL.md` |
 | Before creating or refactoring an Angular Pipe or Directive | `.claude/skills/angular-pipe-logic/SKILL.md` |
 | Before creating or refactoring any Angular component class | `.claude/skills/angularComponentStructure/SKILL.md` |
 | Touching auth guards, interceptors, user services, HTTP CRUD, or protected access | `.claude/skills/auth-and-logging/SKILL.md` |
 | Implementing or refactoring hashing/encryption/tokens in `auth-crypto.ts` | `.claude/skills/auth-crypto/SKILL.md` |
 | New `pages/<x>/` or top-level subtree; structural changes; after `update-docs` | `.claude/skills/breadcrumb-navigator/SKILL.md` |
-| Mid-task checkpoint before context exhaustion (`/checkpoint`) | `.claude/skills/context-management/SKILL.md` |
 | Before creating or editing any `.scss` / `.css` in `src/` | `.claude/skills/cssLayer/SKILL.md` |
-| User says deploy / publish app / GitHub Pages (explicit only) | `.claude/skills/deploy-github-pages/SKILL.md` |
 | After a hacky fix, before a "not ideal" PR, or when duplicate/special-case logic appears | `.claude/skills/elegant-fix/SKILL.md` |
 | Session start or after time away (once per calendar day) | `.claude/skills/github-sync/SKILL.md` |
 | Before workflows that touch dev server / browser / database | `.claude/skills/preflight/SKILL.md` |

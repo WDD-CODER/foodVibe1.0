@@ -2,7 +2,6 @@
 # pre-compact-reminder.sh — PreCompact hook
 # Fires when context is about to be compressed. Reminds the AI to save
 # critical state before earlier conversation details are lost.
-# Pairs with pre-compact-todo-append.sh (todo dump + unresolved signal grep).
 #
 # Hook type: PreCompact (matcher: "")
 # Timeout: 5s

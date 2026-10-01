@@ -32,22 +32,17 @@ Show all registered slash commands with short descriptions and file locations.
 
 | Command | What it does | File | Category | Scope |
 | --- | --- | --- | --- | --- |
-| `/adversarial-template` | Generate adversarial test cases to stress-test a fix template | `.claude/commands/adversarial-template.md` | FLOW | SHARED |
 | `/auto-solve` | Autonomous plan executor (legacy; prefer milestone-by-milestone Contractor) | `.claude/commands/auto-solve.md` | UTIL | SHARED |
 | `/brief` | Capture or generate a session brief | `.claude/commands/brief.md` | FLOW | SHARED |
-| `/brief-detect` | Manually invoke brief-detection gate | `.claude/commands/brief-detect.md` | UTIL | CC |
 | `/cleanup` | Session & worktree pruning | `.claude/commands/cleanup.md` | UTIL | SHARED |
 | `/commands` | List all registered slash commands, categories, and paths | `.claude/commands/commands.md` | UTIL | SHARED |
 | `/docs-refresh` | On-demand documentation refresh (breadcrumbs + project docs) | `.claude/commands/docs-refresh.md` | UTIL | SHARED |
 | `/done` | Validate a finished chat job — close-out ask, then mark matching todos `[x]` | `.claude/commands/done.md` | UTIL | SHARED |
-| `/evaluate-me` | Agent session retrospective â€” grades the session | `.claude/commands/evaluate-me.md` | FLOW | SHARED |
 | `/feat` | New-feature path â€” rules, `/plan`, Contractor + `/review-it` | `.claude/commands/feat.md` | FLOW | SHARED |
 | `/fix` | Bug fix path â€” matching rules + elegant-fix | `.claude/commands/fix.md` | FLOW | SHARED |
 | `/fix-pr-checks` | Bounded PR CI/security fix loop (2 rounds max) | `.claude/commands/fix-pr-checks.md` | FLOW | SHARED |
-| `/mobile-flow-audit` | Walk mobile flows at 375Ã—812 RTL; report layout breakage | `.claude/commands/mobile-flow-audit.md` | FLOW | SHARED |
 | `/plan` | Planning / Plan Contract path | `.claude/commands/plan.md` | FLOW | SHARED |
 | `/refactor` | Refactor path â€” angular/domain rules, cssLayer, techdebt | `.claude/commands/refactor.md` | FLOW | SHARED |
-| `/render-flow-audit` | Walk live Render deployment for functional bugs | `.claude/commands/render-flow-audit.md` | FLOW | SHARED |
 | `/review-it` | Reviewer pass â€” plan-match, conventions, Verify; report-only by default | `.claude/commands/review-it.md` | FLOW | CC |
 | `/security` | Security path â€” security rules + pre-commit security grep + CI | `.claude/commands/security.md` | FLOW | SHARED |
 | `/ship` | Session end â€” build gate, chat-scoped commit (`--yes` skips wait) | `.claude/commands/ship.md` | FLOW | SHARED |
@@ -55,8 +50,6 @@ Show all registered slash commands with short descriptions and file locations.
 | `/end-session` | Alias for `/ship` | `.claude/commands/end-session.md` | FLOW | SHARED |
 | `/skills` | List all registered skills, triggers, and scope | `.claude/commands/skills.md` | UTIL | SHARED |
 | `/sweep-stale-todos` | Find and close todos that are no longer relevant | `.claude/commands/sweep-stale-todos.md` | UTIL | SHARED |
-| `/test-pr-review-merge` | Full Test â†’ PR â†’ Review â†’ Merge (trunk merge) pipeline | `.claude/commands/test-pr-review-merge.md` | FLOW | SHARED |
-| `/test-template` | Score a fix template against its fixture corpus | `.claude/commands/test-template.md` | FLOW | SHARED |
 
 ## Notes
 

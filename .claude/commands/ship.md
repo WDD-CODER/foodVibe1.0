@@ -257,5 +257,4 @@ When the path is a milestone/checkpoint with an incomplete brief, also include t
 |---------|-----------|
 | Techdebt scan | `/techdebt` |
 | Docs refresh | `/docs-refresh` |
-| Session evaluation | `/evaluate-me` |
 | Message-only prep | `git-agent` |

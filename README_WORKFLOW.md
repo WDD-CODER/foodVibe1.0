@@ -1,7 +1,5 @@
 # FoodVibe Workflow — Three-Agent Manual Bridge
 
-Historical cutover record: [`PRD-three-agent-cutover.md`](PRD-three-agent-cutover.md) (2026-07-08).
-
 ## Roles (Planner-Worker workflow — see `docs/brain/decisions/0009-planner-worker-worktrees.md`)
 
 | Role | Where | Job |
