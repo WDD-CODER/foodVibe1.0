@@ -16,6 +16,8 @@ import { ActivatedRoute, NavigationStart, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { filter, startWith } from 'rxjs'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { TranslationService } from '@services/translation.service'
+import { missingMenuFieldsMessage, pruneBlankMenuItems } from './menu-form.util'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { MenuIntelligenceService } from '@services/menu-intelligence.service'
@@ -151,6 +153,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** For pendingChangesGuard: prevents re-triggering after a successful save */
   isSubmitted = false
 
+  private readonly translation = inject(TranslationService)
   protected readonly form_ = this.fb.group({
     name: [''],
     eventType: ['', Validators.required],
@@ -168,11 +171,9 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Which dish field is in edit mode (key: "sectionIndex-itemIndex-fieldKey") */
   protected readonly editingDishField_ = signal<string | null>(null)
-
   /** Event type dropdown open + search query for filtering */
   protected readonly eventTypeDropdownOpen_ = signal(false)
   protected readonly eventTypeSearch_ = signal('')
-
   /** Focus order for keyboard navigation */
   protected readonly FOCUS_ORDER = ['name', 'eventType', 'servingType', 'guestCount', 'eventDate'] as const
 
@@ -613,7 +614,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.isSubmitted = true
       return true
     } catch {
-      this.userMsg.onSetErrorMsg('error_saving_menu')
+      this.userMsg.onSetErrorMsg(this.translation.translate('error_saving_menu'))
       return false
     }
   }
@@ -1104,9 +1105,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected async save(): Promise<void> {
+    pruneBlankMenuItems(this.sectionsArray)
     if (this.form_.invalid) {
       this.form_.markAllAsTouched()
-      this.userMsg.onSetErrorMsg('Please fill all required fields')
+      this.userMsg.onSetErrorMsg(missingMenuFieldsMessage(this.form_, this.translation))
       return
     }
 
@@ -1128,7 +1130,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         this.editingId_.set(created._id)
       }
       this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
-      this.userMsg.onSetSuccessMsg('Menu saved successfully')
+      this.userMsg.onSetSuccessMsg(this.translation.translate('menu_saved'))
       this.router.navigate(['/menu-library'])
     })
   }
@@ -1262,7 +1264,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       _id: section._id ?? '',
       name: section.name ?? '',
       sortOrder: sectionIndex + 1,
-      items: (section.items || []).map((item: MenuItemForm, itemIndex: number) => {
+      items: (section.items || []).flatMap((item: MenuItemForm, itemIndex: number) => {
+        if (!item.recipeId) return []
         const sp = Number(item.serving_portions || 1)
         return {
           recipeId: item.recipeId,

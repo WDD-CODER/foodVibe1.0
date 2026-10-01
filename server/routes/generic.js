@@ -754,9 +754,9 @@ router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, 
  * Prefers a real Mongo transaction (works whenever the deployment is a replica set —
  * Atlas always is). Standalone Mongo (common in local dev) rejects transactions with
  * error code 20 ("Transaction numbers are only allowed on a replica set member or
- * mongos"); on that specific error we fall back to a pending-flag swap: insert the new
- * docs first (flagged), delete the old (unflagged) docs, then clear the flag. A crash
- * mid-fallback can leave a stray _pendingReplace flag or a brief duplicate window, but
+ * mongos"); on that specific error we fall back to an upsert-then-delete swap: upsert the new
+ * docs by _id, then delete the user's docs not in the set. A crash
+ * mid-fallback can leave a brief window where deleted docs are still present, but
  * it never leaves the user with an empty collection.
  */
 async function replaceCollection(type, userId, docs) {
@@ -785,16 +785,15 @@ async function replaceCollection(type, userId, docs) {
 }
 
 async function replaceCollectionFallback(type, userId, docs) {
+  // No transactions (standalone Mongo): upsert every incoming doc by _id first (re-inserting a
+  // doc that is being kept would hit a duplicate key), then drop the user's docs not in the set.
   if (docs.length > 0) {
-    await col(type).insertMany(
-      docs.map(d => ({ ...d, _pendingReplace: true })),
+    await col(type).bulkWrite(
+      docs.map(d => ({ replaceOne: { filter: { _id: d._id }, replacement: d, upsert: true } })),
       { ordered: true }
     );
   }
-  await col(type).deleteMany({ userId, _pendingReplace: { $ne: true } });
-  if (docs.length > 0) {
-    await col(type).updateMany({ userId, _pendingReplace: true }, { $unset: { _pendingReplace: '' } });
-  }
+  await col(type).deleteMany({ userId, _id: { $nin: docs.map(d => d._id) } });
 }
 
 // ---------------------------------------------------------------------------
