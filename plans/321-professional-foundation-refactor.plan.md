@@ -603,10 +603,10 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 
 ### Phase 2b — v2 migration + enforce
 - [x] P2b.0a G1 = keep `recipes` + `dishes` separate (no `kind`), G2 = rename 7 collections — decided by Human 2026-10-01 (see Decision gates)
-- [ ] P2b.0b (checked 2026-10-01: 0 open PRs, 0 commits behind main; maintenance window still to confirm) Reality Check at the start of the next session (`git fetch`, open PRs, parallel branches that touch `src/app` or `server/`) + Human confirms the maintenance window
+- [x] P2b.0b (DONE 2026-10-02: window confirmed by Human) (checked 2026-10-01: 0 open PRs, 0 commits behind main; maintenance window still to confirm) Reality Check at the start of the next session (`git fetch`, open PRs, parallel branches that touch `src/app` or `server/`) + Human confirms the maintenance window
 - [x] P2b.1a `server/migrations/0001-v2-schema.js` written: dry run / `--write=yes` / `--verify=yes`, copies into new collections, old ones kept as rollback; tombstone schema; `shared/schemas` updated (commit db7463be)
 - [x] P2b.1b Local: backup `foodvibe-db-backups/local-2026-10-01T12-12-26`, write, verify OK 2026-10-01 (7 new collections exist locally; app does not read them yet)
-- [ ] P2b.1c Atlas dry run again right before the window (data changes), then Atlas backup → `--write=yes` → `--verify=yes` — Human confirms host
+- [x] P2b.1c (DONE 2026-10-02: Atlas backup atlas-2026-10-02T07-24-01, 0001+0002 written, --verify OK, validate-all 0 violations) Atlas dry run again right before the window (data changes), then Atlas backup → `--write=yes` → `--verify=yes` — Human confirms host
 - [ ] P2b.x Stray keys from the 2a inventory: `ingredients_` on 36 local products is dropped in v2 (old collection keeps it); `steps_[].cooking_time_minutes_` (4 Atlas recipes) is kept as deprecated `cookingTimeMinutes` — Human decides rename-vs-convert later
 - [x] P2b.2 Server cutover to v2 (one PR with P2b.3):
   - [x] P2b.2a `server/constants/collections.js`: the 7 entries use the new names (products, recipes, dishes, suppliers, equipment, venues, menuEvents); trash + KITCHEN_* names unchanged; `COLLECTION_RENAMES` is the one source (re-export from `shared/schemas`)
@@ -626,7 +626,7 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 - [x] P2b.1d TRASH_* (6 collections) and VERSION_HISTORY hold v1-shaped docs and keep their names: upgrade them in place (same `upgradeV1toV2` + cleanup, backup first, verify) — otherwise trash-restore and version-restore break after the cutover. Check what VERSION_HISTORY stores before deciding — `server/migrations/0002-trash-and-history.js` (dry-run/write/verify, in place, idempotent); LOCAL written+verified 2026-10-01 (82 docs, 0 invalid, backup `local-2026-10-01T17-51-08`); ATLAS NOT run — part of the window (P2b.1c)
 - [x] P2b.4 `server/scripts/legacy-import/*` marked v1-only (header comment + early exit against v2 data) — same guard; see P2b.2g
 - [x] P2b.5 Deploy runbook in `docs/session-state-foundation-refactor.md`: Atlas backup → Atlas dry run → Human go → write → verify → deploy → smoke; rollback = restore backup + redeploy previous commit; Human confirms Render build command runs `build:schemas` (`build:render` already does) — runbook appended to `docs/session-state-foundation-refactor.md` (Render build command check still Human)
-- [ ] P2b.6 (2026-10-02 partial: menu save, trash restore OK; menu print OK but 2 pages; Excel quantities 0 and AI-in-builder retest pending — see `docs/handoff-321-validation-findings.md`) HOW TO VALIDATE (Human): login, recipe edit + save, dish with sub-recipe, menu event build, export, trash restore; `validate-all.js` against Atlas → 0 violations; every doc `schemaVersion: 2`
+- [x] P2b.6 (DONE 2026-10-02: Human smoke test "all good" after deploy; PR #239 merged) (2026-10-02 partial: menu save, trash restore OK; menu print OK but 2 pages; Excel quantities 0 and AI-in-builder retest pending — see `docs/handoff-321-validation-findings.md`) HOW TO VALIDATE (Human): login, recipe edit + save, dish with sub-recipe, menu event build, export, trash restore; `validate-all.js` against Atlas → 0 violations; every doc `schemaVersion: 2`
 
 ### Phase 3 — Taxonomy store
 - [ ] P3.0 Reality Check + Human go
