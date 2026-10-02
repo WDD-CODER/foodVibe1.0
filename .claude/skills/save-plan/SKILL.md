@@ -107,6 +107,11 @@ Do not Read .claude/todo.md in full.
 
 **Risk Audit:** Medium/Large + auth/storage → note security surface; rely on pre-commit security grep + CI.
 
+**Prerequisites Gate (Planner only):** If the draft has a `## Prerequisites` section, check it's already true against `origin/main` *before* saving — do not hand a Worker a plan that will STOP on take. If unmet:
+
+- **Tiny, Planner-owned fix** (a few lines, no plan-worthy scope of its own) → land it directly as its own chore commit/PR to `main` now, then save this plan.
+- **Anything bigger** → save the prerequisite as its own plan (`NNN-1`, sequenced before this one) instead of writing a Prerequisites gate that STOPs a Worker. A plan should never ship with a hard gate the Worker who takes it cannot clear itself.
+
 ---
 
 ## Phase 3: Write Plan File

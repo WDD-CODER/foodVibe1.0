@@ -1,34 +1,26 @@
 # Session State
 
 ## Branch
-chore/token-diet-b
+chore/worker-prerequisite-escalation
 
 ## Date
-2026-10-01
+2026-10-02
 
 ## Session Summary
-- Brief A (Parts 1+2, merged PR #229) + Brief B (this commit): completed the full Plan 326 token-diet pass — dropped dead hooks/scripts/commands/skills, slimmed AGENTS.md to 6KB and ship.md to ~10.3KB (8KB target not met, accepted to keep gates intact), collapsed command indexes, added /tune-workflow; fixed a live-found gap where brief-detection skipped the Planner protocol for pasted Plan Contracts on main
+- Fixed the Plan 329 handoff gap: a Worker blocked by an unmet Prerequisites gate or out-of-scope need must offer approved: <path> before claiming it needs a new plan (AGENTS.md).
+- save-plan now pre-flights any plan's Prerequisites section before handoff — land tiny fixes directly or sequence a real NNN-1 plan, never ship a Worker a gate it can't clear itself.
+- Diagnosed ship-prep.mjs's 3 flagged manifest overlaps as false positives: 2 branches already merged (PR #229, #231) and an ancestor of this branch; the 3rd's overlapping file content is already in main. Root cause: overlap check time-gates on manifest mtime (<24h) but never checks merge state.
 
 ## Files Modified
- .claude/commands/_index.md              |  64 -----------
- .claude/commands/commands.md            |  12 +-
- .claude/commands/plan.md                |   8 +-
- .claude/commands/ship.md                | 193 +++++++++++---------------------
- .claude/commands/skills.md              |  49 ++------
- .claude/commands/tune-workflow.md       |  22 ++++
- .claude/references/prd-template.md      |   2 +-
- .claude/skills/brief-detection/SKILL.md |  20 +++-
- .claude/skills/save-plan/SKILL.md       |  10 +-
- AGENTS.md                               | 104 +++++++----------
- docs/agent/job-validation.md            |   8 +-
- docs/agent/workflow-map.md              |   2 +-
- 12 files changed, 182 insertions(+), 312 deletions(-)
+ .claude/skills/save-plan/SKILL.md | 5 +++++
+ AGENTS.md                         | 1 +
+ 2 files changed, 6 insertions(+)
 
 ## Commit
-6cf22d25
+a8375be8
 
 ## PR
 N/A
 
 ## Next Steps
-- Open PR for chore/token-diet-b, watch checks, merge. Unrelated: .claude/todo.md has an uncommitted feat/optimization checkbox change not made by this session -- left alone.
+- None — this was a complete, self-contained docs/skill fix. Separately: ship-prep.mjs's manifest-overlap check should probably also check whether the owning branch was merged/deleted, to stop flagging stale leftovers like this one (not filed as a plan, just noted).
