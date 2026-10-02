@@ -334,6 +334,10 @@
 - [ ] B7: Record the kit repo's location in `docs/workflow-kit/manifest.md`.
 - [ ] B8: STOP. Hand Dandan the two `[human]` reviews (kit.config.json keys; kit repo name/location). Apply changes if requested, then `/ship` on the FoodVibe side only — the kit repo stays local, no remote, until Dandan says otherwise.
 
+### Plan 330 — take-plan.mjs: Skip Mark-Active Commit When Already Active (`plans/330-take-plan-mark-active-skip-fix.plan.md`)
+- [ ] Add the already-active / no-diff guard around the mark-active commit in `scripts/take-plan.mjs`
+- [ ] Verify `node scripts/take-plan.mjs <NNN>` runs to completion both when a plan starts as non-active and when it's already `Status: active`
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
