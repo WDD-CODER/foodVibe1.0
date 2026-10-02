@@ -5,7 +5,9 @@ Lessons verdicts: `lessons-triage.md`. Config keys: `parameters.md`.
 
 ## Summary
 
-**196 files classified** across the inventory roots; 11 excluded path patterns (project history/data).
+**Kit repo (plan 329, phase 2):** `../ai-workflow-kit` (sibling folder, local git, no remote). Its `core/` holds all 77 `tier: core` files, landed by `node scripts/kit-extract.mjs`.
+
+**197 files classified** (196 from plan 328 + `scripts/kit-extract.mjs`, `project`/`stay`) across the inventory roots; 11 excluded path patterns (project history/data).
 
 | tier \ action | copy | parameterize | split | skeleton | stay | total |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -14,8 +16,8 @@ Lessons verdicts: `lessons-triage.md`. Config keys: `parameters.md`.
 | `pack:angular` | 10 | 10 | 2 | · | · | 22 |
 | `pack:node-express` | · | · | 1 | · | · | 1 |
 | `template` | · | · | · | 17 | · | 17 |
-| `project` | · | · | · | · | 51 | 51 |
-| **total** | 70 | 48 | 10 | 17 | 51 | 196 |
+| `project` | · | · | · | · | 52 | 52 |
+| **total** | 70 | 48 | 10 | 17 | 52 | 197 |
 
 Tier legend: `core` = ships to every project; `layer:cursor` = optional Cursor layer (`-Cursor`); `pack:*` = stack pack contract (standards doc, skills, Cursor rules, gotchas, validation commands); `template` = generic structure, FoodVibe content, ships as a skeleton; `project` = stays in FoodVibe.
 
