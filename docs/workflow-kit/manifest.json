@@ -3644,6 +3644,16 @@
       "notes": "This plan's checker. Its COUPLING term list and inventory roots are themselves the kit config (coupling terms, inventory roots) — phase 5 reuses it for drift."
     },
     {
+      "path": "scripts/kit-extract.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/workflow-kit/manifest.json"
+      ],
+      "notes": "Plan 329 extractor: lands tier:core manifest rows into the kit repo (FoodVibe-side; stays here)."
+    },
+    {
       "path": "scripts/lib/slot.mjs",
       "tier": "core",
       "action": "parameterize",
