@@ -168,6 +168,10 @@ async function write(db, args, result) {
   if (invalid && args['skip-invalid'] !== 'yes') {
     throw new Error(`${invalid} doc(s) would be invalid; fix the data/schema or pass --skip-invalid=yes (they stay only in the old collections)`);
   }
+  const unmapped = Object.values(result).flatMap(r => [...r.stats.unmapped.keys()]);
+  if (unmapped.length && args['allow-unmapped'] !== 'yes') {
+    throw new Error(`Unmapped v1 key(s) would be dropped from the v2 copy: ${[...new Set(unmapped)].join(', ')}. Map them in shared/schemas/field-map.v1-to-v2.ts, or pass --allow-unmapped=yes to drop them on purpose`);
+  }
   for (const { stats } of Object.values(result)) {
     const existing = await db.collection(stats.newName).countDocuments();
     if (existing && args.force !== 'yes') throw new Error(`${stats.newName} already has ${existing} doc(s); refusing (use --force=yes to wipe the v2 copy)`);
@@ -227,7 +231,7 @@ async function verify(db, result) {
 }
 
 async function main() {
-  const args = parseArgs(process.argv, { write: 1, verify: 1, force: 1, 'skip-invalid': 1, 'backup-dir': 1 });
+  const args = parseArgs(process.argv, { write: 1, verify: 1, force: 1, 'skip-invalid': 1, 'backup-dir': 1, 'allow-unmapped': 1 });
   const { client, db } = await connect(args);
   try {
     const result = await plan(db, Date.now());

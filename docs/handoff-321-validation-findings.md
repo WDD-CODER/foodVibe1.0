@@ -74,3 +74,9 @@ Remaining suggestion: add a component test that applies this exact patch to a re
 | Not yet tested | Export preview print/Excel button, history restore dialog wording, Atlas migration |
 
 Next session starts with: (1) the Human retests the AI edit; (2) decide the Atlas maintenance window and run the runbook; (3) `/code-review` then the Plan 321 PR (merge only after Atlas); (4) the Planner turns sections 2 and 3 into plans.
+
+## 8. Code review of the branch (2026-10-02, run in wt-2)
+
+No data-loss, auth or validation defects found. Fixed on the branch: 0001 `--write` now refuses when any unmapped v1 key would be dropped (`--allow-unmapped=yes` to override on purpose); the export preview removes its `export-preview-visible` body class when destroyed (a stale class would have blanked a later Ctrl+P); the runbook now states that rolling back also needs the 7 trash/history collections restored from the snapshot.
+
+Left open (low, for the Planner): restoring a master-cloned item from trash can silently no-op (tombstone with the same `_id` -> 409 treated as success; pre-existing); `0002 --verify` may flag post-cutover snapshots that carry the in-memory `recipeType`; root `scripts/*.mjs` repair scripts (`migrate-to-master.mjs`, `link-users-to-master.mjs`, ...) still use v1 names and are not guarded by `v1-only-guard`.
