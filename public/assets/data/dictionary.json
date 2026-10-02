@@ -932,6 +932,13 @@
     "bread_focaccia_savory_baking": "לחם, פוקאצ׳ה ואפייה מלוחה",
     "soups_up": "שדרוג מרקים",
     "update_available": "גרסה חדשה זמינה",
-    "reload_now": "רענן עכשיו"
+    "reload_now": "רענן עכשיו",
+    "menu_saved": "התפריט נשמר בהצלחה",
+    "error_saving_menu": "שגיאה בשמירת התפריט",
+    "menu_missing_fields": "חסרים שדות חובה",
+    "menu_field_event_type": "סוג אירוע",
+    "menu_field_guest_count": "מספר אורחים",
+    "menu_field_serving_type": "סוג הגשה",
+    "menu_field_section_name": "שם מקטע"
   }
 }

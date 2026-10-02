@@ -1,5 +1,7 @@
 # Plan 321 — Professional Foundation Refactor: Shared Master, Zod Schemas, Unified Taxonomy
 
+Status: active
+
 > **Save instructions for the agent:** persisted via `.claude/skills/save-plan/SKILL.md`. Expected to be `320` when written, but `feat/recipe-labels-course-field` had already claimed 320 (commits reference "plan 320 M1"/"M2") with no `plans/320-*.plan.md` file on disk — so this plan is `321`.
 
 overview: Move FoodVibe's data layer to the same professional grade as its workflow layer. The Architecture Audit (2026-09-29) found a disciplined process (AGENTS.md, ADRs, Plan Contracts, job validation, CI with lint/build/tests/gitleaks/Semgrep) sitting on a data layer that grew by patch: a schemaless `data/:type` pipe where the client decides document shape, a copy-the-whole-catalog-per-user tenancy model, 10+ single-doc "registries" with hand-rolled CRUD, compound concepts welded into `labels_` strings, three soft-delete mechanisms, four naming conventions in persisted fields, and zero server tests. This plan fixes these at the source, in 9 sequential phases. Each phase is one or more briefs, and each ends in `/ship` plus Human validation.
@@ -38,8 +40,8 @@ If a Reality Check shows a step is already done, **do not redo it**. Mark it `[x
 
 | Gate | Question | Ask at | Architect recommendation | **Decision** |
 |---|---|---|---|---|
-| G1 | Merge `RECIPE_LIST` + `DISH_LIST` into one `recipes` collection with `kind: 'dish' \| 'preparation'`? They share one schema, and the split doubles services, trash collections and sub-recipe reference logic. | Phase 2b Step 0 | Yes, in the same v2 migration | **YES — merge** (2026-09-29) |
-| G2 | Rename collections from localStorage-era `SCREAMING_CASE` to camelCase (`PRODUCT_LIST` → `products`)? | Phase 2b Step 0 | Yes if G1 = yes (same migration); otherwise defer | **YES — rename** (2026-09-29) |
+| G1 | Merge `RECIPE_LIST` + `DISH_LIST` into one `recipes` collection with `kind: 'dish' \| 'preparation'`? They share one schema, and the split doubles services, trash collections and sub-recipe reference logic. | Phase 2b Step 0 | Yes, in the same v2 migration | **NO — keep separate `recipes` (how-to for the cook) + `dishes` (assembly/pass for the sous-chef)** — Human 2026-10-01, overrides the 2026-09-29 "merge" answer. No `kind` field; the collection says which it is; v1 "preparation" becomes "recipe". |
+| G2 | Rename collections from localStorage-era `SCREAMING_CASE` to camelCase (`PRODUCT_LIST` → `products`)? | Phase 2b Step 0 | Yes if G1 = yes (same migration); otherwise defer | **YES — rename** (2026-09-29, names confirmed 2026-10-01): `products`, `recipes`, `dishes`, `suppliers`, `equipment`, `venues`, `menuEvents`. Trash and `KITCHEN_*` registries keep their names until Phases 6 and 3. |
 | G3 | Kosher status (`meat` / `dairy` / `pareve`) as its **own** axis, separate from `protein`? `dairy_prep` and `dairy_sauce` in the legacy data suggest it matters. | Phase 4 Step 0 | Yes, as `kosherType`, because it's orthogonal to protein | **YES — separate `kosherType`** (2026-09-29) |
 | G4 | Legacy categories "ideas (preparations/dishes)" (keys 56/57): are they really a **workflow status** (idea → draft → approved) rather than a label? | Phase 4 mapping review | Model as `status` alongside `isApproved`, or keep as a label for now |
 | G5 | Preparation-family legacy categories (sauces, doughs, stocks, 2–16, 63, 68–77): labels, or the existing preparation-category registry? | Phase 4 mapping review | Keep as labels in this plan (no behavior change) |
@@ -294,7 +296,7 @@ Move every stored document to schema v2 in one controlled migration, switch the 
 
 ### Steps
 0. **Reality Check** + ask **G1/G2** + confirm a maintenance window (the migration and deploy go out together; the app is briefly read-only).
-1. **Migration `server/migrations/0001-v2-schema.js`:** for every collection, `upgradeV1toV2` → `safeParse` → bulk write, applying the approved per-class resolutions. If G1 = yes: move `RECIPE_LIST` + `DISH_LIST` into `recipes` with `kind`, and `TRASH_RECIPES` + `TRASH_DISHES` accordingly. Sub-recipe references no longer need a `type` to pick a collection. If G2 = yes, rename collections in the same pass. Store `migrations` marker + stats. Follow all Global migration rules (dry run, backup, verify mode, host confirm).
+1. **Migration `server/migrations/0001-v2-schema.js`:** for every collection, `upgradeV1toV2` → `safeParse` → bulk write, applying the approved per-class resolutions. G1 = no (decided 2026-10-01): `RECIPE_LIST` → `recipes` and `DISH_LIST` → `dishes` stay two collections, no `kind`. G2 = yes: rename the 7 schema'd collections in the same pass, COPYING into the new names and leaving the old collections untouched as the rollback. Store `migrations` marker + stats. Follow all Global migration rules (dry run, backup, verify mode, host confirm).
 2. **Server:** `validate.js` switches to **enforce**, returning 400 with Zod issues. Remove the v1 upgrade call from the hot path (keep `upgradeV1toV2` only in the migration and a `schemaVersion < 2` guard that returns 409 "document needs migration"). Update the server code and tests to v2 names.
 3. **Client:** delete the hand-written interfaces in `src/app/core/models/` (replace them with the `v2` re-exports), then fix every compile error. **Growth-frozen files:** renames only, zero net new lines, verified with `git diff --stat`. `dictionary.json` keys that mirror field names are unaffected unless a UI key embeds a field name; list any.
 4. **Scripts:** mark every `server/scripts/legacy-import/*` script as v1-only (header comment + early exit if run against v2 data). They get archived in Phase 7.
@@ -587,25 +589,44 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 - [x] P1.4 Retire/restrict `PUT /:type` whole-collection replace — restricted to `REPLACEABLE_TYPES` (registries actually in use + TRASH_*/VERSION_HISTORY, broader than originally assumed per Reality Check)
 - [x] P1.5 Rate limits on `/api/v1/data` writes (300/15min) and `/api/v1/ai` (20/15min per user)
 - [x] P1.6 Fix docs drift (`standards-backend.md §5`, `standards-security.md §9`) + stale `imageUrl_` comment
-- [x] P1.7 `render.yaml` `PERF_LOG: "0"` — **Human action still open:** mirror in the Render dashboard (file doesn't auto-sync to the live service)
-- [ ] P1.8 Stale remote branch list gathered (65 branches, 60+ days, no open PR — `gh-pages` excluded, it's the deploy target) — **awaiting Human approval before any deletion**
+- [x] P1.7 `render.yaml` `PERF_LOG: "0"` — Render dashboard mirror **done by Human 2026-10-01**
+- [x] P1.8 Stale remote branch list gathered (65 branches, 60+ days, no open PR — `gh-pages` excluded, it's the deploy target) — 66 merged branches deleted by Human 2026-10-01; remaining session/claude/audit branches left for a later cleanup
 
 ### Phase 2a — Shared Zod (observe)
-- [ ] P2a.0 Reality Check + Human go
-- [ ] P2a.1 `shared/schemas/` + `build:schemas` + wiring into build/dev/test scripts
-- [ ] P2a.2 v2 entity schemas (`shared/schemas/entities/*.schema.ts`)
-- [ ] P2a.3 `server/migrations/tools/field-inventory.js` run (local + Atlas) → `field-map.v1-to-v2.ts`
-- [ ] P2a.4 `upgradeV1toV2` + fixture tests
-- [ ] P2a.5 `server/middleware/validate.js` (observe) + `server/migrations/tools/validate-all.js` report → Human
-- [ ] P2a.6 `src/app/core/models/v2/*` inferred types + type test
+- [x] P2a.0 Reality Check + Human go
+- [x] P2a.1 `shared/schemas/` + `build:schemas` + wiring into build/dev/test scripts
+- [x] P2a.2 v2 entity schemas (`shared/schemas/entities/*.schema.ts`)
+- [x] P2a.3 `server/migrations/tools/field-inventory.js` run (local + Atlas) → `field-map.v1-to-v2.ts`
+- [x] P2a.4 `upgradeV1toV2` + fixture tests
+- [x] P2a.5 `server/middleware/validate.js` (observe) + `server/migrations/tools/validate-all.js` report → Human — Atlas run done 2026-10-01: violation classes below sent to Human; unmapped keys deferred to P2b.x
+- [x] P2a.6 `src/app/core/models/v2/*` inferred types + type test
 
 ### Phase 2b — v2 migration + enforce
-- [ ] P2b.0 Reality Check + G1/G2 answers + maintenance window
-- [ ] P2b.1 `server/migrations/0001-v2-schema.js` (dry run → Human → local write → verify → Atlas)
-- [ ] P2b.2 Validator → enforce; server code/tests to v2
-- [ ] P2b.3 Client switched to inferred types; delete legacy interfaces; growth-frozen net-zero check
-- [ ] P2b.4 Legacy scripts marked v1-only
-- [ ] P2b.5 Deploy runbook + Render dashboard check
+- [x] P2b.0a G1 = keep `recipes` + `dishes` separate (no `kind`), G2 = rename 7 collections — decided by Human 2026-10-01 (see Decision gates)
+- [ ] P2b.0b (checked 2026-10-01: 0 open PRs, 0 commits behind main; maintenance window still to confirm) Reality Check at the start of the next session (`git fetch`, open PRs, parallel branches that touch `src/app` or `server/`) + Human confirms the maintenance window
+- [x] P2b.1a `server/migrations/0001-v2-schema.js` written: dry run / `--write=yes` / `--verify=yes`, copies into new collections, old ones kept as rollback; tombstone schema; `shared/schemas` updated (commit db7463be)
+- [x] P2b.1b Local: backup `foodvibe-db-backups/local-2026-10-01T12-12-26`, write, verify OK 2026-10-01 (7 new collections exist locally; app does not read them yet)
+- [ ] P2b.1c Atlas dry run again right before the window (data changes), then Atlas backup → `--write=yes` → `--verify=yes` — Human confirms host
+- [ ] P2b.x Stray keys from the 2a inventory: `ingredients_` on 36 local products is dropped in v2 (old collection keeps it); `steps_[].cooking_time_minutes_` (4 Atlas recipes) is kept as deprecated `cookingTimeMinutes` — Human decides rename-vs-convert later
+- [x] P2b.2 Server cutover to v2 (one PR with P2b.3):
+  - [x] P2b.2a `server/constants/collections.js`: the 7 entries use the new names (products, recipes, dishes, suppliers, equipment, venues, menuEvents); trash + KITCHEN_* names unchanged; `COLLECTION_RENAMES` is the one source (re-export from `shared/schemas`)
+  - [x] P2b.2b (DEVIATION from D4, 2026-10-01: the master/ownership fields `userId`, `_masterId`, `_userModified`, `_userDeleted` KEEP their names until Phases 5/6 delete or redesign them; only domain fields + collection names are renamed) Stored-field renames across `server/db.js`, `routes/{generic,auth,admin,ai}.js`, `services/{clone-master,sync-master,seed-master,master-version}.js`: `userId`→`ownerId`, `_masterId`→`masterId`, `_userModified`→`userModified`, `_userDeleted`→`userDeleted`; `'__master__'` stays as an `ownerId` value; add/verify indexes on the new collections
+  - [x] P2b.2c `server/middleware/validate.js`: observe → enforce (400 + Zod issues), no v1 upgrade on the hot path; `schemaVersion < 2` → 409 "needs migration"; tombstones allowed
+  - [x] P2b.2d seed-master / clone-master / sync-master write v2 docs (so signup and login keep working on v2 data)
+  - [x] P2b.2e Server tests moved to v2 names (63/63 green); the 8 stale `push-to-master` tests (they expect 400 but Plan 322 added `requireAdmin`) — needs `approved:` for the test file if outside scope
+- [x] P2b.3 Client cutover to v2 (compiler-driven; one PR with P2b.2):
+  - [x] P2b.3a Entity-type strings (`PRODUCT_LIST` etc., ~11 files in `src/app`) → new collection names; storage/HTTP adapters use them — done 2026-10-01: all 128 client files renamed by script (131 field tokens + 7 collection names); `HttpStorageAdapter` attaches/strips `recipeType`
+  - [x] P2b.3b Replace `src/app/core/models/*.ts` interfaces with the `core/models/v2` inferred types, then fix every compile error; recipe `recipeType: 'preparation'` → `'recipe'`; no `recipe_type_`/`kind` — DEVIATION: hand-written client interfaces KEPT as view types (create flows omit server-owned userId/schemaVersion/timestamps); `core/models/v2/conformance.ts` fails `ng test` if a schema type stops being assignable to its client interface. `recipeType` is an in-memory discriminator (collection decides)
+  - [x] P2b.3c Growth-frozen files: renames only, zero net new lines (check with `git diff --stat`) — verified 2026-10-01: all 5 frozen files net ≤ 0 lines (`git diff --numstat`)
+  - [x] P2b.3d `dictionary.json` keys that embed old field names — list any, change none without asking — none: `dictionary.json` untouched; no UI key embeds a persisted field name
+  - [x] P2b.3e Fix the 26 stale client specs (RecipeHeader / MetadataManagerPage / TranslationKeyModal / one InventoryProductList: mocks missing `courses_`) — needs `approved:` for those spec paths — no stale specs remain in this tree: 310/310 pass (the old 26 were already fixed or removed)
+  - [x] P2b.3f `ng build` + `ng test` + server tests all green — `ng build` OK; `ng test` 310/310; server jest 63/63 (2026-10-01)
+  - [x] P2b.2f `server/routes/ai.js` AI draft DTOs (recipe/product/menu drafts) stay v1-shaped for now (they are prompts + validators, not stored docs); the client maps draft → v2 entity when adopting a draft. Phase 4 reworks ai.js anyway — changed: handled by a consistent rename (ai.js prompts/validators + client draft DTOs use v2 names together), not left v1-shaped; Human to try the AI recipe/product/menu draft flows
+  - [x] P2b.2g Non-legacy scripts with hardcoded old names (`server/scripts/fix-supplier-refs.js`, `migrate-supplier-ids.js`, `reset-user-from-master.js`): update or mark v1-only — `fix-supplier-refs.js`, `migrate-supplier-ids.js` and all `legacy-import/*` are guarded by `server/utils/v1-only-guard.js` (exit unless `--allow-v1=yes`); `reset-user-from-master.js` already uses the renamed constants
+- [x] P2b.1d TRASH_* (6 collections) and VERSION_HISTORY hold v1-shaped docs and keep their names: upgrade them in place (same `upgradeV1toV2` + cleanup, backup first, verify) — otherwise trash-restore and version-restore break after the cutover. Check what VERSION_HISTORY stores before deciding — `server/migrations/0002-trash-and-history.js` (dry-run/write/verify, in place, idempotent); LOCAL written+verified 2026-10-01 (82 docs, 0 invalid, backup `local-2026-10-01T17-51-08`); ATLAS NOT run — part of the window (P2b.1c)
+- [x] P2b.4 `server/scripts/legacy-import/*` marked v1-only (header comment + early exit against v2 data) — same guard; see P2b.2g
+- [x] P2b.5 Deploy runbook in `docs/session-state-foundation-refactor.md`: Atlas backup → Atlas dry run → Human go → write → verify → deploy → smoke; rollback = restore backup + redeploy previous commit; Human confirms Render build command runs `build:schemas` (`build:render` already does) — runbook appended to `docs/session-state-foundation-refactor.md` (Render build command check still Human)
+- [ ] P2b.6 (2026-10-02 partial: menu save, trash restore OK; menu print OK but 2 pages; Excel quantities 0 and AI-in-builder retest pending — see `docs/handoff-321-validation-findings.md`) HOW TO VALIDATE (Human): login, recipe edit + save, dish with sub-recipe, menu event build, export, trash restore; `validate-all.js` against Atlas → 0 violations; every doc `schemaVersion: 2`
 
 ### Phase 3 — Taxonomy store
 - [ ] P3.0 Reality Check + Human go

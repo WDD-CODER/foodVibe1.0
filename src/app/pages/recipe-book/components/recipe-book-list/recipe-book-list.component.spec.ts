@@ -24,18 +24,18 @@ describe('RecipeBookListComponent', () => {
   const mockRecipesSignal = signal<Recipe[]>([
     {
       _id: 'r1',
-      name_hebrew: 'סלט ירקות',
-      recipe_type_: 'dish',
-      ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
-      steps_: [],
-      yield_amount_: 4,
-      yield_unit_: 'dish',
-      default_station_: '',
-      is_approved_: true
+      nameHebrew: 'סלט ירקות',
+      recipeType: 'dish',
+      ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 100, unit: 'gram' }],
+      steps: [],
+      yieldAmount: 4,
+      yieldUnit: 'dish',
+      defaultStation: '',
+      isApproved: true
     } as Recipe
   ])
 
-  const mockProductsSignal = signal([{ _id: 'p1', allergens_: ['gluten'] }])
+  const mockProductsSignal = signal([{ _id: 'p1', allergens: ['gluten'] }])
 
   beforeEach(async () => {
     sessionStorage.removeItem('list-state:recipe-book')
@@ -90,7 +90,7 @@ describe('RecipeBookListComponent', () => {
   it('should compute filtered recipes from kitchen state', () => {
     const filtered = (component as any).filteredRecipes_()
     expect(filtered.length).toBe(1)
-    expect(filtered[0].name_hebrew).toBe('סלט ירקות')
+    expect(filtered[0].nameHebrew).toBe('סלט ירקות')
   })
 
   it('should aggregate allergens from product ingredients', () => {
@@ -129,7 +129,7 @@ describe('RecipeBookListComponent', () => {
   it('should filter list when search input is set', () => {
     let filtered = (component as any).filteredRecipes_()
     expect(filtered.length).toBe(1)
-    expect(filtered[0].name_hebrew).toBe('סלט ירקות')
+    expect(filtered[0].nameHebrew).toBe('סלט ירקות')
 
     ;(component as any).searchQuery_.set('סלט')
     fixture.detectChanges()

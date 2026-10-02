@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  input,
-  output,
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -29,11 +23,11 @@ import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with
     TranslatePipe,
     ClickOutSideDirective,
     SelectOnFocusDirective,
-    ScrollableDropdownComponent,
+    ScrollableDropdownComponent
   ],
   templateUrl: './menu-dish-row.component.html',
   styleUrl: './menu-dish-row.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenuDishRowComponent {
   // ── Injected ──────────────────────────────────────────────────────────────
@@ -69,7 +63,7 @@ export class MenuDishRowComponent {
 
   // ── Read ──────────────────────────────────────────────────────────────────
   getRecipeName(recipeId: string): string {
-    return this.recipes().find(r => r._id === recipeId)?.name_hebrew || ''
+    return this.recipes().find((r) => r._id === recipeId)?.nameHebrew || ''
   }
 
   getInputWidth(value: unknown): string {
@@ -82,7 +76,7 @@ export class MenuDishRowComponent {
   }
 
   getDishFieldLabelKey(fieldKey: DishFieldKey): string {
-    return ALL_DISH_FIELDS.find(f => f.key === fieldKey)?.labelKey ?? fieldKey
+    return ALL_DISH_FIELDS.find((f) => f.key === fieldKey)?.labelKey ?? fieldKey
   }
 
   isEditingField(fieldKey: string): boolean {
@@ -91,25 +85,25 @@ export class MenuDishRowComponent {
 
   getAutoFoodCost(): number {
     const item = this.itemGroup()
-    const recipeId = item?.get('recipe_id_')?.value as string | undefined
+    const recipeId = item?.get('recipeId')?.value as string | undefined
     if (!recipeId) return 0
-    const recipe = this.recipes().find(r => r._id === recipeId)
+    const recipe = this.recipes().find((r) => r._id === recipeId)
     if (!recipe) return 0
     const derivedPortions = this.menuIntelligence.derivePortions(
       this.servingType(),
       this.guestCount(),
-      Number(item.get('predicted_take_rate_')?.value ?? 0),
+      Number(item.get('predictedTakeRate')?.value ?? 0),
       this.piecesPerPerson(),
       Number(item.get('serving_portions')?.value ?? 1)
     )
-    const baseYield = Math.max(1, recipe.yield_amount_ || 1)
+    const baseYield = Math.max(1, recipe.yieldAmount || 1)
     const multiplier = derivedPortions / baseYield
     const scaledCost = this.recipeCostService.computeRecipeCost({
       ...recipe,
-      ingredients_: recipe.ingredients_.map(ing => ({
+      ingredients: recipe.ingredients.map((ing) => ({
         ...ing,
-        amount_: (ing.amount_ || 0) * multiplier,
-      })),
+        amount: (ing.amount || 0) * multiplier
+      }))
     })
     return Math.round(scaledCost * 100) / 100
   }
@@ -125,7 +119,7 @@ export class MenuDishRowComponent {
     return this.menuIntelligence.derivePortions(
       this.servingType(),
       this.guestCount(),
-      Number(item.get('predicted_take_rate_')?.value ?? 0),
+      Number(item.get('predictedTakeRate')?.value ?? 0),
       this.piecesPerPerson(),
       Number(item.get('serving_portions')?.value ?? 1)
     )
@@ -134,7 +128,7 @@ export class MenuDishRowComponent {
   getFilteredRecipes(): Recipe[] {
     const raw = this.dishSearchQuery().trim()
     if (!raw) return []
-    const filtered = filterOptionsByStartsWith(this.recipes(), raw, (r) => r.name_hebrew ?? '')
+    const filtered = filterOptionsByStartsWith(this.recipes(), raw, (r) => r.nameHebrew ?? '')
     return filtered.slice(0, 12)
   }
 }

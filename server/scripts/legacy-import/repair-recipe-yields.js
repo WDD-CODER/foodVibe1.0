@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('repair-recipe-yields.js');
 /**
  * repair-recipe-yields.js — rewrites `yield_amount_`/`yield_unit_`/
  * `yield_conversions_` on already-imported recipes and dishes to match the

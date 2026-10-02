@@ -19,41 +19,41 @@
 
     <div class="detail-hero c-glass-panel">
       <div class="detail-hero-media">
-        @if (venue.photo_url_) {
-          <img [src]="venue.photo_url_" class="detail-hero-photo" alt="" />
+        @if (venue.photoUrl) {
+          <img [src]="venue.photoUrl" class="detail-hero-photo" alt="" />
         } @else {
           <lucide-icon name="map-pin" [size]="40"></lucide-icon>
         }
       </div>
       <div class="detail-hero-info">
         <div class="detail-hero-title-row">
-          <h1 class="venue-name">{{ venue.name_hebrew }}</h1>
-          <span class="venue-status-badge" [class.venue-status-badge--inactive]="venue.active_ === false">
+          <h1 class="venue-name">{{ venue.nameHebrew }}</h1>
+          <span class="venue-status-badge" [class.venue-status-badge--inactive]="venue.active === false">
             <span class="venue-status-dot"></span>
-            {{ (venue.active_ === false ? 'venue_inactive' : 'venue_active') | translatePipe }}
+            {{ (venue.active === false ? 'venue_inactive' : 'venue_active') | translatePipe }}
           </span>
         </div>
-        @if (venue.address_) {
+        @if (venue.address) {
           <p class="venue-address">
             <lucide-icon name="map-pin" [size]="15"></lucide-icon>
-            {{ venue.address_ }}
+            {{ venue.address }}
           </p>
         }
         <div class="detail-stats">
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'infrastructure_items' | translatePipe }}</span>
-            <span class="detail-stat-value">{{ (venue.available_infrastructure_ ?? []).length }}</span>
+            <span class="detail-stat-value">{{ (venue.availableInfrastructure ?? []).length }}</span>
           </div>
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'capacity' | translatePipe }}</span>
-            <span class="detail-stat-value">{{ venue.capacity_ ?? '—' }}</span>
+            <span class="detail-stat-value">{{ venue.capacity ?? '—' }}</span>
           </div>
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'associated_menus' | translatePipe }}</span>
             <span class="detail-stat-value">{{ associatedMenus_().length }}</span>
           </div>
         </div>
-        <span class="venue-env-chip">{{ venue.environment_type_ | translatePipe }}</span>
+        <span class="venue-env-chip">{{ venue.environmentType | translatePipe }}</span>
       </div>
     </div>
 
@@ -63,20 +63,20 @@
           <lucide-icon name="phone" [size]="18"></lucide-icon>
           <h2>{{ 'contact_name' | translatePipe }}</h2>
         </header>
-        @if (venue.contact_name_ || venue.contact_phone_) {
+        @if (venue.contactName || venue.contactPhone) {
           <div class="contact-row">
             @if (contactInitials_()) {
               <span class="contact-avatar">{{ contactInitials_() }}</span>
             }
             <div>
-              <p class="contact-name">{{ venue.contact_name_ || '—' }}</p>
+              <p class="contact-name">{{ venue.contactName || '—' }}</p>
               <p class="contact-role">{{ 'venue_manager' | translatePipe }}</p>
             </div>
           </div>
-          @if (venue.contact_phone_) {
+          @if (venue.contactPhone) {
             <p class="contact-phone">
               <lucide-icon name="phone" [size]="14"></lucide-icon>
-              {{ venue.contact_phone_ }}
+              {{ venue.contactPhone }}
             </p>
           }
         } @else {
@@ -89,12 +89,12 @@
           <lucide-icon name="calendar-clock" [size]="18"></lucide-icon>
           <h2>{{ 'operating_hours' | translatePipe }}</h2>
         </header>
-        @if (venue.operating_hours_?.length) {
+        @if (venue.operatingHours?.length) {
           <ul class="hours-list">
-            @for (block of venue.operating_hours_; track $index) {
+            @for (block of venue.operatingHours; track $index) {
               <li class="hours-row">
-                <span class="hours-days">{{ block.days_ }}</span>
-                <span class="hours-time">{{ block.time_ }}</span>
+                <span class="hours-days">{{ block.days }}</span>
+                <span class="hours-time">{{ block.time }}</span>
               </li>
             }
           </ul>
@@ -113,9 +113,9 @@
           @for (m of associatedMenus_(); track m._id) {
             <li class="menu-row">
               <div>
-                <span class="menu-row-name">{{ m.name_ }}</span>
+                <span class="menu-row-name">{{ m.name }}</span>
                 <span class="menu-row-meta"
-                  >{{ m.event_date_ }} · {{ m.guest_count_ }} {{ 'menu_guests' | translatePipe }}</span
+                  >{{ m.eventDate }} · {{ m.guestCount }} {{ 'menu_guests' | translatePipe }}</span
                 >
               </div>
               <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
@@ -127,12 +127,12 @@
       }
     </section>
 
-    @if (venue.notes_) {
+    @if (venue.notes) {
       <section class="detail-card c-glass-panel">
         <header class="detail-card-header">
           <h2>{{ 'notes' | translatePipe }}</h2>
         </header>
-        <p class="venue-notes">{{ venue.notes_ }}</p>
+        <p class="venue-notes">{{ venue.notes }}</p>
       </section>
     }
   } @else {

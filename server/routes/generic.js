@@ -6,6 +6,8 @@ const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
 const { bumpMasterVersion } = require('../services/master-version');
 const { newId: makeId } = require('../utils/id');
+const { hasSchema: hasV2Schema } = require('../utils/schema-check');
+const { checkStoredDoc } = require('../middleware/validate');
 
 const router = Router();
 
@@ -36,7 +38,7 @@ router.use('/:type', (req, res, next) => {
 
 /**
  * Returns the native MongoDB collection for the given entity type.
- * Each entity type (PRODUCT_LIST, RECIPE_LIST, etc.) gets its own collection.
+ * Each entity type (products, recipes, etc.) gets its own collection.
  * Documents are stored flat — no entityType wrapper, no data wrapper.
  */
 function col(type) {
@@ -58,7 +60,7 @@ router.get('/:type', optionalToken, async (req, res) => {
     const userId = req.user ? req.user.userId : '__master__';
     // Was capped at 500 (max 1000) — safe when no account had more than a few hundred
     // docs per collection. The legacy FoodComposer import (plan 300) pushed real
-    // accounts past that (PRODUCT_LIST/RECIPE_LIST/DISH_LIST now run 1,000-1,500+ docs
+    // accounts past that (products/recipes/dishes now run 1,000-1,500+ docs
     // for an imported account), and the client never sends ?limit= for a full-collection
     // load — so every list fetch was silently truncated, not just for the importing user.
     // Raised well above current real-world collection sizes; still bounded (not
@@ -101,9 +103,9 @@ router.get('/:type', optionalToken, async (req, res) => {
 // actually render/consume (ingredient-search.component.ts, recipe-book-list.component.ts's
 // filteredProductsForIngredientSearch_) rides along; not the full document. See plan 301.
 const SEARCH_PROJECTIONS = {
-  PRODUCT_LIST: { _id: 1, name_hebrew: 1, base_unit_: 1, purchase_options_: 1 },
-  RECIPE_LIST: { _id: 1, name_hebrew: 1, yield_unit_: 1 },
-  DISH_LIST: { _id: 1, name_hebrew: 1, yield_unit_: 1 },
+  products: { _id: 1, nameHebrew: 1, baseUnit: 1, purchaseOptions: 1 },
+  recipes: { _id: 1, nameHebrew: 1, yieldUnit: 1 },
+  dishes: { _id: 1, nameHebrew: 1, yieldUnit: 1 },
 };
 
 /** Escapes regex metacharacters so a raw query is safe to anchor into a RegExp. */
@@ -113,7 +115,7 @@ function escapeRegex(str) {
 
 // ---------------------------------------------------------------------------
 // GET /api/v1/data/:type/search?q=&limit=
-// Case-insensitive prefix match on name_hebrew, restricted to SEARCHABLE_ENTITY_TYPES
+// Case-insensitive prefix match on nameHebrew, restricted to SEARCHABLE_ENTITY_TYPES
 // and returning only the lean projection above — the point is a tiny response
 // regardless of collection size (plan 301, Milestone 1). Must be registered before
 // GET /:type/:id so "search" is never swallowed as an :id.
@@ -137,7 +139,7 @@ router.get('/:type/search', optionalToken, async (req, res) => {
 
     const docs = await col(req.params.type)
       .find(
-        { userId, _userDeleted: { $ne: true }, name_hebrew: regex },
+        { userId, _userDeleted: { $ne: true }, nameHebrew: regex },
         { projection: SEARCH_PROJECTIONS[req.params.type] }
       )
       .limit(limit)
@@ -153,8 +155,8 @@ router.get('/:type/search', optionalToken, async (req, res) => {
 // GET /api/v1/data/:type/count?filter=lowStock|unapproved
 // Lightweight count so dashboard stats don't need the full collection loaded
 // (plan 301, Milestone 3). Mirrors kitchen-state.service.ts's lowStockProducts_
-// (min_stock_level_ > 0) and dashboard-overview.component.ts's unapprovedCount_
-// (is_approved_ !== true) filters exactly, so a future client switch-over can't drift.
+// (minStockLevel > 0) and dashboard-overview.component.ts's unapprovedCount_
+// (isApproved !== true) filters exactly, so a future client switch-over can't drift.
 // Must be registered before GET /:type/:id so "count" is never swallowed as an :id.
 // ---------------------------------------------------------------------------
 router.get('/:type/count', optionalToken, async (req, res) => {
@@ -163,15 +165,15 @@ router.get('/:type/count', optionalToken, async (req, res) => {
     const filter = { userId, _userDeleted: { $ne: true } };
     const filterName = req.query.filter;
     if (filterName === 'lowStock') {
-      if (req.params.type !== 'PRODUCT_LIST') {
-        return res.status(400).json({ error: 'filter=lowStock is only valid for PRODUCT_LIST' });
+      if (req.params.type !== 'products') {
+        return res.status(400).json({ error: 'filter=lowStock is only valid for products' });
       }
-      filter.min_stock_level_ = { $gt: 0 };
+      filter.minStockLevel = { $gt: 0 };
     } else if (filterName === 'unapproved') {
-      if (req.params.type !== 'RECIPE_LIST' && req.params.type !== 'DISH_LIST') {
-        return res.status(400).json({ error: 'filter=unapproved is only valid for RECIPE_LIST or DISH_LIST' });
+      if (req.params.type !== 'recipes' && req.params.type !== 'dishes') {
+        return res.status(400).json({ error: 'filter=unapproved is only valid for recipes or dishes' });
       }
-      filter.is_approved_ = { $ne: true };
+      filter.isApproved = { $ne: true };
     } else if (filterName) {
       return res.status(400).json({ error: `Unknown filter: ${filterName}` });
     }
@@ -241,13 +243,23 @@ router.post('/:type', verifyToken, async (req, res) => {
     const { _id: clientId, userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = req.body;
     const _id = typeof clientId === 'string' && clientId ? clientId : makeId();
 
+    const now = Date.now();
     const doc = {
       ...safeEntity,
       _id,
       userId: req.user.userId,
       _masterId: _id,
       _userModified: false,
+      ...(hasV2Schema(entityType) && {
+        schemaVersion: 2,
+        // A restored/re-appended doc keeps its original createdAt; a brand-new one gets now.
+        createdAt: typeof safeEntity.createdAt === 'number' ? safeEntity.createdAt : now,
+        updatedAt: now,
+      }),
     };
+
+    const check = checkStoredDoc(entityType, doc);
+    if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
 
     await col(entityType).insertOne(doc);
     res.status(201).json(doc);
@@ -374,20 +386,20 @@ router.put('/:type/registry-delete-master', verifyToken, requireAdmin, async (re
 
     if (req.params.type === 'KITCHEN_LABELS') {
       await Promise.all(
-        ['RECIPE_LIST', 'DISH_LIST'].map((t) =>
-          col(t).updateMany({ userId: { $ne: '__master__' } }, { $pull: { labels_: key, autoLabels_: key } })
+        ['recipes', 'dishes'].map((t) =>
+          col(t).updateMany({ userId: { $ne: '__master__' } }, { $pull: { labels: key, autoLabels: key } })
         )
       );
     } else if (req.params.type === 'KITCHEN_COURSES') {
       await Promise.all(
-        ['RECIPE_LIST', 'DISH_LIST'].map((t) =>
-          col(t).updateMany({ userId: { $ne: '__master__' }, course_: key }, { $set: { course_: '' } })
+        ['recipes', 'dishes'].map((t) =>
+          col(t).updateMany({ userId: { $ne: '__master__' }, course: key }, { $set: { course: '' } })
         )
       );
     } else if (req.params.type === 'KITCHEN_CATEGORIES') {
-      await col('PRODUCT_LIST').updateMany({ userId: { $ne: '__master__' } }, { $pull: { categories_: key } });
+      await col('products').updateMany({ userId: { $ne: '__master__' } }, { $pull: { categories: key } });
     } else if (req.params.type === 'KITCHEN_ALLERGENS') {
-      await col('PRODUCT_LIST').updateMany({ userId: { $ne: '__master__' } }, { $pull: { allergens_: key } });
+      await col('products').updateMany({ userId: { $ne: '__master__' } }, { $pull: { allergens: key } });
     }
 
     res.json({ ok: true });
@@ -444,8 +456,8 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
   try {
     // A2: nameSnapshot enforcement — every linked ingredient must carry a nameSnapshot
     // so the recipe remains readable if the product is later deleted or the DB is reset.
-    if (req.params.type === 'RECIPE_LIST' || req.params.type === 'DISH_LIST') {
-      const ings = req.body.ingredients_ ?? [];
+    if (req.params.type === 'recipes' || req.params.type === 'dishes') {
+      const ings = req.body.ingredients ?? [];
       const orphan = ings.find(ing => ing.referenceId && !ing.nameSnapshot);
       if (orphan) {
         return res.status(400).json({
@@ -458,9 +470,22 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     // Destructure reserved fields out of req.body — client must not override them.
     const { userId: _, _masterId: __, _userModified: ___, ...safeBody } = req.body;
 
+    const filter = { _id: req.params.id, userId: req.user.userId, _userDeleted: { $ne: true } };
+    const stamps = hasV2Schema(req.params.type) ? { schemaVersion: 2, updatedAt: Date.now() } : {};
+    // createdAt is server-owned: a client PUT never rewrites it.
+    const { createdAt: _ca, ...updatable } = safeBody;
+    if (hasV2Schema(req.params.type)) {
+      const current = await col(req.params.type).findOne(filter);
+      if (!current) {
+        return res.status(404).json({ error: `Cannot update, item ${req.params.id} does not exist` });
+      }
+      const check = checkStoredDoc(req.params.type, { ...current, ...updatable, ...stamps, _userModified: true });
+      if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
+    }
+
     const result = await col(req.params.type).findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.userId, _userDeleted: { $ne: true } },
-      { $set: { ...safeBody, _userModified: true } },
+      filter,
+      { $set: { ...updatable, ...stamps, _userModified: true } },
       { returnDocument: 'after' }
     );
     if (!result) {
@@ -493,10 +518,10 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
 
 // Only entities that are actually cloned from master can be pushed back to it.
 // Without this, :type is attacker-controlled and reaches col() unchecked.
-const PUSHABLE_TYPES = new Set(['RECIPE_LIST', 'DISH_LIST', 'PRODUCT_LIST', 'KITCHEN_SUPPLIERS', 'EQUIPMENT_LIST']);
+const PUSHABLE_TYPES = new Set(['recipes', 'dishes', 'products', 'suppliers', 'equipment']);
 
 // Plan 322 M9: pushes one doc to __master__, recursively pushing along any
-// referenced RECIPE_LIST/DISH_LIST/PRODUCT_LIST ingredient that has never
+// referenced recipes/dishes/products ingredient that has never
 // itself been pushed — otherwise a recipe pushed to everyone could arrive
 // for other users with an ingredient row pointing at a referenceId that only
 // ever existed in the pushing user's own account (a brand-new product they
@@ -513,11 +538,11 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   if (!existing) return null;
   if (typeof existing._masterId !== 'string') return null;
 
-  const ingredients = Array.isArray(existing.ingredients_) ? existing.ingredients_ : [];
-  const ingredients_ = await Promise.all(
-    ingredients.map(async (ing) => {
+  const sourceIngredients = Array.isArray(existing.ingredients) ? existing.ingredients : [];
+  const ingredients = await Promise.all(
+    sourceIngredients.map(async (ing) => {
       if (typeof ing.referenceId !== 'string' || !ing.referenceId) return ing;
-      const lookupTypes = ing.type === 'recipe' ? ['RECIPE_LIST', 'DISH_LIST'] : ['PRODUCT_LIST'];
+      const lookupTypes = ing.type === 'recipe' ? ['recipes', 'dishes'] : ['products'];
       for (const t of lookupTypes) {
         const ref = await col(t).findOne(
           { _id: ing.referenceId, userId },
@@ -552,7 +577,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
     resolvedMasterId = makeId();
     await col(type).insertOne({
       ...safeBody,
-      ingredients_,
+      ingredients,
       _id: resolvedMasterId,
       userId: '__master__',
       _masterId: resolvedMasterId,
@@ -561,7 +586,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   } else {
     const result = await col(type).updateOne(
       { _id: resolvedMasterId, userId: '__master__' },
-      { $set: { ...safeBody, ingredients_ } }
+      { $set: { ...safeBody, ingredients } }
     );
     if (result.matchedCount === 0) return null;
   }
@@ -582,7 +607,7 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
       return res.status(400).json({ error: `Type ${req.params.type} cannot be pushed to master` });
     }
     // _masterId / referenceId are read back out of Mongo, but they originally
-    // entered through a client-supplied body (POST's `_id`, PUT's `ingredients_`),
+    // entered through a client-supplied body (POST's `_id`, PUT's `ingredients`),
     // neither of which type-checks them. An object like { $ne: null } stored there
     // earlier would become a query *operator* rather than a value below — so
     // require plain strings before using either one in a selector. Checked once
@@ -627,11 +652,11 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
 // doc either — that still goes through the normal DELETE /:type/:id route;
 // this is only the "also retire it from the shared list" half of the choice.
 // Recipes/dishes only (categories/allergens/etc. have no per-item trash
-// concept the way RECIPE_LIST/DISH_LIST do). Same open-to-any-signed-in-user
+// concept the way recipes/dishes do). Same open-to-any-signed-in-user
 // tradeoff as push-to-master, for the same reason.
 // ---------------------------------------------------------------------------
-const DELETABLE_FROM_MASTER_TYPES = new Set(['RECIPE_LIST', 'DISH_LIST', 'PRODUCT_LIST']);
-const MASTER_TRASH_KEY = { RECIPE_LIST: 'TRASH_RECIPES', DISH_LIST: 'TRASH_DISHES', PRODUCT_LIST: 'TRASH_PRODUCTS' };
+const DELETABLE_FROM_MASTER_TYPES = new Set(['recipes', 'dishes', 'products']);
+const MASTER_TRASH_KEY = { recipes: 'TRASH_RECIPES', dishes: 'TRASH_DISHES', products: 'TRASH_PRODUCTS' };
 
 router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (req, res) => {
   try {
@@ -668,9 +693,9 @@ router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (re
 // ---------------------------------------------------------------------------
 // PUT /api/v1/data/:type/:id/purge-ingredient-everywhere
 //
-// Plan 322 M8. PRODUCT_LIST only. Explicitly Human-requested, dev-only,
+// Plan 322 M8. products only. Explicitly Human-requested, dev-only,
 // higher-risk than delete-from-master above: strips this product's ingredient
-// line out of every OTHER user's own RECIPE_LIST/DISH_LIST docs, not just the
+// line out of every OTHER user's own recipes/dishes docs, not just the
 // shared __master__ copy. Nothing else in this codebase reaches into another
 // user's own documents from one user's action — this is a deliberate,
 // explicitly-requested exception for local development use, not a general
@@ -682,7 +707,7 @@ router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (re
 // recipes/dishes are pulled using THAT user's own product _id, never the
 // caller's _id directly.
 // ---------------------------------------------------------------------------
-const PURGE_EVERYWHERE_TYPES = new Set(['PRODUCT_LIST']);
+const PURGE_EVERYWHERE_TYPES = new Set(['products']);
 
 router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, async (req, res) => {
   try {
@@ -701,17 +726,17 @@ router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, 
       return res.json({ ok: true, usersAffected: 0 });
     }
 
-    const otherClones = await col('PRODUCT_LIST')
+    const otherClones = await col('products')
       .find({ _masterId: existing._masterId, userId: { $nin: ['__master__', req.user.userId] } })
       .project({ _id: 1, userId: 1 })
       .toArray();
 
     await Promise.all(
       otherClones.flatMap((clone) =>
-        ['RECIPE_LIST', 'DISH_LIST'].map((ingredientType) =>
+        ['recipes', 'dishes'].map((ingredientType) =>
           col(ingredientType).updateMany(
-            { userId: clone.userId, 'ingredients_.referenceId': clone._id },
-            { $pull: { ingredients_: { referenceId: clone._id } } }
+            { userId: clone.userId, 'ingredients.referenceId': clone._id },
+            { $pull: { ingredients: { referenceId: clone._id } } }
           )
         )
       )
@@ -729,9 +754,9 @@ router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, 
  * Prefers a real Mongo transaction (works whenever the deployment is a replica set —
  * Atlas always is). Standalone Mongo (common in local dev) rejects transactions with
  * error code 20 ("Transaction numbers are only allowed on a replica set member or
- * mongos"); on that specific error we fall back to a pending-flag swap: insert the new
- * docs first (flagged), delete the old (unflagged) docs, then clear the flag. A crash
- * mid-fallback can leave a stray _pendingReplace flag or a brief duplicate window, but
+ * mongos"); on that specific error we fall back to an upsert-then-delete swap: upsert the new
+ * docs by _id, then delete the user's docs not in the set. A crash
+ * mid-fallback can leave a brief window where deleted docs are still present, but
  * it never leaves the user with an empty collection.
  */
 async function replaceCollection(type, userId, docs) {
@@ -760,16 +785,15 @@ async function replaceCollection(type, userId, docs) {
 }
 
 async function replaceCollectionFallback(type, userId, docs) {
+  // No transactions (standalone Mongo): upsert every incoming doc by _id first (re-inserting a
+  // doc that is being kept would hit a duplicate key), then drop the user's docs not in the set.
   if (docs.length > 0) {
-    await col(type).insertMany(
-      docs.map(d => ({ ...d, _pendingReplace: true })),
+    await col(type).bulkWrite(
+      docs.map(d => ({ replaceOne: { filter: { _id: d._id }, replacement: d, upsert: true } })),
       { ordered: true }
     );
   }
-  await col(type).deleteMany({ userId, _pendingReplace: { $ne: true } });
-  if (docs.length > 0) {
-    await col(type).updateMany({ userId, _pendingReplace: true }, { $unset: { _pendingReplace: '' } });
-  }
+  await col(type).deleteMany({ userId, _id: { $nin: docs.map(d => d._id) } });
 }
 
 // ---------------------------------------------------------------------------
@@ -783,7 +807,7 @@ async function replaceCollectionFallback(type, userId, docs) {
 // atomic whole-collection replace today: the one remaining single-doc-array registry
 // (KITCHEN_PREPARATIONS — the rest move to TaxonomyStore in Phase 3) and TRASH_*/
 // VERSION_HISTORY clear-all/restore-all/trim flows. Every real entity-data collection
-// (PRODUCT_LIST, RECIPE_LIST, ...) must go through per-document POST/PUT/DELETE —
+// (products, recipes, ...) must go through per-document POST/PUT/DELETE —
 // wiping a user's whole catalog in one call was never an intended use of this route.
 // ---------------------------------------------------------------------------
 const REPLACEABLE_TYPES = new Set([
@@ -880,23 +904,23 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
 router.delete('/:type/:id', verifyToken, async (req, res) => {
   try {
     // A1: referential integrity — block product delete if any recipe/dish uses it.
-    // Prevents orphaned ingredient referenceIds in RECIPE_LIST and DISH_LIST.
-    if (req.params.type === 'PRODUCT_LIST') {
-      const recipeRef = await col('RECIPE_LIST').findOne({
+    // Prevents orphaned ingredient referenceIds in recipes and dishes.
+    if (req.params.type === 'products') {
+      const recipeRef = await col('recipes').findOne({
         userId: req.user.userId,
-        'ingredients_.referenceId': req.params.id,
+        'ingredients.referenceId': req.params.id,
         _userDeleted: { $ne: true },
       });
-      const dishRef = !recipeRef && await col('DISH_LIST').findOne({
+      const dishRef = !recipeRef && await col('dishes').findOne({
         userId: req.user.userId,
-        'ingredients_.referenceId': req.params.id,
+        'ingredients.referenceId': req.params.id,
         _userDeleted: { $ne: true },
       });
       if (recipeRef || dishRef) {
         const ref = recipeRef || dishRef;
         return res.status(409).json({
           error: 'Product is used in one or more recipes',
-          referencedBy: ref.name_hebrew || ref._id,
+          referencedBy: ref.nameHebrew || ref._id,
         });
       }
     }
@@ -916,7 +940,10 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
       // _userModified: true ensures syncMasterToUser Rule 3 treats this as user-wins.
       await col(req.params.type).replaceOne(
         { _id: req.params.id, userId: req.user.userId },
-        { _id: req.params.id, userId: req.user.userId, _masterId: existing._masterId, _userDeleted: true, _userModified: true }
+        {
+          _id: req.params.id, userId: req.user.userId, _masterId: existing._masterId, _userDeleted: true, _userModified: true,
+          ...(hasV2Schema(req.params.type) && { schemaVersion: 2 }),
+        }
       );
     } else {
       // Hard delete: user-originated item or legacy (no _masterId / self-referential)

@@ -4,8 +4,8 @@ import { getEffectivePrice } from './product-source.util'
 
 /** Units available for a product: base_unit + unique purchase option symbols. */
 export function getProductUnits(product: Product): string[] {
-  const base = product.base_unit_ || 'unit'
-  const fromOptions = (product.purchase_options_ || []).map(o => o.unit_symbol_).filter(Boolean)
+  const base = product.baseUnit || 'unit'
+  const fromOptions = (product.purchaseOptions || []).map((o) => o.unitSymbol).filter(Boolean)
   return [...new Set([base, ...fromOptions])]
 }
 
@@ -14,17 +14,13 @@ export function getProductUnits(product: Product): string[] {
  * Converts from effective price (stored per base_unit) using purchase option rates
  * or unit-registry conversions as fallback.
  */
-export function getPricePerUnit(
-  product: Product,
-  unit: string,
-  unitRegistry: UnitRegistryService
-): number {
+export function getPricePerUnit(product: Product, unit: string, unitRegistry: UnitRegistryService): number {
   const basePrice = getEffectivePrice(product)
-  const base = product.base_unit_ || 'unit'
+  const base = product.baseUnit || 'unit'
   if (unit === base) return basePrice
-  const opt = (product.purchase_options_ || []).find(o => o.unit_symbol_ === unit)
-  if (opt?.conversion_rate_) {
-    return basePrice * opt.conversion_rate_
+  const opt = (product.purchaseOptions || []).find((o) => o.unitSymbol === unit)
+  if (opt?.conversionRate) {
+    return basePrice * opt.conversionRate
   }
   const baseConv = unitRegistry.getConversion(base)
   const unitConv = unitRegistry.getConversion(unit)
@@ -44,11 +40,11 @@ export function calcBuyPriceGlobal(
   pricePerUnit: number,
   unitRegistry: UnitRegistryService
 ): number {
-  const base = product.base_unit_ || 'unit'
+  const base = product.baseUnit || 'unit'
   if (displayUnit === base) return pricePerUnit
-  const opt = (product.purchase_options_ || []).find(o => o.unit_symbol_ === displayUnit)
-  if (opt?.conversion_rate_) {
-    return pricePerUnit / opt.conversion_rate_
+  const opt = (product.purchaseOptions || []).find((o) => o.unitSymbol === displayUnit)
+  if (opt?.conversionRate) {
+    return pricePerUnit / opt.conversionRate
   }
   const baseConv = unitRegistry.getConversion(base)
   const unitConv = unitRegistry.getConversion(displayUnit)

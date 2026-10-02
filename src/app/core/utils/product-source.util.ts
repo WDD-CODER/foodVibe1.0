@@ -5,7 +5,7 @@ import { Product } from '@models/product.model'
  * Uses the lowest positive source price, falling back to deprecated buy_price_global_.
  */
 export function getEffectivePrice(product: Product): number {
-  const prices = (product.sources_ ?? []).map(s => s.price).filter(p => p > 0)
+  const prices = (product.sources ?? []).map((s) => s.price).filter((p) => p > 0)
   if (prices.length) return Math.min(...prices)
   return product.buy_price_global_ ?? 0
 }
@@ -14,8 +14,8 @@ export function getEffectivePrice(product: Product): number {
  * All unique supplier IDs from sources, falling back to deprecated supplierIds_.
  */
 export function getSupplierIds(product: Product): string[] {
-  if (product.sources_?.length) {
-    return [...new Set(product.sources_.map(s => s.supplierId).filter(Boolean))]
+  if (product.sources?.length) {
+    return [...new Set(product.sources.map((s) => s.supplierId).filter(Boolean))]
   }
   return product.supplierIds_ ?? []
 }

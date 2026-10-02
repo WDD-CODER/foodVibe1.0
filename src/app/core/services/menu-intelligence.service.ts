@@ -40,36 +40,36 @@ export class MenuIntelligenceService {
   hydrateDerivedPortions(event: MenuEventLike): MenuEventLike {
     return {
       ...event,
-      sections_: event.sections_.map(section => ({
+      sections: event.sections.map((section) => ({
         ...section,
-        items_: section.items_.map(item => ({
+        items: section.items.map((item) => ({
           ...item,
-          derived_portions_: this.derivePortions(
-            event.serving_type_,
-            event.guest_count_,
-            item.predicted_take_rate_,
-            event.pieces_per_person_,
-            item.serving_portions_ ?? 1
-          ),
-        })),
-      })),
+          derivedPortions: this.derivePortions(
+            event.servingType,
+            event.guestCount,
+            item.predictedTakeRate,
+            event.piecesPerPerson,
+            item.servingPortions ?? 1
+          )
+        }))
+      }))
     }
   }
 
   computeEventIngredientCost(event: MenuEventLike): number {
     let total = 0
-    event.sections_.forEach(section => {
-      section.items_.forEach(item => {
+    event.sections.forEach((section) => {
+      section.items.forEach((item) => {
         const recipe = this.getRecipeBySelection(item)
         if (!recipe) return
-        const baseYield = Math.max(1, recipe.yield_amount_ || 1)
-        const multiplier = item.derived_portions_ / baseYield
+        const baseYield = Math.max(1, recipe.yieldAmount || 1)
+        const multiplier = item.derivedPortions / baseYield
         const scaledRecipe: Recipe = {
           ...recipe,
-          ingredients_: recipe.ingredients_.map(ing => ({
+          ingredients: recipe.ingredients.map((ing) => ({
             ...ing,
-            amount_: (ing.amount_ || 0) * multiplier,
-          })),
+            amount: (ing.amount || 0) * multiplier
+          }))
         }
         total += this.recipeCostService.computeRecipeCost(scaledRecipe)
       })
@@ -80,10 +80,10 @@ export class MenuIntelligenceService {
   /** Total revenue from sell prices: sum of (sell_price × derived_portions) per item. */
   computeEventRevenue(event: MenuEventLike): number {
     let total = 0
-    event.sections_.forEach(section => {
-      section.items_.forEach(item => {
-        const price = item.sell_price_ ?? 0
-        const portions = item.derived_portions_ ?? 0
+    event.sections.forEach((section) => {
+      section.items.forEach((item) => {
+        const price = item.sellPrice ?? 0
+        const portions = item.derivedPortions ?? 0
         total += price * portions
       })
     })
@@ -92,9 +92,9 @@ export class MenuIntelligenceService {
 
   /** Food cost % using target revenue per guest (legacy). */
   computeFoodCostPct(event: MenuEventLike): number {
-    const revenuePerGuest = event.financial_targets_?.target_revenue_per_guest_ ?? 0
-    if (revenuePerGuest <= 0 || event.guest_count_ <= 0) return 0
-    const revenue = revenuePerGuest * event.guest_count_
+    const revenuePerGuest = event.financialTargets?.targetRevenuePerGuest ?? 0
+    if (revenuePerGuest <= 0 || event.guestCount <= 0) return 0
+    const revenue = revenuePerGuest * event.guestCount
     if (revenue <= 0) return 0
     return (this.computeEventIngredientCost(event) / revenue) * 100
   }
@@ -107,6 +107,6 @@ export class MenuIntelligenceService {
   }
 
   private getRecipeBySelection(item: MenuItemSelection): Recipe | undefined {
-    return this.kitchenState.recipes_().find(r => r._id === item.recipe_id_)
+    return this.kitchenState.recipes_().find((r) => r._id === item.recipeId)
   }
 }

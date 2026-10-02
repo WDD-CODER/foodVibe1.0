@@ -60,9 +60,9 @@ import { MasterPushService } from '@services/master-push.service'
 
 interface ProductFormValue {
   buy_price_global_?: number
-  yield_factor_?: number
-  allergens_?: string[]
-  categories_?: string[]
+  yieldFactor?: number
+  allergens?: string[]
+  categories?: string[]
   supplierIds_?: string[]
   [key: string]: unknown
 }
@@ -154,12 +154,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (!this.formValue_) return 0
     const currentForm = this.formValue_()
     const price = currentForm?.buy_price_global_ || 0
-    const yieldFactor = currentForm?.yield_factor_ || 1
+    const yieldFactor = currentForm?.yieldFactor || 1
     return yieldFactor > 0 ? price / yieldFactor : 0
   })
 
   protected selectedAllergensSignal_ = computed(() => {
-    return this.formValue_()?.allergens_ || []
+    return this.formValue_()?.allergens || []
   })
   protected activeRowIndex_ = signal<number | null>(null)
 
@@ -171,7 +171,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   protected filteredCategoryOptions_ = computed(() => {
     const all = this.metadataRegistry.allCategories_()
-    const selected = (this.formValue_?.()?.categories_ ?? []) as string[]
+    const selected = (this.formValue_?.()?.categories ?? []) as string[]
     return all.filter((c: string) => !selected.includes(c))
   })
 
@@ -219,7 +219,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected onMinStockBlur(clickTarget?: HTMLElement): void {
     if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
-    const val = this.productForm_.get('min_stock_level_')?.value
+    const val = this.productForm_.get('minStockLevel')?.value
     if (val == null || val === 0 || val === '') {
       this.expandedMinStock_.set(false)
     }
@@ -228,7 +228,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected onExpiryDaysBlur(clickTarget?: HTMLElement): void {
     if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
-    const val = this.productForm_.get('expiry_days_default_')?.value
+    const val = this.productForm_.get('expiryDaysDefault')?.value
     if (val == null || val === 0 || val === '') {
       this.expandedExpiryDays_.set(false)
     }
@@ -237,7 +237,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected onAllergensBlur(clickTarget?: HTMLElement): void {
     if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
-    const allergens = (this.productForm_.get('allergens_')?.value || []) as string[]
+    const allergens = (this.productForm_.get('allergens')?.value || []) as string[]
     if (allergens.length === 0) {
       this.expandedAllergens_.set(false)
     }
@@ -247,7 +247,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const waste = this.productForm_.get('waste_percent_')?.value
-    const yieldVal = this.productForm_.get('yield_factor_')?.value
+    const yieldVal = this.productForm_.get('yieldFactor')?.value
     const isDefault = (waste == null || waste === 0) && (yieldVal == null || yieldVal === 1)
     if (isDefault) {
       this.expandedWasteYield_.set(false)
@@ -256,13 +256,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   protected openAiProductModal(): void {
     const snapshot: AiProductDraft = {
-      name_hebrew: this.productForm_.get('productName')?.value ?? '',
-      base_unit_: this.productForm_.get('base_unit_')?.value ?? '',
-      categories_: this.productForm_.get('categories_')?.value ?? [],
-      allergens_: this.productForm_.get('allergens_')?.value ?? [],
-      yield_factor_: this.productForm_.get('yield_factor_')?.value ?? 1,
-      min_stock_level_: this.productForm_.get('min_stock_level_')?.value ?? 0,
-      expiry_days_default_: this.productForm_.get('expiry_days_default_')?.value ?? 0
+      nameHebrew: this.productForm_.get('productName')?.value ?? '',
+      baseUnit: this.productForm_.get('baseUnit')?.value ?? '',
+      categories: this.productForm_.get('categories')?.value ?? [],
+      allergens: this.productForm_.get('allergens')?.value ?? [],
+      yieldFactor: this.productForm_.get('yieldFactor')?.value ?? 1,
+      minStockLevel: this.productForm_.get('minStockLevel')?.value ?? 0,
+      expiryDaysDefault: this.productForm_.get('expiryDaysDefault')?.value ?? 0
     }
     this.aiProductModal_.open('edit', snapshot, undefined, async (patch) => this.productAiFlow_.applyPatch(patch))
   }
@@ -285,15 +285,15 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         if (!lastUnitName) return
 
         if (isBase) {
-          this.productForm_.get('base_unit_')?.setValue(lastUnitName)
+          this.productForm_.get('baseUnit')?.setValue(lastUnitName)
           this.isBaseUnitMode_.set(false)
         } else if (index !== null) {
           const row = this.purchaseOptions_.at(index)
-          const currentBase = this.productForm_.get('base_unit_')?.value
+          const currentBase = this.productForm_.get('baseUnit')?.value
 
           // 3. Patch both the symbol AND the UOM (grams/ml) at once
           row.patchValue({
-            unit_symbol_: lastUnitName,
+            unitSymbol: lastUnitName,
             uom: currentBase
           })
 
@@ -324,7 +324,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         } else {
           this.isEditMode_.set(false)
           this.curProduct_.set(this.utilService.getEmptyProduct())
-          this.productForm_.patchValue({ base_unit_: 'kg' })
+          this.productForm_.patchValue({ baseUnit: 'kg' })
           this.initialFormSnapshot_ = this.getFormSnapshotForComparison()
         }
       })
@@ -333,23 +333,23 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.unitRegistry.unitAdded$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((unitKey) => {
       const idx = this.activeRowIndex_()
       if (idx === null || idx === undefined) return
-      const baseUnit = this.productForm_.get('base_unit_')?.value ?? ''
+      const baseUnit = this.productForm_.get('baseUnit')?.value ?? ''
       const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1
       const unitFactor = this.unitRegistry.getConversion(unitKey) || 1
-      // conversion_rate_ = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
-      const conversion_rate_ = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
+      // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
+      const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
       const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(
         this.productForm_.get('buy_price_global_')?.value || 0,
-        conversion_rate_
+        conversionRate
       )
       const row = this.purchaseOptions_.at(idx)
       if (row) {
         row.patchValue(
           {
-            unit_symbol_: unitKey,
+            unitSymbol: unitKey,
             uom: baseUnit,
-            conversion_rate_: conversion_rate_,
-            price_override_: suggestedPrice
+            conversionRate: conversionRate,
+            priceOverride: suggestedPrice
           },
           { emitEvent: false }
         )
@@ -371,16 +371,16 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           )
         ]
       ],
-      base_unit_: ['', Validators.required],
+      baseUnit: ['', Validators.required],
       buy_price_global_: [0, [Validators.required, Validators.min(0)]],
-      categories_: [[], [Validators.required, Validators.minLength(1)]],
+      categories: [[], [Validators.required, Validators.minLength(1)]],
       supplierIds_: [[]],
-      min_stock_level_: [0, [Validators.min(0)]],
-      expiry_days_default_: [0, [Validators.min(0)]],
-      yield_factor_: [1, [Validators.required, Validators.min(0)]],
+      minStockLevel: [0, [Validators.min(0)]],
+      expiryDaysDefault: [0, [Validators.min(0)]],
+      yieldFactor: [1, [Validators.required, Validators.min(0)]],
       waste_percent_: [0, [Validators.min(0), Validators.max(99)]],
-      allergens_: [[]],
-      purchase_options_: this.fb_.array([])
+      allergens: [[]],
+      purchaseOptions: this.fb_.array([])
     })
     this.setupWasteLogic()
   }
@@ -388,7 +388,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   // RESTORED WASTE LOGIC
   private setupWasteLogic(): void {
     const percentCtrl = this.productForm_.get('waste_percent_')
-    const yieldCtrl = this.productForm_.get('yield_factor_')
+    const yieldCtrl = this.productForm_.get('yieldFactor')
 
     // React to Waste % change
     percentCtrl?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((pct) => {
@@ -481,7 +481,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         await this.metadataRegistry.registerAllergen(englishKey)
         this.translationService.updateDictionary(englishKey, result.hebrewLabel)
       }
-      const current = (this.productForm_.get('allergens_')?.value || []) as string[]
+      const current = (this.productForm_.get('allergens')?.value || []) as string[]
       if (current.includes(englishKey)) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('allergen_already_on_product'))
         return
@@ -501,9 +501,9 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       this.activeRowIndex_.set(null)
       this.isBaseUnitMode_.set(true)
       this.unitRegistry.openUnitCreator()
-      this.productForm_.patchValue({ base_unit_: '' })
+      this.productForm_.patchValue({ baseUnit: '' })
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
-        this.productForm_.patchValue({ base_unit_: newUnit })
+        this.productForm_.patchValue({ baseUnit: newUnit })
       })
     }
   }
@@ -513,13 +513,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       this.activeRowIndex_.set(index)
       this.isBaseUnitMode_.set(false)
       const existingSymbols =
-        ((this.purchaseOptions_.value as { unit_symbol_?: string }[])
-          ?.map((o) => o?.unit_symbol_)
+        ((this.purchaseOptions_.value as { unitSymbol?: string }[])
+          ?.map((o) => o?.unitSymbol)
           ?.filter(Boolean) as string[]) ?? []
       this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols })
-      ;(this.productForm_.get('purchase_options_') as FormArray)?.at(index)?.patchValue({ unit_symbol_: '' })
+      ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ unitSymbol: '' })
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
-        ;(this.productForm_.get('purchase_options_') as FormArray)?.at(index)?.patchValue({ unit_symbol_: newUnit })
+        ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ unitSymbol: newUnit })
       })
     }
   }
@@ -527,15 +527,15 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected onUomValueChange(value: string, index: number): void {
     if (value === 'NEW_UNIT') {
       this.unitRegistry.openUnitCreator()
-      ;(this.productForm_.get('purchase_options_') as FormArray)?.at(index)?.patchValue({ uom: '' })
+      ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ uom: '' })
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
-        ;(this.productForm_.get('purchase_options_') as FormArray)?.at(index)?.patchValue({ uom: newUnit })
+        ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ uom: newUnit })
       })
     }
   }
 
   protected toggleAllergen(allergen: string): void {
-    const ctrl = this.productForm_.get('allergens_')
+    const ctrl = this.productForm_.get('allergens')
     const current = (ctrl?.value || []) as string[]
     const updated = current.includes(allergen) ? current.filter((a: string) => a !== allergen) : [...current, allergen]
 
@@ -545,7 +545,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   protected addCategory(cat: string): void {
     if (!cat?.trim()) return
-    const ctrl = this.productForm_.get('categories_')
+    const ctrl = this.productForm_.get('categories')
     const current = (ctrl?.value || []) as string[]
     if (current.includes(cat)) {
       this.userMsgService.onSetErrorMsg(this.translationService.translate('category_already_on_product'))
@@ -556,7 +556,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected removeCategory(cat: string): void {
-    const ctrl = this.productForm_.get('categories_')
+    const ctrl = this.productForm_.get('categories')
     const current = (ctrl?.value || []) as string[]
     ctrl?.setValue(current.filter((c) => c !== cat))
     ctrl?.markAsDirty()
@@ -584,17 +584,17 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   protected selectedCategories_(): string[] {
-    return (this.productForm_.get('categories_')?.value || []) as string[]
+    return (this.productForm_.get('categories')?.value || []) as string[]
   }
 
   protected getSupplierName(supplierId: string): string {
     const supplier = this.kitchenStateService.suppliersById_().get(supplierId)
-    return supplier?.name_hebrew ?? supplierId
+    return supplier?.nameHebrew ?? supplierId
   }
 
   //GETERS
   get purchaseOptions_(): FormArray {
-    return this.productForm_.get('purchase_options_') as FormArray
+    return this.productForm_.get('purchaseOptions') as FormArray
   }
 
   get readProductForm_(): FormGroup {
@@ -605,8 +605,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   getValuesNeedingTranslation(): string[] {
     if (!this.productForm_) return []
     const raw = this.productForm_.getRawValue()
-    const categories = (raw?.categories_ ?? []) as string[]
-    const allergens = (raw?.allergens_ ?? []) as string[]
+    const categories = (raw?.categories ?? []) as string[]
+    const allergens = (raw?.allergens ?? []) as string[]
     const combined = [...categories, ...allergens]
       .map((v) => (v != null ? String(v).trim() : ''))
       .filter((v) => v !== '')
@@ -614,13 +614,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     return unique.filter((v) => !this.translationService.hasKey(v))
   }
 
-  /** For pendingChangesGuard: remove untranslated values from categories_ and allergens_ when user chooses "continue without saving". */
+  /** For pendingChangesGuard: remove untranslated values from categories and allergens when user chooses "continue without saving". */
   removeValuesNeedingTranslation(): void {
     if (!this.productForm_) return
     const toRemove = this.getValuesNeedingTranslation()
     if (toRemove.length === 0) return
-    const catCtrl = this.productForm_.get('categories_')
-    const allCtrl = this.productForm_.get('allergens_')
+    const catCtrl = this.productForm_.get('categories')
+    const allCtrl = this.productForm_.get('allergens')
     const currentCat = ((catCtrl?.value ?? []) as string[]).filter((v) => !toRemove.includes(String(v).trim()))
     const currentAll = ((allCtrl?.value ?? []) as string[]).filter((v) => !toRemove.includes(String(v).trim()))
     catCtrl?.setValue(currentCat)
@@ -635,88 +635,88 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     return this.getFormSnapshotForComparison() !== this.initialFormSnapshot_
   }
 
-  /** Normalized form value for comparison (sorted arrays, comparable purchase_options_). */
+  /** Normalized form value for comparison (sorted arrays, comparable purchaseOptions). */
   private getFormSnapshotForComparison(): string {
     const raw = this.productForm_.getRawValue()
-    const opts = (raw?.purchase_options_ ?? []) as Array<{
-      unit_symbol_?: string
-      conversion_rate_?: number
+    const opts = (raw?.purchaseOptions ?? []) as Array<{
+      unitSymbol?: string
+      conversionRate?: number
       uom?: string
-      price_override_?: number
+      priceOverride?: number
     }>
     const normalized = {
       productName: raw?.productName ?? '',
-      base_unit_: raw?.base_unit_ ?? '',
+      baseUnit: raw?.baseUnit ?? '',
       buy_price_global_: Number(raw?.buy_price_global_) || 0,
-      categories_: [...((raw?.categories_ ?? []) as string[])].sort(),
+      categories: [...((raw?.categories ?? []) as string[])].sort(),
       supplierIds_: [...(raw?.supplierIds_ ?? [])].sort(),
-      min_stock_level_: Number(raw?.min_stock_level_) ?? 0,
-      expiry_days_default_: Number(raw?.expiry_days_default_) ?? 0,
-      yield_factor_: Number(raw?.yield_factor_) ?? 1,
+      minStockLevel: Number(raw?.minStockLevel) ?? 0,
+      expiryDaysDefault: Number(raw?.expiryDaysDefault) ?? 0,
+      yieldFactor: Number(raw?.yieldFactor) ?? 1,
       waste_percent_: Number(raw?.waste_percent_) ?? 0,
-      allergens_: [...((raw?.allergens_ ?? []) as string[])].sort(),
-      purchase_options_: opts
+      allergens: [...((raw?.allergens ?? []) as string[])].sort(),
+      purchaseOptions: opts
         .map((o) => ({
-          unit_symbol_: o?.unit_symbol_ ?? '',
-          conversion_rate_: Number(o?.conversion_rate_) ?? 0,
+          unitSymbol: o?.unitSymbol ?? '',
+          conversionRate: Number(o?.conversionRate) ?? 0,
           uom: o?.uom ?? '',
-          price_override_: Number(o?.price_override_) ?? 0
+          priceOverride: Number(o?.priceOverride) ?? 0
         }))
-        .sort((a, b) => (a.unit_symbol_ || '').localeCompare(b.unit_symbol_ || ''))
+        .sort((a, b) => (a.unitSymbol || '').localeCompare(b.unitSymbol || ''))
     }
     return JSON.stringify(normalized)
   }
 
   protected addPurchaseOption(opt?: Partial<PurchaseOption_>): void {
-    const unit = opt?.unit_symbol_ || ''
-    const conv = opt ? opt.conversion_rate_ : null
-    const baseUnit = this.productForm_.get('base_unit_')?.value ?? ''
+    const unit = opt?.unitSymbol || ''
+    const conv = opt ? opt.conversionRate : null
+    const baseUnit = this.productForm_.get('baseUnit')?.value ?? ''
     const uomValue = opt?.uom ?? baseUnit
 
     const group = this.fb_.group({
-      unit_symbol_: [unit, Validators.required],
-      conversion_rate_: [conv, [Validators.required, Validators.min(0.0001)]],
+      unitSymbol: [unit, Validators.required],
+      conversionRate: [conv, [Validators.required, Validators.min(0.0001)]],
       uom: [uomValue, Validators.required],
-      show_special_price_: [!!(opt?.price_override_ != null && Number(opt?.price_override_) !== 0)],
-      price_override_: [opt?.price_override_ || 0, [Validators.min(0)]]
+      show_special_price_: [!!(opt?.priceOverride != null && Number(opt?.priceOverride) !== 0)],
+      priceOverride: [opt?.priceOverride || 0, [Validators.min(0)]]
     })
 
     // Initialize state for this row
     this.purchaseOptionState_.set(group, { overrideConfirmed: false })
 
     group
-      .get('unit_symbol_')
+      .get('unitSymbol')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((newUnit: string | null) => {
         if (!newUnit || newUnit === 'NEW_UNIT') {
           group.patchValue(
             {
-              conversion_rate_: null,
+              conversionRate: null,
               uom: '',
-              price_override_: 0
+              priceOverride: 0
             },
             { emitEvent: false }
           )
           return
         }
 
-        const baseUnitKey = this.productForm_.get('base_unit_')?.value ?? ''
+        const baseUnitKey = this.productForm_.get('baseUnit')?.value ?? ''
         const baseFactor = this.unitRegistry.getConversion(baseUnitKey) || 1
         const unitFactor = this.unitRegistry.getConversion(newUnit) || 1
-        // conversion_rate_ = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
+        // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
         const suggestedConv = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
         const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0
 
         // 1. Get the actual base unit selected at the top of the form (e.g., 'gram')
-        const currentBaseUnit = this.productForm_.get('base_unit_')?.value ?? ''
+        const currentBaseUnit = this.productForm_.get('baseUnit')?.value ?? ''
         const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv)
 
         // 2. Patch the row so the "UOM" (middle dropdown) is no longer empty
         group.patchValue(
           {
-            conversion_rate_: suggestedConv,
+            conversionRate: suggestedConv,
             uom: currentBaseUnit, // 👈 This fills the empty slot next to 5000
-            price_override_: suggestedPrice
+            priceOverride: suggestedPrice
           },
           { emitEvent: false }
         )
@@ -727,11 +727,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         this.purchaseOptionState_.set(group, state)
 
         // 3. Mark for check to ensure the UI refreshes the calculation
-        group.get('price_override_')?.markAsDirty()
+        group.get('priceOverride')?.markAsDirty()
       })
 
     group
-      .get('conversion_rate_')
+      .get('conversionRate')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((newConv: number | null | undefined) => {
         if (newConv === null || newConv === undefined) return
@@ -740,16 +740,16 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           return
         }
         const conventional = this.getConventionalPriceForGroup_(group)
-        group.get('price_override_')?.setValue(conventional, { emitEvent: false })
+        group.get('priceOverride')?.setValue(conventional, { emitEvent: false })
       })
 
-    // When user unchecks "special price", clear price_override_ so the state persists on save (when they come back it stays unchecked)
+    // When user unchecks "special price", clear priceOverride so the state persists on save (when they come back it stays unchecked)
     group
       .get('show_special_price_')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((checked: boolean | null) => {
         if (!checked) {
-          group.get('price_override_')?.setValue(0, { emitEvent: false })
+          group.get('priceOverride')?.setValue(0, { emitEvent: false })
         }
       })
 
@@ -759,25 +759,25 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   /** Computes the conventional (auto) price for a row, based on base price and conversion rate. */
   private getConventionalPriceForGroup_(group: FormGroup): number {
     const basePrice = this.productForm_.get('buy_price_global_')?.value || 0
-    const conv = group.get('conversion_rate_')?.value
+    const conv = group.get('conversionRate')?.value
     if (!basePrice || !conv) return 0
     // Conventional meaning: price for the quantity that equals 1 base unit
     return this.conversionService.getSuggestedPurchasePrice(basePrice, conv)
   }
 
-  /** Called on blur of price_override_ to confirm manual overrides that differ from the conventional value. */
+  /** Called on blur of priceOverride to confirm manual overrides that differ from the conventional value. */
   protected async onPriceOverrideBlur(control: AbstractControl | null | undefined): Promise<void> {
     const group = control as FormGroup | null
     if (!group) return
 
     const state = this.purchaseOptionState_.get(group) || { overrideConfirmed: false }
     const conventional = this.getConventionalPriceForGroup_(group)
-    const current = group.get('price_override_')?.value
+    const current = group.get('priceOverride')?.value
     const epsilon = 0.0001
 
     // If empty or NaN, snap back to conventional and clear override
     if (current === null || current === '' || isNaN(Number(current))) {
-      group.get('price_override_')?.setValue(conventional, { emitEvent: false })
+      group.get('priceOverride')?.setValue(conventional, { emitEvent: false })
       state.overrideConfirmed = false
       this.purchaseOptionState_.set(group, state)
       return
@@ -799,7 +799,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       state.overrideConfirmed = true
       this.purchaseOptionState_.set(group, state)
     } else {
-      group.get('price_override_')?.setValue(conventional, { emitEvent: false })
+      group.get('priceOverride')?.setValue(conventional, { emitEvent: false })
       state.overrideConfirmed = false
       this.purchaseOptionState_.set(group, state)
     }
@@ -809,34 +809,34 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.isEditMode_.set(true)
     this.curProduct_.set(data)
 
-    const legacy = data as unknown as { category_?: string; is_dairy_?: boolean }
-    const categories_ = data.categories_ ?? (legacy.category_ ? [legacy.category_] : [])
-    const withDairy = legacy.is_dairy_ && !categories_.includes('dairy') ? [...categories_, 'dairy'] : categories_
+    const legacy = data as unknown as { category?: string; is_dairy_?: boolean }
+    const categories = data.categories ?? (legacy.category ? [legacy.category] : [])
+    const withDairy = legacy.is_dairy_ && !categories.includes('dairy') ? [...categories, 'dairy'] : categories
 
     this.productForm_.patchValue({
-      productName: data.name_hebrew,
-      base_unit_: data.base_unit_,
+      productName: data.nameHebrew,
+      baseUnit: data.baseUnit,
       buy_price_global_: getEffectivePrice(data),
-      categories_: withDairy,
+      categories: withDairy,
       supplierIds_: getSupplierIds(data),
-      min_stock_level_: data.min_stock_level_ ?? 0,
-      expiry_days_default_: data.expiry_days_default_ ?? 0,
-      yield_factor_: data.yield_factor_,
-      waste_percent_: Math.round((1 - data.yield_factor_) * 100),
-      allergens_: data.allergens_ || []
+      minStockLevel: data.minStockLevel ?? 0,
+      expiryDaysDefault: data.expiryDaysDefault ?? 0,
+      yieldFactor: data.yieldFactor,
+      waste_percent_: Math.round((1 - data.yieldFactor) * 100),
+      allergens: data.allergens || []
     })
 
-    if ((data.min_stock_level_ ?? 0) > 0) this.expandedMinStock_.set(true)
-    if ((data.expiry_days_default_ ?? 0) > 0) this.expandedExpiryDays_.set(true)
-    if (Math.abs((data.yield_factor_ ?? 1) - 1) > 0.001) this.expandedWasteYield_.set(true)
-    if ((data.allergens_?.length ?? 0) > 0) this.expandedAllergens_.set(true)
+    if ((data.minStockLevel ?? 0) > 0) this.expandedMinStock_.set(true)
+    if ((data.expiryDaysDefault ?? 0) > 0) this.expandedExpiryDays_.set(true)
+    if (Math.abs((data.yieldFactor ?? 1) - 1) > 0.001) this.expandedWasteYield_.set(true)
+    if ((data.allergens?.length ?? 0) > 0) this.expandedAllergens_.set(true)
     if (getSupplierIds(data).length > 0) this.expandedSupplier_.set(true)
 
     this.purchaseOptions_.clear()
 
-    if (data.purchase_options_ && data.purchase_options_.length > 0) {
-      const baseUom = data.base_unit_ ?? 'gram'
-      data.purchase_options_.forEach((opt) => {
+    if (data.purchaseOptions && data.purchaseOptions.length > 0) {
+      const baseUom = data.baseUnit ?? 'gram'
+      data.purchaseOptions.forEach((opt) => {
         this.addPurchaseOption({ ...opt, uom: opt.uom ?? baseUom })
       })
     }
@@ -847,9 +847,9 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const errors: Record<string, string> = {}
     const val = this.productForm_.getRawValue()
     if (!val.productName?.trim()) errors['productName'] = 'field_name_required'
-    if (!val.base_unit_?.trim()) errors['base_unit_'] = 'field_unit_required'
+    if (!val.baseUnit?.trim()) errors['baseUnit'] = 'field_unit_required'
     if (val.buy_price_global_ == null || val.buy_price_global_ < 0) errors['buy_price_global_'] = 'field_price_required'
-    if (!val.categories_?.length) errors['categories_'] = 'field_category_required'
+    if (!val.categories?.length) errors['categories'] = 'field_category_required'
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
   }
@@ -873,23 +873,23 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       return false
     }
     const val = this.productForm_.getRawValue()
-    const categories = (val.categories_ ?? []) as string[]
+    const categories = (val.categories ?? []) as string[]
     categories.forEach((cat) => this.metadataRegistry.registerCategory(cat))
 
-    const purchaseOptions = (val.purchase_options_ ?? []).map(
+    const purchaseOptions = (val.purchaseOptions ?? []).map(
       (opt: PurchaseOption_ & { show_special_price_?: boolean }) => {
         const { show_special_price_: _, ...rest } = opt
         return rest as PurchaseOption_
       }
     )
 
-    // Build sources_ from form's flat buy_price_global_ + supplierIds_
+    // Build sources from form's flat buy_price_global_ + supplierIds_
     const formPrice = val.buy_price_global_ ?? 0
     const formSupplierIds = (val.supplierIds_ ?? []) as string[]
-    const existingSources = this.curProduct_()?.sources_ ?? []
-    let sources_: ProductSource[]
+    const existingSources = this.curProduct_()?.sources ?? []
+    let sources: ProductSource[]
     if (formSupplierIds.length > 0) {
-      sources_ = formSupplierIds.map((sid) => {
+      sources = formSupplierIds.map((sid) => {
         const existing = existingSources.find((s) => s.supplierId === sid)
         return {
           supplierId: sid,
@@ -899,20 +899,20 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         }
       })
     } else {
-      sources_ = formPrice > 0 ? [{ supplierId: '', price: formPrice, addedAt: Date.now() }] : []
+      sources = formPrice > 0 ? [{ supplierId: '', price: formPrice, addedAt: Date.now() }] : []
     }
 
     const productToSave: Product = {
       ...this.curProduct_()!,
-      name_hebrew: val.productName,
-      base_unit_: val.base_unit_,
-      sources_,
-      categories_: categories,
-      min_stock_level_: val.min_stock_level_ ?? 0,
-      expiry_days_default_: val.expiry_days_default_ ?? 0,
-      yield_factor_: val.yield_factor_,
-      allergens_: val.allergens_,
-      purchase_options_: purchaseOptions
+      nameHebrew: val.productName,
+      baseUnit: val.baseUnit,
+      sources,
+      categories: categories,
+      minStockLevel: val.minStockLevel ?? 0,
+      expiryDaysDefault: val.expiryDaysDefault ?? 0,
+      yieldFactor: val.yieldFactor,
+      allergens: val.allergens,
+      purchaseOptions: purchaseOptions
     }
 
     // Plan 322 M9: same admin "just me / everyone" prompt already asked for

@@ -14,9 +14,10 @@
     "test": "ng test",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
-    "build:render": "npx ng build --configuration=production",
-    "serve:prod": "ng build && cd server && node index.js",
-    "dev:local": "ng serve -c local",
+    "build:schemas": "tsc -p shared/schemas/tsconfig.cjs.json",
+    "build:render": "npm run build:schemas && npx ng build --configuration=production",
+    "serve:prod": "npm run build:schemas && ng build && cd server && node index.js",
+    "dev:local": "npm run build:schemas && ng serve -c local",
     "dev:remote": "ng serve -c remote",
     "repair:backup": "node scripts/backup-before-repair.mjs",
     "repair:diagnose": "node scripts/diagnose-broken-refs.mjs",
@@ -47,6 +48,7 @@
     "lucide-angular": "^0.563.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "zod": "4.6.5",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

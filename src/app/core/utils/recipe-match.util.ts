@@ -1,23 +1,25 @@
 // Pure utility — no Angular imports. Reusable across all AI entity phases.
 
 export function normalizeHebrew(s: string): string {
-  return s
-    .normalize('NFD')
-    // strip niqqud (U+0591–U+05C7) and other Hebrew combining marks
-    .replace(/[\u0591-\u05C7]/g, '')
-    .toLowerCase()
-    // strip common punctuation
-    .replace(/[.,;:!?'"()\[\]{}/\\-]/g, ' ')
-    // collapse whitespace
-    .replace(/\s+/g, ' ')
-    .trim()
+  return (
+    s
+      .normalize('NFD')
+      // strip niqqud (U+0591–U+05C7) and other Hebrew combining marks
+      .replace(/[\u0591-\u05C7]/g, '')
+      .toLowerCase()
+      // strip common punctuation
+      .replace(/[.,;:!?'"()\[\]{}/\\-]/g, ' ')
+      // collapse whitespace
+      .replace(/\s+/g, ' ')
+      .trim()
+  )
 }
 
 function levenshtein(a: string, b: string): number {
   const m = a.length
   const n = b.length
   const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
-    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)),
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
   )
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
@@ -50,14 +52,14 @@ export interface MatchResult {
   status: 'matched' | 'ambiguous' | 'unmatched'
 }
 
-export function matchRecipeName<T extends { _id: string; name_hebrew: string }>(
+export function matchRecipeName<T extends { _id: string; nameHebrew: string }>(
   query: string,
-  records: T[],
+  records: T[]
 ): MatchResult {
   const normQuery = normalizeHebrew(query)
 
   const scored: MatchCandidate[] = records.map((r) => {
-    const normName = normalizeHebrew(r.name_hebrew)
+    const normName = normalizeHebrew(r.nameHebrew)
     let confidence: number
 
     if (normName === normQuery) {
@@ -70,7 +72,7 @@ export function matchRecipeName<T extends { _id: string; name_hebrew: string }>(
       confidence = levenshteinRatio(normQuery, normName)
     }
 
-    return { recipeId: r._id, name: r.name_hebrew, confidence }
+    return { recipeId: r._id, name: r.nameHebrew, confidence }
   })
 
   scored.sort((a, b) => b.confidence - a.confidence)

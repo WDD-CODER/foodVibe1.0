@@ -22,7 +22,7 @@ export type SaveScope = 'me' | 'everyone' | 'cancel'
  * skips the prompt silently sets `_userModified: true`, and sync-master's
  * Rule 3 then excludes that recipe from every future master update.
  *
- * Deliberately NOT used for per-user state such as `favoritedBy_`: pushing a
+ * Deliberately NOT used for per-user state such as `favoritedBy`: pushing a
  * personal favourite to master would publish it to every other user.
  */
 @Injectable({ providedIn: 'root' })
@@ -66,7 +66,7 @@ export class MasterPushService {
    * already saved, so a failed publish is not a lost edit.
    */
   pushToMaster(saved: Recipe): void {
-    const isDish = saved.recipe_type_ === 'dish'
+    const isDish = saved.recipeType === 'dish'
     const op = isDish ? this.dishData.pushToMaster(saved._id) : this.recipeData.pushToMaster(saved._id)
     op.then(({ masterId }) => {
       if (isDish) this.dishData.patchMasterId(saved._id, masterId)
@@ -98,7 +98,7 @@ export class MasterPushService {
    */
   deleteFromMaster(recipe: Recipe): void {
     const op =
-      recipe.recipe_type_ === 'dish'
+      recipe.recipeType === 'dish'
         ? this.dishData.deleteFromMaster(recipe._id)
         : this.recipeData.deleteFromMaster(recipe._id)
     op.catch(() => this.userMsg.onSetErrorMsg(this.translation.translate('delete_from_master_error')))

@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('backfill-dish-prep-items.js');
 /**
  * SUPERSEDED — do not run. This script derives a dish's מיזאנפלס list from its
  * ingredient lines, which plan 314 established is the wrong source: the list

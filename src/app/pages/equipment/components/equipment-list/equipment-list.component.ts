@@ -46,7 +46,7 @@ import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-act
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
 type SortField = 'name' | 'category' | 'owned'
-type EquipmentBulkField = 'category_' | 'is_consumable_'
+type EquipmentBulkField = 'category' | 'isConsumable'
 
 @Component({
   selector: 'app-equipment-list',
@@ -161,13 +161,13 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   protected editableFields_ = computed<BulkEditableField[]>(() => [
     {
-      key: 'category_',
+      key: 'category',
       label: 'category',
       options: this.categories.map((c) => ({ value: c, label: c })),
       multi: false
     },
     {
-      key: 'is_consumable_',
+      key: 'isConsumable',
       label: 'consumable',
       options: [
         { value: 'true', label: 'yes' },
@@ -193,22 +193,22 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     const order = this.sortOrder_()
 
     if (search) {
-      list = list.filter((e) => (e.name_hebrew ?? '').toLowerCase().includes(search))
+      list = list.filter((e) => (e.nameHebrew ?? '').toLowerCase().includes(search))
     }
     if (cats.size > 0) {
-      list = list.filter((e) => cats.has(e.category_))
+      list = list.filter((e) => cats.has(e.category))
     }
     if (consumableOnly !== null) {
-      list = list.filter((e) => e.is_consumable_ === consumableOnly)
+      list = list.filter((e) => e.isConsumable === consumableOnly)
     }
     list = [...list].sort((a, b) => {
       let cmp = 0
       if (sortBy === 'name') {
-        cmp = (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he')
+        cmp = (a.nameHebrew ?? '').localeCompare(b.nameHebrew ?? '', 'he')
       } else if (sortBy === 'category') {
-        cmp = (a.category_ ?? '').localeCompare(b.category_ ?? '')
+        cmp = (a.category ?? '').localeCompare(b.category ?? '')
       } else {
-        cmp = (a.owned_quantity_ ?? 0) - (b.owned_quantity_ ?? 0)
+        cmp = (a.ownedQuantity ?? 0) - (b.ownedQuantity ?? 0)
       }
       return order === 'asc' ? cmp : -cmp
     })
@@ -246,42 +246,42 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
    * `Equipment.dc.html:351,680` per-row label. `null` max renders as a bare min, no dash. */
   protected scalingSummary(rule: ScalingRule | undefined): string {
     if (!rule) return this.translation.translate('no_scaling') ?? '—'
-    const range = rule.max_quantity_ != null ? `${rule.min_quantity_}–${rule.max_quantity_}` : `${rule.min_quantity_}`
+    const range = rule.maxQuantity != null ? `${rule.minQuantity}–${rule.maxQuantity}` : `${rule.minQuantity}`
     return (this.translation.translate('scaling_summary') ?? '{n} guests · min {range}')
-      .replace('{n}', String(rule.per_guests_))
+      .replace('{n}', String(rule.perGuests))
       .replace('{range}', range)
   }
 
   private buildEditForm(): void {
     this.editForm_ = this.fb.group({
-      name_hebrew: ['', [Validators.required]],
-      category_: ['tool', [Validators.required]],
-      owned_quantity_: [1, [Validators.required, Validators.min(0)]],
-      is_consumable_: [false],
-      notes_: [''],
+      nameHebrew: ['', [Validators.required]],
+      category: ['tool', [Validators.required]],
+      ownedQuantity: [1, [Validators.required, Validators.min(0)]],
+      isConsumable: [false],
+      notes: [''],
       scaling_enabled_: [false],
-      per_guests_: [25, [Validators.min(1)]],
-      min_quantity_: [1, [Validators.min(0)]],
-      max_quantity_: [null as number | null]
+      perGuests: [25, [Validators.min(1)]],
+      minQuantity: [1, [Validators.min(0)]],
+      maxQuantity: [null as number | null]
     })
   }
 
   private hydrateEditForm(e: Equipment): void {
-    const cat = (e.category_ ?? 'tool') as string
+    const cat = (e.category ?? 'tool') as string
     if (cat && cat !== ADD_NEW_CATEGORY_VALUE && !this.categories.includes(cat as EquipmentCategory)) {
       this.customCategories_.update((list) => (list.includes(cat) ? list : [...list, cat]))
     }
     this.lastCategory_.set(cat && cat !== ADD_NEW_CATEGORY_VALUE ? cat : 'tool')
     this.editForm_.patchValue({
-      name_hebrew: e.name_hebrew ?? '',
-      category_: cat,
-      owned_quantity_: e.owned_quantity_ ?? 0,
-      is_consumable_: e.is_consumable_ ?? false,
-      notes_: e.notes_ ?? '',
-      scaling_enabled_: !!e.scaling_rule_,
-      per_guests_: e.scaling_rule_?.per_guests_ ?? 25,
-      min_quantity_: e.scaling_rule_?.min_quantity_ ?? 1,
-      max_quantity_: e.scaling_rule_?.max_quantity_ ?? null
+      nameHebrew: e.nameHebrew ?? '',
+      category: cat,
+      ownedQuantity: e.ownedQuantity ?? 0,
+      isConsumable: e.isConsumable ?? false,
+      notes: e.notes ?? '',
+      scaling_enabled_: !!e.scalingRule,
+      perGuests: e.scalingRule?.perGuests ?? 25,
+      minQuantity: e.scalingRule?.minQuantity ?? 1,
+      maxQuantity: e.scalingRule?.maxQuantity ?? null
     })
   }
 
@@ -295,7 +295,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     }
     this.lastCategory_.set(value)
     if (context === 'inline') {
-      this.editForm_.patchValue({ category_: value })
+      this.editForm_.patchValue({ category: value })
     }
   }
 
@@ -324,10 +324,10 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       void this.equipmentCategoryRegistry.addCategory(keyToUse)
       if (context === 'inline') {
         this.lastCategory_.set(keyToUse)
-        this.editForm_.patchValue({ category_: keyToUse })
+        this.editForm_.patchValue({ category: keyToUse })
       }
     } else if (context === 'inline') {
-      this.editForm_.patchValue({ category_: previousCategory })
+      this.editForm_.patchValue({ category: previousCategory })
     }
   }
 
@@ -418,23 +418,23 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     this.isSavingEdit_.set(true)
     try {
       const v = this.editForm_.getRawValue()
-      const now = new Date().toISOString()
+      const now = Date.now()
       const scalingRule: ScalingRule | undefined = v.scaling_enabled_
         ? {
-            per_guests_: Number(v.per_guests_),
-            min_quantity_: Number(v.min_quantity_),
-            max_quantity_: v.max_quantity_ != null && v.max_quantity_ !== '' ? Number(v.max_quantity_) : undefined
+            perGuests: Number(v.perGuests),
+            minQuantity: Number(v.minQuantity),
+            maxQuantity: v.maxQuantity != null && v.maxQuantity !== '' ? Number(v.maxQuantity) : undefined
           }
         : undefined
       const updated: Equipment = {
         ...equipment,
-        name_hebrew: v.name_hebrew,
-        category_: v.category_ as EquipmentCategory,
-        owned_quantity_: Number(v.owned_quantity_),
-        is_consumable_: !!v.is_consumable_,
-        notes_: v.notes_ ?? undefined,
-        scaling_rule_: scalingRule,
-        updated_at_: now
+        nameHebrew: v.nameHebrew,
+        category: v.category as EquipmentCategory,
+        ownedQuantity: Number(v.ownedQuantity),
+        isConsumable: !!v.isConsumable,
+        notes: v.notes ?? undefined,
+        scalingRule: scalingRule,
+        updatedAt: now
       }
       await this.equipmentData.updateEquipment(updated)
       return true
@@ -490,7 +490,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   async onDelete(item: Equipment): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
     if (
-      !(await this.confirmModal.open('האם למחוק את פריט הציוד "' + (item.name_hebrew ?? '') + '"?', {
+      !(await this.confirmModal.open('האם למחוק את פריט הציוד "' + (item.nameHebrew ?? '') + '"?', {
         variant: 'danger'
       }))
     )
@@ -512,10 +512,10 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       const item = equipment.find((e) => e._id === id)
       if (!item) continue
       let updated: Equipment
-      if (field === 'category_') {
-        updated = { ...item, category_: event.value as EquipmentCategory }
+      if (field === 'category') {
+        updated = { ...item, category: event.value as EquipmentCategory }
       } else {
-        updated = { ...item, is_consumable_: event.value === 'true' }
+        updated = { ...item, isConsumable: event.value === 'true' }
       }
       void this.equipmentData.updateEquipment(updated)
     }

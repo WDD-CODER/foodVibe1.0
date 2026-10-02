@@ -21,11 +21,11 @@ describe('RecipeIngredientsTableComponent', () => {
     const ingredientsFormArray = fb.array([
       fb.group({
         amount_net: [0],
-        name_hebrew: [''],
+        nameHebrew: [''],
         referenceId: [''],
         item_type_: ['product'],
         unit: ['gram'],
-        price_override_: [null]
+        priceOverride: [null]
       })
     ])
 

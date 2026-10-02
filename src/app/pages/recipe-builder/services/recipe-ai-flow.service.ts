@@ -12,6 +12,8 @@ import type { Equipment } from '@models/equipment.model'
 export interface RecipeAiFormRefs {
   recipeForm: FormGroup
   ingredientsFormVersion_: WritableSignal<number>
+  /** An AI-stated yield is explicit: the header must not overwrite it with the ingredients' total weight. */
+  netoConfirmed_: WritableSignal<boolean>
   addNewIngredientRow: () => void
 }
 
@@ -38,7 +40,7 @@ export class RecipeAiFlowService {
     return this.refs_!.recipeForm.get('yield_conversions') as FormArray
   }
   private get logisticsBaselineArray(): FormArray {
-    return (this.refs_!.recipeForm.get('logistics') as FormGroup)?.get('baseline_') as FormArray
+    return (this.refs_!.recipeForm.get('logistics') as FormGroup)?.get('baseline') as FormArray
   }
 
   /** Call once from RecipeBuilderPage ngOnInit before any AI operation. */
@@ -70,8 +72,9 @@ export class RecipeAiFlowService {
     const isDish = draft.recipe_type === 'dish'
 
     recipeForm.patchValue({ recipe_type: draft.recipe_type })
-    recipeForm.patchValue({ name_hebrew: draft.name_hebrew }, { emitEvent: false })
+    recipeForm.patchValue({ nameHebrew: draft.nameHebrew }, { emitEvent: false })
 
+    this.refs_!.netoConfirmed_.set(true)
     this.yieldConversionsArray.clear()
     if (isDish) {
       recipeForm.patchValue({ serving_portions: draft.yield_amount }, { emitEvent: false })
@@ -88,7 +91,7 @@ export class RecipeAiFlowService {
       const safeUnit = knownUnits.has(ing.unit) ? ing.unit : 'unit'
       const matched = this.findIngredientMatch_(ing.name)
       last.patchValue({
-        name_hebrew: ing.name,
+        nameHebrew: ing.name,
         amount_net: ing.amount,
         unit: safeUnit,
         ...(matched && { referenceId: matched.entity._id, item_type: matched.type })
@@ -98,7 +101,7 @@ export class RecipeAiFlowService {
     this.workflowArray.clear()
     if (isDish) {
       for (const step of draft.steps) {
-        this.workflowArray.push(this.recipeFormService_.createPrepItemRow({ preparation_name: step }))
+        this.workflowArray.push(this.recipeFormService_.createPrepItemRow({ preparationName: step }))
       }
       if (this.workflowArray.length === 0) {
         this.workflowArray.push(this.recipeFormService_.createPrepItemRow())
@@ -120,10 +123,10 @@ export class RecipeAiFlowService {
         const matched = this.findEquipmentMatch_(item.name)
         this.logisticsBaselineArray.push(
           this.recipeFormService_.createBaselineRow({
-            equipment_id_: matched?._id ?? '',
-            quantity_: item.quantity,
-            phase_: 'both',
-            is_critical_: true,
+            equipmentId: matched?._id ?? '',
+            quantity: item.quantity,
+            phase: 'both',
+            isCritical: true,
             name_hebrew_: matched ? '' : item.name
           })
         )
@@ -139,30 +142,30 @@ export class RecipeAiFlowService {
 
     const ingredients = (this.ingredientsArray.controls as FormGroup[])
       .map((g) => g.getRawValue())
-      .filter((v) => v.name_hebrew)
+      .filter((v) => v.nameHebrew)
       .map((v) => ({
-        name: v.name_hebrew as string,
+        name: v.nameHebrew as string,
         amount: (v.amount_net as number) ?? 0,
         unit: (v.unit as string) ?? 'unit'
       }))
 
     const steps = (this.workflowArray.controls as FormGroup[])
       .map((g) => g.getRawValue())
-      .map((v) => (v.instruction as string | undefined) ?? (v.preparation_name as string | undefined) ?? '')
+      .map((v) => (v.instruction as string | undefined) ?? (v.preparationName as string | undefined) ?? '')
       .filter((s) => s.length > 0)
 
     const equipment = (this.logisticsBaselineArray.controls as FormGroup[])
       .map((g) => g.getRawValue())
-      .filter((v) => v.equipment_id_)
+      .filter((v) => v.equipmentId)
       .map((v) => {
         const eq = this.equipmentData_
           .allEquipment_()
-          .find((e) => e._id === v.equipment_id_ || (e as { _masterId?: string })._masterId === v.equipment_id_)
-        return { name: eq?.name_hebrew ?? v.equipment_id_, quantity: v.quantity_ as number }
+          .find((e) => e._id === v.equipmentId || (e as { _masterId?: string })._masterId === v.equipmentId)
+        return { name: eq?.nameHebrew ?? v.equipmentId, quantity: v.quantity as number }
       })
 
     return {
-      name_hebrew: formVal.name_hebrew ?? '',
+      nameHebrew: formVal.nameHebrew ?? '',
       recipe_type: isDish ? 'dish' : 'preparation',
       yield_amount: primaryYield.amount,
       yield_unit: primaryYield.unit,
@@ -176,11 +179,15 @@ export class RecipeAiFlowService {
     const { recipeForm, ingredientsFormVersion_, addNewIngredientRow } = this.refs_!
     const isDish = (recipeForm.get('recipe_type')?.value as string) === 'dish'
 
-    if (patch.name_hebrew !== undefined) {
-      recipeForm.patchValue({ name_hebrew: patch.name_hebrew }, { emitEvent: false })
+    if (patch.nameHebrew !== undefined) {
+      recipeForm.patchValue({ nameHebrew: patch.nameHebrew }, { emitEvent: false })
     }
 
     if (patch.yield_amount !== undefined || patch.yield_unit !== undefined) {
+      this.refs_!.netoConfirmed_.set(true)
+      if (isDish && patch.yield_amount !== undefined) {
+        recipeForm.patchValue({ serving_portions: patch.yield_amount }, { emitEvent: false })
+      }
       const primary = this.yieldConversionsArray.at(0)
       if (primary) {
         if (patch.yield_amount !== undefined) primary.patchValue({ amount: patch.yield_amount }, { emitEvent: false })
@@ -197,7 +204,7 @@ export class RecipeAiFlowService {
         const safeUnit = knownUnits.has(ing.unit) ? ing.unit : 'unit'
         const matched = this.findIngredientMatch_(ing.name)
         last.patchValue({
-          name_hebrew: ing.name,
+          nameHebrew: ing.name,
           amount_net: ing.amount,
           unit: safeUnit,
           ...(matched && { referenceId: matched.entity._id, item_type: matched.type })
@@ -211,7 +218,7 @@ export class RecipeAiFlowService {
       this.workflowArray.clear()
       if (isDish) {
         for (const step of patch.steps) {
-          this.workflowArray.push(this.recipeFormService_.createPrepItemRow({ preparation_name: step }))
+          this.workflowArray.push(this.recipeFormService_.createPrepItemRow({ preparationName: step }))
         }
         if (this.workflowArray.length === 0) {
           this.workflowArray.push(this.recipeFormService_.createPrepItemRow())
@@ -234,10 +241,10 @@ export class RecipeAiFlowService {
         const matched = this.findEquipmentMatch_(item.name)
         this.logisticsBaselineArray.push(
           this.recipeFormService_.createBaselineRow({
-            equipment_id_: matched?._id ?? '',
-            quantity_: item.quantity,
-            phase_: 'both',
-            is_critical_: true,
+            equipmentId: matched?._id ?? '',
+            quantity: item.quantity,
+            phase: 'both',
+            isCritical: true,
             name_hebrew_: matched ? '' : item.name
           })
         )
@@ -256,9 +263,9 @@ export class RecipeAiFlowService {
   private findIngredientMatch_(name: string): { entity: { _id: string }; type: 'product' | 'recipe' } | null {
     const norm = (s: string) => s.trim().toLowerCase()
     const q = norm(name)
-    const product = this.state_.products_().find((p) => norm(p.name_hebrew) === q)
+    const product = this.state_.products_().find((p) => norm(p.nameHebrew) === q)
     if (product) return { entity: product, type: 'product' }
-    const recipe = this.state_.recipes_().find((r) => norm(r.name_hebrew) === q)
+    const recipe = this.state_.recipes_().find((r) => norm(r.nameHebrew) === q)
     if (recipe) return { entity: recipe, type: 'recipe' }
     return null
   }
@@ -266,6 +273,6 @@ export class RecipeAiFlowService {
   private findEquipmentMatch_(name: string): Equipment | null {
     const norm = (s: string) => s.trim().toLowerCase()
     const q = norm(name)
-    return this.equipmentData_.allEquipment_().find((e) => norm(e.name_hebrew) === q) ?? null
+    return this.equipmentData_.allEquipment_().find((e) => norm(e.nameHebrew) === q) ?? null
   }
 }

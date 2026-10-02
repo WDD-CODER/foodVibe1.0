@@ -8,14 +8,14 @@ import { Product } from '../models/product.model'
 describe('productResolver', () => {
   let mockRouter: jasmine.SpyObj<Router>
   let mockKitchenState: jasmine.SpyObj<KitchenStateService>
-  
+
   // Rule #4: Callable Signal Mock for the SoT
   const mockProductsSignal = signal<Product[]>([])
 
   beforeEach(() => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate'])
     mockKitchenState = jasmine.createSpyObj('KitchenStateService', [], {
-      products_: () => mockProductsSignal() 
+      products_: () => mockProductsSignal()
     })
 
     TestBed.configureTestingModule({
@@ -27,31 +27,28 @@ describe('productResolver', () => {
   })
 
   const executeResolver = (routeOverride: Partial<ActivatedRouteSnapshot>) => {
-    return TestBed.runInInjectionContext(() => 
-      productResolver(
-        routeOverride as ActivatedRouteSnapshot, 
-        {} as RouterStateSnapshot
-      )
+    return TestBed.runInInjectionContext(() =>
+      productResolver(routeOverride as ActivatedRouteSnapshot, {} as RouterStateSnapshot)
     )
   }
 
   it('should return null if no ID is present (Add Mode)', () => {
-    const route = { 
-      paramMap: convertToParamMap({}) 
+    const route = {
+      paramMap: convertToParamMap({})
     }
-    
+
     const result = executeResolver(route)
     expect(result).toBeNull()
   })
 
   it('should return product if found in state (Edit Mode)', () => {
-    const mockProduct = { _id: '123', name_hebrew: 'Test' } as Product
+    const mockProduct = { _id: '123', nameHebrew: 'Test' } as Product
     mockProductsSignal.set([mockProduct])
-    
-    const route = { 
-      paramMap: convertToParamMap({ id: '123' }) 
+
+    const route = {
+      paramMap: convertToParamMap({ id: '123' })
     }
-    
+
     const result = executeResolver(route)
     expect(result).toEqual(mockProduct)
   })
@@ -59,12 +56,12 @@ describe('productResolver', () => {
   it('should redirect and return null if product is not found', () => {
     mockProductsSignal.set([])
     // FIX: Using convertToParamMap to satisfy TS2345
-    const route = { 
-      paramMap: convertToParamMap({ id: '999' }) 
+    const route = {
+      paramMap: convertToParamMap({ id: '999' })
     }
-    
+
     const result = executeResolver(route)
-    
+
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/inventory/list'])
     expect(result).toBeNull()
   })

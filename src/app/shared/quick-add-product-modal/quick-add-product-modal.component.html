@@ -7,14 +7,17 @@
       aria-labelledby="quick-add-title"
       dir="rtl"
       (click)="$event.stopPropagation()"
-      (keydown.escape)="onCancel()">
-
+      (keydown.escape)="onCancel()"
+    >
       <h3 id="quick-add-title" class="quick-add-product-modal__title">
         {{ 'quick_add_product' | translatePipe }}
       </h3>
 
       <form (ngSubmit)="onSave()" class="c-modal-body quick-add-product-modal__form">
-        <section class="quick-add-product-modal__section quick-add-product-modal__section--required" aria-label="Required fields">
+        <section
+          class="quick-add-product-modal__section quick-add-product-modal__section--required"
+          aria-label="Required fields"
+        >
           <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
             <div class="quick-add-product-modal__field" [class.field--error]="nameError_()">
               <label for="quick-add-name">{{ 'product_name' | translatePipe }}</label>
@@ -24,15 +27,17 @@
                   #nameEl
                   type="text"
                   [class.input--error]="nameError_()"
-                  [ngModel]="name_()"
-                  (ngModelChange)="name_.set($event)"
-                  name="name_hebrew"
-                  (keydown.enter)="advanceFocus(baseUnitRef()?.nativeElement); $event.preventDefault()" />
+                  [ngModel]="name()"
+                  (ngModelChange)="name.set($event)"
+                  name="nameHebrew"
+                  (keydown.enter)="advanceFocus(baseUnitRef()?.nativeElement); $event.preventDefault()"
+                />
                 <button
                   type="button"
                   class="c-icon-btn"
                   (click)="onAiFill()"
-                  [disabled]="!name_().trim() || aiLoading_()">
+                  [disabled]="!name().trim() || aiLoading_()"
+                >
                   @if (aiLoading_()) {
                     <app-loader size="small" [inline]="true" />
                   } @else {
@@ -59,7 +64,8 @@
                 [placeholder]="'choose_unit' | translatePipe"
                 [ngModel]="baseUnit_()"
                 (ngModelChange)="onBaseUnitChange($event)"
-                name="base_unit_" />
+                name="baseUnit"
+              />
               @if (unitError_()) {
                 <span class="field-error-msg">{{ unitError_() | translatePipe }}</span>
               }
@@ -75,7 +81,8 @@
                 [ngModel]="buyPrice_()"
                 (ngModelChange)="buyPrice_.set($any($event))"
                 (keydown.enter)="advanceFocus(getNextFocusAfterBuyPrice()); $event.preventDefault()"
-                name="buy_price_global_" />
+                name="buy_price_global_"
+              />
             </div>
             <div class="quick-add-product-modal__field">
               <label for="quick-add-category">{{ 'category' | translatePipe }}</label>
@@ -87,17 +94,15 @@
                 [addNewValue]="'__add_category__'"
                 [options]="categoryOptions_()"
                 [placeholder]="'choose_category' | translatePipe"
-                [ngModel]="category_()"
+                [ngModel]="category()"
                 (ngModelChange)="onCategoryChange($event)"
-                name="category_" />
+                name="category"
+              />
             </div>
           </div>
         </section>
 
-        <button
-          type="button"
-          class="quick-add-product-modal__toggle"
-          (click)="toggleExpanded()">
+        <button type="button" class="quick-add-product-modal__toggle" (click)="toggleExpanded()">
           @if (expanded_()) {
             {{ 'hide_details' | translatePipe }}
           } @else {
@@ -106,7 +111,10 @@
         </button>
 
         @if (expanded_()) {
-          <section class="quick-add-product-modal__section quick-add-product-modal__section--optional" aria-label="Optional details">
+          <section
+            class="quick-add-product-modal__section quick-add-product-modal__section--optional"
+            aria-label="Optional details"
+          >
             <h4 class="quick-add-product-modal__section-title">{{ 'show_more_details' | translatePipe }}</h4>
             <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
               <div class="quick-add-product-modal__field">
@@ -119,8 +127,9 @@
                   step="0.001"
                   [ngModel]="yieldFactor_()"
                   (ngModelChange)="yieldFactor_.set($any($event))"
-                  name="yield_factor_"
-                  (keydown.enter)="advanceFocus(getNextFocusAfterYield()); $event.preventDefault()" />
+                  name="yieldFactor"
+                  (keydown.enter)="advanceFocus(getNextFocusAfterYield()); $event.preventDefault()"
+                />
               </div>
               <div class="quick-add-product-modal__field">
                 <label for="quick-add-min-stock">{{ 'min_stock_level' | translatePipe }}</label>
@@ -130,8 +139,9 @@
                   min="0"
                   [ngModel]="minStock_()"
                   (ngModelChange)="minStock_.set($any($event))"
-                  name="min_stock_level_"
-                  (keydown.enter)="onSave()" />
+                  name="minStockLevel"
+                  (keydown.enter)="onSave()"
+                />
               </div>
               <div class="quick-add-product-modal__field">
                 <label for="quick-add-expiry">{{ 'expiry_days_default' | translatePipe }}</label>
@@ -141,18 +151,16 @@
                   min="0"
                   [ngModel]="expiryDays_()"
                   (ngModelChange)="expiryDays_.set($any($event))"
-                  name="expiry_days_default_"
-                  (keydown.enter)="onSave()" />
+                  name="expiryDaysDefault"
+                  (keydown.enter)="onSave()"
+                />
               </div>
               <div class="quick-add-product-modal__field quick-add-product-modal__field--span">
                 <span class="quick-add-product-modal__label">{{ 'allergens' | translatePipe }}</span>
                 <div class="quick-add-product-modal__allergens">
-                  @for (key of allergens_(); track key) {
+                  @for (key of allergens(); track key) {
                     <label class="quick-add-product-modal__checkbox-label">
-                      <input
-                        type="checkbox"
-                        [checked]="isAllergenSelected(key)"
-                        (change)="toggleAllergen(key)" />
+                      <input type="checkbox" [checked]="isAllergenSelected(key)" (change)="toggleAllergen(key)" />
                       <span>{{ key | translatePipe }}</span>
                     </label>
                   }
@@ -167,12 +175,7 @@
         <button type="button" class="c-btn-ghost" (click)="onCancel()">
           {{ 'cancel' | translatePipe }}
         </button>
-        <button
-          type="button"
-          #saveBtnEl
-          class="c-btn-primary"
-          [disabled]="isSubmitting_()"
-          (click)="onSave()">
+        <button type="button" #saveBtnEl class="c-btn-primary" [disabled]="isSubmitting_()" (click)="onSave()">
           @if (isSubmitting_()) {
             {{ 'saving' | translatePipe }}
           } @else {

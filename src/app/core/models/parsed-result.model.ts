@@ -1,6 +1,6 @@
 /** Ingredient extracted by the AI text parser. */
 export interface ParsedIngredient {
-  name_hebrew: string
+  nameHebrew: string
   amount_net: number | null
   unit: string | null
 }
@@ -16,7 +16,7 @@ export interface ParsedStep {
  * Field names mirror the recipe-builder reactive form fields exactly.
  */
 export interface ParsedRecipe {
-  name_hebrew: string
+  nameHebrew: string
   serving_portions: number | null
   labels: string[]
   ingredients: ParsedIngredient[]
@@ -28,7 +28,7 @@ export interface ParsedRecipe {
  * Mirrors the dish-mode recipe-builder form fields.
  */
 export interface ParsedDish {
-  name_hebrew: string
+  nameHebrew: string
   serving_portions: number | null
   labels: string[]
 }

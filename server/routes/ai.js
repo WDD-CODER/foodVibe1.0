@@ -181,7 +181,7 @@ function extractJsonPayload(raw) {
 function validateRecipeDraft(recipe) {
   const errors = [];
   if (!recipe || typeof recipe !== 'object') return ['recipe must be an object'];
-  if (typeof recipe.name_hebrew !== 'string' || !recipe.name_hebrew.trim()) errors.push('name_hebrew is required');
+  if (typeof recipe.nameHebrew !== 'string' || !recipe.nameHebrew.trim()) errors.push('nameHebrew is required');
   if (!RECIPE_TYPES.has(recipe.recipe_type)) errors.push(`recipe_type must be "dish" or "preparation", got "${recipe.recipe_type}"`);
   if (typeof recipe.yield_amount !== 'number') errors.push('yield_amount must be a number');
   if (typeof recipe.yield_unit !== 'string' || !recipe.yield_unit.trim()) errors.push('yield_unit is required');
@@ -233,7 +233,7 @@ gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
 
 החזר JSON בלבד, ללא markdown, ללא הסברים:
 {
-  "name_hebrew": "...",
+  "nameHebrew": "...",
   "recipe_type": "dish" | "preparation",
   "yield_amount": number,
   "yield_unit": "...",
@@ -279,7 +279,7 @@ function containsInjectionPattern(text) {
 
 function scanRecipeDraftForInjection(draft) {
   if (!draft || typeof draft !== 'object') return false;
-  const fields = [draft.name_hebrew];
+  const fields = [draft.nameHebrew];
   if (Array.isArray(draft.steps)) fields.push(...draft.steps);
   if (Array.isArray(draft.ingredients)) fields.push(...draft.ingredients.map(ing => ing?.name));
   if (Array.isArray(draft.equipment)) fields.push(...draft.equipment.map(eq => eq?.name));
@@ -528,11 +528,11 @@ If type is "recipe", return:
   "type": "recipe",
   "confidence": <number 0-1>,
   "data": {
-    "name_hebrew": <string>,
+    "nameHebrew": <string>,
     "serving_portions": <number | null>,
     "labels": <string[]>,
     "ingredients": [
-      { "name_hebrew": <string>, "amount_net": <number | null>, "unit": <string | null> }
+      { "nameHebrew": <string>, "amount_net": <number | null>, "unit": <string | null> }
     ],
     "steps": [
       { "order": <number>, "instruction": <string> }
@@ -545,7 +545,7 @@ If type is "dish", return:
   "type": "dish",
   "confidence": <number 0-1>,
   "data": {
-    "name_hebrew": <string>,
+    "nameHebrew": <string>,
     "serving_portions": <number | null>,
     "labels": <string[]>
   }
@@ -612,7 +612,7 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
 // Accepts { currentRecipe: AiRecipeDraft, instruction: string }.
 // Gemini reads the current recipe + user instruction and returns ONLY the
 // fields that should change as a sparse patch object.
-// Response: { changes: { name_hebrew?, ingredients?, steps?, yield_amount?, yield_unit?, equipment? } }
+// Response: { changes: { nameHebrew?, ingredients?, steps?, yield_amount?, yield_unit?, equipment? } }
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
@@ -626,8 +626,8 @@ Do NOT include fields that were not mentioned or implied by the instruction.
 ## Rules
 
 ### Field keys you may include in the patch:
-- "name_hebrew" — string: new recipe name
-- "yield_amount" — number: new yield amount
+- "nameHebrew" — string: new recipe name
+- "yield_amount" — number: new yield amount = the total the recipe makes (e.g. "יוצא 10 מנות" -> 10). NEVER an ingredient quantity (100 גרם חמאה is not a yield)
 - "yield_unit" — string: canonical unit key (gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion)
 - "ingredients" — array: FULL replacement array [ { name, amount, unit } ] — only if user asked to change ingredients
 - "steps" — array: FULL replacement string array [ "step text", ... ] — only if user asked to change steps/instructions
@@ -635,8 +635,8 @@ Do NOT include fields that were not mentioned or implied by the instruction.
 
 ### Decision rules:
 - If user says "only add steps" / "add preparation steps" / "create the instructions" → include ONLY "steps"
-- If user says "change the name to X" → include ONLY "name_hebrew"
-- If user pastes a full recipe text → extract all fields and include all of them
+- If user says "change the name to X" → include ONLY "nameHebrew"
+- If user pastes a full recipe text → extract all fields and include all of them: nameHebrew, yield_amount, yield_unit, EVERY ingredient (with its amount and unit) and every step
 - If ambiguous, prefer minimal changes — only include what is clearly requested
 - Include "equipment" ONLY when the user explicitly mentions tools, equipment, kitchen gear, or utensils — do not infer equipment from steps
 
@@ -779,18 +779,18 @@ ONLY include dishes the user explicitly named. Do NOT add, suggest, or invent an
 Return ONLY valid JSON — no markdown, no explanation, no code blocks. Raw JSON only.
 
 {
-  "name_": "<event name in Hebrew>",
-  "event_type_": "<type of event in Hebrew, e.g. חתונה, בר מצווה, ימי הולדת>",
-  "event_date_": "<ISO 8601 date string, e.g. 2025-12-31, or null if not specified>",
-  "serving_type_": "<one of: plated_course | buffet | finger_food | family_style>",
-  "guest_count_": <integer number of guests>,
-  "sections_": [
+  "name": "<event name in Hebrew>",
+  "eventType": "<type of event in Hebrew, e.g. חתונה, בר מצווה, ימי הולדת>",
+  "eventDate": "<ISO 8601 date string, e.g. 2025-12-31, or null if not specified>",
+  "servingType": "<one of: plated_course | buffet | finger_food | family_style>",
+  "guestCount": <integer number of guests>,
+  "sections": [
     {
       "category": "<section name in Hebrew, e.g. ראשונות, עיקריות, קינוחים>",
       "items": [
         {
-          "name_hebrew": "<dish name exactly as the user mentioned it, in Hebrew>",
-          "predicted_take_rate_": <number between 0 and 1 representing expected take rate, or null>,
+          "nameHebrew": "<dish name exactly as the user mentioned it, in Hebrew>",
+          "predictedTakeRate": <number between 0 and 1 representing expected take rate, or null>,
           "serving_portions": <integer number of portions needed, or null>,
           "sell_price": <number in ILS per portion, or null>
         }
@@ -801,23 +801,23 @@ Return ONLY valid JSON — no markdown, no explanation, no code blocks. Raw JSON
 
 ## Rules
 
-- serving_type_ MUST be exactly one of these four English keys: plated_course | buffet | finger_food | family_style — never Hebrew
-- Infer serving_type_ from context: מנות אישיות → plated_course, בופה → buffet, פינגר פוד / אצבעות → finger_food, מנות משפחתיות → family_style
-- sections_ must be a non-empty array with at least one section
+- servingType MUST be exactly one of these four English keys: plated_course | buffet | finger_food | family_style — never Hebrew
+- Infer servingType from context: מנות אישיות → plated_course, בופה → buffet, פינגר פוד / אצבעות → finger_food, מנות משפחתיות → family_style
+- sections must be a non-empty array with at least one section
 - Each section must have only the items the user mentioned — never more
 - All dish names in Hebrew
-- predicted_take_rate_ is a fraction 0–1 (e.g. 0.8 means 80% of guests will take this dish)
-- guest_count_ must be a positive integer
-- If event_date_ is not specified, return null`;
+- predictedTakeRate is a fraction 0–1 (e.g. 0.8 means 80% of guests will take this dish)
+- guestCount must be a positive integer
+- If eventDate is not specified, return null`;
 
 function validateMenuDraft(menu) {
   const errors = [];
   if (!menu || typeof menu !== 'object') { errors.push('menu must be an object'); return errors; }
-  if (typeof menu.name_ !== 'string' || !menu.name_.trim()) errors.push('name_ must be a non-empty string');
+  if (typeof menu.name !== 'string' || !menu.name.trim()) errors.push('name must be a non-empty string');
   const validServingTypes = ['plated_course', 'buffet', 'finger_food', 'family_style'];
-  if (!validServingTypes.includes(menu.serving_type_)) errors.push(`serving_type_ must be one of: ${validServingTypes.join(', ')}`);
-  if (typeof menu.guest_count_ !== 'number' || menu.guest_count_ <= 0) errors.push('guest_count_ must be a positive number');
-  if (!Array.isArray(menu.sections_) || menu.sections_.length === 0) errors.push('sections_ must be a non-empty array');
+  if (!validServingTypes.includes(menu.servingType)) errors.push(`servingType must be one of: ${validServingTypes.join(', ')}`);
+  if (typeof menu.guestCount !== 'number' || menu.guestCount <= 0) errors.push('guestCount must be a positive number');
+  if (!Array.isArray(menu.sections) || menu.sections.length === 0) errors.push('sections must be a non-empty array');
   return errors;
 }
 
@@ -894,7 +894,7 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
 // Accepts { currentMenu: AiMenuDraft, instruction: string }.
 // Gemini reads the current menu + user instruction and returns ONLY the
 // fields that should change as a sparse patch object.
-// Response: { changes: { name_?, event_type_?, event_date_?, serving_type_?, guest_count_?, sections_? } }
+// Response: { changes: { name?, eventType?, eventDate?, servingType?, guestCount?, sections? } }
 // Requires a valid JWT.
 // ---------------------------------------------------------------------------
 
@@ -908,22 +908,22 @@ Do NOT include fields that were not mentioned or implied by the instruction.
 ## Rules
 
 ### Field keys you may include in the patch:
-- "name_" — string: new event name
-- "event_type_" — string: new event type in Hebrew
-- "event_date_" — string: ISO 8601 date or null
-- "serving_type_" — string: MUST be one of plated_course | buffet | finger_food | family_style (English keys only)
-- "guest_count_" — number: new guest count
-- "sections_" — array: FULL replacement array of all sections (only include if user explicitly changes dish lineup or sections)
+- "name" — string: new event name
+- "eventType" — string: new event type in Hebrew
+- "eventDate" — string: ISO 8601 date or null
+- "servingType" — string: MUST be one of plated_course | buffet | finger_food | family_style (English keys only)
+- "guestCount" — number: new guest count
+- "sections" — array: FULL replacement array of all sections (only include if user explicitly changes dish lineup or sections)
 
 ### Decision rules:
 - Only include keys that the user clearly wants to change
-- If user says "change guest count to 150" → include ONLY "guest_count_"
-- If user says "add a dessert section with chocolate cake" → include ONLY "sections_" with the full updated sections array
+- If user says "change guest count to 150" → include ONLY "guestCount"
+- If user says "add a dessert section with chocolate cake" → include ONLY "sections" with the full updated sections array
 - If ambiguous, prefer minimal changes
 
-### sections_ format (when included — full replacement):
+### sections format (when included — full replacement):
 [
-  { "category": "<Hebrew section name>", "items": [{ "name_hebrew": "<Hebrew>", "predicted_take_rate_": <0-1 or null>, "serving_portions": <number or null>, "sell_price": <number or null> }] }
+  { "category": "<Hebrew section name>", "items": [{ "nameHebrew": "<Hebrew>", "predictedTakeRate": <0-1 or null>, "serving_portions": <number or null>, "sell_price": <number or null> }] }
 ]
 
 Return ONLY valid JSON. No markdown, no explanation, no code blocks. Raw JSON only.
@@ -1016,38 +1016,38 @@ const PRODUCT_GENERATE_SYSTEM_PROMPT = `You are an intelligent product catalog a
 
 ## Required output format (JSON only — no markdown, no explanation):
 {
-  "name_hebrew": "<product name in Hebrew>",
-  "base_unit_": "<one of: gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion>",
-  "categories_": ["<Hebrew category name>"],
-  "allergens_": ["<Hebrew allergen name — from: גלוטן, חלב, ביצים, אגוזים, סויה, שומשום, דגים, סרטנים, בוטנים, סלרי, חרדל, לופין, מולוסקים>"],
-  "yield_factor_": <number between 0 and 1>,
-  "min_stock_level_": <integer, 0 if unknown>,
-  "expiry_days_default_": <integer, 0 if unknown>
+  "nameHebrew": "<product name in Hebrew>",
+  "baseUnit": "<one of: gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion>",
+  "categories": ["<Hebrew category name>"],
+  "allergens": ["<Hebrew allergen name — from: גלוטן, חלב, ביצים, אגוזים, סויה, שומשום, דגים, סרטנים, בוטנים, סלרי, חרדל, לופין, מולוסקים>"],
+  "yieldFactor": <number between 0 and 1>,
+  "minStockLevel": <integer, 0 if unknown>,
+  "expiryDaysDefault": <integer, 0 if unknown>
 }
 
 ## Rules
-- base_unit_ MUST be one of the 10 canonical English keys listed above — NEVER use Hebrew for base_unit_.
-- categories_ should be inferred from the product type (e.g. "חלב" → ["מוצרי חלב"], "עוף שלם" → ["עופות"]).
-- allergens_ must list ONLY allergens the product actually contains, inferred from the name and category.
-- yield_factor_ is between 0 and 1. Use 1.0 for packaged goods and liquids (no waste). Use 0.75–0.90 for fresh vegetables and fruits.
+- baseUnit MUST be one of the 10 canonical English keys listed above — NEVER use Hebrew for baseUnit.
+- categories should be inferred from the product type (e.g. "חלב" → ["מוצרי חלב"], "עוף שלם" → ["עופות"]).
+- allergens must list ONLY allergens the product actually contains, inferred from the name and category.
+- yieldFactor is between 0 and 1. Use 1.0 for packaged goods and liquids (no waste). Use 0.75–0.90 for fresh vegetables and fruits.
 - Return ONLY valid JSON. No markdown. No code blocks. No explanation.`;
 
 function validateProductDraft(product) {
   const errors = [];
-  if (!product.name_hebrew || typeof product.name_hebrew !== 'string' || !product.name_hebrew.trim()) {
-    errors.push('name_hebrew is required');
+  if (!product.nameHebrew || typeof product.nameHebrew !== 'string' || !product.nameHebrew.trim()) {
+    errors.push('nameHebrew is required');
   }
-  if (!product.base_unit_ || !CANONICAL_UNITS.has(product.base_unit_)) {
-    errors.push('base_unit_ must be one of the canonical units');
+  if (!product.baseUnit || !CANONICAL_UNITS.has(product.baseUnit)) {
+    errors.push('baseUnit must be one of the canonical units');
   }
-  if (!Array.isArray(product.categories_)) {
-    errors.push('categories_ must be an array');
+  if (!Array.isArray(product.categories)) {
+    errors.push('categories must be an array');
   }
-  if (!Array.isArray(product.allergens_)) {
-    errors.push('allergens_ must be an array');
+  if (!Array.isArray(product.allergens)) {
+    errors.push('allergens must be an array');
   }
-  if (typeof product.yield_factor_ !== 'number' || product.yield_factor_ < 0 || product.yield_factor_ > 1) {
-    errors.push('yield_factor_ must be a number between 0 and 1');
+  if (typeof product.yieldFactor !== 'number' || product.yieldFactor < 0 || product.yieldFactor > 1) {
+    errors.push('yieldFactor must be a number between 0 and 1');
   }
   return errors;
 }
@@ -1134,19 +1134,19 @@ Your job is to produce a SPARSE PATCH — a JSON object containing ONLY the fiel
 Do NOT include fields that were not mentioned or implied by the instruction.
 
 ## Field keys you may include in the patch:
-- "name_hebrew" — string: new product name in Hebrew
-- "base_unit_" — string: MUST be one of gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
-- "categories_" — string[]: full replacement array of Hebrew category names
-- "allergens_" — string[]: full replacement array of Hebrew allergen names
-- "yield_factor_" — number 0–1: new yield factor
-- "min_stock_level_" — integer: new minimum stock level
-- "expiry_days_default_" — integer: new default expiry days
-- "min_stock_level_" — integer: new minimum stock level
-- "expiry_days_default_" — integer: new default expiry days
+- "nameHebrew" — string: new product name in Hebrew
+- "baseUnit" — string: MUST be one of gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
+- "categories" — string[]: full replacement array of Hebrew category names
+- "allergens" — string[]: full replacement array of Hebrew allergen names
+- "yieldFactor" — number 0–1: new yield factor
+- "minStockLevel" — integer: new minimum stock level
+- "expiryDaysDefault" — integer: new default expiry days
+- "minStockLevel" — integer: new minimum stock level
+- "expiryDaysDefault" — integer: new default expiry days
 
 ## Decision rules:
 - Only include keys the user clearly wants to change
-- If user says "change the yield to 0.85" → include ONLY "yield_factor_"
+- If user says "change the yield to 0.85" → include ONLY "yieldFactor"
 - If ambiguous, prefer minimal changes
 
 Return ONLY valid JSON. No markdown, no explanation, no code blocks. Raw JSON only.

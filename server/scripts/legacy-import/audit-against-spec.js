@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('audit-against-spec.js');
 /**
  * audit-against-spec.js — measures live Mongo against plan 317's specification.
  *

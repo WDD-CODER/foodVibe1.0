@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core'
 
 export interface AiRecipeDraft {
-  name_hebrew: string
+  nameHebrew: string
   recipe_type: 'dish' | 'preparation'
   yield_amount: number
   yield_unit: string

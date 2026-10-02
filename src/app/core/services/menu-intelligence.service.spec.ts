@@ -66,67 +66,67 @@ describe('MenuIntelligenceService', () => {
   })
 
   describe('hydrateDerivedPortions', () => {
-    it('should set derived_portions_ on each item using derivePortions', () => {
+    it('should set derivedPortions on each item using derivePortions', () => {
       const event: MenuEvent = {
         _id: 'e1',
-        name_: 'Event',
-        event_type_: '',
-        event_date_: '',
-        serving_type_: 'plated_course',
-        guest_count_: 4,
-        sections_: [
+        name: 'Event',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 4,
+        sections: [
           {
             _id: 's1',
-            name_: 'Main',
-            sort_order_: 1,
-            items_: [
+            name: 'Main',
+            sortOrder: 1,
+            items: [
               {
-                recipe_id_: 'r1',
-                recipe_type_: 'dish',
-                predicted_take_rate_: 0,
-                derived_portions_: 0,
-                serving_portions_: 2
+                recipeId: 'r1',
+                recipeType: 'dish',
+                predictedTakeRate: 0,
+                derivedPortions: 0,
+                servingPortions: 2
               }
             ]
           }
         ],
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
+        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
       }
       const out = service.hydrateDerivedPortions(event)
-      expect(out.sections_[0].items_[0].derived_portions_).toBe(8) // 4 * 2
+      expect(out.sections[0].items[0].derivedPortions).toBe(8) // 4 * 2
     })
 
-    it('should apply cocktail_passed formula when serving_type_ is cocktail_passed', () => {
+    it('should apply cocktail_passed formula when servingType is cocktail_passed', () => {
       const event: MenuEvent = {
         _id: 'e1',
-        name_: 'Event',
-        event_type_: '',
-        event_date_: '',
-        serving_type_: 'cocktail_passed',
-        guest_count_: 100,
-        pieces_per_person_: 3,
-        sections_: [
+        name: 'Event',
+        eventType: '',
+        eventDate: '',
+        servingType: 'cocktail_passed',
+        guestCount: 100,
+        piecesPerPerson: 3,
+        sections: [
           {
             _id: 's1',
-            name_: 'Passed',
-            sort_order_: 1,
-            items_: [
+            name: 'Passed',
+            sortOrder: 1,
+            items: [
               {
-                recipe_id_: 'r1',
-                recipe_type_: 'dish',
-                predicted_take_rate_: 0.4,
-                derived_portions_: 0,
-                serving_portions_: 1
+                recipeId: 'r1',
+                recipeType: 'dish',
+                predictedTakeRate: 0.4,
+                derivedPortions: 0,
+                servingPortions: 1
               }
             ]
           }
         ],
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'cocktail_passed' }
+        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'cocktail_passed' }
       }
       const out = service.hydrateDerivedPortions(event)
-      expect(out.sections_[0].items_[0].derived_portions_).toBe(120) // round(100*3*0.4)
+      expect(out.sections[0].items[0].derivedPortions).toBe(120) // round(100*3*0.4)
     })
   })
 
@@ -134,13 +134,13 @@ describe('MenuIntelligenceService', () => {
     it('should sum scaled recipe costs for all items', () => {
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Dish',
-        ingredients_: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount_: 100, unit_: 'gram' }],
-        steps_: [],
-        yield_amount_: 2,
-        yield_unit_: 'unit',
-        default_station_: '',
-        is_approved_: false
+        nameHebrew: 'Dish',
+        ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 100, unit: 'gram' }],
+        steps: [],
+        yieldAmount: 2,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
       }
       recipesSignal.set([recipe])
       const costService = TestBed.inject(RecipeCostService) as jasmine.SpyObj<RecipeCostService>
@@ -148,36 +148,36 @@ describe('MenuIntelligenceService', () => {
 
       const event: MenuEvent = {
         _id: 'e1',
-        name_: 'Event',
-        event_type_: '',
-        event_date_: '',
-        serving_type_: 'plated_course',
-        guest_count_: 4,
-        sections_: [
+        name: 'Event',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 4,
+        sections: [
           {
             _id: 's1',
-            name_: 'Main',
-            sort_order_: 1,
-            items_: [
+            name: 'Main',
+            sortOrder: 1,
+            items: [
               {
-                recipe_id_: 'r1',
-                recipe_type_: 'dish',
-                predicted_take_rate_: 0,
-                derived_portions_: 4,
-                serving_portions_: 1
+                recipeId: 'r1',
+                recipeType: 'dish',
+                predictedTakeRate: 0,
+                derivedPortions: 4,
+                servingPortions: 1
               },
               {
-                recipe_id_: 'r1',
-                recipe_type_: 'dish',
-                predicted_take_rate_: 0,
-                derived_portions_: 2,
-                serving_portions_: 0.5
+                recipeId: 'r1',
+                recipeType: 'dish',
+                predictedTakeRate: 0,
+                derivedPortions: 2,
+                servingPortions: 0.5
               }
             ]
           }
         ],
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
+        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
       }
       const total = service.computeEventIngredientCost(event)
       expect(total).toBe(25)
@@ -190,29 +190,29 @@ describe('MenuIntelligenceService', () => {
 
       const event: MenuEvent = {
         _id: 'e1',
-        name_: 'Event',
-        event_type_: '',
-        event_date_: '',
-        serving_type_: 'plated_course',
-        guest_count_: 2,
-        sections_: [
+        name: 'Event',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 2,
+        sections: [
           {
             _id: 's1',
-            name_: 'Main',
-            sort_order_: 1,
-            items_: [
+            name: 'Main',
+            sortOrder: 1,
+            items: [
               {
-                recipe_id_: 'missing',
-                recipe_type_: 'dish',
-                predicted_take_rate_: 0,
-                derived_portions_: 2,
-                serving_portions_: 1
+                recipeId: 'missing',
+                recipeType: 'dish',
+                predictedTakeRate: 0,
+                derivedPortions: 2,
+                servingPortions: 1
               }
             ]
           }
         ],
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
+        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
       }
       const total = service.computeEventIngredientCost(event)
       expect(total).toBe(0)
@@ -224,13 +224,13 @@ describe('MenuIntelligenceService', () => {
     it('should return (cost / revenue) * 100', () => {
       const recipe: Recipe = {
         _id: 'r1',
-        name_hebrew: 'Dish',
-        ingredients_: [],
-        steps_: [],
-        yield_amount_: 1,
-        yield_unit_: 'unit',
-        default_station_: '',
-        is_approved_: false
+        nameHebrew: 'Dish',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'unit',
+        defaultStation: '',
+        isApproved: false
       }
       recipesSignal.set([recipe])
       const costService = TestBed.inject(RecipeCostService) as jasmine.SpyObj<RecipeCostService>
@@ -238,29 +238,29 @@ describe('MenuIntelligenceService', () => {
 
       const event: MenuEvent = {
         _id: 'e1',
-        name_: 'Event',
-        event_type_: '',
-        event_date_: '',
-        serving_type_: 'plated_course',
-        guest_count_: 10,
-        sections_: [
+        name: 'Event',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 10,
+        sections: [
           {
             _id: 's1',
-            name_: 'Main',
-            sort_order_: 1,
-            items_: [
+            name: 'Main',
+            sortOrder: 1,
+            items: [
               {
-                recipe_id_: 'r1',
-                recipe_type_: 'dish',
-                predicted_take_rate_: 0,
-                derived_portions_: 10,
-                serving_portions_: 1
+                recipeId: 'r1',
+                recipeType: 'dish',
+                predictedTakeRate: 0,
+                derivedPortions: 10,
+                servingPortions: 1
               }
             ]
           }
         ],
-        financial_targets_: { target_food_cost_pct_: 30, target_revenue_per_guest_: 100 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
+        financialTargets: { targetFoodCostPct: 30, targetRevenuePerGuest: 100 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
       }
       const pct = service.computeFoodCostPct(event)
       expect(pct).toBe(3) // 30 / (10*100) * 100 = 3%
@@ -269,21 +269,21 @@ describe('MenuIntelligenceService', () => {
     it('should return 0 when revenue per guest is 0 or guest_count is 0', () => {
       const eventNoRevenue: MenuEvent = {
         _id: 'e1',
-        name_: 'Event',
-        event_type_: '',
-        event_date_: '',
-        serving_type_: 'plated_course',
-        guest_count_: 10,
-        sections_: [],
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 0 },
-        performance_tags_: { food_cost_pct_: 0, primary_serving_style_: 'plated_course' }
+        name: 'Event',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 10,
+        sections: [],
+        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
       }
       expect(service.computeFoodCostPct(eventNoRevenue)).toBe(0)
 
       const eventNoGuests: MenuEvent = {
         ...eventNoRevenue,
-        guest_count_: 0,
-        financial_targets_: { target_food_cost_pct_: 0, target_revenue_per_guest_: 50 }
+        guestCount: 0,
+        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 50 }
       }
       expect(service.computeFoodCostPct(eventNoGuests)).toBe(0)
     })

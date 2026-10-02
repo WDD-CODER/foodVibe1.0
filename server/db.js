@@ -40,36 +40,36 @@ async function connectDb() {
   console.log('VERSION_HISTORY compound index ensured (userId, entityType, entityId)')
 
   // Compound index for the lean prefix-match /search endpoint (plan 301, Milestone 1).
-  // Supports { userId, name_hebrew: ^prefix } queries without a collection scan.
+  // Supports { userId, nameHebrew: ^prefix } queries without a collection scan.
   await Promise.all(
     SEARCHABLE_ENTITY_TYPES.map(type =>
-      db.collection(type).createIndex({ userId: 1, name_hebrew: 1 }, { background: true })
+      db.collection(type).createIndex({ userId: 1, nameHebrew: 1 }, { background: true })
     )
   )
-  console.log(`name_hebrew search indexes ensured for ${SEARCHABLE_ENTITY_TYPES.join(', ')}`)
+  console.log(`nameHebrew search indexes ensured for ${SEARCHABLE_ENTITY_TYPES.join(', ')}`)
 
   // Compound indexes for GET /:type/count filters (plan 312) — without these, the
   // lowStock/unapproved filters only use the userId prefix and scan every remaining
   // doc in memory.
-  await db.collection('PRODUCT_LIST').createIndex(
-    { userId: 1, min_stock_level_: 1 },
+  await db.collection('products').createIndex(
+    { userId: 1, minStockLevel: 1 },
     { background: true }
   )
   await Promise.all(
-    ['RECIPE_LIST', 'DISH_LIST'].map(type =>
-      db.collection(type).createIndex({ userId: 1, is_approved_: 1 }, { background: true })
+    ['recipes', 'dishes'].map(type =>
+      db.collection(type).createIndex({ userId: 1, isApproved: 1 }, { background: true })
     )
   )
-  console.log('count-filter indexes ensured (PRODUCT_LIST.min_stock_level_, RECIPE_LIST/DISH_LIST.is_approved_)')
+  console.log('count-filter indexes ensured (products.minStockLevel, recipes/dishes.isApproved)')
 
   // Multikey compound index for the DELETE /:type/:id referential-integrity check (plan 312) —
-  // without this, deleting a product scans every recipe/dish's ingredients_ array per user.
+  // without this, deleting a product scans every recipe/dish's ingredients array per user.
   await Promise.all(
-    ['RECIPE_LIST', 'DISH_LIST'].map(type =>
-      db.collection(type).createIndex({ userId: 1, 'ingredients_.referenceId': 1 }, { background: true })
+    ['recipes', 'dishes'].map(type =>
+      db.collection(type).createIndex({ userId: 1, 'ingredients.referenceId': 1 }, { background: true })
     )
   )
-  console.log('ingredients_.referenceId indexes ensured for RECIPE_LIST, DISH_LIST')
+  console.log('ingredients.referenceId indexes ensured for recipes, dishes')
 }
 
 module.exports = { connectDb }

@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('repair-subrecipe-refs.js');
 /**
  * repair-subrecipe-refs.js — one-time data repair for the sync-master.js bug
  * fixed alongside this script: ingredient lines of `type: 'recipe'` (a

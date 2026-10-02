@@ -28,16 +28,16 @@ export class VenueDetailComponent implements OnInit {
   // the component instance across /venues/view/:id -> /venues/view/:otherId.
   protected readonly venue_ = computed(() => (this.routeData_()['venue'] as VenueProfile | null) ?? null)
 
-  /** design-port session 6 — reads the (currently unwired-elsewhere) logistics_.venue_profile_id_
+  /** design-port session 6 — reads the (currently unwired-elsewhere) logistics.venueProfileId
    * link; see MenuEvent/EventLogistics models and the new venue-link-chip on menu-intelligence. */
   protected readonly associatedMenus_ = computed(() => {
     const venueId = this.venue_()?._id
     if (!venueId) return []
-    return this.menuEventData.allMenuEvents_().filter((e) => e.logistics_?.venue_profile_id_ === venueId)
+    return this.menuEventData.allMenuEvents_().filter((e) => e.logistics?.venueProfileId === venueId)
   })
 
   protected readonly contactInitials_ = computed(() => {
-    const name = this.venue_()?.contact_name_?.trim()
+    const name = this.venue_()?.contactName?.trim()
     if (!name) return ''
     return name
       .split(/\s+/)

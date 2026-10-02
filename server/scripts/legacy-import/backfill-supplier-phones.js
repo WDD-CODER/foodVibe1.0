@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('backfill-supplier-phones.js');
 /**
  * backfill-supplier-phones.js — one-off repair for the legacy FoodComposer
  * import: tblSuppliers.phone1/phone2 were never read by transform.js at all

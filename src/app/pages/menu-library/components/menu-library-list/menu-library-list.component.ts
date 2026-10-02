@@ -24,7 +24,7 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
   imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MenuLibraryListComponent {
   private readonly router = inject(Router)
@@ -47,12 +47,12 @@ export class MenuLibraryListComponent {
 
   constructor() {
     useListState('menu-library', [
-      { urlParam: 'q',         signal: this.searchQuery_,        serializer: StringParam },
-      { urlParam: 'sort',      signal: this.sortBy_,             serializer: StringParam },
-      { urlParam: 'order',     signal: this.sortOrder_,          serializer: StringParam },
-      { urlParam: 'eventType', signal: this.eventTypeFilter_,    serializer: StringParam },
-      { urlParam: 'style',     signal: this.servingStyleFilter_, serializer: StringParam },
-      { urlParam: 'dateFrom',  signal: this.dateFrom_,           serializer: StringParam },
+      { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
+      { urlParam: 'sort', signal: this.sortBy_, serializer: StringParam },
+      { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
+      { urlParam: 'eventType', signal: this.eventTypeFilter_, serializer: StringParam },
+      { urlParam: 'style', signal: this.servingStyleFilter_, serializer: StringParam },
+      { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: StringParam }
     ])
   }
 
@@ -62,13 +62,13 @@ export class MenuLibraryListComponent {
     { value: 'all', label: 'all' },
     { value: 'buffet_family', label: 'buffet_family' },
     { value: 'plated_course', label: 'plated_course' },
-    { value: 'cocktail_passed', label: 'cocktail_passed' },
+    { value: 'cocktail_passed', label: 'cocktail_passed' }
   ]
 
   protected readonly eventTypeOptions_ = computed(() => {
     const set = new Set<string>()
-    this.events_().forEach(ev => {
-      if (ev.event_type_) set.add(ev.event_type_)
+    this.events_().forEach((ev) => {
+      if (ev.eventType) set.add(ev.eventType)
     })
     return ['all', ...Array.from(set)]
   })
@@ -81,7 +81,7 @@ export class MenuLibraryListComponent {
     { value: 'date', label: 'sort_by_date' },
     { value: 'name', label: 'sort_by_name' },
     { value: 'food_cost', label: 'menu_food_cost' },
-    { value: 'guest_count', label: 'menu_guest_count' },
+    { value: 'guest_count', label: 'menu_guest_count' }
   ]
 
   protected readonly filteredEvents_ = computed(() => {
@@ -92,17 +92,14 @@ export class MenuLibraryListComponent {
     const sortBy = this.sortBy_()
     const sortOrder = this.sortOrder_()
 
-    let events = this.events_().filter(event => {
-      if (type !== 'all' && event.event_type_ !== type) return false
-      if (style !== 'all' && event.serving_type_ !== style) return false
-      if (from && (!event.event_date_ || event.event_date_ < from)) return false
+    let events = this.events_().filter((event) => {
+      if (type !== 'all' && event.eventType !== type) return false
+      if (style !== 'all' && event.servingType !== style) return false
+      if (from && (!event.eventDate || event.eventDate < from)) return false
       if (query) {
-        const haystack = [
-          event.name_,
-          event.event_type_,
-          event.event_date_ || '',
-          ...(event.cuisine_tags_ || []),
-        ].join(' ').toLowerCase()
+        const haystack = [event.name, event.eventType, event.eventDate || '', ...(event.cuisineTags || [])]
+          .join(' ')
+          .toLowerCase()
         if (!haystack.includes(query)) return false
       }
       return true
@@ -124,13 +121,13 @@ export class MenuLibraryListComponent {
   private compareEvents(a: MenuEvent, b: MenuEvent, field: SortField): number {
     switch (field) {
       case 'name':
-        return (a.name_ || '').localeCompare(b.name_ || '', 'he')
+        return (a.name || '').localeCompare(b.name || '', 'he')
       case 'date':
-        return (a.event_date_ || '').localeCompare(b.event_date_ || '')
+        return (a.eventDate || '').localeCompare(b.eventDate || '')
       case 'food_cost':
         return this.getFoodCostPctForSort(a) - this.getFoodCostPctForSort(b)
       case 'guest_count':
-        return (a.guest_count_ ?? 0) - (b.guest_count_ ?? 0)
+        return (a.guestCount ?? 0) - (b.guestCount ?? 0)
       default:
         return 0
     }
@@ -138,7 +135,7 @@ export class MenuLibraryListComponent {
 
   protected setSort(field: SortField): void {
     if (this.sortBy_() === field) {
-      this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc')
+      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
     } else {
       this.sortBy_.set(field)
       this.sortOrder_.set('asc')
@@ -167,7 +164,7 @@ export class MenuLibraryListComponent {
     if (!this.requireAuthService.requireAuth()) return
     const ok = await this.confirmModal.open('menu_confirm_delete', {
       saveLabel: 'delete',
-      variant: 'danger',
+      variant: 'danger'
     })
     if (!ok) return
     this.deletingId_.set(event._id)
@@ -194,11 +191,11 @@ export class MenuLibraryListComponent {
 
   private computeEventRevenue(event: MenuEvent): number {
     let sum = 0
-    const guestCount = event.guest_count_ ?? 0;
-    (event.sections_ || []).forEach(section => {
-      (section.items_ || []).forEach(item => {
-        const price = item.sell_price_ ?? 0
-        const portions = item.derived_portions_ ?? guestCount * (item.serving_portions_ ?? 1)
+    const guestCount = event.guestCount ?? 0
+    ;(event.sections || []).forEach((section) => {
+      ;(section.items || []).forEach((item) => {
+        const price = item.sellPrice ?? 0
+        const portions = item.derivedPortions ?? guestCount * (item.servingPortions ?? 1)
         sum += price * portions
       })
     })
@@ -206,15 +203,15 @@ export class MenuLibraryListComponent {
   }
 
   protected getGuestCountDisplay(event: MenuEvent): string {
-    return String(event.guest_count_ || 0)
+    return String(event.guestCount || 0)
   }
 
   protected getSectionCount(event: MenuEvent): number {
-    return event.sections_?.length || 0
+    return event.sections?.length || 0
   }
 
   protected getDishCount(event: MenuEvent): number {
-    return (event.sections_ || []).reduce((sum, s) => sum + (s.items_?.length || 0), 0)
+    return (event.sections || []).reduce((sum, s) => sum + (s.items?.length || 0), 0)
   }
 
   /** Translation key for current sort order (א–ת, ת–א, ישן לחדש, etc.). */
@@ -234,7 +231,7 @@ export class MenuLibraryListComponent {
   }
 
   protected toggleSortOrder(): void {
-    this.sortOrder_.update(o => o === 'asc' ? 'desc' : 'asc')
+    this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
   }
 
   protected onDateWrapClick(input: HTMLInputElement | undefined): void {

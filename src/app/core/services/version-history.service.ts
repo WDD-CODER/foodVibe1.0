@@ -138,12 +138,12 @@ export class VersionHistoryService {
       throw new Error('addVersionAsNewRecipe only supports recipe and dish')
     }
     const recipe = snapshot as Recipe
-    const copyName = `${recipe.name_hebrew} (עותק)`
+    const copyName = `${recipe.nameHebrew} (עותק)`
     const { _id: _, ...rest } = recipe
     const newRecipe: Omit<Recipe, '_id'> = {
       ...rest,
-      name_hebrew: copyName,
-      recipe_type_: recipe.recipe_type_ ?? (entityType === 'dish' ? 'dish' : 'preparation')
+      nameHebrew: copyName,
+      recipeType: recipe.recipeType ?? (entityType === 'dish' ? 'dish' : 'preparation')
     }
     if (entityType === 'dish') {
       return this.dishData.addDish(newRecipe)

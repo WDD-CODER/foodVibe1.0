@@ -62,33 +62,33 @@ export class MenuExportService {
 
     const coverWs = wb.addWorksheet('Menu info')
     const coverData: (string | number)[][] = [
-      [heHeader('menu_name'), menu.name_ ?? ''],
-      [heHeader('event_type'), menu.event_type_ ?? ''],
-      [heHeader('date'), menu.event_date_ ?? ''],
-      [heHeader('guest_count'), menu.guest_count_ ?? 0],
-      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? '']
+      [heHeader('menu_name'), menu.name ?? ''],
+      [heHeader('event_type'), menu.eventType ?? ''],
+      [heHeader('date'), menu.eventDate ?? ''],
+      [heHeader('guest_count'), menu.guestCount ?? 0],
+      [heHeader('pieces_per_person'), menu.piecesPerPerson ?? '']
     ]
     coverData.forEach((row) => coverWs.addRow(row))
     coverWs.getColumn(1).width = 18
     coverWs.getColumn(2).width = 24
 
-    const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
+    const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     const recipeMap = new Map(_recipes.map((r) => [r._id, r]))
 
     sections.forEach((section: MenuSection) => {
-      const sheetName = (section.name_ ?? `Section_${section._id}`).slice(0, 31)
+      const sheetName = (section.name ?? `Section_${section._id}`).slice(0, 31)
       const ws = wb.addWorksheet(sheetName)
       ws.addRow([heHeader('dish_name'), heHeader('portions'), heHeader('take_rate'), heHeader('sell_price')])
       styleHeaderRow(ws, 1)
       let rowNum = 2
-      ;(section.items_ ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipe_id_)
-        const name = recipe?.name_hebrew ?? item.recipe_id_
+      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipeId)
+        const name = recipe?.nameHebrew ?? item.recipeId
         ws.addRow([
           name,
-          roundExportNumber(item.derived_portions_ ?? 0),
-          roundExportNumber(item.predicted_take_rate_ ?? 0),
-          item.sell_price_ !== undefined && item.sell_price_ !== null ? roundExportNumber(Number(item.sell_price_)) : ''
+          roundExportNumber(item.derivedPortions ?? 0),
+          roundExportNumber(item.predictedTakeRate ?? 0),
+          item.sellPrice !== undefined && item.sellPrice !== null ? roundExportNumber(Number(item.sellPrice)) : ''
         ])
         styleDataRow(ws, rowNum++)
       })
@@ -98,12 +98,12 @@ export class MenuExportService {
       ws.getColumn(4).width = 12
     })
 
-    const fileName = buildExportFileName('menu-info', menu.name_ ?? 'menu', { includeDate: false })
+    const fileName = buildExportFileName('menu-info', menu.name ?? 'menu', { includeDate: false })
     await downloadWorkbook(wb, fileName)
   }
 
   /**
-   * Export menu shopping list: all dishes' ingredients scaled by derived_portions_, grouped by category.
+   * Export menu shopping list: all dishes' ingredients scaled by derivedPortions, grouped by category.
    * Filename: shopping-list_{menuName}.xlsx (no date for menu).
    */
   async exportMenuShoppingList(menu: MenuEvent, recipes: Recipe[], products: Product[]): Promise<void> {
@@ -122,27 +122,27 @@ export class MenuExportService {
       categoryToAggregate.set(category, arr)
     }
 
-    ;(menu.sections_ ?? []).forEach((section: MenuSection) => {
-      ;(section.items_ ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipe_id_)
-        if (!recipe?.ingredients_?.length) return
-        const portions = item.derived_portions_ ?? 0
-        const yieldAmount = recipe.yield_amount_ || 1
+    ;(menu.sections ?? []).forEach((section: MenuSection) => {
+      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipeId)
+        if (!recipe?.ingredients?.length) return
+        const portions = item.derivedPortions ?? 0
+        const yieldAmount = recipe.yieldAmount || 1
         const factor = yieldAmount > 0 ? portions / yieldAmount : 0
         const scaled = this.scaling_.getScaledIngredients(recipe, factor)
         const scaledRecipe: Recipe = {
           ...recipe,
-          ingredients_: (recipe.ingredients_ ?? []).map((ing) => ({
+          ingredients: (recipe.ingredients ?? []).map((ing) => ({
             ...ing,
-            amount_: (ing.amount_ ?? 0) * factor
+            amount: (ing.amount ?? 0) * factor
           }))
         }
         scaled.forEach((row, i) => {
           const category =
             row.type === 'product'
-              ? (products.find((p) => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
+              ? (products.find((p) => p._id === row.referenceId)?.categories?.[0] ?? 'כללי')
               : 'הכנות'
-          const ing = scaledRecipe.ingredients_[i]
+          const ing = scaledRecipe.ingredients[i]
           const lineCost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
           addRow(category, row.name, row.amount, row.unit, lineCost)
         })
@@ -176,7 +176,7 @@ export class MenuExportService {
     ws.getColumn(5).width = 12
     ws.getColumn(6).width = 12
 
-    const fileName = buildExportFileName('shopping-list', menu.name_ ?? 'menu', { includeDate: false })
+    const fileName = buildExportFileName('shopping-list', menu.name ?? 'menu', { includeDate: false })
     await downloadWorkbook(wb, fileName)
   }
 
@@ -198,23 +198,23 @@ export class MenuExportService {
       const ws = wb.addWorksheet('Checklist', { views: [{ rightToLeft: true }] })
       const numCols = 4
       let rowNum = 1
-      const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
+      const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
       for (const section of sections) {
-        for (const item of section.items_ ?? []) {
-          const recipe = recipeMap.get(item.recipe_id_)
+        for (const item of section.items ?? []) {
+          const recipe = recipeMap.get(item.recipeId)
           if (!recipe) continue
-          const portions = item.derived_portions_ ?? 0
-          const yieldAmount = recipe.yield_amount_ || 1
+          const portions = item.derivedPortions ?? 0
+          const yieldAmount = recipe.yieldAmount || 1
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0
           const prepRows: ScaledPrepRow[] = this.scaling_.getScaledPrepItems(recipe, factor)
           if (prepRows.length === 0) continue
           const sortedPrep = [...prepRows].sort((a, b) => {
-            const catA = a.category_name ?? ''
-            const catB = b.category_name ?? ''
+            const catA = a.categoryName ?? ''
+            const catB = b.categoryName ?? ''
             return catA.localeCompare(catB) || a.name.localeCompare(b.name)
           })
 
-          ws.addRow([recipe.name_hebrew ?? item.recipe_id_])
+          ws.addRow([recipe.nameHebrew ?? item.recipeId])
           styleExcelTitle(ws, rowNum++, numCols)
           ws.addRow([`${heHeader('portions')}: ${portions}`])
           styleExcelSubtitle(ws, rowNum++, numCols)
@@ -223,7 +223,7 @@ export class MenuExportService {
           sortedPrep.forEach((pr) => {
             ws.addRow([
               pr.name,
-              heCategoryLabel(this.translation_, pr.category_name),
+              heCategoryLabel(this.translation_, pr.categoryName),
               roundExportNumber(pr.amount),
               heUnit(pr.unit)
             ])
@@ -258,17 +258,17 @@ export class MenuExportService {
         categoryToAggregate.set(key, arr)
       }
 
-      ;(menu.sections_ ?? []).forEach((section: MenuSection) => {
-        ;(section.items_ ?? []).forEach((item: MenuItemSelection) => {
-          const recipe = recipeMap.get(item.recipe_id_)
+      ;(menu.sections ?? []).forEach((section: MenuSection) => {
+        ;(section.items ?? []).forEach((item: MenuItemSelection) => {
+          const recipe = recipeMap.get(item.recipeId)
           if (!recipe) return
-          const portions = item.derived_portions_ ?? 0
-          const yieldAmount = recipe.yield_amount_ || 1
+          const portions = item.derivedPortions ?? 0
+          const yieldAmount = recipe.yieldAmount || 1
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
           prepRows.forEach((pr) => {
-            const key = isByStation ? (recipe.default_station_ ?? 'כללי') : (pr.category_name ?? 'כללי')
-            addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.category_name ?? '') : undefined)
+            const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+            addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.categoryName ?? '') : undefined)
           })
         })
       })
@@ -320,7 +320,7 @@ export class MenuExportService {
     }
 
     const modeVariant = mode === 'by_dish' ? 'by-dish' : mode === 'by_station' ? 'by-station' : 'by-category'
-    const fileName = buildExportFileName('check-list', menu.name_ ?? 'menu', {
+    const fileName = buildExportFileName('check-list', menu.name ?? 'menu', {
       includeDate: false,
       variant: modeVariant
     })
@@ -343,30 +343,30 @@ export class MenuExportService {
 
     const coverWs = wb.addWorksheet('Menu info', { views: [{ rightToLeft: true }] })
     coverWs.addRow([heHeader('exported_at'), exportDateStr()])
-    coverWs.addRow([heHeader('menu_name'), menu.name_ ?? ''])
-    coverWs.addRow([heHeader('event_type'), menu.event_type_ ?? ''])
-    coverWs.addRow([heHeader('date'), menu.event_date_ ?? ''])
-    coverWs.addRow([heHeader('guest_count'), menu.guest_count_ ?? 0])
-    coverWs.addRow([heHeader('pieces_per_person'), menu.pieces_per_person_ ?? ''])
+    coverWs.addRow([heHeader('menu_name'), menu.name ?? ''])
+    coverWs.addRow([heHeader('event_type'), menu.eventType ?? ''])
+    coverWs.addRow([heHeader('date'), menu.eventDate ?? ''])
+    coverWs.addRow([heHeader('guest_count'), menu.guestCount ?? 0])
+    coverWs.addRow([heHeader('pieces_per_person'), menu.piecesPerPerson ?? ''])
     styleHeaderRow(coverWs, 1)
     coverWs.getColumn(1).width = 18
     coverWs.getColumn(2).width = 24
 
-    const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
+    const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     sections.forEach((section: MenuSection) => {
-      const sheetName = (section.name_ ?? `Section_${section._id}`).slice(0, 31)
+      const sheetName = (section.name ?? `Section_${section._id}`).slice(0, 31)
       const ws = wb.addWorksheet(sheetName, { views: [{ rightToLeft: true }] })
       ws.addRow([heHeader('dish_name'), heHeader('portions'), heHeader('take_rate'), heHeader('sell_price')])
       styleHeaderRow(ws, 1)
       let rowNum = 2
-      ;(section.items_ ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipe_id_)
-        const name = recipe?.name_hebrew ?? item.recipe_id_
+      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipeId)
+        const name = recipe?.nameHebrew ?? item.recipeId
         ws.addRow([
           name,
-          roundExportNumber(item.derived_portions_ ?? 0),
-          roundExportNumber(item.predicted_take_rate_ ?? 0),
-          item.sell_price_ !== undefined && item.sell_price_ !== null ? roundExportNumber(Number(item.sell_price_)) : ''
+          roundExportNumber(item.derivedPortions ?? 0),
+          roundExportNumber(item.predictedTakeRate ?? 0),
+          item.sellPrice !== undefined && item.sellPrice !== null ? roundExportNumber(Number(item.sellPrice)) : ''
         ])
         styleDataRow(ws, rowNum++)
       })
@@ -381,7 +381,7 @@ export class MenuExportService {
 
     const checklistVariant =
       checklistMode === 'by_dish' ? 'by-dish' : checklistMode === 'by_station' ? 'by-station' : 'by-category'
-    const fileName = buildExportFileName('all', menu.name_ ?? 'menu', { includeDate: false, variant: checklistVariant })
+    const fileName = buildExportFileName('all', menu.name ?? 'menu', { includeDate: false, variant: checklistVariant })
     await downloadWorkbook(wb, fileName)
   }
 
@@ -391,36 +391,36 @@ export class MenuExportService {
   getMenuInfoPreviewPayload(menu: MenuEvent, recipes: Recipe[]): ExportPayload {
     const recipeMap = new Map(recipes.map((r) => [r._id, r]))
     const coverRows: (string | number)[][] = [
-      [heHeader('menu_name'), menu.name_ ?? ''],
-      [heHeader('event_type'), menu.event_type_ ?? ''],
-      [heHeader('date'), menu.event_date_ ?? ''],
-      [heHeader('guest_count'), menu.guest_count_ ?? 0],
-      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? '']
+      [heHeader('menu_name'), menu.name ?? ''],
+      [heHeader('event_type'), menu.eventType ?? ''],
+      [heHeader('date'), menu.eventDate ?? ''],
+      [heHeader('guest_count'), menu.guestCount ?? 0],
+      [heHeader('pieces_per_person'), menu.piecesPerPerson ?? '']
     ]
-    const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
+    const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     const exportSections: ExportSection[] = [
       { title: heHeader('menu_info'), headerRow: [heHeader('field'), heHeader('value')], rows: coverRows }
     ]
     sections.forEach((section: MenuSection) => {
-      const sectionRows: (string | number)[][] = (section.items_ ?? []).map((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipe_id_)
-        const name = recipe?.name_hebrew ?? item.recipe_id_
+      const sectionRows: (string | number)[][] = (section.items ?? []).map((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipeId)
+        const name = recipe?.nameHebrew ?? item.recipeId
         return [
           name,
-          roundExportNumber(item.derived_portions_ ?? 0),
-          roundExportNumber(item.predicted_take_rate_ ?? 0),
-          item.sell_price_ !== undefined && item.sell_price_ !== null ? roundExportNumber(Number(item.sell_price_)) : ''
+          roundExportNumber(item.derivedPortions ?? 0),
+          roundExportNumber(item.predictedTakeRate ?? 0),
+          item.sellPrice !== undefined && item.sellPrice !== null ? roundExportNumber(Number(item.sellPrice)) : ''
         ]
       })
       exportSections.push({
-        title: section.name_ ?? 'Section',
+        title: section.name ?? 'Section',
         headerRow: [heHeader('dish_name'), heHeader('portions'), heHeader('take_rate'), heHeader('sell_price')],
         rows: sectionRows
       })
     })
     return {
-      title: menu.name_ ?? 'Menu',
-      subtitle: [menu.event_type_, menu.event_date_].filter(Boolean).join(' · ') || undefined,
+      title: menu.name ?? 'Menu',
+      subtitle: [menu.eventType, menu.eventDate].filter(Boolean).join(' · ') || undefined,
       exportedAt: new Date().toISOString(),
       sections: exportSections
     }
@@ -443,27 +443,27 @@ export class MenuExportService {
       categoryToAggregate.set(category, arr)
     }
 
-    ;(menu.sections_ ?? []).forEach((section: MenuSection) => {
-      ;(section.items_ ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipe_id_)
-        if (!recipe?.ingredients_?.length) return
-        const portions = item.derived_portions_ ?? 0
-        const yieldAmount = recipe.yield_amount_ || 1
+    ;(menu.sections ?? []).forEach((section: MenuSection) => {
+      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipeId)
+        if (!recipe?.ingredients?.length) return
+        const portions = item.derivedPortions ?? 0
+        const yieldAmount = recipe.yieldAmount || 1
         const factor = yieldAmount > 0 ? portions / yieldAmount : 0
         const scaled = this.scaling_.getScaledIngredients(recipe, factor)
         const scaledRecipe: Recipe = {
           ...recipe,
-          ingredients_: (recipe.ingredients_ ?? []).map((ing) => ({
+          ingredients: (recipe.ingredients ?? []).map((ing) => ({
             ...ing,
-            amount_: (ing.amount_ ?? 0) * factor
+            amount: (ing.amount ?? 0) * factor
           }))
         }
         scaled.forEach((row, i) => {
           const category =
             row.type === 'product'
-              ? (products.find((p) => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
+              ? (products.find((p) => p._id === row.referenceId)?.categories?.[0] ?? 'כללי')
               : 'הכנות'
-          const ing = scaledRecipe.ingredients_[i]
+          const ing = scaledRecipe.ingredients[i]
           const lineCost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
           addRow(category, row.name, row.amount, row.unit, lineCost)
         })
@@ -488,7 +488,7 @@ export class MenuExportService {
     }
 
     return {
-      title: `${menu.name_ ?? 'Menu'} — Shopping list`,
+      title: `${menu.name ?? 'Menu'} — Shopping list`,
       exportedAt: new Date().toISOString(),
       sections: [{ headerRow: ['Category', 'Ingredient', 'Amount', 'Unit', 'Unit price', 'Line total'], rows }]
     }
@@ -505,36 +505,36 @@ export class MenuExportService {
 
     if (mode === 'by_dish') {
       const sections: ExportSection[] = []
-      const menuSections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
+      const menuSections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
       for (const section of menuSections) {
-        for (const item of section.items_ ?? []) {
-          const recipe = recipeMap.get(item.recipe_id_)
+        for (const item of section.items ?? []) {
+          const recipe = recipeMap.get(item.recipeId)
           if (!recipe) continue
-          const portions = item.derived_portions_ ?? 0
-          const yieldAmount = recipe.yield_amount_ || 1
+          const portions = item.derivedPortions ?? 0
+          const yieldAmount = recipe.yieldAmount || 1
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
           if (prepRows.length === 0) continue
           const sortedPrep = [...prepRows].sort((a, b) => {
-            const catA = a.category_name ?? ''
-            const catB = b.category_name ?? ''
+            const catA = a.categoryName ?? ''
+            const catB = b.categoryName ?? ''
             return catA.localeCompare(catB) || a.name.localeCompare(b.name)
           })
           const rows: (string | number)[][] = sortedPrep.map((pr) => [
             pr.name,
-            heCategoryLabel(this.translation_, pr.category_name),
+            heCategoryLabel(this.translation_, pr.categoryName),
             roundExportNumber(pr.amount),
             heUnit(pr.unit)
           ])
           sections.push({
-            title: `${heHeader('dish')}: ${recipe.name_hebrew ?? item.recipe_id_} (${heHeader('portions')}: ${portions})`,
+            title: `${heHeader('dish')}: ${recipe.nameHebrew ?? item.recipeId} (${heHeader('portions')}: ${portions})`,
             headerRow: [heHeader('prep_item'), heHeader('category'), heHeader('quantity'), heHeader('unit')],
             rows
           })
         }
       }
       return {
-        title: `${menu.name_ ?? 'Menu'} — ${heHeader('checklist')}`,
+        title: `${menu.name ?? 'Menu'} — ${heHeader('checklist')}`,
         subtitle: modeLabel,
         exportedAt: new Date().toISOString(),
         sections
@@ -561,17 +561,17 @@ export class MenuExportService {
       categoryToAggregate.set(key, arr)
     }
 
-    ;(menu.sections_ ?? []).forEach((section: MenuSection) => {
-      ;(section.items_ ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipe_id_)
+    ;(menu.sections ?? []).forEach((section: MenuSection) => {
+      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipeId)
         if (!recipe) return
-        const portions = item.derived_portions_ ?? 0
-        const yieldAmount = recipe.yield_amount_ || 1
+        const portions = item.derivedPortions ?? 0
+        const yieldAmount = recipe.yieldAmount || 1
         const factor = yieldAmount > 0 ? portions / yieldAmount : 0
         const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
         prepRows.forEach((pr) => {
-          const key = isByStation ? (recipe.default_station_ ?? 'כללי') : (pr.category_name ?? 'כללי')
-          addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.category_name ?? '') : undefined)
+          const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+          addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.categoryName ?? '') : undefined)
         })
       })
     })
@@ -600,7 +600,7 @@ export class MenuExportService {
       : [heHeader('prep_item'), heHeader('quantity'), heHeader('unit')]
 
     return {
-      title: `${menu.name_ ?? 'Menu'} — ${heHeader('checklist')}`,
+      title: `${menu.name ?? 'Menu'} — ${heHeader('checklist')}`,
       subtitle: modeLabel,
       exportedAt: new Date().toISOString(),
       sections: [{ title: heHeader('accumulated'), headerRow: headerAcc, rows: accRows }]
@@ -610,42 +610,42 @@ export class MenuExportService {
   /** Build payload for menu "All" view: cover + sections with food cost data. */
   getMenuAllViewPreviewPayload(menu: MenuEvent, recipes: Recipe[]): ExportPayload {
     const recipeMap = new Map(recipes.map((r) => [r._id, r]))
-    const guestCount = Number(menu.guest_count_ ?? 0)
-    const piecesPerPerson = Number((menu as { pieces_per_person_?: number }).pieces_per_person_ ?? 1)
-    const servingType = (menu.serving_type_ ?? 'plated_course') as ServingType
+    const guestCount = Number(menu.guestCount ?? 0)
+    const piecesPerPerson = Number((menu as { piecesPerPerson?: number }).piecesPerPerson ?? 1)
+    const servingType = (menu.servingType ?? 'plated_course') as ServingType
 
     const coverRows: (string | number)[][] = [
-      [heHeader('menu_name'), menu.name_ ?? ''],
-      [heHeader('event_type'), menu.event_type_ ?? ''],
-      [heHeader('date'), menu.event_date_ ?? ''],
-      [heHeader('guest_count'), menu.guest_count_ ?? 0],
-      [heHeader('pieces_per_person'), menu.pieces_per_person_ ?? '']
+      [heHeader('menu_name'), menu.name ?? ''],
+      [heHeader('event_type'), menu.eventType ?? ''],
+      [heHeader('date'), menu.eventDate ?? ''],
+      [heHeader('guest_count'), menu.guestCount ?? 0],
+      [heHeader('pieces_per_person'), menu.piecesPerPerson ?? '']
     ]
     const exportSections: ExportSection[] = [
       { title: heHeader('menu_info'), headerRow: [heHeader('field'), heHeader('value')], rows: coverRows }
     ]
 
-    const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
+    const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     for (const section of sections) {
-      const sectionRows: (string | number)[][] = (section.items_ ?? []).map((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipe_id_)
-        const name = recipe?.name_hebrew ?? item.recipe_id_
+      const sectionRows: (string | number)[][] = (section.items ?? []).map((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipeId)
+        const name = recipe?.nameHebrew ?? item.recipeId
         const derivedPortions = this.menuIntelligence_.derivePortions(
           servingType,
           guestCount,
-          Number(item.predicted_take_rate_ ?? 0),
+          Number(item.predictedTakeRate ?? 0),
           piecesPerPerson,
-          Number(item.serving_portions_ ?? 1)
+          Number(item.servingPortions ?? 1)
         )
         let totalCost = 0
-        if (recipe?.ingredients_?.length) {
-          const baseYield = Math.max(1, recipe.yield_amount_ || 1)
+        if (recipe?.ingredients?.length) {
+          const baseYield = Math.max(1, recipe.yieldAmount || 1)
           const multiplier = derivedPortions / baseYield
           totalCost = this.recipeCost_.computeRecipeCost({
             ...recipe,
-            ingredients_: recipe.ingredients_.map((ing) => ({
+            ingredients: recipe.ingredients.map((ing) => ({
               ...ing,
-              amount_: (ing.amount_ || 0) * multiplier
+              amount: (ing.amount || 0) * multiplier
             }))
           })
         }
@@ -655,11 +655,11 @@ export class MenuExportService {
           roundExportNumber(derivedPortions),
           roundExportNumber(totalCost),
           roundExportNumber(costPerPortion),
-          item.sell_price_ !== undefined && item.sell_price_ !== null ? roundExportNumber(Number(item.sell_price_)) : ''
+          item.sellPrice !== undefined && item.sellPrice !== null ? roundExportNumber(Number(item.sellPrice)) : ''
         ]
       })
       exportSections.push({
-        title: section.name_ ?? 'Section',
+        title: section.name ?? 'Section',
         headerRow: [
           heHeader('dish_name'),
           heHeader('portions'),
@@ -671,8 +671,8 @@ export class MenuExportService {
       })
     }
     return {
-      title: `${menu.name_ ?? 'Menu'} — ${heHeader('info')}`,
-      subtitle: [menu.event_type_, menu.event_date_].filter(Boolean).join(' · ') || undefined,
+      title: `${menu.name ?? 'Menu'} — ${heHeader('info')}`,
+      subtitle: [menu.eventType, menu.eventDate].filter(Boolean).join(' · ') || undefined,
       exportedAt: new Date().toISOString(),
       sections: exportSections
     }
@@ -690,17 +690,17 @@ export class MenuExportService {
       const ws = wb.addWorksheet('Checklist', { views: [{ rightToLeft: true }] })
       const numCols = 4
       let rowNum = 1
-      const sections = (menu.sections_ ?? []).slice().sort((a, b) => (a.sort_order_ ?? 0) - (b.sort_order_ ?? 0))
+      const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
       for (const section of sections) {
-        for (const item of section.items_ ?? []) {
-          const recipe = recipeMap.get(item.recipe_id_)
+        for (const item of section.items ?? []) {
+          const recipe = recipeMap.get(item.recipeId)
           if (!recipe) continue
-          const portions = item.derived_portions_ ?? 0
-          const yieldAmount = recipe.yield_amount_ || 1
+          const portions = item.derivedPortions ?? 0
+          const yieldAmount = recipe.yieldAmount || 1
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
           if (prepRows.length === 0) continue
-          ws.addRow([recipe.name_hebrew ?? item.recipe_id_])
+          ws.addRow([recipe.nameHebrew ?? item.recipeId])
           styleExcelTitle(ws, rowNum++, numCols)
           ws.addRow([`${heHeader('portions')}: ${portions}`])
           styleExcelSubtitle(ws, rowNum++, numCols)
@@ -709,7 +709,7 @@ export class MenuExportService {
           prepRows.forEach((pr) => {
             ws.addRow([
               pr.name,
-              heCategoryLabel(this.translation_, pr.category_name),
+              heCategoryLabel(this.translation_, pr.categoryName),
               roundExportNumber(pr.amount),
               heUnit(pr.unit)
             ])
@@ -751,17 +751,17 @@ export class MenuExportService {
         categoryToAggregate.set(key, arr)
         byDishRows.push({ groupKey: key, name, amount, unit, dishName })
       }
-      ;(menu.sections_ ?? []).forEach((section: MenuSection) => {
-        ;(section.items_ ?? []).forEach((item: MenuItemSelection) => {
-          const recipe = recipeMap.get(item.recipe_id_)
+      ;(menu.sections ?? []).forEach((section: MenuSection) => {
+        ;(section.items ?? []).forEach((item: MenuItemSelection) => {
+          const recipe = recipeMap.get(item.recipeId)
           if (!recipe) return
-          const portions = item.derived_portions_ ?? 0
-          const factor = (recipe.yield_amount_ || 1) > 0 ? portions / (recipe.yield_amount_ || 1) : 0
+          const portions = item.derivedPortions ?? 0
+          const factor = (recipe.yieldAmount || 1) > 0 ? portions / (recipe.yieldAmount || 1) : 0
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
-          const dishName = recipe.name_hebrew ?? item.recipe_id_
+          const dishName = recipe.nameHebrew ?? item.recipeId
           prepRows.forEach((pr) => {
-            const key = isByStation ? (recipe.default_station_ ?? 'כללי') : (pr.category_name ?? 'כללי')
-            addPrep(key, pr.name, pr.amount, pr.unit, dishName, isByStation ? (pr.category_name ?? '') : undefined)
+            const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+            addPrep(key, pr.name, pr.amount, pr.unit, dishName, isByStation ? (pr.categoryName ?? '') : undefined)
           })
         })
       })
@@ -842,23 +842,23 @@ export class MenuExportService {
       }
       categoryToAggregate.set(category, arr)
     }
-    ;(menu.sections_ ?? []).forEach((section: MenuSection) => {
-      ;(section.items_ ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipe_id_)
-        if (!recipe?.ingredients_?.length) return
-        const portions = item.derived_portions_ ?? 0
-        const factor = (recipe.yield_amount_ || 1) > 0 ? portions / (recipe.yield_amount_ || 1) : 0
+    ;(menu.sections ?? []).forEach((section: MenuSection) => {
+      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
+        const recipe = recipeMap.get(item.recipeId)
+        if (!recipe?.ingredients?.length) return
+        const portions = item.derivedPortions ?? 0
+        const factor = (recipe.yieldAmount || 1) > 0 ? portions / (recipe.yieldAmount || 1) : 0
         const scaled = this.scaling_.getScaledIngredients(recipe, factor)
         const scaledRecipe: Recipe = {
           ...recipe,
-          ingredients_: (recipe.ingredients_ ?? []).map((ing) => ({ ...ing, amount_: (ing.amount_ ?? 0) * factor }))
+          ingredients: (recipe.ingredients ?? []).map((ing) => ({ ...ing, amount: (ing.amount ?? 0) * factor }))
         }
         scaled.forEach((row, i) => {
           const category =
             row.type === 'product'
-              ? (products.find((p) => p._id === row.referenceId)?.categories_?.[0] ?? 'כללי')
+              ? (products.find((p) => p._id === row.referenceId)?.categories?.[0] ?? 'כללי')
               : 'הכנות'
-          const ing = scaledRecipe.ingredients_[i]
+          const ing = scaledRecipe.ingredients[i]
           addRow(category, row.name, row.amount, row.unit, ing ? this.recipeCost_.getCostForIngredient(ing) : 0)
         })
       })

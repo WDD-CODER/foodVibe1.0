@@ -67,16 +67,16 @@ export class VenueFormComponent implements OnInit {
   protected readonly isSaving_ = this.saving.isSaving_
   protected envTypes = ENV_TYPES
   protected validationErrors_ = signal<Record<string, string>>({})
-  /** design-port session 6 — Cloudinary-hosted venue photo, same pattern as recipe-header's imageUrl_. */
+  /** design-port session 6 — Cloudinary-hosted venue photo, same pattern as recipe-header's imageUrl. */
   protected readonly photoUrl_ = signal<string | null>(null)
   protected readonly uploadingPhoto_ = signal(false)
 
   protected get infraArray(): FormArray {
-    return this.venueForm_?.get('available_infrastructure_') as FormArray
+    return this.venueForm_?.get('availableInfrastructure') as FormArray
   }
 
   protected get hoursArray(): FormArray {
-    return this.venueForm_?.get('operating_hours_') as FormArray
+    return this.venueForm_?.get('operatingHours') as FormArray
   }
 
   protected get allEquipment_() {
@@ -85,7 +85,7 @@ export class VenueFormComponent implements OnInit {
 
   protected envOptions: { value: string; label: string }[] = ENV_TYPES.map((env) => ({ value: env, label: env }))
   protected equipmentOptions_ = computed(() =>
-    this.equipmentData.allEquipment_().map((eq) => ({ value: eq._id, label: eq.name_hebrew }))
+    this.equipmentData.allEquipment_().map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
   )
 
   ngOnInit(): void {
@@ -103,7 +103,7 @@ export class VenueFormComponent implements OnInit {
 
   private buildForm(): void {
     this.venueForm_ = this.fb.group({
-      name_hebrew: [
+      nameHebrew: [
         '',
         [
           Validators.required,
@@ -113,47 +113,47 @@ export class VenueFormComponent implements OnInit {
           )
         ]
       ],
-      environment_type_: ['outdoor_field', [Validators.required]],
-      notes_: [''],
-      available_infrastructure_: this.fb.array([]),
-      address_: [''],
-      capacity_: [null],
-      contact_name_: [''],
-      contact_phone_: [''],
-      operating_hours_: this.fb.array([]),
-      active_: [true]
+      environmentType: ['outdoor_field', [Validators.required]],
+      notes: [''],
+      availableInfrastructure: this.fb.array([]),
+      address: [''],
+      capacity: [null],
+      contactName: [''],
+      contactPhone: [''],
+      operatingHours: this.fb.array([]),
+      active: [true]
     })
   }
 
   private hydrateForm(v: VenueProfile): void {
     this.venueForm_.patchValue({
-      name_hebrew: v.name_hebrew ?? '',
-      environment_type_: v.environment_type_ ?? 'outdoor_field',
-      notes_: v.notes_ ?? '',
-      address_: v.address_ ?? '',
-      capacity_: v.capacity_ ?? null,
-      contact_name_: v.contact_name_ ?? '',
-      contact_phone_: v.contact_phone_ ?? '',
-      active_: v.active_ ?? true
+      nameHebrew: v.nameHebrew ?? '',
+      environmentType: v.environmentType ?? 'outdoor_field',
+      notes: v.notes ?? '',
+      address: v.address ?? '',
+      capacity: v.capacity ?? null,
+      contactName: v.contactName ?? '',
+      contactPhone: v.contactPhone ?? '',
+      active: v.active ?? true
     })
-    this.photoUrl_.set(v.photo_url_ ?? null)
+    this.photoUrl_.set(v.photoUrl ?? null)
     const arr = this.infraArray
     arr.clear()
-    ;(v.available_infrastructure_ ?? []).forEach((item) => {
+    ;(v.availableInfrastructure ?? []).forEach((item) => {
       arr.push(
         this.fb.group({
-          equipment_id_: [item.equipment_id_, Validators.required],
-          available_quantity_: [item.available_quantity_, [Validators.required, Validators.min(0)]]
+          equipmentId: [item.equipmentId, Validators.required],
+          availableQuantity: [item.availableQuantity, [Validators.required, Validators.min(0)]]
         })
       )
     })
     const hours = this.hoursArray
     hours.clear()
-    ;(v.operating_hours_ ?? []).forEach((item) => {
+    ;(v.operatingHours ?? []).forEach((item) => {
       hours.push(
         this.fb.group({
-          days_: [item.days_, Validators.required],
-          time_: [item.time_, Validators.required]
+          days: [item.days, Validators.required],
+          time: [item.time, Validators.required]
         })
       )
     })
@@ -181,8 +181,8 @@ export class VenueFormComponent implements OnInit {
   protected addInfraRow(): void {
     this.infraArray.push(
       this.fb.group({
-        equipment_id_: ['', Validators.required],
-        available_quantity_: [1, [Validators.required, Validators.min(0)]]
+        equipmentId: ['', Validators.required],
+        availableQuantity: [1, [Validators.required, Validators.min(0)]]
       })
     )
   }
@@ -194,8 +194,8 @@ export class VenueFormComponent implements OnInit {
   protected addHoursRow(): void {
     this.hoursArray.push(
       this.fb.group({
-        days_: ['', Validators.required],
-        time_: ['', Validators.required]
+        days: ['', Validators.required],
+        time: ['', Validators.required]
       })
     )
   }
@@ -207,7 +207,7 @@ export class VenueFormComponent implements OnInit {
   private validateForm_(): boolean {
     const errors: Record<string, string> = {}
     const val = this.venueForm_.getRawValue()
-    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required'
+    if (!val.nameHebrew?.trim()) errors['nameHebrew'] = 'field_name_required'
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
   }
@@ -222,48 +222,48 @@ export class VenueFormComponent implements OnInit {
     if (this.venueForm_.invalid) return
     await this.saving.withSaving(async () => {
       const v = this.venueForm_.getRawValue()
-      const infra: VenueInfraItem[] = (v.available_infrastructure_ ?? [])
-        .filter((row: { equipment_id_: string }) => row.equipment_id_)
-        .map((row: { equipment_id_: string; available_quantity_: number }) => ({
-          equipment_id_: row.equipment_id_,
-          available_quantity_: Number(row.available_quantity_)
+      const infra: VenueInfraItem[] = (v.availableInfrastructure ?? [])
+        .filter((row: { equipmentId: string }) => row.equipmentId)
+        .map((row: { equipmentId: string; availableQuantity: number }) => ({
+          equipmentId: row.equipmentId,
+          availableQuantity: Number(row.availableQuantity)
         }))
-      const hours: VenueOperatingHours[] = (v.operating_hours_ ?? [])
-        .filter((row: { days_: string; time_: string }) => row.days_ && row.time_)
-        .map((row: { days_: string; time_: string }) => ({ days_: row.days_, time_: row.time_ }))
+      const hours: VenueOperatingHours[] = (v.operatingHours ?? [])
+        .filter((row: { days: string; time: string }) => row.days && row.time)
+        .map((row: { days: string; time: string }) => ({ days: row.days, time: row.time }))
 
-      const now = new Date().toISOString()
+      const now = Date.now()
 
       if (this.isEditMode_()) {
         const venue = this.route.snapshot.data['venue'] as VenueProfile
         await this.venueData.updateVenue({
           ...venue,
-          name_hebrew: v.name_hebrew,
-          environment_type_: v.environment_type_,
-          notes_: v.notes_ || undefined,
-          available_infrastructure_: infra,
-          address_: v.address_ || undefined,
-          capacity_: v.capacity_ != null && v.capacity_ !== '' ? Number(v.capacity_) : undefined,
-          contact_name_: v.contact_name_ || undefined,
-          contact_phone_: v.contact_phone_ || undefined,
-          operating_hours_: hours,
-          active_: v.active_,
-          photo_url_: this.photoUrl_() ?? undefined
+          nameHebrew: v.nameHebrew,
+          environmentType: v.environmentType,
+          notes: v.notes || undefined,
+          availableInfrastructure: infra,
+          address: v.address || undefined,
+          capacity: v.capacity != null && v.capacity !== '' ? Number(v.capacity) : undefined,
+          contactName: v.contactName || undefined,
+          contactPhone: v.contactPhone || undefined,
+          operatingHours: hours,
+          active: v.active,
+          photoUrl: this.photoUrl_() ?? undefined
         })
       } else {
         await this.venueData.addVenue({
-          name_hebrew: v.name_hebrew,
-          environment_type_: v.environment_type_,
-          notes_: v.notes_ || undefined,
-          available_infrastructure_: infra,
-          address_: v.address_ || undefined,
-          capacity_: v.capacity_ != null && v.capacity_ !== '' ? Number(v.capacity_) : undefined,
-          contact_name_: v.contact_name_ || undefined,
-          contact_phone_: v.contact_phone_ || undefined,
-          operating_hours_: hours,
-          created_at_: now,
-          active_: v.active_,
-          photo_url_: this.photoUrl_() ?? undefined
+          nameHebrew: v.nameHebrew,
+          environmentType: v.environmentType,
+          notes: v.notes || undefined,
+          availableInfrastructure: infra,
+          address: v.address || undefined,
+          capacity: v.capacity != null && v.capacity !== '' ? Number(v.capacity) : undefined,
+          contactName: v.contactName || undefined,
+          contactPhone: v.contactPhone || undefined,
+          operatingHours: hours,
+          createdAt: now,
+          active: v.active,
+          photoUrl: this.photoUrl_() ?? undefined
         })
       }
       if (this.embeddedInDashboard()) {
@@ -283,6 +283,6 @@ export class VenueFormComponent implements OnInit {
   }
 
   protected equipmentName(id: string): string {
-    return this.allEquipment_.find((e) => e._id === id)?.name_hebrew ?? id
+    return this.allEquipment_.find((e) => e._id === id)?.nameHebrew ?? id
   }
 }

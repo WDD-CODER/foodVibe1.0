@@ -1,6 +1,6 @@
 @if (embeddedInDashboard()) {
   @if (isEditMode_()) {
-    <h3>{{ 'edit' | translatePipe }}: {{ supplierForm_.get('name_hebrew')?.value }}</h3>
+    <h3>{{ 'edit' | translatePipe }}: {{ supplierForm_.get('nameHebrew')?.value }}</h3>
   } @else {
     <h3>{{ 'add_supplier' | translatePipe }}</h3>
   }
@@ -8,32 +8,32 @@
   <form [formGroup]="supplierForm_" (ngSubmit)="onSubmit()">
     <div class="c-modal-body">
       <div class="c-input-stack full-width">
-        <label for="name_hebrew">{{ 'name' | translatePipe }}</label>
+        <label for="nameHebrew">{{ 'name' | translatePipe }}</label>
         <input
-          id="name_hebrew"
+          id="nameHebrew"
           type="text"
-          formControlName="name_hebrew"
-          [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-          [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null"
+          formControlName="nameHebrew"
+          [class.c-input--invalid]="validationErrors_()['nameHebrew']"
+          [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
         />
-        @if (supplierForm_.get('name_hebrew')?.errors?.['duplicateName'] && supplierForm_.get('name_hebrew')?.touched) {
+        @if (supplierForm_.get('nameHebrew')?.errors?.['duplicateName'] && supplierForm_.get('nameHebrew')?.touched) {
           <span class="form-error">{{ 'duplicate_supplier_name' | translatePipe }}</span>
         }
-        @if (validationErrors_()['name_hebrew']) {
+        @if (validationErrors_()['nameHebrew']) {
           <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
         }
       </div>
       <div class="c-input-stack full-width">
-        <label for="contact_person_">{{ 'contact_person' | translatePipe }}</label>
-        <input id="contact_person_" type="text" formControlName="contact_person_" />
+        <label for="contactPerson">{{ 'contact_person' | translatePipe }}</label>
+        <input id="contactPerson" type="text" formControlName="contactPerson" />
       </div>
       <div class="c-input-stack full-width">
-        <label for="phone_">{{ 'phone' | translatePipe }}</label>
-        <input id="phone_" type="text" formControlName="phone_" />
+        <label for="phone">{{ 'phone' | translatePipe }}</label>
+        <input id="phone" type="text" formControlName="phone" />
       </div>
       <div class="c-input-stack full-width">
         <label>{{ 'delivery_days' | translatePipe }}</label>
-        <div class="c-filter-options c-filter-options--inline" formArrayName="delivery_days_">
+        <div class="c-filter-options c-filter-options--inline" formArrayName="deliveryDays">
           @for (ctrl of deliveryDaysArray.controls; track $index) {
             <label class="c-filter-option">
               <input type="checkbox" [formControlName]="$index" />
@@ -43,12 +43,12 @@
         </div>
       </div>
       <div class="c-input-stack full-width">
-        <label for="min_order_mov_">{{ 'min_order' | translatePipe }}</label>
-        <input id="min_order_mov_" type="number" formControlName="min_order_mov_" min="0" />
+        <label for="minOrderMov">{{ 'min_order' | translatePipe }}</label>
+        <input id="minOrderMov" type="number" formControlName="minOrderMov" min="0" />
       </div>
       <div class="c-input-stack full-width">
-        <label for="lead_time_days_">{{ 'lead_time' | translatePipe }}</label>
-        <input id="lead_time_days_" type="number" formControlName="lead_time_days_" min="0" />
+        <label for="leadTimeDays">{{ 'lead_time' | translatePipe }}</label>
+        <input id="leadTimeDays" type="number" formControlName="leadTimeDays" min="0" />
       </div>
     </div>
 
@@ -68,7 +68,7 @@
   <div class="supplier-form-container" dir="rtl">
     <header class="form-header">
       @if (isEditMode_()) {
-        <h2>{{ 'edit' | translatePipe }}: {{ supplierForm_.get('name_hebrew')?.value }}</h2>
+        <h2>{{ 'edit' | translatePipe }}: {{ supplierForm_.get('nameHebrew')?.value }}</h2>
       } @else {
         <h2>{{ 'add_supplier' | translatePipe }}</h2>
       }
@@ -81,31 +81,29 @@
           <input
             id="name_hebrew_page"
             type="text"
-            formControlName="name_hebrew"
+            formControlName="nameHebrew"
             class="c-input"
-            [class.c-input--invalid]="validationErrors_()['name_hebrew']"
-            [attr.aria-invalid]="validationErrors_()['name_hebrew'] ? true : null"
+            [class.c-input--invalid]="validationErrors_()['nameHebrew']"
+            [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
           />
-          @if (
-            supplierForm_.get('name_hebrew')?.errors?.['duplicateName'] && supplierForm_.get('name_hebrew')?.touched
-          ) {
+          @if (supplierForm_.get('nameHebrew')?.errors?.['duplicateName'] && supplierForm_.get('nameHebrew')?.touched) {
             <span class="form-error">{{ 'duplicate_supplier_name' | translatePipe }}</span>
           }
-          @if (validationErrors_()['name_hebrew']) {
+          @if (validationErrors_()['nameHebrew']) {
             <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
           }
         </div>
         <div class="form-group">
           <label for="contact_person_page">{{ 'contact_person' | translatePipe }}</label>
-          <input id="contact_person_page" type="text" formControlName="contact_person_" class="c-input" />
+          <input id="contact_person_page" type="text" formControlName="contactPerson" class="c-input" />
         </div>
         <div class="form-group">
           <label for="phone_page">{{ 'phone' | translatePipe }}</label>
-          <input id="phone_page" type="text" formControlName="phone_" class="c-input" />
+          <input id="phone_page" type="text" formControlName="phone" class="c-input" />
         </div>
         <div class="form-group">
           <label>{{ 'delivery_days' | translatePipe }}</label>
-          <div class="delivery-days-wrap" formArrayName="delivery_days_">
+          <div class="delivery-days-wrap" formArrayName="deliveryDays">
             @for (ctrl of deliveryDaysArray.controls; track $index) {
               <label class="day-check">
                 <input type="checkbox" [formControlName]="$index" />
@@ -116,11 +114,11 @@
         </div>
         <div class="form-group">
           <label for="min_order_mov_page">{{ 'min_order' | translatePipe }}</label>
-          <input id="min_order_mov_page" type="number" formControlName="min_order_mov_" min="0" class="c-input" />
+          <input id="min_order_mov_page" type="number" formControlName="minOrderMov" min="0" class="c-input" />
         </div>
         <div class="form-group">
           <label for="lead_time_days_page">{{ 'lead_time' | translatePipe }}</label>
-          <input id="lead_time_days_page" type="number" formControlName="lead_time_days_" min="0" class="c-input" />
+          <input id="lead_time_days_page" type="number" formControlName="leadTimeDays" min="0" class="c-input" />
         </div>
       </div>
 

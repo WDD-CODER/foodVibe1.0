@@ -8,8 +8,8 @@
  *   `_masterId` records the source doc's _id so sync-master can track lineage.
  *
  * Ingredient referenceId remapping:
- *   Recipes and dishes contain ingredients_[].referenceId pointing to product/recipe _ids.
- *   After cloning PRODUCT_LIST, each master product gets a new user-scoped _id.
+ *   Recipes and dishes contain ingredients[].referenceId pointing to product/recipe _ids.
+ *   After cloning products, each master product gets a new user-scoped _id.
  *   We build a masterProductId → userProductId map so cloned recipes reference
  *   the user's copy of each product rather than the master copy.
  */
@@ -41,9 +41,9 @@ async function cloneMasterDataToUser(userId) {
   const db = mongoose.connection.db;
   let totalCloned = 0;
 
-  // masterProductId → userProductId (populated when PRODUCT_LIST is cloned)
+  // masterProductId → userProductId (populated when products is cloned)
   const productIdMap = new Map();
-  // masterSupplierId → userSupplierId (populated when KITCHEN_SUPPLIERS is cloned)
+  // masterSupplierId → userSupplierId (populated when suppliers is cloned)
   const supplierIdMap = new Map();
 
   for (const entityType of CLONEABLE_TYPES) {
@@ -65,33 +65,30 @@ async function cloneMasterDataToUser(userId) {
       };
 
       // After we have the product id map, remap ingredient refs in recipes/dishes
-      if (entityType === 'PRODUCT_LIST' && supplierIdMap.size > 0) {
-        if (Array.isArray(clone.supplierIds_)) {
-          clone.supplierIds_ = clone.supplierIds_.map(id => supplierIdMap.get(id) ?? id);
-        }
-        if (Array.isArray(clone.sources_)) {
-          clone.sources_ = clone.sources_.map(s =>
+      if (entityType === 'products' && supplierIdMap.size > 0) {
+        if (Array.isArray(clone.sources)) {
+          clone.sources = clone.sources.map(s =>
             s.supplierId ? { ...s, supplierId: supplierIdMap.get(s.supplierId) ?? s.supplierId } : s
           );
         }
       }
 
-      if ((entityType === 'RECIPE_LIST' || entityType === 'DISH_LIST') && productIdMap.size > 0) {
-        clone.ingredients_ = remapIngredients(clone.ingredients_, productIdMap);
+      if ((entityType === 'recipes' || entityType === 'dishes') && productIdMap.size > 0) {
+        clone.ingredients = remapIngredients(clone.ingredients, productIdMap);
       }
 
       return clone;
     });
 
     // Build masterProduct → userProduct map right after cloning products
-    if (entityType === 'PRODUCT_LIST') {
+    if (entityType === 'products') {
       for (const clone of clones) {
         productIdMap.set(clone._masterId, clone._id);
       }
     }
 
     // Build masterSupplier → userSupplier map right after cloning suppliers
-    if (entityType === 'KITCHEN_SUPPLIERS') {
+    if (entityType === 'suppliers') {
       for (const clone of clones) {
         supplierIdMap.set(clone._masterId, clone._id);
       }

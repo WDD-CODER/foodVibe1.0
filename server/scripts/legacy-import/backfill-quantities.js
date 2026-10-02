@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('backfill-quantities.js');
 /**
  * backfill-quantities.js — one-off repair for the null/zero-quantity import
  * bugs fixed in lib/transform.js:

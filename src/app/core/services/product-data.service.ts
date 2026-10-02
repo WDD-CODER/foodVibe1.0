@@ -5,7 +5,7 @@ import { LoggingService } from './logging.service'
 import { LoadingService } from './loading.service'
 import { Product, ProductSource } from '../models/product.model'
 
-const ENTITY = 'PRODUCT_LIST'
+const ENTITY = 'products'
 const TRASH_KEY = 'TRASH_PRODUCTS'
 
 @Injectable({ providedIn: 'root' })
@@ -20,13 +20,13 @@ export class ProductDataService {
 
   readonly allTopCategories_ = computed(() => {
     const Products = this.ProductsStore_()
-    const categories = Products.flatMap((p) => p.categories_ ?? []).filter((cat): cat is string => !!cat)
+    const categories = Products.flatMap((p) => p.categories ?? []).filter((cat): cat is string => !!cat)
     return Array.from(new Set(categories))
   })
 
   readonly allAllergens_ = computed(() => {
     const Products = this.ProductsStore_()
-    const allergens = Products.flatMap((Product) => Product.allergens_ || []) // Refactored
+    const allergens = Products.flatMap((Product) => Product.allergens || []) // Refactored
     return Array.from(new Set(allergens))
   })
 
@@ -84,45 +84,45 @@ export class ProductDataService {
   }
 
   private normalizeProduct(row: Record<string, unknown>): Product {
-    const legacy = row as Partial<Product> & { category_?: string; is_dairy_?: boolean; supplierId_?: string }
-    let categories_ = (legacy.categories_ ?? []) as string[]
-    if (categories_.length === 0 && legacy.category_) {
-      categories_ = [legacy.category_]
-      if (legacy.is_dairy_ && !categories_.includes('dairy')) {
-        categories_ = [...categories_, 'dairy']
+    const legacy = row as Partial<Product> & { category?: string; is_dairy_?: boolean; supplierId_?: string }
+    let categories = (legacy.categories ?? []) as string[]
+    if (categories.length === 0 && legacy.category) {
+      categories = [legacy.category]
+      if (legacy.is_dairy_ && !categories.includes('dairy')) {
+        categories = [...categories, 'dairy']
       }
     }
 
-    // Migration: build sources_ from legacy flat fields if not present
+    // Migration: build sources from legacy flat fields if not present
     const legacySupplierIds = (legacy.supplierIds_ ?? (legacy.supplierId_ ? [legacy.supplierId_] : [])) as string[]
-    let sources_ = (legacy.sources_ ?? []) as ProductSource[]
-    if (sources_.length === 0) {
+    let sources = (legacy.sources ?? []) as ProductSource[]
+    if (sources.length === 0) {
       const price = legacy.buy_price_global_ ?? 0
-      sources_ =
+      sources =
         legacySupplierIds.length > 0
-          ? legacySupplierIds.map((sid) => ({ supplierId: sid, price, addedAt: legacy.addedAt_ }))
+          ? legacySupplierIds.map((sid) => ({ supplierId: sid, price, addedAt: legacy.createdAt }))
           : price > 0
-            ? [{ supplierId: '', price, addedAt: legacy.addedAt_ }]
+            ? [{ supplierId: '', price, addedAt: legacy.createdAt }]
             : []
     }
 
     return {
       _id: legacy._id ?? '',
-      name_hebrew: legacy.name_hebrew ?? '',
-      base_unit_: legacy.base_unit_ ?? 'gram',
-      sources_,
-      purchase_options_: (legacy.purchase_options_ ?? []) as Product['purchase_options_'],
-      categories_,
-      yield_factor_: legacy.yield_factor_ ?? 1,
-      allergens_: (legacy.allergens_ ?? []) as string[],
-      min_stock_level_: legacy.min_stock_level_ ?? 0,
-      expiry_days_default_: legacy.expiry_days_default_ ?? 0,
-      addedAt_: legacy.addedAt_,
+      nameHebrew: legacy.nameHebrew ?? '',
+      baseUnit: legacy.baseUnit ?? 'gram',
+      sources,
+      purchaseOptions: (legacy.purchaseOptions ?? []) as Product['purchaseOptions'],
+      categories,
+      yieldFactor: legacy.yieldFactor ?? 1,
+      allergens: (legacy.allergens ?? []) as string[],
+      minStockLevel: legacy.minStockLevel ?? 0,
+      expiryDaysDefault: legacy.expiryDaysDefault ?? 0,
+      createdAt: legacy.createdAt,
       updatedAt: legacy.updatedAt,
-      name_english: legacy.name_english,
-      seeded_: legacy.seeded_,
-      allergen_source_: legacy.allergen_source_,
-      nutrition_per_100g: legacy.nutrition_per_100g,
+      nameEnglish: legacy.nameEnglish,
+      seeded: legacy.seeded,
+      allergenSource: legacy.allergenSource,
+      nutritionPer100g: legacy.nutritionPer100g,
       _masterId: legacy._masterId,
       _userModified: legacy._userModified
     }
@@ -132,7 +132,7 @@ export class ProductDataService {
    * Server-side prefix search (plan 301, Milestone 1) — for typeahead components on large
    * catalogs. Returns lean results normalized through the same normalizeProduct() as the
    * full-collection load, so callers get a fully-typed Product with sane defaults for any
-   * field the server's lean projection omitted (e.g. categories_/allergens_).
+   * field the server's lean projection omitted (e.g. categories/allergens).
    */
   async searchProducts(query: string, limit = 25): Promise<Product[]> {
     try {
@@ -165,8 +165,8 @@ export class ProductDataService {
       const now = Date.now()
       const toCreate = {
         ...newProduct,
-        addedAt_: newProduct.addedAt_ ?? now,
-        updatedAt: new Date().toISOString()
+        createdAt: newProduct.createdAt ?? now,
+        updatedAt: Date.now()
       } as Product
       const saved = await this.storage.post<Product & { _merged?: boolean }>(ENTITY, toCreate)
       const wasMerged = !!(saved as { _merged?: boolean })._merged
@@ -203,8 +203,8 @@ export class ProductDataService {
       const existing = await this.storage.get<Product>(ENTITY, product._id).catch(() => null)
       const toSave: Product = {
         ...product,
-        addedAt_: product.addedAt_ ?? existing?.addedAt_,
-        updatedAt: new Date().toISOString()
+        createdAt: product.createdAt ?? existing?.createdAt,
+        updatedAt: Date.now()
       }
       const updated = await this.storage.put<Product>(ENTITY, toSave)
       this.ProductsStore_.update((products) => products.map((p) => (p._id === updated._id ? updated : p)))
@@ -287,7 +287,7 @@ export class ProductDataService {
 
   private normalizeTrashProduct(row: Partial<Product> & { deletedAt: number }): Product & { deletedAt: number } {
     const legacy = row as Partial<Product> & {
-      category_?: string
+      category?: string
       is_dairy_?: boolean
       supplierId_?: string
       deletedAt: number

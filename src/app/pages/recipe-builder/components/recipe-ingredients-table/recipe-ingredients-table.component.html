@@ -11,133 +11,189 @@
 
   <div class="ingredients-grid-body" cdkDropList (cdkDropListDropped)="onDropIngredient($event)">
     @for (group of ingredientGroups; track $index) {
-    <div [formGroup]="group" class="ingredient-grid-row" cdkDrag>
-      <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
-      <div class="col-drag" cdkDragHandle>
-        <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
-      </div>
+      <div [formGroup]="group" class="ingredient-grid-row" cdkDrag>
+        <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
+        <div class="col-drag" cdkDragHandle>
+          <lucide-icon name="grip-vertical" [size]="16" class="drag-handle-icon"></lucide-icon>
+        </div>
 
-      <div class="col-name">
-        @if ((!group.get('referenceId')?.value && !group.get('name_hebrew')?.value) || editingNameAtRow_() === $index) {
-        <app-ingredient-search [rowIndex]="$index" [focusTrigger]="focusSearchAtRow()"
-          [excludeNames]="editingNameAtRow_() === $index ? getExcludeNamesForRow($index) : existingIngredientNames"
-          [initialQuery]="editingNameAtRow_() === $index ? (group.get('name_hebrew')?.value ?? '') : ''"
-          (itemSelected)="onItemSelected($event, group)" (focusDone)="focusSearchDone.emit()"
-          (addNewRowRequested)="addIngredient.emit()" (cancelSearch)="onCancelSearch($index)"></app-ingredient-search>
-        } @else {
-        <div class="selected-item-display"
-          [class.incomplete-row]="isBlockingRow(group)"
-          [class.warning-row]="isWarningRow(group)"
-          [class.unlinked-row]="isUnlinkedRow(group)">
-          @if (getDisplayName(group)) {
-            <span class="item-text" role="button" tabindex="0"
-              (click)="editingNameAtRow_.set($index)"
-              (keydown.enter)="editingNameAtRow_.set($index)">{{ getDisplayName(group) }}</span>
+        <div class="col-name">
+          @if (
+            (!group.get('referenceId')?.value && !group.get('nameHebrew')?.value) || editingNameAtRow_() === $index
+          ) {
+            <app-ingredient-search
+              [rowIndex]="$index"
+              [focusTrigger]="focusSearchAtRow()"
+              [excludeNames]="editingNameAtRow_() === $index ? getExcludeNamesForRow($index) : existingIngredientNames"
+              [initialQuery]="editingNameAtRow_() === $index ? (group.get('nameHebrew')?.value ?? '') : ''"
+              (itemSelected)="onItemSelected($event, group)"
+              (focusDone)="focusSearchDone.emit()"
+              (addNewRowRequested)="addIngredient.emit()"
+              (cancelSearch)="onCancelSearch($index)"
+            ></app-ingredient-search>
           } @else {
-            <span class="item-text unlinked-ingredient" role="button" tabindex="0"
-              (click)="editingNameAtRow_.set($index)"
-              (keydown.enter)="editingNameAtRow_.set($index)">⚠ {{ 'unlinked_ingredient' | translatePipe }}</span>
+            <div
+              class="selected-item-display"
+              [class.incomplete-row]="isBlockingRow(group)"
+              [class.warning-row]="isWarningRow(group)"
+              [class.unlinked-row]="isUnlinkedRow(group)"
+            >
+              @if (getDisplayName(group)) {
+                <span
+                  class="item-text"
+                  role="button"
+                  tabindex="0"
+                  (click)="editingNameAtRow_.set($index)"
+                  (keydown.enter)="editingNameAtRow_.set($index)"
+                  >{{ getDisplayName(group) }}</span
+                >
+              } @else {
+                <span
+                  class="item-text unlinked-ingredient"
+                  role="button"
+                  tabindex="0"
+                  (click)="editingNameAtRow_.set($index)"
+                  (keydown.enter)="editingNameAtRow_.set($index)"
+                  >⚠ {{ 'unlinked_ingredient' | translatePipe }}</span
+                >
+              }
+              @if (isBlockingRow(group)) {
+                <button
+                  type="button"
+                  class="incomplete-badge"
+                  (click)="
+                    $event.stopPropagation();
+                    getProductForGroup(group)
+                      ? onQuickEditBadgeClick(group, $index, 'invalid')
+                      : editingNameAtRow_.set($index)
+                  "
+                  [title]="'product_incomplete_hint' | translatePipe"
+                >
+                  <lucide-icon name="alert-circle" [size]="14"></lucide-icon>
+                  <span class="badge-label">{{ 'fix' | translatePipe }}</span>
+                </button>
+              } @else if (isWarningRow(group)) {
+                <button
+                  type="button"
+                  class="warning-badge"
+                  (click)="$event.stopPropagation(); onQuickEditBadgeClick(group, $index, 'incomplete')"
+                  [title]="'product_warning_hint' | translatePipe"
+                >
+                  <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
+                </button>
+              } @else if (isUnlinkedRow(group)) {
+                <button
+                  type="button"
+                  class="unlinked-badge"
+                  (click)="$event.stopPropagation(); onUnlinkedBadgeClick(group, $index)"
+                  [title]="'unlinked_ingredient_hint' | translatePipe"
+                >
+                  <lucide-icon name="link" [size]="14"></lucide-icon>
+                </button>
+              } @else if (group.get('referenceId')?.value) {
+                <button
+                  type="button"
+                  class="edit-badge"
+                  (click)="$event.stopPropagation(); onQuickEditBadgeClick(group, $index, 'incomplete')"
+                >
+                  <lucide-icon name="pencil" [size]="14"></lucide-icon>
+                </button>
+              }
+              @if (group.get('item_type')?.value === 'product' && getProductForGroup(group)?.nutritionPer100g) {
+                <app-nutrition-badge [nutrition]="getProductForGroup(group)!.nutritionPer100g"></app-nutrition-badge>
+              }
+              <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearIngredient(group)">
+                <lucide-icon name="x" [size]="14"></lucide-icon>
+              </button>
+            </div>
           }
-          @if (isBlockingRow(group)) {
-            <button type="button" class="incomplete-badge"
-              (click)="$event.stopPropagation(); getProductForGroup(group) ? onQuickEditBadgeClick(group, $index, 'invalid') : editingNameAtRow_.set($index)"
-              [title]="'product_incomplete_hint' | translatePipe">
-              <lucide-icon name="alert-circle" [size]="14"></lucide-icon>
-              <span class="badge-label">{{ 'fix' | translatePipe }}</span>
+        </div>
+
+        <div class="col-unit">
+          <app-custom-select
+            formControlName="unit"
+            class="grid-select"
+            variant="chip"
+            [typeToFilter]="true"
+            [addNewValue]="'__add_unit__'"
+            [options]="getUnitOptions(group)"
+            placeholder="unit"
+            [triggerId]="'unit-row-' + $index"
+            focusByRow
+            [rowIndex]="$index"
+            kind="unit"
+            (valueChange)="onUnitChange(group, $index, $event)"
+          />
+        </div>
+
+        <div class="col-quantity">
+          <div class="quantity-controls">
+            <button
+              type="button"
+              class="qty-btn minus"
+              tabindex="-1"
+              [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
+              (click)="decrementAmount(group, $index)"
+            >
+              <lucide-icon name="minus" [size]="16"></lucide-icon>
             </button>
-          } @else if (isWarningRow(group)) {
-            <button type="button" class="warning-badge"
-              (click)="$event.stopPropagation(); onQuickEditBadgeClick(group, $index, 'incomplete')"
-              [title]="'product_warning_hint' | translatePipe">
-              <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
+            <input
+              type="number"
+              SelectOnFocus
+              formControlName="amount_net"
+              (input)="updateLineCalculations($index)"
+              (keydown)="onQuantityKeydown($event, $index)"
+              focusByRow
+              [rowIndex]="$index"
+              kind="qty"
+              class="grid-input qty-input"
+              placeholder="0"
+              step="0.001"
+              min="0"
+              [class.has-error]="group.invalid && group.touched"
+            />
+            <button type="button" class="qty-btn plus" tabindex="-1" (click)="incrementAmount(group, $index)">
+              <lucide-icon name="plus" [size]="16"></lucide-icon>
             </button>
-          } @else if (isUnlinkedRow(group)) {
-            <button type="button" class="unlinked-badge"
-              (click)="$event.stopPropagation(); onUnlinkedBadgeClick(group, $index)"
-              [title]="'unlinked_ingredient_hint' | translatePipe">
-              <lucide-icon name="link" [size]="14"></lucide-icon>
-            </button>
-          } @else if (group.get('referenceId')?.value) {
-            <button type="button" class="edit-badge"
-              (click)="$event.stopPropagation(); onQuickEditBadgeClick(group, $index, 'incomplete')">
-              <lucide-icon name="pencil" [size]="14"></lucide-icon>
-            </button>
+          </div>
+        </div>
+
+        <div class="col-percent">
+          <span class="percent-value">{{ getPercentageDisplay(group) }}</span>
+        </div>
+
+        <div class="col-cost" [class.is-zero]="(group.get('total_cost')?.value ?? 0) === 0">
+          @if (group.get('total_cost')?.value == null) {
+            <span class="pending-text">{{ 'pending' | translatePipe }}</span>
+          } @else {
+            <span class="cost-value">₪{{ group.get('total_cost')?.value | number: '1.2-2' }}</span>
           }
-          @if (group.get('item_type')?.value === 'product' && getProductForGroup(group)?.nutrition_per_100g) {
-            <app-nutrition-badge [nutrition]="getProductForGroup(group)!.nutrition_per_100g"></app-nutrition-badge>
-          }
-          <button type="button" class="clear-btn" (click)="$event.stopPropagation(); clearIngredient(group)">
-            <lucide-icon name="x" [size]="14"></lucide-icon>
+        </div>
+
+        <div class="col-actions">
+          <button type="button" (click)="removeIngredient.emit($index)" class="c-icon-btn danger">
+            <lucide-icon name="trash-2" [size]="18"></lucide-icon>
           </button>
         </div>
+
+        @if (
+          (quickEditRowIndex_() === $index || quickEditRowClosingIndex_() === $index) &&
+          !isMobile_() &&
+          getProductForGroup(group)
+        ) {
+          <div class="quick-edit-accordion" (clickOutside)="onAccordionClickOutside()">
+            <app-quick-edit-product-panel
+              [product]="getProductForGroup(group)!"
+              [tier]="quickEditRowTier_() ?? 'incomplete'"
+              [closing]="quickEditRowClosingIndex_() === $index"
+              (saved)="onQuickEditSaved($index)"
+              (cancelled)="closeQuickEditWithAnimation()"
+              (openFullEdit)="navigateToEditProduct(group)"
+            >
+            </app-quick-edit-product-panel>
+          </div>
         }
       </div>
-
-      <div class="col-unit">
-        <app-custom-select
-          formControlName="unit"
-          class="grid-select"
-          variant="chip"
-          [typeToFilter]="true"
-          [addNewValue]="'__add_unit__'"
-          [options]="getUnitOptions(group)"
-          placeholder="unit"
-          [triggerId]="'unit-row-' + $index"
-          focusByRow
-          [rowIndex]="$index"
-          kind="unit"
-          (valueChange)="onUnitChange(group, $index, $event)" />
-      </div>
-
-      <div class="col-quantity">
-        <div class="quantity-controls">
-          <button type="button" class="qty-btn minus" tabindex="-1"
-            [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
-            (click)="decrementAmount(group, $index)">
-            <lucide-icon name="minus" [size]="16"></lucide-icon>
-          </button>
-          <input type="number" SelectOnFocus formControlName="amount_net" (input)="updateLineCalculations($index)"
-            (keydown)="onQuantityKeydown($event, $index)" focusByRow [rowIndex]="$index" kind="qty"
-            class="grid-input qty-input" placeholder="0" step="0.001" min="0"
-            [class.has-error]="group.invalid && group.touched" />
-          <button type="button" class="qty-btn plus" tabindex="-1" (click)="incrementAmount(group, $index)">
-            <lucide-icon name="plus" [size]="16"></lucide-icon>
-          </button>
-        </div>
-      </div>
-
-      <div class="col-percent">
-        <span class="percent-value">{{ getPercentageDisplay(group) }}</span>
-      </div>
-
-      <div class="col-cost" [class.is-zero]="(group.get('total_cost')?.value ?? 0) === 0">
-        @if (group.get('total_cost')?.value == null) {
-        <span class="pending-text">{{ 'pending' | translatePipe }}</span>
-        } @else {
-        <span class="cost-value">₪{{ group.get('total_cost')?.value | number:'1.2-2' }}</span>
-        }
-      </div>
-
-      <div class="col-actions">
-        <button type="button" (click)="removeIngredient.emit($index)" class="c-icon-btn danger">
-          <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-        </button>
-      </div>
-
-      @if ((quickEditRowIndex_() === $index || quickEditRowClosingIndex_() === $index) && !isMobile_() && getProductForGroup(group)) {
-        <div class="quick-edit-accordion" (clickOutside)="onAccordionClickOutside()">
-          <app-quick-edit-product-panel
-            [product]="getProductForGroup(group)!"
-            [tier]="quickEditRowTier_() ?? 'incomplete'"
-            [closing]="quickEditRowClosingIndex_() === $index"
-            (saved)="onQuickEditSaved($index)"
-            (cancelled)="closeQuickEditWithAnimation()"
-            (openFullEdit)="navigateToEditProduct(group)">
-          </app-quick-edit-product-panel>
-        </div>
-      }
-
-    </div>
     }
   </div>
 </div>

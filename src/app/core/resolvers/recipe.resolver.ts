@@ -26,8 +26,8 @@ export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) =
 
   // In-memory miss (page refresh / direct URL) — use ID prefix to route to the
   // correct collection directly, avoiding a wasted 404 on the wrong collection.
-  // Master dishes use "dish_" prefix (DISH_LIST); master recipes use "prep_" prefix
-  // (RECIPE_LIST); user-created items have MongoDB ObjectId format — try both.
+  // Master dishes use "dish_" prefix (dishes); master recipes use "prep_" prefix
+  // (recipes); user-created items have MongoDB ObjectId format — try both.
   const isDish = id.startsWith('dish_')
   const isRecipe = id.startsWith('prep_')
 

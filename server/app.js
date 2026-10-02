@@ -49,8 +49,8 @@ app.use(helmet({
 }));
 
 // ---------------------------------------------------------------------------
-// gzip/deflate compression — large JSON list responses (PRODUCT_LIST,
-// RECIPE_LIST, DISH_LIST can run 100s of KB–1MB+ for accounts with big
+// gzip/deflate compression — large JSON list responses (products,
+// recipes, dishes can run 100s of KB–1MB+ for accounts with big
 // catalogs) shrink ~70-90% over the wire for near-zero CPU cost. Runs after
 // Helmet (headers still apply to compressed responses) and before every
 // route that produces a body.

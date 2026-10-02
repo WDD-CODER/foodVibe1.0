@@ -6,7 +6,7 @@ import { LoadingService } from './loading.service'
 import { UserService } from './user.service'
 import { Recipe } from '../models/recipe.model'
 
-const ENTITY = 'RECIPE_LIST'
+const ENTITY = 'recipes'
 const TRASH_KEY = 'TRASH_RECIPES'
 
 @Injectable({ providedIn: 'root' })
@@ -78,8 +78,8 @@ export class RecipeDataService {
   /**
    * Server-side prefix search (plan 301, Milestone 1) — for typeahead components on large
    * catalogs. Returns the server's lean projection (not the full Recipe shape); callers
-   * must only rely on the fields the /search endpoint actually returns for RECIPE_LIST
-   * (_id, name_hebrew, yield_unit_).
+   * must only rely on the fields the /search endpoint actually returns for recipes
+   * (_id, nameHebrew, yieldUnit).
    */
   async searchRecipes(query: string, limit = 25): Promise<Recipe[]> {
     try {
@@ -108,8 +108,8 @@ export class RecipeDataService {
       const userId = this.userService.user_()?._id
       const toCreate = {
         ...newRecipe,
-        addedAt_: now,
-        updatedAt_: now,
+        createdAt: now,
+        updatedAt: now,
         ...(userId ? { createdBy: userId } : {})
       } as Recipe
       const saved = await this.storage.post<Recipe>(ENTITY, toCreate)
@@ -151,8 +151,8 @@ export class RecipeDataService {
       const existing = await this.storage.get<Recipe>(ENTITY, recipe._id).catch(() => null)
       const toSave: Recipe = {
         ...recipe,
-        addedAt_: recipe.addedAt_ ?? existing?.addedAt_,
-        updatedAt_: Date.now(),
+        createdAt: recipe.createdAt ?? existing?.createdAt,
+        updatedAt: Date.now(),
         createdBy: existing?.createdBy ?? recipe.createdBy,
         hiddenBy: existing?.hiddenBy ?? recipe.hiddenBy
       }

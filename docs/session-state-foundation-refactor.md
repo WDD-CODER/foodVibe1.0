@@ -110,3 +110,21 @@ Branch: `chore/foundation-p1-single-source-of-truth` (from `origin/main` post-Ph
 - **P1.7:** `render.yaml` `PERF_LOG` → `"0"` (plan 302's sample was collected 2026-09-27, confirmed closed). **Open Human action:** mirror in the Render dashboard — the file doesn't auto-sync to the live service.
 - **P1.8:** Gathered 65 remote branches with no commits in 60+ days and no open PR (full list not reproduced here — see git). Excluded `gh-pages` from candidates (it's the GitHub Pages deploy target, not stale). **No deletions made — awaiting explicit Human approval of which (if any) to delete**, per the plan's own rule.
 - **Verification:** `npm test --prefix server` → 49/49 pass. `ng build` → clean (same pre-existing warnings only). `ng test` → 309/309 pass (after fixing the HttpClient regression above). Live browser click-through (create/edit/delete a product/recipe/menu event on `dev:local`) **not done** — flagging explicitly rather than claiming it.
+
+## Phase 2b — Atlas cutover runbook (Plan 321)
+
+Run only inside the Human's maintenance window. Every command from the repo root. `<HOST>` = Atlas member host from the Atlas UI (Database → Connect), required as `--confirm-host`.
+
+1. **Freeze**: tell users the app is read-only/offline; stop Render auto-deploy for the branch.
+2. **Backup**: `node server/scripts/db-backup.js --target=atlas` → note the snapshot dir.
+3. **Dry runs** (write nothing; must report 0 invalid):
+   - `node server/migrations/0001-v2-schema.js --target=atlas --confirm-host=<HOST>`
+   - `node server/migrations/0002-trash-and-history.js --target=atlas --confirm-host=<HOST>`
+4. **Human go** on the dry-run numbers.
+5. **Write**: add `--write=yes --backup-dir=<snapshot dir>` to both commands (0001 first, then 0002).
+6. **Verify**: add `--verify=yes` to both. Then `node server/migrations/tools/validate-all.js --target=atlas --confirm-host=<HOST>` → 0 violations.
+7. **Deploy** the merged PR. Render build command must run `build:schemas` (`npm run build:render` already does; Human confirms in the Render dashboard).
+8. **Smoke** (Human): login, recipe edit + save, dish with sub-recipe, menu event build, export, trash restore, version restore.
+9. **Rollback**: redeploy the previous commit (it reads the untouched v1 collections `PRODUCT_LIST`, `RECIPE_LIST`, …). 0002 upgraded `TRASH_*` and `VERSION_HISTORY` in place, so restore those from the snapshot too: `db-restore.js` only restores into a scratch DB (`node server/scripts/db-restore.js --target=atlas --dir=<snapshot dir> --db=<scratch>`), then copy those 7 collections back over the originals (mongosh/Compass). Needed for a real rollback: v1 code cannot read the upgraded trash/history docs, so these 7 collections must be restored from the snapshot (0002 has no other undo). Skip it only if v1 trash/history restore is not needed; the v2 collections can simply be left unused.
+
+Notes: the old v1 collections stay for rollback until Phase 3 cleanup. Master/ownership fields (`userId`, `_masterId`, `_userModified`, `_userDeleted`) keep their v1 names until Phases 5/6 (deviation from D4). Version-history `changes[]` text keeps old field names (display only).

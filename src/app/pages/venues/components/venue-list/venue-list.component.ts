@@ -21,7 +21,7 @@ import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/li
 import { HeroFabService } from '@services/hero-fab.service'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
-type VenueBulkField = 'environment_type_'
+type VenueBulkField = 'environmentType'
 
 @Component({
   selector: 'app-venue-list',
@@ -64,7 +64,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   protected editableFields_ = computed<BulkEditableField[]>(() => [
     {
-      key: 'environment_type_',
+      key: 'environmentType',
       label: 'environment_type',
       options: this.envTypes.map((e) => ({ value: e, label: e })),
       multi: false
@@ -126,14 +126,14 @@ export class VenueListComponent implements OnInit, OnDestroy {
     if (search) {
       list = list.filter(
         (v) =>
-          (v.name_hebrew ?? '').toLowerCase().includes(search) ||
-          (v.environment_type_ ?? '').toLowerCase().includes(search)
+          (v.nameHebrew ?? '').toLowerCase().includes(search) ||
+          (v.environmentType ?? '').toLowerCase().includes(search)
       )
     }
     if (selectedEnv.size > 0) {
-      list = list.filter((v) => selectedEnv.has(v.environment_type_))
+      list = list.filter((v) => selectedEnv.has(v.environmentType))
     }
-    return [...list].sort((a, b) => (a.name_hebrew ?? '').localeCompare(b.name_hebrew ?? '', 'he'))
+    return [...list].sort((a, b) => (a.nameHebrew ?? '').localeCompare(b.nameHebrew ?? '', 'he'))
   })
 
   protected envTypeLabel(env: EnvironmentType): string {
@@ -188,8 +188,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
     for (const id of event.ids) {
       const item = venues.find((v) => v._id === id)
       if (!item) continue
-      if (field === 'environment_type_') {
-        void this.venueData.updateVenue({ ...item, environment_type_: event.value as EnvironmentType })
+      if (field === 'environmentType') {
+        void this.venueData.updateVenue({ ...item, environmentType: event.value as EnvironmentType })
       }
     }
   }
@@ -213,7 +213,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   async onDelete(item: VenueProfile): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open('למחוק את המיקום "' + (item.name_hebrew ?? '') + '"?', { variant: 'danger' })))
+    if (!(await this.confirmModal.open('למחוק את המיקום "' + (item.nameHebrew ?? '') + '"?', { variant: 'danger' })))
       return
     this.deletingId_.set(item._id)
     try {

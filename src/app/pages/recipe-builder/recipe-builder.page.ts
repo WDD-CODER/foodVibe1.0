@@ -225,7 +225,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   protected recipeForm_ = this.fb.group(
     {
-      name_hebrew: ['', Validators.required],
+      nameHebrew: ['', Validators.required],
       recipe_type: ['preparation'],
       serving_portions: [1, [Validators.required, Validators.min(1)]],
       yield_conversions: this.fb.array([this.fb.group({ amount: [0], unit: ['gram'] })]),
@@ -236,7 +236,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       labels: [[] as string[]],
       course: [''],
       logistics: this.fb.group({
-        baseline_: this.fb.array([])
+        baseline: this.fb.array([])
       })
     },
     { validators: (c) => this.recipeFormService_.recipeFormValidator(c) }
@@ -263,8 +263,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const products = this.state_.products_().filter((p) => productIds.includes(p._id))
     const triggerSet = new Set<string>()
     products.forEach((p) => {
-      ;(p.categories_ ?? []).forEach((c) => triggerSet.add(c))
-      ;(p.allergens_ ?? []).forEach((a) => triggerSet.add(a))
+      ;(p.categories ?? []).forEach((c) => triggerSet.add(c))
+      ;(p.allergens ?? []).forEach((a) => triggerSet.add(a))
     })
     return this.metadataRegistry_
       .allLabels_()
@@ -275,9 +275,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private destroyRef = inject(DestroyRef)
 
   private cachedPrepItems_: {
-    preparation_name?: string
-    category_name?: string
-    main_category_name?: string
+    preparationName?: string
+    categoryName?: string
+    mainCategoryName?: string
     quantity?: number
     unit?: string
   }[] = []
@@ -308,9 +308,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       this.cachedPrepItems_ = this.workflowArray.controls.map(
         (c) =>
           c.getRawValue() as {
-            preparation_name?: string
-            category_name?: string
-            main_category_name?: string
+            preparationName?: string
+            categoryName?: string
+            mainCategoryName?: string
             quantity?: number
             unit?: string
           }
@@ -332,7 +332,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         // First-time switch: convert step instructions → prep item names
         this.cachedSteps_.forEach((step) =>
           this.workflowArray.push(
-            this.recipeFormService_.createPrepItemRow({ preparation_name: step.instruction ?? '' })
+            this.recipeFormService_.createPrepItemRow({ preparationName: step.instruction ?? '' })
           )
         )
       } else {
@@ -354,7 +354,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         // First-time switch: convert prep item names → step instructions
         this.cachedPrepItems_.forEach((item, i) => {
           const group = this.recipeFormService_.createStepGroup(i + 1)
-          group.patchValue({ instruction: item.preparation_name ?? '' })
+          group.patchValue({ instruction: item.preparationName ?? '' })
           this.workflowArray.push(group)
         })
       } else {
@@ -376,7 +376,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     this.recipeForm_.patchValue(
       {
-        name_hebrew: '',
+        nameHebrew: '',
         recipe_type: 'preparation',
         serving_portions: 1,
         total_weight_g: 0,
@@ -445,6 +445,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       this.aiFlow_.init({
         recipeForm: this.recipeForm_,
         ingredientsFormVersion_: this.ingredientsFormVersion_,
+        netoConfirmed_: this.netoConfirmed_,
         addNewIngredientRow: () => this.addNewIngredientRow()
       })
 
@@ -488,23 +489,23 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         this.workflowArray.push(this.recipeFormService_.createStepGroup(1))
       }
     }
-    this.recipeForm_.get('name_hebrew')?.setAsyncValidators([(ctrl) => this.duplicateNameValidator_(ctrl)])
+    this.recipeForm_.get('nameHebrew')?.setAsyncValidators([(ctrl) => this.duplicateNameValidator_(ctrl)])
     // Prevent stacking on component reuse (Angular reuses the same instance across
     // recipe-builder/:id navigations — destroyRef never fires).
     this.recipeTypeRevalidationSub_?.unsubscribe()
     this.recipeTypeRevalidationSub_ = this.recipeForm_
       .get('recipe_type')
-      ?.valueChanges.subscribe(() => this.recipeForm_.get('name_hebrew')?.updateValueAndValidity())
+      ?.valueChanges.subscribe(() => this.recipeForm_.get('nameHebrew')?.updateValueAndValidity())
     this.updateTotalWeightG()
     this.recipeForm_.markAsPristine()
     // Clear any stale async-validation errors left over from a previous recipe on
     // this reused component instance, and run a fresh check with the correct ID.
-    this.recipeForm_.get('name_hebrew')?.updateValueAndValidity()
+    this.recipeForm_.get('nameHebrew')?.updateValueAndValidity()
     if (!this.historyViewMode_() && !this.recipeForm_.disabled) {
       // Defer snapshot capture to after the first render so that child component effects
       // (e.g. RecipeHeaderComponent auto-syncs yield from ingredient metrics) have already
       // run. Capturing the snapshot before effects fire causes false-positive dirty guards
-      // whenever the computed yield differs from the stored yield_amount_.
+      // whenever the computed yield differs from the stored yieldAmount.
       runInInjectionContext(this.injector_, () => {
         afterNextRender(() => {
           this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
@@ -596,21 +597,21 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         if (!name) return of(null)
         const currentId = this.recipeId_()
         const combined = [...this.recipeDataService_.allRecipes_(), ...this.dishDataService_.allDishes_()]
-        const isDup = combined.some((r) => (r.name_hebrew?.trim() ?? '') === name && r._id !== currentId)
+        const isDup = combined.some((r) => (r.nameHebrew?.trim() ?? '') === name && r._id !== currentId)
         return of(isDup ? { duplicateName: true } : null)
       })
     )
   }
 
   private patchFormFromRecipe(recipe: Recipe): void {
-    this.isApproved_.set(recipe.is_approved_)
+    this.isApproved_.set(recipe.isApproved)
     this.recipeFormService_.patchFormFromRecipe(this.recipeForm_, recipe)
-    this.recipeImageUrl_.set(recipe.imageUrl_ ?? null)
-    this.recipeRating_.set(recipe.rating_ ?? 0)
-    this.netoConfirmed_.set(recipe.neto_confirmed_ ?? false)
+    this.recipeImageUrl_.set(recipe.imageUrl ?? null)
+    this.recipeRating_.set(recipe.rating ?? 0)
+    this.netoConfirmed_.set(recipe.netoConfirmed ?? false)
     // Capture saved portions for the dish reset button (only for existing dishes).
     const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish'
-    this.savedPortions_.set(isDish ? (recipe.yield_amount_ ?? null) : null)
+    this.savedPortions_.set(isDish ? (recipe.yieldAmount ?? null) : null)
     // patchFormFromRecipe uses emitEvent:false, so recipe_type.valueChanges never fires.
     // Manually sync recipeType_ so the template renders the correct workflow format.
     this.recipeType_.set(isDish ? 'dish' : 'preparation')
@@ -633,7 +634,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   protected get logisticsBaselineArray(): FormArray {
-    return (this.recipeForm_.get('logistics') as FormGroup)?.get('baseline_') as FormArray
+    return (this.recipeForm_.get('logistics') as FormGroup)?.get('baseline') as FormArray
   }
 
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the page. */
@@ -643,7 +644,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     if (!this.recipeId_()) {
       // New recipe: failsafe checks for any real content
       if (this.ingredientsArray.controls.some((g) => !!(g as FormGroup).get('referenceId')?.value)) return true
-      if ((this.recipeForm_.get('name_hebrew')?.value ?? '').trim()) return true
+      if ((this.recipeForm_.get('nameHebrew')?.value ?? '').trim()) return true
       return false // blank new recipe — nothing to guard
     }
 
@@ -689,7 +690,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     // Safety net: if a stale duplicateName error survived to this point, re-validate.
-    const nameCtrl = this.recipeForm_.get('name_hebrew')
+    const nameCtrl = this.recipeForm_.get('nameHebrew')
     if (nameCtrl?.errors?.['duplicateName'] && !this.recipeForm_.pending) {
       nameCtrl.updateValueAndValidity()
     }
@@ -725,7 +726,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     this.saving.setSaving(true)
     const recipe = this.buildRecipeFromForm()
-    recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe)
+    recipe.autoLabels = this.recipeFormService_.computeAutoLabels(recipe)
 
     return new Promise<boolean>((resolve) => {
       this.state_.saveRecipe(recipe).subscribe({
@@ -783,30 +784,30 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         }
       }
       return {
-        preparation_name: (row?.['preparation_name'] ?? '').toString(),
-        category_name: (row?.['category_name'] ?? '').toString(),
-        main_category_name: (row?.['main_category_name'] ?? '').toString(),
+        preparationName: (row?.['preparationName'] ?? '').toString(),
+        categoryName: (row?.['categoryName'] ?? '').toString(),
+        mainCategoryName: (row?.['mainCategoryName'] ?? '').toString(),
         quantity: Number(row?.['quantity'] ?? 0),
         unit: (row?.['unit'] ?? '').toString()
       }
     })
-    const logistics = raw?.['logistics'] as { baseline_?: unknown[] } | undefined
-    const baselineRaw = (logistics?.['baseline_'] ?? []) as {
-      equipment_id_?: string
-      quantity_?: number
-      phase_?: string
-      is_critical_?: boolean
-      notes_?: string
+    const logistics = raw?.['logistics'] as { baseline?: unknown[] } | undefined
+    const baselineRaw = (logistics?.['baseline'] ?? []) as {
+      equipmentId?: string
+      quantity?: number
+      phase?: string
+      isCritical?: boolean
+      notes?: string
     }[]
     const baselineNorm = baselineRaw.map((r) => ({
-      equipment_id_: (r?.equipment_id_ ?? '').toString(),
-      quantity_: Number(r?.quantity_ ?? 0),
-      phase_: (r?.phase_ ?? 'both').toString(),
-      is_critical_: !!r?.is_critical_,
-      notes_: (r?.notes_ ?? '').toString()
+      equipmentId: (r?.equipmentId ?? '').toString(),
+      quantity: Number(r?.quantity ?? 0),
+      phase: (r?.phase ?? 'both').toString(),
+      isCritical: !!r?.isCritical,
+      notes: (r?.notes ?? '').toString()
     }))
     const normalized = {
-      name_hebrew: (raw?.['name_hebrew'] ?? '').toString(),
+      nameHebrew: (raw?.['nameHebrew'] ?? '').toString(),
       recipe_type: (raw?.['recipe_type'] ?? 'preparation').toString(),
       serving_portions: Number(raw?.['serving_portions'] ?? 1),
       labels: normalizedLabels,
@@ -819,10 +820,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       // group never holds. Anything saved from a signal has to be mirrored
       // here or the dirty check cannot see it: changing only the rating left
       // the snapshot identical, so leaving the page never prompted to save.
-      imageUrl_: this.recipeImageUrl_() ?? null,
-      rating_: this.recipeRating_(),
-      is_approved_: this.isApproved_(),
-      neto_confirmed_: this.netoConfirmed_()
+      imageUrl: this.recipeImageUrl_() ?? null,
+      rating: this.recipeRating_(),
+      isApproved: this.isApproved_(),
+      netoConfirmed: this.netoConfirmed_()
     }
     return JSON.stringify(normalized)
   }
@@ -832,7 +833,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   }
 
   protected equipmentOptions_ = computed(() =>
-    this.equipmentData_.allEquipment_().map((eq) => ({ value: eq._id, label: eq.name_hebrew }))
+    this.equipmentData_.allEquipment_().map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
   )
 
   protected phaseOptions_: { value: string; label: string }[] = [
@@ -852,24 +853,22 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private logisticsBaselineIds_ = toSignal(
     (this.logisticsBaselineArray.valueChanges as Observable<unknown>).pipe(
       startWith(this.logisticsBaselineArray.value),
-      map(
-        (arr: unknown) => (arr as { equipment_id_?: string }[]).map((r) => r.equipment_id_).filter(Boolean) as string[]
-      )
+      map((arr: unknown) => (arr as { equipmentId?: string }[]).map((r) => r.equipmentId).filter(Boolean) as string[])
     ),
     { initialValue: [] as string[] }
   )
 
-  /** Search options: equipment only (by name_hebrew), "starts with" + Hebrew/Latin script. */
+  /** Search options: equipment only (by nameHebrew), "starts with" + Hebrew/Latin script. */
   protected logisticsSearchOptions_ = computed((): Equipment[] => {
     const raw = this.logisticsToolSearchQuery_().trim()
     if (!raw) return []
     const alreadyAdded = new Set(this.logisticsBaselineIds_() ?? [])
     const allEquipment = this.equipmentData_.allEquipment_().filter((eq) => !alreadyAdded.has(eq._id))
-    const filtered = filterOptionsByStartsWith(allEquipment, raw, (eq) => eq.name_hebrew)
+    const filtered = filterOptionsByStartsWith(allEquipment, raw, (eq) => eq.nameHebrew)
     const qLower = raw.toLowerCase()
     return filtered.slice().sort((a, b) => {
-      const aName = a.name_hebrew.toLowerCase()
-      const bName = b.name_hebrew.toLowerCase()
+      const aName = a.nameHebrew.toLowerCase()
+      const bName = b.nameHebrew.toLowerCase()
       const aStarts = aName.startsWith(qLower) ? 0 : 1
       const bStarts = bName.startsWith(qLower) ? 0 : 1
       if (aStarts !== bStarts) return aStarts - bStarts
@@ -881,7 +880,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const eq = this.equipmentData_
       .allEquipment_()
       .find((e) => e._id === id || (e as { _masterId?: string })._masterId === id)
-    return eq?.name_hebrew ?? id
+    return eq?.nameHebrew ?? id
   }
 
   protected incrementLogisticsQuantity(): void {
@@ -907,7 +906,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   protected selectLogisticsOption(option: Equipment): void {
     this.logisticsSelectedToolId_.set(option._id)
     this.logisticsToolQuantity_.set(1)
-    this.logisticsToolSearchQuery_.set(option.name_hebrew)
+    this.logisticsToolSearchQuery_.set(option.nameHebrew)
     this.logisticsToolDropdownOpen_.set(false)
   }
 
@@ -970,11 +969,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const qty = this.logisticsToolQuantity_()
     this.logisticsBaselineArray.push(
       this.recipeFormService_.createBaselineRow({
-        equipment_id_: id,
-        quantity_: qty,
-        phase_: 'both',
-        is_critical_: true,
-        notes_: undefined
+        equipmentId: id,
+        quantity: qty,
+        phase: 'both',
+        isCritical: true,
+        notes: undefined
       })
     )
     this.logisticsSelectedToolId_.set(null)
@@ -1000,17 +999,17 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const result = await this.addEquipmentModal_.open(initialName)
     if (!result?.name?.trim()) return
     try {
-      const now = new Date().toISOString()
+      const now = Date.now()
       const created = await this.equipmentData_.addEquipment({
-        name_hebrew: result.name.trim(),
-        category_: result.category,
-        owned_quantity_: 0,
-        is_consumable_: false,
-        created_at_: now,
-        updated_at_: now
+        nameHebrew: result.name.trim(),
+        category: result.category,
+        ownedQuantity: 0,
+        isConsumable: false,
+        createdAt: now,
+        updatedAt: now
       })
       this.logisticsSelectedToolId_.set(created._id)
-      this.logisticsToolSearchQuery_.set(created.name_hebrew)
+      this.logisticsToolSearchQuery_.set(created.nameHebrew)
       this.logisticsToolQuantity_.set(1)
     } catch (err) {
       this.logging_.error({
@@ -1042,8 +1041,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     const newGroup = isDish
       ? this.recipeFormService_.createPrepItemRow({
-          category_name: (category as string) || '',
-          main_category_name: (category as string) || ''
+          categoryName: (category as string) || '',
+          mainCategoryName: (category as string) || ''
         })
       : this.recipeFormService_.createStepGroup(nextOrder)
 
@@ -1146,7 +1145,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const navigateOnSuccess = options?.navigateOnSuccess !== false
     this.saving.setSaving(true)
     const recipe = this.buildRecipeFromForm()
-    recipe.autoLabels_ = this.recipeFormService_.computeAutoLabels(recipe)
+    recipe.autoLabels = this.recipeFormService_.computeAutoLabels(recipe)
 
     this.state_.saveRecipe(recipe).subscribe({
       next: (saved) => {
@@ -1165,11 +1164,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
           // Refresh the entry-time snapshot so the pending-changes guard does not
           // fire when the user navigates away after a successful in-place save.
           this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
-          this.initialRecipeType_ = saved.recipe_type_ === 'dish' ? 'dish' : 'preparation'
+          this.initialRecipeType_ = saved.recipeType === 'dish' ? 'dish' : 'preparation'
           this.recipeForm_.markAsPristine()
           // Update savedPortions_ so the reset button reflects the newly saved value.
-          if (saved.recipe_type_ === 'dish') {
-            this.savedPortions_.set(saved.yield_amount_ ?? null)
+          if (saved.recipeType === 'dish') {
+            this.savedPortions_.set(saved.yieldAmount ?? null)
           }
           this.userMsg_.onSetSuccessMsg(
             this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
@@ -1309,8 +1308,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish'
     const errors: string[] = []
 
-    const name = (this.recipeForm_.get('name_hebrew')?.value ?? '').toString().trim()
-    if (this.recipeForm_.get('name_hebrew')?.errors?.['duplicateName']) {
+    const name = (this.recipeForm_.get('nameHebrew')?.value ?? '').toString().trim()
+    if (this.recipeForm_.get('nameHebrew')?.errors?.['duplicateName']) {
       errors.push(isDish ? 'שם מנה זה כבר קיים' : 'שם מתכון זה כבר קיים')
     }
     if (!name) {
@@ -1318,8 +1317,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     const raw = this.recipeForm_.getRawValue() as {
-      ingredients?: { referenceId?: string; amount_net?: number | string; name_hebrew?: string }[]
-      workflow_items?: { preparation_name?: string; quantity?: number | string; unit?: string }[]
+      ingredients?: { referenceId?: string; amount_net?: number | string; nameHebrew?: string }[]
+      workflow_items?: { preparationName?: string; quantity?: number | string; unit?: string }[]
     }
     const ingredients = raw?.ingredients || []
     const hasAnyIngredient = ingredients.some((ing: { referenceId?: string }) => !!ing?.referenceId)
@@ -1327,11 +1326,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       errors.push('חסר מרכיב: יש לבחור לפחות מוצר או מתכון אחד')
     }
     ingredients.forEach(
-      (ing: { referenceId?: string; amount_net?: number | string; name_hebrew?: string }, i: number) => {
+      (ing: { referenceId?: string; amount_net?: number | string; nameHebrew?: string }, i: number) => {
         if (!ing?.referenceId) return
         const amt = ing.amount_net
         const numAmt = typeof amt === 'number' ? amt : Number(amt)
-        const label = ing.name_hebrew || `מרכיב ${i + 1}`
+        const label = ing.nameHebrew || `מרכיב ${i + 1}`
         if (amt == null || amt === '' || isNaN(numAmt) || numAmt < 0) {
           errors.push(`כמות חסרה עבור "${label}"`)
         } else if (numAmt === 0) {
@@ -1348,14 +1347,14 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const workflowRows = raw?.workflow_items || []
     if (isDish) {
       workflowRows.forEach(
-        (row: { preparation_name?: string; quantity?: number | string; unit?: string }, _i: number) => {
-          if (!row?.preparation_name?.trim()) return
+        (row: { preparationName?: string; quantity?: number | string; unit?: string }, _i: number) => {
+          if (!row?.preparationName?.trim()) return
           const qty = typeof row.quantity === 'number' ? row.quantity : Number(row.quantity)
           if (row.quantity == null || row.quantity === '' || isNaN(qty) || qty < 0) {
-            errors.push(`כמות חסרה עבור ההכנה "${row.preparation_name}"`)
+            errors.push(`כמות חסרה עבור ההכנה "${row.preparationName}"`)
           }
           if (!row?.unit?.trim()) {
-            errors.push(`יחידה חסרה עבור ההכנה "${row.preparation_name}"`)
+            errors.push(`יחידה חסרה עבור ההכנה "${row.preparationName}"`)
           }
         }
       )
@@ -1373,9 +1372,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const rating = this.recipeRating_()
     return {
       ...recipe,
-      ...(url ? { imageUrl_: url } : {}),
-      ...(rating > 0 ? { rating_: rating } : {}),
-      neto_confirmed_: this.netoConfirmed_()
+      ...(url ? { imageUrl: url } : {}),
+      ...(rating > 0 ? { rating: rating } : {}),
+      netoConfirmed: this.netoConfirmed_()
     }
   }
 

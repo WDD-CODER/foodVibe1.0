@@ -8,7 +8,7 @@ import {
   input,
   output,
   signal,
-  viewChild,
+  viewChild
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
@@ -29,7 +29,7 @@ import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
   imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent],
   templateUrl: './quick-edit-product-panel.component.html',
   styleUrl: './quick-edit-product-panel.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class QuickEditProductPanelComponent {
   private readonly productData = inject(ProductDataService)
@@ -48,9 +48,9 @@ export class QuickEditProductPanelComponent {
   openFullEdit = output<void>()
 
   // FORM STATE
-  protected name_ = signal('')
+  protected name = signal('')
   protected baseUnit_ = signal('')
-  protected category_ = signal('')
+  protected category = signal('')
   protected price_ = signal(0)
   protected selectedSupplierIds_ = signal<string[]>([])
   protected error_ = signal<string | null>(null)
@@ -64,9 +64,9 @@ export class QuickEditProductPanelComponent {
     const suppliersSorted = [...this.selectedSupplierIds_()].sort().join(',')
     const originalSuppliersSorted = [...getSupplierIds(p)].sort().join(',')
     return (
-      this.name_() !== (p.name_hebrew ?? '') ||
-      this.baseUnit_() !== (p.base_unit_ ?? '') ||
-      this.category_() !== (p.categories_?.[0] ?? '') ||
+      this.name() !== (p.nameHebrew ?? '') ||
+      this.baseUnit_() !== (p.baseUnit ?? '') ||
+      this.category() !== (p.categories?.[0] ?? '') ||
       this.price_() !== getEffectivePrice(p) ||
       suppliersSorted !== originalSuppliersSorted
     )
@@ -78,28 +78,22 @@ export class QuickEditProductPanelComponent {
 
   // OPTIONS
   protected unitKeys_ = this.unitRegistry.allUnitKeys_
-  protected categories_ = this.metadataRegistry.allCategories_
+  protected categories = this.metadataRegistry.allCategories_
   protected suppliers_ = this.kitchenState.suppliers_
 
-  protected baseUnitOptions_ = computed(() =>
-    this.unitKeys_().map(k => ({ value: k, label: k }))
-  )
+  protected baseUnitOptions_ = computed(() => this.unitKeys_().map((k) => ({ value: k, label: k })))
 
-  protected categoryOptions_ = computed(() =>
-    this.categories_().map(c => ({ value: c, label: c }))
-  )
+  protected categoryOptions_ = computed(() => this.categories().map((c) => ({ value: c, label: c })))
 
-  protected supplierOptions_ = computed(() =>
-    this.suppliers_().map(s => ({ value: s._id, label: s.name_hebrew }))
-  )
+  protected supplierOptions_ = computed(() => this.suppliers_().map((s) => ({ value: s._id, label: s.nameHebrew })))
 
   constructor() {
     // Pre-fill fields whenever the product input changes
     effect(() => {
       const p = this.product()
-      this.name_.set(p.name_hebrew ?? '')
-      this.baseUnit_.set(p.base_unit_ ?? '')
-      this.category_.set(p.categories_?.[0] ?? '')
+      this.name.set(p.nameHebrew ?? '')
+      this.baseUnit_.set(p.baseUnit ?? '')
+      this.category.set(p.categories?.[0] ?? '')
       this.price_.set(getEffectivePrice(p))
       this.selectedSupplierIds_.set([...getSupplierIds(p)])
       this.error_.set(null)
@@ -125,7 +119,7 @@ export class QuickEditProductPanelComponent {
   protected onSupplierChange(val: string): void {
     const current = this.selectedSupplierIds_()
     if (current.includes(val)) {
-      this.selectedSupplierIds_.set(current.filter(id => id !== val))
+      this.selectedSupplierIds_.set(current.filter((id) => id !== val))
     } else {
       this.selectedSupplierIds_.set([...current, val])
     }
@@ -141,7 +135,7 @@ export class QuickEditProductPanelComponent {
     this.nameError_.set('')
     this.unitError_.set('')
 
-    const name = this.name_().trim()
+    const name = this.name().trim()
     const baseUnit = this.baseUnit_().trim()
 
     if (!name) {
@@ -157,26 +151,26 @@ export class QuickEditProductPanelComponent {
     this.isSubmitting_.set(true)
     this.error_.set(null)
 
-    const category = this.category_().trim()
+    const category = this.category().trim()
     const price = Math.max(0, Number(this.price_()) || 0)
     const supplierIds = this.selectedSupplierIds_()
-    const existingSources = this.product().sources_ ?? []
-    let sources_: ProductSource[]
+    const existingSources = this.product().sources ?? []
+    let sources: ProductSource[]
     if (supplierIds.length > 0) {
-      sources_ = supplierIds.map(sid => {
-        const existing = existingSources.find(s => s.supplierId === sid)
+      sources = supplierIds.map((sid) => {
+        const existing = existingSources.find((s) => s.supplierId === sid)
         return { supplierId: sid, price, addedBy: existing?.addedBy, addedAt: existing?.addedAt ?? Date.now() }
       })
     } else {
-      sources_ = price > 0 ? [{ supplierId: '', price, addedAt: Date.now() }] : []
+      sources = price > 0 ? [{ supplierId: '', price, addedAt: Date.now() }] : []
     }
 
     const updated: Product = {
       ...this.product(),
-      name_hebrew: name,
-      base_unit_: baseUnit,
-      categories_: category ? [category] : [],
-      sources_,
+      nameHebrew: name,
+      baseUnit: baseUnit,
+      categories: category ? [category] : [],
+      sources
     }
 
     try {

@@ -149,7 +149,7 @@ export class IngredientSearchComponent {
   protected filteredResults_ = computed(() => {
     if ((this.searchQuery_() ?? '').trim().length < MIN_QUERY_LENGTH) return []
     const excludeSet = new Set((this.excludeNames() ?? []).map((n) => (n ?? '').trim().toLowerCase()).filter(Boolean))
-    return this.searchResults_().filter((item) => !excludeSet.has((item.name_hebrew ?? '').trim().toLowerCase()))
+    return this.searchResults_().filter((item) => !excludeSet.has((item.nameHebrew ?? '').trim().toLowerCase()))
   })
 
   selectItem(item: SearchableItem) {

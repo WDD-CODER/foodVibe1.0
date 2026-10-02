@@ -1,18 +1,18 @@
 export interface NutritionPer100g {
-  energy_kcal?: number
-  protein_g?: number
-  carbs_g?: number
-  sugars_g?: number
-  fat_g?: number
-  fiber_g?: number
-  sodium_g?: number
-  cholesterol_mg?: number
+  energyKcal?: number
+  proteinG?: number
+  carbsG?: number
+  sugarsG?: number
+  fatG?: number
+  fiberG?: number
+  sodiumG?: number
+  cholesterolMg?: number
 }
 
 export interface PurchaseOption_ {
-  unit_symbol_: string
-  conversion_rate_: number
-  price_override_?: number
+  unitSymbol: string
+  conversionRate: number
+  priceOverride?: number
   uom?: string
 }
 
@@ -26,31 +26,31 @@ export interface ProductSource {
 
 export interface Product {
   _id: string
-  name_hebrew: string
-  base_unit_: string
-  sources_: ProductSource[]
-  purchase_options_: PurchaseOption_[]
-  categories_: string[]
-  yield_factor_: number
-  allergens_: string[]
-  min_stock_level_: number
-  expiry_days_default_: number
+  nameHebrew: string
+  baseUnit: string
+  sources: ProductSource[]
+  purchaseOptions: PurchaseOption_[]
+  categories: string[]
+  yieldFactor: number
+  allergens: string[]
+  minStockLevel: number
+  expiryDaysDefault: number
   /** Epoch ms when the product was first added (set on create, preserved on update) */
-  addedAt_?: number
-  updatedAt?: string
+  createdAt?: number
+  updatedAt?: number
   /** English translation of the product name — populated by catalog seeder */
-  name_english?: string
+  nameEnglish?: string
   /** True for products inserted by the catalog seeder pipeline */
-  seeded_?: boolean
+  seeded?: boolean
   /** Provenance of allergen data: "off" = Open Food Facts, "llm" = AI-inferred */
-  allergen_source_?: 'off' | 'llm'
+  allergenSource?: 'off' | 'llm'
 
-  /** @deprecated Migration shim — use sources_ */
+  /** @deprecated Migration shim — use sources */
   buy_price_global_?: number
-  /** @deprecated Migration shim — use sources_ */
+  /** @deprecated Migration shim — use sources */
   supplierIds_?: string[]
   /** Nutritional data per 100g — populated by catalog seeder (Open Food Facts) */
-  nutrition_per_100g?: NutritionPer100g
+  nutritionPer100g?: NutritionPer100g
   /** Set at signup-time clone (points to __master__'s original _id) or after a manual
    *  push-to-master (Plan 322). Absent for a product that's never been linked to master. */
   _masterId?: string

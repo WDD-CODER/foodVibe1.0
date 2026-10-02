@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { Equipment } from '../models/equipment.model'
 import { BaseEntityDataService } from './base-entity-data.service'
 
-const ENTITY = 'EQUIPMENT_LIST'
+const ENTITY = 'equipment'
 const TRASH_KEY = 'TRASH_EQUIPMENT'
 
 /** Thrown when add/update would create a duplicate equipment name. */
@@ -31,15 +31,15 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
 
   async addEquipment(newItem: Omit<Equipment, '_id'>): Promise<Equipment> {
     try {
-      const name = (newItem.name_hebrew ?? '').trim()
-      if (name && this.currentItems().some((e) => (e.name_hebrew ?? '').trim() === name)) {
+      const name = (newItem.nameHebrew ?? '').trim()
+      if (name && this.currentItems().some((e) => (e.nameHebrew ?? '').trim() === name)) {
         throw new Error(ERR_DUPLICATE_EQUIPMENT_NAME)
       }
-      const now = new Date().toISOString()
+      const now = Date.now()
       const withTimestamps = {
         ...newItem,
-        created_at_: newItem.created_at_ ?? now,
-        updated_at_: now
+        createdAt: newItem.createdAt ?? now,
+        updatedAt: now
       }
       const saved = await this.storage.post<Equipment>(ENTITY, withTimestamps as Equipment)
       this.updateItems((list) => [...list, saved])
@@ -58,13 +58,13 @@ export class EquipmentDataService extends BaseEntityDataService<Equipment> {
 
   async updateEquipment(item: Equipment): Promise<Equipment> {
     try {
-      const name = (item.name_hebrew ?? '').trim()
-      if (name && this.currentItems().some((e) => e._id !== item._id && (e.name_hebrew ?? '').trim() === name)) {
+      const name = (item.nameHebrew ?? '').trim()
+      if (name && this.currentItems().some((e) => e._id !== item._id && (e.nameHebrew ?? '').trim() === name)) {
         throw new Error(ERR_DUPLICATE_EQUIPMENT_NAME)
       }
       const updated = {
         ...item,
-        updated_at_: new Date().toISOString()
+        updatedAt: Date.now()
       }
       const result = await this.storage.put<Equipment>(ENTITY, updated)
       this.updateItems((list) => list.map((e) => (e._id === result._id ? result : e)))

@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('verify-against-source.js');
 /**
  * verify-against-source.js — read-only, re-runnable audit of the legacy
  * FoodComposer→Mongo import (plan 300). Re-parses fullDATA.sql fresh on every

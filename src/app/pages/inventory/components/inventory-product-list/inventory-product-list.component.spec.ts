@@ -27,19 +27,19 @@ describe('InventoryProductListComponent', () => {
     const mockProductsSignal = signal<Product[]>([
       {
         _id: '1',
-        name_hebrew: 'Tomato',
-        categories_: ['Vegetables'],
-        sources_: [{ supplierId: 'Supplier A', price: 5, addedAt: Date.now() }],
-        allergens_: ['Gluten'],
-        base_unit_: 'gram'
+        nameHebrew: 'Tomato',
+        categories: ['Vegetables'],
+        sources: [{ supplierId: 'Supplier A', price: 5, addedAt: Date.now() }],
+        allergens: ['Gluten'],
+        baseUnit: 'gram'
       } as Product,
       {
         _id: '2',
-        name_hebrew: 'Milk',
-        categories_: ['Dairy'],
-        sources_: [{ supplierId: 'Supplier B', price: 12, addedAt: Date.now() }],
-        allergens_: ['milk products'],
-        base_unit_: 'liter'
+        nameHebrew: 'Milk',
+        categories: ['Dairy'],
+        sources: [{ supplierId: 'Supplier B', price: 12, addedAt: Date.now() }],
+        allergens: ['milk products'],
+        baseUnit: 'liter'
       } as Product
     ])
 
@@ -51,8 +51,8 @@ describe('InventoryProductListComponent', () => {
     mockRouter.serializeUrl.and.returnValue('')
 
     const mockSuppliersSignal = signal([
-      { _id: 'Supplier A', name_hebrew: 'Supplier A' },
-      { _id: 'Supplier B', name_hebrew: 'Supplier B' }
+      { _id: 'Supplier A', nameHebrew: 'Supplier A' },
+      { _id: 'Supplier B', nameHebrew: 'Supplier B' }
     ])
     const mockKitchenState = {
       products_: mockProductsSignal,
@@ -108,7 +108,7 @@ describe('InventoryProductListComponent', () => {
 
     const results = (component as any).filteredProducts_()
     expect(results.length).toBe(1)
-    expect(results[0].name_hebrew).toBe('Milk')
+    expect(results[0].nameHebrew).toBe('Milk')
   })
 
   it('should handle multiple filter categories (AND logic)', () => {
@@ -118,7 +118,7 @@ describe('InventoryProductListComponent', () => {
 
     const results = (component as any).filteredProducts_()
     expect(results.length).toBe(1)
-    expect(results[0].name_hebrew).toBe('Tomato')
+    expect(results[0].nameHebrew).toBe('Tomato')
   })
 
   it('should navigate to edit page with correct absolute path', () => {

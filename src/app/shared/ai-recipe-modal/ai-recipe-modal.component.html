@@ -1,7 +1,6 @@
 @if (modalService.isOpen()) {
   <div class="c-modal-overlay" (click)="onClose()">
     <div class="c-modal-card ai-recipe-modal-card" dir="rtl" (click)="$event.stopPropagation()">
-
       <div class="ai-modal-header">
         <h2 class="ai-modal-title">
           {{ (modalService.mode() === 'edit' ? 'ai_recipe_edit_title' : 'ai_recipe_modal_title') | translatePipe }}
@@ -24,8 +23,8 @@
                 class="ai-prompt-textarea"
                 dir="auto"
                 [placeholder]="'ai_recipe_edit_placeholder' | translatePipe"
-                [value]="instruction_()"
-                (input)="instruction_.set($any($event.target).value)"
+                [value]="instruction()"
+                (input)="instruction.set($any($event.target).value)"
                 rows="4"
                 [disabled]="status_() === 'sending'"
               ></textarea>
@@ -35,7 +34,12 @@
             </div>
 
             @if (status_() !== 'idle') {
-              <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
+              <div
+                class="ai-status-bar"
+                [class.ai-status--sending]="status_() === 'sending'"
+                [class.ai-status--done]="status_() === 'done'"
+                [class.ai-status--error]="status_() === 'error'"
+              >
                 @if (status_() === 'sending') {
                   <app-loader size="small" [inline]="true" />
                   <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
@@ -66,7 +70,7 @@
                 <button
                   type="button"
                   class="c-btn-primary"
-                  [disabled]="!instruction_().trim() || status_() === 'sending'"
+                  [disabled]="!instruction().trim() || status_() === 'sending'"
                   (click)="onEdit()"
                 >
                   @if (status_() === 'sending') {
@@ -79,7 +83,6 @@
               }
             </div>
           </div>
-
         } @else {
           <!-- Patch preview -->
           <div class="ai-draft-preview">
@@ -101,12 +104,10 @@
             </button>
           </div>
         }
-
       } @else {
         <!-- ── Create mode ── -->
         @if (!draft_()) {
           <div class="ai-prompt-panel">
-
             <!-- Input mode tabs -->
             <div class="ai-input-mode-tabs">
               <button
@@ -169,14 +170,13 @@
             @if (inputMode_() === 'image') {
               <div class="ai-input-wrapper">
                 <label class="ai-image-upload">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    (change)="onImageSelected($event)"
-                  />
+                  <input type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
                   @if (imagePreviewUrl_()) {
-                    <img class="ai-image-preview" [src]="imagePreviewUrl_()!" [alt]="'ai_recipe_image_preview_alt' | translatePipe" />
+                    <img
+                      class="ai-image-preview"
+                      [src]="imagePreviewUrl_()!"
+                      [alt]="'ai_recipe_image_preview_alt' | translatePipe"
+                    />
                   } @else {
                     <lucide-icon name="image" [size]="32"></lucide-icon>
                     <span>{{ 'ai_recipe_upload_image_hint' | translatePipe }}</span>
@@ -210,7 +210,12 @@
             }
 
             @if (status_() !== 'idle') {
-              <div class="ai-status-bar" [class.ai-status--sending]="status_() === 'sending'" [class.ai-status--done]="status_() === 'done'" [class.ai-status--error]="status_() === 'error'">
+              <div
+                class="ai-status-bar"
+                [class.ai-status--sending]="status_() === 'sending'"
+                [class.ai-status--done]="status_() === 'done'"
+                [class.ai-status--error]="status_() === 'error'"
+              >
                 @if (status_() === 'sending') {
                   <app-loader size="small" [inline]="true" />
                   <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
@@ -228,10 +233,7 @@
               <span class="ai-usage-label">{{ 'ai_recipe_daily_requests' | translatePipe }}</span>
               <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
               <div class="ai-usage-track">
-                <div
-                  class="ai-usage-fill"
-                  [style.width.%]="(geminiUsage_().count / 1000) * 100">
-                </div>
+                <div class="ai-usage-fill" [style.width.%]="(geminiUsage_().count / 1000) * 100"></div>
               </div>
             </div>
 
@@ -239,11 +241,19 @@
               <button
                 type="button"
                 class="c-btn-primary"
-                [disabled]="loading_() ||
+                [disabled]="
+                  loading_() ||
                   (inputMode_() === 'text' && !prompt_().trim()) ||
                   (inputMode_() === 'image' && !imageFile_()) ||
-                  (inputMode_() === 'url' && !urlInput_().trim())"
-                (click)="inputMode_() === 'image' ? onGenerateFromImage() : inputMode_() === 'url' ? onGenerateFromUrl() : onGenerate()"
+                  (inputMode_() === 'url' && !urlInput_().trim())
+                "
+                (click)="
+                  inputMode_() === 'image'
+                    ? onGenerateFromImage()
+                    : inputMode_() === 'url'
+                      ? onGenerateFromUrl()
+                      : onGenerate()
+                "
               >
                 @if (loading_()) {
                   <app-loader size="small" [inline]="true" />
@@ -254,7 +264,6 @@
               </button>
             </div>
           </div>
-
         } @else {
           <!-- Create preview — interactive editor or warning confirmation -->
           @if (awaitingWarningConfirm_()) {
@@ -284,7 +293,6 @@
           }
         }
       }
-
     </div>
   </div>
 }

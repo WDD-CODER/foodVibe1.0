@@ -9,7 +9,7 @@ export const VALIDATION_FIELD_ICONS: Record<string, string> = {
   missing_unit: 'ruler',
   missing_price: 'coins',
   missing_category: 'tag',
-  missing_supplier: 'truck',
+  missing_supplier: 'truck'
 }
 
 /**
@@ -19,12 +19,8 @@ export const VALIDATION_FIELD_ICONS: Record<string, string> = {
  * - `valid`      → all fields present
  */
 export function getProductValidationStatus(product: Product): ProductValidationStatus {
-  if (!product.name_hebrew?.trim() || !product.base_unit_?.trim()) return 'invalid'
-  if (
-    !getEffectivePrice(product) ||
-    !product.categories_?.length ||
-    !getSupplierIds(product).length
-  ) return 'incomplete'
+  if (!product.nameHebrew?.trim() || !product.baseUnit?.trim()) return 'invalid'
+  if (!getEffectivePrice(product) || !product.categories?.length || !getSupplierIds(product).length) return 'incomplete'
   return 'valid'
 }
 
@@ -34,10 +30,10 @@ export function getProductValidationStatus(product: Product): ProductValidationS
  */
 export function getProductMissingFields(product: Product): string[] {
   const missing: string[] = []
-  if (!product.name_hebrew?.trim()) missing.push('missing_name')
-  if (!product.base_unit_?.trim()) missing.push('missing_unit')
+  if (!product.nameHebrew?.trim()) missing.push('missing_name')
+  if (!product.baseUnit?.trim()) missing.push('missing_unit')
   if (!getEffectivePrice(product)) missing.push('missing_price')
-  if (!product.categories_?.length) missing.push('missing_category')
+  if (!product.categories?.length) missing.push('missing_category')
   if (!getSupplierIds(product).length) missing.push('missing_supplier')
   return missing
 }

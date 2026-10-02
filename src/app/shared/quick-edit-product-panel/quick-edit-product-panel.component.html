@@ -1,9 +1,8 @@
 <div class="inline-edit-panel" [class.closing]="closing()" dir="rtl">
-  <h3 class="inline-edit-title">{{ product().name_hebrew }}</h3>
+  <h3 class="inline-edit-title">{{ product().nameHebrew }}</h3>
 
   <div class="inline-edit-section">
     <div class="inline-edit-grid">
-
       <!-- Name -->
       <div class="inline-edit-field" [class.field--error]="nameError_()">
         <label for="qep-name">{{ 'product_name' | translatePipe }}</label>
@@ -14,9 +13,10 @@
           class="c-input"
           [class.input--highlight]="tier() === 'invalid'"
           [class.input--error]="nameError_()"
-          [ngModel]="name_()"
-          (ngModelChange)="name_.set($event)"
-          (keydown.enter)="$event.preventDefault(); priceInput.focus()" />
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+          (keydown.enter)="$event.preventDefault(); priceInput.focus()"
+        />
         @if (nameError_()) {
           <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
         }
@@ -32,7 +32,8 @@
           [placeholder]="'choose_unit' | translatePipe"
           [ngModel]="baseUnit_()"
           (ngModelChange)="baseUnit_.set($event)"
-          name="base_unit_" />
+          name="baseUnit"
+        />
         @if (unitError_()) {
           <span class="field-error-msg">{{ unitError_() | translatePipe }}</span>
         }
@@ -52,7 +53,8 @@
           [ngModel]="price_()"
           (ngModelChange)="price_.set($any($event))"
           (keydown.enter)="$event.preventDefault(); onSave()"
-          name="buy_price_global_" />
+          name="buy_price_global_"
+        />
       </div>
 
       <!-- Category -->
@@ -63,11 +65,11 @@
           [typeToFilter]="true"
           [options]="categoryOptions_()"
           [placeholder]="'choose_category' | translatePipe"
-          [ngModel]="category_()"
-          (ngModelChange)="category_.set($event)"
-          name="category_" />
+          [ngModel]="category()"
+          (ngModelChange)="category.set($event)"
+          name="category"
+        />
       </div>
-
     </div>
 
     <!-- Suppliers -->
@@ -75,10 +77,9 @@
       @for (s of suppliers_(); track s._id) {
         <label class="inline-edit-check">
           <input type="checkbox" [checked]="isSupplierSelected(s._id)" (change)="onSupplierChange(s._id)" />
-          <span>{{ s.name_hebrew }}</span>
+          <span>{{ s.nameHebrew }}</span>
         </label>
-      }
-      @empty {
+      } @empty {
         <span class="qep__no-suppliers">{{ 'no_suppliers' | translatePipe }}</span>
       }
     </div>
@@ -112,11 +113,7 @@
     <button type="button" class="c-btn-ghost" (click)="onCancel()">
       {{ 'cancel' | translatePipe }}
     </button>
-    <button
-      type="button"
-      class="c-btn-primary"
-      [disabled]="isSubmitting_()"
-      (click)="onSave()">
+    <button type="button" class="c-btn-primary" [disabled]="isSubmitting_()" (click)="onSave()">
       @if (isSubmitting_()) {
         {{ 'saving' | translatePipe }}
       } @else {

@@ -1932,3 +1932,57 @@ textarea.c-input {
     object-fit: contain;
   }
 }
+
+/* Print: an open export preview prints alone, flowing from the top of page 1 as one clean block.
+   `visibility: hidden` kept the hidden page's height (blank first page, content pushed down), so
+   everything that does not contain the preview is removed from layout instead. */
+@media print {
+  body.export-preview-visible *:not(:has(app-export-preview)):not(app-export-preview):not(app-export-preview *) {
+    display: none !important;
+  }
+
+  body.export-preview-visible app-export-preview .export-preview-overlay {
+    position: static;
+
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
+  body.export-preview-visible app-export-preview .export-preview-paper-wrap {
+    max-width: none;
+    max-height: none;
+  }
+
+  body.export-preview-visible app-export-preview .paper,
+  body.export-preview-visible app-export-preview .paper-inner {
+    max-height: none;
+    overflow: visible;
+
+    box-shadow: none;
+  }
+
+  body.export-preview-visible app-export-preview .export-preview-section,
+  body.export-preview-visible app-export-preview tr,
+  body.export-preview-visible app-export-preview .export-preview-summary-row {
+    break-inside: avoid;
+  }
+}
+
+@media print {
+  /* Empty "search a dish" rows are editing placeholders, never part of the printed menu. */
+  .dish-search-wrap {
+    display: none !important;
+  }
+
+  /* Dish and course names are <button>s (click to change), and the print rule above hides every
+     button. They are the menu's content, so show them as plain text. */
+  .menu-editor-shell .dish-name-btn,
+  .menu-editor-shell .section-title-plain {
+    display: inline-block !important;
+
+    border: 0;
+    background: transparent;
+    color: inherit;
+  }
+}

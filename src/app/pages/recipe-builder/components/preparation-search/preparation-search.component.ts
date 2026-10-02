@@ -106,7 +106,7 @@ export class PreparationSearchComponent {
     return query.length >= 2 && this.filteredResults_().length === 0
   })
 
-  protected categories_ = computed(() => this.prepRegistry.preparationCategories_())
+  protected categories = computed(() => this.prepRegistry.preparationCategories_())
 
   selectPreparation(entry: PreparationEntry): void {
     this.preparationSelected.emit(entry)
@@ -118,7 +118,7 @@ export class PreparationSearchComponent {
     const name = this.searchQuery_().trim()
     if (!name) return
 
-    const cats = this.categories_()
+    const cats = this.categories()
     const category = this.selectedCategory().trim() || (cats.length > 0 ? cats[0] : '')
     if (!category) return
 

@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('backfill-name-snapshots.js');
 /**
  * backfill-name-snapshots.js — populate `ingredients_[].nameSnapshot` on
  * recipes and dishes that were imported without it.

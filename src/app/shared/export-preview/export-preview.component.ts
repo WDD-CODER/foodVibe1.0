@@ -4,7 +4,9 @@ import {
   output,
   effect,
   HostListener,
-  ChangeDetectionStrategy
+  ChangeDetectionStrategy,
+  DestroyRef,
+  inject
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
@@ -30,6 +32,8 @@ export class ExportPreviewComponent {
   readonly close = output<void>()
 
   constructor() {
+    // The host is destroyed (not just emptied) when the preview closes: never leave the print class behind.
+    inject(DestroyRef).onDestroy(() => document.body.classList.remove(BODY_PRINT_CLASS))
     effect(() => {
       const hasPayload = !!this.payload()
       if (hasPayload) {

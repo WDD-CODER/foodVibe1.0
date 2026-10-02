@@ -16,6 +16,8 @@ import { ActivatedRoute, NavigationStart, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { filter, startWith } from 'rxjs'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { TranslationService } from '@services/translation.service'
+import { missingMenuFieldsMessage, pruneBlankMenuItems } from './menu-form.util'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { MenuIntelligenceService } from '@services/menu-intelligence.service'
@@ -53,9 +55,9 @@ import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
 
 type MenuItemForm = {
-  recipe_id_: string
-  recipe_type_: 'dish' | 'preparation'
-  predicted_take_rate_: number
+  recipeId: string
+  recipeType: 'dish' | 'preparation'
+  predictedTakeRate: number
   sell_price?: number
   food_cost_money?: number
   food_cost_pct?: number
@@ -64,7 +66,7 @@ type MenuItemForm = {
 }
 
 /** Raw section shape from form getRawValue() before mapping to MenuSection. */
-type MenuSectionFormRaw = { _id?: string; name_?: string; items_?: MenuItemForm[] }
+type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] }
 
 @Component({
   selector: 'app-menu-intelligence-page',
@@ -132,7 +134,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly sectionSearchOpen_ = signal<number | null>(null)
   /** Currently active dish search (for keyboard nav); null when none focused/has query. */
   protected readonly activeDishSearch_ = signal<{ sectionIndex: number; itemIndex: number } | null>(null)
-  /** Dish row being edited (for restoring recipe_id_ on cancel). */
+  /** Dish row being edited (for restoring recipeId on cancel). */
   protected readonly editingDishAt_ = signal<{
     sectionIndex: number
     itemIndex: number
@@ -151,13 +153,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** For pendingChangesGuard: prevents re-triggering after a successful save */
   isSubmitted = false
 
+  private readonly translation = inject(TranslationService)
   protected readonly form_ = this.fb.group({
-    name_: [''],
-    event_type_: ['', Validators.required],
-    event_date_: [new Date().toISOString().slice(0, 10)],
-    serving_type_: ['plated_course' as ServingType, Validators.required],
-    guest_count_: [50, [Validators.required, Validators.min(0)]],
-    sections_: this.fb.array<FormGroup>([])
+    name: [''],
+    eventType: [''],
+    eventDate: [new Date().toISOString().slice(0, 10)],
+    servingType: ['plated_course' as ServingType, Validators.required],
+    guestCount: [50, [Validators.required, Validators.min(0)]],
+    sections: this.fb.array<FormGroup>([])
   })
 
   /** Inline-edit state for metadata fields */
@@ -168,13 +171,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Which dish field is in edit mode (key: "sectionIndex-itemIndex-fieldKey") */
   protected readonly editingDishField_ = signal<string | null>(null)
-
   /** Event type dropdown open + search query for filtering */
   protected readonly eventTypeDropdownOpen_ = signal(false)
   protected readonly eventTypeSearch_ = signal('')
-
   /** Focus order for keyboard navigation */
-  protected readonly FOCUS_ORDER = ['name_', 'event_type_', 'serving_type_', 'guest_count_', 'event_date_'] as const
+  protected readonly FOCUS_ORDER = ['name', 'eventType', 'servingType', 'guestCount', 'eventDate'] as const
 
   protected readonly eventCost_ = computed(() => {
     this.formValueVersion_() // depend on form changes
@@ -192,7 +193,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected readonly totalRevenue_ = computed(() => {
     this.formValueVersion_() // depend on form changes
-    const guestCount = Number(this.form_.get('guest_count_')?.value ?? 0)
+    const guestCount = Number(this.form_.get('guestCount')?.value ?? 0)
     let total = 0
     const sections = this.sectionsArray
     for (let si = 0; si < sections.length; si++) {
@@ -231,7 +232,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   )
 
   protected readonly activeMenuTypeFields_ = computed((): DishFieldKey[] => {
-    const key = this.form_.value.serving_type_
+    const key = this.form_.value.servingType
     if (!key) return [...DEFAULT_DISH_FIELDS]
     const fields = this.metadataRegistry.getMenuTypeFields(key)
     const all = fields.length > 0 ? fields : [...DEFAULT_DISH_FIELDS]
@@ -296,15 +297,15 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.focusField('name_'), 0)
+    setTimeout(() => this.focusField('name'), 0)
   }
 
-  /** Focus a field by name; 'name_' = menu name, then event_type_, serving_type_, guest_count_, event_date_, then 'section_0' */
+  /** Focus a field by name; 'name' = menu name, then eventType, servingType, guestCount, eventDate, then 'section_0' */
   protected focusField(field: string): void {
     const el = document.getElementById(`menu-focus-${field}`)
     if (el && typeof (el as HTMLInputElement).focus === 'function') {
       ;(el as HTMLInputElement).focus()
-      if (field === 'event_date_' && typeof (el as HTMLInputElement).showPicker === 'function') {
+      if (field === 'eventDate' && typeof (el as HTMLInputElement).showPicker === 'function') {
         ;(el as HTMLInputElement).showPicker()
       }
     } else if (el) el.focus()
@@ -313,12 +314,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** Open date picker and focus the date input (called from clickable date label). */
   protected openDatePicker(): void {
     this.dateDigitBuffer_.set('')
-    this.focusField('event_date_')
+    this.focusField('eventDate')
   }
 
-  /** Format event_date_ for display (DD/MM/YYYY or placeholder). */
+  /** Format eventDate for display (DD/MM/YYYY or placeholder). */
   protected getEventDateDisplay(): string {
-    const raw = this.form_.get('event_date_')?.value as string | undefined
+    const raw = this.form_.get('eventDate')?.value as string | undefined
     if (!raw) return ''
     const d = new Date(raw + 'T12:00:00')
     if (Number.isNaN(d.getTime())) return raw
@@ -333,7 +334,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** Handle digit-only input for date: first 2 = day, next 2 = month, then 4 = year. */
   protected onDateKeydown(e: KeyboardEvent): void {
     if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      this.onMetaKeydown('event_date_', e)
+      this.onMetaKeydown('eventDate', e)
       return
     }
     if (e.key.length === 1 && /\d/.test(e.key)) {
@@ -349,7 +350,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           const mNum = Math.min(12, Math.max(1, parseInt(mStr, 10) || 1))
           const yNum = Math.max(1900, Math.min(2100, parseInt(yStr, 10) || new Date().getFullYear()))
           const iso = `${yNum}-${String(mNum).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`
-          this.form_.patchValue({ event_date_: iso })
+          this.form_.patchValue({ eventDate: iso })
           this.dateDigitBuffer_.set('')
         }
       }
@@ -363,23 +364,23 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected incrementGuests(): void {
-    const ctrl = this.form_.get('guest_count_')
+    const ctrl = this.form_.get('guestCount')
     const v = Number(ctrl?.value ?? 0)
     ctrl?.setValue(quantityIncrement(v, 0, { integerOnly: true }))
   }
 
   protected decrementGuests(): void {
-    const ctrl = this.form_.get('guest_count_')
+    const ctrl = this.form_.get('guestCount')
     const v = Number(ctrl?.value ?? 0)
     ctrl?.setValue(quantityDecrement(v, 0, { integerOnly: true }))
   }
 
   protected getGuestCount(): number {
-    return Number(this.form_.get('guest_count_')?.value ?? 0)
+    return Number(this.form_.get('guestCount')?.value ?? 0)
   }
 
   protected onMetaKeydown(field: string, e: KeyboardEvent): void {
-    if (field === 'event_type_') {
+    if (field === 'eventType') {
       if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault()
         this.openEventTypeDropdown()
@@ -435,7 +436,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const set = new Set<string>()
     this.menuEventTypeService.allEventTypes_().forEach((t) => set.add(t))
     this.menuEventData.allMenuEvents_().forEach((ev) => {
-      if (ev.event_type_) set.add(ev.event_type_)
+      if (ev.eventType) set.add(ev.eventType)
     })
     return Array.from(set)
   })
@@ -491,7 +492,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       } else if (idx === addNewIndex) {
         void this.addNewEventType()
       } else {
-        this.focusField('serving_type_')
+        this.focusField('servingType')
       }
       return
     }
@@ -499,14 +500,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       e.preventDefault()
       e.stopPropagation()
       this.closeEventTypeDropdown()
-      this.focusField('event_type_')
+      this.focusField('eventType')
       return
     }
     if (e.key === 'Tab') {
       e.preventDefault()
       e.stopPropagation()
       this.closeEventTypeDropdown()
-      this.focusField('serving_type_')
+      this.focusField('servingType')
     }
   }
 
@@ -562,10 +563,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected selectEventType(value: string): void {
-    this.form_.patchValue({ event_type_: value })
+    this.form_.patchValue({ eventType: value })
     this.closeEventTypeDropdown()
     this.stopEditField()
-    this.focusField('serving_type_')
+    this.focusField('servingType')
   }
 
   protected async addNewEventType(): Promise<void> {
@@ -577,10 +578,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     })
     if (result?.trim()) {
       await this.menuEventTypeService.addEventType(result.trim())
-      this.form_.patchValue({ event_type_: result.trim() })
+      this.form_.patchValue({ eventType: result.trim() })
       this.closeEventTypeDropdown()
       this.stopEditField()
-      this.focusField('serving_type_')
+      this.focusField('servingType')
     }
   }
 
@@ -591,8 +592,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** For pendingChangesGuard — enables ternary modal with "Save & Leave" option */
   async saveAndWait(): Promise<boolean> {
-    if (!this.form_.value.name_?.trim()) {
-      this.form_.patchValue({ name_: this.generateDateName() })
+    if (!this.form_.value.name?.trim()) {
+      this.form_.patchValue({ name: this.generateDateName() })
     }
 
     try {
@@ -600,35 +601,35 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       const now = Date.now()
       const id = this.editingId_()
       if (id) {
-        // buildEventFromForm() doesn't carry logistics_ (the form has no control for it) —
+        // buildEventFromForm() doesn't carry logistics (the form has no control for it) —
         // preserve whatever's already stored so a normal save can't silently drop the
         // venue link set via app-venue-link-chip (design-port session 6).
-        const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics_
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now, logistics_: existingLogistics })
+        const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now, logistics: existingLogistics })
       } else {
-        const created = await this.menuEventData.addMenuEvent({ ...event, created_at_: now, updated_at_: now })
+        const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
         this.editingId_.set(created._id)
       }
       this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
       this.isSubmitted = true
       return true
     } catch {
-      this.userMsg.onSetErrorMsg('error_saving_menu')
+      this.userMsg.onSetErrorMsg(this.translation.translate('error_saving_menu'))
       return false
     }
   }
 
   protected get sectionsArray(): FormArray<FormGroup> {
-    return this.form_.get('sections_') as FormArray<FormGroup>
+    return this.form_.get('sections') as FormArray<FormGroup>
   }
 
   protected addSection(): void {
     this.sectionsArray.push(
       this.fb.group({
         _id: [crypto.randomUUID()],
-        name_: [''],
-        sort_order_: [this.sectionsArray.length + 1],
-        items_: this.fb.array<FormGroup>([])
+        name: [''],
+        sortOrder: [this.sectionsArray.length + 1],
+        items: this.fb.array<FormGroup>([])
       })
     )
   }
@@ -638,16 +639,16 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected getItemsArray(sectionIndex: number): FormArray<FormGroup> {
-    return this.sectionsArray.at(sectionIndex).get('items_') as FormArray<FormGroup>
+    return this.sectionsArray.at(sectionIndex).get('items') as FormArray<FormGroup>
   }
 
   protected addItem(sectionIndex: number): void {
     const items = this.getItemsArray(sectionIndex)
     items.push(
       this.fb.group({
-        recipe_id_: ['', Validators.required],
-        recipe_type_: ['dish'],
-        predicted_take_rate_: [0.4, [Validators.required, Validators.min(0), Validators.max(1)]],
+        recipeId: ['', Validators.required],
+        recipeType: ['dish'],
+        predictedTakeRate: [0.4, [Validators.required, Validators.min(0), Validators.max(1)]],
         sell_price: [0],
         food_cost_money: [0],
         food_cost_pct: [0],
@@ -665,33 +666,33 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected isRecipeDish(recipe: Recipe): boolean {
-    return recipe.recipe_type_ === 'dish' || !!(recipe.prep_items_?.length || recipe.prep_categories_?.length)
+    return recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
   }
 
   protected getPiecesPerPerson(): number {
-    return (this.form_.value as { pieces_per_person_?: number }).pieces_per_person_ ?? 1
+    return (this.form_.value as { piecesPerPerson?: number }).piecesPerPerson ?? 1
   }
 
   private getAutoFoodCost(sectionIndex: number, itemIndex: number): number {
     const item = this.getItemsArray(sectionIndex).at(itemIndex)
-    const recipeId = item?.get('recipe_id_')?.value as string | undefined
+    const recipeId = item?.get('recipeId')?.value as string | undefined
     if (!recipeId) return 0
     const recipe = this.recipes_().find((r) => r._id === recipeId)
     if (!recipe) return 0
     const derivedPortions = this.menuIntelligence.derivePortions(
-      this.form_.value.serving_type_ as ServingType,
+      this.form_.value.servingType as ServingType,
       this.getGuestCount(),
-      Number(item.get('predicted_take_rate_')?.value ?? 0),
+      Number(item.get('predictedTakeRate')?.value ?? 0),
       this.getPiecesPerPerson(),
       Number(item.get('serving_portions')?.value ?? 1)
     )
-    const baseYield = Math.max(1, recipe.yield_amount_ || 1)
+    const baseYield = Math.max(1, recipe.yieldAmount || 1)
     const multiplier = derivedPortions / baseYield
     const scaledCost = this.recipeCostService.computeRecipeCost({
       ...recipe,
-      ingredients_: recipe.ingredients_.map((ing) => ({
+      ingredients: recipe.ingredients.map((ing) => ({
         ...ing,
-        amount_: (ing.amount_ || 0) * multiplier
+        amount: (ing.amount || 0) * multiplier
       }))
     })
     return Math.round(scaledCost * 100) / 100
@@ -800,7 +801,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.activeDishSearch_.set(null)
       const edit = this.editingDishAt_()
       if (edit && edit.sectionIndex === sectionIndex && edit.itemIndex === itemIndex && edit.previousRecipeId) {
-        this.getItemsArray(sectionIndex).at(itemIndex).patchValue({ recipe_id_: edit.previousRecipeId })
+        this.getItemsArray(sectionIndex).at(itemIndex).patchValue({ recipeId: edit.previousRecipeId })
         this.editingDishAt_.set(null)
       }
     }
@@ -810,24 +811,24 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const items = this.getItemsArray(sectionIndex)
     const group = items.at(itemIndex)
     const derivedPortions = this.menuIntelligence.derivePortions(
-      this.form_.value.serving_type_ as ServingType,
-      Number(this.form_.value.guest_count_ || 0),
-      Number(group.get('predicted_take_rate_')?.value ?? 0.4),
-      Number((this.form_.value as { pieces_per_person_?: number }).pieces_per_person_ ?? 1),
+      this.form_.value.servingType as ServingType,
+      Number(this.form_.value.guestCount || 0),
+      Number(group.get('predictedTakeRate')?.value ?? 0.4),
+      Number((this.form_.value as { piecesPerPerson?: number }).piecesPerPerson ?? 1),
       Number(group.get('serving_portions')?.value ?? 1)
     )
-    const baseYield = Math.max(1, recipe.yield_amount_ || 1)
+    const baseYield = Math.max(1, recipe.yieldAmount || 1)
     const multiplier = derivedPortions / baseYield
     const autoCost = this.recipeCostService.computeRecipeCost({
       ...recipe,
-      ingredients_: recipe.ingredients_.map((ing) => ({
+      ingredients: recipe.ingredients.map((ing) => ({
         ...ing,
-        amount_: (ing.amount_ || 0) * multiplier
+        amount: (ing.amount || 0) * multiplier
       }))
     })
     group.patchValue({
-      recipe_id_: recipe._id,
-      recipe_type_: this.isRecipeDish(recipe) ? 'dish' : 'preparation',
+      recipeId: recipe._id,
+      recipeType: this.isRecipeDish(recipe) ? 'dish' : 'preparation',
       food_cost_money: Math.round(autoCost * 100) / 100,
       serving_portions: 1
     })
@@ -844,11 +845,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** Click on dish name: switch row to search and replace (select will replace, not add). */
   protected startEditDishName(sectionIndex: number, itemIndex: number): void {
     const group = this.getItemsArray(sectionIndex).at(itemIndex)
-    const recipeId = group.get('recipe_id_')?.value as string | undefined
+    const recipeId = group.get('recipeId')?.value as string | undefined
     if (!recipeId) return
-    const currentName = this.recipes_().find((r) => r._id === recipeId)?.name_hebrew || ''
+    const currentName = this.recipes_().find((r) => r._id === recipeId)?.nameHebrew || ''
     this.editingDishAt_.set({ sectionIndex, itemIndex, previousRecipeId: recipeId })
-    group.patchValue({ recipe_id_: '' })
+    group.patchValue({ recipeId: '' })
     this.setDishSearchQuery(sectionIndex, itemIndex, currentName)
     this.activeDishSearch_.set({ sectionIndex, itemIndex })
     this.dishSearchHighlightedIndex_.update((m) => ({
@@ -873,7 +874,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const edit = this.editingDishAt_()
     if (edit && edit.sectionIndex === sectionIndex && edit.itemIndex === itemIndex && edit.previousRecipeId) {
       const group = this.getItemsArray(sectionIndex).at(itemIndex)
-      group.patchValue({ recipe_id_: edit.previousRecipeId })
+      group.patchValue({ recipeId: edit.previousRecipeId })
       this.editingDishAt_.set(null)
     }
   }
@@ -890,7 +891,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
     const raw = this.getDishSearchQuery(sectionIndex, itemIndex).trim()
     if (!raw) return []
-    const filtered = filterOptionsByStartsWith(this.recipes_(), raw, (r) => r.name_hebrew ?? '')
+    const filtered = filterOptionsByStartsWith(this.recipes_(), raw, (r) => r.nameHebrew ?? '')
     return filtered.slice(0, 12)
   }
 
@@ -938,7 +939,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       const s = sectionIndex
       const i = itemIndex
       const items = this.getItemsArray(s)
-      const hasRecipe = (items.at(i)?.get('recipe_id_')?.value ?? '') !== ''
+      const hasRecipe = (items.at(i)?.get('recipeId')?.value ?? '') !== ''
       setTimeout(() => {
         if (ke.shiftKey) {
           const prev = document.getElementById('dish-search-' + s + '-' + (i - 1))
@@ -1061,7 +1062,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected selectSectionCategory(index: number, category: string): void {
-    this.sectionsArray.at(index).get('name_')?.setValue(category)
+    this.sectionsArray.at(index).get('name')?.setValue(category)
     this.closeSectionSearch()
   }
 
@@ -1100,18 +1101,19 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       plated_course: 'Plated / Course Based',
       cocktail_passed: 'Cocktail / Passed'
     }
-    return map[this.form_.value.serving_type_ || 'plated_course'] || ''
+    return map[this.form_.value.servingType || 'plated_course'] || ''
   }
 
   protected async save(): Promise<void> {
+    pruneBlankMenuItems(this.sectionsArray)
     if (this.form_.invalid) {
       this.form_.markAllAsTouched()
-      this.userMsg.onSetErrorMsg('Please fill all required fields')
+      this.userMsg.onSetErrorMsg(missingMenuFieldsMessage(this.form_, this.translation))
       return
     }
 
-    if (!this.form_.value.name_?.trim()) {
-      this.form_.patchValue({ name_: this.generateDateName() })
+    if (!this.form_.value.name?.trim()) {
+      this.form_.patchValue({ name: this.generateDateName() })
     }
 
     await this.saving.withSaving(async () => {
@@ -1120,15 +1122,15 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       const id = this.editingId_()
       if (id) {
         // Same preservation as saveAndWait() above — buildEventFromForm() has no
-        // logistics_ control, don't let a normal save wipe the venue link.
-        const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics_
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updated_at_: now, logistics_: existingLogistics })
+        // logistics control, don't let a normal save wipe the venue link.
+        const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now, logistics: existingLogistics })
       } else {
-        const created = await this.menuEventData.addMenuEvent({ ...event, created_at_: now, updated_at_: now })
+        const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
         this.editingId_.set(created._id)
       }
       this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
-      this.userMsg.onSetSuccessMsg('Menu saved successfully')
+      this.userMsg.onSetSuccessMsg(this.translation.translate('menu_saved'))
       this.router.navigate(['/menu-library'])
     })
   }
@@ -1138,7 +1140,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const base = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`
     const existing = this.menuEventData
       .allMenuEvents_()
-      .map((e) => e.name_)
+      .map((e) => e.name)
       .filter((n) => n === base || n.startsWith(`${base} (`))
     if (!existing.includes(base)) return base
     let i = 1
@@ -1174,35 +1176,32 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private async loadEvent(id: string): Promise<void> {
     const event = await this.menuEventData.getMenuEventById(id)
     this.form_.patchValue({
-      name_: event.name_,
-      event_type_: event.event_type_,
-      event_date_: event.event_date_ || '',
-      serving_type_: event.serving_type_,
-      guest_count_: event.guest_count_
+      name: event.name,
+      eventType: event.eventType,
+      eventDate: event.eventDate || '',
+      servingType: event.servingType,
+      guestCount: event.guestCount
     })
 
     this.sectionsArray.clear()
-    event.sections_.forEach((section) => {
+    event.sections.forEach((section) => {
       const sectionGroup = this.fb.group({
         _id: [section._id],
-        name_: [section.name_, Validators.required],
-        sort_order_: [section.sort_order_],
-        items_: this.fb.array<FormGroup>([])
+        name: [section.name, Validators.required],
+        sortOrder: [section.sortOrder],
+        items: this.fb.array<FormGroup>([])
       })
-      const items = sectionGroup.get('items_') as FormArray<FormGroup>
-      section.items_.forEach((item) => {
+      const items = sectionGroup.get('items') as FormArray<FormGroup>
+      section.items.forEach((item) => {
         items.push(
           this.fb.group({
-            recipe_id_: [item.recipe_id_, Validators.required],
-            recipe_type_: [item.recipe_type_],
-            predicted_take_rate_: [
-              item.predicted_take_rate_,
-              [Validators.required, Validators.min(0), Validators.max(1)]
-            ],
-            sell_price: [item.sell_price_ ?? 0],
-            food_cost_money: [item.food_cost_override_ ?? 0],
+            recipeId: [item.recipeId, Validators.required],
+            recipeType: [item.recipeType],
+            predictedTakeRate: [item.predictedTakeRate, [Validators.required, Validators.min(0), Validators.max(1)]],
+            sell_price: [item.sellPrice ?? 0],
+            food_cost_money: [item.foodCostOverride ?? 0],
             food_cost_pct: [0],
-            serving_portions: [item.serving_portions_ ?? 0],
+            serving_portions: [item.servingPortions ?? 0],
             serving_portions_pct: [0]
           })
         )
@@ -1229,25 +1228,25 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private buildAiMenuSnapshot_(): AiMenuDraft {
     const raw = this.form_.getRawValue()
     return {
-      name_: raw.name_ ?? '',
-      event_type_: raw.event_type_ ?? '',
-      event_date_: raw.event_date_ ?? null,
-      serving_type_: raw.serving_type_ ?? 'plated_course',
-      guest_count_: Number(raw.guest_count_ ?? 0),
-      sections_: (raw.sections_ ?? []).map(
+      name: raw.name ?? '',
+      eventType: raw.eventType ?? '',
+      eventDate: raw.eventDate ?? null,
+      servingType: raw.servingType ?? 'plated_course',
+      guestCount: Number(raw.guestCount ?? 0),
+      sections: (raw.sections ?? []).map(
         (sec: {
-          name_?: string
-          items_?: {
-            recipe_id_?: string
-            predicted_take_rate_?: number
+          name?: string
+          items?: {
+            recipeId?: string
+            predictedTakeRate?: number
             serving_portions?: number
             sell_price?: number
           }[]
         }) => ({
-          category: sec.name_ ?? '',
-          items: (sec.items_ ?? []).map((item) => ({
-            name_hebrew: '',
-            predicted_take_rate_: item.predicted_take_rate_ ?? 0.4,
+          category: sec.name ?? '',
+          items: (sec.items ?? []).map((item) => ({
+            nameHebrew: '',
+            predictedTakeRate: item.predictedTakeRate ?? 0.4,
             serving_portions: item.serving_portions ?? 1,
             sell_price: item.sell_price ?? 0
           }))
@@ -1258,50 +1257,51 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   private buildEventFromForm(): Omit<MenuEvent, '_id'> {
     const raw = this.form_.getRawValue()
-    const servingType = raw.serving_type_ as ServingType
-    const guestCount = Number(raw.guest_count_ || 0)
+    const servingType = raw.servingType as ServingType
+    const guestCount = Number(raw.guestCount || 0)
 
-    const sections: MenuSection[] = (raw.sections_ || []).map((section: MenuSectionFormRaw, sectionIndex: number) => ({
+    const sections: MenuSection[] = (raw.sections || []).map((section: MenuSectionFormRaw, sectionIndex: number) => ({
       _id: section._id ?? '',
-      name_: section.name_ ?? '',
-      sort_order_: sectionIndex + 1,
-      items_: (section.items_ || []).map((item: MenuItemForm, itemIndex: number) => {
+      name: section.name ?? '',
+      sortOrder: sectionIndex + 1,
+      items: (section.items || []).flatMap((item: MenuItemForm, itemIndex: number) => {
+        if (!item.recipeId) return []
         const sp = Number(item.serving_portions || 1)
         return {
-          recipe_id_: item.recipe_id_,
-          recipe_type_: item.recipe_type_,
-          predicted_take_rate_: Number(item.predicted_take_rate_ || 0),
-          derived_portions_: sp * guestCount,
-          sell_price_: item.sell_price ?? undefined,
-          food_cost_override_: this.getAutoFoodCost(sectionIndex, itemIndex) || undefined,
-          serving_portions_: sp
+          recipeId: item.recipeId,
+          recipeType: item.recipeType,
+          predictedTakeRate: Number(item.predictedTakeRate || 0),
+          derivedPortions: sp * guestCount,
+          sellPrice: item.sell_price ?? undefined,
+          foodCostOverride: this.getAutoFoodCost(sectionIndex, itemIndex) || undefined,
+          servingPortions: sp
         }
       })
     }))
 
     const hydrated = this.menuIntelligence.hydrateDerivedPortions({
       _id: '',
-      name_: raw.name_ || 'Untitled Event',
-      event_type_: raw.event_type_ || '',
-      event_date_: raw.event_date_ || '',
-      serving_type_: servingType,
-      guest_count_: guestCount,
-      sections_: sections,
-      financial_targets_: {
-        target_food_cost_pct_: 30,
-        target_revenue_per_guest_: 0
+      name: raw.name || 'Untitled Event',
+      eventType: raw.eventType || '',
+      eventDate: raw.eventDate || '',
+      servingType: servingType,
+      guestCount: guestCount,
+      sections: sections,
+      financialTargets: {
+        targetFoodCostPct: 30,
+        targetRevenuePerGuest: 0
       },
-      performance_tags_: {
-        food_cost_pct_: 0,
-        primary_serving_style_: servingType
+      performanceTags: {
+        foodCostPct: 0,
+        primaryServingStyle: servingType
       }
     })
 
     return {
       ...hydrated,
-      performance_tags_: {
-        food_cost_pct_: this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated),
-        primary_serving_style_: servingType
+      performanceTags: {
+        foodCostPct: this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated),
+        primaryServingStyle: servingType
       }
     }
   }

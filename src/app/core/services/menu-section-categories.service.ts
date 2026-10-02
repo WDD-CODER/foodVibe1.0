@@ -32,8 +32,8 @@ export class MenuSectionCategoriesService {
   private readonly translationService = inject(TranslationService)
   private readonly keyResolution = inject(KeyResolutionService)
 
-  private categories_ = signal<string[]>([])
-  readonly sectionCategories_ = this.categories_.asReadonly()
+  private categories = signal<string[]>([])
+  readonly sectionCategories_ = this.categories.asReadonly()
 
   private loaded_ = false
   private loadPromise_: Promise<void> | null = null
@@ -78,7 +78,7 @@ export class MenuSectionCategoriesService {
       const doc = registries[0]
       const items = doc?.items
       if (Array.isArray(items) && items.length > 0) {
-        this.categories_.set([...items])
+        this.categories.set([...items])
         return
       }
       const payload: MenuSectionCategoriesDoc = doc?._id
@@ -89,7 +89,7 @@ export class MenuSectionCategoriesService {
       } else {
         await this.storage.post(STORAGE_KEY, payload)
       }
-      this.categories_.set([...DEFAULT_SECTION_CATEGORIES])
+      this.categories.set([...DEFAULT_SECTION_CATEGORIES])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.logging.error({
@@ -97,7 +97,7 @@ export class MenuSectionCategoriesService {
         message: 'Failed to load menu section categories',
         context: { err }
       })
-      this.categories_.set([...DEFAULT_SECTION_CATEGORIES])
+      this.categories.set([...DEFAULT_SECTION_CATEGORIES])
     }
   }
 
@@ -105,22 +105,22 @@ export class MenuSectionCategoriesService {
   async addCategory(name: string): Promise<void> {
     const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'section_category')
     if (!keyToUse) return
-    const current = this.categories_()
+    const current = this.categories()
     if (keyToUse == null || current.includes(keyToUse)) return
     const updated = [...current, keyToUse]
     await this.persist(updated)
   }
 
   async removeCategory(name: string): Promise<void> {
-    const updated = this.categories_().filter((c) => c !== name)
-    if (updated.length === this.categories_().length) return
+    const updated = this.categories().filter((c) => c !== name)
+    if (updated.length === this.categories().length) return
     await this.persist(updated)
   }
 
   async renameCategory(oldName: string, newName: string): Promise<void> {
     const trimmed = newName.trim()
     if (!trimmed || trimmed === oldName) return
-    const updated = this.categories_().map((c) => (c === oldName ? trimmed : c))
+    const updated = this.categories().map((c) => (c === oldName ? trimmed : c))
     await this.persist(updated)
   }
 
@@ -134,7 +134,7 @@ export class MenuSectionCategoriesService {
       } else {
         await this.storage.post(STORAGE_KEY, payload)
       }
-      this.categories_.set(items)
+      this.categories.set(items)
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.logging.error({
@@ -142,7 +142,7 @@ export class MenuSectionCategoriesService {
         message: 'Failed to persist menu section categories',
         context: { err }
       })
-      this.categories_.set(items)
+      this.categories.set(items)
     }
   }
 }

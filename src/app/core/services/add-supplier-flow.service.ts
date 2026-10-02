@@ -30,10 +30,10 @@ export class AddSupplierFlowService {
 
     try {
       const saved = await this.supplierDataService.addSupplier({
-        name_hebrew: nameHebrew,
-        min_order_mov_: 0,
-        lead_time_days_: 0,
-        delivery_days_: []
+        nameHebrew: nameHebrew,
+        minOrderMov: 0,
+        leadTimeDays: 0,
+        deliveryDays: []
       })
       this.userMsgService.onSetSuccessMsg(`הספק "${nameHebrew}" נוסף בהצלחה`)
       return saved

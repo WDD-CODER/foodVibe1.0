@@ -60,7 +60,7 @@ export class SupplierFormComponent implements OnInit {
   protected validationErrors_ = signal<Record<string, string>>({})
 
   protected get deliveryDaysArray(): FormArray {
-    return this.supplierForm_?.get('delivery_days_') as FormArray
+    return this.supplierForm_?.get('deliveryDays') as FormArray
   }
 
   constructor() {
@@ -73,13 +73,13 @@ export class SupplierFormComponent implements OnInit {
       } else if (supplier === null) {
         this.isEditMode_.set(false)
         this.supplierForm_.patchValue({
-          name_hebrew: '',
-          contact_person_: '',
-          phone_: '',
-          min_order_mov_: 0,
-          lead_time_days_: 0
+          nameHebrew: '',
+          contactPerson: '',
+          phone: '',
+          minOrderMov: 0,
+          leadTimeDays: 0
         })
-        const daysArray = this.supplierForm_.get('delivery_days_') as FormArray
+        const daysArray = this.supplierForm_.get('deliveryDays') as FormArray
         if (daysArray?.controls?.length === 7) {
           for (let i = 0; i < 7; i++) {
             daysArray.at(i).setValue(false)
@@ -105,7 +105,7 @@ export class SupplierFormComponent implements OnInit {
   private buildForm(): void {
     const daysArray = this.fb.array(Array.from({ length: 7 }, () => this.fb.control(false)))
     this.supplierForm_ = this.fb.group({
-      name_hebrew: [
+      nameHebrew: [
         '',
         [
           Validators.required,
@@ -119,33 +119,33 @@ export class SupplierFormComponent implements OnInit {
           )
         ]
       ],
-      contact_person_: [''],
-      phone_: [''],
-      delivery_days_: daysArray,
-      min_order_mov_: [0, [Validators.required, Validators.min(0)]],
-      lead_time_days_: [0, [Validators.required, Validators.min(0)]]
+      contactPerson: [''],
+      phone: [''],
+      deliveryDays: daysArray,
+      minOrderMov: [0, [Validators.required, Validators.min(0)]],
+      leadTimeDays: [0, [Validators.required, Validators.min(0)]]
     })
   }
 
   private hydrateForm(s: Supplier): void {
-    const days = s.delivery_days_ ?? []
+    const days = s.deliveryDays ?? []
     const dayControls = this.deliveryDaysArray
     for (let i = 0; i < 7; i++) {
       dayControls.at(i).setValue(days.includes(i))
     }
     this.supplierForm_.patchValue({
-      name_hebrew: s.name_hebrew ?? '',
-      contact_person_: s.contact_person_ ?? '',
-      phone_: s.phone_ ?? '',
-      min_order_mov_: s.min_order_mov_ ?? 0,
-      lead_time_days_: s.lead_time_days_ ?? 0
+      nameHebrew: s.nameHebrew ?? '',
+      contactPerson: s.contactPerson ?? '',
+      phone: s.phone ?? '',
+      minOrderMov: s.minOrderMov ?? 0,
+      leadTimeDays: s.leadTimeDays ?? 0
     })
   }
 
   private validateForm_(): boolean {
     const errors: Record<string, string> = {}
     const val = this.supplierForm_.getRawValue()
-    if (!val.name_hebrew?.trim()) errors['name_hebrew'] = 'field_name_required'
+    if (!val.nameHebrew?.trim()) errors['nameHebrew'] = 'field_name_required'
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
   }
@@ -159,17 +159,17 @@ export class SupplierFormComponent implements OnInit {
     }
     if (this.supplierForm_.invalid || this.isSaving_()) return
     const raw = this.supplierForm_.getRawValue()
-    const delivery_days_: number[] = []
+    const deliveryDays: number[] = []
     this.deliveryDaysArray.controls.forEach((c, i) => {
-      if (c.value) delivery_days_.push(i)
+      if (c.value) deliveryDays.push(i)
     })
     const payload = {
-      name_hebrew: raw.name_hebrew,
-      contact_person_: raw.contact_person_ || undefined,
-      phone_: raw.phone_ || undefined,
-      delivery_days_,
-      min_order_mov_: Number(raw.min_order_mov_) || 0,
-      lead_time_days_: Number(raw.lead_time_days_) || 0
+      nameHebrew: raw.nameHebrew,
+      contactPerson: raw.contactPerson || undefined,
+      phone: raw.phone || undefined,
+      deliveryDays,
+      minOrderMov: Number(raw.minOrderMov) || 0,
+      leadTimeDays: Number(raw.leadTimeDays) || 0
     }
     this.saving.setSaving(true)
     if (this.isEditMode_()) {

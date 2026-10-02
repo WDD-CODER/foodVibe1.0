@@ -1,4 +1,5 @@
 'use strict';
+require('../../utils/v1-only-guard')('backfill-legacy-config.js');
 /**
  * backfill-legacy-config.js — plan 317 §8.
  *

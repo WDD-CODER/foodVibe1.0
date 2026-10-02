@@ -28,14 +28,14 @@ export class AddEquipmentModalComponent {
   private translationKeyModal = inject(TranslationKeyModalService)
 
   protected isOpen_ = this.modalService.isOpen_
-  protected name_ = signal('')
-  protected category_ = signal<EquipmentCategory | string>('tool')
+  protected name = signal('')
+  protected category = signal<EquipmentCategory | string>('tool')
   protected customCategories_ = signal<string[]>([])
 
   constructor() {
     effect(() => {
       if (this.modalService.isOpen_()) {
-        this.name_.set(this.modalService.initialName() ?? '')
+        this.name.set(this.modalService.initialName() ?? '')
       }
     })
   }
@@ -56,7 +56,7 @@ export class AddEquipmentModalComponent {
   })
 
   protected async onCategoryChange(value: string): Promise<void> {
-    this.category_.set(value as EquipmentCategory | string)
+    this.category.set(value as EquipmentCategory | string)
     if (value === ADD_NEW_VALUE) {
       await this.openAddNewCategory()
     }
@@ -83,16 +83,16 @@ export class AddEquipmentModalComponent {
       if (!this.customCategories_().includes(keyToUse)) {
         this.customCategories_.update((list) => [...list, keyToUse])
       }
-      this.category_.set(keyToUse)
+      this.category.set(keyToUse)
     } else {
-      this.category_.set('tool')
+      this.category.set('tool')
     }
   }
 
   protected save(): void {
-    const name = this.name_().trim()
+    const name = this.name().trim()
     if (!name) return
-    const cat = this.category_()
+    const cat = this.category()
     this.modalService.save({ name, category: cat as EquipmentCategory })
     this.reset()
   }
@@ -107,7 +107,7 @@ export class AddEquipmentModalComponent {
   }
 
   private reset(): void {
-    this.name_.set('')
-    this.category_.set('tool')
+    this.name.set('')
+    this.category.set('tool')
   }
 }

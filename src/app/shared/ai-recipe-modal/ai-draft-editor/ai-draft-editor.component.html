@@ -1,20 +1,14 @@
 <!-- src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.html -->
 <div class="ai-draft-editor" dir="rtl">
-
   <!-- ── Name + Type ── -->
   <div class="editor-row editor-row--header">
     <input
       class="c-input editor-name-input"
-      [value]="name_()"
-      (input)="name_.set($any($event.target).value)"
+      [value]="name()"
+      (input)="name.set($any($event.target).value)"
       [placeholder]="(isDish_() ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe"
     />
-    <button
-      type="button"
-      class="type-toggle-btn"
-      [class.type-toggle-btn--dish]="isDish_()"
-      (click)="toggleType()"
-    >
+    <button type="button" class="type-toggle-btn" [class.type-toggle-btn--dish]="isDish_()" (click)="toggleType()">
       {{ (isDish_() ? 'dish' : 'preparation') | translatePipe }}
     </button>
   </div>
@@ -58,7 +52,7 @@
         <span>{{ 'quantity' | translatePipe }}</span>
         <span></span>
       </div>
-      @for (ing of ingredients_(); track ing.id; let i = $index) {
+      @for (ing of ingredients(); track ing.id; let i = $index) {
         <div class="editor-ing-row" [class.editor-ing-row--new]="ing.isNew" cdkDrag>
           <div class="cdk-custom-placeholder" *cdkDragPlaceholder></div>
           <div class="editor-drag-handle" cdkDragHandle>
@@ -205,5 +199,4 @@
       {{ 'ai_recipe_open_builder' | translatePipe }}
     </button>
   </div>
-
 </div>
