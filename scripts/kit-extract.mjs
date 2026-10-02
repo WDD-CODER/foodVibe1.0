@@ -1,7 +1,8 @@
 /**
- * Kit extractor — lands every `tier: core` file from docs/workflow-kit/manifest.json
- * into the kit repo under `core/`. See
- * plans/329-workflow-kit-extraction-phase-2-core-scaffold.plan.md (B3, B6).
+ * Kit extractor — lands every `core`, `pack:*` and `layer:cursor` row of docs/workflow-kit/manifest.json
+ * into the kit repo (core/, packs/<name>/, layers/cursor/). See
+ * plans/329-workflow-kit-extraction-phase-2-core-scaffold.plan.md (B3, B6) and
+ * plans/331-workflow-kit-extraction-phase-3-stack-packs.plan.md (C2).
  *
  * Usage:
  *   node scripts/kit-extract.mjs [--kit <dir>] [--force]   # write files (skips existing unless --force)
@@ -27,13 +28,19 @@ const kitRoot = resolve(flagValue('--kit') ?? join(repoRoot, '..', 'ai-workflow-
 const force = argv.includes('--force')
 const checkOnly = argv.includes('--check')
 const manifest = JSON.parse(readFileSync(join(repoRoot, 'docs/workflow-kit/manifest.json'), 'utf8'))
-const core = manifest.entries.filter((e) => e.tier === 'core')
+// tier -> destination folder inside the kit repo (mirrors the target project's paths below it)
+const TIER_DEST = { core: 'core', 'pack:angular': 'packs/angular', 'pack:node-express': 'packs/node-express', 'layer:cursor': 'layers/cursor' }
+const rows = manifest.entries.filter((e) => TIER_DEST[e.tier])
+// Packs keep their stack names; only project-specific keys are substituted inside them.
+const PACK_KEEPS = (key) => /^(?:stack|deploy|commands)\./.test(key) || key === 'paths.srcRoot' || key === 'paths.serverRoot'
 
 // Core files whose kit copy is hand-fixed in B4, so byte-identity is not expected.
 const HAND_FIXED = new Set([
   '.claude/commands/feat.md', '.claude/commands/fix.md', '.claude/commands/ship.md',
   'docs/agent/ship-regular.md', 'scripts/brain-capture-comment.mjs', 'docs/agent/job-validation.md',
   'README_WORKFLOW.md', 'scripts/kit-manifest-check.mjs', 'docs/agent/brain-capture.md',
+  // Phase 3 hand-fixes: project-specific domain/icon wording removed from pack copies.
+  'docs/agent/standards-angular.md', '.claude/skills/angularComponentStructure/SKILL.md',
 ])
 
 // FoodVibe sources contain double-encoded UTF-8 (a UTF-8 dash read as cp1252); the kit ships the repaired text.
@@ -78,7 +85,7 @@ const RULES = {
   'project.i18nFile': [[/(?:public\/assets\/data\/)?dictionary\.json/g, ph('project.i18nFile')]],
   'paths.srcRoot': [[/src\/app\//g, ph('paths.srcRoot')]],
   'paths.serverRoot': [[/(^|[^\w/.-])server\/(?=[\w.*])/g, `$1${ph('paths.serverRoot')}`], [/(^|[^\w/.-])server\/(?![\w.*])/g, `$1${ph('paths.serverRoot')}`]],
-  'stack.name': [[/angular(?: \d+)?/gi, ph('stack.name')]],
+  'stack.name': [[/docs\/agent\/standards-angular\.md/g, ph('stack.standardsDoc')], [/angular(?: \d+)?/gi, ph('stack.name')]],
   'stack.backend': [[/\bExpress\b/g, ph('stack.backend')], [/\bMongo(?:DB|ose)?\b/g, ph('stack.backend')]],
   'stack.stylesheetExt': [[/\bscss\b/gi, ph('stack.stylesheetExt')]],
   'deploy.host': [[/\bRender\b/g, ph('deploy.host')]],
@@ -96,8 +103,8 @@ const KEY_ORDER = [
   'deploy.host', 'deploy.dbHost', 'tools.browser',
 ]
 
-function parameterize(text, params) {
-  const keys = new Set(params.map((p) => p.key))
+function parameterize(text, params, tier) {
+  const keys = new Set(params.map((p) => p.key).filter((k) => !(tier.startsWith('pack:') && PACK_KEEPS(k))))
   // project.name drags the slot folder/db rules along even when only it is recorded.
   if (keys.has('project.name')) { keys.add('slots.folderSuffix'); keys.add('slots.dbNameFormat') }
   let out = text
@@ -111,13 +118,15 @@ function parameterize(text, params) {
 }
 
 const problems = []
-let landed = 0
+const counts = {}
 let unhandled = 0
 let written = 0
 
-for (const e of core) {
+for (const e of rows) {
+  const c = (counts[e.tier] ??= { total: 0, landed: 0 })
+  c.total++
   const src = join(repoRoot, e.path)
-  const dest = join(kitRoot, 'core', e.path)
+  const dest = join(kitRoot, TIER_DEST[e.tier], e.path)
   if (!['copy', 'parameterize', 'split'].includes(e.action)) {
     unhandled++
     problems.push(`unhandled-action "${e.action}": ${e.path}`)
@@ -128,21 +137,22 @@ for (const e of core) {
     if (force || !existsSync(dest)) {
       const text = readFileSync(src, 'utf8')
       mkdirSync(dirname(dest), { recursive: true })
-      writeFileSync(dest, fixEncoding(e.action === 'copy' ? text : parameterize(text, e.params)), 'utf8')
+      writeFileSync(dest, fixEncoding(e.action === 'copy' ? text : parameterize(text, e.params, e.tier)), 'utf8')
       written++
     }
   }
-  if (!existsSync(dest)) { problems.push(`missing: core/${e.path}`); continue }
+  if (!existsSync(dest)) { problems.push(`missing: ${TIER_DEST[e.tier]}/${e.path}`); continue }
   if (e.action === 'copy' && !HAND_FIXED.has(e.path) && existsSync(src) && fixEncoding(readFileSync(src, 'utf8')) !== readFileSync(dest, 'utf8')) {
-    problems.push(`copy-not-identical: core/${e.path}`)
+    problems.push(`copy-not-identical: ${TIER_DEST[e.tier]}/${e.path}`)
     continue
   }
-  landed++
+  c.landed++
 }
 
+const summary = Object.entries(counts).map(([tier, c]) => `${c.landed}/${c.total} ${tier}`).join(', ')
 if (problems.length > 0) {
   console.error(problems.join('\n'))
-  console.error(`KIT_EXTRACT: FAIL — ${landed}/${core.length} core files landed, ${core.length - landed - unhandled} missing, ${unhandled} unhandled-action (${problems.length} problems)`)
+  console.error(`KIT_EXTRACT: FAIL — ${summary} landed, ${unhandled} unhandled-action (${problems.length} problems)`)
   process.exit(1)
 }
-console.log(`KIT_EXTRACT: ok — ${landed}/${core.length} core files landed, 0 missing, 0 unhandled-action${checkOnly ? '' : ` (${written} written)`}`)
+console.log(`KIT_EXTRACT: ok — ${summary} landed, 0 missing, 0 unhandled-action${checkOnly ? '' : ` (${written} written)`}`)

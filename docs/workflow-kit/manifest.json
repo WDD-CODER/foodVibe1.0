@@ -3654,6 +3654,16 @@
       "notes": "Plan 329 extractor: lands tier:core manifest rows into the kit repo (FoodVibe-side; stays here)."
     },
     {
+      "path": "scripts/kit-lessons-extract.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/workflow-kit/lessons-triage.md"
+      ],
+      "notes": "Plan 331 lessons extractor: lands transfer/generalize brain lessons from lessons-triage.md in the kit (FoodVibe-side; stays here)."
+    },
+    {
       "path": "scripts/lib/slot.mjs",
       "tier": "core",
       "action": "parameterize",
