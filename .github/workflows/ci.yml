@@ -121,8 +121,12 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-          cache-dependency-path: server/package-lock.json
-      - name: Install
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+      - name: Install root (typescript + zod for build:schemas)
+        run: npm ci
+      - name: Install server
         run: npm ci --prefix server
       - name: Server tests
         run: npm test --prefix server
