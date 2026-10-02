@@ -53,10 +53,11 @@ Human should re-test these in the browser (menu save, restore, print, Excel, AI-
 
 `wt-2`: API on 3002 (`cd server && PORT=3002 ALLOWED_ORIGIN=http://localhost:4202 npm run dev:local`), front end on 4202 (`npx ng serve -c slot --port 4202`; `src/environments/environment.slot.ts` is gitignored and points at 3002). Local DB already has the v2 collections and the upgraded trash/history.
 
-## 6. AI diagnosis result (2026-10-02)
+## 6. AI-in-builder: root causes found and fixed (2026-10-02)
 
-Captured the raw `/ai/patch-recipe` exchange from the Human's real attempt in the recipe builder (blank preparation, instruction = the egg recipe with "10 מנות"):
+The Human's real attempt (blank preparation, "...יוצא 10 מנות") was captured: Gemini's `/ai/patch-recipe` reply was correct (10 portions, 3 ingredients, 3 steps). Two client bugs made the builder show the wrong thing; both fixed on this branch:
 
-- Gemini's reply is **correct and complete**: `nameHebrew: חביתה מקושקשת`, `yield_amount: 10`, `yield_unit: portion`, 3 ingredients (ביצים 2 unit, חמאה 100 gram, מלח 1 pinch) and 3 steps.
-- So the server/prompt side is fine. The defect is client-side, in what the builder does with the patch: `RecipeAiFlowService.applyPatch` (`src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts`) patches the form with `emitEvent: false`; the Human sees yield 100 and empty ingredients/steps afterwards. Suspects: the yield-unit handling when the unit changes gram → portion (amount shown as 100), and something re-initialising the form after the modal closes, or a view not re-rendering after silent patches (OnPush + `emitEvent:false`). Not yet reproduced; needs a component test that applies this exact patch to a real `RecipeBuilderPage` form (fixture reply: the JSON above) and asserts the form + the rendered rows.
-- The recipe book path (`/ai/generate` -> draft -> `prefillFromDraft`) works with the same text, which narrows the fault to `applyPatch` vs `prefillFromDraft`.
+1. **Ingredients did not appear.** `RecipeIngredientsTableComponent` is `OnPush`; an AI patch (applied from the modal, outside the table's inputs) never triggered a redraw, so the table kept its old blank row while the form held the data (the weight box already said 100 g). Fix: the table subscribes to its FormArray's `valueChanges` and calls `markForCheck()`. Same bug class would hit any external change to the ingredient rows (history restore, etc.).
+2. **Yield showed 100 instead of 10.** `RecipeHeaderComponent` auto-syncs the yield to the ingredients' total weight (100 g of butter) unless the yield is flagged as manual/confirmed (`netoConfirmed`). A programmatically set yield was therefore overwritten. Fix: `RecipeAiFlowService` marks `netoConfirmed_` true whenever the AI supplies a yield (patch and first-draft paths).
+
+Remaining suggestion: add a component test that applies this exact patch to a real builder form and asserts the rendered rows and yield (fixture = the JSON above). The earlier prompt tweak (yield = total made, never an ingredient amount) is harmless and kept.

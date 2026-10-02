@@ -445,6 +445,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       this.aiFlow_.init({
         recipeForm: this.recipeForm_,
         ingredientsFormVersion_: this.ingredientsFormVersion_,
+        netoConfirmed_: this.netoConfirmed_,
         addNewIngredientRow: () => this.addNewIngredientRow()
       })
 

@@ -82,6 +82,11 @@ export class RecipeIngredientsTableComponent {
   @ViewChild(QuickEditProductPanelComponent) private quickEditPanelRef_?: QuickEditProductPanelComponent
 
   constructor() {
+    // OnPush: rows changed from outside (AI patch, history restore) must redraw the table.
+    effect((onCleanup) => {
+      const sub = this.ingredientsFormArray().valueChanges.subscribe(() => this.cdr.markForCheck())
+      onCleanup(() => sub.unsubscribe())
+    })
     effect(() => {
       this.kitchenStateService.products_()
       this.kitchenStateService.recipes_()

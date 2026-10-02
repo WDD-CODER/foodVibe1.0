@@ -12,6 +12,8 @@ import type { Equipment } from '@models/equipment.model'
 export interface RecipeAiFormRefs {
   recipeForm: FormGroup
   ingredientsFormVersion_: WritableSignal<number>
+  /** An AI-stated yield is explicit: the header must not overwrite it with the ingredients' total weight. */
+  netoConfirmed_: WritableSignal<boolean>
   addNewIngredientRow: () => void
 }
 
@@ -72,6 +74,7 @@ export class RecipeAiFlowService {
     recipeForm.patchValue({ recipe_type: draft.recipe_type })
     recipeForm.patchValue({ nameHebrew: draft.nameHebrew }, { emitEvent: false })
 
+    this.refs_!.netoConfirmed_.set(true)
     this.yieldConversionsArray.clear()
     if (isDish) {
       recipeForm.patchValue({ serving_portions: draft.yield_amount }, { emitEvent: false })
@@ -181,6 +184,7 @@ export class RecipeAiFlowService {
     }
 
     if (patch.yield_amount !== undefined || patch.yield_unit !== undefined) {
+      this.refs_!.netoConfirmed_.set(true)
       if (isDish && patch.yield_amount !== undefined) {
         recipeForm.patchValue({ serving_portions: patch.yield_amount }, { emitEvent: false })
       }
