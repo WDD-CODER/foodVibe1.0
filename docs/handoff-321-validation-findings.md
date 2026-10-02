@@ -61,3 +61,16 @@ The Human's real attempt (blank preparation, "...יוצא 10 מנות") was capt
 2. **Yield showed 100 instead of 10.** `RecipeHeaderComponent` auto-syncs the yield to the ingredients' total weight (100 g of butter) unless the yield is flagged as manual/confirmed (`netoConfirmed`). A programmatically set yield was therefore overwritten. Fix: `RecipeAiFlowService` marks `netoConfirmed_` true whenever the AI supplies a yield (patch and first-draft paths).
 
 Remaining suggestion: add a component test that applies this exact patch to a real builder form and asserts the rendered rows and yield (fixture = the JSON above). The earlier prompt tweak (yield = total made, never an ingredient amount) is harmless and kept.
+
+## 7. Human re-test results (2026-10-02, end of session)
+
+| Check | Result |
+|---|---|
+| Menu save | Works |
+| Trash restore | Works |
+| Menu print | Prints the correct dishes and courses, but still spills onto 2 pages for no reason (needs the per-list print stylesheet from section 2) |
+| Excel checklist | Structure correct; **quantities still all 0** (prep items have no stored quantities; needs the sub-recipe expansion in section 2) |
+| AI edit in builder | Fixed in code (section 6); last Human retest of the final fix pending |
+| Not yet tested | Export preview print/Excel button, history restore dialog wording, Atlas migration |
+
+Next session starts with: (1) the Human retests the AI edit; (2) decide the Atlas maintenance window and run the runbook; (3) `/code-review` then the Plan 321 PR (merge only after Atlas); (4) the Planner turns sections 2 and 3 into plans.

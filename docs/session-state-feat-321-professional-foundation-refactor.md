@@ -4,30 +4,49 @@
 feat/321-professional-foundation-refactor
 
 ## Date
-2026-10-01
+2026-10-02
 
 ## Session Summary
-- Plan 321 P2b: server + client cut over to v2; 0002 migration upgrades TRASH_*/VERSION_HISTORY in place (local done); v1-only guard on legacy scripts; conformance check locks client types to schemas; Atlas runbook written. ng build, 311 client + 63 server tests green.
+- Plan 321 P2b code-complete and pushed (5b0b0846). Human validation: menu save, trash restore OK; print OK but 2 pages; Excel quantities 0 (needs list redesign plan); AI-in-builder fixed (OnPush table redraw + netoConfirmed), retest pending. Handoff for Planner: docs/handoff-321-validation-findings.md.
 
 ## Files Modified
  .gitignore                                         |   3 +
- ...te-feat-321-professional-foundation-refactor.md |  53 ++
+ docs/handoff-321-validation-findings.md            |  63 +++
+ ...te-feat-321-professional-foundation-refactor.md | 195 ++++++++
+ docs/session-state-foundation-refactor.md          |  18 +
  package-lock.json                                  |   2 +-
  package.json                                       |   8 +-
  plans/321-professional-foundation-refactor.plan.md |  57 ++-
+ public/assets/data/dictionary.json                 |   9 +-
  scripts/take-plan.mjs                              |   4 +-
  server/app.js                                      |   4 +-
  server/constants/collections.js                    |  14 +-
  server/db.js                                       |  24 +-
  server/middleware/validate.js                      |  18 +
- server/migrations/0001-v2-schema.js                | 246 ++++++++++
+ server/migrations/0001-v2-schema.js                | 250 ++++++++++
+ server/migrations/0002-trash-and-history.js        | 128 +++++
  server/migrations/tools/_connect.js                |  47 ++
  server/migrations/tools/field-inventory.js         |  60 +++
  server/migrations/tools/validate-all.js            |  52 ++
  server/package-lock.json                           |  12 +-
  server/package.json                                |   4 +-
- server/routes/ai.js                                | 138 +++---
- server/routes/generic.js                           | 134 ++++--
+ server/routes/ai.js                                | 142 +++---
+ server/routes/generic.js                           | 151 +++---
+ server/scripts/fix-supplier-refs.js                |   1 +
+ server/scripts/legacy-import/audit-against-spec.js |   1 +
+ .../legacy-import/backfill-dish-prep-items.js      |   1 +
+ .../legacy-import/backfill-legacy-config.js        |   1 +
+ .../legacy-import/backfill-name-snapshots.js       |   1 +
+ .../legacy-import/backfill-product-nutrition.js    |   1 +
+ .../scripts/legacy-import/backfill-quantities.js   |   1 +
+ .../legacy-import/backfill-supplier-phones.js      |   1 +
+ server/scripts/legacy-import/cost-cross-check.js   |   1 +
+ .../scripts/legacy-import/import-foodcomposer.js   |   1 +
+ .../legacy-import/repair-dish-prep-items.js        |   1 +
+ .../scripts/legacy-import/repair-recipe-yields.js  |   1 +
+ .../scripts/legacy-import/repair-subrecipe-refs.js |   1 +
+ .../scripts/legacy-import/verify-against-source.js |   1 +
+ server/scripts/migrate-supplier-ids.js             |   1 +
  server/services/clone-master.js                    |  25 +-
  server/services/seed-master.js                     |  62 ++-
  server/services/sync-master.js                     | 134 +++---
@@ -39,6 +58,7 @@ feat/321-professional-foundation-refactor
  server/test/upgrade-v1-to-v2.test.js               | 119 +++++
  server/test/v2-enforcement.test.js                 |  76 +++
  server/utils/schema-check.js                       |  38 ++
+ server/utils/v1-only-guard.js                      |  16 +
  shared/schemas/base.schema.ts                      |  26 +
  shared/schemas/entities/common.schema.ts           |  44 ++
  shared/schemas/entities/equipment.schema.ts        |  20 +
@@ -62,8 +82,9 @@ feat/321-professional-foundation-refactor
  src/app/core/models/product.model.ts               |  56 +--
  src/app/core/models/recipe.model.ts                |  72 +--
  src/app/core/models/supplier.model.ts              |  18 +-
+ src/app/core/models/v2/conformance.ts              |  24 +
  src/app/core/models/v2/index.ts                    |   5 +
- src/app/core/models/v2/v2-types.spec.ts            |  27 ++
+ src/app/core/models/v2/v2-types.spec.ts            |  32 ++
  src/app/core/models/venue.model.ts                 |  36 +-
  .../resolvers/equipment-ensure-loaded.resolver.ts  |   2 +-
  .../menu-events-ensure-loaded.resolver.ts          |   2 +-
@@ -98,7 +119,7 @@ feat/321-professional-foundation-refactor
  src/app/core/services/recipe-data.service.ts       |  14 +-
  src/app/core/services/recipe-export.service.ts     |  88 ++--
  src/app/core/services/scaling.service.spec.ts      | 160 +++---
- src/app/core/services/scaling.service.ts           |  58 +--
+ src/app/core/services/scaling.service.ts           |  60 +--
  src/app/core/services/supplier-data.service.ts     |   2 +-
  src/app/core/services/user.service.ts              |   2 +-
  src/app/core/services/util.service.ts              |  23 +-
@@ -126,8 +147,9 @@ feat/321-professional-foundation-refactor
  .../inventory/services/product-ai-flow.service.ts  |  34 +-
  .../menu-dish-row/menu-dish-row.component.html     |  76 ++-
  .../menu-dish-row/menu-dish-row.component.ts       |  34 +-
+ src/app/pages/menu-intelligence/menu-form.util.ts  |  25 +
  .../menu-intelligence/menu-intelligence.page.html  |  36 +-
- .../menu-intelligence/menu-intelligence.page.ts    | 283 ++++++-----
+ .../menu-intelligence/menu-intelligence.page.ts    | 296 ++++++------
  .../services/menu-ai-flow.service.ts               |  81 ++--
  .../menu-library-list.component.html               |  83 +++-
  .../menu-library-list.component.ts                 |  67 ++-
@@ -148,12 +170,12 @@ feat/321-professional-foundation-refactor
  .../recipe-header/recipe-header.component.ts       |   4 +-
  .../recipe-ingredients-table.component.html        | 286 ++++++-----
  .../recipe-ingredients-table.component.spec.ts     |   4 +-
- .../recipe-ingredients-table.component.ts          | 116 ++---
+ .../recipe-ingredients-table.component.ts          | 121 ++---
  .../recipe-workflow/recipe-workflow.component.html |  71 +--
  .../recipe-workflow/recipe-workflow.component.ts   |  32 +-
  .../pages/recipe-builder/recipe-builder.page.html  | 536 +++++++++++++--------
- .../pages/recipe-builder/recipe-builder.page.ts    | 176 ++++---
- .../services/recipe-ai-flow.service.ts             |  52 +-
+ .../pages/recipe-builder/recipe-builder.page.ts    | 177 ++++---
+ .../services/recipe-ai-flow.service.ts             |  59 ++-
  .../recipe-builder/services/recipe-form.service.ts | 254 +++++-----
  .../supplier-form/supplier-form.component.html     |  58 ++-
  .../supplier-form/supplier-form.component.ts       |  56 +--
@@ -182,14 +204,15 @@ feat/321-professional-foundation-refactor
  .../quick-edit-product-panel.component.html        |  35 +-
  .../quick-edit-product-panel.component.ts          |  58 +--
  .../venue-link-chip/venue-link-chip.component.ts   |  18 +-
+ src/styles.scss                                    |  54 +++
  tsconfig.json                                      |   3 +
- 173 files changed, 6183 insertions(+), 4201 deletions(-)
+ 196 files changed, 6718 insertions(+), 4218 deletions(-)
 
 ## Commit
-29d4c69c
+5b0b0846
 
 ## PR
 N/A
 
 ## Next Steps
-- Human: confirm maintenance window, then run the Atlas runbook (docs/session-state-foundation-refactor.md). Human: manual smoke (login, recipe edit, dish, menu event, export, trash/version restore, AI drafts). Then /code-review, PR, merge. Undecided: cooking_time_minutes_ rename-vs-convert, ingredients_ cleanup.
+- 1) Human retests AI edit. 2) Choose Atlas maintenance window, run runbook in docs/session-state-foundation-refactor.md. 3) /code-review, then PR (merge only after Atlas). 4) Planner writes plans from handoff sections 2-3. Undecided: cooking_time_minutes_, ingredients_ cleanup.
