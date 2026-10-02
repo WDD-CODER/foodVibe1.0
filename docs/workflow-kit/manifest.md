@@ -7,7 +7,9 @@ Lessons verdicts: `lessons-triage.md`. Config keys: `parameters.md`.
 
 **Kit repo (plan 329, phase 2):** `../ai-workflow-kit` (sibling folder, local git, no remote). Its `core/` holds all 77 `tier: core` files, landed by `node scripts/kit-extract.mjs`.
 
-**197 files classified** (196 from plan 328 + `scripts/kit-extract.mjs`, `project`/`stay`) across the inventory roots; 11 excluded path patterns (project history/data).
+**Phase 3 (plan 331):** the same extractor lands `pack:angular` (22) in `packs/angular/`, `pack:node-express` (1) in `packs/node-express/`, and `layer:cursor` (28) in `layers/cursor/`; each pack has a `pack.json` contract checked by `tools/pack-check.mjs`. `scripts/kit-lessons-extract.mjs` lands the 71 transfer/generalize lessons under `core/docs/brain/**` and `packs/<x>/docs/brain/**`. Config now has 41 keys (`stack.standardsDoc` added).
+
+**198 files classified** (196 from plan 328 + `scripts/kit-extract.mjs` and `scripts/kit-lessons-extract.mjs`, both `project`/`stay`) across the inventory roots; 11 excluded path patterns (project history/data).
 
 | tier \ action | copy | parameterize | split | skeleton | stay | total |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -16,8 +18,8 @@ Lessons verdicts: `lessons-triage.md`. Config keys: `parameters.md`.
 | `pack:angular` | 10 | 10 | 2 | · | · | 22 |
 | `pack:node-express` | · | · | 1 | · | · | 1 |
 | `template` | · | · | · | 17 | · | 17 |
-| `project` | · | · | · | · | 52 | 52 |
-| **total** | 70 | 48 | 10 | 17 | 52 | 197 |
+| `project` | · | · | · | · | 53 | 53 |
+| **total** | 70 | 48 | 10 | 17 | 53 | 198 |
 
 Tier legend: `core` = ships to every project; `layer:cursor` = optional Cursor layer (`-Cursor`); `pack:*` = stack pack contract (standards doc, skills, Cursor rules, gotchas, validation commands); `template` = generic structure, FoodVibe content, ships as a skeleton; `project` = stays in FoodVibe.
 
