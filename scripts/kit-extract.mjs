@@ -41,6 +41,16 @@ const HAND_FIXED = new Set([
   'README_WORKFLOW.md', 'scripts/kit-manifest-check.mjs', 'docs/agent/brain-capture.md',
   // Phase 3 hand-fixes: project-specific domain/icon wording removed from pack copies.
   'docs/agent/standards-angular.md', '.claude/skills/angularComponentStructure/SKILL.md',
+  // Hand-fixed parameterize rows (never regenerate with --force): PACK markers, machine paths removed, code-context placeholders.
+  '.claude/skills/elegant-fix/SKILL.md', '.claude/skills/techdebt/SKILL.md', '.claude/skills/update-docs/SKILL.md',
+  'docs/agent/workflow-map.md', 'docs/agent/standards-security.md', '.github/workflows/ci.yml', '.claude/settings.json',
+  '.claude/commands/auto-solve.md', 'scripts/scope-check.mjs', '.lintstagedrc.mjs', 'scripts/pre-commit-no-semi.mjs', 'knip.json', 'scripts/take-plan.mjs',
+  // Phase 4 validation: kit-side scrubs (project history, vendor names, BOM) edited in the kit directly; the kit is now the source for these.
+  '.claude/commands/brief.md', '.claude/commands/end-session.md', '.claude/skills/angular-pipe-logic/SKILL.md',
+  '.claude/skills/github-sync/SKILL.md', '.cursor/rules/angular-component-structure.mdc', '.cursor/rules/core-angular.mdc',
+  '.cursor/rules/git-commit-must-use-skill.mdc', '.cursor/rules/save-plan-must-use-skill.mdc',
+  '.cursor/rules/scss-styling-must-use-cssLayer.mdc', 'docs/agent/ship-recovery.md', 'scripts/plan-ledger-check.mjs',
+  'scripts/plan-name-similarity.mjs', 'scripts/plan-write-guard.sh', 'scripts/pre-commit-secret-scan.mjs', 'scripts/session-startup.sh',
 ])
 
 // FoodVibe sources contain double-encoded UTF-8 (a UTF-8 dash read as cp1252); the kit ships the repaired text.
@@ -134,7 +144,7 @@ for (const e of rows) {
   }
   if (!checkOnly) {
     if (!existsSync(src)) { problems.push(`missing-source: ${e.path}`); continue }
-    if (force || !existsSync(dest)) {
+    if ((force && !HAND_FIXED.has(e.path)) || !existsSync(dest)) {
       const text = readFileSync(src, 'utf8')
       mkdirSync(dirname(dest), { recursive: true })
       writeFileSync(dest, fixEncoding(e.action === 'copy' ? text : parameterize(text, e.params, e.tier)), 'utf8')
@@ -149,10 +159,23 @@ for (const e of rows) {
   c.landed++
 }
 
+// Phase 4: `template` rows are hand-written skeletons in the kit's templates/ folder, never generated. They only have to exist.
+const templateRows = manifest.entries.filter((e) => e.tier === 'template')
+const templatePath = (p) => {
+  if (p.startsWith('_shared/')) return `templates/docs/project/${p.slice('_shared/'.length)}`
+  if (p.startsWith('.cursor/')) return `templates/cursor/${p}`
+  return `templates/${p}`
+}
+let templatesPresent = 0
+for (const e of templateRows) {
+  if (existsSync(join(kitRoot, templatePath(e.path)))) templatesPresent++
+  else problems.push(`missing template skeleton: ${templatePath(e.path)}`)
+}
+
 const summary = Object.entries(counts).map(([tier, c]) => `${c.landed}/${c.total} ${tier}`).join(', ')
 if (problems.length > 0) {
   console.error(problems.join('\n'))
   console.error(`KIT_EXTRACT: FAIL — ${summary} landed, ${unhandled} unhandled-action (${problems.length} problems)`)
   process.exit(1)
 }
-console.log(`KIT_EXTRACT: ok — ${summary} landed, 0 missing, 0 unhandled-action${checkOnly ? '' : ` (${written} written)`}`)
+console.log(`KIT_EXTRACT: ok — ${summary} landed, ${templatesPresent}/${templateRows.length} template skeletons present, 0 missing, 0 unhandled-action${checkOnly ? '' : ` (${written} written)`}`)
