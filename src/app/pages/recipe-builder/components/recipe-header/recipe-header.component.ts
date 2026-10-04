@@ -10,6 +10,7 @@ import {
   effect
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { RouterLink } from '@angular/router'
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
@@ -61,7 +62,8 @@ const IMAGE_PLACEHOLDER_SVG =
     CustomSelectComponent,
     ScalingChipComponent,
     ScrollIndicatorsDirective,
-    RatingStarsComponent
+    RatingStarsComponent,
+    RouterLink
   ],
   templateUrl: './recipe-header.component.html',
   styleUrl: './recipe-header.component.scss',
