@@ -338,6 +338,15 @@
 - [ ] Add the already-active / no-diff guard around the mark-active commit in `scripts/take-plan.mjs`
 - [ ] Verify `node scripts/take-plan.mjs <NNN>` runs to completion both when a plan starts as non-active and when it's already `Status: active`
 
+### Plan 332 — Recipe edit blocked by "name already in use": diagnose and fix (`plans/332-recipe-edit-blocked-duplicate-name.plan.md`)
+
+- [ ] A1: Create src/app/pages/recipe-builder/utils/find-duplicate-name.util.ts, exporting findDuplicateName(list: Recipe[], name: string, currentId: string | null): Recipe | null. Trim both sides and exclude currentId. Add a spec covering: same-id excluded, whitespace, a dish/recipe twin, and no match.
+- [ ] A2: Change duplicateNameValidator_() (recipe-builder.page.ts:593) to use the util over this.state_.recipes_() (kitchen-state.service.ts:35, the same combined list). Return the detail object and add the console.warn.
+- [ ] A3: In recipe-header.component.html around L42, add the "open existing" link (router link to /recipe-builder/ + id) and the optional master tag. Add both dictionary keys.
+- [ ] A4: Human gate. Dandan opens the recipe that failed, tries to save, and reports the console line and what the link opens. STOP until he answers.
+- [ ] A5: Act on the answer: cause (b) make type-change path add-then-delete with a spec; cause (a) unlinked master clone, no client fix, write follow-up note for server-side plan; genuine duplicate, no code fix.
+- [ ] A6: npm run build and the targeted specs pass. Update the session-state file.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
