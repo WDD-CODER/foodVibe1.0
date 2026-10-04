@@ -422,6 +422,13 @@
 - [ ] A5: Delete the dead local classes and `.c-filter-option` (`src/styles.scss`). Run `rg -n 'type="checkbox"' src/app --glob '*.html'` and confirm only list-row-checkbox remains.
 - [ ] A6: Build and run specs. Update the session-state file.
 
+### Plan 343 — Menu building quick fixes: empty library, guests stepper, event-type and serving-type dropdowns (`plans/343-menu-building-quick-fixes-empty-library-guests-stepper-dropdowns.plan.md`)
+- [ ] A1: Library empty and no-results states; hide filters when there are no menus (`menu-library-list.component.html/.scss`).
+- [ ] A2: Guests −/+ stepper (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [ ] A3: Event-type dropdown: anchoring, clipping, width clamp (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [ ] A4: Serving-type select: chip variant, compact, no filter, max height (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [ ] A5: P1 cleanups. Build and run specs. Check at 360px and 1280px. Update the session-state file.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
