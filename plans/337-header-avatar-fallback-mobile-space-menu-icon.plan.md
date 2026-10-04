@@ -1,8 +1,6 @@
 # Plan 337 — Header: avatar image fallback, reclaim mobile top space, menu-building icon
 
 Status: active
-
-Status:
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
@@ -38,13 +36,20 @@ Always allowed regardless of the list below: this plan file itself, its own
 hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
 — add to them, never rewrite or remove an existing entry without escalating).
 
-scope
-```
+```scope
 src/app/core/components/header/**
 src/app/core/components/tab-chips/**
 src/app/appRoot/app.component.scss
 server/app.js
+src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss
+src/app/pages/dashboard/dashboard.page.scss
+src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.scss
+src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.scss
+src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html
+src/app/pages/menu-library/menu-library.page.scss
 ```
+
+Approved by the Human, 2026-10-05: remove the leftover 3.875rem top clearances (recipe-book-list, dashboard), center the dashboard title block on mobile, and give menu-library the list-shell surface (rounded glass container) with working padding.
 
 `src/styles.scss` ~L928: this plan removes the avatar-clearance padding rule. That's an approved exception to append-only for that single rule.
 
@@ -74,15 +79,15 @@ touching any milestone.
 
 ### Must Have (P0)
 
-- [ ] An `imgFailed_` signal in `HeaderComponent`. Both `.avatar-img` get `(error)="imgFailed_.set(true)"`, and the template shows `.avatar-initials` when `!imgUrl || imgFailed_()`. Reset the flag when `user_()` changes.
-- [ ] Diagnose the root cause (A2 gate) and fix it in scope. If the URLs are on a legitimate host the CSP blocks, add that host to `imgSrc` in `server/app.js`. If they're dead or stale, the fallback is the fix and the finding is noted.
-- [ ] Mobile ≤620px: remove the fixed `.mobile-avatar-fab`. The avatar becomes the last item of `nav.bottom-nav` (avatar or initials at 22px, label "פרופיל"), and its menu (`mobileAvatarOpen()` content) opens upward from there.
-- [ ] Delete the avatar-clearance padding in `styles.scss` ~L928, and reduce the `.app-content` top padding at ≤620px to `env(safe-area-inset-top)` only.
-- [ ] `tab-chips.component.ts:55`: change `icon: 'sparkles'` to `icon: 'clipboard-list'` (already registered in `app.config.ts`).
+- [x] An `imgFailed_` signal in `HeaderComponent`. Both `.avatar-img` get `(error)="imgFailed_.set(true)"`, and the template shows `.avatar-initials` when `!imgUrl || imgFailed_()`. Reset the flag when `user_()` changes.
+- [x] Diagnose the root cause (A2 gate) and fix it in scope. If the URLs are on a legitimate host the CSP blocks, add that host to `imgSrc` in `server/app.js`. If they're dead or stale, the fallback is the fix and the finding is noted.
+- [x] Mobile ≤620px: remove the fixed `.mobile-avatar-fab`. The avatar becomes the last item of `nav.bottom-nav` (avatar or initials at 22px, label "פרופיל"), and its menu (`mobileAvatarOpen()` content) opens upward from there.
+- [x] Delete the avatar-clearance padding in `styles.scss` ~L928, and reduce the `.app-content` top padding at ≤620px to `env(safe-area-inset-top)` only.
+- [x] `tab-chips.component.ts:55`: change `icon: 'sparkles'` to `icon: 'clipboard-list'` (already registered in `app.config.ts`).
 
 ### Should Have (P1)
 
-- [ ] Unify the `.app-content` bottom padding breakpoint (767px) with the bottom-nav breakpoint (620px), so 621–767px doesn't reserve space for a bar that isn't shown.
+- [x] Unify the `.app-content` bottom padding breakpoint (767px) with the bottom-nav breakpoint (620px), so 621–767px doesn't reserve space for a bar that isn't shown.
 
 ### Nice to Have (P2)
 
@@ -92,16 +97,16 @@ touching any milestone.
 
 The bottom nav goes from 4 to 5 items. Keep each item ≥44px wide at 320px viewport width (shrink labels with `--fs-2xs` if needed).
 New dictionary key: `profile = "פרופיל"` (only if missing; check first).
-RTL: the avatar is the last item, at the visual left end.
+RTL: the avatar is the first item, at the visual right end (Human change, 2026-10-05).
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Add the avatar `(error)` fallback plus `imgFailed_`, and a header spec case where the image error shows initials.
-- [ ] A2: Human gate. Dandan opens the deployed app, checks the DevTools console for a CSP "img-src" violation, and copies the `imgUrl` host from sessionStorage `user`. STOP until he reports; fix in scope per the result.
-- [ ] A3: Move the avatar into `.bottom-nav` at ≤620px, remove `.mobile-avatar-fab` and its styles, and anchor the avatar menu above the bar.
-- [ ] A4: Remove the top clearance (`styles.scss` ~L928, `app.component.scss`). Apply the P1 breakpoint alignment.
-- [ ] A5: Swap the chip icon to `clipboard-list`. Run `npm run lint:icons`.
-- [ ] A6: Build, run specs, check at 360px and 620px. Update the session-state file.
+- [x] A1: Add the avatar `(error)` fallback plus `imgFailed_`, and a header spec case where the image error shows initials.
+- [x] A2: Human gate. Dandan opens the deployed app, checks the DevTools console for a CSP "img-src" violation, and copies the `imgUrl` host from sessionStorage `user`. STOP until he reports; fix in scope per the result. Result (2026-10-04): Human confirmed the photo renders; no CSP host change needed. The A1 fallback covers dead or stale URLs.
+- [x] A3: Move the avatar into `.bottom-nav` at ≤620px, remove `.mobile-avatar-fab` and its styles, and anchor the avatar menu above the bar.
+- [x] A4: Remove the top clearance (`styles.scss` ~L928, `app.component.scss`). Apply the P1 breakpoint alignment.
+- [x] A5: Swap the chip icon to `clipboard-list`. Run `npm run lint:icons`.
+- [x] A6: Build, run specs, check at 360px and 620px. Update the session-state file.
 
 ## Technical Considerations
 

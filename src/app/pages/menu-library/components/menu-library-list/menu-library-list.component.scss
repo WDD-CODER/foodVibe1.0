@@ -1,9 +1,30 @@
+// Angular hosts are inline by default — make this one a block so the container's
+// max-inline-size and auto margins resolve against the page, not a line box.
+:host {
+  display: block;
+
+  padding-inline: var(--space-4);
+  padding-block: var(--space-4);
+}
+
+// Same surface as list-shell's .table-area so this list matches the other list pages.
+// It used to be transparent, which is why its padding never showed.
 .menu-library-container {
   display: block;
-  max-width: 56.25rem;
-  margin: 0 auto;
-  padding: 1.75rem 1.5rem;
-  background: transparent;
+
+  max-inline-size: 56.25rem;
+
+  background: var(--bg-glass-strong);
+
+  margin-inline: auto;
+  padding-inline: var(--space-6);
+  padding-block: var(--space-6);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
 }
 
 .action-bar {
@@ -299,8 +320,14 @@
 }
 
 @media (max-width: 768px) {
+  :host {
+    padding-inline: var(--space-3);
+    padding-block: var(--space-3);
+  }
+
   .menu-library-container {
-    padding: 1rem;
+    padding-inline: var(--space-4);
+    padding-block: var(--space-4);
   }
 
   .action-bar {

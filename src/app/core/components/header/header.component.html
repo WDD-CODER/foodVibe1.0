@@ -3,8 +3,8 @@
     @if (isLoggedIn()) {
       <div class="user-chip">
         <div class="avatar-wrapper">
-          @if (user_()?.imgUrl) {
-            <img [src]="user_()!.imgUrl" alt="" class="avatar-img" />
+          @if (showAvatarImg()) {
+            <img [src]="user_()!.imgUrl" alt="" class="avatar-img" (error)="imgFailed_.set(true)" />
           } @else {
             <span class="avatar-initials">{{ userInitial() }}</span>
           }
@@ -127,48 +127,42 @@
 
 <div class="mobile-nav-backdrop" [class.open]="isMobileMenuOpen()" (click)="closeMobileMenu()" aria-hidden="true"></div>
 
-<!-- Mobile floating avatar FAB — mobile only (≤ 620px), shown via CSS -->
-<div class="mobile-avatar-fab">
-  @if (isLoggedIn()) {
-    <button
-      type="button"
-      class="mobile-fab-btn"
-      (click)="toggleMobileAvatar()"
-      [attr.aria-expanded]="mobileAvatarOpen()"
-      [attr.aria-label]="'log_out' | translatePipe"
-    >
-      <div class="avatar-wrapper">
-        @if (user_()?.imgUrl) {
-          <img [src]="user_()!.imgUrl" alt="" class="avatar-img" />
-        } @else {
-          <span class="avatar-initials">{{ userInitial() }}</span>
-        }
-        @if (user_()?.role === 'admin') {
-          <span class="role-badge" aria-label="admin">
-            <lucide-icon name="crown" [size]="10"></lucide-icon>
-          </span>
-        }
-      </div>
-    </button>
-    @if (mobileAvatarOpen()) {
-      <button type="button" class="mobile-fab-name" (click)="logout()">
-        {{ user_()!.name }}
-      </button>
-    }
-  } @else {
-    <button
-      type="button"
-      class="mobile-fab-btn mobile-fab-btn--guest"
-      (click)="openAuth('sign-in')"
-      [attr.aria-label]="'sign_in' | translatePipe"
-    >
-      <lucide-icon name="circle-user-round" [size]="24"></lucide-icon>
-    </button>
-  }
-</div>
-
 <!-- Bottom tab bar — mobile only (≤ 620px), shown via CSS -->
 <nav class="bottom-nav" dir="rtl" aria-label="main navigation">
+  <div class="bottom-nav__profile">
+    @if (isLoggedIn()) {
+      <button
+        type="button"
+        class="bottom-nav__item"
+        (click)="toggleMobileAvatar()"
+        [attr.aria-expanded]="mobileAvatarOpen()"
+        aria-haspopup="menu"
+      >
+        <span class="avatar-wrapper">
+          @if (showAvatarImg()) {
+            <img [src]="user_()!.imgUrl" alt="" class="avatar-img" (error)="imgFailed_.set(true)" />
+          } @else {
+            <span class="avatar-initials">{{ userInitial() }}</span>
+          }
+        </span>
+        <span>{{ 'profile' | translatePipe }}</span>
+      </button>
+      @if (mobileAvatarOpen()) {
+        <div class="profile-menu" role="menu">
+          <span class="profile-menu__name">{{ user_()!.name }}</span>
+          <button type="button" class="profile-menu__logout" role="menuitem" (click)="logout()">
+            <lucide-icon name="log-out" [size]="16"></lucide-icon>
+            {{ 'log_out' | translatePipe }}
+          </button>
+        </div>
+      }
+    } @else {
+      <button type="button" class="bottom-nav__item" (click)="openAuth('sign-in')">
+        <lucide-icon name="circle-user-round" [size]="22"></lucide-icon>
+        <span>{{ 'sign_in' | translatePipe }}</span>
+      </button>
+    }
+  </div>
   <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
     <lucide-icon name="layout-dashboard" [size]="22"></lucide-icon>
     <span>{{ 'dashboard' | translatePipe }}</span>

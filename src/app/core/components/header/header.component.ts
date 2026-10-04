@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core'
 import { ActivatedRouteSnapshot, Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -24,6 +24,9 @@ export class HeaderComponent {
 
   protected readonly isLoggedIn = this.userService.isLoggedIn
   protected readonly user_ = this.userService.user_
+  // Resets whenever the stored photo URL changes (new user, re-login, profile update).
+  protected readonly imgFailed_ = linkedSignal({ source: () => this.user_()?.imgUrl, computation: () => false })
+  protected readonly showAvatarImg = computed(() => !!this.user_()?.imgUrl && !this.imgFailed_())
   protected readonly userInitial = computed(() => {
     const name = this.user_()?.name
     return name ? name.charAt(0).toUpperCase() : ''
@@ -38,7 +41,7 @@ export class HeaderComponent {
   }
 
   toggleMobileAvatar(): void {
-    this.mobileAvatarOpen.update(v => !v)
+    this.mobileAvatarOpen.update((v) => !v)
   }
 
   protected openAuth(mode: AuthMode): void {
@@ -66,6 +69,6 @@ export class HeaderComponent {
 
   private _snapshotHasAuthGuard(snapshot: ActivatedRouteSnapshot): boolean {
     if (snapshot.routeConfig?.canActivate?.includes(authGuard)) return true
-    return snapshot.children.some(child => this._snapshotHasAuthGuard(child))
+    return snapshot.children.some((child) => this._snapshotHasAuthGuard(child))
   }
 }

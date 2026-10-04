@@ -548,13 +548,6 @@
       min-block-size: 2.75rem;
     }
   }
-
-  /* Plan 279 — sticky header safe zone */
-  @media (max-width: 620px) {
-    :host {
-      padding-block-start: 3.875rem;
-    }
-  }
 }
 
 /* Favorite button color — outside @layer to beat unlayered .c-icon-btn rule in styles.scss */

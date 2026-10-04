@@ -5,6 +5,9 @@ import { provideRouter, RouterLinkWithHref } from '@angular/router'
 import { By } from '@angular/platform-browser'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { signal } from '@angular/core'
+import { of } from 'rxjs'
+import { UserService } from '@services/user.service'
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent
@@ -49,5 +52,41 @@ describe('HeaderComponent', () => {
   it('should have 4 navigation links', () => {
     const navLinks = fixture.nativeElement.querySelectorAll('li a')
     expect(navLinks.length).toBe(4)
+  })
+})
+
+describe('HeaderComponent avatar fallback', () => {
+  let fixture: ComponentFixture<HeaderComponent>
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        provideRouter([]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => true,
+            user_: signal({ _id: 'u1', name: 'dana', role: 'user', imgUrl: 'https://x.invalid/a.png' }),
+            logout: () => of(null)
+          }
+        }
+      ]
+    }).compileComponents()
+
+    fixture = TestBed.createComponent(HeaderComponent)
+    fixture.detectChanges()
+  })
+
+  it('shows initials instead of a broken image when the avatar fails to load', () => {
+    const host: HTMLElement = fixture.nativeElement
+    const img = host.querySelector('.user-chip .avatar-img')
+    expect(img).toBeTruthy()
+
+    img!.dispatchEvent(new Event('error'))
+    fixture.detectChanges()
+
+    expect(host.querySelector('.user-chip .avatar-img')).toBeNull()
+    expect(host.querySelector('.user-chip .avatar-initials')?.textContent?.trim()).toBe('D')
   })
 })
