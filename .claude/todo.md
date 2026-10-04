@@ -357,6 +357,14 @@
 - [ ] A4: Mark the model field @deprecated. Run the grep in Success Criteria.
 - [ ] A5: Build and run the targeted specs. Update the session-state file.
 
+### Plan 335 — AI product: register categories and allergens through the registry (`plans/335-ai-product-register-categories-allergens-registry.plan.md`)
+- [ ] A1: Make registerAllergen return the key (or null). Update callers and the spec. (`src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/metadata-registry.service.spec.ts`)
+- [ ] A2: Create src/app/pages/inventory/services/ai-draft-metadata.util.ts with resolveDraftMetadata(), plus a spec covering: known key passthrough, Hebrew→key, null dropped, dedupe.
+- [ ] A3: Wire it into ProductAiFlowService.applyDraft() and openAiCreateModal(). (`src/app/pages/inventory/services/product-ai-flow.service.ts`, `src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts`)
+- [ ] A4: Route the modal's free-text add through it (P1). (`src/app/shared/ai-product-modal/**`)
+- [ ] A5: GeminiService: send knownCategories and knownAllergens in the product generate and patch bodies. ai.js: read them (optional arrays, cap 200 each) and append them to the prompt. (`src/app/core/services/gemini.service.ts`, `server/routes/ai.js`)
+- [ ] A6: Server test for the prompt append (or a manual curl if there's no harness for ai.js). Build and run specs. Update the session-state file. (`server/test/**`)
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
