@@ -347,6 +347,16 @@
 - [ ] A5: Act on the answer: cause (b) make type-change path add-then-delete with a spec; cause (a) unlinked master clone, no client fix, write follow-up note for server-side plan; genuine duplicate, no code fix.
 - [ ] A6: npm run build and the targeted specs pass. Update the session-state file.
 
+### Plan 333 — Remove the hidden-recipes concept (`plans/333-remove-hidden-recipes-concept.plan.md`)
+
+> Run after Plan 332 (duplicate-name fix) — both touch `kitchen-state.service.ts`.
+
+- [ ] A1: Remove the hide methods from the three services and the uncalled onHideRecipe.
+- [ ] A2: Replace visibleRecipes_ with recipes_ in recipe-book-list (ts, html, spec), then delete visibleRecipes_.
+- [ ] A3: Remove the hiddenBy carry-forward in both update methods; strip the field on save (P1).
+- [ ] A4: Mark the model field @deprecated. Run the grep in Success Criteria.
+- [ ] A5: Build and run the targeted specs. Update the session-state file.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
