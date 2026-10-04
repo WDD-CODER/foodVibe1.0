@@ -1,5 +1,7 @@
 # Plan 337 — Header: avatar image fallback, reclaim mobile top space, menu-building icon
 
+Status: active
+
 Status:
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
