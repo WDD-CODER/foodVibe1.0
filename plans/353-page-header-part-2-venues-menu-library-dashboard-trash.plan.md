@@ -25,7 +25,7 @@ Each has its own `.page-title` CSS, and the look differs from screen to screen.
 ## Execution Mode
 
 - Parallel: yes
-- Concurrent plans: run after Plan 352 (Page header part 1) and Plan 351 (Recent Activity) — both touch dashboard-overview.
+- Concurrent plans: run after Plan 352 (Page header part 1) and Plan 351 (Recent Activity) — both touch dashboard-overview — and after the Dashboard-chip plan (Plan 367), which removes the back-to-dashboard buttons.
 - Isolated DB: no
 
 ## Read-Write Scope
@@ -69,15 +69,15 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Venues: `<app-page-header titleKey="venue_list" [count]="…" (back)="backToDashboard()">`, with search in `[header-search]` and the CTA in `[header-actions]`. Remove the title, count, back and search wrapper from `.action-bar`; keep `.filters-bar` below.
+- [ ] Venues: `<app-page-header titleKey="venue_list" [count]="…">`, with search in `[header-search]` and the CTA in `[header-actions]`. Remove the title, count and search wrapper from `.action-bar` (the back button is already gone — the Dashboard-chip plan removed it); keep `.filters-bar` below.
 - [ ] Menu library: `<app-page-header titleKey="menu_library">`, with search and the "תפריט חדש" button in the slots.
 - [ ] Dashboard overview: `<app-page-header titleKey="dashboard">`. Add an optional `subtitleKey` input to `PageHeaderComponent` (muted line under the title, desktop only, hidden ≤768px) and use it for `dashboard_subtitle`.
-- [ ] Dashboard tabs header: the title shows the active tab's name (not "dashboard" again), with back to the overview through `(back)`. Tab switching UI is unchanged.
-- [ ] Trash: `<app-page-header titleKey="trash" (back)="backToDashboard()">`, with refresh in `[header-actions]`.
+- [ ] Dashboard tabs header: the title shows the active tab's name (not "dashboard" again). No back button: navigation back to the dashboard is the "לוח בקרה" tab chip (Dashboard-chip plan). Tab switching UI is unchanged.
+- [ ] Trash: `<app-page-header titleKey="trash">`, with refresh in `[header-actions]`.
 - [ ] Delete every local `.page-title`, `.page-subtitle`, `.dashboard-header` title-block, `.trash-header` and `.result-count` style that's now unused, and the back-button styles if no longer referenced.
 
 ### Should Have (P1)
-- [ ] Back buttons are consistent: Lucide `arrow-right` (RTL back) as an icon button with the aria-label from the destination key.
+- [ ] Back buttons are consistent: Lucide `arrow-right` (RTL back) as an icon button with the aria-label from the destination key. Pass `(back)` only for pages that still have a non-dashboard back target; venues, trash and the dashboard tabs header get none.
 
 ### Nice to Have (P2)
 - None.
@@ -100,7 +100,6 @@ touching any milestone.
 - Dependencies: `PageHeaderComponent` (part 1), `VenueListComponent`, `MenuLibraryListComponent`, `DashboardOverviewComponent`, `DashboardHeaderComponent`, `TrashPage`.
 - New files: none.
 - Model changes: none.
-- e2e: keep the existing `data-testid`s on the back buttons (`btn-back-to-dashboard*`) by passing them through as inputs or attributes.
 
 ## Out of Scope
 
@@ -118,5 +117,5 @@ touching any milestone.
 - [auto] `rg -n 'class="page-title"' src/app` → no matches.
 - [auto] `npx ng test --watch=false --include=src/app/pages/venues/**/*.spec.ts --include=src/app/pages/menu-library/**/*.spec.ts --include=src/app/pages/dashboard/**/*.spec.ts --include=src/app/pages/trash/**/*.spec.ts --include=src/app/shared/page-header/**/*.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
-- [human] Venues, menu library, dashboard, a dashboard tab (e.g. metadata) and trash all show the same title row as inventory. The dashboard tab title names the tab, and back returns to the overview.
+- [human] Venues, menu library, dashboard, a dashboard tab (e.g. metadata) and trash all show the same title row as inventory. The dashboard tab title names the tab; there is no back button on venues, trash or dashboard tabs (the "לוח בקרה" chip returns to the overview).
 - [human] Phone: each is at most 2 rows (title row plus search where there is one).

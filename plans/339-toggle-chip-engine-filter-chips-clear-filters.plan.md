@@ -79,7 +79,8 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
   - suppliers: delivery days, linked only
   - equipment: category, and consumable radios as single-choice chips
 - [ ] Venues: replace `.env-filter-pill` with `.c-toggle-chip` and delete the local pill styles.
-- [ ] Clear filters: add a `[shell-filter-clear]` slot in `list-shell.component.html` next to `h3.panel-heading`, absolutely positioned at the heading's inline-end (heading `position:relative`), so it reserves nothing. Move the 4 list-page buttons into it and delete their `.c-filter-section-header` wrappers. Venues: `.filters-bar { position:relative }`, with the button absolute at inline-end (or inside `.action-bar`).
+- [ ] Remove the `h3.panel-heading` ("סינון") from `list-shell.component.html` (~L47) and its `.panel-heading` styles. Add a `[shell-filter-clear]` slot at the top inline-end of `.panel-content` (`position:absolute; inset-block-start:0; inset-inline-end:0`; `.panel-content { position:relative }`), so it reserves no space and sits right next to the first filter group. Move the 4 list-page clear buttons into it and delete their `.c-filter-section-header` wrappers (the wrapper is the reason empty space is reserved even when no filter is active). Venues: `.filters-bar { position:relative }`, button absolute at inline-end.
+- [ ] recipe-book: `hasActiveFilters_()` also counts `selectedProductIds_().length > 0` (the ingredient filter), and `clearAllFilters()` also runs `selectedProductIds_.set([])`.
 - [ ] Delete the now-unused `.c-filter-section-header` rule after a grep confirms there are no other users. Keep the `.c-filter-option` / `.c-filter-options` rules: `supplier-form.component.html:38` (out of scope) still uses them until the form-checkboxes plan.
 
 ### Should Have (P1)
@@ -98,7 +99,7 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
 ## Atomic Sub-tasks
 
 - [ ] A1: Build the `.c-toggle-chip` / `.c-toggle-chip-group` engine and the phone-override exclusion.
-- [ ] A2: Add the list-shell `[shell-filter-clear]` slot and positioning.
+- [ ] A2: Remove the panel heading; add the `[shell-filter-clear]` slot and positioning; fix the recipe-book active-filter check.
 - [ ] A3: Migrate inventory and recipe-book filters.
 - [ ] A4: Migrate suppliers, equipment and venues filters.
 - [ ] A5: Delete the dead `.c-filter-section-header` and `.env-filter-pill` styles (grep first). Keep `.c-filter-option` (still used by supplier-form).
@@ -130,4 +131,5 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
 - [auto] `npx ng test --watch=false --include=src/app/pages/**/*-list.component.spec.ts --include=src/app/shared/list-shell/**/*.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
 - [human] Inventory, recipe book, suppliers, equipment, venues: filters are chips, and tapping toggles their color and filters the list. Tab plus space works with the keyboard.
-- [human] Select a filter → "נקה סינון" appears next to the "סינון" heading without pushing anything down → clear → it disappears with no layout jump.
+- [human] Select a filter → "נקה סינון" appears at the top inline-end of the panel, next to the first filter group, without pushing anything down → clear → it disappears with no layout jump.
+- [human] No "סינון" heading in any filter panel. With no filter selected, there is no empty gap at the top of the panel.

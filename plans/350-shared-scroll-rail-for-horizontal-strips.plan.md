@@ -77,6 +77,8 @@ touching any milestone.
   - Tab chips → wrap the chip list in `<app-scroll-rail snap="proximity">`. Keep `.c-tab-chips` for spacing and centering on wide screens (centered when it fits).
   - menu-dish-row `.dish-data` → `<app-scroll-rail snap="mandatory" arrows="auto">`.
 - [ ] Unit spec: arrows hidden when the content fits, shown when it overflows, RTL normalization.
+- [ ] Fix the tab-chips overflow bug: `.c-tab-chips` keeps `justify-content:center` while overflowing on phone, which pushes the first chip off-screen where it can't be reached. Use `justify-content: safe center` (fallback `flex-start` at ≤767px).
+- [ ] Metadata jump-nav (desktop and below): restyle it on the rail so the section chips are clearly readable and the arrows are visible. It's the "options carousel" Dandan flagged as looking poor.
 
 ### Should Have (P1)
 - [ ] Desktop: vertical mouse wheel over the rail scrolls horizontally only when the content overflows and the shift key isn't held.
@@ -123,3 +125,4 @@ touching any milestone.
 - [auto] `npm run build` → exit 0.
 - [human] Phone: the metadata jump-nav shows an arrow only on the side with more content, and tapping it scrolls. The dashboard tab chips do the same when they overflow. In a menu, the dish data strip swipes and snaps, with arrows when it overflows.
 - [human] Desktop: tab chips are centered with no arrows.
+- [human] On a phone, the dashboard chip row scrolls and its first chip is reachable.

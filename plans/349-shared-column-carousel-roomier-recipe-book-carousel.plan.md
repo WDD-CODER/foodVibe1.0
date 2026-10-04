@@ -90,6 +90,8 @@ touching any milestone.
   - All styles inside the component, including the mobile background that each list currently repeats.
 - [ ] Migrate the 4 lists. Remove `carouselHeaderIndex_` and its wiring, and delete each list's duplicated `@media 768 … app-cell-carousel` block.
 - [ ] Delete `shared/carousel-header` and `shared/cell-carousel`.
+- [ ] Header arrows float: small round buttons (28px, glass background, shadow) overlaid at the cell's top edge (`inset-block-start: -0.5rem`) or floating over the label edges, so the column label gets the full cell width (`white-space:nowrap; text-overflow:ellipsis`). The host must not clip them (no `overflow:hidden` on the carousel host; check `.table-area` clipping).
+- [ ] Cell background: the carousel cell inherits the row's background (`background: inherit` or transparent), with no white fill that differs from the row color. Delete the per-list `@media 768 … app-cell-carousel { background }` blocks.
 - [ ] Recipe-book spacing on ≤768px:
   - The carousel column goes from `1fr` to ~`1.4fr`, and the type column shrinks (`0.7fr` → `0.5fr`) in the mobile grid template `'2fr 0.7fr 1fr 0.8fr 40px 28px'`.
   - Carousel cell `padding-inline` drops to `.25rem`.
@@ -140,3 +142,4 @@ touching any milestone.
 - [auto] `npm run build` → exit 0.
 - [human] Phone: recipe book → swipe a row's carousel cell or tap the header arrow → all rows and the header move together to the next field. The carousel column is wider and its values aren't cut off.
 - [human] Same behavior in inventory, suppliers and equipment.
+- [human] The carousel column title is fully readable with the arrows floating above it, and carousel cells match their row color.

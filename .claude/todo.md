@@ -391,7 +391,7 @@
 
 ### Plan 339 — Toggle-chip engine: replace filter checkboxes with chips, compact clear filters (`plans/339-toggle-chip-engine-filter-chips-clear-filters.plan.md`)
 - [ ] A1: Build the `.c-toggle-chip` / `.c-toggle-chip-group` engine and the phone-override exclusion.
-- [ ] A2: Add the list-shell `[shell-filter-clear]` slot and positioning.
+- [ ] A2: Remove the panel heading; add the `[shell-filter-clear]` slot and positioning; fix the recipe-book active-filter check.
 - [ ] A3: Migrate inventory and recipe-book filters.
 - [ ] A4: Migrate suppliers, equipment and venues filters.
 - [ ] A5: Delete the dead `.c-filter-option`, `.c-filter-section-header` and `.env-filter-pill` styles (grep first).
@@ -496,6 +496,122 @@
 - [ ] A3: Dashboard overview and the dashboard tabs header (title = active tab) (`dashboard-overview.component.html/.scss`, `dashboard-header/**`).
 - [ ] A4: Trash (`src/app/pages/trash/**`).
 - [ ] A5: Delete the dead styles; run `rg 'class="page-title"'`. Build and run specs. Check at 360px and 1280px. Update the session-state file.
+
+### Plan 361 — Lists quick fixes: bulk-edit dropdown clipped, suppliers table grid and labels (`plans/361-lists-quick-fixes-bulk-edit-dropdown-suppliers-grid-labels.plan.md`)
+- [ ] A1: Remove `.selection-bar-area` overflow; verify the bulk-edit dropdown in all 4 lists (`list-shell.component.scss`).
+- [ ] A2: Suppliers 9-track desktop grid (`supplier-list/**`).
+- [ ] A3: Min-order into the carousel; mobile grid `'2fr 1fr 40px 28px'`; ₪ formatting (`supplier-list/**`).
+- [ ] A4: Dictionary keys; title tokens (P1) (`dictionary.json`, `supplier-list.component.scss`).
+- [ ] A5: Build, specs, check at 360px and 1280px. Update session-state.
+
+### Plan 362 — List overlays escape the table: row actions menu and edit modal render at body level (`plans/362-list-overlays-row-actions-menu-edit-modal-body-level.plan.md`)
+- [ ] A1: Move `RowActionsMenuComponent` to CDK Overlay, with a spec (opens, closes on backdrop, `open(anchor)` works) (`shared/row-actions-menu/**`).
+- [ ] A2: Move the list-shell `[shell-modal]` slot out of `.list-container` (`shared/list-shell/**`).
+- [ ] A3: Gotcha entry (`docs/brain/gotchas.md`).
+- [ ] A4: Build, specs. Check inventory, recipe-book, suppliers and equipment at 360px, 800px and 1280px. Update session-state.
+
+### Plan 363 — Search fields, part 1: animated clear (X) button and no browser suggestions on the 8 main search bars (`plans/363-search-fields-part-1-clear-button-no-autocomplete-main-bars.plan.md`)
+- [ ] A1: `InputClearComponent` + spec (hidden when `visible=false`, emits `clear`); engine CSS (`shared/input-clear/**`, `src/styles.scss`).
+- [ ] A2: Wire the 4 list pages (recipe-book, inventory, suppliers, equipment).
+- [ ] A3: Wire menu-library and venues.
+- [ ] A4: Wire ingredient-search and preparation-search, preserving their keyboard and result-panel behavior.
+- [ ] A5: Autocomplete attributes on all 8. Build, specs, phone check. Update session-state.
+
+### Plan 364 — Search fields, part 2: clear (X) in dropdown pickers and no browser suggestions on picker and name fields (`plans/364-search-fields-part-2-picker-clear-and-no-autocomplete.plan.md`)
+- [ ] A1: chip-search-dropdown, custom-select, custom-multi-select: X, autocomplete, unique ids, specs.
+- [ ] A2: Recipe-book ingredient filter and recipe-builder logistics search: X + autocomplete.
+- [ ] A3: Menu-intelligence event type, section category and dish-row search: X + autocomplete.
+- [ ] A4: Autocomplete sweep on the listed modal, form and metadata fields.
+- [ ] A5: Build, specs, Android check. Update session-state.
+
+### Plan 365 — Admin scope prompt ("רק לי / לכולם"): wording that fits each action, item type and count (`plans/365-admin-scope-prompt-wording-per-action-entity-count.plan.md`)
+- [ ] A1: Service API, `buildTexts`, and spec; dictionary keys (`master-push.service.ts`, spec).
+- [ ] A2: Update recipe and dish call sites (cook-view, recipe-book, recipe-builder).
+- [ ] A3: Update product call sites (product-form, inventory), with the product-delete warning.
+- [ ] A4: Metadata `resolvePushScope(type, action)`.
+- [ ] A5: Single dialog on admin delete; `confirm_delete` key. Build, specs. Update session-state.
+
+### Plan 366 — Delete a supplier that's in use: warning, then admin-only "only me / everyone" (`plans/366-delete-in-use-supplier-warning-admin-scope.plan.md`)
+- [ ] A1: Server: allowlist, trash collection and purge route, plus tests (against the isolated DB) (`server/routes/generic.js`, `server/constants/collections.js`, `server/test/**`).
+- [ ] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
+- [ ] A3: `onDelete` / `onBulkDeleteSelected` flow, model field, dictionary keys.
+- [ ] A4: Build, server tests, client specs. Manual test with 2 accounts. Update session-state.
+
+### Plan 367 — Dashboard sub-nav: a "לוח בקרה" chip replaces the current page's chip; remove the four back buttons (`plans/367-dashboard-chip-replaces-current-page-chip-remove-back-buttons.plan.md`)
+- [ ] A1: Tab-chips replacement logic plus spec (overview → 4 chips; metadata, suppliers, venues and trash → dashboard chip in the right index; query-only navigation updates) (`core/components/tab-chips/**`).
+- [ ] A2: Remove the 4 back buttons, handlers and styles.
+- [ ] A3: Specs and e2e cleanup; P1 style.
+- [ ] A4: Build, specs, icons lint, check on phone and desktop. Update session-state.
+
+### Plan 368 — Product form responsive on mobile and tablet (`plans/368-product-form-responsive-mobile-tablet.plan.md`)
+- [ ] A1: Un-nest the media blocks; verify they apply (DevTools computed styles) (`product-form.component.scss`).
+- [ ] A2: ≤900px tablet layout, including collapsible full width and the scaling row in 2 rows.
+- [ ] A3: ≤768px phone layout, including padding, actions wrap and the override input.
+- [ ] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
+
+### Plan 369 — Recipe builder: correct prompt and yield when switching dish ↔ preparation (`plans/369-recipe-builder-type-toggle-prompt-and-yield.plan.md`)
+- [ ] A1: Yield manager caching and correct conversions, plus spec (`recipe-yield-manager.util.ts`, spec).
+- [ ] A2: `isExistingRecord` input; toggle prompt logic; dictionary keys (`recipe-header/**`, `recipe-builder.page.*`).
+- [ ] A3: Build, specs. Manual test of new and existing, both directions. Update session-state.
+
+### Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests (`plans/370-ai-recipe-generation-realistic-portions-with-tests.plan.md`)
+- [ ] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
+- [ ] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
+- [ ] A3: The `implausible_portion_weight` warning, server and client mirror, plus tests and the dictionary key.
+- [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`).
+- [ ] A5: Build, server tests. Update session-state.
+
+### Plan 371 — Venues A: hours on the card, discreet select checkbox, responsive form, unsaved-changes guard (`plans/371-venues-a-card-hours-select-checkbox-responsive-form-guard.plan.md`)
+- [ ] A1: `venue-hours.util.ts` plus spec; card and detail use it.
+- [ ] A2: Checkbox visibility and position on cards (`venue-list/**`).
+- [ ] A3: Responsive venue form (`venue-form.component.scss`).
+- [ ] A4: Guard contract on `VenueFormComponent` plus routes, with a spec (dirty → `hasRealChanges` true; after save → `isSubmitted`) (`venue-form/**`, `app.routes.ts`).
+- [ ] A5: Build, specs. Check at 360px and 1280px, touch and mouse. Update session-state.
+
+### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/372-venues-b-multiple-contacts-hours-picker.plan.md`)
+- [ ] A1: Schema and model additions; `build:schemas`; server validation test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
+- [ ] A2: `venue-hours.util` `toDisplay` / `parseLegacy` plus spec (Hebrew range forms, midnight crossing, unparseable).
+- [ ] A3: `HoursEditorComponent` plus spec; wire into the venue form; hydrate and save both shapes (`shared/hours-editor/**`, `venue-form/**`).
+- [ ] A4: Contacts FormArray, legacy hydrate, save mirror, detail list (`venue-form/**`, `venue-detail/**`).
+- [ ] A5: Build, specs. Open 2 existing venues (one with free-text hours), edit and save, check no 400s. Update session-state.
+
+### Plan 373 — Venues C: tour videos (links with a visit date) and "save my current location" (`plans/373-venues-c-tour-videos-current-location.plan.md`)
+- [ ] A1: Schema and model; `build:schemas`; server test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
+- [ ] A2: Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
+- [ ] A3: Geolocation button and state, plus the detail navigate links.
+- [ ] A4: Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine). Update session-state.
+
+### Plan 374 — Venues D: separate infrastructure from regular equipment in the venue form (`plans/374-venues-d-infrastructure-vs-equipment-groups.plan.md`)
+- [ ] A1: Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
+- [ ] A2: Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
+- [ ] A3: Equipment-form infrastructure hint (`equipment-form/**`).
+- [ ] A4: Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400. Update session-state.
+
+### Plan 375 — Dish types (courses): remove colors entirely (`plans/375-dish-types-remove-colors.plan.md`)
+- [ ] A1: Model optional color; registry seeding and register without color; spec (`course.model.ts`, `metadata-registry.service.*`).
+- [ ] A2: Remove the color dot and `getCourseColor` from metadata-manager (`metadata-manager/**`).
+- [ ] A3: Build, specs. Admin and user check. Update session-state.
+
+### Plan 376 — Dish types cleanup: keep only real dish types, remap recipes safely (decision gate first) (`plans/376-dish-types-cleanup-remap-recipes-decision-gate.plan.md`)
+- [ ] A0: Decision gate: show the table and the a/b question, then STOP.
+- [ ] A1: Pure mapping module plus test; script with dry-run, backup check and log (`server/scripts/cleanup-dish-types.js`, `server/test/**`).
+- [ ] A2: Dry-run local; show counts to Dandan; STOP for go.
+- [ ] A3: Code seed lists, dictionary `main_dish`, safe display (`metadata-registry.service.ts`, `scripts/migrate-labels-to-courses.mjs`, `recipe-header/**`, `recipe-book-list/**`).
+- [ ] A4: `--write` on local; verify in app (recipe book filters, recipe builder select, metadata list).
+- [ ] A5: Hand Dandan the exact PowerShell commands for the Atlas backup, dry-run and write; record results. Update session-state.
+
+### Plan 377 — Units A: rename and edit a unit, with cascade to all my products and recipes (`plans/377-units-a-rename-edit-unit-cascade-own-data.plan.md`)
+- [ ] A1: Registry `renameUnit` / `updateUnitRate` plus spec (`unit-registry.service.*`).
+- [ ] A2: `countUnitUsage` and `cascadeRenameUnitForAll` plus specs, covering all fields (`kitchen-state.service.*`).
+- [ ] A3: Metadata UI: edit for non-system units; unit-creator edit mode; confirms (`metadata-manager/**`, `shared/unit-creator/**`).
+- [ ] A4: Delete in-use check covers recipes.
+- [ ] A5: Build, specs. Manual test against the isolated DB: rename a custom unit used in 2 products and 1 recipe; check the cost is unchanged. Update session-state.
+
+### Plan 378 — Units B: admin "for everyone" when adding, renaming, editing or deleting a unit (`plans/378-units-b-admin-for-everyone-unit-changes.plan.md`)
+- [ ] A1: Server route plus system-unit constant plus tests (isolated DB) (`server/routes/generic.js`, `server/test/**`).
+- [ ] A2: Client adapter, storage and registry plumbing (`http-storage.adapter.ts`, `async-storage.service.ts`, `unit-registry.service.*`).
+- [ ] A3: Metadata scope prompt for units; wire the ops; global dictionary on "everyone" (`metadata-manager.page.component.*`).
+- [ ] A4: Build, server and client tests. Manual test: admin renames a custom unit for everyone → a new signup sees the new unit. Update session-state.
 
 ## Where things live
 
