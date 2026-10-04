@@ -373,6 +373,14 @@
 - [ ] A5: Recipe image path uses the util (P1). — `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts`
 - [ ] A6: Build and run specs. Update the session-state file.
 
+### Plan 337 — Header: avatar image fallback, reclaim mobile top space, menu-building icon (`plans/337-header-avatar-fallback-mobile-space-menu-icon.plan.md`)
+- [ ] A1: Add the avatar `(error)` fallback plus `imgFailed_`, and a header spec case where the image error shows initials.
+- [ ] A2: Human gate. Dandan opens the deployed app, checks the DevTools console for a CSP "img-src" violation, and copies the `imgUrl` host from sessionStorage `user`. STOP until he reports; fix in scope per the result.
+- [ ] A3: Move the avatar into `.bottom-nav` at ≤620px, remove `.mobile-avatar-fab` and its styles, and anchor the avatar menu above the bar.
+- [ ] A4: Remove the top clearance (`styles.scss` ~L928, `app.component.scss`). Apply the P1 breakpoint alignment.
+- [ ] A5: Swap the chip icon to `clipboard-list`. Run `npm run lint:icons`.
+- [ ] A6: Build, run specs, check at 360px and 620px. Update the session-state file.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
