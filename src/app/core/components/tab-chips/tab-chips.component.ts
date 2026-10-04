@@ -52,7 +52,7 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
   ],
   menus: [
     { id: 'menu-library', labelKey: 'menu_library', icon: 'library', path: '/menu-library' },
-    { id: 'menu-intelligence', labelKey: 'menu_intelligence', icon: 'sparkles', path: '/menu-intelligence' }
+    { id: 'menu-intelligence', labelKey: 'menu_intelligence', icon: 'clipboard-list', path: '/menu-intelligence' }
   ]
 }
 

@@ -917,16 +917,6 @@ textarea.c-input {
       scroll-snap-align: center;
     }
   }
-
-  /* app-header hides its entire top bar at ≤620px (header.component.scss) and replaces it
-   * with a `position: fixed` floating avatar button (top: 0.75rem, 2.875rem circle). This row
-   * becomes the first in-flow element at that width — clear the avatar instead of running
-   * under it. Same 620px threshold as the header, deliberately not $break-phone-max: the two
-   * breakpoints don't agree yet (see M2 Task 12) and inventing a third number here would make
-   * that worse, not better. */
-  @media (max-width: 620px) {
-    padding-block-start: calc(0.75rem + 2.875rem + var(--space-2) + env(safe-area-inset-top, 0px));
-  }
 }
 
 /* ---- Engine: Glass Data Grid ---- */
