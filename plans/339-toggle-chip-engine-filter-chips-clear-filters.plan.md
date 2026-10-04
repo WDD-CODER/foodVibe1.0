@@ -80,7 +80,7 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
   - equipment: category, and consumable radios as single-choice chips
 - [ ] Venues: replace `.env-filter-pill` with `.c-toggle-chip` and delete the local pill styles.
 - [ ] Clear filters: add a `[shell-filter-clear]` slot in `list-shell.component.html` next to `h3.panel-heading`, absolutely positioned at the heading's inline-end (heading `position:relative`), so it reserves nothing. Move the 4 list-page buttons into it and delete their `.c-filter-section-header` wrappers. Venues: `.filters-bar { position:relative }`, with the button absolute at inline-end (or inside `.action-bar`).
-- [ ] Delete the now-unused `.c-filter-option` and `.c-filter-section-header` rules after a grep confirms there are no other users.
+- [ ] Delete the now-unused `.c-filter-section-header` rule after a grep confirms there are no other users. Keep the `.c-filter-option` / `.c-filter-options` rules: `supplier-form.component.html:38` (out of scope) still uses them until the form-checkboxes plan.
 
 ### Should Have (P1)
 - [ ] Chip counts (`.c-toggle-chip__count`) stay visible; a zero count renders muted.
@@ -101,7 +101,7 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
 - [ ] A2: Add the list-shell `[shell-filter-clear]` slot and positioning.
 - [ ] A3: Migrate inventory and recipe-book filters.
 - [ ] A4: Migrate suppliers, equipment and venues filters.
-- [ ] A5: Delete the dead `.c-filter-option`, `.c-filter-section-header` and `.env-filter-pill` styles (grep first).
+- [ ] A5: Delete the dead `.c-filter-section-header` and `.env-filter-pill` styles (grep first). Keep `.c-filter-option` (still used by supplier-form).
 - [ ] A6: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file.
 
 ## Technical Considerations
@@ -126,7 +126,7 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
 
 ## Success Criteria
 
-- [auto] `rg -n "c-filter-option|env-filter-pill|c-filter-section-header" src/app src/styles.scss` → no matches.
+- [auto] `rg -n "c-filter-option|env-filter-pill|c-filter-section-header" src/app src/styles.scss` → only supplier-form.component.html matches; keep the .c-filter-option rule until the form-checkboxes plan.
 - [auto] `npx ng test --watch=false --include=src/app/pages/**/*-list.component.spec.ts --include=src/app/shared/list-shell/**/*.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
 - [human] Inventory, recipe book, suppliers, equipment, venues: filters are chips, and tapping toggles their color and filters the list. Tab plus space works with the keyboard.
