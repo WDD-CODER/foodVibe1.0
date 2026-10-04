@@ -939,6 +939,8 @@
     "menu_field_event_type": "סוג אירוע",
     "menu_field_guest_count": "מספר אורחים",
     "menu_field_serving_type": "סוג הגשה",
-    "menu_field_section_name": "שם מקטע"
+    "menu_field_section_name": "שם מקטע",
+    "duplicate_name_open_existing": "פתח את הקיים",
+    "duplicate_from_master": "(מהמאגר המשותף)"
   }
 }

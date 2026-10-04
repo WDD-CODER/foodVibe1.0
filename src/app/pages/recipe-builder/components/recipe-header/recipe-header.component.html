@@ -44,6 +44,16 @@
             (yield.currentRecipeTypeDisplay_() === 'dish' ? 'duplicate_dish_name' : 'duplicate_recipe_name')
               | translatePipe
           }}</span>
+          @if (form().get('nameHebrew')?.errors?.['duplicateName']; as dup) {
+            @if (dup._id) {
+              @if (dup.fromMaster) {
+                <span class="name-error-msg">{{ 'duplicate_from_master' | translatePipe }}</span>
+              }
+              <a class="name-error-msg name-error-link" [routerLink]="['/recipe-builder', dup._id]">{{
+                'duplicate_name_open_existing' | translatePipe
+              }}</a>
+            }
+          }
         }
         @if (validationErrors_()['nameHebrew']) {
           <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>

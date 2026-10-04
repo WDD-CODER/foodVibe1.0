@@ -70,6 +70,7 @@ import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stam
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserService } from '@services/user.service'
 import { RecipeAiFlowService } from './services/recipe-ai-flow.service'
+import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 
@@ -597,8 +598,12 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         if (!name) return of(null)
         const currentId = this.recipeId_()
         const combined = [...this.recipeDataService_.allRecipes_(), ...this.dishDataService_.allDishes_()]
-        const isDup = combined.some((r) => (r.nameHebrew?.trim() ?? '') === name && r._id !== currentId)
-        return of(isDup ? { duplicateName: true } : null)
+        const twin = findDuplicateName(combined, name, currentId)
+        if (!twin) return of(null)
+        console.warn('[duplicateName]', twin)
+        return of({
+          duplicateName: { _id: twin._id, isDish: twin.recipeType === 'dish', fromMaster: !!twin._masterId }
+        })
       })
     )
   }

@@ -1,6 +1,6 @@
 # Plan 332 — Recipe edit blocked by "name already in use": diagnose and fix
 
-Status:
+Status: active
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
@@ -31,10 +31,11 @@ docs/session-state-<branch>.md, .claude/sessions/**, .worktree-*, and the append
 hotspots (src/styles.scss, public/assets/data/dictionary.json, src/app/app.routes.ts
 — add to them, never rewrite or remove an existing entry without escalating).
 
-scope
+```scope
 src/app/pages/recipe-builder/**
 src/app/core/services/kitchen-state.service.ts
 src/app/core/services/kitchen-state.service.spec.ts
+```
 
 ## Read Scope
 
@@ -59,10 +60,10 @@ As a chef, when a name really is taken, I want to see which recipe or dish has i
 
 ## Functional Requirements
 ### Must Have (P0)
-- [ ] The duplicate lookup is a pure function that returns the conflicting record (_id, nameHebrew, isDish, _masterId), or null.
-- [ ] The validator error carries that record: { duplicateName: { _id, isDish, fromMaster } }. Existing truthy checks keep working (recipe-builder.page.ts:694, :1312, recipe-header.component.html:42).
-- [ ] Under the name field, the existing message is followed by a link "פתח את הקיים" that navigates to /recipe-builder/<conflicting _id>.
-- [ ] A console.warn('[duplicateName]', {...}) logs the full conflicting record for diagnosis.
+- [x] The duplicate lookup is a pure function that returns the conflicting record (_id, nameHebrew, isDish, _masterId), or null.
+- [x] The validator error carries that record: { duplicateName: { _id, isDish, fromMaster } }. Existing truthy checks keep working (recipe-builder.page.ts:694, :1312, recipe-header.component.html:42).
+- [x] Under the name field, the existing message is followed by a link "פתח את הקיים" that navigates to /recipe-builder/<conflicting _id>.
+- [x] A console.warn('[duplicateName]', {...}) logs the full conflicting record for diagnosis.
 - [ ] Root cause confirmed with Dandan (A4) before any fix to save logic.
 
 ### Should Have (P1)
@@ -76,15 +77,15 @@ RTL: the link sits inline after .name-error-msg, using the existing link styling
 New dictionary keys (append only): duplicate_name_open_existing = "פתח את הקיים", duplicate_from_master = "(מהמאגר המשותף)".
 
 ## Atomic Sub-tasks
-- [ ] A1: Create src/app/pages/recipe-builder/utils/find-duplicate-name.util.ts, exporting findDuplicateName(list: Recipe[], name: string, currentId: string | null): Recipe | null. Trim both sides and exclude currentId. Add a spec covering: same-id excluded, whitespace, a dish/recipe twin, and no match.
-- [ ] A2: Change duplicateNameValidator_() (recipe-builder.page.ts:593) to use the util over this.state_.recipes_() (kitchen-state.service.ts:35, the same combined list). Return the detail object and add the console.warn.
-- [ ] A3: In recipe-header.component.html around L42, add the "open existing" link (router link to /recipe-builder/ + id) and the optional master tag. Add both dictionary keys.
-- [ ] A4: Human gate. Dandan opens the recipe that failed, tries to save, and reports the console line and what the link opens. STOP until he answers.
-- [ ] A5: Act on the answer:
+- [x] A1: Create src/app/pages/recipe-builder/utils/find-duplicate-name.util.ts, exporting findDuplicateName(list: Recipe[], name: string, currentId: string | null): Recipe | null. Trim both sides and exclude currentId. Add a spec covering: same-id excluded, whitespace, a dish/recipe twin, and no match.
+- [x] A2: Change duplicateNameValidator_() (recipe-builder.page.ts:593) to use the util over this.state_.recipes_() (kitchen-state.service.ts:35, the same combined list). Return the detail object and add the console.warn.
+- [x] A3: In recipe-header.component.html around L42, add the "open existing" link (router link to /recipe-builder/ + id) and the optional master tag. Add both dictionary keys.
+- [x] A4: Human gate. Dandan opens the recipe that failed, tries to save, and reports the console line and what the link opens. STOP until he answers.
+- [x] A5: Act on the answer:
   - Cause (b): make the type-change path add-then-delete, with a spec.
   - Cause (a), an unlinked master clone: no client fix. Write a follow-up note in the session-state file for a server-side plan to link master clones by name in sync-master.js.
   - Genuine user duplicate: no code fix; the link is the fix.
-- [ ] A6: npm run build and the targeted specs pass. Update the session-state file.
+- [x] A6: npm run build and the targeted specs pass. Update the session-state file.
 
 ## Technical Considerations
 Dependencies: RecipeBuilderPage, RecipeHeaderComponent, KitchenStateService.recipes_.
@@ -107,5 +108,5 @@ b) Allow save with a warning
 - [auto] npx ng test --watch=false --include=src/app/pages/recipe-builder/utils/find-duplicate-name.util.spec.ts → all specs pass, 0 failures.
 - [auto] npx ng test --watch=false --include=src/app/pages/recipe-builder/recipe-builder.page.spec.ts → 0 failures.
 - [auto] npm run build → exit code 0, no new errors.
-- [human] Open the recipe that failed today and click save. Either it saves, or the error shows "פתח את הקיים" and clicking it opens the conflicting recipe or dish.
-- [human] Editing any other recipe without changing its name saves normally.
+- [x] [human] Open the recipe that failed today and click save. Either it saves, or the error shows "פתח את הקיים" and clicking it opens the conflicting recipe or dish.
+- [x] [human] Editing any other recipe without changing its name saves normally.

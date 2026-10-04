@@ -136,6 +136,12 @@
     color: var(--color-danger);
   }
 
+  .name-error-link {
+    margin-inline-start: 0.5rem;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
   .top-row .type-toggle-btn {
     padding: 0.4rem 1rem;
     background: var(--bg-glass);
@@ -145,7 +151,9 @@
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
 
     &.dish-mode {
       background: var(--bg-success);
@@ -153,7 +161,6 @@
       border-color: rgba(167, 243, 208, 0.6);
     }
   }
-
 }
 
 .scaling-dock-grid {
@@ -225,7 +232,10 @@
   border-radius: var(--radius-full);
 
   cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
 
   &:hover {
     color: var(--color-primary);
@@ -308,7 +318,7 @@
     max-width: 12.5rem;
     max-height: 9rem;
     padding: 0.2rem 0.5rem 0.7rem 0.5rem;
-    
+
     background: var(--bg-glass-strong);
     color: var(--color-text-secondary);
     font-size: 0.8rem;
@@ -416,7 +426,6 @@
   }
 }
 
-
 // Desktop-only child placement — kept outside the base .center-controls block
 // so mobile's lower-specificity grid-area overrides are not beaten.
 @media (min-width: 40.626rem) {
@@ -466,11 +475,11 @@
   .header-dashboard-container {
     grid-template-columns: 50% 50%;
     grid-template-areas:
-      "title title"
-      "img metrics"
-      "rating rating"
-      "scaling scaling"
-      "labels labels";
+      'title title'
+      'img metrics'
+      'rating rating'
+      'scaling scaling'
+      'labels labels';
     gap: 1.5rem;
     place-items: center;
   }
