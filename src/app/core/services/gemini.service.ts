@@ -7,6 +7,8 @@ import type { ParsedResult } from '@models/parsed-result.model'
 import { environment } from '../../../environments/environment'
 import type { AiMenuDraft, AiMenuPatch } from '@models/ai-menu-draft.model'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
+import { MetadataRegistryService } from './metadata-registry.service'
+import { TranslationService } from './translation.service'
 
 export interface AiRecipePatch {
   nameHebrew?: string
@@ -41,6 +43,8 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
 @Injectable({ providedIn: 'root' })
 export class GeminiService {
   private readonly http_ = inject(HttpClient)
+  private readonly metadataRegistry_ = inject(MetadataRegistryService)
+  private readonly translation_ = inject(TranslationService)
   private readonly authBase_ = environment.authApiUrl
 
   async generateRecipe(prompt: string): Promise<AiRecipeDraft> {
@@ -150,7 +154,10 @@ export class GeminiService {
 
     const data = await withRetry(() =>
       firstValueFrom(
-        this.http_.post<{ product: AiProductDraft }>(`${this.authBase_}/api/v1/ai/generate-product`, { rawText })
+        this.http_.post<{ product: AiProductDraft }>(`${this.authBase_}/api/v1/ai/generate-product`, {
+          rawText,
+          ...this.knownMetadata_()
+        })
       )
     )
     incrementGeminiUsage()
@@ -163,12 +170,32 @@ export class GeminiService {
     const data = await withRetry(() =>
       firstValueFrom(
         this.http_.post<{ changes: AiProductPatch }>(`${this.authBase_}/api/v1/ai/patch-product`, {
-          currentProduct,
-          instruction
+          currentProduct: {
+            ...currentProduct,
+            categories: this.toHebrew_(currentProduct.categories),
+            allergens: this.toHebrew_(currentProduct.allergens)
+          },
+          instruction,
+          ...this.knownMetadata_()
         })
       )
     )
     incrementGeminiUsage()
     return data.changes
+  }
+
+  /**
+   * The user's registered categories and allergens as Hebrew labels, so the model reuses them
+   * and answers in Hebrew; the client maps the Hebrew back to registry keys on apply.
+   */
+  private knownMetadata_(): { knownCategories: string[]; knownAllergens: string[] } {
+    return {
+      knownCategories: this.toHebrew_(this.metadataRegistry_.allCategories_()),
+      knownAllergens: this.toHebrew_(this.metadataRegistry_.allAllergens_())
+    }
+  }
+
+  private toHebrew_(keys: string[] | undefined): string[] {
+    return (keys ?? []).map((key) => this.translation_.translate(key))
   }
 }

@@ -72,17 +72,28 @@ describe('MetadataRegistryService', () => {
   describe('Signal Management', () => {
     it('should register a new allergen if it does not exist', fakeAsync(() => {
       const initialCount = service.allAllergens_().length
-      service.registerAllergen('shellfish')
+      let key: string | null | undefined
+      service.registerAllergen('shellfish').then((k) => (key = k))
       tick()
       expect(service.allAllergens_()).toContain('shellfish')
       expect(service.allAllergens_().length).toBe(initialCount + 1)
+      expect(key).toBe('shellfish')
     }))
 
-    it('should not register duplicate allergens', fakeAsync(() => {
+    it('should not register duplicate allergens but still return the key', fakeAsync(() => {
       const initialCount = service.allAllergens_().length
-      service.registerAllergen('gluten')
+      let key: string | null | undefined
+      service.registerAllergen('gluten').then((k) => (key = k))
       tick()
       expect(service.allAllergens_().length).toBe(initialCount)
+      expect(key).toBe('gluten')
+    }))
+
+    it('should return null when key resolution is cancelled', fakeAsync(() => {
+      let key: string | null | undefined
+      service.registerAllergen('   ').then((k) => (key = k))
+      tick()
+      expect(key).toBeNull()
     }))
   })
 

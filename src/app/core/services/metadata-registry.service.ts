@@ -487,10 +487,20 @@ export class MetadataRegistryService {
     }
   }
 
-  async registerAllergen(name: string): Promise<void> {
+  /** Resolves a category name to its canonical key (may open the translation modal) without registering it. */
+  resolveCategoryKey(name: string): Promise<string | null> {
+    return this.keyResolution.ensureKeyForContext(name, 'category')
+  }
+
+  /** Resolves an allergen name to its canonical key (may open the translation modal) without registering it. */
+  resolveAllergenKey(name: string): Promise<string | null> {
+    return this.keyResolution.ensureKeyForContext(name, 'allergen')
+  }
+
+  async registerAllergen(name: string): Promise<string | null> {
     const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'allergen')
-    if (!keyToUse) return
-    if (this.allergens().includes(keyToUse)) return
+    if (!keyToUse) return null
+    if (this.allergens().includes(keyToUse)) return keyToUse
 
     const updated: string[] = [...this.allergens(), keyToUse]
 
@@ -498,14 +508,16 @@ export class MetadataRegistryService {
       await this.persistRegistry('KITCHEN_ALLERGENS', updated)
       this.allergens.set(updated)
       this.userMsgService.onSetSuccessMsg(`אלרגן "${keyToUse}" נוסף בהצלחה`)
+      return keyToUse
     } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
+      if (err instanceof HttpErrorResponse && err.status === 401) return null
       this.userMsgService.onSetErrorMsg('שגיאה בשמירת האלרגן')
       this.logging.error({
         event: 'crud.metadata.allergen.save_error',
         message: 'Allergen save error',
         context: { err }
       })
+      return null
     }
   }
 

@@ -29,7 +29,7 @@ docs/session-state-<branch>.md, .claude/sessions/**, .worktree-*, and the append
 hotspots (src/styles.scss, public/assets/data/dictionary.json, src/app/app.routes.ts
 — add to them, never rewrite or remove an existing entry without escalating).
 
-scope
+```scope
 src/app/pages/inventory/services/**
 src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts
 src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.spec.ts
@@ -39,6 +39,11 @@ src/app/core/services/metadata-registry.service.spec.ts
 src/app/core/services/gemini.service.ts
 server/routes/ai.js
 server/test/**
+scripts/take-plan.mjs
+src/app/pages/inventory/components/product-form/**
+server/routes/generic.js
+server/test/push-to-master.test.js
+```
 
 ## Read Scope
 
@@ -64,15 +69,15 @@ As a chef, when AI fills a product for me, I want its categories and allergens t
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] registerAllergen(name) returns Promise<string | null> (the resolved key), matching registerCategory.
-- [ ] One shared resolver, resolveDraftMetadata(draft, registry), maps each draft category and allergen through registerCategory / registerAllergen, drops nulls (user cancelled), dedupes, and returns { categories, allergens } as keys.
-- [ ] applyDraft() patches the form with the resolver output, not raw draft.*.
-- [ ] openAiCreateModal() runs the resolver before addProduct().
-- [ ] The client sends the user's current category and allergen keys to /generate-product and /patch-product. The server appends them to the system prompt: "prefer one of these existing keys; only invent if nothing fits".
+- [x] registerAllergen(name) returns Promise<string | null> (the resolved key), matching registerCategory.
+- [x] One shared resolver, resolveDraftMetadata(draft, registry), maps each draft category and allergen through registerCategory / registerAllergen, drops nulls (user cancelled), dedupes, and returns { categories, allergens } as keys.
+- [x] applyDraft() patches the form with the resolver output, not raw draft.*.
+- [x] openAiCreateModal() runs the resolver before addProduct().
+- [x] The client sends the user's current category and allergen keys to /generate-product and /patch-product. The server appends them to the system prompt: "prefer one of these existing keys; only invent if nothing fits".
 
 ### Should Have (P1)
-- [ ] The modal's free-text addCategory() / addAllergen() go through the same resolver.
-- [ ] validateProductDraft() (ai.js:1035) still accepts any strings: the client resolves them. No server rejection.
+- [x] The modal's free-text addCategory() / addAllergen() go through the same resolver.
+- [x] validateProductDraft() (ai.js:1035) still accepts any strings: the client resolves them. No server rejection.
 
 ### Nice to Have (P2)
 - None.
@@ -84,12 +89,12 @@ No new dictionary keys.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Make registerAllergen return the key (or null). Update callers and the spec. (`src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/metadata-registry.service.spec.ts`)
-- [ ] A2: Create src/app/pages/inventory/services/ai-draft-metadata.util.ts with resolveDraftMetadata(), plus a spec covering: known key passthrough, Hebrew→key, null dropped, dedupe.
-- [ ] A3: Wire it into ProductAiFlowService.applyDraft() and openAiCreateModal(). (`src/app/pages/inventory/services/product-ai-flow.service.ts`, `src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts`)
-- [ ] A4: Route the modal's free-text add through it (P1). (`src/app/shared/ai-product-modal/**`)
-- [ ] A5: GeminiService: send knownCategories and knownAllergens in the product generate and patch bodies. ai.js: read them (optional arrays, cap 200 each) and append them to the prompt. (`src/app/core/services/gemini.service.ts`, `server/routes/ai.js`)
-- [ ] A6: Server test for the prompt append (or a manual curl if there's no harness for ai.js). Build and run specs. Update the session-state file. (`server/test/**`)
+- [x] A1: Make registerAllergen return the key (or null). Update callers and the spec. (`src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/metadata-registry.service.spec.ts`)
+- [x] A2: Create src/app/pages/inventory/services/ai-draft-metadata.util.ts with resolveDraftMetadata(), plus a spec covering: known key passthrough, Hebrew→key, null dropped, dedupe.
+- [x] A3: Wire it into ProductAiFlowService.applyDraft() and openAiCreateModal(). (`src/app/pages/inventory/services/product-ai-flow.service.ts`, `src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts`)
+- [x] A4: Route the modal's free-text add through it (P1). (`src/app/shared/ai-product-modal/**`)
+- [x] A5: GeminiService: send knownCategories and knownAllergens in the product generate and patch bodies. ai.js: read them (optional arrays, cap 200 each) and append them to the prompt. (`src/app/core/services/gemini.service.ts`, `server/routes/ai.js`)
+- [x] A6: Server test for the prompt append (or a manual curl if there's no harness for ai.js). Build and run specs. Update the session-state file. (`server/test/**`)
 
 ## Technical Considerations
 
@@ -112,7 +117,7 @@ b) Abort the whole AI create
 
 ## Success Criteria
 
-- [auto] npx ng test --watch=false --include=src/app/pages/inventory/services/*.spec.ts --include=src/app/core/services/metadata-registry.service.spec.ts → 0 failures.
-- [auto] npm run build → exit 0.
-- [human] Inventory → AI create, e.g. "יוגורט עיזים 3%" → open the created product: its categories and allergens appear in Metadata → categories/allergens, with no new unexplained entries in the inventory filter panel.
-- [human] Edit a product → AI patch "add gluten allergen" → the form shows the registered allergen chip.
+- [x] [auto] npx ng test --watch=false --include=src/app/pages/inventory/services/*.spec.ts --include=src/app/core/services/metadata-registry.service.spec.ts → 0 failures.
+- [x] [auto] npm run build → exit 0.
+- [x] [human] Inventory → AI create, e.g. "יוגורט עיזים 3%" → open the created product: its categories and allergens appear in Metadata → categories/allergens, with no new unexplained entries in the inventory filter panel.
+- [x] [human] Edit a product → AI patch "add gluten allergen" → the form shows the registered allergen chip.

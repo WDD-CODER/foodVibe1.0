@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core'
 import { FormGroup } from '@angular/forms'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
+import { resolveDraftMetadata } from './ai-draft-metadata.util'
 
 @Injectable()
 export class ProductAiFlowService {
@@ -15,20 +16,10 @@ export class ProductAiFlowService {
   async applyDraft(draft: AiProductDraft): Promise<void> {
     if (!this.form_) return
 
-    // Register and apply categories
-    const knownCategories = new Set(this.metadataRegistry_.allCategories_())
-    for (const category of draft.categories) {
-      if (!knownCategories.has(category)) {
-        await this.metadataRegistry_.registerCategory(category)
-      }
-    }
-    this.form_.get('categories')?.patchValue(draft.categories)
-
-    // Register and apply allergens
-    for (const allergen of draft.allergens) {
-      await this.metadataRegistry_.registerAllergen(allergen)
-    }
-    this.form_.get('allergens')?.patchValue(draft.allergens)
+    // Resolve categories and allergens to keys and apply them; Metadata registration waits for the product save
+    const { categories, allergens } = await resolveDraftMetadata(draft, this.metadataRegistry_)
+    this.form_.get('categories')?.patchValue(categories)
+    this.form_.get('allergens')?.patchValue(allergens)
 
     // Patch scalar fields (productName is the form control name for nameHebrew)
     this.form_.patchValue({
