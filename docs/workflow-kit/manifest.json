@@ -746,13 +746,15 @@
         {
           "key": "slots.bePorts",
           "strings": [
-            "300n"
+            "300n",
+            "3000"
           ]
         },
         {
           "key": "slots.fePorts",
           "strings": [
-            "420n"
+            "420n",
+            "4200"
           ]
         },
         {
@@ -2504,6 +2506,12 @@
           "strings": [
             "ng lint"
           ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
         }
       ],
       "refs": [
@@ -4215,6 +4223,47 @@
       "params": [],
       "refs": [],
       "notes": "Backend manifest. Workflow-called scripts: `dev:local` (invoked by scripts/take-plan.mjs), `test`. NOTE (see memory): server `dev:remote` points at Atlas while root `dev:remote` points at Render — name collision, separate plan."
+    },
+    {
+      "path": "scripts/kit-owned.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/workflow-kit/manifest.json",
+        "docs/workflow-kit/kit-owned.json",
+        "scripts/scope-guard.sh"
+      ],
+      "notes": "Plan 360 (phase 5): generates and checks the kit-owned file list; scope-guard.sh calls it to deny agent edits to kit-owned files (FoodVibe-side; stays here)."
+    },
+    {
+      "path": "scripts/lib/slot-procs.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "scripts/lib/slot.mjs"
+      ],
+      "notes": "Plan 360: slot dev-server processes (port owner, descendant check, kill tree, wait for port). Kit-authored; FoodVibe gets a copy."
+    },
+    {
+      "path": "scripts/slot-stop.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "scripts/lib/slot.mjs",
+        "scripts/lib/slot-procs.mjs"
+      ],
+      "notes": "Plan 360: stops a slot's dev servers (cross-platform; replaces taskkill by hand). Kit-authored; FoodVibe gets a copy."
+    },
+    {
+      "path": "scripts/lib/plan-scope.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 360: the one Read-Write Scope parser (```scope fence, plain fence, **Scope:** list, or fence-less \"scope\" line), shared by scope-check.mjs and take-plan.mjs. Kit-authored; FoodVibe gets a copy."
     }
   ]
 }

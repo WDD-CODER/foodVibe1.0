@@ -50,6 +50,7 @@ testem.log
 # (.worktree-root and .worktree-port are already ignored below)
 .worktree-plan
 .claude/.slot-pids
+.claude/*.log
 src/environments/environment.slot.ts
 
 # Claude Code local config (never commit)

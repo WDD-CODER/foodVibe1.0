@@ -6,19 +6,35 @@
  *
  * Usage: node scripts/take-plan.mjs <NNN>
  *
- * Never deletes uncommitted work, never force-switches, never kills a
- * process it didn't start. Exit 1 + message on every refusal.
+ * Order matters: every check that can refuse (plan exists, scope block fenced,
+ * clean tree, slot free, ports usable) runs BEFORE the claim (branch + commit),
+ * so a refusal never leaves a half-claimed slot. A failure after the claim
+ * (prepare step, server start) is resumable: re-run with the same NNN.
+ *
+ * Never deletes uncommitted work and never force-switches. This slot's own
+ * servers keep running from plan to plan (they reload as files change) and are
+ * restarted only when an npm install ran. Unrecorded leftover dev servers on the
+ * slot's reserved ports are stopped; any other program there is refused.
+ * Exit 1 + message on every refusal.
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, openSync } from 'fs'
 import { createHash } from 'crypto'
 import { execFileSync, spawn } from 'child_process'
 import { resolve, dirname, join } from 'path'
 import { fileURLToPath } from 'url'
-import { isSlot, slotNumber, ports } from './lib/slot.mjs'
+import { isSlot, slotNumber, ports, listSlots } from './lib/slot.mjs'
+import { extractScopeGlobs } from './lib/plan-scope.mjs'
+import { portState, killTree, waitForPort, waitForPortFree, tail, readSlotPids, writeSlotPids, stopSlotServers } from './lib/slot-procs.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
 const GIT_BASH = 'C:/Program Files/Git/bin/bash.exe'
+const isWin = process.platform === 'win32'
+// Optional npm script run before the servers start (e.g. code generation the backend imports). Empty = skip.
+const SLOT_PREPARE = 'build:schemas'
+// [backup script, restore script] for the isolated-DB seed. Empty = skip.
+const DB_SCRIPTS = ['server/scripts/db-backup.js', 'server/scripts/db-restore.js'].filter(Boolean)
+const START_TIMEOUT_MS = { be: 90000, fe: 180000 }
 
 function fail(message) {
   console.error(`TAKE_PLAN: ${message}`)
@@ -46,8 +62,12 @@ function isAncestorOfMain(ref) {
   }
 }
 
+// Server logs under .claude/ are runtime noise, never work - they must not make the slot look dirty.
 function isDirty() {
-  return tryGit(['status', '--porcelain']).trim().length > 0
+  return tryGit(['status', '--porcelain'])
+    .split(/\r?\n/)
+    .filter((l) => l.trim() && !/^\?\? \.claude\/[^/]+\.log$/.test(l.trim()))
+    .length > 0
 }
 
 function npmInstallIfChanged(dir, hashFileName) {
@@ -58,46 +78,17 @@ function npmInstallIfChanged(dir, hashFileName) {
   const oldHash = existsSync(hashPath) ? readFileSync(hashPath, 'utf8').trim() : null
   if (newHash === oldHash) return false
 
-  execFileSync(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['install'], { cwd: dir, stdio: 'ignore', shell: process.platform === 'win32' })
+  execFileSync(isWin ? 'npm.cmd' : 'npm', ['install'], { cwd: dir, stdio: 'ignore', shell: isWin })
   mkdirSync(dirname(hashPath), { recursive: true })
   writeFileSync(hashPath, newHash)
   return true
 }
 
-function portOwnerPid(port) {
-  try {
-    const out = execFileSync('netstat', ['-ano'], { encoding: 'utf8' })
-    for (const line of out.split(/\r?\n/)) {
-      if (!/LISTENING/.test(line)) continue
-      const cols = line.trim().split(/\s+/)
-      const localPort = (cols[1] || '').split(':').pop()
-      if (localPort === String(port)) return cols[cols.length - 1]
-    }
-    return null
-  } catch {
-    return null
-  }
-}
-
-function readSlotPids() {
-  const p = join(repoRoot, '.claude', '.slot-pids')
-  if (!existsSync(p)) return []
-  try {
-    return JSON.parse(readFileSync(p, 'utf8')).pids || []
-  } catch {
-    return []
-  }
-}
-
-function writeSlotPids(pids) {
-  mkdirSync(join(repoRoot, '.claude'), { recursive: true })
-  writeFileSync(join(repoRoot, '.claude', '.slot-pids'), JSON.stringify({ pids }, null, 2))
-}
-
+// Any existing Status: line (even an empty one) becomes "Status: active"; otherwise one is added under the title.
 function updateStatusActive(planAbsPath) {
   const text = readFileSync(planAbsPath, 'utf8')
-  const updated = /^Status:\s*\S+\s*$/m.test(text)
-    ? text.replace(/^Status:\s*\S+\s*$/m, 'Status: active')
+  const updated = /^Status:.*$/m.test(text)
+    ? text.replace(/^Status:.*$/m, 'Status: active')
     : text.replace(/^(# .+\r?\n)/, '$1\nStatus: active\n')
   writeFileSync(planAbsPath, updated)
 }
@@ -112,14 +103,16 @@ function withDbName(uri, dbName) {
 }
 
 function seedIsolatedDbIfEmpty(dbName) {
+  if (DB_SCRIPTS.length < 2) return { seeded: false, error: 'commands.dbBackup is not configured; skipping DB seed' }
+  const [backupScript, restoreScript] = DB_SCRIPTS
   const backupDir = join(repoRoot, '..', 'foodvibe-db-backups', `wt-seed-${dbName}-${Date.now()}`)
   try {
-    execFileSync('node', ['server/scripts/db-backup.js', '--target=local', `--out=${backupDir}`], { cwd: repoRoot, stdio: 'pipe' })
+    execFileSync('node', [backupScript, '--target=local', `--out=${backupDir}`], { cwd: repoRoot, stdio: 'pipe' })
   } catch (e) {
     return { seeded: false, error: `backup failed: ${String(e.stderr || e.message)}` }
   }
   try {
-    execFileSync('node', ['server/scripts/db-restore.js', '--target=local', `--dir=${backupDir}`, `--db=${dbName}`], { cwd: repoRoot, stdio: 'pipe', encoding: 'utf8' })
+    execFileSync('node', [restoreScript, '--target=local', `--dir=${backupDir}`, `--db=${dbName}`], { cwd: repoRoot, stdio: 'pipe', encoding: 'utf8' })
     return { seeded: true }
   } catch (e) {
     const msg = String(e.stdout || e.stderr || e.message || '')
@@ -142,8 +135,13 @@ function claimLock(dir) {
   return false
 }
 
+// Project shape: dev-server steps run only for the parts this project has.
+const hasServer = existsSync(join(repoRoot, 'server', 'package.json'))
+const envLocalPath = join(repoRoot, 'src', 'environments', 'environment.local.ts')
+const hasFrontend = existsSync(envLocalPath) // the per-slot frontend config is what the dev server runs against
+
 function generateEnvironmentSlot(bePort) {
-  const localPath = join(repoRoot, 'src', 'environments', 'environment.local.ts')
+  const localPath = envLocalPath
   const text = readFileSync(localPath, 'utf8')
   const withApi = text
     .replace(/apiUrl:\s*'[^']*'/, `apiUrl: 'http://localhost:${bePort}'`)
@@ -151,29 +149,94 @@ function generateEnvironmentSlot(bePort) {
   writeFileSync(join(repoRoot, 'src', 'environments', 'environment.slot.ts'), withApi)
 }
 
-// --- (a) not a slot -> refuse -------------------------------------------------
-if (!isSlot()) fail('not a slot - run this only inside a wt-N worktree')
+// --- (a) not a slot -> refuse, and say where to go ----------------------------
+if (!isSlot()) {
+  const free = listSlots().filter((s) => !s.plan)
+  const where = free.length
+    ? ` Free slots: ${free.map((s) => `wt-${s.slot} (${s.path})`).join(', ')}. Open the session in one of those folders and run it there.`
+    : ' No free slot right now - ask the Human which slot to use.'
+  fail(`not a slot - this checkout is not a wt-N worktree.${where}`)
+}
 
-const nnn = process.argv[2]
-if (!nnn) fail('usage: node scripts/take-plan.mjs <NNN>')
+const arg = process.argv[2]
+if (!arg) fail('usage: node scripts/take-plan.mjs <NNN>')
+const nnn = /^\d+$/.test(arg) ? arg.padStart(3, '0') : arg // 1 -> 001, matching plans/NNN-*.plan.md
 
 const n = slotNumber()
 const { fe: fePort, be: bePort } = ports()
 
-// --- (b) safety: refuse dirty, release a merged feat/* branch ---------------
+// --- (b) fetch + locate and validate the plan on origin/main ----------------
+git(['fetch', 'origin', '--prune'])
+
+const remotePlanRe = new RegExp(`^plans/${nnn}-[^/]+\\.plan\\.md$`)
+const mainPlans = tryGit(['ls-tree', '-r', 'origin/main', '--name-only', '--', 'plans/']).split('\n')
+const match = mainPlans.find(p => remotePlanRe.test(p))
+
+if (!match) fail(`plans/${nnn}-*.plan.md not found on origin/main`)
+
+const slug = match.replace(/^plans\/\d+-/, '').replace(/\.plan\.md$/, '')
+const branchName = `feat/${nnn}-${slug}`
+
+// Same parser as scope-check.mjs: without a readable scope every scope check fails after the claim.
+const remotePlanText = tryGit(['show', `origin/main:${match}`])
+if (!extractScopeGlobs(remotePlanText)) {
+  fail(`${match} has no readable scope under "## Read-Write Scope" (need a \`\`\`scope block or a **Scope:** list of \`globs\`) - the Planner must fix the plan on main (see the save-plan skill). Nothing was claimed.`)
+}
+
+// --- (c) safety, all before anything changes: dirty tree, plan order, the plan's branch, then this slot's branch
 if (isDirty()) {
   fail('uncommitted or untracked changes present in this slot - refusing to touch it; commit, stash, or ask the Human')
 }
 
+const atomicStats = (text) => {
+  const sec = (text.match(/^## Atomic Sub-tasks[^\n]*\n([\s\S]*?)(?=^## |(?![\s\S]))/m) || [])[1] || ''
+  return { open: (sec.match(/^\s*- \[ \]/gm) || []).length, done: (sec.match(/^\s*- \[x\]/gim) || []).length }
+}
+
+// Plan order: "must run after plan N" / "until N is done" -> refuse while plan N still has open sub-tasks on main.
+const prereqs = new Set()
+for (const m of remotePlanText.matchAll(/\b(?:must\s+)?runs?\s+after\s+plans?\s+#?(\d{1,3})\b|\buntil\s+(?:plan\s+)?#?(\d{1,3})\s+(?:is\s+)?(?:done|merged|shipped|complete)/gi)) {
+  prereqs.add((m[1] || m[2]).padStart(3, '0'))
+}
+prereqs.delete(nnn)
+if (!process.argv.includes('--ignore-order')) {
+  for (const p of prereqs) {
+    const file = mainPlans.find((f) => f.startsWith(`plans/${p}-`) && f.endsWith('.plan.md'))
+    if (!file) continue // unknown plan number - nothing to judge
+    const st = atomicStats(tryGit(['show', `origin/main:${file}`]))
+    if (st.open > 0) {
+      fail(`plan ${nnn} must run after plan ${p}, which still has ${st.open} open sub-task(s) on main (${file}). Take another plan, or re-run with --ignore-order if the Human says so. Nothing was changed.`)
+    }
+  }
+}
+
 const currentBranch = tryGit(['branch', '--show-current'])
 const worktreePlanPath = join(repoRoot, '.worktree-plan')
+const resuming = currentBranch === branchName
 
-if (currentBranch && currentBranch.startsWith('feat/')) {
-  if (isAncestorOfMain(currentBranch)) {
+// The plan's own branch may already exist: taken by another slot, already merged, or left by an interrupted claim.
+const holder = listSlots().find((s) => s.branch === branchName && s.slot !== n)
+if (holder) fail(`plan ${nnn} is already taken by wt-${holder.slot} (branch ${branchName}) - pick another plan. Nothing was changed.`)
+const leftover = !resuming && Boolean(tryGit(['rev-parse', '--verify', '--quiet', `refs/heads/${branchName}`]))
+const leftoverMerged = leftover && isAncestorOfMain(branchName)
+if (leftoverMerged) {
+  const st = atomicStats(remotePlanText)
+  if (st.done > 0 && st.open === 0) fail(`plan ${nnn} is already done (all sub-tasks [x] on main, branch ${branchName} merged) - pick another plan. Nothing was changed.`)
+}
+
+if (resuming) {
+  console.log(`TAKE_PLAN: resuming ${branchName} (already claimed in this slot)`)
+} else if (currentBranch && currentBranch.startsWith('feat/')) {
+  const merged = isAncestorOfMain(currentBranch)
+  // A squash merge is never an ancestor; its deleted remote branch is the signal. Keep the local branch then.
+  const upstreamGone = !merged && tryGit(['for-each-ref', '--format=%(upstream:track)', `refs/heads/${currentBranch}`]) === '[gone]'
+  if (merged || upstreamGone) {
+    // The slot's own servers keep running: they reload as the branch's files change (restarted below only when deps changed).
     git(['switch', '--detach', 'origin/main'])
-    git(['branch', '-D', currentBranch])
+    if (merged) git(['branch', '-D', currentBranch])
     if (existsSync(worktreePlanPath)) unlinkSync(worktreePlanPath)
-    console.log(`TAKE_PLAN: released ${currentBranch} (merged) - slot wt-${n} now idle`)
+    // An ancestor of main is merged work or an unused branch (no commits of its own) - the script cannot tell which.
+    console.log(`TAKE_PLAN: released ${currentBranch} (${merged ? 'no commits outside main: merged or unused' : 'remote branch deleted, local branch kept'}) - slot wt-${n} now idle`)
   } else {
     const heldPlan = existsSync(worktreePlanPath)
       ? readFileSync(worktreePlanPath, 'utf8').replace(/\r?\n+$/, '').trim()
@@ -182,86 +245,115 @@ if (currentBranch && currentBranch.startsWith('feat/')) {
   }
 }
 
-// --- (c) fetch + locate the plan on origin/main ------------------------------
-git(['fetch', 'origin'])
-
-const remotePlanRe = new RegExp(`^plans/${nnn}-[^/]+\\.plan\\.md$`)
-const match = tryGit(['ls-tree', '-r', 'origin/main', '--name-only', '--', 'plans/'])
-  .split('\n')
-  .find(p => remotePlanRe.test(p))
-
-if (!match) fail(`plans/${nnn}-*.plan.md not found on origin/main`)
-
-const slug = match.replace(/^plans\/\d+-/, '').replace(/\.plan\.md$/, '')
-const branchName = `feat/${nnn}-${slug}`
-
-// --- (d) branch + .worktree-plan + Status: active ----------------------------
-git(['switch', '-c', branchName, 'origin/main'])
-writeFileSync(worktreePlanPath, `${match}\n`)
-
-const planAbs = join(repoRoot, match)
-updateStatusActive(planAbs)
-git(['add', match])
-// The plan may already be saved as `Status: active` - nothing to commit then.
-if (tryGit(['diff', '--cached', '--name-only'])) {
-  git(['commit', '-m', `chore(plan ${nnn}): mark active in wt-${n}`])
-}
-
-// --- (e) npm install only if the lockfile changed -----------------------------
-const rootInstalled = npmInstallIfChanged(repoRoot, '.last-npm-install-hash')
-const serverInstalled = npmInstallIfChanged(join(repoRoot, 'server'), '.last-npm-install-hash-server')
-
-// --- (f) environment.slot.ts --------------------------------------------------
-generateEnvironmentSlot(bePort)
-
-// --- (g) ports: keep this slot's own PIDs, refuse a foreign PID --------------
-const mySlotPids = readSlotPids()
-const newPids = []
-
-for (const [label, port, isBackend] of [['be', bePort, true], ['fe', fePort, false]]) {
-  const ownerPid = portOwnerPid(port)
-  if (ownerPid && mySlotPids.includes(Number(ownerPid))) {
-    newPids.push(Number(ownerPid))
+// --- (d) ports, before the claim: keep this slot's own servers, stop leftovers, refuse others
+const halves = [['be', bePort, hasServer], ['fe', fePort, hasFrontend]].filter(([, , present]) => present)
+const running = new Set()
+for (const [label, port] of halves) {
+  const st = portState(port, readSlotPids())
+  if (st.ours) {
+    running.add(label)
     continue
   }
-  if (ownerPid) fail(`port ${port} is held by PID ${ownerPid}, which this slot did not start - refusing`)
+  if (st.foreign) fail(`port ${port} is held by PID ${st.pid} (${st.cmd.slice(0, 80)}), which is not a dev server - refusing; free the port and re-run`)
+  if (st.stale) {
+    killTree(st.pid)
+    console.log(`TAKE_PLAN: stopped leftover dev server PID ${st.pid} on port ${port}`)
+  }
+  if (!waitForPortFree(port, 10000)) fail(`port ${port} is still busy after stopping its leftover server - run node scripts/slot-stop.mjs, then re-run`)
+}
 
-  const planText = readFileSync(planAbs, 'utf8')
+// --- (e) claim: branch + .worktree-plan + Status: active ----------------------
+const planAbs = join(repoRoot, match)
+if (!resuming) {
+  if (leftover && !leftoverMerged) {
+    git(['switch', branchName])
+    console.log(`TAKE_PLAN: reusing existing branch ${branchName} (it has commits not on main)`)
+  } else {
+    if (leftoverMerged) git(['branch', '-D', branchName]) // stale: nothing on it that main lacks
+    git(['switch', '-c', branchName, 'origin/main'])
+  }
+  updateStatusActive(planAbs)
+  git(['add', match])
+  // The Planner may have saved the plan as "Status: active" already - then there is nothing to commit.
+  if (tryGit(['diff', '--cached', '--name-only'])) git(['commit', '-m', `chore(plan ${nnn}): mark active in wt-${n}`])
+}
+writeFileSync(worktreePlanPath, `${match}\n`)
+
+// --- (f) npm install only if the lockfile changed -----------------------------
+const rootInstalled = npmInstallIfChanged(repoRoot, '.last-npm-install-hash')
+const serverInstalled = hasServer && npmInstallIfChanged(join(repoRoot, 'server'), '.last-npm-install-hash-server')
+
+// Kept servers run on the old dependencies after an install: restart them.
+if ((rootInstalled || serverInstalled) && running.size) {
+  for (const l of stopSlotServers()) console.log(`TAKE_PLAN: dependencies changed - ${l}`)
+  for (const [, port] of halves) waitForPortFree(port, 10000)
+  running.clear()
+}
+
+// --- (g) environment.slot.ts + optional prepare step --------------------------
+if (existsSync(envLocalPath)) generateEnvironmentSlot(bePort)
+
+const resumeHint = `The slot is claimed; fix the cause and re-run: node scripts/take-plan.mjs ${nnn}`
+if (SLOT_PREPARE) {
+  try {
+    execFileSync(isWin ? 'npm.cmd' : 'npm', ['run', SLOT_PREPARE], { cwd: repoRoot, stdio: 'pipe', shell: isWin, encoding: 'utf8' })
+    console.log(`TAKE_PLAN: prepare: npm run ${SLOT_PREPARE} ok`)
+  } catch (e) {
+    const out = `${e.stdout || ''}${e.stderr || ''}`.replace(/\r\n/g, '\n').trimEnd().split('\n').slice(-20).join('\n')
+    fail(`prepare step "npm run ${SLOT_PREPARE}" failed - servers not started.\n${out}\n${resumeHint}`)
+  }
+}
+
+// --- (h) start what is not running, then wait until each port listens --------
+const planText = readFileSync(planAbs, 'utf8')
+const pids = readSlotPids() // kept servers stay recorded
+const started = []
+mkdirSync(join(repoRoot, '.claude'), { recursive: true })
+
+for (const [label, port] of halves) {
+  if (running.has(label)) continue
   const logPath = join(repoRoot, '.claude', `${label}.log`)
-  mkdirSync(join(repoRoot, '.claude'), { recursive: true })
-  const logFd = openSync(logPath, 'a')
-
+  const logFd = openSync(logPath, 'w')
   let child
-  if (isBackend) {
-    let env = { ...process.env, PORT: String(bePort), ALLOWED_ORIGIN: `http://localhost:${fePort}` }
+  if (label === 'be') {
+    const env = { ...process.env, PORT: String(bePort), ALLOWED_ORIGIN: `http://localhost:${fePort}` }
     if (isIsolatedDb(planText) && process.env.MONGO_LOCAL_URI) {
       env.MONGO_LOCAL_URI = withDbName(process.env.MONGO_LOCAL_URI, `foodvibe_wt${n}`)
     }
-    child = spawn(process.platform === 'win32' ? 'npm.cmd' : 'npm', ['run', 'dev:local'], {
+    child = spawn(isWin ? 'npm.cmd' : 'npm', ['run', 'dev:local'], {
       cwd: join(repoRoot, 'server'),
-      shell: process.platform === 'win32',
+      shell: isWin,
       env,
       detached: true,
       stdio: ['ignore', logFd, logFd]
     })
   } else {
-    child = spawn(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['ng', 'serve', '-c', 'slot', '--port', String(fePort)], {
+    child = spawn(isWin ? 'npx.cmd' : 'npx', ['ng', 'serve', '-c', 'slot', '--port', String(fePort)], {
       cwd: repoRoot,
-      shell: process.platform === 'win32',
+      shell: isWin,
       detached: true,
       stdio: ['ignore', logFd, logFd]
     })
   }
   child.unref()
-  newPids.push(child.pid)
+  pids.push(child.pid)
+  started.push([label, port, logPath])
 }
+writeSlotPids(pids)
 
-writeSlotPids(newPids)
+for (const [label, port, logPath] of started) {
+  const owner = waitForPort(port, START_TIMEOUT_MS[label])
+  if (!owner) {
+    fail(`${label} server is not listening on port ${port} after ${START_TIMEOUT_MS[label] / 1000}s. Last lines of ${logPath}:\n${tail(logPath) || '(log is empty)'}\n${resumeHint}`)
+  }
+  pids.push(owner) // the real port owner, so a later run recognises it even if the launcher shell is gone
+}
+writeSlotPids(pids)
+if (started.length) console.log(`TAKE_PLAN: servers listening: ${started.map(([l, p]) => `${l}=${p}`).join(' ')}`)
 
-// --- (h) isolated DB seed (advisory, best-effort) -----------------------------
-const planTextForDb = readFileSync(planAbs, 'utf8')
+// --- (i) isolated DB seed (advisory, best-effort) -----------------------------
 let dbLabel = 'shared'
-if (isIsolatedDb(planTextForDb)) {
+if (isIsolatedDb(planText)) {
   dbLabel = `foodvibe_wt${n}`
   const result = seedIsolatedDbIfEmpty(dbLabel)
   if (result.seeded) console.log('TAKE_PLAN: db: seeded')
@@ -269,10 +361,10 @@ if (isIsolatedDb(planTextForDb)) {
   else console.log(`TAKE_PLAN: db: seed skipped (${result.error})`)
 }
 
-// --- (i) claim liveness lock --------------------------------------------------
+// --- (j) claim liveness lock --------------------------------------------------
 claimLock(repoRoot)
 
-// --- (j) final report ----------------------------------------------------------
+// --- (k) final report ----------------------------------------------------------
 console.log(`OK plan=${nnn} branch=${branchName} fe=${fePort} be=${bePort} db=${dbLabel}`)
 try {
   execFileSync('node', ['scripts/scope-check.mjs', '--drift', `--plan=${match}`], { cwd: repoRoot, stdio: 'inherit' })

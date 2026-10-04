@@ -1,4 +1,4 @@
-﻿---
+---
 name: save-plan
 description: >
   Persist a Plan Contract to plans/ with name-similarity validation, ledger sync,
@@ -34,7 +34,7 @@ Run this skill **before executing milestones** when any of these is true:
 - Every sub-task: `[ ] Brief description of target file(s)`
 - Medium/Large plan touching auth/storage → note security surface
 - Not on a worktree + plan involves code changes → suggest `feat/` branch checkout
-- Every Done-when / Success Criteria item starts with `[auto]` or `[human]`. `[auto]` = the expected output is exact: an exact string, an exit code, a byte-identical diff, `ng build` or a test suite passing, or deterministic CLI output. `[human]` = visual/UI judgement, live interaction, subjective or design quality, product decisions. Untagged counts as `[human]`. A UI-touching plan whose only Done-when is `[auto]` `ng build` passes is under-specified — the planner must add a `[human]` item. Only the plan author tags; agents never promote an item to `[auto]`.
+- Every Done-when / Success Criteria item starts with `[auto]` or `[human]`. `[auto]` = the expected output is exact: an exact string, an exit code, a byte-identical diff, `npm run build` or a test suite passing, or deterministic CLI output. `[human]` = visual/UI judgement, live interaction, subjective or design quality, product decisions. Untagged counts as `[human]`. A UI-touching plan whose only Done-when is `[auto]` `npm run build` passes is under-specified — the planner must add a `[human]` item. Only the plan author tags; agents never promote an item to `[auto]`.
 
 ---
 
@@ -106,6 +106,11 @@ Do not Read .claude/todo.md in full.
 **PRD Alignment:** Atomic sub-tasks cover the plan requirements — no requirement without a task.
 
 **Risk Audit:** Medium/Large + auth/storage → note security surface; rely on pre-commit security grep + CI.
+
+**Shape lint (mandatory before saving):** a Worker's `take-plan.mjs` refuses a plan without these, so check them here where the fix is cheap:
+
+- `## Read-Write Scope` holds the globs in one of the two shapes `scripts/lib/plan-scope.mjs` parses: a fenced block opened with ```` ```scope ```` (one glob per line), or a `**Scope:**` line followed by bullets that each start with a `` `backticked` `` glob. A bare `scope` line, or bullets without backticks, are not parsed.
+- Exactly one `Status:` line, with a value (`Status: draft` for a new plan; take-plan sets `active`).
 
 **Prerequisites Gate (Planner only):** If the draft has a `## Prerequisites` section, check it's already true against `origin/main` *before* saving — do not hand a Worker a plan that will STOP on take. If unmet:
 
