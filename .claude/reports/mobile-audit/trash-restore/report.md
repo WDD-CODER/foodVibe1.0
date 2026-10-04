@@ -18,7 +18,7 @@
 
 ### MAJOR-1 — All row action buttons below 44px touch target height
 **Severity:** Major  
-**Element:** `.btn-item` buttons — "משחזר", "ממחק לצמיתות", "היסטוריה"  
+**Element:** `.btn-item` buttons — "שחזר", "ממחק לצמיתות", "היסטוריה"  
 **Measured:** height = 30px on all three buttons (restore: 74×30, delete: 115×30, history: 67×30)  
 **Required:** ≥44px per WCAG 2.5.5 / Apple HIG  
 **Impact:** High miss-tap rate on a destructive-action screen. "ממחק לצמיתות" (permanent delete) is 30px tall — user can accidentally miss-tap.
@@ -49,10 +49,10 @@
 
 ---
 
-### MINOR-3 — Confirmation modal CTA says "משחזר הכל" for single-item restore
+### MINOR-3 — Confirmation modal CTA says "שחזר הכל" for single-item restore
 **Severity:** Minor  
 **Element:** `.c-modal-card` confirm button  
-**Context:** Per-item restore triggers modal with title "לשחזר פריט זה?" (singular) but confirm CTA reads "משחזר הכל" (Restore All) — contradicts the singular framing.
+**Context:** Per-item restore triggers modal with title "לשחזר פריט זה?" (singular) but confirm CTA reads "שחזר הכל" (Restore All) — contradicts the singular framing.
 
 ---
 
