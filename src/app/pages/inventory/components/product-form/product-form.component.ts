@@ -57,6 +57,8 @@ import { ProductAiFlowService } from 'src/app/pages/inventory/services/product-a
 import type { AiProductDraft } from '@models/ai-product-draft.model'
 import { UserService } from '@services/user.service'
 import { MasterPushService } from '@services/master-push.service'
+import { HeroFabService } from '@services/hero-fab.service'
+import { registerDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
 
 interface ProductFormValue {
   buy_price_global_?: number
@@ -111,6 +113,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   private readonly productAiFlow_ = inject(ProductAiFlowService)
   private readonly userService_ = inject(UserService)
   private readonly masterPush_ = inject(MasterPushService)
+  private readonly heroFab_ = inject(HeroFabService)
 
   unitRegistry = inject(UnitRegistryService)
   private readonly isAdmin_ = computed(() => this.userService_.user_()?.role === 'admin')
@@ -307,6 +310,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.unitRegistry.refreshFromStorage()
     this.initForm()
     this.productAiFlow_.init(this.productForm_)
+    this.heroFab_.setPageActions(
+      [{ labelKey: 'ai_product_title_edit', icon: 'sparkles', run: () => this.openAiProductModal() }],
+      'replace'
+    )
+    this.destroyRef.onDestroy(() => this.heroFab_.clearPageActions())
 
     runInInjectionContext(this.injector, () => {
       this.formValue_ = toSignal(this.productForm_.valueChanges, {
@@ -874,7 +882,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
     const val = this.productForm_.getRawValue()
     const categories = (val.categories ?? []) as string[]
-    categories.forEach((cat) => this.metadataRegistry.registerCategory(cat))
 
     const purchaseOptions = (val.purchaseOptions ?? []).map(
       (opt: PurchaseOption_ & { show_special_price_?: boolean }) => {
@@ -934,6 +941,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           this.validationErrors_.set({})
           this.isSubmitted = true
           if (pushToMasterAfterSave) this.masterPush_.pushProductToMaster(saved)
+          // Categories/allergens enter Metadata only once the product is actually saved.
+          void registerDraftMetadata({ categories, allergens: val.allergens ?? [] }, this.metadataRegistry)
           resolve(true)
         },
         error: () => {

@@ -8,6 +8,8 @@ import { AiProductModalService } from './ai-product-modal.service'
 import { GeminiService } from '@services/gemini.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { MetadataRegistryService } from '@services/metadata-registry.service'
+import { resolveDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
 import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 
@@ -39,6 +41,7 @@ export class AiProductModalComponent implements OnInit {
   private readonly gemini_ = inject(GeminiService)
   private readonly userMsg_ = inject(UserMsgService)
   private readonly translation_ = inject(TranslationService)
+  private readonly metadataRegistry_ = inject(MetadataRegistryService)
 
   protected readonly CANONICAL_UNITS = CANONICAL_UNITS
   protected readonly newCategory_ = signal('')
@@ -79,14 +82,14 @@ export class AiProductModalComponent implements OnInit {
     if ('categories' in patch)
       entries.push({
         label: 'קטגוריות',
-        from: current.categories.join(', ') || '—',
-        to: (patch.categories ?? []).join(', ') || '—'
+        from: this.labels_(current.categories),
+        to: this.labels_(patch.categories)
       })
     if ('allergens' in patch)
       entries.push({
         label: 'אלרגנים',
-        from: current.allergens.join(', ') || '—',
-        to: (patch.allergens ?? []).join(', ') || '—'
+        from: this.labels_(current.allergens),
+        to: this.labels_(patch.allergens)
       })
     if ('minStockLevel' in patch)
       entries.push({
@@ -118,22 +121,26 @@ export class AiProductModalComponent implements OnInit {
     this.draft_.update((d) => (d ? { ...d, [key]: value } : d))
   }
 
-  protected addCategory(): void {
-    const cat = this.newCategory_().trim()
+  protected async addCategory(): Promise<void> {
+    const raw = this.newCategory_().trim()
+    if (!raw) return
+    this.newCategory_.set('')
+    const [cat] = (await resolveDraftMetadata({ categories: [raw] }, this.metadataRegistry_)).categories
     if (!cat) return
     this.draft_.update((d) => (d && !d.categories.includes(cat) ? { ...d, categories: [...d.categories, cat] } : d))
-    this.newCategory_.set('')
   }
 
   protected removeCategory(cat: string): void {
     this.draft_.update((d) => (d ? { ...d, categories: d.categories.filter((c) => c !== cat) } : d))
   }
 
-  protected addAllergen(): void {
-    const al = this.newAllergen_().trim()
+  protected async addAllergen(): Promise<void> {
+    const raw = this.newAllergen_().trim()
+    if (!raw) return
+    this.newAllergen_.set('')
+    const [al] = (await resolveDraftMetadata({ allergens: [raw] }, this.metadataRegistry_)).allergens
     if (!al) return
     this.draft_.update((d) => (d && !d.allergens.includes(al) ? { ...d, allergens: [...d.allergens, al] } : d))
-    this.newAllergen_.set('')
   }
 
   protected removeAllergen(al: string): void {
@@ -219,6 +226,10 @@ export class AiProductModalComponent implements OnInit {
   onClose(): void {
     this.modalService.close()
     this.resetLocalState_()
+  }
+
+  private labels_(values: string[] | undefined): string {
+    return (values ?? []).map((v) => this.translation_.translate(v)).join(', ') || '—'
   }
 
   private resolveErrorKey_(err: unknown): string {

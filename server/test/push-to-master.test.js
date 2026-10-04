@@ -86,6 +86,24 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
     expect(master.ingredients[0].referenceId).toBe('mp1');
   });
 
+  it('pushing a product never adds an ingredients field to the master copy (update path)', async () => {
+    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'old' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true, nameHebrew: 'new' });
+    await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
+    const master = await testDb().collection('products').findOne({ _id: 'm1', userId: '__master__' });
+    expect(master.nameHebrew).toBe('new');
+    expect(master).not.toHaveProperty('ingredients');
+  });
+
+  it('pushing a self-linked product never adds an ingredients field to the new master copy (first-push path)', async () => {
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'u1', nameHebrew: 'חדש' });
+    await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
+    const mine = await testDb().collection('products').findOne({ _id: 'u1' });
+    const master = await testDb().collection('products').findOne({ _id: mine._masterId, userId: '__master__' });
+    expect(master).toBeTruthy();
+    expect(master).not.toHaveProperty('ingredients');
+  });
+
   it('CHARACTERIZATION: pushing an unsupported type is rejected with 400', async () => {
     const res = await request(app)
       .put('/api/v1/data/KITCHEN_UNITS/u1/push-to-master')

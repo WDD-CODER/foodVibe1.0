@@ -61,6 +61,7 @@ import { buildFilterOptionCounts, attachFilterCheckedState } from '@utils/filter
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 import { ProductDataService } from '@services/product-data.service'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
+import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
@@ -200,11 +201,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   private openAiCreateModal(): void {
     this.aiProductModal_.open('create', undefined, async (draft) => {
+      const { categories, allergens } = await resolveDraftMetadata(draft, this.metadataRegistry)
       const payload = {
         nameHebrew: draft.nameHebrew,
         baseUnit: draft.baseUnit,
-        categories: draft.categories,
-        allergens: draft.allergens,
+        categories,
+        allergens,
         yieldFactor: draft.yieldFactor,
         minStockLevel: draft.minStockLevel,
         expiryDaysDefault: draft.expiryDaysDefault,
@@ -213,6 +215,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         sources: []
       }
       const created = await this.productData_.addProduct(payload)
+      // Confirming the AI create IS the save — only now do the values enter Metadata.
+      await registerDraftMetadata({ categories, allergens }, this.metadataRegistry)
       void this.router.navigate(['/inventory/edit', created._id])
     })
   }

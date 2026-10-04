@@ -538,7 +538,10 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   if (!existing) return null;
   if (typeof existing._masterId !== 'string') return null;
 
-  const sourceIngredients = Array.isArray(existing.ingredients) ? existing.ingredients : [];
+  // Only recipes/dishes have ingredients. Writing the field onto a product/supplier/equipment
+  // master copy made the strict v2 schema reject every later PUT on it and on all its clones.
+  const hasIngredients = type === 'recipes' || type === 'dishes';
+  const sourceIngredients = hasIngredients && Array.isArray(existing.ingredients) ? existing.ingredients : [];
   const ingredients = await Promise.all(
     sourceIngredients.map(async (ing) => {
       if (typeof ing.referenceId !== 'string' || !ing.referenceId) return ing;
@@ -563,6 +566,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   );
 
   const { userId: _u, _masterId: _m, _userModified: _um, _id: _i, ...safeBody } = existing;
+  const ingredientsField = hasIngredients ? { ingredients } : {};
   // 2026-09-30 fix (take 2): every new doc self-links (_masterId = its own _id, see POST
   // above). A naive upsert with that same _id fails — `_id` is uniquely indexed across the
   // WHOLE collection regardless of userId, and that exact _id is already taken by the
@@ -577,7 +581,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
     resolvedMasterId = makeId();
     await col(type).insertOne({
       ...safeBody,
-      ingredients,
+      ...ingredientsField,
       _id: resolvedMasterId,
       userId: '__master__',
       _masterId: resolvedMasterId,
@@ -586,7 +590,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   } else {
     const result = await col(type).updateOne(
       { _id: resolvedMasterId, userId: '__master__' },
-      { $set: { ...safeBody, ingredients } }
+      { $set: { ...safeBody, ...ingredientsField } }
     );
     if (result.matchedCount === 0) return null;
   }

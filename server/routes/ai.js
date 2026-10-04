@@ -1006,7 +1006,7 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // POST /generate-product
-// Accepts { rawText: string }.
+// Accepts { rawText: string, knownCategories?: string[], knownAllergens?: string[] }.
 // Gemini reads the raw text and returns a structured AiProductDraft JSON.
 // Response: { product: AiProductDraft }
 // Requires a valid JWT.
@@ -1052,6 +1052,35 @@ function validateProductDraft(product) {
   return errors;
 }
 
+// Plan 335 — the client sends the user's registered categories/allergens (as Hebrew
+// labels) so the model reuses them instead of inventing look-alikes. Optional; malformed input is ignored.
+const KNOWN_METADATA_CAP = 200;
+const KNOWN_METADATA_MAX_LEN = 80;
+
+function sanitizeKnownKeys(value) {
+  if (!Array.isArray(value)) return [];
+  const keys = [];
+  for (const item of value) {
+    if (typeof item !== 'string') continue;
+    const trimmed = item.trim().slice(0, KNOWN_METADATA_MAX_LEN);
+    if (trimmed && !keys.includes(trimmed)) keys.push(trimmed);
+    if (keys.length >= KNOWN_METADATA_CAP) break;
+  }
+  return keys;
+}
+
+function appendKnownMetadata(systemPrompt, { knownCategories, knownAllergens } = {}) {
+  const categories = sanitizeKnownKeys(knownCategories);
+  const allergens = sanitizeKnownKeys(knownAllergens);
+  if (categories.length === 0 && allergens.length === 0) return systemPrompt;
+
+  const lines = ['', '## Existing categories and allergens in this kitchen'];
+  if (categories.length > 0) lines.push(`- categories: ${JSON.stringify(categories)}`);
+  if (allergens.length > 0) lines.push(`- allergens: ${JSON.stringify(allergens)}`);
+  lines.push('For "categories" and "allergens", prefer one of these existing names, written exactly as listed; only invent a new value if nothing fits. Every value you return must be in Hebrew — never an English word or key.');
+  return `${systemPrompt}\n${lines.join('\n')}`;
+}
+
 router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -1075,7 +1104,7 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: PRODUCT_GENERATE_SYSTEM_PROMPT }] },
+        system_instruction: { parts: [{ text: appendKnownMetadata(PRODUCT_GENERATE_SYSTEM_PROMPT, req.body) }] },
         contents: [{ role: 'user', parts: [{ text: rawText }] }],
         generationConfig: { temperature: 0.5, maxOutputTokens: 1024 },
       }),
@@ -1119,7 +1148,8 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // POST /patch-product
-// Accepts { currentProduct: AiProductDraft, instruction: string }.
+// Accepts { currentProduct: AiProductDraft, instruction: string,
+//           knownCategories?: string[], knownAllergens?: string[] }.
 // Gemini reads the current product + user instruction and returns ONLY the
 // fields that should change as a sparse patch object.
 // Response: { changes: { ...only changed fields... } }
@@ -1186,7 +1216,7 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: PRODUCT_PATCH_SYSTEM_PROMPT }] },
+        system_instruction: { parts: [{ text: appendKnownMetadata(PRODUCT_PATCH_SYSTEM_PROMPT, req.body) }] },
         contents: [{ role: 'user', parts: [{ text: userMessage }] }],
         generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
       }),
@@ -1455,3 +1485,4 @@ router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.appendKnownMetadata = appendKnownMetadata;

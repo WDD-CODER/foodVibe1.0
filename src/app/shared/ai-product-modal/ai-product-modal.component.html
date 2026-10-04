@@ -211,7 +211,7 @@
               <div class="editor-chips-row">
                 @for (cat of draft_()!.categories; track cat) {
                   <span class="ai-product-chip">
-                    {{ cat }}
+                    {{ cat | translatePipe }}
                     <button type="button" class="chip-remove" (click)="removeCategory(cat)">×</button>
                   </span>
                 }
@@ -237,7 +237,7 @@
               <div class="editor-chips-row">
                 @for (al of draft_()!.allergens; track al) {
                   <span class="ai-product-chip ai-product-chip--allergen">
-                    {{ al }}
+                    {{ al | translatePipe }}
                     <button type="button" class="chip-remove" (click)="removeAllergen(al)">×</button>
                   </span>
                 }
