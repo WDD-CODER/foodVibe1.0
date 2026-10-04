@@ -1,5 +1,7 @@
 # Plan 332 — Recipe edit blocked by "name already in use": diagnose and fix
 
+Status: active
+
 Status:
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
