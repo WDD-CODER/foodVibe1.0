@@ -9,6 +9,8 @@ Lessons verdicts: `lessons-triage.md`. Config keys: `parameters.md`.
 
 **Phase 3 (plan 331):** the same extractor lands `pack:angular` (22) in `packs/angular/`, `pack:node-express` (1) in `packs/node-express/`, and `layer:cursor` (28) in `layers/cursor/`; each pack has a `pack.json` contract checked by `tools/pack-check.mjs`. `scripts/kit-lessons-extract.mjs` lands the 71 transfer/generalize lessons under `core/docs/brain/**` and `packs/<x>/docs/brain/**`. Config now has 41 keys (`stack.standardsDoc` added).
 
+**Phase 4 (plan 334):** the 17 `template` rows are hand-written skeletons in the kit's `templates/` (`_shared/*` -> `templates/docs/project/*`, the two `.cursor/rules/*` -> `templates/cursor/`); the extractor only checks they exist (`17/17 template skeletons present`). The installer and sync live in the kit (`tools/install.mjs`, `tools/sync.mjs`, wrapped by `kit-install.ps1` / `kit-sync.ps1`); they are kit-owned and have no FoodVibe counterpart. `.claude/settings.json` ships without absolute-path allow lines, so config keys `hooks.projectRoot` and `hooks.userHome` are gone (39 keys). Pack contracts gained optional `configDefaults` and `agentsFragment`. Kit-side hand-fixes after phase 3 (never regenerate with `--force`; the extractor now skips every `HAND_FIXED` path under `--force`): `scope-check.mjs`, `.lintstagedrc.mjs`, `pre-commit-no-semi.mjs`, `knip.json` (list-valued `|quoted` placeholders), `auto-solve.md` (Playwright MCP fallbacks removed).
+
 **198 files classified** (196 from plan 328 + `scripts/kit-extract.mjs` and `scripts/kit-lessons-extract.mjs`, both `project`/`stay`) across the inventory roots; 11 excluded path patterns (project history/data).
 
 | tier \ action | copy | parameterize | split | skeleton | stay | total |

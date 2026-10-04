@@ -140,8 +140,19 @@ for (const [path, g] of gotchaFiles) {
   out.set(path, header + g.entries.map((e) => e.body).join('\n\n---\n\n') + '\n')
 }
 
+// Phase 4 validation: these lesson files were scrubbed or pruned in the kit directly (project history, vendor names,
+// a real hostname); the kit owns them now, so neither --check nor a re-run touches them.
+const KIT_OWNED = new Set([
+  'core/docs/brain/decisions/0004-full-draft-brain-proposals.md',
+  'core/docs/brain/gotchas/agent-workflow.md', 'core/docs/brain/gotchas/backend.md', 'core/docs/brain/gotchas/git-workflow.md',
+  'packs/angular/docs/brain/gotchas/angular.md', 'packs/angular/docs/brain/patterns/defer-singleton-data-ensureLoaded.md',
+  'packs/node-express/docs/brain/gotchas/backend.md', 'packs/node-express/docs/brain/patterns/gemini-backend-proxy.md',
+  'packs/node-express/docs/brain/patterns/tombstone-soft-delete.md',
+])
+
 let landed = 0
 for (const [path, content] of out) {
+  if (KIT_OWNED.has(path)) continue
   const dest = join(kitRoot, path)
   const text = localize(fixEncoding(content), destKeyOf(path))
   if (!checkOnly) {
@@ -158,6 +169,7 @@ let shipped = 0
 let found = 0
 for (const r of rows) {
   if (r.verdict === 'stay' || !DEST[r.dest]) continue
+  if (KIT_OWNED.has(`${DEST[r.dest]}/${r.source}`.replace(/\\/g, '/'))) continue
   shipped++
   const dest = join(kitRoot, DEST[r.dest], r.source)
   if (!existsSync(dest)) continue
