@@ -202,7 +202,10 @@ writeFileSync(worktreePlanPath, `${match}\n`)
 const planAbs = join(repoRoot, match)
 updateStatusActive(planAbs)
 git(['add', match])
-git(['commit', '-m', `chore(plan ${nnn}): mark active in wt-${n}`])
+// The plan may already be saved as `Status: active` - nothing to commit then.
+if (tryGit(['diff', '--cached', '--name-only'])) {
+  git(['commit', '-m', `chore(plan ${nnn}): mark active in wt-${n}`])
+}
 
 // --- (e) npm install only if the lockfile changed -----------------------------
 const rootInstalled = npmInstallIfChanged(repoRoot, '.last-npm-install-hash')
