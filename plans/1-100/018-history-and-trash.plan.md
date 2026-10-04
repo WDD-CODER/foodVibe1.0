@@ -61,8 +61,8 @@ isProject: false
     1. **Dishes** (מנות)
     2. **Recipes** (מתכונים)
     3. **Products** (חומרי גלם) — last, as requested.
-  - Each container shows list of trashed items (name, optional deletedAt). Actions per item: **Recover** (משחזר), **Dispose** (ממחק לצמיתות).
-  - Per container: **Recover all** (משחזר הכל), **Dispose all** (ממחק את כל התוכן לצמיתות). Confirm before dispose-all.
+  - Each container shows list of trashed items (name, optional deletedAt). Actions per item: **Recover** (שחזר), **Dispose** (ממחק לצמיתות).
+  - Per container: **Recover all** (שחזר הכל), **Dispose all** (ממחק את כל התוכן לצמיתות). Confirm before dispose-all.
   - Navigation: link to Trash from main nav or settings/dashboard so users can open it when they need to undo a delete.
 - **Confirmation modals**
   - **Dispose (permanent remove)**: Show a confirmation modal asking if the user is sure they want to remove for good. Use more alerting styling (e.g. red accent / danger theme) so it stands out.

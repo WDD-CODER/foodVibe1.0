@@ -227,7 +227,7 @@ Prior note (2026-07-09): report-only refresh — see [`2026-07-status.md`](./202
 
 | Flow | Severity | Element | Summary | Screenshot |
 |---|---|---|---|---|
-| trash-restore | major | `.btn-item` ("משחזר", "ממחק לצמיתות", "היסטוריה") | All row action buttons 30px tall — below 44px minimum; "permanent delete" only 30px | — |
+| trash-restore | major | `.btn-item` ("שחזר", "ממחק לצמיתות", "היסטוריה") | All row action buttons 30px tall — below 44px minimum; "permanent delete" only 30px | — |
 | trash-restore | major | `.btn-action.btn-restore`, `.btn-action.btn-dispose` | Section-level action buttons also 30px — same root cause | — |
 | recipe-book-list | major | row action buttons (הוסף למועדפים / בישול / מחיקה) | 24×44px — width only 24px; 3 buttons in 80px strip (need 132px for 44px each) | [→](./recipe-book-list/shots/06-row-actions.png) |
 | recipe-book-list | minor | `.c-input-wrapper` (search field) | Search wrapper 39px tall — 5px below 44px minimum | [→](./recipe-book-list/shots/03-search-focused.png) |
@@ -286,7 +286,7 @@ Prior note (2026-07-09): report-only refresh — see [`2026-07-status.md`](./202
 | metadata-manager-all-tabs | minor | 6321px page | No jump navigation / anchor links — users cannot reach a specific section | — |
 | metadata-manager-all-tabs | minor | section headings | Each section heading rendered twice in DOM — screen readers double-announce | — |
 | trash-restore | minor | success toast | Toast overlaps "אשפה" heading on restore confirm — heading illegible for toast duration | [→](./trash-restore/shots/04-after-confirm.png) |
-| trash-restore | minor | confirm modal CTA | "משחזר הכל" (Restore All) shown for single-item restore — contradicts singular framing | — |
+| trash-restore | minor | confirm modal CTA | "שחזר הכל" (Restore All) shown for single-item restore — contradicts singular framing | — |
 | suppliers-add | minor | supplier form | No phone/email/address fields — if intentionally deferred, note for completeness | — |
 | signup | minor | dashboard stat cards | Card label wraps cause inconsistent metric-number vertical offset within grid rows | [→](./signup/shots/06-post-submit.png) |
 
