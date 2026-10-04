@@ -41,7 +41,6 @@ describe('RecipeBookListComponent', () => {
     sessionStorage.removeItem('list-state:recipe-book')
     const mockKitchenState = {
       recipes_: mockRecipesSignal,
-      visibleRecipes_: mockRecipesSignal,
       products_: mockProductsSignal,
       recipesById_: computed(() => new Map(mockRecipesSignal().map((r) => [r._id, r]))),
       productsById_: computed(() => new Map(mockProductsSignal().map((p) => [p._id, p]))),

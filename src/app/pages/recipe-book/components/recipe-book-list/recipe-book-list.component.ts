@@ -301,7 +301,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   // Catalog-only pass — recomputes when the recipe list changes, NOT on every
   // filter-checkbox toggle (see filter-category-counts.util.ts).
   private filterOptionCounts_ = computed(() => {
-    const recipes = this.kitchenState.visibleRecipes_()
+    const recipes = this.kitchenState.recipes_()
     const counts = buildFilterOptionCounts(recipes, (recipe, bump) => {
       bump('Type', this.isRecipeDish(recipe) ? 'dish' : 'preparation')
 
@@ -375,7 +375,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   })
 
   protected filteredRecipes_ = computed(() => {
-    let recipes = this.kitchenState.visibleRecipes_()
+    let recipes = this.kitchenState.recipes_()
     const filters = this.activeFilters_()
     const search = this.searchQuery_().trim().toLowerCase()
     const sortBy = this.sortBy_()
@@ -503,7 +503,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.currentPage_.update((p) => Math.min(this.totalPages_(), p + 1))
   }
 
-  protected isEmptyList_ = computed(() => this.kitchenState.visibleRecipes_().length === 0)
+  protected isEmptyList_ = computed(() => this.kitchenState.recipes_().length === 0)
 
   protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
     const uid = this.currentUserId_()
@@ -823,18 +823,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.deletingId_.set(null)
-      }
-    })
-  }
-
-  private onHideRecipe(recipe: Recipe): void {
-    this.removingId_.set(recipe._id)
-    this.kitchenState.hideRecipe(recipe).subscribe({
-      next: () => {
-        this.removingId_.set(null)
-      },
-      error: () => {
-        this.removingId_.set(null)
       }
     })
   }
