@@ -78,6 +78,7 @@ Verify: `node scripts/kit-manifest-check.mjs --lessons`.
 | docs/brain/gotchas/git-workflow.md | A stale dev server on a different port can present as a design-port regression | generalize | core | A stale dev server left running on another port can masquerade as a regression; check which process owns the port before debugging the code. |
 | docs/brain/gotchas/git-workflow.md | `todo.md`'s "not merged, no PR opened yet" can be stale — verify with `merge-base`, don't just open the PR | transfer | core |  |
 | docs/brain/gotchas/git-workflow.md | A shared-directory branch switch silently carries YOUR uncommitted edits onto someone else's branch — then your next commit lands there | transfer | core |  |
+| docs/brain/gotchas/git-workflow.md | Squash-merge breaks `git merge-base --is-ancestor` "is this branch already merged" checks | transfer | core |  |
 | docs/brain/decisions/0001-lean-native-workflow.md | 0001 — Lean native workflow over heavier orchestration | generalize | core | Prefer native Claude Code/Cursor mechanisms and plain files over bespoke tooling. |
 | docs/brain/decisions/0002-file-based-memory-over-tool-memory.md | 0002 — File-based project memory over a memory tool/service | transfer | core |  |
 | docs/brain/decisions/0003-auto-evoke-brain-on-pr.md | 0003 — Auto-evoke brain capture on push / PR / Merge Gate | transfer | core |  |
