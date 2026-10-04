@@ -365,6 +365,14 @@
 - [ ] A5: GeminiService: send knownCategories and knownAllergens in the product generate and patch bodies. ai.js: read them (optional arrays, cap 200 each) and append them to the prompt. (`src/app/core/services/gemini.service.ts`, `server/routes/ai.js`)
 - [ ] A6: Server test for the prompt append (or a manual curl if there's no harness for ai.js). Build and run specs. Update the session-state file. (`server/test/**`)
 
+### Plan 336 — AI product from a photo (`plans/336-ai-product-from-photo.plan.md`) — must run after Plan 335
+- [ ] A1: Write the `downscaleImage` util and its spec (dimensions capped, small file passthrough). — `src/app/core/utils/downscale-image.util.ts`, `downscale-image.util.spec.ts`
+- [ ] A2: Add the server endpoint plus a test (missing image → 400; bad mime → 400). — `server/routes/ai.js`, `server/test/**`
+- [ ] A3: Add `GeminiService.generateProductFromImage`, using the util. — `src/app/core/services/gemini.service.ts`, `gemini.service.spec.ts`
+- [ ] A4: Add the modal toggle, image picker, preview and generate wiring. On confirm, the result goes through the create path from plan 335 (registry resolver). — `src/app/shared/ai-product-modal/**`
+- [ ] A5: Recipe image path uses the util (P1). — `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts`
+- [ ] A6: Build and run specs. Update the session-state file.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
