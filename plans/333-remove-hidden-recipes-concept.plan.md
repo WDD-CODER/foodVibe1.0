@@ -34,7 +34,7 @@ docs/session-state-<branch>.md, .claude/sessions/**, .worktree-*, and the append
 hotspots (src/styles.scss, public/assets/data/dictionary.json, src/app/app.routes.ts
 — add to them, never rewrite or remove an existing entry without escalating).
 
-scope
+```scope
 src/app/core/services/kitchen-state.service.ts
 src/app/core/services/kitchen-state.service.spec.ts
 src/app/core/services/recipe-data.service.ts
@@ -43,6 +43,7 @@ src/app/core/services/dish-data.service.ts
 src/app/core/services/dish-data.service.spec.ts
 src/app/core/models/recipe.model.ts
 src/app/pages/recipe-book/components/recipe-book-list/**
+```
 
 ## Read Scope
 
@@ -66,13 +67,13 @@ As a chef, I want every recipe I own to show in my recipe book, with no invisibl
 
 ## Functional Requirements
 ### Must Have (P0)
-- [ ] Delete hideRecipe() (recipe-data.service.ts:174), hideDish() (dish-data.service.ts:159), KitchenStateService.hideRecipe() (kitchen-state.service.ts:290), and the uncalled onHideRecipe() (recipe-book-list.component.ts:830).
-- [ ] Remove the hiddenBy: existing?.hiddenBy ?? … carry-forward in updateRecipe (recipe-data.service.ts:157) and updateDish (dish-data.service.ts:147).
-- [ ] Remove visibleRecipes_ (kitchen-state.service.ts:40-44). Switch its 4 consumers in recipe-book-list.component.ts (L304, L378, L506) and .html:11 to recipes_(), and update the spec mock (recipe-book-list.component.spec.ts:44).
-- [ ] Mark hiddenBy in recipe.model.ts:70 as /** @deprecated legacy data only — never read or written */. Do not delete it: the strict schema and stored docs still carry it.
+- [x] Delete hideRecipe() (recipe-data.service.ts:174), hideDish() (dish-data.service.ts:159), KitchenStateService.hideRecipe() (kitchen-state.service.ts:290), and the uncalled onHideRecipe() (recipe-book-list.component.ts:830).
+- [x] Remove the hiddenBy: existing?.hiddenBy ?? … carry-forward in updateRecipe (recipe-data.service.ts:157) and updateDish (dish-data.service.ts:147).
+- [x] Remove visibleRecipes_ (kitchen-state.service.ts:40-44). Switch its 4 consumers in recipe-book-list.component.ts (L304, L378, L506) and .html:11 to recipes_(), and update the spec mock (recipe-book-list.component.spec.ts:44).
+- [x] Mark hiddenBy in recipe.model.ts:70 as /** @deprecated legacy data only — never read or written */. Do not delete it: the strict schema and stored docs still carry it.
 
 ### Should Have (P1)
-- [ ] When an update saves a doc that has hiddenBy, strip the field (const { hiddenBy: _h, ...rest } = recipe), so legacy values fade out naturally.
+- [x] When an update saves a doc that has hiddenBy, strip the field (const { hiddenBy: _h, ...rest } = recipe), so legacy values fade out naturally.
 
 ### Nice to Have (P2)
 - [ ] None.
@@ -82,11 +83,11 @@ No visible UI change, except that previously hidden records reappear in the reci
 No dictionary changes.
 
 ## Atomic Sub-tasks
-- [ ] A1: Remove the hide methods from the three services and the uncalled onHideRecipe.
-- [ ] A2: Replace visibleRecipes_ with recipes_ in recipe-book-list (ts, html, spec), then delete visibleRecipes_.
-- [ ] A3: Remove the hiddenBy carry-forward in both update methods; strip the field on save (P1).
-- [ ] A4: Mark the model field @deprecated. Run the grep in Success Criteria.
-- [ ] A5: Build and run the targeted specs. Update the session-state file.
+- [x] A1: Remove the hide methods from the three services and the uncalled onHideRecipe.
+- [x] A2: Replace visibleRecipes_ with recipes_ in recipe-book-list (ts, html, spec), then delete visibleRecipes_.
+- [x] A3: Remove the hiddenBy carry-forward in both update methods; strip the field on save (P1).
+- [x] A4: Mark the model field @deprecated. Run the grep in Success Criteria.
+- [x] A5: Build and run the targeted specs. Update the session-state file.
 
 ## Technical Considerations
 Dependencies: RecipeDataService, DishDataService, KitchenStateService, RecipeBookListComponent.

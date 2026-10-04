@@ -66,7 +66,7 @@ export interface Recipe {
   updatedAt?: number
   /** _id of the user who created this recipe/dish */
   createdBy?: string
-  /** List of user _ids who have hidden this recipe from their view (soft-delete per user) */
+  /** @deprecated legacy data only — never read or written */
   hiddenBy?: string[]
   /** List of user _ids who have favorited this recipe/dish */
   favoritedBy?: string[]

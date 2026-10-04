@@ -37,11 +37,6 @@ export class KitchenStateService {
   productsById_ = computed(() => new Map(this.products_().map((p) => [p._id, p])))
   /** O(1) id lookups for cost/allergen resolution (plan 303 M1) — rebuilt only when recipes_ changes. */
   recipesById_ = computed(() => new Map(this.recipes_().map((r) => [r._id, r])))
-  /** Recipes visible to the current user — hides entries where the user's id is in hiddenBy[]. */
-  visibleRecipes_ = computed(() => {
-    const userId = this.userService.user_()?._id
-    return this.recipes_().filter((r) => !userId || !(r.hiddenBy ?? []).includes(userId))
-  })
   suppliers_ = computed(() => this.supplierDataService.allSuppliers_())
   /** O(1) id lookups for supplier-name resolution — same rationale as productsById_/recipesById_. */
   suppliersById_ = computed(() => new Map(this.suppliers_().map((s) => [s._id, s])))
@@ -283,23 +278,6 @@ export class KitchenStateService {
         const errorMsg = isDish ? 'שגיאה במחיקת המנה' : 'שגיאה במחיקת המתכון'
         this.userMsgService.onSetErrorMsg(errorMsg)
         return throwError(() => new Error(errorMsg))
-      })
-    )
-  }
-
-  hideRecipe(recipe: Recipe): Observable<Recipe> {
-    const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
-    const operation$ = isDish
-      ? from(this.dishDataService.hideDish(recipe._id))
-      : from(this.recipeDataService.hideRecipe(recipe._id))
-    return operation$.pipe(
-      catchError((err: unknown) => {
-        const msg =
-          err instanceof Error && err.message === 'NOT_AUTHENTICATED'
-            ? 'יש להתחבר כדי להסתיר מתכון'
-            : 'שגיאה בהסתרת המתכון'
-        this.userMsgService.onSetErrorMsg(msg)
-        return throwError(() => err)
       })
     )
   }

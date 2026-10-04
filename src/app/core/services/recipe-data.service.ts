@@ -149,12 +149,12 @@ export class RecipeDataService {
   async updateRecipe(recipe: Recipe): Promise<Recipe> {
     try {
       const existing = await this.storage.get<Recipe>(ENTITY, recipe._id).catch(() => null)
+      const { hiddenBy: _hiddenBy, ...rest } = recipe
       const toSave: Recipe = {
-        ...recipe,
+        ...rest,
         createdAt: recipe.createdAt ?? existing?.createdAt,
         updatedAt: Date.now(),
-        createdBy: existing?.createdBy ?? recipe.createdBy,
-        hiddenBy: existing?.hiddenBy ?? recipe.hiddenBy
+        createdBy: existing?.createdBy ?? recipe.createdBy
       }
       const updated = await this.storage.put<Recipe>(ENTITY, toSave)
       this.recipesStore_.update((recipes) => recipes.map((r) => (r._id === updated._id ? updated : r)))
@@ -167,27 +167,6 @@ export class RecipeDataService {
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.recipe.update_error', message: 'Failed to update recipe', context: { err } })
-      throw err
-    }
-  }
-
-  async hideRecipe(_id: string): Promise<Recipe> {
-    try {
-      const userId = this.userService.user_()?._id
-      if (!userId) throw new Error('NOT_AUTHENTICATED')
-      const recipe = await this.storage.get<Recipe>(ENTITY, _id)
-      const hiddenBy = [...new Set([...(recipe.hiddenBy ?? []), userId])]
-      const updated = await this.storage.put<Recipe>(ENTITY, { ...recipe, hiddenBy })
-      this.recipesStore_.update((recipes) => recipes.map((r) => (r._id === _id ? updated : r)))
-      this.logging.info({
-        event: 'crud.recipe.hide',
-        message: 'Recipe hidden by user',
-        context: { entityType: ENTITY, id: _id, userId }
-      })
-      return updated
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.recipe.hide_error', message: 'Failed to hide recipe', context: { err } })
       throw err
     }
   }
