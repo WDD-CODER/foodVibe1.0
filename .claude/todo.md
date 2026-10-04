@@ -389,6 +389,14 @@
 - [ ] A5: Remove the scaling UI from form and list; deprecate the model fields. (equipment-form.component.*, equipment-list.component.*, equipment.model.ts)
 - [ ] A6: Run rg -n "scaling|isUnderInventory|EquipmentPage|'/equipment" src/app and clean the leftovers. Build, specs, e2e grep. Update the session-state file.
 
+### Plan 339 — Toggle-chip engine: replace filter checkboxes with chips, compact clear filters (`plans/339-toggle-chip-engine-filter-chips-clear-filters.plan.md`)
+- [ ] A1: Build the `.c-toggle-chip` / `.c-toggle-chip-group` engine and the phone-override exclusion.
+- [ ] A2: Add the list-shell `[shell-filter-clear]` slot and positioning.
+- [ ] A3: Migrate inventory and recipe-book filters.
+- [ ] A4: Migrate suppliers, equipment and venues filters.
+- [ ] A5: Delete the dead `.c-filter-option`, `.c-filter-section-header` and `.env-filter-pill` styles (grep first).
+- [ ] A6: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
