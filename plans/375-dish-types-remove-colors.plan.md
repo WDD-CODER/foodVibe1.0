@@ -1,6 +1,6 @@
 # Plan 375 — Dish types (courses): remove colors entirely
 
-Status: draft
+Status: active
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement
