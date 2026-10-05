@@ -105,7 +105,7 @@ As Dandan, away from home, I ask the session "open remote", get a link on my pho
 - [x] A2: CLI on/off/status + state file + TTL cleanup; `.gitignore` (`scripts/remote-port.mjs`, `.gitignore`).
 - [x] A3: Remote-aware `environment.local.ts`; `generateEnvironmentSlot()` regex; regenerate and check `environment.slot.ts` (`src/environments/environment.local.ts`, `scripts/take-plan.mjs`).
 - [x] A4: `/remote` command, `AGENTS.md` row, `commands.md` line, `docs/agent/remote-port.md`.
-- [ ] A5: Build + tests; live check from this slot; update session-state.
+- [x] A5: Build + tests; live check from this slot; update session-state.
 - [x] A6 (live-check fallout, 2026-10-06): through the tunnel the page loads (gate 403/302/200 OK, curl `/api/v1/data/recipes` → 200), but in the browser `/api/v1/auth/guest`, `/auth/refresh` and `DICTIONARY_OVERRIDES` returned 502 and the frontend on 4203 was down afterwards. Find the cause (dev-server restart after the env change? upstream connection handling in `remote-proxy.mjs`?) and fix.
   - Resolved: the proxy was fine — the slot **backend on 3003 was down** (take-plan still reported `be=3003 kept`). With the backend up, through the tunnel: page + data load, real-account login 200, reload keeps the user, a save (PUT dishes 200 + VERSION_HISTORY 201) works. `/auth/guest` → 404 from the tunnel is by design (localhost-only), documented. The proxy's 502 now names the dead server and port. The "kept but not listening" take-plan case is a separate finding for the Planner.
 
