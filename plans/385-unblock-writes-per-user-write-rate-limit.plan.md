@@ -81,12 +81,12 @@ touching any milestone.
 - No new UI. Reuses the `rate_limited` key. No new dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Limiter: per-user `keyGenerator` + IP fallback, `DATA_WRITE_LIMIT_MAX` (default 1000, `0` = off), `.env.example` lines (`server/routes/generic.js`, `server/.env.example`).
-- [ ] A2: Server tests: user A exhausting the limit (set `DATA_WRITE_LIMIT_MAX=3` in test) does not 429 user B on the same IP; `0` never 429s (`server/test/**`).
-- [ ] A3: Before removing anything, confirm `TERM_REFERENCES` covers every field the client rename loops touch (label → recipes/dishes `labels[]`, `autoLabels[]`; course → `course`; category → products `categories[]`; allergen → products `allergens[]`). If a field is missing, STOP and report.
-- [ ] A4: `confirmAndCascadeRename` → server rename only + reload the affected lists. Remove the dead cascade-rename methods. Update/trim the specs that referenced them (`metadata-manager.page.component.ts`, `kitchen-state.service.ts` + specs).
-- [ ] A5: 429 handling in `auth.interceptor.ts`.
-- [ ] A6: Gotcha entry (P1) (`docs/brain/gotchas/backend.md`).
+- [x] A1: Limiter: per-user `keyGenerator` + IP fallback, `DATA_WRITE_LIMIT_MAX` (default 1000, `0` = off), `.env.example` lines (`server/routes/generic.js`, `server/.env.example`).
+- [x] A2: Server tests: user A exhausting the limit (set `DATA_WRITE_LIMIT_MAX=3` in test) does not 429 user B on the same IP; `0` never 429s (`server/test/**`).
+- [x] A3: Before removing anything, confirm `TERM_REFERENCES` covers every field the client rename loops touch (label → recipes/dishes `labels[]`, `autoLabels[]`; course → `course`; category → products `categories[]`; allergen → products `allergens[]`). If a field is missing, STOP and report.
+- [x] A4: `confirmAndCascadeRename` → server rename only + reload the affected lists. Remove the dead cascade-rename methods. Update/trim the specs that referenced them (`metadata-manager.page.component.ts`, `kitchen-state.service.ts` + specs).
+- [x] A5: 429 handling in `auth.interceptor.ts`.
+- [x] A6: Gotcha entry (P1) (`docs/brain/gotchas/backend.md`).
 
 ## Technical Considerations
 - Dependencies: `TaxonomyStore.update` (server re-key), `metadata-registry.service.ts` rename facades, `RecipeDataService` / `DishDataService` / `ProductDataService` reload.

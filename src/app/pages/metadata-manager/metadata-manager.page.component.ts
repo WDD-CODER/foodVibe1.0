@@ -492,18 +492,13 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     return 0
   }
 
-  private async cascadeRename(type: MetadataType, oldKey: string, newKey: string): Promise<number> {
-    switch (type) {
-      case 'label':
-        return this.kitchenState.cascadeRenameLabelForAll(oldKey, newKey)
-      case 'course':
-        return this.kitchenState.cascadeRenameCourseForAll(oldKey, newKey)
-      case 'category':
-        return this.kitchenState.cascadeRenameCategoryForAll(oldKey, newKey)
-      case 'allergen':
-        return this.kitchenState.cascadeRenameAllergenForAll(oldKey, newKey)
-      default:
-        return 0
+  /** The server re-keys every document that used a renamed term (Plan 385), so the client
+   *  only reloads the lists that hold those documents. */
+  private async reloadAfterRename(type: MetadataType): Promise<void> {
+    if (type === 'label' || type === 'course') {
+      await Promise.all([this.recipeData.reloadFromStorage(), this.dishData.reloadFromStorage()])
+    } else if (type === 'category' || type === 'allergen') {
+      await this.productData.reloadFromStorage()
     }
   }
 
@@ -549,7 +544,8 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     return scope === 'save' ? 'everyone' : 'me'
   }
 
-  /** Confirm (only when items are affected) + cascade-rename, for category/course/allergen/label. */
+  /** Confirm (only when items are affected) + rename, for category/course/allergen/label. The
+   *  server carries the new key into every referencing document; the client then reloads. */
   private async confirmAndCascadeRename(
     type: MetadataType,
     oldKey: string,
@@ -569,7 +565,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     }
 
     try {
-      await this.cascadeRename(type, oldKey, newKey)
       await this.registryRename(type, oldKey, newKey)
       let pushFailed = false
       if (
@@ -593,6 +588,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
           })
         })
       }
+      await this.reloadAfterRename(type)
       if (pushFailed) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {

@@ -225,3 +225,23 @@ been killed by it.
 **Why the obvious fix is wrong:** Dropping `color` from the client's `taxonomy.add('course', …)` looks like a client-only change, but the server rejects it. Older plan files still say "no server change" because they were written before that commit.
 
 **What to do instead:** To make dish types colorless on the client, send one constant (`COURSE_NEUTRAL_COLOR = '#78716C'` in `metadata-registry.service.ts`) and just don't render it. Making `color` optional on the server means changing the schema, running `build:schemas` and updating the server tests (planned for plan 376). Before trusting a plan's "no server change", check `server/generated/schemas/entities/taxonomy-term.schema.js`.
+
+---
+
+## `npm run dev` runs as NODE_ENV=production — never gate dev behavior on NODE_ENV
+
+**What hurt:** Plan 385 needed the write limiter relaxed for local work. `server/package.json`'s `dev` script sets `NODE_ENV=production`, so any `if (NODE_ENV !== 'production')` switch is dead locally too.
+
+**Why the obvious fix is wrong:** Gating on `NODE_ENV` looks like the standard dev/prod split, but here dev and prod report the same value, so the switch never fires anywhere.
+
+**What to do instead:** Use a dedicated env var. The write limiter reads `DATA_WRITE_LIMIT_MAX` (default 1000, `0` = off; see `server/.env.example`).
+
+---
+
+## Client per-doc cascades burn the write limit — the server owns re-key
+
+**What hurt:** Metadata Manager renames looped one PUT per referencing recipe/product (plus a version-history POST per product). A few renames used up the 300-writes-per-15-min budget, and then every save and delete — even a menu-event trash — failed with a 429 (2026-10-05).
+
+**Why the obvious fix is wrong:** Raising the limit only hides it until the catalog grows. The loops were also pure double work: since P3.4 a term PUT that changes `key` makes the server re-key every document in `TERM_REFERENCES` (`renameTermEverywhere` in `server/routes/generic.js`).
+
+**What to do instead:** Rename the term once, then reload the affected client lists (`reloadFromStorage`). Before adding any client-side "update every doc that uses X" loop, check whether the server already does it. Delete still uses client cascade-clear, because the server blocks deleting a referenced term.

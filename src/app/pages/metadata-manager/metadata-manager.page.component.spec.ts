@@ -14,6 +14,8 @@ import { TranslationService } from '@services/translation.service'
 describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent
   let fixture: ComponentFixture<MetadataManagerComponent>
+  let metadataRegistrySpy: jasmine.SpyObj<MetadataRegistryService>
+  let productDataSpy: jasmine.SpyObj<ProductDataService>
 
   // LOGIC CHANGE: Standardized English keys for Mock Signals
   const mockUnits = signal(['gram', 'ml'])
@@ -32,16 +34,20 @@ describe('MetadataManagerPageComponent', () => {
     })
     unitRegistrySpy.getConversion.and.returnValue(1)
 
-    const metadataRegistrySpy = jasmine.createSpyObj('MetadataRegistryService', ['registerAllergen', 'getLabelColor'], {
-      allAllergens_: mockAllergens,
-      allCategories_: mockCategories,
-      allLabels_: mockLabels,
-      courses_: mockCourses,
-      allMenuTypes_: mockMenuTypes
-    })
+    metadataRegistrySpy = jasmine.createSpyObj(
+      'MetadataRegistryService',
+      ['registerAllergen', 'getLabelColor', 'renameCategory'],
+      {
+        allAllergens_: mockAllergens,
+        allCategories_: mockCategories,
+        allLabels_: mockLabels,
+        courses_: mockCourses,
+        allMenuTypes_: mockMenuTypes
+      }
+    )
     metadataRegistrySpy.getLabelColor.and.returnValue('#999')
 
-    const productDataSpy = jasmine.createSpyObj('ProductDataService', [], {
+    productDataSpy = jasmine.createSpyObj('ProductDataService', ['reloadFromStorage'], {
       allProducts_: mockProducts
     })
 
@@ -65,6 +71,21 @@ describe('MetadataManagerPageComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  // Plan 385: the server re-keys referencing documents, so a rename is one term write + a reload.
+  it('renames a category through the registry only, then reloads products', async () => {
+    metadataRegistrySpy.renameCategory.and.resolveTo()
+    productDataSpy.reloadFromStorage.and.resolveTo()
+    const rename = (
+      component as unknown as {
+        confirmAndCascadeRename: (type: string, oldKey: string, newKey: string, scope: string) => Promise<boolean>
+      }
+    ).confirmAndCascadeRename.bind(component)
+
+    expect(await rename('category', 'meat', 'fish', 'me')).toBe(true)
+    expect(metadataRegistrySpy.renameCategory).toHaveBeenCalledOnceWith('meat', 'fish')
+    expect(productDataSpy.reloadFromStorage).toHaveBeenCalledTimes(1)
   })
 
   it('should identify system units via isSystemUnit', () => {
