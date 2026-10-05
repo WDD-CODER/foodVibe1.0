@@ -1,6 +1,6 @@
 # Plan 369 — Recipe builder: correct prompt and yield when switching dish ↔ preparation
 
-Status: draft
+Status: active
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement
