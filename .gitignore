@@ -49,6 +49,8 @@ testem.log
 # Planner-Worker slot state (plan 326) — per-slot, never shared across machines
 # (.worktree-root and .worktree-port are already ignored below)
 .worktree-plan
+# On-demand remote link state (plan 388) — holds the link secret, never commit
+.worktree-remote
 .claude/.slot-pids
 .claude/*.log
 src/environments/environment.slot.ts

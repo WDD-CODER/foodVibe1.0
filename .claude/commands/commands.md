@@ -43,6 +43,7 @@ Show all registered slash commands with short descriptions and file locations.
 | `/fix-pr-checks` | Bounded PR CI/security fix loop (2 rounds max) | `.claude/commands/fix-pr-checks.md` | FLOW | SHARED |
 | `/plan` | Planning / Plan Contract path | `.claude/commands/plan.md` | FLOW | SHARED |
 | `/refactor` | Refactor path â€” angular/domain rules, cssLayer, techdebt | `.claude/commands/refactor.md` | FLOW | SHARED |
+| `/remote` | Open / close a secret-gated public link to this checkout's app (validate away from home) | `.claude/commands/remote.md` | UTIL | SHARED |
 | `/review-it` | Reviewer pass â€” plan-match, conventions, Verify; report-only by default | `.claude/commands/review-it.md` | FLOW | CC |
 | `/security` | Security path â€” security rules + pre-commit security grep + CI | `.claude/commands/security.md` | FLOW | SHARED |
 | `/ship` | Session end â€” build gate, chat-scoped commit (`--yes` skips wait) | `.claude/commands/ship.md` | FLOW | SHARED |
