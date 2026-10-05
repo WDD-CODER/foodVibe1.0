@@ -617,6 +617,13 @@
 - [ ] A9: Classify the new files in the workflow-kit manifest.
 - [ ] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
 
+### Plan 388 — On-demand remote port for validation (`plans/388-on-demand-remote-port.plan.md`)
+- [ ] A1: Proxy module + `node --test` suite (`scripts/lib/remote-proxy.mjs`, `scripts/lib/remote-proxy.test.mjs`).
+- [ ] A2: CLI on/off/status + state file + TTL cleanup; `.gitignore` (`scripts/remote-port.mjs`, `.gitignore`).
+- [ ] A3: Remote-aware `environment.local.ts`; `generateEnvironmentSlot()` regex; regenerate and check `environment.slot.ts`.
+- [ ] A4: `/remote` command, `AGENTS.md` row, `commands.md` line, `docs/agent/remote-port.md`.
+- [ ] A5: Build + tests; live check from this slot; update session-state.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
