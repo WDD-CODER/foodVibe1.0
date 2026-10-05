@@ -102,7 +102,7 @@ Values are **npm script names** wherever one exists — core never calls raw `ng
 | `build:render` | root | plan 321 build gate (success criteria of this plan) |
 | `build:schemas` | root (plan 321) | not called yet |
 | `test`, `lint`, `e2e` | root (server: `test`) | CI, contractor-role, review-it |
-| `lint:icons`, `lint:no-native-select`, `lint:backup-entity-types` | root | FoodVibe-only checks (`project` tier) |
+| `lint:icons`, `lint:no-native-select` | root | FoodVibe-only checks (`project` tier) |
 
 ## Kit runtime paths the installer must scaffold
 

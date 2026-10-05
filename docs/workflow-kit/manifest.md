@@ -321,10 +321,9 @@ Full per-file detail (params, refs) is in `manifest.json`; this is the human ind
 | `docs/brain/patterns/signals-only-state.md` | stay | FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied. |
 | `docs/brain/patterns/split-catalog-scan-from-filter-decoration.md` | stay | FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied. |
 | `docs/brain/patterns/tombstone-soft-delete.md` | stay | FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied. |
-| `package.json` | stay | Project manifest. Workflow-called scripts (catalogue -> parameters.md): build, build:render, build:schemas (321), start/dev:local, dev:remote, test, lint, e2e, lint:icons, lint:no-native-select, lint:backup-entity-types. `dev:local` is invoked by scripts/take-plan.mjs. |
+| `package.json` | stay | Project manifest. Workflow-called scripts (catalogue -> parameters.md): build, build:render, build:schemas (321), start/dev:local, dev:remote, test, lint, e2e, lint:icons, lint:no-native-select. `dev:local` is invoked by scripts/take-plan.mjs. |
 | `scripts/audit-labels.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
 | `scripts/backup-before-repair.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/check-backup-entity-types.mjs` | stay | Compares `server/constants/collections.js` with client `async-storage.service.ts` (FoodVibe data model). |
 | `scripts/check-lucide-icons.mjs` | stay | Parses `LucideAngularModule.pick()` in `app.config.ts`; FoodVibe icon policy (`npm run lint:icons`). |
 | `scripts/check-no-native-select.mjs` | stay | Bans native `<select>` in favour of `app-custom-select` (FoodVibe UI rule; `npm run lint:no-native-select`). |
 | `scripts/diagnose-broken-refs.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
