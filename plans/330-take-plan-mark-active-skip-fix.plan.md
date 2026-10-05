@@ -1,6 +1,6 @@
 # Plan 330 — take-plan.mjs: Skip Mark-Active Commit When Already Active
 
-Status: pending
+Status: done
 Snapshot: aca01563
 
 ## Context

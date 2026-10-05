@@ -1,5 +1,9 @@
 # Plan 323 — Metadata Registry Single Source of Truth
 
+Status: superseded
+
+> **Superseded 2026-10-05 by Plan 321 Phase 3** (unified `taxonomyTerms` + `TaxonomyStore`). Do not take.
+
 ## Problem Statement
 
 `KITCHEN_CATEGORIES`, `KITCHEN_ALLERGENS`, `KITCHEN_COURSES`, and `MENU_TYPES` each have **two independent, disconnected seeding paths**:

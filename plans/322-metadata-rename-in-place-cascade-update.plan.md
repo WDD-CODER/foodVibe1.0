@@ -1,5 +1,9 @@
 # Plan 322 — Metadata Rename-in-Place with Cascade Update (Goal)
 
+Status: draft
+
+> **Reality check 2026-10-05 (Planner, on `main`).** M1–M12 are in the code (merged via PR #226; M1/M2 were never ticked — now ticked from code evidence). What is left: **M10.4** (Human live check of label/course/category/allergen delete-for-everyone) and **M13** (`purge-ingredient-everywhere` does not strip the ingredient from other users' recipes). Collection names are v2 now (`recipes`, `dishes`, `products` — Plan 321 P2b), so read `RECIPE_LIST`/`DISH_LIST`/`PRODUCT_LIST` below as those. The Read-Write Scope covers M13 only.
+
 ## Problem Statement
 Follow-up to Plan 320's cascade-delete work. Today, fixing a typo in a label, course, category, or allergen name requires delete-and-recreate — even with the cascade-delete-on-confirm just built (Plan 320), that still means every recipe/product using it loses the tag entirely and has to be manually re-tagged with the corrected value. There's no "rename in place."
 
@@ -26,18 +30,18 @@ The fix already exists as a working pattern in this exact codebase for Menu Type
 ## Milestone 1 — Registry rename methods + cascade methods (no UI yet)
 
 ### Atomic Sub-tasks
-- [ ] M1.1: `metadata-registry.service.ts` — add `renameLabel(oldKey, newKey)`, `renameCourse(oldKey, newKey)`, `renameCategory(oldKey, newKey)`, `renameAllergen(oldKey, newKey)`, each mirroring `renameMenuType`'s shape (trim + no-op check, collision check against existing keys with an error toast, persist, update the relevant signal).
-- [ ] M1.2: `kitchen-state.service.ts` — generalize `cascadeClearLabelFromAll`/`cascadeClearCourseFromAll` into rename-capable variants (or add sibling `cascadeRenameLabelForAll(oldKey, newKey)` / `cascadeRenameCourseForAll(oldKey, newKey)` methods reusing `applyCascadeUpdate`) that replace the old key with the new one in `labels_`/`autoLabels_` (label) or set `course_` to the new key (course), instead of clearing to empty.
-- [ ] M1.3: `kitchen-state.service.ts` — add `cascadeRenameCategoryForAll(oldKey, newKey)` / `cascadeRenameAllergenForAll(oldKey, newKey)`, product-side equivalents using `productDataService.updateProduct` directly + activity/version-history logging (new small private helper, don't force-fit the recipe-shaped `applyCascadeUpdate`).
-- [ ] M1.4: `TranslationKeyModalService.open()` — add an optional prefill param for `englishKey_` (backward compatible: existing callers passing none keep today's empty-key-field behavior).
-- [ ] M1.5: `LabelCreationModalService` — check current `.open()` signature; add an edit-mode prefill (key/hebrew/color/autoTriggers) if not already supported.
+- [x] (in code, seen 2026-10-05) M1.1: `metadata-registry.service.ts` — add `renameLabel(oldKey, newKey)`, `renameCourse(oldKey, newKey)`, `renameCategory(oldKey, newKey)`, `renameAllergen(oldKey, newKey)`, each mirroring `renameMenuType`'s shape (trim + no-op check, collision check against existing keys with an error toast, persist, update the relevant signal).
+- [x] (in code, seen 2026-10-05) M1.2: `kitchen-state.service.ts` — generalize `cascadeClearLabelFromAll`/`cascadeClearCourseFromAll` into rename-capable variants (or add sibling `cascadeRenameLabelForAll(oldKey, newKey)` / `cascadeRenameCourseForAll(oldKey, newKey)` methods reusing `applyCascadeUpdate`) that replace the old key with the new one in `labels_`/`autoLabels_` (label) or set `course_` to the new key (course), instead of clearing to empty.
+- [x] (in code, seen 2026-10-05) M1.3: `kitchen-state.service.ts` — add `cascadeRenameCategoryForAll(oldKey, newKey)` / `cascadeRenameAllergenForAll(oldKey, newKey)`, product-side equivalents using `productDataService.updateProduct` directly + activity/version-history logging (new small private helper, don't force-fit the recipe-shaped `applyCascadeUpdate`).
+- [x] (in code, seen 2026-10-05) M1.4: `TranslationKeyModalService.open()` — add an optional prefill param for `englishKey_` (backward compatible: existing callers passing none keep today's empty-key-field behavior).
+- [x] (in code, seen 2026-10-05) M1.5: `LabelCreationModalService` — check current `.open()` signature; add an edit-mode prefill (key/hebrew/color/autoTriggers) if not already supported.
 
 ## Milestone 2 — Wire up the UI
 
 ### Atomic Sub-tasks
-- [ ] M2.1: Metadata Manager cards (label, course, category, allergen) — add an edit/pencil action per pill, alongside the existing delete button, in the shared `managerCard` template (`metadata-manager.page.component.html`).
-- [ ] M2.2: `metadata-manager.page.component.ts` — new `onRenameMetadata(item, type)` handler: open the appropriate modal per type (per the "Rename UI, per type" section above) prefilled with the current value, on submit confirm via `ConfirmModalService` (mirroring `onMenuTypeNameBlur`'s confirm-before-cascade shape) showing the affected count (reuse the same affected-list computation pattern from Plan 320's `onRemoveMetadata`), then call the registry rename + the cascade method, then a success toast with the count.
-- [ ] M2.3: Reject rename-to-existing-key with a clear error before even opening the confirm dialog (check the target registry for the new key first — same collision check `renameMenuType` already does).
+- [x] (in code, seen 2026-10-05) M2.1: Metadata Manager cards (label, course, category, allergen) — add an edit/pencil action per pill, alongside the existing delete button, in the shared `managerCard` template (`metadata-manager.page.component.html`).
+- [x] (in code, seen 2026-10-05) M2.2: `metadata-manager.page.component.ts` — new `onRenameMetadata(item, type)` handler: open the appropriate modal per type (per the "Rename UI, per type" section above) prefilled with the current value, on submit confirm via `ConfirmModalService` (mirroring `onMenuTypeNameBlur`'s confirm-before-cascade shape) showing the affected count (reuse the same affected-list computation pattern from Plan 320's `onRemoveMetadata`), then call the registry rename + the cascade method, then a success toast with the count.
+- [x] (in code, seen 2026-10-05) M2.3: Reject rename-to-existing-key with a clear error before even opening the confirm dialog (check the target registry for the new key first — same collision check `renameMenuType` already does).
 
 ## Milestone 3 — Admin master-push for registry renames (added mid-execution, 2026-09-30)
 
@@ -193,3 +197,33 @@ The fix already exists as a working pattern in this exact codebase for Menu Type
 - Rename a category/allergen used by several products → every affected product's `categories_`/`allergens_` updated, activity feed shows a "category"/"allergens" changed entry (reusing the existing `buildProductChanges` diff, which already tracks these fields).
 - Attempt to rename to an already-existing key in the same registry → rejected with an error, nothing changes.
 - `ng build` clean.
+
+## Read-Write Scope
+
+Covers Milestone 13 (purge-ingredient-everywhere bug) only — M1–M12 are shipped.
+
+Always allowed regardless of the list below: this plan file itself, its own
+docs/session-state-<branch>.md, .claude/sessions/**, .worktree-*, and the append-only
+hotspots (src/styles.scss, public/assets/data/dictionary.json, src/app/app.routes.ts
+— add to them, never rewrite or remove an existing entry without escalating).
+
+```scope
+server/routes/generic.js
+server/test/**
+src/app/core/services/kitchen-state.service.ts
+src/app/core/services/kitchen-state.service.spec.ts
+src/app/core/services/master-push.service.ts
+src/app/core/services/master-push.service.spec.ts
+src/app/core/services/http-storage.adapter.ts
+```
+
+## Read Scope
+
+Entire repo. Analysis and architectural suggestions are expected.
+
+## Escalation Protocol
+
+Thinking outside the box is expected; writing outside it requires explicit consent. If a
+Worker needs a file outside the ## Read-Write Scope above: STOP, tell the Human the file,
+the exact change, and why it can't be done in-scope; wait for approved: <path>; then
+append the path to the scope block above and retry.

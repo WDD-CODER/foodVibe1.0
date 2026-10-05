@@ -1,5 +1,9 @@
 # Plan 304 — Performance Phase 3: Data Volume
 
+Status: draft
+
+> **Reality check 2026-10-05 (Planner, on `main`).** Prerequisite gate, M2 and M3 are done. Only **Milestone 1 (list projections)** is left and still justified (2026-09-27 production payload numbers; `GET /:type` still returns whole documents — only `/search` has `SEARCH_PROJECTIONS`). Field names are v2 now (Plan 321 P2b): read `steps_`/`nutrition_per_100g`/`logistics_` below as their camelCase v2 names in `shared/schemas/entities/*`. Overlap: Plan 321 P7f (server-side list loading) comes later and builds on this — keep the projection map in one place so P7f can reuse it.
+
 overview: Plans 302 and 303 fix load time and interaction lag without changing the data architecture. This plan finally addresses the volume itself: the app fetches an estimated 5-7 MB of JSON at boot across four auto-loading collections, fetches it **twice** on login, returns whole documents where lists render a handful of fields, and renders every row of a 1,500-item list with no pagination or virtualisation. These are real costs, but they are also the largest and riskiest work in the audit — which is exactly why they come last. Ship 302 and 303 first and re-measure; they may reduce this plan's scope, and they will certainly change its priorities.
 
 **Source audit:** `reports/performance-audit-2026-08-13.md` sections C1.3, D2, D3.
@@ -187,4 +191,40 @@ Preserve the existing `track` expressions.
 - [x] Verify RTL layout is intact inside the virtual viewport — pagination controls use logical properties only (`gap`, no directional offsets); no viewport/scroll mechanism was introduced to interact with `dir="rtl"`
 
 ## Hand-off
-- [ ] Re-assess plan 301 Milestone 2's scope in light of measured results; update `plans/301-server-side-search-lean-data-loading.plan.md` with findings
+- [-] MOOT 2026-10-05 (Plan 301 closed; its remainder is Plan 321 P7f) — Re-assess plan 301 Milestone 2's scope in light of measured results; update `plans/301-server-side-search-lean-data-loading.plan.md` with findings
+
+## Read-Write Scope
+
+Covers Milestone 1 (list projections) only.
+
+Always allowed regardless of the list below: this plan file itself, its own
+docs/session-state-<branch>.md, .claude/sessions/**, .worktree-*, and the append-only
+hotspots (src/styles.scss, public/assets/data/dictionary.json, src/app/app.routes.ts
+— add to them, never rewrite or remove an existing entry without escalating).
+
+```scope
+server/routes/generic.js
+server/constants/**
+server/test/**
+src/app/core/services/product-data.service.ts
+src/app/core/services/product-data.service.spec.ts
+src/app/core/services/recipe-data.service.ts
+src/app/core/services/recipe-data.service.spec.ts
+src/app/core/services/dish-data.service.ts
+src/app/core/services/dish-data.service.spec.ts
+src/app/core/services/http-storage.adapter.ts
+src/app/core/services/async-storage.service.ts
+src/app/core/resolvers/**
+reports/performance-audit-2026-08-13.md
+```
+
+## Read Scope
+
+Entire repo. Analysis and architectural suggestions are expected.
+
+## Escalation Protocol
+
+Thinking outside the box is expected; writing outside it requires explicit consent. If a
+Worker needs a file outside the ## Read-Write Scope above: STOP, tell the Human the file,
+the exact change, and why it can't be done in-scope; wait for approved: <path>; then
+append the path to the scope block above and retry.

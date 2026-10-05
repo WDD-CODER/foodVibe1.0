@@ -1,5 +1,9 @@
 # Plan 320 — Recipe Labels Fix + Course/Category Field (Goal)
 
+Status: superseded
+
+> **Superseded 2026-10-05 by Plan 321 Phase 4** (course/protein/labels split on v2 data). Pre-v2 field names; do not take.
+
 ## Problem Statement
 Two distinct bugs are both surfacing as "labels are broken" in the recipe editor:
 

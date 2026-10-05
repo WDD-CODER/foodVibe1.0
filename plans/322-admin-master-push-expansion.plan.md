@@ -1,5 +1,14 @@
 # Plan 322 — Admin "Apply to Everyone or Just Me" — Master-Push Expansion
 
+Status: draft
+
+> **Reality check 2026-10-05 (Planner, on `main`).** Collection names are now v2 (`products`, `recipes`, `dishes`, `suppliers`, `equipment`, `venues`, `menuEvents` — Plan 321 P2b); the master fields `userId`/`_masterId`/`_userModified` keep their names. Already shipped by other work:
+> - Stage 1: `push-to-master` is gated with `requireAdmin` (`server/routes/generic.js`); `askScope()` already returns `'me'` for non-admins (`master-push.service.ts`, private `isAdmin_`). **Still open:** a public `isAdmin_` on `UserService` + migrating the 4 ad hoc copies (header, user-management, metadata-manager page, product-form, master-push).
+> - Stage 2: Products done (`product-data.service.ts` `pushToMaster`, product-form wiring). `PUSHABLE_TYPES` already has `products`, `suppliers`, `equipment`. **Still open:** equipment + supplier client wiring.
+> - Stage 5: `PUT /:type/:id/delete-from-master` exists for `recipes`/`dishes`/`products`. **Still open:** equipment/suppliers/venues/menuEvents.
+> - **Stage 3 registry part is DEFERRED** — the 9 registry collections are replaced by Plan 321 Phase 3 (`taxonomyTerms` + `TaxonomyStore`). Do not wire push into registry services that are about to be deleted; Phase 3/5 owns it. Stage 3 here = venues + menu events only.
+> - Stage 4 (`create-shared`): not started.
+
 ## Context
 
 Today, when a signed-in user edits a recipe or dish that was cloned from the shared
@@ -85,17 +94,17 @@ missing so the push-decision code can read it.
 - [ ] Migrate existing ad hoc copies to use it: `recipe-book-list.component.ts:137`,
       `user-management.component.ts:26`, `header.component.html:11,146`,
       `kitchen-state.service.ts:310`.
-- [ ] `server/routes/generic.js` — replace the commented-out guard at the push-to-master
+- [x] (already in code, seen 2026-10-05) `server/routes/generic.js` — replace the commented-out guard at the push-to-master
       route (~line 298) with a real `requireAdmin` in the middleware chain: `router.put(
       '/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, res) => {...})`,
       consistent with how `admin.js` already gates its two routes.
-- [ ] `src/app/core/services/master-push.service.ts` — `askScope()` short-circuits to
+- [x] (already in code, seen 2026-10-05) `src/app/core/services/master-push.service.ts` — `askScope()` short-circuits to
       `'me'` (no modal) whenever `!userService.isAdmin_()`, in addition to the existing
       short-circuit when there's no `_masterId`. Non-admins never see the prompt again.
 
 ### Stage 2 — Wire existing server support: Products, Equipment, Suppliers
 
-- [ ] `product-data.service.ts` — add `_masterId?: string` to `Product` model (confirmed
+- [x] (already in code, seen 2026-10-05) `product-data.service.ts` — add `_masterId?: string` to `Product` model (confirmed
       missing), add `pushToMaster(id)` method, wire into product-form save flow.
 - [ ] `equipment-data.service.ts` — confirm/add `_masterId?: string`, add
       `pushToMaster(id)`, wire into equipment list/form save flow.
@@ -107,21 +116,21 @@ missing so the push-decision code can read it.
 
 ### Stage 3 — Extend to Venues, Menu Events, and the 9 taxonomy/registry collections
 
-- [ ] `server/routes/generic.js` — add `VENUE_PROFILES`, `MENU_EVENT_LIST`,
+- [ ] (registry types DEFERRED to Plan 321 Phase 3 — add only `venues`, `menuEvents`) `server/routes/generic.js` — add `VENUE_PROFILES`, `MENU_EVENT_LIST`,
       `KITCHEN_PREPARATIONS`, `KITCHEN_CATEGORIES`, `KITCHEN_ALLERGENS`, `KITCHEN_LABELS`,
       `MENU_TYPES`, `KITCHEN_UNITS`, `MENU_EVENT_TYPES`, `MENU_SECTION_CATEGORIES`,
       `EQUIPMENT_CUSTOM_CATEGORIES` to `PUSHABLE_TYPES`.
 - [ ] `venue-data.service.ts` — `_masterId?: string`, `pushToMaster(id)`, wire into save flow.
 - [ ] `menu-event-data.service.ts` — same.
-- [ ] `preparation-registry.service.ts` — same, wire into register/update/rename/delete
+- [-] DEFERRED (Plan 321 Phase 3) `preparation-registry.service.ts` — same, wire into register/update/rename/delete
       category and preparation methods.
-- [ ] `metadata-registry.service.ts` (covers KITCHEN_CATEGORIES, KITCHEN_ALLERGENS,
+- [-] DEFERRED (Plan 321 Phase 3) `metadata-registry.service.ts` (covers KITCHEN_CATEGORIES, KITCHEN_ALLERGENS,
       KITCHEN_LABELS, MENU_TYPES) — same, wire into each mutating method per collection.
-- [ ] `unit-registry.service.ts` — same.
-- [ ] `menu-event-type.service.ts` — same.
-- [ ] `menu-section-categories.service.ts` — same.
-- [ ] `equipment-category-registry.service.ts` — same.
-- [ ] Consider splitting this stage into 2 PRs (recipe-adjacent registries vs.
+- [-] DEFERRED (Plan 321 Phase 3) `unit-registry.service.ts` — same.
+- [-] DEFERRED (Plan 321 Phase 3) `menu-event-type.service.ts` — same.
+- [-] DEFERRED (Plan 321 Phase 3) `menu-section-categories.service.ts` — same.
+- [-] DEFERRED (Plan 321 Phase 3) `equipment-category-registry.service.ts` — same.
+- [-] MOOT (registries deferred) Consider splitting this stage into 2 PRs (recipe-adjacent registries vs.
       menu/equipment registries) if the diff gets unwieldy.
 
 ### Stage 4 — New items created as shared from the start
@@ -140,7 +149,7 @@ missing so the push-decision code can read it.
 
 ### Stage 5 — Non-destructive delete propagation
 
-- [ ] New server route `PUT /:type/:id/remove-from-master`
+- [ ] (exists as `PUT /:type/:id/delete-from-master` for recipes/dishes/products — extend `DELETABLE_FROM_MASTER_TYPES` instead of a new route) New server route `PUT /:type/:id/remove-from-master`
       (`verifyToken, requireAdmin`, `PUSHABLE_TYPES`-gated, requires `existing._masterId`
       same validation as push-to-master): deletes/tombstones only the `__master__` doc.
       No change needed to `syncMasterToUser` — Rule 4 already leaves existing users'
@@ -170,3 +179,50 @@ missing so the push-decision code can read it.
 | D1 | Delete-to-everyone: cascade-remove from all users, or non-destructive (master-only)? | Non-destructive (2026-09-30) |
 | D2 | Scope: foundation + existing types only, or everything (incl. taxonomy + create flow) in one plan? | Everything in one plan (2026-09-30) |
 | D3 | Add canonical `isAdmin_` signal and migrate existing ad hoc copies, or leave existing usages untouched? | Add + migrate (2026-09-30) |
+
+## Read-Write Scope
+
+Always allowed regardless of the list below: this plan file itself, its own
+docs/session-state-<branch>.md, .claude/sessions/**, .worktree-*, and the append-only
+hotspots (src/styles.scss, public/assets/data/dictionary.json, src/app/app.routes.ts
+— add to them, never rewrite or remove an existing entry without escalating).
+
+Growth-frozen files in reach (`product-form.component.ts`, `menu-intelligence.page.ts`):
+renames/wiring only, no net new lines — new logic goes in services.
+
+```scope
+src/app/core/services/user.service.ts
+src/app/core/services/user.service.spec.ts
+src/app/core/services/master-push.service.ts
+src/app/core/services/master-push.service.spec.ts
+src/app/core/services/equipment-data.service.ts
+src/app/core/services/supplier-data.service.ts
+src/app/core/services/venue-data.service.ts
+src/app/core/services/menu-event-data.service.ts
+src/app/core/services/http-storage.adapter.ts
+src/app/core/services/kitchen-state.service.ts
+src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts
+src/app/core/models/**
+src/app/core/components/header/**
+src/app/pages/metadata-manager/metadata-manager.page.component.ts
+src/app/pages/metadata-manager/components/user-management/**
+src/app/pages/inventory/components/product-form/product-form.component.ts
+src/app/pages/equipment/components/**
+src/app/pages/suppliers/components/**
+src/app/pages/venues/components/**
+src/app/pages/menu-intelligence/**
+server/routes/generic.js
+server/services/clone-master.js
+server/test/**
+```
+
+## Read Scope
+
+Entire repo. Analysis and architectural suggestions are expected.
+
+## Escalation Protocol
+
+Thinking outside the box is expected; writing outside it requires explicit consent. If a
+Worker needs a file outside the ## Read-Write Scope above: STOP, tell the Human the file,
+the exact change, and why it can't be done in-scope; wait for approved: <path>; then
+append the path to the scope block above and retry.

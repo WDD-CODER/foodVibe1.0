@@ -57,6 +57,8 @@
 
 ### Plan 322 — Admin Master-Push Expansion (`plans/322-admin-master-push-expansion.plan.md`)
 
+> 2026-10-05 reality check: Stage 1 server guard, `askScope` admin gate and Products push already shipped (via Plan 322-metadata + 335). Registry part of Stage 3 deferred to Plan 321 Phase 3. Read-Write Scope added — takeable.
+
 > Saved 2026-09-30, not yet started. **Related to Plan 321's Phase 5** ("Shared master +
 > per-user overrides; admin-only push + dedicated modal") but NOT a duplicate: Plan 322
 > is the near-term incremental version built on the *current* clone/`_masterId`/sync-master
@@ -72,6 +74,8 @@
 - [ ] Stage 5 — Non-destructive delete propagation (`PUT .../remove-from-master`, master-only removal, no cascade to existing users)
 
 ### Plan 320 — Recipe Labels Fix + Course/Category Field (`plans/320-recipe-labels-fix-course-category-field.plan.md`) — active in worktree `../foodVibe1.0-wt-recipe-labels`, branch `feat/recipe-labels-course-field`
+
+> **CLOSED 2026-10-05 — superseded by Plan 321 Phase 4** (course/protein/labels split on v2 data). This plan uses pre-v2 names (`labels_`, `KITCHEN_LABELS`, `course_`) that no longer exist after the Phase 2b migration. Do not take it; Phase 4's Step 0 reads it for the label-cluster decisions.
 
 > Scope correction 2026-09-29: only 5 of the audit's 9 clusters are genuine duplicates (dairy, vegan, marinade, asian, sipur_shel_ochel); the other 4 (meat/salads/soups/dessert) are course strings mis-clustered by the audit script's fuzzy matching — deferred to Milestone 2, not merged in Milestone 1. See plan file's Milestone 1 header for full detail.
 
@@ -104,6 +108,8 @@
 - [ ] Bug: course `app-custom-select` dropdown option sometimes needs ~2-3 clicks to register a selection — reproduced, root cause not yet pinned (shared `CustomSelectComponent`, not obviously course-specific); deferred, not a data-correctness issue
 
 ### Plan 322 — Metadata Rename-in-Place with Cascade Update (`plans/322-metadata-rename-in-place-cascade-update.plan.md`)
+
+> 2026-10-05 reality check: M1–M12 in the code (PR #226). Left: M10.4 (Human live check) + M13 (purge bug). Read-Write Scope (M13 only) added — takeable.
 
 > Follow-up to Plan 320: fixing a typo in a label/course/category/allergen today requires delete+recreate+manually-reassign even with cascade-delete. Mirrors the existing `renameMenuType`/`updateServingTypeForAll` pattern. Units explicitly out of scope (riskier, affects conversions elsewhere).
 
@@ -195,6 +201,8 @@
 
 ### Plan 323 — Metadata Registry Single Source of Truth (`plans/323-metadata-registry-single-source-of-truth.plan.md`)
 
+> **CLOSED 2026-10-05 — superseded by Plan 321 Phase 3** (one `taxonomyTerms` collection + `TaxonomyStore` replaces the registries and their seed paths). Do not take it; Phase 3's Step 0 checks its findings.
+
 > Two disconnected seed paths (server clone-from-`__master__` at signup, vs. a client-side hardcoded-default fallback when a user's own doc is empty) let `__master__` silently fall behind real usage for KITCHEN_CATEGORIES/ALLERGENS/COURSES/MENU_TYPES — courses was the extreme case (63 vs 2), found + manually patched 2026-09-30 during Plan 322 testing. Plan-only for now; not started.
 
 **Milestone 1 — Backfill + remove the client-side fallback**
@@ -204,6 +212,8 @@
 - [ ] M1.4: Confirm `clone-master.js` reliably clones these 4 types before removing the client-side safety net
 
 ### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
+
+> **CLOSED 2026-10-05** — plan file is archived (`plans/archive/301-…`); its remaining milestones are Plan 321 P7f.
 
 > Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
 
@@ -220,6 +230,8 @@
 
 ### Plan 303 — Perf Phase 2: Client CPU & Interaction Lag (`plans/303-perf-phase2-client-cpu.plan.md`)
 
+> 2026-10-05: no Worker scope — both items are Human sign-offs. M1: a "before" profile is impossible now (shipped 2026-08-31), so only an "after" profile or close it. M3 Rule 3: already covered by an automated server test (see item) — Human confirms that is enough.
+
 > Gated on plan 302 M1 only. M1 below is the highest value-per-line change in the audit. Full sub-tasks in the plan file.
 > M0/M1/M2 executed 2026-08-22 in response to a live user report ("app is stuck, even in local storage mode") — `ng build` passes, spot-verified live via `/browse` against the real 2113-recipe/1478-product dataset.
 
@@ -232,9 +244,11 @@
 - [x] M3 — Hoist the rebuilt `allProductNames` Set above the master loop — `server/services/sync-master.js:273-274` — done in `feat/optimization`: was rebuilt once per master PRODUCT_LIST doc needing an insert check (up to ~1500x per sync run); now built once. Applies to the app's normal backend-connected mode (the "out of scope" note above was specific to a local-storage-mode bug report, not to whether this helps overall — it does, this runs on every signup and every 13-min token refresh). Static verification only (no live timing — shared backend's Mongo needs credentials this session doesn't have). Human-validated 2026-08-31.
 - [x] M3 — Remove `syncMasterToUser` from `POST /refresh` (or version-gate it) — `server/routes/auth.js:274` — satisfied by `plans/309-optimization-loop-closeout-remaining-backlog.plan.md` Milestone 2 (already `[x]` there): version-gated via `MASTER_META`/`master-version.js` + `User.lastSyncedMasterVersion`. Re-verified 2026-09-16 (overnight auto-solve session) — `server/routes/auth.js:285` skips `syncMasterToUser` when `user.lastSyncedMasterVersion === masterVersion`, `server/services/master-version.js` exists. No new code change needed.
 - [x] M3 — Regression test: brand-new account signup still receives correctly cloned + remapped master data — satisfied by `plans/309-…` Milestone 2 (already `[x]` there: "New-signup clone regression test passed (1478 products/1114 recipes cloned)"). Re-confirmed 2026-09-16 that the code backing this claim is present in `server/routes/auth.js`.
-- [ ] M3 — Regression test: existing user's modified docs still win after login (Rule 3) — not verified this session; the version-gate only touches `POST /refresh`, `/login` is an unchanged code path, so risk is low but untested
+- [ ] M3 — Regression test: existing user's modified docs still win after login (Rule 3) — evidence for Human sign-off: `server/test/sync-master.test.js` "Rule 3 — a user-modified clone is never overwritten" (Plan 321 P0.3, runs in CI); — not verified this session; the version-gate only touches `POST /refresh`, `/login` is an unchanged code path, so risk is low but untested
 
 ### Plan 304 — Perf Phase 3: Data Volume (`plans/304-perf-phase3-data-volume.plan.md`)
+
+> 2026-10-05 reality check: only Milestone 1 (list projections) left, still justified. Read-Write Scope (M1 only) added — takeable.
 
 > HARD GATE: do not start until 302 and 303 have shipped **and** been re-measured — they may reduce or eliminate this scope. Faceted search stays out of scope (that is plan 301 M2). Full sub-tasks in the plan file.
 
@@ -336,8 +350,11 @@
 - [ ] B8: STOP. Hand Dandan the two `[human]` reviews (kit.config.json keys; kit repo name/location). Apply changes if requested, then `/ship` on the FoodVibe side only — the kit repo stays local, no remote, until Dandan says otherwise.
 
 ### Plan 330 — take-plan.mjs: Skip Mark-Active Commit When Already Active (`plans/330-take-plan-mark-active-skip-fix.plan.md`)
-- [ ] Add the already-active / no-diff guard around the mark-active commit in `scripts/take-plan.mjs`
-- [ ] Verify `node scripts/take-plan.mjs <NNN>` runs to completion both when a plan starts as non-active and when it's already `Status: active`
+
+> Done 2026-10-05 check: guard shipped in commit `2030072d` (`fix(take-plan): skip the mark-active commit when the plan is already active`); Human confirmed closing.
+
+- [x] Add the already-active / no-diff guard around the mark-active commit in `scripts/take-plan.mjs`
+- [x] Verify `node scripts/take-plan.mjs <NNN>` runs to completion both when a plan starts as non-active and when it's already `Status: active`
 
 ### Plan 332 — Recipe edit blocked by "name already in use": diagnose and fix (`plans/332-recipe-edit-blocked-duplicate-name.plan.md`)
 
@@ -351,12 +368,13 @@
 ### Plan 333 — Remove the hidden-recipes concept (`plans/333-remove-hidden-recipes-concept.plan.md`)
 
 > Run after Plan 332 (duplicate-name fix) — both touch `kitchen-state.service.ts`.
+> Done: merged as PR #244 (commit `4c3128fe`); Human confirmed closing 2026-10-05.
 
-- [ ] A1: Remove the hide methods from the three services and the uncalled onHideRecipe.
-- [ ] A2: Replace visibleRecipes_ with recipes_ in recipe-book-list (ts, html, spec), then delete visibleRecipes_.
-- [ ] A3: Remove the hiddenBy carry-forward in both update methods; strip the field on save (P1).
-- [ ] A4: Mark the model field @deprecated. Run the grep in Success Criteria.
-- [ ] A5: Build and run the targeted specs. Update the session-state file.
+- [x] A1: Remove the hide methods from the three services and the uncalled onHideRecipe.
+- [x] A2: Replace visibleRecipes_ with recipes_ in recipe-book-list (ts, html, spec), then delete visibleRecipes_.
+- [x] A3: Remove the hiddenBy carry-forward in both update methods; strip the field on save (P1).
+- [x] A4: Mark the model field @deprecated. Run the grep in Success Criteria.
+- [x] A5: Build and run the targeted specs. Update the session-state file.
 
 ### Plan 335 — AI product: register categories and allergens through the registry (`plans/335-ai-product-register-categories-allergens-registry.plan.md`)
 - [ ] A1: Make registerAllergen return the key (or null). Update callers and the spec. (`src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/metadata-registry.service.spec.ts`)
