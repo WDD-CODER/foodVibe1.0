@@ -40,6 +40,6 @@ Entire FoodVibe repo.
 If a Worker needs a FoodVibe file outside the `## Read-Write Scope`: STOP, tell the Human the file, the change, and why; offer `approved: <path>`; then append the path to the scope block and retry.
 
 ## Atomic Sub-tasks
-- [ ] A1: Card format + rules (paste text allowed with the window named; rewrite Done-when in plain words; gloss terms) — `docs/agent/job-validation.md`
-- [ ] A2: `ship.md` Phase 4 and `done.md` show the card shape and point at the doc — `.claude/commands/ship.md`, `.claude/commands/done.md`
+- [x] A1: Card format + rules (paste text allowed with the window named; rewrite Done-when in plain words; gloss terms) — `docs/agent/job-validation.md`
+- [x] A2: `ship.md` Phase 4 and `done.md` show the card shape and point at the doc — `.claude/commands/ship.md`, `.claude/commands/done.md`
 - [ ] A3: Checks + `/ship`; Dandan commits the kit repo.
