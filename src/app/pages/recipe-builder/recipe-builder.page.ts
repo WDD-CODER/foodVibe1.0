@@ -602,7 +602,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         if (!twin) return of(null)
         console.warn('[duplicateName]', twin)
         return of({
-          duplicateName: { _id: twin._id, isDish: twin.recipeType === 'dish', fromMaster: !!twin._masterId }
+          duplicateName: {
+            _id: twin._id,
+            isDish: twin.recipeType === 'dish',
+            fromMaster: !!twin._masterId && twin._masterId !== twin._id
+          }
         })
       })
     )

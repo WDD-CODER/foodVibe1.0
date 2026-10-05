@@ -104,6 +104,24 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
     expect(master).not.toHaveProperty('ingredients');
   });
 
+  it('first push of a recipe whose name a master dish already has is rejected with 409, master unchanged (plan 379)', async () => {
+    await testDb().collection('dishes').insertOne({ _id: 'md1', userId: '__master__', nameHebrew: 'רוטב' });
+    await testDb().collection('recipes').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'u1', nameHebrew: ' רוטב ' });
+    const res = await request(app).put('/api/v1/data/recipes/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
+    expect(res.status).toBe(409);
+    expect(await testDb().collection('recipes').countDocuments({ userId: '__master__' })).toBe(0);
+    const mine = await testDb().collection('recipes').findOne({ _id: 'u1' });
+    expect(mine._masterId).toBe('u1');
+  });
+
+  it('first push of a product whose name master already has is rejected with 409 (plan 379)', async () => {
+    await testDb().collection('products').insertOne({ _id: 'mp1', userId: '__master__', nameHebrew: 'טחינה' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'u1', nameHebrew: 'טחינה' });
+    const res = await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
+    expect(res.status).toBe(409);
+    expect(await testDb().collection('products').countDocuments({ userId: '__master__' })).toBe(1);
+  });
+
   it('CHARACTERIZATION: pushing an unsupported type is rejected with 400', async () => {
     const res = await request(app)
       .put('/api/v1/data/KITCHEN_UNITS/u1/push-to-master')

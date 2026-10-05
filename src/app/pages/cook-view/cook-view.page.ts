@@ -296,9 +296,18 @@ export class CookViewPage implements OnInit, OnDestroy {
           this.cookExport.closeAllExportOverlays()
         }
       })
-    const recipe = this.route.snapshot.data['recipe'] as Recipe | null
+    // route.data, not snapshot: /cook/A → /cook/B reuses this component (e.g. after sign-in,
+    // when UserService swaps the guest-loaded master copy for the user's own copy).
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
+      this.applyRouteRecipe_(data['recipe'] as Recipe | null)
+    })
+  }
+
+  private applyRouteRecipe_(recipe: Recipe | null): void {
     if (recipe) {
       this.recipe_.set(recipe)
+      this.originalRecipe_.set(null)
+      this.editMode_.set(false)
       this.activeStepIndex_.set(0)
       this.stepDoneSet_.set(new Set())
       this.checkedIngredients_.set(new Set())
@@ -551,6 +560,11 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected onApproveStamp(): void {
+    if (!this.isLoggedIn()) {
+      this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'))
+      this.authModal.open('sign-in')
+      return
+    }
     const recipe = this.recipe_()
     if (!recipe) return
     if (this.hasRealChanges()) {

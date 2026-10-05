@@ -529,6 +529,13 @@ const PUSHABLE_TYPES = new Set(['recipes', 'dishes', 'products', 'suppliers', 'e
 // reference recursing forever; a doc already in it is left as-is rather than
 // re-pushed. Returns the resolved __master__ _id, or null if the doc isn't
 // the caller's own (or doesn't exist) — callers treat null as "leave as-is".
+class MasterNameTakenError extends Error {
+  constructor(name) {
+    super(`The shared library already has an item named "${name}"`);
+    this.nameHebrew = name;
+  }
+}
+
 async function pushDocToMasterRecursive(type, id, userId, visited) {
   const key = `${type}:${id}`;
   if (visited.has(key)) return null;
@@ -578,6 +585,16 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   const isFirstPush = existing._masterId === existing._id;
   let resolvedMasterId = existing._masterId;
   if (isFirstPush) {
+    // Plan 379: master must never hold two docs under one name — every user gets a clone of
+    // each, and recipes/dishes share one name namespace, so a duplicate blocks saving either.
+    const name = typeof existing.nameHebrew === 'string' ? existing.nameHebrew.trim() : '';
+    if (name) {
+      const namespace = hasIngredients ? ['recipes', 'dishes'] : [type];
+      for (const t of namespace) {
+        const twin = await col(t).findOne({ userId: '__master__', nameHebrew: name }, { projection: { _id: 1 } });
+        if (twin) throw new MasterNameTakenError(name);
+      }
+    }
     resolvedMasterId = makeId();
     await col(type).insertOne({
       ...safeBody,
@@ -641,6 +658,9 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
     await bumpMasterVersion();
     res.json({ ok: true, masterId: resolvedMasterId });
   } catch (err) {
+    if (err instanceof MasterNameTakenError) {
+      return res.status(409).json({ error: err.message, nameHebrew: err.nameHebrew });
+    }
     console.error('[data/push-to-master]', err);
     res.status(500).json({ error: 'Server error' });
   }
