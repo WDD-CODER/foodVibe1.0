@@ -446,6 +446,8 @@ Give recipes first-class `course` and `protein` fields (plus `kosherType` if G3 
 > read Plan 322's state first and treat its shipped stages as the thing being migrated
 > onto the override model (P5.6's migration + P5.7's removal absorb whatever Plan 322 already
 > built, rather than Phase 5 re-solving "which entity types need this" from scratch).
+>
+> **2026-10-05 (Human):** Plan 322 was cut to Stage 1 (`isAdmin_` consolidation). Its Stages 2–5 (equipment/supplier/venue/menuEvent push, create-shared, delete-from-master for the rest) are **owned by this Phase 5** now — implement them on the override model, not on clones. Also owned here: Plan 322-metadata M13 (`purge-ingredient-everywhere` doesn't strip other users' refs).
 
 ### Goal
 Replace copy-per-user with one master catalog plus per-user overrides and user-owned docs. Make push-to-master **admin-only** with a **dedicated** confirmation modal.
@@ -634,12 +636,12 @@ append the path to the scope block above and retry.
 ## Atomic Sub-tasks
 
 ### Phase 0 — Safety net
-- [ ] P0.0 Reality Check → `docs/session-state-foundation-refactor.md` + Human go
-- [ ] P0.1 Consolidate backup + add restore-to-scratch (`server/scripts/db-backup.js`, `server/scripts/db-restore.js`); drill local + Atlas
-- [ ] P0.2 Server test harness (`server/package.json`, `server/app.js` extraction, `server/test/helpers/app.js`)
-- [ ] P0.3 Characterization tests: `server/test/generic.test.js`, `sync-master.test.js`, `push-to-master.test.js`
-- [ ] P0.4 CI `server-tests` job (`.github/workflows/ci.yml`)
-- [ ] P0.5 ADR 0008 (`docs/brain/decisions/0008-professional-foundation-refactor.md`)
+- [x] P0.0 Reality Check → `docs/session-state-foundation-refactor.md` + Human go
+- [x] P0.1 Consolidate backup + add restore-to-scratch (`server/scripts/db-backup.js`, `server/scripts/db-restore.js`); drill local + Atlas
+- [x] P0.2 Server test harness (`server/package.json`, `server/app.js` extraction, `server/test/helpers/app.js`)
+- [x] P0.3 Characterization tests: `server/test/generic.test.js`, `sync-master.test.js`, `push-to-master.test.js`
+- [x] P0.4 CI `server-tests` job (`.github/workflows/ci.yml`)
+- [x] P0.5 ADR 0008 (`docs/brain/decisions/0008-professional-foundation-refactor.md`)
 
 ### Phase 1 — Single sources of truth & dead paths
 - [x] P1.0 Reality Check + Human go
@@ -694,7 +696,7 @@ append the path to the scope block above and retry.
 - [x] P3.2 `server/migrations/0003-taxonomy-terms.js` (0002 is taken by trash/history) — written + tests (`server/test/migration-0003-taxonomy-terms.test.js`); LOCAL written + verified 2026-10-05 (174 terms, backup `local-2026-10-05T06-57-56`); ATLAS written + verified 2026-10-05 (162 master terms, 0 invalid, backup `atlas-2026-10-05T08-37-18`)
 - [x] P3.3 Server term reads/writes + referenced-term delete policy (ask) — Human: **block** (2026-10-05). `generic.js`: reads = master ∪ own; no `_masterId`/`_userModified` on terms; POST/re-key onto a master key → 409; delete / bulk delete / re-key of a term used by the caller's docs → 409 with `referencedBy` (paths in shared `TERM_REFERENCES`); indexes in `db.js`; `collections.js` entry (`backup: false` until P3.4 adds it client-side). `server/test/taxonomy-terms-api.test.js` 14/14, server 94/94. DEFERRED to P3.4: re-pointing `registry-rename-master`/`registry-delete-master` (the client still reads the old registries until then, so moving them now would break the live admin flow)
 - [ ] P3.4 `TaxonomyStore` + facades → remove six registry services; generic `taxonomy-kind-manager` in Metadata Manager — 2026-10-05: store + six facades + Metadata Manager shared-term lock DONE, Human verified locally (5 checks). Human decision: shared terms admin-only. Re-key = server-side rename in referencing docs (own, or everyone's for a shared term); default master terms seeded server-side (`seed-master.js`). REMAINING: shrink facades to ≤30 lines / inline, generic `taxonomy-kind-manager`
-- [ ] P3.5 Drop old registry collections after verify
+- [ ] P3.5 Drop old registry collections after verify — also delete the dead `registry-rename-master` / `registry-delete-master` routes (`generic.js`) + their unused `http-storage.adapter.ts` methods (client uses `TaxonomyStore` since P3.4; found 2026-10-05)
 
 ### Phase 4 — Course / protein split
 - [ ] P4.0 Reality Check + G3

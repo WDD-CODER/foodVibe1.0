@@ -2,6 +2,8 @@
 
 Status: draft
 
+> **SCOPE CUT 2026-10-05 (Human): Stage 1 only.** Stages 2–5 build on the clone/`_masterId` model that Plan 321 Phase 5 replaces, so they are FOLDED into 321 Phase 5 (its Step 0 reads Stages 2–5 below as the entity inventory). Do not execute Stages 2–5 here. Remaining work: one public `isAdmin_` on `UserService`, replacing the 7 ad hoc copies (master-push, taxonomy-store, product-form, user-management, metadata-manager page, recipe-book-list, recipe-builder).
+
 > **Reality check 2026-10-05 (Planner, on `main`).** Collection names are now v2 (`products`, `recipes`, `dishes`, `suppliers`, `equipment`, `venues`, `menuEvents` — Plan 321 P2b); the master fields `userId`/`_masterId`/`_userModified` keep their names. Already shipped by other work:
 > - Stage 1: `push-to-master` is gated with `requireAdmin` (`server/routes/generic.js`); `askScope()` already returns `'me'` for non-admins (`master-push.service.ts`, private `isAdmin_`). **Still open:** a public `isAdmin_` on `UserService` + migrating the 4 ad hoc copies (header, user-management, metadata-manager page, product-form, master-push).
 > - Stage 2: Products done (`product-data.service.ts` `pushToMaster`, product-form wiring). `PUSHABLE_TYPES` already has `products`, `suppliers`, `equipment`. **Still open:** equipment + supplier client wiring.
@@ -102,7 +104,7 @@ missing so the push-decision code can read it.
       `'me'` (no modal) whenever `!userService.isAdmin_()`, in addition to the existing
       short-circuit when there's no `_masterId`. Non-admins never see the prompt again.
 
-### Stage 2 — Wire existing server support: Products, Equipment, Suppliers
+### [FOLDED into Plan 321 Phase 5] Stage 2 — Wire existing server support: Products, Equipment, Suppliers
 
 - [x] (already in code, seen 2026-10-05) `product-data.service.ts` — add `_masterId?: string` to `Product` model (confirmed
       missing), add `pushToMaster(id)` method, wire into product-form save flow.
@@ -114,7 +116,7 @@ missing so the push-decision code can read it.
       `masterPush.askScope(pending)` before saving; call `pushToMaster` after a
       successful save when scope is `'everyone'`.
 
-### Stage 3 — Extend to Venues, Menu Events, and the 9 taxonomy/registry collections
+### [FOLDED into Plan 321 Phase 5] Stage 3 — Extend to Venues, Menu Events, and the 9 taxonomy/registry collections
 
 - [ ] (registry types DEFERRED to Plan 321 Phase 3 — add only `venues`, `menuEvents`) `server/routes/generic.js` — add `VENUE_PROFILES`, `MENU_EVENT_LIST`,
       `KITCHEN_PREPARATIONS`, `KITCHEN_CATEGORIES`, `KITCHEN_ALLERGENS`, `KITCHEN_LABELS`,
@@ -133,7 +135,7 @@ missing so the push-decision code can read it.
 - [-] MOOT (registries deferred) Consider splitting this stage into 2 PRs (recipe-adjacent registries vs.
       menu/equipment registries) if the diff gets unwieldy.
 
-### Stage 4 — New items created as shared from the start
+### [FOLDED into Plan 321 Phase 5] Stage 4 — New items created as shared from the start
 
 - [ ] `server/services/clone-master.js` — extract the single-doc clone logic (strip
       `_id`/`userId`/`_masterId`/`_userModified`, assign new id + `_masterId` back-
@@ -147,7 +149,7 @@ missing so the push-decision code can read it.
       *before* the initial save (new decision point — no `_masterId` exists yet).
       `'everyone'` → call `create-shared`; `'me'` or non-admin → existing `POST /:type`.
 
-### Stage 5 — Non-destructive delete propagation
+### [FOLDED into Plan 321 Phase 5] Stage 5 — Non-destructive delete propagation
 
 - [ ] (exists as `PUT /:type/:id/delete-from-master` for recipes/dishes/products — extend `DELETABLE_FROM_MASTER_TYPES` instead of a new route) New server route `PUT /:type/:id/remove-from-master`
       (`verifyToken, requireAdmin`, `PUSHABLE_TYPES`-gated, requires `existing._masterId`
@@ -195,25 +197,14 @@ src/app/core/services/user.service.ts
 src/app/core/services/user.service.spec.ts
 src/app/core/services/master-push.service.ts
 src/app/core/services/master-push.service.spec.ts
-src/app/core/services/equipment-data.service.ts
-src/app/core/services/supplier-data.service.ts
-src/app/core/services/venue-data.service.ts
-src/app/core/services/menu-event-data.service.ts
-src/app/core/services/http-storage.adapter.ts
-src/app/core/services/kitchen-state.service.ts
-src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts
-src/app/core/models/**
-src/app/core/components/header/**
+src/app/core/services/taxonomy-store.service.ts
+src/app/core/services/taxonomy-store.service.spec.ts
+src/app/pages/inventory/components/product-form/product-form.component.ts
 src/app/pages/metadata-manager/metadata-manager.page.component.ts
 src/app/pages/metadata-manager/components/user-management/**
-src/app/pages/inventory/components/product-form/product-form.component.ts
-src/app/pages/equipment/components/**
-src/app/pages/suppliers/components/**
-src/app/pages/venues/components/**
-src/app/pages/menu-intelligence/**
-server/routes/generic.js
-server/services/clone-master.js
-server/test/**
+src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts
+src/app/pages/recipe-builder/recipe-builder.page.ts
+src/app/core/components/header/**
 ```
 
 ## Read Scope

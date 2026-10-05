@@ -26,7 +26,7 @@
 
 ### Plan 321 — Professional Foundation Refactor (`plans/321-professional-foundation-refactor.plan.md`)
 
-> Phases 0–2b done (Phase 2b PR #239 merged + Human smoke "all good" 2026-10-02). Phase 3 next — its own Step 0 Reality Check required before starting. Parallel-session note: Plan 320 (recipe course field + labels, `feat/recipe-labels-course-field` in worktree `foodVibe1.0-wt-recipe-labels`) is separate, unrelated work — no file overlap so far.
+> **State 2026-10-05:** Phases 0–2b done; Phase 3 mostly done (PR #253) — P3.4 cleanup + P3.5 left. Phases 4–7 not started. P7e (logging) partly covered by Plan 383.
 
 - [x] P0.0 Reality Check → `docs/session-state-foundation-refactor.md` + Human go
 - [x] P0.1 Consolidate backup + add restore-to-scratch; drill local + Atlas — found & fixed a `system.views` crash bug in `db-backup.js` along the way; both drills verified 0 mismatches
@@ -46,9 +46,12 @@
 - [x] P2a.0–P2a.6 Shared Zod schema package, observe-mode validation (commit `3014d286`)
 - [x] P2b.0–P2b.6 v2 migration: rename + `schemaVersion` + enforce (Gates G1/G2) — PR #239 + #240; Atlas validate-all 0 violations; Human smoke "all good" 2026-10-02
 - [ ] P2b.x Stray keys: `ingredients_` on 36 local products dropped in v2; `steps_[].cooking_time_minutes_` (4 Atlas recipes) kept as deprecated `cookingTimeMinutes` — **Human decides rename-vs-convert**
-- [ ] P3.0–P3.5 Unified taxonomy store (`taxonomyTerms` + `TaxonomyStore`)
+- [x] P3.0–P3.3 Taxonomy schema, 0003 migration (local + Atlas), server term API — PR #253
+- [ ] P3.4 `TaxonomyStore` cutover DONE (PR #253) — REMAINING: shrink the 6 facades (`metadata-registry` 355 lines, `preparation-registry` 223, `unit-registry` 158, …) to ≤30 lines / inline; generic `taxonomy-kind-manager`
+- [ ] P3.5 Drop old `KITCHEN_*` registry collections — also delete the now-dead server routes `registry-rename-master` / `registry-delete-master` and their unused `http-storage.adapter.ts` methods (client already goes through `TaxonomyStore`; reality check 2026-10-05)
+> Related work outside the plan: Plan 385 (per-user write limit, server-owned rename re-key — merged PR #258), Plan 386 (`canWrite` + remove/rename "for me" on shared terms — draft, next), Plan 387 (architecture guard)
 - [ ] P4.0–P4.6 Course/protein/labels split + menu sections → course (Gate G3)
-- [ ] P5.0–P5.8 Shared master + per-user overrides; admin-only push + dedicated modal
+- [ ] P5.0–P5.8 Shared master + per-user overrides; admin-only push + dedicated modal — now also owns Plan 322 Stages 2–5 + Plan 322-metadata M13
 - [ ] P6.0–P6.4 One soft-delete model + `userPrefs`
 - [ ] P7a–P7f Hygiene: god-file decomposition, service base adoption, script archive, CI hardening, logging, plan 301 remainder
 - [ ] P8.1–P8.5 Governance: ADRs 0009–0013, standards docs, lint guards, re-audit
@@ -65,11 +68,13 @@
 > so its Reality Check absorbs Plan 322's shipped state instead of re-deriving it. Safe to
 > execute Plan 322 now — Plan 321 Phase 5 will migrate its output when that phase starts.
 
-- [ ] Stage 1 — Foundation: `isAdmin_` signal on `UserService` + migrate ad hoc copies; gate `push-to-master` route with `requireAdmin`; `askScope()` short-circuits to `'me'` for non-admins
-- [ ] Stage 2 — Wire existing server support (Products, Equipment, Suppliers): `_masterId` field + `pushToMaster()` + save-flow wiring
-- [ ] Stage 3 — Extend to Venues, Menu Events, and 9 taxonomy/registry collections (labels, categories, allergens, units, menu types, menu event types, menu section categories, equipment custom categories, preparations)
-- [ ] Stage 4 — New items created as shared from the start (`POST .../create-shared`, admin-only)
-- [ ] Stage 5 — Non-destructive delete propagation (`PUT .../remove-from-master`, master-only removal, no cascade to existing users)
+> **State 2026-10-05:** Stages 2–5 build on the clone/`_masterId` model that Plan 321 Phase 5 deletes — anything added there is throwaway. **Human 2026-10-05: Stage 1 only; Stages 2–5 FOLDED into 321 P5.**
+
+- [ ] Stage 1 — PARTLY DONE: `requireAdmin` on `push-to-master` ✅, `askScope()` → `'me'` for non-admins ✅. LEFT: one public `isAdmin_` on `UserService`, replace the 7 ad hoc copies (master-push, taxonomy-store, product-form, user-management, metadata-manager page, recipe-book-list, recipe-builder)
+- [-] Stage 2 (FOLDED into 321 P5) — Products DONE; server already accepts suppliers/equipment (`PUSHABLE_TYPES`). LEFT: equipment + supplier client wiring
+- [-] Stage 3 (FOLDED into 321 P5) — registry part MOOT (taxonomy terms are shared live since 321 P3). LEFT: venues + menuEvents only
+- [-] Stage 4 (FOLDED into 321 P5) — not started (terms already support "add as shared")
+- [-] Stage 5 (FOLDED into 321 P5) — `delete-from-master` exists for recipes/dishes/products. LEFT: equipment/suppliers/venues/menuEvents
 
 ### Plan 320 — Recipe Labels Fix + Course/Category Field (`plans/320-recipe-labels-fix-course-category-field.plan.md`) — active in worktree `../foodVibe1.0-wt-recipe-labels`, branch `feat/recipe-labels-course-field`
 
@@ -103,25 +108,25 @@
 - [x] Course dropdown "clear to none" option + cascade-delete-with-confirm for in-use labels/courses (mirrors `renameMenuType`'s confirm+cascade shape) — committed
 - [x] Bug: `getRecipeSnapshotForComparison()` never tracked `course_`, so changing only the course didn't mark the form dirty — fixed
 - [x] Bug: metadata-manager's `onAddLabel` discarded the already-typed input text instead of prefilling the creation modal — fixed
-- [ ] Bug: course `app-custom-select` dropdown option sometimes needs ~2-3 clicks to register a selection — reproduced, root cause not yet pinned (shared `CustomSelectComponent`, not obviously course-specific); deferred, not a data-correctness issue
+- [ ] (still open, not Plan 320 work — fold into Plan 364 A1, which touches `custom-select`) Bug: course `app-custom-select` dropdown option sometimes needs ~2-3 clicks to register a selection — reproduced, root cause not yet pinned (shared `CustomSelectComponent`, not obviously course-specific); deferred, not a data-correctness issue
 
 ### Plan 322 — Metadata Rename-in-Place with Cascade Update (`plans/322-metadata-rename-in-place-cascade-update.plan.md`)
 
-> 2026-10-05 reality check: M1–M12 in the code (PR #226). Left: M10.4 (Human live check) + M13 (purge bug). Read-Write Scope (M13 only) added — takeable.
+> 2026-10-05 reality check: M1–M12 in the code (PR #226). **Update 2026-10-05 (after 321 P3.4 + Plan 385):** label/course/category/allergen rename + delete now go through `TaxonomyStore` (server re-keys docs itself), so M1–M2 are done and M10.4 / M13.4 are moot. Only M13 (product purge across users) is still real — and it lives on the clone model, so 321 P5 replaces it.
 
 > Follow-up to Plan 320: fixing a typo in a label/course/category/allergen today requires delete+recreate+manually-reassign even with cascade-delete. Mirrors the existing `renameMenuType`/`updateServingTypeForAll` pattern. Units explicitly out of scope (riskier, affects conversions elsewhere).
 
 **Milestone 1 — Registry rename + cascade methods (no UI yet)**
-- [ ] M1.1: `metadata-registry.service.ts` — `renameLabel`/`renameCourse`/`renameCategory`/`renameAllergen`, mirroring `renameMenuType`'s collision-check + persist + signal-update shape
-- [ ] M1.2: `kitchen-state.service.ts` — rename-capable variants of `cascadeClearLabelFromAll`/`cascadeClearCourseFromAll` (reuse `applyCascadeUpdate`)
-- [ ] M1.3: `kitchen-state.service.ts` — new `cascadeRenameCategoryForAll`/`cascadeRenameAllergenForAll` (product-side, via `productDataService.updateProduct` directly + activity/version-history logging)
-- [ ] M1.4: `TranslationKeyModalService.open()` — add optional `englishKey_` prefill (backward compatible)
-- [ ] M1.5: `LabelCreationModalService` — add edit-mode prefill if not already supported
+- [x] M1.1: `metadata-registry.service.ts` — `renameLabel`/`renameCourse`/`renameCategory`/`renameAllergen`, mirroring `renameMenuType`'s collision-check + persist + signal-update shape
+- [x] M1.2: `kitchen-state.service.ts` — rename-capable variants of `cascadeClearLabelFromAll`/`cascadeClearCourseFromAll` (reuse `applyCascadeUpdate`)
+- [x] M1.3: `kitchen-state.service.ts` — new `cascadeRenameCategoryForAll`/`cascadeRenameAllergenForAll` (product-side, via `productDataService.updateProduct` directly + activity/version-history logging)
+- [x] M1.4: `TranslationKeyModalService.open()` — add optional `englishKey_` prefill (backward compatible)
+- [x] M1.5: `LabelCreationModalService` — add edit-mode prefill if not already supported
 
 **Milestone 2 — Wire up the UI**
-- [ ] M2.1: Metadata Manager cards — edit/pencil action per pill alongside delete
-- [ ] M2.2: `metadata-manager.page.component.ts` — `onRenameMetadata(item, type)`: open the right modal prefilled, confirm with affected count, cascade, success toast
-- [ ] M2.3: Reject rename-to-existing-key before opening the confirm dialog
+- [x] M2.1: Metadata Manager cards — edit/pencil action per pill alongside delete
+- [x] M2.2: `metadata-manager.page.component.ts` — `onRenameMetadata(item, type)`: open the right modal prefilled, confirm with affected count, cascade, success toast
+- [x] M2.3: Reject rename-to-existing-key before opening the confirm dialog
 
 **Milestone 3 — Admin master-push for registry renames (added 2026-09-30) — Human-validated 2026-09-30 except M3.3 (see M3.7)**
 - [x] M3.1: `registry-rename-master` server route + client plumbing chain
@@ -177,7 +182,7 @@
 - [x] M10.1: `onRemoveMetadata` now calls `resolvePushScope(type)` before executing, in both the in-use cascade branch and the not-in-use plain-delete branch — cancel aborts the whole delete
 - [x] M10.2: New `PUT /:type/registry-delete-master` route — removes key from `__master__`'s registry doc + bulk-strips from every other user's own data in one `updateMany` per collection (no per-user two-hop needed, key is shared literally unlike product `_id`s)
 - [x] M10.3: Decided by Human 2026-09-30 — yes, aggressive cross-user removal, same as Milestone 8's products
-- [ ] M10.4: Not run — standing instruction to skip live verification; `ng build` + `node --check` clean. Human will test in the app.
+- [-] M10.4 (MOOT 2026-10-05 — registry deletes go through `TaxonomyStore`, server route is dead code, removed in 321 P3.5): Not run — standing instruction to skip live verification; `ng build` + `node --check` clean. Human will test in the app.
 
 **Milestone 11 — Bulk multi-select product delete gets Milestone 8's warning + ternary (added 2026-09-30, round 5)**
 - [x] M11.1: `onBulkDeleteSelected` computes in-use count per selected product, cascades the ingredient removal, asks ONE combined ternary for the whole batch (not per-product)
@@ -195,7 +200,7 @@
 - [ ] M13.1: Need backend terminal log for `[data/purge-ingredient-everywhere]` (or add temp logging of otherClones.length + updateMany matchedCount) — masterId chains all check out in DB, client calls are confirmed sent, URL construction is correct; the actual server-side failure point is still unknown
 - [ ] M13.2: Root-cause once visible
 - [ ] M13.3: Fix + verify a non-admin user's RECIPE_LIST/DISH_LIST loses the dangling ref; confirm with Human whether "everyone" should also delete from other users' own PRODUCT_LIST (broader than original M8 scope)
-- [ ] M13.4: Sanity-check whether M10's registry-delete-master shares the same root cause
+- [-] M13.4 (MOOT 2026-10-05 — see M10.4): Sanity-check whether M10's registry-delete-master shares the same root cause
 
 ### Plan 323 — Metadata Registry Single Source of Truth (`plans/323-metadata-registry-single-source-of-truth.plan.md`)
 
