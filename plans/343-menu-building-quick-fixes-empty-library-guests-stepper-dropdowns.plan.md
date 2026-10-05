@@ -1,6 +1,6 @@
 # Plan 343 — Menu building quick fixes: empty library, guests stepper, event-type and serving-type dropdowns
 
-Status: draft
+Status: active
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
