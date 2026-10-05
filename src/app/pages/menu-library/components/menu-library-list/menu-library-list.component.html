@@ -18,6 +18,7 @@
     </button>
   </div>
 
+  @if (events_().length > 0) {
   <div class="filters-bar">
     <label class="filter-item">
       <span>{{ 'menu_event_type' | translatePipe }}</span>
@@ -77,13 +78,18 @@
       </div>
     </div>
   </div>
+  }
 
   <div class="events-list">
-    @if (filteredEvents_().length === 0) {
-      <div class="empty-state">
-        <lucide-icon name="book-open" [size]="48"></lucide-icon>
-        <p>{{ 'menu_empty_library' | translatePipe }}</p>
-      </div>
+    @if (events_().length === 0) {
+      <app-empty-state
+        messageKey="menu_empty_library"
+        icon="book-open"
+        ctaLabelKey="menu_new_event"
+        (ctaClick)="onCreateNew()"
+      />
+    } @else if (filteredEvents_().length === 0) {
+      <app-empty-state messageKey="no_menus_match" icon="search" />
     }
     @for (event of filteredEvents_(); track event._id) {
       <article

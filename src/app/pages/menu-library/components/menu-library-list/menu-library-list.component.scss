@@ -152,22 +152,6 @@
   gap: 0.875rem;
 }
 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.875rem;
-  padding: 3.5rem 1.25rem;
-  padding-inline-end: 72px;
-  font-size: 1.1rem;
-  color: var(--color-text-muted);
-  text-align: center;
-
-  lucide-icon {
-    opacity: 0.6;
-  }
-}
-
 .event-card {
   display: grid;
   grid-template-columns: 1fr auto auto;

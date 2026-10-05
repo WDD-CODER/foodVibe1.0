@@ -586,6 +586,8 @@
     "menu_guests": "אורחים",
     "menu_sections": "מנות",
     "menu_empty_library": "אין תפריטים עדיין – צור את הראשון!",
+    "no_menus_match": "אין תפריטים התואמים את הסינון",
+    "menu_event_name_placeholder": "שם האירוע...",
     "menu_no_date": "ללא תאריך",
     "menu_clone": "שכפל כתבנית",
     "menu_confirm_delete": "למחוק את התפריט הזה?",

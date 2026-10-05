@@ -1,6 +1,6 @@
 # Plan 343 — Menu building quick fixes: empty library, guests stepper, event-type and serving-type dropdowns
 
-Status: draft
+Status: active
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
@@ -98,11 +98,11 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Library empty and no-results states; hide filters when there are no menus (`menu-library-list.component.html/.scss`).
-- [ ] A2: Guests −/+ stepper (`menu-intelligence.page.html`, `_paper-ui.scss`).
-- [ ] A3: Event-type dropdown: anchoring, clipping, width clamp (`menu-intelligence.page.html`, `_paper-ui.scss`).
-- [ ] A4: Serving-type select: chip variant, compact, no filter, max height (`menu-intelligence.page.html`, `_paper-ui.scss`).
-- [ ] A5: P1 cleanups. Build and run specs. Check at 360px and 1280px. Update the session-state file.
+- [x] A1: Library empty and no-results states; hide filters when there are no menus (`menu-library-list.component.html/.scss`).
+- [x] A2: Guests −/+ stepper (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [x] A3: Event-type dropdown: anchoring, clipping, width clamp (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [x] A4: Serving-type select: chip variant, compact, no filter, max height (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [x] A5: P1 cleanups. Build and run specs. Check at 360px and 1280px. Update the session-state file.
 
 ## Technical Considerations
 
