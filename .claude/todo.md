@@ -604,6 +604,19 @@
 - [ ] A8: ADR 0016, AGENTS.md hard-rule line, gotcha, brain index.
 - [ ] A9: Grep for any place that renders a term key without going through the facades (so a `displayName` override wouldn't show). If it's outside the scope, raise it via the Escalation Protocol.
 
+### Plan 387 — Architecture guard: invariants registry, Architecture Impact gate, invariant tests (`plans/387-architecture-guard-invariants-gate.plan.md`)
+
+- [ ] A1: Write `docs/brain/invariants.md` (format + 6 seed invariants + `Enforced from plan: 388`).
+- [ ] A2: Write `scripts/lib/invariants.mjs` (parse the registry + a plan's Architecture Impact).
+- [ ] A3: Add `scope-check.mjs --arch --plan` (block) and `--arch --diff` (warn, including decision-without-adr); update the usage header.
+- [ ] A4: Wire the gate into save-plan Phase 2, `take-plan.mjs`, `ship-prep.mjs`, `/review-it` step 3.
+- [ ] A5: Add the `## Architecture Impact` section to `prd-template.md`, the line to `hld-template.md`, and the Architect step to `plan.md`.
+- [ ] A6: Add the AGENTS.md hard-rule bullet and repoint the `AGENTS.md:57` row.
+- [ ] A7: Write `server/test/invariants.test.js` (INV-1, INV-2, INV-4).
+- [ ] A8: Write ADR 0017, add the brain index line and the gotcha, update `docs/agent/workflow-map.md`.
+- [ ] A9: Classify the new files in the workflow-kit manifest.
+- [ ] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
