@@ -1,6 +1,6 @@
 # Plan 322 — Metadata Rename-in-Place with Cascade Update (Goal)
 
-Status: draft
+Status: superseded
 
 > **Reality check 2026-10-05 (Planner, on `main`).** M1–M12 are in the code (merged via PR #226; M1/M2 were never ticked — now ticked from code evidence). What is left: **M10.4** (Human live check of label/course/category/allergen delete-for-everyone) and **M13** (`purge-ingredient-everywhere` does not strip the ingredient from other users' recipes). Collection names are v2 now (`recipes`, `dishes`, `products` — Plan 321 P2b), so read `RECIPE_LIST`/`DISH_LIST`/`PRODUCT_LIST` below as those. The Read-Write Scope covers M13 only.
 
