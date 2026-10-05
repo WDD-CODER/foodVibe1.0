@@ -4258,6 +4258,21 @@
       "notes": "Plan 360: stops a slot's dev servers (cross-platform; replaces taskkill by hand). Kit-authored; FoodVibe gets a copy."
     },
     {
+      "path": "scripts/next-plan-number.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "origin/main"
+          ]
+        }
+      ],
+      "refs": [],
+      "notes": "Plan 380: next plan NNN from the plans in every checkout plus <type>/NNN-* branches (save-plan numbering). Kit-authored."
+    },
+    {
       "path": "scripts/lib/plan-scope.mjs",
       "tier": "core",
       "action": "copy",

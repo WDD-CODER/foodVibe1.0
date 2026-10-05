@@ -110,6 +110,7 @@
     "scripts/lib/slot-procs.mjs",
     "scripts/lib/slot.mjs",
     "scripts/lib/todo-parse.mjs",
+    "scripts/next-plan-number.mjs",
     "scripts/plan-ledger-check.mjs",
     "scripts/plan-name-similarity.mjs",
     "scripts/plan-write-guard.sh",
