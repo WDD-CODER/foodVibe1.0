@@ -1,5 +1,6 @@
 import { inject, Injector, Injectable, signal } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
+import { Router } from '@angular/router'
 import { User } from '../models/user.model'
 import { catchError, from, map, Observable, of, switchMap, tap, throwError } from 'rxjs'
 import { UserMsgService } from './user-msg.service'
@@ -98,6 +99,28 @@ export class UserService {
     } finally {
       this._isDataReloading_.set(false)
     }
+    await this._reopenOwnCopyOfRecipe()
+  }
+
+  /** A guest viewing /cook/:id holds the shared master copy. Once signed in, swap it for the
+   *  user's own copy — otherwise every save on that page fails (the user doesn't own the master doc). */
+  private async _reopenOwnCopyOfRecipe(): Promise<void> {
+    if (!this.isLoggedIn()) return
+    const [{ RecipeDataService }, { DishDataService }] = await Promise.all([
+      import('./recipe-data.service'),
+      import('./dish-data.service')
+    ])
+    const router = this.injector.get(Router)
+    const match = /^\/cook\/([^/?#]+)/.exec(router.url)
+    if (!match) return
+    const id = decodeURIComponent(match[1])
+    const own = [
+      ...this.injector.get(RecipeDataService).allRecipes_(),
+      ...this.injector.get(DishDataService).allDishes_()
+    ]
+    if (own.some((r) => r._id === id)) return
+    const ownCopy = own.find((r) => r._masterId === id)
+    if (ownCopy) await router.navigate(['/cook', ownCopy._id], { replaceUrl: true })
   }
 
   constructor() {

@@ -24,6 +24,15 @@ export const recipeResolver: ResolveFn<Promise<Recipe | null>> = async (route) =
   const inMemoryDish = dishDataService.allDishes_().find((d) => d._id === id)
   if (inMemoryDish) return inMemoryDish
 
+  // A master id (a link opened as a guest, or shared) → the signed-in user's own copy of it.
+  // Loading the master doc instead would make every save fail: the user doesn't own it.
+  if (userService.isLoggedIn()) {
+    const ownCopy = [...recipeDataService.allRecipes_(), ...dishDataService.allDishes_()].find(
+      (r) => r._masterId === id
+    )
+    if (ownCopy) return ownCopy
+  }
+
   // In-memory miss (page refresh / direct URL) — use ID prefix to route to the
   // correct collection directly, avoiding a wasted 404 on the wrong collection.
   // Master dishes use "dish_" prefix (dishes); master recipes use "prep_" prefix
