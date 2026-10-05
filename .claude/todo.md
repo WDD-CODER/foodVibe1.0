@@ -554,6 +554,37 @@
 - [x] A7: `scripts/next-plan-number.mjs` (plans + `<type>/NNN-*` branches); save-plan numbering calls it; manifest row + `kit-owned.json` — `scripts/next-plan-number.mjs`, `docs/workflow-kit/**`, `docs/agent/workflow-map.md`
 - [ ] A8: Checks + `/ship`; Dandan commits the kit repo.
 
+### Plan 382 — Client log ingest + Mongo sink (replace dev log server) (`plans/382-client-log-ingest-mongo-sink.plan.md`)
+- [ ] A1: Zod `LogEventSchema` + export; `npm run build:schemas` passes (`shared/schemas/entities/log-event.schema.ts`, `shared/schemas/index.ts`).
+- [ ] A2: `server/services/log-sink.js` + indexes in `server/db.js`.
+- [ ] A3: `server/routes/log.js` (optionalToken → rateLimit → json 16kb → validate → sink → 202); mount in `server/app.js`; global error handler writes to sink.
+- [ ] A4: `server/test/log-route.test.js` (supertest + mongodb-memory-server, same helpers as `generic.test.js`): 202 valid; 400 bad `event` pattern; 400 oversized context; 429 after 60 in a minute; `info` not persisted by default, persisted with `LOG_PERSIST_INFO=1`; `userId` set when Bearer token present, `null` when absent.
+- [ ] A5: `LoggingService` rewrite (`sendToServer`, token, back-off, flood guard, `url`) (`src/app/core/services/logging.service.ts`).
+- [ ] A6: Interceptor fix `endsWith('/api/v1/log')` (`src/app/core/interceptors/auth.interceptor.ts`).
+- [ ] A7: Remove `logServerUrl` ×5 (`src/environments/*.ts`), delete `scripts/log-server.js`, npm script (`package.json`), `.gitignore` block.
+- [ ] A8: Docs + ADR 0016 + gotcha supersede + CHANGELOG + tech-stack.
+- [ ] A9: `ng build`, `npm --prefix server test`, the `rg` zero-match check, manual [human] check.
+
+### Plan 383 — Structured server logging: pino + request ids (delivers 321 §7e early) (`plans/383-structured-server-logging-pino-request-ids.plan.md`)
+- [ ] B1: add `pino`, `pino-http` (deps) and `pino-pretty` (devDep) in `server/package.json`; `server/logger.js` with redaction + Mongo bridge.
+- [ ] B2: `pino-http` in `server/app.js` (replace morgan, `genReqId`, `X-Request-Id`, ignore list, `exposedHeaders`); remove `morgan` dependency.
+- [ ] B3: migrate `server/routes/generic.js` (incl. `PERF_LOG` → debug event) and `server/db.js`.
+- [ ] B4: migrate `server/routes/auth.js`, `server/routes/admin.js`, `server/middleware/**`, `server/services/**`.
+- [ ] B5: migrate `server/routes/ai.js` (largest; keep `logTag` semantics as the `event` prefix).
+- [ ] B6: global error handler + `server/index.js`; `render.yaml` cleanup.
+- [ ] B7: client — interceptor `requestId` (`auth.interceptor.ts`), `logging.service.ts` pass-through.
+- [ ] B8: ESLint `no-console` scoped rule (`server/eslint.config.mjs`); fix anything it catches.
+- [ ] B9: `server/test/request-id.test.js` + test helper for capturing pino output (`server/test/helpers/**`).
+- [ ] B10: docs/patterns mapping, standards, tech-stack, 321 checklist, CHANGELOG; run all [auto] criteria.
+
+### Plan 384 — Logs in the AI workflow: query script, slot log retention, command wiring (`plans/384-logs-in-ai-workflow-query-script-slot-retention.plan.md`)
+- [ ] C1: `scripts/lib/log-format.mjs` normaliser (client-echo JSON, pino JSON, raw passthrough) + unit-ish self-test via `node --test` if cheap.
+- [ ] C2: `scripts/log-query.mjs` Mongo mode (URI resolution, filters, `--summary`, `--json`, limits).
+- [ ] C3: `--file` mode + `--since=plan-start` (`scripts/log-query.mjs`).
+- [ ] C4: `scripts/take-plan.mjs` rotation + `.slot-plan-start`; `.gitignore`; prune (`scripts/prune-old-sessions.sh`).
+- [ ] C5: wire `.claude/commands/fix.md`, `auto-solve.md`, `review-it.md`, `.claude/skills/preflight/SKILL.md`, `.claude/references/prd-template.md`, `AGENTS.md`.
+- [ ] C6: `package.json` script, `docs/brain/patterns/log-query-usage.md`, `docs/workflow-kit/manifest.md`, CHANGELOG; run all [auto] criteria.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
