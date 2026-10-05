@@ -84,9 +84,11 @@ As an admin or user, I want dish types to look the same for everyone, without ra
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Model optional color; registry seeding and register without color; spec (`course.model.ts`, `metadata-registry.service.*`).
-- [ ] A2: Remove the color dot and `getCourseColor` from metadata-manager (`metadata-manager/**`).
-- [ ] A3: Build, specs. Admin and user check. Update session-state.
+- [x] A1: Model optional color; registry seeding and register without color; spec (`course.model.ts`, `metadata-registry.service.*`).
+- [x] A2: Remove the color dot and `getCourseColor` from metadata-manager (`metadata-manager/**`).
+
+> **Drift note (2026-10-05, approved by Dandan):** since plan 321 Phase 3 (`5512ea1a`) there is no client seeding, and the `taxonomyTerms` schema requires `color` on course terms (`taxonomy-term.schema.ts`, strictObject). So instead of `{ key }` only, every course is written with one constant neutral color `COURSE_NEUTRAL_COLOR = '#78716C'` (register + push-to-everyone); `courses_` exposes `{ key }` only and nothing renders a course color. Making the server field optional belongs to plan 376. Ran ahead of plan 340 with `--ignore-order` (Human approved).
+- [x] A3: Build, specs. Admin and user check. Update session-state.
 
 ## Technical Considerations
 

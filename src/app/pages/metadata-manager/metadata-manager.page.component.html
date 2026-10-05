@@ -270,8 +270,6 @@
             >
               @if (type === 'label') {
                 <span class="label-color-dot" [style.background-color]="getLabelColor(item)"></span>
-              } @else if (type === 'course') {
-                <span class="label-color-dot" [style.background-color]="getCourseColor(item)"></span>
               }
               <span>{{ item | translatePipe }}</span>
 
