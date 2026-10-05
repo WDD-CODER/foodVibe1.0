@@ -275,3 +275,11 @@ only the Bash tool's command text triggers it.
 **Why the obvious fix is wrong:** Widening the glob or approving the path hides the cause, and every later Worker hits the same trap.
 
 **What to do instead:** Put comments on their own `#` line above the glob. Never put them after it.
+
+## Worker `[x]` marks reach `main` in the plan file but never in `.claude/todo.md`
+
+**What hurt:** Workers tick Atomic Sub-tasks in their own `plans/NNN-*.plan.md` (they may not write `.claude/todo.md`), and the PR carries those ticks to `main`. The ledger only catches up when someone on `main` runs `todo-query.mjs sync --merged` — and nothing ran it. By 2026-10-05 plans 343, 375 and 385 were fully ticked in their plan files but still open in the ledger, which made finished work look unfinished.
+
+**Why the obvious fix is wrong:** Letting Workers write `.claude/todo.md` brings back the merge conflicts between parallel slots that the rule exists to prevent. Asking the Planner to "remember to sync" is how it got missed in the first place.
+
+**What to do instead:** `.github/workflows/todo-sync.yml` runs the sync + `todo-archive.mjs` on every push to `main` that touches `plans/**`, then opens and squash-merges a bot PR with the ledger change (`main` requires a PR; needs the repo setting "Allow GitHub Actions to create and approve pull requests"). Keep plan numbers unique — the sync finds a plan by number and picks the first file, so a duplicate NNN ticks the wrong ledger section. Ledger lines that summarize several plan items (`P3.0–P3.5`) can't be matched and print "tick by hand"; that warning is harmless.
