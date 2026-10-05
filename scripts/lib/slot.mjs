@@ -1,6 +1,6 @@
 /**
  * Slot facts — single source of truth for the 3 permanent worktree slots
- * (wt-1..3) in the Planner-Worker workflow. Shared by session-state-path.mjs,
+ * (wt-N (1..3)) in the Planner-Worker workflow. Shared by session-state-path.mjs,
  * scope-check.mjs, scope-guard.sh (via scope-check.mjs), ship-prep.mjs,
  * take-plan.mjs and session-startup.sh (via --describe).
  * See plans/326-planner-worker-workflow.plan.md.
@@ -9,7 +9,7 @@
  *   node scripts/lib/slot.mjs --describe
  *   node scripts/lib/slot.mjs --list
  */
-import { readFileSync, existsSync } from 'fs'
+import { readFileSync, existsSync, readdirSync } from 'fs'
 import { execFileSync } from 'child_process'
 import { resolve, dirname, join, basename } from 'path'
 import { fileURLToPath } from 'url'
@@ -36,19 +36,34 @@ export function slotNumber() {
   return m ? Number(m[1]) : null
 }
 
-/** { fe, be } ports for this slot (420N/300N), or null outside a slot. */
+/** { fe, be } ports for this slot (4200+N/3000+N), or null outside a slot. */
 export function ports() {
   const n = slotNumber()
   if (!n) return null
   return { fe: 4200 + n, be: 3000 + n }
 }
 
-/** The plan path recorded in .worktree-plan, or null when idle / not a slot. */
+/** The plan a branch named <type>/NNN-<slug> works on (plans/NNN-*.plan.md in that checkout), or null. */
+export function branchPlanPath(branch, cwd) {
+  const m = (branch || '').match(/^[\w.-]+\/(\d{3})-/)
+  if (!m) return null
+  const dir = join(cwd || repoRoot, 'plans')
+  if (!existsSync(dir)) return null
+  const f = readdirSync(dir).find(name => name.startsWith(`${m[1]}-`) && name.endsWith('.plan.md'))
+  return f ? `plans/${f}` : null
+}
+
+/**
+ * The active plan, or null when idle / not a slot. .worktree-plan marks the slot as busy; when the
+ * branch names a different plan (one saved inside the slot), the branch's plan wins.
+ */
 export function activePlanPath() {
   const p = join(repoRoot, '.worktree-plan')
   if (!existsSync(p)) return null
   const rel = readFileSync(p, 'utf8').replace(/\r?\n+$/, '').trim()
-  return rel || null
+  if (!rel) return null
+  const fromBranch = branchPlanPath(git(['branch', '--show-current']))
+  return fromBranch && !rel.startsWith(fromBranch.slice(0, 'plans/NNN-'.length)) ? fromBranch : rel
 }
 
 /** Every wt-N worktree: { slot, path, branch (null if detached), detached, plan }. */
@@ -97,7 +112,9 @@ function list() {
   }
   for (const s of slots) {
     const where = s.detached ? 'detached' : `branch=${s.branch}`
-    console.log(`wt-${s.slot}: ${where}${s.plan ? ` plan=${s.plan}` : ' idle'}`)
+    const fromBranch = s.plan && branchPlanPath(s.branch, s.path)
+    const mismatch = fromBranch && fromBranch !== s.plan ? ` (branch works on ${fromBranch} - that plan is used)` : ''
+    console.log(`wt-${s.slot}: ${where}${s.plan ? ` plan=${s.plan}${mismatch}` : ' idle'}`)
   }
 }
 

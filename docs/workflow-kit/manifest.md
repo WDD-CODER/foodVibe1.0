@@ -15,17 +15,19 @@ Lessons verdicts: `lessons-triage.md`. Config keys: `parameters.md`.
 
 **First kit-first change (plan 360, same PR):** slot-startup fixes from two Worker reports were authored in the kit's `core/` and rendered into FoodVibe with FoodVibe's values: take-plan validates before it claims and resumes after a late failure, waits for both servers and prints the log tail, stops leftover servers on the slot's ports (new `scripts/lib/slot-procs.mjs`, `scripts/slot-stop.mjs`, `core`/`copy`), runs the optional `commands.slotPrepare` (FoodVibe: `build:schemas`); release stops servers and treats a squash merge (`[gone]` upstream) as merged; `todo-query.mjs sync --merged` also syncs plans whose file is ahead of `.claude/todo.md`; one scope parser, `scripts/lib/plan-scope.mjs` (`core`/`copy`), shared by scope-check and take-plan, reads the fenced block plus the mangled shapes the Planner's plans actually contain.
 
-**202 files classified** (196 from plan 328 + `scripts/kit-extract.mjs`, `scripts/kit-lessons-extract.mjs` and `scripts/kit-owned.mjs`, all `project`/`stay`, + `scripts/lib/slot-procs.mjs`, `scripts/slot-stop.mjs` and `scripts/lib/plan-scope.mjs`, all `core`/`copy`) across the inventory roots; 11 excluded path patterns (project history/data).
+**Validation round 1 (plan 380, 2026-10-05):** fixes from two Worker reports, kit-first again: take-plan detects a squash-merged branch through its merged GitHub PR and starts fresh (deleting the old remote branch); a stale session-state pointer is ignored; the branch's plan wins over a mismatched `.worktree-plan`; the drift check falls back to the commit that added the plan; new `scripts/next-plan-number.mjs` (`core`/`parameterize`) counts open `<type>/NNN-*` branches; fetch after a slot merge; post-merge validation goes through the Planner.
+
+**203 files classified** (196 from plan 328 + `scripts/kit-extract.mjs`, `scripts/kit-lessons-extract.mjs` and `scripts/kit-owned.mjs`, all `project`/`stay`, + `scripts/lib/slot-procs.mjs`, `scripts/slot-stop.mjs` and `scripts/lib/plan-scope.mjs`, all `core`/`copy`, + `scripts/next-plan-number.mjs`, `core`/`parameterize`) across the inventory roots; 11 excluded path patterns (project history/data).
 
 | tier \ action | copy | parameterize | split | skeleton | stay | total |
 | --- | --- | --- | --- | --- | --- | --- |
-| `core` | 37 | 36 | 7 | · | · | 80 |
+| `core` | 37 | 37 | 7 | · | · | 81 |
 | `layer:cursor` | 26 | 2 | · | · | · | 28 |
 | `pack:angular` | 10 | 10 | 2 | · | · | 22 |
 | `pack:node-express` | · | · | 1 | · | · | 1 |
 | `template` | · | · | · | 17 | · | 17 |
 | `project` | · | · | · | · | 54 | 54 |
-| **total** | 73 | 48 | 10 | 17 | 54 | 202 |
+| **total** | 73 | 49 | 10 | 17 | 54 | 203 |
 
 Tier legend: `core` = ships to every project; `layer:cursor` = optional Cursor layer (`-Cursor`); `pack:*` = stack pack contract (standards doc, skills, Cursor rules, gotchas, validation commands); `template` = generic structure, FoodVibe content, ships as a skeleton; `project` = stays in FoodVibe.
 
