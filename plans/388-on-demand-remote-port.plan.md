@@ -101,11 +101,12 @@ As Dandan, away from home, I ask the session "open remote", get a link on my pho
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Proxy module + `node --test` suite (`scripts/lib/remote-proxy.mjs`, `scripts/lib/remote-proxy.test.mjs`).
-- [ ] A2: CLI on/off/status + state file + TTL cleanup; `.gitignore` (`scripts/remote-port.mjs`, `.gitignore`).
-- [ ] A3: Remote-aware `environment.local.ts`; `generateEnvironmentSlot()` regex; regenerate and check `environment.slot.ts` (`src/environments/environment.local.ts`, `scripts/take-plan.mjs`).
+- [x] A1: Proxy module + `node --test` suite (`scripts/lib/remote-proxy.mjs`, `scripts/lib/remote-proxy.test.mjs`).
+- [x] A2: CLI on/off/status + state file + TTL cleanup; `.gitignore` (`scripts/remote-port.mjs`, `.gitignore`).
+- [x] A3: Remote-aware `environment.local.ts`; `generateEnvironmentSlot()` regex; regenerate and check `environment.slot.ts` (`src/environments/environment.local.ts`, `scripts/take-plan.mjs`).
 - [ ] A4: `/remote` command, `AGENTS.md` row, `commands.md` line, `docs/agent/remote-port.md`.
 - [ ] A5: Build + tests; live check from this slot; update session-state.
+- [ ] A6 (live-check fallout, 2026-10-06): through the tunnel the page loads (gate 403/302/200 OK, curl `/api/v1/data/recipes` → 200), but in the browser `/api/v1/auth/guest`, `/auth/refresh` and `DICTIONARY_OVERRIDES` returned 502 and the frontend on 4203 was down afterwards. Find the cause (dev-server restart after the env change? upstream connection handling in `remote-proxy.mjs`?) and fix.
 
 ## Technical Considerations
 
