@@ -76,7 +76,7 @@ Entire FoodVibe repo.
 - [x] A6: `PYTHONIOENCODING=utf-8` in `.claude/settings.json` `env`
 - [x] A7: Order check treats a superseded/done/archived prerequisite plan as satisfied (`scripts/take-plan.mjs`)
 - [x] A8: Docs: ledger sync is the todo-sync Action, not a Planner step (`.claude/commands/take-plan.md`, `.claude/commands/plan.md`, `.claude/skills/save-plan/SKILL.md`, `docs/agent/job-validation.md`, `docs/agent/workflow-map.md`)
-- [ ] A9: Kit manifest + kit-owned list for the new command; all checks; session-state
+- [x] A9: Kit manifest + kit-owned list for the new command; all checks; session-state
 
 ## Escalation Protocol
 Blocked outside scope → offer `approved: <path>` first.
