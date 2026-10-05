@@ -6,8 +6,27 @@ import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
+import { UserService } from './user.service'
 import { signal } from '@angular/core'
 import { Product } from '../models/product.model'
+
+/** Fake taxonomyTerms backend: query returns the given terms; post echoes the body as a stored term. */
+function fakeTermStorage(terms: Record<string, unknown>[] = []): jasmine.SpyObj<StorageService> {
+  const spy = jasmine.createSpyObj<StorageService>('StorageService', ['query', 'put', 'post', 'remove'])
+  spy.query.and.callFake(<T>(type: string) => Promise.resolve((type === 'taxonomyTerms' ? terms : []) as T[]))
+  spy.post.and.callFake(<T>(_type: string, body: T) =>
+    Promise.resolve({
+      _id: 'new-' + String((body as { key?: string }).key),
+      userId: 'u1',
+      schemaVersion: 2,
+      createdAt: 1,
+      updatedAt: 1,
+      ...body
+    })
+  )
+  spy.remove.and.returnValue(Promise.resolve())
+  return spy
+}
 
 describe('MetadataRegistryService', () => {
   let service: MetadataRegistryService
@@ -19,20 +38,128 @@ describe('MetadataRegistryService', () => {
       allProducts_: mockProductsSignal
     })
 
-    const storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post'])
-    storageSpy.query.and.callFake((entity: string) => {
-      if (entity === 'KITCHEN_CATEGORIES') {
-        return Promise.resolve([{ _id: 'c1', items: ['vegetables', 'dairy', 'meat', 'dry', 'fish'] }])
+    const storageSpy = fakeTermStorage([
+      {
+        _id: 'ingredientCategory:__master__:vegetables',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'ingredientCategory',
+        key: 'vegetables'
+      },
+      {
+        _id: 'ingredientCategory:__master__:dairy',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'ingredientCategory',
+        key: 'dairy'
+      },
+      {
+        _id: 'ingredientCategory:__master__:meat',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'ingredientCategory',
+        key: 'meat'
+      },
+      {
+        _id: 'ingredientCategory:__master__:dry',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'ingredientCategory',
+        key: 'dry'
+      },
+      {
+        _id: 'ingredientCategory:__master__:fish',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'ingredientCategory',
+        key: 'fish'
+      },
+      {
+        _id: 'allergen:__master__:gluten',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'allergen',
+        key: 'gluten'
+      },
+      {
+        _id: 'allergen:__master__:eggs',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'allergen',
+        key: 'eggs'
+      },
+      {
+        _id: 'allergen:__master__:peanuts',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'allergen',
+        key: 'peanuts'
+      },
+      {
+        _id: 'allergen:__master__:nuts',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'allergen',
+        key: 'nuts'
+      },
+      {
+        _id: 'allergen:__master__:soy',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'allergen',
+        key: 'soy'
+      },
+      {
+        _id: 'allergen:__master__:milk solids',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'allergen',
+        key: 'milk solids'
+      },
+      {
+        _id: 'allergen:__master__:sesame',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'allergen',
+        key: 'sesame'
       }
-      if (entity === 'KITCHEN_ALLERGENS') {
-        return Promise.resolve([
-          { _id: 'a1', items: ['gluten', 'eggs', 'peanuts', 'nuts', 'soy', 'milk solids', 'sesame'] }
-        ])
-      }
-      return Promise.resolve([])
-    })
-    storageSpy.put.and.returnValue(Promise.resolve())
-    storageSpy.post.and.returnValue(Promise.resolve())
+    ])
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     const loggingSpy = jasmine.createSpyObj('LoggingService', ['error', 'warn', 'info'])
@@ -53,6 +180,7 @@ describe('MetadataRegistryService', () => {
         MetadataRegistryService,
         { provide: ProductDataService, useValue: pSpy },
         { provide: StorageService, useValue: storageSpy },
+        { provide: UserService, useValue: { user_: signal(null) } },
         { provide: UserMsgService, useValue: userMsgSpy },
         { provide: LoggingService, useValue: loggingSpy },
         { provide: TranslationService, useValue: translationSpy },
@@ -62,7 +190,7 @@ describe('MetadataRegistryService', () => {
 
     service = TestBed.inject(MetadataRegistryService)
     productDataSpy = TestBed.inject(ProductDataService) as jasmine.SpyObj<ProductDataService>
-    tick() // let initMetadata() complete
+    tick() // let the taxonomy load complete
   }))
 
   it('should be created', () => {

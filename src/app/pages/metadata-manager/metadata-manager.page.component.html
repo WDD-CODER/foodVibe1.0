@@ -151,6 +151,7 @@
                     type="text"
                     class="menu-type-key-input"
                     [value]="def.key"
+                    [readOnly]="!canEditTerm('menuType', def.key)"
                     (blur)="onMenuTypeNameBlur(def.key, $any($event.target).value)"
                     (keydown.enter)="$any($event.target).blur()"
                   />
@@ -160,33 +161,43 @@
                         type="button"
                         class="field-pill field-pill-removable"
                         (click)="removeFieldFromMenuType(def.key, f)"
-                        [disabled]="!isLoggedIn()"
+                        [disabled]="!isLoggedIn() || !canEditTerm('menuType', def.key)"
                         [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
                       >
                         {{ getDishFieldLabelKey(f) | translatePipe }}
                       </button>
                     }
                   </div>
-                  <button
-                    type="button"
-                    class="btn-edit"
-                    (click)="onEditMenuType(def.key)"
-                    [attr.aria-label]="'edit' | translatePipe"
-                    [disabled]="!isLoggedIn()"
-                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                  >
-                    <lucide-icon name="pencil" [size]="14"></lucide-icon>
-                  </button>
-                  <button
-                    type="button"
-                    class="c-icon-btn danger"
-                    (click)="onRemoveMenuType(def.key)"
-                    [attr.aria-label]="'remove' | translatePipe"
-                    [disabled]="!isLoggedIn()"
-                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                  >
-                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-                  </button>
+                  @if (canEditTerm('menuType', def.key)) {
+                    <button
+                      type="button"
+                      class="btn-edit"
+                      (click)="onEditMenuType(def.key)"
+                      [attr.aria-label]="'edit' | translatePipe"
+                      [disabled]="!isLoggedIn()"
+                      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+                    >
+                      <lucide-icon name="pencil" [size]="14"></lucide-icon>
+                    </button>
+                    <button
+                      type="button"
+                      class="c-icon-btn danger"
+                      (click)="onRemoveMenuType(def.key)"
+                      [attr.aria-label]="'remove' | translatePipe"
+                      [disabled]="!isLoggedIn()"
+                      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+                    >
+                      <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                    </button>
+                  } @else {
+                    <span
+                      class="unit-default-badge"
+                      [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
+                      [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+                    >
+                      <lucide-icon name="lock" [size]="14"></lucide-icon>
+                    </span>
+                  }
                 }
               </div>
             }
@@ -272,7 +283,15 @@
                 >
                   <lucide-icon name="lock" [size]="14"></lucide-icon>
                 </span>
-              } @else if (type !== 'unit' || !isSystemUnit(item)) {
+              } @else if (!canEditTerm(type, item)) {
+                <span
+                  class="unit-default-badge"
+                  [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
+                  [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+                >
+                  <lucide-icon name="lock" [size]="14"></lucide-icon>
+                </span>
+              } @else {
                 @if (type !== 'unit') {
                   <button
                     class="c-icon-btn"

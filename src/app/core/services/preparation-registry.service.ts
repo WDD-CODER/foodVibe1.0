@@ -1,51 +1,49 @@
-import { Injectable, signal, computed, inject } from '@angular/core'
+import { Injectable, computed, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { LoggingService } from './logging.service'
 import { LoadingService } from './loading.service'
 import { DishDataService } from './dish-data.service'
-import { newId } from '../utils/id.util'
+import { TaxonomyStore } from './taxonomy-store.service'
 import type { FlatPrepItem, PrepCategory } from '../models/recipe.model'
-
-const STORAGE_KEY = 'KITCHEN_PREPARATIONS'
 
 export interface PreparationEntry {
   name: string
   category: string
 }
 
-interface PreparationRegistryDoc {
-  _id?: string
-  categories: string[]
-  preparations: PreparationEntry[]
-}
-
+/**
+ * Plan 321 Phase 3 — preparation categories (`prepCategory` terms) and named preparations
+ * (`preparation` terms, `categoryKey` -> their category) as a thin facade over TaxonomyStore.
+ * A preparation name is unique per owner (the term key), so the same name can no longer sit
+ * in two categories at once.
+ */
 @Injectable({ providedIn: 'root' })
 export class PreparationRegistryService {
-  private readonly storageService = inject(StorageService)
   private readonly userMsgService = inject(UserMsgService)
   private readonly translationService = inject(TranslationService)
   private readonly keyResolution = inject(KeyResolutionService)
   private readonly logging = inject(LoggingService)
   private readonly loading_ = inject(LoadingService)
   private readonly dishDataService = inject(DishDataService)
+  private readonly taxonomy = inject(TaxonomyStore)
 
-  private categories = signal<string[]>([])
-  private preparations_ = signal<PreparationEntry[]>([])
-
-  readonly preparationCategories_ = this.categories.asReadonly()
-  readonly allPreparations_ = this.preparations_.asReadonly()
-
-  private loaded_ = false
-  private loadPromise_: Promise<void> | null = null
+  readonly preparationCategories_ = computed(() =>
+    this.taxonomy
+      .terms('prepCategory')()
+      .map((t) => t.key)
+  )
+  readonly allPreparations_ = computed<PreparationEntry[]>(() =>
+    this.taxonomy
+      .terms('preparation')()
+      .map((t) => ({ name: t.key, category: t.categoryKey ?? '' }))
+  )
 
   getPreparationsByCategory_ = computed(() => {
-    const preps = this.allPreparations_()
     const byCategory = new Map<string, PreparationEntry[]>()
-    for (const p of preps) {
+    for (const p of this.allPreparations_()) {
       const list = byCategory.get(p.category) ?? []
       list.push(p)
       byCategory.set(p.category, list)
@@ -53,98 +51,29 @@ export class PreparationRegistryService {
     return byCategory
   })
 
-  constructor() {
-    // Deferred: load on ensureLoaded() via recipe-builder / metadata preparation manager.
-  }
-
   hasLoaded(): boolean {
-    return this.loaded_
+    return this.taxonomy.isLoaded_()
   }
 
   async ensureLoaded(): Promise<void> {
-    if (this.loaded_) return
-    if (this.loadPromise_) return this.loadPromise_
-    this.loadPromise_ = this.initRegistry()
-      .catch(() => {})
-      .finally(() => {
-        this.loaded_ = true
-        this.loadPromise_ = null
-      })
-    return this.loadPromise_
+    await this.loading_.track(this.taxonomy.ensureLoaded()).catch((err: unknown) => this.logLoadError(err))
   }
 
   /** Reload categories and preparations from storage (e.g. after demo data load). */
   async reloadFromStorage(): Promise<void> {
-    if (this.loadPromise_) {
-      // A load is already in flight — e.g. this service was just constructed via
-      // injector.get() and its constructor's ensureLoaded() hasn't resolved yet.
-      // Await it instead of firing a redundant concurrent fetch for the same data.
-      await this.loadPromise_
-      return
-    }
-    this.loaded_ = false
-    this.loadPromise_ = null
-    await this.ensureLoaded()
-  }
-
-  private async initRegistry(): Promise<void> {
-    try {
-      const registries = await this.loading_.track(this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY))
-      const doc = registries[0]
-      if (doc?.categories?.length !== undefined) {
-        this.categories.set(doc.categories)
-      }
-      if (doc?.preparations?.length !== undefined) {
-        this.preparations_.set(doc.preparations)
-      }
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({
-        event: 'crud.preparations.load_error',
-        message: 'Failed to load preparation registry',
-        context: { err }
-      })
-    }
-  }
-
-  /** Persist a single registry doc. Assigns _id if missing (e.g. after demo load) so future put() works. */
-  private async persistDoc(payload: PreparationRegistryDoc): Promise<void> {
-    const id = payload._id ?? newId()
-    await this.storageService.replaceAll(STORAGE_KEY, [{ ...payload, _id: id }])
+    await this.taxonomy.reload().catch((err: unknown) => this.logLoadError(err))
   }
 
   /** Register category with English key (backend) and Hebrew label (dictionary). */
   async registerCategory(englishKey: string, hebrewLabel: string): Promise<void> {
     const key = englishKey.trim().toLowerCase().replace(/\s+/g, '_')
     const label = hebrewLabel.trim()
-    if (!key) return
-    if (this.categories().includes(key)) return
-
+    if (!key || this.taxonomy.find('prepCategory', key)) return
     this.translationService.updateDictionary(key, label)
-    const updated = [...this.categories(), key]
-    try {
-      const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
-      const doc = registries[0]
-      const payload: PreparationRegistryDoc = doc
-        ? { ...doc, categories: updated }
-        : { categories: updated, preparations: [] }
-
-      if (doc?._id) {
-        await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
-      } else {
-        await this.persistDoc(payload)
-      }
-      this.categories.set(updated)
+    await this.run('category.save', 'שגיאה בשמירת הקטגוריה', async () => {
+      await this.taxonomy.add('prepCategory', key, {})
       this.userMsgService.onSetSuccessMsg(`הקטגוריה "${label}" נוספה בהצלחה`)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת הקטגוריה')
-      this.logging.error({
-        event: 'crud.preparations.category.save_error',
-        message: 'Preparation category save error',
-        context: { err }
-      })
-    }
+    })
   }
 
   /**
@@ -202,7 +131,7 @@ export class PreparationRegistryService {
   /** Returns the first matching preparation by name (case-insensitive). */
   getPreparationByName(name: string): PreparationEntry | undefined {
     const q = name.trim().toLowerCase()
-    return this.preparations_().find((p) => p.name.toLowerCase() === q)
+    return this.allPreparations_().find((p) => p.name.toLowerCase() === q)
   }
 
   /** Updates a preparation's category in the registry. */
@@ -212,29 +141,12 @@ export class PreparationRegistryService {
     newCategory: string,
     options?: { silent?: boolean; onRevert?: () => void }
   ): Promise<void> {
-    const preps = this.preparations_()
-    const idx = preps.findIndex(
-      (p) => p.name.toLowerCase() === name.trim().toLowerCase() && p.category === oldCategory.trim()
-    )
-    if (idx < 0) return
-
+    const entry = this.getPreparationByName(name)
+    if (!entry || entry.category !== oldCategory.trim()) return
     const sanitizedNew = newCategory.trim().toLowerCase().replace(/\s+/g, '_')
-    const updated = preps.map((p, i) => (i === idx ? { ...p, category: sanitizedNew } : p))
 
-    try {
-      const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
-      const doc = registries[0]
-      const payload: PreparationRegistryDoc = doc
-        ? { ...doc, preparations: updated }
-        : { categories: this.categories(), preparations: updated }
-
-      if (doc?._id) {
-        await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
-      } else {
-        await this.storageService.post(STORAGE_KEY, payload)
-      }
-      this.preparations_.set(updated)
-
+    await this.run('update', 'שגיאה בעדכון ההכנה', async () => {
+      await this.taxonomy.updateByKey('preparation', entry.name, { categoryKey: sanitizedNew || undefined })
       if (!options?.silent) {
         await this.propagateCategoryToDishes(name.trim(), oldCategory.trim(), sanitizedNew)
         const onRevert = options?.onRevert
@@ -242,72 +154,30 @@ export class PreparationRegistryService {
           this.updatePreparationCategory(name, sanitizedNew, oldCategory, { silent: true }).then(() => onRevert?.())
         this.userMsgService.onSetSuccessMsgWithUndo(`ההכנה "${name}" עודכנה בהצלחה`, undo)
       }
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg('שגיאה בעדכון ההכנה')
-      this.logging.error({
-        event: 'crud.preparations.update_error',
-        message: 'Preparation update error',
-        context: { err }
-      })
-    }
+    })
   }
 
   async deleteCategory(key: string): Promise<void> {
     const trimmed = key.trim().toLowerCase()
-    const updated = this.categories().filter((c) => c !== trimmed)
-    if (updated.length === this.categories().length) return
-    try {
-      const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
-      const doc = registries[0]
-      const payload: PreparationRegistryDoc = doc
-        ? { ...doc, categories: updated }
-        : { categories: updated, preparations: [] }
-      if (doc?._id) {
-        await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
-      } else {
-        await this.persistDoc(payload)
-      }
-      this.categories.set(updated)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg('שגיאה במחיקת הקטגוריה')
-      this.logging.error({
-        event: 'crud.preparations.category.delete_error',
-        message: 'Preparation category delete error',
-        context: { err }
-      })
-    }
+    await this.run('category.delete', 'שגיאה במחיקת הקטגוריה', async () => {
+      await this.taxonomy.removeByKey('prepCategory', trimmed)
+    })
   }
 
   async renameCategory(oldKey: string, newKey: string, newLabel: string): Promise<void> {
     const sanitizedNew = newKey.trim().toLowerCase().replace(/\s+/g, '_')
     if (!sanitizedNew || sanitizedNew === oldKey) return
-    const updatedCats = this.categories().map((c) => (c === oldKey ? sanitizedNew : c))
-    const updatedPreps = this.preparations_().map((p) => (p.category === oldKey ? { ...p, category: sanitizedNew } : p))
-    try {
-      const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
-      const doc = registries[0]
-      const payload: PreparationRegistryDoc = doc
-        ? { ...doc, categories: updatedCats, preparations: updatedPreps }
-        : { categories: updatedCats, preparations: updatedPreps }
-      if (doc?._id) {
-        await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
-      } else {
-        await this.persistDoc(payload)
+    await this.run('category.rename', 'שגיאה בעדכון הקטגוריה', async () => {
+      // The server carries the new key into recipes/dishes; the preparations filed under the
+      // category are taxonomy terms themselves, so they are moved here.
+      await this.taxonomy.updateByKey('prepCategory', oldKey, { key: sanitizedNew })
+      for (const prep of this.taxonomy.terms('preparation')()) {
+        if (prep.categoryKey === oldKey && this.taxonomy.canEdit(prep)) {
+          await this.taxonomy.update(prep, { categoryKey: sanitizedNew })
+        }
       }
-      this.categories.set(updatedCats)
-      this.preparations_.set(updatedPreps)
       this.translationService.updateDictionary(sanitizedNew, newLabel.trim())
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg('שגיאה בעדכון הקטגוריה')
-      this.logging.error({
-        event: 'crud.preparations.category.rename_error',
-        message: 'Preparation category rename error',
-        context: { err }
-      })
-    }
+    })
   }
 
   async registerPreparation(name: string, category: string): Promise<void> {
@@ -317,37 +187,37 @@ export class PreparationRegistryService {
 
     const key = await this.keyResolution.ensureKeyForContext(sanitizedCategory, 'preparation_category')
     if (sanitizedCategory && !key) return
-    const cats = this.categories()
-    const categoryExists = key != null && cats.includes(key)
-    if (!categoryExists && key) {
+    if (key && !this.taxonomy.find('prepCategory', key)) {
       await this.registerCategory(key, sanitizedCategory)
     }
+    if (this.getPreparationByName(sanitizedName)) return
 
-    const preps = this.preparations_()
-    const exists = preps.some((p) => p.name.toLowerCase() === sanitizedName.toLowerCase() && p.category === key)
-    if (exists) return
-
-    const entry: PreparationEntry = { name: sanitizedName, category: key ?? '' }
-    const updated = [...preps, entry]
-
-    try {
-      const registries = await this.storageService.query<PreparationRegistryDoc>(STORAGE_KEY)
-      const doc = registries[0]
-      const payload: PreparationRegistryDoc = doc
-        ? { ...doc, preparations: updated }
-        : { categories: this.categories(), preparations: updated }
-
-      if (doc?._id) {
-        await this.storageService.put(STORAGE_KEY, { ...payload, _id: doc._id })
-      } else {
-        await this.persistDoc(payload)
-      }
-      this.preparations_.set(updated)
+    await this.run('save', 'שגיאה בשמירת ההכנה', async () => {
+      await this.taxonomy.add('preparation', sanitizedName, key ? { categoryKey: key } : {})
       this.userMsgService.onSetSuccessMsg(`ההכנה "${sanitizedName}" נוספה בהצלחה`)
+    })
+  }
+
+  /** Runs a write; shows the store's own message (read-only / in use) or `fallbackMsg`. */
+  private async run(event: string, fallbackMsg: string, write: () => Promise<void>): Promise<void> {
+    try {
+      await write()
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg('שגיאה בשמירת ההכנה')
-      this.logging.error({ event: 'crud.preparations.save_error', message: 'Preparation save error', context: { err } })
+      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? fallbackMsg)
+      this.logging.error({
+        event: `crud.preparations.${event}_error`,
+        message: `Preparation ${event} error`,
+        context: { err }
+      })
     }
+  }
+
+  private logLoadError(err: unknown): void {
+    this.logging.error({
+      event: 'crud.preparations.load_error',
+      message: 'Failed to load preparation registry',
+      context: { err }
+    })
   }
 }

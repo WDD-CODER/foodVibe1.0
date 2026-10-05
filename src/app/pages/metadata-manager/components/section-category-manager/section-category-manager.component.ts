@@ -8,6 +8,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
+import { TaxonomyStore } from '@services/taxonomy-store.service'
 
 @Component({
   selector: 'app-section-category-manager',
@@ -25,6 +26,7 @@ export class SectionCategoryManagerComponent implements OnInit {
   private readonly translation = inject(TranslationService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
+  private readonly taxonomy = inject(TaxonomyStore)
 
   protected readonly categories = this.sectionCategories.sectionCategories_
   protected readonly editingName_ = signal<string | null>(null)
@@ -79,8 +81,14 @@ export class SectionCategoryManagerComponent implements OnInit {
   }
 
   onStartRename(name: string): void {
-    if (!this.requireSignIn()) return
+    if (!this.requireSignIn() || !this.canEdit(name)) return
     this.editingName_.set(name)
+  }
+
+  /** Shared terms are read-only except for an admin (Plan 321 Phase 3); own terms are always editable. */
+  canEdit(name: string): boolean {
+    const term = this.taxonomy.find('sectionCategory', name)
+    return !term || this.taxonomy.canEdit(term)
   }
 
   async onRenameBlur(oldName: string, newValue: string): Promise<void> {

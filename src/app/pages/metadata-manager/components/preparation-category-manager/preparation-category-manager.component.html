@@ -41,24 +41,33 @@
               <span class="item-label" (dblclick)="onStartRename(key)">{{ key | translatePipe }}</span>
             }
             <div class="item-actions">
-              <button
-                type="button"
-                class="btn-edit"
-                (click)="onStartRename(key)"
-                [disabled]="!isLoggedIn()"
-                [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-              >
-                <lucide-icon name="pencil" [size]="14"></lucide-icon>
-              </button>
-              <button
-                type="button"
-                class="c-icon-btn danger"
-                (click)="onRemove(key)"
-                [disabled]="!isLoggedIn()"
-                [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-              >
-                <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-              </button>
+              @if (canEdit(key)) {
+                <button
+                  type="button"
+                  class="btn-edit"
+                  (click)="onStartRename(key)"
+                  [disabled]="!isLoggedIn()"
+                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+                >
+                  <lucide-icon name="pencil" [size]="14"></lucide-icon>
+                </button>
+                <button
+                  type="button"
+                  class="c-icon-btn danger"
+                  (click)="onRemove(key)"
+                  [disabled]="!isLoggedIn()"
+                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+                >
+                  <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                </button>
+              } @else {
+                <lucide-icon
+                  name="lock"
+                  [size]="14"
+                  [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
+                  [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+                ></lucide-icon>
+              }
             </div>
           </div>
         }

@@ -6,17 +6,33 @@ import { StorageService } from './async-storage.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
+import { UserService } from './user.service'
+import { signal } from '@angular/core'
+
+/** Fake taxonomyTerms backend: query returns the given terms; post echoes the body as a stored term. */
+function fakeTermStorage(terms: Record<string, unknown>[] = []): jasmine.SpyObj<StorageService> {
+  const spy = jasmine.createSpyObj<StorageService>('StorageService', ['query', 'put', 'post', 'remove'])
+  spy.query.and.callFake(<T>(type: string) => Promise.resolve((type === 'taxonomyTerms' ? terms : []) as T[]))
+  spy.post.and.callFake(<T>(_type: string, body: T) =>
+    Promise.resolve({
+      _id: 'new-' + String((body as { key?: string }).key),
+      userId: 'u1',
+      schemaVersion: 2,
+      createdAt: 1,
+      updatedAt: 1,
+      ...body
+    })
+  )
+  spy.remove.and.returnValue(Promise.resolve())
+  return spy
+}
 
 describe('PreparationRegistryService', () => {
   let service: PreparationRegistryService
   let storageSpy: jasmine.SpyObj<StorageService>
 
   beforeEach(fakeAsync(() => {
-    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post', 'replaceAll'])
-    storageSpy.query.and.returnValue(Promise.resolve([]))
-    storageSpy.put.and.returnValue(Promise.resolve({ _id: 'p1' }))
-    storageSpy.post.and.returnValue(Promise.resolve({ _id: 'p1', categories: [], preparations: [] }))
-    storageSpy.replaceAll.and.returnValue(Promise.resolve())
+    storageSpy = fakeTermStorage()
 
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     const translationSpy = jasmine.createSpyObj('TranslationService', [
@@ -35,6 +51,7 @@ describe('PreparationRegistryService', () => {
         provideHttpClientTesting(),
         PreparationRegistryService,
         { provide: StorageService, useValue: storageSpy },
+        { provide: UserService, useValue: { user_: signal(null) } },
         { provide: UserMsgService, useValue: userMsgSpy },
         { provide: TranslationService, useValue: translationSpy },
         { provide: KeyResolutionService, useValue: keyResolutionSpy }
@@ -51,16 +68,17 @@ describe('PreparationRegistryService', () => {
     expect(service.allPreparations_()).toEqual([])
   })
 
-  it('should register a category and persist', fakeAsync(() => {
-    storageSpy.query.and.returnValue(Promise.resolve([]))
+  it('should register a category and persist it as a prepCategory term', fakeAsync(() => {
     service.registerCategory('cooking_station', 'עמדת בישול')
     tick()
     expect(service.preparationCategories_()).toContain('cooking_station')
-    expect(storageSpy.replaceAll).toHaveBeenCalled()
+    expect(storageSpy.post).toHaveBeenCalledWith(
+      'taxonomyTerms',
+      jasmine.objectContaining({ kind: 'prepCategory', key: 'cooking_station' })
+    )
   }))
 
   it('should register a preparation and persist', fakeAsync(() => {
-    storageSpy.query.and.returnValue(Promise.resolve([{ _id: 'p1', categories: ['מטבח'], preparations: [] }]))
     service.registerPreparation('רוטב עגבניות', 'מטבח')
     flush()
     expect(service.allPreparations_().length).toBe(1)

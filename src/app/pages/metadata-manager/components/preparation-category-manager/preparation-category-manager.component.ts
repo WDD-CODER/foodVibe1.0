@@ -11,6 +11,7 @@ import { TranslationService } from '@services/translation.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
+import { TaxonomyStore } from '@services/taxonomy-store.service'
 
 @Component({
   selector: 'app-preparation-category-manager',
@@ -31,6 +32,7 @@ export class PreparationCategoryManagerComponent implements OnInit {
   private readonly translationKeyModal = inject(TranslationKeyModalService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
+  private readonly taxonomy = inject(TaxonomyStore)
 
   protected readonly categories = this.prepRegistry.preparationCategories_
   protected readonly editingKey_ = signal<string | null>(null)
@@ -110,8 +112,14 @@ export class PreparationCategoryManagerComponent implements OnInit {
   }
 
   onStartRename(key: string): void {
-    if (!this.requireSignIn()) return
+    if (!this.requireSignIn() || !this.canEdit(key)) return
     this.editingKey_.set(key)
+  }
+
+  /** Shared terms are read-only except for an admin (Plan 321 Phase 3); own terms are always editable. */
+  canEdit(key: string): boolean {
+    const term = this.taxonomy.find('prepCategory', key)
+    return !term || this.taxonomy.canEdit(term)
   }
 
   async onRenameBlur(oldKey: string, newValue: string): Promise<void> {
