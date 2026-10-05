@@ -520,35 +520,6 @@ export class KitchenStateService {
     return affected.length
   }
 
-  /** Cascade-rename a label key across every recipe/dish that references it (both labels
-   *  and autoLabels), so fixing a typo doesn't require delete + recreate + manual re-tag.
-   *  Returns the number of items updated. */
-  async cascadeRenameLabelForAll(oldKey: string, newKey: string): Promise<number> {
-    const affected = this.recipes_().filter(
-      (r) => (r.labels ?? []).includes(oldKey) || (r.autoLabels ?? []).includes(oldKey)
-    )
-    for (const recipe of affected) {
-      const rename = (arr: string[]) => [...new Set(arr.map((l) => (l === oldKey ? newKey : l)))]
-      const updated: Recipe = {
-        ...recipe,
-        labels: rename(recipe.labels ?? []),
-        autoLabels: rename(recipe.autoLabels ?? [])
-      }
-      await this.applyCascadeUpdate(recipe, updated)
-    }
-    return affected.length
-  }
-
-  /** Cascade-rename a course key across every recipe/dish that has it set. Returns the
-   *  number of items updated. */
-  async cascadeRenameCourseForAll(oldKey: string, newKey: string): Promise<number> {
-    const affected = this.recipes_().filter((r) => r.course === oldKey)
-    for (const recipe of affected) {
-      await this.applyCascadeUpdate(recipe, { ...recipe, course: newKey })
-    }
-    return affected.length
-  }
-
   /** Plan 322 M8: cascade-remove a deleted product's ingredient line from every one of the
    *  CURRENT user's own recipes/dishes that reference it. Pulls the row out entirely rather
    *  than nulling its referenceId — a referenceless ingredient row is itself an invalid/
@@ -564,65 +535,6 @@ export class KitchenStateService {
         ingredients: (recipe.ingredients ?? []).filter((i) => i.referenceId !== productId)
       }
       await this.applyCascadeUpdate(recipe, updated)
-    }
-    return affected.length
-  }
-
-  /** Shared by cascadeRenameCategoryForAll/cascadeRenameAllergenForAll: applies one product's
-   *  update via the raw update method (not saveProduct(), which would fire one toast per
-   *  affected product for a bulk cascade) while still recording activity-log + version-history
-   *  entries, matching what saveProduct does minus the toast. */
-  private async applyProductCascadeUpdate(previous: Product, updated: Product): Promise<void> {
-    await this.productDataService.updateProduct(updated)
-    const changes = this.buildProductChanges(previous, updated)
-    this.activityLogService.recordActivity({
-      action: 'updated',
-      entityType: 'product',
-      entityId: updated._id,
-      entityName: updated.nameHebrew,
-      changes
-    })
-    try {
-      await this.versionHistoryService.addVersion({
-        entityType: 'product',
-        entityId: previous._id,
-        entityName: previous.nameHebrew,
-        snapshot: previous,
-        changes
-      })
-    } catch (err) {
-      this.logging.error({
-        event: 'crud.versionHistory.addVersion_fireAndForget_error',
-        message: 'Version history write failed after product cascade update',
-        context: { err }
-      })
-    }
-  }
-
-  /** Cascade-rename a category key across every product that references it. Returns the
-   *  number of products updated. */
-  async cascadeRenameCategoryForAll(oldKey: string, newKey: string): Promise<number> {
-    const affected = this.products_().filter((p) => (p.categories ?? []).includes(oldKey))
-    for (const product of affected) {
-      const updated: Product = {
-        ...product,
-        categories: [...new Set((product.categories ?? []).map((c) => (c === oldKey ? newKey : c)))]
-      }
-      await this.applyProductCascadeUpdate(product, updated)
-    }
-    return affected.length
-  }
-
-  /** Cascade-rename an allergen key across every product that references it. Returns the
-   *  number of products updated. */
-  async cascadeRenameAllergenForAll(oldKey: string, newKey: string): Promise<number> {
-    const affected = this.products_().filter((p) => (p.allergens ?? []).includes(oldKey))
-    for (const product of affected) {
-      const updated: Product = {
-        ...product,
-        allergens: [...new Set((product.allergens ?? []).map((a) => (a === oldKey ? newKey : a)))]
-      }
-      await this.applyProductCascadeUpdate(product, updated)
     }
     return affected.length
   }

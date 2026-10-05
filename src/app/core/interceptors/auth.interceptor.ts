@@ -1,15 +1,20 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http'
-import { inject } from '@angular/core'
+import { inject, Injector } from '@angular/core'
 import { Router } from '@angular/router'
 import { BehaviorSubject, catchError, filter, switchMap, take, throwError, timeout } from 'rxjs'
 import { LoggingService } from '@services/logging.service'
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
 import { environment } from '../../../environments/environment'
 
 const REFRESH_URL = '/api/v1/auth/refresh'
 const LOGIN_URL = '/api/v1/auth/login'
 const REFRESH_TIMEOUT_MS = 10_000
+// Generic data API: its write limiter (server/routes/generic.js) answers 429. Auth and AI
+// endpoints show their own 429 messages, so the toast is limited to this path.
+const DATA_API_PATH = '/api/v1/data/'
 
 // Guard against concurrent 401s: only one refresh call in-flight at a time.
 // Subsequent 401s queue here and replay once the new token is emitted.
@@ -32,6 +37,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const userService = inject(UserService)
   const authModal = inject(AuthModalService)
   const router = inject(Router)
+  // Resolved only on a 429: TranslationService loads its dictionary over HttpClient, so
+  // injecting it eagerly here would be a circular dependency during its own construction.
+  const injector = inject(Injector)
 
   // Only our own backend should ever see this token — third-party APIs called directly
   // from the browser (e.g. CloudinaryService's direct upload) must never get it, and
@@ -102,6 +110,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             return throwError(() => refreshErr)
           })
         )
+      }
+
+      if (err.status === 429 && req.url.includes(DATA_API_PATH)) {
+        injector.get(UserMsgService).onSetErrorMsg(injector.get(TranslationService).translate('rate_limited'))
       }
 
       if (err.status && err.status >= 400 && err.status !== 404 && !req.url.startsWith(environment.logServerUrl)) {
