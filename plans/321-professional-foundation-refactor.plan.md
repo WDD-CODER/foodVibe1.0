@@ -333,7 +333,7 @@ Replace the 10+ single-doc registries and their 6 hand-rolled services with one 
 ### Steps
 0. **Reality Check.** In particular, check whether the Metadata Manager mobile jump-nav / design-port work has changed these components since the snapshot.
 1. **Schema:** `shared/schemas/entities/taxonomy-term.schema.ts`, a discriminated union on `kind`: `ingredientCategory | allergen | label | unit | prepCategory | menuType | eventType | sectionCategory | equipmentCategory`, **and already `course | protein`** (plus `kosherType` if G3 is pre-approved; otherwise add it in Phase 4). Common fields: `_id, kind, key, ownerId, sortOrder, createdAt, updatedAt, deletedAt?`. Kind-specific fields: `label.color`, `label.autoTriggers`, `unit.gramRate`, `menuType.fields`, `prepCategory.parentKey?`. Unique index on `{ kind, key, ownerId }`.
-2. **Migration `0002-taxonomy-terms.js`:** explode each `{ items }` doc into term docs. Registry order becomes `sortOrder`. Keep master-owned terms as `ownerId: 'master'`. User-owned registry copies are reduced to **only the terms that don't exist in master** (the per-user copies are an artifact of the copy model). **Report** every user term that differs from master by more than key. Use the plan-319 cluster data to *report* (not merge) near-duplicates. Merging is a Phase 4 decision.
+2. **Migration `0003-taxonomy-terms.js`:** explode each `{ items }` doc into term docs. Registry order becomes `sortOrder`. Keep master-owned terms as `ownerId: 'master'`. User-owned registry copies are reduced to **only the terms that don't exist in master** (the per-user copies are an artifact of the copy model). **Report** every user term that differs from master by more than key. Use the plan-319 cluster data to *report* (not merge) near-duplicates. Merging is a Phase 4 decision.
 3. **Server:** term reads return master ∪ own. Term writes go through the enforce-mode validator. Deleting a term that's referenced by any doc is blocked (same pattern as product referential integrity in `generic.js` DELETE), or it's soft-deleted with a "still used by N items" warning. **Ask the Human which.**
 4. **Client:** one `TaxonomyStore` service (signals, `inject()`), `terms(kind)` returns a readonly signal, plus `add/rename/reorder/remove(kind, …)`, built on `BaseEntityDataService` if that fits, otherwise a sibling base. Re-implement the six services as thin facades over it first (so call sites don't change), then inline the facades away in the same PR where it's cheap. Metadata Manager tabs become one generic `taxonomy-kind-manager` component parameterized by `kind` (the design-port layout stays as-is).
 5. Delete the old registry collections only after `verify` passes **and** a full app smoke test. Keep the backup.
@@ -552,6 +552,66 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 
 ---
 
+## Read-Write Scope
+
+**Per-phase scope.** Phases run one at a time, one claim each, so this block covers only
+the **current phase** (Phase 3 — Unified taxonomy store). Before the next phase is claimed,
+the Planner replaces this block on `main` with that phase's globs (from its "Files to
+check first" + Steps). Do not widen it to the whole plan.
+
+Always allowed regardless of the list below: this plan file itself, its own
+docs/session-state-<branch>.md, docs/session-state-foundation-refactor.md,
+.claude/sessions/**, .worktree-*, and the append-only hotspots (src/styles.scss,
+public/assets/data/dictionary.json, src/app/app.routes.ts — add to them, never rewrite
+or remove an existing entry without escalating).
+
+```scope
+shared/schemas/**
+server/migrations/**
+server/constants/collections.js
+server/middleware/validate.js
+server/routes/generic.js
+server/services/seed-master.js
+server/services/clone-master.js
+server/services/sync-master.js
+server/db.js
+server/test/**
+src/app/core/models/v2/**
+src/app/core/services/taxonomy-store.service.ts
+src/app/core/services/taxonomy-store.service.spec.ts
+src/app/core/services/metadata-registry.service.ts
+src/app/core/services/metadata-registry.service.spec.ts
+src/app/core/services/menu-section-categories.service.ts
+src/app/core/services/preparation-registry.service.ts
+src/app/core/services/preparation-registry.service.spec.ts
+src/app/core/services/unit-registry.service.ts
+src/app/core/services/unit-registry.service.spec.ts
+src/app/core/services/equipment-category-registry.service.ts
+src/app/core/services/menu-event-type.service.ts
+src/app/core/resolvers/menu-section-categories-ensure-loaded.resolver.ts
+src/app/core/resolvers/preparations-ensure-loaded.resolver.ts
+src/app/pages/metadata-manager/**
+```
+
+Phase 3 file overlap — check in Step 0 (P3.0) before writing: Plans 322 (metadata rename
+cascade), 323 (registry single source of truth), 375–378 (dish types, units) also edit the
+registry services or Metadata Manager. Only one of them may be in flight at a time.
+
+Migration numbering: `0001`/`0002` are taken (v2 schema, trash/history). Phase 3's
+taxonomy migration is **`0003-taxonomy-terms.js`**, and the later ones shift by one
+(label split `0004`, shared master `0005`, soft-delete unify `0006`).
+
+## Read Scope
+
+Entire repo. Analysis and architectural suggestions are expected.
+
+## Escalation Protocol
+
+Thinking outside the box is expected; writing outside it requires explicit consent. If a
+Worker needs a file outside the ## Read-Write Scope above: STOP, tell the Human the file,
+the exact change, and why it can't be done in-scope; wait for approved: <path>; then
+append the path to the scope block above and retry.
+
 ## Out of scope (tracked, not done here)
 - Server → TypeScript conversion (Zod-generated CJS gives the server validated shapes; revisit after Phase 8).
 - i18n library migration (plan 248 Transloco; `dictionary.json` stays).
@@ -631,7 +691,7 @@ Encode the new architecture so future sessions (and future Dandan) can't quietly
 ### Phase 3 — Taxonomy store
 - [ ] P3.0 Reality Check + Human go
 - [ ] P3.1 `taxonomy-term.schema.ts` (incl. `course`, `protein`)
-- [ ] P3.2 `server/migrations/0002-taxonomy-terms.js`
+- [ ] P3.2 `server/migrations/0003-taxonomy-terms.js` (0002 is taken by trash/history)
 - [ ] P3.3 Server term reads/writes + referenced-term delete policy (ask)
 - [ ] P3.4 `TaxonomyStore` + facades → remove six registry services; generic `taxonomy-kind-manager` in Metadata Manager
 - [ ] P3.5 Drop old registry collections after verify
