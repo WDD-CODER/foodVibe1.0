@@ -293,18 +293,28 @@
   display: inline-block;
 }
 
+// Anchored under the chip (a sibling of it), aligned to its inline-start edge.
+// No overflow clipping, so the scrollable list below the search box stays visible.
 .event-type-dropdown {
   position: absolute;
-  top: calc(100% + 4px);
-  left: 50%;
-  transform: translateX(-50%);
+  inset-block-start: calc(100% + 4px);
+  inset-inline-start: 0;
   z-index: 200;
+
   min-width: 220px;
+  max-inline-size: min(18rem, calc(100vw - 2rem));
+
   background: #fdfdfa;
+
   border: 1px solid #d0c8b4;
   border-radius: 8px;
+
   box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  overflow: hidden;
+
+  // The shared dropdown is absolutely positioned by default; here it flows under the search box.
+  ::ng-deep .c-dropdown {
+    position: static;
+  }
 }
 
 .event-type-search {
@@ -616,6 +626,15 @@
   }
 }
 
+// Chip-sized list: anchored to the trigger's start edge and as wide as its options,
+// instead of stretching to the (narrow) chip width.
+.event-chip-select ::ng-deep .c-dropdown {
+  inset-inline: auto;
+  inset-inline-start: 0;
+
+  min-width: max-content;
+}
+
 .event-chip-sep {
   color: #c8b890;
   margin: 0 4px;
@@ -705,6 +724,19 @@
   }
 }
 
+// Compact −/+ stepper sized to the meta line (the base .counter-pill is form-sized).
+.guest-counter-pill {
+  height: auto;
+
+  border: none;
+
+  .counter-pill-btn {
+    width: 1.25rem;
+
+    color: inherit;
+  }
+}
+
 .guest-chip-input {
   width: 3ch;
   font-family: var(--font-serif);
@@ -776,7 +808,6 @@
 }
 
 @media (max-width: 620px) {
-  .meta-trigger,
   .section-title-plain,
   .add-dish-btn,
   .add-section-btn {
@@ -786,18 +817,5 @@
   .counter-pill-btn {
     min-inline-size: 44px;
     min-block-size: 44px;
-  }
-
-  // Sub-fix 1: menu title wraps on narrow screens
-  .meta-input.menu-name-input {
-    white-space: normal;
-    word-break: break-word;
-    overflow-wrap: break-word;
-  }
-
-  // Sub-fix 2: serving-style select — width fits content, not full row
-  .meta-row app-custom-select {
-    width: fit-content;
-    max-width: 12rem;
   }
 }

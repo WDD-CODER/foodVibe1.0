@@ -151,6 +151,16 @@
         <!-- Tag line: event type · serving type -->
         <div class="event-tag-line">
           <div class="event-type-chip-wrap" (clickOutside)="closeEventTypeDropdown()">
+            <button
+              type="button"
+              class="event-chip"
+              id="menu-focus-eventType"
+              [attr.aria-expanded]="eventTypeDropdownOpen_()"
+              (click)="openEventTypeDropdown()"
+              (keydown)="onMetaKeydown('eventType', $event)"
+            >
+              {{ ((form_.value.eventType ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
+            </button>
             @if (eventTypeDropdownOpen_()) {
             <div class="event-type-dropdown">
               <input
@@ -188,17 +198,6 @@
                 </button>
               </app-scrollable-dropdown>
             </div>
-            } @else {
-            <button
-              type="button"
-              class="event-chip"
-              id="menu-focus-eventType"
-              [attr.aria-expanded]="eventTypeDropdownOpen_()"
-              (click)="openEventTypeDropdown()"
-              (keydown)="onMetaKeydown('eventType', $event)"
-            >
-              {{ ((form_.value.eventType ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
-            </button>
             }
           </div>
           <span class="event-chip-sep">·</span>
@@ -207,7 +206,9 @@
             formControlName="servingType"
             [options]="servingTypeOptions_()"
             [placeholder]="'menu_serving_style'"
-            [typeToFilter]="true"
+            variant="chip"
+            [compact]="true"
+            [maxHeight]="160"
             class="event-chip-select"
             (keydown)="onMetaKeydown('servingType', $event)"
           />
@@ -220,22 +221,42 @@
           class="menu-title-input"
           formControlName="name"
           [attr.aria-label]="'menu_name_placeholder' | translatePipe"
-          placeholder="שם האירוע..."
+          [placeholder]="'menu_event_name_placeholder' | translatePipe"
           (keydown)="onMetaKeydown('name', $event)"
         />
 
         <!-- Meta line: guests · date -->
         <div class="event-meta-line">
           <span class="event-meta-chip event-meta-chip--guests">
-            <input
-              id="menu-focus-guestCount"
-              type="number"
-              class="guest-chip-input"
-              formControlName="guestCount"
-              min="0"
-              [attr.aria-label]="'menu_guests' | translatePipe"
-              (keydown)="onMetaKeydown('guestCount', $event)"
-            />
+            <span class="counter-pill guest-counter-pill">
+              <button
+                type="button"
+                class="counter-pill-btn"
+                tabindex="-1"
+                [attr.aria-label]="'decrease' | translatePipe"
+                (click)="decrementGuests()"
+              >
+                <lucide-icon name="minus" [size]="12"></lucide-icon>
+              </button>
+              <input
+                id="menu-focus-guestCount"
+                type="number"
+                class="guest-chip-input"
+                formControlName="guestCount"
+                min="0"
+                [attr.aria-label]="'menu_guests' | translatePipe"
+                (keydown)="onMetaKeydown('guestCount', $event)"
+              />
+              <button
+                type="button"
+                class="counter-pill-btn"
+                tabindex="-1"
+                [attr.aria-label]="'increase' | translatePipe"
+                (click)="incrementGuests()"
+              >
+                <lucide-icon name="plus" [size]="12"></lucide-icon>
+              </button>
+            </span>
             {{ 'menu_guests' | translatePipe }}
           </span>
           <span class="event-chip-sep">·</span>
