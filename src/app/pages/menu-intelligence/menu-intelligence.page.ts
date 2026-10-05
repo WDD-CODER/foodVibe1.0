@@ -148,6 +148,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected readonly sectionCategories_ = this.menuSectionCategories.sectionCategories_
 
+  /** Guest −/+ press-and-hold repeat (same timing as the shared counter). */
+  private static readonly GUEST_REPEAT_DELAY_MS = 500
+  private static readonly GUEST_REPEAT_INTERVAL_MS = 80
+  private guestHoldTimer_: ReturnType<typeof setTimeout> | null = null
+
   /** Track saved snapshot for dirty detection */
   private savedSnapshot_ = ''
   /** For pendingChangesGuard: prevents re-triggering after a successful save */
@@ -176,6 +181,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly eventTypeSearch_ = signal('')
   /** Focus order for keyboard navigation */
   protected readonly FOCUS_ORDER = ['name', 'eventType', 'servingType', 'guestCount', 'eventDate'] as const
+
+  /** Section controls for the template's @for. A fresh array on every form change, so this
+   * OnPush view re-renders when sections load or change even when the footer totals stay
+   * the same (an unchanged computed value does not trigger a refresh). */
+  protected readonly sectionControls_ = computed(() => {
+    this.formValueVersion_() // depend on form changes
+    return [...this.sectionsArray.controls]
+  })
 
   protected readonly eventCost_ = computed(() => {
     this.formValueVersion_() // depend on form changes
@@ -294,6 +307,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     document.removeEventListener('keydown', this._boundOnDocumentKeydown, { capture: true })
     this.closeAllExportOverlays()
     this.heroFab.clearPageActions()
+    this.stopGuestHold()
   }
 
   ngAfterViewInit(): void {
@@ -363,16 +377,31 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  protected incrementGuests(): void {
-    const ctrl = this.form_.get('guestCount')
-    const v = Number(ctrl?.value ?? 0)
-    ctrl?.setValue(quantityIncrement(v, 0, { integerOnly: true }))
+  /** Tap steps by 1; holding repeats with the app's tiered hold steps (1…9, then 10s, 100s). */
+  protected startGuestHold(direction: 1 | -1, event: PointerEvent): void {
+    event.preventDefault()
+    this.stopGuestHold()
+    this.stepGuests(direction, false)
+    const tick = (): void => {
+      this.stepGuests(direction, true)
+      this.guestHoldTimer_ = setTimeout(tick, MenuIntelligencePage.GUEST_REPEAT_INTERVAL_MS)
+    }
+    this.guestHoldTimer_ = setTimeout(tick, MenuIntelligencePage.GUEST_REPEAT_DELAY_MS)
   }
 
-  protected decrementGuests(): void {
+  protected stopGuestHold(): void {
+    if (this.guestHoldTimer_ == null) return
+    clearTimeout(this.guestHoldTimer_)
+    this.guestHoldTimer_ = null
+  }
+
+  private stepGuests(direction: 1 | -1, continuousPress: boolean): void {
     const ctrl = this.form_.get('guestCount')
     const v = Number(ctrl?.value ?? 0)
-    ctrl?.setValue(quantityDecrement(v, 0, { integerOnly: true }))
+    const opts = continuousPress ? { continuousPress: true } : { integerOnly: true }
+    const next = direction === 1 ? quantityIncrement(v, 0, opts) : quantityDecrement(v, 0, opts)
+    ctrl?.setValue(next)
+    if (next <= 0) this.stopGuestHold()
   }
 
   protected getGuestCount(): number {

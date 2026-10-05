@@ -234,7 +234,11 @@
                 class="counter-pill-btn"
                 tabindex="-1"
                 [attr.aria-label]="'decrease' | translatePipe"
-                (click)="decrementGuests()"
+                (pointerdown)="startGuestHold(-1, $event)"
+                (pointerup)="stopGuestHold()"
+                (pointerleave)="stopGuestHold()"
+                (pointercancel)="stopGuestHold()"
+                (contextmenu)="$event.preventDefault()"
               >
                 <lucide-icon name="minus" [size]="12"></lucide-icon>
               </button>
@@ -252,7 +256,11 @@
                 class="counter-pill-btn"
                 tabindex="-1"
                 [attr.aria-label]="'increase' | translatePipe"
-                (click)="incrementGuests()"
+                (pointerdown)="startGuestHold(1, $event)"
+                (pointerup)="stopGuestHold()"
+                (pointerleave)="stopGuestHold()"
+                (pointercancel)="stopGuestHold()"
+                (contextmenu)="$event.preventDefault()"
               >
                 <lucide-icon name="plus" [size]="12"></lucide-icon>
               </button>
@@ -288,7 +296,7 @@
 
         <!-- Sections: category looks like plain text; dropdown only on click -->
         <div class="sections-area" formArrayName="sections">
-          @for (section of sectionsArray.controls; track section.get('_id')?.value; let sectionIndex = $index) {
+          @for (section of sectionControls_(); track section.get('_id')?.value; let sectionIndex = $index) {
           <div class="menu-section" [formGroupName]="sectionIndex">
             @if (sectionIndex > 0) {
             <div class="section-divider">✦</div>
