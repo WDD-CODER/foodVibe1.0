@@ -181,3 +181,9 @@ diff under `shared/`, `server/`, `src/app/core/services/` or `metadata-manager/`
 - `seed-master.js`: a fresh DB gets the default master terms (the client no longer seeds per-user registries).
 - Local re-sync 0003 → 177 terms; 3 stale master categories (`aaa`, `cccc`, `dddd`) left from the first write (upsert never deletes). Human verified the 5 browser checks locally.
 - Remaining P3.4: shrink facades to ≤30 lines / inline them; generic `taxonomy-kind-manager`. P3.5: drop old registry collections + plan 322 registry routes after Atlas run + smoke.
+
+## P3.2 — Atlas run (2026-10-05)
+
+- Backup `foodvibe-db-backups/atlas-2026-10-05T08-37-18` (35 collections, 34362 docs).
+- 0003 dry run → write → verify on Atlas: 162 master terms, 0 user-only, 0 differing, 0 invalid; 648 identical user copies dropped; 282 extra registry docs skipped (checked: none holds a key missing from master).
+- Next: merge PR #253 → deploy → Human smoke test on the live app. Then P3.4 cleanup and P3.5 (drop old registry collections + plan 322 registry routes).
