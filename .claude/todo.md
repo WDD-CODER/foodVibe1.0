@@ -493,13 +493,6 @@
 - [ ] A9: Classify the new files in the workflow-kit manifest.
 - [ ] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
 
-### Plan 388 — On-demand remote port for validation (`plans/388-on-demand-remote-port.plan.md`)
-- [ ] A1: Proxy module + `node --test` suite (`scripts/lib/remote-proxy.mjs`, `scripts/lib/remote-proxy.test.mjs`).
-- [ ] A2: CLI on/off/status + state file + TTL cleanup; `.gitignore` (`scripts/remote-port.mjs`, `.gitignore`).
-- [ ] A3: Remote-aware `environment.local.ts`; `generateEnvironmentSlot()` regex; regenerate and check `environment.slot.ts`.
-- [ ] A4: `/remote` command, `AGENTS.md` row, `commands.md` line, `docs/agent/remote-port.md`.
-- [ ] A5: Build + tests; live check from this slot; update session-state.
-
 ### Plan 389 — Workflow Kit Validation Round 2 Fixes (`plans/389-workflow-kit-validation-round-2-fixes.plan.md`)
 - [ ] A1: Slot frees itself after merge — `standards-git.md` "Merging from a slot" ends with `node scripts/free-merged-slots.mjs`; `session-startup.sh` runs it (short timeout) before the role check so a merged slot starts idle (`scripts/session-startup.sh`, `docs/agent/standards-git.md`)
 - [ ] A2: Planner folder stays on `main` — `branch-guard.sh` denies (no auto-switch) a non-plan write in the Planner folder on `main`, telling the agent to use a slot or ask the Human for an explicit branch; `session-startup.sh` warns when the Planner folder is not on `main` (`scripts/branch-guard.sh`, `scripts/session-startup.sh`, `.claude/commands/plan.md`)
