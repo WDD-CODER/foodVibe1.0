@@ -2,7 +2,7 @@
 /**
  * Plan 321 Phase 1 — server/constants/collections.js is now the single source of
  * truth every derived list (ALL_USER_ENTITY_TYPES, CLONEABLE_TYPES,
- * SEARCHABLE_ENTITY_TYPES, and the client's BACKUP_ENTITY_TYPES) comes from.
+ * SEARCHABLE_ENTITY_TYPES, and BACKUP_ENTITY_TYPES) comes from.
  */
 
 const { COLLECTIONS, ALL_USER_ENTITY_TYPES, CLONEABLE_TYPES, SEARCHABLE_ENTITY_TYPES, BACKUP_ENTITY_TYPES } = require('../constants/collections');

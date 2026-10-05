@@ -2,15 +2,14 @@
  * Single source of truth for every collection the generic data API serves.
  * Temporary JS form — this moves into `shared/schemas/collections.ts` in Plan 321
  * Phase 2a, once the shared Zod schema package exists. Until then, this is the one
- * place all four of the previously-hand-maintained lists derive from:
- * `ALL_USER_ENTITY_TYPES` (server), `CLONEABLE_TYPES` (server), `SEARCHABLE_ENTITY_TYPES`
- * (server), `BACKUP_ENTITY_TYPES` (client — check drift with
- * `npm run lint:backup-entity-types` / `scripts/check-backup-entity-types.mjs`).
+ * place every collection list derives from: `ALL_USER_ENTITY_TYPES`, `CLONEABLE_TYPES`,
+ * `SEARCHABLE_ENTITY_TYPES`, `BACKUP_ENTITY_TYPES` (all server; the client copy of the
+ * backup list was removed with the localStorage mode in Plan 321 P1.3).
  *
  * Flags:
  *   userData   — reachable through the generic `/api/v1/data/:type` CRUD pipe
  *   cloneable  — copied into a new user's namespace at signup / kept in sync at login
- *   backup     — mirrored to `backup_<key>` in localStorage after every save
+ *   backup     — was the client localStorage mirror list (removed in Plan 321 P1.3); no runtime consumer today
  *   searchable — has the lean prefix-match `/search` endpoint
  *
  * Rules:

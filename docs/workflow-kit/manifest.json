@@ -3330,7 +3330,6 @@
       "refs": [
         "dist/food-vibe1.0/browser/",
         "scripts/backup-before-repair.mjs",
-        "scripts/check-backup-entity-types.mjs",
         "scripts/check-lucide-icons.mjs",
         "scripts/check-no-native-select.mjs",
         "scripts/diagnose-broken-refs.mjs",
@@ -3338,7 +3337,7 @@
         "scripts/repair-recipe-references.mjs",
         "scripts/todo-query.mjs"
       ],
-      "notes": "Project manifest. Workflow-called scripts (catalogue -> parameters.md): build, build:render, build:schemas (321), start/dev:local, dev:remote, test, lint, e2e, lint:icons, lint:no-native-select, lint:backup-entity-types. `dev:local` is invoked by scripts/take-plan.mjs."
+      "notes": "Project manifest. Workflow-called scripts (catalogue -> parameters.md): build, build:render, build:schemas (321), start/dev:local, dev:remote, test, lint, e2e, lint:icons, lint:no-native-select. `dev:local` is invoked by scripts/take-plan.mjs."
     },
     {
       "path": "README_WORKFLOW.md",
@@ -3490,17 +3489,6 @@
         "AGENTS.md"
       ],
       "notes": "Blocks writes on main; worktree-aware. Only a comment names wt-N; `main` branch name hardcoded (git.mainBranch)."
-    },
-    {
-      "path": "scripts/check-backup-entity-types.mjs",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "server/constants/collections.js",
-        "src/app/core/services/async-storage.service.ts"
-      ],
-      "notes": "Compares `server/constants/collections.js` with client `async-storage.service.ts` (FoodVibe data model)."
     },
     {
       "path": "scripts/check-lucide-icons.mjs",
