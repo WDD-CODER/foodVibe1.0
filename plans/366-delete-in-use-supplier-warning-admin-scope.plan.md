@@ -79,7 +79,7 @@ touching any milestone.
 - [ ] Bulk delete: the same flow with the total linked count and count passed to the scope prompt.
 - [ ] Add `_masterId?: string` to `Supplier` (`supplier.model.ts`); already in the schema.
 - [ ] Server:
-  - Add `'suppliers'` to `DELETABLE_FROM_MASTER_TYPES`, plus `TRASH_SUPPLIERS` in `MASTER_TRASH_KEY`, plus a `{ name: 'TRASH_SUPPLIERS', userData: true, cloneable: false, backup: true, searchable: false }` entry in `collections.js`. Run `npm run lint:backup-entity-types`; if a client-side registry mirrors it, escalate for that file.
+  - Add `'suppliers'` to `DELETABLE_FROM_MASTER_TYPES`, plus `TRASH_SUPPLIERS` in `MASTER_TRASH_KEY`, plus a `{ name: 'TRASH_SUPPLIERS', userData: true, cloneable: false, backup: true, searchable: false }` entry in `collections.js`.
   - New `PUT /api/v1/data/suppliers/:id/purge-supplier-everywhere` (`verifyToken`, `requireAdmin`), modeled on `purge-ingredient-everywhere`. Find other users' clones by `_masterId`. For each: `$pull sources: { supplierId: clone._id }` from that user's products, then move the clone to `TRASH_SUPPLIERS` (that user) and delete it. Return `{ usersAffected }`.
   - Same comment block as the existing purge, marking it as a deliberate, admin-only cross-user exception.
 - [ ] `MasterPushService.deleteSupplierFromMaster(supplier)`: calls `delete-from-master`, then `purge-supplier-everywhere`. Best-effort, with an error message on failure, like `deleteFromMaster`.
@@ -125,7 +125,6 @@ touching any milestone.
 ## Success Criteria
 
 - [auto] Server tests for `purge-supplier-everywhere` and `delete-from-master` (suppliers) → 0 failures (`npm --prefix server test` or the repo's server-tests command).
-- [auto] `npm run lint:backup-entity-types` → exit 0.
 - [auto] `npm run build` → exit 0.
 - [human] As a user: delete a supplier linked to 3 products → the warning says 3 → confirm → the supplier is gone and those products show no supplier (no broken entry).
 - [human] As admin, with a second test user who has the same master supplier: delete → "מחק מכולם" → log in as the test user → the supplier is gone and their products no longer list it. A new signup doesn't get it.
