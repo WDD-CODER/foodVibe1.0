@@ -124,16 +124,21 @@ export class UserService {
   }
 
   constructor() {
-    // Attempt silent session restore on page reload.
-    // If the httpOnly refresh cookie is still valid, this issues a new access token.
-    this.refreshToken().subscribe({
-      next: () => {},
-      error: () => {
-        // Refresh failed (cookie expired or absent) — clear any stale session state.
-        this._saveUserLocal(null)
-        this.clearToken()
-      }
-    })
+    // Local/slot: the auto-guest APP_INITIALIZER restores the session (or signs the guest in)
+    // a second restore here would race it.
+    if (environment.autoLoginGuest) return
+    // Attempt silent session restore on page reload. Deferred: the request runs through
+    // authInterceptor, which injects UserService — calling it mid-construction throws NG0200
+    // (circular DI), and the error branch below then signed every user out on reload.
+    queueMicrotask(() =>
+      this.refreshToken().subscribe({
+        error: () => {
+          // Refresh failed (cookie expired or absent) — clear any stale session state.
+          this._saveUserLocal(null)
+          this.clearToken()
+        }
+      })
+    )
   }
 
   // -------------------------------------------------------------------------
@@ -161,17 +166,28 @@ export class UserService {
     return this.http.post<{ token: string }>(`${this.authBase}/api/v1/auth/refresh`, {}, { withCredentials: true })
   }
 
+  // Login and signup set the fv_refresh cookie. Cross-origin (local/slot: app and API on
+  // different ports) the browser drops it without withCredentials, so the previous session's
+  // cookie (e.g. the dev guest admin) survives and a reload silently signs in as that user.
   private callBackendLogin(name: string, password: string): Observable<{ token: string; user: User }> {
-    return this.http.post<{ token: string; user: User }>(`${this.authBase}/api/v1/auth/login`, { name, password })
+    return this.http.post<{ token: string; user: User }>(
+      `${this.authBase}/api/v1/auth/login`,
+      { name, password },
+      { withCredentials: true }
+    )
   }
 
   private callBackendSignup(newUser: User, hashedPassword: string): Observable<{ token: string; user: User }> {
-    return this.http.post<{ token: string; user: User }>(`${this.authBase}/api/v1/auth/signup`, {
-      name: newUser.name,
-      email: newUser.email,
-      imgUrl: newUser.imgUrl,
-      password: hashedPassword
-    })
+    return this.http.post<{ token: string; user: User }>(
+      `${this.authBase}/api/v1/auth/signup`,
+      {
+        name: newUser.name,
+        email: newUser.email,
+        imgUrl: newUser.imgUrl,
+        password: hashedPassword
+      },
+      { withCredentials: true }
+    )
   }
 
   private callBackendLogout(): Observable<void> {
@@ -211,12 +227,35 @@ export class UserService {
       tap(({ token }) => {
         this.storeToken(token)
         // Restore user signal from session if not already set (page reload case).
-        if (!this._user_()) {
-          const sessionUser = this._loadUserFromSession()
-          if (sessionUser) this._user_.set(sessionUser)
+        const current = this._user_() ?? this._loadUserFromSession()
+        const claims = this._tokenClaims(token)
+        if (claims && current?._id !== claims.userId) {
+          // The refresh cookie belongs to someone else (another tab or slot signed in since):
+          // the token decides who this session is, so the header never shows one user while
+          // saves go out as another.
+          this._saveUserLocal({ _id: claims.userId, name: claims.name, email: '', role: claims.role })
+          if (current) void this._reloadDataServices()
+        } else if (!this._user_() && current) {
+          this._user_.set(current)
         }
       })
     )
+  }
+
+  /** userId / name / role from an access token's payload, or null when it can't be read. */
+  private _tokenClaims(token: string): { userId: string; name: string; role?: 'admin' | 'user' } | null {
+    try {
+      const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+      const bytes = Uint8Array.from(atob(payload), (c) => c.charCodeAt(0))
+      const claims = JSON.parse(new TextDecoder().decode(bytes)) as {
+        userId?: string
+        name?: string
+        role?: 'admin' | 'user'
+      }
+      return claims.userId ? { userId: claims.userId, name: claims.name ?? '', role: claims.role } : null
+    } catch {
+      return null
+    }
   }
 
   private _startRefreshTimer(): void {

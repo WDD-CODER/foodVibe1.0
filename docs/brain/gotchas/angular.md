@@ -189,3 +189,13 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** Reaching for `recipeForm_.dirty`. The form is genuinely not dirty — no control changed. The mismatch is that the save payload is assembled from two sources (form + signals) while the change detection reads only one.
 
 **What to do instead:** Derive the dirty-check from the same function that builds the save payload, or treat "every field the save writes must appear in the snapshot" as an invariant enforced at review time. In a signals codebase this class of bug recurs whenever state migrates out of a form group into a signal and the comparison is not moved with it — the symptom is always silent data loss on navigate-away, never an error.
+
+---
+
+## An HTTP call in a service constructor throws NG0200 through the auth interceptor
+
+**What hurt:** `UserService`'s constructor called `refreshToken()`. The request runs through `authInterceptor`, which injects `UserService`, and that service was still being created → `NG0200: Circular dependency in DI detected for _UserService`. The error branch treated this as "session expired" and cleared the user. Locally the auto-guest initializer then signed in dev-guest (an admin), so on every reload a regular user silently became the admin, and their saves landed in the admin's data.
+
+**Why the obvious fix is wrong:** The error looked like an expired or missing refresh cookie, and adding `withCredentials` to login was a real fix too, but on its own it changed nothing: the request failed in DI before reaching the network.
+
+**What to do instead:** Never start an HTTP request synchronously in a constructor of a service that an interceptor injects. Defer it (`queueMicrotask`) or run it from an `APP_INITIALIZER`. When a "session lost on reload" bug shows up, look for NG0200 in the console first.

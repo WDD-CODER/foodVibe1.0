@@ -100,6 +100,8 @@ export class RecipeHeaderComponent {
   netoConfirmed = input<boolean>(false)
   /** Last-saved serving_portions for existing dishes. Null for new dishes (no reset button shown). */
   savedPortions = input<number | null>(null)
+  /** True when editing a saved recipe/dish — its type change is confirmed at save time instead. */
+  isExistingRecord = input<boolean>(false)
 
   // OUTPUTS
   openUnitCreator = output<string>()
@@ -214,16 +216,17 @@ export class RecipeHeaderComponent {
 
   // WRAPPERS — CDR / output handling
 
+  /** Existing records are confirmed once, at save time; a new record with content gets one confirm here. */
   protected async toggleTypeWrapper(): Promise<void> {
-    if (this.form().dirty) {
-      const confirmed = await this.confirmModal.open('type_change_confirm_message', {
-        saveLabel: 'confirm',
-        headerKey: 'type_change_confirm_header',
-        variant: 'warning'
-      })
+    if (!this.isExistingRecord() && this.form().dirty) {
+      const toDish = this.form().get('recipe_type')?.value !== 'dish'
+      const confirmed = await this.confirmModal.open(
+        toDish ? 'type_toggle_to_dish_message' : 'type_toggle_to_preparation_message',
+        { saveLabel: 'confirm', headerKey: 'type_toggle_header', variant: 'warning' }
+      )
       if (!confirmed) return
     }
-    this.yield.toggleType()
+    if (this.yield.toggleType()) this.yieldManuallyChanged.emit()
     this.cdr.markForCheck()
   }
 
