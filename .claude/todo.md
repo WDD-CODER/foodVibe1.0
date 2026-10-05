@@ -632,6 +632,16 @@
 - [ ] A3: Metadata scope prompt for units; wire the ops; global dictionary on "everyone" (`metadata-manager.page.component.*`).
 - [ ] A4: Build, server and client tests. Manual test: admin renames a custom unit for everyone → a new signup sees the new unit. Update session-state.
 
+### Plan 380 — Workflow Kit Validation Round 1 Fixes
+- [ ] A1: take-plan — squash-merge detection via the merged GitHub PR (head must match); delete the stale local branch and its old remote branch, start fresh; release any merged current branch (not only `feat/`); delete the session-state pointer on claim; one server line (`started` / `kept`) — `scripts/take-plan.mjs`
+- [ ] A2: Session-state pointer ignored when it names another branch's file — `scripts/session-state-path.mjs`
+- [ ] A3: Branch's plan wins over a mismatched `.worktree-plan`; `--list` flags it — `scripts/lib/slot.mjs`
+- [ ] A4: Drift check falls back to the commit that added the plan; save-plan always writes `Snapshot:` — `scripts/scope-check.mjs`, `.claude/skills/save-plan/SKILL.md`
+- [ ] A5: `git fetch origin --prune` after a slot merge — `docs/agent/standards-git.md`, `docs/agent/ship-regular.md`
+- [ ] A6: Validation after merge goes through the Planner, no second PR — `docs/agent/job-validation.md`
+- [ ] A7: `scripts/next-plan-number.mjs` (plans + `<type>/NNN-*` branches); save-plan numbering calls it; manifest row + `kit-owned.json` — `scripts/next-plan-number.mjs`, `docs/workflow-kit/**`, `docs/agent/workflow-map.md`
+- [ ] A8: Checks + `/ship`; Dandan commits the kit repo.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
