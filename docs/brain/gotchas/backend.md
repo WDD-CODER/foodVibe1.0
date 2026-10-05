@@ -245,3 +245,13 @@ been killed by it.
 **Why the obvious fix is wrong:** Raising the limit only hides it until the catalog grows. The loops were also pure double work: since P3.4 a term PUT that changes `key` makes the server re-key every document in `TERM_REFERENCES` (`renameTermEverywhere` in `server/routes/generic.js`).
 
 **What to do instead:** Rename the term once, then reload the affected client lists (`reloadFromStorage`). Before adding any client-side "update every doc that uses X" loop, check whether the server already does it. Delete still uses client cascade-clear, because the server blocks deleting a referenced term.
+
+---
+
+## Local ports share cookies: one login cookie for every slot
+
+**What hurt:** Cookies ignore the port, so main (4200/3000) and every slot (4201-4203 / 3001-3003) shared one `fv_refresh` cookie. A tab on another slot that auto-signed in as the guest overwrote it. The next reload in your slot renewed the session as Guest Admin, while the header still showed the signed-in user.
+
+**Why the obvious fix is wrong:** Logging out and back in works only until some other FoodVibe tab loads. Closing tabs is a workaround, not a fix.
+
+**What to do instead:** In development the refresh cookie is per port (`fv_refresh_<PORT>`, `server/routes/auth.js`). Deployed, it stays `fv_refresh`. The client takes the identity from the access token after every refresh, so what the screen shows is always the account that saves.

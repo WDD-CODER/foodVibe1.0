@@ -9,8 +9,8 @@ This file split on 2026-08-01 once the single flat file crossed ~280 lines / 21 
 | File | Scope | Entries |
 | --- | --- | --- |
 | [agent-workflow](./gotchas/agent-workflow.md) (`docs/brain/gotchas/agent-workflow.md`) | Session/context management, plan persistence and numbering, `.claude/todo.md` archiving, brain-capture gating | 12 |
-| [backend](./gotchas/backend.md) (`docs/brain/gotchas/backend.md`) | `server/` routes, data access, the Gemini AI proxy, logging transport | 16 (well over ~150-line split threshold — propose a further split next Merge Gate) |
-| [angular](./gotchas/angular.md) (`docs/brain/gotchas/angular.md`) | `src/app/` components, signals-based state, routing, change-detection behavior | 11 |
+| [backend](./gotchas/backend.md) (`docs/brain/gotchas/backend.md`) | `server/` routes, data access, the Gemini AI proxy, logging transport | 18 (well over ~150-line split threshold — propose a further split next Merge Gate) |
+| [angular](./gotchas/angular.md) (`docs/brain/gotchas/angular.md`) | `src/app/` components, signals-based state, routing, change-detection behavior | 12 |
 | [ci](./gotchas/ci.md) (`docs/brain/gotchas/ci.md`) | `.github/workflows/*`, `ng build`/`angular.json`, `npm audit` | 2 |
 | [git-workflow](./gotchas/git-workflow.md) (`docs/brain/gotchas/git-workflow.md`) | Worktrees, `gh` auth/PR mechanics, repo-tracked files that interact with commit/push/merge | 7 |
 
