@@ -189,7 +189,7 @@ has no PreToolUse hook of its own.
 | `session-state-path.mjs` | `session-startup.sh`, `handoff-check.sh`, `write-session-state.mjs` — one resolver, no duplicated logic |
 | `scope-check.mjs` | `scope-guard.sh` (`--file`), `ship-prep.mjs` (`--diff`), the Planner protocol (`--overlap`), `take-plan.mjs` + `take-plan.md` (`--drift`) |
 | `take-plan.mjs` | "execute plan NNN" / "take plan NNN" (`.claude/commands/take-plan.md`) |
-| `todo-query.mjs sync --plan NNN` / `sync --merged` | the Planner protocol (`.claude/commands/plan.md`), after a `feat/NNN-*` branch merges |
+| `todo-query.mjs sync --plan NNN` / `sync --merged` | the todo-sync Action (`.github/workflows/todo-sync.yml`) on every push to main touching `plans/**`; the Planner protocol (`.claude/commands/plan.md`) re-runs it as a no-op |
 | `free-merged-slots.mjs` | the Planner protocol (`.claude/commands/plan.md`), step 2 — detaches a `wt-N` back to idle once its branch merges into `origin/main` |
 
 Data-repair scripts (not workflow): `backup-before-repair.mjs`, `diagnose-broken-refs.mjs`, `fix-duplicate-names.mjs`, `link-users-to-master.mjs`, `migrate-to-master.mjs`, `promote-guest-to-master.js`, `push-master-to-atlas.js`, `repair-recipe-references.mjs`, `trim-demo-data.mjs`, `check-lucide-icons.mjs`, `check-no-native-select.mjs`, `remove-trailing-semicolons.mjs`, `log-server.js`.
