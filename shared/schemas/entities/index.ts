@@ -4,12 +4,14 @@ import { menuEventSchema } from './menu-event.schema'
 import { productSchema } from './product.schema'
 import { recipeSchema } from './recipe.schema'
 import { supplierSchema } from './supplier.schema'
+import { taxonomyTermSchema } from './taxonomy-term.schema'
 import { venueSchema } from './venue.schema'
 
 export * from './common.schema'
+export * from './taxonomy-term.schema'
 export { equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }
 
-/** v2 collection name -> schema (Plan 321 G2 names). Registries/trash/logs follow in later phases. */
+/** v2 collection name -> schema (Plan 321 G2 names). Trash/logs follow in later phases. */
 export const SCHEMA_BY_COLLECTION = {
   products: productSchema,
   recipes: recipeSchema,
@@ -17,7 +19,8 @@ export const SCHEMA_BY_COLLECTION = {
   suppliers: supplierSchema,
   equipment: equipmentSchema,
   venues: venueSchema,
-  menuEvents: menuEventSchema
+  menuEvents: menuEventSchema,
+  taxonomyTerms: taxonomyTermSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION

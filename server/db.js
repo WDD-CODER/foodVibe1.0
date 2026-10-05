@@ -70,6 +70,11 @@ async function connectDb() {
     )
   )
   console.log('ingredients.referenceId indexes ensured for recipes, dishes')
+
+  // Plan 321 Phase 3: one term per (kind, key, owner); same names as migration 0003 so both are idempotent.
+  await db.collection('taxonomyTerms').createIndex({ kind: 1, key: 1, userId: 1 }, { unique: true, name: 'kind_key_user_unique' })
+  await db.collection('taxonomyTerms').createIndex({ userId: 1, kind: 1, sortOrder: 1 }, { name: 'user_kind_order' })
+  console.log('taxonomyTerms indexes ensured')
 }
 
 module.exports = { connectDb }

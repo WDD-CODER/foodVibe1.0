@@ -689,10 +689,10 @@ append the path to the scope block above and retry.
 - [x] P2b.6 (DONE 2026-10-02: Human smoke test "all good" after deploy; PR #239 merged) (2026-10-02 partial: menu save, trash restore OK; menu print OK but 2 pages; Excel quantities 0 and AI-in-builder retest pending — see `docs/handoff-321-validation-findings.md`) HOW TO VALIDATE (Human): login, recipe edit + save, dish with sub-recipe, menu event build, export, trash restore; `validate-all.js` against Atlas → 0 violations; every doc `schemaVersion: 2`
 
 ### Phase 3 — Taxonomy store
-- [ ] P3.0 Reality Check + Human go
-- [ ] P3.1 `taxonomy-term.schema.ts` (incl. `course`, `protein`)
-- [ ] P3.2 `server/migrations/0003-taxonomy-terms.js` (0002 is taken by trash/history)
-- [ ] P3.3 Server term reads/writes + referenced-term delete policy (ask)
+- [x] P3.0 Reality Check + Human go — 2026-10-05, drift table in `docs/session-state-foundation-refactor.md`; Human: delete of a referenced term = **block**; near-duplicate report from `report.md` only
+- [x] P3.1 `taxonomy-term.schema.ts` (incl. `course`, `protein`) — also `kosherType` (G3=yes) and `preparation` (KITCHEN_PREPARATIONS holds `{ categories, preparations[{name,category}] }`, not `{ items }`); owner field stays `userId` per the 2b D4 deviation; registered in `SCHEMA_BY_COLLECTION`; `server/test/taxonomy-term-schema.test.js` 6/6
+- [ ] P3.2 `server/migrations/0003-taxonomy-terms.js` (0002 is taken by trash/history) — written + tests (`server/test/migration-0003-taxonomy-terms.test.js`); LOCAL written + verified 2026-10-05 (174 terms, backup `local-2026-10-05T06-57-56`); Atlas dry run/write is part of the Phase 3 deploy window
+- [x] P3.3 Server term reads/writes + referenced-term delete policy (ask) — Human: **block** (2026-10-05). `generic.js`: reads = master ∪ own; no `_masterId`/`_userModified` on terms; POST/re-key onto a master key → 409; delete / bulk delete / re-key of a term used by the caller's docs → 409 with `referencedBy` (paths in shared `TERM_REFERENCES`); indexes in `db.js`; `collections.js` entry (`backup: false` until P3.4 adds it client-side). `server/test/taxonomy-terms-api.test.js` 14/14, server 94/94. DEFERRED to P3.4: re-pointing `registry-rename-master`/`registry-delete-master` (the client still reads the old registries until then, so moving them now would break the live admin flow)
 - [ ] P3.4 `TaxonomyStore` + facades → remove six registry services; generic `taxonomy-kind-manager` in Metadata Manager
 - [ ] P3.5 Drop old registry collections after verify
 

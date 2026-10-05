@@ -54,6 +54,10 @@ const COLLECTIONS = [
   // Plan 322 M4: per-user Hebrew-dictionary overrides. Not cloneable — signup starts with none;
   // the shared '__global__' pseudo-user doc (own routes, see generic.js) is the admin-editable
   // layer every user merges in at runtime, separate from this per-user personal layer.
+  // Plan 321 Phase 3: one doc per taxonomy term. Not cloneable — read live as master ∪ own
+  // (generic.js ownerFilter). backup stays false until the client cutover (P3.4) adds it to
+  // the client's BACKUP_ENTITY_TYPES (check-backup-entity-types.mjs compares the two).
+  { name: 'taxonomyTerms',            userData: true,  cloneable: false, backup: false, searchable: false },
   { name: 'DICTIONARY_OVERRIDES',     userData: true,  cloneable: false, backup: true,  searchable: false },
 ]
 

@@ -128,3 +128,47 @@ Run only inside the Human's maintenance window. Every command from the repo root
 9. **Rollback**: redeploy the previous commit (it reads the untouched v1 collections `PRODUCT_LIST`, `RECIPE_LIST`, …). 0002 upgraded `TRASH_*` and `VERSION_HISTORY` in place, so restore those from the snapshot too: `db-restore.js` only restores into a scratch DB (`node server/scripts/db-restore.js --target=atlas --dir=<snapshot dir> --db=<scratch>`), then copy those 7 collections back over the originals (mongosh/Compass). Needed for a real rollback: v1 code cannot read the upgraded trash/history docs, so these 7 collections must be restored from the snapshot (0002 has no other undo). Skip it only if v1 trash/history restore is not needed; the v2 collections can simply be left unused.
 
 Notes: the old v1 collections stay for rollback until Phase 3 cleanup. Master/ownership fields (`userId`, `_masterId`, `_userModified`, `_userDeleted`) keep their v1 names until Phases 5/6 (deviation from D4). Version-history `changes[]` text keeps old field names (display only).
+
+## Phase 3 — Reality Check (2026-10-05)
+
+Branch `feat/321-phase-3-taxonomy` (wt-2), based on `origin/main @ f6e68bf2`. The old
+`feat/321-professional-foundation-refactor` branch was already squash-merged as PR #239 (`80f1c9ce`).
+
+**Since Phase 2b merged (`80f1c9ce..origin/main`):** one commit touches Phase 3 files:
+`fb58aed5` (plan 335), which changed AI product metadata so it goes through the registry
+(`metadata-registry.service.ts`, 20 lines changed, `server/routes/generic.js`, `server/routes/ai.js`).
+**Open PRs:** none. **Other slots:** wt-1 (`feat/360-…`) and wt-3 (`fix/379-…`) have no
+diff under `shared/`, `server/`, `src/app/core/services/` or `metadata-manager/`.
+**Overlapping plans:** 322 ×2, 375, 376, 377 and 378 are `draft`; 323 is `superseded`. None is in flight.
+
+| Assumption | Status | Evidence |
+|---|---|---|
+| Registries are single `{ items: [...] }` docs | ✅ still true | `metadata-registry.service.ts` `persistRegistry` / `RegistryPayload<T>` |
+| Registry list: CATEGORIES, ALLERGENS, LABELS, UNITS, PREPARATIONS, MENU_TYPES, MENU_EVENT_TYPES, MENU_SECTION_CATEGORIES, EQUIPMENT_CUSTOM_CATEGORIES | ⚠️ changed | `server/constants/collections.js` also has **`KITCHEN_COURSES`** (plan 320, objects `{ key, … }`), so the total is 10 registries |
+| Six services: metadata-registry, menu-section-categories, preparation-registry, unit-registry, equipment-category-registry, menu-event-type | ✅ still true | All present: 670 / 148 / 353 / 257 / 72 / 64 lines |
+| `metadata-registry.service.ts` handles categories, allergens, labels | ⚠️ bigger | It also owns **courses** and **MENU_TYPES** (one 670-line service holding 5 kinds) |
+| `BaseEntityDataService` exists | ✅ still true | `core/services/base-entity-data.service.ts` (97 lines) |
+| Metadata Manager has section-category and preparation-category managers | ✅ still true | Both components, plus `user-management`; the page component is 765 lines and holds the other tabs inline |
+| Master registry docs keyed by `userId: '__master__'` | ⚠️ new constraint | Plan 322 M9/M10 added admin routes `PUT /:type/registry-rename-master` and `registry-delete-master` in `generic.js`, which edit `items` in place. Phase 3 must re-point them to `taxonomyTerms` or they break. |
+| Plan-319 cluster data (`.claude/reports/label-audit/report.md` + `data.json`) | ⚠️ partial | `report.md` exists, **`data.json` is missing**, so near-duplicate reporting in 0003 can use only the report text |
+| Migration number `0003` is free | ✅ still true | `server/migrations/` has 0001 and 0002 only |
+| `shared/schemas/entities` has no taxonomy schema yet | ✅ still true | Entities: common, equipment, menu-event, product, recipe, supplier, venue |
+
+**Proposed adjustments:**
+1. Add `course` as a migrated kind that comes from `KITCHEN_COURSES`, not as a new empty kind. The plan already lists `course`, but it assumed the data had nowhere to come from.
+2. P3.3 also covers `registry-rename-master` / `registry-delete-master`: they keep their URLs and behavior, but run against `taxonomyTerms` with `ownerId: 'master'`.
+3. P3.2 near-duplicate report: read `report.md` only, or the Human restores `data.json` from plan 319.
+4. P3.4: split `metadata-registry.service.ts` into facades per kind (category, allergen, label, course, menuType). It is the biggest service, so most of the work is here.
+5. Open question, to decide before P3.3: should deleting a term used by a document be **blocked**, or **soft-deleted with a "still used by N items" warning**?
+
+## Phase 3 — P3.2 migration dry run, local (2026-10-05)
+
+`node server/migrations/0003-taxonomy-terms.js --target=local` → **174 terms, 0 invalid**, nothing written.
+
+- **Repeated seeding left several copies of each registry doc per owner.** Master has 15 copies each of labels, menu sections and preparations, and 2 of allergens; every user has the same copies. The app reads only the first doc returned (`GET /:type` has no sort and filters out `_userDeleted`), so the migration takes that doc and skips the rest: 173 extra docs, 145 of them with different content.
+- **Master's extra copies differ only by test keys.** The live label doc has label `zzz` and the live allergen doc has allergen `ccc`, which the other copies lack. Both are probably test junk, and they **are** migrated, because they're live today.
+- **User copies match master exactly:** 513 user copies are identical to master and dropped, 0 differ from master, and 1 user-only label is migrated.
+- **No near-duplicate keys** inside any kind.
+- **One master preparation (`בסיס גלידה מוכן`) has no category.** The schema now allows `categoryKey` to be omitted.
+
+**Local write (2026-10-05, Human go):** backup `foodvibe-db-backups/local-2026-10-05T06-57-56` (32,744 docs) → `--write=yes` wrote 174 terms + indexes `kind_key_user_unique`, `user_kind_order` → `--verify=yes` OK. Old registry collections untouched; the app does not read `taxonomyTerms` yet.
