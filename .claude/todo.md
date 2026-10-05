@@ -24,8 +24,6 @@
 
 > Audit says: do these.
 
-- [x] `feat/optimization` — PR #192, merged to `main`. Delivered: double-fetch fix (plan 301 M4), full OnPush sweep (plan 303 M2), animations-async bundle cut, approve-stamp WebP (plan 302 M5), sync-master O(n²) fix (plan 303 M3 first item) — all Human-validated 2026-08-31. Remaining backlog (KITCHEN_UNITS double-fetch mystery, syncMasterToUser version-gating, plan 304's Human-only unblockers) persisted as `plans/309-optimization-loop-closeout-remaining-backlog.plan.md`.
-
 ### Plan 321 — Professional Foundation Refactor (`plans/321-professional-foundation-refactor.plan.md`)
 
 > Phases 0–2b done (Phase 2b PR #239 merged + Human smoke "all good" 2026-10-02). Phase 3 next — its own Step 0 Reality Check required before starting. Parallel-session note: Plan 320 (recipe course field + labels, `feat/recipe-labels-course-field` in worktree `foodVibe1.0-wt-recipe-labels`) is separate, unrelated work — no file overlap so far.
@@ -228,24 +226,6 @@
 - [ ] Milestone 2 — carved out to Plan 310 (below) — see `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`
 - [x] Milestone 4 — collapse `UserService._reloadDataServices()`'s post-login re-fetch with each service's constructor-time load: done in `feat/optimization` — `reloadFromStorage()` now awaits an in-flight load instead of racing a duplicate one (`base-entity-data.service.ts`, `product-data.service.ts`, `recipe-data.service.ts`, `dish-data.service.ts`, `menu-event-data.service.ts`, `menu-section-categories.service.ts`, `preparation-registry.service.ts`, `metadata-registry.service.ts`). Verified via network capture: PRODUCT_LIST/RECIPE_LIST/DISH_LIST/etc. each fetch exactly once per page load, down from twice (~5MB/page deduped). Human-validated 2026-08-31.
 
-### Plan 303 — Perf Phase 2: Client CPU & Interaction Lag (`plans/303-perf-phase2-client-cpu.plan.md`)
-
-> **DONE 2026-10-05** — last two items closed by Human.
-
-> Gated on plan 302 M1 only. M1 below is the highest value-per-line change in the audit. Full sub-tasks in the plan file.
-> M0/M1/M2 executed 2026-08-22 in response to a live user report ("app is stuck, even in local storage mode") — `ng build` passes, spot-verified live via `/browse` against the real 2113-recipe/1478-product dataset.
-
-- [x] M0 (addendum) — Defer the `backup_<entityType>` localStorage mirror write off the critical path — `async-storage.service.ts:172-196`
-- [x] M1 — Map-based lookups: add `productsById_`/`recipesById_` computed Maps; replace all 7 O(n) `.find()` scans in `recipe-cost.service.ts` and `recipe-allergens.util.ts:22,25`
-- [x] M1 — Record before/after costs + allergens for 10 representative recipes — closed as satisfied-via-spot-verification (2026-09-15): M1's Map-based lookups already shipped and were spot-verified live against the real dataset; a retroactive formal before/after table adds no further confidence and isn't worth the effort now that M1/M2 are both done and Human-validated.
-- [x] M1 — DevTools Performance profile on recipe-book before/after — CLOSED by Human 2026-10-05: "before" no longer measurable; speedup already Human-validated 2026-08-31
-- [x] M2 — Precomputed row model for recipe-book + inventory; row loops now read `displayRows_()` instead of calling functions per row
-- [x] M2 — Separate commit: convert the remaining 29 components to `ChangeDetectionStrategy.OnPush` — done in `feat/optimization`, 28 components across 8 commits, each individually traced for signal-safety (not batch-applied); `grep -rL "ChangeDetectionStrategy.OnPush" src/app --include="*.component.ts"` returns empty. Human-validated 2026-08-31.
-- [x] M3 — Hoist the rebuilt `allProductNames` Set above the master loop — `server/services/sync-master.js:273-274` — done in `feat/optimization`: was rebuilt once per master PRODUCT_LIST doc needing an insert check (up to ~1500x per sync run); now built once. Applies to the app's normal backend-connected mode (the "out of scope" note above was specific to a local-storage-mode bug report, not to whether this helps overall — it does, this runs on every signup and every 13-min token refresh). Static verification only (no live timing — shared backend's Mongo needs credentials this session doesn't have). Human-validated 2026-08-31.
-- [x] M3 — Remove `syncMasterToUser` from `POST /refresh` (or version-gate it) — `server/routes/auth.js:274` — satisfied by `plans/309-optimization-loop-closeout-remaining-backlog.plan.md` Milestone 2 (already `[x]` there): version-gated via `MASTER_META`/`master-version.js` + `User.lastSyncedMasterVersion`. Re-verified 2026-09-16 (overnight auto-solve session) — `server/routes/auth.js:285` skips `syncMasterToUser` when `user.lastSyncedMasterVersion === masterVersion`, `server/services/master-version.js` exists. No new code change needed.
-- [x] M3 — Regression test: brand-new account signup still receives correctly cloned + remapped master data — satisfied by `plans/309-…` Milestone 2 (already `[x]` there: "New-signup clone regression test passed (1478 products/1114 recipes cloned)"). Re-confirmed 2026-09-16 that the code backing this claim is present in `server/routes/auth.js`.
-- [x] M3 — Regression test: existing user's modified docs still win after login (Rule 3) — Human validated 2026-10-05 by hand (edit recipe → log out → log in → edit kept); also covered by `server/test/sync-master.test.js` "Rule 3 — a user-modified clone is never overwritten" (Plan 321 P0.3, runs in CI); — not verified this session; the version-gate only touches `POST /refresh`, `/login` is an unchanged code path, so risk is low but untested
-
 ### Plan 304 — Perf Phase 3: Data Volume (`plans/304-perf-phase3-data-volume.plan.md`)
 
 > 2026-10-05 reality check: only Milestone 1 (list projections) left, still justified. Read-Write Scope (M1 only) added — takeable.
@@ -324,66 +304,6 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
-### Plan 328 — Workflow Kit Extraction, Phase 1: Audit & Manifest (`plans/328-workflow-kit-extraction-phase-1-audit-manifest.plan.md`)
-
-- [ ] A1: `git fetch origin`. Generate the raw inventory file list from the roots (and exclusions), and write the pending-branch report.
-- [ ] A2: Write `scripts/kit-manifest-check.mjs` first, against an empty `manifest.json`. It must list everything as unclassified.
-- [ ] A3: Classify `.claude/**` (commands, skills, agents, references, instructions, prompts, workflows, `settings.json`): tier, action, params, refs, notes.
-- [ ] A4: Classify `scripts/**`, `.husky/**`, `.github/workflows/**` and the root config files.
-- [ ] A5: Classify `.cursor/**`, `docs/agent/**`, `docs/brain/**` (as files), `_shared/**`, `.vscode/**`, `AGENTS.md`, `CLAUDE.md` and `README_WORKFLOW.md`.
-- [ ] A6: Build `parameters.md` from all `params[]`, plus the reference map, and record the blockers in the summary.
-- [ ] A7: Lessons triage: all gotcha entries across the 5 domain files, all ADRs, and all patterns.
-- [ ] A8: Write the ADR (next free number after rebase).
-- [ ] A9: Write the `manifest.md` summary. Run both checker modes until they are green, then run the build.
-- [ ] A10: STOP. Hand Dandan the two `[human]` reviews. Apply re-verdicts if requested, then `/ship`.
-
-### Plan 329 — Workflow Kit Extraction, Phase 2: Core Scaffold (`plans/329-workflow-kit-extraction-phase-2-core-scaffold.plan.md`)
-
-- [ ] B0: Verify the Prerequisites gate — plan 321's `take-plan.mjs` Windows `shell` fix is merged to FoodVibe `main`. If not, STOP and tell the Human.
-- [ ] B1: Create `../ai-workflow-kit` (fresh `git init`), baseline `README.md`, `.gitignore`, empty `core/` tree.
-- [ ] B2: Write `kit.config.json` with all 38 `parameters.md` keys plus `docs.domainStandards` and `paths.sharedDocs`, placeholder values only.
-- [ ] B3: Write `scripts/kit-extract.mjs` (FoodVibe-side, reads `manifest.json`, writes into the kit repo path) applying `copy`/`parameterize` for every `tier: core` row; run it.
-- [ ] B4: Hand-fix the 7 `split` core files (generic half only) and the 7 blocker files per the Blockers table's proposed-fix column.
-- [ ] B5: Write the kit repo's framework-name-leak CI check; get it green against the extracted `core/`.
-- [ ] B6: Extend `scripts/kit-extract.mjs` (or add a sibling check) with a coverage report confirming all 77 core rows landed.
-- [ ] B7: Record the kit repo's location in `docs/workflow-kit/manifest.md`.
-- [ ] B8: STOP. Hand Dandan the two `[human]` reviews (kit.config.json keys; kit repo name/location). Apply changes if requested, then `/ship` on the FoodVibe side only — the kit repo stays local, no remote, until Dandan says otherwise.
-
-### Plan 330 — take-plan.mjs: Skip Mark-Active Commit When Already Active (`plans/330-take-plan-mark-active-skip-fix.plan.md`)
-
-> Done 2026-10-05 check: guard shipped in commit `2030072d` (`fix(take-plan): skip the mark-active commit when the plan is already active`); Human confirmed closing.
-
-- [x] Add the already-active / no-diff guard around the mark-active commit in `scripts/take-plan.mjs`
-- [x] Verify `node scripts/take-plan.mjs <NNN>` runs to completion both when a plan starts as non-active and when it's already `Status: active`
-
-### Plan 332 — Recipe edit blocked by "name already in use": diagnose and fix (`plans/332-recipe-edit-blocked-duplicate-name.plan.md`)
-
-- [ ] A1: Create src/app/pages/recipe-builder/utils/find-duplicate-name.util.ts, exporting findDuplicateName(list: Recipe[], name: string, currentId: string | null): Recipe | null. Trim both sides and exclude currentId. Add a spec covering: same-id excluded, whitespace, a dish/recipe twin, and no match.
-- [ ] A2: Change duplicateNameValidator_() (recipe-builder.page.ts:593) to use the util over this.state_.recipes_() (kitchen-state.service.ts:35, the same combined list). Return the detail object and add the console.warn.
-- [ ] A3: In recipe-header.component.html around L42, add the "open existing" link (router link to /recipe-builder/ + id) and the optional master tag. Add both dictionary keys.
-- [ ] A4: Human gate. Dandan opens the recipe that failed, tries to save, and reports the console line and what the link opens. STOP until he answers.
-- [ ] A5: Act on the answer: cause (b) make type-change path add-then-delete with a spec; cause (a) unlinked master clone, no client fix, write follow-up note for server-side plan; genuine duplicate, no code fix.
-- [ ] A6: npm run build and the targeted specs pass. Update the session-state file.
-
-### Plan 333 — Remove the hidden-recipes concept (`plans/333-remove-hidden-recipes-concept.plan.md`)
-
-> Run after Plan 332 (duplicate-name fix) — both touch `kitchen-state.service.ts`.
-> Done: merged as PR #244 (commit `4c3128fe`); Human confirmed closing 2026-10-05.
-
-- [x] A1: Remove the hide methods from the three services and the uncalled onHideRecipe.
-- [x] A2: Replace visibleRecipes_ with recipes_ in recipe-book-list (ts, html, spec), then delete visibleRecipes_.
-- [x] A3: Remove the hiddenBy carry-forward in both update methods; strip the field on save (P1).
-- [x] A4: Mark the model field @deprecated. Run the grep in Success Criteria.
-- [x] A5: Build and run the targeted specs. Update the session-state file.
-
-### Plan 335 — AI product: register categories and allergens through the registry (`plans/335-ai-product-register-categories-allergens-registry.plan.md`)
-- [ ] A1: Make registerAllergen return the key (or null). Update callers and the spec. (`src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/metadata-registry.service.spec.ts`)
-- [ ] A2: Create src/app/pages/inventory/services/ai-draft-metadata.util.ts with resolveDraftMetadata(), plus a spec covering: known key passthrough, Hebrew→key, null dropped, dedupe.
-- [ ] A3: Wire it into ProductAiFlowService.applyDraft() and openAiCreateModal(). (`src/app/pages/inventory/services/product-ai-flow.service.ts`, `src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts`)
-- [ ] A4: Route the modal's free-text add through it (P1). (`src/app/shared/ai-product-modal/**`)
-- [ ] A5: GeminiService: send knownCategories and knownAllergens in the product generate and patch bodies. ai.js: read them (optional arrays, cap 200 each) and append them to the prompt. (`src/app/core/services/gemini.service.ts`, `server/routes/ai.js`)
-- [ ] A6: Server test for the prompt append (or a manual curl if there's no harness for ai.js). Build and run specs. Update the session-state file. (`server/test/**`)
-
 ### Plan 336 — AI product from a photo (`plans/336-ai-product-from-photo.plan.md`) — must run after Plan 335
 - [ ] A1: Write the `downscaleImage` util and its spec (dimensions capped, small file passthrough). — `src/app/core/utils/downscale-image.util.ts`, `downscale-image.util.spec.ts`
 - [ ] A2: Add the server endpoint plus a test (missing image → 400; bad mime → 400). — `server/routes/ai.js`, `server/test/**`
@@ -391,14 +311,6 @@
 - [ ] A4: Add the modal toggle, image picker, preview and generate wiring. On confirm, the result goes through the create path from plan 335 (registry resolver). — `src/app/shared/ai-product-modal/**`
 - [ ] A5: Recipe image path uses the util (P1). — `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts`
 - [ ] A6: Build and run specs. Update the session-state file.
-
-### Plan 337 — Header: avatar image fallback, reclaim mobile top space, menu-building icon (`plans/337-header-avatar-fallback-mobile-space-menu-icon.plan.md`)
-- [ ] A1: Add the avatar `(error)` fallback plus `imgFailed_`, and a header spec case where the image error shows initials.
-- [ ] A2: Human gate. Dandan opens the deployed app, checks the DevTools console for a CSP "img-src" violation, and copies the `imgUrl` host from sessionStorage `user`. STOP until he reports; fix in scope per the result.
-- [ ] A3: Move the avatar into `.bottom-nav` at ≤620px, remove `.mobile-avatar-fab` and its styles, and anchor the avatar menu above the bar.
-- [ ] A4: Remove the top clearance (`styles.scss` ~L928, `app.component.scss`). Apply the P1 breakpoint alignment.
-- [ ] A5: Swap the chip icon to `clipboard-list`. Run `npm run lint:icons`.
-- [ ] A6: Build, run specs, check at 360px and 620px. Update the session-state file.
 
 ### Plan 338 — Equipment: one route tree, back-to-products navigation, remove scaling rule from UI (`plans/338-equipment-one-route-tree-back-to-products-remove-scaling.plan.md`)
 - [ ] A1: Replace the /equipment routes with redirects and delete EquipmentPage. (src/app/app.routes.ts, src/app/pages/equipment/equipment.page.*)
@@ -633,13 +545,13 @@
 - [ ] A4: Build, server and client tests. Manual test: admin renames a custom unit for everyone → a new signup sees the new unit. Update session-state.
 
 ### Plan 380 — Workflow Kit Validation Round 1 Fixes
-- [ ] A1: take-plan — squash-merge detection via the merged GitHub PR (head must match); delete the stale local branch and its old remote branch, start fresh; release any merged current branch (not only `feat/`); delete the session-state pointer on claim; one server line (`started` / `kept`) — `scripts/take-plan.mjs`
-- [ ] A2: Session-state pointer ignored when it names another branch's file — `scripts/session-state-path.mjs`
-- [ ] A3: Branch's plan wins over a mismatched `.worktree-plan`; `--list` flags it — `scripts/lib/slot.mjs`
-- [ ] A4: Drift check falls back to the commit that added the plan; save-plan always writes `Snapshot:` — `scripts/scope-check.mjs`, `.claude/skills/save-plan/SKILL.md`
-- [ ] A5: `git fetch origin --prune` after a slot merge — `docs/agent/standards-git.md`, `docs/agent/ship-regular.md`
-- [ ] A6: Validation after merge goes through the Planner, no second PR — `docs/agent/job-validation.md`
-- [ ] A7: `scripts/next-plan-number.mjs` (plans + `<type>/NNN-*` branches); save-plan numbering calls it; manifest row + `kit-owned.json` — `scripts/next-plan-number.mjs`, `docs/workflow-kit/**`, `docs/agent/workflow-map.md`
+- [x] A1: take-plan — squash-merge detection via the merged GitHub PR (head must match); delete the stale local branch and its old remote branch, start fresh; release any merged current branch (not only `feat/`); delete the session-state pointer on claim; one server line (`started` / `kept`) — `scripts/take-plan.mjs`
+- [x] A2: Session-state pointer ignored when it names another branch's file — `scripts/session-state-path.mjs`
+- [x] A3: Branch's plan wins over a mismatched `.worktree-plan`; `--list` flags it — `scripts/lib/slot.mjs`
+- [x] A4: Drift check falls back to the commit that added the plan; save-plan always writes `Snapshot:` — `scripts/scope-check.mjs`, `.claude/skills/save-plan/SKILL.md`
+- [x] A5: `git fetch origin --prune` after a slot merge — `docs/agent/standards-git.md`, `docs/agent/ship-regular.md`
+- [x] A6: Validation after merge goes through the Planner, no second PR — `docs/agent/job-validation.md`
+- [x] A7: `scripts/next-plan-number.mjs` (plans + `<type>/NNN-*` branches); save-plan numbering calls it; manifest row + `kit-owned.json` — `scripts/next-plan-number.mjs`, `docs/workflow-kit/**`, `docs/agent/workflow-map.md`
 - [ ] A8: Checks + `/ship`; Dandan commits the kit repo.
 
 ## Where things live
