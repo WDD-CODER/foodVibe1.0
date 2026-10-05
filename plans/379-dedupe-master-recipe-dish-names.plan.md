@@ -1,6 +1,6 @@
 # Plan 379 — Dedupe master recipe and dish names
 
-Status: active
+Status: done
 Snapshot: 8dad759d
 
 ## Problem Statement
@@ -80,12 +80,12 @@ append the path to the scope block above and retry.
 - [x] A7: `npm run build` exit 0; server suite 81/81; recipe-builder specs 5/5.
 - [x] A8: Guest can press the approve stamp (cook-view) — gate it like enterEditMode (sign-in prompt). Human-reported during validation 2026-10-05.
 - [x] A9: After sign-in, a page still holding the guest-loaded master copy fails to save (master _id, not owned). Resolver maps a master id to the signed-in user's clone; after login rehydrate, a /cook/:id or /recipe-builder/:id URL on a master id is replaced by the user's clone URL. Scope approved by Human 2026-10-05.
-- [ ] Follow-up (not this plan): 116 master logistics refs still point at equipment ids that never existed (`eq_001`…). Client shows the generic push_to_master_error on the new 409 — a specific message would live in master-push.service.ts (out of scope).
+- Follow-up (not this plan, handed to Planner as a brief): 116 master logistics refs still point at equipment ids that never existed (`eq_001`…). Client shows the generic push_to_master_error on the new 409 — a specific message would live in master-push.service.ts (out of scope).
 
 ## Success Criteria
 - [x] [auto] Dry run after `--write` reports 0 duplicate-name groups in master.
 - [x] [auto] `npm run build` exit 0; server test suite passes.
-- [human] "רוטב לסלט איטריות" can be approved/saved on the deployed app.
-- [human] Signed out on /cook/<id>: tapping the approve stamp asks to sign in and changes nothing.
-- [human] Open a recipe signed out, sign in on that page, tap the stamp once: it saves on the first try.
+- [x] [human] "רוטב לסלט איטריות" can be approved/saved on the deployed app.
+- [x] [human] Signed out on /cook/<id>: tapping the approve stamp asks to sign in and changes nothing.
+- [x] [human] Open a recipe signed out, sign in on that page, tap the stamp once: it saves on the first try.
 - [x] [human] Dry-run report reviewed and approved before any write.
