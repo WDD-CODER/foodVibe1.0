@@ -49,6 +49,7 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 | Before a PR | `.claude/skills/update-docs/SKILL.md` |
 | "execute plan NNN" inside a `wt-N` slot | `.claude/commands/take-plan.md` |
 | "setup worktree" (one-time slot init, not per-plan) | `.claude/skills/worktree-setup/SKILL.md` |
+| Human wants to validate away from the PC ("open remote" / "close remote") | `.claude/commands/remote.md` (`scripts/remote-port.mjs`) |
 | List skills / commands | `.claude/commands/skills.md` / `commands.md` |
 | Finishing a feature | `/ship` — auto-classifies lane, commits/pushes, PRs only when feature-complete. Mandatory Post-push Merge Gate + brain capture: `docs/agent/standards-git.md`. |
 | Job validation — finishing a job, marking todos `[x]`, or done/verified/approved | `docs/agent/job-validation.md` + `/done` |

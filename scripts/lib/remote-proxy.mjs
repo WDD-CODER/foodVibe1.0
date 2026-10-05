@@ -105,7 +105,7 @@ export function createRemoteProxy({ fePort, bePort, token }) {
     )
     upstream.on('error', () => {
       if (!res.headersSent) res.writeHead(502, { 'content-type': 'text/plain; charset=utf-8' })
-      res.end('Bad gateway — is the dev server running?')
+      res.end(`Bad gateway — the ${port === bePort ? 'backend' : 'frontend'} on port ${port} is not answering`)
     })
     req.pipe(upstream)
   })

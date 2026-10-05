@@ -165,7 +165,7 @@ function generateEnvironmentSlot(bePort) {
   const localPath = envLocalPath
   const text = readFileSync(localPath, 'utf8')
   // Rewrites only the localhost port on the apiUrl / authApiUrl lines, so the remote-link
-  // branch (`viaRemote ? '' : 'http://localhost:3000'`, plan 388) survives into the slot file.
+  // branch (`viaRemote ? '' : <localhost url>`, plan 388) survives into the slot file.
   const withApi = text.replace(
     /^(\s*(?:apiUrl|authApiUrl):[^\n]*?)'http:\/\/localhost:\d+'/gm,
     (_, lead) => `${lead}'http://localhost:${bePort}'`
