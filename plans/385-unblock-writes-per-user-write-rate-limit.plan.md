@@ -1,6 +1,6 @@
 # Plan 385 — Unblock writes: per-user write rate limit, drop redundant client rename cascades
 
-Status: draft
+Status: active
 Snapshot: adb954d97afb90d0874b524731ac7e63297d57d4
 
 ## Problem Statement
