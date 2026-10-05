@@ -158,6 +158,17 @@ describe('MetadataRegistryService', () => {
         sortOrder: 0,
         kind: 'allergen',
         key: 'sesame'
+      },
+      {
+        _id: 'course:__master__:starter',
+        userId: '__master__',
+        schemaVersion: 2,
+        createdAt: 1,
+        updatedAt: 1,
+        sortOrder: 0,
+        kind: 'course',
+        key: 'starter',
+        color: '#3B82F6'
       }
     ])
 
@@ -222,6 +233,29 @@ describe('MetadataRegistryService', () => {
       service.registerAllergen('   ').then((k) => (key = k))
       tick()
       expect(key).toBeNull()
+    }))
+  })
+
+  describe('Courses (dish types) have no color', () => {
+    it('loads a stored course that still carries a color as { key } only', () => {
+      expect(service.courses_()).toEqual([{ key: 'starter' }])
+    })
+
+    it('registers every new course with the same neutral color, whatever is already stored', fakeAsync(() => {
+      const storage = TestBed.inject(StorageService) as jasmine.SpyObj<StorageService>
+      service.registerCourse('brunch')
+      tick()
+      service.registerCourse('dessert')
+      tick()
+      const courseBodies = storage.post.calls
+        .allArgs()
+        .map(([, body]) => body as { kind: string; key: string; color: string })
+        .filter((b) => b.kind === 'course')
+      expect(courseBodies.map((b) => [b.key, b.color])).toEqual([
+        ['brunch', '#78716C'],
+        ['dessert', '#78716C']
+      ])
+      expect(service.courses_().map((c) => c.key)).toEqual(['starter', 'brunch', 'dessert'])
     }))
   })
 

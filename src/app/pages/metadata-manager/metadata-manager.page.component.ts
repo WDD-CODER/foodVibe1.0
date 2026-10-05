@@ -188,10 +188,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     return this.metadataRegistry.getLabelColor(key)
   }
 
-  protected getCourseColor(key: string): string {
-    return this.allCourses_().find((c) => c.key === key)?.color ?? '#78716C'
-  }
-
   isSystemUnit(unitKey: string): boolean {
     return unitKey in SYSTEM_UNITS
   }

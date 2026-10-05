@@ -215,3 +215,13 @@ been killed by it.
 **Why the obvious fix is wrong:** The bug isn't in *reading* `system.views` (that call correctly fails — the app DB user has no privilege on it) — it's that `db.listCollections().toArray()` enumerates `system.views` as an ordinary collection name in the first place, indistinguishable from a real one until you `find()` it. Filtering by `{ type: 'collection' }` in the `listCollections` call doesn't help either: MongoDB reports `system.views` with `type: 'collection'`, not `type: 'view'` — only the view itself (`RECIPE_BOOK_VIEW`) correctly reports `type: 'view'`.
 
 **What to do instead:** Filter out any `listCollections()` name starting with `system.` before iterating — `db-backup.js` now does `.filter(name => !name.startsWith('system.'))`. Any other script walking `db.listCollections()` over a database containing a Mongo *view* (this project has exactly one, `RECIPE_BOOK_VIEW`) needs the same filter, or it hits the identical crash the moment it tries to read every listed name.
+
+---
+
+## Course terms must carry a color: the taxonomyTerms schema requires it
+
+**What hurt:** Plan 375 said to save dish types as `{ key }` only. Since plan 321 Phase 3, the `taxonomyTerms` schema declares `kind: 'course'` as a strictObject with a **required** `color` (hex regex). A course saved without a color fails validation and returns a 400.
+
+**Why the obvious fix is wrong:** Dropping `color` from the client's `taxonomy.add('course', …)` looks like a client-only change, but the server rejects it. Older plan files still say "no server change" because they were written before that commit.
+
+**What to do instead:** To make dish types colorless on the client, send one constant (`COURSE_NEUTRAL_COLOR = '#78716C'` in `metadata-registry.service.ts`) and just don't render it. Making `color` optional on the server means changing the schema, running `build:schemas` and updating the server tests (planned for plan 376). Before trusting a plan's "no server change", check `server/generated/schemas/entities/taxonomy-term.schema.js`.

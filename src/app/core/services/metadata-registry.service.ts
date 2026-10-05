@@ -5,12 +5,14 @@ import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { TaxonomyStore } from './taxonomy-store.service'
-import { LABEL_COLOR_PALETTE, type LabelDefinition } from '@models/label.model'
+import type { LabelDefinition } from '@models/label.model'
 import type { CourseDefinition } from '@models/course.model'
 import { type MenuTypeDefinition, type DishFieldKey, DEFAULT_DISH_FIELDS } from '@models/menu-event.model'
 
 type PushableType = 'label' | 'course' | 'category' | 'allergen'
 const KIND_BY_TYPE = { label: 'label', course: 'course', category: 'ingredientCategory', allergen: 'allergen' } as const
+/** Dish types have no color (plan 375); the taxonomyTerms schema still requires one, so every course gets this. */
+const COURSE_NEUTRAL_COLOR = '#78716C'
 
 /**
  * Plan 321 Phase 3 — thin facade over TaxonomyStore for ingredient categories, allergens,
@@ -44,7 +46,7 @@ export class MetadataRegistryService {
   public courses_ = computed<CourseDefinition[]>(() =>
     this.taxonomy
       .terms('course')()
-      .map(({ key, color }) => ({ key, color }))
+      .map(({ key }) => ({ key }))
   )
   public allMenuTypes_ = computed<MenuTypeDefinition[]>(() =>
     this.taxonomy
@@ -166,10 +168,8 @@ export class MetadataRegistryService {
     if (!keyToUse) return
     const sanitized = keyToUse.trim()
     if (!sanitized || this.taxonomy.find('course', sanitized)) return
-    const usedColors = new Set(this.courses_().map((c) => c.color))
-    const color = LABEL_COLOR_PALETTE.find((c) => !usedColors.has(c)) ?? LABEL_COLOR_PALETTE[0]
     await this.run('course.save', 'שגיאה בשמירת סוג המנה', async () => {
-      await this.taxonomy.add('course', sanitized, { color })
+      await this.taxonomy.add('course', sanitized, { color: COURSE_NEUTRAL_COLOR })
       this.userMsgService.onSetSuccessMsg(`סוג מנה "${sanitized}" נוסף בהצלחה`)
     })
   }
@@ -286,7 +286,7 @@ export class MetadataRegistryService {
    * Makes an edit apply to everyone (admin only). Plan 321 Phase 3: terms are shared live, so
    * this renames the shared term `oldKey` (the server carries the new key into every user's
    * documents), or — when no shared term has `oldKey` — turns the admin's own `newKey` term into
-   * a shared one. `itemData` supplies color/autoTriggers for a label/course that isn't own yet.
+   * a shared one. `itemData` supplies color/autoTriggers for a label that isn't own yet.
    */
   async pushRegistryRenameToMaster(
     type: PushableType,
@@ -315,8 +315,7 @@ export class MetadataRegistryService {
         share
       )
     } else if (kind === 'course') {
-      const course = this.taxonomy.find('course', newKey)
-      await this.taxonomy.add('course', newKey, { color: course?.color ?? (itemData?.color || '#78716C') }, share)
+      await this.taxonomy.add('course', newKey, { color: COURSE_NEUTRAL_COLOR }, share)
     } else {
       await this.taxonomy.add(kind, newKey, {}, share)
     }
