@@ -374,11 +374,6 @@
 - [ ] A3: ≤768px phone layout, including padding, actions wrap and the override input.
 - [ ] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
 
-### Plan 369 — Recipe builder: correct prompt and yield when switching dish ↔ preparation (`plans/369-recipe-builder-type-toggle-prompt-and-yield.plan.md`)
-- [ ] A1: Yield manager caching and correct conversions, plus spec (`recipe-yield-manager.util.ts`, spec).
-- [ ] A2: `isExistingRecord` input; toggle prompt logic; dictionary keys (`recipe-header/**`, `recipe-builder.page.*`).
-- [ ] A3: Build, specs. Manual test of new and existing, both directions. Update session-state.
-
 ### Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests (`plans/370-ai-recipe-generation-realistic-portions-with-tests.plan.md`)
 - [ ] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
 - [ ] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
