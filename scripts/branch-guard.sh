@@ -82,7 +82,12 @@ PY
     TARGET_DIR=$(dirname "$NORM")
     while [[ -n "$TARGET_DIR" && ! -d "$TARGET_DIR" && "$(dirname "$TARGET_DIR")" != "$TARGET_DIR" ]]; do TARGET_DIR=$(dirname "$TARGET_DIR"); done
     TARGET_ROOT=$(git -C "$TARGET_DIR" rev-parse --show-toplevel 2>/dev/null)
-    if [[ -n "$TARGET_ROOT" && -f "$TARGET_ROOT/scripts/branch-guard.sh" ]]; then
+    # Only a worktree of this same repository (same git common dir): never run another repo's script.
+    SAME_REPO=0
+    if [[ -n "$TARGET_ROOT" ]]; then
+      [[ "$(cd "$TARGET_ROOT" && cd "$(git rev-parse --git-common-dir)" && pwd)" == "$(cd "$REPO" && cd "$(git rev-parse --git-common-dir)" && pwd)" ]] && SAME_REPO=1
+    fi
+    if [[ "$SAME_REPO" -eq 1 && -f "$TARGET_ROOT/scripts/branch-guard.sh" ]]; then
       printf '%s' "$INPUT" | bash "$TARGET_ROOT/scripts/branch-guard.sh"
       exit 0
     fi
