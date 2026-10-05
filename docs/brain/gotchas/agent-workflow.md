@@ -283,3 +283,11 @@ only the Bash tool's command text triggers it.
 **Why the obvious fix is wrong:** Letting Workers write `.claude/todo.md` brings back the merge conflicts between parallel slots that the rule exists to prevent. Asking the Planner to "remember to sync" is how it got missed in the first place.
 
 **What to do instead:** `.github/workflows/todo-sync.yml` runs the sync + `todo-archive.mjs` on every push to `main` that touches `plans/**`, then opens and squash-merges a bot PR with the ledger change (`main` requires a PR; needs the repo setting "Allow GitHub Actions to create and approve pull requests"). Keep plan numbers unique — the sync finds a plan by number and picks the first file, so a duplicate NNN ticks the wrong ledger section. Ledger lines that summarize several plan items (`P3.0–P3.5`) can't be matched and print "tick by hand"; that warning is harmless.
+
+## `scope-check --file` judged every hook path `out` (absolute vs repo-relative)
+
+**What hurt:** Claude Code passes `file_path` to PreToolUse hooks as an absolute path (`C:\…\wt-3\scripts\x.mjs`). `scope-guard.sh` handed it to `scope-check.mjs --file`, which matched it against repo-relative scope globs, so in a claimed slot even an in-scope file came back `SCOPE: out`. Workers worked around it with Python/Bash writes (the guard only watches Edit/Write), which hid the bug and skipped the guard entirely.
+
+**Why the obvious fix is wrong:** Adding absolute-path variants to the scope globs, or relaxing the guard to fail open, keeps the mismatch and removes the protection.
+
+**What to do instead:** Normalize at the boundary: `scope-check --file` turns an absolute path into `relative(repoRoot, path)` before matching (plan 389). When testing a guard, feed it the same absolute Windows path a hook gets, not a relative one.

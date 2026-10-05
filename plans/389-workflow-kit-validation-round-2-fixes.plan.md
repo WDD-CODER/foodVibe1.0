@@ -68,14 +68,14 @@ Entire FoodVibe repo.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Slot frees itself after merge — `standards-git.md` "Merging from a slot" ends with `node scripts/free-merged-slots.mjs`; `session-startup.sh` runs it (short timeout) before the role check so a merged slot starts idle (`scripts/session-startup.sh`, `docs/agent/standards-git.md`)
-- [ ] A2: Planner folder stays on `main` — `branch-guard.sh` denies (no auto-switch) a non-plan write in the Planner folder on `main`, telling the agent to use a slot or ask the Human for an explicit branch; `session-startup.sh` warns when the Planner folder is not on `main` (`scripts/branch-guard.sh`, `scripts/session-startup.sh`, `.claude/commands/plan.md`)
-- [ ] A3: Guards follow the target file's worktree — when the file is in another worktree that has the same guard script, `branch-guard.sh` / `scope-guard.sh` hand the tool input to that worktree's guard (`scripts/branch-guard.sh`, `scripts/scope-guard.sh`)
-- [ ] A4: `docs/brain/**` always allowed in a slot (append-only) (`scripts/scope-check.mjs`)
-- [ ] A5: `/workflow-report` command with the round-2 report prompt (`.claude/commands/workflow-report.md`, `.claude/commands/commands.md`)
-- [ ] A6: `PYTHONIOENCODING=utf-8` in `.claude/settings.json` `env`
-- [ ] A7: Order check treats a superseded/done/archived prerequisite plan as satisfied (`scripts/take-plan.mjs`)
-- [ ] A8: Docs: ledger sync is the todo-sync Action, not a Planner step (`.claude/commands/take-plan.md`, `.claude/commands/plan.md`, `.claude/skills/save-plan/SKILL.md`, `docs/agent/job-validation.md`, `docs/agent/workflow-map.md`)
+- [x] A1: Slot frees itself after merge — `standards-git.md` "Merging from a slot" ends with `node scripts/free-merged-slots.mjs`; `session-startup.sh` runs it (short timeout) before the role check so a merged slot starts idle (`scripts/session-startup.sh`, `docs/agent/standards-git.md`)
+- [x] A2: Planner folder stays on `main` — `branch-guard.sh` denies (no auto-switch) a non-plan write in the Planner folder on `main`, telling the agent to use a slot or ask the Human for an explicit branch; `session-startup.sh` warns when the Planner folder is not on `main` (`scripts/branch-guard.sh`, `scripts/session-startup.sh`, `.claude/commands/plan.md`)
+- [x] A3: Guards follow the target file's worktree — when the file is in another worktree that has the same guard script, `branch-guard.sh` / `scope-guard.sh` hand the tool input to that worktree's guard (`scripts/branch-guard.sh`, `scripts/scope-guard.sh`)
+- [x] A4: `docs/brain/**` always allowed in a slot (append-only) (`scripts/scope-check.mjs`)
+- [x] A5: `/workflow-report` command with the round-2 report prompt (`.claude/commands/workflow-report.md`, `.claude/commands/commands.md`)
+- [x] A6: `PYTHONIOENCODING=utf-8` in `.claude/settings.json` `env`
+- [x] A7: Order check treats a superseded/done/archived prerequisite plan as satisfied (`scripts/take-plan.mjs`)
+- [x] A8: Docs: ledger sync is the todo-sync Action, not a Planner step (`.claude/commands/take-plan.md`, `.claude/commands/plan.md`, `.claude/skills/save-plan/SKILL.md`, `docs/agent/job-validation.md`, `docs/agent/workflow-map.md`)
 - [ ] A9: Kit manifest + kit-owned list for the new command; all checks; session-state
 
 ## Escalation Protocol

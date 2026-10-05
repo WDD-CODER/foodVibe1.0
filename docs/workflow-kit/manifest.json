@@ -48,6 +48,44 @@
   ],
   "entries": [
     {
+      "path": ".claude/commands/workflow-report.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        "scripts/lib/slot.mjs",
+        "scripts/next-plan-number.mjs",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "Workflow report a Worker/Planner writes before /clear; feeds the next kit fix round (plan 389)."
+    },
+    {
+      "path": ".github/workflows/todo-sync.yml",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "main"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/todo.md",
+        "scripts/todo-archive.mjs",
+        "scripts/todo-query.mjs"
+      ],
+      "notes": "After a merge to main, copies Worker plan-file ticks into the ledger via a bot PR (PR #260, plan 389)."
+    },
+    {
       "path": "_shared/current-state.md",
       "tier": "template",
       "action": "skeleton",

@@ -79,6 +79,17 @@ fi
 
 NORM=$(printf '%s' "$FILE_PATH" | tr '\\' '/')
 
+# A file in another worktree (a slot edited from the Planner session, or the reverse) is judged by
+# that worktree's own guard: its plan scope, not this folder's.
+TARGET_DIR=$(dirname "$NORM")
+while [[ -n "$TARGET_DIR" && ! -d "$TARGET_DIR" && "$(dirname "$TARGET_DIR")" != "$TARGET_DIR" ]]; do TARGET_DIR=$(dirname "$TARGET_DIR"); done
+TARGET_ROOT=$(git -C "$TARGET_DIR" rev-parse --show-toplevel 2>/dev/null)
+THIS_ROOT=$(git -C "$REPO" rev-parse --show-toplevel 2>/dev/null)
+if [[ -n "$TARGET_ROOT" && -n "$THIS_ROOT" && "$TARGET_ROOT" != "$THIS_ROOT" && -f "$TARGET_ROOT/scripts/scope-guard.sh" ]]; then
+  printf '%s' "$INPUT" | bash "$TARGET_ROOT/scripts/scope-guard.sh"
+  exit 0
+fi
+
 # Kit-owned workflow files (ADR 0015 phase 5): the kit repo is their source of truth. Fails open if the checker is absent.
 if [[ -f "$REPO/scripts/kit-owned.mjs" ]]; then
   KIT_OUT=$(node "$REPO/scripts/kit-owned.mjs" --file="$NORM" 2>&1)
