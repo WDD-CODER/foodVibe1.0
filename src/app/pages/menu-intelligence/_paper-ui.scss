@@ -628,17 +628,13 @@
   }
 }
 
-// Chip-sized list: anchored to the trigger's start edge and as wide as its options,
-// instead of stretching to the (narrow) chip width.
-.event-chip-select ::ng-deep .c-dropdown {
-  inset-inline: auto;
-  inset-inline-start: 0;
-
-  min-width: max-content;
-}
-
+// The list takes the chip trigger's width (the shared dropdown spans its fit-content wrap);
+// options stay on one line and truncate rather than widen it.
 .event-chip-select ::ng-deep .custom-select-option {
+  overflow: hidden;
+
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .event-chip-sep {
@@ -832,7 +828,12 @@
     min-block-size: 44px;
   }
 
-  // Serving-type list: content-width and a touch smaller on the phone
+  // Serving-type chip: a smaller trigger (and so a narrower list) on the phone
+  .event-chip-select ::ng-deep .custom-select-trigger {
+    font-size: 0.55rem;
+    letter-spacing: 0.16em;
+  }
+
   .event-chip-select ::ng-deep .custom-select-option {
     font-size: 0.75rem;
 
