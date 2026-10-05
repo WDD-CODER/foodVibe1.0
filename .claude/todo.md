@@ -354,10 +354,10 @@
 - [ ] A6: Build and run specs. Update the session-state file.
 
 ### Plan 343 — Menu building quick fixes: empty library, guests stepper, event-type and serving-type dropdowns (`plans/343-menu-building-quick-fixes-empty-library-guests-stepper-dropdowns.plan.md`)
-- [ ] A1: Library empty and no-results states; hide filters when there are no menus (`menu-library-list.component.html/.scss`).
-- [ ] A2: Guests −/+ stepper (`menu-intelligence.page.html`, `_paper-ui.scss`).
-- [ ] A3: Event-type dropdown: anchoring, clipping, width clamp (`menu-intelligence.page.html`, `_paper-ui.scss`).
-- [ ] A4: Serving-type select: chip variant, compact, no filter, max height (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [x] A1: Library empty and no-results states; hide filters when there are no menus (`menu-library-list.component.html/.scss`).
+- [x] A2: Guests −/+ stepper (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [x] A3: Event-type dropdown: anchoring, clipping, width clamp (`menu-intelligence.page.html`, `_paper-ui.scss`).
+- [x] A4: Serving-type select: chip variant, compact, no filter, max height (`menu-intelligence.page.html`, `_paper-ui.scss`).
 - [ ] A5: P1 cleanups. Build and run specs. Check at 360px and 1280px. Update the session-state file.
 
 ### Plan 344 — Menu "צ'קליסט והדפסות": top drop-down sheet from the FAB, and portrait-safe checklist views (`plans/344-menu-checklist-and-prints-top-sheet-portrait-checklists.plan.md`)
@@ -584,6 +584,14 @@
 - [ ] C4: `scripts/take-plan.mjs` rotation + `.slot-plan-start`; `.gitignore`; prune (`scripts/prune-old-sessions.sh`).
 - [ ] C5: wire `.claude/commands/fix.md`, `auto-solve.md`, `review-it.md`, `.claude/skills/preflight/SKILL.md`, `.claude/references/prd-template.md`, `AGENTS.md`.
 - [ ] C6: `package.json` script, `docs/brain/patterns/log-query-usage.md`, `docs/workflow-kit/manifest.md`, CHANGELOG; run all [auto] criteria.
+
+### Plan 385 — Unblock writes: per-user write rate limit, drop redundant client rename cascades (`plans/385-unblock-writes-per-user-write-rate-limit.plan.md`)
+- [ ] A1: Limiter: per-user `keyGenerator` + IP fallback, `DATA_WRITE_LIMIT_MAX` (default 1000, `0` = off), `.env.example` lines (`server/routes/generic.js`, `server/.env.example`).
+- [ ] A2: Server tests: user A exhausting the limit (set `DATA_WRITE_LIMIT_MAX=3` in test) does not 429 user B on the same IP; `0` never 429s (`server/test/**`).
+- [ ] A3: Before removing anything, confirm `TERM_REFERENCES` covers every field the client rename loops touch (label → recipes/dishes `labels[]`, `autoLabels[]`; course → `course`; category → products `categories[]`; allergen → products `allergens[]`). If a field is missing, STOP and report.
+- [ ] A4: `confirmAndCascadeRename` → server rename only + reload the affected lists. Remove the dead cascade-rename methods. Update/trim the specs that referenced them (`metadata-manager.page.component.ts`, `kitchen-state.service.ts` + specs).
+- [ ] A5: 429 handling in `auth.interceptor.ts`.
+- [ ] A6: Gotcha entry (P1) (`docs/brain/gotchas/backend.md`).
 
 ## Where things live
 
