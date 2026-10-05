@@ -48,51 +48,90 @@ function col(type) {
 
 // ---------------------------------------------------------------------------
 // Plan 321 Phase 3 — taxonomyTerms (one doc per category/label/unit/... term).
-// Unlike the cloned entity types, terms are read live as master ∪ own: master
-// terms are shared, a user's own docs hold only the terms they added. They carry
-// no clone-lineage fields (_masterId/_userModified) — the strict schema rejects them.
+// Read live as master ∪ own: master terms are shared, a user's own docs hold only
+// the terms they added. Only an admin edits shared terms (Human, 2026-10-05): POST
+// with `shared: true` creates one, PUT/DELETE by id reach master terms for admins.
+// Terms carry no clone-lineage fields (_masterId/_userModified) — the strict schema
+// rejects them.
 // ---------------------------------------------------------------------------
 const TAXONOMY = 'taxonomyTerms';
+const MASTER = '__master__';
+const isAdmin = req => req.user?.role === 'admin';
 
 /** userId filter for reads: taxonomy terms include master's; everything else is own-only. */
 function readOwner(type, userId) {
-  return type === TAXONOMY && userId !== '__master__' ? { $in: [userId, '__master__'] } : userId;
+  return type === TAXONOMY && userId !== MASTER ? { $in: [userId, MASTER] } : userId;
 }
 
+/** userId filter for writes to a term: own terms, plus master's for an admin. */
+function termWriteOwner(req) {
+  return isAdmin(req) ? { $in: [req.user.userId, MASTER] } : req.user.userId;
+}
+
+/** Owners whose documents a term's key reaches: everyone for a shared term, else its owner. */
+const termScope = term => (term.userId === MASTER ? { $exists: true } : term.userId);
+
+/** Splits a TERM_REFERENCES path: `labels[]` -> { field: 'labels', isList: true }. */
+const refPath = p => ({ field: p.replace(/\[\]$/, ''), isList: p.endsWith('[]') });
+
 /**
- * Documents of `userId` that still use `term`'s key (TERM_REFERENCES), up to `limit`.
- * Deleting or re-keying a used term is blocked (Human, 2026-10-05) so no document is left
- * pointing at a key that no longer exists.
+ * Documents in the term's scope that still use its key (TERM_REFERENCES), up to `limit`.
+ * Deleting a used term is blocked (Human, 2026-10-05) so no document is left pointing at a
+ * key that no longer exists.
  */
-async function findTermReferences(term, userId, limit = 5) {
+async function findTermReferences(term, limit = 5) {
   const refs = [];
   for (const [type, paths] of Object.entries(TERM_REFERENCES[term.kind] ?? {})) {
     if (!paths.length || refs.length >= limit) continue;
     const docs = await col(type)
       .find(
-        { userId, _userDeleted: { $ne: true }, $or: paths.map(p => ({ [p]: term.key })) },
-        { projection: { nameHebrew: 1, name: 1 } }
+        { userId: termScope(term), _userDeleted: { $ne: true }, $or: paths.map(p => ({ [refPath(p).field]: term.key })) },
+        { projection: { nameHebrew: 1, name: 1, userId: 1 } }
       )
       .limit(limit - refs.length)
       .toArray();
-    for (const d of docs) refs.push({ type, _id: d._id, name: d.nameHebrew ?? d.name ?? d._id });
+    for (const d of docs) refs.push({ type, _id: d._id, name: d.nameHebrew ?? d.name ?? d._id, userId: d.userId });
   }
   return refs;
+}
+
+/**
+ * Renames `term.key` -> `newKey` in every document of the term's scope (TERM_REFERENCES), so
+ * re-keying never strands a document on the old key. Paths: `a[]` = array of keys, `a` = one
+ * key, `a.b` / `a.b.c` = one key inside (nested) arrays of objects.
+ */
+async function renameTermEverywhere(term, newKey) {
+  for (const [type, paths] of Object.entries(TERM_REFERENCES[term.kind] ?? {})) {
+    for (const p of paths) {
+      const { field, isList } = refPath(p);
+      const filter = { userId: termScope(term), [field]: term.key };
+      const parts = field.split('.');
+      if (isList) {
+        await col(type).updateMany(filter, { $set: { [`${field}.$[k]`]: newKey } }, { arrayFilters: [{ k: term.key }] });
+      } else if (parts.length === 1) {
+        await col(type).updateMany(filter, { $set: { [field]: newKey } });
+      } else {
+        const leaf = parts.pop();
+        const target = `${parts.map((s, i) => (i === parts.length - 1 ? `${s}.$[k]` : `${s}.$[]`)).join('.')}.${leaf}`;
+        await col(type).updateMany(filter, { $set: { [target]: newKey } }, { arrayFilters: [{ [`k.${leaf}`]: term.key }] });
+      }
+    }
+  }
 }
 
 /** 409 body for a term that is still used. */
 function termInUse(term, refs) {
   return {
-    error: `Term '${term.key}' is still used and cannot be removed or re-keyed`,
+    error: `Term '${term.key}' is still used and cannot be removed`,
     kind: term.kind,
     key: term.key,
     referencedBy: refs,
   };
 }
 
-/** A user may not add or re-key a term onto a key master already has for that kind. */
+/** A user may not add or re-key an own term onto a key master already has for that kind. */
 async function masterHasTerm(kind, key) {
-  return Boolean(await col(TAXONOMY).findOne({ userId: '__master__', kind, key }, { projection: { _id: 1 } }));
+  return Boolean(await col(TAXONOMY).findOne({ userId: MASTER, kind, key }, { projection: { _id: 1 } }));
 }
 
 // ---------------------------------------------------------------------------
@@ -290,14 +329,19 @@ router.get('/:type/:id', optionalToken, async (req, res) => {
 router.post('/:type', verifyToken, async (req, res) => {
   try {
     const entityType = req.params.type;
-    const { _id: clientId, userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = req.body;
+    const { _id: clientId, userId: _u, _masterId: _m, _userModified: _um, ...body } = req.body;
     const _id = typeof clientId === 'string' && clientId ? clientId : makeId();
+    // Taxonomy terms: `shared: true` (admin only) creates a master term instead of an own one.
+    let shared = false;
+    let safeEntity = body;
+    if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
+    if (shared && !isAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
 
     const now = Date.now();
     const doc = {
       ...safeEntity,
       _id,
-      userId: req.user.userId,
+      userId: shared ? MASTER : req.user.userId,
       ...(entityType !== TAXONOMY && { _masterId: _id, _userModified: false }),
       ...(hasV2Schema(entityType) && {
         schemaVersion: 2,
@@ -311,11 +355,15 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
 
     // After validation, so kind/key are known plain strings before they reach a query.
-    if (entityType === TAXONOMY && await masterHasTerm(doc.kind, doc.key)) {
+    if (entityType === TAXONOMY && !shared && await masterHasTerm(doc.kind, doc.key)) {
       return res.status(409).json({ error: 'This term already exists for everyone', kind: doc.kind, key: doc.key });
     }
 
     await col(entityType).insertOne(doc);
+    // A new shared term covers users' own terms with the same key — fold them into it.
+    if (entityType === TAXONOMY && shared) {
+      await col(TAXONOMY).deleteMany({ kind: doc.kind, key: doc.key, userId: { $ne: MASTER } });
+    }
     res.status(201).json(doc);
   } catch (err) {
     if (err.code === 11000) {
@@ -524,14 +572,15 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     // Destructure reserved fields out of req.body — client must not override them.
     const { userId: _, _masterId: __, _userModified: ___, ...safeBody } = req.body;
 
-    const filter = { _id: req.params.id, userId: req.user.userId, _userDeleted: { $ne: true } };
     const isTerm = req.params.type === TAXONOMY;
+    const filter = { _id: req.params.id, userId: isTerm ? termWriteOwner(req) : req.user.userId, _userDeleted: { $ne: true } };
     const stamps = {
       ...(hasV2Schema(req.params.type) && { schemaVersion: 2, updatedAt: Date.now() }),
       ...(!isTerm && { _userModified: true }),
     };
     // createdAt is server-owned: a client PUT never rewrites it.
     const { createdAt: _ca, ...updatable } = safeBody;
+    let rekeyed = null;
     if (hasV2Schema(req.params.type)) {
       const current = await col(req.params.type).findOne(filter);
       if (!current) {
@@ -543,12 +592,11 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       const check = checkStoredDoc(req.params.type, { ...current, ...updatable, ...stamps });
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
       // After validation, so the new key is a known plain string before it reaches a query.
-      if (isTerm && updatable.key !== current.key && updatable.key !== undefined) {
-        if (await masterHasTerm(current.kind, updatable.key)) {
+      if (isTerm && updatable.key !== undefined && updatable.key !== current.key) {
+        if (current.userId !== MASTER && await masterHasTerm(current.kind, updatable.key)) {
           return res.status(409).json({ error: 'This term already exists for everyone', kind: current.kind, key: updatable.key });
         }
-        const refs = await findTermReferences(current, req.user.userId);
-        if (refs.length) return res.status(409).json(termInUse(current, refs));
+        rekeyed = current;
       }
     }
 
@@ -560,8 +608,17 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     if (!result) {
       return res.status(404).json({ error: `Cannot update, item ${req.params.id} does not exist` });
     }
+    // Re-keyed term: carry the new key into every document that used the old one (the
+    // owner's own, or everyone's for a shared term), and fold users' own same-key terms.
+    if (rekeyed) {
+      await renameTermEverywhere(rekeyed, result.key);
+      if (rekeyed.userId === MASTER) {
+        await col(TAXONOMY).deleteMany({ kind: result.kind, key: result.key, userId: { $ne: MASTER } });
+      }
+    }
     res.json(result);
   } catch (err) {
+    if (err.code === 11000) return res.status(409).json({ error: 'Entity already exists' });
     console.error('[data/put]', err);
     res.status(500).json({ error: 'Server error' });
   }
@@ -981,7 +1038,7 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
     if (req.params.type === TAXONOMY) {
       const terms = await col(TAXONOMY).find({ _id: { $in: ids }, userId: req.user.userId }).toArray();
       for (const term of terms) {
-        const refs = await findTermReferences(term, req.user.userId);
+        const refs = await findTermReferences(term);
         if (refs.length) return res.status(409).json(termInUse(term, refs));
       }
     }
@@ -1028,16 +1085,18 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
 
     const existing = await col(req.params.type).findOne({
       _id: req.params.id,
-      userId: req.user.userId,
+      userId: req.params.type === TAXONOMY ? termWriteOwner(req) : req.user.userId,
     });
     if (!existing) {
       return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${req.params.type} does not exist` });
     }
 
-    // Plan 321 Phase 3: a term still used by the caller's own documents can't be deleted.
+    // Plan 321 Phase 3: a term still used (own docs, or anyone's for a shared term) can't be deleted.
     if (req.params.type === TAXONOMY) {
-      const refs = await findTermReferences(existing, req.user.userId);
+      const refs = await findTermReferences(existing);
       if (refs.length) return res.status(409).json(termInUse(existing, refs));
+      await col(TAXONOMY).deleteOne({ _id: existing._id, userId: existing.userId });
+      return res.json({ ok: true });
     }
 
     const isMasterClone = existing._masterId && existing._masterId !== existing._id;

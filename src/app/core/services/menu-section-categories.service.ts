@@ -1,148 +1,72 @@
-import { Injectable, signal, inject } from '@angular/core'
+import { Injectable, computed, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
 import { LoadingService } from './loading.service'
-import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
+import { UserMsgService } from './user-msg.service'
+import { TaxonomyStore } from './taxonomy-store.service'
 
-const STORAGE_KEY = 'MENU_SECTION_CATEGORIES'
-
-const DEFAULT_SECTION_CATEGORIES = [
-  'Amuse-Bouche',
-  'Appetizers',
-  'Soups',
-  'Salads',
-  'Main Course',
-  'Sides',
-  'Desserts',
-  'Beverages'
-]
-
-interface MenuSectionCategoriesDoc {
-  _id?: string
-  items: string[]
-}
-
+/** Plan 321 Phase 3 — menu section categories as a thin facade over TaxonomyStore (`sectionCategory` terms). */
 @Injectable({ providedIn: 'root' })
 export class MenuSectionCategoriesService {
-  private readonly storage = inject(StorageService)
   private readonly logging = inject(LoggingService)
   private readonly loading_ = inject(LoadingService)
-  private readonly translationService = inject(TranslationService)
   private readonly keyResolution = inject(KeyResolutionService)
+  private readonly userMsgService = inject(UserMsgService)
+  private readonly taxonomy = inject(TaxonomyStore)
 
-  private categories = signal<string[]>([])
-  readonly sectionCategories_ = this.categories.asReadonly()
-
-  private loaded_ = false
-  private loadPromise_: Promise<void> | null = null
-
-  constructor() {
-    // Deferred: load on ensureLoaded() via menu-intelligence / metadata routes.
-  }
+  readonly sectionCategories_ = computed(() =>
+    this.taxonomy
+      .terms('sectionCategory')()
+      .map((t) => t.key)
+  )
 
   hasLoaded(): boolean {
-    return this.loaded_
+    return this.taxonomy.isLoaded_()
   }
 
   async ensureLoaded(): Promise<void> {
-    if (this.loaded_) return
-    if (this.loadPromise_) return this.loadPromise_
-    this.loadPromise_ = this.load()
-      .catch(() => {})
-      .finally(() => {
-        this.loaded_ = true
-        this.loadPromise_ = null
-      })
-    return this.loadPromise_
+    await this.loading_.track(this.taxonomy.ensureLoaded()).catch((err: unknown) => this.logError('hydrate', err))
   }
 
   /** Re-read from storage (e.g. after backup restore). */
   async reloadFromStorage(): Promise<void> {
-    if (this.loadPromise_) {
-      // A load is already in flight — e.g. this service was just constructed via
-      // injector.get() and its constructor's ensureLoaded() hasn't resolved yet.
-      // Await it instead of firing a redundant concurrent fetch for the same data.
-      await this.loadPromise_
-      return
-    }
-    this.loaded_ = false
-    this.loadPromise_ = null
-    await this.ensureLoaded()
+    await this.taxonomy.reload().catch((err: unknown) => this.logError('hydrate', err))
   }
 
-  private async load(): Promise<void> {
-    try {
-      const registries = await this.loading_.track(this.storage.query<MenuSectionCategoriesDoc>(STORAGE_KEY))
-      const doc = registries[0]
-      const items = doc?.items
-      if (Array.isArray(items) && items.length > 0) {
-        this.categories.set([...items])
-        return
-      }
-      const payload: MenuSectionCategoriesDoc = doc?._id
-        ? { ...doc, items: DEFAULT_SECTION_CATEGORIES }
-        : { items: DEFAULT_SECTION_CATEGORIES }
-      if (doc?._id) {
-        await this.storage.put(STORAGE_KEY, payload as MenuSectionCategoriesDoc & { _id: string })
-      } else {
-        await this.storage.post(STORAGE_KEY, payload)
-      }
-      this.categories.set([...DEFAULT_SECTION_CATEGORIES])
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({
-        event: 'crud.menuSectionCategories.hydrate_error',
-        message: 'Failed to load menu section categories',
-        context: { err }
-      })
-      this.categories.set([...DEFAULT_SECTION_CATEGORIES])
-    }
-  }
-
-  /** Add a section category if not already present; resolves Hebrew to key, or opens translation-key modal for English key; persists to storage. */
+  /** Add a section category if not already present; resolves Hebrew to key, or opens translation-key modal for English key. */
   async addCategory(name: string): Promise<void> {
     const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'section_category')
-    if (!keyToUse) return
-    const current = this.categories()
-    if (keyToUse == null || current.includes(keyToUse)) return
-    const updated = [...current, keyToUse]
-    await this.persist(updated)
+    if (!keyToUse || this.taxonomy.find('sectionCategory', keyToUse)) return
+    await this.write(() => this.taxonomy.add('sectionCategory', keyToUse, {}))
   }
 
   async removeCategory(name: string): Promise<void> {
-    const updated = this.categories().filter((c) => c !== name)
-    if (updated.length === this.categories().length) return
-    await this.persist(updated)
+    await this.write(() => this.taxonomy.removeByKey('sectionCategory', name))
   }
 
   async renameCategory(oldName: string, newName: string): Promise<void> {
     const trimmed = newName.trim()
     if (!trimmed || trimmed === oldName) return
-    const updated = this.categories().map((c) => (c === oldName ? trimmed : c))
-    await this.persist(updated)
+    await this.write(() => this.taxonomy.updateByKey('sectionCategory', oldName, { key: trimmed }))
   }
 
-  private async persist(items: string[]): Promise<void> {
+  private async write(op: () => Promise<unknown>): Promise<void> {
     try {
-      const registries = await this.storage.query<MenuSectionCategoriesDoc>(STORAGE_KEY)
-      const doc = registries[0]
-      const payload: MenuSectionCategoriesDoc & { _id?: string } = doc ? { ...doc, items } : { items }
-      if (doc?._id) {
-        await this.storage.put(STORAGE_KEY, { ...payload, _id: doc._id })
-      } else {
-        await this.storage.post(STORAGE_KEY, payload)
-      }
-      this.categories.set(items)
+      await op()
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({
-        event: 'crud.menuSectionCategories.persist_error',
-        message: 'Failed to persist menu section categories',
-        context: { err }
-      })
-      this.categories.set(items)
+      const msg = this.taxonomy.errorMessage(err)
+      if (msg) this.userMsgService.onSetErrorMsg(msg)
+      this.logError('persist', err)
     }
+  }
+
+  private logError(what: 'hydrate' | 'persist', err: unknown): void {
+    this.logging.error({
+      event: `crud.menuSectionCategories.${what}_error`,
+      message: `Failed to ${what} menu section categories`,
+      context: { err }
+    })
   }
 }

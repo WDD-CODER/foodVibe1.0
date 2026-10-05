@@ -44,14 +44,17 @@ export const REGISTRY_KIND_BY_COLLECTION = {
 
 /**
  * Where each kind's `key` is stored on other documents (v2 collection -> dotted field paths).
- * Deleting a term is blocked while any of these still holds its key (Human, 2026-10-05).
+ * A trailing `[]` marks an array of keys (e.g. `categories[]`); a path without it holds a
+ * single key, possibly inside arrays of objects (`ingredients.unit`).
+ * Deleting a term is blocked while any of these still holds its key (Human, 2026-10-05);
+ * re-keying a term renames the key in these paths.
  * Empty for kinds nothing references yet (protein/kosherType arrive in Phase 4; equipment
  * `category` is a fixed enum, so custom equipment categories are not stored on equipment).
  */
 export const TERM_REFERENCES: Record<TaxonomyKind, Partial<Record<'products' | 'recipes' | 'dishes' | 'menuEvents' | 'equipment', readonly string[]>>> = {
-  ingredientCategory: { products: ['categories'] },
-  allergen: { products: ['allergens'] },
-  label: { recipes: ['labels', 'autoLabels'], dishes: ['labels', 'autoLabels'] },
+  ingredientCategory: { products: ['categories[]'] },
+  allergen: { products: ['allergens[]'] },
+  label: { recipes: ['labels[]', 'autoLabels[]'], dishes: ['labels[]', 'autoLabels[]'] },
   course: { recipes: ['course'], dishes: ['course'] },
   unit: {
     products: ['baseUnit', 'purchaseOptions.unitSymbol'],
@@ -111,4 +114,14 @@ export const taxonomyTermSchema = z.discriminatedUnion('kind', [
 ])
 
 export type TaxonomyTerm = z.infer<typeof taxonomyTermSchema>
-export type TaxonomyTermOf<K extends TaxonomyKind> = Extract<TaxonomyTerm, { kind: K }>
+/**
+ * The term type of one kind. Distributes over the union members, so it also narrows the
+ * member that groups the plain kinds (`kind: z.enum(plainKinds)`), where `Extract` gives never.
+ */
+export type TaxonomyTermOf<K extends TaxonomyKind> = TaxonomyTerm extends infer T
+  ? T extends { kind: infer TK }
+    ? K extends TK
+      ? Omit<T, 'kind'> & { kind: K }
+      : never
+    : never
+  : never

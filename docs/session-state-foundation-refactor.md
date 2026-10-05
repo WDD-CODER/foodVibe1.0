@@ -172,3 +172,12 @@ diff under `shared/`, `server/`, `src/app/core/services/` or `metadata-manager/`
 - **One master preparation (`בסיס גלידה מוכן`) has no category.** The schema now allows `categoryKey` to be omitted.
 
 **Local write (2026-10-05, Human go):** backup `foodvibe-db-backups/local-2026-10-05T06-57-56` (32,744 docs) → `--write=yes` wrote 174 terms + indexes `kind_key_user_unique`, `user_kind_order` → `--verify=yes` OK. Old registry collections untouched; the app does not read `taxonomyTerms` yet.
+
+## Phase 3 — P3.4 client cutover (2026-10-05)
+
+- Human decision: **shared (master) terms are admin-only**; users edit only their own terms. No per-user copies, so the old "only me / everyone" choice applies only to own terms.
+- Server (`generic.js`): admin edits master terms through the normal PUT/DELETE; POST `shared: true` (admin) adds one and folds users' same-key terms. Re-keying renames the key in every referencing doc (`TERM_REFERENCES`, `[]` marks arrays) instead of blocking. Delete stays blocked while used (own docs, or anyone's for a shared term).
+- Client: `TaxonomyStore` (+ spec) behind the six registry services (same public API); Metadata Manager + preparation/section sub-managers show a lock on shared terms for non-admins; two dictionary keys added (`taxonomy_shared_admin_only`, `taxonomy_term_in_use`).
+- `seed-master.js`: a fresh DB gets the default master terms (the client no longer seeds per-user registries).
+- Local re-sync 0003 → 177 terms; 3 stale master categories (`aaa`, `cccc`, `dddd`) left from the first write (upsert never deletes). Human verified the 5 browser checks locally.
+- Remaining P3.4: shrink facades to ≤30 lines / inline them; generic `taxonomy-kind-manager`. P3.5: drop old registry collections + plan 322 registry routes after Atlas run + smoke.

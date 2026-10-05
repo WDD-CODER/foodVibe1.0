@@ -5,6 +5,26 @@ import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
+import { UserService } from './user.service'
+import { signal } from '@angular/core'
+
+/** Fake taxonomyTerms backend: query returns the given terms; post echoes the body as a stored term. */
+function fakeTermStorage(terms: Record<string, unknown>[] = []): jasmine.SpyObj<StorageService> {
+  const spy = jasmine.createSpyObj<StorageService>('StorageService', ['query', 'put', 'post', 'remove'])
+  spy.query.and.callFake(<T>(type: string) => Promise.resolve((type === 'taxonomyTerms' ? terms : []) as T[]))
+  spy.post.and.callFake(<T>(_type: string, body: T) =>
+    Promise.resolve({
+      _id: 'new-' + String((body as { key?: string }).key),
+      userId: 'u1',
+      schemaVersion: 2,
+      createdAt: 1,
+      updatedAt: 1,
+      ...body
+    })
+  )
+  spy.remove.and.returnValue(Promise.resolve())
+  return spy
+}
 
 describe('UnitRegistryService', () => {
   let service: UnitRegistryService
@@ -12,14 +32,15 @@ describe('UnitRegistryService', () => {
   let userMsgSpy: jasmine.SpyObj<Pick<UserMsgService, 'onSetSuccessMsg' | 'onSetErrorMsg'>>
 
   beforeEach(fakeAsync(() => {
-    const storageSpy = jasmine.createSpyObj('StorageService', ['query', 'put', 'post'])
-    storageSpy.query.and.returnValue(Promise.resolve([]))
-    storageSpy.put.and.returnValue(Promise.resolve())
-    storageSpy.post.and.returnValue(Promise.resolve())
+    const storageSpy = fakeTermStorage()
 
     userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     const loggingSpy = jasmine.createSpyObj('LoggingService', ['error', 'warn', 'info'])
-    const translationSpy = jasmine.createSpyObj('TranslationService', ['translate', 'validateKeyForHebrew', 'resolveUnit'])
+    const translationSpy = jasmine.createSpyObj('TranslationService', [
+      'translate',
+      'validateKeyForHebrew',
+      'resolveUnit'
+    ])
     translationSpy.validateKeyForHebrew.and.returnValue({ valid: true })
     translationSpy.resolveUnit.and.callFake((s: string) => s?.trim().toLowerCase().replace(/\s+/g, '_') ?? null)
     const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
@@ -31,6 +52,7 @@ describe('UnitRegistryService', () => {
       providers: [
         UnitRegistryService,
         { provide: StorageService, useValue: storageSpy },
+        { provide: UserService, useValue: { user_: signal(null) } },
         { provide: UserMsgService, useValue: userMsgSpy },
         { provide: LoggingService, useValue: loggingSpy },
         { provide: TranslationService, useValue: translationSpy },
@@ -39,7 +61,7 @@ describe('UnitRegistryService', () => {
     })
 
     service = TestBed.inject(UnitRegistryService)
-    tick() // let initUnits() complete
+    tick() // let the taxonomy load complete
   }))
 
   it('should be created and have initial units', () => {

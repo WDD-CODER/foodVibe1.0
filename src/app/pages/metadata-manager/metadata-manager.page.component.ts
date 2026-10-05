@@ -29,6 +29,8 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { LoggingService } from '@services/logging.service'
+import { TaxonomyStore } from '@services/taxonomy-store.service'
+import type { TaxonomyKind } from '@models/v2'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
@@ -36,6 +38,16 @@ import { SectionCategoryManagerComponent } from './components/section-category-m
 import { UserManagementComponent } from './components/user-management/user-management.component'
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label' | 'course'
+
+/** Taxonomy kind behind each Metadata Manager card (Plan 321 Phase 3). */
+const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
+  category: 'ingredientCategory',
+  allergen: 'allergen',
+  unit: 'unit',
+  label: 'label',
+  course: 'course',
+  menuType: 'menuType'
+}
 @Component({
   selector: 'app-metadata-manager',
   standalone: true,
@@ -71,6 +83,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   protected readonly isAdmin = computed(() => this.userService.user_()?.role === 'admin')
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
+  private readonly taxonomy = inject(TaxonomyStore)
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
@@ -181,6 +194,12 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
 
   isSystemUnit(unitKey: string): boolean {
     return unitKey in SYSTEM_UNITS
+  }
+
+  /** Shared terms are read-only except for an admin (Human, 2026-10-05); own terms are always editable. */
+  canEditTerm(type: MetadataType | 'menuType', key: string): boolean {
+    const term = this.taxonomy.find(KIND_BY_TYPE[type], key)
+    return !term || this.taxonomy.canEdit(term)
   }
 
   //CREATE
@@ -334,7 +353,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
           { variant: 'danger' }
         )
         if (!confirmed) return
-        const scope = await this.resolvePushScope(type)
+        const scope = await this.resolvePushScope(type, item)
         if (!scope) return
         try {
           const updatedCount =
@@ -398,7 +417,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     }
 
     // 3. EXECUTION
-    const scope = await this.resolvePushScope(type)
+    const scope = await this.resolvePushScope(type, item)
     if (!scope) return
     try {
       switch (type) {
@@ -509,8 +528,16 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
    *  publishes to everyone (registry key -> __master__, Hebrew label -> the shared global
    *  dictionary doc) or stays on their own account. Non-admins (and category/allergen/course/
    *  label are the only eligible types) always get 'me' silently — no prompt shown.
+   *  Plan 321 Phase 3: editing an already-shared term `key` is always 'everyone' (admin only —
+   *  there is no per-user copy any more); a non-admin gets the read-only message and null.
    *  Returns null if the admin cancels out of the prompt. */
-  private async resolvePushScope(type: MetadataType): Promise<'me' | 'everyone' | null> {
+  private async resolvePushScope(type: MetadataType, key?: string): Promise<'me' | 'everyone' | null> {
+    const term = key === undefined ? undefined : this.taxonomy.find(KIND_BY_TYPE[type], key)
+    if (term && this.taxonomy.isShared(term)) {
+      if (this.taxonomy.canEdit(term)) return 'everyone'
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('taxonomy_shared_admin_only'))
+      return null
+    }
     if (!this.isAdmin() || !(type === 'label' || type === 'course' || type === 'category' || type === 'allergen')) {
       return 'me'
     }
@@ -609,7 +636,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
         result.color === existing?.color &&
         resultTriggers === existingTriggers
       if (unchanged) return
-      const scope = await this.resolvePushScope('label')
+      const scope = await this.resolvePushScope('label', item)
       if (!scope) return
       if (result.key !== item) {
         const ok = await this.confirmAndCascadeRename('label', item, result.key, scope)
@@ -629,7 +656,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
       )
       if (!isTranslationKeyResult(result)) return
       if (result.englishKey === item && result.hebrewLabel === this.translationService.translate(item)) return
-      const scope = await this.resolvePushScope(type)
+      const scope = await this.resolvePushScope(type, item)
       if (!scope) return
       if (result.englishKey === item) {
         this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)

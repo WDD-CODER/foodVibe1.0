@@ -1,72 +1,38 @@
-import { Injectable, signal, inject } from '@angular/core'
-import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
+import { Injectable, computed, inject } from '@angular/core'
 import { LoggingService } from './logging.service'
+import { TaxonomyStore } from './taxonomy-store.service'
 
-const STORAGE_KEY = 'EQUIPMENT_CUSTOM_CATEGORIES'
-
-interface EquipmentCustomCategoriesDoc {
-  _id?: string
-  items: string[]
-}
-
+/** Plan 321 Phase 3 — custom equipment categories as a thin facade over TaxonomyStore (`equipmentCategory` terms). */
 @Injectable({ providedIn: 'root' })
 export class EquipmentCategoryRegistryService {
-  private readonly storage = inject(StorageService)
   private readonly logging = inject(LoggingService)
+  private readonly taxonomy = inject(TaxonomyStore)
 
-  private categories = signal<string[]>([])
-  readonly customCategories_ = this.categories.asReadonly()
+  readonly customCategories_ = computed(() =>
+    this.taxonomy
+      .terms('equipmentCategory')()
+      .map((t) => t.key)
+  )
 
   constructor() {
-    this.load().catch(() => {})
+    this.taxonomy.ensureLoaded().catch((err: unknown) => this.logError('load', err))
   }
 
   async reloadFromStorage(): Promise<void> {
-    await this.load()
-  }
-
-  private async load(): Promise<void> {
-    try {
-      const docs = await this.storage.query<EquipmentCustomCategoriesDoc>(STORAGE_KEY)
-      const doc = docs[0]
-      if (Array.isArray(doc?.items) && doc.items.length > 0) {
-        this.categories.set([...doc.items])
-      }
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({
-        event: 'crud.equipmentCategories.load_error',
-        message: 'Failed to load equipment custom categories',
-        context: { err }
-      })
-    }
+    await this.taxonomy.reload().catch((err: unknown) => this.logError('load', err))
   }
 
   async addCategory(key: string): Promise<void> {
     const trimmed = key.trim()
-    if (!trimmed || this.categories().includes(trimmed)) return
-    await this.persist([...this.categories(), trimmed])
+    if (!trimmed || this.taxonomy.find('equipmentCategory', trimmed)) return
+    await this.taxonomy.add('equipmentCategory', trimmed, {}).catch((err: unknown) => this.logError('persist', err))
   }
 
-  private async persist(items: string[]): Promise<void> {
-    try {
-      const docs = await this.storage.query<EquipmentCustomCategoriesDoc>(STORAGE_KEY)
-      const doc = docs[0]
-      if (doc?._id) {
-        await this.storage.put(STORAGE_KEY, { ...doc, items } as EquipmentCustomCategoriesDoc & { _id: string })
-      } else {
-        await this.storage.post(STORAGE_KEY, { items })
-      }
-      this.categories.set(items)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({
-        event: 'crud.equipmentCategories.persist_error',
-        message: 'Failed to persist equipment custom categories',
-        context: { err }
-      })
-      this.categories.set(items)
-    }
+  private logError(what: 'load' | 'persist', err: unknown): void {
+    this.logging.error({
+      event: `crud.equipmentCategories.${what}_error`,
+      message: `Failed to ${what} equipment custom categories`,
+      context: { err }
+    })
   }
 }
