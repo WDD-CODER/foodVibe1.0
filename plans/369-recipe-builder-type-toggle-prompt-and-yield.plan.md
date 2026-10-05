@@ -37,6 +37,8 @@ src/app/pages/recipe-builder/recipe-builder.page.html
 src/app/pages/recipe-builder/recipe-builder.page.ts
 src/app/core/utils/recipe-yield-manager.util.ts
 src/app/core/utils/recipe-yield-manager.util.spec.ts
+src/app/core/services/user.service.ts
+server/routes/auth.js
 ```
 
 ## Read Scope
@@ -85,9 +87,14 @@ As a chef, I want to switch a recipe between dish and preparation and get a clea
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Yield manager caching and correct conversions, plus spec (`recipe-yield-manager.util.ts`, spec).
-- [ ] A2: `isExistingRecord` input; toggle prompt logic; dictionary keys (`recipe-header/**`, `recipe-builder.page.*`).
-- [ ] A3: Build, specs. Manual test of new and existing, both directions. Update session-state.
+- [x] A1: Yield manager caching and correct conversions, plus spec (`recipe-yield-manager.util.ts`, spec).
+- [x] A2: `isExistingRecord` input; toggle prompt logic; dictionary keys (`recipe-header/**`, `recipe-builder.page.*`).
+- [x] A2b (validation fallout, 2026-10-05): after a type-change save the page threw `Cannot find control with path: 'workflow_items -> 0 -> categoryName'` (error toast) — `resetToNewForm_()` patched `recipe_type` with `emitEvent:false`, so `recipeType_` stayed `dish` while a step row was pushed. Fix: sync `recipeType_` in `resetToNewForm_()` (`recipe-builder.page.ts`). The save itself always succeeded (dish created, recipe in trash).
+- [x] A2c (validation fallout, approved `src/app/core/services/user.service.ts`, 2026-10-05): a regular user was silently switched to Guest Admin on every page reload, so "my" edits landed on the admin account. Cause: `UserService`'s constructor called `refreshToken()`, whose request runs through `authInterceptor` → injects `UserService` mid-construction → NG0200 circular DI → the error branch cleared the user → the auto-guest APP_INITIALIZER signed in dev-guest (admin). Also login/signup lacked `withCredentials`, so the cross-origin refresh cookie was never replaced. Fix: defer the constructor restore (`queueMicrotask`), skip it when `autoLoginGuest` (the initializer restores), `withCredentials` on login/signup. Verified with /browse: login → reload → navigate stays the same user; NG0200 gone.
+- [x] A2d (validation fallout, approved `server/routes/auth.js`, 2026-10-05): browsers share cookies across ports, so another local tab (main 4200 / other slots) auto-signing in as the guest overwrote `fv_refresh`, and the next reload in this slot renewed the session as Guest Admin — while the header still showed the signed-in user. Fix: in development the refresh cookie is per port (`fv_refresh_<PORT>`; deployed unchanged), and `refreshToken()` now takes the identity from the token (header always = the account that saves). Verified with /browse: login on 4203, guest tab on 4200, reload 4203 ×2 → same user, token matches.
+- [x] A3: Build, specs. Manual test of new and existing, both directions. Update session-state.
+
+> **Implementation note (2026-10-05):** the prep-yield cache also remembers the manual-override flag, so prep → dish → prep restores a manually set yield instead of letting the weight auto-sync overwrite it. The cache is dropped on `resetTrigger` (another recipe loaded / new). `toggleType()` returns true when the new prep yield should follow the ingredient weight; the header then emits `yieldManuallyChanged` so the page resets `netoConfirmed`.
 
 ## Technical Considerations
 

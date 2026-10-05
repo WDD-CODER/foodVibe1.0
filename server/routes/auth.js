@@ -13,6 +13,12 @@ const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '30d';
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
+// Browsers share cookies across ports, so local backends (main 3000, slots 3001-3003) would
+// overwrite each other's session — a guest auto-login in one tab signed every other tab in as
+// the guest admin. In development each port gets its own cookie; deployed stays `fv_refresh`.
+const REFRESH_COOKIE = process.env.NODE_ENV === 'development'
+  ? `fv_refresh_${process.env.PORT || 3000}`
+  : 'fv_refresh';
 
 // ---------------------------------------------------------------------------
 // Rate limiters
@@ -146,7 +152,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const token = jwt.sign({ userId: _id, name, role: 'user' }, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
     const refreshToken = jwt.sign({ userId: _id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
-    res.cookie('fv_refresh', refreshToken, {
+    res.cookie(REFRESH_COOKIE, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -209,7 +215,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     );
     const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
-    res.cookie('fv_refresh', refreshToken, {
+    res.cookie(REFRESH_COOKIE, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -238,7 +244,7 @@ router.post('/login', loginLimiter, async (req, res) => {
 
 router.post('/refresh', refreshLimiter, async (req, res) => {
   try {
-    const refreshToken = req.cookies && req.cookies.fv_refresh;
+    const refreshToken = req.cookies && req.cookies[REFRESH_COOKIE];
     if (!refreshToken) return res.status(401).json({ error: 'NO_REFRESH_TOKEN' });
 
     let payload;
@@ -258,7 +264,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     );
 
     const newRefreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
-    res.cookie('fv_refresh', newRefreshToken, {
+    res.cookie(REFRESH_COOKIE, newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -296,7 +302,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
 // ---------------------------------------------------------------------------
 
 router.post('/logout', (req, res) => {
-  res.clearCookie('fv_refresh', {
+  res.clearCookie(REFRESH_COOKIE, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
@@ -332,7 +338,7 @@ router.post('/guest', async (req, res) => {
     );
     const refreshToken = jwt.sign({ userId: 'dev-guest' }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
-    res.cookie('fv_refresh', refreshToken, {
+    res.cookie(REFRESH_COOKIE, refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',

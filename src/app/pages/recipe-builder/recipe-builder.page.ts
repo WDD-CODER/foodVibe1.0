@@ -130,6 +130,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
   private recipeId_ = signal<string | null>(null)
+  protected isExistingRecord_ = computed(() => this.recipeId_() !== null)
   protected resetTrigger_ = signal(0)
   isSubmitted = false
 
@@ -386,6 +387,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       },
       { emitEvent: false }
     )
+    // emitEvent:false skips the recipe_type subscription, so sync the signal by hand — otherwise the
+    // template stays in dish mode and binds prep-item controls to the step row pushed below.
+    this.recipeType_.set('preparation')
 
     this.yieldConversionsArray.clear()
     this.yieldConversionsArray.push(this.fb.group({ amount: [0], unit: ['gram'] }))

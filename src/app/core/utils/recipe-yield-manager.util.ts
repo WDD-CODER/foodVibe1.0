@@ -12,6 +12,10 @@ export interface YieldAutoSyncConfig {
 export class RecipeYieldManager {
   private readonly manualTrigger_ = signal(0)
   readonly isManualOverride_ = signal(false)
+  /** Type-toggle cache: the values each side had when the user last switched away from it. */
+  private readonly lastDishPortions_ = signal<number | null>(null)
+  private readonly lastPrepYield_ = signal<{ amount: number; unit: string; manual: boolean } | null>(null)
+  private cacheEpoch: number | null = null
 
   constructor(
     private readonly form: Signal<FormGroup>,
@@ -348,26 +352,60 @@ export class RecipeYieldManager {
 
   // --- Type toggle ---
 
-  toggleType(): void {
+  /**
+   * Switches dish ↔ preparation without inventing yields: each side's last value is cached, so
+   * toggling back restores it. With no cached preparation yield, dish → preparation starts from the
+   * ingredient weight in grams. Returns true when that weight-based yield should keep auto-syncing
+   * (the caller resets `netoConfirmed`).
+   */
+  toggleType(): boolean {
+    this.dropStaleCache()
     const current = this.form().get('recipe_type')?.value
     const conversions = this.form().get('yield_conversions') as FormArray
+    let followWeight = false
     if (current === 'dish') {
+      this.lastDishPortions_.set(this.form().get('serving_portions')?.value ?? 1)
       this.form().get('recipe_type')?.setValue('preparation')
       if (conversions?.length > 0) {
-        const portions = this.form().get('serving_portions')?.value ?? 1
-        conversions.at(0).patchValue({ amount: portions, unit: 'gram' })
+        const cached = this.lastPrepYield_()
+        if (cached) {
+          conversions.at(0).patchValue({ amount: cached.amount, unit: cached.unit })
+          this.isManualOverride_.set(cached.manual)
+        } else {
+          conversions.at(0).patchValue({ amount: this.ingredientWeightIn('gram'), unit: 'gram' })
+          this.isManualOverride_.set(false)
+          followWeight = true
+        }
       }
-      this.isManualOverride_.set(false)
     } else {
-      this.form().get('recipe_type')?.setValue('dish')
       if (conversions?.length > 0) {
-        const amount = conversions.at(0).get('amount')?.value ?? 1
-        this.form().get('serving_portions')?.setValue(Math.max(1, amount), { emitEvent: true })
-        conversions.at(0).patchValue({ unit: 'dish' })
+        const { amount, unit } = conversions.at(0).value as { amount: number; unit: string }
+        this.lastPrepYield_.set({ amount, unit, manual: this.isManualOverride_() })
       }
+      this.form().get('recipe_type')?.setValue('dish')
+      const portions = this.lastDishPortions_() ?? 1
+      this.form().get('serving_portions')?.setValue(portions, { emitEvent: true })
+      if (conversions?.length > 0) conversions.at(0).patchValue({ amount: portions, unit: 'dish' })
     }
+    this.cacheEpoch = this.resetTrigger()
     this.manualTrigger_.update((v) => v + 1)
     this.form().updateValueAndValidity({ emitEvent: true })
+    return followWeight
+  }
+
+  /** Total ingredient weight in `unit` (0 when unknown). */
+  private ingredientWeightIn(unit: string): number {
+    const totalG = this.autoSyncConfig?.totalWeightG() ?? 0
+    const factor = this.autoSyncConfig?.getConversion(unit) ?? 0
+    if (totalG <= 0 || factor <= 0) return 0
+    return Math.round((totalG / factor) * 100) / 100
+  }
+
+  /** The toggle cache belongs to one loaded recipe; a reset (load/new) invalidates it. */
+  private dropStaleCache(): void {
+    if (this.cacheEpoch === this.resetTrigger()) return
+    this.lastDishPortions_.set(null)
+    this.lastPrepYield_.set(null)
   }
 
   // --- Misc ---
