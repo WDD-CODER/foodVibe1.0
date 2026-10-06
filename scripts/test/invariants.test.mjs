@@ -18,7 +18,7 @@ Enforced from plan: 388
 
 ## INV-1 — Ownership
 - Rule: own items only
-- Source: ADR 0016
+- Source: ADR 0019
 - Touches: \`server/routes/generic.js\`, \`server/utils/can-write.js\`
 - Users lose if broken: edits
 - Test: server/test/invariants.test.js "INV-1 …"
