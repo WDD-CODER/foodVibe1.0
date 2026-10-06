@@ -34,7 +34,7 @@ if (fileArg) {
     console.log(`KIT_OWNED: no — ${rel}`)
     process.exit(0)
   }
-  console.log(`KIT_OWNED: yes - ${rel} is owned by the workflow kit. Change it in ../ai-workflow-kit, then run kit-sync; or the Human edits it in a normal terminal.`)
+  console.log(`KIT_OWNED: yes - ${rel} is owned by the workflow kit. Change it in ../ai-workflow-kit, then apply the kit diff here as a patch (docs/brain/decisions/0018-kit-changes-reach-foodvibe-as-patches.md); or list it in the plan's Read-Write Scope and work in a slot.`)
   process.exit(1)
 }
 

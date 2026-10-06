@@ -299,3 +299,11 @@ only the Bash tool's command text triggers it.
 **Why the obvious fix is wrong:** Debugging the server, Mongo or `.env` wastes time — all are fine; the sandbox blocks the spawned server's network/child processes.
 
 **What to do instead:** Re-run the same `take-plan.mjs` (it resumes the claim) with the sandbox disabled. Same for `ng test`, server vitest, and `gh`/`git push`.
+
+## Windows: a detached process started through cmd.exe writes nothing to its log file
+
+**What hurt:** `take-plan.mjs` started the slot servers with `spawn(..., { shell: true, detached: true, stdio: ['ignore', logFd, logFd] })`. The servers ran fine, but `.claude/be.log` and `.claude/fe.log` stayed at 0 bytes, so agents couldn't see server output. It failed the same way with the sandbox on and off.
+
+**Why the obvious fix is wrong:** `windowsHide: true` doesn't help, and neither does calling `cmd.exe /c` yourself. Any detached child that goes through cmd.exe loses the inherited file handles. Running it in the foreground does write the log, but take-plan needs the servers running in the background.
+
+**What to do instead:** On Windows, skip cmd.exe and run npm's own CLI under node: `spawn(process.execPath, [<node dir>/node_modules/npm/bin/npm-cli.js, ...args], { detached: true, windowsHide: true, stdio })`. Use `npm exec -- ng …` in place of `npx`. This is the `spawnNpm()` helper in `scripts/take-plan.mjs`.
