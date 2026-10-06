@@ -2,7 +2,7 @@ import { Component } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
-import { LucideAngularModule } from 'lucide-angular'
+import { LucideAngularModule, Wrench } from 'lucide-angular'
 
 import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -29,13 +29,15 @@ describe('TabChipsComponent', () => {
     mockTranslation.translate.and.callFake((k: string) => k)
 
     await TestBed.configureTestingModule({
-      imports: [TabChipsComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [TabChipsComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, Wrench })],
       providers: [
         provideRouter([
           { path: 'dashboard', component: BlankStubComponent },
           { path: 'venues', component: BlankStubComponent },
           { path: 'suppliers', component: BlankStubComponent },
           { path: 'trash', component: BlankStubComponent },
+          { path: 'inventory/list', component: BlankStubComponent },
+          { path: 'inventory/equipment', component: BlankStubComponent },
           { path: 'settings', component: BlankStubComponent }
         ]),
         { provide: TranslationService, useValue: mockTranslation }
@@ -59,6 +61,16 @@ describe('TabChipsComponent', () => {
     const links = fixture.debugElement.queryAll(By.directive(RouterLink))
     const paths = links.map((de) => de.injector.get(RouterLink).href)
     expect(paths).toEqual(jasmine.arrayContaining(['/venues', '/dashboard?tab=metadata', '/suppliers', '/trash']))
+  })
+
+  it('should render products then equipment chips on both inventory screens', async () => {
+    for (const url of ['/inventory/list', '/inventory/equipment']) {
+      await router.navigateByUrl(url)
+      fixture.detectChanges()
+      const links = fixture.debugElement.queryAll(By.directive(RouterLink))
+      const paths = links.map((de) => de.injector.get(RouterLink).href)
+      expect(paths).toEqual(['/inventory/list', '/inventory/equipment'])
+    }
   })
 
   it('should render nothing on a route with no mapped chip group', async () => {

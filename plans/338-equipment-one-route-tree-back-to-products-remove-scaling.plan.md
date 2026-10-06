@@ -69,26 +69,26 @@ As a chef, I don't want to fill in a scaling rule that does nothing.
 
 ### Must Have (P0)
 
-- [ ] Routes: replace the `/equipment` tree with redirects:
+- [x] Routes: replace the `/equipment` tree with redirects:
   - `equipment` → `inventory/equipment`
   - `equipment/list` → `inventory/equipment`
   - `equipment/add` → `inventory/equipment/add`
   - `equipment/edit/:id` → `inventory/equipment/edit/:id`
   - Old links and bookmarks keep working.
-- [ ] Delete `src/app/pages/equipment/equipment.page.{ts,html,scss,spec.ts}` (EquipmentPage, `navRoutes_`, `.equipment-nav`).
-- [ ] Remove `isUnderInventory` / `equipmentBasePath` branching in `equipment-list.component.ts` (~L94-99) and `equipment-form.component.ts` (~L180, L194). Always use `['/inventory/equipment']`. Update `equipment.resolver.ts:22` to navigate to `/inventory/equipment`.
-- [ ] Tab chips, `CHIPS_BY_GROUP.inventory = [{ id:'products', labelKey:'product_list', icon:'package', path:'/inventory/list' }, { id:'equipment', labelKey:'equipment', icon:'wrench', path:'/inventory/equipment' }]`. Remove the `['/equipment','inventory']` prefix entry (or keep it harmlessly; it now only matches the redirect).
-- [ ] Naming: the equipment list title and every nav label use the equipment key ("ציוד"). Replace the `logistics` key usages in `equipment-list.component.html` (L10, ~L291) and `inventory-product-list.component.html:265` with `equipment`. Leave the `logistics` dictionary entry: recipe-builder uses `logistics` as a form group name, not a label.
-- [ ] Remove the `.control-nav` product/equipment links from both filter panels (the tab chips replace them).
-- [ ] Scaling, UI only:
+- [x] Delete `src/app/pages/equipment/equipment.page.{ts,html,scss,spec.ts}` (EquipmentPage, `navRoutes_`, `.equipment-nav`).
+- [x] Remove `isUnderInventory` / `equipmentBasePath` branching in `equipment-list.component.ts` (~L94-99) and `equipment-form.component.ts` (~L180, L194). Always use `['/inventory/equipment']`. Update `equipment.resolver.ts:22` to navigate to `/inventory/equipment`.
+- [x] Tab chips, `CHIPS_BY_GROUP.inventory = [{ id:'products', labelKey:'product_list', icon:'package', path:'/inventory/list' }, { id:'equipment', labelKey:'equipment', icon:'wrench', path:'/inventory/equipment' }]`. Remove the `['/equipment','inventory']` prefix entry (or keep it harmlessly; it now only matches the redirect).
+- [x] Naming: the equipment list title and every nav label use the equipment key ("ציוד"). Replace the `logistics` key usages in `equipment-list.component.html` (L10, ~L291) and `inventory-product-list.component.html:265` with `equipment`. Leave the `logistics` dictionary entry: recipe-builder uses `logistics` as a form group name, not a label.
+- [x] Remove the `.control-nav` product/equipment links from both filter panels (the tab chips replace them).
+- [x] Scaling, UI only:
   - Remove `.scaling-section` and its controls (`scaling_enabled_`, `perGuests`, `minQuantity`, `maxQuantity`), `patchScalingDefaults()`, and the `scalingRule` build in `onSubmit()` from equipment-form.
   - Remove `.col-scaling` (header and body cells), `scalingSummary()`, the inline-edit scaling fields, and the column from the grid template in equipment-list.
   - Edits must preserve an existing `scalingRule` via the spread of the original doc.
-- [ ] Mark `Equipment.scalingRule` / `ScalingRule` `@deprecated` in `equipment.model.ts`. Leave `shared/schemas/**` untouched.
+- [x] Mark `Equipment.scalingRule` / `ScalingRule` `@deprecated` in `equipment.model.ts`. Leave `shared/schemas/**` untouched.
 
 ### Should Have (P1)
 
-- [ ] Update e2e selectors or URLs that reference `/equipment`.
+- [x] Update e2e selectors or URLs that reference `/equipment`.
 
 ### Nice to Have (P2)
 
@@ -101,12 +101,12 @@ Dictionary: `product_list` and `equipment` already exist; verify `product_list` 
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Replace the `/equipment` routes with redirects and delete EquipmentPage.
-- [ ] A2: Remove the URL branching in list, form and resolver.
-- [ ] A3: Add the two inventory tab chips, and remove the `.control-nav` from the equipment and inventory filter panels.
-- [ ] A4: Swap the `logistics` labels for `equipment`.
-- [ ] A5: Remove the scaling UI from form and list; deprecate the model fields.
-- [ ] A6: Run `rg -n "scaling|isUnderInventory|EquipmentPage|'/equipment" src/app` and clean the leftovers. Build, specs, e2e grep. Update the session-state file.
+- [x] A1: Replace the `/equipment` routes with redirects and delete EquipmentPage.
+- [x] A2: Remove the URL branching in list, form and resolver.
+- [x] A3: Add the two inventory tab chips, and remove the `.control-nav` from the equipment and inventory filter panels.
+- [x] A4: Swap the `logistics` labels for `equipment`.
+- [x] A5: Remove the scaling UI from form and list; deprecate the model fields.
+- [x] A6: Run `rg -n "scaling|isUnderInventory|EquipmentPage|'/equipment" src/app` and clean the leftovers. Build, specs, e2e grep. Update the session-state file.
 
 ## Technical Considerations
 
