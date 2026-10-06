@@ -430,17 +430,6 @@
 - [x] A7: `scripts/next-plan-number.mjs` (plans + `<type>/NNN-*` branches); save-plan numbering calls it; manifest row + `kit-owned.json` — `scripts/next-plan-number.mjs`, `docs/workflow-kit/**`, `docs/agent/workflow-map.md`
 - [ ] A8: Checks + `/ship`; Dandan commits the kit repo.
 
-### Plan 382 — Client log ingest + Mongo sink (replace dev log server) (`plans/382-client-log-ingest-mongo-sink.plan.md`)
-- [ ] A1: Zod `LogEventSchema` + export; `npm run build:schemas` passes (`shared/schemas/entities/log-event.schema.ts`, `shared/schemas/index.ts`).
-- [ ] A2: `server/services/log-sink.js` + indexes in `server/db.js`.
-- [ ] A3: `server/routes/log.js` (optionalToken → rateLimit → json 16kb → validate → sink → 202); mount in `server/app.js`; global error handler writes to sink.
-- [ ] A4: `server/test/log-route.test.js` (supertest + mongodb-memory-server, same helpers as `generic.test.js`): 202 valid; 400 bad `event` pattern; 400 oversized context; 429 after 60 in a minute; `info` not persisted by default, persisted with `LOG_PERSIST_INFO=1`; `userId` set when Bearer token present, `null` when absent.
-- [ ] A5: `LoggingService` rewrite (`sendToServer`, token, back-off, flood guard, `url`) (`src/app/core/services/logging.service.ts`).
-- [ ] A6: Interceptor fix `endsWith('/api/v1/log')` (`src/app/core/interceptors/auth.interceptor.ts`).
-- [ ] A7: Remove `logServerUrl` ×5 (`src/environments/*.ts`), delete `scripts/log-server.js`, npm script (`package.json`), `.gitignore` block.
-- [ ] A8: Docs + ADR 0016 + gotcha supersede + CHANGELOG + tech-stack.
-- [ ] A9: `ng build`, `npm --prefix server test`, the `rg` zero-match check, manual [human] check.
-
 ### Plan 383 — Structured server logging: pino + request ids (delivers 321 §7e early) (`plans/383-structured-server-logging-pino-request-ids.plan.md`)
 - [ ] B1: add `pino`, `pino-http` (deps) and `pino-pretty` (devDep) in `server/package.json`; `server/logger.js` with redaction + Mongo bridge.
 - [ ] B2: `pino-http` in `server/app.js` (replace morgan, `genReqId`, `X-Request-Id`, ignore list, `exposedHeaders`); remove `morgan` dependency.
@@ -474,16 +463,16 @@
 
 ### Plan 387 — Architecture guard: invariants registry, Architecture Impact gate, invariant tests (`plans/387-architecture-guard-invariants-gate.plan.md`)
 
-- [ ] A1: Write `docs/brain/invariants.md` (format + 6 seed invariants + `Enforced from plan: 388`).
-- [ ] A2: Write `scripts/lib/invariants.mjs` (parse the registry + a plan's Architecture Impact).
-- [ ] A3: Add `scope-check.mjs --arch --plan` (block) and `--arch --diff` (warn, including decision-without-adr); update the usage header.
-- [ ] A4: Wire the gate into save-plan Phase 2, `take-plan.mjs`, `ship-prep.mjs`, `/review-it` step 3.
-- [ ] A5: Add the `## Architecture Impact` section to `prd-template.md`, the line to `hld-template.md`, and the Architect step to `plan.md`.
-- [ ] A6: Add the AGENTS.md hard-rule bullet and repoint the `AGENTS.md:57` row.
+- [x] A1: Write `docs/brain/invariants.md` (format + 6 seed invariants + `Enforced from plan: 388`).
+- [x] A2: Write `scripts/lib/invariants.mjs` (parse the registry + a plan's Architecture Impact).
+- [x] A3: Add `scope-check.mjs --arch --plan` (block) and `--arch --diff` (warn, including decision-without-adr); update the usage header.
+- [x] A4: Wire the gate into save-plan Phase 2, `take-plan.mjs`, `ship-prep.mjs`, `/review-it` step 3.
+- [x] A5: Add the `## Architecture Impact` section to `prd-template.md`, the line to `hld-template.md`, and the Architect step to `plan.md`.
+- [x] A6: Add the AGENTS.md hard-rule bullet and repoint the `AGENTS.md:57` row.
 - [ ] A7: Write `server/test/invariants.test.js` (INV-1, INV-2, INV-4).
-- [ ] A8: Write ADR 0017, add the brain index line and the gotcha, update `docs/agent/workflow-map.md`.
-- [ ] A9: Classify the new files in the workflow-kit manifest.
-- [ ] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
+- [x] A8: Write ADR 0017, add the brain index line and the gotcha, update `docs/agent/workflow-map.md`.
+- [x] A9: Classify the new files in the workflow-kit manifest.
+- [x] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
 
 ## Where things live
 
