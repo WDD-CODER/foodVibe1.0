@@ -256,6 +256,13 @@
     }
   </ng-container>
 
+  <ng-container shell-filter-clear>
+    @if (hasActiveFilters_()) {
+      <button type="button" class="c-btn-ghost--sm c-filter-clear" (click)="clearAllFilters()">
+        {{ 'clear_filters' | translatePipe }}
+      </button>
+    }
+  </ng-container>
   <ng-container shell-filters>
     <nav class="control-nav" aria-label="Inventory and logistics">
       <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{
@@ -266,41 +273,36 @@
       }}</a>
     </nav>
     <div class="c-filter-section">
-      <div class="c-filter-section-header">
-        @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
-            {{ 'clear_filters' | translatePipe }}
-          </button>
-        }
+      <div class="c-toggle-chip-group quick-toggles">
+        <label class="c-toggle-chip">
+          <input type="checkbox" [checked]="lowStockOnly_()" (change)="toggleLowStockOnly()" />
+          <span>{{ 'low_stock' | translatePipe }}</span>
+        </label>
+        <label class="c-toggle-chip validation-filter-option validation-filter-option--invalid">
+          <input type="checkbox" [checked]="showInvalidOnly_()" (change)="toggleShowInvalidOnly()" />
+          <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
+          <span>{{ 'filter_invalid' | translatePipe }}</span>
+        </label>
+        <label class="c-toggle-chip validation-filter-option validation-filter-option--incomplete">
+          <input type="checkbox" [checked]="showIncompleteOnly_()" (change)="toggleShowIncompleteOnly()" />
+          <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
+          <span>{{ 'filter_incomplete' | translatePipe }}</span>
+        </label>
+        <label class="c-toggle-chip nutrition-filter-option nutrition-filter-option--has">
+          <input type="checkbox" [checked]="nutritionFilter_() === 'has'" (change)="toggleNutritionFilter('has')" />
+          <lucide-icon name="leaf" [size]="13"></lucide-icon>
+          <span>{{ 'filter_has_nutrition' | translatePipe }}</span>
+        </label>
+        <label class="c-toggle-chip nutrition-filter-option nutrition-filter-option--missing">
+          <input
+            type="checkbox"
+            [checked]="nutritionFilter_() === 'missing'"
+            (change)="toggleNutritionFilter('missing')"
+          />
+          <lucide-icon name="circle-slash" [size]="13"></lucide-icon>
+          <span>{{ 'filter_missing_nutrition' | translatePipe }}</span>
+        </label>
       </div>
-      <label class="c-filter-option low-stock-toggle">
-        <input type="checkbox" [checked]="lowStockOnly_()" (change)="toggleLowStockOnly()" />
-        <span>{{ 'low_stock' | translatePipe }}</span>
-      </label>
-      <label class="c-filter-option validation-filter-option validation-filter-option--invalid">
-        <input type="checkbox" [checked]="showInvalidOnly_()" (change)="toggleShowInvalidOnly()" />
-        <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
-        <span>{{ 'filter_invalid' | translatePipe }}</span>
-      </label>
-      <label class="c-filter-option validation-filter-option validation-filter-option--incomplete">
-        <input type="checkbox" [checked]="showIncompleteOnly_()" (change)="toggleShowIncompleteOnly()" />
-        <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
-        <span>{{ 'filter_incomplete' | translatePipe }}</span>
-      </label>
-      <label class="c-filter-option nutrition-filter-option nutrition-filter-option--has">
-        <input type="checkbox" [checked]="nutritionFilter_() === 'has'" (change)="toggleNutritionFilter('has')" />
-        <lucide-icon name="leaf" [size]="13"></lucide-icon>
-        <span>{{ 'filter_has_nutrition' | translatePipe }}</span>
-      </label>
-      <label class="c-filter-option nutrition-filter-option nutrition-filter-option--missing">
-        <input
-          type="checkbox"
-          [checked]="nutritionFilter_() === 'missing'"
-          (change)="toggleNutritionFilter('missing')"
-        />
-        <lucide-icon name="circle-slash" [size]="13"></lucide-icon>
-        <span>{{ 'filter_missing_nutrition' | translatePipe }}</span>
-      </label>
       @for (category of filterCategories_(); track category.name) {
         <div class="c-filter-category">
           <button
@@ -319,16 +321,21 @@
             ></lucide-icon>
           </button>
           @if (isCategoryExpanded(category.name)) {
-            <div class="c-filter-options">
+            <div class="c-toggle-chip-group">
               @for (option of category.options; track option.value) {
-                <label class="c-filter-option">
+                <label class="c-toggle-chip">
                   <input
                     type="checkbox"
                     [checked]="option.checked_"
                     (change)="toggleFilter(category.name, option.value)"
                   />
-                  <span class="c-filter-option-label">{{ option.label | translatePipe }}</span>
-                  <span class="c-filter-option-count" aria-hidden="true">{{ option.count }}</span>
+                  <span>{{ option.label | translatePipe }}</span>
+                  <span
+                    class="c-toggle-chip__count"
+                    [class.c-toggle-chip__count--zero]="option.count === 0"
+                    aria-hidden="true"
+                    >{{ option.count }}</span
+                  >
                 </label>
               }
             </div>

@@ -55,6 +55,7 @@
 
   // ─── FILTERS BAR — borderless, blends into the page (matches Menu Library) ──
   .filters-bar {
+    position: relative;
     display: flex;
     align-items: center;
     flex-wrap: wrap;
@@ -63,8 +64,14 @@
     margin-block-end: 1.25rem;
   }
 
-  .select-all-pill,
-  .env-filter-pill {
+  // Out of flow so showing/hiding it never widens or wraps the bar.
+  .filters-clear {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+  }
+
+  .select-all-pill {
     display: inline-flex;
     align-items: center;
 
@@ -92,12 +99,6 @@
 
     &:hover {
       background: var(--bg-glass-hover);
-    }
-
-    &.active {
-      color: var(--color-text-on-primary);
-      background: var(--color-primary);
-      border-color: var(--color-primary);
     }
   }
 

@@ -65,29 +65,29 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] New engine `.c-toggle-chip` in `styles.scss`:
+- [x] New engine `.c-toggle-chip` in `styles.scss`:
   - The pill is a label wrapping a visually hidden but focusable input, using `clip-path` / `position:absolute` and not `display:none`.
   - Selected state via `.c-toggle-chip:has(input:checked)`, plus an `.is-on` fallback class.
   - `:focus-visible` ring on the label.
   - Optional `.c-toggle-chip__dot` (label color) and `.c-toggle-chip__count`.
   - Container `.c-toggle-chip-group { display:flex; flex-wrap:wrap; gap }`.
   - Use only existing tokens; selected colors borrow from `.env-filter-pill.active` (`--color-primary`).
-- [ ] The phone override `app-root input[type=checkbox]` (~L1736) excludes `.c-toggle-chip input`.
-- [ ] Migrate every filter option in the 4 list pages from `label.c-filter-option` to `label.c-toggle-chip`, and `.c-filter-options` to `.c-toggle-chip-group`:
+- [x] The phone override `app-root input[type=checkbox]` (~L1736) excludes `.c-toggle-chip input`.
+- [x] Migrate every filter option in the 4 list pages from `label.c-filter-option` to `label.c-toggle-chip`, and `.c-filter-options` to `.c-toggle-chip-group`:
   - inventory: categories, allergens, suppliers, low stock / invalid / incomplete / nutrition toggles
   - recipe-book: types, labels with dot, favorites
   - suppliers: delivery days, linked only
   - equipment: category, and consumable radios as single-choice chips
-- [ ] Venues: replace `.env-filter-pill` with `.c-toggle-chip` and delete the local pill styles.
-- [ ] Remove the `h3.panel-heading` ("סינון") from `list-shell.component.html` (~L47) and its `.panel-heading` styles. Add a `[shell-filter-clear]` slot at the top inline-end of `.panel-content` (`position:absolute; inset-block-start:0; inset-inline-end:0`; `.panel-content { position:relative }`), so it reserves no space and sits right next to the first filter group. Move the 4 list-page clear buttons into it and delete their `.c-filter-section-header` wrappers (the wrapper is the reason empty space is reserved even when no filter is active). Venues: `.filters-bar { position:relative }`, button absolute at inline-end.
-- [ ] recipe-book: `hasActiveFilters_()` also counts `selectedProductIds_().length > 0` (the ingredient filter), and `clearAllFilters()` also runs `selectedProductIds_.set([])`.
-- [ ] Delete the now-unused `.c-filter-section-header` rule after a grep confirms there are no other users. Keep the `.c-filter-option` / `.c-filter-options` rules: `supplier-form.component.html:38` (out of scope) still uses them until the form-checkboxes plan.
+- [x] Venues: replace `.env-filter-pill` with `.c-toggle-chip` and delete the local pill styles.
+- [x] Remove the `h3.panel-heading` ("סינון") from `list-shell.component.html` (~L47) and its `.panel-heading` styles. Add a `[shell-filter-clear]` slot at the top inline-end of `.panel-content` (`position:absolute; inset-block-start:0; inset-inline-end:0`; `.panel-content { position:relative }`), so it reserves no space and sits right next to the first filter group. Move the 4 list-page clear buttons into it and delete their `.c-filter-section-header` wrappers (the wrapper is the reason empty space is reserved even when no filter is active). Venues: `.filters-bar { position:relative }`, button absolute at inline-end.
+- [x] recipe-book: `hasActiveFilters_()` also counts `selectedProductIds_().length > 0` (the ingredient filter), and `clearAllFilters()` also runs `selectedProductIds_.set([])`.
+- [x] Delete the now-unused `.c-filter-section-header` rule after a grep confirms there are no other users. Keep the `.c-filter-option` / `.c-filter-options` rules: `supplier-form.component.html:38` (out of scope) still uses them until the form-checkboxes plan.
 
 ### Should Have (P1)
-- [ ] Chip counts (`.c-toggle-chip__count`) stay visible; a zero count renders muted.
+- [x] Chip counts (`.c-toggle-chip__count`) stay visible; a zero count renders muted.
 
 ### Nice to Have (P2)
-- [ ] A subtle check icon inside a selected chip (Lucide `check`, 12px).
+- [ ] (skipped — adding a Lucide icon to these templates would require every list spec's icon `pick()` to register `check`; not worth it for P2) A subtle check icon inside a selected chip (Lucide `check`, 12px).
 
 ## UI/UX Notes
 
@@ -98,12 +98,12 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Build the `.c-toggle-chip` / `.c-toggle-chip-group` engine and the phone-override exclusion.
-- [ ] A2: Remove the panel heading; add the `[shell-filter-clear]` slot and positioning; fix the recipe-book active-filter check.
-- [ ] A3: Migrate inventory and recipe-book filters.
-- [ ] A4: Migrate suppliers, equipment and venues filters.
-- [ ] A5: Delete the dead `.c-filter-section-header` and `.env-filter-pill` styles (grep first). Keep `.c-filter-option` (still used by supplier-form).
-- [ ] A6: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file.
+- [x] A1: Build the `.c-toggle-chip` / `.c-toggle-chip-group` engine and the phone-override exclusion.
+- [x] A2: Remove the panel heading; add the `[shell-filter-clear]` slot and positioning; fix the recipe-book active-filter check.
+- [x] A3: Migrate inventory and recipe-book filters.
+- [x] A4: Migrate suppliers, equipment and venues filters.
+- [x] A5: Delete the dead `.c-filter-section-header` and `.env-filter-pill` styles (grep first). Keep `.c-filter-option` (still used by supplier-form).
+- [x] A6: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file. — build exit 0 + 18/18 specs pass [auto]; viewport check verified by Human.
 
 ## Technical Considerations
 
@@ -120,6 +120,8 @@ As a chef, I want filter options as compact chips I tap on and off, so more fit 
 - Collapsing filter categories by default (separate plan).
 
 ## Critical Questions
+
+Worker used the default (a): three radio chips, exactly one on.
 
 - Single-choice filters (equipment "consumable: all/yes/no"):
   a) Three chips, exactly one on (default)
