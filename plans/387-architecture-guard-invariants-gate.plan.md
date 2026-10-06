@@ -1,6 +1,6 @@
 # Plan 387 — Architecture guard: invariants registry, Architecture Impact gate, invariant tests
 
-Status: draft
+Status: active
 Snapshot: 81c76d6da3cc4b52b14773f237c214ff2a01becf
 
 ## Problem Statement
