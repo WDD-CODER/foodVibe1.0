@@ -66,18 +66,18 @@ As a chef receiving goods, I want to snap a photo of a product and get it added 
 
 ### Must Have (P0)
 
-- [ ] New `POST /api/v1/ai/generate-product-from-image`, same guards as `/generate-from-image` (`verifyToken`, `aiLimiter`, usage limit, mimeType check). Prompt = `PRODUCT_GENERATE_SYSTEM_PROMPT` + "Identify the product from the photo (packaging, label, or the item itself)" + the known-keys block from plan 335. Image goes as `inlineData`. Output passes through `validateProductDraft()`. Response shape is `{ product }`, like `/generate-product`.
-- [ ] `GeminiService.generateProductFromImage(file, knownKeys)`.
-- [ ] New `downscaleImage(file, maxEdge = 1280, quality = 0.8): Promise<File>` in `src/app/core/utils/downscale-image.util.ts`. It uses canvas, outputs JPEG, and skips when the file is already small.
-- [ ] The AI-product modal in create mode gets a text / image toggle, like `ai-recipe-modal`. The image input uses `accept="image/*"` and `capture="environment"`, with a preview. Generate calls the new method. The result fills `draft_` and goes through the same review → confirm flow.
+- [x] New `POST /api/v1/ai/generate-product-from-image`, same guards as `/generate-from-image` (`verifyToken`, `aiLimiter`, usage limit, mimeType check). Prompt = `PRODUCT_GENERATE_SYSTEM_PROMPT` + "Identify the product from the photo (packaging, label, or the item itself)" + the known-keys block from plan 335. Image goes as `inlineData`. Output passes through `validateProductDraft()`. Response shape is `{ product }`, like `/generate-product`.
+- [x] `GeminiService.generateProductFromImage(file, knownKeys)`.
+- [x] New `downscaleImage(file, maxEdge = 1280, quality = 0.8): Promise<File>` in `src/app/core/utils/downscale-image.util.ts`. It uses canvas, outputs JPEG, and skips when the file is already small.
+- [x] The AI-product modal in create mode gets a text / image toggle, like `ai-recipe-modal`. The image input uses `accept="image/*"` and `capture="environment"`, with a preview. Generate calls the new method. The result fills `draft_` and goes through the same review → confirm flow.
 
 ### Should Have (P1)
 
-- [ ] `GeminiService.generateFromImage()` (recipes) also uses `downscaleImage()`, which fixes the latent 413.
+- [x] `GeminiService.generateFromImage()` (recipes) also uses `downscaleImage()`, which fixes the latent 413.
 
 ### Nice to Have (P2)
 
-- [ ] Optional text hint alongside the photo ("brand, size…"), sent as an extra text part.
+- [x] Optional text hint alongside the photo ("brand, size…"), sent as an extra text part.
 
 ## UI/UX Notes
 
@@ -87,12 +87,12 @@ As a chef receiving goods, I want to snap a photo of a product and get it added 
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Write the `downscaleImage` util and its spec (dimensions capped, small file passthrough). — `src/app/core/utils/downscale-image.util.ts`, `downscale-image.util.spec.ts`
-- [ ] A2: Add the server endpoint plus a test (missing image → 400; bad mime → 400). — `server/routes/ai.js`, `server/test/**`
-- [ ] A3: Add `GeminiService.generateProductFromImage`, using the util. — `src/app/core/services/gemini.service.ts`, `gemini.service.spec.ts`
-- [ ] A4: Add the modal toggle, image picker, preview and generate wiring. On confirm, the result goes through the create path from plan 335 (registry resolver). — `src/app/shared/ai-product-modal/**`
-- [ ] A5: Recipe image path uses the util (P1). — `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts`
-- [ ] A6: Build and run specs. Update the session-state file.
+- [x] A1: Write the `downscaleImage` util and its spec (dimensions capped, small file passthrough). — `src/app/core/utils/downscale-image.util.ts`, `downscale-image.util.spec.ts`
+- [x] A2: Add the server endpoint plus a test (missing image → 400; bad mime → 400). — `server/routes/ai.js`, `server/test/**`
+- [x] A3: Add `GeminiService.generateProductFromImage`, using the util. — `src/app/core/services/gemini.service.ts`, `gemini.service.spec.ts`
+- [x] A4: Add the modal toggle, image picker, preview and generate wiring. On confirm, the result goes through the create path from plan 335 (registry resolver). — `src/app/shared/ai-product-modal/**`
+- [x] A5: Recipe image path uses the util (P1). (Done inside `GeminiService.generateFromImage()` via the shared `encodeImage_()` — the modal needed no change.) — `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts`
+- [x] A6: Build and run specs. Update the session-state file.
 
 ## Technical Considerations
 
@@ -116,8 +116,8 @@ b) Fall back to a blank draft
 
 ## Success Criteria
 
-- [auto] `npx ng test --watch=false --include=src/app/core/utils/downscale-image.util.spec.ts` → 0 failures.
-- [auto] `npm run build` → exit 0.
-- [auto] Server tests for the new endpoint pass (`npm --prefix server test` or the repo's server-tests command) → 0 failures.
+- [x] [auto] `npx ng test --watch=false --include=src/app/core/utils/downscale-image.util.spec.ts` → 0 failures.
+- [x] [auto] `npm run build` → exit 0.
+- [x] [auto] Server tests for the new endpoint pass (`npm --prefix server test` or the repo's server-tests command) → 0 failures.
 - [human] On the phone: Inventory → AI create → "מתמונה" → photograph a real product → the draft shows name, unit, categories and allergens → confirm → the product is created, with registered categories only.
 - [human] Recipe AI from a full-resolution phone photo still works (no "request too large").

@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { Observable, map, firstValueFrom } from 'rxjs'
 import type { AiRecipeDraft } from './ai-recipe-draft.service'
 import { incrementGeminiUsage, isGeminiLimitReached } from '../utils/gemini-usage.util'
+import { downscaleImage } from '../utils/downscale-image.util'
 import type { ParsedResult } from '@models/parsed-result.model'
 import { environment } from '../../../environments/environment'
 import type { AiMenuDraft, AiMenuPatch } from '@models/ai-menu-draft.model'
@@ -70,23 +71,10 @@ export class GeminiService {
   async generateFromImage(file: File): Promise<AiRecipeDraft> {
     if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
 
-    const imageBase64 = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        const result = reader.result as string
-        // Strip the data-url prefix (e.g. "data:image/jpeg;base64,")
-        resolve(result.split(',')[1])
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
-
+    const image = await this.encodeImage_(file)
     const data = await withRetry(() =>
       firstValueFrom(
-        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-image`, {
-          imageBase64,
-          mimeType: file.type
-        })
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-image`, image)
       )
     )
     incrementGeminiUsage()
@@ -164,6 +152,24 @@ export class GeminiService {
     return data.product
   }
 
+  async generateProductFromImage(file: File, hint?: string): Promise<AiProductDraft> {
+    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+
+    const image = await this.encodeImage_(file)
+    const trimmedHint = hint?.trim()
+    const data = await withRetry(() =>
+      firstValueFrom(
+        this.http_.post<{ product: AiProductDraft }>(`${this.authBase_}/api/v1/ai/generate-product-from-image`, {
+          ...image,
+          ...(trimmedHint ? { hint: trimmedHint } : {}),
+          ...this.knownMetadata_()
+        })
+      )
+    )
+    incrementGeminiUsage()
+    return data.product
+  }
+
   async patchProduct(currentProduct: AiProductDraft, instruction: string): Promise<AiProductPatch> {
     if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
 
@@ -197,5 +203,18 @@ export class GeminiService {
 
   private toHebrew_(keys: string[] | undefined): string[] {
     return (keys ?? []).map((key) => this.translation_.translate(key))
+  }
+
+  /** Downscales the photo (server body limit is 2MB) and returns it as raw base64 + MIME type. */
+  private async encodeImage_(file: File): Promise<{ imageBase64: string; mimeType: string }> {
+    const image = await downscaleImage(file)
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(image)
+    })
+    // Strip the data-url prefix (e.g. "data:image/jpeg;base64,")
+    return { imageBase64: dataUrl.split(',')[1], mimeType: image.type }
   }
 }

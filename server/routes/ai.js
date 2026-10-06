@@ -1299,6 +1299,93 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
 });
 
 // ---------------------------------------------------------------------------
+// POST /generate-product-from-image
+// Accepts { imageBase64: string, mimeType: string, hint?: string,
+//           knownCategories?: string[], knownAllergens?: string[] }.
+// Gemini identifies the product from the photo (packaging, label, or the item)
+// and returns a product record. The photo is never stored.
+// Response: { product: AiProductDraft }
+// Requires a valid JWT.
+// ---------------------------------------------------------------------------
+
+const PRODUCT_FROM_IMAGE_INSTRUCTION = 'Identify the product from the photo (packaging, label, or the item itself) and return its product record.';
+const PRODUCT_IMAGE_HINT_MAX_LEN = 300;
+
+router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { imageBase64, mimeType, hint } = req.body;
+  if (!imageBase64 || typeof imageBase64 !== 'string' || !imageBase64.trim()) {
+    return res.status(400).json({ error: 'imageBase64 is required' });
+  }
+  if (!mimeType || typeof mimeType !== 'string' || !mimeType.startsWith('image/')) {
+    return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
+  }
+
+  const currentCount = await getUsageCount();
+  if (currentCount >= DAILY_LIMIT) {
+    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
+  }
+
+  const parts = [{ text: PRODUCT_FROM_IMAGE_INSTRUCTION }];
+  if (typeof hint === 'string' && hint.trim()) {
+    parts.push({ text: `User hint: ${hint.trim().slice(0, PRODUCT_IMAGE_HINT_MAX_LEN)}` });
+  }
+  parts.push({ inlineData: { mimeType, data: imageBase64 } });
+
+  try {
+    await incrementUsage();
+
+    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: { parts: [{ text: appendKnownMetadata(PRODUCT_GENERATE_SYSTEM_PROMPT, req.body) }] },
+        contents: [{ role: 'user', parts }],
+        generationConfig: { temperature: 0.4, maxOutputTokens: 1024 },
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+
+    if (!geminiRes.ok) {
+      const errBody = await geminiRes.text();
+      console.error('[ai/generate-product-from-image] Gemini API error:', errBody);
+      return res.status(502).json({ error: 'Gemini API error' });
+    }
+
+    const geminiData = await geminiRes.json();
+    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+    if (parsed.error === 'invalid') {
+      console.error('[ai/generate-product-from-image] JSON parse failed:', raw);
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    const validationErrors = validateProductDraft(parsed.value);
+    if (validationErrors.length > 0) {
+      console.error('[ai/generate-product-from-image] validation failed:', validationErrors, parsed.value);
+      return res.status(502).json({ error: 'Gemini returned invalid product structure', details: validationErrors });
+    }
+
+    return res.json({ product: parsed.value });
+  } catch (err) {
+    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
+      console.error('[ai/generate-product-from-image] timeout');
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    }
+    console.error('[ai/generate-product-from-image]', err);
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // POST /generate-from-url
 // Accepts { url: string }.
 // Fetches the URL server-side, extracts recipe text (ld+json first, then

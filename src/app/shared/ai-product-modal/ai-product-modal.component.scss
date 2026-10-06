@@ -82,6 +82,58 @@
   box-sizing: border-box;
 }
 
+// ── Input mode toggle + photo picker ─────────────────────────────────────────
+
+.ai-product-mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-product-image-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.ai-product-image-upload {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  min-block-size: 8rem;
+  min-inline-size: 0;
+
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+
+  padding-block: 0.75rem;
+  padding-inline: 0.75rem;
+  border: 1.5px dashed var(--border-default);
+  border-radius: var(--radius-sm);
+
+  cursor: pointer;
+
+  &.ai-product-image-upload--disabled {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+}
+
+.ai-product-image-preview {
+  display: block;
+
+  max-block-size: 10rem;
+  max-inline-size: 100%;
+
+  object-fit: contain;
+
+  border-radius: var(--radius-xs);
+}
+
 // ── Status bar ────────────────────────────────────────────────────────────────
 
 .ai-product-status-bar {

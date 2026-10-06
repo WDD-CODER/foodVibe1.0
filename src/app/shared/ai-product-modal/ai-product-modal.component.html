@@ -94,15 +94,84 @@
         <!-- ── Create mode ── -->
         @if (!draft_()) {
           <div class="ai-product-prompt-panel">
-            <textarea
-              class="ai-product-textarea"
-              dir="auto"
-              [placeholder]="'ai_product_prompt_placeholder' | translatePipe"
-              [value]="prompt_()"
-              (input)="prompt_.set($any($event.target).value)"
-              rows="4"
-              [disabled]="status_() === 'sending'"
-            ></textarea>
+            <!-- Input mode toggle -->
+            <div class="ai-product-mode-toggle" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                class="c-tab-pill"
+                [class.active]="inputMode_() === 'text'"
+                [attr.aria-selected]="inputMode_() === 'text'"
+                [disabled]="status_() === 'sending'"
+                (click)="inputMode_.set('text')"
+              >
+                <lucide-icon name="type" [size]="14"></lucide-icon>
+                {{ 'ai_product_from_text' | translatePipe }}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                class="c-tab-pill"
+                [class.active]="inputMode_() === 'image'"
+                [attr.aria-selected]="inputMode_() === 'image'"
+                [disabled]="status_() === 'sending'"
+                (click)="inputMode_.set('image')"
+              >
+                <lucide-icon name="camera" [size]="14"></lucide-icon>
+                {{ 'ai_product_from_image' | translatePipe }}
+              </button>
+            </div>
+
+            @if (inputMode_() === 'text') {
+              <textarea
+                class="ai-product-textarea"
+                dir="auto"
+                [placeholder]="'ai_product_prompt_placeholder' | translatePipe"
+                [value]="prompt_()"
+                (input)="prompt_.set($any($event.target).value)"
+                rows="4"
+                [disabled]="status_() === 'sending'"
+              ></textarea>
+            } @else {
+              <div class="ai-product-image-row">
+                <label
+                  class="ai-product-image-upload"
+                  [class.ai-product-image-upload--disabled]="status_() === 'sending'"
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    hidden
+                    [disabled]="status_() === 'sending'"
+                    (change)="onImageSelected($event)"
+                  />
+                  @if (imagePreviewUrl_()) {
+                    <img
+                      class="ai-product-image-preview"
+                      [src]="imagePreviewUrl_()!"
+                      [alt]="'ai_product_photo_alt' | translatePipe"
+                    />
+                  } @else {
+                    <lucide-icon name="camera" [size]="32"></lucide-icon>
+                    <span>{{ 'ai_product_photo_hint' | translatePipe }}</span>
+                  }
+                </label>
+                @if (imageFile_() && status_() !== 'sending') {
+                  <button type="button" class="c-icon-btn" (click)="onClearImage()">
+                    <lucide-icon name="x" [size]="16"></lucide-icon>
+                  </button>
+                }
+              </div>
+              <input
+                class="c-input"
+                dir="auto"
+                [placeholder]="'ai_product_photo_hint_placeholder' | translatePipe"
+                [value]="imageHint_()"
+                (input)="imageHint_.set($any($event.target).value)"
+                [disabled]="status_() === 'sending'"
+              />
+            }
 
             @if (status_() !== 'idle') {
               <div
@@ -126,7 +195,7 @@
                 type="button"
                 class="c-btn-primary"
                 (click)="onGenerate()"
-                [disabled]="loading_() || !prompt_().trim()"
+                [disabled]="loading_() || !canGenerate_()"
               >
                 @if (loading_()) {
                   <app-loader size="small" [inline]="true" />
