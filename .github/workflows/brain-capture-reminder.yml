@@ -15,9 +15,11 @@ permissions:
 
 jobs:
   sticky-reminder:
+    # Skips the todo-sync bot's ledger PRs (chore/todo-sync-*): nothing to capture there.
     if: >
+      !startsWith(github.head_ref, 'chore/todo-sync-') && (
       github.event_name == 'pull_request' ||
-      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')
+      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved'))
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
