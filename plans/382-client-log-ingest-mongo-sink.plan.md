@@ -1,6 +1,6 @@
 # Plan 382 — Client log ingest + Mongo sink (replace dev log server)
 
-Status: draft
+Status: active
 Snapshot: 05132814b7a74187683bb45d5ef48339ae5fb5a0
 
 Logging series: **A = 382 (this plan)**, B = 383 (pino + request ids), C = 384 (logs in the AI
