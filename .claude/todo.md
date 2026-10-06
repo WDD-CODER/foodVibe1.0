@@ -205,14 +205,6 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
-### Plan 336 — AI product from a photo (`plans/336-ai-product-from-photo.plan.md`) — must run after Plan 335
-- [ ] A1: Write the `downscaleImage` util and its spec (dimensions capped, small file passthrough). — `src/app/core/utils/downscale-image.util.ts`, `downscale-image.util.spec.ts`
-- [ ] A2: Add the server endpoint plus a test (missing image → 400; bad mime → 400). — `server/routes/ai.js`, `server/test/**`
-- [ ] A3: Add `GeminiService.generateProductFromImage`, using the util. — `src/app/core/services/gemini.service.ts`, `gemini.service.spec.ts`
-- [ ] A4: Add the modal toggle, image picker, preview and generate wiring. On confirm, the result goes through the create path from plan 335 (registry resolver). — `src/app/shared/ai-product-modal/**`
-- [ ] A5: Recipe image path uses the util (P1). — `src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts`
-- [ ] A6: Build and run specs. Update the session-state file.
-
 ### Plan 338 — Equipment: one route tree, back-to-products navigation, remove scaling rule from UI (`plans/338-equipment-one-route-tree-back-to-products-remove-scaling.plan.md`)
 - [ ] A1: Replace the /equipment routes with redirects and delete EquipmentPage. (src/app/app.routes.ts, src/app/pages/equipment/equipment.page.*)
 - [ ] A2: Remove the URL branching in list, form and resolver. (equipment-list.component.ts, equipment-form.component.ts, equipment.resolver.ts)
