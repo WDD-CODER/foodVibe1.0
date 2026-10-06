@@ -13,7 +13,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
   imports: [LucideAngularModule, TranslatePipe],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserManagementComponent {
   private userAdmin = inject(UserAdminService)
@@ -23,7 +23,7 @@ export class UserManagementComponent {
 
   protected users_ = signal<AdminUser[]>([])
   protected isLoading_ = signal(false)
-  protected isAdmin = computed(() => this.userService.user_()?.role === 'admin')
+  protected isAdmin = this.userService.isAdmin_
   protected currentUserId = computed(() => this.userService.user_()?._id ?? '')
 
   constructor() {
@@ -35,20 +35,28 @@ export class UserManagementComponent {
   private loadUsers(): void {
     this.isLoading_.set(true)
     this.userAdmin.getUsers().subscribe({
-      next: users => { this.users_.set(users); this.isLoading_.set(false) },
-      error: () => { this.isLoading_.set(false) },
+      next: (users) => {
+        this.users_.set(users)
+        this.isLoading_.set(false)
+      },
+      error: () => {
+        this.isLoading_.set(false)
+      }
     })
   }
 
   async onDeleteUser(user: AdminUser): Promise<void> {
-    const confirmed = await this.confirmModal.open(
-      `מחיקת המשתמש "${user.name}" תמחק את כל הנתונים שלו לצמיתות.`,
-      { variant: 'danger', saveLabel: 'remove' }
-    )
+    const confirmed = await this.confirmModal.open(`מחיקת המשתמש "${user.name}" תמחק את כל הנתונים שלו לצמיתות.`, {
+      variant: 'danger',
+      saveLabel: 'remove'
+    })
     if (!confirmed) return
     this.userAdmin.deleteUser(user._id).subscribe({
-      next: () => { this.userMsg.onSetSuccessMsg('המשתמש נמחק בהצלחה'); this.loadUsers() },
-      error: () => this.userMsg.onSetErrorMsg('שגיאה במחיקת המשתמש'),
+      next: () => {
+        this.userMsg.onSetSuccessMsg('המשתמש נמחק בהצלחה')
+        this.loadUsers()
+      },
+      error: () => this.userMsg.onSetErrorMsg('שגיאה במחיקת המשתמש')
     })
   }
 }

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing'
 import { HttpErrorResponse } from '@angular/common/http'
-import { signal } from '@angular/core'
+import { computed, signal } from '@angular/core'
 import { TaxonomyStore, TermInUseError, TermReadOnlyError } from './taxonomy-store.service'
 import { StorageService } from './async-storage.service'
 import { UserService } from './user.service'
@@ -47,7 +47,7 @@ describe('TaxonomyStore', () => {
       providers: [
         TaxonomyStore,
         { provide: StorageService, useValue: storage },
-        { provide: UserService, useValue: { user_: user } },
+        { provide: UserService, useValue: { user_: user, isAdmin_: computed(() => user()?.role === 'admin') } },
         { provide: TranslationService, useValue: translation }
       ]
     })

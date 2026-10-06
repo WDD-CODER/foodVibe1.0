@@ -120,7 +120,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly heroFab_ = inject(HeroFabService)
   private readonly aiFlow_ = inject(RecipeAiFlowService)
   private readonly userService_ = inject(UserService)
-  private readonly isAdmin_ = computed(() => this.userService_.user_()?.role === 'admin')
+  private readonly isAdmin_ = this.userService_.isAdmin_
 
   // CHILD REFS
   private readonly recipeHeaderRef_ = viewChild(RecipeHeaderComponent)

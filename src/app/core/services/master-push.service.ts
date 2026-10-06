@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core'
+import { inject, Injectable } from '@angular/core'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
@@ -34,7 +34,7 @@ export class MasterPushService {
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
   private readonly userService = inject(UserService)
-  private readonly isAdmin_ = computed(() => this.userService.user_()?.role === 'admin')
+  private readonly isAdmin_ = this.userService.isAdmin_
 
   /**
    * Returns the chosen scope. When the recipe is not linked to a master there

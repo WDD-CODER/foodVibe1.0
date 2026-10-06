@@ -116,7 +116,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   private readonly heroFab_ = inject(HeroFabService)
 
   unitRegistry = inject(UnitRegistryService)
-  private readonly isAdmin_ = computed(() => this.userService_.user_()?.role === 'admin')
+  private readonly isAdmin_ = this.userService_.isAdmin_
 
   protected readonly categoryOptions_ = computed(() => this.metadataRegistry.allCategories_())
   protected readonly suppliers_ = computed(() => this.kitchenStateService.suppliers_())
