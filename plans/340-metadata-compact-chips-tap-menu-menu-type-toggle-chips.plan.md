@@ -1,6 +1,6 @@
 # Plan 340 — Metadata: compact chips, tap-to-act menu, menu-type fields as toggle chips
 
-Status: draft
+Status: active
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
