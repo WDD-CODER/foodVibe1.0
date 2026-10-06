@@ -40,6 +40,9 @@ scope
 `src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html`
 `src/app/core/models/equipment.model.ts`
 `e2e/**`
+`src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts`
+`src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.scss`
+`src/app/pages/breadcrumbs.md`
 
 `src/app/app.routes.ts`: this plan replaces the `/equipment` route entry (L16-38) with redirects. That's an approved exception to append-only for that entry.
 

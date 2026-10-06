@@ -9,7 +9,7 @@ Feature areas: one folder per lazy-loaded route segment. Each page owns layout (
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
 | dashboard/ | Default/overview; metadata entry | DashboardPage |
-| equipment/ | Equipment CRUD; `equipmentResolver` | EquipmentPage |
+| equipment/ | Equipment CRUD components (routed under `/inventory/equipment`) | EquipmentListComponent, EquipmentFormComponent |
 | venues/ | Venues CRUD; `venueResolver` | VenuesPage |
 | suppliers/ | Suppliers CRUD; `supplierResolver` | SuppliersPage |
 | inventory/ | Products list + form; `productResolver`, `pendingChangesGuard` | InventoryPage |
