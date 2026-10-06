@@ -291,3 +291,11 @@ only the Bash tool's command text triggers it.
 **Why the obvious fix is wrong:** Adding absolute-path variants to the scope globs, or relaxing the guard to fail open, keeps the mismatch and removes the protection.
 
 **What to do instead:** Normalize at the boundary: `scope-check --file` turns an absolute path into `relative(repoRoot, path)` before matching (plan 389). When testing a guard, feed it the same absolute Windows path a hook gets, not a relative one.
+
+## Claude Code sandbox: slot dev servers never listen (plan 336)
+
+**What hurt:** `node scripts/take-plan.mjs` run from Claude Code's sandboxed Bash claimed the slot, then failed with "be server is not listening on port 300N after 90s" and an empty `.claude/be.log`. Running `node index.js` directly also hung silently.
+
+**Why the obvious fix is wrong:** Debugging the server, Mongo or `.env` wastes time — all are fine; the sandbox blocks the spawned server's network/child processes.
+
+**What to do instead:** Re-run the same `take-plan.mjs` (it resumes the claim) with the sandbox disabled. Same for `ng test`, server vitest, and `gh`/`git push`.
