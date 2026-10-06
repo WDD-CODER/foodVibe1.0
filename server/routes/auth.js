@@ -162,7 +162,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const publicUser = { _id, name, email, imgUrl: imgUrl || '', role: 'user' };
     return res.status(201).json({ token, user: publicUser });
   } catch (err) {
-    console.error('[auth/signup]', err);
+    req.log.error({ err, event: 'auth.signup.failed' });
     // True duplicate-key race (the pre-checks above passed but another request won the insert).
     if (err.code === 11000) {
       const field = Object.keys(err.keyPattern || err.keyValue || {})[0];
@@ -226,12 +226,12 @@ router.post('/login', loginLimiter, async (req, res) => {
       await syncMasterToUser(user._id);
       const masterVersion = await getMasterVersion();
       await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
-    } catch (syncErr) { console.error('[auth/login] sync error:', syncErr.message); }
+    } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.login.sync_failed' }); }
 
     const publicUser = { _id: user._id, name: user.name, email: user.email, imgUrl: user.imgUrl, role: user.role || 'user' };
     return res.json({ token, user: publicUser });
   } catch (err) {
-    console.error('[auth/login]', err);
+    req.log.error({ err, event: 'auth.login.failed' });
     if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -280,17 +280,17 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     getMasterVersion()
       .then(async (masterVersion) => {
         if ((user.lastSyncedMasterVersion || 0) === masterVersion) {
-          console.log(`[auth/refresh] sync skipped (up to date): user=${user._id}`);
+          req.log.debug({ event: 'auth.refresh.sync_skipped', userId: String(user._id) });
           return;
         }
         await syncMasterToUser(user._id);
         await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
       })
-      .catch(syncErr => console.error('[auth/refresh] sync error:', syncErr.message));
+      .catch(syncErr => req.log.error({ err: syncErr, event: 'auth.refresh.sync_failed' }));
 
     return res.json({ token });
   } catch (err) {
-    console.error('[auth/refresh]', err);
+    req.log.error({ err, event: 'auth.refresh.failed' });
     if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -349,14 +349,14 @@ router.post('/guest', async (req, res) => {
       await syncMasterToUser('dev-guest');
       const masterVersion = await getMasterVersion();
       await User.updateOne({ _id: 'dev-guest' }, { lastSyncedMasterVersion: masterVersion });
-    } catch (syncErr) { console.error('[auth/guest] sync error:', syncErr.message); }
+    } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.guest.sync_failed' }); }
 
     return res.json({
       token,
       user: { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin' },
     });
   } catch (err) {
-    console.error('[auth/guest]', err);
+    req.log.error({ err, event: 'auth.guest.failed' });
     if (isDbUnavailableError(err)) return res.status(503).json({ error: 'DB_UNAVAILABLE' });
     return res.status(500).json({ error: 'Server error' });
   }

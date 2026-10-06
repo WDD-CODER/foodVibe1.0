@@ -3,6 +3,15 @@ const jwt = require('jsonwebtoken');
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 
 /**
+ * Verifies the access token onto req.user and binds `userId` onto `req.log` — the pino-http
+ * request logger, Plan 383 — so every handler log line after auth carries it. userId only.
+ */
+function attachUser(req, token) {
+  req.user = jwt.verify(token, ACCESS_SECRET);
+  if (req.log && req.user?.userId) req.log = req.log.child({ userId: req.user.userId });
+}
+
+/**
  * JWT verification middleware.
  * Reads Bearer token from the Authorization header, verifies it against JWT_ACCESS_SECRET,
  * and attaches the decoded payload to req.user.
@@ -20,7 +29,7 @@ function verifyToken(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, ACCESS_SECRET);
+    attachUser(req, token);
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
@@ -47,7 +56,7 @@ function optionalToken(req, res, next) {
   }
 
   try {
-    req.user = jwt.verify(token, ACCESS_SECRET);
+    attachUser(req, token);
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });

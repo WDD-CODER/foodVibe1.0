@@ -24,10 +24,22 @@ export default [
       }
     },
     rules: {
-      'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      quotes: ['error', 'single', { avoidEscape: true }],
-      semi: ['error', 'never'],
+      // `_`-prefixed names are deliberate discards (e.g. `const { _id: _u, ...rest } = doc`).
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrors: 'none' }],
+      // warn, not error: most server files predate these style rules (~1,200 hits in runtime
+      // code alone). Mass-fixing them would collide with every parallel Worker; fix per file.
+      quotes: ['warn', 'single', { avoidEscape: true }],
+      semi: ['warn', 'never'],
       'no-unexpected-multiline': 'error'
+    }
+  },
+  {
+    // Plan 383: server runtime code logs through server/logger.js (pino) — `req.log` inside
+    // handlers, `logger` at startup/db level, always with an `event`. scripts/, migrations/
+    // and test/ keep console.
+    files: ['app.js', 'db.js', 'index.js', 'logger.js', 'routes/**/*.js', 'services/**/*.js', 'middleware/**/*.js'],
+    rules: {
+      'no-console': 'error'
     }
   }
 ]

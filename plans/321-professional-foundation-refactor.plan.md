@@ -733,7 +733,7 @@ append the path to the scope block above and retry.
 - [ ] P7b Entity services onto `BaseEntityDataService`
 - [ ] P7c Archive patch scripts → `archive/scripts/` + README
 - [ ] P7d E2E smoke + server lint + coverage floor in CI
-- [ ] P7e Structured logging + request ids
+- [x] P7e Structured logging + request ids (delivered by plan 383)
 - [ ] P7f Finish remaining plan 301 milestones (server pagination), after confirming what shipped
 
 ### Phase 8 — Governance

@@ -25,6 +25,7 @@
 const mongoose = require('mongoose');
 const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 const { newId: makeId } = require('../utils/id');
+const { logger } = require('../logger');
 
 /**
  * Remap ingredient referenceIds from master IDs to user-scoped IDs.
@@ -191,7 +192,7 @@ async function syncMasterToUser(userId) {
       // legitimately fire hundreds of times for an account with a lot of overlapping
       // legacy/duplicate-named data, and per-item logging drowned out real signal.
       if (collisionCount > 0) {
-        console.log(`[sync-master]   ${type}: skipped ${collisionCount} clone(s) — cross-collection name collision`);
+        logger.info({ event: 'sync.master.clones_skipped', type, count: collisionCount, reason: 'cross-collection name collision' });
       }
     }
   }
@@ -237,7 +238,7 @@ async function syncMasterToUser(userId) {
       const staleClones = userDocs.filter(ud => userCreatedNames.has(ud.nameHebrew?.trim()));
       if (staleClones.length > 0) {
         await col.deleteMany({ _id: { $in: staleClones.map(d => d._id) } });
-        console.log(`[sync-master]   products: removed ${staleClones.length} stale duplicate clone(s): ${staleClones.map(d => d.nameHebrew).join(', ')}`);
+        logger.info({ event: 'sync.master.stale_clones_removed', type: 'products', count: staleClones.length, names: staleClones.map(d => d.nameHebrew) });
         // Remove stale clones from userByMasterId so Rule 2 doesn't try to update them
         for (const sc of staleClones) {
           userByMasterId.delete(String(sc._masterId));
@@ -346,7 +347,7 @@ async function syncMasterToUser(userId) {
     }
 
     if (productNameCollisions > 0) {
-      console.log(`[sync-master]   products: skipped ${productNameCollisions} clone(s) — name collision`);
+      logger.info({ event: 'sync.master.clones_skipped', type: 'products', count: productNameCollisions, reason: 'name collision' });
     }
 
     if (toInsert.length > 0) {

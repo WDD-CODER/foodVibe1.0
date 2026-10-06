@@ -124,6 +124,22 @@ keyed by `userId`) — see `dataWriteLimiter` in `generic.js` and `aiLimiter` in
 
 > Allowlist guard: only types in `ALL_USER_ENTITY_TYPES` (`server/constants/all-user-entity-types.js`) are reachable through the generic router — everything else, including `signed-users-db`, `users` (auth router only), and `GEMINI_SHOTS`/`GEMINI_USAGE` (`ai.js` only), returns `403`. Adding a new entity type means adding it to `ALL_USER_ENTITY_TYPES` first.
 
+### 5a — Logging (Plan 383)
+
+- No `console.*` in server runtime code (`app.js`, `db.js`, `index.js`, `logger.js`,
+  `routes/`, `services/`, `middleware/`) — `npm --prefix server run lint` errors on it.
+  `scripts/`, `migrations/`, `test/` may keep console.
+- Inside a handler use `req.log.<level>(...)` (carries `requestId`, and `userId` after auth);
+  outside a request use `logger` from `server/logger.js`.
+- `event` is mandatory, `domain.action.result`; errors go in as `{ err }`.
+- `warn`+ is persisted to `app_logs` automatically — do not call `log-sink` from routes.
+- Redacted / never logged: `Authorization`, cookies, `password`, `email`, IP, user-agent.
+  `userId` is the only user field.
+- Every response carries `X-Request-Id` (incoming id reused when it matches
+  `^[A-Za-z0-9_-]{8,64}$`); the client copies it onto `http.error` events.
+
+Event map and recipe: `docs/brain/patterns/server-log-events.md`.
+
 ---
 
 ## 6 — Plan Annotation Rule

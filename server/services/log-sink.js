@@ -1,8 +1,11 @@
 /**
  * Single durable sink for application logs (Plan 382, ADR 0016): MongoDB `app_logs`, 90-day TTL.
  *
- * `warn` / `error` are always persisted; `info` only when LOG_PERSIST_INFO=1. Every entry is
- * also echoed as one JSON line to stdout so slot logs (`.claude/be.log`) and Render see it.
+ * `warn` / `error` are always persisted; `info` only when LOG_PERSIST_INFO=1. Client entries are
+ * also echoed as one JSON line to stdout so slot logs (`.claude/be.log`) and Render see them;
+ * server entries arrive through the pino bridge in server/logger.js (Plan 383), which already
+ * printed them. This module writes to process.stdout/stderr directly — never through the
+ * logger, or a failing insert would loop back into the bridge.
  * No PII: callers pass `userId` (= user._id) only — never email, name, IP or user-agent.
  * A sink failure never throws into the caller.
  */
@@ -48,13 +51,19 @@ async function write(entry) {
     createdAt: new Date()
   };
   try {
-    console.log(JSON.stringify(doc));
+    if (doc.source !== 'server') process.stdout.write(JSON.stringify(doc) + '\n');
     if (!shouldPersist(doc.level)) return;
     const db = mongoose.connection.db;
     if (!db) throw new Error('no db connection');
     await db.collection(COLLECTION).insertOne(doc);
   } catch (err) {
-    console.error('[log/sink]', err.message);
+    process.stderr.write(JSON.stringify({
+      level: 50,
+      time: new Date().toISOString(),
+      service: 'foodvibe-api',
+      event: 'log.sink.write_failed',
+      msg: err.message
+    }) + '\n');
   }
 }
 

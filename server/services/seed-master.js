@@ -15,6 +15,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 const { newId: makeId } = require('../utils/id');
+const { logger } = require('../logger');
 
 const ASSETS_DIR = path.resolve(__dirname, '..', '..', 'public', 'assets', 'data');
 
@@ -44,12 +45,12 @@ function readDemoFile(filename) {
     const raw = fs.readFileSync(filePath, 'utf8');
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
-      console.warn(`[seed-master]   ${filename}: not an array — skipping`);
+      logger.warn({ event: 'seed.master.file_skipped', filename, reason: 'not an array' });
       return [];
     }
     return parsed;
   } catch (err) {
-    console.warn(`[seed-master]   ${filename}: could not read (${err.message}) — skipping`);
+    logger.warn({ event: 'seed.master.file_skipped', filename, err });
     return [];
   }
 }
@@ -137,7 +138,7 @@ async function seedMasterTaxonomy() {
   const { buildTerms } = require('../migrations/0003-taxonomy-terms');
   const { terms } = buildTerms(defaultMasterRegistries(), Date.now());
   await db.collection('taxonomyTerms').insertMany(terms, { ordered: false });
-  console.log(`[seed-master]   taxonomyTerms: ${terms.length} default master terms seeded`);
+  logger.info({ event: 'seed.master.taxonomy_seeded', count: terms.length });
   return terms.length;
 }
 
@@ -162,13 +163,11 @@ async function seedMasterData() {
   // Idempotency check: if master products already exist, skip
   const existing = await db.collection('products').findOne({ userId: '__master__' });
   if (existing) {
-    console.log('[seed-master] Master data already exists — skipping.');
+    logger.info({ event: 'seed.master.skipped' }, 'master data already exists');
     return seedMasterTaxonomy();
   }
 
-  console.log('[seed-master] No master data found — seeding from demo JSON files...');
-  console.log('[seed-master] Assets dir:', ASSETS_DIR);
-  console.log('[seed-master] Assets dir exists:', fs.existsSync(ASSETS_DIR));
+  logger.info({ event: 'seed.master.begin', assetsDir: ASSETS_DIR, assetsDirExists: fs.existsSync(ASSETS_DIR) }, 'no master data found — seeding from demo JSON files');
   let totalSeeded = 0;
 
   // Pass 1: build an originalId → newMasterId map for products so that
@@ -219,20 +218,20 @@ async function seedMasterData() {
     try {
       await db.collection(entityType).insertMany(docs, { ordered: false });
       totalSeeded += docs.length;
-      console.log(`[seed-master]   ${entityType}: ${docs.length} docs seeded`);
+      logger.info({ event: 'seed.master.collection_seeded', entityType, inserted: docs.length });
     } catch (err) {
       if (err.code === 11000) {
         const inserted = err.result?.insertedCount ?? 0;
         totalSeeded += inserted;
-        console.log(`[seed-master]   ${entityType}: ${inserted} docs seeded (${docs.length - inserted} duplicates skipped)`);
+        logger.info({ event: 'seed.master.collection_seeded', entityType, inserted, duplicatesSkipped: docs.length - inserted });
       } else {
-        console.error(`[seed-master]   ${entityType}: ERROR —`, err.message);
+        logger.error({ err, event: 'seed.master.collection_failed', entityType });
       }
     }
   }
 
   totalSeeded += await seedMasterTaxonomy();
-  console.log(`[seed-master] Done. Total seeded: ${totalSeeded}`);
+  logger.info({ event: 'seed.master.done', totalSeeded });
   return totalSeeded;
 }
 

@@ -4,7 +4,8 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const morgan = require('morgan');
+const crypto = require('node:crypto');
+const pinoHttp = require('pino-http');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const authRouter = require('./routes/auth');
@@ -12,7 +13,7 @@ const genericRouter = require('./routes/generic');
 const aiRouter = require('./routes/ai')
 const adminRouter = require('./routes/admin');
 const logRouter = require('./routes/log');
-const logSink = require('./services/log-sink');
+const { logger } = require('./logger');
 
 const app = express();
 app.set('trust proxy', 1); // Required for Render/reverse-proxy: enables correct IP from X-Forwarded-For
@@ -60,20 +61,59 @@ app.use(helmet({
 app.use(compression());
 
 // ---------------------------------------------------------------------------
-// Request logging — MUST come before express.static: express.static terminates
-// the response for any file it matches, so requests for static assets never
-// reach morgan if it's registered after. Format includes :response-time (stops
-// at headers-written, not body-transfer-complete — a fast number here does not
-// prove a large JSON response was fast for the user) and :res[content-length]
-// (logs "-" for compressed responses since compression() switches to chunked
-// transfer encoding and drops the header; see [data/query] logging in
-// generic.js for the real pre-compression byte count).
+// Request logging (pino-http, Plan 383) — MUST come before express.static:
+// express.static terminates the response for any file it matches, so requests for
+// static assets never reach the logger if it's registered after. Asset paths are then
+// left out of the request-complete line (autoLogging.ignore) so request logs stay about
+// /api/. `responseTime` stops at headers-written, not body-transfer-complete — a fast
+// number here does not prove a large JSON response was fast for the user; see the
+// `data.query.perf` debug event in generic.js for the real pre-compression byte count.
+//
+// Every request gets an id: a well-formed incoming X-Request-Id is reused, anything else
+// is replaced by a UUID. It is echoed as X-Request-Id on every response (readable by
+// cross-origin slot frontends via corsOptions.exposedHeaders) and bound as `requestId`
+// on req.log, so a client `http.error` and the server failure behind it share one id.
 // ---------------------------------------------------------------------------
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
+const REQUEST_ID = /^[A-Za-z0-9_-]{8,64}$/
+const SLOW_REQUEST_MS = 2000
+
+app.use(pinoHttp({
+  logger,
+  quietReqLogger: true,
+  customAttributeKeys: { reqId: 'requestId' },
+  genReqId(req, res) {
+    const incoming = req.headers['x-request-id']
+    const id = typeof incoming === 'string' && REQUEST_ID.test(incoming) ? incoming : crypto.randomUUID()
+    res.setHeader('X-Request-Id', id)
+    return id
+  },
+  autoLogging: {
+    ignore: req => {
+      const path = req.url.split('?')[0]
+      return path.startsWith('/assets/') || path.startsWith('/favicon') || HASHED_ASSET.test(path)
+    },
+  },
+  // method/url/status only — no headers, no IP (PII rule, auth-and-logging skill).
+  serializers: {
+    req: req => ({ method: req.method, url: req.url }),
+    res: res => ({ statusCode: res.statusCode }),
+  },
+  customProps: req => (req.user?.userId ? { userId: req.user.userId } : {}),
+  customLogLevel(_req, res, err) {
+    if (err || res.statusCode >= 500) return 'error'
+    if (Date.now() - res[pinoHttp.startTime] > SLOW_REQUEST_MS) return 'warn'
+    return 'info'
+  },
+  customSuccessObject: (_req, _res, val) => ({
+    ...val,
+    event: val.responseTime > SLOW_REQUEST_MS ? 'http.request.slow' : 'http.request.ok',
+  }),
+  customErrorObject: (_req, _res, _err, val) => ({ ...val, event: 'http.request.failed' }),
+}));
 
 // ---------------------------------------------------------------------------
 // Static files — served AFTER Helmet so assets also carry security headers,
-// and AFTER morgan so asset requests are logged (see the morgan block above).
+// and AFTER the request logger so asset requests reach it (see the block above).
 // MUST still come before /api/ catch-all.
 //
 // `ng build` content-hashes the JS/CSS bundles it generates ("outputHashing": "all"
@@ -116,6 +156,7 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 204,
   maxAge: 86400,
+  exposedHeaders: ['X-Request-Id'],
 }
 
 // Respond 204 to OPTIONS preflights on every route before they reach handlers.
@@ -163,15 +204,8 @@ app.get('*', (req, res) => {
 // Global error handler — never expose stack traces in production
 // ---------------------------------------------------------------------------
 app.use((err, req, res, _next) => {
-  console.error('[unhandled]', err.message);
-  logSink.write({
-    source: 'server',
-    level: 'error',
-    event: 'server.unhandled',
-    message: String(err.message || err).slice(0, 500),
-    context: process.env.NODE_ENV === 'production' ? { path: req.path } : { path: req.path, stack: err.stack },
-    userId: req.user?.userId ?? null,
-  });
+  // The pino bridge (server/logger.js) persists this to app_logs with the request id.
+  req.log.error({ err, event: 'server.unhandled', path: req.path }, err.message);
   if (process.env.NODE_ENV === 'production') {
     return res.status(500).json({ error: 'Internal server error' });
   }

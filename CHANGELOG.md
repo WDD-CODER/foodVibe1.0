@@ -6,6 +6,11 @@ All notable changes to FoodVibe are documented here.
 
 ### Added
 - **Client log ingest** (Plan 382) — `POST /api/v1/log` on the Express server stores every client `warn`/`error` in MongoDB `app_logs` (90-day TTL, `userId` only, no PII); unhandled server errors land there too as `server.unhandled`
+- **Structured server logging** (Plan 383) — `pino` + `pino-http` replace `morgan` and every `console.*` in server runtime code: one JSON line per record with `level`, `event`, `requestId`, `userId`; `warn`/`error` also persisted to `app_logs` as `source: 'server'`. Every response carries `X-Request-Id` and the client copies it onto `http.error`, so a client error and its server failure share one id. `LOG_LEVEL` / `LOG_PRETTY=1` control output
+- `npm --prefix server run lint` (runtime files only) with a `no-console` rule. Not wired into `/ship` — `ship.md` doesn't run server lint today; CI changes belong to Plan 321 §7d
+
+### Changed
+- `PERF_LOG` replaced by the `data.query.perf` debug event (`LOG_LEVEL=debug`); removed from `render.yaml`. Server ESLint `quotes`/`semi` downgraded to warnings (legacy files predate them)
 
 ### Fixed
 - Production never logged failed HTTP requests: `auth.interceptor.ts` compared URLs against an empty `logServerUrl`, which skipped every one

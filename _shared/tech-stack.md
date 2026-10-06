@@ -31,7 +31,12 @@ Node.js / Express backend · MongoDB Atlas (prod) + local Compass (dev) · Gemin
 
 ## Logging
 Client and server log events go to MongoDB `app_logs` (90-day TTL) — the client via
-`LoggingService` → `POST /api/v1/log`, the server via `server/services/log-sink.js`.
+`LoggingService` → `POST /api/v1/log`, the server via `pino` (`server/logger.js`) whose
+`warn`+ records are bridged into `server/services/log-sink.js`. Server stdout is one JSON line
+per record (`LOG_LEVEL`, default `info` in production / `debug` elsewhere; `LOG_PRETTY=1` for a
+readable local terminal); `pino-http` gives every request an `X-Request-Id` that the client
+copies onto `http.error`, so both sides share one `requestId`. No `console.*` in server
+runtime code.
 Event names `domain.action.result`. Only warn/error are persisted (info with
 `LOG_PERSIST_INFO=1`). `userId` only — no email, name, IP or user-agent in any log.
 See docs/brain/decisions/0016-logging-sink-mongo.md.

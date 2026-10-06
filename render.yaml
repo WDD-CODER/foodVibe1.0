@@ -25,13 +25,11 @@ services:
         sync: false
       - key: MONGO_URI
         sync: false
-      # Diagnostic flag for [data/query] doc-count/byte-count/Mongo-timing lines in
-      # server/routes/generic.js. Plan 302 M1's ~24h sample was collected 2026-09-27 and
-      # recorded in reports/performance-audit-2026-08-13.md — turned off (Plan 321 Phase 1)
-      # since it costs real CPU on this 0.1-shared-CPU tier (JSON.stringify runs purely to
-      # measure payload size). Flip back to "1" only for a deliberate new measurement window.
-      - key: PERF_LOG
-        value: "0"
+      # Server logs are one JSON line each (pino, Plan 383); level defaults to `info` in
+      # production. The `data.query.perf` doc-count/byte-count/Mongo-timing event in
+      # server/routes/generic.js is `debug` — it costs real CPU on this 0.1-shared-CPU tier,
+      # so add LOG_LEVEL=debug here only for a deliberate measurement window.
+      # Never set LOG_PRETTY here: the dashboard and Plan 384 parse the JSON lines.
       # Set in Render dashboard — never commit the value
       - key: GEMINI_API_KEY
         sync: false
