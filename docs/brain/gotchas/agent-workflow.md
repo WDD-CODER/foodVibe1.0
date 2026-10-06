@@ -307,3 +307,11 @@ only the Bash tool's command text triggers it.
 **Why the obvious fix is wrong:** `windowsHide: true` doesn't help, and neither does calling `cmd.exe /c` yourself. Any detached child that goes through cmd.exe loses the inherited file handles. Running it in the foreground does write the log, but take-plan needs the servers running in the background.
 
 **What to do instead:** On Windows, skip cmd.exe and run npm's own CLI under node: `spawn(process.execPath, [<node dir>/node_modules/npm/bin/npm-cli.js, ...args], { detached: true, windowsHide: true, stdio })`. Use `npm exec -- ng …` in place of `npx`. This is the `spawnNpm()` helper in `scripts/take-plan.mjs`.
+
+## A Human answer to a mid-execution question can silently override a locked ADR (plan 387)
+
+**What hurt:** During plan 321 P3.4 a Worker asked "shared terms admin-only?". The Human said yes, and the answer went into a session-state "Human decision" line, the commit and the plan tick. It contradicted ADR 0008 D1 (shared master + per-user overrides): regular users lost create/edit/delete on every default list, and nobody noticed until later.
+
+**Why the obvious fix is wrong:** "Re-read the ADRs before asking" is the judgment call that failed. The Human answered the narrow question asked, without being shown the rule it broke, and a session-state note is never checked again.
+
+**What to do instead:** Ask any question that could break an invariant as INV-n · current rule · proposed change · who loses what (`docs/brain/invariants.md`). A yes needs the Human's explicit `approve arch change INV-n`, a superseding ADR and an `Arch-approved:` line in the plan's `## Architecture Impact`. `scope-check.mjs --arch --diff` warns about any "Human decision" note that names no INV/ADR. See [[0017-architecture-invariants-gate]].

@@ -108,6 +108,7 @@
     "scripts/free-merged-slots.mjs",
     "scripts/handoff-check.sh",
     "scripts/kit-manifest-check.mjs",
+    "scripts/lib/invariants.mjs",
     "scripts/lib/plan-scope.mjs",
     "scripts/lib/slot-procs.mjs",
     "scripts/lib/slot.mjs",

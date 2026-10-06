@@ -48,6 +48,11 @@ server/test/invariants.test.js
 docs/workflow-kit/manifest.json
 docs/workflow-kit/manifest.md
 package.json
+# approved 2026-10-06 (Human: "explicitly approve you to make the changes needed to the kit repo"):
+docs/workflow-kit/kit-owned.json
+# approved 2026-10-06 (Human: "you can do both fixes, i approve"): CI runs test:scripts; non-array ingredients -> 400
+.github/workflows/ci.yml
+server/routes/generic.js
 ```
 
 ## Read Scope
@@ -68,7 +73,9 @@ by symbol (do not re-run the whole reality check from scratch), then STOP for a 
 touching any milestone.
 
 ## Architecture Impact
-- INV-none: preserves — this plan adds the guard itself and changes no runtime behavior.
+- INV-1: preserves — the only `generic.js` change rejects a non-array `ingredients` with 400 before any write; owner filters untouched.
+- INV-2: preserves — no change to master/override reads or writes.
+- INV-3: preserves — no client loops or cascade changes.
 
 ## User Stories
 - As the Human, I want any plan or question that changes my app's architecture to say so in plain words, so that I never approve a core change by accident.
@@ -131,16 +138,16 @@ touching any milestone.
 - None (workflow + tests only). No dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Write `docs/brain/invariants.md` (format + 6 seed invariants + `Enforced from plan: 388`).
-- [ ] A2: Write `scripts/lib/invariants.mjs` (parse the registry + a plan's Architecture Impact).
-- [ ] A3: Add `scope-check.mjs --arch --plan` (block) and `--arch --diff` (warn, including decision-without-adr); update the usage header.
-- [ ] A4: Wire the gate into save-plan Phase 2, `take-plan.mjs`, `ship-prep.mjs`, `/review-it` step 3.
-- [ ] A5: Add the `## Architecture Impact` section to `prd-template.md`, the line to `hld-template.md`, and the Architect step to `plan.md`.
-- [ ] A6: Add the AGENTS.md hard-rule bullet and repoint the `AGENTS.md:57` row.
-- [ ] A7: Write `server/test/invariants.test.js` (INV-1, INV-2, INV-4).
-- [ ] A8: Write ADR 0017, add the brain index line and the gotcha, update `docs/agent/workflow-map.md`.
-- [ ] A9: Classify the new files in the workflow-kit manifest.
-- [ ] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
+- [x] A1: Write `docs/brain/invariants.md` (format + 6 seed invariants + `Enforced from plan: 388`).
+- [x] A2: Write `scripts/lib/invariants.mjs` (parse the registry + a plan's Architecture Impact).
+- [x] A3: Add `scope-check.mjs --arch --plan` (block) and `--arch --diff` (warn, including decision-without-adr); update the usage header.
+- [x] A4: Wire the gate into save-plan Phase 2, `take-plan.mjs`, `ship-prep.mjs`, `/review-it` step 3.
+- [x] A5: Add the `## Architecture Impact` section to `prd-template.md`, the line to `hld-template.md`, and the Architect step to `plan.md`.
+- [x] A6: Add the AGENTS.md hard-rule bullet and repoint the `AGENTS.md:57` row.
+- [ ] A7: Write `server/test/invariants.test.js` (INV-1, INV-2, INV-4). Split (Human 2026-10-06, "go with one"): INV-1 own / other-user / regular-user-on-master across 5 collections, INV-1 admin-on-master term, and INV-4 pass now; INV-1 admin-on-master for products/recipes/dishes/menuEvents and both INV-2 cases are `it.todo` until plan 386 merges.
+- [x] A8: Write ADR 0017, add the brain index line and the gotcha, update `docs/agent/workflow-map.md`.
+- [x] A9: Classify the new files in the workflow-kit manifest.
+- [x] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
 
 ## Technical Considerations
 - Dependencies:

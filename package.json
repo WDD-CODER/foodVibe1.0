@@ -11,6 +11,7 @@
     "lint:no-native-select": "node scripts/check-no-native-select.mjs",
     "todo": "node scripts/todo-query.mjs",
     "test": "ng test",
+    "test:scripts": "node --test scripts/test/*.test.mjs",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "build:schemas": "tsc -p shared/schemas/tsconfig.cjs.json",

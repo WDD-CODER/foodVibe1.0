@@ -4305,6 +4305,153 @@
       "params": [],
       "refs": [],
       "notes": "Plan 360: the one Read-Write Scope parser (```scope fence, plain fence, **Scope:** list, or fence-less \"scope\" line), shared by scope-check.mjs and take-plan.mjs. Kit-authored; FoodVibe gets a copy."
+    },
+    {
+      "path": "scripts/lib/invariants.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "docs/brain/invariants.md",
+        "scripts/scope-check.mjs",
+        "scripts/take-plan.mjs"
+      ],
+      "notes": "Plan 387: parses the architecture invariants registry and a plan's `## Architecture Impact`; pure checks behind `scope-check.mjs --arch` and take-plan's pre-claim gate. Kit-authored; FoodVibe gets a copy."
+    },
+    {
+      "path": "docs/brain/invariants.md",
+      "tier": "template",
+      "action": "skeleton",
+      "params": [
+        {
+          "key": "project.name",
+          "strings": [
+            "FoodVibe"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/brain/decisions/0017-architecture-invariants-gate.md",
+        "scripts/lib/invariants.mjs",
+        "scripts/scope-check.mjs",
+        "server/test/invariants.test.js"
+      ],
+      "notes": "Plan 387: FoodVibe's filled registry (INV-1..6). The kit ships an empty skeleton (`templates/docs/brain/invariants.md`); no file = gate off."
+    },
+    {
+      "path": "docs/brain/decisions/0018-kit-changes-reach-foodvibe-as-patches.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/workflow-kit/kit-owned.json",
+        "docs/workflow-kit/manifest.json"
+      ],
+      "notes": "FoodVibe ADR (chore/workflow-redundant-stops): kit changes reach FoodVibe as a hand-applied patch until kit-install. Classified by plan 387 after the rebase."
+    },
+    {
+      "path": "docs/brain/decisions/0017-architecture-invariants-gate.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "docs/brain/invariants.md",
+        "scripts/scope-check.mjs",
+        "server/test/invariants.test.js"
+      ],
+      "notes": "Plan 387 ADR: the 2026-10-05 incident and the four-layer gate. FoodVibe history; the rule itself ships in core (AGENTS.md template, save-plan, scope-check)."
+    },
+    {
+      "path": "scripts/test/invariants.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/invariants.mjs",
+        "scripts/scope-check.mjs",
+        "docs/brain/invariants.md"
+      ],
+      "notes": "Plan 387: `node --test` script tests (`npm run test:scripts`); they read FoodVibe's real registry, so they stay here."
+    },
+    {
+      "path": "scripts/test/fixtures/arch-missing.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/test/invariants.test.mjs"
+      ],
+      "notes": "Plan 387 fixture: scope touches INV-1, no Architecture Impact (expects `ARCH: missing INV-1`)."
+    },
+    {
+      "path": "scripts/test/fixtures/arch-unapproved.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/test/invariants.test.mjs"
+      ],
+      "notes": "Plan 387 fixture: INV-2 change without Arch-approved (expects `ARCH: unapproved INV-2`)."
+    },
+    {
+      "path": "scripts/test/fixtures/arch-approved.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/test/invariants.test.mjs"
+      ],
+      "notes": "Plan 387 fixture: every touched invariant covered, approved change with an in-scope ADR (expects `ARCH: ok`)."
+    },
+    {
+      "path": ".claude/commands/remote.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/remote-port.mjs"
+      ],
+      "notes": "Plan 388 on-demand remote link (left unclassified by that plan; classified by plan 387). FoodVibe-side for now; candidate for core once validated."
+    },
+    {
+      "path": "docs/agent/remote-port.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/remote-port.mjs"
+      ],
+      "notes": "Plan 388 on-demand remote link (left unclassified by that plan; classified by plan 387). FoodVibe-side for now; candidate for core once validated."
+    },
+    {
+      "path": "scripts/lib/remote-proxy.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/remote-port.mjs"
+      ],
+      "notes": "Plan 388 on-demand remote link (left unclassified by that plan; classified by plan 387). FoodVibe-side for now; candidate for core once validated."
+    },
+    {
+      "path": "scripts/lib/remote-proxy.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/remote-port.mjs"
+      ],
+      "notes": "Plan 388 on-demand remote link (left unclassified by that plan; classified by plan 387). FoodVibe-side for now; candidate for core once validated."
+    },
+    {
+      "path": "scripts/remote-port.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/remote-port.mjs"
+      ],
+      "notes": "Plan 388 on-demand remote link (left unclassified by that plan; classified by plan 387). FoodVibe-side for now; candidate for core once validated."
     }
   ]
 }
