@@ -56,77 +56,6 @@
 - [ ] P7a–P7f Hygiene: god-file decomposition, service base adoption, script archive, CI hardening, logging, plan 301 remainder
 - [ ] P8.1–P8.5 Governance: ADRs 0009–0013, standards docs, lint guards, re-audit
 
-### Plan 322 — Admin Master-Push Expansion (`plans/322-admin-master-push-expansion.plan.md`)
-
-> 2026-10-05 reality check: Stage 1 server guard, `askScope` admin gate and Products push already shipped (via Plan 322-metadata + 335). Registry part of Stage 3 deferred to Plan 321 Phase 3. Read-Write Scope added — takeable.
-
-> Saved 2026-09-30, not yet started. **Related to Plan 321's Phase 5** ("Shared master +
-> per-user overrides; admin-only push + dedicated modal") but NOT a duplicate: Plan 322
-> is the near-term incremental version built on the *current* clone/`_masterId`/sync-master
-> architecture; Plan 321 Phase 5 is the later full replacement of that architecture
-> (override model, no cloning). Plan 321's Phase 5 section now cross-references this plan
-> so its Reality Check absorbs Plan 322's shipped state instead of re-deriving it. Safe to
-> execute Plan 322 now — Plan 321 Phase 5 will migrate its output when that phase starts.
-
-> **State 2026-10-05:** Stages 2–5 build on the clone/`_masterId` model that Plan 321 Phase 5 deletes — anything added there is throwaway. **Human 2026-10-05: Stage 1 only; Stages 2–5 FOLDED into 321 P5.** **Human 2026-10-06: 321 P5 dropped, so Stages 2–5 are dropped.**
-
-- [ ] Stage 1 — PARTLY DONE: `requireAdmin` on `push-to-master` ✅, `askScope()` → `'me'` for non-admins ✅. LEFT: one public `isAdmin_` on `UserService`, replace the 7 ad hoc copies (master-push, taxonomy-store, product-form, user-management, metadata-manager page, recipe-book-list, recipe-builder)
-- [-] Stage 2 (DROPPED (Human 2026-10-06) with 321 P5) — Products DONE; server already accepts suppliers/equipment (`PUSHABLE_TYPES`). LEFT: equipment + supplier client wiring
-- [-] Stage 3 (DROPPED (Human 2026-10-06) with 321 P5) — registry part MOOT (taxonomy terms are shared live since 321 P3). LEFT: venues + menuEvents only
-- [-] Stage 4 (DROPPED (Human 2026-10-06) with 321 P5) — not started (terms already support "add as shared")
-- [-] Stage 5 (DROPPED (Human 2026-10-06) with 321 P5) — `delete-from-master` exists for recipes/dishes/products. LEFT: equipment/suppliers/venues/menuEvents
-
-### Plan 320 — Recipe Labels Fix + Course/Category Field (`plans/320-recipe-labels-fix-course-category-field.plan.md`) — active in worktree `../foodVibe1.0-wt-recipe-labels`, branch `feat/recipe-labels-course-field`
-
-> **CLOSED 2026-10-05 — superseded by Plan 321 Phase 4** (course/protein/labels split on v2 data). This plan uses pre-v2 names (`labels_`, `KITCHEN_LABELS`, `course_`) that no longer exist after the Phase 2b migration. Do not take it; Phase 4's Step 0 reads it for the label-cluster decisions.
-
-> Scope correction 2026-09-29: only 5 of the audit's 9 clusters are genuine duplicates (dairy, vegan, marinade, asian, sipur_shel_ochel); the other 4 (meat/salads/soups/dessert) are course strings mis-clustered by the audit script's fuzzy matching — deferred to Milestone 2, not merged in Milestone 1. See plan file's Milestone 1 header for full detail.
-
-**Milestone 1 — Merge duplicate dietary labels (5 confirmed clusters only)**
-- [ ] M1.1: Read `.claude/reports/label-audit/data.json` Section D — extract the 5 confirmed clusters (dairy, vegan, marinade, asian, sipur_shel_ochel), canonical keys, orphan members, full affected-recipe lists
-- [ ] M1.2: Confirm/register each canonical key in `KITCHEN_LABELS` for every affected `userId` (incl. `__master__`)
-- [ ] M1.3: Write `scripts/merge-labels.mjs` (dry-run default, `--write` to mutate; scoped to the 5 clusters only) — replace orphan members with canonical key, dedupe, log mutations
-- [ ] M1.4: Dry-run local → Human confirms host → `--remote` dry-run → review log → `--write --remote`
-- [ ] M1.5: Fix `normalizeLabelKeys`/`buildRecipeFromForm` asymmetry in `recipe-form.service.ts` (save path should accept translation-dictionary fallback like load path)
-- [ ] M1.6: Re-run `scripts/audit-labels.mjs --remote` — confirm 0 orphans in the 5 merged clusters (the other 4 clusters still showing orphans here is expected, not a regression)
-
-**Milestone 2 — Recipe course/category field**
-- [ ] M2.1: Add `course_?: string` to `Recipe` interface in `recipe.model.ts`
-- [ ] M2.2: Add `KITCHEN_COURSES` registry to `metadata-registry.service.ts` (mirror `KITCHEN_LABELS` pattern; do not touch `KITCHEN_CATEGORIES`)
-- [ ] M2.3: Seed `DEFAULT_COURSES` for `__master__` from non-dietary-duplicate orphan strings in `.claude/reports/label-audit/data.json`, including the 4 course-like clusters' members kept as distinct strings (not merged)
-- [ ] M2.4: `recipe-builder.page.ts` — add `course: ['']` to `recipeForm_` (sole approved exception to file freeze)
-- [ ] M2.5: `recipe-form.service.ts` — course handling in `patchFormFromRecipe`/`buildRecipeFromForm`
-- [ ] M2.6: `recipe-header.component.ts`/`.html` — single-select course dropdown bound to `metadataRegistry.courses_()`
-- [ ] M2.7: Metadata manager — "Courses" CRUD card (mirror labels card)
-- [ ] M2.8: `recipe-book-list.component.ts` — surface `course_` in list/filter sidebar
-- [ ] M2.9: `dictionary.json` — Hebrew translation entries for seeded course strings
-- [ ] M2.10: Write `scripts/migrate-labels-to-courses.mjs` (dry-run default) — move course-like strings from `labels_`/`autoLabels_` to `course_`; multi-match conflicts go to a Human-review list, never auto-picked
-- [ ] M2.11: Dry-run local → Human resolves conflicts → `--remote` dry-run → `--write --remote`
-- [ ] M2.12: Re-run `scripts/audit-labels.mjs --remote` — confirm 0 course-like strings remain in `labels_`/`autoLabels_`
-
-**Follow-up (post-M2, Human-tested 2026-09-29) — landed as a separate commit, not a new milestone:**
-- [x] Course dropdown "clear to none" option + cascade-delete-with-confirm for in-use labels/courses (mirrors `renameMenuType`'s confirm+cascade shape) — committed
-- [x] Bug: `getRecipeSnapshotForComparison()` never tracked `course_`, so changing only the course didn't mark the form dirty — fixed
-- [x] Bug: metadata-manager's `onAddLabel` discarded the already-typed input text instead of prefilling the creation modal — fixed
-- [ ] (still open, not Plan 320 work — fold into Plan 364 A1, which touches `custom-select`) Bug: course `app-custom-select` dropdown option sometimes needs ~2-3 clicks to register a selection — reproduced, root cause not yet pinned (shared `CustomSelectComponent`, not obviously course-specific); deferred, not a data-correctness issue
-
-### Plan 301 — Server-side search & lean data loading (`plans/301-server-side-search-lean-data-loading.plan.md`)
-
-> **CLOSED 2026-10-05** — plan file is archived (`plans/archive/301-…`); its remaining milestones are Plan 321 P7f.
-
-> Milestone 1 done, merged to `main` (PR #177), Human-validated 2026-08-13. Milestones 2-4 still not started.
-
-- [x] Confirm exact lean field list the ingredient-search dropdown needs (read `ingredient-search.component.html` template) before designing the `/search` response shape
-- [x] Add `{ userId: 1, name_hebrew: 1 }` index (or equivalent) to `server/db.js` for `PRODUCT_LIST`/`RECIPE_LIST`/`DISH_LIST`
-- [x] Add `GET /api/v1/data/:type/search?q=&limit=` to `server/routes/generic.js` — prefix match on `name_hebrew`, lean projection, restricted to an allowlist of searchable entity types
-- [x] Add `search<T>()` to `HttpStorageAdapter`/`StorageService` mirroring the existing `query()`/`queryFiltered()` shape
-- [x] Refactor `ingredient-search.component.ts` to debounce + call the new search endpoint instead of filtering `KitchenStateService.products_()`/`recipes_()` in full
-- [x] Refactor `recipe-book-list.component.ts`'s `filteredProductsForIngredientSearch_` the same way
-- [x] Verify: build, curl the new endpoint, live typeahead behavior, no regression on inventory/recipe-book, no keystroke-spam requests
-- [x] Milestone 3 — dashboard count endpoint (`GET /:type/count?filter=lowStock|unapproved`) added to `server/routes/generic.js`; `ng build` + live curl verified against real `dev-guest` data. Dashboard component intentionally not rewired — per plan note, only becomes a real win once Milestone 2 lands.
-- [ ] Milestone 2 — carved out to Plan 310 (below) — see `plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`
-- [x] Milestone 4 — collapse `UserService._reloadDataServices()`'s post-login re-fetch with each service's constructor-time load: done in `feat/optimization` — `reloadFromStorage()` now awaits an in-flight load instead of racing a duplicate one (`base-entity-data.service.ts`, `product-data.service.ts`, `recipe-data.service.ts`, `dish-data.service.ts`, `menu-event-data.service.ts`, `menu-section-categories.service.ts`, `preparation-registry.service.ts`, `metadata-registry.service.ts`). Verified via network capture: PRODUCT_LIST/RECIPE_LIST/DISH_LIST/etc. each fetch exactly once per page load, down from twice (~5MB/page deduped). Human-validated 2026-08-31.
-
 ### Plan 304 — Perf Phase 3: Data Volume (`plans/304-perf-phase3-data-volume.plan.md`)
 
 > 2026-10-05 reality check: only Milestone 1 (list projections) left, still justified. Read-Write Scope (M1 only) added — takeable.
@@ -141,18 +70,6 @@
 - [x] M2 — Collapse the post-login double fetch — `user.service.ts:54-93` (same item as plan 301 M4; done there, see above — Human-validated 2026-08-31)
 - [x] M3 — Add `cdk-virtual-scroll` or pagination to inventory + recipe-book lists (after 303 M2) — delivered as **pagination**, not `cdk-virtual-scroll`, 2026-09-15: the shared `.c-list-row { display: contents }` engine class (used by every list page) is structurally incompatible with CDK's item-wrapper DOM — see new gotcha in `docs/brain/gotchas/angular.md`. Pagination (50/page) gets the same DOM-size win with zero shared-CSS risk. Verified: rendered rows dropped ~2,113 → 50, selection state survives page navigation, search resets to page 1.
 - [ ] Hand-off — re-assess plan 301 M2's scope against measured results
-
-### Plan 310 — Faceted Server-Side Search & Pagination for Inventory + Recipe Book (`plans/310-faceted-search-pagination-inventory-recipe-book.plan.md`)
-
-> **ABANDONED 2026-09-27.** Fully implemented (all 6 milestones) and verified against a local copy of the data, but never tested against the real Atlas database before going live — that test found it made the app badly worse (near-1-minute recipe-book loads from an expensive `$graphLookup` allergens resolution re-run on every page view against free-tier Atlas; non-cancellable debounced fetches queuing up and landing out of order under real latency; a genuine pagination-reset bug in inventory). Human had it fully reverted rather than patched — dropped, not worth fixing. Full postmortem and the specific technical causes are in `plans/310-…plan.md`'s "STATUS: ABANDONED" section at the top — read that before ever reconsidering this plan.
-
-- [ ] Prerequisite gate — confirm plan 304 M1/M2/M3 shipped + measured; re-scope if 304 M3 already solves pagination
-- [ ] Milestone 0 — Decisions (Human): facet-count strategy, allergens resolution strategy (denormalize / `$graphLookup` / punt), ingredient-containment index, pagination ownership vs plan 304 M3, search UX (prefix vs substring), favorites storage shape
-- [ ] Milestone 1 — Low-risk facets + pagination skeleton (Category/Supplier/product-Allergens/low-stock/invalid/incomplete/nutrition for inventory; Type/Approved/Station/Labels/date-range for recipe-book)
-- [ ] Milestone 2 — Allergens facet for recipe-book (recursive nested-recipe resolution — highest-risk piece, per Decision 2)
-- [ ] Milestone 3 — Ingredient-containment filter for recipe-book
-- [ ] Milestone 4 — Client rewire (`inventory-product-list.component.ts`, `recipe-book-list.component.ts`) + pagination UI wiring
-- [ ] Milestone 5 — Cross-screen verification (facet parity, RTL, selection/bulk-edit/inline-edit regressions, `ng build`)
 
 ### Plan 306 — Visual Restyling: UI Refactor Design Language (`plans/306-visual-restyling-ui-refactor-design-language.plan.md`)
 
@@ -335,6 +252,7 @@
 - [ ] A5: Autocomplete attributes on all 8. Build, specs, phone check. Update session-state.
 
 ### Plan 364 — Search fields, part 2: clear (X) in dropdown pickers and no browser suggestions on picker and name fields (`plans/364-search-fields-part-2-picker-clear-and-no-autocomplete.plan.md`)
+> Carried over from archived Plan 320: course `app-custom-select` option sometimes needs 2–3 clicks to register (shared `CustomSelectComponent`, root cause not pinned) — fix in A1.
 - [ ] A1: chip-search-dropdown, custom-select, custom-multi-select: X, autocomplete, unique ids, specs.
 - [ ] A2: Recipe-book ingredient filter and recipe-builder logistics search: X + autocomplete.
 - [ ] A3: Menu-intelligence event type, section category and dish-row search: X + autocomplete.
@@ -438,19 +356,6 @@
 - [ ] A7 (P1): Removed-items disclosure + restore.
 - [ ] A8: ADR 0016, AGENTS.md hard-rule line, gotcha, brain index.
 - [ ] A9: Grep for any place that renders a term key without going through the facades (so a `displayName` override wouldn't show). If it's outside the scope, raise it via the Escalation Protocol.
-
-### Plan 387 — Architecture guard: invariants registry, Architecture Impact gate, invariant tests (`plans/387-architecture-guard-invariants-gate.plan.md`)
-
-- [x] A1: Write `docs/brain/invariants.md` (format + 6 seed invariants + `Enforced from plan: 388`).
-- [x] A2: Write `scripts/lib/invariants.mjs` (parse the registry + a plan's Architecture Impact).
-- [x] A3: Add `scope-check.mjs --arch --plan` (block) and `--arch --diff` (warn, including decision-without-adr); update the usage header.
-- [x] A4: Wire the gate into save-plan Phase 2, `take-plan.mjs`, `ship-prep.mjs`, `/review-it` step 3.
-- [x] A5: Add the `## Architecture Impact` section to `prd-template.md`, the line to `hld-template.md`, and the Architect step to `plan.md`.
-- [x] A6: Add the AGENTS.md hard-rule bullet and repoint the `AGENTS.md:57` row.
-- [ ] A7: Write `server/test/invariants.test.js` (INV-1, INV-2, INV-4).
-- [x] A8: Write ADR 0017, add the brain index line and the gotcha, update `docs/agent/workflow-map.md`.
-- [x] A9: Classify the new files in the workflow-kit manifest.
-- [x] A10 (P1): Add `node --test` script tests + `npm run test:scripts`.
 
 ### Plan 390 — Workflow Kit Phase 6A: Drift Reconciliation and Project Overrides (`plans/390-workflow-kit-phase-6a-drift-reconciliation-overrides.plan.md`)
 - [ ] A0: Step 0 reality check; record the real diff count and the two validation items' state.
