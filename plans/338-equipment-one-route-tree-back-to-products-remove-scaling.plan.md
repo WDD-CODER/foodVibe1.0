@@ -1,6 +1,6 @@
 # Plan 338 — Equipment ("ציוד"): one route tree, back-to-products navigation, remove scaling rule from UI
 
-Status: draft
+Status: active
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
