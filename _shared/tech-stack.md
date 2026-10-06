@@ -29,6 +29,13 @@ Node.js / Express backend · MongoDB Atlas (prod) + local Compass (dev) · Gemin
 - Lint gate: `ng lint` must pass before milestone sign-off.
 - Build gate: `ng build` must pass before any commit.
 
+## Logging
+Client and server log events go to MongoDB `app_logs` (90-day TTL) — the client via
+`LoggingService` → `POST /api/v1/log`, the server via `server/services/log-sink.js`.
+Event names `domain.action.result`. Only warn/error are persisted (info with
+`LOG_PERSIST_INFO=1`). `userId` only — no email, name, IP or user-agent in any log.
+See docs/brain/decisions/0016-logging-sink-mongo.md.
+
 ## Approved dependencies
 Anything already in package.json is approved. New dependencies require explicit
 Plan Contract approval before Cursor installs them.

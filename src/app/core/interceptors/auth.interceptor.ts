@@ -11,6 +11,7 @@ import { environment } from '../../../environments/environment'
 
 const REFRESH_URL = '/api/v1/auth/refresh'
 const LOGIN_URL = '/api/v1/auth/login'
+const LOG_PATH = '/api/v1/log'
 const REFRESH_TIMEOUT_MS = 10_000
 // Generic data API: its write limiter (server/routes/generic.js) answers 429. Auth and AI
 // endpoints show their own 429 messages, so the toast is limited to this path.
@@ -116,11 +117,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         injector.get(UserMsgService).onSetErrorMsg(injector.get(TranslationService).translate('rate_limited'))
       }
 
-      if (err.status && err.status >= 400 && err.status !== 404 && !req.url.startsWith(environment.logServerUrl)) {
+      // LoggingService posts with plain fetch, so a failing log call never reaches here; the
+      // check is a guard against ever logging a log failure in a loop.
+      if (err.status && err.status >= 400 && err.status !== 404 && !req.url.endsWith(LOG_PATH)) {
         logging.error({
           event: 'http.error',
           message: `HTTP ${err.status}`,
-          context: { method: req.method, url: req.url, status: err.status }
+          // Query strings can carry search text — keep only the path.
+          context: { method: req.method, url: req.url.split('?')[0], status: err.status }
         })
       }
       return throwError(() => err)

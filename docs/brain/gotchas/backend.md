@@ -46,6 +46,8 @@ See also: [[atomic-bulk-replace-with-standalone-fallback]]
 
 ## Production logs silently vanish when `logServerUrl` is unset
 
+> **Superseded (Plan 382, 2026-10-06):** `logServerUrl` no longer exists — see "Client logs go to `POST /api/v1/log`" at the end of this file.
+
 **What hurt:** `environment.prod.ts` ships with `logServerUrl: ''`. `LoggingService.sendToLogServer()` (`src/app/core/services/logging.service.ts:19`) silently `return`s when the URL is empty — production logs meant for the remote log server disappear with no error, no console warning, nothing surfaced.
 
 **Why the obvious fix is wrong:** Adding more `logger.*()` calls doesn't help if the transport itself is a silent no-op — the gap is invisible until someone specifically checks whether `logServerUrl` is configured for that environment.
@@ -255,3 +257,13 @@ been killed by it.
 **Why the obvious fix is wrong:** Logging out and back in works only until some other FoodVibe tab loads. Closing tabs is a workaround, not a fix.
 
 **What to do instead:** In development the refresh cookie is per port (`fv_refresh_<PORT>`, `server/routes/auth.js`). Deployed, it stays `fv_refresh`. The client takes the identity from the access token after every refresh, so what the screen shows is always the account that saves.
+
+---
+
+## Client logs go to `POST /api/v1/log` — not a separate log server (supersedes the `logServerUrl` entry)
+
+**What hurt:** Browser errors were posted to a dev-only log server on port 9765 that nothing started, and prod had `logServerUrl: ''`. Worse, `auth.interceptor.ts` skipped logging when `req.url.startsWith('')` — always true — so prod never logged `http.error` at all (fixed 2026-10-06, Plan 382).
+
+**Why the obvious fix is wrong:** Setting `logServerUrl` in prod, or starting the log server, still leaves logs on a process users never reach and in a file that dies with the session.
+
+**What to do instead:** `LoggingService` posts to `${apiUrl}/api/v1/log` on the same Express server; warn/error land in Mongo `app_logs` ([[0016-logging-sink-mongo]]). Query them there (`db.app_logs.find({level:'error'}).sort({createdAt:-1})`), not in the browser console. Any "skip this URL" check must compare against a real path (`endsWith('/api/v1/log')`), never against a config value that may be `''`.

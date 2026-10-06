@@ -28,13 +28,12 @@ All over **HTTPS** in production. Frontend: set `useBackendAuth: true` and `auth
 
 ## Development logging
 
-To write logs to a file in the project during development:
+Nothing to start. `LoggingService` sends every `warn` / `error` to **`POST /api/v1/log`** on the app's own Express server, which stores it in the MongoDB collection **`app_logs`** (local DB in dev, Atlas in prod; entries expire after 90 days). The same works in every environment — see [ADR 0016](brain/decisions/0016-logging-sink-mongo.md).
 
-1. In a separate terminal, run: **`npm run log-server`** (starts a small Node server on port 9765).
-2. Run **`ng serve`** as usual.
-3. Logs appear in the browser console and are appended to **`logs/app.log`** in the project root.
-
-If the log server is not running, the app still logs to the console only; no errors are shown. The log server is for local development only; production builds do not use it.
+- `info` events are stored only when the server runs with `LOG_PERSIST_INFO=1`; otherwise they go to the browser console and server stdout only.
+- Entries carry `userId` only — never email, name, IP or user-agent.
+- Until `scripts/log-query.mjs` lands (Plan 384), query with `mongosh`:
+  `db.app_logs.find({ level: 'error' }).sort({ createdAt: -1 }).limit(20)`
 
 ---
 

@@ -4,7 +4,6 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "log-server": "node scripts/log-server.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "lint:icons": "node scripts/check-lucide-icons.mjs",

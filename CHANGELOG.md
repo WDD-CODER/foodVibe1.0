@@ -2,6 +2,17 @@
 
 All notable changes to FoodVibe are documented here.
 
+## [Unreleased]
+
+### Added
+- **Client log ingest** (Plan 382) — `POST /api/v1/log` on the Express server stores every client `warn`/`error` in MongoDB `app_logs` (90-day TTL, `userId` only, no PII); unhandled server errors land there too as `server.unhandled`
+
+### Fixed
+- Production never logged failed HTTP requests: `auth.interceptor.ts` compared URLs against an empty `logServerUrl`, which skipped every one
+
+### Removed
+- Dev log server (`scripts/log-server.js`, port 9765, `npm run log-server`) and `logServerUrl` from all environments
+
 ## [0.1.0.0] - 2026-04-27
 
 ### Added
@@ -11,7 +22,7 @@ All notable changes to FoodVibe are documented here.
 - **Admin API routes** — `GET /admin/users` and `DELETE /admin/users/:id` with role-gated middleware; `UserAdminService` and `AdminUser` model wired in Angular
 
 ### Fixed
-- `logging.service.ts` — `logServerUrl` removed from default `environment.ts`; eliminates `ERR_CONNECTION_REFUSED` console noise on plain `ng serve` (log server URL retained in `environment.local.ts` for intentional use)
+- `logging.service.ts` — stopped plain `ng serve` from posting to the dev log server, eliminating `ERR_CONNECTION_REFUSED` console noise (the log server itself was retired in Plan 382)
 
 ### Changed
 - Claude configuration: skill routing rules, REV3 token-opt, merge conflict guard, session retrospective, failure-log entries, standards-domain updates, execute-it command revision

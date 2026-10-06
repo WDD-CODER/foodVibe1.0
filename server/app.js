@@ -11,6 +11,8 @@ const authRouter = require('./routes/auth');
 const genericRouter = require('./routes/generic');
 const aiRouter = require('./routes/ai')
 const adminRouter = require('./routes/admin');
+const logRouter = require('./routes/log');
+const logSink = require('./services/log-sink');
 
 const app = express();
 app.set('trust proxy', 1); // Required for Render/reverse-proxy: enables correct IP from X-Forwarded-For
@@ -121,6 +123,10 @@ app.options('*', cors(corsOptions));
 
 app.use(cors(corsOptions));
 
+// Client log ingest (Plan 382) parses its own body with a 16 kb cap, so it mounts before
+// the global 2 mb parser below.
+app.use('/api/v1/log', logRouter);
+
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
 
@@ -158,6 +164,14 @@ app.get('*', (req, res) => {
 // ---------------------------------------------------------------------------
 app.use((err, req, res, _next) => {
   console.error('[unhandled]', err.message);
+  logSink.write({
+    source: 'server',
+    level: 'error',
+    event: 'server.unhandled',
+    message: String(err.message || err).slice(0, 500),
+    context: process.env.NODE_ENV === 'production' ? { path: req.path } : { path: req.path, stack: err.stack },
+    userId: req.user?.userId ?? null,
+  });
   if (process.env.NODE_ENV === 'production') {
     return res.status(500).json({ error: 'Internal server error' });
   }

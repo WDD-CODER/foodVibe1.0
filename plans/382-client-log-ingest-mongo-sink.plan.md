@@ -1,6 +1,6 @@
 # Plan 382 — Client log ingest + Mongo sink (replace dev log server)
 
-Status: draft
+Status: active
 Snapshot: 05132814b7a74187683bb45d5ef48339ae5fb5a0
 
 Logging series: **A = 382 (this plan)**, B = 383 (pino + request ids), C = 384 (logs in the AI
@@ -154,15 +154,15 @@ touching any milestone. Specifically confirm: `LoggingService.sendToLogServer` s
 - No UI. No `dictionary.json` keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Zod `LogEventSchema` + export; `npm run build:schemas` passes (`shared/schemas/entities/log-event.schema.ts`, `shared/schemas/index.ts`).
-- [ ] A2: `server/services/log-sink.js` + indexes in `server/db.js`.
-- [ ] A3: `server/routes/log.js` (optionalToken → rateLimit → json 16kb → validate → sink → 202); mount in `server/app.js`; global error handler writes to sink.
-- [ ] A4: `server/test/log-route.test.js` (supertest + mongodb-memory-server, same helpers as `generic.test.js`): 202 valid; 400 bad `event` pattern; 400 oversized context; 429 after 60 in a minute; `info` not persisted by default, persisted with `LOG_PERSIST_INFO=1`; `userId` set when Bearer token present, `null` when absent.
-- [ ] A5: `LoggingService` rewrite (`sendToServer`, token, back-off, flood guard, `url`) (`src/app/core/services/logging.service.ts`).
-- [ ] A6: Interceptor fix `endsWith('/api/v1/log')` (`src/app/core/interceptors/auth.interceptor.ts`).
-- [ ] A7: Remove `logServerUrl` ×5 (`src/environments/*.ts`), delete `scripts/log-server.js`, npm script (`package.json`), `.gitignore` block.
-- [ ] A8: Docs + ADR 0016 + gotcha supersede + CHANGELOG + tech-stack.
-- [ ] A9: `ng build`, `npm --prefix server test`, the `rg` zero-match check, manual [human] check.
+- [x] A1: Zod `LogEventSchema` + export; `npm run build:schemas` passes (`shared/schemas/entities/log-event.schema.ts`, `shared/schemas/index.ts`).
+- [x] A2: `server/services/log-sink.js` + indexes in `server/db.js`.
+- [x] A3: `server/routes/log.js` (optionalToken → rateLimit → json 16kb → validate → sink → 202); mount in `server/app.js`; global error handler writes to sink.
+- [x] A4: `server/test/log-route.test.js` (supertest + mongodb-memory-server, same helpers as `generic.test.js`): 202 valid; 400 bad `event` pattern; 400 oversized context; 429 after 60 in a minute; `info` not persisted by default, persisted with `LOG_PERSIST_INFO=1`; `userId` set when Bearer token present, `null` when absent.
+- [x] A5: `LoggingService` rewrite (`sendToServer`, token, back-off, flood guard, `url`) (`src/app/core/services/logging.service.ts`).
+- [x] A6: Interceptor fix `endsWith('/api/v1/log')` (`src/app/core/interceptors/auth.interceptor.ts`).
+- [x] A7: Remove `logServerUrl` ×5 (`src/environments/*.ts`), delete `scripts/log-server.js`, npm script (`package.json`), `.gitignore` block.
+- [x] A8: Docs + ADR 0016 + gotcha supersede + CHANGELOG + tech-stack.
+- [x] A9: `ng build`, `npm --prefix server test`, the `rg` zero-match check, manual [human] check.
 
 ## Technical Considerations
 - Dependencies: `express-rate-limit` and `zod` already in `server/package.json`; `mongoose`

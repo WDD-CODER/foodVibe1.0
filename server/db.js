@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const { CLONEABLE_TYPES } = require('./constants/cloneable-types')
 const { SEARCHABLE_ENTITY_TYPES } = require('./constants/searchable-entity-types')
+const { ensureLogIndexes } = require('./services/log-sink')
 
 async function connectDb() {
   const isLocal = process.env.NODE_ENV === 'development'
@@ -75,6 +76,10 @@ async function connectDb() {
   await db.collection('taxonomyTerms').createIndex({ kind: 1, key: 1, userId: 1 }, { unique: true, name: 'kind_key_user_unique' })
   await db.collection('taxonomyTerms').createIndex({ userId: 1, kind: 1, sortOrder: 1 }, { name: 'user_kind_order' })
   console.log('taxonomyTerms indexes ensured')
+
+  // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).
+  await ensureLogIndexes(db)
+  console.log('app_logs indexes ensured')
 }
 
 module.exports = { connectDb }
