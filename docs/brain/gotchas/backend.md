@@ -102,7 +102,7 @@ See also: [[atomic-bulk-replace-with-standalone-fallback]]
 
 **Why the obvious fix is wrong:** Upgrading the morgan *format* to add `:response-time`/`:res[content-length]` (plan 302 M1's actual goal) doesn't fix this — you get richer logs for whatever traffic still reaches morgan, while static assets remain completely absent, and it's easy to mistake "no static-asset log lines" for "the app makes very few static requests" instead of "the logger never sees them."
 
-**What to do instead:** Any middleware that can fully terminate a response (`express.static`, a catch-all `res.sendFile()`, an early `res.json()`) must be registered **after** the request logger, not before. To verify the fix actually worked, `curl` a known static asset path directly and confirm a log line appears for that specific 200 — the absence of a log line for a request you know succeeded is the tell, not the presence of errors.
+**What to do instead:** Any middleware that can fully terminate a response (`express.static`, a catch-all `res.sendFile()`, an early `res.json()`) must be registered **after** the request logger, not before. (Since plan 383 the request logger is `pino-http`, still registered before `express.static`; it deliberately skips the request-complete line for asset paths via `autoLogging.ignore` — so for this check, temporarily remove that ignore or test an `/api/` path.) To verify the fix actually worked, `curl` a known static asset path directly and confirm a log line appears for that specific 200 — the absence of a log line for a request you know succeeded is the tell, not the presence of errors.
 
 ## A blanket `immutable` cache on `express.static` poisons every unhashed asset
 

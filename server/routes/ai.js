@@ -49,6 +49,8 @@ const router = Router();
 
 const GEMINI_MODEL = 'gemini-2.5-flash-lite';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+// Cap on model output copied into a parse/validation failure log line (Plan 383).
+const RAW_LOG_CHARS = 2000;
 
 // ---------------------------------------------------------------------------
 // Shared daily call counter — stored in MongoDB so all users + the Python
@@ -374,13 +376,14 @@ function buildFewShotBlock(shots) {
 
 /**
  * One attempt at calling Gemini for a recipe draft: dispatch, parse, normalize
- * units, validate. Counts as a real Gemini call the moment it's dispatched
+ * units, validate. `log` is the caller's req.log; `eventPrefix` (e.g. 'ai.generate') prefixes
+ * every event it logs. Counts as a real Gemini call the moment it's dispatched
  * (incrementUsage), regardless of what happens after — including a caller
  * retrying this same function again, which counts a second time for the
  * same reason (see the daily-budget-must-reflect-real-spend logic below).
  * Returns a discriminated result — never throws.
  */
-async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag) {
+async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, log, eventPrefix) {
   await incrementUsage();
   try {
     const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
@@ -393,7 +396,7 @@ async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag) {
     if (!geminiRes.ok) {
       const errBody = await geminiRes.json().catch(() => ({}));
       const geminiMsg = errBody?.error?.message ?? '';
-      console.error(`${logTag} Gemini API error:`, geminiRes.status, geminiMsg);
+      log.error({ event: `${eventPrefix}.gemini_failed`, status: geminiRes.status, geminiMessage: geminiMsg });
       return { kind: 'gemini_error', status: geminiRes.status, message: geminiMsg };
     }
 
@@ -403,7 +406,7 @@ async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag) {
     const parsed = extractJsonPayload(raw);
     if (parsed.error === 'empty') return { kind: 'empty' };
     if (parsed.error === 'invalid') {
-      console.error(`${logTag} JSON parse failed, raw:`, raw);
+      log.error({ event: `${eventPrefix}.parse_failed`, raw: raw.slice(0, RAW_LOG_CHARS) });
       return { kind: 'invalid_json' };
     }
 
@@ -412,17 +415,17 @@ async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag) {
 
     const validationErrors = validateRecipeDraft(recipe);
     if (validationErrors.length > 0) {
-      console.error(`${logTag} validation failed:`, validationErrors, 'raw:', raw);
+      log.error({ event: `${eventPrefix}.validation_failed`, validationErrors, raw: raw.slice(0, RAW_LOG_CHARS) });
       return { kind: 'validation_failed', errors: validationErrors };
     }
 
     return { kind: 'success', recipe };
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error(`${logTag} timeout`);
+      log.warn({ event: `${eventPrefix}.timeout` });
       return { kind: 'timeout' };
     }
-    console.error(logTag, err);
+    log.error({ err, event: `${eventPrefix}.failed` });
     return { kind: 'server_error' };
   }
 }
@@ -434,11 +437,11 @@ async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag) {
  * attempt dispatched here is a real Gemini call and is counted independently
  * by callGeminiForRecipe, never assumed free just because it's a retry.
  */
-async function callGeminiForRecipeWithRetry(apiKey, requestBody, timeoutMs, logTag) {
-  let result = await callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag);
+async function callGeminiForRecipeWithRetry(apiKey, requestBody, timeoutMs, log, eventPrefix) {
+  let result = await callGeminiForRecipe(apiKey, requestBody, timeoutMs, log, eventPrefix);
   if (result.kind === 'invalid_json' || result.kind === 'validation_failed') {
-    console.error(`${logTag} retrying once after`, result.kind);
-    result = await callGeminiForRecipe(apiKey, requestBody, timeoutMs, logTag);
+    log.warn({ event: `${eventPrefix}.retry`, after: result.kind });
+    result = await callGeminiForRecipe(apiKey, requestBody, timeoutMs, log, eventPrefix);
   }
   return result;
 }
@@ -492,7 +495,7 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
     }] }],
   };
 
-  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, '[ai/generate]');
+  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate');
   return respondFromRecipeResult(res, result);
 });
 
@@ -580,7 +583,7 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
     });
 
     if (!geminiRes.ok) {
-      console.error('[ai/parse-text] Gemini API error:', geminiRes.status);
+      req.log.error({ event: 'ai.parse_text.gemini_failed', status: geminiRes.status });
       return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
     }
 
@@ -592,17 +595,17 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
     if (parsed.error === 'invalid') {
-      console.error('[ai/parse-text] JSON parse failed, raw:', raw);
+      req.log.error({ event: 'ai.parse_text.parse_failed', raw: raw.slice(0, RAW_LOG_CHARS) });
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
     return res.json({ result: parsed.value });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/parse-text] timeout');
+      req.log.warn({ event: 'ai.parse_text.timeout' });
       return res.status(504).json({ error: 'Gemini request timed out' });
     }
-    console.error('[ai/parse-text]', err);
+    req.log.error({ err, event: 'ai.parse_text.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -697,7 +700,7 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
     });
 
     if (!geminiRes.ok) {
-      console.error('[ai/patch-recipe] Gemini API error:', geminiRes.status);
+      req.log.error({ event: 'ai.patch_recipe.gemini_failed', status: geminiRes.status });
       return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
     }
 
@@ -709,7 +712,7 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
     if (parsed.error === 'invalid') {
-      console.error('[ai/patch-recipe] JSON parse failed, raw:', raw);
+      req.log.error({ event: 'ai.patch_recipe.parse_failed', raw: raw.slice(0, RAW_LOG_CHARS) });
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
@@ -720,10 +723,10 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/patch-recipe] timeout');
+      req.log.warn({ event: 'ai.patch_recipe.timeout' });
       return res.status(504).json({ error: 'Gemini request timed out' });
     }
-    console.error('[ai/patch-recipe]', err);
+    req.log.error({ err, event: 'ai.patch_recipe.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -856,7 +859,7 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
 
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
-      console.error('[ai/generate-menu] Gemini API error:', errBody);
+      req.log.error({ event: 'ai.generate_menu.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
       return res.status(502).json({ error: 'Gemini API error' });
     }
 
@@ -868,23 +871,23 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
     if (parsed.error === 'invalid') {
-      console.error('[ai/generate-menu] JSON parse failed:', raw);
+      req.log.error({ event: 'ai.generate_menu.parse_failed', raw: raw.slice(0, RAW_LOG_CHARS) });
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
     const validationErrors = validateMenuDraft(parsed.value);
     if (validationErrors.length > 0) {
-      console.error('[ai/generate-menu] validation failed:', validationErrors);
+      req.log.error({ event: 'ai.generate_menu.validation_failed', validationErrors });
       return res.status(502).json({ error: 'Gemini returned invalid menu draft', details: validationErrors });
     }
 
     return res.json({ menu: parsed.value });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/generate-menu] timeout');
+      req.log.warn({ event: 'ai.generate_menu.timeout' });
       return res.status(504).json({ error: 'Gemini request timed out' });
     }
-    console.error('[ai/generate-menu]', err);
+    req.log.error({ err, event: 'ai.generate_menu.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -972,7 +975,7 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
 
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
-      console.error('[ai/patch-menu] Gemini API error:', errBody);
+      req.log.error({ event: 'ai.patch_menu.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
       return res.status(502).json({ error: 'Gemini API error' });
     }
 
@@ -984,22 +987,22 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
     if (parsed.error === 'invalid') {
-      console.error('[ai/patch-menu] JSON parse failed:', raw);
+      req.log.error({ event: 'ai.patch_menu.parse_failed', raw: raw.slice(0, RAW_LOG_CHARS) });
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
     if (!parsed.value.changes || typeof parsed.value.changes !== 'object') {
-      console.error('[ai/patch-menu] missing changes key:', parsed.value);
+      req.log.error({ event: 'ai.patch_menu.changes_missing' });
       return res.status(502).json({ error: 'Gemini returned invalid patch format' });
     }
 
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/patch-menu] timeout');
+      req.log.warn({ event: 'ai.patch_menu.timeout' });
       return res.status(504).json({ error: 'Gemini request timed out' });
     }
-    console.error('[ai/patch-menu]', err);
+    req.log.error({ err, event: 'ai.patch_menu.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -1113,7 +1116,7 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
 
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
-      console.error('[ai/generate-product] Gemini API error:', errBody);
+      req.log.error({ event: 'ai.generate_product.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
       return res.status(502).json({ error: 'Gemini API error' });
     }
 
@@ -1125,23 +1128,23 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
     if (parsed.error === 'invalid') {
-      console.error('[ai/generate-product] JSON parse failed:', raw);
+      req.log.error({ event: 'ai.generate_product.parse_failed', raw: raw.slice(0, RAW_LOG_CHARS) });
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
     const validationErrors = validateProductDraft(parsed.value);
     if (validationErrors.length > 0) {
-      console.error('[ai/generate-product] validation failed:', validationErrors, parsed.value);
+      req.log.error({ event: 'ai.generate_product.validation_failed', validationErrors });
       return res.status(502).json({ error: 'Gemini returned invalid product structure', details: validationErrors });
     }
 
     return res.json({ product: parsed.value });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/generate-product] timeout');
+      req.log.warn({ event: 'ai.generate_product.timeout' });
       return res.status(504).json({ error: 'Gemini request timed out' });
     }
-    console.error('[ai/generate-product]', err);
+    req.log.error({ err, event: 'ai.generate_product.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -1225,7 +1228,7 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
 
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
-      console.error('[ai/patch-product] Gemini API error:', errBody);
+      req.log.error({ event: 'ai.patch_product.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
       return res.status(502).json({ error: 'Gemini API error' });
     }
 
@@ -1237,22 +1240,22 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
     if (parsed.error === 'invalid') {
-      console.error('[ai/patch-product] JSON parse failed:', raw);
+      req.log.error({ event: 'ai.patch_product.parse_failed', raw: raw.slice(0, RAW_LOG_CHARS) });
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
     if (!parsed.value.changes || typeof parsed.value.changes !== 'object') {
-      console.error('[ai/patch-product] missing changes key:', parsed.value);
+      req.log.error({ event: 'ai.patch_product.changes_missing' });
       return res.status(502).json({ error: 'Gemini returned invalid patch format' });
     }
 
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/patch-product] timeout');
+      req.log.warn({ event: 'ai.patch_product.timeout' });
       return res.status(504).json({ error: 'Gemini request timed out' });
     }
-    console.error('[ai/patch-product]', err);
+    req.log.error({ err, event: 'ai.patch_product.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -1294,7 +1297,7 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
     }],
   };
 
-  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, '[ai/generate-from-image]');
+  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate_from_image');
   return respondFromRecipeResult(res, result);
 });
 
@@ -1352,7 +1355,7 @@ router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, 
 
     if (!geminiRes.ok) {
       const errBody = await geminiRes.text();
-      console.error('[ai/generate-product-from-image] Gemini API error:', errBody);
+      req.log.error({ event: 'ai.generate_product_from_image.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
       return res.status(502).json({ error: 'Gemini API error' });
     }
 
@@ -1364,23 +1367,23 @@ router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, 
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     }
     if (parsed.error === 'invalid') {
-      console.error('[ai/generate-product-from-image] JSON parse failed:', raw);
+      req.log.error({ event: 'ai.generate_product_from_image.parse_failed', raw: raw.slice(0, RAW_LOG_CHARS) });
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
     const validationErrors = validateProductDraft(parsed.value);
     if (validationErrors.length > 0) {
-      console.error('[ai/generate-product-from-image] validation failed:', validationErrors, parsed.value);
+      req.log.error({ event: 'ai.generate_product_from_image.validation_failed', validationErrors });
       return res.status(502).json({ error: 'Gemini returned invalid product structure', details: validationErrors });
     }
 
     return res.json({ product: parsed.value });
   } catch (err) {
     if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      console.error('[ai/generate-product-from-image] timeout');
+      req.log.warn({ event: 'ai.generate_product_from_image.timeout' });
       return res.status(504).json({ error: 'Gemini request timed out' });
     }
-    console.error('[ai/generate-product-from-image]', err);
+    req.log.error({ err, event: 'ai.generate_product_from_image.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -1472,7 +1475,7 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     const html = await pageRes.text();
     pageText = extractTextFromHtml(html);
   } catch (err) {
-    console.error('[ai/generate-from-url] fetch error:', err);
+    req.log.warn({ err, event: 'ai.generate_from_url.fetch_failed' });
     return res.status(502).json({ error: 'Could not fetch the provided URL' });
   }
 
@@ -1485,7 +1488,7 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
   };
 
-  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, '[ai/generate-from-url]');
+  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate_from_url');
   return respondFromRecipeResult(res, result);
 });
 
@@ -1522,7 +1525,7 @@ router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
     // future /generate call — screen for instruction-like content before
     // anything from any logged-in user enters that shared pool.
     if (containsInjectionPattern(prompt) || scanRecipeDraftForInjection(draft)) {
-      console.error('[ai/shots] rejected: suspected prompt injection content', { userId: req.user._id });
+      req.log.warn({ event: 'ai.shots.injection_rejected' });
       return res.status(400).json({ saved: false, errors: ['content rejected — instruction-like text is not allowed in an approved shot'] });
     }
   }
@@ -1566,7 +1569,7 @@ router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
     }
     return res.json({ saved: true });
   } catch (err) {
-    console.error('[ai/save-menu-shot]', err);
+    req.log.error({ err, event: 'ai.save_menu_shot.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });

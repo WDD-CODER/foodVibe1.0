@@ -166,10 +166,10 @@ async function masterHasTerm(kind, key) {
 // Optional ?filterEntityType=&filterEntityId= narrow the find (e.g. VERSION_HISTORY).
 // ---------------------------------------------------------------------------
 router.get('/:type', optionalToken, async (req, res) => {
-  // 1c perf instrumentation — opt-in via PERF_LOG=1. JSON.stringify-ing the response
-  // purely to measure its size is real CPU on a 0.1-shared-CPU Render instance, so it
-  // stays off by default rather than running on every request in production.
-  const perfLog = process.env.PERF_LOG === '1';
+  // 1c perf instrumentation — a `debug` event (LOG_LEVEL=debug; the default outside
+  // production). JSON.stringify-ing the response purely to measure its size is real CPU on
+  // a 0.1-shared-CPU Render instance, so it only runs when debug is enabled.
+  const perfLog = req.log.isLevelEnabled('debug');
   try {
     const userId = req.user ? req.user.userId : '__master__';
     // Was capped at 500 (max 1000) — safe when no account had more than a few hundred
@@ -201,14 +201,14 @@ router.get('/:type', optionalToken, async (req, res) => {
       const mongoMs = Date.now() - findStart;
       const serializeStart = Date.now();
       // Pre-compression byte count — what actually went over the wire before
-      // compression() shrinks it is invisible to :res[content-length] (see index.js).
+      // compression() shrinks it is invisible to the response's content-length.
       const bytes = Buffer.byteLength(JSON.stringify(docs));
       const serializeMs = Date.now() - serializeStart;
-      console.log(`[data/query] ${req.params.type} docs=${docs.length} bytes=${bytes} mongo=${mongoMs}ms serialize=${serializeMs}ms`);
+      req.log.debug({ event: 'data.query.perf', type: req.params.type, docs: docs.length, bytes, mongoMs, serializeMs });
     }
     res.json(docs);
   } catch (err) {
-    console.error('[data/query]', err);
+    req.log.error({ err, event: 'data.query.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -260,7 +260,7 @@ router.get('/:type/search', optionalToken, async (req, res) => {
       .toArray();
     res.json(docs);
   } catch (err) {
-    console.error('[data/search]', err);
+    req.log.error({ err, event: 'data.search.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -294,7 +294,7 @@ router.get('/:type/count', optionalToken, async (req, res) => {
     const count = await col(req.params.type).countDocuments(filter);
     res.json({ count });
   } catch (err) {
-    console.error('[data/count]', err);
+    req.log.error({ err, event: 'data.count.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -311,7 +311,7 @@ router.get('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
     const doc = await col('DICTIONARY_OVERRIDES').findOne({ userId: '__global__' });
     res.json({ items: doc?.items ?? {} });
   } catch (err) {
-    console.error('[data/dictionary-global-get]', err);
+    req.log.error({ err, event: 'data.dictionary_global_get.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -334,7 +334,7 @@ router.get('/:type/:id', optionalToken, async (req, res) => {
     }
     res.json(doc);
   } catch (err) {
-    console.error('[data/get]', err);
+    req.log.error({ err, event: 'data.get.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -394,7 +394,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (err.code === 11000) {
       return res.status(409).json({ error: 'Entity already exists' });
     }
-    console.error('[data/post]', err);
+    req.log.error({ err, event: 'data.post.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -472,7 +472,7 @@ router.put('/:type/registry-rename-master', verifyToken, requireAdmin, async (re
     await bumpMasterVersion();
     res.json({ ok: true });
   } catch (err) {
-    console.error('[data/registry-rename-master]', err);
+    req.log.error({ err, event: 'data.registry_rename_master.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -531,7 +531,7 @@ router.put('/:type/registry-delete-master', verifyToken, requireAdmin, async (re
 
     res.json({ ok: true });
   } catch (err) {
-    console.error('[data/registry-delete-master]', err);
+    req.log.error({ err, event: 'data.registry_delete_master.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -569,7 +569,7 @@ router.put('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
     );
     res.json({ ok: true });
   } catch (err) {
-    console.error('[data/dictionary-global-put]', err);
+    req.log.error({ err, event: 'data.dictionary_global_put.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -645,7 +645,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     res.json(result);
   } catch (err) {
     if (err.code === 11000) return res.status(409).json({ error: 'Entity already exists' });
-    console.error('[data/put]', err);
+    req.log.error({ err, event: 'data.put.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -813,7 +813,7 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
     if (err instanceof MasterNameTakenError) {
       return res.status(409).json({ error: err.message, nameHebrew: err.nameHebrew });
     }
-    console.error('[data/push-to-master]', err);
+    req.log.error({ err, event: 'data.push_to_master.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -861,7 +861,7 @@ router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (re
 
     res.json({ ok: true });
   } catch (err) {
-    console.error('[data/delete-from-master]', err);
+    req.log.error({ err, event: 'data.delete_from_master.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -920,7 +920,7 @@ router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, 
 
     res.json({ ok: true, usersAffected: otherClones.length });
   } catch (err) {
-    console.error('[data/purge-ingredient-everywhere]', err);
+    req.log.error({ err, event: 'data.purge_ingredient_everywhere.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -1035,13 +1035,13 @@ router.put('/:type', verifyToken, async (req, res) => {
     try {
       await replaceCollection(req.params.type, req.user.userId, docs);
     } catch (txErr) {
-      console.error('[data/replaceAll] transaction aborted', txErr);
+      req.log.error({ err: txErr, event: 'data.replace_all.tx_aborted' });
       return res.status(500).json({ error: 'Replace failed, no changes were made' });
     }
 
     res.json({ ok: true });
   } catch (err) {
-    console.error('[data/replaceAll]', err);
+    req.log.error({ err, event: 'data.replace_all.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -1076,7 +1076,7 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
 
     res.json({ ok: true, deletedCount: result.deletedCount });
   } catch (err) {
-    console.error('[data/deleteBulk]', err);
+    req.log.error({ err, event: 'data.delete_bulk.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -1144,7 +1144,7 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
 
     res.json({ ok: true });
   } catch (err) {
-    console.error('[data/delete]', err);
+    req.log.error({ err, event: 'data.delete.failed' });
     res.status(500).json({ error: 'Server error' });
   }
 });

@@ -120,11 +120,15 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       // LoggingService posts with plain fetch, so a failing log call never reaches here; the
       // check is a guard against ever logging a log failure in a loop.
       if (err.status && err.status >= 400 && err.status !== 404 && !req.url.endsWith(LOG_PATH)) {
+        // The server echoes its request id on every response (Plan 383) — the same id is on
+        // the server's own log line for this failure, so the two join in app_logs.
+        const requestId = err.headers?.get('X-Request-Id') ?? undefined
         logging.error({
           event: 'http.error',
           message: `HTTP ${err.status}`,
           // Query strings can carry search text — keep only the path.
-          context: { method: req.method, url: req.url.split('?')[0], status: err.status }
+          context: { method: req.method, url: req.url.split('?')[0], status: err.status },
+          ...(requestId ? { requestId } : {})
         })
       }
       return throwError(() => err)

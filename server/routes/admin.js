@@ -10,12 +10,12 @@ function col(type) {
   return mongoose.connection.db.collection(type)
 }
 
-router.get('/users', verifyToken, requireAdmin, async (_req, res) => {
+router.get('/users', verifyToken, requireAdmin, async (req, res) => {
   try {
     const users = await User.find({ _id: { $ne: '__master__' } }, '_id name email role').lean()
     res.json(users)
   } catch (err) {
-    console.error('[admin/users GET]', err)
+    req.log.error({ err, event: 'admin.users_list.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
@@ -30,7 +30,7 @@ router.delete('/users/:userId', verifyToken, requireAdmin, async (req, res) => {
     await User.deleteOne({ _id: userId })
     res.json({ ok: true, collectionsCleared: ALL_USER_ENTITY_TYPES.length })
   } catch (err) {
-    console.error('[admin/users DELETE]', err)
+    req.log.error({ err, event: 'admin.users_delete.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
