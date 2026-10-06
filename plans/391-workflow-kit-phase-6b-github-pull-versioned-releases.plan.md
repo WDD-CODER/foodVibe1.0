@@ -54,6 +54,7 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 
 ## Step 0 — Reality Check
 
+0. **Both repos on their latest state, before anything else.** FoodVibe: `git fetch origin --prune`; the slot branch is based on the current `origin/main` (take-plan does this — confirm `git log -1 origin/main` matches). Kit: `git -C ../ai-workflow-kit fetch --prune`; local `main` clean and equal to `origin/main` (`git -C ../ai-workflow-kit pull --ff-only` if behind; STOP and ask if it is ahead or has uncommitted work); `gh pr list -R WDD-CODER/ai-workflow-kit` and `git -C ../ai-workflow-kit branch -a --no-merged main` show no unmerged kit work (finish or ask first). Also check no open FoodVibe Worker branch holds an unported kit-owned change (`node scripts/lib/slot.mjs --list`, diff each claimed slot against `kit-owned.json`). Only then compare the two.
 1. Plan 390 merged (FoodVibe and kit); kit `main` clean; `gh auth status` works for the kit repo (use `env -u GITHUB_TOKEN gh ...` for writes).
 2. Kit `tools/install.mjs` / `sync.mjs` still read the kit root from their own location — confirm before adding `--source`.
 

@@ -4,7 +4,7 @@ Status: draft
 Snapshot: c186c9c0
 
 ## Problem Statement
-Phase 6 makes `../ai-workflow-kit` (public: https://github.com/WDD-CODER/ai-workflow-kit) a real upstream that FoodVibe and new projects pull from with `kit-sync`, ending patch mode (ADR 0018). It is split into three plans that run in order: **390 (this) → 391 → 392**.
+Phase 6 makes `../ai-workflow-kit` (public: https://github.com/WDD-CODER/ai-workflow-kit) a real upstream that FoodVibe and new projects pull from with `kit-sync`, ending patch mode (ADR 0018). It is split into three plans that run in order: **390 (this) → 391 → 392**. This plan must run after plan 393 (same kit-owned files; 393 is the quick CPU/todo fix).
 
 Before FoodVibe can be adopted, the kit and FoodVibe must agree. `node scripts/kit-extract.mjs --check` is clean (byte-identical `copy` rows match), but a fresh extract diffed against the kit still differs in ~60 files (`settings.json`, `ship.md`, `take-plan.mjs`, `ci.yml`, `standards-security.md`, `workflow-map.md`, `standards-backend.md`, …). Many differences are on purpose (placeholders, `<!-- PACK -->` markers, splits); some may be real drift. Nobody has classified them. Also, FoodVibe keeps some deliberate local differences (e.g. `ci.yml`'s root `npm ci` for `build:schemas`) that a future `kit-sync` would flag as a conflict on every run.
 
@@ -22,7 +22,7 @@ Decisions (Dandan, 2026-10-06): pull by git fetch of a tag; v0.x until FoodVibe 
 
 ## Execution Mode
 - **Parallel:** no. Single Worker in a FoodVibe `wt-N` slot; kit edits by path in `../ai-workflow-kit`.
-- **Concurrent plans:** 383 (wt-1) is server-only; no overlap.
+- **Concurrent plans:** none (383 merged; 393 must merge first).
 - **Isolated DB:** no.
 - **Kit edits:** on a kit branch `feat/390-drift-reconciliation`, pushed to GitHub with a kit PR; Dandan merges it. Kit-first, then each fix reaches FoodVibe as an ADR 0018 patch in this plan's branch.
 
@@ -64,6 +64,7 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 
 ## Step 0 — Reality Check
 
+0. **Both repos on their latest state, before anything else.** FoodVibe: `git fetch origin --prune`; the slot branch is based on the current `origin/main` (take-plan does this — confirm `git log -1 origin/main` matches). Kit: `git -C ../ai-workflow-kit fetch --prune`; local `main` clean and equal to `origin/main` (`git -C ../ai-workflow-kit pull --ff-only` if behind; STOP and ask if it is ahead or has uncommitted work); `gh pr list -R WDD-CODER/ai-workflow-kit` and `git -C ../ai-workflow-kit branch -a --no-merged main` show no unmerged kit work (finish or ask first). Also check no open FoodVibe Worker branch holds an unported kit-owned change (`node scripts/lib/slot.mjs --list`, diff each claimed slot against `kit-owned.json`). Only then compare the two.
 1. `node scripts/kit-extract.mjs --check` is clean; `kit-manifest-check` (+ `--lessons`) ok.
 2. Fresh extract into a scratchpad folder, diff against the kit: record the real file count (brief said ~60).
 3. Confirm today's syncs held: workflows (FoodVibe → kit `8488ffc`), `scripts/todo-query.mjs` (kit → FoodVibe).

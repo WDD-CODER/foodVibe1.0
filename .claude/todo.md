@@ -386,6 +386,15 @@
 - [ ] C7: `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end.
 - [ ] C8: No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship`.
 
+### Plan 393 — Slot Dev Servers On Demand and Closed-Todo Archiving (`plans/393-slot-dev-servers-on-demand-closed-todo-archiving.plan.md`)
+- [ ] D0: Step 0: bring both repos up to date, take the process snapshot.
+- [ ] D1: Kit: `slot-serve.mjs`, plus take-plan no longer starting servers.
+- [ ] D2: Kit: orphan-chain detection in `slot-procs.mjs`, `free-merged-slots` stopping servers, and the `SessionEnd` hook.
+- [ ] D3: Kit: `todo-parse.mjs` counting `[-]` as closed, plus its test.
+- [ ] D4: Kit: docs (`take-plan.md`, `remote.md`, preflight, `standards-git.md`, `ship-regular.md`, `job-validation.md`, `workflow-map.md`, `commands.md`), plus the manifest row and the `kit-owned.json` entry for `slot-serve.mjs`.
+- [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
+- [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
