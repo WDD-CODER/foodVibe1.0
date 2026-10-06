@@ -19,6 +19,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | New session, unfamiliar area of the code | `projectbrief.md`, then the relevant sub-file below |
 | About to make an architectural choice | `decisions/` first — check for an existing ADR before deciding again |
 | Something behaves surprisingly / a trap cost time | `gotchas.md` first |
+| Need to know what failed, when, for whom (logs) | [[0016-logging-sink-mongo]] — every warn/error lands in Mongo `app_logs` |
 | Unfamiliar domain term | `glossary.md` |
 | Need rules/conventions (not history) | `AGENTS.md` and `docs/agent/*.md` — not this folder |
 

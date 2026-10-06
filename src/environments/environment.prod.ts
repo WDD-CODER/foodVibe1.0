@@ -4,7 +4,6 @@ export const environment = {
   apiUrl: '',
   authApiUrl: '',
   autoLoginGuest: false,
-  logServerUrl: '',
   cloudinaryCloudName: 'dsxi4o2gb',
   cloudinaryUploadPreset: 'foodvibe',
 }
