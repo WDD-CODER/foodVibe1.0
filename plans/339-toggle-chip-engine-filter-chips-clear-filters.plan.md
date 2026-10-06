@@ -1,6 +1,6 @@
 # Plan 339 — Toggle-chip engine: replace filter checkboxes with chips, compact "clear filters"
 
-Status: draft
+Status: active
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
