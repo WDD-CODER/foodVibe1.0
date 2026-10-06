@@ -1,6 +1,6 @@
 # Plan 341 — Suppliers: add/edit as a page like venues; center the venues inner nav
 
-Status: draft
+Status: active
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
