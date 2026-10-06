@@ -669,7 +669,7 @@ append the path to the scope block above and retry.
 - [x] P2b.1a `server/migrations/0001-v2-schema.js` written: dry run / `--write=yes` / `--verify=yes`, copies into new collections, old ones kept as rollback; tombstone schema; `shared/schemas` updated (commit db7463be)
 - [x] P2b.1b Local: backup `foodvibe-db-backups/local-2026-10-01T12-12-26`, write, verify OK 2026-10-01 (7 new collections exist locally; app does not read them yet)
 - [x] P2b.1c (DONE 2026-10-02: Atlas backup atlas-2026-10-02T07-24-01, 0001+0002 written, --verify OK, validate-all 0 violations) Atlas dry run again right before the window (data changes), then Atlas backup → `--write=yes` → `--verify=yes` — Human confirms host
-- [ ] P2b.x Stray keys from the 2a inventory: `ingredients_` on 36 local products is dropped in v2 (old collection keeps it); `steps_[].cooking_time_minutes_` (4 Atlas recipes) is kept as deprecated `cookingTimeMinutes` — Human decides rename-vs-convert later
+- [-] P2b.x DROPPED (Human 2026-10-06) — Stray keys from the 2a inventory: `ingredients_` on 36 local products is dropped in v2 (old collection keeps it); `steps_[].cooking_time_minutes_` (4 Atlas recipes) is kept as deprecated `cookingTimeMinutes` — Human decides rename-vs-convert later
 - [x] P2b.2 Server cutover to v2 (one PR with P2b.3):
   - [x] P2b.2a `server/constants/collections.js`: the 7 entries use the new names (products, recipes, dishes, suppliers, equipment, venues, menuEvents); trash + KITCHEN_* names unchanged; `COLLECTION_RENAMES` is the one source (re-export from `shared/schemas`)
   - [x] P2b.2b (DEVIATION from D4, 2026-10-01: the master/ownership fields `userId`, `_masterId`, `_userModified`, `_userDeleted` KEEP their names until Phases 5/6 delete or redesign them; only domain fields + collection names are renamed) Stored-field renames across `server/db.js`, `routes/{generic,auth,admin,ai}.js`, `services/{clone-master,sync-master,seed-master,master-version}.js`: `userId`→`ownerId`, `_masterId`→`masterId`, `_userModified`→`userModified`, `_userDeleted`→`userDeleted`; `'__master__'` stays as an `ownerId` value; add/verify indexes on the new collections
@@ -699,25 +699,27 @@ append the path to the scope block above and retry.
 - [ ] P3.5 Drop old registry collections after verify — also delete the dead `registry-rename-master` / `registry-delete-master` routes (`generic.js`) + their unused `http-storage.adapter.ts` methods (client uses `TaxonomyStore` since P3.4; found 2026-10-05)
 
 ### Phase 4 — Course / protein split
-- [ ] P4.0 Reality Check + G3
-- [ ] P4.1 `server/migrations/data/0003-label-split-map.json` → Human review (G4/G5)
-- [ ] P4.2 Recipe + menu-section schema fields + anti-weld validation
-- [ ] P4.3 `server/migrations/0003-label-split.js` (dry run → Human → write → verify)
-- [ ] P4.4 `recipe-classification.component`, recipe-book filters, menu section course picker
-- [ ] P4.5 `server/routes/ai.js` prompt/validation → `courseKey`, `course`/`protein` inference
-- [ ] P4.6 `computeAutoLabels` guard + protein suggestions
+> **DROPPED (Human 2026-10-06):** whole phase dropped; not to be taken. Plan 322 Stages 2–5 (folded into P5) are dropped with it.
+- [-] DROPPED (Human 2026-10-06) — P4.0 Reality Check + G3
+- [-] DROPPED (Human 2026-10-06) — P4.1 `server/migrations/data/0003-label-split-map.json` → Human review (G4/G5)
+- [-] DROPPED (Human 2026-10-06) — P4.2 Recipe + menu-section schema fields + anti-weld validation
+- [-] DROPPED (Human 2026-10-06) — P4.3 `server/migrations/0003-label-split.js` (dry run → Human → write → verify)
+- [-] DROPPED (Human 2026-10-06) — P4.4 `recipe-classification.component`, recipe-book filters, menu section course picker
+- [-] DROPPED (Human 2026-10-06) — P4.5 `server/routes/ai.js` prompt/validation → `courseKey`, `course`/`protein` inference
+- [-] DROPPED (Human 2026-10-06) — P4.6 `computeAutoLabels` guard + protein suggestions
 
 ### Phase 5 — Shared master
+> **DROPPED (Human 2026-10-06):** whole phase dropped; not to be taken. Plan 322 Stages 2–5 (folded into P5) are dropped with it.
 > See "Relationship to Plan 322" note above — P5.0's Reality Check must read `plans/322-admin-master-push-expansion.plan.md`'s progress first.
-- [ ] P5.0 Reality Check + user-account inventory
-- [ ] P5.1 `docs/brain/patterns/master-override-model.md` → Human approval
-- [ ] P5.2 `server/repositories/entity-repo.js` + route rewiring
-- [ ] P5.3 Remove remapping; override-aware reference resolution (client + server)
-- [ ] P5.4 Admin-only push + master versioning + `activity_log` audit
-- [ ] P5.5 `MasterPushConfirmModalComponent` replaces `openTernary` in `master-push.service.ts`; hide entry point for non-admins
-- [ ] P5.6 `server/migrations/0004-shared-master.js` + golden-view diff tool
-- [ ] P5.7 Remove clone/sync services, `_userModified`/`_masterId` (schema v3)
-- [ ] P5.8 Replace characterization tests with repo tests
+- [-] DROPPED (Human 2026-10-06) — P5.0 Reality Check + user-account inventory
+- [-] DROPPED (Human 2026-10-06) — P5.1 `docs/brain/patterns/master-override-model.md` → Human approval
+- [-] DROPPED (Human 2026-10-06) — P5.2 `server/repositories/entity-repo.js` + route rewiring
+- [-] DROPPED (Human 2026-10-06) — P5.3 Remove remapping; override-aware reference resolution (client + server)
+- [-] DROPPED (Human 2026-10-06) — P5.4 Admin-only push + master versioning + `activity_log` audit
+- [-] DROPPED (Human 2026-10-06) — P5.5 `MasterPushConfirmModalComponent` replaces `openTernary` in `master-push.service.ts`; hide entry point for non-admins
+- [-] DROPPED (Human 2026-10-06) — P5.6 `server/migrations/0004-shared-master.js` + golden-view diff tool
+- [-] DROPPED (Human 2026-10-06) — P5.7 Remove clone/sync services, `_userModified`/`_masterId` (schema v3)
+- [-] DROPPED (Human 2026-10-06) — P5.8 Replace characterization tests with repo tests
 
 ### Phase 6 — Soft delete + userPrefs
 - [ ] P6.0 Reality Check + purge-window answer
