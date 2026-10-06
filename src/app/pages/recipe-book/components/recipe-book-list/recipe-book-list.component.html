@@ -347,10 +347,17 @@
     }
   </ng-container>
 
+  <ng-container shell-filter-clear>
+    @if (hasActiveFilters_()) {
+      <button type="button" class="c-btn-ghost--sm c-filter-clear" (click)="clearAllFilters()">
+        {{ 'clear_filters' | translatePipe }}
+      </button>
+    }
+  </ng-container>
   <ng-container shell-filters>
     @if (isLoggedIn()) {
-      <div class="c-filter-category favorites-filter-category">
-        <label class="c-filter-option">
+      <div class="c-filter-category c-toggle-chip-group favorites-filter-category">
+        <label class="c-toggle-chip">
           <input
             type="checkbox"
             [checked]="showFavoritesOnly_()"
@@ -398,13 +405,6 @@
       </div>
     </div>
     <div class="c-filter-section">
-      <div class="c-filter-section-header">
-        @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
-            {{ 'clear_filters' | translatePipe }}
-          </button>
-        }
-      </div>
       <div class="c-filter-category date-filter-category">
         <button
           type="button"
@@ -419,7 +419,7 @@
           <lucide-icon [name]="isCategoryExpanded('Date') ? 'chevron-down' : 'chevron-left'" [size]="16"></lucide-icon>
         </button>
         @if (isCategoryExpanded('Date')) {
-          <div class="c-filter-options date-filter-options">
+          <div class="date-filter-options">
             <div class="date-sort-buttons">
               <button type="button" class="c-btn-ghost--sm" (click)="setSortDateNewestFirst()">
                 {{ 'sort_newest_first' | translatePipe }}
@@ -438,7 +438,7 @@
                 <input type="date" [ngModel]="dateTo_()" (ngModelChange)="dateTo_.set($event)" />
               </label>
             </div>
-            <label class="c-filter-option">
+            <label class="c-toggle-chip">
               <input
                 type="checkbox"
                 [checked]="dateIncludeByUpdated_()"
@@ -469,19 +469,24 @@
             ></lucide-icon>
           </button>
           @if (isCategoryExpanded(category.name)) {
-            <div class="c-filter-options">
+            <div class="c-toggle-chip-group">
               @for (option of category.options; track option.value) {
-                <label class="c-filter-option">
+                <label class="c-toggle-chip">
                   <input
                     type="checkbox"
                     [checked]="option.checked_"
                     (change)="toggleFilter(category.name, option.value)"
                   />
                   @if (option.color) {
-                    <span class="c-filter-option-dot" [style.background-color]="option.color" aria-hidden="true"></span>
+                    <span class="c-toggle-chip__dot" [style.background-color]="option.color" aria-hidden="true"></span>
                   }
-                  <span class="c-filter-option-label">{{ option.label | translatePipe }}</span>
-                  <span class="c-filter-option-count" aria-hidden="true">{{ option.count }}</span>
+                  <span>{{ option.label | translatePipe }}</span>
+                  <span
+                    class="c-toggle-chip__count"
+                    [class.c-toggle-chip__count--zero]="option.count === 0"
+                    aria-hidden="true"
+                    >{{ option.count }}</span
+                  >
                 </label>
               }
             </div>

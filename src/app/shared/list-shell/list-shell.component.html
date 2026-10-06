@@ -44,7 +44,10 @@
 
   <aside class="filter-panel" [class.collapsed]="!isPanelOpen()">
     <div class="panel-content">
-      <h3 class="panel-heading">{{ 'filter' | translatePipe }}</h3>
+      <!-- Out of flow on purpose: a hidden or shown clear button never reserves space or shifts the filters. -->
+      <div class="panel-filter-clear">
+        <ng-content select="[shell-filter-clear]"></ng-content>
+      </div>
       <ng-content select="[shell-filters]"></ng-content>
     </div>
   </aside>

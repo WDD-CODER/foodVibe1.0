@@ -696,6 +696,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.dateTo_.set(null)
     this.dateIncludeByUpdated_.set(false)
     this.showFavoritesOnly_.set(false)
+    this.selectedProductIds_.set([])
   }
 
   protected hasActiveFilters_ = computed(
@@ -703,7 +704,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       Object.values(this.activeFilters_()).some((arr) => arr.length > 0) ||
       this.dateFrom_() != null ||
       this.dateTo_() != null ||
-      this.showFavoritesOnly_()
+      this.showFavoritesOnly_() ||
+      this.selectedProductIds_().length > 0
   )
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {

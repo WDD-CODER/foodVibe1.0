@@ -50,13 +50,13 @@
       </label>
     }
     @for (env of envTypes; track env) {
-      <label class="env-filter-pill" [class.active]="selectedEnvTypes_().has(env)">
+      <label class="c-toggle-chip">
         <input type="checkbox" [checked]="selectedEnvTypes_().has(env)" (change)="toggleEnvType(env)" />
         <span>{{ env | translatePipe }}</span>
       </label>
     }
     @if (hasActiveFilters_()) {
-      <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
+      <button type="button" class="c-btn-ghost--sm c-filter-clear filters-clear" (click)="clearAllFilters()">
         {{ 'clear_filters' | translatePipe }}
       </button>
     }

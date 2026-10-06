@@ -281,6 +281,13 @@
     </ng-container>
   </ng-template>
 
+  <ng-container shell-filter-clear>
+    @if (hasActiveFilters_()) {
+      <button type="button" class="c-btn-ghost--sm c-filter-clear" (click)="clearAllFilters()">
+        {{ 'clear_filters' | translatePipe }}
+      </button>
+    }
+  </ng-container>
   <ng-container shell-filters>
     @if (isUnderInventory) {
       <nav class="control-nav" aria-label="Inventory and logistics">
@@ -293,18 +300,11 @@
       </nav>
     }
     <div class="c-filter-section">
-      <div class="c-filter-section-header">
-        @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
-            {{ 'clear_filters' | translatePipe }}
-          </button>
-        }
-      </div>
       <div class="c-filter-category">
         <span class="c-filter-category-label">{{ 'category' | translatePipe }}</span>
-        <div class="c-filter-options">
+        <div class="c-toggle-chip-group">
           @for (cat of categories; track cat) {
-            <label class="c-filter-option">
+            <label class="c-toggle-chip">
               <input type="checkbox" [checked]="selectedCategories_().has(cat)" (change)="toggleCategory(cat)" />
               <span>{{ cat | translatePipe }}</span>
             </label>
@@ -313,8 +313,8 @@
       </div>
       <div class="c-filter-category consumable-filter">
         <span class="c-filter-category-label">{{ 'is_consumable' | translatePipe }}</span>
-        <div class="c-filter-options c-filter-options--inline">
-          <label class="c-filter-option">
+        <div class="c-toggle-chip-group">
+          <label class="c-toggle-chip">
             <input
               type="radio"
               name="consumable"
@@ -323,7 +323,7 @@
             />
             <span>{{ 'all' | translatePipe }}</span>
           </label>
-          <label class="c-filter-option">
+          <label class="c-toggle-chip">
             <input
               type="radio"
               name="consumable"
@@ -332,7 +332,7 @@
             />
             <span>{{ 'approved_yes' | translatePipe }}</span>
           </label>
-          <label class="c-filter-option">
+          <label class="c-toggle-chip">
             <input
               type="radio"
               name="consumable"

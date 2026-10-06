@@ -330,6 +330,8 @@
   }
 
   .panel-content {
+    position: relative;
+
     padding: 0.5rem 1rem 1rem;
 
     min-height: 12.5rem;
@@ -339,12 +341,11 @@
       transform 0.25s var(--ease-spring);
   }
 
-  .panel-heading {
-    margin: 0 0 0.75rem;
-
-    color: var(--color-text-main);
-    font-size: var(--fs-md);
-    font-weight: var(--fw-semibold);
+  .panel-filter-clear {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    z-index: 1;
   }
 
   // ─── ≤1023px — design's own breakpoint (Inventory.dc.html:58): stack

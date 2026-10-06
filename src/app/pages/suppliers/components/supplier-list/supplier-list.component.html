@@ -244,30 +244,32 @@
     </div>
   </ng-template>
 
+  <ng-container shell-filter-clear>
+    @if (hasActiveFilters_()) {
+      <button type="button" class="c-btn-ghost--sm c-filter-clear" (click)="clearAllFilters()">
+        {{ 'clear_filters' | translatePipe }}
+      </button>
+    }
+  </ng-container>
   <ng-container shell-filters>
     <div class="c-filter-section">
-      <div class="c-filter-section-header">
-        @if (hasActiveFilters_()) {
-          <button type="button" class="c-btn-ghost--sm" (click)="clearAllFilters()">
-            {{ 'clear_filters' | translatePipe }}
-          </button>
-        }
-      </div>
       <div class="c-filter-category">
         <span class="c-filter-category-label">{{ 'delivery_days' | translatePipe }}</span>
-        <div class="c-filter-options c-filter-options--inline">
+        <div class="c-toggle-chip-group">
           @for (day of [0, 1, 2, 3, 4, 5, 6]; track day) {
-            <label class="c-filter-option">
+            <label class="c-toggle-chip">
               <input type="checkbox" [checked]="selectedDays_().has(day)" (change)="toggleDay(day)" />
               <span>{{ deliveryDaysDisplay([day]) }}</span>
             </label>
           }
         </div>
       </div>
-      <label class="c-filter-option linked-only-toggle">
-        <input type="checkbox" [checked]="hasLinkedOnly_()" (change)="hasLinkedOnly_.set(!hasLinkedOnly_())" />
-        <span>{{ 'linked_products' | translatePipe }}</span>
-      </label>
+      <div class="c-toggle-chip-group linked-only-toggle">
+        <label class="c-toggle-chip">
+          <input type="checkbox" [checked]="hasLinkedOnly_()" (change)="hasLinkedOnly_.set(!hasLinkedOnly_())" />
+          <span>{{ 'linked_products' | translatePipe }}</span>
+        </label>
+      </div>
     </div>
   </ng-container>
 </app-list-shell>

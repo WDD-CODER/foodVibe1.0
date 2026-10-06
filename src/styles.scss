@@ -1470,15 +1470,6 @@ textarea.c-input {
   }
 }
 
-.c-filter-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-
-  margin-block-end: 0.75rem;
-  min-height: 1.75rem;
-}
-
 .c-filter-category {
   margin-block-end: 0.5rem;
 }
@@ -1567,9 +1558,10 @@ textarea.c-input {
    Flex-wrap, not CSS grid: grid's shared column-track widths would squeeze
    short and long labels alike into the same track width, cutting text off —
    flex-wrap lets every item keep its own natural width. Engine-level so it
-   applies automatically wherever `.c-filter-section`/`.c-filter-options`/
-   `.c-filter-option` are used (Inventory, Recipe Book, Suppliers, Equipment,
-   Venues, …) — no per-screen opt-in needed. ---- */
+   applies automatically wherever `.c-filter-section`/`.c-filter-options`
+   are used — no per-screen opt-in needed. List filter panels render options as
+   `.c-toggle-chip` (plan 339); `.c-filter-option` survives only in supplier-form
+   until the form-checkboxes plan. ---- */
 @media (max-width: $break-tablet-max) {
   .c-filter-section {
     display: flex;
@@ -1579,7 +1571,7 @@ textarea.c-input {
     gap: 0.5rem 0.875rem;
   }
 
-  .c-filter-section-header,
+  .c-filter-section > .c-toggle-chip-group,
   .c-filter-category {
     flex: 1 0 100%;
   }
@@ -1705,6 +1697,130 @@ textarea.c-input {
   }
 }
 
+/* ---- Engine: Toggle Chip (plan 339) ----
+   A pill the user taps on and off — neutral when off, filled with the primary
+   color when on. Markup: `label.c-toggle-chip > input[type=checkbox|radio] + span`.
+   The input stays in the DOM, focusable and announced (clip-path, never
+   display:none), so Tab + Space and screen readers work exactly as with a
+   checkbox. Selected state comes from `:has(input:checked)`; `.is-on` is the
+   fallback for chips without an input. Wrap chips in `.c-toggle-chip-group`. */
+.c-toggle-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: var(--space-2);
+  padding-block: 1rem;
+}
+
+/* "Clear filters" button in a filter panel/bar — pairs with `.c-btn-ghost--sm`. */
+.c-filter-clear {
+  padding: 0.55rem 0.625rem;
+}
+
+.c-toggle-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.375rem;
+  min-block-size: 2rem;
+
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--color-text-secondary);
+  background: var(--bg-glass);
+  user-select: none;
+
+  padding-inline: 0.75rem;
+  padding-block: 0.25rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease-smooth),
+    color 0.15s var(--ease-smooth),
+    border-color 0.15s var(--ease-smooth);
+
+  > input {
+    position: absolute;
+
+    inline-size: 1px;
+    block-size: 1px;
+
+    margin: 0;
+
+    appearance: none;
+    opacity: 0;
+    clip-path: inset(50%);
+    pointer-events: none;
+  }
+
+  &:hover {
+    color: var(--color-text-main);
+    background: var(--bg-glass-hover);
+    border-color: var(--color-primary);
+  }
+
+  &:has(> input:focus-visible) {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  &:has(> input:checked),
+  &.is-on {
+    color: var(--color-text-on-primary);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+
+    .c-toggle-chip__count {
+      color: inherit;
+
+      opacity: 0.85;
+    }
+
+    .c-toggle-chip__dot {
+      box-shadow: 0 0 0 1.5px var(--color-text-on-primary);
+    }
+  }
+
+  &:has(> input:disabled) {
+    cursor: not-allowed;
+
+    opacity: 0.5;
+  }
+}
+
+.c-toggle-chip__dot {
+  flex-shrink: 0;
+
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+
+  border-radius: var(--radius-full);
+}
+
+.c-toggle-chip__count {
+  flex-shrink: 0;
+
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-muted);
+
+  &.c-toggle-chip__count--zero {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: $break-phone-max) {
+  /* ≥44px tap target on phones. */
+  .c-toggle-chip {
+    padding-block: 0.375rem;
+    min-block-size: 2.75rem;
+  }
+}
+
 /* ============================================================
    Plan 305 M2 — Mobile hardening layer (`UI refactor/mobile-pass.css`)
    Phone-only (≤ $break-phone-max). Nothing here applies to tablet or desktop.
@@ -1726,9 +1842,10 @@ textarea.c-input {
 
   /* Checkboxes read as compact marks on phones — roughly a quarter of the
      desktop footprint. Higher specificity than the per-screen rules, so this is
-     the single source of truth for phone checkbox size. */
-  app-root input[type="checkbox"],
-  app-root input[type="radio"] {
+     the single source of truth for phone checkbox size. Toggle-chip inputs are
+     visually hidden and must stay 1px — excluded. */
+  app-root input[type="checkbox"]:not(.c-toggle-chip > input),
+  app-root input[type="radio"]:not(.c-toggle-chip > input) {
     flex: none !important;
 
     width: 0.875rem !important;
@@ -1739,7 +1856,7 @@ textarea.c-input {
     border-radius: var(--radius-xs) !important;
   }
 
-  app-root input[type="radio"] {
+  app-root input[type="radio"]:not(.c-toggle-chip > input) {
     border-radius: var(--radius-full) !important;
   }
 

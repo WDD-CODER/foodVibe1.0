@@ -10,13 +10,12 @@ import {
   computed
 } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
-import { TranslatePipe } from '../../core/pipes/translation-pipe.pipe'
 import { TranslationService } from '../../core/services/translation.service'
 
 @Component({
   selector: 'app-list-shell',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule],
   templateUrl: './list-shell.component.html',
   styleUrl: './list-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
