@@ -5,7 +5,8 @@ name: todo-sync
 # ledger and archives fully-done sections. main requires a PR, so the bot opens one and
 # squash-merges it. Needs repo setting: Actions → "Allow GitHub Actions to create and
 # approve pull requests". A merge made with GITHUB_TOKEN does not re-trigger workflows,
-# so this cannot loop.
+# so this cannot loop. The PR's own checks must finish before the merge: merging (and
+# deleting the branch) while they start makes every check fail with "workflow file issue".
 
 on:
   push:
@@ -17,6 +18,8 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  checks: read
+  statuses: read
 
 concurrency:
   group: todo-sync
@@ -25,6 +28,7 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -58,4 +62,11 @@ jobs:
           gh pr create --base main --head "$branch" \
             --title "chore(todo): sync ledger from merged plan files" \
             --body "Automatic: copies Worker [x] marks from plans/*.plan.md into .claude/todo.md (todo-sync workflow, triggered by ${GITHUB_SHA::8})."
+          # Checks take a few seconds to register on a new PR; wait for them, then for them to pass.
+          # A failing check stops here and leaves the PR open for the Human.
+          for _ in $(seq 1 20); do
+            if ! gh pr checks "$branch" 2>&1 | grep -q 'no checks reported'; then break; fi
+            sleep 6
+          done
+          gh pr checks "$branch" --watch --interval 10
           gh pr merge "$branch" --squash --delete-branch
