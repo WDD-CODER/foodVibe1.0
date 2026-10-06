@@ -1,6 +1,6 @@
 # Plan 383 — Structured server logging: pino + request ids (delivers 321 §7e early)
 
-Status: draft
+Status: active
 Snapshot: 05132814b7a74187683bb45d5ef48339ae5fb5a0
 
 Logging series: A = 382 (client ingest + Mongo sink), **B = 383 (this plan)**, C = 384 (logs in
