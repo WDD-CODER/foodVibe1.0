@@ -16,14 +16,14 @@ Each section below is parsed by `scripts/lib/invariants.mjs` — keep the exact 
 
 ## INV-1 — Ownership
 - Rule: every user can create, edit and delete his own items; the admin can also do so for shared `__master__` items. Write routes authorize through `server/utils/can-write.js`.
-- Source: ADR 0016 (plan 386), `server/utils/can-write.js`
+- Source: ADR 0019 (plan 386), `server/utils/can-write.js`
 - Touches: `server/routes/generic.js`, `server/utils/can-write.js`, `server/middleware/**`, `src/app/core/services/permission.service.ts`, `src/app/core/services/taxonomy-store.service.ts`, `src/app/core/services/*-data.service.ts`
 - Users lose if broken: a cook can't change or delete his own recipes and products, or can change someone else's; the admin can't fix the shared default lists.
 - Test: server/test/invariants.test.js "INV-1 …"
 
 ## INV-2 — Tenancy
 - Rule: shared master data plus per-user overrides, created lazily on "change/remove only for me". A user's ability to customize shared data is never removed without a replacement in the same release.
-- Source: ADR 0008 D1 + ADR 0016 (plan 386)
+- Source: ADR 0008 D1 + ADR 0019 (plan 386)
 - Touches: `server/routes/generic.js`, `server/services/**`, `server/migrations/**`, `src/app/core/services/taxonomy-store.service.ts`, `src/app/core/services/master-push.service.ts`
 - Users lose if broken: a cook can no longer hide or rename a default category, unit or label for himself — he's stuck with the shared list, or his change leaks to everyone.
 - Test: server/test/invariants.test.js "INV-2 …"

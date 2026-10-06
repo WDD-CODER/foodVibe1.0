@@ -40,7 +40,7 @@ src/app/core/services/menu-section-categories.service.ts
 src/app/core/services/preparation-registry.service.ts
 src/app/pages/metadata-manager/**
 public/assets/data/dictionary.json
-docs/brain/decisions/0016-write-ownership-rule.md
+docs/brain/decisions/0019-write-ownership-rule.md
 docs/brain/gotchas/backend.md
 docs/brain/index.md
 AGENTS.md
@@ -84,7 +84,7 @@ touching any milestone.
   - admin: 🗑 and rename both open `confirmModal.openTernary` with "for me / for everyone". "For me" calls `hideForMe` / `renameForMe`; "for everyone" keeps the existing delete / re-key rename flow.
   - Own terms are unchanged (full rename/delete).
 - [ ] **Brain:**
-  - ADR `docs/brain/decisions/0016-write-ownership-rule.md`. It records that the rule (owner; admin also over `__master__`; per-user remove/rename of shared terms via an override doc) supersedes the P3.4 "shared terms admin-only, no per-user overrides" note, and that it is the taxonomy slice of 0008 D1.
+  - ADR `docs/brain/decisions/0019-write-ownership-rule.md`. It records that the rule (owner; admin also over `__master__`; per-user remove/rename of shared terms via an override doc) supersedes the P3.4 "shared terms admin-only, no per-user overrides" note, and that it is the taxonomy slice of 0008 D1.
   - One hard-rule line in `AGENTS.md`: "Write routes authorize through `server/utils/can-write.js`; never hand-roll `userId` write filters."
   - Gotcha in `backend.md`: "P3.4 dropped per-user removal → users lost CRUD on defaults".
   - Index line in `docs/brain/index.md`.
@@ -107,14 +107,14 @@ touching any milestone.
 - [ ] A5: Same for prep-category, section-category and menu-type UIs.
 - [ ] A6: Dictionary keys (append-only) (`public/assets/data/dictionary.json` — hotspot).
 - [ ] A7 (P1): Removed-items disclosure + restore.
-- [ ] A8: ADR 0016, AGENTS.md hard-rule line, gotcha, brain index.
+- [ ] A8: ADR 0019, AGENTS.md hard-rule line, gotcha, brain index.
 - [ ] A9: Grep for any place that renders a term key without going through the facades (so a `displayName` override wouldn't show). If it's outside the scope, raise it via the Escalation Protocol.
 
 ## Technical Considerations
 - Dependencies: `TaxonomyStore`, the six registry facades (they read through the store, so hidden terms vanish from every picker and renamed terms show the new name; nothing else reads `taxonomyTerms`), and `confirmModal.openTernary`.
 - `generic.js` is not growth-frozen, but keep the net growth small: logic goes in `can-write.js`.
 - Security surface: authorization logic for all write routes moves into `can-write.js` — tests must cover non-owner PUT/DELETE being refused and a regular user being unable to write a `__master__` doc.
-- New files: `server/utils/can-write.js`, `src/app/core/services/permission.service.ts` (+ spec), `docs/brain/decisions/0016-write-ownership-rule.md`.
+- New files: `server/utils/can-write.js`, `src/app/core/services/permission.service.ts` (+ spec), `docs/brain/decisions/0019-write-ownership-rule.md`.
 - Model changes: `hidden?: true` and `displayName?: string` on the taxonomy term schema (`npm run build:schemas`).
 - Hebrew canonical values: n/a (`displayName` is display-only; keys stay canonical).
 
