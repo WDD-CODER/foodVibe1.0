@@ -17,7 +17,7 @@ Single source of truth for hard rules and skill triggers. Both agents defer here
 - Hebrew UI strings always through `translatePipe` + `dictionary.json`.
 - Browser work goes through gstack `/browse`, never raw Playwright MCP. Default: hand the Human a numbered click/check list for multi-step UI checks; do single-step cheap checks yourself (DB query, log read, one screenshot).
 - Compaction: on a context-full warning, state open signals/todos in chat, then prefer `/compact focus on <current job + open signals>`; between unrelated tasks prefer `/clear` + session-state reload.
-- **Job validation (all agents):** A job is not done until every Done-when item is validated — `[auto]` by agent evidence, `[human]`/untagged by the Human; never self-mark `[human]` items or skip marking with "Contractor does not mark." Full procedure: `docs/agent/job-validation.md`.
+- **Job validation (all agents):** A job is not done until every Done-when item is validated — `[auto]` by agent evidence (exact output/exit code/build pass; only the plan author tags `[auto]`), `[human]`/untagged by the Human; never self-mark `[human]` items or skip marking with "Contractor does not mark." Counts as validation: `/ship` **Y**/`--yes`, `done`/`verified`/`approved`, `/done` — not `thanks`/`ok`/silence/CI green alone. Full procedure: `docs/agent/job-validation.md`.
 - **Plan Contracts (all agents):** A pasted/approved big plan must be persisted under `plans/` via `.claude/skills/save-plan/SKILL.md` before milestone execution. Mid-brief new tasks append to that plan's Atomic Sub-tasks (and `.claude/todo.md` — Planner only).
 - **Planner-Worker workflow:** Planner (main, on `main`) writes/pushes `plans/*.plan.md` + `.claude/todo.md` directly; Workers use slots `wt-1`=4201/3001, `wt-2`=4202/3002, `wt-3`=4203/3003 (`main`=4200/3000), writing only inside their plan's `## Read-Write Scope`. Hotspots (`styles.scss`, `dictionary.json`, `app.routes.ts`) are append-only; Workers never write `.claude/todo.md`; `--no-verify` push to `main` is human-only. Rest: `docs/brain/decisions/0009-planner-worker-worktrees.md`.
 - **Worker blocked outside scope (including an unmet plan Prerequisite):** offer `approved: <path>` first — per the plan's Escalation Protocol — never conclude unprompted that "this needs its own plan." That costs a full Planner round trip; a one-line `approved:` reply does not.
@@ -25,10 +25,6 @@ Single source of truth for hard rules and skill triggers. Both agents defer here
 ## Compact instructions
 
 Preserve across `/compact`: current plan number + branch, open todos, and any failing checks.
-
-## Job validation (all agents)
-
-`[auto]` items self-verify by agent evidence (exact output/exit code/build pass — only the plan author tags `[auto]`); `[human]`/untagged need the Human. Counts: `/ship` **Y**/`--yes`, `done`/`verified`/`approved`, `/done`. Doesn't: `thanks`/`ok`/silence/CI green alone. Full procedure: `docs/agent/job-validation.md`.
 
 ## Skill triggers
 
