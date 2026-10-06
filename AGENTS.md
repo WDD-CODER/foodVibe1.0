@@ -21,6 +21,7 @@ Single source of truth for hard rules and skill triggers. Both agents defer here
 - **Plan Contracts (all agents):** A pasted/approved big plan must be persisted under `plans/` via `.claude/skills/save-plan/SKILL.md` before milestone execution. Mid-brief new tasks append to that plan's Atomic Sub-tasks (and `.claude/todo.md` — Planner only).
 - **Planner-Worker workflow:** Planner (main, on `main`) writes/pushes `plans/*.plan.md` + `.claude/todo.md` directly; Workers use slots `wt-1`=4201/3001, `wt-2`=4202/3002, `wt-3`=4203/3003 (`main`=4200/3000), writing only inside their plan's `## Read-Write Scope`. Hotspots (`styles.scss`, `dictionary.json`, `app.routes.ts`) are append-only; Workers never write `.claude/todo.md`; `--no-verify` push to `main` is human-only. Rest: `docs/brain/decisions/0009-planner-worker-worktrees.md`.
 - **Worker blocked outside scope (including an unmet plan Prerequisite):** offer `approved: <path>` first — per the plan's Escalation Protocol — never conclude unprompted that "this needs its own plan." That costs a full Planner round trip; a one-line `approved:` reply does not.
+- **Kit-owned files** (`docs/workflow-kit/kit-owned.json`): change them in `../ai-workflow-kit` first, then bring the kit diff into FoodVibe as a hand-applied patch on a `chore/` branch. `kit-sync` doesn't work on FoodVibe until it's kit-installed. Steps: `docs/brain/decisions/0018-kit-changes-reach-foodvibe-as-patches.md`.
 
 ## Compact instructions
 
