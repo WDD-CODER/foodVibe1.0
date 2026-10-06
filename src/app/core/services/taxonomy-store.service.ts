@@ -65,7 +65,7 @@ export class TaxonomyStore {
 
   readonly allTerms_ = this.terms_.asReadonly()
   readonly isLoaded_ = this.loaded_.asReadonly()
-  readonly isAdmin_ = computed(() => this.userService.user_()?.role === 'admin')
+  readonly isAdmin_ = this.userService.isAdmin_
 
   // ── Read ────────────────────────────────────────────────────────────────
 

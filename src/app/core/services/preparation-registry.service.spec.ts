@@ -51,7 +51,7 @@ describe('PreparationRegistryService', () => {
         provideHttpClientTesting(),
         PreparationRegistryService,
         { provide: StorageService, useValue: storageSpy },
-        { provide: UserService, useValue: { user_: signal(null) } },
+        { provide: UserService, useValue: { user_: signal(null), isAdmin_: signal(false) } },
         { provide: UserMsgService, useValue: userMsgSpy },
         { provide: TranslationService, useValue: translationSpy },
         { provide: KeyResolutionService, useValue: keyResolutionSpy }

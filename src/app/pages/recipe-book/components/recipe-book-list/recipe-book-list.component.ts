@@ -134,7 +134,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected readonly currentUserId_ = computed(() => this.userService.user_()?._id ?? null)
-  protected readonly isAdmin_ = computed(() => this.userService.user_()?.role === 'admin')
+  protected readonly isAdmin_ = this.userService.isAdmin_
 
   protected activeFilters_ = signal<Record<string, string[]>>({})
   protected searchQuery_ = signal<string>('')

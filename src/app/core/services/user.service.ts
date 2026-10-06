@@ -1,4 +1,4 @@
-import { inject, Injector, Injectable, signal } from '@angular/core'
+import { computed, inject, Injector, Injectable, signal } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { Router } from '@angular/router'
 import { User } from '../models/user.model'
@@ -33,6 +33,7 @@ export class UserService {
 
   private _user_ = signal<User | null>(this._loadUserFromSession())
   public user_ = this._user_.asReadonly()
+  public readonly isAdmin_ = computed(() => this._user_()?.role === 'admin')
 
   private _isDataReloading_ = signal(false)
   public isDataReloading_ = this._isDataReloading_.asReadonly()

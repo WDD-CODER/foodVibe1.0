@@ -191,7 +191,7 @@ describe('MetadataRegistryService', () => {
         MetadataRegistryService,
         { provide: ProductDataService, useValue: pSpy },
         { provide: StorageService, useValue: storageSpy },
-        { provide: UserService, useValue: { user_: signal(null) } },
+        { provide: UserService, useValue: { user_: signal(null), isAdmin_: signal(false) } },
         { provide: UserMsgService, useValue: userMsgSpy },
         { provide: LoggingService, useValue: loggingSpy },
         { provide: TranslationService, useValue: translationSpy },

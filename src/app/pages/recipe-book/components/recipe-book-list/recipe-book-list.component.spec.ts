@@ -58,7 +58,10 @@ describe('RecipeBookListComponent', () => {
           useValue: { queryParams: of({}), params: of({}), snapshot: { queryParams: {}, params: {} } }
         },
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
-        { provide: UserService, useValue: { isLoggedIn: () => true, user_: signal({ _id: 'u1', role: 'admin' }) } },
+        {
+          provide: UserService,
+          useValue: { isLoggedIn: () => true, user_: signal({ _id: 'u1', role: 'admin' }), isAdmin_: signal(true) }
+        },
         { provide: UserMsgService, useValue: { onSetWarningMsg: () => {} } },
         { provide: AuthModalService, useValue: { open: () => {} } },
         {

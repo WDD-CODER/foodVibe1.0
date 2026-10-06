@@ -80,7 +80,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   private addItemModal = inject(AddItemModalService)
   private readonly userService = inject(UserService)
   protected readonly isLoggedIn = this.userService.isLoggedIn
-  protected readonly isAdmin = computed(() => this.userService.user_()?.role === 'admin')
+  protected readonly isAdmin = this.userService.isAdmin_
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
   private readonly taxonomy = inject(TaxonomyStore)
