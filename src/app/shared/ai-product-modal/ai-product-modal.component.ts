@@ -14,6 +14,7 @@ import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../c
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
+type InputMode = 'text' | 'image'
 
 const CANONICAL_UNITS = [
   'gram',
@@ -48,7 +49,11 @@ export class AiProductModalComponent implements OnInit {
   protected readonly newAllergen_ = signal('')
 
   // Create mode
+  protected readonly inputMode_ = signal<InputMode>('text')
   protected readonly prompt_ = signal('')
+  protected readonly imageFile_ = signal<File | null>(null)
+  protected readonly imagePreviewUrl_ = signal<string | null>(null)
+  protected readonly imageHint_ = signal('')
   protected readonly draft_ = signal<AiProductDraft | null>(null)
 
   // Edit mode
@@ -67,6 +72,10 @@ export class AiProductModalComponent implements OnInit {
     if (pct >= 0.7) return 'warning'
     return 'ok'
   })
+
+  protected readonly canGenerate_ = computed(() =>
+    this.inputMode_() === 'image' ? !!this.imageFile_() : !!this.prompt_().trim()
+  )
 
   protected readonly diffEntries_ = computed(() => {
     const patch = this.patch_()
@@ -149,14 +158,35 @@ export class AiProductModalComponent implements OnInit {
 
   // ─── Create mode ─────────────────────────────────────────────────
 
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0] ?? null
+    input.value = ''
+    this.imageFile_.set(file)
+    this.imagePreviewUrl_.set(null)
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => this.imagePreviewUrl_.set(reader.result as string)
+    reader.readAsDataURL(file)
+  }
+
+  onClearImage(): void {
+    this.imageFile_.set(null)
+    this.imagePreviewUrl_.set(null)
+  }
+
   async onGenerate(): Promise<void> {
+    if (!this.canGenerate_()) return
+    const file = this.imageFile_()
     const text = this.prompt_().trim()
-    if (!text) return
     this.loading_.set(true)
     this.status_.set('sending')
     this.errorKey_.set('ai_product_error')
     try {
-      const draft = await this.gemini_.generateProduct(text)
+      const draft =
+        this.inputMode_() === 'image' && file
+          ? await this.gemini_.generateProductFromImage(file, this.imageHint_())
+          : await this.gemini_.generateProduct(text)
       this.draft_.set(draft)
       this.status_.set('done')
     } catch (err) {
@@ -245,7 +275,11 @@ export class AiProductModalComponent implements OnInit {
   }
 
   private resetLocalState_(): void {
+    this.inputMode_.set('text')
     this.prompt_.set('')
+    this.imageFile_.set(null)
+    this.imagePreviewUrl_.set(null)
+    this.imageHint_.set('')
     this.draft_.set(null)
     this.newCategory_.set('')
     this.newAllergen_.set('')
