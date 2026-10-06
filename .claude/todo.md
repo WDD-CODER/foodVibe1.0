@@ -430,18 +430,6 @@
 - [x] A7: `scripts/next-plan-number.mjs` (plans + `<type>/NNN-*` branches); save-plan numbering calls it; manifest row + `kit-owned.json` — `scripts/next-plan-number.mjs`, `docs/workflow-kit/**`, `docs/agent/workflow-map.md`
 - [ ] A8: Checks + `/ship`; Dandan commits the kit repo.
 
-### Plan 383 — Structured server logging: pino + request ids (delivers 321 §7e early) (`plans/383-structured-server-logging-pino-request-ids.plan.md`)
-- [ ] B1: add `pino`, `pino-http` (deps) and `pino-pretty` (devDep) in `server/package.json`; `server/logger.js` with redaction + Mongo bridge.
-- [ ] B2: `pino-http` in `server/app.js` (replace morgan, `genReqId`, `X-Request-Id`, ignore list, `exposedHeaders`); remove `morgan` dependency.
-- [ ] B3: migrate `server/routes/generic.js` (incl. `PERF_LOG` → debug event) and `server/db.js`.
-- [ ] B4: migrate `server/routes/auth.js`, `server/routes/admin.js`, `server/middleware/**`, `server/services/**`.
-- [ ] B5: migrate `server/routes/ai.js` (largest; keep `logTag` semantics as the `event` prefix).
-- [ ] B6: global error handler + `server/index.js`; `render.yaml` cleanup.
-- [ ] B7: client — interceptor `requestId` (`auth.interceptor.ts`), `logging.service.ts` pass-through.
-- [ ] B8: ESLint `no-console` scoped rule (`server/eslint.config.mjs`); fix anything it catches.
-- [ ] B9: `server/test/request-id.test.js` + test helper for capturing pino output (`server/test/helpers/**`).
-- [ ] B10: docs/patterns mapping, standards, tech-stack, 321 checklist, CHANGELOG; run all [auto] criteria.
-
 ### Plan 384 — Logs in the AI workflow: query script, slot log retention, command wiring (`plans/384-logs-in-ai-workflow-query-script-slot-retention.plan.md`)
 - [ ] C1: `scripts/lib/log-format.mjs` normaliser (client-echo JSON, pino JSON, raw passthrough) + unit-ish self-test via `node --test` if cheap.
 - [ ] C2: `scripts/log-query.mjs` Mongo mode (URI resolution, filters, `--summary`, `--json`, limits).
