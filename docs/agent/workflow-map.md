@@ -31,7 +31,7 @@ Rule: **a job is never done until every Done-when item is validated** — `[auto
 | `.cursor/rules/*.mdc` (21 files) | Cursor only | Two `alwaysApply: true` rules: `save-plan-must-use-skill.mdc`, `contractor-role.mdc` (role/execution-protocol/handoff — folded in from the now-deleted root `.cursorrules`, see `.claude/reports/cursor-claude-parity-audit.md` §0.2). The rest are glob- or Agent-Requested-triggered skill/convention mirrors. |
 | `docs/agent/` (9 files) | Both, load-on-demand | conventions, standards-angular/-security/-domain/-backend/-git, brain-capture, job-validation, pr-check-fix-loop |
 | `_shared/tech-stack.md` | Both | Stack detail |
-| `docs/brain/` | Both | Second brain: `index.md`, `gotchas.md` (index) + `gotchas/` (domain files), `patterns/`, `decisions/` (ADRs), `glossary.md`, `projectbrief.md`, `how-it-works.md` |
+| `docs/brain/` | Both | Second brain: `index.md`, `invariants.md` (architecture invariants the `--arch` gate checks), `gotchas.md` (index) + `gotchas/` (domain files), `patterns/`, `decisions/` (ADRs), `glossary.md`, `projectbrief.md`, `how-it-works.md` |
 
 Cursor rule files (10 original + 1 role rule + 10 skill-enforcement rules added by Plan 298):
 `angular-component-structure`, `angular-pipe-logic-must-use-skill`,
@@ -187,7 +187,8 @@ has no PreToolUse hook of its own.
 | `prune-merged-worktrees.sh`, `prune-old-sessions.sh` | `/cleanup` |
 | `lib/slot.mjs` | `session-startup.sh` (`--describe`), `scope-check.mjs`, `ship-prep.mjs`, `take-plan.mjs`; `--list` for the Planner protocol |
 | `session-state-path.mjs` | `session-startup.sh`, `handoff-check.sh`, `write-session-state.mjs` — one resolver, no duplicated logic |
-| `scope-check.mjs` | `scope-guard.sh` (`--file`), `ship-prep.mjs` (`--diff`), the Planner protocol (`--overlap`), `take-plan.mjs` + `take-plan.md` (`--drift`) |
+| `scope-check.mjs` | `scope-guard.sh` (`--file`), `ship-prep.mjs` (`--diff`, `--arch --diff` warn), the Planner protocol (`--overlap`), save-plan Shape lint (`--arch --plan` block), `/review-it` step 3 (`--arch --diff`), `take-plan.mjs` + `take-plan.md` (`--drift`) |
+| `lib/invariants.mjs` | `scope-check.mjs --arch` and `take-plan.mjs` (pre-claim architecture gate, judged against the main branch): parses `docs/brain/invariants.md` and a plan's `## Architecture Impact` |
 | `take-plan.mjs` | "execute plan NNN" / "take plan NNN" (`.claude/commands/take-plan.md`) |
 | `todo-query.mjs sync --plan NNN` / `sync --merged` | the todo-sync Action (`.github/workflows/todo-sync.yml`) on every push to main touching `plans/**`; the Planner protocol (`.claude/commands/plan.md`) re-runs it as a no-op |
 | `free-merged-slots.mjs` | the Planner protocol (`.claude/commands/plan.md`), step 2 — detaches a `wt-N` back to idle once its branch merges into `origin/main` |

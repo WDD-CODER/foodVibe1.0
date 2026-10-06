@@ -584,7 +584,8 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     // A2: nameSnapshot enforcement — every linked ingredient must carry a nameSnapshot
     // so the recipe remains readable if the product is later deleted or the DB is reset.
     if (req.params.type === 'recipes' || req.params.type === 'dishes') {
-      const ings = req.body.ingredients ?? [];
+      // A non-array `ingredients` is left to the schema check below (400 Validation failed).
+      const ings = Array.isArray(req.body.ingredients) ? req.body.ingredients : [];
       const orphan = ings.find(ing => ing.referenceId && !ing.nameSnapshot);
       if (orphan) {
         return res.status(400).json({

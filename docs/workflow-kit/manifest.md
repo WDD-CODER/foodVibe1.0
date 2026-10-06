@@ -19,17 +19,21 @@ Lessons verdicts: `lessons-triage.md`. Config keys: `parameters.md`.
 
 **Validation round 2 (plan 389, 2026-10-05):** kit-first again. A slot frees itself after its merge (`free-merged-slots.mjs` in the slot merge step; `--no-fetch` run at session start); the Planner folder never auto-switches off main (`branch-guard.sh` denies, session start warns); both guards hand a file in another worktree to that worktree's guard; `scope-check --file` turns hook-style absolute paths into repo-relative ones (every in-slot Edit was judged `out` before); `docs/brain/**` always allowed; plan-order check skips superseded/done plans; new `/workflow-report` command and `todo-sync.yml` Action (`core`/`parameterize`); `PYTHONIOENCODING=utf-8` in settings.
 
-**204 files classified** (+ `.claude/commands/workflow-report.md`, `.github/workflows/todo-sync.yml`) (196 from plan 328 + `scripts/kit-extract.mjs`, `scripts/kit-lessons-extract.mjs` and `scripts/kit-owned.mjs`, all `project`/`stay`, + `scripts/lib/slot-procs.mjs`, `scripts/slot-stop.mjs` and `scripts/lib/plan-scope.mjs`, all `core`/`copy`, + `scripts/next-plan-number.mjs`, `core`/`parameterize`) across the inventory roots; 11 excluded path patterns (project history/data).
+**Architecture guard (plan 387, 2026-10-06):** kit-first, with the Human's explicit approval to edit the kit repo. New `scripts/lib/invariants.mjs` (`core`/`copy`) parses `docs/brain/invariants.md` (`template`/`skeleton`: FoodVibe's INV-1..6; the kit ships an empty skeleton, and no file means no gate) and a plan's `## Architecture Impact`. `scope-check.mjs --arch --plan` blocks (save-plan Shape lint; `take-plan.mjs` before claiming, judged against main); `--arch --diff` warns (`ship-prep.mjs` report, `/review-it` step 3). The PRD/HLD templates, the `AGENTS.md` template and the brain index template gained the matching section/rule/row; `ci.yml`'s lint job runs `npm run test:scripts --if-present`. FoodVibe-only: ADR 0017, `scripts/test/**` (`npm run test:scripts`), all `project`/`stay`. The same pass classified plan 388's five remote-link files (`project`/`stay`, candidates for core once validated).
+
+**Pending workflow changes:** the kit edits from plan 387 sit uncommitted in `../ai-workflow-kit` until the Human commits them there (this Worker session can't run git outside its slot). FoodVibe has no `.kit/install.json` yet, so the FoodVibe copies were rendered by hand with FoodVibe's values, same as plans 360/380/389.
+
+**216 files classified** (+ plan 387: `scripts/lib/invariants.mjs`, `docs/brain/invariants.md`, ADR 0017, `scripts/test/**` (4); + plan 388's 5 remote-link files) (+ `.claude/commands/workflow-report.md`, `.github/workflows/todo-sync.yml`) (196 from plan 328 + `scripts/kit-extract.mjs`, `scripts/kit-lessons-extract.mjs` and `scripts/kit-owned.mjs`, all `project`/`stay`, + `scripts/lib/slot-procs.mjs`, `scripts/slot-stop.mjs` and `scripts/lib/plan-scope.mjs`, all `core`/`copy`, + `scripts/next-plan-number.mjs`, `core`/`parameterize`) across the inventory roots; 11 excluded path patterns (project history/data).
 
 | tier \ action | copy | parameterize | split | skeleton | stay | total |
 | --- | --- | --- | --- | --- | --- | --- |
-| `core` | 37 | 37 | 7 | · | · | 81 |
+| `core` | 38 | 39 | 7 | · | · | 84 |
 | `layer:cursor` | 26 | 2 | · | · | · | 28 |
 | `pack:angular` | 10 | 10 | 2 | · | · | 22 |
 | `pack:node-express` | · | · | 1 | · | · | 1 |
-| `template` | · | · | · | 17 | · | 17 |
-| `project` | · | · | · | · | 54 | 54 |
-| **total** | 73 | 49 | 10 | 17 | 54 | 203 |
+| `template` | · | · | · | 18 | · | 18 |
+| `project` | · | · | · | · | 63 | 63 |
+| **total** | 74 | 51 | 10 | 18 | 63 | 216 |
 
 Tier legend: `core` = ships to every project; `layer:cursor` = optional Cursor layer (`-Cursor`); `pack:*` = stack pack contract (standards doc, skills, Cursor rules, gotchas, validation commands); `template` = generic structure, FoodVibe content, ships as a skeleton; `project` = stays in FoodVibe.
 
