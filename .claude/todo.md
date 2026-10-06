@@ -45,13 +45,13 @@
 - [x] P1.8 Stale branch list gathered (65 branches, `gh-pages` excluded) — 66 merged branches deleted by Human 2026-10-01; session/claude/audit branches left for later cleanup
 - [x] P2a.0–P2a.6 Shared Zod schema package, observe-mode validation (commit `3014d286`)
 - [x] P2b.0–P2b.6 v2 migration: rename + `schemaVersion` + enforce (Gates G1/G2) — PR #239 + #240; Atlas validate-all 0 violations; Human smoke "all good" 2026-10-02
-- [ ] P2b.x Stray keys: `ingredients_` on 36 local products dropped in v2; `steps_[].cooking_time_minutes_` (4 Atlas recipes) kept as deprecated `cookingTimeMinutes` — **Human decides rename-vs-convert**
+- [-] DROPPED (Human 2026-10-06) P2b.x Stray keys: `ingredients_` on 36 local products dropped in v2; `steps_[].cooking_time_minutes_` (4 Atlas recipes) kept as deprecated `cookingTimeMinutes` — **Human decides rename-vs-convert**
 - [x] P3.0–P3.3 Taxonomy schema, 0003 migration (local + Atlas), server term API — PR #253
 - [ ] P3.4 `TaxonomyStore` cutover DONE (PR #253) — REMAINING: shrink the 6 facades (`metadata-registry` 355 lines, `preparation-registry` 223, `unit-registry` 158, …) to ≤30 lines / inline; generic `taxonomy-kind-manager`
 - [ ] P3.5 Drop old `KITCHEN_*` registry collections — also delete the now-dead server routes `registry-rename-master` / `registry-delete-master` and their unused `http-storage.adapter.ts` methods (client already goes through `TaxonomyStore`; reality check 2026-10-05)
 > Related work outside the plan: Plan 385 (per-user write limit, server-owned rename re-key — merged PR #258), Plan 386 (`canWrite` + remove/rename "for me" on shared terms — draft, next), Plan 387 (architecture guard)
-- [ ] P4.0–P4.6 Course/protein/labels split + menu sections → course (Gate G3)
-- [ ] P5.0–P5.8 Shared master + per-user overrides; admin-only push + dedicated modal — now also owns Plan 322 Stages 2–5 + Plan 322-metadata M13
+- [-] DROPPED (Human 2026-10-06) P4.0–P4.6 Course/protein/labels split + menu sections → course (Gate G3)
+- [-] DROPPED (Human 2026-10-06) P5.0–P5.8 Shared master + per-user overrides; admin-only push + dedicated modal — now also owns Plan 322 Stages 2–5 + Plan 322-metadata M13
 - [ ] P6.0–P6.4 One soft-delete model + `userPrefs`
 - [ ] P7a–P7f Hygiene: god-file decomposition, service base adoption, script archive, CI hardening, logging, plan 301 remainder
 - [ ] P8.1–P8.5 Governance: ADRs 0009–0013, standards docs, lint guards, re-audit
@@ -68,13 +68,13 @@
 > so its Reality Check absorbs Plan 322's shipped state instead of re-deriving it. Safe to
 > execute Plan 322 now — Plan 321 Phase 5 will migrate its output when that phase starts.
 
-> **State 2026-10-05:** Stages 2–5 build on the clone/`_masterId` model that Plan 321 Phase 5 deletes — anything added there is throwaway. **Human 2026-10-05: Stage 1 only; Stages 2–5 FOLDED into 321 P5.**
+> **State 2026-10-05:** Stages 2–5 build on the clone/`_masterId` model that Plan 321 Phase 5 deletes — anything added there is throwaway. **Human 2026-10-05: Stage 1 only; Stages 2–5 FOLDED into 321 P5.** **Human 2026-10-06: 321 P5 dropped, so Stages 2–5 are dropped.**
 
 - [ ] Stage 1 — PARTLY DONE: `requireAdmin` on `push-to-master` ✅, `askScope()` → `'me'` for non-admins ✅. LEFT: one public `isAdmin_` on `UserService`, replace the 7 ad hoc copies (master-push, taxonomy-store, product-form, user-management, metadata-manager page, recipe-book-list, recipe-builder)
-- [-] Stage 2 (FOLDED into 321 P5) — Products DONE; server already accepts suppliers/equipment (`PUSHABLE_TYPES`). LEFT: equipment + supplier client wiring
-- [-] Stage 3 (FOLDED into 321 P5) — registry part MOOT (taxonomy terms are shared live since 321 P3). LEFT: venues + menuEvents only
-- [-] Stage 4 (FOLDED into 321 P5) — not started (terms already support "add as shared")
-- [-] Stage 5 (FOLDED into 321 P5) — `delete-from-master` exists for recipes/dishes/products. LEFT: equipment/suppliers/venues/menuEvents
+- [-] Stage 2 (DROPPED (Human 2026-10-06) with 321 P5) — Products DONE; server already accepts suppliers/equipment (`PUSHABLE_TYPES`). LEFT: equipment + supplier client wiring
+- [-] Stage 3 (DROPPED (Human 2026-10-06) with 321 P5) — registry part MOOT (taxonomy terms are shared live since 321 P3). LEFT: venues + menuEvents only
+- [-] Stage 4 (DROPPED (Human 2026-10-06) with 321 P5) — not started (terms already support "add as shared")
+- [-] Stage 5 (DROPPED (Human 2026-10-06) with 321 P5) — `delete-from-master` exists for recipes/dishes/products. LEFT: equipment/suppliers/venues/menuEvents
 
 ### Plan 320 — Recipe Labels Fix + Course/Category Field (`plans/320-recipe-labels-fix-course-category-field.plan.md`) — active in worktree `../foodVibe1.0-wt-recipe-labels`, branch `feat/recipe-labels-course-field`
 

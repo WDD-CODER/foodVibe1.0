@@ -104,26 +104,26 @@ missing so the push-decision code can read it.
       `'me'` (no modal) whenever `!userService.isAdmin_()`, in addition to the existing
       short-circuit when there's no `_masterId`. Non-admins never see the prompt again.
 
-### [FOLDED into Plan 321 Phase 5] Stage 2 — Wire existing server support: Products, Equipment, Suppliers
+### [DROPPED 2026-10-06 — was folded into Plan 321 Phase 5] Stage 2 — Wire existing server support: Products, Equipment, Suppliers
 
 - [x] (already in code, seen 2026-10-05) `product-data.service.ts` — add `_masterId?: string` to `Product` model (confirmed
       missing), add `pushToMaster(id)` method, wire into product-form save flow.
-- [ ] `equipment-data.service.ts` — confirm/add `_masterId?: string`, add
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — `equipment-data.service.ts` — confirm/add `_masterId?: string`, add
       `pushToMaster(id)`, wire into equipment list/form save flow.
-- [ ] `supplier-data.service.ts` — confirm/add `_masterId?: string`, add
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — `supplier-data.service.ts` — confirm/add `_masterId?: string`, add
       `pushToMaster(id)`, wire into supplier list/form save flow.
-- [ ] Each save flow mirrors `cook-view.page.ts:507-523`: if `pending._masterId`, call
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — Each save flow mirrors `cook-view.page.ts:507-523`: if `pending._masterId`, call
       `masterPush.askScope(pending)` before saving; call `pushToMaster` after a
       successful save when scope is `'everyone'`.
 
-### [FOLDED into Plan 321 Phase 5] Stage 3 — Extend to Venues, Menu Events, and the 9 taxonomy/registry collections
+### [DROPPED 2026-10-06 — was folded into Plan 321 Phase 5] Stage 3 — Extend to Venues, Menu Events, and the 9 taxonomy/registry collections
 
-- [ ] (registry types DEFERRED to Plan 321 Phase 3 — add only `venues`, `menuEvents`) `server/routes/generic.js` — add `VENUE_PROFILES`, `MENU_EVENT_LIST`,
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — (registry types DEFERRED to Plan 321 Phase 3 — add only `venues`, `menuEvents`) `server/routes/generic.js` — add `VENUE_PROFILES`, `MENU_EVENT_LIST`,
       `KITCHEN_PREPARATIONS`, `KITCHEN_CATEGORIES`, `KITCHEN_ALLERGENS`, `KITCHEN_LABELS`,
       `MENU_TYPES`, `KITCHEN_UNITS`, `MENU_EVENT_TYPES`, `MENU_SECTION_CATEGORIES`,
       `EQUIPMENT_CUSTOM_CATEGORIES` to `PUSHABLE_TYPES`.
-- [ ] `venue-data.service.ts` — `_masterId?: string`, `pushToMaster(id)`, wire into save flow.
-- [ ] `menu-event-data.service.ts` — same.
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — `venue-data.service.ts` — `_masterId?: string`, `pushToMaster(id)`, wire into save flow.
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — `menu-event-data.service.ts` — same.
 - [-] DEFERRED (Plan 321 Phase 3) `preparation-registry.service.ts` — same, wire into register/update/rename/delete
       category and preparation methods.
 - [-] DEFERRED (Plan 321 Phase 3) `metadata-registry.service.ts` (covers KITCHEN_CATEGORIES, KITCHEN_ALLERGENS,
@@ -135,28 +135,28 @@ missing so the push-decision code can read it.
 - [-] MOOT (registries deferred) Consider splitting this stage into 2 PRs (recipe-adjacent registries vs.
       menu/equipment registries) if the diff gets unwieldy.
 
-### [FOLDED into Plan 321 Phase 5] Stage 4 — New items created as shared from the start
+### [DROPPED 2026-10-06 — was folded into Plan 321 Phase 5] Stage 4 — New items created as shared from the start
 
-- [ ] `server/services/clone-master.js` — extract the single-doc clone logic (strip
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — `server/services/clone-master.js` — extract the single-doc clone logic (strip
       `_id`/`userId`/`_masterId`/`_userModified`, assign new id + `_masterId` back-
       reference) into a small shared helper usable both at signup-time bulk clone and a
       single new item.
-- [ ] New server route `POST /api/v1/data/:type/create-shared`
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — New server route `POST /api/v1/data/:type/create-shared`
       (`verifyToken, requireAdmin`, `PUSHABLE_TYPES`-gated): inserts the body as a new
       `__master__` doc, clones it into the admin's own collection via the helper above,
       calls `bumpMasterVersion()`.
-- [ ] Client: at each entity/registry's "add new" flow, if `isAdmin_()`, ask scope
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — Client: at each entity/registry's "add new" flow, if `isAdmin_()`, ask scope
       *before* the initial save (new decision point — no `_masterId` exists yet).
       `'everyone'` → call `create-shared`; `'me'` or non-admin → existing `POST /:type`.
 
-### [FOLDED into Plan 321 Phase 5] Stage 5 — Non-destructive delete propagation
+### [DROPPED 2026-10-06 — was folded into Plan 321 Phase 5] Stage 5 — Non-destructive delete propagation
 
-- [ ] (exists as `PUT /:type/:id/delete-from-master` for recipes/dishes/products — extend `DELETABLE_FROM_MASTER_TYPES` instead of a new route) New server route `PUT /:type/:id/remove-from-master`
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — (exists as `PUT /:type/:id/delete-from-master` for recipes/dishes/products — extend `DELETABLE_FROM_MASTER_TYPES` instead of a new route) New server route `PUT /:type/:id/remove-from-master`
       (`verifyToken, requireAdmin`, `PUSHABLE_TYPES`-gated, requires `existing._masterId`
       same validation as push-to-master): deletes/tombstones only the `__master__` doc.
       No change needed to `syncMasterToUser` — Rule 4 already leaves existing users'
       copies untouched when a master item disappears.
-- [ ] Client: extend each entity's delete confirmation — if admin and the item has
+- [-] DROPPED (Human 2026-10-06) (was folded into 321 P5) — Client: extend each entity's delete confirmation — if admin and the item has
       `_masterId`, offer "delete just for me" vs. "also remove from master" before the
       normal local delete (which always happens regardless of the choice).
 
