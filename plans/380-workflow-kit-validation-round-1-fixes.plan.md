@@ -1,7 +1,9 @@
 # Plan 380 — Workflow Kit Validation Round 1 Fixes
 
-Status: active
+Status: closed
 Snapshot: 9394c708
+
+> **CLOSED 2026-10-06 — merged; nothing left to do here.** Any unticked box below is history, not open work. Phase 6 (kit as a GitHub upstream, FoodVibe adoption, retiring patch mode) lives in plans 390 → 391 → 392.
 
 ## Problem Statement
 First validation round after Plan 360 (PR #247): Worker reports from wt-2 (plan 321) and wt-3 (plan 379), 2026-10-05. The new refusals, leftover-server cleanup and stay-in-slot merge worked; these gaps still cost manual steps:
@@ -71,4 +73,4 @@ If a Worker needs a FoodVibe file outside the `## Read-Write Scope`: STOP, tell 
 - [x] A5: `git fetch origin --prune` after a slot merge — `docs/agent/standards-git.md`, `docs/agent/ship-regular.md`
 - [x] A6: Validation after merge goes through the Planner, no second PR — `docs/agent/job-validation.md`
 - [x] A7: `scripts/next-plan-number.mjs` (plans + `<type>/NNN-*` branches); save-plan numbering calls it; manifest row + `kit-owned.json` — `scripts/next-plan-number.mjs`, `docs/workflow-kit/**`, `docs/agent/workflow-map.md`
-- [ ] A8: Checks + `/ship`; Dandan commits the kit repo.
+- [-] A8: Checks + `/ship`; Dandan commits the kit repo. — closed 2026-10-06: shipped in PR #252, kit committed (587d673).

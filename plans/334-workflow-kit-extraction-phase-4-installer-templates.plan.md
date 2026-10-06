@@ -1,7 +1,9 @@
 # Plan 334 — Workflow Kit Extraction, Phase 4: Installer, Sync, Template Skeletons
 
-Status: active
+Status: closed
 Snapshot: deb9eb6b
+
+> **CLOSED 2026-10-06 — merged; nothing left to do here.** Any unticked box below is history, not open work. Phase 6 (kit as a GitHub upstream, FoodVibe adoption, retiring patch mode) lives in plans 390 → 391 → 392.
 
 ## Problem Statement
 Phases 2-3 (plans 329, 331, merged) built the kit repo `../ai-workflow-kit` with core, two stack packs, the Cursor layer and the lessons. It cannot be installed yet. Phase 4 (see `docs/brain/decisions/0015-workflow-kit-extraction.md`) adds the installer (`kit-install.ps1`, optional `-Cursor`), the dry-run-first `kit-sync.ps1`, the 17 `template` skeletons (`AGENTS.md`, `CLAUDE.md`, `docs/brain/*`, `docs/project/*`, `.gitignore`, `.mcp.json`, …) and a `settings.json` with no hardcoded machine paths, then proves the result on an empty repo. FoodVibe's own workflow files are never edited (ADR 0015); all output lands in the kit repo plus FoodVibe-side manifest docs and the extractor's coverage check.

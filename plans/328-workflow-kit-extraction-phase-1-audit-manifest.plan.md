@@ -1,7 +1,9 @@
 # Plan 328 — Workflow Kit Extraction, Phase 1: Audit & Manifest
 
-Status: active
+Status: closed
 Snapshot: a4f396dda2f35a315505293e2414513b30d20ec7
+
+> **CLOSED 2026-10-06 — merged; nothing left to do here.** Any unticked box below is history, not open work. Phase 6 (kit as a GitHub upstream, FoodVibe adoption, retiring patch mode) lives in plans 390 → 391 → 392.
 
 ## Problem Statement
 Dandan's AI workflow lives inside FoodVibe: the Planner-Worker pipeline, skills, commands, guard hooks, the ship and brain system, and the Cursor rules. He wants it as a reusable kit, so new apps run the same workflow from Claude Code inside Cursor's terminal. This plan is phase 1 of 5. It is read-only on the workflow and produces the classification every later phase builds on.

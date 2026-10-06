@@ -1,7 +1,9 @@
 # Plan 329 — Workflow Kit Extraction, Phase 2: Core Scaffold
 
-Status: active
+Status: closed
 Snapshot: 4a2c6ff92d726087c68c3c16366c5868fa0c1ac7
+
+> **CLOSED 2026-10-06 — merged; nothing left to do here.** Any unticked box below is history, not open work. Phase 6 (kit as a GitHub upstream, FoodVibe adoption, retiring patch mode) lives in plans 390 → 391 → 392.
 
 ## Problem Statement
 Plan 328 (phase 1) classified every workflow file into `core` / `layer:cursor` / `pack:angular` / `pack:node-express` / `template` / `project`, and recorded 7 core→project blockers plus a 38-key parameter catalogue (`docs/workflow-kit/manifest.md`, `manifest.json`, `parameters.md`). Phase 2 (of the 5-phase effort map in `docs/brain/decisions/0015-workflow-kit-extraction.md`) creates the actual kit repo: extracts the 77 `tier: core` files, parameterizes them through a new `kit.config.json`, fixes the 7 blockers so no core file points at a FoodVibe-only path, and ships a CI check that fails if a core file names a framework. `layer:cursor`, both stack packs, the `template` skeletons and the installer are explicitly out of scope — phases 3 and 4. FoodVibe's own workflow files are never edited in phases 1-4 (ADR 0015); all extraction writes land in a new repo outside FoodVibe.

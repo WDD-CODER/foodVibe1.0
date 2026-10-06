@@ -1,7 +1,9 @@
 # Plan 389 — Workflow Kit Validation Round 2 Fixes
 
-Status: active
+Status: closed
 Snapshot: 10fbc7e3
+
+> **CLOSED 2026-10-06 — merged; nothing left to do here.** Any unticked box below is history, not open work. Phase 6 (kit as a GitHub upstream, FoodVibe adoption, retiring patch mode) lives in plans 390 → 391 → 392.
 
 ## Problem Statement
 Round 2 of Worker/Planner workflow reports (2026-10-05: wt-1 after plan 385, the Planner folder, wt-3 across plans 375/369/388) plus the Planner's own todo-sync investigation:

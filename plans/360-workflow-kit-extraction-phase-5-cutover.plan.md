@@ -1,7 +1,9 @@
 # Plan 360 — Workflow Kit Extraction, Phase 5: FoodVibe Cutover
 
-Status: active
+Status: closed
 Snapshot: 7c264799
+
+> **CLOSED 2026-10-06 — merged; nothing left to do here.** Any unticked box below is history, not open work. Phase 6 (kit as a GitHub upstream, FoodVibe adoption, retiring patch mode) lives in plans 390 → 391 → 392.
 
 ## Problem Statement
 Phases 1-4 (plans 328, 329, 331, 334, merged) built the kit repo `../ai-workflow-kit` and proved it on an empty repo. Phase 5 (see `docs/brain/decisions/0015-workflow-kit-extraction.md`) flips ownership: the kit becomes the source of truth for every `core`, `layer:cursor` and `pack:*` workflow file, and `scripts/scope-guard.sh` blocks agent edits to those files inside FoodVibe. Workflow changes are then made in the kit and pulled in with `kit-sync`.
@@ -86,7 +88,7 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - [x] Guard change mirrored into the kit's `core/scripts/scope-guard.sh`; manifest row for `scripts/kit-owned.mjs` (`project`/`stay`).
 - [x] `docs/workflow-kit/manifest.md` records phase 5 and how to change a kit-owned file (edit the kit, then `kit-sync`).
 
-### Won't Have (this phase)
+### Won't Have (this phase) — now covered by plans 390–392
 - `.kit/install.json` baseline for FoodVibe and a real `kit-sync` run against FoodVibe.
 - Blocking Bash-level edits (`sed -i`); the hook only sees Edit/Write.
 - Publishing the kit repo to a remote.
@@ -111,4 +113,4 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - [x] E5b: Third Worker report (wt-3, plan 335): take-plan crashed on an empty "mark active" commit when the Planner had saved the plan as `Status: active` (the bug plan 330 targets) - now commits only when something is staged. Slot continuity: merging from a slot drops `--delete-branch` (it switched the checkout to `main`) and deletes the remote branch separately (`standards-git.md` → "Merging from a slot"); the slot's own servers keep running across plans and restart only after an npm install; `free-merged-slots` no longer stops them.
 - [x] E5c: Reports from wt-2 (plan 337) and wt-3 (plan 335), 2026-10-05: take-plan now checks, before changing anything, that the plan's branch is not taken by another slot, that the plan is not already done (all sub-tasks `[x]` on main), and plan order ("must run after plan N" / "until N is done" → refuse while N has open sub-tasks; `--ignore-order` overrides). A leftover merged branch is replaced, a leftover unmerged one reused. "released (merged)" now says "merged or unused". `/ship`: only the literal word `merge` merges — `Y`, `--yes`, "ship fast y" never do (ship.md, ship-regular.md, standards-git.md).
 - [x] E6: `todo-query.mjs sync --merged` also syncs any todo section whose plan file has more `[x]` than the section, so Workers' validated marks reach `.claude/todo.md` without the Planner re-marking (merged branches are usually deleted, so branch refs missed them).
-- [ ] E7: `/ship` the FoodVibe side; Dandan commits the kit repo.
+- [-] E7: `/ship` the FoodVibe side; Dandan commits the kit repo. — closed 2026-10-06: shipped in PR #247, kit committed. Won't Have items moved to plans 390–392.

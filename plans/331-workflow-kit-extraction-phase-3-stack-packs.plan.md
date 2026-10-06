@@ -1,7 +1,9 @@
 # Plan 331 — Workflow Kit Extraction, Phase 3: Stack Packs, Cursor Layer, Lessons
 
-Status: active
+Status: closed
 Snapshot: 16f7428f
+
+> **CLOSED 2026-10-06 — merged; nothing left to do here.** Any unticked box below is history, not open work. Phase 6 (kit as a GitHub upstream, FoodVibe adoption, retiring patch mode) lives in plans 390 → 391 → 392.
 
 ## Problem Statement
 Phase 2 (plan 329, merged) built the kit repo `../ai-workflow-kit` with the 77 `tier: core` files and a leak-check CI. Phase 3 (of the effort map in `docs/brain/decisions/0015-workflow-kit-extraction.md`) fills the rest of what is not core: the two stack packs (`pack:angular` 22 files, `pack:node-express` 1 file), the optional Cursor layer (`layer:cursor` 28 files, including dropping the raw Playwright MCP entry), and the brain lessons per `docs/workflow-kit/lessons-triage.md` (50 transfer, 21 generalize, 13 stay). It also settles the open item from phase 2: `standards-{{stack.name}}.md` breaks when the stack name is "Angular 19", so a 41st key `stack.standardsDoc` is added. Templates (17) and the installer are phase 4. FoodVibe's own workflow files are never edited (ADR 0015); all writes land in the kit repo plus FoodVibe-side tooling.
