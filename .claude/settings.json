@@ -3,7 +3,6 @@
     "PYTHONIOENCODING": "utf-8"
   },
   "permissions": {
-    "defaultMode": "plan",
     "allow": [
       "Bash(*)",
       "Write(C:/coding projects/Cursor/foodVibe1.0/**)",
