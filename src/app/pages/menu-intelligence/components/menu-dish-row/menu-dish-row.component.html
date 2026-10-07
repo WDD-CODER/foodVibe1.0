@@ -78,7 +78,7 @@
     }
   </div>
   @if (itemGroup().get('recipeId')?.value && isMetaExpanded()) {
-    <div class="dish-data">
+    <app-scroll-rail class="dish-data" snap="mandatory" arrows="auto">
       @for (fieldKey of activeFields(); track fieldKey) {
         <div
           class="dish-field"
@@ -111,6 +111,6 @@
         <span class="dish-field-label">{{ 'dish_food_cost_per_portion' | translatePipe }}</span>
         <span class="dish-field-value">₪{{ getFoodCostPerPortion() }}</span>
       </div>
-    </div>
+    </app-scroll-rail>
   }
 </div>

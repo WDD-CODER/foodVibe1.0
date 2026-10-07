@@ -93,10 +93,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: `app-scroll-rail` component plus its spec (`src/app/shared/scroll-rail/**`).
-- [ ] A2: Migrate the metadata jump-nav; delete the old logic (`metadata-manager.page.component.*`).
-- [ ] A3: Migrate tab chips; adjust the `.c-tab-chips` rules (`core/components/tab-chips/**`, `src/styles.scss`).
-- [ ] A4: Migrate the dish data strip (`menu-dish-row/**`).
+- [x] A1: `app-scroll-rail` component plus its spec (`src/app/shared/scroll-rail/**`).
+- [x] A2: Migrate the metadata jump-nav; delete the old logic (`metadata-manager.page.component.*`).
+- [x] A3: Migrate tab chips; adjust the `.c-tab-chips` rules (`core/components/tab-chips/**`, `src/styles.scss`).
+- [x] A4: Migrate the dish data strip (`menu-dish-row/**`).
 - [ ] A5: Build and run specs. Check at 360px and 1280px in RTL. Update the session-state file.
 
 ## Technical Considerations

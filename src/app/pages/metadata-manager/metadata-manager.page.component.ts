@@ -1,14 +1,10 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
-  HostListener,
   inject,
   OnInit,
   signal,
-  computed,
-  viewChild
+  computed
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
@@ -36,6 +32,7 @@ import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
+import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label' | 'course'
 
@@ -58,13 +55,14 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     TranslatePipe,
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
-    UserManagementComponent
+    UserManagementComponent,
+    ScrollRailComponent
   ],
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MetadataManagerComponent implements OnInit, AfterViewInit {
+export class MetadataManagerComponent implements OnInit {
   private unitRegistry = inject(UnitRegistryService)
   private metadataRegistry = inject(MetadataRegistryService)
   private productData = inject(ProductDataService)
@@ -91,10 +89,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     // isn't reached via a route resolver that guarantees them, so load here.
     void this.recipeData.ensureLoaded()
     void this.dishData.ensureLoaded()
-  }
-
-  ngAfterViewInit(): void {
-    requestAnimationFrame(() => this.updateJumpNavScrollState())
   }
 
   /** Returns false if not signed in (shows message and opens sign-in modal). */
@@ -139,8 +133,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   /** Which section (if any) has been brought to the front of the grid; null = natural page order. */
   protected readonly frontSectionId_ = signal<string | null>(null)
 
-  private readonly jumpNavEl = viewChild<ElementRef<HTMLElement>>('jumpNavEl')
-
   protected bringToFront(id: string): void {
     this.frontSectionId_.set(id)
   }
@@ -156,32 +148,6 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     if (this.isFront(id)) return 0
     const index = this.jumpSections.findIndex((s) => s.id === id)
     return index === -1 ? 1 : index + 1
-  }
-
-  /** Tablet-only prev/next arrows for the jump-nav row (mobile relies on touch swipe). */
-  protected scrollJumpNav(direction: 'prev' | 'next'): void {
-    const el = this.jumpNavEl()?.nativeElement
-    if (!el) return
-    const amount = Math.max(160, el.clientWidth * 0.6)
-    el.scrollBy({ left: direction === 'next' ? amount : -amount, behavior: 'smooth' })
-  }
-
-  /** Whether the jump-nav row has more content to scroll to on each side — same "hide the arrow
-   *  once there's nothing left that way" behavior as this app's other carousels. */
-  protected readonly canScrollNavPrev_ = signal(false)
-  protected readonly canScrollNavNext_ = signal(false)
-
-  @HostListener('window:resize')
-  protected updateJumpNavScrollState(): void {
-    const el = this.jumpNavEl()?.nativeElement
-    if (!el) return
-    const threshold = 1
-    const maxScroll = el.scrollWidth - el.clientWidth
-    // RTL-safe: modern browsers report scrollLeft as 0 at the start, going negative toward the
-    // end — abs() makes this direction-agnostic regardless of LTR/RTL scrollLeft sign convention.
-    const scrolled = Math.abs(el.scrollLeft)
-    this.canScrollNavPrev_.set(scrolled > threshold)
-    this.canScrollNavNext_.set(scrolled < maxScroll - threshold)
   }
 
   protected getLabelColor(key: string): string {

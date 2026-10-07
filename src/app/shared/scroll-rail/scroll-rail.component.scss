@@ -1,0 +1,141 @@
+// Plan 350 — shared horizontal scroll strip.
+:host {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  min-inline-size: 0;
+}
+
+.sr-scroller {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: var(--rail-justify, safe center);
+  gap: var(--rail-gap, 0.5rem);
+
+  min-inline-size: 0;
+  padding-block: var(--rail-padding-block, 0.125rem);
+
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+
+  // Fade only the edge(s) that can scroll (widths set from the component, physical sides).
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--sr-fade-left, 0px),
+    #000 calc(100% - var(--sr-fade-right, 0px)),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--sr-fade-left, 0px),
+    #000 calc(100% - var(--sr-fade-right, 0px)),
+    transparent 100%
+  );
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  &[data-snap='proximity'] {
+    scroll-snap-type: x proximity;
+  }
+
+  &[data-snap='mandatory'] {
+    scroll-snap-type: x mandatory;
+  }
+
+  ::ng-deep > * {
+    flex: 0 0 auto;
+    scroll-snap-align: center;
+  }
+}
+
+.sr-arrow {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 50%;
+
+  display: grid;
+  place-content: center;
+
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  padding: 0;
+
+  color: var(--color-text-main);
+  background: var(--bg-glass-strong);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: var(--blur-glass);
+  cursor: pointer;
+
+  transform: translateY(-50%);
+  transition:
+    opacity 0.15s ease,
+    visibility 0s linear 0s;
+
+  &:hover {
+    background: var(--bg-glass-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  // Hidden with visibility, so nothing shifts when an arrow appears.
+  &.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 0.15s ease,
+      visibility 0s linear 0.15s;
+  }
+}
+
+.sr-arrow--prev {
+  inset-inline-start: 0;
+}
+
+.sr-arrow--next {
+  inset-inline-end: 0;
+}
+
+// The app is RTL; swap the chevrons for an LTR context.
+.sr-icon-ltr {
+  display: none;
+}
+
+:host-context([dir='ltr']) {
+  .sr-icon-rtl {
+    display: none;
+  }
+
+  .sr-icon-ltr {
+    display: inline-flex;
+  }
+}
+
+// Browsers without `safe` alignment: start-align so an overflowing strip never hides its
+// first item off-screen.
+@supports not (justify-content: safe center) {
+  .sr-scroller {
+    justify-content: var(--rail-justify-fallback, flex-start);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sr-arrow,
+  .sr-arrow.is-hidden {
+    transition: none;
+  }
+}
