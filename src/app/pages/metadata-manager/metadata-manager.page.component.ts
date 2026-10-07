@@ -16,6 +16,7 @@ import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.servi
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { ProductDataService } from '@services/product-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { buildScopeTexts, type ScopeAction } from '@services/master-push.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
@@ -208,7 +209,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   async onAddLabel(prefillHebrew?: string): Promise<void> {
     const result = await this.labelCreationModal.open(prefillHebrew)
     if (!result?.key || !result?.hebrewLabel) return
-    const scope = await this.resolvePushScope('label')
+    const scope = await this.resolvePushScope('label', 'create')
     if (!scope) return
     try {
       this.translationService.updateDictionary(result.key, result.hebrewLabel, scope)
@@ -283,7 +284,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
       isNewDictionaryEntry = true
     }
 
-    const scope = await this.resolvePushScope(type)
+    const scope = await this.resolvePushScope(type, 'create')
     if (!scope) return
     if (isNewDictionaryEntry) {
       this.translationService.updateDictionary(englishKey, resolvedHebrew, scope)
@@ -349,7 +350,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
           { variant: 'danger' }
         )
         if (!confirmed) return
-        const scope = await this.resolvePushScope(type, item)
+        const scope = await this.resolvePushScope(type, 'delete', item)
         if (!scope) return
         try {
           const updatedCount =
@@ -413,7 +414,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     }
 
     // 3. EXECUTION
-    const scope = await this.resolvePushScope(type, item)
+    const scope = await this.resolvePushScope(type, 'delete', item)
     if (!scope) return
     try {
       switch (type) {
@@ -521,8 +522,13 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
    *  label are the only eligible types) always get 'me' silently — no prompt shown.
    *  Plan 321 Phase 3: editing an already-shared term `key` is always 'everyone' (admin only —
    *  there is no per-user copy any more); a non-admin gets the read-only message and null.
-   *  Returns null if the admin cancels out of the prompt. */
-  private async resolvePushScope(type: MetadataType, key?: string): Promise<'me' | 'everyone' | null> {
+   *  Returns null if the admin cancels out of the prompt. `action` only picks the prompt's
+   *  wording (plan 365). */
+  private async resolvePushScope(
+    type: MetadataType,
+    action: ScopeAction,
+    key?: string
+  ): Promise<'me' | 'everyone' | null> {
     const term = key === undefined ? undefined : this.taxonomy.find(KIND_BY_TYPE[type], key)
     if (term && this.taxonomy.isShared(term)) {
       if (this.taxonomy.canEdit(term)) return 'everyone'
@@ -532,14 +538,13 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     if (!this.isAdmin() || !(type === 'label' || type === 'course' || type === 'category' || type === 'allergen')) {
       return 'me'
     }
-    const scope = await this.confirmModal.openTernary(
-      this.translationService.translate('push_registry_master_message'),
-      {
-        headerKey: 'push_to_master_header',
-        saveLabel: 'push_to_master_save_me',
-        saveButtonLabel: 'push_to_master_save_everyone'
-      }
-    )
+    // Plan 365: wording follows the action (add → publish, rename/text fix → update, remove → delete).
+    const texts = buildScopeTexts(action, 'metadata', 1, (k) => this.translationService.translate(k))
+    const scope = await this.confirmModal.openTernary(texts.message, {
+      headerKey: texts.headerKey,
+      saveLabel: texts.meLabelKey,
+      saveButtonLabel: texts.everyoneLabelKey
+    })
     if (scope === 'cancel') return null
     return scope === 'save' ? 'everyone' : 'me'
   }
@@ -628,7 +633,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
         result.color === existing?.color &&
         resultTriggers === existingTriggers
       if (unchanged) return
-      const scope = await this.resolvePushScope('label', item)
+      const scope = await this.resolvePushScope('label', 'save', item)
       if (!scope) return
       if (result.key !== item) {
         const ok = await this.confirmAndCascadeRename('label', item, result.key, scope)
@@ -648,7 +653,7 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
       )
       if (!isTranslationKeyResult(result)) return
       if (result.englishKey === item && result.hebrewLabel === this.translationService.translate(item)) return
-      const scope = await this.resolvePushScope(type, item)
+      const scope = await this.resolvePushScope(type, 'save', item)
       if (!scope) return
       if (result.englishKey === item) {
         this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)
