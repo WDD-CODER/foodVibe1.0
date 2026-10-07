@@ -47,6 +47,7 @@ import { RestoreChoiceModalService } from '@services/restore-choice-modal.servic
 import { AuthModalService } from '@services/auth-modal.service'
 import { AppUpdateService } from '@services/app-update.service'
 import { UpdateBannerComponent } from '../core/components/update-banner/update-banner.component'
+import { KeyboardInsetService } from '@services/keyboard-inset.service'
 
 @Component({
   selector: 'app-root',
@@ -83,6 +84,7 @@ export class AppComponent {
   private readonly router = inject(Router)
   private readonly userService = inject(UserService)
   private readonly serverHeartbeat_ = inject(ServerHeartbeatService)
+  private readonly keyboardInset_ = inject(KeyboardInsetService)
   protected readonly loading_ = inject(LoadingService)
 
   // Open signals for @defer (when …) — services stay root singletons; only the modal component chunks defer.
@@ -107,6 +109,7 @@ export class AppComponent {
 
   constructor() {
     this.serverHeartbeat_.start()
+    this.keyboardInset_.start()
     this.router.events
       .pipe(
         filter(
