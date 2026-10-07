@@ -18,12 +18,13 @@ import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-d
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
 import { dedupeAndFilterOptions } from '../../core/utils/dedupe-select-options.util'
+import { InputClearComponent } from '../input-clear/input-clear.component'
 
 @Component({
   selector: 'app-custom-select',
   standalone: true,
   host: { tabIndex: '-1' },
-  imports: [CommonModule, TranslatePipe, ClickOutSideDirective, ScrollableDropdownComponent, LucideAngularModule],
+  imports: [CommonModule, TranslatePipe, ClickOutSideDirective, ScrollableDropdownComponent, LucideAngularModule, InputClearComponent],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomSelectComponent, multi: true }],
   templateUrl: './custom-select.component.html',
   styleUrl: './custom-select.component.scss',
@@ -173,6 +174,16 @@ export class CustomSelectComponent implements ControlValueAccessor {
     const currentIdx = this._value() ? filtered.findIndex((o) => o.value === this._value()) : -1
     this.highlightedIndex.set(currentIdx >= 0 ? currentIdx : filtered.length > 0 ? 0 : -1)
     setTimeout(() => this.inputRef?.nativeElement?.focus(), 0)
+  }
+
+  /** Search clear (X, type-to-filter only): empty the filter, keep the list open with every option (plan 364). */
+  protected onClearSearch(): void {
+    this.clearCloseTimeout()
+    this.searchQuery_.set('')
+    const filtered = this.filteredOptions_()
+    const currentIdx = this._value() ? filtered.findIndex((o) => o.value === this._value()) : -1
+    this.highlightedIndex.set(currentIdx >= 0 ? currentIdx : filtered.length > 0 ? 0 : -1)
+    this.inputRef?.nativeElement?.focus()
   }
 
   protected onInputInput(value: string): void {

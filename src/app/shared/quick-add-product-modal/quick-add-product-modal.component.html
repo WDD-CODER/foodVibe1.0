@@ -31,6 +31,10 @@
                   (ngModelChange)="name.set($event)"
                   name="nameHebrew"
                   (keydown.enter)="advanceFocus(baseUnitRef()?.nativeElement); $event.preventDefault()"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
                 />
                 <button
                   type="button"

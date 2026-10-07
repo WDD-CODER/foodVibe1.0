@@ -163,17 +163,28 @@
             </button>
             @if (eventTypeDropdownOpen_()) {
             <div class="event-type-dropdown">
-              <input
-                id="menu-focus-event_type_search"
-                type="text"
-                class="event-type-search"
-                autocomplete="off"
-                [ngModel]="eventTypeSearch_()"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="eventTypeSearch_.set($event); eventTypeHighlightedIndex_.set(0)"
-                [placeholder]="'search' | translatePipe"
-                (keydown)="onEventTypeSearchKeydown($event)"
-              />
+              <div class="c-picker-search-row">
+                <input
+                  #eventTypeSearchInput
+                  id="menu-focus-event_type_search"
+                  type="text"
+                  class="event-type-search"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  [ngModel]="eventTypeSearch_()"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="eventTypeSearch_.set($event); eventTypeHighlightedIndex_.set(0)"
+                  [placeholder]="'search' | translatePipe"
+                  (keydown)="onEventTypeSearchKeydown($event)"
+                />
+                <app-input-clear
+                  [visible]="!!eventTypeSearch_()"
+                  (clear)="eventTypeSearch_.set(''); eventTypeHighlightedIndex_.set(0); eventTypeSearchInput.focus()"
+                  (click)="$event.stopPropagation()"
+                />
+              </div>
               <app-scrollable-dropdown [maxHeight]="200">
                 @for (t of getFilteredEventTypes(); track t; let i = $index) {
                 <button
@@ -305,16 +316,27 @@
             <div class="section-header">
               @if (sectionSearchOpen_() === sectionIndex) {
               <div class="section-search-wrap" (clickOutside)="closeSectionSearch()">
-                <input
-                  type="text"
-                  class="section-search-input"
-                  autocomplete="off"
-                  [ngModel]="getSectionSearchQuery(sectionIndex)"
-                  [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="onSectionSearchQueryChange(sectionIndex, $event)"
-                  [placeholder]="'menu_search_category' | translatePipe"
-                  (keydown)="onSectionSearchKeydown(sectionIndex, $event)"
-                />
+                <div class="c-picker-search-row">
+                  <input
+                    #sectionSearchInput
+                    type="text"
+                    class="section-search-input"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    [ngModel]="getSectionSearchQuery(sectionIndex)"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="onSectionSearchQueryChange(sectionIndex, $event)"
+                    [placeholder]="'menu_search_category' | translatePipe"
+                    (keydown)="onSectionSearchKeydown(sectionIndex, $event)"
+                  />
+                  <app-input-clear
+                    [visible]="!!getSectionSearchQuery(sectionIndex)"
+                    (clear)="onSectionSearchQueryChange(sectionIndex, ''); sectionSearchInput.focus()"
+                    (click)="$event.stopPropagation()"
+                  />
+                </div>
                 <app-scrollable-dropdown [maxHeight]="200">
                   @for (cat of getFilteredSectionCategories(sectionIndex); track cat; let ci = $index) {
                   <button

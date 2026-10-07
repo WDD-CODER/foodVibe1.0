@@ -16,6 +16,10 @@
           [ngModel]="name()"
           (ngModelChange)="name.set($event)"
           (keydown.enter)="$event.preventDefault(); priceInput.focus()"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
         />
         @if (nameError_()) {
           <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>

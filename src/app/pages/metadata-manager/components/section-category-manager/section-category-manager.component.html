@@ -11,6 +11,10 @@
       type="text"
       [placeholder]="'metadata_section_placeholder' | translatePipe"
       (keyup.enter)="onAdd(newInput.value, newInput)"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
     />
     <button
       type="button"
@@ -36,6 +40,10 @@
                 (blur)="onRenameBlur(name, $any($event.target).value)"
                 (keydown.enter)="$any($event.target).blur()"
                 autofocus
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
               />
             } @else {
               <span class="item-label" (dblclick)="onStartRename(name)">{{ name | translatePipe }}</span>

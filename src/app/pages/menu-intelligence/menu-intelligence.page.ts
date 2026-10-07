@@ -53,6 +53,7 @@ import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.ser
 import { MenuAiFlowService } from './services/menu-ai-flow.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 type MenuItemForm = {
   recipeId: string
@@ -83,7 +84,8 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
     CustomSelectComponent,
     ExportPreviewComponent,
     MenuDishRowComponent,
-    VenueLinkChipComponent
+    VenueLinkChipComponent,
+    InputClearComponent
   ],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',

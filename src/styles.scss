@@ -2104,3 +2104,20 @@ textarea.c-input {
     margin-inline-start: auto;
   }
 }
+
+/* ---- Engine: Picker search row (plan 364) — a dropdown picker's search input with its
+   `<app-input-clear>` (X) at the inline-end, on one line. ---- */
+.c-picker-search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  > input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  > app-input-clear {
+    flex-shrink: 0;
+  }
+}

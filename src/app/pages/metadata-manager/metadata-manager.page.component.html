@@ -154,6 +154,10 @@
                     [readOnly]="!canEditTerm('menuType', def.key)"
                     (blur)="onMenuTypeNameBlur(def.key, $any($event.target).value)"
                     (keydown.enter)="$any($event.target).blur()"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
                   />
                   <div class="field-pills">
                     @for (f of def.fields; track f) {
@@ -239,6 +243,10 @@
         type="text"
         [placeholder]="('add' | translatePipe) + ' ' + (title | translatePipe) + '...'"
         (keyup.enter)="onAddMetadata(newInput.value, type, newInput)"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
       />
 
       <button

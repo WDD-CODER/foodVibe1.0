@@ -16,12 +16,16 @@ import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-dropdown.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { InputClearComponent } from '../input-clear/input-clear.component'
+
+/** Per-instance id prefix, so two dropdowns on one page never share option / input ids (plan 364). */
+let nextChipSearchDropdownId = 0
 
 @Component({
   selector: 'app-chip-search-dropdown',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent, TranslatePipe],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent, TranslatePipe, InputClearComponent],
   templateUrl: './chip-search-dropdown.component.html',
   styleUrl: './chip-search-dropdown.component.scss'
 })
@@ -48,6 +52,7 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
   @ViewChild('searchInput')     private searchInputRef?: ElementRef<HTMLInputElement>
 
   // ── Internal state ───────────────────────────────────────────────────────────
+  protected readonly instanceId = `csd-${++nextChipSearchDropdownId}`
   protected searchQuery_    = signal('')
   protected showDropdown_   = signal(false)
   protected highlightIndex_ = signal(-1)
@@ -104,6 +109,14 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
     this.showDropdown_.set(false)
     this.searchQuery_.set('')
     this.highlightIndex_.set(-1)
+  }
+
+  /** Search clear (X): empty the query, keep the list open with every option, refocus (plan 364). */
+  protected onClearSearch(): void {
+    this.searchQuery_.set('')
+    this.highlightIndex_.set(-1)
+    this.showDropdown_.set(true)
+    this.searchInputRef?.nativeElement?.focus()
   }
 
   protected onBoxClick(ev: MouseEvent): void {

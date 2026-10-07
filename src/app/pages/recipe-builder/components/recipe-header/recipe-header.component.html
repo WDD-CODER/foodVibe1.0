@@ -38,6 +38,10 @@
           [class.has-error]="form().get('nameHebrew')?.invalid && form().get('nameHebrew')?.touched"
           [class.c-input--invalid]="validationErrors_()['nameHebrew']"
           [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
         />
         @if (form().get('nameHebrew')?.errors?.['duplicateName'] && form().get('nameHebrew')?.touched) {
           <span class="name-error-msg">{{

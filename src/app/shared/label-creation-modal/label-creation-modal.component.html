@@ -16,6 +16,10 @@
             [ngModel]="modal.hebrewLabel_()"
             (ngModelChange)="modal.hebrewLabel_.set($event)"
             [placeholder]="'label_name_example_placeholder' | translatePipe"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
           />
         </div>
         <div class="c-input-stack full-width">
@@ -26,6 +30,10 @@
             (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
             placeholder="dairy"
             (keydown.enter)="save()"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
           />
           @if (validationError_()) {
             <span class="label-creation-validation-error">{{ validationError_() }}</span>

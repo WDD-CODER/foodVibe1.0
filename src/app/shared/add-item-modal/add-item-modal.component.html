@@ -11,7 +11,11 @@
                [ngModel]="value_()"
                (ngModelChange)="value_.set($event)"
                [placeholder]="(cfg.placeholder || cfg.label) | translatePipe"
-               (keydown.enter)="save()" />
+               (keydown.enter)="save()"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false" />
       </div>
     </div>
 

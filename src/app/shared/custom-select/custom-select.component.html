@@ -17,8 +17,15 @@
         (keydown)="onInputKeydown($event)"
         [attr.aria-expanded]="open()"
         aria-haspopup="listbox"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
         [attr.aria-label]="placeholder() | translatePipe"
         [placeholder]="placeholder() | translatePipe" />
+      @if (variant() !== 'chip') {
+        <app-input-clear [visible]="open() && !!searchQuery_()" (clear)="onClearSearch()" (click)="$event.stopPropagation()" />
+      }
       <lucide-icon name="chevron-down" [size]="variant() === 'chip' ? 10 : 14"></lucide-icon>
     </div>
   } @else {
