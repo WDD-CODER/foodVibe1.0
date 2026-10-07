@@ -1224,11 +1224,12 @@ textarea.c-input {
 
     @media (max-width: $break-phone-max) {
       inset-inline: 0;
-      inset-block: auto 0;
+      // Plan 347: sit above the on-screen keyboard (iOS overlays it; --kb-inset is 0 elsewhere).
+      inset-block: auto var(--kb-inset, 0px);
       z-index: 1001;
 
       max-width: none;
-      max-height: 86dvh;
+      max-height: calc(86dvh - var(--kb-inset, 0px));
       margin-inline: 0;
 
       border-end-end-radius: 0;
@@ -2166,5 +2167,26 @@ textarea.c-input {
     border: 0;
     background: transparent;
     color: inherit;
+  }
+}
+
+/* ---- Keyboard open (plan 347) — KeyboardInsetService toggles body.kb-open and sets
+   --kb-inset while the on-screen keyboard covers the viewport. Fixed bottom chrome hides
+   (visibility only, so nothing reflows) and centered modals shrink above the keyboard. ---- */
+body.kb-open {
+  .bottom-nav,
+  .hero-fab-container,
+  .approve-stamp,
+  .user-msg {
+    visibility: hidden;
+  }
+
+  .app-content {
+    padding-block-end: 0;
+  }
+
+  .c-modal-card {
+    max-height: calc(100dvh - 4rem - var(--kb-inset, 0px));
+    overflow-y: auto;
   }
 }

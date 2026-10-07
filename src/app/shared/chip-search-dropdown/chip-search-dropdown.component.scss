@@ -38,7 +38,7 @@
   /* Plan 282 — category dropdown max-height on mobile */
   @media (max-width: 620px) {
     app-scrollable-dropdown {
-      max-block-size: 40vh;
+      max-block-size: 40dvh;
       overflow-y: auto;
     }
   }
