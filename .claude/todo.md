@@ -122,14 +122,6 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
-### Plan 341 — Suppliers: add/edit as a page like venues; center the venues inner nav (`plans/341-suppliers-add-edit-as-page-center-venues-nav.plan.md`)
-
-- [ ] A1: `SuppliersPage` back bar plus centering styles; venues centering (`src/app/pages/suppliers/suppliers.page.*`, `src/app/pages/venues/venues.page.scss`, `venue-form.component.scss`)
-- [ ] A2: Route add and edit to pages; remove inline edit from supplier-list (`supplier-list.component.*`)
-- [ ] A3: Align the supplier-form full-page markup and styles with venue-form (`supplier-form.component.*`)
-- [ ] A4: Delete the supplier modal, its service and mount; grep for leftovers (`shared/supplier-modal/**`, `supplier-modal.service*`, `app.component.*`)
-- [ ] A5: Build, specs, e2e grep for supplier-modal. Update the session-state file.
-
 ### Plan 342 — Form checkboxes → toggle chips (app-wide) (`plans/342-form-checkboxes-to-toggle-chips-app-wide.plan.md`)
 
 - [ ] A1: Supplier form delivery days (both branches) → chip group (`supplier-form.component.*`)
