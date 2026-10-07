@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, signal, ElementRef, inject } from '@angular/core'
+import { Component, input, ChangeDetectionStrategy, signal, ElementRef, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionPer100g } from '@models/product.model'
@@ -43,7 +43,7 @@ const MACRO_COLORS: Record<string, string> = {
 export class NutritionBadgeComponent {
   private readonly elRef_ = inject(ElementRef)
 
-  @Input() nutrition: NutritionPer100g | null | undefined
+  readonly nutrition = input<NutritionPer100g | null | undefined>()
   showTooltip = false
   isBelow_ = signal(false)
   tooltipStyle_ = signal<Record<string, string>>({})
@@ -105,7 +105,7 @@ export class NutritionBadgeComponent {
   }
 
   get dominantColor(): string | null {
-    const n = this.nutrition
+    const n = this.nutrition()
     if (!n) return null
     const scores: Record<string, number> = {
       protein: (n.proteinG ?? 0) * 4,
@@ -120,7 +120,7 @@ export class NutritionBadgeComponent {
   }
 
   get macroSegments(): MacroSegment[] {
-    const n = this.nutrition
+    const n = this.nutrition()
     if (!n) return []
     const vals: Record<string, number> = {
       protein: (n.proteinG ?? 0) * 4,
@@ -144,7 +144,7 @@ export class NutritionBadgeComponent {
   }
 
   get tooltipRows(): TooltipRow[] {
-    const n = this.nutrition
+    const n = this.nutrition()
     if (!n) return []
     const candidates: (TooltipRow | null)[] = [
       n.energyKcal != null
