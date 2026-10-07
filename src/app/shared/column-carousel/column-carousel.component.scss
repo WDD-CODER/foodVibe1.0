@@ -119,6 +119,7 @@ $cc-break: 768px;
     gap: 0.1875rem;
 
     min-width: 0;
+    padding-inline: 1.5rem;
     outline: none;
 
     &:focus-visible {
@@ -158,11 +159,14 @@ $cc-break: 768px;
     }
   }
 
-  // Floating round arrows over the header's top edge — the label keeps the full width.
+  // Floating round arrows over the label's edges, vertically centred inside the cell — the
+  // table's top edge clips anything that sticks out above the header row (.table-area
+  // overflow), so they stay within the cell; the label reserves room for them.
   .cc-arrow--float {
     position: absolute;
     z-index: 2;
-    inset-block-start: -0.5rem;
+    inset-block-start: 50%;
+    transform: translateY(-50%);
 
     inline-size: 1.75rem;
     block-size: 1.75rem;
@@ -174,11 +178,11 @@ $cc-break: 768px;
     backdrop-filter: var(--blur-glass);
 
     &.cc-arrow--prev {
-      inset-inline-start: -0.375rem;
+      inset-inline-start: 0;
     }
 
     &.cc-arrow--next {
-      inset-inline-end: -0.375rem;
+      inset-inline-end: 0;
     }
   }
 
