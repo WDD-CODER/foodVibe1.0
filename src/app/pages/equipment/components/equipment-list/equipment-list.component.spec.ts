@@ -103,6 +103,6 @@ describe('EquipmentListComponent', () => {
 
   it('should show list shell and title', () => {
     expect(fixture.nativeElement.querySelector('app-list-shell')).toBeTruthy()
-    expect(fixture.nativeElement.querySelector('.page-title')).toBeTruthy()
+    expect(fixture.nativeElement.querySelector('app-page-header h1.ph-title')).toBeTruthy()
   })
 })

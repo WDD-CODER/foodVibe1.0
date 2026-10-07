@@ -1,0 +1,31 @@
+<header class="ph">
+  <div class="ph-start">
+    @if (backLink(); as link) {
+      <a class="ph-back" [routerLink]="link" [attr.aria-label]="backLabelKey() | translatePipe">
+        <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
+      </a>
+    } @else if (showBack()) {
+      <button type="button" class="ph-back" (click)="back.emit()" [attr.aria-label]="backLabelKey() | translatePipe">
+        <lucide-icon name="arrow-right" [size]="18"></lucide-icon>
+      </button>
+    }
+    <ng-content select="[header-back]"></ng-content>
+    <h1 class="ph-title">
+      @if (titleKey(); as key) {
+        {{ key | translatePipe }}
+      }
+      <ng-content select="[header-title]"></ng-content>
+    </h1>
+    @if (count() !== null) {
+      <!-- Re-created per value so the pop animation replays on every change (P1). -->
+      @for (c of [count()]; track c) {
+        <span class="ph-count" [attr.aria-label]="countLabel()" [attr.title]="countLabel()">{{ c }}</span>
+      }
+    }
+  </div>
+  <div class="ph-search"><ng-content select="[header-search]"></ng-content></div>
+  <div class="ph-end">
+    <ng-content select="[header-leading]"></ng-content>
+    <ng-content select="[header-actions]"></ng-content>
+  </div>
+</header>

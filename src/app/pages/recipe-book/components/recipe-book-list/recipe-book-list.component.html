@@ -11,7 +11,7 @@
   [resultCount]="filteredRecipes_().length"
   [resultTotal]="kitchenState.recipes_().length"
 >
-  <h2 shell-title class="page-title">{{ 'recipe_book' | translatePipe }}</h2>
+  <ng-container shell-title>{{ 'recipe_book' | translatePipe }}</ng-container>
 
   <ng-container shell-search>
     <label class="visually-hidden" for="recipe-search">{{ 'search' | translatePipe }}</label>

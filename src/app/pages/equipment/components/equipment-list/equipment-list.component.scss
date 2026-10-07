@@ -3,18 +3,6 @@
     display: block;
   }
 
-  .page-title {
-    flex-shrink: 0;
-
-    margin: 0;
-
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    color: var(--color-text-main);
-
-    letter-spacing: var(--tracking-tight);
-  }
-
   /* Consumable status chip — matches Equipment.dc.html:348-350,676-679 */
   .consumable-chip {
     display: inline-flex;

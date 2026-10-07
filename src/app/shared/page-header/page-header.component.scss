@@ -1,0 +1,142 @@
+// Plan 352 — shared page header. Container queries on the header itself (not the viewport).
+:host {
+  display: block;
+  container-type: inline-size;
+  container-name: page-header;
+}
+
+.ph {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
+  grid-template-areas: 'start search end';
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+
+.ph-start {
+  grid-area: start;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  min-width: 0;
+}
+
+.ph-title {
+  min-width: 0;
+  margin: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-tight);
+  color: var(--color-text-main);
+}
+
+@keyframes ph-count-pop {
+  from {
+    transform: scale(0.85);
+    opacity: 0.4;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+// Uses the .c-chip tokens (primary-soft pill).
+.ph-count {
+  flex-shrink: 0;
+
+  padding: 0.125rem 0.5rem;
+
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--color-primary-hover);
+
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-full);
+
+  animation: ph-count-pop 180ms ease-out;
+}
+
+.ph-back {
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
+
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  padding: 0;
+
+  color: var(--color-primary);
+  background: var(--bg-glass);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-primary-hover);
+    border-color: var(--color-primary);
+  }
+}
+
+.ph-search {
+  grid-area: search;
+  justify-self: center;
+
+  inline-size: 100%;
+  max-inline-size: 24rem;
+  min-width: 0;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.ph-end {
+  grid-area: end;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+// Narrow: title row + (if present) full-width search row. At most 2 rows.
+@container page-header (max-width: 640px) {
+  .ph {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'start end'
+      'search search';
+  }
+
+  .ph-search {
+    max-inline-size: none;
+  }
+
+  .ph-title {
+    font-size: var(--fs-lg);
+  }
+
+  .ph-back,
+  .ph-end ::ng-deep > * {
+    min-block-size: 44px;
+  }
+
+  .ph-back {
+    inline-size: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ph-count {
+    animation: none;
+  }
+}

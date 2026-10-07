@@ -7,9 +7,7 @@
   [resultCount]="filteredEquipment_().length"
   [resultTotal]="equipmentData.allEquipment_().length"
 >
-  <h2 shell-title class="page-title">
-    {{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}
-  </h2>
+  <ng-container shell-title>{{ isUnderInventory ? ('logistics' | translatePipe) : ('equipment_list' | translatePipe) }}</ng-container>
 
   <ng-container shell-search>
     <label class="visually-hidden" for="equipment-search">{{ 'search' | translatePipe }}</label>
