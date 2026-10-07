@@ -1,4 +1,3 @@
-
 /* drag | name | unit | quantity | percent | cost | actions */
 $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 1rem;
 
@@ -17,7 +16,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
-  &:active { cursor: grabbing; }
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .cdk-drag-preview {
@@ -147,7 +148,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
 
     &:hover:not(:disabled) {
       background: var(--bg-glass-hover);
@@ -286,7 +289,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     transform: scale(1.15);
@@ -307,7 +312,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
   animation: incomplete-pulse 2s ease-in-out infinite;
 
   &:hover {
@@ -335,7 +342,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
   animation: warning-pulse 3s ease-in-out infinite;
 
   &:hover {
@@ -344,8 +353,13 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 }
 
 @keyframes incomplete-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .warning-badge {
@@ -361,7 +375,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
   animation: warning-pulse 3s ease-in-out infinite;
 
   &:hover {
@@ -370,10 +386,14 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
-
 @keyframes warning-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .clear-btn {
@@ -408,7 +428,10 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     color: var(--color-primary);
@@ -431,7 +454,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 // Plan 348: the single narrow layout — one card per ingredient. Threshold 700px so phones in
 // landscape (container ~700px) get cards too. (The old ≤640px media block that forced a cramped
 // single row is gone; it used to override this.)
-// Card (RTL): row 1 = name/search, full width; row 2 = amount · unit · cost · actions.
+// Card (RTL): row 1 = name/search + delete; row 2 = amount · unit · cost.
 @container ingredients (max-width: 700px) {
   .ingredients-grid-header {
     display: none;
@@ -439,7 +462,7 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 
   .ingredient-grid-row {
     display: grid;
-    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
     gap: 0.5rem;
     padding: 0.75rem;
@@ -454,13 +477,26 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     }
 
     .col-name {
-      grid-column: 1 / -1;
+      grid-column: 1 / 4;
       grid-row: 1;
       min-inline-size: 0;
 
       .grid-input {
         inline-size: 100%;
         min-inline-size: 0;
+      }
+    }
+
+    .col-actions {
+      grid-column: 4;
+      grid-row: 1;
+      justify-content: center;
+
+      .c-icon-btn {
+        width: 2.75rem;
+        height: 2.75rem;
+
+        opacity: 1;
       }
     }
 
@@ -477,37 +513,30 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     }
 
     .col-cost {
-      grid-column: 3;
+      grid-column: 3 / -1;
       grid-row: 2;
       min-inline-size: 0;
     }
 
-    .col-actions {
-      grid-column: 4;
-      grid-row: 2;
-      justify-content: center;
-
-      .c-icon-btn {
-        opacity: 1;
-        width: 2.75rem;
-        height: 2.75rem;
-      }
-    }
-
-    // Stepper buttons always visible in a card (≥44px targets), input flexes between them.
+    // Compact stepper buttons so the amount itself gets the room; the input flexes between them.
     .quantity-controls {
+      gap: 0.125rem;
+
       inline-size: 100%;
     }
 
     .quantity-controls .qty-btn {
       flex-shrink: 0;
-      inline-size: 2.75rem;
-      block-size: 2.75rem;
+
+      inline-size: 1.75rem;
+      block-size: 1.75rem;
     }
 
     .quantity-controls .qty-input {
       inline-size: 100%;
       min-inline-size: 0;
+
+      padding-inline: 0.125rem;
     }
   }
 

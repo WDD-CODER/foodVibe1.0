@@ -385,50 +385,140 @@ $prep-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) min
 
 /* Recipe builder unified tablet/mobile breakpoint */
 @media (max-width: 768px) {
+  // Preparation steps: row 1 = drag + number + instruction (full width);
+  // row 2 = the step buttons only, compact, aligned to the inline end.
+  .workflow-grid .grid-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 0.25rem;
+
+    margin-block: 0.25rem;
+    margin-inline: 0.25rem;
+    padding-block: 0.375rem;
+    padding-inline: 0.5rem;
+
+    &.timer-open {
+      grid-template-rows: auto auto auto;
+    }
+
+    .col-drag-id {
+      grid-column: 1;
+      grid-row: 1;
+      gap: 0.25rem;
+    }
+
+    .col-instruction {
+      grid-column: 2;
+      grid-row: 1;
+      min-inline-size: 0;
+    }
+
+    .col-step-actions {
+      grid-column: 1 / -1;
+      grid-row: 2;
+      justify-content: flex-end;
+      gap: 0.125rem;
+    }
+
+    .timer-toggle-btn,
+    .col-step-actions .step-delete-btn {
+      inline-size: 1.75rem;
+      block-size: 1.75rem;
+
+      opacity: 1;
+    }
+
+    .col-instruction {
+      align-self: center;
+    }
+
+    .workflow-textarea {
+      text-align: center;
+
+      padding-block: 0.25rem;
+      padding-inline: 0.25rem;
+    }
+  }
+
   .prep-flat-grid .grid-header.prep-grid-header {
     display: none;
   }
 
+  // Mise-en-place: row 1 = drag + name (wraps and grows like the step textarea) + delete;
+  // row 2 = category · quantity · unit, each compact so they fit.
   .prep-flat-grid .prep-grid-row {
     display: grid;
-    // 2×2 grid: row 1 = name | category, row 2 = unit | qty+actions
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: auto minmax(0, 1.2fr) auto minmax(0, 1fr) auto;
     grid-template-rows: auto auto;
-    gap: 0.5rem;
-    padding-inline: 0.75rem;
-    padding-block: 0.75rem;
+    gap: 0.25rem;
+
     min-height: auto;
 
+    padding-block: 0.375rem;
+    padding-inline: 0.5rem;
+
     .col-drag {
-      display: none;
+      grid-column: 1;
+      grid-row: 1;
     }
 
-    // Row 1: product search (left 50%) | category select (right 50%)
     .col-prep-name {
-      grid-column: 1;
+      grid-column: 2 / 5;
       grid-row: 1;
-      min-width: 0;
-    }
-    .col-prep-category {
-      grid-column: 2;
-      grid-row: 1;
-      min-width: 0;
+      min-inline-size: 0;
     }
 
-    // Row 2: unit select (left 50%) | quantity (right 50%)
-    .col-prep-unit {
-      grid-column: 1;
+    .col-prep-category {
+      grid-column: 1 / 3;
       grid-row: 2;
-      min-width: 0;
+      min-inline-size: 0;
     }
+
     .col-prep-qty {
-      grid-column: 2;
+      grid-column: 3;
       grid-row: 2;
-      min-width: 0;
+    }
+
+    .col-prep-unit {
+      grid-column: 4 / -1;
+      grid-row: 2;
+      min-inline-size: 0;
     }
 
     .col-prep-actions {
-      display: none;
+      grid-column: 5;
+      grid-row: 1;
+      align-self: center;
+    }
+
+    .col-prep-actions .c-icon-btn {
+      inline-size: 1.75rem;
+      block-size: 1.75rem;
+
+      opacity: 1;
+    }
+
+    .grid-select {
+      font-size: 0.8125rem;
+
+      padding: 0.25rem;
+    }
+
+    .selected-item-display {
+      min-inline-size: 0;
+
+      padding-block: 0.25rem;
+      padding-inline: 0.5rem;
+
+      .item-text {
+        flex: 1;
+        min-inline-size: 0;
+
+        font-size: 0.95rem;
+        line-height: 1.4;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
     }
   }
 }
