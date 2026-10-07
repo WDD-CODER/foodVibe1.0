@@ -199,3 +199,13 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** The error looked like an expired or missing refresh cookie, and adding `withCredentials` to login was a real fix too, but on its own it changed nothing: the request failed in DI before reaching the network.
 
 **What to do instead:** Never start an HTTP request synchronously in a constructor of a service that an interceptor injects. Defer it (`queueMicrotask`) or run it from an `APP_INITIALIZER`. When a "session lost on reload" bug shows up, look for NG0200 in the console first.
+
+---
+
+## A `backdrop-filter` card traps `position: fixed` popovers — use the Popover API's top layer
+
+**What hurt:** On phones the list ⋮ menu (`app-row-actions-menu`) opened about 4,000px down, off-screen. `list-shell`'s `.table-area` (and every glass card, e.g. `.manager-card`) has `backdrop-filter`, which makes it the containing block for `position: fixed` descendants, so the viewport coordinates the menu computed were applied relative to the card (fixed in plan 340).
+
+**Why the obvious fix is wrong:** Moving the menu outside the card works for one page but not for menus that live inside list rows, and removing `backdrop-filter` breaks the glass design. Any future `transform`/`filter`/`will-change` ancestor brings the bug back.
+
+**What to do instead:** Render floating menus with `popover="manual"` + `showPopover()` / `hidePopover()` (see `row-actions-menu.component.ts`). The top layer ignores ancestor containing blocks. Reset the UA `[popover]` box (`inset: auto; margin: 0; overflow: visible; color: inherit`). For click-away, listen on `document` in the **capture** phase — row actions call `stopPropagation()`, which hides a bubbling click.
