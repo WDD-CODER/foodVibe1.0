@@ -39,6 +39,11 @@ src/app/core/services/supplier-modal.service.ts
 src/app/core/services/supplier-modal.service.spec.ts
 src/app/appRoot/app.component.html
 src/app/appRoot/app.component.ts
+src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
+src/app/pages/inventory/components/product-form/product-form.component.scss
+src/app/shared/breadcrumbs.md
+src/app/core/services/breadcrumbs.md
 ```
 
 ## Read Scope
@@ -66,16 +71,16 @@ touching any milestone.
 
 ### Must Have (P0)
 
-- [ ] `onAdd()` and the hero-fab "add supplier" action → `router.navigate(['/suppliers/add'])`, keeping the `requireAuth()` guard.
-- [ ] Row edit → `router.navigate(['/suppliers/edit', item._id])`. Remove the inline edit (`editingId_`, `editForm_`, `hydrateEditForm`, `saveCurrentInlineEdit`, its template block and styles) per Critical Question 1 default.
-- [ ] `SuppliersPage` gets a `.suppliers-nav` back bar on non-list routes, cloned from `VenuesPage`: `isListRoute_`, `goBackToList()`, `navRoutes_` with `add_supplier`. Its `:host` padding matches venues.
-- [ ] `SupplierFormComponent` full-page branch: structure and classes mirror venue-form (`.form-header`, `.form-section`, `.form-group`, `.c-form-actions`). Save and cancel go back to `/suppliers/list` (already at `:186-211`).
-- [ ] Delete `SupplierModalComponent`, `SupplierModalService` (plus specs) and the `<app-supplier-modal>` `@defer` block in `app.component.html`. Drop the `embeddedInDashboard` branch from `SupplierFormComponent` if nothing else uses it (grep first).
-- [ ] Centering: `.venues-nav` and `.suppliers-nav` get `justify-content:center`; `.venue-form-container` and `.supplier-form-container` get `margin-inline:auto`. Both containers use the same `max-width` (35rem).
+- [x] `onAdd()` and the hero-fab "add supplier" action → `router.navigate(['/suppliers/add'])`, keeping the `requireAuth()` guard.
+- [x] Row edit → `router.navigate(['/suppliers/edit', item._id])`. Remove the inline edit (`editingId_`, `editForm_`, `hydrateEditForm`, `saveCurrentInlineEdit`, its template block and styles) per Critical Question 1 default.
+- [x] `SuppliersPage` gets a `.suppliers-nav` back bar on non-list routes, cloned from `VenuesPage`: `isListRoute_`, `goBackToList()`, `navRoutes_` with `add_supplier`. Its `:host` padding matches venues.
+- [x] `SupplierFormComponent` full-page branch: structure and classes mirror venue-form (`.form-header`, `.form-section`, `.form-group`, `.c-form-actions`). Save and cancel go back to `/suppliers/list` (already at `:186-211`).
+- [x] Delete `SupplierModalComponent`, `SupplierModalService` (plus specs) and the `<app-supplier-modal>` `@defer` block in `app.component.html`. Drop the `embeddedInDashboard` branch from `SupplierFormComponent` if nothing else uses it (grep first).
+- [x] Centering: `.venues-nav` and `.suppliers-nav` get `justify-content:center`; `.venue-form-container` and `.supplier-form-container` get `margin-inline:auto`. Both containers use the same `max-width` (35rem).
 
 ### Should Have (P1)
 
-- [ ] The `pendingChangesGuard` (as used by product-form) on `suppliers/edit/:id` and `suppliers/add`, if the form exposes dirty state. That's a route addition to `app.routes.ts` (append-only: adding `canDeactivate` to the existing entry needs escalation; skip if not trivial).
+- [ ] (skipped — needs a non-append edit of the existing suppliers routes; not trivial) The `pendingChangesGuard` (as used by product-form) on `suppliers/edit/:id` and `suppliers/add`, if the form exposes dirty state. That's a route addition to `app.routes.ts` (append-only: adding `canDeactivate` to the existing entry needs escalation; skip if not trivial).
 
 ### Nice to Have (P2)
 
@@ -89,11 +94,14 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: `SuppliersPage` back bar plus centering styles; venues centering (`src/app/pages/suppliers/suppliers.page.*`, `src/app/pages/venues/venues.page.scss`, `venue-form.component.scss`)
-- [ ] A2: Route add and edit to pages; remove inline edit from supplier-list (`supplier-list.component.*`)
-- [ ] A3: Align the supplier-form full-page markup and styles with venue-form (`supplier-form.component.*`)
-- [ ] A4: Delete the supplier modal, its service and mount; grep for leftovers (`shared/supplier-modal/**`, `supplier-modal.service*`, `app.component.*`)
-- [ ] A5: Build, specs, e2e grep for supplier-modal. Update the session-state file.
+- [x] A1: `SuppliersPage` back bar plus centering styles; venues centering (`src/app/pages/suppliers/suppliers.page.*`, `src/app/pages/venues/venues.page.scss`, `venue-form.component.scss`)
+- [x] A2: Route add and edit to pages; remove inline edit from supplier-list (`supplier-list.component.*`)
+- [x] A3: Align the supplier-form full-page markup and styles with venue-form (`supplier-form.component.*`)
+- [x] A4: Delete the supplier modal, its service and mount; grep for leftovers (`shared/supplier-modal/**`, `supplier-modal.service*`, `app.component.*`)
+- [x] A5: Build, specs, e2e grep for supplier-modal. Update the session-state file.
+- [x] A6 (review fallout): supplier save button no longer grows (loader removed); new supplier lands on list searched by name + success toast (session-restored filters hid it); `min_order` dictionary key
+- [x] A7 (Human request): mobile carousels — supplier min_order, recipe-book cost, inventory unit moved into the cell carousel; supplier desktop grid gets its missing 9th track
+- [x] A8 (Human request): product-form mobile — nested media rules never matched (`.form-container .form-container`); form grid item gets `min-width:0`
 
 ## Technical Considerations
 
@@ -115,9 +123,9 @@ touching any milestone.
 
 ## Success Criteria
 
-- [ ] [auto] `rg -n "SupplierModal|app-supplier-modal|supplier-modal" src/app` → no matches.
-- [ ] [auto] `npx ng test --watch=false --include=src/app/pages/suppliers/**/*.spec.ts --include=src/app/pages/venues/**/*.spec.ts` → 0 failures.
-- [ ] [auto] `npm run build` → exit 0.
-- [ ] [human] Phone: Suppliers → + → a full page with "רשימת ספקים" back button, centered → fill and save → back on the list with the new supplier. Edit opens the same page with the data.
-- [ ] [human] Venues → add venue: the inner nav bar and form card are centered.
-- [ ] [human] Product form → add supplier still works.
+- [x] [auto] `rg -n "SupplierModal|app-supplier-modal|supplier-modal" src/app` → no matches.
+- [x] [auto] `npx ng test --watch=false --include=src/app/pages/suppliers/**/*.spec.ts --include=src/app/pages/venues/**/*.spec.ts` → 0 failures.
+- [x] [auto] `npm run build` → exit 0.
+- [x] [human] Phone: Suppliers → + → a full page with "רשימת ספקים" back button, centered → fill and save → back on the list with the new supplier. Edit opens the same page with the data.
+- [x] [human] Venues → add venue: the inner nav bar and form card are centered.
+- [x] [human] Product form → add supplier still works.
