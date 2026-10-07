@@ -4,7 +4,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { NutritionBadgeComponent } from './nutrition-badge.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
-describe('NutritionBadgeComponent (tap positioning, plan 348)', () => {
+describe('NutritionBadgeComponent (tap, hover and scroll hints, plan 348)', () => {
   let fixture: ComponentFixture<NutritionBadgeComponent>
   let component: NutritionBadgeComponent
 
@@ -19,67 +19,56 @@ describe('NutritionBadgeComponent (tap positioning, plan 348)', () => {
   })
 
   const wrap = (): HTMLElement => fixture.debugElement.query(By.css('.nb-wrap')).nativeElement
-  const tooltip = (): HTMLElement | null => document.body.querySelector(':scope > .nb-tooltip')
+  const tooltip = (): HTMLElement | null => fixture.nativeElement.querySelector('.nb-tooltip')
+  const mouse = (type: string): PointerEvent => new PointerEvent(type, { pointerType: 'mouse' })
 
-  function placeHost(top: number): void {
-    spyOn(fixture.nativeElement as HTMLElement, 'getBoundingClientRect').and.returnValue(new DOMRect(100, top, 20, 20))
-  }
-
-  it('tap opens the tooltip as a direct child of <body>, positioned and height-capped', () => {
-    placeHost(window.innerHeight - 40)
+  it('a tap opens it pinned, in the top layer', () => {
     wrap().click()
+    fixture.detectChanges()
     expect(component.showTooltip_()).toBeTrue()
-    const el = tooltip()
-    expect(el).not.toBeNull()
-    expect(el!.style.left).not.toBe('')
-    expect(el!.style.maxHeight).not.toBe('')
+    expect(component.isPinned_()).toBeTrue()
+    expect(tooltip()!.matches(':popover-open')).toBeTrue()
   })
 
-  it('opens below when there is no room above, capped to the viewport height', () => {
-    placeHost(10)
-    wrap().click()
-    expect(component.isBelow_()).toBeTrue()
-    expect(parseInt(tooltip()!.style.maxHeight, 10)).toBeLessThanOrEqual(window.innerHeight)
-  })
-
-  it('a second tap closes it and removes it from <body>', () => {
-    placeHost(300)
+  it('a second tap closes it', () => {
     wrap().click()
     wrap().click()
     expect(component.showTooltip_()).toBeFalse()
-    expect(tooltip()).toBeNull()
   })
 
   it('a tap outside closes it', () => {
-    placeHost(300)
     wrap().click()
-    expect(component.showTooltip_()).toBeTrue()
     document.body.click()
     expect(component.showTooltip_()).toBeFalse()
   })
 
-  it('a click on a hover-opened tooltip pins it instead of closing it', () => {
-    placeHost(300)
-    wrap().dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }))
+  it('touch enter/leave do not open it (only the tap does)', () => {
+    wrap().dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'touch' }))
+    expect(component.showTooltip_()).toBeFalse()
+  })
+
+  it('mouse hover opens it unpinned and leaving the leaf closes it', () => {
+    wrap().dispatchEvent(mouse('pointerenter'))
     expect(component.showTooltip_()).toBeTrue()
+    expect(component.isPinned_()).toBeFalse()
+    wrap().dispatchEvent(mouse('pointerleave'))
+    expect(component.showTooltip_()).toBeFalse()
+  })
+
+  it('clicking a hover-opened tooltip pins it, so leaving no longer closes it', () => {
+    wrap().dispatchEvent(mouse('pointerenter'))
     wrap().click()
+    wrap().dispatchEvent(mouse('pointerleave'))
     expect(component.showTooltip_()).toBeTrue()
+    expect(component.isPinned_()).toBeTrue()
   })
 
   it('shows the down hint only when the content overflows', () => {
-    placeHost(300)
     wrap().click()
-    const el = tooltip()!
-    el.style.maxHeight = '80px'
+    fixture.detectChanges()
+    tooltip()!.style.maxHeight = '80px'
     component.updateScrollHints()
     expect(component.canScrollDown_()).toBeTrue()
     expect(component.canScrollUp_()).toBeFalse()
-  })
-
-  it('destroying the component removes an open tooltip from <body>', () => {
-    placeHost(300)
-    wrap().click()
-    fixture.destroy()
-    expect(tooltip()).toBeNull()
   })
 })

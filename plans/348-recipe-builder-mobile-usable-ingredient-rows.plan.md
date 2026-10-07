@@ -94,13 +94,14 @@ touching any milestone.
 - [x] A3: Update the `isMobile_` query (`recipe-ingredients-table.component.ts`).
 - [x] A4: Nutrition badge tap positioning, clamp and outside-tap close, with a spec (`shared/nutrition-badge/**`).
 - [x] A5: Header grid `1fr 1fr` (`recipe-header.component.scss`).
-- [ ] A6: Build and run specs. Check at 360×740 portrait, 740×360 landscape and desktop. Update the session-state file.
+- [x] A6: Build and run specs. Check at 360×740 portrait, 740×360 landscape and desktop. Update the session-state file.
 - [x] A7 (review 2026-10-07): Card row 1 = name + delete; row 2 = amount · unit · cost. Smaller stepper buttons (1.75rem) so the amount digits show (`recipe-ingredients-table.component.scss`).
 - [x] A8 (review 2026-10-07): Nutrition tooltip portaled to `<body>` (no clipping/covering by list containers), sized to the viewport, hidden scrollbar with up/down arrow hints (tap = step, mouse rest = auto-scroll), click pins a hover-opened tooltip. Leaving the leaf with the mouse still closes it immediately (Human: no hover bridge) (`shared/nutrition-badge/**`).
 - [x] A9 (review 2026-10-07, approved: src/app/pages/recipe-builder/components/recipe-workflow/**): phone — mise-en-place items and preparation steps as 2-row cards: row 1 = number + drag + full-width text; row 2 = smaller action buttons only; minimal padding.
 - [x] A10 (review 2026-10-07, approved: src/app/pages/inventory/components/product-form/**): product form — supplier / min stock / expiry blocks in a dense auto-fill grid instead of full width each.
 - [x] A11 (review 2026-10-08, approved: src/app/pages/recipe-builder/components/preparation-search/**): mise-en-place name edit box is a textarea that wraps and grows (Enter adds no line break); "add" option gets a solid background. Prep-step text centered and mise name wraps with delete on row 1 (`recipe-workflow`).
 - [x] A12 (review 2026-10-08): Enter in the mise-en-place name box saves the row (first match, or adds the typed name) and opens + focuses a new row; empty box does nothing (`preparation-search` + `recipe-workflow.html`, 3 specs).
+- [x] A13 (2026-10-08, ship): reconciled with #323's top-layer popover tooltip (Human chose option A): kept #323's base, re-added viewport height cap + scroll hint arrows, mouse-only hover, tap-outside close, click-to-pin; page-scroll reposition ignores the tooltip's own scroll.
 
 ## Technical Considerations
 
