@@ -42,11 +42,13 @@
         <label for="ownedQuantity">{{ 'owned_quantity' | translatePipe }}</label>
         <input id="ownedQuantity" type="number" formControlName="ownedQuantity" min="0" class="c-input" />
       </div>
-      <div class="form-group checkbox-group">
-        <label>
-          <input type="checkbox" formControlName="isConsumable" />
-          {{ 'is_consumable' | translatePipe }}
-        </label>
+      <div class="form-group">
+        <div class="c-toggle-chip-group">
+          <label class="c-toggle-chip">
+            <input type="checkbox" formControlName="isConsumable" />
+            <span>{{ 'is_consumable' | translatePipe }}</span>
+          </label>
+        </div>
       </div>
       <div class="form-group">
         <label for="notes">{{ 'notes' | translatePipe }}</label>
@@ -56,11 +58,13 @@
 
     <div class="form-section scaling-section">
       <h3>{{ 'scaling_rule' | translatePipe }}</h3>
-      <div class="form-group checkbox-group">
-        <label>
-          <input type="checkbox" formControlName="scaling_enabled_" />
-          {{ 'scaling_enabled' | translatePipe }}
-        </label>
+      <div class="form-group">
+        <div class="c-toggle-chip-group">
+          <label class="c-toggle-chip">
+            <input type="checkbox" formControlName="scaling_enabled_" />
+            <span>{{ 'scaling_enabled' | translatePipe }}</span>
+          </label>
+        </div>
       </div>
       @if (equipmentForm_.get('scaling_enabled_')?.value) {
         <div class="scaling-fields">

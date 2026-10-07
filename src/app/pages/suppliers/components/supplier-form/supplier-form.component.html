@@ -33,11 +33,11 @@
       </div>
       <div class="c-input-stack full-width">
         <label>{{ 'delivery_days' | translatePipe }}</label>
-        <div class="c-filter-options c-filter-options--inline" formArrayName="deliveryDays">
+        <div class="c-toggle-chip-group" formArrayName="deliveryDays">
           @for (ctrl of deliveryDaysArray.controls; track $index) {
-            <label class="c-filter-option">
+            <label class="c-toggle-chip">
               <input type="checkbox" [formControlName]="$index" />
-              {{ dayKeys[$index] | translatePipe }}
+              <span>{{ dayKeys[$index] | translatePipe }}</span>
             </label>
           }
         </div>
@@ -103,11 +103,11 @@
         </div>
         <div class="form-group">
           <label>{{ 'delivery_days' | translatePipe }}</label>
-          <div class="delivery-days-wrap" formArrayName="deliveryDays">
+          <div class="c-toggle-chip-group" formArrayName="deliveryDays">
             @for (ctrl of deliveryDaysArray.controls; track $index) {
-              <label class="day-check">
+              <label class="c-toggle-chip">
                 <input type="checkbox" [formControlName]="$index" />
-                {{ dayKeys[$index] | translatePipe }}
+                <span>{{ dayKeys[$index] | translatePipe }}</span>
               </label>
             }
           </div>
