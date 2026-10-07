@@ -172,10 +172,10 @@
 - [ ] A5: Build and run specs. Check at 360px and 1280px in RTL. Update the session-state file.
 
 ### Plan 351 — Dashboard "פעילות אחרונה": readable change history (`plans/351-dashboard-recent-activity-readable-change-history.plan.md`)
-- [ ] A1: `activityValue` pipe plus its spec: supplier ids → names, key translation, unknown id, empty (`core/pipes/activity-value.pipe.ts/.spec.ts`).
-- [ ] A2: Switch the popover to the pipe (`shared/change-popover/**`).
-- [ ] A3: New entry template and styles; delete the strip, scroll method and `.change-tag` styles (`dashboard-overview/**`).
-- [ ] A4: Relative time plus the optional day grouping (`dashboard-overview/**`).
+- [x] A1: `activityValue` pipe plus its spec: supplier ids → names, key translation, unknown id, empty (`core/pipes/activity-value.pipe.ts/.spec.ts`).
+- [x] A2: Switch the popover to the pipe (`shared/change-popover/**`).
+- [x] A3: New entry template and styles; delete the strip, scroll method and `.change-tag` styles (`dashboard-overview/**`).
+- [x] A4: Relative time plus the optional day grouping (`dashboard-overview/**`).
 - [ ] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
 
 ### Plan 352 — Page header, part 1: `<app-page-header>` and the list-shell pages (`plans/352-page-header-part-1-app-page-header-list-shell.plan.md`)
