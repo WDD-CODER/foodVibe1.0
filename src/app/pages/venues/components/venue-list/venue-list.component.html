@@ -76,9 +76,17 @@
     @for (item of filteredVenues_(); track item._id) {
       <article
         class="venue-card c-glass-card"
+        [class.is-selected]="selection.isSelected(item._id)"
+        [class.is-selecting]="selection.selectionMode()"
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"
+        (pointerdown)="onCardPointerDown(item, $event)"
+        (pointermove)="onCardPointerMove($event)"
+        (pointerup)="cancelLongPress()"
+        (pointercancel)="cancelLongPress()"
+        (pointerleave)="cancelLongPress()"
+        (contextmenu)="onCardContextMenu($event)"
         (keydown.enter)="onCardActivate(item, $event)"
         (keydown.space)="$event.preventDefault(); onCardActivate(item, $event)"
       >
@@ -106,6 +114,16 @@
               {{ item.address }}
             </p>
           }
+          @let hours = venueHours(item);
+          @if (hours.first) {
+            <p class="venue-card-hours">
+              <lucide-icon name="clock" [size]="14"></lucide-icon>
+              <span class="venue-card-hours-text">{{ hours.first }}</span>
+              @if (hours.extra > 0) {
+                <span class="venue-card-hours-extra">+{{ hours.extra }}</span>
+              }
+            </p>
+          }
           <div class="venue-card-meta">
             <span class="venue-env-chip">{{ item.environmentType | translatePipe }}</span>
             @if (item.capacity) {
@@ -116,7 +134,7 @@
             }
             <span class="venue-infra-count">
               <lucide-icon name="package" [size]="14"></lucide-icon>
-              {{ (item.availableInfrastructure ?? []).length }}
+              {{ item.availableInfrastructure.length }}
             </span>
           </div>
         </div>

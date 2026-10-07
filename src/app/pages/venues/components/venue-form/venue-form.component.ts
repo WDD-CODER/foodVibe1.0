@@ -27,6 +27,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 
@@ -45,7 +46,7 @@ const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', '
   styleUrl: './venue-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class VenueFormComponent implements OnInit {
+export class VenueFormComponent implements OnInit, PendingChangesComponent {
   embeddedInDashboard = input<boolean>(false)
   saved = output<void>()
   cancel = output<void>()
@@ -70,6 +71,11 @@ export class VenueFormComponent implements OnInit {
   /** design-port session 6 — Cloudinary-hosted venue photo, same pattern as recipe-header's imageUrl. */
   protected readonly photoUrl_ = signal<string | null>(null)
   protected readonly uploadingPhoto_ = signal(false)
+
+  /** pendingChangesGuard contract (plan 371): true once a save succeeded, so leaving doesn't prompt. */
+  isSubmitted = false
+  /** Form + photo as loaded (add: empty form; edit: after hydrateForm) — compared by hasRealChanges(). */
+  private initialSnapshot_ = ''
 
   protected get infraArray(): FormArray {
     return this.venueForm_?.get('availableInfrastructure') as FormArray
@@ -98,7 +104,22 @@ export class VenueFormComponent implements OnInit {
         this.isEditMode_.set(true)
         this.hydrateForm(venue)
       }
+      this.initialSnapshot_ = this.currentSnapshot_()
     })
+  }
+
+  /** pendingChangesGuard: anything changed since the form was loaded (fields or photo)? */
+  hasRealChanges(): boolean {
+    return !!this.venueForm_ && this.currentSnapshot_() !== this.initialSnapshot_
+  }
+
+  /** pendingChangesGuard "save and leave": saves without navigating; the guard then lets the navigation through. */
+  saveAndWait(): Promise<boolean> {
+    return this.persist_()
+  }
+
+  private currentSnapshot_(): string {
+    return JSON.stringify({ form: this.venueForm_.getRawValue(), photoUrl: this.photoUrl_() })
   }
 
   private buildForm(): void {
@@ -213,65 +234,80 @@ export class VenueFormComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (!this.requireAuth.requireAuth()) return
+    const saved = await this.persist_()
+    if (!saved) return
+    if (this.embeddedInDashboard()) {
+      this.saved.emit()
+    } else {
+      this.router.navigate(['/venues/list'])
+    }
+  }
+
+  /** Validates and saves (add or update). Resolves true on success; never navigates. */
+  private async persist_(): Promise<boolean> {
+    if (!this.requireAuth.requireAuth()) return false
     if (!this.validateForm_()) {
       this.venueForm_.markAllAsTouched()
       this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'))
-      return
+      return false
     }
-    if (this.venueForm_.invalid) return
-    await this.saving.withSaving(async () => {
-      const v = this.venueForm_.getRawValue()
-      const infra: VenueInfraItem[] = (v.availableInfrastructure ?? [])
-        .filter((row: { equipmentId: string }) => row.equipmentId)
-        .map((row: { equipmentId: string; availableQuantity: number }) => ({
-          equipmentId: row.equipmentId,
-          availableQuantity: Number(row.availableQuantity)
-        }))
-      const hours: VenueOperatingHours[] = (v.operatingHours ?? [])
-        .filter((row: { days: string; time: string }) => row.days && row.time)
-        .map((row: { days: string; time: string }) => ({ days: row.days, time: row.time }))
+    if (this.venueForm_.invalid) return false
+    try {
+      await this.saving.withSaving(() => this.saveVenue_())
+    } catch {
+      return false
+    }
+    this.isSubmitted = true
+    return true
+  }
 
-      const now = Date.now()
+  /** Builds the payload from the form and adds or updates the venue. */
+  private async saveVenue_(): Promise<void> {
+    const v = this.venueForm_.getRawValue()
+    const infra: VenueInfraItem[] = (v.availableInfrastructure ?? [])
+      .filter((row: { equipmentId: string }) => row.equipmentId)
+      .map((row: { equipmentId: string; availableQuantity: number }) => ({
+        equipmentId: row.equipmentId,
+        availableQuantity: Number(row.availableQuantity)
+      }))
+    const hours: VenueOperatingHours[] = (v.operatingHours ?? [])
+      .filter((row: { days: string; time: string }) => row.days && row.time)
+      .map((row: { days: string; time: string }) => ({ days: row.days, time: row.time }))
 
-      if (this.isEditMode_()) {
-        const venue = this.route.snapshot.data['venue'] as VenueProfile
-        await this.venueData.updateVenue({
-          ...venue,
-          nameHebrew: v.nameHebrew,
-          environmentType: v.environmentType,
-          notes: v.notes || undefined,
-          availableInfrastructure: infra,
-          address: v.address || undefined,
-          capacity: v.capacity != null && v.capacity !== '' ? Number(v.capacity) : undefined,
-          contactName: v.contactName || undefined,
-          contactPhone: v.contactPhone || undefined,
-          operatingHours: hours,
-          active: v.active,
-          photoUrl: this.photoUrl_() ?? undefined
-        })
-      } else {
-        await this.venueData.addVenue({
-          nameHebrew: v.nameHebrew,
-          environmentType: v.environmentType,
-          notes: v.notes || undefined,
-          availableInfrastructure: infra,
-          address: v.address || undefined,
-          capacity: v.capacity != null && v.capacity !== '' ? Number(v.capacity) : undefined,
-          contactName: v.contactName || undefined,
-          contactPhone: v.contactPhone || undefined,
-          operatingHours: hours,
-          createdAt: now,
-          active: v.active,
-          photoUrl: this.photoUrl_() ?? undefined
-        })
-      }
-      if (this.embeddedInDashboard()) {
-        this.saved.emit()
-      } else {
-        this.router.navigate(['/venues/list'])
-      }
-    })
+    const now = Date.now()
+
+    if (this.isEditMode_()) {
+      const venue = this.route.snapshot.data['venue'] as VenueProfile
+      await this.venueData.updateVenue({
+        ...venue,
+        nameHebrew: v.nameHebrew,
+        environmentType: v.environmentType,
+        notes: v.notes || undefined,
+        availableInfrastructure: infra,
+        address: v.address || undefined,
+        capacity: v.capacity != null && v.capacity !== '' ? Number(v.capacity) : undefined,
+        contactName: v.contactName || undefined,
+        contactPhone: v.contactPhone || undefined,
+        operatingHours: hours,
+        active: v.active,
+        photoUrl: this.photoUrl_() ?? undefined
+      })
+    } else {
+      await this.venueData.addVenue({
+        nameHebrew: v.nameHebrew,
+        environmentType: v.environmentType,
+        notes: v.notes || undefined,
+        availableInfrastructure: infra,
+        address: v.address || undefined,
+        capacity: v.capacity != null && v.capacity !== '' ? Number(v.capacity) : undefined,
+        contactName: v.contactName || undefined,
+        contactPhone: v.contactPhone || undefined,
+        operatingHours: hours,
+        createdAt: now,
+        active: v.active,
+        photoUrl: this.photoUrl_() ?? undefined
+      })
+    }
   }
 
   onCancel(): void {

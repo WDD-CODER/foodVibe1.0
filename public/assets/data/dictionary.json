@@ -207,6 +207,7 @@
     "create_new_unit": "צור יחידה חדשה",
     "product": "מוצר",
     "product_list": "רשימת מוצרים",
+    "products": "מוצרים",
     "product_incomplete_hint": "המוצר חסר פרטים — לחץ לעריכה",
     "product_warning_hint": "המוצר חסר פרטים משלימים — לחץ לעריכה",
     "product_invalid": "מוצר לא תקין",
@@ -983,6 +984,8 @@
     "scope_delete_many": "{n} פריטים נבחרו. למחוק אותם רק אצלך, או להסיר אותם מכל המשתמשים?",
     "scope_delete_product_warning": "שים לב: מחיקה מכולם תסיר את המוצר גם מכל המתכונים של כל המשתמשים.",
     "confirm_delete": "האם אתה בטוח שברצונך למחוק?",
-    "confirm_delete_product": "האם אתה בטוח שברצונך למחוק חומר גלם זה?"
+    "confirm_delete_product": "האם אתה בטוח שברצונך למחוק חומר גלם זה?",
+    "supplier_added": "הספק \"{name}\" נוסף בהצלחה",
+    "min_order": "מינימום הזמנה"
   }
 }

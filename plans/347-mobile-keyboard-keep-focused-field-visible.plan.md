@@ -108,10 +108,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Viewport meta (`src/index.html`).
-- [ ] A2: `KeyboardInsetService` plus a spec (mock `visualViewport`: inset computed, class toggled, no-op without the API). Inject it in `AppComponent` (`keyboard-inset.service.ts/.spec.ts`, `app.component.ts`).
-- [ ] A3: The `body.kb-open` rules and `.as-modal` / `.c-modal-card` inset handling (`src/styles.scss`).
-- [ ] A4: `vh` → `dvh` in the listed files.
+- [x] A1: Viewport meta (`src/index.html`).
+- [x] A2: `KeyboardInsetService` plus a spec (mock `visualViewport`: inset computed, class toggled, no-op without the API). Inject it in `AppComponent` (`keyboard-inset.service.ts/.spec.ts`, `app.component.ts`).
+- [x] A3: The `body.kb-open` rules and `.as-modal` / `.c-modal-card` inset handling (`src/styles.scss`).
+- [x] A4: `vh` → `dvh` in the listed files.
 - [ ] A5: Build and run specs. Update the session-state file.
 
 ## Technical Considerations
