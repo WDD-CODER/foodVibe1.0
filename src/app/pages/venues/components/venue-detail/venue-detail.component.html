@@ -42,7 +42,7 @@
         <div class="detail-stats">
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'infrastructure_items' | translatePipe }}</span>
-            <span class="detail-stat-value">{{ (venue.availableInfrastructure ?? []).length }}</span>
+            <span class="detail-stat-value">{{ venue.availableInfrastructure.length }}</span>
           </div>
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'capacity' | translatePipe }}</span>
