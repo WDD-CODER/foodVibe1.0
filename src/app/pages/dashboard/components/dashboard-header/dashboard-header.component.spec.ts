@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser'
 import { DashboardHeaderComponent } from './dashboard-header.component'
 import { LucideAngularModule, ArrowRight } from 'lucide-angular'
 import { TranslationService } from '@services/translation.service'
+import { provideRouter } from '@angular/router'
 
 describe('DashboardHeaderComponent', () => {
   let fixture: ComponentFixture<DashboardHeaderComponent>
@@ -23,7 +24,7 @@ describe('DashboardHeaderComponent', () => {
 
     await TestBed.configureTestingModule({
       imports: [DashboardHeaderComponent, LucideAngularModule.pick({ ArrowRight })],
-      providers: [{ provide: TranslationService, useValue: mockTranslation }]
+      providers: [provideRouter([]), { provide: TranslationService, useValue: mockTranslation }]
     }).compileComponents()
 
     fixture = TestBed.createComponent(DashboardHeaderComponent)
@@ -36,11 +37,11 @@ describe('DashboardHeaderComponent', () => {
     expect(component).toBeTruthy()
   })
 
-  it('should emit overview when back button is clicked', () => {
+  it('titles the header with the active tab and shows no back button (plan 353)', () => {
     fixture.componentRef.setInput('activeTab', 'metadata')
     fixture.detectChanges()
-    spyOn(component.tabChange, 'emit')
-    fixture.debugElement.query(By.css('[data-testid="btn-back-to-dashboard"]')).nativeElement.click()
-    expect(component.tabChange.emit).toHaveBeenCalledWith('overview')
+    const h1 = fixture.debugElement.query(By.css('h1.ph-title')).nativeElement as HTMLElement
+    expect(h1.textContent?.trim()).toBe('metadata_manager')
+    expect(fixture.debugElement.query(By.css('button'))).toBeNull()
   })
 })

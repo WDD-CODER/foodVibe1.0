@@ -10,12 +10,17 @@
       </button>
     }
     <ng-content select="[header-back]"></ng-content>
-    <h1 class="ph-title">
-      @if (titleKey(); as key) {
-        {{ key | translatePipe }}
+    <div class="ph-heading">
+      <h1 class="ph-title">
+        @if (titleKey(); as key) {
+          {{ key | translatePipe }}
+        }
+        <ng-content select="[header-title]"></ng-content>
+      </h1>
+      @if (subtitleKey(); as sub) {
+        <p class="ph-subtitle">{{ sub | translatePipe }}</p>
       }
-      <ng-content select="[header-title]"></ng-content>
-    </h1>
+    </div>
     @if (count() !== null) {
       <!-- Re-created per value so the pop animation replays on every change (P1). -->
       @for (c of [count()]; track c) {

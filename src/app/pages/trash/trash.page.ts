@@ -6,7 +6,7 @@ import {
   signal,
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { Router } from '@angular/router'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TrashService } from '@services/trash.service'
@@ -19,7 +19,7 @@ import type { VersionEntityType } from '@services/version-history.service'
 @Component({
   selector: 'app-trash-page',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, VersionHistoryPanelComponent, LoaderComponent],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, VersionHistoryPanelComponent, LoaderComponent, PageHeaderComponent],
   templateUrl: './trash.page.html',
   styleUrl: './trash.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,7 +28,6 @@ export class TrashPage implements OnInit {
   private readonly trash = inject(TrashService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly logging = inject(LoggingService)
-  private readonly router = inject(Router)
 
   readonly loading = signal(true)
   readonly loadError = signal<string | null>(null)
@@ -41,10 +40,6 @@ export class TrashPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.loadTrashInternal()
-  }
-
-  backToDashboard(): void {
-    this.router.navigate(['/dashboard'])
   }
 
   async refresh(): Promise<void> {

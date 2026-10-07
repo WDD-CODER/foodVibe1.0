@@ -1,19 +1,13 @@
 <div class="venue-grid-container" dir="rtl">
-  <div class="action-bar">
-    <button
-      type="button"
-      class="header-btn header-btn--back"
-      data-testid="btn-back-to-dashboard-venues"
-      (click)="backToDashboard()"
-    >
-      <lucide-icon name="layout-dashboard" size="16"></lucide-icon>
-      {{ 'dashboard' | translatePipe }}
-    </button>
-
-    <h2 class="page-title">{{ 'venue_list' | translatePipe }}</h2>
-    <p class="result-count">{{ resultCountText_() }}</p>
-
-    <div class="search-wrap">
+  <!-- Plan 353: shared page header (title + count, search, add). No back button — the
+       "לוח בקרה" tab chip returns to the dashboard. -->
+  <app-page-header
+    class="venue-page-header"
+    titleKey="venue_list"
+    [count]="filteredVenues_().length"
+    [countLabel]="resultCountText_()"
+  >
+    <div header-search class="search-wrap">
       <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
       <div class="c-input-wrapper">
         <lucide-icon name="search" [size]="18"></lucide-icon>
@@ -26,8 +20,8 @@
         />
       </div>
     </div>
-
     <button
+      header-actions
       type="button"
       class="c-btn-primary"
       (click)="onAddPlace()"
@@ -37,7 +31,7 @@
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       {{ 'add_venue' | translatePipe }}
     </button>
-  </div>
+  </app-page-header>
 
   <div class="filters-bar">
     @if (filteredVenueIds_().length > 0) {

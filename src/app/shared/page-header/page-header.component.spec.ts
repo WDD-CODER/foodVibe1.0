@@ -24,6 +24,13 @@ class HostComponent {
   backLink: string | null = null
 }
 
+@Component({
+  standalone: true,
+  imports: [PageHeaderComponent],
+  template: `<app-page-header titleKey="dashboard" subtitleKey="dashboard_subtitle" />`
+})
+class SubtitleHostComponent {}
+
 describe('PageHeaderComponent', () => {
   let fixture: ComponentFixture<HostComponent>
 
@@ -31,7 +38,7 @@ describe('PageHeaderComponent', () => {
     const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
     translation.translate.and.callFake((k: string | undefined) => (k ? `t:${k}` : ''))
     await TestBed.configureTestingModule({
-      imports: [HostComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HostComponent, SubtitleHostComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [provideRouter([]), { provide: TranslationService, useValue: translation }]
     }).compileComponents()
     fixture = TestBed.createComponent(HostComponent)
@@ -64,6 +71,16 @@ describe('PageHeaderComponent', () => {
     f2.detectChanges()
     const back = f2.debugElement.query(By.css('a.ph-back')).nativeElement as HTMLAnchorElement
     expect(back.getAttribute('href')).toBe('/dashboard')
+  })
+
+  it('renders the optional subtitle under the title', () => {
+    fixture.detectChanges()
+    expect(fixture.debugElement.query(By.css('.ph-subtitle'))).toBeNull()
+
+    const f2 = TestBed.createComponent(SubtitleHostComponent)
+    f2.detectChanges()
+    const sub = f2.debugElement.query(By.css('.ph-subtitle')).nativeElement as HTMLElement
+    expect(sub.textContent?.trim()).toBe('t:dashboard_subtitle')
   })
 
   it('projects search, leading and action slots', () => {

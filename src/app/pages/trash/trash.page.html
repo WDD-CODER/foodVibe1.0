@@ -1,19 +1,10 @@
 <div class="trash-page" dir="rtl">
-  <header class="trash-header">
-    <button
-      type="button"
-      class="header-btn header-btn--back"
-      data-testid="btn-back-to-dashboard-trash"
-      (click)="backToDashboard()"
-    >
-      <lucide-icon name="layout-dashboard" size="16"></lucide-icon>
-      {{ 'dashboard' | translatePipe }}
-    </button>
-    <h1>{{ 'trash' | translatePipe }}</h1>
-    <button type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
+  <!-- Plan 353: shared page header. No back button — the "לוח בקרה" tab chip returns. -->
+  <app-page-header class="trash-page-header" titleKey="trash">
+    <button header-actions type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
       {{ loading() ? ('pending' | translatePipe) : ('refresh' | translatePipe) }}
     </button>
-  </header>
+  </app-page-header>
 
   @if (loading()) {
   <app-loader size="medium" label="loader_loading" />

@@ -1,14 +1,21 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { LucideAngularModule } from 'lucide-angular'
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core'
 
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import type { DashboardTab } from '../../dashboard.page'
+
+/** Title for each dashboard tab — the header names the tab, not "dashboard" again (plan 353). */
+const TAB_TITLE_KEYS: Record<DashboardTab, string> = {
+  overview: 'dashboard',
+  metadata: 'metadata_manager',
+  venues: 'venue_list',
+  'add-venue': 'add_venue',
+  trash: 'trash'
+}
 
 @Component({
   selector: 'app-dashboard-header',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe],
+  imports: [PageHeaderComponent],
   templateUrl: './dashboard-header.component.html',
   styleUrl: './dashboard-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -20,7 +27,6 @@ export class DashboardHeaderComponent {
   readonly activeTab = input.required<DashboardTab>()
   readonly tabChange = output<DashboardTab>()
 
-  protected backToDashboard(): void {
-    this.tabChange.emit('overview')
-  }
+  /** No back button: the "לוח בקרה" tab chip returns to the overview (plan 367). */
+  protected readonly titleKey = computed(() => TAB_TITLE_KEYS[this.activeTab()] ?? 'dashboard')
 }

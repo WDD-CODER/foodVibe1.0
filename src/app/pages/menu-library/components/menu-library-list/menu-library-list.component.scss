@@ -27,28 +27,12 @@
   -webkit-backdrop-filter: var(--blur-glass);
 }
 
-.action-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  gap: 1rem;
+.menu-library-header {
   margin-block-end: 1.25rem;
 }
 
-.page-title {
-  flex: 0 0 auto;
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-text-main);
-  letter-spacing: -0.01em;
-}
-
 .search-wrap {
-  flex: 1;
-  min-width: 12.5rem;
-  max-width: 21.25rem;
+  inline-size: 100%;
 }
 
 // Borderless — blends into the page background, matching the design's filter
@@ -312,26 +296,6 @@
   .menu-library-container {
     padding-inline: var(--space-4);
     padding-block: var(--space-4);
-  }
-
-  .action-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-
-    .page-title {
-      font-size: 1.25rem;
-      text-align: center;
-    }
-
-    .search-wrap {
-      max-width: none;
-    }
-
-    .c-btn-primary {
-      width: 100%;
-      justify-content: center;
-    }
   }
 
   .filters-bar {

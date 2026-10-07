@@ -4,19 +4,8 @@
   padding: 1.5rem;
 }
 
-.trash-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.trash-page-header {
   margin-block-end: 1.5rem;
-  gap: 1rem;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-main);
-  }
 }
 
 .btn-refresh {
@@ -224,31 +213,6 @@
 @media (max-width: 768px) {
   .trash-page {
     padding: 1rem;
-  }
-
-  .trash-header {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      'title   title'
-      'back    refresh';
-    gap: 0.5rem 0.75rem;
-
-    h1 {
-      grid-area: title;
-      font-size: 1.25rem;
-      text-align: center;
-    }
-
-    .header-btn--back {
-      grid-area: back;
-      justify-content: center;
-    }
-
-    .btn-refresh {
-      grid-area: refresh;
-      justify-content: center;
-    }
   }
 
   .trash-section-header {

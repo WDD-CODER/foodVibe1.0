@@ -16,13 +16,14 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { useListState, StringParam } from 'src/app/core/utils/list-state.util'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 
 @Component({
   selector: 'app-menu-library-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent, EmptyStateComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent, EmptyStateComponent, PageHeaderComponent],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

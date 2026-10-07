@@ -22,6 +22,25 @@
   min-width: 0;
 }
 
+.ph-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+
+  min-width: 0;
+}
+
+.ph-subtitle {
+  margin: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+}
+
 .ph-title {
   min-width: 0;
   margin: 0;
@@ -123,6 +142,11 @@
 
   .ph-title {
     font-size: var(--fs-lg);
+  }
+
+  // Plan 353, Critical Question → a: the subtitle is desktop-only.
+  .ph-subtitle {
+    display: none;
   }
 
   .ph-back,

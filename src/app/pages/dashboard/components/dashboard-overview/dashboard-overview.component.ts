@@ -11,12 +11,20 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ActivityLogService, ActivityEntry } from '@services/activity-log.service'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
 import { ChangePopoverComponent } from '../../../../shared/change-popover/change-popover.component'
+import { PageHeaderComponent } from '../../../../shared/page-header/page-header.component'
 import type { DashboardTab } from '../../dashboard.page'
 
 @Component({
   selector: 'app-dashboard-overview',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, ScrollIndicatorsDirective, ChangePopoverComponent],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    TranslatePipe,
+    ScrollIndicatorsDirective,
+    ChangePopoverComponent,
+    PageHeaderComponent
+  ],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

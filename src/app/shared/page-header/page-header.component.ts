@@ -24,6 +24,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 export class PageHeaderComponent {
   /** Dictionary key for the title; or project `[header-title]`. */
   readonly titleKey = input<string | null>(null)
+  /** Optional muted line under the title (plan 353) — shown on wide headers only. */
+  readonly subtitleKey = input<string | null>(null)
   /** Result count shown as a pill next to the title; null hides it. */
   readonly count = input<number | null>(null)
   /** Screen-reader text for the count (e.g. "12 מתוך 40 פריטים"). */

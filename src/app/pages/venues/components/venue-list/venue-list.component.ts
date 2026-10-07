@@ -19,6 +19,7 @@ import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-ba
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environmentType'
@@ -33,7 +34,8 @@ type VenueBulkField = 'environmentType'
     TranslatePipe,
     LoaderComponent,
     ListRowCheckboxComponent,
-    SelectionBarComponent
+    SelectionBarComponent,
+    PageHeaderComponent
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
@@ -138,10 +140,6 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   protected envTypeLabel(env: EnvironmentType): string {
     return env
-  }
-
-  backToDashboard(): void {
-    this.router.navigate(['/dashboard'])
   }
 
   protected onAddPlace(): void {
