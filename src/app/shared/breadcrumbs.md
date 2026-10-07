@@ -14,8 +14,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | ai-product-modal/ | AI-drafted product modal + service | AiProductModalComponent, AiProductModalService |
 | ai-recipe-modal/ | AI-drafted recipe modal + service | AiRecipeModalComponent, AiRecipeModalService |
 | approve-stamp/ | Approval stamp UI | ApproveStampComponent |
-| carousel-header/ | Table carousel header row | CarouselHeaderComponent, CarouselHeaderColumnDirective |
-| cell-carousel/ | Carousel cells / slides | CellCarouselComponent, CellCarouselSlideDirective |
+| column-carousel/ | Mobile column carousel for list tables (header + cells, shared index) | ColumnCarouselGroupDirective, ColumnCarouselHeaderComponent, ColumnCarouselCellComponent, ColumnSlideDirective |
 | change-popover/ | Inline change preview popover | ChangePopoverComponent |
 | chip-search-dropdown/ | Searchable chip-select dropdown | ChipSearchDropdownComponent |
 | confirm-modal/ | Confirm/cancel | ConfirmModalComponent |

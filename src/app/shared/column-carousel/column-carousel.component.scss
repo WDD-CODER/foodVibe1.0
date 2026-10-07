@@ -1,0 +1,231 @@
+// Plan 349 — shared mobile column carousel (header + cells). One stylesheet for both.
+// Desktop (>768px): the host is `display: contents`, so each projected [columnSlide] is a
+// normal grid cell and nothing carousel-specific shows.
+$cc-break: 768px;
+
+:host(.column-carousel) {
+  display: contents;
+}
+
+.cc-header,
+.cc-cell-label,
+.cc-arrow {
+  display: none;
+}
+
+// LTR fallback: swap which chevron each arrow shows (the app is RTL by default).
+.cc-icon-ltr {
+  display: none;
+}
+
+:host-context([dir='ltr']) {
+  .cc-icon-rtl {
+    display: none;
+  }
+
+  .cc-icon-ltr {
+    display: inline-flex;
+  }
+}
+
+@keyframes cc-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: $cc-break) {
+  // ── Shared ────────────────────────────────────────────────────────────────
+  :host(.column-carousel) {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+
+    min-width: 0;
+    // No overflow clipping: the header's floating arrows overhang the cell edge.
+    overflow: visible;
+    touch-action: pan-y; // vertical scroll stays native; horizontal swipe handled in JS
+  }
+
+  // Only the active slide shows; it takes the cell's look from the host, not its own.
+  :host(.column-carousel) ::ng-deep .column-slide {
+    display: none !important;
+  }
+
+  :host(.column-carousel) ::ng-deep .column-slide.column-slide--active {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 0;
+    width: 100%;
+    padding: 0;
+
+    background: transparent;
+    border: none;
+
+    animation: cc-slide-in 150ms ease;
+  }
+
+  .cc-arrow {
+    position: relative;
+    display: grid;
+    place-content: center;
+
+    padding: 0;
+
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    // ≥32px tap area regardless of the visual size.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 50% auto auto 50%;
+      inline-size: 2rem;
+      block-size: 2rem;
+      transform: translate(-50%, -50%);
+    }
+
+    &:hover {
+      color: var(--color-text-main);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 1px;
+    }
+  }
+
+  // ── Header ────────────────────────────────────────────────────────────────
+  :host(.column-carousel--header) {
+    padding-inline: 0.25rem;
+  }
+
+  .cc-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.1875rem;
+
+    min-width: 0;
+    outline: none;
+
+    &:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+      border-radius: var(--radius-sm);
+    }
+  }
+
+  .cc-header-label {
+    max-inline-size: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .cc-dots {
+    display: flex;
+    gap: 0.1875rem;
+  }
+
+  .cc-dot {
+    inline-size: 0.3125rem;
+    block-size: 0.3125rem;
+
+    background: var(--border-strong);
+    border-radius: var(--radius-full);
+    transition: background 0.15s ease, transform 0.15s ease;
+
+    &.is-active {
+      background: var(--color-primary);
+      transform: scale(1.25);
+    }
+  }
+
+  // Floating round arrows over the header's top edge — the label keeps the full width.
+  .cc-arrow--float {
+    position: absolute;
+    z-index: 2;
+    inset-block-start: -0.5rem;
+
+    inline-size: 1.75rem;
+    block-size: 1.75rem;
+
+    background: var(--bg-glass-strong);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: var(--blur-glass);
+
+    &.cc-arrow--prev {
+      inset-inline-start: -0.375rem;
+    }
+
+    &.cc-arrow--next {
+      inset-inline-end: -0.375rem;
+    }
+  }
+
+  // ── Cell ──────────────────────────────────────────────────────────────────
+  // The host carries `.c-list-body-cell` (row background, border, tints, hover); only the
+  // inline padding is tightened so the value gets the room.
+  :host(.column-carousel--cell) {
+    gap: 0.125rem;
+    padding-inline: 0.25rem;
+  }
+
+  .cc-cell-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.25rem;
+
+    min-width: 0;
+  }
+
+  .cc-cell-label-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: var(--fs-2xs, 0.6875rem);
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .cc-arrow--inline {
+    flex-shrink: 0;
+
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :host(.column-carousel) ::ng-deep .column-slide.column-slide--active {
+    animation: none;
+  }
+
+  .cc-dot {
+    transition: none;
+  }
+}

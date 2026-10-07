@@ -36,12 +36,7 @@ import { VersionEntityType } from '@services/version-history.service'
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import {
-  CarouselHeaderComponent,
-  CarouselHeaderColumnDirective
-} from 'src/app/shared/carousel-header/carousel-header.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
@@ -62,6 +57,7 @@ import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
 import { buildFilterOptionCounts, attachFilterCheckedState } from 'src/app/core/utils/filter-category-counts.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating'
 type RecipeBulkField = 'labels' | 'recipeType'
@@ -83,16 +79,13 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     VersionHistoryPanelComponent,
     LoaderComponent,
     ScrollableDropdownComponent,
-    CellCarouselComponent,
-    CellCarouselSlideDirective,
     ListShellComponent,
-    CarouselHeaderComponent,
-    CarouselHeaderColumnDirective,
     ListRowCheckboxComponent,
     SelectionBarComponent,
     EmptyStateComponent,
     RatingStarsComponent,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    ...COLUMN_CAROUSEL
   ],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
@@ -253,7 +246,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected deletingId_ = signal<string | null>(null)
   protected removingId_ = signal<string | null>(null)
   protected duplicatingId_ = signal<string | null>(null)
-  protected carouselHeaderIndex_ = signal(0)
 
   protected categoryDisplayKey(internalName: string): string {
     const map: Record<string, string> = {
@@ -634,10 +626,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
         if (scope === 'everyone') this.masterPush.pushToMaster(saved)
       }
     })
-  }
-
-  protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index)
   }
 
   protected setSort(field: SortField): void {

@@ -151,17 +151,4 @@
     }
   }
 
-  @media (max-width: 768px) {
-    .equipment-grid-row app-cell-carousel {
-      background: var(--bg-glass);
-
-      border-block-end: 1px solid var(--border-row);
-
-      transition: background 0.15s ease;
-    }
-
-    .equipment-grid-row:hover app-cell-carousel {
-      background: var(--bg-glass-hover);
-    }
-  }
 }

@@ -1,4 +1,5 @@
 <app-list-shell
+  columnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
   [gridTemplate]="
@@ -6,7 +7,7 @@
       ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(80px, 0.7fr) minmax(72px, 0.85fr) 80px auto'
       : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) minmax(80px, 0.7fr) 0.8fr 80px auto'
   "
-  [mobileGridTemplate]="'2fr 0.7fr 1fr 0.8fr 40px 28px'"
+  [mobileGridTemplate]="'2fr 0.5fr 1.4fr 0.8fr 40px 28px'"
   [resultCount]="filteredRecipes_().length"
   [resultTotal]="kitchenState.recipes_().length"
 >
@@ -69,10 +70,10 @@
     >
       {{ 'type' | translatePipe }}
     </div>
-    <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
+    <app-column-carousel-header>
       <div
         class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col"
-        carouselHeaderColumn
+        columnSlide
         label="labels"
         (click)="labelsExpand.toggleAll()"
         (keydown.enter)="labelsExpand.toggleAll()"
@@ -84,7 +85,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col"
-        carouselHeaderColumn
+        columnSlide
         label="allergens"
         (click)="allergenExpand.toggleAll()"
         (keydown.enter)="allergenExpand.toggleAll()"
@@ -97,7 +98,7 @@
       @if (!hideDateColumn_()) {
         <div
           class="col-date c-grid-header-cell c-sortable-header"
-          carouselHeaderColumn
+          columnSlide
           label="date_added"
           (click)="setSort('dateAdded')"
           (keydown.enter)="setSort('dateAdded')"
@@ -110,7 +111,7 @@
       }
       <div
         class="col-rating c-grid-header-cell c-sortable-header"
-        carouselHeaderColumn
+        columnSlide
         label="rating"
         (click)="setSort('rating')"
         (keydown.enter)="setSort('rating')"
@@ -120,7 +121,7 @@
       >
         {{ 'rating' | translatePipe }}
       </div>
-    </app-carousel-header>
+    </app-column-carousel-header>
     <div
       class="col-cost c-grid-header-cell c-sortable-header"
       (click)="setSort('cost')"
@@ -182,10 +183,10 @@
         <div class="col-type c-list-body-cell">
           {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
         </div>
-        <app-cell-carousel [activeIndex]="carouselHeaderIndex_()">
+        <app-column-carousel-cell>
           <div
             class="col-labels c-list-body-cell c-dense-chip-col"
-            cellCarouselSlide
+            columnSlide
             [label]="'labels' | translatePipe"
           >
             @if (row.labels.length) {
@@ -219,7 +220,7 @@
           </div>
           <div
             class="col-allergens c-list-body-cell c-dense-chip-col"
-            cellCarouselSlide
+            columnSlide
             [label]="'allergens' | translatePipe"
           >
             @if (row.allergens.length) {
@@ -247,7 +248,7 @@
           @if (!hideDateColumn_()) {
             <div
               class="col-date c-list-body-cell date-cell-wrap"
-              cellCarouselSlide
+              columnSlide
               [label]="'date_added' | translatePipe"
               (mouseenter)="showDateTooltip(row.recipe._id, $event)"
               (mouseleave)="hideDateTooltip()"
@@ -260,7 +261,7 @@
           }
           <div
             class="col-rating c-list-body-cell"
-            cellCarouselSlide
+            columnSlide
             [label]="'rating' | translatePipe"
             (click)="$event.stopPropagation()"
           >
@@ -271,7 +272,7 @@
               (ratingChange)="onRatingChange(row.recipe, $event)"
             />
           </div>
-        </app-cell-carousel>
+        </app-column-carousel-cell>
         <div
           class="col-cost c-list-body-cell cost-cell-wrap"
           (mouseenter)="showCostTooltip(row.recipe._id, $event)"

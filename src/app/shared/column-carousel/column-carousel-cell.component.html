@@ -1,0 +1,12 @@
+<div class="cc-cell-label" aria-hidden="true">
+  <button type="button" class="cc-arrow cc-arrow--inline cc-arrow--prev" tabindex="-1" (click)="prev($event)" aria-label="Previous column">
+    <lucide-icon class="cc-icon-rtl" name="chevron-right" [size]="12"></lucide-icon>
+    <lucide-icon class="cc-icon-ltr" name="chevron-left" [size]="12"></lucide-icon>
+  </button>
+  <span class="cc-cell-label-text">{{ activeLabel() | translatePipe }}</span>
+  <button type="button" class="cc-arrow cc-arrow--inline cc-arrow--next" tabindex="-1" (click)="next($event)" aria-label="Next column">
+    <lucide-icon class="cc-icon-rtl" name="chevron-left" [size]="12"></lucide-icon>
+    <lucide-icon class="cc-icon-ltr" name="chevron-right" [size]="12"></lucide-icon>
+  </button>
+</div>
+<ng-content></ng-content>

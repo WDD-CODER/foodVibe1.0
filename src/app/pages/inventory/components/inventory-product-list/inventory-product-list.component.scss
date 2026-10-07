@@ -392,19 +392,6 @@
     }
   }
 
-  @media (max-width: 768px) {
-    .product-grid-row app-cell-carousel {
-      background: var(--bg-glass);
-
-      border-block-end: 1px solid var(--border-row);
-
-      transition: background 0.15s ease;
-    }
-
-    .product-grid-row:hover app-cell-carousel {
-      background: var(--bg-glass-hover);
-    }
-  }
 }
 
 // Row tints — outside @layer so they win over the unlayered .c-list-body-cell background rule

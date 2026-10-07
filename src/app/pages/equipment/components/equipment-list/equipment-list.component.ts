@@ -22,12 +22,7 @@ import { TranslationService } from '@services/translation.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import {
-  CarouselHeaderComponent,
-  CarouselHeaderColumnDirective
-} from 'src/app/shared/carousel-header/carousel-header.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
@@ -42,6 +37,7 @@ import { AddItemModalService } from '@services/add-item-modal.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { EquipmentCategoryRegistryService } from '@services/equipment-category-registry.service'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
@@ -60,16 +56,13 @@ type EquipmentBulkField = 'category' | 'isConsumable'
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    CellCarouselComponent,
-    CellCarouselSlideDirective,
     ListShellComponent,
-    CarouselHeaderComponent,
-    CarouselHeaderColumnDirective,
     CustomSelectComponent,
     ListRowCheckboxComponent,
     SelectionBarComponent,
     ClickOutSideDirective,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    ...COLUMN_CAROUSEL
   ],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
@@ -102,7 +95,6 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected searchQuery_ = signal('')
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
-  protected carouselHeaderIndex_ = signal(0)
 
   /** Row edit panel: inline on desktop, modal on tablet + mobile (plan 305 decision 2). */
   protected readonly isDesktop_ = useIsDesktop()
@@ -333,10 +325,6 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   protected togglePanel(): void {
     this.togglePanelState_()
-  }
-
-  protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index)
   }
 
   protected toggleCategory(cat: EquipmentCategory): void {
