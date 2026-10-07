@@ -157,14 +157,6 @@
 - [x] A4: `vh` → `dvh` in the listed files.
 - [ ] A5: Build and run specs. Update the session-state file.
 
-### Plan 348 — Recipe builder on mobile: usable ingredient rows (portrait and landscape) (`plans/348-recipe-builder-mobile-usable-ingredient-rows.plan.md`)
-- [ ] A1: Remove the conflicting media block; tune the container card layout for portrait and landscape (`recipe-ingredients-table.component.scss`).
-- [ ] A2: Gate hover-reveals behind `(hover: hover)` (`recipe-ingredients-table.component.scss`).
-- [ ] A3: Update the `isMobile_` query (`recipe-ingredients-table.component.ts`).
-- [ ] A4: Nutrition badge tap positioning, clamp and outside-tap close, with a spec (`shared/nutrition-badge/**`).
-- [ ] A5: Header grid `1fr 1fr` (`recipe-header.component.scss`).
-- [ ] A6: Build and run specs. Check at 360×740 portrait, 740×360 landscape and desktop. Update the session-state file.
-
 ### Plan 349 — Shared column carousel (one component for every list) and roomier recipe-book carousel (`plans/349-shared-column-carousel-roomier-recipe-book-carousel.plan.md`)
 - [ ] A1: Build the group directive, header, cell and slide directive, with specs: next/prev wrap or clamp, header and cell share the index, RTL direction (`src/app/shared/column-carousel/**`).
 - [ ] A2: Migrate recipe-book, including the spacing changes (`recipe-book-list/**`).
