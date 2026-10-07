@@ -53,31 +53,6 @@
     margin-block-start: 0.5rem;
   }
 
-  /* Inline edit: grid-column span for list context */
-  .inline-edit-panel {
-    grid-column: 1 / -1;
-  }
-
-  /* Inline edit: supplier-specific extras */
-  .inline-edit-check-label {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-  }
-
-  .inline-edit-days-wrap {
-    display: flex;
-    flex-wrap: wrap;
-
-    gap: 0.5rem 1rem;
-  }
-
-  @media (max-width: 640px) {
-    .inline-edit-grid {
-      grid-template-columns: 1fr;
-    }
-  }
-
   @media (max-width: 768px) {
     .supplier-grid-row app-cell-carousel {
       background: var(--bg-glass);

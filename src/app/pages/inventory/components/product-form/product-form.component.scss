@@ -24,6 +24,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  // Grid item of .product-form-container: let it shrink below the inputs' intrinsic width on phones
+  min-width: 0;
   background: var(--bg-glass-strong);
   padding: var(--space-8);
   border: 1px solid var(--border-glass);
@@ -401,13 +403,15 @@
     min-height: 4.5rem;
   }
 
-  // Responsive — align with single grid column on narrow screens
+  // Responsive — align with single grid column on narrow screens.
+  // These blocks sit inside .form-container, so they target its children (and & for itself);
+  // a `.form-container …` prefix here compiled to `.form-container .form-container …` and never matched.
   @media (max-width: 900px) {
-    .form-container .form-section {
+    .form-section {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .form-container .form-section.grid-2 {
+    .form-section.grid-2 {
       grid-template-columns: 1fr;
     }
 
@@ -424,16 +428,10 @@
   }
 
   @media (max-width: 768px) {
-    .product-form-container {
-      max-width: none;
-    }
+    padding: var(--space-5);
 
-    .form-container {
-      padding: var(--space-5);
-    }
-
-    .form-container .form-section,
-    .form-container .form-section.product-info {
+    .form-section,
+    .form-section.product-info {
       grid-template-columns: 1fr;
     }
 
