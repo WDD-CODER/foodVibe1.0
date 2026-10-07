@@ -122,14 +122,6 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
-### Plan 338 — Equipment: one route tree, back-to-products navigation, remove scaling rule from UI (`plans/338-equipment-one-route-tree-back-to-products-remove-scaling.plan.md`)
-- [ ] A1: Replace the /equipment routes with redirects and delete EquipmentPage. (src/app/app.routes.ts, src/app/pages/equipment/equipment.page.*)
-- [ ] A2: Remove the URL branching in list, form and resolver. (equipment-list.component.ts, equipment-form.component.ts, equipment.resolver.ts)
-- [ ] A3: Add the two inventory tab chips, and remove the .control-nav from the equipment and inventory filter panels. (tab-chips.component.ts, equipment-list.component.html, inventory-product-list.component.html)
-- [ ] A4: Swap the logistics labels for equipment. (equipment-list.component.html, inventory-product-list.component.html)
-- [ ] A5: Remove the scaling UI from form and list; deprecate the model fields. (equipment-form.component.*, equipment-list.component.*, equipment.model.ts)
-- [ ] A6: Run rg -n "scaling|isUnderInventory|EquipmentPage|'/equipment" src/app and clean the leftovers. Build, specs, e2e grep. Update the session-state file.
-
 ### Plan 340 — Metadata: compact chips, tap-to-act menu, menu-type fields as toggle chips (`plans/340-metadata-compact-chips-tap-menu-menu-type-toggle-chips.plan.md`)
 
 - [ ] A1: Add `RowActionsMenuComponent.open(anchor)` / `close()` (public) and anchor-based positioning, with a spec. Verify the 4 existing list usages are unchanged. (`src/app/shared/row-actions-menu/**`)
