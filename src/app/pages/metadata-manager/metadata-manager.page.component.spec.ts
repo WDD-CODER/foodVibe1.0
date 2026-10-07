@@ -73,6 +73,20 @@ describe('MetadataManagerPageComponent', () => {
     expect(component).toBeTruthy()
   })
 
+  it('renders every metadata item as a compact pill with no per-item action buttons (plan 340)', () => {
+    const categoryPills = fixture.debugElement.queryAll(By.css('section[data-type="category"] .label-pill'))
+    expect(categoryPills.length).toBe(2)
+    expect(fixture.debugElement.queryAll(By.css('section[data-type="allergen"] .label-pill')).length).toBe(2)
+    expect(fixture.debugElement.queryAll(By.css('section.manager-card[data-type] .c-icon-btn')).length).toBe(0)
+  })
+
+  it('keeps system units as locked pills (not tappable)', () => {
+    const unitButtons = fixture.debugElement.queryAll(By.css('section[data-type="unit"] button.label-pill'))
+    const lockedUnits = fixture.debugElement.queryAll(By.css('section[data-type="unit"] .label-pill.is-locked'))
+    expect(unitButtons.length).toBe(0)
+    expect(lockedUnits.length).toBe(2)
+  })
+
   // Plan 385: the server re-keys referencing documents, so a rename is one term write + a reload.
   it('renames a category through the registry only, then reloads products', async () => {
     metadataRegistrySpy.renameCategory.and.resolveTo()

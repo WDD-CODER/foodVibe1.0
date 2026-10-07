@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, viewChild } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
@@ -12,11 +12,12 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 @Component({
   selector: 'app-preparation-category-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, TranslatePipe, RowActionsMenuComponent],
   templateUrl: './preparation-category-manager.component.html',
   styleUrl: './preparation-category-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -36,6 +37,9 @@ export class PreparationCategoryManagerComponent implements OnInit {
 
   protected readonly categories = this.prepRegistry.preparationCategories_
   protected readonly editingKey_ = signal<string | null>(null)
+  /** Plan 340: the pill whose edit/delete menu is open. */
+  protected readonly menuKey_ = signal<string | null>(null)
+  private readonly actionsMenu = viewChild<RowActionsMenuComponent>('menu')
 
   ngOnInit(): void {
     void this.prepRegistry.ensureLoaded()
@@ -109,6 +113,34 @@ export class PreparationCategoryManagerComponent implements OnInit {
 
     await this.prepRegistry.deleteCategory(key)
     this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_updated_success'))
+  }
+
+  /** Plan 340: tap a pill → edit/delete menu anchored to it. */
+  protected openMenu(value: string, event: Event): void {
+    if (!this.requireSignIn()) return
+    this.menuKey_.set(value)
+    this.actionsMenu()?.open(event.currentTarget as HTMLElement)
+  }
+
+  protected isMenuOpenFor(value: string): boolean {
+    return this.menuKey_() === value && !!this.actionsMenu()?.opened()
+  }
+
+  protected onMenuEdit(): void {
+    const value = this.takeMenuKey()
+    if (value) this.onStartRename(value)
+  }
+
+  protected onMenuDelete(): void {
+    const value = this.takeMenuKey()
+    if (value) void this.onRemove(value)
+  }
+
+  private takeMenuKey(): string | null {
+    const value = this.menuKey_()
+    this.actionsMenu()?.close()
+    this.menuKey_.set(null)
+    return value
   }
 
   onStartRename(key: string): void {

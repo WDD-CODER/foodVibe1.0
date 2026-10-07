@@ -106,8 +106,8 @@
     width: 2.25rem;
     height: 2.25rem;
 
-    opacity: 0;
-
+    // Plan 340: always visible (no hover-only reveal — unreachable on touch); muted until hover.
+    color: var(--color-text-muted);
     background: transparent;
 
     border: none;
@@ -126,10 +126,6 @@
       cursor: not-allowed;
       pointer-events: none;
     }
-  }
-
-  .list-item:hover .c-icon-btn.danger {
-    opacity: 1;
   }
 }
 

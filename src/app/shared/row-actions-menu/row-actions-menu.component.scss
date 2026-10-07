@@ -87,3 +87,37 @@
     }
   }
 }
+
+// ── Anchored (plan 340): opened via open(anchor) — same popover at every width ──
+:host(.is-anchored) {
+  .ram-backdrop.visible {
+    position: fixed;
+    inset: 0;
+    z-index: 1099;
+    display: block;
+  }
+
+  .ram-popover {
+    position: fixed;
+    z-index: 1100;
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    transform: translateX(-50%);
+
+    background: var(--bg-glass-strong);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-modal);
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+
+    &.is-open {
+      display: flex;
+    }
+  }
+}
+

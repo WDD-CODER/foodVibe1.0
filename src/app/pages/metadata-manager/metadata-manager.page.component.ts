@@ -36,6 +36,7 @@ import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label' | 'course'
 
@@ -58,7 +59,8 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     TranslatePipe,
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
-    UserManagementComponent
+    UserManagementComponent,
+    RowActionsMenuComponent
   ],
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss',
@@ -114,8 +116,14 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
   allCourses_ = this.metadataRegistry.courses_
   allCourseKeys_ = computed(() => this.allCourses_().map((c) => c.key))
   allMenuTypes_ = this.metadataRegistry.allMenuTypes_
-  protected editingMenuTypeKey_ = signal<string | null>(null)
-  protected editingMenuTypeFields_ = signal<DishFieldKey[]>([])
+  /** Plan 340: the pill whose edit/delete menu is open. */
+  protected readonly itemMenuTarget_ = signal<{ item: string; type: MetadataType } | null>(null)
+  /** Plan 340: the menu type whose name menu is open / which is being renamed inline. */
+  protected readonly menuTypeMenuKey_ = signal<string | null>(null)
+  protected readonly renamingMenuTypeKey_ = signal<string | null>(null)
+  private readonly itemMenu = viewChild<RowActionsMenuComponent>('itemMenu')
+  private readonly menuTypeMenu = viewChild<RowActionsMenuComponent>('menuTypeMenu')
+  private readonly menuTypeRenameInput = viewChild<ElementRef<HTMLInputElement>>('menuTypeRenameInput')
 
   readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS
   readonly DEFAULT_DISH_FIELDS = DEFAULT_DISH_FIELDS
@@ -608,6 +616,35 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /** Plan 340: tap a metadata pill → edit/delete menu anchored to it. */
+  protected openItemMenu(item: string, type: MetadataType, event: Event): void {
+    if (!this.requireSignIn()) return
+    this.itemMenuTarget_.set({ item, type })
+    this.itemMenu()?.open(event.currentTarget as HTMLElement)
+  }
+
+  protected isItemMenuFor(item: string, type: MetadataType): boolean {
+    const t = this.itemMenuTarget_()
+    return !!t && t.item === item && t.type === type && !!this.itemMenu()?.opened()
+  }
+
+  protected onItemMenuEdit(): void {
+    const t = this.takeItemMenuTarget()
+    if (t) void this.onRenameMetadata(t.item, t.type)
+  }
+
+  protected onItemMenuDelete(): void {
+    const t = this.takeItemMenuTarget()
+    if (t) void this.onRemoveMetadata(t.item, t.type)
+  }
+
+  private takeItemMenuTarget(): { item: string; type: MetadataType } | null {
+    const t = this.itemMenuTarget_()
+    this.itemMenu()?.close()
+    this.itemMenuTarget_.set(null)
+    return t
+  }
+
   async onRenameMetadata(item: string, type: MetadataType): Promise<void> {
     if (!this.requireSignIn()) return
 
@@ -718,40 +755,52 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onEditMenuType(key: string): void {
+  /** Plan 340: tapping a field chip toggles it and saves; fields keep the fixed ALL_DISH_FIELDS order. */
+  async onToggleMenuTypeField(key: string, fieldKey: DishFieldKey): Promise<void> {
     if (!this.requireSignIn()) return
-    this.editingMenuTypeKey_.set(key)
-    this.editingMenuTypeFields_.set([...this.metadataRegistry.getMenuTypeFields(key)])
+    const current = this.metadataRegistry.getMenuTypeFields(key)
+    const has = current.includes(fieldKey)
+    const updated = ALL_DISH_FIELDS.map((f) => f.key).filter((k) => (k === fieldKey ? !has : current.includes(k)))
+    await this.metadataRegistry.updateMenuType(key, updated)
   }
 
-  toggleMenuTypeField(fieldKey: DishFieldKey): void {
-    this.editingMenuTypeFields_.update((fields) => {
-      const has = fields.includes(fieldKey)
-      if (has) return fields.filter((f) => f !== fieldKey)
-      return [...fields, fieldKey]
-    })
-  }
-
-  isMenuTypeFieldSelected(fieldKey: DishFieldKey): boolean {
-    return this.editingMenuTypeFields_().includes(fieldKey)
-  }
-
-  getDishFieldLabelKey(fieldKey: DishFieldKey): string {
-    return ALL_DISH_FIELDS.find((f) => f.key === fieldKey)?.labelKey ?? fieldKey
-  }
-
-  async onSaveMenuTypeFields(): Promise<void> {
+  protected openMenuTypeMenu(key: string, event: Event): void {
     if (!this.requireSignIn()) return
-    const key = this.editingMenuTypeKey_()
+    this.menuTypeMenuKey_.set(key)
+    this.menuTypeMenu()?.open(event.currentTarget as HTMLElement)
+  }
+
+  protected onMenuTypeMenuEdit(): void {
+    const key = this.menuTypeMenuKey_()
+    this.closeMenuTypeMenu()
     if (!key) return
-    await this.metadataRegistry.updateMenuType(key, this.editingMenuTypeFields_())
-    this.editingMenuTypeKey_.set(null)
-    this.editingMenuTypeFields_.set([])
+    this.renamingMenuTypeKey_.set(key)
+    setTimeout(() => {
+      const el = this.menuTypeRenameInput()?.nativeElement
+      el?.focus()
+      el?.select()
+    }, 0)
   }
 
-  onCancelEditMenuType(): void {
-    this.editingMenuTypeKey_.set(null)
-    this.editingMenuTypeFields_.set([])
+  protected async onMenuTypeMenuDelete(): Promise<void> {
+    const key = this.menuTypeMenuKey_()
+    this.closeMenuTypeMenu()
+    if (key) await this.onRemoveMenuType(key)
+  }
+
+  protected async onMenuTypeRenameDone(oldKey: string, newName: string): Promise<void> {
+    if (this.renamingMenuTypeKey_() !== oldKey) return
+    this.renamingMenuTypeKey_.set(null)
+    await this.onMenuTypeNameBlur(oldKey, newName)
+  }
+
+  protected onMenuTypeRenameCancel(): void {
+    this.renamingMenuTypeKey_.set(null)
+  }
+
+  private closeMenuTypeMenu(): void {
+    this.menuTypeMenu()?.close()
+    this.menuTypeMenuKey_.set(null)
   }
 
   async onRemoveMenuType(key: string): Promise<void> {
@@ -773,12 +822,5 @@ export class MetadataManagerComponent implements OnInit, AfterViewInit {
     if (!confirmed) return
     await this.metadataRegistry.renameMenuType(oldKey, trimmed)
     await this.menuEventData.updateServingTypeForAll(oldKey, trimmed)
-  }
-
-  async removeFieldFromMenuType(key: string, fieldKey: DishFieldKey): Promise<void> {
-    if (!this.requireSignIn()) return
-    const current = this.metadataRegistry.getMenuTypeFields(key)
-    const updated = current.filter((f) => f !== fieldKey)
-    await this.metadataRegistry.updateMenuType(key, updated)
   }
 }

@@ -25,55 +25,56 @@
 
   <div class="list-container">
     @if (categories().length > 0) {
-      <div class="list-stack">
+      <!-- Plan 340: compact pills; tap an editable one → edit/delete menu. Double-click still renames. -->
+      <div class="label-pool">
         @for (name of categories(); track name) {
-          <div class="list-item group">
-            @if (editingName_() === name) {
-              <input
-                type="text"
-                class="inline-edit-input"
-                [value]="name"
-                (blur)="onRenameBlur(name, $any($event.target).value)"
-                (keydown.enter)="$any($event.target).blur()"
-                autofocus
-              />
-            } @else {
-              <span class="item-label" (dblclick)="onStartRename(name)">{{ name | translatePipe }}</span>
-            }
-            <div class="item-actions">
-              @if (canEdit(name)) {
-                <button
-                  type="button"
-                  class="btn-edit"
-                  (click)="onStartRename(name)"
-                  [disabled]="!isLoggedIn()"
-                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                >
-                  <lucide-icon name="pencil" [size]="14"></lucide-icon>
-                </button>
-                <button
-                  type="button"
-                  class="c-icon-btn danger"
-                  (click)="onRemove(name)"
-                  [disabled]="!isLoggedIn()"
-                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                >
-                  <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-                </button>
-              } @else {
-                <lucide-icon
-                  name="lock"
-                  [size]="14"
-                  [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
-                  [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-                ></lucide-icon>
-              }
-            </div>
-          </div>
+          @if (editingName_() === name) {
+            <input
+              type="text"
+              class="inline-edit-input"
+              [value]="name"
+              (blur)="onRenameBlur(name, $any($event.target).value)"
+              (keydown.enter)="$any($event.target).blur()"
+              autofocus
+            />
+          } @else if (canEdit(name)) {
+            <button
+              type="button"
+              class="label-pill"
+              [class.is-active]="isMenuOpenFor(name)"
+              aria-haspopup="menu"
+              [attr.aria-expanded]="isMenuOpenFor(name)"
+              (click)="openMenu(name, $event)"
+              (dblclick)="onStartRename(name)"
+            >
+              {{ name | translatePipe }}
+            </button>
+          } @else {
+            <span class="label-pill is-locked">
+              {{ name | translatePipe }}
+              <lucide-icon
+                name="lock"
+                [size]="12"
+                [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
+                [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+              ></lucide-icon>
+            </span>
+          }
         }
       </div>
     } @else {
       <div class="empty-state">{{ 'metadata_no_section_categories' | translatePipe }}</div>
     }
   </div>
+
+  <app-row-actions-menu #menu [showTrigger]="false">
+    <button type="button" class="c-btn-ghost--sm ram-action" (click)="onMenuEdit()">
+      <lucide-icon name="pencil" [size]="14"></lucide-icon>
+      {{ 'edit' | translatePipe }}
+    </button>
+    <button type="button" class="c-btn-ghost--sm ram-action ram-action--danger" (click)="onMenuDelete()">
+      <lucide-icon name="trash-2" [size]="14"></lucide-icon>
+      {{ 'delete' | translatePipe }}
+    </button>
+  </app-row-actions-menu>
 </section>
