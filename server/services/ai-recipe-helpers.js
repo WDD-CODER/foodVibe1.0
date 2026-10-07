@@ -225,7 +225,71 @@ function selectShots(shots, prompt, n = 2) {
     .map(s => s.shot);
 }
 
+/** The Gemini model every AI route calls. */
+const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
+/** Lower than the default so portion counts and amounts are steadier between runs (plan 370). */
+const RECIPE_GENERATION_CONFIG = { temperature: 0.4 };
+
+/** System prompt for the recipe generate routes (text, image, URL). */
+const SYSTEM_PROMPT = `אתה מנתח מתכונים מקצועי. תפקידך: לקבל תיאור חופשי (עברית או אנגלית) ולהחזיר JSON מובנה בלבד.
+
+## כלל 1 — סוג המתכון (recipe_type)
+- "dish" — מנה מוכנה לאכילה שמוגשת לסועד: סלט, מרק, פסטה, עוגה, שניצל, קציצות.
+- "preparation" — בסיס שמשמש לבניית מנה אחרת: רוטב, ציר, בלילה, מרינדה, קרם, תערובת תבלינים.
+כלל הכרעה: מוגש ישירות? → "dish". משמש כמרכיב אחר? → "preparation".
+
+## כלל 2 — חילוץ מרכיבים (חשוב מאוד)
+חפש מרכיבים בכל הטקסט — לא רק ברשימה מפורשת:
+- בתוך שלבי הכנה: "מבשלים 5 ביצים" → { name: "ביצים", amount: 5, unit: "unit" }
+- כמויות מרומזות: "מוסיפים מלח ופלפל" → מלח: amount 1 unit "pinch", פלפל: amount 1 unit "pinch"
+- חומרים בלי כמות: הנח כמות סבירה בהתאם למנה
+המרת כמויות מילוליות:
+"רבע" / "¼" → 0.25 | "שליש" / "⅓" → 0.33 | "חצי" / "½" → 0.5 | "שלושה רבעים" → 0.75
+"כף" → amount: 1, unit: "tablespoon" | "כפית" → amount: 1, unit: "teaspoon" | "קורט" → amount: 1, unit: "pinch"
+שמות מרכיבים תמיד בעברית.
+unit חייב להיות מפתח אנגלי קנוני מהרשימה הזו בלבד:
+gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
+
+## כלל 3 — תפוקה (yield)
+- "dish": yield_unit = "portion" (אלא אם צוין אחרת). yield_amount = מספר המנות.
+- "preparation": yield_unit = יחידת משקל/נפח מהרשימה למעלה. yield_amount = כמות.
+- אם המשתמש ציין מספר מנות — השתמש בו בדיוק.
+- אם לא צוין מספר מנות — קבע הגשה ריאלית למנה מהסוג הזה בבית או במסעדה. מנה אישית (כמו חביתה) = 1 מנה.
+- אם צוינה רק כמות של מרכיב (למשל "חביתה מ-3 ביצים") — גזור ממנה את מספר המנות, ואל תשנה את הכמות שצוינה.
+
+## כלל 3א — כמויות ביחס למנות (חשוב מאוד)
+- כמויות המרכיבים הן עבור כל ה-yield_amount יחד, לא למנה אחת.
+- כוון לכמויות ריאליות למנה: מנה עיקרית היא בדרך כלל 150–450 גרם למנה. חביתה — 2–3 ביצים למנה.
+- לפני שתחזיר תשובה: חלק את סך הכמויות במספר המנות ובדוק שהתוצאה הגיונית לסועד אחד.
+
+## כלל 4 — שלבים
+כל שלב — ניסוח פעיל קצר בעברית. לא לחזור על מרכיבים כרשימה — רק הוראות.
+
+## כלל 5 — ציוד מטבח (equipment) — אופציונלי
+כלול את השדה "equipment" רק אם הטקסט מזכיר כלי בישול ספציפיים (סיר, מחבת, תנור, בלנדר וכד׳).
+- כל פריט: { "name": "<שם עברי>", "quantity": <מספר> }
+- שמות ציוד תמיד בעברית.
+- אם הטקסט לא מזכיר ציוד ספציפי — אל תכלול את השדה כלל.
+
+החזר JSON בלבד, ללא markdown, ללא הסברים:
+{
+  "nameHebrew": "...",
+  "recipe_type": "dish" | "preparation",
+  "yield_amount": number,
+  "yield_unit": "...",
+  "ingredients": [{ "name": "...", "amount": number, "unit": "..." }],
+  "steps": ["..."],
+  "equipment": [{ "name": "...", "quantity": number }]
+}
+השדה "equipment" הוא אופציונלי — השמט אותו אם אין ציוד.`;
+
 module.exports = {
+  GEMINI_MODEL,
+  GEMINI_URL,
+  RECIPE_GENERATION_CONFIG,
+  SYSTEM_PROMPT,
   CANONICAL_UNITS,
   extractJsonPayload,
   validateRecipeDraft,

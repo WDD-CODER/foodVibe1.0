@@ -99,8 +99,8 @@ As a chef, when I ask the AI for an omelet, I want 1–2 portions with realistic
 - [x] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
 - [x] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
 - [x] A3: The `implausible_portion_weight` warning, server and client mirror, plus tests and the dictionary key.
-- [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`).
-- [ ] A5: Build, server tests. Update session-state.
+- [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`). Script written; full 5×5 run still pending: free tier is 20 calls/day, so split across days with `--only`.
+- [x] A5: Build, server tests. Update session-state.
 
 ## Technical Considerations
 
