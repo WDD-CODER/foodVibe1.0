@@ -1,14 +1,9 @@
 @if (dominantColor) {
-  <span class="nb-wrap"
-    (mouseenter)="onMouseEnter()"
-    (mouseleave)="showTooltip = false"
-    (click)="onBadgeClick($event)">
-
+  <span class="nb-wrap" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()" (click)="onBadgeClick($event)">
     <lucide-icon name="leaf" [size]="14" class="nb-leaf" [style.color]="dominantColor"></lucide-icon>
 
-    @if (showTooltip) {
-      <div class="nb-tooltip" dir="rtl" [class.nb-tooltip--below]="isBelow_()" [ngStyle]="tooltipStyle_()">
-
+    @if (showTooltip_()) {
+      <div #tooltip popover="manual" class="nb-tooltip" dir="rtl" [class.nb-tooltip--below]="isBelow_()">
         <div class="nb-header">100 גר׳</div>
 
         <!-- Macro bar strip -->
@@ -26,12 +21,30 @@
                 <lucide-icon [name]="item.iconName!" [size]="10" [style.color]="item.color"></lucide-icon>
               } @else {
                 <!-- Fat: drop + FAT text -->
-                <svg class="nb-fat-icon" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round">
-                  <path d="M12 2C6.5 8 4 12.5 4 15a8 8 0 0 0 16 0c0-2.5-2.5-7-8-13z"/>
-                  <text x="12" y="17" text-anchor="middle" font-size="5.5" font-weight="800" fill="#ef4444" stroke="none" font-family="system-ui,sans-serif">FAT</text>
+                <svg
+                  class="nb-fat-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#ef4444"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                >
+                  <path d="M12 2C6.5 8 4 12.5 4 15a8 8 0 0 0 16 0c0-2.5-2.5-7-8-13z" />
+                  <text
+                    x="12"
+                    y="17"
+                    text-anchor="middle"
+                    font-size="5.5"
+                    font-weight="800"
+                    fill="#ef4444"
+                    stroke="none"
+                    font-family="system-ui,sans-serif"
+                  >
+                    FAT
+                  </text>
                 </svg>
               }
-              <span class="nb-legend-pct">{{ item.pct | number:'1.0-0' }}%</span>
+              <span class="nb-legend-pct">{{ item.pct | number: '1.0-0' }}%</span>
             </span>
           }
         </div>
@@ -45,20 +58,38 @@
               @if (row.iconType === 'lucide') {
                 <lucide-icon [name]="row.iconName!" [size]="12" [style.color]="row.iconColor"></lucide-icon>
               } @else {
-                <svg class="nb-fat-icon nb-fat-icon--row" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round">
-                  <path d="M12 2C6.5 8 4 12.5 4 15a8 8 0 0 0 16 0c0-2.5-2.5-7-8-13z"/>
-                  <text x="12" y="17" text-anchor="middle" font-size="5.5" font-weight="800" fill="#ef4444" stroke="none" font-family="system-ui,sans-serif">FAT</text>
+                <svg
+                  class="nb-fat-icon nb-fat-icon--row"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#ef4444"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                >
+                  <path d="M12 2C6.5 8 4 12.5 4 15a8 8 0 0 0 16 0c0-2.5-2.5-7-8-13z" />
+                  <text
+                    x="12"
+                    y="17"
+                    text-anchor="middle"
+                    font-size="5.5"
+                    font-weight="800"
+                    fill="#ef4444"
+                    stroke="none"
+                    font-family="system-ui,sans-serif"
+                  >
+                    FAT
+                  </text>
                 </svg>
               }
             </span>
             <span class="nb-row-label">{{ row.label }}</span>
             <span class="nb-row-val">
               @if (row.unit === 'קק"ל') {
-                {{ row.value | number:'1.0-0' }}
+                {{ row.value | number: '1.0-0' }}
               } @else if (row.unit === 'מג') {
-                {{ row.value | number:'1.0-0' }}
+                {{ row.value | number: '1.0-0' }}
               } @else {
-                {{ row.value | number:'1.0-1' }}
+                {{ row.value | number: '1.0-1' }}
               }
               <span class="nb-row-unit">{{ row.unit }}</span>
             </span>
