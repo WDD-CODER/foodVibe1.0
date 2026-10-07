@@ -18,7 +18,7 @@ Four UI issues in venues (`src/app/pages/venues/`):
 ## Goals & Success Criteria
 
 - Primary: each venue card shows a compact hours line (clock icon + days · time; "+N" for more rows).
-- Primary: the card checkbox is hidden until hover, focus or selection mode (always visible on touch devices), at the card's top-left corner and outside the image.
+- Primary: mouse devices: the card checkbox is hidden until hover, focus or selection mode, at the card's top-left corner and outside the image. Touch devices (amended 2026-10-07): no checkboxes; a long press selects (outlined card), taps toggle, Back or a tap outside clears.
 - Primary: the form works at 360px and has a 2-column basic section at ≥768px.
 - Primary: leaving add or edit with unsaved changes asks "save and leave / leave without saving / cancel".
 - Success: no change to the stored data shape.
@@ -104,7 +104,7 @@ touching any milestone.
 - [x] A2: Checkbox visibility and position on cards (`venue-list/**`).
 - [x] A3: Responsive venue form (`venue-form.component.scss`).
 - [x] A4: Guard contract on `VenueFormComponent` plus routes, with a spec (dirty → `hasRealChanges` true; after save → `isSubmitted`) (`venue-form/**`, `app.routes.ts`).
-- [ ] A5: Build, specs. Check at 360px and 1280px, touch and mouse. Update session-state.
+- [x] A5: Build, specs. Check at 360px and 1280px, touch and mouse. Update session-state.
 - [x] A6 (review fallout 2026-10-07): touch devices only (`hover: none`): no card checkboxes; a long press selects a card (outlined) and enters selection mode; taps then toggle; clearing, Back, or a tap outside the cards and selection bar leaves it. Mouse devices keep the hover checkbox (`venue-list/**`).
 
 ## Technical Considerations
@@ -130,5 +130,5 @@ touching any milestone.
 - [auto] `npx ng test --watch=false --include=src/app/pages/venues/**/*.spec.ts --include=src/app/core/utils/venue-hours.util.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
 - [human] Venue list, desktop: no checkboxes until hover; hovering shows one at the card's top-left, not on the photo; selecting keeps it. Cards show the hours line.
-- [human] Phone: checkboxes visible in the corner, not over the photo. The add-venue form fits with no sideways scroll; infrastructure rows wrap.
+- [human] Phone: no checkboxes; a long press selects a card (teal outline), taps toggle, a tap outside or Back clears, the selection bar keeps it. The add-venue form fits with no sideways scroll; infrastructure rows wrap.
 - [human] Edit a venue, change the name, tap another tab → the "unsaved changes" dialog → cancel keeps you; leave discards; save saves.
