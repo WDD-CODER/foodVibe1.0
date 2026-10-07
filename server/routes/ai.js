@@ -115,90 +115,25 @@ router.get('/usage', async (_req, res) => {
   });
 });
 
-const CANONICAL_UNITS = new Set([
-  'gram', 'ml', 'kg', 'liter', 'unit', 'tablespoon', 'teaspoon', 'cup', 'pinch', 'portion',
-]);
+const {
+  CANONICAL_UNITS,
+  extractJsonPayload,
+  validateRecipeDraft,
+  normalizeIngredientUnits,
+  computeSoftWarnings,
+  escapeForPrompt,
+  buildFewShotBlock,
+  selectShots,
+} = require('../services/ai-recipe-helpers');
 
-const RECIPE_TYPES = new Set(['dish', 'preparation']);
+/** Lower than the default so portion counts and amounts are steadier between runs (plan 370). */
+const RECIPE_GENERATION_CONFIG = { temperature: 0.4 };
 
-// Common non-canonical unit words Gemini sometimes substitutes for a
-// count-based ingredient (e.g. "4 cloves of garlic" -> unit: "clove").
-// Mapped to "unit" — the canonical key for countable ingredients — instead
-// of failing validation and discarding an otherwise-correct recipe.
-const UNIT_SYNONYMS = {
-  clove: 'unit', cloves: 'unit',
-  piece: 'unit', pieces: 'unit',
-  slice: 'unit', slices: 'unit',
-  leaf: 'unit', leaves: 'unit',
-  stalk: 'unit', stalks: 'unit',
-  sprig: 'unit', sprigs: 'unit',
-  can: 'unit', cans: 'unit',
-  bunch: 'unit', bunches: 'unit',
-};
+/** How many relevant approved examples a recipe generate call prepends (plan 370). */
+const FEW_SHOT_COUNT = 2;
 
-/**
- * Rewrites known non-canonical unit synonyms to their canonical key in place.
- */
-function normalizeIngredientUnits(recipe) {
-  if (!recipe || !Array.isArray(recipe.ingredients)) return;
-  for (const ing of recipe.ingredients) {
-    if (!ing || typeof ing.unit !== 'string') continue;
-    const canonical = UNIT_SYNONYMS[ing.unit.trim().toLowerCase()];
-    if (canonical) ing.unit = canonical;
-  }
-}
-
-/**
- * Extracts a JSON payload from a Gemini text response. Strips markdown code
- * fences first; if a direct parse still fails (e.g. Gemini echoed surrounding
- * prose or a few-shot "prompt:/output:" label instead of returning bare
- * JSON), falls back to slicing the outermost {...} block and retrying.
- * Returns { value } on success or { error: 'empty' | 'invalid' } on failure.
- */
-function extractJsonPayload(raw) {
-  const fencePattern = /```(?:json)?\s*([\s\S]*?)```/i;
-  const fenceMatch = fencePattern.exec(raw);
-  const cleaned = (fenceMatch ? fenceMatch[1] : raw).trim();
-  if (!cleaned) return { error: 'empty' };
-  try {
-    return { value: JSON.parse(cleaned) };
-  } catch {
-    const start = cleaned.indexOf('{');
-    const end = cleaned.lastIndexOf('}');
-    if (start !== -1 && end > start) {
-      try {
-        return { value: JSON.parse(cleaned.slice(start, end + 1)) };
-      } catch {
-        return { error: 'invalid' };
-      }
-    }
-    return { error: 'invalid' };
-  }
-}
-
-/**
- * Validates the shape and unit values of a Gemini-generated AiRecipeDraft.
- * Returns an array of error strings; empty means valid.
- */
-function validateRecipeDraft(recipe) {
-  const errors = [];
-  if (!recipe || typeof recipe !== 'object') return ['recipe must be an object'];
-  if (typeof recipe.nameHebrew !== 'string' || !recipe.nameHebrew.trim()) errors.push('nameHebrew is required');
-  if (!RECIPE_TYPES.has(recipe.recipe_type)) errors.push(`recipe_type must be "dish" or "preparation", got "${recipe.recipe_type}"`);
-  if (typeof recipe.yield_amount !== 'number') errors.push('yield_amount must be a number');
-  if (typeof recipe.yield_unit !== 'string' || !recipe.yield_unit.trim()) errors.push('yield_unit is required');
-  if (!Array.isArray(recipe.ingredients)) {
-    errors.push('ingredients must be an array');
-  } else {
-    recipe.ingredients.forEach((ing, i) => {
-      if (typeof ing.name !== 'string' || !ing.name.trim()) errors.push(`ingredients[${i}].name is required`);
-      if (typeof ing.amount !== 'number') errors.push(`ingredients[${i}].amount must be a number`);
-      if (!CANONICAL_UNITS.has(ing.unit)) errors.push(`ingredients[${i}].unit "${ing.unit}" is not a canonical key`);
-    });
-  }
-  if (!Array.isArray(recipe.steps) || recipe.steps.length === 0) errors.push('steps must be a non-empty array');
-  return errors;
-}
+/** The URL route matches shots against the page's opening text (title/heading), not the whole page. */
+const URL_SHOT_MATCH_CHARS = 300;
 
 const SYSTEM_PROMPT = `אתה מנתח מתכונים מקצועי. תפקידך: לקבל תיאור חופשי (עברית או אנגלית) ולהחזיר JSON מובנה בלבד.
 
@@ -220,9 +155,16 @@ unit חייב להיות מפתח אנגלי קנוני מהרשימה הזו ב
 gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
 
 ## כלל 3 — תפוקה (yield)
-- "dish": yield_unit = "portion" (אלא אם צוין אחרת). yield_amount = מספר מנות משוער.
+- "dish": yield_unit = "portion" (אלא אם צוין אחרת). yield_amount = מספר המנות.
 - "preparation": yield_unit = יחידת משקל/נפח מהרשימה למעלה. yield_amount = כמות.
-- אם לא צוין — הערך לפי הכמויות.
+- אם המשתמש ציין מספר מנות — השתמש בו בדיוק.
+- אם לא צוין מספר מנות — קבע הגשה ריאלית למנה מהסוג הזה בבית או במסעדה. מנה אישית (כמו חביתה) = 1 מנה.
+- אם צוינה רק כמות של מרכיב (למשל "חביתה מ-3 ביצים") — גזור ממנה את מספר המנות, ואל תשנה את הכמות שצוינה.
+
+## כלל 3א — כמויות ביחס למנות (חשוב מאוד)
+- כמויות המרכיבים הן עבור כל ה-yield_amount יחד, לא למנה אחת.
+- כוון לכמויות ריאליות למנה: מנה עיקרית היא בדרך כלל 150–450 גרם למנה. חביתה — 2–3 ביצים למנה.
+- לפני שתחזיר תשובה: חלק את סך הכמויות במספר המנות ובדוק שהתוצאה הגיונית לסועד אחד.
 
 ## כלל 4 — שלבים
 כל שלב — ניסוח פעיל קצר בעברית. לא לחזור על מרכיבים כרשימה — רק הוראות.
@@ -288,26 +230,6 @@ function scanRecipeDraftForInjection(draft) {
   return fields.some(containsInjectionPattern);
 }
 
-/**
- * Computes soft quality warnings for a recipe draft without blocking save.
- */
-function computeSoftWarnings(draft) {
-  const warnings = [];
-  if (Array.isArray(draft.ingredients) && draft.ingredients.length < 3) {
-    warnings.push('מתכון עם מעט מרכיבים — ייתכן שהבינה הצליחה לחלץ חלקית בלבד');
-  }
-  if (typeof draft.yield_amount === 'number' && draft.yield_amount > 20) {
-    warnings.push('כמות מנות גבוהה במיוחד — בדוק שהתפוקה הגיונית');
-  }
-  if (Array.isArray(draft.steps) && draft.steps.length < 2) {
-    warnings.push('מספר שלבים נמוך — ייתכן שחסרות הוראות');
-  }
-  if (draft.recipe_type === 'dish' && draft.yield_unit === 'unit') {
-    warnings.push('יחידת תפוקה לא סבירה למנה');
-  }
-  return warnings;
-}
-
 const SHOTS_CAP = 50;
 
 /**
@@ -339,9 +261,10 @@ async function saveShot(prompt, draft, status, source, userId) {
 }
 
 /**
- * Returns up to `limit` most-recent approved shots for few-shot injection.
+ * Returns up to `limit` most-recent approved shots — the candidate pool selectShots()
+ * picks the relevant few-shot examples from (plan 370).
  */
-async function getApprovedShots(limit = 2) {
+async function getApprovedShots(limit = SHOTS_CAP) {
   try {
     return await shotsCol()
       .find({ status: 'approved' })
@@ -351,27 +274,6 @@ async function getApprovedShots(limit = 2) {
   } catch {
     return [];
   }
-}
-
-// ---------------------------------------------------------------------------
-// buildFewShotBlock — formats an approved shots array into a Hebrew example
-// block prepended to the system prompt.
-// ---------------------------------------------------------------------------
-
-function escapeForPrompt(str) {
-  return String(str)
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r');
-}
-
-function buildFewShotBlock(shots) {
-  if (!Array.isArray(shots) || shots.length === 0) return '';
-  const examples = shots
-    .map(s => `קלט: "${escapeForPrompt(s.prompt)}"\nפלט: ${JSON.stringify(s.draft)}`)
-    .join('\n\n');
-  return `## דוגמאות מאושרות מהמשתמש\n${examples}\n\n`;
 }
 
 /**
@@ -488,11 +390,12 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
     return res.status(400).json({ error: 'prompt is required' });
   }
 
-  const shots = await getApprovedShots(2);
+  const shots = selectShots(await getApprovedShots(), prompt, FEW_SHOT_COUNT);
   const requestBody = {
     contents: [{ parts: [{
       text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\n## הבקשה הנוכחית — החזר JSON בלבד עבורה:\n' + prompt.trim(),
     }] }],
+    generationConfig: RECIPE_GENERATION_CONFIG,
   };
 
   const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate');
@@ -1287,14 +1190,17 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
     return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
   }
 
-  const shots = await getApprovedShots(2);
+  // No request text to match approved examples against (selectShots would pick none),
+  // and an unrelated recent example would only skew the portion sizes — so no few-shot
+  // block on the image route (plan 370).
   const requestBody = {
     contents: [{
       parts: [
-        { text: buildFewShotBlock(shots) + SYSTEM_PROMPT },
+        { text: SYSTEM_PROMPT },
         { inlineData: { mimeType, data: imageBase64 } },
       ],
     }],
+    generationConfig: RECIPE_GENERATION_CONFIG,
   };
 
   const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate_from_image');
@@ -1483,9 +1389,10 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     return res.status(422).json({ error: 'No usable text found at the provided URL' });
   }
 
-  const shots = await getApprovedShots(2);
+  const shots = selectShots(await getApprovedShots(), pageText.slice(0, URL_SHOT_MATCH_CHARS), FEW_SHOT_COUNT);
   const requestBody = {
     contents: [{ parts: [{ text: buildFewShotBlock(shots) + SYSTEM_PROMPT + '\n\nטקסט לניתוח:\n' + pageText }] }],
+    generationConfig: RECIPE_GENERATION_CONFIG,
   };
 
   const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate_from_url');
