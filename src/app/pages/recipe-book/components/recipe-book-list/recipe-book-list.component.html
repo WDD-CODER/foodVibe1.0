@@ -6,7 +6,7 @@
       ? '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(80px, 0.7fr) minmax(72px, 0.85fr) 80px auto'
       : '2fr 1fr 1fr minmax(48px, 0.8fr) minmax(72px, 0.85fr) minmax(80px, 0.7fr) 0.8fr 80px auto'
   "
-  [mobileGridTemplate]="'2fr 0.7fr 1fr 0.8fr 40px 28px'"
+  [mobileGridTemplate]="'2fr 0.7fr 1.8fr 40px 28px'"
   [resultCount]="filteredRecipes_().length"
   [resultTotal]="kitchenState.recipes_().length"
 >
@@ -120,17 +120,19 @@
       >
         {{ 'rating' | translatePipe }}
       </div>
+      <div
+        class="col-cost c-grid-header-cell c-sortable-header"
+        carouselHeaderColumn
+        label="cost"
+        (click)="setSort('cost')"
+        (keydown.enter)="setSort('cost')"
+        (keydown.space)="$event.preventDefault(); setSort('cost')"
+        role="button"
+        tabindex="0"
+      >
+        {{ 'cost' | translatePipe }}
+      </div>
     </app-carousel-header>
-    <div
-      class="col-cost c-grid-header-cell c-sortable-header"
-      (click)="setSort('cost')"
-      (keydown.enter)="setSort('cost')"
-      (keydown.space)="$event.preventDefault(); setSort('cost')"
-      role="button"
-      tabindex="0"
-    >
-      {{ 'cost' | translatePipe }}
-    </div>
     <div class="c-col-actions c-grid-header-cell">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
       <app-list-row-checkbox
@@ -271,20 +273,22 @@
               (ratingChange)="onRatingChange(row.recipe, $event)"
             />
           </div>
+          <div
+            class="col-cost c-list-body-cell cost-cell-wrap"
+            cellCarouselSlide
+            [label]="'cost' | translatePipe"
+            (mouseenter)="showCostTooltip(row.recipe._id, $event)"
+            (mouseleave)="hideCostTooltip()"
+            (click)="toggleCostTooltipTap(row.recipe._id, $event)"
+            [attr.aria-describedby]="
+              hoveredCostRecipeId_() === row.recipe._id || tappedCostRecipeId_() === row.recipe._id
+                ? 'cost-tooltip-' + row.recipe._id
+                : null
+            "
+          >
+            ₪{{ row.cost | number: '1.2-2' }}
+          </div>
         </app-cell-carousel>
-        <div
-          class="col-cost c-list-body-cell cost-cell-wrap"
-          (mouseenter)="showCostTooltip(row.recipe._id, $event)"
-          (mouseleave)="hideCostTooltip()"
-          (click)="toggleCostTooltipTap(row.recipe._id, $event)"
-          [attr.aria-describedby]="
-            hoveredCostRecipeId_() === row.recipe._id || tappedCostRecipeId_() === row.recipe._id
-              ? 'cost-tooltip-' + row.recipe._id
-              : null
-          "
-        >
-          ₪{{ row.cost | number: '1.2-2' }}
-        </div>
         <app-row-actions-menu class="c-col-actions c-list-body-cell">
           <button
             type="button"

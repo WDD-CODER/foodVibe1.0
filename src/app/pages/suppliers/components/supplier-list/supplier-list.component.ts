@@ -3,25 +3,22 @@ import {
   Component,
   computed,
   inject,
-  output,
   signal,
   OnInit,
   OnDestroy,
   WritableSignal
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
+import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { SupplierDataService } from '@services/supplier-data.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
-import { SupplierModalService } from '@services/supplier-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { Supplier } from '@models/supplier.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { UserService } from '@services/user.service'
-import { UserMsgService } from '@services/user-msg.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -31,7 +28,6 @@ import {
   CarouselHeaderComponent,
   CarouselHeaderColumnDirective
 } from 'src/app/shared/carousel-header/carousel-header.component'
-import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
@@ -39,7 +35,6 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
-import { useIsDesktop } from 'src/app/core/utils/desktop-detection.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { getSupplierIds } from '@utils/product-source.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
@@ -53,7 +48,6 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
@@ -62,7 +56,6 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
     ListShellComponent,
     CarouselHeaderComponent,
     CarouselHeaderColumnDirective,
-    ClickOutSideDirective,
     ListRowCheckboxComponent,
     SelectionBarComponent,
     EmptyStateComponent,
@@ -70,50 +63,26 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
   ],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  inputs: ['embeddedInDashboard']
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SupplierListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   protected readonly supplierData = inject(SupplierDataService)
   private readonly kitchenState = inject(KitchenStateService)
-  private readonly supplierModal = inject(SupplierModalService)
   private readonly heroFab = inject(HeroFabService)
   private readonly translation = inject(TranslationService)
   private readonly router = inject(Router)
-  private readonly userMsg = inject(UserMsgService)
   private readonly requireAuthService = inject(RequireAuthService)
   private readonly logging = inject(LoggingService)
   private readonly confirmModal = inject(ConfirmModalService)
-  private readonly fb = inject(FormBuilder)
-
-  /** When true, add button emits addSupplierClick instead of opening modal and navigating. */
-  embeddedInDashboard = false
-  readonly addSupplierClick = output<void>()
 
   protected searchQuery_ = signal('')
   protected deletingId_ = signal<string | null>(null)
-  protected editingId_ = signal<string | null>(null)
-  protected closingId_ = signal<string | null>(null)
-  protected isSavingEdit_ = signal(false)
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
   protected carouselHeaderIndex_ = signal(0)
 
-  /** Row edit panel: inline on desktop, modal on tablet + mobile (plan 305 decision 2). */
-  protected readonly isDesktop_ = useIsDesktop()
-
-  /** The item behind editingId_/closingId_ — needed once the modal path renders the
-   * panel outside the row @for loop (see shell-modal projection in the template). */
-  protected readonly editingItem_ = computed(() => {
-    const id = this.editingId_() ?? this.closingId_()
-    if (!id) return null
-    return this.filteredSuppliers_().find((s) => s._id === id) ?? null
-  })
-
   protected selection = new ListSelectionState()
-  protected dayLabels = DAY_LABELS
-  protected editForm_!: FormGroup
 
   protected editableFields_: BulkEditableField[] = [
     {
@@ -135,31 +104,15 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     this.isPanelOpen_ = panel.isPanelOpen_
     this.togglePanelState_ = panel.togglePanel
 
-    this.buildEditForm()
-    if (!this.embeddedInDashboard) {
-      useListState('suppliers', [
-        { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
-        { urlParam: 'days', signal: this.selectedDays_, serializer: NumberSetParam },
-        { urlParam: 'linkedOnly', signal: this.hasLinkedOnly_, serializer: BooleanParam }
-      ])
-    }
+    useListState('suppliers', [
+      { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
+      { urlParam: 'days', signal: this.selectedDays_, serializer: NumberSetParam },
+      { urlParam: 'linkedOnly', signal: this.hasLinkedOnly_, serializer: BooleanParam }
+    ])
   }
 
   ngOnInit(): void {
-    if (!this.embeddedInDashboard) {
-      this.heroFab.setPageActions(
-        [
-          {
-            labelKey: 'add_supplier',
-            icon: 'plus',
-            run: () => {
-              if (this.requireAuthService.requireAuth()) this.supplierModal.openAdd()
-            }
-          }
-        ],
-        'replace'
-      )
-    }
+    this.heroFab.setPageActions([{ labelKey: 'add_supplier', icon: 'plus', run: () => this.onAdd() }], 'replace')
   }
 
   ngOnDestroy(): void {
@@ -228,156 +181,28 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     this.hasLinkedOnly_.set(false)
   }
 
-  private buildEditForm(): void {
-    const daysArray = this.fb.array(Array.from({ length: 7 }, () => this.fb.control(false)))
-    this.editForm_ = this.fb.group({
-      nameHebrew: ['', [Validators.required]],
-      contactPerson: [''],
-      phone: [''],
-      deliveryDays: daysArray,
-      minOrderMov: [0, [Validators.required, Validators.min(0)]],
-      leadTimeDays: [0, [Validators.required, Validators.min(0)]]
-    })
-  }
-
-  protected get deliveryDaysArray(): FormArray {
-    return this.editForm_?.get('deliveryDays') as FormArray
-  }
-
-  private hydrateEditForm(s: Supplier): void {
-    const days = s.deliveryDays ?? []
-    const dayControls = this.deliveryDaysArray
-    for (let i = 0; i < 7; i++) {
-      dayControls.at(i).setValue(days.includes(i))
-    }
-    this.editForm_.patchValue({
-      nameHebrew: s.nameHebrew ?? '',
-      contactPerson: s.contactPerson ?? '',
-      phone: s.phone ?? '',
-      minOrderMov: s.minOrderMov ?? 0,
-      leadTimeDays: s.leadTimeDays ?? 0
-    })
-  }
-
   protected linkedProductCount_(supplierId: string): number {
     return this.kitchenState.products_().filter((p) => getSupplierIds(p).includes(supplierId)).length
   }
 
   protected onAdd(): void {
     if (!this.requireAuthService.requireAuth()) return
-    if (this.embeddedInDashboard) {
-      this.addSupplierClick.emit()
-      return
-    }
-    this.supplierModal.openAdd()
+    this.router.navigate(['/suppliers/add'])
   }
 
   protected onRowClick(item: Supplier, event: MouseEvent): void {
     const el = event.target as HTMLElement
-    if (
-      el.closest('button') ||
-      el.closest('a') ||
-      el.closest('.inline-edit-panel') ||
-      el.closest('app-list-row-checkbox')
-    )
-      return
+    if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return
     if (this.selection.selectionMode()) {
       this.selection.toggle(item._id ?? '')
       return
     }
-    if (this.editingId_() === item._id) {
-      this.closeWithAnimation()
-      return
-    }
-    void this.onEdit(item)
+    this.onEdit(item)
   }
 
-  protected toggleRowEdit(item: Supplier): void {
-    if (this.editingId_() === item._id) {
-      this.closeWithAnimation()
-    } else {
-      void this.onEdit(item)
-    }
-  }
-
-  async onEdit(item: Supplier): Promise<void> {
+  protected onEdit(item: Supplier): void {
     if (!this.requireAuthService.requireAuth()) return
-    const currentId = this.editingId_()
-    if (currentId !== null && currentId !== item._id && this.editForm_.dirty) {
-      const saveFirst = await this.confirmModal.open(
-        this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. שמור לפני מעבר?',
-        { variant: 'warning', saveLabel: 'save' }
-      )
-      if (saveFirst) {
-        await this.saveCurrentInlineEdit()
-      }
-    }
-    this.editingId_.set(item._id)
-    this.hydrateEditForm(item)
-  }
-
-  private async saveCurrentInlineEdit(): Promise<boolean> {
-    const id = this.editingId_()
-    if (!id || this.editForm_.invalid) return false
-    const supplier = this.supplierData.allSuppliers_().find((s) => s._id === id)
-    if (!supplier) return false
-    this.isSavingEdit_.set(true)
-    try {
-      const raw = this.editForm_.getRawValue()
-      const deliveryDays: number[] = []
-      this.deliveryDaysArray.controls.forEach((c, i) => {
-        if (c.value) deliveryDays.push(i)
-      })
-      const payload: Partial<Supplier> = {
-        nameHebrew: raw.nameHebrew,
-        contactPerson: raw.contactPerson || undefined,
-        phone: raw.phone || undefined,
-        deliveryDays,
-        minOrderMov: Number(raw.minOrderMov) || 0,
-        leadTimeDays: Number(raw.leadTimeDays) || 0
-      }
-      await this.supplierData.updateSupplier({ ...supplier, ...payload })
-      return true
-    } catch (err) {
-      this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err } })
-      this.userMsg.onSetErrorMsg(this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
-      return false
-    } finally {
-      this.isSavingEdit_.set(false)
-    }
-  }
-
-  private closeWithAnimation(): void {
-    const id = this.editingId_()
-    if (!id) return
-    this.closingId_.set(id)
-    setTimeout(() => {
-      if (this.closingId_() === id) {
-        this.editingId_.set(null)
-        this.closingId_.set(null)
-      }
-    }, 200)
-  }
-
-  protected async onInlineSave(): Promise<void> {
-    const ok = await this.saveCurrentInlineEdit()
-    if (ok) this.closeWithAnimation()
-  }
-
-  protected onInlineCancel(): void {
-    this.closeWithAnimation()
-  }
-
-  /** Close inline panel on click outside; confirm if form has unsaved changes. */
-  protected async onInlinePanelClickOutside(): Promise<void> {
-    if (this.editForm_.dirty) {
-      const discard = await this.confirmModal.open(
-        this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
-        { variant: 'warning', saveLabel: 'leave_without_saving' }
-      )
-      if (!discard) return
-    }
-    this.closeWithAnimation()
+    this.router.navigate(['/suppliers/edit', item._id])
   }
 
   async onDelete(item: Supplier): Promise<void> {

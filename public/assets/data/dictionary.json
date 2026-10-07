@@ -207,6 +207,7 @@
     "create_new_unit": "צור יחידה חדשה",
     "product": "מוצר",
     "product_list": "רשימת מוצרים",
+    "products": "מוצרים",
     "product_incomplete_hint": "המוצר חסר פרטים — לחץ לעריכה",
     "product_warning_hint": "המוצר חסר פרטים משלימים — לחץ לעריכה",
     "product_invalid": "מוצר לא תקין",
@@ -959,6 +960,8 @@
     "activity_deleted_supplier": "ספק שנמחק",
     "activity_today": "היום",
     "activity_yesterday": "אתמול",
-    "activity_just_now": "לפני רגע"
+    "activity_just_now": "לפני רגע",
+    "supplier_added": "הספק \"{name}\" נוסף בהצלחה",
+    "min_order": "מינימום הזמנה"
   }
 }

@@ -12,7 +12,7 @@ import {
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { firstValueFrom } from 'rxjs'
-import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 
 import { KitchenStateService } from '@services/kitchen-state.service'
@@ -73,8 +73,6 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
-    RouterLinkActive,
     LucideAngularModule,
     TranslatePipe,
     ClickOutSideDirective,
