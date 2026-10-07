@@ -365,6 +365,14 @@
 - [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
 - [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
 
+### Plan 394 — Night 2026-10-07 PR Validation and Merge Runbook (`plans/394-night-1007-pr-validation-merge-runbook.plan.md`)
+- [ ] R1–R4: clean rebases — #293 tech debt, #301 (347), #302 (371), #307 (348); Human validates each in wt-1 → approve/skip/reject.
+- [ ] R5–R8: dictionary/spec conflicts — #297 (365), #298 (370, run Mongo server tests here), #295 (351), #296 (367).
+- [ ] R9–R10: #314 chain top (363+364) → merges #299 then #314; #315 (362) rebased onto main's 340.
+- [ ] R11–R15: list/form template conflicts — #300 (361), #294 (345), #304 (342), #306 (368), #308 (344).
+- [ ] R16–R18: #311 chain top (349+350+352) → merges #309 → #310 → #311; then #313 (346); then #312 (353).
+- [ ] Done-when: no open `[night 10-07]` PR; `main` builds + specs pass; wt-1 servers off, `/remote` off.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
