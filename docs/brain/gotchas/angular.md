@@ -199,3 +199,13 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** The error looked like an expired or missing refresh cookie, and adding `withCredentials` to login was a real fix too, but on its own it changed nothing: the request failed in DI before reaching the network.
 
 **What to do instead:** Never start an HTTP request synchronously in a constructor of a service that an interceptor injects. Defer it (`queueMicrotask`) or run it from an `APP_INITIALIZER`. When a "session lost on reload" bug shows up, look for NG0200 in the console first.
+
+---
+
+## `position: fixed` is not relative to the viewport under `transform` / `filter` / `backdrop-filter` / `container-type` / `contain`
+
+**What hurt:** On tablet and phone the row ⋮ menu (`RowActionsMenuComponent`) "didn't respond" or opened off-screen in every list, and the inline edit modal (`.inline-edit-panel.as-modal`) centered somewhere mid-list. Both used `position: fixed` with viewport math, but `.table-area` (list-shell) has `backdrop-filter` and `.list-container` has `container-type: inline-size`. Each of those makes the element the containing block for fixed descendants, so `top`/`left`/`inset: 0` were measured from the table / the whole (tall) list, `overflow` clipped the popover, and the "full-screen" backdrop only covered the table (plan 362).
+
+**Why the obvious fix is wrong:** Raising `z-index` or recomputing coordinates does nothing — the coordinates are right, the reference box is wrong. Removing `backdrop-filter` / `container-type` from the ancestor breaks the glass look and the container queries other components rely on.
+
+**What to do instead:** Render overlays at body level: CDK Overlay (`flexibleConnectedTo` + `withPush`; a `DomPortal` keeps projected content and bindings, as `row-actions-menu` does), or project them through a slot that sits outside every trapping ancestor (list-shell's `[shell-modal]` slot is a direct child of `:host` for this reason). When a fixed element is mispositioned, walk its ancestors in DevTools for those five properties first.

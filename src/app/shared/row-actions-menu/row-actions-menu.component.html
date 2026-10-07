@@ -9,13 +9,7 @@
   </button>
 }
 
-<div class="ram-backdrop" [class.visible]="isOpen()" (click)="close(); $event.stopPropagation()"></div>
-
-<div class="ram-popover"
-  [class.is-open]="isOpen()"
-  [style.bottom.px]="popoverPos()?.bottom"
-  [style.top.px]="popoverPos()?.top"
-  [style.left.px]="popoverPos()?.left"
-  [style.min-height.px]="popoverPos()?.minHeight">
+<!-- While open, this element is moved into a body-level CDK overlay pane (plan 362). -->
+<div #popover class="ram-popover" [class.is-open]="isOpen()">
   <ng-content></ng-content>
 </div>
