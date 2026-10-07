@@ -107,10 +107,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: `menu-export-sheet` component: markup, animation, backdrop and Escape close, with a spec (open → backdrop click → close emitted) (`components/menu-export-sheet/**`).
-- [ ] A2: Wire the FAB action → `exportSheetOpen_`; connect the sheet outputs to the existing page methods (`menu-intelligence.page.ts/.html`).
-- [ ] A3: Remove the export pills, their styles and the dead signals and methods (`menu-intelligence.page.ts/.html`, `_toolbar.scss`).
-- [ ] A4: export-preview portrait styles (`export-preview.component.scss`).
+- [x] A1: `menu-export-sheet` component: markup, animation, backdrop and Escape close, with a spec (open → backdrop click → close emitted) (`components/menu-export-sheet/**`).
+- [x] A2: Wire the FAB action → `exportSheetOpen_`; connect the sheet outputs to the existing page methods (`menu-intelligence.page.ts/.html`).
+- [x] A3: Remove the export pills, their styles and the dead signals and methods (`menu-intelligence.page.ts/.html`, `_toolbar.scss`).
+- [x] A4: export-preview portrait styles (`export-preview.component.scss`).
 - [ ] A5: Build and run specs. Check at 360px portrait, landscape and desktop. Update the session-state file.
 
 ## Technical Considerations
