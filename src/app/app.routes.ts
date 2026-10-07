@@ -52,6 +52,7 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/venues/components/venue-form/venue-form.component').then(m => m.VenueFormComponent),
         resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },
         canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'view/:id',
@@ -66,6 +67,7 @@ export const routes: Routes = [
           equipmentLoaded: equipmentEnsureLoadedResolver,
         },
         canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
       },
     ],
   },

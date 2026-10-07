@@ -19,6 +19,7 @@ import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-ba
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
+import { formatVenueHours, VenueHoursSummary } from 'src/app/core/utils/venue-hours.util'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environmentType'
@@ -135,6 +136,11 @@ export class VenueListComponent implements OnInit, OnDestroy {
     }
     return [...list].sort((a, b) => (a.nameHebrew ?? '').localeCompare(b.nameHebrew ?? '', 'he'))
   })
+
+  /** Compact hours line for the card (plan 371). */
+  protected venueHours(item: VenueProfile): VenueHoursSummary {
+    return formatVenueHours(item.operatingHours)
+  }
 
   protected envTypeLabel(env: EnvironmentType): string {
     return env

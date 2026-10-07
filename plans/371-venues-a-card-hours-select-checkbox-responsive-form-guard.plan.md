@@ -100,10 +100,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: `venue-hours.util.ts` plus spec; card and detail use it.
-- [ ] A2: Checkbox visibility and position on cards (`venue-list/**`).
-- [ ] A3: Responsive venue form (`venue-form.component.scss`).
-- [ ] A4: Guard contract on `VenueFormComponent` plus routes, with a spec (dirty → `hasRealChanges` true; after save → `isSubmitted`) (`venue-form/**`, `app.routes.ts`).
+- [x] A1: `venue-hours.util.ts` plus spec; card and detail use it.
+- [x] A2: Checkbox visibility and position on cards (`venue-list/**`).
+- [x] A3: Responsive venue form (`venue-form.component.scss`).
+- [x] A4: Guard contract on `VenueFormComponent` plus routes, with a spec (dirty → `hasRealChanges` true; after save → `isSubmitted`) (`venue-form/**`, `app.routes.ts`).
 - [ ] A5: Build, specs. Check at 360px and 1280px, touch and mouse. Update session-state.
 
 ## Technical Considerations
