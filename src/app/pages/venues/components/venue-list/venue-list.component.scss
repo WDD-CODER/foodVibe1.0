@@ -133,6 +133,9 @@
     padding-block-start: 2.25rem;
 
     cursor: pointer;
+    // Long press selects: no text selection or iOS link/image callout under the finger.
+    user-select: none;
+    -webkit-touch-callout: none;
 
     &:focus-visible {
       outline: 2px solid var(--border-focus);
@@ -141,7 +144,8 @@
   }
 
   // Plan 371: top-left corner of the card (inline-end in RTL), in the padding band above the
-  // media. Hidden until hover / focus / selection mode / selected; always shown on touch.
+  // media. Hidden until a long press puts the list in selection mode (or a keyboard user
+  // tabs onto the card); then every card shows its checkbox until the selection is cleared.
   .venue-card-select {
     position: absolute;
     inset-block-start: 0.5rem;
@@ -157,17 +161,10 @@
     }
   }
 
-  .venue-card:hover,
-  .venue-card:focus-within,
+  .venue-card:focus-visible,
+  .venue-card:has(:focus-visible),
   .venue-card.is-selecting,
   .venue-card.is-selected {
-    .venue-card-select {
-      opacity: 1;
-      pointer-events: auto;
-    }
-  }
-
-  @media (hover: none) {
     .venue-card-select {
       opacity: 1;
       pointer-events: auto;

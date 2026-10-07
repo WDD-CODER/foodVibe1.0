@@ -81,6 +81,12 @@
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"
+        (pointerdown)="onCardPointerDown(item, $event)"
+        (pointermove)="onCardPointerMove($event)"
+        (pointerup)="cancelLongPress()"
+        (pointercancel)="cancelLongPress()"
+        (pointerleave)="cancelLongPress()"
+        (contextmenu)="onCardContextMenu($event)"
         (keydown.enter)="onCardActivate(item, $event)"
         (keydown.space)="$event.preventDefault(); onCardActivate(item, $event)"
       >

@@ -105,6 +105,7 @@ touching any milestone.
 - [x] A3: Responsive venue form (`venue-form.component.scss`).
 - [x] A4: Guard contract on `VenueFormComponent` plus routes, with a spec (dirty → `hasRealChanges` true; after save → `isSubmitted`) (`venue-form/**`, `app.routes.ts`).
 - [ ] A5: Build, specs. Check at 360px and 1280px, touch and mouse. Update session-state.
+- [x] A6 (review fallout 2026-10-07): checkboxes hidden on every device until a long press on a card enters selection mode; taps then toggle cards; clearing the selection or pressing Back leaves selection mode (`venue-list/**`).
 
 ## Technical Considerations
 
