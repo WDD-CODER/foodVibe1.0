@@ -231,18 +231,13 @@
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       'title   title'
-      'back    refresh';
+      '.       refresh';
     gap: 0.5rem 0.75rem;
 
     h1 {
       grid-area: title;
       font-size: 1.25rem;
       text-align: center;
-    }
-
-    .header-btn--back {
-      grid-area: back;
-      justify-content: center;
     }
 
     .btn-refresh {

@@ -1,15 +1,5 @@
 <div class="venue-grid-container" dir="rtl">
   <div class="action-bar">
-    <button
-      type="button"
-      class="header-btn header-btn--back"
-      data-testid="btn-back-to-dashboard-venues"
-      (click)="backToDashboard()"
-    >
-      <lucide-icon name="layout-dashboard" size="16"></lucide-icon>
-      {{ 'dashboard' | translatePipe }}
-    </button>
-
     <h2 class="page-title">{{ 'venue_list' | translatePipe }}</h2>
     <p class="result-count">{{ resultCountText_() }}</p>
 

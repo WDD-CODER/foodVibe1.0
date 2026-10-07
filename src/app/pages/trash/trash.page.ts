@@ -6,7 +6,6 @@ import {
   signal,
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TrashService } from '@services/trash.service'
@@ -28,7 +27,6 @@ export class TrashPage implements OnInit {
   private readonly trash = inject(TrashService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly logging = inject(LoggingService)
-  private readonly router = inject(Router)
 
   readonly loading = signal(true)
   readonly loadError = signal<string | null>(null)
@@ -41,10 +39,6 @@ export class TrashPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.loadTrashInternal()
-  }
-
-  backToDashboard(): void {
-    this.router.navigate(['/dashboard'])
   }
 
   async refresh(): Promise<void> {

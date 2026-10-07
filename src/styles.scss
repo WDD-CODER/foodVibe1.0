@@ -2091,3 +2091,22 @@ body.kb-open {
     margin-inline-start: auto;
   }
 }
+
+/* ---- Engine modifier: Tab pill "home" (plan 367) — the "לוח בקרה" chip that replaces the
+   current dashboard sub-page's chip. Outlined in the primary color so it reads as "back",
+   not as another section. ---- */
+.c-tab-pill--home {
+  background: transparent;
+  color: var(--color-primary-hover);
+  border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
+  box-shadow: none;
+
+  lucide-icon {
+    opacity: 1;
+  }
+
+  &:hover {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-hover);
+  }
+}
