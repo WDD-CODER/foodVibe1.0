@@ -18,42 +18,54 @@
 
 // ─── Tooltip ─────────────────────────────────────────────────────────────────
 
-// Portaled to <body> on open, so `fixed` is always relative to the viewport.
+// Rendered in the browser top layer via `popover`, so it escapes every
+// ancestor's overflow clipping and stacking context. `inset`, `margin` and
+// `overflow` below undo the user-agent popover defaults; the TS places the box
+// in viewport coordinates and sets --nb-arrow-x to aim the arrow at the badge.
 .nb-tooltip {
   position: fixed;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
+  inset: auto;
+  overflow: visible;
+  // Hovering the tooltip must not count as hovering the badge (it is a DOM
+  // child of the badge, so mouseleave would otherwise never fire).
+  pointer-events: none;
+
   width: 164px;
-  z-index: 9999;
 
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 1rem;
-  box-shadow:
-    0 8px 28px rgba(15, 23, 42, 0.13),
-    0 2px 6px rgba(15, 23, 42, 0.07);
-  backdrop-filter: blur(16px);
+  color: var(--color-text-main);
+  background: var(--bg-glass-dense);
 
-  // Pointer arrow
+  margin: 0;
+  padding-block: 0.625rem 0.5rem;
+  padding-inline: 0.6875rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+
+  box-shadow: var(--shadow-card);
+  backdrop-filter: var(--blur-glass);
+
+  // Pointer arrow. `left` is physical on purpose — --nb-arrow-x is a geometric
+  // distance from the box's left edge, unaffected by the RTL content direction.
   &::after {
     content: '';
     position: absolute;
     top: 100%;
-    left: 50%;
+    left: var(--nb-arrow-x, 50%);
     transform: translateX(-50%);
+
     border: 5px solid transparent;
-    border-top-color: rgba(0, 0, 0, 0.08);
+    border-top-color: var(--border-default);
   }
   &::before {
     content: '';
     position: absolute;
     top: calc(100% - 1px);
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: rgba(255, 255, 255, 0.95);
+    left: var(--nb-arrow-x, 50%);
     z-index: 1;
+    transform: translateX(-50%);
+
+    border: 5px solid transparent;
+    border-top-color: var(--bg-glass-dense);
   }
 }
 
@@ -61,14 +73,16 @@
   &::after {
     top: auto;
     bottom: 100%;
+
     border-top-color: transparent;
-    border-bottom-color: rgba(0, 0, 0, 0.08);
+    border-bottom-color: var(--border-default);
   }
   &::before {
     top: auto;
     bottom: calc(100% - 1px);
+
     border-top-color: transparent;
-    border-bottom-color: rgba(255, 255, 255, 0.95);
+    border-bottom-color: var(--bg-glass-dense);
   }
 }
 
@@ -179,60 +193,6 @@
   font-size: 0.6rem;
   font-weight: 500;
   color: #64748b;
-}
-
-// ─── Scroll body + up/down hints (no visible scrollbar) ──────────────────────
-
-.nb-scroll-body {
-  flex: 1 1 auto;
-  min-block-size: 0;
-
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
-
-  padding-block: 10px 8px;
-  padding-inline: 11px;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.nb-scroll-hint {
-  position: absolute;
-  inset-inline: 0;
-  z-index: 2;
-  display: grid;
-  place-content: center;
-
-  block-size: 1.5rem;
-
-  color: var(--color-text-muted);
-  cursor: pointer;
-
-  padding: 0;
-  border: none;
-
-  &--up {
-    inset-block-start: 0;
-
-    background: linear-gradient(to bottom, var(--bg-pure) 55%, transparent);
-    border-start-start-radius: 1rem;
-    border-start-end-radius: 1rem;
-  }
-
-  &--down {
-    inset-block-end: 0;
-
-    background: linear-gradient(to top, var(--bg-pure) 55%, transparent);
-    border-end-start-radius: 1rem;
-    border-end-end-radius: 1rem;
-  }
-
-  &:hover {
-    color: var(--color-primary);
-  }
 }
 
 // ─── Fat SVG icon ─────────────────────────────────────────────────────────────

@@ -259,13 +259,6 @@
 - [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`).
 - [ ] A5: Build, server tests. Update session-state.
 
-### Plan 371 — Venues A: hours on the card, discreet select checkbox, responsive form, unsaved-changes guard (`plans/371-venues-a-card-hours-select-checkbox-responsive-form-guard.plan.md`)
-- [ ] A1: `venue-hours.util.ts` plus spec; card and detail use it.
-- [ ] A2: Checkbox visibility and position on cards (`venue-list/**`).
-- [ ] A3: Responsive venue form (`venue-form.component.scss`).
-- [ ] A4: Guard contract on `VenueFormComponent` plus routes, with a spec (dirty → `hasRealChanges` true; after save → `isSubmitted`) (`venue-form/**`, `app.routes.ts`).
-- [ ] A5: Build, specs. Check at 360px and 1280px, touch and mouse. Update session-state.
-
 ### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/372-venues-b-multiple-contacts-hours-picker.plan.md`)
 - [ ] A1: Schema and model additions; `build:schemas`; server validation test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
 - [ ] A2: `venue-hours.util` `toDisplay` / `parseLegacy` plus spec (Hebrew range forms, midnight crossing, unparseable).

@@ -1,15 +1,4 @@
-import {
-  Component,
-  input,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  DestroyRef,
-  signal,
-  viewChild,
-  ElementRef,
-  inject,
-  HostListener
-} from '@angular/core'
+import { Component, ChangeDetectionStrategy, ElementRef, effect, inject, input, signal, viewChild } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionPer100g } from '@models/product.model'
@@ -36,19 +25,17 @@ interface TooltipRow {
   sub: boolean
 }
 
-const TOOLTIP_W = 164
-const GAP = 8
-const VIEWPORT_MARGIN = 8
-const MIN_HEIGHT = 80
-const SCROLL_STEP = 60
-const AUTO_SCROLL_PX = 3
-
 const MACRO_COLORS: Record<string, string> = {
   protein: '#3b82f6',
   carbs: '#f59e0b',
   fat: '#ef4444',
   fiber: '#10b981'
 }
+
+/** Gap between the badge and the tooltip, and the minimum breathing room kept
+ *  against every viewport edge. */
+const GAP_PX = 8
+const VIEWPORT_MARGIN_PX = 8
 
 @Component({
   selector: 'app-nutrition-badge',
@@ -60,159 +47,63 @@ const MACRO_COLORS: Record<string, string> = {
 })
 export class NutritionBadgeComponent {
   private readonly elRef_ = inject(ElementRef)
-  private readonly cdr_ = inject(ChangeDetectorRef)
-  private readonly destroyRef_ = inject(DestroyRef)
 
   readonly nutrition = input<NutritionPer100g | null | undefined>()
 
+  private readonly tooltipRef_ = viewChild<ElementRef<HTMLElement>>('tooltip')
   readonly showTooltip_ = signal(false)
   readonly isBelow_ = signal(false)
-  readonly canScrollUp_ = signal(false)
-  readonly canScrollDown_ = signal(false)
-
-  private readonly tooltipRef_ = viewChild<ElementRef<HTMLElement>>('tooltip')
-  private readonly scrollerRef_ = viewChild<ElementRef<HTMLElement>>('scroller')
-
-  private openedByHover_ = false
-  private autoScrollFrame_: number | null = null
-  private readonly onOutsideScroll_ = (event: Event): void => {
-    const tooltip = this.tooltipRef_()?.nativeElement
-    if (tooltip && event.target instanceof Node && tooltip.contains(event.target)) return
-    this.close_()
-  }
 
   constructor() {
-    this.destroyRef_.onDestroy(() => this.close_())
-  }
-
-  // ── Open / close ───────────────────────────────────────────────────────────
-
-  onPointerEnter(event: PointerEvent): void {
-    if (event.pointerType !== 'mouse' || this.showTooltip_()) return
-    this.openedByHover_ = true
-    this.open_()
-  }
-
-  onPointerLeave(event: PointerEvent): void {
-    if (event.pointerType !== 'mouse' || !this.openedByHover_) return
-    this.close_()
-  }
-
-  onBadgeClick(event: MouseEvent): void {
-    event.stopPropagation()
-    // A click on a hover-opened tooltip pins it open instead of closing it.
-    if (this.showTooltip_() && this.openedByHover_) {
-      this.openedByHover_ = false
-      return
-    }
-    if (this.showTooltip_()) this.close_()
-    else this.open_()
-  }
-
-  /** Tap outside closes the tooltip (touch has no pointerleave). */
-  @HostListener('document:click', ['$event'])
-  protected onDocumentClick(event: MouseEvent): void {
-    if (!this.showTooltip_()) return
-    const host = this.elRef_.nativeElement as HTMLElement
-    const tooltip = this.tooltipRef_()?.nativeElement
-    if (event.target instanceof Node && (host.contains(event.target) || tooltip?.contains(event.target))) return
-    this.close_()
-  }
-
-  @HostListener('window:resize')
-  protected onWindowResize(): void {
-    if (this.showTooltip_()) this.close_()
-  }
-
-  /**
-   * Renders the tooltip, moves it to <body> so no ancestor's overflow, stacking context or
-   * containing block (container-type, transform, filter) can clip or cover it, then positions it.
-   */
-  private open_(): void {
-    this.showTooltip_.set(true)
-    this.cdr_.detectChanges()
-    const tooltip = this.tooltipRef_()?.nativeElement
-    if (!tooltip) return
-    if (tooltip.parentElement !== document.body) document.body.appendChild(tooltip)
-    this.positionTooltip_(tooltip)
-    this.updateScrollHints()
-    document.addEventListener('scroll', this.onOutsideScroll_, true)
-  }
-
-  private close_(): void {
-    this.stopAutoScroll()
-    document.removeEventListener('scroll', this.onOutsideScroll_, true)
-    this.openedByHover_ = false
-    if (!this.showTooltip_()) return
-    // The portaled node lives under <body>; Angular only removes it while this view is alive.
-    this.tooltipRef_()?.nativeElement.remove()
-    this.showTooltip_.set(false)
-  }
-
-  /**
-   * Viewport-fixed placement next to the badge, centred and clamped to the screen edges.
-   * Opens above when it fits (as before), otherwise on the side with more room; when neither
-   * side fits, the height is capped and the content scrolls behind the up/down arrows.
-   */
-  private positionTooltip_(tooltip: HTMLElement): void {
-    const rect = (this.elRef_.nativeElement as HTMLElement).getBoundingClientRect()
-    const vw = window.innerWidth
-    const vh = window.innerHeight
-    const halfW = TOOLTIP_W / 2
-
-    tooltip.style.maxHeight = ''
-    const naturalHeight = tooltip.offsetHeight
-
-    const centerX = rect.left + rect.width / 2
-    const left = Math.max(halfW + VIEWPORT_MARGIN, Math.min(vw - halfW - VIEWPORT_MARGIN, centerX))
-    const roomAbove = rect.top - GAP - VIEWPORT_MARGIN
-    const roomBelow = vh - rect.bottom - GAP - VIEWPORT_MARGIN
-    const below = naturalHeight > roomAbove && roomBelow > roomAbove
-    const room = Math.max(MIN_HEIGHT, Math.floor(below ? roomBelow : roomAbove))
-
-    this.isBelow_.set(below)
-    tooltip.classList.toggle('nb-tooltip--below', below)
-    tooltip.style.left = `${left}px`
-    tooltip.style.top = below ? `${rect.bottom + GAP}px` : 'auto'
-    tooltip.style.bottom = below ? 'auto' : `${vh - rect.top + GAP}px`
-    tooltip.style.maxHeight = `${room}px`
-  }
-
-  // ── Scroll hints ───────────────────────────────────────────────────────────
-
-  updateScrollHints(): void {
-    const el = this.scrollerRef_()?.nativeElement
-    if (!el) return
-    this.canScrollUp_.set(el.scrollTop > 1)
-    this.canScrollDown_.set(el.scrollTop + el.clientHeight < el.scrollHeight - 1)
-  }
-
-  scrollStep(direction: 1 | -1, event: MouseEvent): void {
-    event.stopPropagation()
-    this.scrollerRef_()?.nativeElement.scrollBy({ top: direction * SCROLL_STEP, behavior: 'smooth' })
-  }
-
-  /** Mouse resting on an arrow keeps scrolling that way. */
-  startAutoScroll(direction: 1 | -1, event: PointerEvent): void {
-    if (event.pointerType !== 'mouse') return
-    this.stopAutoScroll()
-    const tick = (): void => {
-      const el = this.scrollerRef_()?.nativeElement
+    // The tooltip lives in the browser top layer (popover), so it is never
+    // clipped by an ancestor's overflow and never trapped in an ancestor's
+    // stacking context. Placement therefore happens once the element exists,
+    // against the viewport, using its real measured size.
+    effect((onCleanup) => {
+      const el = this.tooltipRef_()?.nativeElement
       if (!el) return
-      el.scrollTop += direction * AUTO_SCROLL_PX
-      this.updateScrollHints()
-      this.autoScrollFrame_ = requestAnimationFrame(tick)
-    }
-    this.autoScrollFrame_ = requestAnimationFrame(tick)
+
+      if (!el.matches(':popover-open')) el.showPopover()
+      this.place_(el)
+
+      const reposition = (): void => this.place_(el)
+      window.addEventListener('scroll', reposition, true)
+      window.addEventListener('resize', reposition)
+      onCleanup(() => {
+        window.removeEventListener('scroll', reposition, true)
+        window.removeEventListener('resize', reposition)
+      })
+    })
   }
 
-  stopAutoScroll(): void {
-    if (this.autoScrollFrame_ === null) return
-    cancelAnimationFrame(this.autoScrollFrame_)
-    this.autoScrollFrame_ = null
-  }
+  /** Place the tooltip in viewport coordinates. Flips above/below from the real
+   *  measured height, then clamps to the viewport and re-aims the arrow so it
+   *  keeps pointing at the badge even when the box had to be pushed sideways. */
+  private place_(tooltip: HTMLElement): void {
+    const badge = (this.elRef_.nativeElement as HTMLElement).getBoundingClientRect()
+    const { width: tipW, height: tipH } = tooltip.getBoundingClientRect()
+    const viewW = document.documentElement.clientWidth
+    const viewH = document.documentElement.clientHeight
 
-  // ── Derived display data ───────────────────────────────────────────────────
+    const roomAbove = badge.top - VIEWPORT_MARGIN_PX
+    const roomBelow = viewH - badge.bottom - VIEWPORT_MARGIN_PX
+    const needed = tipH + GAP_PX
+    // Prefer above; drop below only when above cannot fit and below is roomier.
+    const below = roomAbove < needed && roomBelow > roomAbove
+    this.isBelow_.set(below)
+
+    const wantedTop = below ? badge.bottom + GAP_PX : badge.top - GAP_PX - tipH
+    const top = Math.max(VIEWPORT_MARGIN_PX, Math.min(viewH - VIEWPORT_MARGIN_PX - tipH, wantedTop))
+
+    const badgeCenterX = badge.left + badge.width / 2
+    const left = Math.max(VIEWPORT_MARGIN_PX, Math.min(viewW - VIEWPORT_MARGIN_PX - tipW, badgeCenterX - tipW / 2))
+
+    tooltip.style.top = `${top}px`
+    tooltip.style.left = `${left}px`
+    // Physical offset on purpose: this is a geometric distance from the box's
+    // left edge, independent of the tooltip's RTL text direction.
+    tooltip.style.setProperty('--nb-arrow-x', `${badgeCenterX - left}px`)
+  }
 
   get dominantColor(): string | null {
     const n = this.nutrition()
@@ -334,5 +225,18 @@ export class NutritionBadgeComponent {
         : null
     ]
     return candidates.filter((r): r is TooltipRow => r !== null)
+  }
+
+  onMouseEnter(): void {
+    this.showTooltip_.set(true)
+  }
+
+  onMouseLeave(): void {
+    this.showTooltip_.set(false)
+  }
+
+  onBadgeClick(event: MouseEvent): void {
+    event.stopPropagation()
+    this.showTooltip_.update((open) => !open)
   }
 }
