@@ -21,6 +21,7 @@ import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { QuickAddProductModalService } from '@services/quick-add-product-modal.service'
 import type { Product } from '@models/product.model'
 import type { Recipe } from '@models/recipe.model'
@@ -44,7 +45,8 @@ export type SearchableItem = (Product | Recipe) & { item_type_: 'product' | 'rec
     ClickOutSideDirective,
     ScrollableDropdownComponent,
     TranslatePipe,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    InputClearComponent
   ],
   templateUrl: './ingredient-search.component.html',
   styleUrl: './ingredient-search.component.scss',
@@ -112,6 +114,14 @@ export class IngredientSearchComponent {
     this.showResults_.set(false)
     this.highlightedIndex_.set(-1)
     this.cancelSearch.emit()
+  }
+
+  /** Search clear (X): empty the field, close the results, keep focus in the field (plan 363). */
+  protected onClearSearch(): void {
+    this.searchQuery_.set('')
+    this.showResults_.set(false)
+    this.highlightedIndex_.set(-1)
+    this.focus()
   }
 
   /** Focus the search input (e.g. after adding a new row). */

@@ -18,6 +18,7 @@ import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 @Component({
   selector: 'app-preparation-search',
@@ -28,7 +29,8 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
     ClickOutSideDirective,
     TranslatePipe,
     ScrollableDropdownComponent,
-    SelectOnFocusDirective
+    SelectOnFocusDirective,
+    InputClearComponent
   ],
   templateUrl: './preparation-search.component.html',
   styleUrl: './preparation-search.component.scss',
@@ -128,5 +130,20 @@ export class PreparationSearchComponent {
     this.preparationSelected.emit(entry)
     this.searchQuery_.set('')
     this.showResults_.set(false)
+  }
+
+  /** Search clear (X): empty the field, close the results, keep focus in the field (plan 363). */
+  protected onClearSearch(): void {
+    this.searchQuery_.set('')
+    this.showResults_.set(false)
+    this.focusSearch()
+  }
+
+  /** Escape in a non-empty field clears it first; a second Escape bubbles as before (plan 363). */
+  protected onSearchEscape(event: Event): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch()
   }
 }

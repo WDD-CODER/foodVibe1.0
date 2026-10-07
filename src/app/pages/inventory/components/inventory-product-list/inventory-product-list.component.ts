@@ -63,6 +63,7 @@ import { ProductDataService } from '@services/product-data.service'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
@@ -88,7 +89,8 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
     SelectionBarComponent,
     EmptyStateComponent,
     NutritionBadgeComponent,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    InputClearComponent
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
@@ -737,5 +739,19 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         this.savingPriceId_.set(null)
       }
     })
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

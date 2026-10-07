@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
-import { LucideAngularModule, Search, Plus } from 'lucide-angular'
+import { LucideAngularModule, Search, Plus, X } from 'lucide-angular'
 import { PreparationSearchComponent } from './preparation-search.component'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
 import { signal } from '@angular/core'
@@ -22,7 +22,7 @@ describe('PreparationSearchComponent', () => {
       imports: [
         PreparationSearchComponent,
         TranslatePipe,
-        LucideAngularModule.pick({ Search, Plus })
+        LucideAngularModule.pick({ Search, Plus, X })
       ],
       providers: [
         provideHttpClient(),

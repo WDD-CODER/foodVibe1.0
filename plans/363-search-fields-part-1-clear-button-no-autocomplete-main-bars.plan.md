@@ -103,10 +103,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: `InputClearComponent` + spec (hidden when `visible=false`, emits `clear`); engine CSS (`shared/input-clear/**`, `src/styles.scss`).
-- [ ] A2: Wire the 4 list pages (recipe-book, inventory, suppliers, equipment).
-- [ ] A3: Wire menu-library and venues.
-- [ ] A4: Wire ingredient-search and preparation-search, preserving their keyboard and result-panel behavior.
+- [x] A1: `InputClearComponent` + spec (hidden when `visible=false`, emits `clear`); engine CSS (`shared/input-clear/**`, `src/styles.scss`).
+- [x] A2: Wire the 4 list pages (recipe-book, inventory, suppliers, equipment).
+- [x] A3: Wire menu-library and venues.
+- [x] A4: Wire ingredient-search and preparation-search, preserving their keyboard and result-panel behavior.
 - [ ] A5: Autocomplete attributes on all 8. Build, specs, phone check. Update session-state.
 
 ## Technical Considerations

@@ -19,6 +19,7 @@ import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-ba
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environmentType'
@@ -33,7 +34,8 @@ type VenueBulkField = 'environmentType'
     TranslatePipe,
     LoaderComponent,
     ListRowCheckboxComponent,
-    SelectionBarComponent
+    SelectionBarComponent,
+    InputClearComponent
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
@@ -223,5 +225,19 @@ export class VenueListComponent implements OnInit, OnDestroy {
     } finally {
       this.deletingId_.set(null)
     }
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

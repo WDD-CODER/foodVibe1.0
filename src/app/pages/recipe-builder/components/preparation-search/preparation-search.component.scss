@@ -5,6 +5,7 @@
 }
 
 .input-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -43,6 +44,11 @@
     &::placeholder {
       color: var(--color-text-muted-light);
     }
+  }
+
+  app-input-clear {
+    flex-shrink: 0;
+    margin-inline-start: auto;
   }
 }
 

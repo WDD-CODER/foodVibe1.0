@@ -42,6 +42,7 @@ import { AddItemModalService } from '@services/add-item-modal.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { EquipmentCategoryRegistryService } from '@services/equipment-category-registry.service'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
@@ -69,7 +70,8 @@ type EquipmentBulkField = 'category' | 'isConsumable'
     ListRowCheckboxComponent,
     SelectionBarComponent,
     ClickOutSideDirective,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    InputClearComponent
   ],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
@@ -536,5 +538,19 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       }
     }
     this.selection.clear()
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

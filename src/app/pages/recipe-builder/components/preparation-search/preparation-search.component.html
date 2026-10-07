@@ -8,7 +8,13 @@
       [value]="searchQuery_()"
       (input)="searchQuery_.set($any($event.target).value); showResults_.set(true)"
       (focus)="showResults_.set(true)"
-      placeholder="{{ 'search_preparation' | translatePipe }}" />
+      placeholder="{{ 'search_preparation' | translatePipe }}"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      (keydown.escape)="onSearchEscape($event)" />
+    <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" />
   </div>
 
   @if (showResults_() && groupedResults_().length > 0) {
