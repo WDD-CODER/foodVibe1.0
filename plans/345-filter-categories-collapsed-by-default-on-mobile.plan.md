@@ -87,9 +87,9 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Write the util plus its spec (`collapsible-categories.util.ts/.spec.ts`).
-- [ ] A2: Migrate inventory and recipe-book (`inventory-product-list/**`, `recipe-book-list/**`).
-- [ ] A3: Add collapsible headers to suppliers and equipment (`supplier-list/**`, `equipment-list/**`).
+- [x] A1: Write the util plus its spec (`collapsible-categories.util.ts/.spec.ts`).
+- [x] A2: Migrate inventory and recipe-book (`inventory-product-list/**`, `recipe-book-list/**`).
+- [x] A3: Add collapsible headers to suppliers and equipment (`supplier-list/**`, `equipment-list/**`).
 - [ ] A4: Build and run specs. Check at 360px and 1280px. Update the session-state file.
 
 ## Technical Considerations

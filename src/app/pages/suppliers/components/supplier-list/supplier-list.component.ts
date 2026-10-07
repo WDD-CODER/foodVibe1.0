@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   output,
   signal,
@@ -39,6 +40,7 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { useListState, StringParam, BooleanParam, NumberSetParam } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
+import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { useIsDesktop } from 'src/app/core/utils/desktop-detection.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { getSupplierIds } from '@utils/product-source.util'
@@ -143,6 +145,14 @@ export class SupplierListComponent implements OnInit, OnDestroy {
         { urlParam: 'linkedOnly', signal: this.hasLinkedOnly_, serializer: BooleanParam }
       ])
     }
+
+    // Open the delivery-days category whenever it gains a selection (e.g. restored from the URL).
+    let hadDays = false
+    effect(() => {
+      const hasDays = this.selectedDays_().size > 0
+      if (hasDays && !hadDays) this.filterCategories.expandIfActive('delivery_days', true)
+      hadDays = hasDays
+    })
   }
 
   ngOnInit(): void {
@@ -169,6 +179,8 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   /** Delivery days to filter (0=Sun .. 6=Sat). Empty set = show all. */
   protected selectedDays_ = signal<Set<number>>(new Set())
   protected hasLinkedOnly_ = signal(false)
+  /** Filter-category open state: collapsed on mobile (≤1023px), expanded on desktop (plan 345). */
+  protected readonly filterCategories = useCollapsibleCategories()
 
   protected isEmptyList_ = computed(() => this.supplierData.allSuppliers_().length === 0)
 
