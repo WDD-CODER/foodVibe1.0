@@ -8,15 +8,42 @@ import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
 import { UserService } from '@services/user.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
-import { ActivityLogService, ActivityEntry } from '@services/activity-log.service'
+import { ActivityLogService, ActivityEntry, ActivityChange, ActivityEntityType } from '@services/activity-log.service'
+import { TranslationService } from '@services/translation.service'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
-import { ChangePopoverComponent } from '../../../../shared/change-popover/change-popover.component'
+import { ActivityValuePipe } from 'src/app/core/pipes/activity-value.pipe'
+import {
+  ALL_CHANGES_FIELD,
+  ChangePopoverComponent
+} from '../../../../shared/change-popover/change-popover.component'
 import type { DashboardTab } from '../../dashboard.page'
+
+/** Change lines shown inline per activity entry before "+N more" (plan 351, Critical Question 1 → a). */
+const MAX_INLINE_CHANGES = 3
+
+const ENTITY_ICONS: Record<ActivityEntityType, string> = {
+  product: 'package',
+  recipe: 'chef-hat',
+  dish: 'utensils'
+}
+
+interface ActivityDayGroup {
+  key: string
+  label: string
+  items: ActivityEntry[]
+}
 
 @Component({
   selector: 'app-dashboard-overview',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, ScrollIndicatorsDirective, ChangePopoverComponent],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    TranslatePipe,
+    ActivityValuePipe,
+    ScrollIndicatorsDirective,
+    ChangePopoverComponent
+  ],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,6 +57,8 @@ export class DashboardOverviewComponent {
   private readonly dishData = inject(DishDataService)
   private readonly router = inject(Router)
   private readonly activityLog = inject(ActivityLogService)
+  private readonly translation = inject(TranslationService)
+  private readonly relativeTimeFormat = new Intl.RelativeTimeFormat('he', { numeric: 'auto', style: 'short' })
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   protected readonly openChange_ = signal<{
     activityId: string
@@ -65,8 +94,46 @@ export class DashboardOverviewComponent {
     return this.activityLog.getRecentEntriesFromStorage(10)
   }
 
-  protected trackByActivityId(_index: number, item: ActivityEntry): string {
-    return item.id
+  /** Recent activity grouped by calendar day, newest first. Day headers render only when there are 2+ groups. */
+  protected activityGroups(): ActivityDayGroup[] {
+    const groups: ActivityDayGroup[] = []
+    for (const entry of this.getRecentActivity()) {
+      const key = this.dayKey(entry.timestamp)
+      const last = groups[groups.length - 1]
+      if (last && last.key === key) last.items.push(entry)
+      else groups.push({ key, label: this.dayLabel(entry.timestamp), items: [entry] })
+    }
+    return groups
+  }
+
+  protected entityIcon(type: ActivityEntityType): string {
+    return ENTITY_ICONS[type] ?? 'package'
+  }
+
+  protected visibleChanges(item: ActivityEntry): ActivityChange[] {
+    return (item.changes ?? []).slice(0, MAX_INLINE_CHANGES)
+  }
+
+  protected hiddenChangeCount(item: ActivityEntry): number {
+    return Math.max(0, (item.changes?.length ?? 0) - MAX_INLINE_CHANGES)
+  }
+
+  protected moreChangesLabel(count: number): string {
+    return this.translation.translate('activity_more_changes').replace('{n}', String(count))
+  }
+
+  protected isoTime(timestamp: number): string {
+    return new Date(timestamp).toISOString()
+  }
+
+  /** "לפני רגע" under a minute, then minutes / hours / days via Intl.RelativeTimeFormat('he'). */
+  protected relativeTime(timestamp: number, now = Date.now()): string {
+    const diffSec = Math.round((timestamp - now) / 1000)
+    const abs = Math.abs(diffSec)
+    if (abs < 60) return this.translation.translate('activity_just_now')
+    if (abs < 3600) return this.relativeTimeFormat.format(Math.round(diffSec / 60), 'minute')
+    if (abs < 86400) return this.relativeTimeFormat.format(Math.round(diffSec / 3600), 'hour')
+    return this.relativeTimeFormat.format(Math.round(diffSec / 86400), 'day')
   }
 
   protected toggleChangePopover(activityId: string, field: string, event: Event): void {
@@ -85,9 +152,9 @@ export class DashboardOverviewComponent {
     })
   }
 
-  protected isChangeOpen(activityId: string, field: string): boolean {
-    const current = this.openChange_()
-    return !!current && current.activityId === activityId && current.field === field
+  /** "+N more changes" → the popover with every change of the entry. */
+  protected toggleAllChanges(activityId: string, event: Event): void {
+    this.toggleChangePopover(activityId, ALL_CHANGES_FIELD, event)
   }
 
   /** Activity entry for the currently open popover (used by fixed popover). */
@@ -97,21 +164,10 @@ export class DashboardOverviewComponent {
     return this.getRecentActivity().find((e) => e.id === open.activityId)
   }
 
-  /** Close popover when clicking outside; ignore clicks on change tags (they toggle instead). */
+  /** Close popover when clicking outside; ignore clicks on the "+N" button (it toggles instead). */
   protected closeChangePopoverOnOutsideClick(target: HTMLElement): void {
-    if (target.closest?.('.change-tag')) return
+    if (target.closest?.('.act-more')) return
     this.openChange_.set(null)
-  }
-
-  /** Scroll the activity-changes container left/right (used on mobile for clickable scroll). */
-  protected scrollActivityChanges(event: Event, direction: 'left' | 'right'): void {
-    const btn = event.currentTarget as HTMLElement
-    const item = btn.closest('.activity-item')
-    const changesEl = item?.querySelector('.activity-changes') as HTMLElement | null
-    if (!changesEl) return
-    const delta = Math.max(120, changesEl.clientWidth * 0.6)
-    const step = direction === 'left' ? -delta : delta
-    changesEl.scrollBy({ left: step, behavior: 'smooth' })
   }
 
   protected goToInventory(): void {
@@ -138,5 +194,19 @@ export class DashboardOverviewComponent {
       queryParams: { lowStock: '1' },
       queryParamsHandling: 'merge'
     })
+  }
+
+  private dayKey(timestamp: number): string {
+    const d = new Date(timestamp)
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
+  }
+
+  private dayLabel(timestamp: number): string {
+    const today = new Date()
+    const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
+    const key = this.dayKey(timestamp)
+    if (key === this.dayKey(today.getTime())) return this.translation.translate('activity_today')
+    if (key === this.dayKey(yesterday.getTime())) return this.translation.translate('activity_yesterday')
+    return new Date(timestamp).toLocaleDateString('he-IL', { day: 'numeric', month: 'long' })
   }
 }

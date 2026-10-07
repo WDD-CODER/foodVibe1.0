@@ -6,15 +6,21 @@
     (clickOutside)="closeRequest.emit($event)"
   >
     @if (activity(); as act) {
-      @if (getChange(act, o.field); as c) {
-        <app-floating-info-container scrollAxis="none">
-          <p class="change-popover-label">{{ c.label | translatePipe }}</p>
-          <div class="change-popover-values">
-            <span class="change-popover-from">{{ formatChangeValue(c.from) }}</span>
-            <span class="change-popover-arrow" aria-hidden="true">→</span>
-            <span class="change-popover-to">{{ formatChangeValue(c.to) }}</span>
-          </div>
-        </app-floating-info-container>
+      @if (getChanges(act, o.field); as changes) {
+        @if (changes.length) {
+          <app-floating-info-container scrollAxis="none">
+            @for (c of changes; track c.field) {
+              <div class="change-popover-item">
+                <p class="change-popover-label">{{ c.label | translatePipe }}</p>
+                <div class="change-popover-values">
+                  <del class="change-popover-from">{{ c.from | activityValue: c.field }}</del>
+                  <lucide-icon class="change-popover-arrow" name="arrow-left" [size]="14" aria-hidden="true"></lucide-icon>
+                  <ins class="change-popover-to">{{ c.to | activityValue: c.field }}</ins>
+                </div>
+              </div>
+            }
+          </app-floating-info-container>
+        }
       }
     }
   </div>

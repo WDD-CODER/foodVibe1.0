@@ -54,7 +54,8 @@ describe('DashboardOverviewComponent', () => {
     const mockKitchenState = {
       products_: mockProducts.asReadonly(),
       recipes_: mockRecipes.asReadonly(),
-      lowStockProducts_: mockLowStock.asReadonly()
+      lowStockProducts_: mockLowStock.asReadonly(),
+      suppliersById_: signal(new Map([['s1', { _id: 's1', nameHebrew: 'ירקות כהן' }]]))
     }
 
     // totalRecipes_/unapprovedCount_ come from the lightweight /count endpoint now
@@ -211,25 +212,73 @@ describe('DashboardOverviewComponent', () => {
 
   // --- Popover ---
 
-  it('should open popover on toggleChangePopover call', () => {
-    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
-      makeEntry({ changes: [{ field: 'price', label: 'activity_field_price' }] })
-    ])
+  const fourChanges = [
+    { field: 'price', label: 'activity_field_price', from: '10 ₪', to: '12 ₪' },
+    { field: 'supplier', label: 'activity_field_supplier', from: 's1', to: 'gone' },
+    { field: 'category', label: 'activity_field_category', to: 'vegetables' },
+    { field: 'unit', label: 'activity_field_unit', from: 'kg', to: 'gram' }
+  ]
+
+  it('shows at most 3 change lines with old/new values resolved', () => {
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: fourChanges })])
     fixture.detectChanges()
-    const changeTag = fixture.debugElement.query(By.css('.change-tag'))
-    changeTag.nativeElement.click()
-    expect((component as unknown as { openChange_: () => unknown }).openChange_()).not.toBeNull()
+    const lines = fixture.debugElement.queryAll(By.css('.act-change'))
+    expect(lines.length).toBe(3)
+    const supplierLine = lines[1].nativeElement as HTMLElement
+    expect(supplierLine.querySelector('.act-old')?.textContent?.trim()).toBe('ירקות כהן')
+    expect(supplierLine.querySelector('.act-new')?.textContent?.trim()).toBe('activity_deleted_supplier')
+    // created-only value: no struck-through old value, no arrow
+    expect((lines[2].nativeElement as HTMLElement).querySelector('.act-old')).toBeNull()
+    expect((lines[2].nativeElement as HTMLElement).querySelector('.act-arrow')).toBeNull()
   })
 
-  it('should close popover on second click of same change tag', () => {
+  it('shows no change list for an update without changes', () => {
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: [] })])
+    fixture.detectChanges()
+    expect(fixture.debugElement.query(By.css('.act-changes'))).toBeNull()
+    expect(fixture.debugElement.query(By.css('.act-more'))).toBeNull()
+  })
+
+  it('should open the all-changes popover from "+N more" and close it on a second click', () => {
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: fourChanges })])
+    fixture.detectChanges()
+    const more = fixture.debugElement.query(By.css('.act-more'))
+    expect(more).not.toBeNull()
+    more.nativeElement.click()
+    const open = (component as unknown as { openChange_: () => { field: string } | null }).openChange_()
+    expect(open?.field).toBe('*')
+    more.nativeElement.click()
+    expect((component as unknown as { openChange_: () => unknown }).openChange_()).toBeNull()
+  })
+
+  it('formats relative time', () => {
+    const c = component as unknown as { relativeTime: (ts: number, now?: number) => string }
+    const now = 1_700_000_000_000
+    expect(c.relativeTime(now - 10_000, now)).toBe('activity_just_now')
+    expect(c.relativeTime(now - 5 * 60_000, now)).toContain('5')
+    expect(c.relativeTime(now - 3 * 3_600_000, now)).toContain('3')
+  })
+
+  it('adds no day headers when all entries are from the same day', () => {
+    const now = Date.now()
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
-      makeEntry({ changes: [{ field: 'price', label: 'activity_field_price' }] })
+      makeEntry({ id: 'a', timestamp: now }),
+      makeEntry({ id: 'b', timestamp: now - 1000 })
     ])
     fixture.detectChanges()
-    const changeTag = fixture.debugElement.query(By.css('.change-tag'))
-    changeTag.nativeElement.click() // open
-    changeTag.nativeElement.click() // close
-    expect((component as unknown as { openChange_: () => unknown }).openChange_()).toBeNull()
+    expect(fixture.debugElement.queryAll(By.css('.act-day')).length).toBe(0)
+  })
+
+  it('groups entries under day headers when they span more than one day', () => {
+    const now = Date.now()
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
+      makeEntry({ id: 'a', timestamp: now }),
+      makeEntry({ id: 'b', timestamp: now - 3 * 86_400_000 })
+    ])
+    fixture.detectChanges()
+    const headers = fixture.debugElement.queryAll(By.css('.act-day'))
+    expect(headers.length).toBe(2)
+    expect((headers[0].nativeElement as HTMLElement).textContent?.trim()).toBe('activity_today')
   })
 
   // --- Auth ---
