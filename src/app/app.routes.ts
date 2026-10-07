@@ -14,29 +14,11 @@ import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
 
 export const routes: Routes = [
-  {
-    path: 'equipment',
-    loadComponent: () => import('./pages/equipment/equipment.page').then(m => m.EquipmentPage),
-    resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },
-    children: [
-      { path: '', redirectTo: 'list', pathMatch: 'full' },
-      {
-        path: 'list',
-        loadComponent: () => import('./pages/equipment/components/equipment-list/equipment-list.component').then(m => m.EquipmentListComponent),
-      },
-      {
-        path: 'add',
-        loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
-        canActivate: [authGuard],
-      },
-      {
-        path: 'edit/:id',
-        loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
-        resolve: { equipment: equipmentResolver },
-        canActivate: [authGuard],
-      },
-    ],
-  },
+  // Plan 338: equipment lives only under /inventory/equipment — old URLs redirect.
+  { path: 'equipment', redirectTo: 'inventory/equipment', pathMatch: 'full' },
+  { path: 'equipment/list', redirectTo: 'inventory/equipment', pathMatch: 'full' },
+  { path: 'equipment/add', redirectTo: 'inventory/equipment/add', pathMatch: 'full' },
+  { path: 'equipment/edit/:id', redirectTo: 'inventory/equipment/edit/:id', pathMatch: 'full' },
   {
     path: 'venues',
     loadComponent: () => import('./pages/venues/venues.page').then(m => m.VenuesPage),
