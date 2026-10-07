@@ -199,3 +199,33 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** The error looked like an expired or missing refresh cookie, and adding `withCredentials` to login was a real fix too, but on its own it changed nothing: the request failed in DI before reaching the network.
 
 **What to do instead:** Never start an HTTP request synchronously in a constructor of a service that an interceptor injects. Defer it (`queueMicrotask`) or run it from an `APP_INITIALIZER`. When a "session lost on reload" bug shows up, look for NG0200 in the console first.
+
+---
+
+## A `backdrop-filter` card traps `position: fixed` popovers — use the Popover API's top layer
+
+**What hurt:** On phones the list ⋮ menu (`app-row-actions-menu`) opened about 4,000px down, off-screen. `list-shell`'s `.table-area` (and every glass card, e.g. `.manager-card`) has `backdrop-filter`, which makes it the containing block for `position: fixed` descendants, so the viewport coordinates the menu computed were applied relative to the card (fixed in plan 340).
+
+**Why the obvious fix is wrong:** Moving the menu outside the card works for one page but not for menus that live inside list rows, and removing `backdrop-filter` breaks the glass design. Any future `transform`/`filter`/`will-change` ancestor brings the bug back.
+
+**What to do instead:** Render floating menus with `popover="manual"` + `showPopover()` / `hidePopover()` (see `row-actions-menu.component.ts`). The top layer ignores ancestor containing blocks. Reset the UA `[popover]` box (`inset: auto; margin: 0; overflow: visible; color: inherit`). For click-away, listen on `document` in the **capture** phase — row actions call `stopPropagation()`, which hides a bubbling click.
+
+---
+
+## `.parent …` selectors inside a nested `@media` under `.parent { }` never match
+
+**What hurt:** Plan 341: the product form scrolled sideways on phones and kept its desktop 2-column grid. Its `@media (max-width: 768px)` block existed and looked right (`.form-container { padding … }`, `.form-container .form-section { grid-template-columns: 1fr }`), but it sat inside the `.form-container { … }` rule, so SCSS compiled it to `.form-container .form-container …` — a selector nothing matches. No build error, no warning.
+
+**Why the obvious fix is wrong:** Bumping specificity or adding `!important` to the mobile rules changes nothing — the rules never apply at all. Separately, once the grid collapsed to one column the card still overflowed by ~30px: a grid/flex item's default `min-width: auto` keeps it at its inputs' intrinsic width, so "the media query is fixed" still looked broken.
+
+**What to do instead:** Inside a nested block, target the parent with `&` and children by their own class (no parent prefix). When a responsive rule "does nothing", inspect the element and check whether the rule appears in the cascade at all before touching values. Give a grid/flex item that holds form inputs `min-width: 0`.
+
+---
+
+## List filters restored from sessionStorage hide a freshly created item
+
+**What hurt:** Plan 341: after "add supplier" moved from a modal to its own page, saving navigated back to `/suppliers/list` and the new supplier wasn't there. It was saved — `useListState` re-applied the last delivery-day / linked-only filters from sessionStorage, and a new supplier (no days, no linked products) matched none of them.
+
+**Why the obvious fix is wrong:** It looks like a data-sync bug (signal not updated, list not refetched), but the store had the item. Clearing the list's session filters on every visit would throw away state users rely on.
+
+**What to do instead:** After creating an item on a separate page, navigate back with a URL param that selects it (e.g. `queryParams: { q: name }`). `useListState` gives URL params priority over sessionStorage and skips the session restore entirely when any URL param is present. Pair it with a success toast.

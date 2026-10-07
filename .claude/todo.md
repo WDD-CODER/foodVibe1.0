@@ -122,30 +122,6 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
-### Plan 338 — Equipment: one route tree, back-to-products navigation, remove scaling rule from UI (`plans/338-equipment-one-route-tree-back-to-products-remove-scaling.plan.md`)
-- [ ] A1: Replace the /equipment routes with redirects and delete EquipmentPage. (src/app/app.routes.ts, src/app/pages/equipment/equipment.page.*)
-- [ ] A2: Remove the URL branching in list, form and resolver. (equipment-list.component.ts, equipment-form.component.ts, equipment.resolver.ts)
-- [ ] A3: Add the two inventory tab chips, and remove the .control-nav from the equipment and inventory filter panels. (tab-chips.component.ts, equipment-list.component.html, inventory-product-list.component.html)
-- [ ] A4: Swap the logistics labels for equipment. (equipment-list.component.html, inventory-product-list.component.html)
-- [ ] A5: Remove the scaling UI from form and list; deprecate the model fields. (equipment-form.component.*, equipment-list.component.*, equipment.model.ts)
-- [ ] A6: Run rg -n "scaling|isUnderInventory|EquipmentPage|'/equipment" src/app and clean the leftovers. Build, specs, e2e grep. Update the session-state file.
-
-### Plan 340 — Metadata: compact chips, tap-to-act menu, menu-type fields as toggle chips (`plans/340-metadata-compact-chips-tap-menu-menu-type-toggle-chips.plan.md`)
-
-- [ ] A1: Add `RowActionsMenuComponent.open(anchor)` / `close()` (public) and anchor-based positioning, with a spec. Verify the 4 existing list usages are unchanged. (`src/app/shared/row-actions-menu/**`)
-- [ ] A2: Switch `#managerCard` to pills for every type and add the tap menu. Delete the category grid styles and hover-reveal rules. (`metadata-manager.page.component.*`)
-- [ ] A3: Switch the preparation and section category managers to pills plus the tap menu. (`metadata-manager/components/**`)
-- [ ] A4: Switch menu types to fixed-order toggle chips that save on toggle, and remove the checkbox edit mode. (`metadata-manager.page.component.*`)
-- [ ] A5: Build and run the specs. Check on the phone at 360px. Update the session-state file.
-
-### Plan 341 — Suppliers: add/edit as a page like venues; center the venues inner nav (`plans/341-suppliers-add-edit-as-page-center-venues-nav.plan.md`)
-
-- [ ] A1: `SuppliersPage` back bar plus centering styles; venues centering (`src/app/pages/suppliers/suppliers.page.*`, `src/app/pages/venues/venues.page.scss`, `venue-form.component.scss`)
-- [ ] A2: Route add and edit to pages; remove inline edit from supplier-list (`supplier-list.component.*`)
-- [ ] A3: Align the supplier-form full-page markup and styles with venue-form (`supplier-form.component.*`)
-- [ ] A4: Delete the supplier modal, its service and mount; grep for leftovers (`shared/supplier-modal/**`, `supplier-modal.service*`, `app.component.*`)
-- [ ] A5: Build, specs, e2e grep for supplier-modal. Update the session-state file.
-
 ### Plan 342 — Form checkboxes → toggle chips (app-wide) (`plans/342-form-checkboxes-to-toggle-chips-app-wide.plan.md`)
 
 - [ ] A1: Supplier form delivery days (both branches) → chip group (`supplier-form.component.*`)
@@ -175,10 +151,10 @@
 - [ ] A4: Build and run specs. Check at 360px, 800px and 1280px. Update the session-state file.
 
 ### Plan 347 — Mobile keyboard: push content up, keep the focused field visible (`plans/347-mobile-keyboard-keep-focused-field-visible.plan.md`)
-- [ ] A1: Viewport meta (`src/index.html`).
-- [ ] A2: `KeyboardInsetService` plus a spec (mock `visualViewport`: inset computed, class toggled, no-op without the API). Inject it in `AppComponent` (`keyboard-inset.service.ts/.spec.ts`, `app.component.ts`).
-- [ ] A3: The `body.kb-open` rules and `.as-modal` / `.c-modal-card` inset handling (`src/styles.scss`).
-- [ ] A4: `vh` → `dvh` in the listed files.
+- [x] A1: Viewport meta (`src/index.html`).
+- [x] A2: `KeyboardInsetService` plus a spec (mock `visualViewport`: inset computed, class toggled, no-op without the API). Inject it in `AppComponent` (`keyboard-inset.service.ts/.spec.ts`, `app.component.ts`).
+- [x] A3: The `body.kb-open` rules and `.as-modal` / `.c-modal-card` inset handling (`src/styles.scss`).
+- [x] A4: `vh` → `dvh` in the listed files.
 - [ ] A5: Build and run specs. Update the session-state file.
 
 ### Plan 348 — Recipe builder on mobile: usable ingredient rows (portrait and landscape) (`plans/348-recipe-builder-mobile-usable-ingredient-rows.plan.md`)
@@ -388,6 +364,14 @@
 - [ ] D4: Kit: docs (`take-plan.md`, `remote.md`, preflight, `standards-git.md`, `ship-regular.md`, `job-validation.md`, `workflow-map.md`, `commands.md`), plus the manifest row and the `kit-owned.json` entry for `slot-serve.mjs`.
 - [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
 - [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
+
+### Plan 394 — Night 2026-10-07 PR Validation and Merge Runbook (`plans/394-night-1007-pr-validation-merge-runbook.plan.md`)
+- [ ] R1–R4: clean rebases — #293 tech debt, #301 (347), #302 (371), #307 (348); Human validates each in wt-1 → approve/skip/reject.
+- [ ] R5–R8: dictionary/spec conflicts — #297 (365), #298 (370, run Mongo server tests here), #295 (351), #296 (367).
+- [ ] R9–R10: #314 chain top (363+364) → merges #299 then #314; #315 (362) rebased onto main's 340.
+- [ ] R11–R15: list/form template conflicts — #300 (361), #294 (345), #304 (342), #306 (368), #308 (344).
+- [ ] R16–R18: #311 chain top (349+350+352) → merges #309 → #310 → #311; then #313 (346); then #312 (353).
+- [ ] Done-when: no open `[night 10-07]` PR; `main` builds + specs pass; wt-1 servers off, `/remote` off.
 
 ## Where things live
 

@@ -207,6 +207,7 @@
     "create_new_unit": "צור יחידה חדשה",
     "product": "מוצר",
     "product_list": "רשימת מוצרים",
+    "products": "מוצרים",
     "product_incomplete_hint": "המוצר חסר פרטים — לחץ לעריכה",
     "product_warning_hint": "המוצר חסר פרטים משלימים — לחץ לעריכה",
     "product_invalid": "מוצר לא תקין",
@@ -954,6 +955,8 @@
     "duplicate_name_open_existing": "פתח את הקיים",
     "duplicate_from_master": "(מהמאגר המשותף)",
     "taxonomy_shared_admin_only": "זהו פריט משותף לכל המשתמשים — רק מנהל יכול לשנות או למחוק אותו",
-    "taxonomy_term_in_use": "לא ניתן למחוק — הפריט עדיין בשימוש ב: {names}"
+    "taxonomy_term_in_use": "לא ניתן למחוק — הפריט עדיין בשימוש ב: {names}",
+    "supplier_added": "הספק \"{name}\" נוסף בהצלחה",
+    "min_order": "מינימום הזמנה"
   }
 }
