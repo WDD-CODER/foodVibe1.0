@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, signal, ElementRef, inject } from '@angular/core'
+import { Component, input, ChangeDetectionStrategy, signal, ElementRef, inject, HostListener } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionPer100g } from '@models/product.model'
@@ -43,13 +43,22 @@ const MACRO_COLORS: Record<string, string> = {
 export class NutritionBadgeComponent {
   private readonly elRef_ = inject(ElementRef)
 
-  @Input() nutrition: NutritionPer100g | null | undefined
+  readonly nutrition = input<NutritionPer100g | null | undefined>()
   showTooltip = false
   isBelow_ = signal(false)
   tooltipStyle_ = signal<Record<string, string>>({})
 
   onMouseEnter(): void {
     this.showTooltip = true
+    this.positionTooltip_()
+  }
+
+  /**
+   * Places the fixed tooltip next to the badge (plan 348: shared by hover and tap). Clamped to
+   * the containing block horizontally; vertically it opens on the side with room, and its
+   * height is capped to the viewport so it fits even a ~360px-tall landscape phone.
+   */
+  private positionTooltip_(): void {
     const host = this.elRef_.nativeElement as HTMLElement
     const rect = host.getBoundingClientRect()
     const cbRect = this.findFixedContainingBlock_(host)
@@ -58,27 +67,36 @@ export class NutritionBadgeComponent {
     // When no intercepting ancestor exists cbRect covers the full viewport,
     // so the formulas degrade to the plain-viewport case.
     const TOOLTIP_W = 164
-    const TOOLTIP_EST_HEIGHT = 240
+    const GAP = 8
+    const estHeight = Math.min(240, window.innerHeight - 16)
     const halfW = TOOLTIP_W / 2
 
     const centerX_cb = rect.left + rect.width / 2 - cbRect.left
     const clampedX = Math.max(halfW, Math.min(cbRect.width - halfW, centerX_cb))
 
-    // Flip to below when the badge is too close to the containing block's top edge
-    const below = rect.top - cbRect.top < TOOLTIP_EST_HEIGHT + 8
+    // Room in the viewport above / below the badge.
+    const roomAbove = rect.top - Math.max(cbRect.top, 0) - GAP
+    const roomBelow = Math.min(cbRect.bottom, window.innerHeight) - rect.bottom - GAP
+    // Open above when it fits there (as before); otherwise on whichever side has more room.
+    const below = roomAbove < estHeight && roomBelow > roomAbove
     this.isBelow_.set(below)
+    const maxHeight = `${Math.max(80, Math.floor(below ? roomBelow : roomAbove))}px`
 
     if (!below) {
       this.tooltipStyle_.set({
-        bottom: `${cbRect.bottom - rect.top + 8}px`,
+        bottom: `${cbRect.bottom - rect.top + GAP}px`,
         top: 'auto',
-        left: `${clampedX}px`
+        left: `${clampedX}px`,
+        'max-height': maxHeight,
+        'overflow-y': 'auto'
       })
     } else {
       this.tooltipStyle_.set({
-        top: `${rect.bottom - cbRect.top + 8}px`,
+        top: `${rect.bottom - cbRect.top + GAP}px`,
         bottom: 'auto',
-        left: `${clampedX}px`
+        left: `${clampedX}px`,
+        'max-height': maxHeight,
+        'overflow-y': 'auto'
       })
     }
   }
@@ -105,7 +123,7 @@ export class NutritionBadgeComponent {
   }
 
   get dominantColor(): string | null {
-    const n = this.nutrition
+    const n = this.nutrition()
     if (!n) return null
     const scores: Record<string, number> = {
       protein: (n.proteinG ?? 0) * 4,
@@ -120,7 +138,7 @@ export class NutritionBadgeComponent {
   }
 
   get macroSegments(): MacroSegment[] {
-    const n = this.nutrition
+    const n = this.nutrition()
     if (!n) return []
     const vals: Record<string, number> = {
       protein: (n.proteinG ?? 0) * 4,
@@ -144,7 +162,7 @@ export class NutritionBadgeComponent {
   }
 
   get tooltipRows(): TooltipRow[] {
-    const n = this.nutrition
+    const n = this.nutrition()
     if (!n) return []
     const candidates: (TooltipRow | null)[] = [
       n.energyKcal != null
@@ -229,5 +247,15 @@ export class NutritionBadgeComponent {
   onBadgeClick(event: MouseEvent): void {
     event.stopPropagation()
     this.showTooltip = !this.showTooltip
+    if (this.showTooltip) this.positionTooltip_()
+  }
+
+  /** Tap outside closes the tooltip (touch has no mouseleave). */
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    if (!this.showTooltip) return
+    const host = this.elRef_.nativeElement as HTMLElement
+    if (event.target instanceof Node && host.contains(event.target)) return
+    this.showTooltip = false
   }
 }

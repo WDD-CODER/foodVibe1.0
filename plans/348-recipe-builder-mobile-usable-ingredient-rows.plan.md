@@ -86,11 +86,11 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Remove the conflicting media block; tune the container card layout for portrait and landscape (`recipe-ingredients-table.component.scss`).
-- [ ] A2: Gate hover-reveals behind `(hover: hover)` (`recipe-ingredients-table.component.scss`).
-- [ ] A3: Update the `isMobile_` query (`recipe-ingredients-table.component.ts`).
-- [ ] A4: Nutrition badge tap positioning, clamp and outside-tap close, with a spec (`shared/nutrition-badge/**`).
-- [ ] A5: Header grid `1fr 1fr` (`recipe-header.component.scss`).
+- [x] A1: Remove the conflicting media block; tune the container card layout for portrait and landscape (`recipe-ingredients-table.component.scss`).
+- [x] A2: Gate hover-reveals behind `(hover: hover)` (`recipe-ingredients-table.component.scss`).
+- [x] A3: Update the `isMobile_` query (`recipe-ingredients-table.component.ts`).
+- [x] A4: Nutrition badge tap positioning, clamp and outside-tap close, with a spec (`shared/nutrition-badge/**`).
+- [x] A5: Header grid `1fr 1fr` (`recipe-header.component.scss`).
 - [ ] A6: Build and run specs. Check at 360×740 portrait, 740×360 landscape and desktop. Update the session-state file.
 
 ## Technical Considerations
