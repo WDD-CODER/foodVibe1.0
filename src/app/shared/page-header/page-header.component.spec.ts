@@ -27,7 +27,7 @@ class HostComponent {
 @Component({
   standalone: true,
   imports: [PageHeaderComponent],
-  template: `<app-page-header titleKey="dashboard" subtitleKey="dashboard_subtitle" />`
+  template: '<app-page-header titleKey="dashboard" subtitleKey="dashboard_subtitle" />'
 })
 class SubtitleHostComponent {}
 
