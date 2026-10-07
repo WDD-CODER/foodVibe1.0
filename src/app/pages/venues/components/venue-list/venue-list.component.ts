@@ -39,6 +39,10 @@ const LONG_PRESS_MS = 500
 const LONG_PRESS_MOVE_TOLERANCE = 10
 /** history.state marker for the entry pushed while selecting, so Back leaves selection mode. */
 const SELECTION_HISTORY_KEY = 'venueSelection'
+/** Same query the SCSS uses to hide the card checkboxes: phones and tablets without a mouse. */
+const TOUCH_QUERY = '(hover: none)'
+/** Taps on these keep the selection: cards toggle, the bar and its dialogs act on it. */
+const KEEP_SELECTION_TARGETS = '.venue-card, app-selection-bar, .select-all-pill, app-confirm-modal, .c-modal-overlay'
 
 @Component({
   selector: 'app-venue-list',
@@ -76,6 +80,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
   protected deletingId_ = signal<string | null>(null)
   protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set())
   protected selection = new ListSelectionState()
+  /** Touch devices select by long press (no checkboxes); mouse devices keep the hover checkbox. */
+  private readonly isTouch_ = typeof matchMedia === 'function' && matchMedia(TOUCH_QUERY).matches
 
   private longPressTimer_: ReturnType<typeof setTimeout> | null = null
   private longPressStart_: { x: number; y: number } | null = null
@@ -86,6 +92,13 @@ export class VenueListComponent implements OnInit, OnDestroy {
   private readonly onPopState_ = (): void => {
     if (!this.selectionHistoryPushed_) return
     this.selectionHistoryPushed_ = false
+    this.selection.clear()
+  }
+  /** Touch: a tap anywhere outside the cards and the selection bar ends selection mode. */
+  private readonly onDocumentClick_ = (event: MouseEvent): void => {
+    if (!this.selection.selectionMode()) return
+    const el = event.target as HTMLElement | null
+    if (!el?.isConnected || el.closest(KEEP_SELECTION_TARGETS)) return
     this.selection.clear()
   }
 
@@ -115,9 +128,10 @@ export class VenueListComponent implements OnInit, OnDestroy {
         { urlParam: 'envTypes', signal: this.selectedEnvTypes_, serializer: StringSetParam }
       ])
     }
-    // Selection mode owns one history entry: entering pushes it (so Back clears the selection),
+    // Touch only: selection mode owns one history entry: entering pushes it (so Back clears the selection),
     // clearing any other way (selection bar, select-all off, last card unchecked) pops it.
     effect(() => {
+      if (!this.isTouch_) return
       const selecting = this.selection.selectionMode()
       if (selecting && !this.selectionHistoryPushed_) {
         history.pushState({ ...history.state, [SELECTION_HISTORY_KEY]: true }, '')
@@ -130,7 +144,10 @@ export class VenueListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    window.addEventListener('popstate', this.onPopState_)
+    if (this.isTouch_) {
+      window.addEventListener('popstate', this.onPopState_)
+      document.addEventListener('click', this.onDocumentClick_)
+    }
     void this.venueData.ensureLoaded()
     this.heroFab.setPageActions([{ labelKey: 'add_venue', icon: 'plus', run: () => this.onAddPlace() }], 'replace')
   }
@@ -138,6 +155,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.heroFab.clearPageActions()
     window.removeEventListener('popstate', this.onPopState_)
+    document.removeEventListener('click', this.onDocumentClick_)
     this.cancelLongPress()
     // Leaving the page (e.g. a card's edit button) while selecting: the pushed entry stays in
     // history as a harmless same-URL step; just stop tracking it.
@@ -209,11 +227,11 @@ export class VenueListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/venues/edit', id])
   }
 
-  /** Long press (touch or mouse) on a card enters selection mode with that card checked. */
+  /** Touch only: a long press on a card enters selection mode with that card selected. */
   protected onCardPointerDown(item: VenueProfile, event: PointerEvent): void {
     // A long press on touch often ends without a click, so a stale flag is reset by the next press.
     this.suppressNextClick_ = false
-    if (event.button !== 0) return
+    if (!this.isTouch_ || event.button !== 0) return
     const el = event.target as HTMLElement
     if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return
     this.cancelLongPress()
