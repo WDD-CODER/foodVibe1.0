@@ -38,25 +38,25 @@ None. No invariant touched. Merges only; every PR was already planned under its 
 ## Rounds (order)
 
 ### Round 1 — PR #293 Tech-debt quick fixes (`chore/night-techdebt-quickfixes`) — rebases clean
-- [ ] Inventory list (desktop): hover the leaf nutrition badge on a product → tooltip as before.
-- [ ] Recipe builder: nutrition badge on an ingredient row still shows.
-- [ ] Venues list + venue detail: infrastructure count still shows.
-- [ ] Menu library: event revenue figures unchanged.
-- [ ] Merged.
+- [x] Inventory list (desktop): hover the leaf nutrition badge on a product → tooltip as before.
+- [x] Recipe builder: nutrition badge on an ingredient row still shows.
+- [x] Venues list + venue detail: infrastructure count still shows.
+- [x] Menu library: event revenue figures unchanged.
+- [x] Merged.
 
 ### Round 2 — PR #301 Plan 347 Mobile keyboard (`feat/night-1007-347-mobile-keyboard`) — rebases clean
-- [ ] Android: recipe builder → tap an ingredient search → field centered above the keyboard, bottom bar + FAB hidden; close keyboard → they return.
-- [ ] iPhone: AI product modal → tap the prompt → modal shrinks, textarea visible above the keyboard.
-- [ ] Phone: list row inline edit (bottom sheet) → tap a field → sheet sits above the keyboard.
-- [ ] Desktop: no visual change anywhere.
-- [ ] Merged.
+- [x] Android: recipe builder → tap an ingredient search → field centered above the keyboard, bottom bar + FAB hidden; close keyboard → they return.
+- [x] iPhone: AI product modal → tap the prompt → modal shrinks, textarea visible above the keyboard.
+- [x] Phone: list row inline edit (bottom sheet) → tap a field → sheet sits above the keyboard.
+- [x] Desktop: no visual change anywhere.
+- [x] Merged.
 
 ### Round 3 — PR #302 Plan 371 Venues A (`feat/night-1007-371-venues-a`) — rebases clean
-- [ ] `/venues/list` desktop 1280: no checkboxes until hover; hover shows one top-left above the photo; selecting keeps all visible; cards with hours show the clock line (+N for 2+ blocks).
-- [ ] Phone 360: checkboxes in the corner, not over the photo; `/venues/add` no sideways scroll; infra + hours rows wrap; buttons full width.
-- [ ] Desktop ≥768: add/edit basic fields in two columns.
-- [ ] Edit a venue name → tap another tab → unsaved dialog: cancel stays / leave discards / save saves then leaves. Photo-only change also prompts. Normal save → no prompt.
-- [ ] Merged.
+- [x] `/venues/list` desktop 1280: no checkboxes until hover; hover shows one top-left above the photo; selecting keeps all visible; cards with hours show the clock line (+N for 2+ blocks).
+- [x] Phone 360: checkboxes in the corner, not over the photo; `/venues/add` no sideways scroll; infra + hours rows wrap; buttons full width.
+- [x] Desktop ≥768: add/edit basic fields in two columns.
+- [x] Edit a venue name → tap another tab → unsaved dialog: cancel stays / leave discards / save saves then leaves. Photo-only change also prompts. Normal save → no prompt.
+- [x] Merged.
 
 ### Round 4 — PR #307 Plan 348 Recipe builder mobile rows (`feat/night-1007-348-recipe-builder-mobile-rows`) — rebases clean
 - [ ] Phone portrait 360×740: new recipe → 3 ingredients → each card shows full name, amount (− / +), unit, cost, delete; all tappable; no sideways scroll; header fits.
