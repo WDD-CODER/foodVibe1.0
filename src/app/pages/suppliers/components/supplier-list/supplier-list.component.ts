@@ -439,6 +439,11 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/dashboard'])
   }
 
+  /** Min-order cell: "₪500", or "—" when empty or 0 (plan 361). */
+  protected minOrderDisplay(value: number | null | undefined): string {
+    return value ? `₪${value}` : '—'
+  }
+
   protected deliveryDaysDisplay(days: number[] | undefined): string {
     if (!days?.length) return '—'
     return days.map((d) => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ')

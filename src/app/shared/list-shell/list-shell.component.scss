@@ -41,7 +41,10 @@
     display: flex;
     justify-content: center;
 
-    overflow: hidden;
+    // No overflow clipping here (plan 361): the bulk-edit dropdowns hang below the bar and
+    // were cut off "behind the table". The bar's slideInOut animation handles its own overflow.
+    position: relative;
+    z-index: 20;
 
     &:empty {
       display: none;

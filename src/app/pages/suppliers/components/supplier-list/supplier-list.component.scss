@@ -8,16 +8,11 @@
 
     margin: 0;
 
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: var(--fs-xl);
+    font-weight: var(--fw-bold);
     color: var(--color-text-main);
 
-    letter-spacing: 0.02em;
-
-    /* Plan 280 — RTL padding on narrow viewport */
-    @media (max-width: 620px) {
-      padding-inline-end: 0.75rem;
-    }
+    letter-spacing: var(--tracking-tight);
   }
 
   .supplier-grid-row {

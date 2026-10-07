@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 0.8fr 1fr minmax(48px, 0.8fr) 0.8fr 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 0.6fr 1fr 40px 28px'"
+  [gridTemplate]="'2fr 0.8fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 0.8fr 80px auto'"
+  [mobileGridTemplate]="'2fr 1fr 40px 28px'"
   [resultCount]="filteredSuppliers_().length"
   [resultTotal]="supplierData.allSuppliers_().length"
 >
@@ -57,8 +57,10 @@
 
   <ng-container shell-table-header>
     <div class="col-name c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
-    <div class="col-min-order c-grid-header-cell" role="columnheader">{{ 'min_order' | translatePipe }}</div>
     <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
+      <div class="col-min-order c-grid-header-cell" carouselHeaderColumn label="min_order" role="presentation">
+        {{ 'min_order' | translatePipe }}
+      </div>
       <div class="col-contact c-grid-header-cell" carouselHeaderColumn label="contact_person" role="presentation">
         {{ 'contact_person' | translatePipe }}
       </div>
@@ -110,8 +112,10 @@
         (keydown.space)="$event.preventDefault(); toggleRowEdit(item)"
       >
         <div class="col-name c-list-body-cell" role="cell">{{ item.nameHebrew }}</div>
-        <div class="col-min-order c-list-body-cell" role="cell">{{ item.minOrderMov }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
+          <div class="col-min-order c-list-body-cell" cellCarouselSlide [label]="'min_order' | translatePipe">
+            {{ minOrderDisplay(item.minOrderMov) }}
+          </div>
           <div class="col-contact c-list-body-cell" cellCarouselSlide [label]="'contact_person' | translatePipe">
             {{ item.contactPerson ?? '—' }}
           </div>
