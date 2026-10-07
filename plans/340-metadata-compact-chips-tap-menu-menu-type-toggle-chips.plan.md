@@ -39,6 +39,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 **Scope:**
 - `src/app/pages/metadata-manager/**`
 - `src/app/shared/row-actions-menu/**`
+- `src/app/core/services/kitchen-state.service.ts` (approved by Human 2026-10-07: same fix, client side)
 
 ## Read Scope
 
@@ -89,11 +90,11 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Add `RowActionsMenuComponent.open(anchor)` / `close()` (public) and anchor-based positioning, with a spec. Verify the 4 existing list usages are unchanged. (`src/app/shared/row-actions-menu/**`)
-- [ ] A2: Switch `#managerCard` to pills for every type and add the tap menu. Delete the category grid styles and hover-reveal rules. (`metadata-manager.page.component.*`)
-- [ ] A3: Switch the preparation and section category managers to pills plus the tap menu. (`metadata-manager/components/**`)
-- [ ] A4: Switch menu types to fixed-order toggle chips that save on toggle, and remove the checkbox edit mode. (`metadata-manager.page.component.*`)
-- [ ] A5: Build and run the specs. Check on the phone at 360px. Update the session-state file.
+- [x] A1: Add `RowActionsMenuComponent.open(anchor)` / `close()` (public) and anchor-based positioning, with a spec. Verify the 4 existing list usages are unchanged. (`src/app/shared/row-actions-menu/**`)
+- [x] A2: Switch `#managerCard` to pills for every type and add the tap menu. Delete the category grid styles and hover-reveal rules. (`metadata-manager.page.component.*`)
+- [x] A3: Switch the preparation and section category managers to pills plus the tap menu. (`metadata-manager/components/**`)
+- [x] A4: Switch menu types to fixed-order toggle chips that save on toggle, and remove the checkbox edit mode. (`metadata-manager.page.component.*`)
+- [x] A5: Build and run the specs. Check on the phone at 360px. Update the session-state file.
 
 ## Technical Considerations
 
