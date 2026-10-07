@@ -5,6 +5,18 @@
 
   :host {
     display: block;
+
+    // Where the pinned table top sticks (plan 346): desktop scrolls the table body inside the
+    // card (0); tablet scrolls the page under the app's top bar; phones hide that bar.
+    --list-sticky-top: 0px;
+
+    @media (max-width: #{$panel-overlay-break}) {
+      --list-sticky-top: 3.875rem;
+    }
+
+    @media (max-width: 620px) {
+      --list-sticky-top: env(safe-area-inset-top, 0px);
+    }
   }
 
   // Suppress all filter-panel transitions until after the first browser paint.
@@ -99,7 +111,7 @@
     position: relative;
     display: grid;
     grid-template-columns: var(--list-grid);
-    grid-template-rows: 50px 1fr;
+    grid-template-rows: auto 1fr;
 
     min-width: 0;
 
@@ -110,7 +122,22 @@
     box-shadow: var(--shadow-glass);
     backdrop-filter: var(--blur-glass);
     -webkit-backdrop-filter: var(--blur-glass);
-    overflow: hidden;
+    // clip, not hidden: still clips the rounded corners but isn't a scroll container, so the
+    // sticky .table-top inside can stick to the page scroll (plan 346).
+    overflow: clip;
+  }
+
+  .table-top {
+    grid-column: 1 / -1;
+    position: sticky;
+    inset-block-start: var(--list-sticky-top, 0px);
+    z-index: 5;
+
+    background: var(--bg-pure);
+  }
+
+  .table-pagination:empty {
+    display: none;
   }
 
   .table-header {

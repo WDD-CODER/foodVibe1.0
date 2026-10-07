@@ -49,6 +49,26 @@
     </button>
   </ng-container>
 
+  <!-- Plan 346: pagination is pinned above the column headers. -->
+  <ng-container shell-pagination>
+    @if (totalPages_() > 1) {
+      <div class="c-pagination-controls">
+        <button type="button" class="c-btn-ghost--sm" [disabled]="displayPage_() === 1" (click)="goToPrevPage()">
+          {{ 'page_previous' | translatePipe }}
+        </button>
+        <span>{{ pageIndicatorText_() }}</span>
+        <button
+          type="button"
+          class="c-btn-ghost--sm"
+          [disabled]="displayPage_() === totalPages_()"
+          (click)="goToNextPage()"
+        >
+          {{ 'page_next' | translatePipe }}
+        </button>
+      </div>
+    }
+  </ng-container>
+
   <ng-container shell-table-header>
     <div
       class="col-name c-grid-header-cell c-sortable-header"
@@ -328,22 +348,6 @@
             (toggle)="selection.toggle(row.recipe._id)"
           />
         </div>
-      </div>
-    }
-    @if (totalPages_() > 1) {
-      <div class="c-pagination-controls">
-        <button type="button" class="c-btn-ghost--sm" [disabled]="displayPage_() === 1" (click)="goToPrevPage()">
-          {{ 'page_previous' | translatePipe }}
-        </button>
-        <span>{{ pageIndicatorText_() }}</span>
-        <button
-          type="button"
-          class="c-btn-ghost--sm"
-          [disabled]="displayPage_() === totalPages_()"
-          (click)="goToNextPage()"
-        >
-          {{ 'page_next' | translatePipe }}
-        </button>
       </div>
     }
   </ng-container>
