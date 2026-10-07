@@ -12,14 +12,7 @@ import { ActivityLogService, ActivityEntry, ActivityChange, ActivityEntityType }
 import { TranslationService } from '@services/translation.service'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
 import { ActivityValuePipe } from 'src/app/core/pipes/activity-value.pipe'
-import {
-  ALL_CHANGES_FIELD,
-  ChangePopoverComponent
-} from '../../../../shared/change-popover/change-popover.component'
 import type { DashboardTab } from '../../dashboard.page'
-
-/** Change lines shown inline per activity entry before "+N more" (plan 351, Critical Question 1 → a). */
-const MAX_INLINE_CHANGES = 3
 
 const ENTITY_ICONS: Record<ActivityEntityType, string> = {
   product: 'package',
@@ -36,17 +29,11 @@ interface ActivityDayGroup {
 @Component({
   selector: 'app-dashboard-overview',
   standalone: true,
-  imports: [
-    CommonModule,
-    LucideAngularModule,
-    TranslatePipe,
-    ActivityValuePipe,
-    ScrollIndicatorsDirective,
-    ChangePopoverComponent
-  ],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, ActivityValuePipe, ScrollIndicatorsDirective],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(document:click)': 'collapseActivity()' }
 })
 export class DashboardOverviewComponent {
   readonly activeTab = input.required<DashboardTab>()
@@ -60,12 +47,8 @@ export class DashboardOverviewComponent {
   private readonly translation = inject(TranslationService)
   private readonly relativeTimeFormat = new Intl.RelativeTimeFormat('he', { numeric: 'auto', style: 'short' })
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
-  protected readonly openChange_ = signal<{
-    activityId: string
-    field: string
-    top: number
-    left: number
-  } | null>(null)
+  /** Activity entry whose change chips are open (mobile only — desktop always shows them). */
+  protected readonly expandedActivityId_ = signal<string | null>(null)
 
   // Recipe/dish counts via the lightweight /count endpoint (plan 301 M3 / 304 M2) — RecipeDataService
   // and DishDataService are now deferred, so reading kitchenState.recipes_() here would force a full
@@ -110,16 +93,9 @@ export class DashboardOverviewComponent {
     return ENTITY_ICONS[type] ?? 'package'
   }
 
-  protected visibleChanges(item: ActivityEntry): ActivityChange[] {
-    return (item.changes ?? []).slice(0, MAX_INLINE_CHANGES)
-  }
-
-  protected hiddenChangeCount(item: ActivityEntry): number {
-    return Math.max(0, (item.changes?.length ?? 0) - MAX_INLINE_CHANGES)
-  }
-
-  protected moreChangesLabel(count: number): string {
-    return this.translation.translate('activity_more_changes').replace('{n}', String(count))
+  /** Changes worth showing — drops entries recorded with identical before/after (no real change). */
+  protected realChanges(item: ActivityEntry): ActivityChange[] {
+    return (item.changes ?? []).filter((c) => c.from !== c.to)
   }
 
   protected isoTime(timestamp: number): string {
@@ -136,38 +112,13 @@ export class DashboardOverviewComponent {
     return this.relativeTimeFormat.format(Math.round(diffSec / 86400), 'day')
   }
 
-  protected toggleChangePopover(activityId: string, field: string, event: Event): void {
-    const current = this.openChange_()
-    if (current && current.activityId === activityId && current.field === field) {
-      this.openChange_.set(null)
-      return
-    }
-    const el = event.currentTarget as HTMLElement
-    const rect = el.getBoundingClientRect()
-    this.openChange_.set({
-      activityId,
-      field,
-      top: rect.bottom + 4,
-      left: rect.left + rect.width / 2
-    })
+  protected toggleActivity(id: string, event: Event): void {
+    event.stopPropagation()
+    this.expandedActivityId_.update((current) => (current === id ? null : id))
   }
 
-  /** "+N more changes" → the popover with every change of the entry. */
-  protected toggleAllChanges(activityId: string, event: Event): void {
-    this.toggleChangePopover(activityId, ALL_CHANGES_FIELD, event)
-  }
-
-  /** Activity entry for the currently open popover (used by fixed popover). */
-  protected getOpenActivity(): ActivityEntry | undefined {
-    const open = this.openChange_()
-    if (!open) return undefined
-    return this.getRecentActivity().find((e) => e.id === open.activityId)
-  }
-
-  /** Close popover when clicking outside; ignore clicks on the "+N" button (it toggles instead). */
-  protected closeChangePopoverOnOutsideClick(target: HTMLElement): void {
-    if (target.closest?.('.act-more')) return
-    this.openChange_.set(null)
+  protected collapseActivity(): void {
+    if (this.expandedActivityId_() !== null) this.expandedActivityId_.set(null)
   }
 
   protected goToInventory(): void {

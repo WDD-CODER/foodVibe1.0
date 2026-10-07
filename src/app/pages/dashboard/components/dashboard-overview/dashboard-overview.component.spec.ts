@@ -210,7 +210,7 @@ describe('DashboardOverviewComponent', () => {
     )
   })
 
-  // --- Popover ---
+  // --- Change chips ---
 
   const fourChanges = [
     { field: 'price', label: 'activity_field_price', from: '10 ₪', to: '12 ₪' },
@@ -219,36 +219,52 @@ describe('DashboardOverviewComponent', () => {
     { field: 'unit', label: 'activity_field_unit', from: 'kg', to: 'gram' }
   ]
 
-  it('shows at most 3 change lines with old/new values resolved', () => {
+  it('renders one chip per change with old/new values resolved', () => {
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: fourChanges })])
     fixture.detectChanges()
-    const lines = fixture.debugElement.queryAll(By.css('.act-change'))
-    expect(lines.length).toBe(3)
-    const supplierLine = lines[1].nativeElement as HTMLElement
-    expect(supplierLine.querySelector('.act-old')?.textContent?.trim()).toBe('ירקות כהן')
-    expect(supplierLine.querySelector('.act-new')?.textContent?.trim()).toBe('activity_deleted_supplier')
+    const chips = fixture.debugElement.queryAll(By.css('.act-chip'))
+    expect(chips.length).toBe(4)
+    const supplierChip = chips[1].nativeElement as HTMLElement
+    expect(supplierChip.querySelector('.act-old')?.textContent?.trim()).toBe('ירקות כהן')
+    expect(supplierChip.querySelector('.act-new')?.textContent?.trim()).toBe('activity_deleted_supplier')
     // created-only value: no struck-through old value, no arrow
-    expect((lines[2].nativeElement as HTMLElement).querySelector('.act-old')).toBeNull()
-    expect((lines[2].nativeElement as HTMLElement).querySelector('.act-arrow')).toBeNull()
+    expect((chips[2].nativeElement as HTMLElement).querySelector('.act-old')).toBeNull()
+    expect((chips[2].nativeElement as HTMLElement).querySelector('.act-arrow')).toBeNull()
   })
 
-  it('shows no change list for an update without changes', () => {
+  it('drops changes whose before and after are identical', () => {
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
+      makeEntry({
+        changes: [
+          { field: 'price', label: 'activity_field_price', from: '10 ₪', to: '12 ₪' },
+          { field: 'purchase_options', label: 'activity_field_purchase_options', from: 'kg, unit', to: 'kg, unit' }
+        ]
+      })
+    ])
+    fixture.detectChanges()
+    expect(fixture.debugElement.queryAll(By.css('.act-chip')).length).toBe(1)
+  })
+
+  it('shows no chips for an update without changes', () => {
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: [] })])
     fixture.detectChanges()
     expect(fixture.debugElement.query(By.css('.act-changes'))).toBeNull()
-    expect(fixture.debugElement.query(By.css('.act-more'))).toBeNull()
   })
 
-  it('should open the all-changes popover from "+N more" and close it on a second click', () => {
+  it('expands an entry on click and collapses it on a second click or an outside click', () => {
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: fourChanges })])
     fixture.detectChanges()
-    const more = fixture.debugElement.query(By.css('.act-more'))
-    expect(more).not.toBeNull()
-    more.nativeElement.click()
-    const open = (component as unknown as { openChange_: () => { field: string } | null }).openChange_()
-    expect(open?.field).toBe('*')
-    more.nativeElement.click()
-    expect((component as unknown as { openChange_: () => unknown }).openChange_()).toBeNull()
+    const item = fixture.debugElement.query(By.css('.activity-item')).nativeElement as HTMLElement
+    item.click()
+    fixture.detectChanges()
+    expect(item.classList.contains('is-expanded')).toBeTrue()
+    item.click()
+    fixture.detectChanges()
+    expect(item.classList.contains('is-expanded')).toBeFalse()
+    item.click()
+    document.body.click()
+    fixture.detectChanges()
+    expect(item.classList.contains('is-expanded')).toBeFalse()
   })
 
   it('formats relative time', () => {

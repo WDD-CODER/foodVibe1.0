@@ -131,7 +131,18 @@
                 <h3 class="act-day">{{ group.label }}</h3>
               }
               @for (item of group.items; track item.id) {
-                <div class="activity-item" data-testid="activity-item">
+                @let changes = realChanges(item);
+                <div
+                  class="activity-item"
+                  data-testid="activity-item"
+                  [class.has-changes]="changes.length"
+                  [class.is-expanded]="expandedActivityId_() === item.id"
+                  [attr.role]="changes.length ? 'button' : null"
+                  [attr.tabindex]="changes.length ? 0 : null"
+                  [attr.aria-expanded]="changes.length ? expandedActivityId_() === item.id : null"
+                  (click)="changes.length && toggleActivity(item.id, $event)"
+                  (keydown.enter)="changes.length && toggleActivity(item.id, $event)"
+                >
                   <div class="act-head">
                     <span class="act-avatar" [attr.data-entity]="item.entityType" aria-hidden="true">
                       <lucide-icon [name]="entityIcon(item.entityType)" [size]="16"></lucide-icon>
@@ -140,8 +151,12 @@
                     <div class="act-middle">
                       <span class="entity-type-tag" [attr.data-entity]="item.entityType">
                         {{
-                          (item.entityType === 'product' ? 'product' : item.entityType === 'dish' ? 'dish' : 'preparation')
-                            | translatePipe
+                          (item.entityType === 'product'
+                            ? 'product'
+                            : item.entityType === 'dish'
+                              ? 'dish'
+                              : 'preparation'
+                          ) | translatePipe
                         }}
                       </span>
                       <span class="act-sep" aria-hidden="true"></span>
@@ -151,35 +166,35 @@
                     <span class="activity-type" [attr.data-action]="item.action">
                       {{ 'activity_' + item.action | translatePipe }}
                     </span>
-                    <time class="act-time" [attr.datetime]="isoTime(item.timestamp)">{{ relativeTime(item.timestamp) }}</time>
+                    <time class="act-time" [attr.datetime]="isoTime(item.timestamp)">{{
+                      relativeTime(item.timestamp)
+                    }}</time>
                   </div>
 
-                  @if (item.changes?.length) {
+                  @if (changes.length) {
                     <ul class="act-changes">
-                      @for (change of visibleChanges(item); track change.field) {
-                        <li class="act-change">
-                          <span class="act-change-label">{{ change.label | translatePipe }}</span>
-                          @if (change.from || change.to) {
-                            <span class="act-change-values">
-                              @if (change.from) {
-                                <del class="act-old">{{ change.from | activityValue: change.field }}</del>
-                              }
-                              @if (change.from && change.to) {
-                                <lucide-icon class="act-arrow" name="arrow-left" [size]="14" aria-hidden="true"></lucide-icon>
-                              }
-                              @if (change.to) {
-                                <ins class="act-new">{{ change.to | activityValue: change.field }}</ins>
-                              }
-                            </span>
-                          }
+                      @for (change of changes; track change.field) {
+                        <li class="act-chip" data-testid="act-chip">
+                          <span class="act-chip-label">{{ change.label | translatePipe }}</span>
+                          <span class="act-chip-values">
+                            @if (change.from) {
+                              <del class="act-old">{{ change.from | activityValue: change.field }}</del>
+                            }
+                            @if (change.from && change.to) {
+                              <lucide-icon
+                                class="act-arrow"
+                                name="arrow-left"
+                                [size]="12"
+                                aria-hidden="true"
+                              ></lucide-icon>
+                            }
+                            @if (change.to) {
+                              <ins class="act-new">{{ change.to | activityValue: change.field }}</ins>
+                            }
+                          </span>
                         </li>
                       }
                     </ul>
-                    @if (hiddenChangeCount(item) > 0) {
-                      <button type="button" class="act-more" (click)="toggleAllChanges(item.id, $event)">
-                        {{ moreChangesLabel(hiddenChangeCount(item)) }}
-                      </button>
-                    }
                   }
                 </div>
               }
@@ -204,10 +219,4 @@
       }
     </section>
   </main>
-
-  <app-change-popover
-    [open]="openChange_()"
-    [activity]="getOpenActivity()"
-    (closeRequest)="closeChangePopoverOnOutsideClick($event)"
-  />
 </div>
