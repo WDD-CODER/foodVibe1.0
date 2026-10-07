@@ -18,7 +18,12 @@ describe('formatVenueHours', () => {
   })
 
   it('shows whichever half is filled and skips empty blocks', () => {
-    expect(formatVenueHours([{ days: ' ', time: '' }, { days: '', time: '09:00–17:00' }])).toEqual({
+    expect(
+      formatVenueHours([
+        { days: ' ', time: '' },
+        { days: '', time: '09:00–17:00' }
+      ])
+    ).toEqual({
       first: '09:00–17:00',
       extra: 0
     })
