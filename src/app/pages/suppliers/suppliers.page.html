@@ -1,1 +1,14 @@
+@if (!isListRoute_()) {
+  <nav class="suppliers-nav" dir="rtl">
+    <button type="button" class="nav-link nav-link--back" (click)="goBackToList()">
+      <lucide-icon name="arrow-right" size="16"></lucide-icon>
+      {{ 'supplier_list' | translatePipe }}
+    </button>
+    @for (item of navRoutes_(); track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active" class="nav-link">
+        {{ item.labelKey | translatePipe }}
+      </a>
+    }
+  </nav>
+}
 <router-outlet></router-outlet>

@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  effect,
-  inject,
-  input,
-  OnInit,
-  output,
-  signal
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms'
@@ -27,6 +17,10 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 
 const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 
+/**
+ * Supplier add/edit — a routed page (`/suppliers/add`, `/suppliers/edit/:id`) laid out like the
+ * venue form. Plan 341 removed the old add-supplier modal mode and the list's inline row edit.
+ */
 @Component({
   selector: 'app-supplier-form',
   standalone: true,
@@ -36,12 +30,6 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SupplierFormComponent implements OnInit {
-  embeddedInDashboard = input<boolean>(false)
-  /** When set (e.g. from SupplierModalService), form is hydrated in modal mode without route resolver. */
-  supplierToEdit = input<Supplier | null>(null)
-  saved = output<void>()
-  cancel = output<void>()
-
   private readonly fb = inject(FormBuilder)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
@@ -63,43 +51,15 @@ export class SupplierFormComponent implements OnInit {
     return this.supplierForm_?.get('deliveryDays') as FormArray
   }
 
-  constructor() {
-    effect(() => {
-      const supplier = this.supplierToEdit()
-      if (!this.supplierForm_) return
+  ngOnInit(): void {
+    this.buildForm()
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
+      const supplier = data['supplier'] as Supplier | null | undefined
       if (supplier) {
         this.isEditMode_.set(true)
         this.hydrateForm(supplier)
-      } else if (supplier === null) {
-        this.isEditMode_.set(false)
-        this.supplierForm_.patchValue({
-          nameHebrew: '',
-          contactPerson: '',
-          phone: '',
-          minOrderMov: 0,
-          leadTimeDays: 0
-        })
-        const daysArray = this.supplierForm_.get('deliveryDays') as FormArray
-        if (daysArray?.controls?.length === 7) {
-          for (let i = 0; i < 7; i++) {
-            daysArray.at(i).setValue(false)
-          }
-        }
       }
     })
-  }
-
-  ngOnInit(): void {
-    this.buildForm()
-    if (!this.embeddedInDashboard()) {
-      this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((data) => {
-        const supplier = data['supplier'] as Supplier | null | undefined
-        if (supplier) {
-          this.isEditMode_.set(true)
-          this.hydrateForm(supplier)
-        }
-      })
-    }
   }
 
   private buildForm(): void {
@@ -111,11 +71,7 @@ export class SupplierFormComponent implements OnInit {
           Validators.required,
           duplicateEntityNameValidator(
             () => this.supplierData.allSuppliers_(),
-            () => {
-              if (!this.isEditMode_()) return null
-              if (this.embeddedInDashboard()) return this.supplierToEdit()?._id ?? null
-              return (this.route.snapshot.data['supplier'] as Supplier)?._id ?? null
-            }
+            () => (this.isEditMode_() ? ((this.route.snapshot.data['supplier'] as Supplier)?._id ?? null) : null)
           )
         ]
       ],
@@ -173,19 +129,14 @@ export class SupplierFormComponent implements OnInit {
     }
     this.saving.setSaving(true)
     if (this.isEditMode_()) {
-      const supplier = this.embeddedInDashboard()
-        ? (this.supplierToEdit() ?? undefined)
-        : (this.route.snapshot.data['supplier'] as Supplier)
+      const supplier = this.route.snapshot.data['supplier'] as Supplier | undefined
       if (!supplier) {
         this.saving.setSaving(false)
         return
       }
       this.supplierData
         .updateSupplier({ ...supplier, ...payload })
-        .then(() => {
-          if (this.embeddedInDashboard()) this.saved.emit()
-          else this.router.navigate(['/suppliers/list'])
-        })
+        .then(() => this.router.navigate(['/suppliers/list']))
         .catch((e) => {
           this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } })
         })
@@ -193,10 +144,7 @@ export class SupplierFormComponent implements OnInit {
     } else {
       this.supplierData
         .addSupplier(payload)
-        .then(() => {
-          if (this.embeddedInDashboard()) this.saved.emit()
-          else this.router.navigate(['/suppliers/list'])
-        })
+        .then(() => this.router.navigate(['/suppliers/list']))
         .catch((e) => {
           this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } })
         })
@@ -205,10 +153,6 @@ export class SupplierFormComponent implements OnInit {
   }
 
   protected onCancel(): void {
-    if (this.embeddedInDashboard()) {
-      this.cancel.emit()
-    } else {
-      this.router.navigate(['/suppliers/list'])
-    }
+    void this.router.navigate(['/suppliers/list'])
   }
 }

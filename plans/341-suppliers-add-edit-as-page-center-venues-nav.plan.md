@@ -89,10 +89,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: `SuppliersPage` back bar plus centering styles; venues centering (`src/app/pages/suppliers/suppliers.page.*`, `src/app/pages/venues/venues.page.scss`, `venue-form.component.scss`)
-- [ ] A2: Route add and edit to pages; remove inline edit from supplier-list (`supplier-list.component.*`)
-- [ ] A3: Align the supplier-form full-page markup and styles with venue-form (`supplier-form.component.*`)
-- [ ] A4: Delete the supplier modal, its service and mount; grep for leftovers (`shared/supplier-modal/**`, `supplier-modal.service*`, `app.component.*`)
+- [x] A1: `SuppliersPage` back bar plus centering styles; venues centering (`src/app/pages/suppliers/suppliers.page.*`, `src/app/pages/venues/venues.page.scss`, `venue-form.component.scss`)
+- [x] A2: Route add and edit to pages; remove inline edit from supplier-list (`supplier-list.component.*`)
+- [x] A3: Align the supplier-form full-page markup and styles with venue-form (`supplier-form.component.*`)
+- [x] A4: Delete the supplier modal, its service and mount; grep for leftovers (`shared/supplier-modal/**`, `supplier-modal.service*`, `app.component.*`)
 - [ ] A5: Build, specs, e2e grep for supplier-modal. Update the session-state file.
 
 ## Technical Considerations
