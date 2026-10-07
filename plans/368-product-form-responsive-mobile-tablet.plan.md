@@ -92,9 +92,9 @@ As a chef receiving goods, I want to add and edit products on my phone or tablet
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Un-nest the media blocks; verify they apply (DevTools computed styles) (`product-form.component.scss`).
-- [ ] A2: ≤900px tablet layout, including collapsible full width and the scaling row in 2 rows.
-- [ ] A3: ≤768px phone layout, including padding, actions wrap and the override input.
+- [x] A1: Un-nest the media blocks; verify they apply (DevTools computed styles) (`product-form.component.scss`).
+- [x] A2: ≤900px tablet layout, including collapsible full width and the scaling row in 2 rows.
+- [x] A3: ≤768px phone layout, including padding, actions wrap and the override input.
 - [ ] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
 
 ## Technical Considerations

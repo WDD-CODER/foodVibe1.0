@@ -107,11 +107,6 @@
       }
     }
 
-    &.product-info {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: var(--space-4);
-    }
-
     &.border-top {
       border-block-start: 1px solid var(--border-default);
       padding-block-start: var(--space-6);
@@ -400,47 +395,6 @@
   select[multiple] {
     min-height: 4.5rem;
   }
-
-  // Responsive — align with single grid column on narrow screens
-  @media (max-width: 900px) {
-    .form-container .form-section {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .form-container .form-section.grid-2 {
-      grid-template-columns: 1fr;
-    }
-
-    // Fix 1 & 4b: match base selector depth (.scaling-box .scaling-row) so media query wins specificity
-    .scaling-box .scaling-row {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-
-      .c-icon-btn.danger {
-        margin-inline-start: auto;
-      }
-    }
-  }
-
-  @media (max-width: 768px) {
-    .product-form-container {
-      max-width: none;
-    }
-
-    .form-container {
-      padding: var(--space-5);
-    }
-
-    .form-container .form-section,
-    .form-container .form-section.product-info {
-      grid-template-columns: 1fr;
-    }
-
-    .form-actions {
-      gap: var(--space-3);
-    }
-  }
 }
 
 // ---- Icon color utilities ----
@@ -514,3 +468,132 @@
     color: var(--text-success);
   }
 }
+
+// ========================================================
+// RESPONSIVE (plan 368) — top level so the selectors actually match. They used to be nested
+// inside `.form-container`, compiling to `.form-container .form-container …`, so none of them
+// ever applied. Selectors mirror the base rules' depth so these win by source order.
+// ========================================================
+
+// Tablet: two columns; an expanded optional field spans the row; scaling rows in two lines.
+@media (max-width: 900px) {
+  .form-container .form-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-container .collapsible-field:has(> .collapsible-field__content:not(.collapsible-field__content--hidden)) {
+    grid-column: 1 / -1;
+  }
+
+  .form-container .scaling-box .scaling-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    grid-template-areas:
+      'unit qty uom .'
+      'price price price del';
+
+    > :nth-child(1) {
+      grid-area: unit;
+    }
+
+    > :nth-child(2) {
+      grid-area: qty;
+    }
+
+    > :nth-child(3) {
+      grid-area: uom;
+    }
+
+    > .price-override-wrapper {
+      grid-area: price;
+      margin-inline-end: 0;
+      padding-inline-end: 0;
+      border-inline-end: none;
+    }
+
+    > .c-icon-btn.danger {
+      grid-area: del;
+      justify-self: end;
+    }
+
+    app-custom-select,
+    input:not([type='checkbox']) {
+      inline-size: 100%;
+      min-inline-size: 0;
+    }
+  }
+}
+
+// Phone: one column, tighter padding, stacked scaling rows, wrapping actions.
+@media (max-width: 768px) {
+  :host {
+    padding: var(--space-3);
+  }
+
+  .product-form-container {
+    max-width: none;
+  }
+
+  .form-container {
+    padding: var(--space-4);
+  }
+
+  .form-container .form-section {
+    grid-template-columns: 1fr;
+  }
+
+  .form-container .form-section.form-section--purchase.border-top {
+    padding: var(--space-3);
+  }
+
+  .form-container .scaling-box {
+    padding: var(--space-3);
+  }
+
+  .form-container .scaling-box .scaling-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'unit unit'
+      'qty qty'
+      'uom uom'
+      'price del';
+
+    .label-row {
+      inline-size: 100%;
+    }
+  }
+
+  .form-container .scaling-box .price-override-wrapper .override-input {
+    inline-size: 100%;
+    min-inline-size: 5rem;
+    flex: 1 1 5rem;
+  }
+
+  .two-col-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-container .form-actions {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+
+    button {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    // Primary action (save) first on phones.
+    button[type='submit'] {
+      order: -1;
+    }
+  }
+
+  // P1 — 44px tap targets.
+  .form-container {
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    app-custom-select {
+      min-block-size: 44px;
+    }
+  }
+}
+
