@@ -229,3 +229,13 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** It looks like a data-sync bug (signal not updated, list not refetched), but the store had the item. Clearing the list's session filters on every visit would throw away state users rely on.
 
 **What to do instead:** After creating an item on a separate page, navigate back with a URL param that selects it (e.g. `queryParams: { q: name }`). `useListState` gives URL params priority over sessionStorage and skips the session restore entirely when any URL param is present. Pair it with a success toast.
+
+---
+
+## Capture-phase scroll listener catches a popover's own scroll
+
+**What hurt:** The nutrition tooltip moves with the page through `window.addEventListener('scroll', reposition, true)`. Once the tooltip got its own scrolling content, every arrow tap snapped it back to the top. The capture listener also fires for scrolls inside the tooltip, and the reposition step reset its `max-height` to measure it.
+
+**Why the obvious fix is wrong:** Dropping the capture flag also drops the scrolls of inner list containers, which are what move the badge, so the tooltip drifts away from the leaf.
+
+**What to do instead:** In the listener, return early when `event.target` is inside the popover. Measure the natural height without resetting styles (box height + `scrollHeight − clientHeight` of the scroll body), so a page scroll keeps the inner scroll position.

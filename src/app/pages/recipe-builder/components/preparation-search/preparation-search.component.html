@@ -1,22 +1,25 @@
 <div class="search-container" dir="rtl" (clickOutside)="showResults_.set(false)">
   <div class="input-wrapper">
     <lucide-icon name="search" size="18"></lucide-icon>
-    <input
+    <!-- Textarea so a long preparation name wraps and grows; Enter saves the row and opens a new one. -->
+    <textarea
       #searchInput
-      type="text"
+      rows="1"
       SelectOnFocus
       [value]="searchQuery_()"
-      (input)="searchQuery_.set($any($event.target).value); showResults_.set(true)"
+      (input)="searchQuery_.set($any($event.target).value); showResults_.set(true); fitHeight_()"
       (focus)="showResults_.set(true)"
-      placeholder="{{ 'search_preparation' | translatePipe }}" />
+      (keydown.enter)="onEnter($event)"
+      placeholder="{{ 'search_preparation' | translatePipe }}"
+    ></textarea>
   </div>
 
   @if (showResults_() && groupedResults_().length > 0) {
     <app-scrollable-dropdown [maxHeight]="240">
       <ul>
         @for (group of groupedResults_(); track group[0]) {
-<li class="category-header">{{ group[0] | translatePipe }}</li>
-            @for (entry of group[1]; track entry.name + entry.category) {
+          <li class="category-header">{{ group[0] | translatePipe }}</li>
+          @for (entry of group[1]; track entry.name + entry.category) {
             <li (click)="selectPreparation(entry)" class="result-item">
               <span class="item-name">{{ entry.name }}</span>
               <span class="category-pill">{{ entry.category | translatePipe }}</span>

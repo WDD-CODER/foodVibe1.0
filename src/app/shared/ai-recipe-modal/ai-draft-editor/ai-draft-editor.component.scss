@@ -87,7 +87,10 @@
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
   backdrop-filter: var(--blur-glass);
 
   &--dish {
@@ -224,7 +227,10 @@
   cursor: pointer;
   flex-shrink: 0;
   padding: 0;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
 
   &:hover {
     background: var(--color-danger);
