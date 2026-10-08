@@ -20,13 +20,16 @@ const EGG_GRAMS = 55
 const EGG_NAME_PATTERN = /ביצ|\begg/i
 const MIN_GRAMS_PER_PORTION = 60
 const MAX_GRAMS_PER_PORTION = 700
+/** The model returns 'portion'; the draft editor emits 'dish' (מנה) for an approved dish. Both mean portions. */
+const PORTION_YIELD_UNITS: ReadonlySet<string> = new Set(['portion', 'dish'])
 
 /**
  * Rough grams per portion for a dish draft from its weighable ingredients, or null when it
  * can't be estimated. Mirrors `estimateGramsPerPortion` in server/services/ai-recipe-helpers.js (plan 370).
  */
 export function estimateGramsPerPortion(draft: AiRecipeDraft): number | null {
-  if (draft.recipe_type !== 'dish' || draft.yield_unit !== 'portion' || !(draft.yield_amount > 0)) return null
+  if (draft.recipe_type !== 'dish' || !PORTION_YIELD_UNITS.has(draft.yield_unit) || !(draft.yield_amount > 0))
+    return null
   let total = 0
   let weighed = 0
   for (const ing of draft.ingredients ?? []) {
@@ -76,9 +79,11 @@ export class GeminiShotsService {
     status: 'approved' | 'rejected',
     source: 'text' | 'image' | 'url'
   ): Observable<{ saved: boolean; warnings: string[] }> {
-    return this.http_.post<{ saved: boolean; warnings: string[] }>(
-      `${this.authBase_}/api/v1/ai/shots`,
-      { prompt, draft, status, source }
-    )
+    return this.http_.post<{ saved: boolean; warnings: string[] }>(`${this.authBase_}/api/v1/ai/shots`, {
+      prompt,
+      draft,
+      status,
+      source
+    })
   }
 }

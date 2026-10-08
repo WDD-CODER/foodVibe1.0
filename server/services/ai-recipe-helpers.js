@@ -116,13 +116,16 @@ const MAX_GRAMS_PER_PORTION = 700;
 
 const IMPLAUSIBLE_PORTION_WEIGHT_WARNING = 'כמויות הרכיבים לא סבירות ביחס למספר המנות';
 
+// The model returns 'portion'; the draft editor emits 'dish' (מנה) for an approved dish. Both mean portions.
+const PORTION_YIELD_UNITS = new Set(['portion', 'dish']);
+
 /**
  * Rough grams per portion for a dish draft, from the ingredients whose units can be
  * weighed. Returns null when it can't be estimated (not a portioned dish, no portions,
  * or no weighable ingredient).
  */
 function estimateGramsPerPortion(draft) {
-  if (!draft || draft.recipe_type !== 'dish' || draft.yield_unit !== 'portion') return null;
+  if (!draft || draft.recipe_type !== 'dish' || !PORTION_YIELD_UNITS.has(draft.yield_unit)) return null;
   if (typeof draft.yield_amount !== 'number' || draft.yield_amount <= 0) return null;
   if (!Array.isArray(draft.ingredients)) return null;
   let total = 0;

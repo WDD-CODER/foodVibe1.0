@@ -25,3 +25,9 @@ First run (before the quota ran out):
 - [ ] [human] In-app check: "חביתה" → 1 portion, 2–3 eggs; "חביתה ל-2" → 2 portions, 4–6 eggs. Uses the same quota.
 - Note (not in scope): the app's `DAILY_LIMIT = 1000` in `server/routes/ai.js` doesn't match the real free-tier 20/day.
 - `ai:eval` npm script in `server/package.json` (P1) needs `approved: server/package.json`; out of scope.
+
+## Validation fix + browser check (2026-10-08, commit c925382e)
+- Bug: the portion-weight warning never fired on approve. The draft editor emits `yield_unit: 'dish'` for an approved dish; `estimateGramsPerPortion` only accepted `'portion'`. Both mirrors now accept both; regression test on each side.
+- The Human's 502 on "חביתה ל 2" was the flash-lite daily quota (429 RESOURCE_EXHAUSTED), shown as "Gemini החזיר תגובה לא תקינה". Fix belongs to plan 395.
+- Browser check (gstack browse, temporarily on `gemini-2.5-flash`, reverted): "חביתה" → 1 portion / 2 eggs / pinch salt; "חביתה ל 2" → 2 portions / 4 eggs; "שקשוקה ל 4" → 4 portions; "חביתה ל-10 מ-2 ביצים" → approve shows the portion warning.
+- Still open: A4 eval prompts 3–5 after the quota resets.

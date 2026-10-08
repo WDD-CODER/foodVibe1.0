@@ -168,6 +168,10 @@ describe('estimateGramsPerPortion', () => {
     expect(estimateGramsPerPortion(d)).toBe(165);
   });
 
+  it('treats the "dish" yield unit the draft editor emits as portions', () => {
+    expect(estimateGramsPerPortion(draft({ yield_unit: 'dish', yield_amount: 10 }))).toBe(18);
+  });
+
   it('returns null when there is nothing to estimate', () => {
     expect(estimateGramsPerPortion(draft({ yield_amount: 0 }))).toBeNull();
     expect(estimateGramsPerPortion(draft({ yield_unit: 'unit' }))).toBeNull();

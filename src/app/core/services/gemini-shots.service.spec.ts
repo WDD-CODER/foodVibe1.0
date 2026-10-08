@@ -49,6 +49,10 @@ describe('GeminiShotsService.computeWarnings', () => {
     expect(service.computeWarnings(d)).toContain(IMPLAUSIBLE)
   })
 
+  it('flags an approved draft whose yield unit is "dish" (what the draft editor emits)', () => {
+    expect(service.computeWarnings(draft({ yield_unit: 'dish', yield_amount: 10 }))).toContain(IMPLAUSIBLE)
+  })
+
   it('does not judge preparations', () => {
     const d = draft({ recipe_type: 'preparation', yield_unit: 'gram', yield_amount: 10 })
     expect(service.computeWarnings(d)).not.toContain(IMPLAUSIBLE)
