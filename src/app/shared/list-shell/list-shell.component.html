@@ -3,6 +3,7 @@
        toggle + actions at the inline-end, search on row 1 (wide) or row 2 (narrow). -->
   <app-page-header
     class="list-header"
+    [listLayout]="true"
     [count]="resultCountText() ? resultCount() : null"
     [countLabel]="resultCountText()"
   >

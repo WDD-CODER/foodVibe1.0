@@ -135,6 +135,95 @@
   }
 }
 
+// List layout (opt-in). Items are placed by column so the order is the same in RTL and LTR.
+// Wide, right to left: back, title, filter, search, count, add.
+.ph--list {
+  grid-template-columns: auto auto auto minmax(0, 1fr) auto auto;
+  grid-template-areas: none;
+
+  .ph-start,
+  .ph-end {
+    display: contents;
+  }
+
+  .ph-back {
+    grid-area: 1 / 1;
+  }
+
+  .ph-title {
+    grid-area: 1 / 2;
+  }
+
+  .ph-end ::ng-deep > [header-leading] {
+    grid-area: 1 / 3;
+  }
+
+  .ph-search {
+    grid-area: 1 / 4;
+  }
+
+  .ph-count {
+    grid-area: 1 / 5;
+  }
+
+  .ph-end ::ng-deep > :not([header-leading]) {
+    grid-area: 1 / 6;
+  }
+}
+
+// Phone, right to left: back, filter, title, count, (space), add as a round + button.
+@container page-header (max-width: 640px) {
+  .ph--list {
+    grid-template-columns: auto auto minmax(0, auto) auto minmax(0, 1fr) auto;
+
+    .ph-back {
+      grid-area: 1 / 1;
+    }
+
+    .ph-end ::ng-deep > [header-leading] {
+      grid-area: 1 / 2;
+    }
+
+    .ph-title {
+      grid-area: 1 / 3;
+    }
+
+    .ph-count {
+      grid-area: 1 / 4;
+    }
+
+    .ph-end ::ng-deep > :not([header-leading]) {
+      grid-area: 1 / 6;
+    }
+
+    .ph-search {
+      grid-area: 2 / 1 / 2 / -1;
+    }
+
+    // Icon-only add: the label stays for screen readers.
+    .ph-end ::ng-deep > .c-btn-primary {
+      display: grid;
+      place-content: center;
+
+      inline-size: 44px;
+      padding: 0;
+
+      border-radius: var(--radius-full);
+    }
+
+    .ph-end ::ng-deep > .c-btn-primary .btn-label {
+      position: absolute;
+
+      inline-size: 1px;
+      block-size: 1px;
+
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ph-count {
     animation: none;

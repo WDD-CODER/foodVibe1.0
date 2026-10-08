@@ -1,4 +1,4 @@
-<header class="ph">
+<header class="ph" [class.ph--list]="listLayout()">
   <div class="ph-start">
     @if (backLink(); as link) {
       <a class="ph-back" [routerLink]="link" [attr.aria-label]="backLabelKey() | translatePipe">

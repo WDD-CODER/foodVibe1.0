@@ -33,6 +33,8 @@ export class PageHeaderComponent {
   readonly showBack = input(false)
   /** Dictionary key for the back button's label. */
   readonly backLabelKey = input('back')
+  /** List layout: phone `[+ icon] [count] [title] [filter]`; wide `[add] [count] [search] [filter] [title]`. */
+  readonly listLayout = input(false)
 
   readonly back = output<void>()
 }
