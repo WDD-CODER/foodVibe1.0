@@ -27,10 +27,12 @@
 
     <div class="form-section form-section--basic">
       <div class="form-group form-group--active form-group--full">
-        <label class="active-toggle">
-          <input type="checkbox" formControlName="active" />
-          <span>{{ 'venue_active' | translatePipe }}</span>
-        </label>
+        <div class="c-toggle-chip-group">
+          <label class="c-toggle-chip">
+            <input type="checkbox" formControlName="active" />
+            <span>{{ 'venue_active' | translatePipe }}</span>
+          </label>
+        </div>
       </div>
       <div class="form-group">
         <label for="nameHebrew">{{ 'name' | translatePipe }}</label>

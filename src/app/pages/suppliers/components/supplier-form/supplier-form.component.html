@@ -46,11 +46,11 @@
 
     <div class="form-section days-section">
       <h3>{{ 'delivery_days' | translatePipe }}</h3>
-      <div class="delivery-days-wrap" formArrayName="deliveryDays">
+      <div class="c-toggle-chip-group" formArrayName="deliveryDays">
         @for (ctrl of deliveryDaysArray.controls; track $index) {
-          <label class="day-check">
+          <label class="c-toggle-chip">
             <input type="checkbox" [formControlName]="$index" />
-            {{ dayKeys[$index] | translatePipe }}
+            <span>{{ dayKeys[$index] | translatePipe }}</span>
           </label>
         }
       </div>

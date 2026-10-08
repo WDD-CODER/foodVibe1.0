@@ -73,25 +73,6 @@
       }
     }
 
-    .delivery-days-wrap {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem 1rem;
-    }
-
-    .day-check {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.375rem;
-
-      font-size: 0.875rem;
-      cursor: pointer;
-
-      input[type='checkbox'] {
-        width: auto;
-      }
-    }
-
     .c-form-actions {
       padding-block-start: 1rem;
     }

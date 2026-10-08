@@ -41,7 +41,7 @@
     flex-direction: column;
     gap: 0.25rem;
 
-    label {
+    > label {
       font-size: 0.875rem;
       font-weight: 500;
     }
@@ -49,13 +49,6 @@
     input.c-input,
     textarea.c-input {
       width: 100%;
-    }
-
-    &.checkbox-group label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
     }
   }
 
