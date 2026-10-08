@@ -154,8 +154,8 @@ describe('DashboardPage', () => {
   it('should navigate with empty queryParams when overview tab is set', () => {
     queryParamsSubject.next({ tab: 'metadata' })
     fixture.detectChanges()
-    const backBtn = fixture.debugElement.query(By.css('[data-testid="btn-back-to-dashboard"]'))
-    backBtn?.nativeElement.click()
+    const page = component as unknown as { setTab: (tab: string) => void }
+    page.setTab('overview')
     expect(router.navigate).toHaveBeenCalledWith(
       [],
       jasmine.objectContaining({

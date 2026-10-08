@@ -16,6 +16,10 @@
           [ngModel]="name()"
           (ngModelChange)="name.set($event)"
           (keydown.enter)="$event.preventDefault(); priceInput.focus()"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
         />
         @if (nameError_()) {
           <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
@@ -73,9 +77,9 @@
     </div>
 
     <!-- Suppliers -->
-    <div class="inline-edit-checkboxes">
+    <div class="c-toggle-chip-group">
       @for (s of suppliers_(); track s._id) {
-        <label class="inline-edit-check">
+        <label class="c-toggle-chip">
           <input type="checkbox" [checked]="isSupplierSelected(s._id)" (change)="onSupplierChange(s._id)" />
           <span>{{ s.nameHebrew }}</span>
         </label>

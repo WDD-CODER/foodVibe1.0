@@ -16,6 +16,10 @@
             [ngModel]="modal.hebrewLabel_()"
             (ngModelChange)="modal.hebrewLabel_.set($event)"
             [placeholder]="'label_name_example_placeholder' | translatePipe"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
           />
         </div>
         <div class="c-input-stack full-width">
@@ -26,6 +30,10 @@
             (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
             placeholder="dairy"
             (keydown.enter)="save()"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
           />
           @if (validationError_()) {
             <span class="label-creation-validation-error">{{ validationError_() }}</span>
@@ -51,9 +59,9 @@
         </div>
         <div class="input-stack full-width">
           <label>{{ 'auto_trigger_sources' | translatePipe }}</label>
-          <div class="trigger-checklist">
+          <div class="c-toggle-chip-group trigger-checklist">
             @for (opt of triggerOptions_(); track opt.value) {
-              <label class="trigger-option">
+              <label class="c-toggle-chip">
                 <input type="checkbox" [checked]="isTriggerSelected(opt.value)" (change)="toggleTrigger(opt.value)" />
                 <span>{{ opt.value | translatePipe }}</span>
               </label>

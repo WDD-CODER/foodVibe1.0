@@ -2,4 +2,75 @@
   :host {
     display: block;
   }
+
+  /* Add/edit pages only — the list keeps its own list-shell spacing. Matches venues.page.scss */
+  :host(.is-form-route) {
+    padding: 1.25rem;
+
+    /* Plan 278 — bottom nav occlusion */
+    @media (max-width: 620px) {
+      padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  .suppliers-nav {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+
+    padding-block: 0.75rem;
+    margin-block-end: 1.25rem;
+    border-block-end: 1px solid var(--border-default);
+
+    .nav-link {
+      display: inline-flex;
+
+      color: var(--color-text-muted);
+      text-decoration: none;
+
+      padding-inline: 1rem;
+      padding-block: 0.5rem;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-full);
+
+      backdrop-filter: var(--blur-glass);
+      cursor: pointer;
+      transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        border-color 0.2s ease;
+
+      &:hover {
+        color: var(--color-text-main);
+
+        background: var(--bg-glass-hover);
+      }
+
+      &.active {
+        color: var(--color-text-on-primary);
+        font-weight: 600;
+
+        background: var(--color-primary);
+        border-color: var(--color-primary);
+
+        box-shadow: var(--shadow-glow);
+      }
+    }
+
+    .nav-link--back {
+      gap: 0.375rem;
+
+      color: var(--color-primary);
+
+      border-color: color-mix(in srgb, var(--color-primary) 30%, transparent);
+
+      &:hover {
+        color: var(--color-primary-hover);
+
+        border-color: var(--color-primary);
+      }
+    }
+  }
 }
