@@ -39,6 +39,12 @@ import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/d
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 
+/**
+ * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
+ * since plan 348, landscape too (touch device with a short viewport).
+ */
+const MOBILE_QUICK_EDIT_QUERY = '(max-width: 767px), (hover: none) and (max-height: 500px)'
+
 @Component({
   selector: 'app-recipe-ingredients-table',
   standalone: true,
@@ -74,7 +80,7 @@ export class RecipeIngredientsTableComponent {
   private readonly cdr = inject(ChangeDetectorRef)
   private readonly router_ = inject(Router)
 
-  protected readonly isMobile_ = toSignal(this.bp.observe('(max-width: 767px)').pipe(map((r) => r.matches)), {
+  protected readonly isMobile_ = toSignal(this.bp.observe(MOBILE_QUICK_EDIT_QUERY).pipe(map((r) => r.matches)), {
     initialValue: false
   })
 

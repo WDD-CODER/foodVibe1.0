@@ -23,7 +23,7 @@ describe('MetadataManagerPageComponent', () => {
   const mockCategories = signal(['vegetables', 'meat'])
   const mockLabels = signal([{ key: 'label1', color: '#ccc' }])
   const mockCourses = signal<{ key: string; color: string }[]>([])
-  const mockMenuTypes = signal<{ key: string }[]>([])
+  const mockMenuTypes = signal<{ key: string; fields?: string[] }[]>([])
   const mockProducts = signal([])
 
   beforeEach(async () => {
@@ -93,6 +93,55 @@ describe('MetadataManagerPageComponent', () => {
     expect(component.isSystemUnit('kg')).toBe(true)
     expect(component.isSystemUnit('dish')).toBe(true)
     expect(component.isSystemUnit('jar')).toBe(false)
+  })
+
+  // --- Plan 340: compact chips + tap menu, menu-type toggle chips ---
+
+  it('renders every metadata card as tap chips with no per-item action buttons', () => {
+    const card = fixture.debugElement.query(By.css('#mm-sec-category'))
+    const chips = card.queryAll(By.css('button.c-tap-chip'))
+    expect(chips.map((c) => c.nativeElement.textContent.trim())).toEqual(['vegetables', 'meat'])
+    expect(fixture.debugElement.queryAll(By.css('.manager-card .c-icon-btn')).length).toBe(0)
+    // System units are locked, not tappable.
+    const unitCard = fixture.debugElement.query(By.css('#mm-sec-unit'))
+    expect(unitCard.queryAll(By.css('button.c-tap-chip')).length).toBe(0)
+    expect(unitCard.queryAll(By.css('.c-tap-chip.is-locked')).length).toBe(2)
+  })
+
+  it('tapping a chip opens edit/delete; delete routes to onRemoveMetadata and closes the menu', () => {
+    const removeSpy = spyOn(component, 'onRemoveMetadata').and.resolveTo()
+    const chip = fixture.debugElement.query(By.css('#mm-sec-category button.c-tap-chip')).nativeElement as HTMLElement
+    chip.click()
+    fixture.detectChanges()
+
+    expect(chip.getAttribute('aria-expanded')).toBe('true')
+    const actions = fixture.debugElement.queryAll(By.css('app-row-actions-menu .c-icon-btn'))
+    expect(actions.map((a) => a.nativeElement.getAttribute('aria-label'))).toEqual(['edit', 'delete'])
+    expect(actions[1].nativeElement.classList).toContain('danger')
+
+    actions[1].nativeElement.click()
+    fixture.detectChanges()
+    expect(removeSpy).toHaveBeenCalledOnceWith('vegetables', 'category')
+    expect(fixture.debugElement.queryAll(By.css('app-row-actions-menu .c-icon-btn')).length).toBe(0)
+  })
+
+  it('menu types show all 5 fields in fixed order; toggling saves in ALL_DISH_FIELDS order', async () => {
+    mockMenuTypes.set([{ key: 'buffet', fields: ['serving_portions'] }])
+    metadataRegistrySpy.getMenuTypeFields = jasmine.createSpy().and.returnValue(['serving_portions'])
+    metadataRegistrySpy.updateMenuType = jasmine.createSpy().and.resolveTo()
+    fixture.detectChanges()
+
+    const chips = fixture.debugElement.queryAll(By.css('.menu-type-row .c-toggle-chip input'))
+    expect(chips.length).toBe(5)
+    expect(chips.map((c) => (c.nativeElement as HTMLInputElement).checked)).toEqual([false, false, false, true, false])
+
+    spyOn(component as unknown as { requireSignIn: () => boolean }, 'requireSignIn').and.returnValue(true)
+    await component.onToggleMenuTypeField('buffet', 'sell_price')
+    expect(metadataRegistrySpy.updateMenuType).toHaveBeenCalledWith('buffet', ['sell_price', 'serving_portions'])
+
+    await component.onToggleMenuTypeField('buffet', 'serving_portions')
+    expect(metadataRegistrySpy.updateMenuType).toHaveBeenCalledWith('buffet', [])
+    mockMenuTypes.set([])
   })
 
   // --- Mobile/tablet jump nav ---

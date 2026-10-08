@@ -73,9 +73,9 @@
     </div>
 
     <!-- Suppliers -->
-    <div class="inline-edit-checkboxes">
+    <div class="c-toggle-chip-group">
       @for (s of suppliers_(); track s._id) {
-        <label class="inline-edit-check">
+        <label class="c-toggle-chip">
           <input type="checkbox" [checked]="isSupplierSelected(s._id)" (change)="onSupplierChange(s._id)" />
           <span>{{ s.nameHebrew }}</span>
         </label>

@@ -24,6 +24,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  // Grid item of .product-form-container: let it shrink below the inputs' intrinsic width on phones
+  min-width: 0;
   background: var(--bg-glass-strong);
   padding: var(--space-8);
   border: 1px solid var(--border-glass);
@@ -224,21 +226,6 @@
       padding-inline-end: var(--space-2);
       border-inline-end: 1px solid var(--border-default);
 
-      .price-override-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        cursor: pointer;
-        font-weight: 600;
-        color: var(--color-text-secondary);
-
-        input[type='checkbox'] {
-          width: 1rem;
-          height: 1rem;
-          accent-color: var(--color-primary);
-        }
-      }
-
       .override-input {
         width: 85px;
         font-weight: 600;
@@ -390,6 +377,15 @@
         flex-direction: row-reverse;
       }
     }
+  }
+
+  // Optional fields (supplier, allergens, waste/yield, min stock, expiry): collapsed headers pack
+  // side by side in a dense grid on every width; an expanded field keeps its cell width and grows downward.
+  // Two classes so it beats the single-column `.form-section` rules in the media blocks below.
+  .form-section.form-section--optional {
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    grid-auto-flow: row dense;
+    gap: var(--space-2);
   }
 
   select[multiple] {

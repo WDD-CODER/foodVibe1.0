@@ -119,5 +119,5 @@ As a chef receiving goods, I want to add and edit products on my phone or tablet
 - [auto] `npx ng test --watch=false --include=src/app/pages/inventory/components/product-form/**/*.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
 - [human] Phone (360px): edit a product → one column, buttons wrap and fit, scaling rows stacked, allergens dropdown usable, no sideways scroll.
-- [human] Tablet (~800px): 2 columns; opening allergens or waste/yield spans full width and is readable.
+- [human] Tablet (~800px): 2 columns; opening allergens or waste/yield keeps its cell width and grows downward.
 - [human] Desktop: looks the same as before.
