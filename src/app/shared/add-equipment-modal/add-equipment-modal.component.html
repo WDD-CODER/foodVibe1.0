@@ -12,6 +12,10 @@
             (ngModelChange)="name.set($event)"
             [placeholder]="'equipment_name' | translatePipe"
             (keydown.enter)="save()"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
           />
         </div>
 

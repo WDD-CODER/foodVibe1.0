@@ -89,6 +89,10 @@
                       SelectOnFocus
                       (blur)="exitLaborTimeEdit(group)"
                       (keydown.enter)="exitLaborTimeEdit(group); $event.preventDefault()"
+                      autocomplete="off"
+                      autocorrect="off"
+                      autocapitalize="off"
+                      spellcheck="false"
                     />
                   } @else {
                     <span
@@ -132,6 +136,10 @@
                       SelectOnFocus
                       (blur)="exitCookTimeEdit(group)"
                       (keydown.enter)="exitCookTimeEdit(group); $event.preventDefault()"
+                      autocomplete="off"
+                      autocorrect="off"
+                      autocapitalize="off"
+                      spellcheck="false"
                     />
                   } @else {
                     <span

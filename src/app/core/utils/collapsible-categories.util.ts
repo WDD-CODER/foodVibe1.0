@@ -29,9 +29,10 @@ export interface CollapsibleCategories {
  */
 export function useCollapsibleCategories(opts: CollapsibleCategoriesOptions = {}): CollapsibleCategories {
   const destroyRef = inject(DestroyRef)
-  const mql = typeof window !== 'undefined' && typeof window.matchMedia === 'function'
-    ? window.matchMedia(COLLAPSIBLE_MOBILE_QUERY)
-    : null
+  const mql =
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+      ? window.matchMedia(COLLAPSIBLE_MOBILE_QUERY)
+      : null
 
   const isMobile_ = signal<boolean>(mql?.matches ?? false)
   const mobileExpanded_ = signal<Set<string>>(new Set())

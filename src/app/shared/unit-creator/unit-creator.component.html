@@ -12,7 +12,11 @@
                (ngModelChange)="onUnitNameChange($event)"
                [placeholder]="'unit_name_placeholder' | translatePipe"
                (keydown.enter)="onNameLeave($event)"
-               (keydown.tab)="onNameLeave($event)">
+               (keydown.tab)="onNameLeave($event)"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false">
       </div>
 
     @if (errorMessage_()) {

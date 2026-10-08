@@ -130,6 +130,10 @@
                     [value]="def.key"
                     (blur)="onMenuTypeNameBlur(def.key, renameInput.value)"
                     (keydown.enter)="renameInput.blur()"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
                   />
                 } @else if (canEditTerm('menuType', def.key)) {
                   <button
@@ -231,6 +235,10 @@
         type="text"
         [placeholder]="('add' | translatePipe) + ' ' + (title | translatePipe) + '...'"
         (keyup.enter)="onAddMetadata(newInput.value, type, newInput)"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
       />
 
       <button

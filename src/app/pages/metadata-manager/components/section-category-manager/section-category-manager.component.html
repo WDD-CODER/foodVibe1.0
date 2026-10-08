@@ -11,6 +11,10 @@
       type="text"
       [placeholder]="'metadata_section_placeholder' | translatePipe"
       (keyup.enter)="onAdd(newInput.value, newInput)"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
     />
     <button
       type="button"
@@ -35,6 +39,10 @@
               [value]="name"
               (blur)="onRenameBlur(name, renameInput.value)"
               (keydown.enter)="renameInput.blur()"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
             />
           } @else if (canEdit(name)) {
             <button

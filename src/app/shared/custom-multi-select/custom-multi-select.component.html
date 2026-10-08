@@ -93,7 +93,11 @@
             (click)="$event.stopPropagation()"
             (keydown)="$event.stopPropagation()"
             autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
             [placeholder]="'search' | translatePipe" />
+          <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" (click)="$event.stopPropagation()" />
         </div>
       }
       @for (opt of dropdownOptions_(); track opt.value; let i = $index) {

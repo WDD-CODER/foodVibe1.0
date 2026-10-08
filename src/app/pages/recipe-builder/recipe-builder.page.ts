@@ -73,6 +73,7 @@ import { RecipeAiFlowService } from './services/recipe-ai-flow.service'
 import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -92,7 +93,8 @@ import { CounterComponent } from 'src/app/shared/counter/counter.component'
     ExportPreviewComponent,
     ExportToolbarOverlayComponent,
     ApproveStampComponent,
-    CounterComponent
+    CounterComponent,
+    InputClearComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'

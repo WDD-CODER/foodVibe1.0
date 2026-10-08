@@ -215,7 +215,10 @@
 }
 
 .custom-multi-select-search-wrap {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-inline-end: 0.25rem;
 
   width: 100%;
 
@@ -225,6 +228,8 @@
 .custom-multi-select-search-input {
   display: block;
 
+  flex: 1;
+  min-width: 0;
   width: 100%;
 
   background: transparent;

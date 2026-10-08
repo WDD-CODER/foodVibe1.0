@@ -23,6 +23,10 @@
           [placeholder]="'product_name_example_placeholder' | translatePipe"
           [class.c-input--invalid]="validationErrors_()['productName']"
           [attr.aria-invalid]="validationErrors_()['productName'] ? true : null"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
         />
         @if (
           productForm_.get('productName')?.invalid &&

@@ -2092,6 +2092,23 @@ body.kb-open {
   }
 }
 
+/* ---- Engine: Picker search row (plan 364) — a dropdown picker's search input with its
+   `<app-input-clear>` (X) at the inline-end, on one line. ---- */
+.c-picker-search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+
+  > input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  > app-input-clear {
+    flex-shrink: 0;
+  }
+}
+
 /* ---- Engine modifier: Tab pill "home" (plan 367) — the "לוח בקרה" chip that replaces the
    current dashboard sub-page's chip. Outlined in the primary color so it reads as "back",
    not as another section. ---- */

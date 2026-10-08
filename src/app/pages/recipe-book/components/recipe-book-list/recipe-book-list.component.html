@@ -383,10 +383,19 @@
         <div class="ingredient-search-input-wrap">
           <lucide-icon name="search" [size]="18"></lucide-icon>
           <input
+            #ingredientSearchInput
             type="text"
             [ngModel]="ingredientSearchQuery_()"
             (ngModelChange)="ingredientSearchQuery_.set($event)"
             [placeholder]="'search_by_ingredients' | translatePipe"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <app-input-clear
+            [visible]="!!ingredientSearchQuery_()"
+            (clear)="ingredientSearchQuery_.set(''); ingredientSearchInput.focus()"
           />
         </div>
         @if (ingredientSearchQuery_().trim()) {

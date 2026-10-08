@@ -13,11 +13,18 @@
     <input #searchInput
            type="text"
            class="csd-input form-input--no-focus-ring"
+           [id]="instanceId + '-input'"
+           [name]="instanceId"
+           autocomplete="off"
+           autocorrect="off"
+           autocapitalize="off"
+           spellcheck="false"
            [value]="searchQuery_()"
            (input)="searchQuery_.set($any($event.target).value); highlightIndex_.set(-1)"
            (focus)="openDropdown()"
            (keydown)="onInputKeydown($event)"
            [placeholder]="placeholder()" />
+    <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" (click)="$event.stopPropagation()" />
   </div>
 
   @if (showDropdown_()) {
@@ -27,7 +34,7 @@
       @for (opt of filteredOptions_(); track opt; let i = $index) {
         <div class="dropdown-item"
              #dropdownItem
-             [id]="'csd-option-' + i"
+             [id]="instanceId + '-option-' + i"
              [class.dropdown-item--highlight]="highlightIndex_() === i"
              tabindex="-1"
              role="option"
@@ -38,7 +45,7 @@
       @if (hasAddNew_()) {
         <div class="dropdown-item dropdown-item--add-new"
              #dropdownItem
-             [id]="'csd-option-' + filteredOptions_().length"
+             [id]="instanceId + '-option-' + filteredOptions_().length"
              [class.dropdown-item--highlight]="highlightIndex_() === filteredOptions_().length"
              tabindex="-1"
              role="option"

@@ -1,5 +1,9 @@
 import { TestBed } from '@angular/core/testing'
-import { COLLAPSIBLE_MOBILE_QUERY, CollapsibleCategories, useCollapsibleCategories } from './collapsible-categories.util'
+import {
+  COLLAPSIBLE_MOBILE_QUERY,
+  CollapsibleCategories,
+  useCollapsibleCategories
+} from './collapsible-categories.util'
 
 type ChangeListener = (e: MediaQueryListEvent) => void
 

@@ -170,6 +170,10 @@
                 [value]="imageHint_()"
                 (input)="imageHint_.set($any($event.target).value)"
                 [disabled]="status_() === 'sending'"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
               />
             }
 
@@ -215,6 +219,10 @@
                 [value]="draft_()!.nameHebrew"
                 (input)="setDraftField('nameHebrew', $any($event.target).value)"
                 dir="rtl"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
               />
             </div>
 
@@ -292,6 +300,10 @@
                     (keydown.enter)="addCategory(); $event.preventDefault()"
                     placeholder="הוסף קטגוריה"
                     dir="rtl"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
                   />
                   <button type="button" class="c-icon-btn" (click)="addCategory()" [disabled]="!newCategory_().trim()">
                     <lucide-icon name="plus" [size]="14"></lucide-icon>
@@ -318,6 +330,10 @@
                     (keydown.enter)="addAllergen(); $event.preventDefault()"
                     placeholder="הוסף אלרגן"
                     dir="rtl"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
                   />
                   <button type="button" class="c-icon-btn" (click)="addAllergen()" [disabled]="!newAllergen_().trim()">
                     <lucide-icon name="plus" [size]="14"></lucide-icon>

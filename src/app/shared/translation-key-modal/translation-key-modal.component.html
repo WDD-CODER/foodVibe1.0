@@ -11,7 +11,11 @@
                [ngModel]="hebrewLabel_()"
                (ngModelChange)="updateHebrew($event)"
                [placeholder]="context_() === 'category' ? ('general.category_placeholder' | translatePipe) : ('hebrew_value' | translatePipe)"
-               aria-describedby="hebrew-hint" />
+               aria-describedby="hebrew-hint"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false" />
         @if (context_() === 'generic') {
         <span id="hebrew-hint" class="translation-key-modal-hint">{{ 'enter_english_key_for_value_above' | translatePipe }}</span>
         }
@@ -23,7 +27,11 @@
                [ngModel]="englishKey_()"
                (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
                placeholder="olive_oil"
-               (keydown.enter)="save()" />
+               (keydown.enter)="save()"
+               autocomplete="off"
+               autocorrect="off"
+               autocapitalize="off"
+               spellcheck="false" />
         @if (validationError_()) {
         <span class="translation-key-validation-error">{{ validationError_() }}</span>
         }
