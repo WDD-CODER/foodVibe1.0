@@ -80,17 +80,17 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `src/app/shared/page-header/page-header.component.{ts,html,scss}` (`app-page-header`):
+- [x] `src/app/shared/page-header/page-header.component.{ts,html,scss}` (`app-page-header`):
   - Inputs: `titleKey` (string, translated) or a projected `[header-title]`, `count` (`number | null`), `backLink` (`string | null`) or a `(back)` output.
   - Slots: `[header-search]`, `[header-actions]`, `[header-leading]` (for the filter toggle).
   - Layout per the proposal, using container queries on the component (not viewport), with logical properties only.
   - The title is an `<h1>` (one per page).
-- [ ] `ListShellComponent` replaces `.list-header` internals with `<app-page-header>`. It maps the existing slots (`[shell-back-btn]`, `[shell-title]`, `[shell-search]`, `[shell-actions]`, the open-panel button) into it. Delete the grid areas, `.header-ham-mirror`, `.header-spacer`, the `::ng-deep .page-title` rule and `$header-break-*` usage.
-- [ ] `resultCountText()` → the count badge (keep the text form for screen readers via `aria-label`).
-- [ ] The 4 list pages drop their local `.page-title` styles; their `shell-title` content becomes the title text only.
+- [x] `ListShellComponent` replaces `.list-header` internals with `<app-page-header>`. It maps the existing slots (`[shell-back-btn]`, `[shell-title]`, `[shell-search]`, `[shell-actions]`, the open-panel button) into it. Delete the grid areas, `.header-ham-mirror`, `.header-spacer`, the `::ng-deep .page-title` rule and `$header-break-*` usage.
+- [x] `resultCountText()` → the count badge (keep the text form for screen readers via `aria-label`).
+- [x] The 4 list pages drop their local `.page-title` styles; their `shell-title` content becomes the title text only.
 
 ### Should Have (P1)
-- [ ] The count badge animates subtly on change (respect reduced motion).
+- [x] The count badge animates subtly on change (respect reduced motion).
 
 ### Nice to Have (P2)
 - None.
@@ -106,7 +106,7 @@ touching any milestone.
 - [x] A1: `PageHeaderComponent` plus a spec (renders title, count, back; slots project) (`src/app/shared/page-header/**`).
 - [x] A2: list-shell uses it; delete the old header grid styles (`src/app/shared/list-shell/**`).
 - [x] A3: Clean the 4 pages' title markup and styles (`inventory-product-list/**`, `recipe-book-list/**`, `supplier-list/**`, `equipment-list/**`).
-- [ ] A4: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file.
+- [x] A4: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file.
 
 ## Technical Considerations
 
