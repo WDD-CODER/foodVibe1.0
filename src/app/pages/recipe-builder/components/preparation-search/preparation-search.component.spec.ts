@@ -19,15 +19,8 @@ describe('PreparationSearchComponent', () => {
     prepRegistrySpy.allPreparations_ = signal([{ name: 'רוטב עגבניות', category: 'מטבח' }])
 
     await TestBed.configureTestingModule({
-      imports: [
-        PreparationSearchComponent,
-        TranslatePipe,
-        LucideAngularModule.pick({ Search, Plus })
-      ],
-      providers: [
-        provideHttpClient(),
-        { provide: PreparationRegistryService, useValue: prepRegistrySpy }
-      ]
+      imports: [PreparationSearchComponent, TranslatePipe, LucideAngularModule.pick({ Search, Plus })],
+      providers: [provideHttpClient(), { provide: PreparationRegistryService, useValue: prepRegistrySpy }]
     }).compileComponents()
 
     fixture = TestBed.createComponent(PreparationSearchComponent)
@@ -43,5 +36,34 @@ describe('PreparationSearchComponent', () => {
     component['searchQuery_'].set('xyz')
     fixture.detectChanges()
     expect(component['showAddOption_']()).toBe(true)
+  })
+
+  it('Enter selects the first match and asks for a new row', async () => {
+    const selected = jasmine.createSpy('selected')
+    const newRow = jasmine.createSpy('newRow')
+    component.preparationSelected.subscribe(selected)
+    component.addNewRowRequested.subscribe(newRow)
+    component['searchQuery_'].set('רוטב')
+    await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    expect(selected).toHaveBeenCalledWith({ name: 'רוטב עגבניות', category: 'מטבח' })
+    expect(newRow).toHaveBeenCalled()
+  })
+
+  it('Enter adds an unknown name and asks for a new row', async () => {
+    const added = jasmine.createSpy('added')
+    const newRow = jasmine.createSpy('newRow')
+    component.preparationAdded.subscribe(added)
+    component.addNewRowRequested.subscribe(newRow)
+    component['searchQuery_'].set('בצל מטוגן')
+    await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    expect(added).toHaveBeenCalledWith({ name: 'בצל מטוגן', category: 'מטבח' })
+    expect(newRow).toHaveBeenCalled()
+  })
+
+  it('Enter on an empty box does not open a new row', async () => {
+    const newRow = jasmine.createSpy('newRow')
+    component.addNewRowRequested.subscribe(newRow)
+    await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    expect(newRow).not.toHaveBeenCalled()
   })
 })

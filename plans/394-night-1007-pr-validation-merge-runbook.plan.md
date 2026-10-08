@@ -59,10 +59,10 @@ None. No invariant touched. Merges only; every PR was already planned under its 
 - [x] Merged.
 
 ### Round 4 — PR #307 Plan 348 Recipe builder mobile rows (`feat/night-1007-348-recipe-builder-mobile-rows`) — rebases clean
-- [ ] Phone portrait 360×740: new recipe → 3 ingredients → each card shows full name, amount (− / +), unit, cost, delete; all tappable; no sideways scroll; header fits.
-- [ ] Phone landscape 740×360: cards; edit badge + nutrition leaf visible; tap leaf → info fully on screen; tap outside closes; delete works; name quick-edit opens the modal, not the inline accordion.
-- [ ] Desktop: rows as before; trash + edit badge hover-reveal; nutrition tooltip positioned as before.
-- [ ] Merged.
+- [x] Phone portrait 360×740: new recipe → 3 ingredients → each card shows full name, amount (− / +), unit, cost, delete; all tappable; no sideways scroll; header fits.
+- [x] Phone landscape 740×360: cards; edit badge + nutrition leaf visible; tap leaf → info fully on screen; tap outside closes; delete works; name quick-edit opens the modal, not the inline accordion.
+- [x] Desktop: rows as before; trash + edit badge hover-reveal; nutrition tooltip positioned as before.
+- [x] Merged.
 
 ### Round 5 — PR #297 Plan 365 Admin scope wording (`feat/night-1007-365-admin-scope-wording`) — conflict: dictionary.json
 - [ ] Metadata: delete a label → header "מחיקה", buttons "מחק רק אצלי / מחק מכולם". Add → "פריט חדש … פרסם לכולם". Rename → "שמירת שינויים … עדכן לכולם".
@@ -81,11 +81,11 @@ Night run skipped A4 (eval script) and could not run Mongo server tests.
 - [ ] Merged.
 
 ### Round 7 — PR #295 Plan 351 Dashboard recent activity (`feat/night-1007-351-recent-activity-history`) — conflict: dictionary.json
-- [ ] Edit a product's supplier, category and price → `/dashboard`: product name, "עודכן", "לפני רגע", 3 lines like "ספק: X ← Y", all Hebrew, no ids.
-- [ ] Edit 4+ fields → "+N שינויים נוספים" opens a popover with all changes; click outside closes.
-- [ ] Phone 360: entries wrap, no sideways scroll; time under the name.
-- [ ] Entries from earlier days → "היום" / "אתמול" / date headers.
-- [ ] Merged.
+- [x] Edit a product's supplier, category and price → `/dashboard`: product name, "עודכן", "לפני רגע", 3 lines like "ספק: X ← Y", all Hebrew, no ids.
+- [x] Edit 4+ fields → "+N שינויים נוספים" opens a popover with all changes; click outside closes.
+- [x] Phone 360: entries wrap, no sideways scroll; time under the name.
+- [x] Entries from earlier days → "היום" / "אתמול" / date headers.
+- [x] Merged.
 
 ### Round 8 — PR #296 Plan 367 Dashboard chip, no back buttons (`feat/night-1007-367-dashboard-chip-no-back`) — conflicts: tab-chips spec, supplier-list.ts
 - [ ] `/dashboard`: chips אתרים · מטא-דאטה · ספקים · אשפה, none active. Tap מטא-דאטה → אתרים · לוח בקרה · ספקים · אשפה (לוח בקרה outlined) → tap it → overview.

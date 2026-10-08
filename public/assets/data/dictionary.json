@@ -606,7 +606,7 @@
     "menu_total_revenue": "הכנסה כוללת",
     "menu_cost_per_guest": "עלות לאורח",
     "menu_profit_per_guest": "רווח לאורח",
-    "menu_toolbar_open": "פתח סרגל כלים",
+    "menu_toolbar_open": "צ׳קליסט והדפסות",
     "menu_save": "שמור תפריט",
     "menu_export_customer": "ייצוא ללקוח",
     "show_metadata": "הצג נתוני מנה",
@@ -985,7 +985,14 @@
     "scope_delete_product_warning": "שים לב: מחיקה מכולם תסיר את המוצר גם מכל המתכונים של כל המשתמשים.",
     "confirm_delete": "האם אתה בטוח שברצונך למחוק?",
     "confirm_delete_product": "האם אתה בטוח שברצונך למחוק חומר גלם זה?",
+    "activity_more_changes": "+{n} שינויים נוספים",
+    "activity_deleted_supplier": "ספק שנמחק",
+    "activity_today": "היום",
+    "activity_yesterday": "אתמול",
+    "activity_just_now": "לפני רגע",
     "supplier_added": "הספק \"{name}\" נוסף בהצלחה",
-    "min_order": "מינימום הזמנה"
+    "min_order": "מינימום הזמנה",
+    "ai_warning_implausible_portion_weight": "כמויות הרכיבים לא סבירות ביחס למספר המנות",
+    "menu_print": "הדפסה"
   }
 }

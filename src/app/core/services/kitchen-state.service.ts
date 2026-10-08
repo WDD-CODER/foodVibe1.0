@@ -202,28 +202,15 @@ export class KitchenStateService {
         to: String(next.yieldFactor ?? 1)
       })
     }
-    if ((prev.purchaseOptions?.length ?? 0) !== (next.purchaseOptions?.length ?? 0)) {
-      const prevUnits = (prev.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
-      const nextUnits = (next.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
+    const prevUnits = (prev.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
+    const nextUnits = (next.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
+    if (prevUnits !== nextUnits) {
       changes.push({
         field: 'purchase_options',
         label: 'activity_field_purchase_options',
         from: prevUnits || undefined,
         to: nextUnits || undefined
       })
-    } else if ((prev.purchaseOptions?.length ?? 0) > 0) {
-      const prevOpts = JSON.stringify(prev.purchaseOptions ?? [])
-      const nextOpts = JSON.stringify(next.purchaseOptions ?? [])
-      if (prevOpts !== nextOpts) {
-        const prevUnits = (prev.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
-        const nextUnits = (next.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
-        changes.push({
-          field: 'purchase_options',
-          label: 'activity_field_purchase_options',
-          from: prevUnits || undefined,
-          to: nextUnits || undefined
-        })
-      }
     }
     return changes
   }

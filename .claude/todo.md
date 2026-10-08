@@ -131,13 +131,6 @@
 - [ ] A5: Delete the dead local classes and `.c-filter-option` (`src/styles.scss`). Run `rg -n 'type="checkbox"' src/app --glob '*.html'` and confirm only list-row-checkbox remains.
 - [ ] A6: Build and run specs. Update the session-state file.
 
-### Plan 344 — Menu "צ'קליסט והדפסות": top drop-down sheet from the FAB, and portrait-safe checklist views (`plans/344-menu-checklist-and-prints-top-sheet-portrait-checklists.plan.md`)
-- [ ] A1: `menu-export-sheet` component: markup, animation, backdrop and Escape close, with a spec (open → backdrop click → close emitted) (`components/menu-export-sheet/**`).
-- [ ] A2: Wire the FAB action → `exportSheetOpen_`; connect the sheet outputs to the existing page methods (`menu-intelligence.page.ts/.html`).
-- [ ] A3: Remove the export pills, their styles and the dead signals and methods (`menu-intelligence.page.ts/.html`, `_toolbar.scss`).
-- [ ] A4: export-preview portrait styles (`export-preview.component.scss`).
-- [ ] A5: Build and run specs. Check at 360px portrait, landscape and desktop. Update the session-state file.
-
 ### Plan 345 — Filter categories collapsed by default on mobile (`plans/345-filter-categories-collapsed-by-default-on-mobile.plan.md`)
 - [ ] A1: Write the util plus its spec (`collapsible-categories.util.ts/.spec.ts`).
 - [ ] A2: Migrate inventory and recipe-book (`inventory-product-list/**`, `recipe-book-list/**`).
@@ -157,14 +150,6 @@
 - [x] A4: `vh` → `dvh` in the listed files.
 - [ ] A5: Build and run specs. Update the session-state file.
 
-### Plan 348 — Recipe builder on mobile: usable ingredient rows (portrait and landscape) (`plans/348-recipe-builder-mobile-usable-ingredient-rows.plan.md`)
-- [ ] A1: Remove the conflicting media block; tune the container card layout for portrait and landscape (`recipe-ingredients-table.component.scss`).
-- [ ] A2: Gate hover-reveals behind `(hover: hover)` (`recipe-ingredients-table.component.scss`).
-- [ ] A3: Update the `isMobile_` query (`recipe-ingredients-table.component.ts`).
-- [ ] A4: Nutrition badge tap positioning, clamp and outside-tap close, with a spec (`shared/nutrition-badge/**`).
-- [ ] A5: Header grid `1fr 1fr` (`recipe-header.component.scss`).
-- [ ] A6: Build and run specs. Check at 360×740 portrait, 740×360 landscape and desktop. Update the session-state file.
-
 ### Plan 349 — Shared column carousel (one component for every list) and roomier recipe-book carousel (`plans/349-shared-column-carousel-roomier-recipe-book-carousel.plan.md`)
 - [ ] A1: Build the group directive, header, cell and slide directive, with specs: next/prev wrap or clamp, header and cell share the index, RTL direction (`src/app/shared/column-carousel/**`).
 - [ ] A2: Migrate recipe-book, including the spacing changes (`recipe-book-list/**`).
@@ -180,10 +165,10 @@
 - [ ] A5: Build and run specs. Check at 360px and 1280px in RTL. Update the session-state file.
 
 ### Plan 351 — Dashboard "פעילות אחרונה": readable change history (`plans/351-dashboard-recent-activity-readable-change-history.plan.md`)
-- [ ] A1: `activityValue` pipe plus its spec: supplier ids → names, key translation, unknown id, empty (`core/pipes/activity-value.pipe.ts/.spec.ts`).
-- [ ] A2: Switch the popover to the pipe (`shared/change-popover/**`).
-- [ ] A3: New entry template and styles; delete the strip, scroll method and `.change-tag` styles (`dashboard-overview/**`).
-- [ ] A4: Relative time plus the optional day grouping (`dashboard-overview/**`).
+- [x] A1: `activityValue` pipe plus its spec: supplier ids → names, key translation, unknown id, empty (`core/pipes/activity-value.pipe.ts/.spec.ts`).
+- [x] A2: Switch the popover to the pipe (`shared/change-popover/**`).
+- [x] A3: New entry template and styles; delete the strip, scroll method and `.change-tag` styles (`dashboard-overview/**`).
+- [x] A4: Relative time plus the optional day grouping (`dashboard-overview/**`).
 - [ ] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
 
 ### Plan 352 — Page header, part 1: `<app-page-header>` and the list-shell pages (`plans/352-page-header-part-1-app-page-header-list-shell.plan.md`)
@@ -253,11 +238,11 @@
 - [ ] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
 
 ### Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests (`plans/370-ai-recipe-generation-realistic-portions-with-tests.plan.md`)
-- [ ] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
-- [ ] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
-- [ ] A3: The `implausible_portion_weight` warning, server and client mirror, plus tests and the dictionary key.
+- [x] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
+- [x] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
+- [x] A3: The `implausible_portion_weight` warning, server and client mirror, plus tests and the dictionary key.
 - [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`).
-- [ ] A5: Build, server tests. Update session-state.
+- [x] A5: Build, server tests. Update session-state.
 
 ### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/372-venues-b-multiple-contacts-hours-picker.plan.md`)
 - [ ] A1: Schema and model additions; `build:schemas`; server validation test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
@@ -365,6 +350,17 @@
 - [ ] R11–R15: list/form template conflicts — #300 (361), #294 (345), #304 (342), #306 (368), #308 (344).
 - [ ] R16–R18: #311 chain top (349+350+352) → merges #309 → #310 → #311; then #313 (346); then #312 (353).
 - [ ] Done-when: no open `[night 10-07]` PR; `main` builds + specs pass; wt-1 servers off, `/remote` off.
+
+### Plan 395 — Gemini Model Chain with Daily Quota Fallback and Real Free-Tier Limit (`plans/395-gemini-model-chain-daily-quota-fallback.plan.md`)
+> After PR #298 (plan 370) merges. Free tier = 20 calls/model/day; app claims 1,000.
+- [ ] G0: Step 0 reality check; per-model status table.
+- [ ] G1: `server/services/gemini-client.js` — chain, daily-quota fallback, exhausted map + Mongo mirror, LA-midnight reset, vision set.
+- [ ] G2: `server/test/gemini-client.test.js` offline vitest (chain, daily 429 moves, per-minute/5xx/timeout stay, all exhausted, reset, vision, env override).
+- [ ] G3: `ai.js` + `ai-recipe-helpers.js` through the client; drop `DAILY_LIMIT` gates; `/usage` new contract.
+- [ ] G4: dictionary append `ai_daily_limit_reached_all` + `ai_models_available`; modals switch key.
+- [ ] G5: `gemini-usage.util.ts` + modals + usage indicator read `models` from `/usage`.
+- [ ] G6: `ai-eval-recipes.js --model=`; eval per model; image call per model; final default order.
+- [ ] G7: `.env.example`; all [auto] criteria; HOW TO VALIDATE; `/ship`.
 
 ## Where things live
 

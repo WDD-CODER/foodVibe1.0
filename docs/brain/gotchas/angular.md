@@ -229,3 +229,23 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** It looks like a data-sync bug (signal not updated, list not refetched), but the store had the item. Clearing the list's session filters on every visit would throw away state users rely on.
 
 **What to do instead:** After creating an item on a separate page, navigate back with a URL param that selects it (e.g. `queryParams: { q: name }`). `useListState` gives URL params priority over sessionStorage and skips the session restore entirely when any URL param is present. Pair it with a success toast.
+
+---
+
+## Capture-phase scroll listener catches a popover's own scroll
+
+**What hurt:** The nutrition tooltip moves with the page through `window.addEventListener('scroll', reposition, true)`. Once the tooltip got its own scrolling content, every arrow tap snapped it back to the top. The capture listener also fires for scrolls inside the tooltip, and the reposition step reset its `max-height` to measure it.
+
+**Why the obvious fix is wrong:** Dropping the capture flag also drops the scrolls of inner list containers, which are what move the badge, so the tooltip drifts away from the leaf.
+
+**What to do instead:** In the listener, return early when `event.target` is inside the popover. Measure the natural height without resetting styles (box height + `scrollHeight − clientHeight` of the scroll body), so a page scroll keeps the inner scroll position.
+
+---
+
+## An approved AI draft says `yield_unit: 'dish'`, not `'portion'`
+
+**What hurt:** Plan 370's "כמויות הרכיבים לא סבירות ביחס למספר המנות" warning passed its unit tests but never showed in the app. Unit tests built drafts with `yield_unit: 'portion'` (what Gemini returns), but `ai-draft-editor.component.ts` `onApprove()` rewrites a dish's yield unit to `'dish'` (מנה) before `computeWarnings` and `POST /ai/shots` see it.
+
+**Why the obvious fix is wrong:** Changing the editor to emit `'portion'` breaks the recipe builder, which expects `'dish'` for dishes.
+
+**What to do instead:** Any check on an approved draft must treat `'portion'` and `'dish'` the same (`PORTION_YIELD_UNITS` in `gemini-shots.service.ts` and `server/services/ai-recipe-helpers.js`). Build test drafts in the shape the editor emits, not the shape the model returns, and check each AI warning once in the real modal.
