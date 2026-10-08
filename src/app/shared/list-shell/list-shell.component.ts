@@ -7,7 +7,8 @@ import {
   ElementRef,
   effect,
   afterNextRender,
-  computed
+  computed,
+  viewChild
 } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
@@ -40,6 +41,23 @@ export class ListShellComponent {
   })
 
   readonly panelToggle = output<void>()
+
+  private readonly tableTop = viewChild<ElementRef<HTMLElement>>('tableTop')
+  private readonly tableBody = viewChild<ElementRef<HTMLElement>>('tableBody')
+
+  /**
+   * P1 (plan 346): after a pagination button press, bring the first row back into view —
+   * the body's own scroll on desktop, the page scroll (to the pinned table top) below 1024px.
+   */
+  protected onPaginationClick(event: Event): void {
+    if (!(event.target instanceof Element) || !event.target.closest('button')) return
+    requestAnimationFrame(() => {
+      const body = this.tableBody()?.nativeElement
+      if (body) body.scrollTop = 0
+      const top = this.tableTop()?.nativeElement
+      if (top && top.getBoundingClientRect().top <= 0) top.scrollIntoView({ block: 'start' })
+    })
+  }
 
   constructor() {
     const el = inject(ElementRef)

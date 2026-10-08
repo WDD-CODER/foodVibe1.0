@@ -961,15 +961,16 @@ textarea.c-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  grid-column: 1 / -1;
   gap: var(--space-4);
 
   color: var(--color-text-muted);
   font-size: 0.875rem;
   text-align: center;
 
-  padding-block: var(--space-3);
-  border-block-start: 1px solid var(--border-default);
+  // Plan 346: sits at the top of the table (pinned with the column header), so the
+  // divider is below it.
+  padding-block: var(--space-2);
+  border-block-end: 1px solid var(--border-default);
 }
 
 /* ---- Engine: Visually Hidden (accessibility) ---- */
