@@ -245,11 +245,11 @@
 - [ ] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
 
 ### Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests (`plans/370-ai-recipe-generation-realistic-portions-with-tests.plan.md`)
-- [ ] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
-- [ ] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
-- [ ] A3: The `implausible_portion_weight` warning, server and client mirror, plus tests and the dictionary key.
+- [x] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
+- [x] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
+- [x] A3: The `implausible_portion_weight` warning, server and client mirror, plus tests and the dictionary key.
 - [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`).
-- [ ] A5: Build, server tests. Update session-state.
+- [x] A5: Build, server tests. Update session-state.
 
 ### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/372-venues-b-multiple-contacts-hours-picker.plan.md`)
 - [ ] A1: Schema and model additions; `build:schemas`; server validation test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
