@@ -15,7 +15,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
-import { Equipment, EquipmentCategory, ScalingRule } from '@models/equipment.model'
+import { Equipment, EquipmentCategory } from '@models/equipment.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -75,8 +75,6 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
       if (equipment) {
         this.isEditMode_.set(true)
         this.hydrateForm(equipment)
-      } else {
-        this.patchScalingDefaults()
       }
     })
   }
@@ -91,11 +89,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
       category: ['tool', [Validators.required]],
       ownedQuantity: [1, [Validators.required, Validators.min(0)]],
       isConsumable: [false],
-      notes: [''],
-      scaling_enabled_: [false],
-      perGuests: [25, [Validators.min(1)]],
-      minQuantity: [1, [Validators.min(0)]],
-      maxQuantity: [null as number | null]
+      notes: ['']
     })
   }
 
@@ -105,20 +99,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
       category: e.category ?? 'tool',
       ownedQuantity: e.ownedQuantity ?? 0,
       isConsumable: e.isConsumable ?? false,
-      notes: e.notes ?? '',
-      scaling_enabled_: !!e.scalingRule,
-      perGuests: e.scalingRule?.perGuests ?? 25,
-      minQuantity: e.scalingRule?.minQuantity ?? 1,
-      maxQuantity: e.scalingRule?.maxQuantity ?? null
-    })
-  }
-
-  private patchScalingDefaults(): void {
-    this.equipmentForm_.patchValue({
-      scaling_enabled_: false,
-      perGuests: 25,
-      minQuantity: 1,
-      maxQuantity: null
+      notes: e.notes ?? ''
     })
   }
 
@@ -142,14 +123,6 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
       try {
         const v = this.equipmentForm_.getRawValue()
         const now = Date.now()
-        const scalingRule: ScalingRule | undefined = v.scaling_enabled_
-          ? {
-              perGuests: Number(v.perGuests),
-              minQuantity: Number(v.minQuantity),
-              maxQuantity: v.maxQuantity != null && v.maxQuantity !== '' ? Number(v.maxQuantity) : undefined
-            }
-          : undefined
-
         if (this.isEditMode_()) {
           const equipment = this.route.snapshot.data['equipment'] as Equipment
           const updated: Equipment = {
@@ -159,7 +132,6 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
             ownedQuantity: Number(v.ownedQuantity),
             isConsumable: !!v.isConsumable,
             notes: v.notes ?? undefined,
-            scalingRule: scalingRule,
             updatedAt: now
           }
           await this.equipmentData.updateEquipment(updated)
@@ -168,17 +140,13 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
             nameHebrew: v.nameHebrew,
             category: v.category,
             ownedQuantity: Number(v.ownedQuantity),
-            scalingRule: scalingRule,
             isConsumable: !!v.isConsumable,
             notes: v.notes || undefined,
             createdAt: now,
             updatedAt: now
           })
         }
-        const listPath = this.router.url.startsWith('/inventory/equipment')
-          ? ['/inventory/equipment']
-          : ['/equipment/list']
-        this.router.navigate(listPath)
+        this.router.navigate(['/inventory/equipment'])
       } catch (err) {
         this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
         const msg =
@@ -191,7 +159,6 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
   }
 
   onCancel(): void {
-    const listPath = this.router.url.startsWith('/inventory/equipment') ? ['/inventory/equipment'] : ['/equipment/list']
-    this.router.navigate(listPath)
+    this.router.navigate(['/inventory/equipment'])
   }
 }

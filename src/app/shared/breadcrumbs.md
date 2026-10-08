@@ -40,7 +40,6 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | scaling-chip/ | Recipe scaling chip | ScalingChipComponent |
 | scrollable-dropdown/ | Scrollable dropdown | ScrollableDropdownComponent |
 | selection-bar/ | Bulk selection bar | SelectionBarComponent |
-| supplier-modal/ | Supplier picker | SupplierModalComponent |
 | translation-key-modal/ | Hebrew → English key | TranslationKeyModalComponent |
 | unit-creator/ | Unit registry editor | UnitCreatorModal |
 | venue-link-chip/ | Venue link chip | VenueLinkChipComponent |

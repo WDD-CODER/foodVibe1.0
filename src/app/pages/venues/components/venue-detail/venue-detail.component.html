@@ -42,7 +42,7 @@
         <div class="detail-stats">
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'infrastructure_items' | translatePipe }}</span>
-            <span class="detail-stat-value">{{ (venue.availableInfrastructure ?? []).length }}</span>
+            <span class="detail-stat-value">{{ venue.availableInfrastructure.length }}</span>
           </div>
           <div class="detail-stat">
             <span class="detail-stat-label">{{ 'capacity' | translatePipe }}</span>
@@ -89,7 +89,7 @@
           <lucide-icon name="calendar-clock" [size]="18"></lucide-icon>
           <h2>{{ 'operating_hours' | translatePipe }}</h2>
         </header>
-        @if (venue.operatingHours?.length) {
+        @if (hasHours_()) {
           <ul class="hours-list">
             @for (block of venue.operatingHours; track $index) {
               <li class="hours-row">

@@ -121,84 +121,53 @@
         @if (allMenuTypes_().length > 0) {
           <div class="list-stack">
             @for (def of allMenuTypes_(); track def.key) {
-              <div class="list-item group menu-type-row">
-                @if (editingMenuTypeKey_() === def.key) {
-                  <div class="menu-type-edit">
-                    <span class="menu-type-key">{{ def.key }}</span>
-                    <div class="field-checkboxes">
-                      @for (f of ALL_DISH_FIELDS; track f.key) {
-                        <label class="field-check">
-                          <input
-                            type="checkbox"
-                            [checked]="isMenuTypeFieldSelected(f.key)"
-                            (change)="toggleMenuTypeField(f.key)"
-                          />
-                          {{ f.labelKey | translatePipe }}
-                        </label>
-                      }
-                    </div>
-                    <div class="edit-actions">
-                      <button type="button" class="c-btn-primary" (click)="onSaveMenuTypeFields()">
-                        {{ 'save' | translatePipe }}
-                      </button>
-                      <button type="button" class="c-btn-ghost--sm" (click)="onCancelEditMenuType()">
-                        {{ 'cancel' | translatePipe }}
-                      </button>
-                    </div>
-                  </div>
-                } @else {
+              <div class="list-item menu-type-row">
+                @if (renamingMenuTypeKey_() === def.key) {
                   <input
+                    #renameInput
                     type="text"
                     class="menu-type-key-input"
                     [value]="def.key"
-                    [readOnly]="!canEditTerm('menuType', def.key)"
-                    (blur)="onMenuTypeNameBlur(def.key, $any($event.target).value)"
-                    (keydown.enter)="$any($event.target).blur()"
+                    (blur)="onMenuTypeNameBlur(def.key, renameInput.value)"
+                    (keydown.enter)="renameInput.blur()"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
                   />
-                  <div class="field-pills">
-                    @for (f of def.fields; track f) {
-                      <button
-                        type="button"
-                        class="field-pill field-pill-removable"
-                        (click)="removeFieldFromMenuType(def.key, f)"
-                        [disabled]="!isLoggedIn() || !canEditTerm('menuType', def.key)"
-                        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                      >
-                        {{ getDishFieldLabelKey(f) | translatePipe }}
-                      </button>
-                    }
-                  </div>
-                  @if (canEditTerm('menuType', def.key)) {
-                    <button
-                      type="button"
-                      class="btn-edit"
-                      (click)="onEditMenuType(def.key)"
-                      [attr.aria-label]="'edit' | translatePipe"
-                      [disabled]="!isLoggedIn()"
-                      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                    >
-                      <lucide-icon name="pencil" [size]="14"></lucide-icon>
-                    </button>
-                    <button
-                      type="button"
-                      class="c-icon-btn danger"
-                      (click)="onRemoveMenuType(def.key)"
-                      [attr.aria-label]="'remove' | translatePipe"
-                      [disabled]="!isLoggedIn()"
-                      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                    >
-                      <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-                    </button>
-                  } @else {
-                    <span
-                      class="unit-default-badge"
+                } @else if (canEditTerm('menuType', def.key)) {
+                  <button
+                    type="button"
+                    class="c-tap-chip menu-type-name"
+                    [attr.aria-expanded]="isMenuOpenFor(def.key, 'menuType')"
+                    (click)="openItemMenu($event, def.key, 'menuType')"
+                  >
+                    {{ def.key }}
+                  </button>
+                } @else {
+                  <span class="c-tap-chip is-locked menu-type-name">
+                    {{ def.key }}
+                    <lucide-icon
+                      name="lock"
+                      [size]="14"
                       [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
                       [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-                    >
-                      <lucide-icon name="lock" [size]="14"></lucide-icon>
-                    </span>
-                  }
+                    ></lucide-icon>
+                  </span>
                 }
+                <div class="c-toggle-chip-group menu-type-fields">
+                  @for (f of ALL_DISH_FIELDS; track f.key) {
+                    <label class="c-toggle-chip">
+                      <input
+                        type="checkbox"
+                        [checked]="def.fields.includes(f.key)"
+                        [disabled]="!isLoggedIn() || !canEditTerm('menuType', def.key)"
+                        (change)="onToggleMenuTypeField(def.key, f.key)"
+                      />
+                      <span>{{ f.labelKey | translatePipe }}</span>
+                    </label>
+                  }
+                </div>
               </div>
             }
           </div>
@@ -212,6 +181,33 @@
     <app-section-category-manager id="mm-sec-section" [style.order]="orderFor('mm-sec-section')" />
     <app-user-management id="mm-sec-user" [style.order]="orderFor('mm-sec-user')" />
   </div>
+
+  <!-- One tap menu for every chip on this page. It sits outside the cards because their
+       backdrop-filter would trap a position:fixed popover. -->
+  <app-row-actions-menu [anchored]="true" (closed)="menuTarget_.set(null)">
+    @if (menuTarget_(); as target) {
+      @if (target.type !== 'unit') {
+        <button
+          type="button"
+          class="c-icon-btn"
+          (click)="onMenuEdit(target)"
+          [attr.aria-label]="'edit' | translatePipe"
+          [attr.title]="'edit' | translatePipe"
+        >
+          <lucide-icon name="pencil" [size]="18"></lucide-icon>
+        </button>
+      }
+      <button
+        type="button"
+        class="c-icon-btn danger"
+        (click)="onMenuDelete(target)"
+        [attr.aria-label]="'delete' | translatePipe"
+        [attr.title]="'delete' | translatePipe"
+      >
+        <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+      </button>
+    }
+  </app-row-actions-menu>
 </div>
 
 <ng-template
@@ -239,6 +235,10 @@
         type="text"
         [placeholder]="('add' | translatePipe) + ' ' + (title | translatePipe) + '...'"
         (keyup.enter)="onAddMetadata(newInput.value, type, newInput)"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
       />
 
       <button
@@ -253,66 +253,34 @@
 
     <div class="list-container">
       @if (items.length > 0) {
-        <div
-          [class]="
-            type === 'allergen' ? 'allergen-pool' : type === 'label' || type === 'course' ? 'label-pool' : 'list-stack'
-          "
-        >
+        <div class="c-tap-chip-group">
           @for (item of items; track item) {
-            <div
-              [class]="
-                type === 'allergen'
-                  ? 'allergen-pill'
-                  : type === 'label' || type === 'course'
-                    ? 'label-pill'
-                    : 'list-item group'
-              "
-            >
-              @if (type === 'label') {
-                <span class="label-color-dot" [style.background-color]="getLabelColor(item)"></span>
-              }
-              <span>{{ item | translatePipe }}</span>
-
-              @if (type === 'unit' && isSystemUnit(item)) {
-                <span
-                  class="unit-default-badge"
-                  [attr.title]="'unit_default_unremovable' | translatePipe"
-                  aria-label="default unit"
-                >
-                  <lucide-icon name="lock" [size]="14"></lucide-icon>
-                </span>
-              } @else if (!canEditTerm(type, item)) {
-                <span
-                  class="unit-default-badge"
-                  [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
-                  [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-                >
-                  <lucide-icon name="lock" [size]="14"></lucide-icon>
-                </span>
-              } @else {
-                @if (type !== 'unit') {
-                  <button
-                    class="c-icon-btn"
-                    (click)="onRenameMetadata(item, type)"
-                    [disabled]="!isLoggedIn()"
-                    [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : ('rename' | translatePipe)"
-                  >
-                    <lucide-icon name="pencil" [size]="type === 'allergen' ? 14 : 16"></lucide-icon>
-                  </button>
+            @if (lockReasonKey(type, item); as lockKey) {
+              <span class="c-tap-chip is-locked">
+                @if (type === 'label') {
+                  <span class="c-tap-chip__dot" [style.background-color]="getLabelColor(item)"></span>
                 }
-                <button
-                  class="c-icon-btn danger"
-                  (click)="onRemoveMetadata(item, type)"
-                  [disabled]="!isLoggedIn()"
-                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                >
-                  <lucide-icon
-                    [name]="type === 'allergen' ? 'x' : 'trash-2'"
-                    [size]="type === 'allergen' ? 14 : 16"
-                  ></lucide-icon>
-                </button>
-              }
-            </div>
+                {{ item | translatePipe }}
+                <lucide-icon
+                  name="lock"
+                  [size]="14"
+                  [attr.title]="lockKey | translatePipe"
+                  [attr.aria-label]="lockKey | translatePipe"
+                ></lucide-icon>
+              </span>
+            } @else {
+              <button
+                type="button"
+                class="c-tap-chip"
+                [attr.aria-expanded]="isMenuOpenFor(item, type)"
+                (click)="openItemMenu($event, item, type)"
+              >
+                @if (type === 'label') {
+                  <span class="c-tap-chip__dot" [style.background-color]="getLabelColor(item)"></span>
+                }
+                {{ item | translatePipe }}
+              </button>
+            }
           }
         </div>
       } @else {

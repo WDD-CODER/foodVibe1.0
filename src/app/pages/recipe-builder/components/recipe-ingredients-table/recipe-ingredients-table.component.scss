@@ -1,4 +1,3 @@
-
 /* drag | name | unit | quantity | percent | cost | actions */
 $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 1rem;
 
@@ -17,7 +16,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
-  &:active { cursor: grabbing; }
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .cdk-drag-preview {
@@ -70,13 +71,19 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 .ingredient-grid-row .col-actions .c-icon-btn {
   width: 1.5rem;
   height: 1.5rem;
-  opacity: 0;
-  transition: opacity 0.15s ease;
 }
 
-.ingredient-grid-row:hover .col-actions .c-icon-btn,
-.ingredient-grid-row .col-actions .c-icon-btn:focus {
-  opacity: 1;
+// Plan 348: hover-reveal only where hovering exists — on touch the row trash is always visible.
+@media (hover: hover) {
+  .ingredient-grid-row .col-actions .c-icon-btn {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .ingredient-grid-row:hover .col-actions .c-icon-btn,
+  .ingredient-grid-row .col-actions .c-icon-btn:focus {
+    opacity: 1;
+  }
 }
 
 .ingredients-grid-header {
@@ -141,7 +148,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
     border: 1px solid var(--border-default);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition:
+      background 0.2s ease,
+      border-color 0.2s ease;
 
     &:hover:not(:disabled) {
       background: var(--bg-glass-hover);
@@ -280,7 +289,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     transform: scale(1.15);
@@ -301,7 +312,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
   animation: incomplete-pulse 2s ease-in-out infinite;
 
   &:hover {
@@ -329,7 +342,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
   animation: warning-pulse 3s ease-in-out infinite;
 
   &:hover {
@@ -338,8 +353,13 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
 }
 
 @keyframes incomplete-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .warning-badge {
@@ -355,7 +375,9 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
   animation: warning-pulse 3s ease-in-out infinite;
 
   &:hover {
@@ -364,10 +386,14 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
-
 @keyframes warning-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .clear-btn {
@@ -402,8 +428,10 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   border: none;
 
   cursor: pointer;
-  opacity: 0;
-  transition: color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 
   &:hover {
     color: var(--color-primary);
@@ -411,89 +439,45 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
   }
 }
 
-.selected-item-display:hover .edit-badge {
-  opacity: 1;
+// Plan 348: the edit badge is hover-revealed only on hover-capable devices.
+@media (hover: hover) {
+  .edit-badge {
+    opacity: 0;
+  }
+
+  .selected-item-display:hover .edit-badge,
+  .edit-badge:focus-visible {
+    opacity: 1;
+  }
 }
 
-@container ingredients (max-width: 520px) {
+// Plan 348: the single narrow layout — one card per ingredient. Threshold 700px so phones in
+// landscape (container ~700px) get cards too. (The old ≤640px media block that forced a cramped
+// single row is gone; it used to override this.)
+// Card (RTL): row 1 = name/search + delete; row 2 = amount · unit · cost.
+@container ingredients (max-width: 700px) {
   .ingredients-grid-header {
     display: none;
   }
 
   .ingredient-grid-row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
     gap: 0.5rem;
-    padding: 1rem;
+    padding: 0.75rem;
     margin-block-end: 0.5rem;
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     background: var(--bg-glass);
 
-    .col-name {
-      grid-column: 1 / -1;
-    }
-    .col-quantity {
-      grid-column: 1;
-    }
-    .col-unit {
-      grid-column: 2;
-    }
+    .col-drag,
     .col-percent {
-      grid-column: 1;
-    }
-    .col-cost {
-      grid-column: 2;
-    }
-    .col-actions {
-      grid-column: 1 / -1;
-      justify-content: flex-end;
-    }
-
-    .quantity-controls .qty-btn {
-      opacity: 0;
-      width: 0;
-      padding: 0;
-      border: none;
-      overflow: hidden;
-      transition: opacity 0.15s ease, width 0.15s ease;
-    }
-    .quantity-controls:hover .qty-btn,
-    .quantity-controls:focus-within .qty-btn {
-      opacity: 1;
-      width: 2rem;
-      border: 1px solid var(--border-default);
-    }
-  }
-}
-
-@media (max-width: 640px) {
-  .ingredients-grid-header {
-    display: none;
-  }
-
-  .ingredient-grid-row {
-    display: grid;
-    // name | unit | quantity | cost | actions — compact single row with visible delete
-    grid-template-columns: 1fr 5rem 4rem 3.5rem 2.5rem;
-    grid-template-rows: auto;
-    gap: 0.375rem;
-    padding-inline: 0.5rem;
-    padding-block: 0.375rem;
-    margin-block-end: 0;
-    border: none;
-    border-block-end: 1px solid var(--border-default);
-    border-radius: 0;
-    background: transparent;
-    min-block-size: 2.75rem;
-
-    .col-drag {
       display: none;
     }
 
     .col-name {
-      grid-column: 1;
+      grid-column: 1 / 4;
       grid-row: 1;
       min-inline-size: 0;
 
@@ -503,55 +487,68 @@ $ingredients-grid-template: 1.5rem minmax(0, 2.5fr) minmax(0, 1fr) minmax(0, 1.5
       }
     }
 
-    .col-unit {
-      grid-column: 2;
-      grid-row: 1;
-      min-inline-size: 0;
-    }
-
-    .col-quantity {
-      grid-column: 3;
-      grid-row: 1;
-      min-inline-size: 0;
-      min-block-size: auto;
-    }
-
-    .col-cost {
+    .col-actions {
       grid-column: 4;
       grid-row: 1;
-      min-block-size: auto;
-      font-size: 0.8rem;
-    }
-
-    .col-percent {
-      display: none;
-    }
-
-    .col-actions {
-      grid-column: 5;
-      grid-row: 1;
-      min-block-size: auto;
       justify-content: center;
 
       .c-icon-btn {
-        opacity: 1;
         width: 2.75rem;
         height: 2.75rem;
+
+        opacity: 1;
       }
     }
 
-    // Hide +/- counter buttons on mobile — user types directly
-    .quantity-controls .qty-btn {
-      display: none;
+    .col-quantity {
+      grid-column: 1;
+      grid-row: 2;
+      min-inline-size: 0;
     }
 
+    .col-unit {
+      grid-column: 2;
+      grid-row: 2;
+      min-inline-size: 0;
+    }
+
+    .col-cost {
+      grid-column: 3 / -1;
+      grid-row: 2;
+      min-inline-size: 0;
+    }
+
+    // Compact stepper buttons so the amount itself gets the room; the input flexes between them.
     .quantity-controls {
-      width: 100%;
+      gap: 0.125rem;
+
+      inline-size: 100%;
+    }
+
+    .quantity-controls .qty-btn {
+      flex-shrink: 0;
+
+      inline-size: 1.75rem;
+      block-size: 1.75rem;
     }
 
     .quantity-controls .qty-input {
-      width: 100%;
-      min-width: unset;
+      inline-size: 100%;
+      min-inline-size: 0;
+
+      padding-inline: 0.125rem;
     }
+  }
+
+  // P1: name on one line with its badges; only the name text truncates.
+  .selected-item-display {
+    min-inline-size: 0;
+  }
+
+  .selected-item-display .item-text {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }
