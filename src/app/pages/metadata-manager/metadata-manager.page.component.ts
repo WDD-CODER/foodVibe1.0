@@ -1,10 +1,14 @@
 import {
+  afterNextRender,
+  ElementRef,
   ChangeDetectionStrategy,
   Component,
   inject,
+  Injector,
   OnInit,
   signal,
-  computed
+  computed,
+  viewChild
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
@@ -12,6 +16,7 @@ import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.servi
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { ProductDataService } from '@services/product-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { buildScopeTexts, type ScopeAction } from '@services/master-push.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
@@ -33,8 +38,14 @@ import { PreparationCategoryManagerComponent } from './components/preparation-ca
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label' | 'course'
+
+interface MenuTarget {
+  item: string
+  type: MetadataType | 'menuType'
+}
 
 /** Taxonomy kind behind each Metadata Manager card (Plan 321 Phase 3). */
 const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
@@ -56,7 +67,8 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
     UserManagementComponent,
-    ScrollRailComponent
+    ScrollRailComponent,
+    RowActionsMenuComponent
   ],
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss',
@@ -82,6 +94,7 @@ export class MetadataManagerComponent implements OnInit {
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
   private readonly taxonomy = inject(TaxonomyStore)
+  private readonly injector = inject(Injector)
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
@@ -108,11 +121,15 @@ export class MetadataManagerComponent implements OnInit {
   allCourses_ = this.metadataRegistry.courses_
   allCourseKeys_ = computed(() => this.allCourses_().map((c) => c.key))
   allMenuTypes_ = this.metadataRegistry.allMenuTypes_
-  protected editingMenuTypeKey_ = signal<string | null>(null)
-  protected editingMenuTypeFields_ = signal<DishFieldKey[]>([])
+  /** Menu type whose name is being renamed inline (opened from its tap menu). */
+  protected readonly renamingMenuTypeKey_ = signal<string | null>(null)
+  /** The chip whose tap menu is open (plan 340) — drives the shared menu's actions. */
+  protected readonly menuTarget_ = signal<MenuTarget | null>(null)
 
   readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS
-  readonly DEFAULT_DISH_FIELDS = DEFAULT_DISH_FIELDS
+
+  private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
+  private readonly renameInput = viewChild<ElementRef<HTMLInputElement>>('renameInput')
 
   /**
    * Mobile/tablet jump-nav destinations, in page order. Built from the app's real 8 sections
@@ -164,6 +181,42 @@ export class MetadataManagerComponent implements OnInit {
     return !term || this.taxonomy.canEdit(term)
   }
 
+  /** Dictionary key explaining why a chip is read-only, or null when it can be tapped. */
+  protected lockReasonKey(type: MetadataType, item: string): string | null {
+    if (type === 'unit' && this.isSystemUnit(item)) return 'unit_default_unremovable'
+    if (!this.canEditTerm(type, item)) return 'taxonomy_shared_admin_only'
+    return null
+  }
+
+  //TAP MENU (plan 340) — one shared edit/delete menu, anchored to the tapped chip
+  protected openItemMenu(event: MouseEvent, item: string, type: MenuTarget['type']): void {
+    this.menuTarget_.set({ item, type })
+    this.itemMenu().open(event.currentTarget as HTMLElement)
+  }
+
+  protected isMenuOpenFor(item: string, type: MenuTarget['type']): boolean {
+    const target = this.menuTarget_()
+    return target?.item === item && target.type === type
+  }
+
+  protected onMenuEdit(target: MenuTarget): void {
+    this.itemMenu().close()
+    if (target.type === 'menuType') {
+      this.onStartRenameMenuType(target.item)
+      return
+    }
+    void this.onRenameMetadata(target.item, target.type)
+  }
+
+  protected onMenuDelete(target: MenuTarget): void {
+    this.itemMenu().close()
+    if (target.type === 'menuType') {
+      void this.onRemoveMenuType(target.item)
+      return
+    }
+    void this.onRemoveMetadata(target.item, target.type)
+  }
+
   //CREATE
 
   // addUnit(name: string): void {
@@ -174,7 +227,7 @@ export class MetadataManagerComponent implements OnInit {
   async onAddLabel(prefillHebrew?: string): Promise<void> {
     const result = await this.labelCreationModal.open(prefillHebrew)
     if (!result?.key || !result?.hebrewLabel) return
-    const scope = await this.resolvePushScope('label')
+    const scope = await this.resolvePushScope('label', 'create')
     if (!scope) return
     try {
       this.translationService.updateDictionary(result.key, result.hebrewLabel, scope)
@@ -249,7 +302,7 @@ export class MetadataManagerComponent implements OnInit {
       isNewDictionaryEntry = true
     }
 
-    const scope = await this.resolvePushScope(type)
+    const scope = await this.resolvePushScope(type, 'create')
     if (!scope) return
     if (isNewDictionaryEntry) {
       this.translationService.updateDictionary(englishKey, resolvedHebrew, scope)
@@ -315,7 +368,7 @@ export class MetadataManagerComponent implements OnInit {
           { variant: 'danger' }
         )
         if (!confirmed) return
-        const scope = await this.resolvePushScope(type, item)
+        const scope = await this.resolvePushScope(type, 'delete', item)
         if (!scope) return
         try {
           const updatedCount =
@@ -379,7 +432,7 @@ export class MetadataManagerComponent implements OnInit {
     }
 
     // 3. EXECUTION
-    const scope = await this.resolvePushScope(type, item)
+    const scope = await this.resolvePushScope(type, 'delete', item)
     if (!scope) return
     try {
       switch (type) {
@@ -487,8 +540,13 @@ export class MetadataManagerComponent implements OnInit {
    *  label are the only eligible types) always get 'me' silently — no prompt shown.
    *  Plan 321 Phase 3: editing an already-shared term `key` is always 'everyone' (admin only —
    *  there is no per-user copy any more); a non-admin gets the read-only message and null.
-   *  Returns null if the admin cancels out of the prompt. */
-  private async resolvePushScope(type: MetadataType, key?: string): Promise<'me' | 'everyone' | null> {
+   *  Returns null if the admin cancels out of the prompt. `action` only picks the prompt's
+   *  wording (plan 365). */
+  private async resolvePushScope(
+    type: MetadataType,
+    action: ScopeAction,
+    key?: string
+  ): Promise<'me' | 'everyone' | null> {
     const term = key === undefined ? undefined : this.taxonomy.find(KIND_BY_TYPE[type], key)
     if (term && this.taxonomy.isShared(term)) {
       if (this.taxonomy.canEdit(term)) return 'everyone'
@@ -498,14 +556,13 @@ export class MetadataManagerComponent implements OnInit {
     if (!this.isAdmin() || !(type === 'label' || type === 'course' || type === 'category' || type === 'allergen')) {
       return 'me'
     }
-    const scope = await this.confirmModal.openTernary(
-      this.translationService.translate('push_registry_master_message'),
-      {
-        headerKey: 'push_to_master_header',
-        saveLabel: 'push_to_master_save_me',
-        saveButtonLabel: 'push_to_master_save_everyone'
-      }
-    )
+    // Plan 365: wording follows the action (add → publish, rename/text fix → update, remove → delete).
+    const texts = buildScopeTexts(action, 'metadata', 1, (k) => this.translationService.translate(k))
+    const scope = await this.confirmModal.openTernary(texts.message, {
+      headerKey: texts.headerKey,
+      saveLabel: texts.meLabelKey,
+      saveButtonLabel: texts.everyoneLabelKey
+    })
     if (scope === 'cancel') return null
     return scope === 'save' ? 'everyone' : 'me'
   }
@@ -594,7 +651,7 @@ export class MetadataManagerComponent implements OnInit {
         result.color === existing?.color &&
         resultTriggers === existingTriggers
       if (unchanged) return
-      const scope = await this.resolvePushScope('label', item)
+      const scope = await this.resolvePushScope('label', 'save', item)
       if (!scope) return
       if (result.key !== item) {
         const ok = await this.confirmAndCascadeRename('label', item, result.key, scope)
@@ -614,7 +671,7 @@ export class MetadataManagerComponent implements OnInit {
       )
       if (!isTranslationKeyResult(result)) return
       if (result.englishKey === item && result.hebrewLabel === this.translationService.translate(item)) return
-      const scope = await this.resolvePushScope(type, item)
+      const scope = await this.resolvePushScope(type, 'save', item)
       if (!scope) return
       if (result.englishKey === item) {
         this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)
@@ -684,40 +741,20 @@ export class MetadataManagerComponent implements OnInit {
     }
   }
 
-  onEditMenuType(key: string): void {
+  /** Tapping a field chip adds or removes it and saves at once. Fields are stored in
+   *  ALL_DISH_FIELDS order so every row reads the same way; zero fields is allowed. */
+  async onToggleMenuTypeField(key: string, fieldKey: DishFieldKey): Promise<void> {
     if (!this.requireSignIn()) return
-    this.editingMenuTypeKey_.set(key)
-    this.editingMenuTypeFields_.set([...this.metadataRegistry.getMenuTypeFields(key)])
+    const current = this.metadataRegistry.getMenuTypeFields(key)
+    const next = current.includes(fieldKey) ? current.filter((f) => f !== fieldKey) : [...current, fieldKey]
+    const ordered = ALL_DISH_FIELDS.map((f) => f.key).filter((k) => next.includes(k))
+    await this.metadataRegistry.updateMenuType(key, ordered)
   }
 
-  toggleMenuTypeField(fieldKey: DishFieldKey): void {
-    this.editingMenuTypeFields_.update((fields) => {
-      const has = fields.includes(fieldKey)
-      if (has) return fields.filter((f) => f !== fieldKey)
-      return [...fields, fieldKey]
-    })
-  }
-
-  isMenuTypeFieldSelected(fieldKey: DishFieldKey): boolean {
-    return this.editingMenuTypeFields_().includes(fieldKey)
-  }
-
-  getDishFieldLabelKey(fieldKey: DishFieldKey): string {
-    return ALL_DISH_FIELDS.find((f) => f.key === fieldKey)?.labelKey ?? fieldKey
-  }
-
-  async onSaveMenuTypeFields(): Promise<void> {
+  private onStartRenameMenuType(key: string): void {
     if (!this.requireSignIn()) return
-    const key = this.editingMenuTypeKey_()
-    if (!key) return
-    await this.metadataRegistry.updateMenuType(key, this.editingMenuTypeFields_())
-    this.editingMenuTypeKey_.set(null)
-    this.editingMenuTypeFields_.set([])
-  }
-
-  onCancelEditMenuType(): void {
-    this.editingMenuTypeKey_.set(null)
-    this.editingMenuTypeFields_.set([])
+    this.renamingMenuTypeKey_.set(key)
+    afterNextRender(() => this.renameInput()?.nativeElement.select(), { injector: this.injector })
   }
 
   async onRemoveMenuType(key: string): Promise<void> {
@@ -731,6 +768,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   async onMenuTypeNameBlur(oldKey: string, newName: string): Promise<void> {
+    this.renamingMenuTypeKey_.set(null)
     if (!this.requireSignIn()) return
     const trimmed = (newName ?? '').trim()
     if (trimmed === oldKey || !trimmed) return
@@ -739,12 +777,5 @@ export class MetadataManagerComponent implements OnInit {
     if (!confirmed) return
     await this.metadataRegistry.renameMenuType(oldKey, trimmed)
     await this.menuEventData.updateServingTypeForAll(oldKey, trimmed)
-  }
-
-  async removeFieldFromMenuType(key: string, fieldKey: DishFieldKey): Promise<void> {
-    if (!this.requireSignIn()) return
-    const current = this.metadataRegistry.getMenuTypeFields(key)
-    const updated = current.filter((f) => f !== fieldKey)
-    await this.metadataRegistry.updateMenuType(key, updated)
   }
 }

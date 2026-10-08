@@ -928,7 +928,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const isNewProduct = !this.curProduct_()?._id
     let pushToMasterAfterSave = false
     if ((productToSave._masterId && !isNewProduct) || (isNewProduct && this.isAdmin_())) {
-      const scope = await this.masterPush_.askScope({ _masterId: productToSave._masterId }, isNewProduct)
+      const scope = await this.masterPush_.askScope(
+        { _masterId: productToSave._masterId },
+        { entity: 'product', isNew: isNewProduct }
+      )
       if (scope === 'cancel') return false
       pushToMasterAfterSave = scope === 'everyone'
     }

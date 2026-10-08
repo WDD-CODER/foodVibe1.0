@@ -290,12 +290,21 @@
                 <div class="logistics-tool-search-wrap">
                   <lucide-icon name="search" class="logistics-search-icon" [size]="18"></lucide-icon>
                   <input
+                    #logisticsSearchInput
                     type="text"
                     class="logistics-tool-search"
                     [value]="logisticsToolSearchQuery_()"
                     (input)="onLogisticsSearchInput($any($event.target).value)"
                     (keydown)="onLogisticsSearchKeydown($event)"
                     [placeholder]="'search_tool_placeholder' | translatePipe"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                  />
+                  <app-input-clear
+                    [visible]="!!logisticsToolSearchQuery_()"
+                    (clear)="onLogisticsSearchInput(''); logisticsSearchInput.focus()"
                   />
                 </div>
                 <app-counter

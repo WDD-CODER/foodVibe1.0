@@ -12,6 +12,7 @@ import { ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 @Component({
   selector: 'app-menu-dish-row',
@@ -25,7 +26,8 @@ import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.comp
     ClickOutSideDirective,
     SelectOnFocusDirective,
     ScrollableDropdownComponent,
-    ScrollRailComponent
+    ScrollRailComponent,
+    InputClearComponent
   ],
   templateUrl: './menu-dish-row.component.html',
   styleUrl: './menu-dish-row.component.scss',

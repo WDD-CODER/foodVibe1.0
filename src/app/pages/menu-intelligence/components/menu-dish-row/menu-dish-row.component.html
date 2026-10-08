@@ -46,17 +46,28 @@
       </button>
     } @else {
       <div class="dish-search-wrap" (clickOutside)="clearSearch.emit()">
-        <input
-          type="text"
-          class="dish-search-input"
-          autocomplete="off"
-          [id]="'dish-search-' + sectionIndex() + '-' + itemIndex()"
-          [ngModel]="dishSearchQuery()"
-          [ngModelOptions]="{ standalone: true }"
-          (ngModelChange)="searchQueryChange.emit($event)"
-          [placeholder]="'menu_search_dish' | translatePipe"
-          (keydown)="dishSearchKeydown.emit($event)"
-        />
+        <div class="c-picker-search-row">
+          <input
+            #dishSearchInput
+            type="text"
+            class="dish-search-input"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            [id]="'dish-search-' + sectionIndex() + '-' + itemIndex()"
+            [ngModel]="dishSearchQuery()"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="searchQueryChange.emit($event)"
+            [placeholder]="'menu_search_dish' | translatePipe"
+            (keydown)="dishSearchKeydown.emit($event)"
+          />
+          <app-input-clear
+            [visible]="!!dishSearchQuery()"
+            (clear)="searchQueryChange.emit(''); dishSearchInput.focus()"
+            (click)="$event.stopPropagation()"
+          />
+        </div>
         @if (dishSearchQuery().trim()) {
           <app-scrollable-dropdown [maxHeight]="200">
             @for (recipe of getFilteredRecipes(); track recipe._id; let i = $index) {

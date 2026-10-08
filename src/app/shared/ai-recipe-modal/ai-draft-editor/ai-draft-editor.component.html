@@ -7,6 +7,10 @@
       [value]="name()"
       (input)="name.set($any($event.target).value)"
       [placeholder]="(isDish_() ? 'dish_name_placeholder' : 'recipe_name_placeholder') | translatePipe"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
     />
     <button type="button" class="type-toggle-btn" [class.type-toggle-btn--dish]="isDish_()" (click)="toggleType()">
       {{ (isDish_() ? 'dish' : 'preparation') | translatePipe }}
@@ -67,6 +71,10 @@
               [value]="ing.name"
               (input)="updateIngredientName(i, $any($event.target).value)"
               [placeholder]="'ingredient_name' | translatePipe"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
             />
           </div>
           <app-custom-select
@@ -153,6 +161,10 @@
               [value]="item.text"
               (input)="updateWorkflowText(i, $any($event.target).value)"
               [placeholder]="'preparation' | translatePipe"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
             />
             <app-custom-select
               class="editor-unit-select"
