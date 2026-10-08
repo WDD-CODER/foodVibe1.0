@@ -96,27 +96,27 @@ Night run skipped A4 (eval script) and could not run Mongo server tests.
 ### Round 9 — PR #314 Plan 364 Search fields part 2 — chain top, contains #299 Plan 363 (`feat/night-1007-364-search-fields-part2`)
 Agent: rebase #299 onto main first, then #314 onto #299; retarget #314 to `main`; serve #314. `approve` merges #299 then #314.
 Plan 363 checks:
-- [ ] `/inventory/list`: empty → no X. Type "עגב" → X fades in → tap → text gone, full list, cursor stays → X fades out. Same on `/recipe-book`, suppliers, `/inventory/equipment`, `/menu-library`, `/venues`.
-- [ ] Escape with text → clears.
-- [ ] Recipe builder ingredient search + preparation search: type → results → X → closed, empty, focused.
-- [ ] Android Chrome: no browser suggestion strip on these fields.
-- [ ] OS "reduce motion": X appears/disappears instantly.
+- [x] `/inventory/list`: empty → no X. Type "עגב" → X fades in → tap → text gone, full list, cursor stays → X fades out. Same on `/recipe-book`, suppliers, `/inventory/equipment`, `/menu-library`, `/venues`.
+- [x] Escape with text → clears.
+- [x] Recipe builder ingredient search + preparation search: type → results → X → closed, empty, focused.
+- [x] Android Chrome: no browser suggestion strip on these fields.
+- [x] OS "reduce motion": X appears/disappears instantly.
 Plan 364 checks:
-- [ ] Android Chrome: chip-search-dropdown (recipe labels) → type → no autofill bar. If it still appears → `fix:` apply the `new-off` fallback (plan 364 line 104).
-- [ ] Each picker: type, tap X → text clears, list stays open with every option, cursor stays.
-- [ ] Menu-intelligence dish row: while editing a dish, tap X → search clears, dish edit NOT reverted.
-- [ ] Venue/supplier contact + phone fields still offer browser autofill.
-- [ ] Merged (#299 then #314).
+- [x] Android Chrome: chip-search-dropdown (recipe labels) → type → no autofill bar. If it still appears → `fix:` apply the `new-off` fallback (plan 364 line 104).
+- [x] Each picker: type, tap X → text clears, list stays open with every option, cursor stays.
+- [x] Menu-intelligence dish row: while editing a dish, tap X → search clears, dish edit NOT reverted.
+- [x] Venue/supplier contact + phone fields still offer browser autofill.
+- [x] Merged (#299 then #314).
 
 ### Round 10 — PR #315 Plan 362 List overlays at body level (`feat/night-1007-362-list-overlays-body-level`) — was stacked on closed #305; rebase onto main (your 340 is there)
 Conflicts expected in `row-actions-menu` and `list-shell` (keep the `[shell-modal]` slot after `.list-container`'s closing `</div>`).
-- [ ] Tablet ~800 + phone 360: equipment → ⋮ on a row near the bottom → menu fully visible next to the button → tap outside closes.
-- [ ] Same ⋮ check in inventory, suppliers, recipe-book.
-- [ ] Edit from ⋮ → menu closes, edit modal centered, page dimmed (equipment + suppliers).
-- [ ] Metadata manager: tap a chip → menu next to it, Edit/Delete work, closes after.
-- [ ] Desktop 1280: row action buttons inline; hover unchanged.
-- [ ] Open a ⋮ menu and scroll → menu follows its button.
-- [ ] Merged.
+- [x] Tablet ~800 + phone 360: equipment → ⋮ on a row near the bottom → menu fully visible next to the button → tap outside closes.
+- [x] Same ⋮ check in inventory, suppliers, recipe-book.
+- [x] Edit from ⋮ → menu closes, edit modal centered, page dimmed (equipment + suppliers).
+- [x] Metadata manager: tap a chip → menu next to it, Edit/Delete work, closes after.
+- [x] Desktop 1280: row action buttons inline; hover unchanged.
+- [x] Open a ⋮ menu and scroll → menu follows its button.
+- [x] Merged.
 
 ### Round 11 — PR #300 Plan 361 Lists quick fixes (`feat/night-1007-361-lists-quick-fixes`) — conflict: supplier-list.html
 - [x] `/inventory/list` (+ recipe-book, suppliers, equipment): select 2 rows → bulk edit → "שנה שדה" + value list fully visible over the table.
@@ -155,33 +155,33 @@ Conflicts expected in `row-actions-menu` and `list-shell` (keep the `[shell-moda
 ### Round 16 — PR #311 Plan 352 Page header part 1 — chain top, contains #309 Plan 349 + #310 Plan 350 (`feat/night-1007-352-page-header-list-shell`)
 Agent: rebase #309 onto main (conflicts: equipment/inventory/recipe-book/supplier list html + supplier-list scss/ts), then #310 onto #309, then #311 onto #310; retarget #311 to `main`; serve #311. `approve` merges #309 → #310 → #311.
 Plan 349 checks:
-- [ ] Phone 360 `/recipe-book`: swipe a carousel cell or tap a header arrow → header + all rows move together; dots follow; values not cut off; header title readable with round arrows above it; carousel cells carry the row's color (incl. inventory invalid/incomplete tints).
-- [ ] Same in `/inventory/list`, suppliers, `/inventory/equipment`.
-- [ ] Vertical scroll over a carousel cell still scrolls the page.
-- [ ] 768 + desktop: carousel hidden, columns as before.
+- [x] Phone 360 `/recipe-book`: swipe a carousel cell or tap a header arrow → header + all rows move together; dots follow; values not cut off; header title readable with round arrows above it; carousel cells carry the row's color (incl. inventory invalid/incomplete tints).
+- [x] Same in `/inventory/list`, suppliers, `/inventory/equipment`.
+- [x] Vertical scroll over a carousel cell still scrolls the page.
+- [x] 768 + desktop: carousel hidden, columns as before.
 Plan 350 checks:
-- [ ] Phone 360 RTL `/dashboard?tab=metadata` jump-nav → arrow only on the side with more tabs; first and last tab reachable.
-- [ ] Dashboard / recipes / menus tab-chip rows → scroll + arrows only on overflow; first chip reachable.
-- [ ] Menu builder dish row data strip swipes and snaps; inline editing still works.
-- [ ] Desktop 1280: tab chips centered, no arrows; mouse wheel scrolls an overflowing strip sideways.
+- [x] Phone 360 RTL `/dashboard?tab=metadata` jump-nav → arrow only on the side with more tabs; first and last tab reachable.
+- [x] Dashboard / recipes / menus tab-chip rows → scroll + arrows only on overflow; first chip reachable.
+- [x] Menu builder dish row data strip swipes and snaps; inline editing still works.
+- [x] Desktop 1280: tab chips centered, no arrows; mouse wheel scrolls an overflowing strip sideways.
 Plan 352 checks:
-- [ ] Phone 360: inventory, recipe book, suppliers, equipment → title right with count pill, filter + actions left, search full-width below. Two rows, nothing centered.
-- [ ] 768: two rows or one if it fits. Desktop 1280: one row — title + count, search middle, filter + add at the end.
-- [ ] Change a filter → count pill updates.
-- [ ] Merged (#309 → #310 → #311).
+- [x] Phone 360: inventory, recipe book, suppliers, equipment → title right with count pill, filter + actions left, search full-width below. Two rows, nothing centered.
+- [x] 768: two rows or one if it fits. Desktop 1280: one row — title + count, search middle, filter + add at the end.
+- [x] Change a filter → count pill updates.
+- [x] Merged (#309 → #310 → #311).
 
 ### Round 17 — PR #313 Plan 346 Sticky table top (`feat/night-1007-346-sticky-table-header-pagination-top`) — rebase onto main after round 16, retarget to `main`
-- [ ] Phone 360 + tablet 800 `/inventory/list`: scroll → pagination bar + column names pinned at top; "next page" from the top jumps to the first row. Same `/recipe-book`.
-- [ ] Desktop 1280: pagination at the top of the table, header pinned while the body scrolls.
-- [ ] Suppliers + equipment: header pinned, no empty strip above.
-- [ ] Phone: carousel header arrows (349) not clipped at the table's top edge.
-- [ ] Merged.
+- [x] Phone 360 + tablet 800 `/inventory/list`: scroll → pagination bar + column names pinned at top; "next page" from the top jumps to the first row. Same `/recipe-book`.
+- [x] Desktop 1280: pagination at the top of the table, header pinned while the body scrolls.
+- [x] Suppliers + equipment: header pinned, no empty strip above.
+- [x] Phone: carousel header arrows (349) not clipped at the table's top edge.
+- [x] Merged.
 
 ### Round 18 — PR #312 Plan 353 Page header part 2 (`feat/night-1007-353-page-header-part2`) — rebase onto main after round 17, retarget to `main`
 - [ ] Desktop 1280: `/venues`, `/menu-library`, `/dashboard` (title + subtitle), `/dashboard?tab=metadata` (metadata title, not "לוח בקרה"), `/trash` → same title row as inventory.
 - [ ] Phone 360: each ≤ 2 rows; dashboard subtitle hidden.
 - [ ] No back buttons on venues, trash, dashboard tabs; "לוח בקרה" chip returns (round 8 merged).
-- [ ] Merged.
+- [-] Not merged: PR #312 closed 2026-10-08 without merging; plan 353 stays open in the ledger for a fresh branch.
 
 ## Done-when
 - [auto] Every one of the 20 PRs is MERGED or CLOSED on GitHub (`gh pr list --state open` shows no `[night 10-07]` PR except none).
