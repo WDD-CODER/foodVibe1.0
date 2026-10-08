@@ -59,6 +59,7 @@ import {
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util'
 import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
+import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { buildFilterOptionCounts, attachFilterCheckedState } from 'src/app/core/utils/filter-category-counts.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
@@ -168,20 +169,19 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
 
-    // Expand any filter category that has selected values (e.g. when opened via URL like ?filters=Approved:false).
-    // Categories start expanded by default now, so this only has to un-collapse ones the user had closed.
+    // Open any filter category that gains a selected value (e.g. when opened via URL like
+    // ?filters=Approved:false) — categories start collapsed on mobile and Date starts collapsed
+    // on desktop (plan 345). Only newly-active names are opened, so a category the user
+    // collapses again stays closed while they keep filtering elsewhere.
+    let prevActive = new Set<string>()
     effect(() => {
       const filters = this.activeFilters_()
-      const withValues = Object.keys(filters).filter((name) => (filters[name]?.length ?? 0) > 0)
-      const hasDateRange = this.dateFrom_() != null || this.dateTo_() != null
-      if (withValues.length === 0 && !hasDateRange) return
-      this.collapsedFilterCategories_.update((set) => {
-        if (set.size === 0) return set
-        const next = new Set(set)
-        withValues.forEach((name) => next.delete(name))
-        if (hasDateRange) next.delete('Date')
-        return next
+      const active = new Set(Object.keys(filters).filter((name) => (filters[name]?.length ?? 0) > 0))
+      if (this.dateFrom_() != null || this.dateTo_() != null) active.add('Date')
+      active.forEach((name) => {
+        if (!prevActive.has(name)) this.filterCategories.expandIfActive(name, true)
       })
+      prevActive = active
     })
 
     // Pagination (plan 304 M3): jump back to page 1 whenever the filtered/sorted result
@@ -217,10 +217,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.labelsExpand.reset()
   }
 
-  /** Tracks explicitly *collapsed* categories — every real filter group starts expanded
-   *  (matches the design), except 'Date' which the mockup doesn't show at all; it starts
-   *  collapsed so it doesn't dominate the panel above the categories the design leads with. */
-  protected collapsedFilterCategories_ = signal<Set<string>>(new Set(['Date']))
+  /** Filter-category open state (plan 345): all collapsed on mobile (≤1023px). On desktop every
+   *  group starts expanded except 'Date', which the mockup doesn't show — it stays collapsed so it
+   *  doesn't dominate the panel above the categories the design leads with. */
+  protected readonly filterCategories = useCollapsibleCategories({ desktopCollapsed: ['Date'] })
   protected readonly allergenExpand = new CellExpandState()
   protected readonly labelsExpand = new CellExpandState()
   protected hoveredCostRecipeId_ = signal<string | null>(null)
@@ -284,16 +284,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleFilterCategory(name: string): void {
-    this.collapsedFilterCategories_.update((set) => {
-      const next = new Set(set)
-      if (next.has(name)) next.delete(name)
-      else next.add(name)
-      return next
-    })
+    this.filterCategories.toggle(name)
   }
 
   protected isCategoryExpanded(name: string): boolean {
-    return !this.collapsedFilterCategories_().has(name)
+    return this.filterCategories.isExpanded(name)
   }
 
   protected togglePanel(): void {

@@ -261,47 +261,79 @@
   <ng-container shell-filters>
     <div class="c-filter-section">
       <div class="c-filter-category">
-        <span class="c-filter-category-label">{{ 'category' | translatePipe }}</span>
-        <div class="c-toggle-chip-group">
-          @for (cat of categories; track cat) {
-            <label class="c-toggle-chip">
-              <input type="checkbox" [checked]="selectedCategories_().has(cat)" (change)="toggleCategory(cat)" />
-              <span>{{ cat | translatePipe }}</span>
-            </label>
+        <button
+          type="button"
+          class="c-filter-category-header"
+          [class.expanded]="filterCategories.isExpanded('category')"
+          (click)="filterCategories.toggle('category')"
+        >
+          <span>{{ 'category' | translatePipe }}</span>
+          @if (selectedCategories_().size > 0) {
+            <span class="c-filter-category-count" aria-hidden="true">{{ selectedCategories_().size }}</span>
           }
-        </div>
+          <lucide-icon
+            [name]="filterCategories.isExpanded('category') ? 'chevron-down' : 'chevron-left'"
+            [size]="16"
+          ></lucide-icon>
+        </button>
+        @if (filterCategories.isExpanded('category')) {
+          <div class="c-toggle-chip-group">
+            @for (cat of categories; track cat) {
+              <label class="c-toggle-chip">
+                <input type="checkbox" [checked]="selectedCategories_().has(cat)" (change)="toggleCategory(cat)" />
+                <span>{{ cat | translatePipe }}</span>
+              </label>
+            }
+          </div>
+        }
       </div>
       <div class="c-filter-category consumable-filter">
-        <span class="c-filter-category-label">{{ 'is_consumable' | translatePipe }}</span>
-        <div class="c-toggle-chip-group">
-          <label class="c-toggle-chip">
-            <input
-              type="radio"
-              name="consumable"
-              [checked]="consumableFilter_() === null"
-              (change)="consumableFilter_.set(null)"
-            />
-            <span>{{ 'all' | translatePipe }}</span>
-          </label>
-          <label class="c-toggle-chip">
-            <input
-              type="radio"
-              name="consumable"
-              [checked]="consumableFilter_() === true"
-              (change)="consumableFilter_.set(true)"
-            />
-            <span>{{ 'approved_yes' | translatePipe }}</span>
-          </label>
-          <label class="c-toggle-chip">
-            <input
-              type="radio"
-              name="consumable"
-              [checked]="consumableFilter_() === false"
-              (change)="consumableFilter_.set(false)"
-            />
-            <span>{{ 'approved_no' | translatePipe }}</span>
-          </label>
-        </div>
+        <button
+          type="button"
+          class="c-filter-category-header"
+          [class.expanded]="filterCategories.isExpanded('is_consumable')"
+          (click)="filterCategories.toggle('is_consumable')"
+        >
+          <span>{{ 'is_consumable' | translatePipe }}</span>
+          @if (consumableFilter_() !== null) {
+            <span class="c-filter-category-count" aria-hidden="true">1</span>
+          }
+          <lucide-icon
+            [name]="filterCategories.isExpanded('is_consumable') ? 'chevron-down' : 'chevron-left'"
+            [size]="16"
+          ></lucide-icon>
+        </button>
+        @if (filterCategories.isExpanded('is_consumable')) {
+          <div class="c-toggle-chip-group">
+            <label class="c-toggle-chip">
+              <input
+                type="radio"
+                name="consumable"
+                [checked]="consumableFilter_() === null"
+                (change)="consumableFilter_.set(null)"
+              />
+              <span>{{ 'all' | translatePipe }}</span>
+            </label>
+            <label class="c-toggle-chip">
+              <input
+                type="radio"
+                name="consumable"
+                [checked]="consumableFilter_() === true"
+                (change)="consumableFilter_.set(true)"
+              />
+              <span>{{ 'approved_yes' | translatePipe }}</span>
+            </label>
+            <label class="c-toggle-chip">
+              <input
+                type="radio"
+                name="consumable"
+                [checked]="consumableFilter_() === false"
+                (change)="consumableFilter_.set(false)"
+              />
+              <span>{{ 'approved_no' | translatePipe }}</span>
+            </label>
+          </div>
+        }
       </div>
     </div>
   </ng-container>

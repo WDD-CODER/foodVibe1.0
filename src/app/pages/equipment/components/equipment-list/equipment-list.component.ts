@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
   OnInit,
@@ -36,6 +37,7 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
+import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { useIsDesktop } from 'src/app/core/utils/desktop-detection.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
@@ -119,6 +121,18 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       { urlParam: 'categories', signal: this.selectedCategories_, serializer: StringSetParam },
       { urlParam: 'consumable', signal: this.consumableFilter_, serializer: NullableBooleanParam }
     ])
+
+    // Open a filter category whenever it gains a selection (e.g. restored from the URL).
+    let hadCategories = false
+    let hadConsumable = false
+    effect(() => {
+      const hasCategories = this.selectedCategories_().size > 0
+      const hasConsumable = this.consumableFilter_() !== null
+      if (hasCategories && !hadCategories) this.filterCategories.expandIfActive('category', true)
+      if (hasConsumable && !hadConsumable) this.filterCategories.expandIfActive('is_consumable', true)
+      hadCategories = hasCategories
+      hadConsumable = hasConsumable
+    })
   }
 
   ngOnInit(): void {
@@ -136,6 +150,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected selectedCategories_ = signal<Set<EquipmentCategory>>(new Set())
   /** null = no filter, true = consumable only, false = non-consumable only. */
   protected consumableFilter_ = signal<boolean | null>(null)
+  /** Filter-category open state: collapsed on mobile (≤1023px), expanded on desktop (plan 345). */
+  protected readonly filterCategories = useCollapsibleCategories()
   protected sortBy_ = signal<SortField>('name')
   protected deletingId_ = signal<string | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
