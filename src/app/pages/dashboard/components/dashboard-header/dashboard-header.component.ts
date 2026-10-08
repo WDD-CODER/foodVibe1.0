@@ -19,8 +19,4 @@ export class DashboardHeaderComponent {
   // app-tab-chips (venues/metadata/suppliers/trash) has been removed — see tab-chips.component.ts.
   readonly activeTab = input.required<DashboardTab>()
   readonly tabChange = output<DashboardTab>()
-
-  protected backToDashboard(): void {
-    this.tabChange.emit('overview')
-  }
 }

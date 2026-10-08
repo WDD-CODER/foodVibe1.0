@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   signal,
   OnInit,
@@ -10,10 +11,10 @@ import {
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms'
-import { Router, RouterLink, RouterLinkActive } from '@angular/router'
+import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
-import { Equipment, EquipmentCategory, ScalingRule } from '@models/equipment.model'
+import { Equipment, EquipmentCategory } from '@models/equipment.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { UserService } from '@services/user.service'
@@ -31,6 +32,7 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { useListState, StringParam, NullableBooleanParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
+import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { useIsDesktop } from 'src/app/core/utils/desktop-detection.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
@@ -38,6 +40,7 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 import { EquipmentCategoryRegistryService } from '@services/equipment-category-registry.service'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
@@ -51,8 +54,6 @@ type EquipmentBulkField = 'category' | 'isConsumable'
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterLink,
-    RouterLinkActive,
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
@@ -62,7 +63,8 @@ type EquipmentBulkField = 'category' | 'isConsumable'
     SelectionBarComponent,
     ClickOutSideDirective,
     RowActionsMenuComponent,
-    ...COLUMN_CAROUSEL
+    ...COLUMN_CAROUSEL,
+    InputClearComponent
   ],
   templateUrl: './equipment-list.component.html',
   styleUrl: './equipment-list.component.scss',
@@ -83,15 +85,6 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   private readonly translationKeyModal = inject(TranslationKeyModalService)
   private readonly equipmentCategoryRegistry = inject(EquipmentCategoryRegistryService)
 
-  /** True when this list is shown under /inventory/equipment (logistics from inventory). */
-  protected get isUnderInventory(): boolean {
-    return this.router.url.startsWith('/inventory/equipment')
-  }
-
-  protected get equipmentBasePath(): string[] {
-    return this.isUnderInventory ? ['/inventory/equipment'] : ['/equipment']
-  }
-
   protected searchQuery_ = signal('')
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
@@ -107,12 +100,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     return this.filteredEquipment_().find((e) => e._id === id) ?? null
   })
 
-  private get panelContext(): 'inventory' | 'equipment' {
-    return this.router.url.startsWith('/inventory/equipment') ? 'inventory' : 'equipment'
-  }
-
   constructor() {
-    const panel = useResponsivePanelState(this.panelContext)
+    const panel = useResponsivePanelState('inventory')
     this.isPanelOpen_ = panel.isPanelOpen_
     this.togglePanelState_ = panel.togglePanel
 
@@ -124,13 +113,23 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       { urlParam: 'categories', signal: this.selectedCategories_, serializer: StringSetParam },
       { urlParam: 'consumable', signal: this.consumableFilter_, serializer: NullableBooleanParam }
     ])
+
+    // Open a filter category whenever it gains a selection (e.g. restored from the URL).
+    let hadCategories = false
+    let hadConsumable = false
+    effect(() => {
+      const hasCategories = this.selectedCategories_().size > 0
+      const hasConsumable = this.consumableFilter_() !== null
+      if (hasCategories && !hadCategories) this.filterCategories.expandIfActive('category', true)
+      if (hasConsumable && !hadConsumable) this.filterCategories.expandIfActive('is_consumable', true)
+      hadCategories = hasCategories
+      hadConsumable = hasConsumable
+    })
   }
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
-      [
-        { labelKey: 'add_equipment', icon: 'plus', run: () => this.router.navigate([...this.equipmentBasePath, 'add']) }
-      ],
+      [{ labelKey: 'add_equipment', icon: 'plus', run: () => this.router.navigate(['/inventory/equipment/add']) }],
       'replace'
     )
   }
@@ -143,6 +142,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected selectedCategories_ = signal<Set<EquipmentCategory>>(new Set())
   /** null = no filter, true = consumable only, false = non-consumable only. */
   protected consumableFilter_ = signal<boolean | null>(null)
+  /** Filter-category open state: collapsed on mobile (≤1023px), expanded on desktop (plan 345). */
+  protected readonly filterCategories = useCollapsibleCategories()
   protected sortBy_ = signal<SortField>('name')
   protected deletingId_ = signal<string | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
@@ -234,27 +235,13 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     return [...fixed, ...custom, { value: ADD_NEW_CATEGORY_VALUE, label: 'add_new_category' }]
   })
 
-  /** List-row scaling-rule summary (e.g. "25 guests · min 1–4"), matching the design's
-   * `Equipment.dc.html:351,680` per-row label. `null` max renders as a bare min, no dash. */
-  protected scalingSummary(rule: ScalingRule | undefined): string {
-    if (!rule) return this.translation.translate('no_scaling') ?? '—'
-    const range = rule.maxQuantity != null ? `${rule.minQuantity}–${rule.maxQuantity}` : `${rule.minQuantity}`
-    return (this.translation.translate('scaling_summary') ?? '{n} guests · min {range}')
-      .replace('{n}', String(rule.perGuests))
-      .replace('{range}', range)
-  }
-
   private buildEditForm(): void {
     this.editForm_ = this.fb.group({
       nameHebrew: ['', [Validators.required]],
       category: ['tool', [Validators.required]],
       ownedQuantity: [1, [Validators.required, Validators.min(0)]],
       isConsumable: [false],
-      notes: [''],
-      scaling_enabled_: [false],
-      perGuests: [25, [Validators.min(1)]],
-      minQuantity: [1, [Validators.min(0)]],
-      maxQuantity: [null as number | null]
+      notes: ['']
     })
   }
 
@@ -269,11 +256,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       category: cat,
       ownedQuantity: e.ownedQuantity ?? 0,
       isConsumable: e.isConsumable ?? false,
-      notes: e.notes ?? '',
-      scaling_enabled_: !!e.scalingRule,
-      perGuests: e.scalingRule?.perGuests ?? 25,
-      minQuantity: e.scalingRule?.minQuantity ?? 1,
-      maxQuantity: e.scalingRule?.maxQuantity ?? null
+      notes: e.notes ?? ''
     })
   }
 
@@ -351,7 +334,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected onAdd(): void {
-    this.router.navigate([...this.equipmentBasePath, 'add'])
+    this.router.navigate(['/inventory/equipment/add'])
   }
 
   protected onRowClick(item: Equipment, event: MouseEvent): void {
@@ -407,13 +390,6 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     try {
       const v = this.editForm_.getRawValue()
       const now = Date.now()
-      const scalingRule: ScalingRule | undefined = v.scaling_enabled_
-        ? {
-            perGuests: Number(v.perGuests),
-            minQuantity: Number(v.minQuantity),
-            maxQuantity: v.maxQuantity != null && v.maxQuantity !== '' ? Number(v.maxQuantity) : undefined
-          }
-        : undefined
       const updated: Equipment = {
         ...equipment,
         nameHebrew: v.nameHebrew,
@@ -421,7 +397,6 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
         ownedQuantity: Number(v.ownedQuantity),
         isConsumable: !!v.isConsumable,
         notes: v.notes ?? undefined,
-        scalingRule: scalingRule,
         updatedAt: now
       }
       await this.equipmentData.updateEquipment(updated)
@@ -524,5 +499,19 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       }
     }
     this.selection.clear()
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

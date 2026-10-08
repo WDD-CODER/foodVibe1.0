@@ -11,7 +11,12 @@
       (keydown)="onSearchKeydown($event)"
       (keydown.tab)="onSearchTab($event)"
       [placeholder]="'search_product_or_recipe' | translatePipe"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
     />
+    <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" />
   </div>
 
   @if (showResults_() && searchQuery_().trim().length > 0) {

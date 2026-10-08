@@ -37,7 +37,6 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | add-supplier-flow.service.ts | Add-supplier from product form | AddSupplierFlowService |
 | add-equipment-modal.service.ts | Add-equipment modal | AddEquipmentModalService |
 | auth-modal.service.ts | Sign-in / auth modal | AuthModalService |
-| supplier-modal.service.ts | Supplier picker modal | SupplierModalService |
 | quick-add-product-modal.service.ts | Quick-add product modal | QuickAddProductModalService |
 | confirm-modal.service.ts | Confirm dialog | ConfirmModalService, ConfirmModalOptions |
 | global-specific-modal.service.ts | Global vs specific choice | GlobalSpecificModalService |

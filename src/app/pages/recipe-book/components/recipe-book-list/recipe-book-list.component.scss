@@ -1,5 +1,4 @@
 @layer components.recipe-book-list {
-
   :host {
     display: block;
   }
@@ -445,7 +444,7 @@
   }
 
   .history-overlay-panel {
-    max-height: 90vh;
+    max-height: 90dvh;
 
     overflow: auto;
   }

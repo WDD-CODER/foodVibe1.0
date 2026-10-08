@@ -17,15 +17,14 @@ import { BulkEditableField } from './bulk-editable-field.model'
     trigger('slideInOut', [
       transition(':enter', [
         style({ height: '0', opacity: 0, overflow: 'hidden' }),
-        animate('300ms cubic-bezier(0.22, 1, 0.36, 1)',
-          style({ height: '*', opacity: 1, overflow: 'hidden' }))
+        animate('300ms cubic-bezier(0.22, 1, 0.36, 1)', style({ height: '*', opacity: 1, overflow: 'hidden' }))
       ]),
       transition(':leave', [
         style({ overflow: 'hidden' }),
         animate('200ms ease-in', style({ height: '0', opacity: 0 }))
       ])
     ])
-  ],
+  ]
 })
 export class SelectionBarComponent {
   selectionState = input.required<ListSelectionState>()
@@ -37,24 +36,24 @@ export class SelectionBarComponent {
 
   protected activeField_ = signal<BulkEditableField | null>(null)
 
-  protected fieldOptions_ = computed(() =>
-    this.editableFields().map(f => ({ value: f.key, label: f.label }))
-  )
+  protected fieldOptions_ = computed(() => this.editableFields().map((f) => ({ value: f.key, label: f.label })))
 
   protected onFieldSelect(key: string): void {
-    this.activeField_.set(this.editableFields().find(f => f.key === key) ?? null)
+    this.activeField_.set(this.editableFields().find((f) => f.key === key) ?? null)
   }
 
   protected onValueSelect(value: string): void {
     const field = this.activeField_()
     if (!field) return
+    // Reset first: if a parent handler throws, the bar must not stay stuck on this field.
+    this.activeField_.set(null)
     if (value === field.addNewValue) {
       this.addNewRequested.emit({ field: field.key })
-    } else {
-      this.bulkEdit.emit({ field: field.key, value, ids: Array.from(this.selectionState().selectedIds()) })
-      this.selectionState().clear()
+      return
     }
-    this.activeField_.set(null)
+    const ids = Array.from(this.selectionState().selectedIds())
+    this.selectionState().clear()
+    this.bulkEdit.emit({ field: field.key, value, ids })
   }
 
   protected onCancelEdit(): void {

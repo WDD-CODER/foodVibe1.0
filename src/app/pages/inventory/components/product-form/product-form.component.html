@@ -23,6 +23,10 @@
           [placeholder]="'product_name_example_placeholder' | translatePipe"
           [class.c-input--invalid]="validationErrors_()['productName']"
           [attr.aria-invalid]="validationErrors_()['productName'] ? true : null"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
         />
         @if (
           productForm_.get('productName')?.invalid &&
@@ -162,14 +166,9 @@
           </div>
 
           <div class="price-override-wrapper">
-            <span class="math-text">{{ 'special_purchase_price' | translatePipe }}</span>
-
-            <label class="price-override-label">
-              <input
-                type="checkbox"
-                formControlName="show_special_price_"
-                [attr.aria-label]="'special_purchase_price' | translatePipe"
-              />
+            <label class="c-toggle-chip">
+              <input type="checkbox" formControlName="show_special_price_" />
+              <span>{{ 'special_purchase_price' | translatePipe }}</span>
             </label>
             @if (option.get('show_special_price_')?.value) {
               <input
