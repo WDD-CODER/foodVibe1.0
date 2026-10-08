@@ -121,51 +121,47 @@
         @if (allMenuTypes_().length > 0) {
           <div class="list-stack">
             @for (def of allMenuTypes_(); track def.key) {
-              @let editable = canEditTerm('menuType', def.key);
               <div class="list-item menu-type-row">
-                <div class="menu-type-name">
-                  @if (renamingMenuTypeKey_() === def.key) {
-                    <input
-                      #menuTypeRenameInput
-                      type="text"
-                      class="menu-type-key-input"
-                      [value]="def.key"
-                      (blur)="onMenuTypeRenameDone(def.key, $any($event.target).value)"
-                      (keydown.enter)="$any($event.target).blur()"
-                      (keydown.escape)="onMenuTypeRenameCancel()"
-                    />
-                  } @else if (editable) {
-                    <button
-                      type="button"
-                      class="label-pill menu-type-key"
-                      [class.is-active]="menuTypeMenuKey_() === def.key"
-                      aria-haspopup="menu"
-                      [attr.aria-expanded]="menuTypeMenuKey_() === def.key"
-                      (click)="openMenuTypeMenu(def.key, $event)"
-                    >
-                      {{ def.key }}
-                    </button>
-                  } @else {
-                    <span class="label-pill menu-type-key is-locked">
-                      {{ def.key }}
-                      <span
-                        class="unit-default-badge"
-                        [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
-                        [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-                      >
-                        <lucide-icon name="lock" [size]="12"></lucide-icon>
-                      </span>
-                    </span>
-                  }
-                </div>
-                <!-- Plan 340: all dish fields in a fixed order; tapping one toggles and saves. -->
+                @if (renamingMenuTypeKey_() === def.key) {
+                  <input
+                    #renameInput
+                    type="text"
+                    class="menu-type-key-input"
+                    [value]="def.key"
+                    (blur)="onMenuTypeNameBlur(def.key, renameInput.value)"
+                    (keydown.enter)="renameInput.blur()"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                  />
+                } @else if (canEditTerm('menuType', def.key)) {
+                  <button
+                    type="button"
+                    class="c-tap-chip menu-type-name"
+                    [attr.aria-expanded]="isMenuOpenFor(def.key, 'menuType')"
+                    (click)="openItemMenu($event, def.key, 'menuType')"
+                  >
+                    {{ def.key }}
+                  </button>
+                } @else {
+                  <span class="c-tap-chip is-locked menu-type-name">
+                    {{ def.key }}
+                    <lucide-icon
+                      name="lock"
+                      [size]="14"
+                      [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
+                      [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+                    ></lucide-icon>
+                  </span>
+                }
                 <div class="c-toggle-chip-group menu-type-fields">
                   @for (f of ALL_DISH_FIELDS; track f.key) {
                     <label class="c-toggle-chip">
                       <input
                         type="checkbox"
                         [checked]="def.fields.includes(f.key)"
-                        [disabled]="!isLoggedIn() || !editable"
+                        [disabled]="!isLoggedIn() || !canEditTerm('menuType', def.key)"
                         (change)="onToggleMenuTypeField(def.key, f.key)"
                       />
                       <span>{{ f.labelKey | translatePipe }}</span>
@@ -186,29 +182,31 @@
     <app-user-management id="mm-sec-user" [style.order]="orderFor('mm-sec-user')" />
   </div>
 
-  <!-- Plan 340: tap-to-act menus, opened next to the tapped pill. -->
-  <app-row-actions-menu #itemMenu [showTrigger]="false">
-    @if (itemMenuTarget_()?.type !== 'unit') {
-      <button type="button" class="c-btn-ghost--sm ram-action" (click)="onItemMenuEdit()">
-        <lucide-icon name="pencil" [size]="14"></lucide-icon>
-        {{ 'edit' | translatePipe }}
+  <!-- One tap menu for every chip on this page. It sits outside the cards because their
+       backdrop-filter would trap a position:fixed popover. -->
+  <app-row-actions-menu [showTrigger]="false" (closed)="menuTarget_.set(null)">
+    @if (menuTarget_(); as target) {
+      @if (target.type !== 'unit') {
+        <button
+          type="button"
+          class="c-icon-btn"
+          (click)="onMenuEdit(target)"
+          [attr.aria-label]="'edit' | translatePipe"
+          [attr.title]="'edit' | translatePipe"
+        >
+          <lucide-icon name="pencil" [size]="18"></lucide-icon>
+        </button>
+      }
+      <button
+        type="button"
+        class="c-icon-btn danger"
+        (click)="onMenuDelete(target)"
+        [attr.aria-label]="'delete' | translatePipe"
+        [attr.title]="'delete' | translatePipe"
+      >
+        <lucide-icon name="trash-2" [size]="18"></lucide-icon>
       </button>
     }
-    <button type="button" class="c-btn-ghost--sm ram-action ram-action--danger" (click)="onItemMenuDelete()">
-      <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-      {{ 'delete' | translatePipe }}
-    </button>
-  </app-row-actions-menu>
-
-  <app-row-actions-menu #menuTypeMenu [showTrigger]="false">
-    <button type="button" class="c-btn-ghost--sm ram-action" (click)="onMenuTypeMenuEdit()">
-      <lucide-icon name="pencil" [size]="14"></lucide-icon>
-      {{ 'edit' | translatePipe }}
-    </button>
-    <button type="button" class="c-btn-ghost--sm ram-action ram-action--danger" (click)="onMenuTypeMenuDelete()">
-      <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-      {{ 'delete' | translatePipe }}
-    </button>
   </app-row-actions-menu>
 </div>
 
@@ -237,6 +235,10 @@
         type="text"
         [placeholder]="('add' | translatePipe) + ' ' + (title | translatePipe) + '...'"
         (keyup.enter)="onAddMetadata(newInput.value, type, newInput)"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
       />
 
       <button
@@ -251,44 +253,32 @@
 
     <div class="list-container">
       @if (items.length > 0) {
-        <!-- Plan 340: every type is a compact pill; tapping an editable one opens the edit/delete menu. -->
-        <div class="label-pool">
+        <div class="c-tap-chip-group">
           @for (item of items; track item) {
-            @let locked = (type === 'unit' && isSystemUnit(item)) || !canEditTerm(type, item);
-            @if (locked) {
-              <span class="label-pill is-locked" [class.label-pill--allergen]="type === 'allergen'">
+            @if (lockReasonKey(type, item); as lockKey) {
+              <span class="c-tap-chip is-locked">
                 @if (type === 'label') {
-                  <span class="label-color-dot" [style.background-color]="getLabelColor(item)"></span>
+                  <span class="c-tap-chip__dot" [style.background-color]="getLabelColor(item)"></span>
                 }
-                <span>{{ item | translatePipe }}</span>
-                <span
-                  class="unit-default-badge"
-                  [attr.title]="
-                    (type === 'unit' && isSystemUnit(item) ? 'unit_default_unremovable' : 'taxonomy_shared_admin_only')
-                      | translatePipe
-                  "
-                  [attr.aria-label]="
-                    (type === 'unit' && isSystemUnit(item) ? 'unit_default_unremovable' : 'taxonomy_shared_admin_only')
-                      | translatePipe
-                  "
-                >
-                  <lucide-icon name="lock" [size]="12"></lucide-icon>
-                </span>
+                {{ item | translatePipe }}
+                <lucide-icon
+                  name="lock"
+                  [size]="14"
+                  [attr.title]="lockKey | translatePipe"
+                  [attr.aria-label]="lockKey | translatePipe"
+                ></lucide-icon>
               </span>
             } @else {
               <button
                 type="button"
-                class="label-pill"
-                [class.label-pill--allergen]="type === 'allergen'"
-                [class.is-active]="isItemMenuFor(item, type)"
-                aria-haspopup="menu"
-                [attr.aria-expanded]="isItemMenuFor(item, type)"
-                (click)="openItemMenu(item, type, $event)"
+                class="c-tap-chip"
+                [attr.aria-expanded]="isMenuOpenFor(item, type)"
+                (click)="openItemMenu($event, item, type)"
               >
                 @if (type === 'label') {
-                  <span class="label-color-dot" [style.background-color]="getLabelColor(item)"></span>
+                  <span class="c-tap-chip__dot" [style.background-color]="getLabelColor(item)"></span>
                 }
-                <span>{{ item | translatePipe }}</span>
+                {{ item | translatePipe }}
               </button>
             }
           }

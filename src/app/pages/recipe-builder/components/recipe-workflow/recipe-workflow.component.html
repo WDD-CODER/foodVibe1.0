@@ -89,6 +89,10 @@
                       SelectOnFocus
                       (blur)="exitLaborTimeEdit(group)"
                       (keydown.enter)="exitLaborTimeEdit(group); $event.preventDefault()"
+                      autocomplete="off"
+                      autocorrect="off"
+                      autocapitalize="off"
+                      spellcheck="false"
                     />
                   } @else {
                     <span
@@ -132,6 +136,10 @@
                       SelectOnFocus
                       (blur)="exitCookTimeEdit(group)"
                       (keydown.enter)="exitCookTimeEdit(group); $event.preventDefault()"
+                      autocomplete="off"
+                      autocorrect="off"
+                      autocapitalize="off"
+                      spellcheck="false"
                     />
                   } @else {
                     <span
@@ -158,7 +166,6 @@
         {{ 'add_prep_stage' | translatePipe }}
       </button>
     </div>
-
   } @else {
     <div class="prep-flat-grid" formArrayName="workflow_items">
       <div class="grid-header prep-grid-header">
@@ -191,6 +198,7 @@
                   (preparationSelected)="onPreparationSelected($event, group)"
                   (preparationAdded)="onPreparationSelected($event, group)"
                   (focusDone)="focusRowDone.emit()"
+                  (addNewRowRequested)="addItem.emit()"
                 >
                 </app-preparation-search>
               } @else {

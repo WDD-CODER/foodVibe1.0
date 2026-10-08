@@ -104,11 +104,11 @@ As an admin, I want the "only me / everyone" prompt to describe exactly what I'm
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Service API, `buildTexts`, and spec; dictionary keys (`master-push.service.ts`, spec).
-- [ ] A2: Update recipe and dish call sites (cook-view, recipe-book, recipe-builder).
-- [ ] A3: Update product call sites (product-form, inventory), with the product-delete warning.
-- [ ] A4: Metadata `resolvePushScope(type, action)`.
-- [ ] A5: Single dialog on admin delete; `confirm_delete` key. Build, specs. Update session-state.
+- [x] A1: Service API, `buildTexts`, and spec; dictionary keys (`master-push.service.ts`, spec).
+- [x] A2: Update recipe and dish call sites (cook-view, recipe-book, recipe-builder).
+- [x] A3: Update product call sites (product-form, inventory), with the product-delete warning.
+- [x] A4: Metadata `resolvePushScope(type, action)`.
+- [x] A5: Single dialog on admin delete; `confirm_delete` key. Build, specs. Update session-state.
 
 ## Technical Considerations
 

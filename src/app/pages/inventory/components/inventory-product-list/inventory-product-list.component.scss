@@ -89,45 +89,6 @@
     }
   }
 
-  .control-nav {
-    display: flex;
-    flex-direction: column;
-
-    gap: 0.375rem;
-    margin-block-end: 1rem;
-    padding-block-end: 1rem;
-
-    border-block-end: 1px solid var(--border-default);
-  }
-
-  .control-nav-link {
-    display: block;
-
-    padding-inline: 0.75rem;
-    padding-block: 0.5rem;
-
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-
-    border-radius: var(--radius-md);
-
-    transition:
-      background 0.2s var(--ease-smooth),
-      color 0.2s var(--ease-smooth);
-
-    &:hover {
-      background: var(--bg-glass-hover);
-      color: var(--color-text-main);
-    }
-
-    &.active {
-      background: var(--color-primary-soft);
-      color: var(--color-primary-hover);
-    }
-  }
-
   // ── Quick toggle chips in sidebar — tint only the icon; a selected chip's
   // icon follows the chip's on-primary text color ─────────────────────────
   .quick-toggles {

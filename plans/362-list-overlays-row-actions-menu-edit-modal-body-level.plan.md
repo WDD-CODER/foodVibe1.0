@@ -58,13 +58,13 @@ As a chef on a tablet, I want the row actions menu and the edit window to open w
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `RowActionsMenuComponent` renders `.ram-popover` through CDK Overlay (`@angular/cdk` 19 is already installed): a `TemplatePortal` attached to a body-level overlay, positioned with `flexibleConnectedTo(triggerOrAnchor)` and fallback positions (above, below, start-aligned, end-aligned), `withPush(true)` to keep it in the viewport, `hasBackdrop:true` with a transparent backdrop, close on backdrop click and Escape. Keep the public API identical, including `open(anchor)` / `close()` from plan 340, plus the ⋮ trigger and projected content.
-- [ ] Delete the manual `popoverPos` math, `.ram-backdrop` and the `.c-list-row` height lookup. Keep the popover's look (move its styles to a global-safe class, because overlay content renders outside the component's host: use `ViewEncapsulation.None` on that class or `:host ::ng-deep` scoped by a unique `panelClass`).
-- [ ] `list-shell.component.html`: move `<ng-content select="[shell-modal]">` outside `.list-container`, as a sibling after it, inside the component root. Wrap the template in a root element if needed, so no ancestor has `container-type`, `transform`, `filter`, `backdrop-filter` or `contain`. Update the existing comment to explain both containing-block traps.
-- [ ] Add a gotcha entry to `docs/brain/gotchas.md`: "`position:fixed` is relative to the nearest ancestor with `transform` / `filter` / `backdrop-filter` / `container-type` / `contain`: render overlays via CDK Overlay or outside those ancestors."
+- [x] `RowActionsMenuComponent` renders `.ram-popover` through CDK Overlay (`@angular/cdk` 19 is already installed): a `TemplatePortal` attached to a body-level overlay, positioned with `flexibleConnectedTo(triggerOrAnchor)` and fallback positions (above, below, start-aligned, end-aligned), `withPush(true)` to keep it in the viewport, `hasBackdrop:true` with a transparent backdrop, close on backdrop click and Escape. Keep the public API identical, including `open(anchor)` / `close()` from plan 340, plus the ⋮ trigger and projected content.
+- [x] Delete the manual `popoverPos` math, `.ram-backdrop` and the `.c-list-row` height lookup. Keep the popover's look (move its styles to a global-safe class, because overlay content renders outside the component's host: use `ViewEncapsulation.None` on that class or `:host ::ng-deep` scoped by a unique `panelClass`).
+- [x] `list-shell.component.html`: move `<ng-content select="[shell-modal]">` outside `.list-container`, as a sibling after it, inside the component root. Wrap the template in a root element if needed, so no ancestor has `container-type`, `transform`, `filter`, `backdrop-filter` or `contain`. Update the existing comment to explain both containing-block traps.
+- [x] Add a gotcha entry to `docs/brain/gotchas.md`: "`position:fixed` is relative to the nearest ancestor with `transform` / `filter` / `backdrop-filter` / `container-type` / `contain`: render overlays via CDK Overlay or outside those ancestors."
 
 ### Should Have (P1)
-- [ ] The overlay repositions on scroll (`scrollStrategy: reposition`) and closes on route change.
+- [x] The overlay repositions on scroll (`scrollStrategy: reposition`) and closes on route change.
 
 ### Nice to Have (P2)
 - None.
@@ -76,9 +76,9 @@ As a chef on a tablet, I want the row actions menu and the edit window to open w
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Move `RowActionsMenuComponent` to CDK Overlay, with a spec (opens, closes on backdrop, `open(anchor)` works) (`shared/row-actions-menu/**`).
-- [ ] A2: Move the list-shell `[shell-modal]` slot out of `.list-container` (`shared/list-shell/**`).
-- [ ] A3: Gotcha entry (`docs/brain/gotchas.md`).
+- [x] A1: Move `RowActionsMenuComponent` to CDK Overlay, with a spec (opens, closes on backdrop, `open(anchor)` works) (`shared/row-actions-menu/**`).
+- [x] A2: Move the list-shell `[shell-modal]` slot out of `.list-container` (`shared/list-shell/**`).
+- [x] A3: Gotcha entry (`docs/brain/gotchas.md`).
 - [ ] A4: Build, specs. Check inventory, recipe-book, suppliers and equipment at 360px, 800px and 1280px. Update session-state.
 
 ## Technical Considerations

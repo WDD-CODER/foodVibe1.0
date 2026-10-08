@@ -1,0 +1,12 @@
+<button
+  type="button"
+  class="input-clear-btn"
+  [class.is-visible]="visible()"
+  [attr.aria-hidden]="visible() ? null : 'true'"
+  [attr.tabindex]="visible() ? null : -1"
+  [attr.aria-label]="'clear_search' | translatePipe"
+  (mousedown)="$event.preventDefault()"
+  (click)="onClick()"
+>
+  <lucide-icon name="x" [size]="16"></lucide-icon>
+</button>

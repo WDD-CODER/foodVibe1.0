@@ -16,13 +16,23 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { useListState, StringParam } from 'src/app/core/utils/list-state.util'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 
 @Component({
   selector: 'app-menu-library-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent, EmptyStateComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    CustomSelectComponent,
+    EmptyStateComponent,
+    InputClearComponent
+  ],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -193,13 +203,13 @@ export class MenuLibraryListComponent {
   private computeEventRevenue(event: MenuEvent): number {
     let sum = 0
     const guestCount = event.guestCount ?? 0
-    ;(event.sections || []).forEach((section) => {
-      ;(section.items || []).forEach((item) => {
+    for (const section of event.sections || []) {
+      for (const item of section.items || []) {
         const price = item.sellPrice ?? 0
         const portions = item.derivedPortions ?? guestCount * (item.servingPortions ?? 1)
         sum += price * portions
-      })
-    })
+      }
+    }
     return sum
   }
 
@@ -239,5 +249,19 @@ export class MenuLibraryListComponent {
     if (input?.showPicker) {
       input.showPicker()
     }
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

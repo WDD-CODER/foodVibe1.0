@@ -19,6 +19,7 @@ import { ClickOutSideDirective } from '../../core/directives/click-out-side'
 import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-dropdown.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
+import { InputClearComponent } from '../input-clear/input-clear.component'
 
 export interface CustomMultiSelectOption {
   value: string
@@ -30,7 +31,14 @@ export interface CustomMultiSelectOption {
   selector: 'app-custom-multi-select',
   standalone: true,
   host: { tabIndex: '-1' },
-  imports: [CommonModule, TranslatePipe, ClickOutSideDirective, ScrollableDropdownComponent, LucideAngularModule],
+  imports: [
+    CommonModule,
+    TranslatePipe,
+    ClickOutSideDirective,
+    ScrollableDropdownComponent,
+    LucideAngularModule,
+    InputClearComponent
+  ],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomMultiSelectComponent, multi: true }],
   templateUrl: './custom-multi-select.component.html',
   styleUrl: './custom-multi-select.component.scss',
@@ -248,6 +256,13 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     }
     this.addOption(opt.value)
     // Keep dropdown open for multi-select
+  }
+
+  /** Search clear (X): empty the filter, keep the list open with every option (plan 364). */
+  protected onClearSearch(): void {
+    this.searchQuery_.set('')
+    this.highlightedIndex.set(0)
+    this.searchInputRef?.nativeElement?.focus()
   }
 
   protected onSearchInput(q: string): void {

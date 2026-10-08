@@ -36,11 +36,9 @@ describe('DashboardHeaderComponent', () => {
     expect(component).toBeTruthy()
   })
 
-  it('should emit overview when back button is clicked', () => {
+  it('should not render a back button (the tab-chips "dashboard" chip replaces it, plan 367)', () => {
     fixture.componentRef.setInput('activeTab', 'metadata')
     fixture.detectChanges()
-    spyOn(component.tabChange, 'emit')
-    fixture.debugElement.query(By.css('[data-testid="btn-back-to-dashboard"]')).nativeElement.click()
-    expect(component.tabChange.emit).toHaveBeenCalledWith('overview')
+    expect(fixture.debugElement.query(By.css('button'))).toBeNull()
   })
 })

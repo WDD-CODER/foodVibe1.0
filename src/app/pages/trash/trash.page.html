@@ -1,14 +1,5 @@
 <div class="trash-page" dir="rtl">
   <header class="trash-header">
-    <button
-      type="button"
-      class="header-btn header-btn--back"
-      data-testid="btn-back-to-dashboard-trash"
-      (click)="backToDashboard()"
-    >
-      <lucide-icon name="layout-dashboard" size="16"></lucide-icon>
-      {{ 'dashboard' | translatePipe }}
-    </button>
     <h1>{{ 'trash' | translatePipe }}</h1>
     <button type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
       {{ loading() ? ('pending' | translatePipe) : ('refresh' | translatePipe) }}
