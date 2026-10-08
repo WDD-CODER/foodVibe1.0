@@ -81,24 +81,24 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `src/app/shared/column-carousel/`:
+- [x] `src/app/shared/column-carousel/`:
   - `ColumnCarouselGroupDirective` (`[columnCarouselGroup]`) on the list container. It provides a group state (`index_` signal, `count_`, `next()`, `prev()`, `go(i)`) via DI, plus optional `[(columnCarouselIndex)]` for URL or state persistence.
   - `ColumnCarouselHeaderComponent` (`app-column-carousel-header`) and `ColumnCarouselCellComponent` (`app-column-carousel-cell`) both inject the group. Slides are marked with `[columnSlide]` (`label` input), queried with the `contentChildren()` signal API (no `@ContentChildren`).
   - Both have prev/next arrows (≥32px tap area, visible), swipe (pointer events, ~40px threshold, horizontal-only, no vertical scroll hijack), and RTL-aware direction.
   - The header shows the active slide label plus small position dots.
   - Animated transition, respecting `prefers-reduced-motion`.
   - All styles inside the component, including the mobile background that each list currently repeats.
-- [ ] Migrate the 4 lists. Remove `carouselHeaderIndex_` and its wiring, and delete each list's duplicated `@media 768 … app-cell-carousel` block.
-- [ ] Delete `shared/carousel-header` and `shared/cell-carousel`.
-- [ ] Header arrows float: small round buttons (28px, glass background, shadow) overlaid at the cell's top edge (`inset-block-start: -0.5rem`) or floating over the label edges, so the column label gets the full cell width (`white-space:nowrap; text-overflow:ellipsis`). The host must not clip them (no `overflow:hidden` on the carousel host; check `.table-area` clipping).
-- [ ] Cell background: the carousel cell inherits the row's background (`background: inherit` or transparent), with no white fill that differs from the row color. Delete the per-list `@media 768 … app-cell-carousel { background }` blocks.
-- [ ] Recipe-book spacing on ≤768px:
+- [x] Migrate the 4 lists. Remove `carouselHeaderIndex_` and its wiring, and delete each list's duplicated `@media 768 … app-cell-carousel` block.
+- [x] Delete `shared/carousel-header` and `shared/cell-carousel`.
+- [x] Header arrows float: small round buttons (28px, glass background, shadow) overlaid at the cell's top edge (`inset-block-start: -0.5rem`) or floating over the label edges, so the column label gets the full cell width (`white-space:nowrap; text-overflow:ellipsis`). The host must not clip them (no `overflow:hidden` on the carousel host; check `.table-area` clipping).
+- [x] Cell background: the carousel cell inherits the row's background (`background: inherit` or transparent), with no white fill that differs from the row color. Delete the per-list `@media 768 … app-cell-carousel { background }` blocks.
+- [x] Recipe-book spacing on ≤768px:
   - The carousel column goes from `1fr` to ~`1.4fr`, and the type column shrinks (`0.7fr` → `0.5fr`) in the mobile grid template `'2fr 0.7fr 1fr 0.8fr 40px 28px'`.
   - Carousel cell `padding-inline` drops to `.25rem`.
   - Override `.c-list-body-cell` padding for the carousel cell only, via a class on that cell in recipe-book scss; don't edit the global engine.
 
 ### Should Have (P1)
-- [ ] Keyboard: the left/right arrow keys on a focused header move slides.
+- [x] Keyboard: the left/right arrow keys on a focused header move slides.
 
 ### Nice to Have (P2)
 - None.
@@ -115,7 +115,7 @@ touching any milestone.
 - [x] A2: Migrate recipe-book, including the spacing changes (`recipe-book-list/**`).
 - [x] A3: Migrate inventory, suppliers and equipment (`inventory-product-list/**`, `supplier-list/**`, `equipment-list/**`).
 - [x] A4: Delete the old components; `rg` for leftovers (`shared/carousel-header/**`, `shared/cell-carousel/**`).
-- [ ] A5: Build and run specs. Check at 360px, 768px and desktop (the carousel is hidden on desktop as today). Update the session-state file.
+- [x] A5: Build and run specs. Check at 360px, 768px and desktop (the carousel is hidden on desktop as today). Update the session-state file.
 
 ## Technical Considerations
 

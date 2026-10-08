@@ -66,22 +66,22 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `src/app/shared/scroll-rail/scroll-rail.component.{ts,html,scss}` (`app-scroll-rail`):
+- [x] `src/app/shared/scroll-rail/scroll-rail.component.{ts,html,scss}` (`app-scroll-rail`):
   - Projects content into a scroller (`overflow-x:auto`, `scroll-snap-type:x proximity`, hidden scrollbar, `overscroll-behavior-x:contain`).
   - Inputs: `snap` (`'none'|'proximity'|'mandatory'`, default `proximity`), `arrows` (`'auto'|'always'|'never'`, default `auto`), `step` (px or `'page'`, default `page` = 80% of the width).
   - Arrow visibility from `canPrev_` / `canNext_` signals, updated on scroll, resize (`ResizeObserver`) and content change. RTL-safe: normalize `scrollLeft` for `dir=rtl` (negative `scrollLeft` in Chrome, Firefox and Safari).
   - Edge fade mask only on the side that can scroll.
   - Arrows are buttons with aria-labels; keyboard focusable.
-- [ ] Migrations:
+- [x] Migrations:
   - Metadata jump-nav → `<app-scroll-rail>`. Delete `canScrollNavPrev_`, `canScrollNavNext_`, `scrollJumpNav` and their arrow markup and styles.
   - Tab chips → wrap the chip list in `<app-scroll-rail snap="proximity">`. Keep `.c-tab-chips` for spacing and centering on wide screens (centered when it fits).
   - menu-dish-row `.dish-data` → `<app-scroll-rail snap="mandatory" arrows="auto">`.
-- [ ] Unit spec: arrows hidden when the content fits, shown when it overflows, RTL normalization.
-- [ ] Fix the tab-chips overflow bug: `.c-tab-chips` keeps `justify-content:center` while overflowing on phone, which pushes the first chip off-screen where it can't be reached. Use `justify-content: safe center` (fallback `flex-start` at ≤767px).
-- [ ] Metadata jump-nav (desktop and below): restyle it on the rail so the section chips are clearly readable and the arrows are visible. It's the "options carousel" Dandan flagged as looking poor.
+- [x] Unit spec: arrows hidden when the content fits, shown when it overflows, RTL normalization.
+- [x] Fix the tab-chips overflow bug: `.c-tab-chips` keeps `justify-content:center` while overflowing on phone, which pushes the first chip off-screen where it can't be reached. Use `justify-content: safe center` (fallback `flex-start` at ≤767px).
+- [x] Metadata jump-nav (desktop and below): restyle it on the rail so the section chips are clearly readable and the arrows are visible. It's the "options carousel" Dandan flagged as looking poor.
 
 ### Should Have (P1)
-- [ ] Desktop: vertical mouse wheel over the rail scrolls horizontally only when the content overflows and the shift key isn't held.
+- [x] Desktop: vertical mouse wheel over the rail scrolls horizontally only when the content overflows and the shift key isn't held.
 
 ### Nice to Have (P2)
 - None.
@@ -97,7 +97,7 @@ touching any milestone.
 - [x] A2: Migrate the metadata jump-nav; delete the old logic (`metadata-manager.page.component.*`).
 - [x] A3: Migrate tab chips; adjust the `.c-tab-chips` rules (`core/components/tab-chips/**`, `src/styles.scss`).
 - [x] A4: Migrate the dish data strip (`menu-dish-row/**`).
-- [ ] A5: Build and run specs. Check at 360px and 1280px in RTL. Update the session-state file.
+- [x] A5: Build and run specs. Check at 360px and 1280px in RTL. Update the session-state file.
 
 ## Technical Considerations
 
