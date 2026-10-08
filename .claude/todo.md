@@ -160,9 +160,9 @@
 - [ ] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
 
 ### Plan 352 — Page header, part 1: `<app-page-header>` and the list-shell pages (`plans/352-page-header-part-1-app-page-header-list-shell.plan.md`)
-- [ ] A1: `PageHeaderComponent` plus a spec (renders title, count, back; slots project) (`src/app/shared/page-header/**`).
-- [ ] A2: list-shell uses it; delete the old header grid styles (`src/app/shared/list-shell/**`).
-- [ ] A3: Clean the 4 pages' title markup and styles (`inventory-product-list/**`, `recipe-book-list/**`, `supplier-list/**`, `equipment-list/**`).
+- [x] A1: `PageHeaderComponent` plus a spec (renders title, count, back; slots project) (`src/app/shared/page-header/**`).
+- [x] A2: list-shell uses it; delete the old header grid styles (`src/app/shared/list-shell/**`).
+- [x] A3: Clean the 4 pages' title markup and styles (`inventory-product-list/**`, `recipe-book-list/**`, `supplier-list/**`, `equipment-list/**`).
 - [ ] A4: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file.
 
 ### Plan 353 — Page header, part 2: venues, menu library, dashboard, trash (`plans/353-page-header-part-2-venues-menu-library-dashboard-trash.plan.md`)
