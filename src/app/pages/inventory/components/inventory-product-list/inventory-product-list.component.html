@@ -2,7 +2,7 @@
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="onPanelToggled()"
   [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1fr 0.8fr 0.8fr 40px 28px'"
+  [mobileGridTemplate]="'2fr 1.8fr 0.8fr 40px 28px'"
   [dir]="'rtl'"
   [resultCount]="filteredProducts_().length"
   [resultTotal]="kitchenStateService.products_().length"
@@ -100,8 +100,10 @@
       >
         {{ 'supplier' | translatePipe }}
       </div>
+      <div class="col-unit c-grid-header-cell" carouselHeaderColumn label="unit" role="presentation">
+        {{ 'unit' | translatePipe }}
+      </div>
     </app-carousel-header>
-    <div class="col-unit c-grid-header-cell" role="columnheader">{{ 'unit' | translatePipe }}</div>
     <div class="col-price c-grid-header-cell" role="columnheader">{{ 'price' | translatePipe }}</div>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
@@ -205,8 +207,10 @@
           <div class="col-supplier c-list-body-cell" cellCarouselSlide [label]="'supplier' | translatePipe">
             {{ row.supplierNames || '—' }}
           </div>
+          <div class="col-unit c-list-body-cell" cellCarouselSlide [label]="'unit' | translatePipe">
+            {{ row.product.baseUnit | translatePipe }}
+          </div>
         </app-cell-carousel>
-        <div class="col-unit c-list-body-cell" role="cell">{{ row.product.baseUnit | translatePipe }}</div>
         <div class="col-price col-price-readonly c-list-body-cell" role="cell">
           <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
           <span class="price-suffix">₪</span>
@@ -271,14 +275,6 @@
     }
   </ng-container>
   <ng-container shell-filters>
-    <nav class="control-nav" aria-label="Inventory and logistics">
-      <a routerLink="/inventory/list" routerLinkActive="active" class="control-nav-link">{{
-        'product_list' | translatePipe
-      }}</a>
-      <a routerLink="/inventory/equipment" routerLinkActive="active" class="control-nav-link">{{
-        'logistics' | translatePipe
-      }}</a>
-    </nav>
     <div class="c-filter-section">
       <div class="c-toggle-chip-group quick-toggles">
         <label class="c-toggle-chip">

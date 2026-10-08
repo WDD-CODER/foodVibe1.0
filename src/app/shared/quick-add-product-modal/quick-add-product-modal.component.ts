@@ -113,7 +113,7 @@ export class QuickAddProductModalComponent {
   /** Accepts either an ElementRef or a native HTMLElement (template ref). */
   protected advanceFocus(ref: ElementRef<HTMLElement> | HTMLElement | null | undefined): void {
     const el = ref && 'nativeElement' in ref ? ref.nativeElement : ref
-    ;(el as HTMLElement)?.focus()
+    el?.focus()
   }
 
   /** After select change: advance focus to next field. */

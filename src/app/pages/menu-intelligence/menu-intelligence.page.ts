@@ -47,6 +47,7 @@ import type { ExportPayload } from 'src/app/core/utils/export.util'
 import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-preview.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { MenuExportSheetComponent } from './components/menu-export-sheet/menu-export-sheet.component'
 import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
@@ -84,6 +85,7 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
     CustomSelectComponent,
     ExportPreviewComponent,
     MenuDishRowComponent,
+    MenuExportSheetComponent,
     VenueLinkChipComponent,
     InputClearComponent
   ],
@@ -121,9 +123,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly products_ = this.kitchenState.products_
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
-  protected readonly showExport_ = signal(false)
-  protected readonly toolbarOpen_ = signal(false)
-  protected readonly menuFabExpanded_ = signal(false)
+  /** "צ'קליסט והדפסות" top sheet, toggled from the hero FAB (plan 344). */
+  protected readonly exportSheetOpen_ = signal(false)
   /** Export preview (View before export). */
   protected readonly exportPreviewPayload_ = signal<ExportPayload | null>(null)
   private exportPreviewType_: 'menu-info' | 'menu-shopping-list' | 'menu-checklist' | 'menu-all' | null = null
@@ -274,7 +275,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.heroFab.setPageActions(
       [
         { labelKey: 'ai_menu_open', icon: 'sparkles', run: () => this.openAiMenuModal() },
-        { labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.openToolbar() }
+        { labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.toggleExportSheet() }
       ],
       'replace'
     )
@@ -296,11 +297,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Close export toolbar and all sub-modals so state is clean when user navigates away. */
   private closeAllExportOverlays(): void {
-    this.showExport_.set(false)
-    this.toolbarOpen_.set(false)
-    this.menuFabExpanded_.set(false)
-    this.viewExportModal_.set(null)
-    this.exportChecklistDropdownOpen_.set(false)
+    this.exportSheetOpen_.set(false)
     this.exportPreviewPayload_.set(null)
     this.exportPreviewType_ = null
   }
@@ -1179,25 +1176,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return `${base} (${i})`
   }
 
-  protected openToolbar(): void {
-    this.toolbarOpen_.set(true)
-    this.menuFabExpanded_.set(false)
-  }
-
-  protected closeToolbar(): void {
-    this.toolbarOpen_.set(false)
-  }
-
-  protected expandMenuFab(): void {
-    this.menuFabExpanded_.set(true)
-  }
-
-  protected collapseMenuFab(): void {
-    this.menuFabExpanded_.set(false)
-  }
-
-  protected toggleExport(): void {
-    this.showExport_.update((v) => !v)
+  protected toggleExportSheet(): void {
+    this.exportSheetOpen_.update((v) => !v)
   }
 
   protected printMenu(): void {
@@ -1347,7 +1327,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const menu = this.getCurrentMenuForExport()
     this.exportPreviewPayload_.set(this.exportService.getMenuAllViewPreviewPayload(menu, this.recipes_()))
     this.exportPreviewType_ = 'menu-all'
-    this.closeViewExportModal()
   }
 
   protected onViewMenuInfo(): void {
@@ -1405,36 +1384,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.exportPreviewPayload_.set(this.exportService.getMenuChecklistPreviewPayload(menu, this.recipes_(), mode))
     this.exportPreviewType_ = 'menu-checklist'
     this.exportChecklistMode_ = mode
-    this.closeExportChecklistDropdown()
-  }
-
-  protected readonly exportChecklistDropdownOpen_ = signal(false)
-
-  /** Which view/export modal is open: menu-info (תפריט), shopping-list (קניות), or all. */
-  protected readonly viewExportModal_ = signal<'menu-info' | 'shopping-list' | 'all' | null>(null)
-
-  protected toggleExportChecklistDropdown(): void {
-    this.exportChecklistDropdownOpen_.update((v) => !v)
-    this.viewExportModal_.set(null)
-  }
-
-  protected closeExportChecklistDropdown(): void {
-    this.exportChecklistDropdownOpen_.set(false)
-  }
-
-  protected openViewExportModal(type: 'menu-info' | 'shopping-list' | 'all'): void {
-    this.viewExportModal_.update((current) => (current === type ? null : type))
-    this.exportChecklistDropdownOpen_.set(false)
-  }
-
-  protected closeViewExportModal(): void {
-    this.viewExportModal_.set(null)
   }
 
   protected async onExportChecklist(mode: 'by_dish' | 'by_category' | 'by_station'): Promise<void> {
     const menu = this.getCurrentMenuForExport()
     await this.exportService.exportChecklist(menu, this.recipes_(), mode)
-    this.closeExportChecklistDropdown()
   }
 
   protected async onExportAllTogether(): Promise<void> {

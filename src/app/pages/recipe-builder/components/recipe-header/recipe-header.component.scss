@@ -473,7 +473,7 @@
 
 @media (max-width: 40.625rem) {
   .header-dashboard-container {
-    grid-template-columns: 50% 50%;
+    grid-template-columns: 1fr 1fr;
     grid-template-areas:
       'title title'
       'img metrics'

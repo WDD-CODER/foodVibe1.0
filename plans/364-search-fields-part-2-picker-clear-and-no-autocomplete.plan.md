@@ -90,7 +90,7 @@ As a chef picking allergens or categories on my phone, I want to type without br
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Add `app-input-clear` to the 7 picker searches. Clearing sets the query to `''`, keeps the dropdown open with the full list, resets the highlighted index, and refocuses the input. menu-dish-row: emit its existing `clearSearch` output (today it only fires on click-outside).
+- [x] Add `app-input-clear` to the 7 picker searches. Clearing sets the query to `''`, keeps the dropdown open with the full list, resets the highlighted index, and refocuses the input. menu-dish-row: emit its existing `clearSearch` output (today it only fires on click-outside).
 - [x] Add `autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"` to:
   - the 7 picker inputs
   - ai-product-modal category and allergen chip inputs (~L219, ~L245)
@@ -101,7 +101,7 @@ As a chef picking allergens or categories on my phone, I want to type without br
 - [x] chip-search-dropdown: unique option ids per instance (prefix with a per-instance id), so two dropdowns on one page don't collide.
 
 ### Should Have (P1)
-- [ ] If Android Chrome still shows suggestions on `.csd-input`, switch that input to `autocomplete="new-off"` plus `name="csd-<instanceId>"`.
+- [x] If Android Chrome still shows suggestions on `.csd-input`, switch that input to `autocomplete="new-off"` plus `name="csd-<instanceId>"`. (not needed: Android check showed no suggestions)
 
 ### Nice to Have (P2)
 - None.
@@ -117,7 +117,7 @@ As a chef picking allergens or categories on my phone, I want to type without br
 - [x] A2: Recipe-book ingredient filter and recipe-builder logistics search: X + autocomplete.
 - [x] A3: Menu-intelligence event type, section category and dish-row search: X + autocomplete.
 - [x] A4: Autocomplete sweep on the listed modal, form and metadata fields.
-- [ ] A5: Build, specs, Android check. Update session-state.
+- [x] A5: Build, specs, Android check. Update session-state.
 
 ## Technical Considerations
 

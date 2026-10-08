@@ -29,55 +29,42 @@
 
   <div class="list-container">
     @if (categories().length > 0) {
-      <div class="list-stack">
+      <div class="c-tap-chip-group">
         @for (name of categories(); track name) {
-          <div class="list-item group">
-            @if (editingName_() === name) {
-              <input
-                type="text"
-                class="inline-edit-input"
-                [value]="name"
-                (blur)="onRenameBlur(name, $any($event.target).value)"
-                (keydown.enter)="$any($event.target).blur()"
-                autofocus
-                autocomplete="off"
-                autocorrect="off"
-                autocapitalize="off"
-                spellcheck="false"
-              />
-            } @else {
-              <span class="item-label" (dblclick)="onStartRename(name)">{{ name | translatePipe }}</span>
-            }
-            <div class="item-actions">
-              @if (canEdit(name)) {
-                <button
-                  type="button"
-                  class="btn-edit"
-                  (click)="onStartRename(name)"
-                  [disabled]="!isLoggedIn()"
-                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                >
-                  <lucide-icon name="pencil" [size]="14"></lucide-icon>
-                </button>
-                <button
-                  type="button"
-                  class="c-icon-btn danger"
-                  (click)="onRemove(name)"
-                  [disabled]="!isLoggedIn()"
-                  [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-                >
-                  <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-                </button>
-              } @else {
-                <lucide-icon
-                  name="lock"
-                  [size]="14"
-                  [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
-                  [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-                ></lucide-icon>
-              }
-            </div>
-          </div>
+          @if (editingName_() === name) {
+            <input
+              #renameInput
+              type="text"
+              class="inline-edit-input"
+              [value]="name"
+              (blur)="onRenameBlur(name, renameInput.value)"
+              (keydown.enter)="renameInput.blur()"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+          } @else if (canEdit(name)) {
+            <button
+              type="button"
+              class="c-tap-chip"
+              [attr.aria-expanded]="menuName_() === name"
+              (click)="onOpenMenu($event, name)"
+              (dblclick)="onStartRename(name)"
+            >
+              {{ name | translatePipe }}
+            </button>
+          } @else {
+            <span class="c-tap-chip is-locked">
+              {{ name | translatePipe }}
+              <lucide-icon
+                name="lock"
+                [size]="14"
+                [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
+                [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
+              ></lucide-icon>
+            </span>
+          }
         }
       </div>
     } @else {
@@ -85,3 +72,27 @@
     }
   </div>
 </section>
+
+<!-- Outside the card: its backdrop-filter would trap the position:fixed popover. -->
+<app-row-actions-menu [anchored]="true" (closed)="menuName_.set(null)">
+  @if (menuName_(); as name) {
+    <button
+      type="button"
+      class="c-icon-btn"
+      (click)="onStartRename(name)"
+      [attr.aria-label]="'edit' | translatePipe"
+      [attr.title]="'edit' | translatePipe"
+    >
+      <lucide-icon name="pencil" [size]="18"></lucide-icon>
+    </button>
+    <button
+      type="button"
+      class="c-icon-btn danger"
+      (click)="onMenuDelete(name)"
+      [attr.aria-label]="'delete' | translatePipe"
+      [attr.title]="'delete' | translatePipe"
+    >
+      <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+    </button>
+  }
+</app-row-actions-menu>

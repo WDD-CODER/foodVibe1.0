@@ -267,3 +267,13 @@ been killed by it.
 **Why the obvious fix is wrong:** Setting `logServerUrl` in prod, or starting the log server, still leaves logs on a process users never reach and in a file that dies with the session.
 
 **What to do instead:** `LoggingService` posts to `${apiUrl}/api/v1/log` on the same Express server; warn/error land in Mongo `app_logs` ([[0016-logging-sink-mongo]]). Query them there (`db.app_logs.find({level:'error'}).sort({createdAt:-1})`), not in the browser console. Any "skip this URL" check must compare against a real path (`endsWith('/api/v1/log')`), never against a config value that may be `''`.
+
+---
+
+## A PUT merges over the stored doc — leaving a bad field out doesn't fix it
+
+**What hurt:** Deleting a label in use failed with 400 `logistics: expected object, received null`: legacy recipe `JZ8j9` was stored with `logistics: null`. The first fix dropped `logistics` from the client's PUT body, and it still failed (plan 340).
+
+**Why the obvious fix is wrong:** `server/routes/generic.js` validates `{ ...current, ...updatable }` and writes with `$set`, so an omitted field keeps the stored null and still fails validation. Loosening the schema to `.nullish()` breaks `server/test/upgrade-v1-to-v2.test.js` "flags nulls … instead of loosening the schema" (INV-4).
+
+**What to do instead:** To clear an invalid stored value through the normal API, send a valid replacement (here `logistics: { baseline: [] }`, see `kitchen-state.service.ts` `applyCascadeUpdate`). For many bad documents, run a one-time server-side data cleanup instead of patching each client write path.
