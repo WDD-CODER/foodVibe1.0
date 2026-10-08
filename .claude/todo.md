@@ -212,9 +212,9 @@
 - [ ] A4: Build, server tests, client specs. Manual test with 2 accounts. Update session-state.
 
 ### Plan 367 — Dashboard sub-nav: a "לוח בקרה" chip replaces the current page's chip; remove the four back buttons (`plans/367-dashboard-chip-replaces-current-page-chip-remove-back-buttons.plan.md`)
-- [ ] A1: Tab-chips replacement logic plus spec (overview → 4 chips; metadata, suppliers, venues and trash → dashboard chip in the right index; query-only navigation updates) (`core/components/tab-chips/**`).
-- [ ] A2: Remove the 4 back buttons, handlers and styles.
-- [ ] A3: Specs and e2e cleanup; P1 style.
+- [x] A1: Tab-chips replacement logic plus spec (overview → 4 chips; metadata, suppliers, venues and trash → dashboard chip in the right index; query-only navigation updates) (`core/components/tab-chips/**`).
+- [x] A2: Remove the 4 back buttons, handlers and styles.
+- [x] A3: Specs and e2e cleanup; P1 style.
 - [ ] A4: Build, specs, icons lint, check on phone and desktop. Update session-state.
 
 ### Plan 368 — Product form responsive on mobile and tablet (`plans/368-product-form-responsive-mobile-tablet.plan.md`)
