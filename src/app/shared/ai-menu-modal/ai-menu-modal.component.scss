@@ -1,6 +1,6 @@
 .ai-menu-modal-card {
   inline-size: min(640px, 94vw);
-  max-block-size: 88vh;
+  max-block-size: 88dvh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -29,9 +29,15 @@
   gap: 0.5rem;
   font-size: 0.75rem;
 
-  &[data-status='danger'] .ai-menu-usage-fill { background: var(--c-danger, #e53e3e); }
-  &[data-status='warning'] .ai-menu-usage-fill { background: var(--c-warning, #dd6b20); }
-  &[data-status='ok'] .ai-menu-usage-fill { background: var(--c-accent, #3182ce); }
+  &[data-status='danger'] .ai-menu-usage-fill {
+    background: var(--c-danger, #e53e3e);
+  }
+  &[data-status='warning'] .ai-menu-usage-fill {
+    background: var(--c-warning, #dd6b20);
+  }
+  &[data-status='ok'] .ai-menu-usage-fill {
+    background: var(--c-accent, #3182ce);
+  }
 }
 
 .ai-menu-usage-track {
@@ -171,9 +177,15 @@
   flex-shrink: 0;
   margin-block-start: 2px;
 
-  &--matched { color: var(--c-success, #38a169); }
-  &--ambiguous { color: var(--c-warning, #dd6b20); }
-  &--unmatched { color: var(--c-danger, #e53e3e); }
+  &--matched {
+    color: var(--c-success, #38a169);
+  }
+  &--ambiguous {
+    color: var(--c-warning, #dd6b20);
+  }
+  &--unmatched {
+    color: var(--c-danger, #e53e3e);
+  }
 }
 
 .ai-menu-dish-name {
@@ -195,7 +207,9 @@
   opacity: 0.5;
   transition: opacity 0.15s;
 
-  &:hover { opacity: 1; }
+  &:hover {
+    opacity: 1;
+  }
 }
 
 // ── Candidate picker ──────────────────────────────────────────────────────────

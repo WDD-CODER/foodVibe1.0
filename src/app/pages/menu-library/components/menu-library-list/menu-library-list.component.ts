@@ -22,7 +22,15 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 @Component({
   selector: 'app-menu-library-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent, EmptyStateComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    CustomSelectComponent,
+    EmptyStateComponent
+  ],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -193,13 +201,13 @@ export class MenuLibraryListComponent {
   private computeEventRevenue(event: MenuEvent): number {
     let sum = 0
     const guestCount = event.guestCount ?? 0
-    ;(event.sections || []).forEach((section) => {
-      ;(section.items || []).forEach((item) => {
+    for (const section of event.sections || []) {
+      for (const item of section.items || []) {
         const price = item.sellPrice ?? 0
         const portions = item.derivedPortions ?? guestCount * (item.servingPortions ?? 1)
         sum += price * portions
-      })
-    })
+      }
+    }
     return sum
   }
 

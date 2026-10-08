@@ -27,7 +27,6 @@ import { AddEquipmentModalComponent } from 'src/app/shared/add-equipment-modal/a
 import { HeroFabComponent } from '../core/components/hero-fab/hero-fab.component'
 import { LabelCreationModalComponent } from 'src/app/shared/label-creation-modal/label-creation-modal.component'
 import { AuthModalComponent } from '../core/components/auth-modal/auth-modal.component'
-import { SupplierModalComponent } from '../shared/supplier-modal/supplier-modal.component'
 import { AiRecipeModalComponent } from '../shared/ai-recipe-modal/ai-recipe-modal.component'
 import { AiMenuModalComponent } from '../shared/ai-menu-modal/ai-menu-modal.component'
 import { AiProductModalComponent } from '../shared/ai-product-modal/ai-product-modal.component'
@@ -42,11 +41,11 @@ import { QuickAddProductModalService } from '@services/quick-add-product-modal.s
 import { QuickEditProductModalService } from '@services/quick-edit-product-modal.service'
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
 import { GlobalSpecificModalService } from '@services/global-specific-modal.service'
-import { SupplierModalService } from '@services/supplier-modal.service'
 import { RestoreChoiceModalService } from '@services/restore-choice-modal.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { AppUpdateService } from '@services/app-update.service'
 import { UpdateBannerComponent } from '../core/components/update-banner/update-banner.component'
+import { KeyboardInsetService } from '@services/keyboard-inset.service'
 
 @Component({
   selector: 'app-root',
@@ -68,7 +67,6 @@ import { UpdateBannerComponent } from '../core/components/update-banner/update-b
     LoaderComponent,
     HeroFabComponent,
     AuthModalComponent,
-    SupplierModalComponent,
     AiRecipeModalComponent,
     AiMenuModalComponent,
     AiProductModalComponent,
@@ -83,6 +81,7 @@ export class AppComponent {
   private readonly router = inject(Router)
   private readonly userService = inject(UserService)
   private readonly serverHeartbeat_ = inject(ServerHeartbeatService)
+  private readonly keyboardInset_ = inject(KeyboardInsetService)
   protected readonly loading_ = inject(LoadingService)
 
   // Open signals for @defer (when …) — services stay root singletons; only the modal component chunks defer.
@@ -97,7 +96,6 @@ export class AppComponent {
   protected readonly quickEditProductModal = inject(QuickEditProductModalService)
   protected readonly addEquipmentModal = inject(AddEquipmentModalService)
   protected readonly globalSpecificModal = inject(GlobalSpecificModalService)
-  protected readonly supplierModal = inject(SupplierModalService)
   protected readonly restoreChoiceModal = inject(RestoreChoiceModalService)
   protected readonly authModal = inject(AuthModalService)
   protected readonly appUpdate = inject(AppUpdateService)
@@ -107,6 +105,7 @@ export class AppComponent {
 
   constructor() {
     this.serverHeartbeat_.start()
+    this.keyboardInset_.start()
     this.router.events
       .pipe(
         filter(

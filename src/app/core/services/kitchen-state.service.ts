@@ -202,28 +202,15 @@ export class KitchenStateService {
         to: String(next.yieldFactor ?? 1)
       })
     }
-    if ((prev.purchaseOptions?.length ?? 0) !== (next.purchaseOptions?.length ?? 0)) {
-      const prevUnits = (prev.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
-      const nextUnits = (next.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
+    const prevUnits = (prev.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
+    const nextUnits = (next.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
+    if (prevUnits !== nextUnits) {
       changes.push({
         field: 'purchase_options',
         label: 'activity_field_purchase_options',
         from: prevUnits || undefined,
         to: nextUnits || undefined
       })
-    } else if ((prev.purchaseOptions?.length ?? 0) > 0) {
-      const prevOpts = JSON.stringify(prev.purchaseOptions ?? [])
-      const nextOpts = JSON.stringify(next.purchaseOptions ?? [])
-      if (prevOpts !== nextOpts) {
-        const prevUnits = (prev.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
-        const nextUnits = (next.purchaseOptions ?? []).map((o) => o.unitSymbol).join(', ')
-        changes.push({
-          field: 'purchase_options',
-          label: 'activity_field_purchase_options',
-          from: prevUnits || undefined,
-          to: nextUnits || undefined
-        })
-      }
     }
     return changes
   }
@@ -463,9 +450,13 @@ export class KitchenStateService {
    *  saveRecipe does minus the toast. */
   private async applyCascadeUpdate(previous: Recipe, updated: Recipe): Promise<void> {
     const isDish = previous.recipeType === 'dish' || !!(previous.prepItems?.length || previous.prepCategories?.length)
+    // Legacy recipes can carry `logistics: null`, which the schema rejects. The server merges a
+    // PUT over the stored doc, so leaving the field out keeps the null; send an empty baseline
+    // ("no equipment") instead so the save validates (plan 340).
+    const toSave: Recipe = updated.logistics === null ? { ...updated, logistics: { baseline: [] } } : updated
     const saved = isDish
-      ? await this.dishDataService.updateDish(updated)
-      : await this.recipeDataService.updateRecipe(updated)
+      ? await this.dishDataService.updateDish(toSave)
+      : await this.recipeDataService.updateRecipe(toSave)
     const changes = this.buildRecipeChanges(previous, saved)
     this.activityLogService.recordActivity({
       action: 'updated',

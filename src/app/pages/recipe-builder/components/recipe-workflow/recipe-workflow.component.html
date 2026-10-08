@@ -158,7 +158,6 @@
         {{ 'add_prep_stage' | translatePipe }}
       </button>
     </div>
-
   } @else {
     <div class="prep-flat-grid" formArrayName="workflow_items">
       <div class="grid-header prep-grid-header">
@@ -191,6 +190,7 @@
                   (preparationSelected)="onPreparationSelected($event, group)"
                   (preparationAdded)="onPreparationSelected($event, group)"
                   (focusDone)="focusRowDone.emit()"
+                  (addNewRowRequested)="addItem.emit()"
                 >
                 </app-preparation-search>
               } @else {

@@ -111,7 +111,7 @@ touching any milestone.
 - [x] A2: Wire the FAB action → `exportSheetOpen_`; connect the sheet outputs to the existing page methods (`menu-intelligence.page.ts/.html`).
 - [x] A3: Remove the export pills, their styles and the dead signals and methods (`menu-intelligence.page.ts/.html`, `_toolbar.scss`).
 - [x] A4: export-preview portrait styles (`export-preview.component.scss`).
-- [ ] A5: Build and run specs. Check at 360px portrait, landscape and desktop. Update the session-state file.
+- [x] A5: Build and run specs. Check at 360px portrait, landscape and desktop. Update the session-state file.
 
 ## Technical Considerations
 
@@ -137,5 +137,5 @@ touching any milestone.
 - [auto] `rg -n "toolbarOpen_|showExport_|menuFabExpanded_|openToolbar" src/app/pages/menu-intelligence` → no matches.
 - [auto] `npx ng test --watch=false --include=src/app/pages/menu-intelligence/**/*.spec.ts --include=src/app/shared/export-preview/**/*.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
-- [human] Phone, menu builder: tap FAB → "צ'קליסט והדפסות" → the sheet slides down from the top → tap outside → it slides away. Choose צ'קליסט → לפי מנה → the preview opens and is readable in portrait, with no horizontal page overflow; close, print and Excel buttons all visible.
-- [human] Save is still visible and works.
+- [x] [human] Phone, menu builder: tap FAB → "צ'קליסט והדפסות" → the sheet slides down from the top → tap outside → it slides away. Choose צ'קליסט → לפי מנה → the preview opens and is readable in portrait, with no horizontal page overflow; close, print and Excel buttons all visible.
+- [x] [human] Save is still visible and works.

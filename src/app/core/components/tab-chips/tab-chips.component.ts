@@ -24,7 +24,6 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
   ['/suppliers', 'dashboard'],
   ['/trash', 'dashboard'],
   ['/inventory', 'inventory'],
-  ['/equipment', 'inventory'],
   ['/recipe-book', 'recipes'],
   ['/recipe-builder', 'recipes'],
   ['/cook', 'recipes'],
@@ -45,7 +44,10 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
     { id: 'suppliers', labelKey: 'suppliers', icon: 'truck', path: '/suppliers' },
     { id: 'trash', labelKey: 'trash', icon: 'trash-2', path: '/trash' }
   ],
-  inventory: [{ id: 'equipment', labelKey: 'equipment', icon: 'wrench', path: '/equipment' }],
+  inventory: [
+    { id: 'products', labelKey: 'products', icon: 'package', path: '/inventory/list' },
+    { id: 'equipment', labelKey: 'equipment', icon: 'wrench', path: '/inventory/equipment' }
+  ],
   recipes: [
     { id: 'recipe-builder', labelKey: 'recipe_builder', icon: 'chef-hat', path: '/recipe-builder' },
     { id: 'cook-view', labelKey: 'cook_view', icon: 'flame', path: '/cook' }

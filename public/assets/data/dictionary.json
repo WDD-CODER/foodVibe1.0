@@ -207,6 +207,7 @@
     "create_new_unit": "צור יחידה חדשה",
     "product": "מוצר",
     "product_list": "רשימת מוצרים",
+    "products": "מוצרים",
     "product_incomplete_hint": "המוצר חסר פרטים — לחץ לעריכה",
     "product_warning_hint": "המוצר חסר פרטים משלימים — לחץ לעריכה",
     "product_invalid": "מוצר לא תקין",
@@ -955,6 +956,14 @@
     "duplicate_from_master": "(מהמאגר המשותף)",
     "taxonomy_shared_admin_only": "זהו פריט משותף לכל המשתמשים — רק מנהל יכול לשנות או למחוק אותו",
     "taxonomy_term_in_use": "לא ניתן למחוק — הפריט עדיין בשימוש ב: {names}",
+    "activity_more_changes": "+{n} שינויים נוספים",
+    "activity_deleted_supplier": "ספק שנמחק",
+    "activity_today": "היום",
+    "activity_yesterday": "אתמול",
+    "activity_just_now": "לפני רגע",
+    "supplier_added": "הספק \"{name}\" נוסף בהצלחה",
+    "min_order": "מינימום הזמנה",
+    "ai_warning_implausible_portion_weight": "כמויות הרכיבים לא סבירות ביחס למספר המנות",
     "menu_print": "הדפסה"
   }
 }
