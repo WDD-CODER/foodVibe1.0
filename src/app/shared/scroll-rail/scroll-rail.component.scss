@@ -103,11 +103,11 @@
 }
 
 .sr-arrow--prev {
-  inset-inline-start: 0;
+  inset-inline-start: calc(-1 * var(--rail-arrow-offset, 0px));
 }
 
 .sr-arrow--next {
-  inset-inline-end: 0;
+  inset-inline-end: calc(-1 * var(--rail-arrow-offset, 0px));
 }
 
 // The app is RTL; swap the chevrons for an LTR context.
