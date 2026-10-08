@@ -138,32 +138,12 @@
 - [x] A4: `vh` → `dvh` in the listed files.
 - [ ] A5: Build and run specs. Update the session-state file.
 
-### Plan 349 — Shared column carousel (one component for every list) and roomier recipe-book carousel (`plans/349-shared-column-carousel-roomier-recipe-book-carousel.plan.md`)
-- [x] A1: Build the group directive, header, cell and slide directive, with specs: next/prev wrap or clamp, header and cell share the index, RTL direction (`src/app/shared/column-carousel/**`).
-- [x] A2: Migrate recipe-book, including the spacing changes (`recipe-book-list/**`).
-- [x] A3: Migrate inventory, suppliers and equipment (`inventory-product-list/**`, `supplier-list/**`, `equipment-list/**`).
-- [x] A4: Delete the old components; `rg` for leftovers (`shared/carousel-header/**`, `shared/cell-carousel/**`).
-- [ ] A5: Build and run specs. Check at 360px, 768px and desktop (the carousel is hidden on desktop as today). Update the session-state file.
-
-### Plan 350 — Shared scroll rail for horizontal strips (`plans/350-shared-scroll-rail-for-horizontal-strips.plan.md`)
-- [x] A1: `app-scroll-rail` component plus its spec (`src/app/shared/scroll-rail/**`).
-- [x] A2: Migrate the metadata jump-nav; delete the old logic (`metadata-manager.page.component.*`).
-- [x] A3: Migrate tab chips; adjust the `.c-tab-chips` rules (`core/components/tab-chips/**`, `src/styles.scss`).
-- [x] A4: Migrate the dish data strip (`menu-dish-row/**`).
-- [ ] A5: Build and run specs. Check at 360px and 1280px in RTL. Update the session-state file.
-
 ### Plan 351 — Dashboard "פעילות אחרונה": readable change history (`plans/351-dashboard-recent-activity-readable-change-history.plan.md`)
 - [x] A1: `activityValue` pipe plus its spec: supplier ids → names, key translation, unknown id, empty (`core/pipes/activity-value.pipe.ts/.spec.ts`).
 - [x] A2: Switch the popover to the pipe (`shared/change-popover/**`).
 - [x] A3: New entry template and styles; delete the strip, scroll method and `.change-tag` styles (`dashboard-overview/**`).
 - [x] A4: Relative time plus the optional day grouping (`dashboard-overview/**`).
 - [ ] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
-
-### Plan 352 — Page header, part 1: `<app-page-header>` and the list-shell pages (`plans/352-page-header-part-1-app-page-header-list-shell.plan.md`)
-- [x] A1: `PageHeaderComponent` plus a spec (renders title, count, back; slots project) (`src/app/shared/page-header/**`).
-- [x] A2: list-shell uses it; delete the old header grid styles (`src/app/shared/list-shell/**`).
-- [x] A3: Clean the 4 pages' title markup and styles (`inventory-product-list/**`, `recipe-book-list/**`, `supplier-list/**`, `equipment-list/**`).
-- [ ] A4: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file.
 
 ### Plan 353 — Page header, part 2: venues, menu library, dashboard, trash (`plans/353-page-header-part-2-venues-menu-library-dashboard-trash.plan.md`)
 - [ ] A1: Add the `subtitleKey` input to `PageHeaderComponent`, plus a spec case (`src/app/shared/page-header/**`).
