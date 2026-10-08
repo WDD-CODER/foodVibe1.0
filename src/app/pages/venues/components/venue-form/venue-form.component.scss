@@ -6,6 +6,8 @@
 
 .venue-form-container {
   max-width: 35rem;
+
+  margin-inline: auto;
   padding: 1.5rem;
   background: var(--bg-glass-strong);
   border: 1px solid var(--border-glass);
@@ -139,14 +141,17 @@
         gap: 0.5rem;
         margin-block-end: 0.5rem;
 
+        flex-wrap: wrap;
+
         app-custom-select {
-          flex: 1;
+          flex: 1 1 10rem;
           min-width: 0;
         }
 
+        // Plan 371: inputs flex instead of a fixed 5rem; quantity keeps a usable minimum.
         input {
-          width: 5rem;
-          flex-shrink: 0;
+          flex: 1 1 4rem;
+          min-inline-size: 4rem;
         }
       }
     }
@@ -174,5 +179,34 @@
 
   .c-form-actions {
     padding-block-start: 1rem;
+  }
+
+  // Plan 371 — responsive form.
+  // ≥768px: the basic fields sit in two columns; the container grows a little.
+  @media (min-width: 768px) {
+    max-width: 44rem;
+
+    .form-section--basic {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .form-group--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  // ≤620px: tighter padding, everything stacks, actions full width.
+  @media (max-width: 620px) {
+    padding: var(--space-3);
+
+    .c-form-actions {
+      flex-direction: column-reverse;
+
+      button {
+        inline-size: 100%;
+      }
+    }
   }
 }

@@ -25,8 +25,8 @@
       </label>
     </div>
 
-    <div class="form-section">
-      <div class="form-group form-group--active">
+    <div class="form-section form-section--basic">
+      <div class="form-group form-group--active form-group--full">
         <label class="active-toggle">
           <input type="checkbox" formControlName="active" />
           <span>{{ 'venue_active' | translatePipe }}</span>
@@ -59,7 +59,7 @@
           [typeToFilter]="true"
         />
       </div>
-      <div class="form-group">
+      <div class="form-group form-group--full">
         <label for="notes">{{ 'notes' | translatePipe }}</label>
         <textarea id="notes" formControlName="notes" rows="2" class="c-input"></textarea>
       </div>

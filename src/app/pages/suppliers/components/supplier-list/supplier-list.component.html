@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 0.8fr 1fr minmax(48px, 0.8fr) 0.8fr 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 0.6fr 1fr 40px 28px'"
+  [gridTemplate]="'2fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr 80px auto'"
+  [mobileGridTemplate]="'2fr 1.6fr 40px 28px'"
   [resultCount]="filteredSuppliers_().length"
   [resultTotal]="supplierData.allSuppliers_().length"
 >
@@ -64,8 +64,10 @@
 
   <ng-container shell-table-header>
     <div class="col-name c-grid-header-cell" role="columnheader">{{ 'name' | translatePipe }}</div>
-    <div class="col-min-order c-grid-header-cell" role="columnheader">{{ 'min_order' | translatePipe }}</div>
     <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
+      <div class="col-min-order c-grid-header-cell" carouselHeaderColumn label="min_order" role="presentation">
+        {{ 'min_order' | translatePipe }}
+      </div>
       <div class="col-contact c-grid-header-cell" carouselHeaderColumn label="contact_person" role="presentation">
         {{ 'contact_person' | translatePipe }}
       </div>
@@ -113,12 +115,14 @@
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"
-        (keydown.enter)="toggleRowEdit(item)"
-        (keydown.space)="$event.preventDefault(); toggleRowEdit(item)"
+        (keydown.enter)="onEdit(item)"
+        (keydown.space)="$event.preventDefault(); onEdit(item)"
       >
         <div class="col-name c-list-body-cell" role="cell">{{ item.nameHebrew }}</div>
-        <div class="col-min-order c-list-body-cell" role="cell">{{ item.minOrderMov }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
+          <div class="col-min-order c-list-body-cell" cellCarouselSlide [label]="'min_order' | translatePipe">
+            {{ item.minOrderMov }}
+          </div>
           <div class="col-contact c-list-body-cell" cellCarouselSlide [label]="'contact_person' | translatePipe">
             {{ item.contactPerson ?? '—' }}
           </div>
@@ -165,91 +169,8 @@
           <app-list-row-checkbox [checked]="selection.isSelected(item._id)" (toggle)="selection.toggle(item._id)" />
         </div>
       </div>
-      @if (isDesktop_() && (editingId_() === item._id || closingId_() === item._id)) {
-        <div
-          class="inline-edit-panel"
-          [class.closing]="closingId_() === item._id"
-          [formGroup]="editForm_"
-          (clickOutside)="onInlinePanelClickOutside()"
-        >
-          <ng-container [ngTemplateOutlet]="panelBody" [ngTemplateOutletContext]="{ item }"></ng-container>
-        </div>
-      }
     }
   </ng-container>
-
-  <!-- Tablet + mobile: same form, rendered via [shell-modal] so it escapes .table-area's
-       backdrop-filter (fixed-position containing block — see list-shell.component.html). -->
-  @if (!isDesktop_() && editingItem_(); as item) {
-    <ng-container shell-modal>
-      <div class="c-modal-overlay" (click)="onInlinePanelClickOutside()"></div>
-      <div
-        class="inline-edit-panel as-modal"
-        [class.closing]="closingId_() === item._id"
-        [formGroup]="editForm_"
-        (clickOutside)="onInlinePanelClickOutside()"
-      >
-        <ng-container [ngTemplateOutlet]="panelBody" [ngTemplateOutletContext]="{ item }"></ng-container>
-      </div>
-    </ng-container>
-  }
-
-  <ng-template #panelBody let-item="item">
-    <h3 class="inline-edit-title">{{ 'edit' | translatePipe }}: {{ item.nameHebrew }}</h3>
-
-    <div class="inline-edit-section">
-      <div class="inline-edit-grid">
-        <div class="inline-edit-field">
-          <label for="inline-supplier-name">{{ 'name' | translatePipe }}</label>
-          <input id="inline-supplier-name" type="text" formControlName="nameHebrew" class="c-input" />
-        </div>
-        <div class="inline-edit-field">
-          <label for="inline-supplier-contact">{{ 'contact_person' | translatePipe }}</label>
-          <input id="inline-supplier-contact" type="text" formControlName="contactPerson" class="c-input" />
-        </div>
-        <div class="inline-edit-field">
-          <label for="inline-supplier-phone">{{ 'phone' | translatePipe }}</label>
-          <input id="inline-supplier-phone" type="text" formControlName="phone" class="c-input" />
-        </div>
-        <div class="inline-edit-field">
-          <label for="inline-supplier-min">{{ 'min_order' | translatePipe }}</label>
-          <input id="inline-supplier-min" type="number" formControlName="minOrderMov" min="0" class="c-input" />
-        </div>
-        <div class="inline-edit-field">
-          <label for="inline-supplier-lead">{{ 'lead_time' | translatePipe }}</label>
-          <input id="inline-supplier-lead" type="number" formControlName="leadTimeDays" min="0" class="c-input" />
-        </div>
-      </div>
-      <div class="inline-edit-checkboxes">
-        <span class="inline-edit-check-label">{{ 'delivery_days' | translatePipe }}</span>
-        <div class="inline-edit-days-wrap" formArrayName="deliveryDays">
-          @for (ctrl of deliveryDaysArray.controls; track $index) {
-            <label class="inline-edit-check">
-              <input type="checkbox" [formControlName]="$index" />
-              <span>{{ dayLabels[$index] | translatePipe }}</span>
-            </label>
-          }
-        </div>
-      </div>
-    </div>
-
-    <div class="inline-edit-actions">
-      <button type="button" class="c-btn-ghost" (click)="onInlineCancel()">
-        {{ 'cancel' | translatePipe }}
-      </button>
-      <button
-        type="button"
-        class="c-btn-primary"
-        (click)="onInlineSave()"
-        [disabled]="editForm_.invalid || isSavingEdit_()"
-      >
-        @if (isSavingEdit_()) {
-          <app-loader size="small" [inline]="true" />
-        }
-        {{ 'save' | translatePipe }}
-      </button>
-    </div>
-  </ng-template>
 
   <ng-container shell-filter-clear>
     @if (hasActiveFilters_()) {

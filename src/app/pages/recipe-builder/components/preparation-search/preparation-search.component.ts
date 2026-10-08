@@ -51,8 +51,10 @@ export class PreparationSearchComponent {
   preparationSelected = output<PreparationEntry>()
   preparationAdded = output<PreparationEntry>()
   focusDone = output<void>()
+  /** Enter saved this row's preparation — parent opens a new row. */
+  addNewRowRequested = output<void>()
 
-  protected searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput')
+  protected searchInputRef = viewChild<ElementRef<HTMLTextAreaElement>>('searchInput')
   searchQuery_ = signal<string>('')
   protected showResults_ = signal(false)
 
@@ -74,7 +76,10 @@ export class PreparationSearchComponent {
       if (q) {
         this.searchQuery_.set(q)
         this.showResults_.set(true)
-        setTimeout(() => this.focusSearch(), 0)
+        setTimeout(() => {
+          this.fitHeight_()
+          this.focusSearch()
+        }, 0)
       }
     })
   }
@@ -82,6 +87,14 @@ export class PreparationSearchComponent {
   /** Focus the search input (e.g. after adding a new row). */
   focusSearch(): void {
     this.searchInputRef()?.nativeElement?.focus()
+  }
+
+  /** Grow the search textarea to its content (one line when short), so long names wrap. */
+  protected fitHeight_(): void {
+    const el = this.searchInputRef()?.nativeElement
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
   }
 
   protected filteredResults_ = computed(() => {
@@ -116,13 +129,25 @@ export class PreparationSearchComponent {
     this.showResults_.set(false)
   }
 
-  async addPreparationDirectly(): Promise<void> {
+  /** Enter saves the row (first match, or adds the typed name) and asks for a new row. */
+  protected async onEnter(event: Event): Promise<void> {
+    event.preventDefault()
+    const results = this.filteredResults_()
+    if (results.length > 0) {
+      this.selectPreparation(results[0])
+      this.addNewRowRequested.emit()
+      return
+    }
+    if (this.showAddOption_() && (await this.addPreparationDirectly())) this.addNewRowRequested.emit()
+  }
+
+  async addPreparationDirectly(): Promise<boolean> {
     const name = this.searchQuery_().trim()
-    if (!name) return
+    if (!name) return false
 
     const cats = this.categories()
     const category = this.selectedCategory().trim() || (cats.length > 0 ? cats[0] : '')
-    if (!category) return
+    if (!category) return false
 
     await this.prepRegistry.registerPreparation(name, category)
     const entry: PreparationEntry = { name, category }
@@ -130,6 +155,7 @@ export class PreparationSearchComponent {
     this.preparationSelected.emit(entry)
     this.searchQuery_.set('')
     this.showResults_.set(false)
+    return true
   }
 
   /** Search clear (X): empty the field, close the results, keep focus in the field (plan 363). */
@@ -137,6 +163,7 @@ export class PreparationSearchComponent {
     this.searchQuery_.set('')
     this.showResults_.set(false)
     this.focusSearch()
+    setTimeout(() => this.fitHeight_(), 0)
   }
 
   /** Escape in a non-empty field clears it first; a second Escape bubbles as before (plan 363). */

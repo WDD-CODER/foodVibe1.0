@@ -122,65 +122,82 @@
         <h2>{{ 'recent_activity' | translatePipe }}</h2>
       </header>
 
-      @if (getRecentActivity().length) {
+      @let groups = activityGroups();
+      @if (groups.length) {
         <div class="activity-list-scroll-wrap">
           <div class="activity-list" data-testid="activity-list" scrollIndicators>
-            @for (item of getRecentActivity(); track item.id) {
-              <div class="activity-item" data-testid="activity-item">
-                <span class="act-avatar">{{
-                  item.entityType === 'product' ? 'P' : item.entityType === 'recipe' ? 'R' : 'D'
-                }}</span>
+            @for (group of groups; track group.key) {
+              @if (groups.length > 1) {
+                <h3 class="act-day">{{ group.label }}</h3>
+              }
+              @for (item of group.items; track item.id) {
+                @let changes = realChanges(item);
+                <div
+                  class="activity-item"
+                  data-testid="activity-item"
+                  [class.has-changes]="changes.length"
+                  [class.is-expanded]="expandedActivityId_() === item.id"
+                  [attr.role]="changes.length ? 'button' : null"
+                  [attr.tabindex]="changes.length ? 0 : null"
+                  [attr.aria-expanded]="changes.length ? expandedActivityId_() === item.id : null"
+                  (click)="changes.length && toggleActivity(item.id, $event)"
+                  (keydown.enter)="changes.length && toggleActivity(item.id, $event)"
+                >
+                  <div class="act-head">
+                    <span class="act-avatar" [attr.data-entity]="item.entityType" aria-hidden="true">
+                      <lucide-icon [name]="entityIcon(item.entityType)" [size]="16"></lucide-icon>
+                    </span>
 
-                <div class="act-middle">
-                  <span class="entity-type-tag" [attr.data-entity]="item.entityType">
-                    {{
-                      (item.entityType === 'product' ? 'product' : item.entityType === 'dish' ? 'dish' : 'preparation')
-                        | translatePipe
-                    }}
-                  </span>
-                  <span class="act-sep" aria-hidden="true"></span>
-                  <span class="activity-name">
-                    {{ item.entityName }}
-                  </span>
-                </div>
+                    <div class="act-middle">
+                      <span class="entity-type-tag" [attr.data-entity]="item.entityType">
+                        {{
+                          (item.entityType === 'product'
+                            ? 'product'
+                            : item.entityType === 'dish'
+                              ? 'dish'
+                              : 'preparation'
+                          ) | translatePipe
+                        }}
+                      </span>
+                      <span class="act-sep" aria-hidden="true"></span>
+                      <span class="activity-name">{{ item.entityName }}</span>
+                    </div>
 
-                <div class="activity-changes-wrapper">
-                  <button
-                    type="button"
-                    class="activity-scroll-btn activity-scroll-left"
-                    (click)="scrollActivityChanges($event, 'left')"
-                    aria-label="Scroll changes left"
-                  >
-                    <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
-                  </button>
-                  <div class="activity-changes">
-                    @for (change of item.changes || []; track change.field) {
-                      <button
-                        type="button"
-                        class="change-tag"
-                        (click)="toggleChangePopover(item.id, change.field, $event)"
-                      >
-                        {{ change.label | translatePipe }}
-                        @if (change.from || change.to) {
-                          : {{ change.from }} → {{ change.to }}
-                        }
-                      </button>
-                    }
+                    <span class="activity-type" [attr.data-action]="item.action">
+                      {{ 'activity_' + item.action | translatePipe }}
+                    </span>
+                    <time class="act-time" [attr.datetime]="isoTime(item.timestamp)">{{
+                      relativeTime(item.timestamp)
+                    }}</time>
                   </div>
-                  <button
-                    type="button"
-                    class="activity-scroll-btn activity-scroll-right"
-                    (click)="scrollActivityChanges($event, 'right')"
-                    aria-label="Scroll changes right"
-                  >
-                    <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
-                  </button>
-                </div>
 
-                <span class="activity-type" [attr.data-action]="item.action">
-                  {{ 'activity_' + item.action | translatePipe }}
-                </span>
-              </div>
+                  @if (changes.length) {
+                    <ul class="act-changes">
+                      @for (change of changes; track change.field) {
+                        <li class="act-chip" data-testid="act-chip">
+                          <span class="act-chip-label">{{ change.label | translatePipe }}</span>
+                          <span class="act-chip-values">
+                            @if (change.from) {
+                              <del class="act-old">{{ change.from | activityValue: change.field }}</del>
+                            }
+                            @if (change.from && change.to) {
+                              <lucide-icon
+                                class="act-arrow"
+                                name="arrow-left"
+                                [size]="12"
+                                aria-hidden="true"
+                              ></lucide-icon>
+                            }
+                            @if (change.to) {
+                              <ins class="act-new">{{ change.to | activityValue: change.field }}</ins>
+                            }
+                          </span>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              }
             }
           </div>
           <div class="activity-scroll-zone activity-scroll-zone--top" aria-hidden="true"></div>
@@ -202,10 +219,4 @@
       }
     </section>
   </main>
-
-  <app-change-popover
-    [open]="openChange_()"
-    [activity]="getOpenActivity()"
-    (closeRequest)="closeChangePopoverOnOutsideClick($event)"
-  />
 </div>
