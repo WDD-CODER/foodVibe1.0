@@ -152,10 +152,10 @@
 - [ ] A5: Build and run specs. Check at 360px, 768px and desktop (the carousel is hidden on desktop as today). Update the session-state file.
 
 ### Plan 350 — Shared scroll rail for horizontal strips (`plans/350-shared-scroll-rail-for-horizontal-strips.plan.md`)
-- [ ] A1: `app-scroll-rail` component plus its spec (`src/app/shared/scroll-rail/**`).
-- [ ] A2: Migrate the metadata jump-nav; delete the old logic (`metadata-manager.page.component.*`).
-- [ ] A3: Migrate tab chips; adjust the `.c-tab-chips` rules (`core/components/tab-chips/**`, `src/styles.scss`).
-- [ ] A4: Migrate the dish data strip (`menu-dish-row/**`).
+- [x] A1: `app-scroll-rail` component plus its spec (`src/app/shared/scroll-rail/**`).
+- [x] A2: Migrate the metadata jump-nav; delete the old logic (`metadata-manager.page.component.*`).
+- [x] A3: Migrate tab chips; adjust the `.c-tab-chips` rules (`core/components/tab-chips/**`, `src/styles.scss`).
+- [x] A4: Migrate the dish data strip (`menu-dish-row/**`).
 - [ ] A5: Build and run specs. Check at 360px and 1280px in RTL. Update the session-state file.
 
 ### Plan 351 — Dashboard "פעילות אחרונה": readable change history (`plans/351-dashboard-recent-activity-readable-change-history.plan.md`)
