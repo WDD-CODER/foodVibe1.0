@@ -354,16 +354,12 @@
   // ─── ≤1023px — design's own breakpoint (Inventory.dc.html:58): stack
   // toolbar → panel (full width, in-flow) → table. No overlay, no backdrop,
   // no fixed/absolute positioning — matches `.inv-aside{position:static;
-  // width:100%}` (dc.html:62). ───────────────────────────────────────────
+  // width:100%}` (dc.html:62). Tablet keeps the desktop scroll model: the
+  // container is a fixed height and only the table body scrolls inside it. ──
   @media (max-width: #{$panel-overlay-break}) {
-    // No fixed/max height here on purpose: the card must grow to its full
-    // content height so the PAGE scrolls past it. The old `max-height:90dvh`
-    // + a `1fr` table row trapped scrolling inside the table's own internal
-    // scrollbar, which sat right below the filter panel and never let the
-    // user reach further content — that's the bug being fixed.
     .list-container {
       display: grid;
-      grid-template-rows: auto auto auto auto;
+      grid-template-rows: auto auto auto minmax(0, 1fr);
       grid-template-columns: 1fr;
       grid-template-areas:
         'header'
@@ -371,11 +367,11 @@
         'panel'
         'table';
 
-      height: auto;
+      height: 90dvh;
       row-gap: 0;
       column-gap: 0;
       padding: 1rem;
-      overflow: visible;
+      overflow: hidden;
     }
 
     .filter-panel {
@@ -383,6 +379,8 @@
       min-width: 0;
       max-width: none;
 
+      // Open panel stacks above the table; cap it so the table keeps room.
+      max-block-size: 40dvh;
       margin-block-end: var(--space-4);
 
       &.collapsed {
@@ -390,30 +388,38 @@
       }
     }
 
-    // Table grows to its content height too — no internal scrollbar at
-    // this width, the outer page scrolls instead.
     .table-area {
-      grid-template-rows: auto auto;
+      grid-template-rows: auto minmax(0, 1fr);
     }
 
     .table-body {
-      overflow-y: visible;
       min-height: 0;
     }
   }
 
-  // ─── PHONE (≤768px) — table's own column count switches; panel already
-  // full-width from the block above ───────────────────────────────────────
+  // ─── PHONE (≤768px) — the page scrolls (app header, list header, filters scroll
+  // away). The table card is the last element and is exactly one screen tall, so once the
+  // user reaches it, it fills the screen with rounded edges and the rows scroll inside it. ──
   @media (max-width: #{$phone-break}) {
     .list-container {
+      grid-template-rows: auto auto auto auto;
+
       width: 100%;
+      height: auto;
       padding-inline: 0.75rem;
       overflow: visible;
       box-sizing: border-box;
     }
 
+    .filter-panel {
+      max-block-size: none;
+    }
+
     .table-area {
       grid-template-columns: var(--list-grid-mobile);
+      grid-template-rows: auto minmax(0, 1fr);
+
+      block-size: calc(100dvh - 2 * var(--space-3));
     }
 
     .table-header {
@@ -422,6 +428,13 @@
 
     .table-body {
       grid-template-columns: var(--list-grid-mobile);
+    }
+  }
+
+  // ≤620px the fixed bottom tab bar (3.5rem + safe area) covers the screen's lower edge.
+  @media (max-width: 620px) {
+    .table-area {
+      block-size: calc(100dvh - 2 * var(--space-3) - 3.5rem - env(safe-area-inset-bottom, 0px));
     }
   }
 

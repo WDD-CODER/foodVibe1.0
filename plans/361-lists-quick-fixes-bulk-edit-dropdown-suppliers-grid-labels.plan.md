@@ -84,7 +84,7 @@ touching any milestone.
 - [x] A2: Suppliers 9-track desktop grid (`supplier-list/**`).
 - [x] A3: Min-order into the carousel; mobile grid `'2fr 1fr 40px 28px'`; ₪ formatting (`supplier-list/**`).
 - [x] A4: Dictionary keys; title tokens (P1) (`dictionary.json`, `supplier-list.component.scss`).
-- [ ] A5: Build, specs, check at 360px and 1280px. Update session-state.
+- [x] A5: Build, specs, check at 360px and 1280px. Update session-state.
 
 ## Technical Considerations
 
