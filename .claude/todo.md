@@ -212,13 +212,6 @@
 - [ ] A4: Autocomplete sweep on the listed modal, form and metadata fields.
 - [ ] A5: Build, specs, Android check. Update session-state.
 
-### Plan 365 — Admin scope prompt ("רק לי / לכולם"): wording that fits each action, item type and count (`plans/365-admin-scope-prompt-wording-per-action-entity-count.plan.md`)
-- [ ] A1: Service API, `buildTexts`, and spec; dictionary keys (`master-push.service.ts`, spec).
-- [ ] A2: Update recipe and dish call sites (cook-view, recipe-book, recipe-builder).
-- [ ] A3: Update product call sites (product-form, inventory), with the product-delete warning.
-- [ ] A4: Metadata `resolvePushScope(type, action)`.
-- [ ] A5: Single dialog on admin delete; `confirm_delete` key. Build, specs. Update session-state.
-
 ### Plan 366 — Delete a supplier that's in use: warning, then admin-only "only me / everyone" (`plans/366-delete-in-use-supplier-warning-admin-scope.plan.md`)
 - [ ] A1: Server: allowlist, trash collection and purge route, plus tests (against the isolated DB) (`server/routes/generic.js`, `server/constants/collections.js`, `server/test/**`).
 - [ ] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
