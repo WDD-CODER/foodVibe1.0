@@ -884,38 +884,26 @@ textarea.c-input {
 }
 
 /* ---- Engine: Tab chip row (plan 305 M3) — contextual sub-nav under the top-level tabs.
-   Composes .c-tab-pill for each chip; this only owns the row/scroller behaviour. ---- */
+   Composes .c-tab-pill for each chip. Plan 350: the chips live in an <app-scroll-rail>, which
+   owns the horizontal scroll, snap, edge fade and arrows; this rule only owns the row's
+   spacing. The rail centers the chips while they fit (`safe center`, so an overflowing row
+   starts at its first chip instead of pushing it off-screen). ---- */
 .c-tab-chips {
   display: flex;
   justify-content: center;
-  // align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-2);
 
   padding-block-start: var(--space-2);
   padding-inline: var(--space-4);
 
+  > app-scroll-rail {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    --rail-gap: var(--space-2);
+  }
+
   @media (max-width: $break-phone-max) {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-
     padding-inline: var(--space-3);
-
-    mask-image: linear-gradient(to left, transparent 0, #000 0.875rem, #000 calc(100% - 0.875rem), transparent 100%);
-    -webkit-mask-image: linear-gradient(to left, transparent 0, #000 0.875rem, #000 calc(100% - 0.875rem), transparent 100%);
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    .c-tab-pill {
-      flex: 0 0 auto;
-      scroll-snap-align: center;
-    }
   }
 }
 

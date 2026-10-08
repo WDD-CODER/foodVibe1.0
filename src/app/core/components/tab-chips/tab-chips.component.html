@@ -1,18 +1,20 @@
 @if (chips_().length) {
   <nav class="c-tab-chips" dir="rtl" aria-label="מסכי משנה">
-    @for (chip of chips_(); track chip.id) {
-      <a
-        class="c-tab-pill"
-        [class.c-tab-pill--home]="chip.home"
-        [routerLink]="chip.path"
-        [queryParams]="chip.queryParams ?? null"
-        [routerLinkActive]="chip.home ? [] : 'active'"
-        [routerLinkActiveOptions]="{ exact: !!chip.queryParams }"
-        (click)="scrollChipIntoView($event)"
-      >
-        <lucide-icon [name]="chip.icon" [size]="15"></lucide-icon>
-        {{ chip.labelKey | translatePipe }}
-      </a>
-    }
+    <app-scroll-rail snap="proximity">
+      @for (chip of chips_(); track chip.id) {
+        <a
+          class="c-tab-pill"
+          [class.c-tab-pill--home]="chip.home"
+          [routerLink]="chip.path"
+          [queryParams]="chip.queryParams ?? null"
+          [routerLinkActive]="chip.home ? [] : 'active'"
+          [routerLinkActiveOptions]="{ exact: !!chip.queryParams }"
+          (click)="scrollChipIntoView($event)"
+        >
+          <lucide-icon [name]="chip.icon" [size]="15"></lucide-icon>
+          {{ chip.labelKey | translatePipe }}
+        </a>
+      }
+    </app-scroll-rail>
   </nav>
 }

@@ -4,6 +4,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/ro
 import { filter } from 'rxjs/operators'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 
 /** One contextual sub-nav destination under a top-level tab. */
 interface TabChip {
@@ -98,7 +99,7 @@ function currentDashboardChipId(url: string): string | null {
 @Component({
   selector: 'app-tab-chips',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe],
+  imports: [RouterLink, RouterLinkActive, LucideAngularModule, TranslatePipe, ScrollRailComponent],
   templateUrl: './tab-chips.component.html',
   styleUrl: './tab-chips.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,40 +1,16 @@
 <div class="metadata-page" dir="rtl">
   <!-- Mobile/tablet-only jump nav — tapping a tab makes that section the first one in the grid
-       below (real CSS order change, no scroll, no overlay). Desktop hides this entirely; grid
-       layout is unaffected either way. Tablet-only prev/next arrows scroll the tab row itself
-       (mobile relies on touch swipe). -->
-  <div class="mm-jump-nav-row">
-    <button
-      type="button"
-      class="mm-jump-nav-arrow mm-jump-nav-arrow--prev"
-      [class.mm-jump-nav-arrow--hidden]="!canScrollNavPrev_()"
-      (click)="scrollJumpNav('prev')"
-      [attr.aria-label]="'mm_jump_nav_prev' | translatePipe"
-    >
-      <lucide-icon name="chevron-right" [size]="16"></lucide-icon>
-    </button>
-    <nav
-      class="mm-jump-nav"
-      #jumpNavEl
-      (scroll)="updateJumpNavScrollState()"
-      [attr.aria-label]="'metadata_manager' | translatePipe"
-    >
+       below (real CSS order change, no scroll, no overlay). Desktop hides this entirely. The
+       shared scroll rail (plan 350) shows an arrow only on the side with more tabs. -->
+  <nav class="mm-jump-nav-row" [attr.aria-label]="'metadata_manager' | translatePipe">
+    <app-scroll-rail class="mm-jump-nav">
       @for (s of jumpSections; track s.id) {
         <button type="button" class="c-tab-pill" [class.active]="isFront(s.id)" (click)="bringToFront(s.id)">
           {{ s.labelKey | translatePipe }}
         </button>
       }
-    </nav>
-    <button
-      type="button"
-      class="mm-jump-nav-arrow mm-jump-nav-arrow--next"
-      [class.mm-jump-nav-arrow--hidden]="!canScrollNavNext_()"
-      (click)="scrollJumpNav('next')"
-      [attr.aria-label]="'mm_jump_nav_next' | translatePipe"
-    >
-      <lucide-icon name="chevron-left" [size]="16"></lucide-icon>
-    </button>
-  </div>
+    </app-scroll-rail>
+  </nav>
 
   <div class="admin-grid">
     <ng-container

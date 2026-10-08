@@ -151,7 +151,9 @@ $cc-break: 768px;
 
     background: var(--border-strong);
     border-radius: var(--radius-full);
-    transition: background 0.15s ease, transform 0.15s ease;
+    transition:
+      background 0.15s ease,
+      transform 0.15s ease;
 
     &.is-active {
       background: var(--color-primary);

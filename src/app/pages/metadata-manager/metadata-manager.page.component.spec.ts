@@ -211,46 +211,10 @@ describe('MetadataManagerPageComponent', () => {
     expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('0')
   })
 
-  it('should show tablet-only prev/next arrows that scroll the jump-nav row', () => {
-    const nav = fixture.debugElement.query(By.css('.mm-jump-nav')).nativeElement
-    spyOn(nav, 'scrollBy')
-    fixture.debugElement.query(By.css('.mm-jump-nav-arrow--next')).nativeElement.click()
-    expect(nav.scrollBy).toHaveBeenCalledWith(
-      jasmine.objectContaining({ left: jasmine.any(Number), behavior: 'smooth' })
-    )
-    const nextArg = (nav.scrollBy as jasmine.Spy).calls.mostRecent().args[0]
-    expect(nextArg.left).toBeGreaterThan(0)
-
-    fixture.debugElement.query(By.css('.mm-jump-nav-arrow--prev')).nativeElement.click()
-    const prevArg = (nav.scrollBy as jasmine.Spy).calls.mostRecent().args[0]
-    expect(prevArg.left).toBeLessThan(0)
-  })
-
-  it('should hide the prev/next arrow once there is nothing left to scroll to on that side', () => {
-    const nav = fixture.debugElement.query(By.css('.mm-jump-nav')).nativeElement
-    const prevBtn = fixture.debugElement.query(By.css('.mm-jump-nav-arrow--prev')).nativeElement
-    const nextBtn = fixture.debugElement.query(By.css('.mm-jump-nav-arrow--next')).nativeElement
-    const stub = (scrollLeft: number, scrollWidth: number, clientWidth: number) => {
-      Object.defineProperty(nav, 'scrollLeft', { value: scrollLeft, configurable: true })
-      Object.defineProperty(nav, 'scrollWidth', { value: scrollWidth, configurable: true })
-      Object.defineProperty(nav, 'clientWidth', { value: clientWidth, configurable: true })
-      ;(component as unknown as { updateJumpNavScrollState: () => void }).updateJumpNavScrollState()
-      fixture.detectChanges()
-    }
-
-    // At the very start — nothing to scroll back to, more ahead.
-    stub(0, 600, 300)
-    expect(prevBtn.classList.contains('mm-jump-nav-arrow--hidden')).toBeTrue()
-    expect(nextBtn.classList.contains('mm-jump-nav-arrow--hidden')).toBeFalse()
-
-    // Scrolled to the middle — both directions available.
-    stub(-150, 600, 300)
-    expect(prevBtn.classList.contains('mm-jump-nav-arrow--hidden')).toBeFalse()
-    expect(nextBtn.classList.contains('mm-jump-nav-arrow--hidden')).toBeFalse()
-
-    // Fully scrolled to the end — nothing further ahead.
-    stub(-300, 600, 300)
-    expect(prevBtn.classList.contains('mm-jump-nav-arrow--hidden')).toBeFalse()
-    expect(nextBtn.classList.contains('mm-jump-nav-arrow--hidden')).toBeTrue()
+  it("renders the jump-nav tabs inside the shared scroll rail (plan 350 — arrows are the rail's job)", () => {
+    const rail = fixture.debugElement.query(By.css('app-scroll-rail.mm-jump-nav'))
+    expect(rail).not.toBeNull()
+    expect(rail.queryAll(By.css('.c-tab-pill')).length).toBe(9)
+    expect(fixture.debugElement.query(By.css('.mm-jump-nav-arrow'))).toBeNull()
   })
 })

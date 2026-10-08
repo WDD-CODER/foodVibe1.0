@@ -1,0 +1,35 @@
+<button
+  type="button"
+  class="sr-arrow sr-arrow--prev"
+  [class.is-hidden]="!showPrev()"
+  [attr.tabindex]="showPrev() ? null : -1"
+  [attr.aria-hidden]="showPrev() ? null : 'true'"
+  [attr.aria-label]="'scroll_prev' | translatePipe"
+  (click)="scrollByStep('prev')"
+>
+  <lucide-icon class="sr-icon-rtl" name="chevron-right" [size]="16"></lucide-icon>
+  <lucide-icon class="sr-icon-ltr" name="chevron-left" [size]="16"></lucide-icon>
+</button>
+<div
+  #scroller
+  class="sr-scroller"
+  [attr.data-snap]="snap()"
+  [style.--sr-fade-left]="fadeLeft()"
+  [style.--sr-fade-right]="fadeRight()"
+  (scroll)="update()"
+  (wheel)="onWheel($event)"
+>
+  <ng-content></ng-content>
+</div>
+<button
+  type="button"
+  class="sr-arrow sr-arrow--next"
+  [class.is-hidden]="!showNext()"
+  [attr.tabindex]="showNext() ? null : -1"
+  [attr.aria-hidden]="showNext() ? null : 'true'"
+  [attr.aria-label]="'scroll_next' | translatePipe"
+  (click)="scrollByStep('next')"
+>
+  <lucide-icon class="sr-icon-rtl" name="chevron-left" [size]="16"></lucide-icon>
+  <lucide-icon class="sr-icon-ltr" name="chevron-right" [size]="16"></lucide-icon>
+</button>
