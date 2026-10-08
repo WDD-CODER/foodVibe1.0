@@ -184,14 +184,6 @@
 - [ ] A3: Gotcha entry (`docs/brain/gotchas.md`).
 - [ ] A4: Build, specs. Check inventory, recipe-book, suppliers and equipment at 360px, 800px and 1280px. Update session-state.
 
-### Plan 364 — Search fields, part 2: clear (X) in dropdown pickers and no browser suggestions on picker and name fields (`plans/364-search-fields-part-2-picker-clear-and-no-autocomplete.plan.md`)
-> Carried over from archived Plan 320: course `app-custom-select` option sometimes needs 2–3 clicks to register (shared `CustomSelectComponent`, root cause not pinned) — fix in A1.
-- [ ] A1: chip-search-dropdown, custom-select, custom-multi-select: X, autocomplete, unique ids, specs.
-- [ ] A2: Recipe-book ingredient filter and recipe-builder logistics search: X + autocomplete.
-- [ ] A3: Menu-intelligence event type, section category and dish-row search: X + autocomplete.
-- [ ] A4: Autocomplete sweep on the listed modal, form and metadata fields.
-- [ ] A5: Build, specs, Android check. Update session-state.
-
 ### Plan 366 — Delete a supplier that's in use: warning, then admin-only "only me / everyone" (`plans/366-delete-in-use-supplier-warning-admin-scope.plan.md`)
 - [ ] A1: Server: allowlist, trash collection and purge route, plus tests (against the isolated DB) (`server/routes/generic.js`, `server/constants/collections.js`, `server/test/**`).
 - [ ] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
