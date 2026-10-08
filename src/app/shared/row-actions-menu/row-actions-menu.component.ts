@@ -5,8 +5,9 @@ import {
   ElementRef,
   inject,
   input,
+  output,
   signal,
-  viewChild,
+  viewChild
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { NavigationStart, Router } from '@angular/router'
@@ -28,7 +29,7 @@ export const ROW_ACTIONS_POSITIONS: ConnectedPosition[] = [
   { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -ANCHOR_GAP_PX },
   { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -ANCHOR_GAP_PX },
   { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: ANCHOR_GAP_PX },
-  { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: ANCHOR_GAP_PX },
+  { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: ANCHOR_GAP_PX }
 ]
 
 /** Panel class on the overlay pane — lets global styles / tests find an open row-actions popover. */
@@ -55,11 +56,13 @@ export const ROW_ACTIONS_PANEL_CLASS = 'ram-overlay-pane'
   templateUrl: './row-actions-menu.component.html',
   styleUrl: './row-actions-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class.is-anchored]': 'anchored_() || !showTrigger()' },
+  host: { '[class.is-anchored]': 'anchored_() || !showTrigger()' }
 })
 export class RowActionsMenuComponent {
   /** Show the built-in ⋮ trigger (list rows). False for menus opened via `open(anchor)`. */
   readonly showTrigger = input(true)
+  /** Emits when the popover closes (any cause). */
+  readonly closed = output<void>()
 
   private readonly overlay = inject(Overlay)
   private readonly router = inject(Router, { optional: true })
@@ -114,6 +117,7 @@ export class RowActionsMenuComponent {
   }
 
   close(): void {
+    if (this.isOpen()) this.closed.emit()
     this.isOpen.set(false)
     this.anchored_.set(false)
     this.disposeOverlay_()
@@ -133,13 +137,14 @@ export class RowActionsMenuComponent {
       scrollStrategy: this.overlay.scrollStrategies.reposition(),
       hasBackdrop: true,
       backdropClass: 'cdk-overlay-transparent-backdrop',
-      panelClass: ROW_ACTIONS_PANEL_CLASS,
+      panelClass: ROW_ACTIONS_PANEL_CLASS
     })
     ref.backdropClick().subscribe((ev) => {
       ev.stopPropagation()
       this.close()
     })
-    ref.keydownEvents()
+    ref
+      .keydownEvents()
       .pipe(filter((ev) => ev.key === 'Escape'))
       .subscribe(() => this.close())
     const popoverEl = this.popoverRef().nativeElement

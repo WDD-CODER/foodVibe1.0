@@ -12,7 +12,7 @@ import {
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { firstValueFrom } from 'rxjs'
-import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 
 import { KitchenStateService } from '@services/kitchen-state.service'
@@ -49,6 +49,7 @@ import {
   NumberParam
 } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
+import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
 import {
   getProductValidationStatus,
@@ -63,6 +64,7 @@ import { ProductDataService } from '@services/product-data.service'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
@@ -73,8 +75,6 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
   imports: [
     CommonModule,
     FormsModule,
-    RouterLink,
-    RouterLinkActive,
     LucideAngularModule,
     TranslatePipe,
     ClickOutSideDirective,
@@ -88,7 +88,8 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
     SelectionBarComponent,
     EmptyStateComponent,
     NutritionBadgeComponent,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    InputClearComponent
   ],
   templateUrl: './inventory-product-list.component.html',
   styleUrl: './inventory-product-list.component.scss',
@@ -118,9 +119,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
-  /** Tracks explicitly *collapsed* categories — empty by default so every filter group
-   *  starts expanded (matches the design), while still letting the user collapse one. */
-  protected collapsedFilterCategories_ = signal<Set<string>>(new Set())
+  /** Filter-category open state: all collapsed on mobile (≤1023px), all expanded on desktop (plan 345). */
+  protected readonly filterCategories = useCollapsibleCategories()
   protected allergenPopoverProductId_ = signal<string | null>(null)
   protected allergenExpandAll_ = signal<boolean>(false)
   protected lowStockOnly_ = signal<boolean>(false)
@@ -173,6 +173,18 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       { urlParam: 'nutrition', signal: this.nutritionFilter_, serializer: StringParam },
       { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
+
+    // Open any category that gains a selected value (e.g. restored from the URL), so the
+    // active filter is visible even on mobile where categories start collapsed.
+    let prevActive = new Set<string>()
+    effect(() => {
+      const filters = this.activeFilters_()
+      const active = new Set(Object.keys(filters).filter((name) => (filters[name]?.length ?? 0) > 0))
+      active.forEach((name) => {
+        if (!prevActive.has(name)) this.filterCategories.expandIfActive(name, true)
+      })
+      prevActive = active
+    })
 
     // Pagination (plan 304 M3): jump back to page 1 whenever the filtered/sorted result
     // set changes, so a search/filter doesn't strand the user on a now-irrelevant page.
@@ -257,16 +269,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleFilterCategory(name: string): void {
-    this.collapsedFilterCategories_.update((set) => {
-      const next = new Set(set)
-      if (next.has(name)) next.delete(name)
-      else next.add(name)
-      return next
-    })
+    this.filterCategories.toggle(name)
   }
 
   protected isCategoryExpanded(name: string): boolean {
-    return !this.collapsedFilterCategories_().has(name)
+    return this.filterCategories.isExpanded(name)
   }
 
   protected onPanelToggled(): void {
@@ -549,10 +556,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const confirmMessage =
       affected.length > 0
         ? `חומר הגלם הזה בשימוש ב-${affected.length} מתכונים/מנות. מחיקה תסיר אותו מכולם. להמשיך?`
-        : 'האם אתה בטוח שברצונך למחוק חומר גלם זה?'
+        : 'confirm_delete_product'
     if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
 
-    const scope = await this.masterPush_.askDeleteScope(product ?? null)
+    const scope = await this.masterPush_.askDeleteScope(product ?? null, { entity: 'product' })
     if (scope === 'cancel') return
 
     this.deletingId_.set(_id)
@@ -595,7 +602,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
 
     const masterLinkedProduct = ids.map((id) => productsById.get(id)).find((p) => p?._masterId)
-    const scope = await this.masterPush_.askDeleteScope(masterLinkedProduct ?? null)
+    const scope = await this.masterPush_.askDeleteScope(masterLinkedProduct ?? null, {
+      entity: 'product',
+      count: ids.length
+    })
     if (scope === 'cancel') return
 
     for (const id of ids) {
@@ -706,9 +716,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       let updated: Product
       if (field === 'supplierIds_') {
         const currentIds = getSupplierIds(product)
-        if (currentIds.includes(event.value)) continue
+        if (currentIds.length === 1 && currentIds[0] === event.value) continue
+        // Bulk "change supplier" replaces — every selected product ends up with exactly this supplier.
         const newSource = { supplierId: event.value, price: getEffectivePrice(product), addedAt: Date.now() }
-        updated = { ...product, sources: [...(product.sources ?? []), newSource] }
+        updated = { ...product, sources: [newSource] }
       } else if (field === 'categories' || field === 'allergens') {
         const current = (product[field] ?? []) as string[]
         if (current.includes(event.value)) continue
@@ -737,5 +748,19 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         this.savingPriceId_.set(null)
       }
     })
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

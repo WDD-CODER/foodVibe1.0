@@ -11,6 +11,10 @@
       type="text"
       [placeholder]="'metadata_add_category' | translatePipe"
       (keyup.enter)="onAdd(newInput.value, newInput)"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
     />
     <button
       type="button"
@@ -25,36 +29,37 @@
 
   <div class="list-container">
     @if (categories().length > 0) {
-      <!-- Plan 340: compact pills; tap an editable one → edit/delete menu. Double-click still renames. -->
-      <div class="label-pool">
+      <div class="c-tap-chip-group">
         @for (key of categories(); track key) {
           @if (editingKey_() === key) {
             <input
+              #renameInput
               type="text"
               class="inline-edit-input"
               [value]="key | translatePipe"
-              (blur)="onRenameBlur(key, $any($event.target).value)"
-              (keydown.enter)="$any($event.target).blur()"
-              autofocus
+              (blur)="onRenameBlur(key, renameInput.value)"
+              (keydown.enter)="renameInput.blur()"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
             />
           } @else if (canEdit(key)) {
             <button
               type="button"
-              class="label-pill"
-              [class.is-active]="isMenuOpenFor(key)"
-              aria-haspopup="menu"
-              [attr.aria-expanded]="isMenuOpenFor(key)"
-              (click)="openMenu(key, $event)"
+              class="c-tap-chip"
+              [attr.aria-expanded]="menuKey_() === key"
+              (click)="onOpenMenu($event, key)"
               (dblclick)="onStartRename(key)"
             >
               {{ key | translatePipe }}
             </button>
           } @else {
-            <span class="label-pill is-locked">
+            <span class="c-tap-chip is-locked">
               {{ key | translatePipe }}
               <lucide-icon
                 name="lock"
-                [size]="12"
+                [size]="14"
                 [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
                 [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
               ></lucide-icon>
@@ -66,15 +71,28 @@
       <div class="empty-state">{{ 'metadata_no_prep_categories' | translatePipe }}</div>
     }
   </div>
-
-  <app-row-actions-menu #menu [showTrigger]="false">
-    <button type="button" class="c-btn-ghost--sm ram-action" (click)="onMenuEdit()">
-      <lucide-icon name="pencil" [size]="14"></lucide-icon>
-      {{ 'edit' | translatePipe }}
-    </button>
-    <button type="button" class="c-btn-ghost--sm ram-action ram-action--danger" (click)="onMenuDelete()">
-      <lucide-icon name="trash-2" [size]="14"></lucide-icon>
-      {{ 'delete' | translatePipe }}
-    </button>
-  </app-row-actions-menu>
 </section>
+
+<!-- Outside the card: its backdrop-filter would trap the position:fixed popover. -->
+<app-row-actions-menu [showTrigger]="false" (closed)="menuKey_.set(null)">
+  @if (menuKey_(); as key) {
+    <button
+      type="button"
+      class="c-icon-btn"
+      (click)="onStartRename(key)"
+      [attr.aria-label]="'edit' | translatePipe"
+      [attr.title]="'edit' | translatePipe"
+    >
+      <lucide-icon name="pencil" [size]="18"></lucide-icon>
+    </button>
+    <button
+      type="button"
+      class="c-icon-btn danger"
+      (click)="onMenuDelete(key)"
+      [attr.aria-label]="'delete' | translatePipe"
+      [attr.title]="'delete' | translatePipe"
+    >
+      <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+    </button>
+  }
+</app-row-actions-menu>

@@ -7,6 +7,7 @@ import { MenuEventDataService } from '@services/menu-event-data.service'
 import { VenueProfile } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { formatVenueHours } from 'src/app/core/utils/venue-hours.util'
 
 @Component({
   selector: 'app-venue-detail',
@@ -30,6 +31,9 @@ export class VenueDetailComponent implements OnInit {
 
   /** design-port session 6 — reads the (currently unwired-elsewhere) logistics.venueProfileId
    * link; see MenuEvent/EventLogistics models and the new venue-link-chip on menu-intelligence. */
+  /** True when at least one hours block has text — empty blocks alone show "—" (plan 371). */
+  protected readonly hasHours_ = computed(() => formatVenueHours(this.venue_()?.operatingHours).first !== '')
+
   protected readonly associatedMenus_ = computed(() => {
     const venueId = this.venue_()?._id
     if (!venueId) return []

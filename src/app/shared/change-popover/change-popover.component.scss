@@ -14,6 +14,10 @@
     pointer-events: auto;
   }
 
+  .change-popover-item + .change-popover-item {
+    margin-block-start: 0.6rem;
+  }
+
   .change-popover-label {
     margin: 0 0 0.5rem 0;
     padding-block-end: 0.35rem;
@@ -45,11 +49,11 @@
   .change-popover-arrow {
     flex-shrink: 0;
     color: var(--color-primary);
-    font-weight: 600;
   }
 
   .change-popover-to {
     font-weight: 600;
+    text-decoration: none;
     color: var(--color-primary-hover);
   }
 }

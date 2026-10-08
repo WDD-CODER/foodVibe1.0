@@ -1,11 +1,19 @@
-<div class="custom-select-wrap" [class.open]="open()" [class.custom-select-wrap--chip]="variant() === 'chip'" (clickOutside)="close()">
+<div
+  class="custom-select-wrap"
+  [class.open]="open()"
+  [class.custom-select-wrap--chip]="variant() === 'chip'"
+  (clickOutside)="close()"
+>
   @if (typeToFilter()) {
-    <div class="custom-select-trigger custom-select-trigger--input"
+    <div
+      class="custom-select-trigger custom-select-trigger--input"
       [class.custom-select-trigger--compact]="compact()"
       [class.custom-select-trigger--chip]="variant() === 'chip'"
       [class.open]="open()"
-      (click)="openDropdown()">
-      <input #inputRef
+      (click)="openDropdown()"
+    >
+      <input
+        #inputRef
         type="text"
         [id]="triggerId()"
         class="custom-select-input form-input--no-focus-ring"
@@ -17,8 +25,20 @@
         (keydown)="onInputKeydown($event)"
         [attr.aria-expanded]="open()"
         aria-haspopup="listbox"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
         [attr.aria-label]="placeholder() | translatePipe"
-        [placeholder]="placeholder() | translatePipe" />
+        [placeholder]="placeholder() | translatePipe"
+      />
+      @if (variant() !== 'chip') {
+        <app-input-clear
+          [visible]="open() && !!searchQuery_()"
+          (clear)="onClearSearch()"
+          (click)="$event.stopPropagation()"
+        />
+      }
       <lucide-icon name="chevron-down" [size]="variant() === 'chip' ? 10 : 14"></lucide-icon>
     </div>
   } @else {
@@ -37,7 +57,8 @@
       (blur)="onTriggerBlur()"
       [attr.aria-expanded]="open()"
       aria-haspopup="listbox"
-      [attr.aria-label]="placeholder()">
+      [attr.aria-label]="placeholder()"
+    >
       <span class="custom-select-label">
         @if (selectedLabel()) {
           @if (translateLabels()) {
@@ -54,7 +75,12 @@
   }
 
   @if (open()) {
-    <app-scrollable-dropdown [maxHeight]="maxHeight()" [attr.aria-activedescendant]="typeToFilter() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null">
+    <app-scrollable-dropdown
+      [maxHeight]="maxHeight()"
+      [attr.aria-activedescendant]="
+        typeToFilter() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null
+      "
+    >
       @for (opt of visibleOptions_(); track opt.value; let i = $index) {
         <button
           type="button"
@@ -64,7 +90,8 @@
           [class.highlighted]="highlightedIndex() === i"
           role="option"
           [attr.aria-selected]="value === opt.value"
-          (click)="onOptionClick(opt)">
+          (click)="onOptionClick(opt)"
+        >
           @if (translateLabels()) {
             {{ opt.label | translatePipe }}
           } @else {
@@ -81,7 +108,8 @@
             [class.highlighted]="highlightedIndex() === visibleOptions_().length"
             role="option"
             [attr.aria-selected]="value === addNewOption_()!.value"
-            (click)="onOptionClick(addNewOption_()!)">
+            (click)="onOptionClick(addNewOption_()!)"
+          >
             <span class="c-add-new-icon">
               <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
             </span>

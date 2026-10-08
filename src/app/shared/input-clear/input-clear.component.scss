@@ -1,0 +1,73 @@
+:host {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+}
+
+.input-clear-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  padding: 0;
+
+  color: var(--color-text-muted);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+
+  opacity: 0;
+  transform: scale(0.6);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease,
+    visibility 0s linear 150ms,
+    background 150ms ease;
+
+  // 44px tap target on touch without changing the visual size.
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+  }
+
+  &.is-visible {
+    opacity: 1;
+    transform: scale(1);
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+      opacity 150ms ease,
+      transform 150ms ease,
+      visibility 0s,
+      background 150ms ease;
+  }
+
+  &:hover {
+    color: var(--color-text-main);
+    background: var(--bg-muted);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 1px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &.is-visible {
+      transition: none;
+    }
+  }
+}

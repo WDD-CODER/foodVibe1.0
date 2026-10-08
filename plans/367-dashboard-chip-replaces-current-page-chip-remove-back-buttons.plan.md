@@ -96,9 +96,9 @@ As a chef in metadata, suppliers, venues or trash, I want the dashboard to be on
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Tab-chips replacement logic plus spec (overview → 4 chips; metadata, suppliers, venues and trash → dashboard chip in the right index; query-only navigation updates) (`core/components/tab-chips/**`).
-- [ ] A2: Remove the 4 back buttons, handlers and styles.
-- [ ] A3: Specs and e2e cleanup; P1 style.
+- [x] A1: Tab-chips replacement logic plus spec (overview → 4 chips; metadata, suppliers, venues and trash → dashboard chip in the right index; query-only navigation updates) (`core/components/tab-chips/**`).
+- [x] A2: Remove the 4 back buttons, handlers and styles.
+- [x] A3: Specs and e2e cleanup; P1 style.
 - [ ] A4: Build, specs, icons lint, check on phone and desktop. Update session-state.
 
 ## Technical Considerations

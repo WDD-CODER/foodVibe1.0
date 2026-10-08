@@ -19,7 +19,7 @@ export const equipmentResolver: ResolveFn<Equipment | null> = (route) => {
       (equipment) => equipment,
       () => {
         userMsgService.onSetErrorMsg('הציוד לא נמצא')
-        router.navigate(['/equipment/list'])
+        router.navigate(['/inventory/equipment'])
         return null
       }
     )

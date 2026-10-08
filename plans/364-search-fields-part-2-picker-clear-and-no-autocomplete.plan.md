@@ -90,18 +90,18 @@ As a chef picking allergens or categories on my phone, I want to type without br
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Add `app-input-clear` to the 7 picker searches. Clearing sets the query to `''`, keeps the dropdown open with the full list, resets the highlighted index, and refocuses the input. menu-dish-row: emit its existing `clearSearch` output (today it only fires on click-outside).
-- [ ] Add `autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"` to:
+- [x] Add `app-input-clear` to the 7 picker searches. Clearing sets the query to `''`, keeps the dropdown open with the full list, resets the highlighted index, and refocuses the input. menu-dish-row: emit its existing `clearSearch` output (today it only fires on click-outside).
+- [x] Add `autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"` to:
   - the 7 picker inputs
   - ai-product-modal category and allergen chip inputs (~L219, ~L245)
   - recipe-workflow timer fields (~L82, ~L125)
   - metadata-manager add/rename inputs (page ~L150, ~L226; section and preparation category managers ~L9, ~L32)
   - name and key fields: product-form `productName` (~L26), recipe-header `nameHebrew` (~L31), translation-key-modal (~L9, ~L21), label-creation-modal (~L14, ~L23), unit-creator (~L9), add-item-modal (~L10), add-equipment-modal (~L9), quick-add-product-modal (~L25), quick-edit-product-panel (~L9), ai-draft-editor (~L5, ~L65, ~L151)
-- [ ] Do not add it to venue or supplier contact, phone and address fields (legitimate autofill).
-- [ ] chip-search-dropdown: unique option ids per instance (prefix with a per-instance id), so two dropdowns on one page don't collide.
+- [x] Do not add it to venue or supplier contact, phone and address fields (legitimate autofill).
+- [x] chip-search-dropdown: unique option ids per instance (prefix with a per-instance id), so two dropdowns on one page don't collide.
 
 ### Should Have (P1)
-- [ ] If Android Chrome still shows suggestions on `.csd-input`, switch that input to `autocomplete="new-off"` plus `name="csd-<instanceId>"`.
+- [x] If Android Chrome still shows suggestions on `.csd-input`, switch that input to `autocomplete="new-off"` plus `name="csd-<instanceId>"`. (not needed: Android check showed no suggestions)
 
 ### Nice to Have (P2)
 - None.
@@ -113,11 +113,11 @@ As a chef picking allergens or categories on my phone, I want to type without br
 
 ## Atomic Sub-tasks
 
-- [ ] A1: chip-search-dropdown, custom-select, custom-multi-select: X, autocomplete, unique ids, specs.
-- [ ] A2: Recipe-book ingredient filter and recipe-builder logistics search: X + autocomplete.
-- [ ] A3: Menu-intelligence event type, section category and dish-row search: X + autocomplete.
-- [ ] A4: Autocomplete sweep on the listed modal, form and metadata fields.
-- [ ] A5: Build, specs, Android check. Update session-state.
+- [x] A1: chip-search-dropdown, custom-select, custom-multi-select: X, autocomplete, unique ids, specs.
+- [x] A2: Recipe-book ingredient filter and recipe-builder logistics search: X + autocomplete.
+- [x] A3: Menu-intelligence event type, section category and dish-row search: X + autocomplete.
+- [x] A4: Autocomplete sweep on the listed modal, form and metadata fields.
+- [x] A5: Build, specs, Android check. Update session-state.
 
 ## Technical Considerations
 
