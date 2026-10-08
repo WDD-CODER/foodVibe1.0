@@ -68,18 +68,18 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `list-shell.component.html`: new `<div class="table-top">` inside `section.table-area`, before the rows. It holds a new `<ng-content select="[shell-pagination]">` followed by the existing `.table-header`.
-- [ ] `.table-top { position:sticky; inset-block-start:var(--list-sticky-top, 0); z-index:5; background: <opaque surface token> }`.
-- [ ] `--list-sticky-top` on `:host`:
+- [x] `list-shell.component.html`: new `<div class="table-top">` inside `section.table-area`, before the rows. It holds a new `<ng-content select="[shell-pagination]">` followed by the existing `.table-header`.
+- [x] `.table-top { position:sticky; inset-block-start:var(--list-sticky-top, 0); z-index:5; background: <opaque surface token> }`.
+- [x] `--list-sticky-top` on `:host`:
   - `0` at >1023px (internal scroll)
   - the app header height (`3.875rem`, the same value `.c-table th` uses at `styles.scss:~1111`) at 621–1023px
   - `env(safe-area-inset-top, 0px)` at ≤620px (the top bar is hidden there)
-- [ ] `.table-area` switches `overflow:hidden` → `overflow:clip`, which keeps the clipping without creating a scroll container. Update `grid-template-rows` (`50px 1fr` → `auto 1fr`) and the ≤1023px variant.
-- [ ] Move the `.c-pagination-controls` blocks in inventory and recipe-book out of `[shell-table-body]` into a `shell-pagination` element. In `styles.scss`, `.c-pagination-controls` swaps `border-block-start` for `border-block-end` and drops `grid-column:1/-1` if it's no longer in the grid.
-- [ ] The `[shell-modal]` slot stays outside `.table-area` (backdrop-filter containing-block reason, per the existing comment).
+- [x] `.table-area` switches `overflow:hidden` → `overflow:clip`, which keeps the clipping without creating a scroll container. Update `grid-template-rows` (`50px 1fr` → `auto 1fr`) and the ≤1023px variant.
+- [x] Move the `.c-pagination-controls` blocks in inventory and recipe-book out of `[shell-table-body]` into a `shell-pagination` element. In `styles.scss`, `.c-pagination-controls` swaps `border-block-start` for `border-block-end` and drops `grid-column:1/-1` if it's no longer in the grid.
+- [x] The `[shell-modal]` slot stays outside `.table-area` (backdrop-filter containing-block reason, per the existing comment).
 
 ### Should Have (P1)
-- [ ] Changing page scrolls the table back to its first row (`scrollIntoView` on `.table-top`, block start).
+- [x] Changing page scrolls the table back to its first row (`scrollIntoView` on `.table-top`, block start).
 
 ### Nice to Have (P2)
 - None.
@@ -94,7 +94,7 @@ touching any milestone.
 - [x] A1: list-shell: `.table-top` wrapper, `[shell-pagination]` slot, sticky styles, `--list-sticky-top`, `overflow:clip`, grid rows (`src/app/shared/list-shell/**`).
 - [x] A2: Move pagination in inventory and recipe-book into the slot; adjust `.c-pagination-controls` (`inventory-product-list.component.html/.scss`, `recipe-book-list.component.html/.scss`, `src/styles.scss`).
 - [x] A3: Verify suppliers and equipment (no pagination) get the sticky column header with no empty gap.
-- [ ] A4: Build and run specs. Check at 360px, 800px and 1280px. Update the session-state file.
+- [x] A4: Build and run specs. Check at 360px, 800px and 1280px. Update the session-state file.
 
 ## Technical Considerations
 
