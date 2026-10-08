@@ -26,6 +26,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { TouchRowSelection } from 'src/app/shared/list-selection/touch-row-selection'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
@@ -150,6 +151,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected editingId_ = signal<string | null>(null)
   protected closingId_ = signal<string | null>(null)
   protected selection = new ListSelectionState()
+  protected touchSelect = new TouchRowSelection({ selection: this.selection, historyKey: 'equipmentSelection' })
   protected isSavingEdit_ = signal(false)
 
   protected editableFields_ = computed<BulkEditableField[]>(() => [
@@ -338,6 +340,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected onRowClick(item: Equipment, event: MouseEvent): void {
+    if (this.touchSelect.consumeClick()) return
     const el = event.target as HTMLElement
     if (
       el.closest('button') ||

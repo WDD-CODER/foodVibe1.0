@@ -1,14 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  inject,
-  output,
-  signal,
-  OnInit,
-  OnDestroy
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, OnInit, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -24,6 +14,7 @@ import { VenueProfile, EnvironmentType } from '@models/venue.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { TouchRowSelection } from 'src/app/shared/list-selection/touch-row-selection'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
@@ -34,14 +25,8 @@ import { formatVenueHours, VenueHoursSummary } from 'src/app/core/utils/venue-ho
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environmentType'
-/** Hold time before a press on a card enters selection mode. */
-const LONG_PRESS_MS = 500
-/** Finger/mouse travel (px) that cancels a long press, so scrolling never selects. */
-const LONG_PRESS_MOVE_TOLERANCE = 10
 /** history.state marker for the entry pushed while selecting, so Back leaves selection mode. */
 const SELECTION_HISTORY_KEY = 'venueSelection'
-/** Same query the SCSS uses to hide the card checkboxes: phones and tablets without a mouse. */
-const TOUCH_QUERY = '(hover: none)'
 /** Taps on these keep the selection: cards toggle, the bar and its dialogs act on it. */
 const KEEP_SELECTION_TARGETS = '.venue-card, app-selection-bar, .select-all-pill, app-confirm-modal, .c-modal-overlay'
 
@@ -83,26 +68,11 @@ export class VenueListComponent implements OnInit, OnDestroy {
   protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set())
   protected selection = new ListSelectionState()
   /** Touch devices select by long press (no checkboxes); mouse devices keep the hover checkbox. */
-  private readonly isTouch_ = typeof matchMedia === 'function' && matchMedia(TOUCH_QUERY).matches
-
-  private longPressTimer_: ReturnType<typeof setTimeout> | null = null
-  private longPressStart_: { x: number; y: number } | null = null
-  /** The click that follows a completed long press must not also navigate or toggle. */
-  private suppressNextClick_ = false
-  /** True while our selection-mode history entry is on top of the stack. */
-  private selectionHistoryPushed_ = false
-  private readonly onPopState_ = (): void => {
-    if (!this.selectionHistoryPushed_) return
-    this.selectionHistoryPushed_ = false
-    this.selection.clear()
-  }
-  /** Touch: a tap anywhere outside the cards and the selection bar ends selection mode. */
-  private readonly onDocumentClick_ = (event: MouseEvent): void => {
-    if (!this.selection.selectionMode()) return
-    const el = event.target as HTMLElement | null
-    if (!el?.isConnected || el.closest(KEEP_SELECTION_TARGETS)) return
-    this.selection.clear()
-  }
+  protected touchSelect = new TouchRowSelection({
+    selection: this.selection,
+    historyKey: SELECTION_HISTORY_KEY,
+    keepTargets: KEEP_SELECTION_TARGETS
+  })
 
   protected envTypes = ENV_TYPES
 
@@ -130,38 +100,15 @@ export class VenueListComponent implements OnInit, OnDestroy {
         { urlParam: 'envTypes', signal: this.selectedEnvTypes_, serializer: StringSetParam }
       ])
     }
-    // Touch only: selection mode owns one history entry: entering pushes it (so Back clears the selection),
-    // clearing any other way (selection bar, select-all off, last card unchecked) pops it.
-    effect(() => {
-      if (!this.isTouch_) return
-      const selecting = this.selection.selectionMode()
-      if (selecting && !this.selectionHistoryPushed_) {
-        history.pushState({ ...history.state, [SELECTION_HISTORY_KEY]: true }, '')
-        this.selectionHistoryPushed_ = true
-      } else if (!selecting && this.selectionHistoryPushed_) {
-        this.selectionHistoryPushed_ = false
-        history.back()
-      }
-    })
   }
 
   ngOnInit(): void {
-    if (this.isTouch_) {
-      window.addEventListener('popstate', this.onPopState_)
-      document.addEventListener('click', this.onDocumentClick_)
-    }
     void this.venueData.ensureLoaded()
     this.heroFab.setPageActions([{ labelKey: 'add_venue', icon: 'plus', run: () => this.onAddPlace() }], 'replace')
   }
 
   ngOnDestroy(): void {
     this.heroFab.clearPageActions()
-    window.removeEventListener('popstate', this.onPopState_)
-    document.removeEventListener('click', this.onDocumentClick_)
-    this.cancelLongPress()
-    // Leaving the page (e.g. a card's edit button) while selecting: the pushed entry stays in
-    // history as a harmless same-URL step; just stop tracking it.
-    this.selectionHistoryPushed_ = false
   }
 
   protected toggleEnvType(env: EnvironmentType): void {
@@ -225,47 +172,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
     this.router.navigate(['/venues/edit', id])
   }
 
-  /** Touch only: a long press on a card enters selection mode with that card selected. */
-  protected onCardPointerDown(item: VenueProfile, event: PointerEvent): void {
-    // A long press on touch often ends without a click, so a stale flag is reset by the next press.
-    this.suppressNextClick_ = false
-    if (!this.isTouch_ || event.button !== 0) return
-    const el = event.target as HTMLElement
-    if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return
-    this.cancelLongPress()
-    this.longPressStart_ = { x: event.clientX, y: event.clientY }
-    this.longPressTimer_ = setTimeout(() => {
-      this.longPressTimer_ = null
-      this.longPressStart_ = null
-      this.suppressNextClick_ = true
-      this.selection.toggle(item._id ?? '')
-      navigator.vibrate?.(30)
-    }, LONG_PRESS_MS)
-  }
-
-  protected onCardPointerMove(event: PointerEvent): void {
-    const start = this.longPressStart_
-    if (!start) return
-    const moved = Math.hypot(event.clientX - start.x, event.clientY - start.y)
-    if (moved > LONG_PRESS_MOVE_TOLERANCE) this.cancelLongPress()
-  }
-
-  protected cancelLongPress(): void {
-    if (this.longPressTimer_) clearTimeout(this.longPressTimer_)
-    this.longPressTimer_ = null
-    this.longPressStart_ = null
-  }
-
-  /** Stop the phone's long-press context menu / image callout from opening over the selection. */
-  protected onCardContextMenu(event: Event): void {
-    if (this.suppressNextClick_ || this.selection.selectionMode()) event.preventDefault()
-  }
-
   protected onRowClick(item: VenueProfile, event: MouseEvent): void {
-    if (this.suppressNextClick_) {
-      this.suppressNextClick_ = false
-      return
-    }
+    if (this.touchSelect.consumeClick()) return
     const el = event.target as HTMLElement
     if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return
     if (this.selection.selectionMode()) {

@@ -46,6 +46,7 @@
   <ng-container shell-selection-bar>
     <app-selection-bar
       [selectionState]="selection"
+      [selectableIds]="filteredEquipmentIds_()"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
       (bulkEdit)="onBulkEdit($event)"
@@ -113,6 +114,13 @@
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"
+        [class.is-selected]="selection.isSelected(item._id)"
+        (pointerdown)="touchSelect.onPointerDown(item._id, $event)"
+        (pointermove)="touchSelect.onPointerMove($event)"
+        (pointerup)="touchSelect.cancel()"
+        (pointercancel)="touchSelect.cancel()"
+        (pointerleave)="touchSelect.cancel()"
+        (contextmenu)="touchSelect.onContextMenu($event)"
         (keydown.enter)="toggleRowEdit(item)"
         (keydown.space)="$event.preventDefault(); toggleRowEdit(item)"
       >

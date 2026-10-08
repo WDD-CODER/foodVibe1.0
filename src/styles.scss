@@ -954,6 +954,11 @@ textarea.c-input {
   background: var(--bg-warning-soft);
 }
 
+/* Selected row (touch has no checkbox to show it). */
+.c-list-row.is-selected .c-list-body-cell {
+  background: color-mix(in srgb, var(--color-primary) 14%, white);
+}
+
 /* ---- Engine: Pagination controls (plan 304 M3) — row-count reduction for large
    .c-list-row/.c-list-body-cell grids where cdk-virtual-scroll's item wrapper would
    break the flat display:contents column layout. Spans the full table-body grid. ---- */

@@ -25,6 +25,7 @@ import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { TouchRowSelection } from 'src/app/shared/list-selection/touch-row-selection'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
@@ -79,6 +80,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   private readonly togglePanelState_: () => void
 
   protected selection = new ListSelectionState()
+  protected touchSelect = new TouchRowSelection({ selection: this.selection, historyKey: 'supplierSelection' })
 
   protected editableFields_: BulkEditableField[] = [
     {
@@ -193,6 +195,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   }
 
   protected onRowClick(item: Supplier, event: MouseEvent): void {
+    if (this.touchSelect.consumeClick()) return
     const el = event.target as HTMLElement
     if (el.closest('button') || el.closest('a') || el.closest('app-list-row-checkbox')) return
     if (this.selection.selectionMode()) {

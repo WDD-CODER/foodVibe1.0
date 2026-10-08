@@ -6,12 +6,27 @@
     </header>
 
     <div class="selection-bar__actions">
+      @if (isTouch && selectableIds().length > 0 && !selectionState().allSelected(selectableIds())) {
+        <button
+          type="button"
+          class="c-btn-ghost--sm selection-bar__btn"
+          (click)="selectionState().selectAll(selectableIds())"
+        >
+          <lucide-icon name="check" [size]="16" />
+          {{ 'select_all' | translatePipe }}
+        </button>
+      }
+
       <button type="button" class="c-btn-ghost--sm selection-bar__btn" (click)="selectionState().clear()">
         <lucide-icon name="x" [size]="16" />
         {{ 'clear' | translatePipe }}
       </button>
 
-      <button type="button" class="c-btn-ghost--sm selection-bar__btn selection-bar__btn--danger" (click)="onBulkDelete()">
+      <button
+        type="button"
+        class="c-btn-ghost--sm selection-bar__btn selection-bar__btn--danger"
+        (click)="onBulkDelete()"
+      >
         <lucide-icon name="trash-2" [size]="16" />
         {{ 'delete' | translatePipe }}
       </button>
@@ -23,7 +38,8 @@
             [placeholder]="'change_field'"
             [translateLabels]="true"
             [compact]="true"
-            (valueChange)="onFieldSelect($event)" />
+            (valueChange)="onFieldSelect($event)"
+          />
         } @else {
           <div class="selection-bar__edit-flow">
             <span class="selection-bar__edit-label">{{ activeField_()!.label | translatePipe }}:</span>
@@ -34,7 +50,8 @@
               [addNewValue]="activeField_()!.addNewValue ?? ''"
               [typeToFilter]="true"
               [compact]="true"
-              (valueChange)="onValueSelect($event)" />
+              (valueChange)="onValueSelect($event)"
+            />
             <button type="button" class="c-btn-ghost--sm selection-bar__btn--cancel" (click)="onCancelEdit()">
               <lucide-icon name="x" [size]="14" />
             </button>

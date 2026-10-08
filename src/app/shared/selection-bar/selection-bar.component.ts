@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { isTouchDevice } from 'src/app/shared/list-selection/touch-row-selection'
 import { BulkEditableField } from './bulk-editable-field.model'
 
 @Component({
@@ -28,6 +29,9 @@ import { BulkEditableField } from './bulk-editable-field.model'
 })
 export class SelectionBarComponent {
   selectionState = input.required<ListSelectionState>()
+  /** Ids a touch "select all" button selects; empty hides the button. */
+  selectableIds = input<string[]>([])
+  protected readonly isTouch = isTouchDevice()
   editableFields = input<BulkEditableField[]>([])
 
   bulkDelete = output<string[]>()
