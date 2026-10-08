@@ -197,13 +197,6 @@
 - [ ] A3: Gotcha entry (`docs/brain/gotchas.md`).
 - [ ] A4: Build, specs. Check inventory, recipe-book, suppliers and equipment at 360px, 800px and 1280px. Update session-state.
 
-### Plan 363 — Search fields, part 1: animated clear (X) button and no browser suggestions on the 8 main search bars (`plans/363-search-fields-part-1-clear-button-no-autocomplete-main-bars.plan.md`)
-- [ ] A1: `InputClearComponent` + spec (hidden when `visible=false`, emits `clear`); engine CSS (`shared/input-clear/**`, `src/styles.scss`).
-- [ ] A2: Wire the 4 list pages (recipe-book, inventory, suppliers, equipment).
-- [ ] A3: Wire menu-library and venues.
-- [ ] A4: Wire ingredient-search and preparation-search, preserving their keyboard and result-panel behavior.
-- [ ] A5: Autocomplete attributes on all 8. Build, specs, phone check. Update session-state.
-
 ### Plan 364 — Search fields, part 2: clear (X) in dropdown pickers and no browser suggestions on picker and name fields (`plans/364-search-fields-part-2-picker-clear-and-no-autocomplete.plan.md`)
 > Carried over from archived Plan 320: course `app-custom-select` option sometimes needs 2–3 clicks to register (shared `CustomSelectComponent`, root cause not pinned) — fix in A1.
 - [ ] A1: chip-search-dropdown, custom-select, custom-multi-select: X, autocomplete, unique ids, specs.
