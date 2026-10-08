@@ -475,14 +475,10 @@
 // ever applied. Selectors mirror the base rules' depth so these win by source order.
 // ========================================================
 
-// Tablet: two columns; an expanded optional field spans the row; scaling rows in two lines.
+// Tablet: two columns; an expanded optional field keeps its cell width and grows downward; scaling rows in two lines.
 @media (max-width: 900px) {
   .form-container .form-section {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .form-container .collapsible-field:has(> .collapsible-field__content:not(.collapsible-field__content--hidden)) {
-    grid-column: 1 / -1;
   }
 
   .form-container .scaling-box .scaling-row {
@@ -596,4 +592,3 @@
     }
   }
 }
-
