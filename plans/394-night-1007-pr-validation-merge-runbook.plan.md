@@ -65,20 +65,20 @@ None. No invariant touched. Merges only; every PR was already planned under its 
 - [x] Merged.
 
 ### Round 5 — PR #297 Plan 365 Admin scope wording (`feat/night-1007-365-admin-scope-wording`) — conflict: dictionary.json
-- [ ] Metadata: delete a label → header "מחיקה", buttons "מחק רק אצלי / מחק מכולם". Add → "פריט חדש … פרסם לכולם". Rename → "שמירת שינויים … עדכן לכולם".
-- [ ] Inventory: delete a master-linked product → "מוצר" + the "תסיר את המוצר גם מכל המתכונים" warning.
-- [ ] Recipe book: select 3 master-linked recipes → delete → "3 פריטים נבחרו…", one dialog. Single → one dialog. Bulk-add label to 3 → "3 פריטים נבחרו…" wording.
-- [ ] Recipe builder as admin: new recipe → "פריט חדש"; new dish → "מנה חדשה".
-- [ ] Regular user: no scope prompts; plain delete confirm still shows.
-- [ ] Merged.
+- [x] Metadata: delete a label → header "מחיקה", buttons "מחק רק אצלי / מחק מכולם". Add → "פריט חדש … פרסם לכולם". Rename → "שמירת שינויים … עדכן לכולם".
+- [x] Inventory: delete a master-linked product → "מוצר" + the "תסיר את המוצר גם מכל המתכונים" warning.
+- [x] Recipe book: select 3 master-linked recipes → delete → "3 פריטים נבחרו…", one dialog. Single → one dialog. Bulk-add label to 3 → "3 פריטים נבחרו…" wording.
+- [x] Recipe builder as admin: new recipe → "פריט חדש"; new dish → "מנה חדשה".
+- [x] Regular user: no scope prompts; plain delete confirm still shows.
+- [x] Merged.
 
 ### Round 6 — PR #298 Plan 370 AI recipe portions (`feat/night-1007-370-ai-recipe-portions`) — conflict: dictionary.json
 Night run skipped A4 (eval script) and could not run Mongo server tests.
-- [ ] Agent: `cd server && npm test` on this PC → all green (incl. Mongo files).
-- [ ] With the local key: "חביתה" → 1 portion, 2–3 eggs, pinch of salt. "חביתה ל-2" → 2 portions, 4–6 eggs. "שקשוקה ל-4" → 4 portions.
-- [ ] Ask "חביתה ל-10 מ-2 ביצים" → approve → warning "כמויות הרכיבים לא סבירות ביחס למספר המנות".
-- [ ] Decide: A4 eval script now (`fix:`) or leave `[ ]` in plan 370.
-- [ ] Merged.
+- [x] Agent: `cd server && npm test` on this PC → all green (incl. Mongo files).
+- [x] With the local key: "חביתה" → 1 portion, 2–3 eggs, pinch of salt. "חביתה ל-2" → 2 portions, 4–6 eggs. "שקשוקה ל-4" → 4 portions.
+- [x] Ask "חביתה ל-10 מ-2 ביצים" → approve → warning "כמויות הרכיבים לא סבירות ביחס למספר המנות".
+- [x] Decide: A4 eval script now (`fix:`) or leave `[ ]` in plan 370.
+- [x] Merged.
 
 ### Round 7 — PR #295 Plan 351 Dashboard recent activity (`feat/night-1007-351-recent-activity-history`) — conflict: dictionary.json
 - [x] Edit a product's supplier, category and price → `/dashboard`: product name, "עודכן", "לפני רגע", 3 lines like "ספק: X ← Y", all Hebrew, no ids.
@@ -88,10 +88,10 @@ Night run skipped A4 (eval script) and could not run Mongo server tests.
 - [x] Merged.
 
 ### Round 8 — PR #296 Plan 367 Dashboard chip, no back buttons (`feat/night-1007-367-dashboard-chip-no-back`) — conflicts: tab-chips spec, supplier-list.ts
-- [ ] `/dashboard`: chips אתרים · מטא-דאטה · ספקים · אשפה, none active. Tap מטא-דאטה → אתרים · לוח בקרה · ספקים · אשפה (לוח בקרה outlined) → tap it → overview.
-- [ ] `/suppliers`, `/venues`, `/trash`: no back button; outlined "לוח בקרה" chip in that page's slot. Phone 360 + desktop.
-- [ ] Suppliers list header: title not squeezed.
-- [ ] Merged.
+- [x] `/dashboard`: chips אתרים · מטא-דאטה · ספקים · אשפה, none active. Tap מטא-דאטה → אתרים · לוח בקרה · ספקים · אשפה (לוח בקרה outlined) → tap it → overview.
+- [x] `/suppliers`, `/venues`, `/trash`: no back button; outlined "לוח בקרה" chip in that page's slot. Phone 360 + desktop.
+- [x] Suppliers list header: title not squeezed.
+- [x] Merged.
 
 ### Round 9 — PR #314 Plan 364 Search fields part 2 — chain top, contains #299 Plan 363 (`feat/night-1007-364-search-fields-part2`)
 Agent: rebase #299 onto main first, then #314 onto #299; retarget #314 to `main`; serve #314. `approve` merges #299 then #314.
@@ -119,38 +119,38 @@ Conflicts expected in `row-actions-menu` and `list-shell` (keep the `[shell-moda
 - [ ] Merged.
 
 ### Round 11 — PR #300 Plan 361 Lists quick fixes (`feat/night-1007-361-lists-quick-fixes`) — conflict: supplier-list.html
-- [ ] `/inventory/list` (+ recipe-book, suppliers, equipment): select 2 rows → bulk edit → "שנה שדה" + value list fully visible over the table.
-- [ ] Suppliers desktop 1280: rows line up under headers; header "מינימום הזמנה"; cells "₪500" or "—".
-- [ ] Suppliers phone 360: name, carousel (first slide מינימום הזמנה), actions, select — no overlap. Empty search → "לא נמצאו ספקים תואמים".
-- [ ] Merged.
+- [x] `/inventory/list` (+ recipe-book, suppliers, equipment): select 2 rows → bulk edit → "שנה שדה" + value list fully visible over the table.
+- [x] Suppliers desktop 1280: rows line up under headers; header "מינימום הזמנה"; cells "₪500" or "—".
+- [x] Suppliers phone 360: name, carousel (first slide מינימום הזמנה), actions, select — no overlap. Empty search → "לא נמצאו ספקים תואמים".
+- [x] Merged.
 
 ### Round 12 — PR #294 Plan 345 Filters collapsed on mobile (`feat/night-1007-345-filters-collapsed-mobile`) — conflict: supplier-list.ts
-- [ ] Phone ≤1023 (360): filters on `/inventory/list`, `/recipe-book`, suppliers, `/inventory/equipment` → only category headers. Tap → opens. Select a value, leave and come back → that category open with count badge.
-- [ ] Desktop 1280: panels as before (all open; recipe-book Date collapsed).
-- [ ] Merged.
+- [x] Phone ≤1023 (360): filters on `/inventory/list`, `/recipe-book`, suppliers, `/inventory/equipment` → only category headers. Tap → opens. Select a value, leave and come back → that category open with count badge.
+- [x] Desktop 1280: panels as before (all open; recipe-book Date collapsed).
+- [x] Merged.
 
 ### Round 13 — PR #304 Plan 342 Form checkboxes → chips (`feat/night-1007-342-form-checkboxes-to-chips`) — conflicts: equipment-form/list html, supplier-form html+scss (your 341 landed)
-- [ ] Supplier add/edit page: delivery days are chips; save → reopen → same days.
-- [ ] Equipment form + list inline edit: "מתכלה" chip toggles and persists.
-- [ ] Venue form: "פעיל" chip persists.
-- [ ] Product form: special price chip shows/hides the override input; persists.
-- [ ] Quick-add product: allergens chips. Quick-edit panel: supplier chips. Metadata add label: auto-trigger chips.
-- [ ] Phone 360: chip groups wrap, no overflow.
-- [ ] Merged.
+- [x] Supplier add/edit page: delivery days are chips; save → reopen → same days.
+- [x] Equipment form + list inline edit: "מתכלה" chip toggles and persists.
+- [x] Venue form: "פעיל" chip persists.
+- [x] Product form: special price chip shows/hides the override input; persists.
+- [x] Quick-add product: allergens chips. Quick-edit panel: supplier chips. Metadata add label: auto-trigger chips.
+- [x] Phone 360: chip groups wrap, no overflow.
+- [x] Merged.
 
 ### Round 14 — PR #306 Plan 368 Product form responsive (`feat/night-1007-368-product-form-responsive`) — conflict: product-form.scss
-- [ ] Phone 360 + 414: `/inventory/add` and edit → one column, buttons wrap (save first), purchase-option rows stacked, special-price + allergens usable, **no sideways scroll**.
-- [ ] Tablet ~800: 2 columns; allergens / waste-yield span the full row; product with 2 purchase options → each in 2 lines, delete at the end of line 2.
-- [ ] Desktop 1280: same as before.
-- [ ] Merged.
+- [x] Phone 360 + 414: `/inventory/add` and edit → one column, buttons wrap (save first), purchase-option rows stacked, special-price + allergens usable, **no sideways scroll**.
+- [x] Tablet ~800: 2 columns; allergens / waste-yield span the full row; product with 2 purchase options → each in 2 lines, delete at the end of line 2.
+- [x] Desktop 1280: same as before.
+- [x] Merged.
 
 ### Round 15 — PR #308 Plan 344 Menu export top sheet (`feat/night-1007-344-menu-export-top-sheet`) — conflict: dictionary.json
-- [ ] Phone `/menu-intelligence`: FAB → "צ׳קליסט והדפסות" → sheet slides down → tap outside → away. Escape closes on desktop.
-- [ ] צ׳קליסט → לפי מנה → view → preview readable at 360 portrait, no page-level sideways overflow; close / print / Excel visible.
-- [ ] Shopping list + "הכל" view, export, print → as before.
-- [ ] Save pill visible + works; Ctrl+P hides pill and sheet.
-- [ ] (Old FAB label may show until the cached dictionary refreshes — clear localStorage if so.)
-- [ ] Merged.
+- [x] Phone `/menu-intelligence`: FAB → "צ׳קליסט והדפסות" → sheet slides down → tap outside → away. Escape closes on desktop.
+- [x] צ׳קליסט → לפי מנה → view → preview readable at 360 portrait, no page-level sideways overflow; close / print / Excel visible.
+- [x] Shopping list + "הכל" view, export, print → as before.
+- [x] Save pill visible + works; Ctrl+P hides pill and sheet.
+- [x] (Old FAB label may show until the cached dictionary refreshes — clear localStorage if so.)
+- [x] Merged.
 
 ### Round 16 — PR #311 Plan 352 Page header part 1 — chain top, contains #309 Plan 349 + #310 Plan 350 (`feat/night-1007-352-page-header-list-shell`)
 Agent: rebase #309 onto main (conflicts: equipment/inventory/recipe-book/supplier list html + supplier-list scss/ts), then #310 onto #309, then #311 onto #310; retarget #311 to `main`; serve #311. `approve` merges #309 → #310 → #311.
