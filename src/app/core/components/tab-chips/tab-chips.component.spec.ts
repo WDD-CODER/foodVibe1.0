@@ -74,9 +74,7 @@ describe('TabChipsComponent', () => {
   })
 
   const chipIds = (): string[] =>
-    fixture.debugElement
-      .queryAll(By.css('a.c-tab-pill'))
-      .map((de) => de.injector.get(RouterLink).href ?? '')
+    fixture.debugElement.queryAll(By.css('a.c-tab-pill')).map((de) => de.injector.get(RouterLink).href ?? '')
 
   it('shows the 4 sub-page chips (no home chip) on the dashboard overview', async () => {
     await router.navigateByUrl('/dashboard')
@@ -98,7 +96,9 @@ describe('TabChipsComponent', () => {
       expect(chipIds()).withContext(url).toEqual(expected)
       const home = fixture.debugElement.query(By.css('.c-tab-pill--home'))
       expect(home).withContext(url).not.toBeNull()
-      expect(fixture.debugElement.query(By.css('a.c-tab-pill.active'))).withContext(url).toBeNull()
+      expect(fixture.debugElement.query(By.css('a.c-tab-pill.active')))
+        .withContext(url)
+        .toBeNull()
     }
   })
 

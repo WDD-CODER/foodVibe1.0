@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-  signal,
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -21,7 +15,7 @@ import type { VersionEntityType } from '@services/version-history.service'
   imports: [CommonModule, LucideAngularModule, TranslatePipe, VersionHistoryPanelComponent, LoaderComponent],
   templateUrl: './trash.page.html',
   styleUrl: './trash.page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TrashPage implements OnInit {
   private readonly trash = inject(TrashService)
@@ -62,14 +56,14 @@ export class TrashPage implements OnInit {
   formatDeletedAt(ts: number): string {
     return new Date(ts).toLocaleString('he-IL', {
       dateStyle: 'short',
-      timeStyle: 'short',
+      timeStyle: 'short'
     })
   }
 
   async onRestoreDish(id: string): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_restore', {
       saveLabel: 'trash_recover',
-      variant: 'warning',
+      variant: 'warning'
     })
     if (ok) await this.trash.restoreDish(id)
   }
@@ -77,7 +71,7 @@ export class TrashPage implements OnInit {
   async onRestoreRecipe(id: string): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_restore', {
       saveLabel: 'trash_recover',
-      variant: 'warning',
+      variant: 'warning'
     })
     if (ok) await this.trash.restoreRecipe(id)
   }
@@ -85,7 +79,7 @@ export class TrashPage implements OnInit {
   async onRestoreProduct(id: string): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_restore', {
       saveLabel: 'trash_recover',
-      variant: 'warning',
+      variant: 'warning'
     })
     if (ok) await this.trash.restoreProduct(id)
   }
@@ -93,7 +87,7 @@ export class TrashPage implements OnInit {
   async onDisposeDish(id: string): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_dispose', {
       saveLabel: 'trash_dispose',
-      variant: 'danger',
+      variant: 'danger'
     })
     if (ok) await this.trash.disposeDish(id)
   }
@@ -101,7 +95,7 @@ export class TrashPage implements OnInit {
   async onDisposeRecipe(id: string): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_dispose', {
       saveLabel: 'trash_dispose',
-      variant: 'danger',
+      variant: 'danger'
     })
     if (ok) await this.trash.disposeRecipe(id)
   }
@@ -109,7 +103,7 @@ export class TrashPage implements OnInit {
   async onDisposeProduct(id: string): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_dispose', {
       saveLabel: 'trash_dispose',
-      variant: 'danger',
+      variant: 'danger'
     })
     if (ok) await this.trash.disposeProduct(id)
   }
@@ -117,7 +111,7 @@ export class TrashPage implements OnInit {
   async onRestoreAllDishes(): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_restore', {
       saveLabel: 'trash_recover_all',
-      variant: 'warning',
+      variant: 'warning'
     })
     if (ok) await this.trash.restoreAllDishes()
   }
@@ -125,7 +119,7 @@ export class TrashPage implements OnInit {
   async onRestoreAllRecipes(): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_restore', {
       saveLabel: 'trash_recover_all',
-      variant: 'warning',
+      variant: 'warning'
     })
     if (ok) await this.trash.restoreAllRecipes()
   }
@@ -133,7 +127,7 @@ export class TrashPage implements OnInit {
   async onRestoreAllProducts(): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_restore', {
       saveLabel: 'trash_recover_all',
-      variant: 'warning',
+      variant: 'warning'
     })
     if (ok) await this.trash.restoreAllProducts()
   }
@@ -141,7 +135,7 @@ export class TrashPage implements OnInit {
   async onDisposeAllDishes(): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_dispose_all', {
       saveLabel: 'trash_dispose_all',
-      variant: 'danger',
+      variant: 'danger'
     })
     if (ok) await this.trash.disposeAllDishes()
   }
@@ -149,7 +143,7 @@ export class TrashPage implements OnInit {
   async onDisposeAllRecipes(): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_dispose_all', {
       saveLabel: 'trash_dispose_all',
-      variant: 'danger',
+      variant: 'danger'
     })
     if (ok) await this.trash.disposeAllRecipes()
   }
@@ -157,7 +151,7 @@ export class TrashPage implements OnInit {
   async onDisposeAllProducts(): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_dispose_all', {
       saveLabel: 'trash_dispose_all',
-      variant: 'danger',
+      variant: 'danger'
     })
     if (ok) await this.trash.disposeAllProducts()
   }
