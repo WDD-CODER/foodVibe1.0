@@ -12,6 +12,56 @@ import { Product } from '@models/product.model'
 /** What the user chose when saving an item cloned from a shared master. */
 export type SaveScope = 'me' | 'everyone' | 'cancel'
 
+/** What the admin is doing — picks the prompt wording (plan 365). */
+export type ScopeAction = 'save' | 'create' | 'delete'
+
+/** What kind of item the prompt is about — picks the noun in the wording (plan 365). */
+export type ScopeEntity = 'recipe' | 'dish' | 'product' | 'metadata' | 'supplier'
+
+export interface ScopeOptions {
+  entity: ScopeEntity
+  /** Number of selected items for bulk actions; > 1 switches to the plural wording. */
+  count?: number
+}
+
+export interface SaveScopeOptions extends ScopeOptions {
+  /**
+   * A brand-new item: prompt even without a _masterId (the server assigns one only at insert)
+   * and word it as a publish ("create") instead of an update. Was `forcePrompt`.
+   */
+  isNew?: boolean
+}
+
+/** Texts for one scope prompt. `message` is final display text (already translated). */
+export interface ScopeTexts {
+  headerKey: string
+  message: string
+  meLabelKey: string
+  everyoneLabelKey: string
+}
+
+/** recipe → 'recipe', dish → 'dish' — the two share one model. */
+export function recipeScopeEntity(recipe: Pick<Recipe, 'recipeType'> | null | undefined): ScopeEntity {
+  return recipe?.recipeType === 'dish' ? 'dish' : 'recipe'
+}
+
+/** A mixed selection reads as recipes; an all-dish selection as dishes. */
+export function bulkScopeEntity(recipes: ReadonlyArray<Pick<Recipe, 'recipeType'>>): ScopeEntity {
+  return recipes.length > 0 && recipes.every((r) => r.recipeType === 'dish') ? 'dish' : 'recipe'
+}
+
+const SCOPE_HEADER_KEYS: Record<ScopeAction, string> = {
+  save: 'scope_save_header',
+  create: 'scope_create_header',
+  delete: 'scope_delete_header'
+}
+
+const SCOPE_BUTTON_KEYS: Record<ScopeAction, { me: string; everyone: string }> = {
+  save: { me: 'scope_me', everyone: 'scope_everyone_update' },
+  create: { me: 'scope_me', everyone: 'scope_everyone_publish' },
+  delete: { me: 'scope_delete_me', everyone: 'scope_delete_everyone' }
+}
+
 /**
  * Asks whether an edit to a master-derived recipe applies to everyone or only
  * to the current user, and performs the push when they choose everyone.
@@ -25,6 +75,33 @@ export type SaveScope = 'me' | 'everyone' | 'cancel'
  * Deliberately NOT used for per-user state such as `favoritedBy`: pushing a
  * personal favourite to master would publish it to every other user.
  */
+/**
+ * Header, message and button texts for one admin scope prompt (plan 365): the action picks
+ * the header and buttons, the entity picks the message noun, count > 1 switches to the
+ * "{n} items selected" plural message, and deleting products appends the
+ * removed-from-every-recipe warning. Pure so metadata-manager can share it without
+ * pulling in this service's data dependencies.
+ */
+export function buildScopeTexts(
+  action: ScopeAction,
+  entity: ScopeEntity,
+  count: number,
+  translate: (key: string) => string
+): ScopeTexts {
+  const buttons = SCOPE_BUTTON_KEYS[action]
+  const messageKey = count > 1 ? `scope_${action}_many` : `scope_${action}_${entity}`
+  let message = translate(messageKey).replace('{n}', String(count))
+  if (action === 'delete' && entity === 'product') {
+    message = `${message} ${translate('scope_delete_product_warning')}`
+  }
+  return {
+    headerKey: SCOPE_HEADER_KEYS[action],
+    message,
+    meLabelKey: buttons.me,
+    everyoneLabelKey: buttons.everyone
+  }
+}
+
 @Injectable({ providedIn: 'root' })
 export class MasterPushService {
   private readonly confirmModal = inject(ConfirmModalService)
@@ -37,9 +114,9 @@ export class MasterPushService {
   private readonly isAdmin_ = this.userService.isAdmin_
 
   /**
-   * Returns the chosen scope. When the recipe is not linked to a master there
+   * Returns the chosen scope. When the item is not linked to a master there
    * is nothing to publish, so this resolves to `'me'` without prompting —
-   * unless `forcePrompt` (2026-09-30: an admin's brand-new recipe, which has
+   * unless `isNew` (2026-09-30: an admin's brand-new recipe/product, which has
    * no _masterId yet client-side since the server only assigns one at insert,
    * but is just as push-able once saved — see the push-to-master route's
    * upsert fix). Non-admins always resolve to 'me' silently, matching
@@ -47,16 +124,34 @@ export class MasterPushService {
    * delete-from-master/purge-ingredient-everywhere routes are requireAdmin-gated,
    * so a non-admin would otherwise be offered a prompt that 403s.
    */
-  async askScope(recipe: Pick<Recipe, '_masterId'> | null | undefined, forcePrompt = false): Promise<SaveScope> {
+  async askScope(item: Pick<Recipe, '_masterId'> | null | undefined, opts: SaveScopeOptions): Promise<SaveScope> {
     if (!this.isAdmin_()) return 'me'
-    if (!recipe?._masterId && !forcePrompt) return 'me'
-    const result = await this.confirmModal.openTernary('push_to_master_message', {
-      headerKey: 'push_to_master_header',
-      saveLabel: 'push_to_master_save_me',
-      saveButtonLabel: 'push_to_master_save_everyone'
+    if (!item?._masterId && !opts.isNew) return 'me'
+    return this.openScopePrompt(opts.isNew ? 'create' : 'save', opts.entity, opts.count)
+  }
+
+  /**
+   * Opens the admin "only me / everyone" prompt for `action` on `entity` and maps the
+   * answer to a SaveScope. Callers own the admin/_masterId gating (askScope and
+   * askDeleteScope do it; metadata-manager gates on its own registry state).
+   */
+  async openScopePrompt(action: ScopeAction, entity: ScopeEntity, count = 1): Promise<SaveScope> {
+    const texts = this.buildTexts(action, entity, count)
+    const result = await this.confirmModal.openTernary(texts.message, {
+      headerKey: texts.headerKey,
+      saveLabel: texts.meLabelKey,
+      saveButtonLabel: texts.everyoneLabelKey
     })
     if (result === 'cancel') return 'cancel'
     return result === 'save' ? 'everyone' : 'me'
+  }
+
+  /**
+   * True when askDeleteScope would show the prompt — lets a caller skip its own
+   * "are you sure?" confirm so an admin sees one dialog, not two (plan 365).
+   */
+  willAskDeleteScope(item: Pick<Recipe, '_masterId'> | null | undefined): boolean {
+    return this.isAdmin_() && !!item?._masterId
   }
 
   /**
@@ -75,19 +170,18 @@ export class MasterPushService {
   }
 
   /**
-   * Same shape as askScope, asked at delete time instead of save time. A
-   * recipe with no _masterId has nothing on master to remove, so this
+   * Same shape as askScope, asked at delete time instead of save time. An
+   * item with no _masterId has nothing on master to remove, so this
    * resolves to 'me' without prompting.
    */
-  async askDeleteScope(recipe: Pick<Recipe, '_masterId'> | null | undefined): Promise<SaveScope> {
-    if (!this.isAdmin_() || !recipe?._masterId) return 'me'
-    const result = await this.confirmModal.openTernary('delete_from_master_message', {
-      headerKey: 'delete_from_master_header',
-      saveLabel: 'delete_from_master_delete_me',
-      saveButtonLabel: 'delete_from_master_delete_everyone'
-    })
-    if (result === 'cancel') return 'cancel'
-    return result === 'save' ? 'everyone' : 'me'
+  async askDeleteScope(item: Pick<Recipe, '_masterId'> | null | undefined, opts: ScopeOptions): Promise<SaveScope> {
+    if (!this.willAskDeleteScope(item)) return 'me'
+    return this.openScopePrompt('delete', opts.entity, opts.count)
+  }
+
+  /** Header, message and button texts for one prompt — see `buildScopeTexts`. */
+  buildTexts(action: ScopeAction, entity: ScopeEntity, count = 1): ScopeTexts {
+    return buildScopeTexts(action, entity, count, (key) => this.translation.translate(key))
   }
 
   /**

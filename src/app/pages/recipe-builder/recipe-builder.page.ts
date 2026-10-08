@@ -46,7 +46,7 @@ import { Recipe } from '@models/recipe.model'
 import type { Equipment } from '@models/equipment.model'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
-import { MasterPushService } from '@services/master-push.service'
+import { MasterPushService, ScopeEntity } from '@services/master-push.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { RecipeFormService } from './services/recipe-form.service'
 import { DishDataService } from '@services/dish-data.service'
@@ -73,6 +73,7 @@ import { RecipeAiFlowService } from './services/recipe-ai-flow.service'
 import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 @Component({
   selector: 'app-recipe-builder-page',
@@ -92,7 +93,8 @@ import { CounterComponent } from 'src/app/shared/counter/counter.component'
     ExportPreviewComponent,
     ExportToolbarOverlayComponent,
     ApproveStampComponent,
-    CounterComponent
+    CounterComponent,
+    InputClearComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
@@ -733,7 +735,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const isNewRecipeOnLeave = !this.recipeId_()
     const scope = await this.masterPush_.askScope(
       { _masterId: this.masterId_ ?? undefined },
-      isNewRecipeOnLeave && this.isAdmin_()
+      { entity: this.scopeEntity(), isNew: isNewRecipeOnLeave && this.isAdmin_() }
     )
     if (scope === 'cancel') return false
 
@@ -1150,7 +1152,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     let pushToMasterAfterSave = false
     const isNewRecipe = !this.recipeId_()
     if ((this.recipeId_() && this.masterId_) || (isNewRecipe && this.isAdmin_())) {
-      const scope = await this.masterPush_.askScope({ _masterId: this.masterId_ ?? undefined }, isNewRecipe)
+      const scope = await this.masterPush_.askScope(
+        { _masterId: this.masterId_ ?? undefined },
+        { entity: this.scopeEntity(), isNew: isNewRecipe }
+      )
       if (scope === 'cancel') return
       pushToMasterAfterSave = scope === 'everyone'
     }
@@ -1377,6 +1382,11 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       return 'יש למלא את כל השדות הנדרשים'
     }
     return errors.length === 1 ? errors[0] : `חסרים: ${errors.join('; ')}`
+  }
+
+  /** Admin scope-prompt noun (plan 365): follows the form's current recipe type. */
+  private scopeEntity(): ScopeEntity {
+    return this.recipeForm_.get('recipe_type')?.value === 'dish' ? 'dish' : 'recipe'
   }
 
   private buildRecipeFromForm(): Recipe {

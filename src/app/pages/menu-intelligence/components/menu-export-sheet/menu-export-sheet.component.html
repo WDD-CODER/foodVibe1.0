@@ -1,0 +1,87 @@
+<div class="mes-backdrop" [class.is-open]="open()" (click)="close.emit()" aria-hidden="true"></div>
+
+<section
+  class="mes-sheet"
+  [class.is-open]="open()"
+  [attr.aria-hidden]="open() ? null : 'true'"
+  [attr.inert]="open() ? null : ''"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="'menu_toolbar_open' | translatePipe"
+  dir="rtl"
+>
+  <header class="mes-header">
+    <h2 class="mes-title">{{ 'menu_toolbar_open' | translatePipe }}</h2>
+    <button
+      type="button"
+      class="c-icon-btn mes-close"
+      (click)="close.emit()"
+      [attr.aria-label]="'close' | translatePipe"
+    >
+      <lucide-icon name="x" [size]="18"></lucide-icon>
+    </button>
+  </header>
+
+  <div class="mes-group">
+    <h3 class="mes-group-title">
+      <lucide-icon name="clipboard-list" [size]="16"></lucide-icon>
+      {{ 'toolbar_checklist' | translatePipe }}
+    </h3>
+    @for (m of checklistModes; track m.mode) {
+      <div class="mes-row">
+        <span class="mes-row-label">{{ m.labelKey | translatePipe }}</span>
+        <button type="button" class="mes-action" (click)="onViewChecklist(m.mode)">
+          <lucide-icon name="eye" [size]="16"></lucide-icon>
+          {{ 'view' | translatePipe }}
+        </button>
+        <button type="button" class="mes-action" (click)="onExportChecklist(m.mode)">
+          <lucide-icon name="download" [size]="16"></lucide-icon>
+          {{ 'export' | translatePipe }}
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="mes-group">
+    <h3 class="mes-group-title">
+      <lucide-icon name="shopping-cart" [size]="16"></lucide-icon>
+      {{ 'toolbar_shopping' | translatePipe }}
+    </h3>
+    <div class="mes-row">
+      <span class="mes-row-label"></span>
+      <button type="button" class="mes-action" (click)="onViewShoppingList()">
+        <lucide-icon name="eye" [size]="16"></lucide-icon>
+        {{ 'view' | translatePipe }}
+      </button>
+      <button type="button" class="mes-action" (click)="onExportShoppingList()">
+        <lucide-icon name="download" [size]="16"></lucide-icon>
+        {{ 'export' | translatePipe }}
+      </button>
+    </div>
+  </div>
+
+  <div class="mes-group">
+    <h3 class="mes-group-title">
+      <lucide-icon name="package" [size]="16"></lucide-icon>
+      {{ 'toolbar_all' | translatePipe }}
+    </h3>
+    <div class="mes-row">
+      <span class="mes-row-label"></span>
+      <button type="button" class="mes-action" (click)="onViewAll()">
+        <lucide-icon name="eye" [size]="16"></lucide-icon>
+        {{ 'view' | translatePipe }}
+      </button>
+      <button type="button" class="mes-action" (click)="onExportAll()">
+        <lucide-icon name="download" [size]="16"></lucide-icon>
+        {{ 'export' | translatePipe }}
+      </button>
+    </div>
+  </div>
+
+  <div class="mes-group">
+    <button type="button" class="mes-action mes-action--wide" (click)="onPrint()">
+      <lucide-icon name="printer" [size]="16"></lucide-icon>
+      {{ 'menu_print' | translatePipe }}
+    </button>
+  </div>
+</section>

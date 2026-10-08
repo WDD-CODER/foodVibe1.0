@@ -4,9 +4,10 @@
       @for (chip of chips_(); track chip.id) {
         <a
           class="c-tab-pill"
+          [class.c-tab-pill--home]="chip.home"
           [routerLink]="chip.path"
           [queryParams]="chip.queryParams ?? null"
-          routerLinkActive="active"
+          [routerLinkActive]="chip.home ? [] : 'active'"
           [routerLinkActiveOptions]="{ exact: !!chip.queryParams }"
           (click)="scrollChipIntoView($event)"
         >
