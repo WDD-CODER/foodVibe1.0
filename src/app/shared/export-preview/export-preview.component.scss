@@ -272,4 +272,52 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
   }
+
+  // Plan 344 — portrait phones: less paper padding, taller scroll area, tables scroll sideways
+  // inside their section instead of pushing the page wider.
+  @media (max-width: 600px) {
+    .export-preview-overlay {
+      padding: 0.5rem;
+    }
+
+    .export-preview-paper-wrap {
+      max-height: calc(100dvh - 1rem);
+    }
+
+    .paper {
+      padding: 0.375rem;
+    }
+
+    .paper-inner {
+      padding: 1rem;
+      max-height: calc(100dvh - 6rem);
+    }
+
+    .export-preview-title {
+      font-size: 1.25rem;
+    }
+
+    .export-preview-sections {
+      gap: 1.25rem;
+    }
+
+    .export-preview-section {
+      padding: 0.5rem;
+      overflow-x: auto;
+    }
+
+    .export-preview-table {
+      font-size: var(--fs-sm);
+    }
+
+    .export-preview-table th,
+    .export-preview-table td {
+      padding: 0.375rem 0.5rem;
+    }
+
+    .export-preview-actions {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+  }
 }
