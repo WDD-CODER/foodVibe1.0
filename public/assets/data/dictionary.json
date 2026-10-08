@@ -994,6 +994,8 @@
     "min_order": "מינימום הזמנה",
     "ai_warning_implausible_portion_weight": "כמויות הרכיבים לא סבירות ביחס למספר המנות",
     "menu_print": "הדפסה",
-    "clear_search": "ניקוי חיפוש"
+    "clear_search": "ניקוי חיפוש",
+    "no_suppliers_match": "לא נמצאו ספקים תואמים",
+    "supplier_in_use_cannot_delete": "הספק מקושר למוצרים. למחוק בכל זאת?"
   }
 }

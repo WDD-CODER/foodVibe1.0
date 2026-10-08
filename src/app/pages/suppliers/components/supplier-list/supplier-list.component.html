@@ -1,8 +1,8 @@
 <app-list-shell
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
-  [gridTemplate]="'2fr 0.8fr 1fr 1fr 0.8fr 0.8fr 0.8fr 80px auto'"
-  [mobileGridTemplate]="'2fr 1.6fr 40px 28px'"
+  [gridTemplate]="'2fr 0.8fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 0.8fr 80px auto'"
+  [mobileGridTemplate]="'2fr 1fr 40px 28px'"
   [resultCount]="filteredSuppliers_().length"
   [resultTotal]="supplierData.allSuppliers_().length"
 >
@@ -110,7 +110,7 @@
         <div class="col-name c-list-body-cell" role="cell">{{ item.nameHebrew }}</div>
         <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
           <div class="col-min-order c-list-body-cell" cellCarouselSlide [label]="'min_order' | translatePipe">
-            {{ item.minOrderMov }}
+            {{ minOrderDisplay(item.minOrderMov) }}
           </div>
           <div class="col-contact c-list-body-cell" cellCarouselSlide [label]="'contact_person' | translatePipe">
             {{ item.contactPerson ?? '—' }}
