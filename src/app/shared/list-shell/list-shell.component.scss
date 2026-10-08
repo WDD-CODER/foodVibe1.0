@@ -1,12 +1,22 @@
 @layer components.list-shell {
   $panel-width-expanded: 250px;
-  $header-break-grid: 640px;
-  $header-break-stack: 360px;
   $panel-overlay-break: 1023px;
   $phone-break: 768px;
 
   :host {
     display: block;
+
+    // Where the pinned table top sticks (plan 346): desktop scrolls the table body inside the
+    // card (0); tablet scrolls the page under the app's top bar; phones hide that bar.
+    --list-sticky-top: 0px;
+
+    @media (max-width: #{$panel-overlay-break}) {
+      --list-sticky-top: 3.875rem;
+    }
+
+    @media (max-width: 620px) {
+      --list-sticky-top: env(safe-area-inset-top, 0px);
+    }
   }
 
   // Suppress all filter-panel transitions until after the first browser paint.
@@ -58,66 +68,10 @@
 
   .list-header {
     grid-area: header;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
 
-    gap: 1rem;
     padding-block-end: 1rem;
 
     border-block-end: 1px solid var(--border-default);
-  }
-
-  .header-spacer {
-    // flex: 1;
-
-    // min-width: 0;
-  }
-
-  .header-back-btn {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-  }
-
-  .header-start {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    min-width: 0;
-  }
-
-  :host ::ng-deep .page-title {
-    flex: 1;
-    text-align: center;
-  }
-
-  .list-result-count {
-    margin: 0;
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-    text-align: center;
-  }
-
-  .header-search {
-    flex: 1 1 30%;
-
-    width: 100%;
-    min-width: 30%;
-    max-width: 22.5rem;
-  }
-
-  .header-actions {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-
-    gap: 1rem;
-    margin-inline-start: 0;
   }
 
   // Matches Inventory.dc.html:257 exactly (38×38, sliders icon) — not the
@@ -155,86 +109,12 @@
     }
   }
 
-  @container (max-width: #{$header-break-grid}) {
-    .list-header {
-      display: grid;
-      grid-template-columns: minmax(44px, auto) auto 1fr auto minmax(44px, auto);
-      grid-template-rows: auto auto;
-      grid-template-areas:
-        'ham  back    title   title   mirror'
-        'ham  search  search  actions mirror';
-
-      gap: 0.75rem 0.5rem;
-    }
-
-    .open-panel-btn {
-      grid-area: ham;
-      align-self: center;
-    }
-
-    .header-back-btn {
-      grid-area: back;
-      align-self: center;
-      display: flex;
-    }
-
-    .header-ham-mirror {
-      grid-area: mirror;
-      align-self: stretch;
-    }
-
-    .header-start {
-      grid-area: title;
-      justify-content: center;
-      flex: none;
-
-      min-width: 0;
-    }
-
-    .header-search {
-      grid-area: search;
-      flex: none;
-
-      min-width: 0;
-      max-width: none;
-    }
-
-    .header-actions {
-      grid-area: actions;
-      justify-content: flex-end;
-      align-self: center;
-    }
-
-    .header-spacer {
-      display: none;
-    }
-  }
-
-  @container (max-width: #{$header-break-stack}) {
-    .list-header {
-      grid-template-columns: minmax(44px, auto) auto 1fr minmax(44px, auto);
-      grid-template-rows: auto auto auto;
-      grid-template-areas:
-        'ham  back     title   mirror'
-        'ham  search   search  mirror'
-        'ham  actions  actions mirror';
-    }
-
-    .header-start {
-      justify-content: center;
-    }
-
-    .header-actions {
-      justify-content: center;
-    }
-  }
-
   .table-area {
     grid-area: table;
     position: relative;
     display: grid;
     grid-template-columns: var(--list-grid);
-    grid-template-rows: 50px 1fr;
+    grid-template-rows: auto 1fr;
 
     min-width: 0;
 
@@ -245,7 +125,22 @@
     box-shadow: var(--shadow-glass);
     backdrop-filter: var(--blur-glass);
     -webkit-backdrop-filter: var(--blur-glass);
-    overflow: hidden;
+    // clip, not hidden: still clips the rounded corners but isn't a scroll container, so the
+    // sticky .table-top inside can stick to the page scroll (plan 346).
+    overflow: clip;
+  }
+
+  .table-top {
+    grid-column: 1 / -1;
+    position: sticky;
+    inset-block-start: var(--list-sticky-top, 0px);
+    z-index: 5;
+
+    background: var(--bg-pure);
+  }
+
+  .table-pagination:empty {
+    display: none;
   }
 
   .table-header {

@@ -1,37 +1,44 @@
 <div class="list-container" [attr.dir]="dir()">
-  <header class="list-header">
-    <button type="button" class="open-panel-btn" (click)="panelToggle.emit()" aria-label="Toggle filters">
+  <!-- Plan 352: the shared compact page header — title + count at the inline-start, filter
+       toggle + actions at the inline-end, search on row 1 (wide) or row 2 (narrow). -->
+  <app-page-header
+    class="list-header"
+    [listLayout]="true"
+    [count]="resultCountText() ? resultCount() : null"
+    [countLabel]="resultCountText()"
+  >
+    <ng-container ngProjectAs="[header-back]"><ng-content select="[shell-back-btn]"></ng-content></ng-container>
+    <ng-container ngProjectAs="[header-title]"><ng-content select="[shell-title]"></ng-content></ng-container>
+    <ng-container ngProjectAs="[header-search]"><ng-content select="[shell-search]"></ng-content></ng-container>
+    <button
+      header-leading
+      type="button"
+      class="open-panel-btn"
+      (click)="panelToggle.emit()"
+      [attr.aria-expanded]="isPanelOpen()"
+      aria-label="Toggle filters"
+    >
       <lucide-icon name="sliders-vertical" [size]="16"></lucide-icon>
     </button>
-    <div class="header-back-btn">
-      <ng-content select="[shell-back-btn]"></ng-content>
-    </div>
-    <div class="header-start">
-      <ng-content select="[shell-title]"></ng-content>
-      @if (resultCountText(); as text) {
-        <p class="list-result-count">{{ text }}</p>
-      }
-    </div>
-    <div class="header-spacer"></div>
-    <div class="header-search">
-      <ng-content select="[shell-search]"></ng-content>
-    </div>
-    <div class="header-spacer"></div>
-    <div class="header-actions">
-      <ng-content select="[shell-actions]"></ng-content>
-    </div>
-    <div class="header-ham-mirror" aria-hidden="true"></div>
-  </header>
+    <ng-container ngProjectAs="[header-actions]"><ng-content select="[shell-actions]"></ng-content></ng-container>
+  </app-page-header>
 
   <div class="selection-bar-area">
     <ng-content select="[shell-selection-bar]"></ng-content>
   </div>
 
   <section class="table-area">
-    <div class="table-header">
-      <ng-content select="[shell-table-header]"></ng-content>
+    <!-- Plan 346: pagination + column header stay pinned while rows scroll (sticky at every
+         width; on desktop the body scrolls inside, below it). -->
+    <div class="table-top" #tableTop>
+      <div class="table-pagination" (click)="onPaginationClick($event)">
+        <ng-content select="[shell-pagination]"></ng-content>
+      </div>
+      <div class="table-header">
+        <ng-content select="[shell-table-header]"></ng-content>
+      </div>
     </div>
-    <div class="table-body">
+    <div class="table-body" #tableBody>
       <ng-content select="[shell-table-body]"></ng-content>
     </div>
   </section>

@@ -7,15 +7,17 @@ import {
   ElementRef,
   effect,
   afterNextRender,
-  computed
+  computed,
+  viewChild
 } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
+import { PageHeaderComponent } from '../page-header/page-header.component'
 
 @Component({
   selector: 'app-list-shell',
   standalone: true,
-  imports: [LucideAngularModule],
+  imports: [LucideAngularModule, PageHeaderComponent],
   templateUrl: './list-shell.component.html',
   styleUrl: './list-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -25,8 +27,8 @@ export class ListShellComponent {
   readonly gridTemplate = input('')
   readonly mobileGridTemplate = input('')
   readonly dir = input<'rtl' | 'ltr'>('rtl')
-  /** Visible row count and unfiltered total — when both are set, the shell renders
-   *  the design's "N מתוך M פריטים" subtitle under the title. Omit either to hide it. */
+  /** Visible row count and unfiltered total — when both are set, the header shows the count as a
+   *  pill next to the title, with "N מתוך M פריטים" as its screen-reader label (plan 352). */
   readonly resultCount = input<number | null>(null)
   readonly resultTotal = input<number | null>(null)
 
@@ -40,6 +42,23 @@ export class ListShellComponent {
   })
 
   readonly panelToggle = output<void>()
+
+  private readonly tableTop = viewChild<ElementRef<HTMLElement>>('tableTop')
+  private readonly tableBody = viewChild<ElementRef<HTMLElement>>('tableBody')
+
+  /**
+   * P1 (plan 346): after a pagination button press, bring the first row back into view —
+   * the body's own scroll on desktop, the page scroll (to the pinned table top) below 1024px.
+   */
+  protected onPaginationClick(event: Event): void {
+    if (!(event.target instanceof Element) || !event.target.closest('button')) return
+    requestAnimationFrame(() => {
+      const body = this.tableBody()?.nativeElement
+      if (body) body.scrollTop = 0
+      const top = this.tableTop()?.nativeElement
+      if (top && top.getBoundingClientRect().top <= 0) top.scrollIntoView({ block: 'start' })
+    })
+  }
 
   constructor() {
     const el = inject(ElementRef)

@@ -131,12 +131,6 @@
 - [x] A5: Delete the dead local classes and `.c-filter-option` (`src/styles.scss`). Run `rg -n 'type="checkbox"' src/app --glob '*.html'` and confirm only list-row-checkbox remains.
 - [ ] A6: Build and run specs. Update the session-state file.
 
-### Plan 346 — Lists: sticky table header and pagination at the top (`plans/346-lists-sticky-table-header-and-pagination-at-top.plan.md`)
-- [ ] A1: list-shell: `.table-top` wrapper, `[shell-pagination]` slot, sticky styles, `--list-sticky-top`, `overflow:clip`, grid rows (`src/app/shared/list-shell/**`).
-- [ ] A2: Move pagination in inventory and recipe-book into the slot; adjust `.c-pagination-controls` (`inventory-product-list.component.html/.scss`, `recipe-book-list.component.html/.scss`, `src/styles.scss`).
-- [ ] A3: Verify suppliers and equipment (no pagination) get the sticky column header with no empty gap.
-- [ ] A4: Build and run specs. Check at 360px, 800px and 1280px. Update the session-state file.
-
 ### Plan 347 — Mobile keyboard: push content up, keep the focused field visible (`plans/347-mobile-keyboard-keep-focused-field-visible.plan.md`)
 - [x] A1: Viewport meta (`src/index.html`).
 - [x] A2: `KeyboardInsetService` plus a spec (mock `visualViewport`: inset computed, class toggled, no-op without the API). Inject it in `AppComponent` (`keyboard-inset.service.ts/.spec.ts`, `app.component.ts`).
@@ -166,9 +160,9 @@
 - [ ] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
 
 ### Plan 352 — Page header, part 1: `<app-page-header>` and the list-shell pages (`plans/352-page-header-part-1-app-page-header-list-shell.plan.md`)
-- [ ] A1: `PageHeaderComponent` plus a spec (renders title, count, back; slots project) (`src/app/shared/page-header/**`).
-- [ ] A2: list-shell uses it; delete the old header grid styles (`src/app/shared/list-shell/**`).
-- [ ] A3: Clean the 4 pages' title markup and styles (`inventory-product-list/**`, `recipe-book-list/**`, `supplier-list/**`, `equipment-list/**`).
+- [x] A1: `PageHeaderComponent` plus a spec (renders title, count, back; slots project) (`src/app/shared/page-header/**`).
+- [x] A2: list-shell uses it; delete the old header grid styles (`src/app/shared/list-shell/**`).
+- [x] A3: Clean the 4 pages' title markup and styles (`inventory-product-list/**`, `recipe-book-list/**`, `supplier-list/**`, `equipment-list/**`).
 - [ ] A4: Build and run specs. Check at 360px, 768px and 1280px. Update the session-state file.
 
 ### Plan 353 — Page header, part 2: venues, menu library, dashboard, trash (`plans/353-page-header-part-2-venues-menu-library-dashboard-trash.plan.md`)
