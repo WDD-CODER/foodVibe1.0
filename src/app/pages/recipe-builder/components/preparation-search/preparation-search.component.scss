@@ -5,6 +5,7 @@
 }
 
 .input-wrapper {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -16,7 +17,9 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
 
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
   &:focus-within {
     border-color: var(--border-focus);
@@ -25,24 +28,37 @@
 
   lucide-icon {
     flex-shrink: 0;
+    align-self: flex-start;
+    margin-block-start: 0.125rem;
     color: var(--color-text-muted);
   }
 
-  input {
+  textarea {
     flex: 1;
     min-width: 0;
-    padding: 0;
 
     background: transparent;
     color: var(--color-text-main);
+    font: inherit;
     font-size: 0.875rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
 
+    padding: 0;
     border: none;
     outline: none;
+
+    resize: none;
+    overflow-y: hidden;
 
     &::placeholder {
       color: var(--color-text-muted-light);
     }
+  }
+
+  app-input-clear {
+    flex-shrink: 0;
+    margin-inline-start: auto;
   }
 }
 
@@ -110,7 +126,8 @@
   width: 100%;
   padding: 0.625rem 0.75rem;
 
-  background: var(--bg-success);
+  // --bg-success is translucent; layer it over a solid surface so the row underneath doesn't show through.
+  background: linear-gradient(var(--bg-success), var(--bg-success)), var(--bg-pure);
   color: var(--text-success);
   font-size: 0.875rem;
   font-weight: 600;
@@ -120,9 +137,9 @@
 
   cursor: pointer;
   transition: background 0.15s ease;
+  box-shadow: var(--shadow-card);
 
   &:hover {
-    background: var(--bg-success);
     filter: brightness(1.05);
   }
 }

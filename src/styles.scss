@@ -1224,11 +1224,12 @@ textarea.c-input {
 
     @media (max-width: $break-phone-max) {
       inset-inline: 0;
-      inset-block: auto 0;
+      // Plan 347: sit above the on-screen keyboard (iOS overlays it; --kb-inset is 0 elsewhere).
+      inset-block: auto var(--kb-inset, 0px);
       z-index: 1001;
 
       max-width: none;
-      max-height: 86dvh;
+      max-height: calc(86dvh - var(--kb-inset, 0px));
       margin-inline: 0;
 
       border-end-end-radius: 0;
@@ -1711,6 +1712,81 @@ textarea.c-input {
   }
 }
 
+/* ---- Engine: Tap Chip (plan 340) ----
+   A compact item pill that opens an actions menu when tapped (`.c-icon-btn` edit /
+   delete in `app-row-actions-menu [anchored]`), so no per-item buttons take space. Markup:
+   `button.c-tap-chip` inside `.c-tap-chip-group`; set `aria-expanded` while its
+   menu is open. Read-only items use `span.c-tap-chip.is-locked` (plus a lock icon). */
+.c-tap-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: var(--space-2);
+}
+
+.c-tap-chip {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.375rem;
+  min-block-size: 2rem;
+
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+  color: var(--color-text-main);
+  background: var(--bg-glass-strong);
+
+  padding-inline: 0.75rem;
+  padding-block: 0.25rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease-smooth),
+    border-color 0.15s var(--ease-smooth);
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background: var(--bg-glass-hover);
+    border-color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  &.is-locked {
+    color: var(--color-text-secondary);
+
+    cursor: default;
+
+    &:hover {
+      background: var(--bg-glass-strong);
+      border-color: var(--border-default);
+    }
+  }
+}
+
+.c-tap-chip__dot {
+  flex-shrink: 0;
+
+  inline-size: 0.625rem;
+  block-size: 0.625rem;
+
+  border-radius: var(--radius-full);
+}
+
+@media (max-width: $break-phone-max) {
+  /* ≥44px tap target on phones. */
+  .c-tap-chip {
+    min-block-size: 2.75rem;
+  }
+}
+
 /* ============================================================
    Plan 305 M2 — Mobile hardening layer (`UI refactor/mobile-pass.css`)
    Phone-only (≤ $break-phone-max). Nothing here applies to tablet or desktop.
@@ -1981,5 +2057,37 @@ textarea.c-input {
     border: 0;
     background: transparent;
     color: inherit;
+  }
+}
+
+/* ---- Keyboard open (plan 347) — KeyboardInsetService toggles body.kb-open and sets
+   --kb-inset while the on-screen keyboard covers the viewport. Fixed bottom chrome hides
+   (visibility only, so nothing reflows) and centered modals shrink above the keyboard. ---- */
+body.kb-open {
+  .bottom-nav,
+  .hero-fab-container,
+  .approve-stamp,
+  .user-msg {
+    visibility: hidden;
+  }
+
+  .app-content {
+    padding-block-end: 0;
+  }
+
+  .c-modal-card {
+    max-height: calc(100dvh - 4rem - var(--kb-inset, 0px));
+    overflow-y: auto;
+  }
+}
+
+/* ---- Engine addition: Input Wrapper clear (X) slot (plan 363) — `<app-input-clear>` sits
+   after the input at the inline-end; its own component styles handle the fade/scale. ---- */
+.c-input-wrapper {
+  position: relative;
+
+  app-input-clear {
+    flex-shrink: 0;
+    margin-inline-start: auto;
   }
 }

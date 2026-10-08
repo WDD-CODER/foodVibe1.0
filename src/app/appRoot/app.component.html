@@ -35,9 +35,6 @@
 
 <!-- Eager: confirm used early in typical sessions. Auth moved to @defer with prefetch-on-idle below (plan 312) — kept the chunk warm without paying its ~61.5kB in the initial bundle. -->
 <app-confirm-modal />
-@defer (when supplierModal.isOpen()) {
-  <app-supplier-modal />
-}
 @defer (when aiRecipeModal.isOpen()) {
   <app-ai-recipe-modal />
 }

@@ -54,7 +54,8 @@ describe('DashboardOverviewComponent', () => {
     const mockKitchenState = {
       products_: mockProducts.asReadonly(),
       recipes_: mockRecipes.asReadonly(),
-      lowStockProducts_: mockLowStock.asReadonly()
+      lowStockProducts_: mockLowStock.asReadonly(),
+      suppliersById_: signal(new Map([['s1', { _id: 's1', nameHebrew: 'ירקות כהן' }]]))
     }
 
     // totalRecipes_/unapprovedCount_ come from the lightweight /count endpoint now
@@ -209,27 +210,91 @@ describe('DashboardOverviewComponent', () => {
     )
   })
 
-  // --- Popover ---
+  // --- Change chips ---
 
-  it('should open popover on toggleChangePopover call', () => {
-    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
-      makeEntry({ changes: [{ field: 'price', label: 'activity_field_price' }] })
-    ])
+  const fourChanges = [
+    { field: 'price', label: 'activity_field_price', from: '10 ₪', to: '12 ₪' },
+    { field: 'supplier', label: 'activity_field_supplier', from: 's1', to: 'gone' },
+    { field: 'category', label: 'activity_field_category', to: 'vegetables' },
+    { field: 'unit', label: 'activity_field_unit', from: 'kg', to: 'gram' }
+  ]
+
+  it('renders one chip per change with old/new values resolved', () => {
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: fourChanges })])
     fixture.detectChanges()
-    const changeTag = fixture.debugElement.query(By.css('.change-tag'))
-    changeTag.nativeElement.click()
-    expect((component as unknown as { openChange_: () => unknown }).openChange_()).not.toBeNull()
+    const chips = fixture.debugElement.queryAll(By.css('.act-chip'))
+    expect(chips.length).toBe(4)
+    const supplierChip = chips[1].nativeElement as HTMLElement
+    expect(supplierChip.querySelector('.act-old')?.textContent?.trim()).toBe('ירקות כהן')
+    expect(supplierChip.querySelector('.act-new')?.textContent?.trim()).toBe('activity_deleted_supplier')
+    // created-only value: no struck-through old value, no arrow
+    expect((chips[2].nativeElement as HTMLElement).querySelector('.act-old')).toBeNull()
+    expect((chips[2].nativeElement as HTMLElement).querySelector('.act-arrow')).toBeNull()
   })
 
-  it('should close popover on second click of same change tag', () => {
+  it('drops changes whose before and after are identical', () => {
     mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
-      makeEntry({ changes: [{ field: 'price', label: 'activity_field_price' }] })
+      makeEntry({
+        changes: [
+          { field: 'price', label: 'activity_field_price', from: '10 ₪', to: '12 ₪' },
+          { field: 'purchase_options', label: 'activity_field_purchase_options', from: 'kg, unit', to: 'kg, unit' }
+        ]
+      })
     ])
     fixture.detectChanges()
-    const changeTag = fixture.debugElement.query(By.css('.change-tag'))
-    changeTag.nativeElement.click() // open
-    changeTag.nativeElement.click() // close
-    expect((component as unknown as { openChange_: () => unknown }).openChange_()).toBeNull()
+    expect(fixture.debugElement.queryAll(By.css('.act-chip')).length).toBe(1)
+  })
+
+  it('shows no chips for an update without changes', () => {
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: [] })])
+    fixture.detectChanges()
+    expect(fixture.debugElement.query(By.css('.act-changes'))).toBeNull()
+  })
+
+  it('expands an entry on click and collapses it on a second click or an outside click', () => {
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([makeEntry({ changes: fourChanges })])
+    fixture.detectChanges()
+    const item = fixture.debugElement.query(By.css('.activity-item')).nativeElement as HTMLElement
+    item.click()
+    fixture.detectChanges()
+    expect(item.classList.contains('is-expanded')).toBeTrue()
+    item.click()
+    fixture.detectChanges()
+    expect(item.classList.contains('is-expanded')).toBeFalse()
+    item.click()
+    document.body.click()
+    fixture.detectChanges()
+    expect(item.classList.contains('is-expanded')).toBeFalse()
+  })
+
+  it('formats relative time', () => {
+    const c = component as unknown as { relativeTime: (ts: number, now?: number) => string }
+    const now = 1_700_000_000_000
+    expect(c.relativeTime(now - 10_000, now)).toBe('activity_just_now')
+    expect(c.relativeTime(now - 5 * 60_000, now)).toContain('5')
+    expect(c.relativeTime(now - 3 * 3_600_000, now)).toContain('3')
+  })
+
+  it('adds no day headers when all entries are from the same day', () => {
+    const now = Date.now()
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
+      makeEntry({ id: 'a', timestamp: now }),
+      makeEntry({ id: 'b', timestamp: now - 1000 })
+    ])
+    fixture.detectChanges()
+    expect(fixture.debugElement.queryAll(By.css('.act-day')).length).toBe(0)
+  })
+
+  it('groups entries under day headers when they span more than one day', () => {
+    const now = Date.now()
+    mockActivityLog.getRecentEntriesFromStorage.and.returnValue([
+      makeEntry({ id: 'a', timestamp: now }),
+      makeEntry({ id: 'b', timestamp: now - 3 * 86_400_000 })
+    ])
+    fixture.detectChanges()
+    const headers = fixture.debugElement.queryAll(By.css('.act-day'))
+    expect(headers.length).toBe(2)
+    expect((headers[0].nativeElement as HTMLElement).textContent?.trim()).toBe('activity_today')
   })
 
   // --- Auth ---

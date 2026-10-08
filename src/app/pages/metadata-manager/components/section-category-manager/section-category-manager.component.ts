@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core'
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  inject,
+  Injector,
+  OnInit,
+  signal,
+  viewChild
+} from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { MenuSectionCategoriesService } from '@services/menu-section-categories.service'
@@ -9,11 +19,12 @@ import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
+import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 @Component({
   selector: 'app-section-category-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, TranslatePipe, RowActionsMenuComponent],
   templateUrl: './section-category-manager.component.html',
   styleUrl: './section-category-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -27,9 +38,15 @@ export class SectionCategoryManagerComponent implements OnInit {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
   private readonly taxonomy = inject(TaxonomyStore)
+  private readonly injector = inject(Injector)
 
   protected readonly categories = this.sectionCategories.sectionCategories_
   protected readonly editingName_ = signal<string | null>(null)
+  /** Category whose tap menu (edit / delete) is open — plan 340. */
+  protected readonly menuName_ = signal<string | null>(null)
+
+  private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
+  private readonly renameInput = viewChild<ElementRef<HTMLInputElement>>('renameInput')
 
   ngOnInit(): void {
     void this.sectionCategories.ensureLoaded()
@@ -81,8 +98,10 @@ export class SectionCategoryManagerComponent implements OnInit {
   }
 
   onStartRename(name: string): void {
+    this.itemMenu().close()
     if (!this.requireSignIn() || !this.canEdit(name)) return
     this.editingName_.set(name)
+    afterNextRender(() => this.renameInput()?.nativeElement.select(), { injector: this.injector })
   }
 
   /** Shared terms are read-only except for an admin (Plan 321 Phase 3); own terms are always editable. */
@@ -121,5 +140,16 @@ export class SectionCategoryManagerComponent implements OnInit {
       const updatedSections = event.sections.map((s) => (s.name === oldName ? { ...s, name: newName } : s))
       await this.menuEventData.updateMenuEvent({ ...event, sections: updatedSections })
     }
+  }
+
+  //TAP MENU (plan 340)
+  protected onOpenMenu(event: MouseEvent, name: string): void {
+    this.menuName_.set(name)
+    this.itemMenu().open(event.currentTarget as HTMLElement)
+  }
+
+  protected onMenuDelete(name: string): void {
+    this.itemMenu().close()
+    void this.onRemove(name)
   }
 }

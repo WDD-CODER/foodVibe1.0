@@ -56,41 +56,6 @@
       </div>
     </div>
 
-    <div class="form-section scaling-section">
-      <h3>{{ 'scaling_rule' | translatePipe }}</h3>
-      <div class="form-group">
-        <div class="c-toggle-chip-group">
-          <label class="c-toggle-chip">
-            <input type="checkbox" formControlName="scaling_enabled_" />
-            <span>{{ 'scaling_enabled' | translatePipe }}</span>
-          </label>
-        </div>
-      </div>
-      @if (equipmentForm_.get('scaling_enabled_')?.value) {
-        <div class="scaling-fields">
-          <div class="form-group">
-            <label for="perGuests">{{ 'per_guests' | translatePipe }}</label>
-            <input id="perGuests" type="number" formControlName="perGuests" min="1" class="c-input" />
-          </div>
-          <div class="form-group">
-            <label for="minQuantity">{{ 'min_quantity' | translatePipe }}</label>
-            <input id="minQuantity" type="number" formControlName="minQuantity" min="0" class="c-input" />
-          </div>
-          <div class="form-group">
-            <label for="maxQuantity">{{ 'max_quantity' | translatePipe }}</label>
-            <input
-              id="maxQuantity"
-              type="number"
-              formControlName="maxQuantity"
-              min="0"
-              placeholder="—"
-              class="c-input"
-            />
-          </div>
-        </div>
-      }
-    </div>
-
     <div class="c-form-actions">
       <button type="button" class="c-btn-ghost" (click)="onCancel()">
         {{ 'cancel' | translatePipe }}
