@@ -7,29 +7,25 @@ feat/night-1007-361-lists-quick-fixes
 2026-10-08
 
 ## Session Summary
-- Merged main into plan 361; fixed bulk supplier replace + selection bar reset
-- Lists: tablet fixed-container scroll, phone one-screen table card
+- Ported plan 346 (pagination at top, pinned table top) onto lists branch; prev/next hidden at the ends
+- Specs 21/21, ng build pass
 
 ## Files Modified
- ...ulk-edit-dropdown-suppliers-grid-labels.plan.md | 10 ++---
- public/assets/data/dictionary.json                 |  4 +-
- .../tab-chips/tab-chips.component.spec.ts          |  8 ++--
- .../inventory-product-list.component.ts            |  5 ++-
- .../supplier-list/supplier-list.component.html     |  6 +--
- .../supplier-list/supplier-list.component.scss     | 11 ++---
- .../supplier-list/supplier-list.component.ts       |  5 +++
- src/app/pages/trash/trash.page.ts                  | 36 +++++++---------
- .../label-creation-modal.component.scss            |  4 +-
- .../shared/list-shell/list-shell.component.scss    | 48 ++++++++++++++--------
- .../quick-add-product-modal.component.scss         |  4 +-
- .../selection-bar/selection-bar.component.ts       | 21 +++++-----
- 12 files changed, 89 insertions(+), 73 deletions(-)
+ ...icky-table-header-and-pagination-at-top.plan.md |  6 +-
+ .../inventory-product-list.component.html          | 35 +++++-----
+ .../recipe-book-list.component.html                | 35 +++++-----
+ .../shared/list-shell/list-shell.component.html    | 13 +++-
+ .../shared/list-shell/list-shell.component.scss    | 31 ++++++++-
+ .../shared/list-shell/list-shell.component.spec.ts | 74 ++++++++++++++++++++++
+ src/app/shared/list-shell/list-shell.component.ts  | 20 +++++-
+ src/styles.scss                                    |  7 +-
+ 8 files changed, 177 insertions(+), 44 deletions(-)
 
 ## Commit
-bc9e87a8
+70deb3ef
 
 ## PR
-https://github.com/WDD-CODER/foodVibe1.0/pull/300
+N/A
 
 ## Next Steps
-- Human re-checks lists at 360px / tablet
+- Human check: phone/tablet/desktop pagination at top; suppliers/equipment header

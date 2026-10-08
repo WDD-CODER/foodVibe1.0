@@ -91,9 +91,9 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: list-shell: `.table-top` wrapper, `[shell-pagination]` slot, sticky styles, `--list-sticky-top`, `overflow:clip`, grid rows (`src/app/shared/list-shell/**`).
-- [ ] A2: Move pagination in inventory and recipe-book into the slot; adjust `.c-pagination-controls` (`inventory-product-list.component.html/.scss`, `recipe-book-list.component.html/.scss`, `src/styles.scss`).
-- [ ] A3: Verify suppliers and equipment (no pagination) get the sticky column header with no empty gap.
+- [x] A1: list-shell: `.table-top` wrapper, `[shell-pagination]` slot, sticky styles, `--list-sticky-top`, `overflow:clip`, grid rows (`src/app/shared/list-shell/**`).
+- [x] A2: Move pagination in inventory and recipe-book into the slot; adjust `.c-pagination-controls` (`inventory-product-list.component.html/.scss`, `recipe-book-list.component.html/.scss`, `src/styles.scss`).
+- [x] A3: Verify suppliers and equipment (no pagination) get the sticky column header with no empty gap.
 - [ ] A4: Build and run specs. Check at 360px, 800px and 1280px. Update the session-state file.
 
 ## Technical Considerations
