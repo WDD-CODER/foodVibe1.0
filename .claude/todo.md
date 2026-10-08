@@ -132,9 +132,9 @@
 - [ ] A6: Build and run specs. Update the session-state file.
 
 ### Plan 346 — Lists: sticky table header and pagination at the top (`plans/346-lists-sticky-table-header-and-pagination-at-top.plan.md`)
-- [ ] A1: list-shell: `.table-top` wrapper, `[shell-pagination]` slot, sticky styles, `--list-sticky-top`, `overflow:clip`, grid rows (`src/app/shared/list-shell/**`).
-- [ ] A2: Move pagination in inventory and recipe-book into the slot; adjust `.c-pagination-controls` (`inventory-product-list.component.html/.scss`, `recipe-book-list.component.html/.scss`, `src/styles.scss`).
-- [ ] A3: Verify suppliers and equipment (no pagination) get the sticky column header with no empty gap.
+- [x] A1: list-shell: `.table-top` wrapper, `[shell-pagination]` slot, sticky styles, `--list-sticky-top`, `overflow:clip`, grid rows (`src/app/shared/list-shell/**`).
+- [x] A2: Move pagination in inventory and recipe-book into the slot; adjust `.c-pagination-controls` (`inventory-product-list.component.html/.scss`, `recipe-book-list.component.html/.scss`, `src/styles.scss`).
+- [x] A3: Verify suppliers and equipment (no pagination) get the sticky column header with no empty gap.
 - [ ] A4: Build and run specs. Check at 360px, 800px and 1280px. Update the session-state file.
 
 ### Plan 347 — Mobile keyboard: push content up, keep the focused field visible (`plans/347-mobile-keyboard-keep-focused-field-visible.plan.md`)
@@ -152,10 +152,10 @@
 - [ ] A5: Build and run specs. Check at 360px, 768px and desktop (the carousel is hidden on desktop as today). Update the session-state file.
 
 ### Plan 350 — Shared scroll rail for horizontal strips (`plans/350-shared-scroll-rail-for-horizontal-strips.plan.md`)
-- [ ] A1: `app-scroll-rail` component plus its spec (`src/app/shared/scroll-rail/**`).
-- [ ] A2: Migrate the metadata jump-nav; delete the old logic (`metadata-manager.page.component.*`).
-- [ ] A3: Migrate tab chips; adjust the `.c-tab-chips` rules (`core/components/tab-chips/**`, `src/styles.scss`).
-- [ ] A4: Migrate the dish data strip (`menu-dish-row/**`).
+- [x] A1: `app-scroll-rail` component plus its spec (`src/app/shared/scroll-rail/**`).
+- [x] A2: Migrate the metadata jump-nav; delete the old logic (`metadata-manager.page.component.*`).
+- [x] A3: Migrate tab chips; adjust the `.c-tab-chips` rules (`core/components/tab-chips/**`, `src/styles.scss`).
+- [x] A4: Migrate the dish data strip (`menu-dish-row/**`).
 - [ ] A5: Build and run specs. Check at 360px and 1280px in RTL. Update the session-state file.
 
 ### Plan 351 — Dashboard "פעילות אחרונה": readable change history (`plans/351-dashboard-recent-activity-readable-change-history.plan.md`)

@@ -28,10 +28,17 @@
   </div>
 
   <section class="table-area">
-    <div class="table-header">
-      <ng-content select="[shell-table-header]"></ng-content>
+    <!-- Plan 346: pagination + column header stay pinned while rows scroll (sticky at every
+         width; on desktop the body scrolls inside, below it). -->
+    <div class="table-top" #tableTop>
+      <div class="table-pagination" (click)="onPaginationClick($event)">
+        <ng-content select="[shell-pagination]"></ng-content>
+      </div>
+      <div class="table-header">
+        <ng-content select="[shell-table-header]"></ng-content>
+      </div>
     </div>
-    <div class="table-body">
+    <div class="table-body" #tableBody>
       <ng-content select="[shell-table-body]"></ng-content>
     </div>
   </section>
