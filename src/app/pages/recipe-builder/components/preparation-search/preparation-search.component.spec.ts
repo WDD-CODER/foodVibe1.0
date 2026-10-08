@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
-import { LucideAngularModule, Search, Plus } from 'lucide-angular'
+import { LucideAngularModule, Search, Plus, X } from 'lucide-angular'
 import { PreparationSearchComponent } from './preparation-search.component'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
 import { signal } from '@angular/core'
@@ -19,7 +19,7 @@ describe('PreparationSearchComponent', () => {
     prepRegistrySpy.allPreparations_ = signal([{ name: 'רוטב עגבניות', category: 'מטבח' }])
 
     await TestBed.configureTestingModule({
-      imports: [PreparationSearchComponent, TranslatePipe, LucideAngularModule.pick({ Search, Plus })],
+      imports: [PreparationSearchComponent, TranslatePipe, LucideAngularModule.pick({ Search, Plus, X })],
       providers: [provideHttpClient(), { provide: PreparationRegistryService, useValue: prepRegistrySpy }]
     }).compileComponents()
 

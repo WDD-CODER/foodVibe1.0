@@ -10,8 +10,14 @@
       (input)="searchQuery_.set($any($event.target).value); showResults_.set(true); fitHeight_()"
       (focus)="showResults_.set(true)"
       (keydown.enter)="onEnter($event)"
+      (keydown.escape)="onSearchEscape($event)"
       placeholder="{{ 'search_preparation' | translatePipe }}"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
     ></textarea>
+    <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" />
   </div>
 
   @if (showResults_() && groupedResults_().length > 0) {

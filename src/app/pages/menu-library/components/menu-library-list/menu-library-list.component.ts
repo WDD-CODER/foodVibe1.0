@@ -16,6 +16,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { useListState, StringParam } from 'src/app/core/utils/list-state.util'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 
@@ -29,7 +30,8 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
     TranslatePipe,
     LoaderComponent,
     CustomSelectComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    InputClearComponent
   ],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
@@ -247,5 +249,19 @@ export class MenuLibraryListComponent {
     if (input?.showPicker) {
       input.showPicker()
     }
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

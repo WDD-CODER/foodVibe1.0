@@ -13,12 +13,19 @@
     <div class="c-input-wrapper">
       <lucide-icon name="search" [size]="18"></lucide-icon>
       <input
+        #searchInput
         id="supplier-search"
         type="text"
         [ngModel]="searchQuery_()"
         (ngModelChange)="searchQuery_.set($event)"
         [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        (keydown.escape)="onSearchEscape($event, searchInput)"
       />
+      <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
     </div>
   </ng-container>
 

@@ -2190,3 +2190,14 @@ body.kb-open {
     overflow-y: auto;
   }
 }
+
+/* ---- Engine addition: Input Wrapper clear (X) slot (plan 363) — `<app-input-clear>` sits
+   after the input at the inline-end; its own component styles handle the fade/scale. ---- */
+.c-input-wrapper {
+  position: relative;
+
+  app-input-clear {
+    flex-shrink: 0;
+    margin-inline-start: auto;
+  }
+}

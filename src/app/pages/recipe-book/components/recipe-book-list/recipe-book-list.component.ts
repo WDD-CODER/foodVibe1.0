@@ -62,6 +62,7 @@ import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
 import { buildFilterOptionCounts, attachFilterCheckedState } from 'src/app/core/utils/filter-category-counts.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating'
 type RecipeBulkField = 'labels' | 'recipeType'
@@ -92,7 +93,8 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     SelectionBarComponent,
     EmptyStateComponent,
     RatingStarsComponent,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    InputClearComponent
   ],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
@@ -877,10 +879,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     // Labels and recipe type are shared content, so the scope question applies
     // — but asked ONCE for the whole selection, not once per item. Passing the
     // first master-linked recipe is enough: askScope only inspects _masterId.
-    const scope = await this.masterPush.askScope(targets.find((r) => r._masterId), {
-      entity: bulkScopeEntity(targets),
-      count: targets.length
-    })
+    const scope = await this.masterPush.askScope(
+      targets.find((r) => r._masterId),
+      {
+        entity: bulkScopeEntity(targets),
+        count: targets.length
+      }
+    )
     if (scope === 'cancel') return
 
     for (const recipe of targets) {
@@ -969,5 +974,19 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected getRecipeCost(recipe: Recipe): number {
     return this.recipeCostService.computeRecipeCost(recipe)
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

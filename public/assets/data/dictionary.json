@@ -993,6 +993,7 @@
     "supplier_added": "הספק \"{name}\" נוסף בהצלחה",
     "min_order": "מינימום הזמנה",
     "ai_warning_implausible_portion_weight": "כמויות הרכיבים לא סבירות ביחס למספר המנות",
-    "menu_print": "הדפסה"
+    "menu_print": "הדפסה",
+    "clear_search": "ניקוי חיפוש"
   }
 }

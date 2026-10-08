@@ -27,7 +27,9 @@ describe('buildScopeTexts', () => {
       for (const entity of ENTITIES) {
         const t = buildScopeTexts(action, entity, 1, echo)
         expect(t.headerKey).withContext(`${action}/${entity}`).toBe(`scope_${action}_header`)
-        expect(t.message.startsWith(`scope_${action}_${entity}`)).withContext(`${action}/${entity}`).toBeTrue()
+        expect(t.message.startsWith(`scope_${action}_${entity}`))
+          .withContext(`${action}/${entity}`)
+          .toBeTrue()
       }
     }
     expect(buildScopeTexts('save', 'recipe', 1, echo)).toEqual(

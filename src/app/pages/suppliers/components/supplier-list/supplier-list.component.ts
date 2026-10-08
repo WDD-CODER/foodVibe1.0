@@ -38,6 +38,7 @@ import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.uti
 import { HeroFabService } from '@services/hero-fab.service'
 import { getSupplierIds } from '@utils/product-source.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 const DAY_LABELS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
@@ -59,7 +60,8 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
     ListRowCheckboxComponent,
     SelectionBarComponent,
     EmptyStateComponent,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    InputClearComponent
   ],
   templateUrl: './supplier-list.component.html',
   styleUrl: './supplier-list.component.scss',
@@ -267,5 +269,19 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected deliveryDaysDisplay(days: number[] | undefined): string {
     if (!days?.length) return '—'
     return days.map((d) => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ')
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }
