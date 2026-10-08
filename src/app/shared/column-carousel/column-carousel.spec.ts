@@ -76,11 +76,12 @@ describe('Column carousel (plan 349)', () => {
     expect(activeTexts()).toEqual(['B', '1-b', '2-b'])
   })
 
-  it('header shows the active label and one dot per column', () => {
+  it('header names the active column for screen readers and shows one dot per column', () => {
     fixture.componentInstance.group().go(1)
     fixture.detectChanges()
-    const label = fixture.debugElement.query(By.css('.cc-header-label')).nativeElement as HTMLElement
-    expect(label.textContent?.trim()).toBe('b')
+    const header = fixture.debugElement.query(By.css('.cc-header')).nativeElement as HTMLElement
+    expect(header.getAttribute('aria-label')).toBe('b')
+    expect(fixture.debugElement.query(By.css('.cc-header-label'))).toBeNull()
     expect(fixture.debugElement.queryAll(By.css('.cc-dot')).length).toBe(3)
     expect(fixture.debugElement.query(By.css('.cc-dot.is-active'))).not.toBeNull()
   })

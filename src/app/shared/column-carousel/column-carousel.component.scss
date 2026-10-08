@@ -129,17 +129,6 @@ $cc-break: 768px;
     }
   }
 
-  .cc-header-label {
-    max-inline-size: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-text-muted);
-  }
-
   .cc-dots {
     display: flex;
     gap: 0.1875rem;

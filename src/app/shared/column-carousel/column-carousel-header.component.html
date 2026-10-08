@@ -1,6 +1,5 @@
 <ng-content></ng-content>
 <div class="cc-header" tabindex="0" [attr.aria-label]="activeLabel() | translatePipe">
-  <span class="cc-header-label">{{ activeLabel() | translatePipe }}</span>
   @if (dots().length > 1) {
     <span class="cc-dots" aria-hidden="true">
       @for (i of dots(); track i) {
@@ -9,7 +8,12 @@
     </span>
   }
 </div>
-<button type="button" class="cc-arrow cc-arrow--float cc-arrow--prev" (click)="prev($event)" aria-label="Previous column">
+<button
+  type="button"
+  class="cc-arrow cc-arrow--float cc-arrow--prev"
+  (click)="prev($event)"
+  aria-label="Previous column"
+>
   <lucide-icon class="cc-icon-rtl" name="chevron-right" [size]="14"></lucide-icon>
   <lucide-icon class="cc-icon-ltr" name="chevron-left" [size]="14"></lucide-icon>
 </button>
