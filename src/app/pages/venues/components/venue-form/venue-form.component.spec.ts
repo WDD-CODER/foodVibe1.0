@@ -28,7 +28,12 @@ type FormAccess = { venueForm_: { get: (k: string) => { setValue: (v: unknown) =
 describe('VenueFormComponent (pending-changes guard contract)', () => {
   let fixture: ComponentFixture<VenueFormComponent>
   let component: VenueFormComponent
-  let venueData: { ensureLoaded: jasmine.Spy; allVenues_: ReturnType<typeof signal>; addVenue: jasmine.Spy; updateVenue: jasmine.Spy }
+  let venueData: {
+    ensureLoaded: jasmine.Spy
+    allVenues_: ReturnType<typeof signal>
+    addVenue: jasmine.Spy
+    updateVenue: jasmine.Spy
+  }
   let router: jasmine.SpyObj<Router>
 
   function setName(value: string): void {

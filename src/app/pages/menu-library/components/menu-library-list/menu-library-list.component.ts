@@ -22,7 +22,15 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 @Component({
   selector: 'app-menu-library-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, LoaderComponent, CustomSelectComponent, EmptyStateComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    CustomSelectComponent,
+    EmptyStateComponent
+  ],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
