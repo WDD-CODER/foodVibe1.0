@@ -29,7 +29,10 @@ export class ActivityValuePipe implements PipeTransform {
     if (value == null || value.trim() === '') return '—'
     if (RAW_FIELDS.has(field)) return value
 
-    const tokens = value.split(',').map((s) => s.trim()).filter(Boolean)
+    const tokens = value
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
     if (tokens.length === 0) return '—'
 
     if (field === 'supplier') {

@@ -21,10 +21,17 @@ export interface ChangePopoverOpen {
 @Component({
   selector: 'app-change-popover',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, ActivityValuePipe, LucideAngularModule, ClickOutSideDirective, FloatingInfoContainerComponent],
+  imports: [
+    CommonModule,
+    TranslatePipe,
+    ActivityValuePipe,
+    LucideAngularModule,
+    ClickOutSideDirective,
+    FloatingInfoContainerComponent
+  ],
   templateUrl: './change-popover.component.html',
   styleUrl: './change-popover.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangePopoverComponent {
   open = input<ChangePopoverOpen | null>(null)
@@ -34,6 +41,6 @@ export class ChangePopoverComponent {
 
   getChanges(activity: ActivityEntry | undefined, field: string): ActivityChange[] {
     const changes = activity?.changes ?? []
-    return field === ALL_CHANGES_FIELD ? changes : changes.filter(c => c.field === field)
+    return field === ALL_CHANGES_FIELD ? changes : changes.filter((c) => c.field === field)
   }
 }

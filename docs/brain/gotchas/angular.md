@@ -239,3 +239,13 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** Dropping the capture flag also drops the scrolls of inner list containers, which are what move the badge, so the tooltip drifts away from the leaf.
 
 **What to do instead:** In the listener, return early when `event.target` is inside the popover. Measure the natural height without resetting styles (box height + `scrollHeight − clientHeight` of the scroll body), so a page scroll keeps the inner scroll position.
+
+---
+
+## An approved AI draft says `yield_unit: 'dish'`, not `'portion'`
+
+**What hurt:** Plan 370's "כמויות הרכיבים לא סבירות ביחס למספר המנות" warning passed its unit tests but never showed in the app. Unit tests built drafts with `yield_unit: 'portion'` (what Gemini returns), but `ai-draft-editor.component.ts` `onApprove()` rewrites a dish's yield unit to `'dish'` (מנה) before `computeWarnings` and `POST /ai/shots` see it.
+
+**Why the obvious fix is wrong:** Changing the editor to emit `'portion'` breaks the recipe builder, which expects `'dish'` for dishes.
+
+**What to do instead:** Any check on an approved draft must treat `'portion'` and `'dish'` the same (`PORTION_YIELD_UNITS` in `gemini-shots.service.ts` and `server/services/ai-recipe-helpers.js`). Build test drafts in the shape the editor emits, not the shape the model returns, and check each AI warning once in the real modal.

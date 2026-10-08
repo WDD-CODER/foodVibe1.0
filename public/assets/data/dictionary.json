@@ -962,6 +962,7 @@
     "activity_yesterday": "אתמול",
     "activity_just_now": "לפני רגע",
     "supplier_added": "הספק \"{name}\" נוסף בהצלחה",
-    "min_order": "מינימום הזמנה"
+    "min_order": "מינימום הזמנה",
+    "ai_warning_implausible_portion_weight": "כמויות הרכיבים לא סבירות ביחס למספר המנות"
   }
 }

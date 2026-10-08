@@ -15,7 +15,7 @@ describe('ActivityValuePipe', () => {
       activity_deleted_supplier: 'ספק שנמחק'
     }
     const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
-    translation.translate.and.callFake((key: string | undefined) => (key ? dict[key.toLowerCase()] ?? key : ''))
+    translation.translate.and.callFake((key: string | undefined) => (key ? (dict[key.toLowerCase()] ?? key) : ''))
     const suppliers = new Map([
       ['s1', { _id: 's1', nameHebrew: 'ירקות כהן' }],
       ['s2', { _id: 's2', nameHebrew: 'פירות השרון' }]
