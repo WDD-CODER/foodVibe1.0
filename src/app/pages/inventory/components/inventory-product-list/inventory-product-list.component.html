@@ -8,7 +8,7 @@
   [resultCount]="filteredProducts_().length"
   [resultTotal]="kitchenStateService.products_().length"
 >
-  <h2 shell-title class="page-title">{{ 'product_list' | translatePipe }}</h2>
+  <ng-container shell-title>{{ 'product_list' | translatePipe }}</ng-container>
 
   <ng-container shell-search>
     <label class="visually-hidden" for="product-search">{{ 'search' | translatePipe }}</label>
@@ -49,7 +49,7 @@
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
-      {{ 'add_product' | translatePipe }}
+      <span class="btn-label">{{ 'add' | translatePipe }}</span>
     </button>
   </ng-container>
 

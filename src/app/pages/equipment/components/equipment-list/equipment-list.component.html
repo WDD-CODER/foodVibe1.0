@@ -7,9 +7,7 @@
   [resultCount]="filteredEquipment_().length"
   [resultTotal]="equipmentData.allEquipment_().length"
 >
-  <h2 shell-title class="page-title">
-    {{ 'equipment' | translatePipe }}
-  </h2>
+  <ng-container shell-title>{{ 'equipment' | translatePipe }}</ng-container>
 
   <ng-container shell-search>
     <label class="visually-hidden" for="equipment-search">{{ 'search' | translatePipe }}</label>
@@ -41,7 +39,7 @@
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
-      {{ 'add_equipment' | translatePipe }}
+      <span class="btn-label">{{ 'add' | translatePipe }}</span>
     </button>
   </ng-container>
 

@@ -103,11 +103,11 @@ describe('EquipmentListComponent', () => {
 
   it('should show list shell and title', () => {
     expect(fixture.nativeElement.querySelector('app-list-shell')).toBeTruthy()
-    expect(fixture.nativeElement.querySelector('.page-title')).toBeTruthy()
+    expect(fixture.nativeElement.querySelector('app-page-header h1.ph-title')).toBeTruthy()
   })
 
   it('titles the list with the equipment key and has no scaling column', () => {
-    expect(fixture.nativeElement.querySelector('.page-title').textContent.trim()).toBe('equipment')
+    expect(fixture.nativeElement.querySelector('app-page-header h1.ph-title').textContent.trim()).toBe('equipment')
     expect(fixture.nativeElement.querySelector('.col-scaling')).toBeNull()
   })
 })
