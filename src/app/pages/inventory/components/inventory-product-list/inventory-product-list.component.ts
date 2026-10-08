@@ -716,9 +716,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       let updated: Product
       if (field === 'supplierIds_') {
         const currentIds = getSupplierIds(product)
-        if (currentIds.includes(event.value)) continue
+        if (currentIds.length === 1 && currentIds[0] === event.value) continue
+        // Bulk "change supplier" replaces — every selected product ends up with exactly this supplier.
         const newSource = { supplierId: event.value, price: getEffectivePrice(product), addedAt: Date.now() }
-        updated = { ...product, sources: [...(product.sources ?? []), newSource] }
+        updated = { ...product, sources: [newSource] }
       } else if (field === 'categories' || field === 'allergens') {
         const current = (product[field] ?? []) as string[]
         if (current.includes(event.value)) continue
