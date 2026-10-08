@@ -30,7 +30,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { Recipe } from '@models/recipe.model'
-import { MasterPushService } from '@services/master-push.service'
+import { MasterPushService, bulkScopeEntity, recipeScopeEntity } from '@services/master-push.service'
 import { Product } from '@models/product.model'
 import { VersionEntityType } from '@services/version-history.service'
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
@@ -63,6 +63,7 @@ import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categor
 import { buildFilterOptionCounts, attachFilterCheckedState } from 'src/app/core/utils/filter-category-counts.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating'
 type RecipeBulkField = 'labels' | 'recipeType'
@@ -93,7 +94,8 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     SelectionBarComponent,
     EmptyStateComponent,
     RatingStarsComponent,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    InputClearComponent
   ],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
@@ -622,7 +624,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected async onRatingChange(recipe: Recipe, value: number): Promise<void> {
-    const scope = await this.masterPush.askScope(recipe)
+    const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     this.kitchenState.saveRecipe({ ...recipe, rating: value }).subscribe({
       next: (saved) => {
@@ -809,8 +811,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected async onDeleteRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' }))) return
-    const scope = await this.masterPush.askDeleteScope(recipe)
+    if (!(await this.confirmDeleteUnlessScoped(recipe))) return
+    const scope = await this.masterPush.askDeleteScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     this.deletingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
@@ -822,6 +824,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
         this.deletingId_.set(null)
       }
     })
+  }
+
+  /**
+   * Plain "are you sure?" confirm — skipped when the admin scope prompt is about to show, so an
+   * admin deleting a master-linked recipe sees one dialog, not two (plan 365).
+   */
+  private async confirmDeleteUnlessScoped(recipe: Recipe): Promise<boolean> {
+    if (this.masterPush.willAskDeleteScope(recipe)) return true
+    return this.confirmModal.open('confirm_delete', { variant: 'danger' })
   }
 
   private async onPermanentlyDeleteRecipe(recipe: Recipe): Promise<void> {
@@ -839,8 +850,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected async onRemoveRecipe(recipe: Recipe): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open('האם אתה בטוח שברצונך למחוק?', { variant: 'danger' }))) return
-    const scope = await this.masterPush.askDeleteScope(recipe)
+    if (!(await this.confirmDeleteUnlessScoped(recipe))) return
+    const scope = await this.masterPush.askDeleteScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     this.removingId_.set(recipe._id)
     this.kitchenState.deleteRecipe(recipe).subscribe({
@@ -863,7 +874,13 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     // Labels and recipe type are shared content, so the scope question applies
     // — but asked ONCE for the whole selection, not once per item. Passing the
     // first master-linked recipe is enough: askScope only inspects _masterId.
-    const scope = await this.masterPush.askScope(targets.find((r) => r._masterId))
+    const scope = await this.masterPush.askScope(
+      targets.find((r) => r._masterId),
+      {
+        entity: bulkScopeEntity(targets),
+        count: targets.length
+      }
+    )
     if (scope === 'cancel') return
 
     for (const recipe of targets) {
@@ -887,11 +904,18 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' }))) return
     const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''))
     // Asked once for the whole selection, matching onBulkEdit's shape — passing the
     // first master-linked recipe is enough since askDeleteScope only inspects _masterId.
-    const scope = await this.masterPush.askDeleteScope(recipes.find((r) => r._masterId))
+    // When the admin scope prompt will show, it is the only dialog (its cancel is the safety).
+    const masterLinked = recipes.find((r) => r._masterId)
+    if (!this.masterPush.willAskDeleteScope(masterLinked)) {
+      if (!(await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' }))) return
+    }
+    const scope = await this.masterPush.askDeleteScope(masterLinked, {
+      entity: bulkScopeEntity(recipes),
+      count: recipes.length
+    })
     if (scope === 'cancel') return
     recipes.forEach((recipe) => {
       this.kitchenState.deleteRecipe(recipe).subscribe({
@@ -922,7 +946,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected async onToggleApproval(recipe: Recipe): Promise<void> {
-    const scope = await this.masterPush.askScope(recipe)
+    const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     const updated = { ...recipe, isApproved: !recipe.isApproved }
     this.kitchenState.saveRecipe(updated).subscribe({
@@ -945,5 +969,19 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   protected getRecipeCost(recipe: Recipe): number {
     return this.recipeCostService.computeRecipeCost(recipe)
+  }
+
+  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
+  protected onClearSearch(input: HTMLInputElement): void {
+    this.searchQuery_.set('')
+    input.focus()
+  }
+
+  /** Escape in a non-empty search clears it, like the X (plan 363). */
+  protected onSearchEscape(event: Event, input: HTMLInputElement): void {
+    if (!this.searchQuery_()) return
+    event.preventDefault()
+    event.stopPropagation()
+    this.onClearSearch(input)
   }
 }

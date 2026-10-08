@@ -25,12 +25,14 @@
       </label>
     </div>
 
-    <div class="form-section">
-      <div class="form-group form-group--active">
-        <label class="active-toggle">
-          <input type="checkbox" formControlName="active" />
-          <span>{{ 'venue_active' | translatePipe }}</span>
-        </label>
+    <div class="form-section form-section--basic">
+      <div class="form-group form-group--active form-group--full">
+        <div class="c-toggle-chip-group">
+          <label class="c-toggle-chip">
+            <input type="checkbox" formControlName="active" />
+            <span>{{ 'venue_active' | translatePipe }}</span>
+          </label>
+        </div>
       </div>
       <div class="form-group">
         <label for="nameHebrew">{{ 'name' | translatePipe }}</label>
@@ -59,7 +61,7 @@
           [typeToFilter]="true"
         />
       </div>
-      <div class="form-group">
+      <div class="form-group form-group--full">
         <label for="notes">{{ 'notes' | translatePipe }}</label>
         <textarea id="notes" formControlName="notes" rows="2" class="c-input"></textarea>
       </div>

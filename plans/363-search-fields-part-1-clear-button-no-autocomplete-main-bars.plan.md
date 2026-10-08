@@ -80,17 +80,17 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] New `InputClearComponent` (`src/app/shared/input-clear/`, selector `app-input-clear`):
+- [x] New `InputClearComponent` (`src/app/shared/input-clear/`, selector `app-input-clear`):
   - Input `visible` (boolean); output `clear`.
   - A `button type="button"` with Lucide `x` (16px), `aria-label` from the `clear_search` key.
   - Always rendered (so it can animate out); hidden via a `[class.is-visible]` toggle with `opacity` / `transform: scale(.6) → 1` and `visibility`, ~150ms, and `pointer-events:none` when hidden. Respects `prefers-reduced-motion`.
   - Takes up no space when hidden (absolute at inline-end, or fixed 1.5rem width; pick whichever keeps the input from jumping).
-- [ ] Engine addition in `styles.scss` (append): `.c-input-wrapper { position: relative }` and the clear-button slot styles, so every engine wrapper supports it. The local `.input-wrapper` in preparation-search gets the same treatment in its own scss.
-- [ ] At each of the 8 sites: place `<app-input-clear [visible]="!!query()" (clear)="onClearSearch()">` after the input. `onClearSearch()` sets the signal to `''` and runs the same side effects as typing (e.g. ingredient-search: `showResults_.set(false)`, `highlightedIndex_.set(-1)`; menu-library: ngModel update; any page that syncs search to URL query params updates them), then refocuses the input via its `#ref`.
-- [ ] Every one of the 8 inputs gets `autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"`. If Chrome still offers suggestions on Android, use `autocomplete="new-off"` and note it in the session state.
+- [x] Engine addition in `styles.scss` (append): `.c-input-wrapper { position: relative }` and the clear-button slot styles, so every engine wrapper supports it. The local `.input-wrapper` in preparation-search gets the same treatment in its own scss.
+- [x] At each of the 8 sites: place `<app-input-clear [visible]="!!query()" (clear)="onClearSearch()">` after the input. `onClearSearch()` sets the signal to `''` and runs the same side effects as typing (e.g. ingredient-search: `showResults_.set(false)`, `highlightedIndex_.set(-1)`; menu-library: ngModel update; any page that syncs search to URL query params updates them), then refocuses the input via its `#ref`.
+- [x] Every one of the 8 inputs gets `autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"`. If Chrome still offers suggestions on Android, use `autocomplete="new-off"` and note it in the session state.
 
 ### Should Have (P1)
-- [ ] Escape inside a non-empty field clears it, same as the X. Where Escape already closes a dropdown, Escape-with-text clears first and Escape-again closes.
+- [x] Escape inside a non-empty field clears it, same as the X. Where Escape already closes a dropdown, Escape-with-text clears first and Escape-again closes.
 
 ### Nice to Have (P2)
 - None.
@@ -103,11 +103,11 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: `InputClearComponent` + spec (hidden when `visible=false`, emits `clear`); engine CSS (`shared/input-clear/**`, `src/styles.scss`).
-- [ ] A2: Wire the 4 list pages (recipe-book, inventory, suppliers, equipment).
-- [ ] A3: Wire menu-library and venues.
-- [ ] A4: Wire ingredient-search and preparation-search, preserving their keyboard and result-panel behavior.
-- [ ] A5: Autocomplete attributes on all 8. Build, specs, phone check. Update session-state.
+- [x] A1: `InputClearComponent` + spec (hidden when `visible=false`, emits `clear`); engine CSS (`shared/input-clear/**`, `src/styles.scss`).
+- [x] A2: Wire the 4 list pages (recipe-book, inventory, suppliers, equipment).
+- [x] A3: Wire menu-library and venues.
+- [x] A4: Wire ingredient-search and preparation-search, preserving their keyboard and result-panel behavior.
+- [x] A5: Autocomplete attributes on all 8. Build, specs, phone check. Update session-state.
 
 ## Technical Considerations
 
@@ -132,6 +132,6 @@ touching any milestone.
 - [auto] `npx ng test --watch=false --include=src/app/shared/input-clear/**/*.spec.ts` → 0 failures.
 - [auto] `rg -n "app-input-clear" src/app --glob '*.html'` → 8 matches.
 - [auto] `npm run build` → exit 0.
-- [human] Inventory search: empty → no X. Type "עגב" → X fades in → tap → text gone, full list back, cursor still in the field → X fades out. Same on recipe book, suppliers, equipment, menu library and venues.
-- [human] Recipe builder ingredient search: type → results → X → results close and the field is empty and focused.
-- [human] Android Chrome: tapping these fields shows no browser suggestion strip over them.
+- [x] [human] Inventory search: empty → no X. Type "עגב" → X fades in → tap → text gone, full list back, cursor still in the field → X fades out. Same on recipe book, suppliers, equipment, menu library and venues.
+- [x] [human] Recipe builder ingredient search: type → results → X → results close and the field is empty and focused.
+- [x] [human] Android Chrome: tapping these fields shows no browser suggestion strip over them.
