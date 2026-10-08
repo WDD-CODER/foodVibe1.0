@@ -13,6 +13,8 @@ interface TabChip {
   path: string
   /** Extra query params to match/apply — only the metadata chip uses this today. */
   queryParams?: Record<string, string>
+  /** The "back to dashboard overview" chip (plan 367) — never shown as active, styled as `.c-tab-pill--home`. */
+  home?: boolean
 }
 
 type TabGroup = 'dashboard' | 'inventory' | 'recipes' | 'menus'
@@ -24,7 +26,6 @@ const GROUP_BY_PATH_PREFIX: ReadonlyArray<[string, TabGroup]> = [
   ['/suppliers', 'dashboard'],
   ['/trash', 'dashboard'],
   ['/inventory', 'inventory'],
-  ['/equipment', 'inventory'],
   ['/recipe-book', 'recipes'],
   ['/recipe-builder', 'recipes'],
   ['/cook', 'recipes'],
@@ -45,7 +46,10 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
     { id: 'suppliers', labelKey: 'suppliers', icon: 'truck', path: '/suppliers' },
     { id: 'trash', labelKey: 'trash', icon: 'trash-2', path: '/trash' }
   ],
-  inventory: [{ id: 'equipment', labelKey: 'equipment', icon: 'wrench', path: '/equipment' }],
+  inventory: [
+    { id: 'products', labelKey: 'products', icon: 'package', path: '/inventory/list' },
+    { id: 'equipment', labelKey: 'equipment', icon: 'wrench', path: '/inventory/equipment' }
+  ],
   recipes: [
     { id: 'recipe-builder', labelKey: 'recipe_builder', icon: 'chef-hat', path: '/recipe-builder' },
     { id: 'cook-view', labelKey: 'cook_view', icon: 'flame', path: '/cook' }
@@ -54,6 +58,36 @@ const CHIPS_BY_GROUP: Readonly<Record<TabGroup, readonly TabChip[]>> = {
     { id: 'menu-library', labelKey: 'menu_library', icon: 'library', path: '/menu-library' },
     { id: 'menu-intelligence', labelKey: 'menu_intelligence', icon: 'clipboard-list', path: '/menu-intelligence' }
   ]
+}
+
+/** Replaces the current dashboard sub-page's chip, in the same position (plan 367). */
+const DASHBOARD_HOME_CHIP: TabChip = {
+  id: 'dashboard',
+  labelKey: 'dashboard',
+  icon: 'layout-dashboard',
+  path: '/dashboard',
+  home: true
+}
+
+/** `/dashboard?tab=<value>` → the dashboard-group chip that value belongs to. */
+const DASHBOARD_CHIP_BY_TAB: Readonly<Record<string, string>> = {
+  metadata: 'metadata',
+  venues: 'venues',
+  'add-venue': 'venues',
+  trash: 'trash'
+}
+
+/** Which dashboard-group chip the URL is on, or null on the overview. */
+function currentDashboardChipId(url: string): string | null {
+  const [path, query = ''] = url.split('?')
+  if (path.startsWith('/venues')) return 'venues'
+  if (path.startsWith('/suppliers')) return 'suppliers'
+  if (path.startsWith('/trash')) return 'trash'
+  if (path.startsWith('/dashboard')) {
+    const tab = new URLSearchParams(query.split('#')[0]).get('tab')
+    return tab ? (DASHBOARD_CHIP_BY_TAB[tab] ?? null) : null
+  }
+  return null
 }
 
 /**
@@ -80,6 +114,10 @@ export class TabChipsComponent {
     const group = GROUP_BY_PATH_PREFIX.find(([prefix]) => path.startsWith(prefix))?.[1]
     if (!group) return []
     const chips = CHIPS_BY_GROUP[group]
+    if (group === 'dashboard') {
+      const currentId = currentDashboardChipId(this.currentUrl_())
+      return currentId ? chips.map((chip) => (chip.id === currentId ? DASHBOARD_HOME_CHIP : chip)) : chips
+    }
     if (group !== 'recipes') return chips
 
     // On a specific recipe's builder/cook page, carry its id across the two chips so
