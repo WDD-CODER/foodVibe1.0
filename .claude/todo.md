@@ -178,13 +178,6 @@
 - [ ] A4: Trash (`src/app/pages/trash/**`).
 - [ ] A5: Delete the dead styles; run `rg 'class="page-title"'`. Build and run specs. Check at 360px and 1280px. Update the session-state file.
 
-### Plan 361 — Lists quick fixes: bulk-edit dropdown clipped, suppliers table grid and labels (`plans/361-lists-quick-fixes-bulk-edit-dropdown-suppliers-grid-labels.plan.md`)
-- [ ] A1: Remove `.selection-bar-area` overflow; verify the bulk-edit dropdown in all 4 lists (`list-shell.component.scss`).
-- [ ] A2: Suppliers 9-track desktop grid (`supplier-list/**`).
-- [ ] A3: Min-order into the carousel; mobile grid `'2fr 1fr 40px 28px'`; ₪ formatting (`supplier-list/**`).
-- [ ] A4: Dictionary keys; title tokens (P1) (`dictionary.json`, `supplier-list.component.scss`).
-- [ ] A5: Build, specs, check at 360px and 1280px. Update session-state.
-
 ### Plan 362 — List overlays escape the table: row actions menu and edit modal render at body level (`plans/362-list-overlays-row-actions-menu-edit-modal-body-level.plan.md`)
 - [ ] A1: Move `RowActionsMenuComponent` to CDK Overlay, with a spec (opens, closes on backdrop, `open(anchor)` works) (`shared/row-actions-menu/**`).
 - [ ] A2: Move the list-shell `[shell-modal]` slot out of `.list-container` (`shared/list-shell/**`).
