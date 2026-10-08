@@ -68,6 +68,7 @@ export class ConfirmModalService {
     this.variant_.set(options?.variant ?? 'default')
     this.showSaveButton_.set(true)
     this.saveButtonLabel_.set(options?.saveButtonLabel ?? 'save')
+    this.headerKey_.set(options?.headerKey ?? null)
     this.isOpen_.set(true)
     return new Promise(resolve => {
       this.resolve_ = (val) => {

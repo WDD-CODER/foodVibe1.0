@@ -19,7 +19,7 @@ import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TranslationService } from '@services/translation.service'
-import { MasterPushService } from '@services/master-push.service'
+import { MasterPushService, recipeScopeEntity } from '@services/master-push.service'
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component'
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component'
 import { FormsModule } from '@angular/forms'
@@ -523,7 +523,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     // opts this recipe out of every future master update (sync-master Rule 3).
     let pushToMasterAfterSave = false
     if (pending._masterId) {
-      const scope = await this.masterPush.askScope(pending)
+      const scope = await this.masterPush.askScope(pending, { entity: recipeScopeEntity(pending) })
       if (scope === 'cancel') return
       pushToMasterAfterSave = scope === 'everyone'
     } else {
@@ -583,7 +583,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (!recipe) return
     // Approval is shared recipe content, not a personal flag — so it asks the
     // same question every other content save asks.
-    const scope = await this.masterPush.askScope(recipe)
+    const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     this.saving.setSaving(true)
     this.kitchenState.saveRecipe({ ...recipe, isApproved: !recipe.isApproved }).subscribe({
@@ -607,7 +607,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected async onRatingChange(value: number): Promise<void> {
     const recipe = this.recipe_()
     if (!recipe) return
-    const scope = await this.masterPush.askScope(recipe)
+    const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     const updated = { ...recipe, rating: value }
     this.recipe_.set(updated)

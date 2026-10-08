@@ -547,10 +547,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const confirmMessage =
       affected.length > 0
         ? `חומר הגלם הזה בשימוש ב-${affected.length} מתכונים/מנות. מחיקה תסיר אותו מכולם. להמשיך?`
-        : 'האם אתה בטוח שברצונך למחוק חומר גלם זה?'
+        : 'confirm_delete_product'
     if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
 
-    const scope = await this.masterPush_.askDeleteScope(product ?? null)
+    const scope = await this.masterPush_.askDeleteScope(product ?? null, { entity: 'product' })
     if (scope === 'cancel') return
 
     this.deletingId_.set(_id)
@@ -593,7 +593,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
 
     const masterLinkedProduct = ids.map((id) => productsById.get(id)).find((p) => p?._masterId)
-    const scope = await this.masterPush_.askDeleteScope(masterLinkedProduct ?? null)
+    const scope = await this.masterPush_.askDeleteScope(masterLinkedProduct ?? null, {
+      entity: 'product',
+      count: ids.length
+    })
     if (scope === 'cancel') return
 
     for (const id of ids) {

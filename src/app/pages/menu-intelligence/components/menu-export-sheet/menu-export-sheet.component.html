@@ -12,7 +12,12 @@
 >
   <header class="mes-header">
     <h2 class="mes-title">{{ 'menu_toolbar_open' | translatePipe }}</h2>
-    <button type="button" class="c-icon-btn mes-close" (click)="close.emit()" [attr.aria-label]="'close' | translatePipe">
+    <button
+      type="button"
+      class="c-icon-btn mes-close"
+      (click)="close.emit()"
+      [attr.aria-label]="'close' | translatePipe"
+    >
       <lucide-icon name="x" [size]="18"></lucide-icon>
     </button>
   </header>
