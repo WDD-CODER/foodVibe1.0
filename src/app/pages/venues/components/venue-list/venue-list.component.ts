@@ -212,10 +212,6 @@ export class VenueListComponent implements OnInit, OnDestroy {
     return env
   }
 
-  backToDashboard(): void {
-    this.router.navigate(['/dashboard'])
-  }
-
   protected onAddPlace(): void {
     if (!this.requireAuthService.requireAuth()) return
     if (this.embeddedInDashboard) {
