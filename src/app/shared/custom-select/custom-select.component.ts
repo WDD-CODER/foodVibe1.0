@@ -24,7 +24,14 @@ import { InputClearComponent } from '../input-clear/input-clear.component'
   selector: 'app-custom-select',
   standalone: true,
   host: { tabIndex: '-1' },
-  imports: [CommonModule, TranslatePipe, ClickOutSideDirective, ScrollableDropdownComponent, LucideAngularModule, InputClearComponent],
+  imports: [
+    CommonModule,
+    TranslatePipe,
+    ClickOutSideDirective,
+    ScrollableDropdownComponent,
+    LucideAngularModule,
+    InputClearComponent
+  ],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomSelectComponent, multi: true }],
   templateUrl: './custom-select.component.html',
   styleUrl: './custom-select.component.scss',

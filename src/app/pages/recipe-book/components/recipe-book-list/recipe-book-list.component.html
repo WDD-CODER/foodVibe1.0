@@ -1,4 +1,5 @@
 <app-list-shell
+  columnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
   [gridTemplate]="
@@ -76,10 +77,10 @@
     >
       {{ 'type' | translatePipe }}
     </div>
-    <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
+    <app-column-carousel-header>
       <div
         class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col"
-        carouselHeaderColumn
+        columnSlide
         label="labels"
         (click)="labelsExpand.toggleAll()"
         (keydown.enter)="labelsExpand.toggleAll()"
@@ -91,7 +92,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col"
-        carouselHeaderColumn
+        columnSlide
         label="allergens"
         (click)="allergenExpand.toggleAll()"
         (keydown.enter)="allergenExpand.toggleAll()"
@@ -104,7 +105,7 @@
       @if (!hideDateColumn_()) {
         <div
           class="col-date c-grid-header-cell c-sortable-header"
-          carouselHeaderColumn
+          columnSlide
           label="date_added"
           (click)="setSort('dateAdded')"
           (keydown.enter)="setSort('dateAdded')"
@@ -117,7 +118,7 @@
       }
       <div
         class="col-rating c-grid-header-cell c-sortable-header"
-        carouselHeaderColumn
+        columnSlide
         label="rating"
         (click)="setSort('rating')"
         (keydown.enter)="setSort('rating')"
@@ -129,7 +130,7 @@
       </div>
       <div
         class="col-cost c-grid-header-cell c-sortable-header"
-        carouselHeaderColumn
+        columnSlide
         label="cost"
         (click)="setSort('cost')"
         (keydown.enter)="setSort('cost')"
@@ -139,7 +140,7 @@
       >
         {{ 'cost' | translatePipe }}
       </div>
-    </app-carousel-header>
+    </app-column-carousel-header>
     <div class="c-col-actions c-grid-header-cell">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
       <app-list-row-checkbox
@@ -191,12 +192,8 @@
         <div class="col-type c-list-body-cell">
           {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
         </div>
-        <app-cell-carousel [activeIndex]="carouselHeaderIndex_()">
-          <div
-            class="col-labels c-list-body-cell c-dense-chip-col"
-            cellCarouselSlide
-            [label]="'labels' | translatePipe"
-          >
+        <app-column-carousel-cell>
+          <div class="col-labels c-list-body-cell c-dense-chip-col" columnSlide [label]="'labels' | translatePipe">
             @if (row.labels.length) {
               <div
                 class="labels-btn-wrapper"
@@ -228,7 +225,7 @@
           </div>
           <div
             class="col-allergens c-list-body-cell c-dense-chip-col"
-            cellCarouselSlide
+            columnSlide
             [label]="'allergens' | translatePipe"
           >
             @if (row.allergens.length) {
@@ -256,7 +253,7 @@
           @if (!hideDateColumn_()) {
             <div
               class="col-date c-list-body-cell date-cell-wrap"
-              cellCarouselSlide
+              columnSlide
               [label]="'date_added' | translatePipe"
               (mouseenter)="showDateTooltip(row.recipe._id, $event)"
               (mouseleave)="hideDateTooltip()"
@@ -269,7 +266,7 @@
           }
           <div
             class="col-rating c-list-body-cell"
-            cellCarouselSlide
+            columnSlide
             [label]="'rating' | translatePipe"
             (click)="$event.stopPropagation()"
           >
@@ -282,7 +279,7 @@
           </div>
           <div
             class="col-cost c-list-body-cell cost-cell-wrap"
-            cellCarouselSlide
+            columnSlide
             [label]="'cost' | translatePipe"
             (mouseenter)="showCostTooltip(row.recipe._id, $event)"
             (mouseleave)="hideCostTooltip()"
@@ -295,7 +292,7 @@
           >
             ₪{{ row.cost | number: '1.2-2' }}
           </div>
-        </app-cell-carousel>
+        </app-column-carousel-cell>
         <app-row-actions-menu class="c-col-actions c-list-body-cell">
           <button
             type="button"

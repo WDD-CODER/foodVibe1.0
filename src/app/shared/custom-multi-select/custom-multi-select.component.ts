@@ -31,7 +31,14 @@ export interface CustomMultiSelectOption {
   selector: 'app-custom-multi-select',
   standalone: true,
   host: { tabIndex: '-1' },
-  imports: [CommonModule, TranslatePipe, ClickOutSideDirective, ScrollableDropdownComponent, LucideAngularModule, InputClearComponent],
+  imports: [
+    CommonModule,
+    TranslatePipe,
+    ClickOutSideDirective,
+    ScrollableDropdownComponent,
+    LucideAngularModule,
+    InputClearComponent
+  ],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomMultiSelectComponent, multi: true }],
   templateUrl: './custom-multi-select.component.html',
   styleUrl: './custom-multi-select.component.scss',

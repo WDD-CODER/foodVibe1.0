@@ -78,7 +78,10 @@
   -webkit-backdrop-filter: var(--blur-glass);
 
   cursor: pointer;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 
   &:hover:not(:disabled) {
     background: var(--bg-glass-hover);
@@ -123,7 +126,7 @@
 
   align-items: center;
   gap: 0.375rem;
-  padding: .5rem;
+  padding: 0.5rem;
 
   flex: 1;
   min-width: 0;
@@ -141,7 +144,7 @@
   padding-block: 0.2rem;
 
   font-size: 0.8125rem;
-  border-radius:var(--radius-md);
+  border-radius: var(--radius-md);
 
   border: none;
 

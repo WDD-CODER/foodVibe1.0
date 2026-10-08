@@ -25,54 +25,61 @@ let nextChipSearchDropdownId = 0
   selector: 'app-chip-search-dropdown',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, ScrollableDropdownComponent, TranslatePipe, InputClearComponent],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    ClickOutSideDirective,
+    ScrollableDropdownComponent,
+    TranslatePipe,
+    InputClearComponent
+  ],
   templateUrl: './chip-search-dropdown.component.html',
   styleUrl: './chip-search-dropdown.component.scss'
 })
 export class ChipSearchDropdownComponent implements AfterViewChecked {
   // ── Inputs ──────────────────────────────────────────────────────────────────
-  options          = input<string[]>([])
-  selected         = input<string[]>([])
-  displayFn        = input<(key: string) => string>(k => k)
-  searchFilterFn   = input<((option: string, query: string) => boolean) | null>(null)
-  placeholder      = input<string>('')
-  addNewLabel      = input<string | null>(null)
+  options = input<string[]>([])
+  selected = input<string[]>([])
+  displayFn = input<(key: string) => string>((k) => k)
+  searchFilterFn = input<((option: string, query: string) => boolean) | null>(null)
+  placeholder = input<string>('')
+  addNewLabel = input<string | null>(null)
   showAddNewAlways = input<boolean>(false)
-  chipClass        = input<string>('chipe')
-  noOptionsLabel   = input<string | null>(null)
+  chipClass = input<string>('chipe')
+  noOptionsLabel = input<string | null>(null)
 
   // ── Outputs ─────────────────────────────────────────────────────────────────
-  add     = output<string>()
-  remove  = output<string>()
-  addNew  = output<string>()
+  add = output<string>()
+  remove = output<string>()
+  addNew = output<string>()
   blurred = output<void>()
 
   // ── View refs ────────────────────────────────────────────────────────────────
   @ViewChildren('dropdownItem') private dropdownItems!: QueryList<ElementRef<HTMLElement>>
-  @ViewChild('searchInput')     private searchInputRef?: ElementRef<HTMLInputElement>
+  @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>
 
   // ── Internal state ───────────────────────────────────────────────────────────
   protected readonly instanceId = `csd-${++nextChipSearchDropdownId}`
-  protected searchQuery_    = signal('')
-  protected showDropdown_   = signal(false)
+  protected searchQuery_ = signal('')
+  protected showDropdown_ = signal(false)
   protected highlightIndex_ = signal(-1)
-  private   focusPending_   = false
+  private focusPending_ = false
 
   // ── Computed ─────────────────────────────────────────────────────────────────
   protected filteredOptions_ = computed(() => {
-    const raw  = this.searchQuery_().trim()
+    const raw = this.searchQuery_().trim()
     const opts = this.options()
     if (!raw) return opts
     const customFilter = this.searchFilterFn()
-    if (customFilter) return opts.filter(o => customFilter(o, raw))
-    const qLower   = raw.toLowerCase()
+    if (customFilter) return opts.filter((o) => customFilter(o, raw))
+    const qLower = raw.toLowerCase()
     const isHebrew = /[\u0590-\u05FF]/.test(raw)
-    const isLatin  = /[a-zA-Z]/.test(raw)
-    const display  = this.displayFn()
-    return opts.filter(o => {
+    const isLatin = /[a-zA-Z]/.test(raw)
+    const display = this.displayFn()
+    return opts.filter((o) => {
       const label = display(o)
       if (isHebrew) return label.startsWith(raw)
-      if (isLatin)  return /[a-zA-Z]/.test(label) && label.toLowerCase().startsWith(qLower)
+      if (isLatin) return /[a-zA-Z]/.test(label) && label.toLowerCase().startsWith(qLower)
       return label.toLowerCase().startsWith(qLower)
     })
   })
@@ -81,9 +88,9 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
     if (this.addNewLabel() == null) return false
     const query = this.searchQuery_().trim()
     if (!query) return this.showAddNewAlways()
-    const display    = this.displayFn()
-    const inOptions  = this.options().some(o => display(o).toLowerCase() === query.toLowerCase())
-    const inSelected = this.selected().some(s => display(s).toLowerCase() === query.toLowerCase())
+    const display = this.displayFn()
+    const inOptions = this.options().some((o) => display(o).toLowerCase() === query.toLowerCase())
+    const inSelected = this.selected().some((s) => display(s).toLowerCase() === query.toLowerCase())
     return !inOptions && !inSelected
   })
 
@@ -91,10 +98,10 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
   ngAfterViewChecked(): void {
     if (this.focusPending_ && this.showDropdown_()) {
       this.focusPending_ = false
-      const idx   = this.highlightIndex_()
+      const idx = this.highlightIndex_()
       const items = this.dropdownItems
       if (items?.length && idx >= 0 && idx < items.length) {
-        (items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus()
+        ;(items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus()
       }
     }
   }
@@ -150,10 +157,10 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
 
   protected onDropdownKeydown(ev: KeyboardEvent): void {
     if (!this.showDropdown_()) return
-    const key       = ev.key
-    const filtered  = this.filteredOptions_()
+    const key = ev.key
+    const filtered = this.filteredOptions_()
     const hasAddNew = this.hasAddNew_()
-    const total     = filtered.length + (hasAddNew ? 1 : 0)
+    const total = filtered.length + (hasAddNew ? 1 : 0)
 
     if (key === 'Escape') {
       ev.preventDefault()
@@ -195,7 +202,7 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
     setTimeout(() => {
       const items = this.dropdownItems
       if (items?.length && index >= 0 && index < items.length) {
-        (items.get(index) as ElementRef<HTMLElement>)?.nativeElement?.focus()
+        ;(items.get(index) as ElementRef<HTMLElement>)?.nativeElement?.focus()
       }
     }, 0)
   }

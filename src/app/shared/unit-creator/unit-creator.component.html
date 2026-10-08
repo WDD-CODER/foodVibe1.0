@@ -1,72 +1,80 @@
 @if (isOpen_()) {
-<div class="c-modal-overlay" (click)="resetAndClose()">
-  <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
-    <h3>{{ 'unit_creator_title' | translatePipe }}</h3>
+  <div class="c-modal-overlay" (click)="resetAndClose()">
+    <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
+      <h3>{{ 'unit_creator_title' | translatePipe }}</h3>
 
-    <div class="c-modal-body unit-creator-formula-grid">
-      <div class="c-input-stack">
-        <label>{{ 'unit_name' | translatePipe }}</label>
-        <input id="unit-creator-name"
-               type="text"
-               [ngModel]="newUnitName_()"
-               (ngModelChange)="onUnitNameChange($event)"
-               [placeholder]="'unit_name_placeholder' | translatePipe"
-               (keydown.enter)="onNameLeave($event)"
-               (keydown.tab)="onNameLeave($event)"
-               autocomplete="off"
-               autocorrect="off"
-               autocapitalize="off"
-               spellcheck="false">
-      </div>
+      <div class="c-modal-body unit-creator-formula-grid">
+        <div class="c-input-stack">
+          <label>{{ 'unit_name' | translatePipe }}</label>
+          <input
+            id="unit-creator-name"
+            type="text"
+            [ngModel]="newUnitName_()"
+            (ngModelChange)="onUnitNameChange($event)"
+            [placeholder]="'unit_name_placeholder' | translatePipe"
+            (keydown.enter)="onNameLeave($event)"
+            (keydown.tab)="onNameLeave($event)"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+        </div>
 
-    @if (errorMessage_()) {
-    <div class="unit-creator-error" role="alert">
-      <span class="unit-creator-error__text">{{ (errorMessage_() ?? '') | translatePipe }}</span>
-    </div>
-    }
+        @if (errorMessage_()) {
+          <div class="unit-creator-error" role="alert">
+            <span class="unit-creator-error__text">{{ errorMessage_() ?? '' | translatePipe }}</span>
+          </div>
+        }
 
-      <div class="c-input-stack unit-creator-amount">
-        <label>{{ 'amount' | translatePipe }}</label>
-        <div class="amount-row">
-          <span class="math-operator"> = </span>
-          <input id="unit-creator-amount"
-                 SelectOnFocus
-                 type="number"
-                 min="0.0001"
-                 [ngModel]="newUnitValue_()"
-                 (ngModelChange)="newUnitValue_.set($event)"
-                 (keydown.enter)="$event.preventDefault(); focusBasisUnitSelect()"
-                 (keydown.tab)="$event.preventDefault(); focusBasisUnitSelect()">
+        <div class="c-input-stack unit-creator-amount">
+          <label>{{ 'amount' | translatePipe }}</label>
+          <div class="amount-row">
+            <span class="math-operator"> = </span>
+            <input
+              id="unit-creator-amount"
+              SelectOnFocus
+              type="number"
+              min="0.0001"
+              [ngModel]="newUnitValue_()"
+              (ngModelChange)="newUnitValue_.set($event)"
+              (keydown.enter)="$event.preventDefault(); focusBasisUnitSelect()"
+              (keydown.tab)="$event.preventDefault(); focusBasisUnitSelect()"
+            />
+          </div>
+        </div>
+
+        <div class="c-input-stack">
+          <label>{{ 'basis_unit_label' | translatePipe }}</label>
+          <app-custom-select
+            triggerId="unit-creator-basis-unit"
+            [ngModel]="basisUnit_()"
+            (ngModelChange)="basisUnit_.set($event)"
+            [options]="basisUnitOptions_()"
+            placeholder="choose_unit"
+            [typeToFilter]="true"
+          />
         </div>
       </div>
 
-      <div class="c-input-stack">
-        <label>{{ 'basis_unit_label' | translatePipe }}</label>
-        <app-custom-select
-          triggerId="unit-creator-basis-unit"
-          [ngModel]="basisUnit_()"
-          (ngModelChange)="basisUnit_.set($event)"
-          [options]="basisUnitOptions_()"
-          placeholder="choose_unit"
-          [typeToFilter]="true" />
+      @if (netUnitCost() > 0) {
+        <div class="cost-preview">
+          <span class="label">{{ 'net_cost_calculated' | translatePipe }}</span>
+          <span class="value">₪{{ netUnitCost() * newUnitValue_() | number: '1.2-2' }}</span>
+        </div>
+      }
+
+      <div class="c-modal-actions">
+        <button type="button" class="c-btn-ghost" (click)="resetAndClose()">{{ 'cancel' | translatePipe }}</button>
+        <button
+          type="button"
+          class="c-btn-primary"
+          (click)="save()"
+          [disabled]="!newUnitName_() || newUnitValue_() <= 0 || !basisUnit_() || isSaving_()"
+        >
+          {{ 'approve_and_save_unit' | translatePipe }}
+        </button>
       </div>
     </div>
-
-    @if (netUnitCost() > 0) {
-    <div class="cost-preview">
-      <span class="label">{{ 'net_cost_calculated' | translatePipe }}</span>
-      <span class="value">₪{{ (netUnitCost() * newUnitValue_()) | number:'1.2-2' }}</span>
-    </div>
-    }
-
-    <div class="c-modal-actions">
-      <button type="button" class="c-btn-ghost" (click)="resetAndClose()">{{ 'cancel' | translatePipe }}</button>
-      <button type="button" class="c-btn-primary"
-              (click)="save()"
-              [disabled]="!newUnitName_() || newUnitValue_() <= 0 || !basisUnit_() || isSaving_()">
-        {{ 'approve_and_save_unit' | translatePipe }}
-      </button>
-    </div>
   </div>
-</div>
 }

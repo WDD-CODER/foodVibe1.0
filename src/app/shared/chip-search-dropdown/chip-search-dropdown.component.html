@@ -1,8 +1,9 @@
-<div class="csd-box"
-     [class.no-chips]="selected().length === 0"
-     (clickOutside)="onBlurred()"
-     (click)="onBoxClick($event)">
-
+<div
+  class="csd-box"
+  [class.no-chips]="selected().length === 0"
+  (clickOutside)="onBlurred()"
+  (click)="onBoxClick($event)"
+>
   <div class="csd-chips-and-input">
     @for (item of selected(); track item) {
       <span [class]="chipClass()" (click)="remove.emit(item); $event.stopPropagation()">
@@ -10,46 +11,50 @@
         <lucide-icon name="x" class="icon"></lucide-icon>
       </span>
     }
-    <input #searchInput
-           type="text"
-           class="csd-input form-input--no-focus-ring"
-           [id]="instanceId + '-input'"
-           [name]="instanceId"
-           autocomplete="off"
-           autocorrect="off"
-           autocapitalize="off"
-           spellcheck="false"
-           [value]="searchQuery_()"
-           (input)="searchQuery_.set($any($event.target).value); highlightIndex_.set(-1)"
-           (focus)="openDropdown()"
-           (keydown)="onInputKeydown($event)"
-           [placeholder]="placeholder()" />
+    <input
+      #searchInput
+      type="text"
+      class="csd-input form-input--no-focus-ring"
+      [id]="instanceId + '-input'"
+      [name]="instanceId"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+      [value]="searchQuery_()"
+      (input)="searchQuery_.set($any($event.target).value); highlightIndex_.set(-1)"
+      (focus)="openDropdown()"
+      (keydown)="onInputKeydown($event)"
+      [placeholder]="placeholder()"
+    />
     <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" (click)="$event.stopPropagation()" />
   </div>
 
   @if (showDropdown_()) {
-    <app-scrollable-dropdown [maxHeight]="200"
-                             (keydown)="onDropdownKeydown($event)"
-                             role="listbox">
+    <app-scrollable-dropdown [maxHeight]="200" (keydown)="onDropdownKeydown($event)" role="listbox">
       @for (opt of filteredOptions_(); track opt; let i = $index) {
-        <div class="dropdown-item"
-             #dropdownItem
-             [id]="instanceId + '-option-' + i"
-             [class.dropdown-item--highlight]="highlightIndex_() === i"
-             tabindex="-1"
-             role="option"
-             (click)="add.emit(opt); closeDropdown(); $event.stopPropagation()">
+        <div
+          class="dropdown-item"
+          #dropdownItem
+          [id]="instanceId + '-option-' + i"
+          [class.dropdown-item--highlight]="highlightIndex_() === i"
+          tabindex="-1"
+          role="option"
+          (click)="add.emit(opt); closeDropdown(); $event.stopPropagation()"
+        >
           {{ displayFn()(opt) }}
         </div>
       }
       @if (hasAddNew_()) {
-        <div class="dropdown-item dropdown-item--add-new"
-             #dropdownItem
-             [id]="instanceId + '-option-' + filteredOptions_().length"
-             [class.dropdown-item--highlight]="highlightIndex_() === filteredOptions_().length"
-             tabindex="-1"
-             role="option"
-             (click)="emitAddNew(); $event.stopPropagation()">
+        <div
+          class="dropdown-item dropdown-item--add-new"
+          #dropdownItem
+          [id]="instanceId + '-option-' + filteredOptions_().length"
+          [class.dropdown-item--highlight]="highlightIndex_() === filteredOptions_().length"
+          tabindex="-1"
+          role="option"
+          (click)="emitAddNew(); $event.stopPropagation()"
+        >
           <span class="c-add-new-icon">
             <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
           </span>

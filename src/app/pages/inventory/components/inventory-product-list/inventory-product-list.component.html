@@ -1,4 +1,5 @@
 <app-list-shell
+  columnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="onPanelToggled()"
   [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
@@ -63,10 +64,10 @@
     >
       {{ 'product' | translatePipe }}
     </div>
-    <app-carousel-header [activeIndex]="carouselHeaderIndex_()" (activeIndexChange)="onCarouselHeaderChange($event)">
+    <app-column-carousel-header>
       <div
         class="col-category c-grid-header-cell c-sortable-header"
-        carouselHeaderColumn
+        columnSlide
         label="category"
         (click)="setSort('category')"
         (keydown.enter)="setSort('category')"
@@ -78,7 +79,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header"
-        carouselHeaderColumn
+        columnSlide
         label="allergens"
         (click)="toggleAllergenExpandAll()"
         (keydown.enter)="toggleAllergenExpandAll()"
@@ -90,7 +91,7 @@
       </div>
       <div
         class="col-supplier c-grid-header-cell c-sortable-header"
-        carouselHeaderColumn
+        columnSlide
         label="supplier"
         (click)="setSort('supplier')"
         (keydown.enter)="setSort('supplier')"
@@ -100,10 +101,10 @@
       >
         {{ 'supplier' | translatePipe }}
       </div>
-      <div class="col-unit c-grid-header-cell" carouselHeaderColumn label="unit" role="presentation">
+      <div class="col-unit c-grid-header-cell" columnSlide label="unit" role="presentation">
         {{ 'unit' | translatePipe }}
       </div>
-    </app-carousel-header>
+    </app-column-carousel-header>
     <div class="col-price c-grid-header-cell" role="columnheader">{{ 'price' | translatePipe }}</div>
     <div class="c-col-actions c-grid-header-cell" role="columnheader">{{ 'actions' | translatePipe }}</div>
     <div class="col-select c-grid-header-cell" role="columnheader">
@@ -177,11 +178,11 @@
             <app-nutrition-badge [nutrition]="row.product.nutritionPer100g"></app-nutrition-badge>
           }
         </div>
-        <app-cell-carousel [activeIndex]="carouselHeaderIndex_()" role="cell">
-          <div class="col-category c-list-body-cell" cellCarouselSlide [label]="'category' | translatePipe">
+        <app-column-carousel-cell>
+          <div class="col-category c-list-body-cell" columnSlide [label]="'category' | translatePipe">
             {{ row.category || '—' }}
           </div>
-          <div class="col-allergens c-list-body-cell" cellCarouselSlide [label]="'allergens' | translatePipe">
+          <div class="col-allergens c-list-body-cell" columnSlide [label]="'allergens' | translatePipe">
             @if (row.product.allergens.length) {
               <div
                 class="allergen-btn-wrapper"
@@ -204,13 +205,13 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-supplier c-list-body-cell" cellCarouselSlide [label]="'supplier' | translatePipe">
+          <div class="col-supplier c-list-body-cell" columnSlide [label]="'supplier' | translatePipe">
             {{ row.supplierNames || '—' }}
           </div>
-          <div class="col-unit c-list-body-cell" cellCarouselSlide [label]="'unit' | translatePipe">
+          <div class="col-unit c-list-body-cell" columnSlide [label]="'unit' | translatePipe">
             {{ row.product.baseUnit | translatePipe }}
           </div>
-        </app-cell-carousel>
+        </app-column-carousel-cell>
         <div class="col-price col-price-readonly c-list-body-cell" role="cell">
           <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
           <span class="price-suffix">₪</span>

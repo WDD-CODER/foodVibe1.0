@@ -23,12 +23,7 @@ import { UserService } from '@services/user.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import {
-  CarouselHeaderComponent,
-  CarouselHeaderColumnDirective
-} from 'src/app/shared/carousel-header/carousel-header.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
@@ -40,6 +35,7 @@ import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categor
 import { HeroFabService } from '@services/hero-fab.service'
 import { getSupplierIds } from '@utils/product-source.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 const DAY_LABELS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
@@ -54,15 +50,12 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    CellCarouselComponent,
-    CellCarouselSlideDirective,
     ListShellComponent,
-    CarouselHeaderComponent,
-    CarouselHeaderColumnDirective,
     ListRowCheckboxComponent,
     SelectionBarComponent,
     EmptyStateComponent,
     RowActionsMenuComponent,
+    ...COLUMN_CAROUSEL,
     InputClearComponent
   ],
   templateUrl: './supplier-list.component.html',
@@ -84,7 +77,6 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected deletingId_ = signal<string | null>(null)
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
-  protected carouselHeaderIndex_ = signal(0)
 
   protected selection = new ListSelectionState()
 
@@ -175,10 +167,6 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected togglePanel(): void {
     this.togglePanelState_()
-  }
-
-  protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index)
   }
 
   protected toggleDay(day: number): void {

@@ -49,15 +49,14 @@ describe('ChipSearchDropdownComponent', () => {
     input('.first').dispatchEvent(new Event('focus'))
     input('.second').dispatchEvent(new Event('focus'))
     fixture.detectChanges()
-    const ids = Array.from(root.querySelectorAll('.dropdown-item[role="option"]')).map(el => el.id)
+    const ids = Array.from(root.querySelectorAll('.dropdown-item[role="option"]')).map((el) => el.id)
     expect(ids.length).toBe(6)
     expect(new Set(ids).size).toBe(6)
   })
 
   it('shows the clear button only with a query; clearing keeps the full list open', () => {
     const el = input('.first')
-    const clearBtn = (): HTMLButtonElement | null =>
-      root.querySelector('.first app-input-clear button.is-visible')
+    const clearBtn = (): HTMLButtonElement | null => root.querySelector('.first app-input-clear button.is-visible')
     expect(clearBtn()).toBeNull()
 
     el.dispatchEvent(new Event('focus'))

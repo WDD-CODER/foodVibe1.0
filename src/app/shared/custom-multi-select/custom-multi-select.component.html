@@ -3,7 +3,8 @@
   [class.open]="open()"
   [class.custom-multi-select-wrap--chip]="variant() === 'chip'"
   [class.custom-multi-select-wrap--titled]="triggerTitle()"
-  (clickOutside)="close()">
+  (clickOutside)="close()"
+>
   @if (triggerTitle()) {
     <legend class="custom-multi-select-legend">
       <span>{{ triggerTitle() | translatePipe }}</span>
@@ -11,7 +12,8 @@
         <button
           type="button"
           class="custom-multi-select-legend-clear"
-          (click)="cleared.emit(); $event.stopPropagation()">
+          (click)="cleared.emit(); $event.stopPropagation()"
+        >
           {{ 'clear_all' | translatePipe }}
         </button>
       }
@@ -32,7 +34,8 @@
     (blur)="onTriggerBlur()"
     [attr.aria-expanded]="open()"
     aria-haspopup="listbox"
-    [attr.aria-label]="placeholder() | translatePipe">
+    [attr.aria-label]="placeholder() | translatePipe"
+  >
     <span class="custom-multi-select-trigger-inner">
       @for (key of readonlyChips(); track key) {
         @let opt = getOptionForValue(key);
@@ -40,7 +43,8 @@
           class="custom-multi-select-chip custom-multi-select-chip--readonly"
           [class.custom-multi-select-chip--colored]="opt.color"
           [style.background-color]="opt.color || null"
-          [style.color]="opt.color ? getChipTextColor(opt.color) : null">
+          [style.color]="opt.color ? getChipTextColor(opt.color) : null"
+        >
           @if (translateLabels()) {
             {{ opt.label | translatePipe }}
           } @else {
@@ -57,7 +61,8 @@
           [style.background-color]="opt.color || null"
           [style.color]="opt.color ? getChipTextColor(opt.color) : null"
           (click)="removeOption(key); $event.stopPropagation()"
-          [attr.aria-label]="'remove' | translatePipe">
+          [attr.aria-label]="'remove' | translatePipe"
+        >
           @if (translateLabels()) {
             {{ opt.label | translatePipe }}
           } @else {
@@ -79,7 +84,10 @@
       [maxHeight]="maxHeight()"
       role="listbox"
       aria-multiselectable="true"
-      [attr.aria-activedescendant]="triggerId() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null">
+      [attr.aria-activedescendant]="
+        triggerId() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null
+      "
+    >
       @if (searchable()) {
         <div class="custom-multi-select-search-wrap">
           <input
@@ -96,7 +104,8 @@
             autocorrect="off"
             autocapitalize="off"
             spellcheck="false"
-            [placeholder]="'search' | translatePipe" />
+            [placeholder]="'search' | translatePipe"
+          />
           <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" (click)="$event.stopPropagation()" />
         </div>
       }
@@ -110,7 +119,8 @@
           [class.highlighted]="highlightedIndex() === i"
           role="option"
           [attr.aria-selected]="value.includes(opt.value)"
-          (click)="onOptionClick(opt)">
+          (click)="onOptionClick(opt)"
+        >
           @if (opt.value === addNewValue()) {
             <span class="c-add-new-icon">
               <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
@@ -124,8 +134,11 @@
         </button>
       }
       @if (showDynamicAddNew_()) {
-        <button type="button" class="custom-select-option custom-select-option--add-new custom-select-option--dynamic-add"
-          (click)="onDynamicAddNewClick()">
+        <button
+          type="button"
+          class="custom-select-option custom-select-option--add-new custom-select-option--dynamic-add"
+          (click)="onDynamicAddNewClick()"
+        >
           <span class="c-add-new-icon">
             <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
           </span>

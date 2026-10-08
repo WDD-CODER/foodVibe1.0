@@ -30,11 +30,6 @@ import { UserService } from '@services/user.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
-import {
-  CarouselHeaderComponent,
-  CarouselHeaderColumnDirective
-} from 'src/app/shared/carousel-header/carousel-header.component'
-import { CellCarouselComponent, CellCarouselSlideDirective } from 'src/app/shared/cell-carousel/cell-carousel.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
@@ -64,6 +59,7 @@ import { ProductDataService } from '@services/product-data.service'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
@@ -80,15 +76,12 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
     ClickOutSideDirective,
     LoaderComponent,
     ListShellComponent,
-    CarouselHeaderComponent,
-    CarouselHeaderColumnDirective,
-    CellCarouselComponent,
-    CellCarouselSlideDirective,
     ListRowCheckboxComponent,
     SelectionBarComponent,
     EmptyStateComponent,
     NutritionBadgeComponent,
     RowActionsMenuComponent,
+    ...COLUMN_CAROUSEL,
     InputClearComponent
   ],
   templateUrl: './inventory-product-list.component.html',
@@ -129,7 +122,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected nutritionFilter_ = signal<'all' | 'has' | 'missing'>('all')
   protected deletingId_ = signal<string | null>(null)
   protected savingPriceId_ = signal<string | null>(null)
-  protected carouselHeaderIndex_ = signal(0)
   protected selection = new ListSelectionState()
 
   protected editableFields_ = computed<BulkEditableField[]>(() => [
@@ -278,10 +270,6 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected onPanelToggled(): void {
     this.togglePanelState_()
-  }
-
-  protected onCarouselHeaderChange(index: number): void {
-    this.carouselHeaderIndex_.set(index)
   }
 
   protected isEmptyList_ = computed(() => this.kitchenStateService.products_().length === 0)
