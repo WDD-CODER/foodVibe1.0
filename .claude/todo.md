@@ -131,13 +131,6 @@
 - [ ] A5: Delete the dead local classes and `.c-filter-option` (`src/styles.scss`). Run `rg -n 'type="checkbox"' src/app --glob '*.html'` and confirm only list-row-checkbox remains.
 - [ ] A6: Build and run specs. Update the session-state file.
 
-### Plan 344 — Menu "צ'קליסט והדפסות": top drop-down sheet from the FAB, and portrait-safe checklist views (`plans/344-menu-checklist-and-prints-top-sheet-portrait-checklists.plan.md`)
-- [ ] A1: `menu-export-sheet` component: markup, animation, backdrop and Escape close, with a spec (open → backdrop click → close emitted) (`components/menu-export-sheet/**`).
-- [ ] A2: Wire the FAB action → `exportSheetOpen_`; connect the sheet outputs to the existing page methods (`menu-intelligence.page.ts/.html`).
-- [ ] A3: Remove the export pills, their styles and the dead signals and methods (`menu-intelligence.page.ts/.html`, `_toolbar.scss`).
-- [ ] A4: export-preview portrait styles (`export-preview.component.scss`).
-- [ ] A5: Build and run specs. Check at 360px portrait, landscape and desktop. Update the session-state file.
-
 ### Plan 345 — Filter categories collapsed by default on mobile (`plans/345-filter-categories-collapsed-by-default-on-mobile.plan.md`)
 - [ ] A1: Write the util plus its spec (`collapsible-categories.util.ts/.spec.ts`).
 - [ ] A2: Migrate inventory and recipe-book (`inventory-product-list/**`, `recipe-book-list/**`).
