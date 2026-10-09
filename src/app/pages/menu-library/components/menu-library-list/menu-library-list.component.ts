@@ -17,6 +17,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { useListState, StringParam } from 'src/app/core/utils/list-state.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 
@@ -31,7 +32,8 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
     LoaderComponent,
     CustomSelectComponent,
     EmptyStateComponent,
-    InputClearComponent
+    InputClearComponent,
+    PageHeaderComponent
   ],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',

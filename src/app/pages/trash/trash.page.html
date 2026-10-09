@@ -1,10 +1,9 @@
 <div class="trash-page" dir="rtl">
-  <header class="trash-header">
-    <h1>{{ 'trash' | translatePipe }}</h1>
-    <button type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
+  <app-page-header class="trash-header" titleKey="trash">
+    <button header-actions type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
       {{ loading() ? ('pending' | translatePipe) : ('refresh' | translatePipe) }}
     </button>
-  </header>
+  </app-page-header>
 
   @if (loading()) {
   <app-loader size="medium" label="loader_loading" />

@@ -23,6 +23,9 @@
       }
     }
   </div>
+  @if (subtitleKey(); as subKey) {
+    <p class="ph-subtitle">{{ subKey | translatePipe }}</p>
+  }
   <div class="ph-search"><ng-content select="[header-search]"></ng-content></div>
   <div class="ph-end">
     <ng-content select="[header-leading]"></ng-content>

@@ -11,7 +11,13 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
   standalone: true,
   imports: [PageHeaderComponent],
   template: `
-    <app-page-header [titleKey]="titleKey" [count]="count" countLabel="3 of 9" [backLink]="backLink">
+    <app-page-header
+      [titleKey]="titleKey"
+      [subtitleKey]="subtitleKey"
+      [count]="count"
+      countLabel="3 of 9"
+      [backLink]="backLink"
+    >
       <input header-search class="search-input" />
       <button header-leading class="filter-btn" type="button">f</button>
       <button header-actions class="add-btn" type="button">+</button>
@@ -22,6 +28,7 @@ class HostComponent {
   titleKey: string | null = 'suppliers'
   count: number | null = 3
   backLink: string | null = null
+  subtitleKey: string | null = null
 }
 
 describe('PageHeaderComponent', () => {
@@ -71,5 +78,16 @@ describe('PageHeaderComponent', () => {
     expect(fixture.debugElement.query(By.css('.ph-search .search-input'))).not.toBeNull()
     expect(fixture.debugElement.query(By.css('.ph-end .filter-btn'))).not.toBeNull()
     expect(fixture.debugElement.query(By.css('.ph-end .add-btn'))).not.toBeNull()
+  })
+
+  it('renders the translated subtitle only when subtitleKey is set', () => {
+    fixture.detectChanges()
+    expect(fixture.debugElement.query(By.css('.ph-subtitle'))).toBeNull()
+
+    const f2 = TestBed.createComponent(HostComponent)
+    f2.componentInstance.subtitleKey = 'dashboard_subtitle'
+    f2.detectChanges()
+    const sub = f2.debugElement.query(By.css('p.ph-subtitle')).nativeElement as HTMLElement
+    expect(sub.textContent?.trim()).toBe('t:dashboard_subtitle')
   })
 })

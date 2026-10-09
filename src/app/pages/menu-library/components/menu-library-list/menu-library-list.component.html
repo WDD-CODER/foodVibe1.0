@@ -1,7 +1,6 @@
 <div class="menu-library-container" dir="rtl">
-  <div class="action-bar">
-    <h2 class="page-title">{{ 'menu_library' | translatePipe }}</h2>
-    <div class="search-wrap">
+  <app-page-header class="menu-library-header" titleKey="menu_library" [listLayout]="true">
+    <div header-search class="search-wrap">
       <div class="c-input-wrapper">
         <lucide-icon name="search" [size]="18"></lucide-icon>
         <input
@@ -19,11 +18,11 @@
         <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
       </div>
     </div>
-    <button type="button" class="c-btn-primary" (click)="onCreateNew()">
+    <button header-actions type="button" class="c-btn-primary" (click)="onCreateNew()">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
-      {{ 'menu_new_event' | translatePipe }}
+      <span class="btn-label">{{ 'menu_new_event' | translatePipe }}</span>
     </button>
-  </div>
+  </app-page-header>
 
   @if (events_().length > 0) {
     <div class="filters-bar">
