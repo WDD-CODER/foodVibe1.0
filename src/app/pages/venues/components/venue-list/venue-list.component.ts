@@ -21,6 +21,7 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { formatVenueHours, VenueHoursSummary } from 'src/app/core/utils/venue-hours.util'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
@@ -41,7 +42,8 @@ const KEEP_SELECTION_TARGETS = '.venue-card, app-selection-bar, .select-all-pill
     LoaderComponent,
     ListRowCheckboxComponent,
     SelectionBarComponent,
-    InputClearComponent
+    InputClearComponent,
+    PageHeaderComponent
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',

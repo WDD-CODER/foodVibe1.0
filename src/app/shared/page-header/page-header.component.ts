@@ -8,6 +8,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
  *
  *   Row 1: [back?] Title (count) ········ [search on wide] [leading/filter] [actions]
  *   Row 2 (narrow, only when search is projected): [search — full width]
+ *   Optional `subtitleKey`: a muted line under row 1, desktop only (plan 353).
  *
  * Breakpoints are container queries on the header itself. The title is the page's <h1>.
  * Slots: `[header-title]` (instead of / after `titleKey`), `[header-back]`, `[header-search]`,
@@ -24,6 +25,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 export class PageHeaderComponent {
   /** Dictionary key for the title; or project `[header-title]`. */
   readonly titleKey = input<string | null>(null)
+  /** Dictionary key for a muted line under the title; desktop only (hidden ≤768px). */
+  readonly subtitleKey = input<string | null>(null)
   /** Result count shown as a pill next to the title; null hides it. */
   readonly count = input<number | null>(null)
   /** Screen-reader text for the count (e.g. "12 מתוך 40 פריטים"). */

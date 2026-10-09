@@ -41,4 +41,12 @@ describe('DashboardHeaderComponent', () => {
     fixture.detectChanges()
     expect(fixture.debugElement.query(By.css('button'))).toBeNull()
   })
+
+  it('titles the header with the active tab, not "dashboard" again (plan 353)', () => {
+    fixture.componentRef.setInput('activeTab', 'metadata')
+    fixture.detectChanges()
+    const h1s = fixture.debugElement.queryAll(By.css('h1'))
+    expect(h1s.length).toBe(1)
+    expect((h1s[0].nativeElement as HTMLElement).textContent?.trim()).toBe('metadata_manager')
+  })
 })

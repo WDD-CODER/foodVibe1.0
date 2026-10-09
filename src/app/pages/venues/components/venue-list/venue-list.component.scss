@@ -16,41 +16,9 @@
     padding: var(--space-6) var(--space-6) var(--space-12);
   }
 
-  // ─── ACTION BAR ────────────────────────────────────────────────────────
-  .action-bar {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-
-    gap: 1rem;
+  // ─── PAGE HEADER (shared <app-page-header>, plan 353) ───────────────────
+  .venue-header {
     margin-block-end: 1rem;
-  }
-
-  .page-title {
-    flex-shrink: 0;
-
-    margin: 0;
-
-    color: var(--color-text-main);
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-    letter-spacing: var(--tracking-tight);
-  }
-
-  .result-count {
-    flex-basis: 100%;
-
-    margin: -0.5rem 0 0;
-
-    color: var(--color-text-muted);
-    font-size: var(--fs-sm);
-  }
-
-  .search-wrap {
-    flex: 1 1 30%;
-
-    min-width: 12.5rem;
-    max-width: 22.5rem;
   }
 
   // ─── FILTERS BAR — borderless, blends into the page (matches Menu Library) ──

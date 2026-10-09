@@ -4,19 +4,9 @@
   padding: 1.5rem;
 }
 
+// Shared <app-page-header> (plan 353).
 .trash-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   margin-block-end: 1.5rem;
-  gap: 1rem;
-
-  h1 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-main);
-  }
 }
 
 .btn-refresh {
@@ -224,15 +214,6 @@
 @media (max-width: 768px) {
   .trash-page {
     padding: 1rem;
-  }
-
-  .trash-header {
-    gap: 0.5rem;
-
-    h1 {
-      font-size: 1.25rem;
-      text-align: center;
-    }
   }
 
   .trash-section-header {

@@ -7,12 +7,20 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import type { VersionEntityType } from '@services/version-history.service'
 
 @Component({
   selector: 'app-trash-page',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, VersionHistoryPanelComponent, LoaderComponent],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    TranslatePipe,
+    VersionHistoryPanelComponent,
+    LoaderComponent,
+    PageHeaderComponent
+  ],
   templateUrl: './trash.page.html',
   styleUrl: './trash.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

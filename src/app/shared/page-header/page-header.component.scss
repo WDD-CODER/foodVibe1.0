@@ -87,6 +87,21 @@
   }
 }
 
+// Own row under the title row; spans the header so it never squeezes search or actions.
+.ph-subtitle {
+  grid-column: 1 / -1;
+  grid-row: 2;
+
+  margin: 0;
+
+  font-size: var(--fs-sm);
+  color: var(--color-text-muted);
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
 .ph-search {
   grid-area: search;
   justify-self: center;
@@ -119,6 +134,11 @@
 
   .ph-search {
     max-inline-size: none;
+  }
+
+  // Row 2 belongs to search here.
+  .ph-subtitle {
+    display: none;
   }
 
   .ph-title {

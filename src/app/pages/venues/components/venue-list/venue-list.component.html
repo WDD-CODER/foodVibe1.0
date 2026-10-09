@@ -1,9 +1,12 @@
 <div class="venue-grid-container" dir="rtl">
-  <div class="action-bar">
-    <h2 class="page-title">{{ 'venue_list' | translatePipe }}</h2>
-    <p class="result-count">{{ resultCountText_() }}</p>
-
-    <div class="search-wrap">
+  <app-page-header
+    class="venue-header"
+    titleKey="venue_list"
+    [listLayout]="true"
+    [count]="filteredVenues_().length"
+    [countLabel]="resultCountText_()"
+  >
+    <div header-search class="search-wrap">
       <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
       <div class="c-input-wrapper">
         <lucide-icon name="search" [size]="18"></lucide-icon>
@@ -25,6 +28,7 @@
     </div>
 
     <button
+      header-actions
       type="button"
       class="c-btn-primary"
       (click)="onAddPlace()"
@@ -32,9 +36,9 @@
       [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
     >
       <lucide-icon name="plus" [size]="18"></lucide-icon>
-      {{ 'add' | translatePipe }}
+      <span class="btn-label">{{ 'add' | translatePipe }}</span>
     </button>
-  </div>
+  </app-page-header>
 
   <div class="filters-bar">
     @if (filteredVenueIds_().length > 0) {

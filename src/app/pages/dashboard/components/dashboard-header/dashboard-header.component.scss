@@ -1,29 +1,3 @@
 :host {
   display: block;
 }
-
-.dashboard-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 1rem;
-  flex-wrap: wrap;
-
-  @media (max-width: 900px) {
-    align-items: stretch;
-
-    .page-title {
-      text-align: center;
-    }
-  }
-}
-
-.page-title {
-  margin: 0;
-
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--color-text-main);
-  letter-spacing: -0.01em;
-}

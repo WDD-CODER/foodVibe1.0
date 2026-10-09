@@ -40,6 +40,7 @@ src/app/pages/venues/components/venue-list/**
 src/app/pages/menu-library/components/menu-library-list/**
 src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html
 src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.scss
+src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.ts
 src/app/pages/dashboard/components/dashboard-header/**
 src/app/pages/trash/**
 src/app/shared/page-header/**
@@ -89,11 +90,11 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Add the `subtitleKey` input to `PageHeaderComponent`, plus a spec case (`src/app/shared/page-header/**`).
-- [ ] A2: Venues and menu library (`venue-list/**`, `menu-library-list/**`).
-- [ ] A3: Dashboard overview and the dashboard tabs header (title = active tab) (`dashboard-overview.component.html/.scss`, `dashboard-header/**`).
-- [ ] A4: Trash (`src/app/pages/trash/**`).
-- [ ] A5: Delete the dead styles; run `rg 'class="page-title"'`. Build and run specs. Check at 360px and 1280px. Update the session-state file.
+- [x] A1: Add the `subtitleKey` input to `PageHeaderComponent`, plus a spec case (`src/app/shared/page-header/**`).
+- [x] A2: Venues and menu library (`venue-list/**`, `menu-library-list/**`).
+- [x] A3: Dashboard overview and the dashboard tabs header (title = active tab) (`dashboard-overview.component.html/.scss`, `dashboard-header/**`).
+- [x] A4: Trash (`src/app/pages/trash/**`).
+- [x] A5: Delete the dead styles; run `rg 'class="page-title"'`. Build and run specs. Check at 360px and 1280px. Update the session-state file.
 
 ## Technical Considerations
 

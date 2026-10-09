@@ -12,6 +12,7 @@ import { ActivityLogService, ActivityEntry, ActivityChange, ActivityEntityType }
 import { TranslationService } from '@services/translation.service'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
 import { ActivityValuePipe } from 'src/app/core/pipes/activity-value.pipe'
+import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import type { DashboardTab } from '../../dashboard.page'
 
 const ENTITY_ICONS: Record<ActivityEntityType, string> = {
@@ -29,7 +30,14 @@ interface ActivityDayGroup {
 @Component({
   selector: 'app-dashboard-overview',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, ActivityValuePipe, ScrollIndicatorsDirective],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    TranslatePipe,
+    ActivityValuePipe,
+    ScrollIndicatorsDirective,
+    PageHeaderComponent
+  ],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
