@@ -1,6 +1,6 @@
 # Plan 362 — List overlays escape the table: row actions menu and edit modal render at body level
 
-Status: draft
+Status: active
 Snapshot: ec175c8c
 
 ## History (read first — refreshed 2026-10-09)
