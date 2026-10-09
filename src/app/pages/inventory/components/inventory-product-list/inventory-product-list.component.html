@@ -34,6 +34,7 @@
   <ng-container shell-selection-bar>
     <app-selection-bar
       [selectionState]="selection"
+      [selectableIds]="filteredProductIds_()"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
       (bulkEdit)="onBulkEdit($event)"
@@ -158,6 +159,13 @@
         role="button"
         tabindex="0"
         (click)="onRowClick(row.product, $event)"
+        [class.is-selected]="selection.isSelected(row.product._id)"
+        (pointerdown)="touchSelect.onPointerDown(row.product._id, $event)"
+        (pointermove)="touchSelect.onPointerMove($event)"
+        (pointerup)="touchSelect.cancel()"
+        (pointercancel)="touchSelect.cancel()"
+        (pointerleave)="touchSelect.cancel()"
+        (contextmenu)="touchSelect.onContextMenu($event)"
         (keydown.enter)="onEditProduct(row.product._id)"
         (keydown.space)="$event.preventDefault(); onEditProduct(row.product._id)"
       >

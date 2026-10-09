@@ -13,6 +13,7 @@ import {
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
 import { PageHeaderComponent } from '../page-header/page-header.component'
+import { isTouchDevice } from 'src/app/shared/list-selection/touch-row-selection'
 
 @Component({
   selector: 'app-list-shell',
@@ -73,7 +74,9 @@ export class ListShellComponent {
 
     effect(() => {
       host.style.setProperty('--list-grid', this.gridTemplate())
-      host.style.setProperty('--list-grid-mobile', this.mobileGridTemplate())
+      // Touch selects by long press, so the phone grid drops its trailing checkbox track.
+      const mobile = isTouchDevice() ? this.mobileGridTemplate().replace(/\s+28px$/, '') : this.mobileGridTemplate()
+      host.style.setProperty('--list-grid-mobile', mobile)
     })
   }
 }

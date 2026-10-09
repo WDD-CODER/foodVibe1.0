@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, contentChildren, effect, inject } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  contentChildren,
+  effect,
+  inject
+} from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ColumnCarouselGroupDirective } from './column-carousel-group.directive'
@@ -7,7 +15,7 @@ import { SwipeStart, isCarouselActive, isRtl, swipeDirection } from './column-ca
 
 /**
  * Header cell of the mobile column carousel (plan 349). Desktop: the projected `[columnSlide]`
- * header cells render as normal grid cells. ≤768px: one cell showing the active column's label,
+ * header cells render as normal grid cells. ≤768px: one cell carrying the active column's name as its aria-label,
  * position dots and two floating round arrows; swipe and ←/→ keys move every row with it.
  */
 @Component({

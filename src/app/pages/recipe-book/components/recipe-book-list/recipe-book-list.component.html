@@ -37,6 +37,7 @@
   <ng-container shell-selection-bar>
     <app-selection-bar
       [selectionState]="selection"
+      [selectableIds]="filteredRecipeIds_()"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
       (bulkEdit)="onBulkEdit($event)"
@@ -189,6 +190,13 @@
       <div
         class="recipe-grid-row c-list-row"
         (click)="onRowClick(row.recipe, $event)"
+        [class.is-selected]="selection.isSelected(row.recipe._id)"
+        (pointerdown)="touchSelect.onPointerDown(row.recipe._id, $event)"
+        (pointermove)="touchSelect.onPointerMove($event)"
+        (pointerup)="touchSelect.cancel()"
+        (pointercancel)="touchSelect.cancel()"
+        (pointerleave)="touchSelect.cancel()"
+        (contextmenu)="touchSelect.onContextMenu($event)"
         role="button"
         tabindex="0"
         (keydown.enter)="onEditRecipe(row.recipe)"

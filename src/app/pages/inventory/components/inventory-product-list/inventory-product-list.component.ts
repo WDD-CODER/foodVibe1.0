@@ -32,6 +32,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { TouchRowSelection } from 'src/app/shared/list-selection/touch-row-selection'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
@@ -123,6 +124,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected deletingId_ = signal<string | null>(null)
   protected savingPriceId_ = signal<string | null>(null)
   protected selection = new ListSelectionState()
+  protected touchSelect = new TouchRowSelection({ selection: this.selection, historyKey: 'productSelection' })
 
   protected editableFields_ = computed<BulkEditableField[]>(() => [
     {
@@ -519,6 +521,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected onRowClick(product: Product, event: MouseEvent): void {
+    if (this.touchSelect.consumeClick()) return
     const el = event.target as HTMLElement
     if (
       el.closest('button') ||
