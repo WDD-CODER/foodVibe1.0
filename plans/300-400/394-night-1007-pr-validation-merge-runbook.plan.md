@@ -1,6 +1,6 @@
 # Plan 394 — Night 2026-10-07 PR Validation and Merge Runbook
 
-Status: draft
+Status: done
 Snapshot: ef21dfae
 
 ## Problem Statement
@@ -178,9 +178,9 @@ Plan 352 checks:
 - [x] Merged.
 
 ### Round 18 — PR #312 Plan 353 Page header part 2 (`feat/night-1007-353-page-header-part2`) — rebase onto main after round 17, retarget to `main`
-- [ ] Desktop 1280: `/venues`, `/menu-library`, `/dashboard` (title + subtitle), `/dashboard?tab=metadata` (metadata title, not "לוח בקרה"), `/trash` → same title row as inventory.
-- [ ] Phone 360: each ≤ 2 rows; dashboard subtitle hidden.
-- [ ] No back buttons on venues, trash, dashboard tabs; "לוח בקרה" chip returns (round 8 merged).
+- [-] Desktop 1280: `/venues`, `/menu-library`, `/dashboard` (title + subtitle), `/dashboard?tab=metadata` (metadata title, not "לוח בקרה"), `/trash` → same title row as inventory.
+- [-] Phone 360: each ≤ 2 rows; dashboard subtitle hidden.
+- [-] No back buttons on venues, trash, dashboard tabs; "לוח בקרה" chip returns (round 8 merged).
 - [-] Not merged: PR #312 closed 2026-10-08 without merging; plan 353 stays open in the ledger for a fresh branch.
 
 ## Done-when

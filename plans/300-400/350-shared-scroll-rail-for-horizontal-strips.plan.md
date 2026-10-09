@@ -1,6 +1,6 @@
 # Plan 350 — Shared scroll rail for horizontal strips
 
-Status: draft
+Status: done
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement

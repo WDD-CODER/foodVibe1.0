@@ -3,6 +3,8 @@
 Status: draft
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
+> **Reality check needed (plan review 2026-10-09).** Written before 321 P3.4. The server already re-keys a unit everywhere it is used (`renameTermEverywhere` + `TERM_REFERENCES.unit` in `taxonomy-term.schema.ts`) and blocks deleting a used term (`findTermReferences`). What is really left: show the edit pencil for non-system units (`metadata-manager.page.component.html`, `target.type !== 'unit'`) and allow editing `gramRate`. Plan 378 was closed into this one.
+
 ## Problem Statement
 
 In the metadata manager, units can only be added or deleted. There's no rename and no way to change a unit's conversion factor:

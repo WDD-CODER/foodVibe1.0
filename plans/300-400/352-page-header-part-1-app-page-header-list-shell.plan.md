@@ -1,6 +1,6 @@
 # Plan 352 — Page header, part 1: `<app-page-header>` and the list-shell pages
 
-Status: draft
+Status: done
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement

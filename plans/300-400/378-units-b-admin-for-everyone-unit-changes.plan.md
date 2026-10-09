@@ -1,6 +1,8 @@
 # Plan 378 — Units B: admin "for everyone" when adding, renaming, editing or deleting a unit
 
-Status: draft
+Status: superseded
+
+> **Superseded 2026-10-09 (Human, plan review).** Written 2026-10-05 01:30, before 321 P3.4 (same day 11:28) moved every registry onto shared `taxonomyTerms`. An admin edit to a shared (master) term already reaches every user, and the server re-keys a unit everywhere it is used (`renameTermEverywhere` + `TERM_REFERENCES.unit`). The leftover UI gap (unit pencil hidden, no gram-rate edit) belongs to plan 377.
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement

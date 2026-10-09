@@ -1,6 +1,6 @@
 # Plan 346 — Lists: sticky table header and pagination at the top
 
-Status: draft
+Status: done
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement

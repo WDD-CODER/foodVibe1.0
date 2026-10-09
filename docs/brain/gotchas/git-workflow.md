@@ -159,3 +159,11 @@ be serving a different branch's stale code on a similar-looking URL.
 **Why the obvious fix is wrong:** Switching the slot to `main`, or `cd`-ing to the main folder to "finish" the merge, takes the Worker out of its slot. The next `take-plan` then refuses with "not a slot", and `main` is the Planner's checkout.
 
 **What to do instead:** In a slot, run `gh pr merge {n} --merge`, then `git push origin --delete <branch>`, and stay on the branch. The next `take plan NNN` in the same slot fetches, releases the merged branch and claims the new plan (`docs/agent/standards-git.md` → "Merging from a slot").
+
+## Merging a stacked PR into its base branch strands the work if the base PR is later closed
+
+**What hurt:** Plan 362's PR #315 was stacked on the 340 branch (`base=feat/night-1007-340-metadata-chips-tap-menu`). The night runbook (plan 394, round 10) validated it and recorded "Merged", but GitHub merged it into the 340 branch, not `main`. That branch's own PR #305 was then closed unmerged, so the 362 fix never reached `main`. Two days later `main` still had the old `popoverPos` positioning while the ledger and runbook both said done.
+
+**Why the obvious fix is wrong:** "The PR shows MERGED" only means it merged into its base. For a stacked PR, MERGED says nothing about `main`.
+
+**What to do instead:** Before ticking "Merged" for a stacked PR, check `gh pr view <n> --json baseRefName` — it must be `main`. Otherwise retarget first (`gh pr edit <n> --base main`) or confirm the base PR merged too. Spot check: `git branch -r --no-merged origin/main` lists feature branches whose work never landed.
