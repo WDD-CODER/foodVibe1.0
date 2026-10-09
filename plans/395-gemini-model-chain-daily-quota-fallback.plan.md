@@ -1,6 +1,6 @@
 # Plan 395 — Gemini Model Chain with Daily Quota Fallback and Real Free-Tier Limit
 
-Status: active
+Status: done
 Snapshot: 070feb29
 
 ## Problem Statement
@@ -169,6 +169,9 @@ Recipe eval (`ai-eval-recipes.js --model=`, 5 prompts × 5 runs, 2026-10-09):
 The salad fails on both models with the same constant g/portion — likely the eval's gram estimate for count-based vegetables, not the model (plan 370's check). The 20-a-day models were not evaluated (one eval = 25+ calls, more than their whole day). Final order: 3.1-flash-lite → 2.5-flash-lite → 2.5-flash → 3.5-flash → 3.6-flash → 3.7-flash → 3.8-flash → 3.5-flash-lite. Image call per model (8×8 PNG, "what color?"): all answered "Red" except gemini-3.7-flash, 503 overloaded — so every chain model stays in the vision set.
 
 Model check (`--check-models`, one "חביתה" recipe per model, 2026-10-09 ~10:30): OK — 3.1-flash-lite 2.2s, 2.5-flash 7.9s, 3.5-flash 12.5s, 3.6-flash 6.8s, 3.8-flash 18.4s, 3.5-flash-lite 1.4s. FAIL — 2.5-flash-lite: daily quota (429, quotaValue 20 — the key is shared with other running copies of the app, e.g. production, which still calls only this model); 3.7-flash: 503 overloaded (200 on an immediate retry; 503 also in the image check).
+
+## Validation
+- Validated: Human 2026-10-09 — "all checkes done!" (both [human] Done-when items, after PR #356 merged as 92dfd7a1).
 
 ## Sequencing
 After PR #298 (plan 370) merges. Unblocks plan 370's in-app Human check and its A4 eval, both stuck on today's 20-call quota.
