@@ -37,6 +37,7 @@ import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
+import { AiModelManagerComponent } from './components/ai-model-manager/ai-model-manager.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
@@ -67,6 +68,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
     UserManagementComponent,
+    AiModelManagerComponent,
     ScrollRailComponent,
     RowActionsMenuComponent
   ],
@@ -144,7 +146,8 @@ export class MetadataManagerComponent implements OnInit {
     { id: 'mm-sec-menu-type', labelKey: 'metadata_menu_types_title' },
     { id: 'mm-sec-preparation', labelKey: 'metadata_prep_categories' },
     { id: 'mm-sec-section', labelKey: 'metadata_section_categories_title' },
-    { id: 'mm-sec-user', labelKey: 'user_management' }
+    { id: 'mm-sec-user', labelKey: 'user_management' },
+    { id: 'mm-sec-ai-models', labelKey: 'ai_model_manager' }
   ] as const
 
   /** Which section (if any) has been brought to the front of the grid; null = natural page order. */
@@ -159,7 +162,7 @@ export class MetadataManagerComponent implements OnInit {
   }
 
   /** CSS `order` for a jump-nav section: 0 (first) when it's the front one, else its natural
-   *  page-order position (1-8) — so bringing one to the front never disturbs the relative order
+   *  page-order position (1-10) — so bringing one to the front never disturbs the relative order
    *  of the rest. */
   protected orderFor(id: string): number {
     if (this.isFront(id)) return 0

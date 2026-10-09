@@ -9,7 +9,13 @@ import { GeminiService } from '@services/gemini.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
-import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
+import {
+  getGeminiUsage,
+  fetchGeminiUsageFromServer,
+  geminiModelAvailability,
+  geminiUsageStatus,
+  geminiBudgetUsedPercent
+} from '../../core/utils/gemini-usage.util'
 import { matchRecipeName } from '../../core/utils/recipe-match.util'
 import type { AiMenuDraft, MatchedMenu, MatchedSection, MatchedDish } from '@models/ai-menu-draft.model'
 
@@ -46,11 +52,25 @@ export class AiMenuModalComponent implements OnInit {
   protected readonly errorKey_ = signal('ai_menu_error')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
 
-  protected readonly usageColor_ = computed(() => {
-    const pct = this.geminiUsage_().count / DAILY_LIMIT
-    if (pct >= 0.9) return 'danger'
-    if (pct >= 0.7) return 'warning'
-    return 'ok'
+  protected readonly usageColor_ = computed(() => geminiUsageStatus(this.geminiUsage_()))
+  protected readonly usageFillPercent_ = computed(() => geminiBudgetUsedPercent(this.geminiUsage_()))
+  /** Button text for the model switch the server offered ("עבור ל-<model>"); empty when none. */
+  protected readonly modelSwitchLabel_ = computed(() => {
+    const offer = this.gemini_.modelSwitch()
+    return offer ? this.translation_.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
+  })
+  /** "נותרו X" — calls left today across the model chain (shared by all users). */
+  protected readonly budgetLeftLabel_ = computed(() =>
+    this.translation_.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))
+  )
+  /** "N מתוך M מודלים זמינים" once any model is out of its daily quota; empty otherwise. */
+  protected readonly modelsAvailableLabel_ = computed(() => {
+    const { available, total } = geminiModelAvailability(this.geminiUsage_())
+    if (total === 0 || available === total) return ''
+    return this.translation_
+      .translate('ai_models_available')
+      .replace('{available}', String(available))
+      .replace('{total}', String(total))
   })
 
   private static readonly SERVING_TYPE_LABELS: Record<string, string> = {
@@ -216,14 +236,18 @@ export class AiMenuModalComponent implements OnInit {
     this.resetLocalState_()
   }
 
+  /** The user's explicit switch to the offered model; they send the request again themselves. */
+  onSwitchModel(): void {
+    this.gemini_.acceptModelSwitch()
+    this.status_.set('idle')
+  }
+
   private resolveErrorKey_(err: unknown): string {
-    if (err instanceof Error && !(err instanceof HttpErrorResponse) && err.message.includes('מגבלת')) {
-      return 'ai_menu_daily_limit_reached'
-    }
+    if (this.gemini_.offerModelSwitch(err)) return 'ai_model_exhausted_prompt'
     if (err instanceof HttpErrorResponse) {
       const msg: string = err.error?.error ?? ''
       const status = err.status
-      if (status === 429 || msg.includes('daily_limit_reached')) return 'ai_menu_daily_limit_reached'
+      if (status === 429 || msg.includes('daily_limit_reached')) return 'ai_daily_limit_reached_all'
       if (status === 504 || msg.includes('timed out')) return 'ai_menu_error'
       if (status === 503 && msg.includes('not configured')) return 'ai_menu_error'
     }

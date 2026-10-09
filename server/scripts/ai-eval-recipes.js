@@ -13,7 +13,15 @@
  * Calls are paced for the free tier (~15/min), so a full run takes a few minutes.
  *
  * Usage (needs GEMINI_API_KEY in server/.env or the environment):
- *   node server/scripts/ai-eval-recipes.js [--runs=5] [--only=1,2]
+ *   node server/scripts/ai-eval-recipes.js [--runs=5] [--only=1,2] [--model=gemini-3.1-flash-lite]
+ *
+ * --check-models: instead of the eval, one real recipe call ("חביתה") to every selectable model
+ * (gemini-client's catalog), parsed and validated like the route. Prints status, time and the
+ * answer per model; exit 1 if any model fails. ~1 call per model.
+ *   node server/scripts/ai-eval-recipes.js --check-models
+ *
+ * --model picks the one model to evaluate (default: the first in the chain, GEMINI_MODELS or
+ * gemini-client.js's default order). No fallback here: each model is measured on its own (plan 395).
  *
  * --only picks prompts by their 1-based position in CASES. The free tier allows only 20 calls
  * per model per day, so a full 5×5 run has to be split across days (e.g. --only=1,2,3 today,
@@ -26,8 +34,8 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
+const { isDailyQuota, modelCatalog, modelChain, modelUrl } = require('../services/gemini-client');
 const {
-  GEMINI_URL,
   RECIPE_GENERATION_CONFIG,
   SYSTEM_PROMPT,
   extractJsonPayload,
@@ -37,6 +45,7 @@ const {
 } = require('../services/ai-recipe-helpers');
 
 const ONLY = (process.argv.find((a) => a.startsWith('--only=')) || '').split('=')[1];
+const MODEL = (process.argv.find((a) => a.startsWith('--model=')) || '').split('=')[1] || modelChain()[0];
 const RUNS = Number((process.argv.find((a) => a.startsWith('--runs=')) || '').split('=')[1]) || 5;
 const MIN_PASS_RATIO = 4 / 5;
 const TIMEOUT_MS = 30000;
@@ -96,19 +105,19 @@ function checkDraft(draft, testCase) {
 }
 
 /** One Gemini call, parsed and validated like the route does. Returns { draft } or { error }. */
-async function generateOnce(apiKey, prompt) {
+async function generateOnce(apiKey, prompt, model = MODEL) {
   const body = {
     contents: [{ parts: [{ text: SYSTEM_PROMPT + '\n\n## הבקשה הנוכחית — החזר JSON בלבד עבורה:\n' + prompt }] }],
     generationConfig: RECIPE_GENERATION_CONFIG,
   };
   try {
-    const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+    const res = await fetch(`${modelUrl(model)}?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (res.status === 429 && (await isDailyQuota(res))) return { error: 'daily quota', dailyQuota: true, retry: false };
+    if (res.status === 429 && isDailyQuota(await res.json().catch(() => ({})))) return { error: 'daily quota', dailyQuota: true, retry: false };
     if (!res.ok) return { error: `http ${res.status}`, status: res.status, retry: false };
     const data = await res.json();
     const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
@@ -121,13 +130,6 @@ async function generateOnce(apiKey, prompt) {
   } catch (err) {
     return { error: err?.name === 'TimeoutError' ? 'timeout' : 'network error', retry: false };
   }
-}
-
-/** A per-day quota (free tier: 20 calls/model/day) won't clear by waiting a minute — stop instead. */
-async function isDailyQuota(res) {
-  const body = await res.json().catch(() => ({}));
-  const details = Array.isArray(body?.error?.details) ? body.error.details : [];
-  return details.some((d) => Array.isArray(d.violations) && d.violations.some((v) => /PerDay/.test(v.quotaId ?? '')));
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -149,14 +151,40 @@ async function generate(apiKey, prompt) {
   return first.retry ? pacedCall(apiKey, prompt) : first;
 }
 
+/** --check-models: one recipe call per selectable model; does each one answer with a valid recipe? */
+async function checkModels(apiKey) {
+  const prompt = 'חביתה';
+  const rows = [];
+  for (const model of modelCatalog()) {
+    const started = Date.now();
+    const result = await generateOnce(apiKey, prompt, model);
+    const ms = Date.now() - started;
+    const answer = result.draft
+      ? `${result.draft.nameHebrew} · ${result.draft.yield_amount} ${result.draft.yield_unit} · ${result.draft.ingredients.length} ingredients · ${result.draft.steps.length} steps`
+      : result.error;
+    rows.push({ model, ok: Boolean(result.draft), ms, answer });
+    process.stdout.write(result.draft ? '.' : 'x');
+    await sleep(CALL_GAP_MS);
+  }
+  process.stdout.write('\n\n');
+  console.log('| Model | Result | Time | Answer |');
+  console.log('| --- | --- | --- | --- |');
+  for (const row of rows) console.log(`| ${row.model} | ${row.ok ? 'OK' : 'FAIL'} | ${(row.ms / 1000).toFixed(1)}s | ${row.answer} |`);
+  const failed = rows.filter((row) => !row.ok);
+  console.log(`\n${failed.length === 0 ? 'Every model answered with a valid recipe' : `${failed.length} model(s) failed`}.`);
+  process.exitCode = failed.length === 0 ? 0 : 1;
+}
+
 async function main() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error('GEMINI_API_KEY is not set (server/.env or environment). Skipping live eval.');
     process.exit(2);
   }
+  if (process.argv.includes('--check-models')) return checkModels(apiKey);
 
   const minPasses = Math.ceil(RUNS * MIN_PASS_RATIO);
+  console.log(`Model: ${MODEL}`);
   const rows = [];
   const cases = ONLY ? CASES.filter((c, i) => ONLY.split(',').includes(String(i + 1))) : CASES;
   for (const testCase of cases) {
@@ -166,7 +194,7 @@ async function main() {
       const result = await generate(apiKey, testCase.prompt);
       if (result.dailyQuota) {
         console.error(`
-Gemini daily quota used up (free tier: 20 calls/day) at "${testCase.prompt}" run ${run}. Try again tomorrow, or use --only / --runs.`);
+Gemini daily quota for ${MODEL} used up at "${testCase.prompt}" run ${run}. Try again tomorrow, or use --only / --runs.`);
         process.exitCode = 3;
         return;
       }
