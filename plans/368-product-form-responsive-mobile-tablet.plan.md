@@ -1,6 +1,6 @@
 # Plan 368 — Product form responsive on mobile and tablet
 
-Status: draft
+Status: done
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement
@@ -64,22 +64,22 @@ As a chef receiving goods, I want to add and edit products on my phone or tablet
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Move both `@media` blocks to top level (or rewrite their selectors) so they target the real elements: `:host`, `.product-form-container`, `.form-container`, `.form-section`.
-- [ ] ≤900px:
+- [x] Move both `@media` blocks to top level (or rewrite their selectors) so they target the real elements: `:host`, `.product-form-container`, `.form-container`, `.form-section`.
+- [x] ≤900px:
   - `.form-section` → `repeat(2, minmax(0, 1fr))`.
   - An expanded `.collapsible-field` → `grid-column: 1 / -1`.
   - `.scaling-row` → a 2-row layout (unit + qty on row 1; price + override + delete on row 2) via `grid-template-areas`.
-- [ ] ≤768px:
+- [x] ≤768px:
   - `.form-section` → `1fr`.
   - `:host` padding → `--space-3`; `.form-container` padding → `--space-4`.
   - `.two-col-grid` → `1fr`.
   - `.scaling-row` → stacked, with full-width selects.
   - `.form-actions` → `flex-wrap: wrap`, buttons `flex: 1 1 auto; min-width: 0`, primary first.
-- [ ] `.override-input` (fixed 85px) → `min-inline-size: 5rem; inline-size: 100%` within its cell on phone.
-- [ ] Delete the dead `.product-info` and `.grid-2` rules.
+- [x] `.override-input` (fixed 85px) → `min-inline-size: 5rem; inline-size: 100%` within its cell on phone.
+- [x] Delete the dead `.product-info` and `.grid-2` rules.
 
 ### Should Have (P1)
-- [ ] Tap targets: inputs, selects and chip pickers are at least 44px tall at ≤768px.
+- [x] Tap targets: inputs, selects and chip pickers are at least 44px tall at ≤768px.
 
 ### Nice to Have (P2)
 - None.
@@ -95,7 +95,7 @@ As a chef receiving goods, I want to add and edit products on my phone or tablet
 - [x] A1: Un-nest the media blocks; verify they apply (DevTools computed styles) (`product-form.component.scss`).
 - [x] A2: ≤900px tablet layout, including collapsible full width and the scaling row in 2 rows.
 - [x] A3: ≤768px phone layout, including padding, actions wrap and the override input.
-- [ ] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
+- [x] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
 
 ## Technical Considerations
 

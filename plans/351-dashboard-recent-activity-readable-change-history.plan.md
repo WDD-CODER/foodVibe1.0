@@ -1,6 +1,6 @@
 # Plan 351 — Dashboard "פעילות אחרונה": readable change history
 
-Status: draft
+Status: done
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
@@ -70,20 +70,20 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] New pure pipe `activityValue` (`core/pipes/activity-value.pipe.ts`): `value | activityValue: field`.
+- [x] New pure pipe `activityValue` (`core/pipes/activity-value.pipe.ts`): `value | activityValue: field`.
   - `field === 'supplier'`: split by `,` and map each id through `KitchenStateService.suppliersById_()` to `nameHebrew`. Unknown id → "ספק שנמחק".
   - Otherwise: split by `,`, translate each token via `TranslationService` (the same logic as `formatChangeValue`), join with "، ".
   - Empty → "—".
-- [ ] `ChangePopoverComponent` uses the pipe; delete `formatChangeValue`.
-- [ ] New entry layout (replaces the `.activity-changes` strip and `button.change-tag`):
+- [x] `ChangePopoverComponent` uses the pipe; delete `formatChangeValue`.
+- [x] New entry layout (replaces the `.activity-changes` strip and `button.change-tag`):
   - Header line: type icon (product / recipe / dish, Lucide), name, action badge (נוסף / עודכן / נמחק), and relative time on the inline-end ("לפני 5 דק'", using `Intl.RelativeTimeFormat('he')`).
   - Change lines (stacked, max 3): `label:` · `<del class="act-old">old</del>` · Lucide `arrow-left` · `<ins class="act-new">new</ins>`. Old is muted with a strikethrough; new uses the primary color at medium weight.
   - If there are more than 3 changes: "+N שינויים נוספים" opens the existing popover.
   - "Updated" with no changes: show "עודכן" only (no empty strip).
-- [ ] Remove `scrollActivityChanges()` and the arrow buttons and styles of the old strip. Use the normal UI font size (no monospace).
+- [x] Remove `scrollActivityChanges()` and the arrow buttons and styles of the old strip. Use the normal UI font size (no monospace).
 
 ### Should Have (P1)
-- [ ] Group entries by day headers ("היום", "אתמול", date) when the list spans multiple days.
+- [x] Group entries by day headers ("היום", "אתמול", date) when the list spans multiple days.
 
 ### Nice to Have (P2)
 - None.
@@ -100,7 +100,7 @@ touching any milestone.
 - [x] A2: Switch the popover to the pipe (`shared/change-popover/**`).
 - [x] A3: New entry template and styles; delete the strip, scroll method and `.change-tag` styles (`dashboard-overview/**`).
 - [x] A4: Relative time plus the optional day grouping (`dashboard-overview/**`).
-- [ ] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
+- [x] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
 
 ## Technical Considerations
 

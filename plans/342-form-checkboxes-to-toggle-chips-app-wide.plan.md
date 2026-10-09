@@ -1,6 +1,6 @@
 # Plan 342 — Form checkboxes → toggle chips (app-wide)
 
-Status: draft
+Status: done
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
@@ -79,15 +79,15 @@ touching any milestone.
 
 ### Must Have (P0)
 
-- [ ] Every row in the table above uses `label.c-toggle-chip > input` (hidden, focusable) with the same bindings: `formControlName`, `[checked]` / `(change)`. No logic changes.
-- [ ] Multi-choice groups are wrapped in `.c-toggle-chip-group`.
-- [ ] Boolean fields become a single chip whose text is the field label (e.g. "מתכלה", "פעיל", "מחיר מיוחד").
-- [ ] Delete the now-dead local classes: `.day-check`, `.checkbox-group`, `.price-override-label`, `.quick-add-product-modal__checkbox-label`, `.inline-edit-check`, `.inline-edit-checkboxes`, `.trigger-option`, `.active-toggle`. Grep each before deleting.
-- [ ] Delete the `.c-filter-option` rule from `styles.scss` (zero users).
+- [x] Every row in the table above uses `label.c-toggle-chip > input` (hidden, focusable) with the same bindings: `formControlName`, `[checked]` / `(change)`. No logic changes.
+- [x] Multi-choice groups are wrapped in `.c-toggle-chip-group`.
+- [x] Boolean fields become a single chip whose text is the field label (e.g. "מתכלה", "פעיל", "מחיר מיוחד").
+- [x] Delete the now-dead local classes: `.day-check`, `.checkbox-group`, `.price-override-label`, `.quick-add-product-modal__checkbox-label`, `.inline-edit-check`, `.inline-edit-checkboxes`, `.trigger-option`, `.active-toggle`. Grep each before deleting.
+- [x] Delete the `.c-filter-option` rule from `styles.scss` (zero users).
 
 ### Should Have (P1)
 
-- [ ] The label-creation trigger chips show the trigger's color dot if one exists (`.c-toggle-chip__dot`).
+- [x] The label-creation trigger chips show the trigger's color dot if one exists (`.c-toggle-chip__dot`).
 
 ### Nice to Have (P2)
 
@@ -106,7 +106,7 @@ touching any milestone.
 - [x] A3: Product form special price, quick-add allergens, quick-edit suppliers → chips (`product-form.component.*`, `quick-add-product-modal/**`, `quick-edit-product-panel/**`)
 - [x] A4: Label-creation triggers and venue-form active → chips (`label-creation-modal/**`, `venue-form.component.*`)
 - [x] A5: Delete the dead local classes and `.c-filter-option` (`src/styles.scss`). Run `rg -n 'type="checkbox"' src/app --glob '*.html'` and confirm only list-row-checkbox remains.
-- [ ] A6: Build and run specs. Update the session-state file.
+- [x] A6: Build and run specs. Update the session-state file.
 
 ## Technical Considerations
 
@@ -128,8 +128,8 @@ touching any milestone.
 
 ## Success Criteria
 
-- [ ] [auto] `rg -n 'type="checkbox"' src/app --glob '*.html'` → only `src/app/shared/list-selection/list-row-checkbox.component.html`.
-- [ ] [auto] `rg -n "c-filter-option" src/app src/styles.scss` → no matches.
-- [ ] [auto] `npx ng test --watch=false --include=src/app/pages/**/*-form.component.spec.ts --include=src/app/shared/**/*.spec.ts` → 0 failures.
-- [ ] [auto] `npm run build` → exit 0.
-- [ ] [human] Supplier form: delivery days are chips; save → reopen → the same days are selected. Equipment "מתכלה", venue "פעיל" and product special price toggle as chips and persist. Quick-add allergens and label triggers are chips.
+- [x] [auto] `rg -n 'type="checkbox"' src/app --glob '*.html'` → only `src/app/shared/list-selection/list-row-checkbox.component.html`.
+- [x] [auto] `rg -n "c-filter-option" src/app src/styles.scss` → no matches.
+- [x] [auto] `npx ng test --watch=false --include=src/app/pages/**/*-form.component.spec.ts --include=src/app/shared/**/*.spec.ts` → 0 failures.
+- [x] [auto] `npm run build` → exit 0.
+- [x] [human] Supplier form: delivery days are chips; save → reopen → the same days are selected. Equipment "מתכלה", venue "פעיל" and product special price toggle as chips and persist. Quick-add allergens and label triggers are chips.

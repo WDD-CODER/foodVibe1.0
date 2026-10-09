@@ -69,23 +69,23 @@ As a chef, when I ask the AI for an omelet, I want 1–2 portions with realistic
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Extract the pure helpers from `ai.js` into `server/services/ai-recipe-helpers.js` (CommonJS): `extractJsonPayload`, `validateRecipeDraft`, `normalizeIngredientUnits`, `computeSoftWarnings`, `buildFewShotBlock`, plus a new `selectShots(shots, prompt, n)`. `ai.js` imports them; behavior is unchanged except where stated below.
-- [ ] Prompt additions (Hebrew, in `SYSTEM_PROMPT`):
+- [x] Extract the pure helpers from `ai.js` into `server/services/ai-recipe-helpers.js` (CommonJS): `extractJsonPayload`, `validateRecipeDraft`, `normalizeIngredientUnits`, `computeSoftWarnings`, `buildFewShotBlock`, plus a new `selectShots(shots, prompt, n)`. `ai.js` imports them; behavior is unchanged except where stated below.
+- [x] Prompt additions (Hebrew, in `SYSTEM_PROMPT`):
   - Ingredient amounts are for the whole `yield_amount`.
   - If the user names a number of portions, use it exactly; otherwise default to a realistic home or restaurant serving (for single-serving dishes like an omelet, 1 portion).
   - Aim for realistic per-portion amounts (a main dish is typically 150–450 g per portion).
-- [ ] `selectShots`: score approved shots by keyword overlap with the request text (normalized Hebrew tokens, niqqud stripped). Take the top 2 with score > 0, otherwise 0 shots (no unrelated examples). Use it in all three generate routes.
-- [ ] `generationConfig: { temperature: 0.4 }` on the recipe generate calls.
-- [ ] New soft warning `implausible_portion_weight`: estimate total grams with a small unit→gram table (g, kg, ml, l, unit-egg ≈ 55 g, tablespoon 15, teaspoon 5, cup 240, pinch ≈ 0; unknown units skipped). Warn when grams per portion is < 60 or > 700 for a dish. Mirror it in `gemini-shots.service.ts`.
-- [ ] Offline vitest (`server/test/ai-recipe-helpers.test.js`) for every helper: fenced JSON, few-shot echo stripping, validation failures, unit normalization, soft warnings including the new one, `selectShots` relevance and empty fallback.
-- [ ] Opt-in live eval `server/scripts/ai-eval-recipes.js`:
+- [x] `selectShots`: score approved shots by keyword overlap with the request text (normalized Hebrew tokens, niqqud stripped). Take the top 2 with score > 0, otherwise 0 shots (no unrelated examples). Use it in all three generate routes.
+- [x] `generationConfig: { temperature: 0.4 }` on the recipe generate calls.
+- [x] New soft warning `implausible_portion_weight`: estimate total grams with a small unit→gram table (g, kg, ml, l, unit-egg ≈ 55 g, tablespoon 15, teaspoon 5, cup 240, pinch ≈ 0; unknown units skipped). Warn when grams per portion is < 60 or > 700 for a dish. Mirror it in `gemini-shots.service.ts`.
+- [x] Offline vitest (`server/test/ai-recipe-helpers.test.js`) for every helper: fenced JSON, few-shot echo stripping, validation failures, unit normalization, soft warnings including the new one, `selectShots` relevance and empty fallback.
+- [x] Opt-in live eval `server/scripts/ai-eval-recipes.js`:
   - Runs only with `GEMINI_API_KEY` set and is not in CI.
   - Prompts: "חביתה", "חביתה ל-2", "חביתה מ-3 ביצים", "שקשוקה ל-4", "סלט ירקות קצוץ"; each 5 times.
   - Asserts: dish type and `yield_unit=portion`; `yield_amount` matches the requested count, or is 1–2 for an omelet; eggs per portion 2–3 for the omelets; grams per portion 100–450; ≥ 2 steps.
   - Prints a pass-rate table; exits 1 if any prompt passes in fewer than 4 of 5 runs.
 
 ### Should Have (P1)
-- [ ] An npm script `ai:eval` in `server/package.json`, if in scope; otherwise escalate. Usage documented at the top of the script.
+- [x] An npm script `ai:eval` in `server/package.json`, if in scope; otherwise escalate. Usage documented at the top of the script.
 
 ### Nice to Have (P2)
 - None.
