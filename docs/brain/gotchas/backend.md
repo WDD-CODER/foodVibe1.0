@@ -277,3 +277,11 @@ been killed by it.
 **Why the obvious fix is wrong:** `server/routes/generic.js` validates `{ ...current, ...updatable }` and writes with `$set`, so an omitted field keeps the stored null and still fails validation. Loosening the schema to `.nullish()` breaks `server/test/upgrade-v1-to-v2.test.js` "flags nulls … instead of loosening the schema" (INV-4).
 
 **What to do instead:** To clear an invalid stored value through the normal API, send a valid replacement (here `logistics: { baseline: [] }`, see `kitchen-state.service.ts` `applyCascadeUpdate`). For many bad documents, run a one-time server-side data cleanup instead of patching each client write path.
+
+## Gemini free tier is a tiny per-model daily bucket, and Google no longer publishes it
+
+**What hurt:** Every AI feature died after 20 calls a day: `gemini-2.5-flash-lite` answered 429 `GenerateRequestsPerDayPerProjectPerModel-FreeTier`, `quotaValue: 20`, while the app still believed `DAILY_LIMIT = 1000` (Google's old published number, cut in Dec 2025). The bucket is per project per model, so every copy of the app on the same key (production, other slots, the seeder) drains it together — it was empty by mid-morning on 2026-10-09 although this slot had used only a few calls (plan 395).
+
+**Why the obvious fix is wrong:** The docs page (ai.google.dev rate-limits) shows no numbers anymore, and a hard-coded app-side daily cap can't see other callers on the key. Auto-falling back to the next model on a 429 was built and then removed on purpose: the Human wants no unattended spend — every extra model call must be a user's click.
+
+**What to do instead:** Read the real limit from the 429 body (`error.details[].violations[].quotaId` / `quotaValue`); per-model budgets live in `MODEL_DAILY_BUDGETS` in `server/services/gemini-client.js` with their source and date. One Gemini call per request: on a daily-quota 429 the server returns `model_exhausted` + `nextModel` and the modal offers the switch. Check every model with `node server/scripts/ai-eval-recipes.js --check-models` (one call each). Quotas reset at midnight Pacific, not UTC.

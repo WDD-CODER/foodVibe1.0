@@ -1,8 +1,8 @@
-import { inject, Injectable } from '@angular/core'
+import { inject, Injectable, signal } from '@angular/core'
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { Observable, map, firstValueFrom } from 'rxjs'
 import type { AiRecipeDraft } from './ai-recipe-draft.service'
-import { incrementGeminiUsage, isGeminiLimitReached } from '../utils/gemini-usage.util'
+import { incrementGeminiUsage, type GeminiModelStatus } from '../utils/gemini-usage.util'
 import { downscaleImage } from '../utils/downscale-image.util'
 import type { ParsedResult } from '@models/parsed-result.model'
 import { environment } from '../../../environments/environment'
@@ -10,6 +10,18 @@ import type { AiMenuDraft, AiMenuPatch } from '@models/ai-menu-draft.model'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { MetadataRegistryService } from './metadata-registry.service'
 import { TranslationService } from './translation.service'
+
+/** One model in the admin's AI model chain (plan 395): today's status plus on/off. */
+export interface GeminiChainModel extends GeminiModelStatus {
+  enabled: boolean
+  vision: boolean
+}
+
+/** Offered after a request hit the daily quota of `from` (server error 'model_exhausted'). */
+export interface GeminiModelSwitch {
+  from: string
+  to: string
+}
 
 export interface AiRecipePatch {
   nameHebrew?: string
@@ -48,33 +60,72 @@ export class GeminiService {
   private readonly translation_ = inject(TranslationService)
   private readonly authBase_ = environment.authApiUrl
 
-  async generateRecipe(prompt: string): Promise<AiRecipeDraft> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
+  /** The model the user switched to (plan 395); null = the admin's chain first. */
+  private readonly model_ = signal<string | null>(null)
+  /** A switch the server suggested and the user hasn't accepted yet. */
+  private readonly modelSwitch_ = signal<GeminiModelSwitch | null>(null)
+  readonly modelSwitch = this.modelSwitch_.asReadonly()
 
+  // ─── Model switch (plan 395) ─────────────────────────────────────
+  // The server never moves to another model by itself: when the model runs out of its daily
+  // quota it answers 'model_exhausted' + the next model, and the user decides.
+
+  /** Records the switch the server offers when `err` is a 'model_exhausted' 429. Returns true if it was one. */
+  offerModelSwitch(err: unknown): boolean {
+    if (!(err instanceof HttpErrorResponse) || err.error?.error !== 'model_exhausted') return false
+    const from: unknown = err.error?.model
+    const to: unknown = err.error?.nextModel
+    if (typeof from !== 'string' || typeof to !== 'string') return false
+    this.modelSwitch_.set({ from, to })
+    return true
+  }
+
+  /** The user's explicit "switch" — later requests go to the offered model. */
+  acceptModelSwitch(): void {
+    const offer = this.modelSwitch_()
+    if (!offer) return
+    this.model_.set(offer.to)
+    this.modelSwitch_.set(null)
+  }
+
+  /** `{ model }` for request bodies once the user switched; empty otherwise. */
+  private modelParam_(): { model?: string } {
+    const model = this.model_()
+    return model ? { model } : {}
+  }
+
+  async generateRecipe(prompt: string): Promise<AiRecipeDraft> {
     const data = await withRetry(() =>
-      firstValueFrom(this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate`, { prompt }))
+      firstValueFrom(
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate`, {
+          prompt,
+          ...this.modelParam_()
+        })
+      )
     )
     incrementGeminiUsage()
     return data.recipe
   }
 
   parseText(rawText: string): Observable<ParsedResult> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-    return this.http_.post<{ result: ParsedResult }>(`${this.authBase_}/api/v1/ai/parse-text`, { rawText }).pipe(
-      map((res) => {
-        incrementGeminiUsage()
-        return res.result
-      })
-    )
+    return this.http_
+      .post<{ result: ParsedResult }>(`${this.authBase_}/api/v1/ai/parse-text`, { rawText, ...this.modelParam_() })
+      .pipe(
+        map((res) => {
+          incrementGeminiUsage()
+          return res.result
+        })
+      )
   }
 
   async generateFromImage(file: File): Promise<AiRecipeDraft> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-
     const image = await this.encodeImage_(file)
     const data = await withRetry(() =>
       firstValueFrom(
-        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-image`, image)
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-image`, {
+          ...image,
+          ...this.modelParam_()
+        })
       )
     )
     incrementGeminiUsage()
@@ -82,11 +133,12 @@ export class GeminiService {
   }
 
   async generateFromUrl(url: string): Promise<AiRecipeDraft> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-
     const data = await withRetry(() =>
       firstValueFrom(
-        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-url`, { url })
+        this.http_.post<{ recipe: AiRecipeDraft }>(`${this.authBase_}/api/v1/ai/generate-from-url`, {
+          url,
+          ...this.modelParam_()
+        })
       )
     )
     incrementGeminiUsage()
@@ -94,13 +146,12 @@ export class GeminiService {
   }
 
   async patchRecipe(currentRecipe: AiRecipeDraft, instruction: string): Promise<AiRecipePatch> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-
     const data = await withRetry(() =>
       firstValueFrom(
         this.http_.post<{ changes: AiRecipePatch }>(`${this.authBase_}/api/v1/ai/patch-recipe`, {
           currentRecipe,
-          instruction
+          instruction,
+          ...this.modelParam_()
         })
       )
     )
@@ -109,10 +160,13 @@ export class GeminiService {
   }
 
   async generateMenu(rawText: string): Promise<AiMenuDraft> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-
     const data = await withRetry(() =>
-      firstValueFrom(this.http_.post<{ menu: AiMenuDraft }>(`${this.authBase_}/api/v1/ai/generate-menu`, { rawText }))
+      firstValueFrom(
+        this.http_.post<{ menu: AiMenuDraft }>(`${this.authBase_}/api/v1/ai/generate-menu`, {
+          rawText,
+          ...this.modelParam_()
+        })
+      )
     )
     incrementGeminiUsage()
     return data.menu
@@ -123,13 +177,12 @@ export class GeminiService {
   }
 
   async patchMenu(currentMenu: AiMenuDraft, instruction: string): Promise<AiMenuPatch> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-
     const data = await withRetry(() =>
       firstValueFrom(
         this.http_.post<{ changes: AiMenuPatch }>(`${this.authBase_}/api/v1/ai/patch-menu`, {
           currentMenu,
-          instruction
+          instruction,
+          ...this.modelParam_()
         })
       )
     )
@@ -138,13 +191,12 @@ export class GeminiService {
   }
 
   async generateProduct(rawText: string): Promise<AiProductDraft> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-
     const data = await withRetry(() =>
       firstValueFrom(
         this.http_.post<{ product: AiProductDraft }>(`${this.authBase_}/api/v1/ai/generate-product`, {
           rawText,
-          ...this.knownMetadata_()
+          ...this.knownMetadata_(),
+          ...this.modelParam_()
         })
       )
     )
@@ -153,8 +205,6 @@ export class GeminiService {
   }
 
   async generateProductFromImage(file: File, hint?: string): Promise<AiProductDraft> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-
     const image = await this.encodeImage_(file)
     const trimmedHint = hint?.trim()
     const data = await withRetry(() =>
@@ -162,7 +212,8 @@ export class GeminiService {
         this.http_.post<{ product: AiProductDraft }>(`${this.authBase_}/api/v1/ai/generate-product-from-image`, {
           ...image,
           ...(trimmedHint ? { hint: trimmedHint } : {}),
-          ...this.knownMetadata_()
+          ...this.knownMetadata_(),
+          ...this.modelParam_()
         })
       )
     )
@@ -171,8 +222,6 @@ export class GeminiService {
   }
 
   async patchProduct(currentProduct: AiProductDraft, instruction: string): Promise<AiProductPatch> {
-    if (isGeminiLimitReached()) throw new Error('הגעת למגבלת הבקשות היומית (1,000)')
-
     const data = await withRetry(() =>
       firstValueFrom(
         this.http_.post<{ changes: AiProductPatch }>(`${this.authBase_}/api/v1/ai/patch-product`, {
@@ -182,7 +231,8 @@ export class GeminiService {
             allergens: this.toHebrew_(currentProduct.allergens)
           },
           instruction,
-          ...this.knownMetadata_()
+          ...this.knownMetadata_(),
+          ...this.modelParam_()
         })
       )
     )
@@ -203,6 +253,26 @@ export class GeminiService {
 
   private toHebrew_(keys: string[] | undefined): string[] {
     return (keys ?? []).map((key) => this.translation_.translate(key))
+  }
+
+  // ─── Admin: model chain (plan 395) ───────────────────────────────
+
+  getModelChain(): Observable<GeminiChainModel[]> {
+    return this.http_
+      .get<{ models: GeminiChainModel[] }>(`${this.authBase_}/api/v1/ai/models`)
+      .pipe(map((res) => res.models))
+  }
+
+  saveModelChain(models: Pick<GeminiChainModel, 'name' | 'enabled'>[]): Observable<GeminiChainModel[]> {
+    return this.http_
+      .put<{ models: GeminiChainModel[] }>(`${this.authBase_}/api/v1/ai/models`, { models })
+      .pipe(map((res) => res.models))
+  }
+
+  resetModelChain(): Observable<GeminiChainModel[]> {
+    return this.http_
+      .delete<{ models: GeminiChainModel[] }>(`${this.authBase_}/api/v1/ai/models`)
+      .pipe(map((res) => res.models))
   }
 
   /** Downscales the photo (server body limit is 2MB) and returns it as raw base64 + MIME type. */

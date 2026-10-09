@@ -46,15 +46,25 @@
                 } @else if (status_() === 'error') {
                   <lucide-icon name="circle-x" [size]="16"></lucide-icon>
                   <span>{{ errorKey_() | translatePipe }}</span>
+                  @if (modelSwitchLabel_()) {
+                    <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
+                      {{ modelSwitchLabel_() }}
+                    </button>
+                  }
                 }
               </div>
             }
 
             <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-              <span class="ai-usage-label">{{ 'ai_recipe_daily_requests' | translatePipe }}</span>
-              <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
+              <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
+              <span class="ai-usage-count">
+                {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
+                @if (modelsAvailableLabel_()) {
+                  · {{ modelsAvailableLabel_() }}
+                }
+              </span>
               <div class="ai-usage-track">
-                <div class="ai-usage-fill" [style.width.%]="(geminiUsage_().count / 1000) * 100"></div>
+                <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
               </div>
             </div>
 
@@ -225,15 +235,25 @@
                 } @else if (status_() === 'error') {
                   <lucide-icon name="circle-x" [size]="16"></lucide-icon>
                   <span>{{ errorKey_() | translatePipe }}</span>
+                  @if (modelSwitchLabel_()) {
+                    <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
+                      {{ modelSwitchLabel_() }}
+                    </button>
+                  }
                 }
               </div>
             }
 
             <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-              <span class="ai-usage-label">{{ 'ai_recipe_daily_requests' | translatePipe }}</span>
-              <span class="ai-usage-count">{{ geminiUsage_().count }} / 1,000</span>
+              <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
+              <span class="ai-usage-count">
+                {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
+                @if (modelsAvailableLabel_()) {
+                  · {{ modelsAvailableLabel_() }}
+                }
+              </span>
               <div class="ai-usage-track">
-                <div class="ai-usage-fill" [style.width.%]="(geminiUsage_().count / 1000) * 100"></div>
+                <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
               </div>
             </div>
 

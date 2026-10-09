@@ -10,7 +10,13 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { resolveDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
-import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
+import {
+  getGeminiUsage,
+  fetchGeminiUsageFromServer,
+  geminiModelAvailability,
+  geminiUsageStatus,
+  geminiBudgetUsedPercent
+} from '../../core/utils/gemini-usage.util'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
@@ -66,11 +72,25 @@ export class AiProductModalComponent implements OnInit {
   protected readonly errorKey_ = signal('ai_product_error')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
 
-  protected readonly usageColor_ = computed(() => {
-    const pct = this.geminiUsage_().count / DAILY_LIMIT
-    if (pct >= 0.9) return 'danger'
-    if (pct >= 0.7) return 'warning'
-    return 'ok'
+  protected readonly usageColor_ = computed(() => geminiUsageStatus(this.geminiUsage_()))
+  protected readonly usageFillPercent_ = computed(() => geminiBudgetUsedPercent(this.geminiUsage_()))
+  /** Button text for the model switch the server offered ("עבור ל-<model>"); empty when none. */
+  protected readonly modelSwitchLabel_ = computed(() => {
+    const offer = this.gemini_.modelSwitch()
+    return offer ? this.translation_.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
+  })
+  /** "נותרו X" — calls left today across the model chain (shared by all users). */
+  protected readonly budgetLeftLabel_ = computed(() =>
+    this.translation_.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))
+  )
+  /** "N מתוך M מודלים זמינים" once any model is out of its daily quota; empty otherwise. */
+  protected readonly modelsAvailableLabel_ = computed(() => {
+    const { available, total } = geminiModelAvailability(this.geminiUsage_())
+    if (total === 0 || available === total) return ''
+    return this.translation_
+      .translate('ai_models_available')
+      .replace('{available}', String(available))
+      .replace('{total}', String(total))
   })
 
   protected readonly canGenerate_ = computed(() =>
@@ -262,14 +282,18 @@ export class AiProductModalComponent implements OnInit {
     return (values ?? []).map((v) => this.translation_.translate(v)).join(', ') || '—'
   }
 
+  /** The user's explicit switch to the offered model; they send the request again themselves. */
+  onSwitchModel(): void {
+    this.gemini_.acceptModelSwitch()
+    this.status_.set('idle')
+  }
+
   private resolveErrorKey_(err: unknown): string {
-    if (err instanceof Error && !(err instanceof HttpErrorResponse) && err.message.includes('מגבלת')) {
-      return 'ai_product_daily_limit_reached'
-    }
+    if (this.gemini_.offerModelSwitch(err)) return 'ai_model_exhausted_prompt'
     if (err instanceof HttpErrorResponse) {
       const msg: string = err.error?.error ?? ''
       const status = err.status
-      if (status === 429 || msg.includes('daily_limit_reached')) return 'ai_product_daily_limit_reached'
+      if (status === 429 || msg.includes('daily_limit_reached')) return 'ai_daily_limit_reached_all'
     }
     return 'ai_product_error'
   }

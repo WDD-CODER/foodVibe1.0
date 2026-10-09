@@ -228,10 +228,6 @@ function selectShots(shots, prompt, n = 2) {
     .map(s => s.shot);
 }
 
-/** The Gemini model every AI route calls. */
-const GEMINI_MODEL = 'gemini-2.5-flash-lite';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-
 /** Lower than the default so portion counts and amounts are steadier between runs (plan 370). */
 const RECIPE_GENERATION_CONFIG = { temperature: 0.4 };
 
@@ -291,8 +287,6 @@ gram | ml | kg | liter | unit | tablespoon | teaspoon | cup | pinch | portion
 השדה "equipment" הוא אופציונלי — השמט אותו אם אין ציוד.`;
 
 module.exports = {
-  GEMINI_MODEL,
-  GEMINI_URL,
   RECIPE_GENERATION_CONFIG,
   SYSTEM_PROMPT,
   CANONICAL_UNITS,

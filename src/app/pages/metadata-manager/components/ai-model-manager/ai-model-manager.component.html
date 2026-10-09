@@ -1,0 +1,86 @@
+<section class="manager-card">
+  <div class="card-title">
+    <lucide-icon name="sparkles" class="card-icon"></lucide-icon>
+    <h2>{{ 'ai_model_manager' | translatePipe }}</h2>
+  </div>
+  <p class="card-desc">{{ 'ai_model_manager_desc' | translatePipe }}</p>
+
+  @if (!isAdmin_()) {
+    <div class="empty-state">
+      <lucide-icon name="lock" [size]="18"></lucide-icon>
+      {{ 'admin_only' | translatePipe }}
+    </div>
+  } @else if (isLoading_()) {
+    <div class="empty-state">{{ 'ai_model_loading' | translatePipe }}</div>
+  } @else {
+    <ol class="model-list" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="onDrop($event)">
+      @for (model of models_(); track model.name; let i = $index, first = $first, last = $last) {
+        <li class="model-row" [class.is-off]="!model.enabled" cdkDrag>
+          <div class="model-placeholder" *cdkDragPlaceholder></div>
+          <span
+            class="model-grip"
+            cdkDragHandle
+            [attr.aria-label]="'ai_model_drag' | translatePipe"
+            [attr.title]="'ai_model_drag' | translatePipe"
+          >
+            <lucide-icon name="grip-vertical" [size]="16"></lucide-icon>
+          </span>
+          <span class="model-rank">{{ ranks_().get(model.name) ?? '—' }}</span>
+
+          <div class="model-info">
+            <span class="model-name" dir="ltr">{{ model.name }}</span>
+            <span class="model-usage">
+              {{ usageLabel(model) }}
+              @if (model.exhausted) {
+                · <span class="model-exhausted">{{ 'ai_model_exhausted' | translatePipe }}</span>
+              }
+            </span>
+          </div>
+
+          <label class="c-toggle-chip">
+            <input type="checkbox" [checked]="model.enabled" (change)="onToggle(model.name)" />
+            <span>{{ 'ai_model_on' | translatePipe }}</span>
+          </label>
+
+          <div class="model-move">
+            <button
+              type="button"
+              class="c-icon-btn"
+              [disabled]="first"
+              [attr.aria-label]="'ai_model_move_up' | translatePipe"
+              [attr.title]="'ai_model_move_up' | translatePipe"
+              (click)="onMove(i, -1)"
+            >
+              <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+            </button>
+            <button
+              type="button"
+              class="c-icon-btn"
+              [disabled]="last"
+              [attr.aria-label]="'ai_model_move_down' | translatePipe"
+              [attr.title]="'ai_model_move_down' | translatePipe"
+              (click)="onMove(i, 1)"
+            >
+              <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        </li>
+      }
+    </ol>
+
+    <div class="model-actions">
+      <button type="button" class="c-btn-primary" [disabled]="!isDirty_() || isSaving_()" (click)="onSave()">
+        {{ 'save' | translatePipe }}
+      </button>
+      @if (isDirty_()) {
+        <button type="button" class="c-btn-ghost" [disabled]="isSaving_()" (click)="onDiscard()">
+          {{ 'cancel' | translatePipe }}
+        </button>
+      }
+      <button type="button" class="c-btn-ghost" [disabled]="isSaving_()" (click)="onReset()">
+        <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+        {{ 'ai_model_reset' | translatePipe }}
+      </button>
+    </div>
+  }
+</section>

@@ -1,15 +1,15 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, requireAdmin } = require('../middleware/auth');
 const dns = require('node:dns').promises;
 
 // Plan 321 Phase 1 — strict per-user limit on the Gemini-backed AI routes (they cost
 // real money per call). Keyed by userId, not IP, since verifyToken has already run by
 // the time this middleware executes on each route below — a shared office/NAT IP must
-// not throttle every user on it together. Independent of the shared 1,000/day global
-// GEMINI_USAGE counter further down this file (that one caps total spend; this one
-// caps how fast any single account can burn through it).
+// not throttle every user on it together. The daily cap is Google's own per-model free
+// quota, handled by the model chain in services/gemini-client.js (plan 395); this one
+// caps how fast any single account can burn through it.
 const aiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
@@ -45,72 +45,62 @@ async function isSafeUrl(rawUrl) {
   return !addresses.some(addr => PRIVATE_IP_RANGES.some(re => re.test(addr)));
 }
 
+const {
+  callGemini,
+  getChainSettings,
+  getModelStatus,
+  getUsageCount,
+  responseText,
+  saveChainSettings,
+  summarizeBudget,
+  todayKey,
+} = require('../services/gemini-client');
+
 const router = Router();
 
 // Cap on model output copied into a parse/validation failure log line (Plan 383).
 const RAW_LOG_CHARS = 2000;
 
 // ---------------------------------------------------------------------------
-// Shared daily call counter — stored in MongoDB so all users + the Python
-// seeder share a single 1,000 calls/day limit.
-//
-// Collection: GEMINI_USAGE
-// Document:   { _id: "YYYY-MM-DD", count: N }
-// ---------------------------------------------------------------------------
-
-const DAILY_LIMIT = 1000;
-const USAGE_COLLECTION = 'GEMINI_USAGE';
-
-function todayKey() {
-  return new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
-}
-
-function usageCol() {
-  return mongoose.connection.db.collection(USAGE_COLLECTION);
-}
-
-/**
- * Returns today's call count without modifying it.
- */
-async function getUsageCount() {
-  try {
-    const doc = await usageCol().findOne({ _id: todayKey() });
-    return doc ? doc.count : 0;
-  } catch {
-    return 0; // treat DB errors as non-blocking
-  }
-}
-
-/**
- * Atomically increments today's counter by 1.
- * Returns the new count after increment.
- */
-async function incrementUsage() {
-  try {
-    const result = await usageCol().findOneAndUpdate(
-      { _id: todayKey() },
-      { $inc: { count: 1 } },
-      { upsert: true, returnDocument: 'after' }
-    );
-    return result?.count ?? 1;
-  } catch {
-    return null; // non-blocking — don't crash the AI call
-  }
-}
-
-// ---------------------------------------------------------------------------
 // GET /api/v1/ai/usage
-// Public endpoint — returns today's call count, limit, and remaining quota.
-// Used by the Angular frontend to show a live usage indicator.
+// Public endpoint — today's dispatched-call count, the chain's daily budget
+// (budget / used / remaining) and each model's quota state (plan 395). Used by the Angular frontend to show a live usage indicator.
 // ---------------------------------------------------------------------------
 router.get('/usage', async (_req, res) => {
-  const count = await getUsageCount();
-  res.json({
-    date:      todayKey(),
-    count,
-    limit:     DAILY_LIMIT,
-    remaining: Math.max(0, DAILY_LIMIT - count),
-  });
+  const [count, models] = await Promise.all([getUsageCount(), getModelStatus()]);
+  res.json({ date: todayKey(), count, ...summarizeBudget(models), models });
+});
+
+// ---------------------------------------------------------------------------
+// GET / PUT / DELETE /api/v1/ai/models — admin only (plan 395 G8).
+// The model chain for all users: every selectable model in order, on/off, with today's
+// budget. PUT { models: [{ name, enabled }] } saves it; DELETE goes back to the default.
+// ---------------------------------------------------------------------------
+router.get('/models', verifyToken, requireAdmin, async (_req, res) => {
+  res.json({ models: await getChainSettings() });
+});
+
+router.put('/models', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const error = await saveChainSettings(req.body?.models);
+    if (error) return res.status(400).json({ error });
+    req.log.info({ event: 'ai.models.saved' });
+    return res.json({ models: await getChainSettings() });
+  } catch (err) {
+    req.log.error({ err, event: 'ai.models.save_failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.delete('/models', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    await saveChainSettings(null);
+    req.log.info({ event: 'ai.models.reset' });
+    return res.json({ models: await getChainSettings() });
+  } catch (err) {
+    req.log.error({ err, event: 'ai.models.save_failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
 });
 
 const {
@@ -122,7 +112,6 @@ const {
   escapeForPrompt,
   buildFewShotBlock,
   selectShots,
-  GEMINI_URL,
   RECIPE_GENERATION_CONFIG,
   SYSTEM_PROMPT,
 } = require('../services/ai-recipe-helpers');
@@ -223,59 +212,35 @@ async function getApprovedShots(limit = SHOTS_CAP) {
 }
 
 /**
- * One attempt at calling Gemini for a recipe draft: dispatch, parse, normalize
- * units, validate. `log` is the caller's req.log; `eventPrefix` (e.g. 'ai.generate') prefixes
- * every event it logs. Counts as a real Gemini call the moment it's dispatched
- * (incrementUsage), regardless of what happens after — including a caller
- * retrying this same function again, which counts a second time for the
- * same reason (see the daily-budget-must-reflect-real-spend logic below).
- * Returns a discriminated result — never throws.
+ * One attempt at calling Gemini for a recipe draft: dispatch (through the model chain),
+ * parse, normalize units, validate. `log` is the caller's req.log; `eventPrefix` (e.g.
+ * 'ai.generate') prefixes every event it logs. Every dispatched call is counted by
+ * callGemini — including a caller retrying this same function, and a model fallback,
+ * since both are real spend. Returns a discriminated result — never throws.
  */
-async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, log, eventPrefix) {
-  await incrementUsage();
-  try {
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      signal: AbortSignal.timeout(timeoutMs),
-    });
+async function callGeminiForRecipe(requestBody, options) {
+  const { log, eventPrefix } = options;
+  const call = await callGemini({ body: requestBody, ...options });
+  if (call.kind !== 'ok') return call;
 
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.json().catch(() => ({}));
-      const geminiMsg = errBody?.error?.message ?? '';
-      log.error({ event: `${eventPrefix}.gemini_failed`, status: geminiRes.status, geminiMessage: geminiMsg });
-      return { kind: 'gemini_error', status: geminiRes.status, message: geminiMsg };
-    }
-
-    const data = await geminiRes.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-
-    const parsed = extractJsonPayload(raw);
-    if (parsed.error === 'empty') return { kind: 'empty' };
-    if (parsed.error === 'invalid') {
-      log.error({ event: `${eventPrefix}.parse_failed`, raw: raw.slice(0, RAW_LOG_CHARS) });
-      return { kind: 'invalid_json' };
-    }
-
-    const recipe = parsed.value;
-    normalizeIngredientUnits(recipe);
-
-    const validationErrors = validateRecipeDraft(recipe);
-    if (validationErrors.length > 0) {
-      log.error({ event: `${eventPrefix}.validation_failed`, validationErrors, raw: raw.slice(0, RAW_LOG_CHARS) });
-      return { kind: 'validation_failed', errors: validationErrors };
-    }
-
-    return { kind: 'success', recipe };
-  } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      log.warn({ event: `${eventPrefix}.timeout` });
-      return { kind: 'timeout' };
-    }
-    log.error({ err, event: `${eventPrefix}.failed` });
-    return { kind: 'server_error' };
+  const raw = responseText(call.data);
+  const parsed = extractJsonPayload(raw);
+  if (parsed.error === 'empty') return { kind: 'empty' };
+  if (parsed.error === 'invalid') {
+    log.error({ event: `${eventPrefix}.parse_failed`, model: call.model, raw: raw.slice(0, RAW_LOG_CHARS) });
+    return { kind: 'invalid_json' };
   }
+
+  const recipe = parsed.value;
+  normalizeIngredientUnits(recipe);
+
+  const validationErrors = validateRecipeDraft(recipe);
+  if (validationErrors.length > 0) {
+    log.error({ event: `${eventPrefix}.validation_failed`, model: call.model, validationErrors, raw: raw.slice(0, RAW_LOG_CHARS) });
+    return { kind: 'validation_failed', errors: validationErrors };
+  }
+
+  return { kind: 'success', recipe };
 }
 
 /**
@@ -283,33 +248,59 @@ async function callGeminiForRecipe(apiKey, requestBody, timeoutMs, log, eventPre
  * or JSON that fails our schema) — not on API-level errors (bad key, model
  * overloaded) or timeouts, which a fresh attempt is unlikely to fix. Each
  * attempt dispatched here is a real Gemini call and is counted independently
- * by callGeminiForRecipe, never assumed free just because it's a retry.
+ * by callGemini, never assumed free just because it's a retry.
  */
-async function callGeminiForRecipeWithRetry(apiKey, requestBody, timeoutMs, log, eventPrefix) {
-  let result = await callGeminiForRecipe(apiKey, requestBody, timeoutMs, log, eventPrefix);
+async function callGeminiForRecipeWithRetry(requestBody, options) {
+  let result = await callGeminiForRecipe(requestBody, options);
   if (result.kind === 'invalid_json' || result.kind === 'validation_failed') {
-    log.warn({ event: `${eventPrefix}.retry`, after: result.kind });
-    result = await callGeminiForRecipe(apiKey, requestBody, timeoutMs, log, eventPrefix);
+    options.log.warn({ event: `${options.eventPrefix}.retry`, after: result.kind });
+    result = await callGeminiForRecipe(requestBody, options);
   }
   return result;
+}
+
+/** The model the user chose to send this request on (after a 'model_exhausted' prompt), if any. */
+function requestedModel(req) {
+  return typeof req.body?.model === 'string' ? req.body.model : undefined;
+}
+
+/**
+ * Response for a callGemini() result that isn't 'ok' (plan 395). 'model_exhausted' (429)
+ * names the next usable model so the client can offer the switch; 'daily_limit_reached'
+ * (429) when every model in the chain is out of its daily quota.
+ */
+function respondFromGeminiFailure(res, result) {
+  switch (result.kind) {
+    case 'model_exhausted':
+      return res.status(429).json({
+        error: 'model_exhausted',
+        model: result.model,
+        nextModel: result.nextModel,
+        resetAt: result.resetAt,
+      });
+    case 'all_exhausted':
+      return res.status(429).json({ error: 'daily_limit_reached', resetAt: result.resetAt });
+    case 'gemini_error':
+      return res.status(502).json({ error: `Gemini API error: ${result.status}`, geminiMessage: result.message });
+    case 'timeout':
+      return res.status(504).json({ error: 'Gemini request timed out' });
+    default:
+      return res.status(500).json({ error: 'Server error' });
+  }
 }
 
 function respondFromRecipeResult(res, result) {
   switch (result.kind) {
     case 'success':
       return res.json({ recipe: result.recipe });
-    case 'gemini_error':
-      return res.status(502).json({ error: `Gemini API error: ${result.status}`, geminiMessage: result.message });
     case 'empty':
       return res.status(502).json({ error: 'Gemini returned an empty response' });
     case 'invalid_json':
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     case 'validation_failed':
       return res.status(502).json({ error: 'Gemini returned a malformed recipe', details: result.errors });
-    case 'timeout':
-      return res.status(504).json({ error: 'Gemini request timed out' });
     default:
-      return res.status(500).json({ error: 'Server error' });
+      return respondFromGeminiFailure(res, result);
   }
 }
 
@@ -326,11 +317,6 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   const { prompt } = req.body;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
     return res.status(400).json({ error: 'prompt is required' });
@@ -344,7 +330,12 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
     generationConfig: RECIPE_GENERATION_CONFIG,
   };
 
-  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate');
+  const result = await callGeminiForRecipeWithRetry(requestBody, {
+    timeoutMs: 30000,
+    log: req.log,
+    eventPrefix: 'ai.generate',
+    model: requestedModel(req),
+  });
   return respondFromRecipeResult(res, result);
 });
 
@@ -409,35 +400,24 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   const { rawText } = req.body;
   if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
     return res.status(400).json({ error: 'rawText is required' });
   }
 
   try {
-    await incrementUsage();
-
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const call = await callGemini({
+      body: {
         contents: [{ parts: [{ text: TEXT_IMPORT_SYSTEM_PROMPT + '\n\nText to analyze:\n' + rawText.trim() }] }],
-      }),
-      signal: AbortSignal.timeout(30000),
+      },
+      timeoutMs: 30000,
+      log: req.log,
+      eventPrefix: 'ai.parse_text',
+      model: requestedModel(req),
     });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
 
-    if (!geminiRes.ok) {
-      req.log.error({ event: 'ai.parse_text.gemini_failed', status: geminiRes.status });
-      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
-    }
-
-    const data = await geminiRes.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const raw = responseText(call.data);
 
     const parsed = extractJsonPayload(raw);
     if (parsed.error === 'empty') {
@@ -450,10 +430,6 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
 
     return res.json({ result: parsed.value });
   } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      req.log.warn({ event: 'ai.parse_text.timeout' });
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
     req.log.error({ err, event: 'ai.parse_text.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -521,11 +497,6 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   const { currentRecipe, instruction } = req.body;
   if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
     return res.status(400).json({ error: 'instruction is required' });
@@ -537,24 +508,18 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
   const userContent = `CURRENT RECIPE:\n${JSON.stringify(currentRecipe, null, 2)}\n\nUSER INSTRUCTION:\n${instruction.trim()}`;
 
   try {
-    await incrementUsage();
-
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const call = await callGemini({
+      body: {
         contents: [{ parts: [{ text: PATCH_SYSTEM_PROMPT + '\n\n' + userContent }] }],
-      }),
-      signal: AbortSignal.timeout(30000),
+      },
+      timeoutMs: 30000,
+      log: req.log,
+      eventPrefix: 'ai.patch_recipe',
+      model: requestedModel(req),
     });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
 
-    if (!geminiRes.ok) {
-      req.log.error({ event: 'ai.patch_recipe.gemini_failed', status: geminiRes.status });
-      return res.status(502).json({ error: `Gemini API error: ${geminiRes.status}` });
-    }
-
-    const data = await geminiRes.json();
-    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const raw = responseText(call.data);
 
     const parsed = extractJsonPayload(raw);
     if (parsed.error === 'empty') {
@@ -571,10 +536,6 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
 
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      req.log.warn({ event: 'ai.patch_recipe.timeout' });
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
     req.log.error({ err, event: 'ai.patch_recipe.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -679,11 +640,6 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   const { rawText } = req.body;
   if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
     return res.status(400).json({ error: 'rawText is required' });
@@ -692,28 +648,21 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
   const menuShots = await getApprovedMenuShots(2);
 
   try {
-    await incrementUsage();
-
     const userContent = buildMenuFewShotBlock(menuShots) + rawText;
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const call = await callGemini({
+      body: {
         system_instruction: { parts: [{ text: MENU_GENERATE_SYSTEM_PROMPT }] },
         contents: [{ role: 'user', parts: [{ text: userContent }] }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
-      }),
-      signal: AbortSignal.timeout(45000),
+      },
+      timeoutMs: 45000,
+      log: req.log,
+      eventPrefix: 'ai.generate_menu',
+      model: requestedModel(req),
     });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
 
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.text();
-      req.log.error({ event: 'ai.generate_menu.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
-      return res.status(502).json({ error: 'Gemini API error' });
-    }
-
-    const geminiData = await geminiRes.json();
-    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const raw = responseText(call.data);
 
     const parsed = extractJsonPayload(raw);
     if (parsed.error === 'empty') {
@@ -732,10 +681,6 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
 
     return res.json({ menu: parsed.value });
   } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      req.log.warn({ event: 'ai.generate_menu.timeout' });
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
     req.log.error({ err, event: 'ai.generate_menu.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -801,35 +746,23 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
     return res.status(400).json({ error: 'instruction is required' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   try {
-    await incrementUsage();
-
     const userMessage = `CURRENT MENU:\n${JSON.stringify(currentMenu, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
 
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const call = await callGemini({
+      body: {
         system_instruction: { parts: [{ text: MENU_PATCH_SYSTEM_PROMPT }] },
         contents: [{ role: 'user', parts: [{ text: userMessage }] }],
         generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
-      }),
-      signal: AbortSignal.timeout(45000),
+      },
+      timeoutMs: 45000,
+      log: req.log,
+      eventPrefix: 'ai.patch_menu',
+      model: requestedModel(req),
     });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
 
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.text();
-      req.log.error({ event: 'ai.patch_menu.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
-      return res.status(502).json({ error: 'Gemini API error' });
-    }
-
-    const geminiData = await geminiRes.json();
-    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const raw = responseText(call.data);
 
     const parsed = extractJsonPayload(raw);
     if (parsed.error === 'empty') {
@@ -847,10 +780,6 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
 
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      req.log.warn({ event: 'ai.patch_menu.timeout' });
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
     req.log.error({ err, event: 'ai.patch_menu.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -944,33 +873,21 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
     return res.status(400).json({ error: 'rawText is required' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   try {
-    await incrementUsage();
-
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const call = await callGemini({
+      body: {
         system_instruction: { parts: [{ text: appendKnownMetadata(PRODUCT_GENERATE_SYSTEM_PROMPT, req.body) }] },
         contents: [{ role: 'user', parts: [{ text: rawText }] }],
         generationConfig: { temperature: 0.5, maxOutputTokens: 1024 },
-      }),
-      signal: AbortSignal.timeout(30000),
+      },
+      timeoutMs: 30000,
+      log: req.log,
+      eventPrefix: 'ai.generate_product',
+      model: requestedModel(req),
     });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
 
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.text();
-      req.log.error({ event: 'ai.generate_product.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
-      return res.status(502).json({ error: 'Gemini API error' });
-    }
-
-    const geminiData = await geminiRes.json();
-    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const raw = responseText(call.data);
 
     const parsed = extractJsonPayload(raw);
     if (parsed.error === 'empty') {
@@ -989,10 +906,6 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
 
     return res.json({ product: parsed.value });
   } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      req.log.warn({ event: 'ai.generate_product.timeout' });
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
     req.log.error({ err, event: 'ai.generate_product.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -1054,35 +967,23 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
     return res.status(400).json({ error: 'instruction is required' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   try {
-    await incrementUsage();
-
     const userMessage = `CURRENT PRODUCT:\n${JSON.stringify(currentProduct, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
 
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const call = await callGemini({
+      body: {
         system_instruction: { parts: [{ text: appendKnownMetadata(PRODUCT_PATCH_SYSTEM_PROMPT, req.body) }] },
         contents: [{ role: 'user', parts: [{ text: userMessage }] }],
         generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
-      }),
-      signal: AbortSignal.timeout(45000),
+      },
+      timeoutMs: 45000,
+      log: req.log,
+      eventPrefix: 'ai.patch_product',
+      model: requestedModel(req),
     });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
 
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.text();
-      req.log.error({ event: 'ai.patch_product.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
-      return res.status(502).json({ error: 'Gemini API error' });
-    }
-
-    const geminiData = await geminiRes.json();
-    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const raw = responseText(call.data);
 
     const parsed = extractJsonPayload(raw);
     if (parsed.error === 'empty') {
@@ -1100,10 +1001,6 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
 
     return res.json({ changes: parsed.value.changes });
   } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      req.log.warn({ event: 'ai.patch_product.timeout' });
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
     req.log.error({ err, event: 'ai.patch_product.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -1121,11 +1018,6 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
-  }
-
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
   }
 
   const { imageBase64, mimeType } = req.body;
@@ -1149,7 +1041,13 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
     generationConfig: RECIPE_GENERATION_CONFIG,
   };
 
-  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate_from_image');
+  const result = await callGeminiForRecipeWithRetry(requestBody, {
+    timeoutMs: 30000,
+    log: req.log,
+    eventPrefix: 'ai.generate_from_image',
+    needsVision: true,
+    model: requestedModel(req),
+  });
   return respondFromRecipeResult(res, result);
 });
 
@@ -1180,11 +1078,6 @@ router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, 
     return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   const parts = [{ text: PRODUCT_FROM_IMAGE_INSTRUCTION }];
   if (typeof hint === 'string' && hint.trim()) {
     parts.push({ text: `User hint: ${hint.trim().slice(0, PRODUCT_IMAGE_HINT_MAX_LEN)}` });
@@ -1192,27 +1085,21 @@ router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, 
   parts.push({ inlineData: { mimeType, data: imageBase64 } });
 
   try {
-    await incrementUsage();
-
-    const geminiRes = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const call = await callGemini({
+      body: {
         system_instruction: { parts: [{ text: appendKnownMetadata(PRODUCT_GENERATE_SYSTEM_PROMPT, req.body) }] },
         contents: [{ role: 'user', parts }],
         generationConfig: { temperature: 0.4, maxOutputTokens: 1024 },
-      }),
-      signal: AbortSignal.timeout(30000),
+      },
+      timeoutMs: 30000,
+      log: req.log,
+      eventPrefix: 'ai.generate_product_from_image',
+      needsVision: true,
+      model: requestedModel(req),
     });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
 
-    if (!geminiRes.ok) {
-      const errBody = await geminiRes.text();
-      req.log.error({ event: 'ai.generate_product_from_image.gemini_failed', geminiMessage: errBody?.error?.message ?? '' });
-      return res.status(502).json({ error: 'Gemini API error' });
-    }
-
-    const geminiData = await geminiRes.json();
-    const raw = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    const raw = responseText(call.data);
 
     const parsed = extractJsonPayload(raw);
     if (parsed.error === 'empty') {
@@ -1231,10 +1118,6 @@ router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, 
 
     return res.json({ product: parsed.value });
   } catch (err) {
-    if (err?.name === 'TimeoutError' || err?.name === 'AbortError') {
-      req.log.warn({ event: 'ai.generate_product_from_image.timeout' });
-      return res.status(504).json({ error: 'Gemini request timed out' });
-    }
     req.log.error({ err, event: 'ai.generate_product_from_image.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
@@ -1288,11 +1171,6 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     return res.status(503).json({ error: 'AI generation is not configured on this server' });
   }
 
-  const currentCount = await getUsageCount();
-  if (currentCount >= DAILY_LIMIT) {
-    return res.status(429).json({ error: 'daily_limit_reached', count: currentCount, limit: DAILY_LIMIT });
-  }
-
   const { url } = req.body;
   if (!url || typeof url !== 'string' || !url.trim()) {
     return res.status(400).json({ error: 'url is required' });
@@ -1341,7 +1219,12 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
     generationConfig: RECIPE_GENERATION_CONFIG,
   };
 
-  const result = await callGeminiForRecipeWithRetry(apiKey, requestBody, 30000, req.log, 'ai.generate_from_url');
+  const result = await callGeminiForRecipeWithRetry(requestBody, {
+    timeoutMs: 30000,
+    log: req.log,
+    eventPrefix: 'ai.generate_from_url',
+    model: requestedModel(req),
+  });
   return respondFromRecipeResult(res, result);
 });
 

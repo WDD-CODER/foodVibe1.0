@@ -9,7 +9,13 @@ import { AiRecipeModalService } from './ai-recipe-modal.service'
 import { GeminiService } from '@services/gemini.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
-import { getGeminiUsage, DAILY_LIMIT, fetchGeminiUsageFromServer } from '../../core/utils/gemini-usage.util'
+import {
+  getGeminiUsage,
+  fetchGeminiUsageFromServer,
+  geminiModelAvailability,
+  geminiUsageStatus,
+  geminiBudgetUsedPercent
+} from '../../core/utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
 import { TranslationService } from '@services/translation.service'
 import { AiDraftEditorComponent } from './ai-draft-editor/ai-draft-editor.component'
@@ -63,11 +69,25 @@ export class AiRecipeModalComponent implements OnInit {
   protected readonly status_ = signal<GenerationStatus>('idle')
   protected readonly errorKey_ = signal('ai_recipe_error')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
-  protected readonly usageColor_ = computed(() => {
-    const pct = this.geminiUsage_().count / DAILY_LIMIT
-    if (pct >= 0.9) return 'danger'
-    if (pct >= 0.7) return 'warning'
-    return 'ok'
+  protected readonly usageColor_ = computed(() => geminiUsageStatus(this.geminiUsage_()))
+  protected readonly usageFillPercent_ = computed(() => geminiBudgetUsedPercent(this.geminiUsage_()))
+  /** Button text for the model switch the server offered ("עבור ל-<model>"); empty when none. */
+  protected readonly modelSwitchLabel_ = computed(() => {
+    const offer = this.gemini.modelSwitch()
+    return offer ? this.translation.translate('ai_model_switch_to').replace('{model}', offer.to) : ''
+  })
+  /** "נותרו X" — calls left today across the model chain (shared by all users). */
+  protected readonly budgetLeftLabel_ = computed(() =>
+    this.translation.translate('ai_budget_left').replace('{n}', String(this.geminiUsage_().remaining))
+  )
+  /** "N מתוך M מודלים זמינים" once any model is out of its daily quota; empty otherwise. */
+  protected readonly modelsAvailableLabel_ = computed(() => {
+    const { available, total } = geminiModelAvailability(this.geminiUsage_())
+    if (total === 0 || available === total) return ''
+    return this.translation
+      .translate('ai_models_available')
+      .replace('{available}', String(available))
+      .replace('{total}', String(total))
   })
 
   protected readonly patchSummary_ = computed(() => {
@@ -183,16 +203,19 @@ export class AiRecipeModalComponent implements OnInit {
     }
   }
 
+  /** The user's explicit switch to the offered model; they send the request again themselves. */
+  onSwitchModel(): void {
+    this.gemini.acceptModelSwitch()
+    this.status_.set('idle')
+  }
+
   private resolveErrorKey_(err: unknown): string {
-    // Local limit check — throws plain Error with Hebrew message
-    if (err instanceof Error && !(err instanceof HttpErrorResponse) && err.message.includes('מגבלת')) {
-      return 'ai_recipe_daily_limit'
-    }
+    if (this.gemini.offerModelSwitch(err)) return 'ai_model_exhausted_prompt'
     if (err instanceof HttpErrorResponse) {
       const msg: string = err.error?.error ?? ''
       const status = err.status
 
-      if (status === 429 || msg.includes('daily_limit_reached')) return 'ai_recipe_daily_limit'
+      if (status === 429 || msg.includes('daily_limit_reached')) return 'ai_daily_limit_reached_all'
       if (status === 504 || msg.includes('timed out')) return 'ai_recipe_timeout'
       if (status === 503 && msg.includes('not configured')) return 'ai_recipe_not_configured'
       if (status === 0) return 'ai_recipe_network_error'

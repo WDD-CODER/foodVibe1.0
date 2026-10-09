@@ -1,6 +1,6 @@
 # Plan 395 — Gemini Model Chain with Daily Quota Fallback and Real Free-Tier Limit
 
-Status: draft
+Status: active
 Snapshot: 070feb29
 
 ## Problem Statement
@@ -29,7 +29,7 @@ Each model has its own daily bucket. A chain of models multiplies the free calls
 - [auto] `rg -n "DAILY_LIMIT|1,000|1000" server/routes/ai.js src/app/core/utils/gemini-usage.util.ts public/assets/data/dictionary.json` → no matches that refer to the Gemini daily limit.
 - [auto] `curl -s http://localhost:3000/api/v1/ai/usage` → JSON with `count`, `date` and a `models` array where each entry has `name`, `exhausted` (boolean) and `resetAt` (ISO string or null); no `limit: 1000`.
 - [auto] `npx ng build` → exit 0; `cd server && npm test` → all pass.
-- [human] With the first model's daily quota already used up (the eval script can burn it, or wait for a day it is), generate a recipe in the app → the recipe arrives; the server log shows one `ai.model.fallback` event naming the exhausted model and the model used.
+- [human] With the first model's daily quota already used up, generate a recipe in the app → the modal says the model reached its daily quota and offers "עבור ל-<next model>"; nothing is sent until you click it and send again, then the recipe arrives (server log: one `ai.model.exhausted`, then one `ai.generate.gemini_call` on the new model). (Changed by G9.)
 - [human] When every model in the chain is exhausted, the recipe / menu / product modals show the new Hebrew "daily limit" message with no number in it.
 
 ## Execution Mode
@@ -54,6 +54,12 @@ src/app/shared/ai-recipe-modal/**
 src/app/shared/ai-menu-modal/**
 src/app/shared/ai-product-modal/**
 .env.example
+src/app/core/services/gemini.service.ts
+server/.env.example
+src/app/pages/metadata-manager/components/ai-model-manager/**
+src/app/pages/metadata-manager/metadata-manager.page.component.html
+src/app/pages/metadata-manager/metadata-manager.page.component.ts
+src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
 ```
 
 Notes: `gemini-client.js` and `gemini-client.test.js` are new. In the modals only the limit-message key and the `remaining` / usage display change. `dictionary.json` is append-only (hotspot).
@@ -68,14 +74,14 @@ Blocked outside scope → stop and ask `approved: <path>`. Never edit an existin
 - INV-2: preserves — the only `server/services/**` file touched is the new `gemini-client.js` (plus `ai-recipe-helpers.js`); no master data, overrides or tenancy logic change.
 - INV-3: preserves — no document writes change; `GEMINI_USAGE` gains an `exhausted` map on the same daily doc, written only by the server.
 - INV-4: preserves — no entity schema or write validation changes.
-- INV-6: preserves — the new `gemini-client.js` is a server module called only from `server/routes/ai.js` / `ai-recipe-helpers.js`; the browser still never sees a key or a model name it can call.
+- INV-6: preserves — the new `gemini-client.js` is a server module called only from `server/routes/ai.js`; the browser never holds a key. It now sees model names (usage bar, switch prompt, admin list) and may send `model` in a request body, but only through `/api/v1/ai/*`, and the server accepts only models enabled in the admin's chain.
 - No new invariant. No ADR.
 
 ## Step 0 — Reality Check
-- [ ] Confirm PR #298 is merged into `main` and `GEMINI_MODEL` / `GEMINI_URL` now live in `server/services/ai-recipe-helpers.js`. If #298 is not merged, STOP: this plan rebases on it.
-- [ ] Count the Gemini call sites: `rg -n "fetch\(\`\$\{GEMINI_URL\}" server/routes/ai.js` (8 on today's `main`: generate, parse-text, patch-recipe, generate-menu, patch-menu, generate-product, patch-product, generate-from-image, generate-product-from-image, generate-from-url — note which share `callGeminiForRecipe`).
-- [ ] Read `src/app/core/utils/gemini-usage.util.ts` and the three modals' use of `remaining` / `isGeminiLimitReached()` so the client change in G5 is minimal.
-- [ ] Run one tiny call per candidate model with the key (a 10-line Node script in the scratch dir, never committed) and record today's status table here, under "Step 0 results".
+- [x] Confirm PR #298 is merged into `main` and `GEMINI_MODEL` / `GEMINI_URL` now live in `server/services/ai-recipe-helpers.js`. If #298 is not merged, STOP: this plan rebases on it.
+- [x] Count the Gemini call sites: `rg -n "fetch\(\`\$\{GEMINI_URL\}" server/routes/ai.js` (8 on today's `main`: generate, parse-text, patch-recipe, generate-menu, patch-menu, generate-product, patch-product, generate-from-image, generate-product-from-image, generate-from-url — note which share `callGeminiForRecipe`).
+- [x] Read `src/app/core/utils/gemini-usage.util.ts` and the three modals' use of `remaining` / `isGeminiLimitReached()` so the client change in G5 is minimal.
+- [x] Run one tiny call per candidate model with the key (a 10-line Node script in the scratch dir, never committed) and record today's status table here, under "Step 0 results".
 
 ## Functional Requirements
 
@@ -100,14 +106,20 @@ Blocked outside scope → stop and ask `approved: <path>`. Never edit an existin
 No new screens. Only the limit message text and the small usage indicator change. Hebrew strings through `translatePipe` + `dictionary.json`.
 
 ## Atomic Sub-tasks
-- [ ] G0: Step 0 reality check; record the per-model status table under "Step 0 results".
-- [ ] G1: `server/services/gemini-client.js` — chain from `GEMINI_MODELS` / default, `callGemini()`, daily-quota detection, exhausted map + Mongo mirror, LA-midnight reset, `ai.model.fallback` log, vision set, `getModelStatus()` for `/usage`.
-- [ ] G2: `server/test/gemini-client.test.js` — offline vitest with mocked `fetch`: chain order; daily 429 → next model + fallback log; per-minute 429 stays; 5xx stays; timeout stays; all exhausted → `all_exhausted` with `resetAt`; model returns after `resetAt`; `needsVision` skips non-vision models; `GEMINI_MODELS` override.
-- [ ] G3: `ai.js` + `ai-recipe-helpers.js` — every Gemini `fetch` through `callGemini()`; remove `GEMINI_MODEL` / `GEMINI_URL` / `DAILY_LIMIT` gates; `daily_limit_reached` only on `all_exhausted`; `/usage` new contract; `model` in call logs. `ai-recipe-helpers.test.js` updated.
-- [ ] G4: `dictionary.json` append the two keys; modals use `ai_daily_limit_reached_all`.
-- [ ] G5: `gemini-usage.util.ts` + modals + usage indicator — drop `DAILY_LIMIT` / `isGeminiLimitReached()`, read `models` from `/usage`, show "N מתוך M".
-- [ ] G6: `ai-eval-recipes.js --model=`; run the plan-370 eval once per model that answered 200 in G0; one image call per model; record the table here; set the final default order in `gemini-client.js`.
-- [ ] G7: `.env.example` `GEMINI_MODELS` line; run every [auto] criterion; HOW TO VALIDATE cards; `/ship`.
+- [x] G0: Step 0 reality check; record the per-model status table under "Step 0 results".
+- [x] G1: `server/services/gemini-client.js` — chain from `GEMINI_MODELS` / default, `callGemini()`, daily-quota detection, exhausted map + Mongo mirror, LA-midnight reset, `ai.model.fallback` log, vision set, `getModelStatus()` for `/usage`.
+- [x] G2: `server/test/gemini-client.test.js` — offline vitest with mocked `fetch`: chain order; daily 429 → next model + fallback log; per-minute 429 stays; 5xx stays; timeout stays; all exhausted → `all_exhausted` with `resetAt`; model returns after `resetAt`; `needsVision` skips non-vision models; `GEMINI_MODELS` override.
+- [x] G3: `ai.js` + `ai-recipe-helpers.js` — every Gemini `fetch` through `callGemini()`; remove `GEMINI_MODEL` / `GEMINI_URL` / `DAILY_LIMIT` gates; `daily_limit_reached` only on `all_exhausted`; `/usage` new contract; `model` in call logs. `ai-recipe-helpers.test.js` updated.
+- [x] G4: `dictionary.json` append the two keys; modals use `ai_daily_limit_reached_all`.
+- [x] G5: `gemini-usage.util.ts` + modals + usage indicator — drop `DAILY_LIMIT` / `isGeminiLimitReached()`, read `models` from `/usage`, show "N מתוך M".
+- [x] G5a: (Human, 2026-10-09) remove the three old "1,000" dictionary keys; find today's per-model budgets and set the chain by them — `MODEL_DAILY_BUDGETS` in `gemini-client.js`, `dailyBudget` per model in `/usage`, chain extended with gemini-3.6/3.7/3.8-flash. Approved out-of-scope paths: `src/app/core/services/gemini.service.ts`, `server/.env.example`.
+- [x] G5b: (Human, 2026-10-09) show how much of today's budget is used / left — per-model `calls` on a `quota-<LA date>` doc in GEMINI_USAGE; `/usage` adds `budget`, `used`, `remaining` and per-model `used` / `remaining`; the three modals show "used / budget · נותרו X".
+- [x] G8: (Human, 2026-10-09) admin-only AI model manager in the metadata manager: turn models on/off and set their order for all users. Paths approved 2026-10-09.
+- [x] G8a: (Human, 2026-10-09) drag & drop reorder in the AI model manager (CDK, grip handle; up/down buttons kept for keyboard); metadata-manager spec updated to 10 jump-nav tabs (approved).
+- [x] G9: (Human, 2026-10-09) **no automatic fallback.** Every request makes exactly one Gemini call. When the model is out of its daily quota the server answers 429 `model_exhausted` { model, nextModel, resetAt } — without calling Gemini when the exhaustion is already known — and the modal shows "עבור ל-<next>"; only the user's click switches (GeminiService sends `model` on later requests). Supersedes the auto-fallback in Must Have "One client" and the `ai.model.fallback` log (now `ai.model.exhausted`).
+- [x] G8b: (Human, 2026-10-09) a no-browser check that every model answers — `ai-eval-recipes.js --check-models`; results under "G6 results".
+- [x] G6: `ai-eval-recipes.js --model=`; run the plan-370 eval once per model that answered 200 in G0; one image call per model; record the table here; set the final default order in `gemini-client.js`.
+- [x] G7: `.env.example` `GEMINI_MODELS` line; run every [auto] criterion; HOW TO VALIDATE cards; `/ship`.
 
 ## Technical Considerations
 - Daily-quota detection must read the 429 body **once**; `callGeminiForRecipe` today reads it for the log message — the client reads it, decides, and passes `message` along.
@@ -128,7 +140,35 @@ No new screens. Only the limit message text and the small usage indicator change
 3. `remaining` removal: any other client reader of `/usage` `limit` / `remaining`? **G0 greps; if only the util and the three modals, remove.**
 
 ## Step 0 results
-(filled by the Worker)
+2026-10-09, one tiny call per model, same key:
+
+| Model | Result |
+| --- | --- |
+| gemini-2.5-flash-lite | 200 (yesterday's 20 calls reset) |
+| gemini-3.1-flash-lite | 200 |
+| gemini-3.5-flash-lite | 200 |
+| gemini-2.5-flash | 200 |
+| gemini-3.5-flash | 200 |
+
+- PR #298 is merged; `GEMINI_MODEL` / `GEMINI_URL` lived in `server/services/ai-recipe-helpers.js`.
+- 8 direct `fetch(GEMINI_URL)` sites in `ai.js` (7 routes plus `callGeminiForRecipe`, which serves generate, generate-from-image and generate-from-url).
+- Readers of the `isGeminiLimitReached()` local pre-block: the three modals **and `src/app/core/services/gemini.service.ts`** (10 call sites, each throwing a hardcoded "(1,000)" Hebrew error). That file is outside the Read-Write Scope — escalated.
+- No client reader of `/usage` `limit` / `remaining` beyond the util (it already read only `date` and `count`).
+- Dictionary placeholders use the codebase's single-brace `.replace('{n}', …)` convention: `ai_models_available` = "{available} מתוך {total} מודלים זמינים".
+
+## G6 results
+Per-model free-tier budgets (RPD): our 429 for gemini-2.5-flash-lite = 20 (2026-10-08); aiplug.work's 429 measurements (2026-09-02): 3.1-flash-lite 500, 3.5-flash-lite 500, 3.5/3.6/3.7-flash 20; 2.5-flash and 3.8-flash assumed 20. ai.google.dev no longer lists numbers. Total ~1,120/day.
+
+Recipe eval (`ai-eval-recipes.js --model=`, 5 prompts × 5 runs, 2026-10-09):
+
+| Model | חביתה | חביתה ל-2 | חביתה מ-3 ביצים | שקשוקה ל-4 | סלט ירקות קצוץ | Total |
+| --- | --- | --- | --- | --- | --- | --- |
+| gemini-3.1-flash-lite | 5/5 | 5/5 | 5/5 | 5/5 | 0/5 (g/portion=30) | 20/25 |
+| gemini-3.5-flash-lite | 5/5 | 2/5 (503s) | 4/5 | 2/5 | 0/5 (g/portion=23) | 11/25 |
+
+The salad fails on both models with the same constant g/portion — likely the eval's gram estimate for count-based vegetables, not the model (plan 370's check). The 20-a-day models were not evaluated (one eval = 25+ calls, more than their whole day). Final order: 3.1-flash-lite → 2.5-flash-lite → 2.5-flash → 3.5-flash → 3.6-flash → 3.7-flash → 3.8-flash → 3.5-flash-lite. Image call per model (8×8 PNG, "what color?"): all answered "Red" except gemini-3.7-flash, 503 overloaded — so every chain model stays in the vision set.
+
+Model check (`--check-models`, one "חביתה" recipe per model, 2026-10-09 ~10:30): OK — 3.1-flash-lite 2.2s, 2.5-flash 7.9s, 3.5-flash 12.5s, 3.6-flash 6.8s, 3.8-flash 18.4s, 3.5-flash-lite 1.4s. FAIL — 2.5-flash-lite: daily quota (429, quotaValue 20 — the key is shared with other running copies of the app, e.g. production, which still calls only this model); 3.7-flash: 503 overloaded (200 on an immediate retry; 503 also in the image check).
 
 ## Sequencing
 After PR #298 (plan 370) merges. Unblocks plan 370's in-app Human check and its A4 eval, both stuck on today's 20-call quota.
