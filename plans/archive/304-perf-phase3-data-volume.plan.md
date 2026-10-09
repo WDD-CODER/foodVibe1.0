@@ -1,6 +1,6 @@
 # Plan 304 — Performance Phase 3: Data Volume
 
-Status: draft
+Status: archived
 
 > **Reality check 2026-10-05 (Planner, on `main`).** Prerequisite gate, M2 and M3 are done. Only **Milestone 1 (list projections)** is left and still justified (2026-09-27 production payload numbers; `GET /:type` still returns whole documents — only `/search` has `SEARCH_PROJECTIONS`). Field names are v2 now (Plan 321 P2b): read `steps_`/`nutrition_per_100g`/`logistics_` below as their camelCase v2 names in `shared/schemas/entities/*`. Overlap: Plan 321 P7f (server-side list loading) comes later and builds on this — keep the projection map in one place so P7f can reuse it.
 
@@ -166,13 +166,13 @@ Preserve the existing `track` expressions.
 - [x] Re-measure and confirm payload/parse cost still justifies this plan; reduce or drop scope if not — confirmed still justified: real production logs (2026-09-27) show PRODUCT_LIST/RECIPE_LIST/DISH_LIST at 765KB-2.7MB each with 1.3-4.9s Mongo time, independent of the now-fixed network/region issue. See `reports/performance-audit-2026-08-13.md` "Update 2026-09-27".
 
 ## Milestone 1 — List projections
-- [ ] Audit which components read `steps_`, `nutrition_per_100g`, `logistics_` and whether they have a detail-fetch path
-- [ ] Confirm what `normalizeProduct()` does when omitted fields are absent — `product-data.service.ts:77-118`
-- [ ] Decide opt-in (`?view=list`) vs. always-lean; document the choice
-- [ ] Add per-type list projections mirroring the existing `SEARCH_PROJECTIONS` shape — `server/routes/generic.js:82-86`, applied at `:45-77`
-- [ ] Verify every list page renders identically
-- [ ] Verify edit flows fetch full documents and saving does not erase omitted fields
-- [ ] Record before/after `bytes=` from plan 302 M1's logging
+- [-] MOOT 2026-10-09 (M1 archived: products shrink ~4%, recipes/dishes already deferred by M2, Frankfurt cutover fixed the slow round trip; see Archive note) — Audit which components read `steps_`, `nutrition_per_100g`, `logistics_` and whether they have a detail-fetch path
+- [-] MOOT 2026-10-09 (M1 archived: products shrink ~4%, recipes/dishes already deferred by M2, Frankfurt cutover fixed the slow round trip; see Archive note) — Confirm what `normalizeProduct()` does when omitted fields are absent — `product-data.service.ts:77-118`
+- [-] MOOT 2026-10-09 (M1 archived: products shrink ~4%, recipes/dishes already deferred by M2, Frankfurt cutover fixed the slow round trip; see Archive note) — Decide opt-in (`?view=list`) vs. always-lean; document the choice
+- [-] MOOT 2026-10-09 (M1 archived: products shrink ~4%, recipes/dishes already deferred by M2, Frankfurt cutover fixed the slow round trip; see Archive note) — Add per-type list projections mirroring the existing `SEARCH_PROJECTIONS` shape — `server/routes/generic.js:82-86`, applied at `:45-77`
+- [-] MOOT 2026-10-09 (M1 archived: products shrink ~4%, recipes/dishes already deferred by M2, Frankfurt cutover fixed the slow round trip; see Archive note) — Verify every list page renders identically
+- [-] MOOT 2026-10-09 (M1 archived: products shrink ~4%, recipes/dishes already deferred by M2, Frankfurt cutover fixed the slow round trip; see Archive note) — Verify edit flows fetch full documents and saving does not erase omitted fields
+- [-] MOOT 2026-10-09 (M1 archived: products shrink ~4%, recipes/dishes already deferred by M2, Frankfurt cutover fixed the slow round trip; see Archive note) — Record before/after `bytes=` from plan 302 M1's logging
 
 ## Milestone 2 — Defer boot loads & collapse double fetch
 - [x] Enumerate every route/component reading `products_()` / `recipes_()` and confirm resolver coverage — audit found `dashboard-overview` (migrated to `/count`), `metadata-manager` + `preparation-category-manager` (given their own `ensureLoaded()`), and `menu-library`/`menu-intelligence` routes (missing `kitchenDataEnsureLoadedResolver`, added)
@@ -228,3 +228,13 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 Worker needs a file outside the ## Read-Write Scope above: STOP, tell the Human the file,
 the exact change, and why it can't be done in-scope; wait for approved: <path>; then
 append the path to the scope block above and retry.
+
+## Archive note — 2026-10-09
+
+Worker (wt-1) measured before writing code; Human agreed to archive. Branch `feat/304-perf-phase3-data-volume` had 0 commits.
+
+Measured on the shared DB, `GET /api/v1/data/:type`: products 1,493 docs / 690KB (droppable `nutritionPer100g` ≈ 4%); recipes 1,115 / 1.7MB (steps 19%; ingredients 51% can't be dropped); dishes 1,002 / 2.1MB (steps 13%; prepItems + prepCategories 33% need a consumer audit). Full-collection fetch locally: 0.09–0.31s.
+
+Why: (1) products are the only big collection still loaded at startup and shrink ~4%; (2) recipes/dishes are already off startup (M2); (3) the 2–4s Mongo times in the 2026-09-27 audit were mostly the Oregon↔Belgium round trip, fixed by the Frankfurt cutover (1369ffd5); (4) risk: `recipe.resolver.ts` returns the list copy before fetching by id, so trimmed list docs would reach edit views and a save would erase steps — a fix touches all 3 detail resolvers for ~15–25% on pages not loaded at startup.
+
+Carried to Plan 321 P7f (server-side list loading): any field trimming belongs there, using one shared field-list map next to `SEARCH_PROJECTIONS` (`generic.js:219`). Trap: `recipe.resolver.ts` uses the list copy before it fetches by id, so detail views must fetch the full document once list docs are trimmed.
