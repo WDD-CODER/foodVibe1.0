@@ -216,17 +216,6 @@
 - [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
 - [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
 
-### Plan 395 — Gemini Model Chain with Daily Quota Fallback and Real Free-Tier Limit (`plans/395-gemini-model-chain-daily-quota-fallback.plan.md`)
-> After PR #298 (plan 370) merges. Free tier = 20 calls/model/day; app claims 1,000.
-- [ ] G0: Step 0 reality check; per-model status table.
-- [ ] G1: `server/services/gemini-client.js` — chain, daily-quota fallback, exhausted map + Mongo mirror, LA-midnight reset, vision set.
-- [ ] G2: `server/test/gemini-client.test.js` offline vitest (chain, daily 429 moves, per-minute/5xx/timeout stay, all exhausted, reset, vision, env override).
-- [ ] G3: `ai.js` + `ai-recipe-helpers.js` through the client; drop `DAILY_LIMIT` gates; `/usage` new contract.
-- [ ] G4: dictionary append `ai_daily_limit_reached_all` + `ai_models_available`; modals switch key.
-- [ ] G5: `gemini-usage.util.ts` + modals + usage indicator read `models` from `/usage`.
-- [ ] G6: `ai-eval-recipes.js --model=`; eval per model; image call per model; final default order.
-- [ ] G7: `.env.example`; all [auto] criteria; HOW TO VALIDATE; `/ship`.
-
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
