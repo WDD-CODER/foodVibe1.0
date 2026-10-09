@@ -15,8 +15,7 @@ import {
 import { LucideAngularModule } from 'lucide-angular'
 
 interface PopoverPos {
-  top?: number
-  bottom?: number
+  top: number
   left: number
   minHeight?: number
 }
@@ -64,25 +63,17 @@ export class RowActionsMenuComponent {
       return
     }
     const btn = event.currentTarget as HTMLElement
-    const btnRect = btn.getBoundingClientRect()
+    // Row mode: the bar is as tall as its row (rows are often display: contents — then the
+    // trigger's height), so it reads as that row's own actions.
     const row = btn.closest('.c-list-row') as HTMLElement | null
-    const rowHeight = row?.getBoundingClientRect().height || btnRect.height
-    this.popoverPos.set({
-      bottom: window.innerHeight - btnRect.top + 2,
-      left: btnRect.left + btnRect.width / 2,
-      minHeight: rowHeight + 4
-    })
-    this.show(btn)
+    const rowHeight = row?.getBoundingClientRect().height || btn.getBoundingClientRect().height
+    this.openNextTo_(btn, rowHeight + 4)
   }
 
   /** Opens the popover next to any element: above it when there is room, else below; aligned
    *  to the anchor's inline-start (right edge in RTL) and clamped inside the viewport. */
   open(anchor: HTMLElement): void {
-    const rect = anchor.getBoundingClientRect()
-    this.isPlaced.set(false)
-    this.popoverPos.set({ top: rect.bottom + ANCHOR_GAP, left: rect.left })
-    this.show(anchor)
-    afterNextRender(() => this.placeNextTo(anchor, rect), { injector: this.injector })
+    this.openNextTo_(anchor)
   }
 
   close(): void {
@@ -96,6 +87,16 @@ export class RowActionsMenuComponent {
     this.isPlaced.set(true)
     this.popoverPos.set(null)
     this.closed.emit()
+  }
+
+  /** Shared by the ⋮ trigger and open(anchor) (plan 362): measured after render, then placed
+   *  and clamped, so a row near a screen edge never opens its menu off-screen. */
+  private openNextTo_(anchor: HTMLElement, minHeight?: number): void {
+    const rect = anchor.getBoundingClientRect()
+    this.isPlaced.set(false)
+    this.popoverPos.set({ top: rect.bottom + ANCHOR_GAP, left: rect.left, minHeight })
+    this.show(anchor)
+    afterNextRender(() => this.placeNextTo(anchor, rect, minHeight), { injector: this.injector })
   }
 
   /** The popover goes in the browser's top layer (`popover="manual"`), so a backdrop-filter or
@@ -113,7 +114,7 @@ export class RowActionsMenuComponent {
     this.isOpen.set(true)
   }
 
-  private placeNextTo(anchor: HTMLElement, rect: DOMRect): void {
+  private placeNextTo(anchor: HTMLElement, rect: DOMRect, minHeight?: number): void {
     if (!this.isOpen()) return
     const pop = this.popoverEl().nativeElement.getBoundingClientRect()
     const isRtl = getComputedStyle(anchor).direction === 'rtl'
@@ -121,7 +122,7 @@ export class RowActionsMenuComponent {
     const left = Math.max(VIEWPORT_MARGIN, Math.min(isRtl ? rect.right - pop.width : rect.left, maxLeft))
     const above = rect.top - pop.height - ANCHOR_GAP
     const top = above >= VIEWPORT_MARGIN ? above : rect.bottom + ANCHOR_GAP
-    this.popoverPos.set({ top, left })
+    this.popoverPos.set({ top, left, minHeight })
     this.isPlaced.set(true)
   }
 
