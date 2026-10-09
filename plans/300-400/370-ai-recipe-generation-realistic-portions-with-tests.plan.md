@@ -1,6 +1,6 @@
 # Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests
 
-Status: draft
+Status: done
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement
@@ -99,7 +99,7 @@ As a chef, when I ask the AI for an omelet, I want 1–2 portions with realistic
 - [x] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
 - [x] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
 - [x] A3: The `implausible_portion_weight` warning, server and client mirror, plus tests and the dictionary key.
-- [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`). Script written; full 5×5 run still pending: free tier is 20 calls/day, so split across days with `--only`.
+- [x] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`). Passed 2026-10-09 on `gemini-3.1-flash-lite`, 25/25 (5 prompts × 5 runs) after rule 3a now requires produce/meat/fish/cheese in grams, not `unit` (the salad's vegetables were unweighable, so g/portion read ~30). First run before that fix: salad 0/5, חביתה 3/5 (timeouts only; 4/5 and 5/5 on re-run).
 - [x] A5: Build, server tests. Update session-state.
 
 ## Technical Considerations
