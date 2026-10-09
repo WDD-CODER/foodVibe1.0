@@ -945,6 +945,56 @@ textarea.c-input {
   transition: background 0.15s ease;
 }
 
+/* ── Marked list row (long press on touch, checkbox on desktop): tint plus one outline around the
+   whole row. The row is display:contents, so each cell draws its share of the line: top and
+   bottom on every cell, the side edge only on the first and last. The side edges are
+   direction-aware (the app is RTL). Outside @layer so it beats .c-list-body-cell above. ── */
+.c-list-row.is-selected {
+  --mark-line: var(--color-primary);
+  --mark-edge-start: inset 2px 0 0 var(--mark-line);
+  --mark-edge-end: inset -2px 0 0 var(--mark-line);
+
+  &:dir(rtl) {
+    --mark-edge-start: inset -2px 0 0 var(--mark-line);
+    --mark-edge-end: inset 2px 0 0 var(--mark-line);
+  }
+}
+
+.c-list-row.is-selected > .c-list-body-cell {
+  background: color-mix(in srgb, var(--color-primary) 14%, var(--bg-pure));
+  box-shadow:
+    inset 0 2px 0 var(--mark-line),
+    inset 0 -2px 0 var(--mark-line);
+
+  &:first-child {
+    box-shadow:
+      inset 0 2px 0 var(--mark-line),
+      inset 0 -2px 0 var(--mark-line),
+      var(--mark-edge-start);
+  }
+
+  &:last-child {
+    box-shadow:
+      inset 0 2px 0 var(--mark-line),
+      inset 0 -2px 0 var(--mark-line),
+      var(--mark-edge-end);
+  }
+}
+
+/* Touch phones hide the checkbox column, so the visible last cell closes the outline. */
+@media (max-width: 768px) and (hover: none) {
+  .col-select {
+    display: none;
+  }
+
+  .c-list-row.is-selected > .c-list-body-cell:nth-last-child(2) {
+    box-shadow:
+      inset 0 2px 0 var(--mark-line),
+      inset 0 -2px 0 var(--mark-line),
+      var(--mark-edge-end);
+  }
+}
+
 /* ── Validation row tints — must be outside @layer to beat .c-list-body-cell above ── */
 .row--invalid .c-list-body-cell {
   background: color-mix(in srgb, var(--color-danger) 8%, white);

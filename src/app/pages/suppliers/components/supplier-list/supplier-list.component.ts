@@ -25,6 +25,7 @@ import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { ListRowSelectDirective } from 'src/app/shared/list-selection/list-row-select.directive'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
@@ -52,6 +53,7 @@ type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
     LoaderComponent,
     ListShellComponent,
     ListRowCheckboxComponent,
+    ListRowSelectDirective,
     SelectionBarComponent,
     EmptyStateComponent,
     RowActionsMenuComponent,

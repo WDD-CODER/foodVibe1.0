@@ -38,6 +38,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { ListRowSelectDirective } from 'src/app/shared/list-selection/list-row-select.directive'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
@@ -83,6 +84,7 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     ScrollableDropdownComponent,
     ListShellComponent,
     ListRowCheckboxComponent,
+    ListRowSelectDirective,
     SelectionBarComponent,
     EmptyStateComponent,
     RatingStarsComponent,

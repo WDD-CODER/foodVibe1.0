@@ -153,6 +153,8 @@
     @for (row of pagedRows_(); track row.product._id) {
       <div
         class="product-grid-row c-list-row"
+        [listRowSelect]="selection"
+        [listRowSelectId]="row.product._id ?? ''"
         [class.row--invalid]="row.validationStatus === 'invalid'"
         [class.row--incomplete]="row.validationStatus === 'incomplete'"
         role="button"

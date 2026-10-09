@@ -326,6 +326,22 @@
     }
   }
 
+  // Touch phones mark rows by long press (list-row-select directive), so the checkbox column
+  // (always the last track) is dropped from the grid here; its cells are hidden by `.col-select`
+  // in styles.scss (the unlayered .c-*-cell display rules would beat a layered rule here).
+  @media (max-width: #{$phone-break}) and (hover: none) {
+    .table-area,
+    .table-header,
+    .table-body {
+      grid-template-columns: var(--list-grid-mobile-touch, var(--list-grid-mobile));
+    }
+
+    :host ::ng-deep .table-body .c-list-row {
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+  }
+
   // ≤620px the fixed bottom tab bar (3.5rem + safe area) covers the screen's lower edge.
   @media (max-width: 620px) {
     .table-area {

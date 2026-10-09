@@ -102,6 +102,8 @@
     @for (item of filteredSuppliers_(); track item._id) {
       <div
         class="supplier-grid-row c-list-row"
+        [listRowSelect]="selection"
+        [listRowSelectId]="item._id ?? ''"
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"

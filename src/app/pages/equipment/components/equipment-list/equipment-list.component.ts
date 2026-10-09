@@ -26,6 +26,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { ListRowSelectDirective } from 'src/app/shared/list-selection/list-row-select.directive'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-field.model'
@@ -60,6 +61,7 @@ type EquipmentBulkField = 'category' | 'isConsumable'
     ListShellComponent,
     CustomSelectComponent,
     ListRowCheckboxComponent,
+    ListRowSelectDirective,
     SelectionBarComponent,
     ClickOutSideDirective,
     RowActionsMenuComponent,

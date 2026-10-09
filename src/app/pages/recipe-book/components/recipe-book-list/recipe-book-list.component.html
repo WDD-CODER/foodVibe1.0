@@ -188,6 +188,8 @@
     @for (row of pagedRows_(); track row.recipe._id) {
       <div
         class="recipe-grid-row c-list-row"
+        [listRowSelect]="selection"
+        [listRowSelectId]="row.recipe._id ?? ''"
         (click)="onRowClick(row.recipe, $event)"
         role="button"
         tabindex="0"

@@ -32,6 +32,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
+import { ListRowSelectDirective } from 'src/app/shared/list-selection/list-row-select.directive'
 import { ListRowCheckboxComponent } from 'src/app/shared/list-selection/list-row-checkbox.component'
 import { SelectionBarComponent } from 'src/app/shared/selection-bar/selection-bar.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
@@ -77,6 +78,7 @@ type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
     LoaderComponent,
     ListShellComponent,
     ListRowCheckboxComponent,
+    ListRowSelectDirective,
     SelectionBarComponent,
     EmptyStateComponent,
     NutritionBadgeComponent,

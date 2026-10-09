@@ -110,6 +110,8 @@
     @for (item of filteredEquipment_(); track item._id) {
       <div
         class="equipment-grid-row c-list-row"
+        [listRowSelect]="selection"
+        [listRowSelectId]="item._id ?? ''"
         role="button"
         tabindex="0"
         (click)="onRowClick(item, $event)"

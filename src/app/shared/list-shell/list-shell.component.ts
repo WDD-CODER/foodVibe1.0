@@ -74,6 +74,8 @@ export class ListShellComponent {
     effect(() => {
       host.style.setProperty('--list-grid', this.gridTemplate())
       host.style.setProperty('--list-grid-mobile', this.mobileGridTemplate())
+      // Touch phones drop the checkbox column, which is always the last track.
+      host.style.setProperty('--list-grid-mobile-touch', this.mobileGridTemplate().replace(/\s+\S+$/, ''))
     })
   }
 }
