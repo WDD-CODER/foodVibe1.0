@@ -325,10 +325,14 @@
       grid-template-columns: var(--list-grid-mobile);
     }
 
-    // Touch: no checkbox column (long press selects); the grid track is dropped in the .ts.
+    // Touch: no checkbox column (long press selects). The grid drops its last track here and the
+    // cells are hidden by `.col-select` in styles.scss — the unlayered .c-*-cell display rules
+    // there would beat a layered rule here and wrap the checkbox onto its own line.
     @media (hover: none) {
-      :host ::ng-deep .col-select {
-        display: none;
+      .table-area,
+      .table-header,
+      .table-body {
+        grid-template-columns: var(--list-grid-mobile-touch);
       }
     }
   }
