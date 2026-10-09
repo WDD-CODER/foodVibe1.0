@@ -1,6 +1,6 @@
 # Plan 347 — Mobile keyboard: push content up, keep the focused field visible
 
-Status: draft
+Status: done
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement
@@ -81,22 +81,22 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `index.html`: viewport meta `width=device-width, initial-scale=1, interactive-widget=resizes-content`.
-- [ ] `KeyboardInsetService` (`providedIn` root, started from `AppComponent`):
+- [x] `index.html`: viewport meta `width=device-width, initial-scale=1, interactive-widget=resizes-content`.
+- [x] `KeyboardInsetService` (`providedIn` root, started from `AppComponent`):
   - Listens to `window.visualViewport` resize / scroll.
   - Computes `inset = max(0, innerHeight - (vv.height + vv.offsetTop))`.
   - Sets `--kb-inset: <px>` on `document.documentElement`, and toggles `body.kb-open` when the inset is over 120px.
   - Exposes `isOpen_` (signal) and `inset_` (signal).
   - No-op when `visualViewport` is missing.
-- [ ] On `focusin` of an `input`, `textarea` or `[contenteditable]` while `kb-open`, call `scrollIntoView({ block:'center', behavior:'smooth' })` after the inset settles (one `requestAnimationFrame` after the resize).
-- [ ] `styles.scss`:
+- [x] On `focusin` of an `input`, `textarea` or `[contenteditable]` while `kb-open`, call `scrollIntoView({ block:'center', behavior:'smooth' })` after the inset settles (one `requestAnimationFrame` after the resize).
+- [x] `styles.scss`:
   - `body.kb-open` hides `.bottom-nav`, `.hero-fab-container`, `.approve-stamp` and toasts (`visibility:hidden`, keeping layout).
   - Remove the reserved bottom-nav padding while open (`.app-content` `padding-block-end`).
   - `.as-modal` bottom sheet: `inset-block-end: var(--kb-inset, 0px)` and `max-height: calc(86dvh - var(--kb-inset, 0px))`.
-- [ ] Replace every `vh` listed in the Problem Statement with `dvh`, keeping the same numbers.
+- [x] Replace every `vh` listed in the Problem Statement with `dvh`, keeping the same numbers.
 
 ### Should Have (P1)
-- [ ] `.c-modal-card` (`styles.scss:~612`) gets `max-height: calc(… - var(--kb-inset,0px))` so centered modals shrink too.
+- [x] `.c-modal-card` (`styles.scss:~612`) gets `max-height: calc(… - var(--kb-inset,0px))` so centered modals shrink too.
 
 ### Nice to Have (P2)
 - None.
@@ -112,7 +112,7 @@ touching any milestone.
 - [x] A2: `KeyboardInsetService` plus a spec (mock `visualViewport`: inset computed, class toggled, no-op without the API). Inject it in `AppComponent` (`keyboard-inset.service.ts/.spec.ts`, `app.component.ts`).
 - [x] A3: The `body.kb-open` rules and `.as-modal` / `.c-modal-card` inset handling (`src/styles.scss`).
 - [x] A4: `vh` → `dvh` in the listed files.
-- [ ] A5: Build and run specs. Update the session-state file.
+- [x] A5: Build and run specs. Update the session-state file.
 
 ## Technical Considerations
 

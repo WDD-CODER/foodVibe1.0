@@ -1,6 +1,6 @@
 # Plan 367 — Dashboard sub-nav: a "לוח בקרה" chip replaces the current page's chip; remove the four back buttons
 
-Status: draft
+Status: done
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement
@@ -69,22 +69,22 @@ As a chef in metadata, suppliers, venues or trash, I want the dashboard to be on
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `TabChipsComponent`:
+- [x] `TabChipsComponent`:
   - Determine the current chip from the URL in the `chips_` computed: path match (`/venues*`, `/suppliers*`, `/trash*`), and for metadata, `/dashboard` with `tab=metadata` in the query.
   - If the group is `dashboard` and a current chip exists, return the group's chips with that one replaced by `{ id: 'dashboard', labelKey: 'dashboard', icon: 'layout-dashboard', path: '/dashboard', queryParams: { tab: 'overview' } }` (check how `DashboardPage` reads `tab`; use whatever selects the overview) in the same index.
   - On the overview (no current chip), return the 4 chips unchanged.
-- [ ] Active styling: no chip is "active" on sub-pages, because the current one was replaced. Drop `routerLinkActive` reliance for the dashboard group, or keep it harmlessly. On the overview none are active.
-- [ ] `currentUrl_` must update on query-param-only navigation (metadata ↔ overview are the same path). Verify the `NavigationEnd` subscription uses `urlAfterRedirects` including the query.
-- [ ] Remove the back buttons and handlers:
+- [x] Active styling: no chip is "active" on sub-pages, because the current one was replaced. Drop `routerLinkActive` reliance for the dashboard group, or keep it harmlessly. On the overview none are active.
+- [x] `currentUrl_` must update on query-param-only navigation (metadata ↔ overview are the same path). Verify the `NavigationEnd` subscription uses `urlAfterRedirects` including the query.
+- [x] Remove the back buttons and handlers:
   - dashboard-header (button and `backToDashboard`; if the component is left with only an h1, keep it as is, since plan 353 handles its title)
   - venue-list (button and `backToDashboard`)
   - trash (button and `backToDashboard`)
   - supplier-list (`[shell-back-btn]` content and `backToDashboard`)
   - Delete their now-unused styles.
-- [ ] Update or remove specs and e2e selectors that reference `btn-back-to-dashboard`, `-venues`, `-trash` and `-suppliers`.
+- [x] Update or remove specs and e2e selectors that reference `btn-back-to-dashboard`, `-venues`, `-trash` and `-suppliers`.
 
 ### Should Have (P1)
-- [ ] The "לוח בקרה" chip gets a subtle distinct style (e.g. outline instead of fill) so it reads as "back", not as a section. Use a modifier class `.c-tab-pill--home` (append to `styles.scss`).
+- [x] The "לוח בקרה" chip gets a subtle distinct style (e.g. outline instead of fill) so it reads as "back", not as a section. Use a modifier class `.c-tab-pill--home` (append to `styles.scss`).
 
 ### Nice to Have (P2)
 - None.
@@ -99,7 +99,7 @@ As a chef in metadata, suppliers, venues or trash, I want the dashboard to be on
 - [x] A1: Tab-chips replacement logic plus spec (overview → 4 chips; metadata, suppliers, venues and trash → dashboard chip in the right index; query-only navigation updates) (`core/components/tab-chips/**`).
 - [x] A2: Remove the 4 back buttons, handlers and styles.
 - [x] A3: Specs and e2e cleanup; P1 style.
-- [ ] A4: Build, specs, icons lint, check on phone and desktop. Update session-state.
+- [x] A4: Build, specs, icons lint, check on phone and desktop. Update session-state.
 
 ## Technical Considerations
 
