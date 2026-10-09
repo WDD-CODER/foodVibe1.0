@@ -1,6 +1,6 @@
 # Plan 364 — Search fields, part 2: clear (X) in dropdown pickers and no browser suggestions on picker and name fields
 
-Status: draft
+Status: done
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement

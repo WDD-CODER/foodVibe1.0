@@ -4,6 +4,8 @@ overview: Screen-by-screen CSS pass to bring every live screen's actual look in 
 isProject: true
 ---
 
+Status: superseded
+
 # Plan 306 — Visual Restyling: UI Refactor Design Language
 
 **Plan only — not executed.** Written to be picked up and run in a separate session.

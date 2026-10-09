@@ -1,6 +1,6 @@
 # Plan 349 — Shared column carousel (one component for every list) and roomier recipe-book carousel
 
-Status: draft
+Status: done
 Snapshot: acab8cff39fd0240f67af00439a8bd044c23889e
 
 ## Problem Statement

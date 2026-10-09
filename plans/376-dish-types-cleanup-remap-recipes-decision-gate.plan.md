@@ -3,6 +3,8 @@
 Status: draft
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
+> **Reality check needed (plan review 2026-10-09).** Written before 321 P3.4 moved every registry onto shared `taxonomyTerms` (`TaxonomyStore`). The `KITCHEN_COURSES` per-user docs, `_userModified` sync and `registry-delete-master` described below no longer drive the app. The goal stands; redo the mechanics on taxonomy terms (a re-key already cascades via `renameTermEverywhere`) before A1.
+
 ## Problem Statement
 
 The dish-type list ("סוגי מנות", `KITCHEN_COURSES`, used by the `course` field on recipes and dishes) holds 63 values. They come from `DEFAULT_COURSES` (`src/app/core/services/metadata-registry.service.ts` ~L27-91), seeded per user when empty, and from `COURSE_STRINGS` in `scripts/migrate-labels-to-courses.mjs` (~L72), originally legacy recipe categories. Many aren't dish types: junk, preparation categories, raw Hebrew keys, near-duplicates.

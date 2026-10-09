@@ -71,19 +71,6 @@
 - [x] M3 — Add `cdk-virtual-scroll` or pagination to inventory + recipe-book lists (after 303 M2) — delivered as **pagination**, not `cdk-virtual-scroll`, 2026-09-15: the shared `.c-list-row { display: contents }` engine class (used by every list page) is structurally incompatible with CDK's item-wrapper DOM — see new gotcha in `docs/brain/gotchas/angular.md`. Pagination (50/page) gets the same DOM-size win with zero shared-CSS risk. Verified: rendered rows dropped ~2,113 → 50, selection state survives page navigation, search resets to page 1.
 - [ ] Hand-off — re-assess plan 301 M2's scope against measured results
 
-### Plan 306 — Visual Restyling: UI Refactor Design Language (`plans/306-visual-restyling-ui-refactor-design-language.plan.md`)
-
-> **RECONCILED 2026-08-26 — superseded for all screen-scoped milestones by `/design-port`**
-> (`.claude/commands/design-port.md`), which has already shipped Dashboard, Inventory, and Recipe
-> Book (PR #187) against the same design generation. Screen-by-screen work now runs there —
-> `_claude-data/design-migration/screens/_registry.md` is the live tracker. Full rationale in
-> `plans/306-visual-restyling-ui-refactor-design-language.plan.md`'s supersession note. Only M9
-> (Product form) and M12 (final cross-screen QA, deferred until all `/design-port` screens are
-> `done`) remain open from this plan.
-
-- [x] M9 Task 17 — Product form — composed `.c-input` engine class on all plain inputs instead of duplicating its styles locally in `product-form.component.scss`; `ng build` clean, visual QA via gstack browse confirmed no regression. Human-validated 2026-09-16.
-- [ ] M12 Tasks 22-25 — cross-screen QA: all 13 screens, 3 breakpoints, RTL, dark-mode-scope check, `ng build` clean (deferred — revisit once `/design-port` registry shows all screens `done`)
-
 ## 6. KEEP DEFERRED — intentional park
 
 > Do not execute against current policy / product decisions.
@@ -93,18 +80,6 @@
 - Do **not** run `npm audit fix --force`.
 - Server `npm audit --omit=dev` is clean (0 vulnerabilities).
 - CI (`.github/workflows/security.yml`) runs `npm audit --omit=dev --audit-level=critical`. `--omit=dev` is permanent (devDependency build-tooling churn — Angular CLI, vite, webpack-dev-server — is noise for a never-shipped tree, not app risk); restore `--audit-level=high` on top of `--omit=dev` after the migration clears the `@angular/*` findings above. See `docs/brain/decisions/0005-scope-npm-audit-to-production-deps.md`.
-
----
-
-### Plan 122 — AI Chatbot Gemini scope (`plans/unused-122-ai-chatbot-gemini-scope.plan.md`)
-> Product decisions never made. Path on disk is `unused-122-…`.
-
-- [ ] Decide chat placement (sidebar / floating button / dedicated Assistant page)
-- [ ] Decide first use case (dictation → recipe and/or create menu for N people)
-- [ ] Decide backend approach for Gemini API key (proxy / serverless / existing API)
-- [ ] Decide language (Hebrew / English / both) for prompts and bot replies
-- [ ] Decide confirmation pattern (open edit screen with draft vs inline draft in chat vs both)
-- [ ] Write designated implementation plan once clarifications are set
 
 ---
 
@@ -121,29 +96,6 @@
 - [ ] Update all remaining `TranslationService` injection sites to `VocabularyService`
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
-
-### Plan 342 — Form checkboxes → toggle chips (app-wide) (`plans/342-form-checkboxes-to-toggle-chips-app-wide.plan.md`)
-
-- [x] A1: Supplier form delivery days (both branches) → chip group (`supplier-form.component.*`)
-- [x] A2: Equipment form `isConsumable` and equipment-list inline-edit booleans → chips (`equipment-form.component.*`, `equipment-list.component.*`)
-- [x] A3: Product form special price, quick-add allergens, quick-edit suppliers → chips (`product-form.component.*`, `quick-add-product-modal/**`, `quick-edit-product-panel/**`)
-- [x] A4: Label-creation triggers and venue-form active → chips (`label-creation-modal/**`, `venue-form.component.*`)
-- [x] A5: Delete the dead local classes and `.c-filter-option` (`src/styles.scss`). Run `rg -n 'type="checkbox"' src/app --glob '*.html'` and confirm only list-row-checkbox remains.
-- [ ] A6: Build and run specs. Update the session-state file.
-
-### Plan 347 — Mobile keyboard: push content up, keep the focused field visible (`plans/347-mobile-keyboard-keep-focused-field-visible.plan.md`)
-- [x] A1: Viewport meta (`src/index.html`).
-- [x] A2: `KeyboardInsetService` plus a spec (mock `visualViewport`: inset computed, class toggled, no-op without the API). Inject it in `AppComponent` (`keyboard-inset.service.ts/.spec.ts`, `app.component.ts`).
-- [x] A3: The `body.kb-open` rules and `.as-modal` / `.c-modal-card` inset handling (`src/styles.scss`).
-- [x] A4: `vh` → `dvh` in the listed files.
-- [ ] A5: Build and run specs. Update the session-state file.
-
-### Plan 351 — Dashboard "פעילות אחרונה": readable change history (`plans/351-dashboard-recent-activity-readable-change-history.plan.md`)
-- [x] A1: `activityValue` pipe plus its spec: supplier ids → names, key translation, unknown id, empty (`core/pipes/activity-value.pipe.ts/.spec.ts`).
-- [x] A2: Switch the popover to the pipe (`shared/change-popover/**`).
-- [x] A3: New entry template and styles; delete the strip, scroll method and `.change-tag` styles (`dashboard-overview/**`).
-- [x] A4: Relative time plus the optional day grouping (`dashboard-overview/**`).
-- [ ] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
 
 ### Plan 353 — Page header, part 2: venues, menu library, dashboard, trash (`plans/353-page-header-part-2-venues-menu-library-dashboard-trash.plan.md`)
 - [ ] A1: Add the `subtitleKey` input to `PageHeaderComponent`, plus a spec case (`src/app/shared/page-header/**`).
@@ -163,18 +115,6 @@
 - [ ] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
 - [ ] A3: `onDelete` / `onBulkDeleteSelected` flow, model field, dictionary keys.
 - [ ] A4: Build, server tests, client specs. Manual test with 2 accounts. Update session-state.
-
-### Plan 367 — Dashboard sub-nav: a "לוח בקרה" chip replaces the current page's chip; remove the four back buttons (`plans/367-dashboard-chip-replaces-current-page-chip-remove-back-buttons.plan.md`)
-- [x] A1: Tab-chips replacement logic plus spec (overview → 4 chips; metadata, suppliers, venues and trash → dashboard chip in the right index; query-only navigation updates) (`core/components/tab-chips/**`).
-- [x] A2: Remove the 4 back buttons, handlers and styles.
-- [x] A3: Specs and e2e cleanup; P1 style.
-- [ ] A4: Build, specs, icons lint, check on phone and desktop. Update session-state.
-
-### Plan 368 — Product form responsive on mobile and tablet (`plans/368-product-form-responsive-mobile-tablet.plan.md`)
-- [x] A1: Un-nest the media blocks; verify they apply (DevTools computed styles) (`product-form.component.scss`).
-- [x] A2: ≤900px tablet layout, including collapsible full width and the scaling row in 2 rows.
-- [x] A3: ≤768px phone layout, including padding, actions wrap and the override input.
-- [ ] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
 
 ### Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests (`plans/370-ai-recipe-generation-realistic-portions-with-tests.plan.md`)
 - [x] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
@@ -216,12 +156,6 @@
 - [ ] A3: Metadata UI: edit for non-system units; unit-creator edit mode; confirms (`metadata-manager/**`, `shared/unit-creator/**`).
 - [ ] A4: Delete in-use check covers recipes.
 - [ ] A5: Build, specs. Manual test against the isolated DB: rename a custom unit used in 2 products and 1 recipe; check the cost is unchanged. Update session-state.
-
-### Plan 378 — Units B: admin "for everyone" when adding, renaming, editing or deleting a unit (`plans/378-units-b-admin-for-everyone-unit-changes.plan.md`)
-- [ ] A1: Server route plus system-unit constant plus tests (isolated DB) (`server/routes/generic.js`, `server/test/**`).
-- [ ] A2: Client adapter, storage and registry plumbing (`http-storage.adapter.ts`, `async-storage.service.ts`, `unit-registry.service.*`).
-- [ ] A3: Metadata scope prompt for units; wire the ops; global dictionary on "everyone" (`metadata-manager.page.component.*`).
-- [ ] A4: Build, server and client tests. Manual test: admin renames a custom unit for everyone → a new signup sees the new unit. Update session-state.
 
 ### Plan 384 — Logs in the AI workflow: query script, slot log retention, command wiring (`plans/384-logs-in-ai-workflow-query-script-slot-retention.plan.md`)
 - [ ] C1: `scripts/lib/log-format.mjs` normaliser (client-echo JSON, pino JSON, raw passthrough) + unit-ish self-test via `node --test` if cheap.
@@ -281,14 +215,6 @@
 - [ ] D4: Kit: docs (`take-plan.md`, `remote.md`, preflight, `standards-git.md`, `ship-regular.md`, `job-validation.md`, `workflow-map.md`, `commands.md`), plus the manifest row and the `kit-owned.json` entry for `slot-serve.mjs`.
 - [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
 - [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
-
-### Plan 394 — Night 2026-10-07 PR Validation and Merge Runbook (`plans/394-night-1007-pr-validation-merge-runbook.plan.md`)
-- [ ] R1–R4: clean rebases — #293 tech debt, #301 (347), #302 (371), #307 (348); Human validates each in wt-1 → approve/skip/reject.
-- [ ] R5–R8: dictionary/spec conflicts — #297 (365), #298 (370, run Mongo server tests here), #295 (351), #296 (367).
-- [ ] R9–R10: #314 chain top (363+364) → merges #299 then #314; #315 (362) rebased onto main's 340.
-- [ ] R11–R15: list/form template conflicts — #300 (361), #294 (345), #304 (342), #306 (368), #308 (344).
-- [ ] R16–R18: #311 chain top (349+350+352) → merges #309 → #310 → #311; then #313 (346); then #312 (353).
-- [ ] Done-when: no open `[night 10-07]` PR; `main` builds + specs pass; wt-1 servers off, `/remote` off.
 
 ### Plan 395 — Gemini Model Chain with Daily Quota Fallback and Real Free-Tier Limit (`plans/395-gemini-model-chain-daily-quota-fallback.plan.md`)
 > After PR #298 (plan 370) merges. Free tier = 20 calls/model/day; app claims 1,000.
