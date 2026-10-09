@@ -65,8 +65,10 @@ Notes: `gemini-client.js` and `gemini-client.test.js` are new. In the modals onl
 Blocked outside scope → stop and ask `approved: <path>`. Never edit an existing dictionary key; append a new one. Never read or print `.env`.
 
 ## Architecture Impact
-- INV-6 (AI calls only through the server): **preserves** — the new `gemini-client.js` is a server module called only from `server/routes/ai.js` / `ai-recipe-helpers.js`; the browser still never sees a key or a model name it can call.
-- INV-3, INV-4: **preserves** — no document writes change; `GEMINI_USAGE` gains an `exhausted` map on the same daily doc, written only by the server.
+- INV-2: preserves — the only `server/services/**` file touched is the new `gemini-client.js` (plus `ai-recipe-helpers.js`); no master data, overrides or tenancy logic change.
+- INV-3: preserves — no document writes change; `GEMINI_USAGE` gains an `exhausted` map on the same daily doc, written only by the server.
+- INV-4: preserves — no entity schema or write validation changes.
+- INV-6: preserves — the new `gemini-client.js` is a server module called only from `server/routes/ai.js` / `ai-recipe-helpers.js`; the browser still never sees a key or a model name it can call.
 - No new invariant. No ADR.
 
 ## Step 0 — Reality Check
