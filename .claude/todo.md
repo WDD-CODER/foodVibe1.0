@@ -122,29 +122,6 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
-### Plan 342 — Form checkboxes → toggle chips (app-wide) (`plans/342-form-checkboxes-to-toggle-chips-app-wide.plan.md`)
-
-- [x] A1: Supplier form delivery days (both branches) → chip group (`supplier-form.component.*`)
-- [x] A2: Equipment form `isConsumable` and equipment-list inline-edit booleans → chips (`equipment-form.component.*`, `equipment-list.component.*`)
-- [x] A3: Product form special price, quick-add allergens, quick-edit suppliers → chips (`product-form.component.*`, `quick-add-product-modal/**`, `quick-edit-product-panel/**`)
-- [x] A4: Label-creation triggers and venue-form active → chips (`label-creation-modal/**`, `venue-form.component.*`)
-- [x] A5: Delete the dead local classes and `.c-filter-option` (`src/styles.scss`). Run `rg -n 'type="checkbox"' src/app --glob '*.html'` and confirm only list-row-checkbox remains.
-- [ ] A6: Build and run specs. Update the session-state file.
-
-### Plan 347 — Mobile keyboard: push content up, keep the focused field visible (`plans/347-mobile-keyboard-keep-focused-field-visible.plan.md`)
-- [x] A1: Viewport meta (`src/index.html`).
-- [x] A2: `KeyboardInsetService` plus a spec (mock `visualViewport`: inset computed, class toggled, no-op without the API). Inject it in `AppComponent` (`keyboard-inset.service.ts/.spec.ts`, `app.component.ts`).
-- [x] A3: The `body.kb-open` rules and `.as-modal` / `.c-modal-card` inset handling (`src/styles.scss`).
-- [x] A4: `vh` → `dvh` in the listed files.
-- [ ] A5: Build and run specs. Update the session-state file.
-
-### Plan 351 — Dashboard "פעילות אחרונה": readable change history (`plans/351-dashboard-recent-activity-readable-change-history.plan.md`)
-- [x] A1: `activityValue` pipe plus its spec: supplier ids → names, key translation, unknown id, empty (`core/pipes/activity-value.pipe.ts/.spec.ts`).
-- [x] A2: Switch the popover to the pipe (`shared/change-popover/**`).
-- [x] A3: New entry template and styles; delete the strip, scroll method and `.change-tag` styles (`dashboard-overview/**`).
-- [x] A4: Relative time plus the optional day grouping (`dashboard-overview/**`).
-- [ ] A5: Build and run specs. Check at 360px and desktop. Update the session-state file.
-
 ### Plan 353 — Page header, part 2: venues, menu library, dashboard, trash (`plans/353-page-header-part-2-venues-menu-library-dashboard-trash.plan.md`)
 - [ ] A1: Add the `subtitleKey` input to `PageHeaderComponent`, plus a spec case (`src/app/shared/page-header/**`).
 - [ ] A2: Venues and menu library (`venue-list/**`, `menu-library-list/**`).
@@ -163,18 +140,6 @@
 - [ ] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
 - [ ] A3: `onDelete` / `onBulkDeleteSelected` flow, model field, dictionary keys.
 - [ ] A4: Build, server tests, client specs. Manual test with 2 accounts. Update session-state.
-
-### Plan 367 — Dashboard sub-nav: a "לוח בקרה" chip replaces the current page's chip; remove the four back buttons (`plans/367-dashboard-chip-replaces-current-page-chip-remove-back-buttons.plan.md`)
-- [x] A1: Tab-chips replacement logic plus spec (overview → 4 chips; metadata, suppliers, venues and trash → dashboard chip in the right index; query-only navigation updates) (`core/components/tab-chips/**`).
-- [x] A2: Remove the 4 back buttons, handlers and styles.
-- [x] A3: Specs and e2e cleanup; P1 style.
-- [ ] A4: Build, specs, icons lint, check on phone and desktop. Update session-state.
-
-### Plan 368 — Product form responsive on mobile and tablet (`plans/368-product-form-responsive-mobile-tablet.plan.md`)
-- [x] A1: Un-nest the media blocks; verify they apply (DevTools computed styles) (`product-form.component.scss`).
-- [x] A2: ≤900px tablet layout, including collapsible full width and the scaling row in 2 rows.
-- [x] A3: ≤768px phone layout, including padding, actions wrap and the override input.
-- [ ] A4: Remove dead rules. Build, specs. Check at 360, 414, 800 and 1280px with an expanded allergens field and a product with 2 purchase options. Update session-state.
 
 ### Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests (`plans/370-ai-recipe-generation-realistic-portions-with-tests.plan.md`)
 - [x] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
