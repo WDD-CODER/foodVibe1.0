@@ -249,3 +249,11 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** Changing the editor to emit `'portion'` breaks the recipe builder, which expects `'dish'` for dishes.
 
 **What to do instead:** Any check on an approved draft must treat `'portion'` and `'dish'` the same (`PORTION_YIELD_UNITS` in `gemini-shots.service.ts` and `server/services/ai-recipe-helpers.js`). Build test drafts in the shape the editor emits, not the shape the model returns, and check each AI warning once in the real modal.
+
+## `container-type` is a `position: fixed` trap too — the list edit modal centred mid-list
+
+**What hurt:** On phones the equipment row-edit modal (`.inline-edit-panel.as-modal`, `inset-block-start: 50%`) opened off-screen and its `.c-modal-overlay` dimmed only the list. It was projected through `list-shell`'s `[shell-modal]` slot, which had already been moved out of `.table-area` (backdrop-filter) — but it was still inside `.list-container`, which has `container-type: inline-size` (layout containment) and, at phone width, `height: auto`. Fixed descendants resolved against the whole-list box (plan 362).
+
+**Why the obvious fix is wrong:** Escaping only the `backdrop-filter` ancestor looks done, because that is the trap everyone remembers (see "A `backdrop-filter` card traps `position: fixed` popovers" above). `container-type`, `contain: layout|paint|strict|content`, `transform`, `filter`, `perspective` and `will-change` on those make a containing block just the same, and container queries are spreading through the design system.
+
+**What to do instead:** Small floating menus: Popover API top layer (entry above). Full modals that stay `position: fixed`: render them outside every such wrapper — in `list-shell` the `[shell-modal]` slot now sits after `.list-container`, directly under `:host`. Before adding `container-type` or any of the properties above to a wrapper, check what fixed-position content is projected inside it.

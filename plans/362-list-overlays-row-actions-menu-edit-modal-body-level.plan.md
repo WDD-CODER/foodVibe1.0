@@ -93,6 +93,25 @@ As a chef on a tablet, I want the row actions menu and the edit window to open w
 ### Nice to Have (P2)
 - None.
 
+## Execution notes (Worker, 2026-10-09)
+
+- **A1 — no CDK Overlay needed.** On `ec175c8c` the menu already renders in the browser's top
+  layer (`popover="manual"` + `showPopover()`, added by #318), which ignores ancestor containing
+  blocks and `overflow` clipping — the same outcome the CDK Overlay requirement was written for,
+  without a second overlay system. What was left: the ⋮ row path still placed the popover with
+  "bottom from the viewport + translateX(-50%)" and no clamping, so a row near a screen edge could
+  open its menu partly off-screen. The ⋮ trigger now uses the same measured, clamped placement as
+  `open(anchor)` (above when there is room, else below; inline-start aligned; 8px viewport margin),
+  keeps its row-height look, and the `bottom` style and centring transform are gone. Public API
+  unchanged. Spec: a row inside a `backdrop-filter` + `overflow: hidden` box opens in the top
+  layer, placed in viewport px.
+- **A2** — `[shell-modal]` moved after `.list-container`, directly under `:host`; spec checks a
+  projected fixed modal is outside both wrappers and centred on the viewport. Only the equipment
+  list uses the slot today.
+- **A3** — new entry in `docs/brain/gotchas/angular.md` (`container-type` is a fixed-position trap
+  too), next to the existing backdrop-filter / Popover API entry; index count updated.
+- **A4** — `ng build` OK; `ng test` 457/457. Browser checks ①–③ validated by the Human 2026-10-09 ("done").
+
 ## UI/UX Notes
 
 - The popover keeps its current look. On phone it may open above the button when there's no room below; that's handled by the fallback positions.
@@ -100,10 +119,10 @@ As a chef on a tablet, I want the row actions menu and the edit window to open w
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Move `RowActionsMenuComponent` to CDK Overlay, with a spec (opens, closes on backdrop, `open(anchor)` works) (`shared/row-actions-menu/**`).
-- [ ] A2: Move the list-shell `[shell-modal]` slot out of `.list-container` (`shared/list-shell/**`).
-- [ ] A3: Gotcha entry (`docs/brain/gotchas/angular.md` + index line in `docs/brain/gotchas.md`).
-- [ ] A4: Build, specs. Check equipment and inventory (⋮ menu, edit modal) and the metadata manager (anchored menu) at 360px, 800px and 1280px. Update session-state.
+- [x] A1: Move `RowActionsMenuComponent` to CDK Overlay, with a spec (opens, closes on backdrop, `open(anchor)` works) (`shared/row-actions-menu/**`).
+- [x] A2: Move the list-shell `[shell-modal]` slot out of `.list-container` (`shared/list-shell/**`).
+- [x] A3: Gotcha entry (`docs/brain/gotchas/angular.md` + index line in `docs/brain/gotchas.md`).
+- [x] A4: Build, specs. Check equipment and inventory (⋮ menu, edit modal) and the metadata manager (anchored menu) at 360px, 800px and 1280px. Update session-state.
 
 ## Technical Considerations
 

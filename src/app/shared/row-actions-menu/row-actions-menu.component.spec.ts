@@ -161,3 +161,57 @@ describe('RowActionsMenuComponent', () => {
     expect(popover().classList).not.toContain('is-open')
   })
 })
+
+// Plan 362: a list row sits inside .table-area (backdrop-filter + overflow: hidden), which would
+// pin and clip a plain position:fixed popover. The ⋮ menu must open in the top layer, placed in
+// viewport coordinates next to the trigger, as tall as its row.
+@Component({
+  standalone: true,
+  imports: [RowActionsMenuComponent],
+  template: `
+    <div
+      class="trap"
+      style="position: fixed; top: 200px; left: 300px; width: 60px; height: 60px; overflow: hidden; backdrop-filter: blur(4px)"
+    >
+      <div class="c-list-row" style="height: 40px">
+        <app-row-actions-menu>
+          <button type="button" class="row-action" style="width: 120px; height: 30px">act</button>
+        </app-row-actions-menu>
+      </div>
+    </div>
+  `
+})
+class TrappedRowHostComponent {}
+
+describe('RowActionsMenuComponent — row inside a containing-block trap (plan 362)', () => {
+  let fixture: ComponentFixture<TrappedRowHostComponent>
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TrappedRowHostComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)]
+    }).compileComponents()
+    fixture = TestBed.createComponent(TrappedRowHostComponent)
+    fixture.autoDetectChanges()
+  })
+
+  it('⋮ opens the popover in the top layer, placed in viewport px next to the trigger, row-tall', async () => {
+    const trigger = fixture.nativeElement.querySelector('.ram-trigger') as HTMLElement
+    trigger.click()
+    fixture.detectChanges()
+    await fixture.whenStable()
+
+    const pop = fixture.nativeElement.querySelector('.ram-popover') as HTMLElement
+    expect(pop.matches(':popover-open')).toBeTrue()
+    expect(pop.style.visibility).toBe('')
+    const top = parseFloat(pop.style.top)
+    const left = parseFloat(pop.style.left)
+    expect(top).toBeGreaterThanOrEqual(8)
+    expect(top).toBeLessThan(window.innerHeight)
+    expect(left).toBeGreaterThanOrEqual(8)
+    expect(left).toBeLessThan(window.innerWidth)
+    expect(pop.style.bottom).toBe('') // no "bottom from the viewport" math left over
+    const row = fixture.nativeElement.querySelector('.c-list-row') as HTMLElement
+    const rowHeight = row.getBoundingClientRect().height || trigger.getBoundingClientRect().height
+    expect(parseFloat(pop.style.minHeight)).toBe(rowHeight + 4) // as tall as its row
+  })
+})

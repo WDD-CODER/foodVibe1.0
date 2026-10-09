@@ -49,7 +49,7 @@
 }
 
 // Anchored: opened programmatically next to any element (open(anchor)); positioned in px by
-// the component, so no centering transform. Host takes no space in the page flow.
+// the component (row mode too, plan 362), so no centering transform. Host takes no space in the page flow.
 :host(.is-anchored) {
   display: contents;
 
@@ -68,8 +68,6 @@
     @include floating-popover;
 
     .ram-popover {
-      transform: translateX(-50%);
-
       // Ensure projected icon buttons are always visible inside the popover
       ::ng-deep .c-icon-btn {
         opacity: 1;

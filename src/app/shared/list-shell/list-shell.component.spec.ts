@@ -25,6 +25,11 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
           <div class="c-list-body-cell" style="height: 60px">{{ i }}</div>
         }
       </ng-container>
+      <ng-container shell-modal>
+        <div class="test-modal" style="position: fixed; inset-block-start: 50%; inset-inline: 0; height: 40px">
+          modal
+        </div>
+      </ng-container>
     </app-list-shell>
   `
 })
@@ -70,5 +75,15 @@ describe('ListShellComponent — pinned table top (plan 346)', () => {
     const stickyTop = parseFloat(getComputedStyle(top).insetBlockStart || getComputedStyle(top).top) || 0
     window.scrollTo(0, top.getBoundingClientRect().top + window.scrollY + 600)
     expect(Math.round(top.getBoundingClientRect().top)).toBe(Math.round(stickyTop))
+  })
+
+  // Plan 362: .list-container (container-type) and .table-area (backdrop-filter) are containing
+  // blocks for position:fixed — a modal projected inside them centres on the list, not the screen.
+  it('renders [shell-modal] content outside .list-container, so fixed modals use the viewport', () => {
+    const modal = fixture.debugElement.query(By.css('.test-modal')).nativeElement as HTMLElement
+    expect(modal.closest('.list-container')).toBeNull()
+    expect(modal.closest('.table-area')).toBeNull()
+    const rect = modal.getBoundingClientRect()
+    expect(Math.round(rect.top)).toBe(Math.round(window.innerHeight / 2))
   })
 })
