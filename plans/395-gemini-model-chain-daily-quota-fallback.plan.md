@@ -1,6 +1,6 @@
 # Plan 395 — Gemini Model Chain with Daily Quota Fallback and Real Free-Tier Limit
 
-Status: draft
+Status: active
 Snapshot: 070feb29
 
 ## Problem Statement
