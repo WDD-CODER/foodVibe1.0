@@ -104,12 +104,6 @@
 - [ ] A4: Trash (`src/app/pages/trash/**`).
 - [ ] A5: Delete the dead styles; run `rg 'class="page-title"'`. Build and run specs. Check at 360px and 1280px. Update the session-state file.
 
-### Plan 362 — List overlays escape the table: row actions menu and edit modal render at body level (`plans/362-list-overlays-row-actions-menu-edit-modal-body-level.plan.md`)
-- [ ] A1: Move `RowActionsMenuComponent` to CDK Overlay, with a spec (opens, closes on backdrop, `open(anchor)` works) (`shared/row-actions-menu/**`).
-- [ ] A2: Move the list-shell `[shell-modal]` slot out of `.list-container` (`shared/list-shell/**`).
-- [ ] A3: Gotcha entry (`docs/brain/gotchas/angular.md` + index line in `docs/brain/gotchas.md`).
-- [ ] A4: Build, specs. Check equipment and inventory (⋮ menu, edit modal) and the metadata manager (anchored menu) at 360px, 800px and 1280px. Update session-state.
-
 ### Plan 366 — Delete a supplier that's in use: warning, then admin-only "only me / everyone" (`plans/366-delete-in-use-supplier-warning-admin-scope.plan.md`)
 - [ ] A1: Server: allowlist, trash collection and purge route, plus tests (against the isolated DB) (`server/routes/generic.js`, `server/constants/collections.js`, `server/test/**`).
 - [ ] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
