@@ -1,6 +1,6 @@
 # Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests
 
-Status: draft
+Status: done
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement
