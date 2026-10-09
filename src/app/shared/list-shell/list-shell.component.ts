@@ -13,7 +13,6 @@ import {
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
 import { PageHeaderComponent } from '../page-header/page-header.component'
-import { isTouchDevice } from 'src/app/shared/list-selection/touch-row-selection'
 
 @Component({
   selector: 'app-list-shell',
@@ -74,9 +73,11 @@ export class ListShellComponent {
 
     effect(() => {
       host.style.setProperty('--list-grid', this.gridTemplate())
-      // Touch selects by long press, so the phone grid drops its trailing checkbox track.
-      const mobile = isTouchDevice() ? this.mobileGridTemplate().replace(/\s+28px$/, '') : this.mobileGridTemplate()
-      host.style.setProperty('--list-grid-mobile', mobile)
+      host.style.setProperty('--list-grid-mobile', this.mobileGridTemplate())
+      // Touch selects by long press, so its grid drops the trailing checkbox track. The SCSS picks
+      // between the two with the same (hover: none) query that hides the checkbox cells — a JS
+      // check made once at load would drift from it (devtools flips hover when inspecting).
+      host.style.setProperty('--list-grid-mobile-touch', this.mobileGridTemplate().replace(/\s+28px$/, ''))
     })
   }
 }

@@ -954,9 +954,53 @@ textarea.c-input {
   background: var(--bg-warning-soft);
 }
 
-/* Selected row (touch has no checkbox to show it). */
-.c-list-row.is-selected .c-list-body-cell {
+/* Selected row (touch has no checkbox to show it): tint plus one outline around the whole row.
+   The row is display:contents, so each direct cell draws its share: top and bottom on every
+   cell, the side edge only on the first and last. Side edges follow the text direction (RTL). */
+.c-list-row.is-selected {
+  --mark-line: var(--color-primary);
+  --mark-edge-start: inset 2px 0 0 var(--mark-line);
+  --mark-edge-end: inset -2px 0 0 var(--mark-line);
+
+  &:dir(rtl) {
+    --mark-edge-start: inset -2px 0 0 var(--mark-line);
+    --mark-edge-end: inset 2px 0 0 var(--mark-line);
+  }
+}
+
+.c-list-row.is-selected > .c-list-body-cell {
   background: color-mix(in srgb, var(--color-primary) 14%, white);
+  box-shadow:
+    inset 0 2px 0 var(--mark-line),
+    inset 0 -2px 0 var(--mark-line);
+
+  &:first-child {
+    box-shadow:
+      inset 0 2px 0 var(--mark-line),
+      inset 0 -2px 0 var(--mark-line),
+      var(--mark-edge-start);
+  }
+
+  &:last-child {
+    box-shadow:
+      inset 0 2px 0 var(--mark-line),
+      inset 0 -2px 0 var(--mark-line),
+      var(--mark-edge-end);
+  }
+}
+
+/* Touch phones hide the checkbox column, so the visible last cell closes the outline. */
+@media (max-width: 768px) and (hover: none) {
+  .col-select {
+    display: none;
+  }
+
+  .c-list-row.is-selected > .c-list-body-cell:nth-last-child(2) {
+    box-shadow:
+      inset 0 2px 0 var(--mark-line),
+      inset 0 -2px 0 var(--mark-line),
+      var(--mark-edge-end);
+  }
 }
 
 /* ---- Engine: Pagination controls (plan 304 M3) — row-count reduction for large
