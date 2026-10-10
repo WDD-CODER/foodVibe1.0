@@ -2866,6 +2866,17 @@
       "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
     },
     {
+      "path": "docs/brain/decisions/0016-logging-sink-mongo.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/services/log-sink.js",
+        "server/routes/log.js"
+      ],
+      "notes": "Plan 382 ADR: MongoDB app_logs (90-day TTL) as the single log sink."
+    },
+    {
       "path": "docs/brain/decisions/0015-workflow-kit-extraction.md",
       "tier": "project",
       "action": "stay",
@@ -3155,6 +3166,16 @@
       "notes": "Pattern template."
     },
     {
+      "path": "docs/brain/patterns/server-log-events.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/logger.js"
+      ],
+      "notes": "Plan 383 pattern: server log event naming and fields."
+    },
+    {
       "path": "docs/brain/patterns/atomic-bulk-replace-with-standalone-fallback.md",
       "tier": "project",
       "action": "stay",
@@ -3371,7 +3392,6 @@
         "scripts/check-lucide-icons.mjs",
         "scripts/check-no-native-select.mjs",
         "scripts/diagnose-broken-refs.mjs",
-        "scripts/log-server.js",
         "scripts/repair-recipe-references.mjs",
         "scripts/todo-query.mjs"
       ],
@@ -3754,14 +3774,6 @@
         "package.json"
       ],
       "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/log-server.js",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [],
-      "notes": "Local logging server (FoodVibe dev tool)."
     },
     {
       "path": "scripts/merge-labels.mjs",
