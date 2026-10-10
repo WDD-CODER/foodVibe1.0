@@ -62,6 +62,13 @@ export class SupplierDataService extends BaseEntityDataService<Supplier> {
     }
   }
 
+  /** Plan 366, admin only: removes the linked __master__ supplier and every other user's
+   *  copy of it, and unlinks those copies from their products — all on the server, in one
+   *  request. The caller's own copy still goes through removeSupplier. */
+  async deleteFromMaster(_id: string): Promise<void> {
+    return this.storage.deleteFromMaster(ENTITY, _id)
+  }
+
   async removeSupplier(_id: string): Promise<void> {
     try {
       await this.storage.remove(ENTITY, _id)

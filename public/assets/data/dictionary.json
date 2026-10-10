@@ -1014,6 +1014,9 @@
     "ai_model_loading": "טוען...",
     "ai_model_drag": "גרור כדי לשנות את הסדר",
     "ai_model_exhausted_prompt": "מודל ה-AI הנוכחי הגיע למכסה היומית שלו. אפשר לעבור למודל הבא ולשלוח שוב.",
-    "ai_model_switch_to": "עבור ל-{model}"
+    "ai_model_switch_to": "עבור ל-{model}",
+    "supplier_delete_in_use_warning": "הספק מקושר ל-{n} מוצרים. מחיקה תסיר אותו מהמוצרים האלה.",
+    "confirm_delete_supplier": "למחוק את הספק?",
+    "supplier_delete_from_master_error": "שגיאה במחיקת הספק מכל המשתמשים"
   }
 }

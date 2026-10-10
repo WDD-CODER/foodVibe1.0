@@ -256,6 +256,24 @@ export class ProductDataService {
     )
   }
 
+  /** Plan 366: the server already pulled these suppliers from the user's products when it
+   *  deleted them — mirror that in the local store so no row shows a dead supplier. */
+  unlinkSuppliersLocally(supplierIds: string[]): void {
+    const removed = new Set(supplierIds)
+    this.ProductsStore_.update((products) =>
+      products.map((p) => {
+        const sources = p.sources ?? []
+        const legacy = p.supplierIds_ ?? []
+        if (!sources.some((s) => removed.has(s.supplierId)) && !legacy.some((id) => removed.has(id))) return p
+        return {
+          ...p,
+          sources: sources.filter((s) => !removed.has(s.supplierId)),
+          ...(p.supplierIds_ && { supplierIds_: legacy.filter((id) => !removed.has(id)) })
+        }
+      })
+    )
+  }
+
   /** Mirror of pushToMaster for the delete path (Plan 322 M6/M8): removes the
    *  caller's linked __master__ copy so future/unsynced users stop receiving it. */
   async deleteFromMaster(productId: string): Promise<void> {

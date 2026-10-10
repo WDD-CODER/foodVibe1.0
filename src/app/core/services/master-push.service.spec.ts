@@ -12,6 +12,7 @@ import { ConfirmModalService } from './confirm-modal.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
 import { ProductDataService } from './product-data.service'
+import { SupplierDataService } from './supplier-data.service'
 import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import { UserService } from './user.service'
@@ -94,6 +95,7 @@ describe('MasterPushService scope prompts', () => {
         { provide: RecipeDataService, useValue: {} },
         { provide: DishDataService, useValue: {} },
         { provide: ProductDataService, useValue: {} },
+        { provide: SupplierDataService, useValue: {} },
         { provide: UserMsgService, useValue: {} }
       ]
     })
@@ -130,5 +132,47 @@ describe('MasterPushService scope prompts', () => {
   it('returns cancel when the admin cancels', async () => {
     confirmModal.openTernary.and.resolveTo('cancel')
     expect(await service.askDeleteScope({ _masterId: 'm1' }, { entity: 'product' })).toBe('cancel')
+  })
+})
+
+describe('MasterPushService.deleteSupplierFromMaster (plan 366)', () => {
+  let service: MasterPushService
+  let supplierData: jasmine.SpyObj<SupplierDataService>
+  let userMsg: jasmine.SpyObj<UserMsgService>
+
+  beforeEach(() => {
+    supplierData = jasmine.createSpyObj<SupplierDataService>('SupplierDataService', ['deleteFromMaster'])
+    userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg'])
+    const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
+    translation.translate.and.callFake((k: string | undefined) => k ?? '')
+    TestBed.configureTestingModule({
+      providers: [
+        MasterPushService,
+        { provide: ConfirmModalService, useValue: {} },
+        { provide: TranslationService, useValue: translation },
+        { provide: UserService, useValue: { isAdmin_: signal(true) } },
+        { provide: RecipeDataService, useValue: {} },
+        { provide: DishDataService, useValue: {} },
+        { provide: ProductDataService, useValue: {} },
+        { provide: SupplierDataService, useValue: supplierData },
+        { provide: UserMsgService, useValue: userMsg }
+      ]
+    })
+    service = TestBed.inject(MasterPushService)
+  })
+
+  const supplier = { _id: 's1', _masterId: 'm1', nameHebrew: 'ספק', deliveryDays: [], minOrderMov: 0, leadTimeDays: 0 }
+
+  it('calls the server with the own supplier id', async () => {
+    supplierData.deleteFromMaster.and.resolveTo()
+    await service.deleteSupplierFromMaster(supplier)
+    expect(supplierData.deleteFromMaster).toHaveBeenCalledWith('s1')
+    expect(userMsg.onSetErrorMsg).not.toHaveBeenCalled()
+  })
+
+  it('shows a message instead of throwing when the server fails', async () => {
+    supplierData.deleteFromMaster.and.rejectWith(new Error('500'))
+    await expectAsync(service.deleteSupplierFromMaster(supplier)).toBeResolved()
+    expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('supplier_delete_from_master_error')
   })
 })
