@@ -196,57 +196,49 @@
 - [ ] A4: Apply directive to `translation-key-modal.component.html` and `label-creation-modal.component.html`; `save()` in both components (and `translation-key-modal.service.ts` if it re-sanitizes) runs `finalizeEnglishKey`
 - [ ] A5: `ng build` + `ng test` green; hand the Human the PC + phone click list from Success
 
-### Plan 399 — Recipe book list split: map seams, then extract self-contained flows (`plans/399-recipe-book-list-split-map-seams-extract-flows.plan.md`)
-
-- [ ] A1: Map `recipe-book-list.component.ts` seams into session-state; ⛔ STOP for the Human's go on which to move
-- [ ] A2: Extract approved pure helpers to `recipe-book-list/utils/*.util.ts` (+ specs)
-- [ ] A3: Extract approved service(s) to `recipe-book-list/services/`; wire component + `recipe-book-list.component.html`
-- [ ] A4: Update `recipe-book-list.component.spec.ts` if it touches moved members
-- [ ] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
-
 ### Plan 400 — Dropdown add option, part 1: shared helper and the shared selects (`plans/400-dropdown-add-option-part-1-shared-helper-shared-selects.plan.md`)
 
 - [ ] A1: Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
 - [ ] A2: `src/app/core/utils/add-option.util.ts` + spec (rules 1–4)
-- [ ] A3: `src/app/shared/add-option-row/` component
-- [ ] A4: Apply to `shared/custom-select` (label, filter by label, stored-key select, keyboard last)
-- [ ] A5: Apply to `shared/custom-multi-select`; remove the second (dynamic) add button
-- [ ] A6: Apply to `shared/chip-search-dropdown`
-- [ ] A7: Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
-- [ ] A8: `ng build` + `ng test` green, `rg` check from Success empty; hand the Human the click list
+- [ ] A3: `src/app/core/utils/keyed-picker-search.util.ts` + spec — `KeyedPickerSearch` copied from the menu service (rule 5) + scroll helper
+- [ ] A4: `src/app/shared/add-option-row/` component
+- [ ] A5: Apply to `shared/custom-select` (label, filter by label, stored-key select; keyboard via A3)
+- [ ] A6: Apply to `shared/custom-multi-select`; remove the second (dynamic) add button; keyboard via A3 (Space toggles)
+- [ ] A7: Apply to `shared/chip-search-dropdown`; keyboard via A3 (focus stays in input, no wrap)
+- [ ] A8: Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
+- [ ] A9: `ng build` + `ng test` green, `rg` checks from Success empty; hand the Human the click list (incl. keyboard check per select)
 
 ### Plan 401 — Dropdown add option, part 2: page dropdowns in recipe builder and menu (`plans/401-dropdown-add-option-part-2-page-dropdowns-recipe-builder-menu.plan.md`)
 
 - [ ] A1: Re-check the audit list on current main (after 397/398/400 merged); list the 7 `filterOptionsByStartsWith(` calls with verdicts — session-state
-- [ ] A2: `ingredient-search` component onto the helper
-- [ ] A3: `preparation-search` component onto the helper
-- [ ] A4: Logistics tool picker (`recipe-builder.page.html` + logistics picker service) — one add option
-- [ ] A5: Menu event type (`menu-intelligence.page.ts/.html`) — label, filter by translated label, stored-key select
-- [ ] A6: Fix any raw-key `filterOptionsByStartsWith(` callers from A1; move the section-category dropdown onto the helper (P1)
-- [ ] A7: Append missing `add_new_<thing>` keys to `dictionary.json`
-- [ ] A8: `ng build` + `ng test` green, `rg` check from Success; hand the Human the click list
+- [ ] A2: Menu: `MenuPickerSearchService` onto `core/utils/keyed-picker-search.util.ts`; delete the local `KeyedPickerSearch`
+- [ ] A3: `ingredient-search` component onto the helpers (add option + keyboard rule 5)
+- [ ] A4: `preparation-search` component onto the helpers (add option + keyboard rule 5 — adds arrows)
+- [ ] A5: Logistics tool picker (`recipe-builder.page.html` + logistics picker service) — one add option; keyboard rule 5
+- [ ] A6: Menu event type (`menu-intelligence.page.ts/.html`) — label, filter by translated label, stored-key select; keyboard via `KeyedPickerSearch`
+- [ ] A7: Fix any raw-key `filterOptionsByStartsWith(` callers from A1; move the section-category dropdown onto the helper (P1)
+- [ ] A8: Append missing `add_new_<thing>` keys to `dictionary.json`
+- [ ] A9: `ng build` + `ng test` green, `rg` checks from Success; hand the Human the click list (incl. keyboard check per dropdown + menu regression)
 
 ### Plan 402 — Dropdown add option, part 3: convention doc and trigger (`plans/402-dropdown-add-option-part-3-convention-doc-trigger.plan.md`)
 
-- [ ] A1: Rule section in `docs/agent/standards-domain.md` (helper/component names from merged plan 400)
+- [ ] A1: Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
 - [ ] A2: Trigger row in `AGENTS.md`
 - [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
 
-### Plan 403 — Data cleanup: legacy null logistics, test items and leftover collections, with a write guard (`plans/403-data-cleanup-legacy-nulls-test-items-write-guard.plan.md`)
+### Plan 405 — Design port from a Claude Design handoff, with live-app comparison and a lost-feature check (`plans/405-design-port-from-claude-design-handoff-live-app-compare.plan.md`)
 
-- [x] A0: Discard list confirmed by the Human 2026-10-10 — see "Approved discard list"
-- [ ] A0b: ⛔ Before deleting the Atlas accounts: Human signs up their real production account, Worker promotes it to admin, Human confirms admin login — then F7 deletes hhhh, dan, danw, dan11
-- [ ] A1: Backups — `server/scripts/db-backup.js` local + Atlas; folders in session-state
-- [ ] A2: `server/scripts/cleanup-legacy-data.js` (F1–F7 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
-- [ ] A3: Dry run local + Atlas; paste both count tables in chat
-- [ ] A4: Server guard in `server/routes/generic.js` PUT + tests in `server/test/generic.test.js`
-- [ ] A5: Client net in `kitchen-state.service.ts` `saveRecipe()` (+ spec)
-- [ ] A6: Stop the re-creation of empty v1 registry collections (`server/db.js` or wherever A2 finds it)
-- [ ] A7: Announce in chat → local `--apply` → dry run again = 0 → `validate-all --target=local` = 0 violations
-- [ ] A8: ⛔ Human approves Atlas `--apply` → apply with `--backup-dir` → `validate-all --target=atlas` = 0 violations
-- [ ] A9: Brain gotcha update (`docs/brain/gotchas/backend.md`)
-- [ ] A10: `npm --prefix server test`, `ng build`, `ng test` green; hand the Human the click list (save / favorite / rating / approve on a formerly-null recipe, local then production)
+- [ ] A1: Fixtures — a tiny fake handoff zip + a copy of two dashboard files for the inventory tests — `scripts/test/fixtures/design-port/**`
+- [ ] A2: `design-handoff-ingest.mjs` + test (find root, hash diff, dry-run writes nothing, dirty-tree refusal, handoffs.md entry) — `scripts/design-handoff-ingest.mjs`, `scripts/test/design-handoff-ingest.test.mjs`
+- [ ] A3: `design-feature-inventory.mjs` + test (extract kinds, identity by kind+name, compare ok / missing exit 1, approved removals skipped) — `scripts/design-feature-inventory.mjs`, `scripts/test/design-feature-inventory.test.mjs`
+- [ ] A4: Rewrite the command (Phase A ingest, registry re-open, Phase B live compare, inventory gate, close-out; drop stale sections and the claude.ai ban) — `.claude/commands/design-port.md`
+- [ ] A5: `MANIFEST.md` authority update + `handoffs.md` seeded with the August snapshot as entry 0 — `.interface-design/source/MANIFEST.md`, `.interface-design/handoffs.md`
+- [ ] A6: Registry: add a `handoff` column note and the re-open rule — `_claude-data/design-migration/screens/_registry.md`
+- [ ] A7: `.gitignore` append for `live/` — `.gitignore`
+- [ ] A8: ADR + brain index line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`
+- [ ] A9: Real handoff dry run with the Human: ingest `--dry-run`, lock the root matcher to the real layout, live compare on the first changed screen, stop at the port-spec — slot only, no port code
+- [ ] A10: `npm run test:scripts` + `ng build` green; hand the Human the check list
 
 ## Where things live
 

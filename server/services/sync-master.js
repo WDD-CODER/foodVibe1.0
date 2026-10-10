@@ -294,7 +294,9 @@ async function syncMasterToUser(userId) {
         if (entityType === 'recipes' || entityType === 'dishes') {
           const [productMap, eqMap, recMap] = await Promise.all([getProductIdMap(), getEquipmentIdMap(), getRecipeIdMap()]);
           clone.ingredients = remapIngredients(clone.ingredients, productMap, recMap);
-          clone.logistics = remapLogistics(clone.logistics, eqMap);
+          // Only when master has it: assigning `undefined` is stored as `logistics: null` by the
+          // driver, which the schema rejects (plan 403).
+          if (clone.logistics !== undefined) clone.logistics = remapLogistics(clone.logistics, eqMap);
         }
 
         // Remap supplier IDs so cloned products reference user-scoped supplier IDs.
@@ -317,7 +319,7 @@ async function syncMasterToUser(userId) {
         if (entityType === 'recipes' || entityType === 'dishes') {
           const [productMap, eqMap, recMap] = await Promise.all([getProductIdMap(), getEquipmentIdMap(), getRecipeIdMap()]);
           masterRest.ingredients = remapIngredients(masterRest.ingredients, productMap, recMap);
-          masterRest.logistics = remapLogistics(masterRest.logistics, eqMap);
+          if (masterRest.logistics !== undefined) masterRest.logistics = remapLogistics(masterRest.logistics, eqMap);
         }
 
         // For products: remap master supplier IDs to user-scoped IDs, then merge sources.

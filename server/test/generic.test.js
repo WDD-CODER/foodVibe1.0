@@ -240,6 +240,29 @@ describe('PUT /api/v1/data/:type/:id', () => {
       .send({ ingredients: [{ _id: 'i1', referenceId: 'p1', nameSnapshot: 'תפוח', amount: 1, unit: 'kg' }] });
     expect(res.status).toBe(200);
   });
+
+  it('plan 403: a stale stored logistics: null the request did not send is unset, the save succeeds', async () => {
+    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', logistics: null }));
+    const res = await request(app)
+      .put('/api/v1/data/recipes/r1')
+      .set('Authorization', `Bearer ${tokenA()}`)
+      .send({ rating: 4 });
+    expect(res.status).toBe(200);
+    expect(res.body.rating).toBe(4);
+    expect('logistics' in res.body).toBe(false);
+    expect('logistics' in await testDb().collection('recipes').findOne({ _id: 'r1' })).toBe(false);
+  });
+
+  it('plan 403: logistics: null sent in the body is still rejected (schema not loosened)', async () => {
+    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', logistics: null }));
+    const res = await request(app)
+      .put('/api/v1/data/recipes/r1')
+      .set('Authorization', `Bearer ${tokenA()}`)
+      .send({ rating: 4, logistics: null });
+    expect(res.status).toBe(400);
+    expect(res.body.issues.map(i => i.path)).toContain('logistics');
+    expect((await testDb().collection('recipes').findOne({ _id: 'r1' })).logistics).toBeNull();
+  });
 });
 
 describe('DELETE /api/v1/data/:type/:id', () => {

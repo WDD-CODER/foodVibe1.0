@@ -123,9 +123,9 @@ describe('RecipeBookListComponent', () => {
     expect((component as any).formatAddedAt(1700000000000)).toMatch(/\d/)
   })
 
-  it('should format updatedAt date or return placeholder when missing', () => {
-    expect((component as any).formatUpdatedAt(undefined)).toBe('—')
-    expect((component as any).formatUpdatedAt(1700000000000)).toMatch(/\d/)
+  it('should format updatedAt date-time or return placeholder when missing', () => {
+    expect((component as any).formatUpdatedAtWithTime(undefined)).toBe('—')
+    expect((component as any).formatUpdatedAtWithTime(1700000000000)).toMatch(/\d/)
   })
 
   it('should filter list when search input is set', () => {
@@ -151,7 +151,7 @@ describe('RecipeBookListComponent', () => {
     ;(stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} })
 
     const recipe = mockRecipesSignal()[0]
-    await (component as any).onDeleteRecipe(recipe)
+    await (component as any).rowActions.remove(recipe)
 
     expect(confirmModal.open).toHaveBeenCalled()
     expect(stateService.deleteRecipe).toHaveBeenCalledWith(recipe)
@@ -163,7 +163,7 @@ describe('RecipeBookListComponent', () => {
     const stateService = TestBed.inject(KitchenStateService)
 
     const recipe = mockRecipesSignal()[0]
-    await (component as any).onDeleteRecipe(recipe)
+    await (component as any).rowActions.remove(recipe)
 
     expect(stateService.deleteRecipe).not.toHaveBeenCalled()
   })

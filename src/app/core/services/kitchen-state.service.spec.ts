@@ -197,6 +197,28 @@ describe('KitchenStateService', () => {
         done()
       })
     })
+
+    it('should send an empty logistics baseline instead of a legacy null (plan 403)', (done) => {
+      const legacy = {
+        _id: 'r1',
+        nameHebrew: 'Hummus',
+        ingredients: [],
+        steps: [],
+        yieldAmount: 1,
+        yieldUnit: 'portion',
+        defaultStation: '',
+        isApproved: true,
+        logistics: null
+      } as unknown as Recipe
+      recipeDataSpy.updateRecipe.and.callFake((r: Recipe) => Promise.resolve(r))
+
+      service.saveRecipe(legacy).subscribe(() => {
+        expect(recipeDataSpy.updateRecipe).toHaveBeenCalledWith(
+          jasmine.objectContaining({ logistics: { baseline: [] } })
+        )
+        done()
+      })
+    })
   })
 
   describe('Direct State Updates', () => {

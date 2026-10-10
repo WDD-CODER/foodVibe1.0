@@ -40,7 +40,7 @@
       [selectableIds]="filteredRecipeIds_()"
       [editableFields]="editableFields_()"
       (bulkDelete)="onBulkDeleteSelected($event)"
-      (bulkEdit)="onBulkEdit($event)"
+      (bulkEdit)="rowActions.bulkEdit($event)"
     />
   </ng-container>
 
@@ -210,7 +210,7 @@
               class="approval-pending-badge"
               [attr.aria-label]="'approve_recipe' | translatePipe"
               [attr.title]="'recipe_pending_approval' | translatePipe"
-              (click)="onToggleApproval(row.recipe); $event.stopPropagation()"
+              (click)="rowActions.toggleApproval(row.recipe); $event.stopPropagation()"
             >
               <lucide-icon name="clock" [size]="12"></lucide-icon>
             </button>
@@ -282,10 +282,10 @@
               class="col-date c-list-body-cell date-cell-wrap"
               columnSlide
               [label]="'date_added' | translatePipe"
-              (mouseenter)="showDateTooltip(row.recipe._id, $event)"
-              (mouseleave)="hideDateTooltip()"
+              (mouseenter)="tooltips.showDate(row.recipe._id, $event)"
+              (mouseleave)="tooltips.hideDate()"
               [attr.aria-describedby]="
-                hoveredDateRecipeId_() === row.recipe._id ? 'date-tooltip-' + row.recipe._id : null
+                tooltips.dateHoveredId() === row.recipe._id ? 'date-tooltip-' + row.recipe._id : null
               "
             >
               {{ formatAddedAt(row.recipe.createdAt) }}
@@ -301,18 +301,18 @@
               [value]="row.recipe.rating ?? 0"
               [readonly]="!isLoggedIn()"
               size="sm"
-              (ratingChange)="onRatingChange(row.recipe, $event)"
+              (ratingChange)="rowActions.rate(row.recipe, $event)"
             />
           </div>
           <div
             class="col-cost c-list-body-cell cost-cell-wrap"
             columnSlide
             [label]="'cost' | translatePipe"
-            (mouseenter)="showCostTooltip(row.recipe._id, $event)"
-            (mouseleave)="hideCostTooltip()"
-            (click)="toggleCostTooltipTap(row.recipe._id, $event)"
+            (mouseenter)="tooltips.showCost(row.recipe._id, $event)"
+            (mouseleave)="tooltips.hideCost()"
+            (click)="tooltips.toggleCostTap(row.recipe._id, $event)"
             [attr.aria-describedby]="
-              hoveredCostRecipeId_() === row.recipe._id || tappedCostRecipeId_() === row.recipe._id
+              tooltips.costHoveredId() === row.recipe._id || tooltips.costTappedId() === row.recipe._id
                 ? 'cost-tooltip-' + row.recipe._id
                 : null
             "
@@ -325,7 +325,7 @@
             type="button"
             class="c-icon-btn favorite-btn"
             [class.is-favorited]="isFavoritedByCurrentUser_(row.recipe)"
-            (click)="onToggleFavorite(row.recipe); $event.stopPropagation()"
+            (click)="rowActions.toggleFavorite(row.recipe, currentUserId_()); $event.stopPropagation()"
             [attr.aria-label]="
               (isFavoritedByCurrentUser_(row.recipe) ? 'remove_from_favorites' : 'add_to_favorites') | translatePipe
             "
@@ -342,13 +342,13 @@
             <lucide-icon name="cooking-pot" [size]="18"></lucide-icon>
           </button>
           @if (isLoggedIn()) {
-            @if (removingId_() === row.recipe._id) {
+            @if (rowActions.removingId() === row.recipe._id) {
               <app-loader size="small" [inline]="true" />
             } @else {
               <button
                 type="button"
                 class="c-icon-btn danger"
-                (click)="onRemoveRecipe(row.recipe); $event.stopPropagation()"
+                (click)="rowActions.remove(row.recipe); $event.stopPropagation()"
                 [attr.aria-label]="'delete' | translatePipe"
               >
                 <lucide-icon name="trash-2" [size]="18"></lucide-icon>
@@ -526,11 +526,11 @@
 </app-list-shell>
 
 @if (activeCostTooltipRecipe_(); as recipe) {
-  @if (costTooltipAnchor_(); as anchor) {
+  @if (tooltips.costAnchor(); as anchor) {
     <div
       class="cost-tooltip cost-tooltip-fixed"
       [id]="'cost-tooltip-' + recipe._id"
-      (clickOutside)="closeCostTooltipTap()"
+      (clickOutside)="tooltips.closeCostTap()"
       [style.top.px]="anchor.bottom + 4"
       [style.left.px]="anchor.left + anchor.width / 2"
     >
@@ -540,7 +540,7 @@
 }
 
 @if (activeDateTooltipRecipe_(); as recipe) {
-  @if (dateTooltipAnchor_(); as anchor) {
+  @if (tooltips.dateAnchor(); as anchor) {
     <div
       class="date-tooltip date-tooltip-fixed"
       [id]="'date-tooltip-' + recipe._id"
@@ -550,18 +550,4 @@
       {{ 'date_updated' | translatePipe }}: {{ formatUpdatedAtWithTime(recipe.updatedAt) }}
     </div>
   }
-}
-
-@if (historyFor_(); as h) {
-  <div class="history-overlay" (click)="closeHistory()">
-    <div class="history-overlay-panel" (click)="$event.stopPropagation()">
-      <app-version-history-panel
-        [entityType]="h.entityType"
-        [entityId]="h.entityId"
-        [entityName]="h.entityName"
-        (closed)="closeHistory()"
-        (restored)="closeHistory()"
-      />
-    </div>
-  </div>
 }
