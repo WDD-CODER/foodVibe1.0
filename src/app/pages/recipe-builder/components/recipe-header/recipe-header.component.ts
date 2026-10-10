@@ -150,6 +150,13 @@ export class RecipeHeaderComponent {
         this.yield.syncYieldFromMetrics()
       }
     })
+    effect((onCleanup) => {
+      const ctrl = this.form().get('course')
+      if (!ctrl) return
+      this.courseValue_.set(ctrl.value ?? '')
+      const sub = ctrl.valueChanges.subscribe((v: string | null) => this.courseValue_.set(v ?? ''))
+      onCleanup(() => sub.unsubscribe())
+    })
   }
 
   // VALIDATION
@@ -205,10 +212,19 @@ export class RecipeHeaderComponent {
   })
 
   // COURSE
-  protected courseSelectOptions_ = computed(() => [
-    { value: '', label: 'no_course' },
-    ...this.metadataRegistry.courses_().map((c) => ({ value: c.key, label: c.key }))
-  ])
+  private readonly courseValue_ = signal('')
+
+  /** A course that is no longer a dish type (plan 376, e.g. restored from trash) shows as "ללא", never as a raw key. */
+  protected courseSelectOptions_ = computed(() => {
+    const keys = this.metadataRegistry.courses_().map((c) => c.key)
+    const current = this.courseValue_()
+    const isStale = !!current && keys.length > 0 && !keys.includes(current)
+    return [
+      { value: '', label: 'no_course' },
+      ...(isStale ? [{ value: current, label: 'no_course' }] : []),
+      ...keys.map((key) => ({ value: key, label: key }))
+    ]
+  })
 
   protected get courseControl(): FormControl<string> {
     return this.form().get('course') as FormControl<string>

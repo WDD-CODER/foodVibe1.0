@@ -117,6 +117,10 @@
     grid-template-rows: auto 1fr;
 
     min-width: 0;
+    // overflow: clip (below) is not a scroll container, so without this the grid item's
+    // automatic minimum is its full content and the 1fr row grows past the 90dvh shell:
+    // the table body and the filter panel stop scrolling and the rest is cut off (plan 376).
+    min-block-size: 0;
 
     background: var(--bg-glass-strong);
 

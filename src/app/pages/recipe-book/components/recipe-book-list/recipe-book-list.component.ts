@@ -180,14 +180,17 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
   ])
 
+  private courseKeys_ = computed(() => new Set(this.metadataRegistry.courses_().map((c) => c.key)))
+
   // Catalog-only pass — recomputes when the recipe list changes, NOT on every
   // filter-checkbox toggle (see filter-category-counts.util.ts).
   private filterOptionCounts_ = computed(() => {
     const recipes = this.kitchenState.recipes_()
+    const courseKeys = this.courseKeys_()
     const counts = buildFilterOptionCounts(recipes, (recipe, bump) => {
       const allergens = this.getRecipeAllergens(recipe)
       RECIPE_FILTER_CATEGORIES.forEach((category) =>
-        recipeFilterValues(recipe, category, allergens).forEach((value) => bump(category, value))
+        recipeFilterValues(recipe, category, allergens, courseKeys).forEach((value) => bump(category, value))
       )
     })
 
@@ -254,7 +257,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
             const allergens = this.getRecipeAllergens(recipe)
             return selectedValues.every((v) => !allergens.includes(v))
           }
-          const recipeValues = recipeFilterValues(recipe, category, [])
+          const recipeValues = recipeFilterValues(recipe, category, [], this.courseKeys_())
           return selectedValues.some((v) => recipeValues.includes(v))
         })
       })

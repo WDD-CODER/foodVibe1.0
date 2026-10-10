@@ -62,6 +62,12 @@ describe('recipe-book-list.util', () => {
       expect(recipeFilterValues(recipe, 'Course', [])).toEqual(['main'])
       expect(recipeFilterValues(recipe, 'Unknown', [])).toEqual([])
     })
+
+    it('counts a course that is no longer a dish type as no course', () => {
+      expect(recipeFilterValues(recipe, 'Course', [], new Set(['main']))).toEqual(['main'])
+      expect(recipeFilterValues(recipe, 'Course', [], new Set(['starter']))).toEqual(['_none'])
+      expect(recipeFilterValues(recipe, 'Course', [], new Set())).toEqual(['main'])
+    })
   })
 
   describe('date helpers', () => {
