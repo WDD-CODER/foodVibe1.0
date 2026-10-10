@@ -35,41 +35,41 @@ function syncMasterToUser(userId) {
 
 describe('syncMasterToUser', () => {
   it('CHARACTERIZATION: Rule 1 — clones a new master item the user has no copy of', async () => {
-    await testDb().collection('KITCHEN_UNITS').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'גרם' });
+    await testDb().collection('venues').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'גרם' });
     const result = await syncMasterToUser('userA');
     expect(result.inserted).toBe(1);
-    const mine = await testDb().collection('KITCHEN_UNITS').findOne({ userId: 'userA' });
+    const mine = await testDb().collection('venues').findOne({ userId: 'userA' });
     expect(mine).toMatchObject({ _masterId: 'm1', _userModified: false, nameHebrew: 'גרם' });
     expect(mine._id).not.toBe('m1'); // gets its own user-scoped id, not the master id
   });
 
   it('CHARACTERIZATION: Rule 2 — an unmodified clone is overwritten with the latest master data', async () => {
-    await testDb().collection('KITCHEN_UNITS').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'גרם v2' });
-    await testDb().collection('KITCHEN_UNITS').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: false, nameHebrew: 'גרם v1' });
+    await testDb().collection('venues').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'גרם v2' });
+    await testDb().collection('venues').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: false, nameHebrew: 'גרם v1' });
     const result = await syncMasterToUser('userA');
     expect(result.updated).toBe(1);
-    const mine = await testDb().collection('KITCHEN_UNITS').findOne({ _id: 'u1' });
+    const mine = await testDb().collection('venues').findOne({ _id: 'u1' });
     expect(mine.nameHebrew).toBe('גרם v2');
     expect(mine._userModified).toBe(false);
   });
 
   it('CHARACTERIZATION: Rule 3 — a user-modified clone is never overwritten', async () => {
-    await testDb().collection('KITCHEN_UNITS').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'master value' });
-    await testDb().collection('KITCHEN_UNITS').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true, nameHebrew: 'my edit' });
+    await testDb().collection('venues').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'master value' });
+    await testDb().collection('venues').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true, nameHebrew: 'my edit' });
     const result = await syncMasterToUser('userA');
     expect(result.inserted).toBe(0);
     expect(result.updated).toBe(0);
-    const mine = await testDb().collection('KITCHEN_UNITS').findOne({ _id: 'u1' });
+    const mine = await testDb().collection('venues').findOne({ _id: 'u1' });
     expect(mine.nameHebrew).toBe('my edit');
   });
 
   it('CHARACTERIZATION: Rule 4 — a master item removed from __master__ is not removed from the user\'s copy', async () => {
     // No master doc at all — simulates "was deleted from master since last sync".
-    await testDb().collection('KITCHEN_UNITS').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: false, nameHebrew: 'still here' });
+    await testDb().collection('venues').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: false, nameHebrew: 'still here' });
     const result = await syncMasterToUser('userA');
     expect(result.inserted).toBe(0);
     expect(result.updated).toBe(0);
-    const mine = await testDb().collection('KITCHEN_UNITS').findOne({ _id: 'u1' });
+    const mine = await testDb().collection('venues').findOne({ _id: 'u1' });
     expect(mine).not.toBeNull();
   });
 

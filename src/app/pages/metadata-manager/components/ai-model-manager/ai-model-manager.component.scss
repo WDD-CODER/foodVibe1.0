@@ -61,7 +61,7 @@
 
 .model-row {
   display: grid;
-  grid-template-columns: auto auto 1fr auto auto;
+  grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 0.75rem;
 
@@ -87,68 +87,111 @@
     opacity: 0.6;
   }
 
-  @media (max-width: 768px) {
-    grid-template-areas:
-      'grip rank info info'
-      'grip rank toggle move';
-    grid-template-columns: auto auto 1fr auto;
-
-    .model-grip {
-      grid-area: grip;
-    }
-    .model-grip {
-      display: grid;
-      place-content: center;
-
-      color: var(--color-text-muted);
-
-      touch-action: none;
-      cursor: grab;
-
-      &:active {
-        cursor: grabbing;
-      }
-    }
-
-    /* Drag & drop (CDK): the lifted row, the gap it leaves, and the rows sliding aside. */
-    .model-row.cdk-drag-preview {
-      background: var(--bg-glass-strong);
-
-      border: 1px solid var(--color-primary);
-      box-shadow: var(--shadow-card);
-    }
-
-    .model-placeholder {
-      min-block-size: 3rem;
-
-      border: 1px dashed var(--border-default);
-      border-radius: var(--radius-md);
-    }
-
-    .model-row.cdk-drag-placeholder {
-      padding: 0;
-      border: none;
-      background: transparent;
-    }
-
-    .cdk-drag-animating,
-    .model-list.cdk-drop-list-dragging .model-row:not(.cdk-drag-placeholder) {
-      transition: transform 250ms var(--ease-smooth);
-    }
+  // Just dropped: a primary flash on the row and its rank, so the moved model is easy to spot
+  // among the look-alike names.
+  &.is-just-moved {
+    animation: model-landed 1.6s var(--ease-smooth);
 
     .model-rank {
-      grid-area: rank;
+      animation: model-rank-pop 0.6s var(--ease-spring);
     }
-    .model-info {
-      grid-area: info;
+  }
+
+  // Phones: still one row — tighter gaps and a smaller toggle make room for the name.
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+
+    padding-inline: 0.5rem;
+
+    .model-toggle {
+      min-block-size: 1.625rem;
+
+      font-size: 0.75rem;
+
+      padding-inline: 0.5rem;
+      padding-block: 0.125rem;
     }
-    .c-toggle-chip {
-      grid-area: toggle;
-      justify-self: start;
-    }
-    .model-move {
-      grid-area: move;
-    }
+  }
+}
+
+.model-grip {
+  display: grid;
+  place-content: center;
+
+  color: var(--color-text-muted);
+
+  touch-action: none;
+  cursor: grab;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+/* Drag & drop (CDK): the lifted row, the slot it will land in, and the rows sliding aside. */
+.model-row.cdk-drag-preview {
+  background: var(--bg-glass-strong);
+
+  border: 1px solid var(--color-primary);
+  box-shadow:
+    var(--shadow-card),
+    0 0 0 4px var(--color-primary-glow);
+
+  transform-origin: center;
+  rotate: -1deg;
+  scale: 1.03;
+  cursor: grabbing;
+}
+
+.model-placeholder {
+  min-block-size: 3rem;
+
+  background: var(--color-primary-soft);
+
+  border: 2px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+}
+
+.model-row.cdk-drag-placeholder {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.cdk-drag-animating {
+  transition: transform 300ms var(--ease-spring);
+}
+
+.model-list.cdk-drop-list-dragging .model-row:not(.cdk-drag-placeholder) {
+  transition: transform 250ms var(--ease-smooth);
+}
+
+@keyframes model-landed {
+  0%,
+  35% {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-glow);
+  }
+
+  100% {
+    background: var(--bg-glass);
+    border-color: transparent;
+    box-shadow: none;
+  }
+}
+
+@keyframes model-rank-pop {
+  0% {
+    scale: 1;
+  }
+
+  40% {
+    scale: 1.6;
+  }
+
+  100% {
+    scale: 1;
   }
 }
 
@@ -162,6 +205,7 @@
 
 .model-info {
   display: flex;
+  place-items: center;
   flex-direction: column;
   gap: 0.125rem;
 
@@ -184,11 +228,6 @@
 
 .model-exhausted {
   color: var(--color-danger);
-}
-
-.model-move {
-  display: flex;
-  gap: 0.25rem;
 }
 
 .model-actions {

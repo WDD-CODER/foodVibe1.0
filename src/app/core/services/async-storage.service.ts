@@ -48,22 +48,6 @@ export class StorageService {
     return this.httpAdapter.purgeProductIngredientEverywhere(entityType, entityId)
   }
 
-  /** Plan 322: renames (or adds, if not already present) a key in __master__'s own registry doc. */
-  async pushRegistryRenameToMaster(
-    entityType: string,
-    oldKey: string,
-    newKey: string,
-    itemData?: { color?: string; autoTriggers?: string[] }
-  ): Promise<void> {
-    return this.httpAdapter.pushRegistryRenameToMaster(entityType, oldKey, newKey, itemData)
-  }
-
-  /** Plan 322 M10: mirror of pushRegistryRenameToMaster, for DELETE — also strips `key` from
-   *  every other user's own recipes/dishes/products. Dev-only, Human-requested. */
-  async pushRegistryDeleteToMaster(entityType: string, key: string): Promise<void> {
-    return this.httpAdapter.pushRegistryDeleteToMaster(entityType, key)
-  }
-
   /** Plan 322 M4: the shared Hebrew-dictionary override layer every client merges in at runtime. */
   async getGlobalDictionaryOverrides(): Promise<Record<string, string>> {
     return this.httpAdapter.getGlobalDictionaryOverrides()

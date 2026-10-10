@@ -34,6 +34,7 @@ import { TaxonomyStore } from '@services/taxonomy-store.service'
 import type { TaxonomyKind } from '@models/v2'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
+import { TaxonomyKindManagerComponent } from './components/taxonomy-kind-manager/taxonomy-kind-manager.component'
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
@@ -42,11 +43,6 @@ import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.comp
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label' | 'course'
-
-interface MenuTarget {
-  item: string
-  type: MetadataType | 'menuType'
-}
 
 /** Taxonomy kind behind each Metadata Manager card (Plan 321 Phase 3). */
 const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
@@ -65,6 +61,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     FormsModule,
     LucideAngularModule,
     TranslatePipe,
+    TaxonomyKindManagerComponent,
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
     UserManagementComponent,
@@ -125,8 +122,8 @@ export class MetadataManagerComponent implements OnInit {
   allMenuTypes_ = this.metadataRegistry.allMenuTypes_
   /** Menu type whose name is being renamed inline (opened from its tap menu). */
   protected readonly renamingMenuTypeKey_ = signal<string | null>(null)
-  /** The chip whose tap menu is open (plan 340) — drives the shared menu's actions. */
-  protected readonly menuTarget_ = signal<MenuTarget | null>(null)
+  /** Menu type whose tap menu (edit / delete, plan 340) is open. */
+  protected readonly menuTypeMenuKey_ = signal<string | null>(null)
 
   readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS
 
@@ -170,9 +167,7 @@ export class MetadataManagerComponent implements OnInit {
     return index === -1 ? 1 : index + 1
   }
 
-  protected getLabelColor(key: string): string {
-    return this.metadataRegistry.getLabelColor(key)
-  }
+  protected readonly labelColor = (key: string): string => this.metadataRegistry.getLabelColor(key)
 
   isSystemUnit(unitKey: string): boolean {
     return unitKey in SYSTEM_UNITS
@@ -191,33 +186,28 @@ export class MetadataManagerComponent implements OnInit {
     return null
   }
 
-  //TAP MENU (plan 340) — one shared edit/delete menu, anchored to the tapped chip
-  protected openItemMenu(event: MouseEvent, item: string, type: MenuTarget['type']): void {
-    this.menuTarget_.set({ item, type })
+  /** `lockReasonKey` bound per card, for the generic taxonomy card's `lockReason` input. */
+  protected readonly lockReasonFor = Object.fromEntries(
+    (['unit', 'category', 'allergen', 'label', 'course'] as const).map((type) => [
+      type,
+      (item: string) => this.lockReasonKey(type, item)
+    ])
+  ) as Record<MetadataType, (item: string) => string | null>
+
+  //TAP MENU (plan 340) — menu types only; the other cards own their menu
+  protected openMenuTypeMenu(event: MouseEvent, key: string): void {
+    this.menuTypeMenuKey_.set(key)
     this.itemMenu().open(event.currentTarget as HTMLElement)
   }
 
-  protected isMenuOpenFor(item: string, type: MenuTarget['type']): boolean {
-    const target = this.menuTarget_()
-    return target?.item === item && target.type === type
+  protected onMenuTypeMenuEdit(key: string): void {
+    this.itemMenu().close()
+    this.onStartRenameMenuType(key)
   }
 
-  protected onMenuEdit(target: MenuTarget): void {
+  protected onMenuTypeMenuDelete(key: string): void {
     this.itemMenu().close()
-    if (target.type === 'menuType') {
-      this.onStartRenameMenuType(target.item)
-      return
-    }
-    void this.onRenameMetadata(target.item, target.type)
-  }
-
-  protected onMenuDelete(target: MenuTarget): void {
-    this.itemMenu().close()
-    if (target.type === 'menuType') {
-      void this.onRemoveMenuType(target.item)
-      return
-    }
-    void this.onRemoveMetadata(target.item, target.type)
+    void this.onRemoveMenuType(key)
   }
 
   //CREATE

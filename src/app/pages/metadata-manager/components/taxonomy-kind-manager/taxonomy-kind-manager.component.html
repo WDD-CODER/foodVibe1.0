@@ -1,0 +1,120 @@
+<section class="manager-card">
+  <div class="card-title">
+    <lucide-icon [name]="icon()" [class]="iconClass()"></lucide-icon>
+    <h2>{{ titleKey() | translatePipe }}</h2>
+  </div>
+  @if (descKey(); as desc) {
+    <p class="card-desc">{{ desc | translatePipe }}</p>
+  }
+
+  <div class="input-group">
+    <input
+      #newInput
+      type="text"
+      [placeholder]="
+        placeholderKey()
+          ? (placeholderKey()! | translatePipe)
+          : ('add' | translatePipe) + ' ' + (titleKey() | translatePipe) + '...'
+      "
+      (keyup.enter)="onAdd(newInput)"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      spellcheck="false"
+    />
+    <button
+      type="button"
+      class="c-btn-primary"
+      (click)="onAdd(newInput)"
+      [disabled]="!isLoggedIn()"
+      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+    >
+      {{ addLabelKey() | translatePipe }}
+    </button>
+  </div>
+
+  <div class="list-container">
+    @if (items().length > 0) {
+      <div class="c-tap-chip-group">
+        @for (item of items(); track item) {
+          @let lockKey = lockReason()(item);
+          @if (editingItem_() === item) {
+            <input
+              #renameInput
+              type="text"
+              class="inline-edit-input"
+              [value]="renameValue()(item)"
+              (blur)="onRenameBlur(item, renameInput.value)"
+              (keydown.enter)="renameInput.blur()"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+          } @else if (lockKey) {
+            <span class="c-tap-chip is-locked">
+              @if (dotColor(); as color) {
+                <span class="c-tap-chip__dot" [style.background-color]="color(item)"></span>
+              }
+              {{ item | translatePipe }}
+              <lucide-icon
+                name="lock"
+                [size]="14"
+                [attr.title]="lockKey | translatePipe"
+                [attr.aria-label]="lockKey | translatePipe"
+              ></lucide-icon>
+            </span>
+          } @else {
+            <button
+              type="button"
+              class="c-tap-chip"
+              [attr.aria-expanded]="menuItem_() === item"
+              (click)="onOpenMenu($event, item)"
+              (dblclick)="inlineRename() && onMenuEdit(item)"
+            >
+              @if (dotColor(); as color) {
+                <span class="c-tap-chip__dot" [style.background-color]="color(item)"></span>
+              }
+              {{ item | translatePipe }}
+            </button>
+          }
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        @if (emptyKey(); as empty) {
+          {{ empty | translatePipe }}
+        } @else {
+          {{ 'metadata_no_items_prefix' | translatePipe }} {{ titleKey() | translatePipe }}
+          {{ 'metadata_no_items_suffix' | translatePipe }}
+        }
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Outside the card: its backdrop-filter would trap the position:fixed popover. -->
+<app-row-actions-menu [anchored]="true" (closed)="menuItem_.set(null)">
+  @if (menuItem_(); as item) {
+    @if (canEdit()) {
+      <button
+        type="button"
+        class="c-icon-btn"
+        (click)="onMenuEdit(item)"
+        [attr.aria-label]="'edit' | translatePipe"
+        [attr.title]="'edit' | translatePipe"
+      >
+        <lucide-icon name="pencil" [size]="18"></lucide-icon>
+      </button>
+    }
+    <button
+      type="button"
+      class="c-icon-btn danger"
+      (click)="onMenuDelete(item)"
+      [attr.aria-label]="'delete' | translatePipe"
+      [attr.title]="'delete' | translatePipe"
+    >
+      <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+    </button>
+  }
+</app-row-actions-menu>

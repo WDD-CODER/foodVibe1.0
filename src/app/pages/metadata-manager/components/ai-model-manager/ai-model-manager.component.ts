@@ -10,8 +10,8 @@ import { TranslationService } from '@services/translation.service'
 /**
  * Admin-only: the Gemini model chain for all users (plan 395). Order decides which model
  * answers first; when one runs out of its free daily quota the next one on the list answers.
- * Reorder by drag & drop (grip handle) or the up/down buttons (keyboard). Edits stay local
- * until Save.
+ * Reorder by drag & drop (grip handle); the dropped row flashes so it is easy to find among
+ * the look-alike names. Edits stay local until Save.
  */
 @Component({
   selector: 'app-ai-model-manager',
@@ -34,6 +34,9 @@ export class AiModelManagerComponent {
   private readonly saved_ = signal<GeminiChainModel[]>([])
   /** The admin's working copy. */
   protected readonly models_ = signal<GeminiChainModel[]>([])
+  /** The row just dropped in a new place — highlighted briefly (see `.is-just-moved`). */
+  protected readonly justMoved_ = signal<string | null>(null)
+  private justMovedTimer_: ReturnType<typeof setTimeout> | null = null
 
   protected readonly isDirty_ = computed(() => this.chainKey_(this.models_()) !== this.chainKey_(this.saved_()))
   protected readonly enabledCount_ = computed(() => this.models_().filter((m) => m.enabled).length)
@@ -90,16 +93,7 @@ export class AiModelManagerComponent {
       moveItemInArray(copy, event.previousIndex, event.currentIndex)
       return copy
     })
-  }
-
-  protected onMove(index: number, delta: -1 | 1): void {
-    const next = index + delta
-    this.models_.update((list) => {
-      if (next < 0 || next >= list.length) return list
-      const copy = [...list]
-      ;[copy[index], copy[next]] = [copy[next], copy[index]]
-      return copy
-    })
+    this.flashMoved_(event.item.data as string)
   }
 
   protected onSave(): void {
@@ -132,6 +126,14 @@ export class AiModelManagerComponent {
   private onSaveFailed_(): void {
     this.isSaving_.set(false)
     this.userMsg_.onSetErrorMsg(this.translation_.translate('ai_model_save_failed'))
+  }
+
+  /** Re-triggers the highlight even when the same row is dropped twice in a row. */
+  private flashMoved_(name: string): void {
+    if (this.justMovedTimer_) clearTimeout(this.justMovedTimer_)
+    this.justMoved_.set(null)
+    queueMicrotask(() => this.justMoved_.set(name))
+    this.justMovedTimer_ = setTimeout(() => this.justMoved_.set(null), 1600)
   }
 
   private setModels_(models: GeminiChainModel[]): void {

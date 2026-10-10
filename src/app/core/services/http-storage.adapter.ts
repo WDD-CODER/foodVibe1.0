@@ -233,38 +233,6 @@ export class HttpStorageAdapter {
     )
   }
 
-  /** Plan 322: renames (or adds, if `oldKey` isn't already in master) a key in __master__'s own
-   *  registry doc, so future signups get it too. Same open-to-any-signed-in-user tradeoff as
-   *  pushToMaster above. */
-  async pushRegistryRenameToMaster(
-    entityType: string,
-    oldKey: string,
-    newKey: string,
-    itemData?: { color?: string; autoTriggers?: string[] }
-  ): Promise<void> {
-    await firstValueFrom(
-      this.http.put<unknown>(
-        `${this.base}/api/v1/data/${entityType}/registry-rename-master`,
-        { oldKey, newKey, itemData },
-        { headers: this.headers(), withCredentials: true }
-      )
-    )
-  }
-
-  /** Plan 322 M10: mirror of pushRegistryRenameToMaster above, for DELETE. Removes `key` from
-   *  __master__'s own registry doc, and — same dev-only, Human-requested cross-user exception as
-   *  purgeProductIngredientEverywhere above — also strips it from every other user's own
-   *  recipes/dishes/products. */
-  async pushRegistryDeleteToMaster(entityType: string, key: string): Promise<void> {
-    await firstValueFrom(
-      this.http.put<unknown>(
-        `${this.base}/api/v1/data/${entityType}/registry-delete-master`,
-        { key },
-        { headers: this.headers(), withCredentials: true }
-      )
-    )
-  }
-
   /** Plan 322 M4: the shared '__global__' Hebrew-dictionary override layer (admin-writable, everyone reads). */
   async getGlobalDictionaryOverrides(): Promise<Record<string, string>> {
     const { items } = await firstValueFrom(
