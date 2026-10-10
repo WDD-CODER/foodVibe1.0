@@ -160,6 +160,11 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected stepDoneSet_ = signal<Set<number>>(new Set())
   /** Index of the step currently "peeked" (expanded preview without being active). */
   protected peekedStepIndex_ = signal<number | null>(null)
+  /** Step card that just became active and plays the one-off "grow" animation (null = none). */
+  protected growStepIndex_ = signal<number | null>(null)
+  private growTimeoutId_: ReturnType<typeof setTimeout> | null = null
+  /** Countdown time being edited in place (tap the time): the draft text. null = not editing. */
+  protected timerDraft_ = signal<string | null>(null)
   private scrollTimeoutId: ReturnType<typeof setTimeout> | null = null
 
   /** Multiplier chip definitions exposed to template. */
@@ -369,6 +374,7 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cancelLongPress()
+    if (this.growTimeoutId_ !== null) clearTimeout(this.growTimeoutId_)
     this.document.documentElement.classList.remove('theme-kitchen', 'cv-page-scroll')
     this.cookExport.closeAllExportOverlays()
     this.heroFab.clearPageActions()
@@ -850,6 +856,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     for (let i = index + 1; i < steps.length; i++) {
       if (!doneSet.has(i)) {
         this.activeStepIndex_.set(i)
+        this.triggerGrow(i)
         this.scrollToActiveStep(i)
         return
       }
@@ -857,6 +864,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     for (let i = 0; i < index; i++) {
       if (!doneSet.has(i)) {
         this.activeStepIndex_.set(i)
+        this.triggerGrow(i)
         this.scrollToActiveStep(i)
         return
       }
@@ -872,6 +880,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       return next
     })
     this.activeStepIndex_.set(index)
+    this.triggerGrow(index)
   }
 
   protected swapToPane(pane: 'ingredients' | 'steps'): void {
@@ -881,7 +890,60 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Jump to any pending step and make it the active one. */
   protected setActiveStep(index: number): void {
     this.activeStepIndex_.set(index)
+    this.triggerGrow(index)
     this.scrollToActiveStep(index)
+  }
+
+  /** Play the step-change animation on the card that just became active (only this click path). */
+  private triggerGrow(index: number): void {
+    if (this.growTimeoutId_ !== null) clearTimeout(this.growTimeoutId_)
+    this.growStepIndex_.set(index)
+    this.growTimeoutId_ = setTimeout(() => {
+      this.growTimeoutId_ = null
+      this.growStepIndex_.set(null)
+    }, 600)
+  }
+
+  // ---- STEP CLOCKS (opt-in countdown + stopwatch per active step) ----
+
+  /** Countdown starts at the step's cooking time, or 5:00 when it has none. */
+  protected startStepCountdown(index: number, step: RecipeStep): void {
+    const secs = (step.cookingTimeSecs ?? 0) > 0 ? step.cookingTimeSecs! : 300
+    this.cookTimer.startTimer(index, secs)
+  }
+
+  protected stepMinutes(step: RecipeStep): number {
+    return Math.round((step.cookingTimeSecs ?? 0) / 60)
+  }
+
+  protected beginTimerEdit(): void {
+    this.cookTimer.pauseTimer()
+    this.timerDraft_.set(this.cookTimer.timerDisplay_())
+  }
+
+  /** Commit the edited time (mm:ss, h:mm:ss, or plain minutes): it becomes the new start, paused. */
+  protected commitTimerEdit(index: number): void {
+    const draft = this.timerDraft_()
+    if (draft === null) return
+    this.timerDraft_.set(null)
+    const secs = this.parseClockInput(draft)
+    if (secs > 0) this.cookTimer.setTimerTime(index, secs)
+  }
+
+  protected cancelTimerEdit(): void {
+    this.timerDraft_.set(null)
+  }
+
+  private parseClockInput(raw: string): number {
+    const text = raw.trim()
+    if (!text) return 0
+    if (!text.includes(':')) {
+      const minutes = Number(text)
+      return Number.isFinite(minutes) && minutes > 0 ? Math.round(minutes * 60) : 0
+    }
+    const parts = text.split(':').map((p) => Number(p))
+    if (parts.some((n) => !Number.isFinite(n) || n < 0)) return 0
+    return parts.reduce((total, n) => total * 60 + n, 0)
   }
 
   /** Toggle peek (expanded preview) on a pending step. Cannot peek the active step. */

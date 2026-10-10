@@ -1026,6 +1026,12 @@
     "recipe_calculated_by": "המתכון חושב לפי",
     "long_press_ingredient_hint": "לחיצה ארוכה על מצרך: יחידת מידה והתאמת המתכון",
     "recipe_will_recalculate": "המתכון יחושב מחדש",
-    "all_ingredients_ready_label": "כל המצרכים מוכנים"
+    "all_ingredients_ready_label": "כל המצרכים מוכנים",
+    "active_now": "פעיל עכשיו",
+    "reset": "איפוס",
+    "pause": "השהה",
+    "resume": "המשך",
+    "reopen_step": "פתח שלב מחדש",
+    "cooking_complete_label": "הבישול הושלם"
   }
 }

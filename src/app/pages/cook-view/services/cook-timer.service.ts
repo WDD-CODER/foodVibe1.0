@@ -14,6 +14,10 @@ export class CookTimerService implements OnDestroy {
   timerSecondsLeft_ = signal<number>(0)
   /** Step index whose countdown just finished (null = none). Cleared by dismissTimerDone(). */
   timerFinishedStepIndex_ = signal<number | null>(null)
+  /** True while the countdown is held (paused, reset, or its time just edited). */
+  timerPaused_ = signal<boolean>(false)
+  /** The countdown's starting time in seconds — what reset returns to. */
+  timerBaseSecs_ = signal<number>(0)
   private timerIntervalId_: ReturnType<typeof setInterval> | null = null
 
   // ---- COOK TIMER INPUT SIGNALS ----
@@ -27,6 +31,9 @@ export class CookTimerService implements OnDestroy {
   private stopwatchIntervalId_: ReturnType<typeof setInterval> | null = null
 
   // ---- COMPUTED SIGNALS ----
+  /** Step that owns the countdown clock — running, paused or finished (null = no countdown). */
+  countdownStepIndex_ = computed(() => this.activeTimerStepIndex_() ?? this.timerFinishedStepIndex_())
+
   /** Formatted timer display (m:ss under 1h, h:mm:ss at 1h+). */
   timerDisplay_ = computed(() => this.formatSeconds(this.timerSecondsLeft_()))
 
@@ -40,33 +47,84 @@ export class CookTimerService implements OnDestroy {
 
   /** Start a countdown timer on a step card. */
   startTimer(stepIndex: number, totalSeconds: number): void {
-    if (this.timerIntervalId_ !== null) {
-      clearInterval(this.timerIntervalId_)
-    }
+    this.clearTimerInterval()
     this.timerFinishedStepIndex_.set(null)
     this.activeTimerStepIndex_.set(stepIndex)
+    this.timerBaseSecs_.set(totalSeconds)
     this.timerSecondsLeft_.set(totalSeconds)
-    this.timerIntervalId_ = setInterval(() => {
-      this.timerSecondsLeft_.update((s) => s - 1)
-      if (this.timerSecondsLeft_() <= 0) {
-        clearInterval(this.timerIntervalId_!)
-        this.timerIntervalId_ = null
-        this.timerFinishedStepIndex_.set(this.activeTimerStepIndex_())
-        this.activeTimerStepIndex_.set(null)
-        this.timerSecondsLeft_.set(0)
-      }
-    }, 1000)
+    this.timerPaused_.set(false)
+    this.runTimer()
+  }
+
+  /** Hold the countdown; the remaining seconds are kept. */
+  pauseTimer(): void {
+    if (this.activeTimerStepIndex_() === null) return
+    this.clearTimerInterval()
+    this.timerPaused_.set(true)
+  }
+
+  /** Continue a paused countdown from the seconds it had left. */
+  resumeTimer(): void {
+    if (this.activeTimerStepIndex_() === null || !this.timerPaused_() || this.timerSecondsLeft_() <= 0) return
+    this.timerPaused_.set(false)
+    this.runTimer()
+  }
+
+  /** Play/pause: pauses a running countdown, resumes a paused one. */
+  toggleTimer(): void {
+    if (this.timerPaused_()) this.resumeTimer()
+    else this.pauseTimer()
+  }
+
+  /** Back to the starting time, paused. Also clears a finished alert (the clock stays on its step). */
+  resetTimer(): void {
+    const stepIndex = this.countdownStepIndex_()
+    if (stepIndex === null) return
+    this.clearTimerInterval()
+    this.timerFinishedStepIndex_.set(null)
+    this.activeTimerStepIndex_.set(stepIndex)
+    this.timerSecondsLeft_.set(this.timerBaseSecs_())
+    this.timerPaused_.set(true)
+  }
+
+  /** Set a new starting time (an edited countdown): it becomes the reset time and the clock holds. */
+  setTimerTime(stepIndex: number, totalSeconds: number): void {
+    if (totalSeconds <= 0) return
+    this.clearTimerInterval()
+    this.timerFinishedStepIndex_.set(null)
+    this.activeTimerStepIndex_.set(stepIndex)
+    this.timerBaseSecs_.set(totalSeconds)
+    this.timerSecondsLeft_.set(totalSeconds)
+    this.timerPaused_.set(true)
   }
 
   /** Cancel the active countdown timer. */
   cancelTimer(): void {
+    this.clearTimerInterval()
+    this.activeTimerStepIndex_.set(null)
+    this.timerFinishedStepIndex_.set(null)
+    this.timerSecondsLeft_.set(0)
+    this.timerPaused_.set(false)
+  }
+
+  private runTimer(): void {
+    this.timerIntervalId_ = setInterval(() => {
+      this.timerSecondsLeft_.update((s) => s - 1)
+      if (this.timerSecondsLeft_() <= 0) {
+        this.clearTimerInterval()
+        this.timerFinishedStepIndex_.set(this.activeTimerStepIndex_())
+        this.activeTimerStepIndex_.set(null)
+        this.timerSecondsLeft_.set(0)
+        this.timerPaused_.set(false)
+      }
+    }, 1000)
+  }
+
+  private clearTimerInterval(): void {
     if (this.timerIntervalId_ !== null) {
       clearInterval(this.timerIntervalId_)
       this.timerIntervalId_ = null
     }
-    this.activeTimerStepIndex_.set(null)
-    this.timerFinishedStepIndex_.set(null)
-    this.timerSecondsLeft_.set(0)
   }
 
   /** Dismiss the timer-done alert for a finished step. */
@@ -131,6 +189,7 @@ export class CookTimerService implements OnDestroy {
 
   /** Resume a paused stopwatch from where it left off. */
   resumeStopwatch(): void {
+    if (this.stopwatchIntervalId_ !== null) return
     this.stopwatchPaused_.set(false)
     this.stopwatchIntervalId_ = setInterval(() => {
       this.stopwatchSecondsElapsed_.update((s) => s + 1)
@@ -144,6 +203,17 @@ export class CookTimerService implements OnDestroy {
     } else {
       this.pauseStopwatch()
     }
+  }
+
+  /** Back to 0:00, paused (the stopwatch stays on its step). */
+  resetStopwatch(): void {
+    if (this.stopwatchStepIndex_() === null) return
+    if (this.stopwatchIntervalId_ !== null) {
+      clearInterval(this.stopwatchIntervalId_)
+      this.stopwatchIntervalId_ = null
+    }
+    this.stopwatchSecondsElapsed_.set(0)
+    this.stopwatchPaused_.set(true)
   }
 
   /** Close and reset the active stopwatch. */

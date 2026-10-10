@@ -710,19 +710,6 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   }
 }
 
-.cv-complete-banner {
-  color: var(--cv-accent);
-  font-size: 1rem;
-  font-weight: 700;
-  text-align: center;
-
-  background: var(--cv-chip-bg);
-  border: 1px solid var(--cv-accent-glow);
-  border-radius: var(--radius-lg);
-  margin: 0.75rem;
-  padding: 1rem;
-}
-
 /* ─────────────────────────────────────────────────────────────────────────
    Two-column body — glass ingredient panel + step list
    ───────────────────────────────────────────────────────────────────────── */
@@ -1141,235 +1128,465 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Step cards — pending (default) / active (in-progress) / done (checked)
+   Steps (plan 404 step 6) — done rows · active card · pending rows, step clocks
    ───────────────────────────────────────────────────────────────────────── */
-.cv-step-card {
-  background: var(--cv-panel-bg);
-
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-lg);
-
-  // Flex items shrink by default — once .cv-step-body has a real bounded height (see
-  // .cv-shell above), a recipe with enough steps to exceed that height was getting each
-  // card squeezed below its own content size instead of scrolling, and overflow:hidden
-  // below then clipped the squeezed-out instruction text. flex-shrink: 0 keeps every
-  // card at its full natural (text-driven) height; .cv-step-body's overflow-y: auto
-  // handles anything past the visible area by scrolling instead of shrinking cards.
-  flex-shrink: 0;
-
-  overflow: hidden;
-  transition:
-    opacity 0.2s var(--ease-smooth),
-    border-color 0.2s var(--ease-smooth),
-    box-shadow 0.2s var(--ease-smooth);
+.cv-step-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
 }
 
-.cv-step-card--active {
-  background: var(--cv-chip-bg);
+// Done row: the whole row reopens the step.
+.cv-dn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 
-  border-color: var(--cv-accent-glow);
-}
+  inline-size: 100%;
+  min-block-size: 48px;
 
-.cv-step-card--done {
-  background: var(--cv-chip-bg);
+  background: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 0.9375rem; // 15
+  text-align: start;
 
-  border-color: var(--cv-accent-glow);
-  opacity: 0.75;
-}
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding-inline: 14px var(--space-2);
 
-/* Pending steps are tappable — cursor indicates this */
-.cv-step-card--pending {
   cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
 
   &:hover {
-    border-color: var(--cv-accent-glow);
+    background: var(--bg-glass);
+  }
+
+  &:active {
+    transform: scale(1.02);
+  }
+
+  > s {
+    flex: 1;
+    min-inline-size: 0;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &.is-alert {
+    border-color: var(--color-danger);
   }
 }
 
-.cv-step-card--timer-alert {
-  border-color: var(--color-danger) !important;
-  border-width: 1.5px !important;
-}
-
-.cv-step-card-head {
-  display: flex;
-  align-items: center;
-
-  gap: 6px;
-  padding: 10px 12px 6px;
-}
-
-.cv-step-card--active .cv-step-card-head {
-  padding: 8px 12px 4px;
-}
-
-.cv-step-num {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.cv-ok {
+  display: grid;
+  place-content: center;
   flex-shrink: 0;
 
-  width: 22px;
-  height: 22px;
+  inline-size: 26px;
+  block-size: 26px;
 
-  background: var(--cv-segment-bg);
-  color: var(--cv-muted-text);
-  font-size: 0.7rem;
-  font-weight: 800;
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary-strong);
 
-  border-radius: 50%;
-}
-
-.cv-step-num--active {
-  background: var(--cv-accent);
-  color: var(--color-text-on-primary);
-}
-
-.cv-step-num--done {
-  background: var(--cv-accent);
-  color: var(--color-text-on-primary);
-}
-
-.cv-step-active-label {
-  color: var(--cv-accent);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-.cv-step-done-label {
-  color: var(--cv-muted-text);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
-.cv-step-status-chip {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--cv-muted-text);
-
-  border: 1px solid var(--cv-nav-border);
   border-radius: var(--radius-full);
-  padding-block: 0.125rem;
-  padding-inline: 0.5rem;
 }
 
-.cv-step-status-chip--done {
-  text-decoration: line-through;
-
+.cv-dn-undo {
+  flex-shrink: 0;
   opacity: 0.7;
 }
 
-.cv-step-card-body {
-  padding: 6px 12px 12px;
+// Active card.
+.cv-act {
+  background: var(--bg-card-solid);
 
-  p {
-    margin: 0;
-    color: var(--cv-main-text);
-    font-size: 0.9rem;
-    line-height: var(--lh-relaxed);
+  border: 2px solid var(--color-primary);
+  border-radius: 22px;
+  padding: 18px 18px var(--space-4);
+
+  box-shadow: 0 16px 36px -18px var(--color-primary-glow-strong);
+
+  &.is-alert {
+    border-color: var(--color-danger);
   }
 }
 
-.cv-step-card:not(.cv-step-card--active) .cv-step-card-body p {
-  color: var(--cv-muted-text);
-  font-size: 0.85rem;
-  line-height: var(--lh-normal);
+.cv-grow {
+  animation: cv-grow 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.cv-step-card--done .cv-step-card-body p {
-  text-decoration: line-through;
+@keyframes cv-grow {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 var(--color-primary-glow-strong);
+  }
+
+  45% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 10px var(--color-primary-glow);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
-/* Timer/stopwatch pills under the step text (mirrors mockup's timerBtnLabel placement) */
-.cv-step-tools-row {
+.cv-lab {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 
-  gap: 6px;
-  margin-block-start: 6px;
+  min-block-size: 36px;
+
+  color: var(--color-primary-ink);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+
+  margin-block-end: 10px;
+
+  > i {
+    inline-size: 8px;
+    block-size: 8px;
+
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+  }
 }
 
-.cv-step-status-chip--clickable {
+.cv-lab-tools {
+  display: flex;
+  gap: 6px;
+
+  margin-inline-start: auto;
+}
+
+// Opt-in clock buttons (timer / stopwatch) in the label row.
+.cv-clk-btn {
+  display: grid;
+  place-content: center;
+
+  inline-size: 36px;
+  block-size: 36px;
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+
   cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-smooth);
 
   &:hover {
-    opacity: 0.75;
+    border-color: var(--color-primary);
+  }
+
+  @media (max-width: $cv-phone-max) {
+    inline-size: 28px;
+    block-size: 28px;
   }
 }
 
-.cv-step-done-btn {
-  display: inline-flex;
+// The active step's text must not inherit the global p colour (it vanished in dark mode).
+.cv-act-text {
+  color: var(--color-text-main);
+  font-size: 1.3125rem; // 21
+  font-weight: var(--fw-medium);
+  line-height: 1.5;
+  text-wrap: pretty;
+
+  margin: 0;
+}
+
+.cv-act-dish {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+
+  color: var(--color-text-main);
+  font-size: 1.3125rem;
+  font-weight: var(--fw-medium);
+
+  margin: 0;
+
+  > b {
+    font-size: 2.125rem; // 34
+    font-weight: var(--fw-extrabold);
+  }
+}
+
+// Clock rows: time first (start side), then reset · play/pause · remove.
+.cv-clock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  margin-block-start: var(--space-3);
+  padding: 10px 14px;
+
+  border-radius: var(--radius-lg);
+}
+
+.cv-clock--timer {
+  background: var(--color-primary-soft);
+
+  &.is-fin {
+    background: var(--bg-warning-tint);
+
+    animation: cv-chip-pulse 0.8s ease-in-out infinite;
+
+    .cv-clock-time {
+      color: var(--color-warning-ink);
+    }
+  }
+}
+
+.cv-clock--sw {
+  border: 1px dashed var(--border-chrome);
+}
+
+.cv-clock-time {
+  flex: 1;
+
+  background: none;
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-size: 2.25rem; // 36
+  font-weight: var(--fw-extrabold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-align: start;
+
+  border: 0;
+  padding: 0;
+
+  &:is(button) {
+    cursor: text;
+  }
+
+  .cv-clock--sw & {
+    color: var(--color-text-main);
+  }
+
+  @media (max-width: $cv-phone-max) {
+    font-size: 1.875rem; // 30
+  }
+}
+
+.cv-clock-input {
+  flex: 1;
+  min-inline-size: 0;
+
+  background: var(--bg-card-solid);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 1.75rem;
+  font-weight: var(--fw-extrabold);
+
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-2);
+
+  &:focus {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.cv-clock-btns {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.cv-cb {
+  display: grid;
+  place-content: center;
+
+  inline-size: var(--cv-tap-min);
+  block-size: var(--cv-tap-min);
+
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary-strong);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  // Phone: 24px circles, 13px icons, with an invisible 10px tap extension.
+  @media (max-width: $cv-phone-max) {
+    position: relative;
+
+    inline-size: 24px;
+    block-size: 24px;
+
+    lucide-icon {
+      transform: scale(0.72);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -10px;
+    }
+  }
+}
+
+.cv-cb--ghost {
+  background: var(--bg-card-solid);
+  color: var(--color-primary-ink);
+
+  border-color: var(--border-default);
+}
+
+.cv-go {
+  display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
 
-  min-height: var(--cv-tap-min);
+  inline-size: 100%;
+  block-size: 56px;
 
-  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
-  color: var(--color-text-on-primary);
-  font-size: 0.8rem;
-  font-weight: 700;
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary-strong);
+  font-family: inherit;
+  font-size: 1.0625rem; // 17
+  font-weight: var(--fw-extrabold);
 
-  border: none;
-  border-radius: var(--radius-full);
+  border: 0;
+  border-radius: var(--radius-lg);
+  margin-block-start: 14px;
+
   cursor: pointer;
-  margin: 0 12px 12px;
-  padding: 0 16px;
+  transition: transform var(--dur-fast) var(--ease-smooth);
 
-  letter-spacing: 0.02em;
-
-  transition: filter 0.2s var(--ease-smooth);
-
-  &:hover {
-    filter: brightness(1.08);
+  &:active {
+    transform: scale(0.97);
   }
 }
 
-/* Pill shown on non-active step cards when timer/stopwatch is running or done */
-.cv-step-timer-pill {
-  display: inline-flex;
+// Pending row: tap to make it the active step.
+.cv-pd {
+  display: flex;
   align-items: center;
+  gap: var(--space-3);
 
-  background: var(--cv-chip-bg);
-  color: var(--cv-accent);
-  font-size: 0.62rem;
-  font-weight: 600;
+  inline-size: 100%;
+  min-block-size: 56px;
 
-  border: 1px solid var(--cv-accent-glow);
-  border-radius: var(--radius-sm);
-  gap: 3px;
-  margin-inline-start: auto;
-  padding: 2px 7px;
+  background: var(--bg-glass);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  text-align: start;
 
-  cursor: default;
-}
-
-.cv-step-timer-pill--alert {
-  background: rgba(217, 119, 6, 0.18);
-  color: #d97706;
-
-  border-color: rgba(217, 119, 6, 0.4);
-  font-weight: 700;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding-inline: 14px;
 
   cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    background: var(--bg-card-solid);
+  }
+
+  &:active {
+    transform: scale(1.02);
+  }
+
+  &.is-alert {
+    border-color: var(--color-danger);
+  }
 }
 
-/* Active step: timer/stopwatch tool pills in the card head */
-.cv-step-tool-btn {
-  display: inline-flex;
-  align-items: center;
+.cv-pd-n {
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
 
-  background: var(--cv-timer-idle-bg);
-  color: var(--cv-accent);
-  font-size: 0.65rem;
-  font-weight: 700;
+  inline-size: 30px;
+  block-size: 30px;
 
-  border: 1px solid var(--cv-timer-idle-border);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-weight: var(--fw-bold);
+
   border-radius: var(--radius-full);
+}
+
+.cv-pd-t {
+  flex: 1;
+  min-inline-size: 0;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cv-pd-min {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+// Clock pills on done / pending rows (a clock still running on another step).
+.cv-row-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+
+  block-size: 28px;
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+
+  border-radius: var(--radius-full);
+  padding-inline: 10px;
+
   cursor: pointer;
-  gap: 3px;
-  padding: 4px 10px;
+}
+
+.cv-row-pill--alert {
+  background: var(--bg-warning-tint);
+  color: var(--color-warning-ink);
+}
+
+.cv-fin-ban {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-extrabold);
+
+  border-radius: var(--radius-xl);
+  margin-block-start: var(--space-1);
+  padding: 18px;
 }
 
 .ingredients-table {
