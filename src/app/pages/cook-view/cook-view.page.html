@@ -331,7 +331,7 @@
               }
             </div>
             }
-            <div class="quantity-control-wrap">
+            <div class="quantity-control-wrap" role="group" [attr.aria-label]="'make_quantity' | translatePipe">
               <app-counter
                 [value]="targetQuantity_()"
                 [min]="isDish_() ? 1 : 0.01"
