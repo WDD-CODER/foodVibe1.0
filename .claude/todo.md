@@ -182,14 +182,6 @@
 - [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
 - [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
 
-### Plan 396 — English Key Input Without Keyboard Switch
-
-- [ ] A1: Audit `src/app/**/*.html` for other English-key inputs; report list (escalate any outside scope)
-- [ ] A2: `src/app/core/utils/english-key.util.ts` + spec — `codeToEnglishChar(code)`, `liveEnglishKey(value)` (whitespace→`_`, lowercase), `finalizeEnglishKey(value)` (collapse/trim `_`, `-`→`_`). Do not change `sanitize-key.util.ts` (used by `key-resolution.service.ts`)
-- [ ] A3: `src/app/core/directives/english-key-input.directive.ts` + spec — keydown code mapping, input-event live normalize with caret keep, blur finalize, host attrs; uses `inject()`, no `@Input`
-- [ ] A4: Apply directive to `translation-key-modal.component.html` and `label-creation-modal.component.html`; `save()` in both components (and `translation-key-modal.service.ts` if it re-sanitizes) runs `finalizeEnglishKey`
-- [ ] A5: `ng build` + `ng test` green; hand the Human the PC + phone click list from Success
-
 ### Plan 400 — Dropdown add option, part 1: shared helper and the shared selects (`plans/400-dropdown-add-option-part-1-shared-helper-shared-selects.plan.md`)
 
 - [ ] A1: Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
