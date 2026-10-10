@@ -196,14 +196,6 @@
 - [ ] A4: Apply directive to `translation-key-modal.component.html` and `label-creation-modal.component.html`; `save()` in both components (and `translation-key-modal.service.ts` if it re-sanitizes) runs `finalizeEnglishKey`
 - [ ] A5: `ng build` + `ng test` green; hand the Human the PC + phone click list from Success
 
-### Plan 399 — Recipe book list split: map seams, then extract self-contained flows (`plans/399-recipe-book-list-split-map-seams-extract-flows.plan.md`)
-
-- [ ] A1: Map `recipe-book-list.component.ts` seams into session-state; ⛔ STOP for the Human's go on which to move
-- [ ] A2: Extract approved pure helpers to `recipe-book-list/utils/*.util.ts` (+ specs)
-- [ ] A3: Extract approved service(s) to `recipe-book-list/services/`; wire component + `recipe-book-list.component.html`
-- [ ] A4: Update `recipe-book-list.component.spec.ts` if it touches moved members
-- [ ] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
-
 ### Plan 400 — Dropdown add option, part 1: shared helper and the shared selects (`plans/400-dropdown-add-option-part-1-shared-helper-shared-selects.plan.md`)
 
 - [ ] A1: Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`

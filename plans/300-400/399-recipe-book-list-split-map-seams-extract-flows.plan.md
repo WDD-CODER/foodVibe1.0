@@ -1,6 +1,6 @@
 # Plan 399 — Recipe book list split: map seams, then extract self-contained flows
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: da1d7f666cefa259d0233d6c5522042073ab8a3f
 
