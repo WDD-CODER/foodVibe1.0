@@ -670,43 +670,76 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Phone-only pane swap tabs
+   Switch buttons (<768, plan 404 step 7) — sticky under the top bar / app header
    ───────────────────────────────────────────────────────────────────────── */
-.cv-phone-swap-bar {
+.cv-segw {
   display: none;
-  align-items: center;
+  position: sticky;
+  inset-block-start: 60px; // under the phone top bar
+  z-index: 20;
 
-  gap: 4px;
-  margin-block-start: var(--space-3);
-  padding: 4px;
+  margin-inline: calc(-1 * var(--space-4));
+  padding: 10px var(--space-4);
 
-  background: var(--cv-segment-bg);
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--bg-body) 88%, transparent);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+
+  @media (max-width: $cv-stack-max) {
+    display: block;
+  }
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    inset-block-start: 62px; // under the app header
+  }
 }
 
-.cv-phone-swap-btn {
-  flex: 1;
-  text-align: center;
+.cv-seg {
+  display: flex;
 
-  background: transparent;
-  color: var(--cv-muted-text);
-  font-size: 0.8rem;
-  font-weight: 600;
+  background: var(--border-default);
+  border-radius: 14px;
+  padding: 4px;
 
-  border: none;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  padding: 8px 0;
+  > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    flex: 1;
 
-  transition:
-    background 0.15s var(--ease-smooth),
-    color 0.15s var(--ease-smooth);
+    block-size: var(--cv-tap-min);
 
-  &.active {
-    color: var(--color-text-on-primary);
+    background: none;
+    color: var(--color-text-muted);
+    font-family: inherit;
+    font-size: 0.9375rem; // 15
+    font-weight: var(--fw-bold);
 
-    background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
+    border: 0;
+    border-radius: 11px;
+
+    cursor: pointer;
+    transition: all 0.2s var(--ease-smooth);
+
+    &.is-on {
+      background: var(--bg-card-solid);
+      color: var(--color-text-main);
+
+      box-shadow: var(--shadow-glass);
+    }
+  }
+
+  em {
+    font-size: 0.78125rem; // 12.5
+    font-style: normal;
+    font-weight: var(--fw-bold);
+
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+
+    border-radius: var(--radius-full);
+    padding: 2px var(--space-2);
   }
 }
 
@@ -732,7 +765,27 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   }
 }
 
-/* Panes (plan 404 step 5): card with a header + 4px progress bar; content grows with the page. */
+/* Panes (plan 404 step 5): card with a header + 4px progress bar; content grows with the page.
+   Stacked (<768): steps first, and scroll-margin keeps a scrolled-to pane under the sticky bars. */
+.cv-step-pane {
+  @media (max-width: $cv-stack-max) {
+    order: -1;
+  }
+}
+
+.cv-pane,
+[data-step-index] {
+  scroll-margin-top: 140px; // phone: top bar 60 + switch bar ~80
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    scroll-margin-top: 146px; // small tablet: app header 62 + switch bar ~84
+  }
+
+  @media (min-width: $cv-tablet-min) {
+    scroll-margin-top: 80px; // tablet up: app header only
+  }
+}
+
 .cv-pane {
   position: relative;
   display: flex;
@@ -1799,10 +1852,4 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 
   margin: 0;
   padding: 1rem;
-}
-
-@media (max-width: $cv-stack-max) {
-  .cv-phone-swap-bar {
-    display: flex;
-  }
 }

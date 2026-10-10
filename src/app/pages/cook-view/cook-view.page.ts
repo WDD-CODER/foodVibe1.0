@@ -141,8 +141,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   private longPressStart_: { x: number; y: number } | null = null
   private suppressClickUntil_ = 0
 
-  /** Phone layout: which pane appears on top. Default: ingredients first. */
-  protected phoneFirstPane_ = signal<'ingredients' | 'steps'>('ingredients')
+  /** Below 768 (one scrolling page): the pane the switch buttons mark — follows the scroll. */
+  protected activePane_ = signal<'ingredients' | 'steps'>('steps')
 
   /**
    * Active multiplier chip factor (null = no chip selected, 1 = 1x selected by default).
@@ -883,8 +883,25 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.triggerGrow(index)
   }
 
-  protected swapToPane(pane: 'ingredients' | 'steps'): void {
-    this.phoneFirstPane_.set(pane)
+  /** Switch button: scroll the page so that pane's top sits under the sticky bars (its scroll-margin). */
+  protected scrollToPane(pane: 'ingredients' | 'steps'): void {
+    const el = this.el.nativeElement.querySelector(
+      pane === 'steps' ? '.cv-step-pane' : '.cv-ing-pane'
+    ) as HTMLElement | null
+    this.activePane_.set(pane)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  /** Scroll spy (<768): ingredients is active once its pane top reaches the bars, or at the page end. */
+  @HostListener('window:scroll')
+  protected onWindowScroll(): void {
+    if (!this.isStackedLayout()) return
+    const ing = this.el.nativeElement.querySelector('.cv-ing-pane') as HTMLElement | null
+    const win = this.document.defaultView
+    if (!ing || !win) return
+    const offset = parseFloat(win.getComputedStyle(ing).scrollMarginTop) || 0
+    const atEnd = win.scrollY + win.innerHeight >= this.document.documentElement.scrollHeight - 2
+    this.activePane_.set(ing.getBoundingClientRect().top <= offset + 40 || atEnd ? 'ingredients' : 'steps')
   }
 
   /** Jump to any pending step and make it the active one. */
@@ -1249,7 +1266,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.scrollTimeoutId = setTimeout(() => {
       this.scrollTimeoutId = null
       const card = this.el.nativeElement.querySelector(`[data-step-index="${index}"]`) as HTMLElement | null
-      card?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      // Rows carry scroll-margin-top = the sticky bars, so 'start' lands them just under the bars.
+      card?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 50)
   }
 }
