@@ -1,6 +1,6 @@
 # Plan 321 — Professional Foundation Refactor: Shared Master, Zod Schemas, Unified Taxonomy
 
-Status: active
+Status: done
 Track: code — here (not design)
 
 > **Save instructions for the agent:** persisted via `.claude/skills/save-plan/SKILL.md`. Expected to be `320` when written, but `feat/recipe-labels-course-field` had already claimed 320 (commits reference "plan 320 M1"/"M2") with no `plans/320-*.plan.md` file on disk — so this plan is `321`.
