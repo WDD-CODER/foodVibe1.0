@@ -212,6 +212,35 @@
 - [ ] A4: Update `recipe-book-list.component.spec.ts` if it touches moved members
 - [ ] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
 
+### Plan 400 — Dropdown add option, part 1: shared helper and the shared selects (`plans/400-dropdown-add-option-part-1-shared-helper-shared-selects.plan.md`)
+
+- [ ] A1: Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
+- [ ] A2: `src/app/core/utils/add-option.util.ts` + spec (rules 1–4)
+- [ ] A3: `src/app/shared/add-option-row/` component
+- [ ] A4: Apply to `shared/custom-select` (label, filter by label, stored-key select, keyboard last)
+- [ ] A5: Apply to `shared/custom-multi-select`; remove the second (dynamic) add button
+- [ ] A6: Apply to `shared/chip-search-dropdown`
+- [ ] A7: Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
+- [ ] A8: `ng build` + `ng test` green, `rg` check from Success empty; hand the Human the click list
+
+### Plan 401 — Dropdown add option, part 2: page dropdowns in recipe builder and menu (`plans/401-dropdown-add-option-part-2-page-dropdowns-recipe-builder-menu.plan.md`)
+
+- [ ] A1: Re-check the audit list on current main (after 397/398/400 merged); list the 7 `filterOptionsByStartsWith(` calls with verdicts — session-state
+- [ ] A2: `ingredient-search` component onto the helper
+- [ ] A3: `preparation-search` component onto the helper
+- [ ] A4: Logistics tool picker (`recipe-builder.page.html` + logistics picker service) — one add option
+- [ ] A5: Menu event type (`menu-intelligence.page.ts/.html`) — label, filter by translated label, stored-key select
+- [ ] A6: Fix any raw-key `filterOptionsByStartsWith(` callers from A1; move the section-category dropdown onto the helper (P1)
+- [ ] A7: Append missing `add_new_<thing>` keys to `dictionary.json`
+- [ ] A8: `ng build` + `ng test` green, `rg` check from Success; hand the Human the click list
+
+### Plan 402 — Dropdown add option, part 3: convention doc and trigger (`plans/402-dropdown-add-option-part-3-convention-doc-trigger.plan.md`)
+
+- [ ] A1: Rule section in `docs/agent/standards-domain.md` (helper/component names from merged plan 400)
+- [ ] A2: Trigger row in `AGENTS.md`
+- [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
+- [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
