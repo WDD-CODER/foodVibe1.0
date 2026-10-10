@@ -53,6 +53,18 @@ describe('syncMasterToUser', () => {
     expect(mine._userModified).toBe(false);
   });
 
+  it('plan 403: a master recipe without logistics never gives the clone logistics: null (Rule 1 and Rule 2)', async () => {
+    await testDb().collection('recipes').insertMany([
+      { _id: 'm1', userId: '__master__', nameHebrew: 'רוטב חדש', ingredients: [] },
+      { _id: 'm2', userId: '__master__', nameHebrew: 'רוטב ישן', ingredients: [] },
+      { _id: 'u2', userId: 'userA', _masterId: 'm2', _userModified: false, nameHebrew: 'רוטב ישן', ingredients: [] },
+    ]);
+    await syncMasterToUser('userA');
+    const mine = await testDb().collection('recipes').find({ userId: 'userA' }).toArray();
+    expect(mine).toHaveLength(2);
+    for (const doc of mine) expect('logistics' in doc).toBe(false);
+  });
+
   it('CHARACTERIZATION: Rule 3 — a user-modified clone is never overwritten', async () => {
     await testDb().collection('venues').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'master value' });
     await testDb().collection('venues').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true, nameHebrew: 'my edit' });

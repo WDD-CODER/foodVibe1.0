@@ -469,6 +469,11 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     // createdAt is server-owned: a client PUT never rewrites it.
     const { createdAt: _ca, ...updatable } = safeBody;
     let rekeyed = null;
+    // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
+    // rejects null on optional keys, and a PUT validates the merge over the stored doc, so one
+    // legacy null blocked every save of that doc. They are left out of the validated doc and
+    // $unset in the same write. A null the client sends is still validated (and rejected).
+    let staleNulls = [];
     if (hasV2Schema(req.params.type)) {
       const current = await col(req.params.type).findOne(filter);
       if (!current) {
@@ -477,7 +482,10 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       if (isTerm && updatable.kind !== undefined && updatable.kind !== current.kind) {
         return res.status(400).json({ error: "A term's kind cannot change" });
       }
-      const check = checkStoredDoc(req.params.type, { ...current, ...updatable, ...stamps });
+      staleNulls = Object.keys(current).filter(k => current[k] === null && !(k in updatable));
+      const merged = { ...current, ...updatable, ...stamps };
+      for (const k of staleNulls) delete merged[k];
+      const check = checkStoredDoc(req.params.type, merged);
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
       // After validation, so the new key is a known plain string before it reaches a query.
       if (isTerm && updatable.key !== undefined && updatable.key !== current.key) {
@@ -490,7 +498,10 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
 
     const result = await col(req.params.type).findOneAndUpdate(
       filter,
-      { $set: { ...updatable, ...stamps } },
+      {
+        $set: { ...updatable, ...stamps },
+        ...(staleNulls.length && { $unset: Object.fromEntries(staleNulls.map(k => [k, ''])) }),
+      },
       { returnDocument: 'after' }
     );
     if (!result) {

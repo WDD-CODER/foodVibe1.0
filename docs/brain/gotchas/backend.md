@@ -276,7 +276,19 @@ been killed by it.
 
 **Why the obvious fix is wrong:** `server/routes/generic.js` validates `{ ...current, ...updatable }` and writes with `$set`, so an omitted field keeps the stored null and still fails validation. Loosening the schema to `.nullish()` breaks `server/test/upgrade-v1-to-v2.test.js` "flags nulls … instead of loosening the schema" (INV-4).
 
-**What to do instead:** To clear an invalid stored value through the normal API, send a valid replacement (here `logistics: { baseline: [] }`, see `kitchen-state.service.ts` `applyCascadeUpdate`). For many bad documents, run a one-time server-side data cleanup instead of patching each client write path.
+**What to do instead:** To clear an invalid stored value through the normal API, send a valid replacement (here `logistics: { baseline: [] }`, see `kitchen-state.service.ts` `withoutNullLogistics`). For many bad documents, run a one-time server-side data cleanup instead of patching each client write path.
+
+**Since plan 403:** stale stored nulls are `$unset` by the PUT guard in `server/routes/generic.js` (a stored key holding `null` that the request didn't send is left out of the validated doc and unset in the same write; a `null` the client sends is still rejected). The legacy nulls themselves are cleaned by `server/scripts/cleanup-legacy-data.js` (dry run by default; re-run it to check a database).
+
+**Where the nulls came from:** `server/services/sync-master.js` assigned `clone.logistics = remapLogistics(undefined)` for master recipes with no logistics, and the MongoDB driver stores an `undefined` field as `null`. Every signup and every master-version sync re-wrote them (~1,100 per user). Never assign a possibly-`undefined` value onto a doc you write — guard it or delete the key.
+
+## Dropped collections come back empty while an older server still runs
+
+**What hurt:** Migration 0004 dropped the 10 v1 registry collections (`KITCHEN_*`, `MENU_TYPES`, …) on local and Atlas on 2026-10-10, and they were back the same day, empty, with only `_id_` + `userId_1` indexes (plan 403).
+
+**Why the obvious fix is wrong:** Nothing in the current code creates them, so searching `main` finds no culprit. Mongo creates a collection on `createIndex`, and `server/db.js` runs `createIndex({ userId: 1 })` over `CLONEABLE_TYPES` on every boot — which listed the registries until commit `9e15760a`. Any server started from an older checkout (another slot, a stale branch, Render before its deploy) re-creates them.
+
+**What to do instead:** After removing a collection from `server/constants/collections.js`, drop it only once every running server (all slots + Render) is on the new code, or re-run the drop afterwards (`cleanup-legacy-data.js` F5 drops them only when empty).
 
 ## Gemini free tier is a tiny per-model daily bucket, and Google no longer publishes it
 

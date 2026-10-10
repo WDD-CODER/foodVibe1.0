@@ -294,7 +294,8 @@ export class KitchenStateService {
     )
   }
 
-  saveRecipe(recipe: Recipe): Observable<Recipe> {
+  saveRecipe(input: Recipe): Observable<Recipe> {
+    const recipe = this.withoutNullLogistics(input)
     const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
     const isUpdate = !!(recipe._id && recipe._id.trim() !== '')
     const previous = isUpdate ? this.recipes_().find((r) => r._id === recipe._id) : null
@@ -444,16 +445,20 @@ export class KitchenStateService {
     return changes
   }
 
+  /** Legacy recipes can carry `logistics: null`, which the schema rejects (a row action like
+   *  favorite / rating / approve sends the stored doc back). Send an empty baseline ("no
+   *  equipment") instead so the save validates (plans 340, 403). */
+  private withoutNullLogistics(recipe: Recipe): Recipe {
+    return recipe.logistics === null ? { ...recipe, logistics: { baseline: [] } } : recipe
+  }
+
   /** Shared by cascadeClear*FromAll: applies one doc's update via the raw per-collection
    *  update method (not saveRecipe(), which would fire one toast per affected doc for a bulk
    *  cascade) while still recording activity-log + version-history entries, matching what
    *  saveRecipe does minus the toast. */
   private async applyCascadeUpdate(previous: Recipe, updated: Recipe): Promise<void> {
     const isDish = previous.recipeType === 'dish' || !!(previous.prepItems?.length || previous.prepCategories?.length)
-    // Legacy recipes can carry `logistics: null`, which the schema rejects. The server merges a
-    // PUT over the stored doc, so leaving the field out keeps the null; send an empty baseline
-    // ("no equipment") instead so the save validates (plan 340).
-    const toSave: Recipe = updated.logistics === null ? { ...updated, logistics: { baseline: [] } } : updated
+    const toSave = this.withoutNullLogistics(updated)
     const saved = isDish
       ? await this.dishDataService.updateDish(toSave)
       : await this.recipeDataService.updateRecipe(toSave)
