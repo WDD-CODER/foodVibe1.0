@@ -1,6 +1,6 @@
 # Plan 403 — Data cleanup: legacy null logistics, test items and leftover collections, with a write guard
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: e6feb7f41c27cc9229ae2a58399856aa2f9e4437
 
