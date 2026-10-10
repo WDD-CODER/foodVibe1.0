@@ -1,5 +1,5 @@
-﻿---
-description: Autonomous plan executor â€” finds next incomplete plan, validates, executes, surfaces for approval
+---
+description: Autonomous plan executor — finds next incomplete plan, validates, executes, surfaces for approval
 allowed-tools: Read, Write, Edit, Bash, Agent, Skill, mcp__playwright__*, mcp__plugin_playwright_playwright__*
 ---
 
@@ -11,16 +11,16 @@ Autonomous workflow that processes plans from `todo.md` one by one.
 
 ---
 
-## Phase 0 â€” Find Next Plan
+## Phase 0 — Find Next Plan
 
 Do not Read .claude/todo.md in full.
 
-1. Run `node scripts/todo-query.mjs next` â€” prints the first plan section with unchecked `[ ]` items, its plan file path (e.g., `plans/219-recipe-header-photo-picker.plan.md`), and each open item with its line number
+1. Run `node scripts/todo-query.mjs next` — prints the first plan section with unchecked `[ ]` items, its plan file path (e.g., `plans/219-recipe-header-photo-picker.plan.md`), and each open item with its line number
 2. If it reports no open plan sections â†’ report "All plans complete" and stop
 
 ---
 
-## Phase 1 â€” Understand & Present
+## Phase 1 — Understand & Present
 
 1. Read the plan file completely
 2. **Present to user in plain language:**
@@ -48,13 +48,13 @@ sleep 5
 
 4. Assess complexity. If the plan has more than 8 tasks, touches >3 subsystems, or requires architectural decisions â†’ stop and report:
 ```
-   COMPLEXITY GATE â€” This plan requires human planning first.
+   COMPLEXITY GATE — This plan requires human planning first.
    Reason: [specific reason]
 ```
 
 ---
 
-## Phase 1.5 â€” Git History Check (before any modification)
+## Phase 1.5 — Git History Check (before any modification)
 
 Before touching any file mentioned in the plan:
 
@@ -73,29 +73,29 @@ Review what would be lost. Surface to user if significant changes detected.
 
 ---
 
-## Phase 2 â€” Pre-Validate Checkboxes
+## Phase 2 — Pre-Validate Checkboxes
 
 For each checkbox in the plan:
 
-**Step 1 â€” UI-DETECTION GATE:** Before pre-validating any checkboxes, scan the plan's target files. If any target file matches `**/*.component.html`, `**/*.component.ts`, `**/*.component.scss`, `**/*.page.html`, `**/*.page.ts`, `**/*.page.scss`, or `src/styles.scss` â€” the plan is **UI-TOUCHING**. For UI-TOUCHING plans, Phase 2 MUST invoke `/browse` against the affected route(s) at least once, capture a snapshot, and include the snapshot summary in the pre-validation output. Grep-only verification is forbidden for UI-TOUCHING plans.
+**Step 1 — UI-DETECTION GATE:** Before pre-validating any checkboxes, scan the plan's target files. If any target file matches `**/*.component.html`, `**/*.component.ts`, `**/*.component.scss`, `**/*.page.html`, `**/*.page.ts`, `**/*.page.scss`, or `src/styles.scss` — the plan is **UI-TOUCHING**. For UI-TOUCHING plans, Phase 2 MUST invoke `/browse` against the affected route(s) at least once, capture a snapshot, and include the snapshot summary in the pre-validation output. Grep-only verification is forbidden for UI-TOUCHING plans.
 
-**Step 1a â€” Route identification:** To identify the affected route, read the page component's usage in `app.routes.ts`. If the route cannot be identified, ask the user which route to probe before proceeding. Do not guess.
+**Step 1a — Route identification:** To identify the affected route, read the page component's usage in `app.routes.ts`. If the route cannot be identified, ask the user which route to probe before proceeding. Do not guess.
 
-**Step 1b â€” Browser budget cap:** Phase 2 browser invocation is capped at 5 `/browse` actions per plan (goto + snapshot + up to 3 additional inspection actions). If more than 5 are needed to verify the plan's assumptions, stop and surface the gap instead of continuing.
+**Step 1b — Browser budget cap:** Phase 2 browser invocation is capped at 5 `/browse` actions per plan (goto + snapshot + up to 3 additional inspection actions). If more than 5 are needed to verify the plan's assumptions, stop and surface the gap instead of continuing.
 
-**Step 2 â€” Code inspection:** Read the target file, check if the described change already exists.
+**Step 2 — Code inspection:** Read the target file, check if the described change already exists.
 
 Mark each checkbox as:
-- `DONE` â€” already implemented in code
-- `TODO` â€” needs to be done
-- `BLOCKED` â€” dependency missing or unexpected state
+- `DONE` — already implemented in code
+- `TODO` — needs to be done
+- `BLOCKED` — dependency missing or unexpected state
 
-**MANDATORY OUTPUT FORMAT** â€” Pre-validation results MUST be rendered as a literal markdown table:
+**MANDATORY OUTPUT FORMAT** — Pre-validation results MUST be rendered as a literal markdown table:
 
 ```
 | # | Task | Status | Evidence |
 |---|------|--------|----------|
-| 1 | [task text] | DONE | file.ts:45 â€” method exists |
+| 1 | [task text] | DONE | file.ts:45 — method exists |
 | 2 | [task text] | TODO | not found in target file |
 | 3 | [task text] | BLOCKED | missing dependency: X |
 ```
@@ -104,12 +104,12 @@ Mark each checkbox as:
 
 **If ALL tasks are DONE (zero TODO or BLOCKED items):**
 â†’ Mark all checkboxes `[x]` in `todo.md`
-â†’ **Surface Phase 5** with all tasks shown as DONE in the report â€” explicit user "approve" is still required before archiving. Phase 3 is skipped (no code to execute). Phase 4 is skipped (no files modified). The Phase 5 report must include: `Phase 4 skipped â€” plan pre-validated-done, no changes made.`
+â†’ **Surface Phase 5** with all tasks shown as DONE in the report — explicit user "approve" is still required before archiving. Phase 3 is skipped (no code to execute). Phase 4 is skipped (no files modified). The Phase 5 report must include: `Phase 4 skipped — plan pre-validated-done, no changes made.`
 â†’ Do NOT archive until the user types "approve" or "approve and stop" in this session.
 
 ---
 
-## Phase 3 â€” Execute
+## Phase 3 — Execute
 
 Use parallelism heuristics (persona orchestration retired) to determine parallelism:
 - Tasks targeting **different files** â†’ run in parallel via Agent tool
@@ -125,19 +125,19 @@ After each task: update checkbox in `.claude/todo.md` to `[x]`.
 
 ---
 
-## Phase 4 â€” Self-Validate
+## Phase 4 — Self-Validate
 
-**BUILD SCOPE RULE** â€” `ng build` must run against the current plan's changes. A build result from a previous plan in the same session is NOT valid Phase 4 evidence, even if no files overlap. Each plan starts Phase 4 with a fresh build.
+**BUILD SCOPE RULE** — `ng build` must run against the current plan's changes. A build result from a previous plan in the same session is NOT valid Phase 4 evidence, even if no files overlap. Each plan starts Phase 4 with a fresh build.
 
-**Skip exemption** â€” Phase 4 may be skipped ONLY if Phase 2 confirmed all tasks as DONE (pre-validated-done) AND no files were modified in Phase 3. In that case, replace Phase 4 with a single line in the Phase 5 report: `Phase 4 skipped â€” plan pre-validated-done, no changes made.` This exemption does NOT apply if any task was executed in Phase 3.
+**Skip exemption** — Phase 4 may be skipped ONLY if Phase 2 confirmed all tasks as DONE (pre-validated-done) AND no files were modified in Phase 3. In that case, replace Phase 4 with a single line in the Phase 5 report: `Phase 4 skipped — plan pre-validated-done, no changes made.` This exemption does NOT apply if any task was executed in Phase 3.
 
-**Logging requirement** â€” Silent skipping is forbidden. If Phase 4 is skipped, the reason must appear explicitly in the Phase 5 report. A Phase 5 report with no Phase 4 entry is invalid.
+**Logging requirement** — Silent skipping is forbidden. If Phase 4 is skipped, the reason must appear explicitly in the Phase 5 report. A Phase 5 report with no Phase 4 entry is invalid.
 
 Run validation checklist:
 ```bash
 ng build 2>&1 | tee /tmp/build-output.txt
 if grep -q "ERROR" /tmp/build-output.txt; then
-  echo "BUILD FAILED â€” errors detected:"
+  echo "BUILD FAILED — errors detected:"
   grep "ERROR" /tmp/build-output.txt
   exit 1
 fi
@@ -154,7 +154,7 @@ If plan touched UI/layout:
 
 ---
 
-## Phase 5 â€” Surface for Approval
+## Phase 5 — Surface for Approval
 
 1. **Sound signal:**
 ```bash
@@ -165,7 +165,7 @@ powershell -Command "[console]::beep(800,300); Start-Sleep -Milliseconds 100; [c
 
 ```
 ===================================================
-PLAN COMPLETE â€” AWAITING APPROVAL
+PLAN COMPLETE — AWAITING APPROVAL
 ===================================================
 
 ## Plan: [Name]
@@ -181,9 +181,9 @@ PLAN COMPLETE â€” AWAITING APPROVAL
 | 3 | [checkbox text] | SKIPPED | [reason] |
 
 ## Validation
-ng build â€” passed / failed
-ng lint â€” passed / N/A
-Visual QA â€” passed / skipped / screenshot captured
+ng build — passed / failed
+ng lint — passed / N/A
+Visual QA — passed / skipped / screenshot captured
 
 ## Files Modified
 - path/to/file1.ts
@@ -191,31 +191,31 @@ Visual QA â€” passed / skipped / screenshot captured
 
 ===================================================
 Commands:
-  "approve"          â€” commit changes and continue to next plan
-  "approve and stop" â€” commit changes and end session
-  "show diff"        â€” display git diff
-  "abort"            â€” discard all changes (git checkout .)
+  "approve"          — commit changes and continue to next plan
+  "approve and stop" — commit changes and end session
+  "show diff"        — display git diff
+  "abort"            — discard all changes (git checkout .)
 ===================================================
 ```
 
 ---
 
-## Phase 6 â€” Handle User Response
+## Phase 6 — Handle User Response
 
 ### ARCHIVAL PRECONDITION (enforced before ANY archive action)
 
 Before any edit to `todo.md` that removes a section, or any run of `node scripts/todo-archive.mjs`, ALL three rules below must be satisfied:
 
-1. **Approval required** â€” the user must have typed the literal string `"approve"` or `"approve and stop"` in the current session. Inference from file state, commit history, pre-validation results, or any other source does NOT satisfy this precondition. If the precondition is not met, stop and ask.
-2. **Pre-validated-done plans still need approval** â€” if Phase 2 pre-validation determined a plan is already fully done, Phase 5 must still be surfaced with all tasks marked DONE, and the user must still type "approve" before archiving. Pre-validated-done plans do not skip the approval gate.
-3. **Operational tasks require session evidence** â€” tasks that are migrations, deployments, reviews, or PR merges can NEVER be marked `[x]` based on filesystem inference or code presence. They require either (a) direct evidence from a command run in this session (e.g. `gh pr list` confirming a merge), or (b) explicit user confirmation ("yes, the migration ran") in this session. If neither exists, the task stays `[ ]` and is surfaced as BLOCKED in Phase 2.
+1. **Approval required** — the user must have typed the literal string `"approve"` or `"approve and stop"` in the current session. Inference from file state, commit history, pre-validation results, or any other source does NOT satisfy this precondition. If the precondition is not met, stop and ask.
+2. **Pre-validated-done plans still need approval** — if Phase 2 pre-validation determined a plan is already fully done, Phase 5 must still be surfaced with all tasks marked DONE, and the user must still type "approve" before archiving. Pre-validated-done plans do not skip the approval gate.
+3. **Operational tasks require session evidence** — tasks that are migrations, deployments, reviews, or PR merges can NEVER be marked `[x]` based on filesystem inference or code presence. They require either (a) direct evidence from a command run in this session (e.g. `gh pr list` confirming a merge), or (b) explicit user confirmation ("yes, the migration ran") in this session. If neither exists, the task stays `[ ]` and is surfaced as BLOCKED in Phase 2.
 
 ---
 
 ### Plan-to-plan dirty-state gate
 After marking a plan complete, run `git status --short`. If output is non-empty:
 - Abort the auto-solve loop
-- Output: "Previous plan left dirty state â€” manual review required."
+- Output: "Previous plan left dirty state — manual review required."
 - Do NOT proceed to next plan.
 
 ---
@@ -236,7 +236,7 @@ After marking a plan complete, run `git status --short`. If output is non-empty:
 
 ## Error Handling
 
-- **Build fails:** Stop, show full error output, wait for user input â€” do not auto-fix
+- **Build fails:** Stop, show full error output, wait for user input — do not auto-fix
 - **gstack /browse unavailable:** Fall back to Playwright MCP for screenshots; if both unavailable, skip visual QA and note in report
 - **Unexpected file state:** Stop that task, mark as "needs human", continue with others
 - **All tasks blocked:** Surface immediately, don't wait for validation phase
@@ -246,7 +246,7 @@ After marking a plan complete, run `git status --short`. If output is non-empty:
 ## Permissions Required
 
 These are already in `.claude/settings.json`:
-- `Bash(*)` â€” for build, git, sound
+- `Bash(*)` — for build, git, sound
 - `Write/Edit` for worktree paths
-- `Skill` â€” for invoking `/browse` (gstack; primary visual QA)
-- `mcp__playwright__*` and `mcp__plugin_playwright_playwright__*` â€” for visual QA (fallback when /browse unavailable)
+- `Skill` — for invoking `/browse` (gstack; primary visual QA)
+- `mcp__playwright__*` and `mcp__plugin_playwright_playwright__*` — for visual QA (fallback when /browse unavailable)

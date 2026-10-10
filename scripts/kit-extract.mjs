@@ -42,11 +42,11 @@ const HAND_FIXED = new Set([
   // Phase 3 hand-fixes: project-specific domain/icon wording removed from pack copies.
   'docs/agent/standards-angular.md', '.claude/skills/angularComponentStructure/SKILL.md',
   // Hand-fixed parameterize rows (never regenerate with --force): PACK markers, machine paths removed, code-context placeholders.
-  '.claude/skills/elegant-fix/SKILL.md', '.claude/skills/techdebt/SKILL.md', '.claude/skills/update-docs/SKILL.md',
+  '.claude/skills/techdebt/SKILL.md', 
   'docs/agent/workflow-map.md', 'docs/agent/standards-security.md', '.github/workflows/ci.yml', '.claude/settings.json',
   '.claude/commands/auto-solve.md', 'scripts/scope-check.mjs', '.lintstagedrc.mjs', 'scripts/pre-commit-no-semi.mjs', 'knip.json', 'scripts/take-plan.mjs',
   // Phase 4 validation: kit-side scrubs (project history, vendor names, BOM) edited in the kit directly; the kit is now the source for these.
-  '.claude/commands/brief.md', '.claude/commands/end-session.md', '.claude/skills/angular-pipe-logic/SKILL.md',
+  '.claude/commands/brief.md', '.claude/commands/end-session.md',
   '.claude/skills/github-sync/SKILL.md', '.cursor/rules/angular-component-structure.mdc', '.cursor/rules/core-angular.mdc',
   '.cursor/rules/git-commit-must-use-skill.mdc', '.cursor/rules/save-plan-must-use-skill.mdc',
   '.cursor/rules/scss-styling-must-use-cssLayer.mdc', 'docs/agent/ship-recovery.md', 'scripts/plan-ledger-check.mjs',

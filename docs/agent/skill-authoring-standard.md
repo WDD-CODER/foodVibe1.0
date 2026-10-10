@@ -168,3 +168,10 @@ Tooling: the `skill-creator` skill automates runs/grading/benchmark/viewer. `cla
 3. For the 3 highest-value skills (cssLayer, angularComponentStructure, save-plan), run each prompt twice in fresh subagents — once with the snapshot (`old_skill`), once with v2 (`with_skill`) — grade, aggregate, and produce the review viewer (`generate_review.py --static`).
 4. Deliver: unified diff per skill + a one-paragraph rationale per diff, the benchmark table, and the viewer HTML.
 5. Kit rule: skills are kit-owned → land the change in `ai-workflow-kit` first, then patch into FoodVibe on a `chore/` branch (ADR 0018).
+
+### Decisions taken 2026-10-10 (after `/skill-doctor` usage data)
+
+- Retired: `angular-pipe-logic` (0 uses), `auth-crypto` (0 uses → folded into `auth-and-logging`), `elegant-fix` (1 use / 185 d; rules already in AGENTS.md).
+- Merged: `update-docs` + `breadcrumb-navigator` → `breadcrumbs` (script-backed).
+- Kept and rewritten: the other 9, including `techdebt` (no interactive uses but invoked by `/refactor` and the nightly maintenance job — stays model-invocable).
+- "Model Guidance" prose deleted everywhere. Result: 14 → 10 skills. Diff + benchmark: `.claude/reports/skills-v2-diff-2026-10-10.md`.

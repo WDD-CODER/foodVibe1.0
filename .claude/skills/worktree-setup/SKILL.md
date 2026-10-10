@@ -1,72 +1,42 @@
 ---
 name: worktree-setup
-description: One-time provisioning of the 3 permanent Planner-Worker slots (wt-1..3). Not automatic — invoke only when a slot is missing or being (re)initialized.
+description: One-time provisioning or repair of the three permanent Planner-Worker slots `../foodVibe1.0-wt-1..3` — git worktrees detached at origin/main with deps installed, `.worktree-root`/`.worktree-port` written and `server/.env` copied. Use only when the user says "setup worktree", "new worktree", "slot is missing" or a `wt-N` folder is absent. Taking a plan into an existing slot is `/take-plan`, not this.
+disable-model-invocation: true
 ---
 
-# Skill: worktree-setup
-**Model Guidance:** Use Haiku/Flash throughout — this is mechanical.
+# worktree-setup
 
-**Trigger:** User says "setup worktree" or "new worktree" (on-demand only).
+Three slots exist so up to three Workers can run in parallel without touching the main folder. A slot is *infrastructure*: created once, reused for every plan, never on a branch while idle. This skill creates or repairs that infrastructure and nothing else — it starts no servers (`scripts/take-plan.mjs` does that when a plan is taken).
 
-> **Not the take-plan flow.** Starting work on a plan is "execute plan NNN" / "take plan
-> NNN" (see `.claude/commands/take-plan.md`), which reuses an already-initialized slot.
-> This skill only creates the 3 permanent slots the first time, or repairs a missing one.
+## 1. Create missing slots
 
-## What this does
-
-Ensures `../foodVibe1.0-wt-1`, `../foodVibe1.0-wt-2` and `../foodVibe1.0-wt-3` exist as git
-worktrees, each detached at `origin/main`, each with its own `.worktree-root` /
-`.worktree-port`, dependencies installed, and `server/.env` copied. It starts no servers —
-`scripts/take-plan.mjs` does that when a plan is actually taken.
-
----
-
-## Phase 1 — Migrate the legacy parallel worktree (one-time)
-
-If `../foodVibe1.0-wt-parallel` exists:
-
-1. Remove the one known disposable artifact before the cleanliness check:
-   `../foodVibe1.0-wt-parallel/.claude/dev-server.log` (a log file the retired
-   `claim-parallel-slot.sh` wrote on every claim — not real work, safe to delete).
-2. `git -C ../foodVibe1.0-wt-parallel status --porcelain` — if anything remains, **stop and
-   report** the dirty/unpushed state to the Human; do not touch the worktree further.
-3. If clean: `git worktree move ../foodVibe1.0-wt-parallel ../foodVibe1.0-wt-1`.
-
-If `../foodVibe1.0-wt-parallel` does not exist, skip this phase.
-
----
-
-## Phase 2 — Create missing slots
-
-For each of `wt-1`, `wt-2`, `wt-3` whose directory does not already exist:
+For each of `wt-1`, `wt-2`, `wt-3` whose folder `../foodVibe1.0-wt-N` does not exist:
 
 ```bash
-git worktree add --detach ../foodVibe1.0-wt-<N> origin/main
+git worktree add --detach ../foodVibe1.0-wt-N origin/main
 ```
 
-Idle slots are always detached at `origin/main` — never on `main`, never on a branch.
+Detached at `origin/main`, never on `main` and never on a branch — an idle slot on a branch is how a stale branch gets accidental commits.
 
----
-
-## Phase 3 — Provision each slot
-
-For every slot directory (existing after Phase 1, or just created in Phase 2):
+## 2. Provision every slot (new or existing)
 
 1. `npm install` at the slot root and inside `server/`.
-2. Write `.worktree-root` (absolute path back to the main repo) and `.worktree-port` (the
-   slot's frontend port — `420N` for `wt-N`, matching the port map in `AGENTS.md`).
-3. Copy `server/.env` from the main repo into the slot's `server/.env` — silent skip if
-   missing. (This repo only has `server/.env`; there is no root `.env` to copy.)
-4. Start no servers — `take-plan.mjs` starts the backend and `ng serve -c slot` when a plan
-   is actually taken.
+2. Write `.worktree-root` = absolute path of the main repo, and `.worktree-port` = `420N` (the port map in `AGENTS.md`: `wt-1`=4201, `wt-2`=4202, `wt-3`=4203).
+3. Copy `server/.env` from the main repo into the slot (`server/.env` is the only env file; skip silently if missing — it is a secret and may be absent on purpose).
 
----
+## 3. Report
 
-## Completion Gate
+One line per slot, then the next step:
 
-Output one line per slot:
 ```
-wt-N: <created | migrated | already present> — deps installed, .env copied
+wt-1: created — deps installed, .env copied
+wt-2: already present — deps installed, .env copied
+wt-3: created — deps installed, .env copied
+3 slots ready. In a free slot, say "execute plan NNN" to start work.
 ```
 
-Then: `3 slots ready. In a free slot, say "execute plan NNN" to start work.`
+<details><summary>Old pattern: the single `wt-parallel` worktree (pre-2026-09)</summary>
+
+If `../foodVibe1.0-wt-parallel` still exists: delete its disposable `.claude/dev-server.log`, then `git -C ../foodVibe1.0-wt-parallel status --porcelain`. Dirty or unpushed → stop and report; clean → `git worktree move ../foodVibe1.0-wt-parallel ../foodVibe1.0-wt-1` before step 1.
+
+</details>

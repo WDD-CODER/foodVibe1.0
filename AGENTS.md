@@ -32,19 +32,15 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 
 | Trigger | File |
 | --- | --- |
-| Before an Angular Pipe or Directive | `.claude/skills/angular-pipe-logic/SKILL.md` |
 | Before any Angular component class | `.claude/skills/angularComponentStructure/SKILL.md` |
-| Auth guards, interceptors, user services, HTTP CRUD | `.claude/skills/auth-and-logging/SKILL.md` |
-| Hashing/tokens in `auth-crypto.ts` | `.claude/skills/auth-crypto/SKILL.md` |
-| New `pages/<x>/` or top-level subtree; after `update-docs` | `.claude/skills/breadcrumb-navigator/SKILL.md` |
+| Auth guards, interceptors, user services, HTTP CRUD, hashing/tokens in `auth-crypto.ts` | `.claude/skills/auth-and-logging/SKILL.md` |
+| New `pages/<x>/` or top-level subtree; files moved/deleted; before a PR that reshaped folders | `.claude/skills/breadcrumbs/SKILL.md` (+ `scripts/breadcrumbs-check.mjs`) |
 | Before any `.scss` / `.css` edit in `src/` | `.claude/skills/cssLayer/SKILL.md` |
-| After a hacky fix, or duplicate/special-case logic appears | `.claude/skills/elegant-fix/SKILL.md` |
-| Session start or after time away (once/day) | `.claude/skills/github-sync/SKILL.md` |
-| Before dev server / browser / database workflows | `.claude/skills/preflight/SKILL.md` |
+| Session start or after time away (once/day) | `.claude/skills/github-sync/SKILL.md` (gate: `scripts/github-sync-gate.mjs`) |
+| Before dev server / browser / database workflows | `.claude/skills/preflight/SKILL.md` (`node scripts/preflight.mjs`) |
 | "save the plan" or pastes a Plan Contract to execute | `.claude/skills/save-plan/SKILL.md` (+ `scripts/plan-name-similarity.mjs`) |
 | Brief adds a new stage / review fallout task | Append `[ ]` to parent plan's Atomic Sub-tasks + `.claude/todo.md` first |
-| Before PR, or "audit tech debt" | `.claude/skills/techdebt/SKILL.md` |
-| Before a PR | `.claude/skills/update-docs/SKILL.md` |
+| Before PR, or "audit tech debt" | `.claude/skills/techdebt/SKILL.md` (+ `scripts/techdebt-report.mjs`) |
 | "execute plan NNN" inside a `wt-N` slot | `.claude/commands/take-plan.md` |
 | "setup worktree" (one-time slot init, not per-plan) | `.claude/skills/worktree-setup/SKILL.md` |
 | Human wants to validate away from the PC ("open remote" / "close remote") | `.claude/commands/remote.md` (`scripts/remote-port.mjs`) |
@@ -68,5 +64,6 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 | `docs/agent/standards-git.md` | Any git write; mandatory Post-push Merge Gate + brain capture |
 | `docs/agent/brain-capture.md` | Writing a `docs/brain/` entry — shapes, usefulness gate |
 | `docs/agent/job-validation.md` | When a job is done; marking todos `[x]` |
+| `docs/agent/skill-authoring-standard.md` | Creating or rewriting any `SKILL.md` |
 
 Stack: `/_shared/tech-stack.md`.
