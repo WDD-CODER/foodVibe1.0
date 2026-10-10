@@ -8,7 +8,7 @@ Full audit: `.claude/techdebt-reports/techdebt-2026-09-27.md`. Two items are rea
 
 ## Atomic Sub-tasks
 
-- [ ] `src/app/core/interceptors/auth.interceptor.ts:4,22` — replace `BehaviorSubject<string | null | undefined>` (refresh-token gate) with `signal()`. Hard rule: signals only, no `BehaviorSubject`. Auth-path file — read `.claude/skills/auth-and-logging/SKILL.md` before touching.
+- [x] `src/app/core/interceptors/auth.interceptor.ts:4,22` — replace `BehaviorSubject<string | null | undefined>` (refresh-token gate) with `signal()`. Done 2026-10-10 as a shared in-flight refresh observable (`shareReplay`, refCount off) rather than a signal — a `toObservable` bridge leaks an effect per queued request. Also fixed a hang when the first 401 caller was cancelled mid-refresh. Spec added; Human-validated success + failure paths 2026-10-10. Hard rule: signals only, no `BehaviorSubject`. Auth-path file — read `.claude/skills/auth-and-logging/SKILL.md` before touching.
 - [x] `src/app/shared/nutrition-badge/nutrition-badge.component.ts:46` — replace legacy `@Input() nutrition` decorator with `input()`. Flagged since at least `techdebt-2026-04-20.md` (~5 months unresolved).
 - [x] `src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts:121` — remove stray trailing semicolon.
 - [x] `src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.ts:197` — remove stray trailing semicolon.
