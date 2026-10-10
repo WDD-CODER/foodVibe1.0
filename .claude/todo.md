@@ -188,7 +188,7 @@
 - [ ] A3: Kit: branch-guard.sh, pre-push, plan-write-guard.sh accept open dirs; save-plan skill text — `../ai-workflow-kit/core/**`
 - [ ] A4: Kit PR on `feat/406-plans-design-folder`; Human merges — `../ai-workflow-kit`
 - [ ] A5: Patch into FoodVibe per ADR 0018 (hand-edit templated hunks, `{{` grep clean) — the scripts in scope, `.husky/pre-push`, `.claude/skills/save-plan/SKILL.md`
-- [ ] A6: Cherry-pick `c4665aac` (plan 318 filed) — `plans/300-400/318-…`, `.claude/todo.md`
+- [ ] A6: Plan 318 filing — done by PR #395; if it is merged, just tick this. Otherwise cherry-pick `512584b0` (plan 318 filed) — `plans/300-400/318-…`, `.claude/todo.md`
 - [ ] A7: `git mv` 372/373/374 → `plans/design/`, fix their `.claude/todo.md` section paths, add `plans/design/README.md` — `plans/design/**`, `.claude/todo.md`
 - [ ] A8: ADR + brain index + AGENTS.md line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`, `AGENTS.md`
 - [ ] A9: `npm run test:scripts`, guard dry runs, `plan-ledger-check`, `kit-owned --check`, `kit-manifest-check`, `ng build`; hand the Human the check list
