@@ -105,7 +105,7 @@ REPORT_LANG: en
 - [x] A3: `scripts/qa/qa-up.ps1` (env.slot generation, port checks, 3 detached processes, pid file, waits, summary line) + `scripts/qa/qa-down.ps1`
 - [x] A4: `package.json` scripts `qa:up` / `qa:down`; `docs/qa/README.md` with the kickoff prompt
 - [x] A6: Nightly scripts `qa-nightly-up.ps1`, `qa-nightly-down.ps1`, `qa-schedule.ps1` (+ idempotent `qa-up.ps1`); `docs/qa/README.md` gains the one-time QA-checkout setup (below) and the nightly prompt
-- [ ] A5: Manual proof on Windows: `npm run qa:up` → health ok → open `http://localhost:4206/shot?run=smoke&name=inv-m&url=/inventory/list&w=375&h=812&full=1` → PNG exists and shows the logged-in list → `npm run qa:down` → ports free. Paste the three outputs in the PR.
+- [x] A5: Manual proof on Windows: `npm run qa:up` → health ok → open `http://localhost:4206/shot?run=smoke&name=inv-m&url=/inventory/list&w=375&h=812&full=1` → PNG exists and shows the logged-in list → `npm run qa:down` → ports free. Paste the three outputs in the PR.
 
 ## Success criteria
 - [auto] `node scripts/qa/evidence-server.mjs` with `QA_USER`/`QA_PASS` set, then `curl http://127.0.0.1:4206/health` → `{"ok":true,...,"loggedIn":true}`

@@ -309,9 +309,16 @@ const server = createServer(async (req, res) => {
 
 server.listen(PORT, '127.0.0.1', () => {
   console.log(`QA evidence: listening on http://127.0.0.1:${PORT} (app ${APP}, api ${API})`)
-  ensureSession()
+  // qa-up starts the backend at the same moment, so keep trying until it answers (up to ~3 min).
+  // A bad password is not retried: every 401 counts toward the account lockout.
+  const signIn = (attempt) => ensureSession()
     .then(() => console.log('QA evidence: signed in as the QA user'))
-    .catch((err) => console.log(`QA evidence: not signed in yet - ${err.message}`))
+    .catch((err) => {
+      const retry = attempt < 36 && !/QA_USER|HTTP 4\d\d/.test(err.message)
+      console.log(`QA evidence: not signed in yet - ${err.message}${retry ? ' (retrying)' : ''}`)
+      if (retry) setTimeout(() => signIn(attempt + 1), 5_000)
+    })
+  signIn(1)
 })
 
 const shutdown = async () => {

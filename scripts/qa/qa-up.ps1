@@ -118,7 +118,7 @@ $states = @{}
 foreach ($s in $services) { $states[$s.Name] = Get-PortState $s.Port $recorded }
 if (@($services | Where-Object { $states[$_.Name].State -eq 'ours' }).Count -eq $services.Count) {
   Write-Output 'QA: already up'
-  Write-Output 'QA ready → http://localhost:4205 · evidence http://localhost:4206/health'
+  Write-Output 'QA ready -> http://localhost:4205 | evidence http://localhost:4206/health'
   exit 0
 }
 
@@ -177,5 +177,5 @@ foreach ($s in $services) {
   else { Write-Output "QA: $($s.Name) FAIL - see $($s.Log)"; $failed = $true }
 }
 if ($failed) { exit 1 }
-Write-Output 'QA ready → http://localhost:4205 · evidence http://localhost:4206/health'
+Write-Output 'QA ready -> http://localhost:4205 | evidence http://localhost:4206/health'
 exit 0
