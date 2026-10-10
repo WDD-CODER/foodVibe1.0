@@ -290,6 +290,16 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Number of steps marked as done (uses stepDoneSet_ for Focus Mode). */
   protected completedStepCount_ = computed(() => this.stepDoneSet_().size)
 
+  /** Empty state: recently cooked recipes with their names (ids no longer in the kitchen are dropped). */
+  protected recentRecipes_ = computed(() => {
+    const all = this.kitchenState.recipes_()
+    return this.cookViewState
+      .recentIds()
+      .map((id) => all.find((r) => r._id === id))
+      .filter((r): r is Recipe => !!r)
+      .map((r) => ({ id: r._id, name: r.nameHebrew }))
+  })
+
   /** Steps (recipe) or prep items (dish) shown in the steps pane. */
   protected stepTotal_ = computed(() =>
     this.isDish_() ? this.scaledPrep_().length : (this.recipe_()?.steps?.length ?? 0)

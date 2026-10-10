@@ -4,15 +4,27 @@
     (click)="onOverlayClick()"
     role="dialog"
     aria-modal="true"
-    aria-label="Export preview">
-    <div
-      class="export-preview-paper-wrap"
-      (click)="$event.stopPropagation()"
-      dir="rtl">
+    aria-label="Export preview"
+  >
+    <div class="export-preview-paper-wrap" (click)="$event.stopPropagation()" dir="rtl">
+      <div class="export-preview-actions">
+        <h3 class="export-preview-head-title">{{ 'export_preview' | translatePipe }}</h3>
+        <span class="export-preview-spacer"></span>
+        <button type="button" class="ep-btn ep-btn--primary" (click)="onExport()">
+          <lucide-icon name="download" [size]="16"></lucide-icon>
+          {{ 'export_to_excel' | translatePipe }}
+        </button>
+        <button type="button" class="ep-btn" (click)="onPrint()">
+          <lucide-icon name="printer" [size]="16"></lucide-icon>
+          {{ 'print' | translatePipe }}
+        </button>
+        <button type="button" class="ep-icon-btn" (click)="onClose()" [attr.aria-label]="'close' | translatePipe">
+          <lucide-icon name="x" [size]="20"></lucide-icon>
+        </button>
+      </div>
       <div class="paper-outer">
         <div class="paper">
           <div class="paper-inner">
-            <div class="paper-ornament top"></div>
             <h2 class="export-preview-title">{{ data.title }}</h2>
             @if (data.subtitle) {
               <p class="export-preview-subtitle">{{ data.subtitle }}</p>
@@ -109,9 +121,9 @@
                         }
                       </tbody>
                     </table>
-                </div>
-              }
-            </div>
+                  </div>
+                }
+              </div>
             }
             @if (data.summary?.length) {
               <div class="export-preview-summary">
@@ -123,23 +135,8 @@
                 }
               </div>
             }
-            <div class="paper-ornament bottom"></div>
           </div>
         </div>
-      </div>
-      <div class="export-preview-actions">
-        <button type="button" class="c-btn-ghost" (click)="onClose()">
-          <lucide-icon name="x" [size]="18"></lucide-icon>
-          {{ 'close' | translatePipe }}
-        </button>
-        <button type="button" class="c-btn-ghost" (click)="onPrint()">
-          <lucide-icon name="printer" [size]="18"></lucide-icon>
-          {{ 'print' | translatePipe }}
-        </button>
-        <button type="button" class="c-btn-primary" (click)="onExport()">
-          <lucide-icon name="download" [size]="18"></lucide-icon>
-          {{ 'export_to_excel' | translatePipe }}
-        </button>
       </div>
     </div>
   </div>

@@ -1,323 +1,312 @@
 @layer components.export-preview {
-  :host {
-    --ep-font-serif: 'Heebo', sans-serif;
-    --ep-color-ornament: var(--color-primary);
-    --ep-color-frame: var(--color-text-main);
-  }
-
+  /* Plan 404 — the preview is always light paper (also in Cook View's kitchen dark mode): a card with
+     a header bar (title · export · print · close) and a scrolling body without a visible scrollbar.
+     The paper re-points the text/border tokens at the --paper-* palette so nothing inside follows
+     the dark theme. Class names the print rules in src/styles.scss rely on are kept. */
   .export-preview-overlay {
     position: fixed;
     inset: 0;
     z-index: 1000;
+    display: grid;
+    place-items: center;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 1rem;
+    padding: var(--space-4);
     background: var(--overlay-backdrop);
-    overflow: auto;
+    backdrop-filter: blur(6px);
 
     cursor: pointer;
   }
 
   .export-preview-paper-wrap {
-    position: relative;
-
-    max-width: 720px;
-    width: 100%;
-    max-height: calc(100dvh - 2rem);
+    --color-text-main: var(--paper-ink);
+    --color-text-secondary: var(--paper-mute);
+    --color-text-muted: var(--paper-mute);
+    --border-default: var(--paper-line);
 
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    position: relative;
 
+    inline-size: 100%;
+    max-inline-size: 640px;
+    max-block-size: 90vh;
+
+    color: var(--paper-ink);
+    background: var(--paper-bg);
+
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+
+    box-shadow: var(--shadow-modal);
     cursor: default;
   }
 
-  .paper-outer {
-    width: 100%;
-    max-width: 720px;
-    margin: 0 auto;
+  .export-preview-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
     flex-shrink: 0;
+
+    border-block-end: 1px solid var(--paper-line);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .export-preview-head-title {
+    color: var(--paper-ink);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-extrabold);
+
+    margin: 0;
+  }
+
+  .export-preview-spacer {
+    flex: 1;
+  }
+
+  .paper-outer {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-block-size: 0;
   }
 
   .paper {
-    position: relative;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0.75rem;
+    flex: 1;
+    min-block-size: 0;
 
-    background: var(--bg-pure);
-    border: 3px solid var(--color-text-main);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-card);
+    overflow: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
   }
 
   .paper-inner {
-    position: relative;
-    min-height: 200px;
-    padding: 2rem 2.5rem 2.5rem;
-    border: 1px solid var(--color-text-main);
-    border-radius: var(--radius-lg);
-    background: transparent;
-
-    overflow: auto;
-    max-height: calc(100dvh - 12rem);
-  }
-
-  .paper-ornament {
-    position: relative;
-    height: 28px;
-    margin: 0 auto 1rem;
-    text-align: center;
-
-    &::before {
-      content: '— ✦ —';
-      font-size: 0.9rem;
-      color: var(--ep-color-ornament);
-      letter-spacing: 6px;
-      font-weight: 600;
-    }
-
-    &.top {
-      margin-top: 0;
-    }
-
-    &.bottom {
-      margin: 1.5rem auto 0;
-    }
+    padding: 20px var(--space-6) 28px;
   }
 
   .export-preview-title {
-    margin: 0 0 0.5rem;
+    color: var(--paper-ink);
+    font-size: 1.625rem; // 26
+    font-weight: var(--fw-extrabold);
 
-    font-family: var(--ep-font-serif);
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-main);
-    text-align: center;
+    margin: 0;
   }
 
   .export-preview-subtitle,
   .export-preview-meta {
-    margin: 0 0 1rem;
+    color: var(--paper-mute);
+    font-size: var(--fs-base);
 
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-    text-align: center;
+    margin: var(--space-1) 0 var(--space-4);
   }
 
   .export-preview-sections {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-  }
-
-  .export-preview-section {
-    border: 2px solid var(--ep-color-frame);
-    border-radius: var(--radius-sm);
-    padding: 0.75rem 1rem;
+    gap: var(--space-4);
   }
 
   .export-preview-section-title {
-    margin: 0 0 0.5rem;
+    color: var(--paper-pri);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-extrabold);
+    letter-spacing: 0.08em;
 
-    font-family: var(--ep-font-serif);
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: var(--color-text-main);
+    margin: 18px 0 var(--space-2);
   }
 
   .export-preview-table {
-    width: 100%;
+    inline-size: 100%;
+
     border-collapse: collapse;
     direction: rtl;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
   }
 
   .export-preview-table th {
-    padding: 0.5rem 0.75rem;
+    color: var(--paper-mute);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-bold);
     text-align: right;
-    border: 1px solid var(--border-default);
-    font-weight: 700;
-    color: var(--color-text-main);
+
+    border-block-end: 1px solid var(--paper-line);
+    padding: var(--space-2) 0;
   }
 
   .export-preview-table td {
-    padding: 0.375rem 0.75rem;
+    color: var(--paper-ink);
     text-align: right;
-    border: 1px solid var(--border-default);
-    color: var(--color-text-secondary);
+
+    border-block-end: 1px solid var(--paper-line);
+    padding: 10px 0;
   }
 
   .export-preview-summary {
-    margin-top: 1.25rem;
-    padding-top: 1rem;
-    border-top: 2px solid var(--ep-color-frame);
-
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: var(--space-2);
+
+    border-block-start: 1px solid var(--paper-line);
+    margin-block-start: var(--space-5);
+    padding-block-start: var(--space-4);
   }
 
   .export-preview-summary-row {
     display: flex;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--space-4);
 
     font-size: 0.9375rem;
   }
 
   .export-preview-summary-label {
-    color: var(--color-text-secondary);
+    color: var(--paper-mute);
   }
 
   .export-preview-summary-value {
-    font-weight: 700;
-    color: var(--color-text-main);
+    color: var(--paper-ink);
+    font-weight: var(--fw-extrabold);
   }
 
   /* Plan 108: recipe-sheet layout (header, yield, ingredients, instructions, prep time) */
   .export-preview-recipe-sheet {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
   .export-preview-recipe-header {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem 1.5rem;
+    gap: var(--space-3) var(--space-6);
 
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--ep-color-frame);
-    border-radius: var(--radius-sm);
+    border-block-end: 1px solid var(--paper-line);
+    padding-block: var(--space-3);
   }
 
   .export-preview-recipe-header-cell {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--space-1);
   }
 
-  .export-preview-recipe-yield {
+  .export-preview-recipe-yield,
+  .export-preview-recipe-prep-time {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem 1rem;
+    gap: var(--space-2) var(--space-4);
 
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--ep-color-frame);
-    border-radius: var(--radius-sm);
+    border-block-end: 1px solid var(--paper-line);
+    padding-block: var(--space-2);
   }
 
   .export-preview-recipe-label {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
+    color: var(--paper-mute);
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
   }
 
   .export-preview-recipe-value {
+    color: var(--paper-ink);
     font-size: 0.9375rem;
-    color: var(--color-text-main);
-  }
-
-  .export-preview-recipe-ingredients {
-    margin-top: 0;
-  }
-
-  .export-preview-recipe-instructions {
-    padding: 0.75rem 1rem;
-    border: 2px solid var(--ep-color-frame);
-    border-radius: var(--radius-sm);
   }
 
   .export-preview-recipe-instructions-block {
-    margin-top: 0.5rem;
+    margin-block-start: var(--space-2);
   }
 
   .export-preview-recipe-instruction-line {
-    margin: 0 0 0.5rem;
+    color: var(--paper-ink);
     font-size: 0.9375rem;
     line-height: 1.5;
-    color: var(--color-text-main);
     text-align: right;
 
+    margin: 0 0 var(--space-2);
+
     &:last-child {
-      margin-bottom: 0;
+      margin-block-end: 0;
     }
   }
 
-  .export-preview-recipe-prep-time {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    padding: 0.5rem 1rem;
-    border: 2px solid var(--ep-color-frame);
-    border-radius: var(--radius-sm);
-  }
-
-  .export-preview-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
-
-    padding: 0.75rem;
-
-    background: var(--bg-pure);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-card);
-  }
-
-  // Plan 344 — portrait phones: less paper padding, taller scroll area, tables scroll sideways
-  // inside their section instead of pushing the page wider.
+  // Portrait phones: tighter paper, tables scroll sideways inside their section.
   @media (max-width: 600px) {
     .export-preview-overlay {
-      padding: 0.5rem;
-    }
-
-    .export-preview-paper-wrap {
-      max-height: calc(100dvh - 1rem);
-    }
-
-    .paper {
-      padding: 0.375rem;
+      padding: var(--space-2);
     }
 
     .paper-inner {
-      padding: 1rem;
-      max-height: calc(100dvh - 6rem);
+      padding: var(--space-4);
     }
 
     .export-preview-title {
-      font-size: 1.25rem;
-    }
-
-    .export-preview-sections {
-      gap: 1.25rem;
+      font-size: 1.375rem;
     }
 
     .export-preview-section {
-      padding: 0.5rem;
       overflow-x: auto;
     }
+  }
+}
 
-    .export-preview-table {
-      font-size: var(--fs-sm);
-    }
+// Buttons sit outside the layer on purpose: the unlayered global button reset would beat any
+// layered rule (cascade layers lose to unlayered styles), and these would render as bare text.
+.ep-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 
-    .export-preview-table th,
-    .export-preview-table td {
-      padding: 0.375rem 0.5rem;
-    }
+  block-size: 44px;
 
-    .export-preview-actions {
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
+  background: var(--paper-soft);
+  color: var(--paper-ink);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-full);
+  padding-inline: var(--space-4);
+
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--paper-pri);
+  }
+}
+
+.ep-btn--primary {
+  background: var(--paper-pri);
+  color: var(--paper-bg);
+
+  border-color: transparent;
+}
+
+.ep-icon-btn {
+  display: grid;
+  place-content: center;
+
+  inline-size: 44px;
+  block-size: 44px;
+
+  background: none;
+  color: var(--paper-mute);
+
+  border: 0;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:hover {
+    background: var(--paper-soft);
+  }
+}
+
+@media (max-width: 600px) {
+  .ep-btn {
+    padding-inline: var(--space-3);
   }
 }

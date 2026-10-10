@@ -61,42 +61,34 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   }
 }
 
+// Empty state (no recipe open): icon, prompt, recipe-book button, recent recipes.
 .cook-view-empty {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
 
-  background: var(--cv-panel-bg);
-  color: var(--cv-main-text);
-  font-size: inherit;
+  color: var(--color-text-muted);
   text-align: center;
 
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-xl);
-  padding: 3rem 2rem;
+  padding: 90px var(--space-5) var(--space-10);
 
-  box-shadow: var(--cv-panel-shadow);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-
-  p {
-    font-size: 1.1rem;
-    color: var(--cv-muted-text);
-
-    margin: 0 0 1rem;
+  > lucide-icon {
+    color: var(--color-primary-ink);
   }
 
-  a {
-    color: var(--cv-accent);
-    font-weight: 600;
-    text-decoration: underline;
+  > p {
+    color: var(--color-text-main);
+    font-size: 1.25rem; // 20
+    font-weight: var(--fw-bold);
+
+    margin: 0;
   }
 
-  lucide-icon {
-    display: block;
+  .cv-pill-btn {
+    flex: 0 0 auto;
 
-    color: var(--cv-accent);
-    opacity: 0.9;
-
-    margin: 0 auto 1rem;
+    text-decoration: none;
   }
 }
 
@@ -734,37 +726,20 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
 
-  gap: 0.5rem;
+  margin-block-start: var(--space-3);
 
-  margin-block-start: 1rem;
+  .cv-chip {
+    text-decoration: none;
+  }
 }
 
 .cv-recent-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--cv-muted-text);
-}
-
-.qty-btn {
-  background: transparent;
-  color: var(--cv-accent);
-
-  border: none;
-  border-radius: var(--radius-full);
-  padding: 0.5rem 0.75rem;
-
-  cursor: pointer;
-  transition: background 0.2s var(--ease-smooth);
-
-  &:hover:not(:disabled) {
-    background: var(--cv-chip-bg);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────

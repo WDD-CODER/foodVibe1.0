@@ -1036,6 +1036,7 @@
     "discard_changes_confirm": "לבטל את השינויים שלא נשמרו?",
     "supplier_delete_in_use_warning": "הספק מקושר ל-{n} מוצרים. מחיקה תסיר אותו מהמוצרים האלה.",
     "confirm_delete_supplier": "למחוק את הספק?",
-    "supplier_delete_from_master_error": "שגיאה במחיקת הספק מכל המשתמשים"
+    "supplier_delete_from_master_error": "שגיאה במחיקת הספק מכל המשתמשים",
+    "export_preview": "תצוגה מקדימה"
   }
 }

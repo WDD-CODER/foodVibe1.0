@@ -832,12 +832,15 @@
   <div class="cook-view-empty">
     <lucide-icon name="utensils" [size]="48"></lucide-icon>
     <p>{{ 'pick_recipe_to_cook' | translatePipe }}</p>
-    <a routerLink="/recipe-book" class="c-btn-primary">{{ 'recipe_book' | translatePipe }}</a>
-    @if (cookViewState.recentIds().length > 0) {
+    <a routerLink="/recipe-book" class="cv-pill-btn cv-pill-btn--primary">
+      <lucide-icon name="book-open" [size]="16"></lucide-icon>
+      {{ 'recipe_book' | translatePipe }}
+    </a>
+    @if (recentRecipes_().length > 0) {
     <div class="cv-recent-chips">
       <span class="cv-recent-label">{{ 'recent_recipes' | translatePipe }}</span>
-      @for (id of cookViewState.recentIds(); track id) {
-      <a [routerLink]="['/cook', id]" class="c-chip">{{ id }}</a>
+      @for (r of recentRecipes_(); track r.id) {
+      <a [routerLink]="['/cook', r.id]" class="cv-chip">{{ r.name }}</a>
       }
     </div>
     }

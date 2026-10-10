@@ -201,6 +201,14 @@ $break-tablet-max: 1023px;
   --shadow-active: 0 4px 12px -4px rgba(20, 184, 166, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   --bg-tabbar: rgba(255, 255, 255, 0.88);
   --bg-page-glow: none;
+
+  /* ---- Export paper (plan 404): always light, never retinted by kitchen dark mode ---- */
+  --paper-bg: #ffffff;
+  --paper-ink: #0f172a;
+  --paper-mute: #475569;
+  --paper-line: rgba(15, 23, 42, 0.10);
+  --paper-soft: #f1f5f9;
+  --paper-pri: #0f766e;
 }
 
 /* Kitchen dark mode — set on <html> by CookViewPage while Cook View is open (plan 404).
