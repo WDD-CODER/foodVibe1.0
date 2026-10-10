@@ -22,7 +22,8 @@ values), with the trigger row in `AGENTS.md`.
   - [auto] `rg -n "add-option rule" AGENTS.md docs/agent/standards-domain.md` prints a hit in each file.
   - [auto] `node scripts/kit-owned.mjs --check` passes (no kit-owned file changed).
   - [auto] `node scripts/kit-manifest-check.mjs` passes.
-  - [human] The Human reads the rule section and confirms it matches what they asked for.
+  - [auto] `rg -n "KeyedPickerSearch" docs/agent/standards-domain.md` prints a hit.
+  - [human] The Human reads the rule section (incl. keyboard) and confirms it matches what they asked for.
 
 ## Execution Mode
 - Parallel: no
@@ -75,11 +76,17 @@ line or file this plan names was removed, renamed or rewritten).
 ### Must Have (P0)
 - [ ] `docs/agent/standards-domain.md`: an "Add-option rule (dropdowns)" section with the five
       rules (one option; `הוסף "<typed>"` vs `הוסף <thing> חדש/ה`, never bare "הוסף"; search by
-      translated label; select the stored key, nothing on cancel; last option, arrows + Enter),
-      and "use `core/utils/add-option.util.ts` + `shared/add-option-row`; shared selects already
-      do it" (names as merged in plan 400).
-- [ ] `AGENTS.md` skill-trigger table: row "New dropdown with add, or changing one → follow the
-      add-option rule" → `docs/agent/standards-domain.md`.
+      translated label; select the stored key, nothing on cancel; keyboard), and "use
+      `core/utils/add-option.util.ts` + `shared/add-option-row`; shared selects already do it"
+      (names as merged in plan 400).
+- [ ] Keyboard subsection — applies to **every** dropdown with a search box, add option or not:
+      first option highlighted on open/typing; ↓/↑ stop at the ends (no wrap); highlight scrolls
+      into view; focus stays in the input (`aria-activedescendant`); Enter picks (add option
+      last); Escape closes; Tab / Shift+Tab close and move to the next / previous field. "Use
+      `core/utils/keyed-picker-search.util.ts` (`KeyedPickerSearch`) — never hand-roll arrow/Enter
+      handling."
+- [ ] `AGENTS.md` skill-trigger table: row "New dropdown / search picker, or changing one → follow
+      the add-option rule (incl. keyboard)" → `docs/agent/standards-domain.md`.
 - [ ] Brain pattern `docs/brain/patterns/dropdown-add-option.md` (per `docs/agent/brain-capture.md`)
       + index line, pointing at the standard (no duplicated rule text).
 
@@ -93,7 +100,7 @@ line or file this plan names was removed, renamed or rewritten).
 - none (docs only).
 
 ## Atomic Sub-tasks
-- [ ] A1: Rule section in `docs/agent/standards-domain.md` (helper/component names from merged plan 400)
+- [ ] A1: Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
 - [ ] A2: Trigger row in `AGENTS.md`
 - [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule

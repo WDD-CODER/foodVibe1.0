@@ -208,27 +208,29 @@
 
 - [ ] A1: Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
 - [ ] A2: `src/app/core/utils/add-option.util.ts` + spec (rules 1–4)
-- [ ] A3: `src/app/shared/add-option-row/` component
-- [ ] A4: Apply to `shared/custom-select` (label, filter by label, stored-key select, keyboard last)
-- [ ] A5: Apply to `shared/custom-multi-select`; remove the second (dynamic) add button
-- [ ] A6: Apply to `shared/chip-search-dropdown`
-- [ ] A7: Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
-- [ ] A8: `ng build` + `ng test` green, `rg` check from Success empty; hand the Human the click list
+- [ ] A3: `src/app/core/utils/keyed-picker-search.util.ts` + spec — `KeyedPickerSearch` copied from the menu service (rule 5) + scroll helper
+- [ ] A4: `src/app/shared/add-option-row/` component
+- [ ] A5: Apply to `shared/custom-select` (label, filter by label, stored-key select; keyboard via A3)
+- [ ] A6: Apply to `shared/custom-multi-select`; remove the second (dynamic) add button; keyboard via A3 (Space toggles)
+- [ ] A7: Apply to `shared/chip-search-dropdown`; keyboard via A3 (focus stays in input, no wrap)
+- [ ] A8: Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
+- [ ] A9: `ng build` + `ng test` green, `rg` checks from Success empty; hand the Human the click list (incl. keyboard check per select)
 
 ### Plan 401 — Dropdown add option, part 2: page dropdowns in recipe builder and menu (`plans/401-dropdown-add-option-part-2-page-dropdowns-recipe-builder-menu.plan.md`)
 
 - [ ] A1: Re-check the audit list on current main (after 397/398/400 merged); list the 7 `filterOptionsByStartsWith(` calls with verdicts — session-state
-- [ ] A2: `ingredient-search` component onto the helper
-- [ ] A3: `preparation-search` component onto the helper
-- [ ] A4: Logistics tool picker (`recipe-builder.page.html` + logistics picker service) — one add option
-- [ ] A5: Menu event type (`menu-intelligence.page.ts/.html`) — label, filter by translated label, stored-key select
-- [ ] A6: Fix any raw-key `filterOptionsByStartsWith(` callers from A1; move the section-category dropdown onto the helper (P1)
-- [ ] A7: Append missing `add_new_<thing>` keys to `dictionary.json`
-- [ ] A8: `ng build` + `ng test` green, `rg` check from Success; hand the Human the click list
+- [ ] A2: Menu: `MenuPickerSearchService` onto `core/utils/keyed-picker-search.util.ts`; delete the local `KeyedPickerSearch`
+- [ ] A3: `ingredient-search` component onto the helpers (add option + keyboard rule 5)
+- [ ] A4: `preparation-search` component onto the helpers (add option + keyboard rule 5 — adds arrows)
+- [ ] A5: Logistics tool picker (`recipe-builder.page.html` + logistics picker service) — one add option; keyboard rule 5
+- [ ] A6: Menu event type (`menu-intelligence.page.ts/.html`) — label, filter by translated label, stored-key select; keyboard via `KeyedPickerSearch`
+- [ ] A7: Fix any raw-key `filterOptionsByStartsWith(` callers from A1; move the section-category dropdown onto the helper (P1)
+- [ ] A8: Append missing `add_new_<thing>` keys to `dictionary.json`
+- [ ] A9: `ng build` + `ng test` green, `rg` checks from Success; hand the Human the click list (incl. keyboard check per dropdown + menu regression)
 
 ### Plan 402 — Dropdown add option, part 3: convention doc and trigger (`plans/402-dropdown-add-option-part-3-convention-doc-trigger.plan.md`)
 
-- [ ] A1: Rule section in `docs/agent/standards-domain.md` (helper/component names from merged plan 400)
+- [ ] A1: Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
 - [ ] A2: Trigger row in `AGENTS.md`
 - [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
