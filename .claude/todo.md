@@ -57,20 +57,20 @@
 - [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`).
 - [x] A5: Build, server tests. Update session-state.
 
-### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/372-venues-b-multiple-contacts-hours-picker.plan.md`)
+### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/design/372-venues-b-multiple-contacts-hours-picker.plan.md`)
 - [ ] A1: Schema and model additions; `build:schemas`; server validation test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
 - [ ] A2: `venue-hours.util` `toDisplay` / `parseLegacy` plus spec (Hebrew range forms, midnight crossing, unparseable).
 - [ ] A3: `HoursEditorComponent` plus spec; wire into the venue form; hydrate and save both shapes (`shared/hours-editor/**`, `venue-form/**`).
 - [ ] A4: Contacts FormArray, legacy hydrate, save mirror, detail list (`venue-form/**`, `venue-detail/**`).
 - [ ] A5: Build, specs. Open 2 existing venues (one with free-text hours), edit and save, check no 400s. Update session-state.
 
-### Plan 373 — Venues C: tour videos (links with a visit date) and "save my current location" (`plans/373-venues-c-tour-videos-current-location.plan.md`)
+### Plan 373 — Venues C: tour videos (links with a visit date) and "save my current location" (`plans/design/373-venues-c-tour-videos-current-location.plan.md`)
 - [ ] A1: Schema and model; `build:schemas`; server test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
 - [ ] A2: Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
 - [ ] A3: Geolocation button and state, plus the detail navigate links.
 - [ ] A4: Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine). Update session-state.
 
-### Plan 374 — Venues D: separate infrastructure from regular equipment in the venue form (`plans/374-venues-d-infrastructure-vs-equipment-groups.plan.md`)
+### Plan 374 — Venues D: separate infrastructure from regular equipment in the venue form (`plans/design/374-venues-d-infrastructure-vs-equipment-groups.plan.md`)
 - [ ] A1: Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
 - [ ] A2: Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
 - [ ] A3: Equipment-form infrastructure hint (`equipment-form/**`).
@@ -180,18 +180,6 @@
 - [ ] A2: Trigger row in `AGENTS.md`
 - [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
-
-### Plan 406 — Design plans folder: open Claude Design plans live in plans/design/ (`plans/406-design-plans-folder-open-claude-design-plans.plan.md`)
-
-- [ ] A1: Kit: `plans.openDirs` config key + `core/scripts/lib/plan-paths.mjs` + tests — `../ai-workflow-kit/kit.config.json`, `../ai-workflow-kit/core/scripts/lib/plan-paths.mjs`
-- [ ] A2: Kit: switch take-plan, todo-query, scope-check, lib/slot, plan-close, next-plan-number (+ ledger/similarity if flat) to the helper; tests — `../ai-workflow-kit/core/scripts/**`
-- [ ] A3: Kit: branch-guard.sh, pre-push, plan-write-guard.sh accept open dirs; save-plan skill text — `../ai-workflow-kit/core/**`
-- [ ] A4: Kit PR on `feat/406-plans-design-folder`; Human merges — `../ai-workflow-kit`
-- [ ] A5: Patch into FoodVibe per ADR 0018 (hand-edit templated hunks, `{{` grep clean) — the scripts in scope, `.husky/pre-push`, `.claude/skills/save-plan/SKILL.md`
-- [ ] A6: Plan 318 filing — done by PR #395; if it is merged, just tick this. Otherwise cherry-pick `512584b0` (plan 318 filed) — `plans/300-400/318-…`, `.claude/todo.md`
-- [ ] A7: `git mv` 372/373/374 → `plans/design/`, fix their `.claude/todo.md` section paths, add `plans/design/README.md` — `plans/design/**`, `.claude/todo.md`
-- [ ] A8: ADR + brain index + AGENTS.md line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`, `AGENTS.md`
-- [ ] A9: `npm run test:scripts`, guard dry runs, `plan-ledger-check`, `kit-owned --check`, `kit-manifest-check`, `ng build`; hand the Human the check list
 
 ### Plan 407 — One soft-delete model and per-user state (userPrefs) (`plans/407-one-soft-delete-model-and-user-prefs.plan.md`)
 

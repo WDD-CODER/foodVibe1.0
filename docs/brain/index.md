@@ -22,6 +22,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | Something behaves surprisingly / a trap cost time | `gotchas.md` first |
 | Need to know what failed, when, for whom (logs) | [[0016-logging-sink-mongo]] — every warn/error lands in Mongo `app_logs` |
 | Porting a design / a new Claude Design handoff | [[0019-design-port-from-handoff]] — handoffs are the source; `design-feature-inventory` is the lost-feature gate |
+| Where to save or find an open plan (design vs code) | [[0020-plans-design-folder]] — open design plans in `plans/design/`, others in `plans/`; closed plans go to `plans/<range>/` |
 | Unfamiliar domain term | `glossary.md` |
 | Need rules/conventions (not history) | `AGENTS.md` and `docs/agent/*.md` — not this folder |
 
