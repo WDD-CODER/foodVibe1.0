@@ -204,14 +204,6 @@
 - [ ] A4: Update `recipe-builder.page.spec.ts` if it touches moved members; add service specs (P1)
 - [ ] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
 
-### Plan 398 — Menu intelligence split: shared dish and section search helper (`plans/398-menu-intelligence-split-shared-dish-section-search.plan.md`)
-
-- [ ] A1: Confirm the seam against the current file (line numbers are from 2026-10-10); list exact differences between the two pickers' keyboard logic before unifying
-- [ ] A2: Create `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts` (+ spec, P1)
-- [ ] A3: Move dish search onto it; wire `menu-intelligence.page.html`
-- [ ] A4: Move section-category search onto it; wire template
-- [ ] A5: `ng build` + `ng test` green, report new line count and the P1 follow-up note; hand the Human the click list from Success
-
 ### Plan 399 — Recipe book list split: map seams, then extract self-contained flows (`plans/399-recipe-book-list-split-map-seams-extract-flows.plan.md`)
 
 - [ ] A1: Map `recipe-book-list.component.ts` seams into session-state; ⛔ STOP for the Human's go on which to move
