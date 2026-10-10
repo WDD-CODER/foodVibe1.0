@@ -213,13 +213,10 @@
               (ratingChange)="onRatingChange($event)"
             />
           </span>
-          @if (cookTimer.activeTimerStepIndex_() !== null) {
-          <span
-            class="cv-chip cv-num cv-chip--timer"
-            [class.cv-chip--alert]="cookTimer.timerFinishedStepIndex_() === cookTimer.activeTimerStepIndex_()"
-          >
+          @if (cookTimer.headerTimer_(); as ht) {
+          <span class="cv-chip cv-num cv-chip--timer" [class.cv-chip--alert]="ht.finished">
             <lucide-icon name="timer" [size]="14"></lucide-icon>
-            {{ 'step' | translatePipe }} {{ cookTimer.activeTimerStepIndex_()! + 1 }} · {{ cookTimer.timerDisplay_() }}
+            {{ 'step' | translatePipe }} {{ ht.step + 1 }} · {{ ht.display }}
           </span>
           }
         </div>
@@ -568,41 +565,41 @@
           } @else {
           <!-- Clock pills shown on a done / pending row whose step owns a running clock -->
           <ng-template #rowPills let-si="si">
-            @if (cookTimer.timerFinishedStepIndex_() === si) {
+            @if (cookTimer.isTimerFinished(si)) {
             <span
               class="cv-row-pill cv-row-pill--alert"
               role="button"
               tabindex="0"
-              (click)="$event.stopPropagation(); cookTimer.dismissTimerDone()"
-              (keydown.enter)="$event.stopPropagation(); cookTimer.dismissTimerDone()"
+              (click)="$event.stopPropagation(); cookTimer.dismissTimerDone(si)"
+              (keydown.enter)="$event.stopPropagation(); cookTimer.dismissTimerDone(si)"
             >
               <lucide-icon name="timer" [size]="13"></lucide-icon>
               {{ 'timer_done' | translatePipe }}
               <lucide-icon name="x" [size]="13"></lucide-icon>
             </span>
-            } @else if (cookTimer.activeTimerStepIndex_() === si) {
+            } @else if (cookTimer.hasCountdown(si)) {
             <span
               class="cv-row-pill cv-num"
               role="button"
               tabindex="0"
-              (click)="$event.stopPropagation(); cookTimer.toggleTimer()"
-              (keydown.enter)="$event.stopPropagation(); cookTimer.toggleTimer()"
+              (click)="$event.stopPropagation(); cookTimer.toggleTimer(si)"
+              (keydown.enter)="$event.stopPropagation(); cookTimer.toggleTimer(si)"
             >
               <lucide-icon name="timer" [size]="13"></lucide-icon>
-              {{ cookTimer.timerDisplay_() }}
-              <lucide-icon [name]="cookTimer.timerPaused_() ? 'play' : 'pause'" [size]="12"></lucide-icon>
+              {{ cookTimer.timerDisplay(si) }}
+              <lucide-icon [name]="cookTimer.isTimerPaused(si) ? 'play' : 'pause'" [size]="12"></lucide-icon>
             </span>
-            } @if (cookTimer.stopwatchStepIndex_() === si) {
+            } @if (cookTimer.hasStopwatch(si)) {
             <span
               class="cv-row-pill cv-num"
               role="button"
               tabindex="0"
-              (click)="$event.stopPropagation(); cookTimer.toggleStopwatch()"
-              (keydown.enter)="$event.stopPropagation(); cookTimer.toggleStopwatch()"
+              (click)="$event.stopPropagation(); cookTimer.toggleStopwatch(si)"
+              (keydown.enter)="$event.stopPropagation(); cookTimer.toggleStopwatch(si)"
             >
               <lucide-icon name="watch" [size]="13"></lucide-icon>
-              {{ cookTimer.stopwatchDisplay_() }}
-              <lucide-icon [name]="cookTimer.stopwatchPaused_() ? 'play' : 'pause'" [size]="12"></lucide-icon>
+              {{ cookTimer.stopwatchDisplay(si) }}
+              <lucide-icon [name]="cookTimer.isStopwatchPaused(si) ? 'play' : 'pause'" [size]="12"></lucide-icon>
             </span>
             }
           </ng-template>
@@ -653,13 +650,13 @@
             <div
               class="cv-act"
               [class.cv-grow]="growStepIndex_() === si"
-              [class.is-alert]="cookTimer.timerFinishedStepIndex_() === si"
+              [class.is-alert]="cookTimer.isTimerFinished(si)"
               [attr.data-step-index]="si"
             >
               <div class="cv-lab">
                 <i></i>{{ 'step' | translatePipe }} {{ si + 1 }} · {{ 'active_now' | translatePipe }}
                 <span class="cv-lab-tools">
-                  @if (cookTimer.countdownStepIndex_() !== si) {
+                  @if (!cookTimer.hasCountdown(si)) {
                   <button
                     type="button"
                     class="cv-clk-btn"
@@ -669,7 +666,7 @@
                   >
                     <lucide-icon name="timer" [size]="18"></lucide-icon>
                   </button>
-                  } @if (cookTimer.stopwatchStepIndex_() !== si) {
+                  } @if (!cookTimer.hasStopwatch(si)) {
                   <button
                     type="button"
                     class="cv-clk-btn"
@@ -684,8 +681,8 @@
               </div>
               <p class="cv-act-text">{{ step.instruction }}</p>
 
-              @if (cookTimer.countdownStepIndex_() === si) {
-              <div class="cv-clock cv-clock--timer" [class.is-fin]="cookTimer.timerFinishedStepIndex_() === si">
+              @if (cookTimer.hasCountdown(si)) {
+              <div class="cv-clock cv-clock--timer" [class.is-fin]="cookTimer.isTimerFinished(si)">
                 @if (timerDraft_() !== null) {
                 <input
                   class="cv-clock-input cv-num"
@@ -698,47 +695,47 @@
                   [attr.aria-label]="'timer_start' | translatePipe"
                 />
                 } @else {
-                <button type="button" class="cv-clock-time cv-num" (click)="beginTimerEdit()">
-                  {{ cookTimer.timerDisplay_() }}
+                <button type="button" class="cv-clock-time cv-num" (click)="beginTimerEdit(si)">
+                  {{ cookTimer.timerDisplay(si) }}
                 </button>
                 }
                 <span class="cv-clock-btns">
                   <button
                     type="button"
                     class="cv-cb cv-cb--ghost"
-                    (click)="cookTimer.resetTimer()"
+                    (click)="cookTimer.resetTimer(si)"
                     [attr.aria-label]="'reset' | translatePipe"
                   >
                     <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
                   </button>
-                  @if (cookTimer.timerFinishedStepIndex_() !== si) {
+                  @if (!cookTimer.isTimerFinished(si)) {
                   <button
                     type="button"
                     class="cv-cb"
-                    (click)="cookTimer.toggleTimer()"
-                    [attr.aria-label]="(cookTimer.timerPaused_() ? 'resume' : 'pause') | translatePipe"
+                    (click)="cookTimer.toggleTimer(si)"
+                    [attr.aria-label]="(cookTimer.isTimerPaused(si) ? 'resume' : 'pause') | translatePipe"
                   >
-                    <lucide-icon [name]="cookTimer.timerPaused_() ? 'play' : 'pause'" [size]="18"></lucide-icon>
+                    <lucide-icon [name]="cookTimer.isTimerPaused(si) ? 'play' : 'pause'" [size]="18"></lucide-icon>
                   </button>
                   }
                   <button
                     type="button"
                     class="cv-cb cv-cb--ghost"
-                    (click)="cookTimer.cancelTimer()"
+                    (click)="cookTimer.cancelTimer(si)"
                     [attr.aria-label]="'remove' | translatePipe"
                   >
                     <lucide-icon name="x" [size]="18"></lucide-icon>
                   </button>
                 </span>
               </div>
-              } @if (cookTimer.stopwatchStepIndex_() === si) {
+              } @if (cookTimer.hasStopwatch(si)) {
               <div class="cv-clock cv-clock--sw">
-                <span class="cv-clock-time cv-num">{{ cookTimer.stopwatchDisplay_() }}</span>
+                <span class="cv-clock-time cv-num">{{ cookTimer.stopwatchDisplay(si) }}</span>
                 <span class="cv-clock-btns">
                   <button
                     type="button"
                     class="cv-cb cv-cb--ghost"
-                    (click)="cookTimer.resetStopwatch()"
+                    (click)="cookTimer.resetStopwatch(si)"
                     [attr.aria-label]="'reset' | translatePipe"
                   >
                     <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
@@ -746,15 +743,15 @@
                   <button
                     type="button"
                     class="cv-cb"
-                    (click)="cookTimer.toggleStopwatch()"
-                    [attr.aria-label]="(cookTimer.stopwatchPaused_() ? 'resume' : 'pause') | translatePipe"
+                    (click)="cookTimer.toggleStopwatch(si)"
+                    [attr.aria-label]="(cookTimer.isStopwatchPaused(si) ? 'resume' : 'pause') | translatePipe"
                   >
-                    <lucide-icon [name]="cookTimer.stopwatchPaused_() ? 'play' : 'pause'" [size]="18"></lucide-icon>
+                    <lucide-icon [name]="cookTimer.isStopwatchPaused(si) ? 'play' : 'pause'" [size]="18"></lucide-icon>
                   </button>
                   <button
                     type="button"
                     class="cv-cb cv-cb--ghost"
-                    (click)="cookTimer.stopStopwatch()"
+                    (click)="cookTimer.stopStopwatch(si)"
                     [attr.aria-label]="'remove' | translatePipe"
                   >
                     <lucide-icon name="x" [size]="18"></lucide-icon>
@@ -772,7 +769,7 @@
             <button
               type="button"
               class="cv-dn"
-              [class.is-alert]="cookTimer.timerFinishedStepIndex_() === si"
+              [class.is-alert]="cookTimer.isTimerFinished(si)"
               [attr.data-step-index]="si"
               (click)="unmarkStepDone(si)"
               [attr.aria-label]="'reopen_step' | translatePipe"
@@ -786,14 +783,14 @@
             <button
               type="button"
               class="cv-pd"
-              [class.is-alert]="cookTimer.timerFinishedStepIndex_() === si"
+              [class.is-alert]="cookTimer.isTimerFinished(si)"
               [attr.data-step-index]="si"
               (click)="setActiveStep(si)"
             >
               <span class="cv-pd-n cv-num">{{ si + 1 }}</span>
               <span class="cv-pd-t">{{ step.instruction }}</span>
               <ng-container *ngTemplateOutlet="rowPills; context: { si: si }"></ng-container>
-              @if (stepMinutes(step) > 0 && cookTimer.countdownStepIndex_() !== si) {
+              @if (stepMinutes(step) > 0 && !cookTimer.hasCountdown(si)) {
               <span class="cv-pd-min cv-num">
                 <lucide-icon name="timer" [size]="13"></lucide-icon>
                 {{ stepMinutes(step) }} {{ 'min' | translatePipe }}

@@ -1178,7 +1178,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   }
 
   &.is-alert {
-    border-color: var(--color-danger);
+    animation: cv-alert-pulse 1.2s ease-in-out infinite;
   }
 }
 
@@ -1201,6 +1201,14 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   opacity: 0.7;
 }
 
+// Finished-timer alert: the outline fades to red and back instead of sitting there.
+@keyframes cv-alert-pulse {
+  50% {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 25%, transparent);
+  }
+}
+
 // Active card.
 .cv-act {
   background: var(--bg-card-solid);
@@ -1212,7 +1220,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   box-shadow: 0 16px 36px -18px var(--color-primary-glow-strong);
 
   &.is-alert {
-    border-color: var(--color-danger);
+    animation: cv-alert-pulse 1.2s ease-in-out infinite;
   }
 }
 
@@ -1510,7 +1518,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   }
 
   &.is-alert {
-    border-color: var(--color-danger);
+    animation: cv-alert-pulse 1.2s ease-in-out infinite;
   }
 }
 

@@ -358,7 +358,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       this.stepDoneSet_.set(new Set())
       this.checkedIngredients_.set(new Set())
       this.peekedStepIndex_.set(null)
-      this.cookTimer.cancelTimer()
+      this.cookTimer.cancelAll()
       this.selectedUnit_.set(recipe.yieldUnit || 'unit')
       this.cookViewState.setLastViewedRecipeId(recipe._id)
       const base = recipe.yieldAmount ?? 1
@@ -916,9 +916,9 @@ export class CookViewPage implements OnInit, OnDestroy {
     return Math.round((step.cookingTimeSecs ?? 0) / 60)
   }
 
-  protected beginTimerEdit(): void {
-    this.cookTimer.pauseTimer()
-    this.timerDraft_.set(this.cookTimer.timerDisplay_())
+  protected beginTimerEdit(index: number): void {
+    this.cookTimer.pauseTimer(index)
+    this.timerDraft_.set(this.cookTimer.timerDisplay(index))
   }
 
   /** Commit the edited time (mm:ss, h:mm:ss, or plain minutes): it becomes the new start, paused. */
