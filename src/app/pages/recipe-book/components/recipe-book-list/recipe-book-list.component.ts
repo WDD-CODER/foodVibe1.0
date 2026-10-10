@@ -24,16 +24,10 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { TranslationService } from '@services/translation.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserService } from '@services/user.service'
-import { UserMsgService } from '@services/user-msg.service'
-import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
-import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { Recipe } from '@models/recipe.model'
-import { MasterPushService, bulkScopeEntity, recipeScopeEntity } from '@services/master-push.service'
 import { Product } from '@models/product.model'
-import { VersionEntityType } from '@services/version-history.service'
-import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
@@ -53,7 +47,7 @@ import {
   NumberParam
 } from 'src/app/core/utils/list-state.util'
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
-import { resolveRecipeAllergens, MAX_ALLERGEN_RECURSION } from 'src/app/core/utils/recipe-allergens.util'
+import { resolveRecipeAllergens } from 'src/app/core/utils/recipe-allergens.util'
 import { CellExpandState } from 'src/app/core/utils/cell-expand-state.util'
 import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { buildFilterOptionCounts, attachFilterCheckedState } from 'src/app/core/utils/filter-category-counts.util'
@@ -61,9 +55,23 @@ import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.c
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-
-export type SortField = 'name' | 'type' | 'cost' | 'labels' | 'allergens' | 'dateAdded' | 'dateUpdated' | 'rating'
-type RecipeBulkField = 'labels' | 'recipeType'
+import {
+  SortField,
+  RECIPE_FILTER_CATEGORIES,
+  isRecipeDish,
+  getAllRecipeLabels,
+  categoryDisplayKey,
+  filterOptionLabel,
+  recipeFilterValues,
+  parseDateToStartOfDay,
+  parseDateToEndOfDay,
+  formatShortDate,
+  formatDateTime,
+  recipeContainsAllProducts,
+  compareRecipes
+} from './utils/recipe-book-list.util'
+import { RecipeRowActionsService } from './services/recipe-row-actions.service'
+import { RecipeListTooltipsService } from './services/recipe-list-tooltips.service'
 
 /** Ingredient-filter typeahead search (plan 301, Milestone 1) — same tuning as ingredient-search.component.ts. */
 const INGREDIENT_SEARCH_LIMIT = 25
@@ -79,7 +87,6 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     LucideAngularModule,
     TranslatePipe,
     ClickOutSideDirective,
-    VersionHistoryPanelComponent,
     LoaderComponent,
     ScrollableDropdownComponent,
     ListShellComponent,
@@ -91,48 +98,28 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     ...COLUMN_CAROUSEL,
     InputClearComponent
   ],
+  providers: [RecipeRowActionsService, RecipeListTooltipsService],
   templateUrl: './recipe-book-list.component.html',
   styleUrl: './recipe-book-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecipeBookListComponent implements OnInit, OnDestroy {
+  // 1. INJECTED
   protected readonly kitchenState = inject(KitchenStateService)
-  private readonly masterPush = inject(MasterPushService)
   private readonly productData = inject(ProductDataService)
   private readonly router = inject(Router)
   private readonly recipeCostService = inject(RecipeCostService)
   private readonly translationService = inject(TranslationService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly userService = inject(UserService)
-  protected readonly isLoggedIn = this.userService.isLoggedIn
-  private readonly requireAuthService = inject(RequireAuthService)
-  private readonly confirmModal = inject(ConfirmModalService)
-  private readonly userMsg = inject(UserMsgService)
   private readonly heroFab = inject(HeroFabService)
   private readonly aiRecipeModal = inject(AiRecipeModalService)
+  protected readonly rowActions = inject(RecipeRowActionsService)
+  protected readonly tooltips = inject(RecipeListTooltipsService)
 
-  ngOnInit(): void {
-    this.heroFab.setPageActions(
-      [
-        {
-          labelKey: 'add_recipe_ai',
-          icon: 'sparkles',
-          run: () => {
-            void this.aiRecipeModal.open()
-          }
-        }
-      ],
-      'replace'
-    )
-  }
-
-  ngOnDestroy(): void {
-    this.heroFab.clearPageActions()
-  }
-
-  protected readonly currentUserId_ = computed(() => this.userService.user_()?._id ?? null)
+  // 4. SIGNALS & CONSTANTS
+  protected readonly isLoggedIn = this.userService.isLoggedIn
   protected readonly isAdmin_ = this.userService.isAdmin_
-
   protected activeFilters_ = signal<Record<string, string[]>>({})
   protected searchQuery_ = signal<string>('')
   protected sortBy_ = signal<SortField | null>(null)
@@ -144,6 +131,239 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected showFavoritesOnly_ = signal<boolean>(false)
   /** When true: show items in range by creation OR by update. When false: by creation only. */
   protected dateIncludeByUpdated_ = signal<boolean>(false)
+  protected ingredientSearchQuery_ = signal<string>('')
+  protected selectedProductIds_ = signal<string[]>([])
+  /** Set to false to show the "date added" column again. */
+  protected hideDateColumn_ = signal(true)
+
+  /** Filter-category open state (plan 345): all collapsed on mobile (≤1023px). On desktop every
+   *  group starts expanded except 'Date', which the mockup doesn't show — it stays collapsed so it
+   *  doesn't dominate the panel above the categories the design leads with. */
+  protected readonly filterCategories = useCollapsibleCategories({ desktopCollapsed: ['Date'] })
+  protected readonly allergenExpand = new CellExpandState()
+  protected readonly labelsExpand = new CellExpandState()
+  protected selection = new ListSelectionState()
+  protected touchSelect = new TouchRowSelection({ selection: this.selection, historyKey: 'recipeSelection' })
+
+  // Pagination (plan 304 M3) — this list has no virtualisation-compatible row/cell markup
+  // (shared .c-list-row engine class uses `display: contents` so its cells flow directly
+  // into the table-body grid; cdk-virtual-scroll's item wrapper would break that column
+  // alignment across every list page using the same shared class). Slicing displayRows_()
+  // to a page gets the same DOM-size win — fewer rendered grid cells — without touching
+  // the shared engine CSS at all.
+  protected readonly PAGE_SIZE = 50
+  protected readonly currentPage_ = signal(1)
+
+  /** Pure helpers the template calls directly (plan 399 utils). */
+  protected readonly isRecipeDish = isRecipeDish
+  protected readonly formatAddedAt = formatShortDate
+  protected readonly formatUpdatedAtWithTime = formatDateTime
+
+  // 5. COMPUTED
+  protected readonly currentUserId_ = computed(() => this.userService.user_()?._id ?? null)
+
+  protected editableFields_ = computed<BulkEditableField[]>(() => [
+    {
+      key: 'labels',
+      label: 'labels',
+      options: this.metadataRegistry.allLabels_().map((l) => ({ value: l.key, label: l.key })),
+      multi: true
+    },
+    {
+      key: 'recipeType',
+      label: 'recipe_type',
+      options: [
+        { value: 'dish', label: 'dish' },
+        { value: 'preparation', label: 'preparation' }
+      ],
+      multi: false
+    }
+  ])
+
+  // Catalog-only pass — recomputes when the recipe list changes, NOT on every
+  // filter-checkbox toggle (see filter-category-counts.util.ts).
+  private filterOptionCounts_ = computed(() => {
+    const recipes = this.kitchenState.recipes_()
+    const counts = buildFilterOptionCounts(recipes, (recipe, bump) => {
+      const allergens = this.getRecipeAllergens(recipe)
+      RECIPE_FILTER_CATEGORIES.forEach((category) =>
+        recipeFilterValues(recipe, category, allergens).forEach((value) => bump(category, value))
+      )
+    })
+
+    // Always show both Approved options (כן/לא), even at 0, so the sidebar can show
+    // selected state when filtering by URL.
+    if (!counts['Approved']) counts['Approved'] = new Map()
+    if (!counts['Approved'].has('true')) counts['Approved'].set('true', 0)
+    if (!counts['Approved'].has('false')) counts['Approved'].set('false', 0)
+
+    return counts
+  })
+
+  // Filters-only pass — cheap, bounded by option count, not catalog size.
+  protected filterCategories_ = computed(() =>
+    attachFilterCheckedState(
+      this.filterOptionCounts_(),
+      this.activeFilters_(),
+      categoryDisplayKey,
+      filterOptionLabel,
+      (name, value) => (name === 'Labels' && value !== 'no_label' ? this.getLabelColor(value) : null)
+    )
+  )
+
+  /**
+   * Server-side prefix search (plan 301, Milestone 1) — debounced + cancels stale
+   * in-flight requests via switchMap. Replaces filtering the full in-memory
+   * kitchenState.products_() on every keystroke, which got slow once a catalog
+   * reached 1,000+ docs (same fix as ingredient-search.component.ts).
+   */
+  private ingredientSearchResults_ = toSignal(
+    toObservable(this.ingredientSearchQuery_).pipe(
+      map((q) => (q ?? '').trim()),
+      debounceTime(INGREDIENT_SEARCH_DEBOUNCE_MS),
+      switchMap((raw): Promise<Product[]> =>
+        raw.length < INGREDIENT_SEARCH_MIN_LENGTH
+          ? Promise.resolve([])
+          : this.productData.searchProducts(raw, INGREDIENT_SEARCH_LIMIT)
+      )
+    ),
+    { initialValue: [] as Product[] }
+  )
+
+  // Exclude already-selected products — layered as its own computed() so it re-runs on
+  // selectedProductIds_() changes without triggering a new network search.
+  protected filteredProductsForIngredientSearch_ = computed(() => {
+    if (this.ingredientSearchQuery_().trim().length < INGREDIENT_SEARCH_MIN_LENGTH) return []
+    const selected = new Set(this.selectedProductIds_())
+    return this.ingredientSearchResults_().filter((p) => !selected.has(p._id))
+  })
+
+  protected filteredRecipes_ = computed(() => {
+    let recipes = this.kitchenState.recipes_()
+    const filters = this.activeFilters_()
+    const search = this.searchQuery_().trim().toLowerCase()
+    const sortBy = this.sortBy_()
+    const sortOrder = this.sortOrder_()
+    const selectedIds = this.selectedProductIds_()
+
+    if (Object.keys(filters).length > 0) {
+      recipes = recipes.filter((recipe) => {
+        return Object.entries(filters).every(([category, selectedValues]) => {
+          if (category === 'Allergens') {
+            // "Do not include allergens": show only recipes that have NONE of the selected allergens
+            const allergens = this.getRecipeAllergens(recipe)
+            return selectedValues.every((v) => !allergens.includes(v))
+          }
+          const recipeValues = recipeFilterValues(recipe, category, [])
+          return selectedValues.some((v) => recipeValues.includes(v))
+        })
+      })
+    }
+
+    if (selectedIds.length > 0) {
+      const recipesById = this.kitchenState.recipesById_()
+      recipes = recipes.filter((r) => recipeContainsAllProducts(r, selectedIds, recipesById))
+    }
+
+    if (search) {
+      recipes = recipes.filter((r) => (r.nameHebrew ?? '').toLowerCase().includes(search))
+    }
+
+    const dateFrom = this.dateFrom_()
+    const dateTo = this.dateTo_()
+    const includeByUpdated = this.dateIncludeByUpdated_()
+    if (dateFrom != null || dateTo != null) {
+      const fromMs = dateFrom != null ? parseDateToStartOfDay(dateFrom) : null
+      const toMs = dateTo != null ? parseDateToEndOfDay(dateTo) : null
+      recipes = recipes.filter((recipe) => {
+        const inRange = (ts: number) => {
+          if (fromMs != null && ts < fromMs) return false
+          if (toMs != null && ts > toMs) return false
+          return true
+        }
+        const createdInRange = inRange(recipe.createdAt ?? 0)
+        const updatedInRange = includeByUpdated && inRange(recipe.updatedAt ?? 0)
+        return createdInRange || updatedInRange
+      })
+    }
+
+    if (this.showFavoritesOnly_()) {
+      const uid = this.currentUserId_()
+      recipes = uid ? recipes.filter((r) => (r.favoritedBy ?? []).includes(uid)) : []
+    }
+
+    if (sortBy) {
+      const isAsc = sortOrder === 'asc'
+      const deps = {
+        translate: (key: string) => this.translationService.translate(key),
+        cost: (r: Recipe) => this.getRecipeCost(r),
+        allergens: (r: Recipe) => this.getRecipeAllergens(r)
+      }
+      recipes = [...recipes].sort((a, b) => {
+        const cmp = compareRecipes(a, b, sortBy, deps)
+        return isAsc ? cmp : -cmp
+      })
+    }
+
+    return recipes
+  })
+
+  /** Visible recipe IDs for header select-all. */
+  protected filteredRecipeIds_ = computed(() =>
+    this.filteredRecipes_()
+      .map((r) => r._id ?? '')
+      .filter(Boolean)
+  )
+
+  /**
+   * Precomputed per-row values (plan 303 M2). getAllRecipeLabels/getRecipeAllergens/getRecipeCost
+   * are cheap after the M1 Map lookups, but the template still called them 2-3x per row on every
+   * change-detection pass (every click/keystroke/scroll). This derives each row's display values
+   * once per data change instead, so the template just reads plain properties.
+   */
+  protected readonly displayRows_ = computed(() =>
+    this.filteredRecipes_().map((recipe) => ({
+      recipe,
+      labels: getAllRecipeLabels(recipe),
+      allergens: this.getRecipeAllergens(recipe),
+      cost: this.getRecipeCost(recipe)
+    }))
+  )
+
+  protected readonly totalPages_ = computed(() => Math.max(1, Math.ceil(this.displayRows_().length / this.PAGE_SIZE)))
+  /** Clamped so an out-of-range page (e.g. after a filter shrinks the result set) self-corrects. */
+  protected readonly displayPage_ = computed(() => Math.min(this.currentPage_(), this.totalPages_()))
+  protected readonly pagedRows_ = computed(() => {
+    const start = (this.displayPage_() - 1) * this.PAGE_SIZE
+    return this.displayRows_().slice(start, start + this.PAGE_SIZE)
+  })
+  protected readonly pageIndicatorText_ = computed(() =>
+    this.translationService
+      .translate('page_indicator')
+      .replace('{n}', String(this.displayPage_()))
+      .replace('{m}', String(this.totalPages_()))
+  )
+
+  protected isEmptyList_ = computed(() => this.kitchenState.recipes_().length === 0)
+
+  protected activeCostTooltipRecipe_ = computed(() => {
+    const id = this.tooltips.costHoveredId() ?? this.tooltips.costTappedId()
+    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
+  })
+
+  protected activeDateTooltipRecipe_ = computed(() => {
+    const id = this.tooltips.dateHoveredId()
+    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
+  })
+
+  protected hasActiveFilters_ = computed(
+    () =>
+      Object.values(this.activeFilters_()).some((arr) => arr.length > 0) ||
+      this.dateFrom_() != null ||
+      this.dateTo_() != null ||
+      this.showFavoritesOnly_() ||
+      this.selectedProductIds_().length > 0
+  )
 
   constructor() {
     const panel = useResponsivePanelState('recipe-book')
@@ -206,67 +426,26 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
   }
 
-  private resetExpandedCells(): void {
-    this.allergenExpand.reset()
-    this.labelsExpand.reset()
-  }
-
-  /** Filter-category open state (plan 345): all collapsed on mobile (≤1023px). On desktop every
-   *  group starts expanded except 'Date', which the mockup doesn't show — it stays collapsed so it
-   *  doesn't dominate the panel above the categories the design leads with. */
-  protected readonly filterCategories = useCollapsibleCategories({ desktopCollapsed: ['Date'] })
-  protected readonly allergenExpand = new CellExpandState()
-  protected readonly labelsExpand = new CellExpandState()
-  protected hoveredCostRecipeId_ = signal<string | null>(null)
-  protected tappedCostRecipeId_ = signal<string | null>(null)
-  protected costTooltipAnchor_ = signal<DOMRect | null>(null)
-  protected hoveredDateRecipeId_ = signal<string | null>(null)
-  /** Set to false to show the "date added" column again. */
-  protected hideDateColumn_ = signal(true)
-  protected dateTooltipAnchor_ = signal<DOMRect | null>(null)
-  protected selection = new ListSelectionState()
-  protected touchSelect = new TouchRowSelection({ selection: this.selection, historyKey: 'recipeSelection' })
-
-  protected editableFields_ = computed<BulkEditableField[]>(() => [
-    {
-      key: 'labels',
-      label: 'labels',
-      options: this.metadataRegistry.allLabels_().map((l) => ({ value: l.key, label: l.key })),
-      multi: true
-    },
-    {
-      key: 'recipeType',
-      label: 'recipe_type',
-      options: [
-        { value: 'dish', label: 'dish' },
-        { value: 'preparation', label: 'preparation' }
+  ngOnInit(): void {
+    this.heroFab.setPageActions(
+      [
+        {
+          labelKey: 'add_recipe_ai',
+          icon: 'sparkles',
+          run: () => {
+            void this.aiRecipeModal.open()
+          }
+        }
       ],
-      multi: false
-    }
-  ])
-  protected ingredientSearchQuery_ = signal<string>('')
-  protected selectedProductIds_ = signal<string[]>([])
-  protected historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null)
-  protected deletingId_ = signal<string | null>(null)
-  protected removingId_ = signal<string | null>(null)
-  protected duplicatingId_ = signal<string | null>(null)
-
-  protected categoryDisplayKey(internalName: string): string {
-    const map: Record<string, string> = {
-      Labels: 'labels',
-      Type: 'type',
-      Allergens: 'allergens',
-      Approved: 'approved',
-      Station: 'station',
-      Course: 'course'
-    }
-    return map[internalName] ?? internalName.toLowerCase()
+      'replace'
+    )
   }
 
-  protected getAllRecipeLabels(recipe: Recipe): string[] {
-    return [...new Set([...(recipe.labels ?? []), ...(recipe.autoLabels ?? [])])]
+  ngOnDestroy(): void {
+    this.heroFab.clearPageActions()
   }
 
+  // 6. METHODS — Read
   /** Resolves label color by registry key, or by display text (e.g. Hebrew) when recipe stores translated value. */
   protected getLabelColor(keyOrDisplay: string): string {
     const byKey = this.metadataRegistry.getLabelColor(keyOrDisplay)
@@ -277,279 +456,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     return byDisplay?.color ?? byKey
   }
 
-  protected toggleFilterCategory(name: string): void {
-    this.filterCategories.toggle(name)
-  }
-
-  protected isCategoryExpanded(name: string): boolean {
-    return this.filterCategories.isExpanded(name)
-  }
-
-  protected togglePanel(): void {
-    this.togglePanelState_()
-  }
-
-  // Catalog-only pass — recomputes when the recipe list changes, NOT on every
-  // filter-checkbox toggle (see filter-category-counts.util.ts).
-  private filterOptionCounts_ = computed(() => {
-    const recipes = this.kitchenState.recipes_()
-    const counts = buildFilterOptionCounts(recipes, (recipe, bump) => {
-      bump('Type', this.isRecipeDish(recipe) ? 'dish' : 'preparation')
-
-      this.getRecipeAllergens(recipe).forEach((a) => bump('Allergens', a))
-
-      const recipeLabels = this.getAllRecipeLabels(recipe)
-      if (recipeLabels.length > 0) recipeLabels.forEach((l) => bump('Labels', l))
-      else bump('Labels', 'no_label')
-
-      bump('Approved', recipe.isApproved ? 'true' : 'false')
-
-      const station = (recipe.defaultStation || '').trim() || '_none'
-      bump('Station', station)
-
-      const course = (recipe.course || '').trim() || '_none'
-      bump('Course', course)
-    })
-
-    // Always show both Approved options (כן/לא), even at 0, so the sidebar can show
-    // selected state when filtering by URL.
-    if (!counts['Approved']) counts['Approved'] = new Map()
-    if (!counts['Approved'].has('true')) counts['Approved'].set('true', 0)
-    if (!counts['Approved'].has('false')) counts['Approved'].set('false', 0)
-
-    return counts
-  })
-
-  // Filters-only pass — cheap, bounded by option count, not catalog size.
-  protected filterCategories_ = computed(() => {
-    const optionLabel = (name: string, value: string): string => {
-      if (name === 'Approved') return value === 'true' ? 'approved_yes' : 'approved_no'
-      if (name === 'Station' && value === '_none') return 'no_station'
-      if (name === 'Course' && value === '_none') return 'no_course'
-      return value
-    }
-
-    return attachFilterCheckedState(
-      this.filterOptionCounts_(),
-      this.activeFilters_(),
-      (name) => this.categoryDisplayKey(name),
-      optionLabel,
-      (name, value) => (name === 'Labels' && value !== 'no_label' ? this.getLabelColor(value) : null)
-    )
-  })
-
-  /**
-   * Server-side prefix search (plan 301, Milestone 1) — debounced + cancels stale
-   * in-flight requests via switchMap. Replaces filtering the full in-memory
-   * kitchenState.products_() on every keystroke, which got slow once a catalog
-   * reached 1,000+ docs (same fix as ingredient-search.component.ts).
-   */
-  private ingredientSearchResults_ = toSignal(
-    toObservable(this.ingredientSearchQuery_).pipe(
-      map((q) => (q ?? '').trim()),
-      debounceTime(INGREDIENT_SEARCH_DEBOUNCE_MS),
-      switchMap((raw): Promise<Product[]> =>
-        raw.length < INGREDIENT_SEARCH_MIN_LENGTH
-          ? Promise.resolve([])
-          : this.productData.searchProducts(raw, INGREDIENT_SEARCH_LIMIT)
-      )
-    ),
-    { initialValue: [] as Product[] }
-  )
-
-  // Exclude already-selected products — layered as its own computed() so it re-runs on
-  // selectedProductIds_() changes without triggering a new network search.
-  protected filteredProductsForIngredientSearch_ = computed(() => {
-    if (this.ingredientSearchQuery_().trim().length < INGREDIENT_SEARCH_MIN_LENGTH) return []
-    const selected = new Set(this.selectedProductIds_())
-    return this.ingredientSearchResults_().filter((p) => !selected.has(p._id))
-  })
-
-  protected filteredRecipes_ = computed(() => {
-    let recipes = this.kitchenState.recipes_()
-    const filters = this.activeFilters_()
-    const search = this.searchQuery_().trim().toLowerCase()
-    const sortBy = this.sortBy_()
-    const sortOrder = this.sortOrder_()
-    const selectedIds = this.selectedProductIds_()
-
-    if (Object.keys(filters).length > 0) {
-      recipes = recipes.filter((recipe) => {
-        return Object.entries(filters).every(([category, selectedValues]) => {
-          let recipeValues: string[] = []
-          if (category === 'Type') {
-            recipeValues = [this.isRecipeDish(recipe) ? 'dish' : 'preparation']
-          } else if (category === 'Allergens') {
-            recipeValues = this.getRecipeAllergens(recipe)
-            // "Do not include allergens": show only recipes that have NONE of the selected allergens
-            return selectedValues.every((v) => !recipeValues.includes(v))
-          } else if (category === 'Labels') {
-            const labels = this.getAllRecipeLabels(recipe)
-            recipeValues = labels.length > 0 ? labels : ['no_label']
-          } else if (category === 'Approved') {
-            recipeValues = [recipe.isApproved ? 'true' : 'false']
-          } else if (category === 'Station') {
-            const st = (recipe.defaultStation || '').trim() || '_none'
-            recipeValues = [st]
-          } else if (category === 'Course') {
-            const c = (recipe.course || '').trim() || '_none'
-            recipeValues = [c]
-          }
-          return selectedValues.some((v) => recipeValues.includes(v))
-        })
-      })
-    }
-
-    if (selectedIds.length > 0) {
-      recipes = recipes.filter((r) => this.recipeContainsAllProducts(r, selectedIds))
-    }
-
-    if (search) {
-      recipes = recipes.filter((r) => (r.nameHebrew ?? '').toLowerCase().includes(search))
-    }
-
-    const dateFrom = this.dateFrom_()
-    const dateTo = this.dateTo_()
-    const includeByUpdated = this.dateIncludeByUpdated_()
-    if (dateFrom != null || dateTo != null) {
-      const fromMs = dateFrom != null ? this.parseDateToStartOfDay(dateFrom) : null
-      const toMs = dateTo != null ? this.parseDateToEndOfDay(dateTo) : null
-      recipes = recipes.filter((recipe) => {
-        const inRange = (ts: number) => {
-          if (fromMs != null && ts < fromMs) return false
-          if (toMs != null && ts > toMs) return false
-          return true
-        }
-        const createdInRange = inRange(recipe.createdAt ?? 0)
-        const updatedInRange = includeByUpdated && inRange(recipe.updatedAt ?? 0)
-        return createdInRange || updatedInRange
-      })
-    }
-
-    if (this.showFavoritesOnly_()) {
-      const uid = this.currentUserId_()
-      recipes = uid ? recipes.filter((r) => (r.favoritedBy ?? []).includes(uid)) : []
-    }
-
-    if (sortBy) {
-      const isAsc = sortOrder === 'asc'
-      recipes = [...recipes].sort((a, b) => {
-        const cmp = this.compareRecipes(a, b, sortBy)
-        return isAsc ? cmp : -cmp
-      })
-    }
-
-    return recipes
-  })
-
-  /** Visible recipe IDs for header select-all. */
-  protected filteredRecipeIds_ = computed(() =>
-    this.filteredRecipes_()
-      .map((r) => r._id ?? '')
-      .filter(Boolean)
-  )
-
-  /**
-   * Precomputed per-row values (plan 303 M2). getAllRecipeLabels/getRecipeAllergens/getRecipeCost
-   * are cheap after the M1 Map lookups, but the template still called them 2-3x per row on every
-   * change-detection pass (every click/keystroke/scroll). This derives each row's display values
-   * once per data change instead, so the template just reads plain properties.
-   */
-  protected readonly displayRows_ = computed(() =>
-    this.filteredRecipes_().map((recipe) => ({
-      recipe,
-      labels: this.getAllRecipeLabels(recipe),
-      allergens: this.getRecipeAllergens(recipe),
-      cost: this.getRecipeCost(recipe)
-    }))
-  )
-
-  // Pagination (plan 304 M3) — this list has no virtualisation-compatible row/cell markup
-  // (shared .c-list-row engine class uses `display: contents` so its cells flow directly
-  // into the table-body grid; cdk-virtual-scroll's item wrapper would break that column
-  // alignment across every list page using the same shared class). Slicing displayRows_()
-  // to a page gets the same DOM-size win — fewer rendered grid cells — without touching
-  // the shared engine CSS at all.
-  protected readonly PAGE_SIZE = 50
-  protected readonly currentPage_ = signal(1)
-  protected readonly totalPages_ = computed(() => Math.max(1, Math.ceil(this.displayRows_().length / this.PAGE_SIZE)))
-  /** Clamped so an out-of-range page (e.g. after a filter shrinks the result set) self-corrects. */
-  protected readonly displayPage_ = computed(() => Math.min(this.currentPage_(), this.totalPages_()))
-  protected readonly pagedRows_ = computed(() => {
-    const start = (this.displayPage_() - 1) * this.PAGE_SIZE
-    return this.displayRows_().slice(start, start + this.PAGE_SIZE)
-  })
-  protected readonly pageIndicatorText_ = computed(() =>
-    this.translationService
-      .translate('page_indicator')
-      .replace('{n}', String(this.displayPage_()))
-      .replace('{m}', String(this.totalPages_()))
-  )
-
-  protected goToPrevPage(): void {
-    this.currentPage_.update((p) => Math.max(1, p - 1))
-  }
-
-  protected goToNextPage(): void {
-    this.currentPage_.update((p) => Math.min(this.totalPages_(), p + 1))
-  }
-
-  protected isEmptyList_ = computed(() => this.kitchenState.recipes_().length === 0)
-
-  protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
-    const uid = this.currentUserId_()
-    if (!uid) return false
-    return (recipe.favoritedBy ?? []).includes(uid)
-  }
-
-  protected activeCostTooltipRecipe_ = computed(() => {
-    const id = this.hoveredCostRecipeId_() ?? this.tappedCostRecipeId_()
-    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
-  })
-
-  protected activeDateTooltipRecipe_ = computed(() => {
-    const id = this.hoveredDateRecipeId_()
-    return id ? (this.filteredRecipes_().find((r) => r._id === id) ?? null) : null
-  })
-
-  protected isRecipeDish(recipe: Recipe): boolean {
-    return recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
-  }
-
   protected getRecipeAllergens(recipe: Recipe): string[] {
     return resolveRecipeAllergens(recipe, this.kitchenState.recipesById_(), this.kitchenState.productsById_())
   }
 
-  /** Parse YYYY-MM-DD to start of day (00:00:00.000) in local timezone. */
-  private parseDateToStartOfDay(dateStr: string): number | null {
-    const parts = dateStr.split('-').map(Number)
-    if (parts.length !== 3 || parts.some(isNaN)) return null
-    const [y, m, d] = parts
-    return new Date(y, m - 1, d).getTime()
-  }
-
-  /** Parse YYYY-MM-DD to end of day (23:59:59.999) in local timezone. */
-  private parseDateToEndOfDay(dateStr: string): number | null {
-    const parts = dateStr.split('-').map(Number)
-    if (parts.length !== 3 || parts.some(isNaN)) return null
-    const [y, m, d] = parts
-    return new Date(y, m - 1, d, 23, 59, 59, 999).getTime()
-  }
-
-  protected formatAddedAt(addedAt: number | undefined): string {
-    if (addedAt == null) return '—'
-    return new Date(addedAt).toLocaleDateString('he-IL', { dateStyle: 'short' })
-  }
-
-  protected formatUpdatedAt(updatedAt: number | undefined): string {
-    if (updatedAt == null) return '—'
-    return new Date(updatedAt).toLocaleDateString('he-IL', { dateStyle: 'short' })
-  }
-
-  /** Date and time for hover tooltip (last updated). */
-  protected formatUpdatedAtWithTime(updatedAt: number | undefined): string {
-    if (updatedAt == null) return '—'
-    return new Date(updatedAt).toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' })
+  protected getRecipeCost(recipe: Recipe): number {
+    return this.recipeCostService.computeRecipeCost(recipe)
   }
 
   protected getRecipeYieldDescription(recipe: Recipe): string {
@@ -558,197 +470,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     return `${amount} ${unit}`.trim() || String(amount)
   }
 
-  protected recipeContainsAllProducts(recipe: Recipe, productIds: string[]): boolean {
-    if (productIds.length === 0) return true
-    const ids = this.getRecipeProductIds(recipe)
-    return productIds.every((id) => ids.has(id))
-  }
-
-  private getRecipeProductIds(recipe: Recipe, depth = 0): Set<string> {
-    if (depth >= MAX_ALLERGEN_RECURSION || !recipe?.ingredients?.length) return new Set()
-    const set = new Set<string>()
-    const recipesById = this.kitchenState.recipesById_()
-    for (const ing of recipe.ingredients) {
-      if (!ing.referenceId) continue
-      if (ing.type === 'product') {
-        set.add(ing.referenceId)
-      } else if (ing.type === 'recipe') {
-        const sub = recipesById.get(ing.referenceId)
-        if (sub) this.getRecipeProductIds(sub, depth + 1).forEach((id) => set.add(id))
-      }
-    }
-    return set
-  }
-
-  private compareRecipes(a: Recipe, b: Recipe, field: SortField): number {
-    const hebrewCompare = (x: string, y: string) => (x || '').localeCompare(y || '', 'he')
-    switch (field) {
-      case 'name':
-        return hebrewCompare(a.nameHebrew || '', b.nameHebrew || '')
-      case 'type': {
-        const aType = this.isRecipeDish(a) ? 'dish' : 'preparation'
-        const bType = this.isRecipeDish(b) ? 'dish' : 'preparation'
-        return hebrewCompare(this.translationService.translate(aType), this.translationService.translate(bType))
-      }
-      case 'cost':
-        return this.recipeCostService.computeRecipeCost(a) - this.recipeCostService.computeRecipeCost(b)
-      case 'labels': {
-        const aLabels = this.getAllRecipeLabels(a)
-        const bLabels = this.getAllRecipeLabels(b)
-        const aStr = aLabels.length > 0 ? aLabels.map((l) => this.translationService.translate(l)).join(', ') : ''
-        const bStr = bLabels.length > 0 ? bLabels.map((l) => this.translationService.translate(l)).join(', ') : ''
-        return hebrewCompare(aStr, bStr)
-      }
-      case 'allergens': {
-        const aAll = this.getRecipeAllergens(a)
-        const bAll = this.getRecipeAllergens(b)
-        const aVal = this.translationService.translate((aAll[0] ?? '') as string)
-        const bVal = this.translationService.translate((bAll[0] ?? '') as string)
-        return hebrewCompare(aVal, bVal)
-      }
-      case 'dateAdded':
-        return (a.createdAt ?? 0) - (b.createdAt ?? 0)
-      case 'dateUpdated':
-        return (a.updatedAt ?? 0) - (b.updatedAt ?? 0)
-      case 'rating':
-        return (a.rating ?? 0) - (b.rating ?? 0)
-      default:
-        return 0
-    }
-  }
-
-  protected async onRatingChange(recipe: Recipe, value: number): Promise<void> {
-    const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
-    if (scope === 'cancel') return
-    this.kitchenState.saveRecipe({ ...recipe, rating: value }).subscribe({
-      next: (saved) => {
-        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
-      }
-    })
-  }
-
-  protected setSort(field: SortField): void {
-    const current = this.sortBy_()
-    if (current === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
-  }
-
-  /** Set sort to date (newest first). */
-  protected setSortDateNewestFirst(): void {
-    this.sortBy_.set('dateAdded')
-    this.sortOrder_.set('desc')
-  }
-
-  /** Set sort to date (oldest first). */
-  protected setSortDateOldestFirst(): void {
-    this.sortBy_.set('dateAdded')
-    this.sortOrder_.set('asc')
-  }
-
-  /** Close allergen chips view on outside click — guard header column clicks. */
-  protected closeAllergenView(clickTarget?: EventTarget | null): void {
-    const el = clickTarget instanceof HTMLElement ? clickTarget : null
-    if (el?.closest('.table-header .col-allergens')) return
-    this.allergenExpand.closeAll()
-  }
-
-  /** Close labels chips view on outside click — guard header column clicks. */
-  protected closeLabelsView(clickTarget?: EventTarget | null): void {
-    const el = clickTarget instanceof HTMLElement ? clickTarget : null
-    if (el?.closest('.table-header .col-labels')) return
-    this.labelsExpand.closeAll()
-  }
-
-  protected toggleFilter(categoryName: string, optionValue: string): void {
-    this.activeFilters_.update((prev) => {
-      const current = { ...prev }
-      const values = current[categoryName] || []
-      if (values.includes(optionValue)) {
-        current[categoryName] = values.filter((v) => v !== optionValue)
-        if (current[categoryName].length === 0) delete current[categoryName]
-      } else {
-        current[categoryName] = [...values, optionValue]
-      }
-      return current
-    })
-  }
-
-  protected clearAllFilters(): void {
-    this.activeFilters_.set({})
-    this.dateFrom_.set(null)
-    this.dateTo_.set(null)
-    this.dateIncludeByUpdated_.set(false)
-    this.showFavoritesOnly_.set(false)
-    this.selectedProductIds_.set([])
-  }
-
-  protected hasActiveFilters_ = computed(
-    () =>
-      Object.values(this.activeFilters_()).some((arr) => arr.length > 0) ||
-      this.dateFrom_() != null ||
-      this.dateTo_() != null ||
-      this.showFavoritesOnly_() ||
-      this.selectedProductIds_().length > 0
-  )
-
-  protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
-    return category.options.filter((o) => o.checked_).length
-  }
-
-  protected showCostTooltip(recipeId: string, event?: Event): void {
-    const el = event?.currentTarget as HTMLElement | undefined
-    if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect())
-    this.hoveredCostRecipeId_.set(recipeId)
-  }
-
-  protected hideCostTooltip(): void {
-    this.hoveredCostRecipeId_.set(null)
-    if (!this.tappedCostRecipeId_()) this.costTooltipAnchor_.set(null)
-  }
-
-  protected toggleCostTooltipTap(recipeId: string, event?: Event): void {
-    const wasOpen = this.tappedCostRecipeId_() === recipeId
-    this.tappedCostRecipeId_.update((id) => (id === recipeId ? null : recipeId))
-    if (!wasOpen && recipeId) {
-      const el = event?.currentTarget as HTMLElement | undefined
-      if (el) this.costTooltipAnchor_.set(el.getBoundingClientRect())
-    } else if (!this.tappedCostRecipeId_() && !this.hoveredCostRecipeId_()) {
-      this.costTooltipAnchor_.set(null)
-    }
-  }
-
-  protected closeCostTooltipTap(): void {
-    this.tappedCostRecipeId_.set(null)
-    if (!this.hoveredCostRecipeId_()) this.costTooltipAnchor_.set(null)
-  }
-
-  protected showDateTooltip(recipeId: string, event?: Event): void {
-    const el = event?.currentTarget as HTMLElement | undefined
-    if (el) this.dateTooltipAnchor_.set(el.getBoundingClientRect())
-    this.hoveredDateRecipeId_.set(recipeId)
-  }
-
-  protected hideDateTooltip(): void {
-    this.hoveredDateRecipeId_.set(null)
-    this.dateTooltipAnchor_.set(null)
-  }
-
-  protected addIngredientProduct(product: Product): void {
-    if (this.selectedProductIds_().includes(product._id)) return
-    this.selectedProductIds_.update((ids) => [...ids, product._id])
-    this.ingredientSearchQuery_.set('')
-  }
-
-  protected removeIngredientProduct(productId: string): void {
-    this.selectedProductIds_.update((ids) => ids.filter((id) => id !== productId))
-  }
-
-  protected clearIngredientProducts(): void {
-    this.selectedProductIds_.set([])
+  protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
+    const uid = this.currentUserId_()
+    if (!uid) return false
+    return (recipe.favoritedBy ?? []).includes(uid)
   }
 
   protected getSelectedProducts(): Product[] {
@@ -756,21 +481,22 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     return this.kitchenState.products_().filter((p) => ids.includes(p._id))
   }
 
+  protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
+    return category.options.filter((o) => o.checked_).length
+  }
+
+  // Delete
+  protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
+    if (await this.rowActions.bulkDelete(ids)) this.selection.clear()
+  }
+
+  // UI handlers — navigation
   protected onAddRecipe(): void {
     this.router.navigate(['/recipe-builder'])
   }
 
   protected onEditRecipe(recipe: Recipe): void {
     this.router.navigate(['/recipe-builder', recipe._id])
-  }
-
-  protected openHistory(recipe: Recipe): void {
-    const entityType: VersionEntityType = this.isRecipeDish(recipe) ? 'dish' : 'recipe'
-    this.historyFor_.set({ entityType, entityId: recipe._id, entityName: recipe.nameHebrew })
-  }
-
-  protected closeHistory(): void {
-    this.historyFor_.set(null)
   }
 
   protected onCookRecipe(recipe: Recipe): void {
@@ -800,166 +526,76 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected async onDeleteRecipe(recipe: Recipe): Promise<void> {
-    if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmDeleteUnlessScoped(recipe))) return
-    const scope = await this.masterPush.askDeleteScope(recipe, { entity: recipeScopeEntity(recipe) })
-    if (scope === 'cancel') return
-    this.deletingId_.set(recipe._id)
-    this.kitchenState.deleteRecipe(recipe).subscribe({
-      next: () => {
-        this.deletingId_.set(null)
-        if (scope === 'everyone') this.masterPush.deleteFromMaster(recipe)
-      },
-      error: () => {
-        this.deletingId_.set(null)
-      }
-    })
+  // UI handlers — sort, filters, search, panel, paging
+  protected setSort(field: SortField): void {
+    const current = this.sortBy_()
+    if (current === field) {
+      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
+    } else {
+      this.sortBy_.set(field)
+      this.sortOrder_.set('asc')
+    }
   }
 
-  /**
-   * Plain "are you sure?" confirm — skipped when the admin scope prompt is about to show, so an
-   * admin deleting a master-linked recipe sees one dialog, not two (plan 365).
-   */
-  private async confirmDeleteUnlessScoped(recipe: Recipe): Promise<boolean> {
-    if (this.masterPush.willAskDeleteScope(recipe)) return true
-    return this.confirmModal.open('confirm_delete', { variant: 'danger' })
+  /** Set sort to date (newest first). */
+  protected setSortDateNewestFirst(): void {
+    this.sortBy_.set('dateAdded')
+    this.sortOrder_.set('desc')
   }
 
-  private async onPermanentlyDeleteRecipe(recipe: Recipe): Promise<void> {
-    if (!(await this.confirmModal.open('מחיקה קבועה — לא ניתן לשחזר. להמשיך?', { variant: 'danger' }))) return
-    this.removingId_.set(recipe._id)
-    this.kitchenState.permanentlyDeleteRecipe(recipe).subscribe({
-      next: () => {
-        this.removingId_.set(null)
-      },
-      error: () => {
-        this.removingId_.set(null)
-      }
-    })
+  /** Set sort to date (oldest first). */
+  protected setSortDateOldestFirst(): void {
+    this.sortBy_.set('dateAdded')
+    this.sortOrder_.set('asc')
   }
 
-  protected async onRemoveRecipe(recipe: Recipe): Promise<void> {
-    if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmDeleteUnlessScoped(recipe))) return
-    const scope = await this.masterPush.askDeleteScope(recipe, { entity: recipeScopeEntity(recipe) })
-    if (scope === 'cancel') return
-    this.removingId_.set(recipe._id)
-    this.kitchenState.deleteRecipe(recipe).subscribe({
-      next: () => {
-        this.removingId_.set(null)
-        if (scope === 'everyone') this.masterPush.deleteFromMaster(recipe)
-      },
-      error: () => {
-        this.removingId_.set(null)
-      }
-    })
-  }
-
-  protected async onBulkEdit(event: { field: string; value: string; ids: string[] }): Promise<void> {
-    const field = event.field as RecipeBulkField
-    const recipes = this.kitchenState.recipes_()
-    const targets = event.ids.map((id) => recipes.find((r) => r._id === id)).filter((r): r is Recipe => !!r)
-    if (!targets.length) return
-
-    // Labels and recipe type are shared content, so the scope question applies
-    // — but asked ONCE for the whole selection, not once per item. Passing the
-    // first master-linked recipe is enough: askScope only inspects _masterId.
-    const scope = await this.masterPush.askScope(
-      targets.find((r) => r._masterId),
-      {
-        entity: bulkScopeEntity(targets),
-        count: targets.length
-      }
-    )
-    if (scope === 'cancel') return
-
-    for (const recipe of targets) {
-      let updated: Recipe
-      if (field === 'labels') {
-        const current = recipe.labels ?? []
-        if (current.includes(event.value)) continue
-        updated = { ...recipe, labels: [...current, event.value] }
+  protected toggleFilter(categoryName: string, optionValue: string): void {
+    this.activeFilters_.update((prev) => {
+      const current = { ...prev }
+      const values = current[categoryName] || []
+      if (values.includes(optionValue)) {
+        current[categoryName] = values.filter((v) => v !== optionValue)
+        if (current[categoryName].length === 0) delete current[categoryName]
       } else {
-        updated = { ...recipe, recipeType: event.value as 'dish' | 'preparation' }
+        current[categoryName] = [...values, optionValue]
       }
-      this.kitchenState.saveRecipe(updated).subscribe({
-        next: (saved) => {
-          if (scope === 'everyone' && saved._masterId) this.masterPush.pushToMaster(saved)
-        },
-        error: () => {}
-      })
-    }
-  }
-
-  protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
-    if (ids.length === 0) return
-    if (!this.requireAuthService.requireAuth()) return
-    const recipes = this.kitchenState.recipes_().filter((r) => ids.includes(r._id ?? ''))
-    // Asked once for the whole selection, matching onBulkEdit's shape — passing the
-    // first master-linked recipe is enough since askDeleteScope only inspects _masterId.
-    // When the admin scope prompt will show, it is the only dialog (its cancel is the safety).
-    const masterLinked = recipes.find((r) => r._masterId)
-    if (!this.masterPush.willAskDeleteScope(masterLinked)) {
-      if (!(await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' }))) return
-    }
-    const scope = await this.masterPush.askDeleteScope(masterLinked, {
-      entity: bulkScopeEntity(recipes),
-      count: recipes.length
-    })
-    if (scope === 'cancel') return
-    recipes.forEach((recipe) => {
-      this.kitchenState.deleteRecipe(recipe).subscribe({
-        next: () => {
-          if (scope === 'everyone' && recipe._masterId) this.masterPush.deleteFromMaster(recipe)
-        },
-        error: () => {}
-      })
-    })
-    this.selection.clear()
-  }
-
-  protected onDuplicateRecipe(recipe: Recipe): void {
-    const copyOf = this.translationService.translate('copy_of')
-    const clone = JSON.parse(JSON.stringify(recipe)) as Recipe
-    delete (clone as { _id?: string })._id
-    clone.nameHebrew = `${copyOf} ${recipe.nameHebrew}`.trim()
-    clone.isApproved = false
-    this.duplicatingId_.set(recipe._id)
-    this.kitchenState.saveRecipe(clone).subscribe({
-      next: () => {
-        this.duplicatingId_.set(null)
-      },
-      error: () => {
-        this.duplicatingId_.set(null)
-      }
+      return current
     })
   }
 
-  protected async onToggleApproval(recipe: Recipe): Promise<void> {
-    const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
-    if (scope === 'cancel') return
-    const updated = { ...recipe, isApproved: !recipe.isApproved }
-    this.kitchenState.saveRecipe(updated).subscribe({
-      next: (saved) => {
-        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
-      }
-    })
+  protected clearAllFilters(): void {
+    this.activeFilters_.set({})
+    this.dateFrom_.set(null)
+    this.dateTo_.set(null)
+    this.dateIncludeByUpdated_.set(false)
+    this.showFavoritesOnly_.set(false)
+    this.selectedProductIds_.set([])
   }
 
-  protected onToggleFavorite(recipe: Recipe): void {
-    const uid = this.currentUserId_()
-    if (!uid) return
-    const current = recipe.favoritedBy ?? []
-    const updated: Recipe = {
-      ...recipe,
-      favoritedBy: current.includes(uid) ? current.filter((id) => id !== uid) : [...current, uid]
-    }
-    this.kitchenState.saveRecipe(updated).subscribe()
+  protected toggleFilterCategory(name: string): void {
+    this.filterCategories.toggle(name)
   }
 
-  protected getRecipeCost(recipe: Recipe): number {
-    return this.recipeCostService.computeRecipeCost(recipe)
+  protected isCategoryExpanded(name: string): boolean {
+    return this.filterCategories.isExpanded(name)
+  }
+
+  protected togglePanel(): void {
+    this.togglePanelState_()
+  }
+
+  protected addIngredientProduct(product: Product): void {
+    if (this.selectedProductIds_().includes(product._id)) return
+    this.selectedProductIds_.update((ids) => [...ids, product._id])
+    this.ingredientSearchQuery_.set('')
+  }
+
+  protected removeIngredientProduct(productId: string): void {
+    this.selectedProductIds_.update((ids) => ids.filter((id) => id !== productId))
+  }
+
+  protected clearIngredientProducts(): void {
+    this.selectedProductIds_.set([])
   }
 
   /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
@@ -974,5 +610,33 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     event.preventDefault()
     event.stopPropagation()
     this.onClearSearch(input)
+  }
+
+  protected goToPrevPage(): void {
+    this.currentPage_.update((p) => Math.max(1, p - 1))
+  }
+
+  protected goToNextPage(): void {
+    this.currentPage_.update((p) => Math.min(this.totalPages_(), p + 1))
+  }
+
+  // UI handlers — expanded chip cells
+  /** Close allergen chips view on outside click — guard header column clicks. */
+  protected closeAllergenView(clickTarget?: EventTarget | null): void {
+    const el = clickTarget instanceof HTMLElement ? clickTarget : null
+    if (el?.closest('.table-header .col-allergens')) return
+    this.allergenExpand.closeAll()
+  }
+
+  /** Close labels chips view on outside click — guard header column clicks. */
+  protected closeLabelsView(clickTarget?: EventTarget | null): void {
+    const el = clickTarget instanceof HTMLElement ? clickTarget : null
+    if (el?.closest('.table-header .col-labels')) return
+    this.labelsExpand.closeAll()
+  }
+
+  private resetExpandedCells(): void {
+    this.allergenExpand.reset()
+    this.labelsExpand.reset()
   }
 }

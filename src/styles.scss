@@ -1003,6 +1003,17 @@ textarea.c-input {
   }
 }
 
+/* Above the phone carousel the column-carousel host is display:contents, so its slides are
+   grid cells one level down — not direct row children — and need the selected look too. */
+@media (min-width: $break-mobile + 1px) {
+  .c-list-row.is-selected > .column-carousel--cell > .c-list-body-cell {
+    background: color-mix(in srgb, var(--color-primary) 14%, white);
+    box-shadow:
+      inset 0 2px 0 var(--mark-line),
+      inset 0 -2px 0 var(--mark-line);
+  }
+}
+
 /* ---- Engine: Pagination controls (plan 304 M3) — row-count reduction for large
    .c-list-row/.c-list-body-cell grids where cdk-virtual-scroll's item wrapper would
    break the flat display:contents column layout. Spans the full table-body grid. ---- */

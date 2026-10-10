@@ -1,6 +1,6 @@
 # Plan 399 — Recipe book list split: map seams, then extract self-contained flows
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: da1d7f666cefa259d0233d6c5522042073ab8a3f
 
@@ -51,6 +51,9 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 
 ```scope
 src/app/pages/recipe-book/components/recipe-book-list/**
+src/app/core/components/tab-chips/tab-chips.component.ts
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
+src/app/pages/equipment/components/equipment-list/equipment-list.component.html
 ```
 
 ## Read Scope
@@ -102,11 +105,15 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI change, no new dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Map `recipe-book-list.component.ts` seams into session-state; ⛔ STOP for the Human's go on which to move
-- [ ] A2: Extract approved pure helpers to `recipe-book-list/utils/*.util.ts` (+ specs)
-- [ ] A3: Extract approved service(s) to `recipe-book-list/services/`; wire component + `recipe-book-list.component.html`
-- [ ] A4: Update `recipe-book-list.component.spec.ts` if it touches moved members
-- [ ] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
+- [x] A1: Map `recipe-book-list.component.ts` seams into session-state; ⛔ STOP for the Human's go on which to move (go + delete dead, 2026-10-10)
+- [x] A2: Extract approved pure helpers to `recipe-book-list/utils/*.util.ts` (+ specs)
+- [x] A3: Extract approved service(s) to `recipe-book-list/services/`; wire component + `recipe-book-list.component.html`
+- [x] A4: Update `recipe-book-list.component.spec.ts` if it touches moved members
+- [x] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
+- [x] A6 (validation fallout): touch — next touch anywhere closes the cost/date tooltip (`recipe-list-tooltips.service.ts`)
+- [x] A7 (validation fallout): >768px — carousel cells of a selected row get the selected tint/outline (`src/styles.scss`, append)
+- [x] A8 (validation fallout, approved): hide recipe-builder/cook tab chips on `/recipe-book` (`tab-chips.component.ts`)
+- [x] A9 (validation fallout, approved): drop the row pencil where it equals the row click — products list + equipment list
 
 ## Technical Considerations
 - Dependencies: recipe data/kitchen state services, admin scope prompt (plan 365), list shell

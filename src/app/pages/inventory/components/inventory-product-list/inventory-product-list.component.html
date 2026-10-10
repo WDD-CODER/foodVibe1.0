@@ -244,16 +244,6 @@
           <span class="price-suffix">₪</span>
         </div>
         <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
-          <button
-            type="button"
-            class="c-icon-btn"
-            (click)="onEditProduct(row.product._id); $event.stopPropagation()"
-            [attr.aria-label]="'edit' | translatePipe"
-            [disabled]="!isLoggedIn()"
-            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-          >
-            <lucide-icon name="pencil" [size]="18"></lucide-icon>
-          </button>
           @if (deletingId_() === row.product._id) {
             <app-loader size="small" [inline]="true" />
           } @else {

@@ -120,6 +120,8 @@ export class TabChipsComponent {
       return currentId ? chips.map((chip) => (chip.id === currentId ? DASHBOARD_HOME_CHIP : chip)) : chips
     }
     if (group !== 'recipes') return chips
+    // Builder/cook chips act on one recipe — the recipe book list has none open.
+    if (path.startsWith('/recipe-book')) return []
 
     // On a specific recipe's builder/cook page, carry its id across the two chips so
     // switching between them stays on the same recipe instead of dropping to the bare
