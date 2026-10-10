@@ -1,6 +1,6 @@
 # Plan 398 — Menu intelligence split: shared dish and section search helper
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: da1d7f666cefa259d0233d6c5522042073ab8a3f
 
