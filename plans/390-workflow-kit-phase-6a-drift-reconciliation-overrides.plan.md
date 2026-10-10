@@ -1,6 +1,7 @@
 # Plan 390 — Workflow Kit Phase 6A: Drift Reconciliation and Project Overrides
 
 Status: draft
+Track: code — here (not design)
 Snapshot: c186c9c0
 
 ## Problem Statement

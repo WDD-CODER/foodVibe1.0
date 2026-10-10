@@ -1,6 +1,7 @@
 # Plan 384 — Logs in the AI workflow: query script, slot log retention, command wiring
 
 Status: draft
+Track: code — here (not design)
 Snapshot: 05132814b7a74187683bb45d5ef48339ae5fb5a0
 
 Logging series: A = 382 (client ingest + Mongo sink), B = 383 (pino + request ids),

@@ -1,5 +1,7 @@
 # Plan 318 — Nightly Maintenance Follow-ups (2026-09-27)
 
+Track: code — here (not design)
+
 **Source:** Unattended `/nightly-maintenance` run, 2026-09-27. Report-only findings — nothing here was fixed by that run; it never commits/pushes application code. Persisted as a plan per Human request so these don't get lost.
 
 ## Context

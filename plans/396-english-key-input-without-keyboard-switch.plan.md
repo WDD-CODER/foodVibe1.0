@@ -1,6 +1,7 @@
 # Plan 396 — English Key Input Without Keyboard Switch
 
 Status: draft
+Track: code — here (not design)
 Snapshot: f739e9a1781505926e53cad32290893670a0b942
 
 ## Problem Statement

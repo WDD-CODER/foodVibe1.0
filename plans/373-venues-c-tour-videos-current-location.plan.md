@@ -1,6 +1,7 @@
 # Plan 373 — Venues C: tour videos (links with a visit date) and "save my current location"
 
 Status: draft
+Track: split — look in Claude Design; schema, geolocation, lat-lng here
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement

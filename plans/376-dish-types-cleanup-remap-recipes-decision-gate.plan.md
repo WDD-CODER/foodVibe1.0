@@ -1,6 +1,7 @@
 # Plan 376 — Dish types cleanup: keep only real dish types, remap recipes safely (decision gate first)
 
 Status: draft
+Track: code — here (not design)
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 > **Reality check needed (plan review 2026-10-09).** Written before 321 P3.4 moved every registry onto shared `taxonomyTerms` (`TaxonomyStore`). The `KITCHEN_COURSES` per-user docs, `_userModified` sync and `registry-delete-master` described below no longer drive the app. The goal stands; redo the mechanics on taxonomy terms (a re-key already cascades via `renameTermEverywhere`) before A1.
