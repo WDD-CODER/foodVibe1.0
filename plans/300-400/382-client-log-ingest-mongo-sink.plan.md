@@ -1,6 +1,6 @@
 # Plan 382 — Client log ingest + Mongo sink (replace dev log server)
 
-Status: active
+Status: done
 Snapshot: 05132814b7a74187683bb45d5ef48339ae5fb5a0
 
 Logging series: **A = 382 (this plan)**, B = 383 (pino + request ids), C = 384 (logs in the AI
@@ -93,33 +93,33 @@ touching any milestone. Specifically confirm: `LoggingService.sendToLogServer` s
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `POST /api/v1/log` on the Express app, mounted in `server/app.js` next to the other
+- [x] `POST /api/v1/log` on the Express app, mounted in `server/app.js` next to the other
       `/api/v1/*` routers. Accepts one event (not batches, keep it simple).
-- [ ] Auth: `optionalToken` (from `server/middleware/auth.js`) — anonymous allowed so
+- [x] Auth: `optionalToken` (from `server/middleware/auth.js`) — anonymous allowed so
       pre-login errors are captured; `userId = req.user?._id ?? null`.
-- [ ] Abuse guard: `express-rate-limit` 60 req / minute / IP on this route only; route-local
+- [x] Abuse guard: `express-rate-limit` 60 req / minute / IP on this route only; route-local
       `express.json({ limit: '16kb' })`; respond `202` on accept (fire-and-forget semantics),
       `400` on invalid body, `429` over limit. Never `401`.
-- [ ] Zod schema `LogEventSchema` in `shared/schemas/entities/log-event.schema.ts`, exported
+- [x] Zod schema `LogEventSchema` in `shared/schemas/entities/log-event.schema.ts`, exported
       from `shared/schemas/index.ts`, validated via `server/middleware/validate.js`:
       `level: 'info'|'warn'|'error'`, `event: /^[a-z0-9]+(\.[a-z0-9_-]+)+$/ max 64`,
       `message: string max 500`, `context?: record max 4kb when stringified`,
       `timestamp: ISO datetime`, `requestId?: string max 64`, `url?: string max 300`
       (the client route path, not query string).
-- [ ] `server/services/log-sink.js` — single `write(entry)` function using
+- [x] `server/services/log-sink.js` — single `write(entry)` function using
       `mongoose.connection.db.collection('app_logs')`. Stored doc:
       `{ source: 'client'|'server', level, event, message, context, userId, requestId, url,
       clientTs, createdAt: new Date() }`. Persists `warn`/`error` always; `info` only when
       `process.env.LOG_PERSIST_INFO === '1'`. Always echoes one JSON line to stdout
       (`console.log(JSON.stringify({...}))`) so `.claude/be.log` / Render see it too.
       Sink failure must never throw into the request — catch, `console.error('[log/sink]')`.
-- [ ] Indexes created in `server/db.js` `connectDb()` (idempotent, same pattern as the
+- [x] Indexes created in `server/db.js` `connectDb()` (idempotent, same pattern as the
       `userId` indexes): `{ createdAt: 1 }` with `expireAfterSeconds: 90*24*3600`;
       `{ level: 1, createdAt: -1 }`; `{ event: 1, createdAt: -1 }`; `{ userId: 1, createdAt: -1 }`.
-- [ ] Global error handler in `server/app.js` also writes `{ source:'server', level:'error',
+- [x] Global error handler in `server/app.js` also writes `{ source:'server', level:'error',
       event:'server.unhandled', message: err.message, context:{ stack: dev only } }` to the sink.
       (All other `console.error('[data/…]')` sites stay for Plan 383.)
-- [ ] `LoggingService`: rename `sendToLogServer` → `sendToServer`; target
+- [x] `LoggingService`: rename `sendToLogServer` → `sendToServer`; target
       `${environment.apiUrl}/api/v1/log` (empty `apiUrl` = same origin, works in prod);
       keep `fetch` + `keepalive`; attach `Authorization: Bearer <token>` when a token exists
       (see Technical Considerations for the DI-cycle rule); add `url: location.pathname`.
@@ -127,12 +127,12 @@ touching any milestone. Specifically confirm: `LoggingService.sendToLogServer` s
       failure; a `429` pauses for 60 s too. Client flood guard: max 30 events/minute total,
       beyond that drop and emit one `log.client.dropped` with the dropped count when the
       window resets.
-- [ ] `auth.interceptor.ts:107`: replace `!req.url.startsWith(environment.logServerUrl)` with
+- [x] `auth.interceptor.ts:107`: replace `!req.url.startsWith(environment.logServerUrl)` with
       `!req.url.endsWith('/api/v1/log')`. This fixes the prod bug.
-- [ ] Remove `logServerUrl` from all five `src/environments/*.ts`; delete
+- [x] Remove `logServerUrl` from all five `src/environments/*.ts`; delete
       `scripts/log-server.js`; remove the `log-server` npm script from root `package.json`;
       drop the `# Log files (dev log server)` / `/logs/` block from `.gitignore`.
-- [ ] Docs: rewrite `docs/security-go-live.md` "Development logging" section (now: nothing to
+- [x] Docs: rewrite `docs/security-go-live.md` "Development logging" section (now: nothing to
       start; query with `mongosh` until Plan 384 lands); fix the stale `CHANGELOG.md:14` line
       and add a new entry; append a gotcha to `docs/brain/gotchas/backend.md` marking the
       "Production logs silently vanish when logServerUrl is unset" entry as superseded (never
@@ -142,13 +142,13 @@ touching any milestone. Specifically confirm: `LoggingService.sendToLogServer` s
       `_shared/tech-stack.md`.
 
 ### Should Have (P1)
-- [ ] `GlobalErrorHandler` additionally listens to `window 'unhandledrejection'` and logs
+- [-] (not built — open follow-up if wanted) `GlobalErrorHandler` additionally listens to `window 'unhandledrejection'` and logs
       `error.unhandled_rejection` (guard against double-logging the same error object).
-- [ ] `GET /api/v1/health` response unchanged, but `log-sink.js` exposes `isHealthy()` used
+- [-] (not built — plan 384 can add it) `GET /api/v1/health` response unchanged, but `log-sink.js` exposes `isHealthy()` used
       by nothing yet (Plan 384 preflight will use it) — skip if it adds complexity.
 
 ### Nice to Have (P2)
-- [ ] Batch endpoint (`events: []`) — explicitly not now.
+- [-] Batch endpoint (`events: []`) — explicitly not now.
 
 ## UI/UX Notes
 - No UI. No `dictionary.json` keys.
