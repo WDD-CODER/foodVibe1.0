@@ -12,18 +12,7 @@ import {
   viewChild
 } from '@angular/core'
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
-import {
-  filter,
-  firstValueFrom,
-  startWith,
-  map,
-  timer,
-  switchMap,
-  of,
-  take,
-  type Observable,
-  type Subscription
-} from 'rxjs'
+import { filter, firstValueFrom, startWith, timer, switchMap, of, take, type Observable, type Subscription } from 'rxjs'
 import { CommonModule } from '@angular/common'
 import {
   AbstractControl,
@@ -43,15 +32,13 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { VersionHistoryService } from '@services/version-history.service'
 import type { VersionEntityType } from '@services/version-history.service'
 import { Recipe } from '@models/recipe.model'
-import type { Equipment } from '@models/equipment.model'
-import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
-import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
 import { MasterPushService, ScopeEntity } from '@services/master-push.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { RecipeFormService } from './services/recipe-form.service'
+import { RecipeLogisticsPickerService } from './services/recipe-logistics-picker.service'
+import { RecipeBuilderExportService } from './services/recipe-builder-export.service'
 import { DishDataService } from '@services/dish-data.service'
 import { TranslationService } from '@services/translation.service'
-import { LoggingService } from '@services/logging.service'
 import { RecipeHeaderComponent } from './components/recipe-header/recipe-header.component'
 import { RecipeIngredientsTableComponent } from './components/recipe-ingredients-table/recipe-ingredients-table.component'
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component'
@@ -59,11 +46,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { ClickOutSideDirective } from '@directives/click-out-side'
-import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
-import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
-import { ExportService } from '@services/export.service'
 import { HeroFabService, type HeroFabAction } from '@services/hero-fab.service'
-import type { ExportPayload } from '../../core/utils/export.util'
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component'
 import { ExportToolbarOverlayComponent } from '../../shared/export-toolbar-overlay/export-toolbar-overlay.component'
 import { ApproveStampComponent } from 'src/app/shared/approve-stamp/approve-stamp.component'
@@ -78,7 +61,7 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
 @Component({
   selector: 'app-recipe-builder-page',
   standalone: true,
-  providers: [RecipeAiFlowService],
+  providers: [RecipeAiFlowService, RecipeLogisticsPickerService, RecipeBuilderExportService],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -108,19 +91,17 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly unitRegistry_ = inject(UnitRegistryService)
   private readonly versionHistory_ = inject(VersionHistoryService)
   private readonly injector_ = inject(Injector)
-  private readonly equipmentData_ = inject(EquipmentDataService)
-  private readonly addEquipmentModal_ = inject(AddEquipmentModalService)
   private readonly metadataRegistry_ = inject(MetadataRegistryService)
   private readonly masterPush_ = inject(MasterPushService)
   private readonly recipeDataService_ = inject(RecipeDataService)
   private readonly dishDataService_ = inject(DishDataService)
   private readonly recipeFormService_ = inject(RecipeFormService)
   private readonly translation_ = inject(TranslationService)
-  private readonly logging_ = inject(LoggingService)
-  private readonly exportService_ = inject(ExportService)
   private readonly confirmModal_ = inject(ConfirmModalService)
   private readonly heroFab_ = inject(HeroFabService)
   private readonly aiFlow_ = inject(RecipeAiFlowService)
+  protected readonly logisticsPicker = inject(RecipeLogisticsPickerService)
+  protected readonly recipeExport = inject(RecipeBuilderExportService)
   private readonly userService_ = inject(UserService)
   private readonly isAdmin_ = this.userService_.isAdmin_
 
@@ -180,16 +161,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   protected tableLogicCollapsed_ = signal(false)
   protected workflowLogicCollapsed_ = signal(false)
   protected logisticsLogicCollapsed_ = signal(false)
-
-  /** Export toolbar overlay (blur header, same pattern as menu-intelligence). */
-  protected exportToolbarOpen_ = signal(false)
-  /** Which View/Export dropdown is open in the toolbar. */
-  protected viewExportModal_ = signal<
-    'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'all' | null
-  >(null)
-  protected exportPreviewPayload_ = signal<ExportPayload | null>(null)
-  private exportPreviewType_:
-    'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'recipe-all' | null = null
 
   protected toggleTableLogic(): void {
     const next = !this.tableLogicCollapsed_()
@@ -288,6 +259,12 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private cachedSteps_: { order?: number; instruction?: string; labor_time?: number; cooking_time?: number }[] = []
 
   constructor() {
+    this.logisticsPicker.connect(this.logisticsBaselineArray)
+    this.recipeExport.connect({
+      recipe: () => this.buildRecipeFromForm(),
+      quantity: () => this.exportQuantity_()
+    })
+
     this.ingredientsArray.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.updateTotalWeightG()
       this.ingredientsFormVersion_.update((v) => v + 1)
@@ -523,7 +500,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     const actions: HeroFabAction[] = [
       { labelKey: 'ai_recipe_edit', icon: 'sparkles', run: () => this.onAiEditClick() },
-      { labelKey: 'export', icon: 'printer', run: () => this.openExportFromHeroFab() }
+      { labelKey: 'export', icon: 'printer', run: () => this.recipeExport.openToolbar() }
     ]
     if (this.recipeId_()) {
       actions.push({
@@ -540,21 +517,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       )
       .subscribe((e) => {
         if (!e.url.startsWith('/recipe-builder')) {
-          this.closeAllExportOverlays()
+          this.recipeExport.closeAllExportOverlays()
         }
       })
   }
 
-  /** Close export toolbar and preview so state is clean when user navigates away. */
-  private closeAllExportOverlays(): void {
-    this.exportToolbarOpen_.set(false)
-    this.viewExportModal_.set(null)
-    this.exportPreviewPayload_.set(null)
-    this.exportPreviewType_ = null
-  }
-
   ngOnDestroy(): void {
-    this.closeAllExportOverlays()
+    this.recipeExport.closeAllExportOverlays()
     this.heroFab_.clearPageActions()
     this.recipeTypeRevalidationSub_?.unsubscribe()
   }
@@ -563,28 +532,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   protected onAiEditClick(): void {
     this.aiFlow_.openEditModal()
-  }
-
-  // ─── Export ───────────────────────────────────────────────────────
-
-  protected openExportFromHeroFab(): void {
-    // Defer to next tick so the opening click is not interpreted as click-outside
-    setTimeout(() => this.exportToolbarOpen_.set(true), 0)
-  }
-
-  protected closeExportToolbar(): void {
-    this.exportToolbarOpen_.set(false)
-    this.viewExportModal_.set(null)
-  }
-
-  protected openViewExportModal(
-    key: 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'dish-checklist' | 'all'
-  ): void {
-    this.viewExportModal_.update((current) => (current === key ? null : key))
-  }
-
-  protected closeViewExportModal(): void {
-    this.viewExportModal_.set(null)
   }
 
   protected goToCookFromHeroFab(): void {
@@ -843,212 +790,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     return JSON.stringify(normalized)
   }
 
-  protected get allEquipment_() {
-    return this.equipmentData_.allEquipment_()
-  }
-
-  protected equipmentOptions_ = computed(() =>
-    this.equipmentData_.allEquipment_().map((eq) => ({ value: eq._id, label: eq.nameHebrew }))
-  )
-
-  protected phaseOptions_: { value: string; label: string }[] = [
-    { value: 'prep', label: 'phase_prep' },
-    { value: 'service', label: 'phase_service' },
-    { value: 'both', label: 'phase_both' }
-  ]
-
-  protected logisticsToolSearchQuery_ = signal('')
-  protected logisticsToolQuantity_ = signal(1)
-  protected logisticsToolDropdownOpen_ = signal(false)
-  protected logisticsHighlightedIndex_ = signal(-1)
-  /** Selected equipment id (from dropdown); user sets quantity then presses Add. */
-  protected logisticsSelectedToolId_ = signal<string | null>(null)
-
-  /** Equipment IDs already in the logistics baseline (excluded from equipment search options). */
-  private logisticsBaselineIds_ = toSignal(
-    (this.logisticsBaselineArray.valueChanges as Observable<unknown>).pipe(
-      startWith(this.logisticsBaselineArray.value),
-      map((arr: unknown) => (arr as { equipmentId?: string }[]).map((r) => r.equipmentId).filter(Boolean) as string[])
-    ),
-    { initialValue: [] as string[] }
-  )
-
-  /** Search options: equipment only (by nameHebrew), "starts with" + Hebrew/Latin script. */
-  protected logisticsSearchOptions_ = computed((): Equipment[] => {
-    const raw = this.logisticsToolSearchQuery_().trim()
-    if (!raw) return []
-    const alreadyAdded = new Set(this.logisticsBaselineIds_() ?? [])
-    const allEquipment = this.equipmentData_.allEquipment_().filter((eq) => !alreadyAdded.has(eq._id))
-    const filtered = filterOptionsByStartsWith(allEquipment, raw, (eq) => eq.nameHebrew)
-    const qLower = raw.toLowerCase()
-    return filtered.slice().sort((a, b) => {
-      const aName = a.nameHebrew.toLowerCase()
-      const bName = b.nameHebrew.toLowerCase()
-      const aStarts = aName.startsWith(qLower) ? 0 : 1
-      const bStarts = bName.startsWith(qLower) ? 0 : 1
-      if (aStarts !== bStarts) return aStarts - bStarts
-      return aName.indexOf(qLower) - bName.indexOf(qLower)
-    })
-  })
-
-  protected getEquipmentNameById(id: string): string {
-    const eq = this.equipmentData_
-      .allEquipment_()
-      .find((e) => e._id === id || (e as { _masterId?: string })._masterId === id)
-    return eq?.nameHebrew ?? id
-  }
-
-  protected incrementLogisticsQuantity(): void {
-    this.logisticsToolQuantity_.update((q) => quantityIncrement(q, 1, { integerOnly: true }))
-  }
-
-  protected decrementLogisticsQuantity(): void {
-    this.logisticsToolQuantity_.update((q) => quantityDecrement(q, 1, { integerOnly: true }))
-  }
-
-  protected onLogisticsQuantityKeydown(e: KeyboardEvent): void {
-    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
-    e.preventDefault()
-    const current = this.logisticsToolQuantity_()
-    const next =
-      e.key === 'ArrowUp'
-        ? quantityIncrement(current, 1, { integerOnly: true })
-        : quantityDecrement(current, 1, { integerOnly: true })
-    this.logisticsToolQuantity_.set(next)
-  }
-
-  /** Select an option from dropdown (does not add yet; user sets quantity and presses Add). */
-  protected selectLogisticsOption(option: Equipment): void {
-    this.logisticsSelectedToolId_.set(option._id)
-    this.logisticsToolQuantity_.set(1)
-    this.logisticsToolSearchQuery_.set(option.nameHebrew)
-    this.logisticsToolDropdownOpen_.set(false)
-  }
-
-  protected onLogisticsSearchInput(value: string): void {
-    this.logisticsToolSearchQuery_.set(value)
-    this.logisticsHighlightedIndex_.set(-1)
-    this.logisticsToolDropdownOpen_.set(value.trim().length > 0)
-    const selectedId = this.logisticsSelectedToolId_()
-    if (selectedId && this.getEquipmentNameById(selectedId) !== value) {
-      this.logisticsSelectedToolId_.set(null)
-    }
-  }
-
-  protected onLogisticsSearchKeydown(event: KeyboardEvent): void {
-    if (!this.logisticsToolDropdownOpen_()) return
-    const opts = this.logisticsSearchOptions_()
-    const len = opts.length + 1 // +1 for 'add new tool'
-    let idx = this.logisticsHighlightedIndex_()
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault()
-      idx = Math.min(idx + 1, len - 1)
-      this.logisticsHighlightedIndex_.set(idx)
-      this.scrollLogisticsDropdownToItem(idx)
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault()
-      idx = Math.max(idx - 1, 0)
-      this.logisticsHighlightedIndex_.set(idx)
-      this.scrollLogisticsDropdownToItem(idx)
-    } else if (event.key === 'Enter') {
-      event.preventDefault()
-      if (idx >= 0 && idx < opts.length) {
-        this.selectLogisticsOption(opts[idx])
-        this.logisticsHighlightedIndex_.set(-1)
-      } else if (idx === opts.length) {
-        this.openAddNewToolModal()
-        this.logisticsHighlightedIndex_.set(-1)
-      }
-    } else if (event.key === 'Escape') {
-      this.logisticsToolDropdownOpen_.set(false)
-      this.logisticsHighlightedIndex_.set(-1)
-    }
-  }
-
-  private scrollLogisticsDropdownToItem(index: number) {
-    setTimeout(() => {
-      const dropdown = document.querySelector('.logistics-tool-dropdown')
-      if (!dropdown) return
-      const items = dropdown.querySelectorAll('.logistics-tool-option')
-      if (items[index]) {
-        items[index].scrollIntoView({ block: 'nearest' })
-      }
-    }, 0)
-  }
-
-  /** Add the currently selected item (with current quantity) to baseline. Called by Add button. */
-  protected addSelectedToolToBaseline(): void {
-    const id = this.logisticsSelectedToolId_()
-    if (!id) return
-    const qty = this.logisticsToolQuantity_()
-    this.logisticsBaselineArray.push(
-      this.recipeFormService_.createBaselineRow({
-        equipmentId: id,
-        quantity: qty,
-        phase: 'both',
-        isCritical: true,
-        notes: undefined
-      })
-    )
-    this.logisticsSelectedToolId_.set(null)
-    this.logisticsToolSearchQuery_.set('')
-    this.logisticsToolQuantity_.set(1)
-    this.logisticsToolDropdownOpen_.set(false)
-  }
-
-  /** Add button click: if something selected → add to baseline; if only search text → open add-new-equipment modal. */
-  protected onLogisticsAddClick(): void {
-    if (this.logisticsSelectedToolId_()) {
-      this.addSelectedToolToBaseline()
-      return
-    }
-    if (this.logisticsToolSearchQuery_().trim()) {
-      this.openAddNewToolModal()
-    }
-  }
-
-  protected async openAddNewToolModal(): Promise<void> {
-    this.logisticsToolDropdownOpen_.set(false)
-    const initialName = this.logisticsToolSearchQuery_().trim() || undefined
-    const result = await this.addEquipmentModal_.open(initialName)
-    if (!result?.name?.trim()) return
-    try {
-      const now = Date.now()
-      const created = await this.equipmentData_.addEquipment({
-        nameHebrew: result.name.trim(),
-        category: result.category,
-        ownedQuantity: 0,
-        isConsumable: false,
-        createdAt: now,
-        updatedAt: now
-      })
-      this.logisticsSelectedToolId_.set(created._id)
-      this.logisticsToolSearchQuery_.set(created.nameHebrew)
-      this.logisticsToolQuantity_.set(1)
-    } catch (err) {
-      this.logging_.error({
-        event: 'recipe_builder.save_error',
-        message: 'Recipe builder save error (add tool)',
-        context: { err }
-      })
-      const msg =
-        err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
-          ? (this.translation_.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
-          : 'שגיאה בהוספת הכלי'
-      this.userMsg_.onSetErrorMsg(msg)
-    }
-  }
-
   //CREATE
-
-  protected addBaselineRow(): void {
-    this.logisticsBaselineArray.push(this.recipeFormService_.createBaselineRow())
-  }
-
-  protected removeBaselineRow(index: number): void {
-    this.logisticsBaselineArray.removeAt(index)
-  }
 
   addNewStep(category?: string | void): void {
     const nextOrder = this.workflowArray.length + 1
@@ -1221,10 +963,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.router_.navigate(['/recipe-book'])
   }
 
-  onPrint(): void {
-    window.print()
-  }
-
   /** Quantity for export (form snapshot): dish = serving_portions, recipe = yield amount; min 1. */
   private exportQuantity_(): number {
     const raw = this.recipeForm_.getRawValue() as {
@@ -1239,86 +977,6 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const conv = raw?.yield_conversions?.[0]
     const n = conv?.amount != null ? Number(conv.amount) : 1
     return isNaN(n) || n < 1 ? 1 : n
-  }
-
-  protected onViewRecipeInfo(): void {
-    const recipe = this.buildRecipeFromForm()
-    const qty = this.exportQuantity_()
-    this.exportPreviewPayload_.set(this.exportService_.getRecipeInfoPreviewPayload(recipe, qty))
-    this.exportPreviewType_ = 'recipe-info'
-  }
-
-  protected onViewShoppingList(): void {
-    const recipe = this.buildRecipeFromForm()
-    const qty = this.exportQuantity_()
-    this.exportPreviewPayload_.set(this.exportService_.getShoppingListPreviewPayload(recipe, qty))
-    this.exportPreviewType_ = 'shopping-list'
-  }
-
-  protected onViewCookingSteps(): void {
-    const recipe = this.buildRecipeFromForm()
-    const qty = this.exportQuantity_()
-    this.exportPreviewPayload_.set(this.exportService_.getCookingStepsPreviewPayload(recipe, qty))
-    this.exportPreviewType_ = 'cooking-steps'
-  }
-
-  protected onViewDishChecklist(): void {
-    const recipe = this.buildRecipeFromForm()
-    const qty = this.exportQuantity_()
-    this.exportPreviewPayload_.set(this.exportService_.getDishChecklistPreviewPayload(recipe, qty))
-    this.exportPreviewType_ = 'dish-checklist'
-  }
-
-  protected onViewAll(): void {
-    const recipe = this.buildRecipeFromForm()
-    const qty = this.exportQuantity_()
-    this.exportPreviewPayload_.set(this.exportService_.getRecipeInfoPreviewPayload(recipe, qty))
-    this.exportPreviewType_ = 'recipe-all'
-    this.closeViewExportModal()
-  }
-
-  protected onExportFromPreview(): void {
-    const payload = this.exportPreviewPayload_()
-    const type = this.exportPreviewType_
-    if (!payload || !type) return
-    const recipe = this.buildRecipeFromForm()
-    const qty = this.exportQuantity_()
-    if (type === 'recipe-info') this.exportService_.exportRecipeInfo(recipe, qty)
-    else if (type === 'shopping-list') this.exportService_.exportShoppingList(recipe, qty)
-    else if (type === 'cooking-steps') this.exportService_.exportCookingSteps(recipe, qty)
-    else if (type === 'dish-checklist') this.exportService_.exportDishChecklist(recipe, qty)
-    else if (type === 'recipe-all') this.exportService_.exportAllTogetherRecipe(recipe, qty)
-    this.exportPreviewPayload_.set(null)
-    this.exportPreviewType_ = null
-  }
-
-  protected onExportRecipeInfo(): void {
-    this.exportService_.exportRecipeInfo(this.buildRecipeFromForm(), this.exportQuantity_())
-  }
-
-  protected onExportShoppingList(): void {
-    this.exportService_.exportShoppingList(this.buildRecipeFromForm(), this.exportQuantity_())
-  }
-
-  protected onExportCookingSteps(): void {
-    this.exportService_.exportCookingSteps(this.buildRecipeFromForm(), this.exportQuantity_())
-  }
-
-  protected onExportDishChecklist(): void {
-    this.exportService_.exportDishChecklist(this.buildRecipeFromForm(), this.exportQuantity_())
-  }
-
-  protected onExportAllTogether(): void {
-    this.exportService_.exportAllTogetherRecipe(this.buildRecipeFromForm(), this.exportQuantity_())
-  }
-
-  protected onPrintFromPreview(): void {
-    window.print()
-  }
-
-  protected onCloseExportPreview(): void {
-    this.exportPreviewPayload_.set(null)
-    this.exportPreviewType_ = null
   }
 
   /** Returns a user-friendly validation error message listing exactly what is missing. */
