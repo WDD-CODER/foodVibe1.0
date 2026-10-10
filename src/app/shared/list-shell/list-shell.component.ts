@@ -13,11 +13,12 @@ import {
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
 import { PageHeaderComponent } from '../page-header/page-header.component'
+import { ScrollIndicatorsDirective } from '../../core/directives/scroll-indicators.directive'
 
 @Component({
   selector: 'app-list-shell',
   standalone: true,
-  imports: [LucideAngularModule, PageHeaderComponent],
+  imports: [LucideAngularModule, PageHeaderComponent, ScrollIndicatorsDirective],
   templateUrl: './list-shell.component.html',
   styleUrl: './list-shell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
