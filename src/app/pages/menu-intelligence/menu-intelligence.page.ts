@@ -52,6 +52,7 @@ import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.c
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
 import { MenuAiFlowService } from './services/menu-ai-flow.service'
+import { MenuPickerSearchService } from './services/menu-picker-search.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
@@ -92,7 +93,7 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [MenuAiFlowService]
+  providers: [MenuAiFlowService, MenuPickerSearchService]
 })
 export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder)
@@ -113,6 +114,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly confirmModal_ = inject(ConfirmModalService)
   private readonly aiMenuModal_ = inject(AiMenuModalService)
   private readonly menuAiFlow_ = inject(MenuAiFlowService)
+  protected readonly pickerSearch_ = inject(MenuPickerSearchService)
 
   /** Bumped when form value changes so footer computeds re-run (form is not a signal). */
   private readonly formValueVersion_ = signal(0)
@@ -130,10 +132,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private exportPreviewType_: 'menu-info' | 'menu-shopping-list' | 'menu-checklist' | 'menu-all' | null = null
   private exportChecklistMode_: 'by_dish' | 'by_category' | 'by_station' | null = null
 
-  /** Per-section dish search query signals keyed by section index */
-  protected readonly dishSearchQueries_ = signal<Record<number, string>>({})
-  /** Per-section header search query signals */
-  protected readonly sectionSearchQueries_ = signal<Record<number, string>>({})
   protected readonly sectionSearchOpen_ = signal<number | null>(null)
   /** Currently active dish search (for keyboard nav); null when none focused/has query. */
   protected readonly activeDishSearch_ = signal<{ sectionIndex: number; itemIndex: number } | null>(null)
@@ -146,8 +144,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Highlighted index for keyboard nav in dropdowns (-1 = none). */
   protected readonly eventTypeHighlightedIndex_ = signal(0)
-  protected readonly sectionCategoryHighlightedIndex_ = signal<Record<number, number>>({})
-  protected readonly dishSearchHighlightedIndex_ = signal<Record<string, number>>({})
 
   protected readonly sectionCategories_ = this.menuSectionCategories.sectionCategories_
 
@@ -685,7 +681,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       })
     )
     const newItemIndex = items.length - 1
-    this.setDishSearchQuery(sectionIndex, newItemIndex, '')
+    this.pickerSearch_.dish.setQuery(this.dishKey(sectionIndex, newItemIndex), '')
     this.focusDishSearchInput(sectionIndex, newItemIndex)
   }
 
@@ -726,7 +722,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return Math.round(scaledCost * 100) / 100
   }
 
-  protected getDishSearchKey(sectionIndex: number, itemIndex: number): string {
+  private dishKey(sectionIndex: number, itemIndex: number): string {
     return `${sectionIndex}-${itemIndex}`
   }
 
@@ -807,32 +803,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected getDishSearchQuery(sectionIndex: number, itemIndex: number): string {
-    const key = this.getDishSearchKey(sectionIndex, itemIndex)
-    const queries: Record<string, string> = this.dishSearchQueries_()
-    return queries[key] ?? ''
-  }
-
-  protected setDishSearchQuery(sectionIndex: number, itemIndex: number, value: string): void {
-    this.dishSearchQueries_.update((q) => ({
-      ...q,
-      [this.getDishSearchKey(sectionIndex, itemIndex)]: value
-    }))
+    return this.pickerSearch_.dish.query(this.dishKey(sectionIndex, itemIndex))
   }
 
   protected onDishSearchQueryChange(sectionIndex: number, itemIndex: number, value: string): void {
-    this.setDishSearchQuery(sectionIndex, itemIndex, value)
-    const key = this.getDishSearchHighlightKey(sectionIndex, itemIndex)
-    this.dishSearchHighlightedIndex_.update((m) => ({ ...m, [key]: 0 }))
-    if (value.trim().length > 0) {
-      this.activeDishSearch_.set({ sectionIndex, itemIndex })
-    } else {
-      this.activeDishSearch_.set(null)
-      const edit = this.editingDishAt_()
-      if (edit && edit.sectionIndex === sectionIndex && edit.itemIndex === itemIndex && edit.previousRecipeId) {
-        this.getItemsArray(sectionIndex).at(itemIndex).patchValue({ recipeId: edit.previousRecipeId })
-        this.editingDishAt_.set(null)
-      }
-    }
+    this.pickerSearch_.dish.onQueryChange(this.dishKey(sectionIndex, itemIndex), value)
+    // Emptying the text while renaming keeps the row open for a fresh name; Escape / click-outside restore.
+    this.activeDishSearch_.set(value.trim().length > 0 ? { sectionIndex, itemIndex } : null)
   }
 
   protected selectRecipe(sectionIndex: number, itemIndex: number, recipe: Recipe): void {
@@ -860,7 +837,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       food_cost_money: Math.round(autoCost * 100) / 100,
       serving_portions: 1
     })
-    this.setDishSearchQuery(sectionIndex, itemIndex, '')
+    this.pickerSearch_.dish.setQuery(this.dishKey(sectionIndex, itemIndex), '')
     this.activeDishSearch_.set(null)
     const editing = this.editingDishAt_()
     if (editing && editing.sectionIndex === sectionIndex && editing.itemIndex === itemIndex) {
@@ -878,12 +855,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const currentName = this.recipes_().find((r) => r._id === recipeId)?.nameHebrew || ''
     this.editingDishAt_.set({ sectionIndex, itemIndex, previousRecipeId: recipeId })
     group.patchValue({ recipeId: '' })
-    this.setDishSearchQuery(sectionIndex, itemIndex, currentName)
+    this.pickerSearch_.dish.onQueryChange(this.dishKey(sectionIndex, itemIndex), currentName)
     this.activeDishSearch_.set({ sectionIndex, itemIndex })
-    this.dishSearchHighlightedIndex_.update((m) => ({
-      ...m,
-      [this.getDishSearchHighlightKey(sectionIndex, itemIndex)]: 0
-    }))
     this.focusDishSearchInput(sectionIndex, itemIndex)
   }
 
@@ -897,7 +870,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Clear dish search query (closes dropdown); used by clickOutside and Escape. */
   protected clearDishSearch(sectionIndex: number, itemIndex: number): void {
-    this.setDishSearchQuery(sectionIndex, itemIndex, '')
+    this.pickerSearch_.dish.setQuery(this.dishKey(sectionIndex, itemIndex), '')
     this.activeDishSearch_.set(null)
     const edit = this.editingDishAt_()
     if (edit && edit.sectionIndex === sectionIndex && edit.itemIndex === itemIndex && edit.previousRecipeId) {
@@ -907,13 +880,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  /** Enter in dish search: select first recipe if any, else keep focus. */
-  protected getDishSearchHighlightKey(sectionIndex: number, itemIndex: number): string {
-    return `${sectionIndex}-${itemIndex}`
-  }
-
   protected getDishSearchHighlightedIndex(sectionIndex: number, itemIndex: number): number {
-    return this.dishSearchHighlightedIndex_()[this.getDishSearchHighlightKey(sectionIndex, itemIndex)] ?? 0
+    return this.pickerSearch_.dish.highlighted(this.dishKey(sectionIndex, itemIndex))
   }
 
   private getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
@@ -923,73 +891,42 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return filtered.slice(0, 12)
   }
 
-  protected onDishSearchKeydown(sectionIndex: number, itemIndex: number, e: Event): void {
-    const ke = e as KeyboardEvent
+  /** Arrows move the highlight, Enter/Space picks, Escape clears, Tab hands focus on. */
+  protected onDishSearchKeydown(sectionIndex: number, itemIndex: number, e: KeyboardEvent): void {
     const recipes = this.getFilteredRecipes(sectionIndex, itemIndex)
-    const key = this.getDishSearchHighlightKey(sectionIndex, itemIndex)
-    let idx = this.getDishSearchHighlightedIndex(sectionIndex, itemIndex)
-    const maxIndex = Math.max(0, recipes.length - 1)
+    this.pickerSearch_.dish.handleKeydown(this.dishKey(sectionIndex, itemIndex), e, {
+      optionCount: recipes.length,
+      selectOnSpace: true,
+      onSelect: (i) => this.selectRecipe(sectionIndex, itemIndex, recipes[i]),
+      onClose: () => this.clearDishSearch(sectionIndex, itemIndex),
+      onHighlightMove: () => this.scrollDropdownHighlightIntoView('.dish-search-wrap'),
+      onTab: (ke) => this.focusAfterDishSearchTab(sectionIndex, itemIndex, ke.shiftKey)
+    })
+  }
 
-    if (ke.key === 'ArrowDown') {
-      ke.preventDefault()
-      ke.stopPropagation()
-      idx = recipes.length ? Math.min(idx + 1, maxIndex) : 0
-      this.dishSearchHighlightedIndex_.update((m) => ({ ...m, [key]: idx }))
-      this.scrollDropdownHighlightIntoView('.dish-search-wrap')
-      return
-    }
-    if (ke.key === 'ArrowUp') {
-      ke.preventDefault()
-      ke.stopPropagation()
-      idx = Math.max(0, idx - 1)
-      this.dishSearchHighlightedIndex_.update((m) => ({ ...m, [key]: idx }))
-      this.scrollDropdownHighlightIntoView('.dish-search-wrap')
-      return
-    }
-    if (ke.key === 'Enter' || ke.key === ' ') {
-      if (recipes.length > 0) {
-        ke.preventDefault()
-        ke.stopPropagation()
-        const i = Math.min(idx, recipes.length - 1)
-        this.selectRecipe(sectionIndex, itemIndex, recipes[i])
+  private focusAfterDishSearchTab(s: number, i: number, backwards: boolean): void {
+    // Tabbing out of a rename without picking restores the old dish, same as click-outside.
+    const edit = this.editingDishAt_()
+    if (edit && edit.sectionIndex === s && edit.itemIndex === i) this.clearDishSearch(s, i)
+    const hasRecipe = (this.getItemsArray(s).at(i)?.get('recipeId')?.value ?? '') !== ''
+    setTimeout(() => {
+      if (backwards) {
+        const prev = document.getElementById('dish-search-' + s + '-' + (i - 1))
+        const sectionTitle = document.getElementById('section-title-' + s)
+        ;(prev ?? sectionTitle)?.focus()
+      } else if (hasRecipe) {
+        document.getElementById('dish-sell-' + s + '-' + i)?.focus()
+      } else {
+        const next = document.getElementById('dish-search-' + s + '-' + (i + 1))
+        const addDish = document.getElementById('add-dish-' + s)
+        ;(next ?? addDish)?.focus()
       }
-      return
-    }
-    if (ke.key === 'Escape') {
-      ke.preventDefault()
-      ke.stopPropagation()
-      this.clearDishSearch(sectionIndex, itemIndex)
-      return
-    }
-    if (ke.key === 'Tab') {
-      ke.preventDefault()
-      ke.stopPropagation()
-      const s = sectionIndex
-      const i = itemIndex
-      const items = this.getItemsArray(s)
-      const hasRecipe = (items.at(i)?.get('recipeId')?.value ?? '') !== ''
-      setTimeout(() => {
-        if (ke.shiftKey) {
-          const prev = document.getElementById('dish-search-' + s + '-' + (i - 1))
-          const sectionTitle = document.getElementById('section-title-' + s)
-          ;(prev ?? sectionTitle)?.focus()
-        } else {
-          if (hasRecipe) {
-            document.getElementById('dish-sell-' + s + '-' + i)?.focus()
-          } else {
-            const next = document.getElementById('dish-search-' + s + '-' + (i + 1))
-            const addDish = document.getElementById('add-dish-' + s)
-            ;(next ?? addDish)?.focus()
-          }
-        }
-      }, 0)
-    }
+    }, 0)
   }
 
   protected openSectionSearch(index: number): void {
     this.sectionSearchOpen_.set(index)
-    this.sectionSearchQueries_.update((q) => ({ ...q, [index]: '' }))
-    this.sectionCategoryHighlightedIndex_.update((m) => ({ ...m, [index]: 0 }))
+    this.pickerSearch_.section.onQueryChange(index, '')
     setTimeout(() => {
       const input = document.querySelector('.section-search-wrap .section-search-input') as HTMLInputElement
       input?.focus()
@@ -1000,93 +937,53 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.sectionSearchOpen_.set(null)
   }
 
-  protected getSectionCategoryHighlightedIndex(sectionIndex: number): number {
-    return this.sectionCategoryHighlightedIndex_()[sectionIndex] ?? 0
+  /** Options: filtered categories, then one "add" — the typed name when it is new, else the add modal. */
+  protected getSectionCategoryOptionCount(sectionIndex: number): number {
+    return this.getFilteredSectionCategories(sectionIndex).length + 1
   }
 
-  protected getSectionCategoryOptionCount(sectionIndex: number): number {
-    const cats = this.getFilteredSectionCategories(sectionIndex)
-    const hasQuery = this.getSectionSearchQuery(sectionIndex).trim().length > 0
-    return cats.length + (hasQuery ? 2 : 1) // cats + [add with query?] + add new modal
+  /** Typed text that is not already a category (by key or Hebrew label); '' when none. */
+  protected getNewSectionCategoryName(index: number): string {
+    const name = this.pickerSearch_.section.query(index).trim()
+    return name && !this.findSectionCategoryKey(name) ? name : ''
+  }
+
+  private findSectionCategoryKey(name: string): string | undefined {
+    return this.sectionCategories_().find((key) => key === name || this.translation.translate(key) === name)
   }
 
   protected onSectionSearchKeydown(sectionIndex: number, e: KeyboardEvent): void {
-    const maxIndex = this.getSectionCategoryOptionCount(sectionIndex) - 1
-    let idx = this.getSectionCategoryHighlightedIndex(sectionIndex)
     const cats = this.getFilteredSectionCategories(sectionIndex)
-    const hasQuery = this.getSectionSearchQuery(sectionIndex).trim().length > 0
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      e.stopPropagation()
-      idx = Math.min(idx + 1, maxIndex)
-      this.sectionCategoryHighlightedIndex_.update((m) => ({ ...m, [sectionIndex]: idx }))
-      this.scrollDropdownHighlightIntoView('.section-search-wrap')
-      return
-    }
-    if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      e.stopPropagation()
-      idx = Math.max(0, idx - 1)
-      this.sectionCategoryHighlightedIndex_.update((m) => ({ ...m, [sectionIndex]: idx }))
-      this.scrollDropdownHighlightIntoView('.section-search-wrap')
-      return
-    }
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      e.stopPropagation()
-      if (idx >= 0 && idx < cats.length) {
-        this.selectSectionCategory(sectionIndex, cats[idx])
+    const newName = this.getNewSectionCategoryName(sectionIndex)
+    this.pickerSearch_.section.handleKeydown(sectionIndex, e, {
+      optionCount: this.getSectionCategoryOptionCount(sectionIndex),
+      onSelect: (idx) => {
+        if (idx < cats.length) this.selectSectionCategory(sectionIndex, cats[idx])
+        else if (newName) void this.addNewSectionCategory(sectionIndex)
+        else void this.openAddCategoryModal(sectionIndex)
         this.closeSectionSearch()
-      } else if (hasQuery && idx === cats.length) {
-        void this.addNewSectionCategory(sectionIndex)
+      },
+      onClose: () => this.closeSectionSearch(),
+      onHighlightMove: () => this.scrollDropdownHighlightIntoView('.section-search-wrap'),
+      onTab: (ke) => {
         this.closeSectionSearch()
-      } else if (idx === cats.length + (hasQuery ? 1 : 0)) {
-        void this.openAddCategoryModal(sectionIndex)
-        this.closeSectionSearch()
+        setTimeout(() => {
+          if (ke.shiftKey) {
+            document.getElementById('section-title-' + sectionIndex)?.focus()
+          } else {
+            const firstDish = document.getElementById('dish-search-' + sectionIndex + '-0')
+            const addDish = document.getElementById('add-dish-' + sectionIndex)
+            ;(firstDish ?? addDish)?.focus()
+          }
+        }, 0)
       }
-      return
-    }
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      e.stopPropagation()
-      this.closeSectionSearch()
-      return
-    }
-    if (e.key === 'Tab') {
-      e.preventDefault()
-      e.stopPropagation()
-      this.closeSectionSearch()
-      const sectionIdx = sectionIndex
-      setTimeout(() => {
-        if (e.shiftKey) {
-          document.getElementById('section-title-' + sectionIdx)?.focus()
-        } else {
-          const firstDish = document.getElementById('dish-search-' + sectionIdx + '-0')
-          const addDish = document.getElementById('add-dish-' + sectionIdx)
-          ;(firstDish ?? addDish)?.focus()
-        }
-      }, 0)
-    }
-  }
-
-  protected getSectionSearchQuery(index: number): string {
-    return this.sectionSearchQueries_()[index] || ''
-  }
-
-  protected setSectionSearchQuery(index: number, value: string): void {
-    this.sectionSearchQueries_.update((q) => ({ ...q, [index]: value }))
-  }
-
-  protected onSectionSearchQueryChange(sectionIndex: number, value: string): void {
-    this.setSectionSearchQuery(sectionIndex, value)
-    this.sectionCategoryHighlightedIndex_.update((m) => ({ ...m, [sectionIndex]: 0 }))
+    })
   }
 
   protected getFilteredSectionCategories(index: number): string[] {
-    const raw = this.getSectionSearchQuery(index).trim()
+    const raw = this.pickerSearch_.section.query(index).trim()
     if (!raw) return this.sectionCategories_()
-    return filterOptionsByStartsWith(this.sectionCategories_(), raw, (c) => c)
+    return filterOptionsByStartsWith(this.sectionCategories_(), raw, (c) => this.translation.translate(c))
   }
 
   protected selectSectionCategory(index: number, category: string): void {
@@ -1095,10 +992,16 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected async addNewSectionCategory(index: number): Promise<void> {
-    const name = this.getSectionSearchQuery(index).trim()
-    if (!name) return
+    const name = this.getNewSectionCategoryName(index)
+    if (name) await this.addAndSelectSectionCategory(index, name)
+  }
+
+  /** Adding may resolve the name to an English key (or be cancelled) — select what was actually stored. */
+  private async addAndSelectSectionCategory(index: number, name: string): Promise<void> {
+    const before = new Set(this.sectionCategories_())
     await this.menuSectionCategories.addCategory(name)
-    this.selectSectionCategory(index, name)
+    const key = this.findSectionCategoryKey(name) ?? this.sectionCategories_().find((k) => !before.has(k))
+    if (key) this.selectSectionCategory(index, key)
   }
 
   protected async openAddCategoryModal(sectionIndex: number): Promise<void> {
@@ -1108,11 +1011,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       placeholder: 'menu_search_category',
       saveLabel: 'save'
     })
-    if (result?.trim()) {
-      const name = result.trim()
-      await this.menuSectionCategories.addCategory(name)
-      this.selectSectionCategory(sectionIndex, name)
-    }
+    if (result?.trim()) await this.addAndSelectSectionCategory(sectionIndex, result.trim())
   }
 
   protected startEditField(field: string): void {

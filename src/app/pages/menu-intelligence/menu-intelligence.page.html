@@ -193,15 +193,15 @@
                     autocorrect="off"
                     autocapitalize="off"
                     spellcheck="false"
-                    [ngModel]="getSectionSearchQuery(sectionIndex)"
+                    [ngModel]="pickerSearch_.section.query(sectionIndex)"
                     [ngModelOptions]="{ standalone: true }"
-                    (ngModelChange)="onSectionSearchQueryChange(sectionIndex, $event)"
+                    (ngModelChange)="pickerSearch_.section.onQueryChange(sectionIndex, $event)"
                     [placeholder]="'menu_search_category' | translatePipe"
                     (keydown)="onSectionSearchKeydown(sectionIndex, $event)"
                   />
                   <app-input-clear
-                    [visible]="!!getSectionSearchQuery(sectionIndex)"
-                    (clear)="onSectionSearchQueryChange(sectionIndex, ''); sectionSearchInput.focus()"
+                    [visible]="!!pickerSearch_.section.query(sectionIndex)"
+                    (clear)="pickerSearch_.section.onQueryChange(sectionIndex, ''); sectionSearchInput.focus()"
                     (click)="$event.stopPropagation()"
                   />
                 </div>
@@ -210,35 +210,36 @@
                   <button
                     type="button"
                     class="dropdown-item"
-                    [class.highlighted]="getSectionCategoryHighlightedIndex(sectionIndex) === ci"
+                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === ci"
                     (click)="selectSectionCategory(sectionIndex, cat)"
                   >
                     {{ cat | translatePipe }}
                   </button>
-                  } @if (getSectionSearchQuery(sectionIndex).trim()) {
+                  } @if (getNewSectionCategoryName(sectionIndex); as newName) {
                   <button
                     type="button"
                     class="dropdown-item add-new"
-                    [class.highlighted]="getSectionCategoryHighlightedIndex(sectionIndex) === getFilteredSectionCategories(sectionIndex).length"
+                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
                     (click)="addNewSectionCategory(sectionIndex)"
                   >
                     <span class="c-add-new-icon">
                       <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
                     </span>
-                    {{ 'add' | translatePipe }}
+                    {{ 'add' | translatePipe }} "{{ newName }}"
                   </button>
-                  }
+                  } @else {
                   <button
                     type="button"
                     class="dropdown-item add-new"
-                    [class.highlighted]="getSectionCategoryHighlightedIndex(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
+                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
                     (click)="openAddCategoryModal(sectionIndex)"
                   >
                     <span class="c-add-new-icon">
                       <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
                     </span>
-                    {{ 'add' | translatePipe }}
+                    {{ 'add_new_category' | translatePipe }}
                   </button>
+                  }
                 </app-scrollable-dropdown>
               </div>
               } @else {
