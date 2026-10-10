@@ -1,6 +1,6 @@
 # Plan 408 — QA harness: dedicated QA slot (4205/3005) + evidence server (4206)
 
-Status: draft
+Status: active
 Snapshot: 2f9be7eb2522709b969b2f710850d3f4f7521f9f
 
 ## Problem Statement
