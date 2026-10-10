@@ -233,6 +233,20 @@
 - [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
 
+### Plan 403 — Data cleanup: legacy null logistics, test items and leftover collections, with a write guard (`plans/403-data-cleanup-legacy-nulls-test-items-write-guard.plan.md`)
+
+- [ ] A0: ⛔ Confirm the discard list with the Human (test items, test users, v1 rollback collections, rows 5–6 report-only) — the Planner's proposed list is in chat 2026-10-10; record the approved final list in session-state and use only that
+- [ ] A1: Backups — `server/scripts/db-backup.js` local + Atlas; folders in session-state
+- [ ] A2: `server/scripts/cleanup-legacy-data.js` (F1–F8 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
+- [ ] A3: Dry run local + Atlas; paste both count tables in chat
+- [ ] A4: Server guard in `server/routes/generic.js` PUT + tests in `server/test/generic.test.js`
+- [ ] A5: Client net in `kitchen-state.service.ts` `saveRecipe()` (+ spec)
+- [ ] A6: Stop the re-creation of empty v1 registry collections (`server/db.js` or wherever A2 finds it)
+- [ ] A7: Announce in chat → local `--apply` → dry run again = 0 → `validate-all --target=local` = 0 violations
+- [ ] A8: ⛔ Human approves Atlas `--apply` → apply with `--backup-dir` → `validate-all --target=atlas` = 0 violations
+- [ ] A9: Brain gotcha update (`docs/brain/gotchas/backend.md`)
+- [ ] A10: `npm --prefix server test`, `ng build`, `ng test` green; hand the Human the click list (save / favorite / rating / approve on a formerly-null recipe, local then production)
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
