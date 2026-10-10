@@ -197,16 +197,16 @@ line or file this plan names was removed, renamed or rewritten).
   screen, the port-spec and the `FEATURES:` line.
 
 ## Atomic Sub-tasks
-- [ ] A1: Fixtures — a tiny fake handoff shaped like the real one (`README.md` with a mapping table, `PROMPT.md`, `designs/x.html`, wrapper folder, zipped) + a copy of two dashboard files for the inventory tests — `scripts/test/fixtures/design-port/**`
-- [ ] A2: `design-handoff-ingest.mjs` + test (find root, slug, README targets, hash diff vs previous slug, dry-run writes nothing, dirty-tree refusal, handoffs.md entry) — `scripts/design-handoff-ingest.mjs`, `scripts/test/design-handoff-ingest.test.mjs`
-- [ ] A3: `design-feature-inventory.mjs` + test (extract kinds, identity by kind+name, compare ok / missing exit 1, approved removals skipped, `--base <ref> --compare-worktree`) — `scripts/design-feature-inventory.mjs`, `scripts/test/design-feature-inventory.test.mjs`
-- [ ] A4: Rewrite the command (Phase A ingest, registry re-open, Phase B live compare, inventory gate, close-out; drop stale sections and the claude.ai ban) — `.claude/commands/design-port.md`
-- [ ] A5: `MANIFEST.md` per-screen authority + `handoffs.md` seeded with the August snapshot (entry 0) and the cook-view handoff (entry 1, owned by plan 404) — `.interface-design/source/MANIFEST.md`, `.interface-design/handoffs.md`
-- [ ] A6: Registry: add a `handoff` column note and the re-open rule — `_claude-data/design-migration/screens/_registry.md`
-- [ ] A7: `.gitignore` append: ignore `_claude-data/design-migration/live/`; un-ignore `.interface-design/handoffs/**/*.png` (handoff assets/screenshots are currently dropped by `*.png`) — `.gitignore`
-- [ ] A8: ADR + brain index line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`
-- [ ] A9: Real handoff dry run: copy `../foodVibe1.0-wt-3/.interface-design/handoffs/cook-view/` (untracked in wt-3, not pushed — read it from disk, never write there) to a temp folder, ingest `--dry-run` with it, live compare for Cook View, stop at the port-spec — no port code
-- [ ] A10: `npm run test:scripts` + `ng build` green; hand the Human the check list
+- [x] A1: Fixtures — a tiny fake handoff shaped like the real one (`README.md` with a mapping table, `PROMPT.md`, `designs/x.html`, wrapper folder, zipped) + a copy of two dashboard files for the inventory tests — `scripts/test/fixtures/design-port/**`
+- [x] A2: `design-handoff-ingest.mjs` + test (find root, slug, README targets, hash diff vs previous slug, dry-run writes nothing, dirty-tree refusal, handoffs.md entry) — `scripts/design-handoff-ingest.mjs`, `scripts/test/design-handoff-ingest.test.mjs`
+- [x] A3: `design-feature-inventory.mjs` + test (extract kinds, identity by kind+name, compare ok / missing exit 1, approved removals skipped, `--base <ref> --compare-worktree`) — `scripts/design-feature-inventory.mjs`, `scripts/test/design-feature-inventory.test.mjs`
+- [x] A4: Rewrite the command (Phase A ingest, registry re-open, Phase B live compare, inventory gate, close-out; drop stale sections and the claude.ai ban) — `.claude/commands/design-port.md`
+- [x] A5: `MANIFEST.md` per-screen authority + `handoffs.md` seeded with the August snapshot (entry 0) and the cook-view handoff (entry 1, owned by plan 404) — `.interface-design/source/MANIFEST.md`, `.interface-design/handoffs.md`
+- [x] A6: Registry: add a `handoff` column note and the re-open rule — `_claude-data/design-migration/screens/_registry.md`
+- [x] A7: `.gitignore` append: ignore `_claude-data/design-migration/live/`; un-ignore `.interface-design/handoffs/**/*.png` (handoff assets/screenshots are currently dropped by `*.png`) — `.gitignore`
+- [x] A8: ADR + brain index line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`
+- [x] A9: Real handoff dry run: copy `../foodVibe1.0-wt-3/.interface-design/handoffs/cook-view/` (untracked in wt-3, not pushed — read it from disk, never write there) to a temp folder, ingest `--dry-run` with it, live compare for Cook View, stop at the port-spec — no port code — 2026-10-10: ingest --dry-run → slug cook-view, target Cook View, 6 shell paths, 17 files; live vs design at 390/700/900/1366 taken (gitignored live/11-cook-view/2026-10-10/); stopped before the port-spec
+- [x] A10: `npm run test:scripts` + `ng build` green; hand the Human the check list — 2026-10-10: test:scripts 38/38, ng build ok; Human validated the command + Cook View dry run ("done"); the wt-3 inventory check runs after merge
 
 ## Technical Considerations
 - Live app needs real data: slot dev server with `ng serve -c local` (plain `ng serve` fakes auth

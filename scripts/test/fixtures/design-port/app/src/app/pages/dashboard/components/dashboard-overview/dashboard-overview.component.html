@@ -1,0 +1,217 @@
+<div class="dashboard-overview" dir="rtl">
+  <app-page-header titleKey="dashboard" subtitleKey="dashboard_subtitle" />
+
+  <main class="dashboard-main">
+    <section class="kpi-grid">
+      <!-- Total Products -->
+      <article class="kpi-card" data-testid="kpi-total-products">
+        <div class="kpi-top">
+          <span class="kpi-icon">
+            <lucide-icon name="package" [size]="13"></lucide-icon>
+          </span>
+          <h2 class="kpi-label">{{ 'total_products' | translatePipe }}</h2>
+        </div>
+        <p class="kpi-value">{{ totalProducts_() }}</p>
+        <div class="kpi-foot">
+          <button type="button" class="link-btn" data-testid="btn-view-inventory" (click)="goToInventory()">
+            {{ 'view_inventory' | translatePipe }}
+            <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
+          </button>
+          <button
+            type="button"
+            class="link-btn"
+            data-testid="btn-add-product"
+            (click)="goToAddProduct()"
+            [disabled]="!isLoggedIn()"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          >
+            {{ 'add_product' | translatePipe }}
+          </button>
+        </div>
+      </article>
+
+      <!-- Total Recipes -->
+      <article class="kpi-card" data-testid="kpi-total-recipes">
+        <div class="kpi-top">
+          <span class="kpi-icon">
+            <lucide-icon name="book-open" [size]="13"></lucide-icon>
+          </span>
+          <h2 class="kpi-label">{{ 'total_recipes' | translatePipe }}</h2>
+        </div>
+        <p class="kpi-value">{{ totalRecipes_() }}</p>
+        <div class="kpi-foot">
+          <button type="button" class="link-btn" data-testid="btn-view-recipes" (click)="goToRecipeBook()">
+            {{ 'view_recipes' | translatePipe }}
+            <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
+          </button>
+          <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
+            <path
+              d="M0 12 L10 13 L20 10 L30 11 L40 7 L50 8 L60 4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+      </article>
+
+      <!-- Low Stock -->
+      <article class="kpi-card warning" data-testid="kpi-low-stock">
+        <div class="kpi-top">
+          <span class="kpi-icon">
+            <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
+          </span>
+          <h2 class="kpi-label">{{ 'low_stock' | translatePipe }}</h2>
+        </div>
+        <p class="kpi-value">{{ lowStockCount_() }}</p>
+        <div class="kpi-foot">
+          <button type="button" class="link-btn" data-testid="btn-view-low-stock" (click)="goToInventoryLowStock()">
+            {{ 'view_inventory' | translatePipe }}
+            <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
+          </button>
+          <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
+            <path
+              d="M0 8 L10 10 L20 7 L30 12 L40 11 L50 15 L60 14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+      </article>
+
+      <!-- Unapproved Recipes -->
+      <article class="kpi-card info" data-testid="kpi-unapproved">
+        <div class="kpi-top">
+          <span class="kpi-icon">
+            <lucide-icon name="clock" [size]="13"></lucide-icon>
+          </span>
+          <h2 class="kpi-label">{{ 'unapproved_recipes' | translatePipe }}</h2>
+        </div>
+        <p class="kpi-value">{{ unapprovedCount_() }}</p>
+        <div class="kpi-foot">
+          <button type="button" class="link-btn" data-testid="btn-view-unapproved" (click)="goToRecipeBookUnapproved()">
+            {{ 'view_recipes' | translatePipe }}
+            <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
+          </button>
+          <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
+            <path
+              d="M0 10 L10 9 L20 11 L30 8 L40 9 L50 6 L60 5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
+      </article>
+    </section>
+
+    <section class="activity-section">
+      <header class="section-header">
+        <h2>{{ 'recent_activity' | translatePipe }}</h2>
+      </header>
+
+      @let groups = activityGroups();
+      @if (groups.length) {
+        <div class="activity-list-scroll-wrap">
+          <div class="activity-list" data-testid="activity-list" scrollIndicators>
+            @for (group of groups; track group.key) {
+              @if (groups.length > 1) {
+                <h3 class="act-day">{{ group.label }}</h3>
+              }
+              @for (item of group.items; track item.id) {
+                @let changes = realChanges(item);
+                <div
+                  class="activity-item"
+                  data-testid="activity-item"
+                  [class.has-changes]="changes.length"
+                  [class.is-expanded]="expandedActivityId_() === item.id"
+                  [attr.role]="changes.length ? 'button' : null"
+                  [attr.tabindex]="changes.length ? 0 : null"
+                  [attr.aria-expanded]="changes.length ? expandedActivityId_() === item.id : null"
+                  (click)="changes.length && toggleActivity(item.id, $event)"
+                  (keydown.enter)="changes.length && toggleActivity(item.id, $event)"
+                >
+                  <div class="act-head">
+                    <span class="act-avatar" [attr.data-entity]="item.entityType" aria-hidden="true">
+                      <lucide-icon [name]="entityIcon(item.entityType)" [size]="16"></lucide-icon>
+                    </span>
+
+                    <div class="act-middle">
+                      <span class="entity-type-tag" [attr.data-entity]="item.entityType">
+                        {{
+                          (item.entityType === 'product'
+                            ? 'product'
+                            : item.entityType === 'dish'
+                              ? 'dish'
+                              : 'preparation'
+                          ) | translatePipe
+                        }}
+                      </span>
+                      <span class="act-sep" aria-hidden="true"></span>
+                      <span class="activity-name">{{ item.entityName }}</span>
+                    </div>
+
+                    <span class="activity-type" [attr.data-action]="item.action">
+                      {{ 'activity_' + item.action | translatePipe }}
+                    </span>
+                    <time class="act-time" [attr.datetime]="isoTime(item.timestamp)">{{
+                      relativeTime(item.timestamp)
+                    }}</time>
+                  </div>
+
+                  @if (changes.length) {
+                    <ul class="act-changes">
+                      @for (change of changes; track change.field) {
+                        <li class="act-chip" data-testid="act-chip">
+                          <span class="act-chip-label">{{ change.label | translatePipe }}</span>
+                          <span class="act-chip-values">
+                            @if (change.from) {
+                              <del class="act-old">{{ change.from | activityValue: change.field }}</del>
+                            }
+                            @if (change.from && change.to) {
+                              <lucide-icon
+                                class="act-arrow"
+                                name="arrow-left"
+                                [size]="12"
+                                aria-hidden="true"
+                              ></lucide-icon>
+                            }
+                            @if (change.to) {
+                              <ins class="act-new">{{ change.to | activityValue: change.field }}</ins>
+                            }
+                          </span>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </div>
+              }
+            }
+          </div>
+          <div class="activity-scroll-zone activity-scroll-zone--top" aria-hidden="true"></div>
+          <div class="activity-scroll-zone activity-scroll-zone--bottom" aria-hidden="true"></div>
+          <div class="activity-scroll-indicator activity-scroll-indicator--top" aria-hidden="true">
+            <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+          </div>
+          <div class="activity-scroll-indicator activity-scroll-indicator--bottom" aria-hidden="true">
+            <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+          </div>
+        </div>
+      } @else {
+        <div class="activity-empty" data-testid="activity-empty">
+          <lucide-icon class="activity-empty-icon" name="activity" [size]="26"></lucide-icon>
+          <p class="empty-copy">
+            {{ 'no_recent_activity' | translatePipe }}
+          </p>
+        </div>
+      }
+    </section>
+  </main>
+</div>

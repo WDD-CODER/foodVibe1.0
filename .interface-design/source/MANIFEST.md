@@ -1,5 +1,16 @@
 # MANIFEST — what has authority in this snapshot
 
+## Per-screen authority (plan 405)
+
+This folder is the **August whole-app snapshot**. Since plan 405 the design arrives as per-screen
+Claude Design handoffs in `../handoffs/<slug>/`, logged in `../handoffs.md`:
+
+- **A screen with a handoff → the latest handoff for that screen wins** (its `README.md` is the
+  spec, later sections override earlier ones; its `designs/*.html` is the visual reference).
+  This folder's `.dc.html` for that screen becomes background.
+- **A screen with no handoff yet → the `.dc.html` here**, under the rules below.
+- The reference-only and archive rules below apply to this folder either way.
+
 **The screen of record is the `.dc.html` file, rendered live in a browser — never a PNG.**
 Screenshots in `screenshots/` are debug/iteration artifacts from building the snapshot, not the
 design itself; a port-spec's Inventory 3 (visual spec) is built by reading the `.dc.html` source
