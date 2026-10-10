@@ -265,3 +265,11 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** Matching on the key looks right because some keys are Hebrew (older or user-made ones), so a quick test can pass while English-keyed terms never match.
 
 **What to do instead:** Filter on the shown label (`translation.translate(key)`); treat a match on key *or* label as "exists"; after `addCategory`, resolve the stored key (by label, else the newly appeared key) and select that — nothing on cancel. Reference: `menu-intelligence.page.ts` `findSectionCategoryKey` / `addAndSelectSectionCategory` (plan 398).
+
+## `.c-list-row.is-selected > .c-list-body-cell` skips column-carousel cells above 768px
+
+**What hurt:** Above 768px a selected recipe row showed the tint and outline on name/type/actions but plain white on labels, allergens, rating and cost — the columns wrapped in `<app-column-carousel-cell>` (plan 399 validation).
+
+**Why the obvious fix is wrong:** The carousel host carries `.c-list-body-cell` itself, so it looks like it should match. But on desktop the host is `display: contents` (`column-carousel.component.scss`) and the visible cells are its projected `[columnSlide]` children — one level below the row, so the `>` child selector never reaches them. Below 768px the host is the real cell and the slides are transparent, so the phone view looked fine.
+
+**What to do instead:** Any row-level cell rule written with `> .c-list-body-cell` (selected, invalid, hover tints) needs a desktop twin `> .column-carousel--cell > .c-list-body-cell` inside `@media (min-width: $break-mobile + 1px)` — see the selected-row block in `src/styles.scss`. Don't add the twin below 768px, or the active slide gets a second outline inside the host's.
