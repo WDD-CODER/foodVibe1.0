@@ -1862,11 +1862,18 @@
             "origin/main",
             "refs/heads/main"
           ]
+        },
+        {
+          "key": "plans.openDirs",
+          "strings": [
+            "plans/design"
+          ]
         }
       ],
       "refs": [
         ".claude/todo.md",
-        "AGENTS.md"
+        "AGENTS.md",
+        "scripts/lib/plan-paths.mjs"
       ],
       "notes": "Planner-Worker guard: push to `refs/heads/main` may only touch `plans/*.plan.md` + `.claude/todo.md` (git.mainBranch)."
     },
@@ -3414,11 +3421,18 @@
           "strings": [
             "wt-n"
           ]
+        },
+        {
+          "key": "plans.openDirs",
+          "strings": [
+            "plans/design"
+          ]
         }
       ],
       "refs": [
         ".claude/todo.md",
-        "AGENTS.md"
+        "AGENTS.md",
+        "scripts/lib/plan-paths.mjs"
       ],
       "notes": "Blocks writes on main; worktree-aware. Only a comment names wt-N; `main` branch name hardcoded (git.mainBranch)."
     },
@@ -4529,6 +4543,52 @@
       "params": [],
       "refs": [],
       "notes": "Part 1 rules are generic, Part 2 is the FoodVibe audit; promote Part 1 to the kit separately."
+    },
+    {
+      "path": "scripts/lib/plan-paths.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "plans.openDirs",
+          "strings": [
+            "plans/design"
+          ]
+        }
+      ],
+      "refs": [
+        "scripts/take-plan.mjs",
+        "scripts/todo-query.mjs",
+        "scripts/scope-check.mjs",
+        "scripts/lib/slot.mjs",
+        "scripts/plan-close.mjs",
+        "scripts/next-plan-number.mjs"
+      ],
+      "notes": "Plan 406: the one place that knows where open plans live (OPEN_PLAN_DIRS = plans.openDirs, rendered |quoted); range folders and plans/archive/ never count. Kit-authored."
+    },
+    {
+      "path": "scripts/test/plan-paths.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/plan-paths.mjs",
+        "scripts/plan-close.mjs",
+        "scripts/branch-guard.sh",
+        ".husky/pre-push"
+      ],
+      "notes": "Plan 406: tests for plan-paths.mjs, plan-close from plans/design/, and the branch-guard / pre-push open-plan rule (FoodVibe values)."
+    },
+    {
+      "path": "docs/brain/decisions/0020-plans-design-folder.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/plan-paths.mjs",
+        ".claude/skills/save-plan/SKILL.md"
+      ],
+      "notes": "Plan 406 ADR: open design plans live in plans/design/; closed plans go to the range folder."
     }
   ]
 }

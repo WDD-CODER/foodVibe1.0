@@ -31,3 +31,14 @@ test('findClosable needs archived, not open, and all tasks closed', () => {
   })
   assert.deepEqual(got.map(g => g.nnn), ['401'])
 })
+
+test('findClosable takes repo-relative paths from every open dir', () => {
+  const texts = { 'plans/401-a.plan.md': plan('- [x] A1'), 'plans/design/402-b.plan.md': plan('- [x] A1') }
+  const got = findClosable({
+    files: Object.keys(texts),
+    openNums: new Set(),
+    archivedNums: new Set(['401', '402']),
+    readPlan: f => texts[f]
+  })
+  assert.deepEqual(got.map(g => g.file), ['plans/401-a.plan.md', 'plans/design/402-b.plan.md'])
+})
