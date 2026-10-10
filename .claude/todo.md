@@ -227,6 +227,19 @@
 - [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
 
+### Plan 405 — Design port from a Claude Design handoff, with live-app comparison and a lost-feature check (`plans/405-design-port-from-claude-design-handoff-live-app-compare.plan.md`)
+
+- [ ] A1: Fixtures — a tiny fake handoff zip + a copy of two dashboard files for the inventory tests — `scripts/test/fixtures/design-port/**`
+- [ ] A2: `design-handoff-ingest.mjs` + test (find root, hash diff, dry-run writes nothing, dirty-tree refusal, handoffs.md entry) — `scripts/design-handoff-ingest.mjs`, `scripts/test/design-handoff-ingest.test.mjs`
+- [ ] A3: `design-feature-inventory.mjs` + test (extract kinds, identity by kind+name, compare ok / missing exit 1, approved removals skipped) — `scripts/design-feature-inventory.mjs`, `scripts/test/design-feature-inventory.test.mjs`
+- [ ] A4: Rewrite the command (Phase A ingest, registry re-open, Phase B live compare, inventory gate, close-out; drop stale sections and the claude.ai ban) — `.claude/commands/design-port.md`
+- [ ] A5: `MANIFEST.md` authority update + `handoffs.md` seeded with the August snapshot as entry 0 — `.interface-design/source/MANIFEST.md`, `.interface-design/handoffs.md`
+- [ ] A6: Registry: add a `handoff` column note and the re-open rule — `_claude-data/design-migration/screens/_registry.md`
+- [ ] A7: `.gitignore` append for `live/` — `.gitignore`
+- [ ] A8: ADR + brain index line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`
+- [ ] A9: Real handoff dry run with the Human: ingest `--dry-run`, lock the root matcher to the real layout, live compare on the first changed screen, stop at the port-spec — slot only, no port code
+- [ ] A10: `npm run test:scripts` + `ng build` green; hand the Human the check list
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
