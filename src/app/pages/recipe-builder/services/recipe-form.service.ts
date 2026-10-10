@@ -310,7 +310,9 @@ export class RecipeFormService {
             isCritical: !!r.isCritical,
             notes: r.notes || undefined
           }))
-        return baseline.length > 0 ? { logistics: { baseline: baseline } } : {}
+        // Always sent, even empty: the server merges a PUT over the stored doc, so leaving it
+        // out keeps a legacy `logistics: null` (schema 400) or the tools the user just removed.
+        return { logistics: { baseline: baseline } }
       })()
     }
   }

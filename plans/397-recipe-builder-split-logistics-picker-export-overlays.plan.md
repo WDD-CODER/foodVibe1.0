@@ -1,6 +1,6 @@
 # Plan 397 — Recipe builder split: logistics picker and export overlays into page services
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: da1d7f666cefa259d0233d6c5522042073ab8a3f
 
@@ -29,9 +29,9 @@ pattern for `RecipeAiFlowService`.
   `src/app/pages/recipe-builder/services/`; the page delegates to them. Refactor only — no
   behavior, look or text change.
 - Success:
-  - [auto] `ng build` passes.
-  - [auto] `ng test` passes (existing specs, incl. `recipe-builder.page.spec.ts`).
-  - [auto] `wc -l src/app/pages/recipe-builder/recipe-builder.page.ts` is lower than 1426 (report the number).
+  - [x] [auto] `ng build` passes. (exit 0, 2026-10-10)
+  - [x] [auto] `ng test` passes (existing specs, incl. `recipe-builder.page.spec.ts`). (TOTAL: 470 SUCCESS)
+  - [x] [auto] `wc -l src/app/pages/recipe-builder/recipe-builder.page.ts` is lower than 1426 (report the number). (1095)
   - [human] Logistics: search a tool, arrow keys + Enter pick it, +/- and typed quantity work, Add puts it in the baseline, remove a row, "add new tool" modal creates and adds one.
   - [human] Export: hero FAB opens the toolbar; each View option (recipe info, shopping list, cooking steps, dish checklist, all) previews; export and print from preview work; closing the preview and leaving the page leave nothing open.
   - [human] Edit and save an existing recipe and a dish; leave with unsaved changes and get the guard prompt — same as before.
@@ -53,6 +53,7 @@ src/app/pages/recipe-builder/recipe-builder.page.ts
 src/app/pages/recipe-builder/recipe-builder.page.html
 src/app/pages/recipe-builder/recipe-builder.page.spec.ts
 src/app/pages/recipe-builder/services/**
+src/app/pages/recipe-builder/recipe-builder.page.scss
 ```
 
 ## Read Scope
@@ -85,24 +86,24 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `RecipeLogisticsPickerService` (`@Injectable()`, provided on the page): picker state
+- [x] `RecipeLogisticsPickerService` (`@Injectable()`, provided on the page): picker state
       (selected id, quantity, search query, highlighted index, filtered equipment options,
       excluded baseline ids) and its handlers (quantity +/- and keydown, search input/keydown,
       dropdown scroll, select option, add-new-tool modal). Writes to the baseline FormArray
       either stay in the page or take the FormArray as an argument — the service never reaches
       into the whole form.
-- [ ] `RecipeExportService` (`@Injectable()`, provided on the page): export toolbar / view-export
+- [x] `RecipeExportService` (`@Injectable()`, provided on the page): export toolbar / view-export
       dropdown / preview signals and the `onView*` / `onExport*` / print / close handlers. It
       receives the recipe snapshot and export quantity from the page (`buildRecipeFromForm()`,
       `exportQuantity_()`) rather than reading the form itself. `closeAllExportOverlays()` on
       leave keeps working.
-- [ ] Template bindings updated to the services; no visible change.
-- [ ] Code style per hard rules: `inject()`, signals with trailing `_` for private state, no
+- [x] Template bindings updated to the services; no visible change.
+- [x] Code style per hard rules: `inject()`, signals with trailing `_` for private state, no
       `any`, single quotes, no semicolons. Class structure per
       `.claude/skills/angularComponentStructure/SKILL.md`.
 
 ### Should Have (P1)
-- [ ] Focused specs for the two new services (picker keyboard nav + add; export opens/closes).
+- [x] Focused specs for the two new services (picker keyboard nav + add; export opens/closes).
 
 ### Nice to Have (P2)
 - none
@@ -111,11 +112,13 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI change, no new dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Confirm the seams against the current file (line numbers above are from 2026-10-10); note in session-state anything that turned out coupled to the form and stays
-- [ ] A2: Extract `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`; wire page + `recipe-builder.page.html`
-- [ ] A3: Extract `src/app/pages/recipe-builder/services/recipe-export.service.ts`; wire page + template
-- [ ] A4: Update `recipe-builder.page.spec.ts` if it touches moved members; add service specs (P1)
-- [ ] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
+- [x] A1: Confirm the seams against the current file (line numbers above are from 2026-10-10); note in session-state anything that turned out coupled to the form and stays
+- [x] A2: Extract `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`; wire page + `recipe-builder.page.html`
+- [x] A3: Extract `src/app/pages/recipe-builder/services/recipe-export.service.ts`; wire page + template — shipped as `recipe-builder-export.service.ts` / `RecipeBuilderExportService`: `core/services/recipe-export.service.ts` already exports a `RecipeExportService`
+- [x] A4: Update `recipe-builder.page.spec.ts` if it touches moved members; add service specs (P1)
+- [x] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
+- [x] A6 (validation fallout, pre-existing): saving a recipe/dish with no tools left 400s on legacy `logistics: null` docs (and silently kept removed tools) — `buildRecipeFromForm` now always sends `logistics: { baseline }`; regression spec `services/recipe-form.service.spec.ts`
+- [x] A7 (validation fallout, pre-existing): tool-search dropdown clipped by `.logistics-add-wrap { overflow: hidden }` — replaced with `min-inline-size: 0` (approved: recipe-builder.page.scss); verified visible at 1280 and 390 wide, no horizontal scroll
 
 ## Technical Considerations
 - Dependencies: `RecipeFormService`, `RecipeAiFlowService` (already in `services/`), equipment
