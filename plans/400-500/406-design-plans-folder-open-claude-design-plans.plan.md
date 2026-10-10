@@ -1,6 +1,6 @@
 # Plan 406 — Design plans folder: open Claude Design plans live in plans/design/
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: 34711de5f66c48518097d15b77edbe8e909b98c1
 
