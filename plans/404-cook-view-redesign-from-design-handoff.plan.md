@@ -63,7 +63,7 @@ src/app/core/components/tab-chips/**
 src/app/core/components/hero-fab/**
 src/app/shared/approve-stamp/**
 src/app/shared/export-preview/**
-src/app/shared/unit-expander/**
+src/app/shared/counter/counter.component.scss
 src/app/app.config.ts
 src/styles.scss
 public/assets/data/dictionary.json
@@ -104,7 +104,7 @@ test phone, tablet and desktop in light and dark. Continue only on the Human's g
 - [ ] 2 Header and chips tokenization (nav pills, user chip, guest avatar, bottom nav, profile menu, `.c-tab-pill`, `.c-icon-btn`) — src/app/core/components/header/header.component.scss, src/app/core/components/tab-chips/**, src/styles.scss
 - [ ] 3 Breakpoints and page frame (1440 max-width frame, page scroll, 620/767/768/1023, hidden page scrollbar, drop fixed shell + scroll indicators) — src/app/pages/cook-view/cook-view.page.html/.scss/.ts
 - [ ] 4 Page header + meta chips (back with history fallback, title, approval chip, cost, yield, rating, timer chip, theme toggle, edit, export menu / phone ⋮ top bar, slim photo banner) — src/app/pages/cook-view/**
-- [ ] 5 Panes + ingredient rows + `app-unit-expander` (units incl. "+ יחידה חדשה", scale-to-ingredient with live preview, no confirm modal, editable scaled banner, long-press, ready badge, unlinked italic) — src/app/pages/cook-view/**, src/app/shared/unit-expander/**
+- [ ] 5 Panes + ingredient rows + row expander (unit dropdown of the other units + "+ יחידה חדשה" saved on the product — Human 2026-10-10; no current-unit tile, scale-to-ingredient with live preview, no confirm modal, editable scaled banner, long-press, ready badge, unlinked italic) — src/app/pages/cook-view/**, src/app/shared/unit-expander/**
 - [ ] 6 Steps (done/active/pending rows, step clocks per "Step clocks", editable countdown, row pills, grow animation, clickable done rows) + `CookTimerService` `pauseTimer`/`resumeTimer`/`resetTimer` with unit tests — src/app/pages/cook-view/**
 - [ ] 7 Single scrolling page below 768 (sticky switch buttons, scroll spy, scroll-margin-top, `scrollToActiveStep` block:'start') — src/app/pages/cook-view/**
 - [ ] 8 Edit mode (banner, header actions, phone save bar, FAB hide/stamp lift, restyled ingredient edit rows, changed-field highlight, restyled `app-recipe-workflow` container) — src/app/pages/cook-view/**, src/app/core/components/hero-fab/**, src/app/shared/approve-stamp/**

@@ -752,8 +752,6 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   flex-direction: column;
   min-inline-size: 0;
 
-  overflow: hidden;
-
   background: var(--bg-glass);
 
   border: 1px solid var(--border-chrome);
@@ -863,6 +861,12 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   &.is-source {
     border-color: var(--color-primary);
   }
+
+  // Above the rows below it, so the unit dropdown's list is not painted over.
+  &.is-open {
+    position: relative;
+    z-index: 2;
+  }
 }
 
 .cv-ing-main {
@@ -970,44 +974,10 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     margin-inline-start: var(--space-1);
     vertical-align: -2px;
   }
-
-  @media (min-width: $cv-tablet-min) {
-    .cv-ing.has-units & {
-      display: none;
-    }
-  }
 }
 
-.cv-unit-chip {
-  display: none;
-  align-items: center;
-  gap: var(--space-1);
-
-  block-size: 34px;
-
-  background: var(--color-primary-soft);
-  color: var(--color-primary-ink);
-  font-family: inherit;
-  font-size: var(--fs-base);
-  font-weight: var(--fw-bold);
-
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
-  padding-inline: 10px;
-
-  cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-smooth);
-
-  &:hover {
-    border-color: var(--color-primary);
-  }
-
-  @media (min-width: $cv-tablet-min) {
-    display: inline-flex;
-  }
-}
-
-.cv-scale-btn {
+// Opens the row's options (unit dropdown + scale to this item) from tablet up; phones long-press.
+.cv-row-more {
   display: none;
   place-content: center;
   flex-shrink: 0;
@@ -1029,16 +999,20 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     color: var(--color-primary-ink);
   }
 
+  .cv-ing.is-open & {
+    transform: rotate(180deg);
+  }
+
   @media (min-width: $cv-tablet-min) {
     display: inline-grid;
   }
+}
 
-  // 768–1100: rows with a unit chip reach the same action from the expanded area.
-  @media (min-width: $cv-tablet-min) and (max-width: 1100px) {
-    .cv-ing.has-units & {
-      display: none;
-    }
-  }
+.cv-ing-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
 // Expander: grows the row with grid-template-rows 0fr → 1fr.
@@ -1063,6 +1037,8 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     flex-direction: column;
     gap: var(--space-3);
 
+    // Visible once open, so the unit dropdown's list can hang below the row.
+    overflow: visible;
     padding: 0 14px 14px;
   }
 }

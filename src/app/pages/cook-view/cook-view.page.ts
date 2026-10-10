@@ -20,6 +20,7 @@ import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } fr
 import { LucideAngularModule } from 'lucide-angular'
 
 import { Recipe, RecipeStep, FlatPrepItem, PrepCategory } from '@models/recipe.model'
+import { Product } from '@models/product.model'
 import { ScalingService, ScaledIngredientRow } from '@services/scaling.service'
 import { CookViewStateService } from '@services/cook-view-state.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
@@ -45,7 +46,6 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
 import { CookTimerService } from './services/cook-timer.service'
 import { CookViewExportService } from './services/cook-view-export.service'
-import { UnitExpanderComponent, UnitExpanderOption } from 'src/app/shared/unit-expander/unit-expander.component'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -73,8 +73,7 @@ const MULTIPLIER_CHIPS = [
     ExportPreviewComponent,
     ApproveStampComponent,
     CounterComponent,
-    RatingStarsComponent,
-    UnitExpanderComponent
+    RatingStarsComponent
   ],
   providers: [CookTimerService, CookViewExportService],
   templateUrl: './cook-view.page.html',
@@ -937,9 +936,20 @@ export class CookViewPage implements OnInit, OnDestroy {
     return Math.round(value * 1000) / 1000
   }
 
-  protected unitOptionsFor(row: ScaledIngredientRow): UnitExpanderOption[] {
-    const units = row.availableUnits?.length ? row.availableUnits : [row.unit]
-    return units.map((u) => ({ value: u, amount: this.amountInUnit(row, u) }))
+  /** Units the row can switch to: every other known unit (the one shown now is left out), then add. */
+  protected otherUnitOptions(index: number, row: ScaledIngredientRow): { value: string; label: string }[] {
+    const shown = this.getDisplayUnit(index, row)
+    const units = (row.availableUnits ?? []).filter((u) => u && u !== shown)
+    return [...units.map((u) => ({ value: u, label: u })), { value: '__add_unit__', label: '+ יחידה חדשה' }]
+  }
+
+  protected onRowUnitPick(index: number, row: ScaledIngredientRow, unit: string | null): void {
+    if (!unit) return
+    if (unit === '__add_unit__') {
+      this.addUnitFor(index, row)
+      return
+    }
+    this.chooseUnit(index, unit)
   }
 
   protected toggleIngredientExpander(index: number): void {
@@ -954,9 +964,36 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.openIngredientIndex_.set(null)
   }
 
-  protected addUnitFor(index: number): void {
-    setTimeout(() => this.unitRegistry.openUnitCreator(), 0)
-    this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((unit) => this.chooseUnit(index, unit))
+  /** "+ new unit": create it, save it on the linked product (as a purchase option, so every recipe
+   *  can use it again — same rule as the recipe builder), then show the row in it. */
+  protected addUnitFor(index: number, row: ScaledIngredientRow): void {
+    const product =
+      row.type === 'product' && row.referenceId
+        ? this.kitchenState.products_().find((p: Product) => p._id === row.referenceId)
+        : undefined
+    const existingUnitSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
+    setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols }), 0)
+    this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((unit) => {
+      if (!product?._id || product.purchaseOptions?.some((o) => o.unitSymbol === unit)) {
+        this.chooseUnit(index, unit)
+        return
+      }
+      const baseFactor = this.unitRegistry.getConversion(product.baseUnit) || 1
+      const unitFactor = this.unitRegistry.getConversion(unit) || 1
+      // conversionRate = base units per 1 of the new unit (e.g. 0.33 kg per jar when 1 jar = 330 g)
+      const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
+      const updated: Product = {
+        ...product,
+        purchaseOptions: [
+          ...(product.purchaseOptions ?? []),
+          { unitSymbol: unit, conversionRate, uom: product.baseUnit, priceOverride: 0 }
+        ]
+      }
+      this.kitchenState.saveProduct(updated).subscribe({
+        next: () => this.chooseUnit(index, unit),
+        error: () => this.chooseUnit(index, unit)
+      })
+    })
   }
 
   /** Row tap toggles the check — unless it is the click that ends a long press. */

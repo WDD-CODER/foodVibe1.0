@@ -430,7 +430,6 @@
                 [class.is-checked]="checkedIngredients_().has(i)"
                 [class.is-open]="openIngredientIndex_() === i"
                 [class.is-source]="scaleByIngredientIndex_() === i"
-                [class.has-units]="row.availableUnits.length > 1"
                 (contextmenu)="$event.preventDefault()"
               >
                 <div
@@ -469,40 +468,36 @@
                     <lucide-icon name="arrow-left-right" [size]="12"></lucide-icon>
                     }
                   </span>
-                  @if (row.availableUnits.length > 1) {
                   <button
                     type="button"
-                    class="cv-unit-chip"
+                    class="cv-row-more"
                     (click)="$event.stopPropagation(); toggleIngredientExpander(i)"
                     [attr.aria-expanded]="openIngredientIndex_() === i"
-                    [attr.aria-label]="'unit_of_measure' | translatePipe"
+                    [attr.aria-label]="'more_actions' | translatePipe"
+                    [attr.title]="'more_actions' | translatePipe"
                   >
-                    {{ getDisplayUnit(i, row) | translatePipe }}
-                    <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
-                  </button>
-                  }
-                  <button
-                    type="button"
-                    class="cv-scale-btn"
-                    (click)="$event.stopPropagation(); toggleIngredientExpander(i)"
-                    [attr.aria-expanded]="openIngredientIndex_() === i"
-                    [attr.aria-label]="'scale_recipe_to_ingredient' | translatePipe"
-                    [attr.title]="'scale_recipe_to_ingredient' | translatePipe"
-                  >
-                    <lucide-icon name="scale" [size]="18"></lucide-icon>
+                    <lucide-icon name="chevron-down" [size]="18"></lucide-icon>
                   </button>
                 </div>
 
                 <div class="cv-ing-exp" [attr.aria-hidden]="openIngredientIndex_() !== i">
                   <div class="cv-ing-exp-inner">
-                    @if (openIngredientIndex_() === i) {
-                    <app-unit-expander
-                      [options]="unitOptionsFor(row)"
-                      [current]="getDisplayUnit(i, row)"
-                      (unitSelect)="chooseUnit(i, $event)"
-                      (addUnit)="addUnitFor(i)"
-                    />
-                    @if (settingByIngredientIndex_() === i) {
+                    @if (openIngredientIndex_() === i) { @if (settingByIngredientIndex_() !== i) {
+                    <div class="cv-ing-actions">
+                      <app-custom-select
+                        class="cv-unit-select"
+                        [ngModel]="null"
+                        (ngModelChange)="onRowUnitPick(i, row, $event)"
+                        [options]="otherUnitOptions(i, row)"
+                        placeholder="choose_unit"
+                        variant="chip"
+                      />
+                      <button type="button" class="cv-scale-open" (click)="startSetByIngredient(i)">
+                        <lucide-icon name="scale" [size]="16"></lucide-icon>
+                        {{ 'scale_recipe_to_ingredient' | translatePipe }}
+                      </button>
+                    </div>
+                    } @if (settingByIngredientIndex_() === i) {
                     <div class="cv-scale-form">
                       <span class="cv-scale-form-label">
                         <lucide-icon name="scale" [size]="16"></lucide-icon>
@@ -534,11 +529,6 @@
                       </p>
                       }
                     </div>
-                    } @else {
-                    <button type="button" class="cv-scale-open" (click)="startSetByIngredient(i)">
-                      <lucide-icon name="scale" [size]="16"></lucide-icon>
-                      {{ 'scale_recipe_to_ingredient' | translatePipe }}
-                    </button>
                     } }
                   </div>
                 </div>
