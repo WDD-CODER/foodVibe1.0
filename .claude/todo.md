@@ -8,13 +8,13 @@
 
 ## Tech Debt (from `/nightly-maintenance` 2026-09-27)
 
-> Full plan: `plans/318-nightly-maintenance-followups-2026-09-27.plan.md`. Full audit: `.claude/techdebt-reports/techdebt-2026-09-27.md`.
+> Full plan: `plans/300-400/318-nightly-maintenance-followups-2026-09-27.plan.md`. Full audit: `.claude/techdebt-reports/techdebt-2026-09-27.md`.
 
 - [ ] `auth.interceptor.ts` — `BehaviorSubject` used for refresh-token gate; hard rule says signals only
 - [ ] `nutrition-badge.component.ts:46` — legacy `@Input()` decorator, unresolved since `techdebt-2026-04-20.md`
 - [ ] 2 stray trailing semicolons (`quick-add-product-modal.component.ts:121`, `menu-library-list.component.ts:197`)
 - [ ] 24-file refactor-candidate backlog (>300 lines each) — triage, top 3 are 1200+ lines
-  - [x] `cook-view.page.ts` — triaged + split 2026-09-28: timer/stopwatch + export/preview extracted to component-scoped services (`src/app/pages/cook-view/services/`), 1201 → 979 lines; `ng build` clean; branch `chore/cook-view-service-split`; Human-validated. Full detail: `plans/318-nightly-maintenance-followups-2026-09-27.plan.md`.
+  - [x] `cook-view.page.ts` — triaged + split 2026-09-28: timer/stopwatch + export/preview extracted to component-scoped services (`src/app/pages/cook-view/services/`), 1201 → 979 lines; `ng build` clean; branch `chore/cook-view-service-split`; Human-validated. Full detail: `plans/300-400/318-nightly-maintenance-followups-2026-09-27.plan.md`.
   - [ ] `menu-intelligence.page.ts` (1413) / `recipe-builder.page.ts` (1394) / remaining ~21-file backlog — not yet triaged
 - [ ] 2 unnecessary `?? []` NG8102 warnings (`venue-detail`/`venue-list` templates)
 
@@ -23,38 +23,6 @@
 ## 1. EXECUTE — real unfinished work
 
 > Audit says: do these.
-
-### Plan 321 — Professional Foundation Refactor (`plans/321-professional-foundation-refactor.plan.md`)
-
-> **State 2026-10-05:** Phases 0–2b done; Phase 3 mostly done (PR #253) — P3.4 cleanup + P3.5 left. Phases 4–7 not started. P7e (logging) partly covered by Plan 383.
-
-- [x] P0.0 Reality Check → `docs/session-state-foundation-refactor.md` + Human go
-- [x] P0.1 Consolidate backup + add restore-to-scratch; drill local + Atlas — found & fixed a `system.views` crash bug in `db-backup.js` along the way; both drills verified 0 mismatches
-- [x] P0.2 Server test harness (vitest + mongodb-memory-server + supertest)
-- [x] P0.3 Characterization tests: generic.js, sync-master.js, push-to-master — 42 tests, all passing
-- [x] P0.4 CI `server-tests` job
-- [x] P0.5 ADR 0008
-- [x] P1.0 Reality Check + Human go
-- [x] P1.1 Collections registry — also fixed a real drift bug (2 collections missing from CLONEABLE_TYPES/BACKUP_ENTITY_TYPES)
-- [x] P1.2 Single `newId()` server+client; server-generated `_id` on POST (client id still honored when given — appendExisting/trash-restore needs it)
-- [x] P1.3 Removed localStorage mode + `useBackend` flags + `delay` param + the now-dead `backup_<key>` mirror — surfaced and fixed a real bug along the way: `UserService`'s constructor now always attempts silent refresh, needing `HttpClient` unconditionally; fixed 5 specs that broke
-- [x] P1.4 Restricted whole-collection replace to `REPLACEABLE_TYPES` (broader than assumed — TRASH_*/VERSION_HISTORY use it too, not just registries)
-- [x] P1.5 Rate limits: `/api/v1/data` writes 300/15min, `/api/v1/ai` 20/15min per user
-- [x] P1.6 Fixed docs drift (`standards-backend.md §5`, `standards-security.md §9`) + stale `imageUrl_` comment
-- [x] P1.7 `render.yaml` `PERF_LOG: "0"` — **Human action open:** mirror in Render dashboard
-- [x] P1.8 Stale branch list gathered (65 branches, `gh-pages` excluded) — 66 merged branches deleted by Human 2026-10-01; session/claude/audit branches left for later cleanup
-- [x] P2a.0–P2a.6 Shared Zod schema package, observe-mode validation (commit `3014d286`)
-- [x] P2b.0–P2b.6 v2 migration: rename + `schemaVersion` + enforce (Gates G1/G2) — PR #239 + #240; Atlas validate-all 0 violations; Human smoke "all good" 2026-10-02
-- [-] DROPPED (Human 2026-10-06) P2b.x Stray keys: `ingredients_` on 36 local products dropped in v2; `steps_[].cooking_time_minutes_` (4 Atlas recipes) kept as deprecated `cookingTimeMinutes` — **Human decides rename-vs-convert**
-- [x] P3.0–P3.3 Taxonomy schema, 0003 migration (local + Atlas), server term API — PR #253
-- [x] P3.4 `TaxonomyStore` cutover DONE (PR #253) — REMAINING: shrink the 6 facades (`metadata-registry` 355 lines, `preparation-registry` 223, `unit-registry` 158, …) to ≤30 lines / inline; generic `taxonomy-kind-manager`
-- [x] P3.5 Drop old `KITCHEN_*` registry collections — also delete the now-dead server routes `registry-rename-master` / `registry-delete-master` and their unused `http-storage.adapter.ts` methods (client already goes through `TaxonomyStore`; reality check 2026-10-05)
-> Related work outside the plan: Plan 385 (per-user write limit, server-owned rename re-key — merged PR #258), Plan 386 (`canWrite` + remove/rename "for me" on shared terms — draft, next), Plan 387 (architecture guard)
-- [-] DROPPED (Human 2026-10-06) P4.0–P4.6 Course/protein/labels split + menu sections → course (Gate G3)
-- [-] DROPPED (Human 2026-10-06) P5.0–P5.8 Shared master + per-user overrides; admin-only push + dedicated modal — now also owns Plan 322 Stages 2–5 + Plan 322-metadata M13
-- [ ] P6.0–P6.4 One soft-delete model + `userPrefs`
-- [ ] P7a–P7f Hygiene: god-file decomposition, service base adoption, script archive, CI hardening, logging, plan 301 remainder
-- [ ] P8.1–P8.5 Governance: ADRs 0009–0013, standards docs, lint guards, re-audit
 
 ## 6. KEEP DEFERRED — intentional park
 
@@ -82,12 +50,6 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
-### Plan 366 — Delete a supplier that's in use: warning, then admin-only "only me / everyone" (`plans/366-delete-in-use-supplier-warning-admin-scope.plan.md`)
-- [ ] A1: Server: allowlist, trash collection and purge route, plus tests (against the isolated DB) (`server/routes/generic.js`, `server/constants/collections.js`, `server/test/**`).
-- [ ] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
-- [ ] A3: `onDelete` / `onBulkDeleteSelected` flow, model field, dictionary keys.
-- [ ] A4: Build, server tests, client specs. Manual test with 2 accounts. Update session-state.
-
 ### Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests (`plans/370-ai-recipe-generation-realistic-portions-with-tests.plan.md`)
 - [x] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
 - [x] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
@@ -95,20 +57,20 @@
 - [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`).
 - [x] A5: Build, server tests. Update session-state.
 
-### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/372-venues-b-multiple-contacts-hours-picker.plan.md`)
+### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/design/372-venues-b-multiple-contacts-hours-picker.plan.md`)
 - [ ] A1: Schema and model additions; `build:schemas`; server validation test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
 - [ ] A2: `venue-hours.util` `toDisplay` / `parseLegacy` plus spec (Hebrew range forms, midnight crossing, unparseable).
 - [ ] A3: `HoursEditorComponent` plus spec; wire into the venue form; hydrate and save both shapes (`shared/hours-editor/**`, `venue-form/**`).
 - [ ] A4: Contacts FormArray, legacy hydrate, save mirror, detail list (`venue-form/**`, `venue-detail/**`).
 - [ ] A5: Build, specs. Open 2 existing venues (one with free-text hours), edit and save, check no 400s. Update session-state.
 
-### Plan 373 — Venues C: tour videos (links with a visit date) and "save my current location" (`plans/373-venues-c-tour-videos-current-location.plan.md`)
+### Plan 373 — Venues C: tour videos (links with a visit date) and "save my current location" (`plans/design/373-venues-c-tour-videos-current-location.plan.md`)
 - [ ] A1: Schema and model; `build:schemas`; server test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
 - [ ] A2: Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
 - [ ] A3: Geolocation button and state, plus the detail navigate links.
 - [ ] A4: Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine). Update session-state.
 
-### Plan 374 — Venues D: separate infrastructure from regular equipment in the venue form (`plans/374-venues-d-infrastructure-vs-equipment-groups.plan.md`)
+### Plan 374 — Venues D: separate infrastructure from regular equipment in the venue form (`plans/design/374-venues-d-infrastructure-vs-equipment-groups.plan.md`)
 - [ ] A1: Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
 - [ ] A2: Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
 - [ ] A3: Equipment-form infrastructure hint (`equipment-form/**`).
@@ -186,15 +148,9 @@
 - [ ] D3: Kit: `todo-parse.mjs` counting `[-]` as closed, plus its test.
 - [ ] D4: Kit: docs (`take-plan.md`, `remote.md`, preflight, `standards-git.md`, `ship-regular.md`, `job-validation.md`, `workflow-map.md`, `commands.md`), plus the manifest row and the `kit-owned.json` entry for `slot-serve.mjs`.
 - [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
+- [ ] D7: FoodVibe only (no kit patch): remove the `playwright` entry from `.cursor/mcp.json` (Playwright MCP was dropped 2026-10-01; each Cursor window was spawning its own copy) — `.cursor/mcp.json`
+- [ ] D8: Kit: `orphan-sweep.mjs` + `slot-stop.mjs` also recognise the plan 408 QA harness chains (ports 4205/3005/4206, `.claude/.qa-pids`, cwd in this folder): the sweep kills only orphans (no port held), never a running QA server; Done-when: [auto] a scratch orphan `node --watch` with QA env in the main folder is swept, a live listener on 4206 survives — `scripts/orphan-sweep.mjs`, `scripts/lib/slot-procs.mjs`, `scripts/test/**`
 - [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
-
-### Plan 396 — English Key Input Without Keyboard Switch
-
-- [ ] A1: Audit `src/app/**/*.html` for other English-key inputs; report list (escalate any outside scope)
-- [ ] A2: `src/app/core/utils/english-key.util.ts` + spec — `codeToEnglishChar(code)`, `liveEnglishKey(value)` (whitespace→`_`, lowercase), `finalizeEnglishKey(value)` (collapse/trim `_`, `-`→`_`). Do not change `sanitize-key.util.ts` (used by `key-resolution.service.ts`)
-- [ ] A3: `src/app/core/directives/english-key-input.directive.ts` + spec — keydown code mapping, input-event live normalize with caret keep, blur finalize, host attrs; uses `inject()`, no `@Input`
-- [ ] A4: Apply directive to `translation-key-modal.component.html` and `label-creation-modal.component.html`; `save()` in both components (and `translation-key-modal.service.ts` if it re-sanitizes) runs `finalizeEnglishKey`
-- [ ] A5: `ng build` + `ng test` green; hand the Human the PC + phone click list from Success
 
 ### Plan 400 — Dropdown add option, part 1: shared helper and the shared selects (`plans/400-dropdown-add-option-part-1-shared-helper-shared-selects.plan.md`)
 
@@ -227,18 +183,23 @@
 - [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
 
-### Plan 405 — Design port from a Claude Design handoff, with live-app comparison and a lost-feature check (`plans/405-design-port-from-claude-design-handoff-live-app-compare.plan.md`)
+### Plan 407 — One soft-delete model and per-user state (userPrefs) (`plans/407-one-soft-delete-model-and-user-prefs.plan.md`)
 
-- [ ] A1: Fixtures — a tiny fake handoff zip + a copy of two dashboard files for the inventory tests — `scripts/test/fixtures/design-port/**`
-- [ ] A2: `design-handoff-ingest.mjs` + test (find root, hash diff, dry-run writes nothing, dirty-tree refusal, handoffs.md entry) — `scripts/design-handoff-ingest.mjs`, `scripts/test/design-handoff-ingest.test.mjs`
-- [ ] A3: `design-feature-inventory.mjs` + test (extract kinds, identity by kind+name, compare ok / missing exit 1, approved removals skipped) — `scripts/design-feature-inventory.mjs`, `scripts/test/design-feature-inventory.test.mjs`
-- [ ] A4: Rewrite the command (Phase A ingest, registry re-open, Phase B live compare, inventory gate, close-out; drop stale sections and the claude.ai ban) — `.claude/commands/design-port.md`
-- [ ] A5: `MANIFEST.md` authority update + `handoffs.md` seeded with the August snapshot as entry 0 — `.interface-design/source/MANIFEST.md`, `.interface-design/handoffs.md`
-- [ ] A6: Registry: add a `handoff` column note and the re-open rule — `_claude-data/design-migration/screens/_registry.md`
-- [ ] A7: `.gitignore` append for `live/` — `.gitignore`
-- [ ] A8: ADR + brain index line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`
-- [ ] A9: Real handoff dry run with the Human: ingest `--dry-run`, lock the root matcher to the real layout, live compare on the first changed screen, stop at the port-spec — slot only, no port code
-- [ ] A10: `npm run test:scripts` + `ng build` green; hand the Human the check list
+- [ ] P6.0: Reality Check (readers/writers, Atlas counts, model + purge window) → Human go — `docs/session-state-<branch>.md`
+- [ ] P6.1: `deletedAt`/`deletedBy` model in schemas + `generic.js` + purge job, with server tests — `shared/schemas/**`, `server/routes/generic.js`, `server/jobs/**`, `server/test/**`
+- [ ] P6.2: `userPrefs` schema + server repo/routes + client `UserPrefsStore`; recipe/dish favorite + hide moved onto it — `shared/schemas/**`, `server/repositories/**`, `src/app/core/services/**`
+- [ ] P6.3: `server/migrations/0005-soft-delete-unify.js` (dry run on Atlas copy → Human go → Atlas) + read-only check script — `server/migrations/**`
+- [ ] P6.4: Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
+- [ ] P6.5: ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
+
+### Plan 408 — QA harness: dedicated QA slot (4205/3005) + evidence server (4206) (`plans/408-qa-harness-qa-slot-evidence-server.plan.md`)
+
+- [ ] A1: `scripts/qa/evidence-server.mjs` — `/health`, `/html2canvas.min.js`, `/save` (+ `html2canvas` devDependency, `bugs/qa-runs/.gitkeep`, `.gitignore` lines)
+- [ ] A2: `/shot` with Playwright + API login + sessionStorage seeding; 503 message when chromium is missing
+- [ ] A3: `scripts/qa/qa-up.ps1` (env.slot generation, port checks, 3 detached processes, pid file, waits, summary line) + `scripts/qa/qa-down.ps1`
+- [ ] A4: `package.json` scripts `qa:up` / `qa:down`; `docs/qa/README.md` with the kickoff prompt
+- [ ] A6: Nightly scripts `qa-nightly-up.ps1`, `qa-nightly-down.ps1`, `qa-schedule.ps1` (+ idempotent `qa-up.ps1`); `docs/qa/README.md` gains the one-time QA-checkout setup (below) and the nightly prompt
+- [ ] A5: Manual proof on Windows: `npm run qa:up` → health ok → open `http://localhost:4206/shot?run=smoke&name=inv-m&url=/inventory/list&w=375&h=812&full=1` → PNG exists and shows the logged-in list → `npm run qa:down` → ports free. Paste the three outputs in the PR.
 
 ## Where things live
 

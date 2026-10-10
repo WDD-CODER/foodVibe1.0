@@ -1,6 +1,6 @@
 # Plan 321 — Professional Foundation Refactor: Shared Master, Zod Schemas, Unified Taxonomy
 
-Status: active
+Status: done
 Track: code — here (not design)
 
 > **Save instructions for the agent:** persisted via `.claude/skills/save-plan/SKILL.md`. Expected to be `320` when written, but `feat/recipe-labels-course-field` had already claimed 320 (commits reference "plan 320 M1"/"M2") with no `plans/320-*.plan.md` file on disk — so this plan is `321`.
@@ -725,26 +725,26 @@ append the path to the scope block above and retry.
 - [-] DROPPED (Human 2026-10-06) — P5.8 Replace characterization tests with repo tests
 
 ### Phase 6 — Soft delete + userPrefs
-- [ ] P6.0 Reality Check + purge-window answer
-- [ ] P6.1 `deletedAt`/`deletedBy` model + purge job
-- [ ] P6.2 `userPrefs` schema + repo + `UserPrefsStore`
-- [ ] P6.3 `server/migrations/0005-soft-delete-unify.js`
-- [ ] P6.4 Trash UI on `deletedAt`
+- [-] MOVED to plan 407 (Human 2026-10-10) P6.0 Reality Check + purge-window answer
+- [-] MOVED to plan 407 (Human 2026-10-10) P6.1 `deletedAt`/`deletedBy` model + purge job
+- [-] MOVED to plan 407 (Human 2026-10-10) P6.2 `userPrefs` schema + repo + `UserPrefsStore`
+- [-] MOVED to plan 407 (Human 2026-10-10) P6.3 `server/migrations/0005-soft-delete-unify.js`
+- [-] MOVED to plan 407 (Human 2026-10-10) P6.4 Trash UI on `deletedAt`
 
 ### Phase 7 — Hygiene
-- [ ] P7a Decompose god files (one sub-brief each)
-- [ ] P7b Entity services onto `BaseEntityDataService`
-- [ ] P7c Archive patch scripts → `archive/scripts/` + README
-- [ ] P7d E2E smoke + server lint + coverage floor in CI
+- [-] DROPPED (Human 2026-10-10) P7a Decompose god files (one sub-brief each)
+- [-] DROPPED (Human 2026-10-10) P7b Entity services onto `BaseEntityDataService`
+- [-] DROPPED (Human 2026-10-10) P7c Archive patch scripts → `archive/scripts/` + README
+- [-] DROPPED (Human 2026-10-10) P7d E2E smoke + server lint + coverage floor in CI
 - [x] P7e Structured logging + request ids (delivered by plan 383)
-- [ ] P7f Finish remaining plan 301 milestones (server pagination), after confirming what shipped
+- [-] DROPPED (Human 2026-10-10) P7f Finish remaining plan 301 milestones (server pagination), after confirming what shipped
 
 ### Phase 8 — Governance
-- [ ] P8.1 ADRs 0009–0013 + update 0008
-- [ ] P8.2 Standards/AGENTS/tech-stack/glossary updates
-- [ ] P8.3 Lint guard for hand-written entity interfaces
-- [ ] P8.4 Skill + trigger-table update
-- [ ] P8.5 Re-run Architecture Audit → before/after to Human
+- [-] DROPPED (Human 2026-10-10) P8.1 ADRs 0009–0013 + update 0008
+- [-] DROPPED (Human 2026-10-10) P8.2 Standards/AGENTS/tech-stack/glossary updates
+- [-] DROPPED (Human 2026-10-10) P8.3 Lint guard for hand-written entity interfaces
+- [-] DROPPED (Human 2026-10-10) P8.4 Skill + trigger-table update
+- [-] DROPPED (Human 2026-10-10) P8.5 Re-run Architecture Audit → before/after to Human
 
 ---
 

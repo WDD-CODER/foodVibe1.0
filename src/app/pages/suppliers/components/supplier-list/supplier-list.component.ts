@@ -14,6 +14,8 @@ import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { SupplierDataService } from '@services/supplier-data.service'
+import { ProductDataService } from '@services/product-data.service'
+import { MasterPushService } from '@services/master-push.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { Supplier } from '@models/supplier.model'
@@ -73,6 +75,8 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   private readonly requireAuthService = inject(RequireAuthService)
   private readonly logging = inject(LoggingService)
   private readonly confirmModal = inject(ConfirmModalService)
+  private readonly productData = inject(ProductDataService)
+  private readonly masterPush = inject(MasterPushService)
 
   protected searchQuery_ = signal('')
   protected deletingId_ = signal<string | null>(null)
@@ -213,17 +217,12 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   async onDelete(item: Supplier): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
     const count = this.linkedProductCount_(item._id)
-    if (count > 0) {
-      if (!(await this.confirmModal.open('supplier_in_use_cannot_delete', { variant: 'warning' }))) return
-    } else if (
-      !(await this.confirmModal.open('למחוק את הספק "' + (item.nameHebrew ?? '') + '"?', { variant: 'danger' }))
-    )
-      return
+    if (!(await this.confirmDelete_(count, 'confirm_delete_supplier', this.masterPush.willAskDeleteScope(item)))) return
+    const scope = await this.masterPush.askDeleteScope(item, { entity: 'supplier' })
+    if (scope === 'cancel') return
     this.deletingId_.set(item._id)
     try {
-      await this.supplierData.removeSupplier(item._id)
-    } catch (e) {
-      this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } })
+      await this.deleteSupplier_(item, scope === 'everyone')
     } finally {
       this.deletingId_.set(null)
     }
@@ -232,18 +231,53 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open(`למחוק ${ids.length} ספקים?`, { variant: 'danger' }))) return
-    for (const id of ids) {
-      this.deletingId_.set(id)
+    const idSet = new Set(ids)
+    const count = this.kitchenState.products_().filter((p) => getSupplierIds(p).some((id) => idSet.has(id))).length
+    const suppliers = this.supplierData.allSuppliers_().filter((s) => idSet.has(s._id))
+    // askDeleteScope only inspects _masterId, so the first master-linked supplier is enough.
+    const masterLinked = suppliers.find((s) => s._masterId) ?? null
+    const fallback = `למחוק ${ids.length} ספקים?`
+    if (!(await this.confirmDelete_(count, fallback, this.masterPush.willAskDeleteScope(masterLinked)))) return
+    const scope = await this.masterPush.askDeleteScope(masterLinked, { entity: 'supplier', count: ids.length })
+    if (scope === 'cancel') return
+    for (const supplier of suppliers) {
+      this.deletingId_.set(supplier._id)
       try {
-        await this.supplierData.removeSupplier(id)
-      } catch (e) {
-        this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } })
+        await this.deleteSupplier_(supplier, scope === 'everyone')
       } finally {
         this.deletingId_.set(null)
       }
     }
     this.selection.clear()
+  }
+
+  /**
+   * In use → the warning with the linked-product count. Not in use → a plain "are you sure",
+   * skipped when the admin scope prompt follows anyway (one dialog, not two — plan 365).
+   */
+  private async confirmDelete_(
+    linkedCount: number,
+    plainMessage: string,
+    scopePromptFollows: boolean
+  ): Promise<boolean> {
+    if (linkedCount > 0) {
+      const warning = this.translation.translate('supplier_delete_in_use_warning').replace('{n}', String(linkedCount))
+      return this.confirmModal.open(warning, { variant: 'warning' })
+    }
+    if (scopePromptFollows) return true
+    return this.confirmModal.open(plainMessage, { variant: 'danger' })
+  }
+
+  /** Deletes one supplier; the server also unlinks it from the user's products (plan 366). */
+  private async deleteSupplier_(supplier: Supplier, everyone: boolean): Promise<void> {
+    try {
+      // Before the own delete: the server finds the master through the caller's own copy.
+      if (everyone && supplier._masterId) await this.masterPush.deleteSupplierFromMaster(supplier)
+      await this.supplierData.removeSupplier(supplier._id)
+      this.productData.unlinkSuppliersLocally([supplier._id])
+    } catch (e) {
+      this.logging.error({ event: 'supplier.list_error', message: 'Supplier list error', context: { err: e } })
+    }
   }
 
   protected async onBulkEdit(event: { field: string; value: string; ids: string[] }): Promise<void> {

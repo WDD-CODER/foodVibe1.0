@@ -34,6 +34,7 @@ const COLLECTIONS = [
   { name: 'TRASH_EQUIPMENT',          userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'TRASH_VENUES',             userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'TRASH_MENU_EVENTS',        userData: true,  cloneable: false, backup: true,  searchable: false },
+  { name: 'TRASH_SUPPLIERS',          userData: true,  cloneable: false, backup: true,  searchable: false }, // Plan 366: admin "delete for everyone"
   { name: 'VERSION_HISTORY',          userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'activity_log',             userData: true,  cloneable: false, backup: true,  searchable: false },
   // The v1 single-doc registries (KITCHEN_UNITS/PREPARATIONS/CATEGORIES/ALLERGENS/LABELS/

@@ -3,18 +3,29 @@
 Tracks the 13-screen port from `.interface-design/source/` onto the Angular app, per
 `.claude/commands/design-port.md`. One screen per session. Status values: `todo`, `spec-pending-approval`
 (spec written, awaiting Human validation word before code), `in-progress` (spec approved, code underway),
-`done` (verified per §6 Step 5, registry updated), `no-design` (no counterpart in the design source — skipped).
+`done` (verified per §6 Step 6 incl. `FEATURES: ok`, registry updated), `no-design` (no counterpart in the design source — skipped).
 
-| # | Screen | Angular path | Design source file | Status | Spec |
-|---|---|---|---|---|---|
-| 1 | Dashboard | `src/app/pages/dashboard/` | `Dashboard.dc.html` | done | `01-dashboard.port-spec.md` |
-| 2 | Inventory | `src/app/pages/inventory/` | `Inventory.dc.html` | done | `02-inventory.port-spec.md` |
-| 3 | Recipe Book | `src/app/pages/recipe-book/` | `RecipeBook.dc.html` | done | `03-recipe-book.port-spec.md` |
-| 4 | Suppliers | `src/app/pages/suppliers/` | `Suppliers.dc.html` | done | `04-suppliers.port-spec.md` |
-| 5 | Equipment | `src/app/pages/equipment/` | `Equipment.dc.html` | done | `05-equipment.port-spec.md` |
-| 6 | Venues (+ VenueDetail) | `src/app/pages/venues/` (incl. `components/venue-detail/`) | `Venues.dc.html` + `VenueDetail.dc.html` | done | `06-venues.port-spec.md` |
-| 7 | Menu Library | `src/app/pages/menu-library/` | `MenuLibrary.dc.html` | todo | — |
-| 8 | Metadata Manager | `src/app/pages/metadata-manager/` | `MetadataManager.dc.html` | todo | — |
+| # | Screen | Angular path | Design source file | Status | Handoff | Spec |
+|---|---|---|---|---|---|---|
+| 1 | Dashboard | `src/app/pages/dashboard/` | `Dashboard.dc.html` | done | — | `01-dashboard.port-spec.md` |
+| 2 | Inventory | `src/app/pages/inventory/` | `Inventory.dc.html` | done | — | `02-inventory.port-spec.md` |
+| 3 | Recipe Book | `src/app/pages/recipe-book/` | `RecipeBook.dc.html` | done | — | `03-recipe-book.port-spec.md` |
+| 4 | Suppliers | `src/app/pages/suppliers/` | `Suppliers.dc.html` | done | — | `04-suppliers.port-spec.md` |
+| 5 | Equipment | `src/app/pages/equipment/` | `Equipment.dc.html` | done | — | `05-equipment.port-spec.md` |
+| 6 | Venues (+ VenueDetail) | `src/app/pages/venues/` (incl. `components/venue-detail/`) | `Venues.dc.html` + `VenueDetail.dc.html` | done | — | `06-venues.port-spec.md` |
+| 7 | Menu Library | `src/app/pages/menu-library/` | `MenuLibrary.dc.html` | todo | — | — |
+| 8 | Metadata Manager | `src/app/pages/metadata-manager/` | `MetadataManager.dc.html` | todo | — | — |
+| 9 | Trash | `src/app/pages/trash/` | `Trash.dc.html` | todo | — | — |
+| 10 | Recipe Builder | `src/app/pages/recipe-builder/` | `RecipeBuilder.dc.html` | todo | — | — |
+| 11 | Cook View | `src/app/pages/cook-view/` | `CookView.dc.html` | todo | cook-view 2026-10-10 (plan 404) | — |
+| 12 | Menu Intelligence | `src/app/pages/menu-intelligence/` | `MenuIntelligence.dc.html` | todo | — | — |
+
+**Handoff column + re-open rule (plan 405).** `Handoff` names the latest Claude Design handoff for
+the screen (`<slug> <date>`, see `.interface-design/handoffs.md`); `—` = the August snapshot in
+`.interface-design/source/` is still its design. When `/design-port <handoff>` ingests a handoff,
+every target screen goes back to `todo` with the new handoff in this column, even if it was `done`.
+Shell targets (tokens, header, tab chips, FAB …) mark every other screen `affected — check` in a note
+below; other screens keep their status.
 
 > **Concurrent-session note (added 2026-08-26, resolved 2026-08-30):** Suppliers (row 4) and
 > Equipment (row 5) were worked in parallel by two separate sessions, each in its own dedicated git
@@ -33,11 +44,7 @@ Tracks the 13-screen port from `.interface-design/source/` onto the Angular app,
 > Tablet-only (768–1023px) prev/next arrows scroll the tab row itself and hide once there's
 > nothing further that way. The future full `/design-port` session for this screen should treat
 > this nav + reorder behavior as already done and exclude it from its own spec.
-| 9 | Trash | `src/app/pages/trash/` | `Trash.dc.html` | todo | — |
-| 10 | Recipe Builder | `src/app/pages/recipe-builder/` | `RecipeBuilder.dc.html` | todo | — |
-| 11 | Cook View | `src/app/pages/cook-view/` | `CookView.dc.html` | todo | — |
-| 12 | Menu Intelligence | `src/app/pages/menu-intelligence/` | `MenuIntelligence.dc.html` | todo | — |
 
 Note: §7 lists 13 screens counting Venues + VenueDetail as one combined session (row 6 above), which is
-why this table has 12 rows for 13 design-source screens — matches the "13 screens, ~11 sessions" framing
+why this table has 12 rows for 13 design-source screens — matches the "13 screens, ~11 sessions" framing of the original
 in `design-port.md` §7.

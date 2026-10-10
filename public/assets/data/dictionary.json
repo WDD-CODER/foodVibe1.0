@@ -1033,6 +1033,9 @@
     "resume": "המשך",
     "reopen_step": "פתח שלב מחדש",
     "cooking_complete_label": "הבישול הושלם",
-    "discard_changes_confirm": "לבטל את השינויים שלא נשמרו?"
+    "discard_changes_confirm": "לבטל את השינויים שלא נשמרו?",
+    "supplier_delete_in_use_warning": "הספק מקושר ל-{n} מוצרים. מחיקה תסיר אותו מהמוצרים האלה.",
+    "confirm_delete_supplier": "למחוק את הספק?",
+    "supplier_delete_from_master_error": "שגיאה במחיקת הספק מכל המשתמשים"
   }
 }

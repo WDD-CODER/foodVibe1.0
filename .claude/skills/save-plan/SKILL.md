@@ -27,7 +27,7 @@ save-plan:
 
 ## Plan rules (what a saved plan looks like)
 
-- Path `plans/<NNN>-<slug>.plan.md`, H1 `# Plan NNN — <Human Title>` (the title drives similarity — make it describe the work). Refactor variant: `NNN-R`.
+- Path `plans/<NNN>-<slug>.plan.md`; a plan with `Track: design` or `Track: split` (Claude Design work: mostly style and layout) goes to `plans/design/<NNN>-<slug>.plan.md`. Closed plans always go to the range folder `plans/<range>/`, design or not. H1 `# Plan NNN — <Human Title>` (the title drives similarity — make it describe the work). Refactor variant: `NNN-R`.
 - `## Read-Write Scope` in a shape `scripts/lib/plan-scope.mjs` parses: a fenced ```` ```scope ```` block, one glob per line, **or** a `**Scope:**` line followed by bullets whose first token is a `` `backticked` `` glob. A bare `scope` line or un-backticked bullets are not parsed and `take-plan` refuses the plan.
 - Exactly one `Status:` line (`Status: draft` for new; `take-plan` sets `active`; after the merge the todo-sync workflow's `plan-close.mjs` sets `done` and moves the plan into `plans/<range>/`). One `Snapshot:` line (filled in Phase 3).
 - Every Atomic Sub-task is `[ ] <what> — <target file(s)>`.
@@ -70,7 +70,7 @@ A Worker never assigns `NNN` and never touches `.claude/todo.md` (it is Planner-
 ## Phase 3 — write, and (Planner) commit + push + verify
 
 - `Snapshot:` = `git rev-parse origin/main` when the draft left it empty; never overwrite a SHA the Architect filled in. If `origin/main` cannot be resolved (no remote, fetch failed), leave it empty and say so — a local `HEAD` SHA is not what the Worker's drift check compares against, and substituting it hides the problem.
-- Write the file (rewrite → existing path; new → `plans/<NNN>-<slug>.plan.md`). Never under `~/.cursor/plans/`.
+- Write the file (rewrite → existing path; new → `plans/<NNN>-<slug>.plan.md`, or `plans/design/…` for Track `design`/`split`). Never under `~/.cursor/plans/`.
 - Not in a worktree and the plan changes code → suggest a `feat/` branch for whoever executes it.
 
 **Planner only:**
@@ -78,14 +78,14 @@ A Worker never assigns `NNN` and never touches `.claude/todo.md` (it is Planner-
 1. `git branch --show-current` **immediately before committing** — if it is not `main` (e.g. `branch-guard.sh` auto-switched to `feat/session-*`), `git checkout main` first. Catch it here, not after.
 2. `git add` the plan file and `.claude/todo.md` only (never `-A`), commit. This is the Planner's admin write to `main` (`AGENTS.md` Planner-Worker bullet; enforced by `scripts/branch-guard.sh` and `.husky/pre-push`).
 3. `git push origin main`. Blocked, rejected or non-zero → **stop**; surface the blocker and ask. Do not tell the Human the plan is ready.
-4. `git fetch origin --quiet` then `git ls-tree origin/main --name-only -- plans/<NNN>-<slug>.plan.md` must print the path. Empty → the push did not land; stop and investigate.
+4. `git fetch origin --quiet` then `git ls-tree origin/main --name-only -- <plan path>` must print the path. Empty → the push did not land; stop and investigate.
 
 A Worker saving mid-brief does not commit here — its plan-file change rides its `feat/NNN-*` branch at `/ship`.
 
 ## Phase 4 — completion line
 
 ```text
-Plan saved: plans/<NNN>-<slug>.plan.md
+Plan saved: plans/[design/]<NNN>-<slug>.plan.md
 Ledger updated. Similarity: <none | rewrite | save-as-new>
 ```
 

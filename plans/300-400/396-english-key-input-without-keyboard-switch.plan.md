@@ -1,6 +1,6 @@
 # Plan 396 — English Key Input Without Keyboard Switch
 
-Status: draft
+Status: done
 Track: code — here (not design)
 Snapshot: f739e9a1781505926e53cad32290893670a0b942
 
@@ -73,21 +73,21 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Physical-key mapping: on keydown, when `KeyboardEvent.code` is `KeyA`–`KeyZ` / `Digit0`–`Digit9`
+- [x] Physical-key mapping: on keydown, when `KeyboardEvent.code` is `KeyA`–`KeyZ` / `Digit0`–`Digit9`
       and `event.key` is not already that ASCII char (e.g. Hebrew layout), prevent default and
       insert the English lowercase char at the caret. No Ctrl/Meta/Alt combos are intercepted.
-- [ ] Space (`code === 'Space'` or any whitespace arriving via `input`, incl. paste and mobile
+- [x] Space (`code === 'Space'` or any whitespace arriving via `input`, incl. paste and mobile
       keyboards) becomes `_` live, caret preserved.
-- [ ] Uppercase becomes lowercase live.
-- [ ] On blur and on save (Enter): collapse `__+` to `_`, trim leading/trailing `_`, `-` → `_`.
+- [x] Uppercase becomes lowercase live.
+- [x] On blur and on save (Enter): collapse `__+` to `_`, trim leading/trailing `_`, `-` → `_`.
       Leftover non-`[a-z0-9_]` chars (e.g. Hebrew from a phone keyboard) are NOT silently
       stripped — the existing `validateKeyForHebrew` error shows instead.
-- [ ] Input is `dir="ltr"`, `lang="en"`, autocapitalize/autocorrect/spellcheck off.
-- [ ] Applied to the English key input in `translation-key-modal` and `label-creation-modal`.
-- [ ] Every change to the value updates the bound `ngModel` (dispatch `input` after mutating).
+- [x] Input is `dir="ltr"`, `lang="en"`, autocapitalize/autocorrect/spellcheck off.
+- [x] Applied to the English key input in `translation-key-modal` and `label-creation-modal`.
+- [x] Every change to the value updates the bound `ngModel` (dispatch `input` after mutating).
 
 ### Should Have (P1)
-- [ ] A1 audit: list any other input in `src/app/**/*.html` that takes an English key; add the
+- [x] A1 audit: list any other input in `src/app/**/*.html` that takes an English key; add the
       directive there via `approved: <path>` escalation.
 
 ### Nice to Have (P2)
@@ -99,11 +99,12 @@ line or file this plan names was removed, renamed or rewritten).
   phone the user still switches to English once; spaces → `_` still works there.
 
 ## Atomic Sub-tasks
-- [ ] A1: Audit `src/app/**/*.html` for other English-key inputs; report list (escalate any outside scope)
-- [ ] A2: `src/app/core/utils/english-key.util.ts` + spec — `codeToEnglishChar(code)`, `liveEnglishKey(value)` (whitespace→`_`, lowercase), `finalizeEnglishKey(value)` (collapse/trim `_`, `-`→`_`). Do not change `sanitize-key.util.ts` (used by `key-resolution.service.ts`)
-- [ ] A3: `src/app/core/directives/english-key-input.directive.ts` + spec — keydown code mapping, input-event live normalize with caret keep, blur finalize, host attrs; uses `inject()`, no `@Input`
-- [ ] A4: Apply directive to `translation-key-modal.component.html` and `label-creation-modal.component.html`; `save()` in both components (and `translation-key-modal.service.ts` if it re-sanitizes) runs `finalizeEnglishKey`
-- [ ] A5: `ng build` + `ng test` green; hand the Human the PC + phone click list from Success
+- [x] A1: Audit `src/app/**/*.html` for other English-key inputs; report list (escalate any outside scope)
+  - Result 2026-10-10: none — other `dir="ltr"` inputs are URLs/display; metadata-manager renames go through these two modals.
+- [x] A2: `src/app/core/utils/english-key.util.ts` + spec — `codeToEnglishChar(code)`, `liveEnglishKey(value)` (whitespace→`_`, lowercase), `finalizeEnglishKey(value)` (collapse/trim `_`, `-`→`_`). Do not change `sanitize-key.util.ts` (used by `key-resolution.service.ts`)
+- [x] A3: `src/app/core/directives/english-key-input.directive.ts` + spec — keydown code mapping, input-event live normalize with caret keep, blur finalize, host attrs; uses `inject()`, no `@Input`
+- [x] A4: Apply directive to `translation-key-modal.component.html` and `label-creation-modal.component.html`; `save()` in both components (and `translation-key-modal.service.ts` if it re-sanitizes) runs `finalizeEnglishKey`
+- [x] A5: `ng build` + `ng test` green; hand the Human the PC + phone click list from Success
 
 ## Technical Considerations
 - Dependencies: `TranslationKeyModalComponent`, `LabelCreationModalComponent`, their services; `TranslationService.validateKeyForHebrew` (read only).

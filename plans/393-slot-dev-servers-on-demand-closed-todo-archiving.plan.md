@@ -76,6 +76,7 @@ docs/agent/job-validation.md
 docs/agent/workflow-map.md
 docs/workflow-kit/**
 docs/brain/**
+.cursor/mcp.json
 ```
 
 **Outside this repo:** the kit repo `../ai-workflow-kit/**`, where these fixes are written first. Scratch test folders go under the session scratchpad.
@@ -122,7 +123,9 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - [ ] D3: Kit: `todo-parse.mjs` counting `[-]` as closed, plus its test.
 - [ ] D4: Kit: docs (`take-plan.md`, `remote.md`, preflight, `standards-git.md`, `ship-regular.md`, `job-validation.md`, `workflow-map.md`, `commands.md`), plus the manifest row and the `kit-owned.json` entry for `slot-serve.mjs`.
 - [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
+- [ ] D7: FoodVibe only (no kit patch): remove the `playwright` entry from `.cursor/mcp.json` (Playwright MCP was dropped 2026-10-01; each Cursor window was spawning its own copy) — `.cursor/mcp.json`
+- [ ] D8: Kit: `orphan-sweep.mjs` + `slot-stop.mjs` also recognise the plan 408 QA harness chains (ports 4205/3005/4206, `.claude/.qa-pids`, cwd in this folder): the sweep kills only orphans (no port held), never a running QA server; Done-when: [auto] a scratch orphan `node --watch` with QA env in the main folder is swept, a live listener on 4206 survives — `scripts/orphan-sweep.mjs`, `scripts/lib/slot-procs.mjs`, `scripts/test/**`
 - [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
 
 ## Out of Scope
-Phase 6 kit work (plans 390–392). MCP server processes (Playwright, agentmemory): they come from Claude/Cursor config, not from the slots.
+Phase 6 kit work (plans 390–392). The agentmemory MCP server in `~/.cursor/mcp.json` (user config, outside the repo). Exception (added 2026-10-10 by Dandan): D7 removes the dropped Playwright MCP from the project's `.cursor/mcp.json`.

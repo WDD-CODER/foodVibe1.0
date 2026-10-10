@@ -12,13 +12,15 @@ import {
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { ClickOutSideDirective } from '@directives/click-out-side'
+import { EnglishKeyInputDirective } from '@directives/english-key-input.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TranslationKeyModalService } from '@services/translation-key-modal.service'
+import { finalizeEnglishKey } from '@utils/english-key.util'
 
 @Component({
   selector: 'translation-key-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ClickOutSideDirective, TranslatePipe],
+  imports: [CommonModule, FormsModule, ClickOutSideDirective, EnglishKeyInputDirective, TranslatePipe],
   templateUrl: './translation-key-modal.component.html',
   styleUrl: './translation-key-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -75,7 +77,8 @@ export class TranslationKeyModalComponent {
   })
 
   protected save(): void {
-    const key = this.englishKey_().trim()
+    const key = finalizeEnglishKey(this.englishKey_())
+    this.englishKey_.set(key)
     const hebrew = this.hebrewLabel_().trim()
     if (!key || !hebrew) return
 

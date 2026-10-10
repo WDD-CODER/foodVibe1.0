@@ -3,11 +3,13 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
 import { ProductDataService } from '@services/product-data.service'
+import { SupplierDataService } from '@services/supplier-data.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
 import { Recipe } from '@models/recipe.model'
 import { Product } from '@models/product.model'
+import { Supplier } from '@models/supplier.model'
 
 /** What the user chose when saving an item cloned from a shared master. */
 export type SaveScope = 'me' | 'everyone' | 'cancel'
@@ -108,6 +110,7 @@ export class MasterPushService {
   private readonly recipeData = inject(RecipeDataService)
   private readonly dishData = inject(DishDataService)
   private readonly productData = inject(ProductDataService)
+  private readonly supplierData = inject(SupplierDataService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
   private readonly userService = inject(UserService)
@@ -211,6 +214,20 @@ export class MasterPushService {
     this.productData
       .deleteFromMaster(product._id)
       .catch(() => this.userMsg.onSetErrorMsg(this.translation.translate('delete_from_master_error')))
+  }
+
+  /**
+   * Plan 366: "delete this supplier for everyone" — the server removes the master supplier
+   * and every other user's copy, and unlinks them from their products. Awaited (call it
+   * before deleting the caller's own copy, which the server looks up); failures surface as a
+   * message, not thrown, so the caller's own delete still goes ahead.
+   */
+  async deleteSupplierFromMaster(supplier: Supplier): Promise<void> {
+    try {
+      await this.supplierData.deleteFromMaster(supplier._id)
+    } catch {
+      this.userMsg.onSetErrorMsg(this.translation.translate('supplier_delete_from_master_error'))
+    }
   }
 
   /**

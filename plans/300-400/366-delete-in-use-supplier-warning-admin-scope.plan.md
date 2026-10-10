@@ -1,7 +1,8 @@
 # Plan 366 — Delete a supplier that's in use: warning, then admin-only "only me / everyone"
 
-Status: draft
+Status: done
 Track: code — here (not design)
+Isolated DB: yes
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement
@@ -97,12 +98,27 @@ touching any milestone.
 - Dictionary (append): `supplier_delete_in_use_warning` = "הספק מקושר ל-{n} מוצרים. מחיקה תסיר אותו מהמוצרים האלה.", and `confirm_delete_supplier` = "למחוק את הספק?" (replaces the hard-coded `'למחוק את הספק "…"?'`).
 - Scope texts come from plan 365 (`entity_supplier`).
 
+## Architecture Impact
+
+- INV-1: preserves — the cross-user part is on the admin-only (`requireAdmin`) `delete-from-master` route; normal deletes stay scoped to the caller's own docs.
+- INV-2: preserves — "only me" still deletes just the caller's copy; "everyone" is admin-only.
+- INV-3: preserves — unlinking the supplier from products runs on the server inside the delete request, not one client write per product.
+- INV-4: preserves — `$pull` on `products.sources` removes elements, so stored products stay valid.
+
+## As built (Worker, 2026-10-10)
+
+- Human answer to the Critical Question: **(a)** — a non-admin can delete an in-use supplier after the warning; their own products are unlinked.
+- **No separate `purge-supplier-everywhere` route.** The purge runs inside `PUT /suppliers/:id/delete-from-master` (one request; INV-3), so no new client storage-adapter method was needed (`http-storage.adapter.ts` / `async-storage.service.ts` are outside this plan's scope). Response: `{ ok, usersAffected }`. It also unlinks the master supplier from `__master__` products so new signups don't get a dead link, and is safe to retry.
+- **Own-product unlink is server-side** in `DELETE /suppliers/:id` and `DELETE /suppliers/bulk` (`$pull sources`), not a client loop through `ProductDataService`. The client only mirrors it in its store (`ProductDataService.unlinkSuppliersLocally`).
+- Legacy `supplierIds_` (P1): v2 dropped the field server-side, so only the client store strips it.
+- The client calls the master removal **before** the own delete (the server finds the master through the caller's own copy).
+
 ## Atomic Sub-tasks
 
-- [ ] A1: Server: allowlist, trash collection and purge route, plus tests (against the isolated DB) (`server/routes/generic.js`, `server/constants/collections.js`, `server/test/**`).
-- [ ] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
-- [ ] A3: `onDelete` / `onBulkDeleteSelected` flow, model field, dictionary keys.
-- [ ] A4: Build, server tests, client specs. Manual test with 2 accounts. Update session-state.
+- [x] A1: Server: allowlist, trash collection and purge route, plus tests (against the isolated DB) (`server/routes/generic.js`, `server/constants/collections.js`, `server/test/**`).
+- [x] A2: Client services: `deleteFromMaster`, `deleteSupplierFromMaster`, own-products source strip.
+- [x] A3: `onDelete` / `onBulkDeleteSelected` flow, model field, dictionary keys.
+- [x] A4: Build, server tests, client specs. Manual test with 2 accounts. Update session-state.
 
 ## Technical Considerations
 
