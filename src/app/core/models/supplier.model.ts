@@ -8,5 +8,7 @@ export interface Supplier {
   minOrderMov: number
   leadTimeDays: number
   supplierLogoUrl?: string
+  /** Shared __master__ supplier this copy was cloned from (admin "delete for everyone"). */
+  _masterId?: string
   updatedAt?: number
 }

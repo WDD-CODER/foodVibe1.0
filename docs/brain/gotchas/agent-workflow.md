@@ -326,3 +326,15 @@ only the Bash tool's command text triggers it.
 1. Before asking the Human to look at UI on a slot port, prove the live bundle has the change: fetch the page's JS chunks and grep them for a new class name, or check that `.claude/fe.log` shows a rebuild after your last edit.
 2. If it's stale, restart it detached, so it outlives the session, with `--host 0.0.0.0` so it answers on both IPv4 and IPv6 localhost. From PowerShell: `Start-Process node -ArgumentList '"<repo>\node_modules\@angular\cli\bin\ng.js"','serve','-c','slot','--port','420N','--host','0.0.0.0' -WindowStyle Hidden`.
 3. Check both `http://localhost:420N` and `http://127.0.0.1:420N` return 200 before handing over.
+
+### `Isolated DB: yes` can silently leave the slot backend on the shared DB
+
+**What hurt:** Plan 366 needed an isolated DB. `take-plan.mjs` printed `db=foodvibe_wt2` and seeded that DB, but the slot backend was actually running on the shared local DB. First, the plan wrote the flag as a bullet (`- Isolated DB: yes.`), and the parser only matches a line that *starts* with `Isolated DB:`. Second, even after fixing that, take-plan only rewrites the DB name when `MONGO_LOCAL_URI` is in its own process env. That value lives only in `server/.env`, which the server loads itself through dotenv, so the override was skipped.
+
+**Why the obvious fix is wrong:** Trusting the `OK … db=foodvibe_wt<N>` line. It reports the seed target, not the DB the backend connected to. Writes from a cross-user test would land in the shared DB.
+
+**What to do instead:**
+1. Put `Isolated DB: yes` as its own header line (under `Status:`), not as a bullet.
+2. After take-plan, check which DB the backend really uses. Start it with a one-shot log of `require('mongoose').connection.name` (db name only, never the URI), or query the DB for a doc you just wrote.
+3. If it's wrong, restart the backend from `server/` with dotenv loaded first and the DB name rewritten in `process.env.MONGO_LOCAL_URI` before `require('./index.js')`. A Claude background task dies at the 2-hour limit (see "Slot dev server goes stale" above).
+4. The real fix belongs in take-plan (load `server/.env` before the override). It is kit-owned, so it goes through `../ai-workflow-kit` first.

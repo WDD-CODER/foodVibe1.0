@@ -703,9 +703,55 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
 // Recipes/dishes only (categories/allergens/etc. have no per-item trash
 // concept the way recipes/dishes do). Same open-to-any-signed-in-user
 // tradeoff as push-to-master, for the same reason.
+//
+// Suppliers (plan 366) go further — see purgeSupplierEverywhere below.
 // ---------------------------------------------------------------------------
-const DELETABLE_FROM_MASTER_TYPES = new Set(['recipes', 'dishes', 'products']);
-const MASTER_TRASH_KEY = { recipes: 'TRASH_RECIPES', dishes: 'TRASH_DISHES', products: 'TRASH_PRODUCTS' };
+const DELETABLE_FROM_MASTER_TYPES = new Set(['recipes', 'dishes', 'products', 'suppliers']);
+const MASTER_TRASH_KEY = {
+  recipes: 'TRASH_RECIPES', dishes: 'TRASH_DISHES', products: 'TRASH_PRODUCTS', suppliers: 'TRASH_SUPPLIERS',
+};
+
+/** Removes supplier ids from the `sources` of one user's products (no dangling links). */
+async function unlinkSuppliersFromProducts(userId, supplierIds) {
+  if (supplierIds.length === 0) return;
+  await col('products').updateMany(
+    { userId, 'sources.supplierId': { $in: supplierIds } },
+    { $pull: { sources: { supplierId: { $in: supplierIds } } }, $set: { updatedAt: Date.now() } }
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Plan 366: "delete this supplier for everyone". Explicitly Human-requested,
+// admin-only (the route is requireAdmin-gated) — like purge-ingredient-everywhere
+// below, a deliberate exception to "one user's action never reaches another
+// user's own documents"; not a general pattern to reuse elsewhere.
+//
+// Every other user's clone of the master supplier (found by _masterId, each with
+// its own _id) is moved to that user's TRASH_SUPPLIERS and deleted, and that
+// clone's id is pulled from that user's products' `sources`. The __master__
+// products lose the master supplier too, so new signups don't get a dangling
+// link. The caller's own copy and products go through the normal DELETE route.
+// Runs in this one request (INV-3) so it can't half-finish from the client.
+// ---------------------------------------------------------------------------
+async function purgeSupplierEverywhere(masterId, callerId) {
+  const clones = await col('suppliers')
+    .find({ _masterId: masterId, userId: { $nin: ['__master__', callerId] } })
+    .toArray();
+  const deletedAt = Date.now();
+  for (const clone of clones) {
+    await unlinkSuppliersFromProducts(clone.userId, [clone._id]);
+    if (!clone._userDeleted) {
+      await col('TRASH_SUPPLIERS').replaceOne(
+        { _id: clone._id, userId: clone.userId },
+        { ...clone, deletedAt },
+        { upsert: true }
+      );
+    }
+    await col('suppliers').deleteOne({ _id: clone._id, userId: clone.userId });
+  }
+  await unlinkSuppliersFromProducts('__master__', [masterId]);
+  return new Set(clones.map(c => c.userId)).size;
+}
 
 router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (req, res) => {
   try {
@@ -728,11 +774,16 @@ router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (re
       const trashKey = MASTER_TRASH_KEY[req.params.type];
       await col(trashKey).insertOne({ ...masterDoc, deletedAt: Date.now() });
       await col(req.params.type).deleteOne({ _id: existing._masterId, userId: '__master__' });
-      await bumpMasterVersion();
     }
-    // masterDoc already gone (e.g. removed by a previous call) — treat as success, nothing to do.
+    // masterDoc already gone (e.g. removed by a previous call) — the supplier purge still
+    // runs, so a retry after a half-failed call finishes the job.
 
-    res.json({ ok: true });
+    const usersAffected = req.params.type === 'suppliers'
+      ? await purgeSupplierEverywhere(existing._masterId, req.user.userId)
+      : undefined;
+    if (masterDoc || usersAffected) await bumpMasterVersion();
+
+    res.json(usersAffected === undefined ? { ok: true } : { ok: true, usersAffected });
   } catch (err) {
     req.log.error({ err, event: 'data.delete_from_master.failed' });
     res.status(500).json({ error: 'Server error' });
@@ -944,6 +995,8 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
       _id: { $in: ids },
       userId: req.user.userId,
     });
+    // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
+    if (req.params.type === 'suppliers') await unlinkSuppliersFromProducts(req.user.userId, ids);
 
     res.json({ ok: true, deletedCount: result.deletedCount });
   } catch (err) {
@@ -1012,6 +1065,8 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
       // Hard delete: user-originated item or legacy (no _masterId / self-referential)
       await col(req.params.type).deleteOne({ _id: req.params.id, userId: req.user.userId });
     }
+    // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
+    if (req.params.type === 'suppliers') await unlinkSuppliersFromProducts(req.user.userId, [req.params.id]);
 
     res.json({ ok: true });
   } catch (err) {
