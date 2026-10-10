@@ -1,6 +1,6 @@
 # Plan 403 — Data cleanup: legacy null logistics, test items and leftover collections, with a write guard
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: e6feb7f41c27cc9229ae2a58399856aa2f9e4437
 
@@ -170,7 +170,7 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Atomic Sub-tasks
 - [x] A0: Discard list confirmed by the Human 2026-10-10 — see "Approved discard list"
-- [ ] A0b: ⛔ Before deleting the Atlas accounts: the Human signs up their real production account first, the Worker sets its `role: admin` (one `updateOne` in the cleanup script, `--promote-admin=<name>`), the Human confirms they can log in as admin — only then F7 deletes `hhhh`, `dan`, `danw`, `dan11`
+- [x] A0b: ⛔ Before deleting the Atlas accounts: the Human signs up their real production account first, the Worker sets its `role: admin` (one `updateOne` in the cleanup script, `--promote-admin=<name>`), the Human confirms they can log in as admin — only then F7 deletes `hhhh`, `dan`, `danw`, `dan11` — 2026-10-10: Human signed up adi and made her admin on production
 - [x] A1: Backups — `server/scripts/db-backup.js` local + Atlas; folders in session-state
 - [x] A2: `server/scripts/cleanup-legacy-data.js` (F1–F7 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
 - [x] A3: Dry run local + Atlas; paste both count tables in chat
@@ -178,9 +178,9 @@ line or file this plan names was removed, renamed or rewritten).
 - [x] A5: Client net in `kitchen-state.service.ts` `saveRecipe()` (+ spec)
 - [x] A6: Stop the re-creation of empty v1 registry collections (`server/db.js` or wherever A2 finds it)
 - [x] A7: Announce in chat → local `--apply` → dry run again = 0 → `validate-all --target=local` = 0 violations — 2026-10-10: all fixers applied locally (F6 after the Human added אלרגן1 + אדמין אלרגן); dry run = 0; `validate-all --target=local` = 0 violations
-- [ ] A8: ⛔ Human approves Atlas `--apply` → apply with `--backup-dir` → `validate-all --target=atlas` = 0 violations
+- [x] A8: ⛔ Human approves Atlas `--apply` → apply with `--backup-dir` → `validate-all --target=atlas` = 0 violations — 2026-10-10: applied with fresh backup atlas-2026-10-10T13-04-28; dry run = 0; validate-all atlas = 0 violations
 - [x] A9: Brain gotcha update (`docs/brain/gotchas/backend.md`)
-- [ ] A10: `npm --prefix server test`, `ng build`, `ng test` green; hand the Human the click list (save / favorite / rating / approve on a formerly-null recipe, local then production)
+- [x] A10: `npm --prefix server test`, `ng build`, `ng test` green; hand the Human the click list (save / favorite / rating / approve on a formerly-null recipe, local then production) — Human validated local + production: "done" (2026-10-10)
 - [x] A11: Root cause of the nulls: `sync-master.js` assigned `remapLogistics(undefined)` → driver stores null on every clone/sync; guarded + test (Human: approved sync-master.js + its test, 2026-10-10)
 
 ## Technical Considerations
