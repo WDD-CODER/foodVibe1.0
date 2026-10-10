@@ -1,4 +1,15 @@
-import { Component, DestroyRef, ElementRef, inject, signal, computed, effect, OnInit, OnDestroy } from '@angular/core'
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  inject,
+  signal,
+  computed,
+  effect,
+  OnInit,
+  OnDestroy
+} from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
@@ -34,6 +45,7 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
 import { CookTimerService } from './services/cook-timer.service'
 import { CookViewExportService } from './services/cook-view-export.service'
+import { UnitExpanderComponent, UnitExpanderOption } from 'src/app/shared/unit-expander/unit-expander.component'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -61,7 +73,8 @@ const MULTIPLIER_CHIPS = [
     ExportPreviewComponent,
     ApproveStampComponent,
     CounterComponent,
-    RatingStarsComponent
+    RatingStarsComponent,
+    UnitExpanderComponent
   ],
   providers: [CookTimerService, CookViewExportService],
   templateUrl: './cook-view.page.html',
@@ -122,6 +135,12 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected settingByIngredientIndex_ = signal<number | null>(null)
   /** Current value in the inline amount input for the row in setting state. */
   protected settingByIngredientAmount_ = signal<number>(0)
+  /** Ingredient row whose expander (units + scale-to-ingredient) is open; one at a time. */
+  protected openIngredientIndex_ = signal<number | null>(null)
+  /** Long-press bookkeeping (<768px): the pending timer, its start point, and a click to swallow. */
+  private longPressTimer_: ReturnType<typeof setTimeout> | null = null
+  private longPressStart_: { x: number; y: number } | null = null
+  private suppressClickUntil_ = 0
 
   /** Phone layout: which pane appears on top. Default: ingredients first. */
   protected phoneFirstPane_ = signal<'ingredients' | 'steps'>('ingredients')
@@ -156,6 +175,18 @@ export class CookViewPage implements OnInit, OnDestroy {
     const idx = this.scaleByIngredientIndex_()
     if (idx === null) return null
     return this.getScaledIngredientAt(idx) ?? null
+  })
+
+  /** Live preview for the scale-to-ingredient form: the factor and the resulting quantity. */
+  protected scalePreview_ = computed(() => {
+    const idx = this.settingByIngredientIndex_()
+    if (idx === null) return null
+    const row = this.scaledIngredients_()[idx]
+    const base = this.recipe_()?.ingredients?.[idx]?.amount ?? 0
+    if (!row || base <= 0) return null
+    const inRowUnit = this.toRowUnitAmount(idx, row, this.settingByIngredientAmount_())
+    const factor = inRowUnit / base
+    return { factor, qty: this.convertedYieldAmount_() * factor }
   })
 
   protected yieldUnitOptions_ = computed(() => {
@@ -249,6 +280,11 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Number of steps marked as done (uses stepDoneSet_ for Focus Mode). */
   protected completedStepCount_ = computed(() => this.stepDoneSet_().size)
 
+  /** Steps (recipe) or prep items (dish) shown in the steps pane. */
+  protected stepTotal_ = computed(() =>
+    this.isDish_() ? this.scaledPrep_().length : (this.recipe_()?.steps?.length ?? 0)
+  )
+
   /** Total step count for the current recipe. */
   protected totalStepCount_ = computed(() => this.recipe_()?.steps?.length ?? 0)
 
@@ -333,6 +369,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cancelLongPress()
     this.document.documentElement.classList.remove('theme-kitchen', 'cv-page-scroll')
     this.cookExport.closeAllExportOverlays()
     this.heroFab.clearPageActions()
@@ -446,7 +483,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     const row = rows[index]
     if (!row) return
     this.settingByIngredientIndex_.set(index)
-    this.settingByIngredientAmount_.set(row.amount)
+    this.settingByIngredientAmount_.set(this.inputAmount(this.getDisplayAmount(index, row)))
   }
 
   /** Cancel setting state (clear inline amount row). */
@@ -460,19 +497,34 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.settingByIngredientAmount_.set(Number.isFinite(num) ? num : 0)
   }
 
-  /** Open confirm dialog, then apply scale by ingredient or cancel. */
-  protected confirmScaleByIngredient(index: number, userAmount: number): void {
-    const amount = Number(userAmount)
-    if (!Number.isFinite(amount) || amount <= 0) return
-    const recipe = this.recipe_()
-    if (!recipe?.ingredients?.[index]) return
-    const baseAmount = recipe.ingredients[index].amount ?? 0
-    if (baseAmount <= 0) return
-    this.confirmModal.open('scale_recipe_confirm', { saveLabel: 'convert' }).then((confirmed) => {
-      if (!confirmed) return
-      this.applyScaleByIngredient(index, amount)
-      this.settingByIngredientIndex_.set(null)
-    })
+  /** Recalculate from the scale form (no confirm — the live preview shows the result first, and
+   *  "back to full recipe" undoes it). The typed amount is in the row's display unit. */
+  protected applyScaleFromForm(index: number): void {
+    const row = this.scaledIngredients_()[index]
+    if (!row) return
+    const amount = this.toRowUnitAmount(index, row, this.settingByIngredientAmount_())
+    this.applyScaleByIngredient(index, amount)
+    this.settingByIngredientIndex_.set(null)
+    this.openIngredientIndex_.set(null)
+  }
+
+  /** Scaled banner: edit the source amount (display unit) and recalculate live. */
+  protected setScaledBannerAmount(displayAmount: number): void {
+    const idx = this.scaleByIngredientIndex_()
+    const row = this.scaledViewRow_()
+    if (idx === null || !row) return
+    this.applyScaleByIngredient(idx, this.toRowUnitAmount(idx, row, displayAmount))
+  }
+
+  protected stepScaledBannerAmount(delta: 1 | -1): void {
+    const idx = this.scaleByIngredientIndex_()
+    const row = this.scaledViewRow_()
+    if (idx === null || !row) return
+    const unit = this.getDisplayUnit(idx, row)
+    const current = this.getDisplayAmount(idx, row)
+    const opts = this.isDish_() ? { integerOnly: true } : { unit }
+    const next = delta > 0 ? quantityIncrement(current, 0.01, opts) : quantityDecrement(current, 0.01, opts)
+    this.setScaledBannerAmount(next)
   }
 
   /** Set targetQuantity_ so that ingredient at index has the given amount; enter special view. */
@@ -484,17 +536,15 @@ export class CookViewPage implements OnInit, OnDestroy {
     const baseAmount = recipe.ingredients[index].amount ?? 0
     if (baseAmount <= 0) return
     const factor = amount / baseAmount
-    const yieldAmount = recipe.yieldAmount ?? 1
-    this.targetQuantity_.set(yieldAmount * factor)
+    // targetQuantity_ is in the selected yield unit, so scale that unit's yield (not the base one).
+    this.targetQuantity_.set(this.convertedYieldAmount_() * factor)
     this.scaleByIngredientIndex_.set(index)
     this.scaleByIngredientAmount_.set(amount)
   }
 
   /** Exit special scaled view: reset to recipe base yield. */
   protected resetToFullRecipe(): void {
-    const recipe = this.recipe_()
-    const base = recipe?.yieldAmount ?? 1
-    this.targetQuantity_.set(base)
+    this.targetQuantity_.set(this.convertedYieldAmount_())
     this.scaleByIngredientIndex_.set(null)
     this.scaleByIngredientAmount_.set(null)
     this.activeMultiplier_.set(null)
@@ -861,13 +911,107 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected getDisplayAmount(rowIndex: number, row: ScaledIngredientRow): number {
-    const overrides = this.unitOverrides_()
-    const targetUnit = overrides[rowIndex]
-    if (!targetUnit || targetUnit === row.unit) return row.amount
+    return this.amountInUnit(row, this.unitOverrides_()[rowIndex] ?? row.unit)
+  }
+
+  /** The row's (scaled) amount expressed in `unit`. */
+  private amountInUnit(row: ScaledIngredientRow, unit: string): number {
+    if (!unit || unit === row.unit) return row.amount
     const baseFrom = this.recipeCostService.convertToBaseUnits(row.amount, row.unit)
-    const basePerOne = this.recipeCostService.convertToBaseUnits(1, targetUnit)
+    const basePerOne = this.recipeCostService.convertToBaseUnits(1, unit)
     if (!basePerOne) return row.amount
     return baseFrom / basePerOne
+  }
+
+  /** Convert an amount typed in the row's display unit back to the recipe's unit for that row. */
+  private toRowUnitAmount(rowIndex: number, row: ScaledIngredientRow, displayAmount: number): number {
+    const shown = this.getDisplayAmount(rowIndex, row)
+    if (!row.amount || !shown) return displayAmount
+    return displayAmount * (row.amount / shown)
+  }
+
+  // ---- INGREDIENT ROW EXPANDER (units + scale to ingredient) ----
+
+  /** A number for an <input type="number">: no unicode fractions, at most 3 decimals. */
+  protected inputAmount(value: number): number {
+    return Math.round(value * 1000) / 1000
+  }
+
+  protected unitOptionsFor(row: ScaledIngredientRow): UnitExpanderOption[] {
+    const units = row.availableUnits?.length ? row.availableUnits : [row.unit]
+    return units.map((u) => ({ value: u, amount: this.amountInUnit(row, u) }))
+  }
+
+  protected toggleIngredientExpander(index: number): void {
+    const next = this.openIngredientIndex_() === index ? null : index
+    this.openIngredientIndex_.set(next)
+    if (this.settingByIngredientIndex_() !== next) this.settingByIngredientIndex_.set(null)
+  }
+
+  protected chooseUnit(index: number, unit: string): void {
+    this.setUnitOverride(index, unit)
+    this.settingByIngredientIndex_.set(null)
+    this.openIngredientIndex_.set(null)
+  }
+
+  protected addUnitFor(index: number): void {
+    setTimeout(() => this.unitRegistry.openUnitCreator(), 0)
+    this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((unit) => this.chooseUnit(index, unit))
+  }
+
+  /** Row tap toggles the check — unless it is the click that ends a long press. */
+  protected onIngredientRowClick(index: number): void {
+    if (Date.now() < this.suppressClickUntil_) return
+    this.toggleIngredientCheck(index)
+  }
+
+  protected onIngredientRowKeydown(event: KeyboardEvent, index: number): void {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    if (event.target !== event.currentTarget) return
+    event.preventDefault()
+    this.toggleIngredientCheck(index)
+  }
+
+  /** Long press (500ms, <768px) opens the row's expander instead of ticking it. */
+  protected onIngredientPointerDown(event: PointerEvent, index: number): void {
+    if (!this.isStackedLayout()) return
+    this.cancelLongPress()
+    this.longPressStart_ = { x: event.clientX, y: event.clientY }
+    this.longPressTimer_ = setTimeout(() => {
+      this.longPressTimer_ = null
+      this.suppressClickUntil_ = Date.now() + 700
+      this.document.defaultView?.navigator.vibrate?.(12)
+      if (this.openIngredientIndex_() !== index) this.toggleIngredientExpander(index)
+    }, 500)
+  }
+
+  protected onIngredientPointerMove(event: PointerEvent): void {
+    const start = this.longPressStart_
+    if (!start || this.longPressTimer_ === null) return
+    if (Math.hypot(event.clientX - start.x, event.clientY - start.y) > 8) this.cancelLongPress()
+  }
+
+  protected cancelLongPress(): void {
+    if (this.longPressTimer_ !== null) clearTimeout(this.longPressTimer_)
+    this.longPressTimer_ = null
+    this.longPressStart_ = null
+  }
+
+  private isStackedLayout(): boolean {
+    return this.document.defaultView?.matchMedia('(max-width: 767px)').matches ?? false
+  }
+
+  /** Click outside the open row closes its expander. */
+  @HostListener('document:pointerdown', ['$event'])
+  protected onDocumentPointerDown(event: PointerEvent): void {
+    const open = this.openIngredientIndex_()
+    if (open === null) return
+    const target = event.target instanceof Element ? event.target : null
+    if (target?.closest(`[data-ing-index="${open}"]`)) return
+    // Overlays opened from the expander (unit creator) live outside the row.
+    if (target?.closest('.c-modal-overlay, .c-modal-card')) return
+    this.openIngredientIndex_.set(null)
+    this.settingByIngredientIndex_.set(null)
   }
 
   protected addWorkflowItem(): void {

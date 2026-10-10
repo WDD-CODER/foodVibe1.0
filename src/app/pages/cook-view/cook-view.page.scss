@@ -554,54 +554,82 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Scale bar — multiplier pills + quantity segmented control.
-   Lives inside the ingredient panel header (mirrors the mockup's in-panel
-   "כמות מנות" row) instead of its own full-width bar above the grid.
+   Quantity controls — multiplier chips + counter + yield unit (plan 404 step 5)
    ───────────────────────────────────────────────────────────────────────── */
 .cv-scale-bar {
   display: flex;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: var(--space-3);
 
-  gap: 0.5rem;
-  padding: 0 1rem var(--space-3);
-
-  border-bottom: 1px dashed var(--cv-panel-border);
+  margin-block-end: var(--space-4);
 }
 
 .cv-multiplier-chips {
   display: flex;
   flex-wrap: wrap;
-
-  gap: 2px;
-  padding: 4px;
-
-  background: var(--cv-segment-bg);
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-full);
+  align-items: center;
+  gap: 6px;
 }
 
-.cv-chip-btn {
-  color: var(--cv-muted-text);
-  font-size: 13px;
-  font-weight: 700;
+.cv-mult-chip {
+  display: grid;
+  place-content: center;
 
-  background: transparent;
-  border: none;
+  block-size: var(--cv-tap-min);
+  min-inline-size: var(--cv-tap-min);
+
+  background: var(--bg-card-solid);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 0.9375rem; // 15
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-full);
-  padding: 6px 14px;
+  padding-inline: var(--space-2);
 
   cursor: pointer;
   transition:
-    background 0.2s var(--ease-smooth),
-    color 0.2s var(--ease-smooth);
+    border-color var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &.is-on {
+    background: var(--color-primary-strong);
+    color: var(--color-on-primary-strong);
+
+    border-color: transparent;
+  }
 }
 
-.cv-chip--active {
-  color: var(--color-text-on-primary);
+.quantity-control-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
 
-  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
-  box-shadow: var(--shadow-glow);
+.cv-long-press-hint {
+  display: none;
+
+  color: var(--color-text-muted);
+  font-size: 0.78125rem; // 12.5
+  font-weight: var(--fw-medium);
+
+  margin: 0;
+
+  @media (max-width: $cv-stack-max) {
+    display: block;
+  }
 }
 
 .cv-recent-chips {
@@ -618,26 +646,6 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--cv-muted-text);
-}
-
-.quantity-control-wrap {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.5rem;
-  padding-block: 4px;
-  padding-inline: 4px 0.75rem;
-
-  background: var(--cv-segment-bg);
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-full);
-}
-
-.quantity-label {
-  color: var(--cv-muted-text);
-  font-size: var(--fs-xs);
-  font-weight: 600;
 }
 
 .qty-btn {
@@ -737,230 +745,414 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   }
 }
 
-.cv-ing-pane,
-.cv-step-pane {
-  background: var(--cv-panel-bg);
+/* Panes (plan 404 step 5): card with a header + 4px progress bar; content grows with the page. */
+.cv-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
 
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-lg);
+  overflow: hidden;
 
-  box-shadow: var(--cv-panel-shadow);
+  background: var(--bg-glass);
+
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-card);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
 }
 
-.cv-ing-pane,
-.cv-step-pane {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-
-  overflow: hidden;
-}
-
-.cv-ing-pane {
-  order: 1;
-}
-
-.cv-ing-pane-header,
-.cv-step-pane-header {
+.cv-pane-head {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
-
-  background: var(--cv-segment-bg);
-
-  border-bottom: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  padding-block: 0.625rem;
-}
-
-.cv-ing-pane-header {
   flex-wrap: wrap;
+  gap: var(--space-2);
 
-  gap: 0.5rem;
-  padding-inline: 1rem;
+  color: var(--color-primary-ink);
+  font-size: 0.9375rem; // 15
+  font-weight: var(--fw-extrabold);
+
+  border-block-end: 1px solid var(--border-default);
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
 }
 
-.cv-ing-pane-title,
-.cv-step-pane-title {
-  display: flex;
-  align-items: center;
+.cv-pane-count {
+  margin-inline-start: auto;
 
-  gap: 0.375rem;
-
-  color: var(--cv-main-text);
-  font-size: var(--fs-md);
+  font-size: var(--fs-sm);
+  font-style: normal;
   font-weight: var(--fw-bold);
 
-  lucide-icon {
-    flex-shrink: 0;
-    color: var(--cv-accent);
-  }
-}
-
-.cv-ing-badge,
-.cv-step-counter {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--cv-accent);
-
-  background: var(--cv-chip-bg);
-
+  background: var(--color-primary-soft);
   border-radius: var(--radius-full);
-  margin-inline-start: auto;
-  padding-block: 0.125rem;
-  padding-inline: 0.5rem;
+  padding: 3px 10px;
 }
 
-.cv-ing-badge--complete {
-  color: var(--color-text-on-primary);
+.cv-ready-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
 
-  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
+  color: var(--color-primary-ink);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
 }
 
-.cv-ing-progress-bar {
-  inline-size: 100%;
+.cv-pane-bar {
+  display: block;
+
   block-size: 4px;
 
-  background: var(--cv-nav-border);
+  background: var(--border-default);
 
-  border-radius: var(--radius-full);
-}
+  i {
+    display: block;
 
-.cv-ing-progress-fill {
-  block-size: 100%;
+    block-size: 100%;
 
-  background: linear-gradient(90deg, var(--cv-accent) 0%, #5eead4 100%);
+    background: linear-gradient(90deg, var(--color-primary-strong), var(--color-primary));
 
-  border-radius: var(--radius-full);
-
-  transition: width 0.4s ease-out;
-}
-
-.cv-ing-pane-header--complete .cv-ing-progress-fill {
-  width: 100%;
-  animation: cv-progress-pulse 1.5s ease-in-out 1;
-}
-
-@keyframes cv-progress-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
+    transition: width 0.5s var(--ease-spring);
   }
 }
 
-.cv-ing-row {
+.cv-pane-inner {
+  padding: var(--space-4);
+
+  @media (min-width: $cv-tablet-min) {
+    padding: 18px var(--space-5) var(--space-5);
+  }
+}
+
+/* Ingredient rows: main line (check · name · amount · unit · unit chip · scale) + expander. */
+.cv-ing-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.cv-ing {
+  display: block;
+
+  background: var(--bg-glass);
+  color: var(--color-text-main);
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    background var(--dur-fast) var(--ease-smooth),
+    border-color var(--dur-fast) var(--ease-smooth);
+
+  &:hover,
+  &.is-open {
+    background: var(--bg-card-solid);
+  }
+
+  &.is-open,
+  &.is-source {
+    border-color: var(--color-primary);
+  }
+}
+
+.cv-ing-main {
   display: flex;
   align-items: center;
+  gap: 14px;
 
-  gap: 0.75rem;
-  min-height: var(--cv-tap-min);
+  min-block-size: 60px;
+  padding-inline: 14px;
 
-  background: var(--cv-row-bg);
-  direction: rtl;
+  font-size: 1.0625rem; // 17
+  font-weight: var(--fw-semibold);
 
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  margin-bottom: 3px;
-  padding-block: 0.625rem;
-  padding-inline: 1rem;
+  border-radius: inherit;
 
   cursor: pointer;
-  transition:
-    background 0.15s var(--ease-smooth),
-    border-color 0.15s var(--ease-smooth);
 
-  &:hover {
-    background: var(--cv-segment-bg);
-    border-color: var(--cv-panel-border);
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
   }
-}
 
-.cv-ing-row--done {
-  --cv-row-bg: var(--cv-chip-bg);
-
-  .cv-ing-name {
-    text-decoration: line-through;
+  @media (min-width: $cv-tablet-min) and (max-width: 1100px) {
+    gap: 10px;
+    padding-inline: 12px;
   }
 }
 
 .cv-ing-check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-content: center;
   flex-shrink: 0;
 
-  width: 20px;
-  height: 20px;
+  inline-size: 30px;
+  block-size: 30px;
 
-  border: 1.5px solid var(--cv-nav-border);
-  border-radius: 6px;
+  color: var(--color-on-primary-strong);
 
-  transition:
-    background 0.2s var(--ease-smooth),
-    border-color 0.2s var(--ease-smooth);
-}
+  border: 2px solid var(--color-text-muted);
+  border-radius: 9px;
 
-.cv-ing-check--done {
-  background: var(--cv-accent);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  border-color: transparent;
+  .cv-ing.is-checked & {
+    background: var(--color-primary-strong);
+    border-color: var(--color-primary-strong);
 
-  &::after {
-    content: '✓';
-
-    color: var(--color-text-on-primary);
-    font-size: 0.7rem;
-    font-weight: 700;
+    transform: scale(1.06) rotate(-6deg);
   }
 }
 
 .cv-ing-name {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
 
-  color: var(--cv-main-text);
-  font-weight: 500;
+  .cv-ing.is-checked & {
+    color: var(--color-text-muted);
+    text-decoration: line-through;
+  }
+
+  &.is-unlinked {
+    font-style: italic;
+    opacity: 0.85;
+  }
+
+  @media (min-width: $cv-tablet-min) and (max-width: 1100px) {
+    min-inline-size: 96px;
+  }
 }
 
-.cv-ing-row--done .cv-ing-name {
-  color: var(--cv-muted-text);
+.cv-source-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  color: var(--color-primary-ink);
+  font-size: 0.6875rem; // 11
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+  vertical-align: 2px;
+
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-full);
+  margin-inline-start: var(--space-2);
+  padding: 2px var(--space-2);
 }
 
 .cv-ing-amt {
-  color: var(--cv-main-text);
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.1875rem; // 19
+  font-weight: var(--fw-extrabold);
 
-  min-width: 3rem;
-  text-align: left;
+  .cv-ing.is-checked & {
+    color: var(--color-text-muted);
+  }
 }
 
-.cv-ing-row--done .cv-ing-amt {
-  color: var(--cv-muted-text);
-}
-
+// Stacked layout (<768): plain unit, faint ⇄ when other units exist. Tablet up: the unit chip.
 .cv-ing-unit {
-  font-size: 0.75rem;
-  color: var(--cv-muted-text);
+  color: var(--color-text-muted);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+
+  lucide-icon {
+    opacity: 0.55;
+    margin-inline-start: var(--space-1);
+    vertical-align: -2px;
+  }
+
+  @media (min-width: $cv-tablet-min) {
+    .cv-ing.has-units & {
+      display: none;
+    }
+  }
 }
 
-.cv-step-pane {
-  order: 2;
+.cv-unit-chip {
+  display: none;
+  align-items: center;
+  gap: var(--space-1);
+
+  block-size: 34px;
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  padding-inline: 10px;
+
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    border-color: var(--color-primary);
+  }
+
+  @media (min-width: $cv-tablet-min) {
+    display: inline-flex;
+  }
 }
 
-.cv-step-pane-header {
-  justify-content: space-between;
+.cv-scale-btn {
+  display: none;
+  place-content: center;
+  flex-shrink: 0;
 
-  padding-inline: 1rem;
+  inline-size: 34px;
+  block-size: 34px;
+
+  background: none;
+  color: var(--color-text-muted);
+
+  border: 0;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+  }
+
+  @media (min-width: $cv-tablet-min) {
+    display: inline-grid;
+  }
+
+  // 768–1100: rows with a unit chip reach the same action from the expanded area.
+  @media (min-width: $cv-tablet-min) and (max-width: 1100px) {
+    .cv-ing.has-units & {
+      display: none;
+    }
+  }
 }
 
-.cv-ing-body {
-  padding: 0.5rem;
+// Expander: grows the row with grid-template-rows 0fr → 1fr.
+.cv-ing-exp {
+  display: grid;
+  grid-template-rows: 0fr;
+
+  transition: grid-template-rows 0.32s var(--ease-spring);
+
+  .cv-ing.is-open & {
+    grid-template-rows: 1fr;
+  }
+}
+
+.cv-ing-exp-inner {
+  min-block-size: 0;
+
+  overflow: hidden;
+
+  .cv-ing.is-open & {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    padding: 0 14px 14px;
+  }
+}
+
+.cv-scale-open {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-2);
+
+  block-size: var(--cv-tap-min);
+
+  background: none;
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+
+  border: 1px dashed var(--border-chrome);
+  border-radius: var(--radius-full);
+  padding-inline: var(--space-4);
+
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+  }
+}
+
+.cv-scale-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  .cv-pill-btn {
+    flex: 0 0 auto;
+  }
+}
+
+.cv-scale-form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  inline-size: 100%;
+
+  color: var(--color-primary-ink);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+}
+
+.cv-scale-form-unit {
+  color: var(--color-text-muted);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+
+  min-inline-size: 32px;
+}
+
+.cv-scale-preview {
+  inline-size: 100%;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+
+  margin: 0;
+}
+
+.cv-amount-input {
+  inline-size: 92px;
+  block-size: var(--cv-tap-min);
+
+  background: var(--bg-card-solid);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  text-align: center;
+
+  border: 1.5px solid var(--border-chrome);
+  border-radius: var(--radius-md);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-focus);
+  }
 }
 
 .cv-step-body {
@@ -1317,151 +1509,86 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   }
 }
 
-.row-highlight {
-  box-shadow:
-    0 0 0 1px var(--border-focus),
-    var(--shadow-glow);
-}
-
-.setting-by {
-  background: var(--cv-chip-bg);
-
-  border: 1px solid var(--cv-accent-glow);
-
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.45);
-}
-
-.col-scale-action {
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-
-  gap: 0.375rem;
-}
-
-.set-by-ingredient-btn {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.25rem;
-
-  background: transparent;
-  color: var(--cv-accent);
-  font-size: 0.75rem;
-
-  border: 1px solid var(--cv-accent-glow);
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
-
-  cursor: pointer;
-  transition:
-    background 0.2s var(--ease-smooth),
-    opacity 0.2s var(--ease-smooth);
-  opacity: 0;
-
-  .cv-ing-row:hover & {
-    opacity: 1;
-  }
-}
-
-.edit-amount .amount-input,
-.set-by-amount .amount-input {
-  font-size: 0.9rem;
-  text-align: center;
-  width: 3.5rem;
-
-  color: var(--cv-main-text);
-
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
-}
-
-.set-by-amount .amount-input {
-  background: var(--cv-panel-bg);
-}
-
-.convert-scale-btn {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.25rem;
-
-  background: var(--cv-accent);
-  color: var(--color-text-on-primary);
-  font-size: 0.8rem;
-  font-weight: 600;
-
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
-
-  cursor: pointer;
-  transition: filter 0.2s var(--ease-smooth);
-
-  &:hover {
-    filter: brightness(1.08);
-  }
-}
-
-.cancel-set-by-btn {
-  background: transparent;
-  color: var(--cv-muted-text);
-  font-size: 0.8rem;
-
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
-
-  cursor: pointer;
-  transition: background 0.2s var(--ease-smooth);
-
-  &:hover {
-    background: var(--cv-segment-bg);
-  }
-}
-
+/* Scaled to an ingredient (plan 404 step 5): editable source amount, yield, back to full recipe. */
 .scaled-view-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 10px 14px;
 
-  background: var(--cv-chip-bg);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
 
-  border: 1px solid var(--cv-accent-glow);
-  border-radius: var(--radius-md);
-  gap: 0.75rem;
-  margin: var(--space-3) var(--space-5) 0;
-  padding: 0.625rem 1rem;
+  border-radius: var(--radius-lg);
+  margin-block-start: var(--space-3);
+  padding: var(--space-3) var(--space-4);
 }
 
 .scaled-view-text {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--cv-main-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.scaled-view-unit {
+  color: var(--color-text-muted);
+  font-weight: var(--fw-semibold);
+}
+
+.scaled-view-yield {
+  color: var(--color-text-main);
+  font-weight: var(--fw-extrabold);
+}
+
+.cv-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  > button {
+    display: grid;
+    place-content: center;
+
+    inline-size: 36px;
+    block-size: var(--cv-tap-min);
+
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+
+    border: 0;
+    border-radius: var(--radius-md);
+
+    cursor: pointer;
+  }
+
+  .cv-amount-input {
+    inline-size: 76px;
+  }
 }
 
 .back-to-full-recipe-btn {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
 
-  gap: 0.375rem;
+  block-size: 40px;
 
-  background: var(--cv-accent);
-  color: var(--color-text-on-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
+  background: var(--bg-card-solid);
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-weight: var(--fw-bold);
 
-  border: none;
+  border: 1px solid var(--border-chrome);
   border-radius: var(--radius-full);
-  padding: 0.375rem 0.75rem;
+  padding-inline: 14px;
 
   cursor: pointer;
-  transition: filter 0.2s var(--ease-smooth);
 
   &:hover {
-    filter: brightness(1.08);
+    border-color: var(--color-primary);
   }
 }
 
@@ -1476,22 +1603,5 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 @media (max-width: $cv-stack-max) {
   .cv-phone-swap-bar {
     display: flex;
-  }
-
-  .cv-ing-pane.cv-pane--second {
-    order: 2;
-  }
-
-  .cv-step-pane.cv-pane--first {
-    order: 1;
-  }
-
-  .cv-chip-btn {
-    min-inline-size: 44px;
-    min-block-size: 44px;
-  }
-
-  .cv-hero-title {
-    font-size: 1.375rem;
   }
 }

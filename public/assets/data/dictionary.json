@@ -1018,6 +1018,14 @@
     "awaiting_approval": "ממתין לאישור",
     "more_actions": "עוד פעולות",
     "download": "הורדה",
-    "edit_recipe": "עריכת מתכון"
+    "edit_recipe": "עריכת מתכון",
+    "unit_of_measure": "יחידת מידה",
+    "scale_recipe_to_ingredient": "התאם את המתכון למצרך זה",
+    "recalculate": "חשב מחדש",
+    "source_ingredient": "מצרך מקור",
+    "recipe_calculated_by": "המתכון חושב לפי",
+    "long_press_ingredient_hint": "לחיצה ארוכה על מצרך: יחידת מידה והתאמת המתכון",
+    "recipe_will_recalculate": "המתכון יחושב מחדש",
+    "all_ingredients_ready_label": "כל המצרכים מוכנים"
   }
 }

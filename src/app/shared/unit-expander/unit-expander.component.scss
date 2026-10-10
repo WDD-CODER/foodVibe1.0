@@ -1,0 +1,73 @@
+:host {
+  display: block;
+}
+
+.ux-label {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+
+  margin-block-end: var(--space-2);
+}
+
+.ux-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: var(--space-2);
+}
+
+.ux-tile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+
+  min-block-size: 48px;
+
+  background: var(--bg-glass);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 0.9375rem; // 15
+  font-weight: var(--fw-bold);
+  text-align: start;
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding-inline: var(--space-3);
+
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    border-color: var(--color-primary);
+  }
+
+  &.is-current {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+
+    border-color: var(--color-primary);
+  }
+}
+
+.ux-unit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.ux-amount {
+  color: var(--color-text-muted);
+  font-weight: var(--fw-extrabold);
+  font-variant-numeric: tabular-nums;
+}
+
+.ux-tile--add {
+  justify-content: center;
+
+  background: transparent;
+  color: var(--color-primary-ink);
+
+  border-style: dashed;
+  border-color: var(--border-chrome);
+}
