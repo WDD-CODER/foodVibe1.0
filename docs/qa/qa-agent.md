@@ -15,7 +15,8 @@ stops you.
 
 | Input | Example | Notes |
 |---|---|---|
-| `RUN_ID` | `2026-10-09-a` | Folder name under `bugs/qa-runs/`. If missing, use today's date + `-a`. |
+| `RUN_ID` | `2026-10-09-a` | Folder name under `bugs/qa-runs/`. **If missing (nightly mode)** the run is chosen from `bugs/qa-runs/INDEX.md`: resume the unfinished one, else start `<today>-a` — see `qa-flow.md` "Run registry". |
+| `STOP_AT` (optional) | `06:30` | Local clock time after which you pause between pages (default `06:30`). |
 | `QA_USER` / `QA_PASS` | `qa-bot` / `…` | Dedicated **non-admin** test account. Never use another account. |
 | `SCOPE` (optional) | `all` (default) or a list of page IDs from the plan, e.g. `DASH, INV, RB` | |
 | `REPORT_LANG` (optional) | `en` (default) or `he` | Body language of the report. UI labels are always quoted in Hebrew verbatim. |
@@ -216,7 +217,7 @@ Generic checks that apply to **every page at every breakpoint** (report under th
 
 ---
 
-## 8. Cleanup (mandatory, last)
+## 8. Cleanup (mandatory, at the end of a finished run — not on a nightly pause, see `qa-flow.md`)
 
 1. Log in as `QA_USER` at D. For each entity type, search `QA-<RUN_ID>` and delete every match through the UI:
    products (→ Trash), recipes/dishes (→ Trash), equipment, suppliers, venues, menus, metadata items you added.
@@ -228,6 +229,9 @@ Generic checks that apply to **every page at every breakpoint** (report under th
 ---
 
 ## 9. Hard blockers — the only reasons to stop and ask
+
+(In unattended/nightly mode there is nobody to ask: follow "Nobody to ask" in `qa-flow.md` — write `BLOCKED.md`,
+set `Status: BLOCKED` in `INDEX.md`, notify if possible, end.)
 
 - `localhost:4205` or `localhost:4206/health` does not load after the site approval.
 - Login with `QA_USER` fails («משתמש לא נמצא» / blocked).

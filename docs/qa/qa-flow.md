@@ -43,14 +43,50 @@ Phase: P0 | P1 | P2 | P3 | DONE     Step: <free text, e.g. "P2 · RBD · T">
 `plan-reality.md`, `effective-plan.md`; continue from the recorded phase/step. Never redo a finished phase.
 If `Phase: P1` is not finished, redo only the pages whose section in `plan-reality.md` is missing.
 
+### Run registry and unattended (nightly) mode
+
+The nightly scheduled task sends the **same prompt every night, without a `RUN_ID`**. Nobody is watching, and the
+session has no memory of earlier nights, so the state lives in one file: `bugs/qa-runs/INDEX.md`.
+
+```
+| RUN_ID | Started | Finished | Build SHA | Phase | Bugs | Drift | Status |
+|---|---|---|---|---|---|---|---|
+| 2026-10-11-a | 2026-10-11 03:01 | | f739e9a1 | P2 · RBD | 7 | 12 | PAUSED |
+```
+Status ∈ `IN-PROGRESS` (written at start; still this value later = the session died) · `PAUSED` (stopped on
+`STOP_AT`) · `BLOCKED` (hard blocker, see `BLOCKED.md`) · `DONE` · `STOPPED` (P1 verdict STOP, or abandoned after 5 nights).
+
+**Run selection (first thing after P0 items 1–2; applies when the kickoff has no `RUN_ID`):**
+1. Read `INDEX.md` (create it with the header row if absent).
+2. Last row is `IN-PROGRESS`, `PAUSED` or `BLOCKED` → **resume that RUN_ID** (retry from its recorded phase/step).
+   Exception: if it started more than 5 days ago, mark it `STOPPED`, do cleanup (P3 step 1) and start a new run.
+3. Last row is `DONE`, `STOPPED` or none → **new run**: `RUN_ID = <today YYYY-MM-DD>-a` (next letter if that exists),
+   new row `IN-PROGRESS`.
+4. Build SHA: read it with plain file reads (`.git/HEAD` → the ref file or `.git/packed-refs`); never run git.
+   Record it in the row and `progress.md`. On resume, if the SHA differs from the recorded one, add
+   `build changed <old> → <new>` to `progress.md` and section A of the report, keep finished pages as they are
+   (they were tested on the older build) and test the remaining pages on the new one.
+
+**Time budget.** The kickoff may carry `STOP_AT` (local clock, default `06:30`). Before starting each page and after
+finishing each one, read the clock (`javascript_tool`: `new Date().toString()`). If it is past `STOP_AT`: finish and
+write the current page's report section, set `Status: PAUSED` and `Step:` to the next page (in `progress.md` and
+`INDEX.md`), and end with the short final message. Do **not** clean up on a pause: records you created stay and are
+listed in `progress.md` under `Fixtures:` (name, type) so the next night's session knows what exists. At resume, verify
+each fixture still exists (search `QA-<RUN_ID>`); recreate any that is missing before running the pages that need it.
+
+**Nobody to ask.** In unattended mode the "stop and ask" cases in `qa-agent.md` §9 become: write
+`bugs/qa-runs/<RUN_ID>/BLOCKED.md` (what failed, the exact step, evidence shot, what Dandan must do), set
+`Status: BLOCKED`, send a push notification if a notification tool is available, and end. The next night retries.
+
 ---
 
 ## P0 — PREFLIGHT (≈ 2 min)
 
 1. Read `docs/qa/qa-agent.md` fully, then `docs/qa/qa-plan.md`.
 2. Folder check: the connected folder is the FoodVibe repo (`package.json` contains `foodVibe1.0`, `docs/qa/` exists).
-3. Create `bugs/qa-runs/<RUN_ID>/{shots}`, copy `docs/qa/qa-plan.md` → `plan-snapshot.md`, write the `progress.md`
-   skeleton (pages × D/T/M) and the `report.md` header (`qa-agent.md` §6.2).
+3. Run selection (see "Run registry" above), then: if the run is new, create `bugs/qa-runs/<RUN_ID>/{shots}`, copy
+   `docs/qa/qa-plan.md` → `plan-snapshot.md`, write the `progress.md` skeleton (pages × D/T/M) and the `report.md`
+   header (`qa-agent.md` §6.2). If resuming, skip creation and continue per the Resume rule (after items 4–5 below).
 4. Browser: open `http://localhost:4205` (site approval once), `http://localhost:4206/health` returns `ok`.
    `resize_window` accepts 1366×768, 768×1024, 375×812 (record the smallest accepted width).
 5. Log in as `QA_USER`. Confirm the header shows the username and no crown (non-admin).
@@ -214,9 +250,18 @@ Run the per-page procedure of `qa-agent.md` §7 over `effective-plan.md`, in the
    - Plan drift: counts by status, grouped by page (so Dandan can see which pages the plan needs refreshing for).
    - Skipped: checks `SKIPPED (upload/download/print/AI)` with reasons, and `SKIP-MISSING` count.
    - Cleanup result, run duration, `Run finished <ISO>`.
-3. `progress.md`: `Phase: DONE`.
-4. Final chat message (≤ 10 lines): verdict, counts (bugs / drift / skipped), path to `report.md` and `plan-reality.md`.
-   Stop.
+3. **Compare with the previous finished run.** Find the last `DONE` row in `INDEX.md` before this one. Write
+   `bugs/qa-runs/<RUN_ID>/diff-vs-<PREV_RUN_ID>.md` and a short table in section C:
+   - `NEW` — a finding here whose plan check ID + title has no match in the previous report;
+   - `STILL OPEN` — matches a previous finding and reproduced again (note if the symptom changed);
+   - `NOT REPRODUCED` — a previous finding whose plan check ran this time and passed (probably fixed; say "probably");
+   - `UNVERIFIED` — a previous finding whose check was skipped or missing this time.
+   Match on the plan check ID first, then on title/Actual text. Use the same for plan-drift rows (`NEW DRIFT` /
+   `DRIFT GONE`). No previous run → write "first run" and skip.
+4. `progress.md`: `Phase: DONE`; `INDEX.md` row: `Finished`, counts, `Status: DONE`.
+5. Final chat message (≤ 10 lines): verdict, counts (bugs / drift / skipped), what is NEW vs previous run, path to
+   `report.md` and `plan-reality.md`. Send a push notification with the same first line if a notification tool is
+   available. Stop.
 
 ---
 
