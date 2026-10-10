@@ -14,8 +14,14 @@
     <div class="empty-state">{{ 'ai_model_loading' | translatePipe }}</div>
   } @else {
     <ol class="model-list" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="onDrop($event)">
-      @for (model of models_(); track model.name; let i = $index, first = $first, last = $last) {
-        <li class="model-row" [class.is-off]="!model.enabled" cdkDrag>
+      @for (model of models_(); track model.name) {
+        <li
+          class="model-row"
+          [class.is-off]="!model.enabled"
+          [class.is-just-moved]="justMoved_() === model.name"
+          cdkDrag
+          [cdkDragData]="model.name"
+        >
           <div class="model-placeholder" *cdkDragPlaceholder></div>
           <span
             class="model-grip"
@@ -37,33 +43,10 @@
             </span>
           </div>
 
-          <label class="c-toggle-chip">
+          <label class="c-toggle-chip model-toggle">
             <input type="checkbox" [checked]="model.enabled" (change)="onToggle(model.name)" />
             <span>{{ 'ai_model_on' | translatePipe }}</span>
           </label>
-
-          <div class="model-move">
-            <button
-              type="button"
-              class="c-icon-btn"
-              [disabled]="first"
-              [attr.aria-label]="'ai_model_move_up' | translatePipe"
-              [attr.title]="'ai_model_move_up' | translatePipe"
-              (click)="onMove(i, -1)"
-            >
-              <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-            </button>
-            <button
-              type="button"
-              class="c-icon-btn"
-              [disabled]="last"
-              [attr.aria-label]="'ai_model_move_down' | translatePipe"
-              [attr.title]="'ai_model_move_down' | translatePipe"
-              (click)="onMove(i, 1)"
-            >
-              <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
-            </button>
-          </div>
         </li>
       }
     </ol>

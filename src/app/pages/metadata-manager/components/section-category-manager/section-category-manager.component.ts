@@ -1,16 +1,4 @@
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  Injector,
-  OnInit,
-  signal,
-  viewChild
-} from '@angular/core'
-import { LucideAngularModule } from 'lucide-angular'
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core'
 import { MenuSectionCategoriesService } from '@services/menu-section-categories.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -19,14 +7,14 @@ import { TranslationService } from '@services/translation.service'
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
-import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { TaxonomyKindManagerComponent } from '../taxonomy-kind-manager/taxonomy-kind-manager.component'
 
+/** Menu section categories (`sectionCategory` terms): the generic card plus the menu-event rules. */
 @Component({
   selector: 'app-section-category-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, RowActionsMenuComponent],
+  imports: [TaxonomyKindManagerComponent],
   templateUrl: './section-category-manager.component.html',
-  styleUrl: './section-category-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SectionCategoryManagerComponent implements OnInit {
@@ -35,35 +23,38 @@ export class SectionCategoryManagerComponent implements OnInit {
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
-  protected readonly isLoggedIn = inject(UserService).isLoggedIn
+  private readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
   private readonly taxonomy = inject(TaxonomyStore)
-  private readonly injector = inject(Injector)
 
   protected readonly categories = this.sectionCategories.sectionCategories_
-  protected readonly editingName_ = signal<string | null>(null)
-  /** Category whose tap menu (edit / delete) is open — plan 340. */
-  protected readonly menuName_ = signal<string | null>(null)
-
-  private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
-  private readonly renameInput = viewChild<ElementRef<HTMLInputElement>>('renameInput')
 
   ngOnInit(): void {
     void this.sectionCategories.ensureLoaded()
     void this.menuEventData.ensureLoaded()
   }
 
-  private requireSignIn(): boolean {
+  requireSignIn(): boolean {
     if (this.isLoggedIn()) return true
     this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'))
     this.authModal.open('sign-in')
     return false
   }
 
+  /** Shared terms are read-only except for an admin (Plan 321 Phase 3); own terms are always editable. */
+  canEdit(name: string): boolean {
+    const term = this.taxonomy.find('sectionCategory', name)
+    return !term || this.taxonomy.canEdit(term)
+  }
+
+  protected readonly lockReason = (name: string): string | null =>
+    this.canEdit(name) ? null : 'taxonomy_shared_admin_only'
+
   private countMenuEventsUsingSection(name: string): number {
     return this.menuEventData.allMenuEvents_().filter((e) => (e.sections ?? []).some((s) => s.name === name)).length
   }
 
+  //CREATE
   async onAdd(value: string, inputEl: HTMLInputElement): Promise<void> {
     if (!this.requireSignIn()) return
     const trimmed = value.trim()
@@ -79,6 +70,7 @@ export class SectionCategoryManagerComponent implements OnInit {
     this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_updated_success'))
   }
 
+  //DELETE
   async onRemove(name: string): Promise<void> {
     if (!this.requireSignIn()) return
 
@@ -97,21 +89,8 @@ export class SectionCategoryManagerComponent implements OnInit {
     this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_updated_success'))
   }
 
-  onStartRename(name: string): void {
-    this.itemMenu().close()
-    if (!this.requireSignIn() || !this.canEdit(name)) return
-    this.editingName_.set(name)
-    afterNextRender(() => this.renameInput()?.nativeElement.select(), { injector: this.injector })
-  }
-
-  /** Shared terms are read-only except for an admin (Plan 321 Phase 3); own terms are always editable. */
-  canEdit(name: string): boolean {
-    const term = this.taxonomy.find('sectionCategory', name)
-    return !term || this.taxonomy.canEdit(term)
-  }
-
+  //UPDATE
   async onRenameBlur(oldName: string, newValue: string): Promise<void> {
-    this.editingName_.set(null)
     const trimmed = (newValue ?? '').trim()
     if (!trimmed || trimmed === oldName) return
 
@@ -140,16 +119,5 @@ export class SectionCategoryManagerComponent implements OnInit {
       const updatedSections = event.sections.map((s) => (s.name === oldName ? { ...s, name: newName } : s))
       await this.menuEventData.updateMenuEvent({ ...event, sections: updatedSections })
     }
-  }
-
-  //TAP MENU (plan 340)
-  protected onOpenMenu(event: MouseEvent, name: string): void {
-    this.menuName_.set(name)
-    this.itemMenu().open(event.currentTarget as HTMLElement)
-  }
-
-  protected onMenuDelete(name: string): void {
-    this.itemMenu().close()
-    void this.onRemove(name)
   }
 }

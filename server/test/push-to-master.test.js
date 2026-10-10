@@ -124,7 +124,7 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
 
   it('CHARACTERIZATION: pushing an unsupported type is rejected with 400', async () => {
     const res = await request(app)
-      .put('/api/v1/data/KITCHEN_UNITS/u1/push-to-master')
+      .put('/api/v1/data/venues/u1/push-to-master')
       .set('Authorization', `Bearer ${tokenA()}`);
     expect(res.status).toBe(400);
   });
