@@ -40,12 +40,9 @@
             type="text"
             [ngModel]="englishKey_()"
             (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
+            englishKeyInput
             placeholder="olive_oil"
             (keydown.enter)="save()"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
           />
           @if (validationError_()) {
             <span class="translation-key-validation-error">{{ validationError_() }}</span>

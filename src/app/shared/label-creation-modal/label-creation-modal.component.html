@@ -28,12 +28,9 @@
             type="text"
             [ngModel]="englishKey_()"
             (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
+            englishKeyInput
             placeholder="dairy"
             (keydown.enter)="save()"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
           />
           @if (validationError_()) {
             <span class="label-creation-validation-error">{{ validationError_() }}</span>
