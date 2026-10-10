@@ -190,6 +190,8 @@
 - [ ] P6.4: Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
 - [ ] P6.5: ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
 
+### Plan 408 — QA harness: dedicated QA slot (4205/3005) + evidence server (4206) (`plans/408-qa-harness-qa-slot-evidence-server.plan.md`)
+
 - [ ] A1: `scripts/qa/evidence-server.mjs` — `/health`, `/html2canvas.min.js`, `/save` (+ `html2canvas` devDependency, `bugs/qa-runs/.gitkeep`, `.gitignore` lines)
 - [ ] A2: `/shot` with Playwright + API login + sessionStorage seeding; 503 message when chromium is missing
 - [ ] A3: `scripts/qa/qa-up.ps1` (env.slot generation, port checks, 3 detached processes, pid file, waits, summary line) + `scripts/qa/qa-down.ps1`
