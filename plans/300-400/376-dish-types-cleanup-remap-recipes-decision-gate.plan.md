@@ -1,6 +1,6 @@
 # Plan 376 — Dish types cleanup: keep only real dish types, remap recipes safely (decision gate first)
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
