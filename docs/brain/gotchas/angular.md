@@ -273,3 +273,11 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** The carousel host carries `.c-list-body-cell` itself, so it looks like it should match. But on desktop the host is `display: contents` (`column-carousel.component.scss`) and the visible cells are its projected `[columnSlide]` children — one level below the row, so the `>` child selector never reaches them. Below 768px the host is the real cell and the slides are transparent, so the phone view looked fine.
 
 **What to do instead:** Any row-level cell rule written with `> .c-list-body-cell` (selected, invalid, hover tints) needs a desktop twin `> .column-carousel--cell > .c-list-body-cell` inside `@media (min-width: $break-mobile + 1px)` — see the selected-row block in `src/styles.scss`. Don't add the twin below 768px, or the active slide gets a second outline inside the host's.
+
+## `overflow: clip` on a grid item stops a `1fr` row from bounding it — the list stops scrolling
+
+**What hurt:** Plan 346 switched `.table-area` in `list-shell.component.scss` from `overflow: hidden` to `overflow: clip` so a sticky header inside could stick. Afterwards no list page (recipe book, inventory, …) scrolled: the table and the filter panel were cut off at the bottom of the 90dvh shell, with no scrollbar anywhere (plan 376).
+
+**Why the obvious fix is wrong:** `clip` looks like `hidden` minus the scroll container, so it seems layout-neutral. It isn't: a grid item's automatic minimum size is `0` only when it *is* a scroll container. With `clip` it falls back to `min-height: auto` = its full content, the `1fr` row grows to ~3000px, and the shell's own `overflow: hidden` silently clips it. Adding `overflow: auto` back on the shell would instead scroll the whole page with the header.
+
+**What to do instead:** When a grid/flex item uses `overflow: clip` (or `visible`) but must stay inside a `1fr` track, give it `min-block-size: 0` explicitly, and let the real scroller inside it (`.table-body`, `.filter-panel`) do the scrolling. Check with `scrollHeight > clientHeight` on the item in the browser.

@@ -75,19 +75,18 @@ const LABEL_COLOR_PALETTE = [
   '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899',
   '#14B8A6', '#F97316', '#6366F1', '#84CC16', '#06B6D4', '#78716C',
 ];
+/** Plan 376: real dish types only (Dandan, 2026-10-10). Same list as MAPPING.keep in scripts/cleanup-dish-types.js. */
 const DEFAULT_COURSES = [
-  'amuse_bouche', 'bakery', 'bread_focaccia_savory_baking', 'cakes_cookies_tarts', 'charcuterie_meat_mass_meat_preps',
-  'conversions_and_techniques', 'dan_and_adi_cooking_from_the_orchard', 'dan_and_adi_dishes_from_the_orchard', 'desserts',
-  'fermentation_curing_pickling', 'fish_shellfish_sauce', 'foams_hot_cold', 'general_preps', 'grains_side_dish',
-  'ideas_dishes', 'ideas_preparations', 'jams_sweet_preps_syrup', 'legume_side_dish', 'main_dish_chicken',
+  'amuse_bouche', 'bread_focaccia_savory_baking', 'cakes_cookies_tarts', 'charcuterie_meat_mass_meat_preps',
+  'desserts', 'fermentation_curing_pickling', 'fish_shellfish_sauce', 'foams_hot_cold', 'general_preps',
+  'grains_side_dish', 'jams_sweet_preps_syrup', 'legume_side_dish', 'main_dish', 'main_dish_chicken',
   'main_dish_fish', 'main_dish_meat', 'main_dish_vegetarian', 'main_seafood', 'meat_sauce', 'oils_and_infusions',
   'pasta_dish', 'pasta_prep', 'pastry_sweets', 'pork_dish', 'powders_spice_mixes_dry_preps', 'pre_dessert',
-  'salad_sauce', 'salads', 'salads_fresh_side_dish', 'salty_baking_doughs', 'sauces_cold_hot_savory', 'side_dish',
-  'sorbet_ice_cream_granita', 'soups', 'soups_stocks_cooking_liquids', 'soups_up', 'special_for_boss',
-  'special_main_for_boss', 'special_starter_for_boss', 'spreads_dips_salty_creams', 'starch_side_dish', 'starter',
+  'salad_sauce', 'salads', 'salty_baking_doughs', 'sauces_cold_hot_savory', 'side_dish', 'sorbet_ice_cream_granita',
+  'soups', 'soups_stocks_cooking_liquids', 'spreads_dips_salty_creams', 'starch_side_dish', 'starter',
   'starter_chicken', 'starter_fish', 'starter_meat', 'starter_seafood', 'starter_vegetarian', 'stews_cookery',
-  'sweet_baking_doughs', 'sweet_creams_custards_mousse', 'sweet_sauce', 'trash_category', 'vegetable_side_dish',
-  'vegetables_snacks_add_ons', 'vinaigrettes_mayonnaise_emulsion', 'גלייז', 'סלט', 'רוטב',
+  'sweet_baking_doughs', 'sweet_creams_custards_mousse', 'sweet_sauce', 'vegetable_side_dish',
+  'vegetables_snacks_add_ons', 'vinaigrettes_mayonnaise_emulsion', 'גלייז', 'רוטב',
 ];
 const DEFAULT_DISH_FIELDS = ['sell_price', 'food_cost_money', 'serving_portions'];
 const SYSTEM_UNITS = {

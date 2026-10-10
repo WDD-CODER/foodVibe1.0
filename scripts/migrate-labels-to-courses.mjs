@@ -2,8 +2,8 @@
  * Migrate course-like strings out of labels_/autoLabels_ into the new course_ field
  * (Plan 320 Milestone 2).
  *
- * Scope: the 63 course strings seeded as DEFAULT_COURSES in metadata-registry.service.ts
- * (kept in sync here — see that file's DEFAULT_COURSES constant). For every recipe/dish
+ * Scope: the course strings seeded as DEFAULT_COURSES in server/services/seed-master.js
+ * (kept in sync here — see that file's DEFAULT_COURSES constant; trimmed by plan 376). For every recipe/dish
  * where labels_ or autoLabels_ contains exactly one of these strings: set course_ to it and
  * remove it from labels_/autoLabels_. A recipe carrying MORE than one course-like string
  * cannot be resolved automatically (course_ is single-select) — it goes into a conflict
@@ -69,26 +69,21 @@ if (uri.startsWith('mongodb+srv://')) {
   }
 }
 
-// ─── Must stay in sync with DEFAULT_COURSES in metadata-registry.service.ts ────────────────
+// ─── Must stay in sync with DEFAULT_COURSES in server/services/seed-master.js (plan 376) ───
 const COURSE_STRINGS = new Set([
   'amuse_bouche',
-  'bakery',
   'bread_focaccia_savory_baking',
   'cakes_cookies_tarts',
   'charcuterie_meat_mass_meat_preps',
-  'conversions_and_techniques',
-  'dan_and_adi_cooking_from_the_orchard',
-  'dan_and_adi_dishes_from_the_orchard',
   'desserts',
   'fermentation_curing_pickling',
   'fish_shellfish_sauce',
   'foams_hot_cold',
   'general_preps',
   'grains_side_dish',
-  'ideas_dishes',
-  'ideas_preparations',
   'jams_sweet_preps_syrup',
   'legume_side_dish',
+  'main_dish',
   'main_dish_chicken',
   'main_dish_fish',
   'main_dish_meat',
@@ -104,17 +99,12 @@ const COURSE_STRINGS = new Set([
   'pre_dessert',
   'salad_sauce',
   'salads',
-  'salads_fresh_side_dish',
   'salty_baking_doughs',
   'sauces_cold_hot_savory',
   'side_dish',
   'sorbet_ice_cream_granita',
   'soups',
   'soups_stocks_cooking_liquids',
-  'soups_up',
-  'special_for_boss',
-  'special_main_for_boss',
-  'special_starter_for_boss',
   'spreads_dips_salty_creams',
   'starch_side_dish',
   'starter',
@@ -127,13 +117,11 @@ const COURSE_STRINGS = new Set([
   'sweet_baking_doughs',
   'sweet_creams_custards_mousse',
   'sweet_sauce',
-  'trash_category',
   'vegetable_side_dish',
   'vegetables_snacks_add_ons',
   'vinaigrettes_mayonnaise_emulsion',
   'גלייז',
-  'סלט',
-  'רוטב'
+  'רוטב',
 ])
 
 // Human-confirmed resolutions for specific multi-match conflicts (Plan 320 M2.11).

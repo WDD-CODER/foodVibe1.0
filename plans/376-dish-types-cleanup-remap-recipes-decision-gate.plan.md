@@ -67,6 +67,8 @@ src/app/pages/recipe-builder/components/recipe-header/**
 src/app/pages/recipe-book/components/recipe-book-list/**
 scripts/migrate-labels-to-courses.mjs
 .claude/reports/dish-types-cleanup/**
+server/services/seed-master.js
+src/app/shared/list-shell/list-shell.component.scss
 ```
 
 ## Read Scope
@@ -121,12 +123,13 @@ As a chef, I want the dish-type list to contain real dish types only, without lo
 
 ## Atomic Sub-tasks
 
-- [ ] A0: Decision gate: show the table and the a/b question, then STOP.
-- [ ] A1: Pure mapping module plus test; script with dry-run, backup check and log (`server/scripts/cleanup-dish-types.js`, `server/test/**`).
-- [ ] A2: Dry-run local; show counts to Dandan; STOP for go.
-- [ ] A3: Code seed lists, dictionary `main_dish`, safe display (`metadata-registry.service.ts`, `scripts/migrate-labels-to-courses.mjs`, `recipe-header/**`, `recipe-book-list/**`).
-- [ ] A4: `--write` on local; verify in app (recipe book filters, recipe builder select, metadata list).
-- [ ] A5: Hand Dandan the exact PowerShell commands for the Atlas backup, dry-run and write; record results. Update session-state.
+- [x] A0: Decision gate: show the table and the a/b question, then STOP. (Dandan 2026-10-10: preparation categories and `soups_stocks_cooking_liquids` KEPT; Q4 = a (clear); Atlas = b (Worker, after explicit approval). Mechanics redone on `taxonomyTerms`; `approved: server/services/seed-master.js`. Final mapping: `MAPPING` in `server/scripts/cleanup-dish-types.js`.)
+- [x] A1: Pure mapping module plus test; script with dry-run, backup check and log (`server/scripts/cleanup-dish-types.js`, `server/test/**`).
+- [x] A2: Dry-run local; show counts to Dandan; STOP for go. (Go 2026-10-10 after two more keeps: dessert categories stay for preparations, `stews_cookery` stays.)
+- [x] A3: Code seed lists, dictionary `main_dish`, safe display (`metadata-registry.service.ts`, `scripts/migrate-labels-to-courses.mjs`, `recipe-header/**`, `recipe-book-list/**`).
+- [x] A3b: List pages could not scroll (table and filter panel cut off at the screen edge) — `.table-area` gets `min-block-size: 0` in `list-shell.component.scss` (Dandan approved 2026-10-10; cause: `overflow: clip` from d7c69ca0).
+- [x] A4: `--write` on local; verify in app (recipe book filters, recipe builder select, metadata list).
+- [x] A5: Hand Dandan the exact PowerShell commands for the Atlas backup, dry-run and write; record results. Update session-state.
 
 ## Technical Considerations
 
