@@ -1,6 +1,6 @@
 # Plan 405 — Design port from a Claude Design handoff, with live-app comparison and a lost-feature check
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: 4f3be02bc8fa41c9396e6d39f51ba5fac0a5d547
 
