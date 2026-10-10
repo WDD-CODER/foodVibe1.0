@@ -8,12 +8,12 @@ Global shell UI: header (primary nav), floating hero FAB, auth modal, and global
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
-| header/ | Top bar, route links | HeaderComponent |
-| hero-fab/ | Contextual primary FAB | HeroFabComponent |
-| auth-modal/ | Sign-in / registration UI | AuthModalComponent |
-| user-msg/ | Toast / user message strip | UserMsg |
-| tab-chips/ | Tab-style chip navigation | TabChipsComponent |
-| update-banner/ | App-update available banner | UpdateBannerComponent |
+| `header/` | Top bar, route links | HeaderComponent |
+| `hero-fab/` | Contextual primary FAB | HeroFabComponent |
+| `auth-modal/` | Sign-in / registration UI | AuthModalComponent |
+| `user-msg/` | Toast / user message strip | UserMsg |
+| `tab-chips/` | Tab-style chip navigation | TabChipsComponent |
+| `update-banner/` | App-update available banner | UpdateBannerComponent |
 
 ## Architecture Context
 
@@ -33,11 +33,7 @@ Used by `appRoot` (or equivalent shell). `UserMsg` is driven by `UserMsgService`
 
 - Adding a primary nav destination: update `header/` and routes together.
 
-## Recent Changes
-
-- 2026-09-27 (nightly-maintenance): Synced 2 dirs that existed on disk but were undocumented — `tab-chips/`, `update-banner/`.
-- 2026-03-22: Documented hero-fab, auth-modal; corrected user-msg export name (`UserMsg`).
 
 ---
 *Last updated: 2026-09-27*
-*Updated by: breadcrumb-navigator*
+*Updated by: breadcrumbs*

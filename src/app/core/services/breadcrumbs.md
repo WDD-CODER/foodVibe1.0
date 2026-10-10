@@ -8,62 +8,64 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
-| async-storage.service.ts | Key-value persistence (IndexedDB/localStorage) | StorageService, BACKUP_ENTITY_TYPES, STORAGE_ERROR_MESSAGE |
-| product-data.service.ts | Product CRUD | ProductDataService |
-| dish-data.service.ts | Dish CRUD | DishDataService |
-| recipe-data.service.ts | Recipe CRUD, routing helpers | RecipeDataService |
-| supplier-data.service.ts | Supplier CRUD | SupplierDataService |
-| equipment-data.service.ts | Equipment CRUD | EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME |
-| venue-data.service.ts | Venue CRUD | VenueDataService |
-| kitchen-state.service.ts | Central navigation/state for kitchen flows | KitchenStateService |
-| metadata-registry.service.ts | Categories, allergens, units registry | MetadataRegistryService |
-| unit-registry.service.ts | Units (mass, volume, dish) | UnitRegistryService, SYSTEM_UNITS |
-| preparation-registry.service.ts | Preparation entries | PreparationRegistryService |
-| menu-section-categories.service.ts | Menu section category registry | MenuSectionCategoriesService |
-| conversion.service.ts | Unit conversion | ConversionService |
-| recipe-cost.service.ts | Recipe costing, bruto/volume | RecipeCostService |
-| scaling.service.ts | Scale by yield | ScalingService, ScaledIngredientRow, ScaledPrepRow |
-| cook-view-state.service.ts | Cook-view workflow state | CookViewStateService |
-| menu-event-data.service.ts | Menu events CRUD | MenuEventDataService |
-| menu-intelligence.service.ts | Menu intelligence logic | MenuIntelligenceService |
-| trash.service.ts | Trash/restore | TrashService |
-| activity-log.service.ts | Activity log | ActivityLogService, ActivityEntry, ACTIVITY_STORAGE_KEY |
-| version-history.service.ts | Version history | VersionHistoryService, VersionEntry |
-| translation.service.ts | Dictionary / Hebrew resolution | TranslationService |
-| key-resolution.service.ts | Canonical key resolution helpers | KeyResolutionService |
-| user-msg.service.ts | Global user messages | UserMsgService |
-| logging.service.ts | App-wide logging | LoggingService, LogEvent |
-| add-item-modal.service.ts | Add-item modal orchestration | AddItemModalService, AddItemConfig |
-| add-supplier-flow.service.ts | Add-supplier from product form | AddSupplierFlowService |
-| add-equipment-modal.service.ts | Add-equipment modal | AddEquipmentModalService |
-| auth-modal.service.ts | Sign-in / auth modal | AuthModalService |
-| quick-add-product-modal.service.ts | Quick-add product modal | QuickAddProductModalService |
-| confirm-modal.service.ts | Confirm dialog | ConfirmModalService, ConfirmModalOptions |
-| global-specific-modal.service.ts | Global vs specific choice | GlobalSpecificModalService |
-| restore-choice-modal.service.ts | Restore-from-trash choice | RestoreChoiceModalService |
-| translation-key-modal.service.ts | English key + Hebrew modal | TranslationKeyModalService |
-| user.service.ts | User/session | UserService, LoginCredentials |
-| util.service.ts | Shared utilities | UtilService |
-| hero-fab.service.ts | Floating action button state per route | HeroFabService |
-| export.service.ts | Data export orchestration | ExportService |
-| global-error.handler.ts | Angular ErrorHandler implementation | GlobalErrorHandler |
-| base-entity-data.service.ts | Shared CRUD base for entity data services | BaseEntityDataService\<T\> |
-| ai-recipe-draft.service.ts | AI-drafted recipe staging | AiRecipeDraftService |
-| app-update.service.ts | App update/reload prompt | AppUpdateService |
-| cloudinary.service.ts | Image upload to Cloudinary | CloudinaryService |
-| equipment-category-registry.service.ts | Equipment category registry | EquipmentCategoryRegistryService |
-| excel-workbook.util.ts | Excel export style constants | XLSX_MIME, EXCEL_TEAL, EXCEL_HEADER_GRAY, EXCEL_SUBTITLE_GRAY, EXCEL_BORDER_THIN, EXCEL_BORDER_MEDIUM |
-| gemini.service.ts | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
-| gemini-shots.service.ts | Gemini image/shot capture flow | GeminiShotsService |
-| http-storage.adapter.ts | HTTP-backed storage adapter | HttpStorageAdapter |
-| master-push.service.ts | Push local entity to master/global | MasterPushService |
-| menu-event-type.service.ts | Menu event type registry | MenuEventTypeService |
-| menu-export.service.ts | Menu export orchestration | MenuExportService |
-| quick-edit-product-modal.service.ts | Quick-edit product modal orchestration | QuickEditProductModalService |
-| recipe-export.service.ts | Recipe export orchestration | RecipeExportService |
-| server-heartbeat.service.ts | Server availability heartbeat | ServerHeartbeatService |
-| user-admin.service.ts | User admin management | UserAdminService |
-| loading.service.ts | Global loading indicator state | LoadingService |
+| `async-storage.service.ts` | Key-value persistence (IndexedDB/localStorage) | StorageService, BACKUP_ENTITY_TYPES, STORAGE_ERROR_MESSAGE |
+| `product-data.service.ts` | Product CRUD | ProductDataService |
+| `dish-data.service.ts` | Dish CRUD | DishDataService |
+| `recipe-data.service.ts` | Recipe CRUD, routing helpers | RecipeDataService |
+| `supplier-data.service.ts` | Supplier CRUD | SupplierDataService |
+| `equipment-data.service.ts` | Equipment CRUD | EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME |
+| `venue-data.service.ts` | Venue CRUD | VenueDataService |
+| `kitchen-state.service.ts` | Central navigation/state for kitchen flows | KitchenStateService |
+| `metadata-registry.service.ts` | Categories, allergens, units registry | MetadataRegistryService |
+| `taxonomy-store.service.ts` | Single store for all taxonomy terms (categories, units, preparations…); the registry services are thin facades over it | TaxonomyStore, TermInUseError, TermReadOnlyError |
+| `unit-registry.service.ts` | Units (mass, volume, dish) | UnitRegistryService, SYSTEM_UNITS |
+| `preparation-registry.service.ts` | Preparation entries | PreparationRegistryService |
+| `menu-section-categories.service.ts` | Menu section category registry | MenuSectionCategoriesService |
+| `conversion.service.ts` | Unit conversion | ConversionService |
+| `recipe-cost.service.ts` | Recipe costing, bruto/volume | RecipeCostService |
+| `scaling.service.ts` | Scale by yield | ScalingService, ScaledIngredientRow, ScaledPrepRow |
+| `cook-view-state.service.ts` | Cook-view workflow state | CookViewStateService |
+| `menu-event-data.service.ts` | Menu events CRUD | MenuEventDataService |
+| `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
+| `trash.service.ts` | Trash/restore | TrashService |
+| `activity-log.service.ts` | Activity log | ActivityLogService, ActivityEntry, ACTIVITY_STORAGE_KEY |
+| `version-history.service.ts` | Version history | VersionHistoryService, VersionEntry |
+| `translation.service.ts` | Dictionary / Hebrew resolution | TranslationService |
+| `key-resolution.service.ts` | Canonical key resolution helpers | KeyResolutionService |
+| `keyboard-inset.service.ts` | Detects the on-screen keyboard (visualViewport) and exposes the inset as `--kb-inset` / `kb-open` | KeyboardInsetService, KEYBOARD_OPEN_THRESHOLD_PX |
+| `user-msg.service.ts` | Global user messages | UserMsgService |
+| `logging.service.ts` | App-wide logging | LoggingService, LogEvent |
+| `add-item-modal.service.ts` | Add-item modal orchestration | AddItemModalService, AddItemConfig |
+| `add-supplier-flow.service.ts` | Add-supplier from product form | AddSupplierFlowService |
+| `add-equipment-modal.service.ts` | Add-equipment modal | AddEquipmentModalService |
+| `auth-modal.service.ts` | Sign-in / auth modal | AuthModalService |
+| `quick-add-product-modal.service.ts` | Quick-add product modal | QuickAddProductModalService |
+| `confirm-modal.service.ts` | Confirm dialog | ConfirmModalService, ConfirmModalOptions |
+| `global-specific-modal.service.ts` | Global vs specific choice | GlobalSpecificModalService |
+| `restore-choice-modal.service.ts` | Restore-from-trash choice | RestoreChoiceModalService |
+| `translation-key-modal.service.ts` | English key + Hebrew modal | TranslationKeyModalService |
+| `user.service.ts` | User/session | UserService, LoginCredentials |
+| `util.service.ts` | Shared utilities | UtilService |
+| `hero-fab.service.ts` | Floating action button state per route | HeroFabService |
+| `export.service.ts` | Data export orchestration | ExportService |
+| `global-error.handler.ts` | Angular ErrorHandler implementation | GlobalErrorHandler |
+| `base-entity-data.service.ts` | Shared CRUD base for entity data services | BaseEntityDataService\<T\> |
+| `ai-recipe-draft.service.ts` | AI-drafted recipe staging | AiRecipeDraftService |
+| `app-update.service.ts` | App update/reload prompt | AppUpdateService |
+| `cloudinary.service.ts` | Image upload to Cloudinary | CloudinaryService |
+| `equipment-category-registry.service.ts` | Equipment category registry | EquipmentCategoryRegistryService |
+| `excel-workbook.util.ts` | Excel export style constants | XLSX_MIME, EXCEL_TEAL, EXCEL_HEADER_GRAY, EXCEL_SUBTITLE_GRAY, EXCEL_BORDER_THIN, EXCEL_BORDER_MEDIUM |
+| `gemini.service.ts` | Gemini AI calls (proxied via server/routes/ai.js) | GeminiService |
+| `gemini-shots.service.ts` | Gemini image/shot capture flow | GeminiShotsService |
+| `http-storage.adapter.ts` | HTTP-backed storage adapter | HttpStorageAdapter |
+| `master-push.service.ts` | Push local entity to master/global | MasterPushService |
+| `menu-event-type.service.ts` | Menu event type registry | MenuEventTypeService |
+| `menu-export.service.ts` | Menu export orchestration | MenuExportService |
+| `quick-edit-product-modal.service.ts` | Quick-edit product modal orchestration | QuickEditProductModalService |
+| `recipe-export.service.ts` | Recipe export orchestration | RecipeExportService |
+| `server-heartbeat.service.ts` | Server availability heartbeat | ServerHeartbeatService |
+| `user-admin.service.ts` | User admin management | UserAdminService |
+| `loading.service.ts` | Global loading indicator state | LoadingService |
 
 ## Architecture Context
 
@@ -85,13 +87,7 @@ Services live under `core/` and are injected into pages and shared UI. Data serv
 - New entity CRUD: model in `core/models/`, service here, resolver in `core/resolvers/`, routes in `app.routes.ts`.
 - Jasmine specs colocated as `*.spec.ts`.
 
-## Recent Changes
-
-- 2026-09-27 (nightly-maintenance): Synced 18 files that existed on disk but were undocumented — `base-entity-data.service.ts`, `ai-recipe-draft.service.ts`, `app-update.service.ts`, `cloudinary.service.ts`, `equipment-category-registry.service.ts`, `excel-workbook.util.ts`, `gemini.service.ts`, `gemini-shots.service.ts`, `http-storage.adapter.ts`, `loading.service.ts`, `master-push.service.ts`, `menu-event-type.service.ts`, `menu-export.service.ts`, `quick-edit-product-modal.service.ts`, `recipe-export.service.ts`, `server-heartbeat.service.ts`, `user-admin.service.ts`.
-- 2026-08-24: Removed `demo-loader.service.ts` (`DemoLoaderService`) and `backup.service.ts` (`BackupService`) — dead UI features purged from the Metadata Manager page. `BACKUP_ENTITY_TYPES` and its always-on `backup_<key>` mirror-write in `async-storage.service.ts` are unrelated always-on infrastructure and were kept.
-- 2026-03-22: Synced file list with repo (auth, export, backup, logging, key-resolution, menu-section-categories, modals, global error handler).
-- 2026-03-22: Removed unused commented `ingredient.service.ts` stub (no imports).
 
 ---
 *Last updated: 2026-09-27*
-*Updated by: breadcrumb-navigator*
+*Updated by: breadcrumbs*

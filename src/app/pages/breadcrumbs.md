@@ -1,49 +1,24 @@
-# pages — Breadcrumbs
+# src/app/pages — breadcrumbs
 
-## Purpose
+One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each page owns its layout and keeps list / form / detail views under its own `components/`.
 
-Feature areas: one folder per lazy-loaded route segment. Each page owns layout (tabs, sidebars, `router-outlet`) and local `components/` for list, form, and detail views.
+| Entry | Purpose |
+| --- | --- |
+| `dashboard/` | `/dashboard` — overview tabs; also hosts metadata (`/command-center` redirects to `dashboard?tab=metadata`) |
+| `inventory/` | `/inventory` — products list + form; `equipment` child routes live under it |
+| `equipment/` | Equipment list + form components, routed under `/inventory/equipment` (no page of its own) |
+| `venues/` | `/venues` — venue list, detail and form |
+| `suppliers/` | `/suppliers` — supplier list and form |
+| `recipe-book/` | `/recipe-book` — recipe list and filters |
+| `recipe-builder/` | `/recipe-builder/:id` — single-recipe editor with local `services/` and `utils/` |
+| `cook-view/` | `/cook/:id` — step-by-step cook workflow |
+| `menu-library/` | `/menu-library` — menu list and filters |
+| `menu-intelligence/` | `/menu-intelligence/:id` — menu editor and costing views |
+| `metadata-manager/` | Categories, allergens, units, preparations (`metadata-manager/metadata-manager.page.component.ts`) |
+| `trash/` | `/trash` — soft-deleted items and restore |
 
-## Navigation
-
-| File/Directory | Purpose | Key Exports |
-|---------------|---------|-------------|
-| dashboard/ | Default/overview; metadata entry | DashboardPage |
-| equipment/ | Equipment CRUD components (routed under `/inventory/equipment`) | EquipmentListComponent, EquipmentFormComponent |
-| venues/ | Venues CRUD; `venueResolver` | VenuesPage |
-| suppliers/ | Suppliers CRUD; `supplierResolver` | SuppliersPage |
-| inventory/ | Products list + form; `productResolver`, `pendingChangesGuard` | InventoryPage |
-| recipe-book/ | Recipe list and filters | RecipeBookPage |
-| recipe-builder/ | Single-recipe editor; `pendingChangesGuard` | RecipeBuilderPage |
-| cook-view/ | Cook workflow | CookViewPage |
-| menu-library/ | Menu library list and filters | MenuLibraryPage |
-| menu-intelligence/ | Menu intelligence views | MenuIntelligencePage |
-| metadata-manager/ | Categories, allergens, units, preparations | MetadataManagerComponent |
-| trash/ | Trash and restore | TrashPage |
-
-## Architecture Context
-
-Lazy-loaded from `app.routes.ts`. Pages depend on `core/services`, `core/guards`, `core/resolvers`, and `shared/` modals/components.
-
-## Patterns & Conventions
-
-- Page container with optional child routes; local UI under `components/`.
-- Naming: `*.page.ts` for routed pages; metadata-manager uses `metadata-manager.page.component.ts` + `MetadataManagerComponent`.
-
-## Dependencies
-
-- **Imports from**: `../../core/services`, `../../core/models`, `../../shared`, `../../core/guards`, `../../core/resolvers`.
-- **Used by**: Router config only (lazy `loadComponent` / `loadChildren`).
-
-## Development Notes
-
-- New feature area: add folder, page component, route in `app.routes.ts`, header link if user-facing.
-- Styling: `.claude/skills/cssLayer/SKILL.md`.
-
-## Recent Changes
-
-- 2026-03-22: Added suppliers; fixed page class names (RecipeBookPage, MetadataManagerComponent, MenuLibraryPage); resolver notes updated.
+## Key exports
+`DashboardPage`, `InventoryPage`, `VenuesPage`, `SuppliersPage`, `RecipeBookPage`, `RecipeBuilderPage`, `CookViewPage`, `MenuLibraryPage`, `MenuIntelligencePage`, `MetadataManagerComponent`, `TrashPage`
 
 ---
-*Last updated: 2026-03-22*
-*Updated by: breadcrumb-navigator*
+*Updated by: breadcrumbs*

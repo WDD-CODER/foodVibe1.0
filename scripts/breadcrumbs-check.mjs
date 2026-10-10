@@ -23,7 +23,9 @@ const APP = 'src/app'
 // The seams are the folders a newcomer lands in. Anything deeper is a leaf.
 const SEAMS = ['core', 'core/services', 'core/models', 'core/components', 'shared', 'pages'].map((s) => join(APP, s))
 // Files that are not worth a breadcrumb line.
-const IGNORE = new Set(['breadcrumbs.md', '.gitkeep', '.DS_Store'])
+const IGNORE = new Set(['breadcrumbs.md', '.gitkeep', '.DS_Store', 'index.ts'])
+// Specs never earn a line (see the skill), so they are never "not mentioned".
+const IGNORE_PATTERN = /\.spec\.ts$/
 
 const json = process.argv.includes('--json')
 const out = { seams: [], stray: [], problems: 0 }
@@ -65,7 +67,7 @@ for (const seam of SEAMS) {
     if (!candidates.some(existsSync)) entry.stale.push(m)
   }
   for (const child of readdirSync(abs)) {
-    if (IGNORE.has(child)) continue
+    if (IGNORE.has(child) || IGNORE_PATTERN.test(child)) continue
     const isDir = statSync(join(abs, child)).isDirectory()
     const name = child
     const hit = [...mentioned].some((m) => m === name || m.endsWith('/' + name) || m.startsWith(name + '/'))

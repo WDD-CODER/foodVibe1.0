@@ -78,7 +78,8 @@ report(`branch != ${MAIN_BRANCH}`, branch !== MAIN_BRANCH, `on ${MAIN_BRANCH} �
 
 if (argv.includes('--visual')) {
   const gstack = join(homedir(), '.claude/skills/gstack/browse/dist/browse')
-  report('gstack browse binary', existsSync(gstack), `${gstack} missing — run gstack-upgrade`)
+  // Windows builds ship browse.exe
+  report('gstack browse binary', existsSync(gstack) || existsSync(gstack + '.exe'),`${gstack} missing — run gstack-upgrade`)
 }
 
 process.exit(results.every(Boolean) ? 0 : 1)

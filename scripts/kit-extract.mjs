@@ -42,7 +42,7 @@ const HAND_FIXED = new Set([
   // Phase 3 hand-fixes: project-specific domain/icon wording removed from pack copies.
   'docs/agent/standards-angular.md', '.claude/skills/angularComponentStructure/SKILL.md',
   // Hand-fixed parameterize rows (never regenerate with --force): PACK markers, machine paths removed, code-context placeholders.
-  '.claude/skills/techdebt/SKILL.md', 
+  '.claude/skills/techdebt/SKILL.md',
   'docs/agent/workflow-map.md', 'docs/agent/standards-security.md', '.github/workflows/ci.yml', '.claude/settings.json',
   '.claude/commands/auto-solve.md', 'scripts/scope-check.mjs', '.lintstagedrc.mjs', 'scripts/pre-commit-no-semi.mjs', 'knip.json', 'scripts/take-plan.mjs',
   // Phase 4 validation: kit-side scrubs (project history, vendor names, BOM) edited in the kit directly; the kit is now the source for these.
@@ -51,6 +51,10 @@ const HAND_FIXED = new Set([
   '.cursor/rules/git-commit-must-use-skill.mdc', '.cursor/rules/save-plan-must-use-skill.mdc',
   '.cursor/rules/scss-styling-must-use-cssLayer.mdc', 'docs/agent/ship-recovery.md', 'scripts/plan-ledger-check.mjs',
   'scripts/plan-name-similarity.mjs', 'scripts/plan-write-guard.sh', 'scripts/pre-commit-secret-scan.mjs', 'scripts/session-startup.sh',
+  // Skills v2 port (2026-10-10): project name / locale / tool wording generalized by hand in the kit copies.
+  '.claude/skills/cssLayer/SKILL.md', '.claude/skills/auth-and-logging/SKILL.md', '.claude/skills/save-plan/SKILL.md',
+  '.claude/skills/preflight/SKILL.md', '.claude/skills/angularComponentStructure/evals/evals.json', '.claude/skills/save-plan/evals/evals.json',
+  'scripts/preflight.mjs', 'docs/agent/workflow-map.md', '.claude/commands/fix.md',
 ])
 
 // FoodVibe sources contain double-encoded UTF-8 (a UTF-8 dash read as cp1252); the kit ships the repaired text.

@@ -972,17 +972,6 @@
       "notes": "Generic: hook wiring (PreToolUse branch/plan-write/scope guards, SessionStart startup, PreCompact reminder, Stop handoff check) and deny list. FoodVibe/machine-specific: lines ~5-12 `permissions.allow` with absolute `C:/coding projects/Cursor/foodVibe1.0/**` and `C:/Users/danwe/...` paths; every hook `command` hardcodes `C:/Program Files/Git/bin/bash.exe`. Phase 4 emits this file with `${CLAUDE_PROJECT_DIR}` and `hooks.shellPath` only."
     },
     {
-      "path": ".claude/skills/angular-pipe-logic/SKILL.md",
-      "tier": "pack:angular",
-      "action": "copy",
-      "params": [],
-      "refs": [
-        "docs/brain/",
-        "docs/brain/index.md"
-      ],
-      "notes": "Wholly Angular pipe/directive logic. React equivalent: hooks/selectors purity skill."
-    },
-    {
       "path": ".claude/skills/angularComponentStructure/SKILL.md",
       "tier": "pack:angular",
       "action": "copy",
@@ -1010,24 +999,6 @@
         "docs/brain/index.md"
       ],
       "notes": "Auth guard / interceptor / logging audit; names `app.routes.ts`. Spans client (Angular) and server (Express) — phase 3 may split into two packs."
-    },
-    {
-      "path": ".claude/skills/auth-crypto/SKILL.md",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        "package.json"
-      ],
-      "notes": "Bound to `src/app/core/auth-crypto.ts` (FoodVibe file). Pairs with security grep + CI gate."
-    },
-    {
-      "path": ".claude/skills/breadcrumb-navigator/SKILL.md",
-      "tier": "pack:angular",
-      "action": "parameterize",
-      "params": [],
-      "refs": [],
-      "notes": "Maintains `breadcrumbs.md` at \"major seams\"; seam definitions live in standards-angular.md (src/app layout). React pack must redefine seams."
     },
     {
       "path": ".claude/skills/brief-detection/SKILL.md",
@@ -1058,37 +1029,6 @@
         "src/styles.scss"
       ],
       "notes": "Wholly the FoodVibe CSS architecture (`.c-*` engines in `src/styles.scss`, tokens, scss variables). Could be `project`; kept pack:angular because other Angular+SCSS apps can adopt it."
-    },
-    {
-      "path": ".claude/skills/elegant-fix/SKILL.md",
-      "tier": "core",
-      "action": "split",
-      "params": [
-        {
-          "key": "commands.test",
-          "strings": [
-            "ng test"
-          ]
-        },
-        {
-          "key": "paths.srcRoot",
-          "strings": [
-            "src/app/core/services/util.service.ts"
-          ]
-        },
-        {
-          "key": "stack.stateRules",
-          "strings": [
-            "signal("
-          ]
-        }
-      ],
-      "refs": [
-        "docs/brain/",
-        "docs/brain/index.md",
-        "src/app/core/services/util.service.ts"
-      ],
-      "notes": "Generic: refine-a-working-fix procedure. Angular part: BehaviorSubject->signal() bullet (line 15), \"State Check\" signal wording (34), `ng test` (64), `src/app/core/services/util.service.ts` as extraction target (18, 46)."
     },
     {
       "path": ".claude/skills/github-sync/SKILL.md",
@@ -1130,6 +1070,12 @@
           "strings": [
             "gstack",
             "/browse"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
           ]
         }
       ],
@@ -1185,13 +1131,20 @@
         {
           "key": "paths.srcRoot",
           "strings": [
-            "src/app/"
+            "src/app/",
+            "src/app/core/services/util.service.ts"
           ]
         },
         {
           "key": "stack.stateRules",
           "strings": [
             "signal("
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
           ]
         }
       ],
@@ -1203,40 +1156,6 @@
         "src/app/"
       ],
       "notes": "Generic debt audit. Angular-only: BehaviorSubject flag (12), `ng test` (143), full-project scope `src/app/` (43)."
-    },
-    {
-      "path": ".claude/skills/update-docs/SKILL.md",
-      "tier": "core",
-      "action": "split",
-      "params": [
-        {
-          "key": "paths.srcRoot",
-          "strings": [
-            "src/app/core/",
-            "src/app/shared/",
-            "src/app/pages/"
-          ]
-        },
-        {
-          "key": "project.name",
-          "strings": [
-            "foodvibe"
-          ]
-        },
-        {
-          "key": "stack.name",
-          "strings": [
-            "angular"
-          ]
-        }
-      ],
-      "refs": [
-        "docs/agent/standards-angular.md",
-        "src/app/core/",
-        "src/app/pages/",
-        "src/app/shared/"
-      ],
-      "notes": "Generic doc-refresh flow; FoodVibe/Angular: description names foodVibe 1.0, seam folders `src/app/core|shared|pages`, defers to standards-angular.md."
     },
     {
       "path": ".claude/skills/worktree-setup/SKILL.md",
@@ -1277,7 +1196,10 @@
         {
           "key": "slots.fePorts",
           "strings": [
-            "420n"
+            "420n",
+            "4201",
+            "4202",
+            "4203"
           ]
         },
         {
@@ -1285,7 +1207,8 @@
           "strings": [
             "-wt-1",
             "-wt-2",
-            "-wt-3"
+            "-wt-3",
+            "-wt-n"
           ]
         },
         {
@@ -1521,16 +1444,6 @@
       "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
     },
     {
-      "path": ".cursor/rules/angular-pipe-logic-must-use-skill.mdc",
-      "tier": "pack:angular",
-      "action": "copy",
-      "params": [],
-      "refs": [
-        ".claude/skills/angular-pipe-logic/SKILL.md"
-      ],
-      "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
-    },
-    {
       "path": ".cursor/rules/auth-and-logging-must-use-skill.mdc",
       "tier": "template",
       "action": "skeleton",
@@ -1558,16 +1471,6 @@
       "notes": "Glob list enumerates project paths from both stacks (`server/middleware`, `server/routes/auth.js`, `src/app/core/guards|interceptors`)."
     },
     {
-      "path": ".cursor/rules/auth-crypto-must-use-skill.mdc",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [
-        ".claude/skills/auth-crypto/SKILL.md"
-      ],
-      "notes": "Rule bound to a FoodVibe-only standard/skill (translation + dictionary.json, Lucide icon registry, auth-crypto.ts)."
-    },
-    {
       "path": ".cursor/rules/brain-memory-session-start.mdc",
       "tier": "layer:cursor",
       "action": "copy",
@@ -1579,16 +1482,6 @@
         "docs/session-state.md"
       ],
       "notes": "Generic Cursor rule pointing at a core skill/doc."
-    },
-    {
-      "path": ".cursor/rules/breadcrumb-navigator-must-use-skill.mdc",
-      "tier": "pack:angular",
-      "action": "copy",
-      "params": [],
-      "refs": [
-        ".claude/skills/breadcrumb-navigator/SKILL.md"
-      ],
-      "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
     },
     {
       "path": ".cursor/rules/brief-detection-must-use-skill.mdc",
@@ -1632,16 +1525,6 @@
         "docs/agent/standards-angular.md"
       ],
       "notes": "Cursor rule glued to an Angular `src/app/**` glob and an Angular skill/standard."
-    },
-    {
-      "path": ".cursor/rules/elegant-fix-must-use-skill.mdc",
-      "tier": "layer:cursor",
-      "action": "copy",
-      "params": [],
-      "refs": [
-        ".claude/skills/elegant-fix/SKILL.md"
-      ],
-      "notes": "Generic Cursor rule pointing at a core skill/doc."
     },
     {
       "path": ".cursor/rules/git-commit-must-use-skill.mdc",
@@ -1758,16 +1641,6 @@
         "public/assets/data/dictionary.json"
       ],
       "notes": "Rule bound to a FoodVibe-only standard/skill (translation + dictionary.json, Lucide icon registry, auth-crypto.ts)."
-    },
-    {
-      "path": ".cursor/rules/update-docs-must-use-skill.mdc",
-      "tier": "layer:cursor",
-      "action": "copy",
-      "params": [],
-      "refs": [
-        ".claude/skills/update-docs/SKILL.md"
-      ],
-      "notes": "Generic Cursor rule pointing at a core skill/doc."
     },
     {
       "path": ".cursor/rules/worktree-setup-must-use-skill.mdc",
@@ -2581,7 +2454,8 @@
           "key": "paths.srcRoot",
           "strings": [
             "src/app/core/guards/**",
-            "src/app/core/interceptors/**"
+            "src/app/core/interceptors/**",
+            "src/app/core/auth-crypto.ts"
           ]
         },
         {
@@ -4452,6 +4326,175 @@
         "scripts/remote-port.mjs"
       ],
       "notes": "Plan 388 on-demand remote link (left unclassified by that plan; classified by plan 387). FoodVibe-side for now; candidate for core once validated."
+    },
+    {
+      "path": ".claude/skills/breadcrumbs/SKILL.md",
+      "tier": "pack:angular",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [
+        "scripts/breadcrumbs-check.mjs"
+      ],
+      "notes": "Replaces breadcrumb-navigator + update-docs. Seams are the Angular src/app layout; the checker script owns the seam list."
+    },
+    {
+      "path": ".claude/skills/angularComponentStructure/evals/evals.json",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Skill eval (skill-creator format)."
+    },
+    {
+      "path": ".claude/skills/cssLayer/evals/evals.json",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [],
+      "notes": "Skill eval (skill-creator format)."
+    },
+    {
+      "path": ".claude/skills/save-plan/evals/evals.json",
+      "tier": "core",
+      "action": "split",
+      "params": [],
+      "refs": [],
+      "notes": "Skill eval; kit copy has project-specific fixture wording removed."
+    },
+    {
+      "path": ".claude/skills/save-plan/reference/mid-flight-sync.md",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        }
+      ],
+      "refs": [
+        "docs/agent/job-validation.md"
+      ],
+      "notes": "Progressive-disclosure reference for save-plan (Planner/Worker mid-flight sync)."
+    },
+    {
+      "path": ".cursor/rules/breadcrumbs-must-use-skill.mdc",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/skills/breadcrumbs/SKILL.md"
+      ],
+      "notes": "Cursor rule pointing at the breadcrumbs skill."
+    },
+    {
+      "path": "scripts/preflight.mjs",
+      "tier": "core",
+      "action": "split",
+      "params": [
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4200",
+            "4201"
+          ]
+        },
+        {
+          "key": "slots.bePorts",
+          "strings": [
+            "3000"
+          ]
+        },
+        {
+          "key": "slots.nameFormat",
+          "strings": [
+            "wt-n"
+          ]
+        },
+        {
+          "key": "git.mainBranch",
+          "strings": [
+            "main"
+          ]
+        },
+        {
+          "key": "stack.backend",
+          "strings": [
+            "mongodb"
+          ]
+        },
+        {
+          "key": "tools.browser",
+          "strings": [
+            "gstack",
+            "/browse"
+          ]
+        }
+      ],
+      "refs": [
+        ".worktree-port"
+      ],
+      "notes": "Deterministic half of the preflight skill. Kit copy keeps the DB probe generic (DB_PORT)."
+    },
+    {
+      "path": "scripts/github-sync-gate.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "notes/github-sync/",
+        ".worktree-cleanup"
+      ],
+      "notes": "Once-a-day gate injected into the github-sync skill."
+    },
+    {
+      "path": "scripts/techdebt-report.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/"
+          ]
+        },
+        {
+          "key": "stack.stylesheetExt",
+          "strings": [
+            "scss"
+          ]
+        }
+      ],
+      "refs": [
+        ".claude/techdebt-reports/"
+      ],
+      "notes": "Rolling 7-report bookkeeping + trend for the techdebt skill."
+    },
+    {
+      "path": "scripts/breadcrumbs-check.mjs",
+      "tier": "pack:angular",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "src/app/"
+      ],
+      "notes": "Seam checker for the breadcrumbs skill (Angular src/app seams)."
+    },
+    {
+      "path": "docs/agent/skill-authoring-standard.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Part 1 rules are generic, Part 2 is the FoodVibe audit; promote Part 1 to the kit separately."
     }
   ]
 }

@@ -15,6 +15,8 @@ Treat the text as a **Plan Contract** (not a brief) when any of these hold:
 - it contains `## Milestones` or `## Atomic Sub-tasks` (case-insensitive)
 - its H1 matches `# Plan …` or contains `Plan Contract`
 
+Only the message's own top-level headers count: ignore headers inside fenced blocks or under a fixture / example section. A message whose top level has `## Goal` + `## Steps` + `## Done when` is a brief that *contains* a plan, not a Plan Contract — go to §2.
+
 Then check `git branch --show-current`:
 
 - **On `main` (Planner):** say `Detected Plan Contract — routing to the Planner protocol` and hand off to `.claude/commands/plan.md` Planner protocol steps 1–6 (pull, todo sync, overlap check, save-plan, commit, push). The Planner never starts execution; it ends on step 6's message.

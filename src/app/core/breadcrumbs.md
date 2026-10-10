@@ -8,16 +8,16 @@ App-wide building blocks: layout components (header, footer, FAB, auth modal, us
 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
-| components/ | Header, footer, hero FAB, auth modal, user-msg | → see components/breadcrumbs.md |
-| services/ | Data, state, modals, logging, export, backup | → see services/breadcrumbs.md |
-| models/ | Domain types and interfaces | → see models/breadcrumbs.md |
-| interceptors/ | HTTP auth header injection | authInterceptor |
-| guards/ | Route activation and pending changes | authGuard, pendingChangesGuard |
-| resolvers/ | Entity fetch for edit routes | productResolver, recipeResolver, equipmentResolver, venueResolver, supplierResolver |
-| pipes/ | Translation and quantity formatting | TranslatePipe, FormatQuantityPipe |
-| directives/ | Focus, scroll, click-outside, textarea grow | SelectOnFocusDirective, FocusByRowDirective, ClickOutSideDirective, ScrollIndicatorsDirective, TextareaAutoGrowDirective |
-| validators/item.validators.ts | Duplicate-name checks for forms | duplicateNameValidator, duplicateEntityNameValidator |
-| utils/ | Pure helpers: auth, export, lists, quantities | require-auth.util, auth-crypto, export.util, list-state.util, panel-preference.util, quantity-step.util, filter-starts-with.util, saving-state.util |
+| `components/` | Header, footer, hero FAB, auth modal, user-msg | → see components/breadcrumbs.md |
+| `services/` | Data, state, modals, logging, export, backup | → see services/breadcrumbs.md |
+| `models/` | Domain types and interfaces | → see models/breadcrumbs.md |
+| `interceptors/` | HTTP auth header injection | authInterceptor |
+| `guards/` | Route activation and pending changes | authGuard, pendingChangesGuard |
+| `resolvers/` | Entity fetch for edit routes | productResolver, recipeResolver, equipmentResolver, venueResolver, supplierResolver |
+| `pipes/` | Translation and quantity formatting | TranslatePipe, FormatQuantityPipe |
+| `directives/` | Focus, scroll, click-outside, textarea grow | SelectOnFocusDirective, FocusByRowDirective, ClickOutSideDirective, ScrollIndicatorsDirective, TextareaAutoGrowDirective |
+| `validators/item.validators.ts` | Duplicate-name checks for forms | duplicateNameValidator, duplicateEntityNameValidator |
+| `utils/` | Pure helpers: auth, export, lists, quantities | require-auth.util, auth-crypto, export.util, list-state.util, panel-preference.util, quantity-step.util, filter-starts-with.util, saving-state.util |
 
 ## Architecture Context
 
@@ -41,10 +41,7 @@ App-wide building blocks: layout components (header, footer, FAB, auth modal, us
 - Pending changes: `pendingChangesGuard` on recipe-builder and inventory product form flows.
 - Unit tests: many `*.spec.ts` alongside services, resolvers, pipes, directives.
 
-## Recent Changes
-
-- 2026-03-22: Added interceptors, auth guard, supplier resolver, utils listing, pipes/directives accuracy; removed obsolete system-health reference.
 
 ---
 *Last updated: 2026-03-22*
-*Updated by: breadcrumb-navigator*
+*Updated by: breadcrumbs*

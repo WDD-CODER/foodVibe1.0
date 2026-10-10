@@ -18,7 +18,7 @@ For each branch in `.worktree-cleanup`: `git push origin --delete <branch>`. "re
 
 ## 2. Sync
 
-- `DIRTY > 0` → `git stash` first, pop after the pull. Never rebase on top of uncommitted work.
+- `DIRTY > 0` → stop and ask the Human to commit or set the work aside first. Never rebase on top of uncommitted work, and never bare `git stash` / `pop`: the stash stack is shared by every worktree, so a `pop` can apply another slot's changes.
 - `git pull --rebase` (rebase keeps the Planner/Worker history linear, which `plan-ledger-check` relies on).
 - On a conflict: stop, show the conflicting files, and ask — do not resolve someone else's work.
 - List local branches already merged into `main` (`git branch --merged main`) and offer them for deletion; do not delete without a yes.
