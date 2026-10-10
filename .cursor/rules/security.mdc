@@ -1,4 +1,4 @@
-﻿---
+---
 globs: "{server/middleware/**,server/routes/auth.js,src/app/core/guards/**,src/app/core/interceptors/**}"
 alwaysApply: false
 ---

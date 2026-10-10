@@ -34,14 +34,14 @@ Rule: **a job is never done until every Done-when item is validated** — `[auto
 | `docs/brain/` | Both | Second brain: `index.md`, `invariants.md` (architecture invariants the `--arch` gate checks), `gotchas.md` (index) + `gotchas/` (domain files), `patterns/`, `decisions/` (ADRs), `glossary.md`, `projectbrief.md`, `how-it-works.md` |
 
 Cursor rule files (10 original + 1 role rule + 10 skill-enforcement rules added by Plan 298):
-`angular-component-structure`, `angular-pipe-logic-must-use-skill`,
-`auth-and-logging-must-use-skill`, `auth-crypto-must-use-skill`, `brain-memory-session-start`,
-`breadcrumb-navigator-must-use-skill`, `brief-detection-must-use-skill`, `contractor-role`,
-`core-angular`, `elegant-fix-must-use-skill`,
+`angular-component-structure`,
+`auth-and-logging-must-use-skill`, `brain-memory-session-start`,
+`breadcrumbs-must-use-skill`, `brief-detection-must-use-skill`, `contractor-role`,
+`core-angular`,
 `git-commit-must-use-skill`, `github-sync-must-use-skill`,
 `lucide-icons-must-register-in-app-config`, `preflight-must-use-skill`, `save-plan-must-use-skill`,
 `scss-styling-must-use-cssLayer`, `security`, `techdebt-must-use-skill`, `translation`,
-`update-docs-must-use-skill`, `worktree-setup-must-use-skill` (`.mdc` each).
+`worktree-setup-must-use-skill` (`.mdc` each).
 
 ---
 
@@ -102,16 +102,12 @@ needs its own design pass, not a copy-paste redirect): `auto-solve`. See
 | `save-plan` | Plan Contract pasted / "save the plan" / plan not yet under `plans/` | runs `scripts/plan-name-similarity.mjs`; writes `plans/NNN-slug.plan.md` + `.claude/todo.md`; `.claude/.plan-write-ack` handshake with `plan-write-guard.sh`; Phase 4 = mid-flight brief↔plan sync | `save-plan-must-use-skill` (pre-existing) |
 | `brief-detection` | 3+ structured H2 markers in first message | gates execution → routes to `/feat` (option b) or discussion | `brief-detection-must-use-skill` (Plan 298) — closes the "no Cursor enforcement" half of known inconsistency #5 below; the routing race itself is unchanged |
 | `angularComponentStructure` | any component class work | class structure + CRDUL ordering | `angular-component-structure` (pre-existing) |
-| `angular-pipe-logic` | pipe/directive work | — | `angular-pipe-logic-must-use-skill` (Plan 298) |
 | `auth-and-logging` | guards, interceptors, HTTP CRUD | pairs with `standards-security.md` | `auth-and-logging-must-use-skill` (Plan 298) |
-| `auth-crypto` | `auth-crypto.ts` hashing/tokens | — | `auth-crypto-must-use-skill` (Plan 298) |
-| `breadcrumb-navigator` | new subtree / structural change | maintains `breadcrumbs.md` files | `breadcrumb-navigator-must-use-skill` (Plan 298) |
+| `breadcrumbs` | new subtree / files moved / before PR / `/docs-refresh` | `scripts/breadcrumbs-check.mjs` + maintains `breadcrumbs.md` files | `breadcrumbs-must-use-skill` |
 | `cssLayer` | any `.scss`/`.css` edit | `.c-*` engine placement, token tiers | `scss-styling-must-use-cssLayer` (pre-existing) |
-| `elegant-fix` | after hacky fix / duplicate logic | — | `elegant-fix-must-use-skill` (Plan 298) |
 | `github-sync` | session start, once per day | writes `notes/github-sync/YYYY-MM-DD.md` | `github-sync-must-use-skill` (Plan 298) — best-effort, no `SessionStart`-hook equivalent in Cursor |
 | `preflight` | before dev server / browser / DB workflows | env check | `preflight-must-use-skill` (Plan 298) |
 | `techdebt` | end of session / before PR / audit | — | `techdebt-must-use-skill` (Plan 298) |
-| `update-docs` | after significant features / before PR | — | `update-docs-must-use-skill` (Plan 298) |
 | `worktree-setup` | "setup worktree" (explicit only) | — | `worktree-setup-must-use-skill` (Plan 298) |
 
 Before Plan 298, only 3 of these 14 skills had any Cursor-side `.mdc` enforcement (`save-plan`,

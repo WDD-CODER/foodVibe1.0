@@ -1,4 +1,4 @@
-﻿---
+---
 paths:
   - "src/app/**/*.html"
   - "public/assets/data/dictionary.json"

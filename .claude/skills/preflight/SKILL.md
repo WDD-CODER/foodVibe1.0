@@ -1,22 +1,18 @@
 ---
 name: preflight
-description: Pre-flight environment check — dev server, MongoDB, branch, gstack binary
+description: Environment check before any work that needs the dev server, the browser or MongoDB — verifies the dev server answers on this checkout's port, MongoDB is reachable, and the branch is not `main`. Use at the start of a UI check, a browser flow, a DB query or a plan that runs the app, and whenever something "doesn't load" — run it before debugging.
+allowed-tools: Bash(node scripts/preflight.mjs *)
 ---
 
-# Preflight Check
+# Preflight
 
-**Skill:** preflight
-Run before any workflow that touches dev server / browser / database.
+Run the script; it prints one line per check and exits non-zero on any `FAIL`:
 
-## Checks
+```bash
+node scripts/preflight.mjs            # dev server, MongoDB, branch
+node scripts/preflight.mjs --visual   # + gstack browse binary, for screenshot/browser flows
+```
 
-1. **Dev server reachable:** `curl -s -o /dev/null -w "%{http_code}" http://localhost:$(cat .worktree-port 2>/dev/null || echo 4200)` returns `200`
-2. **MongoDB reachable:** `mongosh --eval "db.runCommand({ping:1})" --quiet` returns ok
-3. **Current branch != main:** `git branch --show-current` is not `"main"`
-4. **(visual workflows only) gstack binary present:** `ls ~/.claude/skills/gstack/browse/dist/browse`
+The port comes from `.worktree-port` (a `wt-N` slot) or defaults to 4200 (main). Override with `--port`.
 
-## Output
-
-Single line per check: `OK` | `FAIL: <reason>`
-
-On any `FAIL` → return non-zero. Calling workflow aborts.
+On `FAIL`, fix the named cause before continuing — a dev-server check that fails is not "flaky", it means the next browser step would be testing nothing. If the fix is outside your scope (MongoDB not installed, slot not provisioned), report the exact `FAIL` line to the Human and stop.

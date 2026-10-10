@@ -1,4 +1,4 @@
-﻿---
+---
 paths:
   - "server/middleware/**"
   - "server/routes/auth.js"
@@ -14,7 +14,7 @@ paths:
 
 ## Auth & Logging Rules
 
-* Run the `auth-and-logging` skill when touching auth, routes, persistence, or HTTP.
+* Run the `auth-and-logging` skill when touching auth, routes, persistence, HTTP, or `src/app/core/auth-crypto.ts`; it ends with `node scripts/pre-commit-security-grep.mjs`.
 * `LoggingService` for all auth/HTTP/CRUD/errors — structured `{ event, message, context? }` format. Never log passwords, tokens, PII (names, emails). Use user `_id` only.
 * HTTPS in prod, no secrets in source, validate input, no stack traces to client in prod.
 
@@ -29,7 +29,8 @@ paths:
 5. **No Secrets in Source**: No API keys, tokens, or production credentials in any Angular source file. `environment.ts` uses empty string placeholders only.
 6. **Angular XSS**: `[innerHTML]` bindings are forbidden unless explicitly sanitized via `DomSanitizer.bypassSecurityTrustHtml()` with documented justification. Never use `bypassSecurityTrust*` for URL, resource URL, or script contexts.
 7. **Production Readiness** (`useBackendAuth: true`): Enforce HTTPS, require CSP / `X-Frame-Options` / `X-Content-Type-Options` headers, rate-limit login/signup endpoints, prefer httpOnly cookies over sessionStorage for access tokens.
-8. **Dependency Hygiene**: `npm audit` must report zero critical/high vulnerabilities before any production deployment.
+8. **Crypto Hygiene** (`auth-crypto.ts`): salts and IVs generated at runtime per call — never hardcoded, never logged (specs included); one generic error message for every crypto failure (no timing/padding detail); any crypto dependency is typed, in `package.json`, and named in the PR.
+9. **Dependency Hygiene**: `npm audit` must report zero critical/high vulnerabilities before any production deployment.
 
 ---
 

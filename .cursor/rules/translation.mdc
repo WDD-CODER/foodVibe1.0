@@ -1,4 +1,4 @@
-﻿---
+---
 globs: "{src/app/**/*.html,public/assets/data/dictionary.json}"
 alwaysApply: false
 ---
