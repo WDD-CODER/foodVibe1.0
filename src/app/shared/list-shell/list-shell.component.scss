@@ -10,6 +10,11 @@
     // card (0); tablet scrolls the page under the app's top bar; phones hide that bar.
     --list-sticky-top: 0px;
 
+    // Height of the app chrome above the list (top bar 3.875rem + tab-chips row ≈ 2.95rem).
+    // Desktop and tablet size the list to the rest of the screen, so the card ends on screen
+    // and only the table body (and the filter panel) scroll inside it.
+    --list-shell-chrome-h: 7rem;
+
     @media (max-width: #{$panel-overlay-break}) {
       --list-sticky-top: 3.875rem;
     }
@@ -29,7 +34,9 @@
 
   .list-container {
     display: grid;
-    grid-template-rows: auto auto 1fr;
+    // minmax(0, 1fr), not 1fr: a bare 1fr track grows to its content, so the table card
+    // grew to the full list height and the rows below the fold were clipped, unreachable.
+    grid-template-rows: auto auto minmax(0, 1fr);
     grid-template-columns: auto 1fr;
     grid-template-areas:
       'header header'
@@ -37,7 +44,7 @@
       'panel  table';
     container-type: inline-size;
 
-    height: 90dvh;
+    height: calc(100dvh - var(--list-shell-chrome-h));
     padding: 1rem 1.5rem;
     row-gap: 0;
     column-gap: var(--space-5);
@@ -114,7 +121,7 @@
     position: relative;
     display: grid;
     grid-template-columns: var(--list-grid);
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
 
     min-width: 0;
 
@@ -262,7 +269,7 @@
         'panel'
         'table';
 
-      height: 90dvh;
+      height: calc(100dvh - var(--list-shell-chrome-h));
       row-gap: 0;
       column-gap: 0;
       padding: 1rem;
