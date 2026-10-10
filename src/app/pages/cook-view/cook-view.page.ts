@@ -3,7 +3,7 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
-import { CommonModule, DOCUMENT } from '@angular/common'
+import { CommonModule, DOCUMENT, Location } from '@angular/common'
 import { ActivatedRoute, NavigationStart, Router, RouterLink } from '@angular/router'
 import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -88,6 +88,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly recipeFormService = inject(RecipeFormService)
   private readonly el = inject(ElementRef)
   private readonly document = inject(DOCUMENT)
+  private readonly location = inject(Location)
   protected readonly cookTimer = inject(CookTimerService)
   protected readonly cookExport = inject(CookViewExportService)
 
@@ -666,6 +667,18 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   protected async onExportDishChecklist(): Promise<void> {
     await this.cookExport.onExportDishChecklist(this.recipe_(), this.targetQuantity_())
+  }
+
+  /** History-aware back: return to wherever the user came from; a deep link (no in-app history
+   *  entry) falls back to the recipe book. */
+  protected goBack(): void {
+    const navigationId =
+      (this.document.defaultView?.history.state as { navigationId?: number } | null)?.navigationId ?? 1
+    if (navigationId > 1) {
+      this.location.back()
+      return
+    }
+    this.router.navigate(['/recipe-book'])
   }
 
   protected toggleTheme(): void {

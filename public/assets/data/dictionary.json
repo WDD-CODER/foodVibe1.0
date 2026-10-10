@@ -1014,6 +1014,10 @@
     "ai_model_loading": "טוען...",
     "ai_model_drag": "גרור כדי לשנות את הסדר",
     "ai_model_exhausted_prompt": "מודל ה-AI הנוכחי הגיע למכסה היומית שלו. אפשר לעבור למודל הבא ולשלוח שוב.",
-    "ai_model_switch_to": "עבור ל-{model}"
+    "ai_model_switch_to": "עבור ל-{model}",
+    "awaiting_approval": "ממתין לאישור",
+    "more_actions": "עוד פעולות",
+    "download": "הורדה",
+    "edit_recipe": "עריכת מתכון"
   }
 }

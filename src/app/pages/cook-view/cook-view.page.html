@@ -21,119 +21,31 @@
     </div>
     }
 
-    <!-- Page-local nav: title + kitchen dark-mode toggle (mirrors UI refactor/CookView.dc.html's .cv-nav) -->
-    <nav class="cv-nav">
-      <span class="cv-nav-title">{{ 'cook_mode' | translatePipe }}</span>
-      <button
-        type="button"
-        class="cv-theme-toggle"
-        (click)="toggleTheme()"
-        [attr.aria-label]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
-        [attr.title]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
-      >
-        @if (isDarkTheme_()) {
-        <lucide-icon name="sun" [size]="18"></lucide-icon>
-        } @else {
-        <lucide-icon name="moon" [size]="18"></lucide-icon>
-        }
-      </button>
-    </nav>
-
-    <!-- Hero: recipe photo + gradient scrim + name + prep progress (mirrors .cv-hero) -->
-    <div class="cv-hero" [class.cv-hero--photo]="!!recipe.imageUrl">
-      @if (recipe.imageUrl) {
-      <img class="cv-hero-img" [src]="recipe.imageUrl" [alt]="recipe.nameHebrew" />
-      } @else {
-      <div class="cv-hero-placeholder" aria-hidden="true">
-        <lucide-icon name="image" [size]="32"></lucide-icon>
-      </div>
-      }
-      <div class="cv-hero-scrim"></div>
-      <div class="cv-hero-top">
-        <div class="cv-hero-info">
-          <div class="cv-hero-badges">
-            @if (recipe.isApproved) {
-            <span class="cv-hero-badge cv-hero-badge--approved">✓ {{ 'approved' | translatePipe }}</span>
-            } @if (scaledCost_() > 0) {
-            <span class="cv-hero-badge">₪{{ scaledCost_() | number:'1.0-0' }}</span>
-            }
-          </div>
-          <h1 class="cv-hero-title">{{ recipe.nameHebrew }}</h1>
-          <app-rating-stars
-            [value]="recipe.rating ?? 0"
-            [readonly]="!isLoggedIn()"
-            size="sm"
-            (ratingChange)="onRatingChange($event)"
-          />
-        </div>
-        @if (cookTimer.activeTimerStepIndex_() !== null) {
-        <div
-          class="cv-hero-timer"
-          [class.cv-hero-timer--alert]="cookTimer.timerFinishedStepIndex_() === cookTimer.activeTimerStepIndex_()"
-        >
-          <span class="cv-hero-timer-label"
-            >{{ 'step' | translatePipe }} {{ cookTimer.activeTimerStepIndex_()! + 1 }}</span
-          >
-          <span class="cv-hero-timer-value">{{ cookTimer.timerDisplay_() }}</span>
-        </div>
-        }
-      </div>
-      <div class="cv-hero-progress">
-        <div class="cv-hero-progress-row">
-          <span>{{ 'prep_progress' | translatePipe }}</span>
-          <span>{{ heroProgressPct_() }}%</span>
-        </div>
-        <div class="cv-hero-progress-track">
-          <div class="cv-hero-progress-fill" [style.width.%]="heroProgressPct_()"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions row: edit / export controls -->
-    <div class="cv-actions-row">
-      @if (editMode_()) {
-      <div class="edit-actions">
+    <!-- Export menu (more-actions on phone, "export" pill on desktop): edit + view/download per
+         export kind. The transparent scrim behind it closes it on any outside click. -->
+    <ng-template #exportMenu let-withEdit="withEdit">
+      <div class="cv-menu-scrim" (click)="cookExport.closeAllExportOverlays()"></div>
+      <div class="cv-menu" role="menu" (keydown.escape)="cookExport.closeAllExportOverlays()">
+        @if (withEdit) {
         <button
           type="button"
-          class="edit-btn save-btn"
-          (click)="saveEdits()"
-          [disabled]="isSaving_()"
-          [attr.aria-label]="'save_changes' | translatePipe"
+          class="cv-menu-item"
+          role="menuitem"
+          (click)="cookExport.closeAllExportOverlays(); enterEditMode()"
+          [disabled]="!isLoggedIn()"
+          [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
         >
-          @if (isSaving_()) {
-          <app-loader size="small" [inline]="true" />
-          }
-          <lucide-icon name="save" [size]="18"></lucide-icon>
-          {{ 'save_changes' | translatePipe }}
+          <span>{{ 'edit_recipe' | translatePipe }}</span>
+          <lucide-icon name="pencil" [size]="20"></lucide-icon>
         </button>
-        <button
-          type="button"
-          class="edit-btn undo-btn"
-          (click)="undoEdits()"
-          [attr.aria-label]="'undo_changes' | translatePipe"
-        >
-          <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
-          {{ 'undo_changes' | translatePipe }}
-        </button>
-      </div>
-      } @else {
-      <button
-        type="button"
-        class="edit-btn"
-        (click)="enterEditMode()"
-        [attr.aria-label]="'edit' | translatePipe"
-        [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-      >
-        <lucide-icon name="pencil" [size]="18"></lucide-icon>
-        {{ 'edit' | translatePipe }}
-      </button>
-      <div class="export-bar-wrap" (mouseleave)="cookExport.exportBarExpanded_.set(false)">
-        <div class="export-bar-actions" [class.expanded]="cookExport.exportBarExpanded_()">
-          <span class="export-bar-label">{{ 'export_recipe_info' | translatePipe }}</span>
+        <div class="cv-menu-sep"></div>
+        }
+        <div class="cv-menu-head">{{ 'export' | translatePipe }}</div>
+        <div class="cv-menu-item cv-menu-item--row">
+          <span>{{ 'export_recipe_info' | translatePipe }}</span>
           <button
             type="button"
-            class="edit-btn export-view-btn"
+            class="cv-menu-act"
             (click)="onViewRecipeInfo()"
             [attr.aria-label]="'view' | translatePipe"
           >
@@ -141,16 +53,18 @@
           </button>
           <button
             type="button"
-            class="edit-btn export-download-btn"
-            (click)="onExportInfo()"
-            [attr.aria-label]="'export_recipe_info' | translatePipe"
+            class="cv-menu-act"
+            (click)="cookExport.closeAllExportOverlays(); onExportInfo()"
+            [attr.aria-label]="'download' | translatePipe"
           >
             <lucide-icon name="download" [size]="18"></lucide-icon>
           </button>
-          <span class="export-bar-label">{{ 'export_shopping_list' | translatePipe }}</span>
+        </div>
+        <div class="cv-menu-item cv-menu-item--row">
+          <span>{{ 'export_shopping_list' | translatePipe }}</span>
           <button
             type="button"
-            class="edit-btn export-view-btn"
+            class="cv-menu-act"
             (click)="onViewShoppingList()"
             [attr.aria-label]="'view' | translatePipe"
           >
@@ -158,17 +72,19 @@
           </button>
           <button
             type="button"
-            class="edit-btn export-download-btn"
-            (click)="onExportShoppingList()"
-            [attr.aria-label]="'export_shopping_list' | translatePipe"
+            class="cv-menu-act"
+            (click)="cookExport.closeAllExportOverlays(); onExportShoppingList()"
+            [attr.aria-label]="'download' | translatePipe"
           >
             <lucide-icon name="download" [size]="18"></lucide-icon>
           </button>
-          @if (isDish_()) {
-          <span class="export-bar-label">{{ 'export_checklist' | translatePipe }}</span>
+        </div>
+        @if (isDish_()) {
+        <div class="cv-menu-item cv-menu-item--row">
+          <span>{{ 'export_checklist' | translatePipe }}</span>
           <button
             type="button"
-            class="edit-btn export-view-btn"
+            class="cv-menu-act"
             (click)="onViewDishChecklist()"
             [attr.aria-label]="'view' | translatePipe"
           >
@@ -176,17 +92,19 @@
           </button>
           <button
             type="button"
-            class="edit-btn export-download-btn"
-            (click)="onExportDishChecklist()"
-            [attr.aria-label]="'export_checklist' | translatePipe"
+            class="cv-menu-act"
+            (click)="cookExport.closeAllExportOverlays(); onExportDishChecklist()"
+            [attr.aria-label]="'download' | translatePipe"
           >
             <lucide-icon name="download" [size]="18"></lucide-icon>
           </button>
-          } @else {
-          <span class="export-bar-label">{{ 'export_cooking_steps' | translatePipe }}</span>
+        </div>
+        } @else {
+        <div class="cv-menu-item cv-menu-item--row">
+          <span>{{ 'export_cooking_steps' | translatePipe }}</span>
           <button
             type="button"
-            class="edit-btn export-view-btn"
+            class="cv-menu-act"
             (click)="onViewCookingSteps()"
             [attr.aria-label]="'view' | translatePipe"
           >
@@ -194,27 +112,145 @@
           </button>
           <button
             type="button"
-            class="edit-btn export-download-btn"
-            (click)="onExportCookingSteps()"
-            [attr.aria-label]="'export_cooking_steps' | translatePipe"
+            class="cv-menu-act"
+            (click)="cookExport.closeAllExportOverlays(); onExportCookingSteps()"
+            [attr.aria-label]="'download' | translatePipe"
           >
             <lucide-icon name="download" [size]="18"></lucide-icon>
           </button>
-          }
         </div>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #themeToggle>
+      <button
+        type="button"
+        class="cv-icon-btn"
+        (click)="toggleTheme()"
+        [attr.aria-label]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
+        [attr.title]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
+      >
+        <lucide-icon [name]="isDarkTheme_() ? 'sun' : 'moon'" [size]="20"></lucide-icon>
+      </button>
+    </ng-template>
+
+    <!-- Phone top bar (up to 620px, where the app header is hidden): back, title, theme, more -->
+    <div class="cv-topbar">
+      <button type="button" class="cv-icon-btn" (click)="goBack()" [attr.aria-label]="'back' | translatePipe">
+        <lucide-icon name="arrow-right" [size]="22"></lucide-icon>
+      </button>
+      <h1 class="cv-topbar-title">{{ recipe.nameHebrew }}</h1>
+      <ng-container *ngTemplateOutlet="themeToggle"></ng-container>
+      <span class="cv-menu-wrap">
         <button
           type="button"
-          class="edit-btn export-bar-main"
+          class="cv-icon-btn"
+          [class.is-on]="cookExport.exportBarExpanded_()"
           (click)="cookExport.toggleExportBar()"
-          [attr.aria-label]="'export' | translatePipe"
+          [attr.aria-label]="'more_actions' | translatePipe"
           [attr.aria-expanded]="cookExport.exportBarExpanded_()"
         >
-          <lucide-icon name="download" [size]="18"></lucide-icon>
-          {{ 'export' | translatePipe }}
+          <lucide-icon name="more-vertical" [size]="22"></lucide-icon>
         </button>
-      </div>
-      }
+        @if (cookExport.exportBarExpanded_()) {
+        <ng-container *ngTemplateOutlet="exportMenu; context: { withEdit: !editMode_() }"></ng-container>
+        }
+      </span>
     </div>
+
+    <!-- Page header: back, title + meta chips, actions. With a recipe photo it becomes a slim
+         banner (photo behind, bottom scrim, white text). -->
+    <header class="cv-ph" [class.cv-ph--photo]="!!recipe.imageUrl">
+      @if (recipe.imageUrl) {
+      <img class="cv-ph-img" [src]="recipe.imageUrl" alt="" />
+      <div class="cv-ph-scrim" aria-hidden="true"></div>
+      }
+      <button type="button" class="cv-back" (click)="goBack()" [attr.aria-label]="'back' | translatePipe">
+        <lucide-icon name="arrow-right" [size]="20"></lucide-icon>
+      </button>
+      <div class="cv-ph-text">
+        <h1 class="cv-ph-title">{{ recipe.nameHebrew }}</h1>
+        <div class="cv-meta">
+          <button
+            type="button"
+            class="cv-chip"
+            [class.cv-chip--warn]="!recipe.isApproved"
+            (click)="onApproveStamp()"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          >
+            <lucide-icon [name]="recipe.isApproved ? 'check' : 'clock'" [size]="14"></lucide-icon>
+            {{ (recipe.isApproved ? 'approved' : 'awaiting_approval') | translatePipe }}
+          </button>
+          @if (scaledCost_() > 0) {
+          <span class="cv-chip cv-num">₪{{ scaledCost_() | number: '1.0-0' }}</span>
+          }
+          <span class="cv-chip cv-num"
+            >{{ targetQuantity_() | formatQuantity }} {{ selectedUnit_() | translatePipe }}</span
+          >
+          <span class="cv-chip cv-chip--warn cv-chip--rating">
+            <app-rating-stars
+              [value]="recipe.rating ?? 0"
+              [readonly]="!isLoggedIn()"
+              size="sm"
+              (ratingChange)="onRatingChange($event)"
+            />
+          </span>
+          @if (cookTimer.activeTimerStepIndex_() !== null) {
+          <span
+            class="cv-chip cv-num cv-chip--timer"
+            [class.cv-chip--alert]="cookTimer.timerFinishedStepIndex_() === cookTimer.activeTimerStepIndex_()"
+          >
+            <lucide-icon name="timer" [size]="14"></lucide-icon>
+            {{ 'step' | translatePipe }} {{ cookTimer.activeTimerStepIndex_()! + 1 }} · {{ cookTimer.timerDisplay_() }}
+          </span>
+          }
+        </div>
+      </div>
+      <div class="cv-ph-acts" [class.cv-ph-acts--edit]="editMode_()">
+        <span class="cv-ph-theme"><ng-container *ngTemplateOutlet="themeToggle"></ng-container></span>
+        @if (editMode_()) {
+        <button type="button" class="cv-pill-btn cv-pill-btn--primary" (click)="saveEdits()" [disabled]="isSaving_()">
+          @if (isSaving_()) {
+          <app-loader size="small" [inline]="true" />
+          } @else {
+          <lucide-icon name="save" [size]="16"></lucide-icon>
+          } {{ 'save_changes' | translatePipe }}
+        </button>
+        <button type="button" class="cv-pill-btn" (click)="undoEdits()">
+          <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+          {{ 'undo_changes' | translatePipe }}
+        </button>
+        } @else {
+        <button
+          type="button"
+          class="cv-pill-btn"
+          (click)="enterEditMode()"
+          [disabled]="!isLoggedIn()"
+          [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+        >
+          <lucide-icon name="pencil" [size]="16"></lucide-icon>
+          {{ 'edit' | translatePipe }}
+        </button>
+        <span class="cv-menu-wrap">
+          <button
+            type="button"
+            class="cv-pill-btn"
+            [class.cv-pill-btn--primary]="cookExport.exportBarExpanded_()"
+            (click)="cookExport.toggleExportBar()"
+            [attr.aria-expanded]="cookExport.exportBarExpanded_()"
+          >
+            <lucide-icon name="download" [size]="16"></lucide-icon>
+            {{ 'export' | translatePipe }}
+            <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
+          </button>
+          @if (cookExport.exportBarExpanded_()) {
+          <ng-container *ngTemplateOutlet="exportMenu; context: { withEdit: false }"></ng-container>
+          }
+        </span>
+        }
+      </div>
+    </header>
 
     <!-- Phone-only pane swap buttons -->
     <div class="cv-phone-swap-bar">

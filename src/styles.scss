@@ -317,6 +317,14 @@ body::before {
   }
 }
 
+/* Cook View on phones (≤620) has its own top bar (back · title · theme · ⋮) and no sub-nav chips,
+   per the handoff; the chips row stays on every other page. */
+@media (max-width: 620px) {
+  :root.cv-page-scroll app-tab-chips {
+    display: none;
+  }
+}
+
 /* ---- Base resets (replaces Tailwind preflight) ---- */
 img, svg, video, canvas {
   display: block;

@@ -119,336 +119,438 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   padding: 0.5rem 1rem;
 }
 
-.edit-actions {
-  display: flex;
-  align-items: center;
-
-  gap: 0.5rem;
-}
-
-.save-btn {
-  background: var(--bg-success);
-  color: var(--text-success);
-
-  border-color: var(--color-success);
-}
-
-.undo-btn {
-  background: var(--bg-warning);
-  color: var(--text-warning);
-
-  border-color: var(--border-warning);
-}
-
 /* ─────────────────────────────────────────────────────────────────────────
-   Page-local nav — title + kitchen dark-mode toggle
+   Page header (plan 404 step 4) — phone top bar (≤620), page header with meta
+   chips, header actions, export menu, slim photo banner.
    ───────────────────────────────────────────────────────────────────────── */
-.cv-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.cv-icon-btn {
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
 
-  padding: 0;
-}
+  inline-size: var(--cv-tap-min);
+  block-size: var(--cv-tap-min);
 
-.cv-nav-title {
-  color: var(--cv-main-text);
-  font-size: var(--fs-md);
-  font-weight: var(--fw-bold);
-}
+  background: transparent;
+  color: var(--color-text-muted);
 
-.cv-theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: var(--cv-tap-min);
-  height: var(--cv-tap-min);
-
-  background: var(--cv-segment-bg);
-  color: var(--cv-main-text);
-
-  border: 1px solid var(--cv-nav-border);
+  border: 0;
   border-radius: var(--radius-full);
 
   cursor: pointer;
   transition:
-    background 0.2s var(--ease-smooth),
-    transform 0.15s var(--ease-spring);
+    background var(--dur-fast) var(--ease-smooth),
+    color var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
 
-  &:hover {
-    background: var(--cv-chip-bg);
-    transform: scale(1.05);
+  &:hover,
+  &.is-on {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+  }
+
+  &:active {
+    transform: scale(0.94);
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Hero — recipe photo + gradient scrim + name + prep-progress bar
-   ───────────────────────────────────────────────────────────────────────── */
-.cv-hero {
-  position: relative;
+// Phone-only top bar: replaces the app header (hidden ≤620). Full-bleed and sticky.
+.cv-topbar {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 30;
+
+  block-size: 60px;
+
+  margin-inline: calc(-1 * var(--space-4));
+  margin-block-start: calc(-1 * var(--space-4));
+  padding-inline: 10px;
+
+  background: var(--bg-header);
+  border-block-end: 1px solid var(--border-header);
+
+  box-shadow: var(--shadow-header);
+  backdrop-filter: var(--blur-nav);
+  -webkit-backdrop-filter: var(--blur-nav);
+
+  @media (max-width: $cv-phone-max) {
+    display: flex;
+  }
+}
+
+.cv-topbar-title {
+  flex: 1;
+  min-inline-size: 0;
 
   overflow: hidden;
+  color: var(--color-text-main);
+  font-size: 1.1875rem; // 19
+  font-weight: var(--fw-extrabold);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 
-  min-height: 150px;
+  margin: 0;
+}
 
-  background: var(--cv-panel-bg);
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-xl);
-  margin-block-start: var(--space-4);
+.cv-ph {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
 
-  box-shadow: var(--cv-hero-shadow);
-  transition: min-height 0.3s var(--ease-smooth);
+  padding-block-start: var(--space-3);
 
-  &.cv-hero--photo {
-    min-height: 320px;
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    padding-block-start: var(--space-2);
   }
 }
 
-/* No-photo placeholder — small centered icon, matching the mockup's image-slot state
-   instead of filling the hero with a solid brand-color card. */
-.cv-hero-placeholder {
-  position: absolute;
+.cv-back {
+  display: none;
+  place-content: center;
+  flex-shrink: 0;
+
+  inline-size: var(--cv-tap-min);
+  block-size: var(--cv-tap-min);
+
+  background: var(--bg-chrome);
+  color: var(--color-primary-ink);
+
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    border-color: var(--color-primary);
+  }
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    display: grid;
+  }
+}
+
+.cv-ph-text {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.cv-ph-title {
+  display: none;
+
+  color: var(--color-text-main);
+  font-size: 1.875rem; // 30
+  font-weight: var(--fw-extrabold);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+
+  margin: 0 0 10px;
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    display: block;
+  }
+
+  @media (min-width: $cv-desktop-min) {
+    font-size: 2rem; // 32
+  }
+}
+
+.cv-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cv-num {
+  font-variant-numeric: tabular-nums;
+}
+
+.cv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+
+  border: 0;
+  border-radius: var(--radius-full);
+  padding: 5px 11px;
+
+  &:is(button) {
+    cursor: pointer;
+  }
+}
+
+.cv-chip--warn {
+  background: var(--bg-warning-tint);
+  color: var(--color-warning-ink);
+}
+
+.cv-chip--rating {
+  padding-block: 2px;
+}
+
+.cv-chip--alert {
+  background: var(--bg-warning-tint);
+  color: var(--color-warning-ink);
+
+  animation: cv-chip-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes cv-chip-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.cv-ph-acts {
+  display: none;
+  align-items: center;
+  gap: 10px;
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    display: flex;
+  }
+
+  // Phone: save / cancel stay reachable here until the fixed edit bar (step 8).
+  &.cv-ph-acts--edit {
+    @media (max-width: $cv-phone-max) {
+      display: flex;
+      position: absolute;
+      inset-block-end: calc(-1 * (var(--cv-tap-min) + var(--space-3)));
+      inset-inline: 0;
+    }
+  }
+
+  @media (max-width: $cv-phone-max) {
+    .cv-ph-theme {
+      display: none;
+    }
+  }
+}
+
+.cv-ph:has(.cv-ph-acts--edit) {
+  @media (max-width: $cv-phone-max) {
+    margin-block-end: calc(var(--cv-tap-min) + var(--space-3));
+  }
+}
+
+.cv-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  block-size: var(--cv-tap-min);
+
+  background: var(--bg-chrome);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-full);
+  padding-inline: 18px;
+
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: $cv-phone-max) {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+.cv-pill-btn--primary {
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary-strong);
+
+  border-color: transparent;
+}
+
+// Export / more-actions menu, anchored to its trigger's physical left edge.
+.cv-menu-wrap {
+  position: relative;
+}
+
+.cv-menu-scrim {
+  position: fixed;
   inset: 0;
+  z-index: 39;
+}
+
+.cv-menu {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-2));
+  left: 0; // physical on purpose: the trigger sits at the left (end) edge in RTL
+  z-index: 40;
+
+  inline-size: 300px;
+  max-inline-size: calc(100vw - 2 * var(--space-4));
+
+  background: var(--bg-card-solid);
+  color: var(--color-text-main);
+
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2);
+
+  box-shadow: var(--shadow-modal);
+}
+
+.cv-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  inline-size: 100%;
+  min-block-size: 48px;
+
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.9375rem; // 15
+  font-weight: var(--fw-semibold);
+  text-align: start;
+
+  border: 0;
+  border-radius: var(--radius-md);
+  padding-inline: 10px;
+
+  &:is(button) {
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-soft);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  > span {
+    flex: 1;
+  }
+
+  > lucide-icon {
+    color: var(--color-primary-ink);
+  }
+}
+
+.cv-menu-act {
   display: grid;
   place-content: center;
 
-  color: var(--cv-accent);
-  opacity: 0.35;
+  inline-size: 40px;
+  block-size: 40px;
+
+  background: none;
+  color: var(--color-primary-ink);
+
+  border: 0;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-primary-soft);
+  }
 }
 
-.cv-hero-img {
-  display: block;
+.cv-menu-head {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+
+  padding: var(--space-2) 10px var(--space-1);
+}
+
+.cv-menu-sep {
+  block-size: 1px;
+
+  background: var(--border-default);
+
+  margin: var(--space-1) var(--space-2);
+}
+
+// Slim photo banner: the recipe photo sits behind the header; text turns white over a scrim.
+.cv-ph--photo {
+  align-items: flex-end;
+
+  min-block-size: 120px;
+
+  overflow: hidden;
+
+  border-radius: var(--radius-xl);
+  margin-block-start: var(--space-3);
+  padding: var(--space-4);
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    min-block-size: 180px;
+  }
+
+  > :not(.cv-ph-img, .cv-ph-scrim) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .cv-ph-title {
+    color: var(--color-text-on-primary);
+  }
+
+  .cv-chip {
+    background: var(--overlay-backdrop);
+    color: var(--color-text-on-primary);
+
+    backdrop-filter: var(--blur-glass);
+  }
+
+  .cv-ph-acts .cv-icon-btn {
+    color: var(--color-text-on-primary);
+  }
+}
+
+.cv-ph-img {
+  position: absolute;
+  inset: 0;
 
   inline-size: 100%;
   block-size: 100%;
 
   object-fit: cover;
-
-  position: absolute;
-  inset: 0;
 }
 
-.cv-hero-scrim {
+.cv-ph-scrim {
   position: absolute;
   inset: 0;
 
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.2) 35%, rgba(0, 0, 0, 0.75) 100%);
-
-  pointer-events: none;
-}
-
-.cv-hero-top {
-  position: relative;
-
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-
-  gap: var(--space-4);
-  padding: var(--space-5);
-}
-
-.cv-hero-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-
-  gap: var(--space-2);
-}
-
-.cv-hero-badges {
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: 6px;
-}
-
-.cv-hero-badge {
-  color: var(--color-text-on-primary);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: var(--radius-full);
-  padding: 4px 12px;
-
-  backdrop-filter: blur(6px);
-
-  &--approved {
-    background: rgba(20, 184, 166, 0.9);
-  }
-}
-
-.cv-hero-title {
-  color: var(--color-text-on-primary);
-  font-size: 1.75rem;
-  font-weight: var(--fw-extrabold);
-  letter-spacing: var(--tracking-tight);
-  text-wrap: pretty;
-
-  margin: 0;
-
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-}
-
-.cv-hero-timer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  gap: 2px;
-  padding: 10px 18px;
-
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-lg);
-
-  backdrop-filter: blur(10px);
-
-  &--alert {
-    background: rgba(217, 119, 6, 0.85);
-    animation: cv-timer-pulse 1.2s infinite;
-  }
-}
-
-.cv-hero-timer-label {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-medium);
-}
-
-.cv-hero-timer-value {
-  color: var(--color-text-on-primary);
-  font-size: 1.375rem;
-  font-weight: var(--fw-extrabold);
-  font-variant-numeric: tabular-nums;
-}
-
-@keyframes cv-timer-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
-  }
-}
-
-.cv-hero-progress {
-  position: relative;
-
-  padding: 0 var(--space-5) var(--space-5);
-}
-
-.cv-hero-progress-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin-bottom: 6px;
-
-  span:first-child {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-semibold);
-  }
-
-  span:last-child {
-    color: var(--color-text-on-primary);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
-  }
-}
-
-.cv-hero-progress-track {
-  overflow: hidden;
-
-  height: 8px;
-
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-full);
-}
-
-.cv-hero-progress-fill {
-  height: 100%;
-
-  background: linear-gradient(90deg, var(--cv-accent), #5eead4);
-  border-radius: var(--radius-full);
-  box-shadow: 0 0 12px rgba(20, 184, 166, 0.7);
-
-  transition: width 0.4s var(--ease-spring);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Actions row — edit / export controls
-   ───────────────────────────────────────────────────────────────────────── */
-.cv-actions-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.75rem;
-  padding-block-start: var(--space-3);
-}
-
-.export-bar-wrap {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.5rem;
-}
-
-.export-bar-actions {
-  display: none;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.5rem;
-
-  &.expanded {
-    display: flex;
-  }
-}
-
-.export-bar-label {
-  font-size: 0.75rem;
-  color: var(--cv-muted-text);
-
-  margin-inline-end: 0.25rem;
-}
-
-.export-bar-main {
-  display: inline-flex;
-}
-
-.edit-btn {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.5rem;
-
-  background: var(--cv-segment-bg);
-  color: var(--cv-main-text);
-  font-size: 0.875rem;
-
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-full);
-  padding: 0.5rem 0.875rem;
-
-  cursor: pointer;
-  transition:
-    background 0.2s var(--ease-smooth),
-    transform 0.15s var(--ease-spring);
-
-  &:hover {
-    background: var(--cv-chip-bg);
-    transform: scale(1.02);
-  }
+  background: linear-gradient(to top, var(--overlay-backdrop), transparent 70%);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
