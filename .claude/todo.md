@@ -239,15 +239,15 @@
 
 - [x] A0: Discard list confirmed by the Human 2026-10-10 — see "Approved discard list"
 - [ ] A0b: ⛔ Before deleting the Atlas accounts: Human signs up their real production account, Worker promotes it to admin, Human confirms admin login — then F7 deletes hhhh, dan, danw, dan11
-- [ ] A1: Backups — `server/scripts/db-backup.js` local + Atlas; folders in session-state
-- [ ] A2: `server/scripts/cleanup-legacy-data.js` (F1–F7 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
-- [ ] A3: Dry run local + Atlas; paste both count tables in chat
-- [ ] A4: Server guard in `server/routes/generic.js` PUT + tests in `server/test/generic.test.js`
-- [ ] A5: Client net in `kitchen-state.service.ts` `saveRecipe()` (+ spec)
-- [ ] A6: Stop the re-creation of empty v1 registry collections (`server/db.js` or wherever A2 finds it)
-- [ ] A7: Announce in chat → local `--apply` → dry run again = 0 → `validate-all --target=local` = 0 violations
+- [x] A1: Backups — `server/scripts/db-backup.js` local + Atlas; folders in session-state
+- [x] A2: `server/scripts/cleanup-legacy-data.js` (F1–F7 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
+- [x] A3: Dry run local + Atlas; paste both count tables in chat
+- [x] A4: Server guard in `server/routes/generic.js` PUT + tests in `server/test/generic.test.js`
+- [x] A5: Client net in `kitchen-state.service.ts` `saveRecipe()` (+ spec)
+- [x] A6: Stop the re-creation of empty v1 registry collections (`server/db.js` or wherever A2 finds it)
+- [x] A7: Announce in chat → local `--apply` → dry run again = 0 → `validate-all --target=local` = 0 violations
 - [ ] A8: ⛔ Human approves Atlas `--apply` → apply with `--backup-dir` → `validate-all --target=atlas` = 0 violations
-- [ ] A9: Brain gotcha update (`docs/brain/gotchas/backend.md`)
+- [x] A9: Brain gotcha update (`docs/brain/gotchas/backend.md`)
 - [ ] A10: `npm --prefix server test`, `ng build`, `ng test` green; hand the Human the click list (save / favorite / rating / approve on a formerly-null recipe, local then production)
 
 ## Where things live
