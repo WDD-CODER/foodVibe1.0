@@ -2,6 +2,7 @@
 
 Status: active
 Track: code — here (not design)
+Isolated DB: yes
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement
