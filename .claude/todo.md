@@ -202,6 +202,13 @@
 - [ ] P6.4: Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
 - [ ] P6.5: ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
 
+- [ ] A1: `scripts/qa/evidence-server.mjs` — `/health`, `/html2canvas.min.js`, `/save` (+ `html2canvas` devDependency, `bugs/qa-runs/.gitkeep`, `.gitignore` lines)
+- [ ] A2: `/shot` with Playwright + API login + sessionStorage seeding; 503 message when chromium is missing
+- [ ] A3: `scripts/qa/qa-up.ps1` (env.slot generation, port checks, 3 detached processes, pid file, waits, summary line) + `scripts/qa/qa-down.ps1`
+- [ ] A4: `package.json` scripts `qa:up` / `qa:down`; `docs/qa/README.md` with the kickoff prompt
+- [ ] A6: Nightly scripts `qa-nightly-up.ps1`, `qa-nightly-down.ps1`, `qa-schedule.ps1` (+ idempotent `qa-up.ps1`); `docs/qa/README.md` gains the one-time QA-checkout setup (below) and the nightly prompt
+- [ ] A5: Manual proof on Windows: `npm run qa:up` → health ok → open `http://localhost:4206/shot?run=smoke&name=inv-m&url=/inventory/list&w=375&h=812&full=1` → PNG exists and shows the logged-in list → `npm run qa:down` → ports free. Paste the three outputs in the PR.
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
