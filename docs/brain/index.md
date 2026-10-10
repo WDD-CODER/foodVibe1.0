@@ -21,6 +21,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | About to make an architectural choice | `invariants.md`, then `decisions/` — check for an existing rule/ADR before deciding again |
 | Something behaves surprisingly / a trap cost time | `gotchas.md` first |
 | Need to know what failed, when, for whom (logs) | [[0016-logging-sink-mongo]] — every warn/error lands in Mongo `app_logs` |
+| Porting a design / a new Claude Design handoff | [[0019-design-port-from-handoff]] — handoffs are the source; `design-feature-inventory` is the lost-feature gate |
 | Unfamiliar domain term | `glossary.md` |
 | Need rules/conventions (not history) | `AGENTS.md` and `docs/agent/*.md` — not this folder |
 
