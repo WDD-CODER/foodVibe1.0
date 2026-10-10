@@ -20,16 +20,12 @@
   }
 }
 
-.card-icon {
-  color: var(--color-primary);
-}
-
 .card-title {
   display: flex;
   align-items: center;
 
   gap: 0.75rem;
-  margin-block-end: 1rem;
+  margin-block-end: 1.5rem;
   padding-block-end: 1rem;
 
   border-block-end: 1px solid var(--border-default);
@@ -40,6 +36,11 @@
     font-size: 1.125rem;
     font-weight: 700;
     color: var(--color-text-main);
+  }
+
+  // A description sits closer to the title than the add field does.
+  &:has(+ .card-desc) {
+    margin-block-end: 1rem;
   }
 }
 
@@ -119,4 +120,20 @@
   border-radius: var(--radius-md);
 
   font-style: italic;
+}
+
+.icon-primary {
+  color: var(--color-primary);
+}
+
+.icon-success {
+  color: var(--color-success);
+}
+
+.icon-danger {
+  color: var(--color-danger);
+}
+
+.icon-info {
+  color: var(--color-info);
 }

@@ -30,9 +30,6 @@ const DEMO_FILE_MAP = {
   suppliers:        'demo-suppliers.json',
   equipment:           'demo-equipment.json',
   venues:           'demo-venues.json',
-  KITCHEN_PREPARATIONS:     'demo-kitchen-preparations.json',
-  KITCHEN_LABELS:           'demo-labels.json',
-  MENU_SECTION_CATEGORIES:  'demo-section-categories.json',
   menuEvents:          'demo-menu-events.json',
 };
 

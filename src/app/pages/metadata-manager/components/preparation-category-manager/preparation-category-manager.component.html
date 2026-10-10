@@ -1,98 +1,16 @@
-<section class="manager-card">
-  <div class="card-title">
-    <lucide-icon name="cooking-pot" class="card-icon"></lucide-icon>
-    <h2>{{ 'metadata_prep_categories' | translatePipe }}</h2>
-  </div>
-  <p class="card-desc">{{ 'metadata_preparations_desc' | translatePipe }}</p>
-
-  <div class="input-group">
-    <input
-      #newInput
-      type="text"
-      [placeholder]="'metadata_add_category' | translatePipe"
-      (keyup.enter)="onAdd(newInput.value, newInput)"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="off"
-      spellcheck="false"
-    />
-    <button
-      type="button"
-      class="c-btn-primary"
-      (click)="onAdd(newInput.value, newInput)"
-      [disabled]="!isLoggedIn()"
-      [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-    >
-      {{ 'metadata_add' | translatePipe }}
-    </button>
-  </div>
-
-  <div class="list-container">
-    @if (categories().length > 0) {
-      <div class="c-tap-chip-group">
-        @for (key of categories(); track key) {
-          @if (editingKey_() === key) {
-            <input
-              #renameInput
-              type="text"
-              class="inline-edit-input"
-              [value]="key | translatePipe"
-              (blur)="onRenameBlur(key, renameInput.value)"
-              (keydown.enter)="renameInput.blur()"
-              autocomplete="off"
-              autocorrect="off"
-              autocapitalize="off"
-              spellcheck="false"
-            />
-          } @else if (canEdit(key)) {
-            <button
-              type="button"
-              class="c-tap-chip"
-              [attr.aria-expanded]="menuKey_() === key"
-              (click)="onOpenMenu($event, key)"
-              (dblclick)="onStartRename(key)"
-            >
-              {{ key | translatePipe }}
-            </button>
-          } @else {
-            <span class="c-tap-chip is-locked">
-              {{ key | translatePipe }}
-              <lucide-icon
-                name="lock"
-                [size]="14"
-                [attr.title]="'taxonomy_shared_admin_only' | translatePipe"
-                [attr.aria-label]="'taxonomy_shared_admin_only' | translatePipe"
-              ></lucide-icon>
-            </span>
-          }
-        }
-      </div>
-    } @else {
-      <div class="empty-state">{{ 'metadata_no_prep_categories' | translatePipe }}</div>
-    }
-  </div>
-</section>
-
-<!-- Outside the card: its backdrop-filter would trap the position:fixed popover. -->
-<app-row-actions-menu [anchored]="true" (closed)="menuKey_.set(null)">
-  @if (menuKey_(); as key) {
-    <button
-      type="button"
-      class="c-icon-btn"
-      (click)="onStartRename(key)"
-      [attr.aria-label]="'edit' | translatePipe"
-      [attr.title]="'edit' | translatePipe"
-    >
-      <lucide-icon name="pencil" [size]="18"></lucide-icon>
-    </button>
-    <button
-      type="button"
-      class="c-icon-btn danger"
-      (click)="onMenuDelete(key)"
-      [attr.aria-label]="'delete' | translatePipe"
-      [attr.title]="'delete' | translatePipe"
-    >
-      <lucide-icon name="trash-2" [size]="18"></lucide-icon>
-    </button>
-  }
-</app-row-actions-menu>
+<app-taxonomy-kind-manager
+  [items]="categories()"
+  titleKey="metadata_prep_categories"
+  icon="cooking-pot"
+  descKey="metadata_preparations_desc"
+  placeholderKey="metadata_add_category"
+  addLabelKey="metadata_add"
+  emptyKey="metadata_no_prep_categories"
+  [lockReason]="lockReason"
+  [inlineRename]="true"
+  [renameValue]="translateKey"
+  (added)="onAdd($event.value, $event.input)"
+  (editRequested)="requireSignIn()"
+  (renamed)="onRenameBlur($event.item, $event.value)"
+  (removeRequested)="onRemove($event)"
+/>

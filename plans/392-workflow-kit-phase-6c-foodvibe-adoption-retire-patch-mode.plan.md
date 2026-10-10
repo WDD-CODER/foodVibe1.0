@@ -1,6 +1,7 @@
 # Plan 392 — Workflow Kit Phase 6C: FoodVibe Adoption and Retire Patch Mode
 
 Status: draft
+Track: code — here (not design)
 Snapshot: c186c9c0
 
 ## Problem Statement

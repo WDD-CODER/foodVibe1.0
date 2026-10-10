@@ -1,16 +1,4 @@
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  Injector,
-  OnInit,
-  signal,
-  viewChild
-} from '@angular/core'
-import { LucideAngularModule } from 'lucide-angular'
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { RecipeDataService } from '@services/recipe-data.service'
@@ -22,14 +10,14 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
-import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { TaxonomyKindManagerComponent } from '../taxonomy-kind-manager/taxonomy-kind-manager.component'
 
+/** Preparation categories (`prepCategory` terms): the generic card plus the recipe-usage rules. */
 @Component({
   selector: 'app-preparation-category-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, RowActionsMenuComponent],
+  imports: [TaxonomyKindManagerComponent],
   templateUrl: './preparation-category-manager.component.html',
-  styleUrl: './preparation-category-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PreparationCategoryManagerComponent implements OnInit {
@@ -41,18 +29,15 @@ export class PreparationCategoryManagerComponent implements OnInit {
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
   private readonly translationKeyModal = inject(TranslationKeyModalService)
-  protected readonly isLoggedIn = inject(UserService).isLoggedIn
+  private readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly authModal = inject(AuthModalService)
   private readonly taxonomy = inject(TaxonomyStore)
-  private readonly injector = inject(Injector)
 
   protected readonly categories = this.prepRegistry.preparationCategories_
-  protected readonly editingKey_ = signal<string | null>(null)
-  /** Category whose tap menu (edit / delete) is open — plan 340. */
-  protected readonly menuKey_ = signal<string | null>(null)
-
-  private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
-  private readonly renameInput = viewChild<ElementRef<HTMLInputElement>>('renameInput')
+  /** The rename field starts from the category's Hebrew label, not its key. */
+  protected readonly translateKey = (key: string): string => this.translation.translate(key)
+  protected readonly lockReason = (key: string): string | null =>
+    this.canEdit(key) ? null : 'taxonomy_shared_admin_only'
 
   ngOnInit(): void {
     void this.prepRegistry.ensureLoaded()
@@ -62,7 +47,7 @@ export class PreparationCategoryManagerComponent implements OnInit {
     void this.dishData.ensureLoaded()
   }
 
-  private requireSignIn(): boolean {
+  requireSignIn(): boolean {
     if (this.isLoggedIn()) return true
     this.userMsg.onSetWarningMsg(this.translation.translate('sign_in_to_use'))
     this.authModal.open('sign-in')
@@ -128,13 +113,6 @@ export class PreparationCategoryManagerComponent implements OnInit {
     this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_updated_success'))
   }
 
-  onStartRename(key: string): void {
-    this.itemMenu().close()
-    if (!this.requireSignIn() || !this.canEdit(key)) return
-    this.editingKey_.set(key)
-    afterNextRender(() => this.renameInput()?.nativeElement.select(), { injector: this.injector })
-  }
-
   /** Shared terms are read-only except for an admin (Plan 321 Phase 3); own terms are always editable. */
   canEdit(key: string): boolean {
     const term = this.taxonomy.find('prepCategory', key)
@@ -142,7 +120,6 @@ export class PreparationCategoryManagerComponent implements OnInit {
   }
 
   async onRenameBlur(oldKey: string, newValue: string): Promise<void> {
-    this.editingKey_.set(null)
     const trimmed = (newValue ?? '').trim()
     if (!trimmed) return
 
@@ -163,16 +140,5 @@ export class PreparationCategoryManagerComponent implements OnInit {
 
     await this.prepRegistry.renameCategory(oldKey, oldKey, trimmed)
     this.userMsg.onSetSuccessMsg(this.translation.translate('metadata_updated_success'))
-  }
-
-  //TAP MENU (plan 340)
-  protected onOpenMenu(event: MouseEvent, key: string): void {
-    this.menuKey_.set(key)
-    this.itemMenu().open(event.currentTarget as HTMLElement)
-  }
-
-  protected onMenuDelete(key: string): void {
-    this.itemMenu().close()
-    void this.onRemove(key)
   }
 }

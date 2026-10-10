@@ -1,6 +1,7 @@
 # Plan 372 — Venues B: multiple contacts and an interactive days/hours picker
 
 Status: draft
+Track: split — look in Claude Design; schema, build:schemas, old-hours parsing here
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement

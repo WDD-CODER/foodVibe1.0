@@ -1,6 +1,7 @@
 # Plan 366 — Delete a supplier that's in use: warning, then admin-only "only me / everyone"
 
 Status: draft
+Track: code — here (not design)
 Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
 
 ## Problem Statement

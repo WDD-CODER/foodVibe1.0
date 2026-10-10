@@ -36,28 +36,15 @@ const COLLECTIONS = [
   { name: 'TRASH_MENU_EVENTS',        userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'VERSION_HISTORY',          userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'activity_log',             userData: true,  cloneable: false, backup: true,  searchable: false },
-  { name: 'KITCHEN_UNITS',            userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'KITCHEN_PREPARATIONS',     userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'KITCHEN_CATEGORIES',       userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'KITCHEN_ALLERGENS',        userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'KITCHEN_LABELS',           userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'KITCHEN_COURSES',          userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'MENU_TYPES',               userData: true,  cloneable: true,  backup: true,  searchable: false },
-  // MENU_EVENT_TYPES / EQUIPMENT_CUSTOM_CATEGORIES: drift found in Plan 321 Phase 1
-  // Reality Check — present in ALL_USER_ENTITY_TYPES but missing from CLONEABLE_TYPES
-  // and BACKUP_ENTITY_TYPES (an oversight, not a documented design choice — nothing
-  // distinguishes these two small custom-category registries from the others above).
-  // Fixed here: both now cloned and backed up like every other registry.
-  { name: 'MENU_EVENT_TYPES',         userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'MENU_SECTION_CATEGORIES',  userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'EQUIPMENT_CUSTOM_CATEGORIES', userData: true, cloneable: true, backup: true, searchable: false },
+  // The v1 single-doc registries (KITCHEN_UNITS/PREPARATIONS/CATEGORIES/ALLERGENS/LABELS/
+  // COURSES, MENU_TYPES, MENU_EVENT_TYPES, MENU_SECTION_CATEGORIES, EQUIPMENT_CUSTOM_CATEGORIES)
+  // were replaced by taxonomyTerms (Plan 321 Phase 3) and dropped by migration 0004.
+  // Plan 321 Phase 3: one doc per taxonomy term. Not cloneable — read live as master ∪ own
+  // (generic.js ownerFilter).
+  { name: 'taxonomyTerms',            userData: true,  cloneable: false, backup: true,  searchable: false },
   // Plan 322 M4: per-user Hebrew-dictionary overrides. Not cloneable — signup starts with none;
   // the shared '__global__' pseudo-user doc (own routes, see generic.js) is the admin-editable
   // layer every user merges in at runtime, separate from this per-user personal layer.
-  // Plan 321 Phase 3: one doc per taxonomy term. Not cloneable — read live as master ∪ own
-  // (generic.js ownerFilter). backup stays false until the client cutover (P3.4) adds it to
-  // the client's BACKUP_ENTITY_TYPES (check-backup-entity-types.mjs compares the two).
-  { name: 'taxonomyTerms',            userData: true,  cloneable: false, backup: false, searchable: false },
   { name: 'DICTIONARY_OVERRIDES',     userData: true,  cloneable: false, backup: true,  searchable: false },
 ]
 

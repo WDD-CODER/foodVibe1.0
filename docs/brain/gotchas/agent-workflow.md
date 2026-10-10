@@ -315,3 +315,14 @@ only the Bash tool's command text triggers it.
 **Why the obvious fix is wrong:** "Re-read the ADRs before asking" is the judgment call that failed. The Human answered the narrow question asked, without being shown the rule it broke, and a session-state note is never checked again.
 
 **What to do instead:** Ask any question that could break an invariant as INV-n · current rule · proposed change · who loses what (`docs/brain/invariants.md`). A yes needs the Human's explicit `approve arch change INV-n`, a superseding ADR and an `Arch-approved:` line in the plan's `## Architecture Impact`. `scope-check.mjs --arch --diff` warns about any "Human decision" note that names no INV/ADR. See [[0017-architecture-invariants-gate]].
+
+### Slot dev server goes stale or answers only on ::1
+
+**What hurt:** In wt-2, edits were saved and `ng build` passed, but http://localhost:4202 kept serving the old bundle. The `ng serve` file watcher had silently stopped (its log hadn't been written to for ~30 min), so the Human was validating old code. After a restart, the server listened only on `[::1]:4202`: `curl localhost` worked, but `127.0.0.1:4202` returned nothing, and the Human's browser couldn't open the page.
+
+**Why the obvious fix is wrong:** "Build passes" and "port is in use" both look like the server is fine, and they aren't proof. Restarting it from a Claude background task is also a trap: the task is killed at the 2-hour limit (the port can stay held), and it isn't recorded in `.claude/.slot-pids`.
+
+**What to do instead:**
+1. Before asking the Human to look at UI on a slot port, prove the live bundle has the change: fetch the page's JS chunks and grep them for a new class name, or check that `.claude/fe.log` shows a rebuild after your last edit.
+2. If it's stale, restart it detached, so it outlives the session, with `--host 0.0.0.0` so it answers on both IPv4 and IPv6 localhost. From PowerShell: `Start-Process node -ArgumentList '"<repo>\node_modules\@angular\cli\bin\ng.js"','serve','-c','slot','--port','420N','--host','0.0.0.0' -WindowStyle Hidden`.
+3. Check both `http://localhost:420N` and `http://127.0.0.1:420N` return 200 before handing over.

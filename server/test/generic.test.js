@@ -315,27 +315,27 @@ describe('PUT /api/v1/data/:type (whole-collection replace)', () => {
 
   it('CHARACTERIZATION: requires the X-Confirm-Replace header (on an allowlisted type)', async () => {
     const res = await request(app)
-      .put('/api/v1/data/KITCHEN_PREPARATIONS')
+      .put('/api/v1/data/TRASH_PRODUCTS')
       .set('Authorization', `Bearer ${tokenA()}`)
       .send([{ _id: 'u1' }]);
     expect(res.status).toBe(400);
   });
 
   it('CHARACTERIZATION: replaces the caller\'s entire collection, reassigns a colliding id', async () => {
-    await testDb().collection('KITCHEN_PREPARATIONS').insertMany([
+    await testDb().collection('TRASH_PRODUCTS').insertMany([
       { _id: 'old1', userId: 'userA' },
       { _id: 'taken', userId: 'userB' },
     ]);
     const res = await request(app)
-      .put('/api/v1/data/KITCHEN_PREPARATIONS')
+      .put('/api/v1/data/TRASH_PRODUCTS')
       .set('Authorization', `Bearer ${tokenA()}`)
       .set('X-Confirm-Replace', 'true')
       .send([{ _id: 'taken', nameHebrew: 'x' }]);
     expect(res.status).toBe(200);
-    const mine = await testDb().collection('KITCHEN_PREPARATIONS').find({ userId: 'userA' }).toArray();
+    const mine = await testDb().collection('TRASH_PRODUCTS').find({ userId: 'userA' }).toArray();
     expect(mine).toHaveLength(1);
     expect(mine[0]._id).not.toBe('taken'); // reassigned — 'taken' still belongs to userB
-    const othersStillIntact = await testDb().collection('KITCHEN_PREPARATIONS').findOne({ _id: 'taken', userId: 'userB' });
+    const othersStillIntact = await testDb().collection('TRASH_PRODUCTS').findOne({ _id: 'taken', userId: 'userB' });
     expect(othersStillIntact).not.toBeNull();
   });
 });

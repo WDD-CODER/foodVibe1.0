@@ -1,6 +1,7 @@
 # Plan 386 — One write-ownership rule (canWrite) + "remove for me" / "rename for me" on shared terms
 
 Status: draft
+Track: code — here (not design)
 Snapshot: adb954d97afb90d0874b524731ac7e63297d57d4
 
 ## Problem Statement

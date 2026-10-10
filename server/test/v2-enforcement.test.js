@@ -64,8 +64,8 @@ describe('v2 schema enforcement', () => {
     expect(bad.status).toBe(400);
   });
 
-  it('collections without a v2 schema yet (KITCHEN_PREPARATIONS) are not validated', async () => {
-    const res = await request(app).post('/api/v1/data/KITCHEN_PREPARATIONS').set(auth()).send({ items: ['x'] });
+  it('collections without a v2 schema (activity_log) are not validated', async () => {
+    const res = await request(app).post('/api/v1/data/activity_log').set(auth()).send({ items: ['x'] });
     expect(res.status).toBe(201);
   });
 

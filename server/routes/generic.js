@@ -303,8 +303,7 @@ router.get('/:type/count', optionalToken, async (req, res) => {
 // GET /api/v1/data/DICTIONARY_OVERRIDES/global
 // Plan 322 M4 — see the matching PUT route further below for the full comment.
 // Defined here, BEFORE the generic `GET /:type/:id` below, which would otherwise
-// treat "global" as an :id and swallow this route (same Express route-ordering
-// hazard documented at registry-rename-master further down).
+// treat "global" as an :id and swallow this route (Express matches top-to-bottom).
 // ---------------------------------------------------------------------------
 router.get('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
   try {
@@ -400,143 +399,6 @@ router.post('/:type', verifyToken, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// PUT /api/v1/data/:type/registry-rename-master
-//
-// Plan 322: renames a key in-place inside __master__'s own metadata registry
-// doc (KITCHEN_LABELS/COURSES items are {key,...} objects; CATEGORIES/ALLERGENS
-// items are plain strings), then bumps the master version. Only corrects the
-// template for future signups and this caller's own already-cascaded copy —
-// it does NOT retroactively rename the key in other existing users' own
-// registries or their recipes/products, same limitation push-to-master below
-// already has for recipes (Rule 3 / additive-only sync).
-//
-// Defined BEFORE the generic `PUT /:type/:id` route below — Express matches
-// top-to-bottom, and `/:type/:id` would otherwise swallow this by treating
-// "registry-rename-master" as the :id.
-//
-// DELIBERATELY OPEN TO ANY SIGNED-IN USER, same tradeoff and same "Human has
-// accepted this for the current single-operator phase" as push-to-master
-// below — the client UI is what gates this behind an admin-only prompt
-// (metadata-manager.page.component.ts's onRenameMetadata). To lock it down
-// here too, uncomment:
-//
-//   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Forbidden' })
-//
-// ---------------------------------------------------------------------------
-const REGISTRY_RENAME_PUSHABLE_TYPES = new Set(['KITCHEN_LABELS', 'KITCHEN_COURSES', 'KITCHEN_CATEGORIES', 'KITCHEN_ALLERGENS']);
-const REGISTRY_OBJECT_ITEM_TYPES = new Set(['KITCHEN_LABELS', 'KITCHEN_COURSES']);
-
-router.put('/:type/registry-rename-master', verifyToken, requireAdmin, async (req, res) => {
-  try {
-    if (!REGISTRY_RENAME_PUSHABLE_TYPES.has(req.params.type)) {
-      return res.status(400).json({ error: `Type ${req.params.type} has no master registry to rename` });
-    }
-    const { oldKey, newKey, itemData } = req.body || {};
-    if (typeof oldKey !== 'string' || typeof newKey !== 'string' || !oldKey.trim() || !newKey.trim()) {
-      return res.status(400).json({ error: 'oldKey and newKey are required strings' });
-    }
-    const isObjectType = REGISTRY_OBJECT_ITEM_TYPES.has(req.params.type);
-    const result = isObjectType
-      ? await col(req.params.type).updateOne(
-          { userId: '__master__', 'items.key': oldKey },
-          { $set: { 'items.$.key': newKey } }
-        )
-      : await col(req.params.type).updateOne(
-          { userId: '__master__' },
-          { $set: { 'items.$[elem]': newKey } },
-          { arrayFilters: [{ elem: oldKey }] }
-        );
-    // 2026-09-30 fix: `oldKey` not found in master is the COMMON case, not an edge case — it's
-    // every label/course/category/allergen an admin created themselves and is now pushing to
-    // everyone for the first time. Rather than 404 (which silently discarded the whole "save for
-    // everyone" choice — the admin's own copy still saved, but nothing ever reached master),
-    // add it as a new master entry instead, guarding against a duplicate if `newKey` is
-    // somehow already there.
-    if (result.matchedCount === 0) {
-      const already = isObjectType
-        ? await col(req.params.type).findOne({ userId: '__master__', 'items.key': newKey })
-        : await col(req.params.type).findOne({ userId: '__master__', items: newKey });
-      if (!already) {
-        const newItem = isObjectType
-          ? req.params.type === 'KITCHEN_LABELS'
-            ? { key: newKey, color: itemData?.color || '#78716C', autoTriggers: itemData?.autoTriggers ?? [] }
-            : { key: newKey, color: itemData?.color || '#78716C' }
-          : newKey;
-        await col(req.params.type).updateOne(
-          { userId: '__master__' },
-          { $push: { items: newItem } },
-          { upsert: true }
-        );
-      }
-    }
-    await bumpMasterVersion();
-    res.json({ ok: true });
-  } catch (err) {
-    req.log.error({ err, event: 'data.registry_rename_master.failed' });
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// ---------------------------------------------------------------------------
-// PUT /api/v1/data/:type/registry-delete-master
-//
-// Plan 322 M10. Mirror of registry-rename-master above, for DELETE. Removes
-// `key` from __master__'s own registry doc (labels/courses/categories/
-// allergens only), then — Human-explicitly-requested, 2026-09-30, dev-only,
-// same class of cross-user exception as purge-ingredient-everywhere further
-// down — ALSO strips this key from every OTHER user's own recipes/dishes/
-// products, not just the shared registry template. Unlike products (which
-// get a fresh _id per user clone, needing a _masterId-based two-hop lookup),
-// a label/course/category/allergen key IS the shared identifier across every
-// user's own registry doc verbatim, so this is a single direct bulk update,
-// no per-user resolution needed.
-//
-// Defined BEFORE the generic `PUT /:type/:id` route below for the same
-// Express route-ordering reason as registry-rename-master above.
-// ---------------------------------------------------------------------------
-router.put('/:type/registry-delete-master', verifyToken, requireAdmin, async (req, res) => {
-  try {
-    if (!REGISTRY_RENAME_PUSHABLE_TYPES.has(req.params.type)) {
-      return res.status(400).json({ error: `Type ${req.params.type} has no master registry to delete from` });
-    }
-    const { key } = req.body || {};
-    if (typeof key !== 'string' || !key.trim()) {
-      return res.status(400).json({ error: 'key is required' });
-    }
-
-    const isObjectType = REGISTRY_OBJECT_ITEM_TYPES.has(req.params.type);
-    await col(req.params.type).updateOne(
-      { userId: '__master__' },
-      isObjectType ? { $pull: { items: { key } } } : { $pull: { items: key } }
-    );
-    await bumpMasterVersion();
-
-    if (req.params.type === 'KITCHEN_LABELS') {
-      await Promise.all(
-        ['recipes', 'dishes'].map((t) =>
-          col(t).updateMany({ userId: { $ne: '__master__' } }, { $pull: { labels: key, autoLabels: key } })
-        )
-      );
-    } else if (req.params.type === 'KITCHEN_COURSES') {
-      await Promise.all(
-        ['recipes', 'dishes'].map((t) =>
-          col(t).updateMany({ userId: { $ne: '__master__' }, course: key }, { $set: { course: '' } })
-        )
-      );
-    } else if (req.params.type === 'KITCHEN_CATEGORIES') {
-      await col('products').updateMany({ userId: { $ne: '__master__' } }, { $pull: { categories: key } });
-    } else if (req.params.type === 'KITCHEN_ALLERGENS') {
-      await col('products').updateMany({ userId: { $ne: '__master__' } }, { $pull: { allergens: key } });
-    }
-
-    res.json({ ok: true });
-  } catch (err) {
-    req.log.error({ err, event: 'data.registry_delete_master.failed' });
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// ---------------------------------------------------------------------------
 // PUT /api/v1/data/DICTIONARY_OVERRIDES/global
 //
 // Plan 322 M4: the shared Hebrew-dictionary override layer every client merges
@@ -549,8 +411,8 @@ router.put('/:type/registry-delete-master', verifyToken, requireAdmin, async (re
 // The matching GET is defined earlier, above, next to GET /:type/:id — Express
 // route-ordering requires it there (see that route's own comment).
 //
-// Defined BEFORE the generic `PUT /:type/:id` route below for the same
-// Express route-ordering reason as registry-rename-master above.
+// Defined BEFORE the generic `PUT /:type/:id` route below — Express matches
+// top-to-bottom, and `/:type/:id` would otherwise treat "global" as the :id.
 // ---------------------------------------------------------------------------
 router.put('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
   try {
@@ -980,14 +842,12 @@ async function replaceCollectionFallback(type, userId, docs) {
 // Body must be an array of entity objects. Each must have _id.
 //
 // Restricted (Plan 321 Phase 1) to the specific collections that actually still need
-// atomic whole-collection replace today: the one remaining single-doc-array registry
-// (KITCHEN_PREPARATIONS — the rest move to TaxonomyStore in Phase 3) and TRASH_*/
-// VERSION_HISTORY clear-all/restore-all/trim flows. Every real entity-data collection
+// atomic whole-collection replace today: the TRASH_*/VERSION_HISTORY clear-all/
+// restore-all/trim flows (the registries moved to taxonomyTerms in Phase 3). Every real entity-data collection
 // (products, recipes, ...) must go through per-document POST/PUT/DELETE —
 // wiping a user's whole catalog in one call was never an intended use of this route.
 // ---------------------------------------------------------------------------
 const REPLACEABLE_TYPES = new Set([
-  'KITCHEN_PREPARATIONS',
   'TRASH_RECIPES', 'TRASH_DISHES', 'TRASH_PRODUCTS', 'TRASH_EQUIPMENT', 'TRASH_VENUES', 'TRASH_MENU_EVENTS',
   'VERSION_HISTORY',
 ]);

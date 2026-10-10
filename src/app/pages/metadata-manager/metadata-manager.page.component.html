@@ -13,70 +13,72 @@
   </nav>
 
   <div class="admin-grid">
-    <ng-container
-      *ngTemplateOutlet="
-        managerCard;
-        context: {
-          title: 'metadata_units_and_conversions_title',
-          icon: 'scale',
-          colorClass: 'icon-success',
-          items: allUnitKeys_(),
-          type: 'unit'
-        }
-      "
-    ></ng-container>
+    <app-taxonomy-kind-manager
+      id="mm-sec-unit"
+      [style.order]="orderFor('mm-sec-unit')"
+      [items]="allUnitKeys_()"
+      titleKey="metadata_units_and_conversions_title"
+      icon="scale"
+      iconClass="icon-success"
+      [lockReason]="lockReasonFor.unit"
+      [canEdit]="false"
+      (added)="onAddMetadata($event.value, 'unit', $event.input)"
+      (editRequested)="onRenameMetadata($event, 'unit')"
+      (removeRequested)="onRemoveMetadata($event, 'unit')"
+    />
 
-    <ng-container
-      *ngTemplateOutlet="
-        managerCard;
-        context: {
-          title: 'metadata_product_categories_title',
-          icon: 'tag',
-          colorClass: 'icon-primary',
-          items: allCategories_(),
-          type: 'category'
-        }
-      "
-    ></ng-container>
+    <app-taxonomy-kind-manager
+      id="mm-sec-category"
+      [style.order]="orderFor('mm-sec-category')"
+      [items]="allCategories_()"
+      titleKey="metadata_product_categories_title"
+      icon="tag"
+      iconClass="icon-primary"
+      [lockReason]="lockReasonFor.category"
+      (added)="onAddMetadata($event.value, 'category', $event.input)"
+      (editRequested)="onRenameMetadata($event, 'category')"
+      (removeRequested)="onRemoveMetadata($event, 'category')"
+    />
 
-    <ng-container
-      *ngTemplateOutlet="
-        managerCard;
-        context: {
-          title: 'metadata_global_allergens_title',
-          icon: 'alert-triangle',
-          colorClass: 'icon-danger',
-          items: allAllergens_(),
-          type: 'allergen'
-        }
-      "
-    ></ng-container>
+    <app-taxonomy-kind-manager
+      id="mm-sec-allergen"
+      [style.order]="orderFor('mm-sec-allergen')"
+      [items]="allAllergens_()"
+      titleKey="metadata_global_allergens_title"
+      icon="alert-triangle"
+      iconClass="icon-danger"
+      [lockReason]="lockReasonFor.allergen"
+      (added)="onAddMetadata($event.value, 'allergen', $event.input)"
+      (editRequested)="onRenameMetadata($event, 'allergen')"
+      (removeRequested)="onRemoveMetadata($event, 'allergen')"
+    />
 
-    <ng-container
-      *ngTemplateOutlet="
-        managerCard;
-        context: {
-          title: 'metadata_recipe_labels_title',
-          icon: 'tags',
-          colorClass: 'icon-info',
-          items: allLabelKeys_(),
-          type: 'label'
-        }
-      "
-    ></ng-container>
+    <app-taxonomy-kind-manager
+      id="mm-sec-label"
+      [style.order]="orderFor('mm-sec-label')"
+      [items]="allLabelKeys_()"
+      titleKey="metadata_recipe_labels_title"
+      icon="tags"
+      iconClass="icon-info"
+      [lockReason]="lockReasonFor.label"
+      [dotColor]="labelColor"
+      (added)="onAddMetadata($event.value, 'label', $event.input)"
+      (editRequested)="onRenameMetadata($event, 'label')"
+      (removeRequested)="onRemoveMetadata($event, 'label')"
+    />
 
-    <ng-container
-      *ngTemplateOutlet="
-        managerCard;
-        context: {
-          title: 'metadata_recipe_courses_title',
-          icon: 'utensils',
-          colorClass: 'icon-info',
-          items: allCourseKeys_(),
-          type: 'course'
-        }
-      "
-    ></ng-container>
+    <app-taxonomy-kind-manager
+      id="mm-sec-course"
+      [style.order]="orderFor('mm-sec-course')"
+      [items]="allCourseKeys_()"
+      titleKey="metadata_recipe_courses_title"
+      icon="utensils"
+      iconClass="icon-info"
+      [lockReason]="lockReasonFor.course"
+      (added)="onAddMetadata($event.value, 'course', $event.input)"
+      (editRequested)="onRenameMetadata($event, 'course')"
+      (removeRequested)="onRemoveMetadata($event, 'course')"
+    />
 
     <section class="manager-card menu-types-card" id="mm-sec-menu-type" [style.order]="orderFor('mm-sec-menu-type')">
       <div class="card-title">
@@ -115,8 +117,8 @@
                   <button
                     type="button"
                     class="c-tap-chip menu-type-name"
-                    [attr.aria-expanded]="isMenuOpenFor(def.key, 'menuType')"
-                    (click)="openItemMenu($event, def.key, 'menuType')"
+                    [attr.aria-expanded]="menuTypeMenuKey_() === def.key"
+                    (click)="openMenuTypeMenu($event, def.key)"
                   >
                     {{ def.key }}
                   </button>
@@ -159,25 +161,23 @@
     <app-ai-model-manager id="mm-sec-ai-models" [style.order]="orderFor('mm-sec-ai-models')" />
   </div>
 
-  <!-- One tap menu for every chip on this page. It sits outside the cards because their
-       backdrop-filter would trap a position:fixed popover. -->
-  <app-row-actions-menu [anchored]="true" (closed)="menuTarget_.set(null)">
-    @if (menuTarget_(); as target) {
-      @if (target.type !== 'unit') {
-        <button
-          type="button"
-          class="c-icon-btn"
-          (click)="onMenuEdit(target)"
-          [attr.aria-label]="'edit' | translatePipe"
-          [attr.title]="'edit' | translatePipe"
-        >
-          <lucide-icon name="pencil" [size]="18"></lucide-icon>
-        </button>
-      }
+  <!-- The menu types' tap menu. It sits outside the card because its backdrop-filter would
+       trap a position:fixed popover. -->
+  <app-row-actions-menu [anchored]="true" (closed)="menuTypeMenuKey_.set(null)">
+    @if (menuTypeMenuKey_(); as key) {
+      <button
+        type="button"
+        class="c-icon-btn"
+        (click)="onMenuTypeMenuEdit(key)"
+        [attr.aria-label]="'edit' | translatePipe"
+        [attr.title]="'edit' | translatePipe"
+      >
+        <lucide-icon name="pencil" [size]="18"></lucide-icon>
+      </button>
       <button
         type="button"
         class="c-icon-btn danger"
-        (click)="onMenuDelete(target)"
+        (click)="onMenuTypeMenuDelete(key)"
         [attr.aria-label]="'delete' | translatePipe"
         [attr.title]="'delete' | translatePipe"
       >
@@ -186,86 +186,3 @@
     }
   </app-row-actions-menu>
 </div>
-
-<ng-template
-  #managerCard
-  let-title="title"
-  let-icon="icon"
-  let-colorClass="colorClass"
-  let-items="items"
-  let-type="type"
->
-  <section
-    class="manager-card"
-    [attr.data-type]="type"
-    [attr.id]="'mm-sec-' + type"
-    [style.order]="orderFor('mm-sec-' + type)"
-  >
-    <div class="card-title">
-      <lucide-icon [name]="icon" [class]="colorClass"></lucide-icon>
-      <h2>{{ title | translatePipe }}</h2>
-    </div>
-
-    <div class="input-group">
-      <input
-        #newInput
-        type="text"
-        [placeholder]="('add' | translatePipe) + ' ' + (title | translatePipe) + '...'"
-        (keyup.enter)="onAddMetadata(newInput.value, type, newInput)"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        spellcheck="false"
-      />
-
-      <button
-        (click)="onAddMetadata(newInput.value, type, newInput)"
-        class="c-btn-primary"
-        [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-      >
-        {{ 'add' | translatePipe }}
-      </button>
-    </div>
-
-    <div class="list-container">
-      @if (items.length > 0) {
-        <div class="c-tap-chip-group">
-          @for (item of items; track item) {
-            @if (lockReasonKey(type, item); as lockKey) {
-              <span class="c-tap-chip is-locked">
-                @if (type === 'label') {
-                  <span class="c-tap-chip__dot" [style.background-color]="getLabelColor(item)"></span>
-                }
-                {{ item | translatePipe }}
-                <lucide-icon
-                  name="lock"
-                  [size]="14"
-                  [attr.title]="lockKey | translatePipe"
-                  [attr.aria-label]="lockKey | translatePipe"
-                ></lucide-icon>
-              </span>
-            } @else {
-              <button
-                type="button"
-                class="c-tap-chip"
-                [attr.aria-expanded]="isMenuOpenFor(item, type)"
-                (click)="openItemMenu($event, item, type)"
-              >
-                @if (type === 'label') {
-                  <span class="c-tap-chip__dot" [style.background-color]="getLabelColor(item)"></span>
-                }
-                {{ item | translatePipe }}
-              </button>
-            }
-          }
-        </div>
-      } @else {
-        <div class="empty-state">
-          {{ 'metadata_no_items_prefix' | translatePipe }} {{ title | translatePipe }}
-          {{ 'metadata_no_items_suffix' | translatePipe }}
-        </div>
-      }
-    </div>
-  </section>
-</ng-template>
