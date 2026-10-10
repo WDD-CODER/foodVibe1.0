@@ -139,6 +139,7 @@
 
   .table-top {
     grid-column: 1 / -1;
+    grid-row: 1;
     position: sticky;
     inset-block-start: var(--list-sticky-top, 0px);
     z-index: 5;
@@ -162,6 +163,7 @@
 
   .table-body {
     grid-column: 1 / -1;
+    grid-row: 2;
     display: grid;
     grid-template-columns: var(--list-grid);
     grid-auto-rows: minmax(auto, max-content);
@@ -297,6 +299,10 @@
     .table-body {
       min-height: 0;
     }
+
+    .scroll-arrow--panel.scroll-arrow--bottom {
+      margin-block-end: var(--space-4);
+    }
   }
 
   // ─── PHONE (≤768px) — the page scrolls (app header, list header, filters scroll
@@ -349,6 +355,64 @@
     .table-area {
       block-size: calc(100dvh - 2 * var(--space-3) - 3.5rem - env(safe-area-inset-bottom, 0px));
     }
+  }
+
+  // ─── MORE-TO-SCROLL ARROWS — same look as the floating info container's (nutrition) ───
+  // Laid over the scrolling element's grid cell (table body: row 2 of .table-area; filter panel:
+  // the `panel` area), so they stay fixed while the content scrolls under them.
+  .scroll-arrow {
+    position: relative;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 1.5rem;
+    padding-block: 0.2rem;
+
+    color: var(--color-text-muted);
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-smooth);
+  }
+
+  .scroll-arrow--top {
+    align-self: start;
+
+    background: linear-gradient(to bottom, var(--bg-glass-strong) 0%, transparent 100%);
+  }
+
+  .scroll-arrow--bottom {
+    align-self: end;
+
+    background: linear-gradient(to top, var(--bg-glass-strong) 0%, transparent 100%);
+  }
+
+  .scroll-arrow--table {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .scroll-arrow--panel {
+    grid-area: panel;
+  }
+
+  .scroll-arrow--panel.scroll-arrow--top {
+    border-start-start-radius: var(--radius-lg);
+    border-start-end-radius: var(--radius-lg);
+  }
+
+  .scroll-arrow--panel.scroll-arrow--bottom {
+    border-end-start-radius: var(--radius-lg);
+    border-end-end-radius: var(--radius-lg);
+  }
+
+  .table-area:has(> .table-body.can-scroll-up) > .scroll-arrow--table.scroll-arrow--top,
+  .table-area:has(> .table-body.can-scroll-down) > .scroll-arrow--table.scroll-arrow--bottom,
+  .list-container:has(> .filter-panel.can-scroll-up:not(.collapsed)) > .scroll-arrow--panel.scroll-arrow--top,
+  .list-container:has(> .filter-panel.can-scroll-down:not(.collapsed)) > .scroll-arrow--panel.scroll-arrow--bottom {
+    opacity: 0.8;
   }
 
   // ─── EMPTY STATE — fill full table-body height, single background ────────
