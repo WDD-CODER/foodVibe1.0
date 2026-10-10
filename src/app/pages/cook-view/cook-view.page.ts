@@ -1,9 +1,9 @@
-import { Component, DestroyRef, ElementRef, inject, signal, computed, OnInit, OnDestroy } from '@angular/core'
+import { Component, DestroyRef, ElementRef, inject, signal, computed, effect, OnInit, OnDestroy } from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
-import { CommonModule } from '@angular/common'
+import { CommonModule, DOCUMENT } from '@angular/common'
 import { ActivatedRoute, NavigationStart, Router, RouterLink } from '@angular/router'
 import { ReactiveFormsModule, FormBuilder, FormArray, FormGroup, Validators } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -32,7 +32,6 @@ import { quantityIncrement, quantityDecrement, QuantityStepOptions } from '../..
 import { filter, take } from 'rxjs'
 import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
-import { ScrollIndicatorsDirective } from 'src/app/core/directives/scroll-indicators.directive'
 import { CookTimerService } from './services/cook-timer.service'
 import { CookViewExportService } from './services/cook-view-export.service'
 
@@ -62,8 +61,7 @@ const MULTIPLIER_CHIPS = [
     ExportPreviewComponent,
     ApproveStampComponent,
     CounterComponent,
-    RatingStarsComponent,
-    ScrollIndicatorsDirective
+    RatingStarsComponent
   ],
   providers: [CookTimerService, CookViewExportService],
   templateUrl: './cook-view.page.html',
@@ -89,6 +87,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly heroFab = inject(HeroFabService)
   private readonly recipeFormService = inject(RecipeFormService)
   private readonly el = inject(ElementRef)
+  private readonly document = inject(DOCUMENT)
   protected readonly cookTimer = inject(CookTimerService)
   protected readonly cookExport = inject(CookViewExportService)
 
@@ -101,6 +100,10 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected editMode_ = signal<boolean>(false)
   /** Kitchen dark-mode skin (design's default is dark). Session-only, not persisted. */
   protected isDarkTheme_ = signal<boolean>(true)
+  /** Kitchen mode retints the whole viewport: mirror it as `theme-kitchen` on <html> (removed on destroy). */
+  private readonly syncViewportTheme_ = effect(() => {
+    this.document.documentElement.classList.toggle('theme-kitchen', this.isDarkTheme_())
+  })
   /** Snapshot when entering edit mode; restored on Undo. */
   private originalRecipe_ = signal<Recipe | null>(null)
   private readonly saving = useSavingState()
@@ -286,6 +289,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Cook View scrolls the page itself with the scrollbar hidden (plan 404); see :root.cv-page-scroll.
+    this.document.documentElement.classList.add('cv-page-scroll')
     this.router.events
       .pipe(
         filter((e): e is NavigationStart => e instanceof NavigationStart),
@@ -327,6 +332,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.document.documentElement.classList.remove('theme-kitchen', 'cv-page-scroll')
     this.cookExport.closeAllExportOverlays()
     this.heroFab.clearPageActions()
     if (this.scrollTimeoutId !== null) {

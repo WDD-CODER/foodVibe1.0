@@ -5,13 +5,20 @@
    active/done/pending steps) and re-skins it with the design's token language instead
    of the mockup's literal (inline-styled) DOM. */
 
+// Breakpoints (plan 404 — Cook View handoff): phone ≤620 · small tablet 621–767 ·
+// tablet 768–1023 · desktop ≥1024. Mirrors $break-phone-max / $break-tablet-max in src/styles.scss.
+$cv-phone-max: 620px;
+$cv-stack-max: 767px; // mirrors $break-phone-max
+$cv-tablet-min: 768px;
+$cv-desktop-min: 1024px; // $break-tablet-max + 1
+
 :host {
   display: block;
 
   --cv-tap-min: 44px;
 
-  /* ── Design-system tokens — light (default) branch of CookView.dc.html's baseVals() ── */
-  --cv-page-bg: var(--bg-body);
+  /* ── Page tokens — alias the global tokens; kitchen dark mode retints them through
+     :root.theme-kitchen in src/styles.scss (plan 404 step 1). ── */
   --cv-nav-bg: var(--bg-frosted-nav);
   --cv-nav-border: var(--border-glass);
   --cv-segment-bg: var(--bg-subtle);
@@ -31,41 +38,27 @@
   --cv-active-ring: 0 0 0 2px var(--cv-accent-glow);
 }
 
-/* ── Kitchen dark mode (M13 — plan 306 round 2) ─────────────────────────────
-   Design source: UI refactor/CookView.dc.html — near-black "kitchen" theme,
-   toggled per-session via the sun/moon button in .cv-nav (default: dark, matching
-   the mockup's `isDark: true` default). */
-.cook-view-container.theme-kitchen {
-  --cv-page-bg: radial-gradient(ellipse 1200px 800px at 50% -10%, #0f2e2a, #0a1614 60%);
-  --cv-nav-bg: rgba(10, 22, 20, 0.75);
-  --cv-nav-border: rgba(255, 255, 255, 0.1);
-  --cv-segment-bg: rgba(255, 255, 255, 0.06);
-  --cv-main-text: #f1f5f4;
-  --cv-muted-text: rgba(226, 240, 236, 0.74);
-  --cv-panel-bg: rgba(255, 255, 255, 0.05);
-  --cv-panel-border: rgba(255, 255, 255, 0.1);
-  --cv-panel-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
-  --cv-hero-shadow: 0 30px 70px -25px rgba(0, 0, 0, 0.7);
-  --cv-chip-bg: rgba(20, 184, 166, 0.18);
-  --cv-timer-idle-bg: rgba(255, 255, 255, 0.06);
-  --cv-timer-idle-border: rgba(255, 255, 255, 0.15);
-}
-
 /* ─────────────────────────────────────────────────────────────────────────
    Shell / page background
    ───────────────────────────────────────────────────────────────────────── */
+// Page frame: full-bleed under the app header, content centred at 1440px. Page scroll only —
+// no container scrolls internally. Bottom padding keeps content clear of the FAB and stamp.
 .cook-view-container {
   display: block;
 
-  max-width: 1100px;
+  max-width: 1440px;
 
-  background: var(--cv-page-bg);
-  border-radius: var(--radius-xl);
   margin-inline: auto;
-  margin-block: 1.5rem;
-  padding: 0 0 var(--space-8);
+  padding-inline: var(--space-4);
+  padding-block: var(--space-4) 8.125rem; // 130px — clears FAB + stamp
 
-  transition: background 0.3s var(--ease-smooth);
+  @media (max-width: $cv-phone-max) {
+    padding-block-end: 9.375rem; // 150px — also clears the tab bar
+  }
+
+  @media (min-width: $cv-desktop-min) {
+    padding-inline: var(--space-6);
+  }
 }
 
 .cook-view-empty {
@@ -107,39 +100,9 @@
   }
 }
 
+// Edit / scaled states are shown by their banners, not by a bordered shell.
 .cv-shell {
-  display: grid;
-  grid-template-rows: auto auto auto auto 1fr;
-
-  // 6rem only covered the top nav; it ignored the tab-chips row and this container's
-  // own margin/padding, so the shell was consistently ~89px taller than the viewport,
-  // forcing outer-page scroll instead of the intended internal per-pane scrolling.
-  // Measured overhead: top nav + tab-chips + .cook-view-container's margin-block (both
-  // sides) + padding-bottom ≈ 185px — rounded up slightly for safety.
-  height: calc(100vh - 11.75rem);
-  height: calc(100dvh - 11.75rem);
-  overflow: hidden;
-
-  &.edit-mode {
-    background: var(--cv-panel-bg);
-
-    border: 1px solid var(--border-warning);
-    border-radius: var(--radius-xl);
-    padding: 1rem;
-
-    height: auto;
-    overflow: visible;
-  }
-
-  &.scaled-view {
-    background: var(--cv-chip-bg);
-
-    border: 2px solid var(--cv-accent-glow);
-    border-radius: var(--radius-xl);
-    padding: 1rem;
-
-    box-shadow: var(--shadow-glow);
-  }
+  display: block;
 }
 
 .edit-mode-banner {
@@ -185,7 +148,7 @@
   align-items: center;
   justify-content: space-between;
 
-  padding: var(--space-4) var(--space-5) 0;
+  padding: 0;
 }
 
 .cv-nav-title {
@@ -232,7 +195,7 @@
   background: var(--cv-panel-bg);
   border: 1px solid var(--cv-panel-border);
   border-radius: var(--radius-xl);
-  margin: var(--space-4) var(--space-5) 0;
+  margin-block-start: var(--space-4);
 
   box-shadow: var(--cv-hero-shadow);
   transition: min-height 0.3s var(--ease-smooth);
@@ -427,7 +390,7 @@
   flex-wrap: wrap;
 
   gap: 0.75rem;
-  padding: var(--space-3) var(--space-5) 0;
+  padding-block-start: var(--space-3);
 }
 
 .export-bar-wrap {
@@ -604,7 +567,7 @@
   align-items: center;
 
   gap: 4px;
-  margin: var(--space-3) var(--space-5) 0;
+  margin-block-start: var(--space-3);
   padding: 4px;
 
   background: var(--cv-segment-bg);
@@ -637,10 +600,6 @@
   }
 }
 
-.cv-pane-divider {
-  display: none;
-}
-
 .cv-complete-banner {
   color: var(--cv-accent);
   font-size: 1rem;
@@ -657,16 +616,23 @@
 /* ─────────────────────────────────────────────────────────────────────────
    Two-column body — glass ingredient panel + step list
    ───────────────────────────────────────────────────────────────────────── */
+// Stacked below 768; two panes side by side (5fr / 6fr) from tablet up.
 .cv-body {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
-  margin: var(--space-4) var(--space-5) 0;
-  padding-bottom: var(--space-4);
 
-  height: 100%;
+  margin-block-start: var(--space-4);
+
+  @media (min-width: $cv-tablet-min) {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: start;
+  }
+
+  @media (min-width: $cv-desktop-min) {
+    gap: var(--space-6);
+  }
 }
 
 .cv-ing-pane,
@@ -687,7 +653,6 @@
   display: flex;
   flex-direction: column;
 
-  min-height: 0;
   overflow: hidden;
 }
 
@@ -883,54 +848,7 @@
 }
 
 .cv-step-pane {
-  position: relative;
-  display: flex;
-  flex-direction: column;
   order: 2;
-
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* Scroll indicator chevrons — shared by both panes */
-.cv-pane-scroll-indicator--top,
-.cv-pane-scroll-indicator--bottom {
-  position: absolute;
-  inset-inline: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  min-height: 1.5rem;
-  padding-block: 0.25rem;
-
-  color: var(--cv-muted-text);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s var(--ease-smooth);
-}
-
-.cv-pane-scroll-indicator--top {
-  top: 0;
-  background: linear-gradient(to bottom, var(--cv-panel-bg) 0%, transparent 100%);
-}
-
-.cv-pane-scroll-indicator--bottom {
-  bottom: 0;
-  background: linear-gradient(to top, var(--cv-panel-bg) 0%, transparent 100%);
-}
-
-/* Show top chevron when list can scroll up */
-.cv-ing-pane:has(.cv-ing-body.can-scroll-up) .cv-pane-scroll-indicator--top,
-.cv-step-pane:has(.cv-step-body.can-scroll-up) .cv-pane-scroll-indicator--top {
-  opacity: 0.7;
-}
-
-/* Show bottom chevron when list can scroll down */
-.cv-ing-pane:has(.cv-ing-body.can-scroll-down) .cv-pane-scroll-indicator--bottom,
-.cv-step-pane:has(.cv-step-body.can-scroll-down) .cv-pane-scroll-indicator--bottom {
-  opacity: 0.7;
 }
 
 .cv-step-pane-header {
@@ -939,31 +857,15 @@
   padding-inline: 1rem;
 }
 
-.cv-ing-body,
-.cv-step-body {
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 .cv-ing-body {
-  flex: 1;
-
-  min-height: 0;
-  overflow-y: auto;
   padding: 0.5rem;
 }
 
 .cv-step-body {
   display: flex;
   flex-direction: column;
-  flex: 1;
 
   gap: 0.75rem;
-  min-height: 0;
-  overflow-y: auto;
 
   padding: 0.75rem;
 }
@@ -1469,69 +1371,17 @@
   padding: 1rem;
 }
 
-@media (max-width: 48rem) {
-  .cv-nav,
-  .cv-hero,
-  .cv-actions-row,
-  .cv-phone-swap-bar,
-  .cv-body {
-    margin-inline: var(--space-3);
-  }
-
-  .cv-shell {
-    display: block;
-
-    height: auto;
-    overflow: visible;
-  }
-
+@media (max-width: $cv-stack-max) {
   .cv-phone-swap-bar {
     display: flex;
   }
 
-  .cv-body {
-    display: flex;
-    flex-direction: column;
-
-    overflow-y: auto;
-    height: auto;
-  }
-
-  .cv-ing-pane {
-    order: 1;
-    min-height: 0;
-    overflow: visible;
-
-    &.cv-pane--second {
-      order: 2;
-    }
-  }
-
-  .cv-step-pane {
+  .cv-ing-pane.cv-pane--second {
     order: 2;
-    min-height: 0;
-    overflow: visible;
-
-    &.cv-pane--first {
-      order: 1;
-    }
   }
 
-  .cv-ing-body,
-  .cv-step-body {
-    flex: none;
-
-    overflow-y: visible;
-  }
-
-  .cv-pane-divider {
-    display: block;
-
-    background: linear-gradient(90deg, transparent, var(--cv-panel-border), transparent);
-    height: 2px;
-    order: 1.5;
-
-    margin: 0.5rem 0;
+  .cv-step-pane.cv-pane--first {
+    order: 1;
   }
 
   .cv-chip-btn {

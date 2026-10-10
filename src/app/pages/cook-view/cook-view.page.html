@@ -1,4 +1,4 @@
-<div class="cook-view-container" dir="rtl" [class.theme-kitchen]="isDarkTheme_()">
+<div class="cook-view-container" dir="rtl">
   @if (recipe_(); as recipe) {
   <div class="cv-shell" [class.edit-mode]="editMode_()" [class.scaled-view]="isScaledView_()">
     @if (editMode_()) {
@@ -300,7 +300,7 @@
         </div>
         }
 
-        <div class="cv-ing-body" scrollIndicators>
+        <div class="cv-ing-body">
           @if (editMode_()) {
           <!-- Edit mode: original ingredient table -->
           <div class="ingredients-table">
@@ -444,15 +444,7 @@
           </div>
           } }
         </div>
-        <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--top" aria-hidden="true">
-          <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-        </div>
-        <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--bottom" aria-hidden="true">
-          <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
-        </div>
       </div>
-
-      <div class="cv-pane-divider" [style.order]="1"></div>
 
       <!-- Step pane -->
       <div class="cv-step-pane" #stepPane [style.order]="phoneFirstPane_() === 'steps' ? 0 : 2">
@@ -466,7 +458,7 @@
           >
         </div>
 
-        <div class="cv-step-body" scrollIndicators>
+        <div class="cv-step-body">
           @if (editMode_()) {
           <!-- Edit mode: original workflow editor -->
           <app-recipe-workflow
@@ -635,12 +627,6 @@
           } } @if (cookingComplete_()) {
           <div class="cv-complete-banner">🎉 {{ 'cooking_complete' | translatePipe }}</div>
           } }
-        </div>
-        <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--top" aria-hidden="true">
-          <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-        </div>
-        <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--bottom" aria-hidden="true">
-          <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
         </div>
       </div>
     </div>

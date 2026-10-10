@@ -19,14 +19,15 @@
     inset: 0;
     z-index: -1;
 
+    background: var(--bg-header);
     backdrop-filter: var(--blur-nav);
     -webkit-backdrop-filter: var(--blur-nav);
 
     pointer-events: none;
   }
 
-  border-block-end: 1px solid var(--border-glass);
-  box-shadow: var(--shadow-nav);
+  border-block-end: 1px solid var(--border-header);
+  box-shadow: var(--shadow-header);
 
   .mobile-menu-btn,
   .mobile-close-btn {
@@ -57,11 +58,11 @@
 
   padding: 0.25rem;
 
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  background: var(--bg-chrome);
+  border: 1px solid var(--border-chrome);
   border-radius: var(--radius-full);
   backdrop-filter: var(--blur-glass);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 1px 0 var(--border-glass-strong);
 }
 
 .nav-pill {
@@ -95,7 +96,7 @@
 
   &:hover {
     color: var(--color-text-main);
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--bg-glass);
 
     lucide-icon {
       opacity: 1;
@@ -103,11 +104,9 @@
   }
 
   &.active {
-    background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
-    color: var(--color-text-on-primary);
-    box-shadow:
-      0 4px 12px -4px var(--color-primary-glow),
-      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    background: linear-gradient(180deg, var(--color-active-a), var(--color-active-b));
+    color: var(--color-active-fg);
+    box-shadow: var(--shadow-active);
 
     lucide-icon {
       opacity: 1;
@@ -164,16 +163,16 @@
   padding-block: 0.25rem;
   padding-inline: 0.25rem 0.625rem;
 
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid var(--border-default);
+  background: var(--bg-chrome);
+  border: 1px solid var(--border-chrome);
   border-radius: var(--radius-full);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 var(--border-glass-strong);
 
   cursor: default;
   transition: background 0.15s ease;
 
   &:hover {
-    background: var(--bg-pure);
+    background: var(--bg-card-solid);
   }
 }
 
@@ -234,7 +233,7 @@
 
   background: var(--color-primary);
   color: var(--color-text-on-primary);
-  border: 1.5px solid var(--bg-pure);
+  border: 1.5px solid var(--bg-card-solid);
   border-radius: var(--radius-full);
 
   lucide-icon {
@@ -377,11 +376,11 @@
     padding-inline: 0.25rem;
     padding-block-end: env(safe-area-inset-bottom, 0);
 
-    background: var(--bg-glass-strong);
+    background: var(--bg-tabbar);
     backdrop-filter: var(--blur-glass);
     -webkit-backdrop-filter: var(--blur-glass);
 
-    border-block-start: 1px solid var(--border-glass);
+    border-block-start: 1px solid var(--border-header);
     box-shadow: var(--shadow-nav-footer);
 
     a,
@@ -479,12 +478,12 @@
 
       min-inline-size: 10rem;
 
-      background: var(--bg-glass-strong);
+      background: var(--bg-tabbar);
       backdrop-filter: var(--blur-glass);
       -webkit-backdrop-filter: var(--blur-glass);
 
       padding: var(--space-2);
-      border: 1px solid var(--border-glass);
+      border: 1px solid var(--border-chrome);
       border-radius: var(--radius-md);
 
       box-shadow: var(--shadow-nav);

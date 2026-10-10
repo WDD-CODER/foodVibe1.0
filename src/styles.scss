@@ -177,6 +177,79 @@ $break-tablet-max: 1023px;
   /* ---- Breakpoints (CSS) ---- */
   --break-sm: 48rem;
   --break-md: 56.25rem;
+
+  /* ---- Chrome + kitchen tokens (plan 404, Cook View handoff) ----
+     Design name → token: --pri → --color-primary-strong, --on-pri → --color-on-primary-strong,
+     --soft-ink → --color-primary-ink, --card-s → --bg-card-solid, --warn → --color-warning-ink,
+     --warn-bg → --bg-warning-tint, --hdr/-b/-sh → --bg-header/--border-header/--shadow-header,
+     --chrome/-b → --bg-chrome/--border-chrome, --act-a/-b/-fg → --color-active-a/-b/-fg,
+     --tab → --bg-tabbar. Dark values live under :root.theme-kitchen below. */
+  --color-primary-strong: #0f766e;     /* AA primary behind white text */
+  --color-on-primary-strong: #ffffff;
+  --color-primary-ink: #0f766e;
+  --bg-card-solid: #ffffff;
+  --color-warning-ink: #b45309;
+  --bg-warning-tint: rgba(245, 158, 11, 0.16);
+  --bg-header: rgba(255, 255, 255, 0.70);
+  --border-header: rgba(15, 23, 42, 0.08);
+  --shadow-header: 0 1px 8px rgba(0, 0, 0, 0.05);
+  --bg-chrome: rgba(255, 255, 255, 0.80);
+  --border-chrome: rgba(15, 23, 42, 0.10);
+  --color-active-a: #0d9488;
+  --color-active-b: #0f766e;
+  --color-active-fg: #ffffff;
+  --shadow-active: 0 4px 12px -4px rgba(20, 184, 166, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --bg-tabbar: rgba(255, 255, 255, 0.88);
+  --bg-page-glow: none;
+}
+
+/* Kitchen dark mode — set on <html> by CookViewPage while Cook View is open (plan 404).
+   Retints the whole viewport (header, chips, tab bar, FAB) through the global tokens. */
+:root.theme-kitchen {
+  color-scheme: dark;
+
+  --bg-body: #0a1614;
+  --bg-page-glow: radial-gradient(ellipse 1200px 800px at 50% -10%, #0f2e2a, #0a1614 60%);
+  --bg-glass: rgba(255, 255, 255, 0.06);
+  --bg-glass-strong: rgba(255, 255, 255, 0.10);
+  --bg-glass-hover: rgba(255, 255, 255, 0.14);
+  --bg-glass-dense: rgba(20, 48, 45, 0.96);
+  --bg-subtle: rgba(255, 255, 255, 0.04);
+  --bg-muted: rgba(255, 255, 255, 0.06);
+  --bg-frosted-nav: rgba(24, 58, 54, 0.94);
+
+  --border-glass: rgba(255, 255, 255, 0.14);
+  --border-default: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --border-row: rgba(255, 255, 255, 0.08);
+  --border-glass-strong: rgba(255, 255, 255, 0.18);
+
+  --color-text-main: #f1f5f4;
+  --color-text-secondary: #e2f0ec;
+  --color-text-muted: rgba(226, 240, 236, 0.74);
+  --color-text-muted-light: rgba(226, 240, 236, 0.55);
+
+  --color-primary: #2dd4bf;
+  --color-primary-hover: #5eead4;
+  --color-primary-soft: rgba(20, 184, 166, 0.20);
+  --text-warning: #fbbf24;
+  --shadow-nav: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+
+  --color-primary-strong: #14b8a6;
+  --color-on-primary-strong: #04211e;
+  --color-primary-ink: #5eead4;
+  --bg-card-solid: #14302d;
+  --color-warning-ink: #fbbf24;
+  --bg-warning-tint: rgba(245, 158, 11, 0.20);
+  --bg-header: rgba(24, 58, 54, 0.94);
+  --border-header: rgba(255, 255, 255, 0.18);
+  --shadow-header: 0 10px 30px -12px rgba(0, 0, 0, 0.7);
+  --bg-chrome: rgba(255, 255, 255, 0.10);
+  --border-chrome: rgba(255, 255, 255, 0.22);
+  --color-active-a: #2dd4bf;
+  --color-active-b: #14b8a6;
+  --color-active-fg: #04211e;
+  --bg-tabbar: rgba(24, 58, 54, 0.95);
 }
 
 @media (max-width: $break-mobile) {
@@ -227,6 +300,21 @@ body::before {
     radial-gradient(ellipse 400px 300px at 50% 50%, rgba(14, 165, 233, 0.06), transparent);
   background-attachment: fixed;
   pointer-events: none;
+}
+
+/* Kitchen dark mode: the light page glows give way to the design's dark radial wash. */
+:root.theme-kitchen body::before {
+  background: var(--bg-page-glow);
+}
+
+/* Cook View page scroll (plan 404): the page itself scrolls, with no visible scrollbar.
+   Set on <html> by CookViewPage while it is open. */
+:root.cv-page-scroll {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* ---- Base resets (replaces Tailwind preflight) ---- */
@@ -837,16 +925,16 @@ textarea.c-input {
   padding-inline: 0.875rem;
   padding-block: 0.4375rem;
 
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-chrome);
   color: var(--color-text-muted);
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
 
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--border-chrome);
   border-radius: var(--radius-full);
   backdrop-filter: var(--blur-glass);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 var(--border-glass-strong);
 
   cursor: pointer;
   transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
@@ -858,16 +946,16 @@ textarea.c-input {
 
   &:hover {
     color: var(--color-text-main);
-    background: var(--bg-pure);
+    background: var(--bg-card-solid);
 
     lucide-icon { opacity: 1; }
   }
 
   &.active {
-    background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
-    color: var(--color-text-on-primary);
+    background: linear-gradient(180deg, var(--color-active-a), var(--color-active-b));
+    color: var(--color-active-fg);
     border-color: transparent;
-    box-shadow: 0 4px 12px -4px var(--color-primary-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    box-shadow: var(--shadow-active);
 
     lucide-icon { opacity: 1; }
   }
