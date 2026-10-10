@@ -257,3 +257,11 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** Escaping only the `backdrop-filter` ancestor looks done, because that is the trap everyone remembers (see "A `backdrop-filter` card traps `position: fixed` popovers" above). `container-type`, `contain: layout|paint|strict|content`, `transform`, `filter`, `perspective` and `will-change` on those make a containing block just the same, and container queries are spreading through the design system.
 
 **What to do instead:** Small floating menus: Popover API top layer (entry above). Full modals that stay `position: fixed`: render them outside every such wrapper — in `list-shell` the `[shell-modal]` slot now sits after `.list-container`, directly under `:host`. Before adding `container-type` or any of the properties above to a wrapper, check what fixed-position content is projected inside it.
+
+## Searching taxonomy dropdowns by key misses Hebrew input
+
+**What hurt:** The menu section-category search filtered `sectionCategories_()` (taxonomy keys) by the raw key. KeyResolutionService stores Hebrew names under English keys, so typing "חדש" matched nothing even though "חדש" was in the list, and the picker offered to add a duplicate. After adding, the page wrote the typed text into the field instead of the stored key.
+
+**Why the obvious fix is wrong:** Matching on the key looks right because some keys are Hebrew (older or user-made ones), so a quick test can pass while English-keyed terms never match.
+
+**What to do instead:** Filter on the shown label (`translation.translate(key)`); treat a match on key *or* label as "exists"; after `addCategory`, resolve the stored key (by label, else the newly appeared key) and select that — nothing on cancel. Reference: `menu-intelligence.page.ts` `findSectionCategoryKey` / `addAndSelectSectionCategory` (plan 398).

@@ -1,6 +1,6 @@
 # Plan 398 — Menu intelligence split: shared dish and section search helper
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: da1d7f666cefa259d0233d6c5522042073ab8a3f
 
@@ -84,19 +84,19 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] A component-scoped service (e.g. `MenuPickerSearchService`, `@Injectable()`, provided on
+- [x] A component-scoped service (e.g. `MenuPickerSearchService`, `@Injectable()`, provided on
       the page) holding keyed query + highlighted-index signals and a generic keydown handler
       (ArrowUp/ArrowDown/Enter/Escape) parameterised by option count and select/close callbacks.
-- [ ] Dish search and section-category search both use it; their own filter (recipes vs
+- [x] Dish search and section-category search both use it; their own filter (recipes vs
       categories) and select action stay specific.
-- [ ] Template bindings updated; no visible change. `KEYBOARD-FOCUS-REPORT.md` behavior holds.
-- [ ] Code style per hard rules: `inject()`, signals with trailing `_` for private state, no
+- [x] Template bindings updated; no visible change. `KEYBOARD-FOCUS-REPORT.md` behavior holds.
+- [x] Code style per hard rules: `inject()`, signals with trailing `_` for private state, no
       `any`, single quotes, no semicolons. Class structure per
       `.claude/skills/angularComponentStructure/SKILL.md`.
 
 ### Should Have (P1)
-- [ ] Spec for the helper service (highlight wraps/clamps, Enter selects, Escape clears, keys don't cross between sections).
-- [ ] Note in session-state whether the event-type dropdown (~L462–615, same pattern) and the export block (~L1320–1398, like recipe builder's) are worth a follow-up — report only, don't move them.
+- [x] Spec for the helper service (highlight wraps/clamps, Enter selects, Escape clears, keys don't cross between sections).
+- [x] Note in session-state whether the event-type dropdown (~L462–615, same pattern) and the export block (~L1320–1398, like recipe builder's) are worth a follow-up — report only, don't move them.
 
 ### Nice to Have (P2)
 - none
@@ -105,11 +105,14 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI change, no new dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1: Confirm the seam against the current file (line numbers are from 2026-10-10); list exact differences between the two pickers' keyboard logic before unifying
-- [ ] A2: Create `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts` (+ spec, P1)
-- [ ] A3: Move dish search onto it; wire `menu-intelligence.page.html`
-- [ ] A4: Move section-category search onto it; wire template
-- [ ] A5: `ng build` + `ng test` green, report new line count and the P1 follow-up note; hand the Human the click list from Success
+- [x] A1: Confirm the seam against the current file (line numbers are from 2026-10-10); list exact differences between the two pickers' keyboard logic before unifying
+- [x] A2: Create `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts` (+ spec, P1)
+- [x] A3: Move dish search onto it; wire `menu-intelligence.page.html`
+- [x] A4: Move section-category search onto it; wire template
+- [x] A5: `ng build` + `ng test` green, report new line count and the P1 follow-up note; hand the Human the click list from Success
+- [x] A6 (Human review fallout, 2026-10-10): renaming a dish — erasing all the text keeps the row empty for a fresh name instead of snapping back to the old dish (Escape / click-outside still restore it)
+- [x] A7 (Human review fallout, 2026-10-10): section category search matches the Hebrew labels; one "add" option — `הוסף "<typed>"` while typing a new name, else `הוסף קטגוריה חדשה` (modal); the section gets the stored category key, and nothing if the add is cancelled
+- [x] A8 (/ship review fallout): Tab out of a dish rename without picking restores the old dish (same as click-outside), so an erased name can't silently drop the dish on save
 
 ## Technical Considerations
 - Dependencies: the menu `FormArray` sections/items (stays in the page), recipe list, section
