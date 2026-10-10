@@ -2740,6 +2740,17 @@
       "notes": "FoodVibe ADR; its lesson travels via lessons-triage.md (phase 3 regenerates generalized entries into core/pack). The file itself is not copied."
     },
     {
+      "path": "docs/brain/decisions/0016-logging-sink-mongo.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/services/log-sink.js",
+        "server/routes/log.js"
+      ],
+      "notes": "Plan 382 ADR: MongoDB app_logs (90-day TTL) as the single log sink."
+    },
+    {
       "path": "docs/brain/decisions/0015-workflow-kit-extraction.md",
       "tier": "project",
       "action": "stay",
@@ -3029,6 +3040,16 @@
       "notes": "Pattern template."
     },
     {
+      "path": "docs/brain/patterns/server-log-events.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "server/logger.js"
+      ],
+      "notes": "Plan 383 pattern: server log event naming and fields."
+    },
+    {
       "path": "docs/brain/patterns/atomic-bulk-replace-with-standalone-fallback.md",
       "tier": "project",
       "action": "stay",
@@ -3245,7 +3266,6 @@
         "scripts/check-lucide-icons.mjs",
         "scripts/check-no-native-select.mjs",
         "scripts/diagnose-broken-refs.mjs",
-        "scripts/log-server.js",
         "scripts/repair-recipe-references.mjs",
         "scripts/todo-query.mjs"
       ],
@@ -3628,14 +3648,6 @@
         "package.json"
       ],
       "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/log-server.js",
-      "tier": "project",
-      "action": "stay",
-      "params": [],
-      "refs": [],
-      "notes": "Local logging server (FoodVibe dev tool)."
     },
     {
       "path": "scripts/merge-labels.mjs",
@@ -4058,6 +4070,18 @@
       "notes": "Slot claim. Hardcodes Git Bash path (line 21), `npm run dev:local` (237), DB names `foodvibe_wt${n}` (235/260), backup dir `foodvibe-db-backups` (115), `server/scripts/db-backup.js`/`db-restore.js` (117/122), `src/environments/environment.slot.ts` (72), `ng serve -c slot`. 321 pending change: Windows `shell` fix."
     },
     {
+      "path": "scripts/plan-close.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        ".claude/todo-archive",
+        ".claude/todo.md",
+        "scripts/lib/todo-parse.mjs"
+      ],
+      "notes": "Sets Status: done on finished plans and moves them into plans/<range>/. Run by the todo-sync workflow after todo-archive."
+    },
+    {
       "path": "scripts/todo-archive.mjs",
       "tier": "core",
       "action": "copy",
@@ -4234,6 +4258,16 @@
         "server/test/invariants.test.js"
       ],
       "notes": "Plan 387 ADR: the 2026-10-05 incident and the four-layer gate. FoodVibe history; the rule itself ships in core (AGENTS.md template, save-plan, scope-check)."
+    },
+    {
+      "path": "scripts/test/plan-close.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/plan-close.mjs"
+      ],
+      "notes": "Unit tests for plan-close.mjs (range folder, Atomic Sub-tasks check, closable selection)."
     },
     {
       "path": "scripts/test/invariants.test.mjs",
