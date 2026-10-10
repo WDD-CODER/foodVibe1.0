@@ -196,14 +196,6 @@
 - [ ] A4: Apply directive to `translation-key-modal.component.html` and `label-creation-modal.component.html`; `save()` in both components (and `translation-key-modal.service.ts` if it re-sanitizes) runs `finalizeEnglishKey`
 - [ ] A5: `ng build` + `ng test` green; hand the Human the PC + phone click list from Success
 
-### Plan 397 — Recipe builder split: logistics picker and export overlays into page services (`plans/397-recipe-builder-split-logistics-picker-export-overlays.plan.md`)
-
-- [ ] A1: Confirm the seams against the current file (line numbers above are from 2026-10-10); note in session-state anything that turned out coupled to the form and stays
-- [ ] A2: Extract `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`; wire page + `recipe-builder.page.html`
-- [ ] A3: Extract `src/app/pages/recipe-builder/services/recipe-export.service.ts`; wire page + template
-- [ ] A4: Update `recipe-builder.page.spec.ts` if it touches moved members; add service specs (P1)
-- [ ] A5: `ng build` + `ng test` green, report new line count; hand the Human the click list from Success
-
 ### Plan 399 — Recipe book list split: map seams, then extract self-contained flows (`plans/399-recipe-book-list-split-map-seams-extract-flows.plan.md`)
 
 - [ ] A1: Map `recipe-book-list.component.ts` seams into session-state; ⛔ STOP for the Human's go on which to move
