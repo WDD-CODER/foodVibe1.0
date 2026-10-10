@@ -221,6 +221,18 @@
 - [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
 
+### Plan 406 — Design plans folder: open Claude Design plans live in plans/design/ (`plans/406-design-plans-folder-open-claude-design-plans.plan.md`)
+
+- [ ] A1: Kit: `plans.openDirs` config key + `core/scripts/lib/plan-paths.mjs` + tests — `../ai-workflow-kit/kit.config.json`, `../ai-workflow-kit/core/scripts/lib/plan-paths.mjs`
+- [ ] A2: Kit: switch take-plan, todo-query, scope-check, lib/slot, plan-close, next-plan-number (+ ledger/similarity if flat) to the helper; tests — `../ai-workflow-kit/core/scripts/**`
+- [ ] A3: Kit: branch-guard.sh, pre-push, plan-write-guard.sh accept open dirs; save-plan skill text — `../ai-workflow-kit/core/**`
+- [ ] A4: Kit PR on `feat/406-plans-design-folder`; Human merges — `../ai-workflow-kit`
+- [ ] A5: Patch into FoodVibe per ADR 0018 (hand-edit templated hunks, `{{` grep clean) — the scripts in scope, `.husky/pre-push`, `.claude/skills/save-plan/SKILL.md`
+- [ ] A6: Cherry-pick `c4665aac` (plan 318 filed) — `plans/300-400/318-…`, `.claude/todo.md`
+- [ ] A7: `git mv` 372/373/374 → `plans/design/`, fix their `.claude/todo.md` section paths, add `plans/design/README.md` — `plans/design/**`, `.claude/todo.md`
+- [ ] A8: ADR + brain index + AGENTS.md line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`, `AGENTS.md`
+- [ ] A9: `npm run test:scripts`, guard dry runs, `plan-ledger-check`, `kit-owned --check`, `kit-manifest-check`, `ng build`; hand the Human the check list
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
