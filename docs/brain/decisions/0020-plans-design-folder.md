@@ -32,8 +32,8 @@ design plans into a separate archive (closed plans belong in the range folders w
 
 - A new open folder is one config value in the kit plus the same value in FoodVibe's helper and the
   two shell guards. No script owns its own `plans/` readdir any more.
-- `scripts/ship-prep.mjs`'s `PLAN_ONLY_RE` (the ULTRA-TRIVIAL lane for a plan-only diff) is still flat;
-  a diff that only touches `plans/design/` gets a REGULAR lane until it uses the helper.
+- `scripts/ship-prep.mjs` (the ULTRA-TRIVIAL lane for a plan-only diff) uses `isOpenPlanPath` too (kit PR #7),
+  so a diff that only touches `plans/design/` is plan-only like a flat plan.
 - `.worktree-plan` may hold a pre-move path; `activePlanPath()` falls back to the branch's plan when the
   recorded file is gone.
 

@@ -72,6 +72,7 @@ scripts/plan-ledger-check.mjs
 scripts/plan-name-similarity.mjs
 scripts/branch-guard.sh
 scripts/plan-write-guard.sh
+scripts/ship-prep.mjs
 .husky/pre-push
 scripts/test/**
 .claude/skills/save-plan/SKILL.md
@@ -160,6 +161,7 @@ line or file this plan names was removed, renamed or rewritten).
 - [x] A7: `git mv` 372/373/374 → `plans/design/`, fix their `.claude/todo.md` section paths, add `plans/design/README.md` — `plans/design/**`, `.claude/todo.md`
 - [x] A8: ADR + brain index + AGENTS.md line (P1) — `docs/brain/decisions/`, `docs/brain/index.md`, `AGENTS.md`
 - [x] A9: `npm run test:scripts`, guard dry runs, `plan-ledger-check`, `kit-owned --check`, `kit-manifest-check`, `ng build`; hand the Human the check list
+- [x] A10: `ship-prep.mjs` plan-only lane uses `isOpenPlanPath` (approved: scripts/ship-prep.mjs; kit PR WDD-CODER/ai-workflow-kit#7) — `scripts/ship-prep.mjs`
 
 ## Technical Considerations
 - `.claude/todo.md` is Planner-owned; this plan's scope allows the Worker to fix only the path
