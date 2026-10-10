@@ -40,6 +40,30 @@ all `schemaVersion: 2`, epochs are numbers).
 Per-user picture: master has 0 null `logistics`; every user clone has ~1105 (cloned before master
 was fixed; `_userModified` / sync rules keep them). Atlas admin `UMyJP` has 0 (reset from master).
 
+## Approved discard list (Human, 2026-10-10)
+
+Delete by **exact name** in the given collection, in master and every user copy (plus their
+`TRASH_*` / `VERSION_HISTORY` entries). "(empty)" = `nameHebrew` empty or whitespace only.
+
+| Collection | Delete |
+|---|---|
+| recipes | בדיקה בדיקה 333 · בדיקה חדש חדש · נסיון נוסף · Dish 1 · a1 · ניסיון חדש באמת 2 · ניסיון חדש באמת רק לי 3 · ניסיון חדש לכולם 1 · חדש ניסיון 1 · חדש ניסיון 2 · חדש ניסיון לכולם · חדש ניסיון עבורי · חדש ניסיון רק לי · חדש ניסיון רק ליוזר · ממש חדש · ממש חדש (עותק) · (empty) |
+| dishes | אלרגן בדיקה · אלרגן בדיקה1 · (empty) |
+| products | AUDIT-quick-test1 · testdebugfix04 · testdebugfix06 · מוצר בדיקה/ · מוצר בדיקה הוספה · מוצר ניסיון 1 · מוצר ניסיון 2 · מוצר ניסיון 3 · טסט 1 · ניסיון 1; · ניסיון 2 · שמיר חדש בדיקה נועם · שמיר חדש בדיקה 2 · חלב שקדים עזים טסט · חציל יפני ירוק טסט · (empty) |
+| suppliers | kjh · gsf · ss · scac · א · ספק בדיקה 341 · ספק בדיקה ב 341 · (empty) |
+| venues | ccc |
+| taxonomyTerms | ingredientCategory `dddd`, `aaa` · allergen `ccc` · label `new`, `aaaa` · eventType `חח` · sectionCategory `new` (match `kind` + `key`; master and user-owned) |
+
+**Keep** (explicitly): טסט פינגר פוד · בצק פסטה קלאסי טסט · בצק פסטה בין לבין טסט · רוטב פונזו יפני (טסט 2#) · פשטידת תירס ילדים טסט 2 · רוטב ציר בקר ושיטאקי גלייז  טסט לא מאושר · מוס שוקולד לבן לסיפון בדיקה · supplier גד · supplier דן · the ריטסטרטו products · units kg/ml/cup · allergen soy · category dry.
+
+**Test users — delete the user and every doc with their `userId`:**
+- Local: `test1`, `ddd`, `qa369`. Keep `dev-guest`, `danwe`.
+- Atlas: `hhhh` (admin), `dan`, `danw`, `dan11` — **all four Atlas accounts.** ⛔ A0b gate below: this leaves production with no user and no admin.
+
+**v1 rollback collections (row 8): KEEP** — F8 is not run.
+
+Rows 5–6 (dangling refs): report only.
+
 ## Goals & Success Criteria
 - Primary: both databases are clean — no stored value the schema rejects, no test data, no dead
   leftover collections — and a stale stored null can never block a save again.
@@ -126,7 +150,7 @@ line or file this plan names was removed, renamed or rewritten).
   - F5 drop the empty v1 registry collections (row 7) — only when the collection has 0 docs.
   - F6 delete the Human-approved test items (A0 list), by exact name + collection, in master and every user copy; also their `VERSION_HISTORY` / `TRASH_*` entries.
   - F7 delete the Human-approved test users and every doc whose `userId` is theirs (all collections in `constants/collections.js`), local only unless the Human approves an Atlas account.
-  - F8 (only if approved in A0) drop the v1 rollback collections (row 8), after the backup.
+  - F8 ~~drop the v1 rollback collections~~ — not approved (Human 2026-10-10: keep). Do not implement.
   - Rows 5–6 (dangling ingredient / menu refs): **report only** — print the list (doc name · user · missing id), no write, unless the Human approves a fix in A0.
 - [ ] **Find what re-creates the empty v1 registry collections** (row 7) — likely an index loop in `server/db.js` over an old name list — and stop it.
 - [ ] **Server guard** in `server/routes/generic.js` `PUT /:type/:id`: keys of the stored doc whose value is `null` and that the request did not send are removed from the merged doc before validation and `$unset` in the same `updateOne`. Client-sent `null` still 400. Test in `server/test/generic.test.js` (both cases); keep the INV-4 test green.
@@ -143,9 +167,10 @@ line or file this plan names was removed, renamed or rewritten).
 - No UI change. Test items disappear from lists.
 
 ## Atomic Sub-tasks
-- [ ] A0: ⛔ Confirm the discard list with the Human (test items, test users, v1 rollback collections, rows 5–6 report-only) — the Planner's proposed list is in chat 2026-10-10; record the approved final list in session-state and use only that
+- [x] A0: Discard list confirmed by the Human 2026-10-10 — see "Approved discard list"
+- [ ] A0b: ⛔ Before deleting the Atlas accounts: the Human signs up their real production account first, the Worker sets its `role: admin` (one `updateOne` in the cleanup script, `--promote-admin=<name>`), the Human confirms they can log in as admin — only then F7 deletes `hhhh`, `dan`, `danw`, `dan11`
 - [ ] A1: Backups — `server/scripts/db-backup.js` local + Atlas; folders in session-state
-- [ ] A2: `server/scripts/cleanup-legacy-data.js` (F1–F8 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
+- [ ] A2: `server/scripts/cleanup-legacy-data.js` (F1–F7 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
 - [ ] A3: Dry run local + Atlas; paste both count tables in chat
 - [ ] A4: Server guard in `server/routes/generic.js` PUT + tests in `server/test/generic.test.js`
 - [ ] A5: Client net in `kitchen-state.service.ts` `saveRecipe()` (+ spec)
@@ -170,4 +195,4 @@ line or file this plan names was removed, renamed or rewritten).
 - Render deploy itself (normal `/ship` + merge).
 
 ## Critical Questions
-- Q: Which items/users/collections to discard? A: pending — Human confirms the list in chat (A0).
+- Q: Which items/users/collections to discard? A: see "Approved discard list" (Human, 2026-10-10).

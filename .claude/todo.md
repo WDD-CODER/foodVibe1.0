@@ -235,9 +235,10 @@
 
 ### Plan 403 — Data cleanup: legacy null logistics, test items and leftover collections, with a write guard (`plans/403-data-cleanup-legacy-nulls-test-items-write-guard.plan.md`)
 
-- [ ] A0: ⛔ Confirm the discard list with the Human (test items, test users, v1 rollback collections, rows 5–6 report-only) — the Planner's proposed list is in chat 2026-10-10; record the approved final list in session-state and use only that
+- [x] A0: Discard list confirmed by the Human 2026-10-10 — see "Approved discard list"
+- [ ] A0b: ⛔ Before deleting the Atlas accounts: Human signs up their real production account, Worker promotes it to admin, Human confirms admin login — then F7 deletes hhhh, dan, danw, dan11
 - [ ] A1: Backups — `server/scripts/db-backup.js` local + Atlas; folders in session-state
-- [ ] A2: `server/scripts/cleanup-legacy-data.js` (F1–F8 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
+- [ ] A2: `server/scripts/cleanup-legacy-data.js` (F1–F7 + report-only rows 5–6) + `server/test/cleanup-legacy-data.test.js` (each fixer on a memory DB: dry run counts, apply, second run = 0)
 - [ ] A3: Dry run local + Atlas; paste both count tables in chat
 - [ ] A4: Server guard in `server/routes/generic.js` PUT + tests in `server/test/generic.test.js`
 - [ ] A5: Client net in `kitchen-state.service.ts` `saveRecipe()` (+ spec)
