@@ -130,6 +130,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Focus workflow row at index (for add step/prep); cleared after focus. */
   protected focusWorkflowRowAt_ = signal<number | null>(null)
   private workflowResetTrigger_ = 0
+  /** Steps / prep editor value right after it was built — edits to step text count as changes. */
+  private workflowSnapshot_ = ''
 
   /** Scale-by-ingredient: index and amount we scaled by (null = normal view). */
   protected scaleByIngredientIndex_ = signal<number | null>(null)
@@ -615,7 +617,15 @@ export class CookViewPage implements OnInit, OnDestroy {
     }
   }
 
-  protected undoEdits(): void {
+  /** Cancel edits — asks first when something was changed (ingredients or step text). */
+  protected async undoEdits(): Promise<void> {
+    if (this.hasRealChanges()) {
+      const confirmed = await this.confirmModal.open('discard_changes_confirm', {
+        variant: 'warning',
+        saveLabel: 'undo_changes'
+      })
+      if (!confirmed) return
+    }
     const orig = this.originalRecipe_()
     if (orig) {
       this.recipe_.set(orig)
@@ -750,6 +760,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     const orig = this.originalRecipe_()
     const current = this.recipe_()
     if (!edit || !orig || !current) return false
+    if (JSON.stringify(this.workflowFormArray.getRawValue()) !== this.workflowSnapshot_) return true
     return JSON.stringify(current) !== JSON.stringify(orig)
   }
 
@@ -1206,6 +1217,7 @@ export class CookViewPage implements OnInit, OnDestroy {
         arr.push(this.recipeFormService.createStepGroup(1))
       }
     }
+    this.workflowSnapshot_ = JSON.stringify(arr.getRawValue())
     this.workflowResetTrigger_ += 1
   }
 

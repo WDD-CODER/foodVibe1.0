@@ -1032,6 +1032,7 @@
     "pause": "השהה",
     "resume": "המשך",
     "reopen_step": "פתח שלב מחדש",
-    "cooking_complete_label": "הבישול הושלם"
+    "cooking_complete_label": "הבישול הושלם",
+    "discard_changes_confirm": "לבטל את השינויים שלא נשמרו?"
   }
 }

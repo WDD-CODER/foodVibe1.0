@@ -302,6 +302,21 @@ body::before {
   pointer-events: none;
 }
 
+/* Kitchen dark mode: inputs inside reused editors (the step workflow) keep readable placeholders
+   and get a solid field behind the text while focused. */
+:root.theme-kitchen {
+  ::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+  }
+
+  textarea:focus,
+  input:not([type='checkbox'], [type='radio']):focus {
+    background-color: var(--bg-card-solid);
+    color: var(--color-text-main);
+  }
+}
+
 /* Kitchen dark mode: the light page glows give way to the design's dark radial wash. */
 :root.theme-kitchen body::before {
   background: var(--bg-page-glow);

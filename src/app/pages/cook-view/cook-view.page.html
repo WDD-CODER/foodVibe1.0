@@ -1,43 +1,6 @@
 <div class="cook-view-container" dir="rtl" [class.is-editing]="editMode_()">
   @if (recipe_(); as recipe) {
   <div class="cv-shell" [class.edit-mode]="editMode_()" [class.scaled-view]="isScaledView_()">
-    @if (editMode_()) {
-    <div class="edit-mode-banner" role="status"><i aria-hidden="true"></i>{{ 'edit_mode' | translatePipe }}</div>
-    } @if (!editMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
-    <div class="scaled-view-banner">
-      <span class="scaled-view-text">
-        <lucide-icon name="scale" [size]="18"></lucide-icon>
-        <span>{{ 'recipe_calculated_by' | translatePipe }} <b>{{ scaledRow.name }}</b>:</span>
-      </span>
-      <span class="cv-stepper">
-        <button type="button" (click)="stepScaledBannerAmount(-1)" [attr.aria-label]="'decrease' | translatePipe">
-          <lucide-icon name="minus" [size]="16"></lucide-icon>
-        </button>
-        <input
-          type="number"
-          class="cv-amount-input cv-num"
-          inputmode="decimal"
-          step="any"
-          min="0"
-          [value]="inputAmount(getDisplayAmount(scaleByIngredientIndex_()!, scaledRow))"
-          (change)="setScaledBannerAmount($any($event.target).valueAsNumber)"
-          [attr.aria-label]="'quantity' | translatePipe"
-        />
-        <button type="button" (click)="stepScaledBannerAmount(1)" [attr.aria-label]="'increase' | translatePipe">
-          <lucide-icon name="plus" [size]="16"></lucide-icon>
-        </button>
-      </span>
-      <span class="scaled-view-unit">{{ getDisplayUnit(scaleByIngredientIndex_()!, scaledRow) | translatePipe }}</span>
-      <span class="scaled-view-yield cv-num"
-        >{{ targetQuantity_() | formatQuantity }} {{ selectedUnit_() | translatePipe }}</span
-      >
-      <button type="button" class="back-to-full-recipe-btn" (click)="resetToFullRecipe()">
-        <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
-        {{ 'back_to_full_recipe' | translatePipe }}
-      </button>
-    </div>
-    }
-
     <!-- Export menu (more-actions on phone, "export" pill on desktop): edit + view/download per
          export kind. The transparent scrim behind it closes it on any outside click. -->
     <ng-template #exportMenu let-withEdit="withEdit">
@@ -175,6 +138,44 @@
         }
       </span>
     </div>
+
+    <!-- Mode banners sit under the phone top bar (they were hidden behind it) -->
+    @if (editMode_()) {
+    <div class="edit-mode-banner" role="status"><i aria-hidden="true"></i>{{ 'edit_mode' | translatePipe }}</div>
+    } @if (!editMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
+    <div class="scaled-view-banner">
+      <span class="scaled-view-text">
+        <lucide-icon name="scale" [size]="18"></lucide-icon>
+        <span>{{ 'recipe_calculated_by' | translatePipe }} <b>{{ scaledRow.name }}</b>:</span>
+      </span>
+      <span class="cv-stepper">
+        <button type="button" (click)="stepScaledBannerAmount(-1)" [attr.aria-label]="'decrease' | translatePipe">
+          <lucide-icon name="minus" [size]="16"></lucide-icon>
+        </button>
+        <input
+          type="number"
+          class="cv-amount-input cv-num"
+          inputmode="decimal"
+          step="any"
+          min="0"
+          [value]="inputAmount(getDisplayAmount(scaleByIngredientIndex_()!, scaledRow))"
+          (change)="setScaledBannerAmount($any($event.target).valueAsNumber)"
+          [attr.aria-label]="'quantity' | translatePipe"
+        />
+        <button type="button" (click)="stepScaledBannerAmount(1)" [attr.aria-label]="'increase' | translatePipe">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+        </button>
+      </span>
+      <span class="scaled-view-unit">{{ getDisplayUnit(scaleByIngredientIndex_()!, scaledRow) | translatePipe }}</span>
+      <span class="scaled-view-yield cv-num"
+        >{{ targetQuantity_() | formatQuantity }} {{ selectedUnit_() | translatePipe }}</span
+      >
+      <button type="button" class="back-to-full-recipe-btn" (click)="resetToFullRecipe()">
+        <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+        {{ 'back_to_full_recipe' | translatePipe }}
+      </button>
+    </div>
+    }
 
     <!-- Page header: back, title + meta chips, actions. With a recipe photo it becomes a slim
          banner (photo behind, bottom scrim, white text). -->
