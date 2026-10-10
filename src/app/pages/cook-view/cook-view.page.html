@@ -1,8 +1,8 @@
-<div class="cook-view-container" dir="rtl">
+<div class="cook-view-container" dir="rtl" [class.is-editing]="editMode_()">
   @if (recipe_(); as recipe) {
   <div class="cv-shell" [class.edit-mode]="editMode_()" [class.scaled-view]="isScaledView_()">
     @if (editMode_()) {
-    <div class="edit-mode-banner">{{ 'edit_mode' | translatePipe }}</div>
+    <div class="edit-mode-banner" role="status"><i aria-hidden="true"></i>{{ 'edit_mode' | translatePipe }}</div>
     } @if (!editMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
     <div class="scaled-view-banner">
       <span class="scaled-view-text">
@@ -221,7 +221,7 @@
           }
         </div>
       </div>
-      <div class="cv-ph-acts" [class.cv-ph-acts--edit]="editMode_()">
+      <div class="cv-ph-acts">
         <span class="cv-ph-theme"><ng-container *ngTemplateOutlet="themeToggle"></ng-container></span>
         @if (editMode_()) {
         <button type="button" class="cv-pill-btn cv-pill-btn--primary" (click)="saveEdits()" [disabled]="isSaving_()">
@@ -363,63 +363,56 @@
 
           <div class="cv-ing-body">
             @if (editMode_()) {
-            <!-- Edit mode: original ingredient table (restyled in step 8) -->
-            <div class="ingredients-table">
-              <div class="ingredients-table-header">
-                <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
-                <div class="col-amount">{{ 'quantity' | translatePipe }}</div>
-                <div class="col-unit">{{ 'unit' | translatePipe }}</div>
-              </div>
-              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u' + $index) + row.unit + row.amount; let i
-              = $index) {
-              <div class="ingredients-table-row" [class.field-changed]="ingredientChanged(i)">
-                <div class="col-name">{{ row.name }}</div>
-                <div class="col-amount edit-amount">
+            <!-- Edit mode: one row per ingredient — name · − amount + · unit · delete -->
+            <div class="cv-ied-list">
+              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u' + $index) + row.unit; let i = $index) {
+              <div class="cv-ied" [class.is-changed]="ingredientChanged(i)">
+                <span class="cv-ied-name" [class.is-unlinked]="row.isUnlinked">{{ row.name }}</span>
+                <span class="cv-stepper">
                   <button
                     type="button"
-                    class="qty-btn minus small"
                     (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit))"
                     [attr.aria-label]="'decrease' | translatePipe"
                   >
-                    <lucide-icon name="minus" [size]="14"></lucide-icon>
+                    <lucide-icon name="minus" [size]="16"></lucide-icon>
                   </button>
                   <input
                     type="number"
-                    class="amount-input"
-                    [value]="row.amount"
+                    class="cv-amount-input cv-num"
+                    [class.is-changed]="ingredientFieldChanged(i, 'amount')"
+                    [value]="inputAmount(row.amount)"
                     (input)="setIngredientAmount(i, $any($event.target).valueAsNumber ?? 0)"
                     (keydown)="onEditAmountKeydown($event, i, row.amount, row.unit)"
                     [min]="0"
                     [step]="isDish_() ? 1 : 0.01"
+                    [attr.aria-label]="'quantity' | translatePipe"
                   />
                   <button
                     type="button"
-                    class="qty-btn plus small"
                     (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1, row.unit))"
                     [attr.aria-label]="'increase' | translatePipe"
                   >
-                    <lucide-icon name="plus" [size]="14"></lucide-icon>
+                    <lucide-icon name="plus" [size]="16"></lucide-icon>
                   </button>
-                </div>
-                <div class="col-unit">
-                  <app-custom-select
-                    class="unit-select"
-                    [ngModel]="row.unit"
-                    (ngModelChange)="setIngredientUnit(i, $event)"
-                    [options]="getUnitOptionsForRow(row)"
-                    placeholder="unit"
-                    variant="chip"
-                    [typeToFilter]="true"
-                  />
-                  <button
-                    type="button"
-                    class="remove-ingredient-btn"
-                    (click)="removeIngredient(i)"
-                    [attr.aria-label]="'remove' | translatePipe"
-                  >
-                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
-                  </button>
-                </div>
+                </span>
+                <app-custom-select
+                  class="cv-ied-unit"
+                  [class.is-changed]="ingredientFieldChanged(i, 'unit')"
+                  [ngModel]="row.unit"
+                  (ngModelChange)="setIngredientUnit(i, $event)"
+                  [options]="getUnitOptionsForRow(row)"
+                  placeholder="unit"
+                  variant="chip"
+                  [typeToFilter]="true"
+                />
+                <button
+                  type="button"
+                  class="cv-ied-del"
+                  (click)="removeIngredient(i)"
+                  [attr.aria-label]="'remove' | translatePipe"
+                >
+                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
+                </button>
               </div>
               }
             </div>
@@ -817,6 +810,21 @@
       </section>
     </div>
   </div>
+  @if (editMode_()) {
+  <div class="cv-editbar">
+    <button type="button" class="cv-pill-btn cv-pill-btn--primary" (click)="saveEdits()" [disabled]="isSaving_()">
+      @if (isSaving_()) {
+      <app-loader size="small" [inline]="true" />
+      } @else {
+      <lucide-icon name="save" [size]="16"></lucide-icon>
+      } {{ 'save_changes' | translatePipe }}
+    </button>
+    <button type="button" class="cv-pill-btn" (click)="undoEdits()">
+      <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+      {{ 'undo_changes' | translatePipe }}
+    </button>
+  </div>
+  }
   <app-approve-stamp [approved]="recipe.isApproved" [disabled]="isSaving_()" (approve)="onApproveStamp()" />
   } @else {
   <!-- Enhanced empty state: friendly icon, CTA, recent recipe quick-picks -->

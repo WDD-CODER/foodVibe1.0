@@ -105,18 +105,132 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   display: block;
 }
 
+// Edit mode banner: amber, spaced capitals feel, blinking dot.
 .edit-mode-banner {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 
-  background: var(--bg-warning);
-  color: var(--text-warning);
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-align: center;
+  background: var(--bg-warning-tint);
+  color: var(--color-warning-ink);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-extrabold);
+  letter-spacing: 0.12em;
 
+  border-radius: 14px;
+  margin-block-start: var(--space-3);
+  padding: 10px;
+
+  > i {
+    inline-size: 8px;
+    block-size: 8px;
+
+    background: currentColor;
+    border-radius: var(--radius-full);
+
+    animation: cv-chip-pulse 1.2s ease-in-out infinite;
+  }
+}
+
+// Phone edit bar: save / cancel fixed above the tab bar (≥621 they live in the page header).
+.cv-editbar {
+  display: none;
+
+  @media (max-width: $cv-phone-max) {
+    display: flex;
+    gap: 10px;
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: calc(56px + env(safe-area-inset-bottom, 0px));
+    z-index: 205;
+
+    padding: 10px var(--space-4);
+
+    background: var(--bg-header);
+    border-block-start: 1px solid var(--border-header);
+
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+  }
+}
+
+.cook-view-container.is-editing {
+  @media (max-width: $cv-phone-max) {
+    padding-block-end: 190px;
+  }
+}
+
+/* Edit mode ingredient rows (plan 404 step 8). */
+.cv-ied-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.cv-ied {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  min-block-size: 64px;
+
+  background: var(--bg-glass);
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) 10px var(--space-2) 14px;
+
+  // Changed amount / unit: warning fill + border on just the field that changed.
+  .cv-amount-input.is-changed,
+  .cv-ied-unit.is-changed {
+    background: var(--bg-warning-tint);
+
+    border-color: var(--color-warning-ink);
+  }
+}
+
+.cv-ied-name {
+  flex: 1;
+  min-inline-size: 120px;
+
+  color: var(--color-text-main);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+
+  &.is-unlinked {
+    font-style: italic;
+    opacity: 0.85;
+  }
+}
+
+.cv-ied-unit {
+  min-inline-size: 5rem;
+
+  border: 1.5px solid transparent;
   border-radius: var(--radius-full);
-  margin: 0 0 0.5rem;
-  padding: 0.5rem 1rem;
+}
+
+.cv-ied-del {
+  display: grid;
+  place-content: center;
+
+  inline-size: 40px;
+  block-size: 40px;
+
+  background: none;
+  color: var(--color-text-muted);
+
+  border: 0;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-warning-tint);
+    color: var(--color-warning-ink);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -322,26 +436,10 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
     display: flex;
   }
 
-  // Phone: save / cancel stay reachable here until the fixed edit bar (step 8).
-  &.cv-ph-acts--edit {
-    @media (max-width: $cv-phone-max) {
-      display: flex;
-      position: absolute;
-      inset-block-end: calc(-1 * (var(--cv-tap-min) + var(--space-3)));
-      inset-inline: 0;
-    }
-  }
-
   @media (max-width: $cv-phone-max) {
     .cv-ph-theme {
       display: none;
     }
-  }
-}
-
-.cv-ph:has(.cv-ph-acts--edit) {
-  @media (max-width: $cv-phone-max) {
-    margin-block-end: calc(var(--cv-tap-min) + var(--space-3));
   }
 }
 
@@ -1650,66 +1748,6 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   padding: 18px;
 }
 
-.ingredients-table {
-  overflow: hidden;
-
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-md);
-}
-
-.ingredients-table-header,
-.ingredients-table-row {
-  display: grid;
-  grid-template-columns: minmax(120px, 1fr) minmax(60px, auto) minmax(60px, auto);
-  align-items: start;
-
-  gap: 0.375rem;
-  padding: 0.625rem 0.875rem;
-}
-
-.ingredients-table-header {
-  background: var(--cv-segment-bg);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--cv-main-text);
-}
-
-.ingredients-table-row {
-  background: var(--cv-panel-bg);
-
-  border-block-start: 1px solid var(--cv-panel-border);
-
-  &:nth-child(even) {
-    background: var(--cv-segment-bg);
-  }
-
-  .col-name {
-    color: var(--cv-main-text);
-    font-weight: 500;
-  }
-
-  .col-amount {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--cv-accent);
-  }
-}
-
-.ingredients-table-row.field-changed {
-  background: var(--bg-warning);
-
-  border-inline-start: 0.1875rem solid var(--border-warning);
-}
-
-.col-name {
-  min-width: 0;
-}
-
-.col-amount,
-.col-unit {
-  white-space: nowrap;
-}
-
 .unit-select {
   min-width: 4rem;
   width: 100px;
@@ -1728,39 +1766,6 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
   border-radius: var(--radius-sm);
   margin-inline-end: 8px;
   padding: 2px 6px;
-}
-
-.edit-amount {
-  display: flex;
-  align-items: flex-start;
-
-  gap: 0.25rem;
-
-  .qty-btn.small {
-    padding: 0.25rem 0.5rem;
-  }
-
-  .amount-input {
-    background: transparent;
-    color: var(--cv-main-text);
-  }
-}
-
-.remove-ingredient-btn {
-  background: transparent;
-  color: var(--color-danger);
-
-  border: none;
-  border-radius: var(--radius-sm);
-  margin-inline-start: 0.5rem;
-  padding: 0.25rem;
-
-  cursor: pointer;
-  transition: background 0.2s var(--ease-smooth);
-
-  &:hover {
-    background: var(--bg-danger-subtle);
-  }
 }
 
 /* Scaled to an ingredient (plan 404 step 5): editable source amount, yield, back to full recipe. */

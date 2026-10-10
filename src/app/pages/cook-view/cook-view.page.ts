@@ -117,6 +117,10 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly syncViewportTheme_ = effect(() => {
     this.document.documentElement.classList.toggle('theme-kitchen', this.isDarkTheme_())
   })
+  /** Edit mode on <html> (`cv-editing`): on phones the FAB hides and the stamp lifts above the edit bar. */
+  private readonly syncEditingFlag_ = effect(() => {
+    this.document.documentElement.classList.toggle('cv-editing', this.editMode_())
+  })
   /** Snapshot when entering edit mode; restored on Undo. */
   private originalRecipe_ = signal<Recipe | null>(null)
   private readonly saving = useSavingState()
@@ -375,7 +379,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.cancelLongPress()
     if (this.growTimeoutId_ !== null) clearTimeout(this.growTimeoutId_)
-    this.document.documentElement.classList.remove('theme-kitchen', 'cv-page-scroll')
+    this.document.documentElement.classList.remove('theme-kitchen', 'cv-page-scroll', 'cv-editing')
     this.cookExport.closeAllExportOverlays()
     this.heroFab.clearPageActions()
     if (this.scrollTimeoutId !== null) {
@@ -826,6 +830,14 @@ export class CookViewPage implements OnInit, OnDestroy {
     const o = orig.ingredients[index]
     const c = current.ingredients[index]
     return o.amount !== c.amount || o.unit !== c.unit || o.referenceId !== c.referenceId
+  }
+
+  /** Which field of an edited ingredient changed — highlights just that field. */
+  protected ingredientFieldChanged(index: number, field: 'amount' | 'unit'): boolean {
+    const o = this.originalRecipe_()?.ingredients?.[index]
+    const c = this.recipe_()?.ingredients?.[index]
+    if (!o || !c) return false
+    return o[field] !== c[field]
   }
 
   /** Toggle check-off state for ingredient row at index (view mode only, session-only). */

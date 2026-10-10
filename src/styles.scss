@@ -317,6 +317,18 @@ body::before {
   }
 }
 
+/* Cook View edit mode on phones (≤620): the save bar sits above the tab bar, so the FAB hides and
+   the approve stamp lifts above the bar (plan 404). Set on <html> by CookViewPage. */
+@media (max-width: 620px) {
+  :root.cv-editing app-hero-fab {
+    display: none;
+  }
+
+  :root.cv-editing .approve-stamp {
+    inset-block-end: calc(3.5rem + 64px + 12px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* Cook View on phones (≤620) has its own top bar (back · title · theme · ⋮) and no sub-nav chips,
    per the handoff; the chips row stays on every other page. */
 @media (max-width: 620px) {
