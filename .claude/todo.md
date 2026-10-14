@@ -184,6 +184,26 @@
 - [ ] P6.4: Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
 - [ ] P6.5: ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
 
+### Plan 409 — Claude Code mods rollout: fleet, guards, ship-pilot
+- [x] S0: Stage 0 — validate + test all three mods on Windows — `claude-mods-deliverable/layers/claude-code-mods/**`
+- [x] S1: Stage 1 — fleet from disk in a slot (fleet/ports/health, slot lock, /handoff, no flash) — `claude-mods-deliverable/layers/claude-code-mods/fleet/**`
+- [x] S2a: Stage 2 — install fleet from the local marketplace at user scope — `~/.claude/settings.json`
+- [ ] S2b: Stage 2 — one week of fleet use (2026-10-14 → 2026-10-21), no fleet error toasts, ≥1 real lock or recovery — `(no files)`
+- [ ] S3a: Stage 3 — install guards at user scope and run checks 1–7 in a slot and the Planner folder — `(no files)`
+- [ ] S3b: Stage 3 — one week with shell guards + guards mod, no false denials — `(no files)`
+- [ ] S4: Stage 4 — install ship-pilot; /progress, /check, /pr, toast, merge button on a real PR — `(no files)`
+- [ ] K1: kit fix — test mocks strip the drive letter (guards path helper; ship-pilot P + fs.write) — `ai-workflow-kit/layers/claude-code-mods/{guards,ship-pilot}/tests/*.test.ts`
+- [ ] K2: kit fix — fleet registers each command in its own try/catch; `/fleet-health` alias (gstack `/health` clash) — `ai-workflow-kit/layers/claude-code-mods/fleet/hooks/register.tsx`
+- [ ] K3: kit fix — ship-pilot `/pr` handler gets a `.catch` (validator: gating hook without .catch) — `ai-workflow-kit/layers/claude-code-mods/ship-pilot/hooks/register.tsx`
+- [ ] K4: kit docs — headless `claude -p "/cmd"` from Git Bash needs `MSYS_NO_PATHCONV=1` — `ai-workflow-kit/layers/claude-code-mods/README.md`
+- [ ] S5: Stage 5 — kit PR: patch + K1–K4 + `--mods` install flag + manifest tier + kit.json bump + README — `ai-workflow-kit/**`
+- [ ] S6a: Stage 6 — remove Claude Code `hooks` from settings (keep `permissions`) — `.claude/settings.json`
+- [ ] S6b: Stage 6 — "superseded for Claude Code; still used by Cursor" header on shell guards — `scripts/*-guard.sh`, `scripts/session-startup.sh`
+- [ ] S6c: Stage 6 — take-plan step 0 dropped; save-plan Phase 0 uses `/approve` — `.claude/commands/take-plan.md`, `.claude/skills/save-plan/SKILL.md`
+- [ ] S6d: Stage 6 — ship-pilot band notes + `/check` sentence — `.claude/commands/ship.md`, `docs/agent/ship-regular.md`, `docs/agent/standards-git.md`, `docs/agent/job-validation.md`
+- [ ] S6e: Stage 6 — ADR "Claude Code guards run in-process (mods); shell guards remain for Cursor" — `docs/brain/decisions/`
+- [ ] S6f: Stage 6 — AGENTS.md Compaction bullet mentions `/handoff` and `/fleet-health` — `AGENTS.md`
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
