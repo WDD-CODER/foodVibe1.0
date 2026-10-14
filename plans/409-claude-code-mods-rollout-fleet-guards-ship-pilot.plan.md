@@ -59,9 +59,16 @@ Mod code fixes go into the deliverable copy first, then the kit (Stage 5) — ne
 Before each stage: `claude plugin list` (what is installed), `claude --version` ≥ 2.1.299, deliverable folder present.
 
 ## Calendar
-- **2026-10-21 (Wed)** — close Stage 2 (one week of fleet), install guards (Stage 3).
-- **2026-10-28** — close Stage 3 week, install ship-pilot (Stage 4) on the next real small PR.
-- **After Stage 4** — Stage 5 kit PR, then Stage 6 patch.
+- **2026-10-14** — Human chose to compress: guards and ship-pilot installed the same day as fleet (user scope),
+  with daily event logs added to all three mods so any problem can be traced back.
+- **Now → 2026-10-21 (Wed)** — one shared use week for all three; guards checks 1–7 in a slot; ship-pilot on the next real small PR.
+- **2026-10-21** — review the week's logs together (`.claude/mods-*-YYYY-MM-DD.log` in each checkout), close S2b/S3b/S4.
+- **After that** — Stage 5 kit PR, then Stage 6 patch.
+
+## Daily logs
+Each mod appends JSON lines to `<checkout>/.claude/mods-<mod>-YYYY-MM-DD.log` (gitignored by `.claude/*.log`):
+session start/end, every guard deny/approve/error, slot-lock denies, handoffs, merge-gate replies/refusals,
+`/check` ticks, checks-finished events. Read all of them: `Get-ChildItem "C:\coding projects\Cursor\foodVibe1.0*\.claude\mods-*.log"`.
 
 ## Stage notes (how-to, from AGENT-HANDOFF.md)
 - **Stage 2 (now → 2026-10-21):** daily `/fleet` at start, `/fleet-health` when heavy (plain `/health` is gstack's
@@ -90,6 +97,7 @@ Before each stage: `claude plugin list` (what is installed), `claude --version` 
 - [ ] K1: kit fix — test mocks strip the drive letter (guards path helper; ship-pilot P + fs.write) — `ai-workflow-kit/layers/claude-code-mods/{guards,ship-pilot}/tests/*.test.ts`
 - [ ] K2: kit fix — fleet registers each command in its own try/catch; `/fleet-health` alias (gstack `/health` clash) — `ai-workflow-kit/layers/claude-code-mods/fleet/hooks/register.tsx`
 - [ ] K3: kit fix — ship-pilot `/pr` handler gets a `.catch` (validator: gating hook without .catch) — `ai-workflow-kit/layers/claude-code-mods/ship-pilot/hooks/register.tsx`
+- [ ] K5: kit — daily event logs in all three mods (done in the deliverable copy 2026-10-14) — `ai-workflow-kit/layers/claude-code-mods/*/hooks/register.tsx`
 - [ ] K4: kit docs — headless `claude -p "/cmd"` from Git Bash needs `MSYS_NO_PATHCONV=1` — `ai-workflow-kit/layers/claude-code-mods/README.md`
 - [ ] S5: Stage 5 — kit PR: patch + K1–K4 + `--mods` install flag + manifest tier + kit.json bump + README — `ai-workflow-kit/**`
 - [ ] S6a: Stage 6 — remove Claude Code `hooks` from settings (keep `permissions`) — `.claude/settings.json`
