@@ -4,10 +4,12 @@
 feat/404-cook-view-redesign
 
 ## Date
-2026-10-11
+2026-10-16
 
 ## Session Summary
-- fix/list-shell-fixed-height-scroll pushed separately (fixed-size list + inner scroll + scroll arrows), no PR yet
+- Steps 9 + 10 implemented and agent-checked (build, lint, lint:icons, 531 unit tests, new e2e/cook-view.spec.ts 5/5 on :4203, browser pass of empty/recipe/dish/scaled/edit/export/phone/light).
+- Step 10 fixes: dead tokens/bindings/signals removed; duplicate @for track keys (NG0955) fixed; ×1 chip re-selected after "back to full recipe"; timer edit cleared when a clock is removed.
+- fix/list-shell-fixed-height-scroll commits also ride this branch (no PR yet).
 
 ## Files Modified
  .../handoffs/cook-view/CURRENT-STATE.md            |   33 +
@@ -38,10 +40,11 @@ feat/404-cook-view-redesign
  25 files changed, 3797 insertions(+), 1925 deletions(-)
 
 ## Commit
-8113a0b0
+3f6c7969
 
 ## PR
 N/A
 
 ## Next Steps
-- Human validates step 9 (dish mode, empty state, export preview in recipe builder + menu intelligence), then step 10 cleanup + e2e. Open asks: approved: recipe-export.service.ts (English/raw text in previews); port-spec file for the lost-feature check; clearing .angular caches (disk was full).
+- Human runs the single combined validation list (steps 9 + 10 + plan Done-when) and replies done/verified; then mark sub-tasks 9-10 [x] and /ship.
+- Open asks: approved: src/app/core/services/recipe-export.service.ts (raw ISO date + "by_dish" key in export previews); custom-select aria-label shows raw key (shared, out of scope).
