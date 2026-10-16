@@ -111,6 +111,9 @@ test.describe('Cook View', () => {
     await page.goto(`/cook/${id}`)
     const tabs = page.getByRole('tab')
     await expect(tabs).toHaveCount(2)
+    // Ingredients first (right in RTL), steps second; the ingredient card sits above the steps card.
+    await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true')
+    await expect(page.locator('.cv-body > section').first()).toHaveClass(/cv-ing-pane/)
     await tabs.nth(1).click()
     await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true')
     await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100)

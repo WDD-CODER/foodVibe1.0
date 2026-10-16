@@ -824,13 +824,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 }
 
 /* Panes (plan 404 step 5): card with a header + 4px progress bar; content grows with the page.
-   Stacked (<768): steps first, and scroll-margin keeps a scrolled-to pane under the sticky bars. */
-.cv-step-pane {
-  @media (max-width: $cv-stack-max) {
-    order: -1;
-  }
-}
-
+   Stacked (<768): ingredients first, then steps; scroll-margin keeps a scrolled-to pane under the sticky bars. */
 .cv-pane,
 [data-step-index] {
   scroll-margin-top: 140px; // phone: top bar 60 + switch bar ~80

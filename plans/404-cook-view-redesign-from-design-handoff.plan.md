@@ -71,6 +71,8 @@ e2e/cook-view*.spec.ts
 .interface-design/handoffs/cook-view/**
 src/app/pages/breadcrumbs.md
 src/app/shared/breadcrumbs.md
+src/app/core/services/recipe-export.service.ts
+src/app/shared/custom-select/custom-select.component.html
 ```
 
 ## Read Scope

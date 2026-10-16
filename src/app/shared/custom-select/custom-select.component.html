@@ -57,7 +57,7 @@
       (blur)="onTriggerBlur()"
       [attr.aria-expanded]="open()"
       aria-haspopup="listbox"
-      [attr.aria-label]="placeholder()"
+      [attr.aria-label]="placeholder() | translatePipe"
     >
       <span class="custom-select-label">
         @if (selectedLabel()) {

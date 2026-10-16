@@ -148,7 +148,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   private suppressClickUntil_ = 0
 
   /** Below 768 (one scrolling page): the pane the switch buttons mark — follows the scroll. */
-  protected activePane_ = signal<'ingredients' | 'steps'>('steps')
+  protected activePane_ = signal<'ingredients' | 'steps'>('ingredients')
 
   /**
    * Active multiplier chip factor (null = no chip selected, 1 = 1x selected by default).
@@ -913,16 +913,16 @@ export class CookViewPage implements OnInit, OnDestroy {
     el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  /** Scroll spy (<768): ingredients is active once its pane top reaches the bars, or at the page end. */
+  /** Scroll spy (<768): ingredients come first; steps become active once their pane top reaches the bars, or at the page end. */
   @HostListener('window:scroll')
   protected onWindowScroll(): void {
     if (!this.isStackedLayout()) return
-    const ing = this.el.nativeElement.querySelector('.cv-ing-pane') as HTMLElement | null
+    const steps = this.el.nativeElement.querySelector('.cv-step-pane') as HTMLElement | null
     const win = this.document.defaultView
-    if (!ing || !win) return
-    const offset = parseFloat(win.getComputedStyle(ing).scrollMarginTop) || 0
+    if (!steps || !win) return
+    const offset = parseFloat(win.getComputedStyle(steps).scrollMarginTop) || 0
     const atEnd = win.scrollY + win.innerHeight >= this.document.documentElement.scrollHeight - 2
-    this.activePane_.set(ing.getBoundingClientRect().top <= offset + 40 || atEnd ? 'ingredients' : 'steps')
+    this.activePane_.set(steps.getBoundingClientRect().top <= offset + 40 || atEnd ? 'steps' : 'ingredients')
   }
 
   /** Jump to any pending step and make it the active one. */

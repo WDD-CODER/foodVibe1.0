@@ -93,7 +93,9 @@
               </div>
             } @else {
               @if (data.exportedAt) {
-                <p class="export-preview-meta">{{ 'exported_at' | translatePipe }}: {{ data.exportedAt }}</p>
+                <p class="export-preview-meta">
+                  {{ 'exported_at' | translatePipe }}: {{ data.exportedAt | date: 'dd/MM/yyyy HH:mm' }}
+                </p>
               }
               <div class="export-preview-sections">
                 @for (section of data.sections; track $index) {
