@@ -287,9 +287,6 @@ export class CookViewPage implements OnInit, OnDestroy {
     return unit ? { unit } : undefined
   })
 
-  /** Number of steps marked as done (uses stepDoneSet_ for Focus Mode). */
-  protected completedStepCount_ = computed(() => this.stepDoneSet_().size)
-
   /** Empty state: recently cooked recipes with their names (ids no longer in the kitchen are dropped). */
   protected recentRecipes_ = computed(() => {
     const all = this.kitchenState.recipes_()
@@ -304,9 +301,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected stepTotal_ = computed(() =>
     this.isDish_() ? this.scaledPrep_().length : (this.recipe_()?.steps?.length ?? 0)
   )
-
-  /** Total step count for the current recipe. */
-  protected totalStepCount_ = computed(() => this.recipe_()?.steps?.length ?? 0)
 
   // ---- FOCUS MODE COMPUTED SIGNALS ----
   /** True when all ingredients have been checked off. */
@@ -328,13 +322,6 @@ export class CookViewPage implements OnInit, OnDestroy {
       return this.stepDoneSet_().size >= this.scaledPrep_().length && this.scaledPrep_().length > 0
     }
     return this.stepDoneSet_().size >= (recipe.steps?.length ?? 0) && (recipe.steps?.length ?? 0) > 0
-  })
-
-  /** Step/prep-item completion percent, 0–100 — drives the hero progress bar. */
-  protected heroProgressPct_ = computed(() => {
-    const total = this.isDish_() ? this.scaledPrep_().length : (this.recipe_()?.steps?.length ?? 0)
-    if (total === 0) return 0
-    return Math.round((this.stepDoneSet_().size / total) * 100)
   })
 
   protected get workflowFormArray(): FormArray {

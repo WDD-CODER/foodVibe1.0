@@ -1,9 +1,8 @@
-/* Cook View — mirrors UI refactor/CookView.dc.html's visual system: glass panels,
-   pill controls, a photo hero with progress bar, and a "kitchen" dark theme toggle.
-   The mockup's markup is a simplified single-flow screen; this component keeps our
-   richer functionality (edit mode, timers, stopwatch, ingredient scaling, focus-mode
-   active/done/pending steps) and re-skins it with the design's token language instead
-   of the mockup's literal (inline-styled) DOM. */
+/* Cook View — plan 404, from the Cook View handoff (.interface-design/handoffs/cook-view/README.md).
+   Page header + meta chips (slim photo banner when the recipe has an image), two pane cards
+   (stacked single scrolling page below 768), ingredient rows with an expander, done/active/
+   pending step rows with opt-in step clocks, and a kitchen dark mode that retints the whole
+   viewport through :root.theme-kitchen in src/styles.scss. */
 
 // Breakpoints (plan 404 — Cook View handoff): phone ≤620 · small tablet 621–767 ·
 // tablet 768–1023 · desktop ≥1024. Mirrors $break-phone-max / $break-tablet-max in src/styles.scss.
@@ -19,23 +18,9 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 
   /* ── Page tokens — alias the global tokens; kitchen dark mode retints them through
      :root.theme-kitchen in src/styles.scss (plan 404 step 1). ── */
-  --cv-nav-bg: var(--bg-frosted-nav);
-  --cv-nav-border: var(--border-glass);
-  --cv-segment-bg: var(--bg-subtle);
-  --cv-main-text: var(--color-text-main);
   --cv-muted-text: var(--color-text-muted);
-  --cv-panel-bg: var(--bg-glass);
-  --cv-panel-border: var(--border-glass);
-  --cv-panel-shadow: var(--shadow-glass);
-  --cv-hero-shadow: var(--shadow-hover);
   --cv-chip-bg: var(--color-primary-soft);
   --cv-accent: var(--color-primary);
-  --cv-accent-hover: var(--color-primary-hover);
-  --cv-accent-glow: var(--color-primary-glow);
-  --cv-row-bg: transparent;
-  --cv-timer-idle-bg: var(--cv-segment-bg);
-  --cv-timer-idle-border: var(--cv-nav-border);
-  --cv-active-ring: 0 0 0 2px var(--cv-accent-glow);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────

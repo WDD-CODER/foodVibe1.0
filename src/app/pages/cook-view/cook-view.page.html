@@ -1,6 +1,6 @@
 <div class="cook-view-container" dir="rtl" [class.is-editing]="editMode_()">
   @if (recipe_(); as recipe) {
-  <div class="cv-shell" [class.edit-mode]="editMode_()" [class.scaled-view]="isScaledView_()">
+  <div class="cv-shell">
     <!-- Export menu (more-actions on phone, "export" pill on desktop): edit + view/download per
          export kind. The transparent scrim behind it closes it on any outside click. -->
     <ng-template #exportMenu let-withEdit="withEdit">
