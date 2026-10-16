@@ -555,7 +555,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.targetQuantity_.set(this.convertedYieldAmount_())
     this.scaleByIngredientIndex_.set(null)
     this.scaleByIngredientAmount_.set(null)
-    this.activeMultiplier_.set(null)
+    // Back at the full recipe: the ×1 chip shows as selected again.
+    this.activeMultiplier_.set(1)
   }
 
   /** Scaled ingredient row at index (for banner name/unit in special view). */

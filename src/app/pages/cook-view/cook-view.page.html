@@ -366,7 +366,8 @@
             @if (editMode_()) {
             <!-- Edit mode: one row per ingredient — name · − amount + · unit · delete -->
             <div class="cv-ied-list">
-              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u' + $index) + row.unit; let i = $index) {
+              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u') + row.unit + ':' + $index; let i =
+              $index) {
               <div class="cv-ied" [class.is-changed]="ingredientChanged(i)">
                 <span class="cv-ied-name" [class.is-unlinked]="row.isUnlinked">{{ row.name }}</span>
                 <span class="cv-stepper">
@@ -420,7 +421,8 @@
             } @else {
             <!-- View mode: checklist rows; each row expands (units + scale to this ingredient) -->
             <div class="cv-ing-list">
-              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u' + $index) + row.unit; let i = $index) {
+              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u') + row.unit + ':' + $index; let i =
+              $index) {
               <div
                 class="cv-ing"
                 [attr.data-ing-index]="i"
@@ -607,8 +609,8 @@
           <div class="cv-step-list">
             @if (isDish_()) {
             <!-- Dish mode: mise-en-place items (amount + name), no clocks -->
-            @if (scaledPrep_().length > 0) { @for (row of scaledPrep_(); track row.name + row.unit; let si = $index) {
-            @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+            @if (scaledPrep_().length > 0) { @for (row of scaledPrep_(); track row.name + row.unit + ':' + $index; let
+            si = $index) { @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
             <div class="cv-act" [class.cv-grow]="growStepIndex_() === si" [attr.data-step-index]="si">
               <div class="cv-lab">
                 <i></i>{{ 'step' | translatePipe }} {{ si + 1 }} · {{ 'active_now' | translatePipe }}
@@ -721,7 +723,7 @@
                   <button
                     type="button"
                     class="cv-cb cv-cb--ghost"
-                    (click)="cookTimer.cancelTimer(si)"
+                    (click)="cancelTimerEdit(); cookTimer.cancelTimer(si)"
                     [attr.aria-label]="'remove' | translatePipe"
                   >
                     <lucide-icon name="x" [size]="18"></lucide-icon>
