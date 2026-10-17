@@ -281,6 +281,12 @@
             "/browse",
             "gstack"
           ]
+        },
+        {
+          "key": "paths.routesFile",
+          "strings": [
+            "src/app/app.routes.ts"
+          ]
         }
       ],
       "refs": [
@@ -622,6 +628,12 @@
           "strings": [
             "foodvibe"
           ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
         }
       ],
       "refs": [
@@ -646,7 +658,8 @@
         {
           "key": "project.i18nFile",
           "strings": [
-            "dictionary.json"
+            "dictionary.json",
+            "public/assets/data/dictionary.json"
           ]
         }
       ],
@@ -706,13 +719,15 @@
           "key": "paths.hotspots",
           "strings": [
             "src/styles.scss",
-            "app.routes.ts"
+            "app.routes.ts",
+            "src/app/app.routes.ts"
           ]
         },
         {
           "key": "project.i18nFile",
           "strings": [
-            "dictionary.json"
+            "dictionary.json",
+            "public/assets/data/dictionary.json"
           ]
         },
         {
@@ -1203,7 +1218,8 @@
             "420n",
             "4201",
             "4202",
-            "4203"
+            "4203",
+            "4200"
           ]
         },
         {
@@ -3298,7 +3314,8 @@
           "strings": [
             "3001",
             "3002",
-            "3003"
+            "3003",
+            "3000"
           ]
         },
         {
@@ -3306,7 +3323,8 @@
           "strings": [
             "4201",
             "4202",
-            "4203"
+            "4203",
+            "4200"
           ]
         },
         {
@@ -3314,7 +3332,8 @@
           "strings": [
             "wt-1",
             "wt-2",
-            "wt-3"
+            "wt-3",
+            "wt-n"
           ]
         },
         {

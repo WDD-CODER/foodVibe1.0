@@ -36,11 +36,11 @@ Use this path for fixing bugs, errors, and broken behavior.
 2. `investigate` traces the root cause (checks recent changes, failure history, source).
 3. Fix is implemented atomically — one targeted change.
 4. Review the fix for code quality, edge cases, and consistency against `docs/agent/standards-angular.md`; CSS touched → `cssLayer`.
-5. `ng build` / `ng lint` pass. Human commits via `git-agent` prep.
+5. `npm run build` / `npm run lint` pass. Human commits via `git-agent` prep.
 
 ## Hard rules
 
 - NEVER fix a symptom without identifying the root cause first.
-- `ng build` must pass before committing.
+- `npm run build` must pass before committing.
 - No semicolons in any `.ts` file touched during the fix.
 - 3-strike rule: at most 3 autonomous fix attempts in scoped files; then STOP and report.

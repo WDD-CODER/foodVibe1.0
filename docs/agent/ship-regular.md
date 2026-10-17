@@ -1,6 +1,6 @@
 # /ship — REGULAR lane procedure
 
-Loaded from `.claude/commands/ship.md` when Lane = REGULAR, or when any lane's ship reaches the PR path (a feature-complete commit). FAST and ULTRA-TRIVIAL checkpoint-only ships never need this file. See `docs/brain/gotchas/agent-workflow.md` if a section here seems to duplicate something already fixed elsewhere — this file is a direct extraction of ship.md's REGULAR-lane text, moved verbatim (Plan 325).
+Loaded from `.claude/commands/ship.md` when Lane = REGULAR, or when any lane's ship reaches the PR path (a feature-complete commit). FAST and ULTRA-TRIVIAL checkpoint-only ships never need this file. If a section here seems to duplicate something already fixed elsewhere, check `docs/brain/gotchas/` — this file is a direct extraction of ship.md's REGULAR-lane text, moved verbatim.
 
 ---
 
@@ -9,12 +9,12 @@ Loaded from `.claude/commands/ship.md` when Lane = REGULAR, or when any lane's s
 **Lane = REGULAR:**
 1. Invoke `/review` by **reading `.claude/commands/review.md` and executing it inline** — do
    **not** call it via the Skill tool by name (`skill: "review"`). The plain name "review" is
-   ambiguous with a gstack-vendored skill of the same name at `~/.claude/skills/review/`,
+   ambiguous with a vendored third-party skill of the same name at `~/.claude/skills/review/`,
    which is a much heavier multi-agent Review Army (telemetry, onboarding prompts, specialist
    subagent dispatch, Codex integration) — the Skill tool has been observed resolving to that
    one instead of this project's lightweight, judgment-only review, burning many times the
    tokens for no extra safety. Same collision risk applies to any other command name that
-   might shadow a gstack skill (e.g. `browse`) — when a command file says "read X and execute
+   might shadow a vendored third-party skill (e.g. `browse`) — when a command file says "read X and execute
    it," read the file directly, don't route through Skill-tool name resolution.
 2. On `REVIEW: PASS` → continue.
 3. On `ISSUES FOUND` → fix the listed issues → re-run `/review` **exactly once**.
@@ -31,7 +31,7 @@ Loaded from `.claude/commands/ship.md` when Lane = REGULAR, or when any lane's s
 - **One-liner-only proposals are forbidden** — a title that restates the commit subject is not an entry. No draft body that fills the shape → nothing durable → omit the block entirely (the common case for chores).
 - **Split when both apply** — a pattern (happy path) and its paired gotcha (the trap that looked like success) are two lines + two fenced drafts, cross-linked.
 
-**How a proposed brain entry gets approved (any lane, whenever one is proposed):** This rides the existing `Approve? (Y / edit list / abort)` answer — there is no separate Y/N for the brain entry. Say `no brain` / `skip brain` alongside `Y` to opt out for this ship, or "edit list" to revise it (treat it like any other stageable item). On approval, write each approved draft **verbatim** to its `docs/brain/` file (for a gotcha: append to the matching `gotchas/<domain>.md` per the routing table in `docs/brain/gotchas.md`; new file under `patterns/`; new numbered file for `decisions/`) and stage it alongside the rest. See `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`.
+**How a proposed brain entry gets approved (any lane, whenever one is proposed):** This rides the existing `Approve? (Y / edit list / abort)` answer — there is no separate Y/N for the brain entry. Say `no brain` / `skip brain` alongside `Y` to opt out for this ship, or "edit list" to revise it (treat it like any other stageable item). On approval, write each approved draft **verbatim** to its `docs/brain/` file (for a gotcha: append to the matching `gotchas/<domain>.md` per the routing table in `docs/brain/gotchas.md`; new file under `patterns/`; new numbered file for `decisions/`) and stage it alongside the rest.
 
 ---
 
@@ -70,7 +70,7 @@ Follow `docs/agent/standards-git.md` → **Post-push Merge Gate**. Copy the comb
 - **Feature-complete / PR path:** show MERGE GATE + Brain capture. On `merge` → create PR if missing, then `gh pr merge --merge --delete-branch` — inside a slot use `standards-git.md` → "Merging from a slot" instead (no `--delete-branch`, delete the remote branch, then `git fetch origin --prune`; stay in the slot) — (if the merge fails on a dirty tree, see `docs/agent/ship-recovery.md` → "PR merge fallback"). On `later` → stop with PR in Next Steps. On `open-pr-only` → ensure PR exists, do not merge.
 - **Checkpoint / milestone path:** show CHECKPOINT — DO NOT MERGE YET (+ Brain capture when durable). Do not offer merge.
 - **Brain re-show:** If Phase 4 skipped the brain block (ad-hoc commit/push, deferred, or nothing staged then) but something durable happened in the session, **re-show** the Brain capture proposal here — per `docs/agent/brain-capture.md`: banner line = path + one-line title, full draft body in a fenced block below the banner, usefulness gate already passed. Omit only when nothing durable.
-- **Brain capture auto-writes on the gate reply** (per `docs/brain/decisions/0006-auto-write-brain-capture-by-default.md`) — no separate `brain approve` token, matching how Phase 4 already rides `Y`:
+- **Brain capture auto-writes on the gate reply** — no separate `brain approve` token, matching how Phase 4 already rides `Y`:
   - `merge` / `later` / `open-pr-only` → write the approved fenced draft verbatim (append gotcha, new pattern file, or new `decisions/NNNN-*.md`) first, then do the reply's normal action (commit + push to the PR branch when possible; tiny follow-up PR if already merged).
   - `no brain` / `skip brain` (combined with any of the above) → explicit no-op on the brain write only; the gate reply's other action still happens.
   - `brain edit …` → revise draft, re-show banner, wait again before writing.

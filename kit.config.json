@@ -1,0 +1,147 @@
+{
+  "$comment": "FoodVibe's values for the ai-workflow-kit placeholders (see docs/workflow-kit/parameters.md and the kit's kit.config.json for every key). overrides = files FoodVibe keeps different from the kit for good; each one is approved by Dandan and listed in docs/workflow-kit/drift-classification.md. Check: kit-drift.ps1 -Target . (from ../ai-workflow-kit).",
+  "project": {
+    "name": "FoodVibe",
+    "repoName": "foodVibe1.0",
+    "uiLocale": "Hebrew RTL",
+    "i18nFile": "public/assets/data/dictionary.json"
+  },
+  "stack": {
+    "packs": [
+      "angular",
+      "node-express"
+    ],
+    "name": "Angular",
+    "backend": "MongoDB",
+    "stylesheetExt": "scss",
+    "stateRules": "signal()/computed(), no BehaviorSubject",
+    "standardsDoc": "docs/agent/standards-angular.md"
+  },
+  "commands": {
+    "build": "build",
+    "buildProd": "build:render",
+    "dev": "start",
+    "devLocal": "dev:local",
+    "test": "test",
+    "lint": "lint",
+    "e2e": "e2e",
+    "codegen": "build:schemas",
+    "lintStaged": "npx lint-staged",
+    "dbBackup": [
+      "server/scripts/db-backup.js",
+      "server/scripts/db-restore.js"
+    ],
+    "slotPrepare": "build:schemas"
+  },
+  "deploy": {
+    "host": "Render",
+    "dbHost": "Atlas"
+  },
+  "git": {
+    "mainBranch": "main"
+  },
+  "slots": {
+    "count": 3,
+    "nameFormat": "wt-N",
+    "folderSuffix": "-wt-N",
+    "fePorts": 4200,
+    "bePorts": 3000,
+    "dbNameFormat": "foodvibe_wt${n}",
+    "dbBackupDir": "foodvibe-db-backups"
+  },
+  "hooks": {
+    "shellPath": "C:/Program Files/Git/bin/bash.exe"
+  },
+  "paths": {
+    "hotspots": [
+      "src/styles.scss",
+      "src/app/app.routes.ts"
+    ],
+    "srcRoot": "src/app/",
+    "serverRoot": "server/",
+    "slotEnvFile": "src/environments/environment.slot.ts",
+    "sharedDocs": "_shared",
+    "routesFile": "src/app/app.routes.ts"
+  },
+  "plans": {
+    "openDirs": [
+      "plans",
+      "plans/design"
+    ]
+  },
+  "security": {
+    "sensitivePaths": "auth|crypto|guard|interceptor|security|payment|migration|schema|\\.env|server\\/routes|package(-lock)?\\.json|\\.github\\/workflows|\\.claude\\/(settings|commands\\/ship)\\."
+  },
+  "tools": {
+    "browser": "gstack /browse"
+  },
+  "docs": {
+    "domainStandards": "docs/agent/standards-domain.md"
+  },
+  "overrides": [
+    {
+      "path": ".claude/commands/commands.md",
+      "reason": "lists the FoodVibe-only /remote command"
+    },
+    {
+      "path": ".claude/settings.json",
+      "reason": "machine-specific Write/Edit allows and FoodVibe permission set"
+    },
+    {
+      "path": ".claude/skills/techdebt/SKILL.md",
+      "reason": "FoodVibe greps (@Input/@Output, BehaviorSubject) and knip audit"
+    },
+    {
+      "path": ".claude/skills/preflight/SKILL.md",
+      "reason": "documents FoodVibe preflight.mjs (MongoDB 27017, gstack browse binary)"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "reason": "root npm ci for build:schemas; Angular build cache"
+    },
+    {
+      "path": "docs/agent/standards-security.md",
+      "reason": "FoodVibe concrete security rules (authGuard, auth-crypto, sessionStorage)"
+    },
+    {
+      "path": "docs/agent/workflow-map.md",
+      "reason": "FoodVibe map with its own plan history"
+    },
+    {
+      "path": "scripts/kit-manifest-check.mjs",
+      "reason": "FoodVibe extraction audit incl. --lessons"
+    },
+    {
+      "path": "scripts/preflight.mjs",
+      "reason": "checks MongoDB on 27017 and the gstack browse binary"
+    },
+    {
+      "path": ".claude/skills/angularComponentStructure/evals/evals.json",
+      "reason": "Hebrew/translatePipe wording"
+    },
+    {
+      "path": ".claude/skills/angularComponentStructure/SKILL.md",
+      "reason": "Lucide icons, app.config.ts, Hebrew dictionary rules"
+    },
+    {
+      "path": ".claude/skills/cssLayer/SKILL.md",
+      "reason": "Hebrew RTL note"
+    },
+    {
+      "path": "docs/agent/conventions.md",
+      "reason": "FoodVibe translation rules (TranslationService resolvers, Lucide)"
+    },
+    {
+      "path": "docs/agent/standards-angular.md",
+      "reason": "FoodVibe domain logic line"
+    },
+    {
+      "path": "scripts/pre-commit-security-grep.mjs",
+      "reason": "excludes the vendored .interface-design/source/ snapshot"
+    },
+    {
+      "path": "docs/agent/standards-backend.md",
+      "reason": "FoodVibe real versions, entity registry, Atlas notes"
+    }
+  ]
+}

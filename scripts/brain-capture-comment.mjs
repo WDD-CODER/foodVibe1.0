@@ -51,7 +51,7 @@ const findingsBlock =
 const body = `<!-- brain-capture-bot -->
 ## Brain capture reminder
 
-Auto-evoke, auto-write on the gate reply. Drafting stays with the agent session — this comment is visibility only. See \`docs/brain/index.md\` and ADR \`docs/brain/decisions/0006-auto-write-brain-capture-by-default.md\` (supersedes the confirm-to-write clause of \`0003-auto-evoke-brain-on-pr.md\`).
+Auto-evoke, auto-write on the gate reply. Drafting stays with the agent session — this comment is visibility only. See \`docs/brain/index.md\`.
 
 **PR:** ${title}
 

@@ -1,6 +1,6 @@
 ---
 description: Autonomous plan executor — finds next incomplete plan, validates, executes, surfaces for approval
-allowed-tools: Read, Write, Edit, Bash, Agent, Skill, mcp__playwright__*, mcp__plugin_playwright_playwright__*
+allowed-tools: Read, Write, Edit, Bash, Agent, Skill
 ---
 
 # Command: auto-solve
@@ -16,7 +16,7 @@ Autonomous workflow that processes plans from `todo.md` one by one.
 Do not Read .claude/todo.md in full.
 
 1. Run `node scripts/todo-query.mjs next` — prints the first plan section with unchecked `[ ]` items, its plan file path (e.g., `plans/219-recipe-header-photo-picker.plan.md`), and each open item with its line number
-2. If it reports no open plan sections â†’ report "All plans complete" and stop
+2. If it reports no open plan sections → report "All plans complete" and stop
 
 ---
 
@@ -46,7 +46,7 @@ Continuing in 5 seconds... (Ctrl+C to stop)
 sleep 5
 ```
 
-4. Assess complexity. If the plan has more than 8 tasks, touches >3 subsystems, or requires architectural decisions â†’ stop and report:
+4. Assess complexity. If the plan has more than 8 tasks, touches >3 subsystems, or requires architectural decisions → stop and report:
 ```
    COMPLEXITY GATE — This plan requires human planning first.
    Reason: [specific reason]
@@ -77,11 +77,11 @@ Review what would be lost. Surface to user if significant changes detected.
 
 For each checkbox in the plan:
 
-**Step 1 — UI-DETECTION GATE:** Before pre-validating any checkboxes, scan the plan's target files. If any target file matches `**/*.component.html`, `**/*.component.ts`, `**/*.component.scss`, `**/*.page.html`, `**/*.page.ts`, `**/*.page.scss`, or `src/styles.scss` — the plan is **UI-TOUCHING**. For UI-TOUCHING plans, Phase 2 MUST invoke `/browse` against the affected route(s) at least once, capture a snapshot, and include the snapshot summary in the pre-validation output. Grep-only verification is forbidden for UI-TOUCHING plans.
+**Step 1 — UI-DETECTION GATE:** Before pre-validating any checkboxes, scan the plan's target files. If any target file matches `**/*.component.html`, `**/*.component.ts`, `**/*.component.scss`, `**/*.page.html`, `**/*.page.ts`, `**/*.page.scss`, or `src/styles.scss, src/app/app.routes.ts` — the plan is **UI-TOUCHING**. For UI-TOUCHING plans, Phase 2 MUST invoke gstack /browse` against the affected route(s) at least once, capture a snapshot, and include the snapshot summary in the pre-validation output. Grep-only verification is forbidden for UI-TOUCHING plans.
 
-**Step 1a — Route identification:** To identify the affected route, read the page component's usage in `app.routes.ts`. If the route cannot be identified, ask the user which route to probe before proceeding. Do not guess.
+**Step 1a — Route identification:** To identify the affected route, read the page component's usage in `src/app/app.routes.ts`. If the route cannot be identified, ask the user which route to probe before proceeding. Do not guess.
 
-**Step 1b — Browser budget cap:** Phase 2 browser invocation is capped at 5 `/browse` actions per plan (goto + snapshot + up to 3 additional inspection actions). If more than 5 are needed to verify the plan's assumptions, stop and surface the gap instead of continuing.
+**Step 1b — Browser budget cap:** Phase 2 browser invocation is capped at 5 gstack /browse actions per plan (goto + snapshot + up to 3 additional inspection actions). If more than 5 are needed to verify the plan's assumptions, stop and surface the gap instead of continuing.
 
 **Step 2 — Code inspection:** Read the target file, check if the described change already exists.
 
@@ -103,23 +103,23 @@ Mark each checkbox as:
 `Status` must be one of `DONE` / `TODO` / `BLOCKED`. `Evidence` must be a one-line reference (file:line, browser snapshot reference, or skip reason). Inline prose summaries do NOT satisfy this requirement. A `DONE` with no Evidence entry is invalid and must be downgraded to `TODO`. If the table is not produced, Phase 2 did not run.
 
 **If ALL tasks are DONE (zero TODO or BLOCKED items):**
-â†’ Mark all checkboxes `[x]` in `todo.md`
-â†’ **Surface Phase 5** with all tasks shown as DONE in the report — explicit user "approve" is still required before archiving. Phase 3 is skipped (no code to execute). Phase 4 is skipped (no files modified). The Phase 5 report must include: `Phase 4 skipped — plan pre-validated-done, no changes made.`
-â†’ Do NOT archive until the user types "approve" or "approve and stop" in this session.
+→ Mark all checkboxes `[x]` in `todo.md`
+→ **Surface Phase 5** with all tasks shown as DONE in the report — explicit user "approve" is still required before archiving. Phase 3 is skipped (no code to execute). Phase 4 is skipped (no files modified). The Phase 5 report must include: `Phase 4 skipped — plan pre-validated-done, no changes made.`
+→ Do NOT archive until the user types "approve" or "approve and stop" in this session.
 
 ---
 
 ## Phase 3 — Execute
 
 Use parallelism heuristics (persona orchestration retired) to determine parallelism:
-- Tasks targeting **different files** â†’ run in parallel via Agent tool
-- Tasks with **dependencies or same file** â†’ run sequentially
+- Tasks targeting **different files** → run in parallel via Agent tool
+- Tasks with **dependencies or same file** → run sequentially
 
 Execute all `TODO` tasks.
 
 For `BLOCKED` tasks:
-- If solvable without major deviation â†’ solve and continue
-- If complex/risky â†’ mark as "needs human" and skip
+- If solvable without major deviation → solve and continue
+- If complex/risky → mark as "needs human" and skip
 
 After each task: update checkbox in `.claude/todo.md` to `[x]`.
 
@@ -127,7 +127,7 @@ After each task: update checkbox in `.claude/todo.md` to `[x]`.
 
 ## Phase 4 — Self-Validate
 
-**BUILD SCOPE RULE** — `ng build` must run against the current plan's changes. A build result from a previous plan in the same session is NOT valid Phase 4 evidence, even if no files overlap. Each plan starts Phase 4 with a fresh build.
+**BUILD SCOPE RULE** — `npm run build` must run against the current plan's changes. A build result from a previous plan in the same session is NOT valid Phase 4 evidence, even if no files overlap. Each plan starts Phase 4 with a fresh build.
 
 **Skip exemption** — Phase 4 may be skipped ONLY if Phase 2 confirmed all tasks as DONE (pre-validated-done) AND no files were modified in Phase 3. In that case, replace Phase 4 with a single line in the Phase 5 report: `Phase 4 skipped — plan pre-validated-done, no changes made.` This exemption does NOT apply if any task was executed in Phase 3.
 
@@ -135,7 +135,7 @@ After each task: update checkbox in `.claude/todo.md` to `[x]`.
 
 Run validation checklist:
 ```bash
-ng build 2>&1 | tee /tmp/build-output.txt
+npm run build 2>&1 | tee /tmp/build-output.txt
 if grep -q "ERROR" /tmp/build-output.txt; then
   echo "BUILD FAILED — errors detected:"
   grep "ERROR" /tmp/build-output.txt
@@ -144,13 +144,13 @@ fi
 ```
 
 ```bash
-ng lint 2>/dev/null || echo "No lint configured"
+npm run lint 2>/dev/null || echo "No lint configured"
 ```
 
 If plan touched UI/layout:
 - Read `.worktree-port` (fallback 4200)
 - Run `/qa http://localhost:<port>/<affected-page>`
-- Capture screenshot via `$B screenshot /tmp/qa-shot.png` (gstack /browse); fall back to Playwright MCP `browser_take_screenshot` if /browse daemon unavailable
+- Capture screenshot via `$B screenshot /tmp/qa-shot.png` (gstack /browse); if it is unavailable, skip visual QA and note it in the report
 
 ---
 
@@ -181,8 +181,8 @@ PLAN COMPLETE — AWAITING APPROVAL
 | 3 | [checkbox text] | SKIPPED | [reason] |
 
 ## Validation
-ng build — passed / failed
-ng lint — passed / N/A
+npm run build — passed / failed
+npm run lint — passed / N/A
 Visual QA — passed / skipped / screenshot captured
 
 ## Files Modified
@@ -228,16 +228,16 @@ After marking a plan complete, run `git status --short`. If output is non-empty:
      - Run `node scripts/todo-archive.mjs` — moves fully-`[x]` `### Plan` sections from `.claude/todo.md` into `.claude/todo-archive/NNN.md` volumes (max 300 lines; rolls automatically)
      - Do **not** hand-append to a monolithic `todo-archive.md`
   5. Loop back to Phase 0 for next plan
-- **"approve and stop"** â†’ Commit (Human via `git-agent` prep), archive the plan (same step 4 above), then `/ship`
-- **"show diff"** â†’ Run `git diff`, then wait for next command
-- **"abort"** â†’ Run `git checkout .` to discard, end session
+- **"approve and stop"** → Commit (Human via `git-agent` prep), archive the plan (same step 4 above), then `/ship`
+- **"show diff"** → Run `git diff`, then wait for next command
+- **"abort"** → Run `git checkout .` to discard, end session
 
 ---
 
 ## Error Handling
 
 - **Build fails:** Stop, show full error output, wait for user input — do not auto-fix
-- **gstack /browse unavailable:** Fall back to Playwright MCP for screenshots; if both unavailable, skip visual QA and note in report
+- **gstack /browse unavailable:** Skip visual QA and note it in the report (no raw browser-automation MCP fallback)
 - **Unexpected file state:** Stop that task, mark as "needs human", continue with others
 - **All tasks blocked:** Surface immediately, don't wait for validation phase
 
@@ -248,5 +248,4 @@ After marking a plan complete, run `git status --short`. If output is non-empty:
 These are already in `.claude/settings.json`:
 - `Bash(*)` — for build, git, sound
 - `Write/Edit` for worktree paths
-- `Skill` — for invoking `/browse` (gstack; primary visual QA)
-- `mcp__playwright__*` and `mcp__plugin_playwright_playwright__*` — for visual QA (fallback when /browse unavailable)
+- `Skill` — for invoking gstack /browse (primary visual QA)
