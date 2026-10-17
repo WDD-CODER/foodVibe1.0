@@ -96,33 +96,34 @@
 - [ ] A9: Grep for any place that renders a term key without going through the facades (so a `displayName` override wouldn't show). If it's outside the scope, raise it via the Escalation Protocol.
 
 ### Plan 390 — Workflow Kit Phase 6A: Drift Reconciliation and Project Overrides (`plans/390-workflow-kit-phase-6a-drift-reconciliation-overrides.plan.md`)
-- [ ] A0: Step 0 reality check; record the real diff count and the two validation items' state.
-- [ ] A1: Classify every differing file in `docs/workflow-kit/drift-classification.md`.
-- [ ] A2: Fix real drift kit-first; patch into FoodVibe (ADR 0018); name kit SHAs in commits.
-- [ ] A3: `overrides` in kit `tools/sync.mjs` + `tools/install.mjs` + kit README; scratch install test.
-- [ ] A4: Kit `tools/drift-check.mjs` + `kit-drift.ps1`; FoodVibe `kit.config.json` with real values + overrides.
-- [ ] A5: Fix ship-prep ULTRA-TRIVIAL and plan-number reuse kit-first if Step 0 found them still open.
-- [ ] A6: `manifest.md` phase 6A paragraph; run every [auto] criterion; kit PR merged by Dandan; `/ship`.
+- [ ] A0: Step 0 reality check; record the extract-check problems, real diff count, open-slot kit-owned changes and the two validation items' state — `docs/workflow-kit/drift-classification.md`
+- [ ] A1: Land stranded kit work: rebase + fix PR #4 (skills v2), PR the take-plan brief branch, Dandan merges, delete `chore/skills-v2` after go; `kit-extract --check` clean — `../ai-workflow-kit/**`
+- [ ] A2: Classify every differing file — `docs/workflow-kit/drift-classification.md`
+- [ ] A3: Fix real drift kit-first; patch into FoodVibe (ADR 0018); name kit SHAs in commits — `../ai-workflow-kit/**`, `.claude/**`, `scripts/**`, `docs/agent/**`
+- [ ] A4: `overrides` in kit `tools/sync.mjs` + `tools/install.mjs` + kit README; scratch install test — `../ai-workflow-kit/tools/**`
+- [ ] A5: Kit `tools/drift-check.mjs` + `kit-drift.ps1`; FoodVibe `kit.config.json` with real values + overrides — `../ai-workflow-kit/tools/drift-check.mjs`, `kit.config.json`
+- [ ] A6: Fix ship-prep ULTRA-TRIVIAL and plan-number reuse kit-first if Step 0 found them still open — `scripts/ship-prep.mjs`, `scripts/next-plan-number.mjs`
+- [ ] A7: `manifest.md` phase 6A paragraph; run every [auto] criterion; kit PR merged by Dandan; `/ship` — `docs/workflow-kit/manifest.md`
 
 ### Plan 391 — Workflow Kit Phase 6B: GitHub Pull and Versioned Releases (`plans/391-workflow-kit-phase-6b-github-pull-versioned-releases.plan.md`)
-- [ ] B0: Step 0 reality check.
-- [ ] B1: Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers.
-- [ ] B2: `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria.
-- [ ] B3: Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs.
-- [ ] B4: `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps.
-- [ ] B5: Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir.
-- [ ] B6: FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship`.
+- [ ] B0: Step 0 reality check — `docs/workflow-kit/manifest.md`
+- [ ] B1: Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers — `../ai-workflow-kit/tools/**`, `../ai-workflow-kit/*.ps1`
+- [ ] B2: `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria — `../ai-workflow-kit/tools/**`
+- [ ] B3: Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs — `../ai-workflow-kit/tools/leak-check.mjs`, `../ai-workflow-kit/.github/**`
+- [ ] B4: `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps — `../ai-workflow-kit/kit.json`, `CHANGELOG.md`, `README.md`
+- [ ] B5: Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir — kit GitHub repo
+- [ ] B6: FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship` — `docs/workflow-kit/manifest.md`
 
 ### Plan 392 — Workflow Kit Phase 6C: FoodVibe Adoption and Retire Patch Mode (`plans/392-workflow-kit-phase-6c-foodvibe-adoption-retire-patch-mode.plan.md`)
-- [ ] C0: Step 0 reality check.
-- [ ] C1: Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe.
-- [ ] C2: Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR.
-- [ ] C3: New ADR superseding 0018 (amends 0015); mark 0018 superseded; brain index line.
-- [ ] C4: Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md`.
-- [ ] C5: Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`).
-- [ ] C6: Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0`.
-- [ ] C7: `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end.
-- [ ] C8: No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship`.
+- [ ] C0: Step 0 reality check — `docs/workflow-kit/manifest.md`
+- [ ] C1: Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/kit-install.ps1`
+- [ ] C2: Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR — `.kit/install.json` + files kit-sync writes
+- [ ] C3: New ADR superseding 0018 (amends 0015); mark 0018 superseded; brain index line — `docs/brain/decisions/**`, `docs/brain/index.md`
+- [ ] C4: Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md` — `../ai-workflow-kit/docs/CHANGE-LOOP.md`, `docs/workflow-kit/manifest.md`
+- [ ] C5: Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`) — `AGENTS.md`, `scripts/kit-owned.mjs`, `docs/workflow-kit/manifest.md`
+- [ ] C6: Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0` — `.kit/install.json`
+- [ ] C7: `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end — `../kit-proof/**`
+- [ ] C8: No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship` — `.kit/install.json`, `../kit-proof/.kit/install.json`
 
 ### Plan 393 — Slot Dev Servers On Demand and Closed-Todo Archiving (`plans/393-slot-dev-servers-on-demand-closed-todo-archiving.plan.md`)
 - [ ] D0: Step 0: bring both repos up to date, take the process snapshot.

@@ -5,7 +5,7 @@ Track: code — here (not design)
 Snapshot: a60b9cbd
 
 ## Problem Statement
-Two workflow fixes Dandan asked for on 2026-10-06. Run this plan before plan 390, because 390's scope covers the same kit-owned files.
+Two workflow fixes Dandan asked for on 2026-10-06. Order changed by the Planner on 2026-10-17: this plan now runs **after plan 390 has merged** (390 lands the stranded kit work this plan's Step 0 would stop on). Never run it at the same time as 390–392, because they cover the same kit-owned files.
 
 **1. Dev servers run all the time and use too much CPU.** `take-plan.mjs` starts a backend and a frontend in every slot it claims. Since plan 360 (E5b), they keep running from plan to plan, and `free-merged-slots.mjs` leaves them up after a merge, so with three slots plus `main` there are up to 8 servers, most of them idle. A process snapshot taken on 2026-10-06 also showed orphaned `node --watch index.js` chains (`npm run dev:local` → `cross-env` → `node --watch`): three from `foodVibe1.0-wt-1` and one from main, none of them listening on a port. Only ports 4200 and 3001 were listening. `stopSlotServers()` finds servers by recorded PID or by who holds the port, so a watcher that holds no port is never found.
 
@@ -42,7 +42,7 @@ All the files involved are kit-owned. Fix them in `../ai-workflow-kit` first, th
 - [human] A validation click-list in a Worker session starts the servers itself first (or tells you to say "start servers"), and they are off again after the merge.
 
 ## Execution Mode
-- **Parallel:** no. One Worker in a FoodVibe `wt-N` slot, editing the kit repo by path. Plan 390 starts after this plan merges.
+- **Parallel:** no. One Worker in a FoodVibe `wt-N` slot, editing the kit repo by path. Starts after plan 390 merges; not concurrently with 391/392.
 - **Isolated DB:** no.
 - **Kit edits:** made on the kit branch `fix/393-servers-on-demand`, with a kit PR that Dandan merges.
 
