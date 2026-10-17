@@ -68,8 +68,9 @@ describe('Column carousel (plan 349)', () => {
     expect(group.index()).toBe(2)
   })
 
-  it('a cell arrow moves the whole list', () => {
-    const nextArrow = fixture.debugElement.query(By.css('app-column-carousel-cell .cc-arrow--next'))
+  it('a header arrow moves the whole list; rows have no arrows of their own', () => {
+    expect(fixture.debugElement.query(By.css('app-column-carousel-cell .cc-arrow'))).toBeNull()
+    const nextArrow = fixture.debugElement.query(By.css('app-column-carousel-header .cc-arrow--next'))
       .nativeElement as HTMLElement
     nextArrow.click()
     fixture.detectChanges()
