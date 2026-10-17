@@ -501,7 +501,7 @@ export class MenuExportService {
     mode: 'by_dish' | 'by_category' | 'by_station'
   ): ExportPayload {
     const recipeMap = new Map(recipes.map((r) => [r._id, r]))
-    const modeLabel = mode === 'by_dish' ? 'by_dish' : mode === 'by_station' ? 'by_station' : 'by_category'
+    const modeLabel = this.translation_.translate(`export_checklist_${mode}`)
 
     if (mode === 'by_dish') {
       const sections: ExportSection[] = []
