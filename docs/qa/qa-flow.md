@@ -51,7 +51,7 @@ If `Phase: P1` is not finished, redo only the pages whose section in `plan-reali
 2. Folder check: the connected folder is the FoodVibe repo (`package.json` contains `foodVibe1.0`, `docs/qa/` exists).
 3. Create `bugs/qa-runs/<RUN_ID>/{shots}`, copy `docs/qa/qa-plan.md` → `plan-snapshot.md`, write the `progress.md`
    skeleton (pages × D/T/M) and the `report.md` header (`qa-agent.md` §6.2).
-4. Browser: open `http://localhost:4205` (site approval once), `http://localhost:4206/health` returns `ok`.
+4. Browser: open `http://localhost:4205` (site approval once), `http://localhost:4205/qa-evidence/health` returns `"ok":true,"loggedIn":true`.
    `resize_window` accepts 1366×768, 768×1024, 375×812 (record the smallest accepted width).
 5. Log in as `QA_USER`. Confirm the header shows the username and no crown (non-admin).
 6. Set `Phase: P1`.

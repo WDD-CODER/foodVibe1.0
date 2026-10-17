@@ -48,7 +48,7 @@ RUN_ID: <YYYY-MM-DD-a>
 QA_USER: <user>   QA_PASS: <pass>
 SCOPE: all
 REPORT_LANG: en
-השרתים כבר רצים: http://localhost:4205 (אפליקציה), http://localhost:4206/health (evidence). אל תנסה להריץ שרתים בעצמך.
+השרתים כבר רצים: http://localhost:4205 (אפליקציה), http://localhost:4205/qa-evidence/health (evidence). אל תנסה להריץ שרתים בעצמך.
 ```
 
 ## Evidence server
@@ -62,7 +62,10 @@ The agent uses it as described in `qa-agent.md` §5:
   viewport, logged in as `QA_USER` unless `auth=0`.
 - Every saved PNG also gets a line in `bugs/qa-runs/<run>/shots/index.tsv`. The server binds `127.0.0.1` only.
 
-`ng serve` sends no CSP header, so the page can load html2canvas from 4206 and POST to it. A prod-style serve with
+The page never calls 3005 or 4206 directly: `qa-up` starts `ng serve` with `.claude/qa-proxy.conf.json`, which
+proxies `/api` to 3005 and `/qa-evidence` to 4206 (Cowork's built-in browser blocks cross-port calls with
+`ERR_BLOCKED_BY_CLIENT`). The QA build also has no guest auto-login, so a fresh browser is signed out.
+`ng serve` sends no CSP header, so the page can load html2canvas from `/qa-evidence` and POST to it. A prod-style serve with
 helmet's CSP would block this, and that case is not handled.
 
 ## Where reports land
@@ -104,7 +107,7 @@ QA_USER: <user>   QA_PASS: <pass>
 STOP_AT: 06:30
 SCOPE: all
 REPORT_LANG: en
-השרתים מורמים על ידי Windows Task Scheduler: http://localhost:4205 (אפליקציה), http://localhost:4206/health (evidence). אל תנסה להריץ שרתים בעצמך.
+השרתים מורמים על ידי Windows Task Scheduler: http://localhost:4205 (אפליקציה), http://localhost:4205/qa-evidence/health (evidence). אל תנסה להריץ שרתים בעצמך.
 ```
 
 ### Caveats
