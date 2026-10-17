@@ -50,6 +50,7 @@ testem.log
 .worktree-remote
 .claude/.slot-pids
 .claude/*.log
+.claude/logs/
 src/environments/environment.slot.ts
 
 # Claude Code local config (never commit)
