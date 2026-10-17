@@ -5,7 +5,7 @@
  * A dev server is a process chain, e.g. `npm run dev:local` -> cmd.exe -> cross-env -> `node --watch index.js`
  * -> `node index.js` (the port owner). It is always stopped from the chain's ROOT, never from the process that
  * holds the port: killing only the port owner leaves the `node --watch` watcher alive and idle ("Waiting for
- * file changes before restarting") - the orphan leak of plan 393. A start on a port that is already held
+ * file changes before restarting") - the orphan leak. A start on a port that is already held
  * leaves the same orphan (the app dies on EADDRINUSE, the watcher stays), so a start is refused while the
  * port is held, and a start that never comes up is killed from its root.
  *
@@ -30,7 +30,7 @@ export const repoRoot = resolve(__dirname, '..', '..')
 const isWin = process.platform === 'win32'
 const pidsFileOf = (root) => join(root, '.claude', '.slot-pids')
 const DEV_SERVER = /\b(node|nodemon|npm|npx|ng|vite|tsx|ts-node)(\.exe|\.cmd|\.js)?\b/i
-// A process that can sit in a dev chain: npm/npx launchers, npm's cmd.exe/sh shell, cross-env, a watcher, ng serve.
+// A process that can sit in a dev chain: npm/npx launchers, npm's cmd.exe/sh shell, cross-env, a watcher, a frontend dev server.
 const CHAIN_CMD = /npm-cli\.js|npx-cli\.js|\bnpm(\.cmd)?\s|\bnpx(\.cmd)?\s|cross-env|--watch\b|\bng(\.js|\.cmd)?"?\s+serve\b|\bnodemon\b|\bvite\b|\bdev:local\b/i
 // Never bash/powershell on Windows: the agent's own shell must not count as a chain root.
 const CHAIN_NAME = isWin ? /^(node|cmd)\.exe$/i : /^(node|nodejs|npm|npx|sh|dash)$/i
@@ -149,7 +149,7 @@ const norm = (s) => (isWin ? s.replace(/\//g, '\\').toLowerCase() : s)
 const folderKey = (folder) => norm(resolve(folder)).replace(/[\\/]+$/, '') + (isWin ? '\\' : '/')
 
 function procInFolder(p, key) {
-  // Trailing separator: foodVibe1.0\ never matches foodVibe1.0-wt-1\.
+  // Trailing separator: the main folder never matches a slot folder whose name starts with it.
   if (norm(p.cmd).includes(key)) return true
   if (process.platform !== 'linux') return false
   try {
@@ -269,7 +269,7 @@ export function portState(port, { root = repoRoot, table, lst, retried = false }
 
 // --- recorded PIDs -----------------------------------------------------------------------
 
-/** [{ pid, t }] from .claude/.slot-pids (t = 0 for an entry written before plan 393). */
+/** [{ pid, t }] from .claude/.slot-pids (t = 0 for an entry in the old format). */
 export function readSlotPids(root = repoRoot) {
   const file = pidsFileOf(root)
   if (!existsSync(file)) return []
@@ -453,7 +453,7 @@ export function generateEnvironmentSlot(bePort) {
     (_, lead) => `${lead}'http://localhost:${bePort}'`
   )
   const slotPath = join(repoRoot, 'src', 'environments', 'environment.slot.ts')
-  // Same content -> no write, so a running ng serve is not poked into a rebuild.
+  // Same content -> no write, so a running frontend dev server is not poked into a rebuild.
   if (existsSync(slotPath) && readFileSync(slotPath, 'utf8') === withApi) return
   writeFileSync(slotPath, withApi)
 }

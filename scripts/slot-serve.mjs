@@ -1,5 +1,5 @@
 /**
- * Slot serve — starts this slot's dev servers on demand (plan 393). Servers are off unless a step needs the
+ * Slot serve — starts this slot's dev servers on demand. Servers are off unless a step needs the
  * running app (a browser check, a validation click-list, /remote, preflight) or the Human says "start servers".
  * take-plan.mjs claims a slot without starting them; the merge, free-merged-slots.mjs and the SessionEnd hook
  * stop them again (scripts/slot-stop.mjs).

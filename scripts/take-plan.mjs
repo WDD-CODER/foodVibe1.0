@@ -1,6 +1,6 @@
 /**
  * Take plan — claims a wt-N slot for a plan. It starts no dev servers: they are off unless a
- * step needs the running app (node scripts/slot-serve.mjs starts them on demand, plan 393).
+ * step needs the running app (node scripts/slot-serve.mjs starts them on demand).
  * Ports the safety checks from the retired scripts/claim-parallel-slot.sh
  * into the 3-permanent-slot Planner-Worker model. See
  * plans/326-planner-worker-workflow.plan.md.
@@ -261,7 +261,7 @@ if (resuming) {
 }
 
 // --- (d) ports, before the claim: refuse a foreign program, then stop this slot's own servers -------
-// Servers are off by default (plan 393): a claim stops what this slot still runs, orphaned watchers included.
+// Servers are off by default: a claim stops what this slot still runs, orphaned watchers included.
 const halves = [['be', bePort, hasServer], ['fe', fePort, hasFrontend]].filter(([, , present]) => present)
 for (const [, port] of halves) {
   const st = portState(port)

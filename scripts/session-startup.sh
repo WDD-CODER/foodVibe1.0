@@ -20,14 +20,14 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # A slot whose branch already merged is freed before the role check, so it starts idle; the
 # Planner folder frees finished slots too. An idle slot skips it (nothing to free). Local refs only:
 # a fetch can outlast the hook's timeout, and the slot merge step already fetched.
-# Freeing a slot also stops its dev servers (plan 393), so it gets a longer timeout.
+# Freeing a slot also stops its dev servers, so it gets a longer timeout.
 if [[ -f "$REPO_ROOT/.worktree-plan" || ! -f "$REPO_ROOT/.worktree-port" ]]; then
   if command -v timeout >/dev/null 2>&1; then
     timeout 10 node "$SCRIPT_DIR/free-merged-slots.mjs" --no-fetch >/dev/null 2>&1 || true
   fi
 fi
 
-# Orphan sweep (plan 393): kill this folder's idle dev watchers (a `node --watch` with no child, holding no
+# Orphan sweep: kill this folder's idle dev watchers (a `node --watch` with no child, holding no
 # port) left by a session that crashed or closed before its SessionEnd hook. Runs in a slot and in the main
 # folder; a server that holds a port is never touched. Its lines go into the context below.
 SWEEP=""

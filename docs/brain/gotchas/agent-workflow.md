@@ -306,7 +306,15 @@ only the Bash tool's command text triggers it.
 
 **Why the obvious fix is wrong:** `windowsHide: true` doesn't help, and neither does calling `cmd.exe /c` yourself. Any detached child that goes through cmd.exe loses the inherited file handles. Running it in the foreground does write the log, but take-plan needs the servers running in the background.
 
-**What to do instead:** On Windows, skip cmd.exe and run npm's own CLI under node: `spawn(process.execPath, [<node dir>/node_modules/npm/bin/npm-cli.js, ...args], { detached: true, windowsHide: true, stdio })`. Use `npm exec -- ng …` in place of `npx`. This is the `spawnNpm()` helper in `scripts/take-plan.mjs`.
+**What to do instead:** On Windows, skip cmd.exe and run npm's own CLI under node: `spawn(process.execPath, [<node dir>/node_modules/npm/bin/npm-cli.js, ...args], { detached: true, windowsHide: true, stdio })`. Use `npm exec -- ng …` in place of `npx`. This is the `spawnNpm()` helper in `scripts/lib/slot-procs.mjs` (used by `scripts/slot-serve.mjs`).
+
+## Windows: stopping a dev server at its port owner leaves `node --watch` idle forever (plan 393)
+
+**What hurt:** Task Manager filled up with `npm run dev:local` → `cmd.exe` → `cross-env` → `node --watch index.js` chains whose watcher had no child and held no port. On 2026-10-06 four of them sat in `wt-1` and main; on 2026-10-17 `wt-3` still had one from the day before.
+
+**Why the obvious fix is wrong:** Killing whatever holds the port (`taskkill /PID <port owner> /T`) kills only `node index.js`. The watcher prints "Failed running 'index.js'. Waiting for file changes before restarting..." and lives on. A second start while the port is taken ends the same way: the new app dies on `EADDRINUSE`, its watcher stays. Cleaning up by port can never find these, because they hold no port.
+
+**What to do instead:** Stop a dev server from the root of its chain (`killChain` / `stopSlotServers` in `scripts/lib/slot-procs.mjs` walk up from the port owner through npm/cmd/cross-env, then `taskkill /T` the root), never start one while its port is held (`startServer`), and find chains by folder (a chain member's command line contains the checkout path), not only by port. `scripts/orphan-sweep.mjs` at session start removes what a crashed session left. Match the folder with a trailing separator, or `foodVibe1.0` also matches `foodVibe1.0-wt-1`.
 
 ## A Human answer to a mid-execution question can silently override a locked ADR (plan 387)
 

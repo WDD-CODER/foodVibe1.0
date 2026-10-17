@@ -3512,12 +3512,25 @@
           "strings": [
             "wt-n"
           ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4200"
+          ]
+        },
+        {
+          "key": "slots.bePorts",
+          "strings": [
+            "3000"
+          ]
         }
       ],
       "refs": [
-        "plans/326-planner-worker-workflow.plan.md"
+        "plans/326-planner-worker-workflow.plan.md",
+        "scripts/lib/slot-procs.mjs"
       ],
-      "notes": "Detaches merged wt-N slots; `origin/main`, slot naming."
+      "notes": "Detaches merged wt-N slots and stops their dev servers (plan 393); origin/main, slot naming, base ports."
     },
     {
       "path": "scripts/handoff-check.sh",
@@ -4033,12 +4046,6 @@
           ]
         },
         {
-          "key": "commands.devLocal",
-          "strings": [
-            "npm run dev:local"
-          ]
-        },
-        {
           "key": "commands.npm",
           "strings": [
             "npm install"
@@ -4104,7 +4111,7 @@
         "server/scripts/db-backup.js",
         "server/scripts/db-restore.js"
       ],
-      "notes": "Slot claim. Hardcodes Git Bash path (line 21), `npm run dev:local` (237), DB names `foodvibe_wt${n}` (235/260), backup dir `foodvibe-db-backups` (115), `server/scripts/db-backup.js`/`db-restore.js` (117/122), `src/environments/environment.slot.ts` (72), `ng serve -c slot`. 321 pending change: Windows `shell` fix."
+      "notes": "Slot claim (no server start since plan 393). Hardcodes Git Bash path, DB names foodvibe_wt${n}, backup dir foodvibe-db-backups, server/scripts/db-backup.js/db-restore.js."
     },
     {
       "path": "scripts/plan-close.mjs",
@@ -4205,7 +4212,7 @@
       "refs": [
         "scripts/lib/slot.mjs"
       ],
-      "notes": "Plan 360: slot dev-server processes (port owner, descendant check, kill tree, wait for port). Kit-authored; FoodVibe gets a copy."
+      "notes": "Plans 360/393: slot dev-server process chains (find by folder, kill from the chain root, orphan detection, start guard, port state, npm install + environment.slot.ts helpers). Kit-authored; FoodVibe gets a copy."
     },
     {
       "path": "scripts/slot-stop.mjs",
@@ -4217,6 +4224,47 @@
         "scripts/lib/slot-procs.mjs"
       ],
       "notes": "Plan 360: stops a slot's dev servers (cross-platform; replaces taskkill by hand). Kit-authored; FoodVibe gets a copy."
+    },
+    {
+      "path": "scripts/slot-serve.mjs",
+      "tier": "core",
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "commands.slotPrepare",
+          "strings": [
+            "build:schemas"
+          ]
+        },
+        {
+          "key": "slots.dbNameFormat",
+          "strings": [
+            "foodvibe_wt${n}"
+          ]
+        },
+        {
+          "key": "project.name",
+          "strings": [
+            "foodvibe"
+          ]
+        }
+      ],
+      "refs": [
+        "scripts/lib/slot.mjs",
+        "scripts/lib/slot-procs.mjs"
+      ],
+      "notes": "Plan 393: starts a slot's dev servers on demand (keep / refuse while a port is held / start + wait), install + prepare step. Kit-authored."
+    },
+    {
+      "path": "scripts/orphan-sweep.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "scripts/lib/slot-procs.mjs",
+        "scripts/session-startup.sh"
+      ],
+      "notes": "Plan 393: session-start sweep of idle dev watchers (no child, no port) in this folder; never a server that holds a port. Kit-authored."
     },
     {
       "path": "scripts/next-plan-number.mjs",
@@ -4601,6 +4649,26 @@
         ".husky/pre-push"
       ],
       "notes": "Plan 406: tests for plan-paths.mjs, plan-close from plans/design/, and the branch-guard / pre-push open-plan rule (FoodVibe values)."
+    },
+    {
+      "path": "scripts/test/slot-procs.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/slot-procs.mjs"
+      ],
+      "notes": "Plan 393: devChains / chainRoot on synthetic process tables (orphan detection, folder prefix, QA harness chains)."
+    },
+    {
+      "path": "scripts/test/todo-parse.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/todo-parse.mjs"
+      ],
+      "notes": "Plan 393: [-] counts as closed; closed sections are archive candidates."
     },
     {
       "path": "docs/brain/decisions/0020-plans-design-folder.md",

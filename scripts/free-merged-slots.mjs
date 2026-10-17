@@ -79,7 +79,7 @@ function main() {
       console.log(`wt-${s.slot}: branch=${s.branch} not yet merged — left alone`)
       continue
     }
-    // Servers are off unless a session needs them (plan 393): a freed slot's servers are stopped.
+    // Servers are off unless a session needs them: a freed slot's servers are stopped.
     const stopped = stopSlotServers({ root: s.path, slotPorts: { fe: 4200 + s.slot, be: 3000 + s.slot } })
     git(['checkout', '--detach', 'origin/main'], s.path)
     const planFile = join(s.path, '.worktree-plan')

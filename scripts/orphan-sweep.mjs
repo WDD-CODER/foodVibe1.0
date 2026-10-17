@@ -3,7 +3,7 @@
  * its npm / cmd.exe / cross-env parents, whose command line is inside this folder and that holds no port.
  * Runs at session start (session-startup.sh) in a slot and in the main folder, to clean up after a session
  * that crashed or closed before its SessionEnd hook ran. A server that holds a port is never touched, so the
- * Human's running main-folder servers (and a running QA harness) stay up. See plan 393.
+ * Human's running main-folder servers (and a running QA harness) stay up.
  *
  * Usage: node scripts/orphan-sweep.mjs [--quiet]   # --quiet: print nothing when there is nothing to stop
  */
