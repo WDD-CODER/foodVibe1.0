@@ -95,16 +95,6 @@
 - [ ] A8: ADR 0016, AGENTS.md hard-rule line, gotcha, brain index.
 - [ ] A9: Grep for any place that renders a term key without going through the facades (so a `displayName` override wouldn't show). If it's outside the scope, raise it via the Escalation Protocol.
 
-### Plan 390 — Workflow Kit Phase 6A: Drift Reconciliation and Project Overrides (`plans/390-workflow-kit-phase-6a-drift-reconciliation-overrides.plan.md`)
-- [ ] A0: Step 0 reality check; record the extract-check problems, real diff count, open-slot kit-owned changes and the two validation items' state — `docs/workflow-kit/drift-classification.md`
-- [ ] A1: Land stranded kit work: rebase + fix PR #4 (skills v2), PR the take-plan brief branch, Dandan merges, delete `chore/skills-v2` after go; `kit-extract --check` clean — `../ai-workflow-kit/**`
-- [ ] A2: Classify every differing file — `docs/workflow-kit/drift-classification.md`
-- [ ] A3: Fix real drift kit-first; patch into FoodVibe (ADR 0018); name kit SHAs in commits — `../ai-workflow-kit/**`, `.claude/**`, `scripts/**`, `docs/agent/**`
-- [ ] A4: `overrides` in kit `tools/sync.mjs` + `tools/install.mjs` + kit README; scratch install test — `../ai-workflow-kit/tools/**`
-- [ ] A5: Kit `tools/drift-check.mjs` + `kit-drift.ps1`; FoodVibe `kit.config.json` with real values + overrides — `../ai-workflow-kit/tools/drift-check.mjs`, `kit.config.json`
-- [ ] A6: Fix ship-prep ULTRA-TRIVIAL and plan-number reuse kit-first if Step 0 found them still open — `scripts/ship-prep.mjs`, `scripts/next-plan-number.mjs`
-- [ ] A7: `manifest.md` phase 6A paragraph; run every [auto] criterion; kit PR merged by Dandan; `/ship` — `docs/workflow-kit/manifest.md`
-
 ### Plan 391 — Workflow Kit Phase 6B: GitHub Pull and Versioned Releases (`plans/391-workflow-kit-phase-6b-github-pull-versioned-releases.plan.md`)
 - [ ] B0: Step 0 reality check — `docs/workflow-kit/manifest.md`
 - [ ] B1: Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers — `../ai-workflow-kit/tools/**`, `../ai-workflow-kit/*.ps1`
