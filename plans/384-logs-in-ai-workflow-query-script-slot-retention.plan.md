@@ -1,6 +1,6 @@
 # Plan 384 — Logs in the AI workflow: query script, slot log retention, command wiring
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: 05132814b7a74187683bb45d5ef48339ae5fb5a0
 
