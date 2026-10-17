@@ -20,7 +20,7 @@
  * slot's reserved ports are stopped; any other program there is refused.
  * Exit 1 + message on every refusal.
  */
-import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, openSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync, unlinkSync, openSync, renameSync, statSync } from 'fs'
 import { createHash } from 'crypto'
 import { execFileSync, spawn } from 'child_process'
 import { resolve, dirname, join } from 'path'
@@ -89,7 +89,7 @@ function mergedPrFor(branch) {
 function isDirty() {
   return tryGit(['status', '--porcelain'])
     .split(/\r?\n/)
-    .filter((l) => l.trim() && !/^\?\? \.claude\/[^/]+\.log$/.test(l.trim()))
+    .filter((l) => l.trim() && !/^\?\? \.claude\/([^/]+\.log|\.slot-plan-start|logs\/)/.test(l.trim()))
     .length > 0
 }
 
@@ -352,7 +352,12 @@ if (!resuming) {
   // The Planner may have saved the plan as "Status: active" already - then there is nothing to commit.
   if (tryGit(['diff', '--cached', '--name-only'])) git(['commit', '-m', `chore(plan ${nnn}): mark active in wt-${n}`])
 }
+const previousPlan = existsSync(worktreePlanPath) ? readFileSync(worktreePlanPath, 'utf8').trim() : ''
 writeFileSync(worktreePlanPath, `${match}\n`)
+// Plan 384: log-query --since=plan-start reads this. A resumed claim of the same plan keeps its original start.
+const planStartPath = join(repoRoot, '.claude', '.slot-plan-start')
+mkdirSync(join(repoRoot, '.claude'), { recursive: true })
+if (previousPlan !== match || !existsSync(planStartPath)) writeFileSync(planStartPath, `${new Date().toISOString()}\n`)
 // The session-state pointer belongs to the previous plan's branch; the next session start writes a fresh one.
 const statePointer = join(repoRoot, '.claude', '.session-state-path')
 if (existsSync(statePointer)) unlinkSync(statePointer)
@@ -391,6 +396,12 @@ mkdirSync(join(repoRoot, '.claude'), { recursive: true })
 for (const [label, port] of halves) {
   if (running.has(label)) continue
   const logPath = join(repoRoot, '.claude', `${label}.log`)
+  // Plan 384: keep the previous run's log as .claude/logs/<label>-<YYYYMMDD-HHmmss>.log instead of truncating it
+  if (existsSync(logPath) && statSync(logPath).size > 0) {
+    const stamp = new Date(statSync(logPath).mtimeMs).toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15)
+    mkdirSync(join(repoRoot, '.claude', 'logs'), { recursive: true })
+    try { renameSync(logPath, join(repoRoot, '.claude', 'logs', `${label}-${stamp}.log`)) } catch { /* still held by a dying server: truncated below */ }
+  }
   const logFd = openSync(logPath, 'w')
   let child
   if (label === 'be') {

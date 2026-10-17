@@ -337,7 +337,9 @@ Full per-file detail (params, refs) is in `manifest.json`; this is the human ind
 | `scripts/diagnose-broken-refs.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
 | `scripts/fix-duplicate-names.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
 | `scripts/link-users-to-master.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
-| `scripts/log-server.js` | stay | Local logging server (FoodVibe dev tool). |
+| `scripts/log-server.js` | removed | Hand-started dev log server (port 9765) retired in Plan 382; logs go to Mongo `app_logs`. |
+| `scripts/log-query.mjs` | stay | FoodVibe log query for agents (Mongo `app_logs` or a slot log file). Plan 384. |
+| `scripts/lib/log-format.mjs` | stay | Shared log-line normaliser/formatter for `log-query.mjs`. Plan 384. |
 | `scripts/merge-labels.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
 | `scripts/migrate-labels-to-courses.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |
 | `scripts/migrate-to-master.mjs` | stay | One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit. |

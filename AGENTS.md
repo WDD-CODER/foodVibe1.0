@@ -49,6 +49,7 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 | Finishing a feature | `/ship` — auto-classifies lane, commits/pushes, PRs only when feature-complete. Mandatory Post-push Merge Gate + brain capture: `docs/agent/standards-git.md`. |
 | Job validation — finishing a job, marking todos `[x]`, or done/verified/approved | `docs/agent/job-validation.md` + `/done` |
 | PR checks failing | `docs/agent/pr-check-fix-loop.md` (via `/fix-pr-checks`), 2 rounds max |
+| Bug report / "something broke" / Hebrew note about a failure | Run `node scripts/log-query.mjs --since=2h --level=warn --summary` before reading code (`docs/brain/patterns/log-query-usage.md`) |
 | Session start on unfamiliar work | `docs/brain/index.md`, then the relevant sub-file |
 | Architectural choice | `docs/brain/invariants.md` first, then `docs/brain/decisions/`; supersede, never edit in place |
 | Surprising behavior / a trap cost time | `docs/brain/gotchas.md` first |

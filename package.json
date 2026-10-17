@@ -2,6 +2,7 @@
   "name": "food-vibe1.0",
   "version": "0.1.0.0",
   "scripts": {
+    "logs": "node scripts/log-query.mjs",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",

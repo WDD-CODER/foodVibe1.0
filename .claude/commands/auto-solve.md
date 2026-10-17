@@ -117,6 +117,8 @@ Use parallelism heuristics (persona orchestration retired) to determine parallel
 
 Execute all `TODO` tasks.
 
+**Log check first (bug-note tasks):** before touching code for a note, run `node scripts/log-query.mjs --since=24h --level=warn --summary` and quote the matching entry (or state "no recorded failure") in the first report line.
+
 For `BLOCKED` tasks:
 - If solvable without major deviation → solve and continue
 - If complex/risky → mark as "needs human" and skip
@@ -145,6 +147,11 @@ fi
 
 ```bash
 npm run lint 2>/dev/null || echo "No lint configured"
+```
+
+Final log gate — must print `no entries`, or every entry must be explained in the Phase 5 report:
+```bash
+node scripts/log-query.mjs --since=plan-start --level=error
 ```
 
 If plan touched UI/layout:
