@@ -1,44 +1,40 @@
-# Plan 377 — Units A: rename and edit a unit, with cascade to all my products and recipes
+# Plan 377 — Units A: edit a custom unit's name and conversion in the metadata manager
 
 Status: draft
 Track: code — here (not design)
-Snapshot: b776163f43fd1db42a5e0501b3a0e5c30b0bded1
+Snapshot: d601af5a9c761146f41191f6c49fb56b732774d6
 
-> **Reality check needed (plan review 2026-10-09).** Written before 321 P3.4. The server already re-keys a unit everywhere it is used (`renameTermEverywhere` + `TERM_REFERENCES.unit` in `taxonomy-term.schema.ts`) and blocks deleting a used term (`findTermReferences`). What is really left: show the edit pencil for non-system units (`metadata-manager.page.component.html`, `target.type !== 'unit'`) and allow editing `gramRate`. Plan 378 was closed into this one.
+> **Trimmed 2026-10-17 (Planner).** The original draft (client-side cascade, `countUnitUsage`, delete check) was written before 321 P3.4. The server now does that work: changing a term's `key` re-keys every product, recipe and dish that uses it (`renameTermEverywhere` + `TERM_REFERENCES.unit` in `server/generated/schemas/entities/taxonomy-term.schema.js`), and deleting a term that is in use is refused (`findTermReferences`, `server/routes/generic.js`). What is left is the client UI only. Plan 378 was closed into this one.
 
 ## Problem Statement
 
-In the metadata manager, units can only be added or deleted. There's no rename and no way to change a unit's conversion factor:
+In the metadata manager, units can be added and deleted but not edited:
 
-- The pencil is hidden for units (`metadata-manager.page.component.html` ~L276). A comment at .ts ~L443-446 says unit rename was deliberately left out of plan 322 because it touches cost and conversion calculations.
-- `UnitRegistryService.registerUnit` (`src/app/core/services/unit-registry.service.ts` ~L160) stops early when the key exists, so the rate can't be changed.
-- The delete in-use check (`metadata-manager…ts` ~L379-382) only looks at products and ignores recipe ingredients and yields.
+- The units card sets `[canEdit]="false"` (`metadata-manager.page.component.html` ~L24), so the tap menu has no pencil.
+- `onRenameMetadata` (`metadata-manager.page.component.ts` ~L627) has no `unit` branch; `registryRename`, `getAffectedCount` and `reloadAfterRename` ignore units. The comment at ~L468 still says unit rename is "out of scope".
+- There is no way to change a custom unit's `gramRate`. `UnitRegistryService.registerUnit` returns early when the key exists.
 
-Every place a unit key is stored (the cascade must cover all user-owned ones):
+So a typo in a unit name or a wrong conversion (e.g. "קרטון = 500g" that should be 750g) can only be fixed by delete + re-create, and delete is blocked once the unit is used.
 
-| Where | Fields |
-| --- | --- |
-| Registry | `KITCHEN_UNITS` (per user): `{ units: Record<key, gramFactor> }` |
-| Products | `baseUnit`, `purchaseOptions[].unitSymbol`, legacy `unit_options_[].unitSymbol` (still read in `scaling.service.ts` ~L87, `recipe-ingredients-table.component.ts` ~L503) |
-| Recipes and dishes | `ingredients[].unit`, `yieldUnit`, `yieldConversions[].unit`, `prepItems[].unit`, `prepCategories[].items[].unit` |
-| Dictionary | the units section of `public/assets/data/dictionary.json`, plus `DICTIONARY_OVERRIDES` (per user and `__global__`) for the Hebrew label |
-| Leave untouched | `TRASH_*`, `VERSION_HISTORY` snapshots |
-
-`SYSTEM_UNITS` (kg, liter, gram, ml, unit, dish, tablespoon, teaspoon, cup, pinch, portion; `unit-registry.service.ts` ~L20-32) must stay locked.
-
-This plan covers the user's own data. Admin "for everyone" comes in plan 378 (Units B).
+`SYSTEM_UNITS` (kg, liter, gram, ml, unit, dish, tablespoon, teaspoon, cup, pinch, portion; `unit-registry.service.ts`) stay locked. They already show a lock reason (`unit_default_unremovable`) and must not get an edit action.
 
 ## Goals & Success Criteria
 
-- Primary: for any non-system unit, the user can (1) fix its Hebrew label, (2) rename its key, or (3) change its gram/ml factor. Rename cascades to every product and recipe field above; a factor change warns how many products and recipes are affected (costs will change) before saving.
-- Primary: deleting a unit checks recipes and dishes as well as products.
-- Success: after renaming unit X → Y, rg-style checks in the app show no product or recipe still using X, and costs are unchanged by a pure rename.
+- For any custom unit the user can edit, they can change (1) its Hebrew label, (2) its English key, (3) its gram conversion, from one edit dialog.
+- Key change: confirm with the number of affected products + recipes/dishes, then `taxonomy.updateByKey('unit', old, { key })` (the server re-keys everything), then reload products, recipes and dishes.
+- Conversion change: confirm "this changes costs in N products and M recipes", then `taxonomy.updateByKey('unit', key, { gramRate })`.
+- A pure rename leaves every recipe cost unchanged.
+
+## Architecture Impact
+
+- INV-3: preserves — the server stays the owner of cross-document consistency: a unit key change goes through `TaxonomyStore.updateByKey` and the server re-keys every product/recipe/dish (`renameTermEverywhere`); the client only reloads its lists, it never writes the cascade itself.
+- INV-5: preserves — units stay taxonomy terms; edits use the existing `TaxonomyStore` update path and registry service, no parallel unit store.
+- INV-6: preserves — no AI calls added or changed.
 
 ## Execution Mode
 
-- Parallel: no. Run after plan 340, plan 365 (scope wording) and plan 375 (Dish types: remove colors) (metadata-manager and kitchen-state).
-- Concurrent plans: none touching `kitchen-state.service.ts`, `unit-registry.service.ts` or metadata-manager
-- Isolated DB: yes (bulk cascade writes)
+- Parallel: yes, with any plan not touching `metadata-manager/**`, `unit-registry.service.*` or `shared/unit-creator/**`.
+- Isolated DB: yes (a key rename writes to many documents).
 
 ## Read-Write Scope
 
@@ -50,8 +46,6 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 ```scope
 src/app/core/services/unit-registry.service.ts
 src/app/core/services/unit-registry.service.spec.ts
-src/app/core/services/kitchen-state.service.ts
-src/app/core/services/kitchen-state.service.spec.ts
 src/app/pages/metadata-manager/**
 src/app/shared/unit-creator/**
 ```
@@ -75,74 +69,53 @@ touching any milestone.
 
 ## User Stories
 
-As a chef, I want to fix a misnamed unit or its conversion once and have every product and recipe follow.
+As a chef, I want to fix a misnamed unit or its conversion once and have every product and recipe follow, without deleting and re-creating it.
 
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `UnitRegistryService`:
-  - `renameUnit(oldKey, newKey)` refuses system units, empty keys and existing `newKey`; moves the factor, persists and updates the signal.
-  - `updateUnitRate(key, rateInGrams)` refuses system units and rates ≤ 0.
-- [ ] `KitchenStateService.cascadeRenameUnitForAll(oldKey, newKey): Promise<{ products: number; recipes: number }>`:
-  - Updates every product and recipe/dish field in the table above.
-  - Uses `applyProductCascadeUpdate` and `applyCascadeUpdate`, so the activity log and version history are recorded without a toast per item.
-  - Leaves the numeric amounts untouched.
-- [ ] `countUnitUsage(key)` covering products and recipes/dishes, all fields. Used by delete (blocks or warns with counts), rename confirm and rate-change confirm.
-- [ ] Metadata manager, units only:
-  - Show the edit action for non-system units (in the tap menu from plan 340). It opens the unit editor (reuse unit-creator in an edit mode) prefilled with the Hebrew label, key and factor.
-  - Save path:
-    - label-only change → `translationService.updateDictionary(key, he, 'me')`
-    - key change → confirm "{n} מוצרים ו-{m} מתכונים יעודכנו", then `renameUnit` + cascade + dictionary entry for the new key
-    - factor change → confirm "שינוי ההמרה ישנה עלויות ב-{n} מוצרים ו-{m} מתכונים", then `updateUnitRate`
-  - System units keep the lock badge and have no edit.
-- [ ] Remove the "unit rename out of scope" comment and the units exclusion where it's no longer true (the user scope only).
-- [ ] Specs:
-  - registry rename and rate guard rules
-  - cascade touches every field (a fixture product with base, purchase and legacy options; a recipe with ingredient, yield, conversions, prep items and prep category items)
-  - usage count
-
-### Should Have (P1)
-- [ ] Rename and rate change in one save: rename first, then the rate.
+- [ ] `UnitRegistryService.renameUnit(oldKey, newKey)` and `updateUnitRate(key, gramRate)`: refuse system units, an empty or existing `newKey`, and a rate ≤ 0; otherwise call `taxonomy.updateByKey('unit', …)`. Errors go through `taxonomy.errorMessage` like `deleteUnit`.
+- [ ] Units card: edit action for custom units only (per item — system units keep the lock and get no pencil). Replace the card-wide `[canEdit]="false"` with something per item, or rely on the existing `lockReason` if it already hides the menu for system units; check before changing `taxonomy-kind-manager`.
+- [ ] Edit dialog prefilled with Hebrew label, key and conversion (reuse `unit-creator` in an edit mode if it fits; otherwise a small dialog inside `metadata-manager/**`). Shared units the user can't edit get the existing `taxonomy_shared_admin_only` message.
+- [ ] Save path in `onRenameMetadata`, `unit` branch:
+  - label only → `translationService.updateDictionary(key, he, 'me')`
+  - key change → affected-count confirm → `renameUnit` → dictionary entry for the new key → reload products, recipes, dishes
+  - conversion change → cost-impact confirm → `updateUnitRate`
+  - key + conversion in one save → rename first, then the rate on the new key
+- [ ] `getAffectedCount('unit', key)` counts products (`baseUnit`, `purchaseOptions[].unitSymbol`) and recipes/dishes (`ingredients[].unit`, `yieldUnit`, `yieldConversions[].unit`, `prepItems[].unit`, `prepCategories[].items[].unit`); `reloadAfterRename('unit')` reloads all three lists.
+- [ ] Remove the "unit is out of scope" comment.
 
 ### Nice to Have (P2)
 - None.
 
 ## UI/UX Notes
 
-- Dictionary (append): `unit_edit` = "עריכת יחידה", `unit_rename_confirm` = "{n} מוצרים ו-{m} מתכונים יעודכנו. להמשיך?", `unit_rate_change_confirm` = "שינוי ההמרה ישנה עלויות ב-{n} מוצרים ו-{m} מתכונים. להמשיך?", `unit_in_use_delete` = "היחידה בשימוש ב-{n} מוצרים ו-{m} מתכונים".
-- Counts are substituted in code.
+- Dictionary (append): `unit_edit` = "עריכת יחידה", `unit_rename_confirm` = "{n} מוצרים ו-{m} מתכונים יעודכנו. להמשיך?", `unit_rate_change_confirm` = "שינוי ההמרה ישנה עלויות ב-{n} מוצרים ו-{m} מתכונים. להמשיך?". Counts substituted in code.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Registry `renameUnit` / `updateUnitRate` plus spec (`unit-registry.service.*`).
-- [ ] A2: `countUnitUsage` and `cascadeRenameUnitForAll` plus specs, covering all fields (`kitchen-state.service.*`).
-- [ ] A3: Metadata UI: edit for non-system units; unit-creator edit mode; confirms (`metadata-manager/**`, `shared/unit-creator/**`).
-- [ ] A4: Delete in-use check covers recipes.
-- [ ] A5: Build, specs. Manual test against the isolated DB: rename a custom unit used in 2 products and 1 recipe; check the cost is unchanged. Update session-state.
+- [ ] A1: `renameUnit` / `updateUnitRate` with guards + specs — `src/app/core/services/unit-registry.service.ts`, `unit-registry.service.spec.ts`
+- [ ] A2: Edit action for custom units only; edit dialog (label, key, conversion) — `src/app/pages/metadata-manager/**`, `src/app/shared/unit-creator/**`
+- [ ] A3: `unit` branch in `onRenameMetadata` + `getAffectedCount` + `reloadAfterRename`; confirms; dictionary keys; drop the out-of-scope comment — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `public/assets/data/dictionary.json`
+- [ ] A4: Build + specs; manual test on the isolated DB (rename a custom unit used in 2 products and 1 recipe, cost unchanged; change its conversion, cost changes); update session-state — `docs/session-state-<branch>.md`
 
 ## Technical Considerations
 
-- Dependencies: `UnitRegistryService`, `KitchenStateService` (`applyCascadeUpdate`, `applyProductCascadeUpdate`), `TranslationService.updateDictionary`, `MetadataManagerPageComponent`, `UnitCreatorComponent`, recipe-cost (read-only verification).
-- New files: none.
-- Model changes: none.
-- `UNIT_ALIASES` / `MASS_UNITS` in `recipe-cost.constants.ts` reference system units only, so they're untouched.
+- Dependencies: `TaxonomyStore.updateByKey`, `UnitRegistryService`, `TranslationService.updateDictionary`, `MetadataManagerPageComponent`, `TaxonomyKindManagerComponent`, product/recipe/dish data services (`reloadFromStorage`).
+- Legacy `unit_options_[].unitSymbol` is not in `TERM_REFERENCES.unit`. If the isolated DB still has products with it, note it in the PR — don't widen scope to the server.
+- New files: possibly one small edit-dialog component under `metadata-manager/components/`.
 
 ## Out of Scope
 
-- Admin push of unit changes to everyone (plan 378, Units B).
-- Renaming or editing system units.
+- Admin push of unit edits to everyone.
+- Editing system units.
+- Server changes (the re-key and delete-in-use check already exist).
 - Rewriting trash and version-history snapshots.
-
-## Critical Questions
-
-- Deleting a unit that's in use:
-  a) Block, showing the counts (default)
-  b) Allow after a warning (leaves items with an unknown unit)
 
 ## Success Criteria
 
-- [auto] `npx ng test --watch=false --include=src/app/core/services/unit-registry.service.spec.ts --include=src/app/core/services/kitchen-state.service.spec.ts --include=src/app/pages/metadata-manager/**/*.spec.ts` → 0 failures.
+- [auto] `npx ng test --watch=false --include=src/app/core/services/unit-registry.service.spec.ts --include=src/app/pages/metadata-manager/**/*.spec.ts` → 0 failures.
 - [auto] `npm run build` → exit 0.
-- [human] Metadata → units → edit a custom unit "קרטון" → rename → the confirm shows the counts → save → the products and recipe using it now show the new unit; recipe cost is unchanged.
-- [human] Change its factor → the cost-impact confirm → costs update accordingly.
-- [human] System units (ק"ג, ליטר…) show a lock and no edit.
+- [human] Metadata → units → tap a custom unit → edit → change its key → the confirm shows the counts → save → the products and recipe that used it now show the new unit, and the recipe cost is unchanged.
+- [human] Change the same unit's conversion → cost-impact confirm → recipe cost changes to match.
+- [human] System units (ק"ג, ליטר…) still show the lock and offer no edit.
