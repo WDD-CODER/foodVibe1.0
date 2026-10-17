@@ -7,45 +7,29 @@ feat/404-cook-view-redesign
 2026-10-17
 
 ## Session Summary
-- Plan 404 Cook View redesign shipped: steps 1-10, validated by the Human; merged origin/main; menu/recipe export text, select aria-label and dark-mode edit selects fixed.
+- Cook View redesign (404) validated by Human; design handoff assets committed; branch merged with origin/main and shipped.
 
 ## Files Modified
- .../handoffs/cook-view/CURRENT-STATE.md            |   33 +
- .interface-design/handoffs/cook-view/PROMPT.md     |   18 +
- .interface-design/handoffs/cook-view/README.md     |  230 ++
- .../handoffs/cook-view/colors_and_type.css         |  233 ++
- docs/session-state-feat-404-cook-view-redesign.md  |   50 +
- e2e/cook-view.spec.ts                              |  123 ++
- ...-cook-view-redesign-from-design-handoff.plan.md |  115 +
- public/assets/data/dictionary.json                 |   22 +-
- src/app/app.config.ts                              |   14 +
- .../core/components/header/header.component.scss   |   39 +-
- .../components/hero-fab/hero-fab.component.scss    |    2 +-
- .../core/directives/scroll-indicators.directive.ts |   24 +-
- src/app/core/services/menu-export.service.ts       |    2 +-
- src/app/core/services/recipe-export.service.ts     |    9 +-
- src/app/pages/cook-view/cook-view.page.html        | 1222 ++++++-----
- src/app/pages/cook-view/cook-view.page.scss        | 2287 +++++++++++---------
- src/app/pages/cook-view/cook-view.page.ts          |  396 +++-
- .../cook-view/services/cook-timer.service.spec.ts  |  119 +
- .../pages/cook-view/services/cook-timer.service.ts |  315 +--
- .../equipment-list.component.spec.ts               |    2 +
- src/app/pages/recipe-book/recipe-book.page.spec.ts |    2 +
- src/app/shared/counter/counter.component.scss      |    4 +-
- .../custom-select/custom-select.component.html     |    2 +-
- .../export-preview/export-preview.component.html   |   49 +-
- .../export-preview/export-preview.component.scss   |  353 ++-
- .../shared/list-shell/list-shell.component.html    |   18 +-
- .../shared/list-shell/list-shell.component.scss    |   79 +-
- src/app/shared/list-shell/list-shell.component.ts  |    3 +-
- src/styles.scss                                    |  184 +-
- 29 files changed, 3982 insertions(+), 1967 deletions(-)
+ .../handoffs/cook-view/assets/stamp-approved.png   | Bin 0 -> 161418 bytes
+ .../cook-view/assets/stamp-not-approved.png        | Bin 0 -> 177305 bytes
+ .../cook-view/designs/Cook View A Breakpoints.html |   1 +
+ .../handoffs/cook-view/designs/Cook View A.html    | 134 +++++++++++++++++++
+ .../cook-view/designs/Cook View Refactor.html      | 109 +++++++++++++++
+ .../handoffs/cook-view/designs/cook-a.js           | 146 +++++++++++++++++++++
+ .../handoffs/cook-view/screenshots/01-cook.png     | Bin 0 -> 34520 bytes
+ .../handoffs/cook-view/screenshots/02-cook.png     | Bin 0 -> 35862 bytes
+ .../handoffs/cook-view/screenshots/03-cook.png     | Bin 0 -> 33778 bytes
+ .../handoffs/cook-view/screenshots/04-cook.png     | Bin 0 -> 31702 bytes
+ .../handoffs/cook-view/screenshots/05-cook.png     | Bin 0 -> 35676 bytes
+ .../handoffs/cook-view/screenshots/06-cook.png     | Bin 0 -> 25027 bytes
+ .../handoffs/cook-view/screenshots/07-cook.png     | Bin 0 -> 19566 bytes
+ 13 files changed, 390 insertions(+)
 
 ## Commit
-55651ac0
+6d66a81c
 
 ## PR
 N/A
 
 ## Next Steps
-- Done. Optional: techdebt note — cook-view.page.scss over its 20 kB budget (warning only); '+ יחידה חדשה' label is hard-coded in 3 places (2 pre-existing).
+- Plan 404 done; take next plan with /take-plan NNN.
