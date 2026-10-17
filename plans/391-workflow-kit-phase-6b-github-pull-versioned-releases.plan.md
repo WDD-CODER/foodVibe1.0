@@ -2,14 +2,14 @@
 
 Status: draft
 Track: code — here (not design)
-Snapshot: c186c9c0
+Snapshot: 7db0890ef2f25865256f679e36adde3dbc7310e6
 
 ## Problem Statement
-Phase 6, part 2 of 3 (**390 → 391 → 392**). This plan must run after plan 390.
+Phase 6, part 2 of 3 (**390 → 391 → 392**). This plan must run after plan 390 has merged (FoodVibe and kit). Take it only then.
 
-`kit-install` and `kit-sync` only read a local kit folder, and the public kit repo (https://github.com/WDD-CODER/ai-workflow-kit, `main`, no tags, `kit.json` 0.4.0) has no release process. Its README is stale ("phase 4 of 5, local only, no remote"), there is no CHANGELOG, and the leak-check CI has never been confirmed running on GitHub. The repo is public, so it must also be checked for FoodVibe-specific data that shouldn't be there.
+`kit-install` and `kit-sync` only read a local kit folder, and the public kit repo (https://github.com/WDD-CODER/ai-workflow-kit, `main`, no tags, `kit.json` 0.4.0 on 2026-10-17) has no release process. Its README is stale ("phase 4 of 5, local only, no remote"), there is no CHANGELOG, and the leak-check CI has never been confirmed running on GitHub. The repo is public, so it must also be checked for FoodVibe-specific data that shouldn't be there.
 
-Decisions (Dandan, 2026-10-06): pull by **git fetch of a tag** into a cache (no tarball, no npm package, no plugin — ADR 0015 rejected the plugin); **v0.x** until FoodVibe adopts (first tag here `v0.5.0`; `v1.0.0` is cut in plan 392 once FoodVibe runs on kit-sync); **no license** — all rights reserved, stated in the README.
+Decisions (Dandan, 2026-10-06): pull by **git fetch of a tag** into a cache (no tarball, no npm package, no plugin — ADR 0015 rejected the plugin); **v0.x** until FoodVibe adopts (first tag here `v0.5.0` — or the next minor if `kit.json` is already ≥ 0.5.0 by then (plan 409 Stage 5 may bump it); every `v0.5.0` below means that tag; `v1.0.0` is cut in plan 392 once FoodVibe runs on kit-sync); **no license** — all rights reserved, stated in the README.
 
 ## Goals & Success Criteria
 **Primary:** a project installs or syncs from a tagged GitHub release and records exactly which one.
@@ -25,6 +25,7 @@ Decisions (Dandan, 2026-10-06): pull by **git fetch of a tag** into a cache (no 
 
 ## Execution Mode
 - **Parallel:** no. Kit-side plan: the Worker opens its session in `../ai-workflow-kit` (as in phases 2–4). FoodVibe side writes only this plan file.
+- **Concurrent plans:** no other plan that edits the kit repo or kit-owned files (393 waits; 409 Stage 5 must be merged or paused — if merged, its mods layer `layers/claude-code-mods/**` goes into the CHANGELOG and the public-data sweep).
 - **Isolated DB:** no.
 - **Kit edits:** kit branch `feat/391-github-pull-releases` + kit PR; Dandan merges; the tag/release is cut from the merged `main`.
 
@@ -55,8 +56,8 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 
 ## Step 0 — Reality Check
 
-0. **Both repos on their latest state, before anything else.** FoodVibe: `git fetch origin --prune`; the slot branch is based on the current `origin/main` (take-plan does this — confirm `git log -1 origin/main` matches). Kit: `git -C ../ai-workflow-kit fetch --prune`; local `main` clean and equal to `origin/main` (`git -C ../ai-workflow-kit pull --ff-only` if behind; STOP and ask if it is ahead or has uncommitted work); `gh pr list -R WDD-CODER/ai-workflow-kit` and `git -C ../ai-workflow-kit branch -a --no-merged main` show no unmerged kit work (finish or ask first). Also check no open FoodVibe Worker branch holds an unported kit-owned change (`node scripts/lib/slot.mjs --list`, diff each claimed slot against `kit-owned.json`). Only then compare the two.
-1. Plan 390 merged (FoodVibe and kit); kit `main` clean; `gh auth status` works for the kit repo (use `env -u GITHUB_TOKEN gh ...` for writes).
+0. **Both repos on their latest state, before anything else.** FoodVibe: `git fetch origin --prune`; the slot branch is based on the current `origin/main` (take-plan does this — confirm `git log -1 origin/main` matches). Kit: `git -C ../ai-workflow-kit fetch --prune`; local `main` equal to `origin/main` (`git -C ../ai-workflow-kit pull --ff-only` if behind; STOP and ask if it is ahead or has uncommitted work — the untracked `.claude/sessions/` folder is session logs and does not count); `gh pr list -R WDD-CODER/ai-workflow-kit` and `git -C ../ai-workflow-kit branch -a --no-merged main` show no unmerged kit work (finish or ask first). Also check no open FoodVibe Worker branch holds an unported kit-owned change (`node scripts/lib/slot.mjs --list`, diff each claimed slot against `kit-owned.json`). Only then compare the two.
+1. Plan 390 merged (FoodVibe and kit); kit `main` clean; `gh auth status` works for the kit repo (use `GITHUB_TOKEN= gh ...` for writes — `env -u` does not clear it here). `KIT_DRIFT: ok` and `KIT_EXTRACT: ok` still hold for FoodVibe.
 2. Kit `tools/install.mjs` / `sync.mjs` still read the kit root from their own location — confirm before adding `--source`.
 
 ## Functional Requirements
@@ -73,13 +74,13 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - npm package, Claude Code plugin, release tarballs, a LICENSE file.
 
 ## Atomic Sub-tasks
-- [ ] B0: Step 0 reality check.
-- [ ] B1: Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers.
-- [ ] B2: `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria.
-- [ ] B3: Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs.
-- [ ] B4: `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps.
-- [ ] B5: Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir.
-- [ ] B6: FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship`.
+- [ ] B0: Step 0 reality check — `docs/workflow-kit/manifest.md`
+- [ ] B1: Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers — `../ai-workflow-kit/tools/**`, `../ai-workflow-kit/*.ps1`
+- [ ] B2: `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria — `../ai-workflow-kit/tools/**`
+- [ ] B3: Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs — `../ai-workflow-kit/tools/leak-check.mjs`, `../ai-workflow-kit/.github/**`
+- [ ] B4: `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps — `../ai-workflow-kit/kit.json`, `CHANGELOG.md`, `README.md`
+- [ ] B5: Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir — kit GitHub repo
+- [ ] B6: FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship` — `docs/workflow-kit/manifest.md`
 
 ## Out of Scope
 FoodVibe adoption, retiring ADR 0018, the change-loop doc, second-consumer proof, `v1.0.0` (all plan 392).

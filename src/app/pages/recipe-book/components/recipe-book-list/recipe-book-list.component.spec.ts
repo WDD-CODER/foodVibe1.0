@@ -72,7 +72,10 @@ describe('RecipeBookListComponent', () => {
           }
         },
         { provide: AiRecipeModalService, useValue: { open: jasmine.createSpy('open'), isOpen: signal(false) } },
-        { provide: MetadataRegistryService, useValue: { allLabels_: signal([]), getLabelColor: () => '#78716C' } },
+        {
+          provide: MetadataRegistryService,
+          useValue: { allLabels_: signal([]), courses_: signal([]), getLabelColor: () => '#78716C' }
+        },
         {
           provide: ConfirmModalService,
           useValue: { open: jasmine.createSpy('open').and.returnValue(Promise.resolve(true)) }

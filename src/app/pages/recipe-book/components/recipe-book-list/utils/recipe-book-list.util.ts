@@ -37,8 +37,16 @@ export function filterOptionLabel(name: string, value: string): string {
   return value
 }
 
-/** The filter values one recipe carries in a sidebar category — shared by the counts and the filter pass. */
-export function recipeFilterValues(recipe: Recipe, category: string, allergens: string[]): string[] {
+/**
+ * The filter values one recipe carries in a sidebar category — shared by the counts and the filter pass.
+ * `courseKeys`: the current dish types; a course outside them (plan 376) counts as no course.
+ */
+export function recipeFilterValues(
+  recipe: Recipe,
+  category: string,
+  allergens: string[],
+  courseKeys?: ReadonlySet<string>
+): string[] {
   switch (category) {
     case 'Type':
       return [isRecipeDish(recipe) ? 'dish' : 'preparation']
@@ -52,8 +60,11 @@ export function recipeFilterValues(recipe: Recipe, category: string, allergens: 
       return [recipe.isApproved ? 'true' : 'false']
     case 'Station':
       return [(recipe.defaultStation || '').trim() || '_none']
-    case 'Course':
-      return [(recipe.course || '').trim() || '_none']
+    case 'Course': {
+      const course = (recipe.course || '').trim()
+      const isKnown = !courseKeys?.size || courseKeys.has(course)
+      return [course && isKnown ? course : '_none']
+    }
     default:
       return []
   }

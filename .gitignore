@@ -172,3 +172,9 @@ server/generated
 _claude-data/design-migration/live/
 # ...but a Claude Design handoff's own assets/ and screenshots/ PNGs are part of the bundle
 !.interface-design/handoffs/**/*.png
+
+# Plan 408 — QA harness. Run PNGs are already ignored by the global *.png rule above; uncomment
+# to also drop each run's shots/index.tsv (whether QA evidence is committed is not decided yet).
+# bugs/qa-runs/*/shots/
+bugs/qa-runs/.nightly.log
+.claude/.qa-pids

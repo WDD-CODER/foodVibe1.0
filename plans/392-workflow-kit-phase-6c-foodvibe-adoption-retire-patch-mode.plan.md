@@ -2,10 +2,10 @@
 
 Status: draft
 Track: code — here (not design)
-Snapshot: c186c9c0
+Snapshot: 7db0890ef2f25865256f679e36adde3dbc7310e6
 
 ## Problem Statement
-Phase 6, part 3 of 3 (**390 → 391 → 392**). This plan must run after plan 391.
+Phase 6, part 3 of 3 (**390 → 391 → 392**). This plan must run after plan 391 has merged and its tag is on GitHub. Take it only then.
 
 After 390 (kit and FoodVibe agree, overrides declared) and 391 (GitHub pull by tag, `v0.5.0` released), FoodVibe still has no `.kit/install.json`, so `kit-sync` can't target it and every kit change still arrives as a hand-applied patch (ADR 0018). This plan adopts FoodVibe onto the tagged kit in **one PR** (Dandan, 2026-10-06), retires patch mode, writes down the change loop, and proves the kit with a second consumer and an upgrade.
 
@@ -23,6 +23,7 @@ After 390 (kit and FoodVibe agree, overrides declared) and 391 (GitHub pull by t
 
 ## Execution Mode
 - **Parallel:** no. Single Worker in a FoodVibe `wt-N` slot; kit edits by path in `../ai-workflow-kit`; `kit-proof` by path in `../kit-proof`.
+- **Concurrent plans:** no other plan that edits the kit repo or kit-owned files. Plans 393 and 409 Stage 6, if still open, run after this one and reach FoodVibe through `kit-sync`, not a patch.
 - **Isolated DB:** no.
 - **Kit edits:** kit branch `feat/392-adopt-and-change-loop` + kit PR; Dandan merges; tags cut from merged `main` after Dandan's go.
 - ADR 0018 patch mode stays in force for any kit fix until A5 lands.
@@ -68,9 +69,10 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 
 ## Step 0 — Reality Check
 
-0. **Both repos on their latest state, before anything else.** FoodVibe: `git fetch origin --prune`; the slot branch is based on the current `origin/main` (take-plan does this — confirm `git log -1 origin/main` matches). Kit: `git -C ../ai-workflow-kit fetch --prune`; local `main` clean and equal to `origin/main` (`git -C ../ai-workflow-kit pull --ff-only` if behind; STOP and ask if it is ahead or has uncommitted work); `gh pr list -R WDD-CODER/ai-workflow-kit` and `git -C ../ai-workflow-kit branch -a --no-merged main` show no unmerged kit work (finish or ask first). Also check no open FoodVibe Worker branch holds an unported kit-owned change (`node scripts/lib/slot.mjs --list`, diff each claimed slot against `kit-owned.json`). Only then compare the two.
-1. Plans 390 and 391 merged; tag from 391 exists on GitHub; `KIT_DRIFT: ok` still holds for FoodVibe (re-run drift check).
-2. No open Worker branch holds an unported kit-owned change (`node scripts/lib/slot.mjs --list`, check each claimed slot's diff against `kit-owned.json`).
+0. **Both repos on their latest state, before anything else.** FoodVibe: `git fetch origin --prune`; the slot branch is based on the current `origin/main` (take-plan does this — confirm `git log -1 origin/main` matches). Kit: `git -C ../ai-workflow-kit fetch --prune`; local `main` equal to `origin/main` (`git -C ../ai-workflow-kit pull --ff-only` if behind; STOP and ask if it is ahead or has uncommitted work — the untracked `.claude/sessions/` folder is session logs and does not count); `gh pr list -R WDD-CODER/ai-workflow-kit` and `git -C ../ai-workflow-kit branch -a --no-merged main` show no unmerged kit work (finish or ask first). Also check no open FoodVibe Worker branch holds an unported kit-owned change (`node scripts/lib/slot.mjs --list`, diff each claimed slot against `kit-owned.json`). Only then compare the two.
+1. Plans 390 and 391 merged; tag from 391 exists on GitHub; `KIT_DRIFT: ok` and `KIT_EXTRACT: ok` still hold for FoodVibe (re-run both).
+2. Open-plan folders: `plans.openDirs` in FoodVibe's `kit.config.json` still lists `plans/` and `plans/design/` (ADR 0020).
+3. No open Worker branch holds an unported kit-owned change (`node scripts/lib/slot.mjs --list`, check each claimed slot's diff against `kit-owned.json`).
 
 ## Functional Requirements
 
@@ -87,15 +89,15 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - Automatic upgrade PRs (bots/Actions that bump the ref). Tier-by-tier adoption.
 
 ## Atomic Sub-tasks
-- [ ] C0: Step 0 reality check.
-- [ ] C1: Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe.
-- [ ] C2: Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR.
-- [ ] C3: New ADR superseding 0018 (amends 0015); mark 0018 superseded; brain index line.
-- [ ] C4: Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md`.
-- [ ] C5: Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`).
-- [ ] C6: Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0`.
-- [ ] C7: `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end.
-- [ ] C8: No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship`.
+- [ ] C0: Step 0 reality check — `docs/workflow-kit/manifest.md`
+- [ ] C1: Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/kit-install.ps1`
+- [ ] C2: Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR — `.kit/install.json` + files kit-sync writes
+- [ ] C3: New ADR superseding 0018 (amends 0015); mark 0018 superseded; brain index line — `docs/brain/decisions/**`, `docs/brain/index.md`
+- [ ] C4: Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md` — `../ai-workflow-kit/docs/CHANGE-LOOP.md`, `docs/workflow-kit/manifest.md`
+- [ ] C5: Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`) — `AGENTS.md`, `scripts/kit-owned.mjs`, `docs/workflow-kit/manifest.md`
+- [ ] C6: Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0` — `.kit/install.json`
+- [ ] C7: `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end — `../kit-proof/**`
+- [ ] C8: No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship` — `.kit/install.json`, `../kit-proof/.kit/install.json`
 
 ## Out of Scope
 Auto-upgrade bots, npm/plugin distribution, a LICENSE file (Dandan chose all rights reserved).

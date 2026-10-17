@@ -50,13 +50,6 @@
 - [ ] Delete `translation-pipe.pipe.ts` and `translation.service.ts`
 - [ ] Verify `ng build` passes and `{{ 'cup' | transloco }}` renders `כוס` in the app
 
-### Plan 370 — AI recipe generation: realistic portion and ingredient ratios, with tests (`plans/370-ai-recipe-generation-realistic-portions-with-tests.plan.md`)
-- [x] A1: Extract the helpers into `ai-recipe-helpers.js`; `ai.js` imports them; offline tests for the existing behavior (pass before any change).
-- [x] A2: Prompt rules, `selectShots`, temperature (`server/routes/ai.js`).
-- [x] A3: The `implausible_portion_weight` warning, server and client mirror, plus tests and the dictionary key.
-- [ ] A4: Live eval script. Run it locally with the key and paste the pass-rate table into the session state (`server/scripts/ai-eval-recipes.js`).
-- [x] A5: Build, server tests. Update session-state.
-
 ### Plan 372 — Venues B: multiple contacts and an interactive days/hours picker (`plans/design/372-venues-b-multiple-contacts-hours-picker.plan.md`)
 - [ ] A1: Schema and model additions; `build:schemas`; server validation test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
 - [ ] A2: `venue-hours.util` `toDisplay` / `parseLegacy` plus spec (Hebrew range forms, midnight crossing, unparseable).
@@ -75,14 +68,6 @@
 - [ ] A2: Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
 - [ ] A3: Equipment-form infrastructure hint (`equipment-form/**`).
 - [ ] A4: Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400. Update session-state.
-
-### Plan 376 — Dish types cleanup: keep only real dish types, remap recipes safely (decision gate first) (`plans/376-dish-types-cleanup-remap-recipes-decision-gate.plan.md`)
-- [ ] A0: Decision gate: show the table and the a/b question, then STOP.
-- [ ] A1: Pure mapping module plus test; script with dry-run, backup check and log (`server/scripts/cleanup-dish-types.js`, `server/test/**`).
-- [ ] A2: Dry-run local; show counts to Dandan; STOP for go.
-- [ ] A3: Code seed lists, dictionary `main_dish`, safe display (`metadata-registry.service.ts`, `scripts/migrate-labels-to-courses.mjs`, `recipe-header/**`, `recipe-book-list/**`).
-- [ ] A4: `--write` on local; verify in app (recipe book filters, recipe builder select, metadata list).
-- [ ] A5: Hand Dandan the exact PowerShell commands for the Atlas backup, dry-run and write; record results. Update session-state.
 
 ### Plan 377 — Units A: rename and edit a unit, with cascade to all my products and recipes (`plans/377-units-a-rename-edit-unit-cascade-own-data.plan.md`)
 - [ ] A1: Registry `renameUnit` / `updateUnitRate` plus spec (`unit-registry.service.*`).
@@ -111,33 +96,34 @@
 - [ ] A9: Grep for any place that renders a term key without going through the facades (so a `displayName` override wouldn't show). If it's outside the scope, raise it via the Escalation Protocol.
 
 ### Plan 390 — Workflow Kit Phase 6A: Drift Reconciliation and Project Overrides (`plans/390-workflow-kit-phase-6a-drift-reconciliation-overrides.plan.md`)
-- [ ] A0: Step 0 reality check; record the real diff count and the two validation items' state.
-- [ ] A1: Classify every differing file in `docs/workflow-kit/drift-classification.md`.
-- [ ] A2: Fix real drift kit-first; patch into FoodVibe (ADR 0018); name kit SHAs in commits.
-- [ ] A3: `overrides` in kit `tools/sync.mjs` + `tools/install.mjs` + kit README; scratch install test.
-- [ ] A4: Kit `tools/drift-check.mjs` + `kit-drift.ps1`; FoodVibe `kit.config.json` with real values + overrides.
-- [ ] A5: Fix ship-prep ULTRA-TRIVIAL and plan-number reuse kit-first if Step 0 found them still open.
-- [ ] A6: `manifest.md` phase 6A paragraph; run every [auto] criterion; kit PR merged by Dandan; `/ship`.
+- [ ] A0: Step 0 reality check; record the extract-check problems, real diff count, open-slot kit-owned changes and the two validation items' state — `docs/workflow-kit/drift-classification.md`
+- [ ] A1: Land stranded kit work: rebase + fix PR #4 (skills v2), PR the take-plan brief branch, Dandan merges, delete `chore/skills-v2` after go; `kit-extract --check` clean — `../ai-workflow-kit/**`
+- [ ] A2: Classify every differing file — `docs/workflow-kit/drift-classification.md`
+- [ ] A3: Fix real drift kit-first; patch into FoodVibe (ADR 0018); name kit SHAs in commits — `../ai-workflow-kit/**`, `.claude/**`, `scripts/**`, `docs/agent/**`
+- [ ] A4: `overrides` in kit `tools/sync.mjs` + `tools/install.mjs` + kit README; scratch install test — `../ai-workflow-kit/tools/**`
+- [ ] A5: Kit `tools/drift-check.mjs` + `kit-drift.ps1`; FoodVibe `kit.config.json` with real values + overrides — `../ai-workflow-kit/tools/drift-check.mjs`, `kit.config.json`
+- [ ] A6: Fix ship-prep ULTRA-TRIVIAL and plan-number reuse kit-first if Step 0 found them still open — `scripts/ship-prep.mjs`, `scripts/next-plan-number.mjs`
+- [ ] A7: `manifest.md` phase 6A paragraph; run every [auto] criterion; kit PR merged by Dandan; `/ship` — `docs/workflow-kit/manifest.md`
 
 ### Plan 391 — Workflow Kit Phase 6B: GitHub Pull and Versioned Releases (`plans/391-workflow-kit-phase-6b-github-pull-versioned-releases.plan.md`)
-- [ ] B0: Step 0 reality check.
-- [ ] B1: Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers.
-- [ ] B2: `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria.
-- [ ] B3: Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs.
-- [ ] B4: `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps.
-- [ ] B5: Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir.
-- [ ] B6: FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship`.
+- [ ] B0: Step 0 reality check — `docs/workflow-kit/manifest.md`
+- [ ] B1: Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers — `../ai-workflow-kit/tools/**`, `../ai-workflow-kit/*.ps1`
+- [ ] B2: `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria — `../ai-workflow-kit/tools/**`
+- [ ] B3: Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs — `../ai-workflow-kit/tools/leak-check.mjs`, `../ai-workflow-kit/.github/**`
+- [ ] B4: `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps — `../ai-workflow-kit/kit.json`, `CHANGELOG.md`, `README.md`
+- [ ] B5: Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir — kit GitHub repo
+- [ ] B6: FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship` — `docs/workflow-kit/manifest.md`
 
 ### Plan 392 — Workflow Kit Phase 6C: FoodVibe Adoption and Retire Patch Mode (`plans/392-workflow-kit-phase-6c-foodvibe-adoption-retire-patch-mode.plan.md`)
-- [ ] C0: Step 0 reality check.
-- [ ] C1: Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe.
-- [ ] C2: Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR.
-- [ ] C3: New ADR superseding 0018 (amends 0015); mark 0018 superseded; brain index line.
-- [ ] C4: Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md`.
-- [ ] C5: Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`).
-- [ ] C6: Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0`.
-- [ ] C7: `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end.
-- [ ] C8: No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship`.
+- [ ] C0: Step 0 reality check — `docs/workflow-kit/manifest.md`
+- [ ] C1: Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/kit-install.ps1`
+- [ ] C2: Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR — `.kit/install.json` + files kit-sync writes
+- [ ] C3: New ADR superseding 0018 (amends 0015); mark 0018 superseded; brain index line — `docs/brain/decisions/**`, `docs/brain/index.md`
+- [ ] C4: Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md` — `../ai-workflow-kit/docs/CHANGE-LOOP.md`, `docs/workflow-kit/manifest.md`
+- [ ] C5: Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`) — `AGENTS.md`, `scripts/kit-owned.mjs`, `docs/workflow-kit/manifest.md`
+- [ ] C6: Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0` — `.kit/install.json`
+- [ ] C7: `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end — `../kit-proof/**`
+- [ ] C8: No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship` — `.kit/install.json`, `../kit-proof/.kit/install.json`
 
 ### Plan 393 — Slot Dev Servers On Demand and Closed-Todo Archiving (`plans/393-slot-dev-servers-on-demand-closed-todo-archiving.plan.md`)
 - [ ] D0: Step 0: bring both repos up to date, take the process snapshot.
@@ -192,14 +178,27 @@
 - [ ] P6.4: Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
 - [ ] P6.5: ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
 
-### Plan 408 — QA harness: dedicated QA slot (4205/3005) + evidence server (4206) (`plans/408-qa-harness-qa-slot-evidence-server.plan.md`)
-
-- [ ] A1: `scripts/qa/evidence-server.mjs` — `/health`, `/html2canvas.min.js`, `/save` (+ `html2canvas` devDependency, `bugs/qa-runs/.gitkeep`, `.gitignore` lines)
-- [ ] A2: `/shot` with Playwright + API login + sessionStorage seeding; 503 message when chromium is missing
-- [ ] A3: `scripts/qa/qa-up.ps1` (env.slot generation, port checks, 3 detached processes, pid file, waits, summary line) + `scripts/qa/qa-down.ps1`
-- [ ] A4: `package.json` scripts `qa:up` / `qa:down`; `docs/qa/README.md` with the kickoff prompt
-- [ ] A6: Nightly scripts `qa-nightly-up.ps1`, `qa-nightly-down.ps1`, `qa-schedule.ps1` (+ idempotent `qa-up.ps1`); `docs/qa/README.md` gains the one-time QA-checkout setup (below) and the nightly prompt
-- [ ] A5: Manual proof on Windows: `npm run qa:up` → health ok → open `http://localhost:4206/shot?run=smoke&name=inv-m&url=/inventory/list&w=375&h=812&full=1` → PNG exists and shows the logged-in list → `npm run qa:down` → ports free. Paste the three outputs in the PR.
+### Plan 409 — Claude Code mods rollout: fleet, guards, ship-pilot
+- [x] S0: Stage 0 — validate + test all three mods on Windows — `claude-mods-deliverable/layers/claude-code-mods/**`
+- [x] S1: Stage 1 — fleet from disk in a slot (fleet/ports/health, slot lock, /handoff, no flash) — `claude-mods-deliverable/layers/claude-code-mods/fleet/**`
+- [x] S2a: Stage 2 — install fleet from the local marketplace at user scope — `~/.claude/settings.json`
+- [ ] S2b: Stage 2 — one week of fleet use (2026-10-14 → 2026-10-21), no fleet error toasts, ≥1 real lock or recovery — `(no files)`
+- [ ] S3a: Stage 3 — install guards at user scope and run checks 1–7 in a slot and the Planner folder — `(no files)`
+- [ ] S3b: Stage 3 — one week with shell guards + guards mod, no false denials — `(no files)`
+- [ ] S4: Stage 4 — install ship-pilot; /progress, /check, /pr, toast, merge button on a real PR — `(no files)`
+- [ ] K1: kit fix — test mocks strip the drive letter (guards path helper; ship-pilot P + fs.write) — `ai-workflow-kit/layers/claude-code-mods/{guards,ship-pilot}/tests/*.test.ts`
+- [ ] K2: kit fix — fleet registers each command in its own try/catch; `/fleet-health` alias (gstack `/health` clash) — `ai-workflow-kit/layers/claude-code-mods/fleet/hooks/register.tsx`
+- [ ] K3: kit fix — ship-pilot `/pr` handler gets a `.catch` (validator: gating hook without .catch) — `ai-workflow-kit/layers/claude-code-mods/ship-pilot/hooks/register.tsx`
+- [ ] K5: kit — daily event logs in all three mods (done in the deliverable copy 2026-10-14) — `ai-workflow-kit/layers/claude-code-mods/*/hooks/register.tsx`
+- [ ] K4: kit docs — headless `claude -p "/cmd"` from Git Bash needs `MSYS_NO_PATHCONV=1` — `ai-workflow-kit/layers/claude-code-mods/README.md`
+- [ ] K6: kit — mods dock: one framed band above the prompt shared by all three mods (collapsed line, expands on alert; guards status line dropped) — done in the deliverable copy 2026-10-16 — `ai-workflow-kit/layers/claude-code-mods/*/hooks/register.tsx`, `*/tests/*.test.ts`
+- [ ] S5: Stage 5 — kit PR: patch + K1–K4 + `--mods` install flag + manifest tier + kit.json bump + README — `ai-workflow-kit/**`
+- [ ] S6a: Stage 6 — remove Claude Code `hooks` from settings (keep `permissions`) — `.claude/settings.json`
+- [ ] S6b: Stage 6 — "superseded for Claude Code; still used by Cursor" header on shell guards — `scripts/*-guard.sh`, `scripts/session-startup.sh`
+- [ ] S6c: Stage 6 — take-plan step 0 dropped; save-plan Phase 0 uses `/approve` — `.claude/commands/take-plan.md`, `.claude/skills/save-plan/SKILL.md`
+- [ ] S6d: Stage 6 — ship-pilot band notes + `/check` sentence — `.claude/commands/ship.md`, `docs/agent/ship-regular.md`, `docs/agent/standards-git.md`, `docs/agent/job-validation.md`
+- [ ] S6e: Stage 6 — ADR "Claude Code guards run in-process (mods); shell guards remain for Cursor" — `docs/brain/decisions/`
+- [ ] S6f: Stage 6 — AGENTS.md Compaction bullet mentions `/handoff` and `/fleet-health` — `AGENTS.md`
 
 ## Where things live
 

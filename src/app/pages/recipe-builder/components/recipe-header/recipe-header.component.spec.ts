@@ -10,7 +10,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
-import { signal } from '@angular/core'
+import { signal, WritableSignal } from '@angular/core'
 
 describe('RecipeHeaderComponent', () => {
   let component: RecipeHeaderComponent
@@ -76,6 +76,21 @@ describe('RecipeHeaderComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  it('shows a course that is no longer a dish type as no_course, never as its raw key', () => {
+    const registry = TestBed.inject(MetadataRegistryService) as unknown as {
+      courses_: WritableSignal<{ key: string; color: string }[]>
+    }
+    registry.courses_.set([{ key: 'starter', color: '#78716C' }])
+    component.form().get('course')?.setValue('trash_category')
+    fixture.detectChanges()
+    const options = component['courseSelectOptions_']()
+    expect(options).toContain({ value: 'trash_category', label: 'no_course' })
+    expect(options.some((o) => o.label === 'trash_category')).toBeFalse()
+
+    component.form().get('course')?.setValue('starter')
+    expect(component['courseSelectOptions_']().map((o) => o.value)).toEqual(['', 'starter'])
   })
 
   it('should display currentCost from input', () => {
