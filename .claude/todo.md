@@ -191,6 +191,30 @@
 - [ ] S6e: Stage 6 — ADR "Claude Code guards run in-process (mods); shell guards remain for Cursor" — `docs/brain/decisions/`
 - [ ] S6f: Stage 6 — AGENTS.md Compaction bullet mentions `/handoff` and `/fleet-health` — `AGENTS.md`
 
+### Plan 410 — Skill Improver: Nightly Evidence-Driven Skill Upgrades
+- [ ] S0: Step 0 reality check + headless spike, findings written here — `plans/410-skill-improver-nightly-evidence-driven-skill-upgrades.plan.md`
+- [ ] S1: Evidence script over local transcripts (counts only, local output) — `../ai-workflow-kit/tools/skill-improver/evidence.mjs`
+- [ ] S2: Picker + rotation state + open-PR pause — `../ai-workflow-kit/tools/skill-improver/pick.mjs`
+- [ ] S3: Runner: isolated worktree, budget meter over stream-json, path guard, leak guard, log — `../ai-workflow-kit/tools/skill-improver/run.mjs`
+- [ ] S4: Editor command + blind judge agent + eval generation for skills without evals — `../ai-workflow-kit/core/.claude/commands/improve-skill.md`, `../ai-workflow-kit/core/.claude/agents/skill-judge.md`
+- [ ] S5: PR creation + body template — `../ai-workflow-kit/tools/skill-improver/pr.mjs`
+- [ ] S6: Scheduler script (PS5) + README/CHANGELOG section — `../ai-workflow-kit/kit-skill-improver.ps1`, `../ai-workflow-kit/README.md`, `../ai-workflow-kit/CHANGELOG.md`
+- [ ] S7: Manual end-to-end run on one skill + budget-stop test + out-of-scope test — kit repo
+- [ ] S8: Register the task (Dandan's go), receive one nightly PR — local machine
+- [ ] S9: FoodVibe manifest note; `/ship` — `docs/workflow-kit/manifest.md`
+- [ ] S10: One-month review (2026-11-17 or later) — `plans/410-skill-improver-nightly-evidence-driven-skill-upgrades.plan.md`
+
+### Plan 411 — Workflow Scout: Weekly Claude Code and Community Update Page
+- [ ] C0: Step 0 reality check + routine spike, findings written here — `plans/411-workflow-scout-weekly-claude-code-and-community-update-page.plan.md`
+- [ ] C1: Sources config + cursor state format — `../ai-workflow-kit/tools/scout/sources.json`
+- [ ] C2: Scout command (collect, judge fit, emit JSON, budget caps) — `../ai-workflow-kit/core/.claude/commands/scout.md`
+- [ ] C3: Advertiser-style page template + JSON→HTML renderer — `../ai-workflow-kit/templates/scout-page.html`, `../ai-workflow-kit/tools/scout/render.mjs`
+- [ ] C4: Branch + PR step (top-5 text, page link, useful checkboxes) — `../ai-workflow-kit/tools/scout/pr.mjs`
+- [ ] C5: README/CHANGELOG section; kit PR merged; kit-sync into FoodVibe — `../ai-workflow-kit/README.md`, `../ai-workflow-kit/CHANGELOG.md`
+- [ ] C6: Manual run in FoodVibe → first page + PR — `docs/scout/**`
+- [ ] C7: Create the weekly cloud routine (Dandan's go); receive one scheduled PR — cloud routine
+- [ ] C8: Dandan marks useful recommendations; manifest note; `/ship` — `docs/workflow-kit/manifest.md`
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
