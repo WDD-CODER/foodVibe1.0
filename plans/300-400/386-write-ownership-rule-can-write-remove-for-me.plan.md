@@ -73,43 +73,43 @@ touching any milestone.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] **`server/utils/can-write.js`**: `canWrite(user, doc)` returns `doc.userId === user.userId || (doc.userId === '__master__' && user.role === 'admin')`. `ownerFilter(req)` gives the Mongo `userId` filter for writes (own, or own ∪ master for an admin). `generic.js` PUT `/:type/:id`, DELETE `/:type/:id` and DELETE `/:type/bulk` use these instead of inline `userId: req.user.userId` / `termWriteOwner`. Behavior for non-taxonomy collections is unchanged.
-- [ ] **Per-user override doc:** the taxonomy term schema gets two optional fields on `termShape`: `hidden?: true` and `displayName?: string` (min 1). A user's own term doc with the same `kind`/`key` as a master term is an **override** of it: `hidden: true` = "removed for this user"; `displayName` = "renamed for this user" (display only — the `key` and every reference stay the master key). The unique index `kind_key_user_unique` already allows one override per user per term.
-- [ ] **POST override (taxonomyTerms with `hidden` and/or `displayName`)** is allowed for any signed-in user only when master has that `kind`/`key` (skip the `masterHasTerm` 409 for this case). With `hidden: true` it is **blocked (409 + `referencedBy`) when the user's own docs still use the key** (`findTermReferences` scoped to the caller), the same rule as delete. A `displayName`-only override has no reference check (the key doesn't change). Changing it later = PUT on the caller's own override (covered by `canWrite`).
-- [ ] **GET taxonomyTerms** (signed-in): return master ∪ own, minus master terms the caller has hidden; a caller's `displayName` override is merged onto the returned master term; the override docs themselves are not returned. With `?includeHidden=1`, return the hidden overrides too (for the restore list). Anonymous reads are unchanged.
-- [ ] **Restore / reset name:** clearing `hidden` or `displayName` PUTs the override without that field; when neither field is left, DELETE the override. Skip the reference check for override docs.
-- [ ] **Client `PermissionService`** (`src/app/core/services/permission.service.ts`) has `canWrite(doc)` with the same rule as the server, and `isShared(doc)`. `TaxonomyStore.canEdit` delegates to it. Add `TaxonomyStore.hideForMe(kind, key)`, `restoreForMe(kind, key)`, `renameForMe(kind, key, displayName)` and `resetNameForMe(kind, key)`.
-- [ ] **Display:** the registry facades show `displayName ?? key`, so every picker shows the user's name while stored references stay the master key.
-- [ ] **Metadata Manager** (main page, `preparation-category-manager`, `section-category-manager`, menu types). On a shared term:
+- [-] **`server/utils/can-write.js`**: `canWrite(user, doc)` returns `doc.userId === user.userId || (doc.userId === '__master__' && user.role === 'admin')`. `ownerFilter(req)` gives the Mongo `userId` filter for writes (own, or own ∪ master for an admin). `generic.js` PUT `/:type/:id`, DELETE `/:type/:id` and DELETE `/:type/bulk` use these instead of inline `userId: req.user.userId` / `termWriteOwner`. Behavior for non-taxonomy collections is unchanged.
+- [-] **Per-user override doc:** the taxonomy term schema gets two optional fields on `termShape`: `hidden?: true` and `displayName?: string` (min 1). A user's own term doc with the same `kind`/`key` as a master term is an **override** of it: `hidden: true` = "removed for this user"; `displayName` = "renamed for this user" (display only — the `key` and every reference stay the master key). The unique index `kind_key_user_unique` already allows one override per user per term.
+- [-] **POST override (taxonomyTerms with `hidden` and/or `displayName`)** is allowed for any signed-in user only when master has that `kind`/`key` (skip the `masterHasTerm` 409 for this case). With `hidden: true` it is **blocked (409 + `referencedBy`) when the user's own docs still use the key** (`findTermReferences` scoped to the caller), the same rule as delete. A `displayName`-only override has no reference check (the key doesn't change). Changing it later = PUT on the caller's own override (covered by `canWrite`).
+- [-] **GET taxonomyTerms** (signed-in): return master ∪ own, minus master terms the caller has hidden; a caller's `displayName` override is merged onto the returned master term; the override docs themselves are not returned. With `?includeHidden=1`, return the hidden overrides too (for the restore list). Anonymous reads are unchanged.
+- [-] **Restore / reset name:** clearing `hidden` or `displayName` PUTs the override without that field; when neither field is left, DELETE the override. Skip the reference check for override docs.
+- [-] **Client `PermissionService`** (`src/app/core/services/permission.service.ts`) has `canWrite(doc)` with the same rule as the server, and `isShared(doc)`. `TaxonomyStore.canEdit` delegates to it. Add `TaxonomyStore.hideForMe(kind, key)`, `restoreForMe(kind, key)`, `renameForMe(kind, key, displayName)` and `resetNameForMe(kind, key)`.
+- [-] **Display:** the registry facades show `displayName ?? key`, so every picker shows the user's name while stored references stay the master key.
+- [-] **Metadata Manager** (main page, `preparation-category-manager`, `section-category-manager`, menu types). On a shared term:
   - non-admin: the 🔒 badge is replaced by ✏ "rename for me" and 🗑 "remove for me" (confirms, then `hideForMe`). A short "shared" hint (dictionary key) is kept. A term renamed for me shows ↺ "reset name".
   - admin: 🗑 and rename both open `confirmModal.openTernary` with "for me / for everyone". "For me" calls `hideForMe` / `renameForMe`; "for everyone" keeps the existing delete / re-key rename flow.
   - Own terms are unchanged (full rename/delete).
-- [ ] **Brain:**
+- [-] **Brain:**
   - ADR `docs/brain/decisions/0019-write-ownership-rule.md`. It records that the rule (owner; admin also over `__master__`; per-user remove/rename of shared terms via an override doc) supersedes the P3.4 "shared terms admin-only, no per-user overrides" note, and that it is the taxonomy slice of 0008 D1.
   - One hard-rule line in `AGENTS.md`: "Write routes authorize through `server/utils/can-write.js`; never hand-roll `userId` write filters."
   - Gotcha in `backend.md`: "P3.4 dropped per-user removal → users lost CRUD on defaults".
   - Index line in `docs/brain/index.md`.
 
 ### Should Have (P1)
-- [ ] "Removed items" disclosure per Metadata Manager section (from `?includeHidden=1`) with a ↺ restore button.
+- [-] "Removed items" disclosure per Metadata Manager section (from `?includeHidden=1`) with a ↺ restore button.
 
 ### Nice to Have (P2)
-- [ ] none
+- [-] none
 
 ## UI/UX Notes
 - Hebrew RTL, `translatePipe` only. Append-only new keys in `dictionary.json` (hotspot): `taxonomy_remove_for_me`, `taxonomy_remove_for_me_confirm`, `taxonomy_rename_for_me`, `taxonomy_reset_name`, `taxonomy_shared_hint`, `taxonomy_removed_items`, `taxonomy_restore`, `taxonomy_scope_me`, `taxonomy_scope_everyone`.
 - Lucide icons already in use (`trash-2`, `x`, `lock`, `pencil`, `rotate-ccw` — verify `pencil` and `rotate-ccw` with `npm run lint:icons`).
 
 ## Atomic Sub-tasks
-- [ ] A1: `can-write.js` + unit tests. Refactor `generic.js` PUT/DELETE/bulk-DELETE to use it. Existing `generic.test.js` + `taxonomy-terms-api.test.js` stay green (`server/utils/can-write.js`, `server/routes/generic.js`, `server/test/**`).
-- [ ] A2: Schema `hidden` + `displayName`. POST override rules (allowed only over a master key; `hidden` blocked when own docs reference it; `displayName` no ref check). PUT own override. GET filtering + `displayName` merge + `includeHidden`. Restore/reset clears the field, deletes the override when empty. Tests for each, including: user B still sees the term user A hid, and still sees the original name of the term user A renamed (`taxonomy-term.schema.ts`, `generic.js`, `server/test/**`).
-- [ ] A3: `PermissionService` + spec. `TaxonomyStore.canEdit` delegates. `hideForMe` / `restoreForMe` / `renameForMe` / `resetNameForMe` + spec. Facades show `displayName ?? key` (`permission.service.ts`, `taxonomy-store.service.ts`, registry facades).
-- [ ] A4: Metadata Manager main page: non-admin "rename for me" / "remove for me" / "reset name", admin ternary for remove and rename (`src/app/pages/metadata-manager/**`).
-- [ ] A5: Same for prep-category, section-category and menu-type UIs.
-- [ ] A6: Dictionary keys (append-only) (`public/assets/data/dictionary.json` — hotspot).
-- [ ] A7 (P1): Removed-items disclosure + restore.
-- [ ] A8: ADR 0019, AGENTS.md hard-rule line, gotcha, brain index.
-- [ ] A9: Grep for any place that renders a term key without going through the facades (so a `displayName` override wouldn't show). If it's outside the scope, raise it via the Escalation Protocol.
+- [-] A1: `can-write.js` + unit tests. Refactor `generic.js` PUT/DELETE/bulk-DELETE to use it. Existing `generic.test.js` + `taxonomy-terms-api.test.js` stay green (`server/utils/can-write.js`, `server/routes/generic.js`, `server/test/**`).
+- [-] A2: Schema `hidden` + `displayName`. POST override rules (allowed only over a master key; `hidden` blocked when own docs reference it; `displayName` no ref check). PUT own override. GET filtering + `displayName` merge + `includeHidden`. Restore/reset clears the field, deletes the override when empty. Tests for each, including: user B still sees the term user A hid, and still sees the original name of the term user A renamed (`taxonomy-term.schema.ts`, `generic.js`, `server/test/**`).
+- [-] A3: `PermissionService` + spec. `TaxonomyStore.canEdit` delegates. `hideForMe` / `restoreForMe` / `renameForMe` / `resetNameForMe` + spec. Facades show `displayName ?? key` (`permission.service.ts`, `taxonomy-store.service.ts`, registry facades).
+- [-] A4: Metadata Manager main page: non-admin "rename for me" / "remove for me" / "reset name", admin ternary for remove and rename (`src/app/pages/metadata-manager/**`).
+- [-] A5: Same for prep-category, section-category and menu-type UIs.
+- [-] A6: Dictionary keys (append-only) (`public/assets/data/dictionary.json` — hotspot).
+- [-] A7 (P1): Removed-items disclosure + restore.
+- [-] A8: ADR 0019, AGENTS.md hard-rule line, gotcha, brain index.
+- [-] A9: Grep for any place that renders a term key without going through the facades (so a `displayName` override wouldn't show). If it's outside the scope, raise it via the Escalation Protocol.
 
 ## Technical Considerations
 - Dependencies: `TaxonomyStore`, the six registry facades (they read through the store, so hidden terms vanish from every picker and renamed terms show the new name; nothing else reads `taxonomyTerms`), and `confirmModal.openTernary`.

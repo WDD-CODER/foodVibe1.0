@@ -1,6 +1,6 @@
 # Plan 393 — Slot Dev Servers On Demand and Closed-Todo Archiving
 
-Status: draft
+Status: done
 Track: code — here (not design)
 Snapshot: a60b9cbd
 
@@ -101,31 +101,31 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] take-plan stops starting servers. Its pre-claim port check still refuses a foreign process on the slot's ports and still stops this slot's own leftover servers.
-- [ ] New `scripts/slot-serve.mjs` (`core`/`copy` row in the manifest and `kit-owned.json`), built from the server-start code taken out of take-plan.
-- [ ] `stopSlotServers()` also finds orphaned dev chains whose cwd or command line is inside this slot's folder, even with no port. Dev-process patterns only.
-- [ ] Merging from a slot (`standards-git.md`, `ship-regular.md`) begins with `node scripts/slot-stop.mjs`. `free-merged-slots.mjs` stops the servers of each slot it frees.
-- [ ] A `SessionEnd` hook in `.claude/settings.json` runs `slot-stop.mjs` in a slot and does nothing anywhere else.
-- [ ] The docs say servers start on demand: `take-plan.md`, `remote.md` (point it at `slot-serve.mjs` instead of take-plan), the preflight skill (if the server is not reachable in a slot, run `slot-serve.mjs`), `job-validation.md` (start the servers before handing over a click-list), `workflow-map.md` and `commands.md`.
-- [ ] Root-cause the orphan leak (repro on Windows), fix it in `slot-procs.mjs` (stop = kill the whole tree from the `npm run dev:local` root; start = refuse while the port is held), and record the cause in `docs/brain/gotchas/`.
-- [ ] `scripts/orphan-sweep.mjs` (shared helper in `slot-procs.mjs`): kills orphan dev chains for the current folder, in a slot or in main, and never a process that holds a port. `session-startup.sh` runs it with a short timeout. Add its manifest row and `kit-owned.json` entry.
-- [ ] Todo archiving: `checkboxStats` counts `[-]` as closed. `isFullyDone` returns true when there are no `[ ]` lines and at least one `[x]` or `[-]` line. Add a `node --test` test for it.
+- [x] take-plan stops starting servers. Its pre-claim port check still refuses a foreign process on the slot's ports and still stops this slot's own leftover servers.
+- [x] New `scripts/slot-serve.mjs` (`core`/`copy` row in the manifest and `kit-owned.json`), built from the server-start code taken out of take-plan. (made `core`/`parameterize`, not `copy`: it carries `commands.slotPrepare` and `slots.dbNameFormat`.)
+- [x] `stopSlotServers()` also finds orphaned dev chains whose cwd or command line is inside this slot's folder, even with no port. Dev-process patterns only.
+- [x] Merging from a slot (`standards-git.md`, `ship-regular.md`) begins with `node scripts/slot-stop.mjs`. `free-merged-slots.mjs` stops the servers of each slot it frees.
+- [x] A `SessionEnd` hook in `.claude/settings.json` runs `slot-stop.mjs` in a slot and does nothing anywhere else.
+- [x] The docs say servers start on demand: `take-plan.md`, `remote.md` (point it at `slot-serve.mjs` instead of take-plan), the preflight skill (if the server is not reachable in a slot, run `slot-serve.mjs`), `job-validation.md` (start the servers before handing over a click-list), `workflow-map.md` and `commands.md`.
+- [x] Root-cause the orphan leak (repro on Windows), fix it in `slot-procs.mjs` (stop = kill the whole tree from the `npm run dev:local` root; start = refuse while the port is held), and record the cause in `docs/brain/gotchas/`.
+- [x] `scripts/orphan-sweep.mjs` (shared helper in `slot-procs.mjs`): kills orphan dev chains for the current folder, in a slot or in main, and never a process that holds a port. `session-startup.sh` runs it with a short timeout. Add its manifest row and `kit-owned.json` entry.
+- [x] Todo archiving: `checkboxStats` counts `[-]` as closed. `isFullyDone` returns true when there are no `[ ]` lines and at least one `[x]` or `[-]` line. Add a `node --test` test for it.
 
 ### Won't Have (this plan)
 - An idle-timeout auto-stop. Stopping the main folder's *running* servers (the Human runs those); only main's orphans are swept.
 
 ## Atomic Sub-tasks
-- [ ] D0: Step 0: bring both repos up to date, take the process snapshot.
-- [ ] D1: Kit: `slot-serve.mjs`, plus take-plan no longer starting servers.
-- [ ] D2: Kit: orphan-chain detection in `slot-procs.mjs`, `free-merged-slots` stopping servers, and the `SessionEnd` hook.
-- [ ] D2a: Kit: reproduce the orphan leak and fix its root cause (kill the whole tree on stop, refuse a start while the port is held), plus the brain gotcha.
-- [ ] D2b: Kit: `orphan-sweep.mjs` and its session-start call (slot and main, orphans only), plus the manifest row and `kit-owned.json` entry.
-- [ ] D3: Kit: `todo-parse.mjs` counting `[-]` as closed, plus its test.
-- [ ] D4: Kit: docs (`take-plan.md`, `remote.md`, preflight, `standards-git.md`, `ship-regular.md`, `job-validation.md`, `workflow-map.md`, `commands.md`), plus the manifest row and the `kit-owned.json` entry for `slot-serve.mjs`.
-- [ ] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once.
-- [ ] D7: FoodVibe only (no kit patch): remove the `playwright` entry from `.cursor/mcp.json` (Playwright MCP was dropped 2026-10-01; each Cursor window was spawning its own copy) — `.cursor/mcp.json`
-- [ ] D8: Kit: `orphan-sweep.mjs` + `slot-stop.mjs` also recognise the plan 408 QA harness chains (ports 4205/3005/4206, `.claude/.qa-pids`, cwd in this folder): the sweep kills only orphans (no port held), never a running QA server; Done-when: [auto] a scratch orphan `node --watch` with QA env in the main folder is swept, a live listener on 4206 survives — `scripts/orphan-sweep.mjs`, `scripts/lib/slot-procs.mjs`, `scripts/test/**`
-- [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
+- [x] D0: Step 0: bring both repos up to date, take the process snapshot.
+- [x] D1: Kit: `slot-serve.mjs`, plus take-plan no longer starting servers.
+- [x] D2: Kit: orphan-chain detection in `slot-procs.mjs`, `free-merged-slots` stopping servers, and the `SessionEnd` hook.
+- [x] D2a: Kit: reproduce the orphan leak and fix its root cause (kill the whole tree on stop, refuse a start while the port is held), plus the brain gotcha.
+- [x] D2b: Kit: `orphan-sweep.mjs` and its session-start call (slot and main, orphans only), plus the manifest row and `kit-owned.json` entry.
+- [x] D3: Kit: `todo-parse.mjs` counting `[-]` as closed, plus its test.
+- [x] D4: Kit: docs (`take-plan.md`, `remote.md`, preflight, `standards-git.md`, `ship-regular.md`, `job-validation.md`, `workflow-map.md`, `commands.md`), plus the manifest row and the `kit-owned.json` entry for `slot-serve.mjs`.
+- [x] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once. (kit PR #11 merged 88a16ef; FoodVibe scripts byte-identical to the rendered kit; todo-archive: nothing closed to archive)
+- [x] D7: FoodVibe only (no kit patch): remove the `playwright` entry from `.cursor/mcp.json` (Playwright MCP was dropped 2026-10-01; each Cursor window was spawning its own copy) — `.cursor/mcp.json` (already done by plan 390 A3: `.cursor/mcp.json` has no playwright entry)
+- [x] D8: Kit: `orphan-sweep.mjs` + `slot-stop.mjs` also recognise the plan 408 QA harness chains (ports 4205/3005/4206, `.claude/.qa-pids`, cwd in this folder): the sweep kills only orphans (no port held), never a running QA server; Done-when: [auto] a scratch orphan `node --watch` with QA env in the main folder is swept, a live listener on 4206 survives — `scripts/orphan-sweep.mjs`, `scripts/lib/slot-procs.mjs`, `scripts/test/**`
+- [x] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`. (all 12 [auto] criteria verified 2026-10-17; manifest.md validation round 3 added)
 
 ## Out of Scope
 Phase 6 kit work (plans 390–392). The agentmemory MCP server in `~/.cursor/mcp.json` (user config, outside the repo). Exception (added 2026-10-10 by Dandan): D7 removes the dropped Playwright MCP from the project's `.cursor/mcp.json`.

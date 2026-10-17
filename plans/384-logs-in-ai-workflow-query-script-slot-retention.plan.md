@@ -65,6 +65,9 @@ docs/workflow-kit/manifest.md
 docs/workflow-kit/manifest.json
 CHANGELOG.md
 scripts/preflight.mjs
+scripts/lib/slot-procs.mjs
+scripts/lib/slot-procs.mjs
+scripts/lib/slot-procs.mjs
 ```
 
 ## Read Scope
