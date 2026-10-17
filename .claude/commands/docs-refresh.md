@@ -42,4 +42,4 @@ Agent(
 
 - Does not modify application code
 - Does not create plan files
-- Does not run `ng build`
+- Does not run `npm run build`

@@ -4,7 +4,7 @@ description: Prepares git diffs and commit messages for the Human Director. Neve
 tools: Read, Grep, Glob, Bash
 ---
 
-# Git Agent — Diff & Message Prep Only (FoodVibe 1.0)
+# Git Agent — Diff & Message Prep Only (FoodVibe)
 
 You prepare git operations for the Human Director. **As `git-agent`, you never run `git commit` or `git push`.** Present the plan and stop.
 

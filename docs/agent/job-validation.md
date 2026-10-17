@@ -7,7 +7,7 @@
 
 ## Core rule
 
-A job is **done** when every Done-when item is validated. `[auto]` items are validated by agent evidence (Tier 1). `[human]` or untagged items are validated only by the Human. Agents never promote an item to `[auto]`; only the plan author tags it. Tag syntax: `.claude/skills/save-plan/SKILL.md` Plan Rules. Rationale: `docs/brain/decisions/0014-validation-gate-tiers.md`.
+A job is **done** when every Done-when item is validated. `[auto]` items are validated by agent evidence (Tier 1). `[human]` or untagged items are validated only by the Human. Agents never promote an item to `[auto]`; only the plan author tags it. Tag syntax: `.claude/skills/save-plan/SKILL.md` Plan Rules. Rationale: two tiers let agent-verifiable checks (`[auto]`) close without a human round-trip while visual or subjective checks still need the Human.
 
 Plans with no tags behave exactly as before: everything is `[human]`.
 
@@ -63,7 +63,7 @@ HOW TO VALIDATE — 1 check · app: the Claude window of Worker slot 2 · reply:
    WHY     take-plan now notices a branch that was already merged, so a slot never continues on stale work
    (squash merge = GitHub folds the branch into one commit on main)
    WHERE   the Claude window of Worker slot 2
-   SETUP   plan 42's branch must already be merged on GitHub (it is, PR #87)
+   SETUP   plan 42's branch must already be merged on GitHub (it is)
    DO      paste:  take plan 42
    SEE ✓   a line ending "…was merged - starting fresh"
    FAIL ✗  it asks you to reset the branch by hand, or the push is rejected
@@ -74,7 +74,7 @@ HOW TO VALIDATE — 1 check · app: the Claude window of Worker slot 2 · reply:
 - Written for someone who is not an engineer: any person can follow it without asking
 - The header line says how many checks, where the app is running (URL, or which window), and the reply words — the Human should not have to scroll back to find the port
 - WHY is one sentence in the user's words: what changed and what this check proves — never the commit subject or the plan's Done-when text
-- SETUP appears only when the check needs data or state that may not exist (e.g. "have at least 3 venues"); say how to get it in one line, or that the agent already seeded it
+- SETUP appears only when the check needs data or state that may not exist (e.g. "have at least 3 saved records"); say how to get it in one line, or that the agent already seeded it
 - Rewrite each Done-when item in plain words — never copy the plan's wording verbatim
 - One check per card, completable in under a minute
 - WHERE names the exact place (app page + what to click to get there, or which terminal window)
@@ -118,7 +118,7 @@ Do **not** ask “verify / I’ll check?” at task start — the checklist is u
 
 ## Tier 1 — auto-verified
 
-Runs automatically, without a `verify` reply, for `[auto]` Done-when items only. An item is `[auto]` when its expected output is exact: an exact string, an exit code, a byte-identical diff, `ng build` or a test suite passing, or deterministic CLI output.
+Runs automatically, without a `verify` reply, for `[auto]` Done-when items only. An item is `[auto]` when its expected output is exact: an exact string, an exit code, a byte-identical diff, `npm run build` or a test suite passing, or deterministic CLI output.
 
 - Evidence is raw: the exact command, then its actual output, exit code, or diff hash. No paraphrase.
 - An item that fails verification, or cannot be verified, falls back to `[human]` with a ⚠ and a reason.
@@ -254,7 +254,7 @@ Do not leave new stages only in chat or only in a session brief.
 
 ---
 
-## Todo archive volumes (Plan 292)
+## Todo archive volumes
 
 When matching todos are marked `[x]` and a plan section is **fully** done:
 

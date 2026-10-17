@@ -9,7 +9,7 @@ Standalone review command. Used by `/ship` Phase 2 and invokable alone.
 
 ## What to read
 
-1. Current diff against the base branch, excluding noisy generated/report paths (keep `dictionary.json`):
+1. Current diff against the base branch, excluding noisy generated/report paths (keep `public/assets/data/dictionary.json`):
    ```bash
    git fetch origin main 2>/dev/null || true
    git diff origin/main...HEAD -- . ':(exclude)package-lock.json' ':(exclude).claude/reports/**' ':(exclude).claude/todo-archive/**' ':(exclude).claude/techdebt-reports/**'

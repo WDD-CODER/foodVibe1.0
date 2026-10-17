@@ -10,7 +10,7 @@ Use this path for code cleanup, dead code removal, pattern consolidation, and te
 
 ## Invokes
 
-  (`CI / ng test` + `pre-commit security grep + CI`). Not an execution dispatcher.
+  (`CI / npm run test` + `pre-commit security grep + CI`). Not an execution dispatcher.
 
 ## Typical flow
 
@@ -18,13 +18,13 @@ Use this path for code cleanup, dead code removal, pattern consolidation, and te
 2. Select scope: single file, component, service, or subsystem.
 3. Prefer a Plan Contract with milestones for anything non-trivial.
 4. Refactor atomically — one concern per milestone / commit.
-5. `ng build` / `ng lint` must pass after each milestone.
+5. `npm run build` / `npm run lint` must pass after each milestone.
 6. No behavior changes — refactor changes structure only. If behavior must change, use `/feat`.
 
 ## Hard rules
 
 - No behavior changes in a refactor commit. If you find a bug, open a `/fix` separately.
-- `ng build` must pass after every commit.
+- `npm run build` must pass after every commit.
 - No semicolons in any `.ts` file touched.
 - Reference `cssLayer` skill before modifying any `.scss` file — layer order matters.
 - Human commits by default (`git-agent` prep only).

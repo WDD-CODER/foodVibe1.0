@@ -56,10 +56,10 @@ ESLint / prettier errors in the `lint` job (step **ESLint**).
 
 ### `[build]`
 
-`ng build` / compile errors in the `build` job (step **Build**).
+`npm run build` / compile errors in the `build` job (step **Build**).
 
 - Fix the compile error in application code directly.
-- Re-verify locally with `npx ng build` before committing.
+- Re-verify locally with `npm run build` before committing.
 
 ### `[test]`
 

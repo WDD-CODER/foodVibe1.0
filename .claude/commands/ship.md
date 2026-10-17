@@ -35,7 +35,7 @@ Run `node scripts/ship-prep.mjs` (`--mode regular` for `/ship regular`) and act 
 ## Phase 1 — Build gate (UNCONDITIONAL hard stop)
 
 ```bash
-ng build
+npm run build
 node scripts/plan-ledger-check.mjs
 ```
 
@@ -56,7 +56,7 @@ node scripts/plan-ledger-check.mjs
 
 ## Phase 3 — Manifest check
 
-`git worktree list` misses same-directory concurrent sessions — see `docs/brain/gotchas/agent-workflow.md`. Run `node scripts/ship-prep.mjs --check-baseline`, act on the printed status:
+`git worktree list` misses same-directory concurrent sessions — check `docs/brain/gotchas/` for the known trap. Run `node scripts/ship-prep.mjs --check-baseline`, act on the printed status:
 
 - `BRANCH_CHANGED` → **STOP**; show the Human both branch names, wait.
 - `HEAD_MOVED` → re-run `git status --short` fresh, re-`Read` files before `git add`, note it in the summary.
@@ -66,7 +66,7 @@ node scripts/plan-ledger-check.mjs
 - Stage only this-chat dirty paths. Never `-A` unless Human overrode scope. Never stage secrets/`.env`.
 
 Before Phase 4: `git fetch origin && git rebase origin/main`.
-- Conflict where both sides only *added to* a hotspot (`src/styles.scss`, `dictionary.json`, `app.routes.ts`) → keep both sides (union), `git rebase --continue`.
+- Conflict where both sides only *added to* a hotspot (`public/assets/data/dictionary.json`, `src/styles.scss, src/app/app.routes.ts`) → keep both sides (union), `git rebase --continue`.
 - Any other conflict → **STOP**; show the Human; do not resolve unilaterally.
 
 ---

@@ -20,7 +20,7 @@ The full standard is `docs/agent/standards-security.md` (read it for anything no
 
 ```
 Auth & logging:
-- [ ] Every new/changed protected route in app.routes.ts has canActivate: [authGuard]
+- [ ] Every new/changed protected route in src/app/app.routes.ts has canActivate: [authGuard]
 - [ ] Every non-route mutation entry (add/edit/delete button, modal, FAB) calls userService.isLoggedIn() first
 - [ ] Session data only in sessionStorage (key loggedInUser); nothing auth-related in localStorage
 - [ ] LoggingService calls carry { event, message, context? } and no password/hash/token/name/email — user._id only

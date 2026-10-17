@@ -1,11 +1,11 @@
 # FoodVibe Workflow — Three-Agent Manual Bridge
 
-## Roles (Planner-Worker workflow — see `docs/brain/decisions/0009-planner-worker-worktrees.md`)
+## Roles (Planner-Worker workflow)
 
 | Role | Where | Job |
 |---|---|---|
 | **Planner** | Main folder, checked out on `main` | Plans. Writes and pushes Plan Contracts (`plans/NNN-slug.plan.md`) + `.claude/todo.md` directly to `main` — the one admin-bypass write, enforced by `scripts/branch-guard.sh` + `.husky/pre-push`. |
-| **Worker** | One of 3 permanent slots — `wt-1` (4201/3001), `wt-2` (4202/3002), `wt-3` (4203/3003) | Claims a plan via "execute plan NNN", executes its milestones on `feat/NNN-<slug>`, may write only inside that plan's `## Read-Write Scope`. |
+| **Worker** | One of 3 permanent slots — `wt-N` for N = 1..3 (ports 4200+N / 3000+N) | Claims a plan via "execute plan NNN", executes its milestones on `feat/NNN-<slug>`, may write only inside that plan's `## Read-Write Scope`. |
 | **Reviewer** | `/review-it` (either tool) | Report-only by default. Never silently fixes. |
 | **Human Director (Dandan)** | You | Assigns plans to slots, approves ships/merges, the only `--no-verify` override. |
 
@@ -40,7 +40,7 @@ Rules of thumb:
 - Contractor rules (default + overrides): `.cursor/rules/contractor-role.mdc`
 - Stack: `/_shared/tech-stack.md`
 - Current state capsule: `/_shared/current-state.md`
-- Path-scoped standards: `.claude/rules/{angular,security,domain,backend}.md`
+- Path-scoped standards: `.claude/rules/{<stack>,security,domain,backend}.md`
 - Review command: `.claude/commands/review-it.md`
 
 ## What retired

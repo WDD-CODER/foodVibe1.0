@@ -44,6 +44,10 @@
     {
       "path": ".cursor/*.log",
       "reason": "Cursor debug logs (runtime data)"
+    },
+    {
+      "path": "scripts/test/fixtures/design-port/**",
+      "reason": "test fixtures for project script tests (design-port handoff samples); data, not workflow"
     }
   ],
   "entries": [
@@ -276,6 +280,12 @@
           "strings": [
             "/browse",
             "gstack"
+          ]
+        },
+        {
+          "key": "paths.routesFile",
+          "strings": [
+            "src/app/app.routes.ts"
           ]
         }
       ],
@@ -618,6 +628,12 @@
           "strings": [
             "foodvibe"
           ]
+        },
+        {
+          "key": "stack.name",
+          "strings": [
+            "angular"
+          ]
         }
       ],
       "refs": [
@@ -642,7 +658,8 @@
         {
           "key": "project.i18nFile",
           "strings": [
-            "dictionary.json"
+            "dictionary.json",
+            "public/assets/data/dictionary.json"
           ]
         }
       ],
@@ -702,13 +719,15 @@
           "key": "paths.hotspots",
           "strings": [
             "src/styles.scss",
-            "app.routes.ts"
+            "app.routes.ts",
+            "src/app/app.routes.ts"
           ]
         },
         {
           "key": "project.i18nFile",
           "strings": [
-            "dictionary.json"
+            "dictionary.json",
+            "public/assets/data/dictionary.json"
           ]
         },
         {
@@ -1199,7 +1218,8 @@
             "420n",
             "4201",
             "4202",
-            "4203"
+            "4203",
+            "4200"
           ]
         },
         {
@@ -3294,7 +3314,8 @@
           "strings": [
             "3001",
             "3002",
-            "3003"
+            "3003",
+            "3000"
           ]
         },
         {
@@ -3302,7 +3323,8 @@
           "strings": [
             "4201",
             "4202",
-            "4203"
+            "4203",
+            "4200"
           ]
         },
         {
@@ -3310,7 +3332,8 @@
           "strings": [
             "wt-1",
             "wt-2",
-            "wt-3"
+            "wt-3",
+            "wt-n"
           ]
         },
         {
@@ -4589,6 +4612,104 @@
         ".claude/skills/save-plan/SKILL.md"
       ],
       "notes": "Plan 406 ADR: open design plans live in plans/design/; closed plans go to the range folder."
+    },
+    {
+      "path": "docs/brain/decisions/0019-design-port-from-handoff.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/commands/design-port.md"
+      ],
+      "notes": "FoodVibe ADR: Claude Design handoffs drive screen ports (plan 405). Classified by plan 390."
+    },
+    {
+      "path": "scripts/design-feature-inventory.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/commands/design-port.md"
+      ],
+      "notes": "Plan 405 design-port: lists a screen's features so a port cannot drop one. FoodVibe-only (Claude Design flow). Classified by plan 390."
+    },
+    {
+      "path": "scripts/design-handoff-ingest.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        ".claude/commands/design-port.md"
+      ],
+      "notes": "Plan 405 design-port: unpacks a Claude Design handoff into .interface-design/handoffs/. FoodVibe-only. Classified by plan 390."
+    },
+    {
+      "path": "scripts/test/design-feature-inventory.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/design-feature-inventory.mjs"
+      ],
+      "notes": "Tests for design-feature-inventory.mjs. Classified by plan 390."
+    },
+    {
+      "path": "scripts/test/design-handoff-ingest.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/design-handoff-ingest.mjs"
+      ],
+      "notes": "Tests for design-handoff-ingest.mjs. Classified by plan 390."
+    },
+    {
+      "path": "scripts/qa/evidence-server.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 408 QA harness (QA slot 4205/3005, evidence server 4206). FoodVibe-only for now; a kit candidate after it settles. Classified by plan 390."
+    },
+    {
+      "path": "scripts/qa/qa-down.ps1",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 408 QA harness (QA slot 4205/3005, evidence server 4206). FoodVibe-only for now; a kit candidate after it settles. Classified by plan 390."
+    },
+    {
+      "path": "scripts/qa/qa-nightly-down.ps1",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 408 QA harness (QA slot 4205/3005, evidence server 4206). FoodVibe-only for now; a kit candidate after it settles. Classified by plan 390."
+    },
+    {
+      "path": "scripts/qa/qa-nightly-up.ps1",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 408 QA harness (QA slot 4205/3005, evidence server 4206). FoodVibe-only for now; a kit candidate after it settles. Classified by plan 390."
+    },
+    {
+      "path": "scripts/qa/qa-schedule.ps1",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 408 QA harness (QA slot 4205/3005, evidence server 4206). FoodVibe-only for now; a kit candidate after it settles. Classified by plan 390."
+    },
+    {
+      "path": "scripts/qa/qa-up.ps1",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 408 QA harness (QA slot 4205/3005, evidence server 4206). FoodVibe-only for now; a kit candidate after it settles. Classified by plan 390."
     }
   ]
 }
