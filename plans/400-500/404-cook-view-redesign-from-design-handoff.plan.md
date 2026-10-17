@@ -1,6 +1,6 @@
 # Plan 404 — Cook View redesign from design handoff
 
-Status: active
+Status: done
 Track: design — Cook View handoff (overrides `/design-port` for this screen)
 Snapshot: a82263c8fa94cdb0937a064478f3cd13230591c6
 
