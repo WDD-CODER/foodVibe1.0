@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Name/slug similarity check for plans/ - shared by Claude Code and Cursor.
  *
  * Compares an incoming plan name (or proposed filename) against existing
@@ -205,7 +205,7 @@ for (const full of listPlanFiles(plansDir)) {
   })
 }
 
-// Last two archive volumes — heading titles only (Plan 292)
+// Last two archive volumes — heading titles only
 for (const vol of listLastArchiveVolumes(2)) {
   let body = ''
   try {

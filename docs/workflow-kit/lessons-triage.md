@@ -8,7 +8,7 @@ Entries are **not** rewritten here; phase 3 does that.
 - **stay** — FoodVibe-only; remains in FoodVibe's brain.
 - Destination: `core` | `pack:angular` | `pack:node-express` (`-` for stay).
 
-**Totals:** 84 entries — 50 transfer, 21 generalize, 13 stay.
+**Totals:** 116 entries — 64 transfer, 26 generalize, 26 stay (30 rows added by plan 390, 2026-10-17).
 Verify: `node scripts/kit-manifest-check.mjs --lessons`.
 
 | source | title | verdict | destination | draft lesson (generalize only) / why stay |
@@ -99,3 +99,34 @@ Verify: `node scripts/kit-manifest-check.mjs --lessons`.
 | docs/brain/patterns/signals-only-state.md | Pattern: Signals-only state | transfer | pack:angular |  |
 | docs/brain/patterns/split-catalog-scan-from-filter-decoration.md | Pattern: Split a computed()'s expensive catalog scan from its cheap per-toggle decoration | transfer | pack:angular |  |
 | docs/brain/patterns/tombstone-soft-delete.md | Pattern: Tombstone soft-delete | generalize | pack:node-express | Soft-delete with tombstones instead of destructive delete when there is no team review safety net. |
+
+| docs/brain/gotchas/agent-workflow.md | Worker `[x]` marks reach `main` in the plan file but never in `.claude/todo.md` | transfer | core |  |
+| docs/brain/gotchas/agent-workflow.md | `scope-check --file` judged every hook path `out` (absolute vs repo-relative) | transfer | core |  |
+| docs/brain/gotchas/agent-workflow.md | Claude Code sandbox: slot dev servers never listen (plan 336) | generalize | core | A sandboxed agent shell can block the slot dev servers from listening; start them outside the sandbox and check the port before any browser step. |
+| docs/brain/gotchas/agent-workflow.md | Windows: a detached process started through cmd.exe writes nothing to its log file | transfer | core |  |
+| docs/brain/gotchas/agent-workflow.md | A Human answer to a mid-execution question can silently override a locked ADR (plan 387) | generalize | core | A Human answer given mid-execution can contradict a locked decision record; restate the decision it would change and ask for an explicit supersede before acting. |
+| docs/brain/gotchas/angular.md | An HTTP call in a service constructor throws NG0200 through the auth interceptor | transfer | pack:angular |  |
+| docs/brain/gotchas/angular.md | A `backdrop-filter` card traps `position: fixed` popovers — use the Popover API's top layer | transfer | pack:angular |  |
+| docs/brain/gotchas/angular.md | `.parent …` selectors inside a nested `@media` under `.parent { }` never match | transfer | pack:angular |  |
+| docs/brain/gotchas/angular.md | List filters restored from sessionStorage hide a freshly created item | stay | - | FoodVibe list-filter persistence |
+| docs/brain/gotchas/angular.md | Capture-phase scroll listener catches a popover's own scroll | transfer | pack:angular |  |
+| docs/brain/gotchas/angular.md | An approved AI draft says `yield_unit: 'dish'`, not `'portion'` | stay | - | FoodVibe AI recipe draft shape |
+| docs/brain/gotchas/angular.md | `container-type` is a `position: fixed` trap too — the list edit modal centred mid-list | transfer | pack:angular |  |
+| docs/brain/gotchas/angular.md | Searching taxonomy dropdowns by key misses Hebrew input | stay | - | FoodVibe Hebrew taxonomy search |
+| docs/brain/gotchas/angular.md | `.c-list-row.is-selected > .c-list-body-cell` skips column-carousel cells above 768px | stay | - | FoodVibe list engine classes |
+| docs/brain/gotchas/angular.md | `overflow: clip` on a grid item stops a `1fr` row from bounding it — the list stops scrolling | transfer | pack:angular |  |
+| docs/brain/gotchas/backend.md | Course terms must carry a color: the taxonomyTerms schema requires it | stay | - | FoodVibe taxonomy schema |
+| docs/brain/gotchas/backend.md | `npm run dev` runs as NODE_ENV=production — never gate dev behavior on NODE_ENV | stay | - | FoodVibe npm script setup |
+| docs/brain/gotchas/backend.md | Client per-doc cascades burn the write limit — the server owns re-key | generalize | pack:node-express | Client-side per-document cascades burn the database write quota; let the server own bulk re-keys in one operation. |
+| docs/brain/gotchas/backend.md | Local ports share cookies: one login cookie for every slot | transfer | core |  |
+| docs/brain/gotchas/backend.md | Client logs go to `POST /api/v1/log` — not a separate log server (supersedes the `logServerUrl` entry) | stay | - | FoodVibe logging endpoint |
+| docs/brain/gotchas/backend.md | A PUT merges over the stored doc — leaving a bad field out doesn't fix it | stay | - | FoodVibe API update semantics |
+| docs/brain/gotchas/backend.md | Dropped collections come back empty while an older server still runs | generalize | pack:node-express | A still-running older server recreates dropped collections on its next write; stop every server before a destructive migration. |
+| docs/brain/gotchas/backend.md | Gemini free tier is a tiny per-model daily bucket, and Google no longer publishes it | stay | - | FoodVibe AI provider quota |
+| docs/brain/gotchas/git-workflow.md | Merging a stacked PR into its base branch strands the work if the base PR is later closed | transfer | core |  |
+| docs/brain/decisions/0016-logging-sink-mongo.md | 0016. Mongo `app_logs` (90-day TTL) is the single log sink; the dev log server is retired | stay | - | FoodVibe logging architecture |
+| docs/brain/decisions/0017-architecture-invariants-gate.md | 0017. Load-bearing architecture rules live in a checked registry, not only in prose ADRs | transfer | core |  |
+| docs/brain/decisions/0018-kit-changes-reach-foodvibe-as-patches.md | supersedes: none. Refines 0015's "change it in the kit, then kit-sync" for FoodVibe only. | stay | - | FoodVibe-only patch mode, retired by plan 392 |
+| docs/brain/decisions/0019-design-port-from-handoff.md | 0019. Claude Design handoffs are the design source; a script, not a reader, gates lost features | stay | - | FoodVibe design-port pipeline |
+| docs/brain/decisions/0020-plans-design-folder.md | 0020. Open design plans live in `plans/design/`; closed plans still go to the range folder | generalize | core | Open-plan folders are a config list (plans.openDirs); closed plans always move to the range folder. |
+| docs/brain/patterns/server-log-events.md | Pattern: every server log line is one JSON record with an `event`, logged through pino | stay | - | FoodVibe pino log shape |

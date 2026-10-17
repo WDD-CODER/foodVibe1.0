@@ -3,7 +3,7 @@ name: deployAngularToGitHub
 description: Configure this Angular SPA for deployment to GitHub Pages
 argument-hint: Repository name for base-href (e.g. foodVibe1.0)
 ---
-Help me deploy this foodVibe1.0 Angular application to GitHub Pages. Follow these standards:
+Help me deploy this FoodVibe Angular application to GitHub Pages. Follow these standards:
 
 1. **Build configuration**: Use the correct `--base-href` for GitHub Pages (e.g. `/foodVibe1.0/` for repo name `foodVibe1.0`).
 2. **Routing**: Prefer Hash location strategy for GitHub Pages to avoid 404s on refresh, or ensure the server is configured for SPA fallback.

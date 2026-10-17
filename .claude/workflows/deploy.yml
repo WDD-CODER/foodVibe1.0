@@ -1,5 +1,5 @@
-# Deploy foodVibe1.0 to GitHub Pages
-name: Deploy foodVibe1.0
+# Deploy FoodVibe to GitHub Pages
+name: Deploy FoodVibe
 
 on:
   push:

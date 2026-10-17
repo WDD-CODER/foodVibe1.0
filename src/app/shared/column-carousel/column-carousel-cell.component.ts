@@ -1,5 +1,12 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, contentChildren, effect, inject } from '@angular/core'
-import { LucideAngularModule } from 'lucide-angular'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  contentChildren,
+  effect,
+  inject
+} from '@angular/core'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ColumnCarouselGroupDirective } from './column-carousel-group.directive'
 import { ColumnSlideDirective } from './column-slide.directive'
@@ -8,13 +15,13 @@ import { SwipeStart, isCarouselActive, isRtl, swipeDirection } from './column-ca
 /**
  * Row cell of the mobile column carousel (plan 349). Desktop: the projected `[columnSlide]`
  * cells render as normal grid cells. ≤768px: one cell (row-colored, it carries the
- * `.c-list-body-cell` look) with a small "‹ label ›" line above the active value; swipe or the
- * arrows move the whole list (shared group index).
+ * `.c-list-body-cell` look) with a small label line above the active value; a swipe here or the
+ * header arrows move the whole list (shared group index).
  */
 @Component({
   selector: 'app-column-carousel-cell',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [TranslatePipe],
   templateUrl: './column-carousel-cell.component.html',
   styleUrl: './column-carousel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,16 +47,6 @@ export class ColumnCarouselCellComponent {
       const index = this.group.index()
       slides.forEach((s, i) => s.active.set(i === index))
     })
-  }
-
-  protected next(event: Event): void {
-    event.stopPropagation()
-    this.group.next()
-  }
-
-  protected prev(event: Event): void {
-    event.stopPropagation()
-    this.group.prev()
   }
 
   protected onPointerDown(event: PointerEvent): void {

@@ -14,11 +14,11 @@ You are the Reviewer. Follow CLAUDE.md. Report findings; never silently fix; nev
 
 3. **Checks** (scoped to milestone files only):
    - **Plan-match**: Did Cursor implement only what the milestone declared?
-   - **Convention compliance**: Signals, inject(), input/output/model, `.c-*` placement, quotes/semicolons, translatePipe, no client Gemini keys
+   - **Convention compliance**: the hard rules in AGENTS.md and the standards in `docs/agent/standards-angular.md`, no API keys in client code
    - **Secrets**: No hardcoded API keys, tokens, passwords
    - **Dead code**: No unused imports / stubbed leftovers from the milestone
    - **Architecture**: Run `node scripts/scope-check.mjs --arch --diff=origin/main` and copy every `ARCH: warn …` line into Findings (an invariant from `docs/brain/invariants.md` touched with no `## Architecture Impact` entry, or a "Human decision" note naming no INV-n / ADR). Any warn → ESCALATE TO ARCHITECT.
-   - **Verify command**: Run the milestone's declared Verify command (usually `ng lint` and/or targeted build). Record exit code.
+   - **Verify command**: Run the milestone's declared Verify command (usually `npm run lint` and/or targeted build). Record exit code.
 
 4. **Security-sensitive?** If the milestone touches auth, guards, interceptors, or `server/middleware`:
    - Rely on pre-commit security grep + CI security workflow; judgment-only review remains in this command

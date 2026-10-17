@@ -3,7 +3,7 @@
  * QA evidence server (plan 408) — lets the browser-only QA agent leave a PNG next to each finding.
  *
  *   GET  /health               → {"ok":true,"app":"<QA_APP>","loggedIn":true|false}
- *   GET  /html2canvas.min.js   → html2canvas from node_modules, for in-page captures
+ *   GET  /html2canvas.min.js   → html2canvas-pro (else html2canvas) from node_modules, for in-page captures
  *   POST /save                 → {run, name, dataUrl, url?, w?, h?} → bugs/qa-runs/<run>/shots/<name>.png
  *   GET  /shot?run&name&url&w&h&full=0|1&auth=1|0&wait=<ms>&selector=<css>
  *                              → Playwright render of <QA_APP><url> → same folder
@@ -14,8 +14,8 @@
  *
  * Auth for /shot: one login at startup (POST /api/v1/auth/login), re-login when the access token
  * is near expiry or the API answers 401. The page gets the token + user in sessionStorage, and the
- * app's startup refresh call (local/slot builds auto-sign-in the guest when it fails) is answered
- * with the same token, so no refresh cookie and no refresh rate limit is involved.
+ * app's startup refresh call is answered with the same token, so no refresh cookie and no refresh
+ * rate limit is involved. The page reaches this server as /qa-evidence/* on :4205 (ng serve proxy).
  */
 import { createServer } from 'http'
 import { readFileSync, existsSync, mkdirSync, writeFileSync, appendFileSync } from 'fs'
@@ -180,13 +180,14 @@ async function renderShot({ url, w, h, full, auth, wait, selector }, onContext) 
       const s = await ensureSession()
       // An API 401 means the token went bad early: the next shot signs in again.
       context.on('response', (r) => {
-        if (r.status() === 401 && r.url().startsWith(`${API}/api/`) && session === s) session = null
+        if (r.status() === 401 && r.url().includes('/api/') && session === s) session = null
       })
       await context.addInitScript(({ token, user }) => {
         sessionStorage.setItem('fv_token', token)
         sessionStorage.setItem('loggedInUser', JSON.stringify(user))
       }, { token: s.token, user: s.user })
-      await context.route(`${API}/api/v1/auth/refresh`, (route) => {
+      // The QA build calls /api on its own origin (ng serve proxies it); older builds call QA_API.
+      await context.route('**/api/v1/auth/refresh', (route) => {
         const headers = {
           'access-control-allow-origin': APP,
           'access-control-allow-credentials': 'true',
@@ -282,7 +283,14 @@ async function handleSave(req, res) {
 
 // --- server --------------------------------------------------------------------
 
-const html2canvasPath = join(repoRoot, 'node_modules', 'html2canvas', 'dist', 'html2canvas.min.js')
+// html2canvas-pro (devDependency): a drop-in fork that parses CSS color()/oklch/lab, which the app's
+// compiled styles use and html2canvas 1.4.1 rejects («unsupported color function "color"»).
+const html2canvasCandidates = [
+  join(repoRoot, 'node_modules', 'html2canvas-pro', 'dist', 'html2canvas-pro.min.js'),
+  join(repoRoot, 'node_modules', 'html2canvas', 'dist', 'html2canvas.min.js')
+]
+
+let healthLoginFailedAt = 0
 
 const server = createServer(async (req, res) => {
   cors(res)
@@ -293,10 +301,19 @@ const server = createServer(async (req, res) => {
   const { pathname, searchParams } = new URL(req.url, `http://127.0.0.1:${PORT}`)
   try {
     if (req.method === 'GET' && pathname === '/health') {
-      return sendJson(res, 200, { ok: true, app: APP, loggedIn: !!(session && session.exp > Date.now()) })
+      // Signs in again when the token has lapsed, so loggedIn says whether QA_USER can sign in now.
+      // After a failed sign-in, polls within 30s answer false without a new attempt: the backend
+      // allows 10 logins per 15 minutes, and qa-up polls every 2s.
+      let loggedIn = false
+      if (Date.now() - healthLoginFailedAt >= 30_000) {
+        loggedIn = await ensureSession().then(() => true, () => false)
+        if (!loggedIn) healthLoginFailedAt = Date.now()
+      }
+      return sendJson(res, 200, { ok: true, app: APP, loggedIn })
     }
     if (req.method === 'GET' && pathname === '/html2canvas.min.js') {
-      if (!existsSync(html2canvasPath)) return send(res, 404, 'html2canvas is not installed - run npm install')
+      const html2canvasPath = html2canvasCandidates.find(p => existsSync(p))
+      if (!html2canvasPath) return send(res, 404, 'html2canvas is not installed - run npm install')
       return send(res, 200, readFileSync(html2canvasPath), 'application/javascript; charset=utf-8')
     }
     if (req.method === 'POST' && pathname === '/save') return await handleSave(req, res)

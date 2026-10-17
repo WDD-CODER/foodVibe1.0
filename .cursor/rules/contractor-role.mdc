@@ -30,7 +30,7 @@ Stack conventions, security rules, and Plan Contract persistence live in `AGENTS
 6. 3-strike rule: on a compile/test error, at most 3 autonomous fix attempts within the scoped
    files only. On the 3rd failure: `git stash`, write `/bugs/bug_[ID].md`, STOP.
 7. New dependencies only if named and approved in the Plan Contract.
-8. Run `ng lint` before declaring a milestone ready for review — must be clean.
+8. Run `npm run lint` before declaring a milestone ready for review — must be clean.
 
 ## Handoff
 
