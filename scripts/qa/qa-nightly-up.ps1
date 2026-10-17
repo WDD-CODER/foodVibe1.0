@@ -57,11 +57,16 @@ Invoke-Step 'git fetch origin main' $Root 'git' @('fetch', 'origin', 'main') | O
 $ff = Invoke-Step 'git merge --ff-only origin/main' $Root 'git' @('merge', '--ff-only', 'origin/main')
 if ($ff -ne 0) { Write-Log 'not fast-forwardable - continuing on the current tree' }
 
-foreach ($pair in @(@($Root, 'qa-lock-root.sha256'), @((Join-Path $Root 'server'), 'qa-lock-server.sha256'))) {
-  if (Test-LockChanged $pair[0] $pair[1]) {
-    $code = Invoke-Step "npm ci ($($pair[0]))" $pair[0] 'npm.cmd' @('ci')
-    if ($code -ne 0) { Remove-Item (Join-Path $Root ".claude\$($pair[1])") -ErrorAction SilentlyContinue }
-  }
+$changed = @(@(@($Root, 'qa-lock-root.sha256'), @((Join-Path $Root 'server'), 'qa-lock-server.sha256')) |
+  Where-Object { Test-LockChanged $_[0] $_[1] })
+# Servers left running hold node_modules files (esbuild.exe): npm ci then fails with EPERM halfway
+# through and leaves node_modules broken. Stop them first; qa-up starts them again below.
+if ($changed.Count) {
+  Invoke-Step 'qa-down.ps1 (before npm ci)' $Root 'powershell.exe' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $Root 'scripts\qa\qa-down.ps1'), '-Root', $Root) | Out-Null
+}
+foreach ($pair in $changed) {
+  $code = Invoke-Step "npm ci ($($pair[0]))" $pair[0] 'npm.cmd' @('ci')
+  if ($code -ne 0) { Remove-Item (Join-Path $Root ".claude\$($pair[1])") -ErrorAction SilentlyContinue }
 }
 
 $up = Invoke-Step 'qa-up.ps1' $Root 'powershell.exe' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $Root 'scripts\qa\qa-up.ps1'), '-Root', $Root)
