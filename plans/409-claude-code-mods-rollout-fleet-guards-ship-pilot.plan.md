@@ -17,6 +17,7 @@ Stage 2 install (`fleet@ai-workflow-kit-mods`, user scope, enabled). Now in the 
 
 ## Goals & Success Criteria
 - Primary: all three mods installed at user scope and trusted in daily work; the kit ships them as a layer.
+- Limit (Human, 2026-10-17): at most 3 mods installed in total — new features go into fleet, guards or ship-pilot, never a new mod.
 - Success: one full plan runs take-plan → work → /ship → merge with only the mods guarding Claude Code; Cursor unchanged.
 
 ## Execution Mode
@@ -118,6 +119,8 @@ Goal: a glance tells the Human what the agent is doing, what comes next, and whe
 - [ ] K7: ship-pilot plan panel — click the plan % chip to open a panel under the dock: bar, steps (done/now/next), waiting-on-you, time, end checks, after-this; zero model tokens (see K7 spec) — built in the deliverable copy 2026-10-17 (ship-pilot 0.2.0, 13/13 tests) — `claude-mods-deliverable/layers/claude-code-mods/ship-pilot/{hooks/register.tsx,types/index.d.ts,tests/*.test.ts}`
 - [ ] K8: quick-reply mod — suggested replies in an answer (say "go", `approved: <path>`, `a | b | c`, the (recommended) option) clickable in place; click fills the prompt box unsent, second click removes; zero tokens — built in the deliverable copy 2026-10-17 (11/11 tests) — `claude-mods-deliverable/layers/claude-code-mods/quick-reply/**`
 - [ ] K9: fleet clean / ship badge — `✓ clean` or `● N files · N unpushed → /ship` in the dock and status line, refreshed at each answer's end — built in the deliverable copy 2026-10-17 (13/13 tests) — `claude-mods-deliverable/layers/claude-code-mods/fleet/{hooks/register.tsx,tests/fleet.test.ts}`
+- [ ] K10: fleet Pull main button — always in the dock (hidden while the agent works); on `main` `git pull --ff-only origin main`, in a slot `git fetch origin main` + `git merge --no-edit origin/main`, a conflicted merge is aborted; hotkey `u`; result as a toast — built in the deliverable copy 2026-10-17 (fleet 0.1.3, 17/17 tests) — `claude-mods-deliverable/layers/claude-code-mods/fleet/{hooks/register.tsx,types/index.d.ts,tests/fleet.test.ts}`
+- [ ] K11: mod count back to the 3-mod limit — quick-reply (K8) is a 4th mod; fold it into one of the three or remove it (Human decides) — `claude-mods-deliverable/layers/claude-code-mods/**`
 - [ ] S5: Stage 5 — kit PR: patch + K1–K4 + `--mods` install flag + manifest tier + kit.json bump + README — `ai-workflow-kit/**`
 - [ ] S6a: Stage 6 — remove Claude Code `hooks` from settings (keep `permissions`) — `.claude/settings.json`
 - [ ] S6b: Stage 6 — "superseded for Claude Code; still used by Cursor" header on shell guards — `scripts/*-guard.sh`, `scripts/session-startup.sh`
