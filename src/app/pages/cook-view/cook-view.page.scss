@@ -480,7 +480,7 @@ $cv-desktop-min: 1024px; // $break-tablet-max + 1
 .cv-menu {
   position: absolute;
   inset-block-start: calc(100% + var(--space-2));
-  left: 0; // physical on purpose: the trigger sits at the left (end) edge in RTL
+  inset-inline-end: 0; // anchored to the trigger at the inline-end edge (left in RTL)
   z-index: 40;
 
   inline-size: 300px;

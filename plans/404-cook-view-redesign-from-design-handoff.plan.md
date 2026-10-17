@@ -111,5 +111,5 @@ test phone, tablet and desktop in light and dark. Continue only on the Human's g
 - [x] 6 Steps (done/active/pending rows, step clocks per "Step clocks", editable countdown, row pills, grow animation, clickable done rows) + `CookTimerService` `pauseTimer`/`resumeTimer`/`resetTimer` with unit tests — src/app/pages/cook-view/**
 - [x] 7 Single scrolling page below 768 (sticky switch buttons, scroll spy, scroll-margin-top, `scrollToActiveStep` block:'start') — src/app/pages/cook-view/**
 - [x] 8 Edit mode (banner, header actions, phone save bar, FAB hide/stamp lift, restyled ingredient edit rows, changed-field highlight, restyled `app-recipe-workflow` container) — src/app/pages/cook-view/**, src/app/core/components/hero-fab/**, src/app/shared/approve-stamp/**
-- [ ] 9 Dish mode, empty state, export preview paper skin — src/app/pages/cook-view/**, src/app/shared/export-preview/**
-- [ ] 10 Cleanup: delete dead classes from the class map, remove emoji, register icons, translation keys, lint + icons + unit tests + Playwright e2e for `/cook` — src/app/pages/cook-view/**, src/app/app.config.ts, public/assets/data/dictionary.json, e2e/cook-view*.spec.ts
+- [x] 9 Dish mode, empty state, export preview paper skin — src/app/pages/cook-view/**, src/app/shared/export-preview/**
+- [x] 10 Cleanup: delete dead classes from the class map, remove emoji, register icons, translation keys, lint + icons + unit tests + Playwright e2e for `/cook` — src/app/pages/cook-view/**, src/app/app.config.ts, public/assets/data/dictionary.json, e2e/cook-view*.spec.ts
