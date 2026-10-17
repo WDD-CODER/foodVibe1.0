@@ -302,7 +302,7 @@ if (!resuming) {
 }
 const previousPlan = existsSync(worktreePlanPath) ? readFileSync(worktreePlanPath, 'utf8').trim() : ''
 writeFileSync(worktreePlanPath, `${match}\n`)
-// Plan 384: log-query --since=plan-start reads this. A resumed claim of the same plan keeps its original start.
+// Records when the plan was taken, for log queries "since plan start". A resumed claim of the same plan keeps its original start.
 const planStartPath = join(repoRoot, '.claude', '.slot-plan-start')
 mkdirSync(join(repoRoot, '.claude'), { recursive: true })
 if (previousPlan !== match || !existsSync(planStartPath)) writeFileSync(planStartPath, `${new Date().toISOString()}\n`)
