@@ -34,7 +34,7 @@ Order (Planner, 2026-10-17): this plan now runs **before** plan 393. 393 was mea
 
 ## Execution Mode
 - **Parallel:** no. Single Worker in a FoodVibe `wt-N` slot (wt-1 is free on 2026-10-17); kit edits by path in `../ai-workflow-kit`.
-- **Concurrent plans:** no other plan that edits kit-owned files or the kit repo while this one runs. Plan 393 waits until this merges. Plan 409 Stage 5 (moving the mods into the kit) may run alongside only if it writes nothing outside the kit's `layers/claude-code-mods/**`; its `kit.json` bump and README change wait for plan 391. Plan 409 Stage 6 (retiring shell hooks) waits until plan 392 is done.
+- **Concurrent plans:** no other plan that edits kit-owned files or the kit repo while this one runs. Plan 393 waits until this merges. Plan 409 Stage 5 (moving the mods into the kit) may run alongside only if it writes nothing outside the kit's `layers/claude-code-mods/**`; its `kit.json` bump and README change wait for plan 391. Plan 409 Stage 6 (retiring shell hooks) is held back to the end of phase 6 (after the last of the three plans).
 - **Isolated DB:** no.
 - **Kit edits:** on a kit branch `feat/390-drift-reconciliation`, pushed to GitHub with a kit PR; Dandan merges it. Kit-first, then each fix reaches FoodVibe as an ADR 0018 patch in this plan's branch. Use `GITHUB_TOKEN= gh ...` for kit writes (the env token is read-only).
 
