@@ -86,6 +86,21 @@ session start/end, every guard deny/approve/error, slot-lock denies, handoffs, m
   (+ recommend community `next-steps@claude-community`). Checks: leak-check, pack-check, install-check.
 - **Stage 6 (FoodVibe, `chore/` branch in a slot):** per deliverable `WORKFLOW-CHANGES.md` Phases C–D.
 
+## K7 spec — ship-pilot plan panel (asked by the Human 2026-10-17)
+Goal: a glance tells the Human what the agent is doing, what comes next, and whether it needs them.
+
+- **Open/close:** the `plan NNN xx%` chip in the dock becomes a `Button` (`<Button>` can wrap `Text` children), hotkey `p`. Pressing it toggles a framed panel drawn **directly below the dock frame** (same `AbovePrompt` tree, after `frame`). The open/closed choice stays across turns (`$.state`), and the panel closes on its own when there is no active plan.
+- **Panel content, top to bottom:**
+  1. Title `Plan NNN — <title>`.
+  2. A progress bar (the existing `bar()`), `%`, `done/total steps`, and total time on the plan.
+  3. Every Atomic Sub-task, one line each: `✓` done (dim) · `▶` now (bold, plus time on this step) · `○` open, with the next open one marked `next`. Long plans: show at most 12 lines, centred on `now`, and `… N more` above/below.
+  4. `⚠ Waiting on you: …` (yellow), only when it applies, from deterministic signals only: a PR that is open with checks green (merge), an `AskUserQuestion` tool call still pending, or the agent's last message asking for `approved: <path>` / a go.
+  5. `Your checks at the end: N` — the count of `[human]` (and untagged) Done-when items, already parsed into `progress.doneWhen`.
+  6. `After this: plan X → Y` — open plans whose text says `must run after plan NNN` (the same wording `take-plan.mjs` reads), followed one hop further.
+- **Time:** stored per plan in `$.store` (`planStartedAt`, `stepStartedAt` set when `current` changes) so it survives restarts; shown as `1h 40m` / `25m`.
+- **Token cost: zero.** The panel is drawn by the mod. It makes no model calls, adds nothing to `prompt.compose`, and writes nothing to the transcript. Plan files are read only when their mtime changes (the existing `planMtime` poll). The "after this" scan reads open plan files once per plan load, not per redraw.
+- **Narrow terminals:** under 80 columns, drop the time and "after this" lines first.
+
 ## Atomic Sub-tasks
 - [x] S0: Stage 0 — validate + test all three mods on Windows — `claude-mods-deliverable/layers/claude-code-mods/**`
 - [x] S1: Stage 1 — fleet from disk in a slot (fleet/ports/health, slot lock, /handoff, no flash) — `claude-mods-deliverable/layers/claude-code-mods/fleet/**`
@@ -100,6 +115,7 @@ session start/end, every guard deny/approve/error, slot-lock denies, handoffs, m
 - [ ] K5: kit — daily event logs in all three mods (done in the deliverable copy 2026-10-14) — `ai-workflow-kit/layers/claude-code-mods/*/hooks/register.tsx`
 - [ ] K4: kit docs — headless `claude -p "/cmd"` from Git Bash needs `MSYS_NO_PATHCONV=1` — `ai-workflow-kit/layers/claude-code-mods/README.md`
 - [ ] K6: kit — mods dock: one framed band above the prompt shared by all three mods (collapsed line, expands on alert; guards status line dropped) — done in the deliverable copy 2026-10-16 — `ai-workflow-kit/layers/claude-code-mods/*/hooks/register.tsx`, `*/tests/*.test.ts`
+- [ ] K7: ship-pilot plan panel — click the plan % chip to open a panel under the dock: bar, steps (done/now/next), waiting-on-you, time, end checks, after-this; zero model tokens (see K7 spec) — build in the deliverable copy first — `claude-mods-deliverable/layers/claude-code-mods/ship-pilot/{hooks/register.tsx,types/index.d.ts,tests/*.test.ts}`
 - [ ] S5: Stage 5 — kit PR: patch + K1–K4 + `--mods` install flag + manifest tier + kit.json bump + README — `ai-workflow-kit/**`
 - [ ] S6a: Stage 6 — remove Claude Code `hooks` from settings (keep `permissions`) — `.claude/settings.json`
 - [ ] S6b: Stage 6 — "superseded for Claude Code; still used by Cursor" header on shell guards — `scripts/*-guard.sh`, `scripts/session-startup.sh`
@@ -116,6 +132,8 @@ session start/end, every guard deny/approve/error, slot-lock denies, handoffs, m
 - [auto] Stage 4: `gh pr view <n> --json state` → `MERGED`.
 - [auto] Stage 5: `git am` applies cleanly; `node tools/leak-check.mjs` prints `0 leaks`; pack-check and install-check exit 0; `install.mjs --mods --dry-run` output contains no `{{`.
 - [human] Stage 5: kit PR merged.
+- [auto] K7: `claude plugin validate` and `claude plugin test` pass for ship-pilot, with new tests for: the panel toggle, the 12-line window around `now`, waiting-on-you signals, the after-this chain, and no `$.model` / `prompt.compose` use (grep finds none in ship-pilot).
+- [human] K7: in a slot running a plan, pressing the plan % chip (or `p`) opens the panel under the dock; the steps match the plan file; `▶ now` follows the agent's work; a pending question shows `⚠ Waiting on you`; pressing again closes it.
 - [auto] Stage 6: `ng build` passes; `node scripts/plan-ledger-check.mjs` passes.
 - [human] Stage 6: one full plan executed end to end with only the mods; Cursor sessions unchanged.
 
