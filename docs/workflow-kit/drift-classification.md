@@ -26,11 +26,11 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 
 | Path (kit side) | Class | Notes | Kit commit |
 | --- | --- | --- | --- |
-| core/.claude/commands/auto-solve.md | drift-fixed (kit right) | FoodVibe still has Playwright MCP fallback; dropped per 2026-10-01 decision | — |
+| core/.claude/commands/auto-solve.md | override | FoodVibe-only: runs `scripts/log-query.mjs` (Mongo `app_logs`) before reading code; the kit has no log query | — |
 | core/.claude/commands/commands.md | override | `/remote` row: `remote.md` is project-only (manifest `project stay`) | — |
 | core/.claude/commands/feat.md | intended | `{{docs.domainStandards}}` placeholder | — |
-| core/.claude/commands/fix.md | intended | `{{docs.domainStandards}}` placeholder | — |
-| core/.claude/commands/review-it.md | intended | placeholders; convention line generalized to AGENTS.md + standards doc (FoodVibe rules live there) | — |
+| core/.claude/commands/fix.md | override | FoodVibe-only: runs `scripts/log-query.mjs` (Mongo `app_logs`) before reading code; the kit has no log query | — |
+| core/.claude/commands/review-it.md | override | FoodVibe-only: runs `scripts/log-query.mjs` (Mongo `app_logs`) before reading code; the kit has no log query | — |
 | core/.claude/commands/ship.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request pre-approves merge — newer than kit | c708599 |
 | core/.claude/commands/take-plan.md | intended | `{{git.mainBranch}}` | — |
 | core/.claude/settings.json | override | split file: absolute Write/Edit allows and `defaultMode` are per-machine; Playwright MCP allows dropped (kit right) | — |
@@ -98,5 +98,5 @@ with FoodVibe's values and compares with FoodVibe's files (`kit-drift.ps1`). Tha
 - **FoodVibe adopted the rendered kit text** for every other file (34 files + `eslint.config.mjs` and
   `.lintstagedrc.mjs`, BOM only, approved 2026-10-17): placeholders filled, `ng build` → `npm run build`, mojibake
   arrows fixed, plan-number and ADR back-references dropped, Playwright MCP and the deprecated husky lines gone.
-- Result: `KIT_DRIFT: ok — 0 undeclared differences, 16 overrides` (the 16 `override` rows above, including
+- Result: `KIT_DRIFT: ok — 0 undeclared differences, 19 overrides` (the 19 `override` rows above, including
   `preflight/SKILL.md`; each has its reason in `kit.config.json`).

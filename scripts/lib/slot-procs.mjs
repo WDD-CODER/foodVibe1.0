@@ -401,7 +401,7 @@ export function startServer({ label, port, cwd, args, env, logPath, timeoutMs })
   const holder = portOwnerPid(port)
   if (holder) return { ok: false, message: `${label} not started: port ${port} is already held by PID ${holder} (${short(commandLine(holder))}). A second start would leave an idle watcher behind. Run node scripts/slot-stop.mjs if it is a leftover, then re-run.` }
   mkdirSync(dirname(logPath), { recursive: true })
-  // Plan 384: keep the previous run's log as <dir>/logs/<name>-<YYYYMMDD-HHmmss>.log instead of truncating it
+  // Keep the previous run's log as <dir>/logs/<name>-<YYYYMMDD-HHmmss>.log instead of truncating it
   if (existsSync(logPath) && statSync(logPath).size > 0) {
     const stamp = new Date(statSync(logPath).mtimeMs).toISOString().replace(/[-:]/g, '').replace('T', '-').slice(0, 15)
     const keepDir = join(dirname(logPath), 'logs')

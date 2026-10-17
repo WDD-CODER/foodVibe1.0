@@ -46,7 +46,7 @@ const report = (name, ok, reason = '') => {
 
 function httpStatus(port) {
   return new Promise((done) => {
-    const req = http.get({ host: '127.0.0.1', port, path: '/', timeout: TIMEOUT_MS }, (res) => {
+    const req = http.get({ host: 'localhost', port, path: '/', timeout: TIMEOUT_MS }, (res) => {
       res.resume()
       done(res.statusCode)
     })
@@ -81,7 +81,7 @@ report(`branch != ${MAIN_BRANCH}`, branch !== MAIN_BRANCH, `on ${MAIN_BRANCH} â€
 function postLog(port) {
   const body = JSON.stringify({ level: 'info', event: 'preflight.log.ok', message: 'preflight', timestamp: new Date().toISOString() })
   return new Promise((done) => {
-    const req = http.request({ host: '127.0.0.1', port, path: '/api/v1/log', method: 'POST', timeout: TIMEOUT_MS, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => {
+    const req = http.request({ host: 'localhost', port, path: '/api/v1/log', method: 'POST', timeout: TIMEOUT_MS, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => {
       res.resume()
       done(res.statusCode)
     })
