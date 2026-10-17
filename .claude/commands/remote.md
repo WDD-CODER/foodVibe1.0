@@ -17,8 +17,8 @@ Works in the Planner main folder and in any `wt-N` slot — each gets its own li
 2. `REMOTE: on url=…/?k=… expires=…` → give the Human the **full** link (with `?k=`) and the
    expiry time. Send it with a push notification too when that tool is available.
 3. `REMOTE: …` refusal lines are self-explanatory:
-   - `frontend/backend not running` → start the slot servers (`node scripts/take-plan.mjs <NNN>`
-     resumes them), then retry.
+   - `frontend/backend not running` → start the slot servers (`node scripts/slot-serve.mjs`),
+     then retry. In the main folder the servers are the Human's: ask them to start them.
    - `cloudflared is not installed` → the Human runs, once:
      `winget install --id Cloudflare.cloudflared`
 4. On the link the Human signs in with a **real account** — the dev guest auto-login only works
