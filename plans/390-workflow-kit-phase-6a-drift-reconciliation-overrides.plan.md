@@ -101,13 +101,13 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - Remote pull, tags, releases (plan 391). `.kit/install.json` for FoodVibe and retiring patch mode (plan 392). The Claude Code mods layer (plan 409).
 
 ## Atomic Sub-tasks
-- [ ] A0: Step 0 reality check; record the extract-check problems, real diff count, open-slot kit-owned changes and the two validation items' state — `docs/workflow-kit/drift-classification.md`
+- [x] A0: Step 0 reality check; record the extract-check problems, real diff count, open-slot kit-owned changes and the two validation items' state — `docs/workflow-kit/drift-classification.md`
 - [ ] A1: Land stranded kit work: rebase + fix PR #4 (skills v2), PR the take-plan brief branch, Dandan merges, delete `chore/skills-v2` after go; `kit-extract --check` clean — `../ai-workflow-kit/**`
-- [ ] A2: Classify every differing file — `docs/workflow-kit/drift-classification.md`
+- [x] A2: Classify every differing file — `docs/workflow-kit/drift-classification.md`
 - [ ] A3: Fix real drift kit-first; patch into FoodVibe (ADR 0018); name kit SHAs in commits — `../ai-workflow-kit/**`, `.claude/**`, `scripts/**`, `docs/agent/**`
 - [ ] A4: `overrides` in kit `tools/sync.mjs` + `tools/install.mjs` + kit README; scratch install test — `../ai-workflow-kit/tools/**`
 - [ ] A5: Kit `tools/drift-check.mjs` + `kit-drift.ps1`; FoodVibe `kit.config.json` with real values + overrides — `../ai-workflow-kit/tools/drift-check.mjs`, `kit.config.json`
-- [ ] A6: Fix ship-prep ULTRA-TRIVIAL and plan-number reuse kit-first if Step 0 found them still open — `scripts/ship-prep.mjs`, `scripts/next-plan-number.mjs`
+- [x] A6: Fix ship-prep ULTRA-TRIVIAL and plan-number reuse kit-first if Step 0 found them still open — `scripts/ship-prep.mjs`, `scripts/next-plan-number.mjs` (Step 0: both already fixed, nothing to do)
 - [ ] A7: `manifest.md` phase 6A paragraph; run every [auto] criterion; kit PR merged by Dandan; `/ship` — `docs/workflow-kit/manifest.md`
 
 ## Out of Scope
