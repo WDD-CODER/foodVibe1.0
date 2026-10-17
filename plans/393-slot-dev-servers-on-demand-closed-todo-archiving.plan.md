@@ -125,7 +125,7 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - [x] D5: Kit PR merged by Dandan. Patch into FoodVibe (ADR 0018), then run `todo-archive.mjs` once. (kit PR #11 merged 88a16ef; FoodVibe scripts byte-identical to the rendered kit; todo-archive: nothing closed to archive)
 - [x] D7: FoodVibe only (no kit patch): remove the `playwright` entry from `.cursor/mcp.json` (Playwright MCP was dropped 2026-10-01; each Cursor window was spawning its own copy) — `.cursor/mcp.json` (already done by plan 390 A3: `.cursor/mcp.json` has no playwright entry)
 - [x] D8: Kit: `orphan-sweep.mjs` + `slot-stop.mjs` also recognise the plan 408 QA harness chains (ports 4205/3005/4206, `.claude/.qa-pids`, cwd in this folder): the sweep kills only orphans (no port held), never a running QA server; Done-when: [auto] a scratch orphan `node --watch` with QA env in the main folder is swept, a live listener on 4206 survives — `scripts/orphan-sweep.mjs`, `scripts/lib/slot-procs.mjs`, `scripts/test/**`
-- [ ] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`.
+- [x] D6: Run every [auto] criterion, update `manifest.md`'s validation-round paragraph, then `/ship`. (all 12 [auto] criteria verified 2026-10-17; manifest.md validation round 3 added)
 
 ## Out of Scope
 Phase 6 kit work (plans 390–392). The agentmemory MCP server in `~/.cursor/mcp.json` (user config, outside the repo). Exception (added 2026-10-10 by Dandan): D7 removes the dropped Playwright MCP from the project's `.cursor/mcp.json`.
