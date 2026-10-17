@@ -31,10 +31,10 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | core/.claude/commands/feat.md | intended | `{{docs.domainStandards}}` placeholder | — |
 | core/.claude/commands/fix.md | intended | `{{docs.domainStandards}}` placeholder | — |
 | core/.claude/commands/review-it.md | intended | placeholders; convention line generalized to AGENTS.md + standards doc (FoodVibe rules live there) | — |
-| core/.claude/commands/ship.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request pre-approves merge — newer than kit | A3 |
+| core/.claude/commands/ship.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request pre-approves merge — newer than kit | c708599 |
 | core/.claude/commands/take-plan.md | intended | `{{git.mainBranch}}` | — |
 | core/.claude/settings.json | override | split file: absolute Write/Edit allows and `defaultMode` are per-machine; Playwright MCP allows dropped (kit right) | — |
-| core/.claude/skills/preflight/SKILL.md | intended | kit generalized DB/browser checks (DB_PORT, BROWSER_BIN) | — |
+| core/.claude/skills/preflight/SKILL.md | override | documents FoodVibe's preflight.mjs (MongoDB 27017, gstack browse binary); kit's is config-driven | — |
 | core/.claude/skills/save-plan/evals/evals.json | intended | example plan number `395` → `NNN` | — |
 | core/.claude/skills/save-plan/SKILL.md | intended | placeholders + `{{plans.openDirs}}` wording (landed in kit PR #9) | 51874c1 |
 | core/.claude/skills/techdebt/SKILL.md | override | FoodVibe-specific greps (`@Input`, `BehaviorSubject`, knip) vs kit PACK marker | — |
@@ -46,8 +46,8 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | core/docs/agent/brain-capture.md | intended | kit drops FoodVibe-only example links / ADR refs | — |
 | core/docs/agent/job-validation.md | intended | kit drops FoodVibe-only example, ADR link, plan number | — |
 | core/docs/agent/ship-recovery.md | intended | plan-number reference dropped | — |
-| core/docs/agent/ship-regular.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request; ADR/gotcha links are intended | A3 |
-| core/docs/agent/standards-git.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request; rest placeholders | A3 |
+| core/docs/agent/ship-regular.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request; ADR/gotcha links are intended | c708599 |
+| core/docs/agent/standards-git.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request; rest placeholders | c708599 |
 | core/docs/agent/standards-security.md | override | kit generalized + PACK markers; FoodVibe keeps its concrete rules (authGuard, auth-crypto, sessionStorage) | — |
 | core/docs/agent/workflow-map.md | override | split file: FoodVibe's map lists its own plans/history | — |
 | core/README_WORKFLOW.md | intended | ADR link dropped | — |
@@ -64,8 +64,8 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | core/scripts/preflight.mjs | override | kit reads `kit.config.json` + DB_PORT/BROWSER_BIN; FoodVibe checks MongoDB 27017 + gstack browse binary | — |
 | core/scripts/scope-check.mjs | intended | `\|quoted` filters, `{{git.mainBranch}}` | — |
 | core/scripts/session-startup.sh | intended | `{{git.mainBranch}}`, plan-number comments | — |
-| core/scripts/ship-prep.mjs | drift-fixed (FoodVibe right) | `pruned` stale-manifest report is newer than kit; plan-number comments intended | A3 |
-| core/scripts/take-plan.mjs | drift-fixed (FoodVibe right) | apiUrl rewrite keeps the remote-link branch (plan 388); `slotPrepare`/`dbBackup` placeholders intended | A3 |
+| core/scripts/ship-prep.mjs | drift-fixed (FoodVibe right) | `pruned` stale-manifest report is newer than kit; plan-number comments intended | c708599 |
+| core/scripts/take-plan.mjs | drift-fixed (FoodVibe right) | apiUrl rewrite keeps the remote-link branch (plan 388); `slotPrepare`/`dbBackup` placeholders intended | c708599 |
 | layers/cursor/.cursor/mcp.json | drift-fixed (kit right) | Playwright MCP entry dropped per 2026-10-01 decision | — |
 | packs/angular/.claude/skills/angularComponentStructure/evals/evals.json | override | FoodVibe text says Hebrew/translatePipe; kit is language-neutral | — |
 | packs/angular/.claude/skills/angularComponentStructure/SKILL.md | override | Lucide + `app.config.ts` + Hebrew/dictionary.json specifics | — |
@@ -81,5 +81,22 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | packs/node-express/docs/agent/standards-backend.md | override | FoodVibe's real versions, entity registry and Atlas notes vs kit template | — |
 
 Totals: 53 rows = 53 files in the fresh extract diff after kit PR #9 (the 10 skills-v2 files and 3 others now match).
-`intended` 29 · `drift-fixed` 9 (kit right 4, FoodVibe right 5) · `override` 15 (Dandan approves each) · `project-only` 0 here (the 22 unclassified FoodVibe files are handled in `manifest.json`).
+`intended` 28 · `drift-fixed` 9 (kit right 4, FoodVibe right 5) · `override` 16 (Dandan approves each) · `project-only` 0 here (the 22 unclassified FoodVibe files are handled in `manifest.json`).
 "Intended" rows are confirmed only when the A5 drift check renders the kit file with FoodVibe's `kit.config.json`; anything still different there moves to `drift-fixed` or `override`.
+
+## Second pass — kit rendered with FoodVibe's `kit.config.json` (A5)
+
+The extract diff above compares FoodVibe-turned-into-placeholders with the kit. The real check renders the kit
+with FoodVibe's values and compares with FoodVibe's files (`kit-drift.ps1`). That pass found:
+
+- **Kit render bugs, fixed kit-first** (kit `74af9a3`): `{{paths.hotspots}}` used where only the route table was
+  meant (new key `paths.routesFile`); slot folders and base hrefs built from `project.name` (new key
+  `project.repoName`); backup folder (new key `slots.dbBackupDir`); slot lists rendered as `wt-N, wt-N, wt-N`;
+  the browser-tool placeholder standing in for "vendored skill" and leaving stray backticks; `@Angular/*` in a comment.
+- **Brain lessons** (`docs/brain/**`, 13 files): the kit now installs them as seeds — written once, then the
+  project's (kit `89b5458`, approved by Dandan 2026-10-17). They are no longer compared.
+- **FoodVibe adopted the rendered kit text** for every other file (34 files + `eslint.config.mjs` and
+  `.lintstagedrc.mjs`, BOM only, approved 2026-10-17): placeholders filled, `ng build` → `npm run build`, mojibake
+  arrows fixed, plan-number and ADR back-references dropped, Playwright MCP and the deprecated husky lines gone.
+- Result: `KIT_DRIFT: ok — 0 undeclared differences, 16 overrides` (the 16 `override` rows above, including
+  `preflight/SKILL.md`; each has its reason in `kit.config.json`).
