@@ -1,160 +1,207 @@
 import { Injectable, OnDestroy, computed, signal } from '@angular/core'
 
+/** One step's countdown: seconds left, the start time reset returns to, and its state. */
+export interface StepCountdown {
+  left: number
+  base: number
+  paused: boolean
+  finished: boolean
+}
+
+/** One step's stopwatch: seconds counted up and whether it is held. */
+export interface StepStopwatch {
+  elapsed: number
+  paused: boolean
+}
+
 /**
- * Focus-mode countdown timer + stopwatch for a single cook-view step card.
- * Component-scoped (provided on CookViewPage) — one instance per page visit,
- * destroyed (and its intervals cleared) when the page is.
+ * Per-step clocks for Cook View (plan 404): every step can own one countdown and one stopwatch, and
+ * all of them keep running while the cook moves between steps. One shared 1s tick drives every
+ * running clock. Component-scoped (provided on CookViewPage) — destroyed with the page.
  */
 @Injectable()
 export class CookTimerService implements OnDestroy {
-  // ---- COOK TIMER SIGNALS ----
-  /** Which step card has an active countdown timer (null = none). */
-  activeTimerStepIndex_ = signal<number | null>(null)
-  /** Current countdown value in seconds. */
-  timerSecondsLeft_ = signal<number>(0)
-  /** Step index whose countdown just finished (null = none). Cleared by dismissTimerDone(). */
-  timerFinishedStepIndex_ = signal<number | null>(null)
-  private timerIntervalId_: ReturnType<typeof setInterval> | null = null
+  // ---- SIGNALS ----
+  /** Countdown per step index. A step with no entry has no countdown. */
+  readonly countdowns_ = signal<Record<number, StepCountdown>>({})
+  /** Stopwatch per step index. A step with no entry has no stopwatch. */
+  readonly stopwatches_ = signal<Record<number, StepStopwatch>>({})
+  private tickId_: ReturnType<typeof setInterval> | null = null
 
-  // ---- COOK TIMER INPUT SIGNALS ----
-  timerInputExpandedIndex_ = signal<number | null>(null)
-  timerCustomInput_ = signal<string>('')
-
-  // ---- STOPWATCH SIGNALS ----
-  stopwatchStepIndex_ = signal<number | null>(null)
-  stopwatchSecondsElapsed_ = signal<number>(0)
-  stopwatchPaused_ = signal<boolean>(false)
-  private stopwatchIntervalId_: ReturnType<typeof setInterval> | null = null
-
-  // ---- COMPUTED SIGNALS ----
-  /** Formatted timer display (m:ss under 1h, h:mm:ss at 1h+). */
-  timerDisplay_ = computed(() => this.formatSeconds(this.timerSecondsLeft_()))
-
-  /** Formatted stopwatch display (count-up, same format as timerDisplay_). */
-  stopwatchDisplay_ = computed(() => this.formatSeconds(this.stopwatchSecondsElapsed_()))
+  // ---- COMPUTED ----
+  /** The clock the page header shows: a finished countdown first, else the earliest running one. */
+  readonly headerTimer_ = computed(() => {
+    const entries = Object.entries(this.countdowns_()).map(([k, c]) => ({ step: Number(k), c }))
+    const pick = entries.find((e) => e.c.finished) ?? entries.find((e) => !e.c.paused)
+    return pick ? { step: pick.step, display: this.formatSeconds(pick.c.left), finished: pick.c.finished } : null
+  })
 
   ngOnDestroy(): void {
-    this.cancelTimer()
-    this.stopStopwatch()
+    this.cancelAll()
   }
 
-  /** Start a countdown timer on a step card. */
-  startTimer(stepIndex: number, totalSeconds: number): void {
-    if (this.timerIntervalId_ !== null) {
-      clearInterval(this.timerIntervalId_)
+  // ---- COUNTDOWN ----
+  hasCountdown(step: number): boolean {
+    return this.countdowns_()[step] !== undefined
+  }
+
+  isTimerPaused(step: number): boolean {
+    return this.countdowns_()[step]?.paused ?? false
+  }
+
+  isTimerFinished(step: number): boolean {
+    return this.countdowns_()[step]?.finished ?? false
+  }
+
+  timerDisplay(step: number): string {
+    return this.formatSeconds(this.countdowns_()[step]?.left ?? 0)
+  }
+
+  /** Add (or restart) this step's countdown and run it. */
+  startTimer(step: number, totalSeconds: number): void {
+    if (totalSeconds <= 0) return
+    this.setCountdown(step, { left: totalSeconds, base: totalSeconds, paused: false, finished: false })
+  }
+
+  /** Hold the countdown; the remaining seconds are kept. */
+  pauseTimer(step: number): void {
+    const c = this.countdowns_()[step]
+    if (!c || c.finished) return
+    this.setCountdown(step, { ...c, paused: true })
+  }
+
+  /** Continue a paused countdown from the seconds it had left. */
+  resumeTimer(step: number): void {
+    const c = this.countdowns_()[step]
+    if (!c || c.finished || c.left <= 0) return
+    this.setCountdown(step, { ...c, paused: false })
+  }
+
+  toggleTimer(step: number): void {
+    if (this.isTimerPaused(step)) this.resumeTimer(step)
+    else this.pauseTimer(step)
+  }
+
+  /** Back to the starting time, paused. Also clears a finished alert. */
+  resetTimer(step: number): void {
+    const c = this.countdowns_()[step]
+    if (!c) return
+    this.setCountdown(step, { left: c.base, base: c.base, paused: true, finished: false })
+  }
+
+  /** A new starting time (the edited countdown): it becomes the reset time and the clock holds. */
+  setTimerTime(step: number, totalSeconds: number): void {
+    if (totalSeconds <= 0) return
+    this.setCountdown(step, { left: totalSeconds, base: totalSeconds, paused: true, finished: false })
+  }
+
+  /** Clear a finished countdown's alert (removes that clock). */
+  dismissTimerDone(step: number): void {
+    this.cancelTimer(step)
+  }
+
+  /** Remove this step's countdown. */
+  cancelTimer(step: number): void {
+    const { [step]: _removed, ...rest } = this.countdowns_()
+    this.countdowns_.set(rest)
+    this.syncTick()
+  }
+
+  // ---- STOPWATCH ----
+  hasStopwatch(step: number): boolean {
+    return this.stopwatches_()[step] !== undefined
+  }
+
+  isStopwatchPaused(step: number): boolean {
+    return this.stopwatches_()[step]?.paused ?? false
+  }
+
+  stopwatchDisplay(step: number): string {
+    return this.formatSeconds(this.stopwatches_()[step]?.elapsed ?? 0)
+  }
+
+  /** Add (or restart) this step's stopwatch from 0:00 and run it. */
+  startStopwatch(step: number): void {
+    this.setStopwatch(step, { elapsed: 0, paused: false })
+  }
+
+  pauseStopwatch(step: number): void {
+    const s = this.stopwatches_()[step]
+    if (s) this.setStopwatch(step, { ...s, paused: true })
+  }
+
+  resumeStopwatch(step: number): void {
+    const s = this.stopwatches_()[step]
+    if (s) this.setStopwatch(step, { ...s, paused: false })
+  }
+
+  toggleStopwatch(step: number): void {
+    if (this.isStopwatchPaused(step)) this.resumeStopwatch(step)
+    else this.pauseStopwatch(step)
+  }
+
+  /** Back to 0:00, paused (the stopwatch stays on its step). */
+  resetStopwatch(step: number): void {
+    if (this.hasStopwatch(step)) this.setStopwatch(step, { elapsed: 0, paused: true })
+  }
+
+  /** Remove this step's stopwatch. */
+  stopStopwatch(step: number): void {
+    const { [step]: _removed, ...rest } = this.stopwatches_()
+    this.stopwatches_.set(rest)
+    this.syncTick()
+  }
+
+  /** Remove every clock (a different recipe was opened). */
+  cancelAll(): void {
+    this.countdowns_.set({})
+    this.stopwatches_.set({})
+    this.syncTick()
+  }
+
+  // ---- TICK ----
+  private setCountdown(step: number, c: StepCountdown): void {
+    this.countdowns_.update((all) => ({ ...all, [step]: c }))
+    this.syncTick()
+  }
+
+  private setStopwatch(step: number, s: StepStopwatch): void {
+    this.stopwatches_.update((all) => ({ ...all, [step]: s }))
+    this.syncTick()
+  }
+
+  /** Run the shared tick only while at least one clock is running. */
+  private syncTick(): void {
+    const running =
+      Object.values(this.countdowns_()).some((c) => !c.paused && !c.finished) ||
+      Object.values(this.stopwatches_()).some((s) => !s.paused)
+    if (running && this.tickId_ === null) {
+      this.tickId_ = setInterval(() => this.tick(), 1000)
+    } else if (!running && this.tickId_ !== null) {
+      clearInterval(this.tickId_)
+      this.tickId_ = null
     }
-    this.timerFinishedStepIndex_.set(null)
-    this.activeTimerStepIndex_.set(stepIndex)
-    this.timerSecondsLeft_.set(totalSeconds)
-    this.timerIntervalId_ = setInterval(() => {
-      this.timerSecondsLeft_.update((s) => s - 1)
-      if (this.timerSecondsLeft_() <= 0) {
-        clearInterval(this.timerIntervalId_!)
-        this.timerIntervalId_ = null
-        this.timerFinishedStepIndex_.set(this.activeTimerStepIndex_())
-        this.activeTimerStepIndex_.set(null)
-        this.timerSecondsLeft_.set(0)
+  }
+
+  private tick(): void {
+    this.countdowns_.update((all) => {
+      const next: Record<number, StepCountdown> = {}
+      for (const [k, c] of Object.entries(all)) {
+        if (c.paused || c.finished) {
+          next[Number(k)] = c
+          continue
+        }
+        const left = c.left - 1
+        next[Number(k)] = left <= 0 ? { ...c, left: 0, finished: true } : { ...c, left }
       }
-    }, 1000)
-  }
-
-  /** Cancel the active countdown timer. */
-  cancelTimer(): void {
-    if (this.timerIntervalId_ !== null) {
-      clearInterval(this.timerIntervalId_)
-      this.timerIntervalId_ = null
-    }
-    this.activeTimerStepIndex_.set(null)
-    this.timerFinishedStepIndex_.set(null)
-    this.timerSecondsLeft_.set(0)
-  }
-
-  /** Dismiss the timer-done alert for a finished step. */
-  dismissTimerDone(): void {
-    this.timerFinishedStepIndex_.set(null)
-  }
-
-  /** Expand the h:mm input for a step, pre-filling with the step's preset cooking time. */
-  expandTimerInput(stepIndex: number, presetMinutes: number): void {
-    const h = Math.floor(presetMinutes / 60)
-    const m = presetMinutes % 60
-    this.timerCustomInput_.set(h > 0 ? `${h}:${m.toString().padStart(2, '0')}` : `${presetMinutes}`)
-    this.timerInputExpandedIndex_.set(stepIndex)
-  }
-
-  /** Parse the h:mm input and start the countdown timer. */
-  confirmTimerInput(stepIndex: number): void {
-    const raw = this.timerCustomInput_().trim()
-    let totalMinutes = 0
-    if (raw.includes(':')) {
-      const parts = raw.split(':')
-      const h = parseInt(parts[0], 10) || 0
-      const m = parseInt(parts[1], 10) || 0
-      totalMinutes = h * 60 + m
-    } else {
-      totalMinutes = parseInt(raw, 10) || 0
-    }
-    if (totalMinutes > 0) {
-      this.startTimer(stepIndex, totalMinutes)
-    }
-    this.timerInputExpandedIndex_.set(null)
-    this.timerCustomInput_.set('')
-  }
-
-  /** Dismiss the h:mm input without starting a timer. */
-  cancelTimerInput(): void {
-    this.timerInputExpandedIndex_.set(null)
-    this.timerCustomInput_.set('')
-  }
-
-  /** Start a count-up stopwatch on a step card. */
-  startStopwatch(stepIndex: number): void {
-    if (this.stopwatchIntervalId_ !== null) {
-      clearInterval(this.stopwatchIntervalId_)
-    }
-    this.stopwatchStepIndex_.set(stepIndex)
-    this.stopwatchSecondsElapsed_.set(0)
-    this.stopwatchPaused_.set(false)
-    this.stopwatchIntervalId_ = setInterval(() => {
-      this.stopwatchSecondsElapsed_.update((s) => s + 1)
-    }, 1000)
-  }
-
-  /** Pause the running stopwatch. */
-  pauseStopwatch(): void {
-    if (this.stopwatchIntervalId_ !== null) {
-      clearInterval(this.stopwatchIntervalId_)
-      this.stopwatchIntervalId_ = null
-    }
-    this.stopwatchPaused_.set(true)
-  }
-
-  /** Resume a paused stopwatch from where it left off. */
-  resumeStopwatch(): void {
-    this.stopwatchPaused_.set(false)
-    this.stopwatchIntervalId_ = setInterval(() => {
-      this.stopwatchSecondsElapsed_.update((s) => s + 1)
-    }, 1000)
-  }
-
-  /** Toggle pause/resume on the active stopwatch. */
-  toggleStopwatch(): void {
-    if (this.stopwatchPaused_()) {
-      this.resumeStopwatch()
-    } else {
-      this.pauseStopwatch()
-    }
-  }
-
-  /** Close and reset the active stopwatch. */
-  stopStopwatch(): void {
-    if (this.stopwatchIntervalId_ !== null) {
-      clearInterval(this.stopwatchIntervalId_)
-      this.stopwatchIntervalId_ = null
-    }
-    this.stopwatchStepIndex_.set(null)
-    this.stopwatchSecondsElapsed_.set(0)
-    this.stopwatchPaused_.set(false)
+      return next
+    })
+    this.stopwatches_.update((all) => {
+      const next: Record<number, StepStopwatch> = {}
+      for (const [k, s] of Object.entries(all)) next[Number(k)] = s.paused ? s : { ...s, elapsed: s.elapsed + 1 }
+      return next
+    })
+    this.syncTick()
   }
 
   private formatSeconds(s: number): string {

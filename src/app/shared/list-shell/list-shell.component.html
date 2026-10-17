@@ -38,12 +38,20 @@
         <ng-content select="[shell-table-header]"></ng-content>
       </div>
     </div>
-    <div class="table-body" #tableBody>
+    <div class="table-body" #tableBody scrollIndicators>
       <ng-content select="[shell-table-body]"></ng-content>
+    </div>
+    <!-- More-to-scroll arrows: grid items laid over the body's cell, not inside the body, so they
+         stay put while it scrolls (shown by the body's can-scroll-up/down classes). -->
+    <div class="scroll-arrow scroll-arrow--top scroll-arrow--table" aria-hidden="true">
+      <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+    </div>
+    <div class="scroll-arrow scroll-arrow--bottom scroll-arrow--table" aria-hidden="true">
+      <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
     </div>
   </section>
 
-  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()">
+  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()" scrollIndicators>
     <div class="panel-content">
       <!-- Out of flow on purpose: a hidden or shown clear button never reserves space or shifts the filters. -->
       <div class="panel-filter-clear">
@@ -52,6 +60,12 @@
       <ng-content select="[shell-filters]"></ng-content>
     </div>
   </aside>
+  <div class="scroll-arrow scroll-arrow--top scroll-arrow--panel" aria-hidden="true">
+    <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+  </div>
+  <div class="scroll-arrow scroll-arrow--bottom scroll-arrow--panel" aria-hidden="true">
+    <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+  </div>
 </div>
 
 <!-- Outside .list-container on purpose (plan 362). position:fixed resolves against the nearest

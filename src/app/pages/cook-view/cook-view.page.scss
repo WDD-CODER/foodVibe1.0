@@ -1,1263 +1,1705 @@
-/* Cook View — mirrors UI refactor/CookView.dc.html's visual system: glass panels,
-   pill controls, a photo hero with progress bar, and a "kitchen" dark theme toggle.
-   The mockup's markup is a simplified single-flow screen; this component keeps our
-   richer functionality (edit mode, timers, stopwatch, ingredient scaling, focus-mode
-   active/done/pending steps) and re-skins it with the design's token language instead
-   of the mockup's literal (inline-styled) DOM. */
+/* Cook View — plan 404, from the Cook View handoff (.interface-design/handoffs/cook-view/README.md).
+   Page header + meta chips (slim photo banner when the recipe has an image), two pane cards
+   (stacked single scrolling page below 768), ingredient rows with an expander, done/active/
+   pending step rows with opt-in step clocks, and a kitchen dark mode that retints the whole
+   viewport through :root.theme-kitchen in src/styles.scss. */
+
+// Breakpoints (plan 404 — Cook View handoff): phone ≤620 · small tablet 621–767 ·
+// tablet 768–1023 · desktop ≥1024. Mirrors $break-phone-max / $break-tablet-max in src/styles.scss.
+$cv-phone-max: 620px;
+$cv-stack-max: 767px; // mirrors $break-phone-max
+$cv-tablet-min: 768px;
+$cv-desktop-min: 1024px; // $break-tablet-max + 1
 
 :host {
   display: block;
 
   --cv-tap-min: 44px;
 
-  /* ── Design-system tokens — light (default) branch of CookView.dc.html's baseVals() ── */
-  --cv-page-bg: var(--bg-body);
-  --cv-nav-bg: var(--bg-frosted-nav);
-  --cv-nav-border: var(--border-glass);
-  --cv-segment-bg: var(--bg-subtle);
-  --cv-main-text: var(--color-text-main);
+  /* ── Page tokens — alias the global tokens; kitchen dark mode retints them through
+     :root.theme-kitchen in src/styles.scss (plan 404 step 1). ── */
   --cv-muted-text: var(--color-text-muted);
-  --cv-panel-bg: var(--bg-glass);
-  --cv-panel-border: var(--border-glass);
-  --cv-panel-shadow: var(--shadow-glass);
-  --cv-hero-shadow: var(--shadow-hover);
   --cv-chip-bg: var(--color-primary-soft);
   --cv-accent: var(--color-primary);
-  --cv-accent-hover: var(--color-primary-hover);
-  --cv-accent-glow: var(--color-primary-glow);
-  --cv-row-bg: transparent;
-  --cv-timer-idle-bg: var(--cv-segment-bg);
-  --cv-timer-idle-border: var(--cv-nav-border);
-  --cv-active-ring: 0 0 0 2px var(--cv-accent-glow);
-}
-
-/* ── Kitchen dark mode (M13 — plan 306 round 2) ─────────────────────────────
-   Design source: UI refactor/CookView.dc.html — near-black "kitchen" theme,
-   toggled per-session via the sun/moon button in .cv-nav (default: dark, matching
-   the mockup's `isDark: true` default). */
-.cook-view-container.theme-kitchen {
-  --cv-page-bg: radial-gradient(ellipse 1200px 800px at 50% -10%, #0f2e2a, #0a1614 60%);
-  --cv-nav-bg: rgba(10, 22, 20, 0.75);
-  --cv-nav-border: rgba(255, 255, 255, 0.1);
-  --cv-segment-bg: rgba(255, 255, 255, 0.06);
-  --cv-main-text: #f1f5f4;
-  --cv-muted-text: rgba(226, 240, 236, 0.74);
-  --cv-panel-bg: rgba(255, 255, 255, 0.05);
-  --cv-panel-border: rgba(255, 255, 255, 0.1);
-  --cv-panel-shadow: 0 20px 50px -20px rgba(0, 0, 0, 0.6);
-  --cv-hero-shadow: 0 30px 70px -25px rgba(0, 0, 0, 0.7);
-  --cv-chip-bg: rgba(20, 184, 166, 0.18);
-  --cv-timer-idle-bg: rgba(255, 255, 255, 0.06);
-  --cv-timer-idle-border: rgba(255, 255, 255, 0.15);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Shell / page background
    ───────────────────────────────────────────────────────────────────────── */
+// Page frame: full-bleed under the app header, content centred at 1440px. Page scroll only —
+// no container scrolls internally. Bottom padding keeps content clear of the FAB and stamp.
 .cook-view-container {
   display: block;
 
-  max-width: 1100px;
+  max-width: 1440px;
 
-  background: var(--cv-page-bg);
-  border-radius: var(--radius-xl);
   margin-inline: auto;
-  margin-block: 1.5rem;
-  padding: 0 0 var(--space-8);
+  padding-inline: var(--space-4);
+  padding-block: var(--space-4) 8.125rem; // 130px — clears FAB + stamp
 
-  transition: background 0.3s var(--ease-smooth);
+  @media (max-width: $cv-phone-max) {
+    padding-block-end: 9.375rem; // 150px — also clears the tab bar
+  }
+
+  @media (min-width: $cv-desktop-min) {
+    padding-inline: var(--space-6);
+  }
 }
 
+// Empty state (no recipe open): icon, prompt, recipe-book button, recent recipes.
 .cook-view-empty {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
 
-  background: var(--cv-panel-bg);
-  color: var(--cv-main-text);
-  font-size: inherit;
+  color: var(--color-text-muted);
   text-align: center;
 
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-xl);
-  padding: 3rem 2rem;
+  padding: 90px var(--space-5) var(--space-10);
 
-  box-shadow: var(--cv-panel-shadow);
-  backdrop-filter: var(--blur-glass);
-  -webkit-backdrop-filter: var(--blur-glass);
-
-  p {
-    font-size: 1.1rem;
-    color: var(--cv-muted-text);
-
-    margin: 0 0 1rem;
+  > lucide-icon {
+    color: var(--color-primary-ink);
   }
 
-  a {
-    color: var(--cv-accent);
-    font-weight: 600;
-    text-decoration: underline;
+  > p {
+    color: var(--color-text-main);
+    font-size: 1.25rem; // 20
+    font-weight: var(--fw-bold);
+
+    margin: 0;
   }
 
-  lucide-icon {
-    display: block;
+  .cv-pill-btn {
+    flex: 0 0 auto;
 
-    color: var(--cv-accent);
-    opacity: 0.9;
-
-    margin: 0 auto 1rem;
+    text-decoration: none;
   }
 }
 
+// Edit / scaled states are shown by their banners, not by a bordered shell.
 .cv-shell {
-  display: grid;
-  grid-template-rows: auto auto auto auto 1fr;
-
-  // 6rem only covered the top nav; it ignored the tab-chips row and this container's
-  // own margin/padding, so the shell was consistently ~89px taller than the viewport,
-  // forcing outer-page scroll instead of the intended internal per-pane scrolling.
-  // Measured overhead: top nav + tab-chips + .cook-view-container's margin-block (both
-  // sides) + padding-bottom ≈ 185px — rounded up slightly for safety.
-  height: calc(100vh - 11.75rem);
-  height: calc(100dvh - 11.75rem);
-  overflow: hidden;
-
-  &.edit-mode {
-    background: var(--cv-panel-bg);
-
-    border: 1px solid var(--border-warning);
-    border-radius: var(--radius-xl);
-    padding: 1rem;
-
-    height: auto;
-    overflow: visible;
-  }
-
-  &.scaled-view {
-    background: var(--cv-chip-bg);
-
-    border: 2px solid var(--cv-accent-glow);
-    border-radius: var(--radius-xl);
-    padding: 1rem;
-
-    box-shadow: var(--shadow-glow);
-  }
-}
-
-.edit-mode-banner {
   display: block;
-
-  background: var(--bg-warning);
-  color: var(--text-warning);
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-align: center;
-
-  border-radius: var(--radius-full);
-  margin: 0 0 0.5rem;
-  padding: 0.5rem 1rem;
 }
 
-.edit-actions {
+// Edit mode banner: amber, spaced capitals feel, blinking dot.
+.edit-mode-banner {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 10px;
 
-  gap: 0.5rem;
+  background: var(--bg-warning-tint);
+  color: var(--color-warning-ink);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-extrabold);
+  letter-spacing: 0.12em;
+
+  border-radius: 14px;
+  margin-block-start: var(--space-3);
+  padding: 10px;
+
+  > i {
+    inline-size: 8px;
+    block-size: 8px;
+
+    background: currentColor;
+    border-radius: var(--radius-full);
+
+    animation: cv-chip-pulse 1.2s ease-in-out infinite;
+  }
 }
 
-.save-btn {
-  background: var(--bg-success);
-  color: var(--text-success);
+// Phone edit bar: save / cancel fixed above the tab bar (≥621 they live in the page header).
+.cv-editbar {
+  display: none;
 
-  border-color: var(--color-success);
+  @media (max-width: $cv-phone-max) {
+    display: flex;
+    gap: 10px;
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: calc(56px + env(safe-area-inset-bottom, 0px));
+    z-index: 205;
+
+    padding: 10px var(--space-4);
+
+    background: var(--bg-header);
+    border-block-start: 1px solid var(--border-header);
+
+    backdrop-filter: var(--blur-glass);
+    -webkit-backdrop-filter: var(--blur-glass);
+  }
 }
 
-.undo-btn {
-  background: var(--bg-warning);
-  color: var(--text-warning);
+.cook-view-container.is-editing {
+  @media (max-width: $cv-phone-max) {
+    padding-block-end: 190px;
+  }
+}
 
-  border-color: var(--border-warning);
+/* Edit mode ingredient rows (plan 404 step 8). */
+.cv-ied-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.cv-ied {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  min-block-size: 64px;
+
+  background: var(--bg-glass);
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) 10px var(--space-2) 14px;
+
+  // Changed amount / unit: warning fill + border on just the field that changed.
+  .cv-amount-input.is-changed,
+  .cv-ied-unit.is-changed {
+    background: var(--bg-warning-tint);
+
+    border-color: var(--color-warning-ink);
+  }
+}
+
+.cv-ied-name {
+  flex: 1;
+  min-inline-size: 120px;
+
+  color: var(--color-text-main);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+
+  &.is-unlinked {
+    font-style: italic;
+    opacity: 0.85;
+  }
+}
+
+.cv-ied-unit {
+  min-inline-size: 5rem;
+
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-full);
+}
+
+.cv-ied-del {
+  display: grid;
+  place-content: center;
+
+  inline-size: 40px;
+  block-size: 40px;
+
+  background: none;
+  color: var(--color-text-muted);
+
+  border: 0;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg-warning-tint);
+    color: var(--color-warning-ink);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Page-local nav — title + kitchen dark-mode toggle
+   Page header (plan 404 step 4) — phone top bar (≤620), page header with meta
+   chips, header actions, export menu, slim photo banner.
    ───────────────────────────────────────────────────────────────────────── */
-.cv-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.cv-icon-btn {
+  display: grid;
+  place-content: center;
+  flex-shrink: 0;
 
-  padding: var(--space-4) var(--space-5) 0;
-}
+  inline-size: var(--cv-tap-min);
+  block-size: var(--cv-tap-min);
 
-.cv-nav-title {
-  color: var(--cv-main-text);
-  font-size: var(--fs-md);
-  font-weight: var(--fw-bold);
-}
+  background: transparent;
+  color: var(--color-text-muted);
 
-.cv-theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  width: var(--cv-tap-min);
-  height: var(--cv-tap-min);
-
-  background: var(--cv-segment-bg);
-  color: var(--cv-main-text);
-
-  border: 1px solid var(--cv-nav-border);
+  border: 0;
   border-radius: var(--radius-full);
 
   cursor: pointer;
   transition:
-    background 0.2s var(--ease-smooth),
-    transform 0.15s var(--ease-spring);
+    background var(--dur-fast) var(--ease-smooth),
+    color var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
 
-  &:hover {
-    background: var(--cv-chip-bg);
-    transform: scale(1.05);
+  &:hover,
+  &.is-on {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+  }
+
+  &:active {
+    transform: scale(0.94);
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Hero — recipe photo + gradient scrim + name + prep-progress bar
-   ───────────────────────────────────────────────────────────────────────── */
-.cv-hero {
-  position: relative;
-
-  overflow: hidden;
-
-  min-height: 150px;
-
-  background: var(--cv-panel-bg);
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-xl);
-  margin: var(--space-4) var(--space-5) 0;
-
-  box-shadow: var(--cv-hero-shadow);
-  transition: min-height 0.3s var(--ease-smooth);
-
-  &.cv-hero--photo {
-    min-height: 320px;
-  }
-}
-
-/* No-photo placeholder — small centered icon, matching the mockup's image-slot state
-   instead of filling the hero with a solid brand-color card. */
-.cv-hero-placeholder {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-
-  color: var(--cv-accent);
-  opacity: 0.35;
-}
-
-.cv-hero-img {
-  display: block;
-
-  inline-size: 100%;
-  block-size: 100%;
-
-  object-fit: cover;
-
-  position: absolute;
-  inset: 0;
-}
-
-.cv-hero-scrim {
-  position: absolute;
-  inset: 0;
-
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.2) 35%, rgba(0, 0, 0, 0.75) 100%);
-
-  pointer-events: none;
-}
-
-.cv-hero-top {
-  position: relative;
-
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  flex-wrap: wrap;
-
-  gap: var(--space-4);
-  padding: var(--space-5);
-}
-
-.cv-hero-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-
-  gap: var(--space-2);
-}
-
-.cv-hero-badges {
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: 6px;
-}
-
-.cv-hero-badge {
-  color: var(--color-text-on-primary);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-bold);
-
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: var(--radius-full);
-  padding: 4px 12px;
-
-  backdrop-filter: blur(6px);
-
-  &--approved {
-    background: rgba(20, 184, 166, 0.9);
-  }
-}
-
-.cv-hero-title {
-  color: var(--color-text-on-primary);
-  font-size: 1.75rem;
-  font-weight: var(--fw-extrabold);
-  letter-spacing: var(--tracking-tight);
-  text-wrap: pretty;
-
-  margin: 0;
-
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-}
-
-.cv-hero-timer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  gap: 2px;
-  padding: 10px 18px;
-
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-lg);
-
-  backdrop-filter: blur(10px);
-
-  &--alert {
-    background: rgba(217, 119, 6, 0.85);
-    animation: cv-timer-pulse 1.2s infinite;
-  }
-}
-
-.cv-hero-timer-label {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-medium);
-}
-
-.cv-hero-timer-value {
-  color: var(--color-text-on-primary);
-  font-size: 1.375rem;
-  font-weight: var(--fw-extrabold);
-  font-variant-numeric: tabular-nums;
-}
-
-@keyframes cv-timer-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
-  }
-}
-
-.cv-hero-progress {
-  position: relative;
-
-  padding: 0 var(--space-5) var(--space-5);
-}
-
-.cv-hero-progress-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  margin-bottom: 6px;
-
-  span:first-child {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-semibold);
-  }
-
-  span:last-child {
-    color: var(--color-text-on-primary);
-    font-size: var(--fs-sm);
-    font-weight: var(--fw-bold);
-  }
-}
-
-.cv-hero-progress-track {
-  overflow: hidden;
-
-  height: 8px;
-
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-full);
-}
-
-.cv-hero-progress-fill {
-  height: 100%;
-
-  background: linear-gradient(90deg, var(--cv-accent), #5eead4);
-  border-radius: var(--radius-full);
-  box-shadow: 0 0 12px rgba(20, 184, 166, 0.7);
-
-  transition: width 0.4s var(--ease-spring);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Actions row — edit / export controls
-   ───────────────────────────────────────────────────────────────────────── */
-.cv-actions-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.75rem;
-  padding: var(--space-3) var(--space-5) 0;
-}
-
-.export-bar-wrap {
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.5rem;
-}
-
-.export-bar-actions {
+// Phone-only top bar: replaces the app header (hidden ≤620). Full-bleed and sticky.
+.cv-topbar {
   display: none;
   align-items: center;
-  flex-wrap: wrap;
+  gap: 6px;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 30;
 
-  gap: 0.5rem;
+  block-size: 60px;
 
-  &.expanded {
+  margin-inline: calc(-1 * var(--space-4));
+  margin-block-start: calc(-1 * var(--space-4));
+  padding-inline: 10px;
+
+  background: var(--bg-header);
+  border-block-end: 1px solid var(--border-header);
+
+  box-shadow: var(--shadow-header);
+  backdrop-filter: var(--blur-nav);
+  -webkit-backdrop-filter: var(--blur-nav);
+
+  @media (max-width: $cv-phone-max) {
     display: flex;
   }
 }
 
-.export-bar-label {
-  font-size: 0.75rem;
-  color: var(--cv-muted-text);
+.cv-topbar-title {
+  flex: 1;
+  min-inline-size: 0;
 
-  margin-inline-end: 0.25rem;
+  overflow: hidden;
+  color: var(--color-text-main);
+  font-size: 1.1875rem; // 19
+  font-weight: var(--fw-extrabold);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  margin: 0;
 }
 
-.export-bar-main {
-  display: inline-flex;
-}
-
-.edit-btn {
-  display: inline-flex;
+.cv-ph {
+  position: relative;
+  display: flex;
   align-items: center;
+  gap: var(--space-4);
 
-  gap: 0.5rem;
+  padding-block-start: var(--space-3);
 
-  background: var(--cv-segment-bg);
-  color: var(--cv-main-text);
-  font-size: 0.875rem;
-
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-full);
-  padding: 0.5rem 0.875rem;
-
-  cursor: pointer;
-  transition:
-    background 0.2s var(--ease-smooth),
-    transform 0.15s var(--ease-spring);
-
-  &:hover {
-    background: var(--cv-chip-bg);
-    transform: scale(1.02);
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    padding-block-start: var(--space-2);
   }
 }
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Scale bar — multiplier pills + quantity segmented control.
-   Lives inside the ingredient panel header (mirrors the mockup's in-panel
-   "כמות מנות" row) instead of its own full-width bar above the grid.
-   ───────────────────────────────────────────────────────────────────────── */
-.cv-scale-bar {
+.cv-back {
+  display: none;
+  place-content: center;
+  flex-shrink: 0;
+
+  inline-size: var(--cv-tap-min);
+  block-size: var(--cv-tap-min);
+
+  background: var(--bg-chrome);
+  color: var(--color-primary-ink);
+
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    border-color: var(--color-primary);
+  }
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    display: grid;
+  }
+}
+
+.cv-ph-text {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.cv-ph-title {
+  display: none;
+
+  color: var(--color-text-main);
+  font-size: 1.875rem; // 30
+  font-weight: var(--fw-extrabold);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+
+  margin: 0 0 10px;
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    display: block;
+  }
+
+  @media (min-width: $cv-desktop-min) {
+    font-size: 2rem; // 32
+  }
+}
+
+.cv-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.5rem;
-  padding: 0 1rem var(--space-3);
-
-  border-bottom: 1px dashed var(--cv-panel-border);
+  gap: var(--space-2);
 }
 
-.cv-multiplier-chips {
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: 2px;
-  padding: 4px;
-
-  background: var(--cv-segment-bg);
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-full);
+.cv-num {
+  font-variant-numeric: tabular-nums;
 }
 
-.cv-chip-btn {
-  color: var(--cv-muted-text);
-  font-size: 13px;
-  font-weight: 700;
+.cv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 
-  background: transparent;
-  border: none;
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+
+  border: 0;
   border-radius: var(--radius-full);
-  padding: 6px 14px;
+  padding: 5px 11px;
+
+  &:is(button) {
+    cursor: pointer;
+  }
+}
+
+.cv-chip--warn {
+  background: var(--bg-warning-tint);
+  color: var(--color-warning-ink);
+}
+
+.cv-chip--rating {
+  padding-block: 2px;
+}
+
+.cv-chip--alert {
+  background: var(--bg-warning-tint);
+  color: var(--color-warning-ink);
+
+  animation: cv-chip-pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes cv-chip-pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.cv-ph-acts {
+  display: none;
+  align-items: center;
+  gap: 10px;
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    display: flex;
+  }
+
+  @media (max-width: $cv-phone-max) {
+    .cv-ph-theme {
+      display: none;
+    }
+  }
+}
+
+.cv-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+
+  block-size: var(--cv-tap-min);
+
+  background: var(--bg-chrome);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-full);
+  padding-inline: 18px;
 
   cursor: pointer;
   transition:
-    background 0.2s var(--ease-smooth),
-    color 0.2s var(--ease-smooth);
-}
-
-.cv-chip--active {
-  color: var(--color-text-on-primary);
-
-  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
-  box-shadow: var(--shadow-glow);
-}
-
-.cv-recent-chips {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-
-  gap: 0.5rem;
-
-  margin-block-start: 1rem;
-}
-
-.cv-recent-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--cv-muted-text);
-}
-
-.quantity-control-wrap {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-
-  gap: 0.5rem;
-  padding-block: 4px;
-  padding-inline: 4px 0.75rem;
-
-  background: var(--cv-segment-bg);
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-full);
-}
-
-.quantity-label {
-  color: var(--cv-muted-text);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-}
-
-.qty-btn {
-  background: transparent;
-  color: var(--cv-accent);
-
-  border: none;
-  border-radius: var(--radius-full);
-  padding: 0.5rem 0.75rem;
-
-  cursor: pointer;
-  transition: background 0.2s var(--ease-smooth);
+    border-color var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
 
   &:hover:not(:disabled) {
-    background: var(--cv-chip-bg);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-}
 
-/* ─────────────────────────────────────────────────────────────────────────
-   Phone-only pane swap tabs
-   ───────────────────────────────────────────────────────────────────────── */
-.cv-phone-swap-bar {
-  display: none;
-  align-items: center;
-
-  gap: 4px;
-  margin: var(--space-3) var(--space-5) 0;
-  padding: 4px;
-
-  background: var(--cv-segment-bg);
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-full);
-}
-
-.cv-phone-swap-btn {
-  flex: 1;
-  text-align: center;
-
-  background: transparent;
-  color: var(--cv-muted-text);
-  font-size: 0.8rem;
-  font-weight: 600;
-
-  border: none;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  padding: 8px 0;
-
-  transition:
-    background 0.15s var(--ease-smooth),
-    color 0.15s var(--ease-smooth);
-
-  &.active {
-    color: var(--color-text-on-primary);
-
-    background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
+  @media (max-width: $cv-phone-max) {
+    flex: 1;
+    justify-content: center;
   }
 }
 
-.cv-pane-divider {
-  display: none;
+.cv-pill-btn--primary {
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary-strong);
+
+  border-color: transparent;
 }
 
-.cv-complete-banner {
-  color: var(--cv-accent);
-  font-size: 1rem;
-  font-weight: 700;
-  text-align: center;
+// Export / more-actions menu, anchored to its trigger's physical left edge.
+.cv-menu-wrap {
+  position: relative;
+}
 
-  background: var(--cv-chip-bg);
-  border: 1px solid var(--cv-accent-glow);
-  border-radius: var(--radius-lg);
-  margin: 0.75rem;
-  padding: 1rem;
+.cv-menu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+}
+
+.cv-menu {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-2));
+  inset-inline-end: 0; // anchored to the trigger at the inline-end edge (left in RTL)
+  z-index: 40;
+
+  inline-size: 300px;
+  max-inline-size: calc(100vw - 2 * var(--space-4));
+
+  background: var(--bg-card-solid);
+  color: var(--color-text-main);
+
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-xl);
+  padding: var(--space-2);
+
+  box-shadow: var(--shadow-modal);
+}
+
+.cv-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  inline-size: 100%;
+  min-block-size: 48px;
+
+  background: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.9375rem; // 15
+  font-weight: var(--fw-semibold);
+  text-align: start;
+
+  border: 0;
+  border-radius: var(--radius-md);
+  padding-inline: 10px;
+
+  &:is(button) {
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: var(--color-primary-soft);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  > span {
+    flex: 1;
+  }
+
+  > lucide-icon {
+    color: var(--color-primary-ink);
+  }
+}
+
+.cv-menu-act {
+  display: grid;
+  place-content: center;
+
+  inline-size: 40px;
+  block-size: 40px;
+
+  background: none;
+  color: var(--color-primary-ink);
+
+  border: 0;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-primary-soft);
+  }
+}
+
+.cv-menu-head {
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.08em;
+
+  padding: var(--space-2) 10px var(--space-1);
+}
+
+.cv-menu-sep {
+  block-size: 1px;
+
+  background: var(--border-default);
+
+  margin: var(--space-1) var(--space-2);
+}
+
+// Slim photo banner: the recipe photo sits behind the header; text turns white over a scrim.
+.cv-ph--photo {
+  align-items: flex-end;
+
+  min-block-size: 120px;
+
+  overflow: hidden;
+
+  border-radius: var(--radius-xl);
+  margin-block-start: var(--space-3);
+  padding: var(--space-4);
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    min-block-size: 180px;
+  }
+
+  > :not(.cv-ph-img, .cv-ph-scrim) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .cv-ph-title {
+    color: var(--color-text-on-primary);
+  }
+
+  .cv-chip {
+    background: var(--overlay-backdrop);
+    color: var(--color-text-on-primary);
+
+    backdrop-filter: var(--blur-glass);
+  }
+
+  .cv-ph-acts .cv-icon-btn {
+    color: var(--color-text-on-primary);
+  }
+}
+
+.cv-ph-img {
+  position: absolute;
+  inset: 0;
+
+  inline-size: 100%;
+  block-size: 100%;
+
+  object-fit: cover;
+}
+
+.cv-ph-scrim {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(to top, var(--overlay-backdrop), transparent 70%);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Quantity controls — multiplier chips + counter + yield unit (plan 404 step 5)
+   ───────────────────────────────────────────────────────────────────────── */
+.cv-scale-bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+
+  margin-block-end: var(--space-4);
+}
+
+.cv-multiplier-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.cv-mult-chip {
+  display: grid;
+  place-content: center;
+
+  block-size: var(--cv-tap-min);
+  min-inline-size: var(--cv-tap-min);
+
+  background: var(--bg-card-solid);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 0.9375rem; // 15
+  font-weight: var(--fw-bold);
+  font-variant-numeric: tabular-nums;
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  padding-inline: var(--space-2);
+
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: scale(0.94);
+  }
+
+  &.is-on {
+    background: var(--color-primary-strong);
+    color: var(--color-on-primary-strong);
+
+    border-color: transparent;
+  }
+}
+
+.quantity-control-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.cv-long-press-hint {
+  display: none;
+
+  color: var(--color-text-muted);
+  font-size: 0.78125rem; // 12.5
+  font-weight: var(--fw-medium);
+
+  margin: 0;
+
+  @media (max-width: $cv-stack-max) {
+    display: block;
+  }
+}
+
+.cv-recent-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+
+  margin-block-start: var(--space-3);
+
+  .cv-chip {
+    text-decoration: none;
+  }
+}
+
+.cv-recent-label {
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Switch buttons (<768, plan 404 step 7) — sticky under the top bar / app header
+   ───────────────────────────────────────────────────────────────────────── */
+.cv-segw {
+  display: none;
+  position: sticky;
+  inset-block-start: 60px; // under the phone top bar
+  z-index: 20;
+
+  margin-inline: calc(-1 * var(--space-4));
+  padding: 10px var(--space-4);
+
+  background: color-mix(in srgb, var(--bg-body) 88%, transparent);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+
+  @media (max-width: $cv-stack-max) {
+    display: block;
+  }
+
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    inset-block-start: 62px; // under the app header
+  }
+}
+
+.cv-seg {
+  display: flex;
+
+  background: var(--border-default);
+  border-radius: 14px;
+  padding: 4px;
+
+  > button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    flex: 1;
+
+    block-size: var(--cv-tap-min);
+
+    background: none;
+    color: var(--color-text-muted);
+    font-family: inherit;
+    font-size: 0.9375rem; // 15
+    font-weight: var(--fw-bold);
+
+    border: 0;
+    border-radius: 11px;
+
+    cursor: pointer;
+    transition: all 0.2s var(--ease-smooth);
+
+    &.is-on {
+      background: var(--bg-card-solid);
+      color: var(--color-text-main);
+
+      box-shadow: var(--shadow-glass);
+    }
+  }
+
+  em {
+    font-size: 0.78125rem; // 12.5
+    font-style: normal;
+    font-weight: var(--fw-bold);
+
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+
+    border-radius: var(--radius-full);
+    padding: 2px var(--space-2);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
    Two-column body — glass ingredient panel + step list
    ───────────────────────────────────────────────────────────────────────── */
+// Stacked below 768; two panes side by side (5fr / 6fr) from tablet up.
 .cv-body {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   gap: var(--space-4);
-  margin: var(--space-4) var(--space-5) 0;
-  padding-bottom: var(--space-4);
 
-  height: 100%;
+  margin-block-start: var(--space-4);
+
+  @media (min-width: $cv-tablet-min) {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: start;
+  }
+
+  @media (min-width: $cv-desktop-min) {
+    gap: var(--space-6);
+  }
 }
 
-.cv-ing-pane,
-.cv-step-pane {
-  background: var(--cv-panel-bg);
+/* Panes (plan 404 step 5): card with a header + 4px progress bar; content grows with the page.
+   Stacked (<768): ingredients first, then steps; scroll-margin keeps a scrolled-to pane under the sticky bars. */
+.cv-pane,
+[data-step-index] {
+  scroll-margin-top: 140px; // phone: top bar 60 + switch bar ~80
 
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-lg);
+  @media (min-width: calc($cv-phone-max + 1px)) {
+    scroll-margin-top: 146px; // small tablet: app header 62 + switch bar ~84
+  }
 
-  box-shadow: var(--cv-panel-shadow);
+  @media (min-width: $cv-tablet-min) {
+    scroll-margin-top: 80px; // tablet up: app header only
+  }
+}
+
+.cv-pane {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+
+  background: var(--bg-glass);
+
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-xl);
+
+  box-shadow: var(--shadow-card);
   backdrop-filter: var(--blur-glass);
   -webkit-backdrop-filter: var(--blur-glass);
 }
 
-.cv-ing-pane,
-.cv-step-pane {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-
-  min-height: 0;
-  overflow: hidden;
-}
-
-.cv-ing-pane {
-  order: 1;
-}
-
-.cv-ing-pane-header,
-.cv-step-pane-header {
+.cv-pane-head {
   display: flex;
   align-items: center;
-  flex-shrink: 0;
-
-  background: var(--cv-segment-bg);
-
-  border-bottom: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-  padding-block: 0.625rem;
-}
-
-.cv-ing-pane-header {
   flex-wrap: wrap;
+  gap: var(--space-2);
 
-  gap: 0.5rem;
-  padding-inline: 1rem;
+  color: var(--color-primary-ink);
+  font-size: 0.9375rem; // 15
+  font-weight: var(--fw-extrabold);
+
+  border-block-end: 1px solid var(--border-default);
+  margin: 0;
+  padding: var(--space-4) var(--space-5);
 }
 
-.cv-ing-pane-title,
-.cv-step-pane-title {
-  display: flex;
-  align-items: center;
+.cv-pane-count {
+  margin-inline-start: auto;
 
-  gap: 0.375rem;
-
-  color: var(--cv-main-text);
-  font-size: var(--fs-md);
+  font-size: var(--fs-sm);
+  font-style: normal;
   font-weight: var(--fw-bold);
 
-  lucide-icon {
-    flex-shrink: 0;
-    color: var(--cv-accent);
-  }
-}
-
-.cv-ing-badge,
-.cv-step-counter {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--cv-accent);
-
-  background: var(--cv-chip-bg);
-
+  background: var(--color-primary-soft);
   border-radius: var(--radius-full);
-  margin-inline-start: auto;
-  padding-block: 0.125rem;
-  padding-inline: 0.5rem;
+  padding: 3px 10px;
 }
 
-.cv-ing-badge--complete {
-  color: var(--color-text-on-primary);
+.cv-ready-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
 
-  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
+  color: var(--color-primary-ink);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
 }
 
-.cv-ing-progress-bar {
-  inline-size: 100%;
+.cv-pane-bar {
+  display: block;
+
   block-size: 4px;
 
-  background: var(--cv-nav-border);
+  background: var(--border-default);
 
-  border-radius: var(--radius-full);
-}
+  i {
+    display: block;
 
-.cv-ing-progress-fill {
-  block-size: 100%;
+    block-size: 100%;
 
-  background: linear-gradient(90deg, var(--cv-accent) 0%, #5eead4 100%);
+    background: linear-gradient(90deg, var(--color-primary-strong), var(--color-primary));
 
-  border-radius: var(--radius-full);
-
-  transition: width 0.4s ease-out;
-}
-
-.cv-ing-pane-header--complete .cv-ing-progress-fill {
-  width: 100%;
-  animation: cv-progress-pulse 1.5s ease-in-out 1;
-}
-
-@keyframes cv-progress-pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
+    transition: width 0.5s var(--ease-spring);
   }
 }
 
-.cv-ing-row {
+.cv-pane-inner {
+  padding: var(--space-4);
+
+  @media (min-width: $cv-tablet-min) {
+    padding: 18px var(--space-5) var(--space-5);
+  }
+}
+
+/* Ingredient rows: main line (check · name · amount · unit · unit chip · scale) + expander. */
+.cv-ing-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+
+.cv-ing {
+  display: block;
+
+  background: var(--bg-glass);
+  color: var(--color-text-main);
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    background var(--dur-fast) var(--ease-smooth),
+    border-color var(--dur-fast) var(--ease-smooth);
+
+  &:hover,
+  &.is-open {
+    background: var(--bg-card-solid);
+  }
+
+  &.is-open,
+  &.is-source {
+    border-color: var(--color-primary);
+  }
+
+  // Above the rows below it, so the unit dropdown's list is not painted over.
+  &.is-open {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+.cv-ing-main {
   display: flex;
   align-items: center;
+  gap: 14px;
 
-  gap: 0.75rem;
-  min-height: var(--cv-tap-min);
+  min-block-size: 60px;
+  padding-inline: 14px;
 
-  background: var(--cv-row-bg);
-  direction: rtl;
+  font-size: 1.0625rem; // 17
+  font-weight: var(--fw-semibold);
 
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  margin-bottom: 3px;
-  padding-block: 0.625rem;
-  padding-inline: 1rem;
+  border-radius: inherit;
 
   cursor: pointer;
-  transition:
-    background 0.15s var(--ease-smooth),
-    border-color 0.15s var(--ease-smooth);
 
-  &:hover {
-    background: var(--cv-segment-bg);
-    border-color: var(--cv-panel-border);
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
   }
-}
 
-.cv-ing-row--done {
-  --cv-row-bg: var(--cv-chip-bg);
-
-  .cv-ing-name {
-    text-decoration: line-through;
+  @media (min-width: $cv-tablet-min) and (max-width: 1100px) {
+    gap: 10px;
+    padding-inline: 12px;
   }
 }
 
 .cv-ing-check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-content: center;
   flex-shrink: 0;
 
-  width: 20px;
-  height: 20px;
+  inline-size: 30px;
+  block-size: 30px;
 
-  border: 1.5px solid var(--cv-nav-border);
-  border-radius: 6px;
+  color: var(--color-on-primary-strong);
 
-  transition:
-    background 0.2s var(--ease-smooth),
-    border-color 0.2s var(--ease-smooth);
-}
+  border: 2px solid var(--color-text-muted);
+  border-radius: 9px;
 
-.cv-ing-check--done {
-  background: var(--cv-accent);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  border-color: transparent;
+  .cv-ing.is-checked & {
+    background: var(--color-primary-strong);
+    border-color: var(--color-primary-strong);
 
-  &::after {
-    content: '✓';
-
-    color: var(--color-text-on-primary);
-    font-size: 0.7rem;
-    font-weight: 700;
+    transform: scale(1.06) rotate(-6deg);
   }
 }
 
 .cv-ing-name {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
 
-  color: var(--cv-main-text);
-  font-weight: 500;
-}
+  .cv-ing.is-checked & {
+    color: var(--color-text-muted);
+    text-decoration: line-through;
+  }
 
-.cv-ing-row--done .cv-ing-name {
-  color: var(--cv-muted-text);
-}
+  &.is-unlinked {
+    font-style: italic;
+    opacity: 0.85;
+  }
 
-.cv-ing-amt {
-  color: var(--cv-main-text);
-  font-size: 1rem;
-  font-weight: 700;
-
-  min-width: 3rem;
-  text-align: left;
-}
-
-.cv-ing-row--done .cv-ing-amt {
-  color: var(--cv-muted-text);
-}
-
-.cv-ing-unit {
-  font-size: 0.75rem;
-  color: var(--cv-muted-text);
-}
-
-.cv-step-pane {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  order: 2;
-
-  min-height: 0;
-  overflow: hidden;
-}
-
-/* Scroll indicator chevrons — shared by both panes */
-.cv-pane-scroll-indicator--top,
-.cv-pane-scroll-indicator--bottom {
-  position: absolute;
-  inset-inline: 0;
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  min-height: 1.5rem;
-  padding-block: 0.25rem;
-
-  color: var(--cv-muted-text);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s var(--ease-smooth);
-}
-
-.cv-pane-scroll-indicator--top {
-  top: 0;
-  background: linear-gradient(to bottom, var(--cv-panel-bg) 0%, transparent 100%);
-}
-
-.cv-pane-scroll-indicator--bottom {
-  bottom: 0;
-  background: linear-gradient(to top, var(--cv-panel-bg) 0%, transparent 100%);
-}
-
-/* Show top chevron when list can scroll up */
-.cv-ing-pane:has(.cv-ing-body.can-scroll-up) .cv-pane-scroll-indicator--top,
-.cv-step-pane:has(.cv-step-body.can-scroll-up) .cv-pane-scroll-indicator--top {
-  opacity: 0.7;
-}
-
-/* Show bottom chevron when list can scroll down */
-.cv-ing-pane:has(.cv-ing-body.can-scroll-down) .cv-pane-scroll-indicator--bottom,
-.cv-step-pane:has(.cv-step-body.can-scroll-down) .cv-pane-scroll-indicator--bottom {
-  opacity: 0.7;
-}
-
-.cv-step-pane-header {
-  justify-content: space-between;
-
-  padding-inline: 1rem;
-}
-
-.cv-ing-body,
-.cv-step-body {
-  scrollbar-width: none;
-
-  &::-webkit-scrollbar {
-    display: none;
+  @media (min-width: $cv-tablet-min) and (max-width: 1100px) {
+    min-inline-size: 96px;
   }
 }
 
-.cv-ing-body {
-  flex: 1;
+.cv-source-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
 
-  min-height: 0;
-  overflow-y: auto;
-  padding: 0.5rem;
+  color: var(--color-primary-ink);
+  font-size: 0.6875rem; // 11
+  font-weight: var(--fw-bold);
+  text-decoration: none;
+  vertical-align: 2px;
+
+  background: var(--color-primary-soft);
+  border-radius: var(--radius-full);
+  margin-inline-start: var(--space-2);
+  padding: 2px var(--space-2);
+}
+
+.cv-ing-amt {
+  font-size: 1.1875rem; // 19
+  font-weight: var(--fw-extrabold);
+
+  .cv-ing.is-checked & {
+    color: var(--color-text-muted);
+  }
+}
+
+// Stacked layout (<768): plain unit, faint ⇄ when other units exist. Tablet up: the unit chip.
+.cv-ing-unit {
+  color: var(--color-text-muted);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-regular);
+
+  lucide-icon {
+    opacity: 0.55;
+    margin-inline-start: var(--space-1);
+    vertical-align: -2px;
+  }
+}
+
+// Opens the row's options (unit dropdown + scale to this item) from tablet up; phones long-press.
+.cv-row-more {
+  display: none;
+  place-content: center;
+  flex-shrink: 0;
+
+  inline-size: 34px;
+  block-size: 34px;
+
+  background: none;
+  color: var(--color-text-muted);
+
+  border: 0;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease-smooth);
+
+  &:hover {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+  }
+
+  .cv-ing.is-open & {
+    transform: rotate(180deg);
+  }
+
+  @media (min-width: $cv-tablet-min) {
+    display: inline-grid;
+  }
+}
+
+.cv-ing-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+// Expander: grows the row with grid-template-rows 0fr → 1fr.
+.cv-ing-exp {
+  display: grid;
+  grid-template-rows: 0fr;
+
+  transition: grid-template-rows 0.32s var(--ease-spring);
+
+  .cv-ing.is-open & {
+    grid-template-rows: 1fr;
+  }
+}
+
+.cv-ing-exp-inner {
+  min-block-size: 0;
+
+  overflow: hidden;
+
+  .cv-ing.is-open & {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    // Visible once open, so the unit dropdown's list can hang below the row.
+    overflow: visible;
+    padding: 0 14px 14px;
+  }
+}
+
+.cv-scale-open {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--space-2);
+
+  block-size: var(--cv-tap-min);
+
+  background: none;
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+
+  border: 1px dashed var(--border-chrome);
+  border-radius: var(--radius-full);
+  padding-inline: var(--space-4);
+
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+  }
+}
+
+.cv-scale-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+
+  .cv-pill-btn {
+    flex: 0 0 auto;
+  }
+}
+
+.cv-scale-form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  inline-size: 100%;
+
+  color: var(--color-primary-ink);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-bold);
+}
+
+.cv-scale-form-unit {
+  color: var(--color-text-muted);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
+
+  min-inline-size: 32px;
+}
+
+.cv-scale-preview {
+  inline-size: 100%;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+
+  margin: 0;
+}
+
+.cv-amount-input {
+  inline-size: 92px;
+  block-size: var(--cv-tap-min);
+
+  background: var(--bg-card-solid);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  text-align: center;
+
+  border: 1.5px solid var(--border-chrome);
+  border-radius: var(--radius-md);
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-focus);
+  }
 }
 
 .cv-step-body {
   display: flex;
   flex-direction: column;
-  flex: 1;
 
   gap: 0.75rem;
-  min-height: 0;
-  overflow-y: auto;
 
   padding: 0.75rem;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   Step cards — pending (default) / active (in-progress) / done (checked)
+   Steps (plan 404 step 6) — done rows · active card · pending rows, step clocks
    ───────────────────────────────────────────────────────────────────────── */
-.cv-step-card {
-  background: var(--cv-panel-bg);
-
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-lg);
-
-  // Flex items shrink by default — once .cv-step-body has a real bounded height (see
-  // .cv-shell above), a recipe with enough steps to exceed that height was getting each
-  // card squeezed below its own content size instead of scrolling, and overflow:hidden
-  // below then clipped the squeezed-out instruction text. flex-shrink: 0 keeps every
-  // card at its full natural (text-driven) height; .cv-step-body's overflow-y: auto
-  // handles anything past the visible area by scrolling instead of shrinking cards.
-  flex-shrink: 0;
-
-  overflow: hidden;
-  transition:
-    opacity 0.2s var(--ease-smooth),
-    border-color 0.2s var(--ease-smooth),
-    box-shadow 0.2s var(--ease-smooth);
+.cv-step-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
 }
 
-.cv-step-card--active {
-  background: var(--cv-chip-bg);
+// Done row: the whole row reopens the step.
+.cv-dn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 
-  border-color: var(--cv-accent-glow);
-}
+  inline-size: 100%;
+  min-block-size: 48px;
 
-.cv-step-card--done {
-  background: var(--cv-chip-bg);
+  background: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 0.9375rem; // 15
+  text-align: start;
 
-  border-color: var(--cv-accent-glow);
-  opacity: 0.75;
-}
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding-inline: 14px var(--space-2);
 
-/* Pending steps are tappable — cursor indicates this */
-.cv-step-card--pending {
   cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
 
   &:hover {
-    border-color: var(--cv-accent-glow);
+    background: var(--bg-glass);
+  }
+
+  &:active {
+    transform: scale(1.02);
+  }
+
+  > s {
+    flex: 1;
+    min-inline-size: 0;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &.is-alert {
+    animation: cv-alert-pulse 1.2s ease-in-out infinite;
   }
 }
 
-.cv-step-card--timer-alert {
-  border-color: var(--color-danger) !important;
-  border-width: 1.5px !important;
-}
-
-.cv-step-card-head {
-  display: flex;
-  align-items: center;
-
-  gap: 6px;
-  padding: 10px 12px 6px;
-}
-
-.cv-step-card--active .cv-step-card-head {
-  padding: 8px 12px 4px;
-}
-
-.cv-step-num {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.cv-ok {
+  display: grid;
+  place-content: center;
   flex-shrink: 0;
 
-  width: 22px;
-  height: 22px;
+  inline-size: 26px;
+  block-size: 26px;
 
-  background: var(--cv-segment-bg);
-  color: var(--cv-muted-text);
-  font-size: 0.7rem;
-  font-weight: 800;
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary-strong);
 
-  border-radius: 50%;
-}
-
-.cv-step-num--active {
-  background: var(--cv-accent);
-  color: var(--color-text-on-primary);
-}
-
-.cv-step-num--done {
-  background: var(--cv-accent);
-  color: var(--color-text-on-primary);
-}
-
-.cv-step-active-label {
-  color: var(--cv-accent);
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-.cv-step-done-label {
-  color: var(--cv-muted-text);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
-.cv-step-status-chip {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--cv-muted-text);
-
-  border: 1px solid var(--cv-nav-border);
   border-radius: var(--radius-full);
-  padding-block: 0.125rem;
-  padding-inline: 0.5rem;
 }
 
-.cv-step-status-chip--done {
-  text-decoration: line-through;
-
+.cv-dn-undo {
+  flex-shrink: 0;
   opacity: 0.7;
 }
 
-.cv-step-card-body {
-  padding: 6px 12px 12px;
-
-  p {
-    margin: 0;
-    color: var(--cv-main-text);
-    font-size: 0.9rem;
-    line-height: var(--lh-relaxed);
+// Finished-timer alert: the outline fades to red and back instead of sitting there.
+@keyframes cv-alert-pulse {
+  50% {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 25%, transparent);
   }
 }
 
-.cv-step-card:not(.cv-step-card--active) .cv-step-card-body p {
-  color: var(--cv-muted-text);
-  font-size: 0.85rem;
-  line-height: var(--lh-normal);
+// Active card.
+.cv-act {
+  background: var(--bg-card-solid);
+
+  border: 2px solid var(--color-primary);
+  border-radius: 22px;
+  padding: 18px 18px var(--space-4);
+
+  box-shadow: 0 16px 36px -18px var(--color-primary-glow-strong);
+
+  &.is-alert {
+    animation: cv-alert-pulse 1.2s ease-in-out infinite;
+  }
 }
 
-.cv-step-card--done .cv-step-card-body p {
-  text-decoration: line-through;
+.cv-grow {
+  animation: cv-grow 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Timer/stopwatch pills under the step text (mirrors mockup's timerBtnLabel placement) */
-.cv-step-tools-row {
+@keyframes cv-grow {
+  0% {
+    transform: scale(0.97);
+    box-shadow: 0 0 0 0 var(--color-primary-glow-strong);
+  }
+
+  45% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 10px var(--color-primary-glow);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.cv-lab {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
 
-  gap: 6px;
-  margin-block-start: 6px;
+  min-block-size: 36px;
+
+  color: var(--color-primary-ink);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+
+  margin-block-end: 10px;
+
+  > i {
+    inline-size: 8px;
+    block-size: 8px;
+
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+  }
 }
 
-.cv-step-status-chip--clickable {
+.cv-lab-tools {
+  display: flex;
+  gap: 6px;
+
+  margin-inline-start: auto;
+}
+
+// Opt-in clock buttons (timer / stopwatch) in the label row.
+.cv-clk-btn {
+  display: grid;
+  place-content: center;
+
+  inline-size: 36px;
+  block-size: 36px;
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+
   cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-smooth);
 
   &:hover {
-    opacity: 0.75;
+    border-color: var(--color-primary);
+  }
+
+  @media (max-width: $cv-phone-max) {
+    inline-size: 28px;
+    block-size: 28px;
   }
 }
 
-.cv-step-done-btn {
-  display: inline-flex;
+// The active step's text must not inherit the global p colour (it vanished in dark mode).
+.cv-act-text {
+  color: var(--color-text-main);
+  font-size: 1.3125rem; // 21
+  font-weight: var(--fw-medium);
+  line-height: 1.5;
+  text-wrap: pretty;
+
+  margin: 0;
+}
+
+.cv-act-dish {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+
+  color: var(--color-text-main);
+  font-size: 1.3125rem;
+  font-weight: var(--fw-medium);
+
+  margin: 0;
+
+  > b {
+    font-size: 2.125rem; // 34
+    font-weight: var(--fw-extrabold);
+  }
+}
+
+// Clock rows: time first (start side), then reset · play/pause · remove.
+.cv-clock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  margin-block-start: var(--space-3);
+  padding: 10px 14px;
+
+  border-radius: var(--radius-lg);
+}
+
+.cv-clock--timer {
+  background: var(--color-primary-soft);
+
+  &.is-fin {
+    background: var(--bg-warning-tint);
+
+    animation: cv-chip-pulse 0.8s ease-in-out infinite;
+
+    .cv-clock-time {
+      color: var(--color-warning-ink);
+    }
+  }
+}
+
+.cv-clock--sw {
+  border: 1px dashed var(--border-chrome);
+}
+
+.cv-clock-time {
+  flex: 1;
+
+  background: none;
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-size: 2.25rem; // 36
+  font-weight: var(--fw-extrabold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-align: start;
+
+  border: 0;
+  padding: 0;
+
+  &:is(button) {
+    cursor: text;
+  }
+
+  .cv-clock--sw & {
+    color: var(--color-text-main);
+  }
+
+  @media (max-width: $cv-phone-max) {
+    font-size: 1.875rem; // 30
+  }
+}
+
+.cv-clock-input {
+  flex: 1;
+  min-inline-size: 0;
+
+  background: var(--bg-card-solid);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 1.75rem;
+  font-weight: var(--fw-extrabold);
+
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-2);
+
+  &:focus {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.cv-clock-btns {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.cv-cb {
+  display: grid;
+  place-content: center;
+
+  inline-size: var(--cv-tap-min);
+  block-size: var(--cv-tap-min);
+
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary-strong);
+
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:active {
+    transform: scale(0.92);
+  }
+
+  // Phone: 24px circles, 13px icons, with an invisible 10px tap extension.
+  @media (max-width: $cv-phone-max) {
+    position: relative;
+
+    inline-size: 24px;
+    block-size: 24px;
+
+    lucide-icon {
+      transform: scale(0.72);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      inset: -10px;
+    }
+  }
+}
+
+.cv-cb--ghost {
+  background: var(--bg-card-solid);
+  color: var(--color-primary-ink);
+
+  border-color: var(--border-default);
+}
+
+.cv-go {
+  display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
 
-  min-height: var(--cv-tap-min);
+  inline-size: 100%;
+  block-size: 56px;
 
-  background: linear-gradient(180deg, var(--cv-accent), var(--cv-accent-hover));
-  color: var(--color-text-on-primary);
-  font-size: 0.8rem;
-  font-weight: 700;
+  background: var(--color-primary-strong);
+  color: var(--color-on-primary-strong);
+  font-family: inherit;
+  font-size: 1.0625rem; // 17
+  font-weight: var(--fw-extrabold);
 
-  border: none;
-  border-radius: var(--radius-full);
+  border: 0;
+  border-radius: var(--radius-lg);
+  margin-block-start: 14px;
+
   cursor: pointer;
-  margin: 0 12px 12px;
-  padding: 0 16px;
+  transition: transform var(--dur-fast) var(--ease-smooth);
 
-  letter-spacing: 0.02em;
+  &:active {
+    transform: scale(0.97);
+  }
+}
 
-  transition: filter 0.2s var(--ease-smooth);
+// Pending row: tap to make it the active step.
+.cv-pd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  inline-size: 100%;
+  min-block-size: 56px;
+
+  background: var(--bg-glass);
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  text-align: start;
+
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding-inline: 14px;
+
+  cursor: pointer;
+  transition:
+    background var(--dur-fast) var(--ease-smooth),
+    transform var(--dur-fast) var(--ease-smooth);
 
   &:hover {
-    filter: brightness(1.08);
+    background: var(--bg-card-solid);
+  }
+
+  &:active {
+    transform: scale(1.02);
+  }
+
+  &.is-alert {
+    animation: cv-alert-pulse 1.2s ease-in-out infinite;
   }
 }
 
-/* Pill shown on non-active step cards when timer/stopwatch is running or done */
-.cv-step-timer-pill {
-  display: inline-flex;
-  align-items: center;
-
-  background: var(--cv-chip-bg);
-  color: var(--cv-accent);
-  font-size: 0.62rem;
-  font-weight: 600;
-
-  border: 1px solid var(--cv-accent-glow);
-  border-radius: var(--radius-sm);
-  gap: 3px;
-  margin-inline-start: auto;
-  padding: 2px 7px;
-
-  cursor: default;
-}
-
-.cv-step-timer-pill--alert {
-  background: rgba(217, 119, 6, 0.18);
-  color: #d97706;
-
-  border-color: rgba(217, 119, 6, 0.4);
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-/* Active step: timer/stopwatch tool pills in the card head */
-.cv-step-tool-btn {
-  display: inline-flex;
-  align-items: center;
-
-  background: var(--cv-timer-idle-bg);
-  color: var(--cv-accent);
-  font-size: 0.65rem;
-  font-weight: 700;
-
-  border: 1px solid var(--cv-timer-idle-border);
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  gap: 3px;
-  padding: 4px 10px;
-}
-
-.ingredients-table {
-  overflow: hidden;
-
-  border: 1px solid var(--cv-panel-border);
-  border-radius: var(--radius-md);
-}
-
-.ingredients-table-header,
-.ingredients-table-row {
+.cv-pd-n {
   display: grid;
-  grid-template-columns: minmax(120px, 1fr) minmax(60px, auto) minmax(60px, auto);
-  align-items: start;
+  place-content: center;
+  flex-shrink: 0;
 
-  gap: 0.375rem;
-  padding: 0.625rem 0.875rem;
+  inline-size: 30px;
+  block-size: 30px;
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-weight: var(--fw-bold);
+
+  border-radius: var(--radius-full);
 }
 
-.ingredients-table-header {
-  background: var(--cv-segment-bg);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--cv-main-text);
-}
+.cv-pd-t {
+  flex: 1;
+  min-inline-size: 0;
 
-.ingredients-table-row {
-  background: var(--cv-panel-bg);
-
-  border-block-start: 1px solid var(--cv-panel-border);
-
-  &:nth-child(even) {
-    background: var(--cv-segment-bg);
-  }
-
-  .col-name {
-    color: var(--cv-main-text);
-    font-weight: 500;
-  }
-
-  .col-amount {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--cv-accent);
-  }
-}
-
-.ingredients-table-row.field-changed {
-  background: var(--bg-warning);
-
-  border-inline-start: 0.1875rem solid var(--border-warning);
-}
-
-.col-name {
-  min-width: 0;
-}
-
-.col-amount,
-.col-unit {
+  overflow: hidden;
   white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cv-pd-min {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+}
+
+// Clock pills on done / pending rows (a clock still running on another step).
+.cv-row-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+
+  block-size: 28px;
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+
+  border-radius: var(--radius-full);
+  padding-inline: 10px;
+
+  cursor: pointer;
+}
+
+.cv-row-pill--alert {
+  background: var(--bg-warning-tint);
+  color: var(--color-warning-ink);
+}
+
+.cv-fin-ban {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-extrabold);
+
+  border-radius: var(--radius-xl);
+  margin-block-start: var(--space-1);
+  padding: 18px;
 }
 
 .unit-select {
@@ -1280,184 +1722,86 @@
   padding: 2px 6px;
 }
 
-.edit-amount {
-  display: flex;
-  align-items: flex-start;
-
-  gap: 0.25rem;
-
-  .qty-btn.small {
-    padding: 0.25rem 0.5rem;
-  }
-
-  .amount-input {
-    background: transparent;
-    color: var(--cv-main-text);
-  }
-}
-
-.remove-ingredient-btn {
-  background: transparent;
-  color: var(--color-danger);
-
-  border: none;
-  border-radius: var(--radius-sm);
-  margin-inline-start: 0.5rem;
-  padding: 0.25rem;
-
-  cursor: pointer;
-  transition: background 0.2s var(--ease-smooth);
-
-  &:hover {
-    background: var(--bg-danger-subtle);
-  }
-}
-
-.row-highlight {
-  box-shadow:
-    0 0 0 1px var(--border-focus),
-    var(--shadow-glow);
-}
-
-.setting-by {
-  background: var(--cv-chip-bg);
-
-  border: 1px solid var(--cv-accent-glow);
-
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.45);
-}
-
-.col-scale-action {
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-
-  gap: 0.375rem;
-}
-
-.set-by-ingredient-btn {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.25rem;
-
-  background: transparent;
-  color: var(--cv-accent);
-  font-size: 0.75rem;
-
-  border: 1px solid var(--cv-accent-glow);
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
-
-  cursor: pointer;
-  transition:
-    background 0.2s var(--ease-smooth),
-    opacity 0.2s var(--ease-smooth);
-  opacity: 0;
-
-  .cv-ing-row:hover & {
-    opacity: 1;
-  }
-}
-
-.edit-amount .amount-input,
-.set-by-amount .amount-input {
-  font-size: 0.9rem;
-  text-align: center;
-  width: 3.5rem;
-
-  color: var(--cv-main-text);
-
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
-}
-
-.set-by-amount .amount-input {
-  background: var(--cv-panel-bg);
-}
-
-.convert-scale-btn {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.25rem;
-
-  background: var(--cv-accent);
-  color: var(--color-text-on-primary);
-  font-size: 0.8rem;
-  font-weight: 600;
-
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
-
-  cursor: pointer;
-  transition: filter 0.2s var(--ease-smooth);
-
-  &:hover {
-    filter: brightness(1.08);
-  }
-}
-
-.cancel-set-by-btn {
-  background: transparent;
-  color: var(--cv-muted-text);
-  font-size: 0.8rem;
-
-  border: 1px solid var(--cv-nav-border);
-  border-radius: var(--radius-md);
-  padding: 0.25rem 0.5rem;
-
-  cursor: pointer;
-  transition: background 0.2s var(--ease-smooth);
-
-  &:hover {
-    background: var(--cv-segment-bg);
-  }
-}
-
+/* Scaled to an ingredient (plan 404 step 5): editable source amount, yield, back to full recipe. */
 .scaled-view-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 10px 14px;
 
-  background: var(--cv-chip-bg);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-ink);
+  font-size: var(--fs-base);
+  font-weight: var(--fw-semibold);
 
-  border: 1px solid var(--cv-accent-glow);
-  border-radius: var(--radius-md);
-  gap: 0.75rem;
-  margin: var(--space-3) var(--space-5) 0;
-  padding: 0.625rem 1rem;
+  border-radius: var(--radius-lg);
+  margin-block-start: var(--space-3);
+  padding: var(--space-3) var(--space-4);
 }
 
 .scaled-view-text {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--cv-main-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.scaled-view-unit {
+  color: var(--color-text-muted);
+  font-weight: var(--fw-semibold);
+}
+
+.scaled-view-yield {
+  color: var(--color-text-main);
+  font-weight: var(--fw-extrabold);
+}
+
+.cv-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+
+  > button {
+    display: grid;
+    place-content: center;
+
+    inline-size: 36px;
+    block-size: var(--cv-tap-min);
+
+    background: var(--color-primary-soft);
+    color: var(--color-primary-ink);
+
+    border: 0;
+    border-radius: var(--radius-md);
+
+    cursor: pointer;
+  }
+
+  .cv-amount-input {
+    inline-size: 76px;
+  }
 }
 
 .back-to-full-recipe-btn {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
 
-  gap: 0.375rem;
+  block-size: 40px;
 
-  background: var(--cv-accent);
-  color: var(--color-text-on-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
+  background: var(--bg-card-solid);
+  color: var(--color-primary-ink);
+  font-family: inherit;
+  font-weight: var(--fw-bold);
 
-  border: none;
+  border: 1px solid var(--border-chrome);
   border-radius: var(--radius-full);
-  padding: 0.375rem 0.75rem;
+  padding-inline: 14px;
 
   cursor: pointer;
-  transition: filter 0.2s var(--ease-smooth);
 
   &:hover {
-    filter: brightness(1.08);
+    border-color: var(--color-primary);
   }
 }
 
@@ -1467,79 +1811,4 @@
 
   margin: 0;
   padding: 1rem;
-}
-
-@media (max-width: 48rem) {
-  .cv-nav,
-  .cv-hero,
-  .cv-actions-row,
-  .cv-phone-swap-bar,
-  .cv-body {
-    margin-inline: var(--space-3);
-  }
-
-  .cv-shell {
-    display: block;
-
-    height: auto;
-    overflow: visible;
-  }
-
-  .cv-phone-swap-bar {
-    display: flex;
-  }
-
-  .cv-body {
-    display: flex;
-    flex-direction: column;
-
-    overflow-y: auto;
-    height: auto;
-  }
-
-  .cv-ing-pane {
-    order: 1;
-    min-height: 0;
-    overflow: visible;
-
-    &.cv-pane--second {
-      order: 2;
-    }
-  }
-
-  .cv-step-pane {
-    order: 2;
-    min-height: 0;
-    overflow: visible;
-
-    &.cv-pane--first {
-      order: 1;
-    }
-  }
-
-  .cv-ing-body,
-  .cv-step-body {
-    flex: none;
-
-    overflow-y: visible;
-  }
-
-  .cv-pane-divider {
-    display: block;
-
-    background: linear-gradient(90deg, transparent, var(--cv-panel-border), transparent);
-    height: 2px;
-    order: 1.5;
-
-    margin: 0.5rem 0;
-  }
-
-  .cv-chip-btn {
-    min-inline-size: 44px;
-    min-block-size: 44px;
-  }
-
-  .cv-hero-title {
-    font-size: 1.375rem;
-  }
 }

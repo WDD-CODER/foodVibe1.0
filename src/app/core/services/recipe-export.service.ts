@@ -323,10 +323,10 @@ export class RecipeExportService {
       roundExportNumber(s.laborTimeMinutes ?? 0)
     ])
     return {
-      title: `${recipe.nameHebrew ?? 'Recipe'} — Cooking steps`,
-      subtitle: `Yield: ${quantity} ${recipe.yieldUnit ?? 'unit'}`,
+      title: `${recipe.nameHebrew ?? 'Recipe'} — ${heHeader('steps')}`,
+      subtitle: `${heHeader('yield')}: ${quantity} ${heUnit(recipe.yieldUnit ?? 'unit')}`,
       exportedAt: new Date().toISOString(),
-      sections: [{ headerRow: ['Order', 'Instruction', 'Time (min)'], rows }]
+      sections: [{ headerRow: [heHeader('order'), heHeader('instruction'), heHeader('time_min')], rows }]
     }
   }
 
@@ -376,7 +376,8 @@ export class RecipeExportService {
     const rows: (string | number)[][] = []
     for (const cat of sortedCategories) {
       const items = categoryToRows.get(cat) ?? []
-      items.forEach((it) => rows.push([cat, it.name, roundExportNumber(it.amount), heUnit(it.unit)]))
+      const catLabel = this.translation_.translate(cat)
+      items.forEach((it) => rows.push([catLabel, it.name, roundExportNumber(it.amount), heUnit(it.unit)]))
     }
 
     const sections: ExportSection[] = [

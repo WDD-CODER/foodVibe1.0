@@ -20,6 +20,7 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
+  ChevronUp,
   CircleX,
   CookingPot,
   SlidersVertical
@@ -52,6 +53,7 @@ describe('RecipeBookPage', () => {
           ChevronRight,
           ChevronLeft,
           ChevronDown,
+          ChevronUp,
           CircleX,
           CookingPot,
           SlidersVertical

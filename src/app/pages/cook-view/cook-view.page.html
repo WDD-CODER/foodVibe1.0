@@ -1,139 +1,31 @@
-<div class="cook-view-container" dir="rtl" [class.theme-kitchen]="isDarkTheme_()">
+<div class="cook-view-container" dir="rtl" [class.is-editing]="editMode_()">
   @if (recipe_(); as recipe) {
-  <div class="cv-shell" [class.edit-mode]="editMode_()" [class.scaled-view]="isScaledView_()">
-    @if (editMode_()) {
-    <div class="edit-mode-banner">{{ 'edit_mode' | translatePipe }}</div>
-    } @if (!editMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
-    <div class="scaled-view-banner">
-      <span class="scaled-view-text">
-        {{ 'scaled_to' | translatePipe }} {{ scaleByIngredientAmount_()! | formatQuantity }} {{ scaledRow.unit |
-        translatePipe }} {{ scaledRow.name }}
-      </span>
-      <button
-        type="button"
-        class="back-to-full-recipe-btn"
-        (click)="resetToFullRecipe()"
-        [attr.aria-label]="'back_to_full_recipe' | translatePipe"
-      >
-        <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
-        {{ 'back_to_full_recipe' | translatePipe }}
-      </button>
-    </div>
-    }
-
-    <!-- Page-local nav: title + kitchen dark-mode toggle (mirrors UI refactor/CookView.dc.html's .cv-nav) -->
-    <nav class="cv-nav">
-      <span class="cv-nav-title">{{ 'cook_mode' | translatePipe }}</span>
-      <button
-        type="button"
-        class="cv-theme-toggle"
-        (click)="toggleTheme()"
-        [attr.aria-label]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
-        [attr.title]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
-      >
-        @if (isDarkTheme_()) {
-        <lucide-icon name="sun" [size]="18"></lucide-icon>
-        } @else {
-        <lucide-icon name="moon" [size]="18"></lucide-icon>
-        }
-      </button>
-    </nav>
-
-    <!-- Hero: recipe photo + gradient scrim + name + prep progress (mirrors .cv-hero) -->
-    <div class="cv-hero" [class.cv-hero--photo]="!!recipe.imageUrl">
-      @if (recipe.imageUrl) {
-      <img class="cv-hero-img" [src]="recipe.imageUrl" [alt]="recipe.nameHebrew" />
-      } @else {
-      <div class="cv-hero-placeholder" aria-hidden="true">
-        <lucide-icon name="image" [size]="32"></lucide-icon>
-      </div>
-      }
-      <div class="cv-hero-scrim"></div>
-      <div class="cv-hero-top">
-        <div class="cv-hero-info">
-          <div class="cv-hero-badges">
-            @if (recipe.isApproved) {
-            <span class="cv-hero-badge cv-hero-badge--approved">✓ {{ 'approved' | translatePipe }}</span>
-            } @if (scaledCost_() > 0) {
-            <span class="cv-hero-badge">₪{{ scaledCost_() | number:'1.0-0' }}</span>
-            }
-          </div>
-          <h1 class="cv-hero-title">{{ recipe.nameHebrew }}</h1>
-          <app-rating-stars
-            [value]="recipe.rating ?? 0"
-            [readonly]="!isLoggedIn()"
-            size="sm"
-            (ratingChange)="onRatingChange($event)"
-          />
-        </div>
-        @if (cookTimer.activeTimerStepIndex_() !== null) {
-        <div
-          class="cv-hero-timer"
-          [class.cv-hero-timer--alert]="cookTimer.timerFinishedStepIndex_() === cookTimer.activeTimerStepIndex_()"
-        >
-          <span class="cv-hero-timer-label"
-            >{{ 'step' | translatePipe }} {{ cookTimer.activeTimerStepIndex_()! + 1 }}</span
-          >
-          <span class="cv-hero-timer-value">{{ cookTimer.timerDisplay_() }}</span>
-        </div>
-        }
-      </div>
-      <div class="cv-hero-progress">
-        <div class="cv-hero-progress-row">
-          <span>{{ 'prep_progress' | translatePipe }}</span>
-          <span>{{ heroProgressPct_() }}%</span>
-        </div>
-        <div class="cv-hero-progress-track">
-          <div class="cv-hero-progress-fill" [style.width.%]="heroProgressPct_()"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions row: edit / export controls -->
-    <div class="cv-actions-row">
-      @if (editMode_()) {
-      <div class="edit-actions">
+  <div class="cv-shell">
+    <!-- Export menu (more-actions on phone, "export" pill on desktop): edit + view/download per
+         export kind. The transparent scrim behind it closes it on any outside click. -->
+    <ng-template #exportMenu let-withEdit="withEdit">
+      <div class="cv-menu-scrim" (click)="cookExport.closeAllExportOverlays()"></div>
+      <div class="cv-menu" role="menu" (keydown.escape)="cookExport.closeAllExportOverlays()">
+        @if (withEdit) {
         <button
           type="button"
-          class="edit-btn save-btn"
-          (click)="saveEdits()"
-          [disabled]="isSaving_()"
-          [attr.aria-label]="'save_changes' | translatePipe"
+          class="cv-menu-item"
+          role="menuitem"
+          (click)="cookExport.closeAllExportOverlays(); enterEditMode()"
+          [disabled]="!isLoggedIn()"
+          [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
         >
-          @if (isSaving_()) {
-          <app-loader size="small" [inline]="true" />
-          }
-          <lucide-icon name="save" [size]="18"></lucide-icon>
-          {{ 'save_changes' | translatePipe }}
+          <span>{{ 'edit_recipe' | translatePipe }}</span>
+          <lucide-icon name="pencil" [size]="20"></lucide-icon>
         </button>
-        <button
-          type="button"
-          class="edit-btn undo-btn"
-          (click)="undoEdits()"
-          [attr.aria-label]="'undo_changes' | translatePipe"
-        >
-          <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
-          {{ 'undo_changes' | translatePipe }}
-        </button>
-      </div>
-      } @else {
-      <button
-        type="button"
-        class="edit-btn"
-        (click)="enterEditMode()"
-        [attr.aria-label]="'edit' | translatePipe"
-        [disabled]="!isLoggedIn()"
-        [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
-      >
-        <lucide-icon name="pencil" [size]="18"></lucide-icon>
-        {{ 'edit' | translatePipe }}
-      </button>
-      <div class="export-bar-wrap" (mouseleave)="cookExport.exportBarExpanded_.set(false)">
-        <div class="export-bar-actions" [class.expanded]="cookExport.exportBarExpanded_()">
-          <span class="export-bar-label">{{ 'export_recipe_info' | translatePipe }}</span>
+        <div class="cv-menu-sep"></div>
+        }
+        <div class="cv-menu-head">{{ 'export' | translatePipe }}</div>
+        <div class="cv-menu-item cv-menu-item--row">
+          <span>{{ 'export_recipe_info' | translatePipe }}</span>
           <button
             type="button"
-            class="edit-btn export-view-btn"
+            class="cv-menu-act"
             (click)="onViewRecipeInfo()"
             [attr.aria-label]="'view' | translatePipe"
           >
@@ -141,16 +33,18 @@
           </button>
           <button
             type="button"
-            class="edit-btn export-download-btn"
-            (click)="onExportInfo()"
-            [attr.aria-label]="'export_recipe_info' | translatePipe"
+            class="cv-menu-act"
+            (click)="cookExport.closeAllExportOverlays(); onExportInfo()"
+            [attr.aria-label]="'download' | translatePipe"
           >
             <lucide-icon name="download" [size]="18"></lucide-icon>
           </button>
-          <span class="export-bar-label">{{ 'export_shopping_list' | translatePipe }}</span>
+        </div>
+        <div class="cv-menu-item cv-menu-item--row">
+          <span>{{ 'export_shopping_list' | translatePipe }}</span>
           <button
             type="button"
-            class="edit-btn export-view-btn"
+            class="cv-menu-act"
             (click)="onViewShoppingList()"
             [attr.aria-label]="'view' | translatePipe"
           >
@@ -158,17 +52,19 @@
           </button>
           <button
             type="button"
-            class="edit-btn export-download-btn"
-            (click)="onExportShoppingList()"
-            [attr.aria-label]="'export_shopping_list' | translatePipe"
+            class="cv-menu-act"
+            (click)="cookExport.closeAllExportOverlays(); onExportShoppingList()"
+            [attr.aria-label]="'download' | translatePipe"
           >
             <lucide-icon name="download" [size]="18"></lucide-icon>
           </button>
-          @if (isDish_()) {
-          <span class="export-bar-label">{{ 'export_checklist' | translatePipe }}</span>
+        </div>
+        @if (isDish_()) {
+        <div class="cv-menu-item cv-menu-item--row">
+          <span>{{ 'export_checklist' | translatePipe }}</span>
           <button
             type="button"
-            class="edit-btn export-view-btn"
+            class="cv-menu-act"
             (click)="onViewDishChecklist()"
             [attr.aria-label]="'view' | translatePipe"
           >
@@ -176,17 +72,19 @@
           </button>
           <button
             type="button"
-            class="edit-btn export-download-btn"
-            (click)="onExportDishChecklist()"
-            [attr.aria-label]="'export_checklist' | translatePipe"
+            class="cv-menu-act"
+            (click)="cookExport.closeAllExportOverlays(); onExportDishChecklist()"
+            [attr.aria-label]="'download' | translatePipe"
           >
             <lucide-icon name="download" [size]="18"></lucide-icon>
           </button>
-          } @else {
-          <span class="export-bar-label">{{ 'export_cooking_steps' | translatePipe }}</span>
+        </div>
+        } @else {
+        <div class="cv-menu-item cv-menu-item--row">
+          <span>{{ 'export_cooking_steps' | translatePipe }}</span>
           <button
             type="button"
-            class="edit-btn export-view-btn"
+            class="cv-menu-act"
             (click)="onViewCookingSteps()"
             [attr.aria-label]="'view' | translatePipe"
           >
@@ -194,155 +92,314 @@
           </button>
           <button
             type="button"
-            class="edit-btn export-download-btn"
-            (click)="onExportCookingSteps()"
-            [attr.aria-label]="'export_cooking_steps' | translatePipe"
+            class="cv-menu-act"
+            (click)="cookExport.closeAllExportOverlays(); onExportCookingSteps()"
+            [attr.aria-label]="'download' | translatePipe"
           >
             <lucide-icon name="download" [size]="18"></lucide-icon>
           </button>
-          }
         </div>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #themeToggle>
+      <button
+        type="button"
+        class="cv-icon-btn"
+        (click)="toggleTheme()"
+        [attr.aria-label]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
+        [attr.title]="(isDarkTheme_() ? 'kitchen_dark_mode_on' : 'kitchen_dark_mode_off') | translatePipe"
+      >
+        <lucide-icon [name]="isDarkTheme_() ? 'sun' : 'moon'" [size]="20"></lucide-icon>
+      </button>
+    </ng-template>
+
+    <!-- Phone top bar (up to 620px, where the app header is hidden): back, title, theme, more -->
+    <div class="cv-topbar">
+      <button type="button" class="cv-icon-btn" (click)="goBack()" [attr.aria-label]="'back' | translatePipe">
+        <lucide-icon name="arrow-right" [size]="22"></lucide-icon>
+      </button>
+      <h1 class="cv-topbar-title">{{ recipe.nameHebrew }}</h1>
+      <ng-container *ngTemplateOutlet="themeToggle"></ng-container>
+      <span class="cv-menu-wrap">
         <button
           type="button"
-          class="edit-btn export-bar-main"
+          class="cv-icon-btn"
+          [class.is-on]="cookExport.exportBarExpanded_()"
           (click)="cookExport.toggleExportBar()"
-          [attr.aria-label]="'export' | translatePipe"
+          [attr.aria-label]="'more_actions' | translatePipe"
           [attr.aria-expanded]="cookExport.exportBarExpanded_()"
         >
-          <lucide-icon name="download" [size]="18"></lucide-icon>
-          {{ 'export' | translatePipe }}
+          <lucide-icon name="more-vertical" [size]="22"></lucide-icon>
         </button>
-      </div>
-      }
+        @if (cookExport.exportBarExpanded_()) {
+        <ng-container *ngTemplateOutlet="exportMenu; context: { withEdit: !editMode_() }"></ng-container>
+        }
+      </span>
     </div>
 
-    <!-- Phone-only pane swap buttons -->
-    <div class="cv-phone-swap-bar">
-      <button
-        type="button"
-        class="cv-phone-swap-btn"
-        [class.active]="phoneFirstPane_() === 'ingredients'"
-        (click)="swapToPane('ingredients')"
+    <!-- Mode banners sit under the phone top bar (they were hidden behind it) -->
+    @if (editMode_()) {
+    <div class="edit-mode-banner" role="status"><i aria-hidden="true"></i>{{ 'edit_mode' | translatePipe }}</div>
+    } @if (!editMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
+    <div class="scaled-view-banner">
+      <span class="scaled-view-text">
+        <lucide-icon name="scale" [size]="18"></lucide-icon>
+        <span>{{ 'recipe_calculated_by' | translatePipe }} <b>{{ scaledRow.name }}</b>:</span>
+      </span>
+      <span class="cv-stepper">
+        <button type="button" (click)="stepScaledBannerAmount(-1)" [attr.aria-label]="'decrease' | translatePipe">
+          <lucide-icon name="minus" [size]="16"></lucide-icon>
+        </button>
+        <input
+          type="number"
+          class="cv-amount-input cv-num"
+          inputmode="decimal"
+          step="any"
+          min="0"
+          [value]="inputAmount(getDisplayAmount(scaleByIngredientIndex_()!, scaledRow))"
+          (change)="setScaledBannerAmount($any($event.target).valueAsNumber)"
+          [attr.aria-label]="'quantity' | translatePipe"
+        />
+        <button type="button" (click)="stepScaledBannerAmount(1)" [attr.aria-label]="'increase' | translatePipe">
+          <lucide-icon name="plus" [size]="16"></lucide-icon>
+        </button>
+      </span>
+      <span class="scaled-view-unit">{{ getDisplayUnit(scaleByIngredientIndex_()!, scaledRow) | translatePipe }}</span>
+      <span class="scaled-view-yield cv-num"
+        >{{ targetQuantity_() | formatQuantity }} {{ selectedUnit_() | translatePipe }}</span
       >
-        🧪 {{ 'ingredients_index' | translatePipe }}
+      <button type="button" class="back-to-full-recipe-btn" (click)="resetToFullRecipe()">
+        <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+        {{ 'back_to_full_recipe' | translatePipe }}
       </button>
-      <button
-        type="button"
-        class="cv-phone-swap-btn"
-        [class.active]="phoneFirstPane_() === 'steps'"
-        (click)="swapToPane('steps')"
-      >
-        ⏱ {{ isDish_() ? ('prep_list_mise_en_place' | translatePipe) : ('prep_workflow' | translatePipe) }}
+    </div>
+    }
+
+    <!-- Page header: back, title + meta chips, actions. With a recipe photo it becomes a slim
+         banner (photo behind, bottom scrim, white text). -->
+    <header class="cv-ph" [class.cv-ph--photo]="!!recipe.imageUrl">
+      @if (recipe.imageUrl) {
+      <img class="cv-ph-img" [src]="recipe.imageUrl" alt="" />
+      <div class="cv-ph-scrim" aria-hidden="true"></div>
+      }
+      <button type="button" class="cv-back" (click)="goBack()" [attr.aria-label]="'back' | translatePipe">
+        <lucide-icon name="arrow-right" [size]="20"></lucide-icon>
       </button>
+      <div class="cv-ph-text">
+        <h1 class="cv-ph-title">{{ recipe.nameHebrew }}</h1>
+        <div class="cv-meta">
+          <button
+            type="button"
+            class="cv-chip"
+            [class.cv-chip--warn]="!recipe.isApproved"
+            (click)="onApproveStamp()"
+            [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+          >
+            <lucide-icon [name]="recipe.isApproved ? 'check' : 'clock'" [size]="14"></lucide-icon>
+            {{ (recipe.isApproved ? 'approved' : 'awaiting_approval') | translatePipe }}
+          </button>
+          @if (scaledCost_() > 0) {
+          <span class="cv-chip cv-num">₪{{ scaledCost_() | number: '1.0-0' }}</span>
+          }
+          <span class="cv-chip cv-num"
+            >{{ targetQuantity_() | formatQuantity }} {{ selectedUnit_() | translatePipe }}</span
+          >
+          <span class="cv-chip cv-chip--warn cv-chip--rating">
+            <app-rating-stars
+              [value]="recipe.rating ?? 0"
+              [readonly]="!isLoggedIn()"
+              size="sm"
+              (ratingChange)="onRatingChange($event)"
+            />
+          </span>
+          @if (cookTimer.headerTimer_(); as ht) {
+          <span class="cv-chip cv-num cv-chip--timer" [class.cv-chip--alert]="ht.finished">
+            <lucide-icon name="timer" [size]="14"></lucide-icon>
+            {{ 'step' | translatePipe }} {{ ht.step + 1 }} · {{ ht.display }}
+          </span>
+          }
+        </div>
+      </div>
+      <div class="cv-ph-acts">
+        <span class="cv-ph-theme"><ng-container *ngTemplateOutlet="themeToggle"></ng-container></span>
+        @if (editMode_()) {
+        <button type="button" class="cv-pill-btn cv-pill-btn--primary" (click)="saveEdits()" [disabled]="isSaving_()">
+          @if (isSaving_()) {
+          <app-loader size="small" [inline]="true" />
+          } @else {
+          <lucide-icon name="save" [size]="16"></lucide-icon>
+          } {{ 'save_changes' | translatePipe }}
+        </button>
+        <button type="button" class="cv-pill-btn" (click)="undoEdits()">
+          <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+          {{ 'undo_changes' | translatePipe }}
+        </button>
+        } @else {
+        <button
+          type="button"
+          class="cv-pill-btn"
+          (click)="enterEditMode()"
+          [disabled]="!isLoggedIn()"
+          [attr.title]="!isLoggedIn() ? ('sign_in_to_use' | translatePipe) : null"
+        >
+          <lucide-icon name="pencil" [size]="16"></lucide-icon>
+          {{ 'edit' | translatePipe }}
+        </button>
+        <span class="cv-menu-wrap">
+          <button
+            type="button"
+            class="cv-pill-btn"
+            [class.cv-pill-btn--primary]="cookExport.exportBarExpanded_()"
+            (click)="cookExport.toggleExportBar()"
+            [attr.aria-expanded]="cookExport.exportBarExpanded_()"
+          >
+            <lucide-icon name="download" [size]="16"></lucide-icon>
+            {{ 'export' | translatePipe }}
+            <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
+          </button>
+          @if (cookExport.exportBarExpanded_()) {
+          <ng-container *ngTemplateOutlet="exportMenu; context: { withEdit: false }"></ng-container>
+          }
+        </span>
+        }
+      </div>
+    </header>
+
+    <!-- Below 768: sticky switch buttons that scroll the page to each pane and follow the scroll -->
+    <div class="cv-segw">
+      <div class="cv-seg" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          [class.is-on]="activePane_() === 'ingredients'"
+          [attr.aria-selected]="activePane_() === 'ingredients'"
+          (click)="scrollToPane('ingredients')"
+        >
+          {{ 'ingredients_index' | translatePipe }}
+          <em class="cv-num">{{ ingredientCheckProgress_().done }}/{{ ingredientCheckProgress_().total }}</em>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          [class.is-on]="activePane_() === 'steps'"
+          [attr.aria-selected]="activePane_() === 'steps'"
+          (click)="scrollToPane('steps')"
+        >
+          {{ isDish_() ? ('prep_list_mise_en_place' | translatePipe) : ('prep_workflow' | translatePipe) }}
+          <em class="cv-num">{{ stepDoneSet_().size }}/{{ stepTotal_() }}</em>
+        </button>
+      </div>
     </div>
 
     <!-- Two-column body -->
     <div class="cv-body">
       <!-- Ingredient pane -->
-      <div class="cv-ing-pane" [style.order]="phoneFirstPane_() === 'ingredients' ? 0 : 2">
-        <div class="cv-ing-pane-header" [class.cv-ing-pane-header--complete]="allIngredientsChecked_()">
-          <span class="cv-ing-pane-title">
-            <lucide-icon name="flask-conical" [size]="18"></lucide-icon>
-            {{ 'ingredients_index' | translatePipe }}
+      <section class="cv-pane cv-ing-pane" #ingPane>
+        <h2 class="cv-pane-head">
+          <lucide-icon name="flask-conical" [size]="18"></lucide-icon>
+          {{ 'ingredients_index' | translatePipe }}
+          <em class="cv-pane-count cv-num"
+            >{{ ingredientCheckProgress_().done }}/{{ ingredientCheckProgress_().total }}</em
+          >
+          @if (allIngredientsChecked_() && ingredientCheckProgress_().total > 0) {
+          <span class="cv-ready-badge">
+            <lucide-icon name="check" [size]="13"></lucide-icon>
+            {{ 'all_ingredients_ready_label' | translatePipe }}
           </span>
-          @if (allIngredientsChecked_()) {
-          <span class="cv-ing-badge cv-ing-badge--complete">{{ 'all_ingredients_ready' | translatePipe }}</span>
-          } @else {
-          <span class="cv-ing-badge">{{ ingredientCheckProgress_().done }}/{{ ingredientCheckProgress_().total }}</span>
           }
-          <div class="cv-ing-progress-bar">
-            <div
-              class="cv-ing-progress-fill"
-              [style.width.%]="ingredientCheckProgress_().total > 0 ? (ingredientCheckProgress_().done / ingredientCheckProgress_().total) * 100 : 0"
-            ></div>
-          </div>
+        </h2>
+        <div class="cv-pane-bar">
+          <i
+            [style.width.%]="ingredientCheckProgress_().total > 0 ? (ingredientCheckProgress_().done / ingredientCheckProgress_().total) * 100 : 0"
+          ></i>
         </div>
 
-        <!-- Yield/scale controls: multiplier pills + quantity stepper (mirrors mockup's in-panel "כמות מנות" row) -->
-        @if (!isScaledView_()) {
-        <div class="cv-scale-bar">
-          @if (!editMode_()) {
-          <div class="cv-multiplier-chips">
-            @for (chip of multiplierChips; track chip.factor) {
-            <button
-              type="button"
-              class="c-chip cv-chip-btn"
-              [class.cv-chip--active]="activeMultiplier_() === chip.factor"
-              (click)="selectMultiplier(chip.factor)"
-              [attr.aria-pressed]="activeMultiplier_() === chip.factor"
-            >
-              {{ chip.key | translatePipe }}
-            </button>
-            }
-          </div>
-          }
-          <div class="quantity-control-wrap">
-            <span class="quantity-label">{{ 'make_quantity' | translatePipe }}</span>
-            <app-counter
-              [value]="targetQuantity_()"
-              [min]="isDish_() ? 1 : 0.01"
-              [stepOptions]="cookViewStepOpts_()"
-              (valueChange)="setQuantity($event)"
-            />
-            <app-custom-select
-              class="unit-select"
-              [ngModel]="selectedUnit_()"
-              (ngModelChange)="onYieldUnitChange($event)"
-              [options]="yieldUnitOptions_()"
-              placeholder="unit"
-              [typeToFilter]="true"
-            >
-            </app-custom-select>
-            @if (recipe.yieldUnit !== selectedUnit_()) {
-            <span class="conversion-badge"> ×{{ scaleFactor_() | number:'1.2-2' }} </span>
-            }
-          </div>
-        </div>
-        }
-
-        <div class="cv-ing-body" scrollIndicators>
-          @if (editMode_()) {
-          <!-- Edit mode: original ingredient table -->
-          <div class="ingredients-table">
-            <div class="ingredients-table-header">
-              <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
-              <div class="col-amount">{{ 'quantity' | translatePipe }}</div>
-              <div class="col-unit">{{ 'unit' | translatePipe }}</div>
+        <div class="cv-pane-inner">
+          <!-- Quantity controls: multiplier chips (view mode) + counter + yield unit; hidden while scaled -->
+          @if (!isScaledView_()) {
+          <div class="cv-scale-bar">
+            @if (!editMode_()) {
+            <div class="cv-multiplier-chips">
+              @for (chip of multiplierChips; track chip.factor) {
+              <button
+                type="button"
+                class="cv-mult-chip"
+                [class.is-on]="activeMultiplier_() === chip.factor"
+                (click)="selectMultiplier(chip.factor)"
+                [attr.aria-pressed]="activeMultiplier_() === chip.factor"
+              >
+                {{ chip.key | translatePipe }}
+              </button>
+              }
             </div>
-            @for (row of scaledIngredients_(); track (row.referenceId ?? 'u' + $index) + row.unit + row.amount; let i =
-            $index) {
-            <div class="ingredients-table-row" [class.field-changed]="ingredientChanged(i)">
-              <div class="col-name">{{ row.name }}</div>
-              <div class="col-amount edit-amount">
-                <button
-                  type="button"
-                  class="qty-btn minus small"
-                  (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit))"
-                  [attr.aria-label]="'decrease' | translatePipe"
-                >
-                  <lucide-icon name="minus" [size]="14"></lucide-icon>
-                </button>
-                <input
-                  type="number"
-                  class="amount-input"
-                  [value]="row.amount"
-                  (input)="setIngredientAmount(i, $any($event.target).valueAsNumber ?? 0)"
-                  (keydown)="onEditAmountKeydown($event, i, row.amount, row.unit)"
-                  [min]="0"
-                  [step]="isDish_() ? 1 : 0.01"
-                />
-                <button
-                  type="button"
-                  class="qty-btn plus small"
-                  (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1, row.unit))"
-                  [attr.aria-label]="'increase' | translatePipe"
-                >
-                  <lucide-icon name="plus" [size]="14"></lucide-icon>
-                </button>
-              </div>
-              <div class="col-unit">
+            }
+            <div class="quantity-control-wrap" role="group" [attr.aria-label]="'make_quantity' | translatePipe">
+              <app-counter
+                [value]="targetQuantity_()"
+                [min]="isDish_() ? 1 : 0.01"
+                [stepOptions]="cookViewStepOpts_()"
+                (valueChange)="setQuantity($event)"
+              />
+              <app-custom-select
+                class="unit-select"
+                [ngModel]="selectedUnit_()"
+                (ngModelChange)="onYieldUnitChange($event)"
+                [options]="yieldUnitOptions_()"
+                placeholder="unit"
+                variant="chip"
+                [typeToFilter]="true"
+              >
+              </app-custom-select>
+              @if (recipe.yieldUnit !== selectedUnit_()) {
+              <span class="conversion-badge cv-num"> ×{{ scaleFactor_() | number: '1.2-2' }} </span>
+              }
+            </div>
+            @if (!editMode_()) {
+            <p class="cv-long-press-hint">{{ 'long_press_ingredient_hint' | translatePipe }}</p>
+            }
+          </div>
+          }
+
+          <div class="cv-ing-body">
+            @if (editMode_()) {
+            <!-- Edit mode: one row per ingredient — name · − amount + · unit · delete -->
+            <div class="cv-ied-list">
+              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u') + row.unit + ':' + $index; let i =
+              $index) {
+              <div class="cv-ied" [class.is-changed]="ingredientChanged(i)">
+                <span class="cv-ied-name" [class.is-unlinked]="row.isUnlinked">{{ row.name }}</span>
+                <span class="cv-stepper">
+                  <button
+                    type="button"
+                    (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit))"
+                    [attr.aria-label]="'decrease' | translatePipe"
+                  >
+                    <lucide-icon name="minus" [size]="16"></lucide-icon>
+                  </button>
+                  <input
+                    type="number"
+                    class="cv-amount-input cv-num"
+                    [class.is-changed]="ingredientFieldChanged(i, 'amount')"
+                    [value]="inputAmount(row.amount)"
+                    (input)="setIngredientAmount(i, $any($event.target).valueAsNumber ?? 0)"
+                    (keydown)="onEditAmountKeydown($event, i, row.amount, row.unit)"
+                    [min]="0"
+                    [step]="isDish_() ? 1 : 0.01"
+                    [attr.aria-label]="'quantity' | translatePipe"
+                  />
+                  <button
+                    type="button"
+                    (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1, row.unit))"
+                    [attr.aria-label]="'increase' | translatePipe"
+                  >
+                    <lucide-icon name="plus" [size]="16"></lucide-icon>
+                  </button>
+                </span>
                 <app-custom-select
-                  class="unit-select"
+                  class="cv-ied-unit"
+                  [class.is-changed]="ingredientFieldChanged(i, 'unit')"
                   [ngModel]="row.unit"
                   (ngModelChange)="setIngredientUnit(i, $event)"
                   [options]="getUnitOptionsForRow(row)"
@@ -352,121 +409,148 @@
                 />
                 <button
                   type="button"
-                  class="remove-ingredient-btn"
+                  class="cv-ied-del"
                   (click)="removeIngredient(i)"
                   [attr.aria-label]="'remove' | translatePipe"
                 >
-                  <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                  <lucide-icon name="trash-2" [size]="18"></lucide-icon>
                 </button>
               </div>
-            </div>
-            }
-          </div>
-          } @else {
-          <!-- View mode: Focus Mode ingredient checklist -->
-          @for (row of scaledIngredients_(); track (row.referenceId ?? 'u' + $index) + row.unit + row.amount; let i =
-          $index) {
-          <div
-            class="cv-ing-row"
-            [class.cv-ing-row--done]="checkedIngredients_().has(i)"
-            [class.row-highlight]="settingByIngredientIndex_() === i"
-            [class.setting-by]="settingByIngredientIndex_() === i"
-            [attr.role]="'checkbox'"
-            [attr.aria-checked]="checkedIngredients_().has(i)"
-            (click)="settingByIngredientIndex_() !== i ? toggleIngredientCheck(i) : null"
-          >
-            @if (settingByIngredientIndex_() === i) {
-            <div class="col-name">{{ row.name }}</div>
-            <div class="col-amount set-by-amount">
-              <input
-                type="number"
-                class="amount-input"
-                [ngModel]="settingByIngredientAmount_()"
-                (ngModelChange)="onSettingAmountChange($event)"
-                (keydown)="onSettingAmountKeydown($event)"
-                [min]="0.01"
-                [step]="isDish_() ? 1 : 0.1"
-                (click)="$event.stopPropagation()"
-              />
-            </div>
-            <div class="col-unit"><span>{{ row.unit | translatePipe }}</span></div>
-            <div class="col-scale-action">
-              <button
-                type="button"
-                class="convert-scale-btn"
-                (click)="$event.stopPropagation(); confirmScaleByIngredient(i, settingByIngredientAmount_())"
-                [attr.aria-label]="'convert' | translatePipe"
-              >
-                <lucide-icon name="scale" [size]="16"></lucide-icon>
-                {{ 'convert' | translatePipe }}
-              </button>
-              <button
-                type="button"
-                class="cancel-set-by-btn"
-                (click)="$event.stopPropagation(); cancelSetByIngredient()"
-                [attr.aria-label]="'cancel' | translatePipe"
-              >
-                {{ 'cancel' | translatePipe }}
-              </button>
+              }
             </div>
             } @else {
-            <span class="cv-ing-check" [class.cv-ing-check--done]="checkedIngredients_().has(i)"></span>
-            <span
-              class="cv-ing-name"
-              [style.font-style]="row.isUnlinked ? 'italic' : null"
-              [style.opacity]="row.isUnlinked ? '0.85' : null"
-              >{{ row.name }}</span
-            >
-            <span class="cv-ing-amt">{{ getDisplayAmount(i, row) | formatQuantity }}</span>
-            <span class="cv-ing-unit">
-              @if (row.availableUnits.length > 1) {
-              <app-custom-select
-                class="unit-select"
-                [ngModel]="getDisplayUnit(i, row)"
-                (ngModelChange)="setUnitOverride(i, $event)"
-                [options]="getUnitOptionsForRow(row)"
-                placeholder="unit"
-                variant="chip"
-                [typeToFilter]="true"
-                (click)="$event.stopPropagation()"
-              />
-              } @else { {{ getDisplayUnit(i, row) | translatePipe }} }
-            </span>
-            <button
-              type="button"
-              class="set-by-ingredient-btn"
-              (click)="$event.stopPropagation(); startSetByIngredient(i)"
-              [attr.aria-label]="'set_recipe_by_this_item' | translatePipe"
-            >
-              <lucide-icon name="scale" [size]="14"></lucide-icon>
-            </button>
+            <!-- View mode: checklist rows; each row expands (units + scale to this ingredient) -->
+            <div class="cv-ing-list">
+              @for (row of scaledIngredients_(); track (row.referenceId ?? 'u') + row.unit + ':' + $index; let i =
+              $index) {
+              <div
+                class="cv-ing"
+                [attr.data-ing-index]="i"
+                [class.is-checked]="checkedIngredients_().has(i)"
+                [class.is-open]="openIngredientIndex_() === i"
+                [class.is-source]="scaleByIngredientIndex_() === i"
+                (contextmenu)="$event.preventDefault()"
+              >
+                <div
+                  class="cv-ing-main"
+                  role="checkbox"
+                  tabindex="0"
+                  [attr.aria-checked]="checkedIngredients_().has(i)"
+                  (click)="onIngredientRowClick(i)"
+                  (keydown)="onIngredientRowKeydown($event, i)"
+                  (pointerdown)="onIngredientPointerDown($event, i)"
+                  (pointermove)="onIngredientPointerMove($event)"
+                  (pointerup)="cancelLongPress()"
+                  (pointercancel)="cancelLongPress()"
+                  (pointerleave)="cancelLongPress()"
+                >
+                  <span class="cv-ing-check" aria-hidden="true">
+                    @if (checkedIngredients_().has(i)) {
+                    <lucide-icon name="check" [size]="18"></lucide-icon>
+                    }
+                  </span>
+                  <span
+                    class="cv-ing-name"
+                    [class.is-unlinked]="row.isUnlinked"
+                    [attr.title]="row.isUnlinked ? ('unlinked_ingredient' | translatePipe) : null"
+                  >
+                    {{ row.name }} @if (scaleByIngredientIndex_() === i) {
+                    <span class="cv-source-pill">
+                      <lucide-icon name="pin" [size]="11"></lucide-icon>
+                      {{ 'source_ingredient' | translatePipe }}
+                    </span>
+                    }
+                  </span>
+                  <span class="cv-ing-amt cv-num">{{ getDisplayAmount(i, row) | formatQuantity }}</span>
+                  <span class="cv-ing-unit">
+                    {{ getDisplayUnit(i, row) | translatePipe }} @if (row.availableUnits.length > 1) {
+                    <lucide-icon name="arrow-left-right" [size]="12"></lucide-icon>
+                    }
+                  </span>
+                  <button
+                    type="button"
+                    class="cv-row-more"
+                    (click)="$event.stopPropagation(); toggleIngredientExpander(i)"
+                    [attr.aria-expanded]="openIngredientIndex_() === i"
+                    [attr.aria-label]="'more_actions' | translatePipe"
+                    [attr.title]="'more_actions' | translatePipe"
+                  >
+                    <lucide-icon name="chevron-down" [size]="18"></lucide-icon>
+                  </button>
+                </div>
+
+                <div class="cv-ing-exp" [attr.aria-hidden]="openIngredientIndex_() !== i">
+                  <div class="cv-ing-exp-inner">
+                    @if (openIngredientIndex_() === i) { @if (settingByIngredientIndex_() !== i) {
+                    <div class="cv-ing-actions">
+                      <app-custom-select
+                        class="cv-unit-select"
+                        [ngModel]="null"
+                        (ngModelChange)="onRowUnitPick(i, row, $event)"
+                        [options]="otherUnitOptions(i, row)"
+                        placeholder="choose_unit"
+                        variant="chip"
+                      />
+                      <button type="button" class="cv-scale-open" (click)="startSetByIngredient(i)">
+                        <lucide-icon name="scale" [size]="16"></lucide-icon>
+                        {{ 'scale_recipe_to_ingredient' | translatePipe }}
+                      </button>
+                    </div>
+                    } @if (settingByIngredientIndex_() === i) {
+                    <div class="cv-scale-form">
+                      <span class="cv-scale-form-label">
+                        <lucide-icon name="scale" [size]="16"></lucide-icon>
+                        {{ 'scale_recipe_to_ingredient' | translatePipe }}
+                      </span>
+                      <input
+                        type="number"
+                        class="cv-amount-input cv-num"
+                        inputmode="decimal"
+                        [ngModel]="settingByIngredientAmount_()"
+                        (ngModelChange)="onSettingAmountChange($event)"
+                        (keydown)="onSettingAmountKeydown($event)"
+                        (keydown.enter)="applyScaleFromForm(i)"
+                        [min]="0.01"
+                        [step]="isDish_() ? 1 : 0.1"
+                        [attr.aria-label]="'quantity' | translatePipe"
+                      />
+                      <span class="cv-scale-form-unit">{{ getDisplayUnit(i, row) | translatePipe }}</span>
+                      <button type="button" class="cv-pill-btn cv-pill-btn--primary" (click)="applyScaleFromForm(i)">
+                        {{ 'recalculate' | translatePipe }}
+                      </button>
+                      <button type="button" class="cv-pill-btn" (click)="cancelSetByIngredient()">
+                        {{ 'cancel' | translatePipe }}
+                      </button>
+                      @if (scalePreview_(); as preview) {
+                      <p class="cv-scale-preview cv-num">
+                        {{ 'recipe_will_recalculate' | translatePipe }}: ×{{ preview.factor | number: '1.0-2' }} · {{
+                        preview.qty | formatQuantity }} {{ selectedUnit_() | translatePipe }}
+                      </p>
+                      }
+                    </div>
+                    } }
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
             }
           </div>
-          } }
         </div>
-        <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--top" aria-hidden="true">
-          <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-        </div>
-        <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--bottom" aria-hidden="true">
-          <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
-        </div>
-      </div>
-
-      <div class="cv-pane-divider" [style.order]="1"></div>
+      </section>
 
       <!-- Step pane -->
-      <div class="cv-step-pane" #stepPane [style.order]="phoneFirstPane_() === 'steps' ? 0 : 2">
-        <div class="cv-step-pane-header">
-          <span class="cv-step-pane-title">
-            <lucide-icon name="timer" [size]="18"></lucide-icon>
-            {{ isDish_() ? ('prep_list_mise_en_place' | translatePipe) : ('prep_workflow' | translatePipe) }}
-          </span>
-          <span class="cv-step-counter"
-            >{{ stepDoneSet_().size }}/{{ isDish_() ? scaledPrep_().length : recipe.steps.length }}</span
-          >
+      <section class="cv-pane cv-step-pane" #stepPane>
+        <h2 class="cv-pane-head">
+          <lucide-icon name="timer" [size]="18"></lucide-icon>
+          {{ isDish_() ? ('prep_list_mise_en_place' | translatePipe) : ('prep_workflow' | translatePipe) }}
+          <em class="cv-pane-count cv-num">{{ stepDoneSet_().size }}/{{ stepTotal_() }}</em>
+        </h2>
+        <div class="cv-pane-bar">
+          <i [style.width.%]="stepTotal_() > 0 ? (stepDoneSet_().size / stepTotal_()) * 100 : 0"></i>
         </div>
 
-        <div class="cv-step-body" scrollIndicators>
+        <div class="cv-step-body">
           @if (editMode_()) {
           <!-- Edit mode: original workflow editor -->
           <app-recipe-workflow
@@ -481,182 +565,284 @@
           >
           </app-recipe-workflow>
           } @else {
-          <!-- View mode: Focus Mode step cards -->
-          @if (isDish_()) {
-          <!-- Dish mode: prep items as cards -->
-          @if (scaledPrep_().length > 0) { @for (row of scaledPrep_(); track row.name + row.unit + row.amount; let si =
-          $index) { @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-          <!-- ACTIVE prep item -->
-          <div class="cv-step-card cv-step-card--active" [attr.data-step-index]="si">
-            <div class="cv-step-card-head">
-              <span class="cv-step-num cv-step-num--active">{{ si + 1 }}</span>
-              <span class="cv-step-active-label">פעיל עכשיו</span>
+          <!-- Clock pills shown on a done / pending row whose step owns a running clock -->
+          <ng-template #rowPills let-si="si">
+            @if (cookTimer.isTimerFinished(si)) {
+            <span
+              class="cv-row-pill cv-row-pill--alert"
+              role="button"
+              tabindex="0"
+              (click)="$event.stopPropagation(); cookTimer.dismissTimerDone(si)"
+              (keydown.enter)="$event.stopPropagation(); cookTimer.dismissTimerDone(si)"
+            >
+              <lucide-icon name="timer" [size]="13"></lucide-icon>
+              {{ 'timer_done' | translatePipe }}
+              <lucide-icon name="x" [size]="13"></lucide-icon>
+            </span>
+            } @else if (cookTimer.hasCountdown(si)) {
+            <span
+              class="cv-row-pill cv-num"
+              role="button"
+              tabindex="0"
+              (click)="$event.stopPropagation(); cookTimer.toggleTimer(si)"
+              (keydown.enter)="$event.stopPropagation(); cookTimer.toggleTimer(si)"
+            >
+              <lucide-icon name="timer" [size]="13"></lucide-icon>
+              {{ cookTimer.timerDisplay(si) }}
+              <lucide-icon [name]="cookTimer.isTimerPaused(si) ? 'play' : 'pause'" [size]="12"></lucide-icon>
+            </span>
+            } @if (cookTimer.hasStopwatch(si)) {
+            <span
+              class="cv-row-pill cv-num"
+              role="button"
+              tabindex="0"
+              (click)="$event.stopPropagation(); cookTimer.toggleStopwatch(si)"
+              (keydown.enter)="$event.stopPropagation(); cookTimer.toggleStopwatch(si)"
+            >
+              <lucide-icon name="watch" [size]="13"></lucide-icon>
+              {{ cookTimer.stopwatchDisplay(si) }}
+              <lucide-icon [name]="cookTimer.isStopwatchPaused(si) ? 'play' : 'pause'" [size]="12"></lucide-icon>
+            </span>
+            }
+          </ng-template>
+
+          <div class="cv-step-list">
+            @if (isDish_()) {
+            <!-- Dish mode: mise-en-place items (amount + name), no clocks -->
+            @if (scaledPrep_().length > 0) { @for (row of scaledPrep_(); track row.name + row.unit + ':' + $index; let
+            si = $index) { @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+            <div class="cv-act" [class.cv-grow]="growStepIndex_() === si" [attr.data-step-index]="si">
+              <div class="cv-lab">
+                <i></i>{{ 'step' | translatePipe }} {{ si + 1 }} · {{ 'active_now' | translatePipe }}
+              </div>
+              <p class="cv-act-dish">
+                <b class="cv-num">{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }}</b>
+                {{ row.name }}
+              </p>
+              <button type="button" class="cv-go" (click)="markStepDone(si)">
+                <lucide-icon name="check" [size]="20"></lucide-icon>
+                {{ 'mark_step_done' | translatePipe }}
+              </button>
             </div>
-            <div class="cv-step-card-body">
-              <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
-            </div>
-            <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">
-              ✓ &nbsp; {{ 'mark_step_done' | translatePipe }}
+            } @else if (stepDoneSet_().has(si)) {
+            <button
+              type="button"
+              class="cv-dn"
+              [attr.data-step-index]="si"
+              (click)="unmarkStepDone(si)"
+              [attr.aria-label]="'reopen_step' | translatePipe"
+            >
+              <span class="cv-ok"><lucide-icon name="check" [size]="15"></lucide-icon></span>
+              <s>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</s>
+              <lucide-icon class="cv-dn-undo" name="undo-2" [size]="18"></lucide-icon>
             </button>
-          </div>
-          } @else if (stepDoneSet_().has(si)) {
-          <!-- DONE prep item -->
-          <div class="cv-step-card cv-step-card--done" [attr.data-step-index]="si">
-            <div class="cv-step-card-head">
-              <span class="cv-step-num cv-step-num--done">✓</span>
-              <span class="cv-step-done-label">{{ 'step_done_label' | translatePipe }}</span>
-              <span
-                class="cv-step-status-chip cv-step-status-chip--done cv-step-status-chip--clickable"
-                style="margin-inline-start: auto"
-                (click)="unmarkStepDone(si)"
-                >↩</span
+            } @else {
+            <button type="button" class="cv-pd" [attr.data-step-index]="si" (click)="setActiveStep(si)">
+              <span class="cv-pd-n cv-num">{{ si + 1 }}</span>
+              <span class="cv-pd-t"
+                >{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</span
               >
-            </div>
-            <div class="cv-step-card-body">
-              <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
-            </div>
-          </div>
-          } @else {
-          <!-- PENDING prep item -->
-          <div class="cv-step-card" [attr.data-step-index]="si">
-            <div class="cv-step-card-head">
-              <span class="cv-step-num">{{ si + 1 }}</span>
-            </div>
-            <div class="cv-step-card-body">
-              <p>{{ row.amount | formatQuantity }} {{ row.unit | translatePipe }} {{ row.name }}</p>
-            </div>
-          </div>
-          } } } @else {
-          <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
-          } } @else {
-          <!-- Recipe mode: steps as cards -->
-          @if (recipe.steps && recipe.steps.length) { @for (step of recipe.steps; track step.order; let si = $index) {
-          @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
-          <!-- ACTIVE step -->
-          <div class="cv-step-card cv-step-card--active" [attr.data-step-index]="si">
-            <div class="cv-step-card-head">
-              <span class="cv-step-num cv-step-num--active">{{ si + 1 }}</span>
-              <span class="cv-step-active-label">פעיל עכשיו</span>
-            </div>
-            <div class="cv-step-card-body">
-              <p>{{ step.instruction }}</p>
-              <!-- Timer/stopwatch pills sit under the step text (mirrors mockup's timerBtnLabel placement) -->
-              <div class="cv-step-tools-row">
-                @if ((step.cookingTimeSecs ?? 0) > 0) { @if (cookTimer.activeTimerStepIndex_() === si) {
-                <button type="button" class="cv-step-tool-btn" (click)="cookTimer.cancelTimer()">
-                  ⏱ {{ cookTimer.timerDisplay_() }} ⏸
-                </button>
+            </button>
+            } } } @else {
+            <p class="empty-state-text">{{ 'no_preparations_defined' | translatePipe }}</p>
+            } } @else {
+            <!-- Recipe mode: done rows · active card · pending rows -->
+            @if (recipe.steps && recipe.steps.length) { @for (step of recipe.steps; track step.order; let si = $index) {
+            @if (activeStepIndex_() === si && !stepDoneSet_().has(si)) {
+            <div
+              class="cv-act"
+              [class.cv-grow]="growStepIndex_() === si"
+              [class.is-alert]="cookTimer.isTimerFinished(si)"
+              [attr.data-step-index]="si"
+            >
+              <div class="cv-lab">
+                <i></i>{{ 'step' | translatePipe }} {{ si + 1 }} · {{ 'active_now' | translatePipe }}
+                <span class="cv-lab-tools">
+                  @if (!cookTimer.hasCountdown(si)) {
+                  <button
+                    type="button"
+                    class="cv-clk-btn"
+                    (click)="startStepCountdown(si, step)"
+                    [attr.aria-label]="'timer_start' | translatePipe"
+                    [attr.title]="'timer_start' | translatePipe"
+                  >
+                    <lucide-icon name="timer" [size]="18"></lucide-icon>
+                  </button>
+                  } @if (!cookTimer.hasStopwatch(si)) {
+                  <button
+                    type="button"
+                    class="cv-clk-btn"
+                    (click)="cookTimer.startStopwatch(si)"
+                    [attr.aria-label]="'stopwatch' | translatePipe"
+                    [attr.title]="'stopwatch' | translatePipe"
+                  >
+                    <lucide-icon name="watch" [size]="18"></lucide-icon>
+                  </button>
+                  }
+                </span>
+              </div>
+              <p class="cv-act-text">{{ step.instruction }}</p>
+
+              @if (cookTimer.hasCountdown(si)) {
+              <div class="cv-clock cv-clock--timer" [class.is-fin]="cookTimer.isTimerFinished(si)">
+                @if (timerDraft_() !== null) {
+                <input
+                  class="cv-clock-input cv-num"
+                  inputmode="numeric"
+                  [ngModel]="timerDraft_()"
+                  (ngModelChange)="timerDraft_.set($event)"
+                  (keydown.enter)="commitTimerEdit(si)"
+                  (keydown.escape)="cancelTimerEdit()"
+                  (blur)="commitTimerEdit(si)"
+                  [attr.aria-label]="'timer_start' | translatePipe"
+                />
                 } @else {
-                <button
-                  type="button"
-                  class="cv-step-tool-btn"
-                  (click)="cookTimer.startTimer(si, step.cookingTimeSecs!)"
-                >
-                  ⏱ {{ 'timer_start' | translatePipe }}
-                </button>
-                } } @if (cookTimer.stopwatchStepIndex_() === si) {
-                <button type="button" class="cv-step-tool-btn" (click)="cookTimer.toggleStopwatch()">
-                  ⌚ {{ cookTimer.stopwatchDisplay_() }} {{ cookTimer.stopwatchPaused_() ? '▶' : '⏸' }}
-                </button>
-                } @else {
-                <button type="button" class="cv-step-tool-btn" (click)="cookTimer.startStopwatch(si)">
-                  ⌚ {{ 'stopwatch' | translatePipe }}
+                <button type="button" class="cv-clock-time cv-num" (click)="beginTimerEdit(si)">
+                  {{ cookTimer.timerDisplay(si) }}
                 </button>
                 }
+                <span class="cv-clock-btns">
+                  <button
+                    type="button"
+                    class="cv-cb cv-cb--ghost"
+                    (click)="cookTimer.resetTimer(si)"
+                    [attr.aria-label]="'reset' | translatePipe"
+                  >
+                    <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
+                  </button>
+                  @if (!cookTimer.isTimerFinished(si)) {
+                  <button
+                    type="button"
+                    class="cv-cb"
+                    (click)="cookTimer.toggleTimer(si)"
+                    [attr.aria-label]="(cookTimer.isTimerPaused(si) ? 'resume' : 'pause') | translatePipe"
+                  >
+                    <lucide-icon [name]="cookTimer.isTimerPaused(si) ? 'play' : 'pause'" [size]="18"></lucide-icon>
+                  </button>
+                  }
+                  <button
+                    type="button"
+                    class="cv-cb cv-cb--ghost"
+                    (click)="cancelTimerEdit(); cookTimer.cancelTimer(si)"
+                    [attr.aria-label]="'remove' | translatePipe"
+                  >
+                    <lucide-icon name="x" [size]="18"></lucide-icon>
+                  </button>
+                </span>
               </div>
+              } @if (cookTimer.hasStopwatch(si)) {
+              <div class="cv-clock cv-clock--sw">
+                <span class="cv-clock-time cv-num">{{ cookTimer.stopwatchDisplay(si) }}</span>
+                <span class="cv-clock-btns">
+                  <button
+                    type="button"
+                    class="cv-cb cv-cb--ghost"
+                    (click)="cookTimer.resetStopwatch(si)"
+                    [attr.aria-label]="'reset' | translatePipe"
+                  >
+                    <lucide-icon name="rotate-ccw" [size]="18"></lucide-icon>
+                  </button>
+                  <button
+                    type="button"
+                    class="cv-cb"
+                    (click)="cookTimer.toggleStopwatch(si)"
+                    [attr.aria-label]="(cookTimer.isStopwatchPaused(si) ? 'resume' : 'pause') | translatePipe"
+                  >
+                    <lucide-icon [name]="cookTimer.isStopwatchPaused(si) ? 'play' : 'pause'" [size]="18"></lucide-icon>
+                  </button>
+                  <button
+                    type="button"
+                    class="cv-cb cv-cb--ghost"
+                    (click)="cookTimer.stopStopwatch(si)"
+                    [attr.aria-label]="'remove' | translatePipe"
+                  >
+                    <lucide-icon name="x" [size]="18"></lucide-icon>
+                  </button>
+                </span>
+              </div>
+              }
+
+              <button type="button" class="cv-go" (click)="markStepDone(si)">
+                <lucide-icon name="check" [size]="20"></lucide-icon>
+                {{ 'mark_step_done' | translatePipe }}
+              </button>
             </div>
-            <button type="button" class="cv-step-done-btn" (click)="markStepDone(si)">
-              ✓ &nbsp; {{ 'mark_step_done' | translatePipe }}
+            } @else if (stepDoneSet_().has(si)) {
+            <button
+              type="button"
+              class="cv-dn"
+              [class.is-alert]="cookTimer.isTimerFinished(si)"
+              [attr.data-step-index]="si"
+              (click)="unmarkStepDone(si)"
+              [attr.aria-label]="'reopen_step' | translatePipe"
+            >
+              <span class="cv-ok"><lucide-icon name="check" [size]="15"></lucide-icon></span>
+              <s>{{ step.instruction }}</s>
+              <ng-container *ngTemplateOutlet="rowPills; context: { si: si }"></ng-container>
+              <lucide-icon class="cv-dn-undo" name="undo-2" [size]="18"></lucide-icon>
             </button>
+            } @else {
+            <button
+              type="button"
+              class="cv-pd"
+              [class.is-alert]="cookTimer.isTimerFinished(si)"
+              [attr.data-step-index]="si"
+              (click)="setActiveStep(si)"
+            >
+              <span class="cv-pd-n cv-num">{{ si + 1 }}</span>
+              <span class="cv-pd-t">{{ step.instruction }}</span>
+              <ng-container *ngTemplateOutlet="rowPills; context: { si: si }"></ng-container>
+              @if (stepMinutes(step) > 0 && !cookTimer.hasCountdown(si)) {
+              <span class="cv-pd-min cv-num">
+                <lucide-icon name="timer" [size]="13"></lucide-icon>
+                {{ stepMinutes(step) }} {{ 'min' | translatePipe }}
+              </span>
+              }
+            </button>
+            } } } @else {
+            <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
+            } } @if (cookingComplete_()) {
+            <div class="cv-fin-ban">
+              <lucide-icon name="party-popper" [size]="22"></lucide-icon>
+              {{ 'cooking_complete_label' | translatePipe }}
+            </div>
+            }
           </div>
-          } @else if (stepDoneSet_().has(si)) {
-          <!-- DONE step -->
-          <div
-            class="cv-step-card cv-step-card--done"
-            [class.cv-step-card--timer-alert]="cookTimer.timerFinishedStepIndex_() === si"
-            [attr.data-step-index]="si"
-          >
-            <div class="cv-step-card-head">
-              <span class="cv-step-num cv-step-num--done">✓</span>
-              <span class="cv-step-done-label">{{ 'step_done_label' | translatePipe }}</span>
-              <!-- Finished timer alert on done step -->
-              @if (cookTimer.timerFinishedStepIndex_() === si) {
-              <span class="cv-step-timer-pill cv-step-timer-pill--alert" (click)="cookTimer.dismissTimerDone()">
-                ⏱ {{ 'timer_done' | translatePipe }} ✕
-              </span>
-              }
-              <!-- Running stopwatch on done step -->
-              @if (cookTimer.stopwatchStepIndex_() === si) {
-              <span class="cv-step-timer-pill" (click)="cookTimer.toggleStopwatch()">
-                ⌚ {{ cookTimer.stopwatchDisplay_() }} {{ cookTimer.stopwatchPaused_() ? '▶' : '⏸' }}
-              </span>
-              }
-              <!-- Undo done -->
-              <span
-                class="cv-step-status-chip cv-step-status-chip--done cv-step-status-chip--clickable"
-                style="margin-inline-start: auto"
-                (click)="unmarkStepDone(si)"
-                >↩</span
-              >
-            </div>
-            <div class="cv-step-card-body">
-              <p>{{ step.instruction }}</p>
-            </div>
-          </div>
-          } @else {
-          <!-- PENDING step — tap anywhere to jump to this step -->
-          <div
-            class="cv-step-card cv-step-card--pending"
-            [class.cv-step-card--timer-alert]="cookTimer.timerFinishedStepIndex_() === si"
-            [attr.data-step-index]="si"
-            (click)="setActiveStep(si)"
-          >
-            <div class="cv-step-card-head">
-              <span class="cv-step-num">{{ si + 1 }}</span>
-              <!-- Finished timer alert -->
-              @if (cookTimer.timerFinishedStepIndex_() === si) {
-              <span class="cv-step-timer-pill cv-step-timer-pill--alert" (click)="cookTimer.dismissTimerDone()">
-                ⏱ {{ 'timer_done' | translatePipe }} ✕
-              </span>
-              }
-              <!-- Running stopwatch on pending step -->
-              @if (cookTimer.stopwatchStepIndex_() === si) {
-              <span class="cv-step-timer-pill" (click)="cookTimer.toggleStopwatch()">
-                ⌚ {{ cookTimer.stopwatchDisplay_() }} {{ cookTimer.stopwatchPaused_() ? '▶' : '⏸' }}
-              </span>
-              }
-            </div>
-            <div class="cv-step-card-body">
-              <p>{{ step.instruction }}</p>
-            </div>
-          </div>
-          } } } @else {
-          <p class="empty-state-text">{{ 'no_steps_defined' | translatePipe }}</p>
-          } } @if (cookingComplete_()) {
-          <div class="cv-complete-banner">🎉 {{ 'cooking_complete' | translatePipe }}</div>
-          } }
+          }
         </div>
-        <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--top" aria-hidden="true">
-          <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-        </div>
-        <div class="cv-pane-scroll-indicator cv-pane-scroll-indicator--bottom" aria-hidden="true">
-          <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
-        </div>
-      </div>
+      </section>
     </div>
   </div>
+  @if (editMode_()) {
+  <div class="cv-editbar">
+    <button type="button" class="cv-pill-btn cv-pill-btn--primary" (click)="saveEdits()" [disabled]="isSaving_()">
+      @if (isSaving_()) {
+      <app-loader size="small" [inline]="true" />
+      } @else {
+      <lucide-icon name="save" [size]="16"></lucide-icon>
+      } {{ 'save_changes' | translatePipe }}
+    </button>
+    <button type="button" class="cv-pill-btn" (click)="undoEdits()">
+      <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+      {{ 'undo_changes' | translatePipe }}
+    </button>
+  </div>
+  }
   <app-approve-stamp [approved]="recipe.isApproved" [disabled]="isSaving_()" (approve)="onApproveStamp()" />
   } @else {
   <!-- Enhanced empty state: friendly icon, CTA, recent recipe quick-picks -->
   <div class="cook-view-empty">
     <lucide-icon name="utensils" [size]="48"></lucide-icon>
     <p>{{ 'pick_recipe_to_cook' | translatePipe }}</p>
-    <a routerLink="/recipe-book" class="c-btn-primary">{{ 'recipe_book' | translatePipe }}</a>
-    @if (cookViewState.recentIds().length > 0) {
+    <a routerLink="/recipe-book" class="cv-pill-btn cv-pill-btn--primary">
+      <lucide-icon name="book-open" [size]="16"></lucide-icon>
+      {{ 'recipe_book' | translatePipe }}
+    </a>
+    @if (recentRecipes_().length > 0) {
     <div class="cv-recent-chips">
       <span class="cv-recent-label">{{ 'recent_recipes' | translatePipe }}</span>
-      @for (id of cookViewState.recentIds(); track id) {
-      <a [routerLink]="['/cook', id]" class="c-chip">{{ id }}</a>
+      @for (r of recentRecipes_(); track r.id) {
+      <a [routerLink]="['/cook', r.id]" class="cv-chip">{{ r.name }}</a>
       }
     </div>
     }

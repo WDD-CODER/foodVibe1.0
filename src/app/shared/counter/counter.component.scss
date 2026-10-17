@@ -1,5 +1,4 @@
 @layer components.counter {
-
   @media (max-width: 620px) {
     .counter-grid {
       height: auto;
@@ -68,7 +67,7 @@
       min-width: 2.25rem;
       height: 100%;
 
-      background: var(--bg-pure);
+      background: var(--bg-card-solid);
       border-inline: 1px solid var(--color-primary);
 
       .value-mirror {
@@ -110,5 +109,4 @@
       }
     }
   }
-
 }
