@@ -4778,6 +4778,35 @@
       "params": [],
       "refs": [],
       "notes": "Plan 408 QA harness (QA slot 4205/3005, evidence server 4206). FoodVibe-only for now; a kit candidate after it settles. Classified by plan 390."
+    },
+    {
+      "path": "scripts/log-query.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/lib/log-format.mjs",
+        ".claude/.slot-plan-start"
+      ],
+      "notes": "Plan 384: token-lean log query for agents (Mongo app_logs or a slot log file)."
+    },
+    {
+      "path": "scripts/lib/log-format.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 384: shared log-line normaliser/formatter for log-query.mjs."
+    },
+    {
+      "path": "docs/brain/patterns/log-query-usage.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/log-query.mjs"
+      ],
+      "notes": "Plan 384: FoodVibe cheat sheet for log-query (app_logs, slot logs)."
     }
   ]
 }

@@ -1,6 +1,6 @@
 # Plan 384 — Logs in the AI workflow: query script, slot log retention, command wiring
 
-Status: draft
+Status: done
 Track: code — here (not design)
 Snapshot: 05132814b7a74187683bb45d5ef48339ae5fb5a0
 
@@ -62,7 +62,12 @@ package.json
 docs/brain/patterns/log-query-usage.md
 docs/brain/index.md
 docs/workflow-kit/manifest.md
+docs/workflow-kit/manifest.json
 CHANGELOG.md
+scripts/preflight.mjs
+scripts/lib/slot-procs.mjs
+scripts/lib/slot-procs.mjs
+scripts/lib/slot-procs.mjs
 ```
 
 ## Read Scope
@@ -150,12 +155,12 @@ tolerate non-JSON lines (morgan format) by passing them through as `raw`.
 - No UI. All output ASCII, PowerShell-safe (no ANSI colors by default).
 
 ## Atomic Sub-tasks
-- [ ] C1: `scripts/lib/log-format.mjs` normaliser (client-echo JSON, pino JSON, raw passthrough) + unit-ish self-test via `node --test` if cheap.
-- [ ] C2: `scripts/log-query.mjs` Mongo mode (URI resolution, filters, `--summary`, `--json`, limits).
-- [ ] C3: `--file` mode + `--since=plan-start` (`scripts/log-query.mjs`).
-- [ ] C4: `scripts/take-plan.mjs` rotation + `.slot-plan-start`; `.gitignore`; prune (`scripts/prune-old-sessions.sh`).
-- [ ] C5: wire `.claude/commands/fix.md`, `auto-solve.md`, `review-it.md`, `.claude/skills/preflight/SKILL.md`, `.claude/references/prd-template.md`, `AGENTS.md`.
-- [ ] C6: `package.json` script, `docs/brain/patterns/log-query-usage.md`, `docs/workflow-kit/manifest.md`, CHANGELOG; run all [auto] criteria.
+- [x] C1: `scripts/lib/log-format.mjs` normaliser (client-echo JSON, pino JSON, raw passthrough) + unit-ish self-test via `node --test` if cheap.
+- [x] C2: `scripts/log-query.mjs` Mongo mode (URI resolution, filters, `--summary`, `--json`, limits).
+- [x] C3: `--file` mode + `--since=plan-start` (`scripts/log-query.mjs`).
+- [x] C4: `scripts/take-plan.mjs` rotation + `.slot-plan-start`; `.gitignore`; prune (`scripts/prune-old-sessions.sh`).
+- [x] C5: wire `.claude/commands/fix.md`, `auto-solve.md`, `review-it.md`, `.claude/skills/preflight/SKILL.md`, `.claude/references/prd-template.md`, `AGENTS.md`.
+- [x] C6: `package.json` script, `docs/brain/patterns/log-query-usage.md`, `docs/workflow-kit/manifest.md`, CHANGELOG; run all [auto] criteria.
 
 ## Technical Considerations
 - Dependencies: Plan 382 (`app_logs` shape); Plan 383 improves `--file` output but is not required.

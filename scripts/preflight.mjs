@@ -5,7 +5,8 @@
  *   1. dev server answers on this checkout's port (.worktree-port, else 4200)
  *   2. MongoDB accepts a TCP connection (MONGO_PORT, else 27017)
  *   3. current branch is not the main branch
- *   4. --visual only: gstack browse binary exists
+ *   4. log route: POST /api/v1/log on the slot's backend answers 202 (Plan 384)
+ *   5. --visual only: gstack browse binary exists
  *
  * Exit 0 when every check passed, 1 otherwise, so a calling workflow can abort.
  * Node built-ins only — no mongosh/curl dependency, so it behaves the same on
@@ -75,6 +76,23 @@ try {
   branch = execFileSync('git', ['branch', '--show-current'], { cwd: repoRoot, encoding: 'utf8' }).trim()
 } catch { /* detached HEAD prints empty, handled below */ }
 report(`branch != ${MAIN_BRANCH}`, branch !== MAIN_BRANCH, `on ${MAIN_BRANCH} — all code goes through a feature/ fix/ chore/ branch`)
+
+// Log route (Plan 384): the backend port is the frontend port - 1200 (a wt-N slot and main both follow it).
+function postLog(port) {
+  const body = JSON.stringify({ level: 'info', event: 'preflight.log.ok', message: 'preflight', timestamp: new Date().toISOString() })
+  return new Promise((done) => {
+    const req = http.request({ host: '127.0.0.1', port, path: '/api/v1/log', method: 'POST', timeout: TIMEOUT_MS, headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => {
+      res.resume()
+      done(res.statusCode)
+    })
+    req.on('timeout', () => { req.destroy(); done(null) })
+    req.on('error', () => done(null))
+    req.end(body)
+  })
+}
+const bePort = devPort - 1200
+const logStatus = await postLog(bePort)
+report(`log route :${bePort}/api/v1/log`, logStatus === 202, logStatus ? `HTTP ${logStatus}, expected 202` : 'backend not answering - start it with the dev server')
 
 if (argv.includes('--visual')) {
   const gstack = join(homedir(), '.claude/skills/gstack/browse/dist/browse')

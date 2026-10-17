@@ -33,7 +33,7 @@ Use this path for fixing bugs, errors, and broken behavior.
 ## Typical flow
 
 1. User describes the bug (area + symptom).
-2. `investigate` traces the root cause (checks recent changes, failure history, source).
+2. `investigate` traces the root cause. It starts with `node scripts/log-query.mjs --since=2h --level=warn --summary`, then narrows with `--event=` / `--requestId=`; only then recent changes, failure history and source. Never `cat` a slot log.
 3. Fix is implemented atomically — one targeted change.
 4. Review the fix for code quality, edge cases, and consistency against `docs/agent/standards-angular.md`; CSS touched → `cssLayer`.
 5. `npm run build` / `npm run lint` pass. Human commits via `git-agent` prep.

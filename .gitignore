@@ -51,6 +51,7 @@ testem.log
 .claude/.slot-pids
 .claude/*.log
 .claude/logs/
+.claude/.slot-plan-start
 src/environments/environment.slot.ts
 
 # Claude Code local config (never commit)

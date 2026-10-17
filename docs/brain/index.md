@@ -20,7 +20,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | New session, unfamiliar area of the code | `projectbrief.md`, then the relevant sub-file below |
 | About to make an architectural choice | `invariants.md`, then `decisions/` — check for an existing rule/ADR before deciding again |
 | Something behaves surprisingly / a trap cost time | `gotchas.md` first |
-| Need to know what failed, when, for whom (logs) | [[0016-logging-sink-mongo]] — every warn/error lands in Mongo `app_logs` |
+| Need to know what failed, when, for whom (logs) | [[0016-logging-sink-mongo]] — every warn/error lands in Mongo `app_logs`; query it with `patterns/log-query-usage.md` (`scripts/log-query.mjs`) |
 | Porting a design / a new Claude Design handoff | [[0019-design-port-from-handoff]] — handoffs are the source; `design-feature-inventory` is the lost-feature gate |
 | Where to save or find an open plan (design vs code) | [[0020-plans-design-folder]] — open design plans in `plans/design/`, others in `plans/`; closed plans go to `plans/<range>/` |
 | Unfamiliar domain term | `glossary.md` |

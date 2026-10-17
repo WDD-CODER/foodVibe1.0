@@ -9,6 +9,7 @@ Snapshot: [origin/main SHA the plan was verified against — leave filled in if 
 ## Goals & Success Criteria
 - Primary: [measurable outcome]
 - Success: [how we know it's done]
+  - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries
 
 ## Execution Mode
 - Parallel: yes | no — will this run alongside other active plans?
