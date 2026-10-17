@@ -20,7 +20,9 @@ stops you.
 | `SCOPE` (optional) | `all` (default) or a list of page IDs from the plan, e.g. `DASH, INV, RB` | |
 | `REPORT_LANG` (optional) | `en` (default) or `he` | Body language of the report. UI labels are always quoted in Hebrew verbatim. |
 
-Addresses (fixed): frontend `http://localhost:4205`, backend `http://localhost:3005`, evidence server `http://localhost:4206`.
+Addresses (fixed): everything goes through the app origin `http://localhost:4205`: the API as `/api/…` and the
+evidence server as `/qa-evidence/…` (the QA dev server proxies both). Never call `localhost:3005` or `localhost:4206`
+from a page: the built-in browser blocks cross-port calls (`ERR_BLOCKED_BY_CLIENT`).
 
 ---
 
@@ -30,7 +32,7 @@ You run in Claude Cowork with the **built-in browser pane** (`Claude_Browser` to
 runs in a **Linux VM**, not on Windows. Consequences:
 
 1. **You cannot start or stop the app.** Dandan runs `scripts/qa/qa-up.ps1` before you start. If `http://localhost:4205`
-   or `http://localhost:4206/health` does not load in the browser, stop and tell him (section 9). Never try `ng serve`,
+   or `http://localhost:4205/qa-evidence/health` does not load in the browser, stop and tell him (section 9). Never try `ng serve`,
    `npm`, `node`, or `curl localhost` from your shell — the VM's localhost is not the PC's localhost.
 2. **Your shell cannot reach the app at all.** It is only for reading/writing files in the connected repo folder
    (`$HOME/mnt/<repo>/bugs/qa-runs/<RUN_ID>/…`). Never run git commands. Never edit anything outside `bugs/qa-runs/<RUN_ID>/`.
@@ -93,20 +95,36 @@ evidence shot per breakpoint, even when nothing is wrong (baseline), named `<PAG
 
 ---
 
-## 5. Evidence server (`http://localhost:4206`) — how to save pictures
+## 5. Evidence server (`http://localhost:4205/qa-evidence/`) — how to save pictures
 
 ### 5.1 State shot — what the user sees right now (modals, validation errors, carousel position…)
-Run this through the browser `javascript_tool` on the current tab, replacing `NAME`:
+Run this through the browser `javascript_tool` on the current tab, replacing `NAME` and `MARK`:
 
 ```js
 (async () => {
+  const MARK = null // or a CSS selector of the defective element, e.g. '.cc-arrow--next'
   if (!window.html2canvas) {
     await new Promise((ok, err) => { const s = document.createElement('script');
-      s.src = 'http://localhost:4206/html2canvas.min.js'; s.onload = ok; s.onerror = err; document.head.appendChild(s) })
+      s.src = '/qa-evidence/html2canvas.min.js'; s.onload = ok; s.onerror = err; document.head.appendChild(s) })
   }
-  const canvas = await html2canvas(document.documentElement, { useCORS: true, scale: 1,
-    windowWidth: window.innerWidth, windowHeight: window.innerHeight, scrollX: 0, scrollY: -window.scrollY })
-  const r = await fetch('http://localhost:4206/save', { method: 'POST',
+  // A thin magenta box drawn 3px outside the element, so its own colours stay untouched.
+  const el = MARK && document.querySelector(MARK)
+  if (MARK && !el) return 'MARK not found: ' + MARK
+  let box = null
+  if (el) {
+    el.scrollIntoView({ block: 'center' })
+    const b = el.getBoundingClientRect()
+    box = document.createElement('div')
+    box.style.cssText = `position:fixed;z-index:2147483647;pointer-events:none;border:2px solid #ff00ff;
+      left:${b.left - 5}px;top:${b.top - 5}px;width:${b.width + 6}px;height:${b.height + 6}px`
+    document.body.appendChild(box)
+  }
+  let canvas
+  try {
+    canvas = await html2canvas(document.documentElement, { useCORS: true, scale: 1,
+      windowWidth: window.innerWidth, windowHeight: window.innerHeight, scrollX: 0, scrollY: -window.scrollY })
+  } finally { box?.remove() }
+  const r = await fetch('/qa-evidence/save', { method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ run: 'RUN_ID', name: 'NAME', dataUrl: canvas.toDataURL('image/png'),
       url: location.href, w: innerWidth, h: innerHeight }) })
@@ -114,11 +132,15 @@ Run this through the browser `javascript_tool` on the current tab, replacing `NA
 })()
 ```
 The response is the saved path, e.g. `bugs/qa-runs/2026-10-09-a/shots/INV-M-07-overflow.png`. Put that path in the report.
-If html2canvas fails on a page (returns an error), fall back to 5.2 and note `evidence: viewport-only`.
+Every finding about one element (wrong colour, clipped label, small tap target, English text) sets `MARK` to that
+element, so the reader sees where to look. Leave `MARK = null` for whole-page findings (layout, scroll, overlap of
+several parts). The box is in the picture only, never in the app.
+The script is html2canvas-pro, which reads the CSS `color()` values this app uses. If it still fails on a page (returns
+an error), fall back to 5.2 and note `evidence: viewport-only`.
 
 ### 5.2 Viewport shot — clean, true-pixel render of a URL at an exact size (logged in as QA_USER)
 Open in a **new tab** (then close it):
-`http://localhost:4206/shot?run=RUN_ID&name=NAME&url=/inventory/list&w=375&h=812&full=1`
+`http://localhost:4205/qa-evidence/shot?run=RUN_ID&name=NAME&url=/inventory/list&w=375&h=812&full=1`
 - `full=1` captures the full scrollable page; omit for the viewport only.
 - `auth=0` captures logged-out.
 The page shows the saved path as plain text. Use this for every `baseline` shot and whenever `resize_window` cannot reach
@@ -207,12 +229,38 @@ Generic checks that apply to **every page at every breakpoint** (report under th
 - `G1` No horizontal page scroll (`document.documentElement.scrollWidth <= innerWidth`, check via javascript_tool).
 - `G2` Nothing clipped/overlapping: titles, chips, buttons, table headers, FAB vs bottom bar vs financial bar.
 - `G3` RTL: text aligns right, icons sit on the correct side, numbers/₪ readable, no LTR-looking layouts.
-- `G4` Every Hebrew label renders Hebrew — a raw English key (e.g. `menu`, `volume`, `not_convertible`) is a `TEXT` S3.
-- `G5` Tap targets ≥ 44px tall at M for primary actions.
+- `G4` Every Hebrew label renders Hebrew. A raw English key **on screen** (e.g. `menu`, `volume`, `not_convertible`)
+  is `TEXT` S3. English that is only in an `aria-label` (heard by screen readers, never seen) is `A11Y` S4. An English
+  **data value** (a category or allergen name that comes from the database, e.g. «pantry») is `TEXT` S3 with
+  `Suspected cause: data, not translation`. Group all of one kind on one page into one finding.
+- `G5` Tap targets at M. Measure the **hit area**, not the drawn icon: the larger of the element's box and any
+  `::before`/`::after` that extends it (`getComputedStyle(el, '::before')`). Smaller than 24×24 on any control is
+  `A11Y` S3 (below the WCAG 2.2 AA minimum). Smaller than 44px tall on a **primary action** only (save, add, submit,
+  login, the FAB, a dialog's confirm) is `A11Y` S4. A secondary control (row `⋮`, carousel arrows, chips,
+  pagination) between 24 and 44px is **not a finding**. Never report a count of all small elements on a page.
 - `G6` Hero FAB («פעולות מהירות») opens and lists exactly the actions the plan names for the page.
 - `G7` Sub-nav chip row (section 0.3 of the plan) shows the right group and the active chip is highlighted.
-- `G8` Console/network clean (see step 2).
+- `G8` Console/network clean (see step 2). Expected, never a finding: while logged out, `401` on
+  `POST /api/v1/auth/refresh` and on `GET /api/v1/data/DICTIONARY_OVERRIDES/global`; `net::ERR_ABORTED` on
+  `POST /api/v1/log` (fire-and-forget); any error from `/qa-evidence/*` (that is the QA tool, not the app).
 - `G9` Shared page header (`app-page-header`: title, optional subtitle/count, search, action buttons) on DASH, META, ML, VEN, TRASH and the list-shell pages: same arrangement across pages, title never overlaps search/actions, count text («{n} מתוך {m} פריטים») stays beside the title, action button labels readable or intentionally icon-only at M — report inconsistencies between pages with one shot each.
+
+### 7.1 Accuracy rules — before you write a finding
+
+- **Impact first.** A finding needs a user-visible effect, a screen-reader effect, or a broken plan check. A
+  measurement under a guideline with no such effect is not a finding unless a `G` rule above names it.
+- **Look before you report a visual.** Every `VISUAL` / `RTL` finding needs a state shot (5.1) where the defect is
+  visible. If the shot looks right, the finding is wrong: drop it.
+- **Real input before "not verified".** Synthetic events from `javascript_tool` (`el.click()`, `dispatchEvent`) do not
+  trigger everything Angular listens to (right-click, long-press, pointer drags, hover). Before marking a check
+  skipped, try the `computer` tool with a real click / right-click / drag on the element's coordinates. Then record
+  `SKIPPED (tool: <what you tried>)` when the tool could not produce the input, or report a `FUNC` finding when real
+  input reached the element and nothing happened. Never leave it as "could be the app or the tool".
+- **Remembered state is not a fresh page.** The app restores sort, filters and search per list from session storage.
+  Before a check that expects a default list, open the list, press «נקה סינון» if it is shown, and note it. A link
+  that lands on a list with an **old** filter the link did not ask for is a `FUNC` S3 finding.
+- **Severity is about users, not counts.** S1/S2 only when a flow fails. Wrong text that users see is S3; anything
+  users do not see is S4 at most.
 
 ---
 
@@ -229,7 +277,8 @@ Generic checks that apply to **every page at every breakpoint** (report under th
 
 ## 9. Hard blockers — the only reasons to stop and ask
 
-- `localhost:4205` or `localhost:4206/health` does not load after the site approval.
+- `localhost:4205` or `localhost:4205/qa-evidence/health` does not load after the site approval, or `/health`
+  answers `"loggedIn":false` (the QA account cannot sign in).
 - Login with `QA_USER` fails («משתמש לא נמצא» / blocked).
 - The app shows a global error page or the backend returns 5xx on every request.
 - The connected folder is not the FoodVibe repo (no `bugs/` folder, no `package.json` with `foodVibe1.0`).

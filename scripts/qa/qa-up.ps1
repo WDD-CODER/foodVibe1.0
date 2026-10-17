@@ -3,9 +3,11 @@
   Brings up the isolated QA stack (plan 408): frontend 4205, backend 3005, evidence server 4206.
 
 .DESCRIPTION
-  - writes src/environments/environment.slot.ts from environment.local.ts with apiUrl/authApiUrl -> :3005
-    (same rewrite as generateEnvironmentSlot in scripts/take-plan.mjs; run this from the main folder or the
-    QA checkout, not from a wt-N slot, whose own environment.slot.ts it would overwrite)
+  - writes src/environments/environment.slot.ts from environment.local.ts with apiUrl/authApiUrl = '' (same
+    origin) and autoLoginGuest = false. ng serve proxies /api -> :3005 and /qa-evidence -> :4206, so the page
+    only talks to :4205 (Cowork's browser blocks cross-port calls with ERR_BLOCKED_BY_CLIENT). Run this from
+    the main folder or the QA checkout, not from a wt-N slot, whose own environment.slot.ts it would overwrite
+  - after start, waits until the evidence server is signed in as QA_USER; a failed sign-in is a FAIL
   - refuses when a QA port is held by something that is not a dev server; a leftover dev server is stopped
   - starts the three servers detached (they outlive this script and a scheduled task), PIDs in .claude/.qa-pids
   - waits for each port and prints one "QA: <name> ok on <port>" / "QA: <name> FAIL - see <log>" line
@@ -118,7 +120,7 @@ $states = @{}
 foreach ($s in $services) { $states[$s.Name] = Get-PortState $s.Port $recorded }
 if (@($services | Where-Object { $states[$_.Name].State -eq 'ours' }).Count -eq $services.Count) {
   Write-Output 'QA: already up'
-  Write-Output 'QA ready -> http://localhost:4205 | evidence http://localhost:4206/health'
+  Write-Output 'QA ready -> http://localhost:4205 | evidence http://localhost:4205/qa-evidence/health'
   exit 0
 }
 
@@ -142,25 +144,45 @@ foreach ($s in $services) {
 }
 if (Test-Path $pidFile) { Remove-Item $pidFile -Force }
 
-# --- environment.slot.ts -> backend 3005 ---------------------------------------------
+# --- environment.slot.ts -> same origin, no guest auto-login ---------------------------
+# The page calls /api on :4205 and ng serve proxies it to :3005. No auto guest: a fresh browser must be
+# signed out, or the agent would test as «Guest Admin» without noticing.
 $envLocal = Join-Path $Root 'src\environments\environment.local.ts'
 $envSlot = Join-Path $Root 'src\environments\environment.slot.ts'
 $text = [IO.File]::ReadAllText($envLocal)
-$text = [regex]::Replace($text, "(?m)^(\s*(?:apiUrl|authApiUrl):[^\n]*?)'http://localhost:\d+'", { param($m) "$($m.Groups[1].Value)'http://localhost:3005'" })
+$text = [regex]::Replace($text, "(?m)^(\s*(?:apiUrl|authApiUrl):[^\n]*?)'http://localhost:\d+'", { param($m) "$($m.Groups[1].Value)''" })
+$text = [regex]::Replace($text, '(?m)^(\s*autoLoginGuest:\s*)true', '${1}false')
 [IO.File]::WriteAllText($envSlot, $text, (New-Object Text.UTF8Encoding($false)))
+
+# --- ng serve proxy: /api -> backend, /qa-evidence -> evidence server ------------------
+$proxyConf = Join-Path $claudeDir 'qa-proxy.conf.json'
+$proxyJson = @'
+{
+  "/api": { "target": "http://localhost:3005", "secure": false },
+  "/qa-evidence": { "target": "http://localhost:4206", "secure": false, "pathRewrite": { "^/qa-evidence": "" } }
+}
+'@
+[IO.File]::WriteAllText($proxyConf, $proxyJson, (New-Object Text.UTF8Encoding($false)))
 
 if ($Build) {
   Write-Output 'QA: ng build -c slot ...'
   Push-Location $Root
-  try { & npx.cmd ng build -c slot *> (Join-Path $claudeDir 'qa-build.log') } finally { Pop-Location }
+  try { $ErrorActionPreference = 'Continue'; & npx.cmd ng build -c slot *> (Join-Path $claudeDir 'qa-build.log') } finally { $ErrorActionPreference = 'Stop'; Pop-Location }
   if ($LASTEXITCODE -ne 0) { Write-Output "QA: build FAIL - see $(Join-Path $claudeDir 'qa-build.log')"; exit 1 }
 }
+
+# --- shared schemas: server/generated is gitignored, so a fresh or freshly pulled checkout needs it ---
+$schemasLog = Join-Path $claudeDir 'qa-schemas.log'
+Push-Location $Root
+# npm writes warnings to stderr; under 'Stop' PowerShell 5.1 would throw on them.
+try { $ErrorActionPreference = 'Continue'; & npm.cmd run build:schemas *> $schemasLog } finally { $ErrorActionPreference = 'Stop'; Pop-Location }
+if ($LASTEXITCODE -ne 0) { Write-Output "QA: build:schemas FAIL - see $schemasLog"; exit 1 }
 
 # --- start ---------------------------------------------------------------------------
 $nodeEnv = if ($Env -eq 'remote') { 'production' } else { 'development' }
 $pids = @()
 $pids += Start-Detached (Join-Path $Root 'server') "set `"PORT=3005`"&& set `"NODE_ENV=$nodeEnv`"&& set `"ALLOWED_ORIGIN=http://localhost:4205,http://localhost:4206`"&& node index.js" $services[0].Log
-$pids += Start-Detached $Root 'npx ng serve -c slot --port 4205' $services[1].Log
+$pids += Start-Detached $Root "npx ng serve -c slot --port 4205 --proxy-config `"$proxyConf`"" $services[1].Log
 $pids += Start-Detached $Root "set `"QA_PORT=4206`"&& set `"QA_APP=http://localhost:4205`"&& set `"QA_API=http://localhost:3005`"&& node scripts\qa\evidence-server.mjs" $services[2].Log
 @{ pids = $pids } | ConvertTo-Json | Set-Content -Path $pidFile -Encoding UTF8
 
@@ -177,5 +199,15 @@ foreach ($s in $services) {
   else { Write-Output "QA: $($s.Name) FAIL - see $($s.Log)"; $failed = $true }
 }
 if ($failed) { exit 1 }
-Write-Output 'QA ready -> http://localhost:4205 | evidence http://localhost:4206/health'
+
+# --- QA user signed in? (the evidence server retries while the backend boots) ------------
+$signedIn = $false
+$end = (Get-Date).AddSeconds(90)
+while ((Get-Date) -lt $end) {
+  try { if ((Invoke-RestMethod -Uri 'http://127.0.0.1:4206/health' -TimeoutSec 5).loggedIn) { $signedIn = $true; break } } catch { }
+  Start-Sleep -Seconds 2
+}
+if (-not $signedIn) { Write-Output "QA: QA user sign-in FAIL - check QA_USER / QA_PASS in server/.env; see $($services[2].Log)"; exit 1 }
+Write-Output 'QA: QA user signed in'
+Write-Output 'QA ready -> http://localhost:4205 | evidence http://localhost:4205/qa-evidence/health'
 exit 0
