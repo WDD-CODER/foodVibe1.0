@@ -48,7 +48,18 @@
           {
             "type": "command",
             "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/session-startup.sh\"",
-            "timeout": 10
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/slot-stop.mjs\" --if-slot",
+            "timeout": 30
           }
         ]
       }

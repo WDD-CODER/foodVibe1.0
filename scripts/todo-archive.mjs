@@ -263,7 +263,7 @@ function archiveFromTodo({ dryRun: dry }) {
     moved: candidates.map((c, i) => ({
       heading: c.heading,
       volume: written[i]?.volume ?? null,
-      items: checkboxStats(c.full).done
+      items: (({ done, closed }) => done + closed)(checkboxStats(c.full))
     }))
   }
 }

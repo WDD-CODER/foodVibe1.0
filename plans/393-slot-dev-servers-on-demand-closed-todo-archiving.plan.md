@@ -1,6 +1,6 @@
 # Plan 393 — Slot Dev Servers On Demand and Closed-Todo Archiving
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: a60b9cbd
 
