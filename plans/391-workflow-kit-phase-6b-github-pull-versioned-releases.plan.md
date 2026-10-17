@@ -38,6 +38,7 @@ add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
 docs/workflow-kit/manifest.md
+scripts/take-plan.mjs
 ```
 
 **Outside this repo:** the kit repo `../ai-workflow-kit/**` (main output), its GitHub repo (tags, releases, Actions), and the kit's fetch cache folder (choose a per-user cache, e.g. `~/.cache/ai-workflow-kit/`, never inside a project). Scratch install targets under the session scratchpad.
