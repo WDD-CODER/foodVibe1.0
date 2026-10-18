@@ -1,7 +1,8 @@
 ---
-status: accepted
+status: superseded
 date: 2026-10-06
 review-by: when FoodVibe gets a `.kit/install.json` (kit-install run on FoodVibe)
+superseded-by: 0021-kit-changes-reach-foodvibe-by-release-and-kit-sync
 # supersedes: none. Refines 0015's "change it in the kit, then kit-sync" for FoodVibe only.
 ---
 

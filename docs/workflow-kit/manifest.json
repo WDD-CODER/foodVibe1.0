@@ -4330,7 +4330,7 @@
         "docs/workflow-kit/kit-owned.json",
         "docs/workflow-kit/manifest.json"
       ],
-      "notes": "FoodVibe ADR (chore/workflow-redundant-stops): kit changes reach FoodVibe as a hand-applied patch until kit-install. Classified by plan 387 after the rebase."
+      "notes": "FoodVibe ADR (chore/workflow-redundant-stops): kit changes reach FoodVibe as a hand-applied patch until kit-install. Classified by plan 387 after the rebase. Superseded by ADR 0021 (plan 392)."
     },
     {
       "path": "docs/brain/decisions/0017-architecture-invariants-gate.md",
@@ -4680,6 +4680,17 @@
         ".claude/skills/save-plan/SKILL.md"
       ],
       "notes": "Plan 406 ADR: open design plans live in plans/design/; closed plans go to the range folder."
+    },
+    {
+      "path": "docs/brain/decisions/0021-kit-changes-reach-foodvibe-by-release-and-kit-sync.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "AGENTS.md",
+        "scripts/kit-owned.mjs"
+      ],
+      "notes": "Plan 392 ADR: kit changes reach FoodVibe only through a kit release + kit-sync --ref; supersedes 0018. The general loop ships in the kit as docs/CHANGE-LOOP.md."
     },
     {
       "path": "docs/brain/decisions/0019-design-port-from-handoff.md",

@@ -154,6 +154,10 @@
     {
       "path": ".claude/commands/review-it.md",
       "reason": "FoodVibe-only: runs scripts/log-query.mjs (Mongo app_logs) before reading code"
+    },
+    {
+      "path": "docs/brain/patterns/llm-backend-proxy.md",
+      "reason": "kit seed for the node-express pack; FoodVibe keeps its own docs/brain/patterns/gemini-backend-proxy.md"
     }
   ]
 }
