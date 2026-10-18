@@ -75,17 +75,6 @@
 - [ ] A3: Update every product and recipe that uses a unit when it is renamed — `unit` branch in `onRenameMetadata` + `getAffectedCount` + `reloadAfterRename`; confirms; dictionary keys; drop the out-of-scope comment — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `public/assets/data/dictionary.json`
 - [ ] A4: Prove a rename keeps costs the same and a conversion change updates them — Build + specs; manual test on the isolated DB (rename a custom unit used in 2 products and 1 recipe, cost unchanged; change its conversion, cost changes); update session-state — `docs/session-state-<branch>.md`
 
-### Plan 392 — Workflow Kit Phase 6C: FoodVibe Adoption and Retire Patch Mode (`plans/392-workflow-kit-phase-6c-foodvibe-adoption-retire-patch-mode.plan.md`)
-- [ ] C0: Check the plan still matches the kit and FoodVibe before starting — Step 0 reality check — `docs/workflow-kit/manifest.md`
-- [ ] C1: Teach the kit installer to adopt an existing project without overwriting it — Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/kit-install.ps1`
-- [ ] C2: Adopt FoodVibe into the kit so it syncs like any other project — Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR — `.kit/install.json` + files kit-sync writes
-- [ ] C3: Record in an ADR that kit changes now reach FoodVibe by sync, not patches — New ADR superseding 0018 (amends 0015); mark 0018 superseded; brain index line — `docs/brain/decisions/**`, `docs/brain/index.md`
-- [ ] C4: Write down how a kit change travels from the kit into projects — Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md` — `../ai-workflow-kit/docs/CHANGE-LOOP.md`, `docs/workflow-kit/manifest.md`
-- [ ] C5: Remove the old hand-applied patch instructions everywhere — Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`) — `AGENTS.md`, `scripts/kit-owned.mjs`, `docs/workflow-kit/manifest.md`
-- [ ] C6: Cut kit v1.0.0 and move FoodVibe onto it — Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0` — `.kit/install.json`
-- [ ] C7: Prove a fresh project installed from GitHub runs a full plan end to end — `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end — `../kit-proof/**`
-- [ ] C8: Prove upgrading to a new kit version works in both projects — No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship` — `.kit/install.json`, `../kit-proof/.kit/install.json`
-
 ### Plan 400 — Dropdown add option, part 1: shared helper and the shared selects (`plans/400-dropdown-add-option-part-1-shared-helper-shared-selects.plan.md`)
 
 - [ ] A1: List every shared dropdown that offers "add new" and the label each one needs — Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
