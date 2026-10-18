@@ -17,6 +17,7 @@ Hand-off §7 acceptance test is the definition of done:
 - [auto] Rendered CI on the fixture has no `--prefix ` at end of line, no server job, and lints changed files only.
 - [auto] SessionStart run with a state file containing quotes and newlines → valid JSON.
 - [auto] Tag + release `v1.2.0`; CHANGELOG "what a project must do" lists the `commands.*` script-name change and which overrides can be dropped.
+- [auto] Stack detection: `install --target <fixture> --dry-run` with no `--packs` and no `stack.packs` prints `KIT_INSTALL: detected packs=[angular, node-express]` on an Angular+Express fixture and `packs=[react-vite] layers=[supabase]` on the React fixture, writes nothing until confirmed (`--yes` or `-Packs` given), and an Angular install contains no `packs/react-vite` file (and vice versa).
 - [auto] FoodVibe `kit-sync -Ref v1.2.0 -Apply`: 0 unresolved `conflict`, `npx ng build`, `node scripts/kit-owned.mjs --check`, `node scripts/kit-manifest-check.mjs` pass; `overrides` list unchanged or shorter.
 - [human] In a FoodVibe slot after the sync: `execute plan` on a small plan claims the slot, starts the Angular dev server on first need, and `/ship` works — same as before.
 - [human] The adopting React project syncs to `v1.2.0` and deletes every "backport to kit" override in hand-off Appendix A (Dandan runs it there or confirms the other agent did). Then the `handoff/` folder is deleted from the kit checkout.
@@ -70,6 +71,7 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - **`layers/upstream-owned/`:** config `ownership.upstreamPaths` (globs) that install never writes and the scope guard denies with "upstream-owned, not an `approved:`"; turns on local-excludes, `AGENTS.workflow.md`, `scripts/package.json`; CI defaults `ci.lintScope: changed`, `ci.appAuditMode: report`, `ci.install: "npm install --no-audit --no-fund"`; `/pull-copy` command (rebase on `upstream/main`, refuse to resolve conflicts, force-push left to the Human).
 - **Tools (§5):** `tools/e2e-check.mjs --project <path>` mode (scratch clone of a real project, junctioned `node_modules` removed with `rmdir` only, asserts source `node_modules` intact); `tools/adoption-report.mjs` (per-part status from `.kit/install.json` + hooks + `.husky`); fixtures for Angular, React-Vite and upstream-owned run in kit CI.
 - **Release:** bump `kit.json` to `1.2.0`, date the CHANGELOG, tag after Dandan's go.
+- **Stack detection (installer):** packs are already opt-in (only the chosen packs are copied), but today the human must name them. Install now proposes them when neither `--packs` nor `stack.packs` is set: `@angular/core` → `angular`; `vite` + `react` → `react-vite`; `express` in the root or `paths.serverRoot` package → `node-express`; `supabase/` folder or `@supabase/supabase-js` → `supabase`; a fork `origin` with an `upstream` remote → suggest `upstream-owned`. It prints the proposal with the reason for each, writes `stack.packs`/layers into `kit.config.json` only after confirmation (`--yes`, or explicit `-Packs`), and refuses (exit 2) when nothing matches instead of installing core with dangling stack references. Detection rules live in each `pack.json` (`detect`), so a new pack brings its own rule.
 
 ## Atomic Sub-tasks
 - [ ] V0: Check 414 and 415 landed and decide where the Supabase backend rules live — Step 0 — `plans/416-kit-react-vite-pack-upstream-owned-layer-adoption-checks.plan.md`
@@ -82,6 +84,7 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - [ ] V7: Release v1.2.0 with clear upgrade notes — CHANGELOG what-to-do, kit.json, README packs/layers section; tag after Dandan's go — kit repo
 - [ ] V8: Sync FoodVibe to v1.2.0 and ship it — dry-run, Apply, ng build, kit-owned and manifest checks, /ship — `.kit/install.json` + files kit-sync writes
 - [ ] V9: Have the React project drop its forked files and delete the hand-off — adopting project syncs v1.2.0 and removes Appendix A overrides; delete the kit handoff folder after Dandan's go — `../ai-workflow-kit/handoff/`
+- [ ] V10: Make the installer detect the project stack and install only the matching packs — pack.json detect rules, proposal + confirm, refuse when nothing matches, install-check cases for both stacks — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/tools/lib/**`, `../ai-workflow-kit/packs/*/pack.json`, `../ai-workflow-kit/kit-install.ps1`, `../ai-workflow-kit/tools/install-check.mjs`
 
 ## Out of Scope
 Porting the Python session-manifest scripts to node; the guards mod stale-scope bug (hand-off I-28, tracked under plan 409); upstream fixes in the friend's repo (hand-off Appendix B).

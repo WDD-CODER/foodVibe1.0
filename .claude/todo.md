@@ -232,6 +232,7 @@
 - [ ] V7: Release v1.2.0 with clear upgrade notes — CHANGELOG what-to-do, kit.json, README packs/layers section; tag after Dandan's go — kit repo
 - [ ] V8: Sync FoodVibe to v1.2.0 and ship it — dry-run, Apply, ng build, kit-owned and manifest checks, /ship — `.kit/install.json` + files kit-sync writes
 - [ ] V9: Have the React project drop its forked files and delete the hand-off — adopting project syncs v1.2.0 and removes Appendix A overrides; delete the kit handoff folder after Dandan's go — `../ai-workflow-kit/handoff/`
+- [ ] V10: Make the installer detect the project stack and install only the matching packs — pack.json detect rules, proposal + confirm, refuse when nothing matches, install-check cases for both stacks — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/tools/lib/**`, `../ai-workflow-kit/packs/*/pack.json`, `../ai-workflow-kit/kit-install.ps1`, `../ai-workflow-kit/tools/install-check.mjs`
 
 ## Where things live
 
