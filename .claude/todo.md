@@ -136,6 +136,7 @@
 - [ ] K11: Keep the mods at three by folding quick-reply into fleet — mod count back to the 3-mod limit — quick-reply (K8) is a 4th mod; Human chose: fold into fleet. Done 2026-10-18: code in `fleet/hooks/quick-reply.tsx`, called from fleet's register; quick-reply uninstalled and removed from the marketplace; folder moved to `claude-mods-deliverable/backups/`; fleet 0.2.0, 33/33 tests, validate + tsc clean — `claude-mods-deliverable/layers/claude-code-mods/{fleet/**,.claude-plugin/marketplace.json,README.md}`
 - [ ] K12: Show each plan step as a plain one-line title instead of raw commands — save-plan requires a plain title before the first ' — ' (kit PR #13, FoodVibe PR #417); ship-pilot 0.3.0 shows only that title (cleans up older lines) and counts only Atomic Sub-tasks as steps (14/14 tests); open plans retitled 2026-10-18 — `claude-mods-deliverable/layers/claude-code-mods/ship-pilot/{hooks/register.tsx,tests/ship-pilot.test.ts}`
 - [ ] K13: Show reply buttons only where the answer marks a reply on purpose, inline in the sentence — fleet 0.3.0: a button only after a code span followed by ⏎; fleet adds a short rule to the system prompt telling the model when to mark; all wording-based guessing removed (27/27 tests) — `claude-mods-deliverable/layers/claude-code-mods/fleet/{hooks/quick-reply.tsx,tests/quick-reply.test.ts}`
+- [ ] K14: Reload the plan scope when a slot claims a new plan in the same session — guards freshContext re-reads .worktree-plan and reloads on branch change; the approve path writes to the current plan, not the cached one (kit hand-off 2026-10-18 I-28) — `claude-mods-deliverable/layers/claude-code-mods/guards/hooks/register.tsx`
 - [ ] S5: Move the finished mods into the kit as an installable layer — Stage 5 — kit PR: patch + K1–K4 + `--mods` install flag + manifest tier + kit.json bump + README — `ai-workflow-kit/**`
 - [ ] S6a: Stop running the old shell guards in Claude Code — Stage 6 — remove Claude Code `hooks` from settings (keep `permissions`) — `.claude/settings.json`
 - [ ] S6b: Mark the shell guards as kept only for Cursor — Stage 6 — "superseded for Claude Code; still used by Cursor" header on shell guards — `scripts/*-guard.sh`, `scripts/session-startup.sh`
@@ -167,6 +168,70 @@
 - [ ] C6: Run it once by hand and get the first page and PR — Manual run in FoodVibe → first page + PR — `docs/scout/**`
 - [ ] C7: Schedule it weekly after your go and receive one automatic PR — Create the weekly cloud routine (Dandan's go); receive one scheduled PR — cloud routine
 - [ ] C8: You mark which tips were useful; record that and ship — Dandan marks useful recommendations; manifest note; `/ship` — `docs/workflow-kit/manifest.md`
+
+### Plan 412 — Kit Patch Fixes for Hooks, Session Start and CI from the React-Vite Adoption (`plans/412-kit-patch-fixes-hooks-session-start-ci-react-vite-adoption.plan.md`)
+
+- [ ] P0: Check which hand-off fixes are still needed on the current kit — Step 0 reality check, one line per issue — `plans/412-kit-patch-fixes-hooks-session-start-ci-react-vite-adoption.plan.md`
+- [ ] P1: Make git hooks run on Windows without husky installed — shebang, set -e, guarded lint-staged, executable bit in kit and at install, e2e case without husky — `../ai-workflow-kit/core/.husky/*`, `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/tools/e2e-check.mjs`
+- [ ] P2: Make session start actually deliver the worker and resume text to the session — JSON built in node, additionalContext under hookSpecificOutput, test with quotes and newlines — `../ai-workflow-kit/core/scripts/session-startup.sh`
+- [ ] P3: Give the secret-scan CI job the permissions it needs — gitleaks permissions + comments off + README CI note — `../ai-workflow-kit/core/.github/workflows/ci.yml`, `../ai-workflow-kit/README.md`
+- [ ] P4: Stop the session manifest from silently failing when python3 is missing — run-python.sh fallback for the hook; ship-prep tries python3, python, py and warns — `../ai-workflow-kit/core/scripts/run-python.sh`, `../ai-workflow-kit/core/.claude/settings.json`, `../ai-workflow-kit/core/scripts/ship-prep.mjs`
+- [ ] P5: Let the Planner push closed plans that moved into range folders — pre-push regex accepts plans/<range>/ — `../ai-workflow-kit/core/.husky/pre-push`
+- [ ] P6: Make todo-sync explain the missing repo setting and clean up its branch — delete branch on failure, ::error line, install output + README first-time setup — `../ai-workflow-kit/core/.github/workflows/todo-sync.yml`, `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/README.md`
+- [ ] P7: Fix stale paths and leftovers from the retired agent personas — security-grep name, todo-archive folder, generic example plans, docs-refresh subagent type, garbled security step — `../ai-workflow-kit/core/.claude/skills/save-plan/SKILL.md`, `../ai-workflow-kit/core/docs/agent/workflow-map.md`, `../ai-workflow-kit/core/.claude/commands/{auto-solve,docs-refresh,security}.md`
+- [ ] P8: Run all kit checks, open the kit PR and release v1.0.5 — leak-check, pack-check, install-check, e2e-check; CHANGELOG; tag after Dandan's go — kit repo
+- [ ] P9: Sync FoodVibe to v1.0.5 and ship it — kit-sync dry-run (0 conflicts), Apply, ng build, kit-owned check, /ship — `.kit/install.json` + files kit-sync writes
+
+### Plan 413 — Planner Always Runs the Architect and Product Manager Review (`plans/413-planner-always-runs-architect-and-product-manager-review.plan.md`)
+
+- [ ] R0: Check the plan still matches the kit and list every place that says who plans — Step 0 reality check + grep list — `plans/413-planner-always-runs-architect-and-product-manager-review.plan.md`
+- [ ] R1: Make the Planner run an architect and product review on every plan before saving — new review section, role line, Planner protocol first step, Cursor mirror — `../ai-workflow-kit/core/.claude/commands/plan.md`, `../ai-workflow-kit/layers/cursor/.cursor/commands/plan.md`
+- [ ] R2: Ship the plan and design templates in the kit so every project has them — generic prd and hld templates, HLD alternatives replaced by why-this-design — `../ai-workflow-kit/core/.claude/references/{prd,hld}-template.md`
+- [ ] R3: Let each project add its own planning checks without forking the command — paths.planChecks config key, scaffold, parameters doc — `../ai-workflow-kit/kit.config.json`, `../ai-workflow-kit/templates/**`, `../ai-workflow-kit/docs/**`
+- [ ] R4: Describe the current roles instead of the old three-agent setup — workflow-map roles, README_WORKFLOW title and intro, skills.md note — `../ai-workflow-kit/core/docs/agent/workflow-map.md`, `../ai-workflow-kit/core/README_WORKFLOW.md`, `../ai-workflow-kit/core/.claude/commands/skills.md`
+- [ ] R5: Run the kit checks, open the kit PR and release v1.1.0 — leak-check, pack-check, install-check; CHANGELOG; tag after Dandan's go — kit repo
+- [ ] R6: Move FoodVibe's own planning checks into a project file before syncing — Hebrew values, Entity contract, icons, RTL, Zod; kit.config paths.planChecks — `docs/agent/plan-checks.md`, `kit.config.json`
+- [ ] R7: Sync FoodVibe to v1.1.0 and ship it — dry-run, take kit templates, Apply, ng build, kit-owned check, /ship — `.kit/install.json` + files kit-sync writes
+- [ ] R8: Try the review on a pasted brief and on a new idea in the Planner — Dandan's two checks from Goals — Planner session
+
+### Plan 414 — Kit Stack-Neutral Core Part 1: Install, Slots and Runtime Files (`plans/414-kit-stack-neutral-core-part-1-install-slots-runtime-files.plan.md`)
+
+- [ ] N0: Check which runtime issues are still open and pick refuse versus auto-strip — Step 0 — `plans/414-kit-stack-neutral-core-part-1-install-slots-runtime-files.plan.md`
+- [ ] N1: Leave the slot clean when claiming a plan fails halfway — rollback on claim-commit failure + e2e case — `../ai-workflow-kit/core/scripts/take-plan.mjs`, `../ai-workflow-kit/tools/e2e-check.mjs`
+- [ ] N2: Keep runtime files ignored in fresh clones even when the project owns its gitignore — local-excludes script as the single list; install, take-plan and worktree-setup run it — `../ai-workflow-kit/core/scripts/local-excludes.mjs`, `../ai-workflow-kit/templates/.gitignore`, `../ai-workflow-kit/core/.claude/skills/worktree-setup/SKILL.md`
+- [ ] N3: Refuse full commands where the config expects npm script names — install and sync validation, scaffold wording, install-check case — `../ai-workflow-kit/tools/{install,sync,install-check}.mjs`, `../ai-workflow-kit/kit.config.json`
+- [ ] N4: Load the kit rules even when the project owns its AGENTS file — AGENTS.workflow.md render + CLAUDE.md imports both — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/templates/{AGENTS,CLAUDE}.md`
+- [ ] N5: Start any stack's dev server in slots from config instead of Angular-only code — slot-procs reads config; Angular pack supplies today's values — `../ai-workflow-kit/core/scripts/{slot-serve,take-plan}.mjs`, `../ai-workflow-kit/core/scripts/lib/slot-procs.mjs`, `../ai-workflow-kit/packs/angular/**`
+- [ ] N6: Give workflow scripts their own package file so projects needn't edit theirs — kit-managed scripts/package.json, install --prefix scripts, lockfile hash — `../ai-workflow-kit/core/scripts/package.json`, `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/core/scripts/{take-plan,slot-serve}.mjs`
+- [ ] N7: Fix the smaller config and drift gaps from the adoption — install.json always in scope, sensitive paths from config, ignored files skipped, i18n glob, browser default — `../ai-workflow-kit/core/scripts/{scope-check,ship-prep}.mjs`, `../ai-workflow-kit/tools/{drift-check,install}.mjs`, `../ai-workflow-kit/kit.config.json`
+- [ ] N8: Prove FoodVibe still works with the changed kit before merging — local-source kit-sync dry-run (0 conflicts) and scratch-clone slot-serve test; notes file — `docs/workflow-kit/kit-sync-notes.md`
+- [ ] N9: Run all kit checks and open the kit PR — leak-check, pack-check, install-check, e2e-check (Linux + Windows); CHANGELOG Unreleased — kit repo
+
+### Plan 415 — Kit Stack-Neutral Core Part 2: CI, Commands and Tech-Debt Rules by Pack (`plans/415-kit-stack-neutral-core-part-2-ci-commands-tech-debt-rules-by-pack.plan.md`)
+
+- [ ] M0: Check the issues are still open and map every core-to-pack reference — Step 0 + pack contract list — `plans/415-kit-stack-neutral-core-part-2-ci-commands-tech-debt-rules-by-pack.plan.md`
+- [ ] M1: Render backend CI jobs only when the project has a backend — serverRoot block markers in ci and security workflows, actionlint on renders — `../ai-workflow-kit/core/.github/workflows/{ci,security}.yml`, `../ai-workflow-kit/tools/install-check.mjs`
+- [ ] M2: Let projects choose how CI installs, lints and audits — ci.install, ci.lintScope, ci.appAuditMode keys, changed-files lint, report-only audit, scripts audit — `../ai-workflow-kit/core/.github/workflows/{ci,security}.yml`, `../ai-workflow-kit/kit.config.json`, `../ai-workflow-kit/docs/**`
+- [ ] M3: Move Angular style rules out of core commands into the Angular pack — match-existing-style line in core, PACK:style fragments, no-semi hook fragment, prettier seed — `../ai-workflow-kit/core/.claude/commands/{feat,fix,refactor,security}.md`, `../ai-workflow-kit/core/.husky/pre-commit`, `../ai-workflow-kit/packs/angular/**`, `../ai-workflow-kit/templates/**`
+- [ ] M4: Make packs declare which core references they provide and fail when one is missing — pack.json contract, core fallbacks, pack-check rule, fix.md section names — `../ai-workflow-kit/packs/*/pack.json`, `../ai-workflow-kit/tools/pack-check.mjs`, `../ai-workflow-kit/core/.claude/commands/**`
+- [ ] M5: Add a link check that proves every path the workflow docs mention exists — workflow-link-check tool + kit CI job over renders — `../ai-workflow-kit/tools/workflow-link-check.mjs`, `../ai-workflow-kit/.github/workflows/**`
+- [ ] M6: Make the tech-debt scan work for any stack and compare against a baseline — scan subcommand, baseline file, tsx/jsx, pack rule sets, skill PACK:stack — `../ai-workflow-kit/core/scripts/techdebt-report.mjs`, `../ai-workflow-kit/core/.claude/skills/techdebt/SKILL.md`, `../ai-workflow-kit/packs/angular/**`
+- [ ] M7: Make git commands work in forks and when PR edit is blocked — gh -R from origin, PATCH fallback documented — `../ai-workflow-kit/core/docs/agent/standards-git.md`, `../ai-workflow-kit/core/.claude/commands/ship.md`
+- [ ] M8: Prove FoodVibe still renders the same CI and rules before merging — local-source dry-run, rendered ci.yml and fix.md compared; notes — `docs/workflow-kit/kit-sync-notes.md`
+- [ ] M9: Run all kit checks and open the kit PR — leak-check, pack-check, install-check, e2e-check, link check; CHANGELOG Unreleased — kit repo
+
+### Plan 416 — Kit React-Vite Pack, Upstream-Owned Layer and Adoption Checks (`plans/416-kit-react-vite-pack-upstream-owned-layer-adoption-checks.plan.md`)
+
+- [ ] V0: Check 414 and 415 landed and decide where the Supabase backend rules live — Step 0 — `plans/416-kit-react-vite-pack-upstream-owned-layer-adoption-checks.plan.md`
+- [ ] V1: Add a React and Vite stack pack built from the files that already work — standards, conventions, skills, gotchas, techdebt rules, config defaults, fragments — `../ai-workflow-kit/packs/react-vite/**`
+- [ ] V2: Add the Supabase backend rules where React projects can opt in — backend standards + gotchas as layer or pack part per V0 — `../ai-workflow-kit/layers/supabase/**` or `../ai-workflow-kit/packs/react-vite/**`
+- [ ] V3: Support projects that are a copy of someone else's repo without touching their files — upstream-owned layer, ownership.upstreamPaths, scope-guard message, CI defaults, pull-copy command — `../ai-workflow-kit/layers/upstream-owned/**`, `../ai-workflow-kit/core/scripts/scope-check.mjs`, `../ai-workflow-kit/tools/install.mjs`
+- [ ] V4: Let the end-to-end check run against a real installed project — e2e --project mode, safe junction cleanup — `../ai-workflow-kit/tools/e2e-check.mjs`
+- [ ] V5: Add an adoption report that shows which workflow parts are installed and working — adoption-report tool — `../ai-workflow-kit/tools/adoption-report.mjs`
+- [ ] V6: Run the acceptance test on Angular, React-Vite and upstream-owned fixtures in kit CI — fixtures + CI matrix (Linux + Windows) — `../ai-workflow-kit/tools/fixtures/**`, `../ai-workflow-kit/.github/workflows/**`
+- [ ] V7: Release v1.2.0 with clear upgrade notes — CHANGELOG what-to-do, kit.json, README packs/layers section; tag after Dandan's go — kit repo
+- [ ] V8: Sync FoodVibe to v1.2.0 and ship it — dry-run, Apply, ng build, kit-owned and manifest checks, /ship — `.kit/install.json` + files kit-sync writes
+- [ ] V9: Have the React project drop its forked files and delete the hand-off — adopting project syncs v1.2.0 and removes Appendix A overrides; delete the kit handoff folder after Dandan's go — `../ai-workflow-kit/handoff/`
 
 ## Where things live
 
