@@ -85,7 +85,7 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - [x] B3: Make sure no FoodVibe or private data ships in the public kit — Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs — `../ai-workflow-kit/tools/leak-check.mjs`, `../ai-workflow-kit/.github/**`
 - [x] B4: Give the kit version numbers, a changelog and a rewritten README — `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps — `../ai-workflow-kit/kit.json`, `CHANGELOG.md`, `README.md`
 - [x] B5: Publish the first versioned kit release (v0.5.0) and install it from GitHub — Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir — kit GitHub repo
-- [ ] B6: Record phase 6B in FoodVibe's kit manifest and ship — FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship` — `docs/workflow-kit/manifest.md`
+- [x] B6: Record phase 6B in FoodVibe's kit manifest and ship — FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship` — `docs/workflow-kit/manifest.md`
 
 ## Out of Scope
 FoodVibe adoption, retiring ADR 0018, the change-loop doc, second-consumer proof, `v1.0.0` (all plan 392).
