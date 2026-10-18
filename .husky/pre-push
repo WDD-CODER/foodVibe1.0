@@ -10,6 +10,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
   [ "$remote_ref" = "refs/heads/main" ] || continue
 
   if [ "$remote_sha" = "$ZERO" ]; then
+    # First push of the branch to an empty remote (a new repository): nothing to compare against yet.
+    git rev-parse -q --verify "origin/main" >/dev/null || continue
     base="origin/main"
   else
     base="$remote_sha"

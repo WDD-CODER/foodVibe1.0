@@ -167,7 +167,7 @@ Tooling: the `skill-creator` skill automates runs/grading/benchmark/viewer. `cla
 2. Write v2 skills. Each gets `evals/evals.json` with 2–3 realistic prompts + assertions.
 3. For the 3 highest-value skills (cssLayer, angularComponentStructure, save-plan), run each prompt twice in fresh subagents — once with the snapshot (`old_skill`), once with v2 (`with_skill`) — grade, aggregate, and produce the review viewer (`generate_review.py --static`).
 4. Deliver: unified diff per skill + a one-paragraph rationale per diff, the benchmark table, and the viewer HTML.
-5. Kit rule: skills are kit-owned → land the change in `ai-workflow-kit` first, then patch into FoodVibe on a `chore/` branch (ADR 0018).
+5. Kit rule: skills are kit-owned → land the change in `ai-workflow-kit` first, release it, then `kit-sync --ref` it into FoodVibe (ADR 0021).
 
 ### Decisions taken 2026-10-10 (after `/skill-doctor` usage data)
 

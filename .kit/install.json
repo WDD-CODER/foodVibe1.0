@@ -1,0 +1,811 @@
+{
+  "kit": {
+    "version": "1.0.2"
+  },
+  "source": "github:WDD-CODER/ai-workflow-kit",
+  "ref": "v1.0.2",
+  "commit": "b14b956f762e7896f4f55cbb71ee2fb5a2868c52",
+  "packs": [
+    "angular",
+    "node-express"
+  ],
+  "cursor": true,
+  "yesChef": false,
+  "files": {
+    ".claude/agents/git-agent.md": {
+      "sha256": "90e24438b0517ac0c04a7a5bc65e8d5b61db7c52207f13bbaefb102e55a87f4a",
+      "kind": "managed",
+      "source": "core/.claude/agents/git-agent.md"
+    },
+    ".claude/commands/brief.md": {
+      "sha256": "55a830a0aee50eba0660085d550ed0c1b7af2b12bc8c39882aa8eaf0dc2b0383",
+      "kind": "managed",
+      "source": "core/.claude/commands/brief.md"
+    },
+    ".claude/commands/cleanup.md": {
+      "sha256": "c720c4b788fb1aad532cbdc415381fb804650f0bacf86cb06476738ab2971ede",
+      "kind": "managed",
+      "source": "core/.claude/commands/cleanup.md"
+    },
+    ".claude/commands/docs-refresh.md": {
+      "sha256": "9c1fa0a5cce85ff2b8ddbf24567d44406d30ef81210c500bfc40b40be5ab3dbb",
+      "kind": "managed",
+      "source": "core/.claude/commands/docs-refresh.md"
+    },
+    ".claude/commands/done.md": {
+      "sha256": "0d608759502e8bd244e73d07c75f5d1481722d6312e199a8c9d353bf681e24b7",
+      "kind": "managed",
+      "source": "core/.claude/commands/done.md"
+    },
+    ".claude/commands/end-session.md": {
+      "sha256": "ed1dd14a72d0ce2153a610ffa9cdde9b6c7a53509eec6bdf7e7851e028e814ef",
+      "kind": "managed",
+      "source": "core/.claude/commands/end-session.md"
+    },
+    ".claude/commands/feat.md": {
+      "sha256": "d6aabb26b2f2be19ee972a273ebff9f0352e2712e60530755ce95ac2f52205a7",
+      "kind": "managed",
+      "source": "core/.claude/commands/feat.md"
+    },
+    ".claude/commands/fix-pr-checks.md": {
+      "sha256": "fb315946b839c2d346354e33ca6a31898369e4113a3c40a4851fe8ad17462831",
+      "kind": "managed",
+      "source": "core/.claude/commands/fix-pr-checks.md"
+    },
+    ".claude/commands/plan.md": {
+      "sha256": "75c39dda1e343d5945deb8cab84c18316642c0e88ff606a13fe739f60fb63c9f",
+      "kind": "managed",
+      "source": "core/.claude/commands/plan.md"
+    },
+    ".claude/commands/refactor.md": {
+      "sha256": "184e587446924d551ecce87ba7cc34429fef8ba70fb234a96050af7240d68bc8",
+      "kind": "managed",
+      "source": "core/.claude/commands/refactor.md"
+    },
+    ".claude/commands/review.md": {
+      "sha256": "14352d8b4324159e65b81a404c19760afd4a8f7b4d3f429fafcc67ffe8086e09",
+      "kind": "managed",
+      "source": "core/.claude/commands/review.md"
+    },
+    ".claude/commands/security.md": {
+      "sha256": "05945ce13c23b2a6f2768ea2c96c7deae197e89dc2a92e84abc638938adfa00b",
+      "kind": "managed",
+      "source": "core/.claude/commands/security.md"
+    },
+    ".claude/commands/ship.md": {
+      "sha256": "90479a76141838b36cff926ec74535c4aaf425e35309dbc2ef295fde12b4ebc8",
+      "kind": "managed",
+      "source": "core/.claude/commands/ship.md"
+    },
+    ".claude/commands/skills.md": {
+      "sha256": "37f30e75837009aeed3bbcd028d7d26cf07ccdffc1389b0387ee605777273e03",
+      "kind": "managed",
+      "source": "core/.claude/commands/skills.md"
+    },
+    ".claude/commands/sweep-stale-todos.md": {
+      "sha256": "645d566a8d368f27566246f79fe63e8e036f12a972a03905ca2104b2c56aa8ac",
+      "kind": "managed",
+      "source": "core/.claude/commands/sweep-stale-todos.md"
+    },
+    ".claude/commands/take-plan.md": {
+      "sha256": "5e4fb3350d0b3e704eb6d3808ddbf2e49ab176e60761c3a782b436b529d65c8d",
+      "kind": "managed",
+      "source": "core/.claude/commands/take-plan.md"
+    },
+    ".claude/commands/tune-workflow.md": {
+      "sha256": "9a3dcc2d505683766f3744eb19555da3ee5cf5cdd26dd9a915248824de9f3bd6",
+      "kind": "managed",
+      "source": "core/.claude/commands/tune-workflow.md"
+    },
+    ".claude/commands/workflow-report.md": {
+      "sha256": "f3142d38fc6d8ebd95ea12846ee3700f8b589deaab0285f6dbfdedde495b0a2d",
+      "kind": "managed",
+      "source": "core/.claude/commands/workflow-report.md"
+    },
+    ".claude/instructions/validation-checklist.md": {
+      "sha256": "14f936625beee4d1c362809d706bb6e53ca6caca1be502bd589d859479ab2341",
+      "kind": "managed",
+      "source": "core/.claude/instructions/validation-checklist.md"
+    },
+    ".claude/prompts/deploy-angular-github.md": {
+      "sha256": "599bf3d8dc165013cb1ff1041fdec8663fbf57eaba30c52dbb517bbd10bdb51f",
+      "kind": "managed",
+      "source": "packs/angular/.claude/prompts/deploy-angular-github.md"
+    },
+    ".claude/references/hld-template.md": {
+      "sha256": "4d5471938410bad5975aaf3d2c75cd99dcf6727e25035c2b2ffff8fa1b87ea8b",
+      "kind": "seed",
+      "source": "templates/.claude/references/hld-template.md"
+    },
+    ".claude/references/prd-template.md": {
+      "sha256": "8081d602edc8fa3ec10117b847c58c19a0276e5a5675db43d05ef84ebae63238",
+      "kind": "seed",
+      "source": "templates/.claude/references/prd-template.md"
+    },
+    ".claude/skills/auth-and-logging/SKILL.md": {
+      "sha256": "08c349adbdac41df4d424a6dfeefec3ec1ec22318bcba5d8a6dfd00166b84b4c",
+      "kind": "managed",
+      "source": "packs/angular/.claude/skills/auth-and-logging/SKILL.md"
+    },
+    ".claude/skills/breadcrumbs/SKILL.md": {
+      "sha256": "4b5fdd1e654d3c348e9ed02d8fcacc3efc8bf7f96e93c69b114dd2cfd47f0aab",
+      "kind": "managed",
+      "source": "packs/angular/.claude/skills/breadcrumbs/SKILL.md"
+    },
+    ".claude/skills/brief-detection/SKILL.md": {
+      "sha256": "625757b66cdc73c7a345286d6a56b6049215c70f603eafab34d08fad3174d0bc",
+      "kind": "managed",
+      "source": "core/.claude/skills/brief-detection/SKILL.md"
+    },
+    ".claude/skills/cssLayer/evals/evals.json": {
+      "sha256": "c72d4c47341b07343d0980cb7fba669142de5e5f21ee7171a05891ba32431350",
+      "kind": "managed",
+      "source": "packs/angular/.claude/skills/cssLayer/evals/evals.json"
+    },
+    ".claude/skills/github-sync/SKILL.md": {
+      "sha256": "3031f46c6d9413d881f81cdc66cd8015680dba12356ba70797bf3637863a8f2a",
+      "kind": "managed",
+      "source": "core/.claude/skills/github-sync/SKILL.md"
+    },
+    ".claude/skills/save-plan/SKILL.md": {
+      "sha256": "8c8546c9a0d69f5d86623e669b697163790d05caeac04c5e93646af2a111ba14",
+      "kind": "managed",
+      "source": "core/.claude/skills/save-plan/SKILL.md"
+    },
+    ".claude/skills/save-plan/evals/evals.json": {
+      "sha256": "d7deffe10deb21611459fc3bfbd8c78f431a1f0cd3ec5df06eeea322bdecdbef",
+      "kind": "managed",
+      "source": "core/.claude/skills/save-plan/evals/evals.json"
+    },
+    ".claude/skills/save-plan/reference/mid-flight-sync.md": {
+      "sha256": "7cb17f394e3e594346ce4a1311d932ab76d1ce91f77ee600d107dc0a510cedc4",
+      "kind": "managed",
+      "source": "core/.claude/skills/save-plan/reference/mid-flight-sync.md"
+    },
+    ".claude/skills/worktree-setup/SKILL.md": {
+      "sha256": "ec95e4649fe935aa4487897193de3c1a58f9cef08e125372617a95b2292a5783",
+      "kind": "managed",
+      "source": "core/.claude/skills/worktree-setup/SKILL.md"
+    },
+    ".claude/workflows/deploy.yml": {
+      "sha256": "d8adc381fe57316234bed05052662006a297aaf307464583b593a28f6dcd24c2",
+      "kind": "managed",
+      "source": "packs/angular/.claude/workflows/deploy.yml"
+    },
+    ".cursor/commands/brief.md": {
+      "sha256": "d5706171bddd4ed432422d4953ac58cdc507d457900f00b00bd9e7cce5cb3923",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/brief.md"
+    },
+    ".cursor/commands/cleanup.md": {
+      "sha256": "7192913edae642f9f1b7b1d57d30824c020101e7ca4a6ae200624b21e4884c1b",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/cleanup.md"
+    },
+    ".cursor/commands/commit-github.md": {
+      "sha256": "d9d19e5665218157d0caca3c9d655bc32a2928c268a7cf036bd688bed2f5245b",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/commit-github.md"
+    },
+    ".cursor/commands/docs-refresh.md": {
+      "sha256": "915758c407609b83ad3b44d45ae668970453a2f007dabeb415dadac754799681",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/docs-refresh.md"
+    },
+    ".cursor/commands/done.md": {
+      "sha256": "12759553e92b471deaa2bff3eac9c6e29c9945ed0f635160663aee5eb2810960",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/done.md"
+    },
+    ".cursor/commands/feat.md": {
+      "sha256": "bf09748cc2535f66ea37870e80de1d2e6f559d5f052596cc75398cf851746b62",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/feat.md"
+    },
+    ".cursor/commands/fix-pr-checks.md": {
+      "sha256": "b1ea17a4fde69c7ecbb8d1a2dacbf153618f459f5db719cfbc368a471e529511",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/fix-pr-checks.md"
+    },
+    ".cursor/commands/fix.md": {
+      "sha256": "d2ccbd663a3c05bf7fcb1555619fc0fd231c8c60922b855d89c7ebd1ffe26f4c",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/fix.md"
+    },
+    ".cursor/commands/git.md": {
+      "sha256": "e3afb09c9a8814628cff1835db9ec1bc8775fa90077fbf66e11f03fe77b7b855",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/git.md"
+    },
+    ".cursor/commands/plan.md": {
+      "sha256": "0c951164abf9e4ac95a4c42c66a22effe01edc374477fd6f76fe865359a0b3a0",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/plan.md"
+    },
+    ".cursor/commands/refactor.md": {
+      "sha256": "50a7995462459af63e29df1ba17995c95f3f22ae35ce58b005444e523070b00d",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/refactor.md"
+    },
+    ".cursor/commands/review-it.md": {
+      "sha256": "3ad7dd5ffdb6eaaf900419d4f7bdec6fabd2f6448c1c8bb3ab5e65cfbd0ac129",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/review-it.md"
+    },
+    ".cursor/commands/review.md": {
+      "sha256": "5f3e25c742a8b2307548ebe5b6a12bd1e6411e81a88bc46a8bd7f6732f38523f",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/review.md"
+    },
+    ".cursor/commands/security.md": {
+      "sha256": "f7feb8d16e35746070f5632e387359ddedfaf3d045a8a0a81b4ccbca258f50e6",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/security.md"
+    },
+    ".cursor/commands/ship.md": {
+      "sha256": "34dcca8436597b7b4e35644862bf84fcd9cb827520b22948a987db740a0a6c66",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/ship.md"
+    },
+    ".cursor/commands/sweep-stale-todos.md": {
+      "sha256": "fd9cdd3d0f47e7927b5cac40d30e0ed39a97f2484d1bba1c024742d1536a2762",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/commands/sweep-stale-todos.md"
+    },
+    ".cursor/mcp.json": {
+      "sha256": "3460e1e08defbfa585bed6eef567ed1e62a3673a772274f5f9ecc255665796d7",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/mcp.json"
+    },
+    ".cursor/rules/angular-component-structure.mdc": {
+      "sha256": "8a73eb19f7cbb6f0dad328da4ad35ba26e15a7292b48c3cf2b837da83c047dd5",
+      "kind": "managed",
+      "source": "packs/angular/.cursor/rules/angular-component-structure.mdc"
+    },
+    ".cursor/rules/auth-and-logging-must-use-skill.mdc": {
+      "sha256": "5171586f66772cb821ac5d1e75d5c87f198e6f309dc8add0d4ef749b33637dba",
+      "kind": "seed",
+      "source": "templates/cursor/.cursor/rules/auth-and-logging-must-use-skill.mdc"
+    },
+    ".cursor/rules/brain-memory-session-start.mdc": {
+      "sha256": "f92f6e09d8904289b1dcac070ee5eb94357c9194d29384b33d60f88c07ac45bf",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/brain-memory-session-start.mdc"
+    },
+    ".cursor/rules/breadcrumbs-must-use-skill.mdc": {
+      "sha256": "b6bfbd33ea60de92a9f6f727113cf8b521f25b98dfbaf69ab2f6ab0513baf883",
+      "kind": "managed",
+      "source": "packs/angular/.cursor/rules/breadcrumbs-must-use-skill.mdc"
+    },
+    ".cursor/rules/brief-detection-must-use-skill.mdc": {
+      "sha256": "13248136880b2dc391c2f6b38227e5334a6a5f8e1d3f9d99abe53f7a85ce82e6",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/brief-detection-must-use-skill.mdc"
+    },
+    ".cursor/rules/contractor-role.mdc": {
+      "sha256": "6ac5902358526a770d7685038ea1747e94adc6afd368bc0bc9ef0aae4a27f9d3",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/contractor-role.mdc"
+    },
+    ".cursor/rules/core-angular.mdc": {
+      "sha256": "1448e3961ac1a092398349c09085842931cbbc4f3c75c7b6f5b0bfcb1b48c4a3",
+      "kind": "managed",
+      "source": "packs/angular/.cursor/rules/core-angular.mdc"
+    },
+    ".cursor/rules/git-commit-must-use-skill.mdc": {
+      "sha256": "dadfdaa2e4f4ba912503d394203a2d668de016e6a535ad210b6dad6648006162",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/git-commit-must-use-skill.mdc"
+    },
+    ".cursor/rules/github-sync-must-use-skill.mdc": {
+      "sha256": "00af03279c8909501e89d78ac2b5dbfb1d23696597f7c9000d379c26454e0650",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/github-sync-must-use-skill.mdc"
+    },
+    ".cursor/rules/preflight-must-use-skill.mdc": {
+      "sha256": "1623b8507f86a7d96c9ba10d65b7a29f6da0cbc05b2380d155d42d6fb9f1a6bb",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/preflight-must-use-skill.mdc"
+    },
+    ".cursor/rules/save-plan-must-use-skill.mdc": {
+      "sha256": "7c3c3043c8fe4d39783d95d43545727c4d843565147ec59cab13b3812dd139d2",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/save-plan-must-use-skill.mdc"
+    },
+    ".cursor/rules/scss-styling-must-use-cssLayer.mdc": {
+      "sha256": "e8bc52af699e3ae96d3bd2dc2130c5512973b6528ea87bf6a4359828707a6c8f",
+      "kind": "managed",
+      "source": "packs/angular/.cursor/rules/scss-styling-must-use-cssLayer.mdc"
+    },
+    ".cursor/rules/security.mdc": {
+      "sha256": "8793a3e8b3f212f10c8c0edb37f37165a4287817fdc0ec54fb7b4963160dc6f7",
+      "kind": "seed",
+      "source": "templates/cursor/.cursor/rules/security.mdc"
+    },
+    ".cursor/rules/techdebt-must-use-skill.mdc": {
+      "sha256": "6b59e21cdafbf387a77ffed8c2f360478a1877ebffc6a2de7294e98bde61dc81",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/techdebt-must-use-skill.mdc"
+    },
+    ".cursor/rules/worktree-setup-must-use-skill.mdc": {
+      "sha256": "0c5f5e78e74bc913189aad15479ce2a353e9002c68b0143b63183da9d4f2e829",
+      "kind": "managed",
+      "source": "layers/cursor/.cursor/rules/worktree-setup-must-use-skill.mdc"
+    },
+    ".editorconfig": {
+      "sha256": "d62fd282eadb5b3ff888a23ba5968e490cc0a77dded2fbc4f704b7e6e247f4db",
+      "kind": "managed",
+      "source": "core/.editorconfig"
+    },
+    ".gitattributes": {
+      "sha256": "e988f836790d67296b0e6138cf0cb52ee2b841e1f78e618a63046f44692df684",
+      "kind": "managed",
+      "source": "core/.gitattributes"
+    },
+    ".github/workflows/brain-capture-reminder.yml": {
+      "sha256": "f8937c3e028c163ae599f67d4319bc952f79e06921b24d894ff6bf0021e71e1b",
+      "kind": "managed",
+      "source": "core/.github/workflows/brain-capture-reminder.yml"
+    },
+    ".github/workflows/security.yml": {
+      "sha256": "f0f82607458b78f459cef5a01da4e29dcfea910de9103729a9a44493f457e176",
+      "kind": "managed",
+      "source": "core/.github/workflows/security.yml"
+    },
+    ".github/workflows/todo-sync.yml": {
+      "sha256": "66f0a03d74fe9b3f0faa1dd5f9e2e37dd6ff9036eab092839efb88304b406c00",
+      "kind": "managed",
+      "source": "core/.github/workflows/todo-sync.yml"
+    },
+    ".gitignore": {
+      "sha256": "cef849edeb5074726f2e1ef3a9f96f8f1545f51cca2781373ff234aa6e6e965c",
+      "kind": "seed",
+      "source": "templates/.gitignore"
+    },
+    ".husky/pre-commit": {
+      "sha256": "5dd3d9bb0a3d4ce1a6bcdd662f8e3126cbc542ee82993a0a66ac5ba99afd6d70",
+      "kind": "managed",
+      "source": "core/.husky/pre-commit"
+    },
+    ".husky/pre-push": {
+      "sha256": "55c834905c4d47649a4d25244c3be2404950d09529b1f5cc9b04631ae2f492e1",
+      "kind": "managed",
+      "source": "core/.husky/pre-push"
+    },
+    ".lintstagedrc.mjs": {
+      "sha256": "8c2f79b3b36e69d08758dcc9ee0d90d54379fd4883261034955241ad92f6f927",
+      "kind": "managed",
+      "source": "packs/angular/.lintstagedrc.mjs"
+    },
+    ".mcp.json": {
+      "sha256": "e7c01fbc3d15b719bdbcbd1f4ae26ab38d65340e7e49c0bf53e9d209207eedd5",
+      "kind": "seed",
+      "source": "templates/.mcp.json"
+    },
+    ".nvmrc": {
+      "sha256": "4c42fb8d6334c5cdcac68b93f96c581fb83b1f58cda898cff115e5e941ef717d",
+      "kind": "seed",
+      "source": "templates/.nvmrc"
+    },
+    ".prettierrc.json": {
+      "sha256": "91e95a01edd7da2978dd2d895f9bc403c0a86bb695ad417130133b4c55fef49b",
+      "kind": "seed",
+      "source": "templates/.prettierrc.json"
+    },
+    ".vscode/extensions.json": {
+      "sha256": "6da5b6004a21316f17db45d15fc93a8d8b060ddfa4139c1fadab4d191187c898",
+      "kind": "managed",
+      "source": "packs/angular/.vscode/extensions.json"
+    },
+    ".vscode/launch.json": {
+      "sha256": "d2e7a817688daf2f187f74902717e525da165d77060fec3b0da1a9d2726971ed",
+      "kind": "managed",
+      "source": "packs/angular/.vscode/launch.json"
+    },
+    ".vscode/settings.json": {
+      "sha256": "5cd80f43313b0af162229abd9fabff0f902ebf2e9acd1ef624aabbff7efe12c5",
+      "kind": "managed",
+      "source": "core/.vscode/settings.json"
+    },
+    ".vscode/tasks.json": {
+      "sha256": "b409efe1410a770328f16565a420d6f70fd00afaab9e23ca3f80a8a751953ae2",
+      "kind": "managed",
+      "source": "packs/angular/.vscode/tasks.json"
+    },
+    "AGENTS.md": {
+      "sha256": "ac9e90ad658c60651aa9f541c5734a89150ee2a7b633d7c195fd0f016769822d",
+      "kind": "seed",
+      "source": "templates/AGENTS.md"
+    },
+    "CLAUDE.md": {
+      "sha256": "56695cc776dfff8118bbb6b1b6d15ef08a817f4b2fa9924a29400d1dec8a9db8",
+      "kind": "seed",
+      "source": "templates/CLAUDE.md"
+    },
+    "README_WORKFLOW.md": {
+      "sha256": "4b1729f65c329b6249a01e39c00ee6bd3665fe77205f16ea55f875f0885b2850",
+      "kind": "managed",
+      "source": "core/README_WORKFLOW.md"
+    },
+    "_shared/current-state.md": {
+      "sha256": "c1b44339ba576a90bc3c8f27861eac51c0f955c700eb1ff657806decc02aa54b",
+      "kind": "seed",
+      "source": "templates/docs/project/current-state.md"
+    },
+    "_shared/tech-stack.md": {
+      "sha256": "3767dc06ad8db888d66fe04ffccba704ef0e3ad5a984496e9fe323b9f1bda2e3",
+      "kind": "seed",
+      "source": "templates/docs/project/tech-stack.md"
+    },
+    "docs/agent/brain-capture.md": {
+      "sha256": "4509d221f674ee13cd6a407703eb0d38502a8a200ade66db5f412c61aefeb3ac",
+      "kind": "managed",
+      "source": "core/docs/agent/brain-capture.md"
+    },
+    "docs/agent/job-validation.md": {
+      "sha256": "dbc54c22ce661dab87f6b0e1ad3f51ce40a99a94cf0fbd9eb59c43a1719a16f5",
+      "kind": "managed",
+      "source": "core/docs/agent/job-validation.md"
+    },
+    "docs/agent/pr-check-fix-loop.md": {
+      "sha256": "dfeff132bcbe3959ba5e7ab0991337a58047943771f0d051c0160bf075a7b91f",
+      "kind": "managed",
+      "source": "core/docs/agent/pr-check-fix-loop.md"
+    },
+    "docs/agent/ship-recovery.md": {
+      "sha256": "9a420f72c1f1ae8d874a6f8f73975f711892549091cb3638d9619ede23c9e161",
+      "kind": "managed",
+      "source": "core/docs/agent/ship-recovery.md"
+    },
+    "docs/agent/ship-regular.md": {
+      "sha256": "46606db124ddaf886b39a722735e54e9f39ee04e6bd06bb14ce3a0f32aa7d4a9",
+      "kind": "managed",
+      "source": "core/docs/agent/ship-regular.md"
+    },
+    "docs/agent/standards-git.md": {
+      "sha256": "a718d941a3badf72e1a3bbe9d79663503f95f78f6c9023773b01035a6eaa0773",
+      "kind": "managed",
+      "source": "core/docs/agent/standards-git.md"
+    },
+    "docs/brain/decisions/0001-lean-native-workflow.md": {
+      "sha256": "5b17771e796114edca608d00b1a2cec9b0b753e69731d33a5eab7d7813353707",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0001-lean-native-workflow.md"
+    },
+    "docs/brain/decisions/0002-file-based-memory-over-tool-memory.md": {
+      "sha256": "2a7413d931c3cac88fd3c8397b9b972210c74cfef28ceb04387fd9ddb5e48e73",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0002-file-based-memory-over-tool-memory.md"
+    },
+    "docs/brain/decisions/0003-auto-evoke-brain-on-pr.md": {
+      "sha256": "9f4f6911fc7d53d895ce1530f3efa0e6c44b72dd03c9eaf30d7c806e190e76a0",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0003-auto-evoke-brain-on-pr.md"
+    },
+    "docs/brain/decisions/0004-full-draft-brain-proposals.md": {
+      "sha256": "215f8e3e8a33be87021b7e86e772808ba7cc33d5574b64076a9064c4f1de0bc8",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0004-full-draft-brain-proposals.md"
+    },
+    "docs/brain/decisions/0005-scope-npm-audit-to-production-deps.md": {
+      "sha256": "6668deb0234a6cd4b134db344f62402964914007ff6fed3ea23f2bd264077a01",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0005-scope-npm-audit-to-production-deps.md"
+    },
+    "docs/brain/decisions/0006-auto-write-brain-capture-by-default.md": {
+      "sha256": "125aa8d73054261a764f7960decf05fca6ae68715ac8acb679a420d664b3abdb",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0006-auto-write-brain-capture-by-default.md"
+    },
+    "docs/brain/decisions/0007-ship-fast-decouples-approval-from-classification.md": {
+      "sha256": "154e637a3a57a554586087ab120ac3ec8c172dc82d4d79f6e1e979fa410df03b",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0007-ship-fast-decouples-approval-from-classification.md"
+    },
+    "docs/brain/decisions/0009-planner-worker-worktrees.md": {
+      "sha256": "7d915320b9611a7e885a4676a6318a3dcade262828406b7bba82973b18bb6b6c",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0009-planner-worker-worktrees.md"
+    },
+    "docs/brain/decisions/0014-validation-gate-tiers.md": {
+      "sha256": "6cafd66ad667f0293377a314da95ac12c9c0006dd473dc860fe12a2b3d6aa1c1",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/0014-validation-gate-tiers.md"
+    },
+    "docs/brain/decisions/_TEMPLATE.md": {
+      "sha256": "217597f37f906cbed9b4d798a752900c3a08d3ab77f0c6608a057f73073a64aa",
+      "kind": "seed",
+      "source": "core/docs/brain/decisions/_TEMPLATE.md"
+    },
+    "docs/brain/glossary.md": {
+      "sha256": "06f8c5742d8deb05e08af74f3f7acb535848616f3ec866bef3f508f824dd087c",
+      "kind": "seed",
+      "source": "templates/docs/brain/glossary.md"
+    },
+    "docs/brain/gotchas.md": {
+      "sha256": "2a6f22807628a3e4ee8606f641931a1e6908ff02b2003327a893d5d8cb6a242b",
+      "kind": "seed",
+      "source": "templates/docs/brain/gotchas.md"
+    },
+    "docs/brain/gotchas/agent-workflow.md": {
+      "sha256": "7d715b6b12cbf5c4a08056dbaf326a52daad6ea328243853c46352126090d7de",
+      "kind": "seed",
+      "source": "core/docs/brain/gotchas/agent-workflow.md"
+    },
+    "docs/brain/gotchas/angular.md": {
+      "sha256": "df035ed9c9d88f07caf92abbc470653712799e3d9ead5c84bda560ffbecb18f3",
+      "kind": "seed",
+      "source": "packs/angular/docs/brain/gotchas/angular.md"
+    },
+    "docs/brain/gotchas/backend.md": {
+      "sha256": "1236eba303faa7ecb1f970f8f08834608a48dbb08d6b0f96cf599e0afb21f9be",
+      "kind": "seed",
+      "source": "core/docs/brain/gotchas/backend.md + packs/node-express/docs/brain/gotchas/backend.md"
+    },
+    "docs/brain/gotchas/ci.md": {
+      "sha256": "cdd5fa64492f15b42c362b3532594ad31207cfc6a9a58c2113d7302e267a10fc",
+      "kind": "seed",
+      "source": "core/docs/brain/gotchas/ci.md + packs/angular/docs/brain/gotchas/ci.md"
+    },
+    "docs/brain/gotchas/git-workflow.md": {
+      "sha256": "a4df43327f858f25099b298bcbf2b6d524baf79492b8021443a75b2d92826fea",
+      "kind": "seed",
+      "source": "core/docs/brain/gotchas/git-workflow.md"
+    },
+    "docs/brain/how-it-works.md": {
+      "sha256": "74cce941098a51cfacd66a0f77da8851e01e617b001b54d5074247385494a69e",
+      "kind": "seed",
+      "source": "templates/docs/brain/how-it-works.md"
+    },
+    "docs/brain/index.md": {
+      "sha256": "cb1467f901239ce6b817251cef23f189ad33d2c158983337eb9ef8bea8604c5a",
+      "kind": "seed",
+      "source": "templates/docs/brain/index.md"
+    },
+    "docs/brain/invariants.md": {
+      "sha256": "5e1faa333dc5cac4bc03677a97b6d2f519c668282a0d009ee4378436089f010d",
+      "kind": "seed",
+      "source": "templates/docs/brain/invariants.md"
+    },
+    "docs/brain/patterns/_TEMPLATE.md": {
+      "sha256": "bad82f0a8a0bfb69ad3d06088c847fbd629a70730fbeb8ed3b7e9e410a712d15",
+      "kind": "seed",
+      "source": "core/docs/brain/patterns/_TEMPLATE.md"
+    },
+    "docs/brain/patterns/atomic-bulk-replace-with-standalone-fallback.md": {
+      "sha256": "4842e2fab5f602236d5a1c3a274ba4d836002e5ccfb34d1cb1b47307ce2543dc",
+      "kind": "seed",
+      "source": "packs/node-express/docs/brain/patterns/atomic-bulk-replace-with-standalone-fallback.md"
+    },
+    "docs/brain/patterns/defer-singleton-data-ensureLoaded.md": {
+      "sha256": "d52cacd151cf6a51c0d22143165777618a8ea04f8a148cbeba81876b8af44ba8",
+      "kind": "seed",
+      "source": "packs/angular/docs/brain/patterns/defer-singleton-data-ensureLoaded.md"
+    },
+    "docs/brain/patterns/how-to-validate-on-job-gate.md": {
+      "sha256": "99a34f58a441b40fb0635c5c9c361469cb88cdeab5e42e626898a1dc84d130f6",
+      "kind": "seed",
+      "source": "core/docs/brain/patterns/how-to-validate-on-job-gate.md"
+    },
+    "docs/brain/patterns/signals-only-state.md": {
+      "sha256": "f10505f0a6ce4d8529f3962fccea5a1a0228a9b5f19d33dd89582fd69d64d89d",
+      "kind": "seed",
+      "source": "packs/angular/docs/brain/patterns/signals-only-state.md"
+    },
+    "docs/brain/patterns/split-catalog-scan-from-filter-decoration.md": {
+      "sha256": "40c8a76b3f5e4089b545be24fbf6c0620ec6bc0a295962d79579b7cf1ea2a92b",
+      "kind": "seed",
+      "source": "packs/angular/docs/brain/patterns/split-catalog-scan-from-filter-decoration.md"
+    },
+    "docs/brain/projectbrief.md": {
+      "sha256": "6a9c9662cf0a2ea5ceb94b2cfed17909e7f6c14c4e0e1602fbe79c0a8f95aede",
+      "kind": "seed",
+      "source": "templates/docs/brain/projectbrief.md"
+    },
+    "eslint.config.mjs": {
+      "sha256": "8beda61914aa6c7a8850d597e9ea9239192cd10e2d862752f30b25e2d5908a96",
+      "kind": "managed",
+      "source": "packs/angular/eslint.config.mjs"
+    },
+    "knip.json": {
+      "sha256": "7e34d6fe2cf9907fc902bd98a012183ba0c56e86100b1671445d90e43af38f9f",
+      "kind": "managed",
+      "source": "packs/angular/knip.json"
+    },
+    "scripts/brain-capture-comment.mjs": {
+      "sha256": "f2fa5d887f9b7b2d7d58d64956d54c61fd4503d067a0661449fce7a3cf933dce",
+      "kind": "managed",
+      "source": "core/scripts/brain-capture-comment.mjs"
+    },
+    "scripts/brain-review-check.mjs": {
+      "sha256": "c4507a51d6a1eb08bf183c49ab90ad4551ad8e9c2a6bb88e702016d7314801c0",
+      "kind": "managed",
+      "source": "core/scripts/brain-review-check.mjs"
+    },
+    "scripts/branch-guard.sh": {
+      "sha256": "0a04fece326247246ac01ad7a9729c2bc8e1250ef220ce88e413273a25a1a973",
+      "kind": "managed",
+      "source": "core/scripts/branch-guard.sh"
+    },
+    "scripts/breadcrumbs-check.mjs": {
+      "sha256": "2aa7a0834cd21875a18f7bda6d0afd44b3f45fc5e6e6d99ede86e1d43b07dadd",
+      "kind": "managed",
+      "source": "packs/angular/scripts/breadcrumbs-check.mjs"
+    },
+    "scripts/free-merged-slots.mjs": {
+      "sha256": "a71c1f3a22f010a050e9d1a94bce09f46c6e386f276c012a7a3d97cbe997f9b4",
+      "kind": "managed",
+      "source": "core/scripts/free-merged-slots.mjs"
+    },
+    "scripts/github-sync-gate.mjs": {
+      "sha256": "0e9c2db46380e9859de12543f230102409c44da3b31ab59eedbd1479cfa89403",
+      "kind": "managed",
+      "source": "core/scripts/github-sync-gate.mjs"
+    },
+    "scripts/handoff-check.sh": {
+      "sha256": "4dd138eab38991b576f9b115b85df64a87dfeac712cf0d6724ca4142e22e700c",
+      "kind": "managed",
+      "source": "core/scripts/handoff-check.sh"
+    },
+    "scripts/lib/invariants.mjs": {
+      "sha256": "f898bc3371c485d7120816366e245716f1199c9349c31d5601c1afc112350c55",
+      "kind": "managed",
+      "source": "core/scripts/lib/invariants.mjs"
+    },
+    "scripts/lib/plan-paths.mjs": {
+      "sha256": "5d95c2e1f9d68cde7d2f29cbef5b8408a2deb63f76ced1130c0b995920e9ea8e",
+      "kind": "managed",
+      "source": "core/scripts/lib/plan-paths.mjs"
+    },
+    "scripts/lib/plan-scope.mjs": {
+      "sha256": "9329582a2029e085160605893c778570a66d5a0c26b966c3ffd36f92cd161df8",
+      "kind": "managed",
+      "source": "core/scripts/lib/plan-scope.mjs"
+    },
+    "scripts/lib/slot-procs.mjs": {
+      "sha256": "b32c6864c0a25b0769e5942bc4c450597e71f53bb634e5311a6737ccd8de01a1",
+      "kind": "managed",
+      "source": "core/scripts/lib/slot-procs.mjs"
+    },
+    "scripts/lib/slot.mjs": {
+      "sha256": "7a336fb5871ed9636f03d7a5170885f83177b1fe0868a194e81d7998219bffb0",
+      "kind": "managed",
+      "source": "core/scripts/lib/slot.mjs"
+    },
+    "scripts/lib/todo-parse.mjs": {
+      "sha256": "352b9a5f93e13dbea0991ecd1a5b839ef51b691dbe9c2f169ea5908f54aea509",
+      "kind": "managed",
+      "source": "core/scripts/lib/todo-parse.mjs"
+    },
+    "scripts/next-plan-number.mjs": {
+      "sha256": "484dd13af43eb456fd723f821ef3792654d474cbd0f379c2453fd7f7523cfc70",
+      "kind": "managed",
+      "source": "core/scripts/next-plan-number.mjs"
+    },
+    "scripts/orphan-sweep.mjs": {
+      "sha256": "b8ff6bcf2cdf9b2b2f797cf8767c071cf72a779abc721a5dce7fece0623288d7",
+      "kind": "managed",
+      "source": "core/scripts/orphan-sweep.mjs"
+    },
+    "scripts/plan-close.mjs": {
+      "sha256": "d8a4e6af1aa59068966fdacb4a6a64ab65051a4d8d2e4f3a98202f08b8eb8c83",
+      "kind": "managed",
+      "source": "core/scripts/plan-close.mjs"
+    },
+    "scripts/plan-ledger-check.mjs": {
+      "sha256": "0b832559b4fb0f123bc046e5415ca2cecab92ea8b8a64a3a627a29a714570f17",
+      "kind": "managed",
+      "source": "core/scripts/plan-ledger-check.mjs"
+    },
+    "scripts/plan-name-similarity.mjs": {
+      "sha256": "b021e94b3416a66518245ca905018951e3b69af28e444bc7e45fc345499c6a8a",
+      "kind": "managed",
+      "source": "core/scripts/plan-name-similarity.mjs"
+    },
+    "scripts/plan-write-guard.sh": {
+      "sha256": "c038d4672e18500b449024d6528492201e86951a89d5546444a36bfbbda54387",
+      "kind": "managed",
+      "source": "core/scripts/plan-write-guard.sh"
+    },
+    "scripts/pre-commit-no-semi.mjs": {
+      "sha256": "bba0c1f4f3f4442a479ace6bba9d171a6906cdff69dfb385840a9e0f6707d431",
+      "kind": "managed",
+      "source": "packs/angular/scripts/pre-commit-no-semi.mjs"
+    },
+    "scripts/pre-commit-secret-scan.mjs": {
+      "sha256": "049ad5376dee0589de3e6512e88d78b09d260d3473f3307b3b7d222157637f7a",
+      "kind": "managed",
+      "source": "core/scripts/pre-commit-secret-scan.mjs"
+    },
+    "scripts/pre-compact-reminder.sh": {
+      "sha256": "d018d795f0379292cdc1f4483c5af61b69133fe8f8085f1d5bdd10218ddca509",
+      "kind": "managed",
+      "source": "core/scripts/pre-compact-reminder.sh"
+    },
+    "scripts/prune-merged-worktrees.sh": {
+      "sha256": "9ca1de07ce979fedc42bcde75a17410026566bb99f4057abb237eccda25c3ca2",
+      "kind": "managed",
+      "source": "core/scripts/prune-merged-worktrees.sh"
+    },
+    "scripts/prune-old-sessions.sh": {
+      "sha256": "c19cf87ec4cbd4ad7f94c55aeca3306fe9bca13fd44b6b1f8d23c950b7c0bfcb",
+      "kind": "managed",
+      "source": "core/scripts/prune-old-sessions.sh"
+    },
+    "scripts/scope-check.mjs": {
+      "sha256": "d6be282c6ff1f7f4297dfe92092deebed568bc487848247efed0a25d9b4ab0be",
+      "kind": "managed",
+      "source": "core/scripts/scope-check.mjs"
+    },
+    "scripts/scope-guard.sh": {
+      "sha256": "dfd5c78bb56e6b38df31362b7f08daa41c4088b7a0f0b5df7a10d884eb39d7c8",
+      "kind": "managed",
+      "source": "core/scripts/scope-guard.sh"
+    },
+    "scripts/session-lock.sh": {
+      "sha256": "cdb12ee087929b92bbdb7f2151a99c1d4f1697de62cdcbf5d373934db9478d0d",
+      "kind": "managed",
+      "source": "core/scripts/session-lock.sh"
+    },
+    "scripts/session-manifest-hook.py": {
+      "sha256": "3ef6b27d8bc92cb8b7ac1cc0fbe38cbe7d4f450115b25665198560dd0cd8686f",
+      "kind": "managed",
+      "source": "core/scripts/session-manifest-hook.py"
+    },
+    "scripts/session-manifest-ship.py": {
+      "sha256": "142bae278c84bf8ff3400d59dba2dfe1649b4352adbf83cf27481294b97e266a",
+      "kind": "managed",
+      "source": "core/scripts/session-manifest-ship.py"
+    },
+    "scripts/session-startup.sh": {
+      "sha256": "f4c32e81e4918799430f172176ce40a1d3f3bdcf10409c72cec13cddc45049ff",
+      "kind": "managed",
+      "source": "core/scripts/session-startup.sh"
+    },
+    "scripts/session-state-path.mjs": {
+      "sha256": "8c607cc54c40d35d306dee8f25a4587987c542005cab8d3240125bfca53a5032",
+      "kind": "managed",
+      "source": "core/scripts/session-state-path.mjs"
+    },
+    "scripts/ship-prep.mjs": {
+      "sha256": "d673dd3f4616a85d6082b6fbc1af9279db8e68566c3e8d1a6f1f96413689c8f9",
+      "kind": "managed",
+      "source": "core/scripts/ship-prep.mjs"
+    },
+    "scripts/slot-serve.mjs": {
+      "sha256": "196afdcd17df91817ee622e2fdacd60beb09f0c727c9ddb31bbea5ed99e00bb8",
+      "kind": "managed",
+      "source": "core/scripts/slot-serve.mjs"
+    },
+    "scripts/slot-stop.mjs": {
+      "sha256": "9e0f600e842ed4d7a2cd752dd53859d456e837afb21b08a24a896f1ab94f8933",
+      "kind": "managed",
+      "source": "core/scripts/slot-stop.mjs"
+    },
+    "scripts/take-plan.mjs": {
+      "sha256": "c2256fb988c8e6fd1214daba3cc8ee8d117111d40be6c541ce7b76c8784d4e34",
+      "kind": "managed",
+      "source": "core/scripts/take-plan.mjs"
+    },
+    "scripts/techdebt-report.mjs": {
+      "sha256": "2ef212d72d5823e8871590c3174ea3412ba16af06a96e5b91739d5690c844a4b",
+      "kind": "managed",
+      "source": "core/scripts/techdebt-report.mjs"
+    },
+    "scripts/todo-archive.mjs": {
+      "sha256": "e028ea8eab9b92bdd3d21f643382a496bd1cbe80a3f6df39ceb65fddbf538fec",
+      "kind": "managed",
+      "source": "core/scripts/todo-archive.mjs"
+    },
+    "scripts/todo-query.mjs": {
+      "sha256": "534d2c26b8011e650daeb57d478de4de744131c80a37537d054b8a7d71d3ea3f",
+      "kind": "managed",
+      "source": "core/scripts/todo-query.mjs"
+    },
+    "scripts/write-session-state.mjs": {
+      "sha256": "4072944a1de1ed6773831310149b34bc856ccccf5ca1cb051c8377020d39c36f",
+      "kind": "managed",
+      "source": "core/scripts/write-session-state.mjs"
+    }
+  }
+}
