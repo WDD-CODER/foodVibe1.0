@@ -91,11 +91,11 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 ## Atomic Sub-tasks
 - [x] C0: Check the plan still matches the kit and FoodVibe before starting — Step 0 reality check — `docs/workflow-kit/manifest.md`
 - [x] C1: Teach the kit installer to adopt an existing project without overwriting it — Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/kit-install.ps1`
-- [ ] C2: Adopt FoodVibe into the kit so it syncs like any other project — Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR — `.kit/install.json` + files kit-sync writes
+- [x] C2: Adopt FoodVibe into the kit so it syncs like any other project — Adopt FoodVibe; dry-run sync shows 0 conflicts; `kit-sync -Apply`; build + checks; FoodVibe chore PR — `.kit/install.json` + files kit-sync writes
 - [x] C3: Record in an ADR that kit changes now reach FoodVibe by sync, not patches — New ADR superseding 0018 (amends 0015); mark 0018 superseded; brain index line — `docs/brain/decisions/**`, `docs/brain/index.md`
-- [ ] C4: Write down how a kit change travels from the kit into projects — Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md` — `../ai-workflow-kit/docs/CHANGE-LOOP.md`, `docs/workflow-kit/manifest.md`
-- [ ] C5: Remove the old hand-applied patch instructions everywhere — Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`) — `AGENTS.md`, `scripts/kit-owned.mjs`, `docs/workflow-kit/manifest.md`
-- [ ] C6: Cut kit v1.0.0 and move FoodVibe onto it — Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0` — `.kit/install.json`
+- [x] C4: Write down how a kit change travels from the kit into projects — Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md` — `../ai-workflow-kit/docs/CHANGE-LOOP.md`, `docs/workflow-kit/manifest.md`
+- [x] C5: Remove the old hand-applied patch instructions everywhere — Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`) — `AGENTS.md`, `scripts/kit-owned.mjs`, `docs/workflow-kit/manifest.md`
+- [x] C6: Cut kit v1.0.0 and move FoodVibe onto it — Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0` — `.kit/install.json`
 - [ ] C7: Prove a fresh project installed from GitHub runs a full plan end to end — `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end — `../kit-proof/**`
 - [ ] C8: Prove upgrading to a new kit version works in both projects — No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship` — `.kit/install.json`, `../kit-proof/.kit/install.json`
 

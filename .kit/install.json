@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "0.5.0"
+    "version": "1.0.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v0.5.0",
-  "commit": "9c3e84b6059bda88180979393f6bdb831350ca4b",
+  "ref": "v1.0.0",
+  "commit": "d6d31dcbbb7fab2aeac077a49bbc7b47d3ba0a16",
   "packs": [
     "angular",
     "node-express"
@@ -738,7 +738,7 @@
       "source": "core/scripts/scope-check.mjs"
     },
     "scripts/scope-guard.sh": {
-      "sha256": "0578eea441c0d2e99f80f6398a2ca85983e17de510f2621ed963b228c7eb0704",
+      "sha256": "dfd5c78bb56e6b38df31362b7f08daa41c4088b7a0f0b5df7a10d884eb39d7c8",
       "kind": "managed",
       "source": "core/scripts/scope-guard.sh"
     },
