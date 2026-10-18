@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v1.0.0",
-  "commit": "d6d31dcbbb7fab2aeac077a49bbc7b47d3ba0a16",
+  "ref": "v1.0.1",
+  "commit": "a66d8fe8f4a802b6a1a3024f5bbaf3a68137c8ea",
   "packs": [
     "angular",
     "node-express"
