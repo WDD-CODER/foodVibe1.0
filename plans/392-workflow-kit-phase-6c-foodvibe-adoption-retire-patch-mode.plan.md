@@ -96,8 +96,8 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - [x] C4: Write down how a kit change travels from the kit into projects — Change-loop doc in the kit; link it from the kit README and FoodVibe `manifest.md` — `../ai-workflow-kit/docs/CHANGE-LOOP.md`, `docs/workflow-kit/manifest.md`
 - [x] C5: Remove the old hand-applied patch instructions everywhere — Replace patch-mode wording (AGENTS.md, `kit-owned.mjs`, kit `scope-guard.sh` + `README_WORKFLOW.md` via release + sync, `manifest.md`) — `AGENTS.md`, `scripts/kit-owned.mjs`, `docs/workflow-kit/manifest.md`
 - [x] C6: Cut kit v1.0.0 and move FoodVibe onto it — Cut `v1.0.0`; FoodVibe `kit-sync --ref v1.0.0` — `.kit/install.json`
-- [ ] C7: Prove a fresh project installed from GitHub runs a full plan end to end — `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end — `../kit-proof/**`
-- [ ] C8: Prove upgrading to a new kit version works in both projects — No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship` — `.kit/install.json`, `../kit-proof/.kit/install.json`
+- [x] C7: Prove a fresh project installed from GitHub runs a full plan end to end — `kit-proof` from GitHub, `/plan` → `/take-plan` → `/ship` end to end — `../kit-proof/**`
+- [x] C8: Prove upgrading to a new kit version works in both projects — No-op `v1.0.1`; upgrade FoodVibe and `kit-proof`; run all [auto] criteria; `/ship` — `.kit/install.json`, `../kit-proof/.kit/install.json`
 
 ## Out of Scope
 Auto-upgrade bots, npm/plugin distribution, a LICENSE file (Dandan chose all rights reserved).

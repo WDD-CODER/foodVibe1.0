@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "1.0.1"
+    "version": "1.0.2"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v1.0.1",
-  "commit": "a66d8fe8f4a802b6a1a3024f5bbaf3a68137c8ea",
+  "ref": "v1.0.2",
+  "commit": "b14b956f762e7896f4f55cbb71ee2fb5a2868c52",
   "packs": [
     "angular",
     "node-express"
@@ -53,7 +53,7 @@
       "source": "core/.claude/commands/fix-pr-checks.md"
     },
     ".claude/commands/plan.md": {
-      "sha256": "e4b97b242ed54b87a6a977aded9fd658301d37927ab5c493bc61baadf3e989ec",
+      "sha256": "75c39dda1e343d5945deb8cab84c18316642c0e88ff606a13fe739f60fb63c9f",
       "kind": "managed",
       "source": "core/.claude/commands/plan.md"
     },
@@ -368,7 +368,7 @@
       "source": "core/.husky/pre-commit"
     },
     ".husky/pre-push": {
-      "sha256": "eada80ba61cd157ac4e1943be35aaddb40eef51fb84104c13a2a88aa51383f35",
+      "sha256": "55c834905c4d47649a4d25244c3be2404950d09529b1f5cc9b04631ae2f492e1",
       "kind": "managed",
       "source": "core/.husky/pre-push"
     },
@@ -663,7 +663,7 @@
       "source": "core/scripts/lib/plan-scope.mjs"
     },
     "scripts/lib/slot-procs.mjs": {
-      "sha256": "39ebd3e7c0988ada38da9454bf41f3f2347c44991fe3e0a104cbfd4f7f7b839a",
+      "sha256": "b32c6864c0a25b0769e5942bc4c450597e71f53bb634e5311a6737ccd8de01a1",
       "kind": "managed",
       "source": "core/scripts/lib/slot-procs.mjs"
     },
@@ -733,7 +733,7 @@
       "source": "core/scripts/prune-old-sessions.sh"
     },
     "scripts/scope-check.mjs": {
-      "sha256": "ddaca92f02987199b221be2c20e99741ed5dc3a029150b3cd828ea48a089534f",
+      "sha256": "d6be282c6ff1f7f4297dfe92092deebed568bc487848247efed0a25d9b4ab0be",
       "kind": "managed",
       "source": "core/scripts/scope-check.mjs"
     },
@@ -798,7 +798,7 @@
       "source": "core/scripts/todo-archive.mjs"
     },
     "scripts/todo-query.mjs": {
-      "sha256": "cc45296f82aa861b95b04098c24032cb4b7797e77d8cce2fc419ff336bcb3032",
+      "sha256": "534d2c26b8011e650daeb57d478de4de744131c80a37537d054b8a7d71d3ea3f",
       "kind": "managed",
       "source": "core/scripts/todo-query.mjs"
     },
