@@ -166,15 +166,15 @@ line or file this plan names was removed, renamed or rewritten).
 - Hebrew labels only through `translatePipe` + `dictionary.json`.
 
 ## Atomic Sub-tasks
-- [ ] A1: Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
-- [ ] A2: `src/app/core/utils/add-option.util.ts` + spec (rules 1–4)
-- [ ] A3: `src/app/core/utils/keyed-picker-search.util.ts` + spec — `KeyedPickerSearch` copied from the menu service (rule 5) + scroll helper
-- [ ] A4: `src/app/shared/add-option-row/` component
-- [ ] A5: Apply to `shared/custom-select` (label, filter by label, stored-key select; keyboard via A3)
-- [ ] A6: Apply to `shared/custom-multi-select`; remove the second (dynamic) add button; keyboard via A3 (Space toggles)
-- [ ] A7: Apply to `shared/chip-search-dropdown`; keyboard via A3 (focus stays in input, no wrap)
-- [ ] A8: Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
-- [ ] A9: `ng build` + `ng test` green, `rg` checks from Success empty; hand the Human the click list (incl. keyboard check per select)
+- [ ] A1: List every shared dropdown that offers "add new" and the label each one needs — Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
+- [ ] A2: Write one shared helper that decides when and how "add new" shows — `src/app/core/utils/add-option.util.ts` + spec (rules 1–4)
+- [ ] A3: Share the menu's keyboard search so every dropdown navigates the same way — `src/app/core/utils/keyed-picker-search.util.ts` + spec — `KeyedPickerSearch` copied from the menu service (rule 5) + scroll helper
+- [ ] A4: Build one reusable "add new" row for dropdown lists — `src/app/shared/add-option-row/` component
+- [ ] A5: Use the add row and keyboard rules in the single-select dropdown — Apply to `shared/custom-select` (label, filter by label, stored-key select; keyboard via A3)
+- [ ] A6: Use them in the multi-select dropdown and drop its duplicate add button — Apply to `shared/custom-multi-select`; remove the second (dynamic) add button; keyboard via A3 (Space toggles)
+- [ ] A7: Use them in the chip search dropdown — Apply to `shared/chip-search-dropdown`; keyboard via A3 (focus stays in input, no wrap)
+- [ ] A8: Give each dropdown its own Hebrew "add new <thing>" label — Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
+- [ ] A9: Build, test and hand you a click list for every dropdown — `ng build` + `ng test` green, `rg` checks from Success empty; hand the Human the click list (incl. keyboard check per select)
 
 ## Technical Considerations
 - Dependencies: `TranslationService` / `translatePipe`, `KeyResolutionService` (keys may be

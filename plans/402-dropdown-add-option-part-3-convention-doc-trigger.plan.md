@@ -100,10 +100,10 @@ line or file this plan names was removed, renamed or rewritten).
 - none (docs only).
 
 ## Atomic Sub-tasks
-- [ ] A1: Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
-- [ ] A2: Trigger row in `AGENTS.md`
-- [ ] A3: `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
-- [ ] A4: `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
+- [ ] A1: Write the dropdown "add new" rule into the domain standards — Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
+- [ ] A2: Point agents to the rule from AGENTS.md — Trigger row in `AGENTS.md`
+- [ ] A3: Save the dropdown pattern in the project brain — `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
+- [ ] A4: Run the doc checks and have you read the rule — `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
 
 ## Technical Considerations
 - `AGENTS.md` is the shared source for Claude and Cursor; keep the row short like the others.

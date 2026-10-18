@@ -139,15 +139,15 @@ line or file this plan names was removed, renamed or rewritten).
 - Visible change: add-option text per the rule; logistics shows one add entry. Icons/styles stay.
 
 ## Atomic Sub-tasks
-- [ ] A1: Re-check the audit list on current main (after 397/398/400 merged); list the 7 `filterOptionsByStartsWith(` calls with verdicts — session-state
-- [ ] A2: Menu: `MenuPickerSearchService` onto `core/utils/keyed-picker-search.util.ts`; delete the local `KeyedPickerSearch`
-- [ ] A3: `ingredient-search` component onto the helpers (add option + keyboard rule 5)
-- [ ] A4: `preparation-search` component onto the helpers (add option + keyboard rule 5 — adds arrows)
-- [ ] A5: Logistics tool picker (`recipe-builder.page.html` + logistics picker service) — one add option; keyboard rule 5
-- [ ] A6: Menu event type (`menu-intelligence.page.ts/.html`) — label, filter by translated label, stored-key select; keyboard via `KeyedPickerSearch`
-- [ ] A7: Fix any raw-key `filterOptionsByStartsWith(` callers from A1; move the section-category dropdown onto the helper (P1)
-- [ ] A8: Append missing `add_new_<thing>` keys to `dictionary.json`
-- [ ] A9: `ng build` + `ng test` green, `rg` checks from Success; hand the Human the click list (incl. keyboard check per dropdown + menu regression)
+- [ ] A1: Recheck which page dropdowns still need the fix after part 1 merged — Re-check the audit list on current main (after 397/398/400 merged); list the 7 `filterOptionsByStartsWith(` calls with verdicts — session-state
+- [ ] A2: Move the menu's picker search onto the shared keyboard helper — Menu: `MenuPickerSearchService` onto `core/utils/keyed-picker-search.util.ts`; delete the local `KeyedPickerSearch`
+- [ ] A3: Give the ingredient search the shared add option and keyboard rules — `ingredient-search` component onto the helpers (add option + keyboard rule 5)
+- [ ] A4: Give the preparation search the shared add option and arrow-key navigation — `preparation-search` component onto the helpers (add option + keyboard rule 5 — adds arrows)
+- [ ] A5: Give the logistics tool picker one add option and keyboard rules — Logistics tool picker (`recipe-builder.page.html` + logistics picker service) — one add option; keyboard rule 5
+- [ ] A6: Make the menu event-type dropdown show and filter by translated labels — Menu event type (`menu-intelligence.page.ts/.html`) — label, filter by translated label, stored-key select; keyboard via `KeyedPickerSearch`
+- [ ] A7: Fix the remaining dropdowns that filter by raw keys instead of labels — Fix any raw-key `filterOptionsByStartsWith(` callers from A1; move the section-category dropdown onto the helper (P1)
+- [ ] A8: Add the missing Hebrew "add new <thing>" labels — Append missing `add_new_<thing>` keys to `dictionary.json`
+- [ ] A9: Build, test and hand you a click list, including a menu regression check — `ng build` + `ng test` green, `rg` checks from Success; hand the Human the click list (incl. keyboard check per dropdown + menu regression)
 
 ## Technical Considerations
 - Dependencies: plan 400's `add-option.util.ts`, `keyed-picker-search.util.ts` and

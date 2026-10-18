@@ -82,10 +82,10 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
-- [ ] A2: Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
-- [ ] A3: Equipment-form infrastructure hint (`equipment-form/**`).
-- [ ] A4: Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400. Update session-state.
+- [ ] A1: Sort venue equipment into infrastructure and regular groups behind the scenes — Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
+- [ ] A2: Show infrastructure and regular equipment as two groups on the venue pages — Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
+- [ ] A3: Hint in the equipment form which items count as infrastructure — Equipment-form infrastructure hint (`equipment-form/**`).
+- [ ] A4: Build, test and check an existing venue still saves — Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400. Update session-state.
 
 ## Technical Considerations
 

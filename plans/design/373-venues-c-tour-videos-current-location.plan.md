@@ -94,10 +94,10 @@ touching any milestone.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Schema and model; `build:schemas`; server test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
-- [ ] A2: Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
-- [ ] A3: Geolocation button and state, plus the detail navigate links.
-- [ ] A4: Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine). Update session-state.
+- [ ] A1: Let a venue store tour video links and a saved location — Schema and model; `build:schemas`; server test (`venue.schema.ts`, `venue.model.ts`, `server/test/**`).
+- [ ] A2: Add tour videos with a visit date to the venue form and detail page — Videos FormArray, plus the detail list (`venue-form/**`, `venue-detail/**`).
+- [ ] A3: Add a "save my current location" button and navigation links — Geolocation button and state, plus the detail navigate links.
+- [ ] A4: Build, test and try it on a phone over HTTPS — Build, specs. Phone test over HTTPS (geolocation needs a secure context; localhost is fine). Update session-state.
 
 ## Technical Considerations
 
