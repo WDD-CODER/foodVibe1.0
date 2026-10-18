@@ -40,6 +40,9 @@ add to them, never rewrite or remove an existing entry without escalating).
 docs/workflow-kit/manifest.md
 scripts/take-plan.mjs
 .claude/commands/take-plan.md
+README_WORKFLOW.md
+scripts/lib/slot.mjs
+scripts/session-startup.sh
 ```
 
 **Outside this repo:** the kit repo `../ai-workflow-kit/**` (main output), its GitHub repo (tags, releases, Actions), and the kit's fetch cache folder (choose a per-user cache, e.g. `~/.cache/ai-workflow-kit/`, never inside a project). Scratch install targets under the session scratchpad.
@@ -81,7 +84,7 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - [x] B2: Remember which kit version a project installed, so sync and upgrades use it — `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria — `../ai-workflow-kit/tools/**`
 - [x] B3: Make sure no FoodVibe or private data ships in the public kit — Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs — `../ai-workflow-kit/tools/leak-check.mjs`, `../ai-workflow-kit/.github/**`
 - [x] B4: Give the kit version numbers, a changelog and a rewritten README — `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps — `../ai-workflow-kit/kit.json`, `CHANGELOG.md`, `README.md`
-- [ ] B5: Publish the first versioned kit release (v0.5.0) and install it from GitHub — Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir — kit GitHub repo
+- [x] B5: Publish the first versioned kit release (v0.5.0) and install it from GitHub — Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir — kit GitHub repo
 - [ ] B6: Record phase 6B in FoodVibe's kit manifest and ship — FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship` — `docs/workflow-kit/manifest.md`
 
 ## Out of Scope
