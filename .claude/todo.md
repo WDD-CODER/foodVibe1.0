@@ -75,15 +75,6 @@
 - [ ] A3: Update every product and recipe that uses a unit when it is renamed — `unit` branch in `onRenameMetadata` + `getAffectedCount` + `reloadAfterRename`; confirms; dictionary keys; drop the out-of-scope comment — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `public/assets/data/dictionary.json`
 - [ ] A4: Prove a rename keeps costs the same and a conversion change updates them — Build + specs; manual test on the isolated DB (rename a custom unit used in 2 products and 1 recipe, cost unchanged; change its conversion, cost changes); update session-state — `docs/session-state-<branch>.md`
 
-### Plan 391 — Workflow Kit Phase 6B: GitHub Pull and Versioned Releases (`plans/391-workflow-kit-phase-6b-github-pull-versioned-releases.plan.md`)
-- [ ] B0: Check the plan still matches the kit and FoodVibe before starting — Step 0 reality check — `docs/workflow-kit/manifest.md`
-- [ ] B1: Let the installer pull the kit straight from a GitHub release instead of a local copy — Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers — `../ai-workflow-kit/tools/**`, `../ai-workflow-kit/*.ps1`
-- [ ] B2: Remember which kit version a project installed, so sync and upgrades use it — `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria — `../ai-workflow-kit/tools/**`
-- [ ] B3: Make sure no FoodVibe or private data ships in the public kit — Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs — `../ai-workflow-kit/tools/leak-check.mjs`, `../ai-workflow-kit/.github/**`
-- [ ] B4: Give the kit version numbers, a changelog and a rewritten README — `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps — `../ai-workflow-kit/kit.json`, `CHANGELOG.md`, `README.md`
-- [ ] B5: Publish the first versioned kit release (v0.5.0) and install it from GitHub — Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir — kit GitHub repo
-- [ ] B6: Record phase 6B in FoodVibe's kit manifest and ship — FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship` — `docs/workflow-kit/manifest.md`
-
 ### Plan 392 — Workflow Kit Phase 6C: FoodVibe Adoption and Retire Patch Mode (`plans/392-workflow-kit-phase-6c-foodvibe-adoption-retire-patch-mode.plan.md`)
 - [ ] C0: Check the plan still matches the kit and FoodVibe before starting — Step 0 reality check — `docs/workflow-kit/manifest.md`
 - [ ] C1: Teach the kit installer to adopt an existing project without overwriting it — Kit `--adopt` mode + `-Adopt` wrapper; scratch test on a copy of FoodVibe — `../ai-workflow-kit/tools/install.mjs`, `../ai-workflow-kit/kit-install.ps1`
