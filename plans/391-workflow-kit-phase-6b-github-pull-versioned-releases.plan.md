@@ -76,11 +76,11 @@ Thinking outside the box is expected; writing outside it requires explicit conse
 - npm package, Claude Code plugin, release tarballs, a LICENSE file.
 
 ## Atomic Sub-tasks
-- [ ] B0: Check the plan still matches the kit and FoodVibe before starting — Step 0 reality check — `docs/workflow-kit/manifest.md`
-- [ ] B1: Let the installer pull the kit straight from a GitHub release instead of a local copy — Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers — `../ai-workflow-kit/tools/**`, `../ai-workflow-kit/*.ps1`
-- [ ] B2: Remember which kit version a project installed, so sync and upgrades use it — `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria — `../ai-workflow-kit/tools/**`
-- [ ] B3: Make sure no FoodVibe or private data ships in the public kit — Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs — `../ai-workflow-kit/tools/leak-check.mjs`, `../ai-workflow-kit/.github/**`
-- [ ] B4: Give the kit version numbers, a changelog and a rewritten README — `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps — `../ai-workflow-kit/kit.json`, `CHANGELOG.md`, `README.md`
+- [x] B0: Check the plan still matches the kit and FoodVibe before starting — Step 0 reality check — `docs/workflow-kit/manifest.md`
+- [x] B1: Let the installer pull the kit straight from a GitHub release instead of a local copy — Fetch-to-cache helper (`tools/lib/source.mjs`) + `--source/--ref` in install, sync, drift-check, `.ps1` wrappers — `../ai-workflow-kit/tools/**`, `../ai-workflow-kit/*.ps1`
+- [x] B2: Remember which kit version a project installed, so sync and upgrades use it — `install.json` source/ref/commit; sync defaults + `--ref` upgrade; scratch tests for all [auto] criteria — `../ai-workflow-kit/tools/**`
+- [x] B3: Make sure no FoodVibe or private data ships in the public kit — Public-data sweep; extend leak-check if a pattern is worth keeping; confirm the GitHub Action runs — `../ai-workflow-kit/tools/leak-check.mjs`, `../ai-workflow-kit/.github/**`
+- [x] B4: Give the kit version numbers, a changelog and a rewritten README — `kit.json` semver, `CHANGELOG.md`, README rewrite, release steps — `../ai-workflow-kit/kit.json`, `CHANGELOG.md`, `README.md`
 - [ ] B5: Publish the first versioned kit release (v0.5.0) and install it from GitHub — Kit PR merged; Dandan's go; tag + GitHub release `v0.5.0`; install from GitHub into a scratch dir — kit GitHub repo
 - [ ] B6: Record phase 6B in FoodVibe's kit manifest and ship — FoodVibe `docs/workflow-kit/manifest.md` phase 6B paragraph; `/ship` — `docs/workflow-kit/manifest.md`
 
