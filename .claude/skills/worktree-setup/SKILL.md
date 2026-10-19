@@ -1,6 +1,6 @@
 ---
 name: worktree-setup
-description: One-time provisioning or repair of the three permanent Planner-Worker slots `../foodVibe1.0-wt-N` (N = 1..3) — git worktrees detached at origin/main with deps installed, `.worktree-root`/`.worktree-port` written and `server/.env` copied. Use only when the user says "setup worktree", "new worktree", "slot is missing" or a `wt-N` folder is absent. Taking a plan into an existing slot is `/take-plan`, not this.
+description: One-time provisioning or repair of the three permanent Planner-Worker slots `../foodVibe1.0-wt-N` (N = 1..3) — git worktrees detached at origin/main with deps installed (root, `scripts/`, backend), `.worktree-root`/`.worktree-port` written, runtime files excluded and the backend `.env` copied. Use only when the user says "setup worktree", "new worktree", "slot is missing" or a `wt-N` folder is absent. Taking a plan into an existing slot is `/take-plan`, not this.
 disable-model-invocation: true
 ---
 
@@ -20,9 +20,10 @@ Detached at `origin/main`, never on `main` and never on a branch — an idle slo
 
 ## 2. Provision every slot (new or existing)
 
-1. `npm install` at the slot root and inside `server/`.
+1. `npm install` at the slot root, `npm install` inside `scripts/` (the workflow scripts' own dependencies, `scripts/package.json`), and `npm install` inside the backend folder `server/` when the project has one (`paths.serverRoot` set).
 2. Write `.worktree-root` = absolute path of the main repo, and `.worktree-port` = `4200+N` (the port map in `AGENTS.md`: slot N = 4200+N).
-3. Copy `server/.env` from the main repo into the slot (`server/.env` is the only env file; skip silently if missing — it is a secret and may be absent on purpose).
+3. `node scripts/local-excludes.mjs` — adds the runtime files (`.worktree-*`, logs, install hashes) to the shared `.git/info/exclude`, so a slot never looks dirty even when the project keeps its own `.gitignore`.
+4. With a backend folder only: copy `server/.env` from the main repo into the slot (`server/.env` is the only env file; skip silently if missing — it is a secret and may be absent on purpose).
 
 ## 3. Report
 

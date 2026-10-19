@@ -37,7 +37,7 @@ save-plan:
   - Good: `B1: Let the installer pull the kit straight from a GitHub release instead of a local copy — --source/--ref flags, fetch-to-cache helper — tools/install.mjs, tools/lib/source.mjs`.
   - When the Human's pasted plan has raw-action sub-tasks, write the titles yourself while saving (keep their wording in `<details>`); never ask the Human to rewrite them.
 - Every Done-when item starts with `[auto]` or `[human]`. `[auto]` means the expected output is exact — a string, an exit code, `npm run build` passing, deterministic CLI output. `[human]` is visual/UI judgement, live interaction, product decisions; untagged counts as `[human]`. A UI-touching plan whose only Done-when is `[auto] npm run build` is under-specified — add a `[human]` item. Only the plan author tags; agents never promote to `[auto]`.
-- Medium/large plan touching auth or storage → a one-line security-surface note; `scripts/pre-commit-security-grep.mjs` is the gate.
+- Medium/large plan touching auth or storage → a one-line security-surface note; `scripts/pre-commit-secret-scan.mjs` (pre-commit) and the CI security workflow are the gates, plus any stack pack's pre-commit checks.
 
 ## Phase 0 — similarity gate (always)
 
@@ -55,26 +55,26 @@ Reply: rewrite existing | save as new | cancel
 ```
 
 - **rewrite existing** → overwrite that path, sync its Atomic Sub-tasks + `.claude/todo.md`, no new `NNN`.
-- **save as new** → continue; before the Write put the relative path in `.claude/.plan-write-ack` (one line, e.g. `plans/291-foo.plan.md`) so the PreToolUse guard allows the create.
+- **save as new** → continue; before the Write put the relative path in `.claude/.plan-write-ack` (one line, e.g. `plans/123-example-feature.plan.md`) so the PreToolUse guard allows the create.
 - **cancel** → stop, write nothing, execute nothing.
 
 ## Phase 1 — number + ledger (Planner only)
 
 A Worker never assigns `NNN` and never touches `.claude/todo.md` (it is Planner-owned; `todo-query.mjs sync --merged` collects the Worker's plan-file changes after merge).
 
-- **Number (save-as-new):** `node scripts/next-plan-number.mjs`. The script's number wins even when the pasted H1 already carries one (an Architect drafting in chat cannot see Workers' open branches) — rename the H1 and tell the Human in the completion line. It fetches, then takes the highest number across local plans, `origin/main` plans, the main worktree, and every local/remote `<type>/NNN-*` branch — a Worker's open branch whose plan you cannot see yet — plus 1. Never count `plans/` by hand; that is exactly how a number got reused. Re-run right before the write if anything else saved a plan meanwhile.
+- **Number (save-as-new):** `node scripts/next-plan-number.mjs`. The script's number wins even when the pasted H1 already carries one (a plan drafted in chat cannot see Workers' open branches) — rename the H1 and tell the Human in the completion line. It fetches, then takes the highest number across local plans, `origin/main` plans, the main worktree, and every local/remote `<type>/NNN-*` branch — a Worker's open branch whose plan you cannot see yet — plus 1. Never count `plans/` by hand; that is exactly how a number got reused. Re-run right before the write if anything else saved a plan meanwhile.
 - **Ledger:** don't read `.claude/todo.md` in full. Extract the Atomic Sub-tasks into a temp file and `node scripts/todo-query.mjs append --from <file>` (it inserts under `### Plan NNN — <Title>` before the footers). Then `node scripts/todo-query.mjs open` — unrelated open items get surfaced, not silently buried.
 
 ## Phase 2 — lint the draft (cheap here, expensive in a slot)
 
 - **Shape:** scope block parses; one `Status:`; a `Snapshot:` line exists (may be empty until Phase 3); Done-when tags present; every Atomic Sub-task has a title per Plan rules (read each title alone: if it does not say what changes and why, rewrite it).
 - **Coverage:** every requirement in the plan has an Atomic Sub-task.
-- **Architecture gate:** `node scripts/scope-check.mjs --arch --plan=<path>` must exit 0 (`ARCH: ok …` or `ARCH: skipped …`). A crash that is environmental (`Cannot find package 'picomatch'` → `node_modules` missing, run `npm ci`) is not a gate result — fix the environment and re-run; do not reason the gate out by hand. It fails when the scope touches an invariant in `docs/brain/invariants.md` with no `## Architecture Impact` line, or a `deviation`/`changes` line lacking `Arch-approved: Human YYYY-MM-DD` or a valid ADR. Fix the draft. Only the Human's literal `approve arch change INV-n` in chat allows an `Arch-approved:` line — never write one on your own.
+- **Architecture gate:** `node scripts/scope-check.mjs --arch --plan=<path>` must exit 0 (`ARCH: ok …` or `ARCH: skipped …`). A crash that is environmental (`Cannot find package 'picomatch'` → the workflow scripts' dependencies are missing, run `npm install` inside `scripts/`) is not a gate result — fix the environment and re-run; do not reason the gate out by hand. It fails when the scope touches an invariant in `docs/brain/invariants.md` with no `## Architecture Impact` line, or a `deviation`/`changes` line lacking `Arch-approved: Human YYYY-MM-DD` or a valid ADR. Fix the draft. Only the Human's literal `approve arch change INV-n` in chat allows an `Arch-approved:` line — never write one on your own.
 - **Prerequisites (Planner):** if the draft has `## Prerequisites`, verify each is already true on `origin/main` *now*. A tiny Planner-owned fix (a few lines) → land it as its own chore commit first. Anything bigger → save it as its own plan `NNN-1`, sequenced before this one. A Worker must never take a plan with a gate it cannot clear itself.
 
 ## Phase 3 — write, and (Planner) commit + push + verify
 
-- `Snapshot:` = `git rev-parse origin/main` when the draft left it empty; never overwrite a SHA the Architect filled in. If `origin/main` cannot be resolved (no remote, fetch failed), leave it empty and say so — a local `HEAD` SHA is not what the Worker's drift check compares against, and substituting it hides the problem.
+- `Snapshot:` = `git rev-parse origin/main` when the draft left it empty; never overwrite a SHA the author filled in. If `origin/main` cannot be resolved (no remote, fetch failed), leave it empty and say so — a local `HEAD` SHA is not what the Worker's drift check compares against, and substituting it hides the problem.
 - Write the file (rewrite → existing path; new → `plans/<NNN>-<slug>.plan.md`, or `plans/design/…` for Track `design`/`split` when that folder is open). Never under `~/.cursor/plans/`.
 - Not in a worktree and the plan changes code → suggest a `feat/` branch for whoever executes it.
 

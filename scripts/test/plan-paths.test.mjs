@@ -135,11 +135,12 @@ function prePush(root, files) {
   }
 }
 
-test('pre-push to main: accepts plans/design/NNN-*, refuses range folders and code', () => {
+test('pre-push to main: accepts plans/design/NNN-* and closed plans in range folders, refuses code', () => {
   const root = gitRepo()
   try {
     assert.equal(prePush(root, ['plans/design/374-x.plan.md', 'plans/406-y.plan.md', '.claude/todo.md']), 0)
-    assert.equal(prePush(root, ['plans/300-400/318-x.plan.md']), 1)
+    // Kit 1.0.5: plan-close.mjs files closed plans under plans/<range>/, and the Planner pushes that move to main.
+    assert.equal(prePush(root, ['plans/300-400/318-x.plan.md']), 0)
     assert.equal(prePush(root, ['scripts/foo.mjs']), 1)
   } finally {
     rmSync(root, { recursive: true, force: true })

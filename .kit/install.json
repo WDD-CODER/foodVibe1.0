@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "1.0.2"
+    "version": "1.2.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v1.0.2",
-  "commit": "b14b956f762e7896f4f55cbb71ee2fb5a2868c52",
+  "ref": "v1.2.0",
+  "commit": "85294d6691ae28d1ec12f267fc8b3e801776bbb6",
   "packs": [
     "angular",
     "node-express"
@@ -28,7 +28,7 @@
       "source": "core/.claude/commands/cleanup.md"
     },
     ".claude/commands/docs-refresh.md": {
-      "sha256": "9c1fa0a5cce85ff2b8ddbf24567d44406d30ef81210c500bfc40b40be5ab3dbb",
+      "sha256": "e3742d7219aefd973b1709cbc613274e7807f883a65fcf489bc7a5bfa0fba2f0",
       "kind": "managed",
       "source": "core/.claude/commands/docs-refresh.md"
     },
@@ -43,7 +43,7 @@
       "source": "core/.claude/commands/end-session.md"
     },
     ".claude/commands/feat.md": {
-      "sha256": "d6aabb26b2f2be19ee972a273ebff9f0352e2712e60530755ce95ac2f52205a7",
+      "sha256": "2db82529d67232ca0f3832341e97d74a18938b3456c4daa02b7156fabfca7f6c",
       "kind": "managed",
       "source": "core/.claude/commands/feat.md"
     },
@@ -53,32 +53,32 @@
       "source": "core/.claude/commands/fix-pr-checks.md"
     },
     ".claude/commands/plan.md": {
-      "sha256": "75c39dda1e343d5945deb8cab84c18316642c0e88ff606a13fe739f60fb63c9f",
+      "sha256": "7547ade5638b1eb6f3802117be0e283938a0826dc2a449551a728f5f39e432cf",
       "kind": "managed",
       "source": "core/.claude/commands/plan.md"
     },
     ".claude/commands/refactor.md": {
-      "sha256": "184e587446924d551ecce87ba7cc34429fef8ba70fb234a96050af7240d68bc8",
+      "sha256": "4db91eca28541f09c7a4656c5dd6fda2b1ad3ad5637f114cb54792f623109a38",
       "kind": "managed",
       "source": "core/.claude/commands/refactor.md"
     },
     ".claude/commands/review.md": {
-      "sha256": "14352d8b4324159e65b81a404c19760afd4a8f7b4d3f429fafcc67ffe8086e09",
+      "sha256": "c104f8e63159938b0db5f03930a65ea1a724d93ec05074fdfbb9213b7443a1d6",
       "kind": "managed",
       "source": "core/.claude/commands/review.md"
     },
     ".claude/commands/security.md": {
-      "sha256": "05945ce13c23b2a6f2768ea2c96c7deae197e89dc2a92e84abc638938adfa00b",
+      "sha256": "d7d950ed024003eaf83151a760b79271024cb55b427865717110f37fd7e42206",
       "kind": "managed",
       "source": "core/.claude/commands/security.md"
     },
     ".claude/commands/ship.md": {
-      "sha256": "90479a76141838b36cff926ec74535c4aaf425e35309dbc2ef295fde12b4ebc8",
+      "sha256": "588eb7867e66304503ad52b8f36c56faa91bc9815e5f24d28169caa9f916a79e",
       "kind": "managed",
       "source": "core/.claude/commands/ship.md"
     },
     ".claude/commands/skills.md": {
-      "sha256": "37f30e75837009aeed3bbcd028d7d26cf07ccdffc1389b0387ee605777273e03",
+      "sha256": "a17df4611387090568661364977004f38a52a3f8b139260d9e3c937a86a6a172",
       "kind": "managed",
       "source": "core/.claude/commands/skills.md"
     },
@@ -113,14 +113,14 @@
       "source": "packs/angular/.claude/prompts/deploy-angular-github.md"
     },
     ".claude/references/hld-template.md": {
-      "sha256": "4d5471938410bad5975aaf3d2c75cd99dcf6727e25035c2b2ffff8fa1b87ea8b",
-      "kind": "seed",
-      "source": "templates/.claude/references/hld-template.md"
+      "sha256": "8dd0236690d4e2db843c24e6140e449006cc55894f8817ec9a70abbafe6c4ad7",
+      "kind": "managed",
+      "source": "core/.claude/references/hld-template.md"
     },
     ".claude/references/prd-template.md": {
-      "sha256": "8081d602edc8fa3ec10117b847c58c19a0276e5a5675db43d05ef84ebae63238",
-      "kind": "seed",
-      "source": "templates/.claude/references/prd-template.md"
+      "sha256": "9437d59ad4f39879ccd9f08a73aff96676e83185ac27fc169a1313e7153bde11",
+      "kind": "managed",
+      "source": "core/.claude/references/prd-template.md"
     },
     ".claude/skills/auth-and-logging/SKILL.md": {
       "sha256": "08c349adbdac41df4d424a6dfeefec3ec1ec22318bcba5d8a6dfd00166b84b4c",
@@ -133,7 +133,7 @@
       "source": "packs/angular/.claude/skills/breadcrumbs/SKILL.md"
     },
     ".claude/skills/brief-detection/SKILL.md": {
-      "sha256": "625757b66cdc73c7a345286d6a56b6049215c70f603eafab34d08fad3174d0bc",
+      "sha256": "b08bfb2e54354485907896039d558cdf1fa89c9f42b608240c0eb17f5b568da3",
       "kind": "managed",
       "source": "core/.claude/skills/brief-detection/SKILL.md"
     },
@@ -148,7 +148,7 @@
       "source": "core/.claude/skills/github-sync/SKILL.md"
     },
     ".claude/skills/save-plan/SKILL.md": {
-      "sha256": "8c8546c9a0d69f5d86623e669b697163790d05caeac04c5e93646af2a111ba14",
+      "sha256": "7c01db1ee673ce96291c9ac5ff75a86be238bd4551dd31dd5d5aae8c06cc74f3",
       "kind": "managed",
       "source": "core/.claude/skills/save-plan/SKILL.md"
     },
@@ -163,7 +163,7 @@
       "source": "core/.claude/skills/save-plan/reference/mid-flight-sync.md"
     },
     ".claude/skills/worktree-setup/SKILL.md": {
-      "sha256": "ec95e4649fe935aa4487897193de3c1a58f9cef08e125372617a95b2292a5783",
+      "sha256": "1582d65f12c136e92f9fd54e3d56be0a582e941e616bdc33f38bec9790c0feed",
       "kind": "managed",
       "source": "core/.claude/skills/worktree-setup/SKILL.md"
     },
@@ -218,7 +218,7 @@
       "source": "layers/cursor/.cursor/commands/git.md"
     },
     ".cursor/commands/plan.md": {
-      "sha256": "0c951164abf9e4ac95a4c42c66a22effe01edc374477fd6f76fe865359a0b3a0",
+      "sha256": "60730173bdb89a6c4f467049a748778421e6211482a42a18989ec005036d85a9",
       "kind": "managed",
       "source": "layers/cursor/.cursor/commands/plan.md"
     },
@@ -343,17 +343,17 @@
       "source": "core/.gitattributes"
     },
     ".github/workflows/brain-capture-reminder.yml": {
-      "sha256": "f8937c3e028c163ae599f67d4319bc952f79e06921b24d894ff6bf0021e71e1b",
+      "sha256": "677b757bbbb8f976fb67383dfa321482d59cd344d33d0842d1ac218ef3c215e6",
       "kind": "managed",
       "source": "core/.github/workflows/brain-capture-reminder.yml"
     },
     ".github/workflows/security.yml": {
-      "sha256": "f0f82607458b78f459cef5a01da4e29dcfea910de9103729a9a44493f457e176",
+      "sha256": "4387ec26b089b98378d86a4548fa0b0dd11027bc9cdd0b39bdc9a7feac2ae042",
       "kind": "managed",
       "source": "core/.github/workflows/security.yml"
     },
     ".github/workflows/todo-sync.yml": {
-      "sha256": "66f0a03d74fe9b3f0faa1dd5f9e2e37dd6ff9036eab092839efb88304b406c00",
+      "sha256": "a721fc53432bba5f341be2767fa86d0d74c40b049201f4079d1467fb1190ee4f",
       "kind": "managed",
       "source": "core/.github/workflows/todo-sync.yml"
     },
@@ -363,12 +363,12 @@
       "source": "templates/.gitignore"
     },
     ".husky/pre-commit": {
-      "sha256": "5dd3d9bb0a3d4ce1a6bcdd662f8e3126cbc542ee82993a0a66ac5ba99afd6d70",
+      "sha256": "e5e6adbba9c3c3725e6cfb060c2bd3ac5ed59c24b69ec1c699c4b21d97f33b01",
       "kind": "managed",
       "source": "core/.husky/pre-commit"
     },
     ".husky/pre-push": {
-      "sha256": "55c834905c4d47649a4d25244c3be2404950d09529b1f5cc9b04631ae2f492e1",
+      "sha256": "011915423f99e1626fd1050f24bcebd25263adab4798a8fc9a5c5e30719c87e0",
       "kind": "managed",
       "source": "core/.husky/pre-push"
     },
@@ -390,7 +390,7 @@
     ".prettierrc.json": {
       "sha256": "91e95a01edd7da2978dd2d895f9bc403c0a86bb695ad417130133b4c55fef49b",
       "kind": "seed",
-      "source": "templates/.prettierrc.json"
+      "source": "packs/angular/.prettierrc.json"
     },
     ".vscode/extensions.json": {
       "sha256": "6da5b6004a21316f17db45d15fc93a8d8b060ddfa4139c1fadab4d191187c898",
@@ -423,7 +423,7 @@
       "source": "templates/CLAUDE.md"
     },
     "README_WORKFLOW.md": {
-      "sha256": "4b1729f65c329b6249a01e39c00ee6bd3665fe77205f16ea55f875f0885b2850",
+      "sha256": "51b81e47fabdcc688a813bf72e17c573f42434df598a0e30081de387872d8f46",
       "kind": "managed",
       "source": "core/README_WORKFLOW.md"
     },
@@ -463,7 +463,7 @@
       "source": "core/docs/agent/ship-regular.md"
     },
     "docs/agent/standards-git.md": {
-      "sha256": "a718d941a3badf72e1a3bbe9d79663503f95f78f6c9023773b01035a6eaa0773",
+      "sha256": "53c438bab9d9c0130ab29573893229fa7da66cfb0d658fe588280d33dbb577e6",
       "kind": "managed",
       "source": "core/docs/agent/standards-git.md"
     },
@@ -663,7 +663,7 @@
       "source": "core/scripts/lib/plan-scope.mjs"
     },
     "scripts/lib/slot-procs.mjs": {
-      "sha256": "b32c6864c0a25b0769e5942bc4c450597e71f53bb634e5311a6737ccd8de01a1",
+      "sha256": "d434051d01bd498f30aa0ea612094d81aecdbe6162d3b735405d888172596bc6",
       "kind": "managed",
       "source": "core/scripts/lib/slot-procs.mjs"
     },
@@ -677,6 +677,11 @@
       "kind": "managed",
       "source": "core/scripts/lib/todo-parse.mjs"
     },
+    "scripts/local-excludes.mjs": {
+      "sha256": "6f732cd1a4b3a7a3968fb5fb007116f60e29d2d5d78aa6b06ce28d2ca6bc6b41",
+      "kind": "managed",
+      "source": "core/scripts/local-excludes.mjs"
+    },
     "scripts/next-plan-number.mjs": {
       "sha256": "484dd13af43eb456fd723f821ef3792654d474cbd0f379c2453fd7f7523cfc70",
       "kind": "managed",
@@ -686,6 +691,11 @@
       "sha256": "b8ff6bcf2cdf9b2b2f797cf8767c071cf72a779abc721a5dce7fece0623288d7",
       "kind": "managed",
       "source": "core/scripts/orphan-sweep.mjs"
+    },
+    "scripts/package.json": {
+      "sha256": "c7de218d6660669ab396602b24d7633042597fa3b8a96a07d444f049a8484787",
+      "kind": "managed",
+      "source": "core/scripts/package.json"
     },
     "scripts/plan-close.mjs": {
       "sha256": "d8a4e6af1aa59068966fdacb4a6a64ab65051a4d8d2e4f3a98202f08b8eb8c83",
@@ -732,13 +742,18 @@
       "kind": "managed",
       "source": "core/scripts/prune-old-sessions.sh"
     },
+    "scripts/run-python.sh": {
+      "sha256": "b89ab7652bde31489a733fe8a1cd309f423726877f0ea32ed7949ace9a5417cd",
+      "kind": "managed",
+      "source": "core/scripts/run-python.sh"
+    },
     "scripts/scope-check.mjs": {
-      "sha256": "d6be282c6ff1f7f4297dfe92092deebed568bc487848247efed0a25d9b4ab0be",
+      "sha256": "2e9017c632eca1f2d0f3d193bf2e8e48931810ada5f66f7423d83f98ee5268e3",
       "kind": "managed",
       "source": "core/scripts/scope-check.mjs"
     },
     "scripts/scope-guard.sh": {
-      "sha256": "dfd5c78bb56e6b38df31362b7f08daa41c4088b7a0f0b5df7a10d884eb39d7c8",
+      "sha256": "e855b46a9f383935906e13d77284ac3a838e61f82b555b0be665070e4f87165f",
       "kind": "managed",
       "source": "core/scripts/scope-guard.sh"
     },
@@ -758,7 +773,7 @@
       "source": "core/scripts/session-manifest-ship.py"
     },
     "scripts/session-startup.sh": {
-      "sha256": "f4c32e81e4918799430f172176ce40a1d3f3bdcf10409c72cec13cddc45049ff",
+      "sha256": "2cc43c6e872f00657e27d6e16b63278456ed65794513f2f6cfa525dc78909b50",
       "kind": "managed",
       "source": "core/scripts/session-startup.sh"
     },
@@ -768,12 +783,12 @@
       "source": "core/scripts/session-state-path.mjs"
     },
     "scripts/ship-prep.mjs": {
-      "sha256": "d673dd3f4616a85d6082b6fbc1af9279db8e68566c3e8d1a6f1f96413689c8f9",
+      "sha256": "15efae94f89a3c68482d3b701630072bf6f0f45c9e36f341500ffb3f52a0d0fd",
       "kind": "managed",
       "source": "core/scripts/ship-prep.mjs"
     },
     "scripts/slot-serve.mjs": {
-      "sha256": "196afdcd17df91817ee622e2fdacd60beb09f0c727c9ddb31bbea5ed99e00bb8",
+      "sha256": "8045770a5565793a44fb4953c21db36186cdc0fac018b44823eebbc4e0e92d00",
       "kind": "managed",
       "source": "core/scripts/slot-serve.mjs"
     },
@@ -783,12 +798,12 @@
       "source": "core/scripts/slot-stop.mjs"
     },
     "scripts/take-plan.mjs": {
-      "sha256": "c2256fb988c8e6fd1214daba3cc8ee8d117111d40be6c541ce7b76c8784d4e34",
+      "sha256": "c0838c62083267616e2c03bc4f5f20026ba427a2c826359339702878164a6518",
       "kind": "managed",
       "source": "core/scripts/take-plan.mjs"
     },
     "scripts/techdebt-report.mjs": {
-      "sha256": "2ef212d72d5823e8871590c3174ea3412ba16af06a96e5b91739d5690c844a4b",
+      "sha256": "1c51556c42efab53a0144d52b7876ef93435b2b5caec42e7b0be5b0ef45425b0",
       "kind": "managed",
       "source": "core/scripts/techdebt-report.mjs"
     },

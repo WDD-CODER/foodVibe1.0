@@ -1,15 +1,14 @@
 # Plan XXX — [Feature Name]
 
 Status: draft | active | done
-Snapshot: [origin/main SHA the plan was verified against — leave filled in if the Architect already set it; save-plan only fills this when empty, never overwrites]
+Snapshot: [origin/main SHA the plan was verified against — leave filled in if the author already set it; save-plan only fills this when empty, never overwrites]
 
 ## Problem Statement
 [What problem does this solve for the user?]
 
 ## Goals & Success Criteria
 - Primary: [measurable outcome]
-- Success: [how we know it's done]
-  - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries
+- Success: [how we know it's done — tag each item `[auto]` or `[human]`]
 
 ## Execution Mode
 - Parallel: yes | no — will this run alongside other active plans?
@@ -20,11 +19,10 @@ Snapshot: [origin/main SHA the plan was verified against — leave filled in if 
 
 Always allowed regardless of the list below: this plan file itself, its own
 `docs/session-state-<branch>.md`, `.claude/sessions/**`, `.worktree-*`, and the append-only
-hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
-— add to them, never rewrite or remove an existing entry without escalating).
+hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
-[one glob per line, prefer folder globs; # for comments]
+[one glob per line, prefer folder globs]
 ```
 
 ## Read Scope
@@ -35,7 +33,7 @@ Entire repo. Analysis and architectural suggestions are expected.
 
 Thinking outside the box is expected; writing outside it requires explicit consent. If a
 Worker needs a file outside the `## Read-Write Scope` above: STOP, tell the Human the file,
-the exact change, and why it can't be done in-scope; wait for `approved: <path>`; then
+the exact change, and why it can't be done in-scope; offer `approved: <path>`; then
 append the path to the scope block above and retry.
 
 ## Architecture Impact
@@ -58,7 +56,7 @@ by symbol (do not re-run the whole reality check from scratch) and print one lin
 line or file this plan names was removed, renamed or rewritten).
 
 ## User Stories
-- As a chef, I want [goal] so that [benefit]
+- As a [user], I want [goal] so that [benefit]
 
 ## Functional Requirements
 
@@ -72,19 +70,25 @@ line or file this plan names was removed, renamed or rewritten).
 - [ ] [Requirement]
 
 ## UI/UX Notes
-- [Layout expectations, Hebrew text considerations]
-- [Which translation keys are needed in dictionary.json]
+- [Layout expectations, Hebrew RTL text considerations]
+- [Which keys are needed in `public/assets/data/dictionary.json`]
 
 ## Atomic Sub-tasks
 - [ ] A1: [First atomic task]
 - [ ] A2: [Second atomic task]
-- [ ] ...
 
 ## Technical Considerations
 - Dependencies: [existing services/components affected]
 - New files needed: [list]
 - Model changes: [any interface/type updates]
-- Hebrew canonical values: [if the feature accepts user-entered units, categories, allergens, or section/preparation categories → flag the Hebrew canonical values guidance in `.claude/rules/domain.md`; the canonical resolution flow and translation modal UX are required]
+- Backend / API: [new or changed endpoints, server logic — or "none"]
+- Auth and validation: [who may call it, what input is checked — or "none"]
+- Security surface: [new inputs, secrets, permissions — or "none"]
+- Data / migration: [schema or stored-data changes — or "none"]
+- Project checks: [each check in `docs/agent/plan-checks.md` that applies, when that file exists]
+
+Every Atomic Sub-task names its files and is concrete enough for a Worker to run without asking (no "TBD",
+"handle errors appropriately", "same as the other screen"). `/plan`'s Architect + PM review checks this.
 
 ## Out of Scope
 [Explicitly list what is NOT included]

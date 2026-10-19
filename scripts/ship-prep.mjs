@@ -22,12 +22,27 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
 const BASELINE_PATH = join(repoRoot, '.claude', '.ship-baseline')
 
-// Verbatim from .claude/commands/ship.md Phase 0 — keep in sync.
-const SENSITIVE_PATHS_RE = /auth|crypto|guard|interceptor|security|payment|migration|schema|\.env|server\/routes|package(-lock)?\.json|\.github\/workflows|\.claude\/(settings|commands\/ship)\./
+// Sensitive paths (a FAST lane is never taken over one). kit.config.json security.sensitivePaths: a regex
+// string replaces this default, a list of globs (`**` any depth, `*` within a folder) is added to it.
+const DEFAULT_SENSITIVE_RE = /auth|crypto|guard|interceptor|security|payment|migration|schema|\.env|server\/routes|package(-lock)?\.json|\.github\/workflows|\.claude\/(settings|commands\/ship)\./
+const SENSITIVE_CFG = "auth|crypto|guard|interceptor|security|payment|migration|schema|\\.env|server\\/routes|package(-lock)?\\.json|\\.github\\/workflows|\\.claude\\/(settings|commands\\/ship)\\."
+const globRe = (g) => new RegExp(`^${g.split('**').map((part) => part.split('*').map((s) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('[^/]*')).join('.*')}$`)
+function sensitiveTests() {
+  if (Array.isArray(SENSITIVE_CFG)) return [DEFAULT_SENSITIVE_RE, ...SENSITIVE_CFG.filter(Boolean).map(globRe)]
+  if (typeof SENSITIVE_CFG !== 'string' || !SENSITIVE_CFG) return [DEFAULT_SENSITIVE_RE]
+  try {
+    return [new RegExp(SENSITIVE_CFG)]
+  } catch {
+    console.log('ship-prep: warning - security.sensitivePaths is not a valid regex; using the built-in sensitive paths')
+    return [DEFAULT_SENSITIVE_RE]
+  }
+}
+const SENSITIVE_TESTS = sensitiveTests()
+const isSensitive = (f) => SENSITIVE_TESTS.some((re) => re.test(f))
 const ULTRA_TRIVIAL_RE = /docs\/session-state-.*\.md|\.claude\/todo\.md|CHANGELOG\.md|docs\/.*\.md/
 const SECRET_PATH_RE = /(^|\/)\.env|\.pem$|\.key$|secret/i
 // Planner admin-bypass shape — a diff entirely inside this is
-// always ULTRA-TRIVIAL, evaluated before SENSITIVE_PATHS_RE so a plan named
+// always ULTRA-TRIVIAL, evaluated before the sensitive paths so a plan named
 // e.g. "…-migration-spec.plan.md" doesn't get bumped to REGULAR.
 const isPlanOnly = f => isOpenPlanPath(f) || f === '.claude/todo.md'
 
@@ -98,14 +113,32 @@ function getManifestFiles(branch) {
   return new Set(lines)
 }
 
+// The first interpreter that actually runs: on Windows `python3` is often the Store stub, which fails.
+const PYTHONS = ['python3', 'python', 'py']
+function findPython() {
+  for (const py of PYTHONS) {
+    try {
+      execFileSync(py, ['-c', 'import sys'], { stdio: 'ignore' })
+      return py
+    } catch { /* try the next one */ }
+  }
+  return null
+}
+
 function getManifestOverlaps(branch) {
+  const py = findPython()
+  if (!py) {
+    console.error(`WARNING: no working Python (tried ${PYTHONS.join(', ')}); session manifest skipped, using the full dirty-file list`)
+    return { no_manifest: true, files: [], overlaps: [] }
+  }
   try {
-    const out = execFileSync('python3', ['scripts/session-manifest-ship.py', branch], {
+    const out = execFileSync(py, ['scripts/session-manifest-ship.py', branch], {
       cwd: repoRoot,
       encoding: 'utf8'
     })
     return JSON.parse(out)
-  } catch {
+  } catch (e) {
+    console.error(`WARNING: scripts/session-manifest-ship.py failed under ${py} (${String(e.message).split(/\r?\n/)[0]}); using the full dirty-file list`)
     return { no_manifest: true, files: [], overlaps: [] }
   }
 }
@@ -199,7 +232,7 @@ function classify() {
 
   const fileCount = thisChatFiles.length
   const totalLines = [...linesByFile.values()].reduce((a, b) => a + b, 0)
-  const sensitiveMatches = thisChatFiles.filter(f => SENSITIVE_PATHS_RE.test(f))
+  const sensitiveMatches = thisChatFiles.filter(isSensitive)
   const secretPaths = thisChatFiles.filter(f => SECRET_PATH_RE.test(f))
 
   const allPlanOnly = fileCount > 0 && thisChatFiles.every(isPlanOnly)
