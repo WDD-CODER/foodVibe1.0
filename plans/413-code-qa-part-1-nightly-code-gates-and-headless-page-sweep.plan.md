@@ -1,6 +1,6 @@
 # Plan 413 — Code QA Part 1: Nightly Code Gates and Headless Page Sweep
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: a426f19aebb86fd103f1edee3df469880fb0b1af
 
