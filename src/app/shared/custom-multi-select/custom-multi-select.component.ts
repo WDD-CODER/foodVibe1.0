@@ -20,12 +20,20 @@ import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-d
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
 import { InputClearComponent } from '../input-clear/input-clear.component'
+import { AddOptionRowComponent } from '../add-option-row/add-option-row.component'
+import { AddOptionLabel, addOptionLabel, DEFAULT_ADD_NEW_LABEL_KEY } from '../../core/utils/add-option.util'
+import { KeyedPickerSearch, scrollHighlightIntoView } from '../../core/utils/keyed-picker-search.util'
 
 export interface CustomMultiSelectOption {
   value: string
   label: string
   color?: string
 }
+
+/** Per-instance id prefix for option ids when no triggerId is given. */
+let nextMultiSelectId = 0
+/** KeyedPickerSearch key — one picker per component instance. */
+const PICKER_KEY = 0
 
 @Component({
   selector: 'app-custom-multi-select',
@@ -37,7 +45,8 @@ export interface CustomMultiSelectOption {
     ClickOutSideDirective,
     ScrollableDropdownComponent,
     LucideAngularModule,
-    InputClearComponent
+    InputClearComponent,
+    AddOptionRowComponent
   ],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomMultiSelectComponent, multi: true }],
   templateUrl: './custom-multi-select.component.html',
@@ -45,6 +54,12 @@ export interface CustomMultiSelectOption {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomMultiSelectComponent implements ControlValueAccessor {
+  // INJECTED
+  private _injector = inject(Injector)
+  private _translationService = inject(TranslationService)
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
+
+  // INPUTS
   options = input.required<CustomMultiSelectOption[]>()
   placeholder = input<string>('')
   maxHeight = input<number>(240)
@@ -53,66 +68,77 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   compact = input<boolean>(false)
   variant = input<'default' | 'chip'>('default')
   readonlyChips = input<string[]>([])
+  /** Sentinel option value for the single "add" option (add-option rule 1); '' = no add option. */
   addNewValue = input<string>('')
+  /** Generic "add new <thing>" key shown when nothing new is typed (add-option rule 2). Never bare `add`. */
+  addNewLabelKey = input<string>(DEFAULT_ADD_NEW_LABEL_KEY)
+  /** Opt in when the caller's add flow takes the typed name (via addNewChosen): shows `הוסף "<typed>"`. */
+  allowTypedAdd = input<boolean>(false)
   searchable = input<boolean>(false)
   triggerTitle = input<string>('')
   clearable = input<boolean>(false)
 
+  // OUTPUTS
   valueChange = output<string[]>()
+  /** The add option was chosen: the typed new name, or '' for the generic add (open the modal). */
   addNewChosen = output<string>()
   cleared = output<void>()
 
+  // SIGNALS
   private _value = signal<string[]>([])
   private _onChange: (value: string[]) => void = () => {}
   private _onTouched: () => void = () => {}
   private _disabled = signal(false)
 
-  private _injector = inject(Injector)
-  private _translationService = inject(TranslationService)
-
   @ViewChild('triggerRef') protected triggerRef?: ElementRef<HTMLButtonElement>
   @ViewChild('searchInputRef') protected searchInputRef?: ElementRef<HTMLInputElement>
 
   protected open = signal(false)
-  protected highlightedIndex = signal(-1)
   private closeTimeout: ReturnType<typeof setTimeout> | null = null
   private _focusFromMouse = false
-
   protected searchQuery_ = signal('')
+  private readonly picker_ = new KeyedPickerSearch()
+  private readonly instanceId_ = `cms-${++nextMultiSelectId}`
 
-  /** Returns the display text for an option — translated when translateLabels is true. */
-  private getDisplayText_(label: string): string {
-    return this.translateLabels() ? this._translationService.translate(label) || label : label
-  }
+  // COMPUTED
+  protected highlightedIndex = computed(() => this.picker_.highlighted(PICKER_KEY))
 
-  /** Options to show in dropdown: exclude already selected and readonly chips, with optional search filter. */
+  /** Option id prefix — for `aria-activedescendant` (focus stays in the search input, rule 5d). */
+  protected optionIdPrefix_ = computed(() => (this.triggerId() || this.instanceId_) + '-opt-')
+
+  /** The single add option (rule 1) — present when the caller lists the `addNewValue` sentinel. */
+  protected addNewOption_ = computed(() => {
+    const addNew = this.addNewValue()
+    return addNew ? (this.options().find((o) => o.value === addNew) ?? null) : null
+  })
+
+  /** Options to show: exclude the add sentinel, already selected and readonly chips; search by on-screen label (rule 3). */
   protected dropdownOptions_ = computed(() => {
-    const opts = this.options()
     const value = this._value()
     const readonly = this.readonlyChips()
     const addNew = this.addNewValue()
-    const query = this.searchQuery_().toLowerCase().trim()
-    const isSearchable = this.searchable()
-
-    return opts.filter((o) => {
-      // When searchable, never show the static addNew option (dynamic one replaces it)
-      if (isSearchable && addNew && o.value === addNew) return false
-      // Exclude already selected and readonly
-      if (o.value !== addNew && (value.includes(o.value) || readonly.includes(o.value))) return false
-      // Apply search filter against the translated display text
-      if (isSearchable && query) {
-        return this.getDisplayText_(o.label).toLowerCase().includes(query)
-      }
+    const query = this.searchable() ? this.searchQuery_().toLowerCase().trim() : ''
+    return this.options().filter((o) => {
+      if (addNew && o.value === addNew) return false
+      if (value.includes(o.value) || readonly.includes(o.value)) return false
+      if (query) return this.getDisplayText_(o.label).toLowerCase().includes(query)
       return true
     })
   })
 
-  /** Show dynamic "create new" option when searchable and query doesn't exactly match any displayed option. */
-  protected showDynamicAddNew_ = computed(() => {
-    if (!this.searchable()) return false
-    const query = this.searchQuery_().trim()
-    if (!query) return false
-    return !this.dropdownOptions_().some((o) => this.getDisplayText_(o.label).toLowerCase() === query.toLowerCase())
+  /** Display and keyboard order: the options, then the add option last (rule 5e). */
+  protected keyboardOptions_ = computed(() => {
+    const add = this.addNewOption_()
+    const opts = this.dropdownOptions_()
+    return add ? [...opts, add] : opts
+  })
+
+  /** Add option label: typed new name (no option has that on-screen label), else the generic key (rule 2–3). */
+  protected addLabel_ = computed<AddOptionLabel>(() => {
+    const addNew = this.addNewValue()
+    const all = this.options().filter((o) => o.value !== addNew)
+    const typed = this.searchable() && this.allowTypedAdd() ? this.searchQuery_() : ''
+    return addOptionLabel(typed, all, (o) => this.getDisplayText_(o.label), this.addNewLabelKey())
   })
 
   @HostListener('focus')
@@ -144,6 +170,17 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     return this._disabled()
   }
 
+  // CREATE
+  protected addOption(value: string): void {
+    const current = this._value()
+    if (current.includes(value)) return
+    const next = [...current, value]
+    this._value.set(next)
+    this._onChange(next)
+    this.valueChange.emit(next)
+  }
+
+  // READ
   /** Resolve option for a value (for chip label/color); fallback to value as label. */
   protected getOptionForValue(value: string): CustomMultiSelectOption {
     return this.options().find((o) => o.value === value) ?? { value, label: value }
@@ -163,17 +200,28 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     return luminance > 0.5 ? '#0f172a' : '#ffffff'
   }
 
+  /** Returns the display text for an option — translated when translateLabels is true. */
+  private getDisplayText_(label: string): string {
+    return this.translateLabels() ? this._translationService.translate(label) || label : label
+  }
+
+  // DELETE
+  protected removeOption(value: string): void {
+    const next = this._value().filter((v) => v !== value)
+    this._value.set(next)
+    this._onChange(next)
+    this.valueChange.emit(next)
+  }
+
+  // UI HANDLERS
   protected toggle(): void {
     if (this._disabled()) return
     this.clearCloseTimeout()
     const next = !this.open()
     this.open.set(next)
     if (next) {
-      const opts = this.dropdownOptions_()
-      this.highlightedIndex.set(opts.length > 0 ? 0 : -1)
-      if (this.searchable()) {
-        this.focusSearchInput_()
-      }
+      this.setHighlight_(0)
+      if (this.searchable()) this.focusSearchInput_()
     }
   }
 
@@ -188,20 +236,8 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     if (this._disabled()) return
     this.clearCloseTimeout()
     this.open.set(true)
-    const opts = this.dropdownOptions_()
-    this.highlightedIndex.set(opts.length > 0 ? 0 : -1)
-    if (this.searchable()) {
-      this.focusSearchInput_()
-    }
-  }
-
-  private focusSearchInput_(): void {
-    afterNextRender(
-      () => {
-        this.searchInputRef?.nativeElement?.focus()
-      },
-      { injector: this._injector }
-    )
+    this.setHighlight_(0)
+    if (this.searchable()) this.focusSearchInput_()
   }
 
   protected onTriggerBlur(): void {
@@ -210,13 +246,6 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
       this.closeTimeout = null
       this.close()
     }, 120)
-  }
-
-  private clearCloseTimeout(): void {
-    if (this.closeTimeout != null) {
-      clearTimeout(this.closeTimeout)
-      this.closeTimeout = null
-    }
   }
 
   /** Called when the search input receives focus — cancels any pending close. */
@@ -232,47 +261,41 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     }, 120)
   }
 
-  protected addOption(value: string): void {
-    const current = this._value()
-    if (current.includes(value)) return
-    const next = [...current, value]
-    this._value.set(next)
-    this._onChange(next)
-    this.valueChange.emit(next)
-  }
-
-  protected removeOption(value: string): void {
-    const next = this._value().filter((v) => v !== value)
-    this._value.set(next)
-    this._onChange(next)
-    this.valueChange.emit(next)
-  }
-
   protected onOptionClick(opt: CustomMultiSelectOption): void {
-    if (opt.value === this.addNewValue()) {
-      this.addNewChosen.emit(this.searchQuery_().trim())
-      this.close()
-      return
-    }
-    this.addOption(opt.value)
-    // Keep dropdown open for multi-select
+    this.pick_(opt)
   }
 
   /** Search clear (X): empty the filter, keep the list open with every option (plan 364). */
   protected onClearSearch(): void {
     this.searchQuery_.set('')
-    this.highlightedIndex.set(0)
+    this.setHighlight_(0)
     this.searchInputRef?.nativeElement?.focus()
   }
 
   protected onSearchInput(q: string): void {
     this.searchQuery_.set(q)
-    this.highlightedIndex.set(0)
+    this.setHighlight_(0)
   }
 
-  protected onDynamicAddNewClick(): void {
-    this.addNewChosen.emit(this.searchQuery_().trim())
-    this.close()
+  /** Search-box keys (rule 5): shared KeyedPickerSearch; Space types; Tab closes and lets the browser move focus. */
+  protected onSearchKeydown(e: KeyboardEvent): void {
+    e.stopPropagation()
+    if (e.key === 'Tab') {
+      this.close()
+      return
+    }
+    const opts = this.keyboardOptions_()
+    this.picker_.handleKeydown(PICKER_KEY, e, {
+      optionCount: opts.length,
+      onSelect: (idx) => this.pick_(opts[idx]),
+      onClose: () => {
+        this.close()
+        // Focus stays on the field without reopening the list (rule 5f).
+        this._focusFromMouse = true
+        this.triggerRef?.nativeElement?.focus()
+      },
+      onHighlightMove: () => this.scrollHighlightIntoView_()
+    })
   }
 
   protected onTriggerMousedown(): void {
@@ -293,6 +316,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     this.toggle()
   }
 
+  /** Trigger keys (no search box): same keyboard rules; Space toggles like Enter. */
   @HostListener('keydown', ['$event'])
   protected onKeydown(e: KeyboardEvent): void {
     if (!this.open()) {
@@ -302,41 +326,55 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
       }
       return
     }
-    const opts = this.dropdownOptions_()
-    let idx = this.highlightedIndex()
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      this.close()
-      return
-    }
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      if (idx >= 0 && opts[idx]) {
-        if (opts[idx].value === this.addNewValue()) {
-          this.addNewChosen.emit(this.searchQuery_().trim())
-          this.close()
-        } else {
-          this.addOption(opts[idx].value)
-        }
-      } else if (idx < 0 && this.showDynamicAddNew_()) {
-        this.onDynamicAddNewClick()
-      }
-      return
-    }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      idx = Math.min(idx + 1, opts.length - 1)
-      this.highlightedIndex.set(idx)
-      return
-    }
-    if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      idx = Math.max(idx - 1, 0)
-      this.highlightedIndex.set(idx)
-      return
-    }
     if (e.key === 'Tab') {
       this.close()
+      return
+    }
+    const opts = this.keyboardOptions_()
+    this.picker_.handleKeydown(PICKER_KEY, e, {
+      optionCount: opts.length,
+      onSelect: (idx) => this.pick_(opts[idx]),
+      onClose: () => this.close(),
+      onHighlightMove: () => this.scrollHighlightIntoView_(),
+      selectOnSpace: true
+    })
+  }
+
+  /** Add the option (list stays open), or run the add: emits the typed new name, '' for the generic add (rule 2). */
+  private pick_(opt: CustomMultiSelectOption | undefined): void {
+    if (!opt) return
+    if (opt.value === this.addNewValue()) {
+      const label = this.addLabel_()
+      this.addNewChosen.emit(label.kind === 'typed' ? label.text : '')
+      this.close()
+      return
+    }
+    this.addOption(opt.value)
+    const count = this.keyboardOptions_().length
+    if (this.highlightedIndex() > count - 1) this.setHighlight_(Math.max(0, count - 1))
+  }
+
+  private setHighlight_(index: number): void {
+    this.picker_.setHighlighted(PICKER_KEY, index)
+  }
+
+  private scrollHighlightIntoView_(): void {
+    afterNextRender(() => scrollHighlightIntoView(this.hostRef.nativeElement), { injector: this._injector })
+  }
+
+  private focusSearchInput_(): void {
+    afterNextRender(
+      () => {
+        this.searchInputRef?.nativeElement?.focus()
+      },
+      { injector: this._injector }
+    )
+  }
+
+  private clearCloseTimeout(): void {
+    if (this.closeTimeout != null) {
+      clearTimeout(this.closeTimeout)
+      this.closeTimeout = null
     }
   }
 }

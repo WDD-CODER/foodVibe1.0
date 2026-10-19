@@ -91,6 +91,20 @@ src/app/shared/custom-multi-select/**
 src/app/shared/chip-search-dropdown/**
 src/app/core/utils/dedupe-select-options.util.ts
 src/app/core/utils/dedupe-select-options.util.spec.ts
+# approved by the Human 2026-10-19 (A8 callers, pre-approved before execution)
+src/app/pages/equipment/components/equipment-list/equipment-list.component.html
+src/app/pages/equipment/components/equipment-list/equipment-list.component.ts
+src/app/pages/inventory/components/product-form/product-form.component.html
+src/app/pages/inventory/components/product-form/product-form.component.ts
+src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html
+src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.html
+src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.ts
+src/app/shared/add-equipment-modal/add-equipment-modal.component.html
+src/app/shared/add-equipment-modal/add-equipment-modal.component.ts
+src/app/shared/quick-add-product-modal/quick-add-product-modal.component.html
+src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts
+src/app/shared/selection-bar/selection-bar.component.html
+src/app/shared/selection-bar/bulk-editable-field.model.ts
 ```
 
 ## Read Scope
@@ -124,37 +138,37 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `add-option.util.ts`: pure functions —
+- [x] `add-option.util.ts`: pure functions —
       `findOptionByLabel(typed, options, labelFn)` (exact match on the trimmed, translated label),
       `addOptionLabel(typed, options, labelFn, genericKey)` → `{ kind: 'typed', text }` or `{ kind: 'generic', key }`,
       `resolveAddedKey(beforeKeys, afterKeys, typed, labelFn)` → stored key or `null` (cancel / nothing new).
-- [ ] `core/utils/keyed-picker-search.util.ts`: copy `KeyedPickerSearch` + `PickerKeydownOptions`
+- [x] `core/utils/keyed-picker-search.util.ts`: copy `KeyedPickerSearch` + `PickerKeydownOptions`
       from `menu-picker-search.service.ts` here unchanged in behavior (rule 5a–c, e–g), plus a
       `scrollHighlightIntoView(container: Element | null)` helper (`.highlighted` →
       `scrollIntoView({ block: 'nearest' })`). Spec ports the menu spec's keyboard cases.
       Leave the menu file alone — plan 401 points it here and deletes its copy.
-- [ ] `shared/add-option-row` presentational component: the `c-add-new-icon` + label row, takes
+- [x] `shared/add-option-row` presentational component: the `c-add-new-icon` + label row, takes
       the `addOptionLabel` result (`input()` only), renders `הוסף "<typed>"` or the generic key
       through `translatePipe`.
-- [ ] `custom-select`, `custom-multi-select`, `chip-search-dropdown`: one add option, last in the
+- [x] `custom-select`, `custom-multi-select`, `chip-search-dropdown`: one add option, last in the
       list and in keyboard order; label per rule 2; filter by translated label (rule 3); after
       add select the resolved stored key, nothing on cancel (rule 4). Remove multi-select's second
       (dynamic) add button.
-- [ ] `custom-select`, `custom-multi-select`, `chip-search-dropdown`: keyboard through the shared
+- [x] `custom-select`, `custom-multi-select`, `chip-search-dropdown`: keyboard through the shared
       helper (rule 5) — first option highlighted on open, scroll-into-view, focus stays in the
       input with `aria-activedescendant`, Tab/Shift+Tab close the list and let the browser's
       default Tab move focus (the component can't know the next field, so no `preventDefault`).
       Remove chip-search's `focusItem` roving focus and wrap-around.
-- [ ] Each shared select takes the generic label key as an input (e.g. `addNewLabelKey`), default
+- [x] Each shared select takes the generic label key as an input (e.g. `addNewLabelKey`), default
       a neutral existing key — never bare `add`.
-- [ ] Missing `add_new_<thing>` keys for the callers found in A1 are appended to
+- [x] Missing `add_new_<thing>` keys for the callers found in A1 are appended to
       `dictionary.json` (append-only; existing: `add_new_category`, `add_new_unit`,
       `add_new_allergen`, `add_new_label`, `add_new_tool`).
-- [ ] Code style per hard rules (`inject()`, `input()`/`output()`, signals, no `any`, single
+- [x] Code style per hard rules (`inject()`, `input()`/`output()`, signals, no `any`, single
       quotes, no semicolons); class structure per `.claude/skills/angularComponentStructure/SKILL.md`.
 
 ### Should Have (P1)
-- [ ] A short note in session-state listing every dropdown in the app that offers add and
+- [x] A short note in session-state listing every dropdown in the app that offers add and
       whether it is covered by this plan (shared select) or plan 401 (page-level dropdown).
 
 ### Nice to Have (P2)
@@ -166,14 +180,14 @@ line or file this plan names was removed, renamed or rewritten).
 - Hebrew labels only through `translatePipe` + `dictionary.json`.
 
 ## Atomic Sub-tasks
-- [ ] A1: List every shared dropdown that offers "add new" and the label each one needs — Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
-- [ ] A2: Write one shared helper that decides when and how "add new" shows — `src/app/core/utils/add-option.util.ts` + spec (rules 1–4)
-- [ ] A3: Share the menu's keyboard search so every dropdown navigates the same way — `src/app/core/utils/keyed-picker-search.util.ts` + spec — `KeyedPickerSearch` copied from the menu service (rule 5) + scroll helper
-- [ ] A4: Build one reusable "add new" row for dropdown lists — `src/app/shared/add-option-row/` component
-- [ ] A5: Use the add row and keyboard rules in the single-select dropdown — Apply to `shared/custom-select` (label, filter by label, stored-key select; keyboard via A3)
-- [ ] A6: Use them in the multi-select dropdown and drop its duplicate add button — Apply to `shared/custom-multi-select`; remove the second (dynamic) add button; keyboard via A3 (Space toggles)
-- [ ] A7: Use them in the chip search dropdown — Apply to `shared/chip-search-dropdown`; keyboard via A3 (focus stays in input, no wrap)
-- [ ] A8: Give each dropdown its own Hebrew "add new <thing>" label — Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
+- [x] A1: List every shared dropdown that offers "add new" and the label each one needs — Audit callers of `custom-select` / `custom-multi-select` / `chip-search-dropdown` that enable add; list each with its "thing" and the `add_new_<thing>` key it needs (session-state) — `src/app/**/*.html`
+- [x] A2: Write one shared helper that decides when and how "add new" shows — `src/app/core/utils/add-option.util.ts` + spec (rules 1–4)
+- [x] A3: Share the menu's keyboard search so every dropdown navigates the same way — `src/app/core/utils/keyed-picker-search.util.ts` + spec — `KeyedPickerSearch` copied from the menu service (rule 5) + scroll helper
+- [x] A4: Build one reusable "add new" row for dropdown lists — `src/app/shared/add-option-row/` component
+- [x] A5: Use the add row and keyboard rules in the single-select dropdown — Apply to `shared/custom-select` (label, filter by label, stored-key select; keyboard via A3)
+- [x] A6: Use them in the multi-select dropdown and drop its duplicate add button — Apply to `shared/custom-multi-select`; remove the second (dynamic) add button; keyboard via A3 (Space toggles)
+- [x] A7: Use them in the chip search dropdown — Apply to `shared/chip-search-dropdown`; keyboard via A3 (focus stays in input, no wrap)
+- [x] A8: Give each dropdown its own Hebrew "add new <thing>" label — Callers: pass the right `add_new_<thing>` key (escalate each path via `approved:`); append missing keys to `dictionary.json`
 - [ ] A9: Build, test and hand you a click list for every dropdown — `ng build` + `ng test` green, `rg` checks from Success empty; hand the Human the click list (incl. keyboard check per select)
 
 ## Technical Considerations

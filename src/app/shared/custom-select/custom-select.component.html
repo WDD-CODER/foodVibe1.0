@@ -25,6 +25,7 @@
         (keydown)="onInputKeydown($event)"
         [attr.aria-expanded]="open()"
         aria-haspopup="listbox"
+        [attr.aria-activedescendant]="open() && highlightedIndex() >= 0 ? optionIdPrefix_() + highlightedIndex() : null"
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
@@ -75,18 +76,13 @@
   }
 
   @if (open()) {
-    <app-scrollable-dropdown
-      [maxHeight]="maxHeight()"
-      [attr.aria-activedescendant]="
-        typeToFilter() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null
-      "
-    >
+    <app-scrollable-dropdown [maxHeight]="maxHeight()" role="listbox">
       @for (opt of visibleOptions_(); track opt.value; let i = $index) {
         <button
           type="button"
           class="custom-select-option"
           [class.custom-select-option--chip]="variant() === 'chip'"
-          [id]="triggerId() ? triggerId() + '-opt-' + i : null"
+          [id]="optionIdPrefix_() + i"
           [class.highlighted]="highlightedIndex() === i"
           role="option"
           [attr.aria-selected]="value === opt.value"
@@ -105,15 +101,13 @@
             type="button"
             class="custom-select-option custom-select-option--add-new"
             [class.custom-select-option--chip]="variant() === 'chip'"
+            [id]="optionIdPrefix_() + visibleOptions_().length"
             [class.highlighted]="highlightedIndex() === visibleOptions_().length"
             role="option"
-            [attr.aria-selected]="value === addNewOption_()!.value"
+            [attr.aria-selected]="false"
             (click)="onOptionClick(addNewOption_()!)"
           >
-            <span class="c-add-new-icon">
-              <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-            </span>
-            {{ 'add' | translatePipe }}
+            <app-add-option-row [label]="addLabel_()" />
           </button>
         </div>
       }

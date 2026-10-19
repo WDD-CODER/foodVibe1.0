@@ -75,3 +75,91 @@ describe('ChipSearchDropdownComponent', () => {
     expect(document.activeElement).toBe(el)
   })
 })
+
+describe('ChipSearchDropdownComponent — add option + keyboard (add-option rule)', () => {
+  let fixture: ComponentFixture<ChipSearchDropdownComponent>
+  let root: HTMLElement
+  let el: HTMLInputElement
+  let added: string[]
+  let addedNew: string[]
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ChipSearchDropdownComponent, LucideAngularModule.pick({ X, ChevronUp, ChevronDown })],
+      providers: [{ provide: TranslationService, useValue: { translate: (k: string) => k || '' } }]
+    }).compileComponents()
+
+    fixture = TestBed.createComponent(ChipSearchDropdownComponent)
+    fixture.componentRef.setInput('options', ['apple', 'banana'])
+    fixture.componentRef.setInput('addNewLabelKey', 'add_new_category')
+    fixture.componentRef.setInput('allowTypedAdd', true)
+    fixture.componentRef.setInput('showAddNewAlways', true)
+    added = []
+    addedNew = []
+    fixture.componentInstance.add.subscribe((v: string) => added.push(v))
+    fixture.componentInstance.addNew.subscribe((v: string) => addedNew.push(v))
+    fixture.detectChanges()
+    root = fixture.nativeElement as HTMLElement
+    el = root.querySelector('.csd-input') as HTMLInputElement
+    el.dispatchEvent(new Event('focus'))
+    fixture.detectChanges()
+  })
+
+  function press(key: string): KeyboardEvent {
+    const e = new KeyboardEvent('keydown', { key, cancelable: true })
+    el.dispatchEvent(e)
+    fixture.detectChanges()
+    return e
+  }
+
+  function highlighted(): Element | null {
+    return root.querySelector('.dropdown-item--highlight')
+  }
+
+  it('opens with the first option highlighted and stops at the ends (no wrap)', () => {
+    expect(highlighted()?.textContent?.trim()).toBe('apple')
+    press('ArrowUp')
+    expect(highlighted()?.textContent?.trim()).toBe('apple')
+    for (let i = 0; i < 5; i++) press('ArrowDown')
+    expect(highlighted()?.classList).toContain('dropdown-item--add-new')
+    expect(el.getAttribute('aria-activedescendant')).toMatch(/-option-2$/)
+  })
+
+  it('never moves focus into the list (no roving tabindex)', () => {
+    expect(root.querySelectorAll('.dropdown-item[tabindex]').length).toBe(0)
+  })
+
+  it('Enter picks the highlighted option', () => {
+    press('ArrowDown')
+    press('Enter')
+    expect(added).toEqual(['banana'])
+  })
+
+  it('typed new name → add "<typed>", Enter on it emits the name', () => {
+    el.value = 'cherry'
+    el.dispatchEvent(new Event('input'))
+    fixture.detectChanges()
+    expect(root.querySelectorAll('.dropdown-item--add-new').length).toBe(1)
+    expect(root.querySelector('.dropdown-item--add-new')?.textContent?.trim()).toBe('add "cherry"')
+    press('Enter')
+    expect(addedNew).toEqual(['cherry'])
+  })
+
+  it('nothing typed → generic label; Enter on it emits ""', () => {
+    expect(root.querySelector('.dropdown-item--add-new')?.textContent?.trim()).toBe('add_new_category')
+    press('ArrowDown')
+    press('ArrowDown')
+    press('Enter')
+    expect(addedNew).toEqual([''])
+  })
+
+  it('Escape closes; Tab closes without preventing the browser move', () => {
+    press('Escape')
+    expect(root.querySelector('app-scrollable-dropdown')).toBeNull()
+    press('ArrowDown')
+    expect(root.querySelector('app-scrollable-dropdown')).not.toBeNull()
+    const tab = press('Tab')
+    expect(tab.defaultPrevented).toBeFalse()
+    expect(root.querySelector('app-scrollable-dropdown')).toBeNull()
+  })
+})

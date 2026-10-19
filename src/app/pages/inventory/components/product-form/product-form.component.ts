@@ -432,9 +432,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     select.value = ''
   }
 
-  protected async openAddNewCategory(): Promise<void> {
+  /** Add a category; a typed new name prefills the key modal. The stored English key is what gets selected. */
+  protected async openAddNewCategory(typed = ''): Promise<void> {
     try {
-      const result = await this.translationKeyModal.open('', 'category')
+      const result = await this.translationKeyModal.open(typed.trim(), 'category')
       if (!isTranslationKeyResult(result)) return
       this.translationService.updateDictionary(result.englishKey, result.hebrewLabel)
       await this.metadataRegistry.registerCategory(result.hebrewLabel)

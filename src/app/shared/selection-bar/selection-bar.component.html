@@ -48,6 +48,7 @@
               [placeholder]="'select_value'"
               [translateLabels]="true"
               [addNewValue]="activeField_()!.addNewValue ?? ''"
+              [addNewLabelKey]="activeField_()!.addNewLabelKey ?? 'add_new_item'"
               [typeToFilter]="true"
               [compact]="true"
               (valueChange)="onValueSelect($event)"

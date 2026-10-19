@@ -8,7 +8,9 @@ import {
   HostListener,
   ViewChild,
   ElementRef,
-  inject
+  inject,
+  afterNextRender,
+  Injector
 } from '@angular/core'
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms'
 import { CommonModule } from '@angular/common'
@@ -19,6 +21,14 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
 import { dedupeAndFilterOptions } from '../../core/utils/dedupe-select-options.util'
 import { InputClearComponent } from '../input-clear/input-clear.component'
+import { AddOptionRowComponent } from '../add-option-row/add-option-row.component'
+import { AddOptionLabel, addOptionLabel } from '../../core/utils/add-option.util'
+import { KeyedPickerSearch, scrollHighlightIntoView } from '../../core/utils/keyed-picker-search.util'
+
+/** Per-instance id prefix for option ids when no triggerId is given. */
+let nextCustomSelectId = 0
+/** KeyedPickerSearch key — one picker per component instance. */
+const PICKER_KEY = 0
 
 @Component({
   selector: 'app-custom-select',
@@ -30,7 +40,8 @@ import { InputClearComponent } from '../input-clear/input-clear.component'
     ClickOutSideDirective,
     ScrollableDropdownComponent,
     LucideAngularModule,
-    InputClearComponent
+    InputClearComponent,
+    AddOptionRowComponent
   ],
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: CustomSelectComponent, multi: true }],
   templateUrl: './custom-select.component.html',
@@ -52,20 +63,32 @@ export class CustomSelectComponent implements ControlValueAccessor {
   variant = input<'default' | 'chip'>('default')
   /** Option value treated as "add new" for styling and pinned at end when filtering. Parent handles in valueChange. */
   addNewValue = input<string>('__add_unit__')
+  /** Generic "add new <thing>" key (add-option rule 2) — default pairs with the default unit sentinel. Never bare `add`. */
+  addNewLabelKey = input<string>('add_new_unit')
+  /** Opt in when the caller's add flow takes the typed name (via addNewChosen): shows `הוסף "<typed>"`. */
+  allowTypedAdd = input<boolean>(false)
 
   valueChange = output<string>()
+  /** Emitted right before the add-new sentinel is selected: the typed new name, or '' for the generic add. */
+  addNewChosen = output<string>()
 
   private _value = signal<string>('')
   private _onChange: (value: string) => void = () => {}
   private _onTouched: () => void = () => {}
   private _disabled = signal(false)
   private readonly translationService = inject(TranslationService)
+  private readonly injector = inject(Injector)
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
 
   @ViewChild('triggerRef') protected triggerRef?: ElementRef<HTMLButtonElement>
   @ViewChild('inputRef') protected inputRef?: ElementRef<HTMLInputElement>
 
   protected open = signal(false)
-  protected highlightedIndex = signal(-1)
+  private readonly picker_ = new KeyedPickerSearch()
+  protected highlightedIndex = computed(() => this.picker_.highlighted(PICKER_KEY))
+  private readonly instanceId_ = `cs-${++nextCustomSelectId}`
+  /** Option id prefix — for `aria-activedescendant` (focus stays in the input, rule 5d). */
+  protected optionIdPrefix_ = computed(() => (this.triggerId() || this.instanceId_) + '-opt-')
   protected searchQuery_ = signal('')
   private closeTimeout: ReturnType<typeof setTimeout> | null = null
   /** When true, next trigger focus came from mouse (click); do not auto-open dropdown. */
@@ -105,11 +128,26 @@ export class CustomSelectComponent implements ControlValueAccessor {
   /** The add-new option from the full options list, or null if not present. */
   protected addNewOption_ = computed(() => this.options().find((o) => o.value === this.addNewValue()) ?? null)
 
+  /** Add option label: typed new name (not an existing option by on-screen label), else the generic key (rule 2–3). */
+  protected addLabel_ = computed<AddOptionLabel>(() => {
+    const addNewVal = this.addNewValue()
+    const rest = this.options().filter((o) => o.value !== addNewVal)
+    const typed = this.typeToFilter() && this.allowTypedAdd() ? this.searchQuery_() : ''
+    return addOptionLabel(typed, rest, (o) => this.displayLabel_(o.label), this.addNewLabelKey())
+  })
+
   /** Options for the scrollable list — excludes the add-new sentinel (rendered separately as footer). */
   protected visibleOptions_ = computed(() => {
     const all = this.typeToFilter() ? this.filteredOptions_() : this.options()
     const addNewVal = this.addNewValue()
     return all.filter((o) => o.value !== addNewVal)
+  })
+
+  /** Options in display and keyboard order: the list, then the single add option last (rule 1, 5e). */
+  protected keyboardOptions_ = computed(() => {
+    const add = this.addNewOption_()
+    const visible = this.visibleOptions_()
+    return add ? [...visible, add] : visible
   })
 
   /** Input display value: when open show search query, when closed show selected label (translated if needed). */
@@ -129,6 +167,14 @@ export class CustomSelectComponent implements ControlValueAccessor {
     const placeholderLen = placeholderText.length
     return Math.max(4, placeholderLen, displayLen)
   })
+
+  private displayLabel_(label: string): string {
+    return this.translateLabels() ? this.translationService.translate(label) : label
+  }
+
+  private setHighlight_(index: number): void {
+    this.picker_.setHighlighted(PICKER_KEY, index)
+  }
 
   writeValue(value: string): void {
     this._value.set(value ?? '')
@@ -160,8 +206,8 @@ export class CustomSelectComponent implements ControlValueAccessor {
     const next = !this.open()
     this.open.set(next)
     if (next) {
-      const idx = this.options().findIndex((o) => o.value === this._value())
-      this.highlightedIndex.set(idx >= 0 ? idx : 0)
+      const idx = this.keyboardOptions_().findIndex((o) => o.value === this._value())
+      this.setHighlight_(idx >= 0 ? idx : 0)
     }
   }
 
@@ -177,9 +223,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
     this.clearCloseTimeout()
     this.open.set(true)
     this.searchQuery_.set('')
-    const filtered = this.filteredOptions_()
-    const currentIdx = this._value() ? filtered.findIndex((o) => o.value === this._value()) : -1
-    this.highlightedIndex.set(currentIdx >= 0 ? currentIdx : filtered.length > 0 ? 0 : -1)
+    this.setHighlight_(0)
     setTimeout(() => this.inputRef?.nativeElement?.focus(), 0)
   }
 
@@ -187,58 +231,50 @@ export class CustomSelectComponent implements ControlValueAccessor {
   protected onClearSearch(): void {
     this.clearCloseTimeout()
     this.searchQuery_.set('')
-    const filtered = this.filteredOptions_()
-    const currentIdx = this._value() ? filtered.findIndex((o) => o.value === this._value()) : -1
-    this.highlightedIndex.set(currentIdx >= 0 ? currentIdx : filtered.length > 0 ? 0 : -1)
+    this.setHighlight_(0)
     this.inputRef?.nativeElement?.focus()
   }
 
   protected onInputInput(value: string): void {
     this.searchQuery_.set(value ?? '')
-    if (!this.open()) {
-      this.open.set(true)
-      const filtered = this.filteredOptions_()
-      this.highlightedIndex.set(filtered.length > 0 ? 0 : -1)
-    } else {
-      const filtered = this.filteredOptions_()
-      this.highlightedIndex.set(filtered.length > 0 ? 0 : -1)
-    }
+    if (!this.open()) this.open.set(true)
+    this.setHighlight_(0)
   }
 
+  /** Search-box keys (rule 5): shared KeyedPickerSearch; Tab closes and lets the browser move focus. */
   protected onInputKeydown(e: KeyboardEvent): void {
     if (!this.open()) {
-      if (e.key === 'Escape') return
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
         this.openDropdown()
       }
       return
     }
-    const opts = this.filteredOptions_()
-    let idx = this.highlightedIndex()
-    if (e.key === 'Escape') {
-      e.preventDefault()
+    if (e.key === 'Tab') {
       this.close()
-      this.inputRef?.nativeElement?.blur()
       return
     }
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      if (idx >= 0 && opts[idx]) this.select(opts[idx].value)
-      return
+    const opts = this.keyboardOptions_()
+    this.picker_.handleKeydown(PICKER_KEY, e, {
+      optionCount: opts.length,
+      onSelect: (idx) => this.pick_(opts[idx]),
+      onClose: () => this.close(),
+      onHighlightMove: () => this.scrollHighlightIntoView_()
+    })
+  }
+
+  private scrollHighlightIntoView_(): void {
+    afterNextRender(() => scrollHighlightIntoView(this.hostRef.nativeElement), { injector: this.injector })
+  }
+
+  /** Select an option; the add-new sentinel first reports the typed name (rule 2) via addNewChosen. */
+  private pick_(opt: { value: string; label: string } | undefined): void {
+    if (!opt) return
+    if (opt.value === this.addNewValue()) {
+      const label = this.addLabel_()
+      this.addNewChosen.emit(label.kind === 'typed' ? label.text : '')
     }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      idx = Math.min(idx + 1, opts.length - 1)
-      this.highlightedIndex.set(idx)
-      return
-    }
-    if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      idx = Math.max(idx - 1, 0)
-      this.highlightedIndex.set(idx)
-      return
-    }
+    this.select(opt.value)
   }
 
   /** Close after a short delay so option click can run first when focus moves on mousedown. */
@@ -284,7 +320,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   protected onOptionClick(opt: { value: string; label: string }): void {
-    this.select(opt.value)
+    this.pick_(opt)
   }
 
   @HostListener('keydown', ['$event'])
@@ -297,7 +333,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
       }
       return
     }
-    const opts = this.typeToFilter() ? this.filteredOptions_() : this.options()
+    const opts = this.keyboardOptions_()
     let idx = this.highlightedIndex()
     if (e.key === 'Escape') {
       e.preventDefault()
@@ -306,19 +342,21 @@ export class CustomSelectComponent implements ControlValueAccessor {
     }
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
-      if (idx >= 0 && opts[idx]) this.select(opts[idx].value)
+      if (idx >= 0 && opts[idx]) this.pick_(opts[idx])
       return
     }
     if (e.key === 'ArrowDown') {
       e.preventDefault()
       idx = Math.min(idx + 1, opts.length - 1)
-      this.highlightedIndex.set(idx)
+      this.setHighlight_(idx)
+      this.scrollHighlightIntoView_()
       return
     }
     if (e.key === 'ArrowUp') {
       e.preventDefault()
       idx = Math.max(idx - 1, 0)
-      this.highlightedIndex.set(idx)
+      this.setHighlight_(idx)
+      this.scrollHighlightIntoView_()
       return
     }
     if (e.key === 'Tab') {

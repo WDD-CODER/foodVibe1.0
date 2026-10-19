@@ -28,6 +28,9 @@
             [placeholder]="'category'"
             [typeToFilter]="true"
             [addNewValue]="'__add_new__'"
+            addNewLabelKey="add_new_category"
+            [allowTypedAdd]="true"
+            (addNewChosen)="pendingAddName_.set($event)"
             [translateLabels]="true"
           />
         </div>

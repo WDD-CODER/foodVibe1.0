@@ -1039,6 +1039,9 @@
     "supplier_delete_in_use_warning": "הספק מקושר ל-{n} מוצרים. מחיקה תסיר אותו מהמוצרים האלה.",
     "confirm_delete_supplier": "למחוק את הספק?",
     "supplier_delete_from_master_error": "שגיאה במחיקת הספק מכל המשתמשים",
-    "export_preview": "תצוגה מקדימה"
+    "export_preview": "תצוגה מקדימה",
+    "add_new_item": "הוסף פריט חדש",
+    "add_new_supplier": "הוסף ספק חדש",
+    "add_new_preparation_category": "הוסף קטגוריית הכנה חדשה"
   }
 }
