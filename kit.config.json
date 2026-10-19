@@ -61,7 +61,8 @@
     "serverRoot": "server/",
     "slotEnvFile": "src/environments/environment.slot.ts",
     "sharedDocs": "_shared",
-    "routesFile": "src/app/app.routes.ts"
+    "routesFile": "src/app/app.routes.ts",
+    "planChecks": "docs/agent/plan-checks.md"
   },
   "plans": {
     "openDirs": [

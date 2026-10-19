@@ -8,13 +8,11 @@
 ## Architecture Decision
 
 ### Approach
-[Chosen architecture with rationale]
+[The design: components, boundaries, and the existing patterns it follows]
 
-### Alternatives Considered
-| Approach | Pros | Cons |
-|----------|------|------|
-| A | ... | ... |
-| B | ... | ... |
+### Why this design
+[One short paragraph: why this is the best fit for the problem, the standards doc and the code as it is.
+No forced alternatives; name another option only when the Human has to choose between them.]
 
 ### Architecture Impact
 - [Same lines as the plan's `## Architecture Impact`: `INV-n: preserves | deviation until … | changes — ADR …` per invariant in `docs/brain/invariants.md` this design touches, or `INV-none: preserves — <why>`]
@@ -23,15 +21,15 @@
 [Which components, services, models are needed and how they connect]
 
 ## Data Flow
-[Signal flow: source → computed → template binding]
+[Where state originates and how it reaches the UI]
 
 ## File Changes
 | File | Action | Purpose |
 |------|--------|---------|
-| path/to/file.ts | Create/Modify | What and why |
+| path/to/file | Create/Modify | What and why |
 
-## Translation Keys
-[New dictionary.json entries needed]
+## Translation / i18n
+[New entries needed in `public/assets/data/dictionary.json`, if the project has one]
 
 ## Risks & Open Questions
 - [Technical risks and mitigations]

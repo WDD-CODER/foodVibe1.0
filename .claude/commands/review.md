@@ -33,7 +33,7 @@ Standalone review command. Used by `/ship` Phase 2 and invokable alone.
 
 ## What to skip (CI already covers)
 
-Do **not** re-check: semicolons, quotes, `no-explicit-any`, unused vars, secret-shaped strings, npm audit, semgrep OWASP patterns, or other mechanical lint/CI gates from Brief 2.
+Do **not** re-check: formatting (punctuation, quote style), `no-explicit-any`, unused vars, secret-shaped strings, npm audit, semgrep OWASP patterns, or other mechanical lint/CI gates from Brief 2.
 
 ## Output format (required)
 

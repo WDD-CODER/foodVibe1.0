@@ -48,6 +48,10 @@
     {
       "path": "scripts/test/fixtures/design-port/**",
       "reason": "test fixtures for project script tests (design-port handoff samples); data, not workflow"
+    },
+    {
+      "path": "scripts/node_modules/**",
+      "reason": "the workflow scripts' own dependencies, installed by npm install inside scripts/ (kit 1.2.0)"
     }
   ],
   "entries": [
@@ -544,6 +548,12 @@
           "strings": [
             "wt-n"
           ]
+        },
+        {
+          "key": "stack.standardsDoc",
+          "strings": [
+            "angular"
+          ]
         }
       ],
       "refs": [
@@ -883,23 +893,26 @@
     },
     {
       "path": ".claude/references/hld-template.md",
-      "tier": "template",
-      "action": "skeleton",
+      "tier": "core",
+      "action": "parameterize",
       "params": [
         {
           "key": "project.i18nFile",
           "strings": [
+            "public/assets/data/dictionary.json",
             "dictionary.json"
           ]
         }
       ],
-      "refs": [],
-      "notes": "High-level-design template; one `dictionary.json` placeholder line."
+      "refs": [
+        "public/assets/data/dictionary.json"
+      ],
+      "notes": "HLD template; kit-managed since kit 1.2.0 (was a seed). FoodVibe-only lines live in docs/agent/plan-checks.md."
     },
     {
       "path": ".claude/references/prd-template.md",
-      "tier": "template",
-      "action": "skeleton",
+      "tier": "core",
+      "action": "parameterize",
       "params": [
         {
           "key": "git.mainBranch",
@@ -911,13 +924,15 @@
           "key": "paths.hotspots",
           "strings": [
             "src/styles.scss",
-            "public/assets/data/dictionary.json",
-            "src/app/app.routes.ts"
+            "src/app/app.routes.ts",
+            "app.routes.ts",
+            "scss"
           ]
         },
         {
           "key": "project.i18nFile",
           "strings": [
+            "public/assets/data/dictionary.json",
             "dictionary.json"
           ]
         },
@@ -926,20 +941,15 @@
           "strings": [
             "hebrew"
           ]
-        },
-        {
-          "key": "stack.stylesheetExt",
-          "strings": [
-            "scss"
-          ]
         }
       ],
       "refs": [
+        "docs/agent/plan-checks.md",
         "public/assets/data/dictionary.json",
         "src/app/app.routes.ts",
         "src/styles.scss"
       ],
-      "notes": "PRD template; lists FoodVibe hotspots, Hebrew considerations and dictionary keys. STALE-REF [.claude/rules/domain.md] not on disk."
+      "notes": "PRD template; kit-managed since kit 1.2.0 (was a seed). FoodVibe-only lines live in docs/agent/plan-checks.md."
     },
     {
       "path": ".claude/references/tab-orders.md",
@@ -1763,6 +1773,12 @@
           "key": "stack.name",
           "strings": [
             "angular"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/"
           ]
         }
       ],
@@ -4207,8 +4223,15 @@
     {
       "path": "scripts/lib/slot-procs.mjs",
       "tier": "core",
-      "action": "copy",
-      "params": [],
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "slots.feEnvFile",
+          "strings": [
+            "src/environments/environment.local.ts"
+          ]
+        }
+      ],
       "refs": [
         "scripts/lib/slot.mjs"
       ],
@@ -4246,6 +4269,12 @@
           "key": "project.name",
           "strings": [
             "foodvibe"
+          ]
+        },
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/package.json"
           ]
         }
       ],
@@ -4818,6 +4847,51 @@
         "scripts/log-query.mjs"
       ],
       "notes": "Plan 384: FoodVibe cheat sheet for log-query (app_logs, slot logs)."
+    },
+    {
+      "params": [],
+      "refs": [
+        "docs/agent/conventions.md",
+        "docs/agent/standards-backend.md",
+        "docs/agent/standards-domain.md",
+        "scripts/log-query.mjs"
+      ],
+      "path": "docs/agent/plan-checks.md",
+      "tier": "project",
+      "action": "stay",
+      "notes": "FoodVibe planning checks (kit paths.planChecks) that /plan's Architect + PM review adds; the FoodVibe-only lines of the PRD/HLD templates moved here at the kit 1.2.0 sync."
+    },
+    {
+      "params": [],
+      "refs": [],
+      "path": "scripts/local-excludes.mjs",
+      "tier": "core",
+      "action": "copy",
+      "notes": "Kit 1.2.0: the runtime-file list, appended to .git/info/exclude by install, take-plan and worktree-setup."
+    },
+    {
+      "params": [],
+      "refs": [],
+      "path": "scripts/package.json",
+      "tier": "core",
+      "action": "copy",
+      "notes": "Kit 1.2.0: the workflow scripts' own dependencies (picomatch); kit-managed."
+    },
+    {
+      "params": [],
+      "refs": [],
+      "path": "scripts/package-lock.json",
+      "tier": "project",
+      "action": "stay",
+      "notes": "Lockfile of scripts/package.json; the project's (npm install inside scripts/), refreshed by kit-sync --apply."
+    },
+    {
+      "params": [],
+      "refs": [],
+      "path": "scripts/run-python.sh",
+      "tier": "core",
+      "action": "copy",
+      "notes": "Kit 1.0.5: runs the session-manifest hook with the first working python3/python/py, else a quiet no-op."
     }
   ]
 }

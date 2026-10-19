@@ -4,13 +4,13 @@ Use this path for building new features. Loads Angular + domain standards automa
 
 ## Loads
 
-- `docs/agent/standards-angular.md` — Signals, Components, CSS (Layers), Angular conventions
+- `docs/agent/standards-angular.md` — Angular conventions (state, components, styling)
 - `docs/agent/standards-domain.md` (skip if unset) — FoodVibe domain model, data flow, naming conventions
-- `/_shared/tech-stack.md` — stack overrides
+- `_shared/tech-stack.md` — stack overrides
 
 ## Invokes
 
-- `/plan` — read-only phase: codebase scan → Plan Contract (Architect authors, saved to `plans/`)
+- `/plan` — read-only phase: codebase scan → Plan Contract (the Planner authors it and runs the Architect + PM review, saved to `plans/`)
 - `/review-it` — review phase: Reviewer checks plan-match, conventions, and the Verify gate
 
 ## Typical flow
@@ -25,6 +25,7 @@ Use this path for building new features. Loads Angular + domain standards automa
 
 ## Hard rules (inherited from CLAUDE.md / .cursor/rules/contractor-role.mdc)
 
+- Match the file's existing style; never reformat untouched lines.
 - No semicolons in `.ts` files. Single quotes in TS, double quotes in HTML.
 - `npm run build` / `npm run lint` must pass before declaring a milestone ready.
 - Branch guard enforced — never write on `main`.

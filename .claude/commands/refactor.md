@@ -4,7 +4,7 @@ Use this path for code cleanup, dead code removal, pattern consolidation, and te
 
 ## Loads
 
-- `docs/agent/standards-angular.md` — component structure, Signals, CSS layer architecture
+- `docs/agent/standards-angular.md` — component structure, state rules, styling architecture
 - `cssLayer` skill — CSS layer ordering, BEM naming, token usage
 - `techdebt` skill — scan for violations, duplications, dead code
 
@@ -25,6 +25,7 @@ Use this path for code cleanup, dead code removal, pattern consolidation, and te
 
 - No behavior changes in a refactor commit. If you find a bug, open a `/fix` separately.
 - `npm run build` must pass after every commit.
+- Match the file's existing style; never reformat untouched lines.
 - No semicolons in any `.ts` file touched.
 - Reference `cssLayer` skill before modifying any `.scss` file — layer order matters.
 - Human commits by default (`git-agent` prep only).

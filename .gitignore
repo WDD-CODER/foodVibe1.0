@@ -9,6 +9,7 @@
 # Node
 /node_modules
 server/node_modules
+scripts/node_modules/
 npm-debug.log
 yarn-error.log
 
@@ -65,6 +66,7 @@ src/environments/environment.slot.ts
 .claude/.parallel-slot-b
 .claude/.last-npm-install-hash
 .claude/.last-npm-install-hash-server
+.claude/.last-npm-install-hash-scripts
 .worktree-root
 .worktree-port
 

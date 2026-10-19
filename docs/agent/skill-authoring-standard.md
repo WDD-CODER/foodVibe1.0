@@ -47,7 +47,7 @@ Claude Code extensions worth using (ignored harmlessly elsewhere; **not** allowe
 | `when_to_use` | Extra trigger phrases; appended to description. Combined cap 1,536 chars in the listing. |
 | `disable-model-invocation: true` | The skill has side effects (git push, deletes, deploys, provisioning). Only `/name` runs it; the description leaves the listing (saves budget). |
 | `user-invocable: false` | Pure background knowledge/rules Claude should apply but nobody would type as a command. Hidden from the `/` menu, description kept. |
-| `allowed-tools` | Pre-approve the bundled script or the exact git commands so the skill runs without prompts: `Bash(node scripts/x.mjs *)`. |
+| `allowed-tools` | Pre-approve the bundled script or the exact git commands so the skill runs without prompts: `Bash(node scripts/<name>.mjs *)`. |
 | `paths` | Glob list — the skill auto-activates only when Claude touches matching files (`src/**/*.scss`). Ideal for file-type rules. |
 | `context: fork` + `agent:` | Run as a subagent with its own context. Needs an explicit task, not guidelines. |
 | `model`, `effort` | Per-skill model/effort override. Replaces prose like "use Haiku for phase 1". |
@@ -84,7 +84,7 @@ skill-name/
 ```
 
 - References **one level deep** only; say when to read each one.
-- **Prefer scripts for deterministic operations** — more reliable than generated code, saves tokens, consistent. Be explicit: "Run `scripts/x.mjs`" (execute) vs "See `scripts/x.mjs`" (read).
+- **Prefer scripts for deterministic operations** — more reliable than generated code, saves tokens, consistent. Be explicit: "Run `scripts/<name>.mjs`" (execute) vs "See `scripts/<name>.mjs`" (read).
 - Scripts solve, they don't defer: handle errors, make validation errors actionable (name the field, list what exists), document every constant ("30 s — typical HTTP completion").
 - State dependencies and install commands; don't assume packages exist.
 
@@ -150,11 +150,11 @@ Tooling: the `skill-creator` skill automates runs/grading/benchmark/viewer. `cla
 | angularComponentStructure | 72 | Rewrite (rename? keep) | Description + `paths`; section-order rule as a code example (input→output); drop duplicated AGENTS.md rules; `user-invocable: false` |
 | auth-and-logging | 63 | Rewrite | BOM; description with trigger words; replace "security grep + CI agent" with the real command/hook; checklist |
 | auth-crypto | 52 | Rewrite | BOM + mojibake; `paths: src/app/core/auth-crypto.ts`; move the pre-commit grep into `hooks` or `scripts/`; keep rules, drop phases |
-| breadcrumb-navigator | 55 | Rewrite + script | Seam list and "every file must exist" check → `scripts/breadcrumb-check.mjs`; description |
+| breadcrumb-navigator | 55 | Rewrite + script | Seam list and "every file must exist" check → `scripts/breadcrumbs-check.mjs`; description |
 | brief-detection | 91 | Light edit | BOM; already well structured; `user-invocable: false`; description with the H2 marker words |
 | cssLayer | 65 | Rewrite | `paths: src/**/*.scss`; keep five-group rhythm as an example block; token rule stays (it's the single owner); validation loop (`grep` for `.c-` in component scss) |
 | elegant-fix | 66 | Rewrite | BOM; description with user phrases ("hacky", "not ideal", "duplicate"); drop rules duplicated from AGENTS.md |
-| github-sync | 64 | Rewrite + script | BOM + mojibake; `disable-model-invocation: true`; once-per-day gate + cleanup → `scripts/github-sync.mjs`; drop GitHub MCP ref |
+| github-sync | 64 | Rewrite + script | BOM + mojibake; `disable-model-invocation: true`; once-per-day gate + cleanup → `scripts/github-sync-gate.mjs`; drop GitHub MCP ref |
 | preflight | 23 | Script | Already minimal; turn the 4 checks into `scripts/preflight.mjs` with `allowed-tools`; decide gstack |
 | save-plan | 189 | Restructure | Largest and most load-bearing. Keep content, reorder: Phase 0–3 core first, Phase 4 (mid-flight sync) → `reference/mid-flight-sync.md`; `disable-model-invocation: true`; `allowed-tools` for the 4 scripts; evals |
 | techdebt | 145 | Rewrite + script | BOM + mojibake; retention/trend → `scripts/techdebt-report.mjs`; remove duplicated retention text; drop `commit-to-github` |
