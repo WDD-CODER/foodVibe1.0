@@ -18,7 +18,7 @@ Agent entry point: `/remote` (`.claude/commands/remote.md`).
 | Piece | What it does |
 | --- | --- |
 | `scripts/lib/remote-proxy.mjs` | One origin on `localhost:4290+N` (main = 4290, wt-1..3 = 4291..4293). `/api/*` → the checkout's backend, everything else (incl. the live-reload WebSocket) → its dev server. Rewrites `Host`/`Origin`/`Referer` to localhost so the dev-server host check and the backend's `ALLOWED_ORIGIN` CORS check pass unchanged. |
-| `scripts/remote-port.mjs` | Starts a detached worker that runs the proxy and a Cloudflare quick tunnel (`cloudflared tunnel --url`, no account), writes `.worktree-remote` (gitignored: pids, url, secret, expiry), and stops both at the time limit. Log: `.claude/remote.log`. |
+| `scripts/remote-port.mjs` | Starts a detached worker that runs the proxy and a Cloudflare quick tunnel (`cloudflared tunnel --url`, no account), writes `.worktree-remote` (gitignored: pids, url, secret, expiry), and stops both at the time limit. Log: `remote.log` in `.claude/` (gitignored, written at run time). |
 | `src/environments/environment.local.ts` | Opened on any host but `localhost`, the app calls the API on the same origin (`apiUrl: ''`), which the proxy routes. `take-plan.mjs` copies this into each slot's `environment.slot.ts`. |
 
 ## Security model
