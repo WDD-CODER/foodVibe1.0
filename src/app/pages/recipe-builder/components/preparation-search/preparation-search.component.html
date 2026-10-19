@@ -7,10 +7,13 @@
       rows="1"
       SelectOnFocus
       [value]="searchQuery_()"
-      (input)="searchQuery_.set($any($event.target).value); showResults_.set(true); fitHeight_()"
-      (focus)="showResults_.set(true)"
-      (keydown.enter)="onEnter($event)"
-      (keydown.escape)="onSearchEscape($event)"
+      (input)="onQueryInput($any($event.target).value)"
+      (focus)="onSearchFocus()"
+      (keydown)="onSearchKeydown($event)"
+      role="combobox"
+      aria-autocomplete="list"
+      [attr.aria-expanded]="listOpen_()"
+      [attr.aria-activedescendant]="listOpen_() ? optionIdPrefix + highlightedIndex_() : null"
       placeholder="{{ 'search_preparation' | translatePipe }}"
       autocomplete="off"
       autocorrect="off"
@@ -20,30 +23,40 @@
     <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" />
   </div>
 
-  @if (showResults_() && groupedResults_().length > 0) {
+  @if (listOpen_()) {
     <app-scrollable-dropdown [maxHeight]="240">
-      <ul>
+      <ul role="listbox">
         @for (group of groupedResults_(); track group[0]) {
-          <li class="category-header">{{ group[0] | translatePipe }}</li>
-          @for (entry of group[1]; track entry.name + entry.category) {
-            <li (click)="selectPreparation(entry)" class="result-item">
-              <span class="item-name">{{ entry.name }}</span>
-              <span class="category-pill">{{ entry.category | translatePipe }}</span>
+          <li class="category-header" role="presentation">{{ group[0] | translatePipe }}</li>
+          @for (item of group[1]; track item.entry.name + item.entry.category) {
+            <li
+              role="option"
+              class="result-item"
+              [id]="optionIdPrefix + item.index"
+              [class.highlighted]="highlightedIndex_() === item.index"
+              [attr.aria-selected]="highlightedIndex_() === item.index"
+              (mousedown)="$event.preventDefault()"
+              (click)="selectPreparation(item.entry)"
+            >
+              <span class="item-name">{{ item.entry.name }}</span>
+              <span class="category-pill">{{ item.entry.category | translatePipe }}</span>
             </li>
           }
         }
+        @if (showAddOption_()) {
+          <li
+            role="option"
+            class="result-item result-item--add"
+            [id]="optionIdPrefix + flatResults_().length"
+            [class.highlighted]="highlightedIndex_() === flatResults_().length"
+            [attr.aria-selected]="highlightedIndex_() === flatResults_().length"
+            (mousedown)="$event.preventDefault()"
+            (click)="addPreparationDirectly()"
+          >
+            <app-add-option-row [label]="addLabel_()" />
+          </li>
+        }
       </ul>
     </app-scrollable-dropdown>
-  }
-
-  @if (showResults_() && showAddOption_()) {
-    <div class="add-option">
-      <button type="button" (click)="addPreparationDirectly()" class="add-prep-btn">
-        <span class="c-add-new-icon">
-          <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-        </span>
-        {{ 'add' | translatePipe }}
-      </button>
-    </div>
   }
 </div>

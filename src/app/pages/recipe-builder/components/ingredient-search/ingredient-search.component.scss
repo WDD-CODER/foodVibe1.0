@@ -31,6 +31,8 @@
   }
 
   &.result-item--add {
+    justify-content: flex-start;
+
     border-block-start: 1px dashed var(--border-default);
     color: var(--color-primary);
     font-size: 0.875rem;

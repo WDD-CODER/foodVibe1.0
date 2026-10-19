@@ -36,12 +36,12 @@ describe('RecipeLogisticsPickerService', () => {
     service.connect(baseline)
   })
 
-  const key = (k: string): KeyboardEvent => new KeyboardEvent('keydown', { key: k })
+  const key = (k: string): KeyboardEvent => new KeyboardEvent('keydown', { key: k, cancelable: true })
 
   it('arrow keys + Enter select an option without adding it yet', () => {
     service.onSearchInput('ס')
     expect(service.dropdownOpen_()).toBeTrue()
-    service.onSearchKeydown(key('ArrowDown'))
+    expect(service.highlightedIndex_()).toBe(0)
     service.onSearchKeydown(key('ArrowDown'))
     expect(service.highlightedIndex_()).toBe(1)
     service.onSearchKeydown(key('Enter'))
@@ -75,5 +75,48 @@ describe('RecipeLogisticsPickerService', () => {
     service.onAddClick()
     service.removeBaselineRow(0)
     expect(baseline.length).toBe(0)
+  })
+
+  it('stops at the add option (no wrap) and Enter on it opens the modal with the typed name', () => {
+    service.onSearchInput('ס')
+    for (let i = 0; i < 5; i++) service.onSearchKeydown(key('ArrowDown'))
+    expect(service.highlightedIndex_()).toBe(2)
+    service.onSearchKeydown(key('ArrowUp'))
+    service.onSearchKeydown(key('ArrowUp'))
+    service.onSearchKeydown(key('ArrowUp'))
+    expect(service.highlightedIndex_()).toBe(0)
+    for (let i = 0; i < 5; i++) service.onSearchKeydown(key('ArrowDown'))
+    service.onSearchKeydown(key('Enter'))
+    expect(modalOpen).toHaveBeenCalledWith('ס')
+  })
+
+  it('add label: typed new name vs exact match (generic add_new_tool)', () => {
+    service.onSearchInput('מחבת')
+    expect(service.addLabel_()).toEqual({ kind: 'typed', text: 'מחבת' })
+    service.onSearchInput('סיר')
+    expect(service.addLabel_()).toEqual({ kind: 'generic', key: 'add_new_tool' })
+  })
+
+  it('Tab closes the list without blocking the browser focus move; Escape closes', () => {
+    service.onSearchInput('ס')
+    const tab = key('Tab')
+    service.onSearchKeydown(tab)
+    expect(tab.defaultPrevented).toBeFalse()
+    expect(service.dropdownOpen_()).toBeFalse()
+    service.onSearchKeydown(key('ArrowDown'))
+    expect(service.dropdownOpen_()).toBeTrue()
+    service.onSearchKeydown(key('Escape'))
+    expect(service.dropdownOpen_()).toBeFalse()
+  })
+
+  it('a newly added tool lands selected and keeps the chosen quantity', async () => {
+    const eqData = TestBed.inject(EquipmentDataService) as unknown as { addEquipment: jasmine.Spy }
+    eqData.addEquipment.and.resolveTo({ _id: 'e9', nameHebrew: 'מחבת' })
+    modalOpen.and.resolveTo({ name: 'מחבת', category: 'tool' })
+    service.quantity_.set(4)
+    service.onSearchInput('מחבת')
+    await service.openAddNewToolModal()
+    expect(service.selectedToolId_()).toBe('e9')
+    expect(service.quantity_()).toBe(4)
   })
 })
