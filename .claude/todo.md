@@ -101,9 +101,9 @@
 
 ### Plan 402 — Dropdown add option, part 3: convention doc and trigger (`plans/402-dropdown-add-option-part-3-convention-doc-trigger.plan.md`)
 
-- [ ] A1: Write the dropdown "add new" rule into the domain standards — Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
-- [ ] A2: Point agents to the rule from AGENTS.md — Trigger row in `AGENTS.md`
-- [ ] A3: Save the dropdown pattern in the project brain — `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
+- [x] A1: Write the dropdown "add new" rule into the domain standards — Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
+- [x] A2: Point agents to the rule from AGENTS.md — Trigger row in `AGENTS.md`
+- [x] A3: Save the dropdown pattern in the project brain — `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: Run the doc checks and have you read the rule — `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
 
 ### Plan 407 — One soft-delete model and per-user state (userPrefs) (`plans/407-one-soft-delete-model-and-user-prefs.plan.md`)
