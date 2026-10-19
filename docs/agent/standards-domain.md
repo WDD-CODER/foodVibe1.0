@@ -41,3 +41,39 @@ paths:
 * Missing registration causes runtime error: *"The '...' icon has not been provided by any available icon providers."*
 * **Execution gate**: After any task that adds a `<lucide-icon>` to a template, grep the template for every icon name added, then verify each one is present in both the `import { ... } from 'lucide-angular'` block AND the `LucideAngularModule.pick({ ... })` call in `app.config.ts`. This check must pass before the task is marked `[x]`.
 
+
+---
+
+## Add-option rule (dropdowns)
+
+Every dropdown that offers "add" follows this add-option rule (plans 398–401). Shared selects
+(`custom-select`, `custom-multi-select`, `chip-search-dropdown`) already do it — pass the right inputs.
+
+1. **One add option**, always last in the list and in keyboard order — never two "הוסף" buttons.
+2. **Label:** typed text that isn't an existing option → `הוסף "<typed>"`. Nothing typed, or an exact
+   match → the generic `add_new_<thing>` key (`הוסף <thing> חדש/ה`), which opens the add modal. Never
+   the bare word `add` / "הוסף". Show the typed form only when the add flow can take the typed name
+   (`[allowTypedAdd]="true"` on the shared selects); otherwise the generic label.
+3. **Search by the label on screen** (the translated key), not the stored key — keys are often English
+   (`KeyResolutionService`). Exact-match checks use the translated label too.
+4. **After adding, select the key that was actually stored** (it may differ from the typed text); select
+   nothing if the add was cancelled. Never write the raw typed text into the field.
+
+Use `core/utils/add-option.util.ts` (`addOptionLabel`, `findOptionByLabel`, `resolveAddedKey`) and
+render the row with `shared/add-option-row` (`<app-add-option-row [label]="…" />`). Shared-select
+inputs: `addNewValue` (sentinel), `addNewLabelKey`, `allowTypedAdd`; output `addNewChosen` /
+`addNew` carries the typed name (`''` for the generic add). New `add_new_<thing>` keys go in
+`dictionary.json` → `general` (append-only).
+
+### Keyboard (every dropdown with a search box — add option or not)
+
+- First option highlighted on open and on every keystroke, so Enter picks the top match.
+- ↓/↑ move the highlight and stop at the ends (no wrap-around); the highlighted row scrolls into view.
+- Focus stays in the search input (no roving focus into the list); point `aria-activedescendant` at the
+  highlighted option.
+- Enter picks the highlighted option (on the add option it runs the add). Escape closes the list, focus
+  stays on the field. Tab / Shift+Tab close the list and move to the next / previous field.
+- `custom-multi-select` without a search box: Space toggles like Enter.
+
+Use `core/utils/keyed-picker-search.util.ts` (`KeyedPickerSearch` + `scrollHighlightIntoView`) — never
+hand-roll arrow/Enter handling.

@@ -3111,6 +3111,14 @@
       "notes": "FoodVibe pattern; verdict in lessons-triage.md. The file itself is not copied."
     },
     {
+      "path": "docs/brain/patterns/dropdown-add-option.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe pattern (plan 402): dropdown add-option rule + shared KeyedPickerSearch. The file itself is not copied."
+    },
+    {
       "path": "docs/brain/patterns/gemini-backend-proxy.md",
       "tier": "project",
       "action": "stay",

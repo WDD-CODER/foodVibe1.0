@@ -43,6 +43,8 @@ docs/agent/standards-domain.md
 AGENTS.md
 docs/brain/patterns/dropdown-add-option.md
 docs/brain/index.md
+# approved by the Human 2026-10-19 (A4: classify the new pattern file if the kit check asks)
+docs/workflow-kit/manifest.json
 ```
 
 ## Read Scope
@@ -74,20 +76,20 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `docs/agent/standards-domain.md`: an "Add-option rule (dropdowns)" section with the five
+- [x] `docs/agent/standards-domain.md`: an "Add-option rule (dropdowns)" section with the five
       rules (one option; `הוסף "<typed>"` vs `הוסף <thing> חדש/ה`, never bare "הוסף"; search by
       translated label; select the stored key, nothing on cancel; keyboard), and "use
       `core/utils/add-option.util.ts` + `shared/add-option-row`; shared selects already do it"
       (names as merged in plan 400).
-- [ ] Keyboard subsection — applies to **every** dropdown with a search box, add option or not:
+- [x] Keyboard subsection — applies to **every** dropdown with a search box, add option or not:
       first option highlighted on open/typing; ↓/↑ stop at the ends (no wrap); highlight scrolls
       into view; focus stays in the input (`aria-activedescendant`); Enter picks (add option
       last); Escape closes; Tab / Shift+Tab close and move to the next / previous field. "Use
       `core/utils/keyed-picker-search.util.ts` (`KeyedPickerSearch`) — never hand-roll arrow/Enter
       handling."
-- [ ] `AGENTS.md` skill-trigger table: row "New dropdown / search picker, or changing one → follow
+- [x] `AGENTS.md` skill-trigger table: row "New dropdown / search picker, or changing one → follow
       the add-option rule (incl. keyboard)" → `docs/agent/standards-domain.md`.
-- [ ] Brain pattern `docs/brain/patterns/dropdown-add-option.md` (per `docs/agent/brain-capture.md`)
+- [x] Brain pattern `docs/brain/patterns/dropdown-add-option.md` (per `docs/agent/brain-capture.md`)
       + index line, pointing at the standard (no duplicated rule text).
 
 ### Should Have (P1)
@@ -100,9 +102,9 @@ line or file this plan names was removed, renamed or rewritten).
 - none (docs only).
 
 ## Atomic Sub-tasks
-- [ ] A1: Write the dropdown "add new" rule into the domain standards — Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
-- [ ] A2: Point agents to the rule from AGENTS.md — Trigger row in `AGENTS.md`
-- [ ] A3: Save the dropdown pattern in the project brain — `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
+- [x] A1: Write the dropdown "add new" rule into the domain standards — Rule section in `docs/agent/standards-domain.md` incl. keyboard subsection (helper/component names from merged plan 400)
+- [x] A2: Point agents to the rule from AGENTS.md — Trigger row in `AGENTS.md`
+- [x] A3: Save the dropdown pattern in the project brain — `docs/brain/patterns/dropdown-add-option.md` + line in `docs/brain/index.md`
 - [ ] A4: Run the doc checks and have you read the rule — `rg`, `kit-owned --check`, `kit-manifest-check` green (classify the new pattern file in `docs/workflow-kit/manifest.json` via `approved:` if the check asks); Human reads the rule
 
 ## Technical Considerations
