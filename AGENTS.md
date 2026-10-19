@@ -38,6 +38,7 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 | Auth guards, interceptors, user services, HTTP CRUD, hashing/tokens in `auth-crypto.ts` | `.claude/skills/auth-and-logging/SKILL.md` |
 | New `pages/<x>/` or top-level subtree; files moved/deleted; before a PR that reshaped folders | `.claude/skills/breadcrumbs/SKILL.md` (+ `scripts/breadcrumbs-check.mjs`) |
 | Before any `.scss` / `.css` edit in `src/` | `.claude/skills/cssLayer/SKILL.md` |
+| New dropdown / search picker, or changing one → follow the add-option rule (incl. keyboard) | `docs/agent/standards-domain.md` → Add-option rule |
 | Session start or after time away (once/day) | `.claude/skills/github-sync/SKILL.md` (gate: `scripts/github-sync-gate.mjs`) |
 | Before dev server / browser / database workflows | `.claude/skills/preflight/SKILL.md` (`node scripts/preflight.mjs`) |
 | "save the plan" or pastes a Plan Contract to execute | `.claude/skills/save-plan/SKILL.md` (+ `scripts/plan-name-similarity.mjs`) |
