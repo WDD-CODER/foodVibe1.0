@@ -184,3 +184,8 @@ bugs/qa-runs/.nightly.log
 .claude/.qa-pids
 .claude/qa-proxy.conf.json
 .claude/qa-lock-*.sha256
+# Plan 413 — Code QA reports and its nightly output
+bugs/qa-runs/code-qa/
+.claude/qa-code.log
+# Plan 414 — qa-up.ps1 records whether the QA backend uses local or remote Mongo
+.claude/.qa-env

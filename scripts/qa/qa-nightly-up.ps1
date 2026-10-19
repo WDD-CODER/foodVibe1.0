@@ -1,7 +1,9 @@
 <#
 .SYNOPSIS
-  Nightly QA, step 1 (plan 408): run by the "FoodVibe QA up" Windows task inside the dedicated QA checkout.
-  Fast-forwards to origin/main, reinstalls dependencies when a lockfile changed, then runs qa-up.ps1.
+  Nightly QA, step 1 (plan 408): run by the "FoodVibe QA up" Windows task (00:00) inside the dedicated QA checkout.
+  Fast-forwards to origin/main, reinstalls dependencies when a lockfile changed, runs qa-up.ps1, then Code QA
+  (plan 413: scripts/qa/code-qa/run.mjs --nightly, deadline 02:40). Code QA writes its own
+  "CODE-QA: <layer> <status> <n> findings" lines to the log; its full output goes to .claude/qa-code.log.
   Every step and its exit status goes to bugs/qa-runs/.nightly.log. Nothing throws before it is logged:
   when this fails, the 03:00 Cowork run finds the servers down and writes its own BLOCKED.md.
 #>
@@ -70,5 +72,22 @@ foreach ($pair in $changed) {
 }
 
 $up = Invoke-Step 'qa-up.ps1' $Root 'powershell.exe' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $Root 'scripts\qa\qa-up.ps1'), '-Root', $Root)
+
+# Code QA (plan 413). Without the servers only the layers that need none run.
+$layers = if ($up -eq 0) { 'gates,static,sweep' } else { 'gates,static' }
+$codeLog = Join-Path $Root '.claude\qa-code.log'
+Write-Log "code-qa start (layers $layers, output $codeLog)"
+Push-Location $Root
+try {
+  & node.exe (Join-Path $Root 'scripts\qa\code-qa\run.mjs') '--nightly' "--layers=$layers" *> $codeLog
+  $code = $LASTEXITCODE
+} catch {
+  Add-Content -Path $codeLog -Value $_.Exception.Message -Encoding UTF8
+  $code = 1
+} finally {
+  Pop-Location
+}
+Write-Log "code-qa -> exit $code"
+
 Write-Log "done (qa-up exit $up)"
 exit $up

@@ -54,9 +54,13 @@ If `Phase: P1` is not finished, redo only the pages whose section in `plan-reali
 4. Browser: open `http://localhost:4205` (site approval once), `http://localhost:4205/qa-evidence/health` returns `"ok":true,"loggedIn":true`.
    `resize_window` accepts 1366×768, 768×1024, 375×812 (record the smallest accepted width).
 5. Log in as `QA_USER`. Confirm the header shows the username and no crown (non-admin).
-6. Set `Phase: P1`.
+6. **Code QA handoff.** Read `bugs/qa-runs/code-qa/latest.md` (written by the midnight Code QA run, `docs/qa/code-qa.md`).
+   Check its `Generated:` line: if the file is missing or older than 24 hours, write `Code QA: none` in `progress.md`
+   and run the full protocol. Otherwise write `Code QA: <Generated> · <n> open findings` in `progress.md`, copy its
+   `PRE-CHECKED` table into `progress.md`, and follow `qa-agent.md` §7.2 for the whole run.
+7. Set `Phase: P1`.
 
-Exit criteria: all six green, else hard blocker (`qa-agent.md` §9).
+Exit criteria: items 1–5 green, else hard blocker (`qa-agent.md` §9). Item 6 never blocks.
 
 ---
 

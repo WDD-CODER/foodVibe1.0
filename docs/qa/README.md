@@ -77,9 +77,22 @@ line in `.gitignore`.
 ## Nightly mode
 
 Cowork's scheduled task cannot start Windows processes, so Windows Task Scheduler owns the servers.
-`qa-nightly-up.ps1` (02:45) fast-forwards the QA checkout to `origin/main`, runs `npm ci` where a lockfile changed,
-then runs `qa-up.ps1`. `qa-nightly-down.ps1` (07:00) stops the servers. Every step is appended to
-`bugs/qa-runs/.nightly.log`.
+
+| Time | Who | What |
+| --- | --- | --- |
+| 00:00 | Windows "FoodVibe QA up" (`qa-nightly-up.ps1`) | fast-forward to `origin/main`, `npm ci` where a lockfile changed, `qa-up.ps1`, then Code QA (`run.mjs --nightly`, stops by 02:40) — see `code-qa.md` |
+| 03:00 | Cowork UI agent | reads `bugs/qa-runs/code-qa/latest.md` first, skips what Code QA already checked |
+| 07:30 | Windows "FoodVibe QA down" (`qa-nightly-down.ps1`) | stops the servers |
+
+Every step is appended to `bugs/qa-runs/.nightly.log`; Code QA adds one `CODE-QA: <layer> <status> <n> findings` line
+per layer (its full output is in `.claude/qa-code.log`).
+
+After pulling plan 413, re-register the tasks once so they use the new times and the 3-hour limit of the up task
+(run in the QA checkout):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\qa\qa-schedule.ps1 -Root C:\dev\foodVibe-qa
+```
 
 ### One-time setup
 
@@ -90,13 +103,14 @@ cd C:\dev\foodVibe-qa
 npm ci ; cd server ; npm ci ; cd ..
 npx playwright install chromium
 # 2. copy server/.env from your working folder; add QA_USER / QA_PASS (non-admin account, created once through the UI)
-# 3. register the two Windows tasks (wake the PC at 02:45, stop the servers at 07:00)
+# 3. register the two Windows tasks (wake the PC at 00:00 for servers + Code QA, stop the servers at 07:30)
 powershell -ExecutionPolicy Bypass -File scripts\qa\qa-schedule.ps1 -Root C:\dev\foodVibe-qa
-# optional: -Up 02:30 -Down 07:30 ; remove with -Unregister
+# optional: -Up 23:30 -Down 08:00 ; remove with -Unregister
 ```
 
 Dry run: `Start-ScheduledTask -TaskName 'FoodVibe QA up'`, then check `bugs/qa-runs/.nightly.log` for the
-`QA: … ok` lines. `Start-ScheduledTask -TaskName 'FoodVibe QA down'` frees the ports.
+`QA: … ok` lines, then the `CODE-QA:` lines (Code QA takes 30–50 minutes). `Start-ScheduledTask -TaskName 'FoodVibe QA down'`
+frees the ports.
 
 Then in Claude, create the scheduled task: daily at 03:00 Asia/Jerusalem, requires this computer, folder = the QA
 checkout. Use this prompt (no `RUN_ID`: the agent picks the run from `bugs/qa-runs/INDEX.md`):
@@ -112,7 +126,7 @@ REPORT_LANG: en
 
 ### Caveats
 
-- The PC must be awake (the up task wakes it) and Claude Desktop must be open at 03:00.
+- The PC must be awake (the up task wakes it at 00:00) and Claude Desktop must be open at 03:00.
 - Do one manual run first and approve `localhost:4205` there. Then set the scheduled task to automatic approval.
 - QA runs write `QA-*` records to the same local Mongo the dev server uses. They are prefixed and removed when a run
   finishes.

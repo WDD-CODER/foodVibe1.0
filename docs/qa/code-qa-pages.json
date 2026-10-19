@@ -1,0 +1,273 @@
+{
+  "about": "Code QA page map (plan 413): one entry per page section of docs/qa/qa-plan.md. routes = what the sweep opens; idType = the data collection whose first record fills :id; files = the page's component, service and server-route globs (plan 415 reviews them). The static layer reports a glob that matches no file as 'page map stale'.",
+  "pages": [
+    {
+      "id": "SHELL",
+      "title": "global chrome",
+      "routes": ["/does-not-exist"],
+      "auth": false,
+      "files": [
+        "src/app/appRoot/**",
+        "src/app/app.routes.ts",
+        "src/app/core/components/header/**",
+        "src/app/core/components/auth-modal/**",
+        "src/app/core/components/hero-fab/**",
+        "src/app/core/components/tab-chips/**",
+        "src/app/core/components/user-msg/**",
+        "src/app/core/components/update-banner/**",
+        "src/app/core/services/user.service.ts",
+        "src/app/core/services/auth-modal.service.ts",
+        "src/app/core/services/hero-fab.service.ts",
+        "src/app/core/guards/**",
+        "server/routes/auth.js"
+      ]
+    },
+    {
+      "id": "DASH",
+      "title": "לוח בקרה",
+      "routes": ["/dashboard"],
+      "auth": false,
+      "files": [
+        "src/app/pages/dashboard/**",
+        "src/app/core/services/activity-log.service.ts",
+        "src/app/shared/page-header/**"
+      ]
+    },
+    {
+      "id": "META",
+      "title": "לוח בקרה → מטא-דאטה",
+      "routes": ["/dashboard?tab=metadata"],
+      "auth": false,
+      "files": [
+        "src/app/pages/metadata-manager/**",
+        "src/app/core/services/metadata-registry.service.ts",
+        "src/app/core/services/taxonomy-store.service.ts",
+        "src/app/core/services/unit-registry.service.ts",
+        "src/app/core/services/user-admin.service.ts",
+        "src/app/shared/label-creation-modal/**",
+        "src/app/shared/add-item-modal/**",
+        "src/app/shared/translation-key-modal/**",
+        "server/routes/admin.js"
+      ]
+    },
+    {
+      "id": "INV",
+      "title": "רשימת מוצרים",
+      "routes": ["/inventory/list"],
+      "auth": false,
+      "files": [
+        "src/app/pages/inventory/inventory.page.*",
+        "src/app/pages/inventory/components/inventory-product-list/**",
+        "src/app/core/services/product-data.service.ts",
+        "src/app/shared/list-shell/**",
+        "src/app/shared/column-carousel/**",
+        "src/app/shared/selection-bar/**",
+        "src/app/shared/ai-product-modal/**",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "EQ",
+      "title": "ציוד",
+      "routes": ["/inventory/equipment"],
+      "auth": false,
+      "files": [
+        "src/app/pages/equipment/components/equipment-list/**",
+        "src/app/core/services/equipment-data.service.ts",
+        "src/app/core/services/equipment-category-registry.service.ts",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "RB",
+      "title": "ספר מתכונים",
+      "routes": ["/recipe-book"],
+      "auth": false,
+      "files": [
+        "src/app/pages/recipe-book/**",
+        "src/app/core/services/recipe-data.service.ts",
+        "src/app/core/services/dish-data.service.ts",
+        "src/app/core/services/recipe-cost.service.ts",
+        "src/app/shared/rating-stars/**",
+        "src/app/shared/ai-recipe-modal/**",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "ML",
+      "title": "תפריטי אירוע",
+      "routes": ["/menu-library"],
+      "auth": false,
+      "files": [
+        "src/app/pages/menu-library/**",
+        "src/app/core/services/menu-event-data.service.ts",
+        "src/app/shared/ai-menu-modal/**",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "COOK",
+      "title": "מסך בישול",
+      "routes": ["/cook", "/cook/:id"],
+      "idType": "recipes",
+      "auth": false,
+      "files": [
+        "src/app/pages/cook-view/**",
+        "src/app/core/services/cook-view-state.service.ts",
+        "src/app/core/services/scaling.service.ts",
+        "src/app/core/services/recipe-export.service.ts",
+        "src/app/shared/export-preview/**",
+        "src/app/shared/approve-stamp/**"
+      ]
+    },
+    {
+      "id": "SUP",
+      "title": "ספקים",
+      "routes": ["/suppliers/list"],
+      "auth": false,
+      "files": [
+        "src/app/pages/suppliers/suppliers.page.*",
+        "src/app/pages/suppliers/components/supplier-list/**",
+        "src/app/core/services/supplier-data.service.ts",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "VEN",
+      "title": "מיקומי אירוע",
+      "routes": ["/venues/list"],
+      "auth": false,
+      "files": [
+        "src/app/pages/venues/venues.page.*",
+        "src/app/pages/venues/components/venue-list/**",
+        "src/app/core/services/venue-data.service.ts",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "VEND",
+      "title": "venue detail",
+      "routes": ["/venues/view/:id"],
+      "idType": "venues",
+      "auth": false,
+      "files": [
+        "src/app/pages/venues/components/venue-detail/**",
+        "src/app/core/resolvers/venue.resolver.ts",
+        "src/app/core/services/venue-data.service.ts"
+      ]
+    },
+    {
+      "id": "INVF",
+      "title": "product form",
+      "routes": ["/inventory/add", "/inventory/edit/:id"],
+      "idType": "products",
+      "auth": true,
+      "files": [
+        "src/app/pages/inventory/components/product-form/**",
+        "src/app/pages/inventory/services/**",
+        "src/app/core/resolvers/product.resolver.ts",
+        "src/app/core/services/product-data.service.ts",
+        "src/app/shared/unit-creator/**",
+        "src/app/shared/quick-add-product-modal/**",
+        "server/routes/generic.js",
+        "server/routes/ai.js"
+      ]
+    },
+    {
+      "id": "EQF",
+      "title": "equipment form",
+      "routes": ["/inventory/equipment/add", "/inventory/equipment/edit/:id"],
+      "idType": "equipment",
+      "auth": true,
+      "files": [
+        "src/app/pages/equipment/components/equipment-form/**",
+        "src/app/core/resolvers/equipment.resolver.ts",
+        "src/app/core/services/equipment-data.service.ts",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "SUPF",
+      "title": "supplier form",
+      "routes": ["/suppliers/add", "/suppliers/edit/:id"],
+      "idType": "suppliers",
+      "auth": true,
+      "files": [
+        "src/app/pages/suppliers/components/supplier-form/**",
+        "src/app/core/resolvers/supplier.resolver.ts",
+        "src/app/core/services/supplier-data.service.ts",
+        "src/app/core/services/add-supplier-flow.service.ts",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "VENF",
+      "title": "venue form",
+      "routes": ["/venues/add", "/venues/edit/:id"],
+      "idType": "venues",
+      "auth": true,
+      "files": [
+        "src/app/pages/venues/components/venue-form/**",
+        "src/app/core/resolvers/venue.resolver.ts",
+        "src/app/core/services/venue-data.service.ts",
+        "src/app/core/services/cloudinary.service.ts",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "RBD",
+      "title": "recipe builder",
+      "routes": ["/recipe-builder", "/recipe-builder/:id"],
+      "idType": "recipes",
+      "auth": true,
+      "files": [
+        "src/app/pages/recipe-builder/**",
+        "src/app/core/resolvers/recipe.resolver.ts",
+        "src/app/core/services/recipe-data.service.ts",
+        "src/app/core/services/recipe-cost.service.ts",
+        "src/app/core/services/conversion.service.ts",
+        "src/app/core/services/ai-recipe-draft.service.ts",
+        "src/app/shared/quick-edit-product-modal/**",
+        "src/app/shared/add-equipment-modal/**",
+        "server/routes/generic.js",
+        "server/routes/ai.js"
+      ]
+    },
+    {
+      "id": "MI",
+      "title": "menu builder",
+      "routes": ["/menu-intelligence", "/menu-intelligence/:id"],
+      "idType": "menuEvents",
+      "auth": true,
+      "files": [
+        "src/app/pages/menu-intelligence/**",
+        "src/app/core/services/menu-intelligence.service.ts",
+        "src/app/core/services/menu-event-data.service.ts",
+        "src/app/core/services/menu-section-categories.service.ts",
+        "src/app/core/services/menu-export.service.ts",
+        "server/routes/generic.js",
+        "server/routes/ai.js"
+      ]
+    },
+    {
+      "id": "TRASH",
+      "title": "אשפה",
+      "routes": ["/trash", "/dashboard?tab=trash"],
+      "auth": true,
+      "files": [
+        "src/app/pages/trash/**",
+        "src/app/core/services/trash.service.ts",
+        "src/app/core/services/version-history.service.ts",
+        "src/app/shared/version-history-panel/**",
+        "server/routes/generic.js"
+      ]
+    },
+    {
+      "id": "REDIR",
+      "title": "redirects",
+      "routes": ["/", "/command-center", "/equipment"],
+      "auth": false,
+      "files": ["src/app/app.routes.ts"]
+    }
+  ]
+}
