@@ -9,9 +9,10 @@ import { TranslationService } from '@services/translation.service'
 
 /**
  * Admin-only: the Gemini model chain for all users (plan 395). Order decides which model
- * answers first; when one runs out of its free daily quota the next one on the list answers.
+ * answers first; when one runs out of its free daily quota the user is offered the next one.
  * Reorder by drag & drop (grip handle); the dropped row flashes so it is easy to find among
- * the look-alike names. Edits stay local until Save.
+ * the look-alike names. Edits stay local until Save. Models Google retired that an old saved
+ * chain still names are listed read-only as removed and dropped on the next save (plan 412).
  */
 @Component({
   selector: 'app-ai-model-manager',
@@ -32,8 +33,10 @@ export class AiModelManagerComponent {
   protected readonly isSaving_ = signal(false)
   /** What the server holds — the baseline for "dirty". */
   private readonly saved_ = signal<GeminiChainModel[]>([])
-  /** The admin's working copy. */
+  /** The admin's working copy — catalog models only. */
   protected readonly models_ = signal<GeminiChainModel[]>([])
+  /** Retired models the saved chain still names: shown read-only, never sent back. */
+  protected readonly removedModels_ = signal<GeminiChainModel[]>([])
   /** The row just dropped in a new place — highlighted briefly (see `.is-just-moved`). */
   protected readonly justMoved_ = signal<string | null>(null)
   private justMovedTimer_: ReturnType<typeof setTimeout> | null = null
@@ -137,8 +140,10 @@ export class AiModelManagerComponent {
   }
 
   private setModels_(models: GeminiChainModel[]): void {
-    this.saved_.set(models)
-    this.models_.set(models)
+    const kept = models.filter((m) => !m.removed)
+    this.saved_.set(kept)
+    this.models_.set(kept)
+    this.removedModels_.set(models.filter((m) => m.removed))
   }
 
   private chainKey_(models: GeminiChainModel[]): string {

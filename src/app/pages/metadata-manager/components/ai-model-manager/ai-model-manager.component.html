@@ -51,6 +51,24 @@
       }
     </ol>
 
+    @if (removedModels_().length > 0) {
+      <ul class="model-list model-list-removed">
+        @for (model of removedModels_(); track model.name) {
+          <li class="model-row is-removed">
+            <span class="model-rank">—</span>
+            <div class="model-info">
+              <span class="model-name" dir="ltr">{{ model.name }}</span>
+              <span class="model-usage model-removed">{{ 'ai_model_removed' | translatePipe }}</span>
+            </div>
+            <label class="c-toggle-chip model-toggle">
+              <input type="checkbox" [checked]="false" disabled />
+              <span>{{ 'ai_model_on' | translatePipe }}</span>
+            </label>
+          </li>
+        }
+      </ul>
+    }
+
     <div class="model-actions">
       <button type="button" class="c-btn-primary" [disabled]="!isDirty_() || isSaving_()" (click)="onSave()">
         {{ 'save' | translatePipe }}
