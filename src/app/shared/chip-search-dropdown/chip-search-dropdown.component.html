@@ -21,8 +21,15 @@
       autocorrect="off"
       autocapitalize="off"
       spellcheck="false"
+      role="combobox"
+      aria-autocomplete="list"
+      [attr.aria-expanded]="showDropdown_()"
+      [attr.aria-controls]="instanceId + '-listbox'"
+      [attr.aria-activedescendant]="
+        showDropdown_() && optionCount_() > 0 ? instanceId + '-option-' + highlightIndex_() : null
+      "
       [value]="searchQuery_()"
-      (input)="searchQuery_.set($any($event.target).value); highlightIndex_.set(-1)"
+      (input)="onQueryInput($any($event.target).value)"
       (focus)="openDropdown()"
       (keydown)="onInputKeydown($event)"
       [placeholder]="placeholder()"
@@ -31,16 +38,16 @@
   </div>
 
   @if (showDropdown_()) {
-    <app-scrollable-dropdown [maxHeight]="200" (keydown)="onDropdownKeydown($event)" role="listbox">
+    <app-scrollable-dropdown [maxHeight]="200" [id]="instanceId + '-listbox'" role="listbox">
       @for (opt of filteredOptions_(); track opt; let i = $index) {
         <div
           class="dropdown-item"
-          #dropdownItem
           [id]="instanceId + '-option-' + i"
           [class.dropdown-item--highlight]="highlightIndex_() === i"
-          tabindex="-1"
           role="option"
-          (click)="add.emit(opt); closeDropdown(); $event.stopPropagation()"
+          [attr.aria-selected]="highlightIndex_() === i"
+          (mousedown)="$event.preventDefault()"
+          (click)="onOptionClick(opt); $event.stopPropagation()"
         >
           {{ displayFn()(opt) }}
         </div>
@@ -48,17 +55,14 @@
       @if (hasAddNew_()) {
         <div
           class="dropdown-item dropdown-item--add-new"
-          #dropdownItem
           [id]="instanceId + '-option-' + filteredOptions_().length"
           [class.dropdown-item--highlight]="highlightIndex_() === filteredOptions_().length"
-          tabindex="-1"
           role="option"
+          [attr.aria-selected]="highlightIndex_() === filteredOptions_().length"
+          (mousedown)="$event.preventDefault()"
           (click)="emitAddNew(); $event.stopPropagation()"
         >
-          <span class="c-add-new-icon">
-            <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-          </span>
-          {{ 'add' | translatePipe }}
+          <app-add-option-row [label]="addLabel_()" />
         </div>
       }
       @if (noOptionsLabel() && filteredOptions_().length === 0 && !searchQuery_().trim()) {

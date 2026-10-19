@@ -87,6 +87,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   private readonly equipmentCategoryRegistry = inject(EquipmentCategoryRegistryService)
 
   protected searchQuery_ = signal('')
+  /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
+  protected readonly pendingAddName_ = signal('')
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
 
@@ -276,25 +278,31 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Add a category: a typed new name skips the name modal; cancel restores the previous category (add-option rule 4). */
   protected async openAddNewCategory(context: 'inline'): Promise<void> {
     const previousCategory = this.lastCategory_()
-    const result = await this.addItemModal.open({
-      title: 'add_new_category',
-      label: 'category',
-      placeholder: 'category',
-      saveLabel: 'save'
-    })
+    const typed = this.pendingAddName_()
+    this.pendingAddName_.set('')
+    const result =
+      typed ||
+      (await this.addItemModal.open({
+        title: 'add_new_category',
+        label: 'category',
+        placeholder: 'category',
+        saveLabel: 'save'
+      }))
+    let keyToUse = ''
     if (result?.trim()) {
-      let keyToUse: string = this.translation.resolveCategory(result.trim()) ?? ''
+      keyToUse = this.translation.resolveCategory(result.trim()) ?? ''
       if (!keyToUse) {
         const modalResult = await this.translationKeyModal.open(result.trim(), 'category')
         if (isTranslationKeyResult(modalResult)) {
           this.translation.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel)
           keyToUse = modalResult.englishKey
-        } else {
-          keyToUse = result.trim()
         }
       }
+    }
+    if (keyToUse) {
       if (!this.customCategories_().includes(keyToUse)) {
         this.customCategories_.update((list) => [...list, keyToUse])
       }

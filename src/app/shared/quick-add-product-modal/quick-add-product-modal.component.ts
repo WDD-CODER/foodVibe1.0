@@ -47,6 +47,8 @@ export class QuickAddProductModalComponent {
   protected name = signal('')
   protected baseUnit_ = signal('gram')
   protected expanded_ = signal(false)
+  /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
+  protected readonly pendingAddName_ = signal('')
   protected buyPrice_ = signal(0)
   protected category = signal('')
   protected yieldFactor_ = signal(1)
@@ -123,12 +125,16 @@ export class QuickAddProductModalComponent {
 
   protected async onCategoryChange(val: string): Promise<void> {
     if (val === '__add_category__') {
-      const newCategory = await this.addItemModal.open({
-        title: 'add_new_category',
-        label: 'categoryName',
-        placeholder: 'categoryName',
-        saveLabel: 'save_category'
-      })
+      const typed = this.pendingAddName_()
+      this.pendingAddName_.set('')
+      const newCategory =
+        typed ||
+        (await this.addItemModal.open({
+          title: 'add_new_category',
+          label: 'categoryName',
+          placeholder: 'categoryName',
+          saveLabel: 'save_category'
+        }))
       if (newCategory) {
         const key = await this.metadataRegistry.registerCategory(newCategory)
         if (key) {

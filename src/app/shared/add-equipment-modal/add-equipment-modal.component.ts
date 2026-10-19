@@ -31,6 +31,8 @@ export class AddEquipmentModalComponent {
   protected name = signal('')
   protected category = signal<EquipmentCategory | string>('tool')
   protected customCategories_ = signal<string[]>([])
+  /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
+  protected readonly pendingAddName_ = signal('')
 
   constructor() {
     effect(() => {
@@ -56,37 +58,46 @@ export class AddEquipmentModalComponent {
   })
 
   protected async onCategoryChange(value: string): Promise<void> {
-    this.category.set(value as EquipmentCategory | string)
     if (value === ADD_NEW_VALUE) {
       await this.openAddNewCategory()
+      return
     }
+    this.category.set(value as EquipmentCategory | string)
   }
 
+  /** Add a category: a typed new name skips the name modal; cancel keeps the previous category (add-option rule 4). */
   protected async openAddNewCategory(): Promise<void> {
-    const result = await this.addItemModal.open({
-      title: 'add_new_category',
-      label: 'category',
-      placeholder: 'category',
-      saveLabel: 'save'
-    })
+    const previous = this.category()
+    const typed = this.pendingAddName_()
+    this.pendingAddName_.set('')
+    this.category.set(ADD_NEW_VALUE)
+    const result =
+      typed ||
+      (await this.addItemModal.open({
+        title: 'add_new_category',
+        label: 'category',
+        placeholder: 'category',
+        saveLabel: 'save'
+      }))
+    let keyToUse = ''
     if (result?.trim()) {
-      let keyToUse: string = this.translationService.resolveCategory(result.trim()) ?? ''
+      keyToUse = this.translationService.resolveCategory(result.trim()) ?? ''
       if (!keyToUse) {
         const modalResult = await this.translationKeyModal.open(result.trim(), 'category')
         if (isTranslationKeyResult(modalResult)) {
           this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel)
           keyToUse = modalResult.englishKey
-        } else {
-          keyToUse = result.trim()
         }
       }
-      if (!this.customCategories_().includes(keyToUse)) {
-        this.customCategories_.update((list) => [...list, keyToUse])
-      }
-      this.category.set(keyToUse)
-    } else {
-      this.category.set('tool')
     }
+    if (!keyToUse) {
+      this.category.set(previous)
+      return
+    }
+    if (!this.customCategories_().includes(keyToUse)) {
+      this.customCategories_.update((list) => [...list, keyToUse])
+    }
+    this.category.set(keyToUse)
   }
 
   protected save(): void {

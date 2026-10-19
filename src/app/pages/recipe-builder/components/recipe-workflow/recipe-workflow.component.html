@@ -226,6 +226,9 @@
                 placeholder="choose_category"
                 [typeToFilter]="true"
                 [addNewValue]="'__add_new__'"
+                addNewLabelKey="add_new_preparation_category"
+                [allowTypedAdd]="true"
+                (addNewChosen)="pendingAddName_.set($event)"
                 (valueChange)="onCategoryChange(group, $event)"
               />
             </div>

@@ -69,6 +69,8 @@ export class RecipeWorkflowComponent {
   focusRowDone = output<void>()
 
   showAddCategoryPicker_ = signal(false)
+  /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
+  protected readonly pendingAddName_ = signal('')
 
   /** Tracks which prep-step rows have the timer counter open. */
   timerOpenRows_ = signal<Set<number>>(new Set())
@@ -329,7 +331,9 @@ export class RecipeWorkflowComponent {
 
   async onCategoryChange(group: FormGroup, value: string): Promise<void> {
     if (value === '__add_new__') {
-      const result = await this.translationKeyModal_.open('', 'category')
+      const typed = this.pendingAddName_()
+      this.pendingAddName_.set('')
+      const result = await this.translationKeyModal_.open(typed, 'category')
       if (!isTranslationKeyResult(result) || !result.englishKey?.trim() || !result.hebrewLabel?.trim()) {
         group.patchValue({ categoryName: '' })
         return

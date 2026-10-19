@@ -1,25 +1,29 @@
 import {
   Component,
   ChangeDetectionStrategy,
-  AfterViewChecked,
   input,
   output,
   signal,
   computed,
-  ViewChildren,
   ViewChild,
-  QueryList,
-  ElementRef
+  ElementRef,
+  inject,
+  afterNextRender,
+  Injector
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-dropdown.component'
-import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { InputClearComponent } from '../input-clear/input-clear.component'
+import { AddOptionRowComponent } from '../add-option-row/add-option-row.component'
+import { AddOptionLabel, addOptionLabel } from '../../core/utils/add-option.util'
+import { KeyedPickerSearch, scrollHighlightIntoView } from '../../core/utils/keyed-picker-search.util'
 
 /** Per-instance id prefix, so two dropdowns on one page never share option / input ids (plan 364). */
 let nextChipSearchDropdownId = 0
+/** KeyedPickerSearch key — one picker per component instance. */
+const PICKER_KEY = 0
 
 @Component({
   selector: 'app-chip-search-dropdown',
@@ -30,42 +34,51 @@ let nextChipSearchDropdownId = 0
     LucideAngularModule,
     ClickOutSideDirective,
     ScrollableDropdownComponent,
-    TranslatePipe,
-    InputClearComponent
+    InputClearComponent,
+    AddOptionRowComponent
   ],
   templateUrl: './chip-search-dropdown.component.html',
   styleUrl: './chip-search-dropdown.component.scss'
 })
-export class ChipSearchDropdownComponent implements AfterViewChecked {
+export class ChipSearchDropdownComponent {
+  // ── Injected ────────────────────────────────────────────────────────────────
+  private readonly injector = inject(Injector)
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
+
   // ── Inputs ──────────────────────────────────────────────────────────────────
   options = input<string[]>([])
   selected = input<string[]>([])
   displayFn = input<(key: string) => string>((k) => k)
   searchFilterFn = input<((option: string, query: string) => boolean) | null>(null)
   placeholder = input<string>('')
-  addNewLabel = input<string | null>(null)
+  /** Generic "add new <thing>" dictionary key (add-option rule 2); null = no add option. */
+  addNewLabelKey = input<string | null>(null)
+  /** Show the generic add option even with nothing typed (or an exact match). */
   showAddNewAlways = input<boolean>(false)
+  /** Opt in when the caller's add flow takes the typed name (via addNew): shows `הוסף "<typed>"`. */
+  allowTypedAdd = input<boolean>(false)
   chipClass = input<string>('chipe')
   noOptionsLabel = input<string | null>(null)
 
   // ── Outputs ─────────────────────────────────────────────────────────────────
   add = output<string>()
   remove = output<string>()
+  /** The add option was chosen: the typed new name, or '' for the generic add (open the modal). */
   addNew = output<string>()
   blurred = output<void>()
 
   // ── View refs ────────────────────────────────────────────────────────────────
-  @ViewChildren('dropdownItem') private dropdownItems!: QueryList<ElementRef<HTMLElement>>
   @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>
 
   // ── Internal state ───────────────────────────────────────────────────────────
   protected readonly instanceId = `csd-${++nextChipSearchDropdownId}`
   protected searchQuery_ = signal('')
   protected showDropdown_ = signal(false)
-  protected highlightIndex_ = signal(-1)
-  private focusPending_ = false
+  private readonly picker_ = new KeyedPickerSearch()
 
   // ── Computed ─────────────────────────────────────────────────────────────────
+  protected highlightIndex_ = computed(() => this.picker_.highlighted(PICKER_KEY))
+
   protected filteredOptions_ = computed(() => {
     const raw = this.searchQuery_().trim()
     const opts = this.options()
@@ -73,7 +86,7 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
     const customFilter = this.searchFilterFn()
     if (customFilter) return opts.filter((o) => customFilter(o, raw))
     const qLower = raw.toLowerCase()
-    const isHebrew = /[\u0590-\u05FF]/.test(raw)
+    const isHebrew = /[֐-׿]/.test(raw)
     const isLatin = /[a-zA-Z]/.test(raw)
     const display = this.displayFn()
     return opts.filter((o) => {
@@ -84,44 +97,47 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
     })
   })
 
+  /** Add option label: typed new name (no option or chip has that on-screen label), else the generic key. */
+  protected addLabel_ = computed<AddOptionLabel>(() =>
+    addOptionLabel(
+      this.allowTypedAdd() ? this.searchQuery_() : '',
+      [...this.options(), ...this.selected()],
+      this.displayFn(),
+      this.addNewLabelKey() ?? ''
+    )
+  )
+
+  /** One add option (rule 1): for a typed new name, or the generic add when `showAddNewAlways`. */
   protected hasAddNew_ = computed(() => {
-    if (this.addNewLabel() == null) return false
-    const query = this.searchQuery_().trim()
-    if (!query) return this.showAddNewAlways()
-    const display = this.displayFn()
-    const inOptions = this.options().some((o) => display(o).toLowerCase() === query.toLowerCase())
-    const inSelected = this.selected().some((s) => display(s).toLowerCase() === query.toLowerCase())
-    return !inOptions && !inSelected
+    if (this.addNewLabelKey() == null) return false
+    return this.addLabel_().kind === 'typed' || this.showAddNewAlways()
   })
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────────────
-  ngAfterViewChecked(): void {
-    if (this.focusPending_ && this.showDropdown_()) {
-      this.focusPending_ = false
-      const idx = this.highlightIndex_()
-      const items = this.dropdownItems
-      if (items?.length && idx >= 0 && idx < items.length) {
-        ;(items.get(idx) as ElementRef<HTMLElement>)?.nativeElement?.focus()
-      }
-    }
-  }
+  /** Options then the add option — the keyboard order (rule 5e). */
+  protected optionCount_ = computed(() => this.filteredOptions_().length + (this.hasAddNew_() ? 1 : 0))
 
   // ── Protected methods ─────────────────────────────────────────────────────────
   protected openDropdown(): void {
     this.showDropdown_.set(true)
-    this.highlightIndex_.set(-1)
+    this.picker_.setHighlighted(PICKER_KEY, 0)
   }
 
   protected closeDropdown(): void {
     this.showDropdown_.set(false)
+    this.picker_.onQueryChange(PICKER_KEY, '')
     this.searchQuery_.set('')
-    this.highlightIndex_.set(-1)
+  }
+
+  protected onQueryInput(value: string): void {
+    this.searchQuery_.set(value)
+    this.picker_.onQueryChange(PICKER_KEY, value)
+    if (!this.showDropdown_()) this.showDropdown_.set(true)
   }
 
   /** Search clear (X): empty the query, keep the list open with every option, refocus (plan 364). */
   protected onClearSearch(): void {
     this.searchQuery_.set('')
-    this.highlightIndex_.set(-1)
+    this.picker_.onQueryChange(PICKER_KEY, '')
     this.showDropdown_.set(true)
     this.searchInputRef?.nativeElement?.focus()
   }
@@ -137,73 +153,43 @@ export class ChipSearchDropdownComponent implements AfterViewChecked {
     this.blurred.emit()
   }
 
-  protected onInputKeydown(ev: KeyboardEvent): void {
-    const key = ev.key
-    if (key === 'ArrowDown') {
-      ev.preventDefault()
-      if (!this.showDropdown_()) this.openDropdown()
-      this.highlightIndex_.set(0)
-      this.focusPending_ = true
-    } else if (key === 'ArrowUp') {
-      ev.preventDefault()
-      if (!this.showDropdown_()) this.openDropdown()
-      const total = this.filteredOptions_().length + (this.hasAddNew_() ? 1 : 0)
-      this.highlightIndex_.set(Math.max(0, total - 1))
-      this.focusPending_ = true
-    } else if (key === 'Escape') {
-      this.closeDropdown()
-    }
+  protected onOptionClick(opt: string): void {
+    this.add.emit(opt)
+    this.closeDropdown()
   }
 
-  protected onDropdownKeydown(ev: KeyboardEvent): void {
-    if (!this.showDropdown_()) return
-    const key = ev.key
-    const filtered = this.filteredOptions_()
-    const hasAddNew = this.hasAddNew_()
-    const total = filtered.length + (hasAddNew ? 1 : 0)
-
-    if (key === 'Escape') {
-      ev.preventDefault()
-      this.closeDropdown()
-      this.searchInputRef?.nativeElement?.focus()
+  /** Search-box keys (rule 5): focus stays in the input; no wrap; Tab closes and lets the browser move focus. */
+  protected onInputKeydown(ev: KeyboardEvent): void {
+    if (!this.showDropdown_()) {
+      if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+        ev.preventDefault()
+        this.openDropdown()
+      }
       return
     }
-    if (total === 0) return
-    if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter' && key !== ' ') return
-    ev.preventDefault()
-
-    let idx = this.highlightIndex_()
-    if (key === 'ArrowDown') {
-      idx = idx < total - 1 ? idx + 1 : 0
-      this.highlightIndex_.set(idx)
-      this.focusItem(idx)
-    } else if (key === 'ArrowUp') {
-      idx = idx > 0 ? idx - 1 : total - 1
-      this.highlightIndex_.set(idx)
-      this.focusItem(idx)
-    } else if (key === 'Enter' || key === ' ') {
-      if (idx >= 0 && idx < filtered.length) {
-        this.add.emit(filtered[idx])
-      } else if (hasAddNew && idx === filtered.length) {
-        this.emitAddNew()
-      }
-      this.searchInputRef?.nativeElement?.focus()
+    if (ev.key === 'Tab') {
+      this.closeDropdown()
+      return
     }
+    const filtered = this.filteredOptions_()
+    this.picker_.handleKeydown(PICKER_KEY, ev, {
+      optionCount: this.optionCount_(),
+      onSelect: (idx) => {
+        if (idx < filtered.length) this.add.emit(filtered[idx])
+        else this.emitAddNew()
+      },
+      onClose: () => this.closeDropdown(),
+      onHighlightMove: () =>
+        afterNextRender(() => scrollHighlightIntoView(this.hostRef.nativeElement, '.dropdown-item--highlight'), {
+          injector: this.injector
+        })
+    })
   }
 
   protected emitAddNew(): void {
-    this.addNew.emit(this.searchQuery_().trim())
+    const label = this.addLabel_()
+    this.addNew.emit(label.kind === 'typed' ? label.text : '')
     this.searchQuery_.set('')
-    this.highlightIndex_.set(-1)
-  }
-
-  // ── Private methods ───────────────────────────────────────────────────────────
-  private focusItem(index: number): void {
-    setTimeout(() => {
-      const items = this.dropdownItems
-      if (items?.length && index >= 0 && index < items.length) {
-        ;(items.get(index) as ElementRef<HTMLElement>)?.nativeElement?.focus()
-      }
-    }, 0)
+    this.picker_.onQueryChange(PICKER_KEY, '')
   }
 }

@@ -34,6 +34,7 @@
     (blur)="onTriggerBlur()"
     [attr.aria-expanded]="open()"
     aria-haspopup="listbox"
+    [attr.aria-activedescendant]="open() && !searchable() ? optionIdPrefix_() + highlightedIndex() : null"
     [attr.aria-label]="placeholder() | translatePipe"
   >
     <span class="custom-multi-select-trigger-inner">
@@ -80,14 +81,7 @@
   </button>
 
   @if (open()) {
-    <app-scrollable-dropdown
-      [maxHeight]="maxHeight()"
-      role="listbox"
-      aria-multiselectable="true"
-      [attr.aria-activedescendant]="
-        triggerId() && highlightedIndex() >= 0 ? triggerId() + '-opt-' + highlightedIndex() : null
-      "
-    >
+    <app-scrollable-dropdown [maxHeight]="maxHeight()" role="listbox" aria-multiselectable="true">
       @if (searchable()) {
         <div class="custom-multi-select-search-wrap">
           <input
@@ -99,7 +93,8 @@
             (focus)="onSearchInputFocus_()"
             (blur)="onSearchInputBlur_()"
             (click)="$event.stopPropagation()"
-            (keydown)="$event.stopPropagation()"
+            (keydown)="onSearchKeydown($event)"
+            [attr.aria-activedescendant]="optionIdPrefix_() + highlightedIndex()"
             autocomplete="off"
             autocorrect="off"
             autocapitalize="off"
@@ -113,36 +108,32 @@
         <button
           type="button"
           class="custom-select-option"
-          [class.custom-select-option--add-new]="opt.value === addNewValue()"
           [class.custom-select-option--chip]="variant() === 'chip'"
-          [id]="triggerId() ? triggerId() + '-opt-' + i : null"
+          [id]="optionIdPrefix_() + i"
           [class.highlighted]="highlightedIndex() === i"
           role="option"
           [attr.aria-selected]="value.includes(opt.value)"
           (click)="onOptionClick(opt)"
         >
-          @if (opt.value === addNewValue()) {
-            <span class="c-add-new-icon">
-              <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-            </span>
-            {{ 'add' | translatePipe }}
-          } @else if (translateLabels()) {
+          @if (translateLabels()) {
             {{ opt.label | translatePipe }}
           } @else {
             {{ opt.label }}
           }
         </button>
       }
-      @if (showDynamicAddNew_()) {
+      @if (addNewOption_(); as addOpt) {
         <button
           type="button"
-          class="custom-select-option custom-select-option--add-new custom-select-option--dynamic-add"
-          (click)="onDynamicAddNewClick()"
+          class="custom-select-option custom-select-option--add-new"
+          [class.custom-select-option--chip]="variant() === 'chip'"
+          [id]="optionIdPrefix_() + dropdownOptions_().length"
+          [class.highlighted]="highlightedIndex() === dropdownOptions_().length"
+          role="option"
+          [attr.aria-selected]="false"
+          (click)="onOptionClick(addOpt)"
         >
-          <span class="c-add-new-icon">
-            <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-          </span>
-          {{ 'add' | translatePipe }}
+          <app-add-option-row [label]="addLabel_()" />
         </button>
       }
     </app-scrollable-dropdown>

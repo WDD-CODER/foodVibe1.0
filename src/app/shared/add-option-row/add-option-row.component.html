@@ -1,0 +1,10 @@
+<span class="c-add-new-icon">
+  <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
+</span>
+@if (label(); as l) {
+  @if (l.kind === 'typed') {
+    <span class="add-option-row__text">{{ 'add' | translatePipe }} "{{ l.text }}"</span>
+  } @else {
+    <span class="add-option-row__text">{{ l.key | translatePipe }}</span>
+  }
+}
