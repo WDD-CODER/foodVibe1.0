@@ -4,7 +4,13 @@
     "name": "FoodVibe",
     "repoName": "foodVibe1.0",
     "uiLocale": "Hebrew RTL",
-    "i18nFile": "public/assets/data/dictionary.json"
+    "uiDirection": "rtl",
+    "i18nFile": "public/assets/data/dictionary.json",
+    "icons": {
+      "library": "Lucide",
+      "component": "LucideAngularComponent",
+      "registry": "app.config.ts"
+    }
   },
   "stack": {
     "packs": [
@@ -27,6 +33,7 @@
     "e2e": "e2e",
     "codegen": "build:schemas",
     "lintStaged": "npx lint-staged",
+    "logQuery": "node scripts/log-query.mjs --since=plan-start --level=error",
     "dbBackup": [
       "server/scripts/db-backup.js",
       "server/scripts/db-restore.js"
@@ -77,7 +84,8 @@
     "browser": "gstack /browse"
   },
   "docs": {
-    "domainStandards": "docs/agent/standards-domain.md"
+    "domainStandards": "docs/agent/standards-domain.md",
+    "domainSummary": "Ingredient Ledger, Triple-Unit conversion, Recursive Compounding, Waste Factor"
   },
   "overrides": [
     {
@@ -122,19 +130,11 @@
     },
     {
       "path": ".claude/skills/angularComponentStructure/SKILL.md",
-      "reason": "Lucide icons, app.config.ts, Hebrew dictionary rules"
-    },
-    {
-      "path": ".claude/skills/cssLayer/SKILL.md",
-      "reason": "Hebrew RTL note"
+      "reason": "Hebrew/translatePipe/dictionary.json line (icons render from project.icons.*)"
     },
     {
       "path": "docs/agent/conventions.md",
       "reason": "FoodVibe translation rules (TranslationService resolvers, Lucide)"
-    },
-    {
-      "path": "docs/agent/standards-angular.md",
-      "reason": "FoodVibe domain logic line"
     },
     {
       "path": "scripts/pre-commit-security-grep.mjs",
@@ -150,10 +150,6 @@
     },
     {
       "path": ".claude/commands/auto-solve.md",
-      "reason": "FoodVibe-only: runs scripts/log-query.mjs (Mongo app_logs) before reading code"
-    },
-    {
-      "path": ".claude/commands/review-it.md",
       "reason": "FoodVibe-only: runs scripts/log-query.mjs (Mongo app_logs) before reading code"
     },
     {

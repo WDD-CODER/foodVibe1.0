@@ -30,7 +30,7 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | core/.claude/commands/commands.md | override | `/remote` row: `remote.md` is project-only (manifest `project stay`) | — |
 | core/.claude/commands/feat.md | intended | `{{docs.domainStandards}}` placeholder | — |
 | core/.claude/commands/fix.md | override | FoodVibe-only: runs `scripts/log-query.mjs` (Mongo `app_logs`) before reading code; the kit has no log query | — |
-| core/.claude/commands/review-it.md | override | FoodVibe-only: runs `scripts/log-query.mjs` (Mongo `app_logs`) before reading code; the kit has no log query | — |
+| core/.claude/commands/review-it.md | intended | kit 1.3.0: the Logs check renders from `commands.logQuery`; override dropped, kit wording taken (Architecture line names the Planner; table cell shows the full command) | 30ee30f |
 | core/.claude/commands/ship.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request pre-approves merge — newer than kit | c708599 |
 | core/.claude/commands/take-plan.md | intended | `{{git.mainBranch}}` | — |
 | core/.claude/settings.json | override | split file: absolute Write/Edit allows and `defaultMode` are per-machine; Playwright MCP allows dropped (kit right) | — |
@@ -68,12 +68,12 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | core/scripts/take-plan.mjs | drift-fixed (FoodVibe right) | apiUrl rewrite keeps the remote-link branch (plan 388); `slotPrepare`/`dbBackup` placeholders intended | c708599 |
 | layers/cursor/.cursor/mcp.json | drift-fixed (kit right) | Playwright MCP entry dropped per 2026-10-01 decision | — |
 | packs/angular/.claude/skills/angularComponentStructure/evals/evals.json | override | FoodVibe text says Hebrew/translatePipe; kit is language-neutral | — |
-| packs/angular/.claude/skills/angularComponentStructure/SKILL.md | override | Lucide + `app.config.ts` + Hebrew/dictionary.json specifics | — |
+| packs/angular/.claude/skills/angularComponentStructure/SKILL.md | override | Hebrew/`translatePipe`/`dictionary.json` line (60) only; Lucide + `app.config.ts` now render from `project.icons.*` (kit 1.3.0) | — |
 | packs/angular/.claude/skills/auth-and-logging/SKILL.md | intended | `{{project.name}}` | — |
-| packs/angular/.claude/skills/cssLayer/SKILL.md | override | `{{project.name}}` intended; "UI is Hebrew RTL" line is FoodVibe's | — |
+| packs/angular/.claude/skills/cssLayer/SKILL.md | intended | kit 1.3.0: "The UI is Hebrew RTL" renders from `project.uiDirection: rtl` + `project.uiLocale`; override dropped (byte-identical) | 30ee30f |
 | packs/angular/.lintstagedrc.mjs | intended | BOM + `\|quoted` filter | — |
 | packs/angular/docs/agent/conventions.md | override | FoodVibe's translation rules (Hebrew, TranslationService resolvers, Lucide) vs generic kit text | — |
-| packs/angular/docs/agent/standards-angular.md | override | FoodVibe domain logic line (Ingredient Ledger…) vs `{{docs.domainStandards}}` pointer | — |
+| packs/angular/docs/agent/standards-angular.md | intended | kit 1.3.0: the **Logic** line renders from `docs.domainSummary`; override dropped (byte-identical) | 30ee30f |
 | packs/angular/eslint.config.mjs | intended | BOM only | — |
 | packs/angular/knip.json | intended | `\|dquoted` filter | — |
 | packs/angular/scripts/pre-commit-no-semi.mjs | intended | `\|quoted` filter | — |

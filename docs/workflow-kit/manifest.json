@@ -4233,9 +4233,20 @@
         }
       ],
       "refs": [
-        "scripts/lib/slot.mjs"
+        "scripts/lib/slot.mjs",
+        "scripts/lib/fe-command.mjs"
       ],
       "notes": "Plans 360/393: slot dev-server process chains (find by folder, kill from the chain root, orphan detection, start guard, port state, npm install + environment.slot.ts helpers). Kit-authored; FoodVibe gets a copy."
+    },
+    {
+      "path": "scripts/lib/fe-command.mjs",
+      "tier": "core",
+      "action": "copy",
+      "params": [],
+      "refs": [
+        "scripts/lib/slot-procs.mjs"
+      ],
+      "notes": "Kit 1.3.0: pure builder of the slot frontend command (frontendCommand); slot-procs.mjs frontendArgs() calls it and the kit adoption report prints the same command. Kit-authored; FoodVibe gets a copy."
     },
     {
       "path": "scripts/slot-stop.mjs",
