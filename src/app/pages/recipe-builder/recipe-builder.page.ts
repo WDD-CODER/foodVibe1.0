@@ -58,6 +58,7 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
+import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
 @Component({
   selector: 'app-recipe-builder-page',
   standalone: true,
@@ -77,7 +78,8 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
     ExportToolbarOverlayComponent,
     ApproveStampComponent,
     CounterComponent,
-    InputClearComponent
+    InputClearComponent,
+    AddOptionRowComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'

@@ -6,10 +6,15 @@
       type="text"
       SelectOnFocus
       [value]="searchQuery_()"
-      (input)="searchQuery_.set($any($event.target).value); showResults_.set(true); highlightedIndex_.set(-1)"
-      (focus)="showResults_.set(true); highlightedIndex_.set(-1)"
+      (input)="onQueryInput($any($event.target).value)"
+      (focus)="onSearchFocus()"
       (keydown)="onSearchKeydown($event)"
-      (keydown.tab)="onSearchTab($event)"
+      role="combobox"
+      aria-autocomplete="list"
+      [attr.aria-expanded]="showResults_() && searchQuery_().trim().length > 0"
+      [attr.aria-activedescendant]="
+        showResults_() && searchQuery_().trim().length > 0 ? optionIdPrefix + highlightedIndex_() : null
+      "
       [placeholder]="'search_product_or_recipe' | translatePipe"
       autocomplete="off"
       autocorrect="off"
@@ -25,11 +30,11 @@
         @for (item of filteredResults_(); track item._id; let i = $index) {
           <li
             role="option"
-            tabindex="0"
+            [id]="optionIdPrefix + i"
             [attr.aria-selected]="highlightedIndex_() === i"
             [class.highlighted]="highlightedIndex_() === i"
+            (mousedown)="$event.preventDefault()"
             (click)="selectItem(item)"
-            (keydown)="onResultItemKeydown($event, i)"
             class="result-item"
           >
             <span class="item-name">{{ item.nameHebrew }}</span>
@@ -44,18 +49,15 @@
         }
         <li
           role="option"
-          tabindex="0"
+          [id]="optionIdPrefix + filteredResults_().length"
           [attr.aria-selected]="highlightedIndex_() === filteredResults_().length"
           [class.highlighted]="highlightedIndex_() === filteredResults_().length"
           [class.result-item--add]="true"
           class="result-item"
+          (mousedown)="$event.preventDefault()"
           (click)="addNewProduct()"
-          (keydown)="onAddItemKeydown($event)"
         >
-          <span class="c-add-new-icon">
-            <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-          </span>
-          {{ 'add' | translatePipe }}
+          <app-add-option-row [label]="addLabel_()" />
         </li>
       </ul>
     </app-scrollable-dropdown>

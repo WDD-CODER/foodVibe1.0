@@ -9,7 +9,9 @@ import {
   viewChild,
   effect,
   untracked,
-  ElementRef
+  ElementRef,
+  Injector,
+  afterNextRender
 } from '@angular/core'
 import { toObservable, toSignal } from '@angular/core/rxjs-interop'
 import { debounceTime, map, switchMap } from 'rxjs'
@@ -25,6 +27,9 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
 import { QuickAddProductModalService } from '@services/quick-add-product-modal.service'
 import type { Product } from '@models/product.model'
 import type { Recipe } from '@models/recipe.model'
+import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
+import { AddOptionLabel, addOptionLabel } from 'src/app/core/utils/add-option.util'
+import { KeyedPickerSearch, scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
 
 /** Typeahead never needs more than what's visible in the dropdown. */
 const SEARCH_LIMIT = 25
@@ -32,6 +37,11 @@ const SEARCH_LIMIT = 25
 const MIN_QUERY_LENGTH = 2
 /** Matches the debounce window used elsewhere in the app for async lookups (recipe-builder.page.ts's duplicate-name validator). */
 const SEARCH_DEBOUNCE_MS = 250
+
+/** KeyedPickerSearch key — one picker per component instance. */
+const PICKER_KEY = 0
+/** Per-instance id prefix for option ids (aria-activedescendant). */
+let nextIngredientSearchId = 0
 
 /** Product or Recipe with item_type_ for search results and emit. */
 export type SearchableItem = (Product | Recipe) & { item_type_: 'product' | 'recipe' }
@@ -46,7 +56,8 @@ export type SearchableItem = (Product | Recipe) & { item_type_: 'product' | 'rec
     ScrollableDropdownComponent,
     TranslatePipe,
     SelectOnFocusDirective,
-    InputClearComponent
+    InputClearComponent,
+    AddOptionRowComponent
   ],
   templateUrl: './ingredient-search.component.html',
   styleUrl: './ingredient-search.component.scss',
@@ -56,6 +67,8 @@ export class IngredientSearchComponent {
   private readonly productData = inject(ProductDataService)
   private readonly recipeData = inject(RecipeDataService)
   private readonly quickAddModalService = inject(QuickAddProductModalService)
+  private readonly injector = inject(Injector)
+  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
 
   /** Row index for focus trigger; when focusTrigger matches this row, we focus. */
   rowIndex = input<number>(0)
@@ -77,8 +90,10 @@ export class IngredientSearchComponent {
   protected searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput')
   searchQuery_ = signal<string>('')
   protected showResults_ = signal(false)
-  /** Index of highlighted option for keyboard nav (-1 = none). */
-  protected highlightedIndex_ = signal(-1)
+  /** Keyboard state (add-option rule 5): first option highlighted, no wrap, focus stays in the input. */
+  private readonly picker_ = new KeyedPickerSearch()
+  protected highlightedIndex_ = computed(() => this.picker_.highlighted(PICKER_KEY))
+  protected readonly optionIdPrefix = `ing-search-${++nextIngredientSearchId}-opt-`
 
   private lastHandledFocusTrigger: number | null = null
   /** True for one microtask after the component is created — prevents the triggering click from immediately re-closing. */
@@ -105,14 +120,14 @@ export class IngredientSearchComponent {
         this.showResults_.set(true)
         setTimeout(() => this.focus(), 0)
       }
-      if (q) this.highlightedIndex_.set(-1)
+      if (q) this.picker_.setHighlighted(PICKER_KEY, 0)
     })
   }
 
   protected onClickOutside(): void {
     if (this.ignoreFirstClickOutside) return
     this.showResults_.set(false)
-    this.highlightedIndex_.set(-1)
+    this.picker_.setHighlighted(PICKER_KEY, 0)
     this.cancelSearch.emit()
   }
 
@@ -120,7 +135,7 @@ export class IngredientSearchComponent {
   protected onClearSearch(): void {
     this.searchQuery_.set('')
     this.showResults_.set(false)
-    this.highlightedIndex_.set(-1)
+    this.picker_.setHighlighted(PICKER_KEY, 0)
     this.focus()
   }
 
@@ -162,114 +177,66 @@ export class IngredientSearchComponent {
     return this.searchResults_().filter((item) => !excludeSet.has((item.nameHebrew ?? '').trim().toLowerCase()))
   })
 
+  /** One add option, last: `הוסף "<typed>"` for a new name, else `add_new_ingredient` (rules 1–3). */
+  protected addLabel_ = computed<AddOptionLabel>(() =>
+    addOptionLabel(this.searchQuery_(), this.searchResults_(), (item) => item.nameHebrew ?? '', 'add_new_ingredient')
+  )
+
+  protected onQueryInput(value: string): void {
+    this.searchQuery_.set(value)
+    this.showResults_.set(true)
+    this.picker_.onQueryChange(PICKER_KEY, value)
+  }
+
+  protected onSearchFocus(): void {
+    this.showResults_.set(true)
+    this.picker_.setHighlighted(PICKER_KEY, 0)
+  }
+
   selectItem(item: SearchableItem) {
     this.itemSelected.emit(item)
     this.searchQuery_.set('')
     this.showResults_.set(false)
-    this.highlightedIndex_.set(-1)
+    this.picker_.setHighlighted(PICKER_KEY, 0)
   }
 
-  protected onSearchKeydown(e: KeyboardEvent) {
-    const results = this.filteredResults_()
-    const addItemIndex = results.length
-    const key = e.key
-
-    if (key === 'Enter') {
-      const idx = this.highlightedIndex_()
-      if (idx === addItemIndex || (results.length === 0 && idx < 0)) {
+  /** Rule 5 via KeyedPickerSearch; Enter with the list closed asks the parent for a new row. */
+  protected onSearchKeydown(e: KeyboardEvent): void {
+    const open = this.showResults_() && this.searchQuery_().trim().length > 0
+    if (!open) {
+      if (e.key === 'Enter') {
         e.preventDefault()
-        this.addNewProduct()
-        return
+        this.addNewRowRequested.emit()
+      } else if (e.key === 'Escape') {
+        this.cancelSearch.emit()
       }
-      if (results.length > 0) {
-        e.preventDefault()
-        this.selectItem(results[idx < 0 ? 0 : idx])
-        return
-      }
-      e.preventDefault()
-      this.addNewRowRequested.emit()
       return
     }
-
-    if (key === 'ArrowDown') {
-      e.preventDefault()
-      this.highlightedIndex_.update((i) => (i < 0 ? 0 : i < addItemIndex ? i + 1 : 0))
-      this.scrollHighlightedIntoView()
-      return
-    }
-    if (key === 'ArrowUp') {
-      e.preventDefault()
-      this.highlightedIndex_.update((i) => (i <= 0 ? addItemIndex : i - 1))
-      this.scrollHighlightedIntoView()
-      return
-    }
-    if (key === 'Escape') {
+    if (e.key === 'Tab') {
       this.showResults_.set(false)
-      this.highlightedIndex_.set(-1)
-      this.cancelSearch.emit()
+      return
     }
+    const results = this.filteredResults_()
+    this.picker_.handleKeydown(PICKER_KEY, e, {
+      optionCount: results.length + 1,
+      onSelect: (idx) => {
+        if (idx < results.length) this.selectItem(results[idx])
+        else void this.addNewProduct()
+      },
+      onClose: () => {
+        this.showResults_.set(false)
+        this.cancelSearch.emit()
+      },
+      onHighlightMove: () =>
+        afterNextRender(() => scrollHighlightIntoView(this.hostRef.nativeElement), { injector: this.injector })
+    })
   }
 
+  /** Add: a typed new name prefills the quick-add modal; the saved product is selected, nothing on cancel (rule 4). */
   protected async addNewProduct(): Promise<void> {
-    const product = await this.quickAddModalService.open({ prefillName: this.searchQuery_() })
+    const label = this.addLabel_()
+    const product = await this.quickAddModalService.open({ prefillName: label.kind === 'typed' ? label.text : '' })
     if (!product) return
     this.selectItem({ ...product, item_type_: 'product' as const })
-  }
-
-  protected onSearchTab(e: Event): void {
-    if ((e as KeyboardEvent).shiftKey) return
-    if (!this.showResults_()) return
-    if (this.filteredResults_().length === 0) return
-    e.preventDefault()
-    const first = document.querySelector<HTMLElement>('.result-item')
-    first?.focus()
-  }
-
-  protected onResultItemKeydown(e: KeyboardEvent, index: number): void {
-    if (e.key !== 'Tab') return
-    e.preventDefault()
-    const allItems = Array.from(document.querySelectorAll<HTMLElement>('.result-item'))
-    if (e.shiftKey) {
-      const prev = allItems[index - 1]
-      if (prev) {
-        prev.focus()
-      } else {
-        this.showResults_.set(false)
-        this.searchInputRef()?.nativeElement?.focus()
-      }
-    } else {
-      const next = allItems[index + 1]
-      if (next) {
-        next.focus()
-      } else {
-        this.showResults_.set(false)
-        this.searchInputRef()?.nativeElement?.focus()
-      }
-    }
-  }
-
-  protected onAddItemKeydown(e: KeyboardEvent): void {
-    if (e.key !== 'Tab') return
-    e.preventDefault()
-    const allItems = Array.from(document.querySelectorAll<HTMLElement>('.result-item'))
-    if (e.shiftKey) {
-      const prev = allItems[allItems.length - 2]
-      if (prev) {
-        prev.focus()
-      } else {
-        this.searchInputRef()?.nativeElement?.focus()
-      }
-    } else {
-      this.showResults_.set(false)
-      this.searchInputRef()?.nativeElement?.focus()
-    }
-  }
-
-  private scrollHighlightedIntoView(): void {
-    setTimeout(() => {
-      const list = document.querySelector('.c-dropdown__list')
-      const highlighted = list?.querySelector('.result-item.highlighted')
-      highlighted?.scrollIntoView({ block: 'nearest' })
-    }, 0)
   }
 }

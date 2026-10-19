@@ -41,6 +41,8 @@ import { ExportService } from '@services/export.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
+import { AddOptionLabel, addOptionLabel, resolveAddedKey } from 'src/app/core/utils/add-option.util'
+import { scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import type { ExportPayload } from 'src/app/core/utils/export.util'
@@ -71,6 +73,7 @@ type MenuItemForm = {
 /** Raw section shape from form getRawValue() before mapping to MenuSection. */
 type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] }
 
+import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
@@ -88,7 +91,8 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
     MenuDishRowComponent,
     MenuExportSheetComponent,
     VenueLinkChipComponent,
-    InputClearComponent
+    InputClearComponent,
+    AddOptionRowComponent
   ],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
@@ -142,9 +146,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     previousRecipeId: string
   } | null>(null)
 
-  /** Highlighted index for keyboard nav in dropdowns (-1 = none). */
-  protected readonly eventTypeHighlightedIndex_ = signal(0)
-
   protected readonly sectionCategories_ = this.menuSectionCategories.sectionCategories_
 
   /** Guest −/+ press-and-hold repeat (same timing as the shared counter). */
@@ -175,9 +176,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Which dish field is in edit mode (key: "sectionIndex-itemIndex-fieldKey") */
   protected readonly editingDishField_ = signal<string | null>(null)
-  /** Event type dropdown open + search query for filtering */
+  /** Event type dropdown open; its query + highlight live in pickerSearch_.eventType (key 0). */
   protected readonly eventTypeDropdownOpen_ = signal(false)
-  protected readonly eventTypeSearch_ = signal('')
   /** Focus order for keyboard navigation */
   protected readonly FOCUS_ORDER = ['name', 'eventType', 'servingType', 'guestCount', 'eventDate'] as const
 
@@ -465,74 +465,56 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return Array.from(set)
   })
 
+  /** Event types matching the query by the Hebrew label shown on screen, not the stored key (rule 3). */
   protected getFilteredEventTypes(): string[] {
-    const raw = this.eventTypeSearch_().trim()
+    const raw = this.pickerSearch_.eventType.query(0).trim()
     const list = this.eventTypeOptions_()
     if (!raw) return list
-    return filterOptionsByStartsWith(list, raw, (t) => t)
+    return filterOptionsByStartsWith(list, raw, (t) => this.translation.translate(t))
+  }
+
+  /** One add option, last: `הוסף "<typed>"` for a new name, else `add_new_event_type` (rules 1–2). */
+  protected eventTypeAddLabel(): AddOptionLabel {
+    return addOptionLabel(
+      this.pickerSearch_.eventType.query(0),
+      this.eventTypeOptions_(),
+      (t) => this.translation.translate(t),
+      'add_new_event_type'
+    )
   }
 
   protected openEventTypeDropdown(): void {
     this.eventTypeDropdownOpen_.set(true)
-    this.eventTypeSearch_.set('')
-    this.eventTypeHighlightedIndex_.set(0)
+    this.pickerSearch_.eventType.onQueryChange(0, '')
     this.startEditField('event_type')
     setTimeout(() => document.getElementById('menu-focus-event_type_search')?.focus(), 50)
   }
 
   protected closeEventTypeDropdown(): void {
     this.eventTypeDropdownOpen_.set(false)
-    this.eventTypeSearch_.set('')
-    this.eventTypeHighlightedIndex_.set(-1)
+    this.pickerSearch_.eventType.onQueryChange(0, '')
   }
 
+  /** Rule 5 via the shared KeyedPickerSearch; Tab / Shift+Tab move to serving type / the event-type chip. */
   protected onEventTypeSearchKeydown(e: KeyboardEvent): void {
     const list = this.getFilteredEventTypes()
-    const addNewIndex = list.length
-    const maxIndex = addNewIndex // last option is "add new"
-    let idx = this.eventTypeHighlightedIndex_()
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      e.stopPropagation()
-      idx = Math.min(idx + 1, maxIndex)
-      this.eventTypeHighlightedIndex_.set(idx)
-      this.scrollDropdownHighlightIntoView('.event-type-dropdown')
-      return
-    }
-    if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      e.stopPropagation()
-      idx = Math.max(0, idx - 1)
-      this.eventTypeHighlightedIndex_.set(idx)
-      this.scrollDropdownHighlightIntoView('.event-type-dropdown')
-      return
-    }
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      e.stopPropagation()
-      if (idx >= 0 && idx < list.length) {
-        this.selectEventType(list[idx])
-      } else if (idx === addNewIndex) {
-        void this.addNewEventType()
-      } else {
-        this.focusField('servingType')
+    this.pickerSearch_.eventType.handleKeydown(0, e, {
+      optionCount: list.length + 1,
+      onSelect: (idx) => {
+        if (idx < list.length) this.selectEventType(list[idx])
+        else void this.addNewEventType()
+      },
+      onClose: () => {
+        this.closeEventTypeDropdown()
+        this.focusField('eventType')
+      },
+      onHighlightMove: () =>
+        setTimeout(() => scrollHighlightIntoView(document.querySelector('.event-type-dropdown')), 0),
+      onTab: (ke) => {
+        this.closeEventTypeDropdown()
+        this.focusField(ke.shiftKey ? 'eventType' : 'servingType')
       }
-      return
-    }
-    if (e.key === 'Escape') {
-      e.preventDefault()
-      e.stopPropagation()
-      this.closeEventTypeDropdown()
-      this.focusField('eventType')
-      return
-    }
-    if (e.key === 'Tab') {
-      e.preventDefault()
-      e.stopPropagation()
-      this.closeEventTypeDropdown()
-      this.focusField('servingType')
-    }
+    })
   }
 
   private scrollDropdownHighlightIntoView(containerClass: string): void {
@@ -593,20 +575,31 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.focusField('servingType')
   }
 
+  /** Typed new name adds directly; the generic option opens the modal. Selects the stored key, nothing on cancel (rule 4). */
   protected async addNewEventType(): Promise<void> {
-    const result = await this.addItemModal.open({
-      title: 'add_new_category',
-      label: 'menu_event_type',
-      placeholder: 'menu_event_type',
-      saveLabel: 'save'
-    })
-    if (result?.trim()) {
-      await this.menuEventTypeService.addEventType(result.trim())
-      this.form_.patchValue({ eventType: result.trim() })
-      this.closeEventTypeDropdown()
-      this.stopEditField()
-      this.focusField('servingType')
-    }
+    const label = this.eventTypeAddLabel()
+    const name =
+      label.kind === 'typed'
+        ? label.text
+        : (
+            (await this.addItemModal.open({
+              title: 'add_new_event_type',
+              label: 'menu_event_type',
+              placeholder: 'menu_event_type',
+              saveLabel: 'save'
+            })) ?? ''
+          ).trim()
+    if (!name) return
+    const before = this.eventTypeOptions_()
+    await this.menuEventTypeService.addEventType(name)
+    const existing = before.find((t) => t === name || this.translation.translate(t) === name)
+    const key =
+      existing ?? resolveAddedKey(before, this.eventTypeOptions_(), name, (t) => this.translation.translate(t))
+    if (!key) return
+    this.form_.patchValue({ eventType: key })
+    this.closeEventTypeDropdown()
+    this.stopEditField()
+    this.focusField('servingType')
   }
 
   /** For pendingChangesGuard — method name must match PendingChangesComponent interface */
@@ -946,6 +939,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected getNewSectionCategoryName(index: number): string {
     const name = this.pickerSearch_.section.query(index).trim()
     return name && !this.findSectionCategoryKey(name) ? name : ''
+  }
+
+  /** The section dropdown's single add option label (shared add-option rule). */
+  protected sectionCategoryAddLabel(index: number): AddOptionLabel {
+    const name = this.getNewSectionCategoryName(index)
+    return name ? { kind: 'typed', text: name } : addOptionLabel('', [], (k: string) => k, 'add_new_category')
   }
 
   private findSectionCategoryKey(name: string): string | undefined {

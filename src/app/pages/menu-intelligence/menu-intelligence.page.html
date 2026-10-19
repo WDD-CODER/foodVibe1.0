@@ -41,15 +41,19 @@
                   autocorrect="off"
                   autocapitalize="off"
                   spellcheck="false"
-                  [ngModel]="eventTypeSearch_()"
+                  [ngModel]="pickerSearch_.eventType.query(0)"
                   [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="eventTypeSearch_.set($event); eventTypeHighlightedIndex_.set(0)"
+                  (ngModelChange)="pickerSearch_.eventType.onQueryChange(0, $event)"
                   [placeholder]="'search' | translatePipe"
                   (keydown)="onEventTypeSearchKeydown($event)"
+                  role="combobox"
+                  aria-autocomplete="list"
+                  aria-expanded="true"
+                  [attr.aria-activedescendant]="'event-type-opt-' + pickerSearch_.eventType.highlighted(0)"
                 />
                 <app-input-clear
-                  [visible]="!!eventTypeSearch_()"
-                  (clear)="eventTypeSearch_.set(''); eventTypeHighlightedIndex_.set(0); eventTypeSearchInput.focus()"
+                  [visible]="!!pickerSearch_.eventType.query(0)"
+                  (clear)="pickerSearch_.eventType.onQueryChange(0, ''); eventTypeSearchInput.focus()"
                   (click)="$event.stopPropagation()"
                 />
               </div>
@@ -58,22 +62,25 @@
                 <button
                   type="button"
                   class="dropdown-item"
-                  [class.highlighted]="eventTypeHighlightedIndex_() === i"
+                  role="option"
+                  [id]="'event-type-opt-' + i"
+                  [class.highlighted]="pickerSearch_.eventType.highlighted(0) === i"
+                  (mousedown)="$event.preventDefault()"
                   (click)="selectEventType(t)"
                 >
-                  {{ t }}
+                  {{ t | translatePipe }}
                 </button>
                 }
                 <button
                   type="button"
                   class="dropdown-item add-new"
-                  [class.highlighted]="eventTypeHighlightedIndex_() === getFilteredEventTypes().length"
+                  role="option"
+                  [id]="'event-type-opt-' + getFilteredEventTypes().length"
+                  [class.highlighted]="pickerSearch_.eventType.highlighted(0) === getFilteredEventTypes().length"
+                  (mousedown)="$event.preventDefault()"
                   (click)="addNewEventType()"
                 >
-                  <span class="c-add-new-icon">
-                    <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-                  </span>
-                  {{ 'add' | translatePipe }}
+                  <app-add-option-row [label]="eventTypeAddLabel()" />
                 </button>
               </app-scrollable-dropdown>
             </div>
@@ -215,31 +222,16 @@
                   >
                     {{ cat | translatePipe }}
                   </button>
-                  } @if (getNewSectionCategoryName(sectionIndex); as newName) {
-                  <button
-                    type="button"
-                    class="dropdown-item add-new"
-                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
-                    (click)="addNewSectionCategory(sectionIndex)"
-                  >
-                    <span class="c-add-new-icon">
-                      <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-                    </span>
-                    {{ 'add' | translatePipe }} "{{ newName }}"
-                  </button>
-                  } @else {
-                  <button
-                    type="button"
-                    class="dropdown-item add-new"
-                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
-                    (click)="openAddCategoryModal(sectionIndex)"
-                  >
-                    <span class="c-add-new-icon">
-                      <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-                    </span>
-                    {{ 'add_new_category' | translatePipe }}
-                  </button>
                   }
+                  <button
+                    type="button"
+                    class="dropdown-item add-new"
+                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
+                    (mousedown)="$event.preventDefault()"
+                    (click)="getNewSectionCategoryName(sectionIndex) ? addNewSectionCategory(sectionIndex) : openAddCategoryModal(sectionIndex)"
+                  >
+                    <app-add-option-row [label]="sectionCategoryAddLabel(sectionIndex)" />
+                  </button>
                 </app-scrollable-dropdown>
               </div>
               } @else {

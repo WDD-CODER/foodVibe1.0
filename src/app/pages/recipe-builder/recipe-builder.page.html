@@ -360,6 +360,10 @@
                     [value]="logisticsPicker.searchQuery_()"
                     (input)="logisticsPicker.onSearchInput($any($event.target).value)"
                     (keydown)="logisticsPicker.onSearchKeydown($event)"
+                    role="combobox"
+                    aria-autocomplete="list"
+                    [attr.aria-expanded]="logisticsPicker.dropdownOpen_()"
+                    [attr.aria-activedescendant]="logisticsPicker.dropdownOpen_() ? 'logistics-tool-opt-' + logisticsPicker.highlightedIndex_() : null"
                     [placeholder]="'search_tool_placeholder' | translatePipe"
                     autocomplete="off"
                     autocorrect="off"
@@ -393,7 +397,10 @@
                   <li
                     role="option"
                     class="logistics-tool-option"
+                    [id]="'logistics-tool-opt-' + i"
                     [class.highlighted]="logisticsPicker.highlightedIndex_() === i"
+                    [attr.aria-selected]="logisticsPicker.highlightedIndex_() === i"
+                    (mousedown)="$event.preventDefault()"
                     (click)="logisticsPicker.selectOption(opt)"
                   >
                     {{ opt.nameHebrew }}
@@ -402,13 +409,13 @@
                   <li
                     role="option"
                     class="logistics-tool-option logistics-tool-add-new"
+                    [id]="'logistics-tool-opt-' + logisticsPicker.searchOptions_().length"
                     [class.highlighted]="logisticsPicker.highlightedIndex_() === logisticsPicker.searchOptions_().length"
+                    [attr.aria-selected]="logisticsPicker.highlightedIndex_() === logisticsPicker.searchOptions_().length"
+                    (mousedown)="$event.preventDefault()"
                     (click)="logisticsPicker.openAddNewToolModal()"
                   >
-                    <span class="c-add-new-icon">
-                      <img src="/assets/images/add_ingrediant.png" alt="" aria-hidden="true" />
-                    </span>
-                    {{ 'add' | translatePipe }}
+                    <app-add-option-row [label]="logisticsPicker.addLabel_()" />
                   </li>
                 </ul>
               </app-scrollable-dropdown>
