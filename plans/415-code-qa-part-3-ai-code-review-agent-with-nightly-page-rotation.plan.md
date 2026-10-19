@@ -43,6 +43,7 @@ another page waits.
   `code-verified | suspect | unknown`).
 - [human] After the first night with the Cowork task on: at least one `review-<PAGE>.md` exists, `latest.md` shows
   its marks, and the UI agent's report follows `suspect` / `unknown` checks first for that page.
+- [human] The Human sets up both Cowork tasks and the Windows tasks from the C11 guide without needing to ask a follow-up question.
 - [human] After 7 nights: `ledger.json` shows no page reviewed twice before every page was reviewed once, and the
   Human reads 5 `CODE-AI-` findings at random and at most 1 is wrong.
 
@@ -160,6 +161,7 @@ in the browser (`confirmed` / `not reproduced`) instead of re-discovering it.
 - [ ] C8: Prove the rotation is fair with a 30-night simulation and fixture reviews — scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**
 - [ ] C9: Document the full night and the Human's one-time setup — timeline (00:00 scripts, 01:00 Code QA agent, 02:45 merge, 03:00 UI agent, 07:30 down), Cowork task settings, re-register command — docs/qa/README.md, docs/qa/code-qa.md
 - [ ] C10: Dry-run one page by hand and record it — run pick, run the agent prompt in Cowork on the first page, run ingest; paste the queue head, the review header and the latest.md block into Execution Notes — this plan file
+- [ ] C11: Hand the Human the ready-to-paste Cowork prompts and a click-by-click setup guide — final chat message: both Cowork tasks (Code QA 01:00, UI QA 03:00) with name, time, folder C:\dev\foodVibe-qa, prompt text, approval settings; the PowerShell lines to re-register the Windows tasks; how to do one manual "Run now" first — docs/qa/README.md
 
 ## Technical Considerations
 - Dependencies: plans 413/414 files; Cowork scheduled tasks (Human sets them up); git in the QA checkout for the

@@ -218,6 +218,7 @@
 - [ ] C8: Prove the rotation is fair with a 30-night simulation and fixture reviews — `scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**`
 - [ ] C9: Document the full night and the Human's one-time setup — timeline (00:00 scripts, 01:00 Code QA agent, 02:45 merge, 03:00 UI agent, 07:30 down), Cowork task settings, re-register command — `docs/qa/README.md, docs/qa/code-qa.md`
 - [ ] C10: Dry-run one page by hand and record it — run pick, run the agent prompt in Cowork on the first page, run ingest; paste the queue head, the review header and the latest.md block into Execution Notes — `this plan file`
+- [ ] C11: Hand the Human the ready-to-paste Cowork prompts and a click-by-click setup guide — final chat message: both Cowork tasks (Code QA 01:00, UI QA 03:00) with name, time, folder C:devoodVibe-qa, prompt text, approval settings; the PowerShell lines to re-register the Windows tasks; how to do one manual "Run now" first — `docs/qa/README.md`
 
 ## Where things live
 
