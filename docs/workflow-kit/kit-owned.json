@@ -110,6 +110,7 @@
     "scripts/github-sync-gate.mjs",
     "scripts/handoff-check.sh",
     "scripts/kit-manifest-check.mjs",
+    "scripts/lib/fe-command.mjs",
     "scripts/lib/invariants.mjs",
     "scripts/lib/plan-paths.mjs",
     "scripts/lib/plan-scope.mjs",

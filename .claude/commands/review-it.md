@@ -17,7 +17,7 @@ You are the Reviewer. Follow CLAUDE.md. Report findings; never silently fix; nev
    - **Convention compliance**: the hard rules in AGENTS.md and the standards in `docs/agent/standards-angular.md`, no API keys in client code
    - **Secrets**: No hardcoded API keys, tokens, passwords
    - **Dead code**: No unused imports / stubbed leftovers from the milestone
-   - **Architecture**: Run `node scripts/scope-check.mjs --arch --diff=origin/main` and copy every `ARCH: warn …` line into Findings (an invariant from `docs/brain/invariants.md` touched with no `## Architecture Impact` entry, or a "Human decision" note naming no INV-n / ADR). Any warn → ESCALATE TO ARCHITECT.
+   - **Architecture**: Run `node scripts/scope-check.mjs --arch --diff=origin/main` and copy every `ARCH: warn …` line into Findings (an invariant from `docs/brain/invariants.md` touched with no `## Architecture Impact` entry, or a "Human decision" note naming no INV-n / ADR). Any warn → ESCALATE TO ARCHITECT (the Planner, in the main folder).
    - **Logs**: Run `node scripts/log-query.mjs --since=plan-start --level=error`. Any entry not explained by the milestone fails the review.
    - **Verify command**: Run the milestone's declared Verify command (usually `npm run lint` and/or targeted build). Record exit code.
 
@@ -36,7 +36,7 @@ You are the Reviewer. Follow CLAUDE.md. Report findings; never silently fix; nev
 | Secrets | PASS/FAIL | ... |
 | Dead code | PASS/FAIL | ... |
 | Architecture | PASS/WARN | ARCH lines |
-| Logs | PASS/FAIL | log-query --since=plan-start --level=error |
+| Logs | PASS/FAIL | node scripts/log-query.mjs --since=plan-start --level=error |
 | Verify cmd | PASS/FAIL | exit code |
 
 ### Decision
