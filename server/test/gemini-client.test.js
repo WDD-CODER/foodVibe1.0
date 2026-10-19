@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Plan 395 — tests for the Gemini model chain (mocked fetch, no Gemini); the admin route
+ * Plans 395 + 412 — tests for the Gemini model chain (mocked fetch, no Gemini); the admin route
  * tests at the end use the in-memory Mongo test app.
  */
 
@@ -8,8 +8,11 @@ const {
   DEFAULT_MODELS,
   MODEL_DAILY_BUDGETS,
   callGemini,
+  getChainSettings,
   getModelStatus,
   isDailyQuota,
+  isVisionModel,
+  modelCatalog,
   modelChain,
   nextResetAt,
   quotaDayKey,
@@ -70,15 +73,24 @@ describe('model chain', () => {
   it('uses the default order when GEMINI_MODELS is unset', () => {
     expect(modelChain()).toEqual(DEFAULT_MODELS);
     expect(DEFAULT_MODELS[0]).toBe('gemini-3.1-flash-lite');
-    expect(DEFAULT_MODELS.every(m => m in MODEL_DAILY_BUDGETS)).toBe(true);
+    expect(modelCatalog()).toEqual(DEFAULT_MODELS);
+  });
+
+  it('DEFAULT_MODELS is sorted by MODEL_DAILY_BUDGETS descending (ties allowed; unknown budgets last)', () => {
+    const budgets = DEFAULT_MODELS.map(m => MODEL_DAILY_BUDGETS[m] ?? null);
+    const firstUnknown = budgets.indexOf(null);
+    const known = firstUnknown === -1 ? budgets : budgets.slice(0, firstUnknown);
+    if (firstUnknown !== -1) expect(budgets.slice(firstUnknown).every(b => b === null)).toBe(true);
+    for (let i = 1; i < known.length; i++) expect(known[i]).toBeLessThanOrEqual(known[i - 1]);
+    expect(Object.keys(MODEL_DAILY_BUDGETS).every(m => DEFAULT_MODELS.includes(m))).toBe(true);
   });
 
   it('GEMINI_MODELS overrides the order', async () => {
-    process.env.GEMINI_MODELS = ' gemini-3.5-flash , gemini-2.5-flash ';
-    expect(modelChain()).toEqual(['gemini-3.5-flash', 'gemini-2.5-flash']);
+    process.env.GEMINI_MODELS = ' gemini-3.6-flash , gemini-2.5-flash ';
+    expect(modelChain()).toEqual(['gemini-3.6-flash', 'gemini-2.5-flash']);
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
     const result = await call(fakeLog());
-    expect(result.model).toBe('gemini-3.5-flash');
+    expect(result.model).toBe('gemini-3.6-flash');
   });
 
   it('calls the first model and returns its data', async () => {
@@ -135,10 +147,11 @@ describe('daily quota — one call, the user decides the switch', () => {
     expect(fetchMock).toHaveBeenCalledTimes(DEFAULT_MODELS.length);
   });
 
-  it('a model the chain does not allow is ignored in favour of the chain first', async () => {
+  it('a catalog model the chain has switched off is ignored in favour of the chain first', async () => {
+    process.env.GEMINI_MODELS = 'gemini-3.1-flash-lite';
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
-    const result = await call(fakeLog(), { model: 'not-a-model' });
-    expect(result.model).toBe(DEFAULT_MODELS[0]);
+    const result = await call(fakeLog(), { model: 'gemini-2.5-flash' });
+    expect(result.model).toBe('gemini-3.1-flash-lite');
   });
 
   it('a model comes back after its reset time', async () => {
@@ -183,12 +196,66 @@ describe('other failures return on the model tried', () => {
 });
 
 describe('vision', () => {
-  it('needsVision skips models outside the vision set', async () => {
-    process.env.GEMINI_MODELS = 'gemma-4-31b-it,gemini-3.1-flash-lite';
+  it('every kept model accepts inline images (gemini-3-flash-preview included)', () => {
+    expect(DEFAULT_MODELS.filter(m => !isVisionModel(m))).toEqual([]);
+    expect(isVisionModel('gemini-3-flash-preview')).toBe(true);
+    expect(isVisionModel('gemma-4-31b-it')).toBe(false);
+  });
+
+  it('needsVision still calls the chain first', async () => {
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
     const result = await call(fakeLog(), { needsVision: true });
-    expect(result.model).toBe('gemini-3.1-flash-lite');
+    expect(result.model).toBe(DEFAULT_MODELS[0]);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('removed models (plan 412)', () => {
+  it('a saved chain naming gemini-3.7-flash skips it, flags it removed, and never calls it', async () => {
+    setChainSettingsForTests([
+      { name: 'gemini-3.7-flash', enabled: true },
+      { name: 'gemini-2.5-flash', enabled: true },
+    ]);
+    expect(modelChain()).toEqual(['gemini-2.5-flash']);
+    const settings = await getChainSettings();
+    expect(settings.find(m => m.name === 'gemini-3.7-flash')).toMatchObject({ removed: true, enabled: false });
+    expect(settings.filter(m => !m.removed).map(m => m.name).sort()).toEqual([...DEFAULT_MODELS].sort());
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
+    expect((await call(fakeLog())).model).toBe('gemini-2.5-flash');
+    expect(fetchMock.mock.calls.map(modelOf)).not.toContain('gemini-3.7-flash');
+  });
+
+  it('a saved chain with only removed models falls back to the base chain', () => {
+    setChainSettingsForTests([{ name: 'gemini-3.7-flash', enabled: true }]);
+    expect(modelChain()).toEqual(DEFAULT_MODELS);
+  });
+
+  it('GEMINI_MODELS naming gemini-3.5-flash skips it, flags it removed, and never calls it', async () => {
+    process.env.GEMINI_MODELS = 'gemini-3.5-flash,gemini-3.6-flash';
+    expect(modelChain()).toEqual(['gemini-3.6-flash']);
+    const settings = await getChainSettings();
+    expect(settings.find(m => m.name === 'gemini-3.5-flash')).toMatchObject({ removed: true, enabled: false });
+    fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
+    expect((await call(fakeLog())).model).toBe('gemini-3.6-flash');
+    expect(fetchMock.mock.calls.map(modelOf)).not.toContain('gemini-3.5-flash');
+  });
+
+  it('GEMINI_MODELS with only removed names falls back to DEFAULT_MODELS', () => {
+    process.env.GEMINI_MODELS = 'gemini-3.5-flash';
+    expect(modelChain()).toEqual(DEFAULT_MODELS);
+  });
+
+  it('an explicit request for a removed model is refused without a call', async () => {
+    const log = fakeLog();
+    const result = await call(log, { model: 'gemini-3.7-flash' });
+    expect(result).toEqual({ kind: 'model_removed', model: 'gemini-3.7-flash' });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(log.warn.mock.calls.map(c => c[0].event)).toContain('ai.test.model_removed');
+  });
+
+  it('getModelStatus (usage) lists only kept models', async () => {
+    setChainSettingsForTests([{ name: 'gemini-3.7-flash', enabled: true }, { name: 'gemini-3.8-flash', enabled: true }]);
+    expect((await getModelStatus()).map(m => m.name)).toEqual(['gemini-3.8-flash']);
   });
 });
 
@@ -228,31 +295,37 @@ describe('helpers', () => {
 
 describe('admin chain settings', () => {
   it('GEMINI_MODELS sets the chain when no admin settings are saved', () => {
-    process.env.GEMINI_MODELS = 'gemini-3.5-flash';
-    expect(modelChain()).toEqual(['gemini-3.5-flash']);
+    process.env.GEMINI_MODELS = 'gemini-3.6-flash';
+    expect(modelChain()).toEqual(['gemini-3.6-flash']);
   });
 
   it('the admin order and on/off decide the chain', async () => {
     setChainSettingsForTests([
-      { name: 'gemini-3.5-flash', enabled: true },
+      { name: 'gemini-3.6-flash', enabled: true },
       { name: 'gemini-3.1-flash-lite', enabled: false },
       { name: 'gemini-2.5-flash', enabled: true },
     ]);
-    expect(modelChain()).toEqual(['gemini-3.5-flash', 'gemini-2.5-flash']);
+    expect(modelChain()).toEqual(['gemini-3.6-flash', 'gemini-2.5-flash']);
     fetchMock.mockResolvedValue(jsonResponse(200, OK_DATA));
-    expect((await call(fakeLog())).model).toBe('gemini-3.5-flash');
+    expect((await call(fakeLog())).model).toBe('gemini-3.6-flash');
   });
 
   it('validateChainSettings rejects bad lists', () => {
     expect(validateChainSettings('x')).toBe('models must be an array');
-    expect(validateChainSettings([{ name: 'gemini-3.5-flash' }])).toMatch(/boolean/);
-    expect(validateChainSettings([{ name: 'not-a-model', enabled: true }])).toBe('unknown model');
+    expect(validateChainSettings([{ name: 'gemini-3.6-flash' }])).toMatch(/boolean/);
+    expect(validateChainSettings([{ name: 'not-a-model', enabled: true }])).toBe('removed model');
+    expect(validateChainSettings([{ name: 'gemini-3.7-flash', enabled: true }])).toBe('removed model');
     expect(validateChainSettings([
-      { name: 'gemini-3.5-flash', enabled: true },
-      { name: 'gemini-3.5-flash', enabled: false },
+      { name: 'gemini-3.6-flash', enabled: true },
+      { name: 'gemini-3.6-flash', enabled: false },
     ])).toBe('duplicate model');
-    expect(validateChainSettings([{ name: 'gemini-3.5-flash', enabled: false }])).toBe('at least one model must stay on');
-    expect(validateChainSettings([{ name: 'gemini-3.5-flash', enabled: true }])).toBeNull();
+    expect(validateChainSettings([{ name: 'gemini-3.6-flash', enabled: false }])).toBe('at least one model must stay on');
+    expect(validateChainSettings([{ name: 'gemini-3.6-flash', enabled: true }])).toBeNull();
+    // A removed model sent back switched off (the admin screen lists it) is accepted and dropped.
+    expect(validateChainSettings([
+      { name: 'gemini-3.6-flash', enabled: true },
+      { name: 'gemini-3.7-flash', enabled: false },
+    ])).toBeNull();
   });
 });
 
@@ -280,25 +353,52 @@ describe('GET / PUT / DELETE /api/v1/ai/models (admin)', () => {
     const list = await request(app).get('/api/v1/ai/models').set('Authorization', admin());
     expect(list.status).toBe(200);
     expect(list.body.models.map(m => m.name)).toEqual(DEFAULT_MODELS);
-    expect(list.body.models.every(m => m.enabled)).toBe(true);
+    expect(list.body.models.every(m => m.enabled && !m.removed)).toBe(true);
 
     const bad = await request(app).put('/api/v1/ai/models').set('Authorization', admin())
-      .send({ models: [{ name: 'gemini-3.5-flash', enabled: false }] });
+      .send({ models: [{ name: 'gemini-3.6-flash', enabled: false }] });
     expect(bad.status).toBe(400);
 
     const saved = await request(app).put('/api/v1/ai/models').set('Authorization', admin())
-      .send({ models: [{ name: 'gemini-3.5-flash', enabled: true }, { name: 'gemini-3.1-flash-lite', enabled: false }] });
+      .send({ models: [{ name: 'gemini-3.6-flash', enabled: true }, { name: 'gemini-3.1-flash-lite', enabled: false }] });
     expect(saved.status).toBe(200);
-    expect(saved.body.models[0]).toMatchObject({ name: 'gemini-3.5-flash', enabled: true });
-    expect(saved.body.models.filter(m => m.enabled).map(m => m.name)).toEqual(['gemini-3.5-flash']);
+    expect(saved.body.models[0]).toMatchObject({ name: 'gemini-3.6-flash', enabled: true });
+    expect(saved.body.models.filter(m => m.enabled).map(m => m.name)).toEqual(['gemini-3.6-flash']);
 
     resetForTests(); // a restart: the saved chain comes back from Mongo
     const usage = await request(app).get('/api/v1/ai/usage');
-    expect(usage.body.models.map(m => m.name)).toEqual(['gemini-3.5-flash']);
-    expect(usage.body.budget).toBe(MODEL_DAILY_BUDGETS['gemini-3.5-flash']);
+    expect(usage.body.models.map(m => m.name)).toEqual(['gemini-3.6-flash']);
+    expect(usage.body.budget).toBe(MODEL_DAILY_BUDGETS['gemini-3.6-flash']);
 
     const reset = await request(app).delete('/api/v1/ai/models').set('Authorization', admin());
     expect(reset.status).toBe(200);
     expect(reset.body.models.filter(m => m.enabled).map(m => m.name)).toEqual(DEFAULT_MODELS);
+  });
+
+  it('an old saved chain shows removed models as removed; usage lists only kept ones; saving drops them', async () => {
+    const mongoose = require('mongoose');
+    await mongoose.connection.db.collection('GEMINI_USAGE').updateOne(
+      { _id: 'chain-settings' },
+      { $set: { models: [{ name: 'gemini-3.7-flash', enabled: true }, { name: 'gemini-3.8-flash', enabled: true }] } },
+      { upsert: true },
+    );
+    resetForTests();
+
+    const list = await request(app).get('/api/v1/ai/models').set('Authorization', admin());
+    expect(list.body.models.find(m => m.name === 'gemini-3.7-flash')).toMatchObject({ removed: true, enabled: false });
+    const usage = await request(app).get('/api/v1/ai/usage');
+    expect(usage.body.models.map(m => m.name)).toEqual(['gemini-3.8-flash']);
+
+    // The admin screen sends the whole list back, removed entry included (off): saved without it.
+    const saved = await request(app).put('/api/v1/ai/models').set('Authorization', admin())
+      .send({ models: list.body.models.map(m => ({ name: m.name, enabled: m.enabled })) });
+    expect(saved.status).toBe(200);
+    expect(saved.body.models.some(m => m.removed)).toBe(false);
+
+    const enabledRemoved = await request(app).put('/api/v1/ai/models').set('Authorization', admin())
+      .send({ models: [{ name: 'gemini-3.7-flash', enabled: true }, { name: 'gemini-3.8-flash', enabled: true }] });
+    expect(enabledRemoved.status).toBe(400);
+
+    await request(app).delete('/api/v1/ai/models').set('Authorization', admin());
   });
 });

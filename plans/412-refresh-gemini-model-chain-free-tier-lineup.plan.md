@@ -1,6 +1,6 @@
 # Plan 412 — Refresh Gemini Model Chain to Google's Oct-2026 Free-Tier Lineup
 
-Status: draft
+Status: active
 Snapshot: 5e0342575a4765db9400ae169d3b3473e87eca4e
 
 ## Problem Statement
@@ -72,19 +72,32 @@ Blocked outside scope → stop and ask `approved: <path>`. Never read or print `
 - Order rule (Human 2026-10-19): sort by real free RPD descending. Quality is not the primary key — the strongest models have the smallest buckets and users must not burn them first. Recipe eval is only a tiebreaker between equal RPD. Unknown RPD goes after all known ones.
 
 ## Atomic Sub-tasks
-- [ ] A1: Check every candidate model live with our key and record which ones answer and share quota — GET v1beta/models, then one tiny generateContent per candidate (3.8-flash, 3.6-flash, 3.5-flash-lite, 3.1-flash-lite, 3-flash-preview, 2.5-flash, 2.5-flash-lite, 3.5-flash, 3.7-flash, any Gemma listed); record status, response modelVersion (proves auto-routing), 429 quotaId/quotaValue; confirm whether 3.5-flash / 3.7-flash share quota with 3.6-flash / 3.8-flash; table goes into this plan under "Live check results" — server/scripts/ai-eval-recipes.js
-- [ ] B1: Drop the two deprecated models and add only free models that answer on their own quota — remove gemini-3.5-flash and gemini-3.7-flash from MODEL_DAILY_BUDGETS, DEFAULT_MODELS and the GEMINI_MODELS example; add gemini-3-flash-preview only if A1 shows 200 and its own bucket; never paid-only models — server/services/gemini-client.js, server/.env.example, .env.example
+- [x] A1: Check every candidate model live with our key and record which ones answer and share quota — GET v1beta/models, then one tiny generateContent per candidate (3.8-flash, 3.6-flash, 3.5-flash-lite, 3.1-flash-lite, 3-flash-preview, 2.5-flash, 2.5-flash-lite, 3.5-flash, 3.7-flash, any Gemma listed); record status, response modelVersion (proves auto-routing), 429 quotaId/quotaValue; confirm whether 3.5-flash / 3.7-flash share quota with 3.6-flash / 3.8-flash; table goes into this plan under "Live check results" — server/scripts/ai-eval-recipes.js
+- [x] B1: Drop the two deprecated models and add only free models that answer on their own quota — remove gemini-3.5-flash and gemini-3.7-flash from MODEL_DAILY_BUDGETS, DEFAULT_MODELS and the GEMINI_MODELS example; add gemini-3-flash-preview only if A1 shows 200 and its own bucket; never paid-only models — server/services/gemini-client.js, server/.env.example, .env.example
 - [ ] C1: Set each model's daily budget from the Human's rate-limit screenshot and real 429 numbers — [human] Human sends the ai.dev/rate-limit screenshot; update MODEL_DAILY_BUDGETS and its source/date comment — server/services/gemini-client.js
-- [ ] D1: Order the default chain by free daily quota, largest first, so users don't burn the small buckets first — sort DEFAULT_MODELS and the .env.example GEMINI_MODELS line by MODEL_DAILY_BUDGETS descending; recipe eval only breaks ties; unknown RPD after all known; replace the plan 395 rationale comment with this rule — server/services/gemini-client.js, server/.env.example, .env.example
-- [ ] D2: Add a test that fails if the default chain is ever not sorted by daily quota — DEFAULT_MODELS sorted by MODEL_DAILY_BUDGETS descending, ties allowed, unknown budgets last — server/test/gemini-client.test.js
-- [ ] E1: Never send a request to a removed model from an old saved chain or env list — entries in the admin's saved chain or GEMINI_MODELS that are not in the catalog are skipped by modelChain/callGemini and the explicit-model path, and reported as removed (e.g. removed: true) by the chain endpoint; usage endpoint lists only kept models — server/services/gemini-client.js, server/routes/ai.js
-- [ ] E2: Show removed models as removed in the admin chain screen — read-only "removed" state, cannot be enabled; new Hebrew label via translatePipe + appended dictionary key — src/app/pages/metadata-manager/components/ai-model-manager/**
-- [ ] E3: Add tests for stale saved chains and stale env lists — saved chain with gemini-3.7-flash: skipped, flagged removed, no fetch to it; GEMINI_MODELS with gemini-3.5-flash: same; explicit request for a removed model refused — server/test/gemini-client.test.js
-- [ ] F1: Confirm every kept model accepts inline images — VISION_MODEL_PATTERN matches all kept models including gemini-3-flash-preview (extend pattern + test if not) — server/services/gemini-client.js, server/test/gemini-client.test.js
-- [ ] G1: Update the Gemini free-tier gotcha with the new lineup and the quota-first ordering rule — docs/brain/gotchas/backend.md
+- [x] D1: Order the default chain by free daily quota, largest first, so users don't burn the small buckets first — sort DEFAULT_MODELS and the .env.example GEMINI_MODELS line by MODEL_DAILY_BUDGETS descending; recipe eval only breaks ties; unknown RPD after all known; replace the plan 395 rationale comment with this rule — server/services/gemini-client.js, server/.env.example, .env.example
+- [x] D2: Add a test that fails if the default chain is ever not sorted by daily quota — DEFAULT_MODELS sorted by MODEL_DAILY_BUDGETS descending, ties allowed, unknown budgets last — server/test/gemini-client.test.js
+- [x] E1: Never send a request to a removed model from an old saved chain or env list — entries in the admin's saved chain or GEMINI_MODELS that are not in the catalog are skipped by modelChain/callGemini and the explicit-model path, and reported as removed (e.g. removed: true) by the chain endpoint; usage endpoint lists only kept models — server/services/gemini-client.js, server/routes/ai.js
+- [x] E2: Show removed models as removed in the admin chain screen — read-only "removed" state, cannot be enabled; new Hebrew label via translatePipe + appended dictionary key — src/app/pages/metadata-manager/components/ai-model-manager/**
+- [x] E3: Add tests for stale saved chains and stale env lists — saved chain with gemini-3.7-flash: skipped, flagged removed, no fetch to it; GEMINI_MODELS with gemini-3.5-flash: same; explicit request for a removed model refused — server/test/gemini-client.test.js
+- [x] F1: Confirm every kept model accepts inline images — VISION_MODEL_PATTERN matches all kept models including gemini-3-flash-preview (extend pattern + test if not) — server/services/gemini-client.js, server/test/gemini-client.test.js
+- [x] G1: Update the Gemini free-tier gotcha with the new lineup and the quota-first ordering rule — docs/brain/gotchas/backend.md
 
 ## Live check results
-(A1 fills this table.)
+`node server/scripts/ai-eval-recipes.js --probe-models`, 2026-10-19, our key. One GET v1beta/models (http 200, 46 models with generateContent) plus one tiny generateContent per candidate. No 429 came back, so no quotaId/quotaValue was observed today; "Own bucket?" is read from `modelVersion` (the model that actually answered).
 
 | Model | Status | modelVersion | quotaId / quotaValue | Own bucket? |
 | --- | --- | --- | --- | --- |
+| gemini-3.8-flash | 200 | gemini-3.8-flash | — | yes |
+| gemini-3.6-flash | 200 | gemini-3.6-flash | — | yes |
+| gemini-3.5-flash-lite | 200 | gemini-3.5-flash-lite | — | yes |
+| gemini-3.1-flash-lite | 200 | gemini-3.1-flash-lite | — | yes |
+| gemini-3-flash-preview | 200 | gemini-3-flash-preview | — | yes (also: recipe eval חביתה 1/1 PASS, image call "Red") |
+| gemini-2.5-flash | 200 | gemini-2.5-flash | — | yes |
+| gemini-2.5-flash-lite | 200 | gemini-2.5-flash-lite | — | yes |
+| gemini-3.5-flash | 200 | **gemini-3.6-flash** | — | no — auto-routed to 3.6-flash |
+| gemini-3.7-flash | 200 | **gemini-3.8-flash** | — | no — auto-routed to 3.8-flash |
+| gemma-4-26b-a4b-it | 200 | gemma-4-26b-a4b-it | — | yes, but not added (not in B1's list; no JSON-mode/vision check) |
+| gemma-4-31b-it | 500 | — | "Internal error encountered." | unknown |
+
+Quota sharing of 3.5/3.7-flash with 3.6/3.8-flash is inferred from routing, not proven by a 429 (that would need draining a bucket).

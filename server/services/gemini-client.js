@@ -23,37 +23,41 @@ const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models
  * Free-tier requests per day, per model, for our key's project. Google no longer publishes
  * these (ai.dev/rate-limit shows them only to the signed-in owner); values come from 429
  * `quotaValue`s — ours for gemini-2.5-flash-lite (2026-10-08), aiplug.work's measurements
- * (2026-09-02) for the rest. Informational: the chain reacts to the real 429, not to these.
+ * (2026-09-02) for the rest. A model missing here has an unknown budget.
+ * Informational: the chain reacts to the real 429, not to these.
  */
 const MODEL_DAILY_BUDGETS = {
   'gemini-3.1-flash-lite': 500,
   'gemini-3.5-flash-lite': 500,
   'gemini-2.5-flash-lite': 20,
   'gemini-2.5-flash': 20,
-  'gemini-3.5-flash': 20,
   'gemini-3.6-flash': 20,
-  'gemini-3.7-flash': 20,
   'gemini-3.8-flash': 20,
 };
 
 /**
- * Order (plan 395 G6, 2026-10-09): gemini-3.1-flash-lite leads — the biggest bucket and the
- * best recipe-eval score (20/25). gemini-3.5-flash-lite is the other 500-a-day bucket but
- * scored 11/25 with 503s, so it is the last reserve. The order only picks who answers; the
- * total stays ~1,120 calls a day. Every model here answered 200 on 2026-10-09.
+ * The catalog: every free-tier model the server may call, in default order. Anything else —
+ * an old saved chain entry or a GEMINI_MODELS name — is "removed" and never called (plan 412).
+ *
+ * Order rule (Human, 2026-10-19): largest free daily quota first, so users don't burn the small
+ * buckets of the strong models before the big ones. The recipe eval only breaks ties
+ * (3.1-flash-lite 20/25 beat 3.5-flash-lite 11/25, plan 395 G6); a model with an unknown
+ * budget goes after every known one. A unit test holds this order.
+ *
+ * Dropped 2026-10-19 (plan 412): the 3.5 and 3.7 flash models — deprecated 2026-10-08,
+ * Google answers them with gemini-3.6-flash / gemini-3.8-flash. Paid-only models never belong here.
  */
 const DEFAULT_MODELS = [
   'gemini-3.1-flash-lite',
+  'gemini-3.5-flash-lite',
   'gemini-2.5-flash-lite',
   'gemini-2.5-flash',
-  'gemini-3.5-flash',
   'gemini-3.6-flash',
-  'gemini-3.7-flash',
   'gemini-3.8-flash',
-  'gemini-3.5-flash-lite',
+  'gemini-3-flash-preview',
 ];
 
-/** Models that accept inline images — every gemini-*-flash* model today. */
+/** Models that accept inline images — every gemini-*-flash* model today (3-flash-preview included). */
 const VISION_MODEL_PATTERN = /^gemini-[\d.]+-flash/;
 
 const USAGE_COLLECTION = 'GEMINI_USAGE';
@@ -78,21 +82,35 @@ function envModels() {
     .filter(Boolean);
 }
 
-/** The chain before any admin choice: GEMINI_MODELS (comma list) when set, else DEFAULT_MODELS. */
+/** True when the server may call `model` at all. */
+function isCatalogModel(model) {
+  return DEFAULT_MODELS.includes(model);
+}
+
+/**
+ * The chain before any admin choice: the catalog models of GEMINI_MODELS (comma list) in its
+ * order, else DEFAULT_MODELS. Removed names in GEMINI_MODELS are skipped.
+ */
 function baseChain() {
-  const fromEnv = envModels();
+  const fromEnv = [...new Set(envModels().filter(isCatalogModel))];
   return fromEnv.length > 0 ? fromEnv : DEFAULT_MODELS;
 }
 
-/** Every model the admin may pick from: the base chain plus every model with a known budget. */
+/** Every model the admin may pick from — the fixed catalog, no runtime discovery. */
 function modelCatalog() {
-  return [...new Set([...baseChain(), ...Object.keys(MODEL_DAILY_BUDGETS)])];
+  return [...DEFAULT_MODELS];
+}
+
+/** Names in the admin's saved chain or GEMINI_MODELS that are no longer in the catalog. */
+function removedModels() {
+  const named = [...(adminSettings ?? []).map(e => e?.name), ...envModels()];
+  return [...new Set(named.filter(n => typeof n === 'string' && !isCatalogModel(n)))];
 }
 
 /**
  * The admin's full list, in order, with on/off: the saved settings (models still in the
  * catalog), then any catalog model the settings don't mention, off. Without settings: the
- * base chain on, the rest of the catalog off.
+ * base chain on, the rest of the catalog off. Removed models are left out (removedModels).
  */
 function chainSettings() {
   const catalog = modelCatalog();
@@ -100,12 +118,12 @@ function chainSettings() {
     const base = new Set(baseChain());
     return [...baseChain(), ...catalog.filter(m => !base.has(m))].map(name => ({ name, enabled: base.has(name) }));
   }
-  const saved = adminSettings.filter(e => catalog.includes(e.name));
+  const saved = adminSettings.filter(e => catalog.includes(e?.name));
   const savedNames = new Set(saved.map(e => e.name));
   return [...saved, ...catalog.filter(m => !savedNames.has(m)).map(name => ({ name, enabled: false }))];
 }
 
-/** The ordered chain callGemini walks: the admin's enabled models, else the base chain. */
+/** The ordered chain callGemini walks: the admin's enabled models, else the base chain. Catalog only. */
 function modelChain() {
   const enabled = chainSettings().filter(e => e.enabled).map(e => e.name);
   return enabled.length > 0 ? enabled : baseChain();
@@ -286,18 +304,31 @@ async function getModelStatus(names) {
   });
 }
 
-/** The admin view: every catalog model in chain order, on/off, with today's status. */
+/**
+ * The admin view: every catalog model in chain order, on/off, with today's status, then the
+ * removed models an old saved chain or GEMINI_MODELS still names (removed: true, always off).
+ */
 async function getChainSettings() {
   await ensureLoaded();
   const settings = chainSettings();
   const status = await getModelStatus(settings.map(e => e.name));
-  return settings.map((e, i) => ({ ...status[i], enabled: e.enabled, vision: isVisionModel(e.name) }));
+  const kept = settings.map((e, i) => ({ ...status[i], enabled: e.enabled, vision: isVisionModel(e.name), removed: false }));
+  const removed = removedModels().map(name => ({
+    name, exhausted: false, resetAt: null, dailyBudget: null, used: 0, remaining: null,
+    enabled: false, vision: false, removed: true,
+  }));
+  return [...kept, ...removed];
 }
 
-/** Returns an error string for a bad admin chain list, or null. */
+/**
+ * Returns an error string for a bad admin chain list, or null. A removed model may appear only
+ * switched off (the admin screen lists it); saving drops it.
+ */
 function validateChainSettings(models) {
   if (!Array.isArray(models)) return 'models must be an array';
   const catalog = modelCatalog();
+  if (models.some(e => typeof e?.name === 'string' && !catalog.includes(e.name) && e.enabled === true)) return 'removed model';
+  models = models.filter(e => catalog.includes(e?.name) || typeof e?.name !== 'string' || e.enabled !== false);
   const names = models.map(e => e?.name);
   if (models.some(e => typeof e?.enabled !== 'boolean')) return 'every model needs a boolean "enabled"';
   if (names.some(n => !catalog.includes(n))) return 'unknown model';
@@ -319,7 +350,8 @@ async function saveChainSettings(models) {
   }
   const error = validateChainSettings(models);
   if (error) return error;
-  const clean = models.map(e => ({ name: e.name, enabled: e.enabled }));
+  const catalog = modelCatalog();
+  const clean = models.filter(e => catalog.includes(e.name)).map(e => ({ name: e.name, enabled: e.enabled }));
   await usageCol().updateOne({ _id: SETTINGS_DOC_ID }, { $set: { models: clean, updatedAt: new Date() } }, { upsert: true });
   adminSettings = clean;
   return null;
@@ -354,8 +386,10 @@ function allExhausted(candidates) {
  * `model` when the user picked one (it must be an enabled chain model), else the first in
  * the chain. If that model is out of its daily quota — known already, or learned from this
  * call's 429 — the result is 'model_exhausted' naming the next usable model, and the user
- * decides whether to send again on it. Never throws. Returns:
+ * decides whether to send again on it. A requested model no longer in the catalog is refused
+ * without a call (plan 412). Never throws. Returns:
  *   { kind: 'ok', model, data }
+ *   { kind: 'model_removed', model }
  *   { kind: 'model_exhausted', model, nextModel, resetAt }
  *   { kind: 'all_exhausted', resetAt }          (ISO string or null)
  *   { kind: 'gemini_error', model, status, message }
@@ -363,6 +397,10 @@ function allExhausted(candidates) {
  */
 async function callGemini({ body, timeoutMs, log, eventPrefix, needsVision = false, model: requested }) {
   await ensureLoaded();
+  if (typeof requested === 'string' && !isCatalogModel(requested)) {
+    log.warn({ event: `${eventPrefix}.model_removed`, model: requested });
+    return { kind: 'model_removed', model: requested };
+  }
   const apiKey = process.env.GEMINI_API_KEY;
   const candidates = modelChain().filter(m => !needsVision || isVisionModel(m));
   const now = new Date();
@@ -442,12 +480,14 @@ module.exports = {
   saveChainSettings,
   validateChainSettings,
   getUsageCount,
+  isCatalogModel,
   isDailyQuota,
   isVisionModel,
   modelCatalog,
   modelChain,
   modelUrl,
   nextResetAt,
+  removedModels,
   quotaDayKey,
   summarizeBudget,
   responseText,

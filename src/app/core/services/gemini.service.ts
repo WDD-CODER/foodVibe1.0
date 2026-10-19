@@ -15,6 +15,8 @@ import { TranslationService } from './translation.service'
 export interface GeminiChainModel extends GeminiModelStatus {
   enabled: boolean
   vision: boolean
+  /** Retired by Google; a saved chain still names it, the server never calls it (plan 412). */
+  removed?: boolean
 }
 
 /** Offered after a request hit the daily quota of `from` (server error 'model_exhausted'). */
@@ -70,8 +72,13 @@ export class GeminiService {
   // The server never moves to another model by itself: when the model runs out of its daily
   // quota it answers 'model_exhausted' + the next model, and the user decides.
 
-  /** Records the switch the server offers when `err` is a 'model_exhausted' 429. Returns true if it was one. */
+  /**
+   * Records the switch the server offers when `err` is a 'model_exhausted' 429. Returns true if it was one.
+   * A 'model_removed' 400 (the switched-to model was retired, plan 412) drops the switch, so the
+   * next request goes to the chain first.
+   */
   offerModelSwitch(err: unknown): boolean {
+    if (err instanceof HttpErrorResponse && err.error?.error === 'model_removed') this.model_.set(null)
     if (!(err instanceof HttpErrorResponse) || err.error?.error !== 'model_exhausted') return false
     const from: unknown = err.error?.model
     const to: unknown = err.error?.nextModel

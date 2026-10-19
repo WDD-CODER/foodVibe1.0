@@ -267,7 +267,8 @@ function requestedModel(req) {
 /**
  * Response for a callGemini() result that isn't 'ok' (plan 395). 'model_exhausted' (429)
  * names the next usable model so the client can offer the switch; 'daily_limit_reached'
- * (429) when every model in the chain is out of its daily quota.
+ * (429) when every model in the chain is out of its daily quota; 'model_removed' (400) when
+ * the user's chosen model left the catalog (plan 412).
  */
 function respondFromGeminiFailure(res, result) {
   switch (result.kind) {
@@ -280,6 +281,8 @@ function respondFromGeminiFailure(res, result) {
       });
     case 'all_exhausted':
       return res.status(429).json({ error: 'daily_limit_reached', resetAt: result.resetAt });
+    case 'model_removed':
+      return res.status(400).json({ error: 'model_removed', model: result.model });
     case 'gemini_error':
       return res.status(502).json({ error: `Gemini API error: ${result.status}`, geminiMessage: result.message });
     case 'timeout':

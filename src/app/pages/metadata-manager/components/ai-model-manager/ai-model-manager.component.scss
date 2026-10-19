@@ -87,6 +87,13 @@
     opacity: 0.6;
   }
 
+  // Retired by Google (plan 412): no grip, so one column fewer; read-only.
+  &.is-removed {
+    grid-template-columns: auto 1fr auto;
+
+    opacity: 0.6;
+  }
+
   // Just dropped: a primary flash on the row and its rank, so the moved model is easy to spot
   // among the look-alike names.
   &.is-just-moved {
@@ -227,6 +234,10 @@
 }
 
 .model-exhausted {
+  color: var(--color-danger);
+}
+
+.model-removed {
   color: var(--color-danger);
 }
 

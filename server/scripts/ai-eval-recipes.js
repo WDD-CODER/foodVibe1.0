@@ -20,6 +20,10 @@
  * answer per model; exit 1 if any model fails. ~1 call per model.
  *   node server/scripts/ai-eval-recipes.js --check-models
  *
+ * --probe-models: one GET v1beta/models plus one tiny call per free-tier candidate (and every
+ * listed Gemma model); prints status, answering modelVersion and 429 quota ids (plan 412).
+ *   node server/scripts/ai-eval-recipes.js --probe-models
+ *
  * --model picks the one model to evaluate (default: the first in the chain, GEMINI_MODELS or
  * gemini-client.js's default order). No fallback here: each model is measured on its own (plan 395).
  *
@@ -175,6 +179,71 @@ async function checkModels(apiKey) {
   process.exitCode = failed.length === 0 ? 0 : 1;
 }
 
+/** Free-tier candidates to probe (plan 412 A1); --probe-models adds every Gemma model the key lists. */
+const PROBE_CANDIDATES = [
+  'gemini-3.8-flash',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-3-flash-preview',
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3.7-flash',
+];
+
+/** The quota violations of a 429 body, as "quotaId=quotaValue" strings. */
+function quotaViolations(body) {
+  const details = Array.isArray(body?.error?.details) ? body.error.details : [];
+  return details
+    .flatMap((d) => (Array.isArray(d.violations) ? d.violations : []))
+    .map((v) => `${v.quotaId ?? '?'}=${v.quotaValue ?? '?'}`);
+}
+
+/**
+ * --probe-models (plan 412 A1): one GET v1beta/models, then one tiny generateContent per
+ * candidate. Prints status, the answering modelVersion (shows auto-routing) and any 429
+ * quotaId/quotaValue. Never prints the key.
+ */
+async function probeModels(apiKey) {
+  const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000&key=${apiKey}`, {
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+  const listed = listRes.ok ? ((await listRes.json()).models ?? []) : [];
+  const generative = listed
+    .filter((m) => (m.supportedGenerationMethods ?? []).includes('generateContent'))
+    .map((m) => m.name.replace(/^models\//, ''));
+  console.log(`GET models: http ${listRes.status}, ${generative.length} with generateContent:`);
+  console.log(generative.join(', '));
+
+  const gemma = generative.filter((m) => m.startsWith('gemma-'));
+  const candidates = [...new Set([...PROBE_CANDIDATES, ...gemma])];
+  const body = { contents: [{ parts: [{ text: 'Reply with the single word: ok' }] }], generationConfig: { maxOutputTokens: 8 } };
+  console.log('\n| Model | Listed | Status | modelVersion | quotaId / quotaValue |');
+  console.log('| --- | --- | --- | --- | --- |');
+  for (const model of candidates) {
+    let status = 'network';
+    let version = '';
+    let quota = '';
+    try {
+      const res = await fetch(`${modelUrl(model)}?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      status = String(res.status);
+      const json = await res.json().catch(() => ({}));
+      version = json.modelVersion ?? '';
+      if (!res.ok) quota = quotaViolations(json).join('; ') || (json?.error?.message ?? '').slice(0, 120);
+    } catch (err) {
+      status = err?.name === 'TimeoutError' ? 'timeout' : 'network';
+    }
+    console.log(`| ${model} | ${generative.includes(model) ? 'yes' : 'no'} | ${status} | ${version} | ${quota} |`);
+    await sleep(CALL_GAP_MS);
+  }
+}
+
 async function main() {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -182,6 +251,7 @@ async function main() {
     process.exit(2);
   }
   if (process.argv.includes('--check-models')) return checkModels(apiKey);
+  if (process.argv.includes('--probe-models')) return probeModels(apiKey);
 
   const minPasses = Math.ceil(RUNS * MIN_PASS_RATIO);
   console.log(`Model: ${MODEL}`);
