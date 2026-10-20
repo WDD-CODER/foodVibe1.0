@@ -15,6 +15,8 @@
  *   (default)       dry run: counts per step, nothing written.
  *   --write=yes     apply. Needs --backup-dir=<fresh db-backup.js snapshot>. Safe to re-run: a
  *                   second run finds nothing left to move and changes nothing.
+ *   --db=<scratch>  (local only) run against a scratch copy, e.g. a restored Atlas snapshot — the
+ *                   rehearsal; a scratch copy needs no --backup-dir.
  *   --verify=yes    read-only check: 0 TRASH_* collections, 0 tombstones, 0 favoritedBy/hiddenBy.
  */
 
@@ -138,7 +140,7 @@ function printPlan({ trash, tombstones, legacyArrays }) {
 }
 
 async function write(db, args, result, now) {
-  checkBackup(args);
+  if (args.db === undefined) checkBackup(args);
   const { trash, tombstones, legacyArrays } = result;
 
   for (const [name, list] of Object.entries(trash)) {
