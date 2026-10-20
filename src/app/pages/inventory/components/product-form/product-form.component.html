@@ -92,6 +92,8 @@
           [typeToFilter]="true"
           [addNewValue]="'NEW_UNIT'"
           [class.c-input--invalid]="validationErrors_()['baseUnit']"
+          [allowTypedAdd]="true"
+          (addNewChosen)="pendingUnitName_.set($event)"
           (valueChange)="onBaseUnitValueChange($event)"
         />
         @if (validationErrors_()['baseUnit']) {
@@ -124,6 +126,8 @@
               placeholder="choose_unit"
               [typeToFilter]="true"
               [addNewValue]="'NEW_UNIT'"
+              [allowTypedAdd]="true"
+              (addNewChosen)="pendingUnitName_.set($event)"
               (valueChange)="onUnitSymbolValueChange($event, idx)"
             />
           </div>
@@ -161,6 +165,8 @@
                 [placeholder]="productForm_.get('baseUnit')?.value || 'compare_to_unit'"
                 [typeToFilter]="true"
                 [addNewValue]="'NEW_UNIT'"
+                [allowTypedAdd]="true"
+                (addNewChosen)="pendingUnitName_.set($event)"
                 (valueChange)="onUomValueChange($event, idx)"
               />
             </label>

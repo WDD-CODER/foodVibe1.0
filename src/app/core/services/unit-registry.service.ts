@@ -40,8 +40,11 @@ export class UnitRegistryService {
 
   public readonly unitAdded$ = new Subject<string>()
 
-  /** When opening the unit creator from a product form, pass this product's purchase unit symbols so duplicate names can be rejected in-modal. */
-  private unitCreatorContext = signal<{ existingUnitSymbols?: string[] } | null>(null)
+  /** When opening the unit creator from a product form, pass this product's purchase unit symbols so duplicate names can be rejected in-modal,
+   *  and the name the user already typed in the unit picker so the creator opens with it. */
+  private unitCreatorContext = signal<{ existingUnitSymbols?: string[]; name?: string } | null>(null)
+  /** Name the unit creator should open with (plan 377), or '' for an empty field. */
+  public readonly creatorPrefillName_ = computed(() => (this.unitCreatorContext()?.name ?? '').trim())
 
   // SIGNALS
   private isCreatorOpen = signal(false)
@@ -62,7 +65,7 @@ export class UnitRegistryService {
   }
 
   // UI CONTROL
-  openUnitCreator(context?: { existingUnitSymbols?: string[] }) {
+  openUnitCreator(context?: { existingUnitSymbols?: string[]; name?: string }) {
     this.unitCreatorContext.set(context ?? null)
     this.isCreatorOpen.set(true)
     this.refreshFromStorage()
