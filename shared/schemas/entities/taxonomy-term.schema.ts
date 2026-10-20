@@ -23,7 +23,8 @@ export const TAXONOMY_KINDS = [
   'menuType',
   'eventType',
   'sectionCategory',
-  'equipmentCategory'
+  'equipmentCategory',
+  'station'
 ] as const
 
 export type TaxonomyKind = (typeof TAXONOMY_KINDS)[number]
@@ -73,6 +74,8 @@ export const TERM_REFERENCES: Record<TaxonomyKind, Partial<Record<'products' | '
   eventType: { menuEvents: ['eventType'] },
   sectionCategory: { menuEvents: ['sections.name'] },
   equipmentCategory: {},
+  /** Plan 436: a station key is stored on the recipe / dish as `defaultStation` ('' = general). */
+  station: { recipes: ['defaultStation'], dishes: ['defaultStation'] },
   protein: {},
   kosherType: {}
 }
@@ -100,7 +103,8 @@ const plainKinds = [
   'kosherType',
   'prepCategory',
   'sectionCategory',
-  'equipmentCategory'
+  'equipmentCategory',
+  'station'
 ] as const
 
 export const taxonomyTermSchema = z.discriminatedUnion('kind', [

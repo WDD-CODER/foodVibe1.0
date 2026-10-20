@@ -4,6 +4,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
+import { StationRegistryService } from '@services/station-registry.service'
 import { TranslationService } from '@services/translation.service'
 import { Recipe, RecipeStep, FlatPrepItem, PrepCategory } from '@models/recipe.model'
 import { Ingredient } from '@models/ingredient.model'
@@ -25,6 +26,7 @@ export class RecipeFormService {
   private readonly state = inject(KitchenStateService)
   private readonly recipeCost = inject(RecipeCostService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
+  private readonly stationRegistry = inject(StationRegistryService)
   private readonly translation = inject(TranslationService)
 
   // ─── Validators ───────────────────────────────────────────────────
@@ -273,6 +275,9 @@ export class RecipeFormService {
     const rawCourse = ((raw['course'] as string | undefined) ?? '').trim()
     const course = this.metadataRegistry.courses_().some((c) => c.key === rawCourse) ? rawCourse : ''
 
+    const rawStation = ((raw['default_station'] as string | undefined) ?? '').trim()
+    const defaultStation = this.stationRegistry.hasStation(rawStation) ? rawStation : ''
+
     return {
       _id: (recipeId ?? '') as string,
       nameHebrew: (raw['nameHebrew'] as string)?.trim() ?? '',
@@ -281,7 +286,7 @@ export class RecipeFormService {
       yieldAmount: yieldAmount,
       yieldUnit: yieldUnit,
       ...(yieldConversions.length > 0 ? { yieldConversions: yieldConversions } : {}),
-      defaultStation: '',
+      defaultStation: defaultStation,
       isApproved: isApproved,
       recipeType: isDish ? 'dish' : 'preparation',
       labels: labels,
@@ -332,7 +337,8 @@ export class RecipeFormService {
         total_weight_g: 0,
         total_cost: 0,
         labels: normalizedLabels,
-        course: recipe.course ?? ''
+        course: recipe.course ?? '',
+        default_station: recipe.defaultStation ?? ''
       },
       { emitEvent: false }
     )

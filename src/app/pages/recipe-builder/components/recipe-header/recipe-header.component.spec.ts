@@ -9,6 +9,8 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
+import { StationRegistryService } from '@services/station-registry.service'
+import { AddItemModalService } from '@services/add-item-modal.service'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { signal, WritableSignal } from '@angular/core'
 
@@ -16,6 +18,9 @@ describe('RecipeHeaderComponent', () => {
   let component: RecipeHeaderComponent
   let fixture: ComponentFixture<RecipeHeaderComponent>
   let fb: FormBuilder
+  let stations_: WritableSignal<string[]>
+  let stationRegistrySpy: jasmine.SpyObj<StationRegistryService>
+  let addItemModalSpy: jasmine.SpyObj<AddItemModalService>
 
   function createRecipeForm(
     overrides: { recipe_type?: 'dish' | 'preparation'; serving_portions?: number; yield_conversions?: FormArray } = {}
@@ -29,7 +34,8 @@ describe('RecipeHeaderComponent', () => {
       nameHebrew: [''],
       total_weight_g: [0],
       labels: [[] as string[]],
-      course: ['']
+      course: [''],
+      default_station: ['']
     })
   }
 
@@ -50,6 +56,20 @@ describe('RecipeHeaderComponent', () => {
     const labelCreationModalSpy = jasmine.createSpyObj('LabelCreationModalService', ['open'])
     labelCreationModalSpy.open.and.returnValue(Promise.resolve(null))
 
+    stations_ = signal(['חם', 'קר'])
+    stationRegistrySpy = jasmine.createSpyObj<StationRegistryService>(
+      'StationRegistryService',
+      ['addStation', 'hasStation'],
+      { stations_: stations_ as never }
+    )
+    stationRegistrySpy.hasStation.and.callFake((k: string) => stations_().includes(k))
+    stationRegistrySpy.addStation.and.callFake((n: string) => {
+      stations_.update((l) => [...l, n.trim()])
+      return Promise.resolve(n.trim())
+    })
+    addItemModalSpy = jasmine.createSpyObj<AddItemModalService>('AddItemModalService', ['open'])
+    addItemModalSpy.open.and.returnValue(Promise.resolve(null))
+
     await TestBed.configureTestingModule({
       imports: [RecipeHeaderComponent, ReactiveFormsModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
@@ -60,7 +80,9 @@ describe('RecipeHeaderComponent', () => {
         { provide: KitchenStateService, useValue: {} },
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
         { provide: MetadataRegistryService, useValue: metadataRegistrySpy },
-        { provide: LabelCreationModalService, useValue: labelCreationModalSpy }
+        { provide: LabelCreationModalService, useValue: labelCreationModalSpy },
+        { provide: StationRegistryService, useValue: stationRegistrySpy },
+        { provide: AddItemModalService, useValue: addItemModalSpy }
       ]
     }).compileComponents()
 
@@ -91,6 +113,40 @@ describe('RecipeHeaderComponent', () => {
 
     component.form().get('course')?.setValue('starter')
     expect(component['courseSelectOptions_']().map((o) => o.value)).toEqual(['', 'starter'])
+  })
+
+  it('station options start with general_group, list the station keys, then the add option', () => {
+    const options = component['stationSelectOptions_']()
+    expect(options[0]).toEqual({ value: '', label: 'general_group' })
+    expect(options.slice(1, 3).map((o) => o.value)).toEqual(['חם', 'קר'])
+    expect(options[options.length - 1]).toEqual({ value: '__add_station__', label: 'add_new_station' })
+  })
+
+  it('a station deleted elsewhere shows as general_group, never as its raw key', () => {
+    component.form().get('default_station')?.setValue('גריל')
+    const options = component['stationSelectOptions_']()
+    expect(options).toContain({ value: 'גריל', label: 'general_group' })
+    expect(options.some((o) => o.label === 'גריל')).toBeFalse()
+  })
+
+  it('choosing the add option opens the add window prefilled and selects the stored key after save', async () => {
+    addItemModalSpy.open.and.returnValue(Promise.resolve('גריל'))
+    component.form().get('default_station')?.setValue('חם')
+    component.form().get('default_station')?.setValue('__add_station__')
+    await component['onAddStation']('גר')
+    expect(addItemModalSpy.open).toHaveBeenCalledWith(
+      jasmine.objectContaining({ initialValue: 'גר', title: 'add_new_station' })
+    )
+    expect(stationRegistrySpy.addStation).toHaveBeenCalledWith('גריל')
+    expect(component.form().get('default_station')?.value).toBe('גריל')
+  })
+
+  it('cancelling the add window puts the previous station back', async () => {
+    component.form().get('default_station')?.setValue('קר')
+    component.form().get('default_station')?.setValue('__add_station__')
+    await component['onAddStation']('')
+    expect(stationRegistrySpy.addStation).not.toHaveBeenCalled()
+    expect(component.form().get('default_station')?.value).toBe('קר')
   })
 
   it('should display currentCost from input', () => {

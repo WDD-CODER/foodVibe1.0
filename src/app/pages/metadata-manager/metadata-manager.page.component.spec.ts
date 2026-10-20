@@ -255,13 +255,14 @@ describe('MetadataManagerPageComponent', () => {
     'mm-sec-menu-type',
     'mm-sec-preparation',
     'mm-sec-section',
+    'mm-sec-station',
     'mm-sec-user',
     'mm-sec-ai-models'
   ]
 
-  it('should render exactly 10 jump-nav tabs in page order', () => {
+  it('should render exactly 11 jump-nav tabs in page order', () => {
     const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))
-    expect(tabs.length).toBe(10)
+    expect(tabs.length).toBe(11)
     expect(tabs.map((t) => t.nativeElement.textContent.trim())).toEqual([
       'metadata_units_and_conversions_title',
       'metadata_product_categories_title',
@@ -271,12 +272,13 @@ describe('MetadataManagerPageComponent', () => {
       'metadata_menu_types_title',
       'metadata_prep_categories',
       'metadata_section_categories_title',
+      'metadata_stations_title',
       'user_management',
       'ai_model_manager'
     ])
   })
 
-  it('should give each of the 10 sections a matching stable id', () => {
+  it('should give each of the 11 sections a matching stable id', () => {
     for (const id of JUMP_SECTION_IDS) {
       expect(fixture.debugElement.query(By.css(`#${id}`)))
         .withContext(id)
@@ -299,7 +301,7 @@ describe('MetadataManagerPageComponent', () => {
     expect(tab.nativeElement.classList.contains('active')).toBeTrue()
     // Everyone else keeps their natural relative order.
     expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('1')
-    expect(fixture.debugElement.query(By.css('#mm-sec-user')).nativeElement.style.order).toBe('9')
+    expect(fixture.debugElement.query(By.css('#mm-sec-user')).nativeElement.style.order).toBe('10')
   })
 
   it('should swap directly to a different section when its tab is clicked while another is front', () => {
@@ -316,7 +318,7 @@ describe('MetadataManagerPageComponent', () => {
   it("renders the jump-nav tabs inside the shared scroll rail (plan 350 — arrows are the rail's job)", () => {
     const rail = fixture.debugElement.query(By.css('app-scroll-rail.mm-jump-nav'))
     expect(rail).not.toBeNull()
-    expect(rail.queryAll(By.css('.c-tab-pill')).length).toBe(10)
+    expect(rail.queryAll(By.css('.c-tab-pill')).length).toBe(11)
     expect(fixture.debugElement.query(By.css('.mm-jump-nav-arrow'))).toBeNull()
   })
 })

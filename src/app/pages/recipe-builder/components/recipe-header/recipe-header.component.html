@@ -168,6 +168,19 @@
       [options]="courseSelectOptions_()"
       placeholder="course"
     />
+
+    <app-custom-select
+      class="course-select"
+      triggerId="station"
+      [formControl]="stationControl"
+      [options]="stationSelectOptions_()"
+      placeholder="station"
+      [typeToFilter]="true"
+      addNewValue="__add_station__"
+      addNewLabelKey="add_new_station"
+      [allowTypedAdd]="true"
+      (addNewChosen)="onAddStation($event)"
+    />
   </div>
 
   <div class="metrics-square">

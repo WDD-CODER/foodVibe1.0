@@ -140,6 +140,35 @@ async function seedMasterTaxonomy() {
   return terms.length;
 }
 
+/** Plan 436: the default kitchen stations, keyed by their Hebrew names. */
+const DEFAULT_STATIONS = ['חם', 'קר', 'מאפה', 'קינוחים', 'הגשה'];
+
+/**
+ * Plan 436: inserts the five default master `station` terms when no master station term exists
+ * (fresh and live databases alike). Idempotent. Never touches an existing document.
+ * @returns {Promise<number>} terms inserted (0 if skipped)
+ */
+async function ensureDefaultStations() {
+  const col = mongoose.connection.db.collection('taxonomyTerms');
+  if (await col.findOne({ kind: 'station', businessId: '__master__' })) return 0;
+  const now = Date.now();
+  const terms = DEFAULT_STATIONS.map((key, sortOrder) => ({
+    _id: makeId(),
+    schemaVersion: 2,
+    kind: 'station',
+    key,
+    sortOrder,
+    userId: '__master__',
+    businessId: '__master__',
+    createdBy: '__master__',
+    createdAt: now,
+    updatedAt: now,
+  }));
+  await col.insertMany(terms, { ordered: false });
+  logger.info({ event: 'seed.master.stations_seeded', count: terms.length });
+  return terms.length;
+}
+
 /**
  * Seeds master data from demo JSON files into MongoDB.
  * Idempotent — skips entirely if any __master__ doc exists in products.
@@ -162,7 +191,7 @@ async function seedMasterData() {
   const existing = await db.collection('products').findOne({ businessId: '__master__' });
   if (existing) {
     logger.info({ event: 'seed.master.skipped' }, 'master data already exists');
-    return seedMasterTaxonomy();
+    return (await seedMasterTaxonomy()) + (await ensureDefaultStations());
   }
 
   logger.info({ event: 'seed.master.begin', assetsDir: ASSETS_DIR, assetsDirExists: fs.existsSync(ASSETS_DIR) }, 'no master data found — seeding from demo JSON files');
@@ -231,8 +260,9 @@ async function seedMasterData() {
   }
 
   totalSeeded += await seedMasterTaxonomy();
+  totalSeeded += await ensureDefaultStations();
   logger.info({ event: 'seed.master.done', totalSeeded });
   return totalSeeded;
 }
 
-module.exports = { seedMasterData, seedMasterTaxonomy };
+module.exports = { seedMasterData, seedMasterTaxonomy, ensureDefaultStations };

@@ -8,10 +8,11 @@ const { buildTestApp, teardownTestApp, testDb } = require('./helpers/app');
 const { parseV2 } = require('../utils/schema-check');
 
 let seedMasterTaxonomy;
+let ensureDefaultStations;
 
 beforeAll(async () => {
   await buildTestApp();
-  ({ seedMasterTaxonomy } = require('../services/seed-master'));
+  ({ seedMasterTaxonomy, ensureDefaultStations } = require('../services/seed-master'));
 }, 60000);
 
 afterAll(async () => {
@@ -54,4 +55,31 @@ it('is a no-op once master terms exist', async () => {
   const before = await testDb().collection('taxonomyTerms').countDocuments();
   expect(await seedMasterTaxonomy()).toBe(0);
   expect(await testDb().collection('taxonomyTerms').countDocuments()).toBe(before);
+});
+
+describe('ensureDefaultStations (plan 436)', () => {
+  const stations = () => testDb().collection('taxonomyTerms').find({ kind: 'station' }).sort({ sortOrder: 1 }).toArray();
+
+  it('inserts the five master stations when master terms exist but no station', async () => {
+    await seedMasterTaxonomy();
+    expect(await stations()).toHaveLength(0);
+    expect(await ensureDefaultStations()).toBe(5);
+    const terms = await stations();
+    expect(terms.map(t => t.key)).toEqual(['חם', 'קר', 'מאפה', 'קינוחים', 'הגשה']);
+    expect(terms.map(t => t.sortOrder)).toEqual([0, 1, 2, 3, 4]);
+    expect(terms.every(t => t.businessId === '__master__' && parseV2('taxonomyTerms', t).success)).toBe(true);
+  });
+
+  it('inserts 0 on a second run', async () => {
+    await ensureDefaultStations();
+    expect(await ensureDefaultStations()).toBe(0);
+    expect(await stations()).toHaveLength(5);
+  });
+
+  it('inserts 0 when any master station term already exists', async () => {
+    await ensureDefaultStations();
+    await testDb().collection('taxonomyTerms').deleteMany({ kind: 'station', key: { $ne: 'חם' } });
+    expect(await ensureDefaultStations()).toBe(0);
+    expect(await stations()).toHaveLength(1);
+  });
 });

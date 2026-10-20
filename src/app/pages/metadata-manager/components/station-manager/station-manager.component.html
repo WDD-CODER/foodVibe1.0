@@ -1,0 +1,15 @@
+<app-taxonomy-kind-manager
+  [items]="stations()"
+  titleKey="metadata_stations_title"
+  icon="chef-hat"
+  descKey="metadata_stations_desc"
+  placeholderKey="metadata_station_placeholder"
+  addLabelKey="metadata_add"
+  emptyKey="metadata_no_stations"
+  [lockReason]="lockReason"
+  [inlineRename]="true"
+  (added)="onAdd($event.value, $event.input)"
+  (editRequested)="requireSignIn()"
+  (renamed)="onRenameBlur($event.item, $event.value)"
+  (removeRequested)="onRemove($event)"
+/>
