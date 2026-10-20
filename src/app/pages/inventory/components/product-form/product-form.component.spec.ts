@@ -187,6 +187,40 @@ describe('ProductFormComponent', () => {
     })
   })
 
+  // Plan 438 — a product needs a name and a base unit, nothing else.
+  describe('Lean entry (plan 438)', () => {
+    it('saves with only a name and a base unit', async () => {
+      const kitchen = TestBed.inject(KitchenStateService)
+      const saveSpy = spyOn(kitchen, 'saveProduct').and.returnValue(of(null as unknown as Product))
+      component['productForm_'].patchValue({ productName: 'בצל ירוק', baseUnit: 'kg', buy_price_global_: null })
+      expect(await component.saveAndWait()).toBe(true)
+      const saved = saveSpy.calls.mostRecent().args[0] as Product
+      expect(saved.sources).toEqual([])
+      expect(saved.categories).toEqual([])
+      expect(saved.yieldFactor).toBe(1)
+    })
+
+    it('an empty name fails with field_name_required', async () => {
+      ;(TestBed.inject(UserMsgService) as unknown as { onSetErrorMsg: () => void }).onSetErrorMsg = () => undefined
+      component['productForm_'].patchValue({ productName: '', baseUnit: 'kg' })
+      expect(await component.saveAndWait()).toBe(false)
+      const errors = component['validationErrors_']()
+      expect(errors['productName']).toBe('field_name_required')
+      expect(errors['buy_price_global_']).toBeUndefined()
+      expect(errors['categories']).toBeUndefined()
+    })
+
+    it('no base unit fails with field_unit_required', async () => {
+      ;(TestBed.inject(UserMsgService) as unknown as { onSetErrorMsg: () => void }).onSetErrorMsg = () => undefined
+      component['productForm_'].patchValue({ productName: 'בצל ירוק', baseUnit: '' })
+      expect(await component.saveAndWait()).toBe(false)
+      const errors = component['validationErrors_']()
+      expect(errors['baseUnit']).toBe('field_unit_required')
+      expect(errors['buy_price_global_']).toBeUndefined()
+      expect(errors['categories']).toBeUndefined()
+    })
+  })
+
   describe('Add a unit from a dropdown (plan 418)', () => {
     it('opens the unit window with the typed name', () => {
       component['pendingAddName_'].set('צנצנת')

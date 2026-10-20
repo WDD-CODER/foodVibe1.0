@@ -333,8 +333,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         ]
       ],
       baseUnit: ['', Validators.required],
-      buy_price_global_: [0, [Validators.required, Validators.min(0)]],
-      categories: [[], [Validators.required, Validators.minLength(1)]],
+      buy_price_global_: [0, [Validators.min(0)]],
+      categories: [[]],
       supplierIds_: [[]],
       minStockLevel: [0, [Validators.min(0)]],
       expiryDaysDefault: [0, [Validators.min(0)]],
@@ -889,8 +889,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const val = this.productForm_.getRawValue()
     if (!val.productName?.trim()) errors['productName'] = 'field_name_required'
     if (!val.baseUnit?.trim()) errors['baseUnit'] = 'field_unit_required'
-    if (val.buy_price_global_ == null || val.buy_price_global_ < 0) errors['buy_price_global_'] = 'field_price_required'
-    if (!val.categories?.length) errors['categories'] = 'field_category_required'
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
   }

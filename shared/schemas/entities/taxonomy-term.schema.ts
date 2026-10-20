@@ -106,7 +106,12 @@ export const taxonomyTermSchema = z.discriminatedUnion('kind', [
     color: colorSchema,
     autoTriggers: z.array(z.string()).optional()
   }),
-  z.strictObject({ ...termShape, kind: z.literal('course'), color: colorSchema }),
+  z.strictObject({
+    ...termShape,
+    kind: z.literal('course'),
+    /** @deprecated never written since plan 438; stored values removed by migration 0007 */
+    color: colorSchema.optional()
+  }),
   z.strictObject({ ...termShape, kind: z.literal('unit'), gramRate: z.number().positive() }),
   /** `categoryKey` is absent for an uncategorized preparation (exists in live master data). */
   z.strictObject({ ...termShape, kind: z.literal('preparation'), categoryKey: z.string().min(1).optional() }),

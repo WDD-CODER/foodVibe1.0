@@ -36,6 +36,12 @@ describe('taxonomyTermSchema', () => {
     expect(ok({ ...base, kind: 'menuType', key: 'buffet_family', fields: ['sell_price', 'serving_portions'] })).toBe(true);
   });
 
+  test('a dish type needs no color, but a stored one is still accepted (plan 438)', () => {
+    expect(ok({ ...base, kind: 'course', key: 'starter' })).toBe(true);
+    expect(ok({ ...base, kind: 'course', key: 'starter', color: '#3B82F6' })).toBe(true);
+    expect(ok({ ...base, kind: 'course', key: 'k', color: 'blue' })).toBe(false);
+  });
+
   test('rejects missing kind-specific fields and fields from another kind', () => {
     expect(ok({ ...base, kind: 'label', key: 'vegan' })).toBe(false);
     expect(ok({ ...base, kind: 'unit', key: 'kg' })).toBe(false);

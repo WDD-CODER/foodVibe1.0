@@ -33,6 +33,13 @@ it('seeds valid default master terms for the core kinds on an empty database', a
   expect(terms.find(t => t.kind === 'unit' && t.key === 'kg').gramRate).toBe(1000);
 });
 
+it('seeds dish types without a color (plan 438)', async () => {
+  await seedMasterTaxonomy();
+  const courses = await testDb().collection('taxonomyTerms').find({ kind: 'course' }).toArray();
+  expect(courses.length).toBeGreaterThan(0);
+  expect(courses.some(t => 'color' in t)).toBe(false);
+});
+
 it('is a no-op once master terms exist', async () => {
   await seedMasterTaxonomy();
   const before = await testDb().collection('taxonomyTerms').countDocuments();

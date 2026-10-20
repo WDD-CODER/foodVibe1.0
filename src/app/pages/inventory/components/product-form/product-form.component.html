@@ -58,9 +58,6 @@
           (remove)="removeCategory($event)"
           (addNew)="openAddNewCategory($event)"
         />
-        @if (validationErrors_()['categories']) {
-          <span class="c-field-error">{{ 'field_category_required' | translatePipe }}</span>
-        }
       </div>
 
       <div class="form-group">
@@ -78,9 +75,6 @@
           />
           <span class="prefix">₪</span>
         </div>
-        @if (validationErrors_()['buy_price_global_']) {
-          <span class="c-field-error">{{ 'field_price_required' | translatePipe }}</span>
-        }
       </div>
 
       <div class="form-group">
