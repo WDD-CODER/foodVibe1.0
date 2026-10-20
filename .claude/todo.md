@@ -277,6 +277,20 @@
 - [ ] S9: Register the WhatsApp icon and add the Hebrew texts — MessageCircle in app.config.ts; dictionary keys listed in UI/UX Notes — src/app/app.config.ts, public/assets/data/dictionary.json
 - [ ] S10: Build, test, check the frozen page and icons, then hand over the six device checks — ng build, ng test include list, numstat, icon grep, log-query; cards ①–⑥ — this plan file
 
+### Plan 436 — Kitchen stations as a managed list, picked in the recipe header (`plans/436-kitchen-stations-as-a-managed-list-picked-in-the-recipe-header.plan.md`)
+
+- [ ] T1: Add stations as their own taxonomy kind that recipes and dishes point to — 'station' in TAXONOMY_KINDS and plainKinds; TERM_REFERENCES.station = { recipes: ['defaultStation'], dishes: ['defaultStation'] }; schema test cases — shared/schemas/entities/taxonomy-term.schema.ts, server/test/taxonomy-term-schema.test.js
+- [ ] T2: Seed the five default stations once, on fresh and existing databases — ensureDefaultStations(): no master station term → insert חם, קר, מאפה, קינוחים, הגשה (sortOrder 0–4, schemaVersion 2, master owner fields, parseV2-checked); called at the end of both seedMasterData paths; exported; tests — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
+- [ ] T3: Prove renaming and deleting a station is handled on the server for recipes and dishes — rename re-keys defaultStation; delete of a used station → 409 — server/test/taxonomy-terms-api.test.js
+- [ ] T4: Give the app one place to read and change stations — StationRegistryService: stations_ (keys in sortOrder), addStation(name) (trimmed, duplicate → returns existing key), renameStation(old, new) via updateByKey, removeStation(key) via removeByKey, canEdit(key); spec — src/app/core/services/station-registry.service.ts, station-registry.service.spec.ts, src/app/core/services/breadcrumbs.md
+- [ ] T5: Let the owner manage stations in the metadata manager — StationManagerComponent (add / inline rename with confirm / remove with confirm; TaxonomyStore.errorMessage for read-only and in-use; sign-in guard; permission gate when 428 merged); spec; page tag + jumpSections entry + import — src/app/pages/metadata-manager/components/station-manager/**, metadata-manager.page.component.ts, metadata-manager.page.component.html
+- [ ] T6: Save and restore the recipe's station instead of always wiping it — buildRecipeFromForm: defaultStation = raw default_station if it is a known station key, else ''; patchFormFromRecipe: default_station = recipe.defaultStation ?? ''; spec cases — src/app/pages/recipe-builder/services/recipe-form.service.ts, recipe-form.service.spec.ts
+- [ ] T7: Add the station control to the frozen recipe page without growing it — default_station: [''] in recipeForm_ and in the dirty-check normalized object; offset by collapsing the 4-line "Signal-backed state…" comment in the dirty check (`getRecipeSnapshotForComparison`) to 2 lines; added ≤ deleted — src/app/pages/recipe-builder/recipe-builder.page.ts
+- [ ] T8: Let the chef pick or add a station in the recipe header — stationSelectOptions_ computed, stationControl getter, add-option flow via AddItemModalService + notifyItemAdded; spec cases — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts, .html, .spec.ts
+- [ ] T9: Put recipes without a station under "כללי" on the station checklist — replace the three defaultStation ?? 'כללי' with defaultStation || 'כללי' (same line count) — src/app/core/services/menu-export.service.ts
+- [ ] T10: Add the Hebrew texts for the station list and picker — keys listed in UI/UX Notes — public/assets/data/dictionary.json
+- [ ] T11: Build, run server and client tests and the log check, then hand over the station checks — ng build, npm --prefix server test, ng test include list, git grep, numstat, log-query; cards ①–④ + production check — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
