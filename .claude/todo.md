@@ -424,6 +424,22 @@
 - [ ] S8: Add the Hebrew labels — keys from UI/UX Notes, appended — public/assets/data/dictionary.json
 - [ ] S9: Build, test client and server, confirm the page is untouched, then hand over the checks — ng build, the Done-when ng test and server test commands, git diff --name-only on the page, log-query; slot servers up; [human] cards — this plan file
 
+### Plan 447 — Show the business its inquiries, closings, revenue and pricing accuracy (`plans/447-show-the-business-its-inquiries-closings-revenue-and-pricing-accuracy.plan.md`)
+
+- [ ] Baseline: cards 1–3 normalised to a month (value ÷ period days × 30) vs baseline; revenue baseline = closed
+- [ ] Funnel: count of active events per stage now, "פנייה" … "פוסט-פרודקשן"; click → `/menu-library?stage=<key>`.
+- [ ] Upcoming: events dated today … today + 14 (Asia/Jerusalem): name, date, guests, stage.
+- [ ] Staff: funnel + upcoming only; the server omits `cards`.
+- [ ] D1: Compute every dashboard number on the server with two scoped aggregations — business-stats.js: periodBounds, eventsPipeline ($facet: inquiries, closed, notClosed, revenue, accuracy, funnel, upcoming), usagePipeline, shapeStats per Design — server/services/business-stats.js
+- [ ] D2: Serve the numbers to owners in full and to staff without money — GET /api/v1/stats/business in stats.js (verifyToken, period validation, business doc, can(..., 'editMoney') decides cards), mounted in app.js — server/routes/stats.js, server/app.js
+- [ ] D3: Prove the numbers with the spec's acceptance fixture and the isolation rules — business-stats.test.js: the 07.2 fixture, legacy/deleted/other-business exclusions, staff response, no-baseline, no-events, period=all, bad period, the 08.1 accuracy numbers — server/test/business-stats.test.js
+- [ ] D4: Add a timing check to run against a restored copy of the live data — time-business-stats.js per Design — server/scripts/time-business-stats.js
+- [ ] D5: Fetch the stats in the app and format them with the shared rounding helpers — BusinessStatsService + model types; formatDecimal1 appended to rounding.ts + specs — src/app/core/services/business-stats.service.ts, src/app/core/services/business-stats.service.spec.ts, src/app/core/models/business-stats.model.ts, src/app/core/engine/rounding.ts, src/app/core/engine/rounding.spec.ts
+- [ ] D6: Build the performance area with period picker, five cards, funnel and upcoming events — BusinessPerformanceComponent per Design and UI/UX Notes; funnel → router.navigate(['/menu-library'], { queryParams: { stage } }); empty states + spec — src/app/pages/dashboard/components/business-performance/**
+- [ ] D7: Put the area on top of the dashboard and remove the fake sparklines — mount <business-performance /> first inside .dashboard-main (above plan 431's setup card), delete the three .kpi-sparkline SVG blocks and their unused styles — src/app/pages/dashboard/components/dashboard-overview/**
+- [ ] D8: Add the Hebrew labels and the two trend icons — keys from UI/UX Notes, TrendingUp/TrendingDown in LucideAngularModule.pick — public/assets/data/dictionary.json, src/app/app.config.ts
+- [ ] D9: Build, test server and client, time the queries if a restore exists, then hand over — ng build, the Done-when test commands, the sparkline grep, the timing script (restored copy if present, else local + final-gate entry), log-query; slot servers up; [human] cards — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
