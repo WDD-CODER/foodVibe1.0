@@ -459,6 +459,19 @@
 - [ ] U6: Prove counting, throttling, Israel midnight and the helpers with server tests — every Done-when case; update the team test's lastActiveAt expectation — server/test/usage-days.test.js, server/test/business-team.test.js
 - [ ] U7: Build, test, lint and hand over the Team-tab check — server suite, lint, ng build, log-query; Human runs the two [human] items — this plan file
 
+### Plan 431 — Capture the opening baseline and guide a new business through setup (`plans/431-capture-the-opening-baseline-and-guide-a-new-business-through-setup.plan.md`)
+
+- [ ] B1: Give the opening baseline one validated shape on the business — baselineInputSchema, businessBaselineSchema, baseline field — shared/schemas/entities/business.schema.ts
+- [ ] B2: Let only the owner save the baseline with the date it was filled — PUT /baseline replace + filledAt, GET / includes baseline — server/routes/business.js
+- [ ] B3: Tell the owner which setup steps are done using only items made in the business — GET /setup-status with OWN filter and capped counts — server/routes/business.js
+- [ ] B4: Prove baseline saving, skipping, validation and setup counts with server tests — every Done-when case — server/test/business-baseline.test.js
+- [ ] B5: Add the opening-baseline tab with save and skip — SETTINGS_TABS entry, @case, BaselineTabComponent, BusinessService.updateBaseline, specs — src/app/pages/settings/**, src/app/core/services/business.service.ts
+- [ ] B6: Show the setup card on the dashboard and open the baseline once for a new owner — SetupChecklistCardComponent, loadSetupStatus, localStorage hide, first-visit redirect, placement in dashboard overview, spec — src/app/pages/dashboard/components/setup-checklist-card/**, dashboard-overview.component.ts/.html
+- [ ] B7: Name the installed app FoodVibe — manifest name/short_name/dir/lang, index title + apple title — public/manifest.webmanifest, src/index.html
+- [ ] B8: Remove the master seed's attempt to read demo files that don't exist — drop DEMO_FILE_MAP and the loop, keep taxonomy seeding, extend the seed test — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
+- [ ] B9: Add the Hebrew texts and the checklist icon — 19 dictionary keys, ListChecks — public/assets/data/dictionary.json, src/app/app.config.ts
+- [ ] B10: Build, test and hand over the baseline, card and phone-name checks — ng build, server suite, listed specs, manifest check, log-query; Human runs the [human] items — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
