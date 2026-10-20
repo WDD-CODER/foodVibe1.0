@@ -1,3 +1,4 @@
 # Fingerprint allowlist for known false positives (not real secrets).
 15973291f1ab5030f7e681275d58de5b0b057605:.claude/commands/review.md:generic-api-key:27
 d11e1c867d6e6914942ac652877456e86e0e2af9:.gitleaksignore:generic-api-key:1
+107179282a7b6cc6dd9ca8677ad9b22683db8a19:scripts/test/code-qa-findings.test.mjs:jwt:59

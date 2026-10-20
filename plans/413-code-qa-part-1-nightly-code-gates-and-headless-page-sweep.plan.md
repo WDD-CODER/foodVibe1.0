@@ -65,6 +65,7 @@ docs/qa/**
 package.json
 package-lock.json
 .gitignore
+.gitleaksignore
 ```
 
 ## Read Scope
@@ -222,3 +223,5 @@ Decisions taken while building (Architect review):
   nightly run still does `gates,static`.
 - `.gitignore` also gets `.claude/.qa-env` now, for plan 414's guard file (414's scope has no `.gitignore`).
 - `sweep.jsonl` (raw page text) is deleted once its findings are in the redacted `pre-qa.json`.
+- `.gitleaksignore` added to scope (Human: `approved: .gitleaksignore`, 2026-10-20): the PR's gitleaks check flagged
+  the fake JWT in `code-qa-findings.test.mjs`; the test now builds it at runtime and the old commit's fingerprint is listed.
