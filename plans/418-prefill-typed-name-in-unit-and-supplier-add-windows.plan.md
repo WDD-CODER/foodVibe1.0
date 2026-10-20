@@ -1,6 +1,6 @@
 # Plan 418 — Prefill the typed name in the unit and supplier add windows
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: b81cb1f4858b4ae86e97b382cf931bd9ca4445f4
 
