@@ -181,18 +181,6 @@
 - [x] F1: Confirm every kept model accepts inline images — VISION_MODEL_PATTERN matches all kept models including gemini-3-flash-preview (extend pattern + test if not) — server/services/gemini-client.js, server/test/gemini-client.test.js
 - [x] G1: Update the Gemini free-tier gotcha with the new lineup and the quota-first ordering rule — docs/brain/gotchas/backend.md
 
-### Plan 414 — Code QA Part 2: API and Data Checks
-- [ ] B1: Build a valid sample record for every entity so the API can be tested with real data shapes — fixtures checked against the shared schemas, QA-CODE- name prefix, reference order — `scripts/qa/code-qa/api-fixtures.mjs`
-- [ ] B2: Make sure API tests can only ever write to the local QA database — qa-up writes .claude/.qa-env; the layer refuses unless it reads local — `scripts/qa/qa-up.ps1, scripts/qa/code-qa/api-layer.mjs`
-- [ ] B3: Check that every entity saves, reads, edits, deletes, goes to trash and comes back intact — CRUD and trash cases — `scripts/qa/code-qa/api-cases.mjs`
-- [ ] B4: Check that bad input is refused with a clear error instead of crashing the server — validation cases — `scripts/qa/code-qa/api-cases.mjs`
-- [ ] B5: Check that users cannot touch each other's data or admin routes — auth and cross-user cases, skipped when QA_USER2 is missing; unauthenticated AI routes return 401 — `scripts/qa/code-qa/api-cases.mjs`
-- [ ] B6: Remove every test record before and after the run so the QA database stays clean — cleanup with its own finding on failure — `scripts/qa/code-qa/api-layer.mjs`
-- [ ] B7: Plug the API layer into the nightly run and the findings report — register layer api in run.mjs, write-call counter, allow-list file — `scripts/qa/code-qa/run.mjs, docs/qa/code-qa-api-cases.md`
-- [ ] B8: Test the case builder and the local-only guard without a server — `scripts/test/code-qa-api.test.mjs, scripts/test/fixtures/code-qa/**`
-- [ ] B9: Document the API layer and the second QA account setup — `docs/qa/code-qa.md, docs/qa/README.md`
-- [ ] B10: Prove it on the QA stack and record the numbers — run --layers=api, paste coverage, write count and failed cases into Execution Notes — `this plan file`
-
 ### Plan 415 — Code QA Part 3: AI Code-Review Agent with a Nightly Page Rotation
 - [ ] C1: Number the checks of every QA page so reviews can be resumed check by check — derive <PAGE>-C<NN> ids from qa-plan.md — `scripts/qa/code-qa/plan-checks.mjs`
 - [ ] C2: Keep a ledger of which page was reviewed when, so each night continues where the last stopped — ledger.json read/write, ingest of review files (header + ### lines), idempotent — `scripts/qa/code-qa/rotation.mjs`
