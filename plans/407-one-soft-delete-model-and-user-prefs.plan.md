@@ -25,12 +25,12 @@ plus shared `__master__` items with per-user overrides only where plan 386 added
   collection (`userPrefs`), with no `TRASH_*` collections and no `hiddenBy` / `favoritedBy`
   fields left.
 - Success:
-  - [auto] Server tests pass (`npm --prefix server test`), with new tests: delete sets `deletedAt`; list excludes it; restore unsets it; purge removes only docs older than N days; user A's favorites/hidden never touch user B's view.
-  - [auto] Migration dry run on a restored Atlas copy (scratch DB) reports counts per `TRASH_*` collection moved and `hiddenBy`/`favoritedBy` entries moved, and a second run is a no-op.
+  - [x] [auto] Server tests pass (`npm --prefix server test`), with new tests: delete sets `deletedAt`; list excludes it; restore unsets it; purge removes only docs older than N days; user A's favorites/hidden never touch user B's view.
+  - [x] [auto] Migration dry run on a restored Atlas copy (scratch DB) reports counts per `TRASH_*` collection moved and `hiddenBy`/`favoritedBy` entries moved, and a second run is a no-op.
   - [auto] After the real migration: a read-only check script prints 0 `TRASH_*` collections and 0 docs with `hiddenBy` / `favoritedBy`.
-  - [auto] `ng build` and `ng test` pass.
-  - [human] Delete → Trash → Restore works for product, recipe, dish, equipment, venue, menu event, supplier.
-  - [human] Favorites and hidden items survive for 3 real accounts (spot check before/after).
+  - [x] [auto] `ng build` and `ng test` pass.
+  - [x] [human] Delete → Trash → Restore works for product, recipe, dish, equipment, venue, menu event, supplier.
+  - [x] [human] Favorites and hidden items survive for 3 real accounts (spot check before/after).
 
 ## Execution Mode
 - Parallel: no (touches `generic.js`, data services and a production migration).
@@ -152,7 +152,7 @@ admin "delete for everyone"). Stop for a go.
 - [x] P6.2: Keep each user's favorites and hidden items in one user-prefs record — `userPrefs` schema + server repo/routes + client `UserPrefsStore`; recipe/dish favorite + hide moved onto it — `shared/schemas/**`, `server/repositories/**`, `src/app/core/services/**`
 - [ ] P6.3: Move existing data onto the new delete model, dry run first — `server/migrations/0005-soft-delete-unify.js` (dry run on Atlas copy → Human go → Atlas) + read-only check script — `server/migrations/**`
 - [x] P6.4: Rebuild the trash page on the new delete model — Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
-- [ ] P6.5: Record the decision, then build, test and hand you a check list — ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
+- [x] P6.5: Record the decision, then build, test and hand you a check list — ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
 
 ## Technical Considerations
 - Migration numbering: `0001`–`0004` exist; this is `0005`.
