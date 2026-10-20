@@ -44,8 +44,8 @@ export class UnitCreatorModal {
   constructor() {
     effect(() => {
       if (this.isOpen_()) {
-        const prefill = this.unitRegistryService.creatorPrefillName_()
-        if (prefill) untracked(() => this.newUnitName_.set(prefill))
+        // Open with the name the chef typed in the dropdown (rule W); read untracked so typing never resets it.
+        this.newUnitName_.set(untracked(() => this.unitRegistryService.creatorPrefillName_()))
         setTimeout(() => document.getElementById('unit-creator-name')?.focus(), 0)
       }
     })

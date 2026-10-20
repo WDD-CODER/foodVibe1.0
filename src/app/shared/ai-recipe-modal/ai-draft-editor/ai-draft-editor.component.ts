@@ -4,10 +4,10 @@ import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { Observable } from 'rxjs'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { FormsModule } from '@angular/forms'
 import { AiRecipeDraft } from '@services/ai-recipe-draft.service'
-import { take } from 'rxjs/operators'
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -52,6 +52,8 @@ export interface DraftWorkflowItem {
 })
 export class AiDraftEditorComponent {
   private readonly unitRegistry = inject(UnitRegistryService)
+  /** Typed name from a unit dropdown's add row, read once by the unit-change handler (rule W). */
+  protected readonly pendingAddName_ = signal('')
   private nextId_ = 0
   private newId(): number {
     return ++this.nextId_
@@ -104,13 +106,20 @@ export class AiDraftEditorComponent {
   // ── Yield unit ────────────────────────────────────────────────────
   protected onYieldUnitChange(val: string): void {
     if (val === '__add_unit__') {
-      this.unitRegistry.openUnitCreator()
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+      this.openUnitCreator_().subscribe((newUnit) => {
         this.yieldUnit_.set(newUnit)
       })
     } else {
       this.yieldUnit_.set(val)
     }
+  }
+
+  /** Opens the unit creator with the typed name; emits the saved unit, nothing on cancel. */
+  private openUnitCreator_(): Observable<string> {
+    const prefillName = this.pendingAddName_()
+    this.pendingAddName_.set('')
+    this.unitRegistry.openUnitCreator({ prefillName })
+    return this.unitRegistry.awaitUnitCreated()
   }
 
   // ── Ingredients ───────────────────────────────────────────────────
@@ -141,8 +150,7 @@ export class AiDraftEditorComponent {
 
   protected onIngredientUnitChange(index: number, val: string): void {
     if (val === '__add_unit__') {
-      this.unitRegistry.openUnitCreator()
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+      this.openUnitCreator_().subscribe((newUnit) => {
         this.ingredients.update((list) => list.map((item, i) => (i === index ? { ...item, unit: newUnit } : item)))
       })
     } else {
@@ -178,8 +186,7 @@ export class AiDraftEditorComponent {
 
   protected onWorkflowUnitChange(index: number, val: string): void {
     if (val === '__add_unit__') {
-      this.unitRegistry.openUnitCreator()
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+      this.openUnitCreator_().subscribe((newUnit) => {
         this.workflowItems_.update((list) => list.map((item, i) => (i === index ? { ...item, unit: newUnit } : item)))
       })
     } else {

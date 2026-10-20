@@ -91,9 +91,9 @@
           placeholder="choose_unit"
           [typeToFilter]="true"
           [addNewValue]="'NEW_UNIT'"
-          [class.c-input--invalid]="validationErrors_()['baseUnit']"
           [allowTypedAdd]="true"
-          (addNewChosen)="pendingUnitName_.set($event)"
+          (addNewChosen)="pendingAddName_.set($event)"
+          [class.c-input--invalid]="validationErrors_()['baseUnit']"
           (valueChange)="onBaseUnitValueChange($event)"
         />
         @if (validationErrors_()['baseUnit']) {
@@ -127,7 +127,7 @@
               [typeToFilter]="true"
               [addNewValue]="'NEW_UNIT'"
               [allowTypedAdd]="true"
-              (addNewChosen)="pendingUnitName_.set($event)"
+              (addNewChosen)="pendingAddName_.set($event)"
               (valueChange)="onUnitSymbolValueChange($event, idx)"
             />
           </div>
@@ -166,7 +166,7 @@
                 [typeToFilter]="true"
                 [addNewValue]="'NEW_UNIT'"
                 [allowTypedAdd]="true"
-                (addNewChosen)="pendingUnitName_.set($event)"
+                (addNewChosen)="pendingAddName_.set($event)"
                 (valueChange)="onUomValueChange($event, idx)"
               />
             </label>
@@ -229,11 +229,12 @@
             [displayFn]="supplierDisplayFn"
             [placeholder]="'choose_supplier' | translatePipe"
             addNewLabelKey="add_new_supplier"
+            [allowTypedAdd]="true"
             [showAddNewAlways]="true"
             chipClass="chipe supplier"
             (add)="addSupplierId($event)"
             (remove)="removeSupplierId($event)"
-            (addNew)="openAddSupplier()"
+            (addNew)="openAddSupplier($event)"
           />
         </div>
         <div

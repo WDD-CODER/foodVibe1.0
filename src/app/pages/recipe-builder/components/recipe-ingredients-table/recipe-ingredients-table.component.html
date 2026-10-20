@@ -116,14 +116,14 @@
             variant="chip"
             [typeToFilter]="true"
             [addNewValue]="'__add_unit__'"
+            [allowTypedAdd]="true"
+            (addNewChosen)="pendingAddName_.set($event)"
             [options]="getUnitOptions(group)"
             placeholder="unit"
             [triggerId]="'unit-row-' + $index"
             focusByRow
             [rowIndex]="$index"
             kind="unit"
-            [allowTypedAdd]="true"
-            (addNewChosen)="pendingUnitName_.set($event)"
             (valueChange)="onUnitChange(group, $index, $event)"
           />
         </div>

@@ -19,10 +19,14 @@ The Human had to re-explain the same rule per dropdown (plans 398, 400, 401).
 5. Filter by "contains", prefix matches first (`filterOptionsByLabel`); an exact typed name hides the add
    option entirely; every add opens its window prefilled with the typed name; after the window saves,
    `notifyItemAdded` shows `"<name>" נוסף` (plan 416 — found in the Human's validation of 400–402).
+6. Units and suppliers prefill too (plan 418): `openUnitCreator({ prefillName })`,
+   `AddSupplierFlowService.open(name)`. Wait for a new unit with `awaitUnitCreated()` — a bare
+   `unitAdded$.pipe(take(1))` stays open after a cancel and fills the cancelled field with the next unit
+   added anywhere.
 
 ## When to use
 
 Building or changing any dropdown or search picker. Do not use it for list-page toolbar "add" buttons
 or form commit buttons — those are not dropdown add options.
 
-See also: plans 398, 400, 401, 402, 416.
+See also: plans 398, 400, 401, 402, 416, 418.

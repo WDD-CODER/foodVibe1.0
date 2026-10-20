@@ -14,11 +14,13 @@ export class AddSupplierFlowService {
   private translationKeyModal = inject(TranslationKeyModalService)
   private addItemModal = inject(AddItemModalService)
 
-  async open(): Promise<Supplier | null> {
+  /** prefillName: the supplier name the chef already typed in the dropdown (add-option rule W). */
+  async open(prefillName?: string): Promise<Supplier | null> {
     const nameHebrew = await this.addItemModal.open({
       title: 'add_supplier',
       label: 'supplier',
-      saveLabel: 'save_supplier'
+      saveLabel: 'save_supplier',
+      initialValue: prefillName?.trim() || undefined
     })
     if (!nameHebrew?.trim()) return null
 

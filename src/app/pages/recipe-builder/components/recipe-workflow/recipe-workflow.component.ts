@@ -28,7 +28,6 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
-import { take } from 'rxjs/operators'
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 
@@ -183,14 +182,16 @@ export class RecipeWorkflowComponent {
 
   protected unitOptionsForWorkflow(): { value: string; label: string }[] {
     const opts = this.getAllUnitKeys().map((u) => ({ value: u, label: u }))
-    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }]
+    return [...opts, { value: '__add_unit__', label: 'add_new_unit' }]
   }
 
   onUnitChange(group: FormGroup, val: string): void {
     if (val === '__add_unit__') {
       group.get('unit')?.setValue('')
-      this.unitRegistry_.openUnitCreator()
-      this.unitRegistry_.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+      const prefillName = this.pendingAddName_()
+      this.pendingAddName_.set('')
+      this.unitRegistry_.openUnitCreator({ prefillName })
+      this.unitRegistry_.awaitUnitCreated().subscribe((newUnit) => {
         group.get('unit')?.setValue(newUnit)
       })
     } else {

@@ -41,7 +41,7 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { FormatQuantityPipe } from 'src/app/core/pipes/format-quantity.pipe'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from '../../core/utils/quantity-step.util'
-import { filter, take } from 'rxjs'
+import { filter } from 'rxjs'
 import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
 import { CookTimerService } from './services/cook-timer.service'
@@ -91,6 +91,8 @@ export class CookViewPage implements OnInit, OnDestroy {
   private readonly kitchenState = inject(KitchenStateService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly unitRegistry = inject(UnitRegistryService)
+  /** Typed name from a unit dropdown's add row, read once by the unit-change handler (rule W). */
+  protected readonly pendingAddName_ = signal('')
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly userMsg = inject(UserMsgService)
   private readonly authModal = inject(AuthModalService)
@@ -213,7 +215,7 @@ export class CookViewPage implements OnInit, OnDestroy {
       const u = recipe.yieldUnit || 'unit'
       opts = [{ value: u, label: u }]
     }
-    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }]
+    return [...opts, { value: '__add_unit__', label: 'add_new_unit' }]
   })
 
   protected convertedYieldAmount_ = computed(() => {
@@ -413,11 +415,19 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.activeMultiplier_.set(factor)
   }
 
+  /** Reads and clears the typed add-row name (rule W). */
+  private takePendingAddName_(): string {
+    const typed = this.pendingAddName_()
+    this.pendingAddName_.set('')
+    return typed
+  }
+
   /** When user changes the yield unit, convert quantity to equivalent in the new unit (e.g. 1 kg → 4 when switching to "unit"). */
   protected onYieldUnitChange(newUnit: string): void {
     if (newUnit === '__add_unit__') {
-      setTimeout(() => this.unitRegistry.openUnitCreator(), 0)
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((unit) => {
+      const prefillName = this.takePendingAddName_()
+      setTimeout(() => this.unitRegistry.openUnitCreator({ prefillName }), 0)
+      this.unitRegistry.awaitUnitCreated().subscribe((unit) => {
         this.onYieldUnitChange(unit)
       })
       return
@@ -787,8 +797,9 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   protected setIngredientUnit(index: number, unit: string): void {
     if (unit === '__add_unit__') {
-      setTimeout(() => this.unitRegistry.openUnitCreator(), 0)
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+      const prefillName = this.takePendingAddName_()
+      setTimeout(() => this.unitRegistry.openUnitCreator({ prefillName }), 0)
+      this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => {
         this.setIngredientUnit(index, newUnit)
       })
       return
@@ -1006,7 +1017,7 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   protected getUnitOptionsForRow(row: ScaledIngredientRow): { value: string; label: string }[] {
     const opts = (row.availableUnits || []).map((u) => ({ value: u, label: u }))
-    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }]
+    return [...opts, { value: '__add_unit__', label: 'add_new_unit' }]
   }
 
   protected getDisplayAmount(rowIndex: number, row: ScaledIngredientRow): number {
@@ -1040,7 +1051,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected otherUnitOptions(index: number, row: ScaledIngredientRow): { value: string; label: string }[] {
     const shown = this.getDisplayUnit(index, row)
     const units = (row.availableUnits ?? []).filter((u) => u && u !== shown)
-    return [...units.map((u) => ({ value: u, label: u })), { value: '__add_unit__', label: '+ יחידה חדשה' }]
+    return [...units.map((u) => ({ value: u, label: u })), { value: '__add_unit__', label: 'add_new_unit' }]
   }
 
   protected onRowUnitPick(index: number, row: ScaledIngredientRow, unit: string | null): void {
@@ -1073,7 +1084,7 @@ export class CookViewPage implements OnInit, OnDestroy {
         : undefined
     const existingUnitSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
     setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols }), 0)
-    this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((unit) => {
+    this.unitRegistry.awaitUnitCreated().subscribe((unit) => {
       if (!product?._id || product.purchaseOptions?.some((o) => o.unitSymbol === unit)) {
         this.chooseUnit(index, unit)
         return

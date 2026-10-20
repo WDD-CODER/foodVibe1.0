@@ -34,7 +34,6 @@ import { getEffectivePrice } from '@utils/product-source.util'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
 import { map } from 'rxjs'
-import { take } from 'rxjs/operators'
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
@@ -73,6 +72,8 @@ export class RecipeIngredientsTableComponent {
   private readonly kitchenStateService = inject(KitchenStateService)
   private readonly recipeCostService = inject(RecipeCostService)
   private readonly unitRegistry = inject(UnitRegistryService)
+  /** Typed name from the unit dropdown's add row, read once by onUnitChange (rule W). */
+  protected readonly pendingAddName_ = signal('')
   private readonly quickEditModalService = inject(QuickEditProductModalService)
   private readonly productDataService = inject(ProductDataService)
   private readonly bp = inject(BreakpointObserver)
@@ -132,8 +133,6 @@ export class RecipeIngredientsTableComponent {
 
   /** When set, this row index shows ingredient-search instead of selected-item-display (click name to change item). */
   protected editingNameAtRow_ = signal<number | null>(null)
-  /** Name typed in a row's unit picker before choosing "add", handed to the unit creator (plan 377). */
-  protected readonly pendingUnitName_ = signal('')
 
   /** Index of the row currently showing the inline quick-edit accordion (desktop only). */
   protected quickEditRowIndex_ = signal<number | null>(null)
@@ -542,7 +541,7 @@ export class RecipeIngredientsTableComponent {
       unitsSet.add(currentUnit.trim())
     }
     const opts = Array.from(unitsSet).map((u) => ({ value: u, label: u }))
-    return [...opts, { value: '__add_unit__', label: '+ יחידה חדשה' }]
+    return [...opts, { value: '__add_unit__', label: 'add_new_unit' }]
   }
 
   onUnitChange(group: FormGroup, index: number, val: string): void {
@@ -551,10 +550,10 @@ export class RecipeIngredientsTableComponent {
       const product =
         group.get('item_type')?.value === 'product' ? (this.getItemMetadata(group) as Product | undefined) : undefined
       const existingSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
-      const name = this.pendingUnitName_()
-      this.pendingUnitName_.set('')
-      setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, name }), 0)
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+      const prefillName = this.pendingAddName_()
+      this.pendingAddName_.set('')
+      setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, prefillName }), 0)
+      this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => {
         const setUnitAndUpdate = (): void => {
           group.get('unit')?.setValue(newUnit)
           this.updateLineCalculations(index)
