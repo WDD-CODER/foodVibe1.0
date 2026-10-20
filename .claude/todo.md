@@ -333,6 +333,18 @@
 - [ ] P11: Add the new texts and the paste icon — 8 dictionary keys above; ClipboardPaste in app.config.ts — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] P12: Build, run the listed specs, check the error log, then hand over the five app checks — ng build, ng test (listed specs), log-query — this plan file
 
+### Plan 440 — Store event and serving coefficients and compute portions in one place (`plans/440-store-event-and-serving-coefficients-and-compute-portions-in-one-place.plan.md`)
+
+- [ ] Schema: `coefficient` on `eventType` and `menuType` terms; event snapshots; item `portionsPerDiner`,
+- [ ] C1: Add coefficients to event and serving types, and type snapshots to events, in the schema — coefficientSchema, eventType member, menuType coefficient, typeSnapshotSchema, item portionsPerDiner / coefficientOverride, predictedTakeRate optional; npm run build:schemas; schema tests — shared/schemas/entities/taxonomy-term.schema.ts, shared/schemas/entities/menu-event.schema.ts, server/test/coefficient-schema.test.js
+- [ ] C2: Mirror the new event fields in the client model so the app keeps compiling — TypeSnapshot, eventTypeSnapshot / servingTypeSnapshot, portionsPerDiner, coefficientOverride, predictedTakeRate optional; `item.predictedTakeRate ?? 0` in hydrateDerivedPortions — src/app/core/models/menu-event.model.ts, src/app/core/services/menu-intelligence.service.ts
+- [ ] C3: Compute every menu item's portions in one pure function with the agreed rounding — computePortions, defaultCoefficient, isValidCoefficient, formatCoefficient per Design; spec with every acceptance number in Done-when — src/app/core/engine/portions.ts, src/app/core/engine/portions.spec.ts
+- [ ] C4: Write migration 0007 that seeds coefficients and gives old events snapshots of 1.0 — pure functions + plan / write / verify / main per Design, dry run default, --write=yes + --backup-dir, --db scratch, --confirm-host, --verify=yes; vitest on fixtures incl. second run = 0 changes — server/migrations/0007-coefficients.js, server/test/migration-0007-coefficients.test.js
+- [ ] C5: Seed a fresh database with the default event and serving types and their coefficients — defaultMasterRegistries + seedMasterTaxonomy; add chef_plated_front to the dictionary; seed test — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js, public/assets/data/dictionary.json
+- [ ] C6: Rehearse migration 0007 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB: dry → write → dry (0) → verify; db-backup atlas → db-restore into foodvibe_scratch_0007 → same sequence; Atlas dry run with --confirm-host; paste counts, folds and portions-change list into session state; STOP for `go 0007` — this plan file, docs/session-state-<branch>.md
+- [ ] C7: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
+- [ ] C8: Build, run the specs and server tests, check the error log — ng build, ng test (listed specs), npm --prefix server test, log-query — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
