@@ -1,6 +1,9 @@
 # Plan 321 — Professional Foundation Refactor: Shared Master, Zod Schemas, Unified Taxonomy
 
 Status: done
+
+> **Closure note (2026-10-20, Planner):** `Status: done` means *closed*, not *fully built*. Phases 0–3 shipped. Phases 4–5 (shared master + per-user overrides) were **dropped** 2026-10-06; Phase 6 moved to plan 407 (merged); Phases 7–8 were dropped. Tenancy is now decided by ADR 0023 (business is the tenant, plan 424).
+
 Track: code — here (not design)
 
 > **Save instructions for the agent:** persisted via `.claude/skills/save-plan/SKILL.md`. Expected to be `320` when written, but `feat/recipe-labels-course-field` had already claimed 320 (commits reference "plan 320 M1"/"M2") with no `plans/320-*.plan.md` file on disk — so this plan is `321`.
