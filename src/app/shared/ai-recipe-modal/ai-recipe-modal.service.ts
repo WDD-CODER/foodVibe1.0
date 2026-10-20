@@ -5,6 +5,8 @@ import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 
 export type AiModalMode = 'create' | 'edit'
+/** The tab the create window opens on. 'paste' sends pasted recipe text to the server parser. */
+export type AiModalInputMode = 'text' | 'image' | 'url' | 'paste'
 
 @Injectable({ providedIn: 'root' })
 export class AiRecipeModalService {
@@ -17,9 +19,17 @@ export class AiRecipeModalService {
   private onPatch_: ((patch: AiRecipePatch) => void) | null = null
 
   readonly isOpen = this.isOpen_.asReadonly()
-  readonly mode = this.mode_.asReadonly()
+  private readonly initialInputMode_ = signal<AiModalInputMode>('text')
 
-  open(mode: AiModalMode = 'create', currentRecipe?: AiRecipeDraft, onPatch?: (patch: AiRecipePatch) => void): void {
+  readonly mode = this.mode_.asReadonly()
+  readonly initialInputMode = this.initialInputMode_.asReadonly()
+
+  open(
+    mode: AiModalMode = 'create',
+    currentRecipe?: AiRecipeDraft,
+    onPatch?: (patch: AiRecipePatch) => void,
+    inputMode: AiModalInputMode = 'text'
+  ): void {
     if (!this.userService.isLoggedIn()) {
       this.authModal.open('sign-in')
       return
@@ -27,6 +37,7 @@ export class AiRecipeModalService {
     this.mode_.set(mode)
     this.currentRecipe_ = currentRecipe ?? null
     this.onPatch_ = onPatch ?? null
+    this.initialInputMode_.set(inputMode)
     this.isOpen_.set(true)
   }
 

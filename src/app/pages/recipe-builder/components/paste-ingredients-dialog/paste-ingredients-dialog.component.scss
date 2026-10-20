@@ -1,0 +1,41 @@
+/* Uses engine: .c-modal-overlay, .c-modal-card, .c-modal-body, .c-modal-actions, .c-btn-ghost, .c-btn-primary */
+@layer components.paste-ingredients-dialog {
+  :host .c-modal-overlay {
+    z-index: 1100;
+  }
+
+  .paste-ingredients-card {
+    inline-size: min(32rem, 92vw);
+    max-block-size: 90dvh;
+  }
+
+  .paste-box {
+    inline-size: 100%;
+    box-sizing: border-box;
+
+    color: var(--color-text-main);
+    font-family: inherit;
+    font-size: var(--fs-md, 0.9rem);
+    line-height: 1.5;
+
+    padding-block: 0.625rem;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+
+    resize: vertical;
+
+    &:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+  }
+
+  .paste-hint {
+    margin-block: 0.5rem 0;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+}

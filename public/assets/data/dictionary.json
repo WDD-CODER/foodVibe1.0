@@ -1061,6 +1061,14 @@
     "add_new_ingredient": "הוסף מרכיב חדש",
     "add_new_preparation": "הוסף הכנה חדשה",
     "add_new_event_type": "הוסף סוג אירוע חדש",
-    "item_added_suffix": "נוסף"
+    "item_added_suffix": "נוסף",
+    "paste_recipe": "הדבק מתכון",
+    "paste_recipe_placeholder": "הדבק כאן את טקסט המתכון — שם, מצרכים ושלבים",
+    "paste_recipe_parse": "זהה מתכון",
+    "paste_recipe_not_recognized": "לא זוהה מתכון בטקסט",
+    "paste_ingredients": "הדבק מצרכים",
+    "paste_ingredients_hint": "שורה אחת לכל מצרך, למשל: 2 ק\"ג עגבניות",
+    "paste_ingredients_add": "הוסף",
+    "ingredient_not_ready": "לא מוכן"
   }
 }

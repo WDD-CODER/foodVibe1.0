@@ -29,12 +29,20 @@ export class RecipeFormService {
 
   // ─── Validators ───────────────────────────────────────────────────
 
-  /** Require amount > 0 when referenceId or nameHebrew is set; empty rows are valid. */
+  /**
+   * A linked row needs amount > 0; empty rows are valid. An unlinked ("not ready") row — a name with no
+   * product behind it — may have no amount yet, so a pasted line the app could not read still saves.
+   */
   ingredientRowValidator(control: AbstractControl): ValidationErrors | null {
     const refId = control.get('referenceId')?.value
     const name = control.get('nameHebrew')?.value?.trim()
     if (!refId && !name) return null
     const amount = control.get('amount_net')?.value
+    if (!refId) {
+      if (amount == null || amount === '') return null
+      const numUnlinked = typeof amount === 'number' ? amount : Number(amount)
+      return isNaN(numUnlinked) || numUnlinked < 0 ? { min: true } : null
+    }
     if (amount == null || amount === '') return { required: true }
     const numAmt = typeof amount === 'number' ? amount : Number(amount)
     if (isNaN(numAmt) || numAmt <= 0) return { min: true }
@@ -190,8 +198,8 @@ export class RecipeFormService {
     const ingredients: Ingredient[] = rawIngredients
       .filter((ing) => {
         if (ing?.referenceId) return true
-        if (ing?.nameHebrew?.trim() && (ing.amount_net ?? 0) > 0) return true
-        return false
+        // An unlinked row keeps its text even without an amount — nothing the chef pasted is dropped.
+        return !!ing?.nameHebrew?.trim()
       })
       .map((ing) => ({
         _id: 'ing_' + Math.random().toString(36).slice(2, 9),

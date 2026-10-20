@@ -8,6 +8,7 @@ import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-dr
 import { AiRecipeModalService } from '../../../shared/ai-recipe-modal/ai-recipe-modal.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import type { Equipment } from '@models/equipment.model'
+import { findIngredientMatch, type IngredientMatch } from 'src/app/core/utils/ingredient-match.util'
 
 export interface RecipeAiFormRefs {
   recipeForm: FormGroup
@@ -84,16 +85,21 @@ export class RecipeAiFlowService {
     }
 
     this.ingredientsArray.clear()
+    const knownUnits = new Set(this.unitRegistry_.allUnitKeys_())
     for (const ing of draft.ingredients) {
       this.ingredientsArray.push(this.recipeFormService_.createIngredientGroup())
       const last = this.ingredientsArray.at(this.ingredientsArray.length - 1)
-      const knownUnits = new Set(this.unitRegistry_.allUnitKeys_())
-      const safeUnit = knownUnits.has(ing.unit) ? ing.unit : 'unit'
+      // An unknown unit is never guessed: the row keeps the unit text in its name and stays unlinked (not ready).
+      const unitText = (ing.unit ?? '').trim()
+      if (unitText && !knownUnits.has(unitText)) {
+        last.patchValue({ nameHebrew: `${ing.name} (${unitText})`, amount_net: ing.amount, unit: 'unit' })
+        continue
+      }
       const matched = this.findIngredientMatch_(ing.name)
       last.patchValue({
         nameHebrew: ing.name,
         amount_net: ing.amount,
-        unit: safeUnit,
+        unit: unitText || 'unit',
         ...(matched && { referenceId: matched.entity._id, item_type: matched.type })
       })
     }
@@ -260,14 +266,8 @@ export class RecipeAiFlowService {
     setTimeout(() => el?.classList.remove('just-filled'), 1500)
   }
 
-  private findIngredientMatch_(name: string): { entity: { _id: string }; type: 'product' | 'recipe' } | null {
-    const norm = (s: string) => s.trim().toLowerCase()
-    const q = norm(name)
-    const product = this.state_.products_().find((p) => norm(p.nameHebrew) === q)
-    if (product) return { entity: product, type: 'product' }
-    const recipe = this.state_.recipes_().find((r) => norm(r.nameHebrew) === q)
-    if (recipe) return { entity: recipe, type: 'recipe' }
-    return null
+  private findIngredientMatch_(name: string): IngredientMatch | null {
+    return findIngredientMatch(name, this.state_.products_(), this.state_.recipes_())
   }
 
   private findEquipmentMatch_(name: string): Equipment | null {
