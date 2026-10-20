@@ -4,7 +4,6 @@ import { VenueProfile } from '../models/venue.model'
 import { BaseEntityDataService } from './base-entity-data.service'
 
 const ENTITY = 'venues'
-const TRASH_KEY = 'TRASH_VENUES'
 
 @Injectable({ providedIn: 'root' })
 export class VenueDataService extends BaseEntityDataService<VenueProfile> {
@@ -66,9 +65,7 @@ export class VenueDataService extends BaseEntityDataService<VenueProfile> {
 
   async deleteVenue(_id: string): Promise<void> {
     try {
-      const item = await this.storage.get<VenueProfile>(ENTITY, _id)
-      const withDeleted = { ...item, deletedAt: Date.now() } as VenueProfile & { deletedAt: number }
-      await this.storage.appendExisting(TRASH_KEY, withDeleted)
+      // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
       this.updateItems((list) => list.filter((v) => v._id !== _id))
       this.logging.info({
@@ -79,38 +76,6 @@ export class VenueDataService extends BaseEntityDataService<VenueProfile> {
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.venue.delete_error', message: 'Failed to delete venue', context: { err } })
-      throw err
-    }
-  }
-
-  async getTrashVenues(): Promise<(VenueProfile & { deletedAt: number })[]> {
-    try {
-      return this.storage.query<VenueProfile & { deletedAt: number }>(TRASH_KEY)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.venue.getTrash_error',
-        message: 'Failed to get trash venues',
-        context: { err }
-      })
-      throw err
-    }
-  }
-
-  async restoreVenue(_id: string): Promise<VenueProfile> {
-    try {
-      const trash = await this.storage.query<VenueProfile & { deletedAt: number }>(TRASH_KEY)
-      const found = trash.find((v) => v._id === _id)
-      if (!found) throw new Error(`Venue ${_id} not found in trash`)
-      const { deletedAt: _, ...item } = found
-      const rest = trash.filter((v) => v._id !== _id)
-      await this.storage.replaceAll(TRASH_KEY, rest)
-      await this.storage.appendExisting(ENTITY, item)
-      this.updateItems((list) => [...list, item])
-      return item
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.venue.restore_error', message: 'Failed to restore venue', context: { err } })
       throw err
     }
   }

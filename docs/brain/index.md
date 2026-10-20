@@ -23,6 +23,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | Need to know what failed, when, for whom (logs) | [[0016-logging-sink-mongo]] — every warn/error lands in Mongo `app_logs`; query it with `patterns/log-query-usage.md` (`scripts/log-query.mjs`) |
 | Porting a design / a new Claude Design handoff | [[0019-design-port-from-handoff]] — handoffs are the source; `design-feature-inventory` is the lost-feature gate |
 | Where to save or find an open plan (design vs code) | [[0020-plans-design-folder]] — open design plans in `plans/design/`, others in `plans/`; closed plans go to `plans/<range>/` |
+| Deleting, Trash, restore, or per-user state like favorites | [[0022-soft-delete-user-prefs]] — `deletedAt` on the doc, Trash routes on the server, 30-day purge; favorites are a flag on the user's own copy |
 | Building or changing a dropdown / search picker | `patterns/dropdown-add-option.md` — one add option + shared `KeyedPickerSearch`; the add-option rule lives in `docs/agent/standards-domain.md` |
 | Unfamiliar domain term | `glossary.md` |
 | Need rules/conventions (not history) | `AGENTS.md` and `docs/agent/*.md` — not this folder |

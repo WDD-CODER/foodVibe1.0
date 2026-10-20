@@ -42,6 +42,5 @@ export const productSchema = z.strictObject({
   /** search helper written by seed/import */
   nameHebrewNormalized: z.string().optional(),
   _masterId: z.string().optional(),
-  _userModified: z.boolean().optional(),
-  _userDeleted: z.boolean().optional()
+  _userModified: z.boolean().optional()
 })

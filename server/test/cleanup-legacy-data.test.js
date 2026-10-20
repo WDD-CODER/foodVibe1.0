@@ -69,12 +69,12 @@ describe('F2 _masterId: null in trash', () => {
 });
 
 describe('F3 missing timestamps', () => {
-  it('backfills from updatedAt, else now; leaves tombstones alone', async () => {
+  it('backfills from updatedAt, else now; leaves purged stubs alone', async () => {
     const { createdAt: _c, updatedAt: _u, ...noTimes } = stored(productBody(), { _id: 'p1', userId: 'u' });
     await db.collection('products').insertMany([
       noTimes,
       { ...noTimes, _id: 'p2', updatedAt: 500 },
-      { _id: 'p3', userId: 'u', schemaVersion: 2, _userDeleted: true },
+      { _id: 'p3', userId: 'u', schemaVersion: 2, _masterId: 'm3', deletedAt: 1, purgedAt: 2 },
     ]);
     expect(await runTwice(F.fixMissingTimestamps, { now: 1234 })).toBe(2);
     expect(await db.collection('products').findOne({ _id: 'p1' })).toMatchObject({ createdAt: 1234, updatedAt: 1234 });

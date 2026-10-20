@@ -74,8 +74,8 @@ const SCOPE_BUTTON_KEYS: Record<ScopeAction, { me: string; everyone: string }> =
  * skips the prompt silently sets `_userModified: true`, and sync-master's
  * Rule 3 then excludes that recipe from every future master update.
  *
- * Deliberately NOT used for per-user state such as `favoritedBy`: pushing a
- * personal favourite to master would publish it to every other user.
+ * Deliberately NOT used for per-user state such as `favorite`: the server strips
+ * it from push-to-master too, so a personal favourite never reaches other users.
  */
 /**
  * Header, message and button texts for one admin scope prompt (plan 365): the action picks

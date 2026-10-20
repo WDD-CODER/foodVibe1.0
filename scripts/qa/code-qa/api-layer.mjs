@@ -12,7 +12,7 @@ import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 import { loginQa } from '../lib/qa-login.mjs'
 import { buildCases, aiRoutesOf } from './api-cases.mjs'
-import { ENTITY_ORDER, fixtureFor, isCodeQaRecord, loadSchemas, REF_KEYS, TRASH_OF, validateFixture } from './api-fixtures.mjs'
+import { ENTITY_ORDER, fixtureFor, isCodeQaRecord, loadSchemas, REF_KEYS, validateFixture } from './api-fixtures.mjs'
 import { loadPageMap } from './common.mjs'
 import { runCommand } from './gates.mjs'
 
@@ -75,31 +75,36 @@ function makeClient(api, sessions, counter) {
   }
 }
 
-/** Deletes every QA-CODE- record of QA_USER in every entity and trash type; returns the ones left. */
+/** Removes every QA-CODE- record of QA_USER for good (live and in Trash); returns the ones left. */
 export async function cleanup(call, extra = []) {
-  const types = [...[...ENTITY_ORDER].reverse(), ...Object.values(TRASH_OF).filter(Boolean)]
-  for (const s of extra) await call('DELETE', `${D}/${s.type}/${s.id}`)
+  const types = [...ENTITY_ORDER].reverse()
+  const lists = (type) => [`${D}/${type}`, `${D}/${type}/trash`]
+  for (const s of extra) await call('DELETE', `${D}/${s.type}/${s.id}?permanent=true`)
   const left = []
   for (const type of types) {
-    const r = await call('GET', `${D}/${type}`)
-    const mine = (Array.isArray(r.json) ? r.json : []).filter(isCodeQaRecord)
-    for (const doc of mine) {
-      const d = await call('DELETE', `${D}/${type}/${encodeURIComponent(doc._id)}`)
-      if (d.status >= 300 && d.status !== 404) left.push(`${type}/${doc._id} (${d.status})`)
+    for (const list of lists(type)) {
+      const r = await call('GET', list)
+      const mine = (Array.isArray(r.json) ? r.json : []).filter(isCodeQaRecord)
+      for (const doc of mine) {
+        const d = await call('DELETE', `${D}/${type}/${encodeURIComponent(doc._id)}?permanent=true`)
+        if (d.status >= 300 && d.status !== 404) left.push(`${type}/${doc._id} (${d.status})`)
+      }
     }
   }
   // A product delete is refused while a recipe still points at it: one more pass after the recipes are gone.
   for (const type of types) {
     const r = await call('GET', `${D}/${type}`)
     for (const doc of (Array.isArray(r.json) ? r.json : []).filter(isCodeQaRecord)) {
-      const d = await call('DELETE', `${D}/${type}/${encodeURIComponent(doc._id)}`)
+      const d = await call('DELETE', `${D}/${type}/${encodeURIComponent(doc._id)}?permanent=true`)
       if (d.status >= 300 && d.status !== 404 && !left.some((l) => l.startsWith(`${type}/${doc._id}`))) left.push(`${type}/${doc._id} (${d.status})`)
     }
   }
   const remaining = []
   for (const type of types) {
-    const r = await call('GET', `${D}/${type}`)
-    for (const doc of (Array.isArray(r.json) ? r.json : []).filter(isCodeQaRecord)) remaining.push(`${type}/${doc._id}`)
+    for (const list of lists(type)) {
+      const r = await call('GET', list)
+      for (const doc of (Array.isArray(r.json) ? r.json : []).filter(isCodeQaRecord)) remaining.push(`${type}/${doc._id}`)
+    }
   }
   return remaining
 }
@@ -154,7 +159,7 @@ export async function runApi({ root, opts, signal, date, log = () => {} }) {
   if (before.length) log(`api: ${before.length} leftover QA-CODE records could not be removed before the run`)
 
   // Reference records the subjects point at.
-  const ctx = { refs: {}, ids: {}, docs: {}, counts: {}, trash: {}, strays: [] }
+  const ctx = { refs: {}, ids: {}, docs: {}, counts: {}, strays: [] }
   for (const [entity, key] of Object.entries(REF_KEYS)) {
     const r = await call('POST', `${D}/${entity}`, { body: fixtureFor(entity, date, ctx.refs, 'ref') })
     if (r.status !== 201 || !r.json?._id) {

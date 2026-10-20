@@ -11,6 +11,7 @@
  *   cloneable  — copied into a new user's namespace at signup / kept in sync at login
  *   backup     — was the client localStorage mirror list (removed in Plan 321 P1.3); no runtime consumer today
  *   searchable — has the lean prefix-match `/search` endpoint
+ *   softDelete — delete stamps `deletedAt`/`deletedBy` on the doc; Trash lists it (plan 407)
  *
  * Rules:
  *  - Never use db.listCollections() to derive any of this — that picks up system
@@ -21,20 +22,13 @@
  */
 const COLLECTIONS = [
   // name                         userData cloneable backup searchable
-  { name: 'suppliers',        userData: true,  cloneable: true,  backup: true,  searchable: false }, // must precede products in CLONEABLE_TYPES order so supplierIdMap is ready
-  { name: 'products',             userData: true,  cloneable: true,  backup: true,  searchable: true },
-  { name: 'recipes',              userData: true,  cloneable: true,  backup: true,  searchable: true },
-  { name: 'dishes',                userData: true,  cloneable: true,  backup: true,  searchable: true },
-  { name: 'equipment',           userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'venues',           userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'menuEvents',          userData: true,  cloneable: true,  backup: true,  searchable: false },
-  { name: 'TRASH_RECIPES',            userData: true,  cloneable: false, backup: true,  searchable: false },
-  { name: 'TRASH_DISHES',             userData: true,  cloneable: false, backup: true,  searchable: false },
-  { name: 'TRASH_PRODUCTS',           userData: true,  cloneable: false, backup: true,  searchable: false },
-  { name: 'TRASH_EQUIPMENT',          userData: true,  cloneable: false, backup: true,  searchable: false },
-  { name: 'TRASH_VENUES',             userData: true,  cloneable: false, backup: true,  searchable: false },
-  { name: 'TRASH_MENU_EVENTS',        userData: true,  cloneable: false, backup: true,  searchable: false },
-  { name: 'TRASH_SUPPLIERS',          userData: true,  cloneable: false, backup: true,  searchable: false }, // Plan 366: admin "delete for everyone"
+  { name: 'suppliers',        userData: true,  cloneable: true,  backup: true,  searchable: false, softDelete: true }, // must precede products in CLONEABLE_TYPES order so supplierIdMap is ready
+  { name: 'products',             userData: true,  cloneable: true,  backup: true,  searchable: true, softDelete: true },
+  { name: 'recipes',              userData: true,  cloneable: true,  backup: true,  searchable: true, softDelete: true },
+  { name: 'dishes',                userData: true,  cloneable: true,  backup: true,  searchable: true, softDelete: true },
+  { name: 'equipment',           userData: true,  cloneable: true,  backup: true,  searchable: false, softDelete: true },
+  { name: 'venues',           userData: true,  cloneable: true,  backup: true,  searchable: false, softDelete: true },
+  { name: 'menuEvents',          userData: true,  cloneable: true,  backup: true,  searchable: false, softDelete: true },
   { name: 'VERSION_HISTORY',          userData: true,  cloneable: false, backup: true,  searchable: false },
   { name: 'activity_log',             userData: true,  cloneable: false, backup: true,  searchable: false },
   // The v1 single-doc registries (KITCHEN_UNITS/PREPARATIONS/CATEGORIES/ALLERGENS/LABELS/
@@ -51,7 +45,8 @@ const COLLECTIONS = [
 
 const ALL_USER_ENTITY_TYPES = COLLECTIONS.filter(c => c.userData).map(c => c.name)
 const CLONEABLE_TYPES = COLLECTIONS.filter(c => c.cloneable).map(c => c.name)
+const SOFT_DELETE_TYPES = COLLECTIONS.filter(c => c.softDelete).map(c => c.name)
 const SEARCHABLE_ENTITY_TYPES = COLLECTIONS.filter(c => c.searchable).map(c => c.name)
 const BACKUP_ENTITY_TYPES = COLLECTIONS.filter(c => c.backup).map(c => c.name)
 
-module.exports = { COLLECTIONS, ALL_USER_ENTITY_TYPES, CLONEABLE_TYPES, SEARCHABLE_ENTITY_TYPES, BACKUP_ENTITY_TYPES }
+module.exports = { COLLECTIONS, ALL_USER_ENTITY_TYPES, CLONEABLE_TYPES, SEARCHABLE_ENTITY_TYPES, BACKUP_ENTITY_TYPES, SOFT_DELETE_TYPES }

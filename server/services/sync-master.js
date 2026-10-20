@@ -6,7 +6,8 @@
  *   1. New master item (no matching _masterId in user data)   → clone to user
  *   2. Unchanged clone (_userModified: false) with stale data → overwrite with latest master
  *   3. User-modified clone (_userModified: true)              → skip (user's version wins)
- *   4. Deleted master item                                    → skip (no removal from user)
+ *   4. Deleted master item (deletedAt set, plan 407)          → skip (no removal from user)
+ *   5. Clone the user deleted (deletedAt set, in Trash or a purged stub) → skip; never re-cloned
  *
  * Ingredient referenceId remapping (Rules 1 & 2):
  *   When a master recipe/dish is cloned (or refreshed) for a user, its ingredient
@@ -26,6 +27,7 @@ const mongoose = require('mongoose');
 const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 const { newId: makeId } = require('../utils/id');
 const { logger } = require('../logger');
+const { LIVE } = require('../jobs/purge-deleted');
 
 /**
  * Remap ingredient referenceIds from master IDs to user-scoped IDs.
@@ -167,7 +169,7 @@ async function syncMasterToUser(userId) {
     for (const type of ['recipes', 'dishes']) {
       const col2 = db.collection(type);
       const [masterDocs2, userDocs2] = await Promise.all([
-        col2.find({ userId: '__master__' }).project({ _id: 1, nameHebrew: 1 }).toArray(),
+        col2.find({ userId: '__master__', ...LIVE }).project({ _id: 1, nameHebrew: 1 }).toArray(),
         col2.find({ userId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
       ]);
       const userByMasterId2 = new Map(userDocs2.map(d => [String(d._masterId), d]));
@@ -201,7 +203,7 @@ async function syncMasterToUser(userId) {
     const col = db.collection(entityType);
 
     const [masterDocs, userDocs, allUserDocs] = await Promise.all([
-      col.find({ userId: '__master__' }).toArray(),
+      col.find({ userId: '__master__', ...LIVE }).toArray(),
       col.find({ userId, _masterId: { $ne: null } }).toArray(),
       col.find({ userId }, { projection: { _id: 1, nameHebrew: 1 } }).toArray(),
     ]);
@@ -310,7 +312,7 @@ async function syncMasterToUser(userId) {
         }
 
         toInsert.push(clone);
-      } else if (!existing._userModified) {
+      } else if (!existing._userModified && existing.deletedAt === undefined) {
         // Rule 2: unmodified clone — overwrite with latest master data
         const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, ...masterRest } = master;
 
@@ -344,7 +346,7 @@ async function syncMasterToUser(userId) {
           update: { $set: { ...masterRest, _userModified: false } },
         });
       }
-      // Rule 3: _userModified === true → skip
+      // Rule 3: _userModified === true → skip; Rule 5: a clone the user deleted → skip
       // Rule 4: deleted master items → skip (absence in masterDocs means no action)
     }
 

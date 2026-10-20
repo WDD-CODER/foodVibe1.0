@@ -54,7 +54,9 @@ const DISCARD_USERS = {
 
 const TRASH_OF = { recipes: 'TRASH_RECIPES', dishes: 'TRASH_DISHES', products: 'TRASH_PRODUCTS', venues: 'TRASH_VENUES' };
 const HISTORY_TYPE = { recipes: 'recipe', dishes: 'dish', products: 'product' };
-const TRASH_COLLECTIONS = ALL_USER_ENTITY_TYPES.filter(n => n.startsWith('TRASH_'));
+// Pre-plan-407 trash collections; migration 0005 moves their docs back and drops them, so after it
+// these fixers find nothing there.
+const TRASH_COLLECTIONS = ['TRASH_RECIPES', 'TRASH_DISHES', 'TRASH_PRODUCTS', 'TRASH_EQUIPMENT', 'TRASH_VENUES', 'TRASH_MENU_EVENTS', 'TRASH_SUPPLIERS'];
 
 async function exists(db, name) {
   return (await db.listCollections({ name }, { nameOnly: true }).toArray()).length > 0;
@@ -111,7 +113,7 @@ function backfillTimes(doc, now) {
 }
 
 async function fixMissingTimestamps(db, { now = Date.now() } = {}) {
-  const filter = { _userDeleted: { $ne: true }, $or: [{ createdAt: null }, { updatedAt: null }] };
+  const filter = { purgedAt: { $exists: false }, $or: [{ createdAt: null }, { updatedAt: null }] };
   const found = [];
   for (const collection of ALL_USER_ENTITY_TYPES.filter(hasSchema)) {
     const docs = await db.collection(collection).find(filter).project({ _id: 1, createdAt: 1, updatedAt: 1 }).toArray();
@@ -195,8 +197,8 @@ async function fixEmptyRegistryCollections(db) {
 function nameFilter(names) {
   const exact = names.filter(n => n !== EMPTY_NAME);
   const or = [{ nameHebrew: { $in: exact } }];
-  // Tombstones carry no name, so `$type: 'string'` keeps them out of the (empty) match.
-  if (names.includes(EMPTY_NAME)) or.push({ nameHebrew: { $type: 'string', $regex: /^\s*$/ }, _userDeleted: { $ne: true } });
+  // Purged stubs carry no name, so `$type: 'string'` keeps them out of the (empty) match.
+  if (names.includes(EMPTY_NAME)) or.push({ nameHebrew: { $type: 'string', $regex: /^\s*$/ } });
   return { $or: or };
 }
 
@@ -238,7 +240,7 @@ async function fixTestItems(db, { ignoreUserIds = [] } = {}) {
   const staying = collection => ({
     _id: { $nin: doomed[collection] ?? [] },
     userId: { $nin: ignoreUserIds },
-    _userDeleted: { $ne: true },
+    deletedAt: { $exists: false },
   });
   const recipeIds = [...doomed.recipes, ...doomed.dishes].map(String);
   const refChecks = [
@@ -319,7 +321,7 @@ async function reportDanglingRefs(db) {
   const recipes = new Set([...await idsOf('recipes'), ...await idsOf('dishes')]);
   const lines = [];
   for (const collection of ['recipes', 'dishes']) {
-    const docs = await db.collection(collection).find({ 'ingredients.referenceId': { $exists: true }, _userDeleted: { $ne: true } })
+    const docs = await db.collection(collection).find({ 'ingredients.referenceId': { $exists: true }, deletedAt: { $exists: false } })
       .project({ nameHebrew: 1, userId: 1, ingredients: 1 }).toArray();
     for (const d of docs) {
       for (const ing of d.ingredients ?? []) {
@@ -329,7 +331,7 @@ async function reportDanglingRefs(db) {
       }
     }
   }
-  const events = await db.collection('menuEvents').find({ 'sections.items.recipeId': { $exists: true }, _userDeleted: { $ne: true } })
+  const events = await db.collection('menuEvents').find({ 'sections.items.recipeId': { $exists: true }, deletedAt: { $exists: false } })
     .project({ nameHebrew: 1, name: 1, userId: 1, sections: 1 }).toArray();
   for (const e of events) {
     for (const s of e.sections ?? []) {

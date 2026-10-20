@@ -182,7 +182,7 @@ async function main() {
   }
 
   // Flag other top-level array-of-string fields (possible migrated labels elsewhere)
-  const KNOWN_ARRAY_FIELDS = new Set(['labels_', 'autoLabels_', 'ingredients_', 'steps_', 'hiddenBy', 'favoritedBy_', 'version_history_', 'prep_items_', 'prep_categories_', 'yield_conversions_'])
+  const KNOWN_ARRAY_FIELDS = new Set(['labels_', 'autoLabels_', 'ingredients_', 'steps_', 'version_history_', 'prep_items_', 'prep_categories_', 'yield_conversions_'])
   const otherArrayFields = new Set()
   for (const doc of allRecipeDocs) {
     for (const [key, val] of Object.entries(doc)) {

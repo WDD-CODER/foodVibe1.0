@@ -42,10 +42,8 @@ export const recipeSchema = z.strictObject({
   course: z.string().optional(),
   autoLabels: z.array(z.string()).optional(),
   createdBy: z.string().optional(),
-  /** @deprecated moves to userPrefs in Phase 6 */
-  hiddenBy: z.array(z.string()).optional(),
-  /** @deprecated moves to userPrefs in Phase 6 */
-  favoritedBy: z.array(z.string()).optional(),
+  /** The owner's favorite mark on their own copy (plan 407); never pushed to master. */
+  favorite: z.boolean().optional(),
   imageUrl: z.string().optional(),
   rating: z.number().optional(),
   netoConfirmed: z.boolean().optional(),
@@ -54,6 +52,5 @@ export const recipeSchema = z.strictObject({
   /** @deprecated legacy-import provenance */
   legacyRecipeNo: z.number().optional(),
   _masterId: z.string().optional(),
-  _userModified: z.boolean().optional(),
-  _userDeleted: z.boolean().optional()
+  _userModified: z.boolean().optional()
 })

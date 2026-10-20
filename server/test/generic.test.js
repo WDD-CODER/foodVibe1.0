@@ -61,10 +61,11 @@ describe('GET /api/v1/data/:type', () => {
     expect(res.body.map(d => d._id)).toEqual(['a1']);
   });
 
-  it('CHARACTERIZATION: _userDeleted tombstones are excluded from reads', async () => {
+  it('plan 407: soft-deleted docs (in Trash or purged stubs) are excluded from reads', async () => {
     await testDb().collection('products').insertMany([
       { _id: 'a1', userId: 'userA', nameHebrew: 'פלפל' },
-      { _id: 'a2', userId: 'userA', nameHebrew: 'שום', _userDeleted: true },
+      { _id: 'a2', userId: 'userA', nameHebrew: 'שום', deletedAt: 1, deletedBy: 'userA' },
+      { _id: 'a3', userId: 'userA', _masterId: 'm3', deletedAt: 1, purgedAt: 2 },
     ]);
     const res = await request(app)
       .get('/api/v1/data/products')
@@ -166,9 +167,9 @@ describe('POST /api/v1/data/:type', () => {
     expect(res.body._userModified).toBe(false);
   });
 
-  it('Plan 321 Phase 1: a client-supplied _id is still honored (appendExisting / trash-restore relies on this)', async () => {
+  it('Plan 321 Phase 1: a client-supplied _id is still honored (appendExisting relies on this)', async () => {
     const res = await request(app)
-      .post('/api/v1/data/TRASH_PRODUCTS')
+      .post('/api/v1/data/activity_log')
       .set('Authorization', `Bearer ${tokenA()}`)
       .send({ _id: 'restored-1', nameHebrew: 'x' });
     expect(res.status).toBe(201);
@@ -266,25 +267,53 @@ describe('PUT /api/v1/data/:type/:id', () => {
 });
 
 describe('DELETE /api/v1/data/:type/:id', () => {
-  it('CHARACTERIZATION: hard-deletes a document with no _masterId (user-originated)', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA' });
+  it('plan 407: delete sets deletedAt/deletedBy and keeps the whole doc (own item)', async () => {
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', nameHebrew: 'x' });
+    const before = Date.now();
     const res = await request(app)
       .delete('/api/v1/data/products/p1')
       .set('Authorization', `Bearer ${tokenA()}`);
     expect(res.status).toBe(200);
-    const remaining = await testDb().collection('products').findOne({ _id: 'p1' });
-    expect(remaining).toBeNull();
+    const doc = await testDb().collection('products').findOne({ _id: 'p1' });
+    expect(doc).toMatchObject({ nameHebrew: 'x', deletedBy: 'userA' });
+    expect(doc.deletedAt).toBeGreaterThanOrEqual(before);
   });
 
-  it('CHARACTERIZATION: tombstones (does not hard-delete) a master clone', async () => {
+  it('plan 407: a master clone is soft-deleted the same way, lineage kept', async () => {
     await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', _masterId: 'm1', nameHebrew: 'x' });
+    await request(app).delete('/api/v1/data/products/p1').set('Authorization', `Bearer ${tokenA()}`);
+    const doc = await testDb().collection('products').findOne({ _id: 'p1' });
+    expect(doc).toMatchObject({ _masterId: 'm1', nameHebrew: 'x', deletedBy: 'userA' });
+  });
+
+  it('plan 407: ?permanent=true hard-deletes an own item, even from Trash', async () => {
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', deletedAt: 5 });
     const res = await request(app)
-      .delete('/api/v1/data/products/p1')
+      .delete('/api/v1/data/products/p1?permanent=true')
       .set('Authorization', `Bearer ${tokenA()}`);
     expect(res.status).toBe(200);
-    const remaining = await testDb().collection('products').findOne({ _id: 'p1' });
-    expect(remaining).toMatchObject({ _userDeleted: true, _userModified: true, _masterId: 'm1' });
-    expect(remaining.nameHebrew).toBeUndefined();
+    expect(await testDb().collection('products').findOne({ _id: 'p1' })).toBeNull();
+  });
+
+  it('plan 407: ?permanent=true shrinks a master clone to a stub that sync never re-clones', async () => {
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', _masterId: 'm1', nameHebrew: 'x', deletedAt: 5, deletedBy: 'userA' });
+    await request(app).delete('/api/v1/data/products/p1?permanent=true').set('Authorization', `Bearer ${tokenA()}`);
+    const stub = await testDb().collection('products').findOne({ _id: 'p1' });
+    expect(stub).toMatchObject({ _masterId: 'm1', deletedAt: 5, deletedBy: 'userA', _userModified: true });
+    expect(typeof stub.purgedAt).toBe('number');
+    expect(stub.nameHebrew).toBeUndefined();
+  });
+
+  it('plan 407: a plain delete of a doc already in Trash is a 404', async () => {
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', deletedAt: 5 });
+    const res = await request(app).delete('/api/v1/data/products/p1').set('Authorization', `Bearer ${tokenA()}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('plan 407: a non-Trash collection is still hard-deleted', async () => {
+    await testDb().collection('activity_log').insertOne({ _id: 'l1', userId: 'userA' });
+    await request(app).delete('/api/v1/data/activity_log/l1').set('Authorization', `Bearer ${tokenA()}`);
+    expect(await testDb().collection('activity_log').findOne({ _id: 'l1' })).toBeNull();
   });
 
   it('CHARACTERIZATION: deleting a product referenced by a recipe ingredient is blocked with 409', async () => {
@@ -338,27 +367,27 @@ describe('PUT /api/v1/data/:type (whole-collection replace)', () => {
 
   it('CHARACTERIZATION: requires the X-Confirm-Replace header (on an allowlisted type)', async () => {
     const res = await request(app)
-      .put('/api/v1/data/TRASH_PRODUCTS')
+      .put('/api/v1/data/VERSION_HISTORY')
       .set('Authorization', `Bearer ${tokenA()}`)
       .send([{ _id: 'u1' }]);
     expect(res.status).toBe(400);
   });
 
   it('CHARACTERIZATION: replaces the caller\'s entire collection, reassigns a colliding id', async () => {
-    await testDb().collection('TRASH_PRODUCTS').insertMany([
+    await testDb().collection('VERSION_HISTORY').insertMany([
       { _id: 'old1', userId: 'userA' },
       { _id: 'taken', userId: 'userB' },
     ]);
     const res = await request(app)
-      .put('/api/v1/data/TRASH_PRODUCTS')
+      .put('/api/v1/data/VERSION_HISTORY')
       .set('Authorization', `Bearer ${tokenA()}`)
       .set('X-Confirm-Replace', 'true')
       .send([{ _id: 'taken', nameHebrew: 'x' }]);
     expect(res.status).toBe(200);
-    const mine = await testDb().collection('TRASH_PRODUCTS').find({ userId: 'userA' }).toArray();
+    const mine = await testDb().collection('VERSION_HISTORY').find({ userId: 'userA' }).toArray();
     expect(mine).toHaveLength(1);
     expect(mine[0]._id).not.toBe('taken'); // reassigned — 'taken' still belongs to userB
-    const othersStillIntact = await testDb().collection('TRASH_PRODUCTS').findOne({ _id: 'taken', userId: 'userB' });
+    const othersStillIntact = await testDb().collection('VERSION_HISTORY').findOne({ _id: 'taken', userId: 'userB' });
     expect(othersStillIntact).not.toBeNull();
   });
 });

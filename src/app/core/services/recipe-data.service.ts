@@ -7,7 +7,6 @@ import { UserService } from './user.service'
 import { Recipe } from '../models/recipe.model'
 
 const ENTITY = 'recipes'
-const TRASH_KEY = 'TRASH_RECIPES'
 
 @Injectable({ providedIn: 'root' })
 export class RecipeDataService {
@@ -149,7 +148,7 @@ export class RecipeDataService {
   async updateRecipe(recipe: Recipe): Promise<Recipe> {
     try {
       const existing = await this.storage.get<Recipe>(ENTITY, recipe._id).catch(() => null)
-      const { hiddenBy: _hiddenBy, ...rest } = recipe
+      const rest = recipe
       const toSave: Recipe = {
         ...rest,
         createdAt: recipe.createdAt ?? existing?.createdAt,
@@ -173,7 +172,7 @@ export class RecipeDataService {
 
   async permanentlyDeleteRecipe(_id: string): Promise<void> {
     try {
-      await this.storage.remove(ENTITY, _id)
+      await this.storage.removePermanently(ENTITY, _id)
       this.recipesStore_.update((recipes) => recipes.filter((r) => r._id !== _id))
       this.logging.info({
         event: 'crud.recipe.hardDelete',
@@ -193,9 +192,7 @@ export class RecipeDataService {
 
   async deleteRecipe(_id: string): Promise<void> {
     try {
-      const recipe = await this.storage.get<Recipe>(ENTITY, _id)
-      const withDeleted = { ...recipe, deletedAt: Date.now() } as Recipe & { deletedAt: number }
-      await this.storage.appendExisting(TRASH_KEY, withDeleted)
+      // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
       this.recipesStore_.update((recipes) => recipes.filter((r) => r._id !== _id))
       this.logging.info({
@@ -206,88 +203,6 @@ export class RecipeDataService {
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.recipe.delete_error', message: 'Failed to delete recipe', context: { err } })
-      throw err
-    }
-  }
-
-  async getTrashRecipes(): Promise<(Recipe & { deletedAt: number })[]> {
-    try {
-      return this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.recipe.getTrash_error',
-        message: 'Failed to get trash recipes',
-        context: { err }
-      })
-      throw err
-    }
-  }
-
-  async restoreRecipe(_id: string): Promise<Recipe> {
-    try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
-      const item = trash.find((r) => r._id === _id)
-      if (!item) throw new Error(`Recipe ${_id} not found in trash`)
-      const { deletedAt: _, ...recipe } = item
-      const rest = trash.filter((r) => r._id !== _id)
-      await this.storage.replaceAll(TRASH_KEY, rest)
-      await this.storage.appendExisting(ENTITY, recipe)
-      this.recipesStore_.update((recipes) => [...recipes, recipe])
-      return recipe
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.recipe.restore_error', message: 'Failed to restore recipe', context: { err } })
-      throw err
-    }
-  }
-
-  async disposeRecipe(_id: string): Promise<void> {
-    try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
-      const rest = trash.filter((r) => r._id !== _id)
-      if (rest.length === trash.length) throw new Error(`Recipe ${_id} not found in trash`)
-      await this.storage.replaceAll(TRASH_KEY, rest)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.recipe.dispose_error', message: 'Failed to dispose recipe', context: { err } })
-      throw err
-    }
-  }
-
-  async restoreAllRecipes(): Promise<Recipe[]> {
-    try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
-      const restored: Recipe[] = []
-      for (const item of trash) {
-        const { deletedAt: _, ...recipe } = item
-        await this.storage.appendExisting(ENTITY, recipe)
-        restored.push(recipe)
-      }
-      await this.storage.replaceAll(TRASH_KEY, [])
-      this.recipesStore_.update((recipes) => [...recipes, ...restored])
-      return restored
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.recipe.restoreAll_error',
-        message: 'Failed to restore all recipes',
-        context: { err }
-      })
-      throw err
-    }
-  }
-
-  async disposeAllRecipes(): Promise<void> {
-    try {
-      await this.storage.replaceAll(TRASH_KEY, [])
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.recipe.disposeAll_error',
-        message: 'Failed to dispose all recipes',
-        context: { err }
-      })
       throw err
     }
   }

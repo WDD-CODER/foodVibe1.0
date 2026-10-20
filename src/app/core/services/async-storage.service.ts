@@ -62,18 +62,30 @@ export class StorageService {
     return this.httpAdapter.put<T>(entityType, updatedEntity)
   }
 
+  /** For a Trash type (plan 407) the server soft-deletes: the item lands in Trash. */
   async remove(entityType: string, entityId: string): Promise<void> {
     return this.httpAdapter.remove(entityType, entityId)
   }
 
-  /** Appends an entity that already has an _id (e.g. restoring from trash). */
-  async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
-    return this.httpAdapter.appendExisting<T>(entityType, entity)
+  /** Removes for good — also out of Trash (plan 407). */
+  async removePermanently(entityType: string, entityId: string): Promise<void> {
+    return this.httpAdapter.removePermanently(entityType, entityId)
   }
 
-  /** Replaces the entire collection for an entity type (e.g. trash clear-all, a registry save). */
-  async replaceAll<T>(entityType: string, entities: T[]): Promise<void> {
-    return this.httpAdapter.replaceAll<T>(entityType, entities)
+  async trash<T>(entityType: string): Promise<(T & { deletedAt: number })[]> {
+    return this.httpAdapter.trash<T>(entityType)
+  }
+
+  async restore<T>(entityType: string, entityId: string): Promise<T> {
+    return this.httpAdapter.restore<T>(entityType, entityId)
+  }
+
+  async restoreAll(entityType: string): Promise<void> {
+    return this.httpAdapter.restoreAll(entityType)
+  }
+
+  async emptyTrash(entityType: string): Promise<void> {
+    return this.httpAdapter.emptyTrash(entityType)
   }
 
   async queryFiltered<T extends { entityType?: string; entityId?: string }>(

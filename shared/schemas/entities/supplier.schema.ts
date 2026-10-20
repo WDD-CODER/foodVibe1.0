@@ -16,6 +16,5 @@ export const supplierSchema = z.strictObject({
   /** @deprecated legacy-import provenance */
   legacySupplierCode: z.number().optional(),
   _masterId: z.string().optional(),
-  _userModified: z.boolean().optional(),
-  _userDeleted: z.boolean().optional()
+  _userModified: z.boolean().optional()
 })

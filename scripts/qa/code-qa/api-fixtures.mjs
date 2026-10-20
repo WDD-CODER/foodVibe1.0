@@ -14,19 +14,7 @@ import { join } from 'path'
 /** Creation order: each entity only references entities before it. */
 export const ENTITY_ORDER = ['suppliers', 'equipment', 'products', 'recipes', 'dishes', 'venues', 'menuEvents']
 
-/** The trash collection the app moves a deleted record into; null = deleted for good (suppliers). */
-export const TRASH_OF = {
-  suppliers: null,
-  equipment: 'TRASH_EQUIPMENT',
-  products: 'TRASH_PRODUCTS',
-  recipes: 'TRASH_RECIPES',
-  dishes: 'TRASH_DISHES',
-  venues: 'TRASH_VENUES',
-  menuEvents: 'TRASH_MENU_EVENTS'
-}
-
-/** Entities the app can restore from the trash (src/app/core/services/*-data.service.ts restore*()). */
-export const RESTORABLE = new Set(['equipment', 'products', 'recipes', 'dishes', 'venues'])
+/** Plan 407: every entity has a Trash — delete stamps deletedAt, `/:type/trash` lists it, `/restore` brings it back. */
 
 /** Entities with the /search endpoint (server/constants/collections.js searchable). */
 export const SEARCHABLE = new Set(['products', 'recipes', 'dishes'])

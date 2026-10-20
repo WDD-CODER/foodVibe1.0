@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
-import { TrashService } from '@services/trash.service'
+import { TrashService, TRASH_SECTIONS, type TrashType } from '@services/trash.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-panel/version-history-panel.component'
@@ -33,9 +33,8 @@ export class TrashPage implements OnInit {
   readonly loading = signal(true)
   readonly loadError = signal<string | null>(null)
 
-  readonly dishes = this.trash.trashDishes
-  readonly recipes = this.trash.trashRecipes
-  readonly products = this.trash.trashProducts
+  readonly sections = TRASH_SECTIONS
+  readonly items = this.trash.items
 
   readonly historyFor_ = signal<{ entityType: VersionEntityType; entityId: string; entityName: string } | null>(null)
 
@@ -68,100 +67,36 @@ export class TrashPage implements OnInit {
     })
   }
 
-  async onRestoreDish(id: string): Promise<void> {
+  async onRestore(type: TrashType, id: string): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_restore', {
       saveLabel: 'trash_recover',
       variant: 'warning'
     })
-    if (ok) await this.trash.restoreDish(id)
+    if (ok) await this.trash.restore(type, id)
   }
 
-  async onRestoreRecipe(id: string): Promise<void> {
-    const ok = await this.confirmModal.open('trash_confirm_restore', {
-      saveLabel: 'trash_recover',
-      variant: 'warning'
-    })
-    if (ok) await this.trash.restoreRecipe(id)
-  }
-
-  async onRestoreProduct(id: string): Promise<void> {
-    const ok = await this.confirmModal.open('trash_confirm_restore', {
-      saveLabel: 'trash_recover',
-      variant: 'warning'
-    })
-    if (ok) await this.trash.restoreProduct(id)
-  }
-
-  async onDisposeDish(id: string): Promise<void> {
+  async onDispose(type: TrashType, id: string): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_dispose', {
       saveLabel: 'trash_dispose',
       variant: 'danger'
     })
-    if (ok) await this.trash.disposeDish(id)
+    if (ok) await this.trash.dispose(type, id)
   }
 
-  async onDisposeRecipe(id: string): Promise<void> {
-    const ok = await this.confirmModal.open('trash_confirm_dispose', {
-      saveLabel: 'trash_dispose',
-      variant: 'danger'
-    })
-    if (ok) await this.trash.disposeRecipe(id)
-  }
-
-  async onDisposeProduct(id: string): Promise<void> {
-    const ok = await this.confirmModal.open('trash_confirm_dispose', {
-      saveLabel: 'trash_dispose',
-      variant: 'danger'
-    })
-    if (ok) await this.trash.disposeProduct(id)
-  }
-
-  async onRestoreAllDishes(): Promise<void> {
+  async onRestoreAll(type: TrashType): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_restore', {
       saveLabel: 'trash_recover_all',
       variant: 'warning'
     })
-    if (ok) await this.trash.restoreAllDishes()
+    if (ok) await this.trash.restoreAll(type)
   }
 
-  async onRestoreAllRecipes(): Promise<void> {
-    const ok = await this.confirmModal.open('trash_confirm_restore', {
-      saveLabel: 'trash_recover_all',
-      variant: 'warning'
-    })
-    if (ok) await this.trash.restoreAllRecipes()
-  }
-
-  async onRestoreAllProducts(): Promise<void> {
-    const ok = await this.confirmModal.open('trash_confirm_restore', {
-      saveLabel: 'trash_recover_all',
-      variant: 'warning'
-    })
-    if (ok) await this.trash.restoreAllProducts()
-  }
-
-  async onDisposeAllDishes(): Promise<void> {
+  async onDisposeAll(type: TrashType): Promise<void> {
     const ok = await this.confirmModal.open('trash_confirm_dispose_all', {
       saveLabel: 'trash_dispose_all',
       variant: 'danger'
     })
-    if (ok) await this.trash.disposeAllDishes()
-  }
-
-  async onDisposeAllRecipes(): Promise<void> {
-    const ok = await this.confirmModal.open('trash_confirm_dispose_all', {
-      saveLabel: 'trash_dispose_all',
-      variant: 'danger'
-    })
-    if (ok) await this.trash.disposeAllRecipes()
-  }
-
-  async onDisposeAllProducts(): Promise<void> {
-    const ok = await this.confirmModal.open('trash_confirm_dispose_all', {
-      saveLabel: 'trash_dispose_all',
-      variant: 'danger'
-    })
-    if (ok) await this.trash.disposeAllProducts()
+    if (ok) await this.trash.disposeAll(type)
   }
 
   openHistory(entityType: VersionEntityType, entityId: string, entityName: string): void {
@@ -173,8 +108,6 @@ export class TrashPage implements OnInit {
   }
 
   getRecoverBeforeRestore(h: { entityType: VersionEntityType; entityId: string }): () => Promise<void> {
-    if (h.entityType === 'dish') return () => this.trash.restoreDish(h.entityId)
-    if (h.entityType === 'recipe') return () => this.trash.restoreRecipe(h.entityId)
-    return () => this.trash.restoreProduct(h.entityId)
+    return () => this.trash.restoreFor(h.entityType, h.entityId)
   }
 }
