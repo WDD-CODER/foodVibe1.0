@@ -472,6 +472,18 @@
 - [ ] B9: Add the Hebrew texts and the checklist icon — 19 dictionary keys, ListChecks — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] B10: Build, test and hand over the baseline, card and phone-name checks — ng build, server suite, listed specs, manifest check, log-query; Human runs the [human] items — this plan file
 
+### Plan 432 — Import products from a pasted supplier price list (`plans/432-import-products-from-a-pasted-supplier-price-list.plan.md`)
+
+- [ ] I1: Clean the AI's rows into a safe preview list — normalizeProductName, Hebrew unit map, dedupe, 200 cap, per-unit price — server/utils/price-list-import.js
+- [ ] I2: Let the owner turn pasted price-list text into rows with one AI call — POST /parse-price-list, PRICE_LIST_SYSTEM_PROMPT, assertCan before aiLimiter — server/routes/ai.js
+- [ ] I3: Save a whole import in one server request: create new products, update only prices — product-import.js /apply with match, skip, stampNew, checkStoredDoc, insertMany/bulkWrite; mount in app.js — server/routes/product-import.js, server/app.js
+- [ ] I4: Prove the cleaning rules and the apply route with server tests — every Done-when case — server/test/price-list-import.test.js, server/test/product-import-route.test.js
+- [ ] I5: Give the browser the same name-matching rule and the two calls — normalizeProductName + spec, GeminiService.parsePriceList, ProductImportService.apply — src/app/core/utils/product-name.util.ts, src/app/core/services/gemini.service.ts, src/app/core/services/product-import.service.ts
+- [ ] I6: Build the paste, preview and save screen — ProductImportComponent (paste, supplier, preview, statuses, row delete, category resolution, summary), spec — src/app/pages/inventory/components/product-import/**
+- [ ] I7: Open the import screen from inventory for the owner only — lazy inventory/import route, HeroFab action gated by editMoney — src/app/app.routes.ts, inventory-product-list.component.ts
+- [ ] I8: Add the Hebrew texts and the paste icon — 19 dictionary keys, ClipboardPaste — public/assets/data/dictionary.json, src/app/app.config.ts
+- [ ] I9: Build, test and hand over the import checks — ng build, server suite, listed specs, log-query; Human runs the [human] items on desktop and mobile — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
