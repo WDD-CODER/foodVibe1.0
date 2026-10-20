@@ -234,6 +234,20 @@
 - [ ] T10: Refresh the folder maps for the new settings page and shared edit gate — breadcrumbs skill — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md
 - [ ] T11: Build, test, check the frozen files and hand over the team and lock checks — ng build, server suite, listed specs, numstat, log-query; Human runs the [human] items on desktop and mobile — this plan file
 
+### Plan 433 — One quantity and cost engine for every event list, with fixture tests (`plans/433-one-quantity-and-cost-engine-for-every-event-list-with-fixture-tests.plan.md`)
+
+- [ ] Waste: `buyQty = netQty ÷ yieldFactor`; `yieldFactor` 0, negative or missing → 1.
+- [ ] E1: Define the engine's input and output shapes so every later screen shares one vocabulary — contract types plus the listed extensions — src/app/core/engine/event-plan.types.ts
+- [ ] E2: Add one place for quantity, money and percent rounding, with the 121-not-122 float check — roundPortions, formatQty, formatMoney, formatPct1, formatPctInt, roundMoney + spec — src/app/core/engine/rounding.ts, rounding.spec.ts
+- [ ] E3: Pick each product's supplier by the cheapest price, with a fallback to the general price — chooseSupplier + spec — src/app/core/engine/supplier-choice.ts, supplier-choice.spec.ts
+- [ ] E4: Convert amounts into the product's base unit or the prep's yield unit, or flag it — toBase, toYield, unitFamily; widen optionRateInBase's registry parameter to Pick<UnitRegistryService, 'getConversion'> — src/app/core/engine/units.ts, src/app/core/utils/purchase-option-rate.util.ts (+ spec case with a plain object)
+- [ ] E5: Expand preps inside dishes into raw lines, prep lines and dish costs, stopping on cycles — computeEventPlan per the Design steps 1–6 — src/app/core/engine/event-plan.engine.ts
+- [ ] E6: Write the 04.1 fixture once and test every listed case against hand-computed numbers — buildFixtureInput + engine spec (fixture, cost, cycle, no conversion, deleted, unlinked, waste, purchase unit, no yield, no ingredients) — src/app/core/engine/testing/event-plan.fixture.ts, event-plan.engine.spec.ts
+- [ ] E7: Read today's stored portions until the coefficients plan lands — portionsFromDerived + spec — src/app/core/engine/portions-from-derived.ts, portions-from-derived.spec.ts
+- [ ] E8: Give screens one Angular entry point to the engine for a whole event or a single dish — EventPlanService.planFor, costFor + spec with stubbed KitchenStateService and UnitRegistryService — src/app/core/engine/event-plan.service.ts, event-plan.service.spec.ts
+- [ ] E9: Note the new engine folder in the core map so the next agent finds it — breadcrumbs skill — src/app/core/breadcrumbs.md
+- [ ] E10: Build, run the engine specs and the log check, and report the evidence — ng build, ng test include list, log-query — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
