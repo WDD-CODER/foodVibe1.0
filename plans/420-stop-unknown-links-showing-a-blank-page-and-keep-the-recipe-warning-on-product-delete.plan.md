@@ -1,6 +1,6 @@
 # Plan 420 — Stop unknown links showing a blank page and keep the recipe warning on product delete
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: 8d7997e5b732007392f50cc07f40b2aa430f37d6
 
@@ -32,12 +32,12 @@ User stories:
 **Primary:** an unknown URL lands on `/dashboard`; deleting a used product always warns with the real count and
 cleans the recipes, also on a cold load of `/inventory`.
 
-- [auto] `ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/pages/inventory/components/inventory-product-list/**'`
+- [x] [auto] `ng build` passes.
+- [x] [auto] `npx ng test --watch=false --include='src/app/pages/inventory/components/inventory-product-list/**'`
   passes, including the new specs: with recipes not yet loaded, `onDeleteProduct` and `onBulkDeleteSelected`
   await `ensureLoaded()` on `RecipeDataService` and `DishDataService` before counting, and the confirm text
   carries the count.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Open `/does-not-exist` → the dashboard opens and the address bar shows `/dashboard`.
 - [human] With a product that one recipe uses: reload `/inventory` (F5), delete that product → the warning says
   «בשימוש ב-1 מתכונים/מנות»; after the delete the recipe opens without that ingredient row.
@@ -103,16 +103,16 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Unknown URLs redirect to `/dashboard`.
-- [ ] Single and bulk product delete load recipes and dishes before counting the recipes that use the product.
+- [x] Unknown URLs redirect to `/dashboard`.
+- [x] Single and bulk product delete load recipes and dishes before counting the recipes that use the product.
 
 ### Won't Have (this plan)
 - A dedicated 404 page.
 - Moving the ingredient cascade to the server (INV-3 gap).
 
 ## Atomic Sub-tasks
-- [ ] F1: Send unknown links to the dashboard instead of a blank page — append path '**' redirect as the last route — src/app/app.routes.ts
-- [ ] F2: Always warn how many recipes use a product before it is deleted, also right after a reload — ensureRecipesLoaded_ before counting in single and bulk delete, stop on load failure, specs — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts, src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.spec.ts
+- [x] F1: Send unknown links to the dashboard instead of a blank page — append path '**' redirect as the last route — src/app/app.routes.ts
+- [x] F2: Always warn how many recipes use a product before it is deleted, also right after a reload — ensureRecipesLoaded_ before counting in single and bulk delete, stop on load failure, specs — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts, src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.spec.ts
 - [ ] F3: Build, test and hand you the two checks — ng build, the inventory-product-list specs, log-query; Human runs the unknown-link and cold-reload delete checks — this plan file
 
 ## Technical Considerations

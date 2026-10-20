@@ -12,6 +12,8 @@ import { Product } from '@models/product.model'
 import { TranslationService } from '@services/translation.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { RecipeDataService } from '@services/recipe-data.service'
+import { DishDataService } from '@services/dish-data.service'
 
 describe('InventoryProductListComponent', () => {
   let component: InventoryProductListComponent
@@ -70,6 +72,11 @@ describe('InventoryProductListComponent', () => {
         provideHttpClientTesting(),
         { provide: KitchenStateService, useValue: mockKitchenState },
         { provide: Router, useValue: mockRouter },
+        {
+          provide: RecipeDataService,
+          useValue: { ensureLoaded: jasmine.createSpy('recipeEnsureLoaded').and.resolveTo() }
+        },
+        { provide: DishDataService, useValue: { ensureLoaded: jasmine.createSpy('dishEnsureLoaded').and.resolveTo() } },
         {
           provide: ActivatedRoute,
           useValue: { queryParams: of({}), params: of({}), snapshot: { queryParams: {}, params: {} } }
@@ -135,5 +142,48 @@ describe('InventoryProductListComponent', () => {
 
     await (component as any).onDeleteProduct('1')
     expect(stateService.deleteProduct).toHaveBeenCalledWith('1')
+  })
+
+  describe('recipes not yet loaded (plan 420)', () => {
+    let confirmOpen: jasmine.Spy
+    let state: any
+    let recipeData: { ensureLoaded: jasmine.Spy }
+    let dishData: { ensureLoaded: jasmine.Spy }
+    const usingRecipe = { _id: 'r1', ingredients: [{ referenceId: '1' }] }
+
+    beforeEach(() => {
+      confirmOpen = TestBed.inject(ConfirmModalService).open as jasmine.Spy
+      confirmOpen.calls.reset()
+      confirmOpen.and.returnValue(Promise.resolve(false))
+      state = TestBed.inject(KitchenStateService)
+      recipeData = TestBed.inject(RecipeDataService) as any
+      dishData = TestBed.inject(DishDataService) as any
+      recipeData.ensureLoaded.calls.reset()
+      dishData.ensureLoaded.calls.reset()
+      // Recipes appear in the list only once ensureLoaded has run (cold /inventory load).
+      state.recipes_.set([])
+      recipeData.ensureLoaded.and.callFake(async () => state.recipes_.set([usingRecipe]))
+    })
+
+    it('onDeleteProduct awaits ensureLoaded on recipes and dishes and the confirm text carries the count', async () => {
+      await (component as any).onDeleteProduct('1')
+      expect(recipeData.ensureLoaded).toHaveBeenCalledTimes(1)
+      expect(dishData.ensureLoaded).toHaveBeenCalledTimes(1)
+      expect(confirmOpen.calls.mostRecent().args[0]).toContain('ב-1 מתכונים/מנות')
+    })
+
+    it('onBulkDeleteSelected awaits ensureLoaded on recipes and dishes and the confirm text carries the count', async () => {
+      await (component as any).onBulkDeleteSelected(['1', '2'])
+      expect(recipeData.ensureLoaded).toHaveBeenCalledTimes(1)
+      expect(dishData.ensureLoaded).toHaveBeenCalledTimes(1)
+      expect(confirmOpen.calls.mostRecent().args[0]).toContain('ב-1 מתכונים/מנות')
+    })
+
+    it('stops the delete when the load fails', async () => {
+      recipeData.ensureLoaded.and.rejectWith(new Error('load failed'))
+      await (component as any).onDeleteProduct('1')
+      await (component as any).onBulkDeleteSelected(['1'])
+      expect(confirmOpen).not.toHaveBeenCalled()
+    })
   })
 })

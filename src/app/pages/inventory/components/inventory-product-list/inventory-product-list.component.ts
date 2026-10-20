@@ -57,6 +57,8 @@ import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { buildFilterOptionCounts, attachFilterCheckedState } from '@utils/filter-category-counts.util'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
 import { ProductDataService } from '@services/product-data.service'
+import { RecipeDataService } from '@services/recipe-data.service'
+import { DishDataService } from '@services/dish-data.service'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
@@ -103,6 +105,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly productData_ = inject(ProductDataService)
+  private readonly recipeData_ = inject(RecipeDataService)
+  private readonly dishData_ = inject(DishDataService)
   private readonly aiProductModal_ = inject(AiProductModalService)
 
   private lastPriceEdit_ = { productId: '', unit: '', value: 0 }
@@ -538,7 +542,19 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   // DELETE
+  /** Recipes and dishes load lazily; count and cascade must never read an empty list (plan 420). */
+  private async ensureRecipesLoaded_(): Promise<boolean> {
+    try {
+      await Promise.all([this.recipeData_.ensureLoaded(), this.dishData_.ensureLoaded()])
+      return true
+    } catch {
+      // The data services already log and toast a failed load; deleting blind is the bug, so stop.
+      return false
+    }
+  }
+
   protected async onDeleteProduct(_id: string): Promise<void> {
+    if (!(await this.ensureRecipesLoaded_())) return
     const product = this.kitchenStateService.products_().find((p) => p._id === _id)
     const affected = this.kitchenStateService
       .recipes_()
@@ -572,6 +588,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
+    if (!(await this.ensureRecipesLoaded_())) return
 
     const productsById = new Map(this.kitchenStateService.products_().map((p) => [p._id, p]))
     const recipes = this.kitchenStateService.recipes_()
