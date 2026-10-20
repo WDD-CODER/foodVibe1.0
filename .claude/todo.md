@@ -359,6 +359,19 @@
 - [ ] K10: Add the new texts — 13 dictionary keys above — public/assets/data/dictionary.json
 - [ ] K11: Build, run the listed specs and greps, check the error log, then hand over the app checks — ng build, git diff --numstat on the two frozen files, ng test (listed), both greps, log-query — this plan file
 
+### Plan 442 — Give every event a stage, a stage history and a notes log on the server (`plans/442-give-every-event-a-stage-a-stage-history-and-a-notes-log-on-the-server.plan.md`)
+
+- [ ] S1: Define the event stages and the server-owned event fields once, for client and server — EVENT_STAGES, NOT_CLOSED_REASONS, NOT_CLOSED_FROM, CLOSED_FROM_INDEX, NOTE_MAX_LENGTH, EVENT_SERVER_FIELDS; re-export from the entities index — shared/schemas/entities/event-stage.ts, shared/schemas/entities/index.ts
+- [ ] S2: Add stage, history, notes, customer and deposit fields to the event schema and model — per Design; npm run build:schemas; schema tests — shared/schemas/entities/menu-event.schema.ts, src/app/core/models/menu-event.model.ts, server/test/event-stage-schema.test.js
+- [ ] S3: Encode every stage-move and note rule in pure functions — applyStageChange, newNote per Design; tests for every case in Done-when — server/utils/event-stage.js, server/test/event-stage.test.js
+- [ ] S4: Serve stage moves and notes from a dedicated events router — routes per Design with scopeFilter, assertCan, author check, rate limit, logging; mount at /api/v1/events; router tests — server/routes/events.js, server/app.js, server/test/events-router.test.js
+- [ ] S5: Keep stages and notes server-only in the generic data API — POST stamps inquiry + first history + empty notes; POST and PUT drop EVENT_SERVER_FIELDS for menuEvents; tests in events-router.test.js — server/routes/generic.js
+- [ ] S6: Write migration 0008 that gives every existing event a stage and marks it old — pure functions, plan / write / verify / main, modes per Design; vitest incl. second run = 0 — server/migrations/0008-event-stages.js, server/test/migration-0008-event-stages.test.js
+- [ ] S7: Document the events endpoints for the next plans — add the /api/v1/events rows and why a dedicated router (server-owned history) to §5 — docs/agent/standards-backend.md
+- [ ] S8: Rehearse migration 0008 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB dry → write → dry (0) → verify; restored copy foodvibe_scratch_0008 same; Atlas dry run with --confirm-host; counts into session state; STOP for `go 0008` — this plan file, docs/session-state-<branch>.md
+- [ ] S9: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
+- [ ] S10: Build, run server tests, check the error log — ng build, npm --prefix server test, log-query — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
