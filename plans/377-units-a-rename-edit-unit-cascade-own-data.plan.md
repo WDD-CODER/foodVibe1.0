@@ -99,6 +99,7 @@ As a chef, I want to fix a misnamed unit or its conversion once and have every p
 - [x] A2: Add an Edit button and dialog for custom units in the metadata manager — Edit action for custom units only; edit dialog (label, key, conversion) — `src/app/pages/metadata-manager/**`, `src/app/shared/unit-creator/**`
 - [x] A3: Update every product and recipe that uses a unit when it is renamed — `unit` branch in `onRenameMetadata` + `getAffectedCount` + `reloadAfterRename`; confirms; dictionary keys; drop the out-of-scope comment — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `public/assets/data/dictionary.json`
 - [x] A5: Open the unit creator with the name already typed in the product form's unit picker (Human, 2026-10-20) — `src/app/shared/unit-creator/**`, `src/app/pages/inventory/components/product-form/**`
+- [x] A6: Product form saves a purchase unit's price as special only when "special price" is ticked — an auto-filled price no longer turns it on by itself (Human, 2026-10-20) — `src/app/pages/inventory/components/product-form/**`
 - [ ] A4: Prove a rename keeps costs the same and a conversion change updates them — Build + specs; manual test on the isolated DB (rename a custom unit used in 2 products and 1 recipe, cost unchanged; change its conversion, cost changes); update session-state — `docs/session-state-<branch>.md`
 
 ## Technical Considerations

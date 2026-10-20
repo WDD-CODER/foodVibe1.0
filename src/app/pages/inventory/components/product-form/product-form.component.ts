@@ -891,8 +891,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
     const purchaseOptions = (val.purchaseOptions ?? []).map(
       (opt: PurchaseOption_ & { show_special_price_?: boolean }) => {
-        const { show_special_price_: _, ...rest } = opt
-        return rest as PurchaseOption_
+        const { show_special_price_: special, ...rest } = opt
+        // The row keeps an auto-filled price even when "special price" is off; saving it would
+        // turn the special price on by itself and cost the unit at that price (plan 377).
+        return { ...rest, priceOverride: special ? rest.priceOverride : 0 } as PurchaseOption_
       }
     )
 
