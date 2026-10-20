@@ -484,6 +484,18 @@
 - [ ] I8: Add the Hebrew texts and the paste icon — 19 dictionary keys, ClipboardPaste — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] I9: Build, test and hand over the import checks — ng build, server suite, listed specs, log-query; Human runs the [human] items on desktop and mobile — this plan file
 
+### Plan 448 — Give the platform admin a table of every business's activity and events (`plans/448-give-the-platform-admin-a-table-of-every-business-s-activity-and-events.plan.md`)
+
+- [ ] P1: Compute one row per business from members, activity and events, never their content — GET /businesses with five grouped queries, PUT /businesses/:id/internal — server/routes/admin.js
+- [ ] P2: Prove the numbers, the internal flag and the admin-only lock with server tests — two-business fixture, every Done-when case — server/test/admin-businesses.test.js
+- [ ] P3: Keep the screen to the platform admin and load its data — platform-admin guard (or 426's), PlatformAdminService — src/app/core/guards/platform-admin.guard.ts, src/app/core/services/platform-admin.service.ts
+- [ ] P4: Show the sortable business table with idle colours, internal toggle and totals — PlatformDashboardPage, lazy /platform route, spec — src/app/pages/platform-dashboard/**, src/app/app.routes.ts
+- [ ] P5: Link the screen from the header for the platform admin only — side menu + mobile profile menu — src/app/core/components/header/**
+- [ ] P6: (Only if 447 merged) Serve one business's performance numbers to the platform admin — GET /businesses/:id/performance running 447's builders (computeBusinessStats wrapper if needed), test case — server/routes/admin.js, server/services/business-stats.js, server/test/admin-businesses.test.js
+- [ ] P7: (Only if 447 merged) Open a business's performance cards read-only from the table — BusinessPerformanceViewComponent, platform/business/:id route, readonly + statsSource inputs on 447's cards — src/app/pages/platform-dashboard/components/business-performance-view/**, src/app/pages/dashboard/components/business-performance/**
+- [ ] P8: Add the Hebrew texts, the sort icon and the folder map entry — 18 dictionary keys, ArrowUpDown, pages breadcrumbs — public/assets/data/dictionary.json, src/app/app.config.ts, src/app/pages/breadcrumbs.md
+- [ ] P9: Build, test and hand over the admin dashboard checks — ng build, server suite, listed specs, log-query; Human runs the [human] items — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
