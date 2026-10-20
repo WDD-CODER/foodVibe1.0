@@ -140,15 +140,15 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Print one lin
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Show every option containing the typed text, with exact-start matches first — option-filter util + spec; use it in the three shared selects — src/app/core/utils/option-filter.util.ts, shared/custom-select, custom-multi-select, chip-search-dropdown, dedupe-select-options.util.ts
-- [ ] A2: Hide the add row when the typed text exactly matches an existing item — add-option.util + shared selects (showAddNewAlways only when empty) + specs — src/app/core/utils/add-option.util.ts, shared selects
-- [ ] A3: Make every add open its window with the typed name filled in — AddItemConfig.initialValue + modal; allergens, event type, section category, preparation search, equipment/quick-add/add-equipment category — see FR 3
-- [ ] A4: Tell the user an added item was saved — item_added_msg key + one helper called on every add path after save — add-option.util.ts, dictionary.json, callers
-- [ ] A5: Give the hand-rolled pickers the same filter and exact-match rule — event type, section category, dish search, preparation search, logistics tool — menu-intelligence, preparation-search, recipe-logistics-picker.service.ts
-- [ ] A6: Make a new recipe warn before leaving whatever was changed — hasRealChanges short-circuit removed, ingredient name in snapshot, AI-draft baseline, specs — recipe-builder.page.ts, recipe-builder.page.spec.ts
-- [ ] A7: Make the keyboard work the same in every dropdown — serving type arrow conflict, recipe-book ingredient filter, chip dropdown Enter/close — menu-intelligence, custom-select, recipe-book-list, chip-search-dropdown
-- [ ] A8: Write the unified dropdown rules into the standard — rules F, X, W, M, K — docs/agent/standards-domain.md, docs/brain/patterns/dropdown-add-option.md
-- [ ] A9: Build, test, start the app and hand you the click list — ng build + ng test green, rg checks, slot-serve running, validation cards
+- [x] A1: Show every option containing the typed text, with exact-start matches first — option-filter util + spec; use it in the three shared selects — src/app/core/utils/option-filter.util.ts, shared/custom-select, custom-multi-select, chip-search-dropdown, dedupe-select-options.util.ts
+- [x] A2: Hide the add row when the typed text exactly matches an existing item — add-option.util + shared selects (showAddNewAlways only when empty) + specs — src/app/core/utils/add-option.util.ts, shared selects
+- [x] A3: Make every add open its window with the typed name filled in — AddItemConfig.initialValue + modal; allergens, event type, section category, preparation search, equipment/quick-add/add-equipment category — see FR 3
+- [x] A4: Tell the user an added item was saved — item_added_msg key + one helper called on every add path after save — add-option.util.ts, dictionary.json, callers
+- [x] A5: Give the hand-rolled pickers the same filter and exact-match rule — event type, section category, dish search, preparation search, logistics tool — menu-intelligence, preparation-search, recipe-logistics-picker.service.ts
+- [x] A6: Make a new recipe warn before leaving whatever was changed — hasRealChanges short-circuit removed, ingredient name in snapshot, AI-draft baseline, specs — recipe-builder.page.ts, recipe-builder.page.spec.ts
+- [x] A7: Make the keyboard work the same in every dropdown — serving type arrow conflict, recipe-book ingredient filter, chip dropdown Enter/close — menu-intelligence, custom-select, recipe-book-list, chip-search-dropdown
+- [x] A8: Write the unified dropdown rules into the standard — rules F, X, W, M, K — docs/agent/standards-domain.md, docs/brain/patterns/dropdown-add-option.md
+- [x] A9: Build, test, start the app and hand you the click list — ng build + ng test green, rg checks, slot-serve running, validation cards
 
 ## Technical Considerations
 

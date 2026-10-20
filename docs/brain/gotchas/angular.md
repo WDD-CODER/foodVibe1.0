@@ -281,3 +281,11 @@ This preserves normal force-refresh behavior for the common case (called long af
 **Why the obvious fix is wrong:** `clip` looks like `hidden` minus the scroll container, so it seems layout-neutral. It isn't: a grid item's automatic minimum size is `0` only when it *is* a scroll container. With `clip` it falls back to `min-height: auto` = its full content, the `1fr` row grows to ~3000px, and the shell's own `overflow: hidden` silently clips it. Adding `overflow: auto` back on the shell would instead scroll the whole page with the header.
 
 **What to do instead:** When a grid/flex item uses `overflow: clip` (or `visible`) but must stay inside a `1fr` track, give it `min-block-size: 0` explicitly, and let the real scroller inside it (`.table-body`, `.filter-panel`) do the scrolling. Check with `scrollHeight > clientHeight` on the item in the browser.
+
+## A page's `(keydown)` on a component host runs before the component's own `@HostListener('keydown')`
+
+**What hurt:** In menu intelligence, the serving-type `app-custom-select` (button mode) has `(keydown)="onMetaKeydown('servingType', $event)"` on its host. ↓/Enter opened the list *and* jumped focus to the next field, so arrows never moved through the options (plan 416 validation).
+
+**Why the obvious fix is wrong:** Calling `stopImmediatePropagation()` inside the component's `@HostListener('keydown')` looks enough, but both listeners sit on the same host element and the parent template's listener was registered first — it has already run by then (a spec proved it: the page saw every key).
+
+**What to do instead:** Handle the list keys on the element the event starts from (the trigger button: `(keydown)="onKeydown($event)"`) and `stopPropagation()` there for ↑/↓/Enter/Space (and Escape while open), so the event never bubbles to the host. Let Tab through so page focus-order still works. Reference: `custom-select.component` trigger + spec "button mode inside a page that moves focus on keys".
