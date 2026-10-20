@@ -346,3 +346,9 @@ only the Bash tool's command text triggers it.
 2. After take-plan, check which DB the backend really uses. Start it with a one-shot log of `require('mongoose').connection.name` (db name only, never the URI), or query the DB for a doc you just wrote.
 3. If it's wrong, restart the backend from `server/` with dotenv loaded first and the DB name rewritten in `process.env.MONGO_LOCAL_URI` before `require('./index.js')`. A Claude background task dies at the 2-hour limit (see "Slot dev server goes stale" above).
 4. The real fix belongs in take-plan (load `server/.env` before the override). It is kit-owned, so it goes through `../ai-workflow-kit` first.
+
+## slot-serve never switches to the slot's own database (2026-10-20, plan 407)
+
+**What hurt:** A plan with `Isolated DB: yes` still ran its backend on the shared local DB. `scripts/slot-serve.mjs` rewrites `process.env.MONGO_LOCAL_URI`, but never loads `server/.env`, so that variable is empty and nothing changes. The `Isolated DB:` line must also start the line — a `- ` bullet is ignored.
+
+**What to do instead:** Until the kit loads `server/.env` in slot-serve, start the servers with `MONGO_LOCAL_URI` already set to the slot DB, and confirm the DB before trusting a local check. Point migration tools at a copy with `--db=<scratch>` (`server/migrations/tools/_connect.js`).
