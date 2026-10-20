@@ -95,7 +95,7 @@
           class="dish-field"
           (click)="!isDishFieldReadOnly(fieldKey) && !isEditingField(fieldKey) && editDishFieldStart.emit(fieldKey)"
         >
-          <span class="dish-field-label">{{ getDishFieldLabelKey(fieldKey) | translatePipe }}</span>
+          <span class="dish-field-label">{{ getFieldLabel(fieldKey) }}</span>
           @if (isDishFieldReadOnly(fieldKey) || !isEditingField(fieldKey)) {
             <span class="dish-field-value">{{
               fieldKey === 'food_cost_money' ? getAutoFoodCost() : (itemGroup().get(fieldKey)?.value ?? '')
@@ -117,6 +117,43 @@
             />
           }
         </div>
+      }
+      <div class="dish-field dish-coefficient">
+        <label class="dish-field-label" [for]="'dish-coef-' + sectionIndex() + '-' + itemIndex()">{{
+          'dish_coefficient' | translatePipe
+        }}</label>
+        <input
+          type="text"
+          inputmode="decimal"
+          autocomplete="off"
+          class="dish-field-input-inline dish-coefficient-input"
+          [id]="'dish-coef-' + sectionIndex() + '-' + itemIndex()"
+          [value]="coefficientText_()"
+          [attr.aria-invalid]="coefficientInvalid_() ? 'true' : null"
+          SelectOnFocus
+          (input)="onCoefficientInput($any($event.target).value)"
+          (blur)="onCoefficientBlur()"
+          (click)="$event.stopPropagation()"
+        />
+        @if (portionInfo()?.overridden) {
+          <span class="dish-coefficient-tag">{{ 'coefficient_manual' | translatePipe }}</span>
+          <button type="button" class="dish-coefficient-reset" (click)="resetCoefficient(); $event.stopPropagation()">
+            <lucide-icon name="rotate-ccw" [size]="12"></lucide-icon>
+            {{ 'coefficient_reset' | translatePipe }}
+          </button>
+        }
+      </div>
+      <div class="dish-field read-only">
+        <span class="dish-field-label">{{ 'event_portions' | translatePipe }}:</span>
+        <span class="dish-field-value dish-portions-value">{{ getDerivedPortions() }}</span>
+      </div>
+      @if (coefficientInvalid_()) {
+        <span class="c-field-error dish-coefficient-error" role="alert">{{
+          'coefficient_invalid' | translatePipe
+        }}</span>
+      }
+      @if (isPerDinerZero()) {
+        <span class="c-field-error dish-coefficient-error">{{ 'portions_per_diner_zero' | translatePipe }}</span>
       }
       <div class="dish-field read-only">
         <span class="dish-field-label">{{ 'dish_food_cost_per_portion' | translatePipe }}</span>

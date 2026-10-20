@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -7,8 +7,9 @@ import { ClickOutSideDirective } from '@directives/click-out-side'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { EventPlanService } from '../../../../core/engine/event-plan.service'
+import { formatCoefficient, isValidCoefficient, type ItemPortions } from '../../../../core/engine/portions'
 import { roundMoney } from '../../../../core/engine/rounding'
-import { MenuIntelligenceService } from '@services/menu-intelligence.service'
+import { TranslationService } from '@services/translation.service'
 import { ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
@@ -37,7 +38,7 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
 export class MenuDishRowComponent {
   // ── Injected ──────────────────────────────────────────────────────────────
   private readonly eventPlan_ = inject(EventPlanService)
-  private readonly menuIntelligence = inject(MenuIntelligenceService)
+  private readonly translation_ = inject(TranslationService)
 
   // ── Inputs ────────────────────────────────────────────────────────────────
   readonly itemGroup = input.required<FormGroup>()
@@ -49,9 +50,16 @@ export class MenuDishRowComponent {
   readonly highlightedIndex = input<number>(0)
   readonly isMetaExpanded = input<boolean>(false)
   readonly editingDishField = input<string | null>(null)
-  readonly servingType = input<string>('plated_course')
-  readonly guestCount = input<number>(0)
-  readonly piecesPerPerson = input<number>(1)
+  /** Portions, coefficient and override flag of this row, from `MenuPortionsService` (null = unknown row). */
+  readonly portionInfo = input<ItemPortions | null>(null)
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  /** Text being typed in the coefficient box (null = show the stored value). */
+  protected readonly coefficientDraft_ = signal<string | null>(null)
+  protected readonly coefficientInvalid_ = signal(false)
+  protected readonly coefficientText_ = computed(
+    () => this.coefficientDraft_() ?? formatCoefficient(this.portionInfo()?.coefficient ?? 1)
+  )
 
   // ── Outputs ───────────────────────────────────────────────────────────────
   readonly remove = output<void>()
@@ -89,17 +97,9 @@ export class MenuDishRowComponent {
   }
 
   getAutoFoodCost(): number {
-    const item = this.itemGroup()
-    const recipeId = item?.get('recipeId')?.value as string | undefined
+    const recipeId = this.itemGroup()?.get('recipeId')?.value as string | undefined
     if (!recipeId) return 0
-    const derivedPortions = this.menuIntelligence.derivePortions(
-      this.servingType(),
-      this.guestCount(),
-      Number(item.get('predictedTakeRate')?.value ?? 0),
-      this.piecesPerPerson(),
-      Number(item.get('serving_portions')?.value ?? 1)
-    )
-    return roundMoney(this.eventPlan_.costFor(recipeId, derivedPortions).cost)
+    return roundMoney(this.eventPlan_.costFor(recipeId, this.getDerivedPortions()).cost)
   }
 
   getFoodCostPerPortion(): number {
@@ -109,14 +109,55 @@ export class MenuDishRowComponent {
   }
 
   getDerivedPortions(): number {
-    const item = this.itemGroup()
-    return this.menuIntelligence.derivePortions(
-      this.servingType(),
-      this.guestCount(),
-      Number(item.get('predictedTakeRate')?.value ?? 0),
-      this.piecesPerPerson(),
-      Number(item.get('serving_portions')?.value ?? 1)
-    )
+    return this.portionInfo()?.portions ?? 0
+  }
+
+  /** Label of a detail field: a preparation counts per diner in its own yield unit, a dish in portions. */
+  getFieldLabel(fieldKey: DishFieldKey): string {
+    const unit = this.prepYieldUnit()
+    if (fieldKey === 'serving_portions' && unit) {
+      return this.translation_.translate('per_diner_in_unit').replace('{{unit}}', this.translation_.translate(unit))
+    }
+    return this.translation_.translate(this.getDishFieldLabelKey(fieldKey))
+  }
+
+  isPerDinerZero(): boolean {
+    return Number(this.itemGroup().get('serving_portions')?.value ?? 1) === 0
+  }
+
+  /** Typing a coefficient: valid → stored as this dish's override; invalid → message, old value kept. */
+  onCoefficientInput(text: string): void {
+    this.coefficientDraft_.set(text)
+    const trimmed = text.trim()
+    if (!trimmed) {
+      this.coefficientInvalid_.set(false)
+      return
+    }
+    const value = Number(trimmed.replace(',', '.'))
+    if (!isValidCoefficient(value)) {
+      this.coefficientInvalid_.set(true)
+      return
+    }
+    this.coefficientInvalid_.set(false)
+    this.itemGroup().patchValue({ coefficient_override: value })
+  }
+
+  /** Leaving the box shows the stored value again. */
+  onCoefficientBlur(): void {
+    this.coefficientDraft_.set(null)
+    this.coefficientInvalid_.set(false)
+  }
+
+  resetCoefficient(): void {
+    this.itemGroup().patchValue({ coefficient_override: null })
+    this.coefficientDraft_.set(null)
+    this.coefficientInvalid_.set(false)
+  }
+
+  private prepYieldUnit(): string {
+    if (this.itemGroup().get('recipeType')?.value !== 'preparation') return ''
+    const id = this.itemGroup().get('recipeId')?.value as string | undefined
+    return this.recipes().find((r) => r._id === id)?.yieldUnit ?? ''
   }
 
   getFilteredRecipes(): Recipe[] {

@@ -60,6 +60,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `http-storage.adapter.ts` | HTTP-backed storage adapter | HttpStorageAdapter |
 | `master-push.service.ts` | Push local entity to master/global | MasterPushService |
 | `menu-event-type.service.ts` | Menu event type registry | MenuEventTypeService |
+| `event-type-snapshot.service.ts` | Freezes an event's event-type and serving-type coefficients when picked (plan 441) | EventTypeSnapshotService |
 | `menu-export.service.ts` | Menu export orchestration | MenuExportService |
 | `quick-edit-product-modal.service.ts` | Quick-edit product modal orchestration | QuickEditProductModalService |
 | `recipe-export.service.ts` | Recipe export orchestration | RecipeExportService |

@@ -152,6 +152,37 @@ describe('ExportService', () => {
     })
   })
 
+  describe('menu info preview (plan 441: no take rate, no pieces per person)', () => {
+    const menu: MenuEvent = {
+      _id: 'm1',
+      name: 'Menu',
+      eventType: 'פרטי',
+      eventDate: '',
+      servingType: 'cocktail_passed',
+      guestCount: 50,
+      sections: [
+        {
+          _id: 's1',
+          name: 'Passed',
+          sortOrder: 0,
+          items: [{ recipeId: 'r1', recipeType: 'dish', derivedPortions: 173, sellPrice: 12 }]
+        }
+      ],
+      financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
+      performanceTags: { foodCostPct: 0, primaryServingStyle: 'cocktail_passed' }
+    }
+
+    it('prints the portions and price per dish and no take-rate column or pieces-per-person row', () => {
+      const payload = service.getMenuInfoPreviewPayload(menu, [])
+      const cover = payload.sections[0]
+      expect(cover.rows.map((r) => r[0])).not.toContain('פריטים לסועד')
+      const dishes = payload.sections[1]
+      expect(dishes.headerRow ?? []).not.toContain('שיעור לקיחה')
+      expect(dishes.headerRow?.length).toBe(3)
+      expect(dishes.rows[0][1]).toBe(173)
+    })
+  })
+
   describe('getRecipeInfoPreviewPayload and exportRecipeInfo (Plan 108)', () => {
     it('should return payload with recipeSheet, recipeSheetLabels, and ingredients section', () => {
       const recipe: Recipe = {

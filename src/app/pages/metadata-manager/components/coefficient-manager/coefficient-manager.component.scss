@@ -1,0 +1,147 @@
+:host {
+  display: block;
+}
+
+.manager-card {
+  height: fit-content;
+
+  padding: 1.5rem;
+
+  background: var(--bg-glass-strong);
+
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+  -webkit-backdrop-filter: var(--blur-glass);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+
+  gap: 0.75rem;
+  margin-block-end: 1rem;
+  padding-block-end: 1rem;
+
+  border-block-end: 1px solid var(--border-default);
+
+  h2 {
+    margin: 0;
+
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+  }
+}
+
+.card-desc {
+  margin: 0 0 1rem;
+
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.icon-primary {
+  color: var(--color-primary);
+}
+
+.list-title {
+  margin-block: 1.25rem 0.5rem;
+
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+}
+
+.coef-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.coef-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  min-block-size: 2.5rem;
+  padding-inline: 0.5rem;
+
+  border-radius: var(--radius-md);
+}
+
+.coef-name {
+  flex: 1;
+  min-inline-size: 0;
+
+  font-size: 0.875rem;
+  color: var(--color-text-main);
+}
+
+.coef-input {
+  inline-size: 5rem;
+  min-block-size: 2.25rem;
+
+  padding-inline: 0.5rem;
+
+  color: var(--color-text-main);
+  font-size: 0.875rem;
+  text-align: center;
+
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+  }
+}
+
+.coef-add {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  margin-block-start: 0.75rem;
+}
+
+.coef-add-name {
+  flex: 1;
+  min-inline-size: 0;
+  min-block-size: 2.25rem;
+
+  padding-inline: 0.75rem;
+
+  color: var(--color-text-main);
+  font-size: 0.875rem;
+
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  outline: none;
+
+  &:focus {
+    border-color: var(--border-focus);
+    box-shadow: var(--shadow-focus);
+  }
+}

@@ -38,6 +38,7 @@ import { TaxonomyKindManagerComponent } from './components/taxonomy-kind-manager
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { StationManagerComponent } from './components/station-manager/station-manager.component'
+import { CoefficientManagerComponent } from './components/coefficient-manager/coefficient-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
 import { AiModelManagerComponent } from './components/ai-model-manager/ai-model-manager.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
@@ -67,6 +68,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
     StationManagerComponent,
+    CoefficientManagerComponent,
     UserManagementComponent,
     AiModelManagerComponent,
     ScrollRailComponent,
@@ -147,6 +149,7 @@ export class MetadataManagerComponent implements OnInit {
     { id: 'mm-sec-label', labelKey: 'metadata_recipe_labels_title' },
     { id: 'mm-sec-course', labelKey: 'metadata_recipe_courses_title' },
     { id: 'mm-sec-menu-type', labelKey: 'metadata_menu_types_title' },
+    { id: 'mm-sec-coefficients', labelKey: 'metadata_coefficients_title' },
     { id: 'mm-sec-preparation', labelKey: 'metadata_prep_categories' },
     { id: 'mm-sec-section', labelKey: 'metadata_section_categories_title' },
     { id: 'mm-sec-station', labelKey: 'metadata_stations_title' },
