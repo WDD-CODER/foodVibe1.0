@@ -44,7 +44,7 @@ export class MenuIntelligenceService {
           derivedPortions: this.derivePortions(
             event.servingType,
             event.guestCount,
-            item.predictedTakeRate,
+            item.predictedTakeRate ?? 0,
             event.piecesPerPerson,
             item.servingPortions ?? 1
           )

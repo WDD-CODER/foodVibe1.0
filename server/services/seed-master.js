@@ -85,6 +85,7 @@ const DEFAULT_COURSES = [
   'vegetables_snacks_add_ons', 'vinaigrettes_mayonnaise_emulsion', 'גלייז', 'רוטב',
 ];
 const DEFAULT_DISH_FIELDS = ['sell_price', 'food_cost_money', 'serving_portions'];
+const EVENT_TYPE_KEYS = ['עסקי', 'פרטי', 'חתונה', 'מסיבה', 'כנסים'];
 const SYSTEM_UNITS = {
   kg: 1000, liter: 1000, gram: 1, ml: 1, unit: 1, dish: 1, tablespoon: 15, teaspoon: 5, cup: 240, pinch: 1, portion: 1,
 };
@@ -106,9 +107,11 @@ function defaultMasterRegistries() {
         { key: 'buffet_family', fields: DEFAULT_DISH_FIELDS },
         { key: 'plated_course', fields: DEFAULT_DISH_FIELDS },
         { key: 'cocktail_passed', fields: ['food_cost_pct', 'serving_portions_pct'] },
+        { key: 'chef_plated_front', fields: DEFAULT_DISH_FIELDS },
       ],
     }),
-    MENU_EVENT_TYPES: [],
+    // Plan 440: the five default event types, keyed by their Hebrew names (the coefficients come from migration 0007).
+    MENU_EVENT_TYPES: master({ items: EVENT_TYPE_KEYS }),
     MENU_SECTION_CATEGORIES: master({
       items: ['Amuse-Bouche', 'Appetizers', 'Soups', 'Salads', 'Main Course', 'Sides', 'Desserts', 'Beverages'],
     }),
@@ -128,8 +131,10 @@ async function seedMasterTaxonomy() {
   if (await db.collection('taxonomyTerms').findOne({ userId: '__master__' })) return 0;
   // Required lazily: the migration module pulls in the generated schemas.
   const { buildTerms } = require('../migrations/0003-taxonomy-terms');
+  const { termPatch } = require('../migrations/0007-coefficients');
   const { terms } = buildTerms(defaultMasterRegistries(), Date.now());
-  const stamped = terms.map(t => ({ ...t, businessId: '__master__', createdBy: '__master__' }));
+  // Plan 440: every seeded eventType / menuType term carries its coefficient (same table as migration 0007).
+  const stamped = terms.map(t => ({ ...t, ...termPatch(t)?.$set, businessId: '__master__', createdBy: '__master__' }));
   await db.collection('taxonomyTerms').insertMany(stamped, { ordered: false });
   logger.info({ event: 'seed.master.taxonomy_seeded', count: terms.length });
   return terms.length;

@@ -1072,6 +1072,7 @@
     "engine_error_cycle": "הכנה מעגלית: {name}",
     "engine_error_no_yield": "חסרה תפוקה במתכון: {name}",
     "engine_error_no_conversion": "לא ניתן להמיר כמות להכנה: {name}",
-    "engine_error_no_ingredients": "אין מצרכים: {name}"
+    "engine_error_no_ingredients": "אין מצרכים: {name}",
+    "chef_plated_front": "פלייט שף פרונטלי"
   }
 }

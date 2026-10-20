@@ -31,14 +31,27 @@ export interface MenuPerformanceTags {
   primaryServingStyle: ServingType
 }
 
+/** Plan 440: the name and coefficient of an event type / serving type, copied when it was selected. */
+export interface TypeSnapshot {
+  key: string
+  name: string
+  coefficient: number
+}
+
 export interface MenuItemSelection {
   recipeId: string
   recipeType: 'dish' | 'preparation'
-  predictedTakeRate: number
+  /** @deprecated legacy since plan 440, unused */
+  predictedTakeRate?: number
   derivedPortions: number
   sellPrice?: number
   foodCostOverride?: number
+  /** @deprecated replaced by portionsPerDiner (plan 440); read only as a fallback */
   servingPortions?: number
+  /** Plan 440: portions of this item per diner (before the coefficient) */
+  portionsPerDiner?: number
+  /** Plan 440: replaces the event's default coefficient for this item (> 0, at most 2 decimals) */
+  coefficientOverride?: number
 }
 
 export interface MenuSection {
@@ -54,7 +67,10 @@ export interface MenuEvent {
   eventType: string
   eventDate?: string
   servingType: ServingType
+  eventTypeSnapshot?: TypeSnapshot
+  servingTypeSnapshot?: TypeSnapshot
   guestCount: number
+  /** @deprecated legacy since plan 440, unused */
   piecesPerPerson?: number
   sections: MenuSection[]
   financialTargets?: MenuFinancialTargets

@@ -1,6 +1,6 @@
 # Plan 440 — Store event and serving coefficients and compute portions in one place
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -32,8 +32,8 @@ This plan lays the data and the one formula; plan 441 builds the screens and swi
   as a no-op and verifies — locally, on a restored Atlas copy, then on Atlas after Dandan's go.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/core/engine/portions.spec.ts' --include='src/app/core/services/menu-intelligence.service.spec.ts'`
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/engine/portions.spec.ts' --include='src/app/core/services/menu-intelligence.service.spec.ts'`
   passes; `portions.spec.ts` covers (dish items, `recipeType: 'dish'`, 1 portion per diner unless stated):
   - 100 guests, private 1.15 × buffet 1.1 → coefficient `1.265` (not rounded), `formatCoefficient(1.265) === '1.27'`, portions **127**;
   - same dish with `coefficientOverride: 1.1` → portions **110**, `overridden: true`;
@@ -48,7 +48,7 @@ Done when:
   - no snapshots (event created before this plan) → coefficient 1.0, portions = guests × portionsPerDiner;
   - item without `portionsPerDiner` but with legacy `servingPortions: 2` → uses 2;
   - `isValidCoefficient`: `1.25` true, `0.9` true, `1.255` false, `0` false, `-1` false.
-- [auto] `npm --prefix server test` passes, including new tests:
+- [x] [auto] `npm --prefix server test` passes, including new tests:
   - `server/test/coefficient-schema.test.js`: eventType term with `coefficient: 1.15` valid, `1.155` invalid, `0`
     invalid, without coefficient valid; menuType same; menu event with both snapshots, an item with
     `portionsPerDiner: 0.5` and `coefficientOverride: 1.1` valid; item without `predictedTakeRate` valid;
@@ -61,14 +61,14 @@ Done when:
     `portionsPerDiner: 2`; course terms lose `color`; a second `plan()` on the written fixture reports 0 changes;
   - `server/test/seed-master-taxonomy.test.js`: a fresh seed has the five event types and four serving types with
     their coefficients.
-- [auto] Local run in this slot's isolated DB: `node server/migrations/0007-coefficients.js --target=local`
+- [x] [auto] Local run in this slot's isolated DB: `node server/migrations/0007-coefficients.js --target=local`
   (dry run) prints the per-step counts; `--write=yes --backup-dir=<fresh local snapshot>` applies; a second dry
   run prints `0` for every step; `--verify=yes` exits 0.
-- [auto] Rehearsal on a restored Atlas copy: `node server/scripts/db-restore.js --target=local --dir="<atlas snapshot>" --db=foodvibe_scratch_0007`,
+- [x] [auto] Rehearsal on a restored Atlas copy: `node server/scripts/db-restore.js --target=local --dir="<atlas snapshot>" --db=foodvibe_scratch_0007`,
   then the same dry run → write → dry run (all 0) → verify against `--db=foodvibe_scratch_0007`, exit 0. The dry
   run's "portions change" list (events whose recomputed portions differ from stored `derivedPortions`) is pasted
   into the session state for Dandan.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Dandan reviews the Atlas dry-run output (counts per step, folded own terms, the "portions change" list)
   and replies `go 0007` before the Atlas write. The Worker never writes Atlas without it.
 - [human] After the Atlas write: `node server/migrations/0007-coefficients.js --target=atlas --confirm-host=<host> --verify=yes`
@@ -169,13 +169,13 @@ shape and `piecesPerPerson` in `menu-event.schema.ts`; `MenuItemSelection`, `Men
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Schema: `coefficient` on `eventType` and `menuType` terms; event snapshots; item `portionsPerDiner`,
+- [x] Schema: `coefficient` on `eventType` and `menuType` terms; event snapshots; item `portionsPerDiner`,
   `coefficientOverride`; `predictedTakeRate` optional.
-- [ ] `computePortions(event, recipes)` per C-PORTIONS with the rounding rule: portion-unit items rounded by
+- [x] `computePortions(event, recipes)` per C-PORTIONS with the rounding rule: portion-unit items rounded by
   `roundPortions`; weight/volume preparations not rounded.
-- [ ] `isValidCoefficient(x)` and `formatCoefficient(x)` exported from `portions.ts`.
-- [ ] Migration 0007 (dry run / write / verify / scratch / Atlas host confirm), idempotent, rollback note.
-- [ ] Seed for an empty DB carries the same defaults.
+- [x] `isValidCoefficient(x)` and `formatCoefficient(x)` exported from `portions.ts`.
+- [x] Migration 0007 (dry run / write / verify / scratch / Atlas host confirm), idempotent, rollback note.
+- [x] Seed for an empty DB carries the same defaults.
 
 ### Should Have (P1)
 - none
@@ -274,14 +274,14 @@ Header comment with the modes. Exported pure functions (tested) + `plan`, `write
 its coefficient.
 
 ## Atomic Sub-tasks
-- [ ] C1: Add coefficients to event and serving types, and type snapshots to events, in the schema — coefficientSchema, eventType member, menuType coefficient, typeSnapshotSchema, item portionsPerDiner / coefficientOverride, predictedTakeRate optional; npm run build:schemas; schema tests — shared/schemas/entities/taxonomy-term.schema.ts, shared/schemas/entities/menu-event.schema.ts, server/test/coefficient-schema.test.js
-- [ ] C2: Mirror the new event fields in the client model so the app keeps compiling — TypeSnapshot, eventTypeSnapshot / servingTypeSnapshot, portionsPerDiner, coefficientOverride, predictedTakeRate optional; `item.predictedTakeRate ?? 0` in hydrateDerivedPortions — src/app/core/models/menu-event.model.ts, src/app/core/services/menu-intelligence.service.ts
-- [ ] C3: Compute every menu item's portions in one pure function with the agreed rounding — computePortions, defaultCoefficient, isValidCoefficient, formatCoefficient per Design; spec with every acceptance number in Done-when — src/app/core/engine/portions.ts, src/app/core/engine/portions.spec.ts
-- [ ] C4: Write migration 0007 that seeds coefficients and gives old events snapshots of 1.0 — pure functions + plan / write / verify / main per Design, dry run default, --write=yes + --backup-dir, --db scratch, --confirm-host, --verify=yes; vitest on fixtures incl. second run = 0 changes — server/migrations/0007-coefficients.js, server/test/migration-0007-coefficients.test.js
-- [ ] C5: Seed a fresh database with the default event and serving types and their coefficients — defaultMasterRegistries + seedMasterTaxonomy; add chef_plated_front to the dictionary; seed test — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js, public/assets/data/dictionary.json
-- [ ] C6: Rehearse migration 0007 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB: dry → write → dry (0) → verify; db-backup atlas → db-restore into foodvibe_scratch_0007 → same sequence; Atlas dry run with --confirm-host; paste counts, folds and portions-change list into session state; STOP for `go 0007` — this plan file, docs/session-state-<branch>.md
+- [x] C1: Add coefficients to event and serving types, and type snapshots to events, in the schema — coefficientSchema, eventType member, menuType coefficient, typeSnapshotSchema, item portionsPerDiner / coefficientOverride, predictedTakeRate optional; npm run build:schemas; schema tests — shared/schemas/entities/taxonomy-term.schema.ts, shared/schemas/entities/menu-event.schema.ts, server/test/coefficient-schema.test.js
+- [x] C2: Mirror the new event fields in the client model so the app keeps compiling — TypeSnapshot, eventTypeSnapshot / servingTypeSnapshot, portionsPerDiner, coefficientOverride, predictedTakeRate optional; `item.predictedTakeRate ?? 0` in hydrateDerivedPortions — src/app/core/models/menu-event.model.ts, src/app/core/services/menu-intelligence.service.ts
+- [x] C3: Compute every menu item's portions in one pure function with the agreed rounding — computePortions, defaultCoefficient, isValidCoefficient, formatCoefficient per Design; spec with every acceptance number in Done-when — src/app/core/engine/portions.ts, src/app/core/engine/portions.spec.ts
+- [x] C4: Write migration 0007 that seeds coefficients and gives old events snapshots of 1.0 — pure functions + plan / write / verify / main per Design, dry run default, --write=yes + --backup-dir, --db scratch, --confirm-host, --verify=yes; vitest on fixtures incl. second run = 0 changes — server/migrations/0007-coefficients.js, server/test/migration-0007-coefficients.test.js
+- [x] C5: Seed a fresh database with the default event and serving types and their coefficients — defaultMasterRegistries + seedMasterTaxonomy; add chef_plated_front to the dictionary; seed test — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js, public/assets/data/dictionary.json
+- [x] C6: Rehearse migration 0007 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB: dry → write → dry (0) → verify; db-backup atlas → db-restore into foodvibe_scratch_0007 → same sequence; Atlas dry run with --confirm-host; paste counts, folds and portions-change list into session state; STOP for `go 0007` — this plan file, docs/session-state-<branch>.md
 - [ ] C7: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
-- [ ] C8: Build, run the specs and server tests, check the error log — ng build, ng test (listed specs), npm --prefix server test, log-query — this plan file
+- [x] C8: Build, run the specs and server tests, check the error log — ng build, ng test (listed specs), npm --prefix server test, log-query — this plan file
 
 ## Technical Considerations
 - Dependencies: `roundPortions` (plan 433), `UNIT_ALIASES` / `VOLUME_OR_WEIGHT_KEYS`

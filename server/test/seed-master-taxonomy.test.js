@@ -40,6 +40,15 @@ it('seeds dish types without a color (plan 438)', async () => {
   expect(courses.some(t => 'color' in t)).toBe(false);
 });
 
+it('seeds the five event types and four serving types with their coefficients (plan 440)', async () => {
+  await seedMasterTaxonomy();
+  const coefficients = async kind => Object.fromEntries(
+    (await testDb().collection('taxonomyTerms').find({ kind }).toArray()).map(t => [t.key, t.coefficient])
+  );
+  expect(await coefficients('eventType')).toEqual({ 'עסקי': 1.1, 'פרטי': 1.15, 'חתונה': 1.2, 'מסיבה': 1.1, 'כנסים': 0.9 });
+  expect(await coefficients('menuType')).toEqual({ plated_course: 1, buffet_family: 1.1, cocktail_passed: 3, chef_plated_front: 2 });
+});
+
 it('is a no-op once master terms exist', async () => {
   await seedMasterTaxonomy();
   const before = await testDb().collection('taxonomyTerms').countDocuments();
