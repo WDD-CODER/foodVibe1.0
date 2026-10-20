@@ -8,7 +8,7 @@
  *
  * Kinds: crud · trash · validation · auth · ai. Severity is decided by api-layer.mjs from the outcome.
  */
-import { fixtureFor, nameField, RESTORABLE, SEARCHABLE, TRASH_OF } from './api-fixtures.mjs'
+import { fixtureFor, nameField, SEARCHABLE } from './api-fixtures.mjs'
 
 const D = '/api/v1/data'
 const FAKE_ID = '000000000000000000000000'
@@ -31,7 +31,6 @@ export function entityCases(entity, date, { hasUser2 = true } = {}) {
   const name = nameField(entity)
   const fx = (ctx) => fixtureFor(entity, date, ctx.refs)
   const id = (ctx) => ctx.ids[entity]
-  const trash = TRASH_OF[entity]
   const rows = []
   const add = (row) => rows.push({ entity, ...row, id: `${entity}.${row.kind}.${row.id}` })
 
@@ -79,32 +78,18 @@ export function entityCases(entity, date, { hasUser2 = true } = {}) {
   add({ kind: 'validation', id: 'huge-string', method: 'POST', path: `${D}/${entity}`, as: 'user', expect: [400], after: stray,
     body: (ctx) => ({ ...fx(ctx), [name]: `${fx(ctx)[name]}-huge-${'x'.repeat(200_000)}` }) })
 
-  // 2. Trash — the app's own path (src/app/core/services/*-data.service.ts)
-  if (trash) {
-    add({ kind: 'trash', id: 'move-to-trash', method: 'POST', path: `${D}/${trash}`, as: 'user', expect: [201],
-      body: (ctx) => ({ ...ctx.docs[entity], deletedAt: Date.now() }) })
-    add({ kind: 'trash', id: 'delete', method: 'DELETE', path: (ctx) => `${D}/${entity}/${id(ctx)}`, as: 'user', expect: [200] })
-    add({ kind: 'trash', id: 'gone-from-list', method: 'GET', path: `${D}/${entity}`, as: 'user', expect: [200],
-      check: (res, ctx) => (has(res.json, id(ctx)) ? 'the deleted record is still in the list' : '') })
-    add({ kind: 'trash', id: 'in-trash', method: 'GET', path: `${D}/${trash}`, as: 'user', expect: [200],
-      check: (res, ctx) => (has(res.json, id(ctx)) ? '' : `the deleted record is not in ${trash}`),
-      after: (res, ctx) => { ctx.trash[trash] = Array.isArray(res.json) ? res.json : [] } })
-    if (RESTORABLE.has(entity)) {
-      add({ kind: 'trash', id: 'restore-trash-rewrite', method: 'PUT', path: `${D}/${trash}`, as: 'user', expect: [200],
-        headers: { 'X-Confirm-Replace': 'true' },
-        body: (ctx) => (ctx.trash[trash] || []).filter((d) => d._id !== id(ctx)) })
-      add({ kind: 'trash', id: 'restore', method: 'POST', path: `${D}/${entity}`, as: 'user', expect: [201],
-        body: (ctx) => { const { deletedAt: _d, ...doc } = (ctx.trash[trash] || []).find((d) => d._id === id(ctx)) || {}; return doc } })
-      add({ kind: 'trash', id: 'restored-intact', method: 'GET', path: (ctx) => `${D}/${entity}/${id(ctx)}`, as: 'user', expect: [200],
-        check: (res, ctx) => compareFields({ ...fx(ctx), [name]: `${fx(ctx)[name]}-edited` }, res.json) })
-      add({ kind: 'trash', id: 'gone-from-trash', method: 'GET', path: `${D}/${trash}`, as: 'user', expect: [200],
-        check: (res, ctx) => (has(res.json, id(ctx)) ? `the restored record is still in ${trash}` : '') })
-    }
-  } else {
-    add({ kind: 'trash', id: 'delete', method: 'DELETE', path: (ctx) => `${D}/${entity}/${id(ctx)}`, as: 'user', expect: [200] })
-    add({ kind: 'trash', id: 'gone-from-list', method: 'GET', path: `${D}/${entity}`, as: 'user', expect: [200],
-      check: (res, ctx) => (has(res.json, id(ctx)) ? 'the deleted record is still in the list' : '') })
-  }
+  // 2. Trash (plan 407) — the app's own path: delete stamps deletedAt, restore unsets it.
+  const trash = `${D}/${entity}/trash`
+  add({ kind: 'trash', id: 'delete', method: 'DELETE', path: (ctx) => `${D}/${entity}/${id(ctx)}`, as: 'user', expect: [200] })
+  add({ kind: 'trash', id: 'gone-from-list', method: 'GET', path: `${D}/${entity}`, as: 'user', expect: [200],
+    check: (res, ctx) => (has(res.json, id(ctx)) ? 'the deleted record is still in the list' : '') })
+  add({ kind: 'trash', id: 'in-trash', method: 'GET', path: trash, as: 'user', expect: [200],
+    check: (res, ctx) => (has(res.json, id(ctx)) ? '' : 'the deleted record is not in the Trash') })
+  add({ kind: 'trash', id: 'restore', method: 'PUT', path: (ctx) => `${D}/${entity}/${id(ctx)}/restore`, as: 'user', expect: [200] })
+  add({ kind: 'trash', id: 'restored-intact', method: 'GET', path: (ctx) => `${D}/${entity}/${id(ctx)}`, as: 'user', expect: [200],
+    check: (res, ctx) => compareFields({ ...fx(ctx), [name]: `${fx(ctx)[name]}-edited` }, res.json) })
+  add({ kind: 'trash', id: 'gone-from-trash', method: 'GET', path: trash, as: 'user', expect: [200],
+    check: (res, ctx) => (has(res.json, id(ctx)) ? 'the restored record is still in the Trash' : '') })
   return rows
 }
 

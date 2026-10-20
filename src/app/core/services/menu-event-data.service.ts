@@ -6,7 +6,6 @@ import { LoadingService } from './loading.service'
 import { MenuEvent } from '@models/menu-event.model'
 
 const ENTITY = 'menuEvents'
-const TRASH_KEY = 'TRASH_MENU_EVENTS'
 
 @Injectable({ providedIn: 'root' })
 export class MenuEventDataService {
@@ -111,9 +110,7 @@ export class MenuEventDataService {
 
   async deleteMenuEvent(_id: string): Promise<void> {
     try {
-      const item = await this.storage.get<MenuEvent>(ENTITY, _id)
-      const withDeleted = { ...item, deletedAt: Date.now() } as MenuEvent & { deletedAt: number }
-      await this.storage.appendExisting(TRASH_KEY, withDeleted)
+      // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
       this.eventsStore_.update((events) => events.filter((e) => e._id !== _id))
     } catch (err) {

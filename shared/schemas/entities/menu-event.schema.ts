@@ -36,6 +36,5 @@ export const menuEventSchema = z.strictObject({
   createdFromTemplateId: z.string().optional(),
   logistics: eventLogisticsSchema.optional(),
   _masterId: z.string().optional(),
-  _userModified: z.boolean().optional(),
-  _userDeleted: z.boolean().optional()
+  _userModified: z.boolean().optional()
 })

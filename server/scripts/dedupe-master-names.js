@@ -116,7 +116,7 @@ function planDedupe(data, { forceDelete = [] } = {}) {
   const deleted = new Set(); // `${col}:${_id}`
   const repoint = new Map(); // old _id → kept _id (ids are unique per collection, and practically globally)
   const log = { merged: [], renamed: [], relinked: [], skippedEdited: [] };
-  const live = (col) => [...state[col].values()].filter((d) => !deleted.has(`${col}:${d._id}`) && d._userDeleted !== true);
+  const live = (col) => [...state[col].values()].filter((d) => !deleted.has(`${col}:${d._id}`) && d.deletedAt === undefined);
   // An old import left logistics pointing at equipment ids that never existed (eq_001…). A copy
   // whose logistics only differs by such dead ids counts as empty there, so the valid copy wins.
   const equipmentIds = new Set(state.equipment.keys());
@@ -276,7 +276,7 @@ function planDedupe(data, { forceDelete = [] } = {}) {
     const byOwner = new Map();
     for (const col of cols) {
       for (const [id, doc] of state[col]) {
-        if (deleted.has(`${col}:${id}`) || doc._userDeleted === true) continue;
+        if (deleted.has(`${col}:${id}`) || doc.deletedAt !== undefined) continue;
         const key = `${doc.userId}\u0000${nameOf(doc)}`;
         byOwner.set(key, (byOwner.get(key) ?? 0) + 1);
       }

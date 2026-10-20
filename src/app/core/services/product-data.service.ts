@@ -6,7 +6,6 @@ import { LoadingService } from './loading.service'
 import { Product, ProductSource } from '../models/product.model'
 
 const ENTITY = 'products'
-const TRASH_KEY = 'TRASH_PRODUCTS'
 
 @Injectable({ providedIn: 'root' })
 export class ProductDataService {
@@ -222,9 +221,7 @@ export class ProductDataService {
 
   async deleteProduct(_id: string): Promise<void> {
     try {
-      const product = await this.storage.get<Product>(ENTITY, _id)
-      const withDeleted = { ...product, deletedAt: Date.now() } as Product & { deletedAt: number }
-      await this.storage.appendExisting(TRASH_KEY, withDeleted)
+      // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
       this.ProductsStore_.update((products) => products.filter((p) => p._id !== _id))
       this.logging.info({
@@ -286,107 +283,5 @@ export class ProductDataService {
    *  than deleteFromMaster — reaches into other users' own documents. */
   async purgeIngredientEverywhere(productId: string): Promise<void> {
     return this.storage.purgeProductIngredientEverywhere(ENTITY, productId)
-  }
-
-  async getTrashProducts(): Promise<(Product & { deletedAt: number })[]> {
-    try {
-      const raw = await this.storage.query<Record<string, unknown>>(TRASH_KEY)
-      return raw.map((row) => this.normalizeTrashProduct(row as Partial<Product> & { deletedAt: number }))
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.product.getTrash_error',
-        message: 'Failed to get trash products',
-        context: { err }
-      })
-      throw err
-    }
-  }
-
-  private normalizeTrashProduct(row: Partial<Product> & { deletedAt: number }): Product & { deletedAt: number } {
-    const legacy = row as Partial<Product> & {
-      category?: string
-      is_dairy_?: boolean
-      supplierId_?: string
-      deletedAt: number
-    }
-    const product = this.normalizeProduct(legacy as Record<string, unknown>)
-    return { ...product, deletedAt: legacy.deletedAt }
-  }
-
-  async restoreProduct(_id: string): Promise<Product> {
-    try {
-      const trash = await this.getTrashProducts()
-      const item = trash.find((p) => p._id === _id)
-      if (!item) throw new Error(`Product ${_id} not found in trash`)
-      const { deletedAt: _, ...product } = item
-      const rest = trash.filter((p) => p._id !== _id)
-      await this.storage.replaceAll(TRASH_KEY, rest)
-      await this.storage.appendExisting(ENTITY, product)
-      this.ProductsStore_.update((products) => [...products, product])
-      return product
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.product.restore_error',
-        message: 'Failed to restore product',
-        context: { err }
-      })
-      throw err
-    }
-  }
-
-  async disposeProduct(_id: string): Promise<void> {
-    try {
-      const trash = await this.getTrashProducts()
-      const rest = trash.filter((p) => p._id !== _id)
-      if (rest.length === trash.length) throw new Error(`Product ${_id} not found in trash`)
-      await this.storage.replaceAll(TRASH_KEY, rest)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.product.dispose_error',
-        message: 'Failed to dispose product',
-        context: { err }
-      })
-      throw err
-    }
-  }
-
-  async restoreAllProducts(): Promise<Product[]> {
-    try {
-      const trash = await this.getTrashProducts()
-      const restored: Product[] = []
-      for (const item of trash) {
-        const { deletedAt: _, ...product } = item
-        await this.storage.appendExisting(ENTITY, product)
-        restored.push(product)
-      }
-      await this.storage.replaceAll(TRASH_KEY, [])
-      this.ProductsStore_.update((products) => [...products, ...restored])
-      return restored
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.product.restoreAll_error',
-        message: 'Failed to restore all products',
-        context: { err }
-      })
-      throw err
-    }
-  }
-
-  async disposeAllProducts(): Promise<void> {
-    try {
-      await this.storage.replaceAll(TRASH_KEY, [])
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.product.disposeAll_error',
-        message: 'Failed to dispose all products',
-        context: { err }
-      })
-      throw err
-    }
   }
 }

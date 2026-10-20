@@ -1,6 +1,6 @@
 import { Injectable, Injector, inject } from '@angular/core'
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http'
-import { catchError, firstValueFrom, of } from 'rxjs'
+import { HttpClient, HttpHeaders } from '@angular/common/http'
+import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
 
 /** Mirrors EntityId from async-storage.service.ts — kept local to avoid circular import. */
@@ -53,9 +53,12 @@ function toServer<T>(entityType: string, doc: T): T {
  *   get          → GET    /api/v1/data/:entityType/:id
  *   post         → POST   /api/v1/data/:entityType        (server assigns _id unless the body already has one — see generic.js)
  *   put          → PUT    /api/v1/data/:entityType/:id
- *   remove       → DELETE /api/v1/data/:entityType/:id
- *   appendExisting → POST /api/v1/data/:entityType        (body already has _id — server honors it, e.g. trash restore)
- *   replaceAll   → PUT    /api/v1/data/:entityType        (body is full array, no :id segment)
+ *   remove       → DELETE /api/v1/data/:entityType/:id        (Trash types: soft delete, plan 407)
+ *   removePermanently → DELETE /api/v1/data/:entityType/:id?permanent=true
+ *   trash        → GET    /api/v1/data/:entityType/trash
+ *   restore      → PUT    /api/v1/data/:entityType/:id/restore
+ *   restoreAll   → PUT    /api/v1/data/:entityType/trash/restore-all
+ *   emptyTrash   → DELETE /api/v1/data/:entityType/trash
  *   queryFiltered → GET   /api/v1/data/:entityType?filterEntityType=&filterEntityId=
  *   deleteBulk   → DELETE /api/v1/data/:entityType/bulk   (body: { ids })
  *   search        → GET   /api/v1/data/:entityType/search?q=&limit=
@@ -255,7 +258,7 @@ export class HttpStorageAdapter {
     )
   }
 
-  /** Removes one entity by id. */
+  /** Removes one entity by id. For a Trash type (plan 407) the server soft-deletes it into Trash. */
   async remove(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
       this.http.delete<void>(`${this.base}/api/v1/data/${entityType}/${entityId}`, {
@@ -265,35 +268,61 @@ export class HttpStorageAdapter {
     )
   }
 
-  /**
-   * Appends an entity that already has an _id (e.g. restoring from trash).
-   * Unlike post(), does not generate a new _id — sends body as-is.
-   */
-  async appendExisting<T extends EntityId>(entityType: string, entity: T): Promise<void> {
+  /** Removes one entity for good — also out of Trash (plan 407). */
+  async removePermanently(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
-      this.http
-        .post<unknown>(`${this.base}/api/v1/data/${entityType}`, toServer(entityType, entity), {
-          headers: this.headers(),
-          withCredentials: true
-        })
-        .pipe(
-          // 409 = item already exists in the target collection (e.g. already in trash from a
-          // prior attempt). The goal of appendExisting is "make sure it's there" — treat as success.
-          catchError((err: HttpErrorResponse) =>
-            err.status === 409 ? of(null) : new Promise((_, reject) => reject(err))
-          )
-        )
+      this.http.delete<void>(`${this.base}/api/v1/data/${entityType}/${entityId}?permanent=true`, {
+        headers: this.headers(),
+        withCredentials: true
+      })
     )
   }
 
-  /**
-   * Replaces the entire entity collection (e.g. clearing trash after dispose-all).
-   * Sends array to PUT /api/v1/data/:entityType (no id segment — server does deleteMany + insertMany).
-   */
-  async replaceAll<T>(entityType: string, entities: T[]): Promise<void> {
+  /** The caller's deleted items of one type, newest first (plan 407). */
+  async trash<T>(entityType: string): Promise<(T & { deletedAt: number })[]> {
+    const docs = await firstValueFrom(
+      this.http.get<(T & { deletedAt: number })[]>(`${this.base}/api/v1/data/${entityType}/trash`, {
+        headers: this.headers(),
+        withCredentials: true
+      })
+    )
+    return docs.map((d) => fromServer(entityType, d))
+  }
+
+  /** Brings one item back from Trash; returns it as stored. */
+  async restore<T>(entityType: string, entityId: string): Promise<T> {
+    const doc = await firstValueFrom(
+      this.http.put<T>(
+        `${this.base}/api/v1/data/${entityType}/${entityId}/restore`,
+        {},
+        {
+          headers: this.headers(),
+          withCredentials: true
+        }
+      )
+    )
+    return fromServer(entityType, doc)
+  }
+
+  /** Brings every item of one type back from Trash. */
+  async restoreAll(entityType: string): Promise<void> {
     await firstValueFrom(
-      this.http.put<unknown>(`${this.base}/api/v1/data/${entityType}`, entities, {
-        headers: this.headers().set('X-Confirm-Replace', 'true'),
+      this.http.put<unknown>(
+        `${this.base}/api/v1/data/${entityType}/trash/restore-all`,
+        {},
+        {
+          headers: this.headers(),
+          withCredentials: true
+        }
+      )
+    )
+  }
+
+  /** Removes every item of one type in Trash for good. */
+  async emptyTrash(entityType: string): Promise<void> {
+    await firstValueFrom(
+      this.http.delete<unknown>(`${this.base}/api/v1/data/${entityType}/trash`, {
+        headers: this.headers(),
         withCredentials: true
       })
     )

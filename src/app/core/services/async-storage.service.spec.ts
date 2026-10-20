@@ -21,8 +21,11 @@ describe('StorageService', () => {
       'pushToMaster',
       'put',
       'remove',
-      'appendExisting',
-      'replaceAll',
+      'removePermanently',
+      'trash',
+      'restore',
+      'restoreAll',
+      'emptyTrash',
       'queryFiltered',
       'search',
       'count',
@@ -68,18 +71,22 @@ describe('StorageService', () => {
     expect(adapter.remove).toHaveBeenCalledWith(ENTITY_TYPE, '1')
   })
 
-  it('appendExisting() delegates to the adapter', async () => {
-    const entity = { _id: 'restored-1' }
-    adapter.appendExisting.and.resolveTo(undefined)
-    await service.appendExisting(ENTITY_TYPE, entity)
-    expect(adapter.appendExisting).toHaveBeenCalledWith(ENTITY_TYPE, entity)
-  })
-
-  it('replaceAll() delegates to the adapter', async () => {
-    const entities = [{ _id: '1' }, { _id: '2' }]
-    adapter.replaceAll.and.resolveTo(undefined)
-    await service.replaceAll(ENTITY_TYPE, entities)
-    expect(adapter.replaceAll).toHaveBeenCalledWith(ENTITY_TYPE, entities)
+  it('Trash calls (plan 407) delegate to the adapter', async () => {
+    adapter.removePermanently.and.resolveTo(undefined)
+    adapter.trash.and.resolveTo([])
+    adapter.restore.and.resolveTo({ _id: '1' })
+    adapter.restoreAll.and.resolveTo(undefined)
+    adapter.emptyTrash.and.resolveTo(undefined)
+    await service.removePermanently(ENTITY_TYPE, '1')
+    await service.trash(ENTITY_TYPE)
+    await service.restore(ENTITY_TYPE, '1')
+    await service.restoreAll(ENTITY_TYPE)
+    await service.emptyTrash(ENTITY_TYPE)
+    expect(adapter.removePermanently).toHaveBeenCalledWith(ENTITY_TYPE, '1')
+    expect(adapter.trash).toHaveBeenCalledWith(ENTITY_TYPE)
+    expect(adapter.restore).toHaveBeenCalledWith(ENTITY_TYPE, '1')
+    expect(adapter.restoreAll).toHaveBeenCalledWith(ENTITY_TYPE)
+    expect(adapter.emptyTrash).toHaveBeenCalledWith(ENTITY_TYPE)
   })
 
   it('deleteBulk() delegates to the adapter', async () => {

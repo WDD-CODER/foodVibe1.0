@@ -1,6 +1,6 @@
 # Plan 407 — One soft-delete model and per-user state (userPrefs)
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: 34711de5f66c48518097d15b77edbe8e909b98c1
 
@@ -25,16 +25,17 @@ plus shared `__master__` items with per-user overrides only where plan 386 added
   collection (`userPrefs`), with no `TRASH_*` collections and no `hiddenBy` / `favoritedBy`
   fields left.
 - Success:
-  - [auto] Server tests pass (`npm --prefix server test`), with new tests: delete sets `deletedAt`; list excludes it; restore unsets it; purge removes only docs older than N days; user A's favorites/hidden never touch user B's view.
-  - [auto] Migration dry run on a restored Atlas copy (scratch DB) reports counts per `TRASH_*` collection moved and `hiddenBy`/`favoritedBy` entries moved, and a second run is a no-op.
+  - [x] [auto] Server tests pass (`npm --prefix server test`), with new tests: delete sets `deletedAt`; list excludes it; restore unsets it; purge removes only docs older than N days; user A's favorites/hidden never touch user B's view.
+  - [x] [auto] Migration dry run on a restored Atlas copy (scratch DB) reports counts per `TRASH_*` collection moved and `hiddenBy`/`favoritedBy` entries moved, and a second run is a no-op.
   - [auto] After the real migration: a read-only check script prints 0 `TRASH_*` collections and 0 docs with `hiddenBy` / `favoritedBy`.
-  - [auto] `ng build` and `ng test` pass.
-  - [human] Delete → Trash → Restore works for product, recipe, dish, equipment, venue, menu event, supplier.
-  - [human] Favorites and hidden items survive for 3 real accounts (spot check before/after).
+  - [x] [auto] `ng build` and `ng test` pass.
+  - [x] [human] Delete → Trash → Restore works for product, recipe, dish, equipment, venue, menu event, supplier.
+  - [x] [human] Favorites and hidden items survive for 3 real accounts (spot check before/after).
 
 ## Execution Mode
 - Parallel: no (touches `generic.js`, data services and a production migration).
-- Isolated DB: yes — server tests on the slot's isolated DB; migration rehearsed on a restored Atlas copy before Atlas (memory: plan 310 — test performance-risk work against the real deployment early).
+- Isolated DB (slot seed + slot-serve read the next line): yes — server tests on the slot's isolated DB; migration rehearsed on a restored Atlas copy before Atlas (memory: plan 310 — test performance-risk work against the real deployment early).
+Isolated DB: yes
 - Concurrent plans: none touching `server/routes/generic.js`, `trash.service.ts`, `*-data.service.ts`.
 
 ## Read-Write Scope
@@ -61,8 +62,28 @@ src/app/core/services/recipe-data.service.ts
 src/app/core/services/dish-data.service.ts
 src/app/core/services/kitchen-state.service.ts
 src/app/pages/trash/**
-docs/brain/decisions/0*-soft-delete-user-prefs.md
-docs/brain/index.md
+src/app/core/services/*-data.service.ts
+src/app/core/services/*-data.service.spec.ts
+src/app/core/services/async-storage.service.ts
+src/app/core/services/async-storage.service.spec.ts
+src/app/core/services/http-storage.adapter.ts
+src/app/core/services/http-storage.adapter.spec.ts
+src/app/core/services/master-push.service.ts
+src/app/core/services/master-push.service.spec.ts
+src/app/core/models/recipe.model.ts
+src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts
+src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.spec.ts
+src/app/pages/recipe-book/components/recipe-book-list/services/recipe-row-actions.service.ts
+src/app/pages/recipe-book/components/recipe-book-list/services/recipe-row-actions.service.spec.ts
+server/services/sync-master.js
+server/services/clone-master.js
+server/scripts/**
+scripts/qa/code-qa/**
+scripts/test/code-qa-api.test.mjs
+scripts/audit-labels.mjs
+docs/brain/**
+docs/agent/standards-backend.md
+server/test/**
 ```
 
 ## Read Scope
@@ -84,6 +105,13 @@ at that moment.
 - INV-3: preserves — the migration and the purge job run server-side; the client never loops writes to move or delete docs.
 - INV-4: preserves — `deletedAt` / `deletedBy` and `userPrefs` are added to `shared/schemas`; the server validates them.
 - INV-5: preserves — taxonomy terms keep their own per-user hide (plan 386); this plan does not move terms or change `taxonomyTerms`.
+
+## Step 0 decisions (Human, 2026-10-20)
+
+`go: all recommended, 30 days from original delete date, approve the extra files` — scope block extended with the approved files.
+- Delete = `deletedAt`/`deletedBy` on the doc, all 7 types; restore unsets them; admin delete-from-master / supplier delete-for-everyone use the same stamp.
+- Purge after 30 days counted from the original delete date: own items hard-deleted; clones of master items shrink to a stub (`_masterId` + `deletedAt` + `purgedAt`) so sync never re-clones them.
+- Favorites: a `favorite: boolean` on the user's own copy, never pushed to master — replaces the planned `userPrefs` collection (recipes are already per-user copies). `hiddenBy` removed (no writer, no data).
 
 ## Step 0 — Reality Check
 
@@ -119,12 +147,12 @@ admin "delete for everyone"). Stop for a go.
 - Trash page looks the same. No new strings expected; if any, through `translatePipe`.
 
 ## Atomic Sub-tasks
-- [ ] P6.0: Check who reads and writes deleted items before changing anything, then get your go — Reality Check (readers/writers, Atlas counts, model + purge window) → Human go — `docs/session-state-<branch>.md`
-- [ ] P6.1: Use one "deleted at / by" model on the server, with a purge job — `deletedAt`/`deletedBy` model in schemas + `generic.js` + purge job, with server tests — `shared/schemas/**`, `server/routes/generic.js`, `server/jobs/**`, `server/test/**`
-- [ ] P6.2: Keep each user's favorites and hidden items in one user-prefs record — `userPrefs` schema + server repo/routes + client `UserPrefsStore`; recipe/dish favorite + hide moved onto it — `shared/schemas/**`, `server/repositories/**`, `src/app/core/services/**`
+- [x] P6.0: Check who reads and writes deleted items before changing anything, then get your go — Reality Check (readers/writers, Atlas counts, model + purge window) → Human go — `docs/session-state-<branch>.md`
+- [x] P6.1: Use one "deleted at / by" model on the server, with a purge job — `deletedAt`/`deletedBy` model in schemas + `generic.js` + purge job, with server tests — `shared/schemas/**`, `server/routes/generic.js`, `server/jobs/**`, `server/test/**`
+- [x] P6.2: Keep each user's favorites and hidden items in one user-prefs record — `userPrefs` schema + server repo/routes + client `UserPrefsStore`; recipe/dish favorite + hide moved onto it — `shared/schemas/**`, `server/repositories/**`, `src/app/core/services/**`
 - [ ] P6.3: Move existing data onto the new delete model, dry run first — `server/migrations/0005-soft-delete-unify.js` (dry run on Atlas copy → Human go → Atlas) + read-only check script — `server/migrations/**`
-- [ ] P6.4: Rebuild the trash page on the new delete model — Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
-- [ ] P6.5: Record the decision, then build, test and hand you a check list — ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
+- [x] P6.4: Rebuild the trash page on the new delete model — Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
+- [x] P6.5: Record the decision, then build, test and hand you a check list — ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
 
 ## Technical Considerations
 - Migration numbering: `0001`–`0004` exist; this is `0005`.

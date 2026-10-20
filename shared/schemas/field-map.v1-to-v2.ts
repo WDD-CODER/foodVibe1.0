@@ -27,7 +27,7 @@ export function toEpoch(value: unknown): unknown {
 
 /**
  * Master/clone + ownership bookkeeping keeps its v1 names through Phase 2b on purpose (Human-visible
- * deviation from D4, decided 2026-10-01): userId, _masterId, _userModified, _userDeleted are used
+ * deviation from D4, decided 2026-10-01): userId, _masterId, _userModified are used
  * identically by all 24 collections and by the clone/sync/push-to-master machinery that Phase 5
  * deletes. Renaming them for 7 collections now would mean a mixed-name server layer that is thrown
  * away (Phase 5) or redone (Phase 6) later.
@@ -36,8 +36,7 @@ const COMMON: KeyMap = {
   _id: '_id',
   userId: 'userId',
   _masterId: '_masterId',
-  _userModified: '_userModified',
-  _userDeleted: '_userDeleted'
+  _userModified: '_userModified'
 }
 
 const INGREDIENT: KeyMap = {
@@ -168,8 +167,7 @@ const RECIPE: KeyMap = {
   addedAt_: { to: 'createdAt', fn: toEpoch },
   updatedAt_: { to: 'updatedAt', fn: toEpoch },
   createdBy: 'createdBy',
-  hiddenBy: 'hiddenBy', // @deprecated — moves to userPrefs in Phase 6
-  favoritedBy_: 'favoritedBy', // @deprecated — moves to userPrefs in Phase 6
+  favorite: 'favorite',
   imageUrl_: 'imageUrl',
   rating_: 'rating',
   neto_confirmed_: 'netoConfirmed',

@@ -91,11 +91,8 @@ export class RecipeRowActionsService {
 
   toggleFavorite(recipe: Recipe, uid: string | null): void {
     if (!uid) return
-    const current = recipe.favoritedBy ?? []
-    const updated: Recipe = {
-      ...recipe,
-      favoritedBy: current.includes(uid) ? current.filter((id) => id !== uid) : [...current, uid]
-    }
+    // The mark lives on the user's own copy (plan 407); push-to-master never carries it.
+    const updated: Recipe = { ...recipe, favorite: !recipe.favorite }
     this.kitchenState.saveRecipe(updated).subscribe()
   }
 

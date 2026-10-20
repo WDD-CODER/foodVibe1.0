@@ -7,7 +7,6 @@ import { LoadingService } from './loading.service'
 import { Recipe, PrepCategory } from '../models/recipe.model'
 
 const ENTITY = 'dishes'
-const TRASH_KEY = 'TRASH_DISHES'
 
 @Injectable({ providedIn: 'root' })
 export class DishDataService {
@@ -139,7 +138,7 @@ export class DishDataService {
   async updateDish(dish: Recipe): Promise<Recipe> {
     try {
       const existing = await this.storage.get<Recipe>(ENTITY, dish._id).catch(() => null)
-      const { hiddenBy: _hiddenBy, ...rest } = dish
+      const rest = dish
       const toSave: Recipe = {
         ...rest,
         createdAt: dish.createdAt ?? existing?.createdAt,
@@ -158,7 +157,7 @@ export class DishDataService {
 
   async permanentlyDeleteDish(_id: string): Promise<void> {
     try {
-      await this.storage.remove(ENTITY, _id)
+      await this.storage.removePermanently(ENTITY, _id)
       this.dishesStore_.update((dishes) => dishes.filter((d) => d._id !== _id))
       this.logging.info({
         event: 'crud.dish.hardDelete',
@@ -178,92 +177,12 @@ export class DishDataService {
 
   async deleteDish(_id: string): Promise<void> {
     try {
-      const dish = await this.storage.get<Recipe>(ENTITY, _id)
-      const withDeleted = { ...dish, deletedAt: Date.now() } as Recipe & { deletedAt: number }
-      await this.storage.appendExisting(TRASH_KEY, withDeleted)
+      // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
       this.dishesStore_.update((dishes) => dishes.filter((d) => d._id !== _id))
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.dish.delete_error', message: 'Failed to delete dish', context: { err } })
-      throw err
-    }
-  }
-
-  async getTrashDishes(): Promise<(Recipe & { deletedAt: number })[]> {
-    try {
-      return this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.dish.getTrash_error', message: 'Failed to get trash dishes', context: { err } })
-      throw err
-    }
-  }
-
-  async restoreDish(_id: string): Promise<Recipe> {
-    try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
-      const item = trash.find((d) => d._id === _id)
-      if (!item) throw new Error(`Dish ${_id} not found in trash`)
-      const { deletedAt: _, ...dish } = item
-      const rest = trash.filter((d) => d._id !== _id)
-      await this.storage.replaceAll(TRASH_KEY, rest)
-      await this.storage.appendExisting(ENTITY, dish)
-      this.dishesStore_.update((dishes) => [...dishes, dish])
-      return dish
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.dish.restore_error', message: 'Failed to restore dish', context: { err } })
-      throw err
-    }
-  }
-
-  async disposeDish(_id: string): Promise<void> {
-    try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
-      const rest = trash.filter((d) => d._id !== _id)
-      if (rest.length === trash.length) throw new Error(`Dish ${_id} not found in trash`)
-      await this.storage.replaceAll(TRASH_KEY, rest)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({ event: 'crud.dish.dispose_error', message: 'Failed to dispose dish', context: { err } })
-      throw err
-    }
-  }
-
-  async restoreAllDishes(): Promise<Recipe[]> {
-    try {
-      const trash = await this.storage.query<Recipe & { deletedAt: number }>(TRASH_KEY)
-      const restored: Recipe[] = []
-      for (const item of trash) {
-        const { deletedAt: _, ...dish } = item
-        await this.storage.appendExisting(ENTITY, dish)
-        restored.push(dish)
-      }
-      await this.storage.replaceAll(TRASH_KEY, [])
-      this.dishesStore_.update((dishes) => [...dishes, ...restored])
-      return restored
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.dish.restoreAll_error',
-        message: 'Failed to restore all dishes',
-        context: { err }
-      })
-      throw err
-    }
-  }
-
-  async disposeAllDishes(): Promise<void> {
-    try {
-      await this.storage.replaceAll(TRASH_KEY, [])
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) throw err
-      this.logging.error({
-        event: 'crud.dish.disposeAll_error',
-        message: 'Failed to dispose all dishes',
-        context: { err }
-      })
       throw err
     }
   }

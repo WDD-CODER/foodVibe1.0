@@ -15,6 +15,5 @@ export const equipmentSchema = z.strictObject({
   tags: z.array(z.string()).optional(),
   notes: z.string().optional(),
   _masterId: z.string().optional(),
-  _userModified: z.boolean().optional(),
-  _userDeleted: z.boolean().optional()
+  _userModified: z.boolean().optional()
 })

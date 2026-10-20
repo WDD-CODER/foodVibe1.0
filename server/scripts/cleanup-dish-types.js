@@ -99,7 +99,7 @@ async function planCleanup(db, mapping = MAPPING, now = Date.now()) {
   for (const collection of ['recipes', 'dishes']) {
     const docs = await db
       .collection(collection)
-      .find({ course: { $exists: true, $nin: ['', null] }, _userDeleted: { $ne: true } }, { projection: { course: 1, userId: 1, nameHebrew: 1 } })
+      .find({ course: { $exists: true, $nin: ['', null] }, deletedAt: { $exists: false } }, { projection: { course: 1, userId: 1, nameHebrew: 1 } })
       .toArray();
     for (const d of docs) {
       const { next, action } = mapCourse(d.course, collection, mapping);

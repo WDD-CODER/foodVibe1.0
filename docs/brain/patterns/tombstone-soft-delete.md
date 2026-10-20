@@ -1,14 +1,14 @@
-<!-- ADR-0004 gate, reviewed 2026-07-20: keep-as-is -->
-# Pattern: Tombstone soft-delete
+<!-- Rewritten for plan 407 / ADR 0022 (2026-10-20): the TRASH_* collections are gone. -->
+# Pattern: Soft-delete with `deletedAt`
 
 ## Problem
 
-Destructive delete on kitchen/venue data (recipes, dishes, products, equipment, venues, menu events) is unrecoverable — a solo dev with no team review has no safety net if it happens by mistake.
+Destructive delete on kitchen/venue data (recipes, dishes, products, equipment, venues, menu events, suppliers) is unrecoverable — a solo dev with no team review has no safety net if it happens by mistake.
 
 ## Solution
 
-Every major entity type has a parallel `TRASH_*` entity type (`TRASH_RECIPES`, `TRASH_DISHES`, `TRASH_PRODUCTS`, `TRASH_EQUIPMENT`, `TRASH_VENUES`, `TRASH_MENU_EVENTS`). Deleting an item moves it to its trash counterpart instead of removing it outright, so it stays recoverable until explicitly purged.
+Deleting stamps `deletedAt` / `deletedBy` on the document itself; it stays in its own collection and shows in Trash until it is restored (stamp removed) or removed for good (dispose, empty Trash, or the 30-day purge). A user's copy of a shared item is never hard-deleted — it shrinks to a stub (`_masterId` + `purgedAt`) so the login sync does not clone it back. See [[0022-soft-delete-user-prefs]].
 
 ## When to use
 
-Any new entity type that supports user-initiated delete should get a matching `TRASH_*` type rather than a real `DELETE`. See the full entity registry and new-collection checklist in `docs/agent/standards-backend.md` §1 and §3 — this pattern file doesn't restate that checklist, just the "why." Not for ephemeral UI-only state (modals, draft form fields) that never hits the entity registry.
+Any new entity type that supports user-initiated delete: set `softDelete: true` on its entry in `server/constants/collections.js` and add it to `TRASH_SECTIONS` in `src/app/core/services/trash.service.ts`. Every server read/write of that collection filters on `LIVE` from `server/jobs/purge-deleted.js`. Not for ephemeral UI-only state (modals, draft form fields).

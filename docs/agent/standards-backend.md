@@ -39,12 +39,6 @@ paths:
 | `EQUIPMENT_LIST` | Kitchen | Kitchen equipment |
 | `VENUE_PROFILES` | Venue | Event venue profiles |
 | `MENU_EVENT_LIST` | Menu | Menu events |
-| `TRASH_RECIPES` | Trash | Soft-deleted recipes |
-| `TRASH_DISHES` | Trash | Soft-deleted dishes |
-| `TRASH_PRODUCTS` | Trash | Soft-deleted products |
-| `TRASH_EQUIPMENT` | Trash | Soft-deleted equipment |
-| `TRASH_VENUES` | Trash | Soft-deleted venues |
-| `TRASH_MENU_EVENTS` | Trash | Soft-deleted menu events |
 | `VERSION_HISTORY` | System | Schema/version snapshots |
 | `activity_log` | System | Activity log entries (`ACTIVITY_STORAGE_KEY`) |
 | `KITCHEN_UNITS` | Registry | Unit of measure registry |
@@ -77,7 +71,7 @@ When a feature needs a new persisted entity type:
 
 1. Add the TypeScript model to `src/app/core/models/`
 2. Create a data service extending `BaseEntityDataService` (or custom if registry-doc pattern)
-3. Choose an `entityType` key: `SCREAMING_SNAKE_CASE`, domain-prefixed (`KITCHEN_*`, `MENU_*`, `TRASH_*`)
+3. Choose an `entityType` key: `SCREAMING_SNAKE_CASE`, domain-prefixed (`KITCHEN_*`, `MENU_*`); if users can delete it, set `softDelete: true` in `server/constants/collections.js` (Trash, plan 407 / ADR 0022)
 4. Add the key to `BACKUP_ENTITY_TYPES` in `async-storage.service.ts`
 5. Add a `reloadFromStorage()` method and wire it into `UserService`'s post-login/logout data-reload flow (`user.service.ts`)
 6. **No server changes needed** — generic routes use native `collection(type)` access (no Mongoose model for entity types; `server/routes/generic.js` calls `mongoose.connection.db.collection(type)` directly)

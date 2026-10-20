@@ -19,6 +19,7 @@
 const mongoose = require('mongoose');
 const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 const { newId: makeId } = require('../utils/id');
+const { LIVE } = require('../jobs/purge-deleted');
 
 /** Remap ingredient referenceIds from master IDs to user-scoped IDs. */
 function remapIngredients(ingredients, idMap) {
@@ -48,7 +49,8 @@ async function cloneMasterDataToUser(userId) {
 
   for (const entityType of CLONEABLE_TYPES) {
     const col = db.collection(entityType);
-    const masterDocs = await col.find({ userId: '__master__' }).toArray();
+    // Soft-deleted master items (plan 407) are not handed out.
+    const masterDocs = await col.find({ userId: '__master__', ...LIVE }).toArray();
 
     if (masterDocs.length === 0) continue;
 

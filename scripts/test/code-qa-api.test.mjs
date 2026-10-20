@@ -55,9 +55,8 @@ test('the case builder covers CRUD, trash, validation and auth for every entity,
   }
   assert.ok(ids.includes('products.crud.search'))
   assert.ok(!ids.includes('suppliers.crud.search'))
-  assert.ok(ids.includes('products.trash.restore'))
-  assert.ok(!ids.includes('menuEvents.trash.restore'), 'the app cannot restore a menu event')
-  assert.ok(!ids.includes('suppliers.trash.in-trash'), 'suppliers are deleted for good')
+  // Plan 407: every entity has a Trash with restore.
+  for (const e of ENTITY_ORDER) assert.ok(ids.includes(`${e}.trash.restore`) && ids.includes(`${e}.trash.in-trash`), e)
   assert.ok(ids.includes('global.ai.post-generate'))
   assert.ok(writeCount(rows) <= 300, `writes ${writeCount(rows)}`)
 })
@@ -70,14 +69,13 @@ test('without QA_USER2 the cross-user cases are marked skipped, the rest still r
 })
 
 test('rows resolve their paths and bodies from the run context', () => {
-  const ctx = { refs, ids: { products: 'P9' }, docs: { products: { _id: 'P9', nameHebrew: 'x' } }, counts: { products: 4 }, trash: { TRASH_PRODUCTS: [{ _id: 'P9', deletedAt: 1, nameHebrew: 'x' }, { _id: 'other' }] }, strays: [] }
+  const ctx = { refs, ids: { products: 'P9' }, docs: { products: { _id: 'P9', nameHebrew: 'x' } }, counts: { products: 4 }, strays: [] }
   const rows = Object.fromEntries(entityCases('products', DATE).map((r) => [r.id, r]))
   assert.equal(rows['products.crud.read'].path(ctx), '/api/v1/data/products/P9')
   assert.equal(rows['products.validation.missing-required'].body(ctx).nameHebrew, undefined)
   assert.equal(rows['products.validation.wrong-type'].body(ctx).nameHebrew, 12345)
   assert.ok(rows['products.validation.huge-string'].body(ctx).nameHebrew.length > 200_000)
-  assert.deepEqual(rows['products.trash.restore-trash-rewrite'].body(ctx), [{ _id: 'other' }])
-  assert.deepEqual(rows['products.trash.restore'].body(ctx), { _id: 'P9', nameHebrew: 'x' })
+  assert.equal(rows['products.trash.restore'].path(ctx), '/api/v1/data/products/P9/restore')
   assert.equal(rows['products.crud.count-after'].check({ json: { count: 5 } }, ctx), '')
   assert.match(rows['products.crud.count-after'].check({ json: { count: 4 } }, ctx), /expected \+1/)
   rows['products.validation.wrong-type'].after({ status: 201, json: { _id: 'stray' } }, ctx)

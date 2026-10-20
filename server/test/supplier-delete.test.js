@@ -59,7 +59,7 @@ describe('DELETE /api/v1/data/suppliers/:id — own products unlinked', () => {
     expect(await sourcesOf('pB1')).toEqual(['s1']);
   });
 
-  it('unlinks a master clone too (tombstoned, not hard-deleted)', async () => {
+  it('unlinks a master clone too (soft-deleted into Trash, plan 407)', async () => {
     await testDb().collection('suppliers').insertOne({ _id: 's1', userId: 'userA', _masterId: 'm1', nameHebrew: 'ספק' });
     await testDb().collection('products').insertOne(product('pA1', 'userA', ['s1']));
 
@@ -68,8 +68,8 @@ describe('DELETE /api/v1/data/suppliers/:id — own products unlinked', () => {
       .set('Authorization', `Bearer ${tokenUser('userA')}`);
 
     expect(await sourcesOf('pA1')).toEqual([]);
-    const tomb = await testDb().collection('suppliers').findOne({ _id: 's1' });
-    expect(tomb).toMatchObject({ _userDeleted: true, _masterId: 'm1' });
+    const deleted = await testDb().collection('suppliers').findOne({ _id: 's1' });
+    expect(deleted).toMatchObject({ _masterId: 'm1', nameHebrew: 'ספק', deletedBy: 'userA' });
   });
 
   it('bulk delete unlinks every deleted supplier from the caller\'s products', async () => {
@@ -95,7 +95,7 @@ describe('PUT /api/v1/data/suppliers/:id/delete-from-master — delete for every
       { _id: 'm1', userId: '__master__', nameHebrew: 'ספק' },
       { _id: 'sAdmin', userId: 'admin1', _masterId: 'm1', nameHebrew: 'ספק' },
       { _id: 'sB', userId: 'userB', _masterId: 'm1', nameHebrew: 'ספק' },
-      { _id: 'sC', userId: 'userC', _masterId: 'm1', _userDeleted: true },
+      { _id: 'sC', userId: 'userC', _masterId: 'm1', deletedAt: 7, purgedAt: 8 },
       { _id: 'other', userId: 'userB', _masterId: 'm2', nameHebrew: 'אחר' },
     ]);
     await testDb().collection('products').insertMany([
@@ -125,13 +125,16 @@ describe('PUT /api/v1/data/suppliers/:id/delete-from-master — delete for every
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true, usersAffected: 2 });
 
-    const remaining = await testDb().collection('suppliers').find({}).toArray();
-    // The caller's own copy is left for the normal DELETE route; unrelated suppliers stay.
-    expect(remaining.map(d => d._id).sort()).toEqual(['other', 'sAdmin']);
+    const all = await testDb().collection('suppliers').find({}).toArray();
+    // The caller's own copy is left for the normal DELETE route; unrelated suppliers stay live.
+    expect(all.filter(d => d.deletedAt === undefined).map(d => d._id).sort()).toEqual(['other', 'sAdmin']);
 
-    const trash = await testDb().collection('TRASH_SUPPLIERS').find({}).toArray();
-    expect(trash.map(d => `${d._id}:${d.userId}`).sort()).toEqual(['m1:__master__', 'sB:userB']);
-    expect(trash.every(d => typeof d.deletedAt === 'number')).toBe(true);
+    // Plan 407: the master and userB's clone are soft-deleted (userB finds it in Trash);
+    // userC's stub is left as it was.
+    const byId = Object.fromEntries(all.map(d => [d._id, d]));
+    expect(byId.m1).toMatchObject({ nameHebrew: 'ספק', deletedBy: 'admin1' });
+    expect(byId.sB).toMatchObject({ nameHebrew: 'ספק', deletedBy: 'admin1' });
+    expect(byId.sC).toMatchObject({ deletedAt: 7, purgedAt: 8 });
 
     expect(await sourcesOf('pB')).toEqual(['other']);
     expect(await sourcesOf('pMaster')).toEqual([]);

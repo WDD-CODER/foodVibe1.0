@@ -295,7 +295,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
     if (this.showFavoritesOnly_()) {
       const uid = this.currentUserId_()
-      recipes = uid ? recipes.filter((r) => (r.favoritedBy ?? []).includes(uid)) : []
+      recipes = uid ? recipes.filter((r) => r.favorite === true) : []
     }
 
     if (sortBy) {
@@ -477,9 +477,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected isFavoritedByCurrentUser_(recipe: Recipe): boolean {
-    const uid = this.currentUserId_()
-    if (!uid) return false
-    return (recipe.favoritedBy ?? []).includes(uid)
+    // Each user has their own copy, so the mark on it is theirs alone (plan 407).
+    return !!this.currentUserId_() && recipe.favorite === true
   }
 
   protected getSelectedProducts(): Product[] {

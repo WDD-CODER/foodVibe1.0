@@ -37,9 +37,8 @@ describe('ProductDataService', () => {
   ]
 
   beforeEach(fakeAsync(() => {
-    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'get', 'post', 'put', 'remove', 'appendExisting'])
+    storageSpy = jasmine.createSpyObj('StorageService', ['query', 'get', 'post', 'put', 'remove'])
 
-    storageSpy.appendExisting.and.returnValue(Promise.resolve())
     // Crucial: The constructor calls query() immediately
     storageSpy.query.and.returnValue(Promise.resolve(mockProducts))
     storageSpy.get.and.returnValue(Promise.resolve(mockProducts[0]))

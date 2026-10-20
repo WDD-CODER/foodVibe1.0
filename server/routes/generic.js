@@ -10,6 +10,8 @@ const { newId: makeId } = require('../utils/id');
 const { hasSchema: hasV2Schema } = require('../utils/schema-check');
 const { checkStoredDoc } = require('../middleware/validate');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
+const { SOFT_DELETE_TYPES } = require('../constants/collections');
+const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 
 const router = Router();
 
@@ -71,6 +73,14 @@ function col(type) {
   return mongoose.connection.db.collection(type);
 }
 
+/** Plan 407: collections whose delete is the soft-delete stamp (Trash). */
+const SOFT_DELETE = new Set(SOFT_DELETE_TYPES);
+
+function requireSoftDelete(req, res, next) {
+  if (!SOFT_DELETE.has(req.params.type)) return res.status(400).json({ error: `Type ${req.params.type} has no Trash` });
+  next();
+}
+
 // ---------------------------------------------------------------------------
 // Plan 321 Phase 3 — taxonomyTerms (one doc per category/label/unit/... term).
 // Read live as master ∪ own: master terms are shared, a user's own docs hold only
@@ -110,7 +120,7 @@ async function findTermReferences(term, limit = 5) {
     if (!paths.length || refs.length >= limit) continue;
     const docs = await col(type)
       .find(
-        { userId: termScope(term), _userDeleted: { $ne: true }, $or: paths.map(p => ({ [refPath(p).field]: term.key })) },
+        { userId: termScope(term), ...LIVE, $or: paths.map(p => ({ [refPath(p).field]: term.key })) },
         { projection: { nameHebrew: 1, name: 1, userId: 1 } }
       )
       .limit(limit - refs.length)
@@ -184,7 +194,7 @@ router.get('/:type', optionalToken, async (req, res) => {
     // at all for most UI) is tracked separately — see plan 301.
     const limit = Math.min(parseInt(req.query.limit) || 20000, 20000);
     const skip = parseInt(req.query.skip) || 0;
-    const filter = { userId: readOwner(req.params.type, userId), _userDeleted: { $ne: true } };
+    const filter = { userId: readOwner(req.params.type, userId), ...LIVE };
     if (req.query.filterEntityType) {
       filter.entityType = String(req.query.filterEntityType);
     }
@@ -253,7 +263,7 @@ router.get('/:type/search', optionalToken, async (req, res) => {
 
     const docs = await col(req.params.type)
       .find(
-        { userId, _userDeleted: { $ne: true }, nameHebrew: regex },
+        { userId, ...LIVE, nameHebrew: regex },
         { projection: SEARCH_PROJECTIONS[req.params.type] }
       )
       .limit(limit)
@@ -276,7 +286,7 @@ router.get('/:type/search', optionalToken, async (req, res) => {
 router.get('/:type/count', optionalToken, async (req, res) => {
   try {
     const userId = req.user ? req.user.userId : '__master__';
-    const filter = { userId, _userDeleted: { $ne: true } };
+    const filter = { userId, ...LIVE };
     const filterName = req.query.filter;
     if (filterName === 'lowStock') {
       if (req.params.type !== 'products') {
@@ -316,6 +326,53 @@ router.get('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
+// GET /api/v1/data/:type/trash — plan 407 (see the Trash block near DELETE below). Registered
+// before GET /:type/:id so "trash" is never swallowed as an :id. Purges the caller's (and
+// master's) docs deleted more than 30 days ago first, so Trash never shows an expired item.
+// ---------------------------------------------------------------------------
+router.get('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
+  try {
+    await purgeExpired(mongoose.connection.db, { owners: [req.user.userId, MASTER], types: [req.params.type] });
+    const docs = await col(req.params.type)
+      .find({ userId: req.user.userId, ...IN_TRASH })
+      .sort({ deletedAt: -1 })
+      .toArray();
+    res.json(docs);
+  } catch (err) {
+    req.log.error({ err, event: 'data.trash_list.failed' });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (req, res) => {
+  try {
+    const result = await col(req.params.type).updateMany(
+      { userId: req.user.userId, ...IN_TRASH },
+      { $unset: { deletedAt: '', deletedBy: '' } }
+    );
+    res.json({ ok: true, restored: result.modifiedCount });
+  } catch (err) {
+    req.log.error({ err, event: 'data.trash_restore_all.failed' });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res) => {
+  try {
+    const restored = await col(req.params.type).findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.userId, ...IN_TRASH },
+      { $unset: { deletedAt: '', deletedBy: '' } },
+      { returnDocument: 'after' }
+    );
+    if (!restored) return res.status(404).json({ error: `Item ${req.params.id} is not in Trash` });
+    res.json(restored);
+  } catch (err) {
+    req.log.error({ err, event: 'data.trash_restore.failed' });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // GET /api/v1/data/:type/:id
 // Authenticated → returns one document by _id scoped to the user.
 // Anonymous → returns one document by _id from __master__.
@@ -326,7 +383,7 @@ router.get('/:type/:id', optionalToken, async (req, res) => {
     const doc = await col(req.params.type).findOne({
       _id: req.params.id,
       userId: readOwner(req.params.type, userId),
-      _userDeleted: { $ne: true },
+      ...LIVE,
     });
     if (!doc) {
       return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist` });
@@ -461,7 +518,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     const { userId: _, _masterId: __, _userModified: ___, ...safeBody } = req.body;
 
     const isTerm = req.params.type === TAXONOMY;
-    const filter = { _id: req.params.id, userId: isTerm ? termWriteOwner(req) : req.user.userId, _userDeleted: { $ne: true } };
+    const filter = { _id: req.params.id, userId: isTerm ? termWriteOwner(req) : req.user.userId, ...LIVE };
     const stamps = {
       ...(hasV2Schema(req.params.type) && { schemaVersion: 2, updatedAt: Date.now() }),
       ...(!isTerm && { _userModified: true }),
@@ -566,7 +623,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   if (visited.has(key)) return null;
   visited.add(key);
 
-  const existing = await col(type).findOne({ _id: id, userId, _userDeleted: { $ne: true } });
+  const existing = await col(type).findOne({ _id: id, userId, ...LIVE });
   if (!existing) return null;
   if (typeof existing._masterId !== 'string') return null;
 
@@ -597,7 +654,8 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
     })
   );
 
-  const { userId: _u, _masterId: _m, _userModified: _um, _id: _i, ...safeBody } = existing;
+  // Per-user state never reaches the shared copy (plan 407): the owner's favorite mark and delete stamps.
+  const { userId: _u, _masterId: _m, _userModified: _um, _id: _i, favorite: _f, deletedAt: _da, deletedBy: _db, purgedAt: _pa, ...safeBody } = existing;
   const ingredientsField = hasIngredients ? { ingredients } : {};
   // 2026-09-30 fix (take 2): every new doc self-links (_masterId = its own _id, see POST
   // above). A naive upsert with that same _id fails — `_id` is uniquely indexed across the
@@ -616,7 +674,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
     if (name) {
       const namespace = hasIngredients ? ['recipes', 'dishes'] : [type];
       for (const t of namespace) {
-        const twin = await col(t).findOne({ userId: '__master__', nameHebrew: name }, { projection: { _id: 1 } });
+        const twin = await col(t).findOne({ userId: '__master__', nameHebrew: name, ...LIVE }, { projection: { _id: 1 } });
         if (twin) throw new MasterNameTakenError(name);
       }
     }
@@ -631,7 +689,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
     });
   } else {
     const result = await col(type).updateOne(
-      { _id: resolvedMasterId, userId: '__master__' },
+      { _id: resolvedMasterId, userId: '__master__', ...LIVE },
       { $set: { ...safeBody, ...ingredientsField } }
     );
     if (result.matchedCount === 0) return null;
@@ -660,7 +718,7 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
     // up front here (pushDocToMasterRecursive re-checks internally too, for the
     // recursive calls it makes on referenced products/sub-recipes).
     const preCheck = await col(req.params.type).findOne(
-      { _id: req.params.id, userId: req.user.userId, _userDeleted: { $ne: true } },
+      { _id: req.params.id, userId: req.user.userId, ...LIVE },
       { projection: { _masterId: 1 } }
     );
     if (!preCheck) {
@@ -707,9 +765,9 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
 // Suppliers (plan 366) go further — see purgeSupplierEverywhere below.
 // ---------------------------------------------------------------------------
 const DELETABLE_FROM_MASTER_TYPES = new Set(['recipes', 'dishes', 'products', 'suppliers']);
-const MASTER_TRASH_KEY = {
-  recipes: 'TRASH_RECIPES', dishes: 'TRASH_DISHES', products: 'TRASH_PRODUCTS', suppliers: 'TRASH_SUPPLIERS',
-};
+
+/** Plan 407: the soft-delete stamp — the doc stays where it is and Trash lists it. */
+const deleteStamp = (userId, now = Date.now()) => ({ deletedAt: now, deletedBy: userId });
 
 /** Removes supplier ids from the `sources` of one user's products (no dangling links). */
 async function unlinkSuppliersFromProducts(userId, supplierIds) {
@@ -727,7 +785,7 @@ async function unlinkSuppliersFromProducts(userId, supplierIds) {
 // user's own documents"; not a general pattern to reuse elsewhere.
 //
 // Every other user's clone of the master supplier (found by _masterId, each with
-// its own _id) is moved to that user's TRASH_SUPPLIERS and deleted, and that
+// its own _id) is soft-deleted (lands in that user's Trash, plan 407), and that
 // clone's id is pulled from that user's products' `sources`. The __master__
 // products lose the master supplier too, so new signups don't get a dangling
 // link. The caller's own copy and products go through the normal DELETE route.
@@ -737,17 +795,12 @@ async function purgeSupplierEverywhere(masterId, callerId) {
   const clones = await col('suppliers')
     .find({ _masterId: masterId, userId: { $nin: ['__master__', callerId] } })
     .toArray();
-  const deletedAt = Date.now();
+  const stamp = deleteStamp(callerId);
   for (const clone of clones) {
     await unlinkSuppliersFromProducts(clone.userId, [clone._id]);
-    if (!clone._userDeleted) {
-      await col('TRASH_SUPPLIERS').replaceOne(
-        { _id: clone._id, userId: clone.userId },
-        { ...clone, deletedAt },
-        { upsert: true }
-      );
+    if (clone.deletedAt === undefined) {
+      await col('suppliers').updateOne({ _id: clone._id, userId: clone.userId, ...LIVE }, { $set: stamp });
     }
-    await col('suppliers').deleteOne({ _id: clone._id, userId: clone.userId });
   }
   await unlinkSuppliersFromProducts('__master__', [masterId]);
   return new Set(clones.map(c => c.userId)).size;
@@ -769,11 +822,13 @@ router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (re
       return res.status(400).json({ error: 'This item has no linked master copy to remove' });
     }
 
-    const masterDoc = await col(req.params.type).findOne({ _id: existing._masterId, userId: '__master__' });
+    const masterDoc = await col(req.params.type).findOne({ _id: existing._masterId, userId: '__master__', ...LIVE });
     if (masterDoc) {
-      const trashKey = MASTER_TRASH_KEY[req.params.type];
-      await col(trashKey).insertOne({ ...masterDoc, deletedAt: Date.now() });
-      await col(req.params.type).deleteOne({ _id: existing._masterId, userId: '__master__' });
+      // Soft-deleted like any doc: signup clone and login sync skip it; the purge removes it later.
+      await col(req.params.type).updateOne(
+        { _id: existing._masterId, userId: '__master__' },
+        { $set: deleteStamp(req.user.userId) }
+      );
     }
     // masterDoc already gone (e.g. removed by a previous call) — the supplier purge still
     // runs, so a retry after a half-failed call finishes the job.
@@ -904,15 +959,12 @@ async function replaceCollectionFallback(type, userId, docs) {
 // Body must be an array of entity objects. Each must have _id.
 //
 // Restricted (Plan 321 Phase 1) to the specific collections that actually still need
-// atomic whole-collection replace today: the TRASH_*/VERSION_HISTORY clear-all/
-// restore-all/trim flows (the registries moved to taxonomyTerms in Phase 3). Every real entity-data collection
+// atomic whole-collection replace today: the VERSION_HISTORY trim flow (Trash moved onto
+// `deletedAt` in plan 407; the registries moved to taxonomyTerms in Phase 3). Every real entity-data collection
 // (products, recipes, ...) must go through per-document POST/PUT/DELETE —
 // wiping a user's whole catalog in one call was never an intended use of this route.
 // ---------------------------------------------------------------------------
-const REPLACEABLE_TYPES = new Set([
-  'TRASH_RECIPES', 'TRASH_DISHES', 'TRASH_PRODUCTS', 'TRASH_EQUIPMENT', 'TRASH_VENUES', 'TRASH_MENU_EVENTS',
-  'VERSION_HISTORY',
-]);
+const REPLACEABLE_TYPES = new Set(['VERSION_HISTORY']);
 
 router.put('/:type', verifyToken, async (req, res) => {
   try {
@@ -1006,26 +1058,53 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
 });
 
 // ---------------------------------------------------------------------------
-// DELETE /api/v1/data/:type/:id
-// Removes one document, scoped to the authenticated user.
+// Plan 407 — Trash on the soft-delete stamp. One set of routes for every SOFT_DELETE_TYPES
+// collection; all scoped to the caller's own documents.
+//   GET    /:type/trash               the caller's deleted docs (runs the 30-day purge first)
+//   PUT    /:type/:id/restore         unset deletedAt/deletedBy on one doc
+//   PUT    /:type/trash/restore-all   the same for every doc in the caller's Trash
+//   DELETE /:type/trash               remove every doc in the caller's Trash for good
+// ---------------------------------------------------------------------------
+router.delete('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
+  try {
+    const docs = await col(req.params.type)
+      .find({ userId: req.user.userId, ...IN_TRASH }, { projection: { _id: 1, userId: 1, _masterId: 1, deletedAt: 1, deletedBy: 1 } })
+      .toArray();
+    const now = Date.now();
+    for (const doc of docs) await disposeDoc(col(req.params.type), doc, now);
+    res.json({ ok: true, disposed: docs.length });
+  } catch (err) {
+    req.log.error({ err, event: 'data.trash_empty.failed' });
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// DELETE /api/v1/data/:type/:id[?permanent=true]
+// Plan 407: for SOFT_DELETE_TYPES a plain delete stamps deletedAt/deletedBy (the item goes to
+// Trash); `?permanent=true` removes it for good (also from Trash) — a stub for a master clone so
+// sync never clones it back, a hard delete otherwise. Other collections are hard-deleted.
 // ---------------------------------------------------------------------------
 router.delete('/:type/:id', verifyToken, async (req, res) => {
   try {
-    // A1: referential integrity — block product delete if any recipe/dish uses it.
+    const type = req.params.type;
+    const softType = SOFT_DELETE.has(type);
+    const permanent = req.query.permanent === 'true';
+    const existing = await col(type).findOne({
+      _id: req.params.id,
+      userId: type === TAXONOMY ? termWriteOwner(req) : req.user.userId,
+      ...(softType && permanent ? { purgedAt: { $exists: false } } : LIVE),
+    });
+    if (!existing) {
+      return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${type} does not exist` });
+    }
+
+    // A1: referential integrity — block deleting a live product that a live recipe/dish uses.
     // Prevents orphaned ingredient referenceIds in recipes and dishes.
-    if (req.params.type === 'products') {
-      const recipeRef = await col('recipes').findOne({
-        userId: req.user.userId,
-        'ingredients.referenceId': req.params.id,
-        _userDeleted: { $ne: true },
-      });
-      const dishRef = !recipeRef && await col('dishes').findOne({
-        userId: req.user.userId,
-        'ingredients.referenceId': req.params.id,
-        _userDeleted: { $ne: true },
-      });
-      if (recipeRef || dishRef) {
-        const ref = recipeRef || dishRef;
+    if (type === 'products' && existing.deletedAt === undefined) {
+      const refFilter = { userId: req.user.userId, 'ingredients.referenceId': req.params.id, ...LIVE };
+      const ref = await col('recipes').findOne(refFilter) || await col('dishes').findOne(refFilter);
+      if (ref) {
         return res.status(409).json({
           error: 'Product is used in one or more recipes',
           referencedBy: ref.nameHebrew || ref._id,
@@ -1033,40 +1112,25 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
       }
     }
 
-    const existing = await col(req.params.type).findOne({
-      _id: req.params.id,
-      userId: req.params.type === TAXONOMY ? termWriteOwner(req) : req.user.userId,
-    });
-    if (!existing) {
-      return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${req.params.type} does not exist` });
-    }
-
     // Plan 321 Phase 3: a term still used (own docs, or anyone's for a shared term) can't be deleted.
-    if (req.params.type === TAXONOMY) {
+    if (type === TAXONOMY) {
       const refs = await findTermReferences(existing);
       if (refs.length) return res.status(409).json(termInUse(existing, refs));
       await col(TAXONOMY).deleteOne({ _id: existing._id, userId: existing.userId });
       return res.json({ ok: true });
     }
 
-    const isMasterClone = existing._masterId && existing._masterId !== existing._id;
-
-    if (isMasterClone) {
-      // Tombstone: preserve lineage so sync doesn't re-clone this item on next login.
-      // _userModified: true ensures syncMasterToUser Rule 3 treats this as user-wins.
-      await col(req.params.type).replaceOne(
-        { _id: req.params.id, userId: req.user.userId },
-        {
-          _id: req.params.id, userId: req.user.userId, _masterId: existing._masterId, _userDeleted: true, _userModified: true,
-          ...(hasV2Schema(req.params.type) && { schemaVersion: 2 }),
-        }
-      );
+    if (!softType) {
+      await col(type).deleteOne({ _id: existing._id, userId: existing.userId });
+    } else if (permanent) {
+      await disposeDoc(col(type), existing);
     } else {
-      // Hard delete: user-originated item or legacy (no _masterId / self-referential)
-      await col(req.params.type).deleteOne({ _id: req.params.id, userId: req.user.userId });
+      await col(type).updateOne({ _id: existing._id, userId: existing.userId }, { $set: deleteStamp(req.user.userId) });
     }
     // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
-    if (req.params.type === 'suppliers') await unlinkSuppliersFromProducts(req.user.userId, [req.params.id]);
+    if (type === 'suppliers' && existing.deletedAt === undefined) {
+      await unlinkSuppliersFromProducts(req.user.userId, [req.params.id]);
+    }
 
     res.json({ ok: true });
   } catch (err) {
