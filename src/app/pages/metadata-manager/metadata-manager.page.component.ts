@@ -41,6 +41,7 @@ import { UserManagementComponent } from './components/user-management/user-manag
 import { AiModelManagerComponent } from './components/ai-model-manager/ai-model-manager.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
+import { UnitEditDialogComponent, type UnitEditValue } from './components/unit-edit-dialog/unit-edit-dialog.component'
 
 type MetadataType = 'category' | 'allergen' | 'unit' | 'label' | 'course'
 
@@ -67,7 +68,8 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     UserManagementComponent,
     AiModelManagerComponent,
     ScrollRailComponent,
-    RowActionsMenuComponent
+    RowActionsMenuComponent,
+    UnitEditDialogComponent
   ],
   templateUrl: './metadata-manager.page.component.html',
   styleUrl: './metadata-manager.page.component.scss',
@@ -124,6 +126,8 @@ export class MetadataManagerComponent implements OnInit {
   protected readonly renamingMenuTypeKey_ = signal<string | null>(null)
   /** Menu type whose tap menu (edit / delete, plan 340) is open. */
   protected readonly menuTypeMenuKey_ = signal<string | null>(null)
+  /** Custom unit open in the edit dialog (plan 377), as it was when the dialog opened. */
+  protected readonly editingUnit_ = signal<UnitEditValue | null>(null)
 
   readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS
 
@@ -469,8 +473,8 @@ export class MetadataManagerComponent implements OnInit {
 
   //RENAME (plan 322) — fix a typo in place instead of delete + recreate + manually re-tag
   // every recipe/product. category/allergen/course share the Hebrew+English key modal
-  // label reuses its own creation modal so color/autoTriggers can be corrected too; unit is
-  // out of scope (riskier — affects cost/conversion calculations elsewhere).
+  // label reuses its own creation modal so color/autoTriggers can be corrected too; unit has
+  // its own dialog (plan 377) because it also carries a gram conversion.
   private registryHasKey(type: MetadataType, key: string): boolean {
     switch (type) {
       case 'label':
@@ -481,9 +485,30 @@ export class MetadataManagerComponent implements OnInit {
         return this.allCategories_().includes(key)
       case 'allergen':
         return this.allAllergens_().includes(key)
+      case 'unit':
+        return this.allUnitKeys_().includes(key)
       default:
         return false
     }
+  }
+
+  /** Products and recipes/dishes that use unit `key`, over the same fields the server re-keys
+   *  (`TERM_REFERENCES.unit`). */
+  private unitUsage(key: string): { products: number; recipes: number } {
+    const products = this.productData
+      .allProducts_()
+      .filter((p) => p.baseUnit === key || (p.purchaseOptions ?? []).some((o) => o.unitSymbol === key)).length
+    const recipes = this.kitchenState
+      .recipes_()
+      .filter(
+        (r) =>
+          r.yieldUnit === key ||
+          (r.ingredients ?? []).some((i) => i.unit === key) ||
+          (r.yieldConversions ?? []).some((c) => c.unit === key) ||
+          (r.prepItems ?? []).some((i) => i.unit === key) ||
+          (r.prepCategories ?? []).some((c) => (c.items ?? []).some((i) => i.unit === key))
+      ).length
+    return { products, recipes }
   }
 
   private getAffectedCount(type: MetadataType, key: string): number {
@@ -501,6 +526,10 @@ export class MetadataManagerComponent implements OnInit {
     if (type === 'allergen') {
       return this.productData.allProducts_().filter((p) => (p.allergens ?? []).includes(key)).length
     }
+    if (type === 'unit') {
+      const usage = this.unitUsage(key)
+      return usage.products + usage.recipes
+    }
     return 0
   }
 
@@ -511,6 +540,12 @@ export class MetadataManagerComponent implements OnInit {
       await Promise.all([this.recipeData.reloadFromStorage(), this.dishData.reloadFromStorage()])
     } else if (type === 'category' || type === 'allergen') {
       await this.productData.reloadFromStorage()
+    } else if (type === 'unit') {
+      await Promise.all([
+        this.productData.reloadFromStorage(),
+        this.recipeData.reloadFromStorage(),
+        this.dishData.reloadFromStorage()
+      ])
     }
   }
 
@@ -627,6 +662,20 @@ export class MetadataManagerComponent implements OnInit {
   async onRenameMetadata(item: string, type: MetadataType): Promise<void> {
     if (!this.requireSignIn()) return
 
+    if (type === 'unit') {
+      if (this.isSystemUnit(item)) return
+      if (!this.canEditTerm('unit', item)) {
+        this.userMsgService.onSetErrorMsg(this.translationService.translate('taxonomy_shared_admin_only'))
+        return
+      }
+      this.editingUnit_.set({
+        key: item,
+        hebrewLabel: this.translationService.translate(item),
+        gramRate: this.unitRegistry.getConversion(item)
+      })
+      return
+    }
+
     if (type === 'label') {
       const existing = this.allLabels_().find((l) => l.key === item)
       const result = await this.labelCreationModal.open(
@@ -675,6 +724,43 @@ export class MetadataManagerComponent implements OnInit {
       if (!ok) return
       this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)
     }
+  }
+
+  /** Save from the unit edit dialog. Both confirms are asked before anything is written, so a
+   *  cancel never leaves half an edit. Key first, then the rate on the new key. */
+  async onUnitEditSaved(next: UnitEditValue): Promise<void> {
+    const prev = this.editingUnit_()
+    this.editingUnit_.set(null)
+    if (!prev || !this.requireSignIn()) return
+    const keyChanged = next.key !== prev.key
+    const rateChanged = next.gramRate !== prev.gramRate
+    const labelChanged = next.hebrewLabel !== prev.hebrewLabel
+    if (!keyChanged && !rateChanged && !labelChanged) return
+
+    if (keyChanged && this.registryHasKey('unit', next.key)) {
+      this.userMsgService.onSetErrorMsg(`${this.metadataTypeNames.unit} "${next.key}" כבר קיימת`)
+      return
+    }
+    const usage = this.unitUsage(prev.key)
+    const inUse = usage.products + usage.recipes > 0
+    const withCounts = (dictKey: string): string =>
+      this.translationService
+        .translate(dictKey)
+        .replace('{n}', String(usage.products))
+        .replace('{m}', String(usage.recipes))
+    if (keyChanged && inUse && !(await this.confirmModal.open(withCounts('unit_rename_confirm')))) return
+    if (rateChanged && inUse && !(await this.confirmModal.open(withCounts('unit_rate_change_confirm')))) return
+
+    const scope = await this.resolvePushScope('unit', 'save', prev.key)
+    if (!scope) return
+
+    if (keyChanged) {
+      if (!(await this.unitRegistry.renameUnit(prev.key, next.key))) return
+    }
+    if (keyChanged || labelChanged) this.translationService.updateDictionary(next.key, next.hebrewLabel, scope)
+    const rateSaved = !rateChanged || (await this.unitRegistry.updateUnitRate(next.key, next.gramRate))
+    if (keyChanged) await this.reloadAfterRename('unit')
+    if (rateSaved) this.userMsgService.onSetSuccessMsg('העדכון בוצע בהצלחה')
   }
 
   //HELPERS

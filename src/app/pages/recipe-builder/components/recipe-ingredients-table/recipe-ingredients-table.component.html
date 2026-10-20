@@ -122,6 +122,8 @@
             focusByRow
             [rowIndex]="$index"
             kind="unit"
+            [allowTypedAdd]="true"
+            (addNewChosen)="pendingUnitName_.set($event)"
             (valueChange)="onUnitChange(group, $index, $event)"
           />
         </div>

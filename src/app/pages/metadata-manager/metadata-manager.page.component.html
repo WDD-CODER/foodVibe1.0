@@ -21,7 +21,6 @@
       icon="scale"
       iconClass="icon-success"
       [lockReason]="lockReasonFor.unit"
-      [canEdit]="false"
       (added)="onAddMetadata($event.value, 'unit', $event.input)"
       (editRequested)="onRenameMetadata($event, 'unit')"
       (removeRequested)="onRemoveMetadata($event, 'unit')"
@@ -160,6 +159,10 @@
     <app-user-management id="mm-sec-user" [style.order]="orderFor('mm-sec-user')" />
     <app-ai-model-manager id="mm-sec-ai-models" [style.order]="orderFor('mm-sec-ai-models')" />
   </div>
+
+  @if (editingUnit_(); as unit) {
+    <app-unit-edit-dialog [unit]="unit" (saved)="onUnitEditSaved($event)" (cancelled)="editingUnit_.set(null)" />
+  }
 
   <!-- The menu types' tap menu. It sits outside the card because its backdrop-filter would
        trap a position:fixed popover. -->

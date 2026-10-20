@@ -166,6 +166,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     return this.formValue_()?.allergens || []
   })
   protected activeRowIndex_ = signal<number | null>(null)
+  /** Name typed in a unit picker before choosing "add", handed to the unit creator (plan 377). */
+  protected readonly pendingUnitName_ = signal('')
 
   protected filteredAllergenOptions_ = computed(() => {
     const all = this.metadataRegistry.allAllergens_()
@@ -501,11 +503,18 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /** Typed unit name for the creator; cleared so the next add starts fresh. */
+  private takePendingUnitName(): string {
+    const name = this.pendingUnitName_()
+    this.pendingUnitName_.set('')
+    return name
+  }
+
   protected onBaseUnitValueChange(value: string): void {
     if (value === 'NEW_UNIT') {
       this.activeRowIndex_.set(null)
       this.isBaseUnitMode_.set(true)
-      this.unitRegistry.openUnitCreator()
+      this.unitRegistry.openUnitCreator({ name: this.takePendingUnitName() })
       this.productForm_.patchValue({ baseUnit: '' })
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         this.productForm_.patchValue({ baseUnit: newUnit })
@@ -521,7 +530,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         ((this.purchaseOptions_.value as { unitSymbol?: string }[])
           ?.map((o) => o?.unitSymbol)
           ?.filter(Boolean) as string[]) ?? []
-      this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols })
+      this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, name: this.takePendingUnitName() })
       ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ unitSymbol: '' })
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ unitSymbol: newUnit })
@@ -531,7 +540,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   protected onUomValueChange(value: string, index: number): void {
     if (value === 'NEW_UNIT') {
-      this.unitRegistry.openUnitCreator()
+      this.unitRegistry.openUnitCreator({ name: this.takePendingUnitName() })
       ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ uom: '' })
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ uom: newUnit })
@@ -882,8 +891,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
     const purchaseOptions = (val.purchaseOptions ?? []).map(
       (opt: PurchaseOption_ & { show_special_price_?: boolean }) => {
-        const { show_special_price_: _, ...rest } = opt
-        return rest as PurchaseOption_
+        const { show_special_price_: special, ...rest } = opt
+        // The row keeps an auto-filled price even when "special price" is off; saving it would
+        // turn the special price on by itself and cost the unit at that price (plan 377).
+        return { ...rest, priceOverride: special ? rest.priceOverride : 0 } as PurchaseOption_
       }
     )
 

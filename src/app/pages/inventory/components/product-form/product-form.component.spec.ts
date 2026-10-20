@@ -87,6 +87,7 @@ describe('ProductFormComponent', () => {
           provide: KitchenStateService,
           useValue: {
             saveProduct: () => of(null),
+            products_: signal<Product[]>([]),
             suppliers_: mockSuppliersSignal,
             suppliersById_: computed(() => new Map(mockSuppliersSignal().map((s) => [s._id, s])))
           }
@@ -153,6 +154,25 @@ describe('ProductFormComponent', () => {
       // 5. Assert — conversionRate = base units per 1 purchase unit; kg/kg => 1
       expect(firstRow.get('conversionRate')?.value).toBe(1)
       expect(firstRow.get('priceOverride')?.value).toBe(10000)
+    })
+  })
+
+  // Plan 377 — an auto-filled price must not be saved as a special price.
+  describe('Special purchase price on save', () => {
+    it('saves priceOverride only for rows with "special price" ticked', async () => {
+      const kitchen = TestBed.inject(KitchenStateService)
+      const saveSpy = spyOn(kitchen, 'saveProduct').and.returnValue(of(null as unknown as Product))
+      const form = component['productForm_']
+      form.patchValue({ productName: 'בצל', baseUnit: 'kg', buy_price_global_: 10, categories: ['vegetables'] })
+      const add = (component as unknown as { addPurchaseOption: (o: object) => void }).addPurchaseOption.bind(component)
+      add({ unitSymbol: 'jar', conversionRate: 0.5, uom: 'kg' })
+      add({ unitSymbol: 'box', conversionRate: 2, uom: 'kg', priceOverride: 7 })
+      // The auto-filled price the row keeps while "special price" is off.
+      component.purchaseOptions_.at(0).patchValue({ priceOverride: 10 }, { emitEvent: false })
+
+      expect(await component.saveAndWait()).toBe(true)
+      const saved = saveSpy.calls.mostRecent().args[0] as Product
+      expect(saved.purchaseOptions.map((o) => o.priceOverride)).toEqual([0, 7])
     })
   })
 

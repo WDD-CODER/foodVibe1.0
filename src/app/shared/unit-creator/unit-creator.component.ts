@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, output, input } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  output,
+  input,
+  untracked
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -34,6 +44,8 @@ export class UnitCreatorModal {
   constructor() {
     effect(() => {
       if (this.isOpen_()) {
+        const prefill = this.unitRegistryService.creatorPrefillName_()
+        if (prefill) untracked(() => this.newUnitName_.set(prefill))
         setTimeout(() => document.getElementById('unit-creator-name')?.focus(), 0)
       }
     })
