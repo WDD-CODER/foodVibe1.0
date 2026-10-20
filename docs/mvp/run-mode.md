@@ -41,3 +41,18 @@ standards docs and the plan itself still applies.
 ## Run file `docs/mvp/runs/<NNN>.md`
 Sections: `## Status` (built / parked + reason) · `## Evidence` ([auto] results) · `## Decisions` ·
 `## Human checks` · `## Final gate — Atlas` (if any) · `## Checker rounds` (one line per round).
+
+## Reuse first (from the 2026-10-20 reuse audit, `docs/mvp/reuse-audit-2026-10-20.md`)
+The big reuse refactor (audit §4, P1–P9) is NOT part of the MVP run. But no MVP plan may add to the drift:
+- Before any new UI, scan `src/app/shared/` and use the existing family: `app-custom-select` / `custom-multi-select`
+  for pickers (no new hand-built `input + app-scrollable-dropdown` shells), `app-list-shell` + `app-empty-state`
+  for lists, `.c-modal-*` engines for modals (with Escape close and `role="dialog"`), `BaseEntityDataService`
+  for new entity data services, `TaxonomyStore` for taxonomy, `normalizeHebrew` for search.
+- No new `.c-*` definitions outside `src/styles.scss`; `@layer` in every new component scss; OnPush; signal APIs
+  (no `@ViewChild`/`@HostListener` in new code); `app-` selector prefix; `@if/@for`.
+- No raw Hebrew literals in `.ts`/`.html` — dictionary keys only. Errors: `logging.error` + translated toast.
+- Pure helpers (time, number, percent formatting) go in `core/utils/` with a spec, never page-local; money/qty/percent
+  formatting only from `src/app/core/engine/rounding.ts`.
+- If a plan needs a missing shared piece, build it in `shared/` (rung 3/4 of the audit's ladder) only when the plan
+  scope allows; otherwise use the closest existing family and log the decision.
+The checker treats a new page-local duplicate of an existing shared family as a major problem.
