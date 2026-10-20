@@ -308,6 +308,16 @@
 - [ ] P11: Add the Hebrew texts for the prep sheets — keys listed in UI/UX Notes — public/assets/data/dictionary.json
 - [ ] P12: Build, test, check frozen files and the stylesheet append, then hand over the print checks — ng build, ng test include list, numstat, git grep, styles diff, log-query; cards ①–⑥ — this plan file
 
+### Plan 438 — Save a product with just a name and a unit, and drop dish-type colors (`plans/438-save-a-product-with-just-a-name-and-a-unit-and-drop-dish-type-colors.plan.md`)
+
+- [ ] A1: Let a product save with only a name and a base unit — drop required on buy_price_global_ (keep min 0) and categories (keep the control, no minLength), drop the two validateForm_ lines for price and category, remove the two error spans in the template; net lines in the .ts ≤ 0; specs for the cases in Done-when — src/app/pages/inventory/components/product-form/product-form.component.ts, product-form.component.html, product-form.component.spec.ts
+- [ ] A2: Show products without a category under "כללי" in the inventory list — getCategoryDisplay returns translate('category_general') when the joined text is empty; add the dictionary key; spec — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts, inventory-product-list.component.spec.ts, public/assets/data/dictionary.json
+- [ ] A3: Stop requiring a color on dish types in the shared schema — course member: `color: colorSchema.optional()` with a `/** @deprecated never written since plan 438; stored values removed by migration 0007 */` comment; run npm run build:schemas; schema tests — shared/schemas/entities/taxonomy-term.schema.ts, server/test/taxonomy-term-schema.test.js
+- [ ] A4: Stop sending a fake color when a dish type is added or shared — delete COURSE_NEUTRAL_COLOR and pass `{}` in registerCourse and the course branch of pushRegistryRenameToMaster; replace the neutral-color spec with "no color key" — src/app/core/services/metadata-registry.service.ts, metadata-registry.service.spec.ts
+- [ ] A5: Seed dish types without colors on a fresh database — KITCHEN_COURSES items become `{ key }`; delete LABEL_COLOR_PALETTE (only the course seed used it); seed test asserts no course color — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
+- [ ] A6: Replace the "course terms must carry a color" gotcha with what is true now — short entry: plan 438 made color optional and stopped writing it, migration 0007 (plan 440) unsets stored colors, never re-add a constant — docs/brain/gotchas/backend.md
+- [ ] A7: Build, run specs and server tests, check the error log, then hand over the app checks — ng build, git diff --numstat on the frozen form, ng test (listed specs), npm --prefix server test, log-query — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
