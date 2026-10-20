@@ -74,7 +74,8 @@ foreach ($pair in $changed) {
 $up = Invoke-Step 'qa-up.ps1' $Root 'powershell.exe' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $Root 'scripts\qa\qa-up.ps1'), '-Root', $Root)
 
 # Code QA (plan 413). Without the servers only the layers that need none run.
-$layers = if ($up -eq 0) { 'gates,static,sweep' } else { 'gates,static' }
+# api (plan 414) skips itself unless the backend runs on local Mongo (.claude/.qa-env).
+$layers = if ($up -eq 0) { 'gates,static,api,sweep' } else { 'gates,static' }
 $codeLog = Join-Path $Root '.claude\qa-code.log'
 Write-Log "code-qa start (layers $layers, output $codeLog)"
 Push-Location $Root

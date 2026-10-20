@@ -18,6 +18,8 @@ refresh cookie is per port in development (`fv_refresh_3005`), so the QA login d
 1. Create a **non-admin** account once through the UI, then add its credentials to `server/.env` (or a root `.env`):
    `QA_USER=<name>` and `QA_PASS=<password>`. The evidence server reads them itself. They are never passed on a
    command line or printed.
+   For Code QA's cross-user API checks (`code-qa.md`, plan 414) create a **second** non-admin account the same way and
+   add `QA_USER2=<name>` / `QA_PASS2=<password>` next to them. Without it those checks are skipped.
 2. Install the Playwright browser once: `npx playwright install chromium`. Without it, `/shot` answers 503 with this
    command.
 3. Run the QA harness from the main folder or the dedicated QA checkout, **not** from a `wt-N` slot. `qa-up`
