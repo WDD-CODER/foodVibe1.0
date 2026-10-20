@@ -36,7 +36,8 @@ import {
 } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { RecipeCostService } from '@services/recipe-cost.service'
+import { EventPlanService } from '../../core/engine/event-plan.service'
+import { roundMoney } from '../../core/engine/rounding'
 import { ExportService } from '@services/export.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
@@ -117,7 +118,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly menuSectionCategories = inject(MenuSectionCategoriesService)
   private readonly menuEventTypeService = inject(MenuEventTypeService)
-  private readonly recipeCostService = inject(RecipeCostService)
+  private readonly eventPlan_ = inject(EventPlanService)
   private readonly exportService = inject(ExportService)
   private readonly heroFab = inject(HeroFabService)
   private readonly destroyRef = inject(DestroyRef)
@@ -198,7 +199,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly eventCost_ = computed(() => {
     this.formValueVersion_() // depend on form changes
     const event = this.buildEventFromForm()
-    return this.menuIntelligence.computeEventIngredientCost(event)
+    return this.eventPlan_.planFor(event).eventFoodCost
   })
 
   protected readonly foodCostPct_ = computed(() => {
@@ -705,8 +706,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const item = this.getItemsArray(sectionIndex).at(itemIndex)
     const recipeId = item?.get('recipeId')?.value as string | undefined
     if (!recipeId) return 0
-    const recipe = this.recipes_().find((r) => r._id === recipeId)
-    if (!recipe) return 0
     const derivedPortions = this.menuIntelligence.derivePortions(
       this.form_.value.servingType as ServingType,
       this.getGuestCount(),
@@ -714,16 +713,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.getPiecesPerPerson(),
       Number(item.get('serving_portions')?.value ?? 1)
     )
-    const baseYield = Math.max(1, recipe.yieldAmount || 1)
-    const multiplier = derivedPortions / baseYield
-    const scaledCost = this.recipeCostService.computeRecipeCost({
-      ...recipe,
-      ingredients: recipe.ingredients.map((ing) => ({
-        ...ing,
-        amount: (ing.amount || 0) * multiplier
-      }))
-    })
-    return Math.round(scaledCost * 100) / 100
+    return roundMoney(this.eventPlan_.costFor(recipeId, derivedPortions).cost)
   }
 
   private dishKey(sectionIndex: number, itemIndex: number): string {
@@ -826,19 +816,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       Number((this.form_.value as { piecesPerPerson?: number }).piecesPerPerson ?? 1),
       Number(group.get('serving_portions')?.value ?? 1)
     )
-    const baseYield = Math.max(1, recipe.yieldAmount || 1)
-    const multiplier = derivedPortions / baseYield
-    const autoCost = this.recipeCostService.computeRecipeCost({
-      ...recipe,
-      ingredients: recipe.ingredients.map((ing) => ({
-        ...ing,
-        amount: (ing.amount || 0) * multiplier
-      }))
-    })
     group.patchValue({
       recipeId: recipe._id,
       recipeType: this.isRecipeDish(recipe) ? 'dish' : 'preparation',
-      food_cost_money: Math.round(autoCost * 100) / 100,
+      food_cost_money: roundMoney(this.eventPlan_.costFor(recipe._id, derivedPortions).cost),
       serving_portions: 1
     })
     this.pickerSearch_.dish.setQuery(this.dishKey(sectionIndex, itemIndex), '')

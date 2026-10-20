@@ -1,6 +1,6 @@
 # Plan 434 — Make every menu list, preview, Excel and the menu footer read the one engine
 
-Status: draft
+Status: active
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 Track: code
 
@@ -20,8 +20,8 @@ numbers on screen, in the preview and in Excel. A prep inside a dish shows as "�
   copies are replaced by one table builder.
 
 Done when:
-- [auto] `npx ng build` exits 0.
-- [auto] `npx ng test --watch=false --include='src/app/core/utils/shopping-list-table.util.spec.ts' --include='src/app/core/services/export.service.spec.ts' --include='src/app/core/services/menu-intelligence.service.spec.ts' --include='src/app/core/engine/**/*.spec.ts'`
+- [x] [auto] `npx ng build` exits 0.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/utils/shopping-list-table.util.spec.ts' --include='src/app/core/services/export.service.spec.ts' --include='src/app/core/services/menu-intelligence.service.spec.ts' --include='src/app/core/engine/**/*.spec.ts'`
   passes (0 failures), including:
   - `buildShoppingListTable` on the 04.1 fixture plan (`buildFixtureInput()` from plan 433): exactly one tomato row
     (qty to buy 18.75, unit `ק"ג`, purchase units `2 ארגז`, line total 93.75), olive oil 1.6 `ק"ג` 64.00, lemon
@@ -32,10 +32,10 @@ Done when:
   - `ExportService.getMenuShoppingListPreviewPayload` (with a stub `EventPlanService` returning the fixture plan)
     returns exactly the table's rows plus the total row — same values the Excel path writes.
   - `MenuIntelligenceService.computeEventIngredientCost(event)` returns the stub plan's `eventFoodCost` (157.75).
-- [auto] `git diff --numstat origin/mvp...HEAD -- src/app/pages/menu-intelligence/menu-intelligence.page.ts src/app/core/services/menu-export.service.ts`
+- [x] [auto] `git diff --numstat origin/mvp...HEAD -- src/app/pages/menu-intelligence/menu-intelligence.page.ts src/app/core/services/menu-export.service.ts`
   shows added ≤ deleted for both files (growth-frozen, `_shared/tech-stack.md`).
-- [auto] `git grep -n "getScaledIngredients\|getCostForIngredient" -- src/app/core/services/menu-export.service.ts` → no output.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `git grep -n "getScaledIngredients\|getCostForIngredient" -- src/app/core/services/menu-export.service.ts` → no output.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Desktop, menu with a dish that uses a prep: the shopping list shows the prep's own products, not the
   prep, and the footer total equals the shopping list's total row and the Excel total (card ①–③ below).
 - [human] Mobile (phone width): the same menu's shopping list preview is readable and its total equals the footer.
@@ -140,19 +140,19 @@ engine: `EventPlanService.planFor`, `costFor`, `buildFixtureInput`. If 441 alrea
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] One shopping-list table builder from the engine plan, used by the preview, the shopping-list Excel and the
+- [x] One shopping-list table builder from the engine plan, used by the preview, the shopping-list Excel and the
       all-together Excel; the three copies are deleted.
-- [ ] Rows: grouped by the product's first category (translated) or "כללי"; unlinked rows in the "לא מקושר" group,
+- [x] Rows: grouped by the product's first category (translated) or "כללי"; unlinked rows in the "לא מקושר" group,
       deleted rows in the "נמחק" group; columns category · product · qty to buy · unit · purchase units · line total ·
       note; quantities through `formatQty`, money through `roundMoney` (Excel numeric) / `formatMoney` (preview);
       a last "סה״כ" row = `eventFoodCost`, labelled "חלקי" when `plan.partial`.
-- [ ] Engine errors (cycle, no yield, no conversion, no ingredients) listed under the table (preview `summary`,
+- [x] Engine errors (cycle, no yield, no conversion, no ingredients) listed under the table (preview `summary`,
       Excel rows after the total), never a hang.
-- [ ] Footer total, dish-row cost, cost on recipe pick, "All" view per-dish cost and the library food-cost % come
+- [x] Footer total, dish-row cost, cost on recipe pick, "All" view per-dish cost and the library food-cost % come
       from `EventPlanService`.
 
 ### Should Have (P1)
-- [ ] The "All" view uses each item's own `derivedPortions` (no re-derivation with `piecesPerPerson ?? 1`).
+- [x] The "All" view uses each item's own `derivedPortions` (no re-derivation with `piecesPerPerson ?? 1`).
 
 ## UI/UX Notes
 - RTL; preview reuses `app-export-preview` (`ExportPayload`); no new component, no new CSS.
@@ -165,15 +165,15 @@ engine: `EventPlanService.planFor`, `costFor`, `buildFixtureInput`. If 441 alrea
   `note` "הערה" (`category`, `ingredient`, `unit`, `line_total` exist).
 
 ## Atomic Sub-tasks
-- [ ] W1: Build one shopping-list table from the engine plan so preview and Excel can't disagree — buildShoppingListTable(plan, products, t) → { headerRow, groups/rows, totalRow, notes }; formatQty/roundMoney/formatMoney only; spec on the 04.1 fixture, unlinked, no_conversion, cycle — src/app/core/utils/shopping-list-table.util.ts, shopping-list-table.util.spec.ts, src/app/core/utils/export.util.ts
-- [ ] W2: Replace the three shopping-list copies with the one table — inject EventPlanService; exportMenuShoppingList, getMenuShoppingListPreviewPayload, addMenuShoppingListSheetToWorkbook call buildShoppingListTable(this.eventPlan_.planFor(menu), products, t); line total written as a value, not a C×E formula; drop getCostForIngredient/getScaledIngredients use and the RecipeCostService inject if unused; net lines ≤ 0 — src/app/core/services/menu-export.service.ts
-- [ ] W3: Show each dish's cost in the All view from the engine instead of re-deriving portions — getMenuAllViewPreviewPayload reads plan.dishCosts by item key and item.derivedPortions — src/app/core/services/menu-export.service.ts
-- [ ] W4: Make the event cost and library food-cost percent come from the engine — computeEventIngredientCost returns eventPlan.planFor(event).eventFoodCost; remove the RecipeCostService inject; rewrite its two spec cases with a stub EventPlanService — src/app/core/services/menu-intelligence.service.ts, menu-intelligence.service.spec.ts
-- [ ] W5: Point the menu footer and dish costs at the engine without growing the frozen page — eventCost_ uses eventPlan.planFor(buildEventFromForm()).eventFoodCost; getAutoFoodCost and selectRecipe use roundMoney(eventPlan.costFor(recipeId, derivedPortions).cost); remove RecipeCostService import/inject; net lines ≤ 0 — src/app/pages/menu-intelligence/menu-intelligence.page.ts
-- [ ] W6: Make each dish row's cost and cost per portion come from the engine — getAutoFoodCost via EventPlanService.costFor + roundMoney; drop RecipeCostService — src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts
-- [ ] W7: Update the export spec to the engine-based shopping list — replace the getScaledIngredients-per-dish cases with a stub EventPlanService returning the fixture plan; assert preview rows equal buildShoppingListTable rows — src/app/core/services/export.service.spec.ts
-- [ ] W8: Add the Hebrew labels for line statuses, totals and engine errors — keys listed in UI/UX Notes — public/assets/data/dictionary.json
-- [ ] W9: Build, test, check frozen-file line counts and the log, then hand over the screen checks — ng build, ng test include list, git diff --numstat, log-query; cards ①–④ — this plan file
+- [x] W1: Build one shopping-list table from the engine plan so preview and Excel can't disagree — buildShoppingListTable(plan, products, t) → { headerRow, groups/rows, totalRow, notes }; formatQty/roundMoney/formatMoney only; spec on the 04.1 fixture, unlinked, no_conversion, cycle — src/app/core/utils/shopping-list-table.util.ts, shopping-list-table.util.spec.ts, src/app/core/utils/export.util.ts
+- [x] W2: Replace the three shopping-list copies with the one table — inject EventPlanService; exportMenuShoppingList, getMenuShoppingListPreviewPayload, addMenuShoppingListSheetToWorkbook call buildShoppingListTable(this.eventPlan_.planFor(menu), products, t); line total written as a value, not a C×E formula; drop getCostForIngredient/getScaledIngredients use and the RecipeCostService inject if unused; net lines ≤ 0 — src/app/core/services/menu-export.service.ts
+- [x] W3: Show each dish's cost in the All view from the engine instead of re-deriving portions — getMenuAllViewPreviewPayload reads plan.dishCosts by item key and item.derivedPortions — src/app/core/services/menu-export.service.ts
+- [x] W4: Make the event cost and library food-cost percent come from the engine — computeEventIngredientCost returns eventPlan.planFor(event).eventFoodCost; remove the RecipeCostService inject; rewrite its two spec cases with a stub EventPlanService — src/app/core/services/menu-intelligence.service.ts, menu-intelligence.service.spec.ts
+- [x] W5: Point the menu footer and dish costs at the engine without growing the frozen page — eventCost_ uses eventPlan.planFor(buildEventFromForm()).eventFoodCost; getAutoFoodCost and selectRecipe use roundMoney(eventPlan.costFor(recipeId, derivedPortions).cost); remove RecipeCostService import/inject; net lines ≤ 0 — src/app/pages/menu-intelligence/menu-intelligence.page.ts
+- [x] W6: Make each dish row's cost and cost per portion come from the engine — getAutoFoodCost via EventPlanService.costFor + roundMoney; drop RecipeCostService — src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts
+- [x] W7: Update the export spec to the engine-based shopping list — replace the getScaledIngredients-per-dish cases with a stub EventPlanService returning the fixture plan; assert preview rows equal buildShoppingListTable rows — src/app/core/services/export.service.spec.ts
+- [x] W8: Add the Hebrew labels for line statuses, totals and engine errors — keys listed in UI/UX Notes — public/assets/data/dictionary.json
+- [x] W9: Build, test, check frozen-file line counts and the log, then hand over the screen checks — ng build, ng test include list, git diff --numstat, log-query; cards ①–④ — this plan file
 
 ## Technical Considerations
 - Dependencies: `EventPlanService` (433); `ExportService` facade signatures stay the same (`menu`, `recipes`,

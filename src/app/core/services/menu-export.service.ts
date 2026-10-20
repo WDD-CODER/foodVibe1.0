@@ -12,13 +12,12 @@ import { Injectable, inject } from '@angular/core'
 import type { Workbook } from 'exceljs'
 
 import { Recipe } from '@models/recipe.model'
-import { MenuEvent, MenuSection, MenuItemSelection, ServingType } from '@models/menu-event.model'
+import { MenuEvent, MenuSection, MenuItemSelection } from '@models/menu-event.model'
 import { Product } from '@models/product.model'
 import { KitchenStateService } from './kitchen-state.service'
-import { MenuIntelligenceService } from './menu-intelligence.service'
 import { ScalingService } from './scaling.service'
 import type { ScaledPrepRow } from './scaling.service'
-import { RecipeCostService } from './recipe-cost.service'
+import { EventPlanService } from '../engine/event-plan.service'
 import { TranslationService } from './translation.service'
 import {
   buildExportFileName,
@@ -29,6 +28,7 @@ import {
   type ExportPayload,
   type ExportSection
 } from '../utils/export.util'
+import { buildShoppingListTable, type ShoppingListTable } from '../utils/shopping-list-table.util'
 import {
   downloadWorkbook,
   heCategoryLabel,
@@ -45,9 +45,8 @@ import {
 @Injectable({ providedIn: 'root' })
 export class MenuExportService {
   private readonly kitchenState_ = inject(KitchenStateService)
-  private readonly menuIntelligence_ = inject(MenuIntelligenceService)
   private readonly scaling_ = inject(ScalingService)
-  private readonly recipeCost_ = inject(RecipeCostService)
+  private readonly eventPlan_ = inject(EventPlanService)
   private readonly translation_ = inject(TranslationService)
 
   // ── Excel exports ────────────────────────────────────────────────────────────
@@ -103,79 +102,13 @@ export class MenuExportService {
   }
 
   /**
-   * Export menu shopping list: all dishes' ingredients scaled by derivedPortions, grouped by category.
+   * Export menu shopping list: one table from the event plan (preps expanded, waste applied), grouped by category.
    * Filename: shopping-list_{menuName}.xlsx (no date for menu).
    */
-  async exportMenuShoppingList(menu: MenuEvent, recipes: Recipe[], products: Product[]): Promise<void> {
-    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
-    const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; cost: number }[]>()
-
-    const addRow = (category: string, name: string, amount: number, unit: string, lineCost: number): void => {
-      const arr = categoryToAggregate.get(category) ?? []
-      const existing = arr.find((x) => x.name === name && x.unit === unit)
-      if (existing) {
-        existing.amount += amount
-        existing.cost += lineCost
-      } else {
-        arr.push({ name, amount, unit, cost: lineCost })
-      }
-      categoryToAggregate.set(category, arr)
-    }
-
-    ;(menu.sections ?? []).forEach((section: MenuSection) => {
-      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipeId)
-        if (!recipe?.ingredients?.length) return
-        const portions = item.derivedPortions ?? 0
-        const yieldAmount = recipe.yieldAmount || 1
-        const factor = yieldAmount > 0 ? portions / yieldAmount : 0
-        const scaled = this.scaling_.getScaledIngredients(recipe, factor)
-        const scaledRecipe: Recipe = {
-          ...recipe,
-          ingredients: (recipe.ingredients ?? []).map((ing) => ({
-            ...ing,
-            amount: (ing.amount ?? 0) * factor
-          }))
-        }
-        scaled.forEach((row, i) => {
-          const category =
-            row.type === 'product'
-              ? (products.find((p) => p._id === row.referenceId)?.categories?.[0] ?? 'כללי')
-              : 'הכנות'
-          const ing = scaledRecipe.ingredients[i]
-          const lineCost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
-          addRow(category, row.name, row.amount, row.unit, lineCost)
-        })
-      })
-    })
-
+  async exportMenuShoppingList(menu: MenuEvent, _recipes: Recipe[], products: Product[]): Promise<void> {
     const ExcelJS = await import('exceljs')
     const wb = new ExcelJS.Workbook()
-    const ws = wb.addWorksheet('Shopping list', { views: [{ rightToLeft: true }] })
-    ws.addRow(['Category', 'Ingredient', 'Amount', 'Unit', 'Unit price', 'Line total'])
-    styleHeaderRow(ws, 1)
-    let rowNum = 2
-    const sortedCategories = Array.from(categoryToAggregate.keys()).sort()
-    for (const cat of sortedCategories) {
-      ;(categoryToAggregate.get(cat) ?? []).forEach((it) => {
-        const unitPrice = it.amount > 0 ? it.cost / it.amount : 0
-        const row = ws.getRow(rowNum)
-        row.getCell(1).value = cat
-        row.getCell(2).value = it.name
-        row.getCell(3).value = roundExportNumber(it.amount)
-        row.getCell(4).value = heUnit(it.unit)
-        row.getCell(5).value = roundExportNumber(unitPrice)
-        row.getCell(6).value = { formula: `C${rowNum}*E${rowNum}` }
-        styleDataRow(ws, rowNum++)
-      })
-    }
-    ws.getColumn(1).width = 18
-    ws.getColumn(2).width = 28
-    ws.getColumn(3).width = 12
-    ws.getColumn(4).width = 10
-    ws.getColumn(5).width = 12
-    ws.getColumn(6).width = 12
-
+    this.addMenuShoppingListSheetToWorkbook(wb, menu, products)
     const fileName = buildExportFileName('shopping-list', menu.name ?? 'menu', { includeDate: false })
     await downloadWorkbook(wb, fileName)
   }
@@ -377,7 +310,7 @@ export class MenuExportService {
     })
 
     this.addChecklistSheetsToWorkbook(wb, menu, recipeMap, checklistMode)
-    this.addMenuShoppingListSheetToWorkbook(wb, menu, recipeMap, products)
+    this.addMenuShoppingListSheetToWorkbook(wb, menu, products)
 
     const checklistVariant =
       checklistMode === 'by_dish' ? 'by-dish' : checklistMode === 'by_station' ? 'by-station' : 'by-category'
@@ -426,71 +359,14 @@ export class MenuExportService {
     }
   }
 
-  /** Build payload for menu shopping list preview (same aggregation as export). */
-  getMenuShoppingListPreviewPayload(menu: MenuEvent, recipes: Recipe[], products: Product[]): ExportPayload {
-    const recipeMap = new Map(recipes.map((r) => [r._id, r]))
-    const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; cost: number }[]>()
-
-    const addRow = (category: string, name: string, amount: number, unit: string, lineCost: number): void => {
-      const arr = categoryToAggregate.get(category) ?? []
-      const existing = arr.find((x) => x.name === name && x.unit === unit)
-      if (existing) {
-        existing.amount += amount
-        existing.cost += lineCost
-      } else {
-        arr.push({ name, amount, unit, cost: lineCost })
-      }
-      categoryToAggregate.set(category, arr)
-    }
-
-    ;(menu.sections ?? []).forEach((section: MenuSection) => {
-      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipeId)
-        if (!recipe?.ingredients?.length) return
-        const portions = item.derivedPortions ?? 0
-        const yieldAmount = recipe.yieldAmount || 1
-        const factor = yieldAmount > 0 ? portions / yieldAmount : 0
-        const scaled = this.scaling_.getScaledIngredients(recipe, factor)
-        const scaledRecipe: Recipe = {
-          ...recipe,
-          ingredients: (recipe.ingredients ?? []).map((ing) => ({
-            ...ing,
-            amount: (ing.amount ?? 0) * factor
-          }))
-        }
-        scaled.forEach((row, i) => {
-          const category =
-            row.type === 'product'
-              ? (products.find((p) => p._id === row.referenceId)?.categories?.[0] ?? 'כללי')
-              : 'הכנות'
-          const ing = scaledRecipe.ingredients[i]
-          const lineCost = ing ? this.recipeCost_.getCostForIngredient(ing) : 0
-          addRow(category, row.name, row.amount, row.unit, lineCost)
-        })
-      })
-    })
-
-    const rows: (string | number)[][] = []
-    const sortedCategories = Array.from(categoryToAggregate.keys()).sort()
-    for (const cat of sortedCategories) {
-      ;(categoryToAggregate.get(cat) ?? []).forEach((it) => {
-        const unitPrice = it.amount > 0 ? it.cost / it.amount : 0
-        const lineTotal = roundExportNumber(it.cost)
-        rows.push([
-          cat,
-          it.name,
-          roundExportNumber(it.amount),
-          heUnit(it.unit),
-          roundExportNumber(unitPrice),
-          lineTotal
-        ])
-      })
-    }
-
+  /** Build payload for menu shopping list preview (the same table the Excel writes). */
+  getMenuShoppingListPreviewPayload(menu: MenuEvent, _recipes: Recipe[], products: Product[]): ExportPayload {
+    const table = this.shoppingListTable_(menu, products)
     return {
       title: `${menu.name ?? 'Menu'} — Shopping list`,
       exportedAt: new Date().toISOString(),
-      sections: [{ headerRow: ['Category', 'Ingredient', 'Amount', 'Unit', 'Unit price', 'Line total'], rows }]
+      sections: [{ headerRow: table.headerRow, rows: [...table.rows, table.totalRow] }],
+      summary: table.notes.map((note) => ({ label: note, value: '' }))
     }
   }
 
@@ -610,9 +486,7 @@ export class MenuExportService {
   /** Build payload for menu "All" view: cover + sections with food cost data. */
   getMenuAllViewPreviewPayload(menu: MenuEvent, recipes: Recipe[]): ExportPayload {
     const recipeMap = new Map(recipes.map((r) => [r._id, r]))
-    const guestCount = Number(menu.guestCount ?? 0)
-    const piecesPerPerson = Number((menu as { piecesPerPerson?: number }).piecesPerPerson ?? 1)
-    const servingType = (menu.servingType ?? 'plated_course') as ServingType
+    const costByItem = new Map(this.eventPlan_.planFor(menu).dishCosts.map((d) => [d.itemKey, d.cost]))
 
     const coverRows: (string | number)[][] = [
       [heHeader('menu_name'), menu.name ?? ''],
@@ -627,32 +501,14 @@ export class MenuExportService {
 
     const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     for (const section of sections) {
-      const sectionRows: (string | number)[][] = (section.items ?? []).map((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipeId)
-        const name = recipe?.nameHebrew ?? item.recipeId
-        const derivedPortions = this.menuIntelligence_.derivePortions(
-          servingType,
-          guestCount,
-          Number(item.predictedTakeRate ?? 0),
-          piecesPerPerson,
-          Number(item.servingPortions ?? 1)
-        )
-        let totalCost = 0
-        if (recipe?.ingredients?.length) {
-          const baseYield = Math.max(1, recipe.yieldAmount || 1)
-          const multiplier = derivedPortions / baseYield
-          totalCost = this.recipeCost_.computeRecipeCost({
-            ...recipe,
-            ingredients: recipe.ingredients.map((ing) => ({
-              ...ing,
-              amount: (ing.amount || 0) * multiplier
-            }))
-          })
-        }
-        const costPerPortion = derivedPortions >= 1 ? totalCost / derivedPortions : totalCost
+      const sectionRows: (string | number)[][] = (section.items ?? []).map((item: MenuItemSelection, index) => {
+        const name = recipeMap.get(item.recipeId)?.nameHebrew ?? item.recipeId
+        const portions = item.derivedPortions ?? 0
+        const totalCost = costByItem.get(`${section._id}|${index}`) ?? 0
+        const costPerPortion = portions >= 1 ? totalCost / portions : totalCost
         return [
           name,
-          roundExportNumber(derivedPortions),
+          roundExportNumber(portions),
           roundExportNumber(totalCost),
           roundExportNumber(costPerPortion),
           item.sellPrice !== undefined && item.sellPrice !== null ? roundExportNumber(Number(item.sellPrice)) : ''
@@ -824,74 +680,24 @@ export class MenuExportService {
     }
   }
 
-  private addMenuShoppingListSheetToWorkbook(
-    wb: Workbook,
-    menu: MenuEvent,
-    recipeMap: Map<string, Recipe>,
-    products: Product[]
-  ): void {
-    const categoryToAggregate = new Map<string, { name: string; amount: number; unit: string; cost: number }[]>()
-    const addRow = (category: string, name: string, amount: number, unit: string, lineCost: number): void => {
-      const arr = categoryToAggregate.get(category) ?? []
-      const existing = arr.find((x) => x.name === name && x.unit === unit)
-      if (existing) {
-        existing.amount += amount
-        existing.cost += lineCost
-      } else {
-        arr.push({ name, amount, unit, cost: lineCost })
-      }
-      categoryToAggregate.set(category, arr)
-    }
-    ;(menu.sections ?? []).forEach((section: MenuSection) => {
-      ;(section.items ?? []).forEach((item: MenuItemSelection) => {
-        const recipe = recipeMap.get(item.recipeId)
-        if (!recipe?.ingredients?.length) return
-        const portions = item.derivedPortions ?? 0
-        const factor = (recipe.yieldAmount || 1) > 0 ? portions / (recipe.yieldAmount || 1) : 0
-        const scaled = this.scaling_.getScaledIngredients(recipe, factor)
-        const scaledRecipe: Recipe = {
-          ...recipe,
-          ingredients: (recipe.ingredients ?? []).map((ing) => ({ ...ing, amount: (ing.amount ?? 0) * factor }))
-        }
-        scaled.forEach((row, i) => {
-          const category =
-            row.type === 'product'
-              ? (products.find((p) => p._id === row.referenceId)?.categories?.[0] ?? 'כללי')
-              : 'הכנות'
-          const ing = scaledRecipe.ingredients[i]
-          addRow(category, row.name, row.amount, row.unit, ing ? this.recipeCost_.getCostForIngredient(ing) : 0)
-        })
-      })
-    })
+  private addMenuShoppingListSheetToWorkbook(wb: Workbook, menu: MenuEvent, products: Product[]): void {
+    const table = this.shoppingListTable_(menu, products)
     const ws = wb.addWorksheet('Shopping list', { views: [{ rightToLeft: true }] })
-    ws.addRow([
-      heHeader('category'),
-      heHeader('ingredient'),
-      heHeader('amount'),
-      heHeader('unit'),
-      heHeader('unit_price'),
-      heHeader('line_total')
-    ])
+    ws.addRow(table.headerRow)
     styleHeaderRow(ws, 1)
     let rowNum = 2
-    for (const cat of Array.from(categoryToAggregate.keys()).sort()) {
-      ;(categoryToAggregate.get(cat) ?? []).forEach((it) => {
-        const unitPrice = it.amount > 0 ? it.cost / it.amount : 0
-        const row = ws.getRow(rowNum)
-        row.getCell(1).value = cat
-        row.getCell(2).value = it.name
-        row.getCell(3).value = roundExportNumber(it.amount)
-        row.getCell(4).value = heUnit(it.unit)
-        row.getCell(5).value = roundExportNumber(unitPrice)
-        row.getCell(6).value = { formula: `C${rowNum}*E${rowNum}` }
-        styleDataRow(ws, rowNum++)
-      })
+    for (const row of [...table.rows, table.totalRow]) {
+      ws.addRow(row)
+      styleDataRow(ws, rowNum++)
     }
-    ws.getColumn(1).width = 18
-    ws.getColumn(2).width = 28
-    ws.getColumn(3).width = 12
-    ws.getColumn(4).width = 10
-    ws.getColumn(5).width = 12
-    ws.getColumn(6).width = 12
+    ws.getRow(rowNum - 1).font = { bold: true }
+    table.notes.forEach((note) => ws.addRow([note]))
+    const widths = [18, 28, 14, 10, 14, 12, 28]
+    widths.forEach((w, i) => (ws.getColumn(i + 1).width = w))
+  }
+
+  /** The one shopping-list table every preview and Excel export of a menu reads (plan 434). */
+  private shoppingListTable_(menu: MenuEvent, products: Product[]): ShoppingListTable {
+    return buildShoppingListTable(this.eventPlan_.planFor(menu), products, (key) => this.translation_.translate(key))
   }
 }

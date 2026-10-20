@@ -6,7 +6,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
-import { RecipeCostService } from '@services/recipe-cost.service'
+import { EventPlanService } from '../../../../core/engine/event-plan.service'
+import { roundMoney } from '../../../../core/engine/rounding'
 import { MenuIntelligenceService } from '@services/menu-intelligence.service'
 import { ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
@@ -35,7 +36,7 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
 })
 export class MenuDishRowComponent {
   // ── Injected ──────────────────────────────────────────────────────────────
-  private readonly recipeCostService = inject(RecipeCostService)
+  private readonly eventPlan_ = inject(EventPlanService)
   private readonly menuIntelligence = inject(MenuIntelligenceService)
 
   // ── Inputs ────────────────────────────────────────────────────────────────
@@ -91,8 +92,6 @@ export class MenuDishRowComponent {
     const item = this.itemGroup()
     const recipeId = item?.get('recipeId')?.value as string | undefined
     if (!recipeId) return 0
-    const recipe = this.recipes().find((r) => r._id === recipeId)
-    if (!recipe) return 0
     const derivedPortions = this.menuIntelligence.derivePortions(
       this.servingType(),
       this.guestCount(),
@@ -100,16 +99,7 @@ export class MenuDishRowComponent {
       this.piecesPerPerson(),
       Number(item.get('serving_portions')?.value ?? 1)
     )
-    const baseYield = Math.max(1, recipe.yieldAmount || 1)
-    const multiplier = derivedPortions / baseYield
-    const scaledCost = this.recipeCostService.computeRecipeCost({
-      ...recipe,
-      ingredients: recipe.ingredients.map((ing) => ({
-        ...ing,
-        amount: (ing.amount || 0) * multiplier
-      }))
-    })
-    return Math.round(scaledCost * 100) / 100
+    return roundMoney(this.eventPlan_.costFor(recipeId, derivedPortions).cost)
   }
 
   getFoodCostPerPortion(): number {

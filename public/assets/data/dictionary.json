@@ -1060,6 +1060,17 @@
     "add_new_ingredient": "הוסף מרכיב חדש",
     "add_new_preparation": "הוסף הכנה חדשה",
     "add_new_event_type": "הוסף סוג אירוע חדש",
-    "item_added_suffix": "נוסף"
+    "item_added_suffix": "נוסף",
+    "general_group": "כללי",
+    "line_status_unlinked": "לא מקושר",
+    "line_status_deleted": "נמחק",
+    "line_status_no_conversion": "לא ניתן לאחד – חסרה המרה",
+    "no_supplier": "ללא ספק",
+    "partial_total": "חלקי",
+    "shopping_total": "סה״כ",
+    "engine_error_cycle": "הכנה מעגלית: {name}",
+    "engine_error_no_yield": "חסרה תפוקה במתכון: {name}",
+    "engine_error_no_conversion": "לא ניתן להמיר כמות להכנה: {name}",
+    "engine_error_no_ingredients": "אין מצרכים: {name}"
   }
 }
