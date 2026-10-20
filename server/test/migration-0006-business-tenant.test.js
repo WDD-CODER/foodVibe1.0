@@ -134,13 +134,30 @@ describe('stamped docs stay valid', () => {
     expect(tombstoneSchema.safeParse(stub).success).toBe(true)
   })
 
-  it('an existing createdBy is kept, only a missing one is filled', async () => {
+  it('a real user item copied with the master author gets createdBy = its userId', async () => {
     await seed()
     await testDb().collection('recipes').updateOne({ _id: 'r1' }, { $set: { createdBy: 'dev-guest' } })
     await run()
     const r1 = await testDb().collection('recipes').findOne({ _id: 'r1' })
-    expect(r1.createdBy).toBe('dev-guest')
+    expect(r1.createdBy).toBe('u1')
     expect(r1.businessId).toBeTruthy()
+  })
+
+  it('a master doc keeps the createdBy it already has (push-to-master pusher)', async () => {
+    await seed()
+    await testDb().collection('recipes').updateOne({ _id: 'rm' }, { $set: { createdBy: 'u1' } })
+    await run()
+    expect((await testDb().collection('recipes').findOne({ _id: 'rm' })).createdBy).toBe('u1')
+  })
+
+  it('a re-run after a business was inserted without the user update creates no new business', async () => {
+    await seed()
+    await testDb().collection('businesses').insertOne({ _id: 'half', name: 'x', ownerId: 'u1', createdAt: 1, internal: false, lastSyncedMasterVersion: 0 })
+    await run()
+    const db = testDb()
+    expect((await db.collection('users').findOne({ _id: 'u1' })).businessId).toBe('half')
+    expect(await db.collection('businesses').countDocuments({ ownerId: 'u1' })).toBe(1)
+    expect(await db.collection('businesses').countDocuments()).toBe(2)
   })
 })
 

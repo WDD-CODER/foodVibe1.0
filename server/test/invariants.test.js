@@ -5,8 +5,8 @@
  * broken rule. Changing what these assert means changing an invariant — that needs the
  * Human's "approve arch change INV-n" and a superseding ADR, never a quiet test edit.
  *
- * The it.todo cases wait for plan 386 (canWrite + remove/rename for me); turn them into
- * real tests when it merges.
+ * The it.todo cases wait for plans 425/427 (business-scoped reads and writes); turn them into
+ * real tests when they merge.
  */
 
 const request = require('supertest');
@@ -108,9 +108,7 @@ describe('INV-1 Ownership', () => {
     expect(res.body).toMatchObject({ userId: MASTER, sortOrder: 7 });
   });
 
-  for (const type of ['products', 'recipes', 'dishes', 'menuEvents']) {
-    it.todo(`INV-1 ${type}: the admin edits a shared ${MASTER} item (needs plan 386 canWrite)`);
-  }
+  it.todo('INV-1 a member reads only their business items; staff change only what they created and never money fields (plans 425/427)');
 });
 
 describe('INV-2 Tenancy', () => {

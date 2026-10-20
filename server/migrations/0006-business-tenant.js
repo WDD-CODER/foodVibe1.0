@@ -28,6 +28,7 @@ const { parseArgs, connect } = require('./tools/_connect');
 const { checkBackup } = require('./0001-v2-schema');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { newId } = require('../utils/id');
+const { defaultBusinessName } = require('../services/business');
 
 const MIGRATION_ID = '0006-business-tenant';
 const MASTER = '__master__';
@@ -37,7 +38,7 @@ const GLOBAL = '__global__';
 function businessDocFor(user, now, id) {
   return {
     _id: id,
-    name: 'העסק של ' + user.name,
+    name: defaultBusinessName(user.name),
     ownerId: user._id,
     createdAt: now,
     internal: false,
@@ -77,7 +78,12 @@ async function loadBusinessMap(db) {
 
 async function plan(db, now) {
   const { users, businessByUser } = await loadBusinessMap(db);
-  const toCreate = users.filter(u => !u.businessId).map(user => ({ user, businessId: newId() }));
+  const toCreate = [];
+  for (const user of users.filter(u => !u.businessId)) {
+    // A business already inserted for this user by a run that crashed before the user update: reuse it.
+    const existing = await db.collection('businesses').findOne({ ownerId: user._id });
+    toCreate.push({ user, businessId: existing ? existing._id : newId(), exists: Boolean(existing) });
+  }
   for (const c of toCreate) businessByUser.set(c.user._id, c.businessId);
 
   const collections = {};
@@ -88,7 +94,16 @@ async function plan(db, now) {
           _id: '$userId',
           docs: { $sum: 1 },
           noBusiness: { $sum: { $cond: [{ $eq: [{ $type: '$businessId' }, 'missing'] }, 1, 0] } },
-          noCreator: { $sum: { $cond: [{ $eq: [{ $type: '$createdBy' }, 'missing'] }, 1, 0] } },
+          // master docs: createdBy missing; real users: createdBy is not the doc's own userId
+          noCreator: {
+            $sum: {
+              $cond: [
+                { $eq: ['$userId', MASTER] },
+                { $cond: [{ $eq: [{ $type: '$createdBy' }, 'missing'] }, 1, 0] },
+                { $cond: [{ $ne: ['$createdBy', '$userId'] }, 1, 0] },
+              ],
+            },
+          },
         },
       },
     ]).toArray();
@@ -112,8 +127,8 @@ async function plan(db, now) {
 
 function printPlan({ toCreate, collections }) {
   console.log(`[migrate] users without a business: ${toCreate.length}  → businesses to create: ${toCreate.length}`);
-  for (const { user } of toCreate) {
-    console.log(`[migrate]   ${user._id} → "העסק של ${user.name}"  isPlatformAdmin=${user.role === 'admin'}`);
+  for (const { user, businessId } of toCreate) {
+    console.log(`[migrate]   ${user._id} → "${businessDocFor(user, 0, businessId).name}"  isPlatformAdmin=${user.role === 'admin'}`);
   }
   for (const [coll, r] of Object.entries(collections)) {
     const orphanDocs = r.orphans.reduce((n, o) => n + o.docs, 0);
@@ -126,8 +141,8 @@ async function write(db, args, result, now) {
   if (args.db === undefined) checkBackup(args);
   const { toCreate, businessByUser, collections } = result;
 
-  for (const { user, businessId } of toCreate) {
-    await db.collection('businesses').insertOne(businessDocFor(user, now, businessId));
+  for (const { user, businessId, exists } of toCreate) {
+    if (!exists) await db.collection('businesses').insertOne(businessDocFor(user, now, businessId));
     await usersCol(db).updateOne({ _id: user._id }, { $set: userBusinessFields(user, businessId, now) });
   }
 
@@ -139,7 +154,10 @@ async function write(db, args, result, now) {
       const owner = ownerOf(userId, businessByUser);
       if (typeof owner === 'string') continue;
       const a = await col.updateMany({ userId, businessId: { $exists: false } }, { $set: { businessId: owner.businessId } });
-      const b = await col.updateMany({ userId, createdBy: { $exists: false } }, { $set: { createdBy: owner.createdBy } });
+      // Master docs keep a createdBy that is already there (push-to-master sets it to the pusher);
+      // a real user's items always get createdBy = userId, replacing the master author an old clone copied.
+      const missingCreator = userId === MASTER ? { $exists: false } : { $ne: userId };
+      const b = await col.updateMany({ userId, createdBy: missingCreator }, { $set: { createdBy: owner.createdBy } });
       stamped += Math.max(a.modifiedCount, b.modifiedCount);
     }
   }
@@ -172,7 +190,11 @@ async function verify(db) {
       if (typeof owner === 'string') continue;
       const byUser = await col.countDocuments({ userId });
       if (!byUser) continue;
-      const byBusiness = await col.countDocuments({ userId, businessId: owner.businessId, createdBy: { $exists: true } });
+      const byBusiness = await col.countDocuments({
+        userId,
+        businessId: owner.businessId,
+        createdBy: userId === MASTER ? { $exists: true } : userId,
+      });
       const ok = byUser === byBusiness;
       if (!ok) failed = true;
       console.log(`${ok ? 'ok' : 'MISMATCH'} ${userId} ${coll} byUser=${byUser} byBusiness=${byBusiness}`);

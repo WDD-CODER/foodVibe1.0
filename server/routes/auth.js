@@ -179,7 +179,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const user = created.toObject();
 
     // Plan 424: every new user starts as the owner of their own business.
-    await createBusinessFor(user, { name: 'העסק של ' + name, masterVersion });
+    await createBusinessFor(user, { masterVersion });
     await cloneMasterDataToUser(_id, { businessId: user.businessId });
     await User.updateOne({ _id }, { lastSyncedMasterVersion: masterVersion });
 
