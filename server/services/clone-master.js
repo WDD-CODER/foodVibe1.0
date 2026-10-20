@@ -36,9 +36,10 @@ function remapIngredients(ingredients, idMap) {
  * into the given user's namespace.
  *
  * @param {string} userId  — the new user's _id
+ * @param {{ businessId?: string }} [opts]  — plan 424: the business the clones belong to
  * @returns {Promise<number>} total number of documents cloned
  */
-async function cloneMasterDataToUser(userId) {
+async function cloneMasterDataToUser(userId, { businessId } = {}) {
   const db = mongoose.connection.db;
   let totalCloned = 0;
 
@@ -57,11 +58,13 @@ async function cloneMasterDataToUser(userId) {
     const clones = masterDocs.map(doc => {
       const newId = makeId();
       // Strip master-specific fields; assign new identity
-      const { _id: masterId, userId: _u, _masterId: _m, _userModified: _um, ...rest } = doc;
+      const { _id: masterId, userId: _u, _masterId: _m, _userModified: _um, businessId: _b, createdBy: _cb, ...rest } = doc;
       const clone = {
         ...rest,
         _id: newId,
         userId,
+        ...(businessId && { businessId }),
+        createdBy: userId,
         _masterId: String(masterId),
         _userModified: false,
       };

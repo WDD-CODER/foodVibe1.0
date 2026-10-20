@@ -7,6 +7,7 @@ import { supplierSchema } from './supplier.schema'
 import { taxonomyTermSchema } from './taxonomy-term.schema'
 import { venueSchema } from './venue.schema'
 
+export * from './business.schema'
 export * from './common.schema'
 export * from './taxonomy-term.schema'
 export { equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }

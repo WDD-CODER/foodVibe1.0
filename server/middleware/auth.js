@@ -63,11 +63,18 @@ function optionalToken(req, res, next) {
   }
 }
 
-function requireAdmin(req, res, next) {
-  if (!req.user || req.user.role !== 'admin') {
+/**
+ * Plan 424: platform-admin gate. Until plan 425 drops the legacy `role` fallback, a token with
+ * `role: 'admin'` counts as a platform admin too.
+ */
+function requirePlatformAdmin(req, res, next) {
+  if (!req.user || !(req.user.isPlatformAdmin === true || req.user.role === 'admin')) {
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();
 }
 
-module.exports = { verifyToken, optionalToken, requireAdmin };
+/** Alias kept until plan 425 replaces every use. */
+const requireAdmin = requirePlatformAdmin;
+
+module.exports = { verifyToken, optionalToken, requireAdmin, requirePlatformAdmin };

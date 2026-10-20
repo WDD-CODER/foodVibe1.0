@@ -41,7 +41,6 @@ export const recipeSchema = z.strictObject({
   labels: z.array(z.string()).optional(),
   course: z.string().optional(),
   autoLabels: z.array(z.string()).optional(),
-  createdBy: z.string().optional(),
   /** The owner's favorite mark on their own copy (plan 407); never pushed to master. */
   favorite: z.boolean().optional(),
   imageUrl: z.string().optional(),
