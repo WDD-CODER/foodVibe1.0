@@ -1,10 +1,10 @@
 import { z } from 'zod'
-import { baseDocShape } from '../base.schema'
+import { baseDocShape, nameField } from '../base.schema'
 import { environmentTypeSchema } from './common.schema'
 
 export const venueSchema = z.strictObject({
   ...baseDocShape,
-  nameHebrew: z.string(),
+  nameHebrew: nameField,
   environmentType: environmentTypeSchema,
   availableInfrastructure: z.array(z.strictObject({
     equipmentId: z.string(),

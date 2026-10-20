@@ -1,9 +1,9 @@
 import { z } from 'zod'
-import { baseDocShape } from '../base.schema'
+import { baseDocShape, nameField } from '../base.schema'
 
 export const equipmentSchema = z.strictObject({
   ...baseDocShape,
-  nameHebrew: z.string(),
+  nameHebrew: nameField,
   category: z.enum(['heat_source', 'tool', 'container', 'packaging', 'infrastructure', 'consumable']),
   ownedQuantity: z.number(),
   scalingRule: z.strictObject({

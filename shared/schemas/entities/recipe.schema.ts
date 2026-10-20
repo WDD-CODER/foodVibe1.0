@@ -1,10 +1,10 @@
 import { z } from 'zod'
-import { baseDocShape } from '../base.schema'
+import { baseDocShape, nameField } from '../base.schema'
 import { dishLogisticsSchema, ingredientSchema } from './common.schema'
 
 export const recipeSchema = z.strictObject({
   ...baseDocShape,
-  nameHebrew: z.string(),
+  nameHebrew: nameField,
   ingredients: z.array(ingredientSchema),
   steps: z.array(z.strictObject({
     order: z.number(),

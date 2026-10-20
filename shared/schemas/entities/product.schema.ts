@@ -1,10 +1,10 @@
 import { z } from 'zod'
-import { baseDocShape } from '../base.schema'
+import { baseDocShape, nameField } from '../base.schema'
 
 export const productSchema = z.strictObject({
   ...baseDocShape,
-  nameHebrew: z.string(),
-  nameEnglish: z.string().optional(),
+  nameHebrew: nameField,
+  nameEnglish: nameField.optional(),
   baseUnit: z.string(),
   sources: z.array(z.strictObject({
     supplierId: z.string(),

@@ -1,9 +1,9 @@
 import { z } from 'zod'
-import { baseDocShape } from '../base.schema'
+import { baseDocShape, nameField } from '../base.schema'
 
 export const supplierSchema = z.strictObject({
   ...baseDocShape,
-  nameHebrew: z.string(),
+  nameHebrew: nameField,
   contactPerson: z.string().optional(),
   phone: z.string().optional(),
   phone2: z.string().optional(),

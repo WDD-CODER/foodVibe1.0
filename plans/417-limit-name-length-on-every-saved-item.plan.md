@@ -1,6 +1,6 @@
 # Plan 417 — Limit name length on every saved item
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: d6bc95000a39553fd55fef34aef362f18e0f93dd
 
@@ -99,9 +99,9 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Name limit of 200 characters on every entity's own name, enforced on POST and PUT through the shared schemas.
-- [ ] Server test covering all 7 types (POST over / at the limit, PUT over the limit).
-- [ ] Read-only check script for existing data, local and Atlas.
+- [x] Name limit of 200 characters on every entity's own name, enforced on POST and PUT through the shared schemas.
+- [x] Server test covering all 7 types (POST over / at the limit, PUT over the limit).
+- [x] Read-only check script for existing data, local and Atlas.
 
 ### Won't Have (this plan)
 - A `maxlength` on the app's input fields (the server is the gate; the app's normal screens never send 200+
@@ -109,10 +109,10 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
 - Limits on other text fields (notes, descriptions, steps).
 
 ## Atomic Sub-tasks
-- [ ] C1: Add one shared 200-character name limit to the schemas so every entity uses the same rule — NAME_MAX_LENGTH + nameField in base.schema.ts; apply to the 7 entity name fields — shared/schemas/base.schema.ts, shared/schemas/entities/*.schema.ts
-- [ ] C2: Prove the server refuses a too-long name and still saves a normal one on every entity — POST over/at limit and PUT over limit for all 7 types; extra minimal bodies in v2-docs.js — server/test/name-length.test.js, server/test/helpers/v2-docs.js
-- [ ] C3: Add a read-only check that shows whether any saved item already has a name over the limit — local and Atlas targets, one line per collection, exit 1 when over — server/scripts/check-name-lengths.js
-- [ ] C4: Build, test, check local data and hand you the Atlas check and the save check — npm --prefix server test, ng build, check script on local, log-query; Human runs the Atlas check and saves one product and one recipe — this plan file
+- [x] C1: Add one shared 200-character name limit to the schemas so every entity uses the same rule — NAME_MAX_LENGTH + nameField in base.schema.ts; apply to the 7 entity name fields — shared/schemas/base.schema.ts, shared/schemas/entities/*.schema.ts
+- [x] C2: Prove the server refuses a too-long name and still saves a normal one on every entity — POST over/at limit and PUT over limit for all 7 types; extra minimal bodies in v2-docs.js — server/test/name-length.test.js, server/test/helpers/v2-docs.js
+- [x] C3: Add a read-only check that shows whether any saved item already has a name over the limit — local and Atlas targets, one line per collection, exit 1 when over — server/scripts/check-name-lengths.js
+- [x] C4: Build, test, check local data and hand you the Atlas check and the save check — npm --prefix server test, ng build, check script on local, log-query; Human runs the Atlas check and saves one product and one recipe — this plan file
 
 ## Technical Considerations
 - Dependencies: `zod`, `npm run build:schemas` (the server loads `server/generated/schemas`; the server's
@@ -130,3 +130,14 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
 - Changing the QA api cases (`scripts/qa/code-qa/**`): the `huge-string` case stays as it is and will pass.
 
 ## Execution Notes
+
+**2026-10-20 — C1–C3 done, C4 waits on the Human** (wt-2).
+
+- `npm --prefix server test`: 25 files, 272 passed (6 todo); `name-length.test.js` 24 cases (8 name fields × POST over / POST at / PUT over).
+- `ng build`: passes (only the existing budget / exceljs warnings).
+- `node server/scripts/check-name-lengths.js --target=local`: exit 0, `NAME_LENGTH: ok (limit 200)`; longest
+  local name 100 (dishes), every collection `over limit 0`.
+- `node scripts/log-query.mjs --since=plan-start --level=error`: no entries.
+- Atlas check not run by the agent (production reads are the Human's): Done-when `[human]`.
+- 2026-10-20 — Human ran the Atlas check: every collection `over limit 0`, longest 100 (dishes),
+  `NAME_LENGTH: ok (limit 200)`; Human replied `merge` (validates C4). Nightly api follow-up stays open.
