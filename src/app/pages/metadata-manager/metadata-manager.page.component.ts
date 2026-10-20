@@ -549,7 +549,7 @@ export class MetadataManagerComponent implements OnInit {
     }
   }
 
-  private async registryRename(type: MetadataType, oldKey: string, newKey: string): Promise<void> {
+  private async registryRename(type: MetadataType, oldKey: string, newKey: string): Promise<boolean> {
     switch (type) {
       case 'label':
         return this.metadataRegistry.renameLabel(oldKey, newKey)
@@ -559,6 +559,8 @@ export class MetadataManagerComponent implements OnInit {
         return this.metadataRegistry.renameCategory(oldKey, newKey)
       case 'allergen':
         return this.metadataRegistry.renameAllergen(oldKey, newKey)
+      default:
+        return false
     }
   }
 
@@ -854,7 +856,8 @@ export class MetadataManagerComponent implements OnInit {
     const msg = this.translationService.translate('menu_type_rename_confirm')
     const confirmed = await this.confirmModal.open(msg, { saveLabel: 'save' })
     if (!confirmed) return
-    await this.metadataRegistry.renameMenuType(oldKey, trimmed)
-    await this.menuEventData.updateServingTypeForAll(oldKey, trimmed)
+    const renamed = await this.metadataRegistry.renameMenuType(oldKey, trimmed)
+    // The server re-keys menuEvents.servingType; reload so the menus show the new name.
+    if (renamed) await this.menuEventData.reloadFromStorage()
   }
 }

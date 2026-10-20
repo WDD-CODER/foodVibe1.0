@@ -12,6 +12,8 @@ import { signal } from '@angular/core'
 import { TranslationService } from '@services/translation.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
+import { MenuEventDataService } from '@services/menu-event-data.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 
 describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent
@@ -43,7 +45,7 @@ describe('MetadataManagerPageComponent', () => {
 
     metadataRegistrySpy = jasmine.createSpyObj(
       'MetadataRegistryService',
-      ['registerAllergen', 'getLabelColor', 'renameCategory'],
+      ['registerAllergen', 'getLabelColor', 'renameCategory', 'renameMenuType'],
       {
         allAllergens_: mockAllergens,
         allCategories_: mockCategories,
@@ -93,6 +95,41 @@ describe('MetadataManagerPageComponent', () => {
     expect(await rename('category', 'meat', 'fish', 'me')).toBe(true)
     expect(metadataRegistrySpy.renameCategory).toHaveBeenCalledOnceWith('meat', 'fish')
     expect(productDataSpy.reloadFromStorage).toHaveBeenCalledTimes(1)
+  })
+
+  // Plan 421 - a refused menu-type rename must not touch any menu; the server re-keys on success.
+  describe('renaming a menu type', () => {
+    type MenuTypeRename = { requireSignIn: () => boolean; onMenuTypeNameBlur: (o: string, n: string) => Promise<void> }
+    const page = (): MenuTypeRename => component as unknown as MenuTypeRename
+    let menuReload: jasmine.Spy
+    let menuWrite: jasmine.Spy
+
+    beforeEach(() => {
+      spyOn(page(), 'requireSignIn').and.returnValue(true)
+      spyOn(TestBed.inject(ConfirmModalService), 'open').and.resolveTo(true)
+      const menus = TestBed.inject(MenuEventDataService)
+      menuReload = spyOn(menus, 'reloadFromStorage').and.resolveTo()
+      menuWrite = spyOn(menus, 'updateMenuEvent').and.resolveTo()
+    })
+
+    it('a refused rename (to an existing type) writes no menu and does not reload', async () => {
+      metadataRegistrySpy.renameMenuType.and.resolveTo(false)
+      await page().onMenuTypeNameBlur('buffet', 'plated')
+      expect(metadataRegistrySpy.renameMenuType).toHaveBeenCalledOnceWith('buffet', 'plated')
+      expect(menuWrite).not.toHaveBeenCalled()
+      expect(menuReload).not.toHaveBeenCalled()
+    })
+
+    it('a successful rename reloads the menus once and writes none from the client', async () => {
+      metadataRegistrySpy.renameMenuType.and.resolveTo(true)
+      await page().onMenuTypeNameBlur('buffet', 'banquet')
+      expect(menuReload).toHaveBeenCalledTimes(1)
+      expect(menuWrite).not.toHaveBeenCalled()
+    })
+
+    it('MenuEventDataService no longer has updateServingTypeForAll', () => {
+      expect('updateServingTypeForAll' in TestBed.inject(MenuEventDataService)).toBeFalse()
+    })
   })
 
   // Plan 377 — the unit edit dialog's save path.
