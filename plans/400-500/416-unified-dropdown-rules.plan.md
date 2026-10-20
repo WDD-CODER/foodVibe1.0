@@ -1,6 +1,6 @@
 # Plan 416 — Unified dropdown rules: exact match, add window always, saved message, keyboard everywhere
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: 4816d408a371818a98ec18521c895f8a1125aa91
 
