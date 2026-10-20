@@ -34,7 +34,7 @@ permissions are checked every night, without a browser.
   every entity and trash type.
 - [auto] The api layer makes at most 300 write calls per run (printed as `writes: <n>`), well under
   `DATA_WRITE_LIMIT_MAX` (1000).
-- [human] The Human reads the first night's `api` section and agrees each failed case is a real bug or adds it to
+- [x] [human] (validated by Human 2026-10-20: all 7 failed cases are real bugs) The Human reads the first night's `api` section and agrees each failed case is a real bug or adds it to
   the allow-list in `docs/qa/code-qa-api-cases.md` with a reason.
 
 ## Execution Mode
