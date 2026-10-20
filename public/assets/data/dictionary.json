@@ -1072,6 +1072,21 @@
     "engine_error_cycle": "הכנה מעגלית: {name}",
     "engine_error_no_yield": "חסרה תפוקה במתכון: {name}",
     "engine_error_no_conversion": "לא ניתן להמיר כמות להכנה: {name}",
-    "engine_error_no_ingredients": "אין מצרכים: {name}"
+    "engine_error_no_ingredients": "אין מצרכים: {name}",
+    "supplier_orders": "הזמנות לספקים",
+    "supplier_orders_copy": "העתק",
+    "supplier_orders_whatsapp": "שלח ב-WhatsApp",
+    "supplier_orders_copy_all": "העתק הכל",
+    "supplier_orders_copied": "הועתק – הדבק ב-WhatsApp",
+    "supplier_orders_invalid_phone": "מספר לא תקין – הועתק להדבקה",
+    "supplier_orders_nothing": "אין מה להזמין",
+    "supplier_orders_review": "לבדיקה",
+    "supplier_orders_est_total": "סה״כ משוער",
+    "supplier_orders_manual_copy": "ההעתקה נחסמה – סמן את הטקסט והעתק ידנית",
+    "supplier_orders_open": "פתח",
+    "order_msg_title": "הזמנה – {business}",
+    "order_msg_event": "לאירוע: {event}",
+    "order_msg_thanks": "תודה!",
+    "unit_short_unit": "יח'"
   }
 }

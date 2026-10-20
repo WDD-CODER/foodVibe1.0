@@ -8,6 +8,10 @@
       <app-loader size="small" [inline]="true" />
       } {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
     </button>
+    <button type="button" class="pill" (click)="openSupplierOrders()">
+      <lucide-icon name="truck" [size]="16"></lucide-icon>
+      {{ 'supplier_orders' | translatePipe }}
+    </button>
   </div>
 
   <!-- Paper in the middle of the screen -->
@@ -353,4 +357,9 @@
   (viewAll)="onViewAll()"
   (exportAll)="onExportAllTogether()"
   (print)="printMenu()"
+  (openSupplierOrders)="openSupplierOrders()"
 />
+
+@if (supplierOrdersEvent_(); as ev) { @defer {
+<app-supplier-orders class="no-print" [event]="ev" (close)="supplierOrdersEvent_.set(null)" />
+} }

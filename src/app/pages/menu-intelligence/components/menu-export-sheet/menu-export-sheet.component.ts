@@ -29,6 +29,7 @@ export class MenuExportSheetComponent {
   readonly viewAll = output<void>()
   readonly exportAll = output<void>()
   readonly print = output<void>()
+  readonly openSupplierOrders = output<void>()
 
   protected readonly checklistModes: readonly { mode: ChecklistMode; labelKey: string }[] = [
     { mode: 'by_dish', labelKey: 'export_checklist_by_dish' },
@@ -74,5 +75,10 @@ export class MenuExportSheetComponent {
   protected onPrint(): void {
     this.close.emit()
     this.print.emit()
+  }
+
+  protected onOpenSupplierOrders(): void {
+    this.close.emit()
+    this.openSupplierOrders.emit()
   }
 }
