@@ -1,6 +1,6 @@
 # Plan 377 — Units A: edit a custom unit's name and conversion in the metadata manager
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: d601af5a9c761146f41191f6c49fb56b732774d6
 
