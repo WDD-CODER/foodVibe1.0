@@ -181,20 +181,6 @@
 - [x] F1: Confirm every kept model accepts inline images — VISION_MODEL_PATTERN matches all kept models including gemini-3-flash-preview (extend pattern + test if not) — server/services/gemini-client.js, server/test/gemini-client.test.js
 - [x] G1: Update the Gemini free-tier gotcha with the new lineup and the quota-first ordering rule — docs/brain/gotchas/backend.md
 
-### Plan 413 — Code QA Part 1: Nightly Code Gates and Headless Page Sweep
-- [ ] A1: Share the QA login so the sweep and the evidence server sign in the same way — move qaCredential, login and the sessionStorage seeding out of evidence-server.mjs into a shared module; evidence server behaviour unchanged — `scripts/qa/lib/qa-login.mjs, scripts/qa/evidence-server.mjs`
-- [ ] A2: Write the page map that ties every QA plan page to its routes and source files — one entry per qa-plan.md section, shape in Design — `docs/qa/code-qa-pages.json`
-- [ ] A3: Add the findings store so each bug gets a stable ID and is never reported twice — fingerprint, merge into known.json, mark gone, render pre-qa.md / pre-qa.json / latest.md — `scripts/qa/code-qa/findings.mjs`
-- [ ] A4: Run the existing build, lint and test commands as the first layer and stop the night on a broken build — gates layer with BLOCKED.md — `scripts/qa/code-qa/gates.mjs`
-- [ ] A5: Catch missing translations, physical CSS and broken routes straight from the source — static layer per Design — `scripts/qa/code-qa/static-checks.mjs`
-- [ ] A6: Visit every page at three screen sizes and record scroll, console, tap-size, image and accessibility problems — Playwright sweep + axe + shots, plus a second project that runs e2e/*.spec.ts against 4205 — `e2e-qa/sweep.spec.ts, playwright.qa.config.ts`
-- [ ] A7: Add the one command that runs all layers and writes the night's report — orchestrator with --layers, --nightly, --date, --deadline; npm script qa:code; add @axe-core/playwright devDependency — `scripts/qa/code-qa/run.mjs, package.json, package-lock.json`
-- [ ] A8: Start Code QA automatically after the servers come up at midnight — call run.mjs from the nightly up script; change default Up to 00:00 and Down to 07:30 — `scripts/qa/qa-nightly-up.ps1, scripts/qa/qa-schedule.ps1`
-- [ ] A9: Test the static checks and the findings store with planted fixtures so CI catches regressions — `scripts/test/code-qa-static.test.mjs, scripts/test/code-qa-findings.test.mjs, scripts/test/fixtures/code-qa/**`
-- [ ] A10: Teach the UI agent to read the Code QA report first and skip what it already covers — qa-flow.md P0 step reads latest.md; qa-agent.md §7 marks G1/G4/G5/G8 pre-checked when latest.md lists them for the page and bp, never re-report a CODE fingerprint, fall back to the full protocol when latest.md is missing or older than 24h — `docs/qa/qa-flow.md, docs/qa/qa-agent.md`
-- [ ] A11: Document Code QA and the new night timeline — new code-qa.md (layers, outputs, fingerprint, how to run by hand); README Nightly mode timeline and the Windows task re-register command; ignore bugs/qa-runs/code-qa/ — `docs/qa/code-qa.md, docs/qa/README.md, .gitignore`
-- [ ] A12: Prove it end to end on the QA stack and record the numbers — run qa:code with the stack up, paste the per-layer status lines and durations into Execution Notes — `this plan file`
-
 ### Plan 414 — Code QA Part 2: API and Data Checks
 - [ ] B1: Build a valid sample record for every entity so the API can be tested with real data shapes — fixtures checked against the shared schemas, QA-CODE- name prefix, reference order — `scripts/qa/code-qa/api-fixtures.mjs`
 - [ ] B2: Make sure API tests can only ever write to the local QA database — qa-up writes .claude/.qa-env; the layer refuses unless it reads local — `scripts/qa/qa-up.ps1, scripts/qa/code-qa/api-layer.mjs`
