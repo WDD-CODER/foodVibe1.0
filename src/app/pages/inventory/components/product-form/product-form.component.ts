@@ -40,6 +40,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { TranslationService } from '@services/translation.service'
+import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service'
 import { LoggingService } from '@services/logging.service'
@@ -440,6 +441,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       this.translationService.updateDictionary(result.englishKey, result.hebrewLabel)
       await this.metadataRegistry.registerCategory(result.hebrewLabel)
       this.addCategory(result.englishKey)
+      notifyItemAdded(this.userMsgService, (k) => this.translationService.translate(k), result.hebrewLabel)
     } catch (err) {
       this.logging.error({
         event: 'inventory.product.add_category_error',
@@ -475,27 +477,21 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /** Add an allergen: always through the key window, prefilled with the typed name (rule W). */
   protected async onAddNewAllergen(hebrewLabel: string): Promise<void> {
-    if (!hebrewLabel?.trim()) return
-    const trimmed = hebrewLabel.trim()
     try {
-      let englishKey: string
-      const resolved = this.translationService.resolveAllergen(trimmed)
-      if (resolved) {
-        englishKey = resolved
-      } else {
-        const result = await this.translationKeyModal.open(trimmed, 'allergen')
-        if (!isTranslationKeyResult(result)) return
-        englishKey = result.englishKey
-        await this.metadataRegistry.registerAllergen(englishKey)
-        this.translationService.updateDictionary(englishKey, result.hebrewLabel)
-      }
+      const result = await this.translationKeyModal.open((hebrewLabel ?? '').trim(), 'allergen')
+      if (!isTranslationKeyResult(result)) return
+      const englishKey = result.englishKey
       const current = (this.productForm_.get('allergens')?.value || []) as string[]
       if (current.includes(englishKey)) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('allergen_already_on_product'))
         return
       }
+      await this.metadataRegistry.registerAllergen(englishKey)
+      this.translationService.updateDictionary(englishKey, result.hebrewLabel)
       this.toggleAllergen(englishKey)
+      notifyItemAdded(this.userMsgService, (k) => this.translationService.translate(k), result.hebrewLabel)
     } catch (err) {
       this.logging.error({
         event: 'inventory.product.add_allergen_error',

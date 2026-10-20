@@ -10,7 +10,7 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { MenuIntelligenceService } from '@services/menu-intelligence.service'
 import { ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
-import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
+import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
@@ -132,7 +132,7 @@ export class MenuDishRowComponent {
   getFilteredRecipes(): Recipe[] {
     const raw = this.dishSearchQuery().trim()
     if (!raw) return []
-    const filtered = filterOptionsByStartsWith(this.recipes(), raw, (r) => r.nameHebrew ?? '')
+    const filtered = filterOptionsByLabel(this.recipes(), raw, (r) => r.nameHebrew ?? '')
     return filtered.slice(0, 12)
   }
 }

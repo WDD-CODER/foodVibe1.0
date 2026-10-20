@@ -8,6 +8,7 @@ import {
   effect,
   ElementRef
 } from '@angular/core'
+import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -17,6 +18,7 @@ import { ProductDataService } from '@services/product-data.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { Product } from '@models/product.model'
 import { take } from 'rxjs/operators'
@@ -38,6 +40,7 @@ export class QuickAddProductModalComponent {
   private readonly unitRegistry = inject(UnitRegistryService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
   private readonly addItemModal = inject(AddItemModalService)
   private readonly gemini_ = inject(GeminiService)
 
@@ -127,18 +130,18 @@ export class QuickAddProductModalComponent {
     if (val === '__add_category__') {
       const typed = this.pendingAddName_()
       this.pendingAddName_.set('')
-      const newCategory =
-        typed ||
-        (await this.addItemModal.open({
-          title: 'add_new_category',
-          label: 'categoryName',
-          placeholder: 'categoryName',
-          saveLabel: 'save_category'
-        }))
+      const newCategory = await this.addItemModal.open({
+        title: 'add_new_category',
+        label: 'categoryName',
+        placeholder: 'categoryName',
+        saveLabel: 'save_category',
+        initialValue: typed
+      })
       if (newCategory) {
         const key = await this.metadataRegistry.registerCategory(newCategory)
         if (key) {
           this.category.set(key)
+          notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), newCategory)
           this.onSelectChange(this.getNextFocusAfterCategory())
         } else {
           this.category.set('')
@@ -233,6 +236,7 @@ export class QuickAddProductModalComponent {
     this.productData.addProduct(product).then(
       (saved) => {
         this.isSubmitting_.set(false)
+        notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), saved.nameHebrew)
         this.modalService.save(saved)
       },
       () => {

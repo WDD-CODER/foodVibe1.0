@@ -53,3 +53,14 @@ export function resolveAddedKey(
   }
   return added[0]
 }
+
+/** Shows the success message after an add window saved (rule M): `"<name>" נוסף`. */
+export function notifyItemAdded(
+  userMsg: { onSetSuccessMsg: (txt: string) => void },
+  translate: (key: string) => string,
+  name: string
+): void {
+  const label = (name ?? '').trim()
+  if (!label) return
+  userMsg.onSetSuccessMsg(`"${label}" ${translate('item_added_suffix')}`)
+}

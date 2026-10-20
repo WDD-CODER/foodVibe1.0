@@ -16,13 +16,16 @@ import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { PreparationRegistryService, type PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
-import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
+import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
-import { AddOptionLabel, addOptionLabel } from 'src/app/core/utils/add-option.util'
+import { AddOptionLabel, addOptionLabel, notifyItemAdded } from 'src/app/core/utils/add-option.util'
+import { AddItemModalService } from '@services/add-item-modal.service'
+import { TranslationService } from '@services/translation.service'
+import { UserMsgService } from '@services/user-msg.service'
 import { KeyedPickerSearch, scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
 
 /** KeyedPickerSearch key — one picker per component instance. */
@@ -50,6 +53,9 @@ let nextPrepSearchId = 0
 export class PreparationSearchComponent {
   private readonly prepRegistry = inject(PreparationRegistryService)
   private readonly injector = inject(Injector)
+  private readonly addItemModal = inject(AddItemModalService)
+  private readonly translation = inject(TranslationService)
+  private readonly userMsg = inject(UserMsgService)
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
 
   /** Category from the row's category dropdown; used when adding a new preparation. */
@@ -119,7 +125,7 @@ export class PreparationSearchComponent {
     if (raw.length < 2) return []
 
     const preps = this.prepRegistry.allPreparations_()
-    return filterOptionsByStartsWith(preps, raw, (p) => p.name)
+    return filterOptionsByLabel(preps, raw, (p) => p.name)
   })
 
   /** Results grouped by category; each entry carries its keyboard index (display order). */
@@ -207,25 +213,38 @@ export class PreparationSearchComponent {
       this.addNewRowRequested.emit()
       return
     }
-    if (await this.addPreparationDirectly()) this.addNewRowRequested.emit()
+    if (await this.addPreparationViaWindow()) this.addNewRowRequested.emit()
   }
 
-  async addPreparationDirectly(): Promise<boolean> {
-    const name = this.searchQuery_().trim()
-    if (!name) return false
-
+  /** Add a preparation: always through the add window, prefilled with the typed name (rule W). */
+  async addPreparationViaWindow(): Promise<boolean> {
+    const typed = this.searchQuery_().trim()
     const cats = this.categories()
     const category = this.selectedCategory().trim() || (cats.length > 0 ? cats[0] : '')
     if (!category) return false
-
+    this.showResults_.set(false)
+    const name = (
+      (await this.addItemModal.open({
+        title: 'add_new_preparation',
+        label: 'preparation',
+        placeholder: 'preparation',
+        saveLabel: 'save',
+        initialValue: typed
+      })) ?? ''
+    ).trim()
+    if (!name) {
+      this.focusSearch()
+      return false
+    }
+    const existed = this.prepRegistry.allPreparations_().some((p) => p.name === name)
     await this.prepRegistry.registerPreparation(name, category)
     // Select what was stored (the registry may keep an existing entry); nothing if the save failed (rule 4).
     const entry = this.prepRegistry.allPreparations_().find((p) => p.name === name) ?? (null as PreparationEntry | null)
     if (!entry) return false
+    if (!existed) notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), name)
     this.preparationAdded.emit(entry)
     this.preparationSelected.emit(entry)
     this.searchQuery_.set('')
-    this.showResults_.set(false)
     return true
   }
 

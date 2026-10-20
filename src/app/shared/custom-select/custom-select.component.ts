@@ -22,7 +22,7 @@ import { TranslationService } from '../../core/services/translation.service'
 import { dedupeAndFilterOptions } from '../../core/utils/dedupe-select-options.util'
 import { InputClearComponent } from '../input-clear/input-clear.component'
 import { AddOptionRowComponent } from '../add-option-row/add-option-row.component'
-import { AddOptionLabel, addOptionLabel } from '../../core/utils/add-option.util'
+import { AddOptionLabel, addOptionLabel, findOptionByLabel } from '../../core/utils/add-option.util'
 import { KeyedPickerSearch, scrollHighlightIntoView } from '../../core/utils/keyed-picker-search.util'
 
 /** Per-instance id prefix for option ids when no triggerId is given. */
@@ -111,7 +111,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
     return opt ? opt.label : ''
   })
 
-  /** Options filtered by search: "starts with" + Hebrew vs Latin by script. Add-new option is always pinned at end. Deduplicated by translated label (prefer current value). */
+  /** Options filtered by search: contains, prefix matches first (rule F). Add-new option is always pinned at end. Deduplicated by translated label (prefer current value). */
   protected filteredOptions_ = computed(() => {
     const raw = this.searchQuery_().trim()
     const opts = this.options()
@@ -125,8 +125,14 @@ export class CustomSelectComponent implements ControlValueAccessor {
     return addNewOpt ? [...deduped, addNewOpt] : deduped
   })
 
-  /** The add-new option from the full options list, or null if not present. */
-  protected addNewOption_ = computed(() => this.options().find((o) => o.value === this.addNewValue()) ?? null)
+  /** The add-new option from the full options list; null when absent or the search exactly names an option (rule X). */
+  protected addNewOption_ = computed(() => {
+    const addNewVal = this.addNewValue()
+    const addOpt = this.options().find((o) => o.value === addNewVal) ?? null
+    if (!addOpt || !this.typeToFilter()) return addOpt
+    const rest = this.options().filter((o) => o.value !== addNewVal)
+    return findOptionByLabel(this.searchQuery_(), rest, (o) => this.displayLabel_(o.label)) ? null : addOpt
+  })
 
   /** Add option label: typed new name (not an existing option by on-screen label), else the generic key (rule 2–3). */
   protected addLabel_ = computed<AddOptionLabel>(() => {
@@ -323,9 +329,15 @@ export class CustomSelectComponent implements ControlValueAccessor {
     this.pick_(opt)
   }
 
+  /** Button-mode keys: bound on the trigger, and on the host for keys from inside the open list. */
   @HostListener('keydown', ['$event'])
   protected onKeydown(e: KeyboardEvent): void {
     if (this.typeToFilter() && (e.target as HTMLElement)?.tagName === 'INPUT') return
+    // Keys the list uses are its own: stop them on the trigger so a page's (keydown) on this host
+    // doesn't also move focus (rule K). Tab and a closed-list Escape still bubble.
+    if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key) || (e.key === 'Escape' && this.open())) {
+      e.stopPropagation()
+    }
     if (!this.open()) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()

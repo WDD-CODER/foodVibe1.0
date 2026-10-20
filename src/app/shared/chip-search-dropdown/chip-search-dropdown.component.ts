@@ -17,7 +17,8 @@ import { ClickOutSideDirective } from '@directives/click-out-side'
 import { ScrollableDropdownComponent } from '../scrollable-dropdown/scrollable-dropdown.component'
 import { InputClearComponent } from '../input-clear/input-clear.component'
 import { AddOptionRowComponent } from '../add-option-row/add-option-row.component'
-import { AddOptionLabel, addOptionLabel } from '../../core/utils/add-option.util'
+import { AddOptionLabel, addOptionLabel, findOptionByLabel } from '../../core/utils/add-option.util'
+import { filterOptionsByLabel } from '../../core/utils/option-filter.util'
 import { KeyedPickerSearch, scrollHighlightIntoView } from '../../core/utils/keyed-picker-search.util'
 
 /** Per-instance id prefix, so two dropdowns on one page never share option / input ids (plan 364). */
@@ -79,22 +80,14 @@ export class ChipSearchDropdownComponent {
   // ── Computed ─────────────────────────────────────────────────────────────────
   protected highlightIndex_ = computed(() => this.picker_.highlighted(PICKER_KEY))
 
+  /** Typed text filters by on-screen label: contains, prefix matches first (rule F); or the caller's filter. */
   protected filteredOptions_ = computed(() => {
     const raw = this.searchQuery_().trim()
     const opts = this.options()
     if (!raw) return opts
     const customFilter = this.searchFilterFn()
     if (customFilter) return opts.filter((o) => customFilter(o, raw))
-    const qLower = raw.toLowerCase()
-    const isHebrew = /[֐-׿]/.test(raw)
-    const isLatin = /[a-zA-Z]/.test(raw)
-    const display = this.displayFn()
-    return opts.filter((o) => {
-      const label = display(o)
-      if (isHebrew) return label.startsWith(raw)
-      if (isLatin) return /[a-zA-Z]/.test(label) && label.toLowerCase().startsWith(qLower)
-      return label.toLowerCase().startsWith(qLower)
-    })
+    return filterOptionsByLabel(opts, raw, this.displayFn())
   })
 
   /** Add option label: typed new name (no option or chip has that on-screen label), else the generic key. */
@@ -107,11 +100,17 @@ export class ChipSearchDropdownComponent {
     )
   )
 
-  /** One add option (rule 1): for a typed new name, or the generic add when `showAddNewAlways`. */
+  /** One add option (rule 1): for a typed new name, or the generic add when `showAddNewAlways`; never on an exact match. */
   protected hasAddNew_ = computed(() => {
     if (this.addNewLabelKey() == null) return false
+    if (this.isExactMatch_()) return false
     return this.addLabel_().kind === 'typed' || this.showAddNewAlways()
   })
+
+  /** The search exactly names an option or a chosen chip: no add option at all (rule X). */
+  private isExactMatch_ = computed(
+    () => !!findOptionByLabel(this.searchQuery_(), [...this.options(), ...this.selected()], this.displayFn())
+  )
 
   /** Options then the add option — the keyboard order (rule 5e). */
   protected optionCount_ = computed(() => this.filteredOptions_().length + (this.hasAddNew_() ? 1 : 0))
@@ -175,7 +174,7 @@ export class ChipSearchDropdownComponent {
     this.picker_.handleKeydown(PICKER_KEY, ev, {
       optionCount: this.optionCount_(),
       onSelect: (idx) => {
-        if (idx < filtered.length) this.add.emit(filtered[idx])
+        if (idx < filtered.length) this.onOptionClick(filtered[idx])
         else this.emitAddNew()
       },
       onClose: () => this.closeDropdown(),
@@ -189,7 +188,6 @@ export class ChipSearchDropdownComponent {
   protected emitAddNew(): void {
     const label = this.addLabel_()
     this.addNew.emit(label.kind === 'typed' ? label.text : '')
-    this.searchQuery_.set('')
-    this.picker_.onQueryChange(PICKER_KEY, '')
+    this.closeDropdown()
   }
 }

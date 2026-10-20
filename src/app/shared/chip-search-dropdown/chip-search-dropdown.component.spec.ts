@@ -162,4 +162,55 @@ describe('ChipSearchDropdownComponent — add option + keyboard (add-option rule
     expect(tab.defaultPrevented).toBeFalse()
     expect(root.querySelector('app-scrollable-dropdown')).toBeNull()
   })
+
+  describe('add option (plan 416)', () => {
+    let addFx: ComponentFixture<ChipSearchDropdownComponent>
+
+    beforeEach(() => {
+      addFx = TestBed.createComponent(ChipSearchDropdownComponent)
+      addFx.componentRef.setInput('options', ['ביצים', 'בוטנים', 'בשר'])
+      addFx.componentRef.setInput('addNewLabelKey', 'add_new_category')
+      addFx.componentRef.setInput('allowTypedAdd', true)
+      addFx.componentRef.setInput('showAddNewAlways', true)
+      addFx.detectChanges()
+    })
+
+    function typeIn(text: string): void {
+      const el = (addFx.nativeElement as HTMLElement).querySelector('.csd-input') as HTMLInputElement
+      el.dispatchEvent(new Event('focus'))
+      el.value = text
+      el.dispatchEvent(new Event('input'))
+      addFx.detectChanges()
+    }
+
+    function addRows(): number {
+      return (addFx.nativeElement as HTMLElement).querySelectorAll('.dropdown-item--add-new').length
+    }
+
+    it('shows no add option for an exact existing name, even with showAddNewAlways (rule X)', () => {
+      typeIn('בשר')
+      expect(addRows()).toBe(0)
+      typeIn('בשר ')
+      expect(addRows()).toBe(0)
+    })
+
+    it('shows the add option for a partial or different name', () => {
+      typeIn('ב')
+      expect(addRows()).toBe(1)
+      typeIn('בשר בקר')
+      expect(addRows()).toBe(1)
+    })
+
+    it('Enter on the add option emits addNew with the typed name and closes the list', () => {
+      const added: string[] = []
+      addFx.componentInstance.addNew.subscribe((v: string) => added.push(v))
+      typeIn('ב')
+      const el = (addFx.nativeElement as HTMLElement).querySelector('.csd-input') as HTMLInputElement
+      for (let i = 0; i < 5; i++) el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', cancelable: true }))
+      el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }))
+      addFx.detectChanges()
+      expect(added).toEqual(['ב'])
+      expect((addFx.nativeElement as HTMLElement).querySelector('app-scrollable-dropdown')).toBeNull()
+    })
+  })
 })

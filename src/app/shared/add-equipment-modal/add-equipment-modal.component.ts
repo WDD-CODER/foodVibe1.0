@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, effect } from '@angular/core'
+import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
-import { AddItemModalService } from '@services/add-item-modal.service'
+import { UserMsgService } from '@services/user-msg.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
@@ -22,7 +23,7 @@ const ADD_NEW_VALUE = '__add_new__'
 })
 export class AddEquipmentModalComponent {
   private modalService = inject(AddEquipmentModalService)
-  private addItemModal = inject(AddItemModalService)
+  private readonly userMsg = inject(UserMsgService)
   private confirmModal = inject(ConfirmModalService)
   private translationService = inject(TranslationService)
   private translationKeyModal = inject(TranslationKeyModalService)
@@ -65,30 +66,18 @@ export class AddEquipmentModalComponent {
     this.category.set(value as EquipmentCategory | string)
   }
 
-  /** Add a category: a typed new name skips the name modal; cancel keeps the previous category (add-option rule 4). */
+  /** Add a category: always the key window, prefilled with the typed name (rule W); cancel keeps the previous category. */
   protected async openAddNewCategory(): Promise<void> {
     const previous = this.category()
     const typed = this.pendingAddName_()
     this.pendingAddName_.set('')
     this.category.set(ADD_NEW_VALUE)
-    const result =
-      typed ||
-      (await this.addItemModal.open({
-        title: 'add_new_category',
-        label: 'category',
-        placeholder: 'category',
-        saveLabel: 'save'
-      }))
     let keyToUse = ''
-    if (result?.trim()) {
-      keyToUse = this.translationService.resolveCategory(result.trim()) ?? ''
-      if (!keyToUse) {
-        const modalResult = await this.translationKeyModal.open(result.trim(), 'category')
-        if (isTranslationKeyResult(modalResult)) {
-          this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel)
-          keyToUse = modalResult.englishKey
-        }
-      }
+    const modalResult = await this.translationKeyModal.open(typed.trim(), 'category')
+    if (isTranslationKeyResult(modalResult)) {
+      this.translationService.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel)
+      keyToUse = modalResult.englishKey
+      notifyItemAdded(this.userMsg, (k) => this.translationService.translate(k), modalResult.hebrewLabel)
     }
     if (!keyToUse) {
       this.category.set(previous)

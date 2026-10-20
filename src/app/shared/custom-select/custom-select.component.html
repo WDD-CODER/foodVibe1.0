@@ -55,6 +55,7 @@
       (mousedown)="onTriggerMousedown()"
       (focus)="onTriggerFocus()"
       (click)="onTriggerClick()"
+      (keydown)="onKeydown($event)"
       (blur)="onTriggerBlur()"
       [attr.aria-expanded]="open()"
       aria-haspopup="listbox"

@@ -1,8 +1,8 @@
-import { filterOptionsByStartsWith } from './filter-starts-with.util'
+import { filterOptionsByLabel } from './option-filter.util'
 
 /**
  * Filters and deduplicates a list of select options.
- * - Applies script-aware "starts with" filtering via filterOptionsByStartsWith.
+ * - Filters by contains, prefix matches first (filterOptionsByLabel, rule F).
  * - Deduplicates by translated display label, preferring the current value when
  *   two options share the same display string.
  */
@@ -12,7 +12,7 @@ export function dedupeAndFilterOptions(
   currentValue: string,
   translateFn: (key: string) => string
 ): { value: string; label: string }[] {
-  const baseList = filterOptionsByStartsWith(options, query, (opt) => translateFn(opt.label))
+  const baseList = filterOptionsByLabel(options, query, (opt) => translateFn(opt.label))
   const deduped: { value: string; label: string }[] = []
   const seenDisplay = new Map<string, number>()
   for (const opt of baseList) {

@@ -1045,6 +1045,7 @@
     "add_new_preparation_category": "הוסף קטגוריית הכנה חדשה",
     "add_new_ingredient": "הוסף מרכיב חדש",
     "add_new_preparation": "הוסף הכנה חדשה",
-    "add_new_event_type": "הוסף סוג אירוע חדש"
+    "add_new_event_type": "הוסף סוג אירוע חדש",
+    "item_added_suffix": "נוסף"
   }
 }

@@ -1,4 +1,10 @@
-import { addOptionLabel, DEFAULT_ADD_NEW_LABEL_KEY, findOptionByLabel, resolveAddedKey } from './add-option.util'
+import {
+  addOptionLabel,
+  DEFAULT_ADD_NEW_LABEL_KEY,
+  findOptionByLabel,
+  resolveAddedKey,
+  notifyItemAdded
+} from './add-option.util'
 
 const he: Record<string, string> = { dairy: 'חלבי', meat: 'בשרי', fish: 'דגים' }
 const label = (k: string): string => he[k] ?? k
@@ -62,5 +68,15 @@ describe('add-option util', () => {
     it('cancel (nothing new) → null', () => {
       expect(resolveAddedKey(['meat'], ['meat'], 'דגים', label)).toBeNull()
     })
+  })
+})
+
+describe('notifyItemAdded', () => {
+  it('shows "<name>" + the added suffix, and nothing for an empty name', () => {
+    const msgs: string[] = []
+    const userMsg = { onSetSuccessMsg: (t: string) => msgs.push(t) }
+    notifyItemAdded(userMsg, (k) => (k === 'item_added_suffix' ? 'נוסף' : k), ' ביצים ')
+    notifyItemAdded(userMsg, (k) => k, '  ')
+    expect(msgs).toEqual(['"ביצים" נוסף'])
   })
 })

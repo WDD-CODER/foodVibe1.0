@@ -47,18 +47,20 @@
             </span>
           </li>
         }
-        <li
-          role="option"
-          [id]="optionIdPrefix + filteredResults_().length"
-          [attr.aria-selected]="highlightedIndex_() === filteredResults_().length"
-          [class.highlighted]="highlightedIndex_() === filteredResults_().length"
-          [class.result-item--add]="true"
-          class="result-item"
-          (mousedown)="$event.preventDefault()"
-          (click)="addNewProduct()"
-        >
-          <app-add-option-row [label]="addLabel_()" />
-        </li>
+        @if (showsAdd_()) {
+          <li
+            role="option"
+            [id]="optionIdPrefix + filteredResults_().length"
+            [attr.aria-selected]="highlightedIndex_() === filteredResults_().length"
+            [class.highlighted]="highlightedIndex_() === filteredResults_().length"
+            [class.result-item--add]="true"
+            class="result-item"
+            (mousedown)="$event.preventDefault()"
+            (click)="addNewProduct()"
+          >
+            <app-add-option-row [label]="addLabel_()" />
+          </li>
+        }
       </ul>
     </app-scrollable-dropdown>
   }

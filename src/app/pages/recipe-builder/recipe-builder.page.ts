@@ -124,6 +124,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** Snapshot of form value when user entered the page (for hasRealChanges). */
   private initialRecipeSnapshot_: string | null = null
+  /** True after an AI draft was applied to a new recipe and not yet saved — the draft itself is unsaved work. */
+  private unsavedAiDraft_ = false
   /** Original recipe_type when the record was loaded — used to detect type-change saves. */
   private initialRecipeType_: 'dish' | 'preparation' | null = null
   /** TEMPORARY (dev-process-only, see chat 2026-09-26): source master doc's _id, if any. */
@@ -354,6 +356,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.isApproved_.set(false)
     this.netoConfirmed_.set(false)
     this.savedPortions_.set(null)
+    this.unsavedAiDraft_ = false
     this.cachedPrepItems_ = []
     this.cachedSteps_ = []
 
@@ -401,6 +404,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     // Reset guard flag so canDeactivate works correctly if the component is reused
     // (Angular may reuse the same instance when navigating between recipe-builder/:id routes).
     this.isSubmitted = false
+    this.unsavedAiDraft_ = false
     const lsIngredients = localStorage.getItem('rb_col_ingredients')
     if (lsIngredients !== null) this.tableLogicCollapsed_.set(JSON.parse(lsIngredients))
     const lsWorkflow = localStorage.getItem('rb_col_workflow')
@@ -442,6 +446,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       } else {
         this.recipeId_.set(null)
         const gotDraft = this.aiFlow_.applyPendingDraft()
+        // The draft lands in the baseline snapshot below, so flag it explicitly:
+        // an applied draft is unsaved work until the recipe is saved.
+        this.unsavedAiDraft_ = gotDraft
         if (!gotDraft) {
           const type = this.route_.snapshot.queryParams['type'] as string | undefined
           if (type === 'dish') {
@@ -605,13 +612,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   hasRealChanges(): boolean {
     if (this.historyViewMode_() || this.recipeForm_.disabled) return false
 
-    if (!this.recipeId_()) {
-      // New recipe: failsafe checks for any real content
-      if (this.ingredientsArray.controls.some((g) => !!(g as FormGroup).get('referenceId')?.value)) return true
-      if ((this.recipeForm_.get('nameHebrew')?.value ?? '').trim()) return true
-      return false // blank new recipe — nothing to guard
-    }
-
+    // New and existing recipes share the snapshot comparison: every field change
+    // (label, course, rating, free-text ingredient…) counts as unsaved.
+    if (this.unsavedAiDraft_) return true
     if (this.initialRecipeSnapshot_ === null) return this.recipeForm_.dirty === true
     const current = this.getRecipeSnapshotForComparison()
     return current !== this.initialRecipeSnapshot_
@@ -721,6 +724,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }))
     const ingredients = (raw?.['ingredients'] ?? []) as {
       referenceId?: string
+      nameHebrew?: string
       item_type?: string
       amount_net?: number | string
       unit?: string
@@ -728,6 +732,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }[]
     const ingNorm = ingredients.map((ing) => ({
       referenceId: (ing?.referenceId ?? '').toString(),
+      nameHebrew: (ing?.nameHebrew ?? '').toString(),
       item_type: (ing?.item_type ?? '').toString(),
       amount_net: Number(ing?.amount_net ?? 0),
       unit: (ing?.unit ?? '').toString()
@@ -926,6 +931,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
           // Refresh the entry-time snapshot so the pending-changes guard does not
           // fire when the user navigates away after a successful in-place save.
           this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
+          this.unsavedAiDraft_ = false
           this.initialRecipeType_ = saved.recipeType === 'dish' ? 'dish' : 'preparation'
           this.recipeForm_.markAsPristine()
           // Update savedPortions_ so the reset button reflects the newly saved value.

@@ -55,6 +55,7 @@ import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.c
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { KeyedPickerSearch, scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
 import {
   SortField,
   RECIPE_FILTER_CATEGORIES,
@@ -132,6 +133,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   /** When true: show items in range by creation OR by update. When false: by creation only. */
   protected dateIncludeByUpdated_ = signal<boolean>(false)
   protected ingredientSearchQuery_ = signal<string>('')
+  /** Keyboard state for the ingredient filter search (rule K). */
+  protected readonly ingredientPicker_ = new KeyedPickerSearch()
   protected selectedProductIds_ = signal<string[]>([])
   /** Set to false to show the "date added" column again. */
   protected hideDateColumn_ = signal(true)
@@ -587,10 +590,28 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.togglePanelState_()
   }
 
+  protected onIngredientQueryChange(value: string): void {
+    this.ingredientSearchQuery_.set(value)
+    this.ingredientPicker_.onQueryChange(0, value)
+  }
+
+  /** ↑/↓ move through the results, Enter picks, Esc clears the search (rule K). */
+  protected onIngredientSearchKeydown(e: KeyboardEvent): void {
+    if (!this.ingredientSearchQuery_().trim()) return
+    const results = this.filteredProductsForIngredientSearch_()
+    this.ingredientPicker_.handleKeydown(0, e, {
+      optionCount: results.length,
+      onSelect: (idx) => this.addIngredientProduct(results[idx]),
+      onClose: () => this.onIngredientQueryChange(''),
+      onHighlightMove: () =>
+        setTimeout(() => scrollHighlightIntoView(document.querySelector('.ingredient-dropdown-list')), 0)
+    })
+  }
+
   protected addIngredientProduct(product: Product): void {
     if (this.selectedProductIds_().includes(product._id)) return
     this.selectedProductIds_.update((ids) => [...ids, product._id])
-    this.ingredientSearchQuery_.set('')
+    this.onIngredientQueryChange('')
   }
 
   protected removeIngredientProduct(productId: string): void {

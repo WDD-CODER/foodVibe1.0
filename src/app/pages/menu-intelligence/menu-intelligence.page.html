@@ -70,7 +70,7 @@
                 >
                   {{ t | translatePipe }}
                 </button>
-                }
+                } @if (eventTypeShowsAdd()) {
                 <button
                   type="button"
                   class="dropdown-item add-new"
@@ -82,6 +82,7 @@
                 >
                   <app-add-option-row [label]="eventTypeAddLabel()" />
                 </button>
+                }
               </app-scrollable-dropdown>
             </div>
             }
@@ -222,16 +223,17 @@
                   >
                     {{ cat | translatePipe }}
                   </button>
-                  }
+                  } @if (sectionShowsAdd(sectionIndex)) {
                   <button
                     type="button"
                     class="dropdown-item add-new"
                     [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
                     (mousedown)="$event.preventDefault()"
-                    (click)="getNewSectionCategoryName(sectionIndex) ? addNewSectionCategory(sectionIndex) : openAddCategoryModal(sectionIndex)"
+                    (click)="openAddCategoryModal(sectionIndex)"
                   >
                     <app-add-option-row [label]="sectionCategoryAddLabel(sectionIndex)" />
                   </button>
+                  }
                 </app-scrollable-dropdown>
               </div>
               } @else {

@@ -88,6 +88,13 @@ describe('CustomMultiSelectComponent', () => {
       expect(adds[0].textContent?.trim()).toBe('add_new_label')
     })
 
+    it('an exact existing name shows no add option (rule X)', () => {
+      search.value = 'banana'
+      search.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+      expect(addOption()).toBeNull()
+    })
+
     it('typing a new name labels the add option with it and Enter emits it', () => {
       const chosen: string[] = []
       component.addNewChosen.subscribe((v: string) => chosen.push(v))

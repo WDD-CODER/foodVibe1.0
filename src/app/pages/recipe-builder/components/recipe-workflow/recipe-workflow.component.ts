@@ -11,12 +11,15 @@ import {
   QueryList,
   ElementRef
 } from '@angular/core'
+import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
 import { ReactiveFormsModule, FormArray, FormGroup, FormBuilder } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
+import { TranslationService } from '@services/translation.service'
+import { UserMsgService } from '@services/user-msg.service'
 import { GlobalSpecificModalService } from '@services/global-specific-modal.service'
 import { PreparationSearchComponent } from '../preparation-search/preparation-search.component'
 import type { PreparationEntry } from '@services/preparation-registry.service'
@@ -56,6 +59,8 @@ export class RecipeWorkflowComponent {
   private readonly prepRegistry_ = inject(PreparationRegistryService)
   private readonly translationKeyModal_ = inject(TranslationKeyModalService)
   private readonly globalSpecificModal_ = inject(GlobalSpecificModalService)
+  private readonly translation_ = inject(TranslationService)
+  private readonly userMsg_ = inject(UserMsgService)
 
   workflowFormArray = input.required<FormArray>()
   type = input.required<'preparation' | 'dish'>()
@@ -340,6 +345,7 @@ export class RecipeWorkflowComponent {
       }
       await this.prepRegistry_.registerCategory(result.englishKey, result.hebrewLabel)
       group.patchValue({ categoryName: result.englishKey })
+      notifyItemAdded(this.userMsg_, (k) => this.translation_.translate(k), result.hebrewLabel)
       return
     }
 

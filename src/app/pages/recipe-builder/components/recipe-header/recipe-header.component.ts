@@ -9,6 +9,7 @@ import {
   ChangeDetectorRef,
   effect
 } from '@angular/core'
+import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
 import { RouterLink } from '@angular/router'
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
@@ -340,6 +341,7 @@ export class RecipeHeaderComponent {
           .get('labels')
           ?.setValue([...current, result.key], { emitEvent: true })
       }
+      notifyItemAdded(this.userMsg, (k) => this.translationService.translate(k), result.hebrewLabel)
     } catch {
       // Error already shown by registry
     }

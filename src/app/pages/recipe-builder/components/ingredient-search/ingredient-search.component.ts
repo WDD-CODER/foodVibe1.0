@@ -28,7 +28,7 @@ import { QuickAddProductModalService } from '@services/quick-add-product-modal.s
 import type { Product } from '@models/product.model'
 import type { Recipe } from '@models/recipe.model'
 import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
-import { AddOptionLabel, addOptionLabel } from 'src/app/core/utils/add-option.util'
+import { AddOptionLabel, addOptionLabel, findOptionByLabel } from 'src/app/core/utils/add-option.util'
 import { KeyedPickerSearch, scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
 
 /** Typeahead never needs more than what's visible in the dropdown. */
@@ -182,6 +182,11 @@ export class IngredientSearchComponent {
     addOptionLabel(this.searchQuery_(), this.searchResults_(), (item) => item.nameHebrew ?? '', 'add_new_ingredient')
   )
 
+  /** No add option when the search names a result exactly (rule X). */
+  protected showsAdd_ = computed(
+    () => !findOptionByLabel(this.searchQuery_(), this.searchResults_(), (item) => item.nameHebrew ?? '')
+  )
+
   protected onQueryInput(value: string): void {
     this.searchQuery_.set(value)
     this.showResults_.set(true)
@@ -218,7 +223,7 @@ export class IngredientSearchComponent {
     }
     const results = this.filteredResults_()
     this.picker_.handleKeydown(PICKER_KEY, e, {
-      optionCount: results.length + 1,
+      optionCount: results.length + (this.showsAdd_() ? 1 : 0),
       onSelect: (idx) => {
         if (idx < results.length) this.selectItem(results[idx])
         else void this.addNewProduct()

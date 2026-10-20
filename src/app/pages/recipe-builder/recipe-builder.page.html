@@ -405,7 +405,7 @@
                   >
                     {{ opt.nameHebrew }}
                   </li>
-                  }
+                  } @if (logisticsPicker.showsAdd_()) {
                   <li
                     role="option"
                     class="logistics-tool-option logistics-tool-add-new"
@@ -417,6 +417,7 @@
                   >
                     <app-add-option-row [label]="logisticsPicker.addLabel_()" />
                   </li>
+                  }
                 </ul>
               </app-scrollable-dropdown>
               }

@@ -6,6 +6,8 @@ export interface AddItemConfig {
   label: string
   placeholder?: string
   saveLabel: string
+  /** Prefill for the name field — the name the user typed in the dropdown (add-option rule W). */
+  initialValue?: string
 }
 
 @Injectable({ providedIn: 'root' })
