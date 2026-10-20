@@ -128,7 +128,7 @@ function defaultMasterRegistries() {
  */
 async function seedMasterTaxonomy() {
   const db = mongoose.connection.db;
-  if (await db.collection('taxonomyTerms').findOne({ userId: '__master__' })) return 0;
+  if (await db.collection('taxonomyTerms').findOne({ businessId: '__master__' })) return 0;
   // Required lazily: the migration module pulls in the generated schemas.
   const { buildTerms } = require('../migrations/0003-taxonomy-terms');
   const { termPatch } = require('../migrations/0007-coefficients');
@@ -159,7 +159,7 @@ async function seedMasterData() {
   }
 
   // Idempotency check: if master products already exist, skip
-  const existing = await db.collection('products').findOne({ userId: '__master__' });
+  const existing = await db.collection('products').findOne({ businessId: '__master__' });
   if (existing) {
     logger.info({ event: 'seed.master.skipped' }, 'master data already exists');
     return seedMasterTaxonomy();

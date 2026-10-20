@@ -45,4 +45,14 @@ async function ensureBusinessForUser(user) {
   return (await createBusinessFor(user))._id
 }
 
-module.exports = { createBusinessFor, ensureBusinessForUser, defaultBusinessName }
+/** The `businesses` document, or null. */
+async function getBusiness(id) {
+  return id ? col().findOne({ _id: String(id) }) : null
+}
+
+/** Records the master version a business has been synced to (the refresh sync gate). */
+async function setBusinessSyncedVersion(id, version) {
+  await col().updateOne({ _id: String(id) }, { $set: { lastSyncedMasterVersion: version } })
+}
+
+module.exports = { createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

@@ -10,6 +10,8 @@ const base = {
   _id: 't1',
   schemaVersion: 2,
   userId: '__master__',
+  businessId: '__master__',
+  createdBy: '__master__',
   createdAt: 1700000000000,
   updatedAt: 1700000000000,
   sortOrder: 0
