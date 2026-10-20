@@ -13,6 +13,16 @@ export type RegisterUnitResult =
 export interface UnitCreatorContext {
   existingUnitSymbols?: string[]
   prefillName?: string
+  /** Plan 423 — product mode: the window asks how much one unit of THIS product weighs. */
+  forProduct?: { name: string; baseUnit: string }
+}
+
+/** Plan 423 — what the window returns in product mode: this product's own amount for the unit. */
+export interface ProductUnitAdded {
+  key: string
+  amount: number
+  /** Unit the amount is typed in (the «:» unit of the purchase row). */
+  basis: string
 }
 
 /** System units: constant, non-removable, values never overwritten. */
@@ -44,6 +54,8 @@ export class UnitRegistryService {
   private readonly taxonomy = inject(TaxonomyStore)
 
   public readonly unitAdded$ = new Subject<string>()
+  /** Plan 423 — fires (before unitAdded$) when a unit was added in product mode, with that product's own amount. */
+  public readonly productUnitAdded$ = new Subject<ProductUnitAdded>()
   /** Fires whenever the unit creator closes (saved or cancelled). */
   private readonly creatorClosed$ = new Subject<void>()
 
@@ -54,6 +66,9 @@ export class UnitRegistryService {
   private unitCreatorContext = signal<UnitCreatorContext | null>(null)
   /** Name the unit creator opens with ('' when none was typed). */
   public readonly creatorPrefillName_ = computed(() => this.unitCreatorContext()?.prefillName?.trim() ?? '')
+
+  /** Product the window was opened for (null = plain mode, nothing about a product is asked). */
+  public readonly creatorForProduct_ = computed(() => this.unitCreatorContext()?.forProduct ?? null)
 
   // SIGNALS
   private isCreatorOpen = signal(false)
@@ -92,6 +107,14 @@ export class UnitRegistryService {
    */
   awaitUnitCreated(): Observable<string> {
     return this.unitAdded$.pipe(take(1), takeUntil(this.creatorClosed$))
+  }
+
+  /**
+   * Product mode: the unit and this product's own amount, once. Completes with no value when the window
+   * closes without a save. Subscribe when opening the creator with `forProduct`.
+   */
+  awaitProductUnitAdded(): Observable<ProductUnitAdded> {
+    return this.productUnitAdded$.pipe(take(1), takeUntil(this.creatorClosed$))
   }
 
   /** Re-load units from storage so dropdowns show the latest (e.g. after add in another tab or previous session). */
@@ -134,8 +157,12 @@ export class UnitRegistryService {
     }
 
     // 2. Unit already in the registry: add to product only; single success message; modal will close
+    //    (product mode never takes this shortcut silently: the amount typed for this product is delivered too)
     if (this.globalUnits_()[key]) {
       this.refreshFromStorage()
+      if (context?.forProduct) {
+        this.productUnitAdded$.next({ key, amount: rate, basis: basisUnitKey || context.forProduct.baseUnit })
+      }
       this.unitAdded$.next(key)
       this.userMsgService.onSetSuccessMsg('נוספה לרשימת יחידות הרכש של המוצר.')
       return { success: true, alreadyInRegistry: true }
@@ -147,6 +174,9 @@ export class UnitRegistryService {
 
     try {
       await this.taxonomy.add('unit', key, { gramRate })
+      if (context?.forProduct) {
+        this.productUnitAdded$.next({ key, amount: rate, basis: basisUnitKey || context.forProduct.baseUnit })
+      }
       this.unitAdded$.next(key)
       this.userMsgService.onSetSuccessMsg(`היחידה ${key} נוספה בהצלחה`)
       return { success: true }

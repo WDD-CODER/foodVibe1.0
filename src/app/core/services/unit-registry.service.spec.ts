@@ -132,6 +132,43 @@ describe('UnitRegistryService', () => {
       expect(got).toEqual([])
     }))
   })
+
+  describe('Unit creator window in product mode (plan 423)', () => {
+    it('a new name: stores the shared term and emits this product amount and basis', fakeAsync(() => {
+      const got: { key: string; amount: number; basis: string }[] = []
+      service.openUnitCreator({ forProduct: { name: 'בצל', baseUnit: 'kg' } })
+      expect(service.creatorForProduct_()).toEqual({ name: 'בצל', baseUnit: 'kg' })
+      service.awaitProductUnitAdded().subscribe((e) => got.push(e))
+      service.registerUnit('jar', 500, 'gram')
+      tick()
+      expect(got).toEqual([{ key: 'jar', amount: 500, basis: 'gram' }])
+      expect(service.getConversion('jar')).toBe(500)
+    }))
+
+    it('a name that already exists still delivers the typed amount and writes no taxonomy term', fakeAsync(() => {
+      const storage = TestBed.inject(StorageService) as jasmine.SpyObj<StorageService>
+      storage.post.calls.reset()
+      const got: { key: string; amount: number; basis: string }[] = []
+      service.openUnitCreator({ forProduct: { name: 'חמוצים', baseUnit: 'kg' } })
+      tick()
+      service.awaitProductUnitAdded().subscribe((e) => got.push(e))
+      // "cup" already exists in the registry (system unit): no shortcut, the amount for this product is still delivered
+      service.registerUnit('cup', 350, 'gram')
+      tick()
+      expect(got).toEqual([{ key: 'cup', amount: 350, basis: 'gram' }])
+      expect(storage.post).not.toHaveBeenCalled()
+      expect(service.getConversion('cup')).toBe(240)
+    }))
+
+    it('plain mode never emits productUnitAdded$', fakeAsync(() => {
+      const got: unknown[] = []
+      service.productUnitAdded$.subscribe((e) => got.push(e))
+      service.openUnitCreator()
+      service.registerUnit('sack', 25000)
+      tick()
+      expect(got).toEqual([])
+    }))
+  })
 })
 
 // Plan 377 — editing a custom unit's key and conversion goes through the taxonomy term.

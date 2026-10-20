@@ -31,6 +31,7 @@ import { ProductDataService } from '@services/product-data.service'
 import type { Product } from '@models/product.model'
 import { getProductValidationStatus } from 'src/app/core/utils/product-validation.util'
 import { getEffectivePrice } from '@utils/product-source.util'
+import { optionRateInBase } from '@utils/purchase-option-rate.util'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
 import { map } from 'rxjs'
@@ -463,7 +464,7 @@ export class RecipeIngredientsTableComponent {
         if (unitOption.priceOverride != null && unitOption.priceOverride > 0) {
           lineCost = netAmount * unitOption.priceOverride
         } else {
-          const normalizedAmount = netAmount * (unitOption.conversionRate || 1)
+          const normalizedAmount = netAmount * (optionRateInBase(prod, unitOption, this.unitRegistry) || 1)
           const yieldFactor = prod.yieldFactor || 1
           lineCost = (normalizedAmount / yieldFactor) * effectivePrice
         }
@@ -552,40 +553,38 @@ export class RecipeIngredientsTableComponent {
       const existingSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
       const prefillName = this.pendingAddName_()
       this.pendingAddName_.set('')
-      setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, prefillName }), 0)
-      this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => {
-        const setUnitAndUpdate = (): void => {
-          group.get('unit')?.setValue(newUnit)
-          this.updateLineCalculations(index)
+      const setUnitAndUpdate = (newUnit: string): void => {
+        group.get('unit')?.setValue(newUnit)
+        this.updateLineCalculations(index)
+      }
+      if (!product?._id) {
+        setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, prefillName }), 0)
+        this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => setUnitAndUpdate(newUnit))
+        return
+      }
+      // Plan 423: the window asks how much one unit of THIS product weighs; that typed amount is what is saved.
+      const forProduct = { name: product.nameHebrew, baseUnit: product.baseUnit }
+      setTimeout(
+        () => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, prefillName, forProduct }),
+        0
+      )
+      this.unitRegistry.awaitProductUnitAdded().subscribe(({ key, amount, basis }) => {
+        const current = (this.getItemMetadata(group) as Product | undefined) ?? product
+        if (current.purchaseOptions?.some((o) => o.unitSymbol === key)) {
+          setUnitAndUpdate(key)
+          return
         }
-        if (group.get('item_type')?.value === 'product') {
-          const prod = this.getItemMetadata(group) as Product | undefined
-          if (prod && prod._id) {
-            const existing = prod.purchaseOptions?.some((o) => o.unitSymbol === newUnit)
-            if (!existing) {
-              const baseFactor = this.unitRegistry.getConversion(prod.baseUnit) || 1
-              const unitFactor = this.unitRegistry.getConversion(newUnit) || 1
-              // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
-              const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
-              const newOption = {
-                unitSymbol: newUnit,
-                conversionRate,
-                uom: prod.baseUnit,
-                priceOverride: 0
-              }
-              const updated: Product = {
-                ...prod,
-                purchaseOptions: [...(prod.purchaseOptions ?? []), newOption]
-              }
-              this.kitchenStateService.saveProduct(updated).subscribe({
-                next: () => setUnitAndUpdate(),
-                error: () => setUnitAndUpdate()
-              })
-              return
-            }
-          }
+        const updated: Product = {
+          ...current,
+          purchaseOptions: [
+            ...(current.purchaseOptions ?? []),
+            { unitSymbol: key, conversionRate: amount, uom: basis, priceOverride: 0 }
+          ]
         }
-        setUnitAndUpdate()
+        this.kitchenStateService.saveProduct(updated).subscribe({
+          next: () => setUnitAndUpdate(key),
+          error: () => setUnitAndUpdate(key)
+        })
       })
     } else {
       group.get('unit')?.setValue(val)

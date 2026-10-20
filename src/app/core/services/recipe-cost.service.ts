@@ -5,6 +5,7 @@ import { Recipe } from '../models/recipe.model'
 import { Product } from '../models/product.model'
 import { Ingredient } from '../models/ingredient.model'
 import { getEffectivePrice } from '../utils/product-source.util'
+import { optionRateInBase } from '../utils/purchase-option-rate.util'
 import { MAX_RECURSION_DEPTH, UNIT_ALIASES, MASS_UNITS, VOLUME_OR_WEIGHT_KEYS } from '../utils/recipe-cost.constants'
 
 export type IngredientWeightRow = {
@@ -137,7 +138,7 @@ export class RecipeCostService {
         if (opt?.conversionRate && product.baseUnit) {
           const baseKey = (UNIT_ALIASES[product.baseUnit] ?? product.baseUnit).toLowerCase()
           if (baseKey === 'gram' || baseKey === 'kg' || MASS_UNITS.has(baseKey)) {
-            const amountInBaseUnits = net * (opt.conversionRate || 1)
+            const amountInBaseUnits = net * optionRateInBase(product, opt, this.unitRegistry_)
             const gramsPerBaseUnit = baseKey === 'kg' ? 1000 : 1
             return amountInBaseUnits * gramsPerBaseUnit
           }
@@ -265,7 +266,7 @@ export class RecipeCostService {
         if (unitOption.priceOverride != null && unitOption.priceOverride > 0) {
           return ing.amount * unitOption.priceOverride
         }
-        normalizedAmount = ing.amount * (unitOption.conversionRate || 1)
+        normalizedAmount = ing.amount * (optionRateInBase(product, unitOption, this.unitRegistry_) || 1)
       } else {
         // Custom/registry unit not in purchaseOptions: convert to product base unit.
         const amountG = this.convertToBaseUnits(ing.amount, ing.unit)

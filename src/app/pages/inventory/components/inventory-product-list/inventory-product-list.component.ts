@@ -47,6 +47,7 @@ import {
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-price.util'
+import { optionRateInBase } from '@utils/purchase-option-rate.util'
 import {
   getProductValidationStatus,
   getProductMissingFields,
@@ -673,7 +674,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     if (newUnit !== oldBase) {
       const opt = (product.purchaseOptions || []).find((o) => o.unitSymbol === newUnit)
       if (opt?.conversionRate) {
-        newPrice = oldPrice * opt.conversionRate
+        newPrice = oldPrice * optionRateInBase(product, opt, this.unitRegistry)
       } else {
         const baseConv = this.unitRegistry.getConversion(oldBase)
         const unitConv = this.unitRegistry.getConversion(newUnit)
@@ -684,6 +685,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const updated: Product = {
       ...product,
       baseUnit: newUnit,
+      // Plan 423: keep every purchase row relative to the unit it was typed in
+      purchaseOptions: (product.purchaseOptions ?? []).map((o) => ({ ...o, uom: o.uom || oldBase })),
       sources: newSources.length ? newSources : [{ supplierId: '', price: newPrice, addedAt: Date.now() }]
     }
     this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} })

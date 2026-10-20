@@ -1083,26 +1083,29 @@ export class CookViewPage implements OnInit, OnDestroy {
         ? this.kitchenState.products_().find((p: Product) => p._id === row.referenceId)
         : undefined
     const existingUnitSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
-    setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols }), 0)
-    this.unitRegistry.awaitUnitCreated().subscribe((unit) => {
-      if (!product?._id || product.purchaseOptions?.some((o) => o.unitSymbol === unit)) {
-        this.chooseUnit(index, unit)
+    if (!product?._id) {
+      setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols }), 0)
+      this.unitRegistry.awaitUnitCreated().subscribe((unit) => this.chooseUnit(index, unit))
+      return
+    }
+    // Plan 423: the window asks how much one unit of THIS product weighs; that typed amount is what is saved.
+    const forProduct = { name: product.nameHebrew, baseUnit: product.baseUnit }
+    setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols, forProduct }), 0)
+    this.unitRegistry.awaitProductUnitAdded().subscribe(({ key, amount, basis }) => {
+      if (product.purchaseOptions?.some((o) => o.unitSymbol === key)) {
+        this.chooseUnit(index, key)
         return
       }
-      const baseFactor = this.unitRegistry.getConversion(product.baseUnit) || 1
-      const unitFactor = this.unitRegistry.getConversion(unit) || 1
-      // conversionRate = base units per 1 of the new unit (e.g. 0.33 kg per jar when 1 jar = 330 g)
-      const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
       const updated: Product = {
         ...product,
         purchaseOptions: [
           ...(product.purchaseOptions ?? []),
-          { unitSymbol: unit, conversionRate, uom: product.baseUnit, priceOverride: 0 }
+          { unitSymbol: key, conversionRate: amount, uom: basis, priceOverride: 0 }
         ]
       }
       this.kitchenState.saveProduct(updated).subscribe({
-        next: () => this.chooseUnit(index, unit),
-        error: () => this.chooseUnit(index, unit)
+        next: () => this.chooseUnit(index, key),
+        error: () => this.chooseUnit(index, key)
       })
     })
   }

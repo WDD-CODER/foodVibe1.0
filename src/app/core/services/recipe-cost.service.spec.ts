@@ -152,6 +152,18 @@ describe('RecipeCostService', () => {
       expect(service.computeTotalWeightG(rows)).toBe(300)
     })
 
+    it('plan 423: honors the unit after the colon (1 jar = 500 : gram on a kg product) -> 500 g', () => {
+      productsSignal.set([
+        createProduct({
+          _id: 'p1',
+          baseUnit: 'kg',
+          purchaseOptions: [{ unitSymbol: 'jar', conversionRate: 500, uom: 'gram' }]
+        })
+      ])
+      const rows = [{ amount_net: 1, unit: 'jar', referenceId: 'p1', item_type: 'product' }]
+      expect(service.computeTotalWeightG(rows)).toBe(500)
+    })
+
     it('should return 0 at max recursion depth', () => {
       const rows = [{ amount_net: 100, unit: 'gram' }]
       expect(service.computeTotalWeightG(rows, 5)).toBe(0)
@@ -204,6 +216,22 @@ describe('RecipeCostService', () => {
       })
       // 1 unit = 0.3 kg; cost = (0.3 / 1) * 10 = 3
       expect(service.computeRecipeCost(recipe)).toBe(3)
+    })
+
+    it('plan 423: 1 jar = 500 : gram on a kg-priced product costs half the kg price', () => {
+      productsSignal.set([
+        createProduct({
+          _id: 'p1',
+          buy_price_global_: 10,
+          baseUnit: 'kg',
+          purchaseOptions: [{ unitSymbol: 'jar', conversionRate: 500, uom: 'gram' }]
+        })
+      ])
+      const recipe = createRecipe({
+        _id: 'r1',
+        ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 1, unit: 'jar' }]
+      })
+      expect(service.computeRecipeCost(recipe)).toBe(5)
     })
 
     it('should use priceOverride as price per 1 purchase unit', () => {
