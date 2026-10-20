@@ -135,13 +135,6 @@
 - [x] F1: Confirm every kept model accepts inline images — VISION_MODEL_PATTERN matches all kept models including gemini-3-flash-preview (extend pattern + test if not) — server/services/gemini-client.js, server/test/gemini-client.test.js
 - [x] G1: Update the Gemini free-tier gotcha with the new lineup and the quota-first ordering rule — docs/brain/gotchas/backend.md
 
-### Plan 418 — Prefill the typed name in the unit and supplier add windows
-- [ ] A1: Let the unit window open with the name the chef already typed — prefillName in the context, window reads it on open, specs — src/app/core/services/unit-registry.service.ts, src/app/shared/unit-creator/**
-- [ ] A2: Stop a cancelled unit window from filling the field later — completes-on-close helper replaces take(1) subscriptions in every caller, spec — unit-registry.service.ts, all FR 5 callers
-- [ ] A3: Let the supplier window open with the typed supplier name — open(prefillName) → initialValue, spec — src/app/core/services/add-supplier-flow.service.ts
-- [ ] A4: Show the typed name in every unit and supplier add row and pass it to the window — allowTypedAdd + pendingAddName_ per FR 5 — product-form, recipe-ingredients-table, recipe-workflow, quick-add-product, ai-draft-editor, cook-view, scaling-chip, recipe-header
-- [ ] A5: Remove units and suppliers as exceptions from the dropdown rule — rule W text and prefill entry points — docs/agent/standards-domain.md, docs/brain/patterns/dropdown-add-option.md
-
 ### Plan 419 — Bring the initial bundle back under its size budget
 - [ ] A1: Measure what fills the first download and pick what to cut — stats-json breakdown, top 15 and chosen cuts in Execution Notes — angular.json (read), build output
 - [ ] A2: Load the header's click-only parts on first use instead of at startup — @defer / lazy pieces, unused imports removed — src/app/core/components/header/**
