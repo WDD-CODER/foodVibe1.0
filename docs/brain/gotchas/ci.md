@@ -23,3 +23,11 @@ Scope: `.github/workflows/*`, `ng build`/`angular.json`, `npm audit`, and other 
 **Why the obvious fix is wrong:** Retrying the build or waiting for network only papers over CI/sandbox environments that cannot reach Google. Leaving `optimization: true` (default) keeps the footgun.
 
 **What to do instead:** Set `optimization.fonts: false` for `production` and `gh-pages` in `angular.json`. Keep the CSS `@import` so browsers still load fonts at runtime when the CDN is available. Self-host fonts only if you need offline runtime too.
+
+## A fake token in a test fails gitleaks — and fixing the line does not clear the PR
+
+**What hurt:** PR #428 (plan 413) failed the `gitleaks` check on a made-up JWT literal in `scripts/test/code-qa-findings.test.mjs`, written to prove that reports redact tokens.
+
+**Why the obvious fix is wrong:** Editing the literal in a new commit does not help: the action scans every commit in the PR range, so the first commit still trips it. Amending and force-pushing breaks the repo's never-force-push rule.
+
+**What to do instead:** Never commit a token-shaped literal, fake or not — build it at runtime (`['eyJ…', 'eyJ…', 'sig'].join('.')`). If one already landed in a pushed commit, add its fingerprint from the gitleaks log (`<commit>:<file>:<rule>:<line>`) to `.gitleaksignore` in a follow-up commit.

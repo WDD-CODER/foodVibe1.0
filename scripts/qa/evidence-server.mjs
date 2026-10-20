@@ -19,29 +19,12 @@
  */
 import { createServer } from 'http'
 import { readFileSync, existsSync, mkdirSync, writeFileSync, appendFileSync } from 'fs'
-import { resolve, dirname, join } from 'path'
-import { fileURLToPath } from 'url'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const repoRoot = resolve(__dirname, '..', '..')
+import { join } from 'path'
+import { loginQa, repoRoot, seedQaContext } from './lib/qa-login.mjs'
 
 const PORT = Number(process.env.QA_PORT || 4206)
 const APP = (process.env.QA_APP || 'http://localhost:4205').replace(/\/$/, '')
 const API = (process.env.QA_API || 'http://localhost:3005').replace(/\/$/, '')
-
-/** QA_USER / QA_PASS from the environment, else from `.env` / `server/.env` — kept off command lines. */
-function qaCredential(key) {
-  if (process.env[key]) return process.env[key]
-  for (const file of [join(repoRoot, '.env'), join(repoRoot, 'server', '.env')]) {
-    if (!existsSync(file)) continue
-    const m = new RegExp(`^\\s*${key}\\s*=\\s*(.*)$`, 'm').exec(readFileSync(file, 'utf8'))
-    if (m) return m[1].trim().replace(/^(['"])(.*)\1$/, '$2')
-  }
-  return ''
-}
-
-const QA_USER = qaCredential('QA_USER')
-const QA_PASS = qaCredential('QA_PASS')
 
 const BODY_LIMIT = 25 * 1024 * 1024
 const SHOT_TIMEOUT_MS = 30_000
@@ -112,26 +95,8 @@ function checkRunName(run, name) {
 let session = null // { token, user, exp } — never logged
 let loginInFlight = null
 
-function tokenExp(token) {
-  try {
-    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64url').toString('utf8'))
-    return typeof payload.exp === 'number' ? payload.exp * 1000 : 0
-  } catch {
-    return 0
-  }
-}
-
 async function login() {
-  if (!QA_USER || !QA_PASS) throw new Error('QA_USER / QA_PASS are not set')
-  const r = await fetch(`${API}/api/v1/auth/login`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ name: QA_USER, password: QA_PASS })
-  })
-  if (!r.ok) throw new Error(`login failed: HTTP ${r.status}`)
-  const { token, user } = await r.json()
-  if (!token || !user) throw new Error('login failed: response has no token/user')
-  session = { token, user, exp: tokenExp(token) }
+  session = await loginQa({ api: API })
   return session
 }
 
@@ -182,21 +147,7 @@ async function renderShot({ url, w, h, full, auth, wait, selector }, onContext) 
       context.on('response', (r) => {
         if (r.status() === 401 && r.url().includes('/api/') && session === s) session = null
       })
-      await context.addInitScript(({ token, user }) => {
-        sessionStorage.setItem('fv_token', token)
-        sessionStorage.setItem('loggedInUser', JSON.stringify(user))
-      }, { token: s.token, user: s.user })
-      // The QA build calls /api on its own origin (ng serve proxies it); older builds call QA_API.
-      await context.route('**/api/v1/auth/refresh', (route) => {
-        const headers = {
-          'access-control-allow-origin': APP,
-          'access-control-allow-credentials': 'true',
-          'access-control-allow-headers': 'content-type, authorization',
-          'access-control-allow-methods': 'POST, OPTIONS'
-        }
-        if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 204, headers })
-        return route.fulfill({ status: 200, headers, contentType: 'application/json', body: JSON.stringify({ token: s.token }) })
-      })
+      await seedQaContext(context, s, APP)
     }
     const page = await context.newPage()
     await page.goto(`${APP}${url}`, { waitUntil: 'networkidle', timeout: 20_000 }).catch(() => {})

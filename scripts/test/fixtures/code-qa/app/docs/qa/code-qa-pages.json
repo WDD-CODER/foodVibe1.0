@@ -1,0 +1,6 @@
+{
+  "pages": [
+    { "id": "HOME", "title": "home", "routes": ["/home/list"], "auth": false, "files": ["src/app/pages/home/**"] },
+    { "id": "FORM", "title": "form", "routes": ["/home/edit/:id"], "idType": "products", "auth": true, "files": ["src/app/pages/planted-stale/**"] }
+  ]
+}

@@ -1,0 +1,4 @@
+{
+  // comments are allowed here, like in the real tsconfig
+  "compilerOptions": { "baseUrl": "./", "paths": { "@pages/*": ["src/app/pages/*"] } }
+}

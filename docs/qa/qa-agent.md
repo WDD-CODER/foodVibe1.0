@@ -218,7 +218,8 @@ Execute only checks that `effective-plan.md` marks `RUN`, `RUN-ADAPTED` or `RUN-
 1. `resize_window` → D. Navigate to the page route. Wait for the global loader «רגע, מכינים הכל...» to disappear.
 2. Clear the console (`read_console_messages` with `clear`), then run the page's checks from `qa-plan.md` in order.
    After the functional pass, read console + network once; any `error`-level entry or 4xx/5xx is a `CONSOLE` finding
-   (dedupe identical entries).
+   (dedupe identical entries) — unless §7.2 lists G8 as pre-checked for this page and breakpoint and a `CODE-*` line
+   already covers the entry.
 3. Save `<PAGE>-D-baseline.png` via 5.2. Save a state shot (5.1) for **every** finding at the moment it is visible.
 4. `resize_window` → T, reload the route, run the responsive checklist of the page plus `[all-bp]` checks. Baseline shot.
 5. Same for M. Confirm the bottom tab bar «לוח בקרה / מלאי / ספר מתכונים / תפריטי אירוע / פרופיל» is present and usable.
@@ -261,6 +262,21 @@ Generic checks that apply to **every page at every breakpoint** (report under th
   that lands on a list with an **old** filter the link did not ask for is a `FUNC` S3 finding.
 - **Severity is about users, not counts.** S1/S2 only when a flow fails. Wrong text that users see is S3; anything
   users do not see is S4 at most.
+
+### 7.2 Code QA handoff — what the script already did
+
+When `qa-flow.md` P0 step 6 found a fresh `bugs/qa-runs/code-qa/latest.md` (under 24 hours old):
+
+- **Pre-checked G-checks.** For a page and breakpoint that the `PRE-CHECKED` table lists, do not run the listed
+  checks (`G1`, `G4`, `G5`, `G8`). Mark them `PRE-CHECKED (code)` in the page section instead of passed/failed. Every
+  other check (G2, G3, G6, G7, G9 and the plan's own checks) runs as usual. A page or breakpoint the table does not
+  list (the script did not reach it) gets the full G-list.
+- **Known findings.** Never report a finding that `latest.md` already lists: same page, breakpoint (`any bp` means
+  every breakpoint) and defect as a `CODE-*` line. If you see it, add one line under the page section — `Seen: CODE-SWEEP-007` — and move on. Never
+  re-number it, never give it a `<PAGE>-<NNN>` ID.
+- **Something new still counts.** A G1/G4/G5/G8 problem you notice while doing other checks on a pre-checked page
+  that has no `CODE-*` line is a normal finding (the script missed it — say so in one line: `Missed by Code QA`).
+- If `latest.md` is missing or stale: ignore this section and run the full protocol.
 
 ---
 

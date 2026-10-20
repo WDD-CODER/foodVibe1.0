@@ -1,0 +1,9 @@
+<h1>{{ 'title_home' | translatePipe }}</h1>
+<!-- a comment with words -->
+@if (ready()) {
+  <button type="button" [attr.aria-label]="'save' | translatePipe">{{ 'save' | translatePipe }}</button>
+} @else {
+  <span>{{ 'planted_missing_key' | translatePipe }}</span>
+}
+<p class="note">Planted text</p>
+<span>{{ count() }} &nbsp; ₪</span>
