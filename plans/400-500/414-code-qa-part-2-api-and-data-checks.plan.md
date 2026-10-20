@@ -1,6 +1,6 @@
 # Plan 414 — Code QA Part 2: API and Data Checks
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: a426f19aebb86fd103f1edee3df469880fb0b1af
 
