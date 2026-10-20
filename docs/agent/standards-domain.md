@@ -69,8 +69,11 @@ Every dropdown in the app follows one rule (plans 398–401, 416). Shared select
 7. **Every add opens its window (rule W).** Choosing the add option — Enter or click, typed or generic —
    always opens that item's add window, prefilled with the typed name where the window takes a name
    (`AddItemModalService.open({ …, initialValue })`, `TranslationKeyModalService.open(typed, …)`,
-   `QuickAddProductModalService.open({ prefillName })`, `AddEquipmentModalService.open(name)`). A
+   `QuickAddProductModalService.open({ prefillName })`, `AddEquipmentModalService.open(name)`,
+   `UnitRegistryService.openUnitCreator({ prefillName })`, `AddSupplierFlowService.open(name)`). A
    dropdown never adds a typed name directly, so the user always sees and confirms what is saved.
+   Units: wait for the result with `unitRegistry.awaitUnitCreated()`, never `unitAdded$.pipe(take(1))` —
+   it ends on cancel, so a cancelled field is not filled by a unit added later elsewhere.
 8. **Say it was saved (rule M).** After the add window saves and the item is stored, show
    `notifyItemAdded(userMsg, translate, name)` → `"<name>" נוסף` (success message). Cancel shows nothing.
    Flows whose service already announces the add (supplier, unit) don't add a second message.

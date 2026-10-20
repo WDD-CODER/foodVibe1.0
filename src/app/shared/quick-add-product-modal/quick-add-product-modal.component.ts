@@ -21,7 +21,6 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { Product } from '@models/product.model'
-import { take } from 'rxjs/operators'
 import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { LoaderComponent } from '../loader/loader.component'
 import { GeminiService } from '@services/gemini.service'
@@ -157,9 +156,11 @@ export class QuickAddProductModalComponent {
 
   protected onBaseUnitChange(val: string): void {
     if (val === '__add_unit__') {
+      const typed = this.pendingAddName_()
+      this.pendingAddName_.set('')
       this.baseUnit_.set('')
-      this.unitRegistry.openUnitCreator()
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
+      this.unitRegistry.openUnitCreator({ prefillName: typed })
+      this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => {
         this.baseUnit_.set(newUnit)
         this.onSelectChange(this.getNextFocusAfterBaseUnit())
       })

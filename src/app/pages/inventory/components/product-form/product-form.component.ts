@@ -9,7 +9,6 @@ import {
   Signal,
   runInInjectionContext,
   Injector,
-  effect,
   ElementRef,
   AfterViewInit,
   ViewChild,
@@ -45,7 +44,6 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service'
 import { LoggingService } from '@services/logging.service'
 import { toSignal } from '@angular/core/rxjs-interop'
-import { take } from 'rxjs/operators'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
@@ -140,7 +138,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
   protected curProduct_ = signal<Product | null>(null)
-  protected isBaseUnitMode_ = signal(false)
+  /** Typed name from a unit dropdown's add row, read once by the value-change handler (rule W). */
+  protected readonly pendingAddName_ = signal('')
   protected validationErrors_ = signal<Record<string, string>>({})
 
   //SIMPLE VALUES
@@ -165,9 +164,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected selectedAllergensSignal_ = computed(() => {
     return this.formValue_()?.allergens || []
   })
-  protected activeRowIndex_ = signal<number | null>(null)
-  /** Name typed in a unit picker before choosing "add", handed to the unit creator (plan 377). */
-  protected readonly pendingUnitName_ = signal('')
 
   protected filteredAllergenOptions_ = computed(() => {
     const all = this.metadataRegistry.allAllergens_()
@@ -277,38 +273,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     setTimeout(() => this.productNameInputRef?.nativeElement?.focus(), 0)
   }
 
-  constructor() {
-    effect(() => {
-      // 1. Define variables first
-      const allUnits = this.unitRegistry.allUnitKeys_()
-      const isCreatorOpen = this.unitRegistry.isCreatorOpen_()
-      const index = this.activeRowIndex_()
-      const isBase = this.isBaseUnitMode_()
-
-      // 2. Only run logic if the modal just closed
-      if (!isCreatorOpen) {
-        const lastUnitName = Array.from(allUnits.keys()).pop()
-        if (!lastUnitName) return
-
-        if (isBase) {
-          this.productForm_.get('baseUnit')?.setValue(lastUnitName)
-          this.isBaseUnitMode_.set(false)
-        } else if (index !== null) {
-          const row = this.purchaseOptions_.at(index)
-          const currentBase = this.productForm_.get('baseUnit')?.value
-
-          // 3. Patch both the symbol AND the UOM (grams/ml) at once
-          row.patchValue({
-            unitSymbol: lastUnitName,
-            uom: currentBase
-          })
-
-          this.activeRowIndex_.set(null)
-        }
-      }
-    })
-  }
-
   ngOnInit(): void {
     this.unitRegistry.refreshFromStorage()
     this.initForm()
@@ -340,34 +304,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         }
       })
     }
-
-    this.unitRegistry.unitAdded$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((unitKey) => {
-      const idx = this.activeRowIndex_()
-      if (idx === null || idx === undefined) return
-      const baseUnit = this.productForm_.get('baseUnit')?.value ?? ''
-      const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1
-      const unitFactor = this.unitRegistry.getConversion(unitKey) || 1
-      // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
-      const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
-      const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(
-        this.productForm_.get('buy_price_global_')?.value || 0,
-        conversionRate
-      )
-      const row = this.purchaseOptions_.at(idx)
-      if (row) {
-        row.patchValue(
-          {
-            unitSymbol: unitKey,
-            uom: baseUnit,
-            conversionRate: conversionRate,
-            priceOverride: suggestedPrice
-          },
-          { emitEvent: false }
-        )
-        this.productForm_.markAsDirty()
-      }
-      this.activeRowIndex_.set(null)
-    })
   }
 
   private initForm(): void {
@@ -468,8 +404,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     select.value = ''
   }
 
-  protected async openAddSupplier(): Promise<void> {
-    const supplier = await this.addSupplierFlowService.open()
+  protected async openAddSupplier(typedName = ''): Promise<void> {
+    const supplier = await this.addSupplierFlowService.open(typedName)
     if (supplier?._id) {
       const ctrl = this.productForm_.get('supplierIds_')
       const current = (ctrl?.value || []) as string[]
@@ -503,48 +439,74 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
-  /** Typed unit name for the creator; cleared so the next add starts fresh. */
-  private takePendingUnitName(): string {
-    const name = this.pendingUnitName_()
-    this.pendingUnitName_.set('')
-    return name
+  /** Reads and clears the typed add-row name (rule W). */
+  private takePendingAddName_(): string {
+    const typed = this.pendingAddName_()
+    this.pendingAddName_.set('')
+    return typed
   }
 
   protected onBaseUnitValueChange(value: string): void {
     if (value === 'NEW_UNIT') {
-      this.activeRowIndex_.set(null)
-      this.isBaseUnitMode_.set(true)
-      this.unitRegistry.openUnitCreator({ name: this.takePendingUnitName() })
+      this.unitRegistry.openUnitCreator({ prefillName: this.takePendingAddName_() })
       this.productForm_.patchValue({ baseUnit: '' })
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
-        this.productForm_.patchValue({ baseUnit: newUnit })
-      })
+      this.unitRegistry
+        .awaitUnitCreated()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((newUnit) => {
+          this.productForm_.patchValue({ baseUnit: newUnit })
+        })
     }
   }
 
   protected onUnitSymbolValueChange(value: string, index: number): void {
     if (value === 'NEW_UNIT') {
-      this.activeRowIndex_.set(index)
-      this.isBaseUnitMode_.set(false)
       const existingSymbols =
         ((this.purchaseOptions_.value as { unitSymbol?: string }[])
           ?.map((o) => o?.unitSymbol)
           ?.filter(Boolean) as string[]) ?? []
-      this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, name: this.takePendingUnitName() })
-      ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ unitSymbol: '' })
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
-        ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ unitSymbol: newUnit })
+      this.unitRegistry.openUnitCreator({
+        existingUnitSymbols: existingSymbols,
+        prefillName: this.takePendingAddName_()
       })
+      this.purchaseOptions_.at(index)?.patchValue({ unitSymbol: '' })
+      this.unitRegistry
+        .awaitUnitCreated()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((unitKey) => this.applyNewPurchaseUnit_(index, unitKey))
     }
+  }
+
+  /** Fill a purchase row with a just-created unit: symbol, base uom, conversion rate and suggested price. */
+  private applyNewPurchaseUnit_(index: number, unitKey: string): void {
+    const row = this.purchaseOptions_.at(index)
+    if (!row) return
+    const baseUnit = this.productForm_.get('baseUnit')?.value ?? ''
+    const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1
+    const unitFactor = this.unitRegistry.getConversion(unitKey) || 1
+    // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
+    const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
+    const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(
+      this.productForm_.get('buy_price_global_')?.value || 0,
+      conversionRate
+    )
+    row.patchValue(
+      { unitSymbol: unitKey, uom: baseUnit, conversionRate, priceOverride: suggestedPrice },
+      { emitEvent: false }
+    )
+    this.productForm_.markAsDirty()
   }
 
   protected onUomValueChange(value: string, index: number): void {
     if (value === 'NEW_UNIT') {
-      this.unitRegistry.openUnitCreator({ name: this.takePendingUnitName() })
-      ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ uom: '' })
-      this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
-        ;(this.productForm_.get('purchaseOptions') as FormArray)?.at(index)?.patchValue({ uom: newUnit })
-      })
+      this.unitRegistry.openUnitCreator({ prefillName: this.takePendingAddName_() })
+      this.purchaseOptions_.at(index)?.patchValue({ uom: '' })
+      this.unitRegistry
+        .awaitUnitCreated()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((newUnit) => {
+          this.purchaseOptions_.at(index)?.patchValue({ uom: newUnit })
+        })
     }
   }
 

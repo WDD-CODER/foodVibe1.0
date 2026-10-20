@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output, effect, ViewChild, OnDestroy } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, output, effect, signal, ViewChild, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormControl, ReactiveFormsModule } from '@angular/forms'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -35,13 +35,16 @@ export class ScalingChipComponent implements OnDestroy {
 
   valueChange = output<number>()
   unitChange = output<string>()
-  createUnit = output<void>()
+  /** Emits the name typed in the unit dropdown ('' for the generic add) — the unit window opens with it (rule W). */
+  createUnit = output<string>()
   remove = output<void>()
 
   @ViewChild(CustomSelectComponent) customSelect?: CustomSelectComponent
 
   readonly unitControl = new FormControl<string>('', { nonNullable: true })
   private subscription: { unsubscribe: () => void } | null = null
+  /** Typed name from the add row, read once by onUnitSelect. */
+  protected readonly pendingAddName_ = signal('')
 
   constructor() {
     effect(() => {
@@ -57,7 +60,9 @@ export class ScalingChipComponent implements OnDestroy {
 
   protected onUnitSelect(value: string): void {
     if (value === ADD_NEW_UNIT_VALUE) {
-      this.createUnit.emit()
+      const typed = this.pendingAddName_()
+      this.pendingAddName_.set('')
+      this.createUnit.emit(typed)
       this.unitControl.setValue(this.unit(), { emitEvent: false })
       return
     }

@@ -64,6 +64,8 @@
                 [typeToFilter]="true"
                 [compact]="true"
                 [addNewValue]="'__add_unit__'"
+                [allowTypedAdd]="true"
+                (addNewChosen)="pendingAddName_.set($event)"
                 [options]="baseUnitOptions_()"
                 [placeholder]="'choose_unit' | translatePipe"
                 [ngModel]="baseUnit_()"

@@ -38,6 +38,8 @@
         name="yield_unit"
         [typeToFilter]="true"
         addNewValue="__add_unit__"
+        [allowTypedAdd]="true"
+        (addNewChosen)="pendingAddName_.set($event)"
         [compact]="true"
       />
     }
@@ -85,6 +87,8 @@
             [name]="'ing_unit_' + i"
             [typeToFilter]="true"
             addNewValue="__add_unit__"
+            [allowTypedAdd]="true"
+            (addNewChosen)="pendingAddName_.set($event)"
             [compact]="true"
           />
           <input
@@ -174,6 +178,8 @@
               [name]="'wf_unit_' + i"
               [typeToFilter]="true"
               addNewValue="__add_unit__"
+              [allowTypedAdd]="true"
+              (addNewChosen)="pendingAddName_.set($event)"
               [compact]="true"
             />
             <input

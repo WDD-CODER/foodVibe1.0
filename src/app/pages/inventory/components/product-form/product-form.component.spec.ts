@@ -10,7 +10,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { UtilService } from '@services/util.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { ActivatedRoute, Router } from '@angular/router'
-import { of, Subject } from 'rxjs'
+import { of, Subject, take, takeUntil } from 'rxjs'
 import { signal, computed } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -25,6 +25,9 @@ describe('ProductFormComponent', () => {
   let mockRouter: jasmine.SpyObj<Router>
   let mockConversionService: jasmine.SpyObj<ConversionService>
   let mockUnitRegistry: jasmine.SpyObj<UnitRegistryService>
+  // Same semantics as UnitRegistryService.awaitUnitCreated: one saved unit, nothing after the window closes.
+  let unitAdded$: Subject<string>
+  let creatorClosed$: Subject<void>
 
   // Signal Mocks for SoT
   const mockCategories = signal(['meat', 'dairy'])
@@ -42,16 +45,19 @@ describe('ProductFormComponent', () => {
     mockConversionService.handleWasteChange.and.returnValue({ yieldFactor: 1 })
     mockConversionService.handleYieldChange.and.returnValue({ wastePercent: 0 })
     mockConversionService.getSuggestedPurchasePrice.and.returnValue(0)
+    unitAdded$ = new Subject<string>()
+    creatorClosed$ = new Subject<void>()
     mockUnitRegistry = jasmine.createSpyObj(
       'UnitRegistryService',
-      ['getConversion', 'openUnitCreator', 'refreshFromStorage'],
+      ['getConversion', 'openUnitCreator', 'refreshFromStorage', 'awaitUnitCreated'],
       {
         allUnitKeys_: mockUnitKeys,
         isCreatorOpen_: mockIsCreatorOpen,
-        unitAdded$: new Subject<string>()
+        unitAdded$
       }
     )
     mockUnitRegistry.refreshFromStorage.and.returnValue(Promise.resolve())
+    mockUnitRegistry.awaitUnitCreated.and.callFake(() => unitAdded$.pipe(take(1), takeUntil(creatorClosed$)))
 
     const mockMetadata = jasmine.createSpyObj('MetadataRegistryService', ['registerCategory'], {
       allCategories_: mockCategories,
@@ -173,6 +179,31 @@ describe('ProductFormComponent', () => {
       expect(await component.saveAndWait()).toBe(true)
       const saved = saveSpy.calls.mostRecent().args[0] as Product
       expect(saved.purchaseOptions.map((o) => o.priceOverride)).toEqual([0, 7])
+    })
+  })
+
+  describe('Add a unit from a dropdown (plan 418)', () => {
+    it('opens the unit window with the typed name', () => {
+      component['pendingAddName_'].set('צנצנת')
+      component['onBaseUnitValueChange']('NEW_UNIT')
+      expect(mockUnitRegistry.openUnitCreator).toHaveBeenCalledWith({ prefillName: 'צנצנת' })
+      expect(component['pendingAddName_']()).toBe('')
+    })
+
+    it('fills the base unit with the unit saved in the window', () => {
+      component['onBaseUnitValueChange']('NEW_UNIT')
+      unitAdded$.next('jar')
+      expect(component['productForm_'].get('baseUnit')?.value).toBe('jar')
+    })
+
+    it('after a cancel, a unit added later elsewhere does not fill the cancelled field', () => {
+      component['addPurchaseOption']()
+      component['onBaseUnitValueChange']('NEW_UNIT')
+      creatorClosed$.next() // cancel
+      component['onUomValueChange']('NEW_UNIT', 0)
+      unitAdded$.next('jar')
+      expect(component['productForm_'].get('baseUnit')?.value).toBe('')
+      expect(component.purchaseOptions_.at(0).get('uom')?.value).toBe('jar')
     })
   })
 

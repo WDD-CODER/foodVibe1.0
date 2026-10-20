@@ -1,6 +1,6 @@
 # Plan 418 — Prefill the typed name in the unit and supplier add windows
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: b81cb1f4858b4ae86e97b382cf931bd9ca4445f4
 
@@ -141,11 +141,11 @@ Plans 377 (units rename) and 417 (name length) may have changed `unit-registry.s
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Let the unit window open with the name the chef already typed — prefillName in the context, window reads it on open, specs — src/app/core/services/unit-registry.service.ts, src/app/shared/unit-creator/**
-- [ ] A2: Stop a cancelled unit window from filling the field later — completes-on-close helper replaces take(1) subscriptions in every caller, spec — unit-registry.service.ts, all FR 5 callers
-- [ ] A3: Let the supplier window open with the typed supplier name — open(prefillName) → initialValue, spec — src/app/core/services/add-supplier-flow.service.ts
-- [ ] A4: Show the typed name in every unit and supplier add row and pass it to the window — allowTypedAdd + pendingAddName_ per FR 5 — product-form, recipe-ingredients-table, recipe-workflow, quick-add-product, ai-draft-editor, cook-view, scaling-chip, recipe-header
-- [ ] A5: Remove units and suppliers as exceptions from the dropdown rule — rule W text and prefill entry points — docs/agent/standards-domain.md, docs/brain/patterns/dropdown-add-option.md
+- [x] A1: Let the unit window open with the name the chef already typed — prefillName in the context, window reads it on open, specs — src/app/core/services/unit-registry.service.ts, src/app/shared/unit-creator/**
+- [x] A2: Stop a cancelled unit window from filling the field later — completes-on-close helper replaces take(1) subscriptions in every caller, spec — unit-registry.service.ts, all FR 5 callers
+- [x] A3: Let the supplier window open with the typed supplier name — open(prefillName) → initialValue, spec — src/app/core/services/add-supplier-flow.service.ts
+- [x] A4: Show the typed name in every unit and supplier add row and pass it to the window — allowTypedAdd + pendingAddName_ per FR 5 — product-form, recipe-ingredients-table, recipe-workflow, quick-add-product, ai-draft-editor, cook-view, scaling-chip, recipe-header
+- [x] A5: Remove units and suppliers as exceptions from the dropdown rule — rule W text and prefill entry points — docs/agent/standards-domain.md, docs/brain/patterns/dropdown-add-option.md
 
 ## Out of Scope
 
@@ -155,3 +155,14 @@ Plans 377 (units rename) and 417 (name length) may have changed `unit-registry.s
 - Backend, API, auth, schemas, data migration: none.
 
 ## Execution Notes
+- 2026-10-20 (wt-2): A1–A5 done. `UnitRegistryService.awaitUnitCreated()` (completes on close) replaces every
+  `unitAdded$.pipe(take(1))`. product-form also lost two older cancel leaks: a constructor effect that, on any
+  creator close, wrote `Array.from(allUnitKeys.keys()).pop()` (a list index, not a unit) into the base unit /
+  active row, and a permanent `unitAdded$` subscription keyed on `activeRowIndex_` (its conversion/price logic
+  moved into `applyNewPurchaseUnit_`). Hardcoded `'+ יחידה חדשה'` option labels → `add_new_unit`.
+  cook-view's expander unit picker has no typing, so it opens empty (no typed name to pass).
+  The "units and suppliers" exception text was already gone from both docs; A5 added the entry points + cancel rule.
+  Evidence: `ng build` ok; `ng test` 604 SUCCESS; log-query --level=error → no entries.
+- Rebase onto plan 377 (merged first, same prefill under `{ name }` / `pendingUnitName_`): Human chose
+  `resolve: keep 418` — 418's `prefillName` + `awaitUnitCreated()` kept, 377's other work kept; 377's
+  unit-creator name specs replaced by 418's equivalent ones. After resolve: `ng build` ok, `ng test` 618 SUCCESS.

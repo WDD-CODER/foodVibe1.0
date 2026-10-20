@@ -350,6 +350,8 @@
                 placeholder="unit"
                 variant="chip"
                 [typeToFilter]="true"
+                [allowTypedAdd]="true"
+                (addNewChosen)="pendingAddName_.set($event)"
               >
               </app-custom-select>
               @if (recipe.yieldUnit !== selectedUnit_()) {
@@ -406,6 +408,8 @@
                   placeholder="unit"
                   variant="chip"
                   [typeToFilter]="true"
+                  [allowTypedAdd]="true"
+                  (addNewChosen)="pendingAddName_.set($event)"
                 />
                 <button
                   type="button"

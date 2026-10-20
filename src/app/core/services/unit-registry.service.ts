@@ -5,10 +5,15 @@ import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { TaxonomyStore } from './taxonomy-store.service'
-import { Subject } from 'rxjs'
+import { Observable, Subject, take, takeUntil } from 'rxjs'
 
 export type RegisterUnitResult =
   { success: true; alreadyInRegistry?: boolean } | { success: false; alreadyOnProduct?: boolean; error?: string }
+
+export interface UnitCreatorContext {
+  existingUnitSymbols?: string[]
+  prefillName?: string
+}
 
 /** System units: constant, non-removable, values never overwritten. */
 export const SYSTEM_UNITS: Readonly<Record<string, number>> = {
@@ -39,12 +44,16 @@ export class UnitRegistryService {
   private readonly taxonomy = inject(TaxonomyStore)
 
   public readonly unitAdded$ = new Subject<string>()
+  /** Fires whenever the unit creator closes (saved or cancelled). */
+  private readonly creatorClosed$ = new Subject<void>()
 
-  /** When opening the unit creator from a product form, pass this product's purchase unit symbols so duplicate names can be rejected in-modal,
-   *  and the name the user already typed in the unit picker so the creator opens with it. */
-  private unitCreatorContext = signal<{ existingUnitSymbols?: string[]; name?: string } | null>(null)
-  /** Name the unit creator should open with (plan 377), or '' for an empty field. */
-  public readonly creatorPrefillName_ = computed(() => (this.unitCreatorContext()?.name ?? '').trim())
+  /**
+   * existingUnitSymbols: this product's purchase unit symbols, so duplicate names can be rejected in-modal.
+   * prefillName: the name the chef already typed in the dropdown (add-option rule W).
+   */
+  private unitCreatorContext = signal<UnitCreatorContext | null>(null)
+  /** Name the unit creator opens with ('' when none was typed). */
+  public readonly creatorPrefillName_ = computed(() => this.unitCreatorContext()?.prefillName?.trim() ?? '')
 
   // SIGNALS
   private isCreatorOpen = signal(false)
@@ -65,7 +74,7 @@ export class UnitRegistryService {
   }
 
   // UI CONTROL
-  openUnitCreator(context?: { existingUnitSymbols?: string[]; name?: string }) {
+  openUnitCreator(context?: UnitCreatorContext) {
     this.unitCreatorContext.set(context ?? null)
     this.isCreatorOpen.set(true)
     this.refreshFromStorage()
@@ -73,6 +82,16 @@ export class UnitRegistryService {
   closeUnitCreator() {
     this.isCreatorOpen.set(false)
     this.unitCreatorContext.set(null)
+    this.creatorClosed$.next()
+  }
+
+  /**
+   * The unit saved in the creator, once. Completes with no value when the creator closes without a save,
+   * so a cancelled field is never filled by a unit added later elsewhere. Subscribe when opening the creator.
+   * (save() emits unitAdded$ before it closes the creator, so a save still delivers.)
+   */
+  awaitUnitCreated(): Observable<string> {
+    return this.unitAdded$.pipe(take(1), takeUntil(this.creatorClosed$))
   }
 
   /** Re-load units from storage so dropdowns show the latest (e.g. after add in another tab or previous session). */

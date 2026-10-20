@@ -249,6 +249,8 @@
                 placeholder="unit"
                 [typeToFilter]="true"
                 [addNewValue]="'__add_unit__'"
+                [allowTypedAdd]="true"
+                (addNewChosen)="pendingAddName_.set($event)"
                 (valueChange)="onUnitChange(group, $event)"
               />
             </div>

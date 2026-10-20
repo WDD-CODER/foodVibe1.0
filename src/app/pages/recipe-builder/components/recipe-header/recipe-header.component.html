@@ -87,7 +87,7 @@
           [stepOptions]="{ unit: yield.primaryUnitLabel_() }"
           (valueChange)="onPrimaryAmountChange($event)"
           (unitChange)="onPrimaryUnitChange($event)"
-          (createUnit)="onCreateUnit()"
+          (createUnit)="onCreateUnit($event)"
         />
         @if (yield.currentRecipeTypeDisplay_() !== 'dish' && yield.yieldDiffersFromComputed_()) {
           <button
@@ -135,7 +135,7 @@
               [stepOptions]="{ unit: group.get('unit')?.value }"
               (valueChange)="yield.onSecondaryScalingChipAmountChange(chipIdx, $event)"
               (unitChange)="changeSecondaryUnitWrapper(chipIdx, $event)"
-              (createUnit)="onCreateUnit(chipIdx)"
+              (createUnit)="onCreateUnit($event, chipIdx)"
               (remove)="yield.removeSecondaryUnit(chipIdx)"
             />
           }

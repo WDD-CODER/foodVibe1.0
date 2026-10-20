@@ -99,6 +99,39 @@ describe('UnitRegistryService', () => {
       expect(service.getConversion('UnknownUnit')).toBe(1)
     })
   })
+
+  describe('Unit creator window (plan 418)', () => {
+    it('opens with the typed name as its prefill, and with none when nothing was typed', () => {
+      service.openUnitCreator({ prefillName: '  צנצנת ' })
+      expect(service.creatorPrefillName_()).toBe('צנצנת')
+      service.closeUnitCreator()
+      service.openUnitCreator()
+      expect(service.creatorPrefillName_()).toBe('')
+    })
+
+    it('awaitUnitCreated delivers the unit saved in the window', fakeAsync(() => {
+      const got: string[] = []
+      service.openUnitCreator()
+      service.awaitUnitCreated().subscribe((u) => got.push(u))
+      service.registerUnit('jar', 330, 'gram')
+      tick()
+      service.closeUnitCreator() // the window closes after a save
+      expect(got).toEqual(['jar'])
+    }))
+
+    it('awaitUnitCreated completes empty on cancel, so a later unit never reaches the cancelled field', fakeAsync(() => {
+      const got: string[] = []
+      let completed = false
+      service.openUnitCreator()
+      service.awaitUnitCreated().subscribe({ next: (u) => got.push(u), complete: () => (completed = true) })
+      service.closeUnitCreator() // cancel
+      expect(completed).toBeTrue()
+      service.openUnitCreator()
+      service.registerUnit('sack', 25000)
+      tick()
+      expect(got).toEqual([])
+    }))
+  })
 })
 
 // Plan 377 — editing a custom unit's key and conversion goes through the taxonomy term.
