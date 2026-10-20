@@ -94,6 +94,16 @@ describe('CoefficientManagerComponent', () => {
     expect(store.add).not.toHaveBeenCalled()
   })
 
+  it('blames the name, not the coefficient, when the event type already exists', async () => {
+    const name = document.createElement('input')
+    const coefficient = document.createElement('input')
+    name.value = 'חתונה'
+    coefficient.value = '1.2'
+    await component.onAddEventType(name, coefficient)
+    expect(store.add).not.toHaveBeenCalled()
+    expect(component['invalid_']()).toEqual({ row: 'new', key: 'metadata_event_type_exists' })
+  })
+
   it('saves a changed coefficient with one updateByKey', async () => {
     const input = document.createElement('input')
     input.value = '1.35'

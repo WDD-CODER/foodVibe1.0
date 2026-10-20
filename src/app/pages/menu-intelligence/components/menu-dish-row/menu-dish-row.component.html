@@ -136,7 +136,7 @@
           (click)="$event.stopPropagation()"
         />
         @if (portionInfo()?.overridden) {
-          <span class="dish-coefficient-tag">{{ 'coefficient_manual' | translatePipe }}</span>
+          <span class="c-chip teal dish-coefficient-tag">{{ 'coefficient_manual' | translatePipe }}</span>
           <button type="button" class="dish-coefficient-reset" (click)="resetCoefficient(); $event.stopPropagation()">
             <lucide-icon name="rotate-ccw" [size]="12"></lucide-icon>
             {{ 'coefficient_reset' | translatePipe }}

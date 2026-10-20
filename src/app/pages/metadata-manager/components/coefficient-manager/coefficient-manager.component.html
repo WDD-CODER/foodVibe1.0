@@ -24,9 +24,9 @@
           inputmode="decimal"
           step="0.01"
           min="0.01"
-          class="coef-input"
+          class="c-input coef-input"
           [attr.aria-label]="'coefficient_label' | translatePipe"
-          [attr.aria-invalid]="invalidRow_() === 'eventType:' + term.key ? 'true' : null"
+          [attr.aria-invalid]="invalidRowId_() === 'eventType:' + term.key ? 'true' : null"
           [value]="formatCoefficient(term.coefficient ?? 1)"
           [disabled]="!canEdit(term)"
           (change)="onCoefficientChange('eventType', term, coefInput)"
@@ -43,7 +43,7 @@
           </button>
         }
       </li>
-      @if (invalidRow_() === 'eventType:' + term.key) {
+      @if (invalidRowId_() === 'eventType:' + term.key) {
         <li class="c-field-error">{{ 'coefficient_invalid' | translatePipe }}</li>
       }
     }
@@ -53,7 +53,7 @@
     <input
       #newName
       type="text"
-      class="coef-add-name"
+      class="c-input coef-add-name"
       autocomplete="off"
       [placeholder]="'add_new_event_type' | translatePipe"
       [attr.aria-label]="'menu_event_type' | translatePipe"
@@ -65,18 +65,18 @@
       inputmode="decimal"
       step="0.01"
       min="0.01"
-      class="coef-input"
+      class="c-input coef-input"
       value="1"
       [attr.aria-label]="'coefficient_label' | translatePipe"
-      [attr.aria-invalid]="invalidRow_() === 'new' ? 'true' : null"
+      [attr.aria-invalid]="invalidRowId_() === 'new' ? 'true' : null"
       (keyup.enter)="onAddEventType(newName, newCoef)"
     />
     <button type="button" class="c-btn-primary" (click)="onAddEventType(newName, newCoef)">
       {{ 'metadata_add' | translatePipe }}
     </button>
   </div>
-  @if (invalidRow_() === 'new') {
-    <p class="c-field-error">{{ 'coefficient_invalid' | translatePipe }}</p>
+  @if (invalidRowId_() === 'new') {
+    <p class="c-field-error">{{ invalid_()?.key ?? 'coefficient_invalid' | translatePipe }}</p>
   }
 
   <h3 class="list-title">{{ 'metadata_serving_types_title' | translatePipe }}</h3>
@@ -98,15 +98,15 @@
           inputmode="decimal"
           step="0.01"
           min="0.01"
-          class="coef-input"
+          class="c-input coef-input"
           [attr.aria-label]="'coefficient_label' | translatePipe"
-          [attr.aria-invalid]="invalidRow_() === 'menuType:' + term.key ? 'true' : null"
+          [attr.aria-invalid]="invalidRowId_() === 'menuType:' + term.key ? 'true' : null"
           [value]="formatCoefficient(term.coefficient ?? 1)"
           [disabled]="!canEdit(term)"
           (change)="onCoefficientChange('menuType', term, servingInput)"
         />
       </li>
-      @if (invalidRow_() === 'menuType:' + term.key) {
+      @if (invalidRowId_() === 'menuType:' + term.key) {
         <li class="c-field-error">{{ 'coefficient_invalid' | translatePipe }}</li>
       }
     }

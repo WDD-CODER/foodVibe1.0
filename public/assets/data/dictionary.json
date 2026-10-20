@@ -1086,6 +1086,7 @@
     "coefficient_manual": "שונה ידנית",
     "coefficient_reset": "חזור לברירת מחדל",
     "coefficient_invalid": "מקדם חייב להיות מספר גדול מ-0 עם עד 2 ספרות אחרי הנקודה",
+    "metadata_event_type_exists": "סוג האירוע כבר קיים",
     "coefficient_label": "מקדם",
     "event_portions": "מנות לאירוע",
     "enter_guest_count": "הזן מספר אורחים",

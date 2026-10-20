@@ -96,6 +96,14 @@ describe('MenuPortionsService', () => {
     expect(service.snapshots('פרטי', 'buffet_family').eventTypeSnapshot?.coefficient).toBe(1)
   })
 
+  it('freezes the picked type on the form change, not inside the computed', () => {
+    form.get('eventType')?.setValue('חתונה')
+    bump()
+    coefficients['eventType:חתונה'] = 3
+    bump()
+    expect(service.at(0, 0)?.coefficient).toBeCloseTo(1.2 * 1.1, 9)
+  })
+
   it('takes a new snapshot from the current term when the key changes', () => {
     service.remember({ eventTypeSnapshot: { key: 'פרטי', name: 'פרטי', coefficient: 1 } })
     expect(service.snapshots('חתונה', '').eventTypeSnapshot).toEqual({ key: 'חתונה', name: 'חתונה', coefficient: 1.2 })

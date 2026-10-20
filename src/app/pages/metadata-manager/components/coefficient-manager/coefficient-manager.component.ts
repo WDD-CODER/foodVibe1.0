@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { formatCoefficient, isValidCoefficient } from '../../../../core/engine/portions'
@@ -37,8 +37,12 @@ export class CoefficientManagerComponent {
   protected readonly servingTypes_ = this.taxonomy_.terms('menuType')
   protected readonly formatCoefficient = formatCoefficient
 
-  /** `${kind}:${key}` of the row whose typed value was refused, or 'new' for the add row. */
-  protected readonly invalidRow_ = signal<string | null>(null)
+  /** The row whose typed value was refused (`${kind}:${key}`, or 'new' for the add row) and the message key why. */
+  protected readonly invalid_ = signal<{
+    row: string
+    key: 'coefficient_invalid' | 'metadata_event_type_exists'
+  } | null>(null)
+  protected readonly invalidRowId_ = computed(() => this.invalid_()?.row ?? null)
 
   /** Own terms are always editable; shared ones only by the platform admin (the server decides again). */
   canEdit(term: TaxonomyTermOf<CoefficientKind>): boolean {
@@ -55,11 +59,11 @@ export class CoefficientManagerComponent {
     const stored = term.coefficient ?? 1
     const value = Number(input.value.trim().replace(',', '.'))
     if (!isValidCoefficient(value)) {
-      this.invalidRow_.set(rowId)
+      this.invalid_.set({ row: rowId, key: 'coefficient_invalid' })
       input.value = formatCoefficient(stored)
       return
     }
-    this.invalidRow_.set(null)
+    this.invalid_.set(null)
     if (value === stored) return
     try {
       await this.taxonomy_.updateByKey(kind, term.key, { coefficient: value })
@@ -74,11 +78,15 @@ export class CoefficientManagerComponent {
     const name = nameInput.value.trim()
     if (!name) return
     const value = Number(coefficientInput.value.trim().replace(',', '.'))
-    if (!isValidCoefficient(value) || this.taxonomy_.find('eventType', name)) {
-      this.invalidRow_.set('new')
+    if (!isValidCoefficient(value)) {
+      this.invalid_.set({ row: 'new', key: 'coefficient_invalid' })
       return
     }
-    this.invalidRow_.set(null)
+    if (this.taxonomy_.find('eventType', name)) {
+      this.invalid_.set({ row: 'new', key: 'metadata_event_type_exists' })
+      return
+    }
+    this.invalid_.set(null)
     try {
       if (!(await this.eventTypeService_.addEventType(name, value))) {
         this.userMsg_.onSetErrorMsg(this.translation_.translate('server_error'))
