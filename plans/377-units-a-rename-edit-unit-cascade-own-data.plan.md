@@ -1,6 +1,7 @@
 # Plan 377 — Units A: edit a custom unit's name and conversion in the metadata manager
 
 Status: active
+Validated: Human "done" 2026-10-20 (Metadata ①–③, product-form prefill + special price, recipe live cost + row prefill)
 Track: code — here (not design)
 Snapshot: d601af5a9c761146f41191f6c49fb56b732774d6
 
@@ -76,16 +77,16 @@ As a chef, I want to fix a misnamed unit or its conversion once and have every p
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `UnitRegistryService.renameUnit(oldKey, newKey)` and `updateUnitRate(key, gramRate)`: refuse system units, an empty or existing `newKey`, and a rate ≤ 0; otherwise call `taxonomy.updateByKey('unit', …)`. Errors go through `taxonomy.errorMessage` like `deleteUnit`.
-- [ ] Units card: edit action for custom units only (per item — system units keep the lock and get no pencil). Replace the card-wide `[canEdit]="false"` with something per item, or rely on the existing `lockReason` if it already hides the menu for system units; check before changing `taxonomy-kind-manager`.
-- [ ] Edit dialog prefilled with Hebrew label, key and conversion (reuse `unit-creator` in an edit mode if it fits; otherwise a small dialog inside `metadata-manager/**`). Shared units the user can't edit get the existing `taxonomy_shared_admin_only` message.
-- [ ] Save path in `onRenameMetadata`, `unit` branch:
+- [x] `UnitRegistryService.renameUnit(oldKey, newKey)` and `updateUnitRate(key, gramRate)`: refuse system units, an empty or existing `newKey`, and a rate ≤ 0; otherwise call `taxonomy.updateByKey('unit', …)`. Errors go through `taxonomy.errorMessage` like `deleteUnit`.
+- [x] Units card: edit action for custom units only (per item — system units keep the lock and get no pencil). Replace the card-wide `[canEdit]="false"` with something per item, or rely on the existing `lockReason` if it already hides the menu for system units; check before changing `taxonomy-kind-manager`.
+- [x] Edit dialog prefilled with Hebrew label, key and conversion (reuse `unit-creator` in an edit mode if it fits; otherwise a small dialog inside `metadata-manager/**`). Shared units the user can't edit get the existing `taxonomy_shared_admin_only` message.
+- [x] Save path in `onRenameMetadata`, `unit` branch:
   - label only → `translationService.updateDictionary(key, he, 'me')`
   - key change → affected-count confirm → `renameUnit` → dictionary entry for the new key → reload products, recipes, dishes
   - conversion change → cost-impact confirm → `updateUnitRate`
   - key + conversion in one save → rename first, then the rate on the new key
-- [ ] `getAffectedCount('unit', key)` counts products (`baseUnit`, `purchaseOptions[].unitSymbol`) and recipes/dishes (`ingredients[].unit`, `yieldUnit`, `yieldConversions[].unit`, `prepItems[].unit`, `prepCategories[].items[].unit`); `reloadAfterRename('unit')` reloads all three lists.
-- [ ] Remove the "unit is out of scope" comment.
+- [x] `getAffectedCount('unit', key)` counts products (`baseUnit`, `purchaseOptions[].unitSymbol`) and recipes/dishes (`ingredients[].unit`, `yieldUnit`, `yieldConversions[].unit`, `prepItems[].unit`, `prepCategories[].items[].unit`); `reloadAfterRename('unit')` reloads all three lists.
+- [x] Remove the "unit is out of scope" comment.
 
 ### Nice to Have (P2)
 - None.
@@ -103,7 +104,7 @@ As a chef, I want to fix a misnamed unit or its conversion once and have every p
 - [x] A6: Product form saves a purchase unit's price as special only when "special price" is ticked — an auto-filled price no longer turns it on by itself (Human, 2026-10-20) — `src/app/pages/inventory/components/product-form/**`
 - [x] A7: Recipe editor shows the live ingredient cost on open (not the cost saved with the recipe), and its row unit picker hands the typed name to the unit creator (Human, 2026-10-20) — `src/app/pages/recipe-builder/**`
 - [ ] A8: Unsaved-changes prompt missed after creating a unit from the recipe editor — not reproduced on an existing recipe (prompt appeared); waiting on the Human's exact steps — `src/app/pages/recipe-builder/**`
-- [ ] A4: Prove a rename keeps costs the same and a conversion change updates them — Build + specs; manual test on the isolated DB (rename a custom unit used in 2 products and 1 recipe, cost unchanged; change its conversion, cost changes); update session-state — `docs/session-state-<branch>.md`
+- [x] A4: Prove a rename keeps costs the same and a conversion change updates them — Build + specs; manual test on the isolated DB (rename a custom unit used in 2 products and 1 recipe, cost unchanged; change its conversion, cost changes); update session-state — `docs/session-state-<branch>.md`
 
 ## Technical Considerations
 
