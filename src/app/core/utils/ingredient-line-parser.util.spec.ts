@@ -1,4 +1,4 @@
-import { parseIngredientLines } from './ingredient-line-parser.util'
+import { createUnitWordResolver, parseIngredientLines } from './ingredient-line-parser.util'
 
 const UNITS: Record<string, string> = {
   'ק"ג': 'kg',
@@ -71,5 +71,27 @@ describe('parseIngredientLines', () => {
 
   it('handles Windows line breaks and leading bullets', () => {
     expect(parseIngredientLines('- 3 ביצים\r\n• 200 גרם מלח', resolve).map((l) => l.kind)).toEqual(['parsed', 'parsed'])
+  })
+
+  it('reads a mixed vulgar fraction', () => {
+    expect(parseIngredientLines('1½ כוס סוכר', resolve)).toEqual([
+      { kind: 'parsed', amount: 1.5, unit: 'cup', name: 'סוכר' }
+    ])
+  })
+})
+
+describe('createUnitWordResolver', () => {
+  const resolver = createUnitWordResolver({
+    aliases: { 'ק"ג': 'kg' },
+    translate: (t) => (t === 'גרם' ? 'gram' : t === 'ק״מ' ? 'km' : null),
+    knownKeys: () => ['cup']
+  })
+
+  it('tries aliases, then the dictionary (also with gershayim), then a key as typed', () => {
+    expect(resolver('ק"ג')).toBe('kg')
+    expect(resolver('גרם')).toBe('gram')
+    expect(resolver('ק"מ')).toBe('km')
+    expect(resolver('Cup')).toBe('cup')
+    expect(resolver('קופסה')).toBeNull()
   })
 })

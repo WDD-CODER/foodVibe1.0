@@ -21,7 +21,10 @@ import { GeminiShotsService } from '@services/gemini-shots.service'
 import { TranslationService } from '@services/translation.service'
 import { AiDraftEditorComponent } from './ai-draft-editor/ai-draft-editor.component'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
-import { parsedResultToDraft } from '../../core/utils/parsed-result-draft.util'
+import { parsedResultToDraft } from '@utils/parsed-result-draft.util'
+import { createUnitWordResolver } from '@utils/ingredient-line-parser.util'
+import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
+import { UnitRegistryService } from '@services/unit-registry.service'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = AiModalInputMode
@@ -48,6 +51,12 @@ export class AiRecipeModalComponent implements OnInit {
   private readonly router = inject(Router)
   private readonly shots = inject(GeminiShotsService)
   private readonly translation = inject(TranslationService)
+  private readonly unitRegistry = inject(UnitRegistryService)
+  private readonly pastedUnitResolver_ = createUnitWordResolver({
+    aliases: UNIT_ALIASES,
+    translate: (token) => this.translation.resolveUnit(token),
+    knownKeys: () => this.unitRegistry.allUnitKeys_()
+  })
 
   // Create mode
   protected readonly inputMode_ = signal<InputMode>('text')
@@ -151,7 +160,7 @@ export class AiRecipeModalComponent implements OnInit {
     this.status_.set('sending')
     this.errorKey_.set('ai_recipe_error')
     try {
-      const draft = parsedResultToDraft(await firstValueFrom(this.gemini.parseText(text)))
+      const draft = parsedResultToDraft(await firstValueFrom(this.gemini.parseText(text)), this.pastedUnitResolver_)
       if (draft) {
         this.draft_.set(draft)
         this.status_.set('done')

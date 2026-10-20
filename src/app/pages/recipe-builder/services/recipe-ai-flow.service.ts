@@ -8,7 +8,7 @@ import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-dr
 import { AiRecipeModalService } from '../../../shared/ai-recipe-modal/ai-recipe-modal.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import type { Equipment } from '@models/equipment.model'
-import { findIngredientMatch, type IngredientMatch } from 'src/app/core/utils/ingredient-match.util'
+import { findIngredientMatch, type IngredientMatch } from '@utils/ingredient-match.util'
 
 export interface RecipeAiFormRefs {
   recipeForm: FormGroup

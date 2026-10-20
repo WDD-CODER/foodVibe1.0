@@ -15,12 +15,11 @@ export class AiRecipeModalService {
 
   private readonly isOpen_ = signal(false)
   private readonly mode_ = signal<AiModalMode>('create')
+  private readonly initialInputMode_ = signal<AiModalInputMode>('text')
   private currentRecipe_: AiRecipeDraft | null = null
   private onPatch_: ((patch: AiRecipePatch) => void) | null = null
 
   readonly isOpen = this.isOpen_.asReadonly()
-  private readonly initialInputMode_ = signal<AiModalInputMode>('text')
-
   readonly mode = this.mode_.asReadonly()
   readonly initialInputMode = this.initialInputMode_.asReadonly()
 

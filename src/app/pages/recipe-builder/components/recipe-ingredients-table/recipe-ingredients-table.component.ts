@@ -41,9 +41,9 @@ import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutritio
 import { TranslationService } from '@services/translation.service'
 import { RecipeFormService } from '../../services/recipe-form.service'
 import { PasteIngredientsDialogComponent } from '../paste-ingredients-dialog/paste-ingredients-dialog.component'
-import { UNIT_ALIASES } from 'src/app/core/utils/recipe-cost.constants'
-import { parseIngredientLines } from 'src/app/core/utils/ingredient-line-parser.util'
-import { findIngredientMatch } from 'src/app/core/utils/ingredient-match.util'
+import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
+import { createUnitWordResolver, parseIngredientLines } from '@utils/ingredient-line-parser.util'
+import { findIngredientMatch } from '@utils/ingredient-match.util'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
@@ -90,6 +90,11 @@ export class RecipeIngredientsTableComponent {
   private readonly router_ = inject(Router)
   private readonly translation_ = inject(TranslationService)
   private readonly recipeFormService_ = inject(RecipeFormService)
+  private readonly pastedUnitResolver_ = createUnitWordResolver({
+    aliases: UNIT_ALIASES,
+    translate: (token) => this.translation_.resolveUnit(token),
+    knownKeys: () => this.unitRegistry.allUnitKeys_()
+  })
 
   protected readonly isMobile_ = toSignal(this.bp.observe(MOBILE_QUICK_EDIT_QUERY).pipe(map((r) => r.matches)), {
     initialValue: false
@@ -121,72 +126,6 @@ export class RecipeIngredientsTableComponent {
 
   // GETTERS
 
-  /**
-   * Adds one row per non-empty pasted line (plan 439). A readable line becomes a row linked to the product or
-   * recipe of the same name when there is one; a line that cannot be read is kept as an unlinked row holding
-   * its original text — nothing pasted is dropped. Trailing empty rows are replaced.
-   */
-  onPasteIngredients(text: string): void {
-    const lines = parseIngredientLines(text, (token) => this.resolvePastedUnit_(token))
-    this.pasteOpen_.set(false)
-    if (lines.length === 0) return
-    const array = this.ingredientsFormArray()
-    while (array.length > 0 && this.isEmptyRow_(array.at(array.length - 1) as FormGroup)) {
-      array.removeAt(array.length - 1)
-    }
-    const firstNewIndex = array.length
-    for (const line of lines) {
-      const row = this.recipeFormService_.createIngredientGroup()
-      if (line.kind === 'parsed') {
-        const match = findIngredientMatch(
-          line.name,
-          this.kitchenStateService.products_(),
-          this.kitchenStateService.recipes_()
-        )
-        const linkedName = match
-          ? ((match.type === 'product'
-              ? this.kitchenStateService.products_()
-              : this.kitchenStateService.recipes_()
-            ).find((x) => x._id === match.entity._id)?.nameHebrew ?? line.name)
-          : line.name
-        row.patchValue({
-          nameHebrew: linkedName,
-          nameSnapshot: linkedName,
-          amount_net: line.amount,
-          unit: line.unit,
-          ...(match && { referenceId: match.entity._id, item_type: match.type })
-        })
-      } else {
-        row.patchValue({ nameHebrew: line.text, nameSnapshot: line.text, amount_net: null, unit: 'unit' })
-      }
-      array.push(row)
-    }
-    for (let i = firstNewIndex; i < array.length; i++) {
-      if (array.at(i).get('referenceId')?.value) this.updateLineCalculations(i)
-    }
-    array.markAsDirty()
-    array.updateValueAndValidity()
-    this.cdr.markForCheck()
-  }
-
-  /** Unit word from a pasted line → canonical unit key: alias table, then the dictionary, then a key as typed. */
-  private resolvePastedUnit_(token: string): string | null {
-    const variants = [token, token.replace(/"/g, '״')]
-    for (const t of variants) {
-      const alias = UNIT_ALIASES[t] ?? UNIT_ALIASES[t.toLowerCase()]
-      if (alias) return alias
-    }
-    for (const t of variants) {
-      const resolved = this.translation_.resolveUnit(t)
-      if (resolved) return resolved
-    }
-    return this.unitRegistry.allUnitKeys_().includes(token.toLowerCase()) ? token.toLowerCase() : null
-  }
-
-  private isEmptyRow_(group: FormGroup): boolean {
-    return !group.get('referenceId')?.value && !(group.get('nameHebrew')?.value ?? '').toString().trim()
-  }
-
   onDropIngredient(event: CdkDragDrop<FormGroup[]>): void {
     if (event.previousIndex === event.currentIndex) return
     const formArray = this.ingredientsFormArray()
@@ -210,9 +149,6 @@ export class RecipeIngredientsTableComponent {
   /** When set, this row index shows ingredient-search instead of selected-item-display (click name to change item). */
   protected editingNameAtRow_ = signal<number | null>(null)
 
-  /** True while the "paste ingredients" window is open. */
-  protected pasteOpen_ = signal(false)
-
   /** Index of the row currently showing the inline quick-edit accordion (desktop only). */
   protected quickEditRowIndex_ = signal<number | null>(null)
 
@@ -221,6 +157,9 @@ export class RecipeIngredientsTableComponent {
 
   /** Validation tier of the currently-open quick-edit row — drives field focus inside the panel. */
   protected quickEditRowTier_ = signal<'invalid' | 'incomplete' | null>(null)
+
+  /** True while the "paste ingredients" window is open. */
+  protected pasteOpen_ = signal(false)
 
   /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
   protected getProductForGroup(group: FormGroup): Product | null {
@@ -265,6 +204,53 @@ export class RecipeIngredientsTableComponent {
       group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.nameHebrew })
       this.onQuickEditBadgeClick(group, index, 'incomplete')
     })
+  }
+
+  /**
+   * Adds one row per non-empty pasted line (plan 439). A readable line becomes a row linked to the product or
+   * recipe of the same name when there is one; a line that cannot be read is kept as an unlinked row holding
+   * its original text — nothing pasted is dropped. Trailing empty rows are replaced.
+   */
+  onPasteIngredients(text: string): void {
+    const lines = parseIngredientLines(text, this.pastedUnitResolver_)
+    this.pasteOpen_.set(false)
+    if (lines.length === 0) return
+    const array = this.ingredientsFormArray()
+    while (array.length > 0 && this.isEmptyRow_(array.at(array.length - 1) as FormGroup)) {
+      array.removeAt(array.length - 1)
+    }
+    const firstNewIndex = array.length
+    for (const line of lines) {
+      const row = this.recipeFormService_.createIngredientGroup()
+      if (line.kind === 'parsed') {
+        const match = findIngredientMatch(
+          line.name,
+          this.kitchenStateService.products_(),
+          this.kitchenStateService.recipes_()
+        )
+        const linkedName = match?.entity.nameHebrew ?? line.name
+        row.patchValue({
+          nameHebrew: linkedName,
+          nameSnapshot: linkedName,
+          amount_net: line.amount,
+          unit: line.unit,
+          ...(match && { referenceId: match.entity._id, item_type: match.type })
+        })
+      } else {
+        row.patchValue({ nameHebrew: line.text, nameSnapshot: line.text, amount_net: null, unit: 'unit' })
+      }
+      array.push(row)
+    }
+    for (let i = firstNewIndex; i < array.length; i++) {
+      if (array.at(i).get('referenceId')?.value) this.updateLineCalculations(i)
+    }
+    array.markAsDirty()
+    array.updateValueAndValidity()
+    this.cdr.markForCheck()
+  }
+
+  private isEmptyRow_(group: FormGroup): boolean {
+    return !group.get('referenceId')?.value && !(group.get('nameHebrew')?.value ?? '').toString().trim()
   }
 
   /** Called by clickOutside on the accordion div — defers to panel if it has unsaved changes. */

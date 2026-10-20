@@ -89,6 +89,18 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
     expect(internals().draft_()?.ingredients).toEqual([{ name: 'עגבניות', amount: 2, unit: 'kg' }])
   })
 
+  it('resolves Hebrew units in a parsed recipe to canonical keys', async () => {
+    gemini.parseText.and.returnValue(
+      of({
+        ...parsed,
+        data: { ...parsed.data, ingredients: [{ nameHebrew: 'עגבניות', amount_net: 2, unit: 'ק"ג' }] }
+      } as ParsedResult)
+    )
+    internals().prompt_.set('רוטב\n2 ק"ג עגבניות')
+    await internals().onParsePasted()
+    expect(internals().draft_()?.ingredients).toEqual([{ name: 'עגבניות', amount: 2, unit: 'kg' }])
+  })
+
   it('shows "not recognized" and opens no draft when nothing was found', async () => {
     gemini.parseText.and.returnValue(
       of({

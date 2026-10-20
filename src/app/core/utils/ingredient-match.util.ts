@@ -2,7 +2,7 @@ import type { Product } from '@models/product.model'
 import type { Recipe } from '@models/recipe.model'
 
 export interface IngredientMatch {
-  entity: { _id: string }
+  entity: { _id: string; nameHebrew: string }
   type: 'product' | 'recipe'
 }
 

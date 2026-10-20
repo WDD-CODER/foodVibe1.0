@@ -8,10 +8,33 @@ const VULGAR_FRACTIONS: Record<string, number> = { '½': 0.5, '¼': 0.25, '¾': 
 const FRACTION_CHARS = Object.keys(VULGAR_FRACTIONS).join('')
 
 const MIXED_SLASH = /^(\d+)\s+(\d+)\s*\/\s*(\d+)(?=\s|$|\D)/
-const MIXED_VULGAR = new RegExp(`^(\d+)\s*([${FRACTION_CHARS}])`)
+const MIXED_VULGAR = new RegExp(String.raw`^(\d+)\s*([${FRACTION_CHARS}])`)
 const SLASH = /^(\d+)\s*\/\s*(\d+)/
 const VULGAR = new RegExp(`^([${FRACTION_CHARS}])`)
 const DECIMAL = /^(\d+(?:[.,]\d+)?)/
+
+/**
+ * Builds the unit-word resolver shared by the paste flows: alias table, then the dictionary
+ * (also tried with the gershayim form of a quote), then a unit key typed as-is. Null when it is not a unit.
+ */
+export function createUnitWordResolver(deps: {
+  aliases: Readonly<Record<string, string>>
+  translate: (token: string) => string | null
+  knownKeys: () => readonly string[]
+}): UnitResolver {
+  return (token: string): string | null => {
+    const variants = [token, token.replace(/"/g, '״')]
+    for (const t of variants) {
+      const alias = deps.aliases[t] ?? deps.aliases[t.toLowerCase()]
+      if (alias) return alias
+    }
+    for (const t of variants) {
+      const resolved = deps.translate(t)
+      if (resolved) return resolved
+    }
+    return deps.knownKeys().includes(token.toLowerCase()) ? token.toLowerCase() : null
+  }
+}
 
 /** Gershayim and prime marks become a plain double quote so "ק״ג" and "ק"ג" read the same. */
 function normalizeQuotes(s: string): string {
