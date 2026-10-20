@@ -132,6 +132,8 @@ export class RecipeIngredientsTableComponent {
 
   /** When set, this row index shows ingredient-search instead of selected-item-display (click name to change item). */
   protected editingNameAtRow_ = signal<number | null>(null)
+  /** Name typed in a row's unit picker before choosing "add", handed to the unit creator (plan 377). */
+  protected readonly pendingUnitName_ = signal('')
 
   /** Index of the row currently showing the inline quick-edit accordion (desktop only). */
   protected quickEditRowIndex_ = signal<number | null>(null)
@@ -549,7 +551,9 @@ export class RecipeIngredientsTableComponent {
       const product =
         group.get('item_type')?.value === 'product' ? (this.getItemMetadata(group) as Product | undefined) : undefined
       const existingSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
-      setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols }), 0)
+      const name = this.pendingUnitName_()
+      this.pendingUnitName_.set('')
+      setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, name }), 0)
       this.unitRegistry.unitAdded$.pipe(take(1)).subscribe((newUnit) => {
         const setUnitAndUpdate = (): void => {
           group.get('unit')?.setValue(newUnit)

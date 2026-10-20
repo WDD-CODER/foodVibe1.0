@@ -49,6 +49,7 @@ src/app/core/services/unit-registry.service.spec.ts
 src/app/pages/metadata-manager/**
 src/app/shared/unit-creator/**
 src/app/pages/inventory/components/product-form/**
+src/app/pages/recipe-builder/**
 ```
 
 ## Read Scope
@@ -100,6 +101,8 @@ As a chef, I want to fix a misnamed unit or its conversion once and have every p
 - [x] A3: Update every product and recipe that uses a unit when it is renamed — `unit` branch in `onRenameMetadata` + `getAffectedCount` + `reloadAfterRename`; confirms; dictionary keys; drop the out-of-scope comment — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `public/assets/data/dictionary.json`
 - [x] A5: Open the unit creator with the name already typed in the product form's unit picker (Human, 2026-10-20) — `src/app/shared/unit-creator/**`, `src/app/pages/inventory/components/product-form/**`
 - [x] A6: Product form saves a purchase unit's price as special only when "special price" is ticked — an auto-filled price no longer turns it on by itself (Human, 2026-10-20) — `src/app/pages/inventory/components/product-form/**`
+- [x] A7: Recipe editor shows the live ingredient cost on open (not the cost saved with the recipe), and its row unit picker hands the typed name to the unit creator (Human, 2026-10-20) — `src/app/pages/recipe-builder/**`
+- [ ] A8: Unsaved-changes prompt missed after creating a unit from the recipe editor — not reproduced on an existing recipe (prompt appeared); waiting on the Human's exact steps — `src/app/pages/recipe-builder/**`
 - [ ] A4: Prove a rename keeps costs the same and a conversion change updates them — Build + specs; manual test on the isolated DB (rename a custom unit used in 2 products and 1 recipe, cost unchanged; change its conversion, cost changes); update session-state — `docs/session-state-<branch>.md`
 
 ## Technical Considerations

@@ -408,7 +408,11 @@ export class RecipeFormService {
         nameSnapshot: ing.nameSnapshot ?? item?.nameHebrew ?? '',
         amount_net: ing.amount,
         unit: ing.unit,
-        total_cost: ing.calculatedCost ?? this.recipeCost.getCostForIngredient(ing)
+        // Live cost when the item is known (a unit's conversion or a price may have changed
+        // since the recipe was saved); the saved cost only when the item is gone (plan 377).
+        total_cost: item
+          ? this.recipeCost.getCostForIngredient({ ...ing, referenceId: resolvedRefId, type: resolvedType ?? ing.type })
+          : (ing.calculatedCost ?? 0)
       })
     })
 
