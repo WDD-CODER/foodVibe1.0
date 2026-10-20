@@ -112,7 +112,7 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
 - [x] C1: Add one shared 200-character name limit to the schemas so every entity uses the same rule — NAME_MAX_LENGTH + nameField in base.schema.ts; apply to the 7 entity name fields — shared/schemas/base.schema.ts, shared/schemas/entities/*.schema.ts
 - [x] C2: Prove the server refuses a too-long name and still saves a normal one on every entity — POST over/at limit and PUT over limit for all 7 types; extra minimal bodies in v2-docs.js — server/test/name-length.test.js, server/test/helpers/v2-docs.js
 - [x] C3: Add a read-only check that shows whether any saved item already has a name over the limit — local and Atlas targets, one line per collection, exit 1 when over — server/scripts/check-name-lengths.js
-- [ ] C4: Build, test, check local data and hand you the Atlas check and the save check — npm --prefix server test, ng build, check script on local, log-query; Human runs the Atlas check and saves one product and one recipe — this plan file
+- [x] C4: Build, test, check local data and hand you the Atlas check and the save check — npm --prefix server test, ng build, check script on local, log-query; Human runs the Atlas check and saves one product and one recipe — this plan file
 
 ## Technical Considerations
 - Dependencies: `zod`, `npm run build:schemas` (the server loads `server/generated/schemas`; the server's
@@ -139,3 +139,5 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
   local name 100 (dishes), every collection `over limit 0`.
 - `node scripts/log-query.mjs --since=plan-start --level=error`: no entries.
 - Atlas check not run by the agent (production reads are the Human's): Done-when `[human]`.
+- 2026-10-20 — Human ran the Atlas check: every collection `over limit 0`, longest 100 (dishes),
+  `NAME_LENGTH: ok (limit 200)`; Human replied `merge` (validates C4). Nightly api follow-up stays open.
