@@ -181,19 +181,6 @@
 - [x] F1: Confirm every kept model accepts inline images — VISION_MODEL_PATTERN matches all kept models including gemini-3-flash-preview (extend pattern + test if not) — server/services/gemini-client.js, server/test/gemini-client.test.js
 - [x] G1: Update the Gemini free-tier gotcha with the new lineup and the quota-first ordering rule — docs/brain/gotchas/backend.md
 
-### Plan 415 — Code QA Part 3: AI Code-Review Agent with a Nightly Page Rotation
-- [ ] C1: Number the checks of every QA page so reviews can be resumed check by check — derive <PAGE>-C<NN> ids from qa-plan.md — `scripts/qa/code-qa/plan-checks.mjs`
-- [ ] C2: Keep a ledger of which page was reviewed when, so each night continues where the last stopped — ledger.json read/write, ingest of review files (header + ### lines), idempotent — `scripts/qa/code-qa/rotation.mjs`
-- [ ] C3: Order tomorrow's pages fairly so every page gets reviewed and none is stuck in a loop — pick: partial → never → oldest, changes only break ties; write queue.md — `scripts/qa/code-qa/rotation.mjs`
-- [ ] C4: Show the code review results to the UI agent — render Code review blocks and CODE-AI- findings into latest.md via findings.mjs — `scripts/qa/code-qa/findings.mjs, scripts/qa/code-qa/run.mjs`
-- [ ] C5: Write the code-review agent's instructions — protocol per Design, review file format, verifier pass, Cowork kickoff prompt with STOP_AT — `docs/qa/code-qa-agent.md`
-- [ ] C6: Merge tonight's reviews before the UI agent starts — new 02:45 Windows task registered by qa-schedule.ps1 (-Merge param, default 02:45) running qa-code-merge.ps1 — `scripts/qa/qa-code-merge.ps1, scripts/qa/qa-schedule.ps1`
-- [ ] C7: Make the UI agent follow up on suspect checks and confirm code-review findings — qa-agent.md §7 and qa-flow.md P0 — `docs/qa/qa-agent.md, docs/qa/qa-flow.md`
-- [ ] C8: Prove the rotation is fair with a 30-night simulation and fixture reviews — `scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**`
-- [ ] C9: Document the full night and the Human's one-time setup — timeline (00:00 scripts, 01:00 Code QA agent, 02:45 merge, 03:00 UI agent, 07:30 down), Cowork task settings, re-register command — `docs/qa/README.md, docs/qa/code-qa.md`
-- [ ] C10: Dry-run one page by hand and record it — run pick, run the agent prompt in Cowork on the first page, run ingest; paste the queue head, the review header and the latest.md block into Execution Notes — `this plan file`
-- [ ] C11: Hand the Human the ready-to-paste Cowork prompts and a click-by-click setup guide — final chat message: both Cowork tasks (Code QA 01:00, UI QA 03:00) with name, time, QA checkout folder, prompt text, approval settings; the PowerShell lines to re-register the Windows tasks; how to do one manual "Run now" first — `docs/qa/README.md`
-
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
