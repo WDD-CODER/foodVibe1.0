@@ -51,6 +51,11 @@ describe('taxonomyTermSchema', () => {
     expect(ok({ ...base, kind: 'menuType', key: 'x', fields: ['not_a_field'] })).toBe(false);
   });
 
+  test('a station is a plain term: no color allowed (plan 436)', () => {
+    expect(ok({ ...base, kind: 'station', key: 'חם' })).toBe(true);
+    expect(ok({ ...base, kind: 'station', key: 'חם', color: '#10B981' })).toBe(false);
+  });
+
   test('rejects an unknown kind, an empty key and a bad color', () => {
     expect(ok({ ...base, kind: 'flavor', key: 'k' })).toBe(false);
     expect(ok({ ...base, kind: 'allergen', key: '' })).toBe(false);

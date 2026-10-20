@@ -64,6 +64,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `quick-edit-product-modal.service.ts` | Quick-edit product modal orchestration | QuickEditProductModalService |
 | `recipe-export.service.ts` | Recipe export orchestration | RecipeExportService |
 | `server-heartbeat.service.ts` | Server availability heartbeat | ServerHeartbeatService |
+| `station-registry.service.ts` | Kitchen stations (taxonomy kind `station`) for the recipe header and metadata manager | StationRegistryService |
 | `user-admin.service.ts` | User admin management | UserAdminService |
 | `loading.service.ts` | Global loading indicator state | LoadingService |
 

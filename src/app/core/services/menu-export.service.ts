@@ -200,7 +200,7 @@ export class MenuExportService {
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
           prepRows.forEach((pr) => {
-            const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+            const key = isByStation ? recipe.defaultStation || 'כללי' : (pr.categoryName ?? 'כללי')
             addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.categoryName ?? '') : undefined)
           })
         })
@@ -446,7 +446,7 @@ export class MenuExportService {
         const factor = yieldAmount > 0 ? portions / yieldAmount : 0
         const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
         prepRows.forEach((pr) => {
-          const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+          const key = isByStation ? recipe.defaultStation || 'כללי' : (pr.categoryName ?? 'כללי')
           addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.categoryName ?? '') : undefined)
         })
       })
@@ -616,7 +616,7 @@ export class MenuExportService {
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
           const dishName = recipe.nameHebrew ?? item.recipeId
           prepRows.forEach((pr) => {
-            const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+            const key = isByStation ? recipe.defaultStation || 'כללי' : (pr.categoryName ?? 'כללי')
             addPrep(key, pr.name, pr.amount, pr.unit, dishName, isByStation ? (pr.categoryName ?? '') : undefined)
           })
         })

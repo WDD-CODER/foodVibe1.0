@@ -23,6 +23,9 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { TranslationService } from '@services/translation.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { StationRegistryService } from '@services/station-registry.service'
+import { AddItemModalService } from '@services/add-item-modal.service'
+import { LoggingService } from '@services/logging.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component'
@@ -82,6 +85,9 @@ export class RecipeHeaderComponent {
   private confirmModal = inject(ConfirmModalService)
   private cloudinary = inject(CloudinaryService)
   private userMsg = inject(UserMsgService)
+  private stationRegistry = inject(StationRegistryService)
+  private addItemModal = inject(AddItemModalService)
+  private logging = inject(LoggingService)
 
   // INPUTS
   form = input.required<FormGroup>()
@@ -158,6 +164,17 @@ export class RecipeHeaderComponent {
       const sub = ctrl.valueChanges.subscribe((v: string | null) => this.courseValue_.set(v ?? ''))
       onCleanup(() => sub.unsubscribe())
     })
+    effect((onCleanup) => {
+      const ctrl = this.form().get('default_station')
+      if (!ctrl) return
+      this.stationValue_.set(ctrl.value ?? '')
+      this.lastStation_ = ctrl.value ?? ''
+      const sub = ctrl.valueChanges.subscribe((v: string | null) => {
+        this.stationValue_.set(v ?? '')
+        if (v !== RecipeHeaderComponent.ADD_STATION_VALUE) this.lastStation_ = v ?? ''
+      })
+      onCleanup(() => sub.unsubscribe())
+    })
   }
 
   // VALIDATION
@@ -229,6 +246,59 @@ export class RecipeHeaderComponent {
 
   protected get courseControl(): FormControl<string> {
     return this.form().get('course') as FormControl<string>
+  }
+
+  // STATION (plan 436)
+  private static readonly ADD_STATION_VALUE = '__add_station__'
+  private readonly stationValue_ = signal('')
+  /** The last real station value, so a cancelled add window can put it back. */
+  private lastStation_ = ''
+
+  /** "כללי" (no station) first, then the stations, then the add option. A station deleted elsewhere shows as "כללי". */
+  protected stationSelectOptions_ = computed(() => {
+    const keys = this.stationRegistry.stations_()
+    const current = this.stationValue_()
+    const isStale =
+      !!current && current !== RecipeHeaderComponent.ADD_STATION_VALUE && keys.length > 0 && !keys.includes(current)
+    return [
+      { value: '', label: 'general_group' },
+      ...(isStale ? [{ value: current, label: 'general_group' }] : []),
+      ...keys.map((key) => ({ value: key, label: key })),
+      { value: RecipeHeaderComponent.ADD_STATION_VALUE, label: 'add_new_station' }
+    ]
+  })
+
+  protected get stationControl(): FormControl<string> {
+    return this.form().get('default_station') as FormControl<string>
+  }
+
+  /** Add-option flow: the typed name prefills the add window; the key that was stored gets selected; cancel restores the old value. */
+  protected async onAddStation(typed: string): Promise<void> {
+    const previous = this.lastStation_
+    const ctrl = this.stationControl
+    const name = (
+      (await this.addItemModal.open({
+        title: 'add_new_station',
+        label: 'station',
+        placeholder: 'station',
+        saveLabel: 'save',
+        initialValue: typed
+      })) ?? ''
+    ).trim()
+    if (!name) {
+      ctrl.setValue(previous)
+      return
+    }
+    try {
+      const existed = this.stationRegistry.hasStation(name)
+      const key = await this.stationRegistry.addStation(name)
+      ctrl.setValue(key || previous)
+      if (key && !existed) notifyItemAdded(this.userMsg, (k) => this.translationService.translate(k), key)
+    } catch (err) {
+      ctrl.setValue(previous)
+      this.logging.error({ event: 'crud.stations.persist_error', message: 'Failed to add station', context: { err } })
+      this.userMsg.onSetErrorMsg(this.translationService.translate('server_error'))
+    }
   }
 
   // WRAPPERS — CDR / output handling

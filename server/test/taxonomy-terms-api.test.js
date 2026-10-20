@@ -58,6 +58,33 @@ describe('reads', () => {
   });
 });
 
+describe('stations (plan 436)', () => {
+  it('renaming an own station re-keys defaultStation on the user own recipes and dishes in the same request', async () => {
+    const db = testDb();
+    await db.collection('taxonomyTerms').insertOne(term('userA', 'station', 'גריל'));
+    await db.collection('recipes').insertOne(stored(recipeBody({ defaultStation: 'גריל' }), { _id: 'r1', userId: 'userA', businessId: 'b_userA' }));
+    await db.collection('dishes').insertMany([
+      stored(recipeBody({ defaultStation: 'גריל' }), { _id: 'd1', userId: 'userA', businessId: 'b_userA' }),
+      stored(recipeBody({ defaultStation: 'גריל' }), { _id: 'd2', userId: 'userB', businessId: 'b_userB' }),
+    ]);
+    const res = await auth(request(app).put(`${URL}/station:userA:גריל`)).send({ key: 'גריל פחמים' });
+    expect(res.status).toBe(200);
+    expect((await db.collection('recipes').findOne({ _id: 'r1' })).defaultStation).toBe('גריל פחמים');
+    expect((await db.collection('dishes').findOne({ _id: 'd1' })).defaultStation).toBe('גריל פחמים');
+    expect((await db.collection('dishes').findOne({ _id: 'd2' })).defaultStation).toBe('גריל');
+  });
+
+  it('deleting a station still used by a recipe is a 409 with referencedBy', async () => {
+    await testDb().collection('taxonomyTerms').insertOne(term('userA', 'station', 'גריל'));
+    await testDb().collection('recipes').insertOne(stored(recipeBody({ defaultStation: 'גריל' }), { _id: 'r1', userId: 'userA', businessId: 'b_userA' }));
+    const res = await auth(request(app).delete(`${URL}/station:userA:גריל`));
+    expect(res.status).toBe(409);
+    expect(res.body.referencedBy).toHaveLength(1);
+    expect(res.body.referencedBy[0]).toMatchObject({ type: 'recipes', _id: 'r1' });
+    expect(await testDb().collection('taxonomyTerms').countDocuments()).toBe(1);
+  });
+});
+
 describe('writes', () => {
   it('POST stores a valid term without _masterId/_userModified', async () => {
     const res = await auth(request(app).post(URL)).send({ kind: 'label', key: 'kids', color: '#F59E0B', sortOrder: 0 });

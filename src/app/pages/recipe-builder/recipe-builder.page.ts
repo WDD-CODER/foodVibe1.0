@@ -214,6 +214,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       total_cost: [0],
       labels: [[] as string[]],
       course: [''],
+      default_station: [''],
       logistics: this.fb.group({
         baseline: this.fb.array([])
       })
@@ -781,14 +782,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       serving_portions: Number(raw?.['serving_portions'] ?? 1),
       labels: normalizedLabels,
       course: (raw?.['course'] ?? '').toString(),
+      default_station: (raw?.['default_station'] ?? '').toString(),
       yield_conversions: yieldNorm,
       ingredients: ingNorm,
       workflow_items: workflowNorm,
       logistics_baseline: baselineNorm,
-      // Signal-backed state that buildRecipeFromForm() persists but the form
-      // group never holds. Anything saved from a signal has to be mirrored
-      // here or the dirty check cannot see it: changing only the rating left
-      // the snapshot identical, so leaving the page never prompted to save.
+      // Signal-backed state saved by buildRecipeFromForm() but not held by the form:
+      // mirror it here or the dirty check cannot see it (a rating-only change went unnoticed).
       imageUrl: this.recipeImageUrl_() ?? null,
       rating: this.recipeRating_(),
       isApproved: this.isApproved_(),
