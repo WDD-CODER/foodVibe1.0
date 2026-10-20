@@ -16,10 +16,13 @@ The Human had to re-explain the same rule per dropdown (plans 398, 400, 401).
 3. For a page-level picker, use `core/utils/add-option.util.ts` + `shared/add-option-row` for the add
    option and `core/utils/keyed-picker-search.util.ts` (`KeyedPickerSearch`) for the keyboard.
 4. After an add, resolve the stored key from the registry/result (`resolveAddedKey`), not from the text.
+5. Filter by "contains", prefix matches first (`filterOptionsByLabel`); an exact typed name hides the add
+   option entirely; every add opens its window prefilled with the typed name; after the window saves,
+   `notifyItemAdded` shows `"<name>" נוסף` (plan 416 — found in the Human's validation of 400–402).
 
 ## When to use
 
 Building or changing any dropdown or search picker. Do not use it for list-page toolbar "add" buttons
 or form commit buttons — those are not dropdown add options.
 
-See also: plans 398, 400, 401, 402.
+See also: plans 398, 400, 401, 402, 416.

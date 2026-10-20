@@ -21,7 +21,13 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslationService } from '../../core/services/translation.service'
 import { InputClearComponent } from '../input-clear/input-clear.component'
 import { AddOptionRowComponent } from '../add-option-row/add-option-row.component'
-import { AddOptionLabel, addOptionLabel, DEFAULT_ADD_NEW_LABEL_KEY } from '../../core/utils/add-option.util'
+import {
+  AddOptionLabel,
+  addOptionLabel,
+  DEFAULT_ADD_NEW_LABEL_KEY,
+  findOptionByLabel
+} from '../../core/utils/add-option.util'
+import { filterOptionsByLabel } from '../../core/utils/option-filter.util'
 import { KeyedPickerSearch, scrollHighlightIntoView } from '../../core/utils/keyed-picker-search.util'
 
 export interface CustomMultiSelectOption {
@@ -106,10 +112,13 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   /** Option id prefix — for `aria-activedescendant` (focus stays in the search input, rule 5d). */
   protected optionIdPrefix_ = computed(() => (this.triggerId() || this.instanceId_) + '-opt-')
 
-  /** The single add option (rule 1) — present when the caller lists the `addNewValue` sentinel. */
+  /** The single add option (rule 1) — when the caller lists the `addNewValue` sentinel and the search doesn't exactly name an option (rule X). */
   protected addNewOption_ = computed(() => {
     const addNew = this.addNewValue()
-    return addNew ? (this.options().find((o) => o.value === addNew) ?? null) : null
+    const addOpt = addNew ? (this.options().find((o) => o.value === addNew) ?? null) : null
+    if (!addOpt || !this.searchable()) return addOpt
+    const rest = this.options().filter((o) => o.value !== addNew)
+    return findOptionByLabel(this.searchQuery_(), rest, (o) => this.getDisplayText_(o.label)) ? null : addOpt
   })
 
   /** Options to show: exclude the add sentinel, already selected and readonly chips; search by on-screen label (rule 3). */
@@ -117,13 +126,11 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     const value = this._value()
     const readonly = this.readonlyChips()
     const addNew = this.addNewValue()
-    const query = this.searchable() ? this.searchQuery_().toLowerCase().trim() : ''
-    return this.options().filter((o) => {
-      if (addNew && o.value === addNew) return false
-      if (value.includes(o.value) || readonly.includes(o.value)) return false
-      if (query) return this.getDisplayText_(o.label).toLowerCase().includes(query)
-      return true
-    })
+    const query = this.searchable() ? this.searchQuery_() : ''
+    const pickable = this.options().filter(
+      (o) => !(addNew && o.value === addNew) && !value.includes(o.value) && !readonly.includes(o.value)
+    )
+    return filterOptionsByLabel(pickable, query, (o) => this.getDisplayText_(o.label))
   })
 
   /** Display and keyboard order: the options, then the add option last (rule 5e). */

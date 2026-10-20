@@ -46,18 +46,34 @@ paths:
 
 ## Add-option rule (dropdowns)
 
-Every dropdown that offers "add" follows this add-option rule (plans 398–401). Shared selects
+Every dropdown in the app follows one rule (plans 398–401, 416). Shared selects
 (`custom-select`, `custom-multi-select`, `chip-search-dropdown`) already do it — pass the right inputs.
 
 1. **One add option**, always last in the list and in keyboard order — never two "הוסף" buttons.
-2. **Label:** typed text that isn't an existing option → `הוסף "<typed>"`. Nothing typed, or an exact
-   match → the generic `add_new_<thing>` key (`הוסף <thing> חדש/ה`), which opens the add modal. Never
-   the bare word `add` / "הוסף". Show the typed form only when the add flow can take the typed name
-   (`[allowTypedAdd]="true"` on the shared selects); otherwise the generic label.
+2. **Label:** typed text that isn't an existing option → `הוסף "<typed>"`. Nothing typed → the generic
+   `add_new_<thing>` key (`הוסף <thing> חדש/ה`). Never the bare word `add` / "הוסף". Show the typed form
+   only when the add flow can take the typed name (`[allowTypedAdd]="true"` on the shared selects);
+   otherwise the generic label.
 3. **Search by the label on screen** (the translated key), not the stored key — keys are often English
    (`KeyResolutionService`). Exact-match checks use the translated label too.
 4. **After adding, select the key that was actually stored** (it may differ from the typed text); select
    nothing if the add was cancelled. Never write the raw typed text into the field.
+5. **Show similar items while typing (rule F).** The list shows every option whose label *contains* the
+   typed text, case-insensitive; options that start with it come first. The user sees what already
+   exists before adding a near-duplicate. Use `filterOptionsByLabel` (`core/utils/option-filter.util.ts`).
+   Server searches keep their server matching.
+6. **Exact name = no add option (rule X).** When the typed text (trimmed, case-insensitive) equals an
+   existing option's label, the list shows only that option — no add row at all, not even the generic one
+   (`showAddNewAlways` applies only to an empty search). Any difference — another letter, a space inside
+   the text — is a new name and offers `הוסף "<typed>"`.
+7. **Every add opens its window (rule W).** Choosing the add option — Enter or click, typed or generic —
+   always opens that item's add window, prefilled with the typed name where the window takes a name
+   (`AddItemModalService.open({ …, initialValue })`, `TranslationKeyModalService.open(typed, …)`,
+   `QuickAddProductModalService.open({ prefillName })`, `AddEquipmentModalService.open(name)`). A
+   dropdown never adds a typed name directly, so the user always sees and confirms what is saved.
+8. **Say it was saved (rule M).** After the add window saves and the item is stored, show
+   `notifyItemAdded(userMsg, translate, name)` → `"<name>" נוסף` (success message). Cancel shows nothing.
+   Flows whose service already announces the add (supplier, unit) don't add a second message.
 
 Use `core/utils/add-option.util.ts` (`addOptionLabel`, `findOptionByLabel`, `resolveAddedKey`) and
 render the row with `shared/add-option-row` (`<app-add-option-row [label]="…" />`). Shared-select
@@ -65,7 +81,7 @@ inputs: `addNewValue` (sentinel), `addNewLabelKey`, `allowTypedAdd`; output `add
 `addNew` carries the typed name (`''` for the generic add). New `add_new_<thing>` keys go in
 `dictionary.json` → `general` (append-only).
 
-### Keyboard (every dropdown with a search box — add option or not)
+### Keyboard (rule K — every dropdown and picker in the app, search box or not)
 
 - First option highlighted on open and on every keystroke, so Enter picks the top match.
 - ↓/↑ move the highlight and stop at the ends (no wrap-around); the highlighted row scrolls into view.
@@ -74,6 +90,9 @@ inputs: `addNewValue` (sentinel), `addNewLabelKey`, `allowTypedAdd`; output `add
 - Enter picks the highlighted option (on the add option it runs the add). Escape closes the list, focus
   stays on the field. Tab / Shift+Tab close the list and move to the next / previous field.
 - `custom-multi-select` without a search box: Space toggles like Enter.
+- A dropdown without a search box (`custom-select` button mode) owns ↑/↓/Enter/Space/Escape while it has
+  focus: a page's own `(keydown)` focus-moving on the same element must not also fire (the select stops
+  the event). Tab still moves to the next field.
 
 Use `core/utils/keyed-picker-search.util.ts` (`KeyedPickerSearch` + `scrollHighlightIntoView`) — never
 hand-roll arrow/Enter handling.

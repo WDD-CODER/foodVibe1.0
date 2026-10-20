@@ -1,3 +1,4 @@
+import { Component } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { LucideAngularModule, ChevronDown, ChevronUp, X } from 'lucide-angular'
 import { CustomSelectComponent } from './custom-select.component'
@@ -90,11 +91,21 @@ describe('CustomSelectComponent', () => {
       expect(addRowText()).toBe('add_new_category')
     })
 
-    it('shows add "<typed>" for a new name and the generic key for an exact match', () => {
+    it('shows add "<typed>" for a new name and no add option for an exact match (rule X)', () => {
       type('Cherry')
       expect(addRowText()).toBe('add "Cherry"')
-      type('apple')
-      expect(addRowText()).toBe('add_new_category')
+      type(' apple ')
+      expect(root().querySelectorAll('.custom-select-option--add-new').length).toBe(0)
+      type('apple pie')
+      expect(addRowText()).toBe('add "apple pie"')
+    })
+
+    it('filters by contains, prefix matches first (rule F)', () => {
+      type('an')
+      const labels = Array.from(
+        root().querySelectorAll('.custom-select-option:not(.custom-select-option--add-new)')
+      ).map((el) => el.textContent?.trim())
+      expect(labels).toEqual(['Banana'])
     })
 
     it('highlights the first option, stops at the ends, and points aria-activedescendant at it', () => {
@@ -135,6 +146,37 @@ describe('CustomSelectComponent', () => {
       const tab = press('Tab')
       expect(tab.defaultPrevented).toBeFalse()
       expect(root().querySelector('app-scrollable-dropdown')).toBeNull()
+    })
+  })
+
+  describe('button mode inside a page that moves focus on keys (rule K)', () => {
+    @Component({
+      standalone: true,
+      imports: [CustomSelectComponent],
+      template: '<app-custom-select [options]="opts" (keydown)="pageKeys.push($any($event).key)" />'
+    })
+    class PageHostComponent {
+      opts = [
+        { value: 'a', label: 'Option A' },
+        { value: 'b', label: 'Option B' }
+      ]
+      pageKeys: string[] = []
+    }
+
+    it('arrows and Enter drive the list, never the page handler; Tab still reaches the page', () => {
+      const host = TestBed.createComponent(PageHostComponent)
+      host.detectChanges()
+      const trigger = (host.nativeElement as HTMLElement).querySelector('button') as HTMLButtonElement
+      const press = (key: string): void => {
+        trigger.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
+        host.detectChanges()
+      }
+      press('ArrowDown')
+      press('ArrowDown')
+      press('Enter')
+      expect(host.componentInstance.pageKeys).toEqual([])
+      press('Tab')
+      expect(host.componentInstance.pageKeys).toEqual(['Tab'])
     })
   })
 })

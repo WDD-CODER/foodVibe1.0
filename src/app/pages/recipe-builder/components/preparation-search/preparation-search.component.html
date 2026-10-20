@@ -51,7 +51,7 @@
             [class.highlighted]="highlightedIndex_() === flatResults_().length"
             [attr.aria-selected]="highlightedIndex_() === flatResults_().length"
             (mousedown)="$event.preventDefault()"
-            (click)="addPreparationDirectly()"
+            (click)="addPreparationViaWindow()"
           >
             <app-add-option-row [label]="addLabel_()" />
           </li>

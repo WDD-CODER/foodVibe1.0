@@ -5,10 +5,14 @@ import { PreparationSearchComponent } from './preparation-search.component'
 import { PreparationRegistryService } from '@services/preparation-registry.service'
 import { signal } from '@angular/core'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { AddItemConfig, AddItemModalService } from '@services/add-item-modal.service'
 
 describe('PreparationSearchComponent', () => {
   let component: PreparationSearchComponent
   let fixture: ComponentFixture<PreparationSearchComponent>
+  /** The add window: saves the prefilled name as-is unless a test sets `windowResult`. */
+  let addItemModal: jasmine.SpyObj<AddItemModalService>
+  let windowResult: string | null | undefined
 
   beforeEach(async () => {
     const prepRegistrySpy = jasmine.createSpyObj('PreparationRegistryService', [
@@ -22,13 +26,23 @@ describe('PreparationSearchComponent', () => {
       preps.update((list) => [...list, { name, category }])
     })
 
+    windowResult = undefined
+    addItemModal = jasmine.createSpyObj('AddItemModalService', ['open'])
+    addItemModal.open.and.callFake(async (cfg: AddItemConfig) =>
+      windowResult === undefined ? (cfg.initialValue ?? null) : windowResult
+    )
+
     await TestBed.configureTestingModule({
       imports: [
         PreparationSearchComponent,
         TranslatePipe,
         LucideAngularModule.pick({ Search, Plus, X, ChevronUp, ChevronDown })
       ],
-      providers: [provideHttpClient(), { provide: PreparationRegistryService, useValue: prepRegistrySpy }]
+      providers: [
+        provideHttpClient(),
+        { provide: PreparationRegistryService, useValue: prepRegistrySpy },
+        { provide: AddItemModalService, useValue: addItemModal }
+      ]
     }).compileComponents()
 
     fixture = TestBed.createComponent(PreparationSearchComponent)
@@ -57,15 +71,25 @@ describe('PreparationSearchComponent', () => {
     expect(newRow).toHaveBeenCalled()
   })
 
-  it('Enter adds an unknown name and asks for a new row', async () => {
+  it('Enter on an unknown name opens the add window prefilled, then adds and asks for a new row (rule W)', async () => {
     const added = jasmine.createSpy('added')
     const newRow = jasmine.createSpy('newRow')
     component.preparationAdded.subscribe(added)
     component.addNewRowRequested.subscribe(newRow)
     component['searchQuery_'].set('בצל מטוגן')
     await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    expect(addItemModal.open).toHaveBeenCalledWith(jasmine.objectContaining({ initialValue: 'בצל מטוגן' }))
     expect(added).toHaveBeenCalledWith({ name: 'בצל מטוגן', category: 'מטבח' })
     expect(newRow).toHaveBeenCalled()
+  })
+
+  it('cancelling the add window adds nothing', async () => {
+    const added = jasmine.createSpy('added')
+    component.preparationAdded.subscribe(added)
+    windowResult = null
+    component['searchQuery_'].set('בצל מטוגן')
+    await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    expect(added).not.toHaveBeenCalled()
   })
 
   it('Enter on an empty box does not open a new row', async () => {

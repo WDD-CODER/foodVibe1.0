@@ -40,8 +40,14 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { ExportService } from '@services/export.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
-import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
-import { AddOptionLabel, addOptionLabel, resolveAddedKey } from 'src/app/core/utils/add-option.util'
+import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
+import {
+  AddOptionLabel,
+  addOptionLabel,
+  findOptionByLabel,
+  notifyItemAdded,
+  resolveAddedKey
+} from 'src/app/core/utils/add-option.util'
 import { scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
 import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -470,7 +476,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const raw = this.pickerSearch_.eventType.query(0).trim()
     const list = this.eventTypeOptions_()
     if (!raw) return list
-    return filterOptionsByStartsWith(list, raw, (t) => this.translation.translate(t))
+    return filterOptionsByLabel(list, raw, (t) => this.translation.translate(t))
   }
 
   /** One add option, last: `הוסף "<typed>"` for a new name, else `add_new_event_type` (rules 1–2). */
@@ -481,6 +487,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       (t) => this.translation.translate(t),
       'add_new_event_type'
     )
+  }
+
+  /** The add option shows with an empty search or a new name — never when the search names a type exactly (rule X). */
+  protected eventTypeShowsAdd(): boolean {
+    const q = this.pickerSearch_.eventType.query(0)
+    return !findOptionByLabel(q, this.eventTypeOptions_(), (t) => this.translation.translate(t))
   }
 
   protected openEventTypeDropdown(): void {
@@ -499,7 +511,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected onEventTypeSearchKeydown(e: KeyboardEvent): void {
     const list = this.getFilteredEventTypes()
     this.pickerSearch_.eventType.handleKeydown(0, e, {
-      optionCount: list.length + 1,
+      optionCount: list.length + (this.eventTypeShowsAdd() ? 1 : 0),
       onSelect: (idx) => {
         if (idx < list.length) this.selectEventType(list[idx])
         else void this.addNewEventType()
@@ -575,20 +587,18 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.focusField('servingType')
   }
 
-  /** Typed new name adds directly; the generic option opens the modal. Selects the stored key, nothing on cancel (rule 4). */
+  /** Always opens the add window, prefilled with a typed new name (rule W). Selects the stored key, nothing on cancel. */
   protected async addNewEventType(): Promise<void> {
     const label = this.eventTypeAddLabel()
-    const name =
-      label.kind === 'typed'
-        ? label.text
-        : (
-            (await this.addItemModal.open({
-              title: 'add_new_event_type',
-              label: 'menu_event_type',
-              placeholder: 'menu_event_type',
-              saveLabel: 'save'
-            })) ?? ''
-          ).trim()
+    const name = (
+      (await this.addItemModal.open({
+        title: 'add_new_event_type',
+        label: 'menu_event_type',
+        placeholder: 'menu_event_type',
+        saveLabel: 'save',
+        initialValue: label.kind === 'typed' ? label.text : ''
+      })) ?? ''
+    ).trim()
     if (!name) return
     const before = this.eventTypeOptions_()
     await this.menuEventTypeService.addEventType(name)
@@ -596,6 +606,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const key =
       existing ?? resolveAddedKey(before, this.eventTypeOptions_(), name, (t) => this.translation.translate(t))
     if (!key) return
+    if (!existing) notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), name)
     this.form_.patchValue({ eventType: key })
     this.closeEventTypeDropdown()
     this.stopEditField()
@@ -880,7 +891,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
     const raw = this.getDishSearchQuery(sectionIndex, itemIndex).trim()
     if (!raw) return []
-    const filtered = filterOptionsByStartsWith(this.recipes_(), raw, (r) => r.nameHebrew ?? '')
+    const filtered = filterOptionsByLabel(this.recipes_(), raw, (r) => r.nameHebrew ?? '')
     return filtered.slice(0, 12)
   }
 
@@ -930,9 +941,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.sectionSearchOpen_.set(null)
   }
 
-  /** Options: filtered categories, then one "add" — the typed name when it is new, else the add modal. */
+  /** Options: filtered categories, then one "add" — hidden when the search names a category exactly (rule X). */
   protected getSectionCategoryOptionCount(sectionIndex: number): number {
-    return this.getFilteredSectionCategories(sectionIndex).length + 1
+    return this.getFilteredSectionCategories(sectionIndex).length + (this.sectionShowsAdd(sectionIndex) ? 1 : 0)
+  }
+
+  /** The add option shows with an empty search or a new name. */
+  protected sectionShowsAdd(index: number): boolean {
+    return !this.pickerSearch_.section.query(index).trim() || !!this.getNewSectionCategoryName(index)
   }
 
   /** Typed text that is not already a category (by key or Hebrew label); '' when none. */
@@ -948,17 +964,18 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private findSectionCategoryKey(name: string): string | undefined {
-    return this.sectionCategories_().find((key) => key === name || this.translation.translate(key) === name)
+    const n = name.trim().toLowerCase()
+    return this.sectionCategories_().find(
+      (key) => key.toLowerCase() === n || this.translation.translate(key).trim().toLowerCase() === n
+    )
   }
 
   protected onSectionSearchKeydown(sectionIndex: number, e: KeyboardEvent): void {
     const cats = this.getFilteredSectionCategories(sectionIndex)
-    const newName = this.getNewSectionCategoryName(sectionIndex)
     this.pickerSearch_.section.handleKeydown(sectionIndex, e, {
       optionCount: this.getSectionCategoryOptionCount(sectionIndex),
       onSelect: (idx) => {
         if (idx < cats.length) this.selectSectionCategory(sectionIndex, cats[idx])
-        else if (newName) void this.addNewSectionCategory(sectionIndex)
         else void this.openAddCategoryModal(sectionIndex)
         this.closeSectionSearch()
       },
@@ -982,7 +999,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected getFilteredSectionCategories(index: number): string[] {
     const raw = this.pickerSearch_.section.query(index).trim()
     if (!raw) return this.sectionCategories_()
-    return filterOptionsByStartsWith(this.sectionCategories_(), raw, (c) => this.translation.translate(c))
+    return filterOptionsByLabel(this.sectionCategories_(), raw, (c) => this.translation.translate(c))
   }
 
   protected selectSectionCategory(index: number, category: string): void {
@@ -990,25 +1007,25 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.closeSectionSearch()
   }
 
-  protected async addNewSectionCategory(index: number): Promise<void> {
-    const name = this.getNewSectionCategoryName(index)
-    if (name) await this.addAndSelectSectionCategory(index, name)
-  }
-
   /** Adding may resolve the name to an English key (or be cancelled) — select what was actually stored. */
   private async addAndSelectSectionCategory(index: number, name: string): Promise<void> {
     const before = new Set(this.sectionCategories_())
+    const existed = this.findSectionCategoryKey(name)
     await this.menuSectionCategories.addCategory(name)
     const key = this.findSectionCategoryKey(name) ?? this.sectionCategories_().find((k) => !before.has(k))
-    if (key) this.selectSectionCategory(index, key)
+    if (!key) return
+    if (!existed) notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), name)
+    this.selectSectionCategory(index, key)
   }
 
+  /** Always the add window, prefilled with a typed new name (rule W). */
   protected async openAddCategoryModal(sectionIndex: number): Promise<void> {
     const result = await this.addItemModal.open({
       title: 'add_new_category',
       label: 'menu_search_category',
       placeholder: 'menu_search_category',
-      saveLabel: 'save'
+      saveLabel: 'save',
+      initialValue: this.getNewSectionCategoryName(sectionIndex)
     })
     if (result?.trim()) await this.addAndSelectSectionCategory(sectionIndex, result.trim())
   }

@@ -9,6 +9,7 @@ import {
   OnDestroy,
   WritableSignal
 } from '@angular/core'
+import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -36,7 +37,6 @@ import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.uti
 import { useCollapsibleCategories } from 'src/app/core/utils/collapsible-categories.util'
 import { useIsDesktop } from 'src/app/core/utils/desktop-detection.util'
 import { HeroFabService } from '@services/hero-fab.service'
-import { AddItemModalService } from '@services/add-item-modal.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { EquipmentCategoryRegistryService } from '@services/equipment-category-registry.service'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
@@ -82,7 +82,6 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   private readonly logging = inject(LoggingService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly fb = inject(FormBuilder)
-  private readonly addItemModal = inject(AddItemModalService)
   private readonly translationKeyModal = inject(TranslationKeyModalService)
   private readonly equipmentCategoryRegistry = inject(EquipmentCategoryRegistryService)
 
@@ -278,29 +277,17 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Add a category: a typed new name skips the name modal; cancel restores the previous category (add-option rule 4). */
+  /** Add a category: always the key window, prefilled with the typed name (rule W); cancel restores the previous category. */
   protected async openAddNewCategory(context: 'inline'): Promise<void> {
     const previousCategory = this.lastCategory_()
     const typed = this.pendingAddName_()
     this.pendingAddName_.set('')
-    const result =
-      typed ||
-      (await this.addItemModal.open({
-        title: 'add_new_category',
-        label: 'category',
-        placeholder: 'category',
-        saveLabel: 'save'
-      }))
     let keyToUse = ''
-    if (result?.trim()) {
-      keyToUse = this.translation.resolveCategory(result.trim()) ?? ''
-      if (!keyToUse) {
-        const modalResult = await this.translationKeyModal.open(result.trim(), 'category')
-        if (isTranslationKeyResult(modalResult)) {
-          this.translation.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel)
-          keyToUse = modalResult.englishKey
-        }
-      }
+    const modalResult = await this.translationKeyModal.open(typed.trim(), 'category')
+    if (isTranslationKeyResult(modalResult)) {
+      this.translation.addKeyAndHebrew(modalResult.englishKey, modalResult.hebrewLabel)
+      keyToUse = modalResult.englishKey
+      notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), modalResult.hebrewLabel)
     }
     if (keyToUse) {
       if (!this.customCategories_().includes(keyToUse)) {

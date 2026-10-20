@@ -7,8 +7,8 @@ import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { filterOptionsByStartsWith } from 'src/app/core/utils/filter-starts-with.util'
-import { AddOptionLabel, addOptionLabel } from 'src/app/core/utils/add-option.util'
+import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
+import { AddOptionLabel, addOptionLabel, findOptionByLabel, notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { KeyedPickerSearch, scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
 import { RecipeFormService } from './recipe-form.service'
 
@@ -43,13 +43,13 @@ export class RecipeLogisticsPickerService {
   /** Equipment IDs already in the logistics baseline (excluded from equipment search options). */
   private readonly baselineIds_ = signal<string[]>([])
 
-  /** Search options: equipment only (by nameHebrew), "starts with" + Hebrew/Latin script. */
+  /** Search options: equipment only (by nameHebrew), contains, prefix matches first (rule F). */
   readonly searchOptions_ = computed((): Equipment[] => {
     const raw = this.searchQuery_().trim()
     if (!raw) return []
     const alreadyAdded = new Set(this.baselineIds_())
     const allEquipment = this.equipmentData_.allEquipment_().filter((eq) => !alreadyAdded.has(eq._id))
-    const filtered = filterOptionsByStartsWith(allEquipment, raw, (eq) => eq.nameHebrew)
+    const filtered = filterOptionsByLabel(allEquipment, raw, (eq) => eq.nameHebrew)
     const qLower = raw.toLowerCase()
     return filtered.slice().sort((a, b) => {
       const aName = a.nameHebrew.toLowerCase()
@@ -64,6 +64,11 @@ export class RecipeLogisticsPickerService {
   /** One add option, last: `הוסף "<typed>"` for a new tool name, else `add_new_tool` (rules 1–3). */
   readonly addLabel_ = computed<AddOptionLabel>(() =>
     addOptionLabel(this.searchQuery_(), this.equipmentData_.allEquipment_(), (eq) => eq.nameHebrew, 'add_new_tool')
+  )
+
+  /** No add option when the search names a tool exactly (rule X). */
+  readonly showsAdd_ = computed(
+    () => !findOptionByLabel(this.searchQuery_(), this.equipmentData_.allEquipment_(), (eq) => eq.nameHebrew)
   )
 
   connect(baseline: FormArray): void {
@@ -106,6 +111,7 @@ export class RecipeLogisticsPickerService {
       // The saved tool lands selected, keeping the quantity already chosen (rule 4).
       this.selectedToolId_.set(created._id)
       this.searchQuery_.set(created.nameHebrew)
+      notifyItemAdded(this.userMsg_, (k) => this.translation_.translate(k), created.nameHebrew)
     } catch (err) {
       this.logging_.error({
         event: 'recipe_builder.save_error',
@@ -171,7 +177,7 @@ export class RecipeLogisticsPickerService {
     }
     const opts = this.searchOptions_()
     this.picker_.handleKeydown(PICKER_KEY, event, {
-      optionCount: opts.length + 1,
+      optionCount: opts.length + (this.showsAdd_() ? 1 : 0),
       onSelect: (idx) => {
         if (idx < opts.length) this.selectOption(opts[idx])
         else void this.openAddNewToolModal()
