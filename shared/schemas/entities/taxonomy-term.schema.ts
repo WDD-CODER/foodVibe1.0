@@ -87,13 +87,18 @@ const termShape = {
 
 const colorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/)
 
+/** Plan 440: a portions multiplier (event type, serving type, per-dish override): > 0, at most 2 decimals. */
+export const coefficientSchema = z
+  .number()
+  .positive()
+  .refine(n => Math.abs(Math.round(n * 100) - n * 100) < 1e-9, 'max 2 decimals')
+
 const plainKinds = [
   'ingredientCategory',
   'allergen',
   'protein',
   'kosherType',
   'prepCategory',
-  'eventType',
   'sectionCategory',
   'equipmentCategory'
 ] as const
@@ -115,7 +120,14 @@ export const taxonomyTermSchema = z.discriminatedUnion('kind', [
   z.strictObject({ ...termShape, kind: z.literal('unit'), gramRate: z.number().positive() }),
   /** `categoryKey` is absent for an uncategorized preparation (exists in live master data). */
   z.strictObject({ ...termShape, kind: z.literal('preparation'), categoryKey: z.string().min(1).optional() }),
-  z.strictObject({ ...termShape, kind: z.literal('menuType'), fields: z.array(z.enum(DISH_FIELD_KEYS)) })
+  /** Plan 440: `coefficient` multiplies the portions of an event of this type (missing = 1.0). */
+  z.strictObject({ ...termShape, kind: z.literal('eventType'), coefficient: coefficientSchema.optional() }),
+  z.strictObject({
+    ...termShape,
+    kind: z.literal('menuType'),
+    fields: z.array(z.enum(DISH_FIELD_KEYS)),
+    coefficient: coefficientSchema.optional()
+  })
 ])
 
 export type TaxonomyTerm = z.infer<typeof taxonomyTermSchema>
