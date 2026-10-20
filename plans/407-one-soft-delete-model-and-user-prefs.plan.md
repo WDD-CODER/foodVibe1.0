@@ -1,6 +1,6 @@
 # Plan 407 — One soft-delete model and per-user state (userPrefs)
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: 34711de5f66c48518097d15b77edbe8e909b98c1
 
