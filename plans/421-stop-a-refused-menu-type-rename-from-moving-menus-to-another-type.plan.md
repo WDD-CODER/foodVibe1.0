@@ -1,6 +1,6 @@
 # Plan 421 — Stop a refused menu-type rename from moving menus to another type
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: 8d7997e5b732007392f50cc07f40b2aa430f37d6
 
@@ -29,11 +29,11 @@ User story: as a chef, I want a refused menu-type rename to change nothing so th
 **Primary:** a refused or failed menu-type rename changes no menu; a successful one shows the new name on every
 menu without a client loop.
 
-- [auto] `ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/pages/metadata-manager/**' --include='src/app/core/services/metadata-registry.service.spec.ts'`
+- [x] [auto] `ng build` passes.
+- [x] [auto] `npx ng test --watch=false --include='src/app/pages/metadata-manager/**' --include='src/app/core/services/metadata-registry.service.spec.ts'`
   passes, including the new specs: rename to an existing menu type → no `menuEventData` write and no reload;
   successful rename → `menuEventData.reloadFromStorage()` called once; `updateServingTypeForAll` no longer exists.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] `/metadata-manager`, menu types: rename a type that a saved menu uses to the name of another existing
   type → the error «סוג תפריט "…" כבר קיים» shows, and the menu (open it in `/menu-intelligence`) still shows its
   old serving style.
@@ -104,7 +104,7 @@ mark G1 `n/a: fixed by plan 377` and say so. Print one line per symbol: `ok` or 
 - Escape to cancel the inline menu-type rename (META review note, S4).
 
 ## Atomic Sub-tasks
-- [ ] G1: Change no menu when a menu-type rename is refused, and let the server do the re-pointing — renameTerm returns boolean, page reloads menus only on success, drop updateServingTypeForAll, specs — src/app/core/services/metadata-registry.service.ts, src/app/pages/metadata-manager/metadata-manager.page.component.ts, src/app/core/services/menu-event-data.service.ts, specs
+- [x] G1: Change no menu when a menu-type rename is refused, and let the server do the re-pointing — renameTerm returns boolean, page reloads menus only on success, drop updateServingTypeForAll, specs — src/app/core/services/metadata-registry.service.ts, src/app/pages/metadata-manager/metadata-manager.page.component.ts, src/app/core/services/menu-event-data.service.ts, specs
 - [ ] G2: Build, test and hand you the two rename checks — ng build, the listed specs, log-query; Human runs the two checks — this plan file
 
 ## Technical Considerations

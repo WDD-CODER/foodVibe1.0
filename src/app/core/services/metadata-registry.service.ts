@@ -101,7 +101,7 @@ export class MetadataRegistryService {
     return this.removeTerm('menuType', key, 'שגיאה במחיקת סוג התפריט', `סוג תפריט "${key}" נמחק`)
   }
 
-  renameMenuType(oldKey: string, newKey: string): Promise<void> {
+  renameMenuType(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('menuType', oldKey, newKey, {
       exists: (k) => `סוג תפריט "${k}" כבר קיים`,
       error: 'שגיאה בשינוי שם סוג התפריט',
@@ -135,7 +135,7 @@ export class MetadataRegistryService {
     })
   }
 
-  renameLabel(oldKey: string, newKey: string): Promise<void> {
+  renameLabel(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('label', oldKey, newKey, {
       exists: (k) => `התווית "${k}" כבר קיימת`,
       error: 'שגיאה בשינוי שם התווית',
@@ -160,7 +160,7 @@ export class MetadataRegistryService {
     return this.removeTerm('course', key, 'שגיאה במחיקת סוג המנה', `סוג מנה ${key} נמחק בהצלחה`)
   }
 
-  renameCourse(oldKey: string, newKey: string): Promise<void> {
+  renameCourse(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('course', oldKey, newKey, {
       exists: (k) => `סוג המנה "${k}" כבר קיים`,
       error: 'שגיאה בשינוי שם סוג המנה',
@@ -215,7 +215,7 @@ export class MetadataRegistryService {
     return this.removeTerm('ingredientCategory', name, 'שגיאה במחיקת הקטגוריה מהשרת', `הקטגוריה ${name} נמחקה בהצלחה`)
   }
 
-  renameCategory(oldKey: string, newKey: string): Promise<void> {
+  renameCategory(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('ingredientCategory', oldKey, newKey, {
       exists: (k) => `הקטגוריה "${k}" כבר קיימת`,
       error: 'שגיאה בשינוי שם הקטגוריה',
@@ -223,7 +223,7 @@ export class MetadataRegistryService {
     })
   }
 
-  renameAllergen(oldKey: string, newKey: string): Promise<void> {
+  renameAllergen(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('allergen', oldKey, newKey, {
       exists: (k) => `האלרגן "${k}" כבר קיים`,
       error: 'שגיאה בשינוי שם האלרגן',
@@ -301,18 +301,19 @@ export class MetadataRegistryService {
     oldKey: string,
     newKey: string,
     msgs: { exists: (key: string) => string; error: string; success: (key: string) => string }
-  ): Promise<void> {
+  ): Promise<boolean> {
     const trimmed = newKey.trim()
-    if (!trimmed || trimmed === oldKey) return
+    if (!trimmed || trimmed === oldKey) return false
     if (this.taxonomy.find(kind, trimmed)) {
       this.userMsgService.onSetErrorMsg(msgs.exists(trimmed))
-      return
+      return false
     }
-    await this.run(`${kind}.rename`, msgs.error, async () => {
-      if (await this.taxonomy.updateByKey(kind, oldKey, { key: trimmed })) {
-        this.userMsgService.onSetSuccessMsg(msgs.success(trimmed))
-      }
+    let renamed = false
+    const ok = await this.run(`${kind}.rename`, msgs.error, async () => {
+      renamed = await this.taxonomy.updateByKey(kind, oldKey, { key: trimmed })
+      if (renamed) this.userMsgService.onSetSuccessMsg(msgs.success(trimmed))
     })
+    return ok && renamed
   }
 
   /** Runs a write; shows the store's own message (read-only / in use) or `fallbackMsg`. True on success. */

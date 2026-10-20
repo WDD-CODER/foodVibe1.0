@@ -208,6 +208,33 @@ describe('MetadataRegistryService', () => {
     expect(service).toBeTruthy()
   })
 
+  // Plan 421 - rename methods say whether anything was renamed.
+  describe('rename results', () => {
+    it('is false when the new name already exists, and shows the error', fakeAsync(() => {
+      const msgs = TestBed.inject(UserMsgService) as jasmine.SpyObj<UserMsgService>
+      let result: boolean | undefined
+      service.renameCategory('vegetables', 'dairy').then((r) => (result = r))
+      tick()
+      expect(result).toBeFalse()
+      expect(msgs.onSetErrorMsg).toHaveBeenCalled()
+    }))
+
+    it('is false for an empty or unchanged name', fakeAsync(() => {
+      const results: boolean[] = []
+      service.renameCategory('vegetables', '  ').then((r) => results.push(r))
+      service.renameCategory('vegetables', 'vegetables').then((r) => results.push(r))
+      tick()
+      expect(results).toEqual([false, false])
+    }))
+
+    it('is false when the write fails (read-only shared term)', fakeAsync(() => {
+      let result: boolean | undefined
+      service.renameCategory('vegetables', 'greens').then((r) => (result = r))
+      tick()
+      expect(result).toBeFalse()
+    }))
+  })
+
   describe('Signal Management', () => {
     it('should register a new allergen if it does not exist', fakeAsync(() => {
       const initialCount = service.allAllergens_().length
