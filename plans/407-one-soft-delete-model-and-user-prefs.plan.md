@@ -27,7 +27,7 @@ plus shared `__master__` items with per-user overrides only where plan 386 added
 - Success:
   - [x] [auto] Server tests pass (`npm --prefix server test`), with new tests: delete sets `deletedAt`; list excludes it; restore unsets it; purge removes only docs older than N days; user A's favorites/hidden never touch user B's view.
   - [x] [auto] Migration dry run on a restored Atlas copy (scratch DB) reports counts per `TRASH_*` collection moved and `hiddenBy`/`favoritedBy` entries moved, and a second run is a no-op.
-  - [auto] After the real migration: a read-only check script prints 0 `TRASH_*` collections and 0 docs with `hiddenBy` / `favoritedBy`.
+  - [x] [auto] After the real migration: a read-only check script prints 0 `TRASH_*` collections and 0 docs with `hiddenBy` / `favoritedBy`.
   - [x] [auto] `ng build` and `ng test` pass.
   - [x] [human] Delete → Trash → Restore works for product, recipe, dish, equipment, venue, menu event, supplier.
   - [x] [human] Favorites and hidden items survive for 3 real accounts (spot check before/after).
@@ -150,7 +150,7 @@ admin "delete for everyone"). Stop for a go.
 - [x] P6.0: Check who reads and writes deleted items before changing anything, then get your go — Reality Check (readers/writers, Atlas counts, model + purge window) → Human go — `docs/session-state-<branch>.md`
 - [x] P6.1: Use one "deleted at / by" model on the server, with a purge job — `deletedAt`/`deletedBy` model in schemas + `generic.js` + purge job, with server tests — `shared/schemas/**`, `server/routes/generic.js`, `server/jobs/**`, `server/test/**`
 - [x] P6.2: Keep each user's favorites and hidden items in one user-prefs record — `userPrefs` schema + server repo/routes + client `UserPrefsStore`; recipe/dish favorite + hide moved onto it — `shared/schemas/**`, `server/repositories/**`, `src/app/core/services/**`
-- [ ] P6.3: Move existing data onto the new delete model, dry run first — `server/migrations/0005-soft-delete-unify.js` (dry run on Atlas copy → Human go → Atlas) + read-only check script — `server/migrations/**`
+- [x] P6.3: Move existing data onto the new delete model, dry run first — `server/migrations/0005-soft-delete-unify.js` (dry run on Atlas copy → Human go → Atlas) + read-only check script — `server/migrations/**`
 - [x] P6.4: Rebuild the trash page on the new delete model — Trash UI on `deletedAt`; `trash.service.ts` rewritten — `src/app/pages/trash/**`, `src/app/core/services/trash.service.ts`
 - [x] P6.5: Record the decision, then build, test and hand you a check list — ADR + brain index (P1); build, tests, Human check list — `docs/brain/**`
 
@@ -164,3 +164,8 @@ admin "delete for everyone"). Stop for a go.
 
 ## Critical Questions
 - Purge window N (proposal 30 days) — asked in Step 0.
+
+## Close-out evidence (2026-10-20)
+
+- Atlas `0005 --write=yes`: TRASH_RECIPES 2 (1 insert, 1 replace), TRASH_DISHES 1 insert, 4 TRASH_* dropped.
+- Atlas `0005 --verify=yes`: `[verify] OK: 0 TRASH_* collections, 0 tombstones, 0 favoritedBy/hiddenBy; marker stored.`
