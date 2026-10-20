@@ -177,3 +177,4 @@ These extend the contracts above; each plan file carries its own exact wording.
 
 Workers append here: `- plan NNN · <extension> · why`.
 - plan 424 · `tombstoneSchema` also accepts optional `createdBy` (next to `businessId`) · migration 0006 stamps purged stubs like any doc and the strict schema rejected them.
+- plan 423 · `UnitRegistryService`: `UnitCreatorContext.forProduct?: { name, baseUnit }`, `productUnitAdded$` (`ProductUnitAdded { key, amount, basis }`), `awaitProductUnitAdded()`, `creatorForProduct_`; `optionRateInBase(product, opt, registry)` in `core/utils/purchase-option-rate.util.ts` · product-mode unit window asks the amount for that product; every reader of `purchaseOptions[].conversionRate` (433 engine, 438 form) must go through `optionRateInBase`.

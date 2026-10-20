@@ -1,6 +1,7 @@
 import { Product } from '@models/product.model'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { getEffectivePrice } from './product-source.util'
+import { optionRateInBase } from './purchase-option-rate.util'
 
 /** Units available for a product: base_unit + unique purchase option symbols. */
 export function getProductUnits(product: Product): string[] {
@@ -20,7 +21,7 @@ export function getPricePerUnit(product: Product, unit: string, unitRegistry: Un
   if (unit === base) return basePrice
   const opt = (product.purchaseOptions || []).find((o) => o.unitSymbol === unit)
   if (opt?.conversionRate) {
-    return basePrice * opt.conversionRate
+    return basePrice * optionRateInBase(product, opt, unitRegistry)
   }
   const baseConv = unitRegistry.getConversion(base)
   const unitConv = unitRegistry.getConversion(unit)
@@ -44,7 +45,7 @@ export function calcBuyPriceGlobal(
   if (displayUnit === base) return pricePerUnit
   const opt = (product.purchaseOptions || []).find((o) => o.unitSymbol === displayUnit)
   if (opt?.conversionRate) {
-    return pricePerUnit / opt.conversionRate
+    return pricePerUnit / optionRateInBase(product, opt, unitRegistry)
   }
   const baseConv = unitRegistry.getConversion(base)
   const unitConv = unitRegistry.getConversion(displayUnit)

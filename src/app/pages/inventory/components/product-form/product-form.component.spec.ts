@@ -27,6 +27,7 @@ describe('ProductFormComponent', () => {
   let mockUnitRegistry: jasmine.SpyObj<UnitRegistryService>
   // Same semantics as UnitRegistryService.awaitUnitCreated: one saved unit, nothing after the window closes.
   let unitAdded$: Subject<string>
+  let productUnitAdded$: Subject<{ key: string; amount: number; basis: string }>
   let creatorClosed$: Subject<void>
 
   // Signal Mocks for SoT
@@ -47,9 +48,10 @@ describe('ProductFormComponent', () => {
     mockConversionService.getSuggestedPurchasePrice.and.returnValue(0)
     unitAdded$ = new Subject<string>()
     creatorClosed$ = new Subject<void>()
+    productUnitAdded$ = new Subject<{ key: string; amount: number; basis: string }>()
     mockUnitRegistry = jasmine.createSpyObj(
       'UnitRegistryService',
-      ['getConversion', 'openUnitCreator', 'refreshFromStorage', 'awaitUnitCreated'],
+      ['getConversion', 'openUnitCreator', 'refreshFromStorage', 'awaitUnitCreated', 'awaitProductUnitAdded'],
       {
         allUnitKeys_: mockUnitKeys,
         isCreatorOpen_: mockIsCreatorOpen,
@@ -58,6 +60,9 @@ describe('ProductFormComponent', () => {
     )
     mockUnitRegistry.refreshFromStorage.and.returnValue(Promise.resolve())
     mockUnitRegistry.awaitUnitCreated.and.callFake(() => unitAdded$.pipe(take(1), takeUntil(creatorClosed$)))
+    mockUnitRegistry.awaitProductUnitAdded.and.callFake(() =>
+      productUnitAdded$.pipe(take(1), takeUntil(creatorClosed$))
+    )
 
     const mockMetadata = jasmine.createSpyObj('MetadataRegistryService', ['registerCategory'], {
       allCategories_: mockCategories,
@@ -202,8 +207,69 @@ describe('ProductFormComponent', () => {
       creatorClosed$.next() // cancel
       component['onUomValueChange']('NEW_UNIT', 0)
       unitAdded$.next('jar')
-      expect(component['productForm_'].get('baseUnit')?.value).toBe('')
+      expect(component['productForm_'].get('baseUnit')?.value).toBe('kg') // restored, a string
       expect(component.purchaseOptions_.at(0).get('uom')?.value).toBe('jar')
+    })
+  })
+
+  // Plan 423 - a purchase unit's weight belongs to the product it is added to.
+  describe('Purchase units carry this product own weight (plan 423)', () => {
+    const rowAt = (i: number) => component.purchaseOptions_.at(i)
+
+    beforeEach(() => {
+      mockUnitRegistry.getConversion.and.callFake((k: string) => ({ kg: 1000, gram: 1, jar: 500 })[k] ?? 1)
+      component['productForm_'].patchValue({ productName: 'חמוצים', baseUnit: 'kg' })
+    })
+
+    it('choosing an existing custom unit leaves the amount empty and compares to the base unit', () => {
+      component['addPurchaseOption']()
+      rowAt(0).get('unitSymbol')?.setValue('jar')
+      expect(rowAt(0).get('conversionRate')?.value).toBeNull()
+      expect(rowAt(0).get('uom')?.value).toBe('kg')
+    })
+
+    it('choosing a system unit fills the exact amount', () => {
+      component['addPurchaseOption']()
+      rowAt(0).get('unitSymbol')?.setValue('gram')
+      expect(rowAt(0).get('conversionRate')?.value).toBe(0.001)
+      rowAt(0).get('unitSymbol')?.setValue('kg')
+      expect(rowAt(0).get('conversionRate')?.value).toBe(1)
+    })
+
+    it('add new unit opens the window in product mode with the product name and base unit', () => {
+      component['addPurchaseOption']()
+      component['onUnitSymbolValueChange']('NEW_UNIT', 0)
+      expect(mockUnitRegistry.openUnitCreator).toHaveBeenCalledWith(
+        jasmine.objectContaining({ forProduct: { name: 'חמוצים', baseUnit: 'kg' } })
+      )
+    })
+
+    it('add new unit then add: the row holds the typed amount, its basis and the new key', () => {
+      component['addPurchaseOption']()
+      component['onUnitSymbolValueChange']('NEW_UNIT', 0)
+      productUnitAdded$.next({ key: 'jar', amount: 350, basis: 'gram' })
+      expect(rowAt(0).value).toEqual(jasmine.objectContaining({ unitSymbol: 'jar', conversionRate: 350, uom: 'gram' }))
+    })
+
+    it('add new unit then cancel: the row keeps its previous unit, amount and basis (strings, not numbers)', () => {
+      component['addPurchaseOption']({ unitSymbol: 'gram', conversionRate: 1, uom: 'gram' })
+      rowAt(0).get('unitSymbol')?.setValue('NEW_UNIT')
+      component['onUnitSymbolValueChange']('NEW_UNIT', 0)
+      expect(rowAt(0).get('unitSymbol')?.value).toBe('')
+      creatorClosed$.next() // cancel
+      expect(rowAt(0).get('unitSymbol')?.value).toBe('gram')
+      expect(rowAt(0).get('conversionRate')?.value).toBe(1)
+      expect(rowAt(0).get('uom')?.value).toBe('gram')
+    })
+
+    it('base unit: add new unit then cancel keeps what it showed; then add selects the new unit', () => {
+      component['onBaseUnitValueChange']('NEW_UNIT')
+      expect(component['productForm_'].get('baseUnit')?.value).toBe('')
+      creatorClosed$.next()
+      expect(component['productForm_'].get('baseUnit')?.value).toBe('kg')
+      component['onBaseUnitValueChange']('NEW_UNIT')
+      unitAdded$.next('crate')
+      expect(component['productForm_'].get('baseUnit')?.value).toBe('crate')
     })
   })
 

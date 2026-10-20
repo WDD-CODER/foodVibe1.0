@@ -35,7 +35,7 @@ import { Product, PurchaseOption_, ProductSource } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { UtilService } from '@services/util.service'
-import { UnitRegistryService } from '@services/unit-registry.service'
+import { UnitRegistryService, UnitCreatorContext, ProductUnitAdded } from '@services/unit-registry.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { TranslationService } from '@services/translation.service'
@@ -44,6 +44,7 @@ import { TranslationKeyModalService, isTranslationKeyResult } from '@services/tr
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service'
 import { LoggingService } from '@services/logging.service'
 import { toSignal } from '@angular/core/rxjs-interop'
+import { map, Observable } from 'rxjs'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
@@ -58,6 +59,19 @@ import { UserService } from '@services/user.service'
 import { MasterPushService } from '@services/master-push.service'
 import { HeroFabService } from '@services/hero-fab.service'
 import { registerDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
+
+/**
+ * Plan 423 — units whose size is a physical constant: choosing one in a purchase row fills the exact amount.
+ * Any other unit (jar, box, ...) weighs something different for every product, so its amount is typed per product.
+ */
+const PREFILLED_UNITS: ReadonlySet<string> = new Set(['kg', 'gram', 'liter', 'ml', 'tablespoon', 'teaspoon', 'cup'])
+
+interface PurchaseOptionState {
+  overrideConfirmed: boolean
+  /** Last real unit of the row (never 'NEW_UNIT'): what a cancelled "add new unit" restores. */
+  previousUnit?: string
+  previousUom?: string
+}
 
 interface ProductFormValue {
   buy_price_global_?: number
@@ -150,7 +164,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   isSubmitted = false
 
   // Tracks per-row state for purchase options (e.g., whether a manual override was confirmed)
-  private readonly purchaseOptionState_ = new WeakMap<FormGroup, { overrideConfirmed: boolean }>()
+  private readonly purchaseOptionState_ = new WeakMap<FormGroup, PurchaseOptionState>()
 
   //COMPUTED
   protected netUnitCost_ = computed(() => {
@@ -329,8 +343,17 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       allergens: [[]],
       purchaseOptions: this.fb_.array([])
     })
+    this.productForm_
+      .get('baseUnit')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v: string | null) => {
+        if (v && v !== 'NEW_UNIT') this.previousBaseUnit_ = v
+      })
     this.setupWasteLogic()
   }
+
+  /** Last real base unit (never 'NEW_UNIT'): what a cancelled "add new unit" restores. */
+  private previousBaseUnit_ = ''
 
   // RESTORED WASTE LOGIC
   private setupWasteLogic(): void {
@@ -446,68 +469,95 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     return typed
   }
 
+  /**
+   * Plan 423 - one flow for every "add new unit" in the form. Clears the control, opens the window, then
+   * delivers the unit that was saved (`onAdded`) or, when the window closes without a save, puts `previous`
+   * (a string, never a number) back. Takes the first result only and ends with the component.
+   */
+  private pickNewUnit_(
+    control: AbstractControl | null | undefined,
+    previous: string,
+    context: UnitCreatorContext,
+    onAdded: (added: { key: string; amount?: number; basis?: string }) => void
+  ): void {
+    control?.setValue('', { emitEvent: false })
+    this.unitRegistry.openUnitCreator(context)
+    const added$: Observable<{ key: string; amount?: number; basis?: string }> = context.forProduct
+      ? this.unitRegistry.awaitProductUnitAdded()
+      : this.unitRegistry.awaitUnitCreated().pipe(map((key) => ({ key })))
+    let didAdd = false
+    added$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (added) => {
+        didAdd = true
+        onAdded(added)
+      },
+      complete: () => {
+        if (!didAdd) control?.setValue(previous, { emitEvent: false })
+      }
+    })
+  }
+
   protected onBaseUnitValueChange(value: string): void {
-    if (value === 'NEW_UNIT') {
-      this.unitRegistry.openUnitCreator({ prefillName: this.takePendingAddName_() })
-      this.productForm_.patchValue({ baseUnit: '' })
-      this.unitRegistry
-        .awaitUnitCreated()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((newUnit) => {
-          this.productForm_.patchValue({ baseUnit: newUnit })
-        })
-    }
+    if (value !== 'NEW_UNIT') return
+    const control = this.productForm_.get('baseUnit')
+    this.pickNewUnit_(control, this.previousBaseUnit_, { prefillName: this.takePendingAddName_() }, ({ key }) => {
+      control?.setValue(key)
+    })
   }
 
   protected onUnitSymbolValueChange(value: string, index: number): void {
-    if (value === 'NEW_UNIT') {
-      const existingSymbols =
-        ((this.purchaseOptions_.value as { unitSymbol?: string }[])
-          ?.map((o) => o?.unitSymbol)
-          ?.filter(Boolean) as string[]) ?? []
-      this.unitRegistry.openUnitCreator({
+    if (value !== 'NEW_UNIT') return
+    const row = this.purchaseOptions_.at(index) as FormGroup | undefined
+    if (!row) return
+    const existingSymbols =
+      ((this.purchaseOptions_.value as { unitSymbol?: string }[])
+        ?.map((o) => o?.unitSymbol)
+        ?.filter(Boolean) as string[]) ?? []
+    const productName = String(this.productForm_.get('productName')?.value ?? '').trim()
+    const baseUnit = String(this.productForm_.get('baseUnit')?.value ?? '')
+    const previous = this.purchaseOptionState_.get(row)?.previousUnit ?? ''
+    this.pickNewUnit_(
+      row.get('unitSymbol'),
+      previous,
+      {
         existingUnitSymbols: existingSymbols,
-        prefillName: this.takePendingAddName_()
-      })
-      this.purchaseOptions_.at(index)?.patchValue({ unitSymbol: '' })
-      this.unitRegistry
-        .awaitUnitCreated()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((unitKey) => this.applyNewPurchaseUnit_(index, unitKey))
-    }
+        prefillName: this.takePendingAddName_(),
+        forProduct: { name: productName, baseUnit }
+      },
+      (added) => this.applyNewPurchaseUnit_(index, added as ProductUnitAdded)
+    )
   }
 
-  /** Fill a purchase row with a just-created unit: symbol, base uom, conversion rate and suggested price. */
-  private applyNewPurchaseUnit_(index: number, unitKey: string): void {
-    const row = this.purchaseOptions_.at(index)
+  /** Fill a purchase row with a just-added unit: this product's own amount, the unit it was typed in, suggested price. */
+  private applyNewPurchaseUnit_(index: number, added: ProductUnitAdded): void {
+    const row = this.purchaseOptions_.at(index) as FormGroup | undefined
     if (!row) return
-    const baseUnit = this.productForm_.get('baseUnit')?.value ?? ''
-    const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1
-    const unitFactor = this.unitRegistry.getConversion(unitKey) || 1
-    // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
-    const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
     const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(
       this.productForm_.get('buy_price_global_')?.value || 0,
-      conversionRate
+      added.amount
     )
     row.patchValue(
-      { unitSymbol: unitKey, uom: baseUnit, conversionRate, priceOverride: suggestedPrice },
+      { unitSymbol: added.key, uom: added.basis, conversionRate: added.amount, priceOverride: suggestedPrice },
       { emitEvent: false }
     )
+    const state = this.purchaseOptionState_.get(row) ?? { overrideConfirmed: false }
+    this.purchaseOptionState_.set(row, {
+      ...state,
+      overrideConfirmed: false,
+      previousUnit: added.key,
+      previousUom: added.basis
+    })
     this.productForm_.markAsDirty()
   }
 
   protected onUomValueChange(value: string, index: number): void {
-    if (value === 'NEW_UNIT') {
-      this.unitRegistry.openUnitCreator({ prefillName: this.takePendingAddName_() })
-      this.purchaseOptions_.at(index)?.patchValue({ uom: '' })
-      this.unitRegistry
-        .awaitUnitCreated()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((newUnit) => {
-          this.purchaseOptions_.at(index)?.patchValue({ uom: newUnit })
-        })
-    }
+    if (value !== 'NEW_UNIT') return
+    const row = this.purchaseOptions_.at(index) as FormGroup | undefined
+    if (!row) return
+    const previous = this.purchaseOptionState_.get(row)?.previousUom ?? ''
+    this.pickNewUnit_(row.get('uom'), previous, { prefillName: this.takePendingAddName_() }, ({ key }) => {
+      row.get('uom')?.setValue(key)
+    })
   }
 
   protected toggleAllergen(allergen: string): void {
@@ -658,13 +708,24 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     })
 
     // Initialize state for this row
-    this.purchaseOptionState_.set(group, { overrideConfirmed: false })
+    this.purchaseOptionState_.set(group, { overrideConfirmed: false, previousUnit: unit, previousUom: uomValue })
+
+    group
+      .get('uom')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v: string | null) => {
+        if (!v || v === 'NEW_UNIT') return
+        const state = this.purchaseOptionState_.get(group) ?? { overrideConfirmed: false }
+        this.purchaseOptionState_.set(group, { ...state, previousUom: v })
+      })
 
     group
       .get('unitSymbol')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((newUnit: string | null) => {
-        if (!newUnit || newUnit === 'NEW_UNIT') {
+        // 'NEW_UNIT': the row stays as it was until the window answers (a cancel restores the previous unit)
+        if (newUnit === 'NEW_UNIT') return
+        if (!newUnit) {
           group.patchValue(
             {
               conversionRate: null,
@@ -679,13 +740,18 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         const baseUnitKey = this.productForm_.get('baseUnit')?.value ?? ''
         const baseFactor = this.unitRegistry.getConversion(baseUnitKey) || 1
         const unitFactor = this.unitRegistry.getConversion(newUnit) || 1
-        // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
-        const suggestedConv = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
+        // Plan 423: only physical-constant units are pre-filled (kg, gram, ...). A custom unit (jar, box)
+        // weighs something different for every product, so another product's number is never copied in.
+        const suggestedConv: number | null = PREFILLED_UNITS.has(newUnit)
+          ? baseFactor > 0 && unitFactor > 0
+            ? unitFactor / baseFactor
+            : 1
+          : null
         const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0
 
         // 1. Get the actual base unit selected at the top of the form (e.g., 'gram')
         const currentBaseUnit = this.productForm_.get('baseUnit')?.value ?? ''
-        const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv)
+        const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv ?? 0)
 
         // 2. Patch the row so the "UOM" (middle dropdown) is no longer empty
         group.patchValue(
@@ -698,9 +764,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         )
 
         // Reset override state when unit changes
-        const state = this.purchaseOptionState_.get(group) || { overrideConfirmed: false }
-        state.overrideConfirmed = false
-        this.purchaseOptionState_.set(group, state)
+        const state = this.purchaseOptionState_.get(group) ?? { overrideConfirmed: false }
+        this.purchaseOptionState_.set(group, { ...state, overrideConfirmed: false, previousUnit: newUnit })
 
         // 3. Mark for check to ensure the UI refreshes the calculation
         group.get('priceOverride')?.markAsDirty()
@@ -711,7 +776,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((newConv: number | null | undefined) => {
         if (newConv === null || newConv === undefined) return
-        const state = this.purchaseOptionState_.get(group) || { overrideConfirmed: false }
+        const state = this.purchaseOptionState_.get(group) ?? { overrideConfirmed: false }
         if (state.overrideConfirmed) {
           return
         }
@@ -746,7 +811,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const group = control as FormGroup | null
     if (!group) return
 
-    const state = this.purchaseOptionState_.get(group) || { overrideConfirmed: false }
+    const state = this.purchaseOptionState_.get(group) ?? { overrideConfirmed: false }
     const conventional = this.getConventionalPriceForGroup_(group)
     const current = group.get('priceOverride')?.value
     const epsilon = 0.0001

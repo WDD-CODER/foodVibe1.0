@@ -46,6 +46,12 @@ export class UnitCreatorModal {
       if (this.isOpen_()) {
         // Open with the name the chef typed in the dropdown (rule W); read untracked so typing never resets it.
         this.newUnitName_.set(untracked(() => this.unitRegistryService.creatorPrefillName_()))
+        // Plan 423: product mode asks this product's own amount, in the product's base unit by default.
+        const forProduct = untracked(() => this.unitRegistryService.creatorForProduct_())
+        if (forProduct) {
+          this.newUnitValue_.set(0)
+          this.basisUnit_.set(forProduct.baseUnit)
+        }
         setTimeout(() => document.getElementById('unit-creator-name')?.focus(), 0)
       }
     })
@@ -59,6 +65,15 @@ export class UnitCreatorModal {
   newUnitName_ = signal('')
   newUnitValue_ = signal(1)
   basisUnit_ = signal<string>('') // 🛠️ REFACTORED: Use technical key 'gram'
+
+  /** Product the window was opened for, or null in plain mode. */
+  protected forProduct_ = this.unitRegistryService.creatorForProduct_
+  protected titleKey_ = computed(() => (this.forProduct_() ? 'unit_creator_title_for_product' : 'unit_creator_title'))
+  protected titleText_ = computed(() => this.fillPlaceholders_(this.translationService.translate(this.titleKey_())))
+  protected amountLabel_ = computed(() => {
+    if (!this.forProduct_()) return this.translationService.translate('amount')
+    return this.fillPlaceholders_(this.translationService.translate('unit_amount_for_product'))
+  })
 
   protected basisOptions_ = this.unitRegistryService.allUnitKeys_
   protected basisUnitOptions_ = computed(() => this.basisOptions_().map((k) => ({ value: k, label: k })))
@@ -95,6 +110,12 @@ export class UnitCreatorModal {
   close() {
     this.unitRegistryService.closeUnitCreator()
     this.resetFields()
+  }
+
+  /** Fills {{name}} (the product) and {{unit}} (the unit being typed) in a product-mode text. */
+  private fillPlaceholders_(text: string): string {
+    const unitName = this.newUnitName_().trim() || this.translationService.translate('unit_name')
+    return text.replace('{{name}}', this.forProduct_()?.name ?? '').replace('{{unit}}', unitName)
   }
 
   private resetFields() {

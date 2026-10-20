@@ -269,6 +269,8 @@
     "compare_to_unit": "להשוואה ל-",
     "basis_unit_label": "יחידת מידה להשוואה",
     "unit_creator_title": "הגדרת יחידת המרה חדשה",
+    "unit_creator_title_for_product": "יחידה חדשה עבור {{name}}",
+    "unit_amount_for_product": "כמה שוקלת {{unit}} אחת של {{name}}?",
     "unit_name": "שם היחידה",
     "unit_name_placeholder": "למשל: דלי",
     "net_cost_calculated": "עלות נטו מחושבת:",

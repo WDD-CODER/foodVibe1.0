@@ -1,7 +1,7 @@
 @if (isOpen_()) {
   <div class="c-modal-overlay" (click)="resetAndClose()">
     <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
-      <h3>{{ 'unit_creator_title' | translatePipe }}</h3>
+      <h3>{{ titleText_() }}</h3>
 
       <div class="c-modal-body unit-creator-formula-grid">
         <div class="c-input-stack">
@@ -28,7 +28,7 @@
         }
 
         <div class="c-input-stack unit-creator-amount">
-          <label>{{ 'amount' | translatePipe }}</label>
+          <label>{{ amountLabel_() }}</label>
           <div class="amount-row">
             <span class="math-operator"> = </span>
             <input
