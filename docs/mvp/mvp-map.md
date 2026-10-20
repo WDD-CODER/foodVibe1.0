@@ -176,3 +176,4 @@ These extend the contracts above; each plan file carries its own exact wording.
 ## Contract extensions (run)
 
 Workers append here: `- plan NNN · <extension> · why`.
+- plan 424 · `tombstoneSchema` also accepts optional `createdBy` (next to `businessId`) · migration 0006 stamps purged stubs like any doc and the strict schema rejected them.

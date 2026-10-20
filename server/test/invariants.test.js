@@ -114,8 +114,8 @@ describe('INV-1 Ownership', () => {
 });
 
 describe('INV-2 Tenancy', () => {
-  it.todo('INV-2 a user removes a shared term for himself only; another user still reads it (needs plan 386)');
-  it.todo('INV-2 a user renames a shared term for himself only; another user still reads the original name (needs plan 386)');
+  it.todo('INV-2 a business never reads another business items; the business copy of a master item is shared by owner and staff (plan 425)');
+  it.todo('INV-2 master sync runs per business and never overwrites an item the business changed or deleted (plan 425)');
 });
 
 describe('INV-4 One schema package, server validates every write', () => {

@@ -7,6 +7,7 @@ const { cloneMasterDataToUser } = require('../services/clone-master');
 const { syncMasterToUser } = require('../services/sync-master');
 const { getMasterVersion } = require('../services/master-version');
 const { newId } = require('../utils/id');
+const { createBusinessFor, ensureBusinessForUser } = require('../services/business');
 
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -64,6 +65,36 @@ function isDbUnavailableError(err) {
     err.name === 'MongoServerSelectionError' ||
     /buffering timed out/i.test(err.message || '')
   );
+}
+
+/**
+ * Plan 424: the one place an access token is signed. Carries the business fields next to the
+ * legacy `role` (plan 426 removes the last client read of it; plan 425 drops the role fallback).
+ */
+function signAccess(user) {
+  const payload = {
+    userId: String(user._id),
+    name: user.name,
+    role: user.role || 'user',
+    businessId: user.businessId ?? null,
+    businessRole: user.businessRole ?? null,
+    isPlatformAdmin: user.isPlatformAdmin === true || user.role === 'admin',
+  };
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+}
+
+/** The user object login/signup/guest hand to the client. */
+function toPublicUser(user) {
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    imgUrl: user.imgUrl || '',
+    role: user.role || 'user',
+    businessId: user.businessId ?? null,
+    businessRole: user.businessRole ?? null,
+    isPlatformAdmin: user.isPlatformAdmin === true || user.role === 'admin',
+  };
 }
 
 /**
@@ -143,13 +174,16 @@ router.post('/signup', signupLimiter, async (req, res) => {
     }
     const passwordHash = password;
     const _id = newId();
-    await User.create({ _id, name, email, imgUrl: imgUrl || '', passwordHash });
-
-    await cloneMasterDataToUser(_id);
     const masterVersion = await getMasterVersion();
+    const created = await User.create({ _id, name, email, imgUrl: imgUrl || '', passwordHash });
+    const user = created.toObject();
+
+    // Plan 424: every new user starts as the owner of their own business.
+    await createBusinessFor(user, { name: 'העסק של ' + name, masterVersion });
+    await cloneMasterDataToUser(_id, { businessId: user.businessId });
     await User.updateOne({ _id }, { lastSyncedMasterVersion: masterVersion });
 
-    const token = jwt.sign({ userId: _id, name, role: 'user' }, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    const token = signAccess(user);
     const refreshToken = jwt.sign({ userId: _id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -159,7 +193,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    const publicUser = { _id, name, email, imgUrl: imgUrl || '', role: 'user' };
+    const publicUser = toPublicUser(user);
     return res.status(201).json({ token, user: publicUser });
   } catch (err) {
     req.log.error({ err, event: 'auth.signup.failed' });
@@ -208,11 +242,7 @@ router.post('/login', loginLimiter, async (req, res) => {
       await User.updateOne({ _id: user._id }, { failedAttempts: 0, lockedUntil: null });
     }
 
-    const token = jwt.sign(
-      { userId: user._id, name: user.name, role: user.role || 'user' },
-      ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_EXPIRY }
-    );
+    const token = signAccess(user);
     const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -223,12 +253,12 @@ router.post('/login', loginLimiter, async (req, res) => {
     });
 
     try {
-      await syncMasterToUser(user._id);
+      await syncMasterToUser(user._id, { businessId: user.businessId ?? undefined });
       const masterVersion = await getMasterVersion();
       await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
     } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.login.sync_failed' }); }
 
-    const publicUser = { _id: user._id, name: user.name, email: user.email, imgUrl: user.imgUrl, role: user.role || 'user' };
+    const publicUser = toPublicUser(user);
     return res.json({ token, user: publicUser });
   } catch (err) {
     req.log.error({ err, event: 'auth.login.failed' });
@@ -257,11 +287,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     const user = await User.findById(payload.userId).lean();
     if (!user) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
-    const token = jwt.sign(
-      { userId: user._id, name: user.name, role: user.role || 'user' },
-      ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_EXPIRY }
-    );
+    const token = signAccess(user);
 
     const newRefreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
     res.cookie(REFRESH_COOKIE, newRefreshToken, {
@@ -283,7 +309,7 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
           req.log.debug({ event: 'auth.refresh.sync_skipped', userId: String(user._id) });
           return;
         }
-        await syncMasterToUser(user._id);
+        await syncMasterToUser(user._id, { businessId: user.businessId ?? undefined });
         await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
       })
       .catch(syncErr => req.log.error({ err: syncErr, event: 'auth.refresh.sync_failed' }));
@@ -325,17 +351,15 @@ router.post('/guest', async (req, res) => {
   }
 
   try {
-    await User.findOneAndUpdate(
+    const guestDoc = await User.findOneAndUpdate(
       { _id: 'dev-guest' },
-      { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin', passwordHash: null },
+      { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin', isPlatformAdmin: true, passwordHash: null },
       { upsert: true, new: true }
     );
+    const guest = guestDoc.toObject();
+    await ensureBusinessForUser(guest);
 
-    const token = jwt.sign(
-      { userId: 'dev-guest', name: 'Guest Admin', role: 'admin' },
-      ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_EXPIRY }
-    );
+    const token = signAccess(guest);
     const refreshToken = jwt.sign({ userId: 'dev-guest' }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -346,14 +370,14 @@ router.post('/guest', async (req, res) => {
     });
 
     try {
-      await syncMasterToUser('dev-guest');
+      await syncMasterToUser('dev-guest', { businessId: guest.businessId });
       const masterVersion = await getMasterVersion();
       await User.updateOne({ _id: 'dev-guest' }, { lastSyncedMasterVersion: masterVersion });
     } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.guest.sync_failed' }); }
 
     return res.json({
       token,
-      user: { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin' },
+      user: toPublicUser(guest),
     });
   } catch (err) {
     req.log.error({ err, event: 'auth.guest.failed' });

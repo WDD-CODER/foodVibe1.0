@@ -13,6 +13,12 @@ const userSchema = new Schema(
     // Master version (server/services/master-version.js) this user was last synced against.
     // POST /refresh skips syncMasterToUser when this already matches the current version.
     lastSyncedMasterVersion: { type: Number, default: 0 },
+    // Plan 424: the business (tenant) the user belongs to and their part in it.
+    businessId: { type: String, default: null },
+    businessRole: { type: String, enum: ['owner', 'staff'], default: null },
+    isPlatformAdmin: { type: Boolean, default: false },
+    removedAt: { type: Number, default: null },
+    createdAt: { type: Number, default: null },
   },
   { timestamps: false }
 );

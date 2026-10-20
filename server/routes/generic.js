@@ -12,6 +12,7 @@ const { checkStoredDoc } = require('../middleware/validate');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
+const { MASTER_BUSINESS_ID, stampNew } = require('../utils/business-scope');
 
 const router = Router();
 
@@ -410,7 +411,7 @@ router.get('/:type/:id', optionalToken, async (req, res) => {
 router.post('/:type', verifyToken, async (req, res) => {
   try {
     const entityType = req.params.type;
-    const { _id: clientId, userId: _u, _masterId: _m, _userModified: _um, ...body } = req.body;
+    const { _id: clientId, userId: _u, businessId: _b, createdBy: _cb, _masterId: _m, _userModified: _um, ...body } = req.body;
     const _id = typeof clientId === 'string' && clientId ? clientId : makeId();
     // Taxonomy terms: `shared: true` (admin only) creates a master term instead of an own one.
     let shared = false;
@@ -419,7 +420,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (shared && !isAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
 
     const now = Date.now();
-    const doc = {
+    const doc = stampNew(req, {
       ...safeEntity,
       _id,
       userId: shared ? MASTER : req.user.userId,
@@ -430,7 +431,9 @@ router.post('/:type', verifyToken, async (req, res) => {
         createdAt: typeof safeEntity.createdAt === 'number' ? safeEntity.createdAt : now,
         updatedAt: now,
       }),
-    };
+    });
+    // Plan 424: a shared term belongs to the master catalog, not to the admin's own business.
+    if (shared) doc.businessId = MASTER_BUSINESS_ID;
 
     const check = checkStoredDoc(entityType, doc);
     if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
@@ -515,7 +518,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     }
 
     // Destructure reserved fields out of req.body — client must not override them.
-    const { userId: _, _masterId: __, _userModified: ___, ...safeBody } = req.body;
+    const { userId: _, businessId: _bid, createdBy: _cby, _masterId: __, _userModified: ___, ...safeBody } = req.body;
 
     const isTerm = req.params.type === TAXONOMY;
     const filter = { _id: req.params.id, userId: isTerm ? termWriteOwner(req) : req.user.userId, ...LIVE };
@@ -655,7 +658,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   );
 
   // Per-user state never reaches the shared copy (plan 407): the owner's favorite mark and delete stamps.
-  const { userId: _u, _masterId: _m, _userModified: _um, _id: _i, favorite: _f, deletedAt: _da, deletedBy: _db, purgedAt: _pa, ...safeBody } = existing;
+  const { userId: _u, businessId: _bz, createdBy: _cz, _masterId: _m, _userModified: _um, _id: _i, favorite: _f, deletedAt: _da, deletedBy: _db, purgedAt: _pa, ...safeBody } = existing;
   const ingredientsField = hasIngredients ? { ingredients } : {};
   // 2026-09-30 fix (take 2): every new doc self-links (_masterId = its own _id, see POST
   // above). A naive upsert with that same _id fails — `_id` is uniquely indexed across the
@@ -684,6 +687,8 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
       ...ingredientsField,
       _id: resolvedMasterId,
       userId: '__master__',
+      businessId: MASTER_BUSINESS_ID,
+      createdBy: userId,
       _masterId: resolvedMasterId,
       _userModified: false
     });
@@ -996,14 +1001,14 @@ router.put('/:type', verifyToken, async (req, res) => {
     const stillTaken = new Set(conflictDocs.map(d => d._id));
 
     const docs = entities.map(e => {
-      const { userId: _u, _masterId: _m, _userModified: _um, ...safeEntity } = e;
-      return {
+      const { userId: _u, businessId: _b, createdBy: _cb, _masterId: _m, _userModified: _um, ...safeEntity } = e;
+      return stampNew(req, {
         ...safeEntity,
         _id: stillTaken.has(safeEntity._id) ? makeId() : (safeEntity._id || makeId()),
         userId: req.user.userId,
         _masterId: null,
         _userModified: false,
-      };
+      });
     });
 
     try {

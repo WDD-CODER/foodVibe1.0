@@ -11,6 +11,10 @@ export const baseDocShape = {
   _id: z.string().min(1),
   schemaVersion: z.literal(2),
   userId: z.string().min(1),
+  /** Plan 424: the business (tenant) that owns the item; `'__master__'` for shared master items. Required from plan 425. */
+  businessId: z.string().min(1).optional(),
+  /** Plan 424: userId of whoever created the item. Required from plan 425. */
+  createdBy: z.string().min(1).optional(),
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().optional(),
@@ -26,6 +30,8 @@ export const tombstoneSchema = z.strictObject({
   _id: z.string().min(1),
   schemaVersion: z.literal(2),
   userId: z.string().min(1),
+  businessId: z.string().min(1).optional(),
+  createdBy: z.string().min(1).optional(),
   _masterId: z.string().min(1),
   _userModified: z.boolean().optional(),
   deletedAt: z.number(),

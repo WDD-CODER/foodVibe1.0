@@ -62,9 +62,10 @@ function remapLogistics(logistics, equipmentIdMap) {
  * Syncs master data changes into the given user's namespace.
  *
  * @param {string} userId
+ * @param {{ businessId?: string }} [opts]  — plan 424: stamped on newly cloned items (Rule 1)
  * @returns {Promise<{ inserted: number, updated: number }>}
  */
-async function syncMasterToUser(userId) {
+async function syncMasterToUser(userId, { businessId } = {}) {
   const db = mongoose.connection.db;
   let totalInserted = 0;
   let totalUpdated = 0;
@@ -282,11 +283,13 @@ async function syncMasterToUser(userId) {
           }
         }
         const newId = NAMED_TYPES.has(entityType) ? newCloneId.get(masterId) : makeId();
-        const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, ...rest } = master;
+        const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, businessId: _b, createdBy: _cb, ...rest } = master;
         const clone = {
           ...rest,
           _id: newId,
           userId,
+          ...(businessId && { businessId }),
+          createdBy: userId,
           _masterId: masterId,
           _userModified: false,
         };
@@ -314,7 +317,7 @@ async function syncMasterToUser(userId) {
         toInsert.push(clone);
       } else if (!existing._userModified && existing.deletedAt === undefined) {
         // Rule 2: unmodified clone — overwrite with latest master data
-        const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, ...masterRest } = master;
+        const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, businessId: _b, createdBy: _cb, ...masterRest } = master;
 
         // Remap ingredient refs so user's product/sub-recipe IDs are preserved
         // (same guard as Rule 1). Remap logistics equipmentId likewise.

@@ -95,7 +95,7 @@ const SYSTEM_UNITS = {
 
 /** The default master registries, in the v1 registry shape migration 0003 explodes into terms. */
 function defaultMasterRegistries() {
-  const master = fields => [{ _id: 'default', userId: '__master__', ...fields }];
+  const master = fields => [{ _id: 'default', userId: '__master__', businessId: '__master__', createdBy: '__master__', ...fields }];
   return {
     KITCHEN_CATEGORIES: master({ items: ['vegetables', 'dairy', 'meat', 'dry', 'fish', 'spices'] }),
     KITCHEN_ALLERGENS: master({
@@ -133,7 +133,8 @@ async function seedMasterTaxonomy() {
   // Required lazily: the migration module pulls in the generated schemas.
   const { buildTerms } = require('../migrations/0003-taxonomy-terms');
   const { terms } = buildTerms(defaultMasterRegistries(), Date.now());
-  await db.collection('taxonomyTerms').insertMany(terms, { ordered: false });
+  const stamped = terms.map(t => ({ ...t, businessId: '__master__', createdBy: '__master__' }));
+  await db.collection('taxonomyTerms').insertMany(stamped, { ordered: false });
   logger.info({ event: 'seed.master.taxonomy_seeded', count: terms.length });
   return terms.length;
 }
@@ -190,6 +191,8 @@ async function seedMasterData() {
         ...upgraded,
         _id: newId,
         userId: '__master__',
+        businessId: '__master__',
+        createdBy: '__master__',
         _masterId: null,
         _userModified: false,
       };
