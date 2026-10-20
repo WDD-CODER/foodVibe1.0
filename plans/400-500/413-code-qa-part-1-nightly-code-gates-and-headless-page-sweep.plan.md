@@ -37,7 +37,7 @@ agent reads, so the agent does not test or report them again.
   fingerprints.
 - [human] After one night: `bugs/qa-runs/.nightly.log` shows the `CODE-QA:` lines before 02:40, and the UI agent's
   `report.md` repeats no `CODE-*` finding and marks G1/G4/G5/G8 as pre-checked.
-- [human] The Human reads one `pre-qa.md` and confirms the false-alarm rate is acceptable (the Human picks 5
+- [x] [human] (validated by Human 2026-10-20) The Human reads one `pre-qa.md` and confirms the false-alarm rate is acceptable (the Human picks 5
   findings at random; at most 1 is wrong).
 
 ## Execution Mode

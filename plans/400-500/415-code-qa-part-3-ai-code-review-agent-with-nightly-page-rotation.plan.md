@@ -43,7 +43,7 @@ another page waits.
   `code-verified | suspect | unknown`).
 - [human] After the first night with the Cowork task on: at least one `review-<PAGE>.md` exists, `latest.md` shows
   its marks, and the UI agent's report follows `suspect` / `unknown` checks first for that page.
-- [human] The Human sets up both Cowork tasks and the Windows tasks from the C11 guide without needing to ask a follow-up question.
+- [x] [human] (validated by Human 2026-10-20) The Human sets up both Cowork tasks and the Windows tasks from the C11 guide without needing to ask a follow-up question.
 - [human] After 7 nights: `ledger.json` shows no page reviewed twice before every page was reviewed once, and the
   Human reads 5 `CODE-AI-` findings at random and at most 1 is wrong.
 

@@ -1,46 +1,25 @@
-# Session State — 2026-04-14
+# Session State
 
-> Single source of continuity. Read this at session start, update it at session end.
+## Branch
+chore/validate-code-qa-413-415
 
----
-
-## Current Status
-
-**Branch:** `main`
-**Latest commit:** `ab73c3d`
-**Test baseline:** passing (Plan 266 build verified)
-**Build status:** passing
-**Open PRs:** none
-
----
+## Date
+2026-10-20
 
 ## Session Summary
+- Planned Code QA (plans 413-415, since merged) and recorded the Human's validation of their now-checkable items; the night-dependent checks stay open|Added a machine-wide validation hand-off: rule + page-grouped card template in ~/.claude/CLAUDE.md, hook ~/.claude/hooks/validation-handoff.mjs (Stop + PreToolUse) registered in ~/.claude/settings.json|Kit plan 009 (validation hand-off in kit files) merged as kit PR #30
 
-- Shipped Plan 266: cook timer / labor time separation — cook-view now shows a per-step countdown timer (h:mm:ss), recipe-builder has a separate cook time field, labor time hidden from cooking mode. Merged PR #108.
-- Built Plan 267 context-management system: installed claude-code-session-kit hooks (context-monitor, pre-compact-reminder, session-startup, handoff-check) into `scripts/` and merged into `.claude/settings.json`; created `docs/session-state.md`; added `## Context hygiene` to all 6 agent personas; created `.claude/skills/context-management/SKILL.md`.
-- Removed redundant custom `/checkpoint` and `/resume` commands — gstack already handles checkpoint/resume with auto-detection (`/resume` with no args loads most recent).
-- Plan 267 changes are uncommitted — ready to commit and PR.
+## Files Modified
+ ...13-code-qa-part-1-nightly-code-gates-and-headless-page-sweep.plan.md | 2 +-
+ plans/400-500/414-code-qa-part-2-api-and-data-checks.plan.md            | 2 +-
+ ...de-qa-part-3-ai-code-review-agent-with-nightly-page-rotation.plan.md | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
 
----
+## Commit
+e5a0c04a
+
+## PR
+N/A
 
 ## Next Steps
-
-1. Commit and PR Plan 267 changes (context-management system, session-kit hooks, agent persona edits, CLAUDE.md session section, docs/session-state.md)
-2. Verify `session-startup.sh` fires correctly on next session start and loads this file into context
-3. Address Plan 234 re-opened operational tasks (stamp migration, manual deploy/smoke test) — see `todo.md`
-
----
-
-## Blocked
-
-- Plan 234 operational tasks require manual Atlas/Compass access and production deploy — cannot be agent-executed
-
----
-
-## References
-
-- `plans/267-context-management-session-handoff.plan.md` — context-management system plan
-- `plans/session-kit-eval.md` — full session-kit compatibility report
-- `plans/session-handoff-setup.md` — user-facing guide to the handoff system
-- `.claude/skills/context-management/SKILL.md` — checkpoint trigger rules for agents
-- `scripts/` — 4 session-kit hook scripts (context-monitor, pre-compact-reminder, session-startup, handoff-check)
+- Write a /fix plan for the 7 API failures in C:/dev/foodVibe-qa/bugs/qa-runs/code-qa/2026-10-20/pre-qa.md (server accepts bad input: expected 400, got 201)|Run kit plan 009 after kit plan 008 merges|After tonight: check .nightly.log CODE-QA lines and the UI agent report (413/415 night checks)
