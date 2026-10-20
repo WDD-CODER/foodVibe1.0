@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
-const { verifyToken, requireAdmin } = require('../middleware/auth');
+const { verifyToken, requirePlatformAdmin } = require('../middleware/auth');
 const dns = require('node:dns').promises;
 
 // Plan 321 Phase 1 — strict per-user limit on the Gemini-backed AI routes (they cost
@@ -76,11 +76,11 @@ router.get('/usage', async (_req, res) => {
 // The model chain for all users: every selectable model in order, on/off, with today's
 // budget. PUT { models: [{ name, enabled }] } saves it; DELETE goes back to the default.
 // ---------------------------------------------------------------------------
-router.get('/models', verifyToken, requireAdmin, async (_req, res) => {
+router.get('/models', verifyToken, requirePlatformAdmin, async (_req, res) => {
   res.json({ models: await getChainSettings() });
 });
 
-router.put('/models', verifyToken, requireAdmin, async (req, res) => {
+router.put('/models', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     const error = await saveChainSettings(req.body?.models);
     if (error) return res.status(400).json({ error });
@@ -92,7 +92,7 @@ router.put('/models', verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-router.delete('/models', verifyToken, requireAdmin, async (req, res) => {
+router.delete('/models', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     await saveChainSettings(null);
     req.log.info({ event: 'ai.models.reset' });

@@ -1,6 +1,6 @@
 /**
- * Syncs master document updates into a user's namespace on login.
- * Respects user modifications — never overwrites user-edited documents.
+ * Syncs master document updates into a business on login (plan 425: once per business, shared by its members).
+ * Respects business modifications — never overwrites edited documents.
  *
  * Sync rules (applied per document per collection):
  *   1. New master item (no matching _masterId in user data)   → clone to user
@@ -28,6 +28,7 @@ const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 const { newId: makeId } = require('../utils/id');
 const { logger } = require('../logger');
 const { LIVE } = require('../jobs/purge-deleted');
+const { MASTER_BUSINESS_ID } = require('../utils/business-scope');
 
 /**
  * Remap ingredient referenceIds from master IDs to user-scoped IDs.
@@ -59,13 +60,14 @@ function remapLogistics(logistics, equipmentIdMap) {
 }
 
 /**
- * Syncs master data changes into the given user's namespace.
+ * Syncs master data changes into the given business.
  *
- * @param {string} userId
- * @param {{ businessId?: string }} [opts]  — plan 424: stamped on newly cloned items (Rule 1)
+ * @param {string} businessId
+ * @param {{ createdBy: string }} opts  — the business owner: stamped as `createdBy` / `userId` on newly cloned items (Rule 1)
  * @returns {Promise<{ inserted: number, updated: number }>}
  */
-async function syncMasterToUser(userId, { businessId } = {}) {
+async function syncMasterToBusiness(businessId, { createdBy } = {}) {
+  if (!businessId || !createdBy) throw new Error('syncMasterToBusiness needs a businessId and a createdBy')
   const db = mongoose.connection.db;
   let totalInserted = 0;
   let totalUpdated = 0;
@@ -77,7 +79,7 @@ async function syncMasterToUser(userId, { businessId } = {}) {
   async function getProductIdMap() {
     if (productIdMap) return productIdMap;
     const userProducts = await db.collection('products')
-      .find({ userId, _masterId: { $ne: null } })
+      .find({ businessId, _masterId: { $ne: null } })
       .project({ _id: 1, _masterId: 1 })
       .toArray();
     productIdMap = new Map(userProducts.map(p => [String(p._masterId), String(p._id)]));
@@ -93,8 +95,8 @@ async function syncMasterToUser(userId, { businessId } = {}) {
   async function getRecipeIdMap() {
     if (recipeIdMap) return recipeIdMap;
     const [userRecipes, userDishes] = await Promise.all([
-      db.collection('recipes').find({ userId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
-      db.collection('dishes').find({ userId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
+      db.collection('recipes').find({ businessId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
+      db.collection('dishes').find({ businessId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
     ]);
     recipeIdMap = new Map([...userRecipes, ...userDishes].map(d => [String(d._masterId), String(d._id)]));
     return recipeIdMap;
@@ -107,7 +109,7 @@ async function syncMasterToUser(userId, { businessId } = {}) {
   async function getEquipmentIdMap() {
     if (equipmentIdMap) return equipmentIdMap;
     const userEquipment = await db.collection('equipment')
-      .find({ userId, _masterId: { $ne: null } })
+      .find({ businessId, _masterId: { $ne: null } })
       .project({ _id: 1, _masterId: 1 })
       .toArray();
     equipmentIdMap = new Map(userEquipment.map(e => [String(e._masterId), String(e._id)]));
@@ -121,7 +123,7 @@ async function syncMasterToUser(userId, { businessId } = {}) {
   async function getSupplierIdMap() {
     if (supplierIdMap) return supplierIdMap;
     const userSuppliers = await db.collection('suppliers')
-      .find({ userId, _masterId: { $ne: null } })
+      .find({ businessId, _masterId: { $ne: null } })
       .project({ _id: 1, _masterId: 1 })
       .toArray();
     supplierIdMap = new Map(userSuppliers.map(s => [String(s._masterId), String(s._id)]));
@@ -136,8 +138,8 @@ async function syncMasterToUser(userId, { businessId } = {}) {
   async function getCrossCollectionNameSet() {
     if (crossCollectionNameSet) return crossCollectionNameSet;
     const [recipeDocs, dishDocs] = await Promise.all([
-      db.collection('recipes').find({ userId }, { projection: { nameHebrew: 1 } }).toArray(),
-      db.collection('dishes').find({ userId }, { projection: { nameHebrew: 1 } }).toArray(),
+      db.collection('recipes').find({ businessId }, { projection: { nameHebrew: 1 } }).toArray(),
+      db.collection('dishes').find({ businessId }, { projection: { nameHebrew: 1 } }).toArray(),
     ]);
     crossCollectionNameSet = new Set([
       ...recipeDocs.map(d => d.nameHebrew?.trim()).filter(Boolean),
@@ -170,8 +172,8 @@ async function syncMasterToUser(userId, { businessId } = {}) {
     for (const type of ['recipes', 'dishes']) {
       const col2 = db.collection(type);
       const [masterDocs2, userDocs2] = await Promise.all([
-        col2.find({ userId: '__master__', ...LIVE }).project({ _id: 1, nameHebrew: 1 }).toArray(),
-        col2.find({ userId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
+        col2.find({ businessId: MASTER_BUSINESS_ID, ...LIVE }).project({ _id: 1, nameHebrew: 1 }).toArray(),
+        col2.find({ businessId, _masterId: { $ne: null } }).project({ _id: 1, _masterId: 1 }).toArray(),
       ]);
       const userByMasterId2 = new Map(userDocs2.map(d => [String(d._masterId), d]));
       let collisionCount = 0;
@@ -204,9 +206,9 @@ async function syncMasterToUser(userId, { businessId } = {}) {
     const col = db.collection(entityType);
 
     const [masterDocs, userDocs, allUserDocs] = await Promise.all([
-      col.find({ userId: '__master__', ...LIVE }).toArray(),
-      col.find({ userId, _masterId: { $ne: null } }).toArray(),
-      col.find({ userId }, { projection: { _id: 1, nameHebrew: 1 } }).toArray(),
+      col.find({ businessId: MASTER_BUSINESS_ID, ...LIVE }).toArray(),
+      col.find({ businessId, _masterId: { $ne: null } }).toArray(),
+      col.find({ businessId }, { projection: { _id: 1, nameHebrew: 1 } }).toArray(),
     ]);
 
     if (masterDocs.length === 0) continue;
@@ -287,9 +289,9 @@ async function syncMasterToUser(userId, { businessId } = {}) {
         const clone = {
           ...rest,
           _id: newId,
-          userId,
-          ...(businessId && { businessId }),
-          createdBy: userId,
+          userId: createdBy,
+          businessId,
+          createdBy,
           _masterId: masterId,
           _userModified: false,
         };
@@ -374,4 +376,4 @@ async function syncMasterToUser(userId, { businessId } = {}) {
   return { inserted: totalInserted, updated: totalUpdated };
 }
 
-module.exports = { syncMasterToUser };
+module.exports = { syncMasterToBusiness };

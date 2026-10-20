@@ -2,7 +2,7 @@ const { Router } = require('express');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
-const { verifyToken, optionalToken, requireAdmin } = require('../middleware/auth');
+const { verifyToken, optionalToken, requirePlatformAdmin } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
 const { bumpMasterVersion } = require('../services/master-version');
@@ -12,7 +12,7 @@ const { checkStoredDoc } = require('../middleware/validate');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
-const { MASTER_BUSINESS_ID, stampNew } = require('../utils/business-scope');
+const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
 
 const router = Router();
 
@@ -92,20 +92,16 @@ function requireSoftDelete(req, res, next) {
 // ---------------------------------------------------------------------------
 const TAXONOMY = 'taxonomyTerms';
 const MASTER = '__master__';
-const isAdmin = req => req.user?.role === 'admin';
+const isAdmin = req => req.user?.isPlatformAdmin === true;
 
-/** userId filter for reads: taxonomy terms include master's; everything else is own-only. */
-function readOwner(type, userId) {
-  return type === TAXONOMY && userId !== MASTER ? { $in: [userId, MASTER] } : userId;
-}
-
-/** userId filter for writes to a term: own terms, plus master's for an admin. */
+/** businessId filter for writes to a term (plan 425): own business's terms, plus master's for a platform admin. */
 function termWriteOwner(req) {
-  return isAdmin(req) ? { $in: [req.user.userId, MASTER] } : req.user.userId;
+  const { businessId } = scopeFilter(req);
+  return isAdmin(req) ? { businessId: { $in: [businessId, MASTER] } } : { businessId };
 }
 
-/** Owners whose documents a term's key reaches: everyone for a shared term, else its owner. */
-const termScope = term => (term.userId === MASTER ? { $exists: true } : term.userId);
+/** Businesses whose documents a term's key reaches: everyone for a shared term, else its own business. */
+const termScope = term => (term.businessId === MASTER ? { $exists: true } : term.businessId);
 
 /** Splits a TERM_REFERENCES path: `labels[]` -> { field: 'labels', isList: true }. */
 const refPath = p => ({ field: p.replace(/\[\]$/, ''), isList: p.endsWith('[]') });
@@ -121,12 +117,12 @@ async function findTermReferences(term, limit = 5) {
     if (!paths.length || refs.length >= limit) continue;
     const docs = await col(type)
       .find(
-        { userId: termScope(term), ...LIVE, $or: paths.map(p => ({ [refPath(p).field]: term.key })) },
-        { projection: { nameHebrew: 1, name: 1, userId: 1 } }
+        { businessId: termScope(term), ...LIVE, $or: paths.map(p => ({ [refPath(p).field]: term.key })) },
+        { projection: { nameHebrew: 1, name: 1, businessId: 1 } }
       )
       .limit(limit - refs.length)
       .toArray();
-    for (const d of docs) refs.push({ type, _id: d._id, name: d.nameHebrew ?? d.name ?? d._id, userId: d.userId });
+    for (const d of docs) refs.push({ type, _id: d._id, name: d.nameHebrew ?? d.name ?? d._id, businessId: d.businessId });
   }
   return refs;
 }
@@ -140,7 +136,7 @@ async function renameTermEverywhere(term, newKey) {
   for (const [type, paths] of Object.entries(TERM_REFERENCES[term.kind] ?? {})) {
     for (const p of paths) {
       const { field, isList } = refPath(p);
-      const filter = { userId: termScope(term), [field]: term.key };
+      const filter = { businessId: termScope(term), [field]: term.key };
       const parts = field.split('.');
       if (isList) {
         await col(type).updateMany(filter, { $set: { [`${field}.$[k]`]: newKey } }, { arrayFilters: [{ k: term.key }] });
@@ -167,7 +163,7 @@ function termInUse(term, refs) {
 
 /** A user may not add or re-key an own term onto a key master already has for that kind. */
 async function masterHasTerm(kind, key) {
-  return Boolean(await col(TAXONOMY).findOne({ userId: MASTER, kind, key }, { projection: { _id: 1 } }));
+  return Boolean(await col(TAXONOMY).findOne({ businessId: MASTER, kind, key }, { projection: { _id: 1 } }));
 }
 
 // ---------------------------------------------------------------------------
@@ -182,7 +178,6 @@ router.get('/:type', optionalToken, async (req, res) => {
   // a 0.1-shared-CPU Render instance, so it only runs when debug is enabled.
   const perfLog = req.log.isLevelEnabled('debug');
   try {
-    const userId = req.user ? req.user.userId : '__master__';
     // Was capped at 500 (max 1000) — safe when no account had more than a few hundred
     // docs per collection. The legacy FoodComposer import (plan 300) pushed real
     // accounts past that (products/recipes/dishes now run 1,000-1,500+ docs
@@ -195,7 +190,7 @@ router.get('/:type', optionalToken, async (req, res) => {
     // at all for most UI) is tracked separately — see plan 301.
     const limit = Math.min(parseInt(req.query.limit) || 20000, 20000);
     const skip = parseInt(req.query.skip) || 0;
-    const filter = { userId: readOwner(req.params.type, userId), ...LIVE };
+    const filter = { ...readScope(req, req.params.type), ...LIVE };
     if (req.query.filterEntityType) {
       filter.entityType = String(req.query.filterEntityType);
     }
@@ -258,13 +253,12 @@ router.get('/:type/search', optionalToken, async (req, res) => {
     if (!q) return res.json([]);
 
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 25, 1), 50);
-    const userId = req.user ? req.user.userId : '__master__';
     const isLatin = /[a-zA-Z]/.test(q);
     const regex = new RegExp('^' + escapeRegex(q), isLatin ? 'i' : '');
 
     const docs = await col(req.params.type)
       .find(
-        { userId, ...LIVE, nameHebrew: regex },
+        { ...scopeFilter(req), ...LIVE, nameHebrew: regex },
         { projection: SEARCH_PROJECTIONS[req.params.type] }
       )
       .limit(limit)
@@ -286,8 +280,7 @@ router.get('/:type/search', optionalToken, async (req, res) => {
 // ---------------------------------------------------------------------------
 router.get('/:type/count', optionalToken, async (req, res) => {
   try {
-    const userId = req.user ? req.user.userId : '__master__';
-    const filter = { userId, ...LIVE };
+    const filter = { ...scopeFilter(req), ...LIVE };
     const filterName = req.query.filter;
     if (filterName === 'lowStock') {
       if (req.params.type !== 'products') {
@@ -333,9 +326,9 @@ router.get('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
 // ---------------------------------------------------------------------------
 router.get('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
   try {
-    await purgeExpired(mongoose.connection.db, { owners: [req.user.userId, MASTER], types: [req.params.type] });
+    await purgeExpired(mongoose.connection.db, { businessIds: [scopeFilter(req).businessId, MASTER], types: [req.params.type] });
     const docs = await col(req.params.type)
-      .find({ userId: req.user.userId, ...IN_TRASH })
+      .find({ ...scopeFilter(req), ...IN_TRASH })
       .sort({ deletedAt: -1 })
       .toArray();
     res.json(docs);
@@ -348,7 +341,7 @@ router.get('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
 router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (req, res) => {
   try {
     const result = await col(req.params.type).updateMany(
-      { userId: req.user.userId, ...IN_TRASH },
+      { ...scopeFilter(req), ...IN_TRASH },
       { $unset: { deletedAt: '', deletedBy: '' } }
     );
     res.json({ ok: true, restored: result.modifiedCount });
@@ -361,7 +354,7 @@ router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (re
 router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res) => {
   try {
     const restored = await col(req.params.type).findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.userId, ...IN_TRASH },
+      { _id: req.params.id, ...scopeFilter(req), ...IN_TRASH },
       { $unset: { deletedAt: '', deletedBy: '' } },
       { returnDocument: 'after' }
     );
@@ -380,10 +373,9 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
 // ---------------------------------------------------------------------------
 router.get('/:type/:id', optionalToken, async (req, res) => {
   try {
-    const userId = req.user ? req.user.userId : '__master__';
     const doc = await col(req.params.type).findOne({
       _id: req.params.id,
-      userId: readOwner(req.params.type, userId),
+      ...readScope(req, req.params.type),
       ...LIVE,
     });
     if (!doc) {
@@ -446,7 +438,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     await col(entityType).insertOne(doc);
     // A new shared term covers users' own terms with the same key — fold them into it.
     if (entityType === TAXONOMY && shared) {
-      await col(TAXONOMY).deleteMany({ kind: doc.kind, key: doc.key, userId: { $ne: MASTER } });
+      await col(TAXONOMY).deleteMany({ kind: doc.kind, key: doc.key, businessId: { $ne: MASTER } });
     }
     res.status(201).json(doc);
   } catch (err) {
@@ -474,11 +466,8 @@ router.post('/:type', verifyToken, async (req, res) => {
 // Defined BEFORE the generic `PUT /:type/:id` route below — Express matches
 // top-to-bottom, and `/:type/:id` would otherwise treat "global" as the :id.
 // ---------------------------------------------------------------------------
-router.put('/DICTIONARY_OVERRIDES/global', verifyToken, async (req, res) => {
+router.put('/DICTIONARY_OVERRIDES/global', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
     const { key, hebrewLabel } = req.body || {};
     if (typeof key !== 'string' || typeof hebrewLabel !== 'string' || !key.trim() || !hebrewLabel.trim()) {
       return res.status(400).json({ error: 'key and hebrewLabel are required strings' });
@@ -521,7 +510,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     const { userId: _, businessId: _bid, createdBy: _cby, _masterId: __, _userModified: ___, ...safeBody } = req.body;
 
     const isTerm = req.params.type === TAXONOMY;
-    const filter = { _id: req.params.id, userId: isTerm ? termWriteOwner(req) : req.user.userId, ...LIVE };
+    const filter = { _id: req.params.id, ...(isTerm ? termWriteOwner(req) : scopeFilter(req)), ...LIVE };
     const stamps = {
       ...(hasV2Schema(req.params.type) && { schemaVersion: 2, updatedAt: Date.now() }),
       ...(!isTerm && { _userModified: true }),
@@ -549,7 +538,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
       // After validation, so the new key is a known plain string before it reaches a query.
       if (isTerm && updatable.key !== undefined && updatable.key !== current.key) {
-        if (current.userId !== MASTER && await masterHasTerm(current.kind, updatable.key)) {
+        if (current.businessId !== MASTER && await masterHasTerm(current.kind, updatable.key)) {
           return res.status(409).json({ error: 'This term already exists for everyone', kind: current.kind, key: updatable.key });
         }
         rekeyed = current;
@@ -571,8 +560,8 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     // owner's own, or everyone's for a shared term), and fold users' own same-key terms.
     if (rekeyed) {
       await renameTermEverywhere(rekeyed, result.key);
-      if (rekeyed.userId === MASTER) {
-        await col(TAXONOMY).deleteMany({ kind: result.kind, key: result.key, userId: { $ne: MASTER } });
+      if (rekeyed.businessId === MASTER) {
+        await col(TAXONOMY).deleteMany({ kind: result.kind, key: result.key, businessId: { $ne: MASTER } });
       }
     }
     res.json(result);
@@ -621,12 +610,12 @@ class MasterNameTakenError extends Error {
   }
 }
 
-async function pushDocToMasterRecursive(type, id, userId, visited) {
+async function pushDocToMasterRecursive(type, id, businessId, visited, pusherId) {
   const key = `${type}:${id}`;
   if (visited.has(key)) return null;
   visited.add(key);
 
-  const existing = await col(type).findOne({ _id: id, userId, ...LIVE });
+  const existing = await col(type).findOne({ _id: id, businessId, ...LIVE });
   if (!existing) return null;
   if (typeof existing._masterId !== 'string') return null;
 
@@ -640,7 +629,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
       const lookupTypes = ing.type === 'recipe' ? ['recipes', 'dishes'] : ['products'];
       for (const t of lookupTypes) {
         const ref = await col(t).findOne(
-          { _id: ing.referenceId, userId },
+          { _id: ing.referenceId, businessId },
           { projection: { _masterId: 1, _id: 1 } }
         );
         if (!ref) continue;
@@ -650,7 +639,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
         }
         // Never pushed (self-linked or missing _masterId) — push it now so the
         // master copy doesn't end up with a referenceId nobody else can resolve.
-        const pushedId = await pushDocToMasterRecursive(t, ref._id, userId, visited);
+        const pushedId = await pushDocToMasterRecursive(t, ref._id, businessId, visited, pusherId);
         return { ...ing, referenceId: pushedId ?? ing.referenceId };
       }
       return ing;
@@ -677,7 +666,7 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
     if (name) {
       const namespace = hasIngredients ? ['recipes', 'dishes'] : [type];
       for (const t of namespace) {
-        const twin = await col(t).findOne({ userId: '__master__', nameHebrew: name, ...LIVE }, { projection: { _id: 1 } });
+        const twin = await col(t).findOne({ businessId: MASTER_BUSINESS_ID, nameHebrew: name, ...LIVE }, { projection: { _id: 1 } });
         if (twin) throw new MasterNameTakenError(name);
       }
     }
@@ -688,13 +677,13 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
       _id: resolvedMasterId,
       userId: '__master__',
       businessId: MASTER_BUSINESS_ID,
-      createdBy: userId,
+      createdBy: pusherId,
       _masterId: resolvedMasterId,
       _userModified: false
     });
   } else {
     const result = await col(type).updateOne(
-      { _id: resolvedMasterId, userId: '__master__', ...LIVE },
+      { _id: resolvedMasterId, businessId: MASTER_BUSINESS_ID, ...LIVE },
       { $set: { ...safeBody, ...ingredientsField } }
     );
     if (result.matchedCount === 0) return null;
@@ -705,12 +694,12 @@ async function pushDocToMasterRecursive(type, id, userId, visited) {
   // that clone forever — so without this the user would publish their change to everyone and
   // simultaneously opt themselves out of every future master update. Their copy already
   // matches master, so letting Rule 2 manage it again is both safe and correct.
-  await col(type).updateOne({ _id: id, userId }, { $set: { _masterId: resolvedMasterId, _userModified: false } });
+  await col(type).updateOne({ _id: id, businessId }, { $set: { _masterId: resolvedMasterId, _userModified: false } });
 
   return resolvedMasterId;
 }
 
-router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, res) => {
+router.put('/:type/:id/push-to-master', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     if (!PUSHABLE_TYPES.has(req.params.type)) {
       return res.status(400).json({ error: `Type ${req.params.type} cannot be pushed to master` });
@@ -723,7 +712,7 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
     // up front here (pushDocToMasterRecursive re-checks internally too, for the
     // recursive calls it makes on referenced products/sub-recipes).
     const preCheck = await col(req.params.type).findOne(
-      { _id: req.params.id, userId: req.user.userId, ...LIVE },
+      { _id: req.params.id, ...scopeFilter(req), ...LIVE },
       { projection: { _masterId: 1 } }
     );
     if (!preCheck) {
@@ -736,8 +725,9 @@ router.put('/:type/:id/push-to-master', verifyToken, requireAdmin, async (req, r
     const resolvedMasterId = await pushDocToMasterRecursive(
       req.params.type,
       req.params.id,
-      req.user.userId,
-      new Set()
+      scopeFilter(req).businessId,
+      new Set(),
+      req.user.userId
     );
     if (!resolvedMasterId) {
       return res.status(404).json({ error: 'Linked master document no longer exists' });
@@ -774,18 +764,18 @@ const DELETABLE_FROM_MASTER_TYPES = new Set(['recipes', 'dishes', 'products', 's
 /** Plan 407: the soft-delete stamp — the doc stays where it is and Trash lists it. */
 const deleteStamp = (userId, now = Date.now()) => ({ deletedAt: now, deletedBy: userId });
 
-/** Removes supplier ids from the `sources` of one user's products (no dangling links). */
-async function unlinkSuppliersFromProducts(userId, supplierIds) {
+/** Removes supplier ids from the `sources` of one business's products (no dangling links). */
+async function unlinkSuppliersFromProducts(businessId, supplierIds) {
   if (supplierIds.length === 0) return;
   await col('products').updateMany(
-    { userId, 'sources.supplierId': { $in: supplierIds } },
+    { businessId, 'sources.supplierId': { $in: supplierIds } },
     { $pull: { sources: { supplierId: { $in: supplierIds } } }, $set: { updatedAt: Date.now() } }
   );
 }
 
 // ---------------------------------------------------------------------------
 // Plan 366: "delete this supplier for everyone". Explicitly Human-requested,
-// admin-only (the route is requireAdmin-gated) — like purge-ingredient-everywhere
+// admin-only (the route is requirePlatformAdmin-gated) — like purge-ingredient-everywhere
 // below, a deliberate exception to "one user's action never reaches another
 // user's own documents"; not a general pattern to reuse elsewhere.
 //
@@ -796,29 +786,29 @@ async function unlinkSuppliersFromProducts(userId, supplierIds) {
 // link. The caller's own copy and products go through the normal DELETE route.
 // Runs in this one request (INV-3) so it can't half-finish from the client.
 // ---------------------------------------------------------------------------
-async function purgeSupplierEverywhere(masterId, callerId) {
+async function purgeSupplierEverywhere(masterId, callerId, callerBusinessId) {
   const clones = await col('suppliers')
-    .find({ _masterId: masterId, userId: { $nin: ['__master__', callerId] } })
+    .find({ _masterId: masterId, businessId: { $nin: [MASTER_BUSINESS_ID, callerBusinessId] } })
     .toArray();
   const stamp = deleteStamp(callerId);
   for (const clone of clones) {
-    await unlinkSuppliersFromProducts(clone.userId, [clone._id]);
+    await unlinkSuppliersFromProducts(clone.businessId, [clone._id]);
     if (clone.deletedAt === undefined) {
-      await col('suppliers').updateOne({ _id: clone._id, userId: clone.userId, ...LIVE }, { $set: stamp });
+      await col('suppliers').updateOne({ _id: clone._id, businessId: clone.businessId, ...LIVE }, { $set: stamp });
     }
   }
-  await unlinkSuppliersFromProducts('__master__', [masterId]);
-  return new Set(clones.map(c => c.userId)).size;
+  await unlinkSuppliersFromProducts(MASTER_BUSINESS_ID, [masterId]);
+  return new Set(clones.map(c => c.businessId)).size;
 }
 
-router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (req, res) => {
+router.put('/:type/:id/delete-from-master', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     if (!DELETABLE_FROM_MASTER_TYPES.has(req.params.type)) {
       return res.status(400).json({ error: `Type ${req.params.type} cannot be removed from master` });
     }
     const existing = await col(req.params.type).findOne({
       _id: req.params.id,
-      userId: req.user.userId,
+      ...scopeFilter(req),
     });
     if (!existing) {
       return res.status(404).json({ error: `Item ${req.params.id} not found` });
@@ -827,11 +817,11 @@ router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (re
       return res.status(400).json({ error: 'This item has no linked master copy to remove' });
     }
 
-    const masterDoc = await col(req.params.type).findOne({ _id: existing._masterId, userId: '__master__', ...LIVE });
+    const masterDoc = await col(req.params.type).findOne({ _id: existing._masterId, businessId: MASTER_BUSINESS_ID, ...LIVE });
     if (masterDoc) {
       // Soft-deleted like any doc: signup clone and login sync skip it; the purge removes it later.
       await col(req.params.type).updateOne(
-        { _id: existing._masterId, userId: '__master__' },
+        { _id: existing._masterId, businessId: MASTER_BUSINESS_ID },
         { $set: deleteStamp(req.user.userId) }
       );
     }
@@ -839,7 +829,7 @@ router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (re
     // runs, so a retry after a half-failed call finishes the job.
 
     const usersAffected = req.params.type === 'suppliers'
-      ? await purgeSupplierEverywhere(existing._masterId, req.user.userId)
+      ? await purgeSupplierEverywhere(existing._masterId, req.user.userId, scopeFilter(req).businessId)
       : undefined;
     if (masterDoc || usersAffected) await bumpMasterVersion();
 
@@ -869,14 +859,14 @@ router.put('/:type/:id/delete-from-master', verifyToken, requireAdmin, async (re
 // ---------------------------------------------------------------------------
 const PURGE_EVERYWHERE_TYPES = new Set(['products']);
 
-router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, async (req, res) => {
+router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     if (!PURGE_EVERYWHERE_TYPES.has(req.params.type)) {
       return res.status(400).json({ error: `Type ${req.params.type} does not support purge-ingredient-everywhere` });
     }
     const existing = await col(req.params.type).findOne({
       _id: req.params.id,
-      userId: req.user.userId,
+      ...scopeFilter(req),
     });
     if (!existing) {
       return res.status(404).json({ error: `Item ${req.params.id} not found` });
@@ -887,15 +877,15 @@ router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, 
     }
 
     const otherClones = await col('products')
-      .find({ _masterId: existing._masterId, userId: { $nin: ['__master__', req.user.userId] } })
-      .project({ _id: 1, userId: 1 })
+      .find({ _masterId: existing._masterId, businessId: { $nin: [MASTER_BUSINESS_ID, scopeFilter(req).businessId] } })
+      .project({ _id: 1, businessId: 1 })
       .toArray();
 
     await Promise.all(
       otherClones.flatMap((clone) =>
         ['recipes', 'dishes'].map((ingredientType) =>
           col(ingredientType).updateMany(
-            { userId: clone.userId, 'ingredients.referenceId': clone._id },
+            { businessId: clone.businessId, 'ingredients.referenceId': clone._id },
             { $pull: { ingredients: { referenceId: clone._id } } }
           )
         )
@@ -919,16 +909,16 @@ router.put('/:type/:id/purge-ingredient-everywhere', verifyToken, requireAdmin, 
  * mid-fallback can leave a brief window where deleted docs are still present, but
  * it never leaves the user with an empty collection.
  */
-async function replaceCollection(type, userId, docs) {
+async function replaceCollection(type, businessId, docs) {
   let session;
   try {
     session = await mongoose.connection.startSession();
   } catch (err) {
-    return replaceCollectionFallback(type, userId, docs);
+    return replaceCollectionFallback(type, businessId, docs);
   }
   try {
     await session.withTransaction(async () => {
-      await col(type).deleteMany({ userId }, { session });
+      await col(type).deleteMany({ businessId }, { session });
       if (docs.length > 0) {
         await col(type).insertMany(docs, { ordered: true, session });
       }
@@ -936,7 +926,7 @@ async function replaceCollection(type, userId, docs) {
   } catch (err) {
     const isStandalone = err.code === 20 || /replica set|mongos/i.test(err.message || '');
     if (isStandalone) {
-      return replaceCollectionFallback(type, userId, docs);
+      return replaceCollectionFallback(type, businessId, docs);
     }
     throw err;
   } finally {
@@ -944,7 +934,7 @@ async function replaceCollection(type, userId, docs) {
   }
 }
 
-async function replaceCollectionFallback(type, userId, docs) {
+async function replaceCollectionFallback(type, businessId, docs) {
   // No transactions (standalone Mongo): upsert every incoming doc by _id first (re-inserting a
   // doc that is being kept would hit a duplicate key), then drop the user's docs not in the set.
   if (docs.length > 0) {
@@ -953,7 +943,7 @@ async function replaceCollectionFallback(type, userId, docs) {
       { ordered: true }
     );
   }
-  await col(type).deleteMany({ userId, _id: { $nin: docs.map(d => d._id) } });
+  await col(type).deleteMany({ businessId, _id: { $nin: docs.map(d => d._id) } });
 }
 
 // ---------------------------------------------------------------------------
@@ -992,7 +982,7 @@ router.put('/:type', verifyToken, async (req, res) => {
     const conflictDocs = incomingIds.length > 0
       ? await col(req.params.type)
           .find(
-            { _id: { $in: incomingIds }, userId: { $ne: req.user.userId } },
+            { _id: { $in: incomingIds }, businessId: { $ne: scopeFilter(req).businessId } },
             { projection: { _id: 1 } }
           )
           .toArray()
@@ -1012,7 +1002,7 @@ router.put('/:type', verifyToken, async (req, res) => {
     });
 
     try {
-      await replaceCollection(req.params.type, req.user.userId, docs);
+      await replaceCollection(req.params.type, scopeFilter(req).businessId, docs);
     } catch (txErr) {
       req.log.error({ err: txErr, event: 'data.replace_all.tx_aborted' });
       return res.status(500).json({ error: 'Replace failed, no changes were made' });
@@ -1041,7 +1031,7 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
     }
 
     if (req.params.type === TAXONOMY) {
-      const terms = await col(TAXONOMY).find({ _id: { $in: ids }, userId: req.user.userId }).toArray();
+      const terms = await col(TAXONOMY).find({ _id: { $in: ids }, ...scopeFilter(req) }).toArray();
       for (const term of terms) {
         const refs = await findTermReferences(term);
         if (refs.length) return res.status(409).json(termInUse(term, refs));
@@ -1050,10 +1040,10 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
 
     const result = await col(req.params.type).deleteMany({
       _id: { $in: ids },
-      userId: req.user.userId,
+      ...scopeFilter(req),
     });
     // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
-    if (req.params.type === 'suppliers') await unlinkSuppliersFromProducts(req.user.userId, ids);
+    if (req.params.type === 'suppliers') await unlinkSuppliersFromProducts(scopeFilter(req).businessId, ids);
 
     res.json({ ok: true, deletedCount: result.deletedCount });
   } catch (err) {
@@ -1073,7 +1063,7 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
 router.delete('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
   try {
     const docs = await col(req.params.type)
-      .find({ userId: req.user.userId, ...IN_TRASH }, { projection: { _id: 1, userId: 1, _masterId: 1, deletedAt: 1, deletedBy: 1 } })
+      .find({ ...scopeFilter(req), ...IN_TRASH }, { projection: { _id: 1, userId: 1, businessId: 1, _masterId: 1, deletedAt: 1, deletedBy: 1 } })
       .toArray();
     const now = Date.now();
     for (const doc of docs) await disposeDoc(col(req.params.type), doc, now);
@@ -1097,7 +1087,7 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
     const permanent = req.query.permanent === 'true';
     const existing = await col(type).findOne({
       _id: req.params.id,
-      userId: type === TAXONOMY ? termWriteOwner(req) : req.user.userId,
+      ...(type === TAXONOMY ? termWriteOwner(req) : scopeFilter(req)),
       ...(softType && permanent ? { purgedAt: { $exists: false } } : LIVE),
     });
     if (!existing) {
@@ -1107,7 +1097,7 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
     // A1: referential integrity — block deleting a live product that a live recipe/dish uses.
     // Prevents orphaned ingredient referenceIds in recipes and dishes.
     if (type === 'products' && existing.deletedAt === undefined) {
-      const refFilter = { userId: req.user.userId, 'ingredients.referenceId': req.params.id, ...LIVE };
+      const refFilter = { ...scopeFilter(req), 'ingredients.referenceId': req.params.id, ...LIVE };
       const ref = await col('recipes').findOne(refFilter) || await col('dishes').findOne(refFilter);
       if (ref) {
         return res.status(409).json({
@@ -1121,20 +1111,20 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
     if (type === TAXONOMY) {
       const refs = await findTermReferences(existing);
       if (refs.length) return res.status(409).json(termInUse(existing, refs));
-      await col(TAXONOMY).deleteOne({ _id: existing._id, userId: existing.userId });
+      await col(TAXONOMY).deleteOne({ _id: existing._id, businessId: existing.businessId });
       return res.json({ ok: true });
     }
 
     if (!softType) {
-      await col(type).deleteOne({ _id: existing._id, userId: existing.userId });
+      await col(type).deleteOne({ _id: existing._id, businessId: existing.businessId });
     } else if (permanent) {
       await disposeDoc(col(type), existing);
     } else {
-      await col(type).updateOne({ _id: existing._id, userId: existing.userId }, { $set: deleteStamp(req.user.userId) });
+      await col(type).updateOne({ _id: existing._id, businessId: existing.businessId }, { $set: deleteStamp(req.user.userId) });
     }
     // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
     if (type === 'suppliers' && existing.deletedAt === undefined) {
-      await unlinkSuppliersFromProducts(req.user.userId, [req.params.id]);
+      await unlinkSuppliersFromProducts(scopeFilter(req).businessId, [req.params.id]);
     }
 
     res.json({ ok: true });

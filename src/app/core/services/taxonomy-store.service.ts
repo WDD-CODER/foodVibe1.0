@@ -14,6 +14,8 @@ export type TermExtras<K extends TaxonomyKind> = Omit<
   | '_id'
   | 'schemaVersion'
   | 'userId'
+  | 'businessId'
+  | 'createdBy'
   | 'createdAt'
   | 'updatedAt'
   | 'deletedAt'

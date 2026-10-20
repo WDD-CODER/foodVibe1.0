@@ -81,23 +81,23 @@ describe('push-to-master', () => {
 
 describe('master sync and clone', () => {
   it('login sync Rule 2 never overwrites a clone businessId with __master__; Rule 1 stamps the clone', async () => {
-    const { syncMasterToUser } = require('../services/sync-master')
+    const { syncMasterToBusiness } = require('../services/sync-master')
     const db = testDb()
     await db.collection('venues').insertMany([
       { _id: 'm1', userId: '__master__', businessId: '__master__', createdBy: '__master__', nameHebrew: 'v2' },
       { _id: 'm2', userId: '__master__', businessId: '__master__', createdBy: '__master__', nameHebrew: 'new' },
       { _id: 'u1', userId: 'userA', businessId: 'bizA', createdBy: 'userA', _masterId: 'm1', _userModified: false, nameHebrew: 'v1' },
     ])
-    await syncMasterToUser('userA', { businessId: 'bizA' })
+    await syncMasterToBusiness('bizA', { createdBy: 'userA' })
     expect(await db.collection('venues').findOne({ _id: 'u1' })).toMatchObject({ nameHebrew: 'v2', businessId: 'bizA', createdBy: 'userA' })
     expect(await db.collection('venues').findOne({ userId: 'userA', _masterId: 'm2' })).toMatchObject({ businessId: 'bizA', createdBy: 'userA' })
   })
 
-  it('cloneMasterDataToUser stamps the given business and never copies master fields', async () => {
-    const { cloneMasterDataToUser } = require('../services/clone-master')
+  it('cloneMasterDataToBusiness stamps the given business and never copies master fields', async () => {
+    const { cloneMasterDataToBusiness } = require('../services/clone-master')
     const db = testDb()
     await db.collection('venues').insertOne({ _id: 'm1', userId: '__master__', businessId: '__master__', createdBy: '__master__', nameHebrew: 'x' })
-    await cloneMasterDataToUser('userB', { businessId: 'bizB' })
+    await cloneMasterDataToBusiness('bizB', { createdBy: 'userB' })
     expect(await db.collection('venues').findOne({ userId: 'userB' })).toMatchObject({ businessId: 'bizB', createdBy: 'userB' })
   })
 })

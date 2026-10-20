@@ -47,7 +47,9 @@ function menuEventBody(overrides = {}) {
 
 /** A full stored doc (what is in Mongo): body + server-owned fields. */
 function stored(body, fields) {
-  return { schemaVersion: 2, createdAt: 1, updatedAt: 1, ...body, ...fields };
+  // Plan 425: every stored doc carries a business and a creator. Tests seed by `userId`; the business follows it.
+  const businessId = fields.userId === '__master__' ? '__master__' : 'b_' + fields.userId;
+  return { schemaVersion: 2, createdAt: 1, updatedAt: 1, businessId, createdBy: fields.userId, ...body, ...fields };
 }
 
 module.exports = { productBody, recipeBody, supplierBody, equipmentBody, venueBody, menuEventBody, stored };

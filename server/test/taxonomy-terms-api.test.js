@@ -25,11 +25,11 @@ beforeEach(async () => {
 });
 
 const URL = '/api/v1/data/taxonomyTerms';
-const tokenA = () => signTestToken({ userId: 'userA', role: 'user' });
+const tokenA = () => signTestToken({ userId: 'userA', businessId: 'b_userA', role: 'user' });
 const auth = req => req.set('Authorization', `Bearer ${tokenA()}`);
 
 const term = (userId, kind, key, extra = {}) => ({
-  _id: `${kind}:${userId}:${key}`, schemaVersion: 2, userId, createdAt: 1, updatedAt: 1, sortOrder: 0, kind, key, ...extra,
+  _id: `${kind}:${userId}:${key}`, schemaVersion: 2, userId, businessId: userId === '__master__' ? '__master__' : `b_${userId}`, createdBy: userId, createdAt: 1, updatedAt: 1, sortOrder: 0, kind, key, ...extra,
 });
 
 describe('reads', () => {
@@ -63,7 +63,7 @@ describe('writes', () => {
     const res = await auth(request(app).post(URL)).send({ kind: 'label', key: 'kids', color: '#F59E0B', sortOrder: 0 });
     expect(res.status).toBe(201);
     const doc = await testDb().collection('taxonomyTerms').findOne({ _id: res.body._id });
-    expect(doc).toMatchObject({ userId: 'userA', kind: 'label', key: 'kids', schemaVersion: 2 });
+    expect(doc).toMatchObject({ userId: 'userA', businessId: 'b_userA', kind: 'label', key: 'kids', schemaVersion: 2 });
     expect(doc._masterId).toBeUndefined();
     expect(doc._userModified).toBeUndefined();
   });
@@ -111,10 +111,10 @@ describe('writes', () => {
 describe('delete is blocked while the term is used', () => {
   it('blocks deleting a category used by an own product, and lists it', async () => {
     await testDb().collection('taxonomyTerms').insertOne(term('userA', 'ingredientCategory', 'herbs'));
-    await testDb().collection('products').insertOne(stored(productBody({ categories: ['herbs'] }), { _id: 'p1', userId: 'userA' }));
+    await testDb().collection('products').insertOne(stored(productBody({ categories: ['herbs'] }), { _id: 'p1', userId: 'userA', businessId: 'b_userA' }));
     const res = await auth(request(app).delete(`${URL}/ingredientCategory:userA:herbs`));
     expect(res.status).toBe(409);
-    expect(res.body.referencedBy).toEqual([{ type: 'products', _id: 'p1', name: 'תפוח', userId: 'userA' }]);
+    expect(res.body.referencedBy).toEqual([{ type: 'products', _id: 'p1', name: 'תפוח', businessId: 'b_userA' }]);
     expect(await testDb().collection('taxonomyTerms').countDocuments()).toBe(1);
   });
 
@@ -122,7 +122,7 @@ describe('delete is blocked while the term is used', () => {
     await testDb().collection('taxonomyTerms').insertOne(term('userA', 'unit', 'crate', { gramRate: 5000 }));
     await testDb().collection('recipes').insertOne(stored(
       recipeBody({ ingredients: [{ _id: 'i1', referenceId: 'p1', amount: 1, unit: 'crate', nameSnapshot: 'x' }] }),
-      { _id: 'r1', userId: 'userA' },
+      { _id: 'r1', userId: 'userA', businessId: 'b_userA' },
     ));
     const res = await auth(request(app).delete(`${URL}/unit:userA:crate`));
     expect(res.status).toBe(409);
@@ -131,7 +131,7 @@ describe('delete is blocked while the term is used', () => {
 
   it('another user\'s use of the same key does not block', async () => {
     await testDb().collection('taxonomyTerms').insertOne(term('userA', 'ingredientCategory', 'herbs'));
-    await testDb().collection('products').insertOne(stored(productBody({ categories: ['herbs'] }), { _id: 'p2', userId: 'userB' }));
+    await testDb().collection('products').insertOne(stored(productBody({ categories: ['herbs'] }), { _id: 'p2', userId: 'userB', businessId: 'b_userB' }));
     const res = await auth(request(app).delete(`${URL}/ingredientCategory:userA:herbs`));
     expect(res.status).toBe(200);
     expect(await testDb().collection('taxonomyTerms').countDocuments()).toBe(0);
@@ -139,7 +139,7 @@ describe('delete is blocked while the term is used', () => {
 
   it('bulk delete is blocked when any of the terms is used', async () => {
     await testDb().collection('taxonomyTerms').insertMany([term('userA', 'eventType', 'wedding'), term('userA', 'eventType', 'brit')]);
-    await testDb().collection('menuEvents').insertOne({ _id: 'e1', userId: 'userA', name: 'x', eventType: 'wedding' });
+    await testDb().collection('menuEvents').insertOne({ _id: 'e1', userId: 'userA', businessId: 'b_userA', name: 'x', eventType: 'wedding' });
     const res = await auth(request(app).delete(`${URL}/bulk`)).send({ ids: ['eventType:userA:wedding', 'eventType:userA:brit'] });
     expect(res.status).toBe(409);
     expect(await testDb().collection('taxonomyTerms').countDocuments()).toBe(2);
@@ -154,14 +154,14 @@ describe('re-key renames the key in the documents that use it', () => {
       term('userA', 'unit', 'crate', { gramRate: 5000 }),
     ]);
     await db.collection('dishes').insertMany([
-      stored(recipeBody({ labels: ['kids', 'spicy'] }), { _id: 'd1', userId: 'userA' }),
-      stored(recipeBody({ labels: ['kids'] }), { _id: 'd2', userId: 'userB' }),
+      stored(recipeBody({ labels: ['kids', 'spicy'] }), { _id: 'd1', userId: 'userA', businessId: 'b_userA' }),
+      stored(recipeBody({ labels: ['kids'] }), { _id: 'd2', userId: 'userB', businessId: 'b_userB' }),
     ]);
     await db.collection('recipes').insertOne(stored(recipeBody({
       yieldUnit: 'crate',
       ingredients: [{ _id: 'i1', amount: 1, unit: 'crate' }, { _id: 'i2', amount: 1, unit: 'kg' }],
       prepCategories: [{ categoryName: 'c', items: [{ itemName: 'x', unit: 'crate' }] }],
-    }), { _id: 'r1', userId: 'userA' }));
+    }), { _id: 'r1', userId: 'userA', businessId: 'b_userA' }));
 
     expect((await auth(request(app).put(`${URL}/label:userA:kids`)).send({ key: 'children' })).status).toBe(200);
     expect((await auth(request(app).put(`${URL}/unit:userA:crate`)).send({ key: 'box' })).status).toBe(200);
@@ -181,7 +181,7 @@ describe('re-key renames the key in the documents that use it', () => {
 });
 
 describe('shared terms are admin-only (Human, 2026-10-05)', () => {
-  const admin = req => req.set('Authorization', `Bearer ${signTestToken({ userId: 'boss', role: 'admin' })}`);
+  const admin = req => req.set('Authorization', `Bearer ${signTestToken({ userId: 'boss', businessId: 'b_boss', role: 'admin' })}`);
 
   it('a regular user cannot add a shared term', async () => {
     const res = await auth(request(app).post(URL)).send({ kind: 'allergen', key: 'lupin', sortOrder: 0, shared: true });
@@ -201,8 +201,8 @@ describe('shared terms are admin-only (Human, 2026-10-05)', () => {
     const db = testDb();
     await db.collection('taxonomyTerms').insertOne(term('__master__', 'ingredientCategory', 'veg'));
     await db.collection('products').insertMany([
-      stored(productBody({ categories: ['veg'] }), { _id: 'p1', userId: 'userA' }),
-      stored(productBody({ categories: ['veg', 'dry'] }), { _id: 'p2', userId: 'userB' }),
+      stored(productBody({ categories: ['veg'] }), { _id: 'p1', userId: 'userA', businessId: 'b_userA' }),
+      stored(productBody({ categories: ['veg', 'dry'] }), { _id: 'p2', userId: 'userB', businessId: 'b_userB' }),
     ]);
     const res = await admin(request(app).put(`${URL}/ingredientCategory:__master__:veg`)).send({ key: 'vegetables' });
     expect(res.status).toBe(200);
@@ -213,10 +213,10 @@ describe('shared terms are admin-only (Human, 2026-10-05)', () => {
   it('an admin cannot delete a shared term any user still uses; can once unused', async () => {
     const db = testDb();
     await db.collection('taxonomyTerms').insertOne(term('__master__', 'allergen', 'nuts'));
-    await db.collection('products').insertOne(stored(productBody({ allergens: ['nuts'] }), { _id: 'p9', userId: 'userB' }));
+    await db.collection('products').insertOne(stored(productBody({ allergens: ['nuts'] }), { _id: 'p9', userId: 'userB', businessId: 'b_userB' }));
     const blocked = await admin(request(app).delete(`${URL}/allergen:__master__:nuts`));
     expect(blocked.status).toBe(409);
-    expect(blocked.body.referencedBy[0]).toMatchObject({ _id: 'p9', userId: 'userB' });
+    expect(blocked.body.referencedBy[0]).toMatchObject({ _id: 'p9', businessId: 'b_userB' });
     await db.collection('products').deleteMany({});
     expect((await admin(request(app).delete(`${URL}/allergen:__master__:nuts`))).status).toBe(200);
     expect(await db.collection('taxonomyTerms').countDocuments()).toBe(0);
@@ -228,6 +228,6 @@ describe('`shared` is only meaningful for taxonomy terms', () => {
     const res = await auth(request(app).post('/api/v1/data/products')).send({ ...productBody(), shared: true });
     // The strict product schema rejects the unknown field; it must never become a master doc or a 403.
     expect(res.status).toBe(400);
-    expect(await testDb().collection('products').countDocuments({ userId: '__master__' })).toBe(0);
+    expect(await testDb().collection('products').countDocuments({ userId: '__master__', businessId: '__master__' })).toBe(0);
   });
 });
