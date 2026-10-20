@@ -152,6 +152,58 @@ export class UnitRegistryService {
     }
   }
 
+  /**
+   * Plan 377 — changes a custom unit's key. The server re-keys every product, recipe and dish
+   * that uses it; the caller reloads those lists. False when refused or the save failed.
+   */
+  async renameUnit(oldKey: string, newKey: string): Promise<boolean> {
+    const next = (newKey ?? '').trim().toLowerCase()
+    if (oldKey in SYSTEM_UNITS) {
+      this.userMsgService.onSetErrorMsg('לא ניתן לערוך יחידות בסיס')
+      return false
+    }
+    if (!next) {
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_name_empty'))
+      return false
+    }
+    if (next === oldKey) return true
+    if (next in this.globalUnits_()) {
+      this.userMsgService.onSetErrorMsg(`היחידה ${next} כבר קיימת`)
+      return false
+    }
+    return this.saveUnitChange(oldKey, { key: next }, 'crud.units.rename_error')
+  }
+
+  /** Plan 377 — changes a custom unit's gram-equivalent rate. False when refused or the save failed. */
+  async updateUnitRate(key: string, gramRate: number): Promise<boolean> {
+    if (key in SYSTEM_UNITS) {
+      this.userMsgService.onSetErrorMsg('לא ניתן לערוך יחידות בסיס')
+      return false
+    }
+    if (!Number.isFinite(gramRate) || gramRate <= 0) {
+      this.userMsgService.onSetErrorMsg('ההמרה חייבת להיות גדולה מאפס')
+      return false
+    }
+    return this.saveUnitChange(key, { gramRate }, 'crud.units.rate_error')
+  }
+
+  private async saveUnitChange(
+    key: string,
+    changes: { key?: string; gramRate?: number },
+    event: string
+  ): Promise<boolean> {
+    try {
+      if (await this.taxonomy.updateByKey('unit', key, changes)) return true
+      this.userMsgService.onSetErrorMsg(`היחידה ${key} לא נמצאה`)
+      return false
+    } catch (err) {
+      if (err instanceof HttpErrorResponse && err.status === 401) return false
+      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? 'שגיאה בשמירת היחידה במערכת')
+      this.logging.error({ event, message: 'Unit update error', context: { err } })
+      return false
+    }
+  }
+
   private logLoadError(err: unknown): void {
     this.logging.error({ event: 'crud.units.hydrate_error', message: 'Failed to hydrate units', context: { err } })
   }

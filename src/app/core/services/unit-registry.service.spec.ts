@@ -100,3 +100,80 @@ describe('UnitRegistryService', () => {
     })
   })
 })
+
+// Plan 377 — editing a custom unit's key and conversion goes through the taxonomy term.
+describe('UnitRegistryService — edit a custom unit', () => {
+  let service: UnitRegistryService
+  let storageSpy: jasmine.SpyObj<StorageService>
+  let userMsgSpy: jasmine.SpyObj<Pick<UserMsgService, 'onSetSuccessMsg' | 'onSetErrorMsg'>>
+  const jar = { _id: 't-jar', userId: 'u1', schemaVersion: 2, kind: 'unit', key: 'jar', gramRate: 500, sortOrder: 0 }
+
+  beforeEach(fakeAsync(() => {
+    storageSpy = fakeTermStorage([jar])
+    storageSpy.put.and.callFake(<T>(_type: string, body: T) => Promise.resolve({ ...jar, ...body } as T))
+    userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
+    TestBed.configureTestingModule({
+      providers: [
+        UnitRegistryService,
+        { provide: StorageService, useValue: storageSpy },
+        { provide: UserService, useValue: { user_: signal(null), isAdmin_: signal(false) } },
+        { provide: UserMsgService, useValue: userMsgSpy },
+        { provide: LoggingService, useValue: jasmine.createSpyObj('LoggingService', ['error', 'warn', 'info']) },
+        { provide: TranslationService, useValue: { translate: (k: string) => k } },
+        {
+          provide: KeyResolutionService,
+          useValue: jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
+        }
+      ]
+    })
+    service = TestBed.inject(UnitRegistryService)
+    tick()
+  }))
+
+  it('renames a custom unit: one term write with the new key, rate kept', fakeAsync(() => {
+    let ok: boolean | undefined
+    service.renameUnit('jar', ' Crate ').then((r) => (ok = r))
+    tick()
+    expect(ok).toBe(true)
+    expect(storageSpy.put).toHaveBeenCalledOnceWith(
+      'taxonomyTerms',
+      jasmine.objectContaining({ key: 'crate', _id: 't-jar' })
+    )
+    expect(service.getConversion('crate')).toBe(500)
+    expect(service.allUnitKeys_()).not.toContain('jar')
+  }))
+
+  it('refuses to rename a system unit, to an empty key, or to a key that exists', fakeAsync(() => {
+    const results: boolean[] = []
+    service.renameUnit('gram', 'grams').then((r) => results.push(r))
+    service.renameUnit('jar', '  ').then((r) => results.push(r))
+    service.renameUnit('jar', 'kg').then((r) => results.push(r))
+    tick()
+    expect(results).toEqual([false, false, false])
+    expect(storageSpy.put).not.toHaveBeenCalled()
+    expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledTimes(3)
+  }))
+
+  it('changes a custom unit conversion', fakeAsync(() => {
+    let ok: boolean | undefined
+    service.updateUnitRate('jar', 750).then((r) => (ok = r))
+    tick()
+    expect(ok).toBe(true)
+    expect(storageSpy.put).toHaveBeenCalledOnceWith(
+      'taxonomyTerms',
+      jasmine.objectContaining({ gramRate: 750, _id: 't-jar' })
+    )
+    expect(service.getConversion('jar')).toBe(750)
+  }))
+
+  it('refuses a conversion of zero or less, and any conversion change on a system unit', fakeAsync(() => {
+    const results: boolean[] = []
+    service.updateUnitRate('jar', 0).then((r) => results.push(r))
+    service.updateUnitRate('jar', -5).then((r) => results.push(r))
+    service.updateUnitRate('kg', 900).then((r) => results.push(r))
+    tick()
+    expect(results).toEqual([false, false, false])
+    expect(storageSpy.put).not.toHaveBeenCalled()
+    expect(service.getConversion('kg')).toBe(1000)
+  }))
+})

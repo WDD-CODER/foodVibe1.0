@@ -10,12 +10,16 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { signal } from '@angular/core'
 import { TranslationService } from '@services/translation.service'
+import { RecipeDataService } from '@services/recipe-data.service'
+import { DishDataService } from '@services/dish-data.service'
 
 describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent
   let fixture: ComponentFixture<MetadataManagerComponent>
   let metadataRegistrySpy: jasmine.SpyObj<MetadataRegistryService>
   let productDataSpy: jasmine.SpyObj<ProductDataService>
+  let unitRegistrySpy: jasmine.SpyObj<UnitRegistryService>
+  let translationMock: { translate: (k: string) => string; updateDictionary: jasmine.Spy }
 
   // LOGIC CHANGE: Standardized English keys for Mock Signals
   const mockUnits = signal(['gram', 'ml'])
@@ -29,9 +33,12 @@ describe('MetadataManagerPageComponent', () => {
   beforeEach(async () => {
     // Mocking Services
     // REPLACEMENT: Changed 'allUnits_' to 'allUnitKeys_' to match the refactored Service
-    const unitRegistrySpy = jasmine.createSpyObj('UnitRegistryService', ['getConversion', 'registerUnit'], {
-      allUnitKeys_: mockUnits
-    })
+    unitRegistrySpy = jasmine.createSpyObj(
+      'UnitRegistryService',
+      ['getConversion', 'registerUnit', 'renameUnit', 'updateUnitRate'],
+      { allUnitKeys_: mockUnits }
+    )
+    translationMock = { translate: (k: string) => k || '', updateDictionary: jasmine.createSpy('updateDictionary') }
     unitRegistrySpy.getConversion.and.returnValue(1)
 
     metadataRegistrySpy = jasmine.createSpyObj(
@@ -59,7 +66,7 @@ describe('MetadataManagerPageComponent', () => {
         { provide: UnitRegistryService, useValue: unitRegistrySpy },
         { provide: MetadataRegistryService, useValue: metadataRegistrySpy },
         { provide: ProductDataService, useValue: productDataSpy },
-        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } }
+        { provide: TranslationService, useValue: translationMock }
       ]
     }).compileComponents()
 
@@ -86,6 +93,62 @@ describe('MetadataManagerPageComponent', () => {
     expect(await rename('category', 'meat', 'fish', 'me')).toBe(true)
     expect(metadataRegistrySpy.renameCategory).toHaveBeenCalledOnceWith('meat', 'fish')
     expect(productDataSpy.reloadFromStorage).toHaveBeenCalledTimes(1)
+  })
+
+  // Plan 377 — the unit edit dialog's save path.
+  describe('editing a custom unit', () => {
+    type UnitSave = { key: string; hebrewLabel: string; gramRate: number }
+    const page = (): {
+      requireSignIn: () => boolean
+      editingUnit_: { (): UnitSave | null; set: (v: UnitSave | null) => void }
+      onUnitEditSaved: (v: UnitSave) => Promise<void>
+    } => component as unknown as ReturnType<typeof page>
+    const jar: UnitSave = { key: 'jar', hebrewLabel: 'צנצנת', gramRate: 500 }
+    let recipeReload: jasmine.Spy
+    let dishReload: jasmine.Spy
+
+    beforeEach(() => {
+      spyOn(page(), 'requireSignIn').and.returnValue(true)
+      unitRegistrySpy.renameUnit.and.resolveTo(true)
+      unitRegistrySpy.updateUnitRate.and.resolveTo(true)
+      productDataSpy.reloadFromStorage.and.resolveTo()
+      recipeReload = spyOn(TestBed.inject(RecipeDataService), 'reloadFromStorage').and.resolveTo()
+      dishReload = spyOn(TestBed.inject(DishDataService), 'reloadFromStorage').and.resolveTo()
+    })
+
+    it('key + conversion in one save: renames first, then sets the rate on the new key, then reloads all lists', async () => {
+      page().editingUnit_.set(jar)
+      await page().onUnitEditSaved({ key: 'crate', hebrewLabel: 'קרטון', gramRate: 750 })
+      expect(unitRegistrySpy.renameUnit).toHaveBeenCalledOnceWith('jar', 'crate')
+      expect(translationMock.updateDictionary).toHaveBeenCalledOnceWith('crate', 'קרטון', 'me')
+      expect(unitRegistrySpy.updateUnitRate).toHaveBeenCalledOnceWith('crate', 750)
+      expect(unitRegistrySpy.renameUnit).toHaveBeenCalledBefore(unitRegistrySpy.updateUnitRate)
+      expect(productDataSpy.reloadFromStorage).toHaveBeenCalledTimes(1)
+      expect(recipeReload).toHaveBeenCalledTimes(1)
+      expect(dishReload).toHaveBeenCalledTimes(1)
+    })
+
+    it('label only: updates the dictionary, no term write, no reload', async () => {
+      page().editingUnit_.set(jar)
+      await page().onUnitEditSaved({ ...jar, hebrewLabel: 'צנצנת גדולה' })
+      expect(translationMock.updateDictionary).toHaveBeenCalledOnceWith('jar', 'צנצנת גדולה', 'me')
+      expect(unitRegistrySpy.renameUnit).not.toHaveBeenCalled()
+      expect(unitRegistrySpy.updateUnitRate).not.toHaveBeenCalled()
+      expect(productDataSpy.reloadFromStorage).not.toHaveBeenCalled()
+    })
+
+    it('a failed rename stops the save before the rate or dictionary change', async () => {
+      unitRegistrySpy.renameUnit.and.resolveTo(false)
+      page().editingUnit_.set(jar)
+      await page().onUnitEditSaved({ key: 'crate', hebrewLabel: 'קרטון', gramRate: 750 })
+      expect(unitRegistrySpy.updateUnitRate).not.toHaveBeenCalled()
+      expect(translationMock.updateDictionary).not.toHaveBeenCalled()
+    })
+
+    it('a system unit never opens the edit dialog', async () => {
+      await component.onRenameMetadata('gram', 'unit')
+      expect(page().editingUnit_()).toBeNull()
+    })
   })
 
   it('should identify system units via isSystemUnit', () => {
