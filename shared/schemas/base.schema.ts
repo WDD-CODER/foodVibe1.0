@@ -1,5 +1,11 @@
 import { z } from 'zod'
 
+/** Longest name an item may have (plan 417): one limit for every entity, Hebrew or English. */
+export const NAME_MAX_LENGTH = 200
+
+/** An item's own name. Snapshot copies of a name (nameSnapshot, itemName, …) stay unlimited. */
+export const nameField = z.string().max(NAME_MAX_LENGTH)
+
 /** Fields every persisted v2 document carries (Plan 321 Phase 2a, decision D4: camelCase, no trailing `_`). */
 export const baseDocShape = {
   _id: z.string().min(1),

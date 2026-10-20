@@ -1,10 +1,10 @@
 import { z } from 'zod'
-import { baseDocShape } from '../base.schema'
+import { baseDocShape, nameField } from '../base.schema'
 import { eventLogisticsSchema } from './common.schema'
 
 export const menuEventSchema = z.strictObject({
   ...baseDocShape,
-  name: z.string(),
+  name: nameField,
   eventType: z.string(),
   eventDate: z.string().optional(),
   servingType: z.string(),
