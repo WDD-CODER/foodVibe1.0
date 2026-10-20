@@ -291,6 +291,23 @@
 - [ ] T10: Add the Hebrew texts for the station list and picker — keys listed in UI/UX Notes — public/assets/data/dictionary.json
 - [ ] T11: Build, run server and client tests and the log check, then hand over the station checks — ng build, npm --prefix server test, ng test include list, git grep, numstat, log-query; cards ①–④ + production check — this plan file
 
+### Plan 437 — Printed prep sheets per station, category or dish, one page per group (`plans/437-printed-prep-sheets-per-station-category-or-dish-one-page-per-group.plan.md`)
+
+- [ ] Order: stations in their list order then "כללי"; categories alphabetical (he) then "כללי"; dishes in menu order;
+- [ ] Print: A4 portrait, RTL, body ≥ 14pt, group title ≥ 20pt, black on white, no backgrounds, no app chrome or
+- [ ] P1: Build the printed groups once from the engine so screen, paper and Excel match — buildPrepSheetGroups(plan, event, recipesById, mode, t, stationOrder) → PrepSheetGroup[] { key, title, rows { name, qty, unit, forDishes, note }, emptyText? }; aggregate by prepId+unit before formatQty; rules and order from P0; prepSheetTableRows(group, t) gives the header + cell rows both the template and Excel use — src/app/core/utils/prep-sheet-groups.util.ts
+- [ ] P2: Turn supplier orders into printable pages — buildSupplierSheetGroups(orders, t): one group per card (review card excluded), rows product · qty · unit · purchase text, no prices — src/app/core/utils/prep-sheet-groups.util.ts
+- [ ] P3: Test grouping, dish station, merging, empty groups and supplier pages on the 04.1 fixture — cases in Done when — src/app/core/utils/prep-sheet-groups.util.spec.ts
+- [ ] P4: Show the prep sheets as printed pages with a checkbox per group — PrepSheetsComponent: groups computed from EventPlanService + StationRegistryService order; selected_ signal (all on open); mode tabs; header block per page; body class + runtime @page style via Renderer2/DOCUMENT, removed in ngOnDestroy; Escape closes — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.ts, .html, .scss
+- [ ] P5: Print only the chosen groups, cleanly on A4 — print() → window.print(); component print SCSS; append the body-class rule to the global stylesheet — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.scss, src/styles.scss
+- [ ] P6: Add supplier pages to the same screen — by_supplier mode reads buildSupplierOrders (plan 435) and buildSupplierSheetGroups; no Excel button in this mode — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.ts, .html
+- [ ] P7: Test the component's selection, print call and page-footer style — spec with window.print spied and a stub EventPlanService — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.spec.ts
+- [ ] P8: Make the Excel prep sheets the same rows as the screen and drop the old copies — exportChecklist and the checklist part of exportAllTogetherMenu write one worksheet per group from buildPrepSheetGroups + prepSheetTableRows via one private helper; delete getMenuChecklistPreviewPayload, the ScalingService prep calls and (if unused) the ScalingService inject; remove the facade method; net lines ≤ 0 — src/app/core/services/menu-export.service.ts, src/app/core/services/export.service.ts, src/app/core/services/export.service.spec.ts
+- [ ] P9: Rename the sheet's checklist group to prep sheets and add the supplier mode — prep_sheets title, by_supplier row (view only), ChecklistMode union; the exportChecklist output stays typed Exclude<ChecklistMode, 'by_supplier'> so ExportService.exportChecklist keeps its signature; spec — src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.ts, .html, .spec.ts
+- [ ] P10: Open prep sheets from the menu without growing the frozen page — prepSheets_ signal; onViewChecklist sets { event: getCurrentMenuForExport(), mode }; remove the 'menu-checklist' preview branch and exportChecklistMode_; closeAllExportOverlays clears prepSheets_; lazy @defer block in html; added ≤ deleted — src/app/pages/menu-intelligence/menu-intelligence.page.ts, menu-intelligence.page.html
+- [ ] P11: Add the Hebrew texts for the prep sheets — keys listed in UI/UX Notes — public/assets/data/dictionary.json
+- [ ] P12: Build, test, check frozen files and the stylesheet append, then hand over the print checks — ng build, ng test include list, numstat, git grep, styles diff, log-query; cards ①–⑥ — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
