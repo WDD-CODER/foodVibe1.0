@@ -11,6 +11,7 @@ import {
   viewChild
 } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import type { RawLine } from 'src/app/core/engine/event-plan.types'
 import { EventPlanService } from 'src/app/core/engine/event-plan.service'
@@ -38,7 +39,7 @@ import { UserService } from '@services/user.service'
 @Component({
   selector: 'app-supplier-orders',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent],
   templateUrl: './supplier-orders.component.html',
   styleUrl: './supplier-orders.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

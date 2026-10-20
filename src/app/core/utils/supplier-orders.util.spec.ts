@@ -162,9 +162,21 @@ describe('buildAllOrdersMessage', () => {
   })
 
   it('leaves the review lines out', () => {
-    const withReview = buildAllOrdersMessage(header, orders.cards, t)
-    expect(withReview).not.toContain('line_status')
-    expect(orders.review.length).toBe(0)
+    const plan: EventPlan = {
+      rawLines: [
+        rawLine({ name: 'נבדק', status: 'unlinked' }),
+        rawLine({ name: 'd', supplierId: ID.supplierB, lineCost: 5 })
+      ],
+      prepLines: [],
+      dishCosts: [],
+      eventFoodCost: 5,
+      partial: true,
+      missing: [],
+      errors: []
+    }
+    const built = buildSupplierOrders(plan, new Map(), new Map(FIXTURE_SUPPLIERS.map((s) => [s._id, s])), t)
+    expect(built.review.length).toBe(1)
+    expect(buildAllOrdersMessage(header, built.cards, t)).not.toContain('נבדק')
   })
 })
 

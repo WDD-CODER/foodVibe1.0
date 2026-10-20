@@ -31,15 +31,6 @@
     color: var(--color-text-main);
   }
 
-  .so-empty {
-    margin: 0;
-    padding-block: var(--space-6);
-
-    font-size: var(--fs-base);
-    color: var(--color-text-muted);
-    text-align: center;
-  }
-
   .so-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -56,10 +47,6 @@
     gap: var(--space-2);
 
     padding: var(--space-3);
-
-    background: var(--bg-glass);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
   }
 
   .so-card--review {

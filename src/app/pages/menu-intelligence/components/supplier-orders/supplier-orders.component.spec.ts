@@ -15,7 +15,7 @@ import { UserService } from '@services/user.service'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { SupplierOrdersComponent } from './supplier-orders.component'
 
-const RLM = '‏'
+const RLM = '\u200F'
 const TEXTS: Record<string, string> = {
   no_supplier: 'ללא ספק',
   order_msg_title: 'הזמנה – {business}',
