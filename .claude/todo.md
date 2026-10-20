@@ -150,13 +150,6 @@
 - [x] F1: Confirm every kept model accepts inline images — VISION_MODEL_PATTERN matches all kept models including gemini-3-flash-preview (extend pattern + test if not) — server/services/gemini-client.js, server/test/gemini-client.test.js
 - [x] G1: Update the Gemini free-tier gotcha with the new lineup and the quota-first ordering rule — docs/brain/gotchas/backend.md
 
-### Plan 417 — Limit name length on every saved item (`plans/417-limit-name-length-on-every-saved-item.plan.md`)
-
-- [ ] C1: Add one shared 200-character name limit to the schemas so every entity uses the same rule — NAME_MAX_LENGTH + nameField in base.schema.ts; apply to the 7 entity name fields — shared/schemas/base.schema.ts, shared/schemas/entities/*.schema.ts
-- [ ] C2: Prove the server refuses a too-long name and still saves a normal one on every entity — POST over/at limit and PUT over limit for all 7 types; extra minimal bodies in v2-docs.js — server/test/name-length.test.js, server/test/helpers/v2-docs.js
-- [ ] C3: Add a read-only check that shows whether any saved item already has a name over the limit — local and Atlas targets, one line per collection, exit 1 when over — server/scripts/check-name-lengths.js
-- [ ] C4: Build, test, check local data and hand you the Atlas check and the save check — npm --prefix server test, ng build, check script on local, log-query; Human runs the Atlas check and saves one product and one recipe — this plan file
-
 ### Plan 418 — Prefill the typed name in the unit and supplier add windows
 - [ ] A1: Let the unit window open with the name the chef already typed — prefillName in the context, window reads it on open, specs — src/app/core/services/unit-registry.service.ts, src/app/shared/unit-creator/**
 - [ ] A2: Stop a cancelled unit window from filling the field later — completes-on-close helper replaces take(1) subscriptions in every caller, spec — unit-registry.service.ts, all FR 5 callers
