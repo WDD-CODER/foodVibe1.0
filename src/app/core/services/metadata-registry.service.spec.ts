@@ -268,21 +268,18 @@ describe('MetadataRegistryService', () => {
       expect(service.courses_()).toEqual([{ key: 'starter' }])
     })
 
-    it('registers every new course with the same neutral color, whatever is already stored', fakeAsync(() => {
+    it('registers a new course with no color key', fakeAsync(() => {
       const storage = TestBed.inject(StorageService) as jasmine.SpyObj<StorageService>
       service.registerCourse('brunch')
       tick()
-      service.registerCourse('dessert')
-      tick()
       const courseBodies = storage.post.calls
         .allArgs()
-        .map(([, body]) => body as { kind: string; key: string; color: string })
-        .filter((b) => b.kind === 'course')
-      expect(courseBodies.map((b) => [b.key, b.color])).toEqual([
-        ['brunch', '#78716C'],
-        ['dessert', '#78716C']
-      ])
-      expect(service.courses_().map((c) => c.key)).toEqual(['starter', 'brunch', 'dessert'])
+        .map(([, body]) => body as Record<string, unknown>)
+        .filter((b) => b['kind'] === 'course')
+      expect(courseBodies.length).toBe(1)
+      expect(courseBodies[0]['key']).toBe('brunch')
+      expect('color' in courseBodies[0]).toBe(false)
+      expect(service.courses_().map((c) => c.key)).toEqual(['starter', 'brunch'])
     }))
   })
 

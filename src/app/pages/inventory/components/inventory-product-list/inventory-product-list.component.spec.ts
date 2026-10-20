@@ -128,6 +128,11 @@ describe('InventoryProductListComponent', () => {
     expect(results[0].nameHebrew).toBe('Tomato')
   })
 
+  it('shows the general category for a product with no category (plan 438)', () => {
+    expect((component as any).getCategoryDisplay([])).toBe('category_general')
+    expect((component as any).getCategoryDisplay(undefined)).toBe('category_general')
+  })
+
   it('should navigate to edit page with correct absolute path', () => {
     // FIX: Aligning with Component's actual navigation logic
     component.onEditProduct('123')

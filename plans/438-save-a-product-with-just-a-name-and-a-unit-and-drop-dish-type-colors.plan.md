@@ -1,6 +1,6 @@
 # Plan 438 — Save a product with just a name and a unit, and drop dish-type colors
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -30,10 +30,10 @@ under "כללי" (shopping lists already fall back to `'כללי'` in `menu-expo
 - Primary: a dish type is stored and seeded without a color; the schema no longer requires one.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `git diff --numstat origin/mvp -- src/app/pages/inventory/components/product-form/product-form.component.ts`
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `git diff --numstat origin/mvp -- src/app/pages/inventory/components/product-form/product-form.component.ts`
   shows deletions ≥ insertions (growth-frozen file, net ≤ 0; base branch per MVP run mode).
-- [auto] `npx ng test --watch=false --include='src/app/pages/inventory/components/product-form/**' --include='src/app/core/services/metadata-registry.service.spec.ts' --include='src/app/pages/inventory/components/inventory-product-list/**'`
+- [x] [auto] `npx ng test --watch=false --include='src/app/pages/inventory/components/product-form/**' --include='src/app/core/services/metadata-registry.service.spec.ts' --include='src/app/pages/inventory/components/inventory-product-list/**'`
   passes, including the new/changed specs:
   - product form: name "בצל ירוק" + base unit `kg`, price empty, no category → `saveAndWait()` resolves `true`
     and `KitchenStateService.saveProduct` is called with `sources: []`, `categories: []`, `yieldFactor: 1`;
@@ -43,11 +43,11 @@ Done when:
   - metadata registry: `registerCourse('brunch')` posts a body with no `color` key (replaces the old
     "same neutral color" test);
   - inventory list: a product with `categories: []` shows `כללי` in its category cell.
-- [auto] `npm --prefix server test` passes, including the new tests in `server/test/taxonomy-term-schema.test.js`:
+- [x] [auto] `npm --prefix server test` passes, including the new tests in `server/test/taxonomy-term-schema.test.js`:
   `{ kind: 'course', key: 'starter' }` → valid; `{ kind: 'course', key: 'starter', color: '#3B82F6' }` → still
   valid (legacy stored docs); `{ kind: 'course', key: 'k', color: 'blue' }` → still invalid; and in
   `server/test/seed-master-taxonomy.test.js`: after `seedMasterTaxonomy()` no `course` term has a `color` field.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Desktop: `/inventory/add` → type name "בצל ירוק", choose base unit "ק"ג", leave price, category and
   everything else empty → «שמור». The product saves, you land on the inventory list, and the new row shows
   category "כללי".
@@ -95,6 +95,7 @@ shared/schemas/entities/taxonomy-term.schema.ts
 server/services/seed-master.js
 server/test/taxonomy-term-schema.test.js
 server/test/seed-master-taxonomy.test.js
+server/test/migration-0003-taxonomy-terms.test.js
 public/assets/data/dictionary.json
 docs/brain/gotchas/backend.md
 ```
@@ -160,13 +161,13 @@ the `kind: z.literal('course')` member in `taxonomy-term.schema.ts`; `DEFAULT_CO
 - No new Lucide icons.
 
 ## Atomic Sub-tasks
-- [ ] A1: Let a product save with only a name and a base unit — drop required on buy_price_global_ (keep min 0) and categories (keep the control, no minLength), drop the two validateForm_ lines for price and category, remove the two error spans in the template; net lines in the .ts ≤ 0; specs for the cases in Done-when — src/app/pages/inventory/components/product-form/product-form.component.ts, product-form.component.html, product-form.component.spec.ts
-- [ ] A2: Show products without a category under "כללי" in the inventory list — getCategoryDisplay returns translate('category_general') when the joined text is empty; add the dictionary key; spec — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts, inventory-product-list.component.spec.ts, public/assets/data/dictionary.json
-- [ ] A3: Stop requiring a color on dish types in the shared schema — course member: `color: colorSchema.optional()` with a `/** @deprecated never written since plan 438; stored values removed by migration 0007 */` comment; run npm run build:schemas; schema tests — shared/schemas/entities/taxonomy-term.schema.ts, server/test/taxonomy-term-schema.test.js
-- [ ] A4: Stop sending a fake color when a dish type is added or shared — delete COURSE_NEUTRAL_COLOR and pass `{}` in registerCourse and the course branch of pushRegistryRenameToMaster; replace the neutral-color spec with "no color key" — src/app/core/services/metadata-registry.service.ts, metadata-registry.service.spec.ts
-- [ ] A5: Seed dish types without colors on a fresh database — KITCHEN_COURSES items become `{ key }`; delete LABEL_COLOR_PALETTE (only the course seed used it); seed test asserts no course color — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
-- [ ] A6: Replace the "course terms must carry a color" gotcha with what is true now — short entry: plan 438 made color optional and stopped writing it, migration 0007 (plan 440) unsets stored colors, never re-add a constant — docs/brain/gotchas/backend.md
-- [ ] A7: Build, run specs and server tests, check the error log, then hand over the app checks — ng build, git diff --numstat on the frozen form, ng test (listed specs), npm --prefix server test, log-query — this plan file
+- [x] A1: Let a product save with only a name and a base unit — drop required on buy_price_global_ (keep min 0) and categories (keep the control, no minLength), drop the two validateForm_ lines for price and category, remove the two error spans in the template; net lines in the .ts ≤ 0; specs for the cases in Done-when — src/app/pages/inventory/components/product-form/product-form.component.ts, product-form.component.html, product-form.component.spec.ts
+- [x] A2: Show products without a category under "כללי" in the inventory list — getCategoryDisplay returns translate('category_general') when the joined text is empty; add the dictionary key; spec — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts, inventory-product-list.component.spec.ts, public/assets/data/dictionary.json
+- [x] A3: Stop requiring a color on dish types in the shared schema — course member: `color: colorSchema.optional()` with a `/** @deprecated never written since plan 438; stored values removed by migration 0007 */` comment; run npm run build:schemas; schema tests — shared/schemas/entities/taxonomy-term.schema.ts, server/test/taxonomy-term-schema.test.js
+- [x] A4: Stop sending a fake color when a dish type is added or shared — delete COURSE_NEUTRAL_COLOR and pass `{}` in registerCourse and the course branch of pushRegistryRenameToMaster; replace the neutral-color spec with "no color key" — src/app/core/services/metadata-registry.service.ts, metadata-registry.service.spec.ts
+- [x] A5: Seed dish types without colors on a fresh database — KITCHEN_COURSES items become `{ key }`; delete LABEL_COLOR_PALETTE (only the course seed used it); seed test asserts no course color — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
+- [x] A6: Replace the "course terms must carry a color" gotcha with what is true now — short entry: plan 438 made color optional and stopped writing it, migration 0007 (plan 440) unsets stored colors, never re-add a constant — docs/brain/gotchas/backend.md
+- [x] A7: Build, run specs and server tests, check the error log, then hand over the app checks — ng build, git diff --numstat on the frozen form, ng test (listed specs), npm --prefix server test, log-query — this plan file
 
 ## Technical Considerations
 - Dependencies: `KitchenStateService.saveProduct` (unchanged), `TaxonomyStore.add` (extras typed from the schema —

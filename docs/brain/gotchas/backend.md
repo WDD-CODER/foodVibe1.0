@@ -220,13 +220,13 @@ been killed by it.
 
 ---
 
-## Course terms must carry a color: the taxonomyTerms schema requires it
+## Course terms: color is optional and never written (plan 438)
 
-**What hurt:** Plan 375 said to save dish types as `{ key }` only. Since plan 321 Phase 3, the `taxonomyTerms` schema declares `kind: 'course'` as a strictObject with a **required** `color` (hex regex). A course saved without a color fails validation and returns a 400.
+**What hurt:** The `taxonomyTerms` schema used to require a hex `color` on `kind: 'course'`, so the client sent a fake constant (`COURSE_NEUTRAL_COLOR`) for a value nobody reads.
 
-**Why the obvious fix is wrong:** Dropping `color` from the client's `taxonomy.add('course', …)` looks like a client-only change, but the server rejects it. Older plan files still say "no server change" because they were written before that commit.
+**Why the obvious fix is wrong:** Re-adding a constant "to be safe" brings the fake data back. Stored course colors still on Atlas stay valid because the field is optional, not removed.
 
-**What to do instead:** To make dish types colorless on the client, send one constant (`COURSE_NEUTRAL_COLOR = '#78716C'` in `metadata-registry.service.ts`) and just don't render it. Making `color` optional on the server means changing the schema, running `build:schemas` and updating the server tests (planned for plan 376). Before trusting a plan's "no server change", check `server/generated/schemas/entities/taxonomy-term.schema.js`.
+**What to do instead:** Save dish types as `{ key }` only. Plan 438 made `color` optional in `shared/schemas/entities/taxonomy-term.schema.ts` and stopped seeding it; migration 0007 (plan 440) unsets the stored colors. Never re-add a color constant.
 
 ---
 

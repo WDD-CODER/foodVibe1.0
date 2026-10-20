@@ -71,10 +71,6 @@ function upgradeDemoEntity(entityType, entity) {
 // into each user's own registry docs on first load; terms are now shared (master ∪ own), so
 // a fresh database gets them once, as master terms. Same values the client used to seed.
 // ---------------------------------------------------------------------------
-const LABEL_COLOR_PALETTE = [
-  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899',
-  '#14B8A6', '#F97316', '#6366F1', '#84CC16', '#06B6D4', '#78716C',
-];
 /** Plan 376: real dish types only (Dandan, 2026-10-10). Same list as MAPPING.keep in scripts/cleanup-dish-types.js. */
 const DEFAULT_COURSES = [
   'amuse_bouche', 'bread_focaccia_savory_baking', 'cakes_cookies_tarts', 'charcuterie_meat_mass_meat_preps',
@@ -103,7 +99,7 @@ function defaultMasterRegistries() {
     }),
     KITCHEN_LABELS: [],
     KITCHEN_COURSES: master({
-      items: DEFAULT_COURSES.map((key, i) => ({ key, color: LABEL_COLOR_PALETTE[i % LABEL_COLOR_PALETTE.length] })),
+      items: DEFAULT_COURSES.map(key => ({ key })),
     }),
     MENU_TYPES: master({
       items: [

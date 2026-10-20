@@ -657,7 +657,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       (ids ?? [])
         .map((id) => this.translationService.translate(id))
         .filter(Boolean)
-        .join(', ') || ''
+        .join(', ') || this.translationService.translate('category_general')
     )
   }
 

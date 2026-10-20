@@ -12,8 +12,6 @@ import { type MenuTypeDefinition, type DishFieldKey, DEFAULT_DISH_FIELDS } from 
 
 type PushableType = 'label' | 'course' | 'category' | 'allergen'
 const KIND_BY_TYPE = { label: 'label', course: 'course', category: 'ingredientCategory', allergen: 'allergen' } as const
-/** Dish types have no color (plan 375); the taxonomyTerms schema still requires one, so every course gets this. */
-const COURSE_NEUTRAL_COLOR = '#78716C'
 
 /**
  * Plan 321 Phase 3 — thin facade over TaxonomyStore for ingredient categories, allergens,
@@ -151,7 +149,7 @@ export class MetadataRegistryService {
     const sanitized = keyToUse.trim()
     if (!sanitized || this.taxonomy.find('course', sanitized)) return
     await this.run('course.save', 'שגיאה בשמירת סוג המנה', async () => {
-      await this.taxonomy.add('course', sanitized, { color: COURSE_NEUTRAL_COLOR })
+      await this.taxonomy.add('course', sanitized, {})
       this.userMsgService.onSetSuccessMsg(`סוג מנה "${sanitized}" נוסף בהצלחה`)
     })
   }
@@ -270,7 +268,7 @@ export class MetadataRegistryService {
         share
       )
     } else if (kind === 'course') {
-      await this.taxonomy.add('course', newKey, { color: COURSE_NEUTRAL_COLOR }, share)
+      await this.taxonomy.add('course', newKey, {}, share)
     } else {
       await this.taxonomy.add(kind, newKey, {}, share)
     }
