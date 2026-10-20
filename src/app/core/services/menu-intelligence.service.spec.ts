@@ -1,27 +1,21 @@
 import { TestBed } from '@angular/core/testing'
-import { signal } from '@angular/core'
 import { MenuIntelligenceService } from './menu-intelligence.service'
-import { KitchenStateService } from './kitchen-state.service'
-import { RecipeCostService } from './recipe-cost.service'
+import { EventPlanService } from '../engine/event-plan.service'
+import { computeEventPlan } from '../engine/event-plan.engine'
+import { buildFixtureInput } from '../engine/testing/event-plan.fixture'
+import type { EventPlan } from '../engine/event-plan.types'
 import { MenuEvent } from '@models/menu-event.model'
-import { Recipe } from '@models/recipe.model'
 
 describe('MenuIntelligenceService', () => {
   let service: MenuIntelligenceService
-  const recipesSignal = signal<Recipe[]>([])
+  let planSpy: jasmine.SpyObj<EventPlanService>
+  const fixturePlan: EventPlan = computeEventPlan(buildFixtureInput())
 
   beforeEach(() => {
-    recipesSignal.set([])
-    const kitchenSpy = jasmine.createSpyObj('KitchenStateService', [], {
-      recipes_: recipesSignal
-    })
-    const costSpy = jasmine.createSpyObj('RecipeCostService', ['computeRecipeCost'])
+    planSpy = jasmine.createSpyObj('EventPlanService', ['planFor'])
+    planSpy.planFor.and.returnValue(fixturePlan)
     TestBed.configureTestingModule({
-      providers: [
-        MenuIntelligenceService,
-        { provide: KitchenStateService, useValue: kitchenSpy },
-        { provide: RecipeCostService, useValue: costSpy }
-      ]
+      providers: [MenuIntelligenceService, { provide: EventPlanService, useValue: planSpy }]
     })
     service = TestBed.inject(MenuIntelligenceService)
   })
@@ -131,111 +125,7 @@ describe('MenuIntelligenceService', () => {
   })
 
   describe('computeEventIngredientCost', () => {
-    it('should sum scaled recipe costs for all items', () => {
-      const recipe: Recipe = {
-        _id: 'r1',
-        nameHebrew: 'Dish',
-        ingredients: [{ _id: 'i1', referenceId: 'p1', type: 'product', amount: 100, unit: 'gram' }],
-        steps: [],
-        yieldAmount: 2,
-        yieldUnit: 'unit',
-        defaultStation: '',
-        isApproved: false
-      }
-      recipesSignal.set([recipe])
-      const costService = TestBed.inject(RecipeCostService) as jasmine.SpyObj<RecipeCostService>
-      costService.computeRecipeCost.and.returnValues(10, 15)
-
-      const event: MenuEvent = {
-        _id: 'e1',
-        name: 'Event',
-        eventType: '',
-        eventDate: '',
-        servingType: 'plated_course',
-        guestCount: 4,
-        sections: [
-          {
-            _id: 's1',
-            name: 'Main',
-            sortOrder: 1,
-            items: [
-              {
-                recipeId: 'r1',
-                recipeType: 'dish',
-                predictedTakeRate: 0,
-                derivedPortions: 4,
-                servingPortions: 1
-              },
-              {
-                recipeId: 'r1',
-                recipeType: 'dish',
-                predictedTakeRate: 0,
-                derivedPortions: 2,
-                servingPortions: 0.5
-              }
-            ]
-          }
-        ],
-        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
-        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
-      }
-      const total = service.computeEventIngredientCost(event)
-      expect(total).toBe(25)
-      expect(costService.computeRecipeCost).toHaveBeenCalledTimes(2)
-    })
-
-    it('should skip items with missing recipe', () => {
-      recipesSignal.set([])
-      const costService = TestBed.inject(RecipeCostService) as jasmine.SpyObj<RecipeCostService>
-
-      const event: MenuEvent = {
-        _id: 'e1',
-        name: 'Event',
-        eventType: '',
-        eventDate: '',
-        servingType: 'plated_course',
-        guestCount: 2,
-        sections: [
-          {
-            _id: 's1',
-            name: 'Main',
-            sortOrder: 1,
-            items: [
-              {
-                recipeId: 'missing',
-                recipeType: 'dish',
-                predictedTakeRate: 0,
-                derivedPortions: 2,
-                servingPortions: 1
-              }
-            ]
-          }
-        ],
-        financialTargets: { targetFoodCostPct: 0, targetRevenuePerGuest: 0 },
-        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
-      }
-      const total = service.computeEventIngredientCost(event)
-      expect(total).toBe(0)
-      expect(costService.computeRecipeCost).not.toHaveBeenCalled()
-    })
-  })
-
-  describe('computeFoodCostPct', () => {
-    it('should return (cost / revenue) * 100', () => {
-      const recipe: Recipe = {
-        _id: 'r1',
-        nameHebrew: 'Dish',
-        ingredients: [],
-        steps: [],
-        yieldAmount: 1,
-        yieldUnit: 'unit',
-        defaultStation: '',
-        isApproved: false
-      }
-      recipesSignal.set([recipe])
-      const costService = TestBed.inject(RecipeCostService) as jasmine.SpyObj<RecipeCostService>
-      costService.computeRecipeCost.and.returnValue(30)
-
+    it('returns the engine plan food cost of the event', () => {
       const event: MenuEvent = {
         _id: 'e1',
         name: 'Event',
@@ -254,7 +144,75 @@ describe('MenuIntelligenceService', () => {
                 recipeType: 'dish',
                 predictedTakeRate: 0,
                 derivedPortions: 10,
-                servingPortions: 1
+                servingPortions: 1,
+                sellPrice: 0
+              }
+            ]
+          }
+        ],
+        financialTargets: { targetFoodCostPct: 30, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
+      }
+      expect(service.computeEventIngredientCost(event)).toBe(157.75)
+      expect(planSpy.planFor).toHaveBeenCalledOnceWith(event)
+    })
+
+    it('returns 0 when the plan has no cost', () => {
+      planSpy.planFor.and.returnValue({ ...fixturePlan, eventFoodCost: 0 })
+      const event: MenuEvent = {
+        _id: 'e1',
+        name: 'Event',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 2,
+        sections: [
+          {
+            _id: 's1',
+            name: 'Main',
+            sortOrder: 1,
+            items: [
+              {
+                recipeId: 'r1',
+                recipeType: 'dish',
+                predictedTakeRate: 0,
+                derivedPortions: 10,
+                servingPortions: 1,
+                sellPrice: 0
+              }
+            ]
+          }
+        ],
+        financialTargets: { targetFoodCostPct: 30, targetRevenuePerGuest: 0 },
+        performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
+      }
+      expect(service.computeEventIngredientCost(event)).toBe(0)
+    })
+  })
+
+  describe('computeFoodCostPct', () => {
+    it('should return (cost / revenue) * 100 using the engine cost', () => {
+      planSpy.planFor.and.returnValue({ ...fixturePlan, eventFoodCost: 30 })
+      const event: MenuEvent = {
+        _id: 'e1',
+        name: 'Event',
+        eventType: '',
+        eventDate: '',
+        servingType: 'plated_course',
+        guestCount: 10,
+        sections: [
+          {
+            _id: 's1',
+            name: 'Main',
+            sortOrder: 1,
+            items: [
+              {
+                recipeId: 'r1',
+                recipeType: 'dish',
+                predictedTakeRate: 0,
+                derivedPortions: 10,
+                servingPortions: 1,
+                sellPrice: 100
               }
             ]
           }
@@ -262,8 +220,7 @@ describe('MenuIntelligenceService', () => {
         financialTargets: { targetFoodCostPct: 30, targetRevenuePerGuest: 100 },
         performanceTags: { foodCostPct: 0, primaryServingStyle: 'plated_course' }
       }
-      const pct = service.computeFoodCostPct(event)
-      expect(pct).toBe(3) // 30 / (10*100) * 100 = 3%
+      expect(service.computeFoodCostPct(event)).toBe(3) // 30 / (10*100) * 100 = 3%
     })
 
     it('should return 0 when revenue per guest is 0 or guest_count is 0', () => {
