@@ -163,6 +163,32 @@
 - [ ] A3: Trim the other always-on shell parts and unused icons — tab-chips, scroll-rail, hero-fab, Lucide pick — src/app/core/components/tab-chips/**, hero-fab/**, src/app/shared/scroll-rail/**, src/app/app.config.ts
 - [ ] A4: Raise the warning budget on purpose only if trimming was not enough — new value + one-line reason — angular.json
 
+### Plan 420 — Stop unknown links showing a blank page and keep the recipe warning on product delete
+- [ ] F1: Send unknown links to the dashboard instead of a blank page — append path '**' redirect as the last route — src/app/app.routes.ts
+- [ ] F2: Always warn how many recipes use a product before it is deleted, also right after a reload — ensureRecipesLoaded_ before counting in single and bulk delete, stop on load failure, specs — src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts, src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.spec.ts
+- [ ] F3: Build, test and hand you the two checks — ng build, the inventory-product-list specs, log-query; Human runs the unknown-link and cold-reload delete checks — this plan file
+
+### Plan 421 — Stop a refused menu-type rename from moving menus to another type
+- [ ] G1: Change no menu when a menu-type rename is refused, and let the server do the re-pointing — renameTerm returns boolean, page reloads menus only on success, drop updateServingTypeForAll, specs — src/app/core/services/metadata-registry.service.ts, src/app/pages/metadata-manager/metadata-manager.page.component.ts, src/app/core/services/menu-event-data.service.ts, specs
+- [ ] G2: Build, test and hand you the two rename checks — ng build, the listed specs, log-query; Human runs the two checks — this plan file
+
+### Plan 422 — Nightly QA morning report and shorter runs once pages are clean
+- [ ] H1: Review only pages whose code changed so nights get shorter as the app gets cleaner — citedFiles at ingest, due/skipped rule with a 14-day full review, Nothing-to-review queue, tests — scripts/qa/code-qa/rotation.mjs, scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**
+- [ ] H2: Tell the Code QA agent to skip unchanged pages and stop when nothing is due — work only numbered pages, ignore Skipped, Nothing-to-review rule — docs/qa/code-qa-agent.md
+- [ ] H3: Write one morning report that says whether the night needs anything from you — status, Do now, steps, new/fixed/open, history line, tests on fixture folders — scripts/qa/morning-report.mjs, scripts/test/qa-morning-report.test.mjs, scripts/test/fixtures/qa-morning/**
+- [ ] H4: Produce the report every morning after QA stops — call morning-report.mjs from the 07:30 down step and log it — scripts/qa/qa-nightly-down.ps1
+- [ ] H5: Show the morning report's status line when Claude Code opens in the main folder — morning-brief.mjs SessionStart hook, silent in slots and when stale, drift note — scripts/qa/morning-brief.mjs, .claude/settings.json, docs/workflow-kit/drift-classification.md
+- [ ] H6: Explain the morning report and the shorter nights in the QA docs — Every morning section, due/skipped rule, file table — docs/qa/README.md, docs/qa/code-qa.md
+- [ ] H7: Test, run the report on the real QA folder and hand you the two morning checks — npm run test:scripts, morning-report --out=- on C:/dev/foodVibe-qa, ng build; Human checks the first and second mornings — this plan file
+
+### Plan 423 — Give each product its own weight for its purchase units
+- [ ] U1: Read every purchase unit in the product's base unit, honoring the unit after the colon — optionRateInBase util + spec; use it in recipe-cost, product-price, ingredients-table line cost, inventory list unit change — src/app/core/utils/purchase-option-rate.util.ts, src/app/core/services/recipe-cost.service.ts, src/app/core/utils/product-price.util.ts, recipe-ingredients-table.component.ts, inventory-product-list.component.ts
+- [ ] U2: Let the unit window ask how much one unit of this product weighs, also for an existing unit name — forProduct context, productUnitAdded$, product-mode title and label, two dictionary keys, specs — src/app/core/services/unit-registry.service.ts, src/app/shared/unit-creator/**, public/assets/data/dictionary.json
+- [ ] U3: Make the product form use this product's own number for every purchase unit — product-mode add, no shared pre-fill for custom units, pickNewUnit_ replaces the close effect (INVF-C06), specs — src/app/pages/inventory/components/product-form/**
+- [ ] U4: Ask the product's own weight when a unit is added from a recipe line or cook view — product mode, save the typed amount, drop the shared-rate math, specs — recipe-ingredients-table.component.ts, cook-view.page.ts and their specs
+- [ ] U5: Add a read-only check that lists products and recipe lines the old behavior may have got wrong — three sections, local and Atlas — server/scripts/check-unit-weights.js
+- [ ] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
