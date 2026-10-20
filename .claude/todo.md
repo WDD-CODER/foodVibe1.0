@@ -449,6 +449,16 @@
 - [ ] S5: Add the Hebrew texts and the building icon — 11 dictionary keys, Building2 — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] S6: Build, test and hand over the settings checks — ng build, server suite, listed specs, log-query; Human runs the [human] items on desktop and mobile — this plan file
 
+### Plan 430 — Record each user's active days on the server (`plans/430-record-each-user-s-active-days-on-the-server.plan.md`)
+
+- [ ] U1: Record one active-day entry per user per Israel day after each signed-in request — usage.js with jerusalemDate, isCountedWrite, recordUsage on finish, throttle — server/middleware/usage.js
+- [ ] U2: Call the recorder from token checking so every signed-in request is seen — attachUser(req, res, token) → recordUsage — server/middleware/auth.js
+- [ ] U3: Index the new collection by business and date for the dashboards — business_date index — server/db.js
+- [ ] U4: Add read helpers for last activity and active days per business — lastActiveByUser, activeDays, activeDaysByBusiness, weekBounds — server/utils/usage-stats.js
+- [ ] U5: Show each team member's real last activity instead of a dash — GET /team fills lastActiveAt — server/routes/business.js
+- [ ] U6: Prove counting, throttling, Israel midnight and the helpers with server tests — every Done-when case; update the team test's lastActiveAt expectation — server/test/usage-days.test.js, server/test/business-team.test.js
+- [ ] U7: Build, test, lint and hand over the Team-tab check — server suite, lint, ng build, log-query; Human runs the two [human] items — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
