@@ -10,6 +10,7 @@ adds API checks; plan 415 adds an AI code review on a nightly page rotation.
 | --- | --- | --- | --- |
 | `gates` | nothing | `npx ng build -c slot`, `npm run lint`, `npm run lint:icons`, `npm run lint:no-native-select`, `npx ng test --watch=false --browsers=ChromeHeadless`, `npm test --prefix server` | build fails → run **BLOCKED** (`<DATE>/BLOCKED.md`, later layers skipped); any other failure S2 with the last 30 output lines |
 | `static` | nothing | G4: every `'key' \| translatePipe` exists in `dictionary.json`; template text that is not piped. G3: physical CSS (`margin/padding/border-left/right`, `left:`, `right:`, `text-align`/`float: left/right`) in `src/**/*.scss` and inline styles. Routes: every `loadComponent` resolves to a file exporting the class, every `redirectTo` target exists, every route in the `qa-plan.md` section headers exists in the router. Page map: every glob in `code-qa-pages.json` matches a file | S3 · S3 · S2 · S4 |
+| `api` | QA stack up on **local** Mongo | per user entity (suppliers, equipment, products, recipes, dishes, venues, menu events): create → read → update → list → search → count; delete → trash → restore by the app's own path; missing field, wrong type, 200 kB string → must be 400; no token → 401; the second account (`QA_USER2`) on QA_USER's record → refused and the record unchanged; QA_USER on admin routes → 403; every token-guarded `server/routes/ai.js` route without a token → 401 (no AI call is ever made) | 500 or a write that should be refused but succeeds S1 · data lost on the round trip S2 · another status with the right effect S3 |
 | `sweep` | QA stack up (`npm run qa:up`) | every route in `code-qa-pages.json` × D 1366×768 / T 768×1024 / M 375×812, signed in as `QA_USER`: G1 horizontal scroll (S2 at M, S3 at T/D) · G8 console errors and 4xx/5xx (S2, minus the expected ones in `qa-agent.md` G8) · G4 raw dictionary keys on screen (S3) · G5 at M: hit area under 24×24 (S3), primary action under 44px tall (S4) · broken images (S3) · `<html dir>` not `rtl` (S2) · axe-core `wcag2a`/`wcag2aa` serious/critical (S3) · one full-page shot per route and breakpoint. Then the `e2e/*.spec.ts` flows against 4205 (a failing flow is S2) | see left |
 
 Console/network (G8), raw keys (G4), axe, broken images and `<html dir>` do not depend on the screen size: each is one
@@ -24,6 +25,24 @@ with no such record is `NO-DATA`: listed by name on the sweep's `Coverage:` line
 
 The e2e project runs only the read-only `cook-view` flow by default. `--e2e=all` runs every flow; the other flows
 create and delete records in the QA user's kitchen.
+
+## The api layer (plan 414)
+
+**Only local test data.** `qa-up.ps1` writes `.claude/.qa-env` (`local` or `remote`) when it starts the backend.
+The layer writes only when that file reads `local` and the API is `http://localhost:3005`; otherwise it prints
+`CODE-QA: api skipped (not local Mongo)` and sends nothing.
+
+**Records.** Every record is named `QA-CODE-<DATE>-<entity>-subject` (or `-ref` for the records other fixtures point
+at). Before and after the cases the layer deletes every `QA-CODE-` record of QA_USER in every entity and trash
+collection; a record it cannot remove is an S2 finding. Fixtures are checked against `shared/schemas` first (built by
+`npm run build:schemas`, which the layer runs when the build is missing), so a failing case is never the fixture's fault.
+
+**Second account.** The cross-user cases need a second non-admin account: `QA_USER2` / `QA_PASS2` in `server/.env`
+(see `README.md`). Without it those cases are `skipped` and the rest runs. Two logins per run, under the login limit.
+
+**Budget.** About 130 write calls per run (printed as `writes: <n>`), far under `DATA_WRITE_LIMIT_MAX` (1000).
+
+**Allow-list.** A case listed in `docs/qa/code-qa-api-cases.md` counts as `accepted`, not as a finding.
 
 ## Outputs (`bugs/qa-runs/code-qa/`, untracked)
 
@@ -57,7 +76,8 @@ Reports never hold a token: every free-text field goes through `redact()` (JWTs,
 npm run qa:up
 npm run qa:code
 npm run qa:code -- --layers=static
-npm run qa:code -- --layers=gates,static,sweep --deadline=02:40
+npm run qa:code -- --layers=api
+npm run qa:code -- --layers=gates,static,api,sweep --deadline=02:40
 ```
 
 Run it from the main folder or the QA checkout (the sweep needs the QA stack on 4205/3005). `QA_USER` / `QA_PASS`
@@ -70,7 +90,7 @@ layer stops there, later layers are skipped, the reports are still written; a ti
 
 Exit code: 0 the run finished (with or without findings) · 2 blocked by a failed build · 1 bad usage.
 
-Expected time: gates ≈ 10 min, static < 1 min, sweep ≈ 15–25 min.
+Expected time: gates ≈ 10 min, static < 1 min, api < 1 min, sweep ≈ 15–25 min.
 
 ## At night
 
@@ -81,6 +101,7 @@ Expected time: gates ≈ 10 min, static < 1 min, sweep ≈ 15–25 min.
 ```
 2026-10-20 00:41:12 code  CODE-QA: gates ok 1 findings
 2026-10-20 00:41:14 code  CODE-QA: static ok 42 findings
+2026-10-20 00:41:28 code  CODE-QA: api ok 7 findings
 2026-10-20 01:02:50 code  CODE-QA: sweep ok 37 findings
 ```
 
@@ -90,10 +111,12 @@ The UI agent reads `latest.md` in its P0 step (`qa-flow.md` P0.6) and skips what
 
 - `scripts/qa/code-qa/run.mjs` — orchestrator, layer registry, sweep layer
 - `scripts/qa/code-qa/gates.mjs`, `static-checks.mjs` — layers 1 and 2
+- `scripts/qa/code-qa/api-layer.mjs` (guard, runner, cleanup), `api-cases.mjs` (the case rows), `api-fixtures.mjs` (one valid record per entity) — the api layer
+- `docs/qa/code-qa-api-cases.md` — accepted API deviations (allow-list)
 - `scripts/qa/code-qa/findings.mjs` — fingerprints, `known.json`, report rendering
 - `scripts/qa/code-qa/common.mjs` — paths, globs, page map
 - `scripts/qa/lib/qa-login.mjs` — the QA login shared with the evidence server
 - `e2e-qa/sweep.spec.ts`, `playwright.qa.config.ts` — the Playwright sweep and the e2e project
 - `docs/qa/code-qa-pages.json` — page map: `{ id, title, routes, idType?, auth, files }` per `qa-plan.md` section
-- Tests: `scripts/test/code-qa-static.test.mjs`, `scripts/test/code-qa-findings.test.mjs` (fixtures in
+- Tests: `scripts/test/code-qa-static.test.mjs`, `scripts/test/code-qa-findings.test.mjs`, `scripts/test/code-qa-api.test.mjs` (fixtures in
   `scripts/test/fixtures/code-qa/`)

@@ -54,6 +54,7 @@ scripts/qa/qa-up.ps1
 scripts/test/code-qa-api.test.mjs
 scripts/test/fixtures/code-qa/**
 docs/qa/**
+scripts/qa/qa-nightly-up.ps1
 ```
 
 ## Read Scope
@@ -120,22 +121,22 @@ the list is reported as `accepted`, not as a finding.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `api` layer in `run.mjs`, between `static` and `sweep`, with the guard, cases, cleanup and allow-list above.
+- [x] `api` layer in `run.mjs`, between `static` and `sweep`, with the guard, cases, cleanup and allow-list above.
 
 ### Won't Have (this plan)
 - Load or performance tests; authenticated AI calls; admin-only success paths (push-to-master as admin).
 
 ## Atomic Sub-tasks
-- [ ] B1: Build a valid sample record for every entity so the API can be tested with real data shapes — fixtures checked against the shared schemas, QA-CODE- name prefix, reference order — scripts/qa/code-qa/api-fixtures.mjs
-- [ ] B2: Make sure API tests can only ever write to the local QA database — qa-up writes .claude/.qa-env; the layer refuses unless it reads local — scripts/qa/qa-up.ps1, scripts/qa/code-qa/api-layer.mjs
-- [ ] B3: Check that every entity saves, reads, edits, deletes, goes to trash and comes back intact — CRUD and trash cases — scripts/qa/code-qa/api-cases.mjs
-- [ ] B4: Check that bad input is refused with a clear error instead of crashing the server — validation cases — scripts/qa/code-qa/api-cases.mjs
-- [ ] B5: Check that users cannot touch each other's data or admin routes — auth and cross-user cases, skipped when QA_USER2 is missing; unauthenticated AI routes return 401 — scripts/qa/code-qa/api-cases.mjs
-- [ ] B6: Remove every test record before and after the run so the QA database stays clean — cleanup with its own finding on failure — scripts/qa/code-qa/api-layer.mjs
-- [ ] B7: Plug the API layer into the nightly run and the findings report — register layer api in run.mjs, write-call counter, allow-list file — scripts/qa/code-qa/run.mjs, docs/qa/code-qa-api-cases.md
-- [ ] B8: Test the case builder and the local-only guard without a server — scripts/test/code-qa-api.test.mjs, scripts/test/fixtures/code-qa/**
-- [ ] B9: Document the API layer and the second QA account setup — docs/qa/code-qa.md, docs/qa/README.md
-- [ ] B10: Prove it on the QA stack and record the numbers — run --layers=api, paste coverage, write count and failed cases into Execution Notes — this plan file
+- [x] B1: Build a valid sample record for every entity so the API can be tested with real data shapes — fixtures checked against the shared schemas, QA-CODE- name prefix, reference order — scripts/qa/code-qa/api-fixtures.mjs
+- [x] B2: Make sure API tests can only ever write to the local QA database — qa-up writes .claude/.qa-env; the layer refuses unless it reads local — scripts/qa/qa-up.ps1, scripts/qa/code-qa/api-layer.mjs
+- [x] B3: Check that every entity saves, reads, edits, deletes, goes to trash and comes back intact — CRUD and trash cases — scripts/qa/code-qa/api-cases.mjs
+- [x] B4: Check that bad input is refused with a clear error instead of crashing the server — validation cases — scripts/qa/code-qa/api-cases.mjs
+- [x] B5: Check that users cannot touch each other's data or admin routes — auth and cross-user cases, skipped when QA_USER2 is missing; unauthenticated AI routes return 401 — scripts/qa/code-qa/api-cases.mjs
+- [x] B6: Remove every test record before and after the run so the QA database stays clean — cleanup with its own finding on failure — scripts/qa/code-qa/api-layer.mjs
+- [x] B7: Plug the API layer into the nightly run and the findings report — register layer api in run.mjs, write-call counter, allow-list file — scripts/qa/code-qa/run.mjs, docs/qa/code-qa-api-cases.md
+- [x] B8: Test the case builder and the local-only guard without a server — scripts/test/code-qa-api.test.mjs, scripts/test/fixtures/code-qa/**
+- [x] B9: Document the API layer and the second QA account setup — docs/qa/code-qa.md, docs/qa/README.md
+- [x] B10: Prove it on the QA stack and record the numbers — run --layers=api, paste coverage, write count and failed cases into Execution Notes — this plan file
 
 ## Technical Considerations
 - Dependencies: plan 413 files; `shared/schemas` built output; `server/routes/generic.js` behaviour (read only).
@@ -154,3 +155,30 @@ the list is reported as `accepted`, not as a finding.
   `unit-registry.service.spec.ts` in the gates layer.
 
 ## Execution Notes
+
+**2026-10-20 — B1–B10 done** (built in wt-1's session, files in wt-2 per the Human).
+
+B10 — live on the QA stack (started by the Worker from `C:\dev\foodVibe-qa` with `qa-up.ps1 -Env local`; the QA
+checkout's `qa-up.ps1` on main does not write `.claude/.qa-env` yet, so wt-2's marker was set by hand to match):
+
+- `.qa-env` = `remote` → `CODE-QA: api skipped (not local Mongo)`, exit 0, no request sent.
+- `.qa-env` = `local` → `CODE-QA: api ok 7 findings`, 13 s. Coverage: `7 entities × 25 cases · 179 rows: 179 run ·
+  7 failed · 0 accepted · 0 skipped · writes: 132 · cross-user: on`.
+- After the run, a separate script listed every entity and trash type as QA_USER: 0 records named `QA-CODE-`.
+- The 7 failures are one defect on every entity: `<entity>.validation.huge-string` — a 200 kB `nameHebrew` / `name`
+  is stored (201). The schemas have no length limit. Reported as S1 by the plan's rule (a write that should be
+  refused succeeds); the Human decides: fix plan, or a line in `docs/qa/code-qa-api-cases.md`.
+- Every other case passed: CRUD round trip, list/search/count, trash and restore by the app's path, missing field and
+  wrong type → 400, no token → 401, QA_USER2 on QA_USER's record → refused and unchanged, admin routes → 403, all
+  token-guarded AI routes without a token → 401.
+
+Decisions:
+- Unknown type expects 400/403/404 (the server answers 403 from its type allow-list — the right effect).
+- Subjects never carry references: reference records (`…-ref`) are created first, so each subject can go through
+  delete/trash/restore; a product used by a recipe cannot be deleted (409) by design.
+- `push-to-master` is probed with a fake id: `requireAdmin` answers before the handler, and nothing real can be pushed
+  if the guard ever broke.
+- Trash restore follows the app (`replaceAll(TRASH_*, rest)` then POST); menu events have no restore in the app and
+  suppliers have no trash, so those rows are not built.
+- `scripts/qa/qa-nightly-up.ps1` added to scope (Human: `approved: qa-nightly-up.ps1`): the nightly layers are now
+  `gates,static,api,sweep`.

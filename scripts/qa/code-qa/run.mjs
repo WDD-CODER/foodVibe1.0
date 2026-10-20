@@ -3,10 +3,12 @@
  * Code QA (plan 413) — the deterministic night run, no AI. Layers in order:
  *   gates   build, lint, unit and server tests (a failed build ends the run: BLOCKED.md)
  *   static  translation keys, untranslated text, physical CSS, routes, page map — no server
+ *   api     CRUD, trash, validation and permission cases straight against the QA backend (plan 414;
+ *           local Mongo only, every record removed)
  *   sweep   Playwright over every page × D/T/M on the QA stack, plus the e2e flows
  * Writes bugs/qa-runs/code-qa/<DATE>/pre-qa.{md,json}, known.json and latest.md (findings.mjs).
  *
- * Usage: node scripts/qa/code-qa/run.mjs [--layers=gates,static,sweep] [--date=YYYY-MM-DD]
+ * Usage: node scripts/qa/code-qa/run.mjs [--layers=gates,static,api,sweep] [--date=YYYY-MM-DD]
  *          [--deadline=HH:MM] [--nightly] [--e2e=all] [--app=http://localhost:4205] [--api=http://localhost:3005]
  *   --nightly   deadline 02:40 unless given, and every CODE-QA line also goes to bugs/qa-runs/.nightly.log
  *   --deadline  the running layer stops at that time (marked partial), later layers are skipped, reports
@@ -23,11 +25,12 @@ import { localDate, loadPageMap, nightlyLog, outRoot, repoRoot } from './common.
 import { BREAKPOINTS, dedupe, LAYER_ORDER, normalizeFinding, redact, writeReports } from './findings.mjs'
 import { runGates } from './gates.mjs'
 import { runStatic } from './static-checks.mjs'
+import { runApi } from './api-layer.mjs'
 
 // --- args ----------------------------------------------------------------------
 
 export function parseArgs(argv) {
-  const opts = { layers: ['gates', 'static', 'sweep'], nightly: false, date: localDate(), deadline: null, e2e: '', app: 'http://localhost:4205', api: 'http://localhost:3005' }
+  const opts = { layers: ['gates', 'static', 'api', 'sweep'], nightly: false, date: localDate(), deadline: null, e2e: '', app: 'http://localhost:4205', api: 'http://localhost:3005' }
   for (const a of argv) {
     const [k, v = ''] = a.replace(/^--/, '').split(/=(.*)/s)
     if (k === 'layers') opts.layers = v.split(',').map((s) => s.trim()).filter(Boolean)
@@ -259,6 +262,7 @@ async function runSweep({ root, opts, signal, date }) {
 export const LAYERS = {
   gates: ({ root, signal, date, log }) => runGates({ root, signal, log, blockedDir: join(outRoot(root), date) }),
   static: ({ root }) => runStatic({ root }),
+  api: (ctx) => runApi(ctx),
   sweep: (ctx) => runSweep(ctx)
 }
 
@@ -316,7 +320,8 @@ export async function main(argv = process.argv.slice(2), { root = repoRoot, laye
     if (preChecked) run.preChecked = preChecked
     if (shots) run.shots = shots
     if (blocked) run.blocked = blocked
-    say(`${name} ${rest.status} ${rest.findings.length} findings`)
+    // A layer may word its own status (api: `skipped (not local Mongo)`).
+    say(`${name} ${rest.statusLine || `${rest.status} ${rest.findings.length} findings`}`)
   }
   if (timer) clearTimeout(timer)
   run.finishedAt = new Date().toISOString()

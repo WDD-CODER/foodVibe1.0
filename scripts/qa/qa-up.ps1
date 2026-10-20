@@ -12,6 +12,7 @@
   - starts the three servers detached (they outlive this script and a scheduled task), PIDs in .claude/.qa-pids
   - waits for each port and prints one "QA: <name> ok on <port>" / "QA: <name> FAIL - see <log>" line
   - idempotent: when all three are already up from a previous run it prints "QA: already up" and exits 0
+  - writes .claude/.qa-env (local | remote) when it starts the backend; Code QA's api layer writes only on 'local'
 
   QA_USER / QA_PASS are read by the evidence server itself from .env or server/.env, never passed or printed.
 
@@ -180,6 +181,8 @@ if ($LASTEXITCODE -ne 0) { Write-Output "QA: build:schemas FAIL - see $schemasLo
 
 # --- start ---------------------------------------------------------------------------
 $nodeEnv = if ($Env -eq 'remote') { 'production' } else { 'development' }
+# Plan 414: Code QA's api layer writes test records only when this reads 'local'.
+Set-Content -Path (Join-Path $claudeDir '.qa-env') -Value $Env -Encoding ASCII
 $pids = @()
 $pids += Start-Detached (Join-Path $Root 'server') "set `"PORT=3005`"&& set `"NODE_ENV=$nodeEnv`"&& set `"ALLOWED_ORIGIN=http://localhost:4205,http://localhost:4206`"&& node index.js" $services[0].Log
 $pids += Start-Detached $Root "npx ng serve -c slot --port 4205 --proxy-config `"$proxyConf`"" $services[1].Log
