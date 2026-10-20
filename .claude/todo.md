@@ -218,6 +218,22 @@
 - [ ] P5: Prove the rules through the real routes and the ownership invariant — new server/test/permissions-api.test.js (owner + staff tokens via `signTestToken({ userId, businessId: 'b1', businessRole })`, seeds via `stored()` with `createdBy`); invariants.test.js `INV-1 staff …` cases (Goals) — server/test/permissions-api.test.js, server/test/invariants.test.js
 - [ ] P6: Build, test and check the logs — `npx ng build`, `npm --prefix server test`, `node scripts/log-query.mjs --since=plan-start --level=error`, the `assertCan` grep — this plan file
 
+### Plan 428 — Let the owner add and remove staff, and lock what staff may not change (`plans/428-let-the-owner-add-and-remove-staff-and-lock-what-staff-may-not-change.plan.md`)
+
+- [ ] Staff: no delete on items they did not create (recipe book, inventory); no save on another member's recipe.
+- [ ] T1: Let the owner list, add and remove staff on the server, with the sign-up username rule — GET/POST/DELETE /team in business.js, assertCan manageTeam, placeholder email, removedAt, server/utils/username.js used by /auth/signup — server/routes/business.js, server/utils/username.js, server/routes/auth.js
+- [ ] T1b: Refuse login and refresh for removed staff if plan 425 did not already — only when Step 0 found it missing; 403 USER_REMOVED in /login, 401 USER_REMOVED + cleared cookie in /refresh (as plan 425) — server/routes/auth.js
+- [ ] T2: Prove team management and the removed-staff block with server tests — every case in Done-when, users seeded with User.create — server/test/business-team.test.js
+- [ ] T3: Mirror the server permission rules in the browser so screens hide what would be refused — PermissionService.can, isOwner_, PermissionAction, spec — src/app/core/services/permission.service.ts, permission.service.spec.ts
+- [ ] T4: Add the settings page with tabs and the owner-only state for staff — lazy /settings route, SETTINGS_TABS, SettingsPage, spec — src/app/app.routes.ts, src/app/pages/settings/settings-tabs.ts, src/app/pages/settings/settings.page.*
+- [ ] T5: Build the Team tab where the owner adds and removes cooks — TeamTabComponent, BusinessService team_/loadTeam/addStaff/removeStaff, hashPassword, validateUsername/validatePassword, confirm modal — src/app/pages/settings/components/team-tab/**, src/app/core/services/business.service.ts
+- [ ] T6: Lock product prices for staff without growing the frozen product form — ProductPriceLockComponent + spec, one tag in the form template, import offset by deleted lines — src/app/pages/inventory/components/product-price-lock/**, product-form.component.html, product-form.component.ts
+- [ ] T7: Hide save on someone else's recipe and delete on items staff did not create — EditGateComponent + spec, builder save wrapped (net ≤ 0), canDelete in recipe book and inventory lists — src/app/shared/edit-gate/**, recipe-builder.page.html/.ts, recipe-book-list.component.*, inventory-product-list.component.*
+- [ ] T8: Show the owner a settings link and every user a Hebrew message when the server refuses — header link + profile menu item, 403 no_permission toast + info log in the interceptor — src/app/core/components/header/**, src/app/core/interceptors/auth.interceptor.ts
+- [ ] T9: Add the Hebrew texts and icons the new screens use — 15 dictionary keys (skip existing), Settings + UserPlus icons — public/assets/data/dictionary.json, src/app/app.config.ts
+- [ ] T10: Refresh the folder maps for the new settings page and shared edit gate — breadcrumbs skill — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md
+- [ ] T11: Build, test, check the frozen files and hand over the team and lock checks — ng build, server suite, listed specs, numstat, log-query; Human runs the [human] items on desktop and mobile — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
