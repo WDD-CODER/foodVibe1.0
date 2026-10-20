@@ -1,6 +1,6 @@
 # Plan 402 — Dropdown add option, part 3: convention doc and trigger
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: 0ca1ac799a023b3baf09e4382a916b3ffa6f9de9
 
