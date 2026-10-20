@@ -440,6 +440,15 @@
 - [ ] D8: Add the Hebrew labels and the two trend icons — keys from UI/UX Notes, TrendingUp/TrendingDown in LucideAngularModule.pick — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] D9: Build, test server and client, time the queries if a restore exists, then hand over — ng build, the Done-when test commands, the sparkline grep, the timing script (restored copy if present, else local + final-gate entry), log-query; slot servers up; [human] cards — this plan file
 
+### Plan 429 — Let the owner set the business profit target, safety margin and overrun threshold (`plans/429-let-the-owner-set-the-business-profit-target-safety-margin-and-overrun-threshold.plan.md`)
+
+- [ ] S1: Give business settings one validated shape with the agreed defaults — businessSettingsSchema, BUSINESS_SETTINGS_DEFAULTS, settings field optional, rebuild schemas — shared/schemas/entities/business.schema.ts
+- [ ] S2: Let only the owner save the settings and always return them with defaults filled — GET / defaults, PUT /settings with assertCan editSettings + safeParse — server/routes/business.js
+- [ ] S3: Prove defaults, validation, owner-only and same-business writes with server tests — every Done-when case — server/test/business-settings.test.js
+- [ ] S4: Add the Business tab where the owner edits the three numbers — SETTINGS_TABS entry, @case, BusinessSettingsTabComponent, BusinessService.updateSettings, specs — src/app/pages/settings/**, src/app/core/services/business.service.ts, business.service.spec.ts
+- [ ] S5: Add the Hebrew texts and the building icon — 11 dictionary keys, Building2 — public/assets/data/dictionary.json, src/app/app.config.ts
+- [ ] S6: Build, test and hand over the settings checks — ng build, server suite, listed specs, log-query; Human runs the [human] items on desktop and mobile — this plan file
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
