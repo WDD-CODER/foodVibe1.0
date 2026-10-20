@@ -11,3 +11,5 @@ Format: `- YYYY-MM-DD · plan NNN · decision · why`
 - 2026-10-20 · old map #11 · dropped: plan 407 merged without userPrefs; its business scoping folds into 425 · Reality Check
 - 2026-10-20 · old map #27 · plan 321 header fixed by the Planner directly · plan-file-only edit
 - 2026-10-20 · 424 · 407 migration 0005 not yet on Atlas → 0006 is rehearsed on a scratch Atlas copy only; Atlas order at final gate: 0005, 0006, 0007, 0008 · no production writes without Dandan
+- 2026-10-20 · all · reuse audit: refactor plans P1–P9 deferred until after the MVP; MVP plans follow a "reuse first" rule and the checker enforces it · avoids delaying the MVP and colliding with every MVP file, while stopping new drift
+- 2026-10-20 · all · builders + merge step on Sonnet (merge at low effort), checker on Opus at high effort, 3 lanes kept · Dandan asked for cost cuts; fewer lanes would spend the same total, just slower
