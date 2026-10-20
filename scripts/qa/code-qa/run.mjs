@@ -10,7 +10,8 @@
  *
  * Usage: node scripts/qa/code-qa/run.mjs [--layers=gates,static,api,sweep] [--date=YYYY-MM-DD]
  *          [--deadline=HH:MM] [--nightly] [--e2e=all] [--app=http://localhost:4205] [--api=http://localhost:3005]
- *   --nightly   deadline 02:40 unless given, and every CODE-QA line also goes to bugs/qa-runs/.nightly.log
+ *   --nightly   deadline 02:40 unless given, and every CODE-QA line also goes to bugs/qa-runs/.nightly.log;
+ *               also ingests yesterday's code reviews first and writes tonight's review queue last (plan 415)
  *   --deadline  the running layer stops at that time (marked partial), later layers are skipped, reports
  *               are still written. A time earlier than now means tomorrow.
  * Exit: 0 run complete (findings or not) · 2 blocked by a failed build · 1 usage or internal error.
@@ -26,6 +27,7 @@ import { BREAKPOINTS, dedupe, LAYER_ORDER, normalizeFinding, redact, writeReport
 import { runGates } from './gates.mjs'
 import { runStatic } from './static-checks.mjs'
 import { runApi } from './api-layer.mjs'
+import { codeReviewExtras, ingest, loadLedger, pick } from './rotation.mjs'
 
 // --- args ----------------------------------------------------------------------
 
@@ -46,6 +48,13 @@ export function parseArgs(argv) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(opts.date)) throw new Error('--date must be YYYY-MM-DD')
   if (opts.deadline && !/^\d{1,2}:\d{2}$/.test(opts.deadline)) throw new Error('--deadline must be HH:MM')
   return opts
+}
+
+/** The calendar day before YYYY-MM-DD. */
+export function previousDate(date) {
+  const d = new Date(`${date}T12:00:00`)
+  d.setDate(d.getDate() - 1)
+  return localDate(d)
 }
 
 /** ms epoch of the next HH:MM after `now`. */
@@ -299,6 +308,16 @@ export async function main(argv = process.argv.slice(2), { root = repoRoot, laye
     say(`start ${opts.date} layers=${opts.layers.join(',')} deadline ${new Date(at).toLocaleString('sv-SE').slice(0, 16)}`)
   } else say(`start ${opts.date} layers=${opts.layers.join(',')}`)
 
+  // Plan 415: yesterday's code reviews in before tonight's reports (the 02:45 merge may have missed some).
+  if (opts.nightly) {
+    try {
+      const r = ingest({ root, date: previousDate(opts.date), log: say })
+      say(`ingest ${previousDate(opts.date)}: ${r.reviews} review(s), ${r.findings} suspect finding(s)`)
+    } catch (err) {
+      say(`ingest failed: ${redact(err.message)}`)
+    }
+  }
+
   const run = { run: `code-qa-${opts.date}`, date: opts.date, commit: commitOf(root), startedAt: new Date().toISOString(), layers: {} }
   const order = [...opts.layers].sort((a, b) => (LAYER_ORDER.indexOf(a) + 1 || 99) - (LAYER_ORDER.indexOf(b) + 1 || 99))
   for (const name of order) {
@@ -327,9 +346,18 @@ export async function main(argv = process.argv.slice(2), { root = repoRoot, laye
   run.finishedAt = new Date().toISOString()
   const base = outRoot(root)
   const pageMap = existsSync(join(root, 'docs', 'qa', 'code-qa-pages.json')) ? loadPageMap(root) : { pages: [] }
-  const known = writeReports(base, run, { pageOrder: ['GLOBAL', ...pageMap.pages.map((p) => p.id)] })
+  const extras = codeReviewExtras(loadLedger(join(base, 'ledger.json')))
+  const known = writeReports(base, run, { pageOrder: ['GLOBAL', ...pageMap.pages.map((p) => p.id)], pageExtras: extras })
   const open = Object.values(known.findings).filter((k) => k.status === 'open').length
   say(`done ${open} open findings — bugs/qa-runs/code-qa/latest.md`)
+  if (opts.nightly) {
+    try {
+      const q = pick({ root, date: opts.date })
+      say(`queue ${opts.date}: ${q.order.slice(0, 5).join(' ')}${q.order.length > 5 ? ' …' : ''}`)
+    } catch (err) {
+      say(`queue failed: ${redact(err.message)}`)
+    }
+  }
   return run.blocked ? 2 : 0
 }
 

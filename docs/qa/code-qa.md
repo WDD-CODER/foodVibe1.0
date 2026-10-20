@@ -54,7 +54,10 @@ collection; a record it cannot remove is an S2 finding. Fixtures are checked aga
 | `<DATE>/sweep.jsonl` | raw sweep results while the sweep runs; deleted once they are in `pre-qa.json` (raw page text is never kept unredacted) |
 | `<DATE>/BLOCKED.md` | only when the build failed |
 | `known.json` | every finding ever seen, by fingerprint: `{ fp, id, firstSeen, lastSeen, status: open\|gone, layer, page, title }` |
-| `latest.md` | what the UI agent reads: open findings by page, the `PRE-CHECKED` table, the newest shots |
+| `latest.md` | what the UI agent reads: open findings by page, the `PRE-CHECKED` table, a `Code review:` block per reviewed page, the newest shots |
+| `<DATE>/queue.md` | tonight's code-review order (plan 415), written by `rotation.mjs pick` |
+| `<DATE>/review-<PAGE>.md` | one page's code review, written by the Cowork Code QA agent |
+| `ledger.json` | per page: last review, commit, `done`/`partial`/`never`, checks done, marks — the rotation's memory |
 
 Layer status: `ok` (finished) · `partial` (the deadline stopped it) · `fail` (it could not run, e.g. no QA login) ·
 `skipped` (blocked build or deadline).
@@ -95,7 +98,8 @@ Expected time: gates ≈ 10 min, static < 1 min, api < 1 min, sweep ≈ 15–25 
 ## At night
 
 `qa-nightly-up.ps1` (Windows task "FoodVibe QA up", 00:00) runs `qa-up.ps1` and then
-`node scripts/qa/code-qa/run.mjs --nightly`. When the servers did not come up it runs only `gates,static`.
+`node scripts/qa/code-qa/run.mjs --nightly`. That first ingests yesterday's code reviews, runs `gates,static,api,sweep`
+(only `gates,static` when the servers did not come up), writes the reports, and last writes tonight's review queue.
 `bugs/qa-runs/.nightly.log` then holds one line per layer:
 
 ```
@@ -107,16 +111,44 @@ Expected time: gates ≈ 10 min, static < 1 min, api < 1 min, sweep ≈ 15–25 
 
 The UI agent reads `latest.md` in its P0 step (`qa-flow.md` P0.6) and skips what it lists (`qa-agent.md` §7.2).
 
+## Code review rotation (plan 415)
+
+An AI agent reads page code against the page's checks in `qa-plan.md` — the logic bugs a script cannot see (a dead
+handler, a swallowed error, a list that does not refresh, a message that differs from the plan). A full pass does
+not fit in one night, so it works down a **rotation queue**; scripts own all state, the agent only reads
+`queue.md` and writes `review-<PAGE>.md` (protocol: `code-qa-agent.md`).
+
+- **Check ids.** `plan-checks.mjs` numbers every `**PAGE-…**` check and the `Responsive` line of each `qa-plan.md`
+  page section: `RB-C01`, `RB-C02`, … in order.
+- **Queue order** (`rotation.mjs pick`): pages the agent left `partial` first (it resumes at the next unchecked
+  check), then never-reviewed pages in plan order, then the rest by last review, oldest first. Files changed since a
+  page's last review only break ties — age always wins, so a busy page cannot starve a quiet one. Every page is
+  reviewed at least once every `ceil(19 / pages-per-night)` nights (+1 for a partial page).
+- **Ingest** (`rotation.mjs ingest --date=<DATE>`): reads only each review's header (`Page`, `Commit`, `Status`,
+  `Checks-done`) and its `### <CHECK> · <mark> · …` lines; a malformed file is skipped with
+  `CODE-QA: ingest skipped <file> <reason>`. Ingesting the same file twice changes nothing. A `suspect` check
+  becomes a `CODE-AI-<NNN>` finding; the page gets a `Code review:` block in `latest.md` with its marks.
+- **Times.** 00:00 `run.mjs --nightly` (ingest yesterday, pick tonight) · 01:00 Cowork Code QA agent until
+  `STOP_AT` 02:40 · 02:45 Windows "FoodVibe Code QA merge" (`qa-code-merge.ps1` → ingest tonight) · 03:00 UI agent.
+
+```powershell
+node scripts/qa/code-qa/rotation.mjs pick --date=2026-10-20
+node scripts/qa/code-qa/rotation.mjs ingest --date=2026-10-20
+```
+
 ## Files
 
 - `scripts/qa/code-qa/run.mjs` — orchestrator, layer registry, sweep layer
 - `scripts/qa/code-qa/gates.mjs`, `static-checks.mjs` — layers 1 and 2
 - `scripts/qa/code-qa/api-layer.mjs` (guard, runner, cleanup), `api-cases.mjs` (the case rows), `api-fixtures.mjs` (one valid record per entity) — the api layer
 - `docs/qa/code-qa-api-cases.md` — accepted API deviations (allow-list)
+- `scripts/qa/code-qa/rotation.mjs` (ledger, pick, ingest), `plan-checks.mjs` (check ids) — the code-review rotation
+- `docs/qa/code-qa-agent.md` — the Cowork Code QA agent's protocol and kickoff prompt
+- `scripts/qa/qa-code-merge.ps1` — the 02:45 merge task
 - `scripts/qa/code-qa/findings.mjs` — fingerprints, `known.json`, report rendering
 - `scripts/qa/code-qa/common.mjs` — paths, globs, page map
 - `scripts/qa/lib/qa-login.mjs` — the QA login shared with the evidence server
 - `e2e-qa/sweep.spec.ts`, `playwright.qa.config.ts` — the Playwright sweep and the e2e project
 - `docs/qa/code-qa-pages.json` — page map: `{ id, title, routes, idType?, auth, files }` per `qa-plan.md` section
-- Tests: `scripts/test/code-qa-static.test.mjs`, `scripts/test/code-qa-findings.test.mjs`, `scripts/test/code-qa-api.test.mjs` (fixtures in
+- Tests: `scripts/test/code-qa-static.test.mjs`, `scripts/test/code-qa-findings.test.mjs`, `scripts/test/code-qa-api.test.mjs`, `scripts/test/code-qa-rotation.test.mjs` (fixtures in
   `scripts/test/fixtures/code-qa/`)

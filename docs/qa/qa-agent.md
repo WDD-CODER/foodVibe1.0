@@ -276,6 +276,13 @@ When `qa-flow.md` P0 step 6 found a fresh `bugs/qa-runs/code-qa/latest.md` (unde
   re-number it, never give it a `<PAGE>-<NNN>` ID.
 - **Something new still counts.** A G1/G4/G5/G8 problem you notice while doing other checks on a pre-checked page
   that has no `CODE-*` line is a normal finding (the script missed it — say so in one line: `Missed by Code QA`).
+- **Code review first (plan 415).** A page may carry a `Code review:` block — the 01:00 Code QA agent read its code
+  (`docs/qa/code-qa-agent.md`) and marked each plan check `code-verified`, `suspect` or `unknown`. On that page run the
+  `suspect` checks first, then the `unknown` ones, then the rest in plan order (`<PAGE>-C<NN>` is the page's N-th
+  check in `qa-plan.md`). `code-verified` checks still run; they are just not urgent.
+- **Confirm, don't rediscover.** For every `CODE-AI-*` finding on the page, try it in the browser and write one line
+  under the page section: `CODE-AI-004: confirmed` (with a state shot, §5.1) or `CODE-AI-004: not reproduced` (what you
+  did, one line). Never report it again as a new `<PAGE>-<NNN>` finding.
 - If `latest.md` is missing or stale: ignore this section and run the full protocol.
 
 ---

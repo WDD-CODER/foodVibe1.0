@@ -57,7 +57,9 @@ If `Phase: P1` is not finished, redo only the pages whose section in `plan-reali
 6. **Code QA handoff.** Read `bugs/qa-runs/code-qa/latest.md` (written by the midnight Code QA run, `docs/qa/code-qa.md`).
    Check its `Generated:` line: if the file is missing or older than 24 hours, write `Code QA: none` in `progress.md`
    and run the full protocol. Otherwise write `Code QA: <Generated> · <n> open findings` in `progress.md`, copy its
-   `PRE-CHECKED` table into `progress.md`, and follow `qa-agent.md` §7.2 for the whole run.
+   `PRE-CHECKED` table into `progress.md`, and follow `qa-agent.md` §7.2 for the whole run. Note in `progress.md`
+   which pages have a `Code review:` block and how many `CODE-AI-*` findings they carry — those pages run their
+   `suspect` and `unknown` checks first and confirm or reject each `CODE-AI-*` finding (§7.2).
 7. Set `Phase: P1`.
 
 Exit criteria: items 1–5 green, else hard blocker (`qa-agent.md` §9). Item 6 never blocks.
