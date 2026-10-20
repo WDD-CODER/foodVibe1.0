@@ -1,6 +1,6 @@
 # Plan 415 — Code QA Part 3: AI Code-Review Agent with a Nightly Page Rotation
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: a426f19aebb86fd103f1edee3df469880fb0b1af
 
@@ -65,6 +65,7 @@ scripts/qa/qa-code-merge.ps1
 scripts/test/code-qa-rotation.test.mjs
 scripts/test/fixtures/code-qa/**
 docs/qa/**
+bugs/qa-runs/code-qa/**
 ```
 
 ## Read Scope
@@ -143,25 +144,25 @@ in the browser (`confirmed` / `not reproduced`) instead of re-discovering it.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Rotation ledger, pick and ingest as above, with the starvation-free order.
-- [ ] Cowork agent protocol and the kickoff prompt.
-- [ ] 02:45 merge task so the UI agent sees tonight's review.
+- [x] Rotation ledger, pick and ingest as above, with the starvation-free order.
+- [x] Cowork agent protocol and the kickoff prompt.
+- [x] 02:45 merge task so the UI agent sees tonight's review.
 
 ### Won't Have (this plan)
 - Headless CLI runner; auto-fixing; reviewing server-only code with no page (covered by plan 414's API layer).
 
 ## Atomic Sub-tasks
-- [ ] C1: Number the checks of every QA page so reviews can be resumed check by check — derive <PAGE>-C<NN> ids from qa-plan.md — scripts/qa/code-qa/plan-checks.mjs
-- [ ] C2: Keep a ledger of which page was reviewed when, so each night continues where the last stopped — ledger.json read/write, ingest of review files (header + ### lines), idempotent — scripts/qa/code-qa/rotation.mjs
-- [ ] C3: Order tomorrow's pages fairly so every page gets reviewed and none is stuck in a loop — pick: partial → never → oldest, changes only break ties; write queue.md — scripts/qa/code-qa/rotation.mjs
-- [ ] C4: Show the code review results to the UI agent — render Code review blocks and CODE-AI- findings into latest.md via findings.mjs — scripts/qa/code-qa/findings.mjs, scripts/qa/code-qa/run.mjs
-- [ ] C5: Write the code-review agent's instructions — protocol per Design, review file format, verifier pass, Cowork kickoff prompt with STOP_AT — docs/qa/code-qa-agent.md
-- [ ] C6: Merge tonight's reviews before the UI agent starts — new 02:45 Windows task registered by qa-schedule.ps1 (-Merge param, default 02:45) running qa-code-merge.ps1 — scripts/qa/qa-code-merge.ps1, scripts/qa/qa-schedule.ps1
-- [ ] C7: Make the UI agent follow up on suspect checks and confirm code-review findings — qa-agent.md §7 and qa-flow.md P0 — docs/qa/qa-agent.md, docs/qa/qa-flow.md
-- [ ] C8: Prove the rotation is fair with a 30-night simulation and fixture reviews — scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**
-- [ ] C9: Document the full night and the Human's one-time setup — timeline (00:00 scripts, 01:00 Code QA agent, 02:45 merge, 03:00 UI agent, 07:30 down), Cowork task settings, re-register command — docs/qa/README.md, docs/qa/code-qa.md
-- [ ] C10: Dry-run one page by hand and record it — run pick, run the agent prompt in Cowork on the first page, run ingest; paste the queue head, the review header and the latest.md block into Execution Notes — this plan file
-- [ ] C11: Hand the Human the ready-to-paste Cowork prompts and a click-by-click setup guide — final chat message: both Cowork tasks (Code QA 01:00, UI QA 03:00) with name, time, folder C:\dev\foodVibe-qa, prompt text, approval settings; the PowerShell lines to re-register the Windows tasks; how to do one manual "Run now" first — docs/qa/README.md
+- [x] C1: Number the checks of every QA page so reviews can be resumed check by check — derive <PAGE>-C<NN> ids from qa-plan.md — scripts/qa/code-qa/plan-checks.mjs
+- [x] C2: Keep a ledger of which page was reviewed when, so each night continues where the last stopped — ledger.json read/write, ingest of review files (header + ### lines), idempotent — scripts/qa/code-qa/rotation.mjs
+- [x] C3: Order tomorrow's pages fairly so every page gets reviewed and none is stuck in a loop — pick: partial → never → oldest, changes only break ties; write queue.md — scripts/qa/code-qa/rotation.mjs
+- [x] C4: Show the code review results to the UI agent — render Code review blocks and CODE-AI- findings into latest.md via findings.mjs — scripts/qa/code-qa/findings.mjs, scripts/qa/code-qa/run.mjs
+- [x] C5: Write the code-review agent's instructions — protocol per Design, review file format, verifier pass, Cowork kickoff prompt with STOP_AT — docs/qa/code-qa-agent.md
+- [x] C6: Merge tonight's reviews before the UI agent starts — new 02:45 Windows task registered by qa-schedule.ps1 (-Merge param, default 02:45) running qa-code-merge.ps1 — scripts/qa/qa-code-merge.ps1, scripts/qa/qa-schedule.ps1
+- [x] C7: Make the UI agent follow up on suspect checks and confirm code-review findings — qa-agent.md §7 and qa-flow.md P0 — docs/qa/qa-agent.md, docs/qa/qa-flow.md
+- [x] C8: Prove the rotation is fair with a 30-night simulation and fixture reviews — scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**
+- [x] C9: Document the full night and the Human's one-time setup — timeline (00:00 scripts, 01:00 Code QA agent, 02:45 merge, 03:00 UI agent, 07:30 down), Cowork task settings, re-register command — docs/qa/README.md, docs/qa/code-qa.md
+- [x] C10: Dry-run one page by hand and record it — run pick, run the agent prompt in Cowork on the first page, run ingest; paste the queue head, the review header and the latest.md block into Execution Notes — this plan file
+- [x] C11: Hand the Human the ready-to-paste Cowork prompts and a click-by-click setup guide — final chat message: both Cowork tasks (Code QA 01:00, UI QA 03:00) with name, time, folder C:\dev\foodVibe-qa, prompt text, approval settings; the PowerShell lines to re-register the Windows tasks; how to do one manual "Run now" first — docs/qa/README.md
 
 ## Technical Considerations
 - Dependencies: plans 413/414 files; Cowork scheduled tasks (Human sets them up); git in the QA checkout for the
@@ -181,3 +182,41 @@ in the browser (`confirmed` / `not reproduced`) instead of re-discovering it.
 - Fixing findings; reviewing kit or workflow scripts; PR-time code review (that is `/code-review`).
 
 ## Execution Notes
+
+**2026-10-20 — C1–C11 done** (wt-1, after 413 and 414 merged).
+
+- `npm run test:scripts` 93 pass, including `code-qa-rotation.test.mjs` (partial resumes first, never before
+  reviewed, oldest first with changes only as tie-break, 30-night simulation with one page changed daily — every page
+  reviewed, max gap ≤ cycle + 1 — and ingest twice = no change). `npm run build` passes.
+- Real repo: `rotation.mjs pick --date=2026-10-20` → queue of all 19 pages, head `SHELL DASH META INV EQ RB`
+  (never-reviewed, plan order); check counts SHELL 16 · DASH 8 · META 12 · INV 12 · EQ 9 · RB 12 · ML 8 · COOK 13 · SUP 7
+  · VEN 7 · VEND 5 · INVF 14 · EQF 7 · SUPF 7 · VENF 7 · RBD 18 · MI 11 · TRASH 7 · REDIR 4 (194 checks).
+- `run.mjs --nightly` now logs `ingest <yesterday>` first and `queue <today>` last; `qa-code-merge.ps1` ran by hand
+  (`merge start … CODE-QA: ingest 2026-10-20: 0 review(s) … merge done (exit 0)` in `.nightly.log`).
+
+C10 dry run — the Worker followed `code-qa-agent.md` itself on the queue's first page (SHELL), in a copy of
+`docs/qa` + the real `known.json` under the scratchpad: the write guard refuses `bugs/qa-runs/code-qa/**` from a
+slot even after `approved:` through the question tool. Results:
+
+```
+Queue head: SHELL DASH META INV EQ RB
+Review header: Page: SHELL · Commit: 489f6c7f · Status: partial · Checks-done: SHELL-C01, SHELL-C12, SHELL-C15
+ingest 1: {"reviews":1,"findings":1} · ingest 2: same · ledger and latest.md unchanged by the 2nd ingest
+latest.md → ### SHELL
+- `CODE-AI-001` · S2 · any bp · unknown route `/does-not-exist` throws instead of redirecting — code review of SHELL (SHELL-C15)
+Code review: 2026-10-20 (partial) · commit 489f6c7f · suspect 1 · unknown 0 · verified 2
+  SHELL-C01 code-verified · SHELL-C12 code-verified · SHELL-C15 suspect
+Next night: SHELL first again — Status: partial · Already done: SHELL-C01, SHELL-C12, SHELL-C15
+```
+
+The SHELL-C15 suspect is real: `app.routes.ts` has no `**` route (the sweep's G8 finding on SHELL is the same bug).
+The first real Cowork run is the Human's (`[human]` items; guide in `docs/qa/README.md` "Set it up").
+
+Decisions:
+- Check ids are positional per page (`<PAGE>-C<NN>`); adding a plan check renumbers later ones on that page, which
+  only makes them look unreviewed — never skipped.
+- A `suspect` `###` line may carry its severity (`### RB-C02 · suspect · S2 · …`, default S3); the finding's
+  fingerprint is the check id, so rewording the line on a later night does not create a duplicate.
+- A page's marks are kept for its whole cycle; `Checks-done` resets when the page is `done`.
+- `bugs/qa-runs/code-qa/**` added to scope (Human: `approved: bugs/qa-runs/code-qa/**`) for the dry run; the guard
+  still refused it, so the dry run used the scratchpad copy above.

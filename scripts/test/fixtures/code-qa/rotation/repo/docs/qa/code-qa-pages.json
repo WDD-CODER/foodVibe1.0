@@ -1,0 +1,6 @@
+{
+  "pages": [
+    { "id": "DASH", "title": "לוח בקרה", "routes": ["/dashboard"], "auth": false, "files": ["src/app/pages/dashboard/**"] },
+    { "id": "RB", "title": "ספר מתכונים", "routes": ["/recipe-book"], "auth": false, "files": ["src/app/pages/recipe-book/**"] }
+  ]
+}

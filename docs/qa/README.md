@@ -82,40 +82,52 @@ Cowork's scheduled task cannot start Windows processes, so Windows Task Schedule
 
 | Time | Who | What |
 | --- | --- | --- |
-| 00:00 | Windows "FoodVibe QA up" (`qa-nightly-up.ps1`) | fast-forward to `origin/main`, `npm ci` where a lockfile changed, `qa-up.ps1`, then Code QA (`run.mjs --nightly`, stops by 02:40) — see `code-qa.md` |
-| 03:00 | Cowork UI agent | reads `bugs/qa-runs/code-qa/latest.md` first, skips what Code QA already checked |
+| 00:00 | Windows "FoodVibe QA up" (`qa-nightly-up.ps1`) | fast-forward to `origin/main`, `npm ci` where a lockfile changed, `qa-up.ps1`, then Code QA (`run.mjs --nightly`: yesterday's code reviews in, gates · static · api · sweep, tonight's review queue out; stops by 02:40) — see `code-qa.md` |
+| 01:00 | Cowork "FoodVibe Code QA" agent | reads `bugs/qa-runs/code-qa/<DATE>/queue.md`, reviews page code against `qa-plan.md` until 02:40, one `review-<PAGE>.md` per page (`code-qa-agent.md`) |
+| 02:45 | Windows "FoodVibe Code QA merge" (`qa-code-merge.ps1`) | merges tonight's reviews into `ledger.json` and `latest.md` |
+| 03:00 | Cowork "FoodVibe UI QA" agent | reads `latest.md` first: skips what Code QA already checked, runs `suspect`/`unknown` checks first, confirms `CODE-AI-*` findings |
 | 07:30 | Windows "FoodVibe QA down" (`qa-nightly-down.ps1`) | stops the servers |
 
 Every step is appended to `bugs/qa-runs/.nightly.log`; Code QA adds one `CODE-QA: <layer> <status> <n> findings` line
-per layer (its full output is in `.claude/qa-code.log`).
+per layer (its full output is in `.claude/qa-code.log`) and `CODE-QA: ingest …` / `CODE-QA: queue …` lines.
 
-After pulling plan 413, re-register the tasks once so they use the new times and the 3-hour limit of the up task
-(run in the QA checkout):
+The two Cowork agents share the night's usage. If the UI agent keeps running out, lower the Code QA agent's
+`STOP_AT` first: the rotation makes a shorter window safe — it only means more nights per full cycle.
 
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\qa\qa-schedule.ps1 -Root C:\dev\foodVibe-qa
-```
+### Set it up (once, about 15 minutes)
 
-### One-time setup
+**1. Windows tasks** — in PowerShell, in the QA checkout (registers all three; run it again after any change to the times):
 
 ```powershell
-# 1. dedicated QA checkout, stays on main (path is yours to choose)
-git clone https://github.com/WDD-CODER/foodVibe1.0 C:\dev\foodVibe-qa
 cd C:\dev\foodVibe-qa
-npm ci ; cd server ; npm ci ; cd ..
-npx playwright install chromium
-# 2. copy server/.env from your working folder; add QA_USER / QA_PASS (non-admin account, created once through the UI)
-# 3. register the two Windows tasks (wake the PC at 00:00 for servers + Code QA, stop the servers at 07:30)
+git pull --ff-only
 powershell -ExecutionPolicy Bypass -File scripts\qa\qa-schedule.ps1 -Root C:\dev\foodVibe-qa
-# optional: -Up 23:30 -Down 08:00 ; remove with -Unregister
 ```
 
-Dry run: `Start-ScheduledTask -TaskName 'FoodVibe QA up'`, then check `bugs/qa-runs/.nightly.log` for the
-`QA: … ok` lines, then the `CODE-QA:` lines (Code QA takes 30–50 minutes). `Start-ScheduledTask -TaskName 'FoodVibe QA down'`
-frees the ports.
+It prints `QA: task 'FoodVibe QA up' next run … 00:00`, `… 'FoodVibe QA down' … 07:30`, `… 'FoodVibe Code QA merge' … 02:45`.
+Times: `-Up 23:30 -Merge 02:50 -Down 08:00`; remove all three with `-Unregister`.
 
-Then in Claude, create the scheduled task: daily at 03:00 Asia/Jerusalem, requires this computer, folder = the QA
-checkout. Use this prompt (no `RUN_ID`: the agent picks the run from `bugs/qa-runs/INDEX.md`):
+**2. Second QA account** (for the API layer's cross-user checks): create another non-admin user through the UI and add
+`QA_USER2` / `QA_PASS2` to `C:\dev\foodVibe-qa\server\.env` (see "Before the first run").
+
+**3. Cowork task "FoodVibe Code QA"** — Claude Desktop → Cowork → Scheduled → New task:
+- Name: `FoodVibe Code QA` · Schedule: daily, 01:00 (Asia/Jerusalem) · Requires: this computer
+- Folder: `C:\dev\foodVibe-qa` · Tools: file read/write in that folder only; no browser needed
+- Approvals: automatic for file reads and for writes under `bugs/qa-runs/code-qa/`
+- Prompt (paste as is):
+
+```
+אתה סוכן ה-Code QA של FoodVibe. קרא את docs/qa/code-qa-agent.md בתיקייה המחוברת ופעל לפיו עד הסוף, בלי לשאול שאלות.
+DATE: היום (YYYY-MM-DD)
+STOP_AT: 02:40
+עבוד לפי bugs/qa-runs/code-qa/<DATE>/queue.md מהדף הראשון, כתוב review-<PAGE>.md לכל דף ועדכן את הכותרת אחרי כל בדיקה. אל תריץ שרתים, אל תפתח דפדפן, אל תשנה קוד.
+```
+
+**4. Cowork task "FoodVibe UI QA"** — same place:
+- Name: `FoodVibe UI QA` · Schedule: daily, 03:00 (Asia/Jerusalem) · Requires: this computer
+- Folder: `C:\dev\foodVibe-qa` · Tools: the built-in browser + files
+- Approvals: approve `localhost:4205` once (site scope) in a manual run, then automatic
+- Prompt (fill in the QA account; no `RUN_ID`: the agent picks the run from `bugs/qa-runs/INDEX.md`):
 
 ```
 אתה סוכן ה-QA הלילי של FoodVibe. התחל מ-docs/qa/qa-flow.md בתיקייה המחוברת (אחריו docs/qa/qa-agent.md ו-docs/qa/qa-plan.md) ופעל לפי ארבעת השלבים. אין RUN_ID: בחר ריצה לפי bugs/qa-runs/INDEX.md (המשך ריצה לא גמורה, אחרת פתח חדשה). אף אחד לא נמצא — לא לשאול שאלות; בעיה חוסמת → BLOCKED.md וסיום.
@@ -124,6 +136,27 @@ STOP_AT: 06:30
 SCOPE: all
 REPORT_LANG: en
 השרתים מורמים על ידי Windows Task Scheduler: http://localhost:4205 (אפליקציה), http://localhost:4205/qa-evidence/health (evidence). אל תנסה להריץ שרתים בעצמך.
+```
+
+**5. First run by hand** (so every approval is given once while you watch):
+
+1. `Start-ScheduledTask -TaskName 'FoodVibe QA up'` — wait for `CODE-QA: queue …` in `bugs/qa-runs/.nightly.log`
+   (Code QA takes 30–50 minutes; `QA: … ok` lines come first).
+2. Cowork → "FoodVibe Code QA" → **Run now**. Let it finish one page (or stop it after a few minutes), then check
+   `bugs/qa-runs/code-qa/<today>/review-<PAGE>.md` exists.
+3. `Start-ScheduledTask -TaskName 'FoodVibe Code QA merge'` — `latest.md` now shows a `Code review:` block for that page.
+4. Cowork → "FoodVibe UI QA" → **Run now**, approve `localhost:4205` (site scope), let it reach P1, stop it.
+5. `Start-ScheduledTask -TaskName 'FoodVibe QA down'` frees the ports.
+
+### Checkout setup (once, before "Set it up")
+
+```powershell
+# dedicated QA checkout, stays on main (path is yours to choose)
+git clone https://github.com/WDD-CODER/foodVibe1.0 C:\dev\foodVibe-qa
+cd C:\dev\foodVibe-qa
+npm ci ; cd server ; npm ci ; cd ..
+npx playwright install chromium
+# copy server/.env from your working folder; add QA_USER / QA_PASS and QA_USER2 / QA_PASS2 (non-admin accounts)
 ```
 
 ### Caveats

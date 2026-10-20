@@ -1,9 +1,10 @@
 <#
 .SYNOPSIS
-  Registers (or removes) the two Windows scheduled tasks that own the nightly QA servers (plan 408):
-  "FoodVibe QA up" (default 00:00: servers, then Code QA until 02:40 - plan 413) and "FoodVibe QA down"
-  (default 07:30), daily, wake the PC, catch up when missed, allowed on battery, run only while the user is
-  logged on. The up task may run 3 hours (Code QA); the down task 30 minutes.
+  Registers (or removes) the three Windows scheduled tasks of the nightly QA (plans 408, 413, 415):
+  "FoodVibe QA up" (default 00:00: servers, then Code QA until 02:40), "FoodVibe Code QA merge" (default 02:45:
+  merges the 01:00 Cowork code reviews into latest.md before the 03:00 UI agent) and "FoodVibe QA down"
+  (default 07:30). Daily, wake the PC, catch up when missed, allowed on battery, run only while the user is
+  logged on. The up task may run 3 hours (Code QA); the others 30 minutes.
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File scripts\qa\qa-schedule.ps1 -Root C:\dev\foodVibe-qa
@@ -13,11 +14,12 @@ param(
   [string] $Root = '',
   [string] $Up = '00:00',
   [string] $Down = '07:30',
+  [string] $Merge = '02:45',
   [switch] $Unregister
 )
 
 $ErrorActionPreference = 'Stop'
-$names = 'FoodVibe QA up', 'FoodVibe QA down'
+$names = 'FoodVibe QA up', 'FoodVibe QA down', 'FoodVibe Code QA merge'
 
 if ($Unregister) {
   foreach ($n in $names) {
@@ -42,14 +44,14 @@ function New-QaSettings([int] $minutes) {
     -ExecutionTimeLimit (New-TimeSpan -Minutes $minutes) -MultipleInstances IgnoreNew
 }
 
-foreach ($t in @(@($names[0], 'qa-nightly-up.ps1', $Up, 180), @($names[1], 'qa-nightly-down.ps1', $Down, 30))) {
+foreach ($t in @(@($names[0], 'qa-nightly-up.ps1', $Up, 180), @($names[1], 'qa-nightly-down.ps1', $Down, 30), @($names[2], 'qa-code-merge.ps1', $Merge, 30))) {
   $settings = New-QaSettings $t[3]
   $script = Join-Path $Root "scripts\qa\$($t[1])"
   $action = New-ScheduledTaskAction -Execute 'powershell.exe' -WorkingDirectory $Root `
     -Argument "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$script`" -Root `"$Root`""
   $trigger = New-ScheduledTaskTrigger -Daily -At $t[2]
   Register-ScheduledTask -TaskName $t[0] -Action $action -Trigger $trigger -Principal $principal -Settings $settings `
-    -Description "FoodVibe nightly QA (plan 408) - $Root" -Force | Out-Null
+    -Description "FoodVibe nightly QA (plans 408/413/415) - $Root" -Force | Out-Null
 }
 
 foreach ($n in $names) {
