@@ -103,6 +103,7 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
+server/routes/admin.js
 shared/schemas/base.schema.ts
 server/routes/**
 server/middleware/auth.js
