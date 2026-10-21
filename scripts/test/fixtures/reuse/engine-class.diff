@@ -1,0 +1,7 @@
+diff --git a/src/app/pages/orders/orders.component.scss b/src/app/pages/orders/orders.component.scss
+--- a/src/app/pages/orders/orders.component.scss
++++ b/src/app/pages/orders/orders.component.scss
+@@ -3,0 +4,3 @@
++.c-order-chip {
++  padding-inline: 0.5rem;
++}

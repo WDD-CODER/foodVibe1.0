@@ -19,6 +19,7 @@ save-plan:
 - [ ] 1 ledger (Planner): Atomic Sub-tasks appended to .claude/todo.md via todo-query.mjs append
 - [ ] 2 shape: Read-Write Scope parses, exactly one Status:, Snapshot: present, every Done-when tagged [auto]/[human], every Atomic Sub-task opens with a plain explanatory title
 - [ ] 2 arch gate: node scripts/scope-check.mjs --arch --plan=<path> → exit 0
+- [ ] 2 reuse gate: node scripts/scope-check.mjs --reuse --plan=<path> → exit 0
 - [ ] 2 prerequisites (Planner): already true on origin/main, or split into NNN-1
 - [ ] 3 written to plans/NNN-slug.plan.md (never ~/.cursor/plans/)
 - [ ] 3 Planner: on main → commit plan + todo only → push → git ls-tree origin/main prints the path
@@ -70,6 +71,7 @@ A Worker never assigns `NNN` and never touches `.claude/todo.md` (it is Planner-
 - **Shape:** scope block parses; one `Status:`; a `Snapshot:` line exists (may be empty until Phase 3); Done-when tags present; every Atomic Sub-task has a title per Plan rules (read each title alone: if it does not say what changes and why, rewrite it).
 - **Coverage:** every requirement in the plan has an Atomic Sub-task.
 - **Architecture gate:** `node scripts/scope-check.mjs --arch --plan=<path>` must exit 0 (`ARCH: ok …` or `ARCH: skipped …`). A crash that is environmental (`Cannot find package 'picomatch'` → the workflow scripts' dependencies are missing, run `npm install` inside `scripts/`) is not a gate result — fix the environment and re-run; do not reason the gate out by hand. It fails when the scope touches an invariant in `docs/brain/invariants.md` with no `## Architecture Impact` line, or a `deviation`/`changes` line lacking `Arch-approved: Human YYYY-MM-DD` or a valid ADR. Fix the draft. Only the Human's literal `approve arch change INV-n` in chat allows an `Arch-approved:` line — never write one on your own.
+- **Reuse gate:** `node scripts/scope-check.mjs --reuse --plan=<path>` must exit 0 (`REUSE: ok …` or `REUSE: skipped …`). It fails when `## Reuse Check` is missing or empty, a row has no rung, a rung 1–3 row names no registry family (`docs/brain/component-families.md`), or a rung-4 row has no `why:`. Fix the draft; the ladder is in `docs/agent/standards-reuse.md`.
 - **Prerequisites (Planner):** if the draft has `## Prerequisites`, verify each is already true on `origin/main` *now*. A tiny Planner-owned fix (a few lines) → land it as its own chore commit first. Anything bigger → save it as its own plan `NNN-1`, sequenced before this one. A Worker must never take a plan with a gate it cannot clear itself.
 
 ## Phase 3 — write, and (Planner) commit + push + verify

@@ -37,6 +37,7 @@ import { activePlanPath } from './lib/slot.mjs'
 import { extractScopeGlobs } from './lib/plan-scope.mjs'
 import { listOpenPlans, OPEN_PLAN_DIRS } from './lib/plan-paths.mjs'
 import { parseInvariants, checkPlanArch, diffArchWarnings, decisionWithoutAdr, parseAddedLines } from './lib/invariants.mjs'
+import { runReuseCheck } from './lib/reuse-check.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const repoRoot = resolve(__dirname, '..')
@@ -298,6 +299,7 @@ function cmdArchDiff(args) {
 }
 
 const args = parseArgs(process.argv.slice(2))
+if (args.reuse) process.exit(runReuseCheck({ args, repoRoot }))
 
 if (args.arch && args.diff) cmdArchDiff(args)
 else if (args.arch && args.plan) cmdArchPlan(args)

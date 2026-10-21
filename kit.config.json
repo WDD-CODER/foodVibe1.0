@@ -155,6 +155,18 @@
     {
       "path": "docs/brain/patterns/llm-backend-proxy.md",
       "reason": "kit seed for the node-express pack; FoodVibe keeps its own docs/brain/patterns/gemini-backend-proxy.md"
+    },
+    {
+      "path": "scripts/scope-check.mjs",
+      "reason": "plan 450 reuse layer: one import + one --reuse dispatch line (logic in FoodVibe-owned scripts/lib/reuse-check.mjs); queued as a kit PR"
+    },
+    {
+      "path": ".claude/references/prd-template.md",
+      "reason": "plan 450 reuse layer: the ## Reuse Check block; queued as a kit PR"
+    },
+    {
+      "path": ".claude/skills/save-plan/SKILL.md",
+      "reason": "plan 450 reuse layer: reuse-gate checklist line + Phase 2 rule; queued as a kit PR"
     }
   ]
 }
