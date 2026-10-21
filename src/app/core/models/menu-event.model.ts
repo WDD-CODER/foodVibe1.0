@@ -120,7 +120,7 @@ export interface ClosingSupplier {
   photos: string[]
 }
 
-/** Plan 446 (C-SNAPSHOT): what was really paid. Written only through `/api/v1/events/:id/closing`. */
+/** Plan 446 (C-SNAPSHOT): what was really paid. Written only through the events route `:id/closing` (`API.events`). */
 export interface EventClosing {
   suppliers: ClosingSupplier[]
   actualExtraCosts?: number
@@ -156,7 +156,7 @@ export interface MenuEvent {
   createdFromTemplateId?: string
   /** Resolved equipment + venue context (contextual logistics) */
   logistics?: EventLogistics
-  /** Plan 442: set and changed only by the server (`/api/v1/events`) */
+  /** Plan 442: set and changed only by the server (`API.events`) */
   stage?: EventStage
   stageHistory?: EventStageEntry[]
   /** First move to deposit_paid or later; never changes */
