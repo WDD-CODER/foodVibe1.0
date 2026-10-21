@@ -68,7 +68,7 @@ describe('PUT /api/v1/business/settings', () => {
     const res = await put(body)
     expect(res.status).toBe(400)
     expect(res.body.error).toBe('Validation failed')
-    expect(res.body.issues.some(i => i.path.includes(field))).toBe(true)
+    expect(res.body.issues.some(i => i.path === field)).toBe(true)
     expect((await stored('b1')).settings).toBeUndefined()
   })
 
@@ -84,6 +84,12 @@ describe('PUT /api/v1/business/settings', () => {
     expect(res.status).toBe(403)
     expect(res.body).toEqual({ error: 'FORBIDDEN', messageKey: 'no_permission' })
     expect((await stored('b1')).settings).toEqual(VALID)
+  })
+
+  it('returns 404 and writes nothing when the business in the token does not exist', async () => {
+    const res = await put(VALID, { userId: 'own9', name: 'owner9', businessId: 'gone', businessRole: 'owner' })
+    expect(res.status).toBe(404)
+    expect(res.body).toEqual({ error: 'Business not found' })
   })
 
   it('anonymous gets 401', async () => {

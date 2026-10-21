@@ -78,22 +78,22 @@ export class BusinessSettingsTabComponent {
 
   // 5. COMPUTED
   /** The stored numbers (defaults already filled by the server). */
-  private readonly stored_ = computed<BusinessSettings>(() => ({
+  private readonly stored = computed<BusinessSettings>(() => ({
     ...BUSINESS_SETTINGS_DEFAULTS,
     ...(this.businessService.business_()?.settings ?? {})
   }))
 
   /** Save is allowed only for a valid form that differs from what is stored. */
-  protected readonly canSave_ = computed(() => {
+  protected readonly canSave = computed(() => {
     const value = this.value_()
-    const stored = this.stored_()
+    const stored = this.stored()
     return !this.saving_() && this.form.valid && this.fields.some((field) => value[field.key] !== stored[field.key])
   })
 
   constructor() {
     // Show the stored numbers once the business is loaded, unless the owner has already started typing.
     effect(() => {
-      const stored = this.stored_()
+      const stored = this.stored()
       untracked(() => {
         if (!this.form.dirty) this.form.reset(stored)
       })
@@ -101,25 +101,30 @@ export class BusinessSettingsTabComponent {
   }
 
   // 6. METHODS (UI handlers)
-  protected hasError(key: SettingsField): boolean {
-    const control = this.form.controls[key]
-    return control.invalid && (control.dirty || control.touched)
-  }
-
   async save(): Promise<void> {
-    if (!this.canSave_()) return
+    if (!this.canSave()) return
     this.saving_.set(true)
     try {
       await this.businessService.updateSettings(this.form.getRawValue())
-      this.form.reset(this.stored_())
+      this.form.reset(this.stored())
       this.userMsg.onSetSuccessMsg(this.translation.translate('settings_saved'))
     } catch (err) {
       const status = (err as { status?: number }).status
-      this.logging.warn('Business settings could not be saved', { status })
       // A 403 already got the "no permission" toast from the interceptor.
-      if (status !== 403) this.userMsg.onSetErrorMsg(this.translation.translate('settings_invalid'))
+      if (status === 400) {
+        this.logging.warn('Business settings refused as invalid', { status })
+        this.userMsg.onSetErrorMsg(this.translation.translate('settings_invalid'))
+      } else if (status !== 403) {
+        this.logging.error('Business settings could not be saved', { status })
+        this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
+      }
     } finally {
       this.saving_.set(false)
     }
+  }
+
+  protected hasError(key: SettingsField): boolean {
+    const control = this.form.controls[key]
+    return control.invalid && (control.dirty || control.touched)
   }
 }

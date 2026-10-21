@@ -3,12 +3,11 @@
 const { Router } = require('express')
 const rateLimit = require('express-rate-limit')
 const { verifyToken } = require('../middleware/auth')
-const { getBusiness } = require('../services/business')
+const { getBusiness, setBusinessSettings } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
 const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
-const mongoose = require('mongoose')
 const { businessSettingsSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 
 const router = Router()
@@ -45,10 +44,10 @@ router.put('/settings', verifyToken, async (req, res) => {
     const parsed = businessSettingsSchema.safeParse(req.body)
     if (!parsed.success) {
       req.log.info({ event: 'business.settings.failed', reason: 'validation' })
-      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
     }
-    await mongoose.connection.db.collection('businesses')
-      .updateOne({ _id: String(req.user.businessId) }, { $set: { settings: parsed.data } })
+    const result = await setBusinessSettings(req.user.businessId, parsed.data)
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
     req.log.info({ event: 'business.settings.saved' })
     res.json({ settings: parsed.data })
   } catch (err) {

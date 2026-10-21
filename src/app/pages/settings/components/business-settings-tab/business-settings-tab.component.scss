@@ -32,28 +32,7 @@
     font-weight: 600;
   }
 
-  .business-field__input {
-    position: relative;
-    display: block;
-
-    .c-input {
-      inline-size: 100%;
-      padding-inline-end: var(--space-6);
-    }
-  }
-
   .business-field__suffix {
-    position: absolute;
-    inset-inline-end: var(--space-3);
-    inset-block-start: 50%;
-    transform: translateY(-50%);
-
     color: var(--color-text-muted);
-    pointer-events: none;
-  }
-
-  .business-form__buttons {
-    display: flex;
-    gap: var(--space-2);
   }
 }

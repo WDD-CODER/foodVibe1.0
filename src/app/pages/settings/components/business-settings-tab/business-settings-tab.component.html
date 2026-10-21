@@ -3,9 +3,8 @@
     @for (field of fields; track field.key) {
       <label class="business-field">
         <span class="business-field__label">{{ field.labelKey | translatePipe }}</span>
-        <span class="business-field__input">
+        <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
           <input
-            class="c-input"
             type="number"
             inputmode="decimal"
             step="0.1"
@@ -25,8 +24,8 @@
         }
       </label>
     }
-    <div class="business-form__buttons">
-      <button type="submit" class="c-btn-primary" data-testid="business-settings-save" [disabled]="!canSave_()">
+    <div class="c-form-actions">
+      <button type="submit" class="c-btn-primary" data-testid="business-settings-save" [disabled]="!canSave()">
         {{ 'save' | translatePipe }}
       </button>
     </div>
