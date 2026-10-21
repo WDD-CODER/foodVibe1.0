@@ -8,7 +8,7 @@
           } @else {
             <span class="avatar-initials">{{ userInitial() }}</span>
           }
-          @if (user_()?.role === 'admin') {
+          @if (isPlatformAdmin_()) {
             <span class="role-badge" aria-label="admin">
               <lucide-icon name="crown" [size]="10"></lucide-icon>
             </span>
@@ -23,6 +23,9 @@
           >
             {{ user_()!.name }}
           </button>
+          @if (business_(); as business) {
+            <span class="business-name">{{ business.name }}</span>
+          }
         </div>
       </div>
     } @else {

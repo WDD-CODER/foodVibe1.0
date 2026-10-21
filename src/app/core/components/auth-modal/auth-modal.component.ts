@@ -19,6 +19,8 @@ import { environment } from '../../../../environments/environment'
 import { validateUsername, validateEmail, validatePassword } from '../../utils/auth-validation.util'
 import { take } from 'rxjs/operators'
 
+const BUSINESS_NAME_MAX_LENGTH = 200
+
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
@@ -45,6 +47,7 @@ export class AuthModalComponent {
   }
 
   protected name = ''
+  protected businessName = ''
   protected email = ''
   protected password = ''
   protected confirmPassword = ''
@@ -135,6 +138,16 @@ export class AuthModalComponent {
     }
 
     if (this.isSignUp) {
+      const businessName = this.businessName.trim()
+      if (!businessName) {
+        this.errorKey.set('business_name_required')
+        return
+      }
+      if (businessName.length > BUSINESS_NAME_MAX_LENGTH) {
+        this.errorKey.set('business_name_too_long')
+        return
+      }
+
       const emailErr = validateEmail(this.email)
       if (emailErr) {
         this.errorKey.set(emailErr)
@@ -167,10 +180,10 @@ export class AuthModalComponent {
           {
             name: this.name.trim(),
             email: this.email.trim(),
-            imgUrl: this.imgCloudinaryUrl ?? undefined,
-            role: 'user'
+            imgUrl: this.imgCloudinaryUrl ?? undefined
           },
-          this.password.trim()
+          this.password.trim(),
+          this.businessName.trim()
         )
         .subscribe({
           next: () => this._onSuccess(),
@@ -219,6 +232,14 @@ export class AuthModalComponent {
       this.errorKey.set('username_invalid_chars')
     } else if (err.message === 'INVALID_EMAIL') {
       this.errorKey.set('email_invalid')
+    } else if (err.message === 'BUSINESS_NAME_REQUIRED') {
+      this.errorKey.set('business_name_required')
+    } else if (err.message === 'BUSINESS_NAME_TOO_LONG') {
+      this.errorKey.set('business_name_too_long')
+    } else if (err.message === 'NO_BUSINESS') {
+      this.errorKey.set('no_business')
+    } else if (err.message === 'USER_REMOVED') {
+      this.errorKey.set('user_removed')
     } else if (err.message === 'PASSWORD_REQUIRED') {
       this.errorKey.set('password_required')
     } else if (err.message === 'ACCOUNT_LOCKED') {
@@ -236,6 +257,7 @@ export class AuthModalComponent {
 
   private _reset(): void {
     this.name = ''
+    this.businessName = ''
     this.email = ''
     this.password = ''
     this.confirmPassword = ''

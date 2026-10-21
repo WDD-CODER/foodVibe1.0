@@ -272,7 +272,7 @@ export class KitchenStateService {
   permanentlyDeleteRecipe(recipe: Recipe): Observable<void> {
     const user = this.userService.user_()
     if (!user) return throwError(() => new Error('NOT_AUTHENTICATED'))
-    if (user.role !== 'admin') return throwError(() => new Error('NOT_AUTHORIZED'))
+    if (!this.userService.isPlatformAdmin_()) return throwError(() => new Error('NOT_AUTHORIZED'))
     const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
     const operation$ = isDish
       ? from(this.dishDataService.permanentlyDeleteDish(recipe._id))

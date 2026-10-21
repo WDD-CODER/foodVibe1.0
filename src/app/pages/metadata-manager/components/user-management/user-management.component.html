@@ -6,12 +6,7 @@
   <p class="card-desc">{{ 'user_management_desc' | translatePipe }}</p>
 
   <div class="list-container">
-    @if (!isAdmin()) {
-      <div class="empty-state">
-        <lucide-icon name="lock" [size]="18"></lucide-icon>
-        גישה למנהלים בלבד
-      </div>
-    } @else if (isLoading_()) {
+    @if (isLoading_()) {
       <div class="empty-state">טוען...</div>
     } @else if (users_().length === 0) {
       <div class="empty-state">אין משתמשים רשומים</div>
@@ -22,13 +17,28 @@
             <div class="user-info">
               <span>{{ user.name }}</span>
               <span class="user-email">{{ user.email }}</span>
+              @if (user.businessName) {
+                <span class="user-business">{{ user.businessName }}</span>
+              }
+              <span class="user-chips">
+                @if (user.businessRole) {
+                  <span class="role-chip">{{ 'business_role_' + user.businessRole | translatePipe }}</span>
+                }
+                @if (user.isPlatformAdmin) {
+                  <span class="role-chip role-chip--admin" [attr.title]="'platform_admin' | translatePipe">
+                    <lucide-icon name="crown" [size]="12"></lucide-icon>
+                  </span>
+                }
+              </span>
             </div>
             <div class="item-actions">
               <button
                 class="c-icon-btn danger"
                 (click)="onDeleteUser(user)"
-                [disabled]="user._id === currentUserId()"
-                [attr.title]="user._id === currentUserId() ? 'לא ניתן למחוק את עצמך' : ('remove' | translatePipe)">
+                [disabled]="isOwnBusiness(user)"
+                [attr.aria-label]="'remove' | translatePipe"
+                [attr.title]="'remove' | translatePipe"
+              >
                 <lucide-icon name="trash-2" [size]="16"></lucide-icon>
               </button>
             </div>

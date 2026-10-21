@@ -7,6 +7,7 @@ const { cloneMasterDataToBusiness } = require('../services/clone-master');
 const { syncMasterToBusiness } = require('../services/sync-master');
 const { getMasterVersion } = require('../services/master-version');
 const { newId } = require('../utils/id');
+const { NAME_MAX_LENGTH } = require('../generated/schemas/base.schema');
 const { createBusinessFor, ensureBusinessForUser, getBusiness, setBusinessSyncedVersion } = require('../services/business');
 
 const router = Router();
@@ -68,15 +69,14 @@ function isDbUnavailableError(err) {
 }
 
 /**
- * The one place an access token is signed. Carries the business fields next to the legacy `role`
- * (plan 426 removes the last client read of it). Plan 425: platform-admin power comes from the
- * `isPlatformAdmin` flag only.
+ * The one place an access token is signed. Plan 426: the payload is exactly the C-USER contract
+ * (`userId, name, businessId, businessRole, isPlatformAdmin`) — no `role`. Platform-admin power comes
+ * from the `isPlatformAdmin` flag only.
  */
 function signAccess(user) {
   const payload = {
     userId: String(user._id),
     name: user.name,
-    role: user.role || 'user',
     businessId: user.businessId ?? null,
     businessRole: user.businessRole ?? null,
     isPlatformAdmin: user.isPlatformAdmin === true,
@@ -91,7 +91,6 @@ function toPublicUser(user) {
     name: user.name,
     email: user.email,
     imgUrl: user.imgUrl || '',
-    role: user.role || 'user',
     businessId: user.businessId ?? null,
     businessRole: user.businessRole ?? null,
     isPlatformAdmin: user.isPlatformAdmin === true,
@@ -150,7 +149,7 @@ function verifyPbkdf2(plain, stored) {
 
 router.post('/signup', signupLimiter, async (req, res) => {
   try {
-    const { name, email, imgUrl, password } = req.body;
+    const { name, email, imgUrl, password, businessName } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'name, email, and password are required' });
@@ -168,6 +167,11 @@ router.post('/signup', signupLimiter, async (req, res) => {
     if (!EMAIL_REGEX.test(email.trim())) {
       return res.status(400).json({ error: 'INVALID_EMAIL' });
     }
+
+    // Plan 426: the business name is required (1–200 chars after trim).
+    const trimmedBusinessName = typeof businessName === 'string' ? businessName.trim() : '';
+    if (!trimmedBusinessName) return res.status(400).json({ error: 'BUSINESS_NAME_REQUIRED' });
+    if (trimmedBusinessName.length > NAME_MAX_LENGTH) return res.status(400).json({ error: 'BUSINESS_NAME_TOO_LONG' });
 
     // Note: password strength (min length, letter+digit, username/email check) is enforced
     // client-side only. The password arrives pre-hashed (saltHex:hashHex) from the Angular
@@ -195,7 +199,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const user = created.toObject();
 
     // Plan 424: every new user starts as the owner of their own business.
-    const business = await createBusinessFor(user, { masterVersion });
+    const business = await createBusinessFor(user, { name: trimmedBusinessName, masterVersion });
     await cloneMasterDataToBusiness(business._id, { createdBy: String(_id) });
 
     const token = signAccess(user);

@@ -3,6 +3,7 @@ import { ActivatedRouteSnapshot, Router, RouterLink, RouterLinkActive } from '@a
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
+import { BusinessService } from '@services/business.service'
 import { AuthModalService, AuthMode } from '@services/auth-modal.service'
 import { authGuard } from '../../guards/auth.guard'
 
@@ -16,6 +17,7 @@ import { authGuard } from '../../guards/auth.guard'
 })
 export class HeaderComponent {
   private readonly userService = inject(UserService)
+  private readonly businessService = inject(BusinessService)
   private readonly authModal = inject(AuthModalService)
   private readonly router = inject(Router)
 
@@ -24,6 +26,8 @@ export class HeaderComponent {
 
   protected readonly isLoggedIn = this.userService.isLoggedIn
   protected readonly user_ = this.userService.user_
+  protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
+  protected readonly business_ = this.businessService.business_
   // Resets whenever the stored photo URL changes (new user, re-login, profile update).
   protected readonly imgFailed_ = linkedSignal({ source: () => this.user_()?.imgUrl, computation: () => false })
   protected readonly showAvatarImg = computed(() => !!this.user_()?.imgUrl && !this.imgFailed_())

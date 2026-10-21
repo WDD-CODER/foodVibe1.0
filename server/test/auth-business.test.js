@@ -25,10 +25,10 @@ const SALT = 'a'.repeat(32)
 // Same shape the client stores: saltHex:PBKDF2(plain). Login sends the plain password.
 const HASH = SALT + ':' + crypto.pbkdf2Sync('pw', Buffer.from(SALT, 'hex'), 100000, 32, 'sha256').toString('hex')
 const decode = token => jwt.decode(token)
-const FIELDS = ['userId', 'name', 'role', 'businessId', 'businessRole', 'isPlatformAdmin']
+const FIELDS = ['userId', 'name', 'businessId', 'businessRole', 'isPlatformAdmin']
 
-async function signup(name = 'chefone') {
-  return request(app).post('/api/v1/auth/signup').send({ name, email: `${name}@x.com`, password: HASH })
+async function signup(name = 'chefone', businessName = `העסק של ${name}`) {
+  return request(app).post('/api/v1/auth/signup').send({ name, email: `${name}@x.com`, password: HASH, businessName })
 }
 
 describe('signup', () => {
@@ -54,7 +54,7 @@ describe('signup', () => {
     const res = await signup()
     const payload = decode(res.body.token)
     for (const f of FIELDS) expect(payload).toHaveProperty(f)
-    expect(payload).toMatchObject({ name: 'chefone', role: 'user', businessRole: 'owner', isPlatformAdmin: false })
+    expect(payload).toMatchObject({ name: 'chefone', businessRole: 'owner', isPlatformAdmin: false })
     expect(payload.businessId).toBe(res.body.user.businessId)
   })
 })
@@ -62,7 +62,7 @@ describe('signup', () => {
 describe('login, refresh and guest', () => {
   it('login and refresh tokens carry the business fields', async () => {
     const agent = request.agent(app)
-    const su = await agent.post('/api/v1/auth/signup').send({ name: 'chefone', email: 'c@x.com', password: HASH })
+    const su = await agent.post('/api/v1/auth/signup').send({ name: 'chefone', email: 'c@x.com', password: HASH, businessName: 'מטבח' })
     expect(su.status).toBe(201)
     const login = await request(app).post('/api/v1/auth/login').send({ name: 'chefone', password: 'pw' })
     expect(login.status).toBe(200)
@@ -77,7 +77,7 @@ describe('login, refresh and guest', () => {
     await signup('boss')
     await db.collection('users').updateOne({ name: 'boss' }, { $set: { role: 'admin' } })
     const asRole = await request(app).post('/api/v1/auth/login').send({ name: 'boss', password: 'pw' })
-    expect(decode(asRole.body.token)).toMatchObject({ role: 'admin', isPlatformAdmin: false })
+    expect(decode(asRole.body.token)).toMatchObject({ isPlatformAdmin: false })
     await db.collection('users').updateOne({ name: 'boss' }, { $set: { isPlatformAdmin: true } })
     const asFlag = await request(app).post('/api/v1/auth/login').send({ name: 'boss', password: 'pw' })
     expect(decode(asFlag.body.token)).toMatchObject({ isPlatformAdmin: true })
