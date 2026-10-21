@@ -96,7 +96,9 @@ function authorizeDelete(req, res, type, doc) {
  */
 function authorizeEdit(req, res, type, current, merged) {
   if (SYSTEM_TYPES.includes(type)) return true;
-  if (!assertCan(req, res, writeAction(type, current, 'edit'), { type, doc: current })) return false;
+  // Locked kinds are owner-only whether the stored term or the resulting one is in a locked kind.
+  const action = writeAction(type, merged, writeAction(type, current, 'edit'));
+  if (!assertCan(req, res, action, { type, doc: current })) return false;
   if (moneyFieldsChanged(type, current, merged)) return assertCan(req, res, 'editMoney', { type, doc: current });
   return true;
 }
@@ -1003,6 +1005,8 @@ const REPLACEABLE_TYPES = new Set(['VERSION_HISTORY']);
 
 router.put('/:type', verifyToken, async (req, res) => {
   try {
+    // Plan 449: replacing a whole list bypasses every per-document rule, so only an owner may do it.
+    if (!assertCan(req, res, 'editSettings', { type: req.params.type })) return;
     if (!REPLACEABLE_TYPES.has(req.params.type)) {
       return res.status(400).json({ error: `Whole-collection replace is not permitted for ${req.params.type}` });
     }
@@ -1031,7 +1035,8 @@ router.put('/:type', verifyToken, async (req, res) => {
     const stillTaken = new Set(conflictDocs.map(d => d._id));
 
     const docs = entities.map(e => {
-      const { userId: _u, businessId: _b, createdBy: _cb, _masterId: _m, _userModified: _um, ...safeEntity } = e;
+      const { userId: _u, businessId: _b, createdBy: _cb, _masterId: _m, _userModified: _um, ...clientEntity } = e;
+      const safeEntity = req.params.type === EVENTS ? withoutServerEventFields(clientEntity) : clientEntity;
       return stampNew(req, {
         ...safeEntity,
         _id: stillTaken.has(safeEntity._id) ? makeId() : (safeEntity._id || makeId()),

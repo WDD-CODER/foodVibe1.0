@@ -194,3 +194,35 @@ describe('staff: system collections', () => {
     }
   })
 })
+
+describe('plan 449: closed permission holes', () => {
+  const priced = () => productBody({ sources: [{ supplierId: 'sA', price: 5 }, { supplierId: 'sB' }] })
+
+  it('staff cannot move a term into a locked kind (403, unchanged)', async () => {
+    await seed('taxonomyTerms', { kind: 'ingredientCategory', key: 'c1', sortOrder: 0 }, 't-mv', 'st1')
+    const res = await request(app).put(url('taxonomyTerms', 't-mv')).set(as(STAFF)).send({ kind: 'eventType' })
+    expect(res.status).toBe(400) // the kind-immutable rule fires first; authorizeEdit also checks the merged kind
+    expect((await raw('taxonomyTerms', 't-mv')).kind).toBe('ingredientCategory')
+  })
+
+  it('staff cannot move a price from one supplier row to another (403, unchanged)', async () => {
+    await seed('products', priced(), 'p-mv', 'st1')
+    const res = await request(app).put(url('products', 'p-mv')).set(as(STAFF))
+      .send({ sources: [{ supplierId: 'sA' }, { supplierId: 'sB', price: 5 }] })
+    expect(res.status).toBe(403)
+    expect(res.body).toEqual(FORBIDDEN)
+    expect((await raw('products', 'p-mv')).sources[0].price).toBe(5)
+  })
+
+  it('staff cannot replace a whole collection; the owner still can', async () => {
+    const hist = { _id: 'h1', businessId: 'b1' }
+    await testDb().collection('VERSION_HISTORY').insertOne(hist)
+    const staff = await request(app).put(url('VERSION_HISTORY')).set(as(STAFF)).set('X-Confirm-Replace', 'true').send([])
+    expect(staff.status).toBe(403)
+    expect(staff.body).toEqual(FORBIDDEN)
+    expect(await raw('VERSION_HISTORY', 'h1')).toEqual(hist)
+    const owner = await request(app).put(url('VERSION_HISTORY')).set(as(OWNER)).set('X-Confirm-Replace', 'true').send([])
+    expect(owner.status).toBe(200)
+    expect(await raw('VERSION_HISTORY', 'h1')).toBeNull()
+  })
+})
