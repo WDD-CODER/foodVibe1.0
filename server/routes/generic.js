@@ -1,7 +1,5 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const { verifyToken, optionalToken, requirePlatformAdmin } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
@@ -9,7 +7,9 @@ const { bumpMasterVersion } = require('../services/master-version');
 const { newId: makeId } = require('../utils/id');
 const { hasSchema: hasV2Schema } = require('../utils/schema-check');
 const { checkStoredDoc } = require('../middleware/validate');
+const { dataWriteLimiter } = require('../middleware/write-limit');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
+const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-stage');
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
@@ -19,41 +19,8 @@ const router = Router();
 
 // Write routes (POST/PUT/DELETE) require a valid JWT. Reads are public.
 
-// Plan 321 Phase 1 — moderate rate limit on writes (POST/PUT/DELETE); reads (GET) are
-// skipped since master-catalog/search reads are meant to be cheap and frequent.
-// Plan 385 — the bucket is per user (verified JWT), not per IP, so users behind one IP
-// don't share a budget; anonymous writes fall back to the IP. DATA_WRITE_LIMIT_MAX sets
-// the budget (default 1000); 0 turns the limiter off. Never gate this on NODE_ENV —
-// `npm run dev` runs as NODE_ENV=production.
-const DATA_WRITE_LIMIT_MAX = Number(process.env.DATA_WRITE_LIMIT_MAX ?? 1000);
-
-/** Bucket key: `user:<id>` for a verified Bearer token, else the IPv6-safe IP key. */
-function writeLimitKey(req) {
-  const header = req.headers['authorization'] || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-  if (token) {
-    try {
-      const { userId } = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-      if (userId) return `user:${userId}`;
-    } catch {
-      // Invalid/expired token: verifyToken rejects the write anyway; bucket it by IP.
-    }
-  }
-  return ipKeyGenerator(req.ip);
-}
-
-if (DATA_WRITE_LIMIT_MAX > 0) {
-  const dataWriteLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: DATA_WRITE_LIMIT_MAX,
-    standardHeaders: true,
-    legacyHeaders: false,
-    keyGenerator: writeLimitKey,
-    skip: (req) => req.method === 'GET',
-    message: { error: 'Too many requests, please try again later' },
-  });
-  router.use(dataWriteLimiter);
-}
+// Writes share one rate limit with the events router (server/middleware/write-limit.js).
+router.use(dataWriteLimiter);
 
 // Only known user-data entity types may be read/written through the generic data API.
 // Everything else (auth's signed-users-db/users, ai.js's GEMINI_SHOTS/GEMINI_USAGE,
@@ -103,6 +70,15 @@ function termWriteOwner(req) {
 
 /** Businesses whose documents a term's key reaches: everyone for a shared term, else its own business. */
 const termScope = term => (term.businessId === MASTER ? { $exists: true } : term.businessId);
+
+const EVENTS = 'menuEvents';
+
+/** Plan 442: `body` without the event fields only the server writes (stage, history, notes ...). */
+function withoutServerEventFields(body) {
+  const copy = { ...body };
+  for (const key of EVENT_SERVER_FIELDS) delete copy[key];
+  return copy;
+}
 
 /** Plan 427: permission action for changing or deleting a stored doc (locked taxonomy kinds are owner-only). */
 const writeAction = (type, doc, fallback) =>
@@ -448,6 +424,8 @@ router.post('/:type', verifyToken, async (req, res) => {
     let shared = false;
     let safeEntity = body;
     if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
+    // Plan 442: a client never sets an event's stage, history or notes; the server starts every event in "inquiry".
+    if (entityType === EVENTS) safeEntity = withoutServerEventFields(safeEntity);
     if (shared && !isAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
@@ -474,6 +452,11 @@ router.post('/:type', verifyToken, async (req, res) => {
         updatedAt: now,
       }),
     });
+    if (entityType === EVENTS) {
+      doc.stage = 'inquiry';
+      doc.stageHistory = [{ stage: 'inquiry', at: now, by: req.user.userId, byName: req.user.name ?? '' }];
+      doc.notes = [];
+    }
     // Plan 424: a shared term belongs to the master catalog, not to the admin's own business.
     if (shared) doc.businessId = MASTER_BUSINESS_ID;
 
@@ -566,7 +549,9 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       ...(!isTerm && { _userModified: true }),
     };
     // createdAt is server-owned: a client PUT never rewrites it.
-    const { createdAt: _ca, ...updatable } = safeBody;
+    const { createdAt: _ca, ...clientUpdatable } = safeBody;
+    // Plan 442: stage, history, closedAt and notes survive a client PUT unchanged (the events router owns them).
+    const updatable = req.params.type === EVENTS ? withoutServerEventFields(clientUpdatable) : clientUpdatable;
     let rekeyed = null;
     // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
     // rejects null on optional keys, and a PUT validates the merge over the stored doc, so one

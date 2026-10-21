@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { baseDocShape, nameField } from '../base.schema'
 import { eventLogisticsSchema } from './common.schema'
+import { EVENT_STAGES, NOTE_MAX_LENGTH, NOT_CLOSED_REASONS } from './event-stage'
 import { coefficientSchema } from './taxonomy-term.schema'
 
 /** Plan 440: a copy of the event type's / serving type's name and coefficient at selection time (no decimal rule: it is a copy). */
@@ -50,6 +51,35 @@ export const menuEventSchema = z.strictObject({
   cuisineTags: z.array(z.string()).optional(),
   createdFromTemplateId: z.string().optional(),
   logistics: eventLogisticsSchema.optional(),
+  /** Plan 442: pipeline stage; optional only so events not yet migrated still validate. Server-owned. */
+  stage: z.enum(EVENT_STAGES).optional(),
+  stageHistory: z.array(z.strictObject({
+    stage: z.enum(EVENT_STAGES),
+    at: z.number(),
+    by: z.string(),
+    byName: z.string(),
+    reason: z.enum(NOT_CLOSED_REASONS).optional(),
+    reasonText: z.string().max(NOTE_MAX_LENGTH).optional()
+  })).optional(),
+  closedAt: z.number().optional(),
+  notClosedAt: z.number().optional(),
+  notClosedReason: z.enum(NOT_CLOSED_REASONS).optional(),
+  notClosedText: z.string().max(NOTE_MAX_LENGTH).optional(),
+  legacy: z.boolean().optional(),
+  notes: z.array(z.strictObject({
+    _id: z.string(),
+    text: z.string().min(1).max(NOTE_MAX_LENGTH),
+    at: z.number(),
+    by: z.string(),
+    byName: z.string(),
+    editedAt: z.number().optional()
+  })).optional(),
+  clientName: nameField.optional(),
+  clientPhone: z.string().max(30).optional(),
+  deposit: z.strictObject({
+    amount: z.number().min(0).optional(),
+    date: z.string().optional()
+  }).optional(),
   _masterId: z.string().optional(),
   _userModified: z.boolean().optional()
 })

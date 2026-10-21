@@ -1,5 +1,30 @@
 import type { EventLogistics } from './logistics.model'
 
+/** Plan 442: pipeline stage keys (mirror of shared/schemas/entities/event-stage.ts). */
+export type EventStage =
+  'inquiry' | 'quote_sent' | 'deposit_paid' | 'ordering' | 'execution' | 'post_production' | 'finished' | 'not_closed'
+
+export type NotClosedReason = 'price' | 'date_taken' | 'no_reply' | 'other'
+
+export interface EventStageEntry {
+  stage: EventStage
+  at: number
+  by: string
+  byName: string
+  reason?: NotClosedReason
+  reasonText?: string
+}
+
+export interface EventNote {
+  _id: string
+  /** 1 to 2,000 characters, plain text */
+  text: string
+  at: number
+  by: string
+  byName: string
+  editedAt?: number
+}
+
 /** Dynamic menu types from registry; legacy values buffet_family | plated_course | cocktail_passed still name the serving styles. */
 export type ServingType = string
 
@@ -81,4 +106,18 @@ export interface MenuEvent {
   createdFromTemplateId?: string
   /** Resolved equipment + venue context (contextual logistics) */
   logistics?: EventLogistics
+  /** Plan 442: set and changed only by the server (`/api/v1/events`) */
+  stage?: EventStage
+  stageHistory?: EventStageEntry[]
+  /** First move to deposit_paid or later; never changes */
+  closedAt?: number
+  notClosedAt?: number
+  notClosedReason?: NotClosedReason
+  notClosedText?: string
+  /** Events that existed before stages ("ישן"); dashboards never count them */
+  legacy?: boolean
+  notes?: EventNote[]
+  clientName?: string
+  clientPhone?: string
+  deposit?: { amount?: number; date?: string }
 }
