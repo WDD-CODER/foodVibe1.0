@@ -87,3 +87,72 @@ describe('ListShellComponent — pinned table top (plan 346)', () => {
     expect(Math.round(rect.top)).toBe(Math.round(window.innerHeight / 2))
   })
 })
+
+@Component({
+  standalone: true,
+  imports: [ListShellComponent],
+  template: `
+    <app-list-shell layout="cards" cardMin="10rem">
+      <ng-container shell-title>Cards</ng-container>
+      <ng-container shell-selection-bar><div class="test-selbar">bar</div></ng-container>
+      <ng-container shell-cards>
+        @for (i of cards; track i) {
+          <article class="test-card">{{ i }}</article>
+        }
+      </ng-container>
+      <ng-container shell-table-body><div class="test-table-row">row</div></ng-container>
+      <ng-container shell-filters><div class="test-filter">filter</div></ng-container>
+    </app-list-shell>
+  `
+})
+class CardsHostComponent {
+  readonly cards = [1, 2, 3, 4]
+}
+
+describe('ListShellComponent — cards layout (plan 453)', () => {
+  let fixture: ComponentFixture<CardsHostComponent>
+
+  beforeEach(async () => {
+    const translation = jasmine.createSpyObj<TranslationService>('TranslationService', ['translate'])
+    translation.translate.and.callFake((k: string | undefined) => k ?? '')
+    await TestBed.configureTestingModule({
+      imports: [CardsHostComponent, HostComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [{ provide: TranslationService, useValue: translation }]
+    }).compileComponents()
+    fixture = TestBed.createComponent(CardsHostComponent)
+    fixture.detectChanges()
+  })
+
+  it('projects the cards as direct children of the card grid', () => {
+    const body = fixture.debugElement.query(By.css('.table-body--cards')).nativeElement as HTMLElement
+    expect(body.querySelectorAll(':scope > .test-card').length).toBe(4)
+    expect(getComputedStyle(body).display).toBe('grid')
+  })
+
+  it('does not render the pinned table top, nor table-mode slots', () => {
+    const host = fixture.nativeElement as HTMLElement
+    expect(host.querySelector('.table-top')).toBeNull()
+    expect(host.querySelector('.test-table-row')).toBeNull()
+  })
+
+  it('keeps the header, selection bar and filter panel', () => {
+    const host = fixture.nativeElement as HTMLElement
+    expect(host.querySelector('.list-header')).not.toBeNull()
+    expect(host.querySelector('.selection-bar-area .test-selbar')).not.toBeNull()
+    expect(host.querySelector('.filter-panel .test-filter')).not.toBeNull()
+    expect(host.querySelectorAll('.scroll-arrow--table').length).toBe(2)
+  })
+
+  it('passes cardMin to the grid as --card-min', () => {
+    const shell = fixture.debugElement.query(By.directive(ListShellComponent)).nativeElement as HTMLElement
+    expect(shell.style.getPropertyValue('--card-min')).toBe('10rem')
+  })
+
+  it('table layout (the default) still renders the pinned top and no card grid', async () => {
+    const tableFixture = TestBed.createComponent(HostComponent)
+    tableFixture.detectChanges()
+    const host = tableFixture.nativeElement as HTMLElement
+    expect(host.querySelector('.table-top')).not.toBeNull()
+    expect(host.querySelector('.table-body--cards')).toBeNull()
+  })
+})

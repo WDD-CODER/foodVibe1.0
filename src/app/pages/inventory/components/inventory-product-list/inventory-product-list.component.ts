@@ -67,6 +67,7 @@ import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-d
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
@@ -122,6 +123,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected searchQuery_ = signal<string>('')
   protected sortBy_ = signal<SortField | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
+  protected readonly listControls = useListControls<SortField>({
+    search: this.searchQuery_,
+    sortBy: this.sortBy_,
+    sortOrder: this.sortOrder_
+  })
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
   /** Filter-category open state: all collapsed on mobile (≤1023px), all expanded on desktop (plan 345). */
@@ -298,7 +304,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected filteredProducts_ = computed(() => {
     let products = this.kitchenStateService.products_()
     const filters = this.activeFilters_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const sortBy = this.sortBy_()
     const sortOrder = this.sortOrder_()
     const lowStockOnly = this.lowStockOnly_()
@@ -342,7 +348,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
     // 2. Apply search (within filtered results)
     if (search) {
-      products = products.filter((p) => (p.nameHebrew ?? '').toLowerCase().includes(search))
+      products = products.filter((p) => matchesSearch(search, p.nameHebrew))
     }
 
     // 3. Apply sort
@@ -433,13 +439,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected setSort(field: SortField): void {
-    const current = this.sortBy_()
-    if (current === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
+    this.listControls.setSort(field)
   }
 
   protected toggleAllergenExpandAll(): void {
@@ -481,12 +481,14 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected clearAllFilters(): void {
-    this.lowStockOnly_.set(false)
-    this.showInvalidOnly_.set(false)
-    this.showIncompleteOnly_.set(false)
-    this.showUnpricedOnly_.set(false)
-    this.nutritionFilter_.set('all')
-    this.activeFilters_.set({})
+    this.listControls.clearAll(
+      () => this.lowStockOnly_.set(false),
+      () => this.showInvalidOnly_.set(false),
+      () => this.showIncompleteOnly_.set(false),
+      () => this.showUnpricedOnly_.set(false),
+      () => this.nutritionFilter_.set('all'),
+      () => this.activeFilters_.set({})
+    )
   }
 
   protected toggleNutritionFilter(value: 'has' | 'missing'): void {
@@ -784,17 +786,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     })
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }

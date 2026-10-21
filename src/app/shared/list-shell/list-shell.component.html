@@ -27,29 +27,47 @@
     <ng-content select="[shell-selection-bar]"></ng-content>
   </div>
 
-  <section class="table-area">
-    <!-- Plan 346: pagination + column header stay pinned while rows scroll (sticky at every
-         width; on desktop the body scrolls inside, below it). -->
-    <div class="table-top" #tableTop>
-      <div class="table-pagination" (click)="onPaginationClick($event)">
-        <ng-content select="[shell-pagination]"></ng-content>
+  @if (layout() === 'cards') {
+    <!-- Plan 453: cards layout — same header, selection bar, filter panel and arrows; the pinned table top
+         is replaced by a plain scroll area that lays the projected cards out as a responsive grid. -->
+    <section class="table-area table-area--cards">
+      <div class="table-body table-body--cards" scrollIndicators>
+        <ng-content select="[shell-cards]"></ng-content>
       </div>
-      <div class="table-header">
-        <ng-content select="[shell-table-header]"></ng-content>
+      <!-- More-to-scroll arrows: grid items laid over the body's cell, not inside the body, so they
+           stay put while it scrolls (shown by the body's can-scroll-up/down classes). -->
+      <div class="scroll-arrow scroll-arrow--top scroll-arrow--table" aria-hidden="true">
+        <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
       </div>
-    </div>
-    <div class="table-body" #tableBody scrollIndicators>
-      <ng-content select="[shell-table-body]"></ng-content>
-    </div>
-    <!-- More-to-scroll arrows: grid items laid over the body's cell, not inside the body, so they
-         stay put while it scrolls (shown by the body's can-scroll-up/down classes). -->
-    <div class="scroll-arrow scroll-arrow--top scroll-arrow--table" aria-hidden="true">
-      <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
-    </div>
-    <div class="scroll-arrow scroll-arrow--bottom scroll-arrow--table" aria-hidden="true">
-      <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
-    </div>
-  </section>
+      <div class="scroll-arrow scroll-arrow--bottom scroll-arrow--table" aria-hidden="true">
+        <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+      </div>
+    </section>
+  } @else {
+    <section class="table-area">
+      <!-- Plan 346: pagination + column header stay pinned while rows scroll (sticky at every
+           width; on desktop the body scrolls inside, below it). -->
+      <div class="table-top" #tableTop>
+        <div class="table-pagination" (click)="onPaginationClick($event)">
+          <ng-content select="[shell-pagination]"></ng-content>
+        </div>
+        <div class="table-header">
+          <ng-content select="[shell-table-header]"></ng-content>
+        </div>
+      </div>
+      <div class="table-body" #tableBody scrollIndicators>
+        <ng-content select="[shell-table-body]"></ng-content>
+      </div>
+      <!-- More-to-scroll arrows: grid items laid over the body's cell, not inside the body, so they
+           stay put while it scrolls (shown by the body's can-scroll-up/down classes). -->
+      <div class="scroll-arrow scroll-arrow--top scroll-arrow--table" aria-hidden="true">
+        <lucide-icon name="chevron-up" [size]="16"></lucide-icon>
+      </div>
+      <div class="scroll-arrow scroll-arrow--bottom scroll-arrow--table" aria-hidden="true">
+        <lucide-icon name="chevron-down" [size]="16"></lucide-icon>
+      </div>
+    </section>
+  }
 
   <aside class="filter-panel" [class.collapsed]="!isPanelOpen()" scrollIndicators>
     <div class="panel-content">

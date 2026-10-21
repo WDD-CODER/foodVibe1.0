@@ -73,6 +73,7 @@ import {
 } from './utils/recipe-book-list.util'
 import { RecipeRowActionsService } from './services/recipe-row-actions.service'
 import { RecipeListTooltipsService } from './services/recipe-list-tooltips.service'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 /** Ingredient-filter typeahead search (plan 301, Milestone 1) — same tuning as ingredient-search.component.ts. */
 const INGREDIENT_SEARCH_LIMIT = 25
@@ -129,6 +130,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected searchQuery_ = signal<string>('')
   protected sortBy_ = signal<SortField | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
+  protected readonly listControls = useListControls<SortField>({
+    search: this.searchQuery_,
+    sortBy: this.sortBy_,
+    sortOrder: this.sortOrder_
+  })
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
   protected dateFrom_ = signal<string | null>(null)
@@ -251,7 +257,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected filteredRecipes_ = computed(() => {
     let recipes = this.kitchenState.recipes_()
     const filters = this.activeFilters_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const sortBy = this.sortBy_()
     const sortOrder = this.sortOrder_()
     const selectedIds = this.selectedProductIds_()
@@ -276,7 +282,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
 
     if (search) {
-      recipes = recipes.filter((r) => (r.nameHebrew ?? '').toLowerCase().includes(search))
+      recipes = recipes.filter((r) => matchesSearch(search, r.nameHebrew))
     }
 
     const dateFrom = this.dateFrom_()
@@ -544,13 +550,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   // UI handlers — sort, filters, search, panel, paging
   protected setSort(field: SortField): void {
-    const current = this.sortBy_()
-    if (current === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
+    this.listControls.setSort(field)
   }
 
   /** Set sort to date (newest first). */
@@ -580,12 +580,14 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected clearAllFilters(): void {
-    this.activeFilters_.set({})
-    this.dateFrom_.set(null)
-    this.dateTo_.set(null)
-    this.dateIncludeByUpdated_.set(false)
-    this.showFavoritesOnly_.set(false)
-    this.selectedProductIds_.set([])
+    this.listControls.clearAll(
+      () => this.activeFilters_.set({}),
+      () => this.dateFrom_.set(null),
+      () => this.dateTo_.set(null),
+      () => this.dateIncludeByUpdated_.set(false),
+      () => this.showFavoritesOnly_.set(false),
+      () => this.selectedProductIds_.set([])
+    )
   }
 
   protected toggleFilterCategory(name: string): void {
@@ -614,18 +616,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.selectedProductIds_.set([])
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 
   protected goToPrevPage(): void {
