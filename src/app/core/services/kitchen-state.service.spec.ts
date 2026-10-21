@@ -115,7 +115,7 @@ describe('KitchenStateService', () => {
       productDataSpy.addProduct.and.returnValue(Promise.resolve(savedProduct))
 
       // FIXED: Method name in service is saveProduct
-      service.saveProduct(product).subscribe(() => {
+      void service.saveProduct(product).then(() => {
         expect(productDataSpy.addProduct).toHaveBeenCalled()
         expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('חומר גלם נוסף בהצלחה')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
@@ -130,7 +130,7 @@ describe('KitchenStateService', () => {
       // FIXED: ProductDataService uses deleteProduct
       productDataSpy.deleteProduct.and.returnValue(Promise.resolve())
 
-      service.deleteProduct('p-del').subscribe(() => {
+      void service.deleteProduct('p-del').then(() => {
         expect(productDataSpy.deleteProduct).toHaveBeenCalledWith('p-del')
         expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('חומר הגלם נמחק בהצלחה')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
@@ -142,13 +142,11 @@ describe('KitchenStateService', () => {
       mockAllItemsSignal.set([])
       TestBed.flushEffects()
 
-      service.deleteProduct('none').subscribe({
-        error: (err) => {
-          expect(err.message).toBe('NOT_FOUND')
-          // FIX: Align with the actual string in kitchen-state.service.ts
-          expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('הפריט לא נמצא')
-          done()
-        }
+      service.deleteProduct('none').catch((err: Error) => {
+        expect(err.message).toBe('NOT_FOUND')
+        // FIX: Align with the actual string in kitchen-state.service.ts
+        expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('הפריט לא נמצא')
+        done()
       })
     })
   })
@@ -167,7 +165,7 @@ describe('KitchenStateService', () => {
       } as Recipe
       recipeDataSpy.addRecipe.and.returnValue(Promise.resolve({ ...recipe, _id: 'r1' }))
 
-      service.saveRecipe(recipe).subscribe(() => {
+      void service.saveRecipe(recipe).then(() => {
         expect(recipeDataSpy.addRecipe).toHaveBeenCalled()
         expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המתכון נשמר בהצלחה')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
@@ -190,7 +188,7 @@ describe('KitchenStateService', () => {
       const dishDataSpy = TestBed.inject(DishDataService) as jasmine.SpyObj<DishDataService>
       dishDataSpy.addDish.and.returnValue(Promise.resolve({ ...dish, _id: 'd1' }))
 
-      service.saveRecipe(dish).subscribe(() => {
+      void service.saveRecipe(dish).then(() => {
         expect(dishDataSpy.addDish).toHaveBeenCalled()
         expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המנה נשמרה בהצלחה')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
@@ -212,7 +210,7 @@ describe('KitchenStateService', () => {
       } as unknown as Recipe
       recipeDataSpy.updateRecipe.and.callFake((r: Recipe) => Promise.resolve(r))
 
-      service.saveRecipe(legacy).subscribe(() => {
+      void service.saveRecipe(legacy).then(() => {
         expect(recipeDataSpy.updateRecipe).toHaveBeenCalledWith(
           jasmine.objectContaining({ logistics: { baseline: [] } })
         )

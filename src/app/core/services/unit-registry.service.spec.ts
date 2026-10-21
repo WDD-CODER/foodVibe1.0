@@ -110,35 +110,35 @@ describe('UnitRegistryService', () => {
     })
 
     it('awaitUnitCreated delivers the unit saved in the window', fakeAsync(() => {
-      const got: string[] = []
+      const got: (string | null)[] = []
       service.openUnitCreator()
-      service.awaitUnitCreated().subscribe((u) => got.push(u))
+      void service.awaitUnitCreated().then((u) => got.push(u))
       service.registerUnit('jar', 330, 'gram')
       tick()
       service.closeUnitCreator() // the window closes after a save
       expect(got).toEqual(['jar'])
     }))
 
-    it('awaitUnitCreated completes empty on cancel, so a later unit never reaches the cancelled field', fakeAsync(() => {
-      const got: string[] = []
-      let completed = false
+    it('awaitUnitCreated resolves null on cancel, so a later unit never reaches the cancelled field', fakeAsync(() => {
+      const got: (string | null)[] = []
       service.openUnitCreator()
-      service.awaitUnitCreated().subscribe({ next: (u) => got.push(u), complete: () => (completed = true) })
+      void service.awaitUnitCreated().then((u) => got.push(u))
       service.closeUnitCreator() // cancel
-      expect(completed).toBeTrue()
+      tick()
+      expect(got).toEqual([null])
       service.openUnitCreator()
       service.registerUnit('sack', 25000)
       tick()
-      expect(got).toEqual([])
+      expect(got).toEqual([null])
     }))
   })
 
   describe('Unit creator window in product mode (plan 423)', () => {
     it('a new name: stores the shared term and emits this product amount and basis', fakeAsync(() => {
-      const got: { key: string; amount: number; basis: string }[] = []
+      const got: ({ key: string; amount: number; basis: string } | null)[] = []
       service.openUnitCreator({ forProduct: { name: 'בצל', baseUnit: 'kg' } })
       expect(service.creatorForProduct_()).toEqual({ name: 'בצל', baseUnit: 'kg' })
-      service.awaitProductUnitAdded().subscribe((e) => got.push(e))
+      void service.awaitProductUnitAdded().then((e) => got.push(e))
       service.registerUnit('jar', 500, 'gram')
       tick()
       expect(got).toEqual([{ key: 'jar', amount: 500, basis: 'gram' }])
@@ -148,10 +148,10 @@ describe('UnitRegistryService', () => {
     it('a name that already exists still delivers the typed amount and writes no taxonomy term', fakeAsync(() => {
       const storage = TestBed.inject(StorageService) as jasmine.SpyObj<StorageService>
       storage.post.calls.reset()
-      const got: { key: string; amount: number; basis: string }[] = []
+      const got: ({ key: string; amount: number; basis: string } | null)[] = []
       service.openUnitCreator({ forProduct: { name: 'חמוצים', baseUnit: 'kg' } })
       tick()
-      service.awaitProductUnitAdded().subscribe((e) => got.push(e))
+      void service.awaitProductUnitAdded().then((e) => got.push(e))
       // "cup" already exists in the registry (system unit): no shortcut, the amount for this product is still delivered
       service.registerUnit('cup', 350, 'gram')
       tick()
@@ -160,13 +160,13 @@ describe('UnitRegistryService', () => {
       expect(service.getConversion('cup')).toBe(240)
     }))
 
-    it('plain mode never emits productUnitAdded$', fakeAsync(() => {
+    it('plain mode never delivers a product amount', fakeAsync(() => {
       const got: unknown[] = []
-      service.productUnitAdded$.subscribe((e) => got.push(e))
+      void service.awaitProductUnitAdded().then((e) => got.push(e))
       service.openUnitCreator()
       service.registerUnit('sack', 25000)
       tick()
-      expect(got).toEqual([])
+      expect(got).toEqual([null])
     }))
   })
 })

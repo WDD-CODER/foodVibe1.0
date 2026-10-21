@@ -11,7 +11,6 @@ import {
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { firstValueFrom } from 'rxjs'
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 
@@ -600,7 +599,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       if (affected.length > 0) {
         await this.kitchenStateService.cascadeRemoveIngredientForAll(_id)
       }
-      await firstValueFrom(this.kitchenStateService.deleteProduct(_id))
+      await this.kitchenStateService.deleteProduct(_id)
       if (scope === 'everyone' && product?._masterId) {
         this.masterPush_.deleteProductFromMaster(product)
         this.masterPush_.purgeProductIngredientEverywhere(product)
@@ -648,7 +647,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         if (affectedByProduct.has(id)) {
           await this.kitchenStateService.cascadeRemoveIngredientForAll(id)
         }
-        await firstValueFrom(this.kitchenStateService.deleteProduct(id))
+        await this.kitchenStateService.deleteProduct(id)
         if (scope === 'everyone' && product?._masterId) {
           this.masterPush_.deleteProductFromMaster(product)
           this.masterPush_.purgeProductIngredientEverywhere(product)
@@ -714,7 +713,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       purchaseOptions: (product.purchaseOptions ?? []).map((o) => ({ ...o, uom: o.uom || oldBase })),
       sources: newSources.length ? newSources : [{ supplierId: '', price: newPrice, addedAt: Date.now() }]
     }
-    this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} })
+    void this.kitchenStateService.saveProduct(updated).catch(() => {})
   }
 
   protected onPriceFocus(product: Product, displayUnit: string): void {
@@ -763,7 +762,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       } else {
         updated = { ...product, baseUnit: event.value }
       }
-      this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} })
+      void this.kitchenStateService.saveProduct(updated).catch(() => {})
     }
   }
 
@@ -776,14 +775,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       sources: newSources.length ? newSources : [{ supplierId: '', price: buyPriceGlobal, addedAt: Date.now() }]
     }
     this.savingPriceId_.set(product._id ?? '')
-    this.kitchenStateService.saveProduct(updated).subscribe({
-      next: () => {
-        this.savingPriceId_.set(null)
-      },
-      error: () => {
-        this.savingPriceId_.set(null)
-      }
-    })
+    void this.kitchenStateService
+      .saveProduct(updated)
+      .catch(() => {})
+      .finally(() => this.savingPriceId_.set(null))
   }
 
   protected onClearSearch(input: HTMLInputElement): void {

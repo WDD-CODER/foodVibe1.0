@@ -4,10 +4,14 @@ import { UserMsgService } from './user-msg.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { LoggingService } from './logging.service'
-import { LoadingService } from './loading.service'
 import { DishDataService } from './dish-data.service'
 import { TaxonomyStore } from './taxonomy-store.service'
 import type { FlatPrepItem, PrepCategory } from '../models/recipe.model'
+
+const PREPARATION_LOAD_LOG = {
+  event: 'crud.preparations.load_error',
+  message: 'Failed to load preparation registry'
+}
 
 export interface PreparationEntry {
   name: string
@@ -26,7 +30,6 @@ export class PreparationRegistryService {
   private readonly translationService = inject(TranslationService)
   private readonly keyResolution = inject(KeyResolutionService)
   private readonly logging = inject(LoggingService)
-  private readonly loading_ = inject(LoadingService)
   private readonly dishDataService = inject(DishDataService)
   private readonly taxonomy = inject(TaxonomyStore)
 
@@ -56,12 +59,12 @@ export class PreparationRegistryService {
   }
 
   async ensureLoaded(): Promise<void> {
-    await this.loading_.track(this.taxonomy.ensureLoaded()).catch((err: unknown) => this.logLoadError(err))
+    await this.taxonomy.loadSafely(PREPARATION_LOAD_LOG, { track: true })
   }
 
   /** Reload categories and preparations from storage (e.g. after demo data load). */
   async reloadFromStorage(): Promise<void> {
-    await this.taxonomy.reload().catch((err: unknown) => this.logLoadError(err))
+    await this.taxonomy.reloadSafely(PREPARATION_LOAD_LOG)
   }
 
   /** Register category with English key (backend) and Hebrew label (dictionary). */
@@ -211,13 +214,5 @@ export class PreparationRegistryService {
         context: { err }
       })
     }
-  }
-
-  private logLoadError(err: unknown): void {
-    this.logging.error({
-      event: 'crud.preparations.load_error',
-      message: 'Failed to load preparation registry',
-      context: { err }
-    })
   }
 }

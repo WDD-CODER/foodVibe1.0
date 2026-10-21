@@ -9,7 +9,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { Product } from '@models/product.model'
-import { of } from 'rxjs'
+import { ProductUnitAdded } from '@services/unit-registry.service'
 
 describe('RecipeIngredientsTableComponent', () => {
   let component: RecipeIngredientsTableComponent
@@ -66,7 +66,9 @@ describe('RecipeIngredientsTableComponent', () => {
     it('opens the unit window in product mode and saves the typed amount on the product', fakeAsync(() => {
       const registry = TestBed.inject(UnitRegistryService)
       const open = spyOn(registry, 'openUnitCreator')
-      const save = spyOn(TestBed.inject(KitchenStateService), 'saveProduct').and.returnValue(of(product))
+      let deliver!: (added: ProductUnitAdded | null) => void
+      spyOn(registry, 'awaitProductUnitAdded').and.returnValue(new Promise((resolve) => (deliver = resolve)))
+      const save = spyOn(TestBed.inject(KitchenStateService), 'saveProduct').and.returnValue(Promise.resolve(product))
       spyOn(component, 'getItemMetadata').and.returnValue(product)
       spyOn(component, 'updateLineCalculations')
       const group = lineGroup()
@@ -77,7 +79,8 @@ describe('RecipeIngredientsTableComponent', () => {
         jasmine.objectContaining({ forProduct: { name: 'חמוצים', baseUnit: 'kg' }, existingUnitSymbols: ['box'] })
       )
 
-      registry.productUnitAdded$.next({ key: 'jar', amount: 350, basis: 'gram' })
+      deliver({ key: 'jar', amount: 350, basis: 'gram' })
+      tick()
       const saved = save.calls.mostRecent().args[0] as Product
       expect(saved.purchaseOptions.at(-1)).toEqual({
         unitSymbol: 'jar',
@@ -92,13 +95,16 @@ describe('RecipeIngredientsTableComponent', () => {
       const registry = TestBed.inject(UnitRegistryService)
       spyOn(registry, 'openUnitCreator')
       const getConversion = spyOn(registry, 'getConversion').and.returnValue(500)
-      const save = spyOn(TestBed.inject(KitchenStateService), 'saveProduct').and.returnValue(of(product))
+      let deliver!: (added: ProductUnitAdded | null) => void
+      spyOn(registry, 'awaitProductUnitAdded').and.returnValue(new Promise((resolve) => (deliver = resolve)))
+      const save = spyOn(TestBed.inject(KitchenStateService), 'saveProduct').and.returnValue(Promise.resolve(product))
       spyOn(component, 'getItemMetadata').and.returnValue(product)
       spyOn(component, 'updateLineCalculations')
 
       component.onUnitChange(lineGroup(), 0, '__add_unit__')
       tick()
-      registry.productUnitAdded$.next({ key: 'jar', amount: 350, basis: 'gram' })
+      deliver({ key: 'jar', amount: 350, basis: 'gram' })
+      tick()
       expect((save.calls.mostRecent().args[0] as Product).purchaseOptions.at(-1)?.conversionRate).toBe(350)
       expect(getConversion).not.toHaveBeenCalled()
     }))

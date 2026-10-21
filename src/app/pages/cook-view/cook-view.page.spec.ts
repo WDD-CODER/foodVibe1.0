@@ -1,5 +1,4 @@
 import { fakeAsync, tick } from '@angular/core/testing'
-import { of, Subject, take } from 'rxjs'
 import { CookViewPage } from './cook-view.page'
 import { Product } from '@models/product.model'
 
@@ -47,11 +46,11 @@ describe('CookViewPage', () => {
       const registry = {
         openUnitCreator: jasmine.createSpy('openUnitCreator'),
         getConversion: jasmine.createSpy('getConversion').and.returnValue(500),
-        awaitUnitCreated: jasmine.createSpy('awaitUnitCreated'),
-        productUnitAdded$: new Subject<{ key: string; amount: number; basis: string }>()
+        awaitUnitCreated: jasmine.createSpy('awaitUnitCreated')
       }
-      const awaitProduct = () => registry.productUnitAdded$.pipe(take(1))
-      const save = jasmine.createSpy('saveProduct').and.returnValue(of(product))
+      let deliver!: (added: { key: string; amount: number; basis: string } | null) => void
+      const awaitProduct = () => new Promise((resolve) => (deliver = resolve))
+      const save = jasmine.createSpy('saveProduct').and.returnValue(Promise.resolve(product))
       const page = Object.create(CookViewPage.prototype) as Record<string, unknown>
       page['kitchenState'] = { products_: () => [product], saveProduct: save }
       page['unitRegistry'] = { ...registry, awaitProductUnitAdded: awaitProduct }
@@ -68,7 +67,8 @@ describe('CookViewPage', () => {
         forProduct: { name: 'חמוצים', baseUnit: 'kg' }
       })
 
-      registry.productUnitAdded$.next({ key: 'jar', amount: 350, basis: 'gram' })
+      deliver({ key: 'jar', amount: 350, basis: 'gram' })
+      tick()
       const saved = save.calls.mostRecent().args[0] as Product
       expect(saved.purchaseOptions.at(-1)).toEqual({
         unitSymbol: 'jar',

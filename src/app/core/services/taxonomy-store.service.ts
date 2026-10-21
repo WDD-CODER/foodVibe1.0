@@ -3,7 +3,15 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { StorageService } from './async-storage.service'
 import { UserService } from './user.service'
 import { TranslationService } from './translation.service'
+import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 import type { TaxonomyKind, TaxonomyTerm, TaxonomyTermOf } from '@models/v2'
+
+/** Log entry a registry facade uses for a failed taxonomy load. */
+export interface TaxonomyLoadLog {
+  event: string
+  message: string
+}
 
 const COLLECTION = 'taxonomyTerms'
 const MASTER = '__master__'
@@ -59,6 +67,8 @@ export class TaxonomyStore {
   private readonly storage = inject(StorageService)
   private readonly userService = inject(UserService)
   private readonly translation = inject(TranslationService)
+  private readonly logging = inject(LoggingService)
+  private readonly loading_ = inject(LoadingService)
 
   private readonly terms_ = signal<TaxonomyTerm[]>([])
   private readonly loaded_ = signal(false)
@@ -119,6 +129,24 @@ export class TaxonomyStore {
         this.loadPromise_ = null
       })
     return this.loadPromise_
+  }
+
+  /**
+   * Plan 454 — ensureLoaded() for the registry facades: never throws, a failure is logged as `log`.
+   * `track` shows the app loading indicator while it runs.
+   */
+  async loadSafely(log: TaxonomyLoadLog, options: { track?: boolean } = {}): Promise<void> {
+    const load = this.ensureLoaded()
+    await (options.track ? this.loading_.track(load) : load).catch((err: unknown) => this.logFailedLoad(log, err))
+  }
+
+  /** Plan 454 — reload() for the registry facades: never throws, a failure is logged as `log`. */
+  async reloadSafely(log: TaxonomyLoadLog): Promise<void> {
+    await this.reload().catch((err: unknown) => this.logFailedLoad(log, err))
+  }
+
+  private logFailedLoad(log: TaxonomyLoadLog, err: unknown): void {
+    this.logging.error({ event: log.event, message: log.message, context: { err } })
   }
 
   // ── Create / Update / Delete ────────────────────────────────────────────

@@ -160,7 +160,8 @@ export class QuickAddProductModalComponent {
       this.pendingAddName_.set('')
       this.baseUnit_.set('')
       this.unitRegistry.openUnitCreator({ prefillName: typed })
-      this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => {
+      void this.unitRegistry.awaitUnitCreated().then((newUnit) => {
+        if (!newUnit) return
         this.baseUnit_.set(newUnit)
         this.onSelectChange(this.getNextFocusAfterBaseUnit())
       })

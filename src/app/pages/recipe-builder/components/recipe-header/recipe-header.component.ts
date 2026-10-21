@@ -370,7 +370,8 @@ export class RecipeHeaderComponent {
   /** prefillName: the unit name typed in the yield dropdown (rule W); '' opens the window empty. */
   protected onCreateUnit(prefillName = '', secondaryChipIndex?: number): void {
     this.unitRegistryService.openUnitCreator({ prefillName })
-    this.unitRegistryService.awaitUnitCreated().subscribe((newUnit) => {
+    void this.unitRegistryService.awaitUnitCreated().then((newUnit) => {
+      if (!newUnit) return
       if (secondaryChipIndex === undefined) {
         this.yield.setPrimaryUnit(newUnit)
       } else {

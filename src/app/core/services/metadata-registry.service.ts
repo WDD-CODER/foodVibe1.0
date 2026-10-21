@@ -10,6 +10,8 @@ import type { LabelDefinition } from '@models/label.model'
 import type { CourseDefinition } from '@models/course.model'
 import { type MenuTypeDefinition, type DishFieldKey, DEFAULT_DISH_FIELDS } from '@models/menu-event.model'
 
+const METADATA_LOAD_LOG = { event: 'crud.metadata.hydrate_error', message: 'Failed to load metadata' }
+
 type PushableType = 'label' | 'course' | 'category' | 'allergen'
 const KIND_BY_TYPE = { label: 'label', course: 'course', category: 'ingredientCategory', allergen: 'allergen' } as const
 
@@ -54,12 +56,12 @@ export class MetadataRegistryService {
   )
 
   constructor() {
-    this.taxonomy.ensureLoaded().catch((err: unknown) => this.logLoadError(err))
+    void this.taxonomy.loadSafely(METADATA_LOAD_LOG)
   }
 
   /** Reload all metadata from storage (e.g. after a backup import/restore). */
   async reloadFromStorage(): Promise<void> {
-    await this.taxonomy.reload().catch((err: unknown) => this.logLoadError(err))
+    await this.taxonomy.reloadSafely(METADATA_LOAD_LOG)
   }
 
   /** Reload labels from storage (e.g. after demo data load). */
@@ -329,9 +331,5 @@ export class MetadataRegistryService {
       })
       return false
     }
-  }
-
-  private logLoadError(err: unknown): void {
-    this.logging.error({ event: 'crud.metadata.hydrate_error', message: 'Failed to load metadata', context: { err } })
   }
 }

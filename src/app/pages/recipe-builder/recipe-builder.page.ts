@@ -692,21 +692,17 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const recipe = this.buildRecipeFromForm()
     recipe.autoLabels = this.recipeFormService_.computeAutoLabels(recipe)
 
-    return new Promise<boolean>((resolve) => {
-      this.state_.saveRecipe(recipe).subscribe({
-        next: (saved) => {
-          if (scope === 'everyone' && saved) this.masterPush_.pushToMaster(saved)
-          this.saving.setSaving(false)
-          this.isSubmitted = true
-          resolve(true)
-        },
-        error: () => {
-          this.saving.setSaving(false)
-          this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'))
-          resolve(false)
-        }
-      })
-    })
+    try {
+      const saved = await this.state_.saveRecipe(recipe)
+      if (scope === 'everyone' && saved) this.masterPush_.pushToMaster(saved)
+      this.saving.setSaving(false)
+      this.isSubmitted = true
+      return true
+    } catch {
+      this.saving.setSaving(false)
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'))
+      return false
+    }
   }
 
   /** Normalized form value for comparison (numbers coerced, labels sorted). */
@@ -910,42 +906,40 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const recipe = this.buildRecipeFromForm()
     recipe.autoLabels = this.recipeFormService_.computeAutoLabels(recipe)
 
-    this.state_.saveRecipe(recipe).subscribe({
-      next: (saved) => {
-        this.saving.setSaving(false)
-        if (pushToMasterAfterSave) this.masterPush_.pushToMaster(saved)
-        if (navigateOnSuccess) {
-          this.isSubmitted = true
-          this.resetToNewForm_()
-          this.router_.navigate(['/recipe-book'])
-        } else {
-          // If a type-change caused a new _id to be assigned, update recipeId_ so the
-          // duplicate-name validator does not flag the same recipe as a conflict.
-          if (saved._id && saved._id !== this.recipeId_()) {
-            this.recipeId_.set(saved._id)
-          }
-          // Refresh the entry-time snapshot so the pending-changes guard does not
-          // fire when the user navigates away after a successful in-place save.
-          this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
-          this.unsavedAiDraft_ = false
-          this.initialRecipeType_ = saved.recipeType === 'dish' ? 'dish' : 'preparation'
-          this.recipeForm_.markAsPristine()
-          // Update savedPortions_ so the reset button reflects the newly saved value.
-          if (saved.recipeType === 'dish') {
-            this.savedPortions_.set(saved.yieldAmount ?? null)
-          }
-          this.userMsg_.onSetSuccessMsg(
-            this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
-          )
-        }
-      },
-      error: () => {
-        this.saving.setSaving(false)
-        if (!navigateOnSuccess) {
-          this.userMsg_.onSetErrorMsg(this.translation_.translate('approval_error'))
-        }
+    let saved: Recipe
+    try {
+      saved = await this.state_.saveRecipe(recipe)
+    } catch {
+      this.saving.setSaving(false)
+      if (!navigateOnSuccess) this.userMsg_.onSetErrorMsg(this.translation_.translate('approval_error'))
+      return
+    }
+    this.saving.setSaving(false)
+    if (pushToMasterAfterSave) this.masterPush_.pushToMaster(saved)
+    if (navigateOnSuccess) {
+      this.isSubmitted = true
+      this.resetToNewForm_()
+      this.router_.navigate(['/recipe-book'])
+    } else {
+      // If a type-change caused a new _id to be assigned, update recipeId_ so the
+      // duplicate-name validator does not flag the same recipe as a conflict.
+      if (saved._id && saved._id !== this.recipeId_()) {
+        this.recipeId_.set(saved._id)
       }
-    })
+      // Refresh the entry-time snapshot so the pending-changes guard does not
+      // fire when the user navigates away after a successful in-place save.
+      this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
+      this.unsavedAiDraft_ = false
+      this.initialRecipeType_ = saved.recipeType === 'dish' ? 'dish' : 'preparation'
+      this.recipeForm_.markAsPristine()
+      // Update savedPortions_ so the reset button reflects the newly saved value.
+      if (saved.recipeType === 'dish') {
+        this.savedPortions_.set(saved.yieldAmount ?? null)
+      }
+      this.userMsg_.onSetSuccessMsg(
+        this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
+      )
+    }
   }
 
   protected onApproveStamp(): void {

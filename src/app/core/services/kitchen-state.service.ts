@@ -1,6 +1,4 @@
 import { Injectable, signal, computed, inject } from '@angular/core'
-import { from, throwError, of, Observable } from 'rxjs'
-import { tap, catchError, switchMap, map } from 'rxjs/operators'
 import { Product } from '../models/product.model'
 import { Recipe } from '../models/recipe.model'
 import { Supplier } from '@models/supplier.model'
@@ -46,7 +44,7 @@ export class KitchenStateService {
   // COMPUTED SIGNALS
   lowStockProducts_ = computed(() => this.products_().filter((p) => p.minStockLevel > 0))
 
-  saveProduct(product: Product): Observable<Product> {
+  async saveProduct(product: Product): Promise<Product> {
     const isUpdate = !!(product._id && product._id.trim() !== '')
 
     const isDuplicate = this.products_().some(
@@ -55,66 +53,62 @@ export class KitchenStateService {
 
     if (isDuplicate) {
       this.userMsgService.onSetErrorMsg('כבר קיים חומר גלם בשם זה - לא ניתן לשמור')
-      return throwError(() => new Error('Duplicate product name'))
+      throw new Error('Duplicate product name')
     }
 
     if (isUpdate) {
       const previous = this.products_().find((p) => p._id === product._id) ?? null
       const changes = previous ? this.buildProductChanges(previous, product) : []
 
-      return from(this.productDataService.updateProduct(product)).pipe(
-        tap(() => {
-          this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה')
-          this.activityLogService.recordActivity({
-            action: 'updated',
-            entityType: 'product',
-            entityId: product._id,
-            entityName: product.nameHebrew,
-            changes
-          })
-          if (previous) {
-            void this.versionHistoryService
-              .addVersion({
-                entityType: 'product',
-                entityId: previous._id,
-                entityName: previous.nameHebrew,
-                snapshot: previous,
-                changes
-              })
-              .catch((err) => {
-                this.logging.error({
-                  event: 'crud.versionHistory.addVersion_fireAndForget_error',
-                  message: 'Version history write failed after product save',
-                  context: { err }
-                })
-              })
-          }
-        }),
-        map(() => product),
-        catchError((err) => {
-          this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר')
-          return throwError(() => err)
+      try {
+        await this.productDataService.updateProduct(product)
+        this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה')
+        this.activityLogService.recordActivity({
+          action: 'updated',
+          entityType: 'product',
+          entityId: product._id,
+          entityName: product.nameHebrew,
+          changes
         })
-      )
-    } else {
-      // Create path – use saved product to get the new _id
-      return from(this.productDataService.addProduct(product as Omit<Product, '_id'>)).pipe(
-        tap((saved) => {
-          this.userMsgService.onSetSuccessMsg('חומר גלם נוסף בהצלחה')
-          this.activityLogService.recordActivity({
-            action: 'created',
-            entityType: 'product',
-            entityId: saved._id,
-            entityName: saved.nameHebrew,
-            changes: []
-          })
-        }),
-        map((saved) => saved),
-        catchError((err) => {
-          this.userMsgService.onSetErrorMsg('שגיאה בהוספת המוצר')
-          return throwError(() => err)
-        })
-      )
+        if (previous) {
+          void this.versionHistoryService
+            .addVersion({
+              entityType: 'product',
+              entityId: previous._id,
+              entityName: previous.nameHebrew,
+              snapshot: previous,
+              changes
+            })
+            .catch((err) => {
+              this.logging.error({
+                event: 'crud.versionHistory.addVersion_fireAndForget_error',
+                message: 'Version history write failed after product save',
+                context: { err }
+              })
+            })
+        }
+        return product
+      } catch (err) {
+        this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר')
+        throw err
+      }
+    }
+
+    // Create path – use saved product to get the new _id
+    try {
+      const saved = await this.productDataService.addProduct(product as Omit<Product, '_id'>)
+      this.userMsgService.onSetSuccessMsg('חומר גלם נוסף בהצלחה')
+      this.activityLogService.recordActivity({
+        action: 'created',
+        entityType: 'product',
+        entityId: saved._id,
+        entityName: saved.nameHebrew,
+        changes: []
+      })
+      return saved
+    } catch (err) {
+      this.userMsgService.onSetErrorMsg('שגיאה בהוספת המוצר')
+      throw err
     }
   }
 
@@ -215,86 +209,72 @@ export class KitchenStateService {
     return changes
   }
 
-  deleteProduct(_id: string): Observable<void> {
+  async deleteProduct(_id: string): Promise<void> {
     const existing = this.products_().find((p) => p._id === _id)
     const entityName = existing?.nameHebrew ?? _id
 
-    return of(null).pipe(
-      switchMap(() => {
-        const exists = this.products_().some((p) => p._id === _id)
-        if (!exists) return throwError(() => new Error('NOT_FOUND'))
+    try {
+      const exists = this.products_().some((p) => p._id === _id)
+      if (!exists) throw new Error('NOT_FOUND')
 
-        return from(this.productDataService.deleteProduct(_id))
-      }),
-      tap(() => {
-        this.userMsgService.onSetSuccessMsg('חומר הגלם נמחק בהצלחה')
-        this.activityLogService.recordActivity({
-          action: 'deleted',
-          entityType: 'product',
-          entityId: _id,
-          entityName
-        })
-      }),
-      catchError((err) => {
-        const msg = err.message === 'NOT_FOUND' ? 'הפריט לא נמצא' : 'שגיאה בעת המחיקה'
-        this.userMsgService.onSetErrorMsg(msg)
-        return throwError(() => err)
+      await this.productDataService.deleteProduct(_id)
+      this.userMsgService.onSetSuccessMsg('חומר הגלם נמחק בהצלחה')
+      this.activityLogService.recordActivity({
+        action: 'deleted',
+        entityType: 'product',
+        entityId: _id,
+        entityName
       })
-    )
+    } catch (err) {
+      const msg = (err as Error | null)?.message === 'NOT_FOUND' ? 'הפריט לא נמצא' : 'שגיאה בעת המחיקה'
+      this.userMsgService.onSetErrorMsg(msg)
+      throw err
+    }
   }
 
   // RECIPE / DISH CRUD
-  deleteRecipe(recipe: Recipe): Observable<void> {
+  async deleteRecipe(recipe: Recipe): Promise<void> {
     const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
-    const operation$ = isDish
-      ? from(this.dishDataService.deleteDish(recipe._id))
-      : from(this.recipeDataService.deleteRecipe(recipe._id))
-
-    return operation$.pipe(
-      tap(() => {
-        const msg = isDish ? 'המנה נמחקה בהצלחה' : 'המתכון נמחק בהצלחה'
-        this.userMsgService.onSetSuccessMsg(msg)
-        this.activityLogService.recordActivity({
-          action: 'deleted',
-          entityType: isDish ? 'dish' : 'recipe',
-          entityId: recipe._id,
-          entityName: recipe.nameHebrew
-        })
-      }),
-      catchError(() => {
-        const errorMsg = isDish ? 'שגיאה במחיקת המנה' : 'שגיאה במחיקת המתכון'
-        this.userMsgService.onSetErrorMsg(errorMsg)
-        return throwError(() => new Error(errorMsg))
+    try {
+      if (isDish) await this.dishDataService.deleteDish(recipe._id)
+      else await this.recipeDataService.deleteRecipe(recipe._id)
+      const msg = isDish ? 'המנה נמחקה בהצלחה' : 'המתכון נמחק בהצלחה'
+      this.userMsgService.onSetSuccessMsg(msg)
+      this.activityLogService.recordActivity({
+        action: 'deleted',
+        entityType: isDish ? 'dish' : 'recipe',
+        entityId: recipe._id,
+        entityName: recipe.nameHebrew
       })
-    )
+    } catch {
+      const errorMsg = isDish ? 'שגיאה במחיקת המנה' : 'שגיאה במחיקת המתכון'
+      this.userMsgService.onSetErrorMsg(errorMsg)
+      throw new Error(errorMsg)
+    }
   }
 
-  permanentlyDeleteRecipe(recipe: Recipe): Observable<void> {
+  async permanentlyDeleteRecipe(recipe: Recipe): Promise<void> {
     const user = this.userService.user_()
-    if (!user) return throwError(() => new Error('NOT_AUTHENTICATED'))
-    if (!this.userService.isPlatformAdmin_()) return throwError(() => new Error('NOT_AUTHORIZED'))
+    if (!user) throw new Error('NOT_AUTHENTICATED')
+    if (!this.userService.isPlatformAdmin_()) throw new Error('NOT_AUTHORIZED')
     const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
-    const operation$ = isDish
-      ? from(this.dishDataService.permanentlyDeleteDish(recipe._id))
-      : from(this.recipeDataService.permanentlyDeleteRecipe(recipe._id))
-    return operation$.pipe(
-      tap(() => {
-        this.userMsgService.onSetSuccessMsg(isDish ? 'המנה נמחקה לצמיתות' : 'המתכון נמחק לצמיתות')
-        this.activityLogService.recordActivity({
-          action: 'deleted',
-          entityType: isDish ? 'dish' : 'recipe',
-          entityId: recipe._id,
-          entityName: recipe.nameHebrew
-        })
-      }),
-      catchError(() => {
-        this.userMsgService.onSetErrorMsg('שגיאה במחיקה הקבועה')
-        return throwError(() => new Error('permanentDelete failed'))
+    try {
+      if (isDish) await this.dishDataService.permanentlyDeleteDish(recipe._id)
+      else await this.recipeDataService.permanentlyDeleteRecipe(recipe._id)
+      this.userMsgService.onSetSuccessMsg(isDish ? 'המנה נמחקה לצמיתות' : 'המתכון נמחק לצמיתות')
+      this.activityLogService.recordActivity({
+        action: 'deleted',
+        entityType: isDish ? 'dish' : 'recipe',
+        entityId: recipe._id,
+        entityName: recipe.nameHebrew
       })
-    )
+    } catch {
+      this.userMsgService.onSetErrorMsg('שגיאה במחיקה הקבועה')
+      throw new Error('permanentDelete failed')
+    }
   }
 
-  saveRecipe(input: Recipe): Observable<Recipe> {
+  async saveRecipe(input: Recipe): Promise<Recipe> {
     const recipe = this.withoutNullLogistics(input)
     const isDish = recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
     const isUpdate = !!(recipe._id && recipe._id.trim() !== '')
@@ -306,23 +286,6 @@ export class KitchenStateService {
     const entityType = isDish ? ('dish' as const) : ('recipe' as const)
     const previousEntityType = previousIsDish ? ('dish' as const) : ('recipe' as const)
 
-    const operation$ = typeChanged
-      ? this.deleteRecipe(previous!).pipe(
-          switchMap(() => {
-            const { _id: _omit, ...payload } = recipe as Recipe & { _id?: string }
-            return isDish
-              ? from(this.dishDataService.addDish(payload as Omit<Recipe, '_id'>))
-              : from(this.recipeDataService.addRecipe(payload as Omit<Recipe, '_id'>))
-          })
-        )
-      : isDish
-        ? isUpdate
-          ? from(this.dishDataService.updateDish(recipe))
-          : from(this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>))
-        : isUpdate
-          ? from(this.recipeDataService.updateRecipe(recipe))
-          : from(this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>))
-
     const fallbackErrorMsg = isDish
       ? isUpdate
         ? 'שגיאה בעדכון המנה'
@@ -331,53 +294,75 @@ export class KitchenStateService {
         ? 'שגיאה בעדכון המתכון'
         : 'שגיאה בשמירת המתכון'
 
-    return operation$.pipe(
-      tap((saved) => {
-        const msg = typeChanged
-          ? 'המתכון/המנה שונה לסוג החדש ונשמר בהצלחה'
-          : isDish
-            ? isUpdate
-              ? 'המנה עודכנה בהצלחה'
-              : 'המנה נשמרה בהצלחה'
-            : isUpdate
-              ? 'המתכון עודכן בהצלחה'
-              : 'המתכון נשמר בהצלחה'
-        this.userMsgService.onSetSuccessMsg(msg)
-        const changes = isUpdate && previous ? this.buildRecipeChanges(previous, saved) : []
-        this.activityLogService.recordActivity({
-          action: typeChanged ? 'created' : isUpdate ? 'updated' : 'created',
-          entityType: isDish ? 'dish' : 'recipe',
-          entityId: saved._id,
-          entityName: saved.nameHebrew,
-          changes
-        })
-        if (isUpdate && previous) {
-          void this.versionHistoryService
-            .addVersion({
-              entityType: typeChanged ? previousEntityType : entityType,
-              entityId: previous._id,
-              entityName: previous.nameHebrew,
-              snapshot: previous,
-              changes: this.buildRecipeChanges(previous, recipe)
-            })
-            .catch((err) => {
-              this.logging.error({
-                event: 'crud.versionHistory.addVersion_fireAndForget_error',
-                message: 'Version history write failed after recipe/dish save',
-                context: { err }
-              })
-            })
-        }
-      }),
-      catchError((err: unknown) => {
-        const msg =
-          (err && typeof err === 'object' && (err as { error?: { message?: string } }).error?.message) ||
-          (err instanceof Error ? err.message : null) ||
-          fallbackErrorMsg
-        this.userMsgService.onSetErrorMsg(String(msg))
-        return throwError(() => (err instanceof Error ? err : new Error(String(msg))))
+    try {
+      const saved = await this.writeRecipe(recipe, { isDish, isUpdate, typeChanged, previous })
+      const msg = typeChanged
+        ? 'המתכון/המנה שונה לסוג החדש ונשמר בהצלחה'
+        : isDish
+          ? isUpdate
+            ? 'המנה עודכנה בהצלחה'
+            : 'המנה נשמרה בהצלחה'
+          : isUpdate
+            ? 'המתכון עודכן בהצלחה'
+            : 'המתכון נשמר בהצלחה'
+      this.userMsgService.onSetSuccessMsg(msg)
+      const changes = isUpdate && previous ? this.buildRecipeChanges(previous, saved) : []
+      this.activityLogService.recordActivity({
+        action: typeChanged ? 'created' : isUpdate ? 'updated' : 'created',
+        entityType: isDish ? 'dish' : 'recipe',
+        entityId: saved._id,
+        entityName: saved.nameHebrew,
+        changes
       })
-    )
+      if (isUpdate && previous) {
+        void this.versionHistoryService
+          .addVersion({
+            entityType: typeChanged ? previousEntityType : entityType,
+            entityId: previous._id,
+            entityName: previous.nameHebrew,
+            snapshot: previous,
+            changes: this.buildRecipeChanges(previous, recipe)
+          })
+          .catch((err) => {
+            this.logging.error({
+              event: 'crud.versionHistory.addVersion_fireAndForget_error',
+              message: 'Version history write failed after recipe/dish save',
+              context: { err }
+            })
+          })
+      }
+      return saved
+    } catch (err: unknown) {
+      const msg =
+        (err && typeof err === 'object' && (err as { error?: { message?: string } }).error?.message) ||
+        (err instanceof Error ? err.message : null) ||
+        fallbackErrorMsg
+      this.userMsgService.onSetErrorMsg(String(msg))
+      throw err instanceof Error ? err : new Error(String(msg))
+    }
+  }
+
+  /** The data-service write behind saveRecipe: a type change deletes the old doc and adds a new one. */
+  private async writeRecipe(
+    recipe: Recipe,
+    mode: { isDish: boolean; isUpdate: boolean; typeChanged: boolean; previous: Recipe | null | undefined }
+  ): Promise<Recipe> {
+    const { isDish, isUpdate, typeChanged, previous } = mode
+    if (typeChanged && previous) {
+      await this.deleteRecipe(previous)
+      const { _id: _omit, ...payload } = recipe as Recipe & { _id?: string }
+      return isDish
+        ? this.dishDataService.addDish(payload as Omit<Recipe, '_id'>)
+        : this.recipeDataService.addRecipe(payload as Omit<Recipe, '_id'>)
+    }
+    if (isDish) {
+      return isUpdate
+        ? this.dishDataService.updateDish(recipe)
+        : this.dishDataService.addDish(recipe as Omit<Recipe, '_id'>)
+    }
+    return isUpdate
+      ? this.recipeDataService.updateRecipe(recipe)
+      : this.recipeDataService.addRecipe(recipe as Omit<Recipe, '_id'>)
   }
 
   /** Build structured change list between two recipes/dishes for activity log. */
