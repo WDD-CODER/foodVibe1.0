@@ -30,6 +30,7 @@ import type { MenuEvent } from '@models/menu-event.model'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { BusinessService } from '@services/business.service'
 import { UserService } from '@services/user.service'
 
 /**
@@ -51,6 +52,7 @@ export class SupplierOrdersComponent {
   private readonly kitchenState_ = inject(KitchenStateService)
   private readonly translation_ = inject(TranslationService)
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly businessService_ = inject(BusinessService)
   private readonly userService_ = inject(UserService)
 
   // 2. INPUTS
@@ -74,7 +76,7 @@ export class SupplierOrdersComponent {
   private readonly header_ = computed<OrderHeader>(() => {
     const event = this.event()
     return {
-      business: this.userService_.user_()?.name ?? '',
+      business: this.businessService_.business_()?.name ?? this.userService_.user_()?.name ?? '',
       eventName: event.name,
       eventDate: event.eventDate
     }

@@ -11,6 +11,7 @@ import type { Supplier } from '@models/supplier.model'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { BusinessService } from '@services/business.service'
 import { UserService } from '@services/user.service'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { SupplierOrdersComponent } from './supplier-orders.component'
@@ -65,7 +66,8 @@ describe('SupplierOrdersComponent', () => {
         },
         { provide: TranslationService, useValue: translation },
         { provide: UserMsgService, useValue: userMsg },
-        { provide: UserService, useValue: { user_: signal({ name: 'מטבח בדיקה' }) } }
+        { provide: BusinessService, useValue: { business_: signal({ name: 'מטבח בדיקה' }) } },
+        { provide: UserService, useValue: { user_: signal({ name: 'שם האדם' }) } }
       ]
     })
     fixture = TestBed.createComponent(SupplierOrdersComponent)
