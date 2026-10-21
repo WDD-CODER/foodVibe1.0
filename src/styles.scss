@@ -2346,3 +2346,28 @@ body.kb-open {
     color: var(--color-primary-hover);
   }
 }
+
+/* Plan 437: while prep sheets are open, print only them */
+@media print {
+  body.prep-sheets-open *:not(:has(app-prep-sheets)):not(app-prep-sheets):not(app-prep-sheets *) {
+    display: none !important;
+  }
+
+  body.prep-sheets-open app-prep-sheets,
+  body.prep-sheets-open app-prep-sheets * {
+    visibility: visible;
+  }
+}
+
+/* Plan 437: the engine overlay is unlayered, so its print reset must be unlayered too (a layered rule loses) */
+@media print {
+  body.prep-sheets-open .prep-overlay {
+    position: static;
+
+    display: block;
+    overflow: visible;
+
+    background: none;
+    backdrop-filter: none;
+  }
+}

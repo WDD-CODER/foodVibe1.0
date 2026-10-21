@@ -10,6 +10,7 @@ import { Product } from '../models/product.model'
 import { MenuEvent } from '@models/menu-event.model'
 import { ScaledIngredientRow } from './scaling.service'
 import { EventPlanService } from '../engine/event-plan.service'
+import { StationRegistryService } from './station-registry.service'
 import { computeEventPlan } from '../engine/event-plan.engine'
 import { buildFixtureInput } from '../engine/testing/event-plan.fixture'
 import { buildShoppingListTable } from '../utils/shopping-list-table.util'
@@ -58,7 +59,8 @@ describe('ExportService', () => {
         { provide: ScalingService, useValue: scalingSpy },
         { provide: RecipeCostService, useValue: costSpy },
         { provide: TranslationService, useValue: translationSpy },
-        { provide: EventPlanService, useValue: planSpy }
+        { provide: EventPlanService, useValue: planSpy },
+        { provide: StationRegistryService, useValue: { stations_: signal(['קר']) } }
       ]
     })
     service = TestBed.inject(ExportService)
@@ -149,6 +151,21 @@ describe('ExportService', () => {
       await service.exportMenuShoppingList(menu, [], fixtureInput.products)
       expect(planSpy.planFor).toHaveBeenCalledWith(menu)
       expect(scalingSpy.getScaledIngredients).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('prep sheets (plan 437)', () => {
+    it('no longer has the flattened checklist preview', () => {
+      expect((service as unknown as Record<string, unknown>)['getMenuChecklistPreviewPayload']).toBeUndefined()
+    })
+
+    it('exports every mode from the engine plan, never from the per-recipe scaling', async () => {
+      for (const mode of ['by_dish', 'by_category', 'by_station'] as const) {
+        await service.exportChecklist(fixtureInput.event, fixtureInput.recipes, mode)
+      }
+      await service.exportAllTogetherMenu(fixtureInput.event, fixtureInput.recipes, fixtureInput.products, 'by_station')
+      expect(planSpy.planFor).toHaveBeenCalledWith(fixtureInput.event)
+      expect(scalingSpy.getScaledPrepItems).not.toHaveBeenCalled()
     })
   })
 

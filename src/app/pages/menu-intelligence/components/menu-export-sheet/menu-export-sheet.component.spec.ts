@@ -78,4 +78,26 @@ describe('MenuExportSheetComponent', () => {
     orders.click()
     expect(calls).toEqual(['close', 'orders'])
   })
+
+  it('titles the group "prep_sheets" and offers four views but only three exports', () => {
+    open()
+    const el = fixture.nativeElement as HTMLElement
+    expect(el.querySelector('.mes-group-title')?.textContent).toContain('prep_sheets')
+    const rows = el.querySelectorAll('.mes-group:first-of-type .mes-row')
+    expect(rows.length).toBe(4)
+    expect(rows[3].textContent).toContain('prep_sheets_by_supplier')
+    expect(rows[3].querySelectorAll('.mes-action').length).toBe(1)
+    expect(rows[0].querySelectorAll('.mes-action').length).toBe(2)
+  })
+
+  it('emits viewChecklist by_supplier and never an export for it', () => {
+    open()
+    const calls: string[] = []
+    component.viewChecklist.subscribe((mode) => calls.push(`view:${mode}`))
+    component.exportChecklist.subscribe((mode) => calls.push(`export:${mode}`))
+    const rows = fixture.nativeElement.querySelectorAll('.mes-group:first-of-type .mes-row')
+    ;(rows[3].querySelector('.mes-action') as HTMLElement).click()
+    ;(component as unknown as { onExportChecklist(m: string): void }).onExportChecklist('by_supplier')
+    expect(calls).toEqual(['view:by_supplier'])
+  })
 })

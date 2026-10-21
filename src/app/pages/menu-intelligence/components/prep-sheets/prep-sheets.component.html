@@ -1,0 +1,94 @@
+<div class="c-modal-overlay prep-overlay" (click)="onOverlayClick($event)">
+  <section
+    class="prep-sheets"
+    dir="rtl"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'prep_sheets' | translatePipe"
+  >
+    <header class="prep-bar no-print">
+      <h3 class="prep-bar-title">
+        <lucide-icon name="printer" [size]="18"></lucide-icon>
+        {{ 'prep_sheets' | translatePipe }}
+      </h3>
+      <div class="prep-tabs" role="tablist">
+        @for (m of modes; track m.mode) {
+          <button
+            type="button"
+            role="tab"
+            class="c-tab-pill"
+            [class.active]="activeMode_() === m.mode"
+            [attr.aria-selected]="activeMode_() === m.mode"
+            (click)="pickMode(m.mode)"
+          >
+            {{ m.labelKey | translatePipe }}
+          </button>
+        }
+      </div>
+      <div class="prep-bar-actions">
+        <button type="button" class="c-btn-primary prep-print" [disabled]="printedCount_() === 0" (click)="print()">
+          <lucide-icon name="printer" [size]="16"></lucide-icon>
+          {{ 'prep_sheets_print' | translatePipe }}
+        </button>
+        @if (activeMode_() !== 'by_supplier') {
+          <button type="button" class="c-btn-ghost c-btn-ghost--sm prep-export" (click)="exportExcel()">
+            <lucide-icon name="download" [size]="16"></lucide-icon>
+            {{ 'export' | translatePipe }}
+          </button>
+        }
+        <button type="button" class="c-icon-btn" (click)="close.emit()" [attr.aria-label]="'close' | translatePipe">
+          <lucide-icon name="x" [size]="18"></lucide-icon>
+        </button>
+      </div>
+    </header>
+
+    @if (pages_().length === 0) {
+      <p class="prep-nothing no-print">{{ 'prep_sheets_nothing' | translatePipe }}</p>
+    } @else {
+      <fieldset class="prep-choose no-print">
+        <legend class="prep-choose-title">{{ 'prep_sheets_choose' | translatePipe }}</legend>
+        @for (page of pages_(); track page.group.key) {
+          <label class="prep-choose-item">
+            <input type="checkbox" [checked]="isIncluded(page.group)" (change)="toggleGroup(page.group)" />
+            <span>{{ page.group.title }}</span>
+          </label>
+        }
+      </fieldset>
+
+      <div class="prep-papers">
+        @for (page of pages_(); track page.group.key; let i = $index) {
+          <article class="prep-page" [class.is-excluded]="!isIncluded(page.group)" [style.page]="'pg-' + i">
+            <header class="prep-page-head">
+              <h2 class="prep-title">{{ page.group.title }}</h2>
+              <p class="prep-meta">{{ metaLine_() }}</p>
+            </header>
+            @if (page.group.emptyText) {
+              <p class="prep-empty">{{ page.group.emptyText }}</p>
+            } @else {
+              <table class="prep-table">
+                <thead>
+                  <tr>
+                    <th class="prep-box-cell" aria-hidden="true"></th>
+                    @for (cell of page.header; track $index) {
+                      <th>{{ cell }}</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of page.body; track $index) {
+                    <tr>
+                      <td class="prep-box-cell"><span class="prep-box" aria-hidden="true"></span></td>
+                      @for (cell of row; track $index) {
+                        <td [class.prep-num]="$index === 1">{{ cell }}</td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>

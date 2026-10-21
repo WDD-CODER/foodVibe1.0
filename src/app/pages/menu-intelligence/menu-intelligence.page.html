@@ -373,6 +373,8 @@
   (openSupplierOrders)="openSupplierOrders()"
 />
 
-@if (supplierOrdersEvent_(); as ev) { @defer {
+@if (prepSheets_(); as ps) { @defer {
+<app-prep-sheets [event]="ps.event" [mode]="ps.mode" (close)="prepSheets_.set(null)" />
+} } @if (supplierOrdersEvent_(); as ev) { @defer {
 <app-supplier-orders class="no-print" [event]="ev" (close)="supplierOrdersEvent_.set(null)" />
 } }

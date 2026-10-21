@@ -99,7 +99,7 @@ export function toWhatsAppPhone(raw: string | null | undefined): string | null {
   return null
 }
 
-function unitLabel(unit: string, t: Translate): string {
+export function unitLabel(unit: string, t: Translate): string {
   return unit === 'unit' ? t('unit_short_unit') : t(unit)
 }
 
@@ -127,7 +127,8 @@ function lineText(line: RawLine, t: Translate): string {
   return RLM + v.name + ' – ' + v.qty + ' ' + v.unit + (v.purchase ? ' (' + v.purchase + ')' : '')
 }
 
-function formatDate(iso: string | undefined): string {
+/** ISO date (yyyy-mm-dd...) as dd.mm.yyyy; empty when it is not a date. */
+export function formatDate(iso: string | undefined): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? '')
   return match ? `${match[3]}.${match[2]}.${match[1]}` : ''
 }

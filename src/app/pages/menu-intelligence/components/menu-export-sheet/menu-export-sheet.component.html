@@ -25,7 +25,7 @@
   <div class="mes-group">
     <h3 class="mes-group-title">
       <lucide-icon name="clipboard-list" [size]="16"></lucide-icon>
-      {{ 'toolbar_checklist' | translatePipe }}
+      {{ 'prep_sheets' | translatePipe }}
     </h3>
     @for (m of checklistModes; track m.mode) {
       <div class="mes-row">
@@ -34,10 +34,12 @@
           <lucide-icon name="eye" [size]="16"></lucide-icon>
           {{ 'view' | translatePipe }}
         </button>
-        <button type="button" class="mes-action" (click)="onExportChecklist(m.mode)">
-          <lucide-icon name="download" [size]="16"></lucide-icon>
-          {{ 'export' | translatePipe }}
-        </button>
+        @if (m.mode !== 'by_supplier') {
+          <button type="button" class="mes-action" (click)="onExportChecklist(m.mode)">
+            <lucide-icon name="download" [size]="16"></lucide-icon>
+            {{ 'export' | translatePipe }}
+          </button>
+        }
       </div>
     }
   </div>
