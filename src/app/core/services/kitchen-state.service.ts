@@ -11,6 +11,7 @@ import { SupplierDataService } from './supplier-data.service'
 import { ActivityLogService, ActivityChange } from './activity-log.service'
 import { VersionHistoryService } from './version-history.service'
 import { LoggingService } from './logging.service'
+import { TranslationService } from './translation.service'
 import { getEffectivePrice, getSupplierIds } from '../utils/product-source.util'
 
 @Injectable({
@@ -26,6 +27,7 @@ export class KitchenStateService {
   private activityLogService = inject(ActivityLogService)
   private versionHistoryService = inject(VersionHistoryService)
   private logging = inject(LoggingService)
+  private translation = inject(TranslationService)
 
   // CORE SIGNALS
   products_ = computed(() => this.productDataService.allProducts_())
@@ -52,7 +54,7 @@ export class KitchenStateService {
     )
 
     if (isDuplicate) {
-      this.userMsgService.onSetErrorMsg('כבר קיים חומר גלם בשם זה - לא ניתן לשמור')
+      this.userMsgService.onSetErrorMsg(this.translation.translate('product_duplicate_name_error'))
       throw new Error('Duplicate product name')
     }
 
@@ -62,7 +64,7 @@ export class KitchenStateService {
 
       try {
         await this.productDataService.updateProduct(product)
-        this.userMsgService.onSetSuccessMsg('המוצר עודכן בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.translation.translate('product_updated_success'))
         this.activityLogService.recordActivity({
           action: 'updated',
           entityType: 'product',
@@ -89,7 +91,8 @@ export class KitchenStateService {
         }
         return product
       } catch (err) {
-        this.userMsgService.onSetErrorMsg('שגיאה בעדכון המוצר')
+        this.logging.error({ event: 'crud.products.update_error', message: 'Product update error', context: { err } })
+        this.userMsgService.onSetErrorMsg(this.translation.translate('product_update_error'))
         throw err
       }
     }
@@ -97,7 +100,7 @@ export class KitchenStateService {
     // Create path – use saved product to get the new _id
     try {
       const saved = await this.productDataService.addProduct(product as Omit<Product, '_id'>)
-      this.userMsgService.onSetSuccessMsg('חומר גלם נוסף בהצלחה')
+      this.userMsgService.onSetSuccessMsg(this.translation.translate('product_added_success'))
       this.activityLogService.recordActivity({
         action: 'created',
         entityType: 'product',
@@ -107,7 +110,8 @@ export class KitchenStateService {
       })
       return saved
     } catch (err) {
-      this.userMsgService.onSetErrorMsg('שגיאה בהוספת המוצר')
+      this.logging.error({ event: 'crud.products.add_error', message: 'Product add error', context: { err } })
+      this.userMsgService.onSetErrorMsg(this.translation.translate('product_add_error'))
       throw err
     }
   }
@@ -218,7 +222,7 @@ export class KitchenStateService {
       if (!exists) throw new Error('NOT_FOUND')
 
       await this.productDataService.deleteProduct(_id)
-      this.userMsgService.onSetSuccessMsg('חומר הגלם נמחק בהצלחה')
+      this.userMsgService.onSetSuccessMsg(this.translation.translate('product_deleted_success'))
       this.activityLogService.recordActivity({
         action: 'deleted',
         entityType: 'product',
@@ -226,8 +230,9 @@ export class KitchenStateService {
         entityName
       })
     } catch (err) {
-      const msg = (err as Error | null)?.message === 'NOT_FOUND' ? 'הפריט לא נמצא' : 'שגיאה בעת המחיקה'
-      this.userMsgService.onSetErrorMsg(msg)
+      this.logging.error({ event: 'crud.products.delete_error', message: 'Product delete error', context: { err } })
+      const key = (err as Error | null)?.message === 'NOT_FOUND' ? 'item_not_found_error' : 'delete_error_generic'
+      this.userMsgService.onSetErrorMsg(this.translation.translate(key))
       throw err
     }
   }
@@ -238,7 +243,7 @@ export class KitchenStateService {
     try {
       if (isDish) await this.dishDataService.deleteDish(recipe._id)
       else await this.recipeDataService.deleteRecipe(recipe._id)
-      const msg = isDish ? 'המנה נמחקה בהצלחה' : 'המתכון נמחק בהצלחה'
+      const msg = this.translation.translate(isDish ? 'dish_deleted_success' : 'recipe_deleted_success')
       this.userMsgService.onSetSuccessMsg(msg)
       this.activityLogService.recordActivity({
         action: 'deleted',
@@ -246,8 +251,9 @@ export class KitchenStateService {
         entityId: recipe._id,
         entityName: recipe.nameHebrew
       })
-    } catch {
-      const errorMsg = isDish ? 'שגיאה במחיקת המנה' : 'שגיאה במחיקת המתכון'
+    } catch (err) {
+      this.logging.error({ event: 'crud.recipes.delete_error', message: 'Recipe/dish delete error', context: { err } })
+      const errorMsg = this.translation.translate(isDish ? 'dish_delete_error' : 'recipe_delete_error')
       this.userMsgService.onSetErrorMsg(errorMsg)
       throw new Error(errorMsg)
     }
@@ -261,15 +267,22 @@ export class KitchenStateService {
     try {
       if (isDish) await this.dishDataService.permanentlyDeleteDish(recipe._id)
       else await this.recipeDataService.permanentlyDeleteRecipe(recipe._id)
-      this.userMsgService.onSetSuccessMsg(isDish ? 'המנה נמחקה לצמיתות' : 'המתכון נמחק לצמיתות')
+      this.userMsgService.onSetSuccessMsg(
+        this.translation.translate(isDish ? 'dish_deleted_permanently' : 'recipe_deleted_permanently')
+      )
       this.activityLogService.recordActivity({
         action: 'deleted',
         entityType: isDish ? 'dish' : 'recipe',
         entityId: recipe._id,
         entityName: recipe.nameHebrew
       })
-    } catch {
-      this.userMsgService.onSetErrorMsg('שגיאה במחיקה הקבועה')
+    } catch (err) {
+      this.logging.error({
+        event: 'crud.recipes.permanent_delete_error',
+        message: 'Recipe/dish permanent delete error',
+        context: { err }
+      })
+      this.userMsgService.onSetErrorMsg(this.translation.translate('permanent_delete_error'))
       throw new Error('permanentDelete failed')
     }
   }
@@ -286,26 +299,26 @@ export class KitchenStateService {
     const entityType = isDish ? ('dish' as const) : ('recipe' as const)
     const previousEntityType = previousIsDish ? ('dish' as const) : ('recipe' as const)
 
-    const fallbackErrorMsg = isDish
+    const fallbackErrorKey = isDish
       ? isUpdate
-        ? 'שגיאה בעדכון המנה'
-        : 'שגיאה בשמירת המנה'
+        ? 'dish_update_error'
+        : 'dish_save_error'
       : isUpdate
-        ? 'שגיאה בעדכון המתכון'
-        : 'שגיאה בשמירת המתכון'
+        ? 'recipe_update_error'
+        : 'error_saving_recipe'
 
     try {
       const saved = await this.writeRecipe(recipe, { isDish, isUpdate, typeChanged, previous })
-      const msg = typeChanged
-        ? 'המתכון/המנה שונה לסוג החדש ונשמר בהצלחה'
+      const msgKey = typeChanged
+        ? 'recipe_type_changed_saved'
         : isDish
           ? isUpdate
-            ? 'המנה עודכנה בהצלחה'
-            : 'המנה נשמרה בהצלחה'
+            ? 'dish_updated_success'
+            : 'dish_saved_success'
           : isUpdate
-            ? 'המתכון עודכן בהצלחה'
-            : 'המתכון נשמר בהצלחה'
-      this.userMsgService.onSetSuccessMsg(msg)
+            ? 'recipe_updated_success'
+            : 'recipe_saved_success'
+      this.userMsgService.onSetSuccessMsg(this.translation.translate(msgKey))
       const changes = isUpdate && previous ? this.buildRecipeChanges(previous, saved) : []
       this.activityLogService.recordActivity({
         action: typeChanged ? 'created' : isUpdate ? 'updated' : 'created',
@@ -333,10 +346,11 @@ export class KitchenStateService {
       }
       return saved
     } catch (err: unknown) {
+      this.logging.error({ event: 'crud.recipes.save_error', message: 'Recipe/dish save error', context: { err } })
       const msg =
         (err && typeof err === 'object' && (err as { error?: { message?: string } }).error?.message) ||
         (err instanceof Error ? err.message : null) ||
-        fallbackErrorMsg
+        this.translation.translate(fallbackErrorKey)
       this.userMsgService.onSetErrorMsg(String(msg))
       throw err instanceof Error ? err : new Error(String(msg))
     }

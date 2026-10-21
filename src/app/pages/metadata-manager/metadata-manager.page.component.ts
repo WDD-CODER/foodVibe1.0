@@ -261,11 +261,11 @@ export class MetadataManagerComponent implements OnInit {
       if (pushFailed) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {
-        this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.msg('metadata_saved_success'))
       }
     } catch (err) {
       this.logging.error({ event: 'metadata.sync_error', message: 'Metadata sync error (add label)', context: { err } })
-      this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים')
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_sync_error'))
     }
   }
 
@@ -283,7 +283,7 @@ export class MetadataManagerComponent implements OnInit {
     const existingLabels = currentIds.map((id) => this.translationService.translate(id))
 
     if (existingLabels.includes(sanitizedHebrew)) {
-      this.userMsgService.onSetErrorMsg(`הערך "${sanitizedHebrew}" כבר קיים ברשימה הזו.`)
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_value_exists', { name: sanitizedHebrew }))
       return
     }
 
@@ -340,7 +340,7 @@ export class MetadataManagerComponent implements OnInit {
       if (pushFailed) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {
-        this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.msg('metadata_saved_success'))
       }
     } catch (err) {
       this.logging.error({
@@ -348,17 +348,28 @@ export class MetadataManagerComponent implements OnInit {
         message: 'Metadata sync error (add metadata)',
         context: { err }
       })
-      this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים')
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_sync_error'))
     }
   }
 
   //DELETE
-  private readonly metadataTypeNames: Record<MetadataType, string> = {
-    unit: 'היחידה',
-    allergen: 'האלרגן',
-    category: 'הקטגוריה',
-    label: 'התווית',
-    course: 'סוג המנה'
+  /** Dictionary keys of the type names used inside messages ("היחידה", "האלרגן", ...). */
+  private readonly metadataTypeKeys: Record<MetadataType, string> = {
+    unit: 'metadata_type_unit',
+    allergen: 'metadata_type_allergen',
+    category: 'metadata_type_category',
+    label: 'metadata_type_label',
+    course: 'metadata_type_course'
+  }
+
+  /** Dictionary text for `key` with `{type}`, `{name}` and `{n}` filled in. */
+  private msg(key: string, params: { type?: MetadataType; name?: string; n?: number } = {}): string {
+    let text = this.translationService.translate(key)
+    if (params.type)
+      text = text.replace('{type}', this.translationService.translate(this.metadataTypeKeys[params.type]))
+    if (params.name !== undefined) text = text.replace('{name}', params.name)
+    if (params.n !== undefined) text = text.replace('{n}', String(params.n))
+    return text
   }
 
   async onRemoveMetadata(item: string, type: MetadataType) {
@@ -374,7 +385,11 @@ export class MetadataManagerComponent implements OnInit {
 
       if (affected.length > 0) {
         const confirmed = await this.confirmModal.open(
-          `מחיקת ${this.metadataTypeNames[type]} "${this.translationService.translate(item)}" תעדכן ${affected.length} מתכונים/מנות ותסיר אותה מכולם. להמשיך?`,
+          this.msg('metadata_cascade_delete_confirm', {
+            type,
+            name: this.translationService.translate(item),
+            n: affected.length
+          }),
           { variant: 'danger' }
         )
         if (!confirmed) return
@@ -401,7 +416,7 @@ export class MetadataManagerComponent implements OnInit {
           if (pushFailed) {
             this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
           } else {
-            this.userMsgService.onSetSuccessMsg(`נמחק בהצלחה ועודכנו ${updatedCount} מתכונים/מנות`)
+            this.userMsgService.onSetSuccessMsg(this.msg('metadata_deleted_updated_count', { n: updatedCount }))
           }
         } catch (err) {
           this.logging.error({
@@ -409,7 +424,7 @@ export class MetadataManagerComponent implements OnInit {
             message: `Failed to cascade-delete ${type}`,
             context: { err }
           })
-          this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת')
+          this.userMsgService.onSetErrorMsg(this.msg('metadata_delete_server_error'))
         }
         return
       }
@@ -436,7 +451,7 @@ export class MetadataManagerComponent implements OnInit {
     // 2. BLOCK DELETION IF IN USE
     if (isUsed) {
       this.userMsgService.onSetErrorMsg(
-        `לא ניתן למחוק את ${this.metadataTypeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש במלאי`
+        this.msg('metadata_in_use_cannot_delete', { type, name: this.translationService.translate(item) })
       )
       return
     }
@@ -476,11 +491,11 @@ export class MetadataManagerComponent implements OnInit {
       if (pushFailed) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {
-        this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.msg('metadata_delete_success'))
       }
     } catch (err) {
       this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } })
-      this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת')
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_delete_server_error'))
     }
   }
 
@@ -622,13 +637,13 @@ export class MetadataManagerComponent implements OnInit {
     scope: 'me' | 'everyone'
   ): Promise<boolean> {
     if (this.registryHasKey(type, newKey)) {
-      this.userMsgService.onSetErrorMsg(`${this.metadataTypeNames[type]} "${newKey}" כבר קיים`)
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_item_exists', { type, name: newKey }))
       return false
     }
     const affected = this.getAffectedCount(type, oldKey)
     if (affected > 0) {
       const confirmed = await this.confirmModal.open(
-        `שינוי שם ${this.metadataTypeNames[type]} "${this.translationService.translate(oldKey)}" יעדכן ${affected} פריטים. להמשיך?`
+        this.msg('metadata_rename_confirm', { type, name: this.translationService.translate(oldKey), n: affected })
       )
       if (!confirmed) return false
     }
@@ -662,7 +677,9 @@ export class MetadataManagerComponent implements OnInit {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {
         this.userMsgService.onSetSuccessMsg(
-          affected > 0 ? `שונה בהצלחה ועודכנו ${affected} פריטים` : 'השינוי בוצע בהצלחה'
+          affected > 0
+            ? this.msg('metadata_renamed_updated_count', { n: affected })
+            : this.msg('metadata_change_success')
         )
       }
       return true
@@ -672,7 +689,7 @@ export class MetadataManagerComponent implements OnInit {
         message: `Failed to cascade-rename ${type}`,
         context: { err }
       })
-      this.userMsgService.onSetErrorMsg('שגיאה בביצוע השינוי מול השרת')
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_change_server_error'))
       return false
     }
   }
@@ -735,7 +752,7 @@ export class MetadataManagerComponent implements OnInit {
       if (!scope) return
       if (result.englishKey === item) {
         this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)
-        this.userMsgService.onSetSuccessMsg('העדכון בוצע בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.msg('metadata_update_success'))
         return
       }
       const ok = await this.confirmAndCascadeRename(type, item, result.englishKey, scope)
@@ -756,7 +773,7 @@ export class MetadataManagerComponent implements OnInit {
     if (!keyChanged && !rateChanged && !labelChanged) return
 
     if (keyChanged && this.registryHasKey('unit', next.key)) {
-      this.userMsgService.onSetErrorMsg(`${this.metadataTypeNames.unit} "${next.key}" כבר קיימת`)
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_unit_exists', { type: 'unit', name: next.key }))
       return
     }
     const usage = this.unitUsage(prev.key)
@@ -778,7 +795,7 @@ export class MetadataManagerComponent implements OnInit {
     if (keyChanged || labelChanged) this.translationService.updateDictionary(next.key, next.hebrewLabel, scope)
     const rateSaved = !rateChanged || (await this.unitRegistry.updateUnitRate(next.key, next.gramRate))
     if (keyChanged) await this.reloadAfterRename('unit')
-    if (rateSaved) this.userMsgService.onSetSuccessMsg('העדכון בוצע בהצלחה')
+    if (rateSaved) this.userMsgService.onSetSuccessMsg(this.msg('metadata_update_success'))
   }
 
   //HELPERS
@@ -831,7 +848,7 @@ export class MetadataManagerComponent implements OnInit {
     if (result?.trim()) {
       const key = result.trim()
       if (this.allMenuTypes_().some((t) => t.key === key)) {
-        this.userMsgService.onSetErrorMsg(`סוג תפריט "${key}" כבר קיים`)
+        this.userMsgService.onSetErrorMsg(this.msg('menu_type_exists', { name: key }))
         return
       }
       await this.metadataRegistry.registerMenuType({ key, fields: [...DEFAULT_DISH_FIELDS] })
@@ -858,7 +875,7 @@ export class MetadataManagerComponent implements OnInit {
     if (!this.requireSignIn()) return
     const isUsed = this.menuEventData.allMenuEvents_().some((e) => e.servingType === key)
     if (isUsed) {
-      this.userMsgService.onSetErrorMsg(`לא ניתן למחוק: סוג התפריט "${key}" בשימוש בתפריטים שמורים`)
+      this.userMsgService.onSetErrorMsg(this.msg('menu_type_in_use_cannot_delete', { name: key }))
       return
     }
     await this.metadataRegistry.deleteMenuType(key)

@@ -7,6 +7,7 @@ import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
 import { hashPassword } from '../utils/auth-crypto'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 
 const SESSION_USER_KEY = 'loggedInUser'
 const TOKEN_KEY = 'fv_token'
@@ -168,7 +169,7 @@ export class UserService {
 
   /** Public — auth interceptor calls this on 401 to silently refresh the access token. */
   callBackendRefresh(): Observable<{ token: string }> {
-    return this.http.post<{ token: string }>(`${this.authBase}/api/v1/auth/refresh`, {}, { withCredentials: true })
+    return this.http.post<{ token: string }>(`${this.authBase}${API.auth('refresh')}`, {}, { withCredentials: true })
   }
 
   // Login and signup set the fv_refresh cookie. Cross-origin (local/slot: app and API on
@@ -176,7 +177,7 @@ export class UserService {
   // cookie (e.g. the dev guest admin) survives and a reload silently signs in as that user.
   private callBackendLogin(name: string, password: string): Observable<{ token: string; user: User }> {
     return this.http.post<{ token: string; user: User }>(
-      `${this.authBase}/api/v1/auth/login`,
+      `${this.authBase}${API.auth('login')}`,
       { name, password },
       { withCredentials: true }
     )
@@ -188,7 +189,7 @@ export class UserService {
     businessName: string
   ): Observable<{ token: string; user: User }> {
     return this.http.post<{ token: string; user: User }>(
-      `${this.authBase}/api/v1/auth/signup`,
+      `${this.authBase}${API.auth('signup')}`,
       {
         name: newUser.name,
         email: newUser.email,
@@ -201,12 +202,12 @@ export class UserService {
   }
 
   private callBackendLogout(): Observable<void> {
-    return this.http.post<void>(`${this.authBase}/api/v1/auth/logout`, {}, { withCredentials: true })
+    return this.http.post<void>(`${this.authBase}${API.auth('logout')}`, {}, { withCredentials: true })
   }
 
   private callBackendGuestLogin(): Observable<{ token: string; user: User }> {
     return this.http.post<{ token: string; user: User }>(
-      `${this.authBase}/api/v1/auth/guest`,
+      `${this.authBase}${API.auth('guest')}`,
       {},
       { withCredentials: true }
     )

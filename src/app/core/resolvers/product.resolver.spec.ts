@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing'
 import { ActivatedRouteSnapshot, RouterStateSnapshot, Router, convertToParamMap } from '@angular/router'
 import { productResolver } from './product.resolver'
 import { KitchenStateService } from '../services/kitchen-state.service'
+import { TranslationService } from '../services/translation.service'
 import { signal } from '@angular/core'
 import { Product } from '../models/product.model'
 
@@ -21,7 +22,8 @@ describe('productResolver', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: Router, useValue: mockRouter },
-        { provide: KitchenStateService, useValue: mockKitchenState }
+        { provide: KitchenStateService, useValue: mockKitchenState },
+        { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
     })
   })

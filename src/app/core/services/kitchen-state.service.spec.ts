@@ -117,7 +117,7 @@ describe('KitchenStateService', () => {
       // FIXED: Method name in service is saveProduct
       void service.saveProduct(product).then(() => {
         expect(productDataSpy.addProduct).toHaveBeenCalled()
-        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('חומר גלם נוסף בהצלחה')
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('product_added_success')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
         done()
       })
@@ -132,7 +132,7 @@ describe('KitchenStateService', () => {
 
       void service.deleteProduct('p-del').then(() => {
         expect(productDataSpy.deleteProduct).toHaveBeenCalledWith('p-del')
-        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('חומר הגלם נמחק בהצלחה')
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('product_deleted_success')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
         done()
       })
@@ -145,7 +145,7 @@ describe('KitchenStateService', () => {
       service.deleteProduct('none').catch((err: Error) => {
         expect(err.message).toBe('NOT_FOUND')
         // FIX: Align with the actual string in kitchen-state.service.ts
-        expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('הפריט לא נמצא')
+        expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('item_not_found_error')
         done()
       })
     })
@@ -167,7 +167,7 @@ describe('KitchenStateService', () => {
 
       void service.saveRecipe(recipe).then(() => {
         expect(recipeDataSpy.addRecipe).toHaveBeenCalled()
-        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המתכון נשמר בהצלחה')
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('recipe_saved_success')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
         done()
       })
@@ -190,7 +190,7 @@ describe('KitchenStateService', () => {
 
       void service.saveRecipe(dish).then(() => {
         expect(dishDataSpy.addDish).toHaveBeenCalled()
-        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המנה נשמרה בהצלחה')
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('dish_saved_success')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
         done()
       })

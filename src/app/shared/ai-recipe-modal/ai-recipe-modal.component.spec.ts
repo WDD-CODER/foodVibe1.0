@@ -8,6 +8,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { of, throwError } from 'rxjs'
 import { GeminiService } from '@services/gemini.service'
+import { getGeminiUsage } from '@utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import type { ParsedResult } from '@models/parsed-result.model'
@@ -48,8 +49,9 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
     spyOn(window, 'fetch').and.rejectWith(new Error('offline'))
     isOpen_.set(false)
     initialInputMode_.set('text')
-    gemini = jasmine.createSpyObj<GeminiService>('GeminiService', ['parseText', 'offerModelSwitch'])
+    gemini = jasmine.createSpyObj<GeminiService>('GeminiService', ['parseText', 'offerModelSwitch', 'fetchUsage'])
     gemini.offerModelSwitch.and.returnValue(false)
+    gemini.fetchUsage.and.callFake(() => Promise.resolve(getGeminiUsage()))
     shots = jasmine.createSpyObj<GeminiShotsService>('GeminiShotsService', ['saveShot', 'computeWarnings'])
     shots.saveShot.and.returnValue(of({ saved: true, warnings: [] }))
     shots.computeWarnings.and.returnValue([])

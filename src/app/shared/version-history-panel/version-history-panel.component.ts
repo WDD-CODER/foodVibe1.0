@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  input,
-  output,
-  signal,
-  effect,
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, input, output, signal, effect } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -14,6 +6,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { VersionHistoryService, VersionEntry, VersionEntityType } from '@services/version-history.service'
 import { RestoreChoiceModalService } from '@services/restore-choice-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
+import { LoggingService } from '@services/logging.service'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 
 @Component({
@@ -22,12 +16,14 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
   imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './version-history-panel.component.html',
   styleUrl: './version-history-panel.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VersionHistoryPanelComponent {
   private readonly versionHistory = inject(VersionHistoryService)
   private readonly restoreChoiceModal = inject(RestoreChoiceModalService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly logging = inject(LoggingService)
   private readonly router = inject(Router)
 
   entityType = input.required<VersionEntityType>()
@@ -57,8 +53,13 @@ export class VersionHistoryPanelComponent {
     try {
       const list = await this.versionHistory.getVersions(entityType, entityId)
       this.versions.set(list)
-    } catch {
-      this.loadError.set('שגיאה בטעינת הגרסאות')
+    } catch (err) {
+      this.logging.error({
+        event: 'crud.versionHistory.load_error',
+        message: 'Version list load error',
+        context: { err }
+      })
+      this.loadError.set(this.translation.translate('history_load_error'))
     } finally {
       this.loading.set(false)
     }
@@ -67,7 +68,7 @@ export class VersionHistoryPanelComponent {
   formatDate(ts: number): string {
     return new Date(ts).toLocaleString('he-IL', {
       dateStyle: 'short',
-      timeStyle: 'short',
+      timeStyle: 'short'
     })
   }
 
@@ -78,8 +79,8 @@ export class VersionHistoryPanelComponent {
         view: 'history',
         entityType: this.entityType(),
         entityId: this.entityId(),
-        versionAt: entry.versionAt,
-      },
+        versionAt: entry.versionAt
+      }
     })
   }
 
@@ -90,24 +91,21 @@ export class VersionHistoryPanelComponent {
       if (choice === 'replace') {
         const recoverFirst = this.recoverBeforeRestore()
         if (recoverFirst) await recoverFirst()
-        await this.versionHistory.restoreVersion(
-          this.entityType(),
-          this.entityId(),
-          entry.versionAt
-        )
-        this.userMsg.onSetSuccessMsg('הגרסה שוחזרה')
+        await this.versionHistory.restoreVersion(this.entityType(), this.entityId(), entry.versionAt)
+        this.userMsg.onSetSuccessMsg(this.translation.translate('history_restored'))
       } else {
-        await this.versionHistory.addVersionAsNewRecipe(
-          this.entityType(),
-          this.entityId(),
-          entry.versionAt
-        )
-        this.userMsg.onSetSuccessMsg('נוצר מתכון חדש מהגרסה')
+        await this.versionHistory.addVersionAsNewRecipe(this.entityType(), this.entityId(), entry.versionAt)
+        this.userMsg.onSetSuccessMsg(this.translation.translate('history_new_recipe_from_version'))
       }
       this.restored.emit()
       this.closed.emit()
-    } catch {
-      this.userMsg.onSetErrorMsg('שגיאה בשחזור הגרסה')
+    } catch (err) {
+      this.logging.error({
+        event: 'crud.versionHistory.restore_error',
+        message: 'Version restore error',
+        context: { err }
+      })
+      this.userMsg.onSetErrorMsg(this.translation.translate('history_restore_error'))
     }
   }
 

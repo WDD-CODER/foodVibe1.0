@@ -3,6 +3,22 @@ import { HttpClient, HttpHeaders } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
 
+/** Plan 456 — every backend path in one place. Paths only: each caller keeps its own base
+ *  (`environment.apiUrl` or `environment.authApiUrl`) in front, exactly as before. */
+const API_ROOT = '/api/v1'
+export const API = {
+  data: (type: string) => `${API_ROOT}/data/${type}`,
+  ai: (path: string) => `${API_ROOT}/ai/${path}`,
+  auth: (path: string) => `${API_ROOT}/auth/${path}`,
+  admin: (path: string) => `${API_ROOT}/admin/${path}`,
+  business: (path?: string) => (path ? `${API_ROOT}/business/${path}` : `${API_ROOT}/business`),
+  stats: (path: string) => `${API_ROOT}/stats/${path}`,
+  productImport: (path: string) => `${API_ROOT}/product-import/${path}`,
+  events: `${API_ROOT}/events`,
+  log: `${API_ROOT}/log`,
+  health: `${API_ROOT}/health`
+} as const
+
 /** Mirrors EntityId from async-storage.service.ts — kept local to avoid circular import. */
 type EntityId = { _id: string }
 
@@ -88,7 +104,7 @@ export class HttpStorageAdapter {
   /** Returns all entities of a given type. */
   async query<T>(entityType: string): Promise<T[]> {
     const docs = await firstValueFrom(
-      this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}`, { headers: this.headers(), withCredentials: true })
+      this.http.get<T[]>(`${this.base}${API.data(entityType)}`, { headers: this.headers(), withCredentials: true })
     )
     return docs.map((d) => fromServer(entityType, d))
   }
@@ -103,7 +119,7 @@ export class HttpStorageAdapter {
       filterEntityId
     })
     return firstValueFrom(
-      this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}?${params.toString()}`, {
+      this.http.get<T[]>(`${this.base}${API.data(entityType)}?${params.toString()}`, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -118,7 +134,7 @@ export class HttpStorageAdapter {
   async search<T>(entityType: string, q: string, limit = 25): Promise<T[]> {
     const params = new URLSearchParams({ q, limit: String(limit) })
     return firstValueFrom(
-      this.http.get<T[]>(`${this.base}/api/v1/data/${entityType}/search?${params.toString()}`, {
+      this.http.get<T[]>(`${this.base}${API.data(entityType)}/search?${params.toString()}`, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -132,7 +148,7 @@ export class HttpStorageAdapter {
   async count(entityType: string, filter?: string): Promise<number> {
     const params = filter ? `?${new URLSearchParams({ filter }).toString()}` : ''
     const { count } = await firstValueFrom(
-      this.http.get<{ count: number }>(`${this.base}/api/v1/data/${entityType}/count${params}`, {
+      this.http.get<{ count: number }>(`${this.base}${API.data(entityType)}/count${params}`, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -145,7 +161,7 @@ export class HttpStorageAdapter {
    */
   async deleteBulk(entityType: string, ids: string[]): Promise<void> {
     await firstValueFrom(
-      this.http.delete<unknown>(`${this.base}/api/v1/data/${entityType}/bulk`, {
+      this.http.delete<unknown>(`${this.base}${API.data(entityType)}/bulk`, {
         headers: this.headers(),
         withCredentials: true,
         body: { ids }
@@ -156,7 +172,7 @@ export class HttpStorageAdapter {
   /** Returns one entity by id. Throws if not found (404 → HttpErrorResponse). */
   async get<T extends EntityId>(entityType: string, entityId: string): Promise<T> {
     const doc = await firstValueFrom(
-      this.http.get<T>(`${this.base}/api/v1/data/${entityType}/${entityId}`, {
+      this.http.get<T>(`${this.base}${API.data(entityType)}/${entityId}`, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -171,7 +187,7 @@ export class HttpStorageAdapter {
    */
   async post<T>(entityType: string, newEntity: T): Promise<T & EntityId> {
     const saved = await firstValueFrom(
-      this.http.post<T & EntityId>(`${this.base}/api/v1/data/${entityType}`, toServer(entityType, newEntity), {
+      this.http.post<T & EntityId>(`${this.base}${API.data(entityType)}`, toServer(entityType, newEntity), {
         headers: this.headers(),
         withCredentials: true
       })
@@ -183,7 +199,7 @@ export class HttpStorageAdapter {
   async put<T extends EntityId>(entityType: string, updatedEntity: T): Promise<T> {
     const saved = await firstValueFrom(
       this.http.put<T>(
-        `${this.base}/api/v1/data/${entityType}/${updatedEntity._id}`,
+        `${this.base}${API.data(entityType)}/${updatedEntity._id}`,
         toServer(entityType, updatedEntity),
         {
           headers: this.headers(),
@@ -203,7 +219,7 @@ export class HttpStorageAdapter {
   async pushToMaster(entityType: string, entityId: string): Promise<{ masterId: string }> {
     return firstValueFrom(
       this.http.put<{ ok: boolean; masterId: string }>(
-        `${this.base}/api/v1/data/${entityType}/${entityId}/push-to-master`,
+        `${this.base}${API.data(entityType)}/${entityId}/push-to-master`,
         {},
         { headers: this.headers(), withCredentials: true }
       )
@@ -215,7 +231,7 @@ export class HttpStorageAdapter {
   async deleteFromMaster(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
       this.http.put<unknown>(
-        `${this.base}/api/v1/data/${entityType}/${entityId}/delete-from-master`,
+        `${this.base}${API.data(entityType)}/${entityId}/delete-from-master`,
         {},
         { headers: this.headers(), withCredentials: true }
       )
@@ -229,7 +245,7 @@ export class HttpStorageAdapter {
   async purgeProductIngredientEverywhere(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
       this.http.put<unknown>(
-        `${this.base}/api/v1/data/${entityType}/${entityId}/purge-ingredient-everywhere`,
+        `${this.base}${API.data(entityType)}/${entityId}/purge-ingredient-everywhere`,
         {},
         { headers: this.headers(), withCredentials: true }
       )
@@ -239,7 +255,7 @@ export class HttpStorageAdapter {
   /** Plan 322 M4: the shared '__global__' Hebrew-dictionary override layer (admin-writable, everyone reads). */
   async getGlobalDictionaryOverrides(): Promise<Record<string, string>> {
     const { items } = await firstValueFrom(
-      this.http.get<{ items: Record<string, string> }>(`${this.base}/api/v1/data/DICTIONARY_OVERRIDES/global`, {
+      this.http.get<{ items: Record<string, string> }>(`${this.base}${API.data('DICTIONARY_OVERRIDES')}/global`, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -251,7 +267,7 @@ export class HttpStorageAdapter {
   async putGlobalDictionaryOverride(key: string, hebrewLabel: string): Promise<void> {
     await firstValueFrom(
       this.http.put<unknown>(
-        `${this.base}/api/v1/data/DICTIONARY_OVERRIDES/global`,
+        `${this.base}${API.data('DICTIONARY_OVERRIDES')}/global`,
         { key, hebrewLabel },
         { headers: this.headers(), withCredentials: true }
       )
@@ -261,7 +277,7 @@ export class HttpStorageAdapter {
   /** Removes one entity by id. For a Trash type (plan 407) the server soft-deletes it into Trash. */
   async remove(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
-      this.http.delete<void>(`${this.base}/api/v1/data/${entityType}/${entityId}`, {
+      this.http.delete<void>(`${this.base}${API.data(entityType)}/${entityId}`, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -271,7 +287,7 @@ export class HttpStorageAdapter {
   /** Removes one entity for good — also out of Trash (plan 407). */
   async removePermanently(entityType: string, entityId: string): Promise<void> {
     await firstValueFrom(
-      this.http.delete<void>(`${this.base}/api/v1/data/${entityType}/${entityId}?permanent=true`, {
+      this.http.delete<void>(`${this.base}${API.data(entityType)}/${entityId}?permanent=true`, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -281,7 +297,7 @@ export class HttpStorageAdapter {
   /** The caller's deleted items of one type, newest first (plan 407). */
   async trash<T>(entityType: string): Promise<(T & { deletedAt: number })[]> {
     const docs = await firstValueFrom(
-      this.http.get<(T & { deletedAt: number })[]>(`${this.base}/api/v1/data/${entityType}/trash`, {
+      this.http.get<(T & { deletedAt: number })[]>(`${this.base}${API.data(entityType)}/trash`, {
         headers: this.headers(),
         withCredentials: true
       })
@@ -293,7 +309,7 @@ export class HttpStorageAdapter {
   async restore<T>(entityType: string, entityId: string): Promise<T> {
     const doc = await firstValueFrom(
       this.http.put<T>(
-        `${this.base}/api/v1/data/${entityType}/${entityId}/restore`,
+        `${this.base}${API.data(entityType)}/${entityId}/restore`,
         {},
         {
           headers: this.headers(),
@@ -308,7 +324,7 @@ export class HttpStorageAdapter {
   async restoreAll(entityType: string): Promise<void> {
     await firstValueFrom(
       this.http.put<unknown>(
-        `${this.base}/api/v1/data/${entityType}/trash/restore-all`,
+        `${this.base}${API.data(entityType)}/trash/restore-all`,
         {},
         {
           headers: this.headers(),
@@ -321,7 +337,7 @@ export class HttpStorageAdapter {
   /** Removes every item of one type in Trash for good. */
   async emptyTrash(entityType: string): Promise<void> {
     await firstValueFrom(
-      this.http.delete<unknown>(`${this.base}/api/v1/data/${entityType}/trash`, {
+      this.http.delete<unknown>(`${this.base}${API.data(entityType)}/trash`, {
         headers: this.headers(),
         withCredentials: true
       })

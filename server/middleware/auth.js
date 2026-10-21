@@ -1,14 +1,46 @@
 const jwt = require('jsonwebtoken');
 const { recordUsage } = require('./usage');
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
+/** The Bearer token of the request's Authorization header, or '' when there is none. */
+function bearerToken(req) {
+  const header = req.headers['authorization'] || '';
+  return header.startsWith('Bearer ') ? header.slice(7) : '';
+}
+
+/**
+ * Plan 456 — the one place an access token is checked. Returns the payload; throws when the
+ * token is invalid or expired. The secret is read per call, as write-limit.js always did.
+ */
+function decodeAccessToken(token) {
+  return jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+}
+
+/**
+ * Payload of the request's Bearer access token, or null when it is missing, invalid or expired.
+ * Never throws and never answers: for callers that degrade to anonymous (log ingest, the
+ * write-limit bucket key). Routes that must reject a bad token use verifyToken / optionalToken.
+ */
+function verifyAccessToken(req) {
+  const token = bearerToken(req);
+  if (!token) return null;
+  try {
+    return decodeAccessToken(token);
+  } catch {
+    return null;
+  }
+}
+
+/** Plan 425: platform admin is the `isPlatformAdmin` flag only; the legacy `role` is never read. */
+function isPlatformAdmin(req) {
+  return req.user?.isPlatformAdmin === true;
+}
 
 /**
  * Verifies the access token onto req.user and binds `userId` onto `req.log` — the pino-http
  * request logger, Plan 383 — so every handler log line after auth carries it. userId only.
  */
 function attachUser(req, res, token) {
-  const payload = jwt.verify(token, ACCESS_SECRET);
+  const payload = decodeAccessToken(token);
   // Plan 425: a token without a business can't be scoped to any data. The client refreshes and retries.
   if (payload?.userId && !payload.businessId) throw new Error('NO_BUSINESS_IN_TOKEN');
   req.user = payload;
@@ -26,8 +58,7 @@ function attachUser(req, res, token) {
  * @param {import('express').NextFunction} next
  */
 function verifyToken(req, res, next) {
-  const header = req.headers['authorization'] || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  const token = bearerToken(req);
 
   if (!token) {
     return res.status(401).json({ error: 'No token provided' });
@@ -52,8 +83,7 @@ function verifyToken(req, res, next) {
  * This distinction prevents silently degrading an expired session to anonymous reads.
  */
 function optionalToken(req, res, next) {
-  const header = req.headers['authorization'] || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
+  const token = bearerToken(req);
 
   if (!token) {
     req.user = null;
@@ -70,10 +100,10 @@ function optionalToken(req, res, next) {
 
 /** Platform-admin gate (plan 425): only the `isPlatformAdmin` flag counts; the legacy `role` is never read. */
 function requirePlatformAdmin(req, res, next) {
-  if (!req.user || req.user.isPlatformAdmin !== true) {
+  if (!isPlatformAdmin(req)) {
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();
 }
 
-module.exports = { verifyToken, optionalToken, requirePlatformAdmin };
+module.exports = { verifyToken, optionalToken, requirePlatformAdmin, verifyAccessToken, isPlatformAdmin };

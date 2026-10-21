@@ -11,7 +11,6 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import {
   getGeminiUsage,
-  fetchGeminiUsageFromServer,
   geminiModelAvailability,
   geminiUsageStatus,
   geminiBudgetUsedPercent
@@ -110,7 +109,7 @@ export class AiMenuModalComponent implements OnInit {
 
   private refreshUsage_(): void {
     this.geminiUsage_.set(getGeminiUsage())
-    fetchGeminiUsageFromServer().then((usage) => this.geminiUsage_.set(usage))
+    this.gemini_.fetchUsage().then((usage) => this.geminiUsage_.set(usage))
   }
 
   // ─── Create mode ─────────────────────────────────────────────────

@@ -425,7 +425,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
           this.historyViewMode_.set(true)
           this.recipeForm_.disable()
         } else {
-          this.userMsg_.onSetErrorMsg('גרסה לא נמצאה')
+          this.userMsg_.onSetErrorMsg(this.translation_.translate('version_not_found'))
         }
       }
     } else {
@@ -827,7 +827,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const headerValid = this.recipeHeaderRef_()?.validate() ?? true
     if (this.recipeForm_.pending) {
       // Async validators (duplicate-name check) still running — block save to avoid racing
-      this.userMsg_.onSetErrorMsg(this.translation_.translate('validating_please_wait') ?? 'אנא המתן לסיום האימות')
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('validating_please_wait'))
       return
     }
     if (this.recipeForm_.invalid || !headerValid) {

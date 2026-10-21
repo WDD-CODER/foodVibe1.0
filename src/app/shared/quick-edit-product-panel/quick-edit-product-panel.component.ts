@@ -20,6 +20,8 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
+import { LoggingService } from '@services/logging.service'
 import { Product, ProductSource } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 
@@ -37,6 +39,8 @@ export class QuickEditProductPanelComponent {
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly kitchenState = inject(KitchenStateService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly logging = inject(LoggingService)
 
   // INPUTS / OUTPUTS
   product = input.required<Product>()
@@ -175,12 +179,17 @@ export class QuickEditProductPanelComponent {
 
     try {
       await this.productData.updateProduct(updated)
-      this.userMsg.onSetSuccessMsg('המוצר נשמר')
+      this.userMsg.onSetSuccessMsg(this.translation.translate('product_saved'))
       this.isSubmitting_.set(false)
       this.saved.emit()
-    } catch {
+    } catch (err) {
+      this.logging.error({
+        event: 'crud.products.quick_edit_error',
+        message: 'Quick edit save error',
+        context: { err }
+      })
       this.isSubmitting_.set(false)
-      this.error_.set('שגיאה בשמירת המוצר')
+      this.error_.set(this.translation.translate('product_save_error'))
     }
   }
 

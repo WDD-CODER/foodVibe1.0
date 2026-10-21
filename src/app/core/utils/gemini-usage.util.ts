@@ -6,10 +6,9 @@
  * server falls back along a model chain when one model's quota runs out. The indicator
  * shows the chain's budget for today — used / total, and what is left — shared by all users.
  *
- * localStorage is kept only as a fast optimistic cache between fetches.
+ * localStorage is kept only as a fast optimistic cache between fetches. The fetch itself is
+ * GeminiService.fetchUsage() (plan 456: through HttpClient, so the auth interceptor runs).
  */
-
-import { environment } from '../../../environments/environment'
 
 const STORAGE_KEY = 'FV_GEMINI_USAGE'
 
@@ -103,25 +102,19 @@ export function geminiUsageStatus(usage: GeminiUsage): GeminiUsageStatus {
 }
 
 // ---------------------------------------------------------------------------
-// Server fetch — call this to get the real global state from MongoDB
+// Server reply — GeminiService.fetchUsage() gets the real global state from MongoDB
 // ---------------------------------------------------------------------------
 
-export async function fetchGeminiUsageFromServer(): Promise<GeminiUsage> {
-  try {
-    const res = await fetch(`${environment.authApiUrl}/api/v1/ai/usage`)
-    if (!res.ok) return getGeminiUsage()
-    const data = (await res.json()) as Partial<GeminiUsage>
-    const usage: GeminiUsage = {
-      date: data.date ?? todayStr(),
-      count: data.count ?? 0,
-      budget: data.budget ?? 0,
-      used: data.used ?? 0,
-      remaining: data.remaining ?? 0,
-      models: Array.isArray(data.models) ? data.models : []
-    }
-    setGeminiUsageCache(usage) // update local cache with server truth
-    return usage
-  } catch {
-    return getGeminiUsage() // fall back to local cache on network error
+/** Fills the gaps in the server's `/ai/usage` reply and stores it as the local cache. */
+export function cacheServerGeminiUsage(data: Partial<GeminiUsage>): GeminiUsage {
+  const usage: GeminiUsage = {
+    date: data.date ?? todayStr(),
+    count: data.count ?? 0,
+    budget: data.budget ?? 0,
+    used: data.used ?? 0,
+    remaining: data.remaining ?? 0,
+    models: Array.isArray(data.models) ? data.models : []
   }
+  setGeminiUsageCache(usage) // update local cache with server truth
+  return usage
 }

@@ -72,10 +72,10 @@ describe('add-option util', () => {
 })
 
 describe('notifyItemAdded', () => {
-  it('shows "<name>" + the added suffix, and nothing for an empty name', () => {
+  it('shows the item_added_named text with the name, and nothing for an empty name', () => {
     const msgs: string[] = []
     const userMsg = { onSetSuccessMsg: (t: string) => msgs.push(t) }
-    notifyItemAdded(userMsg, (k) => (k === 'item_added_suffix' ? 'נוסף' : k), ' ביצים ')
+    notifyItemAdded(userMsg, (k) => (k === 'item_added_named' ? '"{name}" נוסף' : k), ' ביצים ')
     notifyItemAdded(userMsg, (k) => k, '  ')
     expect(msgs).toEqual(['"ביצים" נוסף'])
   })

@@ -73,9 +73,9 @@ export class PreparationRegistryService {
     const label = hebrewLabel.trim()
     if (!key || this.taxonomy.find('prepCategory', key)) return
     this.translationService.updateDictionary(key, label)
-    await this.run('category.save', 'שגיאה בשמירת הקטגוריה', async () => {
+    await this.run('category.save', 'category_save_error', async () => {
       await this.taxonomy.add('prepCategory', key, {})
-      this.userMsgService.onSetSuccessMsg(`הקטגוריה "${label}" נוספה בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(this.translationService.translate('category_added').replace('{name}', label))
     })
   }
 
@@ -148,21 +148,22 @@ export class PreparationRegistryService {
     if (!entry || entry.category !== oldCategory.trim()) return
     const sanitizedNew = newCategory.trim().toLowerCase().replace(/\s+/g, '_')
 
-    await this.run('update', 'שגיאה בעדכון ההכנה', async () => {
+    await this.run('update', 'preparation_update_error', async () => {
       await this.taxonomy.updateByKey('preparation', entry.name, { categoryKey: sanitizedNew || undefined })
       if (!options?.silent) {
         await this.propagateCategoryToDishes(name.trim(), oldCategory.trim(), sanitizedNew)
         const onRevert = options?.onRevert
         const undo = () =>
           this.updatePreparationCategory(name, sanitizedNew, oldCategory, { silent: true }).then(() => onRevert?.())
-        this.userMsgService.onSetSuccessMsgWithUndo(`ההכנה "${name}" עודכנה בהצלחה`, undo)
+        const text = this.translationService.translate('preparation_updated_named').replace('{name}', name)
+        this.userMsgService.onSetSuccessMsgWithUndo(text, undo)
       }
     })
   }
 
   async deleteCategory(key: string): Promise<void> {
     const trimmed = key.trim().toLowerCase()
-    await this.run('category.delete', 'שגיאה במחיקת הקטגוריה', async () => {
+    await this.run('category.delete', 'prep_category_delete_error', async () => {
       await this.taxonomy.removeByKey('prepCategory', trimmed)
     })
   }
@@ -170,7 +171,7 @@ export class PreparationRegistryService {
   async renameCategory(oldKey: string, newKey: string, newLabel: string): Promise<void> {
     const sanitizedNew = newKey.trim().toLowerCase().replace(/\s+/g, '_')
     if (!sanitizedNew || sanitizedNew === oldKey) return
-    await this.run('category.rename', 'שגיאה בעדכון הקטגוריה', async () => {
+    await this.run('category.rename', 'prep_category_update_error', async () => {
       // The server carries the new key into recipes/dishes; the preparations filed under the
       // category are taxonomy terms themselves, so they are moved here.
       await this.taxonomy.updateByKey('prepCategory', oldKey, { key: sanitizedNew })
@@ -195,24 +196,29 @@ export class PreparationRegistryService {
     }
     if (this.getPreparationByName(sanitizedName)) return
 
-    await this.run('save', 'שגיאה בשמירת ההכנה', async () => {
+    await this.run('save', 'preparation_save_error', async () => {
       await this.taxonomy.add('preparation', sanitizedName, key ? { categoryKey: key } : {})
-      this.userMsgService.onSetSuccessMsg(`ההכנה "${sanitizedName}" נוספה בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(
+        this.translationService.translate('preparation_added_named').replace('{name}', sanitizedName)
+      )
     })
   }
 
-  /** Runs a write; shows the store's own message (read-only / in use) or `fallbackMsg`. */
-  private async run(event: string, fallbackMsg: string, write: () => Promise<void>): Promise<void> {
+  /** Runs a write; logs a failure, then shows the store's own message (read-only / in use) or the
+   *  `fallbackKey` dictionary text. */
+  private async run(event: string, fallbackKey: string, write: () => Promise<void>): Promise<void> {
     try {
       await write()
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? fallbackMsg)
       this.logging.error({
         event: `crud.preparations.${event}_error`,
         message: `Preparation ${event} error`,
         context: { err }
       })
+      this.userMsgService.onSetErrorMsg(
+        this.taxonomy.errorMessage(err) ?? this.translationService.translate(fallbackKey)
+      )
     }
   }
 }

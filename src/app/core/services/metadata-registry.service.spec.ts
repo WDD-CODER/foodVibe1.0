@@ -181,6 +181,7 @@ describe('MetadataRegistryService', () => {
     ])
     translationSpy.validateKeyForHebrew.and.returnValue({ valid: true })
     translationSpy.resolveAllergen.and.callFake((s: string) => s?.trim().toLowerCase().replace(/\s+/g, '_') ?? null)
+    translationSpy.translate.and.callFake((k: string) => k)
     const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
     keyResolutionSpy.ensureKeyForContext.and.callFake((v: string) =>
       Promise.resolve(v?.trim() ? v.trim().toLowerCase().replace(/\s+/g, '_') : null)

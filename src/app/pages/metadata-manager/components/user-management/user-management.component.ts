@@ -4,6 +4,7 @@ import { UserService } from '@services/user.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { LoggingService } from '@services/logging.service'
 import { AdminUser } from '@models/admin-user.model'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -22,6 +23,7 @@ export class UserManagementComponent {
   private userMsg = inject(UserMsgService)
   private userService = inject(UserService)
   private translation = inject(TranslationService)
+  private logging = inject(LoggingService)
 
   protected users_ = signal<AdminUser[]>([])
   protected isLoading_ = signal(false)
@@ -41,7 +43,8 @@ export class UserManagementComponent {
         this.users_.set(users)
         this.isLoading_.set(false)
       },
-      error: () => {
+      error: (err: unknown) => {
+        this.logging.error({ event: 'admin.users.load_error', message: 'Admin user list load error', context: { err } })
         this.isLoading_.set(false)
       }
     })
@@ -74,7 +77,10 @@ export class UserManagementComponent {
         )
         this.loadUsers()
       },
-      error: () => this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
+      error: (err: unknown) => {
+        this.logging.error({ event: 'admin.users.delete_error', message: 'Admin user delete error', context: { err } })
+        this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
+      }
     })
   }
 }

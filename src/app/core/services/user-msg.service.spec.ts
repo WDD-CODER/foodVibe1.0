@@ -1,5 +1,10 @@
-import { fakeAsync, tick } from '@angular/core/testing'
+import { TestBed, fakeAsync, flushMicrotasks, tick } from '@angular/core/testing'
+import { provideHttpClient } from '@angular/common/http'
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
 import { UserMsgService } from './user-msg.service'
+import { TranslationService } from './translation.service'
+import { StorageService } from './async-storage.service'
+import { LoggingService } from './logging.service'
 
 describe('UserMsgService', () => {
   let service: UserMsgService
@@ -83,4 +88,31 @@ describe('UserMsgService', () => {
     service.onSetSuccessMsgWithUndo('Undo me', undo)
     expect(service.msg_()).toEqual({ txt: 'Undo me', type: 'success', undo })
   })
+
+  // Plan 456 — toasts take translate(key), never a Hebrew literal: the dictionary text is what shows.
+  it('shows the dictionary text of a translated key', fakeAsync(() => {
+    localStorage.removeItem('DICTIONARY_CACHE')
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: StorageService,
+          useValue: { getGlobalDictionaryOverrides: async () => ({}), query: async () => [] }
+        },
+        { provide: LoggingService, useValue: jasmine.createSpyObj('LoggingService', ['info', 'warn', 'error']) }
+      ]
+    })
+    const translation = TestBed.inject(TranslationService)
+    TestBed.inject(HttpTestingController)
+      .expectOne('assets/data/dictionary.json')
+      .flush({ general: { product_saved: 'המוצר נשמר', unit_added_named: 'היחידה {name} נוספה בהצלחה' } })
+    flushMicrotasks()
+
+    service.onSetSuccessMsg(translation.translate('product_saved'))
+    expect(service.msg_()).toEqual({ txt: 'המוצר נשמר', type: 'success' })
+    service.onSetSuccessMsg(translation.translate('unit_added_named').replace('{name}', 'jar'))
+    expect(service.msg_()?.txt).toBe('היחידה jar נוספה בהצלחה')
+    tick(2000)
+  }))
 })

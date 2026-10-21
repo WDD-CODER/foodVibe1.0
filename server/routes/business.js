@@ -1,7 +1,7 @@
 'use strict'
 /** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Plan 431: owner-only opening baseline and setup status. */
 const { Router } = require('express')
-const rateLimit = require('express-rate-limit')
+const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
 const { getBusiness, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
@@ -19,14 +19,12 @@ const router = Router()
 const STAFF_EMAIL_DOMAIN = '@staff.foodvibe.invalid'
 
 // Team routes are not under the /api/v1/data write limiter, and POST creates accounts, so POST is rate limited.
-const teamLimiter = rateLimit({
+const teamLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
   keyGenerator: req => String(req.user?.userId ?? 'anonymous'),
   validate: { keyGeneratorIpFallback: false },
-  message: { error: 'Too many team requests, please try again later' },
+  message: 'Too many team requests, please try again later',
 })
 
 // GET /api/v1/business — the business document of the signed-in user; `settings` always has the defaults filled in (nothing is written on read). Any member may read it.

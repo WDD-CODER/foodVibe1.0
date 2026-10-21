@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import type { BaselineInput, Business, BusinessSettings } from '@schemas/entities'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 import { LoggingService } from './logging.service'
 import { UserService } from './user.service'
 
@@ -47,19 +48,19 @@ export class BusinessService {
 
   /** Owner only: which setup steps are done. Not cached: the setup card asks every time it is created. */
   loadSetupStatus(): Promise<SetupStatus> {
-    return firstValueFrom(this.http.get<SetupStatus>(`${environment.apiUrl}/api/v1/business/setup-status`))
+    return firstValueFrom(this.http.get<SetupStatus>(`${environment.apiUrl}${API.business('setup-status')}`))
   }
 
   /** PUTs one owner-only part of the business and puts the stored reply into `business_`. */
   private async _put<K extends 'settings' | 'baseline'>(key: K, body: BusinessSettings | BaselineInput): Promise<void> {
     const res = await firstValueFrom(
-      this.http.put<Pick<Business, K>>(`${environment.apiUrl}/api/v1/business/${key}`, body)
+      this.http.put<Pick<Business, K>>(`${environment.apiUrl}${API.business(key)}`, body)
     )
     this._business_.update((business) => (business ? { ...business, ...res } : business))
   }
 
   private _load(userId: string): void {
-    this.http.get<Business>(`${environment.apiUrl}/api/v1/business`).subscribe({
+    this.http.get<Business>(`${environment.apiUrl}${API.business()}`).subscribe({
       next: (business) => {
         if (this._userId_() === userId) this._business_.set(business)
       },

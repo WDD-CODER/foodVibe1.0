@@ -3,7 +3,7 @@ import type { EventStage } from '@schemas/entities'
 /** Periods the dashboard offers: last 30 days, last 90 days, or since the business was created. */
 export type StatsPeriod = '30' | '90' | 'all'
 
-/** Read model of `GET /api/v1/stats/business` (plan 447). `null` where a value cannot be computed. */
+/** Read model of `GET API.stats('business')` (plan 447). `null` where a value cannot be computed. */
 export interface BusinessStats {
   period: StatsPeriod
   periodDays: number

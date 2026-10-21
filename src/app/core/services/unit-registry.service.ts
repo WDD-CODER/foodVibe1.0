@@ -172,7 +172,7 @@ export class UnitRegistryService {
     if (this.globalUnits_()[key]) {
       this.refreshFromStorage()
       this.deliverUnit(key, rate, basisUnitKey, context)
-      this.userMsgService.onSetSuccessMsg('נוספה לרשימת יחידות הרכש של המוצר.')
+      this.userMsgService.onSetSuccessMsg(this.translationService.translate('unit_added_to_product_purchase'))
       return { success: true, alreadyInRegistry: true }
     }
 
@@ -183,12 +183,14 @@ export class UnitRegistryService {
     try {
       await this.taxonomy.add('unit', key, { gramRate })
       this.deliverUnit(key, rate, basisUnitKey, context)
-      this.userMsgService.onSetSuccessMsg(`היחידה ${key} נוספה בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(this.translationService.translate('unit_added_named').replace('{name}', key))
       return { success: true }
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return { success: false, error: 'unit_save_error' }
-      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? 'שגיאה בשמירת היחידה במערכת')
       this.logging.error({ event: 'crud.units.save_error', message: 'Unit save error', context: { err } })
+      this.userMsgService.onSetErrorMsg(
+        this.taxonomy.errorMessage(err) ?? this.translationService.translate('unit_save_error')
+      )
       return { success: false, error: 'unit_save_error' }
     }
   }
@@ -210,16 +212,20 @@ export class UnitRegistryService {
   /** Deletes a custom unit. System units (kg, liter, gram, ml, unit, dish, ...) cannot be removed. */
   async deleteUnit(unitKey: string): Promise<void> {
     if (unitKey in SYSTEM_UNITS) {
-      this.userMsgService.onSetErrorMsg('לא ניתן למחוק יחידות בסיס')
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_base_cannot_delete'))
       return
     }
     try {
       if (await this.taxonomy.removeByKey('unit', unitKey))
-        this.userMsgService.onSetSuccessMsg(`היחידה ${unitKey} הוסרה`)
+        this.userMsgService.onSetSuccessMsg(
+          this.translationService.translate('unit_removed_named').replace('{name}', unitKey)
+        )
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? 'שגיאה במחיקת היחידה מהשרת')
       this.logging.error({ event: 'crud.units.delete_error', message: 'Unit delete error', context: { err } })
+      this.userMsgService.onSetErrorMsg(
+        this.taxonomy.errorMessage(err) ?? this.translationService.translate('unit_delete_server_error')
+      )
     }
   }
 
@@ -230,7 +236,7 @@ export class UnitRegistryService {
   async renameUnit(oldKey: string, newKey: string): Promise<boolean> {
     const next = (newKey ?? '').trim().toLowerCase()
     if (oldKey in SYSTEM_UNITS) {
-      this.userMsgService.onSetErrorMsg('לא ניתן לערוך יחידות בסיס')
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_base_cannot_edit'))
       return false
     }
     if (!next) {
@@ -239,7 +245,7 @@ export class UnitRegistryService {
     }
     if (next === oldKey) return true
     if (next in this.globalUnits_()) {
-      this.userMsgService.onSetErrorMsg(`היחידה ${next} כבר קיימת`)
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_exists_named').replace('{name}', next))
       return false
     }
     return this.saveUnitChange(oldKey, { key: next }, 'crud.units.rename_error')
@@ -248,11 +254,11 @@ export class UnitRegistryService {
   /** Plan 377 — changes a custom unit's gram-equivalent rate. False when refused or the save failed. */
   async updateUnitRate(key: string, gramRate: number): Promise<boolean> {
     if (key in SYSTEM_UNITS) {
-      this.userMsgService.onSetErrorMsg('לא ניתן לערוך יחידות בסיס')
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_base_cannot_edit'))
       return false
     }
     if (!Number.isFinite(gramRate) || gramRate <= 0) {
-      this.userMsgService.onSetErrorMsg('ההמרה חייבת להיות גדולה מאפס')
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_rate_must_be_positive'))
       return false
     }
     return this.saveUnitChange(key, { gramRate }, 'crud.units.rate_error')
@@ -265,12 +271,16 @@ export class UnitRegistryService {
   ): Promise<boolean> {
     try {
       if (await this.taxonomy.updateByKey('unit', key, changes)) return true
-      this.userMsgService.onSetErrorMsg(`היחידה ${key} לא נמצאה`)
+      this.userMsgService.onSetErrorMsg(
+        this.translationService.translate('unit_not_found_named').replace('{name}', key)
+      )
       return false
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return false
-      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? 'שגיאה בשמירת היחידה במערכת')
       this.logging.error({ event, message: 'Unit update error', context: { err } })
+      this.userMsgService.onSetErrorMsg(
+        this.taxonomy.errorMessage(err) ?? this.translationService.translate('unit_save_error')
+      )
       return false
     }
   }

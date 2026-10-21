@@ -37,8 +37,10 @@ describe('PreparationRegistryService', () => {
     const userMsgSpy = jasmine.createSpyObj('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
     const translationSpy = jasmine.createSpyObj('TranslationService', [
       'updateDictionary',
-      'resolvePreparationCategory'
+      'resolvePreparationCategory',
+      'translate'
     ])
+    translationSpy.translate.and.callFake((k: string) => k)
     translationSpy.resolvePreparationCategory.and.returnValue('מטבח')
     const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
     keyResolutionSpy.ensureKeyForContext.and.callFake((v: string) =>

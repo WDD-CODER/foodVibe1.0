@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, inject } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { catchError, of } from 'rxjs'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 
 /** Ping interval — well under Render Free ~15 min idle sleep. */
 const PING_INTERVAL_MS = 4 * 60 * 1000
@@ -72,7 +73,7 @@ export class ServerHeartbeatService {
 
   private ping_(): void {
     this.http_
-      .get<{ ok: boolean; ts: number }>(`${environment.authApiUrl}/api/v1/health`)
+      .get<{ ok: boolean; ts: number }>(`${environment.authApiUrl}${API.health}`)
       .pipe(catchError(() => of(null)))
       .subscribe()
   }

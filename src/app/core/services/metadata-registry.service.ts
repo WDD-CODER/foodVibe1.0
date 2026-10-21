@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http'
 import { ProductDataService } from './product-data.service'
 import { UserMsgService } from './user-msg.service'
 import { LoggingService } from './logging.service'
+import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { TaxonomyStore } from './taxonomy-store.service'
 import type { TaxonomyKind } from '@models/v2'
@@ -27,6 +28,7 @@ export class MetadataRegistryService {
   private readonly logging = inject(LoggingService)
   private readonly keyResolution = inject(KeyResolutionService)
   private readonly taxonomy = inject(TaxonomyStore)
+  private readonly translation = inject(TranslationService)
 
   //PUBLIC SIGNALS
   public allCategories_ = computed(() =>
@@ -83,29 +85,29 @@ export class MetadataRegistryService {
   async registerMenuType(def: MenuTypeDefinition): Promise<void> {
     const key = def.key.trim()
     if (!key || this.taxonomy.find('menuType', key)) return
-    await this.run('menuType.save', 'שגיאה בשמירת סוג התפריט', async () => {
+    await this.run('menuType.save', 'menu_type_save_error', async () => {
       await this.taxonomy.add('menuType', key, { fields: def.fields ?? [...DEFAULT_DISH_FIELDS] })
-      this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" נוסף בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(this.msg('menu_type_added', key))
     })
   }
 
   async updateMenuType(key: string, fields: DishFieldKey[]): Promise<void> {
-    await this.run('menuType.update', 'שגיאה בעדכון סוג התפריט', async () => {
+    await this.run('menuType.update', 'menu_type_update_error', async () => {
       if (await this.taxonomy.updateByKey('menuType', key, { fields })) {
-        this.userMsgService.onSetSuccessMsg(`סוג תפריט "${key}" עודכן`)
+        this.userMsgService.onSetSuccessMsg(this.msg('menu_type_updated', key))
       }
     })
   }
 
   deleteMenuType(key: string): Promise<void> {
-    return this.removeTerm('menuType', key, 'שגיאה במחיקת סוג התפריט', `סוג תפריט "${key}" נמחק`)
+    return this.removeTerm('menuType', key, 'menu_type_delete_error', 'menu_type_deleted')
   }
 
   renameMenuType(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('menuType', oldKey, newKey, {
-      exists: (k) => `סוג תפריט "${k}" כבר קיים`,
-      error: 'שגיאה בשינוי שם סוג התפריט',
-      success: (k) => `סוג תפריט שונה ל-"${k}"`
+      exists: 'menu_type_exists',
+      error: 'menu_type_rename_error',
+      success: 'menu_type_renamed'
     })
   }
 
@@ -118,28 +120,28 @@ export class MetadataRegistryService {
   async registerLabel(key: string, color: string, autoTriggers?: string[]): Promise<void> {
     const sanitized = key.trim()
     if (!sanitized || this.taxonomy.find('label', sanitized)) return
-    await this.run('label.save', 'שגיאה בשמירת התווית', async () => {
+    await this.run('label.save', 'label_save_error', async () => {
       await this.taxonomy.add('label', sanitized, { color: color || '#78716C', autoTriggers: autoTriggers ?? [] })
-      this.userMsgService.onSetSuccessMsg(`תווית "${sanitized}" נוספה בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(this.msg('label_added', sanitized))
     })
   }
 
   deleteLabel(key: string): Promise<void> {
-    return this.removeTerm('label', key, 'שגיאה במחיקת התווית', `תווית ${key} נמחקה בהצלחה`)
+    return this.removeTerm('label', key, 'label_delete_error', 'label_deleted')
   }
 
   async updateLabel(key: string, changes: Partial<LabelDefinition>): Promise<void> {
     const { key: newKey, ...extras } = changes
-    await this.run('label.update', 'שגיאה בעדכון התווית', async () => {
+    await this.run('label.update', 'label_update_error', async () => {
       await this.taxonomy.updateByKey('label', key, { ...extras, ...(newKey !== undefined && { key: newKey }) })
     })
   }
 
   renameLabel(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('label', oldKey, newKey, {
-      exists: (k) => `התווית "${k}" כבר קיימת`,
-      error: 'שגיאה בשינוי שם התווית',
-      success: (k) => `התווית שונתה ל-"${k}"`
+      exists: 'label_exists',
+      error: 'label_rename_error',
+      success: 'label_renamed'
     })
   }
 
@@ -150,21 +152,21 @@ export class MetadataRegistryService {
     if (!keyToUse) return
     const sanitized = keyToUse.trim()
     if (!sanitized || this.taxonomy.find('course', sanitized)) return
-    await this.run('course.save', 'שגיאה בשמירת סוג המנה', async () => {
+    await this.run('course.save', 'course_save_error', async () => {
       await this.taxonomy.add('course', sanitized, {})
-      this.userMsgService.onSetSuccessMsg(`סוג מנה "${sanitized}" נוסף בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(this.msg('course_added', sanitized))
     })
   }
 
   deleteCourse(key: string): Promise<void> {
-    return this.removeTerm('course', key, 'שגיאה במחיקת סוג המנה', `סוג מנה ${key} נמחק בהצלחה`)
+    return this.removeTerm('course', key, 'course_delete_error', 'course_deleted')
   }
 
   renameCourse(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('course', oldKey, newKey, {
-      exists: (k) => `סוג המנה "${k}" כבר קיים`,
-      error: 'שגיאה בשינוי שם סוג המנה',
-      success: (k) => `סוג המנה שונה ל-"${k}"`
+      exists: 'course_exists',
+      error: 'course_rename_error',
+      success: 'course_renamed'
     })
   }
 
@@ -193,9 +195,9 @@ export class MetadataRegistryService {
     const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'allergen')
     if (!keyToUse) return null
     if (this.taxonomy.find('allergen', keyToUse)) return keyToUse
-    const ok = await this.run('allergen.save', 'שגיאה בשמירת האלרגן', async () => {
+    const ok = await this.run('allergen.save', 'allergen_save_error', async () => {
       await this.taxonomy.add('allergen', keyToUse, {})
-      this.userMsgService.onSetSuccessMsg(`אלרגן "${keyToUse}" נוסף בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(this.msg('allergen_added', keyToUse))
     })
     return ok ? keyToUse : null
   }
@@ -204,35 +206,35 @@ export class MetadataRegistryService {
     const keyToUse = await this.keyResolution.ensureKeyForContext(name, 'category')
     if (!keyToUse) return null
     if (this.taxonomy.find('ingredientCategory', keyToUse)) return keyToUse
-    const ok = await this.run('category.save', 'שגיאה בשמירת הקטגוריה', async () => {
+    const ok = await this.run('category.save', 'category_save_error', async () => {
       await this.taxonomy.add('ingredientCategory', keyToUse, {})
-      this.userMsgService.onSetSuccessMsg(`הקטגוריה "${keyToUse}" נוספה בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(this.msg('category_added', keyToUse))
     })
     return ok ? keyToUse : null
   }
 
   deleteCategory(name: string): Promise<void> {
-    return this.removeTerm('ingredientCategory', name, 'שגיאה במחיקת הקטגוריה מהשרת', `הקטגוריה ${name} נמחקה בהצלחה`)
+    return this.removeTerm('ingredientCategory', name, 'category_delete_server_error', 'category_deleted')
   }
 
   renameCategory(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('ingredientCategory', oldKey, newKey, {
-      exists: (k) => `הקטגוריה "${k}" כבר קיימת`,
-      error: 'שגיאה בשינוי שם הקטגוריה',
-      success: (k) => `הקטגוריה שונתה ל-"${k}"`
+      exists: 'category_exists',
+      error: 'category_rename_error',
+      success: 'category_renamed'
     })
   }
 
   renameAllergen(oldKey: string, newKey: string): Promise<boolean> {
     return this.renameTerm('allergen', oldKey, newKey, {
-      exists: (k) => `האלרגן "${k}" כבר קיים`,
-      error: 'שגיאה בשינוי שם האלרגן',
-      success: (k) => `האלרגן שונה ל-"${k}"`
+      exists: 'allergen_exists',
+      error: 'allergen_rename_error',
+      success: 'allergen_renamed'
     })
   }
 
   deleteAllergen(name: string): Promise<void> {
-    return this.removeTerm('allergen', name, 'שגיאה במחיקת האלרגן מהשרת', `האלרגן ${name} נמחק`)
+    return this.removeTerm('allergen', name, 'allergen_delete_server_error', 'allergen_deleted')
   }
 
   // ── Share with everyone (admin) ─────────────────────────────────────────
@@ -287,48 +289,56 @@ export class MetadataRegistryService {
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
-  /** Deletes the term `key` of `kind`; `success` shows only when there was such a term. */
-  private async removeTerm(kind: TaxonomyKind, key: string, error: string, success: string): Promise<void> {
-    await this.run(`${kind}.delete`, error, async () => {
-      if (await this.taxonomy.removeByKey(kind, key)) this.userMsgService.onSetSuccessMsg(success)
+  /** Dictionary text for `key`, with `{name}` filled in when a name is given. */
+  private msg(key: string, name?: string): string {
+    const text = this.translation.translate(key)
+    return name === undefined ? text : text.replace('{name}', name)
+  }
+
+  /** Deletes the term `key` of `kind`; the `successKey` message shows only when there was such a term. */
+  private async removeTerm(kind: TaxonomyKind, key: string, errorKey: string, successKey: string): Promise<void> {
+    await this.run(`${kind}.delete`, errorKey, async () => {
+      if (await this.taxonomy.removeByKey(kind, key)) this.userMsgService.onSetSuccessMsg(this.msg(successKey, key))
     })
   }
 
   /** Re-keys a term (the server carries the new key into the documents that use it). A no-op for
-   *  an empty or unchanged key; refused with `exists` when `kind` already has the new key. */
+   *  an empty or unchanged key; refused with `exists` when `kind` already has the new key.
+   *  `msgs` are dictionary keys; `{name}` is filled with the new key. */
   private async renameTerm(
     kind: TaxonomyKind,
     oldKey: string,
     newKey: string,
-    msgs: { exists: (key: string) => string; error: string; success: (key: string) => string }
+    msgs: { exists: string; error: string; success: string }
   ): Promise<boolean> {
     const trimmed = newKey.trim()
     if (!trimmed || trimmed === oldKey) return false
     if (this.taxonomy.find(kind, trimmed)) {
-      this.userMsgService.onSetErrorMsg(msgs.exists(trimmed))
+      this.userMsgService.onSetErrorMsg(this.msg(msgs.exists, trimmed))
       return false
     }
     let renamed = false
     const ok = await this.run(`${kind}.rename`, msgs.error, async () => {
       renamed = await this.taxonomy.updateByKey(kind, oldKey, { key: trimmed })
-      if (renamed) this.userMsgService.onSetSuccessMsg(msgs.success(trimmed))
+      if (renamed) this.userMsgService.onSetSuccessMsg(this.msg(msgs.success, trimmed))
     })
     return ok && renamed
   }
 
-  /** Runs a write; shows the store's own message (read-only / in use) or `fallbackMsg`. True on success. */
-  private async run(event: string, fallbackMsg: string, write: () => Promise<void>): Promise<boolean> {
+  /** Runs a write; logs a failure, then shows the store's own message (read-only / in use) or the
+   *  `fallbackKey` dictionary text. True on success. */
+  private async run(event: string, fallbackKey: string, write: () => Promise<void>): Promise<boolean> {
     try {
       await write()
       return true
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return false
-      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? fallbackMsg)
       this.logging.error({
         event: `crud.metadata.${event}_error`,
         message: `Metadata ${event} error`,
         context: { err }
       })
+      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? this.msg(fallbackKey))
       return false
     }
   }

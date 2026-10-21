@@ -43,6 +43,7 @@ describe('UnitRegistryService', () => {
     ])
     translationSpy.validateKeyForHebrew.and.returnValue({ valid: true })
     translationSpy.resolveUnit.and.callFake((s: string) => s?.trim().toLowerCase().replace(/\s+/g, '_') ?? null)
+    translationSpy.translate.and.callFake((k: string) => k)
     const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
     keyResolutionSpy.ensureKeyForContext.and.callFake((v: string) =>
       Promise.resolve(v?.trim() ? v.trim().toLowerCase().replace(/\s+/g, '_') : null)
@@ -91,7 +92,7 @@ describe('UnitRegistryService', () => {
     it('should not delete system units and should show error message', fakeAsync(() => {
       service.deleteUnit('gram')
       tick()
-      expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('לא ניתן למחוק יחידות בסיס')
+      expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('unit_base_cannot_delete')
       expect(service.allUnitKeys_()).toContain('gram')
     }))
 

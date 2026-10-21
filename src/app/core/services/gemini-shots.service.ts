@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
 import type { AiRecipeDraft } from './ai-recipe-draft.service'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 
 /** Grams per one of each canonical unit — mirrors GRAMS_PER_UNIT in server/services/ai-recipe-helpers.js. */
 const GRAMS_PER_UNIT: Readonly<Record<string, number>> = {
@@ -79,7 +80,7 @@ export class GeminiShotsService {
     status: 'approved' | 'rejected',
     source: 'text' | 'image' | 'url'
   ): Observable<{ saved: boolean; warnings: string[] }> {
-    return this.http_.post<{ saved: boolean; warnings: string[] }>(`${this.authBase_}/api/v1/ai/shots`, {
+    return this.http_.post<{ saved: boolean; warnings: string[] }>(`${this.authBase_}${API.ai('shots')}`, {
       prompt,
       draft,
       status,

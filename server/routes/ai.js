@@ -1,7 +1,8 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const rateLimit = require('express-rate-limit');
 const { verifyToken, requirePlatformAdmin } = require('../middleware/auth');
+const { createRateLimiter } = require('../middleware/rate-limit');
+const { badRequest, requireFields } = require('../middleware/validate');
 const dns = require('node:dns').promises;
 const { assertCan } = require('../utils/permissions');
 const { MAX_IMPORT_TEXT, normalizePriceListRows } = require('../utils/price-list-import');
@@ -12,13 +13,11 @@ const { MAX_IMPORT_TEXT, normalizePriceListRows } = require('../utils/price-list
 // not throttle every user on it together. The daily cap is Google's own per-model free
 // quota, handled by the model chain in services/gemini-client.js (plan 395); this one
 // caps how fast any single account can burn through it.
-const aiLimiter = rateLimit({
+const aiLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
   keyGenerator: (req) => req.user?.userId || req.ip,
-  message: { error: 'Too many AI requests, please try again later' },
+  message: 'Too many AI requests, please try again later',
 });
 
 const PRIVATE_IP_RANGES = [
@@ -85,7 +84,7 @@ router.get('/models', verifyToken, requirePlatformAdmin, async (_req, res) => {
 router.put('/models', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     const error = await saveChainSettings(req.body?.models);
-    if (error) return res.status(400).json({ error });
+    if (error) return badRequest(res, error);
     req.log.info({ event: 'ai.models.saved' });
     return res.json({ models: await getChainSettings() });
   } catch (err) {
@@ -284,7 +283,7 @@ function respondFromGeminiFailure(res, result) {
     case 'all_exhausted':
       return res.status(429).json({ error: 'daily_limit_reached', resetAt: result.resetAt });
     case 'model_removed':
-      return res.status(400).json({ error: 'model_removed', model: result.model });
+      return badRequest(res, 'model_removed', { model: result.model });
     case 'gemini_error':
       return res.status(502).json({ error: `Gemini API error: ${result.status}`, geminiMessage: result.message });
     case 'timeout':
@@ -323,9 +322,7 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { prompt } = req.body;
-  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
-    return res.status(400).json({ error: 'prompt is required' });
-  }
+  if (!requireFields(res, req.body, { prompt: 'text' })) return;
 
   const shots = selectShots(await getApprovedShots(), prompt, FEW_SHOT_COUNT);
   const requestBody = {
@@ -406,9 +403,7 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { rawText } = req.body;
-  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
-    return res.status(400).json({ error: 'rawText is required' });
-  }
+  if (!requireFields(res, req.body, { rawText: 'text' })) return;
 
   try {
     const call = await callGemini({
@@ -471,11 +466,9 @@ router.post('/parse-price-list', verifyToken, (req, res, next) => {
   }
 
   const { rawText } = req.body;
-  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
-    return res.status(400).json({ error: 'rawText is required' });
-  }
+  if (!requireFields(res, req.body, { rawText: 'text' })) return;
   if (rawText.length > MAX_IMPORT_TEXT) {
-    return res.status(400).json({ error: 'TEXT_TOO_LONG', max: MAX_IMPORT_TEXT });
+    return badRequest(res, 'TEXT_TOO_LONG', { max: MAX_IMPORT_TEXT });
   }
 
   try {
@@ -574,12 +567,7 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { currentRecipe, instruction } = req.body;
-  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
-    return res.status(400).json({ error: 'instruction is required' });
-  }
-  if (!currentRecipe || typeof currentRecipe !== 'object') {
-    return res.status(400).json({ error: 'currentRecipe is required' });
-  }
+  if (!requireFields(res, req.body, { instruction: 'text', currentRecipe: 'object' })) return;
 
   const userContent = `CURRENT RECIPE:\n${JSON.stringify(currentRecipe, null, 2)}\n\nUSER INSTRUCTION:\n${instruction.trim()}`;
 
@@ -717,9 +705,7 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { rawText } = req.body;
-  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
-    return res.status(400).json({ error: 'rawText is required' });
-  }
+  if (!requireFields(res, req.body, { rawText: 'text' })) return;
 
   const menuShots = await getApprovedMenuShots(2);
 
@@ -815,12 +801,7 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { currentMenu, instruction } = req.body;
-  if (!currentMenu || typeof currentMenu !== 'object') {
-    return res.status(400).json({ error: 'currentMenu is required' });
-  }
-  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
-    return res.status(400).json({ error: 'instruction is required' });
-  }
+  if (!requireFields(res, req.body, { currentMenu: 'object', instruction: 'text' })) return;
 
   try {
     const userMessage = `CURRENT MENU:\n${JSON.stringify(currentMenu, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
@@ -945,9 +926,7 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { rawText } = req.body;
-  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
-    return res.status(400).json({ error: 'rawText is required' });
-  }
+  if (!requireFields(res, req.body, { rawText: 'text' })) return;
 
   try {
     const call = await callGemini({
@@ -1036,12 +1015,7 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { currentProduct, instruction } = req.body;
-  if (!currentProduct || typeof currentProduct !== 'object') {
-    return res.status(400).json({ error: 'currentProduct is required' });
-  }
-  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
-    return res.status(400).json({ error: 'instruction is required' });
-  }
+  if (!requireFields(res, req.body, { currentProduct: 'object', instruction: 'text' })) return;
 
   try {
     const userMessage = `CURRENT PRODUCT:\n${JSON.stringify(currentProduct, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
@@ -1097,11 +1071,9 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
   }
 
   const { imageBase64, mimeType } = req.body;
-  if (!imageBase64 || typeof imageBase64 !== 'string' || !imageBase64.trim()) {
-    return res.status(400).json({ error: 'imageBase64 is required' });
-  }
+  if (!requireFields(res, req.body, { imageBase64: 'text' })) return;
   if (!mimeType || typeof mimeType !== 'string' || !mimeType.startsWith('image/')) {
-    return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
+    return badRequest(res, 'mimeType must be a valid image MIME type');
   }
 
   // No request text to match approved examples against (selectShots would pick none),
@@ -1147,11 +1119,9 @@ router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, 
   }
 
   const { imageBase64, mimeType, hint } = req.body;
-  if (!imageBase64 || typeof imageBase64 !== 'string' || !imageBase64.trim()) {
-    return res.status(400).json({ error: 'imageBase64 is required' });
-  }
+  if (!requireFields(res, req.body, { imageBase64: 'text' })) return;
   if (!mimeType || typeof mimeType !== 'string' || !mimeType.startsWith('image/')) {
-    return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
+    return badRequest(res, 'mimeType must be a valid image MIME type');
   }
 
   const parts = [{ text: PRODUCT_FROM_IMAGE_INSTRUCTION }];
@@ -1248,15 +1218,13 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { url } = req.body;
-  if (!url || typeof url !== 'string' || !url.trim()) {
-    return res.status(400).json({ error: 'url is required' });
-  }
+  if (!requireFields(res, req.body, { url: 'text' })) return;
   if (!/^https?:\/\//i.test(url.trim())) {
-    return res.status(400).json({ error: 'url must start with http:// or https://' });
+    return badRequest(res, 'url must start with http:// or https://');
   }
   const safe = await isSafeUrl(url.trim());
   if (!safe) {
-    return res.status(400).json({ error: 'url resolves to a disallowed address' });
+    return badRequest(res, 'url resolves to a disallowed address');
   }
 
   let pageText;
@@ -1314,17 +1282,12 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
 router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
   const { prompt, draft, status, source } = req.body;
 
-  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
-    return res.status(400).json({ error: 'prompt is required' });
-  }
-  if (!draft || typeof draft !== 'object') {
-    return res.status(400).json({ error: 'draft is required' });
-  }
+  if (!requireFields(res, req.body, { prompt: 'text', draft: 'object' })) return;
   if (status !== 'approved' && status !== 'rejected') {
-    return res.status(400).json({ error: 'status must be "approved" or "rejected"' });
+    return badRequest(res, 'status must be "approved" or "rejected"');
   }
   if (!['text', 'image', 'url'].includes(source)) {
-    return res.status(400).json({ error: 'source must be "text", "image", or "url"' });
+    return badRequest(res, 'source must be "text", "image", or "url"');
   }
 
   // Hard structural validation — only block approved shots with broken structure
@@ -1356,15 +1319,10 @@ router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
 
 router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
   const { prompt, menu } = req.body;
-  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
-    return res.status(400).json({ error: 'prompt is required' });
-  }
-  if (!menu || typeof menu !== 'object') {
-    return res.status(400).json({ error: 'menu is required' });
-  }
+  if (!requireFields(res, req.body, { prompt: 'text', menu: 'object' })) return;
   const validationErrors = validateMenuDraft(menu);
   if (validationErrors.length > 0) {
-    return res.status(400).json({ error: 'invalid menu draft', details: validationErrors });
+    return badRequest(res, 'invalid menu draft', { details: validationErrors });
   }
   try {
     await menuShotsCol().insertOne({ prompt: prompt.trim(), menu, createdAt: new Date() });

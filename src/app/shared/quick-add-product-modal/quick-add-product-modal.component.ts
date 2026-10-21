@@ -19,6 +19,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { LoggingService } from '@services/logging.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { Product } from '@models/product.model'
 import { CustomSelectComponent } from '../custom-select/custom-select.component'
@@ -39,6 +40,7 @@ export class QuickAddProductModalComponent {
   private readonly unitRegistry = inject(UnitRegistryService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly logging = inject(LoggingService)
   private readonly translation = inject(TranslationService)
   private readonly addItemModal = inject(AddItemModalService)
   private readonly gemini_ = inject(GeminiService)
@@ -241,9 +243,14 @@ export class QuickAddProductModalComponent {
         notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), saved.nameHebrew)
         this.modalService.save(saved)
       },
-      () => {
+      (err: unknown) => {
+        this.logging.error({
+          event: 'crud.products.quick_add_error',
+          message: 'Quick add save error',
+          context: { err }
+        })
         this.isSubmitting_.set(false)
-        this.userMsg.onSetErrorMsg('שגיאה בשמירת המוצר')
+        this.userMsg.onSetErrorMsg(this.translation.translate('product_save_error'))
       }
     )
   }
