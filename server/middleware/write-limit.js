@@ -1,5 +1,6 @@
-const jwt = require('jsonwebtoken');
-const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
+const { verifyAccessToken } = require('./auth');
+const { createRateLimiter } = require('./rate-limit');
 
 // Plan 321 Phase 1 — moderate rate limit on writes (POST/PUT/DELETE); reads (GET) are
 // skipped since master-catalog/search reads are meant to be cheap and frequent.
@@ -12,28 +13,19 @@ const DATA_WRITE_LIMIT_MAX = Number(process.env.DATA_WRITE_LIMIT_MAX ?? 1000);
 
 /** Bucket key: `user:<id>` for a verified Bearer token, else the IPv6-safe IP key. */
 function writeLimitKey(req) {
-  const header = req.headers['authorization'] || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-  if (token) {
-    try {
-      const { userId } = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-      if (userId) return `user:${userId}`;
-    } catch {
-      // Invalid/expired token: verifyToken rejects the write anyway; bucket it by IP.
-    }
-  }
+  // Invalid/expired token: verifyToken rejects the write anyway; bucket it by IP.
+  const userId = verifyAccessToken(req)?.userId;
+  if (userId) return `user:${userId}`;
   return ipKeyGenerator(req.ip);
 }
 
 const dataWriteLimiter = DATA_WRITE_LIMIT_MAX > 0
-  ? rateLimit({
+  ? createRateLimiter({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: DATA_WRITE_LIMIT_MAX,
-      standardHeaders: true,
-      legacyHeaders: false,
       keyGenerator: writeLimitKey,
       skip: (req) => req.method === 'GET',
-      message: { error: 'Too many requests, please try again later' },
+      message: 'Too many requests, please try again later',
     })
   : (req, res, next) => next();
 

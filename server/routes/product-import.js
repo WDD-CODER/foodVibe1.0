@@ -9,7 +9,7 @@
  * A matching product (same normalized name, same business) only gets its price/supplier updated; a new name is created.
  */
 const { Router } = require('express')
-const rateLimit = require('express-rate-limit')
+const { createRateLimiter } = require('../middleware/rate-limit')
 const mongoose = require('mongoose')
 const { verifyToken } = require('../middleware/auth')
 const { assertCan } = require('../utils/permissions')
@@ -23,14 +23,12 @@ const router = Router()
 
 // IMPORT_LIMIT_MAX: tests raise or lower the budget; production keeps the plan's 10 per 15 minutes.
 const IMPORT_LIMIT_MAX = Number(process.env.IMPORT_LIMIT_MAX ?? 10)
-const importLimiter = rateLimit({
+const importLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: IMPORT_LIMIT_MAX,
-  standardHeaders: true,
-  legacyHeaders: false,
   keyGenerator: req => String(req.user?.userId ?? 'anonymous'),
   validate: { keyGeneratorIpFallback: false },
-  message: { error: 'Too many imports, please try again later' },
+  message: 'Too many imports, please try again later',
 })
 
 const col = name => mongoose.connection.db.collection(name)

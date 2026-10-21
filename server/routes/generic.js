@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const { verifyToken, optionalToken, requirePlatformAdmin } = require('../middleware/auth');
+const { verifyToken, optionalToken, requirePlatformAdmin, isPlatformAdmin } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
 const { bumpMasterVersion } = require('../services/master-version');
@@ -60,12 +60,11 @@ function requireSoftDelete(req, res, next) {
 // ---------------------------------------------------------------------------
 const TAXONOMY = 'taxonomyTerms';
 const MASTER = '__master__';
-const isAdmin = req => req.user?.isPlatformAdmin === true;
 
 /** businessId filter for writes to a term (plan 425): own business's terms, plus master's for a platform admin. */
 function termWriteOwner(req) {
   const { businessId } = scopeFilter(req);
-  return isAdmin(req) ? { businessId: { $in: [businessId, MASTER] } } : { businessId };
+  return isPlatformAdmin(req) ? { businessId: { $in: [businessId, MASTER] } } : { businessId };
 }
 
 /** Businesses whose documents a term's key reaches: everyone for a shared term, else its own business. */
@@ -442,7 +441,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
     // Plan 442: a client never sets an event's stage, history or notes; the server starts every event in "inquiry".
     if (entityType === EVENTS) safeEntity = withSavedSnapshot(withoutServerEventFields(safeEntity), null);
-    if (shared && !isAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
+    if (shared && !isPlatformAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
       if (!assertCan(req, res, writeAction(entityType, safeEntity, 'create'), { type: entityType })) return;

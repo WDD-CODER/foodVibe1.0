@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const rateLimit = require('express-rate-limit');
+const { createRateLimiter } = require('../middleware/rate-limit');
 const User = require('../models/user.model');
 const { cloneMasterDataToBusiness } = require('../services/clone-master');
 const { syncMasterToBusiness } = require('../services/sync-master');
@@ -27,28 +27,22 @@ const REFRESH_COOKIE = process.env.NODE_ENV === 'development'
 // Rate limiters
 // ---------------------------------------------------------------------------
 
-const loginLimiter = rateLimit({
+const loginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many login attempts, please try again later' },
+  message: 'Too many login attempts, please try again later',
 });
 
-const signupLimiter = rateLimit({
+const signupLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many signup attempts, please try again later' },
+  message: 'Too many signup attempts, please try again later',
 });
 
-const refreshLimiter = rateLimit({
+const refreshLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many refresh attempts, please try again later' },
+  message: 'Too many refresh attempts, please try again later',
 });
 
 // ---------------------------------------------------------------------------
