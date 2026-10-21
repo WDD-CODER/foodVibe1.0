@@ -143,10 +143,19 @@ describe('GET /team', () => {
     const a = await add('cook1')
     const b = await add('cook2')
     await request(app).delete(`${TEAM}/${b.body._id}`).set(as(OWNER))
+    // Earlier calls were recorded after their responses; let them land, then set known usage records (plan 430).
+    await new Promise(resolve => setTimeout(resolve, 300))
+    const usage = testDb().collection('usageDays')
+    await usage.deleteMany({})
+    await usage.insertMany([
+      { _id: 'own1:2026-10-19', userId: 'own1', businessId: 'b1', date: '2026-10-19', firstAt: 1000, lastAt: 2000, writeCount: 1 },
+      { _id: 'own1:2026-10-20', userId: 'own1', businessId: 'b1', date: '2026-10-20', firstAt: 5000, lastAt: 6000, writeCount: 1 },
+      { _id: 'x:2026-10-20', userId: 'x', businessId: 'b2', date: '2026-10-20', firstAt: 1, lastAt: 9999, writeCount: 1 },
+    ])
     const res = await request(app).get(TEAM).set(as(OWNER))
     expect(res.status).toBe(200)
     expect(res.body.map(r => r.name)).toEqual(['owner1', 'cook1'])
-    expect(res.body[0]).toEqual({ _id: 'own1', name: 'owner1', businessRole: 'owner', createdAt: 10, lastActiveAt: null })
+    expect(res.body[0]).toEqual({ _id: 'own1', name: 'owner1', businessRole: 'owner', createdAt: 10, lastActiveAt: 6000 })
     expect(res.body[1]).toEqual({ _id: a.body._id, name: 'cook1', businessRole: 'staff', createdAt: expect.any(Number), lastActiveAt: null })
   })
 })
