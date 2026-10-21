@@ -10,14 +10,6 @@ $break-mobile: 768px; // mirrors src/styles.scss
 
     padding: 1.5rem;
 
-    background: var(--bg-glass-strong);
-
-    border: 1px solid var(--border-glass);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-glass);
-    backdrop-filter: var(--blur-glass);
-    -webkit-backdrop-filter: var(--blur-glass);
-
     @media (max-width: $break-mobile) {
       padding: 1rem;
     }

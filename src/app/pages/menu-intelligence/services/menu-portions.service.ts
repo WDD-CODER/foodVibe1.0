@@ -65,17 +65,12 @@ export class MenuPortionsService {
     if (event.servingTypeSnapshot) this.remembered_.set('menuType', event.servingTypeSnapshot)
   }
 
-  /** The snapshots to store on the event for the chosen event type and serving type. */
+  /** The snapshots to store on the event for the chosen event type and serving type. Only reads: safe inside a computed. */
   snapshots(
     eventTypeKey: string,
     servingTypeKey: string
   ): { eventTypeSnapshot?: TypeSnapshot; servingTypeSnapshot?: TypeSnapshot } {
-    const eventTypeSnapshot = this.snapshotOf('eventType', eventTypeKey)
-    const servingTypeSnapshot = this.snapshotOf('menuType', servingTypeKey)
-    return {
-      ...(eventTypeSnapshot && { eventTypeSnapshot }),
-      ...(servingTypeSnapshot && { servingTypeSnapshot })
-    }
+    return this.buildSnapshots(eventTypeKey, servingTypeKey)
   }
 
   /** Portions, coefficient and override flag of one dish row (null for a row that does not exist). */
@@ -85,30 +80,29 @@ export class MenuPortionsService {
     return this.byItem().get(`${sectionId}|${itemIndex}`) ?? null
   }
 
-  /** Remembers the snapshots of the chosen types (once the terms are loaded); the only writer besides `snapshots`. */
+  /** Remembers the snapshots of the chosen types once the terms are loaded (a fresh one taken earlier would hold a wrong 1); the only writer. */
   private freeze(form: FormGroup): void {
     const raw = form.getRawValue() as { eventType?: string; servingType?: string }
-    this.snapshots(raw.eventType ?? '', raw.servingType ?? '')
+    if (!this.taxonomy_.isLoaded_()) return
+    const built = this.buildSnapshots(raw.eventType ?? '', raw.servingType ?? '')
+    if (built.eventTypeSnapshot) this.remembered_.set('eventType', built.eventTypeSnapshot)
+    if (built.servingTypeSnapshot) this.remembered_.set('menuType', built.servingTypeSnapshot)
   }
 
-  /** Same snapshot as `snapshotOf` but never remembers it, so it is safe inside a computed. */
-  private peekSnapshot(kind: Kind, key: string): TypeSnapshot | undefined {
-    return this.snapshotService_.snapshotFor(kind, key, this.remembered_.get(kind))
-  }
-
-  private snapshotOf(kind: Kind, key: string): TypeSnapshot | undefined {
-    const snapshot = this.snapshotService_.snapshotFor(kind, key, this.remembered_.get(kind))
-    // Freeze it once the terms are loaded: a fresh snapshot taken before that would hold a wrong 1.
-    if (snapshot && this.taxonomy_.isLoaded_()) this.remembered_.set(kind, snapshot)
-    return snapshot
-  }
-
-  private peekedSnapshots(
+  private buildSnapshots(
     eventTypeKey: string,
     servingTypeKey: string
   ): { eventTypeSnapshot?: TypeSnapshot; servingTypeSnapshot?: TypeSnapshot } {
-    const eventTypeSnapshot = this.peekSnapshot('eventType', eventTypeKey)
-    const servingTypeSnapshot = this.peekSnapshot('menuType', servingTypeKey)
+    const eventTypeSnapshot = this.snapshotService_.snapshotFor(
+      'eventType',
+      eventTypeKey,
+      this.remembered_.get('eventType')
+    )
+    const servingTypeSnapshot = this.snapshotService_.snapshotFor(
+      'menuType',
+      servingTypeKey,
+      this.remembered_.get('menuType')
+    )
     return {
       ...(eventTypeSnapshot && { eventTypeSnapshot }),
       ...(servingTypeSnapshot && { servingTypeSnapshot })
@@ -127,7 +121,7 @@ export class MenuPortionsService {
       name: '',
       eventType: raw.eventType ?? '',
       servingType: raw.servingType ?? '',
-      ...this.peekedSnapshots(raw.eventType ?? '', raw.servingType ?? ''),
+      ...this.buildSnapshots(raw.eventType ?? '', raw.servingType ?? ''),
       guestCount: Number(raw.guestCount ?? 0),
       sections: (raw.sections ?? []).map((section, sortOrder) => ({
         _id: section._id ?? '',

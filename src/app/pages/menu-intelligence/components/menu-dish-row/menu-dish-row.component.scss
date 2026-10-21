@@ -397,21 +397,6 @@
   flex: 0 0 auto;
 
   min-block-size: 2rem;
-  padding-inline: 0.25rem;
-
-  font-family: var(--font-serif);
-  font-size: 0.75rem;
-  white-space: nowrap;
-  color: var(--color-primary);
-
-  background: transparent;
-  border: none;
-  cursor: pointer;
-
-  &:focus-visible {
-    outline: none;
-    box-shadow: var(--shadow-focus);
-  }
 }
 
 .dish-coefficient-error {
