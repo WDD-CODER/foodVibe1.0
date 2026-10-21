@@ -24,9 +24,6 @@
   .settings-tabs {
     display: flex;
     gap: var(--space-2);
-
-    overflow-x: auto;
-    scrollbar-width: none;
   }
 
   .settings-content {

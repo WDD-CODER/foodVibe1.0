@@ -69,31 +69,31 @@ describe('TeamTabComponent', () => {
 
   it('a too short username shows the sign-up error key and sends nothing', async () => {
     const cmp = fixture.componentInstance
-    cmp.name_.set('ab')
-    cmp.password_.set('abcdefg1')
+    cmp['name_'].set('ab')
+    cmp['password_'].set('abcdefg1')
     await cmp.addMember()
-    expect(cmp.errorKey_()).toBe('username_too_short')
+    expect(cmp['errorKey_']()).toBe('username_too_short')
     expect(team.addStaff).not.toHaveBeenCalled()
   })
 
   it('a valid username and password are sent and the form closes', async () => {
     const cmp = fixture.componentInstance
     cmp.openForm()
-    cmp.name_.set('cook2')
-    cmp.password_.set('abcdefg1')
+    cmp['name_'].set('cook2')
+    cmp['password_'].set('abcdefg1')
     await cmp.addMember()
     expect(team.addStaff).toHaveBeenCalledWith('cook2', 'abcdefg1')
-    expect(cmp.formOpen_()).toBeFalse()
+    expect(cmp['formOpen_']()).toBeFalse()
   })
 
   it('a taken username keeps the form open with the error', async () => {
     team.addStaff.and.resolveTo({ ok: false, errorKey: 'username_taken' })
     const cmp = fixture.componentInstance
     cmp.openForm()
-    cmp.name_.set('cook1')
-    cmp.password_.set('abcdefg1')
+    cmp['name_'].set('cook1')
+    cmp['password_'].set('abcdefg1')
     await cmp.addMember()
-    expect(cmp.errorKey_()).toBe('username_taken')
-    expect(cmp.formOpen_()).toBeTrue()
+    expect(cmp['errorKey_']()).toBe('username_taken')
+    expect(cmp['formOpen_']()).toBeTrue()
   })
 })

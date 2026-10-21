@@ -25,12 +25,12 @@ export class TeamTabComponent implements OnInit {
 
   // 4. SIGNALS & CONSTANTS
   readonly team = this.teamService.team_
-  readonly name_ = signal('')
-  readonly password_ = signal('')
-  readonly formOpen_ = signal(false)
-  readonly saving_ = signal(false)
+  protected readonly name_ = signal('')
+  protected readonly password_ = signal('')
+  protected readonly formOpen_ = signal(false)
+  protected readonly saving_ = signal(false)
   /** Dictionary key of the last failed check, or null. */
-  readonly errorKey_ = signal<string | null>(null)
+  protected readonly errorKey_ = signal<string | null>(null)
 
   // 5. COMPUTED
   readonly hasStaff = computed(() => this.team().some((member) => member.businessRole === 'staff'))

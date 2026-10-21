@@ -63,11 +63,12 @@ export class ProductPriceLockComponent implements OnInit {
   }
 
   private lockPrices(form: FormGroup): void {
-    const locked = new WeakSet<AbstractControl>()
+    const loadedValues = new WeakMap<AbstractControl, unknown>()
+    const watchedRows = new WeakSet<AbstractControl>()
     const lock = (control: AbstractControl | null): void => {
-      if (!control || locked.has(control)) return
-      locked.add(control)
+      if (!control || loadedValues.has(control)) return
       const loaded: unknown = control.value
+      loadedValues.set(control, loaded)
       control.disable({ emitEvent: false })
       // The form's own price suggestion would otherwise change a money field and the save would be refused.
       control.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((value) => {
@@ -75,8 +76,18 @@ export class ProductPriceLockComponent implements OnInit {
       })
     }
     const lockRow = (row: AbstractControl): void => {
-      lock(row.get('priceOverride'))
-      lock(row.get('show_special_price_'))
+      const controls = [row.get('priceOverride'), row.get('show_special_price_')]
+      controls.forEach(lock)
+      if (watchedRows.has(row)) return
+      watchedRows.add(row)
+      // The product form also writes priceOverride silently (conversion-rate change): put it back here.
+      row.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+        for (const control of controls) {
+          if (control && loadedValues.has(control) && control.value !== loadedValues.get(control)) {
+            control.setValue(loadedValues.get(control), { emitEvent: false })
+          }
+        }
+      })
     }
 
     lock(form.get('buy_price_global_'))

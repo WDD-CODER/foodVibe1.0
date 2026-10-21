@@ -47,8 +47,10 @@ export class PermissionService {
 
     const isCreator = !!ctx.doc && !!user._id && (ctx.doc as { createdBy?: string }).createdBy === user._id
     if (action === 'edit' || action === 'delete') return isCreator
+    // Event actions: the server denies them on any other type (NOT_AN_EVENT).
+    if (ctx.type !== undefined && ctx.type !== 'menuEvents') return false
     if (action === 'changeStage') return isCreator
     // addNote, markArrival: any event of the business.
-    return ctx.type === undefined || ctx.type === 'menuEvents'
+    return true
   }
 }

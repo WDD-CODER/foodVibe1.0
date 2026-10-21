@@ -5,20 +5,22 @@
   <app-empty-state data-testid="settings-owner-only" messageKey="settings_owner_only" icon="lock" />
   } @else {
   <div class="settings-tabs" role="tablist">
-    @for (tab of visibleTabs_(); track tab.key) {
-    <button
-      type="button"
-      role="tab"
-      class="c-tab-pill"
-      [class.active]="activeTab_() === tab.key"
-      [attr.aria-selected]="activeTab_() === tab.key"
-      [attr.data-testid]="'settings-tab-' + tab.key"
-      (click)="setTab(tab.key)"
-    >
-      <lucide-icon [name]="tab.icon" [size]="16" />
-      {{ tab.labelKey | translatePipe }}
-    </button>
-    }
+    <app-scroll-rail>
+      @for (tab of visibleTabs_(); track tab.key) {
+      <button
+        type="button"
+        role="tab"
+        class="c-tab-pill"
+        [class.active]="activeTab_() === tab.key"
+        [attr.aria-selected]="activeTab_() === tab.key"
+        [attr.data-testid]="'settings-tab-' + tab.key"
+        (click)="setTab(tab.key)"
+      >
+        <lucide-icon [name]="tab.icon" [size]="16" />
+        {{ tab.labelKey | translatePipe }}
+      </button>
+      }
+    </app-scroll-rail>
   </div>
 
   <div class="settings-content" role="tabpanel">

@@ -19,7 +19,7 @@ describe('ProductPriceLockComponent', () => {
   const user_ = signal<User | null>(null)
 
   const row = (price: number) =>
-    fb.group({ unitSymbol: ['box'], show_special_price_: [price > 0], priceOverride: [price] })
+    fb.group({ unitSymbol: ['box'], conversionRate: [1], show_special_price_: [price > 0], priceOverride: [price] })
   const rows = () => form.get('purchaseOptions') as FormArray
 
   function setup(user: User, product: object | null): void {
@@ -69,6 +69,16 @@ describe('ProductPriceLockComponent', () => {
     rows().at(0).get('priceOverride')!.setValue(50)
     expect(rows().at(0).get('priceOverride')!.value).toBe(7)
     expect(form.getRawValue().buy_price_global_).toBe(12)
+  })
+
+  it('staff: a silent priceOverride write on conversion-rate change is put back', () => {
+    setup(STAFF, { _id: 'p1', createdBy: 's1' })
+    const r = rows().at(0)
+    // Mirrors the product form: the conversion-rate subscriber writes priceOverride with emitEvent false.
+    r.get('conversionRate')!.valueChanges.subscribe(() => r.get('priceOverride')!.setValue(99, { emitEvent: false }))
+    r.get('conversionRate')!.setValue(5)
+    expect(r.getRawValue().priceOverride).toBe(7)
+    expect(r.getRawValue().show_special_price_).toBeTrue()
   })
 
   it("staff on another member's product: the whole form is read-only with both notes", () => {

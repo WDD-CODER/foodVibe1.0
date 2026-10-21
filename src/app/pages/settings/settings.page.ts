@@ -7,12 +7,20 @@ import { PermissionService } from '@services/permission.service'
 import { PageHeaderComponent } from '../../shared/page-header/page-header.component'
 import { EmptyStateComponent } from '../../shared/empty-state/empty-state.component'
 import { SETTINGS_TABS, SettingsTab } from './settings-tabs'
+import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { TeamTabComponent } from './components/team-tab/team-tab.component'
 
 @Component({
   selector: 'app-settings-page',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, PageHeaderComponent, EmptyStateComponent, TeamTabComponent],
+  imports: [
+    LucideAngularModule,
+    TranslatePipe,
+    PageHeaderComponent,
+    EmptyStateComponent,
+    ScrollRailComponent,
+    TeamTabComponent
+  ],
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

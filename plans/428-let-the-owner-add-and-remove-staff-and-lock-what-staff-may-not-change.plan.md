@@ -122,6 +122,7 @@ src/app/pages/settings/**
 src/app/pages/breadcrumbs.md
 src/app/pages/inventory/components/product-price-lock/**
 src/app/pages/inventory/components/product-form/product-form.component.ts
+src/app/pages/inventory/components/product-form/product-form.component.spec.ts
 src/app/pages/inventory/components/product-form/product-form.component.html
 src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts
 src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
@@ -132,6 +133,9 @@ src/app/pages/recipe-builder/recipe-builder.page.html
 src/app/shared/edit-gate/**
 src/app/shared/breadcrumbs.md
 src/app/app.config.ts
+src/app/core/models/product.model.ts
+src/app/core/services/product-data.service.ts
+src/app/core/services/product-data.service.spec.ts
 ```
 
 ## Read Scope
@@ -363,7 +367,7 @@ Add `Settings`, `UserPlus`. Already registered: `Lock`, `Users`, `Trash2`.
 - [x] T6: Lock product prices for staff without growing the frozen product form — ProductPriceLockComponent + spec, one tag in the form template, import offset by deleted lines — src/app/pages/inventory/components/product-price-lock/**, product-form.component.html, product-form.component.ts
 - [x] T7: Hide save on someone else's recipe and delete on items staff did not create — EditGateComponent + spec, builder save wrapped (net ≤ 0), canDelete in recipe book and inventory lists — src/app/shared/edit-gate/**, recipe-builder.page.html/.ts, recipe-book-list.component.*, inventory-product-list.component.*
 - [x] T8: Show the owner a settings link and every user a Hebrew message when the server refuses — header link + profile menu item, 403 no_permission toast + info log in the interceptor — src/app/core/components/header/**, src/app/core/interceptors/auth.interceptor.ts
-- [x] T9: Add the Hebrew texts and icons the new screens use — 15 dictionary keys (skip existing), Settings + UserPlus icons — public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] T9: Add the Hebrew texts and icons the new screens use — 15 dictionary keys (skip existing), Settings + UserPlus icons — public/assets/data/dictionary.json, src/app/app.config.ts (icons: used registered sliders-vertical / plus instead — bundle budget, see docs/mvp/runs/428.md Decisions)
 - [x] T10: Refresh the folder maps for the new settings page and shared edit gate — breadcrumbs skill — src/app/pages/breadcrumbs.md, src/app/shared/breadcrumbs.md, src/app/core/services/breadcrumbs.md
 - [ ] T11: Build, test, check the frozen files and hand over the team and lock checks — ng build, server suite, listed specs, numstat, log-query; Human runs the [human] items on desktop and mobile — this plan file
 

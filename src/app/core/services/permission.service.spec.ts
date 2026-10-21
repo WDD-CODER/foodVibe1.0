@@ -73,6 +73,7 @@ describe('PermissionService.can', () => {
     it('changes the stage only of his own events, but notes and arrivals on any event', () => {
       expect(service.can('changeStage', { type: 'menuEvents', doc: { createdBy: 's1' } })).toBeTrue()
       expect(service.can('changeStage', { type: 'menuEvents', doc: { createdBy: 'o1' } })).toBeFalse()
+      expect(service.can('changeStage', { type: 'recipes', doc: { createdBy: 's1' } })).toBeFalse()
       expect(service.can('addNote', { type: 'menuEvents', doc: { createdBy: 'o1' } })).toBeTrue()
       expect(service.can('markArrival', { type: 'menuEvents', doc: { createdBy: 'o1' } })).toBeTrue()
       expect(service.can('addNote', { type: 'recipes' })).toBeFalse()
