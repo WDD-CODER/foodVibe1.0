@@ -1,45 +1,10 @@
 @layer components.venue-list {
-  // Matches the header's own mobile cutoff (header.component.scss), where the
-  // top nav gives way to the bottom tab bar — the grid narrows to one column then.
-  $venue-break-mobile: 620px;
-
   :host {
     display: block;
   }
 
-  .venue-grid-container {
-    display: block;
-
-    max-width: 75rem; // 1200px, matches Venues.dc.html:95
-    margin-inline: auto;
-
-    padding: var(--space-6) var(--space-6) var(--space-12);
-  }
-
-  // ─── PAGE HEADER (shared <app-page-header>, plan 353) ───────────────────
-  .venue-header {
-    margin-block-end: 1rem;
-  }
-
-  // ─── FILTERS BAR — borderless, blends into the page (matches Menu Library) ──
-  .filters-bar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-
-    gap: 0.625rem;
-    margin-block-end: 1.25rem;
-  }
-
-  // Out of flow so showing/hiding it never widens or wraps the bar.
-  .filters-clear {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-end: 0;
-  }
-
   .select-all-pill {
+    margin-block-end: var(--space-3);
     display: inline-flex;
     align-items: center;
 
@@ -70,14 +35,7 @@
     }
   }
 
-  // ─── CARD GRID ─────────────────────────────────────────────────────────
-  .venues-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr)); // 280px, matches Venues.dc.html:24
-
-    gap: var(--space-5);
-  }
-
+  // ─── CARDS — laid out by <app-list-shell layout="cards"> (plan 453) ─────────────────
   .no-results {
     grid-column: 1 / -1;
 
@@ -321,12 +279,6 @@
     padding-block-start: 0.625rem;
 
     border-block-start: 1px solid var(--border-default);
-  }
-
-  @media (max-width: #{$venue-break-mobile}) {
-    .venues-grid {
-      grid-template-columns: 1fr;
-    }
   }
 }
 

@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, OnInit, OnDestroy } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  WritableSignal,
+  computed,
+  inject,
+  output,
+  signal,
+  OnInit,
+  OnDestroy
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -6,7 +16,6 @@ import { LucideAngularModule } from 'lucide-angular'
 import { VenueDataService } from '@services/venue-data.service'
 import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { TranslationService } from '@services/translation.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -21,7 +30,8 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { formatVenueHours, VenueHoursSummary } from 'src/app/core/utils/venue-hours.util'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
@@ -44,7 +54,7 @@ const KEEP_SELECTION_TARGETS = '.venue-card, app-selection-bar, .select-all-pill
     ListRowCheckboxComponent,
     SelectionBarComponent,
     InputClearComponent,
-    PageHeaderComponent
+    ListShellComponent
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
@@ -58,7 +68,6 @@ export class VenueListComponent implements OnInit, OnDestroy {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly requireAuthService = inject(RequireAuthService)
   private readonly userMsg = inject(UserMsgService)
-  private readonly translation = inject(TranslationService)
   private readonly logging = inject(LoggingService)
   private readonly confirmModal = inject(ConfirmModalService)
 
@@ -89,15 +98,16 @@ export class VenueListComponent implements OnInit, OnDestroy {
     }
   ])
 
-  /** "N מתוך M פריטים" under the title — same wording as the list-shell chassis. */
-  protected resultCountText_ = computed(() =>
-    this.translation
-      .translate('list_result_count')
-      .replace('{n}', String(this.filteredVenues_().length))
-      .replace('{m}', String(this.venueData.allVenues_().length))
-  )
+  protected totalVenues_ = computed(() => this.venueData.allVenues_().length)
+
+  protected readonly isPanelOpen_: WritableSignal<boolean>
+  private readonly togglePanelState_: () => void
 
   constructor() {
+    const panel = useResponsivePanelState('venues')
+    this.isPanelOpen_ = panel.isPanelOpen_
+    this.togglePanelState_ = panel.togglePanel
+
     if (!this.embeddedInDashboard) {
       useListState('venues', [
         { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
@@ -122,6 +132,10 @@ export class VenueListComponent implements OnInit, OnDestroy {
       else next.add(env)
       return next
     })
+  }
+
+  protected togglePanel(): void {
+    this.togglePanelState_()
   }
 
   protected hasActiveFilters_ = computed(() => this.selectedEnvTypes_().size > 0)
