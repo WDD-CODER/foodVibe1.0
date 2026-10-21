@@ -99,9 +99,41 @@ function stripMoneyFields(type, body) {
   return copy
 }
 
-/** Money values at `path` for comparison: absent, null and 0 all mean "no price", so they are dropped. */
+/** Field that identifies a row of a money-bearing list, so a price is compared with the SAME row's price. */
+const ROW_KEY_FIELDS = { sources: 'supplierId', purchaseOptions: 'unitSymbol', suppliers: 'supplierId' }
+
+/** [{ id, value }] for every value at `path`; `id` joins the stable key of each list row on the way down. */
+function keyedValuesAt(doc, path) {
+  let nodes = [{ id: '', node: doc }]
+  for (const { key, list } of parsePath(path)) {
+    const next = []
+    for (const { id, node } of nodes) {
+      if (node === null || typeof node !== 'object') continue
+      const value = node[key]
+      if (value === undefined) continue
+      if (!list) { next.push({ id, node: value }); continue }
+      if (!Array.isArray(value)) continue
+      value.forEach((row, index) => {
+        const rowKey = row && typeof row === 'object' ? row[ROW_KEY_FIELDS[key] || 'supplierId'] : undefined
+        next.push({ id: `${id}/${key}:${rowKey ?? '#' + index}`, node: row })
+      })
+    }
+    nodes = next
+  }
+  return nodes.map(({ id, node }) => ({ id, value: node }))
+}
+
+/**
+ * Money values at `path` for comparison, keyed by the row they belong to (supplier / purchase unit), so moving
+ * a price to another row changes the signature. Absent, null and 0 all mean "no price" and are dropped.
+ */
 const moneySignature = (doc, path) =>
-  JSON.stringify(valuesAt(doc || {}, path).filter(value => value != null && value !== 0))
+  JSON.stringify(
+    keyedValuesAt(doc || {}, path)
+      .filter(({ value }) => value != null && value !== 0)
+      .map(({ id, value }) => [id, value])
+      .sort((x, y) => (x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : JSON.stringify(x[1]) < JSON.stringify(y[1]) ? -1 : 1)),
+  )
 
 /** True when any money field of `type` differs between the two documents (absent, null and 0 are the same). */
 function moneyFieldsChanged(type, before, after) {

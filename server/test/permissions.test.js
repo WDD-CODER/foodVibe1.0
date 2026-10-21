@@ -81,3 +81,18 @@ describe('money fields', () => {
     expect(moneyFieldsChanged('menuEvents', { pricePerGuest: 200 }, { pricePerGuest: 210 })).toBe(true)
   })
 })
+
+describe('plan 449: money signature is keyed by row', () => {
+  const doc = sources => ({ sources, purchaseOptions: [] })
+  it('detects a price moved to another supplier or swapped between rows', () => {
+    const before = doc([{ supplierId: 'a', price: 5 }, { supplierId: 'b', price: 0 }])
+    expect(moneyFieldsChanged('products', before, doc([{ supplierId: 'a' }, { supplierId: 'b', price: 5 }]))).toBe(true)
+    const two = doc([{ supplierId: 'a', price: 5 }, { supplierId: 'b', price: 7 }])
+    expect(moneyFieldsChanged('products', two, doc([{ supplierId: 'a', price: 7 }, { supplierId: 'b', price: 5 }]))).toBe(true)
+  })
+  it('treats 0, null and absent as the same, and ignores row order', () => {
+    const before = doc([{ supplierId: 'a', price: 5 }, { supplierId: 'b', price: 0 }])
+    expect(moneyFieldsChanged('products', before, doc([{ supplierId: 'b', price: null }, { supplierId: 'a', price: 5 }]))).toBe(false)
+    expect(moneyFieldsChanged('products', before, doc([{ supplierId: 'a', price: 5 }, { supplierId: 'b' }]))).toBe(false)
+  })
+})
