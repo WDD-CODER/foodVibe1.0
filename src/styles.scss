@@ -2358,3 +2358,16 @@ body.kb-open {
     visibility: visible;
   }
 }
+
+/* Plan 437: the engine overlay is unlayered, so its print reset must be unlayered too (a layered rule loses) */
+@media print {
+  body.prep-sheets-open .prep-overlay {
+    position: static;
+
+    display: block;
+    overflow: visible;
+
+    background: none;
+    backdrop-filter: none;
+  }
+}

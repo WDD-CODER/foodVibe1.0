@@ -2,7 +2,7 @@ import type { EventPlan, PrepLine } from '../engine/event-plan.types'
 import { formatQty } from '../engine/rounding'
 import type { MenuEvent } from '@models/menu-event.model'
 import type { Recipe } from '@models/recipe.model'
-import { describeOrderLine, unitLabel, type SupplierOrders } from './supplier-orders.util'
+import { describeOrderLine, formatDate, unitLabel, type SupplierOrders } from './supplier-orders.util'
 
 /**
  * Plan 437 — the printed prep sheets: one group per dish / category / station / supplier. The screen, the paper
@@ -190,4 +190,11 @@ export function prepSheetTableRows(group: PrepSheetGroup, t: Translate): (string
     return cells
   })
   return [header, ...rows]
+}
+
+/** Event name · date (dd.mm.yyyy) · guests · serving type: the line under every group title, on screen, paper and Excel. */
+export function prepSheetMetaLine(event: MenuEvent, t: (key: string) => string): string {
+  const guests = t('prep_sheets_guests').replace('{n}', String(event.guestCount ?? 0))
+  const serving = event.servingType ? t(event.servingType) : ''
+  return [event.name, formatDate(event.eventDate), guests, serving].filter(Boolean).join(' · ')
 }

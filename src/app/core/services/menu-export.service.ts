@@ -26,7 +26,7 @@ import {
   type ExportPayload,
   type ExportSection
 } from '../utils/export.util'
-import { buildPrepSheetGroups, prepSheetTableRows } from '../utils/prep-sheet-groups.util'
+import { buildPrepSheetGroups, prepSheetMetaLine, prepSheetTableRows } from '../utils/prep-sheet-groups.util'
 import { buildShoppingListTable, type ShoppingListTable } from '../utils/shopping-list-table.util'
 import {
   downloadWorkbook,
@@ -299,9 +299,7 @@ export class MenuExportService {
       t,
       this.stations_.stations_()
     )
-    const meta = [menu.name, menu.eventDate, t('prep_sheets_guests').replace('{n}', String(menu.guestCount ?? 0))]
-      .filter(Boolean)
-      .join(' · ')
+    const meta = prepSheetMetaLine(menu, t)
     const used = new Set<string>()
     for (const group of groups) {
       const ws = wb.addWorksheet(this.uniqueSheetName_(group.title, used), { views: [{ rightToLeft: true }] })

@@ -2,7 +2,12 @@ import { computeEventPlan } from '../engine/event-plan.engine'
 import type { EventPlan, EventPlanInput, PrepLine } from '../engine/event-plan.types'
 import { FIXTURE_IDS as ID, FIXTURE_SUPPLIERS, buildFixtureInput } from '../engine/testing/event-plan.fixture'
 import type { Recipe } from '@models/recipe.model'
-import { buildPrepSheetGroups, buildSupplierSheetGroups, prepSheetTableRows } from './prep-sheet-groups.util'
+import {
+  buildPrepSheetGroups,
+  buildSupplierSheetGroups,
+  prepSheetMetaLine,
+  prepSheetTableRows
+} from './prep-sheet-groups.util'
 import { buildSupplierOrders } from './supplier-orders.util'
 
 const TEXTS: Record<string, string> = {
@@ -178,5 +183,14 @@ describe('prepSheetTableRows', () => {
     const { input, plan } = withStations('קר')
     const [group] = buildPrepSheetGroups(plan, input.event, recipesById(input), 'by_dish', t)
     expect(prepSheetTableRows(group, t)[0]).toEqual(['הכנה', 'כמות', 'יחידה', 'הערה'])
+  })
+
+  it('meta line: name, dd.mm.yyyy date, guests, serving type', () => {
+    const { input } = withStations('קר')
+    const event = { ...input.event, name: 'חתונה', eventDate: '2026-10-21', guestCount: 80, servingType: 'buffet' }
+    const texts: Record<string, string> = { prep_sheets_guests: '{n} סועדים', buffet: 'בופה' }
+    expect(prepSheetMetaLine(event as typeof input.event, (k) => texts[k] ?? k)).toBe(
+      'חתונה · 21.10.2026 · 80 סועדים · בופה'
+    )
   })
 })

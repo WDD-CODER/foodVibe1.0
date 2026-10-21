@@ -17,6 +17,7 @@ import { EventPlanService } from 'src/app/core/engine/event-plan.service'
 import {
   buildPrepSheetGroups,
   buildSupplierSheetGroups,
+  prepSheetMetaLine,
   prepSheetTableRows,
   type PrepSheetGroup
 } from 'src/app/core/utils/prep-sheet-groups.util'
@@ -133,11 +134,7 @@ export class PrepSheetsComponent {
   protected readonly printedCount_ = computed(() => this.groups_().filter((g) => !this.excluded_().has(g.key)).length)
 
   /** Event name · date · guests · serving type, printed under every group title. */
-  protected readonly metaLine_ = computed(() => {
-    const event = this.event()
-    const guests = this.t_('prep_sheets_guests').replace('{n}', String(event.guestCount ?? 0))
-    return [event.name, this.dateText(event.eventDate), guests, this.t_(event.servingType)].filter(Boolean).join(' · ')
-  })
+  protected readonly metaLine_ = computed(() => prepSheetMetaLine(this.event(), this.t_))
 
   constructor() {
     this.document_.body.classList.add(BODY_CLASS)
@@ -192,11 +189,6 @@ export class PrepSheetsComponent {
 
   protected onOverlayClick(ev: MouseEvent): void {
     if (ev.target === ev.currentTarget) this.close.emit()
-  }
-
-  private dateText(iso: string | undefined): string {
-    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? '')
-    return match ? `${match[3]}.${match[2]}.${match[1]}` : ''
   }
 
   /** One named `@page` per printed group, its footer "page X of Y · group" from the dictionary text. */
