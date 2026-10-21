@@ -42,6 +42,7 @@ import { EquipmentCategoryRegistryService } from '@services/equipment-category-r
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
@@ -149,6 +150,11 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected sortBy_ = signal<SortField>('name')
   protected deletingId_ = signal<string | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
+  protected readonly listControls = useListControls<SortField>({
+    search: this.searchQuery_,
+    sortBy: this.sortBy_,
+    sortOrder: this.sortOrder_
+  })
   protected editingId_ = signal<string | null>(null)
   protected closingId_ = signal<string | null>(null)
   protected selection = new ListSelectionState()
@@ -182,14 +188,14 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   protected filteredEquipment_ = computed(() => {
     let list = this.equipmentData.allEquipment_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const cats = this.selectedCategories_()
     const consumableOnly = this.consumableFilter_()
     const sortBy = this.sortBy_()
     const order = this.sortOrder_()
 
     if (search) {
-      list = list.filter((e) => (e.nameHebrew ?? '').toLowerCase().includes(search))
+      list = list.filter((e) => matchesSearch(search, e.nameHebrew))
     }
     if (cats.size > 0) {
       list = list.filter((e) => cats.has(e.category))
@@ -317,17 +323,14 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected clearAllFilters(): void {
-    this.selectedCategories_.set(new Set())
-    this.consumableFilter_.set(null)
+    this.listControls.clearAll(
+      () => this.selectedCategories_.set(new Set()),
+      () => this.consumableFilter_.set(null)
+    )
   }
 
   protected setSort(field: SortField): void {
-    if (this.sortBy_() === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
+    this.listControls.setSort(field)
   }
 
   protected onAdd(): void {
@@ -499,17 +502,11 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     this.selection.clear()
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }

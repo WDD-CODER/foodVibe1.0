@@ -23,6 +23,7 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { formatVenueHours, VenueHoursSummary } from 'src/app/core/utils/venue-hours.util'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environmentType'
@@ -66,6 +67,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   readonly addVenueClick = output<void>()
 
   protected searchQuery_ = signal('')
+  protected readonly listControls = useListControls<never>({ search: this.searchQuery_ })
   protected deletingId_ = signal<string | null>(null)
   protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set())
   protected selection = new ListSelectionState()
@@ -125,7 +127,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   protected hasActiveFilters_ = computed(() => this.selectedEnvTypes_().size > 0)
 
   protected clearAllFilters(): void {
-    this.selectedEnvTypes_.set(new Set())
+    this.listControls.clearAll(() => this.selectedEnvTypes_.set(new Set()))
   }
 
   /** Visible venue IDs for header select-all. */
@@ -137,14 +139,10 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   protected filteredVenues_ = computed(() => {
     let list = this.venueData.allVenues_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const selectedEnv = this.selectedEnvTypes_()
     if (search) {
-      list = list.filter(
-        (v) =>
-          (v.nameHebrew ?? '').toLowerCase().includes(search) ||
-          (v.environmentType ?? '').toLowerCase().includes(search)
-      )
+      list = list.filter((v) => matchesSearch(search, v.nameHebrew, v.environmentType))
     }
     if (selectedEnv.size > 0) {
       list = list.filter((v) => selectedEnv.has(v.environmentType))
@@ -243,17 +241,11 @@ export class VenueListComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }
