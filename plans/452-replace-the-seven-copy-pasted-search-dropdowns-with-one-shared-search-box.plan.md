@@ -4,7 +4,7 @@ Status: draft
 Track: code
 Depends-on: 450
 Conflicts-with: 453, 454, 455, 456, 457
-Snapshot: 4d7e1ffdf098683d976e93f36c1c4cd113397fdd
+Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
 
 ## Problem Statement
 Seven pages each hand-build the same `input + <app-scrollable-dropdown> + <ul role="listbox"> + <app-add-option-row>` shell instead of using `shared/custom-select` (`typeToFilter`, `allowTypedAdd`). Each copy re-implements the keyboard rule (rule K), the add-option rule and the Hebrew-aware filter, and they drift (some skip highlight-on-open, some miss rule X). Multi-pick with chips also has two bases (`shared/custom-multi-select`, `shared/chip-search-dropdown`). Found by the reuse audit (`docs/mvp/reuse-audit-2026-10-20.md`, P3). This is a refactor: **no behaviour change**.
