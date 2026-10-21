@@ -1,5 +1,10 @@
 @if (isOpen_() && config()) {
-  <app-modal-shell size="md" cardClass="quick-edit-product-modal" (dismissed)="onCancelled()">
+  <app-modal-shell
+    size="md"
+    cardClass="quick-edit-product-modal"
+    labelKey="edit_product_title"
+    (dismissed)="onCancelled()"
+  >
     <app-quick-edit-product-panel
       [product]="config()!.product"
       [tier]="config()!.tier"

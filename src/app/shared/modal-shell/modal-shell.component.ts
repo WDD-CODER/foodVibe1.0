@@ -117,7 +117,16 @@ export class ModalShellComponent {
     if (!card.contains(this.document_.activeElement)) card.focus({ preventScroll: true })
   }
 
+  /**
+   * Focus goes back to the opener only when nothing else took it: if the caller already moved focus
+   * to a live field outside this card (for example the next field of a keyboard flow), it stays there.
+   */
   private restoreFocus_(): void {
+    const active = this.document_.activeElement as HTMLElement | null
+    const card = this.card_().nativeElement
+    const focusMovedElsewhere =
+      active !== null && active !== this.document_.body && active.isConnected && !card.contains(active)
+    if (focusMovedElsewhere) return
     const opener = this.opener_
     if (opener && opener.isConnected && typeof opener.focus === 'function') {
       opener.focus({ preventScroll: true })

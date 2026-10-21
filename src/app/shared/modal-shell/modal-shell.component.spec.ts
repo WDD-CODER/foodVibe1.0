@@ -9,6 +9,7 @@ import { ModalShellComponent, ModalShellSize } from './modal-shell.component'
   imports: [ModalShellComponent],
   template: `
     <button id="opener" type="button">opener</button>
+    <input id="next" type="text" />
     @if (open_()) {
       <app-modal-shell
         [size]="size_()"
@@ -139,6 +140,21 @@ describe('ModalShellComponent', () => {
     host.open_.set(false)
     fixture.detectChanges()
     expect(document.activeElement).toBe(opener)
+  })
+
+  it('keeps focus where the caller moved it before the popup closed', async () => {
+    host.open_.set(false)
+    fixture.detectChanges()
+    const opener = query<HTMLButtonElement>('#opener')!
+    const next = query<HTMLInputElement>('#next')!
+    opener.focus()
+    host.open_.set(true)
+    fixture.detectChanges()
+    await fixture.whenStable()
+    next.focus()
+    host.open_.set(false)
+    fixture.detectChanges()
+    expect(document.activeElement).toBe(next)
   })
 
   it('Tab on the last field wraps to the first, Shift+Tab on the first wraps to the last', () => {
