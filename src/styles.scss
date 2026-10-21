@@ -998,7 +998,6 @@ textarea.c-input {
   }
 }
 
-/* ---- Engine: Tab Filter Pill ---- */
 /* ---- Engine: Tab chip row (plan 305 M3) — contextual sub-nav under the top-level tabs.
    Composes .c-chip--tab for each chip. Plan 350: the chips live in an <app-scroll-rail>, which
    owns the horizontal scroll, snap, edge fade and arrows; this rule only owns the row's
@@ -2055,9 +2054,6 @@ body.kb-open {
   }
 }
 
-/* ---- Engine modifier: Tab pill "home" (plan 367) — the "לוח בקרה" chip that replaces the
-   current dashboard sub-page's chip. Outlined in the primary color so it reads as "back",
-   not as another section. ---- */
 /* Plan 437: while prep sheets are open, print only them */
 @media print {
   body.prep-sheets-open *:not(:has(app-prep-sheets)):not(app-prep-sheets):not(app-prep-sheets *) {
