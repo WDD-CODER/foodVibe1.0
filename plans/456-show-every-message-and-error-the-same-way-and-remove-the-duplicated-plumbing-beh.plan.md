@@ -4,7 +4,7 @@ Status: draft
 Track: code
 Depends-on: 450, 454
 Conflicts-with: 451, 452, 453, 454, 455
-Snapshot: 8eb64ddb637d4165ff80ec78cfad1d909dfc1603
+Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
 
 ## Problem Statement
 The reuse audit (`docs/mvp/reuse-audit-2026-10-20.md`, P7) found the message, error and HTTP/server plumbing copied
