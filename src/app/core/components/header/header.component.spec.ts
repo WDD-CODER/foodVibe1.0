@@ -8,6 +8,7 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { signal } from '@angular/core'
 import { of } from 'rxjs'
 import { UserService } from '@services/user.service'
+import { BusinessService } from '@services/business.service'
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent
@@ -67,7 +68,8 @@ describe('HeaderComponent avatar fallback', () => {
           provide: UserService,
           useValue: {
             isLoggedIn: () => true,
-            user_: signal({ _id: 'u1', name: 'dana', role: 'user', imgUrl: 'https://x.invalid/a.png' }),
+            user_: signal({ _id: 'u1', name: 'dana', imgUrl: 'https://x.invalid/a.png' }),
+            isPlatformAdmin_: signal(false),
             logout: () => of(null)
           }
         }
@@ -88,5 +90,50 @@ describe('HeaderComponent avatar fallback', () => {
 
     expect(host.querySelector('.user-chip .avatar-img')).toBeNull()
     expect(host.querySelector('.user-chip .avatar-initials')?.textContent?.trim()).toBe('D')
+  })
+})
+
+describe('HeaderComponent business and platform admin (plan 426)', () => {
+  const isPlatformAdmin = signal(false)
+  const business = signal<{ name: string } | null>(null)
+  let fixture: ComponentFixture<HeaderComponent>
+
+  beforeEach(async () => {
+    isPlatformAdmin.set(false)
+    business.set(null)
+    await TestBed.configureTestingModule({
+      imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        provideRouter([]),
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => true,
+            user_: signal({ _id: 'u1', name: 'dana' }),
+            isPlatformAdmin_: isPlatformAdmin,
+            logout: () => of(null)
+          }
+        },
+        { provide: BusinessService, useValue: { business_: business } }
+      ]
+    }).compileComponents()
+    fixture = TestBed.createComponent(HeaderComponent)
+    fixture.detectChanges()
+  })
+
+  it('shows the crown badge only for a platform admin', () => {
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelector('.user-chip .role-badge')).toBeNull()
+    isPlatformAdmin.set(true)
+    fixture.detectChanges()
+    expect(host.querySelector('.user-chip .role-badge')).not.toBeNull()
+  })
+
+  it('shows the business name under the username, and nothing when there is none', () => {
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelector('.user-chip .business-name')).toBeNull()
+    business.set({ name: 'מטבח בדיקה' })
+    fixture.detectChanges()
+    expect(host.querySelector('.user-chip .business-name')?.textContent?.trim()).toBe('מטבח בדיקה')
   })
 })

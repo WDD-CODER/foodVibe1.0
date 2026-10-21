@@ -14,6 +14,7 @@ import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { UserService } from '@services/user.service'
 
 describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent
@@ -74,12 +75,41 @@ describe('MetadataManagerPageComponent', () => {
 
     fixture = TestBed.createComponent(MetadataManagerComponent)
     component = fixture.componentInstance
+    // The page lists all 12 sections for a platform admin; plan 426 tests below flip this.
+    TestBed.inject(UserService)._saveUserLocal({ _id: 'u1', name: 'u', email: 'u@x', isPlatformAdmin: true })
 
     fixture.detectChanges()
   })
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  describe('platform-admin sections (plan 426)', () => {
+    const setPlatformAdmin = (isPlatformAdmin: boolean) => {
+      TestBed.inject(UserService)._saveUserLocal({ _id: 'u1', name: 'u', email: 'u@x', isPlatformAdmin })
+      fixture.detectChanges()
+    }
+    const tabLabels = () =>
+      fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill')).map((b) => b.nativeElement.textContent.trim())
+
+    it('hides user management, AI models and their jump tabs when the user is not a platform admin', () => {
+      setPlatformAdmin(false)
+      const host: HTMLElement = fixture.nativeElement
+      expect(host.querySelector('#mm-sec-user')).toBeNull()
+      expect(host.querySelector('#mm-sec-ai-models')).toBeNull()
+      expect(tabLabels()).not.toContain('user_management')
+      expect(tabLabels()).not.toContain('ai_model_manager')
+    })
+
+    it('shows them, and their jump tabs, for a platform admin', () => {
+      setPlatformAdmin(true)
+      const host: HTMLElement = fixture.nativeElement
+      expect(host.querySelector('#mm-sec-user')).not.toBeNull()
+      expect(host.querySelector('#mm-sec-ai-models')).not.toBeNull()
+      expect(tabLabels()).toContain('user_management')
+      expect(tabLabels()).toContain('ai_model_manager')
+    })
   })
 
   // Plan 385: the server re-keys referencing documents, so a rename is one term write + a reload.

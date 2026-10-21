@@ -147,6 +147,19 @@
   color: var(--color-text-muted);
 }
 
+.user-business {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--color-text-main);
+}
+
+.user-chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
 .empty-state {
   display: flex;
   align-items: center;

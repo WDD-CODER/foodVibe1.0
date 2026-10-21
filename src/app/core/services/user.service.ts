@@ -33,7 +33,11 @@ export class UserService {
 
   private _user_ = signal<User | null>(this._loadUserFromSession())
   public user_ = this._user_.asReadonly()
-  public readonly isAdmin_ = computed(() => this._user_()?.role === 'admin')
+  public readonly isPlatformAdmin_ = computed(() => this._user_()?.isPlatformAdmin === true)
+  public readonly businessRole_ = computed(() => this._user_()?.businessRole ?? null)
+  public readonly isOwner_ = computed(() => this._user_()?.businessRole === 'owner')
+  /** @deprecated use isPlatformAdmin_ */
+  public readonly isAdmin_ = this.isPlatformAdmin_
 
   private _isDataReloading_ = signal(false)
   public isDataReloading_ = this._isDataReloading_.asReadonly()
@@ -178,14 +182,19 @@ export class UserService {
     )
   }
 
-  private callBackendSignup(newUser: User, hashedPassword: string): Observable<{ token: string; user: User }> {
+  private callBackendSignup(
+    newUser: User,
+    hashedPassword: string,
+    businessName: string
+  ): Observable<{ token: string; user: User }> {
     return this.http.post<{ token: string; user: User }>(
       `${this.authBase}/api/v1/auth/signup`,
       {
         name: newUser.name,
         email: newUser.email,
         imgUrl: newUser.imgUrl,
-        password: hashedPassword
+        password: hashedPassword,
+        businessName
       },
       { withCredentials: true }
     )
@@ -234,7 +243,14 @@ export class UserService {
           // The refresh cookie belongs to someone else (another tab or slot signed in since):
           // the token decides who this session is, so the header never shows one user while
           // saves go out as another.
-          this._saveUserLocal({ _id: claims.userId, name: claims.name, email: '', role: claims.role })
+          this._saveUserLocal({
+            _id: claims.userId,
+            name: claims.name,
+            email: '',
+            businessId: claims.businessId,
+            businessRole: claims.businessRole,
+            isPlatformAdmin: claims.isPlatformAdmin
+          })
           if (current) void this._reloadDataServices()
         } else if (!this._user_() && current) {
           this._user_.set(current)
@@ -243,17 +259,33 @@ export class UserService {
     )
   }
 
-  /** userId / name / role from an access token's payload, or null when it can't be read. */
-  private _tokenClaims(token: string): { userId: string; name: string; role?: 'admin' | 'user' } | null {
+  /** userId / name / business claims from an access token's payload, or null when it can't be read. */
+  private _tokenClaims(token: string): {
+    userId: string
+    name: string
+    businessId?: string
+    businessRole?: 'owner' | 'staff'
+    isPlatformAdmin: boolean
+  } | null {
     try {
       const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
       const bytes = Uint8Array.from(atob(payload), (c) => c.charCodeAt(0))
       const claims = JSON.parse(new TextDecoder().decode(bytes)) as {
         userId?: string
         name?: string
-        role?: 'admin' | 'user'
+        businessId?: string
+        businessRole?: 'owner' | 'staff'
+        isPlatformAdmin?: boolean
       }
-      return claims.userId ? { userId: claims.userId, name: claims.name ?? '', role: claims.role } : null
+      return claims.userId
+        ? {
+            userId: claims.userId,
+            name: claims.name ?? '',
+            businessId: claims.businessId,
+            businessRole: claims.businessRole,
+            isPlatformAdmin: claims.isPlatformAdmin === true
+          }
+        : null
     } catch {
       return null
     }
@@ -277,9 +309,9 @@ export class UserService {
   // Public auth methods
   // -------------------------------------------------------------------------
 
-  public signup(newUser: User, password: string) {
+  public signup(newUser: User, password: string, businessName: string) {
     return from(hashPassword(password)).pipe(
-      switchMap((hashedPassword) => this.callBackendSignup(newUser, hashedPassword)),
+      switchMap((hashedPassword) => this.callBackendSignup(newUser, hashedPassword, businessName)),
       tap(({ token, user }) => {
         this.storeToken(token)
         this._saveUserLocal(user)
@@ -294,6 +326,8 @@ export class UserService {
         if (body === 'EMAIL_TAKEN') return throwError(() => new Error('EMAIL_TAKEN'))
         if (body === 'INVALID_USERNAME') return throwError(() => new Error('INVALID_USERNAME'))
         if (body === 'INVALID_EMAIL') return throwError(() => new Error('INVALID_EMAIL'))
+        if (body === 'BUSINESS_NAME_REQUIRED') return throwError(() => new Error('BUSINESS_NAME_REQUIRED'))
+        if (body === 'BUSINESS_NAME_TOO_LONG') return throwError(() => new Error('BUSINESS_NAME_TOO_LONG'))
         // Anything unrecognized (DB_UNAVAILABLE, network failure, etc.) is a real server
         // problem — never assume it means the username is taken.
         return throwError(() => new Error('SERVER_ERROR'))
@@ -328,6 +362,9 @@ export class UserService {
       }),
       map(({ user }) => user),
       catchError((err: HttpErrorResponse) => {
+        const code = err.error?.error
+        if (err.status === 403 && code === 'NO_BUSINESS') return throwError(() => new Error('NO_BUSINESS'))
+        if (err.status === 403 && code === 'USER_REMOVED') return throwError(() => new Error('USER_REMOVED'))
         if (err.status === 423) return throwError(() => new Error('ACCOUNT_LOCKED'))
         if (err.status === 429) return throwError(() => new Error('RATE_LIMITED'))
         if (err.error?.error === 'USER_NOT_FOUND' || err.status === 401) {

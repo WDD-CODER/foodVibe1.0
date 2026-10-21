@@ -13,7 +13,9 @@ export class UserAdminService {
     return this.http.get<AdminUser[]>(`${this.base}/api/v1/admin/users`)
   }
 
-  deleteUser(userId: string): Observable<{ ok: boolean }> {
-    return this.http.delete<{ ok: boolean }>(`${this.base}/api/v1/admin/users/${userId}`)
+  deleteUser(userId: string): Observable<{ ok: boolean; deletedBusiness?: boolean; usersDeleted?: number }> {
+    return this.http.delete<{ ok: boolean; deletedBusiness?: boolean; usersDeleted?: number }>(
+      `${this.base}/api/v1/admin/users/${userId}`
+    )
   }
 }

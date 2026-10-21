@@ -183,6 +183,17 @@
   min-width: 0;
 }
 
+.business-name {
+  max-inline-size: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.2;
+}
+
 .avatar-img {
   width: 2rem;
   height: 2rem;

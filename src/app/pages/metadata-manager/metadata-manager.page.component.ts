@@ -95,7 +95,7 @@ export class MetadataManagerComponent implements OnInit {
   private addItemModal = inject(AddItemModalService)
   private readonly userService = inject(UserService)
   protected readonly isLoggedIn = this.userService.isLoggedIn
-  protected readonly isAdmin = this.userService.isAdmin_
+  protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
   private readonly taxonomy = inject(TaxonomyStore)
@@ -142,7 +142,7 @@ export class MetadataManagerComponent implements OnInit {
    * Mobile/tablet jump-nav destinations, in page order. Built from the app's real 8 sections
    * (not the design's tab list).
    */
-  protected readonly jumpSections = [
+  private readonly _allJumpSections = [
     { id: 'mm-sec-unit', labelKey: 'metadata_units_and_conversions_title' },
     { id: 'mm-sec-category', labelKey: 'metadata_product_categories_title' },
     { id: 'mm-sec-allergen', labelKey: 'metadata_global_allergens_title' },
@@ -156,6 +156,13 @@ export class MetadataManagerComponent implements OnInit {
     { id: 'mm-sec-user', labelKey: 'user_management' },
     { id: 'mm-sec-ai-models', labelKey: 'ai_model_manager' }
   ] as const
+
+  /** User management and AI models are platform-admin screens: no tab for anyone else. */
+  protected readonly jumpSections = computed(() =>
+    this.isPlatformAdmin_()
+      ? this._allJumpSections
+      : this._allJumpSections.filter((s) => s.id !== 'mm-sec-user' && s.id !== 'mm-sec-ai-models')
+  )
 
   /** Which section (if any) has been brought to the front of the grid; null = natural page order. */
   protected readonly frontSectionId_ = signal<string | null>(null)
@@ -173,7 +180,7 @@ export class MetadataManagerComponent implements OnInit {
    *  of the rest. */
   protected orderFor(id: string): number {
     if (this.isFront(id)) return 0
-    const index = this.jumpSections.findIndex((s) => s.id === id)
+    const index = this.jumpSections().findIndex((s) => s.id === id)
     return index === -1 ? 1 : index + 1
   }
 
@@ -589,7 +596,10 @@ export class MetadataManagerComponent implements OnInit {
       this.userMsgService.onSetErrorMsg(this.translationService.translate('taxonomy_shared_admin_only'))
       return null
     }
-    if (!this.isAdmin() || !(type === 'label' || type === 'course' || type === 'category' || type === 'allergen')) {
+    if (
+      !this.isPlatformAdmin_() ||
+      !(type === 'label' || type === 'course' || type === 'category' || type === 'allergen')
+    ) {
       return 'me'
     }
     // Plan 365: wording follows the action (add → publish, rename/text fix → update, remove → delete).
