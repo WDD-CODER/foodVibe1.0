@@ -3,7 +3,7 @@
 const { Router } = require('express')
 const rateLimit = require('express-rate-limit')
 const { verifyToken } = require('../middleware/auth')
-const { getBusiness, setBusinessSettings } = require('../services/business')
+const { getBusiness, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
 const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
@@ -12,7 +12,7 @@ const { businessSettingsSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS 
 const mongoose = require('mongoose')
 const { lastActiveByUser } = require('../utils/usage-stats')
 const { scopeFilter } = require('../utils/business-scope')
-const { LIVE } = require('../jobs/purge-deleted')
+const { LIVE, NOT_MASTER_CLONE } = require('../jobs/purge-deleted')
 
 const router = Router()
 
@@ -71,7 +71,7 @@ router.put('/baseline', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
     }
     const baseline = { ...parsed.data, filledAt: Date.now() }
-    const result = await mongoose.connection.db.collection('businesses').updateOne({ _id: String(req.user.businessId) }, { $set: { baseline } })
+    const result = await setBusinessBaseline(req.user.businessId, baseline)
     if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
     req.log.info({ event: 'business.baseline.saved' })
     res.json({ baseline })
@@ -82,7 +82,6 @@ router.put('/baseline', verifyToken, async (req, res) => {
 })
 
 /** Items created inside the business: no master lineage, or the lineage marker is the item's own id (not cloned from master). */
-const OWN = { $or: [{ _masterId: { $exists: false } }, { _masterId: null }, { $expr: { $eq: ['$_masterId', '$_id'] } }] }
 /** The card only needs "reached or not", so no count goes past this. */
 const SETUP_COUNT_CAP = 10
 
@@ -91,7 +90,7 @@ router.get('/setup-status', verifyToken, async (req, res) => {
   try {
     if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
     const db = mongoose.connection.db
-    const base = { $and: [scopeFilter(req), LIVE, OWN] }
+    const base = { $and: [scopeFilter(req), LIVE, NOT_MASTER_CLONE] }
     const count = (name, extra) =>
       db.collection(name).countDocuments(extra ? { $and: [...base.$and, extra] } : base, { limit: SETUP_COUNT_CAP })
     const [pricedProducts, suppliers, recipes, dishes, events, staff] = await Promise.all([

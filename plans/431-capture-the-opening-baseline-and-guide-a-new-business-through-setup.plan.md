@@ -106,6 +106,9 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 ```scope
 shared/schemas/entities/business.schema.ts
 server/routes/business.js
+server/services/business.js
+server/jobs/purge-deleted.js
+docs/mvp/mvp-map.md
 server/services/seed-master.js
 server/test/business-baseline.test.js
 server/test/seed-master-taxonomy.test.js

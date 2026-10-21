@@ -107,6 +107,7 @@ describe('SetupChecklistCardComponent', () => {
     localStorage.setItem(KEY, '1')
     await setup()
     expect(card()).toBeNull()
+    expect(loadSetupStatus).not.toHaveBeenCalled()
   })
 
   it('renders nothing and asks for nothing for staff', async () => {

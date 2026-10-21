@@ -103,6 +103,7 @@ export class SetupChecklistCardComponent {
           return
         }
         this.hidden_.set(this.readHidden(business._id))
+        if (this.hidden_()) return
         if (this.statusRequested_()) return
         this.statusRequested_.set(true)
         void this.loadStatus()

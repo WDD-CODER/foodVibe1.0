@@ -103,6 +103,24 @@ describe('BaselineTabComponent', () => {
     expect(saveBtn().disabled).toBeTrue()
   })
 
+  it('an out-of-range value shows a message', () => {
+    setup()
+    type('estProfitPct', '100')
+    expect(el().querySelector('[data-testid="baseline-error-estProfitPct"]')?.textContent).toContain(
+      'baseline_value_invalid'
+    )
+  })
+
+  it('clearing a stored value can be saved as an empty baseline', async () => {
+    setup()
+    business_.set({ ...BUSINESS, baseline: { eventsClosedPerMonth: 4, filledAt: 1700000000000 } })
+    fixture.detectChanges()
+    type('eventsClosedPerMonth', '')
+    expect(saveBtn().disabled).toBeFalse()
+    await fixture.componentInstance.save()
+    expect(updateBaseline).toHaveBeenCalledOnceWith({})
+  })
+
   it('no skip button outside the first visit', () => {
     setup()
     expect(skipBtn()).toBeNull()

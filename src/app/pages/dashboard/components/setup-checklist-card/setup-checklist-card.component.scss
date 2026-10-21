@@ -12,14 +12,6 @@ $break-mobile: 768px; // mirrors src/styles.scss
 
     padding-block: var(--space-4);
     padding-inline: var(--space-5);
-
-    border: 1px solid var(--border-glass);
-    border-radius: var(--radius-lg);
-
-    background: var(--bg-glass);
-    backdrop-filter: var(--blur-glass);
-    -webkit-backdrop-filter: var(--blur-glass);
-    box-shadow: var(--shadow-glass);
   }
 
   .setup-card__head {

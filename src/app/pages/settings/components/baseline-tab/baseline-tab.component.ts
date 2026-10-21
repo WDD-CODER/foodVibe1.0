@@ -67,7 +67,9 @@ export class BaselineTabComponent {
   })
   protected readonly canSave = computed(() => {
     const value = this.value_()
-    return !this.saving_() && this.form.valid && this.fields.some((field) => value[field.key] != null)
+    return (
+      !this.saving_() && this.form.valid && (this.form.dirty || this.fields.some((field) => value[field.key] != null))
+    )
   })
 
   constructor() {

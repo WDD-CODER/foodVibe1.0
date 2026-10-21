@@ -1,12 +1,17 @@
 @if (visible()) {
-  <section class="setup-card" data-testid="setup-card" dir="rtl" [attr.aria-label]="'setup_card_title' | translatePipe">
+  <section
+    class="setup-card c-glass-panel"
+    data-testid="setup-card"
+    dir="rtl"
+    [attr.aria-label]="'setup_card_title' | translatePipe"
+  >
     <header class="setup-card__head">
       <span class="setup-card__icon"><lucide-icon name="clipboard-list" [size]="16" /></span>
       <h2 class="setup-card__title">{{ 'setup_card_title' | translatePipe }}</h2>
       <span class="setup-card__progress" data-testid="setup-progress">
         {{ doneRequired() }} {{ 'setup_progress' | translatePipe }}
       </span>
-      <button type="button" class="link-btn" data-testid="setup-hide" (click)="hide()">
+      <button type="button" class="c-btn-ghost--sm" data-testid="setup-hide" (click)="hide()">
         {{ 'hide' | translatePipe }}
       </button>
     </header>

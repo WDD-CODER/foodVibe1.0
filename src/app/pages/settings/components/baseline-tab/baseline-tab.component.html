@@ -18,6 +18,11 @@
             <span class="baseline-field__suffix" aria-hidden="true">{{ field.suffix }}</span>
           }
         </span>
+        @if (hasError(field.key)) {
+          <span class="c-field-error" role="alert" [attr.data-testid]="'baseline-error-' + field.key">
+            {{ 'baseline_value_invalid' | translatePipe }}
+          </span>
+        }
       </label>
     }
     <p class="baseline-updated" data-testid="baseline-updated">

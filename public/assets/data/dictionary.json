@@ -1142,6 +1142,7 @@
     "baseline_events_closed_per_month": "אירועים שנסגרו בחודש",
     "baseline_avg_revenue_per_event": "הכנסה ממוצעת לאירוע (₪)",
     "baseline_est_profit_pct": "רווח משוער (%)",
+    "baseline_value_invalid": "ערך לא תקין – מספר חיובי (רווח: בין -99.99 ל-99.99)",
     "baseline_saved": "פרטי הפתיחה נשמרו",
     "baseline_updated_at": "עודכן ב-",
     "baseline_not_filled": "עדיין לא מולא",
