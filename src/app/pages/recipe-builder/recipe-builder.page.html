@@ -454,7 +454,7 @@
       @if (blockingIngredientsError_()) {
       <p class="blocking-ingredients-error">{{ 'blocking_ingredients_error' | translatePipe }}</p>
       }
-      <app-edit-gate type="recipes">
+      <app-edit-gate [type]="recipeType_() === 'dish' ? 'dishes' : 'recipes'">
         <button class="c-btn-primary main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
           @if (isSaving_()) {
           <app-loader size="small" [inline]="true" />

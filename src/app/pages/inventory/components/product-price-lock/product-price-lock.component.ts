@@ -1,5 +1,6 @@
+import { EMPTY } from 'rxjs'
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, input } from '@angular/core'
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
 import { AbstractControl, FormArray, FormGroup } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -31,25 +32,26 @@ export class ProductPriceLockComponent implements OnInit {
 
   // 4. SIGNALS & CONSTANTS
   /** The product being edited (route data of `/inventory/edit/:id`); undefined when adding a new one. */
-  private readonly product = this.route.snapshot?.data?.['product'] as Product | undefined | null
+  private readonly routeData_ = toSignal(this.route.data ?? EMPTY, { initialValue: this.route.snapshot?.data ?? {} })
+  private readonly product_ = computed(() => this.routeData_()['product'] as Product | undefined | null)
 
   // 5. COMPUTED
   /** Staff on a product another member created: the whole form is read-only. */
-  readonly viewOnly = computed(
+  readonly viewOnly_ = computed(
     () =>
       this.permission.isStaff_() &&
-      !!this.product &&
-      !this.permission.can('edit', { type: 'products', doc: this.product })
+      !!this.product_() &&
+      !this.permission.can('edit', { type: 'products', doc: this.product_() as Product })
   )
   /** Staff: prices are the owner's job. */
-  readonly pricesLocked = computed(
+  readonly pricesLocked_ = computed(
     () => this.permission.isStaff_() && !this.permission.can('editMoney', { type: 'products' })
   )
 
   ngOnInit(): void {
     const form = this.form()
-    if (this.viewOnly()) this.lockWholeForm(form)
-    else if (this.pricesLocked()) this.lockPrices(form)
+    if (this.viewOnly_()) this.lockWholeForm(form)
+    else if (this.pricesLocked_()) this.lockPrices(form)
   }
 
   // 6. METHODS

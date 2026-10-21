@@ -110,6 +110,7 @@ server/routes/business.js
 server/routes/auth.js
 server/app.js
 server/utils/username.js
+server/utils/permissions.js
 server/test/business-team.test.js
 src/app/core/services/permission.service.ts
 src/app/core/services/permission.service.spec.ts

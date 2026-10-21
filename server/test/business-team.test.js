@@ -3,6 +3,7 @@
 
 const crypto = require('crypto')
 const request = require('supertest')
+const { productBody: baseProduct } = require('./helpers/v2-docs')
 const jwt = require('jsonwebtoken')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
 
@@ -147,5 +148,25 @@ describe('GET /team', () => {
     expect(res.body.map(r => r.name)).toEqual(['owner1', 'cook1'])
     expect(res.body[0]).toEqual({ _id: 'own1', name: 'owner1', businessRole: 'owner', createdAt: 10, lastActiveAt: null })
     expect(res.body[1]).toEqual({ _id: a.body._id, name: 'cook1', businessRole: 'staff', createdAt: expect.any(Number), lastActiveAt: null })
+  })
+})
+
+describe('staff save their own product again (zero prices)', () => {
+  const productBody = (overrides = {}) => baseProduct({
+    purchaseOptions: [{ unitSymbol: 'box', conversionRate: 6, priceOverride: 0 }],
+    sources: [{ supplierId: 's1', price: 0 }],
+    ...overrides,
+  })
+  const DATA = '/api/v1/data/products'
+
+  it('PUT with the same zero prices -> 200; a real price -> 403', async () => {
+    const created = await request(app).post(DATA).set(as(STAFF)).send(productBody())
+    expect(created.status).toBe(201)
+    const same = await request(app).put(`${DATA}/${created.body._id}`).set(as(STAFF)).send(productBody({ nameHebrew: 'עגבניות' }))
+    expect(same.status).toBe(200)
+    const priced = await request(app).put(`${DATA}/${created.body._id}`).set(as(STAFF))
+      .send(productBody({ purchaseOptions: [{ unitSymbol: 'box', conversionRate: 6, priceOverride: 5 }] }))
+    expect(priced.status).toBe(403)
+    expect(priced.body).toEqual(FORBIDDEN)
   })
 })

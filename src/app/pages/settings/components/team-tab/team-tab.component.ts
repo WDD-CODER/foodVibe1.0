@@ -24,7 +24,7 @@ export class TeamTabComponent implements OnInit {
   private readonly translation = inject(TranslationService)
 
   // 4. SIGNALS & CONSTANTS
-  readonly team = this.teamService.team_
+  readonly team_ = this.teamService.teamList_
   protected readonly name_ = signal('')
   protected readonly password_ = signal('')
   protected readonly formOpen_ = signal(false)
@@ -33,7 +33,7 @@ export class TeamTabComponent implements OnInit {
   protected readonly errorKey_ = signal<string | null>(null)
 
   // 5. COMPUTED
-  readonly hasStaff = computed(() => this.team().some((member) => member.businessRole === 'staff'))
+  readonly hasStaff_ = computed(() => this.team_().some((member) => member.businessRole === 'staff'))
 
   ngOnInit(): void {
     void this.teamService.loadTeam()

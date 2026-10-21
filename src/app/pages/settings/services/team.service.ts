@@ -33,20 +33,20 @@ export class TeamService {
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
 
-  private readonly _team_ = signal<TeamMember[]>([])
+  private readonly team_ = signal<TeamMember[]>([])
   /** The owner and the active staff of the business; filled by `loadTeam()`. */
-  readonly team_ = this._team_.asReadonly()
+  readonly teamList_ = this.team_.asReadonly()
 
   /** Reads the team list (owner only; staff get a 403 and an empty list). */
   async loadTeam(): Promise<void> {
-    this._team_.set([])
+    this.team_.set([])
     try {
-      this._team_.set(await firstValueFrom(this.http.get<TeamMember[]>(TEAM_URL)))
+      this.team_.set(await firstValueFrom(this.http.get<TeamMember[]>(TEAM_URL)))
     } catch (err) {
-      this.logging.error('Team could not be loaded', { err: String(err) })
+      const status = (err as { status?: number }).status
+      this.logRefusal('Team could not be loaded', 'team.load_refused', status, err)
       // A 403 already got the "no permission" toast from the interceptor.
-      if ((err as { status?: number }).status !== 403)
-        this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
+      if (status !== 403) this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
     }
   }
 
@@ -55,13 +55,13 @@ export class TeamService {
     try {
       const password = await hashPassword(plainPassword)
       const member = await firstValueFrom(this.http.post<TeamMember>(TEAM_URL, { name: name.trim(), password }))
-      this._team_.update((team) => [...team, member])
+      this.team_.update((team) => [...team, member])
       this.userMsg.onSetSuccessMsg(this.translation.translate('team_member_added'))
       return { ok: true }
     } catch (err) {
       const status = (err as { status?: number }).status
       const errorKey = status === 409 ? 'username_taken' : status === 400 ? 'username_invalid_chars' : 'server_error'
-      this.logging.error('Team member could not be added', { status: String(status) })
+      this.logRefusal('Team member could not be added', 'team.add_refused', status, err)
       return { ok: false, errorKey }
     }
   }
@@ -70,15 +70,28 @@ export class TeamService {
   async removeStaff(userId: string): Promise<boolean> {
     try {
       await firstValueFrom(this.http.delete(`${TEAM_URL}/${userId}`))
-      this._team_.update((team) => team.filter((member) => member._id !== userId))
+      this.team_.update((team) => team.filter((member) => member._id !== userId))
       this.userMsg.onSetSuccessMsg(this.translation.translate('team_member_removed'))
       return true
     } catch (err) {
       const status = (err as { status?: number }).status
-      this.logging.error('Team member could not be removed', { status: String(status) })
-      // A 403 already got the "no permission" toast from the interceptor.
-      if (status !== 403) this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
+      this.logRefusal('Team member could not be removed', 'team.remove_refused', status, err)
+      if (status === 403 && (err as { error?: { error?: string } }).error?.error === 'CANNOT_REMOVE_SELF') {
+        this.userMsg.onSetErrorMsg(this.translation.translate('team_cannot_remove_self'))
+      } else if (status !== 403) {
+        // Any other 403 already got the "no permission" toast from the interceptor.
+        this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
+      }
       return false
+    }
+  }
+
+  /** An expected refusal (4xx) is not an app error: warn. Server and network failures stay errors. */
+  private logRefusal(msg: string, event: string, status: number | undefined, err: unknown): void {
+    if (status !== undefined && status >= 400 && status < 500) {
+      this.logging.warn({ event, message: msg, context: { status: String(status) } })
+    } else {
+      this.logging.error(msg, { status: String(status), err: String(err) })
     }
   }
 }

@@ -48,10 +48,14 @@
   }
 
   <ul class="team-list c-glass-panel" data-testid="team-list">
-    @for (member of team(); track member._id) {
+    @for (member of team_(); track member._id) {
       <li class="team-row" data-testid="team-row">
         <span class="team-row__name">{{ member.name }}</span>
-        <span class="team-row__role c-chip" [class.teal]="member.businessRole === 'owner'">
+        <span
+          class="team-row__role c-chip"
+          [attr.aria-label]="'team_col_role' | translatePipe"
+          [class.teal]="member.businessRole === 'owner'"
+        >
           {{ (member.businessRole === 'owner' ? 'business_role_owner' : 'business_role_staff') | translatePipe }}
         </span>
         <span class="team-row__last" [attr.aria-label]="'team_col_last_login' | translatePipe">
@@ -76,7 +80,7 @@
     }
   </ul>
 
-  @if (!hasStaff()) {
+  @if (!hasStaff_()) {
     <app-empty-state messageKey="team_empty" icon="users" />
   }
 </section>

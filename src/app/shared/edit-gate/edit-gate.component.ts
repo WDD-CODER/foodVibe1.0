@@ -1,3 +1,5 @@
+import { EMPTY } from 'rxjs'
+import { toSignal } from '@angular/core/rxjs-interop'
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -28,9 +30,13 @@ export class EditGateComponent {
   /** Key of the route data that holds the opened document. */
   readonly routeDataKey = input<string>('recipe')
 
+  // 4. SIGNALS & CONSTANTS
+  /** The route data; follows the router when it reuses this component for another document. */
+  private readonly routeData_ = toSignal(this.route.data ?? EMPTY, { initialValue: this.route.snapshot?.data ?? {} })
+
   // 5. COMPUTED
-  readonly allowed = computed(() => {
-    const doc = this.route.snapshot?.data?.[this.routeDataKey()] as object | null | undefined
+  readonly allowed_ = computed(() => {
+    const doc = this.routeData_()[this.routeDataKey()] as object | null | undefined
     return doc
       ? this.permission.can('edit', { type: this.type(), doc })
       : this.permission.can('create', { type: this.type() })

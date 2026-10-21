@@ -1,3 +1,4 @@
+import { of } from 'rxjs'
 import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { ActivatedRoute } from '@angular/router'
@@ -30,7 +31,7 @@ describe('EditGateComponent', () => {
       providers: [
         { provide: UserService, useValue: { user_, isOwner_: computed(() => user_()?.businessRole === 'owner') } },
         { provide: TranslationService, useValue: { translate: (key: string) => key } },
-        { provide: ActivatedRoute, useValue: { snapshot: { data } } }
+        { provide: ActivatedRoute, useValue: { snapshot: { data }, data: of(data) } }
       ]
     })
     fixture = TestBed.createComponent(HostComponent)

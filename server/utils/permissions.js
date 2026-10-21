@@ -99,10 +99,13 @@ function stripMoneyFields(type, body) {
   return copy
 }
 
-/** True when any money field of `type` differs between the two documents. */
+/** Money values at `path` for comparison: absent, null and 0 all mean "no price", so they are dropped. */
+const moneySignature = (doc, path) =>
+  JSON.stringify(valuesAt(doc || {}, path).filter(value => value != null && value !== 0))
+
+/** True when any money field of `type` differs between the two documents (absent, null and 0 are the same). */
 function moneyFieldsChanged(type, before, after) {
-  return (MONEY_FIELDS[type] || []).some(path =>
-    JSON.stringify(valuesAt(before || {}, path)) !== JSON.stringify(valuesAt(after || {}, path)))
+  return (MONEY_FIELDS[type] || []).some(path => moneySignature(before, path) !== moneySignature(after, path))
 }
 
 module.exports = { can, assertCan, stripMoneyFields, moneyFieldsChanged, valuesAt, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES, ACTIONS }

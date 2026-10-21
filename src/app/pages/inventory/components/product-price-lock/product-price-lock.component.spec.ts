@@ -1,3 +1,4 @@
+import { of } from 'rxjs'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { computed, signal } from '@angular/core'
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms'
@@ -30,7 +31,10 @@ describe('ProductPriceLockComponent', () => {
       providers: [
         { provide: UserService, useValue: { user_, isOwner_: computed(() => user_()?.businessRole === 'owner') } },
         { provide: TranslationService, useValue: { translate: (key: string) => key } },
-        { provide: ActivatedRoute, useValue: { snapshot: { data: product ? { product } : {} } } }
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { data: product ? { product } : {} }, data: of(product ? { product } : {}) }
+        }
       ]
     })
     fixture = TestBed.createComponent(ProductPriceLockComponent)

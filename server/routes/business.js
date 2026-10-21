@@ -53,7 +53,8 @@ const toTeamRow = user => ({
 // GET /api/v1/business/team — the owner and the active staff of the caller's business.
 router.get('/team', verifyToken, ownerOnly, async (req, res) => {
   try {
-    const users = await User.find({ businessId: req.user.businessId, removedAt: null }).lean()
+    const users = await User.find({ businessId: req.user.businessId, removedAt: null })
+      .select('_id name businessRole createdAt').lean()
     const rank = user => (user.businessRole === 'owner' ? 0 : 1)
     users.sort((a, b) => rank(a) - rank(b) || String(a.name).localeCompare(String(b.name)))
     res.json(users.map(toTeamRow))

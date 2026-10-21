@@ -14,12 +14,12 @@ const TEAM: TeamMember[] = [
 
 describe('TeamTabComponent', () => {
   let fixture: ComponentFixture<TeamTabComponent>
-  let team: jasmine.SpyObj<TeamService> & { team_: ReturnType<typeof signal<TeamMember[]>> }
+  let team: jasmine.SpyObj<TeamService> & { teamList_: ReturnType<typeof signal<TeamMember[]>> }
   let confirm: jasmine.SpyObj<ConfirmModalService>
 
   beforeEach(() => {
     team = Object.assign(jasmine.createSpyObj<TeamService>('TeamService', ['loadTeam', 'addStaff', 'removeStaff']), {
-      team_: signal<TeamMember[]>(TEAM)
+      teamList_: signal<TeamMember[]>(TEAM)
     })
     team.loadTeam.and.resolveTo()
     team.addStaff.and.resolveTo({ ok: true })

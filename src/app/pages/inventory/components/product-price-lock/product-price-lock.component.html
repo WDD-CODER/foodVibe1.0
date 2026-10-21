@@ -1,10 +1,10 @@
-@if (viewOnly()) {
+@if (viewOnly_()) {
   <p class="price-lock-note" role="note" data-testid="product-view-only-note">
     <lucide-icon name="lock" [size]="14" />
     {{ 'view_only_not_yours' | translatePipe }}
   </p>
 }
-@if (pricesLocked()) {
+@if (pricesLocked_()) {
   <p class="price-lock-note" role="note" data-testid="product-prices-locked-note">
     <lucide-icon name="lock" [size]="14" />
     {{ 'prices_locked_owner_only' | translatePipe }}
