@@ -2362,6 +2362,55 @@ body.kb-open {
   }
 }
 
+/* Value chip with a trailing remove button at inline-end (RTL-safe). Sub-part: `__remove`. */
+.c-chip--removable {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.375rem;
+
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+
+  background: var(--bg-muted);
+
+  padding-inline: 0.5rem;
+  padding-block: 0.2rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+}
+
+.c-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+
+  color: var(--color-danger);
+
+  background: var(--bg-danger-subtle);
+
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+}
+
 .c-chip--teal {
   color: var(--color-primary-hover);
 

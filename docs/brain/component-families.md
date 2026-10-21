@@ -132,11 +132,13 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
   `src/app/pages/venues/components/venue-form/venue-form.component.ts`.
 
 ### chip — chips, badges, pills
-- Status: converging — plan 457 adds one chip engine
-- Use: CSS engines in `src/styles.scss`: `.c-chip`, `.c-toggle-chip`, `.c-tap-chip`, `.c-tab-pill`, `.c-filter-chip`;
-  tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
-- When: a small rounded label, toggle or filter.
-- Known copies: 51 distinct local `*chip*` selectors in component `.scss` files (audit: ~80 local chip classes).
+- Status: converging — plan 457 built one chip engine; tab, toggle, tap and filter chips are on it, page-local pills are not yet
+- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal/.amber/.red` or `--teal|--amber|--red`) plus variants
+  `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
+  `--removable` (+ `.c-chip__remove`), `--tab` (+ `.active`, `.c-chip--home`, `.trash`); sub-parts `.c-chip__count` (+ `--zero`),
+  `.c-chip__dot`; wrapper `.c-chip-group`. Markup: `class="c-chip c-chip--toggle"`. Tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
+- When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
+- Known copies: ~50 page-local `*chip*` / `*pill*` selectors in component `.scss` files still carry their own radius, size and colours (plan 457 S7-S11 deferred, see `docs/mvp/runs/457.md`).
 
 ### feedback — loading, toasts, errors shown to the user
 - Status: converging — plan 456 converges messages and errors
