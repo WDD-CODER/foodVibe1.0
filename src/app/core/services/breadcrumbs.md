@@ -28,6 +28,8 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `menu-event-data.service.ts` | Menu events CRUD | MenuEventDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
+| `business.service.ts` | The signed-in user's business (`business_`) | BusinessService |
+| `permission.service.ts` | Client mirror of the server permission checker; UI hides/locks by the same rules | PermissionService, PermissionAction |
 | `activity-log.service.ts` | Activity log | ActivityLogService, ActivityEntry, ACTIVITY_STORAGE_KEY |
 | `version-history.service.ts` | Version history | VersionHistoryService, VersionEntry |
 | `translation.service.ts` | Dictionary / Hebrew resolution | TranslationService |

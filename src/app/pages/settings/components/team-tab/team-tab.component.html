@@ -1,0 +1,86 @@
+<section class="team-tab" dir="rtl">
+  <div class="team-actions">
+    @if (!formOpen_()) {
+      <button type="button" class="c-btn-primary" data-testid="team-add-open" (click)="openForm()">
+        <lucide-icon name="plus" [size]="16" />
+        {{ 'team_add_member' | translatePipe }}
+      </button>
+    }
+  </div>
+
+  @if (formOpen_()) {
+    <form class="team-form c-glass-panel" data-testid="team-add-form" (ngSubmit)="addMember()">
+      <label class="team-field">
+        <span>{{ 'username' | translatePipe }}</span>
+        <input
+          class="c-input"
+          name="name"
+          type="text"
+          autocomplete="off"
+          maxlength="20"
+          [ngModel]="name_()"
+          (ngModelChange)="name_.set($event)"
+          [attr.aria-invalid]="errorKey_() !== null"
+        />
+      </label>
+      <label class="team-field">
+        <span>{{ 'team_initial_password' | translatePipe }}</span>
+        <input
+          class="c-input"
+          name="password"
+          type="password"
+          autocomplete="new-password"
+          [ngModel]="password_()"
+          (ngModelChange)="password_.set($event)"
+          [attr.aria-invalid]="errorKey_() !== null"
+        />
+      </label>
+      @if (errorKey_(); as key) {
+        <span class="c-field-error" role="alert" data-testid="team-add-error">{{ key | translatePipe }}</span>
+      }
+      <div class="team-form__buttons">
+        <button type="submit" class="c-btn-primary" [disabled]="saving_()" data-testid="team-add-save">
+          {{ 'add' | translatePipe }}
+        </button>
+        <button type="button" class="c-btn-ghost" (click)="closeForm()">{{ 'cancel' | translatePipe }}</button>
+      </div>
+    </form>
+  }
+
+  <ul class="team-list c-glass-panel" data-testid="team-list">
+    @for (member of team_(); track member._id) {
+      <li class="team-row" data-testid="team-row">
+        <span class="team-row__name">{{ member.name }}</span>
+        <span
+          class="team-row__role c-chip"
+          [attr.aria-label]="'team_col_role' | translatePipe"
+          [class.teal]="member.businessRole === 'owner'"
+        >
+          {{ (member.businessRole === 'owner' ? 'business_role_owner' : 'business_role_staff') | translatePipe }}
+        </span>
+        <span class="team-row__last" [attr.aria-label]="'team_col_last_login' | translatePipe">
+          @if (member.lastActiveAt) {
+            {{ member.lastActiveAt | date: 'dd/MM/yyyy HH:mm' }}
+          } @else {
+            —
+          }
+        </span>
+        @if (member.businessRole === 'staff') {
+          <button
+            type="button"
+            class="c-icon-btn danger team-row__remove"
+            data-testid="team-remove"
+            [attr.aria-label]="'remove' | translatePipe"
+            (click)="removeMember(member)"
+          >
+            <lucide-icon name="trash-2" [size]="16" />
+          </button>
+        }
+      </li>
+    }
+  </ul>
+
+  @if (!hasStaff_()) {
+    <app-empty-state messageKey="team_empty" icon="users" />
+  }
+</section>

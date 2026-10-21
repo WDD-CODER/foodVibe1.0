@@ -1,0 +1,32 @@
+@layer components.settings-page {
+  // Matches the header cutoff (header.component.scss), where the bottom tab bar appears.
+  $settings-break-mobile: 620px;
+
+  :host {
+    display: block;
+  }
+
+  .settings-shell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+
+    max-inline-size: 60rem;
+    margin-inline: auto;
+
+    padding: var(--space-4);
+
+    @media (max-width: $settings-break-mobile) {
+      padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  .settings-tabs {
+    display: flex;
+    gap: var(--space-2);
+  }
+
+  .settings-content {
+    min-inline-size: 0;
+  }
+}

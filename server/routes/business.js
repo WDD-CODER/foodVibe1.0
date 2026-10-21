@@ -1,10 +1,28 @@
 'use strict'
-/** Plan 425: the caller's business. Owner-only sub-routes (settings, baseline, team) arrive with plans 427-431. */
+/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Settings/baseline arrive with plans 429/431. */
 const { Router } = require('express')
+const rateLimit = require('express-rate-limit')
 const { verifyToken } = require('../middleware/auth')
 const { getBusiness } = require('../services/business')
+const { assertCan } = require('../utils/permissions')
+const { isValidUsername, isValidPasswordHash } = require('../utils/username')
+const { newId } = require('../utils/id')
+const User = require('../models/user.model')
 
 const router = Router()
+
+const STAFF_EMAIL_DOMAIN = '@staff.foodvibe.invalid'
+
+// Team routes are not under the /api/v1/data write limiter, and POST creates accounts, so POST is rate limited.
+const teamLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: req => String(req.user?.userId ?? 'anonymous'),
+  validate: { keyGeneratorIpFallback: false },
+  message: { error: 'Too many team requests, please try again later' },
+})
 
 // GET /api/v1/business — the business document of the signed-in user, as stored. Any member may read it.
 router.get('/', verifyToken, async (req, res) => {
@@ -14,6 +32,95 @@ router.get('/', verifyToken, async (req, res) => {
     res.json(business)
   } catch (err) {
     req.log.error({ err, event: 'business.get.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+/** Owner only: sends the 403 itself. Runs before the limiter so refused requests never use up the owner's quota. */
+function ownerOnly(req, res, next) {
+  if (assertCan(req, res, 'manageTeam', { type: 'businesses' })) next()
+}
+
+/** The row shape every team response uses. `lastActiveAt` is filled from usageDays by plan 430. */
+const toTeamRow = user => ({
+  _id: user._id,
+  name: user.name,
+  businessRole: user.businessRole,
+  createdAt: user.createdAt ?? null,
+  lastActiveAt: null,
+})
+
+// GET /api/v1/business/team — the owner and the active staff of the caller's business.
+router.get('/team', verifyToken, ownerOnly, async (req, res) => {
+  try {
+    const users = await User.find({ businessId: req.user.businessId, removedAt: null })
+      .select('_id name businessRole createdAt').lean()
+    const rank = user => (user.businessRole === 'owner' ? 0 : 1)
+    users.sort((a, b) => rank(a) - rank(b) || String(a.name).localeCompare(String(b.name)))
+    res.json(users.map(toTeamRow))
+  } catch (err) {
+    req.log.error({ err, event: 'business.team.failed', action: 'list' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// POST /api/v1/business/team — add a staff member with a username and an initial (client-hashed) password.
+router.post('/team', verifyToken, ownerOnly, teamLimiter, async (req, res) => {
+  try {
+    const { name, password } = req.body || {}
+    if (!isValidUsername(name)) return res.status(400).json({ error: 'INVALID_USERNAME' })
+    if (!isValidPasswordHash(password)) {
+      return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' })
+    }
+    const trimmed = name.trim()
+    if (await User.findOne({ name: trimmed }).lean()) return res.status(409).json({ error: 'USERNAME_TAKEN' })
+
+    const business = await getBusiness(req.user.businessId)
+    if (!business) return res.status(404).json({ error: 'NOT_FOUND' })
+
+    const _id = newId()
+    // No clone: staff share the business's own copy of the data. The email is a reserved placeholder
+    // (`users.email` is required + unique); the .invalid domain never receives mail and the UI never shows it.
+    const created = await User.create({
+      _id,
+      name: trimmed,
+      email: `${_id}${STAFF_EMAIL_DOMAIN}`,
+      imgUrl: '',
+      role: 'user',
+      passwordHash: password,
+      businessId: req.user.businessId,
+      businessRole: 'staff',
+      isPlatformAdmin: false,
+      createdAt: Date.now(),
+      lastSyncedMasterVersion: business.lastSyncedMasterVersion ?? 0,
+    })
+    req.log.info({ event: 'business.team.added', staffId: _id })
+    res.status(201).json(toTeamRow(created.toObject()))
+  } catch (err) {
+    if (err.code === 11000) {
+      req.log.info({ event: 'business.team.failed', action: 'add', reason: 'username_taken' })
+      return res.status(409).json({ error: 'USERNAME_TAKEN' })
+    }
+    req.log.error({ err, event: 'business.team.failed', action: 'add' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// DELETE /api/v1/business/team/:userId — block a staff member's login. Never deletes the user or their items.
+router.delete('/team/:userId', verifyToken, ownerOnly, async (req, res) => {
+  try {
+    const targetId = String(req.params.userId)
+    const target = await User.findOne({ _id: targetId, businessId: req.user.businessId }).lean()
+    if (!target) return res.status(404).json({ error: 'NOT_FOUND' })
+    if (targetId === String(req.user.userId)) return res.status(403).json({ error: 'CANNOT_REMOVE_SELF' })
+    if (target.businessRole === 'owner') return res.status(403).json({ error: 'CANNOT_REMOVE_OWNER' })
+    if (!target.removedAt) {
+      await User.updateOne({ _id: targetId }, { $set: { removedAt: Date.now() } })
+      req.log.info({ event: 'business.team.removed', staffId: targetId })
+    }
+    res.json({ ok: true })
+  } catch (err) {
+    req.log.error({ err, event: 'business.team.failed', action: 'remove' })
     res.status(500).json({ error: 'Server error' })
   }
 })

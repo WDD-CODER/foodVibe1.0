@@ -117,6 +117,7 @@ export class ProductDataService {
       minStockLevel: legacy.minStockLevel ?? 0,
       expiryDaysDefault: legacy.expiryDaysDefault ?? 0,
       createdAt: legacy.createdAt,
+      createdBy: legacy.createdBy,
       updatedAt: legacy.updatedAt,
       nameEnglish: legacy.nameEnglish,
       seeded: legacy.seeded,

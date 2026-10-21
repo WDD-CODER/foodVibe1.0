@@ -246,7 +246,7 @@
         <app-row-actions-menu class="c-col-actions c-list-body-cell" role="cell">
           @if (deletingId_() === row.product._id) {
             <app-loader size="small" [inline]="true" />
-          } @else {
+          } @else if (!isLoggedIn() || canDelete_(row.product)) {
             <button
               type="button"
               class="c-icon-btn danger"

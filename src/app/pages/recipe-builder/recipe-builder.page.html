@@ -454,11 +454,13 @@
       @if (blockingIngredientsError_()) {
       <p class="blocking-ingredients-error">{{ 'blocking_ingredients_error' | translatePipe }}</p>
       }
-      <button class="c-btn-primary main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
-        @if (isSaving_()) {
-        <app-loader size="small" [inline]="true" />
-        } {{ (isSaving_() ? 'saving' : (recipeType_() === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
-      </button>
+      <app-edit-gate [type]="recipeType_() === 'dish' ? 'dishes' : 'recipes'">
+        <button class="c-btn-primary main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
+          @if (isSaving_()) {
+          <app-loader size="small" [inline]="true" />
+          } {{ (isSaving_() ? 'saving' : (recipeType_() === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
+        </button>
+      </app-edit-gate>
     </footer>
     }
   </div>

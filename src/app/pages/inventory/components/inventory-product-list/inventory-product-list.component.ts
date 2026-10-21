@@ -27,6 +27,7 @@ import { TranslationService } from '@services/translation.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { MasterPushService } from '@services/master-push.service'
 import { UserService } from '@services/user.service'
+import { PermissionService } from '@services/permission.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
@@ -104,6 +105,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   private readonly userMsg = inject(UserMsgService)
   protected readonly unitRegistry = inject(UnitRegistryService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
+  private readonly permission = inject(PermissionService)
+  /** Staff may delete only the products they created (plan 428). */
+  protected readonly canDelete_ = (product: Product): boolean =>
+    this.permission.can('delete', { type: 'products', doc: product })
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly productData_ = inject(ProductDataService)
   private readonly recipeData_ = inject(RecipeDataService)
