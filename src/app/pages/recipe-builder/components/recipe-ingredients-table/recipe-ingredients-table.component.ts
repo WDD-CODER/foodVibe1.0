@@ -38,6 +38,12 @@ import { map } from 'rxjs'
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { NutritionBadgeComponent } from 'src/app/shared/nutrition-badge/nutrition-badge.component'
+import { TranslationService } from '@services/translation.service'
+import { RecipeFormService } from '../../services/recipe-form.service'
+import { PasteIngredientsDialogComponent } from '../paste-ingredients-dialog/paste-ingredients-dialog.component'
+import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
+import { createUnitWordResolver, parseIngredientLines } from '@utils/ingredient-line-parser.util'
+import { findIngredientMatch } from '@utils/ingredient-match.util'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
@@ -62,7 +68,8 @@ const MOBILE_QUICK_EDIT_QUERY = '(max-width: 767px), (hover: none) and (max-heig
     CdkDropList,
     CdkDragHandle,
     ClickOutSideDirective,
-    NutritionBadgeComponent
+    NutritionBadgeComponent,
+    PasteIngredientsDialogComponent
   ],
   templateUrl: './recipe-ingredients-table.component.html',
   styleUrl: './recipe-ingredients-table.component.scss',
@@ -81,6 +88,13 @@ export class RecipeIngredientsTableComponent {
   private fb = inject(FormBuilder)
   private readonly cdr = inject(ChangeDetectorRef)
   private readonly router_ = inject(Router)
+  private readonly translation_ = inject(TranslationService)
+  private readonly recipeFormService_ = inject(RecipeFormService)
+  private readonly pastedUnitResolver_ = createUnitWordResolver({
+    aliases: UNIT_ALIASES,
+    translate: (token) => this.translation_.resolveUnit(token),
+    knownKeys: () => this.unitRegistry.allUnitKeys_()
+  })
 
   protected readonly isMobile_ = toSignal(this.bp.observe(MOBILE_QUICK_EDIT_QUERY).pipe(map((r) => r.matches)), {
     initialValue: false
@@ -144,6 +158,9 @@ export class RecipeIngredientsTableComponent {
   /** Validation tier of the currently-open quick-edit row — drives field focus inside the panel. */
   protected quickEditRowTier_ = signal<'invalid' | 'incomplete' | null>(null)
 
+  /** True while the "paste ingredients" window is open. */
+  protected pasteOpen_ = signal(false)
+
   /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
   protected getProductForGroup(group: FormGroup): Product | null {
     const refId = group.get('referenceId')?.value as string | null
@@ -187,6 +204,53 @@ export class RecipeIngredientsTableComponent {
       group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.nameHebrew })
       this.onQuickEditBadgeClick(group, index, 'incomplete')
     })
+  }
+
+  /**
+   * Adds one row per non-empty pasted line (plan 439). A readable line becomes a row linked to the product or
+   * recipe of the same name when there is one; a line that cannot be read is kept as an unlinked row holding
+   * its original text — nothing pasted is dropped. Trailing empty rows are replaced.
+   */
+  onPasteIngredients(text: string): void {
+    const lines = parseIngredientLines(text, this.pastedUnitResolver_)
+    this.pasteOpen_.set(false)
+    if (lines.length === 0) return
+    const array = this.ingredientsFormArray()
+    while (array.length > 0 && this.isEmptyRow_(array.at(array.length - 1) as FormGroup)) {
+      array.removeAt(array.length - 1)
+    }
+    const firstNewIndex = array.length
+    for (const line of lines) {
+      const row = this.recipeFormService_.createIngredientGroup()
+      if (line.kind === 'parsed') {
+        const match = findIngredientMatch(
+          line.name,
+          this.kitchenStateService.products_(),
+          this.kitchenStateService.recipes_()
+        )
+        const linkedName = match?.entity.nameHebrew ?? line.name
+        row.patchValue({
+          nameHebrew: linkedName,
+          nameSnapshot: linkedName,
+          amount_net: line.amount,
+          unit: line.unit,
+          ...(match && { referenceId: match.entity._id, item_type: match.type })
+        })
+      } else {
+        row.patchValue({ nameHebrew: line.text, nameSnapshot: line.text, amount_net: null, unit: 'unit' })
+      }
+      array.push(row)
+    }
+    for (let i = firstNewIndex; i < array.length; i++) {
+      if (array.at(i).get('referenceId')?.value) this.updateLineCalculations(i)
+    }
+    array.markAsDirty()
+    array.updateValueAndValidity()
+    this.cdr.markForCheck()
+  }
+
+  private isEmptyRow_(group: FormGroup): boolean {
+    return !group.get('referenceId')?.value && !(group.get('nameHebrew')?.value ?? '').toString().trim()
   }
 
   /** Called by clickOutside on the accordion div — defers to panel if it has unsaved changes. */

@@ -177,3 +177,54 @@ describe('RecipeFormService default station', () => {
     expect(f.get('default_station')?.value).toBe('קר')
   })
 })
+
+// Plan 439 — a recipe with "not ready" rows (a name, no product) still saves, and keeps their text.
+describe('RecipeFormService unready ingredient rows', () => {
+  let service: RecipeFormService
+  let fb: FormBuilder
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] })
+    service = TestBed.inject(RecipeFormService)
+    fb = TestBed.inject(FormBuilder)
+  })
+
+  it('accepts an unlinked row with a name and no amount', () => {
+    const row = service.createIngredientGroup()
+    row.patchValue({ nameHebrew: 'קצת פטרוזיליה', amount_net: null })
+    expect(row.valid).toBeTrue()
+    row.patchValue({ amount_net: 0 })
+    expect(row.valid).toBeTrue()
+  })
+
+  it('still rejects a linked row without an amount', () => {
+    const row = service.createIngredientGroup()
+    row.patchValue({ referenceId: 'p1', item_type: 'product', nameHebrew: 'בצל', amount_net: null })
+    expect(row.valid).toBeFalse()
+  })
+
+  it('keeps the unlinked row in the save payload with amount 0 and its text', () => {
+    const unready = service.createIngredientGroup()
+    unready.patchValue({ nameHebrew: 'קצת פטרוזיליה', amount_net: null, unit: 'unit' })
+    const linked = service.createIngredientGroup()
+    linked.patchValue({ referenceId: 'p1', item_type: 'product', nameHebrew: 'בצל', amount_net: 2, unit: 'kg' })
+    const f = fb.group({
+      nameHebrew: ['x'],
+      recipe_type: ['preparation'],
+      serving_portions: [1],
+      yield_conversions: fb.array([fb.group({ amount: [1], unit: ['gram'] })]),
+      ingredients: fb.array([linked, unready, service.createIngredientGroup()]),
+      workflow_items: fb.array([]),
+      total_weight_g: [0],
+      total_cost: [0],
+      labels: [[] as string[]],
+      course: ['']
+    })
+    const recipe = service.buildRecipeFromForm(f, 'r1', false)
+    expect(recipe.ingredients.length).toBe(2)
+    const kept = recipe.ingredients[1]
+    expect(kept.amount).toBe(0)
+    expect(kept.nameSnapshot).toBe('קצת פטרוזיליה')
+    expect(kept.referenceId).toBeUndefined()
+  })
+})

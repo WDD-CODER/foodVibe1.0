@@ -9,6 +9,8 @@ import { EmptyStateComponent } from '../../shared/empty-state/empty-state.compon
 import { SETTINGS_TABS, SettingsTab } from './settings-tabs'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { TeamTabComponent } from './components/team-tab/team-tab.component'
+import { BusinessSettingsTabComponent } from './components/business-settings-tab/business-settings-tab.component'
+import { BaselineTabComponent } from './components/baseline-tab/baseline-tab.component'
 
 @Component({
   selector: 'app-settings-page',
@@ -19,7 +21,9 @@ import { TeamTabComponent } from './components/team-tab/team-tab.component'
     PageHeaderComponent,
     EmptyStateComponent,
     ScrollRailComponent,
-    TeamTabComponent
+    TeamTabComponent,
+    BusinessSettingsTabComponent,
+    BaselineTabComponent
   ],
   templateUrl: './settings.page.html',
   styleUrl: './settings.page.scss',

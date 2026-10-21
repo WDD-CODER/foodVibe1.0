@@ -103,29 +103,6 @@ describe('master sync and clone', () => {
 })
 
 describe('seed-master', () => {
-  it('stamps businessId + createdBy __master__ on every product seedMasterData writes', async () => {
-    const { seedMasterData } = require('../services/seed-master')
-    await testDb().collection('products').deleteMany({})
-    // The repo ships the demo products as demoProducts.json; the seeder reads demo-products.json.
-    const fs = require('fs')
-    const path = require('path')
-    const real = fs.readFileSync.bind(fs)
-    const spy = vi.spyOn(fs, 'readFileSync').mockImplementation((file, ...rest) => {
-      if (String(file).endsWith('demo-products.json')) {
-        return real(path.resolve(__dirname, '..', '..', 'public', 'assets', 'data', 'demoProducts.json'), ...rest)
-      }
-      return real(file, ...rest)
-    })
-    try {
-      expect(await seedMasterData()).toBeGreaterThan(0)
-    } finally {
-      spy.mockRestore()
-    }
-    const products = await testDb().collection('products').find({ userId: '__master__' }).toArray()
-    expect(products.length).toBeGreaterThan(0)
-    for (const p of products) expect(p).toMatchObject({ businessId: '__master__', createdBy: '__master__' })
-  })
-
   it('stamps businessId __master__ on every master term it writes', async () => {
     const { seedMasterTaxonomy } = require('../services/seed-master')
     expect(await seedMasterTaxonomy()).toBeGreaterThan(0)

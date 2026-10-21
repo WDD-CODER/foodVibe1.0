@@ -26,10 +26,10 @@ beforeEach(async () => {
 const as = user => ({ Authorization: `Bearer ${signTestToken(user)}` })
 
 describe('GET /api/v1/business', () => {
-  it('returns the business doc as stored for the owner and for staff', async () => {
+  it('returns the business doc (settings defaults filled) for the owner and for staff', async () => {
     const owner = await request(app).get('/api/v1/business').set(as({ userId: 'ownerA', businessId: 'bA', businessRole: 'owner' }))
     expect(owner.status).toBe(200)
-    expect(owner.body).toEqual({ _id: 'bA', name: 'העסק של A', ownerId: 'ownerA', createdAt: 1, internal: false, lastSyncedMasterVersion: 7 })
+    expect(owner.body).toEqual({ _id: 'bA', name: 'העסק של A', ownerId: 'ownerA', createdAt: 1, internal: false, lastSyncedMasterVersion: 7, settings: { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 } })
     const staff = await request(app).get('/api/v1/business').set(as({ userId: 'staffA', businessId: 'bA', businessRole: 'staff' }))
     expect(staff.status).toBe(200)
     expect(staff.body._id).toBe('bA')

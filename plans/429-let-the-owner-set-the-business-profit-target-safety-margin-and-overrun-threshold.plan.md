@@ -1,6 +1,6 @@
 # Plan 429 — Let the owner set the business profit target, safety margin and overrun threshold
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -25,8 +25,8 @@ User stories:
 owner from Settings → «הגדרות עסק», validated by one Zod schema on the server.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npm --prefix server test -- test/business-settings.test.js` passes, covering:
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npm --prefix server test -- test/business-settings.test.js` passes, covering:
   - a business with no stored `settings` → `GET /api/v1/business` returns `settings: { profitTargetPct: 25,
     safetyMarginPct: 10, overrunThresholdPct: 10 }`;
   - owner `PUT /api/v1/business/settings` `{ profitTargetPct: 30, safetyMarginPct: 12.5, overrunThresholdPct: 15 }`
@@ -36,8 +36,8 @@ Done when:
     an unknown key (`foo: 1`) → 400;
   - staff `PUT /settings` → 403 `{ error: 'FORBIDDEN', messageKey: 'no_permission' }`, stored values unchanged;
   - owner of business X cannot change business Y (the route only ever writes `req.user.businessId`).
-- [auto] `npm --prefix server test` passes (whole server suite).
-- [auto] `npx ng test --watch=false --include='src/app/pages/settings/**/*.spec.ts' --include='src/app/core/services/business.service.spec.ts'`
+- [x] [auto] `npm --prefix server test` passes (whole server suite).
+- [x] [auto] `npx ng test --watch=false --include='src/app/pages/settings/**/*.spec.ts' --include='src/app/core/services/business.service.spec.ts'`
   passes, covering: the Business tab is listed for an owner and not for staff; `?tab=business` as staff falls back
   to the owner-only state; the form shows the defaults when the server returns them; 100 in the target field shows
   the field error and disables save; `BusinessService.updateSettings` puts the new `settings` into `business_`.
@@ -79,6 +79,8 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 shared/schemas/entities/business.schema.ts
 server/routes/business.js
 server/test/business-settings.test.js
+server/test/business-route.test.js
+src/testing/test-lucide-icons.ts
 src/app/core/services/business.service.ts
 src/app/core/services/business.service.spec.ts
 src/app/pages/settings/**
@@ -194,13 +196,13 @@ Add `Building2` to `src/app/app.config.ts` (import list + `LucideAngularModule.p
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] One `settings` shape with defaults 25 / 10 / 10 in the shared Zod schema.
-- [ ] `GET /api/v1/business` always returns full settings (defaults filled).
-- [ ] `PUT /api/v1/business/settings` owner-only, validated; target ≥ 100 refused.
-- [ ] «הגדרות עסק» tab in `/settings`, owner only; staff never see it or its numbers.
+- [x] One `settings` shape with defaults 25 / 10 / 10 in the shared Zod schema.
+- [x] `GET /api/v1/business` always returns full settings (defaults filled).
+- [x] `PUT /api/v1/business/settings` owner-only, validated; target ≥ 100 refused.
+- [x] «הגדרות עסק» tab in `/settings`, owner only; staff never see it or its numbers.
 
 ### Should Have (P1)
-- [ ] Field help texts under each number.
+- [x] Field help texts under each number.
 
 ## UI/UX Notes
 - Same tab bar as plan 428; form in a single column card, max inline size ~28rem on desktop.
@@ -208,11 +210,11 @@ Add `Building2` to `src/app/app.config.ts` (import list + `LucideAngularModule.p
 - Run the `cssLayer` skill before the component `.scss`.
 
 ## Atomic Sub-tasks
-- [ ] S1: Give business settings one validated shape with the agreed defaults — businessSettingsSchema, BUSINESS_SETTINGS_DEFAULTS, settings field optional, rebuild schemas — shared/schemas/entities/business.schema.ts
-- [ ] S2: Let only the owner save the settings and always return them with defaults filled — GET / defaults, PUT /settings with assertCan editSettings + safeParse — server/routes/business.js
-- [ ] S3: Prove defaults, validation, owner-only and same-business writes with server tests — every Done-when case — server/test/business-settings.test.js
-- [ ] S4: Add the Business tab where the owner edits the three numbers — SETTINGS_TABS entry, @case, BusinessSettingsTabComponent, BusinessService.updateSettings, specs — src/app/pages/settings/**, src/app/core/services/business.service.ts, business.service.spec.ts
-- [ ] S5: Add the Hebrew texts and the building icon — 11 dictionary keys, Building2 — public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] S1: Give business settings one validated shape with the agreed defaults — businessSettingsSchema, BUSINESS_SETTINGS_DEFAULTS, settings field optional, rebuild schemas — shared/schemas/entities/business.schema.ts
+- [x] S2: Let only the owner save the settings and always return them with defaults filled — GET / defaults, PUT /settings with assertCan editSettings + safeParse — server/routes/business.js
+- [x] S3: Prove defaults, validation, owner-only and same-business writes with server tests — every Done-when case — server/test/business-settings.test.js
+- [x] S4: Add the Business tab where the owner edits the three numbers — SETTINGS_TABS entry, @case, BusinessSettingsTabComponent, BusinessService.updateSettings, specs — src/app/pages/settings/**, src/app/core/services/business.service.ts, business.service.spec.ts
+- [x] S5: Add the Hebrew texts and the building icon — 11 dictionary keys, Building2 — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] S6: Build, test and hand over the settings checks — ng build, server suite, listed specs, log-query; Human runs the [human] items on desktop and mobile — this plan file
 
 ## Technical Considerations

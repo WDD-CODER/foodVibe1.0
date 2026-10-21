@@ -1,6 +1,8 @@
 {
-  "name": "foodVibe1.0",
-  "short_name": "foodVibe1.0",
+  "name": "FoodVibe",
+  "short_name": "FoodVibe",
+  "dir": "rtl",
+  "lang": "he",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",

@@ -1,0 +1,48 @@
+@layer components.baseline-tab {
+  :host {
+    display: block;
+  }
+
+  .baseline-tab {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .baseline-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+
+    inline-size: 100%;
+    max-inline-size: 28rem;
+    padding: var(--space-4);
+  }
+
+  .baseline-intro,
+  .baseline-updated {
+    margin: 0;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .baseline-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .baseline-field__label {
+    color: var(--color-text-main);
+    font-weight: 600;
+  }
+
+  .baseline-field__suffix {
+    padding-inline-start: var(--space-2);
+
+    color: var(--color-text-muted);
+  }
+}

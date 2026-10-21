@@ -96,6 +96,9 @@ async function connectDb() {
   // Plan 424: one document per business; looked up by its owner.
   await db.collection('businesses').createIndex({ ownerId: 1 }, { name: 'business_owner' })
 
+  // Plan 430: per-user-per-day activity records; dashboards read them by business and date. No TTL.
+  await db.collection('usageDays').createIndex({ businessId: 1, date: 1 }, { name: 'business_date' })
+
   // Plan 321 Phase 3: one term per (kind, key, owner); same names as migration 0003 so both are idempotent.
   await db.collection('taxonomyTerms').createIndex({ kind: 1, key: 1, userId: 1 }, { unique: true, name: 'kind_key_user_unique' })
   await db.collection('taxonomyTerms').createIndex({ userId: 1, kind: 1, sortOrder: 1 }, { name: 'user_kind_order' })

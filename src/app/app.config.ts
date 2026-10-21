@@ -17,7 +17,6 @@ import {
   Watch,
   Undo2,
   ArrowRight,
-  Archive,
   BookOpen,
   Camera,
   LayoutDashboard,
@@ -32,6 +31,7 @@ import {
   CircleUserRound,
   CircleX,
   ClipboardList,
+  ClipboardPaste,
   CookingPot,
   Copy,
   Download,
@@ -72,7 +72,7 @@ import {
   Timer,
   Trash2,
   Truck,
-  Upload,
+  MessageCircle,
   Wrench,
   Utensils,
   UtensilsCrossed,
@@ -93,7 +93,8 @@ import {
   Phone,
   Moon,
   Sun,
-  SlidersVertical
+  SlidersVertical,
+  Building2
 } from 'lucide-angular'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -177,6 +178,7 @@ export const appConfig: ApplicationConfig = {
         MessageSquare,
         MoreVertical,
         Truck,
+        MessageCircle,
         Wrench,
         Package,
         CalendarClock,
@@ -201,11 +203,10 @@ export const appConfig: ApplicationConfig = {
         LogOut,
         GripVertical,
         Heart,
-        Archive,
         Download,
-        Upload,
         CircleUserRound,
         ClipboardList,
+        ClipboardPaste,
         Eye,
         EyeOff,
         Star,
@@ -229,7 +230,8 @@ export const appConfig: ApplicationConfig = {
         Phone,
         Moon,
         Sun,
-        SlidersVertical
+        SlidersVertical,
+        Building2
       })
     ),
     // Registered only in production builds — never in ng serve, matching the rest of the app's

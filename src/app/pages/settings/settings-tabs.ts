@@ -11,5 +11,7 @@ export interface SettingsTabDef {
 
 /** The tabs of `/settings`. Plans 429 (business) and 431 (baseline) append their entry and one `@case` in the page template. */
 export const SETTINGS_TABS: SettingsTabDef[] = [
-  { key: 'team', labelKey: 'settings_tab_team', icon: 'users', ownerOnly: true }
+  { key: 'team', labelKey: 'settings_tab_team', icon: 'users', ownerOnly: true },
+  { key: 'business', labelKey: 'settings_tab_business', icon: 'building-2', ownerOnly: true },
+  { key: 'baseline', labelKey: 'settings_tab_baseline', icon: 'clipboard-list', ownerOnly: true }
 ]

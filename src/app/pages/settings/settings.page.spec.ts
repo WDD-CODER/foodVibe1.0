@@ -9,9 +9,17 @@ import { TranslationService } from '@services/translation.service'
 import type { User } from '@models/user.model'
 import { SettingsPage } from './settings.page'
 import { TeamTabComponent } from './components/team-tab/team-tab.component'
+import { BusinessSettingsTabComponent } from './components/business-settings-tab/business-settings-tab.component'
+import { BaselineTabComponent } from './components/baseline-tab/baseline-tab.component'
 
 @Component({ selector: 'app-team-tab', standalone: true, template: '<p data-testid="team-stub"></p>' })
 class TeamTabStub {}
+
+@Component({ selector: 'app-business-settings-tab', standalone: true, template: '<p data-testid="business-stub"></p>' })
+class BusinessTabStub {}
+
+@Component({ selector: 'app-baseline-tab', standalone: true, template: '<p data-testid="baseline-stub"></p>' })
+class BaselineTabStub {}
 
 const STAFF: User = { _id: 's1', name: 'cook', email: 's@x', businessId: 'b1', businessRole: 'staff' }
 const OWNER: User = { _id: 'o1', name: 'owner', email: 'o@x', businessId: 'b1', businessRole: 'owner' }
@@ -33,7 +41,10 @@ describe('SettingsPage', () => {
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: { queryParams: of(query), snapshot: { queryParams: query } } }
       ]
-    }).overrideComponent(SettingsPage, { remove: { imports: [TeamTabComponent] }, add: { imports: [TeamTabStub] } })
+    }).overrideComponent(SettingsPage, {
+      remove: { imports: [TeamTabComponent, BusinessSettingsTabComponent, BaselineTabComponent] },
+      add: { imports: [TeamTabStub, BusinessTabStub, BaselineTabStub] }
+    })
     fixture = TestBed.createComponent(SettingsPage)
     fixture.detectChanges()
   }
@@ -67,5 +78,33 @@ describe('SettingsPage', () => {
       [],
       jasmine.objectContaining({ queryParams: { tab: 'team' }, replaceUrl: true })
     )
+  })
+
+  it('owner: the Business tab is listed and ?tab=business opens it', () => {
+    setup(OWNER, { tab: 'business' })
+    expect(el().querySelector('[data-testid="settings-tab-business"]')).not.toBeNull()
+    expect(el().querySelector('[data-testid="settings-tab-business"]')!.getAttribute('aria-selected')).toBe('true')
+    expect(el().querySelector('[data-testid="business-stub"]')).not.toBeNull()
+    expect(el().querySelector('[data-testid="team-stub"]')).toBeNull()
+  })
+
+  it('owner: the Baseline tab is listed and ?tab=baseline opens it', () => {
+    setup(OWNER, { tab: 'baseline', first: '1' })
+    const tab = el().querySelector('[data-testid="settings-tab-baseline"]')!
+    expect(tab.getAttribute('aria-selected')).toBe('true')
+    expect(el().querySelector('[data-testid="baseline-stub"]')).not.toBeNull()
+  })
+
+  it('staff: ?tab=baseline shows no baseline tab and no form', () => {
+    setup(STAFF, { tab: 'baseline' })
+    expect(el().querySelector('[data-testid="settings-tab-baseline"]')).toBeNull()
+    expect(el().querySelector('[data-testid="baseline-stub"]')).toBeNull()
+  })
+
+  it('staff: ?tab=business shows only the owner-only state and no tab or numbers', () => {
+    setup(STAFF, { tab: 'business' })
+    expect(el().querySelector('[data-testid="settings-owner-only"]')).not.toBeNull()
+    expect(el().querySelector('[data-testid="settings-tab-business"]')).toBeNull()
+    expect(el().querySelector('[data-testid="business-stub"]')).toBeNull()
   })
 })

@@ -1,13 +1,18 @@
 'use strict'
-/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Settings/baseline arrive with plans 429/431. */
+/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Plan 431: owner-only opening baseline and setup status. */
 const { Router } = require('express')
 const rateLimit = require('express-rate-limit')
 const { verifyToken } = require('../middleware/auth')
-const { getBusiness } = require('../services/business')
+const { getBusiness, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
 const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
+const { businessSettingsSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
+const mongoose = require('mongoose')
+const { lastActiveByUser } = require('../utils/usage-stats')
+const { scopeFilter } = require('../utils/business-scope')
+const { LIVE, NOT_MASTER_CLONE } = require('../jobs/purge-deleted')
 
 const router = Router()
 
@@ -24,14 +29,80 @@ const teamLimiter = rateLimit({
   message: { error: 'Too many team requests, please try again later' },
 })
 
-// GET /api/v1/business — the business document of the signed-in user, as stored. Any member may read it.
+// GET /api/v1/business — the business document of the signed-in user; `settings` always has the defaults filled in (nothing is written on read). Any member may read it.
 router.get('/', verifyToken, async (req, res) => {
   try {
     const business = await getBusiness(req.user.businessId)
     if (!business) return res.status(404).json({ error: 'Business not found' })
-    res.json(business)
+    res.json({ ...business, settings: { ...BUSINESS_SETTINGS_DEFAULTS, ...(business.settings ?? {}) } })
   } catch (err) {
     req.log.error({ err, event: 'business.get.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// PUT /api/v1/business/settings — the owner sets the three business numbers. Only ever writes the caller's own business.
+router.put('/settings', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const parsed = businessSettingsSchema.safeParse(req.body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.settings.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
+    }
+    const result = await setBusinessSettings(req.user.businessId, parsed.data)
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
+    req.log.info({ event: 'business.settings.saved' })
+    res.json({ settings: parsed.data })
+  } catch (err) {
+    req.log.error({ err, event: 'business.settings.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// PUT /api/v1/business/baseline — the owner stores how the business ran before FoodVibe. Whole replace; `filledAt` is always server-set.
+router.put('/baseline', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const { filledAt: _ignored, ...body } = req.body && typeof req.body === 'object' ? req.body : {}
+    const parsed = baselineInputSchema.safeParse(body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.baseline.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
+    }
+    const baseline = { ...parsed.data, filledAt: Date.now() }
+    const result = await setBusinessBaseline(req.user.businessId, baseline)
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
+    req.log.info({ event: 'business.baseline.saved' })
+    res.json({ baseline })
+  } catch (err) {
+    req.log.error({ err, event: 'business.baseline.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+/** The card only needs "reached or not", so no count goes past this. */
+const SETUP_COUNT_CAP = 10
+
+// GET /api/v1/business/setup-status — what the owner has set up so far, counting only items made in this business.
+router.get('/setup-status', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const db = mongoose.connection.db
+    const base = { $and: [scopeFilter(req), LIVE, NOT_MASTER_CLONE] }
+    const count = (name, extra) =>
+      db.collection(name).countDocuments(extra ? { $and: [...base.$and, extra] } : base, { limit: SETUP_COUNT_CAP })
+    const [pricedProducts, suppliers, recipes, dishes, events, staff] = await Promise.all([
+      count('products', { $or: [{ 'sources.price': { $gt: 0 } }, { 'purchaseOptions.priceOverride': { $gt: 0 } }] }),
+      count('suppliers'),
+      count('recipes'),
+      count('dishes'),
+      count('menuEvents'),
+      User.countDocuments({ businessId: req.user.businessId, businessRole: 'staff', removedAt: null }).limit(SETUP_COUNT_CAP)
+    ])
+    res.json({ pricedProducts, suppliers, recipes: recipes + dishes, events, staff })
+  } catch (err) {
+    req.log.error({ err, event: 'business.setup_status.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
@@ -42,12 +113,12 @@ function ownerOnly(req, res, next) {
 }
 
 /** The row shape every team response uses. `lastActiveAt` is filled from usageDays by plan 430. */
-const toTeamRow = user => ({
+const toTeamRow = (user, lastActive = null) => ({
   _id: user._id,
   name: user.name,
   businessRole: user.businessRole,
   createdAt: user.createdAt ?? null,
-  lastActiveAt: null,
+  lastActiveAt: lastActive,
 })
 
 // GET /api/v1/business/team — the owner and the active staff of the caller's business.
@@ -57,7 +128,8 @@ router.get('/team', verifyToken, ownerOnly, async (req, res) => {
       .select('_id name businessRole createdAt').lean()
     const rank = user => (user.businessRole === 'owner' ? 0 : 1)
     users.sort((a, b) => rank(a) - rank(b) || String(a.name).localeCompare(String(b.name)))
-    res.json(users.map(toTeamRow))
+    const lastActive = await lastActiveByUser(mongoose.connection.db, req.user.businessId)
+    res.json(users.map(u => toTeamRow(u, lastActive.get(u._id) ?? null)))
   } catch (err) {
     req.log.error({ err, event: 'business.team.failed', action: 'list' })
     res.status(500).json({ error: 'Server error' })

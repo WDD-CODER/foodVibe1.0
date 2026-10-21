@@ -84,7 +84,11 @@ describe('DashboardOverviewComponent', () => {
         { provide: RecipeDataService, useValue: mockRecipeData },
         { provide: DishDataService, useValue: mockDishData },
         { provide: ActivityLogService, useValue: mockActivityLog },
-        { provide: UserService, useValue: { isLoggedIn: mockIsLoggedIn } },
+        {
+          provide: UserService,
+          // user_/isOwner_: the setup card (plan 431) reads them through PermissionService and BusinessService.
+          useValue: { isLoggedIn: mockIsLoggedIn, user_: signal(null), isOwner_: signal(false) }
+        },
         { provide: Router, useValue: mockRouter },
         { provide: TranslationService, useValue: mockTranslation }
       ]
