@@ -191,8 +191,8 @@ export class RecipeWorkflowComponent {
       const prefillName = this.pendingAddName_()
       this.pendingAddName_.set('')
       this.unitRegistry_.openUnitCreator({ prefillName })
-      this.unitRegistry_.awaitUnitCreated().subscribe((newUnit) => {
-        group.get('unit')?.setValue(newUnit)
+      void this.unitRegistry_.awaitUnitCreated().then((newUnit) => {
+        if (newUnit) group.get('unit')?.setValue(newUnit)
       })
     } else {
       group.get('unit')?.setValue(val)

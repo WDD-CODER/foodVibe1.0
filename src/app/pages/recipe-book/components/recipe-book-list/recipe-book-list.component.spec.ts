@@ -44,7 +44,7 @@ describe('RecipeBookListComponent', () => {
       products_: mockProductsSignal,
       recipesById_: computed(() => new Map(mockRecipesSignal().map((r) => [r._id, r]))),
       productsById_: computed(() => new Map(mockProductsSignal().map((p) => [p._id, p]))),
-      deleteRecipe: jasmine.createSpy('deleteRecipe').and.returnValue({ subscribe: () => {} })
+      deleteRecipe: jasmine.createSpy('deleteRecipe').and.returnValue(Promise.resolve())
     }
 
     await TestBed.configureTestingModule({
@@ -151,7 +151,7 @@ describe('RecipeBookListComponent', () => {
     const confirmModal = TestBed.inject(ConfirmModalService)
     ;(confirmModal.open as jasmine.Spy).and.returnValue(Promise.resolve(true))
     const stateService = TestBed.inject(KitchenStateService)
-    ;(stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} })
+    ;(stateService.deleteRecipe as jasmine.Spy).and.returnValue(Promise.resolve())
 
     const recipe = mockRecipesSignal()[0]
     await (component as any).rowActions.remove(recipe)

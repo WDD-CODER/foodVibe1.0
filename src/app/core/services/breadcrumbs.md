@@ -9,23 +9,23 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | File/Directory | Purpose | Key Exports |
 |---------------|---------|-------------|
 | `async-storage.service.ts` | Key-value persistence (IndexedDB/localStorage) | StorageService, BACKUP_ENTITY_TYPES, STORAGE_ERROR_MESSAGE |
-| `product-data.service.ts` | Product CRUD | ProductDataService |
-| `dish-data.service.ts` | Dish CRUD | DishDataService |
-| `recipe-data.service.ts` | Recipe CRUD, routing helpers | RecipeDataService |
+| `product-data.service.ts` | Product CRUD (on BaseEntityDataService; loads on start) | ProductDataService |
+| `dish-data.service.ts` | Dish CRUD (on BaseEntityDataService) | DishDataService |
+| `recipe-data.service.ts` | Recipe CRUD (on BaseEntityDataService) | RecipeDataService |
 | `supplier-data.service.ts` | Supplier CRUD | SupplierDataService |
 | `equipment-data.service.ts` | Equipment CRUD | EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME |
 | `venue-data.service.ts` | Venue CRUD | VenueDataService |
-| `kitchen-state.service.ts` | Central navigation/state for kitchen flows | KitchenStateService |
+| `kitchen-state.service.ts` | Central state for kitchen flows; save/delete methods return Promises | KitchenStateService |
 | `metadata-registry.service.ts` | Categories, allergens, units registry | MetadataRegistryService |
-| `taxonomy-store.service.ts` | Single store for all taxonomy terms (categories, units, preparations…); the registry services are thin facades over it | TaxonomyStore, TermInUseError, TermReadOnlyError |
-| `unit-registry.service.ts` | Units (mass, volume, dish) | UnitRegistryService, SYSTEM_UNITS |
+| `taxonomy-store.service.ts` | Single store for all taxonomy terms (categories, units, preparations…); the registry services are thin facades over it and load through `loadSafely` / `reloadSafely` | TaxonomyStore, TermInUseError, TermReadOnlyError, TaxonomyLoadLog |
+| `unit-registry.service.ts` | Units (mass, volume, dish); `awaitUnitCreated()` resolves the saved unit or null | UnitRegistryService, SYSTEM_UNITS |
 | `preparation-registry.service.ts` | Preparation entries | PreparationRegistryService |
 | `menu-section-categories.service.ts` | Menu section category registry | MenuSectionCategoriesService |
 | `conversion.service.ts` | Unit conversion | ConversionService |
 | `recipe-cost.service.ts` | Recipe costing, bruto/volume | RecipeCostService |
 | `scaling.service.ts` | Scale by yield | ScalingService, ScaledIngredientRow, ScaledPrepRow |
 | `cook-view-state.service.ts` | Cook-view workflow state | CookViewStateService |
-| `menu-event-data.service.ts` | Menu events CRUD | MenuEventDataService |
+| `menu-event-data.service.ts` | Menu events CRUD (on BaseEntityDataService) | MenuEventDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
 | `business.service.ts` | The signed-in user's business (`business_`) | BusinessService |
@@ -51,7 +51,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `hero-fab.service.ts` | Floating action button state per route | HeroFabService |
 | `export.service.ts` | Data export orchestration | ExportService |
 | `global-error.handler.ts` | Angular ErrorHandler implementation | GlobalErrorHandler |
-| `base-entity-data.service.ts` | Shared CRUD base for entity data services | BaseEntityDataService\<T\> |
+| `base-entity-data.service.ts` | Shared load/reload base for every entity data service | BaseEntityDataService\<T\>, EntityLoadOptions |
 | `ai-recipe-draft.service.ts` | AI-drafted recipe staging | AiRecipeDraftService |
 | `app-update.service.ts` | App update/reload prompt | AppUpdateService |
 | `cloudinary.service.ts` | Image upload to Cloudinary | CloudinaryService |
@@ -94,5 +94,5 @@ Services live under `core/` and are injected into pages and shared UI. Data serv
 
 
 ---
-*Last updated: 2026-09-27*
+*Last updated: 2026-10-22*
 *Updated by: breadcrumbs*

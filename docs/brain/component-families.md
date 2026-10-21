@@ -169,26 +169,28 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 ## Logic families
 
 ### entity-data-service — load and save one entity type
-- Status: converging — plan 454 moves the rest onto the base
+- Status: stable — plan 454 moved the last copies onto the base
 - Use: `src/app/core/services/base-entity-data.service.ts` · `BaseEntityDataService<T>` (users:
   `src/app/core/services/equipment-data.service.ts`, `src/app/core/services/supplier-data.service.ts`,
-  `src/app/core/services/venue-data.service.ts`).
-- When: a new entity type needs a client data service.
-- Known copies (copy the load block): `src/app/core/services/recipe-data.service.ts`,
+  `src/app/core/services/venue-data.service.ts`, `src/app/core/services/recipe-data.service.ts`,
   `src/app/core/services/dish-data.service.ts`, `src/app/core/services/product-data.service.ts`,
-  `src/app/core/services/menu-event-data.service.ts`.
+  `src/app/core/services/menu-event-data.service.ts`). A service's own log event and "empty the list on
+  reload" go in `EntityLoadOptions`; a legacy-field migration goes in a `normalizeRow` override.
+- When: a new entity type needs a client data service.
+- Known copies: none.
 
 ### kitchen-state — app-wide signal state
-- Status: converging — plan 454 drops the Promise→Observable wrapping
+- Status: stable — save/delete methods return Promises (plan 454)
 - Use: `src/app/core/services/kitchen-state.service.ts` (signals).
 - When: state that several pages read or change (the loaded entity collections); never a page-local copy.
-- Known copies: its methods wrap Promises into Observables; callers `.subscribe` to them.
+- Known copies: none.
 
 ### taxonomy — categories, units, labels, kinds
 - Status: stable
 - Use: `src/app/core/services/taxonomy-store.service.ts` · `TaxonomyStore`.
 - When: a page reads or adds a category, unit, label or kind.
-- Known copies: `src/app/core/services/unit-registry.service.ts` still exposes an RxJS `unitAdded$`.
+- Facades load through `loadSafely` / `reloadSafely` (one logging path, plan 454).
+- Known copies: none.
 
 ### page-entry-loading — data ready before a page opens
 - Status: stable

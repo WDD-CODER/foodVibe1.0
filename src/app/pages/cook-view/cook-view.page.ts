@@ -427,8 +427,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (newUnit === '__add_unit__') {
       const prefillName = this.takePendingAddName_()
       setTimeout(() => this.unitRegistry.openUnitCreator({ prefillName }), 0)
-      this.unitRegistry.awaitUnitCreated().subscribe((unit) => {
-        this.onYieldUnitChange(unit)
+      void this.unitRegistry.awaitUnitCreated().then((unit) => {
+        if (unit) this.onYieldUnitChange(unit)
       })
       return
     }
@@ -611,17 +611,15 @@ export class CookViewPage implements OnInit, OnDestroy {
       const recipe = this.recipe_()
       if (!recipe) return
       this.saving.setSaving(true)
-      this.kitchenState.saveRecipe(recipe).subscribe({
-        next: (saved) => {
-          if (pushToMasterAfterSave) this.masterPush.pushToMaster(saved ?? recipe)
-          this.originalRecipe_.set(null)
-          this.editMode_.set(false)
-          this.saving.setSaving(false)
-        },
-        error: () => {
-          this.saving.setSaving(false)
-        }
-      })
+      try {
+        const saved = await this.kitchenState.saveRecipe(recipe)
+        if (pushToMasterAfterSave) this.masterPush.pushToMaster(saved ?? recipe)
+        this.originalRecipe_.set(null)
+        this.editMode_.set(false)
+        this.saving.setSaving(false)
+      } catch {
+        this.saving.setSaving(false)
+      }
     }
   }
 
@@ -670,22 +668,22 @@ export class CookViewPage implements OnInit, OnDestroy {
     const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     this.saving.setSaving(true)
-    this.kitchenState.saveRecipe({ ...recipe, isApproved: !recipe.isApproved }).subscribe({
-      next: (saved) => {
-        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
-        this.recipe_.set(saved)
-        this.originalRecipe_.set(null)
-        this.editMode_.set(false)
-        this.saving.setSaving(false)
-        this.userMsg.onSetSuccessMsg(
-          this.translation.translate(saved.isApproved ? 'approval_success' : 'unapproval_success')
-        )
-      },
-      error: () => {
-        this.saving.setSaving(false)
-        this.userMsg.onSetErrorMsg(this.translation.translate('approval_error'))
-      }
-    })
+    let saved: Recipe
+    try {
+      saved = await this.kitchenState.saveRecipe({ ...recipe, isApproved: !recipe.isApproved })
+    } catch {
+      this.saving.setSaving(false)
+      this.userMsg.onSetErrorMsg(this.translation.translate('approval_error'))
+      return
+    }
+    if (scope === 'everyone') this.masterPush.pushToMaster(saved)
+    this.recipe_.set(saved)
+    this.originalRecipe_.set(null)
+    this.editMode_.set(false)
+    this.saving.setSaving(false)
+    this.userMsg.onSetSuccessMsg(
+      this.translation.translate(saved.isApproved ? 'approval_success' : 'unapproval_success')
+    )
   }
 
   protected async onRatingChange(value: number): Promise<void> {
@@ -695,11 +693,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (scope === 'cancel') return
     const updated = { ...recipe, rating: value }
     this.recipe_.set(updated)
-    this.kitchenState.saveRecipe(updated).subscribe({
-      next: (saved) => {
-        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
-      }
-    })
+    const saved = await this.kitchenState.saveRecipe(updated)
+    if (scope === 'everyone') this.masterPush.pushToMaster(saved)
   }
 
   protected async onExportInfo(): Promise<void> {
@@ -799,8 +794,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (unit === '__add_unit__') {
       const prefillName = this.takePendingAddName_()
       setTimeout(() => this.unitRegistry.openUnitCreator({ prefillName }), 0)
-      this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => {
-        this.setIngredientUnit(index, newUnit)
+      void this.unitRegistry.awaitUnitCreated().then((newUnit) => {
+        if (newUnit) this.setIngredientUnit(index, newUnit)
       })
       return
     }
@@ -1085,13 +1080,15 @@ export class CookViewPage implements OnInit, OnDestroy {
     const existingUnitSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
     if (!product?._id) {
       setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols }), 0)
-      this.unitRegistry.awaitUnitCreated().subscribe((unit) => this.chooseUnit(index, unit))
+      void this.unitRegistry.awaitUnitCreated().then((unit) => unit && this.chooseUnit(index, unit))
       return
     }
     // Plan 423: the window asks how much one unit of THIS product weighs; that typed amount is what is saved.
     const forProduct = { name: product.nameHebrew, baseUnit: product.baseUnit }
     setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols, forProduct }), 0)
-    this.unitRegistry.awaitProductUnitAdded().subscribe(({ key, amount, basis }) => {
+    void this.unitRegistry.awaitProductUnitAdded().then(async (added) => {
+      if (!added) return
+      const { key, amount, basis } = added
       if (product.purchaseOptions?.some((o) => o.unitSymbol === key)) {
         this.chooseUnit(index, key)
         return
@@ -1103,10 +1100,8 @@ export class CookViewPage implements OnInit, OnDestroy {
           { unitSymbol: key, conversionRate: amount, uom: basis, priceOverride: 0 }
         ]
       }
-      this.kitchenState.saveProduct(updated).subscribe({
-        next: () => this.chooseUnit(index, key),
-        error: () => this.chooseUnit(index, key)
-      })
+      await this.kitchenState.saveProduct(updated).catch(() => {})
+      this.chooseUnit(index, key)
     })
   }
 

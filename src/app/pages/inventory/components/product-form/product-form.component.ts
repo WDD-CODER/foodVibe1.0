@@ -43,7 +43,7 @@ import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service'
 import { LoggingService } from '@services/logging.service'
-import { map, Observable } from 'rxjs'
+import { map } from 'rxjs'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
@@ -474,27 +474,23 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
    * delivers the unit that was saved (`onAdded`) or, when the window closes without a save, puts `previous`
    * (a string, never a number) back. Takes the first result only and ends with the component.
    */
-  private pickNewUnit_(
+  private async pickNewUnit_(
     control: AbstractControl | null | undefined,
     previous: string,
     context: UnitCreatorContext,
     onAdded: (added: { key: string; amount?: number; basis?: string }) => void
-  ): void {
+  ): Promise<void> {
     control?.setValue('', { emitEvent: false })
     this.unitRegistry.openUnitCreator(context)
-    const added$: Observable<{ key: string; amount?: number; basis?: string }> = context.forProduct
+    let alive = true
+    const stopWatching = this.destroyRef.onDestroy(() => (alive = false))
+    const added = await (context.forProduct
       ? this.unitRegistry.awaitProductUnitAdded()
-      : this.unitRegistry.awaitUnitCreated().pipe(map((key) => ({ key })))
-    let didAdd = false
-    added$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (added) => {
-        didAdd = true
-        onAdded(added)
-      },
-      complete: () => {
-        if (!didAdd) control?.setValue(previous, { emitEvent: false })
-      }
-    })
+      : this.unitRegistry.awaitUnitCreated().then((key) => (key ? { key } : null)))
+    stopWatching()
+    if (!alive) return
+    if (added) onAdded(added)
+    else control?.setValue(previous, { emitEvent: false })
   }
 
   protected onBaseUnitValueChange(value: string): void {
@@ -970,23 +966,20 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
 
     this.saving.setSaving(true)
-    return new Promise<boolean>((resolve) => {
-      this.kitchenStateService.saveProduct(productToSave).subscribe({
-        next: (saved) => {
-          this.saving.setSaving(false)
-          this.validationErrors_.set({})
-          this.isSubmitted = true
-          if (pushToMasterAfterSave) this.masterPush_.pushProductToMaster(saved)
-          // Categories/allergens enter Metadata only once the product is actually saved.
-          void registerDraftMetadata({ categories, allergens: val.allergens ?? [] }, this.metadataRegistry)
-          resolve(true)
-        },
-        error: () => {
-          this.saving.setSaving(false)
-          resolve(false)
-        }
-      })
-    })
+    let saved: Product
+    try {
+      saved = await this.kitchenStateService.saveProduct(productToSave)
+    } catch {
+      this.saving.setSaving(false)
+      return false
+    }
+    this.saving.setSaving(false)
+    this.validationErrors_.set({})
+    this.isSubmitted = true
+    if (pushToMasterAfterSave) this.masterPush_.pushProductToMaster(saved)
+    // Categories/allergens enter Metadata only once the product is actually saved.
+    void registerDraftMetadata({ categories, allergens: val.allergens ?? [] }, this.metadataRegistry)
+    return true
   }
 
   protected onCancel(): void {

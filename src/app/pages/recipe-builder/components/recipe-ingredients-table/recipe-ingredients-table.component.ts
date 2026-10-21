@@ -623,7 +623,7 @@ export class RecipeIngredientsTableComponent {
       }
       if (!product?._id) {
         setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, prefillName }), 0)
-        this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => setUnitAndUpdate(newUnit))
+        void this.unitRegistry.awaitUnitCreated().then((newUnit) => newUnit && setUnitAndUpdate(newUnit))
         return
       }
       // Plan 423: the window asks how much one unit of THIS product weighs; that typed amount is what is saved.
@@ -632,7 +632,9 @@ export class RecipeIngredientsTableComponent {
         () => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, prefillName, forProduct }),
         0
       )
-      this.unitRegistry.awaitProductUnitAdded().subscribe(({ key, amount, basis }) => {
+      void this.unitRegistry.awaitProductUnitAdded().then(async (added) => {
+        if (!added) return
+        const { key, amount, basis } = added
         const current = (this.getItemMetadata(group) as Product | undefined) ?? product
         if (current.purchaseOptions?.some((o) => o.unitSymbol === key)) {
           setUnitAndUpdate(key)
@@ -645,10 +647,8 @@ export class RecipeIngredientsTableComponent {
             { unitSymbol: key, conversionRate: amount, uom: basis, priceOverride: 0 }
           ]
         }
-        this.kitchenStateService.saveProduct(updated).subscribe({
-          next: () => setUnitAndUpdate(key),
-          error: () => setUnitAndUpdate(key)
-        })
+        await this.kitchenStateService.saveProduct(updated).catch(() => {})
+        setUnitAndUpdate(key)
       })
     } else {
       group.get('unit')?.setValue(val)
