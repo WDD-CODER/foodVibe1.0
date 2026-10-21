@@ -24,6 +24,9 @@ function isMasterClone(doc) {
   return doc.businessId !== MASTER && typeof doc._masterId === 'string' && doc._masterId !== doc._id;
 }
 
+/** Query form of `!isMasterClone(doc)`: items created inside the business (`_masterId` absent, null or equal to `_id`). */
+const NOT_MASTER_CLONE = Object.freeze({ $or: [{ _masterId: { $exists: false } }, { _masterId: null }, { $expr: { $eq: ['$_masterId', '$_id'] } }] });
+
 /** The stub a purged master clone leaves behind. */
 function toStub(doc, now) {
   return {
@@ -69,4 +72,4 @@ async function purgeExpired(db, { businessIds, types = SOFT_DELETE_TYPES, now = 
   return counts;
 }
 
-module.exports = { LIVE, IN_TRASH, MASTER, PURGE_AFTER_DAYS, isMasterClone, toStub, disposeDoc, purgeExpired };
+module.exports = { LIVE, NOT_MASTER_CLONE, IN_TRASH, MASTER, PURGE_AFTER_DAYS, isMasterClone, toStub, disposeDoc, purgeExpired };

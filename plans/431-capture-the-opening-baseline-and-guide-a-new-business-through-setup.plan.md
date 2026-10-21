@@ -1,6 +1,6 @@
 # Plan 431 — Capture the opening baseline and guide a new business through setup
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -34,8 +34,8 @@ shows a setup card whose steps tick from real business data; the installed app i
 is gone.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npm --prefix server test -- test/business-baseline.test.js` passes, covering:
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npm --prefix server test -- test/business-baseline.test.js` passes, covering:
   - owner `PUT /api/v1/business/baseline` `{ eventsClosedPerMonth: 4, avgRevenuePerEvent: 12000 }` → 200; `GET
     /api/v1/business` → `baseline: { eventsClosedPerMonth: 4, avgRevenuePerEvent: 12000, filledAt: <number> }`;
   - a second PUT `{ eventsClosedPerMonth: 5 }` replaces the baseline (other fields gone) and `filledAt` is newer;
@@ -48,13 +48,13 @@ Done when:
     with `sources[0].price > 0`, 1 supplier, 1 recipe, 1 menu event via `/api/v1/data` and adds 1 staff →
     `{ pricedProducts: 10, suppliers: 1, recipes: 1, events: 1, staff: 1 }`; a product priced only in
     `purchaseOptions[].priceOverride` counts; a soft-deleted product does not; another business's items never count.
-- [auto] `npm --prefix server test -- test/seed-master-taxonomy.test.js` passes, plus a new case in it: on an empty
+- [x] [auto] `npm --prefix server test -- test/seed-master-taxonomy.test.js` passes, plus a new case in it: on an empty
   database `seedMasterData()` seeds the master taxonomy terms and logs no `seed.master.file_skipped`.
-- [auto] `npm --prefix server test` passes (whole server suite).
-- [auto] `node -e "const m=JSON.parse(require('fs').readFileSync('public/manifest.webmanifest','utf8'));console.log(m.name,m.short_name,m.dir,m.lang)"`
+- [x] [auto] `npm --prefix server test` passes (whole server suite).
+- [x] [auto] `node -e "const m=JSON.parse(require('fs').readFileSync('public/manifest.webmanifest','utf8'));console.log(m.name,m.short_name,m.dir,m.lang)"`
   → prints `FoodVibe FoodVibe rtl he`.
-- [auto] `grep -c "demo-" server/services/seed-master.js` → `0`.
-- [auto] `npx ng test --watch=false --include='src/app/pages/settings/**/*.spec.ts' --include='src/app/pages/dashboard/components/setup-checklist-card/**/*.spec.ts' --include='src/app/core/services/business.service.spec.ts'`
+- [x] [auto] `grep -c "demo-" server/services/seed-master.js` → `0`.
+- [x] [auto] `npx ng test --watch=false --include='src/app/pages/settings/**/*.spec.ts' --include='src/app/pages/dashboard/components/setup-checklist-card/**/*.spec.ts' --include='src/app/core/services/business.service.spec.ts'`
   passes, covering: `updateBaseline` puts the returned `baseline` into `business_`; baseline tab hidden for staff; the form saves only filled fields; «דלג» calls
   `updateBaseline({})`; setup card: steps ✓ from a status fixture (`pricedProducts: 10` → step 1 ✓, `9` → not),
   card hidden when the 4 required steps are ✓ even if staff = 0, hidden after «הסתר», never rendered for staff;
@@ -106,15 +106,20 @@ hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.
 ```scope
 shared/schemas/entities/business.schema.ts
 server/routes/business.js
+server/services/business.js
+server/jobs/purge-deleted.js
+docs/mvp/mvp-map.md
 server/services/seed-master.js
 server/test/business-baseline.test.js
 server/test/seed-master-taxonomy.test.js
+server/test/business-stamp.test.js
 src/app/core/services/business.service.ts
 src/app/core/services/business.service.spec.ts
 src/app/pages/settings/**
 src/app/pages/dashboard/components/setup-checklist-card/**
 src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.ts
 src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html
+src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.spec.ts
 public/manifest.webmanifest
 src/index.html
 src/app/app.config.ts
@@ -297,15 +302,15 @@ Skip any key that already exists at take time.
 - Run the `cssLayer` skill before any `.scss`. RTL, logical properties only.
 
 ## Atomic Sub-tasks
-- [ ] B1: Give the opening baseline one validated shape on the business — baselineInputSchema, businessBaselineSchema, baseline field — shared/schemas/entities/business.schema.ts
-- [ ] B2: Let only the owner save the baseline with the date it was filled — PUT /baseline replace + filledAt, GET / includes baseline — server/routes/business.js
-- [ ] B3: Tell the owner which setup steps are done using only items made in the business — GET /setup-status with OWN filter and capped counts — server/routes/business.js
-- [ ] B4: Prove baseline saving, skipping, validation and setup counts with server tests — every Done-when case — server/test/business-baseline.test.js
-- [ ] B5: Add the opening-baseline tab with save and skip — SETTINGS_TABS entry, @case, BaselineTabComponent, BusinessService.updateBaseline, specs — src/app/pages/settings/**, src/app/core/services/business.service.ts
-- [ ] B6: Show the setup card on the dashboard and open the baseline once for a new owner — SetupChecklistCardComponent, loadSetupStatus, localStorage hide, first-visit redirect, placement in dashboard overview, spec — src/app/pages/dashboard/components/setup-checklist-card/**, dashboard-overview.component.ts/.html
-- [ ] B7: Name the installed app FoodVibe — manifest name/short_name/dir/lang, index title + apple title — public/manifest.webmanifest, src/index.html
-- [ ] B8: Remove the master seed's attempt to read demo files that don't exist — drop DEMO_FILE_MAP and the loop, keep taxonomy seeding, extend the seed test — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
-- [ ] B9: Add the Hebrew texts and the checklist icon — 19 dictionary keys, ListChecks — public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] B1: Give the opening baseline one validated shape on the business — baselineInputSchema, businessBaselineSchema, baseline field — shared/schemas/entities/business.schema.ts
+- [x] B2: Let only the owner save the baseline with the date it was filled — PUT /baseline replace + filledAt, GET / includes baseline — server/routes/business.js
+- [x] B3: Tell the owner which setup steps are done using only items made in the business — GET /setup-status with OWN filter and capped counts — server/routes/business.js
+- [x] B4: Prove baseline saving, skipping, validation and setup counts with server tests — every Done-when case — server/test/business-baseline.test.js
+- [x] B5: Add the opening-baseline tab with save and skip — SETTINGS_TABS entry, @case, BaselineTabComponent, BusinessService.updateBaseline, specs — src/app/pages/settings/**, src/app/core/services/business.service.ts
+- [x] B6: Show the setup card on the dashboard and open the baseline once for a new owner — SetupChecklistCardComponent, loadSetupStatus, localStorage hide, first-visit redirect, placement in dashboard overview, spec — src/app/pages/dashboard/components/setup-checklist-card/**, dashboard-overview.component.ts/.html
+- [x] B7: Name the installed app FoodVibe — manifest name/short_name/dir/lang, index title + apple title — public/manifest.webmanifest, src/index.html
+- [x] B8: Remove the master seed's attempt to read demo files that don't exist — drop DEMO_FILE_MAP and the loop, keep taxonomy seeding, extend the seed test — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
+- [x] B9: Add the Hebrew texts and the checklist icon — 19 dictionary keys, ListChecks — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] B10: Build, test and hand over the baseline, card and phone-name checks — ng build, server suite, listed specs, manifest check, log-query; Human runs the [human] items — this plan file
 
 ## Technical Considerations

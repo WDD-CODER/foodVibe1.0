@@ -14,6 +14,20 @@ export const businessSettingsSchema = z.strictObject({
 
 export type BusinessSettings = z.infer<typeof businessSettingsSchema>
 
+/** Plan 431: how the business ran before FoodVibe (monthly averages of the last 3 months). Every number is optional. */
+export const baselineInputSchema = z.strictObject({
+  inquiriesPerMonth: z.number().min(0).optional(),
+  eventsClosedPerMonth: z.number().min(0).optional(),
+  avgRevenuePerEvent: z.number().min(0).optional(),
+  estProfitPct: z.number().gt(-100).lt(100).optional()
+})
+
+/** The stored baseline: the input plus the time the server saved it. An empty baseline (only `filledAt`) means "skipped". */
+export const businessBaselineSchema = baselineInputSchema.extend({ filledAt: z.number() })
+
+export type BaselineInput = z.infer<typeof baselineInputSchema>
+export type BusinessBaseline = z.infer<typeof businessBaselineSchema>
+
 /** Plan 424: one document per business (the tenant). Lives in the `businesses` collection, not the generic data pipe. */
 export const businessSchema = z.strictObject({
   _id: z.string().min(1),
@@ -23,7 +37,9 @@ export const businessSchema = z.strictObject({
   internal: z.boolean(),
   lastSyncedMasterVersion: z.number().int().min(0),
   /** Plan 429: absent on older documents; reads fill the defaults. */
-  settings: businessSettingsSchema.optional()
+  settings: businessSettingsSchema.optional(),
+  /** Plan 431: absent until the owner fills or skips the opening details. */
+  baseline: businessBaselineSchema.optional()
 })
 
 export type Business = z.infer<typeof businessSchema>

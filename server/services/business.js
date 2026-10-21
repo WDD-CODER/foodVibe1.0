@@ -60,4 +60,9 @@ async function setBusinessSettings(id, settings) {
   return col().updateOne({ _id: String(id) }, { $set: { settings } })
 }
 
-module.exports = { setBusinessSettings, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+/** Plan 431: replaces the business's opening baseline (already validated by the route). */
+async function setBusinessBaseline(id, baseline) {
+  return col().updateOne({ _id: String(id) }, { $set: { baseline } })
+}
+
+module.exports = { setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
