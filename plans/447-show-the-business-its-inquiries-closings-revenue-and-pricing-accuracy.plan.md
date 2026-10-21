@@ -1,6 +1,6 @@
 # Plan 447 — Show the business its inquiries, closings, revenue and pricing accuracy
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -25,8 +25,8 @@ not only the local DB.
 accuracy and usage — each against their opening baseline — computed on the server in well under a second.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npm --prefix server test -- business-stats` passes. Fixture (spec 07.2 acceptance; one business, "now"
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npm --prefix server test -- business-stats` passes. Fixture (spec 07.2 acceptance; one business, "now"
   fixed, all in the last 30 days): 10 events created; 4 with `closedAt` in the period (each planned revenue 12,000
   in `pricing.revenue`); 3 with `stage: 'not_closed'`; 2 of the closed ones finished (`closing.finishedAt` set,
   `actualRevenue` 12,000) whose actual − planned profit % are +2 and −4 points; baseline `{ inquiriesPerMonth: 6,
@@ -45,15 +45,15 @@ Done when:
   - business without baseline → `hasBaseline: false`, every `changePct` `null`;
   - business without events → all card values 0, `accuracy.avgAccuracyPts null`;
   - `period=all` uses the business `createdAt` as the start; `period=7` → 400.
-- [auto] `npm --prefix server test -- business-stats` also asserts the accuracy formula on spec 08.1's numbers
+- [x] [auto] `npm --prefix server test -- business-stats` also asserts the accuracy formula on spec 08.1's numbers
   (revenue 10,000; A 1,000 → 1,150; B 2,000 → 1,950; extra 1,000) → actual profit % 59, accuracy −1 — the same
   numbers plan 446's `event-closing.spec.ts` locks on the client.
-- [auto] `npx ng test --watch=false --include='src/app/pages/dashboard/components/business-performance/**/*.spec.ts' --include='src/app/core/services/business-stats.service.spec.ts' --include='src/app/core/engine/rounding.spec.ts'`
+- [x] [auto] `npx ng test --watch=false --include='src/app/pages/dashboard/components/business-performance/**/*.spec.ts' --include='src/app/core/services/business-stats.service.spec.ts' --include='src/app/core/engine/rounding.spec.ts'`
   passes: "+67% מול לפני" / "−33% מול לפני" labels from `changePct`; "אין נתוני פתיחה" when `hasBaseline` is false;
   accuracy "−1 נקודה בממוצע"; "—" with "יופיע אחרי סגירת אירוע ראשון" when `avgAccuracyPts` is null; no money cards
   when the response has no `cards`; funnel click navigates to `/menu-library?stage=<key>`; `formatDecimal1(2.345)`
   → "2.3".
-- [auto] `grep -c "kpi-sparkline" src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html`
+- [x] [auto] `grep -c "kpi-sparkline" src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html`
   prints `0`.
 - [auto] Timing, only when a restored Atlas copy is already available locally (a `foodvibe_scratch_*` database
   restored from an Atlas snapshot): `node server/scripts/time-business-stats.js --target=local --db=<that scratch db>`
@@ -272,14 +272,14 @@ Reused, not added: `event_stage_<key>` stage names and `event_legacy` "ישן" (
 list's stage chip and its legacy tag.
 
 ## Atomic Sub-tasks
-- [ ] D1: Compute every dashboard number on the server with two scoped aggregations — business-stats.js: periodBounds, eventsPipeline ($facet: inquiries, closed, notClosed, revenue, accuracy, funnel, upcoming), usagePipeline, shapeStats per Design — server/services/business-stats.js
-- [ ] D2: Serve the numbers to owners in full and to staff without money — GET /api/v1/stats/business in stats.js (verifyToken, period validation, business doc, can(..., 'editMoney') decides cards), mounted in app.js — server/routes/stats.js, server/app.js
-- [ ] D3: Prove the numbers with the spec's acceptance fixture and the isolation rules — business-stats.test.js: the 07.2 fixture, legacy/deleted/other-business exclusions, staff response, no-baseline, no-events, period=all, bad period, the 08.1 accuracy numbers — server/test/business-stats.test.js
-- [ ] D4: Add a timing check to run against a restored copy of the live data — time-business-stats.js per Design — server/scripts/time-business-stats.js
-- [ ] D5: Fetch the stats in the app and format them with the shared rounding helpers — BusinessStatsService + model types; formatDecimal1 appended to rounding.ts + specs — src/app/core/services/business-stats.service.ts, src/app/core/services/business-stats.service.spec.ts, src/app/core/models/business-stats.model.ts, src/app/core/engine/rounding.ts, src/app/core/engine/rounding.spec.ts
-- [ ] D6: Build the performance area with period picker, five cards, funnel and upcoming events — BusinessPerformanceComponent per Design and UI/UX Notes; funnel → router.navigate(['/menu-library'], { queryParams: { stage } }); empty states + spec — src/app/pages/dashboard/components/business-performance/**
-- [ ] D7: Put the area on top of the dashboard and remove the fake sparklines — mount <business-performance /> first inside .dashboard-main (above plan 431's setup card), delete the three .kpi-sparkline SVG blocks and their unused styles — src/app/pages/dashboard/components/dashboard-overview/**
-- [ ] D8: Add the Hebrew labels and the two trend icons — keys from UI/UX Notes, TrendingUp/TrendingDown in LucideAngularModule.pick — public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] D1: Compute every dashboard number on the server with two scoped aggregations — business-stats.js: periodBounds, eventsPipeline ($facet: inquiries, closed, notClosed, revenue, accuracy, funnel, upcoming), usagePipeline, shapeStats per Design — server/services/business-stats.js
+- [x] D2: Serve the numbers to owners in full and to staff without money — GET /api/v1/stats/business in stats.js (verifyToken, period validation, business doc, can(..., 'editMoney') decides cards), mounted in app.js — server/routes/stats.js, server/app.js
+- [x] D3: Prove the numbers with the spec's acceptance fixture and the isolation rules — business-stats.test.js: the 07.2 fixture, legacy/deleted/other-business exclusions, staff response, no-baseline, no-events, period=all, bad period, the 08.1 accuracy numbers — server/test/business-stats.test.js
+- [x] D4: Add a timing check to run against a restored copy of the live data — time-business-stats.js per Design — server/scripts/time-business-stats.js
+- [x] D5: Fetch the stats in the app and format them with the shared rounding helpers — BusinessStatsService + model types; formatDecimal1 appended to rounding.ts + specs — src/app/core/services/business-stats.service.ts, src/app/core/services/business-stats.service.spec.ts, src/app/core/models/business-stats.model.ts, src/app/core/engine/rounding.ts, src/app/core/engine/rounding.spec.ts
+- [x] D6: Build the performance area with period picker, five cards, funnel and upcoming events — BusinessPerformanceComponent per Design and UI/UX Notes; funnel → router.navigate(['/menu-library'], { queryParams: { stage } }); empty states + spec — src/app/pages/dashboard/components/business-performance/**
+- [x] D7: Put the area on top of the dashboard and remove the fake sparklines — mount <business-performance /> first inside .dashboard-main (above plan 431's setup card), delete the three .kpi-sparkline SVG blocks and their unused styles — src/app/pages/dashboard/components/dashboard-overview/**
+- [x] D8: Add the Hebrew labels and the two trend icons — keys from UI/UX Notes, TrendingUp/TrendingDown in LucideAngularModule.pick — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] D9: Build, test server and client, time the queries if a restore exists, then hand over — ng build, the Done-when test commands, the sparkline grep, the timing script (restored copy if present, else local + final-gate entry), log-query; slot servers up; [human] cards — this plan file
 
 ## Technical Considerations

@@ -13,6 +13,7 @@ const genericRouter = require('./routes/generic');
 const aiRouter = require('./routes/ai')
 const adminRouter = require('./routes/admin');
 const businessRouter = require('./routes/business');
+const statsRouter = require('./routes/stats');
 const eventsRouter = require('./routes/events');
 const productImportRouter = require('./routes/product-import');
 const logRouter = require('./routes/log');
@@ -185,6 +186,7 @@ app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/ai', aiRouter)
 app.use('/api/v1/admin', adminRouter);
 app.use('/api/v1/business', businessRouter);
+app.use('/api/v1/stats', statsRouter);
 app.use('/api/v1/product-import', productImportRouter);
 
 app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));

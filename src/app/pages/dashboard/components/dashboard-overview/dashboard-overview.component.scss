@@ -166,19 +166,6 @@
   }
 }
 
-.kpi-sparkline {
-  flex-shrink: 0;
-  color: var(--color-text-main);
-
-  .kpi-card.warning & {
-    color: var(--text-warning);
-  }
-
-  .kpi-card.info & {
-    color: var(--color-info);
-  }
-}
-
 .link-btn {
   display: inline-flex;
   align-items: center;

@@ -1328,6 +1328,26 @@
     "closing_accuracy": "דיוק התמחור (נקודות אחוז)",
     "closing_pick_supplier": "בחרו ספק להוספה",
     "closing_photo_open": "פתח תמונה בחלון חדש",
-    "closing_photo_remove": "הסר תמונה"
+    "closing_photo_remove": "הסר תמונה",
+    "performance_title": "ביצועים",
+    "period_30": "30 יום",
+    "period_90": "90 יום",
+    "period_all": "מההתחלה",
+    "stat_inquiries": "פניות",
+    "stat_closed": "אירועים שנסגרו",
+    "stat_close_rate": "אחוז סגירה",
+    "stat_revenue": "הכנסות",
+    "stat_accuracy": "דיוק תמחור",
+    "stat_accuracy_value": "{{pts}} נקודה בממוצע",
+    "stat_avg_actual_profit": "רווח בפועל ממוצע {{pct}}",
+    "stat_accuracy_empty": "יופיע אחרי סגירת אירוע ראשון",
+    "stat_usage_per_week": "ימי שימוש בשבוע",
+    "stat_vs_before": "{{pct}} מול לפני",
+    "stat_no_baseline": "אין נתוני פתיחה",
+    "stat_points_short": "נק׳",
+    "funnel_title": "אירועים לפי שלב",
+    "upcoming_title": "אירועים קרובים",
+    "upcoming_empty": "אין אירועים ב-14 הימים הקרובים",
+    "create_first_inquiry": "צור פנייה ראשונה"
   }
 }
