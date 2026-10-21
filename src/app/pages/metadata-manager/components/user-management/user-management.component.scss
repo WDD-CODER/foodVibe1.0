@@ -148,8 +148,8 @@
 }
 
 .user-business {
-  font-size: 0.8125rem;
-  font-weight: 600;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
   color: var(--color-text-main);
 }
 
@@ -158,21 +158,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.25rem;
-}
-
-.role-chip {
-  display: inline-flex;
-  align-items: center;
-
-  padding-block: 0.0625rem;
-  padding-inline: 0.5rem;
-
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-size: 0.6875rem;
-  font-weight: 700;
-
-  border-radius: var(--radius-full);
 }
 
 .empty-state {

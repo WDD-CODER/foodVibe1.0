@@ -18,8 +18,7 @@ import { CloudinaryService } from '@services/cloudinary.service'
 import { environment } from '../../../../environments/environment'
 import { validateUsername, validateEmail, validatePassword } from '../../utils/auth-validation.util'
 import { take } from 'rxjs/operators'
-
-const BUSINESS_NAME_MAX_LENGTH = 200
+import { NAME_MAX_LENGTH } from '@schemas/base.schema'
 
 @Component({
   selector: 'app-auth-modal',
@@ -143,7 +142,7 @@ export class AuthModalComponent {
         this.errorKey.set('business_name_required')
         return
       }
-      if (businessName.length > BUSINESS_NAME_MAX_LENGTH) {
+      if (businessName.length > NAME_MAX_LENGTH) {
         this.errorKey.set('business_name_too_long')
         return
       }

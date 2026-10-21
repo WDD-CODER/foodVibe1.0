@@ -733,6 +733,7 @@
     "no_business": "החשבון לא משויך לעסק – פנה לתמיכה",
     "user_removed": "המשתמש הוסר מהעסק – פנה לבעל העסק",
     "platform_admin": "מנהל מערכת",
+    "no_users_registered": "אין משתמשים רשומים",
     "business_role_owner": "בעלים",
     "business_role_staff": "צוות",
     "delete_business_confirm": "מחיקת בעל העסק מוחקת את כל העסק – כל הנתונים וכל המשתמשים שלו. העסק:",

@@ -40,6 +40,26 @@ describe('BusinessService', () => {
     http.expectNone(URL)
   })
 
+  it('an update of the same _id triggers no second GET', () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    user.set({ _id: 'u1', name: 'renamed', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectNone(URL)
+    expect(service.business_()).not.toBeNull()
+  })
+
+  it('a late reply after sign-out does not overwrite null', () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    const req = http.expectOne(URL)
+    user.set(null)
+    TestBed.flushEffects()
+    req.flush({ _id: 'b1', name: 'x' })
+    expect(service.business_()).toBeNull()
+  })
+
   it('sign-out clears business_()', () => {
     user.set({ _id: 'u1', name: 'u', email: 'u@x' })
     TestBed.flushEffects()

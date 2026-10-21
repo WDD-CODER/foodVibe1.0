@@ -25,7 +25,7 @@ shows business and role and asks twice before deleting a business; and the last 
 - Primary: a new owner signs up with a business name and sees it in the header; an owner never sees platform
   screens; a user with no business gets the Hebrew block message.
 - Success:
-  - [x] [auto] `npx ng test --watch=false --include='src/app/core/services/user.service.spec.ts' --include='src/app/core/services/business.service.spec.ts' --include='src/app/core/services/taxonomy-store.service.spec.ts' --include='src/app/core/components/auth-modal/**' --include='src/app/core/components/header/**' --include='src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts' --include='src/app/pages/metadata-manager/components/user-management/**'`
+  - [x] [auto] `npx ng test --watch=false --include='src/app/core/services/user.service.spec.ts' --include='src/app/core/services/business.service.spec.ts' --include='src/app/core/services/taxonomy-store.service.spec.ts' --include='src/app/core/components/auth-modal/**/*.spec.ts' --include='src/app/core/components/header/**/*.spec.ts' --include='src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts' --include='src/app/pages/metadata-manager/components/user-management/**/*.spec.ts'`
     passes, including the new specs:
     - `UserService`: a login response with `isPlatformAdmin: true` → `isPlatformAdmin_()` true, `isAdmin_()` true
       (alias); `businessRole: 'owner'` → `isOwner_()` true; a refreshed token's claims (`businessId`,
@@ -49,7 +49,7 @@ shows business and role and asks twice before deleting a business; and the last 
   - [x] [auto] `grep -rnE "(user|claims)[_A-Za-z]*(\(\))?\??\.role\b|role [!=]== 'admin'" src/app --include=*.ts --include=*.html --exclude=*.spec.ts`
     → no output (at snapshot it lists 5 lines: header.html:11, kitchen-state:275, user.service:36/237/256).
   - [x] [auto] `npx ng build` passes.
-  - [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+  - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries. (Not checked against the slot DB: local MongoDB was down; re-run when it is up.)
   - [human] wt-1 slot `http://localhost:4201` → sign up → the form has «שם העסק»; leaving it empty shows «נא
     להזין את שם העסק»; fill «מטבח בדיקה» → signed in, the header chip shows «מטבח בדיקה» under the username.
     Phone width and desktop.

@@ -7,9 +7,9 @@
 
   <div class="list-container">
     @if (isLoading_()) {
-      <div class="empty-state">טוען...</div>
+      <div class="empty-state">{{ 'loader_loading' | translatePipe }}</div>
     } @else if (users_().length === 0) {
-      <div class="empty-state">אין משתמשים רשומים</div>
+      <div class="empty-state">{{ 'no_users_registered' | translatePipe }}</div>
     } @else {
       <div class="list-stack">
         @for (user of users_(); track user._id) {
@@ -22,10 +22,10 @@
               }
               <span class="user-chips">
                 @if (user.businessRole) {
-                  <span class="role-chip">{{ 'business_role_' + user.businessRole | translatePipe }}</span>
+                  <span class="c-chip teal">{{ 'business_role_' + user.businessRole | translatePipe }}</span>
                 }
                 @if (user.isPlatformAdmin) {
-                  <span class="role-chip role-chip--admin" [attr.title]="'platform_admin' | translatePipe">
+                  <span class="c-chip amber" [attr.title]="'platform_admin' | translatePipe">
                     <lucide-icon name="crown" [size]="12"></lucide-icon>
                   </span>
                 }
