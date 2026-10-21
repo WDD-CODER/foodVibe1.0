@@ -133,12 +133,14 @@ Runs only when `scope-check.mjs --drift` reports drift. In `inventory-product-li
 - Project checks: log-query [auto]; chef-side stories; no new dictionary keys (`missing_price`, `product_unpriced`, `missing_*` exist).
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - Folding the «מלאי נמוך» badge into the status mark.
 - Changing which products count as invalid / incomplete / unpriced, or the filter panel.
 - The product form's own warnings (plan 461) and the «חלקי» badge in recipes and menus (plan 466).
 - A shared tooltip / floating-panel component (plan 460 covers viewport placement for popovers).
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 1. **D4 (decision owed)** — recommended: price and unit gaps look the same as supplier / category gaps (one mark, one tooltip, price listed first); only the colour changes with severity: red when name or unit is missing (the app cannot calculate with it), amber otherwise. Alternative: keep price visually separate from the other gaps. This plan builds the recommended answer.
 2. Recommended: keep the «מלאי נמוך» badge as its own small badge next to the name. Alternative: add «מלאי נמוך» as one more line in the tooltip. Your call.
 3. Phone behaviour — recommended: the mark is a button; tap opens the box, tap outside closes it (same as the «חלקי» badge). Alternative: show the missing list inline under the product name on narrow screens. Tell me if you prefer the inline version.

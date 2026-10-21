@@ -125,12 +125,14 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: `c
 - Project checks: log-query [auto]; chef-side stories; two dictionary keys; logical CSS only.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - Changing which costs make a plan partial (`event-plan.engine.ts` is not touched), the partial popover itself (plan 466), choosing a supplier price (D5).
 - Rounding weight or volume preparations up to whole numbers (see Critical Question 1).
 - The metadata/info panel contents of a dish, desktop layout of the dish row, and print layouts.
 - Cleaning `derivedPortions` already stored on saved events (they are recomputed on the next save).
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it. Still open: what «מינימום 10 אחרי הנקודה» meant — until answered, use the recommended rounding.
 1. D6 — portions rounding: **dishes and per-unit items are whole numbers rounded up after the float is cleaned (already so); weight and volume preparations keep their decimals (up to 2 on screen) because rounding 5.2 kg up to 6 kg overbuys (recommended)** · round every item up to a whole number. What did «מינימום 10 אחרי הנקודה» mean — a minimum of 10 decimals kept, or something else? The plan assumes it meant "clean the float" and keeps 6 decimals in the engine.
 2. F6 — when revenue is ₪0 because no dish price and no price per guest is set: **show the tag «לא הוגדר מחיר ללקוח» (recommended)** · show nothing special.
 3. F6 — if the reasons line is not enough and the Human's menu still shows «חלקי» with nothing listed after validation, the cause is outside the engine's errors; the next step would be a new plan with that menu's data.

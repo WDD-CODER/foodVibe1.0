@@ -159,6 +159,7 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: th
 - Project checks: log-query [auto]; chef-side stories; new dictionary keys named above.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - H4 — sign-up business name (decision D1); a later plan.
 - The fallback "dirty form" option for H2 (keep the redirect but ask to save or skip) — not built; see Critical Questions.
 - Counting unpriced products, or telling the user a product was skipped for having no price (decision D9; assumed "priced only").
@@ -166,6 +167,7 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: th
 - Sign-up / onboarding flows, a first-run tour.
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 1. D9 — setup step 1 counts: only products WITH a price (recommended; matches today's behaviour and the step's wording «מוצרים עם מחיר»), or all products? If "all", the server count drops the price filter and the label loses «עם מחיר». This plan assumes "priced only".
 2. H2 — banner (built here, recommended) or the fallback you also named: keep the form but make it a dirty form that asks to save or skip? This plan builds only the banner.
 3. Should staff see anything where the performance area would be while the owner's details are missing? Recommended: no (staff already see the area as today and never see the banner).

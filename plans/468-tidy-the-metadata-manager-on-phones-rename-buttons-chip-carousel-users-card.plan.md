@@ -157,11 +157,13 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: `i
 - Project checks: log-query [auto]; chef-side stories; no new dictionary keys (`save`, `cancel` exist).
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - G5 — editing a unit's name (decision D8 is open: rename everywhere or display label only). A later plan once D8 is answered; it will start from `unit-edit-dialog/`.
 - Renaming coefficients' event / serving type names (not offered today).
 - Highlighting the active chip while scrolling by hand; a new carousel for the stage bar of the menu editor (plan 467 reuses `centerChild`).
 - Any server change; any change to the confirm questions' wording.
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 1. Should leaving the rename field (tapping elsewhere / closing the phone keyboard) cancel, save, or do nothing? Recommended: do nothing (field stays open until Save, Cancel or Escape) — safest on a phone. Alternative: cancel on blur.
 2. Make the chip bar sticky under the app header so you see the chip glide to the centre while the section sits at the top? Recommended: yes (G3-3). Without it the bar scrolls out of sight as the section moves to the top and the animation can't be seen.

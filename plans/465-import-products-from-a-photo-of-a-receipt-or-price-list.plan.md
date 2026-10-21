@@ -189,6 +189,7 @@ helpers in `product-import.component.ts` (as left by plan 464); `express.json` l
 - Project checks: log-query [auto]; chef-side stories; seven new Hebrew keys.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - Reading several photos or a multi-page PDF in one go; HEIC conversion on desktop browsers that cannot decode it.
 - Saving the photo or attaching it to the products or the supplier.
 - Reading the supplier name or date from the receipt, or choosing the supplier automatically.
@@ -197,6 +198,7 @@ helpers in `product-import.component.ts` (as left by plan 464); `express.json` l
 - Changing the global 2 MB request limit.
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 1. Image size limit: the plan caps the encoded photo at 1,800,000 characters (about 1.3 MB of image) after shrinking to 2000 px, to stay under the server's existing 2 MB body limit. Recommended: keep it; raising it means changing `server/app.js` and exposes every route to bigger bodies.
 2. Formats: JPG, PNG, WEBP only. iPhone photos usually arrive as JPG from the browser's file picker, but a raw HEIC picked on a desktop cannot be shrunk and will be refused with the "choose JPG, PNG or WEBP" message. Recommended: accept that for now.
 3. Quota: one photo uses one AI call, and the name-matching step (plan 463) can add a second. Every user shares 20 AI calls per 15 minutes and the daily model budget. Recommended: count them normally; no special allowance for photos.

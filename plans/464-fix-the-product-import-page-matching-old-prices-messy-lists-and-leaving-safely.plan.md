@@ -174,6 +174,7 @@ plan 463's `ProductNameMatcherService` exists. Print `ok` or `conflict: <what>` 
 - Project checks: log-query [auto]; chef-side stories; five new Hebrew keys.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - Receipt photos (plan 465).
 - Creating the missing unit (taxonomy term) for an unknown pack word at import time; this plan only warns (see question 2).
 - Changing the apply route to match by id or fuzzy name.
@@ -181,6 +182,7 @@ plan 463's `ProductNameMatcherService` exists. Print `ok` or `conflict: <what>` 
 - Fixing the dropdown layering/click problems seen on this page (plan 459) and the modal/popover placement (plan 460).
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it. Still open: what «עוהל» in `עגבניה ניסיון 1 קילו 1 עוהל 50 שח` is and how much it holds — until answered, use the assumed reading in the fixture.
 1. What does `עגבניה ניסיון 1 קילו 1 עוהל 50 שח` mean? Recommended reading (used by the fixtures): base unit kg, the pack «עוהל» holds 1 kg, and the price 50 is per kg and per pack (the same number). If «עוהל» is a crate of more than one kilo, which number is the crate size? Tell me the intended meaning of the line and I will fix the fixture.
 2. A pack word the app does not know (like «עוהל») is dropped on save today. Recommended: for now show the warning chip (S5) and let the owner add the unit in the product form later. Alternative (a larger plan touching the server apply route and the unit list, INV-5): create the unit automatically on import. Which do you want?
 3. An import can now use two AI calls (read the list, then check unmatched names). Recommended: yes, the second call only when some names found no match. Alternative: skip the second call and rely on exact/variant matching only (typos would stay «חדש»).

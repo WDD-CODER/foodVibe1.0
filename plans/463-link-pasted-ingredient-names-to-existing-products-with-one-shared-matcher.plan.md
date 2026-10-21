@@ -174,6 +174,7 @@ Runs only when `scope-check.mjs --drift` reports drift. Check by symbol on `orig
 - Project checks: log-query [auto]; chef-side stories; one new Hebrew key.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - Unit conversion of the pasted amount into the product's unit (a line `2 עגבניות` keeps unit «unit» as plan 439 built it).
 - Letting the AI link text-only lines (`קצת פטרוזיליה`): those stay red by design; an amount is missing.
 - Fuzzy (edit-distance) matching on the client; typos beyond the folding rules go to the AI step.
@@ -181,6 +182,7 @@ Runs only when `scope-check.mjs --drift` reports drift. Check by symbol on `orig
 - Linking to recipes through the AI step.
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 1. Should the AI step link automatically when it is confident, or show «האם התכוונת ל-…?» first? Recommended: link automatically; the row shows the product's own name and the model answers null when unsure. Asking each time would add a click per line.
 2. A paste with unmatched names costs one AI call out of the shared daily quota (and the import page may add one more per import, plan 464). Accept? Recommended: yes, one call per paste, never when everything matched.
 3. Plural/singular folding uses the rules in S1 and will link «ביצים» to «ביצה» but not «חלבה» to «חלב». Any word pairs the chef knows that must never merge (for example brand names)? Recommended: none now; the ambiguity rule and the AI answer «null when unsure» are the guards.

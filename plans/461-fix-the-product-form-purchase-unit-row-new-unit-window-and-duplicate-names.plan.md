@@ -148,6 +148,7 @@ Runs only when `scope-check.mjs --drift` reports drift. Find on `origin/mvp`: `d
 - Project checks: log-query [auto]; stories from the chef's side; new keys named above; no server change.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - B5, a price per supplier (needs decision D5 — which price a recipe cost uses); it is a later plan and touches the source-building part of `saveAndWait`, so it must also stay net ≤ 0.
 - The shared number-input behaviour (select-all on focus, empty instead of `0`) — plan 460 (A5).
 - The shared modal shell and backdrop used by the unit window (A8) and floating-panel placement (A4) — plan 460.
@@ -157,6 +158,7 @@ Runs only when `scope-check.mjs --drift` reports drift. Find on `origin/mvp`: `d
 - Editing or removing the old dictionary key `unit_amount_for_product`.
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 1. **D2 — quantity required once a unit is chosen?** Recommended: **yes**. Without it the unit cannot be priced. This plan assumes yes (it is how the form already validates); the only change is that the box is hidden until a unit exists. Alternative: allow an empty quantity and ignore that row on save.
 2. **D3 — wording of the new-unit question.** Recommended: the handoff proposal «כמה {{base}} יש ב{{unit}} אחת של {{name}}?» (for example «כמה גרם יש בצנצנת אחת של פטרוזיליה?»), where the base follows the base-unit box in the window. Alternative: keep «כמה שוקלת …» only when the base is a weight unit.
 3. **Should the server also refuse a duplicate product name?** Recommended: **not in this plan** — add it later as its own server plan. Today only the browser refuses; a second browser tab or the AI / quick-add paths can still create a twin, and master sync removes stale same-name clones. A server guard must use the same rule as the import (`normalizeProductName`), apply per business (INV-1 and INV-2 file `server/routes/generic.js`) and decide what happens to existing duplicates and master clones. Alternative: yes now, answering 409 with a message key; that needs `server/routes/generic.js` and server tests added to this plan's scope.

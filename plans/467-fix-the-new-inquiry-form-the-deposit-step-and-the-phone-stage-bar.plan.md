@@ -136,6 +136,7 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: `p
 - Project checks: log-query [auto]; chef-side stories; four dictionary keys; Lucide icons registered in `app.config.ts`.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - The desktop backdrop bug (plan 460, A8).
 - The event-date chip on the menu editor page and the library's date filter (they keep native inputs).
 - Recording the amount in stage history, a payments ledger, several deposits, or tightening the `deposit.date` schema to ISO.
@@ -143,6 +144,7 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: `p
 - F4–F6 (plan 470).
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 1. Staff (no money permission) tapping «מקדמה שולמה»: **move straight through, no payment window (recommended)** · block the move until the owner records the payment. The recommendation keeps today's behaviour.
 2. In the window, is the amount required and above 0? **Yes, both fields required (recommended)** · allow an empty amount and fill it later in «פרטי לקוח».
 3. Which phone date order do you want? **dd/mm/yyyy as in `eventDate` display on the editor page (recommended)** · follow the phone's own setting (not possible with a native field).

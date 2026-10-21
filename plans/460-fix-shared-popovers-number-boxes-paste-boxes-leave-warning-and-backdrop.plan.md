@@ -144,6 +144,7 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: `p
 - Project checks: log-query [auto]; chef-side stories; no new dictionary keys.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - Wiring `pendingChangesGuard` / `warnBeforeUnload` onto `inventory/import` (plan 464) or the opening-details form (plan 469); no change to `app.routes.ts`.
 - Making `row-actions-menu` use the helper; any other popover.
 - "Start empty, not 0" for number boxes: the new-unit window's `0` start belongs to plan 461 (B3); coefficient boxes keep 1 on purpose.
@@ -152,4 +153,5 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: `p
 - Making every `<textarea>` in the app grow (notes boxes, AI prompt boxes other than the recipe window).
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 None.

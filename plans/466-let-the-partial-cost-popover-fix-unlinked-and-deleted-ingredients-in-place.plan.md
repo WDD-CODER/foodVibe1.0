@@ -152,6 +152,7 @@ Runs only when `scope-check.mjs --drift` reports drift. Find `MissingItem` in `e
 - Project checks: log-query [auto]; chef-side stories; Hebrew only through dictionary keys; no `any`; signals; `inject()`.
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - Popover placement, off-screen clipping and shared positioning (plan 460, handoff A4).
 - Removing a deleted ingredient from the recipe from inside the popover (the note tells the user to do it in the recipe; offered as a follow-up).
 - Changes to how the engine produces `unlinked` / `deleted` items.
@@ -159,6 +160,7 @@ Runs only when `scope-check.mjs --drift` reports drift. Find `MissingItem` in `e
 - Changes to `quick-add-product-modal` itself.
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 1. Recommended: a `deleted` row only explains (no action). Alternative: add a «הסר מהמתכון» button that deletes the ingredient row. Not built here; say if you want it.
 2. Recommended: linking by name updates every ingredient with that same unlinked name in all the listed recipes at once. Alternative: link only the one recipe the user is in. The batch version fixes the whole menu in one click.
 3. Recommended: the link control is one search field with «הוסף "…"» (create) built in. Alternative: two buttons, «צור מוצר» and «קשר למוצר קיים». Tell me if you prefer two buttons.

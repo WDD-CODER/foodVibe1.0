@@ -109,9 +109,11 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: `o
 - Project checks: log-query [auto]; chef-side stories; no new dictionary keys; `@layer` rules unchanged (the new rule is in `src/styles.scss`, where engines live).
 
 ## Out of Scope
+- Any export, print or preview of a recipe or a menu (export-preview, export toolbar, export services, Excel) — plan 471, not this run.
 - A second positioning mechanism for lists (top layer); page-local `overflow` clipping such as the import preview table (plan 464).
 - Changing the 120 ms Tab-away close, the add-option rule, or any dropdown's keyboard map.
 - Any other `selectOnSpace` user; the popover/modal placement helper (plan 460).
 
 ## Critical Questions
+- Answered 2026-10-21 (Human): every recommended answer below is accepted; build to it.
 None.
