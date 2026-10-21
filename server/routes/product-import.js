@@ -53,7 +53,10 @@ router.post('/apply', verifyToken, (req, res, next) => {
 
     const existing = await col('products').find({ ...scopeFilter(req), ...LIVE }).toArray()
     const byName = new Map()
-    for (const product of existing) byName.set(normalizeProductName(product.nameHebrew), product)
+    for (const product of existing) {
+      const nameKey = normalizeProductName(product.nameHebrew)
+      if (!byName.has(nameKey)) byName.set(nameKey, product) // first one wins, same as the client preview
+    }
 
     const unitTerms = await col('taxonomyTerms').find({ ...readScope(req, 'taxonomyTerms'), kind: 'unit' }, { projection: { key: 1 } }).toArray()
     const knownUnits = new Set([...BASE_UNITS, ...unitTerms.map(term => term.key)])

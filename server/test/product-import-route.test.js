@@ -180,6 +180,16 @@ describe('POST /api/v1/product-import/apply', () => {
     expect(other.body.updated).toBe(1)
   })
 
+  it('two products with the same normalized name: the first one is updated', async () => {
+    const db = testDb().collection('products')
+    await db.insertOne(stored(productBody({ nameHebrew: 'בצל', sources: [] }), { _id: 'dup-1', userId: 'own1', businessId: 'b1' }))
+    await db.insertOne(stored(productBody({ nameHebrew: ' בצל ', sources: [] }), { _id: 'dup-2', userId: 'own1', businessId: 'b1' }))
+    const res = await apply({ supplierId: null, rows: [line('בצל', 'kg', 3)] })
+    expect(res.body).toMatchObject({ created: 0, updated: 1 })
+    expect((await db.findOne({ _id: 'dup-1' })).sources).toHaveLength(1)
+    expect((await db.findOne({ _id: 'dup-2' })).sources).toHaveLength(0)
+  })
+
   it('a deleted product is not matched', async () => {
     await testDb().collection('products').insertOne(stored(productBody({ nameHebrew: 'כרוב' }), { _id: 'p-del', userId: 'own1', businessId: 'b1', deletedAt: 5 }))
     const res = await apply({ supplierId: null, rows: [line('כרוב', 'kg', 2)] })
