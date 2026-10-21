@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms'
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { LucideAngularModule } from 'lucide-angular'
@@ -7,6 +7,7 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { RecipeIngredientsTableComponent } from './recipe-ingredients-table.component'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
+import { TranslationService } from '@services/translation.service'
 import { Product } from '@models/product.model'
 import { of } from 'rxjs'
 
@@ -101,5 +102,55 @@ describe('RecipeIngredientsTableComponent', () => {
       expect((save.calls.mostRecent().args[0] as Product).purchaseOptions.at(-1)?.conversionRate).toBe(350)
       expect(getConversion).not.toHaveBeenCalled()
     }))
+  })
+
+  // Plan 439 - pasted ingredient lines become rows; a line that cannot be read stays as a red "not ready" row.
+  describe('paste ingredients (plan 439)', () => {
+    const products = [
+      { _id: 'p1', nameHebrew: 'עגבניות', baseUnit: 'kg' },
+      { _id: 'p2', nameHebrew: 'מלח', baseUnit: 'kg' }
+    ] as unknown as Product[]
+    const rows = () => component.ingredientsFormArray().controls
+
+    beforeEach(() => {
+      spyOn(TestBed.inject(KitchenStateService), 'products_').and.returnValue(products)
+      spyOn(TestBed.inject(TranslationService), 'resolveUnit').and.callFake((t: string) =>
+        t === 'גרם' ? 'gram' : null
+      )
+      spyOn(component, 'updateLineCalculations')
+    })
+
+    it('adds one row per line, links known products, keeps the unreadable line as unlinked text', () => {
+      component.onPasteIngredients('2 ק"ג עגבניות\n200 גרם מלח\nקצת פטרוזיליה')
+      expect(rows().length).toBe(3)
+      expect(rows()[0].get('referenceId')?.value).toBe('p1')
+      expect(rows()[0].get('amount_net')?.value).toBe(2)
+      expect(rows()[0].get('unit')?.value).toBe('kg')
+      expect(rows()[1].get('referenceId')?.value).toBe('p2')
+      expect(rows()[1].get('unit')?.value).toBe('gram')
+      const third = rows()[2] as FormGroup
+      expect(third.get('nameHebrew')?.value).toBe('קצת פטרוזיליה')
+      expect(third.get('referenceId')?.value).toBeFalsy()
+      expect((component as unknown as { isUnlinkedRow: (g: FormGroup) => boolean }).isUnlinkedRow(third)).toBeTrue()
+      expect(third.valid).toBeTrue()
+    })
+
+    it('replaces the empty trailing row instead of keeping it', () => {
+      expect(rows().length).toBe(1)
+      component.onPasteIngredients('3 ביצים')
+      expect(rows().length).toBe(1)
+      expect(rows()[0].get('nameHebrew')?.value).toBe('ביצים')
+    })
+
+    it('appends after rows that already have content', () => {
+      component.onPasteIngredients('3 ביצים')
+      component.onPasteIngredients('1 גרם מלח')
+      expect(rows().length).toBe(2)
+    })
+
+    it('does nothing for blank text', () => {
+      component.onPasteIngredients('  \n ')
+      expect(rows().length).toBe(1)
+    })
   })
 })

@@ -1,6 +1,6 @@
 # Plan 439 — Paste a recipe or a list of ingredients, with red "not ready" rows
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -38,8 +38,8 @@ Also: the AI draft path silently turns an unknown unit into `'unit'` (`recipe-ai
   their original text, and the recipe still saves.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/core/utils/ingredient-line-parser.util.spec.ts' --include='src/app/core/utils/parsed-result-draft.util.spec.ts' --include='src/app/core/utils/ingredient-match.util.spec.ts' --include='src/app/pages/recipe-builder/**' --include='src/app/shared/ai-recipe-modal/**'`
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/utils/ingredient-line-parser.util.spec.ts' --include='src/app/core/utils/parsed-result-draft.util.spec.ts' --include='src/app/core/utils/ingredient-match.util.spec.ts' --include='src/app/pages/recipe-builder/**' --include='src/app/shared/ai-recipe-modal/**'`
   passes, including the new specs:
   - parser (unit resolver knows `kg` for `ק"ג`, `gram` for `גרם`, `cup` for `כוס`):
     `parseIngredientLines('2 ק"ג עגבניות\n200 גרם מלח\nקצת פטרוזיליה')` →
@@ -57,7 +57,7 @@ Done when:
     ingredients `{ name, amount, unit }` and steps as strings; a result with no ingredients and no steps → `null`;
   - AI prefill: a draft ingredient whose unit is not a known unit → row has no `referenceId` and its name keeps
     the unit text (`'עגבניות (קופסה)'`).
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Desktop: `/recipe-book` → floating button → «הדבק מתכון» → paste a full recipe (name, 4 ingredients,
   3 steps) → «זהה מתכון». The editable draft shows the name, ingredients and steps; change one amount → «פתח בבונה
   המתכון» → the builder opens filled in, with the changed amount → «שמור» → the recipe is in the recipe book.
@@ -116,6 +116,7 @@ src/app/pages/recipe-builder/components/recipe-ingredients-table/**
 src/app/pages/recipe-builder/components/paste-ingredients-dialog/**
 public/assets/data/dictionary.json
 src/app/app.config.ts
+src/testing/test-lucide-icons.ts
 ```
 
 ## Read Scope
@@ -200,18 +201,18 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
 - New Lucide icon: `ClipboardPaste` (`clipboard-paste`) — import + `LucideAngularModule.pick` in `app.config.ts`.
 
 ## Atomic Sub-tasks
-- [ ] P1: Read pasted ingredient lines into amount, unit and name, keeping unreadable lines as text — pure parseIngredientLines(text, resolveUnit) → ParsedLine[] (`{ kind: 'parsed', amount, unit, name } | { kind: 'text', text }`); number forms int, decimal with . or , , a/b, ½ ¼ ¾; normalizes ״ and ′ quotes; first token a unit → that unit, else unit 'unit' and the whole rest is the name; no number → text; spec with the Done-when cases — src/app/core/utils/ingredient-line-parser.util.ts, ingredient-line-parser.util.spec.ts
-- [ ] P2: Share one exact-name matcher for products and recipes — move findIngredientMatch_ out of RecipeAiFlowService into findIngredientMatch(name, products, recipes); RecipeAiFlowService calls it; spec — src/app/core/utils/ingredient-match.util.ts, ingredient-match.util.spec.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts
-- [ ] P3: Turn a parse-text result into the same draft the AI recipe uses — parsedResultToDraft(result): AiRecipeDraft | null; recipe_type 'dish' when type is 'dish' else 'preparation'; yield_amount = serving_portions ?? 1, yield_unit 'portion'; ingredients map nameHebrew/amount_net ?? 0/unit ?? 'unit'; steps sorted by order → instruction; null when name, ingredients and steps are all empty or when both lists are empty; spec — src/app/core/utils/parsed-result-draft.util.ts, parsed-result-draft.util.spec.ts
-- [ ] P4: Add a "paste recipe" tab to the AI recipe window that goes through the server parser — InputMode gains 'paste'; AiRecipeModalService.open(mode, currentRecipe?, onPatch?, inputMode = 'text') stores initialInputMode_; the component sets inputMode_ from it when isOpen turns true (effect); onParsePasted(): firstValueFrom(gemini.parseText(prompt_())) → parsedResultToDraft → draft_ or errorKey_ 'paste_recipe_not_recognized'; skip saveShot when inputMode_ is 'paste'; tab, textarea, button label; spec — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts/.html/.scss/.spec.ts, ai-recipe-modal.service.ts
-- [ ] P5: Put "הדבק מתכון" in the recipe book's floating button next to the AI recipe — second HeroFab action `{ labelKey: 'paste_recipe', icon: 'clipboard-paste', run: () => aiRecipeModal.open('create', undefined, undefined, 'paste') }` — src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts
-- [ ] P6: Keep AI-draft rows with an unknown unit unlinked so they show as not ready — in prefillFromDraft, when ing.unit is not a known unit key: no referenceId, unit 'unit', nameHebrew `${ing.name} (${ing.unit})`; spec — src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts, recipe-ai-flow.service.spec.ts
-- [ ] P7: Let a recipe save with unready rows and never lose their text — ingredientRowValidator returns null for a named row without referenceId and with an empty amount; the save serializer keeps every row with a referenceId or a trimmed nameHebrew (amount ?? 0); spec — src/app/pages/recipe-builder/services/recipe-form.service.ts, recipe-form.service.spec.ts
-- [ ] P8: Add a paste window for ingredient lines — new standalone child component, input open, outputs submitted(text) and closed; textarea + hint + «הוסף» / «ביטול»; Escape closes — src/app/pages/recipe-builder/components/paste-ingredients-dialog/paste-ingredients-dialog.component.ts/.html/.scss
-- [ ] P9: Add "הדבק מצרכים" to the ingredients table, one row per pasted line — button + dialog; onPasteIngredients(text): drop trailing empty rows, then for each parsed line push RecipeFormService.createIngredientGroup() patched with amount/unit/name and the matcher's referenceId + item_type, for each text line push a row with nameHebrew = original text, amount null, unit 'unit'; unit resolver = UNIT_ALIASES → TranslationService.resolveUnit → UnitRegistryService.allUnitKeys_; mark the array dirty and bump updateValueAndValidity; spec — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts/.html/.spec.ts
-- [ ] P10: Show unlinked rows in red with a "לא מוכן" label — .unlinked-row and .unlinked-badge colors to --color-danger (logical properties), badge text label — recipe-ingredients-table.component.scss, recipe-ingredients-table.component.html
-- [ ] P11: Add the new texts and the paste icon — 8 dictionary keys above; ClipboardPaste in app.config.ts — public/assets/data/dictionary.json, src/app/app.config.ts
-- [ ] P12: Build, run the listed specs, check the error log, then hand over the five app checks — ng build, ng test (listed specs), log-query — this plan file
+- [x] P1: Read pasted ingredient lines into amount, unit and name, keeping unreadable lines as text — pure parseIngredientLines(text, resolveUnit) → ParsedLine[] (`{ kind: 'parsed', amount, unit, name } | { kind: 'text', text }`); number forms int, decimal with . or , , a/b, ½ ¼ ¾; normalizes ״ and ′ quotes; first token a unit → that unit, else unit 'unit' and the whole rest is the name; no number → text; spec with the Done-when cases — src/app/core/utils/ingredient-line-parser.util.ts, ingredient-line-parser.util.spec.ts
+- [x] P2: Share one exact-name matcher for products and recipes — move findIngredientMatch_ out of RecipeAiFlowService into findIngredientMatch(name, products, recipes); RecipeAiFlowService calls it; spec — src/app/core/utils/ingredient-match.util.ts, ingredient-match.util.spec.ts, src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts
+- [x] P3: Turn a parse-text result into the same draft the AI recipe uses — parsedResultToDraft(result): AiRecipeDraft | null; recipe_type 'dish' when type is 'dish' else 'preparation'; yield_amount = serving_portions ?? 1, yield_unit 'portion'; ingredients map nameHebrew/amount_net ?? 0/unit ?? 'unit'; steps sorted by order → instruction; null when name, ingredients and steps are all empty or when both lists are empty; spec — src/app/core/utils/parsed-result-draft.util.ts, parsed-result-draft.util.spec.ts
+- [x] P4: Add a "paste recipe" tab to the AI recipe window that goes through the server parser — InputMode gains 'paste'; AiRecipeModalService.open(mode, currentRecipe?, onPatch?, inputMode = 'text') stores initialInputMode_; the component sets inputMode_ from it when isOpen turns true (effect); onParsePasted(): firstValueFrom(gemini.parseText(prompt_())) → parsedResultToDraft → draft_ or errorKey_ 'paste_recipe_not_recognized'; skip saveShot when inputMode_ is 'paste'; tab, textarea, button label; spec — src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts/.html/.scss/.spec.ts, ai-recipe-modal.service.ts
+- [x] P5: Put "הדבק מתכון" in the recipe book's floating button next to the AI recipe — second HeroFab action `{ labelKey: 'paste_recipe', icon: 'clipboard-paste', run: () => aiRecipeModal.open('create', undefined, undefined, 'paste') }` — src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts
+- [x] P6: Keep AI-draft rows with an unknown unit unlinked so they show as not ready — in prefillFromDraft, when ing.unit is not a known unit key: no referenceId, unit 'unit', nameHebrew `${ing.name} (${ing.unit})`; spec — src/app/pages/recipe-builder/services/recipe-ai-flow.service.ts, recipe-ai-flow.service.spec.ts
+- [x] P7: Let a recipe save with unready rows and never lose their text — ingredientRowValidator returns null for a named row without referenceId and with an empty amount; the save serializer keeps every row with a referenceId or a trimmed nameHebrew (amount ?? 0); spec — src/app/pages/recipe-builder/services/recipe-form.service.ts, recipe-form.service.spec.ts
+- [x] P8: Add a paste window for ingredient lines — new standalone child component, input open, outputs submitted(text) and closed; textarea + hint + «הוסף» / «ביטול»; Escape closes — src/app/pages/recipe-builder/components/paste-ingredients-dialog/paste-ingredients-dialog.component.ts/.html/.scss
+- [x] P9: Add "הדבק מצרכים" to the ingredients table, one row per pasted line — button + dialog; onPasteIngredients(text): drop trailing empty rows, then for each parsed line push RecipeFormService.createIngredientGroup() patched with amount/unit/name and the matcher's referenceId + item_type, for each text line push a row with nameHebrew = original text, amount null, unit 'unit'; unit resolver = UNIT_ALIASES → TranslationService.resolveUnit → UnitRegistryService.allUnitKeys_; mark the array dirty and bump updateValueAndValidity; spec — src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts/.html/.spec.ts
+- [x] P10: Show unlinked rows in red with a "לא מוכן" label — .unlinked-row and .unlinked-badge colors to --color-danger (logical properties), badge text label — recipe-ingredients-table.component.scss, recipe-ingredients-table.component.html
+- [x] P11: Add the new texts and the paste icon — 8 dictionary keys above; ClipboardPaste in app.config.ts — public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] P12: Build, run the listed specs, check the error log, then hand over the five app checks — ng build, ng test (listed specs), log-query — this plan file
 
 ## Technical Considerations
 - Dependencies: `GeminiService.parseText` (Observable → `firstValueFrom`), `AiRecipeDraftService`,
