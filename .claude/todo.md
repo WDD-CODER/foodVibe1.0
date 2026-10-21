@@ -612,6 +612,17 @@
 - [ ] S11: OnPush on `cook-view.page.ts` and `recipe-builder.page.ts`: first count what the change adds (import + `changeDetection` = +2 lines each) and what can be deleted in the same file to pay for it; if the file can end at net <= 0 and all reads in the template are signals, add OnPush, run the page's spec, and record it; if not, do NOT add it — record `blocked: frozen-file growth` and raise Critical Question 1 — `cook-view.page.ts`, `recipe-builder.page.ts`, `docs/refactor/runs/458.md`
 - [ ] S12: Final pass: re-run every rule's measure, fill the "after" column, build, run all tests, write the validation cards for the touched pages — `docs/refactor/runs/458.md`
 
+### Plan 450 — Add the reuse layer: a component registry, a decision ladder and checks that catch a new copy (`plans/450-add-the-reuse-layer-a-component-registry-a-decision-ladder-and-checks-that-catch.plan.md`)
+
+- [ ] S1: Reality check — print ok/conflict per symbol listed in Step 0 and record current copy counts — `docs/mvp/runs/450.md`
+- [ ] S2: Write the registry from the audit family map plus MVP-added families, with the current copy counts and which plan (451–457) removes each copy — `docs/brain/component-families.md`, `docs/brain/index.md`
+- [ ] S3: CHECKPOINT — Human reads the registry and says `approved registry` or lists corrections — `docs/brain/component-families.md`
+- [ ] S4: Write the decision ladder and sibling rule, add the Standards-index row and the Skill-trigger row, and the ADR — `docs/agent/standards-reuse.md`, `AGENTS.md`, `docs/brain/decisions/0024-reuse-layer.md`
+- [ ] S5: Add the `## Reuse Check` section to the plan template, plan checks and save-plan checklist; add the `overrides` entries — `.claude/references/prd-template.md`, `docs/agent/plan-checks.md`, `.claude/skills/save-plan/SKILL.md`, `kit.config.json`, `docs/workflow-kit/drift-classification.md`
+- [ ] S6: Build `--reuse` (parser in `scripts/lib/reuse-check.mjs`, one import + one dispatch line in `scope-check.mjs`) with fixture plans and tests — `scripts/scope-check.mjs`, `scripts/lib/reuse-check.mjs`, `scripts/test/reuse-check.test.mjs`, `scripts/test/fixtures/reuse/**`
+- [ ] S7: Build `reuse-lint.mjs` with the rules table, `--diff`, `--check-registry` and `npm run lint:reuse`; tests on fixture diffs — `scripts/reuse-lint.mjs`, `scripts/lib/registry-families.mjs`, `scripts/test/reuse-lint.test.mjs`, `scripts/test/fixtures/reuse/**`, `package.json`
+- [ ] S8: Add `@pipes/*` to `tsconfig.json`, convert the two relative pipe imports, run `ng build`, `ng test`, `npm run test:scripts`, log-query; write the run file with the validation cards — `tsconfig.json`, `src/app/shared/export-preview/export-preview.component.ts`, `src/app/shared/change-popover/change-popover.component.ts`, `docs/mvp/runs/450.md`
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).

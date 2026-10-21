@@ -3,7 +3,7 @@
 Status: draft
 Track: code
 Depends-on: mvp-merge
-Snapshot: 7588f9d196c8ba3377d93ea30cab12a97faa90d3
+Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
 
 ## Problem Statement
 The 2026-10-20 reuse audit (`docs/mvp/reuse-audit-2026-10-20.md`) found the same job built many times: 7 page-local
