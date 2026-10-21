@@ -7,6 +7,8 @@ Written 2026-10-21 from `docs/mvp/mvp-map.md`, `run-mode.md`, `decisions.md`, ev
 All 29 plans (420, 421, 423, 424–449) are merged into `mvp`, none parked. Nothing reached `main` and nothing was written to Atlas.
 What is left for you: restart local MongoDB, walk the 127 validation cards (section 6), run four Atlas migrations by hand (three of them still open: 0006, 0007, 0008), and only then merge `mvp` into `main`.
 
+**Validation progress (2026-10-21): cards 1–90 are walked. Continue from card 91** («Empty price is computed, a typed price is live» [445], menu editor). Everything found in cards 1–90 (bugs, wanted changes, open decisions) is in `docs/mvp/review-handoff-2026-10-21.md`, for the Planner to turn into plans on `mvp`.
+
 ## 2. What you must do, in order
 
 ### (a) Bring MongoDB back, then run the deferred checks
@@ -181,6 +183,8 @@ From builders and checkers, with the plan that recorded each:
 - Card 11 (plan 421) names the page `/metadata-manager`; the map says the metadata manager is only reachable at `/dashboard?tab=metadata`. Cards below use the dashboard address. Card 50 (plan 449) names `/products`; the inventory page is `/inventory`.
 
 ## 6. Validation cards, grouped by page
+
+**Progress: cards 1–90 walked on 2026-10-21 — continue from card 91.** Findings from 1–90: `docs/mvp/review-handoff-2026-10-21.md`.
 
 127 checks. Format per card: title, WHERE (with SETUP in front when needed), DO, SEE ✓, FAIL ✗ (the WHY is folded into the title; with more than 60 cards each card is kept to five short lines). The source plan is in brackets. Cards refer to earlier cards by name, not by number. Reply `done`, `not yet` or `failed: <numbers>`.
 
@@ -426,7 +430,7 @@ Setup for the group: owner whose business has a supplier «ירקן» (create it
    FAIL ✗ the save is refused, or the row is gone
 45. Pick a station in a recipe [436]
    WHERE  header field «תחנה», next to the dish type. Setup: open a dish.
-   DO     open the list, choose «קר», save, reload; then at phone width (about 390 px) open the list. Also give a second dish station «חם» (needed by the print and station cards later).
+   DO     open the list, choose «קר», save, reload; then at phone width (about 390 px) open the list. Also open a second dish and set its station to «חם» (a dish has one station; the print and station cards later need two dishes on different stations).
    SEE ✓  after reload the field shows «קר»; on the phone the list opens (first entry «כללי», last «הוסף תחנה חדשה»)
    FAIL ✗ field empty after reload, cut off on the phone, or the list does not open
 46. The recipe cost says «חלקי» [444]
@@ -666,6 +670,8 @@ Setup for the group: an event "בדיקה 443" from the library check (events 44
    DO     look at the bar
    SEE ✓  price per guest, profit per guest, profit %, either green «עומד ביעד» or red «חסר … ₪ לאורח», the minimum price per guest and «מומלץ להוסיף … ₪ מרווח ביטחון»; no red food-cost % at 33 %
    FAIL ✗ the old five-number footer, or no verdict
+**▶ CONTINUE HERE — cards 1–90 were walked on 2026-10-21 (findings: `docs/mvp/review-handoff-2026-10-21.md`).**
+
 91. Empty price is computed, a typed price is live [445]
    WHERE  field «מחיר לאורח ללקוח» in the bar. Setup: leave it empty.
    DO     read the price, type 120, then add a dish
