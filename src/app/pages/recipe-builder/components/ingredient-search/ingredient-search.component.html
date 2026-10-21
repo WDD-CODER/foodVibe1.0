@@ -20,9 +20,9 @@
     <ng-template #optionTemplate let-item>
       <span class="item-name">{{ item.nameHebrew }}</span>
       <span
-        class="type-pill"
-        [class.recipe]="item.item_type_ === 'recipe'"
-        [class.product]="item.item_type_ !== 'recipe'"
+        class="c-chip c-chip--tag c-chip--sm c-chip--square"
+        [class.c-chip--green]="item.item_type_ === 'recipe'"
+        [class.c-chip--teal]="item.item_type_ !== 'recipe'"
       >
         {{ (item.item_type_ === 'recipe' ? 'recipe' : 'product') | translatePipe }}
       </span>

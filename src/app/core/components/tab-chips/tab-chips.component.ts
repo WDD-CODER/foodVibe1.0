@@ -14,7 +14,7 @@ interface TabChip {
   path: string
   /** Extra query params to match/apply — only the metadata chip uses this today. */
   queryParams?: Record<string, string>
-  /** The "back to dashboard overview" chip (plan 367) — never shown as active, styled as `.c-tab-pill--home`. */
+  /** The "back to dashboard overview" chip (plan 367) — never shown as active, styled as `.c-chip--home`. */
   home?: boolean
 }
 

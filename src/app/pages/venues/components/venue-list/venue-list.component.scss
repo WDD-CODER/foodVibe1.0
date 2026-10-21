@@ -247,18 +247,6 @@
     border-block-start: 1px dashed var(--border-default);
   }
 
-  .venue-env-chip {
-    padding-inline: 0.625rem;
-    padding-block: 0.25rem;
-
-    color: var(--color-text-muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-
-    background: var(--bg-glass-strong);
-    border-radius: var(--radius-full);
-  }
-
   .venue-capacity,
   .venue-infra-count {
     display: inline-flex;

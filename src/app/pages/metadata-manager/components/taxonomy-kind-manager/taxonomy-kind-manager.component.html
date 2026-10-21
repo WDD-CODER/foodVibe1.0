@@ -35,7 +35,7 @@
 
   <div class="list-container">
     @if (items().length > 0) {
-      <div class="c-tap-chip-group">
+      <div class="c-chip-group">
         @for (item of items(); track item) {
           @let lockKey = lockReason()(item);
           @if (editingItem_() === item) {
@@ -52,9 +52,9 @@
               spellcheck="false"
             />
           } @else if (lockKey) {
-            <span class="c-tap-chip is-locked">
+            <span class="c-chip c-chip--tap is-locked">
               @if (dotColor(); as color) {
-                <span class="c-tap-chip__dot" [style.background-color]="color(item)"></span>
+                <span class="c-chip__dot" [style.background-color]="color(item)"></span>
               }
               {{ item | translatePipe }}
               <lucide-icon
@@ -67,13 +67,13 @@
           } @else {
             <button
               type="button"
-              class="c-tap-chip"
+              class="c-chip c-chip--tap"
               [attr.aria-expanded]="menuItem_() === item"
               (click)="onOpenMenu($event, item)"
               (dblclick)="inlineRename() && onMenuEdit(item)"
             >
               @if (dotColor(); as color) {
-                <span class="c-tap-chip__dot" [style.background-color]="color(item)"></span>
+                <span class="c-chip__dot" [style.background-color]="color(item)"></span>
               }
               {{ item | translatePipe }}
             </button>

@@ -12,16 +12,3 @@
   font-weight: 500;
   color: var(--color-text-secondary);
 }
-
-.category-pill {
-  flex-shrink: 0;
-
-  padding: 0.125rem 0.5rem;
-
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--color-primary-hover);
-
-  border-radius: var(--radius-xs);
-  background-color: var(--color-primary-soft);
-}

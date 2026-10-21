@@ -7,7 +7,7 @@
   font-family: 'Heebo', sans-serif;
 
   // Jump nav: mobile + tablet only (hidden on desktop, ≥1024px — matches the app's own
-  // tablet/desktop split in header.component.scss). Pills reuse .c-tab-pill (src/styles.scss);
+  // tablet/desktop split in header.component.scss). Pills reuse .c-chip--tab (src/styles.scss);
   // this wrapper only owns the row/scroller layout, same split as .c-tab-chips. Tapping a tab
   // sets that section's CSS `order` to 0 (see orderFor() in the .ts) — a real, page-flow
   // reorder, not a scroll or an overlay.
@@ -30,10 +30,6 @@
     .mm-jump-nav {
       --rail-gap: 0.375rem;
       --rail-arrow-offset: 2.25rem;
-
-      .c-tab-pill {
-        white-space: nowrap;
-      }
     }
   }
 

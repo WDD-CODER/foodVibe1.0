@@ -239,9 +239,11 @@
                 @if (labelsExpand.isExpanded(row.recipe._id)) {
                   <div class="c-dense-chip-grid">
                     @for (label of row.labels; track label) {
-                      <span class="label-chip" [style.background-color]="getLabelColor(label)">{{
-                        label | translatePipe
-                      }}</span>
+                      <span
+                        class="c-chip c-chip--tag c-chip--square c-chip--solid"
+                        [style.background-color]="getLabelColor(label)"
+                        >{{ label | translatePipe }}</span
+                      >
                     }
                   </div>
                 }
@@ -268,7 +270,7 @@
                 @if (allergenExpand.isExpanded(row.recipe._id)) {
                   <div class="c-dense-chip-grid">
                     @for (a of row.allergens; track a) {
-                      <span class="allergen-pill">{{ a | translatePipe }}</span>
+                      <span class="c-chip c-chip--tag c-chip--square c-chip--allergen">{{ a | translatePipe }}</span>
                     }
                   </div>
                 }
@@ -375,8 +377,8 @@
   </ng-container>
   <ng-container shell-filters>
     @if (isLoggedIn()) {
-      <div class="c-filter-category c-toggle-chip-group favorites-filter-category">
-        <label class="c-toggle-chip">
+      <div class="c-filter-category c-chip-group favorites-filter-category">
+        <label class="c-chip c-chip--toggle">
           <input
             type="checkbox"
             [checked]="showFavoritesOnly_()"
@@ -405,7 +407,7 @@
         />
         <div class="ingredient-chips-wrap">
           @for (p of getSelectedProducts(); track p._id) {
-            <button type="button" class="c-filter-chip" (click)="removeIngredientProduct(p._id)">
+            <button type="button" class="c-chip c-chip--filter" (click)="removeIngredientProduct(p._id)">
               {{ p.nameHebrew }}
             </button>
           }
@@ -451,7 +453,7 @@
                 <input type="date" [ngModel]="dateTo_()" (ngModelChange)="dateTo_.set($event)" />
               </label>
             </div>
-            <label class="c-toggle-chip">
+            <label class="c-chip c-chip--toggle">
               <input
                 type="checkbox"
                 [checked]="dateIncludeByUpdated_()"
@@ -482,24 +484,21 @@
             ></lucide-icon>
           </button>
           @if (isCategoryExpanded(category.name)) {
-            <div class="c-toggle-chip-group">
+            <div class="c-chip-group">
               @for (option of category.options; track option.value) {
-                <label class="c-toggle-chip">
+                <label class="c-chip c-chip--toggle">
                   <input
                     type="checkbox"
                     [checked]="option.checked_"
                     (change)="toggleFilter(category.name, option.value)"
                   />
                   @if (option.color) {
-                    <span class="c-toggle-chip__dot" [style.background-color]="option.color" aria-hidden="true"></span>
+                    <span class="c-chip__dot" [style.background-color]="option.color" aria-hidden="true"></span>
                   }
                   <span>{{ option.label | translatePipe }}</span>
-                  <span
-                    class="c-toggle-chip__count"
-                    [class.c-toggle-chip__count--zero]="option.count === 0"
-                    aria-hidden="true"
-                    >{{ option.count }}</span
-                  >
+                  <span class="c-chip__count" [class.c-chip__count--zero]="option.count === 0" aria-hidden="true">{{
+                    option.count
+                  }}</span>
                 </label>
               }
             </div>

@@ -133,7 +133,7 @@
             {{ item.ownedQuantity }}
           </div>
           <div class="col-consumable c-list-body-cell" columnSlide [label]="'is_consumable' | translatePipe">
-            <span class="consumable-chip" [class.consumable-chip--yes]="item.isConsumable">
+            <span class="c-chip c-chip--tag c-chip--soft" [class.c-chip--teal]="item.isConsumable">
               {{ item.isConsumable ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}
             </span>
           </div>
@@ -221,7 +221,7 @@
           </div>
         </div>
         <div class="inline-edit-checkboxes">
-          <label class="c-toggle-chip">
+          <label class="c-chip c-chip--toggle">
             <input type="checkbox" formControlName="isConsumable" />
             <span>{{ 'is_consumable' | translatePipe }}</span>
           </label>
@@ -277,9 +277,9 @@
           ></lucide-icon>
         </button>
         @if (filterCategories.isExpanded('category')) {
-          <div class="c-toggle-chip-group">
+          <div class="c-chip-group">
             @for (cat of categories; track cat) {
-              <label class="c-toggle-chip">
+              <label class="c-chip c-chip--toggle">
                 <input type="checkbox" [checked]="selectedCategories_().has(cat)" (change)="toggleCategory(cat)" />
                 <span>{{ cat | translatePipe }}</span>
               </label>
@@ -304,8 +304,8 @@
           ></lucide-icon>
         </button>
         @if (filterCategories.isExpanded('is_consumable')) {
-          <div class="c-toggle-chip-group">
-            <label class="c-toggle-chip">
+          <div class="c-chip-group">
+            <label class="c-chip c-chip--toggle">
               <input
                 type="radio"
                 name="consumable"
@@ -314,7 +314,7 @@
               />
               <span>{{ 'all' | translatePipe }}</span>
             </label>
-            <label class="c-toggle-chip">
+            <label class="c-chip c-chip--toggle">
               <input
                 type="radio"
                 name="consumable"
@@ -323,7 +323,7 @@
               />
               <span>{{ 'approved_yes' | translatePipe }}</span>
             </label>
-            <label class="c-toggle-chip">
+            <label class="c-chip c-chip--toggle">
               <input
                 type="radio"
                 name="consumable"

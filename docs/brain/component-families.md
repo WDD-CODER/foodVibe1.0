@@ -132,11 +132,17 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
   `src/app/pages/venues/components/venue-form/venue-form.component.ts`.
 
 ### chip — chips, badges, pills
-- Status: converging — plan 457 adds one chip engine
-- Use: CSS engines in `src/styles.scss`: `.c-chip`, `.c-toggle-chip`, `.c-tap-chip`, `.c-tab-pill`, `.c-filter-chip`;
-  tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
-- When: a small rounded label, toggle or filter.
-- Known copies: 51 distinct local `*chip*` selectors in component `.scss` files (audit: ~80 local chip classes).
+- Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it
+- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal/.amber/.red` or `--teal|--amber|--red`) plus variants
+  `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
+  `--removable` (+ `.c-chip__remove`), `--tab` (+ `.active`, `.c-chip--home`, `.trash`); sub-parts `.c-chip__count` (+ `--zero`),
+  `.c-chip__dot`; wrapper `.c-chip-group`. Markup: `class="c-chip c-chip--toggle"`. Tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
+  Static tag: `.c-chip--tag` (size `--sm`; shape `--soft` radius-sm, `--square` radius-xs; tones `--teal|--amber|--red|--green|--allergen|--glass`,
+  `--solid` = light text on a data color). Data-colored value chip: `--colored` (background/color inline).
+- When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
+- Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
+  (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
+  header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.
 
 ### feedback — loading, toasts, errors shown to the user
 - Status: converging — plan 456 converges messages and errors

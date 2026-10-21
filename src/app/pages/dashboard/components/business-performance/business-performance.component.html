@@ -7,13 +7,9 @@
   <header class="perf__head">
     <h2 class="perf__title">{{ 'performance_title' | translatePipe }}</h2>
     @if (cards().length) {
-      <div
-        class="c-toggle-chip-group perf__periods"
-        role="radiogroup"
-        [attr.aria-label]="'performance_title' | translatePipe"
-      >
+      <div class="c-chip-group perf__periods" role="radiogroup" [attr.aria-label]="'performance_title' | translatePipe">
         @for (option of periods; track option.value) {
-          <label class="c-toggle-chip" [attr.data-testid]="'period-' + option.value">
+          <label class="c-chip c-chip--toggle" [attr.data-testid]="'period-' + option.value">
             <input
               type="radio"
               name="performance-period"

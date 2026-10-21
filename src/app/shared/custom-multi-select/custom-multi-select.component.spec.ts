@@ -33,7 +33,7 @@ describe('CustomMultiSelectComponent', () => {
     ])
     component.writeValue(['a', 'b'])
     fixture.detectChanges()
-    const chips = fixture.nativeElement.querySelectorAll('.custom-multi-select-chip--removable')
+    const chips = fixture.nativeElement.querySelectorAll('button.c-chip--removable')
     expect(chips.length).toBe(2)
   })
 

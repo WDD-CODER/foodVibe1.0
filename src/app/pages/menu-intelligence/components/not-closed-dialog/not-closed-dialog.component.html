@@ -10,9 +10,9 @@
     <h3 id="not-closed-title">{{ 'not_closed_title' | translatePipe }}</h3>
 
     <div class="c-modal-body">
-      <div class="c-toggle-chip-group reason-group" role="radiogroup" [attr.aria-labelledby]="'not-closed-title'">
+      <div class="c-chip-group reason-group" role="radiogroup" [attr.aria-labelledby]="'not-closed-title'">
         @for (reason of reasons; track reason) {
-          <label class="c-toggle-chip">
+          <label class="c-chip c-chip--toggle">
             <input
               type="radio"
               name="not-closed-reason"

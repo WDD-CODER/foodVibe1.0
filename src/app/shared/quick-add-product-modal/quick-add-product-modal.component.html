@@ -166,9 +166,9 @@
               </div>
               <div class="quick-add-product-modal__field quick-add-product-modal__field--span">
                 <span class="quick-add-product-modal__label">{{ 'allergens' | translatePipe }}</span>
-                <div class="c-toggle-chip-group quick-add-product-modal__allergens">
+                <div class="c-chip-group quick-add-product-modal__allergens">
                   @for (key of allergens(); track key) {
-                    <label class="c-toggle-chip">
+                    <label class="c-chip c-chip--toggle">
                       <input type="checkbox" [checked]="isAllergenSelected(key)" (change)="toggleAllergen(key)" />
                       <span>{{ key | translatePipe }}</span>
                     </label>
