@@ -44,8 +44,11 @@ function sectionBody(planText, title) {
   return m ? m[1] : null
 }
 
+// Bullet fields are split by —, ·, | or an ASCII " - " / " -- " (spaces around it, so ids like search-combobox survive).
+const SEP = '\\s+(?:—|·|\\||--?)\\s+'
+
 function field(text, name) {
-  const m = text.match(new RegExp(`\\b${name}\\s*:\\s*([^—·|]*)`, 'i'))
+  const m = text.match(new RegExp(`\\b${name}\\s*:\\s*(.*?)(?=${SEP}|$)`, 'i'))
   return m ? m[1].trim() : ''
 }
 
@@ -64,7 +67,7 @@ export function parseReuseCheck(planText) {
     if (line.startsWith('|')) {
       const c = cells(line)
       if (c.every((x) => /^:?-{2,}:?$/.test(x))) continue
-      if (!header && c.some((x) => /^rung$/i.test(x))) {
+      if (!header && c.some((x) => /^rung\b/i.test(x))) {
         header = c.map((x) => x.toLowerCase())
         continue
       }
@@ -82,14 +85,14 @@ export function parseReuseCheck(planText) {
     if (!b) continue
     const text = b[1]
     if (/^none\b/i.test(text)) {
-      rows.push({ raw: line, none: true, piece: 'none', family: '', rung: null, why: text.replace(/^none\s*[—·:-]?\s*/i, '').trim() })
+      rows.push({ raw: line, none: true, piece: 'none', family: '', rung: null, why: text.replace(/^none\s*[—·:-]*\s*/i, '').trim() })
       continue
     }
     const rungText = field(text, 'rung')
     rows.push({
       raw: line,
       none: false,
-      piece: text.split(/\s[—·|]\s|\bfamily\s*:/i)[0].trim(),
+      piece: text.split(new RegExp(`${SEP}|\\bfamily\\s*:`, 'i'))[0].trim(),
       family: field(text, 'family'),
       rung: /^[1-4]$/.test(rungText) ? Number(rungText) : null,
       why: ((text.match(/\b(?:why|justification)\s*:\s*(.*)$/i) || [])[1] || '').trim()

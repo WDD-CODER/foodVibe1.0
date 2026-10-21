@@ -109,3 +109,24 @@ test('scope-check --reuse: the real registry (docs/brain/component-families.md) 
   const filled = spawnSync(process.execPath, ['scripts/scope-check.mjs', '--reuse', `--plan=${FIX}/500-filled.plan.md`], { cwd: repoRoot, encoding: 'utf8' })
   assert.equal(filled.status, 0, filled.stderr)
 })
+
+test('bullet rows with ASCII " - " / " -- " separators parse like the em-dash form', () => {
+  for (const sep of [' - ', ' -- ']) {
+    const plan = `## Reuse Check\n- Supplier picker${sep}family: search-combobox${sep}rung: 2${sep}why: inputs cover it\n`
+    const { rows } = parseReuseCheck(plan)
+    assert.equal(rows[0].piece, 'Supplier picker')
+    assert.equal(rows[0].family, 'search-combobox')
+    assert.equal(rows[0].rung, 2)
+    assert.equal(rows[0].why, 'inputs cover it')
+    assert.equal(checkPlanReuse({ planPath: 'plans/600-x.plan.md', planText: plan, registry }).ok, true)
+  }
+  const none = parseReuseCheck('## Reuse Check\n- none -- docs only\n')
+  assert.equal(none.rows[0].why, 'docs only')
+})
+
+test('table whose header reads "Rung (1-4)" is read as the header', () => {
+  const plan = '## Reuse Check\n| New piece | Family | Rung (1-4) | Why |\n| --- | --- | --- | --- |\n| Supplier picker | search-combobox | 2 | inputs cover it |\n'
+  const res = checkPlanReuse({ planPath: 'plans/600-x.plan.md', planText: plan, registry })
+  assert.equal(res.ok, true, res.lines.join('\n'))
+  assert.deepEqual(res.lines, ['REUSE: ok Supplier picker (rung 2)'])
+})

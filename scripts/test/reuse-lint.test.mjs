@@ -102,3 +102,10 @@ test('--check-registry: the real registry exits 0 (every listed path exists)', (
   assert.equal(r.status, 0, r.stderr)
   assert.match(r.stdout, /^REUSE: registry ok \(\d+ families, \d+ paths\)/)
 })
+
+test('--diff with a base git cannot resolve is a usage error, not REUSE: ok', () => {
+  const r = lint('--diff=no-such-branch-450')
+  assert.equal(r.status, 1)
+  assert.match(r.stderr, /REUSE: bad base no-such-branch-450/)
+  assert.doesNotMatch(r.stdout, /REUSE: ok/)
+})

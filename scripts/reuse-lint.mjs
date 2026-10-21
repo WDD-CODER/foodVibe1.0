@@ -1,6 +1,6 @@
 /**
  * Reuse lint (plan 450, ADR 0024) — warns when a diff adds a new copy of a registered component family.
- * Never blocks: always exit 0 for --diff / --patch. Rules are data in scripts/lib/registry-families.mjs.
+ * Never blocks: always exit 0 for --diff / --patch. A --diff base git cannot resolve exits 1 ("REUSE: bad base"). Rules are data in scripts/lib/registry-families.mjs.
  *
  * Usage:
  *   node scripts/reuse-lint.mjs --diff=<base>          added lines since the merge base with <base> (+ untracked files)
@@ -123,6 +123,13 @@ function main() {
     }
     added = parseAddedLines(readFileSync(p, 'utf8'))
   } else if (args.diff && args.diff !== true) {
+    // A base git cannot resolve (typo, ref missing here) is a usage error, never a clean diff.
+    try {
+      execFileSync('git', ['rev-parse', '--verify', '--quiet', `${args.diff}^{commit}`], { cwd: repoRoot, stdio: 'ignore' })
+    } catch {
+      console.error(`REUSE: bad base ${args.diff}`)
+      process.exit(1)
+    }
     added = addedSince(args.diff)
   } else {
     console.error('usage: --diff=<base> | --patch=<file.diff> | --check-registry [--registry=<path>]')

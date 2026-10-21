@@ -32,15 +32,15 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
   (add-option rule in `docs/agent/standards-domain.md`).
 - Building blocks (use only inside a shared base, never in a page): `src/app/shared/scrollable-dropdown/`
   (`app-scrollable-dropdown`), `src/app/shared/add-option-row/` (`app-add-option-row`).
-- Known copies (7 hand-built `input + app-scrollable-dropdown` shells in 7 files):
+- Known copies (7 hand-built `input + app-scrollable-dropdown` shells in 6 templates, plus the page-local search state in
+  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts`):
   `src/app/pages/menu-intelligence/menu-intelligence.page.html` (event type + section category),
   `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`,
   `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html` (ingredient filter),
   `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.html`,
   `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.html`,
   `src/app/pages/recipe-builder/recipe-builder.page.html` (logistics picker, with
-  `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`),
-  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts` (page-local search state).
+  `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`).
 
 ### multi-pick — pick several values, shown as chips
 - Status: converging — plan 452 picks one base
@@ -174,17 +174,20 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 ### kitchen-state — app-wide signal state
 - Status: converging — plan 454 drops the Promise→Observable wrapping
 - Use: `src/app/core/services/kitchen-state.service.ts` (signals).
+- When: state that several pages read or change (the loaded entity collections); never a page-local copy.
 - Known copies: its methods wrap Promises into Observables; callers `.subscribe` to them.
 
 ### taxonomy — categories, units, labels, kinds
 - Status: stable
 - Use: `src/app/core/services/taxonomy-store.service.ts` · `TaxonomyStore`.
+- When: a page reads or adds a category, unit, label or kind.
 - Known copies: `src/app/core/services/unit-registry.service.ts` still exposes an RxJS `unitAdded$`.
 
 ### page-entry-loading — data ready before a page opens
 - Status: stable
 - Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`.
 - When: a route needs its collection loaded first.
+- Known copies: none.
 
 ### helpers — pure functions
 - Status: stable
@@ -197,6 +200,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 ### http — talking to the server
 - Status: stable
 - Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
+- When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
 - Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
   `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
 
@@ -205,11 +209,13 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Use: `src/app/core/engine/event-plan.engine.ts` with `src/app/core/engine/event-plan.service.ts`; units:
   `src/app/core/engine/units.ts`; portions: `src/app/core/engine/portions.ts`.
 - When: anything that computes quantities, costs or prices for an event.
+- Known copies: none.
 
 ### server-auth — who is calling the server
 - Status: converging — plan 458 (rule sweep) decides
 - Use: `server/middleware/auth.js` (token check), `server/utils/business-scope.js` (the only tenant-scoping path,
   ADR 0023), `server/utils/permissions.js` (the only write-permission path), `server/middleware/write-limit.js`.
+- When: a server route checks who is calling, scopes data to a business, checks a write permission or limits a rate.
 - Known copies: `jwt.verify` also in `server/routes/auth.js` and `server/routes/log.js`; `isAdmin` re-declared in
   `server/routes/generic.js`; rate limiters built per file in `server/routes/ai.js`, `server/routes/auth.js`,
   `server/routes/business.js`, `server/routes/log.js`, `server/routes/product-import.js`.
