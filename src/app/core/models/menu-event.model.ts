@@ -51,6 +51,16 @@ export interface MenuFinancialTargets {
   targetRevenuePerGuest?: number
 }
 
+/** Plan 445: the summary stored on every save (C-PRICING); other screens read it, never the engine. */
+export interface MenuPricingCache {
+  foodCost: number
+  revenue: number
+  profit: number
+  profitPct: number | null
+  partial: boolean
+  computedAt: number
+}
+
 export interface MenuPerformanceTags {
   foodCostPct: number
   primaryServingStyle: ServingType
@@ -98,7 +108,14 @@ export interface MenuEvent {
   /** @deprecated legacy since plan 440, unused */
   piecesPerPerson?: number
   sections: MenuSection[]
+  /** @deprecated legacy since plan 445: no longer written */
   financialTargets?: MenuFinancialTargets
+  /** Plan 445 money fields (owner only) */
+  pricePerGuest?: number
+  extraCosts?: { amount: number; note?: string }
+  targetsOverride?: { profitTargetPct?: number; safetyMarginPct?: number }
+  /** Plan 445: derived on every save */
+  pricing?: MenuPricingCache
   performanceTags?: MenuPerformanceTags
   cuisineTags?: string[]
   createdAt?: number

@@ -1286,6 +1286,20 @@
     "quick_price_save": "שמור מחיר",
     "quick_price_saved": "המחיר נשמר",
     "awaiting_owner_price": "ממתין לתמחור של הבעלים",
-    "open_recipe": "פתח מתכון"
+    "open_recipe": "פתח מתכון",
+    "price_per_guest_client": "מחיר לאורח ללקוח",
+    "price_computed": "מחושב",
+    "extra_costs": "עלויות נוספות",
+    "extra_costs_note": "הערה לעלויות",
+    "event_target_toggle": "יעד לאירוע זה",
+    "profit_per_guest": "רווח לאורח",
+    "profit_pct": "אחוז רווח",
+    "meets_target": "עומד ביעד",
+    "short_per_guest": "חסר {{amount}} לאורח",
+    "min_price_per_guest": "מחיר מינימום לאורח",
+    "recommended_margin": "מומלץ להוסיף {{amount}} מרווח ביטחון",
+    "target_too_high": "היעד חייב להיות קטן מ-100%",
+    "extra_costs_negative": "עלויות נוספות לא יכולות להיות שליליות",
+    "money_locked_hint": "רק הבעלים יכולים לשנות סכומים"
   }
 }

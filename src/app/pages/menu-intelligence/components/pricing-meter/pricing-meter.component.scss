@@ -1,0 +1,163 @@
+$break-mobile: 768px; // mirrors src/styles.scss
+
+@layer components.pricing-meter {
+  :host {
+    display: contents;
+  }
+
+  .pricing-meter {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+
+    padding-inline: var(--space-6);
+    padding-block: var(--space-2);
+    background: var(--bg-glass-strong);
+    border-block-start: 1px solid var(--border-default);
+    box-shadow: var(--shadow-nav);
+    backdrop-filter: var(--blur-glass);
+  }
+
+  .meter-summary {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    padding-block: var(--space-2);
+    background: transparent;
+    border: none;
+    color: var(--color-text-main);
+    font-weight: var(--fw-semibold, 600);
+    cursor: pointer;
+  }
+
+  .meter-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .meter-inputs,
+  .meter-numbers {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  .meter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .c-input-wrapper {
+      padding-block: var(--space-1);
+      inline-size: 8rem;
+
+      &.invalid {
+        border-color: var(--color-danger);
+      }
+    }
+
+    input {
+      inline-size: 100%;
+      color: var(--color-text-main);
+    }
+  }
+
+  .fin-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .fin-label {
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+  }
+
+  .fin-value {
+    color: var(--color-text-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .fin-value--bad {
+    color: var(--color-danger);
+  }
+
+  .computed-tag,
+  .partial-tag {
+    padding-inline: var(--space-2);
+    background: var(--bg-warning-soft);
+    border-radius: var(--radius-full);
+    color: var(--text-warning);
+    font-size: 0.65rem;
+  }
+
+  .verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    font-weight: 600;
+
+    &.ok {
+      color: var(--color-success-emphasis);
+    }
+
+    &.bad {
+      color: var(--color-danger);
+    }
+  }
+
+  .field-error {
+    color: var(--color-danger);
+    font-size: 0.7rem;
+  }
+
+  .margin-hint {
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+  }
+
+  .targets-toggle {
+    cursor: pointer;
+  }
+
+  @media (max-width: $break-mobile) {
+    .pricing-meter {
+      padding-inline: var(--space-4);
+    }
+
+    .meter-summary {
+      display: flex;
+      min-block-size: 44px;
+    }
+
+    .meter-body {
+      display: none;
+      max-block-size: 60vh;
+      overflow-y: auto;
+    }
+
+    .pricing-meter.expanded .meter-body {
+      display: flex;
+    }
+
+    .meter-inputs,
+    .meter-numbers {
+      justify-content: flex-start;
+    }
+
+    .meter-field .c-input-wrapper {
+      inline-size: 100%;
+    }
+  }
+}

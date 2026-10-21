@@ -11,6 +11,9 @@ const typeSnapshotSchema = z.strictObject({
   coefficient: z.number().positive()
 })
 
+/** Plan 445: a per-event override of the business profit target / safety margin (each 0 <= x < 100). */
+const pctBelow100 = z.number().min(0).lt(100)
+
 export const menuEventSchema = z.strictObject({
   ...baseDocShape,
   name: nameField,
@@ -40,6 +43,28 @@ export const menuEventSchema = z.strictObject({
       coefficientOverride: coefficientSchema.optional()
     }))
   })),
+  /** Plan 445 (money field, plan 427): the price per guest quoted to the client. Empty = computed from dish sell prices. */
+  pricePerGuest: z.number().min(0).optional(),
+  /** Plan 445 (money field): costs beyond food (staff, transport). */
+  extraCosts: z.strictObject({
+    amount: z.number().min(0),
+    note: z.string().max(200).optional()
+  }).optional(),
+  /** Plan 445 (money field): this event's own target and margin; the business settings stay untouched. */
+  targetsOverride: z.strictObject({
+    profitTargetPct: pctBelow100.optional(),
+    safetyMarginPct: pctBelow100.optional()
+  }).optional(),
+  /** Plan 445: derived cache written by the client on every save (not a money field). */
+  pricing: z.strictObject({
+    foodCost: z.number(),
+    revenue: z.number(),
+    profit: z.number(),
+    profitPct: z.number().nullable(),
+    partial: z.boolean(),
+    computedAt: z.number()
+  }).optional(),
+  /** @deprecated legacy since plan 445: no longer written */
   financialTargets: z.strictObject({
     targetFoodCostPct: z.number(),
     targetRevenuePerGuest: z.number().optional()

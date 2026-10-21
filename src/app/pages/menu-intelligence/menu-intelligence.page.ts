@@ -36,7 +36,6 @@ import {
 } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { EventPlanService } from '../../core/engine/event-plan.service'
 import { roundMoney } from '../../core/engine/rounding'
 import { ExportService } from '@services/export.service'
@@ -67,6 +66,9 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
 import { MenuAiFlowService } from './services/menu-ai-flow.service'
 import { MenuPortionsService } from './services/menu-portions.service'
+import { MenuEventSaveService } from './services/menu-event-save.service'
+import { PricingMeterComponent } from './components/pricing-meter/pricing-meter.component'
+import { createMoneyGroup, moneyFieldsFromForm, moneyFormFromEvent } from './menu-money-form.util'
 import { MenuPickerSearchService } from './services/menu-picker-search.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
@@ -97,7 +99,7 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    PartialCostBadgeComponent,
+    PricingMeterComponent,
     ClickOutSideDirective,
     ScrollableDropdownComponent,
     CustomSelectComponent,
@@ -138,6 +140,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly menuAiFlow_ = inject(MenuAiFlowService)
   protected readonly pickerSearch_ = inject(MenuPickerSearchService)
   protected readonly menuPortions_ = inject(MenuPortionsService)
+  private readonly menuEventSave_ = inject(MenuEventSaveService)
 
   /** Bumped when form value changes so footer computeds re-run (form is not a signal). */
   private readonly formValueVersion_ = signal(0)
@@ -185,6 +188,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     eventDate: [new Date().toISOString().slice(0, 10)],
     servingType: ['plated_course' as ServingType, Validators.required],
     guestCount: [50, [Validators.required, Validators.min(0)]],
+    money: createMoneyGroup(this.fb),
     sections: this.fb.array<FormGroup>([])
   })
 
@@ -207,52 +211,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return [...this.sectionsArray.controls]
   })
 
+  /** The event the live form describes (money fields included): what the engine and the pricing meter read. */
+  protected readonly liveEvent_ = computed(() => {
+    this.formValueVersion_() // depend on form changes
+    return this.buildEventFromForm()
+  })
   /** The whole `EventPlan` of the live form: cost, partial and missing items (plan 444). */
-  protected readonly menuPlan_ = computed(() => {
-    this.formValueVersion_() // depend on form changes
-    return this.eventPlan_.planFor(this.buildEventFromForm())
-  })
-  protected readonly eventCost_ = computed(() => this.menuPlan_().eventFoodCost)
-
-  protected readonly foodCostPct_ = computed(() => {
-    this.formValueVersion_() // depend on form changes
-    const revenue = this.totalRevenue_()
-    const cost = this.eventCost_()
-    if (revenue <= 0) return 0
-    return (cost / revenue) * 100
-  })
-
-  protected readonly totalRevenue_ = computed(() => {
-    this.formValueVersion_() // depend on form changes
-    const guestCount = Number(this.form_.get('guestCount')?.value ?? 0)
-    let total = 0
-    const sections = this.sectionsArray
-    for (let si = 0; si < sections.length; si++) {
-      const items = this.getItemsArray(si)
-      for (let ii = 0; ii < items.length; ii++) {
-        const item = items.at(ii)
-        const price = Number(item.get('sell_price')?.value ?? 0)
-        const sp = Number(item.get('serving_portions')?.value ?? 1)
-        total += price * sp * guestCount
-      }
-    }
-    return total
-  })
-
-  protected readonly costPerGuest_ = computed(() => {
-    this.formValueVersion_() // depend on form changes
-    const guestCount = this.getGuestCount()
-    if (guestCount <= 0) return 0
-    return this.eventCost_() / guestCount
-  })
-
-  /** Plan 305 H — revenue per guest minus ingredient cost per guest. */
-  protected readonly profitPerGuest_ = computed(() => {
-    this.formValueVersion_() // depend on form changes
-    const guestCount = this.getGuestCount()
-    if (guestCount <= 0) return 0
-    return this.totalRevenue_() / guestCount - this.costPerGuest_()
-  })
+  protected readonly menuPlan_ = computed(() => this.eventPlan_.planFor(this.liveEvent_()))
 
   protected readonly menuTypeOptions_ = computed(() => this.metadataRegistry.allMenuTypes_().map((t) => t.key))
 
@@ -634,13 +599,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     }
 
     try {
-      const event = this.menuIntelligence.hydrateDerivedPortions(this.buildEventFromForm())
-      const now = Date.now()
       const id = this.editingId_()
+      // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
+      const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
+      const now = Date.now()
       if (id) {
-        // The form has no logistics control: keep the stored one (venue link) on save.
-        const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now, logistics: existingLogistics })
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now })
       } else {
         const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
         this.editingId_.set(created._id)
@@ -1023,13 +987,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     }
 
     await this.saving.withSaving(async () => {
-      const event = this.menuIntelligence.hydrateDerivedPortions(this.buildEventFromForm())
-      const now = Date.now()
       const id = this.editingId_()
+      // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
+      const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
+      const now = Date.now()
       if (id) {
-        // Same as saveAndWait(): keep the stored logistics (venue link) on a normal save.
-        const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now, logistics: existingLogistics })
+        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now })
       } else {
         const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
         this.editingId_.set(created._id)
@@ -1069,7 +1032,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       eventType: event.eventType,
       eventDate: event.eventDate || '',
       servingType: event.servingType,
-      guestCount: event.guestCount
+      guestCount: event.guestCount,
+      money: moneyFormFromEvent(event)
     })
 
     this.sectionsArray.clear()
@@ -1165,7 +1129,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       })
     }))
 
-    const hydrated = this.menuIntelligence.hydrateDerivedPortions({
+    return this.menuIntelligence.hydrateDerivedPortions({
       _id: '',
       name: raw.name || 'Untitled Event',
       eventType: raw.eventType || '',
@@ -1174,23 +1138,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       guestCount: guestCount,
       ...this.menuPortions_.snapshots(raw.eventType || '', servingType),
       sections: sections,
-      financialTargets: {
-        targetFoodCostPct: 30,
-        targetRevenuePerGuest: 0
-      },
+      ...moneyFieldsFromForm(raw.money),
       performanceTags: {
         foodCostPct: 0,
         primaryServingStyle: servingType
       }
     })
-
-    return {
-      ...hydrated,
-      performanceTags: {
-        foodCostPct: this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated),
-        primaryServingStyle: servingType
-      }
-    }
   }
 
   /** Build current menu event for export (includes _id). */

@@ -136,7 +136,12 @@
           @if (event.legacy) {
             <span class="tag legacy">{{ 'event_legacy' | translatePipe }}</span>
           }
-          <span class="tag cost">{{ 'menu_food_cost' | translatePipe }}: {{ getFoodCostPctDisplay(event) }}</span>
+          <span class="tag cost"
+            >{{ 'menu_food_cost' | translatePipe }}: {{ getFoodCostPctDisplay(event) }}
+            @if (event.pricing?.partial) {
+              <span class="tag-value">{{ 'partial_total' | translatePipe }}</span>
+            }
+          </span>
           <span class="tag sale"
             >{{ 'menu_total_revenue' | translatePipe }}:
             <span class="tag-value" dir="ltr">{{ getTotalSalePriceDisplay(event) }}</span></span

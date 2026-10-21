@@ -770,52 +770,6 @@
   }
 }
 
-/* ---------- Financial Footnote — fixed bottom bar ---------- */
-
-.financial-footnote {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 90;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 32px;
-  flex-wrap: wrap;
-  padding: 10px 24px;
-  background: rgba(253, 253, 250, 0.97);
-  border-top: 1px solid #e6dece;
-  box-shadow: 0 -2px 14px rgba(0, 0, 0, 0.08);
-}
-
-.financial-footnote .fin-metric {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.financial-footnote .fin-label {
-  font-family: var(--font-serif);
-  font-size: 0.55rem;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #b0a080;
-}
-
-.financial-footnote .fin-value {
-  font-family: var(--font-serif);
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #6a5a3a;
-
-  &.fin-value--warning {
-    color: #b05a2a;
-  }
-}
-
 @media (max-width: 620px) {
   .section-title-plain,
   .add-dish-btn,

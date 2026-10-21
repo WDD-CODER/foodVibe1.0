@@ -7,7 +7,6 @@ import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { provideRouter } from '@angular/router'
 import { MenuLibraryListComponent } from './menu-library-list.component'
 import { MenuEventDataService } from '@services/menu-event-data.service'
-import { MenuIntelligenceService } from '@services/menu-intelligence.service'
 import { UserService } from '@services/user.service'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 
@@ -48,10 +47,6 @@ describe('MenuLibraryListComponent stage filter', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: MenuEventDataService, useValue: { allMenuEvents_: store.asReadonly() } },
-        {
-          provide: MenuIntelligenceService,
-          useValue: { hydrateDerivedPortions: (e: MenuEvent) => e, computeFoodCostPctFromActualRevenue: () => 0 }
-        },
         { provide: UserService, useValue: { isLoggedIn: () => true, user_: signal(null) } }
       ]
     }).compileComponents()
@@ -90,5 +85,50 @@ describe('MenuLibraryListComponent stage filter', () => {
     const legacy = cards.filter((card) => !!card.querySelector('.tag.legacy'))
     expect(legacy.length).toBe(1)
     expect(legacy[0].querySelector('.card-title')?.textContent?.trim()).toBe('אירוע f')
+  })
+
+  describe('revenue and food cost from the pricing summary (plan 445)', () => {
+    const pricing = { foodCost: 4000, revenue: 10000, profit: 6000, profitPct: 60, partial: false, computedAt: 1 }
+    const ts = () =>
+      component as unknown as {
+        getTotalSalePriceDisplay(e: MenuEvent): string
+        getFoodCostPctDisplay(e: MenuEvent): string
+        sortBy_: { set(v: string): void }
+        sortOrder_: { set(v: string): void }
+      }
+
+    it('shows pricing.revenue and the food cost % of it', () => {
+      const event = make('p', 'inquiry', { pricing })
+      expect(ts().getTotalSalePriceDisplay(event)).toBe('₪10,000.00')
+      expect(ts().getFoodCostPctDisplay(event)).toBe('40.0%')
+    })
+
+    it('shows "—" when the event has no pricing', () => {
+      const event = make('p', 'inquiry')
+      expect(ts().getTotalSalePriceDisplay(event)).toBe('—')
+      expect(ts().getFoodCostPctDisplay(event)).toBe('—')
+    })
+
+    it('marks a partial summary on the card', () => {
+      store.set([make('p', 'inquiry', { pricing: { ...pricing, partial: true } })])
+      fixture.detectChanges()
+      expect(fixture.nativeElement.querySelector('.tag.cost')?.textContent).toContain('partial_total')
+    })
+
+    it('sorts by food cost % with events without pricing last, in both directions', () => {
+      store.set([
+        make('none', 'inquiry'),
+        make('high', 'inquiry', { pricing: { ...pricing, foodCost: 8000 } }),
+        make('low', 'inquiry', { pricing })
+      ])
+      filter().stageFilter_.set('all')
+      ts().sortBy_.set('food_cost')
+      ts().sortOrder_.set('asc')
+      fixture.detectChanges()
+      expect(names()).toEqual(['אירוע low', 'אירוע high', 'אירוע none'])
+      ts().sortOrder_.set('desc')
+      fixture.detectChanges()
+      expect(names()).toEqual(['אירוע high', 'אירוע low', 'אירוע none'])
+    })
   })
 })
