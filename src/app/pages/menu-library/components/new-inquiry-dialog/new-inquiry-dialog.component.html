@@ -1,0 +1,96 @@
+<div class="c-modal-overlay" (click)="cancelled.emit()">
+  <div
+    class="c-modal-card c-modal-card--md"
+    dir="rtl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="inquiry-title"
+    (click)="$event.stopPropagation()"
+  >
+    <h3 id="inquiry-title">{{ 'new_inquiry' | translatePipe }}</h3>
+
+    <div class="c-modal-body">
+      <div class="c-input-stack">
+        <label for="inquiry-name">{{ 'new_inquiry_name' | translatePipe }}</label>
+        <input
+          id="inquiry-name"
+          type="text"
+          autocomplete="off"
+          [maxLength]="nameMax"
+          [class.c-input--invalid]="touched_() && !nameValid_()"
+          [ngModel]="name_()"
+          (ngModelChange)="name_.set($event)"
+          (keydown.enter)="onSave()"
+        />
+      </div>
+
+      <div class="c-input-stack">
+        <label for="inquiry-phone">{{ 'client_phone' | translatePipe }}</label>
+        <input
+          id="inquiry-phone"
+          type="tel"
+          dir="ltr"
+          autocomplete="off"
+          maxlength="20"
+          [class.c-input--invalid]="!phoneValid_()"
+          [ngModel]="phone_()"
+          (ngModelChange)="phone_.set($event)"
+        />
+        @if (!phoneValid_()) {
+          <span class="c-field-error">{{ 'client_phone_invalid' | translatePipe }}</span>
+        }
+      </div>
+
+      <div class="inquiry-row">
+        <div class="c-input-stack">
+          <label for="inquiry-date">{{ 'date_filter' | translatePipe }}</label>
+          <input id="inquiry-date" type="date" [ngModel]="date_()" (ngModelChange)="date_.set($event)" />
+        </div>
+        <div class="c-input-stack">
+          <label for="inquiry-guests">{{ 'menu_guest_count' | translatePipe }}</label>
+          <input
+            id="inquiry-guests"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            dir="ltr"
+            [class.c-input--invalid]="!guestsValid_()"
+            [ngModel]="guests_()"
+            (ngModelChange)="guests_.set($event === null ? '' : '' + $event)"
+          />
+        </div>
+      </div>
+
+      <div class="c-input-stack">
+        <label>{{ 'menu_event_type' | translatePipe }}</label>
+        <app-custom-select
+          [ngModel]="eventType_()"
+          (ngModelChange)="eventType_.set($event)"
+          [options]="eventTypeOptions_()"
+          placeholder="menu_event_type"
+          [typeToFilter]="true"
+        />
+      </div>
+
+      <div class="c-input-stack">
+        <label for="inquiry-note">{{ 'first_note' | translatePipe }}</label>
+        <textarea
+          id="inquiry-note"
+          class="c-input"
+          rows="3"
+          [maxLength]="noteMax"
+          [ngModel]="note_()"
+          (ngModelChange)="note_.set($event)"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
+      <button type="button" class="c-btn-primary" [disabled]="saving_()" (click)="onSave()">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </div>
+</div>

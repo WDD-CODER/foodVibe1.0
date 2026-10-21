@@ -1,0 +1,145 @@
+@if (event_(); as event) {
+  <section class="stage-bar no-print" dir="rtl">
+    <div class="stage-row" role="group" [attr.aria-label]="'stage_filter' | translatePipe">
+      @for (stage of flowStages; track stage; let i = $index) {
+        <button
+          type="button"
+          class="stage-pill"
+          [class.is-current]="stage === current_()"
+          [class.is-past]="i < currentIndex_()"
+          [class.is-locked]="stage === 'finished' || !canChangeStage_()"
+          [attr.aria-current]="stage === current_() ? 'step' : null"
+          [attr.aria-disabled]="stage === 'finished' || !canChangeStage_() ? 'true' : null"
+          [attr.title]="stage === 'finished' ? ('stage_finished_hint' | translatePipe) : null"
+          (click)="pick(stage)"
+        >
+          {{ stageLabelKey(stage) | translatePipe }}
+        </button>
+      }
+      <button
+        type="button"
+        class="stage-pill stage-pill--danger"
+        [class.is-current]="current_() === 'not_closed'"
+        [class.is-locked]="!canChangeStage_()"
+        [attr.aria-current]="current_() === 'not_closed' ? 'step' : null"
+        [attr.aria-disabled]="!canChangeStage_() ? 'true' : null"
+        (click)="pick('not_closed')"
+      >
+        {{ stageLabelKey('not_closed') | translatePipe }}
+      </button>
+    </div>
+
+    @if (current_() === 'not_closed' && event.notClosedReason) {
+      <p class="stage-reason">
+        {{ 'not_closed_reason_' + event.notClosedReason | translatePipe }}
+        @if (event.notClosedText) {
+          <span>· {{ event.notClosedText }}</span>
+        }
+      </p>
+    }
+
+    <div class="stage-links">
+      <button type="button" class="stage-link" [attr.aria-expanded]="detailsOpen_()" (click)="toggleDetails()">
+        <lucide-icon
+          name="chevron-left"
+          [size]="16"
+          class="stage-link-icon"
+          [class.is-open]="detailsOpen_()"
+        ></lucide-icon>
+        <span>{{ 'client_details' | translatePipe }}</span>
+        @if (detailsSummary_()) {
+          <span class="stage-link-summary">{{ detailsSummary_() }}</span>
+        }
+      </button>
+      <button type="button" class="stage-link" [attr.aria-expanded]="historyOpen_()" (click)="toggleHistory()">
+        <lucide-icon
+          name="chevron-left"
+          [size]="16"
+          class="stage-link-icon"
+          [class.is-open]="historyOpen_()"
+        ></lucide-icon>
+        <span>{{ 'stage_history' | translatePipe }}</span>
+      </button>
+    </div>
+
+    @if (detailsOpen_()) {
+      <div class="client-details">
+        <div class="c-input-stack">
+          <label for="stage-client-name">{{ 'client_name' | translatePipe }}</label>
+          <input
+            id="stage-client-name"
+            type="text"
+            maxlength="200"
+            autocomplete="off"
+            [value]="event.clientName ?? ''"
+            [disabled]="!canEdit_()"
+            (change)="onClientNameChange($any($event.target).value)"
+          />
+        </div>
+        <div class="c-input-stack">
+          <label for="stage-client-phone">{{ 'client_phone' | translatePipe }}</label>
+          <input
+            id="stage-client-phone"
+            type="tel"
+            dir="ltr"
+            maxlength="20"
+            autocomplete="off"
+            [class.c-input--invalid]="phoneInvalid_()"
+            [value]="event.clientPhone ?? ''"
+            [disabled]="!canEdit_()"
+            (change)="onClientPhoneChange($any($event.target).value)"
+          />
+          @if (phoneInvalid_()) {
+            <span class="c-field-error">{{ 'client_phone_invalid' | translatePipe }}</span>
+          }
+        </div>
+        <div class="c-input-stack">
+          <label for="stage-deposit-amount">{{ 'deposit_amount' | translatePipe }}</label>
+          <input
+            id="stage-deposit-amount"
+            type="number"
+            min="0"
+            dir="ltr"
+            [value]="event.deposit?.amount ?? ''"
+            [disabled]="!canEditMoney_()"
+            (change)="onDepositAmountChange($any($event.target).value)"
+          />
+        </div>
+        <div class="c-input-stack">
+          <label for="stage-deposit-date">{{ 'deposit_date' | translatePipe }}</label>
+          <input
+            id="stage-deposit-date"
+            type="date"
+            [value]="event.deposit?.date ?? ''"
+            [disabled]="!canEditMoney_()"
+            (change)="onDepositDateChange($any($event.target).value)"
+          />
+        </div>
+      </div>
+    }
+
+    @if (historyOpen_()) {
+      <ul class="stage-history">
+        @for (entry of history_(); track entry.at + entry.stage) {
+          <li class="stage-history-row">
+            <span class="stage-history-stage">{{ stageLabelKey(entry.stage) | translatePipe }}</span>
+            <span class="stage-history-when" dir="ltr">{{ entry.at | date: 'dd/MM/yyyy HH:mm' }}</span>
+            <span class="stage-history-who">{{ entry.byName }}</span>
+            @if (entry.reason) {
+              <span class="stage-history-reason">
+                {{ 'not_closed_reason_' + entry.reason | translatePipe }}
+                @if (entry.reasonText) {
+                  <span>· {{ entry.reasonText }}</span>
+                }
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+
+  @if (notClosedDialogOpen_()) {
+    <app-not-closed-dialog (confirmed)="onNotClosed($event)" (cancelled)="notClosedDialogOpen_.set(false)" />
+  }
+}

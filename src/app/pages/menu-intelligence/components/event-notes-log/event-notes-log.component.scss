@@ -1,0 +1,142 @@
+@layer components.event-notes-log {
+  :host {
+    display: block;
+    inline-size: 100%;
+  }
+
+  .notes-log {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    padding: var(--space-4);
+
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+
+    background: var(--bg-glass-strong);
+  }
+
+  .notes-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    margin: 0;
+
+    color: var(--color-text-main);
+    font-size: var(--fs-md);
+    font-weight: var(--fw-semibold);
+  }
+
+  .notes-add {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    textarea {
+      inline-size: 100%;
+      resize: vertical;
+    }
+  }
+
+  .notes-add-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .notes-counter {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .notes-empty {
+    margin: 0;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .note {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    padding-block-end: var(--space-3);
+
+    border-block-end: 1px solid var(--border-row);
+
+    textarea {
+      inline-size: 100%;
+      resize: vertical;
+    }
+  }
+
+  .note-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .note-author {
+    color: var(--color-text-secondary);
+    font-weight: var(--fw-semibold);
+  }
+
+  .note-actions {
+    display: inline-flex;
+    gap: var(--space-1);
+
+    margin-inline-start: auto;
+  }
+
+  .note-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-inline-size: 2rem;
+    min-block-size: 2rem;
+
+    border: 0;
+    border-radius: var(--radius-sm);
+
+    background: transparent;
+    color: var(--color-text-muted);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-text-main);
+    }
+
+    &.note-delete:hover {
+      color: var(--color-danger);
+    }
+  }
+
+  .note-text {
+    margin: 0;
+
+    color: var(--color-text-main);
+    font-size: var(--fs-base);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}

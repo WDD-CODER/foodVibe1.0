@@ -1,0 +1,16 @@
+@layer components.new-inquiry-dialog {
+  :host {
+    display: contents;
+  }
+
+  .inquiry-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+
+  textarea {
+    inline-size: 100%;
+    resize: vertical;
+  }
+}

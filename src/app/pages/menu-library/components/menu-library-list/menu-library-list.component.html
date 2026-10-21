@@ -18,6 +18,10 @@
         <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
       </div>
     </div>
+    <button header-actions type="button" class="c-btn-ghost header-inquiry-btn" (click)="openInquiry()">
+      <lucide-icon name="file-plus" [size]="18"></lucide-icon>
+      <span class="btn-label">{{ 'new_inquiry' | translatePipe }}</span>
+    </button>
     <button header-actions type="button" class="c-btn-primary" (click)="onCreateNew()">
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'menu_new_event' | translatePipe }}</span>
@@ -26,6 +30,16 @@
 
   @if (events_().length > 0) {
     <div class="filters-bar">
+      <label class="filter-item">
+        <span>{{ 'stage_filter' | translatePipe }}</span>
+        <app-custom-select
+          [ngModel]="stageFilter_()"
+          (ngModelChange)="stageFilter_.set($event)"
+          [options]="stageOptions_"
+          placeholder="stage_filter_active"
+        />
+      </label>
+
       <label class="filter-item">
         <span>{{ 'menu_event_type' | translatePipe }}</span>
         <app-custom-select
@@ -113,6 +127,15 @@
           </p>
         </div>
         <div class="card-tags">
+          <span
+            class="tag stage"
+            [class.stage--lost]="event.stage === 'not_closed'"
+            [class.stage--done]="event.stage === 'finished'"
+            >{{ stageLabelKey(event.stage ?? 'inquiry') | translatePipe }}</span
+          >
+          @if (event.legacy) {
+            <span class="tag legacy">{{ 'event_legacy' | translatePipe }}</span>
+          }
           <span class="tag cost">{{ 'menu_food_cost' | translatePipe }}: {{ getFoodCostPctDisplay(event) }}</span>
           <span class="tag sale"
             >{{ 'menu_total_revenue' | translatePipe }}:
@@ -166,4 +189,8 @@
       </article>
     }
   </div>
+
+  @if (inquiryOpen_()) {
+    <app-new-inquiry-dialog (saved)="closeInquiry()" (cancelled)="closeInquiry()" />
+  }
 </div>
