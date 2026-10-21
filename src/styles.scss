@@ -2371,3 +2371,8 @@ body.kb-open {
     backdrop-filter: none;
   }
 }
+
+/* Plan 451: app-modal-shell moves focus onto the card (tabindex -1) when a popup opens — no ring on the card itself */
+.c-modal-card:focus {
+  outline: none;
+}

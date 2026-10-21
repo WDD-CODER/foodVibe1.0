@@ -19,6 +19,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
   selector: 'unit-creator-modal',
@@ -29,7 +30,8 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
     LucideAngularModule,
     SelectOnFocusDirective,
     CustomSelectComponent,
-    TranslatePipe
+    TranslatePipe,
+    ModalShellComponent
   ],
   templateUrl: './unit-creator.component.html',
   styleUrl: './unit-creator.component.scss',

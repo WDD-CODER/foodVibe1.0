@@ -32,6 +32,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `list-selection/` | Row selection + `ListSelectionState` | ListRowCheckboxComponent, ListSelectionState |
 | `list-shell/` | Reusable list/table shell | ListShellComponent |
 | `loader/` | Loading indicator | LoaderComponent |
+| `modal-shell/` | The one popup shell: engines + dialog role, Escape (top-most only), focus trap | ModalShellComponent |
 | `nutrition-badge/` | Per-100g nutrition badge/tooltip | NutritionBadgeComponent |
 | `partial-cost-badge/` | "חלקי" badge + missing-prices popover (owner can price in place) | PartialCostBadgeComponent |
 | `page-header/` | Standard page title bar: title, subtitle, result-count pill, back link | PageHeaderComponent |

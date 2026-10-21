@@ -1,18 +1,16 @@
 @if (modalService.isOpen()) {
-  <div class="c-modal-overlay" (click)="modalService.choose(null)">
-    <div class="c-modal-card c-modal-card--fluid" dir="rtl" (click)="$event.stopPropagation()">
-      <p class="restore-modal-message">{{ 'history_restore_choice_title' | translatePipe }}</p>
-      <div class="c-modal-actions">
-        <button type="button" class="c-btn-ghost" (click)="modalService.choose(null)">
-          {{ 'cancel' | translatePipe }}
-        </button>
-        <button type="button" class="c-btn-primary" (click)="modalService.choose('add-new')">
-          {{ 'history_restore_add_new' | translatePipe }}
-        </button>
-        <button type="button" class="restore-btn-replace" (click)="modalService.choose('replace')">
-          {{ 'history_restore_replace' | translatePipe }}
-        </button>
-      </div>
+  <app-modal-shell size="fluid" labelledBy="restore-modal-message" (dismissed)="modalService.choose(null)">
+    <p id="restore-modal-message" class="restore-modal-message">{{ 'history_restore_choice_title' | translatePipe }}</p>
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="modalService.choose(null)">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      <button type="button" class="c-btn-primary" (click)="modalService.choose('add-new')">
+        {{ 'history_restore_add_new' | translatePipe }}
+      </button>
+      <button type="button" class="restore-btn-replace" (click)="modalService.choose('replace')">
+        {{ 'history_restore_replace' | translatePipe }}
+      </button>
     </div>
-  </div>
+  </app-modal-shell>
 }

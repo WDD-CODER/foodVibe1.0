@@ -19,11 +19,12 @@ import { environment } from '../../../../environments/environment'
 import { validateUsername, validateEmail, validatePassword } from '../../utils/auth-validation.util'
 import { take } from 'rxjs/operators'
 import { NAME_MAX_LENGTH } from '@schemas/base.schema'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [FormsModule, LucideAngularModule, TranslatePipe, ModalShellComponent],
   templateUrl: './auth-modal.component.html',
   styleUrl: './auth-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

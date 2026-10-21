@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core'
-import { Subject, firstValueFrom } from 'rxjs'
 import { Product } from '../models/product.model'
+import { ModalController } from './modal-controller'
 
 interface QuickAddProductConfig {
   prefillName: string
@@ -8,30 +8,27 @@ interface QuickAddProductConfig {
 
 @Injectable({ providedIn: 'root' })
 export class QuickAddProductModalService {
-  private readonly resultSubject = new Subject<Product | null>()
+  private readonly controller_ = new ModalController<Product | null>(null)
   private readonly config_ = signal<QuickAddProductConfig | null>(null)
 
-  readonly isOpen_ = signal(false)
+  readonly isOpen_ = this.controller_.isOpen_
   readonly config = this.config_.asReadonly()
 
   open(config: QuickAddProductConfig): Promise<Product | null> {
     this.config_.set(config)
-    this.isOpen_.set(true)
-    return firstValueFrom(this.resultSubject)
+    return this.controller_.open()
   }
 
   save(product: Product): void {
-    this.resultSubject.next(product)
-    this.close()
+    this.close(product)
   }
 
   cancel(): void {
-    this.resultSubject.next(null)
-    this.close()
+    this.close(null)
   }
 
-  private close(): void {
-    this.isOpen_.set(false)
+  private close(result: Product | null): void {
+    this.controller_.close(result)
     this.config_.set(null)
   }
 }

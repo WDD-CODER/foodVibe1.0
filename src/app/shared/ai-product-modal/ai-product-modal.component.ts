@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, HostListener, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
@@ -18,6 +18,7 @@ import {
   geminiBudgetUsedPercent
 } from '../../core/utils/gemini-usage.util'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = 'text' | 'image'
@@ -38,7 +39,7 @@ const CANONICAL_UNITS = [
 @Component({
   selector: 'app-ai-product-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent, ModalShellComponent],
   templateUrl: './ai-product-modal.component.html',
   styleUrl: './ai-product-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -267,11 +268,6 @@ export class AiProductModalComponent implements OnInit {
   }
 
   // ─── Shared ──────────────────────────────────────────────────────
-
-  @HostListener('document:keydown.escape')
-  onEscapeKey(): void {
-    if (this.modalService.isOpen()) this.onClose()
-  }
 
   onClose(): void {
     this.modalService.close()

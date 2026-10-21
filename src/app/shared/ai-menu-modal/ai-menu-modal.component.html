@@ -1,229 +1,216 @@
 @if (modalService.isOpen()) {
-  <div class="c-modal-overlay" (click)="onClose()">
-    <div class="c-modal-card ai-menu-modal-card" dir="rtl" (click)="$event.stopPropagation()">
-      <div class="ai-menu-header">
-        <h2 class="ai-menu-title">
-          {{ (modalService.mode() === 'edit' ? 'ai_menu_title_edit' : 'ai_menu_title_create') | translatePipe }}
-        </h2>
-        <button type="button" class="c-icon-btn" (click)="onClose()">
-          <lucide-icon name="x" [size]="20"></lucide-icon>
-        </button>
-      </div>
+  <app-modal-shell
+    cardClass="ai-menu-modal-card"
+    labelledBy="ai-menu-modal-title"
+    [dismissible]="status_() !== 'sending'"
+    (dismissed)="onClose()"
+  >
+    <div class="ai-menu-header">
+      <h2 id="ai-menu-modal-title" class="ai-menu-title">
+        {{ (modalService.mode() === 'edit' ? 'ai_menu_title_edit' : 'ai_menu_title_create') | translatePipe }}
+      </h2>
+      <button type="button" class="c-icon-btn" (click)="onClose()">
+        <lucide-icon name="x" [size]="20"></lucide-icon>
+      </button>
+    </div>
 
-      <!-- Usage indicator -->
-      <div class="ai-menu-usage-bar" [attr.data-status]="usageColor_()">
-        <span class="ai-menu-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
-        <span class="ai-menu-usage-count">
-          {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
-          @if (modelsAvailableLabel_()) {
-            · {{ modelsAvailableLabel_() }}
-          }
-        </span>
-        <div class="ai-menu-usage-track">
-          <div class="ai-menu-usage-fill" [style.width.%]="usageFillPercent_()"></div>
-        </div>
-      </div>
-
-      @if (modalService.mode() === 'edit') {
-        <!-- ── Edit mode ── -->
-        @if (!patch_()) {
-          <div class="ai-menu-prompt-panel">
-            <textarea
-              class="ai-menu-textarea"
-              dir="auto"
-              [placeholder]="'ai_menu_instruction_placeholder' | translatePipe"
-              [value]="instruction()"
-              (input)="instruction.set($any($event.target).value)"
-              rows="4"
-              [disabled]="status_() === 'sending'"
-            ></textarea>
-
-            @if (status_() !== 'idle') {
-              <div
-                class="ai-menu-status-bar"
-                [class.ai-menu-status--sending]="status_() === 'sending'"
-                [class.ai-menu-status--error]="status_() === 'error'"
-              >
-                @if (status_() === 'sending') {
-                  <app-loader size="small" [inline]="true" />
-                  <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
-                } @else if (status_() === 'error') {
-                  <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                  <span>{{ errorKey_() | translatePipe }}</span>
-                  @if (modelSwitchLabel_()) {
-                    <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
-                      {{ modelSwitchLabel_() }}
-                    </button>
-                  }
-                }
-              </div>
-            }
-
-            <div class="ai-menu-footer">
-              <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
-              <button
-                type="button"
-                class="c-btn-primary"
-                (click)="onEdit()"
-                [disabled]="loading_() || !instruction().trim()"
-              >
-                @if (loading_()) {
-                  <app-loader size="small" [inline]="true" />
-                }
-                {{ 'ai_menu_generate' | translatePipe }}
-              </button>
-            </div>
-          </div>
-        } @else {
-          <!-- Patch summary — before/after diff -->
-          <div class="ai-menu-patch-panel">
-            <p class="ai-menu-patch-title">{{ 'ai_menu_title_edit' | translatePipe }}</p>
-            <ul class="ai-menu-patch-list">
-              @for (entry of diffEntries_(); track entry.label) {
-                <li class="ai-menu-patch-item">
-                  <span class="ai-menu-patch-label">{{ entry.label }}</span>
-                  <span class="ai-menu-patch-from">{{ entry.from }}</span>
-                  <span class="ai-menu-patch-arrow">→</span>
-                  <span class="ai-menu-patch-to">{{ entry.to }}</span>
-                </li>
-              }
-              @if (diffEntries_().length === 0) {
-                <li class="ai-menu-patch-item ai-menu-patch-item--empty">אין שינויים זוהו</li>
-              }
-            </ul>
-            <div class="ai-menu-footer">
-              <button type="button" class="c-btn-ghost" (click)="onEditAgain()">
-                {{ 'ai_menu_generate_again' | translatePipe }}
-              </button>
-              <button type="button" class="c-btn-primary" (click)="onApplyPatch()">
-                {{ 'ai_menu_apply' | translatePipe }}
-              </button>
-            </div>
-          </div>
+    <!-- Usage indicator -->
+    <div class="ai-menu-usage-bar" [attr.data-status]="usageColor_()">
+      <span class="ai-menu-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
+      <span class="ai-menu-usage-count">
+        {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
+        @if (modelsAvailableLabel_()) {
+          · {{ modelsAvailableLabel_() }}
         }
-      } @else {
-        <!-- ── Create mode ── -->
-        @if (!matched_()) {
-          <div class="ai-menu-prompt-panel">
-            <textarea
-              class="ai-menu-textarea"
-              dir="auto"
-              [placeholder]="'ai_menu_prompt_placeholder' | translatePipe"
-              [value]="prompt_()"
-              (input)="prompt_.set($any($event.target).value)"
-              rows="5"
-              [disabled]="status_() === 'sending'"
-            ></textarea>
+      </span>
+      <div class="ai-menu-usage-track">
+        <div class="ai-menu-usage-fill" [style.width.%]="usageFillPercent_()"></div>
+      </div>
+    </div>
 
-            @if (status_() !== 'idle') {
-              <div
-                class="ai-menu-status-bar"
-                [class.ai-menu-status--sending]="status_() === 'sending'"
-                [class.ai-menu-status--error]="status_() === 'error'"
-              >
-                @if (status_() === 'sending') {
-                  <app-loader size="small" [inline]="true" />
-                  <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
-                } @else if (status_() === 'error') {
-                  <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                  <span>{{ errorKey_() | translatePipe }}</span>
-                  @if (modelSwitchLabel_()) {
-                    <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
-                      {{ modelSwitchLabel_() }}
-                    </button>
-                  }
-                }
-              </div>
-            }
+    @if (modalService.mode() === 'edit') {
+      <!-- ── Edit mode ── -->
+      @if (!patch_()) {
+        <div class="ai-menu-prompt-panel">
+          <textarea
+            class="ai-menu-textarea"
+            dir="auto"
+            [placeholder]="'ai_menu_instruction_placeholder' | translatePipe"
+            [value]="instruction()"
+            (input)="instruction.set($any($event.target).value)"
+            rows="4"
+            [disabled]="status_() === 'sending'"
+          ></textarea>
 
-            <div class="ai-menu-footer">
-              <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
-              <button
-                type="button"
-                class="c-btn-primary"
-                (click)="onGenerate()"
-                [disabled]="loading_() || !prompt_().trim()"
-              >
-                @if (loading_()) {
-                  <app-loader size="small" [inline]="true" />
+          @if (status_() !== 'idle') {
+            <div
+              class="ai-menu-status-bar"
+              [class.ai-menu-status--sending]="status_() === 'sending'"
+              [class.ai-menu-status--error]="status_() === 'error'"
+            >
+              @if (status_() === 'sending') {
+                <app-loader size="small" [inline]="true" />
+                <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
+              } @else if (status_() === 'error') {
+                <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                <span>{{ errorKey_() | translatePipe }}</span>
+                @if (modelSwitchLabel_()) {
+                  <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
+                    {{ modelSwitchLabel_() }}
+                  </button>
                 }
-                {{ 'ai_menu_generate' | translatePipe }}
-              </button>
+              }
             </div>
+          }
+
+          <div class="ai-menu-footer">
+            <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
+            <button
+              type="button"
+              class="c-btn-primary"
+              (click)="onEdit()"
+              [disabled]="loading_() || !instruction().trim()"
+            >
+              @if (loading_()) {
+                <app-loader size="small" [inline]="true" />
+              }
+              {{ 'ai_menu_generate' | translatePipe }}
+            </button>
           </div>
-        } @else {
-          <!-- Matched menu preview -->
-          <div class="ai-menu-preview-panel">
-            <div class="ai-menu-preview-meta">
-              <span class="ai-menu-meta-name">{{ matched_()!.name }}</span>
-              <span class="ai-menu-meta-guests">{{ matched_()!.guestCount }}</span>
-            </div>
+        </div>
+      } @else {
+        <!-- Patch summary — before/after diff -->
+        <div class="ai-menu-patch-panel">
+          <p class="ai-menu-patch-title">{{ 'ai_menu_title_edit' | translatePipe }}</p>
+          <ul class="ai-menu-patch-list">
+            @for (entry of diffEntries_(); track entry.label) {
+              <li class="ai-menu-patch-item">
+                <span class="ai-menu-patch-label">{{ entry.label }}</span>
+                <span class="ai-menu-patch-from">{{ entry.from }}</span>
+                <span class="ai-menu-patch-arrow">→</span>
+                <span class="ai-menu-patch-to">{{ entry.to }}</span>
+              </li>
+            }
+            @if (diffEntries_().length === 0) {
+              <li class="ai-menu-patch-item ai-menu-patch-item--empty">אין שינויים זוהו</li>
+            }
+          </ul>
+          <div class="ai-menu-footer">
+            <button type="button" class="c-btn-ghost" (click)="onEditAgain()">
+              {{ 'ai_menu_generate_again' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onApplyPatch()">
+              {{ 'ai_menu_apply' | translatePipe }}
+            </button>
+          </div>
+        </div>
+      }
+    } @else {
+      <!-- ── Create mode ── -->
+      @if (!matched_()) {
+        <div class="ai-menu-prompt-panel">
+          <textarea
+            class="ai-menu-textarea"
+            dir="auto"
+            [placeholder]="'ai_menu_prompt_placeholder' | translatePipe"
+            [value]="prompt_()"
+            (input)="prompt_.set($any($event.target).value)"
+            rows="5"
+            [disabled]="status_() === 'sending'"
+          ></textarea>
 
-            <div class="ai-menu-sections">
-              @for (section of matched_()!.sections; track section.category; let si = $index) {
-                <div class="ai-menu-section">
-                  <h3 class="ai-menu-section-title">{{ section.category }}</h3>
-                  <ul class="ai-menu-dish-list">
-                    @for (dish of section.items; track dish.nameHebrew; let di = $index) {
-                      <li class="ai-menu-dish-row" [attr.data-status]="dish.status">
-                        @if (dish.status === 'matched') {
-                          <!-- Matched: show the database recipe name, not the AI input -->
-                          <lucide-icon
-                            name="check-circle"
-                            [size]="16"
-                            class="ai-menu-dish-icon ai-menu-dish-icon--matched"
-                          ></lucide-icon>
-                          <span class="ai-menu-dish-name">{{
-                            dish.candidates[0] ? dish.candidates[0].name : dish.nameHebrew
-                          }}</span>
-                          <button
-                            type="button"
-                            class="c-icon-btn ai-menu-change-btn"
-                            (click)="onResolve(si + ':' + dish.nameHebrew, '')"
-                          >
-                            <lucide-icon name="pencil" [size]="14"></lucide-icon>
-                          </button>
-                        } @else if (dish.status === 'ambiguous') {
-                          <!-- Ambiguous: radio of top candidates -->
-                          <lucide-icon
-                            name="help-circle"
-                            [size]="16"
-                            class="ai-menu-dish-icon ai-menu-dish-icon--ambiguous"
-                          ></lucide-icon>
-                          <span class="ai-menu-dish-name">{{ dish.nameHebrew }}</span>
-                          <div class="ai-menu-candidates">
-                            <p class="ai-menu-candidates-label">{{ 'ai_menu_ambiguous' | translatePipe }}</p>
-                            @for (candidate of dish.candidates; track candidate.recipeId) {
-                              <label class="ai-menu-candidate-option">
-                                <input
-                                  type="radio"
-                                  [name]="'dish-' + si + '-' + di"
-                                  [value]="candidate.recipeId"
-                                  (change)="onResolve(si + ':' + dish.nameHebrew, candidate.recipeId)"
-                                />
-                                <span>{{ candidate.name }}</span>
-                                <span class="ai-menu-candidate-score"
-                                  >{{ (candidate.confidence * 100).toFixed(0) }}%</span
-                                >
-                              </label>
-                            }
-                            <button
-                              type="button"
-                              class="c-btn-ghost ai-menu-skip-btn"
-                              (click)="onResolve(si + ':' + dish.nameHebrew, 'skip')"
-                            >
-                              {{ 'ai_menu_skip_dish' | translatePipe }}
-                            </button>
-                          </div>
-                        } @else {
-                          <!-- Unmatched -->
-                          <lucide-icon
-                            name="circle-x"
-                            [size]="16"
-                            class="ai-menu-dish-icon ai-menu-dish-icon--unmatched"
-                          ></lucide-icon>
-                          <span class="ai-menu-dish-name ai-menu-dish-name--placeholder">{{ dish.nameHebrew }}</span>
-                          <span class="ai-menu-unmatched-note">{{ 'ai_menu_unmatched' | translatePipe }}</span>
+          @if (status_() !== 'idle') {
+            <div
+              class="ai-menu-status-bar"
+              [class.ai-menu-status--sending]="status_() === 'sending'"
+              [class.ai-menu-status--error]="status_() === 'error'"
+            >
+              @if (status_() === 'sending') {
+                <app-loader size="small" [inline]="true" />
+                <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
+              } @else if (status_() === 'error') {
+                <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                <span>{{ errorKey_() | translatePipe }}</span>
+                @if (modelSwitchLabel_()) {
+                  <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
+                    {{ modelSwitchLabel_() }}
+                  </button>
+                }
+              }
+            </div>
+          }
+
+          <div class="ai-menu-footer">
+            <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
+            <button
+              type="button"
+              class="c-btn-primary"
+              (click)="onGenerate()"
+              [disabled]="loading_() || !prompt_().trim()"
+            >
+              @if (loading_()) {
+                <app-loader size="small" [inline]="true" />
+              }
+              {{ 'ai_menu_generate' | translatePipe }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Matched menu preview -->
+        <div class="ai-menu-preview-panel">
+          <div class="ai-menu-preview-meta">
+            <span class="ai-menu-meta-name">{{ matched_()!.name }}</span>
+            <span class="ai-menu-meta-guests">{{ matched_()!.guestCount }}</span>
+          </div>
+
+          <div class="ai-menu-sections">
+            @for (section of matched_()!.sections; track section.category; let si = $index) {
+              <div class="ai-menu-section">
+                <h3 class="ai-menu-section-title">{{ section.category }}</h3>
+                <ul class="ai-menu-dish-list">
+                  @for (dish of section.items; track dish.nameHebrew; let di = $index) {
+                    <li class="ai-menu-dish-row" [attr.data-status]="dish.status">
+                      @if (dish.status === 'matched') {
+                        <!-- Matched: show the database recipe name, not the AI input -->
+                        <lucide-icon
+                          name="check-circle"
+                          [size]="16"
+                          class="ai-menu-dish-icon ai-menu-dish-icon--matched"
+                        ></lucide-icon>
+                        <span class="ai-menu-dish-name">{{
+                          dish.candidates[0] ? dish.candidates[0].name : dish.nameHebrew
+                        }}</span>
+                        <button
+                          type="button"
+                          class="c-icon-btn ai-menu-change-btn"
+                          (click)="onResolve(si + ':' + dish.nameHebrew, '')"
+                        >
+                          <lucide-icon name="pencil" [size]="14"></lucide-icon>
+                        </button>
+                      } @else if (dish.status === 'ambiguous') {
+                        <!-- Ambiguous: radio of top candidates -->
+                        <lucide-icon
+                          name="help-circle"
+                          [size]="16"
+                          class="ai-menu-dish-icon ai-menu-dish-icon--ambiguous"
+                        ></lucide-icon>
+                        <span class="ai-menu-dish-name">{{ dish.nameHebrew }}</span>
+                        <div class="ai-menu-candidates">
+                          <p class="ai-menu-candidates-label">{{ 'ai_menu_ambiguous' | translatePipe }}</p>
+                          @for (candidate of dish.candidates; track candidate.recipeId) {
+                            <label class="ai-menu-candidate-option">
+                              <input
+                                type="radio"
+                                [name]="'dish-' + si + '-' + di"
+                                [value]="candidate.recipeId"
+                                (change)="onResolve(si + ':' + dish.nameHebrew, candidate.recipeId)"
+                              />
+                              <span>{{ candidate.name }}</span>
+                              <span class="ai-menu-candidate-score"
+                                >{{ (candidate.confidence * 100).toFixed(0) }}%</span
+                              >
+                            </label>
+                          }
                           <button
                             type="button"
                             class="c-btn-ghost ai-menu-skip-btn"
@@ -231,25 +218,41 @@
                           >
                             {{ 'ai_menu_skip_dish' | translatePipe }}
                           </button>
-                        }
-                      </li>
-                    }
-                  </ul>
-                </div>
-              }
-            </div>
-
-            <div class="ai-menu-footer">
-              <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
-                {{ 'ai_menu_generate_again' | translatePipe }}
-              </button>
-              <button type="button" class="c-btn-primary" (click)="onApply()">
-                {{ 'ai_menu_apply' | translatePipe }}
-              </button>
-            </div>
+                        </div>
+                      } @else {
+                        <!-- Unmatched -->
+                        <lucide-icon
+                          name="circle-x"
+                          [size]="16"
+                          class="ai-menu-dish-icon ai-menu-dish-icon--unmatched"
+                        ></lucide-icon>
+                        <span class="ai-menu-dish-name ai-menu-dish-name--placeholder">{{ dish.nameHebrew }}</span>
+                        <span class="ai-menu-unmatched-note">{{ 'ai_menu_unmatched' | translatePipe }}</span>
+                        <button
+                          type="button"
+                          class="c-btn-ghost ai-menu-skip-btn"
+                          (click)="onResolve(si + ':' + dish.nameHebrew, 'skip')"
+                        >
+                          {{ 'ai_menu_skip_dish' | translatePipe }}
+                        </button>
+                      }
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
           </div>
-        }
+
+          <div class="ai-menu-footer">
+            <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
+              {{ 'ai_menu_generate_again' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onApply()">
+              {{ 'ai_menu_apply' | translatePipe }}
+            </button>
+          </div>
+        </div>
       }
-    </div>
-  </div>
+    }
+  </app-modal-shell>
 }

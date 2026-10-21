@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, HostListener, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
@@ -18,13 +18,14 @@ import {
 } from '../../core/utils/gemini-usage.util'
 import { matchRecipeName } from '../../core/utils/recipe-match.util'
 import type { AiMenuDraft, MatchedMenu, MatchedSection, MatchedDish } from '@models/ai-menu-draft.model'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 
 @Component({
   selector: 'app-ai-menu-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent, ModalShellComponent],
   templateUrl: './ai-menu-modal.component.html',
   styleUrl: './ai-menu-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -225,11 +226,6 @@ export class AiMenuModalComponent implements OnInit {
   }
 
   // ─── Shared ──────────────────────────────────────────────────────
-
-  @HostListener('document:keydown.escape')
-  onEscapeKey(): void {
-    if (this.modalService.isOpen()) this.onClose()
-  }
 
   onClose(): void {
     this.modalService.close()

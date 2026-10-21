@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { ClickOutSideDirective } from '@directives/click-out-side'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { AddItemModalService } from '@services/add-item-modal.service'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
   selector: 'add-item-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ClickOutSideDirective, TranslatePipe],
+  imports: [CommonModule, FormsModule, TranslatePipe, ModalShellComponent],
   templateUrl: './add-item-modal.component.html',
   styleUrl: './add-item-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

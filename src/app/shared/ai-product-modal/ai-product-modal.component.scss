@@ -1,4 +1,5 @@
-.ai-product-modal-card {
+/* The card lives in app-modal-shell (its own view), so reach it through :host */
+:host ::ng-deep .ai-product-modal-card {
   max-inline-size: 560px;
   inline-size: 90vw;
   max-block-size: 85dvh;

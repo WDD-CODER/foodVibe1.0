@@ -25,6 +25,7 @@ import { parsedResultToDraft } from '@utils/parsed-result-draft.util'
 import { createUnitWordResolver } from '@utils/ingredient-line-parser.util'
 import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
 import { UnitRegistryService } from '@services/unit-registry.service'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = AiModalInputMode
@@ -38,7 +39,8 @@ type InputMode = AiModalInputMode
     TranslatePipe,
     LoaderComponent,
     AiDraftEditorComponent,
-    ScrollIndicatorsDirective
+    ScrollIndicatorsDirective,
+    ModalShellComponent
   ],
   templateUrl: './ai-recipe-modal.component.html',
   styleUrl: './ai-recipe-modal.component.scss',
