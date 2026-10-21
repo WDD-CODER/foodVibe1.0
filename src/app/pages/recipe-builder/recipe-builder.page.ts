@@ -29,8 +29,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
-import { VersionHistoryService } from '@services/version-history.service'
-import type { VersionEntityType } from '@services/version-history.service'
+import { VersionHistoryService, type VersionEntityType } from '@services/version-history.service'
 import { Recipe } from '@models/recipe.model'
 import { MasterPushService, ScopeEntity } from '@services/master-push.service'
 import { RecipeDataService } from '@services/recipe-data.service'
@@ -59,6 +58,7 @@ import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
+import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
 @Component({
   selector: 'app-recipe-builder-page',
   standalone: true,
@@ -79,7 +79,8 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     ApproveStampComponent,
     CounterComponent,
     InputClearComponent,
-    AddOptionRowComponent
+    AddOptionRowComponent,
+    EditGateComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'

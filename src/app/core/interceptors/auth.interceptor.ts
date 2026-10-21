@@ -102,9 +102,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         injector.get(UserMsgService).onSetErrorMsg(injector.get(TranslationService).translate('rate_limited'))
       }
 
+      // Plan 428: an expected refusal (the server's permission checker) gets a Hebrew toast and an info
+      // line, not an app-error line.
+      const forbidden = err.status === 403 && err.error?.messageKey === 'no_permission'
+      if (forbidden) {
+        injector.get(UserMsgService).onSetErrorMsg(injector.get(TranslationService).translate('no_permission'))
+        logging.info({ event: 'http.forbidden', message: req.method })
+      }
+
       // LoggingService posts with plain fetch, so a failing log call never reaches here; the
       // check is a guard against ever logging a log failure in a loop.
-      if (err.status && err.status >= 400 && err.status !== 404 && !req.url.endsWith(LOG_PATH)) {
+      if (!forbidden && err.status && err.status >= 400 && err.status !== 404 && !req.url.endsWith(LOG_PATH)) {
         // The server echoes its request id on every response (Plan 383) — the same id is on
         // the server's own log line for this failure, so the two join in app_logs.
         const requestId = err.headers?.get('X-Request-Id') ?? undefined

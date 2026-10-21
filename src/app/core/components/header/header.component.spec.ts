@@ -70,6 +70,7 @@ describe('HeaderComponent avatar fallback', () => {
             isLoggedIn: () => true,
             user_: signal({ _id: 'u1', name: 'dana', imgUrl: 'https://x.invalid/a.png' }),
             isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
             logout: () => of(null)
           }
         }
@@ -95,11 +96,13 @@ describe('HeaderComponent avatar fallback', () => {
 
 describe('HeaderComponent business and platform admin (plan 426)', () => {
   const isPlatformAdmin = signal(false)
+  const isOwner = signal(false)
   const business = signal<{ name: string } | null>(null)
   let fixture: ComponentFixture<HeaderComponent>
 
   beforeEach(async () => {
     isPlatformAdmin.set(false)
+    isOwner.set(false)
     business.set(null)
     await TestBed.configureTestingModule({
       imports: [HeaderComponent, HttpClientTestingModule, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
@@ -111,6 +114,7 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
             isLoggedIn: () => true,
             user_: signal({ _id: 'u1', name: 'dana' }),
             isPlatformAdmin_: isPlatformAdmin,
+            isOwner_: isOwner,
             logout: () => of(null)
           }
         },
@@ -135,5 +139,18 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
     business.set({ name: 'מטבח בדיקה' })
     fixture.detectChanges()
     expect(host.querySelector('.user-chip .business-name')?.textContent?.trim()).toBe('מטבח בדיקה')
+  })
+
+  it('shows the settings link in the pills, the drawer and the profile menu only to the owner (plan 428)', () => {
+    const host: HTMLElement = fixture.nativeElement
+    const settingsLinks = () => host.querySelectorAll('a[href="/settings"]')
+    expect(settingsLinks().length).toBe(0)
+    isOwner.set(true)
+    fixture.detectChanges()
+    // desktop pill + drawer entry; the profile menu item exists once the mobile profile menu is open
+    expect(settingsLinks().length).toBe(2)
+    ;(host.querySelector('.bottom-nav__profile .bottom-nav__item') as HTMLButtonElement).click()
+    fixture.detectChanges()
+    expect(host.querySelector('.profile-menu__item')).not.toBeNull()
   })
 })

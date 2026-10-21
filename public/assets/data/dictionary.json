@@ -1109,6 +1109,21 @@
     "metadata_coefficients_title": "מקדמים",
     "metadata_coefficients_desc": "כמה אוכלים בכל סוג אירוע ובכל סגנון הגשה. 1 = כמות רגילה.",
     "metadata_event_types_title": "סוגי אירוע",
-    "metadata_serving_types_title": "סוגי הגשה"
+    "metadata_serving_types_title": "סוגי הגשה",
+    "settings": "הגדרות",
+    "settings_tab_team": "צוות",
+    "settings_owner_only": "ההגדרות זמינות לבעל העסק בלבד",
+    "team_add_member": "הוסף חבר צוות",
+    "team_initial_password": "סיסמה ראשונית",
+    "team_col_role": "תפקיד",
+    "team_col_last_login": "כניסה אחרונה",
+    "team_member_added": "חבר הצוות נוסף",
+    "team_member_removed": "חבר הצוות הוסר",
+    "team_remove_confirm": "להסיר את חבר הצוות? הפריטים שיצר יישארו בעסק",
+    "team_cannot_remove_self": "לא ניתן להסיר את עצמך",
+    "team_empty": "עדיין אין חברי צוות",
+    "no_permission": "אין לך הרשאה לפעולה הזו",
+    "prices_locked_owner_only": "המחירים נעולים – רק בעל העסק יכול לשנות אותם",
+    "view_only_not_yours": "נוצר על ידי חבר צוות אחר – צפייה בלבד"
   }
 }

@@ -7,6 +7,8 @@ import { authInterceptor } from './auth.interceptor'
 import { LoggingService } from '@services/logging.service'
 import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
 
 describe('authInterceptor — concurrent 401 refresh gate', () => {
   let http: HttpClient
@@ -117,5 +119,54 @@ describe('authInterceptor — concurrent 401 refresh gate', () => {
     refresh$.next({ token: 'newer' })
     refresh$.complete()
     expect(backend.expectOne('/c').request.headers.get('Authorization')).toBe('Bearer newer')
+  })
+})
+
+describe('authInterceptor — 403 no_permission (plan 428)', () => {
+  let http: HttpClient
+  let backend: HttpTestingController
+  const errorMsg = jasmine.createSpy('onSetErrorMsg')
+  const info = jasmine.createSpy('info')
+  const error = jasmine.createSpy('error')
+
+  beforeEach(() => {
+    errorMsg.calls.reset()
+    info.calls.reset()
+    error.calls.reset()
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClientTesting(),
+        { provide: UserService, useValue: { getToken: () => 't', isLoggedIn: () => true } },
+        { provide: LoggingService, useValue: { info, error } },
+        { provide: AuthModalService, useValue: { open: () => undefined } },
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+        { provide: UserMsgService, useValue: { onSetErrorMsg: errorMsg } },
+        { provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } }
+      ]
+    })
+    http = TestBed.inject(HttpClient)
+    backend = TestBed.inject(HttpTestingController)
+  })
+
+  afterEach(() => backend.verify())
+
+  it('shows the Hebrew toast and logs at info, not as an http error', () => {
+    http.put('/api/v1/data/recipes/r1', {}).subscribe({ error: () => undefined })
+    backend
+      .expectOne('/api/v1/data/recipes/r1')
+      .flush({ error: 'FORBIDDEN', messageKey: 'no_permission' }, { status: 403, statusText: 'Forbidden' })
+    expect(errorMsg).toHaveBeenCalledWith('T:no_permission')
+    expect(info).toHaveBeenCalledWith(jasmine.objectContaining({ event: 'http.forbidden' }))
+    expect(error).not.toHaveBeenCalled()
+  })
+
+  it('any other 403 still logs the http error and shows no toast', () => {
+    http.get('/api/v1/business/team').subscribe({ error: () => undefined })
+    backend
+      .expectOne('/api/v1/business/team')
+      .flush({ error: 'CANNOT_REMOVE_SELF' }, { status: 403, statusText: 'Forbidden' })
+    expect(errorMsg).not.toHaveBeenCalled()
+    expect(error).toHaveBeenCalledWith(jasmine.objectContaining({ event: 'http.error' }))
   })
 })

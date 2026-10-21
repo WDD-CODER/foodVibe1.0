@@ -14,7 +14,7 @@ import {
   ViewChild,
   DestroyRef
 } from '@angular/core'
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import {
   ReactiveFormsModule,
@@ -43,7 +43,6 @@ import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service'
 import { LoggingService } from '@services/logging.service'
-import { toSignal } from '@angular/core/rxjs-interop'
 import { map, Observable } from 'rxjs'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -59,6 +58,7 @@ import { UserService } from '@services/user.service'
 import { MasterPushService } from '@services/master-push.service'
 import { HeroFabService } from '@services/hero-fab.service'
 import { registerDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
+import { ProductPriceLockComponent } from '../product-price-lock/product-price-lock.component'
 
 /**
  * Plan 423 — units whose size is a physical constant: choosing one in a purchase row fills the exact amount.
@@ -95,7 +95,8 @@ interface ProductFormValue {
     TranslatePipe,
     LoaderComponent,
     CustomSelectComponent,
-    ChipSearchDropdownComponent
+    ChipSearchDropdownComponent,
+    ProductPriceLockComponent
   ],
   providers: [ProductAiFlowService],
   templateUrl: './product-form.component.html',

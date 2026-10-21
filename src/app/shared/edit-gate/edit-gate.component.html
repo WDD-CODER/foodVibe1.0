@@ -1,0 +1,8 @@
+@if (allowed()) {
+  <ng-content />
+} @else {
+  <p class="edit-gate-note" role="note" data-testid="edit-gate-note">
+    <lucide-icon name="lock" [size]="14" />
+    {{ 'view_only_not_yours' | translatePipe }}
+  </p>
+}

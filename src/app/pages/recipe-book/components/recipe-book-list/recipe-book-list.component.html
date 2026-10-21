@@ -341,7 +341,7 @@
           >
             <lucide-icon name="cooking-pot" [size]="18"></lucide-icon>
           </button>
-          @if (isLoggedIn()) {
+          @if (isLoggedIn() && canDelete_(row.recipe)) {
             @if (rowActions.removingId() === row.recipe._id) {
               <app-loader size="small" [inline]="true" />
             } @else {

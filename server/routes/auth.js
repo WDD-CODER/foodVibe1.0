@@ -7,6 +7,7 @@ const { cloneMasterDataToBusiness } = require('../services/clone-master');
 const { syncMasterToBusiness } = require('../services/sync-master');
 const { getMasterVersion } = require('../services/master-version');
 const { newId } = require('../utils/id');
+const { isValidUsername } = require('../utils/username');
 const { NAME_MAX_LENGTH } = require('../generated/schemas/base.schema');
 const { createBusinessFor, ensureBusinessForUser, getBusiness, setBusinessSyncedVersion } = require('../services/business');
 
@@ -156,9 +157,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     }
 
     // Validate username format: trimmed, 3–20 chars, alphanumeric + _ and -
-    const trimmedName = name.trim();
-    const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-    if (trimmedName.length < 3 || trimmedName.length > 20 || !USERNAME_REGEX.test(trimmedName)) {
+    if (!isValidUsername(name)) {
       return res.status(400).json({ error: 'INVALID_USERNAME' });
     }
 
