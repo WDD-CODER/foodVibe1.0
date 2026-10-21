@@ -79,6 +79,12 @@
   </div>
 
   <div class="mes-group">
+    <button type="button" class="mes-action mes-action--wide" (click)="onOpenSupplierOrders()">
+      <lucide-icon name="truck" [size]="16"></lucide-icon>
+      {{ 'supplier_orders' | translatePipe }}
+    </button>
+  </div>
+  <div class="mes-group">
     <button type="button" class="mes-action mes-action--wide" (click)="onPrint()">
       <lucide-icon name="printer" [size]="16"></lucide-icon>
       {{ 'menu_print' | translatePipe }}

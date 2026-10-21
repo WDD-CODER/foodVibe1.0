@@ -58,6 +58,7 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { MenuExportSheetComponent } from './components/menu-export-sheet/menu-export-sheet.component'
 import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.component'
+import { SupplierOrdersComponent } from './components/supplier-orders/supplier-orders.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
 import { MenuAiFlowService } from './services/menu-ai-flow.service'
@@ -98,6 +99,7 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     ExportPreviewComponent,
     MenuDishRowComponent,
     MenuExportSheetComponent,
+    SupplierOrdersComponent,
     VenueLinkChipComponent,
     InputClearComponent,
     AddOptionRowComponent
@@ -140,6 +142,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly isSaving_ = this.saving.isSaving_
   /** "צ'קליסט והדפסות" top sheet, toggled from the hero FAB (plan 344). */
   protected readonly exportSheetOpen_ = signal(false)
+  protected readonly supplierOrdersEvent_ = signal<MenuEvent | null>(null)
   /** Export preview (View before export). */
   protected readonly exportPreviewPayload_ = signal<ExportPayload | null>(null)
   private exportPreviewType_: 'menu-info' | 'menu-shopping-list' | 'menu-checklist' | 'menu-all' | null = null
@@ -190,9 +193,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** Focus order for keyboard navigation */
   protected readonly FOCUS_ORDER = ['name', 'eventType', 'servingType', 'guestCount', 'eventDate'] as const
 
-  /** Section controls for the template's @for. A fresh array on every form change, so this
-   * OnPush view re-renders when sections load or change even when the footer totals stay
-   * the same (an unchanged computed value does not trigger a refresh). */
+  /** Section controls for the @for: a fresh array on every form change so the OnPush view re-renders. */
   protected readonly sectionControls_ = computed(() => {
     this.formValueVersion_() // depend on form changes
     return [...this.sectionsArray.controls]
@@ -236,9 +237,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return this.eventCost_() / guestCount
   })
 
-  /** Plan 305 ACTION-LIST H — sell_price was already a wired field; this derived
-   * profit-per-guest calculation was the missing half. Revenue per guest minus
-   * ingredient cost per guest — both already computed above, just never subtracted. */
+  /** Plan 305 H — revenue per guest minus ingredient cost per guest. */
   protected readonly profitPerGuest_ = computed(() => {
     this.formValueVersion_() // depend on form changes
     const guestCount = this.getGuestCount()
@@ -281,7 +280,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.heroFab.setPageActions(
       [
         { labelKey: 'ai_menu_open', icon: 'sparkles', run: () => this.openAiMenuModal() },
-        { labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.toggleExportSheet() }
+        { labelKey: 'menu_toolbar_open', icon: 'printer', run: () => this.toggleExportSheet() },
+        { labelKey: 'supplier_orders', icon: 'truck', run: () => this.openSupplierOrders() }
       ],
       'replace'
     )
@@ -296,14 +296,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         }
       })
 
-    // Use capture phase so we intercept keydown before inputs consume arrow/enter keys,
-    // but we guard explicitly inside the handler to skip when the event target is a text field.
+    // Capture phase: intercept keydown before inputs consume arrows/enter; the handler skips text fields.
     document.addEventListener('keydown', this._boundOnDocumentKeydown, { capture: true })
   }
 
   /** Close export toolbar and all sub-modals so state is clean when user navigates away. */
   private closeAllExportOverlays(): void {
     this.exportSheetOpen_.set(false)
+    this.supplierOrdersEvent_.set(null)
     this.exportPreviewPayload_.set(null)
     this.exportPreviewType_ = null
   }
@@ -556,8 +556,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       tag === 'TEXTAREA' ||
       target.isContentEditable
 
-    // Bail out when the user is typing in a text field that is NOT inside one of our
-    // managed dropdown search boxes — prevents the handler from hijacking general keyboard input.
+    // Bail out when typing in a text field outside our managed dropdown search boxes.
     const el = e.target as Element
     const inManagedDropdown =
       el.closest('.event-type-dropdown') || el.closest('.section-search-wrap') || el.closest('.dish-search-wrap')
@@ -633,9 +632,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       const now = Date.now()
       const id = this.editingId_()
       if (id) {
-        // buildEventFromForm() doesn't carry logistics (the form has no control for it) —
-        // preserve whatever's already stored so a normal save can't silently drop the
-        // venue link set via app-venue-link-chip (design-port session 6).
+        // The form has no logistics control: keep the stored one (venue link) on save.
         const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics
         await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now, logistics: existingLogistics })
       } else {
@@ -1033,8 +1030,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       const now = Date.now()
       const id = this.editingId_()
       if (id) {
-        // Same preservation as saveAndWait() above — buildEventFromForm() has no
-        // logistics control, don't let a normal save wipe the venue link.
+        // Same as saveAndWait(): keep the stored logistics (venue link) on a normal save.
         const existingLogistics = this.menuEventData.allMenuEvents_().find((e) => e._id === id)?.logistics
         await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now, logistics: existingLogistics })
       } else {
@@ -1204,6 +1200,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private getCurrentMenuForExport(): MenuEvent {
     const built = this.buildEventFromForm()
     return { ...built, _id: this.editingId_() ?? '' }
+  }
+
+  protected openSupplierOrders(): void {
+    this.supplierOrdersEvent_.set(this.getCurrentMenuForExport())
   }
 
   protected onViewAll(): void {

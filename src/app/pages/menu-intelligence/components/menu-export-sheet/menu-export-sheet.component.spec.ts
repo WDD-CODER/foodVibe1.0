@@ -66,4 +66,16 @@ describe('MenuExportSheetComponent', () => {
     print.click()
     expect(calls).toEqual(['close', 'checklist:by_dish', 'close', 'print'])
   })
+
+  it('closes first, then emits openSupplierOrders', () => {
+    open()
+    const calls: string[] = []
+    component.close.subscribe(() => calls.push('close'))
+    component.openSupplierOrders.subscribe(() => calls.push('orders'))
+    const actions = fixture.debugElement.queryAll(By.css('.mes-action'))
+    const orders = actions[actions.length - 2].nativeElement as HTMLElement
+    expect(orders.textContent).toContain('supplier_orders')
+    orders.click()
+    expect(calls).toEqual(['close', 'orders'])
+  })
 })
