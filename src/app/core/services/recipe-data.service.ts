@@ -1,77 +1,32 @@
-import { Injectable, signal, inject } from '@angular/core'
+import { Injectable, Signal, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
-import { LoggingService } from './logging.service'
-import { LoadingService } from './loading.service'
+import { BaseEntityDataService } from './base-entity-data.service'
 import { UserService } from './user.service'
 import { Recipe } from '../models/recipe.model'
 
 const ENTITY = 'recipes'
 
 @Injectable({ providedIn: 'root' })
-export class RecipeDataService {
-  private storage = inject(StorageService)
-  private logging = inject(LoggingService)
-  private loading_ = inject(LoadingService)
+export class RecipeDataService extends BaseEntityDataService<Recipe> {
   private userService = inject(UserService)
 
-  private recipesStore_ = signal<Recipe[]>([])
-  readonly allRecipes_ = this.recipesStore_.asReadonly()
-
-  private loaded_ = false
-  private loadPromise_: Promise<void> | null = null
+  /** Domain alias for the base-class signal. */
+  readonly allRecipes_: Signal<Recipe[]> = this.all_
 
   // Deferred: load on ensureLoaded() via kitchenDataEnsureLoadedResolver (recipe-builder,
   // recipe-book, cook, menu-library, menu-intelligence routes) — see plan 304 M2.
-  constructor() {}
-
-  /** True after at least one successful (or attempted) hydrate. */
-  hasLoaded(): boolean {
-    return this.loaded_
+  // A reload empties the list before re-reading (kept by plan 454).
+  constructor() {
+    super(ENTITY, false, {
+      errorEvent: 'crud.recipes.hydrate_error',
+      errorMessage: 'Failed to load recipes',
+      clearOnReload: true
+    })
   }
 
   /** Lightweight count — does not require the full collection to be loaded (plan 304 M2). */
   async getCount(filter?: 'unapproved'): Promise<number> {
     return this.storage.count(ENTITY, filter)
-  }
-
-  /** Loads from storage once. Safe to call repeatedly — concurrent callers share one promise. */
-  async ensureLoaded(): Promise<void> {
-    if (this.loaded_) return
-    if (this.loadPromise_) return this.loadPromise_
-    this.loadPromise_ = this.loadInitialData()
-      .catch(() => {})
-      .finally(() => {
-        this.loaded_ = true
-        this.loadPromise_ = null
-      })
-    return this.loadPromise_
-  }
-
-  /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
-  async reloadFromStorage(): Promise<void> {
-    if (this.loadPromise_) {
-      // A load is already in flight — e.g. this service was just constructed via
-      // injector.get() and its constructor's ensureLoaded() hasn't resolved yet.
-      // Await it instead of firing a redundant concurrent fetch for the same data.
-      await this.loadPromise_
-      return
-    }
-    this.loaded_ = false
-    this.loadPromise_ = null
-    this.recipesStore_.set([])
-    await this.loadInitialData()
-    this.loaded_ = true
-  }
-
-  private async loadInitialData(): Promise<void> {
-    try {
-      const data = await this.loading_.track(this.storage.query<Recipe>(ENTITY))
-      this.recipesStore_.set(data)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.recipes.hydrate_error', message: 'Failed to load recipes', context: { err } })
-    }
   }
 
   /**
@@ -112,7 +67,7 @@ export class RecipeDataService {
         ...(userId ? { createdBy: userId } : {})
       } as Recipe
       const saved = await this.storage.post<Recipe>(ENTITY, toCreate)
-      this.recipesStore_.update((recipes) => [...recipes, saved])
+      this.updateItems((recipes) => [...recipes, saved])
       this.logging.info({
         event: 'crud.recipe.create',
         message: 'Recipe created',
@@ -135,7 +90,7 @@ export class RecipeDataService {
    *  server just resolved it to (see product-data.service.ts's patchMasterId
    *  for the full reasoning — same fix, recipe side). */
   patchMasterId(id: string, masterId: string): void {
-    this.recipesStore_.update((recipes) =>
+    this.updateItems((recipes) =>
       recipes.map((r) => (r._id === id ? { ...r, _masterId: masterId, _userModified: false } : r))
     )
   }
@@ -156,7 +111,7 @@ export class RecipeDataService {
         createdBy: existing?.createdBy ?? recipe.createdBy
       }
       const updated = await this.storage.put<Recipe>(ENTITY, toSave)
-      this.recipesStore_.update((recipes) => recipes.map((r) => (r._id === updated._id ? updated : r)))
+      this.updateItems((recipes) => recipes.map((r) => (r._id === updated._id ? updated : r)))
       this.logging.info({
         event: 'crud.recipe.update',
         message: 'Recipe updated',
@@ -173,7 +128,7 @@ export class RecipeDataService {
   async permanentlyDeleteRecipe(_id: string): Promise<void> {
     try {
       await this.storage.removePermanently(ENTITY, _id)
-      this.recipesStore_.update((recipes) => recipes.filter((r) => r._id !== _id))
+      this.updateItems((recipes) => recipes.filter((r) => r._id !== _id))
       this.logging.info({
         event: 'crud.recipe.hardDelete',
         message: 'Recipe permanently deleted',
@@ -194,7 +149,7 @@ export class RecipeDataService {
     try {
       // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
-      this.recipesStore_.update((recipes) => recipes.filter((r) => r._id !== _id))
+      this.updateItems((recipes) => recipes.filter((r) => r._id !== _id))
       this.logging.info({
         event: 'crud.recipe.delete',
         message: 'Recipe deleted',

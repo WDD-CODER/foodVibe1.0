@@ -4,6 +4,16 @@ import { StorageService } from './async-storage.service'
 import { LoggingService } from './logging.service'
 import { LoadingService } from './loading.service'
 
+/** Per-service load options (plan 454): keeps each service's own log event and reload behaviour. */
+export interface EntityLoadOptions {
+  /** Log event for a failed hydrate (default `crud.entity.hydrate_error`). */
+  errorEvent?: string
+  /** Log message for a failed hydrate (default `Failed to load <storageKey>`). */
+  errorMessage?: string
+  /** Empty the list before a reload re-reads storage (recipes, dishes). */
+  clearOnReload?: boolean
+}
+
 /**
  * Abstract base for simple entity data services that:
  *  - store a flat array of T in a single storage collection
@@ -28,7 +38,8 @@ export abstract class BaseEntityDataService<T> {
 
   constructor(
     private readonly storageKey: string,
-    autoLoad = true
+    autoLoad = true,
+    private readonly loadOptions_: EntityLoadOptions = {}
   ) {
     if (autoLoad) {
       void this.ensureLoaded()
@@ -66,6 +77,7 @@ export abstract class BaseEntityDataService<T> {
     }
     this.loaded_ = false
     this.loadPromise_ = null
+    if (this.loadOptions_.clearOnReload) this.store_.set([])
     await this.ensureLoaded()
   }
 
@@ -81,15 +93,20 @@ export abstract class BaseEntityDataService<T> {
     return this.store_()
   }
 
+  /** Turns one stored row into T on load (legacy-field migrations). Default: as stored. */
+  protected normalizeRow(row: T): T {
+    return row
+  }
+
   private async loadInitialData(): Promise<void> {
     try {
       const data = await this.loading_.track(this.storage.query<T>(this.storageKey))
-      this.store_.set(Array.isArray(data) ? data : [])
+      this.store_.set(Array.isArray(data) ? data.map((row) => this.normalizeRow(row)) : [])
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
       this.logging.error({
-        event: 'crud.entity.hydrate_error',
-        message: `Failed to load ${this.storageKey}`,
+        event: this.loadOptions_.errorEvent ?? 'crud.entity.hydrate_error',
+        message: this.loadOptions_.errorMessage ?? `Failed to load ${this.storageKey}`,
         context: { err }
       })
     }
