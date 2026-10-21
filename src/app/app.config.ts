@@ -92,7 +92,8 @@ import {
   Phone,
   Moon,
   Sun,
-  SlidersVertical
+  SlidersVertical,
+  Building2
 } from 'lucide-angular'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { provideHttpClient, withInterceptors } from '@angular/common/http'
@@ -227,7 +228,8 @@ export const appConfig: ApplicationConfig = {
         Phone,
         Moon,
         Sun,
-        SlidersVertical
+        SlidersVertical,
+        Building2
       })
     ),
     // Registered only in production builds — never in ng serve, matching the rest of the app's
