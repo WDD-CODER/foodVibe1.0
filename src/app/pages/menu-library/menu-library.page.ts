@@ -5,6 +5,9 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { ServingType } from '@models/menu-event.model'
+import { EventTypeSnapshotService } from '@services/event-type-snapshot.service'
+import { TaxonomyStore } from '@services/taxonomy-store.service'
+import { MenuIntelligenceService } from '@services/menu-intelligence.service'
 import type { MatchedMenu } from '@models/ai-menu-draft.model'
 
 @Component({
@@ -20,6 +23,9 @@ export class MenuLibraryPage implements OnInit, OnDestroy {
   private readonly heroFab = inject(HeroFabService)
   private readonly aiMenuModal_ = inject(AiMenuModalService)
   private readonly menuEventData = inject(MenuEventDataService)
+  private readonly menuIntelligence_ = inject(MenuIntelligenceService)
+  private readonly snapshots_ = inject(EventTypeSnapshotService)
+  private readonly taxonomy_ = inject(TaxonomyStore)
 
   ngOnInit(): void {
     this.heroFab.setPageActions(
@@ -37,6 +43,7 @@ export class MenuLibraryPage implements OnInit, OnDestroy {
 
   private openAiCreateModal(): void {
     this.aiMenuModal_.open('create', undefined, async (matched: MatchedMenu, resolutions) => {
+      await this.taxonomy_.ensureLoaded() // a snapshot taken before the terms load would freeze coefficient 1
       const now = Date.now()
       const sections = matched.sections.map((section, si) => ({
         _id: crypto.randomUUID(),
@@ -50,24 +57,27 @@ export class MenuLibraryPage implements OnInit, OnDestroy {
             return {
               recipeId: recipeId,
               recipeType: 'dish' as const,
-              predictedTakeRate: dish.predictedTakeRate ?? 0.4,
-              derivedPortions: Math.round(matched.guestCount * (dish.predictedTakeRate ?? 0.4)),
+              derivedPortions: 0,
               sellPrice: dish.sellPrice ?? undefined,
-              servingPortions: dish.servingPortions ?? 1
+              portionsPerDiner: dish.servingPortions ?? 1
             }
           })
       }))
+      const eventTypeSnapshot = this.snapshots_.snapshotFor('eventType', matched.eventType)
+      const servingTypeSnapshot = this.snapshots_.snapshotFor('menuType', matched.servingType)
       const draft = {
         name: matched.name,
         eventType: matched.eventType,
         eventDate: matched.eventDate ?? undefined,
         servingType: matched.servingType as ServingType,
+        ...(eventTypeSnapshot && { eventTypeSnapshot }),
+        ...(servingTypeSnapshot && { servingTypeSnapshot }),
         guestCount: matched.guestCount,
         sections: sections,
         createdAt: now,
         updatedAt: now
       }
-      const created = await this.menuEventData.addMenuEvent(draft)
+      const created = await this.menuEventData.addMenuEvent(this.menuIntelligence_.hydrateDerivedPortions(draft))
       void this.router.navigate(['/menu-intelligence', created._id])
     })
   }

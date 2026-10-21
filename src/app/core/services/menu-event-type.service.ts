@@ -22,10 +22,17 @@ export class MenuEventTypeService {
     await this.taxonomy.reload().catch((err: unknown) => this.logError('load', err))
   }
 
-  async addEventType(name: string): Promise<void> {
+  /** Adds an event type with its coefficient (plan 441; 1 = a normal amount). False when it was not saved. */
+  async addEventType(name: string, coefficient = 1): Promise<boolean> {
     const trimmed = name.trim()
-    if (!trimmed || this.taxonomy.find('eventType', trimmed)) return
-    await this.taxonomy.add('eventType', trimmed, {}).catch((err: unknown) => this.logError('persist', err))
+    if (!trimmed || this.taxonomy.find('eventType', trimmed)) return false
+    return this.taxonomy
+      .add('eventType', trimmed, { coefficient })
+      .then(() => true)
+      .catch((err: unknown) => {
+        this.logError('persist', err)
+        return false
+      })
   }
 
   private logError(what: 'load' | 'persist', err: unknown): void {

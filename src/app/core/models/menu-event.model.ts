@@ -1,6 +1,6 @@
 import type { EventLogistics } from './logistics.model'
 
-/** Dynamic menu types from registry; legacy values buffet_family | plated_course | cocktail_passed still drive derivePortions logic. */
+/** Dynamic menu types from registry; legacy values buffet_family | plated_course | cocktail_passed still name the serving styles. */
 export type ServingType = string
 
 export type DishFieldKey =

@@ -1081,6 +1081,20 @@
     "metadata_station_exists": "התחנה כבר קיימת ברשימה",
     "metadata_confirm_rename_station": "לשנות את שם התחנה? המתכונים שמשויכים אליה יעודכנו",
     "metadata_confirm_remove_station": "למחוק את התחנה",
-    "add_new_station": "הוסף תחנה חדשה"
+    "add_new_station": "הוסף תחנה חדשה",
+    "dish_coefficient": "מקדם המנה",
+    "coefficient_manual": "שונה ידנית",
+    "coefficient_reset": "חזור לברירת מחדל",
+    "coefficient_invalid": "מקדם חייב להיות מספר גדול מ-0 עם עד 2 ספרות אחרי הנקודה",
+    "metadata_event_type_exists": "סוג האירוע כבר קיים",
+    "coefficient_label": "מקדם",
+    "event_portions": "מנות לאירוע",
+    "enter_guest_count": "הזן מספר אורחים",
+    "portions_per_diner_zero": "0 לסועד — המנה לא תיכלל בכמויות",
+    "per_diner_in_unit": "{{unit}} לסועד",
+    "metadata_coefficients_title": "מקדמים",
+    "metadata_coefficients_desc": "כמה אוכלים בכל סוג אירוע ובכל סגנון הגשה. 1 = כמות רגילה.",
+    "metadata_event_types_title": "סוגי אירוע",
+    "metadata_serving_types_title": "סוגי הגשה"
   }
 }

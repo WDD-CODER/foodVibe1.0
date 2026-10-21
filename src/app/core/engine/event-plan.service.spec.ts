@@ -1,9 +1,22 @@
 import { TestBed } from '@angular/core/testing'
+import type { MenuEvent } from '@models/menu-event.model'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { SYSTEM_UNITS, UnitRegistryService } from '@services/unit-registry.service'
 import { computeEventPlan } from './event-plan.engine'
 import { EventPlanService } from './event-plan.service'
 import { FIXTURE_IDS as ID, buildFixtureInput } from './testing/event-plan.fixture'
+
+/** The fixture event restated through the one formula: 1 guest, portionsPerDiner = the fixture's portions. */
+function viaFormula(event: MenuEvent): MenuEvent {
+  return {
+    ...event,
+    guestCount: 1,
+    sections: event.sections.map((section) => ({
+      ...section,
+      items: section.items.map((item) => ({ ...item, portionsPerDiner: item.derivedPortions }))
+    }))
+  }
+}
 
 describe('EventPlanService', () => {
   const input = buildFixtureInput()
@@ -24,12 +37,23 @@ describe('EventPlanService', () => {
     service = TestBed.inject(EventPlanService)
   })
 
-  it('planFor returns the same plan as the engine on the fixture input', () => {
-    expect(service.planFor(input.event)).toEqual(computeEventPlan(input))
+  it('planFor returns the same plan as the engine when the portions come from computePortions', () => {
+    expect(service.planFor(viaFormula(input.event))).toEqual(
+      computeEventPlan({ ...input, event: viaFormula(input.event) })
+    )
+  })
+
+  it('planFor scales the plan with guests and the item coefficient override', () => {
+    const base = viaFormula(input.event)
+    const doubled: MenuEvent = {
+      ...base,
+      sections: base.sections.map((s) => ({ ...s, items: s.items.map((i) => ({ ...i, coefficientOverride: 2 })) }))
+    }
+    expect(service.planFor(doubled).eventFoodCost).toBeCloseTo(service.planFor(base).eventFoodCost * 2, 6)
   })
 
   it('planFor accepts an unsaved event without an id', () => {
-    const { _id, ...unsaved } = input.event
+    const { _id, ...unsaved } = viaFormula(input.event)
     expect(_id).toBe(ID.event)
     expect(service.planFor(unsaved).eventFoodCost).toBeCloseTo(157.75, 9)
   })
