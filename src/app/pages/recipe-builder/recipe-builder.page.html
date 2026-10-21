@@ -344,37 +344,28 @@
           </button>
         </div>
         <div class="section-card-body" (click)="$event.stopPropagation()">
-          <div
-            class="logistics-grid"
-            [formGroup]="recipeForm_"
-            (clickOutside)="logisticsPicker.dropdownOpen_.set(false)"
-          >
+          <div class="logistics-grid" [formGroup]="recipeForm_">
             <div class="logistics-add-wrap">
               <div class="logistics-add-inner">
-                <div class="logistics-tool-search-wrap">
-                  <lucide-icon name="search" class="logistics-search-icon" [size]="18"></lucide-icon>
-                  <input
-                    #logisticsSearchInput
-                    type="text"
-                    class="logistics-tool-search"
-                    [value]="logisticsPicker.searchQuery_()"
-                    (input)="logisticsPicker.onSearchInput($any($event.target).value)"
-                    (keydown)="logisticsPicker.onSearchKeydown($event)"
-                    role="combobox"
-                    aria-autocomplete="list"
-                    [attr.aria-expanded]="logisticsPicker.dropdownOpen_()"
-                    [attr.aria-activedescendant]="logisticsPicker.dropdownOpen_() ? 'logistics-tool-opt-' + logisticsPicker.highlightedIndex_() : null"
-                    [placeholder]="'search_tool_placeholder' | translatePipe"
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                  />
-                  <app-input-clear
-                    [visible]="!!logisticsPicker.searchQuery_()"
-                    (clear)="logisticsPicker.onSearchInput(''); logisticsSearchInput.focus()"
-                  />
-                </div>
+                <app-search-combobox
+                  class="logistics-tool-search-wrap"
+                  icon="search"
+                  placeholder="search_tool_placeholder"
+                  addLabelKey="add_new_tool"
+                  [query]="logisticsPicker.searchQuery_()"
+                  (queryChange)="logisticsPicker.onSearchInput($event)"
+                  [options]="logisticsPicker.searchOptions_()"
+                  [knownOptions]="logisticsPicker.allTools_()"
+                  [labelOf]="logisticsPicker.toolLabel_"
+                  [keyOf]="logisticsPicker.toolKey_"
+                  [clientFilter]="false"
+                  [minChars]="1"
+                  [maxHeight]="220"
+                  [openOnFocus]="false"
+                  [closeOnOutsideClick]="true"
+                  (picked)="logisticsPicker.selectOption($event.option)"
+                  (addChosen)="logisticsPicker.openAddNewToolModal($event.typed)"
+                />
                 <app-counter
                   [value]="logisticsPicker.quantity_()"
                   [min]="1"
@@ -390,37 +381,6 @@
                   {{ 'add' | translatePipe }}
                 </button>
               </div>
-              @if (logisticsPicker.dropdownOpen_()) {
-              <app-scrollable-dropdown [maxHeight]="220" class="logistics-tool-dropdown">
-                <ul role="listbox">
-                  @for (opt of logisticsPicker.searchOptions_(); track opt._id; let i = $index) {
-                  <li
-                    role="option"
-                    class="logistics-tool-option"
-                    [id]="'logistics-tool-opt-' + i"
-                    [class.highlighted]="logisticsPicker.highlightedIndex_() === i"
-                    [attr.aria-selected]="logisticsPicker.highlightedIndex_() === i"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="logisticsPicker.selectOption(opt)"
-                  >
-                    {{ opt.nameHebrew }}
-                  </li>
-                  } @if (logisticsPicker.showsAdd_()) {
-                  <li
-                    role="option"
-                    class="logistics-tool-option logistics-tool-add-new"
-                    [id]="'logistics-tool-opt-' + logisticsPicker.searchOptions_().length"
-                    [class.highlighted]="logisticsPicker.highlightedIndex_() === logisticsPicker.searchOptions_().length"
-                    [attr.aria-selected]="logisticsPicker.highlightedIndex_() === logisticsPicker.searchOptions_().length"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="logisticsPicker.openAddNewToolModal()"
-                  >
-                    <app-add-option-row [label]="logisticsPicker.addLabel_()" />
-                  </li>
-                  }
-                </ul>
-              </app-scrollable-dropdown>
-              }
             </div>
             <div class="logistics-chips-wrap" formGroupName="logistics">
               <div class="logistics-chips" formArrayName="baseline">

@@ -19,7 +19,7 @@ export const REUSE_RULES = [
     family: 'search-combobox',
     files: ['src/app/pages/**/*.html', 'src/app/pages/**/*.ts'],
     pattern: /<app-(?:scrollable-dropdown|add-option-row)\b/,
-    hint: 'use app-custom-select (src/app/shared/custom-select/) instead of a hand-built input + dropdown shell'
+    hint: 'use app-search-combobox (src/app/shared/search-combobox/) instead of a hand-built input + dropdown shell'
   },
   {
     id: 'engine-class-outside-styles',

@@ -43,7 +43,7 @@ import { RecipeIngredientsTableComponent } from './components/recipe-ingredients
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { HeroFabService, type HeroFabAction } from '@services/hero-fab.service'
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component'
@@ -55,8 +55,6 @@ import { RecipeAiFlowService } from './services/recipe-ai-flow.service'
 import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
-import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
 import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
 @Component({
   selector: 'app-recipe-builder-page',
@@ -71,14 +69,12 @@ import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    ScrollableDropdownComponent,
+    SearchComboboxComponent,
     ClickOutSideDirective,
     ExportPreviewComponent,
     ExportToolbarOverlayComponent,
     ApproveStampComponent,
     CounterComponent,
-    InputClearComponent,
-    AddOptionRowComponent,
     EditGateComponent
   ],
   templateUrl: './recipe-builder.page.html',

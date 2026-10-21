@@ -341,44 +341,13 @@
     gap: var(--rb-gap-tight);
   }
 
+  /* The shared search box (plan 452); its list spans the whole add row, so it anchors to .logistics-add-wrap. */
   .logistics-tool-search-wrap {
-    display: flex;
-    align-items: center;
+    --search-combobox-position: static;
+    --search-combobox-z-index: 50;
 
     flex: 1 1 0;
     min-width: 0;
-
-    padding-inline: var(--rb-gap-mid);
-    padding-block: 0.5rem;
-
-    background: var(--bg-glass);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-
-    &:focus-within {
-      border-color: var(--border-focus);
-      box-shadow: var(--shadow-focus);
-    }
-  }
-
-  .logistics-search-icon {
-    flex-shrink: 0;
-
-    margin-inline-end: 0.35rem;
-
-    color: var(--color-text-muted);
-  }
-
-  .logistics-tool-search {
-    flex: 1;
-    min-width: 0;
-
-    padding: 0;
-    background: none;
-    border: none;
-    outline: none;
-    font-size: 0.875rem;
-    color: var(--color-text-main);
   }
 
   .logistics-add-btn {
@@ -408,46 +377,6 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
-  }
-
-  .logistics-tool-dropdown {
-    position: absolute;
-    inset-inline-start: 0;
-    inset-inline-end: 0;
-    top: 100%;
-    z-index: 50;
-
-    margin-block-start: 0.25rem;
-
-    background: var(--bg-pure);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
-  }
-
-  .logistics-tool-option {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    padding-inline: var(--rb-gap-mid);
-    padding-block: 0.5rem;
-
-    font-size: 0.875rem;
-    color: var(--color-text-main);
-
-    cursor: pointer;
-    transition: background 0.15s ease;
-
-    &:hover,
-    &.highlighted {
-      background: var(--bg-glass-hover);
-    }
-  }
-
-  .logistics-tool-add-new {
-    color: var(--color-primary);
-    font-weight: 600;
   }
 }
 

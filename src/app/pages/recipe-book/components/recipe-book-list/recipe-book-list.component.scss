@@ -246,89 +246,12 @@
     margin-block-end: 1.25rem;
   }
 
-  .no-dropdown-results {
-    padding: 0.75rem;
-
-    text-align: center;
-    font-size: 0.8125rem;
-    color: var(--color-text-muted-light);
-  }
-
   .ingredient-search-block {
     position: relative;
     display: flex;
     flex-direction: column;
 
     gap: 0.5rem;
-  }
-
-  .ingredient-search-input-wrap {
-    display: flex;
-    align-items: center;
-
-    gap: 0.5rem;
-    padding-inline: 0.75rem;
-    padding-block: 0.5rem;
-
-    background: var(--bg-glass);
-
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-md);
-
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
-
-    &:focus-within {
-      border-color: var(--border-focus);
-      box-shadow: var(--shadow-focus);
-    }
-
-    lucide-icon {
-      flex-shrink: 0;
-
-      color: var(--color-text-muted);
-    }
-
-    input {
-      flex: 1;
-
-      min-width: 0;
-      padding: 0;
-
-      background: transparent;
-      color: var(--color-text-main);
-      font-size: 0.875rem;
-
-      border: none;
-      outline: none;
-
-      &::placeholder {
-        color: var(--color-text-muted-light);
-      }
-    }
-  }
-
-  :host ::ng-deep app-scrollable-dropdown .ingredient-dropdown-list {
-    list-style: none;
-
-    margin: 0;
-    padding: 0;
-
-    li {
-      padding: 0.5rem 0.75rem;
-
-      font-size: 0.875rem;
-      color: var(--color-text-main);
-
-      cursor: pointer;
-      transition: background 0.15s ease;
-
-      &:hover,
-      &.highlighted {
-        background: var(--bg-glass);
-      }
-    }
   }
 
   .ingredient-chips-wrap {

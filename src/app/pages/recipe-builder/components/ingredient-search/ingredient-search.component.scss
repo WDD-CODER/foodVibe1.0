@@ -3,40 +3,9 @@
 
   width: 100%;
 
-  /* TODO: remove ::ng-deep when scrollable-dropdown exposes a slot or engine class */
-  app-scrollable-dropdown {
-    ::ng-deep .c-dropdown {
-      z-index: 250;
-    }
-  }
-}
-
-.result-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-
-  padding: 0.5rem 0.75rem;
-
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: var(--bg-glass);
-  }
-
-  &.highlighted {
-    background: var(--color-primary-soft);
-  }
-
-  &.result-item--add {
-    justify-content: flex-start;
-
-    border-block-start: 1px dashed var(--border-default);
-    color: var(--color-primary);
-    font-size: 0.875rem;
-    font-weight: 500;
+  /* Result rows sit over the table below (shared search box, plan 452). */
+  app-search-combobox {
+    --search-combobox-z-index: 250;
   }
 }
 

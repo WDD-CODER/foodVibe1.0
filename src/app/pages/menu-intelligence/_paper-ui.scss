@@ -310,22 +310,16 @@
   border-radius: 8px;
 
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-
-  // The shared dropdown is absolutely positioned by default; here it flows under the search box.
-  ::ng-deep .c-dropdown {
-    position: static;
-  }
 }
 
+// The shared search box (plan 452) in the paper look: its list flows under the field (listPosition="inline").
 .event-type-search {
-  width: 100%;
-  padding: 8px 12px;
-  border: none;
-  border-bottom: 1px solid #e8e0d0;
-  font-family: var(--font-serif);
-  font-size: 0.85rem;
-  background: transparent;
-  outline: none;
+  --search-combobox-input-padding: 8px 12px;
+  --search-combobox-input-font: var(--font-serif);
+  --search-combobox-input-font-size: 0.85rem;
+  --search-combobox-field-border-block-end: 1px solid #e8e0d0;
+  --search-combobox-option-font: var(--font-serif);
+  --search-combobox-highlight-ring: inset 0 0 0 1px var(--border-focus);
 }
 
 .meta-column ::ng-deep .custom-select-trigger {
@@ -459,60 +453,20 @@
   width: 280px;
 }
 
-.section-search-input {
-  width: 100%;
-  padding: 6px 12px;
-  text-align: center;
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  color: var(--color-ink);
-  background: var(--bg-glass);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  outline: none;
-  backdrop-filter: var(--blur-glass);
-
-  &:focus {
-    border-color: var(--border-focus);
-    box-shadow: var(--shadow-focus);
-  }
-}
-
-.dropdown-item {
-  display: block;
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  text-align: right;
-  font-family: var(--font-serif);
-  font-size: 0.875rem;
-  color: var(--color-text-main);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: var(--bg-glass-hover);
-  }
-
-  &.highlighted {
-    background: var(--color-primary-soft);
-    box-shadow: inset 0 0 0 1px var(--border-focus);
-  }
-
-  &.add-new {
-    color: var(--color-primary);
-    font-weight: 600;
-    border-top: 1px solid var(--border-default);
-  }
-}
-
-.dropdown-empty {
-  display: block;
-  padding: 8px 12px;
-  font-size: 0.8125rem;
-  color: var(--color-text-muted-light);
-  text-align: center;
+// The shared search box (plan 452) as a glass input under the section title.
+.section-search {
+  --search-combobox-input-padding: 6px 12px;
+  --search-combobox-input-text-align: center;
+  --search-combobox-input-font: var(--font-serif);
+  --search-combobox-input-font-size: 1.1rem;
+  --search-combobox-input-color: var(--color-ink);
+  --search-combobox-input-background: var(--bg-glass);
+  --search-combobox-input-border: 1px solid var(--border-default);
+  --search-combobox-input-radius: var(--radius-md);
+  --search-combobox-input-focus-border-color: var(--border-focus);
+  --search-combobox-input-focus-shadow: var(--shadow-focus);
+  --search-combobox-option-font: var(--font-serif);
+  --search-combobox-highlight-ring: inset 0 0 0 1px var(--border-focus);
 }
 
 /* ---------- Dish Name Clickable ---------- */

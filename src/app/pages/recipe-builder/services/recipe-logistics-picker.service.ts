@@ -8,16 +8,12 @@ import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
-import { AddOptionLabel, addOptionLabel, findOptionByLabel, notifyItemAdded } from 'src/app/core/utils/add-option.util'
-import { KeyedPickerSearch, scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
+import { addOptionLabel, notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { RecipeFormService } from './recipe-form.service'
 
-/** KeyedPickerSearch key — one tool picker per page. */
-const PICKER_KEY = 0
-
 /**
- * Recipe-builder logistics/equipment picker: search + keyboard nav, quantity,
- * add to baseline, add-new-tool modal, remove chip. Component-scoped (provided
+ * Recipe-builder logistics/equipment picker: search results, quantity, add to baseline, add-new-tool modal,
+ * remove chip. The search box and its keyboard are the shared `app-search-combobox`. Component-scoped (provided
  * on RecipeBuilderPage); the page connects only the logistics baseline FormArray.
  */
 @Injectable()
@@ -34,10 +30,6 @@ export class RecipeLogisticsPickerService {
 
   readonly searchQuery_ = signal('')
   readonly quantity_ = signal(1)
-  readonly dropdownOpen_ = signal(false)
-  /** Keyboard state (add-option rule 5): first option highlighted, no wrap, focus stays in the input. */
-  private readonly picker_ = new KeyedPickerSearch()
-  readonly highlightedIndex_ = computed(() => this.picker_.highlighted(PICKER_KEY))
   /** Selected equipment id (from dropdown); user sets quantity then presses Add. */
   readonly selectedToolId_ = signal<string | null>(null)
   /** Equipment IDs already in the logistics baseline (excluded from equipment search options). */
@@ -61,15 +53,11 @@ export class RecipeLogisticsPickerService {
     })
   })
 
-  /** One add option, last: `הוסף "<typed>"` for a new tool name, else `add_new_tool` (rules 1–3). */
-  readonly addLabel_ = computed<AddOptionLabel>(() =>
-    addOptionLabel(this.searchQuery_(), this.equipmentData_.allEquipment_(), (eq) => eq.nameHebrew, 'add_new_tool')
-  )
+  /** Every tool: the search box checks a typed name against these (rule X) before offering to add it. */
+  readonly allTools_ = this.equipmentData_.allEquipment_
 
-  /** No add option when the search names a tool exactly (rule X). */
-  readonly showsAdd_ = computed(
-    () => !findOptionByLabel(this.searchQuery_(), this.equipmentData_.allEquipment_(), (eq) => eq.nameHebrew)
-  )
+  readonly toolLabel_ = (tool: Equipment): string => tool.nameHebrew
+  readonly toolKey_ = (tool: Equipment): string => tool._id
 
   connect(baseline: FormArray): void {
     this.baseline_ = baseline
@@ -87,16 +75,16 @@ export class RecipeLogisticsPickerService {
       this.addSelectedToBaseline_()
       return
     }
-    if (this.searchQuery_().trim()) {
-      this.openAddNewToolModal()
+    const typed = this.searchQuery_().trim()
+    if (typed) {
+      const label = addOptionLabel(typed, this.allTools_(), this.toolLabel_, 'add_new_tool')
+      void this.openAddNewToolModal(label.kind === 'typed' ? label.text : '')
     }
   }
 
-  async openAddNewToolModal(): Promise<void> {
-    this.dropdownOpen_.set(false)
-    const label = this.addLabel_()
-    const initialName = label.kind === 'typed' ? label.text : undefined
-    const result = await this.addEquipmentModal_.open(initialName)
+  /** Always the add window, prefilled with a typed new name (rule W); '' = nothing typed. */
+  async openAddNewToolModal(typed: string): Promise<void> {
+    const result = await this.addEquipmentModal_.open(typed || undefined)
     if (!result?.name?.trim()) return
     try {
       const now = Date.now()
@@ -148,44 +136,14 @@ export class RecipeLogisticsPickerService {
     this.selectedToolId_.set(option._id)
     this.quantity_.set(1)
     this.searchQuery_.set(option.nameHebrew)
-    this.dropdownOpen_.set(false)
   }
 
   onSearchInput(value: string): void {
     this.searchQuery_.set(value)
-    this.picker_.onQueryChange(PICKER_KEY, value)
-    this.dropdownOpen_.set(value.trim().length > 0)
     const selectedId = this.selectedToolId_()
     if (selectedId && this.getEquipmentNameById(selectedId) !== value) {
       this.selectedToolId_.set(null)
     }
-  }
-
-  /** Rule 5 via KeyedPickerSearch; Tab closes the list and lets the browser move to the quantity field. */
-  onSearchKeydown(event: KeyboardEvent): void {
-    if (!this.dropdownOpen_()) {
-      if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && this.searchQuery_().trim()) {
-        event.preventDefault()
-        this.dropdownOpen_.set(true)
-        this.picker_.setHighlighted(PICKER_KEY, 0)
-      }
-      return
-    }
-    if (event.key === 'Tab') {
-      this.dropdownOpen_.set(false)
-      return
-    }
-    const opts = this.searchOptions_()
-    this.picker_.handleKeydown(PICKER_KEY, event, {
-      optionCount: opts.length + (this.showsAdd_() ? 1 : 0),
-      onSelect: (idx) => {
-        if (idx < opts.length) this.selectOption(opts[idx])
-        else void this.openAddNewToolModal()
-      },
-      onClose: () => this.dropdownOpen_.set(false),
-      onHighlightMove: () =>
-        setTimeout(() => scrollHighlightIntoView(document.querySelector('.logistics-tool-dropdown')), 0)
-    })
   }
 
   /** Add the currently selected item (with current quantity) to baseline. */
@@ -204,7 +162,6 @@ export class RecipeLogisticsPickerService {
     this.selectedToolId_.set(null)
     this.searchQuery_.set('')
     this.quantity_.set(1)
-    this.dropdownOpen_.set(false)
   }
 
   private syncBaselineIds_(value: unknown): void {

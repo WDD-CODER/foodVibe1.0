@@ -1,67 +1,31 @@
 <div class="search-container" dir="rtl" (clickOutside)="onClickOutside()">
-  <div class="c-input-wrapper">
-    <lucide-icon name="search" size="18"></lucide-icon>
-    <input
-      #searchInput
-      type="text"
-      SelectOnFocus
-      [value]="searchQuery_()"
-      (input)="onQueryInput($any($event.target).value)"
-      (focus)="onSearchFocus()"
-      (keydown)="onSearchKeydown($event)"
-      role="combobox"
-      aria-autocomplete="list"
-      [attr.aria-expanded]="showResults_() && searchQuery_().trim().length > 0"
-      [attr.aria-activedescendant]="
-        showResults_() && searchQuery_().trim().length > 0 ? optionIdPrefix + highlightedIndex_() : null
-      "
-      [placeholder]="'search_product_or_recipe' | translatePipe"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="off"
-      spellcheck="false"
-    />
-    <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" />
-  </div>
-
-  @if (showResults_() && searchQuery_().trim().length > 0) {
-    <app-scrollable-dropdown [maxHeight]="240">
-      <ul role="listbox">
-        @for (item of filteredResults_(); track item._id; let i = $index) {
-          <li
-            role="option"
-            [id]="optionIdPrefix + i"
-            [attr.aria-selected]="highlightedIndex_() === i"
-            [class.highlighted]="highlightedIndex_() === i"
-            (mousedown)="$event.preventDefault()"
-            (click)="selectItem(item)"
-            class="result-item"
-          >
-            <span class="item-name">{{ item.nameHebrew }}</span>
-            <span
-              class="type-pill"
-              [class.recipe]="item.item_type_ === 'recipe'"
-              [class.product]="item.item_type_ !== 'recipe'"
-            >
-              {{ (item.item_type_ === 'recipe' ? 'recipe' : 'product') | translatePipe }}
-            </span>
-          </li>
-        }
-        @if (showsAdd_()) {
-          <li
-            role="option"
-            [id]="optionIdPrefix + filteredResults_().length"
-            [attr.aria-selected]="highlightedIndex_() === filteredResults_().length"
-            [class.highlighted]="highlightedIndex_() === filteredResults_().length"
-            [class.result-item--add]="true"
-            class="result-item"
-            (mousedown)="$event.preventDefault()"
-            (click)="addNewProduct()"
-          >
-            <app-add-option-row [label]="addLabel_()" />
-          </li>
-        }
-      </ul>
-    </app-scrollable-dropdown>
-  }
+  <app-search-combobox
+    icon="search"
+    placeholder="search_product_or_recipe"
+    addLabelKey="add_new_ingredient"
+    [(query)]="searchQuery_"
+    [(open)]="showResults_"
+    [options]="filteredResults_()"
+    [knownOptions]="searchResults_()"
+    [labelOf]="itemLabel_"
+    [keyOf]="itemKey_"
+    [clientFilter]="false"
+    [minChars]="1"
+    [selectOnFocus]="true"
+    (picked)="selectItem($event.option)"
+    (addChosen)="addNewProduct($event.typed)"
+    (escaped)="cancelSearch.emit()"
+    (unhandledKeydown)="onSearchKeyUnhandled($event)"
+  >
+    <ng-template #optionTemplate let-item>
+      <span class="item-name">{{ item.nameHebrew }}</span>
+      <span
+        class="type-pill"
+        [class.recipe]="item.item_type_ === 'recipe'"
+        [class.product]="item.item_type_ !== 'recipe'"
+      >
+        {{ (item.item_type_ === 'recipe' ? 'recipe' : 'product') | translatePipe }}
+      </span>
+    </ng-template>
+  </app-search-combobox>
 </div>

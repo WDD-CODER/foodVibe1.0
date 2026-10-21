@@ -47,45 +47,26 @@
       </button>
     } @else {
       <div class="dish-search-wrap" (clickOutside)="clearSearch.emit()">
-        <div class="c-picker-search-row">
-          <input
-            #dishSearchInput
-            type="text"
-            class="dish-search-input"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
-            [id]="'dish-search-' + sectionIndex() + '-' + itemIndex()"
-            [ngModel]="dishSearchQuery()"
-            [ngModelOptions]="{ standalone: true }"
-            (ngModelChange)="searchQueryChange.emit($event)"
-            [placeholder]="'menu_search_dish' | translatePipe"
-            (keydown)="dishSearchKeydown.emit($event)"
-          />
-          <app-input-clear
-            [visible]="!!dishSearchQuery()"
-            (clear)="searchQueryChange.emit(''); dishSearchInput.focus()"
-            (click)="$event.stopPropagation()"
-          />
-        </div>
-        @if (dishSearchQuery().trim()) {
-          <app-scrollable-dropdown [maxHeight]="200">
-            @for (recipe of getFilteredRecipes(); track recipe._id; let i = $index) {
-              <button
-                type="button"
-                class="dropdown-item"
-                [class.highlighted]="highlightedIndex() === i"
-                (click)="selectRecipe.emit({ recipe })"
-              >
-                {{ recipe.nameHebrew }}
-              </button>
-            }
-            @if (getFilteredRecipes().length === 0) {
-              <span class="dropdown-empty">{{ 'no_recipes_match' | translatePipe }}</span>
-            }
-          </app-scrollable-dropdown>
-        }
+        <app-search-combobox
+          variant="plain"
+          placeholder="menu_search_dish"
+          emptyKey="no_recipes_match"
+          [inputId]="'dish-search-' + sectionIndex() + '-' + itemIndex()"
+          [query]="dishSearchQuery()"
+          (queryChange)="searchQueryChange.emit($event)"
+          [options]="recipes()"
+          [labelOf]="recipeLabel_"
+          [keyOf]="recipeKey_"
+          [minChars]="1"
+          [maxResults]="12"
+          [maxHeight]="200"
+          [selectOnSpace]="true"
+          [handleTab]="true"
+          (picked)="selectRecipe.emit({ recipe: $event.option })"
+          (escaped)="clearSearch.emit()"
+          (unhandledKeydown)="onSearchKeyUnhandled($event)"
+          (tab)="dishSearchTab.emit($event)"
+        />
       </div>
     }
   </div>

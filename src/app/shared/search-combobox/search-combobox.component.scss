@@ -1,0 +1,122 @@
+/* Look comes from the engine (`.c-input-wrapper`, `.c-picker-search-row`, `.c-dropdown`); a page restyles the
+   plain variant through the CSS variables listed in the component docblock. */
+@layer components.search-combobox {
+  :host {
+    display: block;
+  }
+
+  .search-combobox {
+    position: var(--search-combobox-position, relative);
+  }
+
+  .search-combobox__field {
+    border-block-end: var(--search-combobox-field-border-block-end, none);
+  }
+
+  .search-combobox__input {
+    flex: 1;
+    min-inline-size: 0;
+
+    padding: var(--search-combobox-input-padding, 0);
+
+    color: var(--search-combobox-input-color, var(--color-text-main));
+    font-family: var(--search-combobox-input-font, inherit);
+    font-size: var(--search-combobox-input-font-size, 0.875rem);
+    text-align: var(--search-combobox-input-text-align, start);
+    background: var(--search-combobox-input-background, transparent);
+
+    border: var(--search-combobox-input-border, none);
+    border-radius: var(--search-combobox-input-radius, 0);
+    outline: none;
+
+    &::placeholder {
+      color: var(--search-combobox-placeholder-color, var(--color-text-muted-light));
+    }
+
+    &:focus {
+      border-color: var(--search-combobox-input-focus-border-color, transparent);
+      box-shadow: var(--search-combobox-input-focus-shadow, none);
+    }
+  }
+
+  textarea.search-combobox__input {
+    align-self: stretch;
+
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    resize: none;
+    overflow-y: hidden;
+  }
+
+  .search-combobox__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .search-combobox__group {
+    padding-block: 0.375rem;
+    padding-inline: 0.75rem;
+
+    color: var(--color-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--bg-glass);
+
+    border-block-end: 1px solid var(--border-default);
+  }
+
+  .search-combobox__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+
+    color: var(--color-text-main);
+    font-family: var(--search-combobox-option-font, inherit);
+    font-size: var(--search-combobox-option-font-size, 0.875rem);
+
+    cursor: pointer;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--bg-glass-hover);
+    }
+
+    &.is-highlighted {
+      background: var(--color-primary-soft);
+      box-shadow: var(--search-combobox-highlight-ring, none);
+    }
+  }
+
+  .search-combobox__option--add {
+    justify-content: flex-start;
+
+    color: var(--color-primary);
+    font-weight: 600;
+
+    border-block-start: 1px dashed var(--border-default);
+  }
+
+  .search-combobox__empty {
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
+
+    color: var(--color-text-muted-light);
+    font-size: 0.8125rem;
+    text-align: center;
+  }
+}
+
+/* Outside the layer: the engine's `.c-dropdown` is unlayered, so these must be too to beat it. */
+.search-combobox ::ng-deep .c-dropdown {
+  inset-inline: var(--search-combobox-list-inset, 0);
+  z-index: var(--search-combobox-z-index, 10);
+}
+
+.search-combobox--inline ::ng-deep .c-dropdown {
+  position: static;
+}

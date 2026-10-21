@@ -40,7 +40,7 @@ Every plan lists each new piece it creates, the family it searched, and the rung
 `node scripts/reuse-lint.mjs --diff=<base>` (or `npm run lint:reuse -- --diff=<base>`) prints
 `REUSE: warn <rule> <family> <file>:<line> — <hint>` for added lines that look like a new copy:
 
-- `<app-scrollable-dropdown>` / `<app-add-option-row>` inside `src/app/pages/**` (search combobox — use `app-custom-select`);
+- `<app-scrollable-dropdown>` / `<app-add-option-row>` inside `src/app/pages/**` (search combobox — use `app-search-combobox`, or `app-custom-select` for a fixed list);
 - a `.c-*` selector defined outside `src/styles.scss`;
 - `core/utils|pipes|services` imported through `../` (use `@utils/*`, `@pipes/*`, `@services/*`);
 - `onClearSearch` / `onSearchEscape` / `clearAllFilters` added to a page (list logic).
