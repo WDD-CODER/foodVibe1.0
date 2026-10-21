@@ -75,4 +75,30 @@ describe('BusinessService', () => {
     http.expectOne(URL).flush({ error: 'Business not found' }, { status: 404, statusText: 'Not Found' })
     expect(service.business_()).toBeNull()
   })
+
+  it('updateSettings PUTs the numbers and puts the stored settings into business_', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http
+      .expectOne(URL)
+      .flush({ _id: 'b1', name: 'x', settings: { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 } })
+    const next = { profitTargetPct: 30, safetyMarginPct: 12.5, overrunThresholdPct: 15 }
+    const done = service.updateSettings(next)
+    const req = http.expectOne(`${URL}/settings`)
+    expect(req.request.method).toBe('PUT')
+    expect(req.request.body).toEqual(next)
+    req.flush({ settings: next })
+    await done
+    expect(service.business_()?.settings).toEqual(next)
+  })
+
+  it('updateSettings rejects on a refusal and leaves business_ unchanged', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    const done = service.updateSettings({ profitTargetPct: 100, safetyMarginPct: 10, overrunThresholdPct: 10 })
+    http.expectOne(`${URL}/settings`).flush({ error: 'Validation failed' }, { status: 400, statusText: 'Bad Request' })
+    await expectAsync(done).toBeRejected()
+    expect(service.business_()?.settings).toBeUndefined()
+  })
 })

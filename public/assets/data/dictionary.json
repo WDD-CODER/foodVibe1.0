@@ -1124,6 +1124,17 @@
     "team_empty": "עדיין אין חברי צוות",
     "no_permission": "אין לך הרשאה לפעולה הזו",
     "prices_locked_owner_only": "המחירים נעולים – רק בעל העסק יכול לשנות אותם",
-    "view_only_not_yours": "נוצר על ידי חבר צוות אחר – צפייה בלבד"
+    "view_only_not_yours": "נוצר על ידי חבר צוות אחר – צפייה בלבד",
+    "settings_tab_business": "הגדרות עסק",
+    "profit_target_pct": "יעד רווח נקי (%)",
+    "profit_target_help": "הרווח שאתה רוצה מכל אירוע, באחוזים מההכנסה",
+    "safety_margin_pct": "מרווח ביטחון (%)",
+    "safety_margin_help": "סכום ביטחון מומלץ להוספה למחיר האירוע",
+    "overrun_threshold_pct": "סף חריגה מספק (%)",
+    "overrun_threshold_help": "מעל אחוז זה תשלום לספק יסומן באדום בסגירת אירוע",
+    "pct_range_0_99": "חייב להיות בין 0 ל-99.9",
+    "pct_range_overrun": "חייב להיות בין 0.1 ל-100",
+    "settings_saved": "ההגדרות נשמרו",
+    "settings_invalid": "ערך לא תקין – בדוק את השדות"
   }
 }

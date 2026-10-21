@@ -1,5 +1,5 @@
 'use strict'
-/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Settings/baseline arrive with plans 429/431. */
+/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Baseline arrives with plan 431. */
 const { Router } = require('express')
 const rateLimit = require('express-rate-limit')
 const { verifyToken } = require('../middleware/auth')
@@ -8,6 +8,8 @@ const { assertCan } = require('../utils/permissions')
 const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
+const mongoose = require('mongoose')
+const { businessSettingsSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 
 const router = Router()
 
@@ -24,14 +26,33 @@ const teamLimiter = rateLimit({
   message: { error: 'Too many team requests, please try again later' },
 })
 
-// GET /api/v1/business — the business document of the signed-in user, as stored. Any member may read it.
+// GET /api/v1/business — the business document of the signed-in user; `settings` always has the defaults filled in (nothing is written on read). Any member may read it.
 router.get('/', verifyToken, async (req, res) => {
   try {
     const business = await getBusiness(req.user.businessId)
     if (!business) return res.status(404).json({ error: 'Business not found' })
-    res.json(business)
+    res.json({ ...business, settings: { ...BUSINESS_SETTINGS_DEFAULTS, ...(business.settings ?? {}) } })
   } catch (err) {
     req.log.error({ err, event: 'business.get.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// PUT /api/v1/business/settings — the owner sets the three business numbers. Only ever writes the caller's own business.
+router.put('/settings', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const parsed = businessSettingsSchema.safeParse(req.body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.settings.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues })
+    }
+    await mongoose.connection.db.collection('businesses')
+      .updateOne({ _id: String(req.user.businessId) }, { $set: { settings: parsed.data } })
+    req.log.info({ event: 'business.settings.saved' })
+    res.json({ settings: parsed.data })
+  } catch (err) {
+    req.log.error({ err, event: 'business.settings.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })

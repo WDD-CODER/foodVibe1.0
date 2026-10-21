@@ -1,6 +1,19 @@
 import { z } from 'zod'
 import { nameField } from '../base.schema'
 
+/** Plan 429: the three numbers that belong to the business. Defaults apply on read when a business has none stored. */
+export const BUSINESS_SETTINGS_DEFAULTS = { profitTargetPct: 25, safetyMarginPct: 10, overrunThresholdPct: 10 } as const
+
+export const businessSettingsSchema = z.strictObject({
+  /** Spec 03.2: a target of 100% or more is an error. */
+  profitTargetPct: z.number().min(0).lt(100),
+  safetyMarginPct: z.number().min(0).lt(100),
+  /** 0 would flag every supplier. */
+  overrunThresholdPct: z.number().gt(0).max(100)
+})
+
+export type BusinessSettings = z.infer<typeof businessSettingsSchema>
+
 /** Plan 424: one document per business (the tenant). Lives in the `businesses` collection, not the generic data pipe. */
 export const businessSchema = z.strictObject({
   _id: z.string().min(1),
@@ -8,7 +21,9 @@ export const businessSchema = z.strictObject({
   ownerId: z.string().min(1),
   createdAt: z.number(),
   internal: z.boolean(),
-  lastSyncedMasterVersion: z.number().int().min(0)
+  lastSyncedMasterVersion: z.number().int().min(0),
+  /** Plan 429: absent on older documents; reads fill the defaults. */
+  settings: businessSettingsSchema.optional()
 })
 
 export type Business = z.infer<typeof businessSchema>

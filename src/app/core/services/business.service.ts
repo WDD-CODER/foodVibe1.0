@@ -1,6 +1,7 @@
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
-import type { Business } from '@schemas/entities'
+import { firstValueFrom } from 'rxjs'
+import type { Business, BusinessSettings } from '@schemas/entities'
 import { environment } from '../../../environments/environment'
 import { LoggingService } from './logging.service'
 import { UserService } from './user.service'
@@ -23,6 +24,14 @@ export class BusinessService {
       const userId = this._userId_()
       untracked(() => (userId ? this._load(userId) : this._business_.set(null)))
     })
+  }
+
+  /** Owner only: saves the three business numbers and puts the stored result into `business_`. Throws on any refusal. */
+  async updateSettings(settings: BusinessSettings): Promise<void> {
+    const res = await firstValueFrom(
+      this.http.put<{ settings: BusinessSettings }>(`${environment.apiUrl}/api/v1/business/settings`, settings)
+    )
+    this._business_.update((business) => (business ? { ...business, settings: res.settings } : business))
   }
 
   private _load(userId: string): void {
