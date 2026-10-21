@@ -67,8 +67,25 @@ describe('recordUsage', () => {
     for (const url of [
       '/api/v1/auth/login', '/api/v1/auth/refresh', '/api/v1/auth/logout', '/api/v1/ai/parse-price-list',
       '/api/v1/log', '/api/v1/admin/businesses/b1/internal', '/api/v1/data/VERSION_HISTORY', '/api/v1/data/activity_log',
+      '/api/v1/data/DICTIONARY_OVERRIDES', '/api/v1/data/DICTIONARY_OVERRIDES/x',
     ]) {
       expect(isCountedWrite(req('POST', url))).toBe(false)
+    }
+  })
+
+  it('sends one upsert when several reads finish at once', async () => {
+    const col = testDb().collection('usageDays')
+    const id = `u1:${today()}`
+    await col.insertOne({ _id: id, userId: 'u1', businessId: 'b1', date: today(), firstAt: 1000, lastAt: 1000, writeCount: 0 })
+    const spy = vi.spyOn(Object.getPrototypeOf(col), 'updateOne')
+    try {
+      await Promise.all([1, 2, 3, 4, 5].map(() => request(app).get('/api/v1/data/products').set(as(OWNER))))
+      await until(async () => (await col.findOne({ _id: id })).lastAt > 1000)
+      await sleep(300)
+      const usageCalls = spy.mock.calls.filter(c => c[0] && c[0]._id === id)
+      expect(usageCalls).toHaveLength(1)
+    } finally {
+      spy.mockRestore()
     }
   })
 
@@ -180,5 +197,6 @@ describe('usage-stats', () => {
     expect(weekBounds('2026-10-18')).toEqual({ from: '2026-10-18', to: '2026-10-24' })
     expect(weekBounds('2026-10-24')).toEqual({ from: '2026-10-18', to: '2026-10-24' })
     expect(weekBounds(Date.UTC(2026, 9, 20, 21, 30))).toEqual({ from: '2026-10-18', to: '2026-10-24' })
+    expect(weekBounds(Date.UTC(2026, 9, 24, 22, 30))).toEqual({ from: '2026-10-25', to: '2026-10-31' })
   })
 })

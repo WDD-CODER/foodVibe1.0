@@ -5,6 +5,7 @@
  */
 const mongoose = require('mongoose')
 const { logger } = require('../logger')
+const { SYSTEM_TYPES } = require('../utils/permissions')
 
 const READ_THROTTLE_MS = 60 * 1000
 const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
@@ -15,8 +16,7 @@ const NOT_BUSINESS_WRITE_PREFIXES = [
   '/api/v1/log',
   '/api/v1/ai',
   '/api/v1/admin',
-  '/api/v1/data/VERSION_HISTORY',
-  '/api/v1/data/activity_log',
+  ...SYSTEM_TYPES.map(t => `/api/v1/data/${t}`),
 ]
 
 const dateFormat_ = new Intl.DateTimeFormat('en-CA', {
@@ -48,7 +48,6 @@ async function writeUsage(userId, businessId, write) {
     },
     { upsert: true }
   )
-  lastUpdate_.set(userId, now)
 }
 
 /** Fire-and-forget: registers a `finish` listener, so the response is never delayed and errors never reach the caller. */
@@ -61,6 +60,7 @@ function recordUsage(req, res) {
       const write = isCountedWrite(req) && res.statusCode < 400
       const last = lastUpdate_.get(userId)
       if (!write && last !== undefined && Date.now() - last < READ_THROTTLE_MS) return
+      lastUpdate_.set(userId, Date.now())
       writeUsage(userId, businessId, write).catch(err => {
         logger.warn({ err, event: 'usage.record.failed' })
       })

@@ -6,6 +6,7 @@ const request = require('supertest')
 const { productBody: baseProduct } = require('./helpers/v2-docs')
 const jwt = require('jsonwebtoken')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
+const { _resetUsageThrottle } = require('../middleware/usage')
 
 let app
 
@@ -144,8 +145,16 @@ describe('GET /team', () => {
     const b = await add('cook2')
     await request(app).delete(`${TEAM}/${b.body._id}`).set(as(OWNER))
     // Earlier calls were recorded after their responses; let them land, then set known usage records (plan 430).
-    await new Promise(resolve => setTimeout(resolve, 300))
     const usage = testDb().collection('usageDays')
+    const snapshot = async () => JSON.stringify(await usage.find({}).sort({ _id: 1 }).toArray())
+    let before = ''
+    for (let i = 0; i < 60; i++) {
+      const now = await snapshot()
+      if (now !== '[]' && now === before) break
+      before = now
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    _resetUsageThrottle()
     await usage.deleteMany({})
     await usage.insertMany([
       { _id: 'own1:2026-10-19', userId: 'own1', businessId: 'b1', date: '2026-10-19', firstAt: 1000, lastAt: 2000, writeCount: 1 },

@@ -1,5 +1,6 @@
 'use strict'
 /** Plan 430 (C-USAGE): read helpers over `usageDays` for the Team list (428) and the dashboards (447, 448). */
+const { jerusalemDate } = require('../middleware/usage')
 
 /** `Map<userId, epoch ms of the user's latest activity>` for one business. */
 async function lastActiveByUser(db, businessId) {
@@ -28,7 +29,7 @@ async function activeDaysByBusiness(db, { from, to }) {
 
 /** Sunday-Saturday Israel week containing `date` (`YYYY-MM-DD`, or epoch ms). */
 function weekBounds(date) {
-  const day = typeof date === 'number' ? new Date(date).toISOString() : String(date)
+  const day = typeof date === 'number' ? jerusalemDate(date) : String(date)
   const base = new Date(day.slice(0, 10) + 'T00:00:00Z')
   const iso = offset => new Date(base.getTime() + offset * 86400000).toISOString().slice(0, 10)
   const dow = base.getUTCDay()
