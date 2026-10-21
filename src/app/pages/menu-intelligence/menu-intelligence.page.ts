@@ -48,6 +48,7 @@ import type { ExportPayload } from 'src/app/core/utils/export.util'
 import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-preview.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { EventStageBarComponent } from './components/event-stage-bar/event-stage-bar.component'
 import { EventNotesLogComponent } from './components/event-notes-log/event-notes-log.component'
 import { MenuExportSheetComponent } from './components/menu-export-sheet/menu-export-sheet.component'
@@ -163,8 +164,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private static readonly GUEST_REPEAT_INTERVAL_MS = 80
   private guestHoldTimer_: ReturnType<typeof setTimeout> | null = null
 
-  /** Track saved snapshot for dirty detection */
-  private savedSnapshot_ = ''
+  private readonly unsaved_ = useUnsavedChanges({ form: () => this.form_ })
   /** For pendingChangesGuard: prevents re-triggering after a successful save */
   isSubmitted = false
 
@@ -232,7 +232,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       void this.loadEvent(id)
     } else {
       this.addSection()
-      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+      this.unsaved_.markSaved()
     }
   }
 
@@ -487,7 +487,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** For pendingChangesGuard — method name must match PendingChangesComponent interface */
   hasRealChanges(): boolean {
-    return JSON.stringify(this.form_.getRawValue()) !== this.savedSnapshot_
+    return this.unsaved_.hasChanges()
   }
 
   /** For pendingChangesGuard — enables ternary modal with "Save & Leave" option */
@@ -507,7 +507,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
         this.editingId_.set(created._id)
       }
-      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+      this.unsaved_.markSaved()
       this.isSubmitted = true
       return true
     } catch {
@@ -829,7 +829,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
         const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
         this.editingId_.set(created._id)
       }
-      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+      this.unsaved_.markSaved()
       this.userMsg.onSetSuccessMsg(this.translation.translate('menu_saved'))
       this.router.navigate(['/menu-library'])
     })
@@ -894,7 +894,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.sectionsArray.push(sectionGroup)
     })
 
-    this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+    this.unsaved_.markSaved()
   }
 
   protected openAiMenuModal(): void {

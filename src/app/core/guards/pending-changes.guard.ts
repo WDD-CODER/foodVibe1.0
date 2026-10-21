@@ -7,7 +7,7 @@ export interface PendingChangesComponent {
   readProductForm_?: AbstractControl
   recipeForm_?: AbstractControl
   isSubmitted?: boolean
-  /** Optional: true when current form value differs from initial state (so we show save confirmation). */
+  /** Optional: true when current form value differs from initial state (so we show save confirmation). Pages delegate to `useUnsavedChanges` (core/utils/unsaved-changes.ts). */
   hasRealChanges?: () => boolean
   /** Optional: save the entity and wait for completion. Return true if save succeeded. */
   saveAndWait?: () => Promise<boolean>
@@ -31,9 +31,7 @@ export const pendingChangesGuard: CanDeactivateFn<PendingChangesComponent> = asy
   if (form?.disabled) return true
 
   const hasRealChanges =
-    typeof component?.hasRealChanges === 'function'
-      ? component.hasRealChanges()
-      : (form?.dirty ?? false)
+    typeof component?.hasRealChanges === 'function' ? component.hasRealChanges() : (form?.dirty ?? false)
 
   if (!hasRealChanges) return true
 
@@ -42,7 +40,7 @@ export const pendingChangesGuard: CanDeactivateFn<PendingChangesComponent> = asy
     const result = await confirmModal.openTernary('unsaved_changes_confirm', {
       variant: 'warning',
       saveLabel: 'leave_without_saving',
-      saveButtonLabel: 'save_and_leave',
+      saveButtonLabel: 'save_and_leave'
     })
 
     if (result === 'cancel') return false
@@ -60,7 +58,7 @@ export const pendingChangesGuard: CanDeactivateFn<PendingChangesComponent> = asy
   // Binary flow: no save capability (product form, etc.)
   const isConfirmed = await confirmModal.open('unsaved_changes_confirm', {
     variant: 'warning',
-    saveLabel: 'leave_without_saving',
+    saveLabel: 'leave_without_saving'
   })
 
   if (!isConfirmed) return false

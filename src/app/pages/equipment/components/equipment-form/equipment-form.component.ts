@@ -19,6 +19,7 @@ import { Equipment, EquipmentCategory } from '@models/equipment.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
@@ -42,7 +43,8 @@ const CATEGORIES: EquipmentCategory[] = [
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    CustomSelectComponent
+    CustomSelectComponent,
+    FormFieldComponent
   ],
   templateUrl: './equipment-form.component.html',
   styleUrl: './equipment-form.component.scss',

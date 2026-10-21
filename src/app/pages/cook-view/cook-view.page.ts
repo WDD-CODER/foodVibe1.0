@@ -11,6 +11,7 @@ import {
   OnDestroy
 } from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
@@ -132,8 +133,11 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Focus workflow row at index (for add step/prep); cleared after focus. */
   protected focusWorkflowRowAt_ = signal<number | null>(null)
   private workflowResetTrigger_ = 0
-  /** Steps / prep editor value right after it was built — edits to step text count as changes. */
-  private workflowSnapshot_ = ''
+  /** Steps / prep editor as built, plus the recipe copy vs the original — either differing counts as a change. */
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.workflowFormArray,
+    extra: () => JSON.stringify(this.recipe_()) !== JSON.stringify(this.originalRecipe_())
+  })
 
   /** Scale-by-ingredient: index and amount we scaled by (null = normal view). */
   protected scaleByIngredientIndex_ = signal<number | null>(null)
@@ -759,12 +763,8 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   /** For route guard (PendingChangesComponent interface): true when in edit mode with unsaved changes. */
   hasRealChanges(): boolean {
-    const edit = this.editMode_()
-    const orig = this.originalRecipe_()
-    const current = this.recipe_()
-    if (!edit || !orig || !current) return false
-    if (JSON.stringify(this.workflowFormArray.getRawValue()) !== this.workflowSnapshot_) return true
-    return JSON.stringify(current) !== JSON.stringify(orig)
+    if (!this.editMode_() || !this.originalRecipe_() || !this.recipe_()) return false
+    return this.unsaved_.hasChanges()
   }
 
   protected getEditAmountStep(currentAmount: number, delta: number, rowUnit?: string): number {
@@ -1224,7 +1224,7 @@ export class CookViewPage implements OnInit, OnDestroy {
         arr.push(this.recipeFormService.createStepGroup(1))
       }
     }
-    this.workflowSnapshot_ = JSON.stringify(arr.getRawValue())
+    this.unsaved_.markSaved()
     this.workflowResetTrigger_ += 1
   }
 
