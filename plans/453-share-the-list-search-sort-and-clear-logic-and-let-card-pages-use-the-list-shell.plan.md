@@ -4,7 +4,7 @@ Status: draft
 Track: code
 Depends-on: 450
 Conflicts-with: 452, 454, 455, 456, 457
-Snapshot: c1e6db7afb472e27bc90befbe3527b5cb3a9bebd
+Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
 
 ## Problem Statement
 Six list pages copy the same four handlers, and four pages draw their own list chrome instead of `shared/list-shell` (reuse audit 2026-10-20, family "List logic" and "List page"):

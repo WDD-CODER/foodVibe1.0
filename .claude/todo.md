@@ -647,6 +647,19 @@
 - [ ] S9: Choose the single multi-pick base: gap-list `chip-search-dropdown` vs `custom-multi-select` (CVA); migrate product-form's three chip pickers if no behaviour change, else mark `chip-search-dropdown` `@deprecated`; product-form `.ts` net <= 0 — `src/app/shared/custom-multi-select/custom-multi-select.component.ts`, `src/app/shared/custom-multi-select/custom-multi-select.component.html`, `src/app/shared/custom-multi-select/custom-multi-select.component.scss`, `src/app/shared/custom-multi-select/custom-multi-select.component.spec.ts`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.ts`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.html`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.spec.ts`, `src/app/pages/inventory/components/product-form/product-form.component.html`, `src/app/pages/inventory/components/product-form/product-form.component.ts`
 - [ ] S10: Final grep proof, registry + breadcrumbs update, `ng build`, tests, validation cards — `docs/brain/component-families.md`, `src/app/shared/breadcrumbs.md`
 
+### Plan 453 — Share the list search, sort and clear logic and let card pages use the list shell (`plans/453-share-the-list-search-sort-and-clear-logic-and-let-card-pages-use-the-list-shell.plan.md`)
+
+- [ ] S1: Write the shared list logic and its spec — `core/utils/list-controls.util.ts` with `useListControls` and `matchesSearch`; spec covers toggle-then-reset sort, clear keeps focus, Escape only acts on non-empty search, Hebrew niqqud match — `src/app/core/utils/list-controls.util.ts`, `src/app/core/utils/list-controls.util.spec.ts`
+- [ ] S3: Convert the equipment list (`setSort`, clear/escape, search on `nameHebrew`) — `src/app/pages/equipment/components/equipment-list/**`
+- [ ] S4: Convert the inventory product list (`setSort`, clear/escape, `clearAllFilters`, search on `nameHebrew`; leave its `internalName` map alone) — `src/app/pages/inventory/components/inventory-product-list/**`
+- [ ] S5: Convert the recipe book list (`setSort` plus the two date presets that call it, clear/escape, `clearAllFilters`, search) — `src/app/pages/recipe-book/components/recipe-book-list/**`
+- [ ] S6: Convert the venue list's handlers (`clearAllFilters`, clear/escape, search on `nameHebrew` and `environmentType`); keep its own page chrome for now — `src/app/pages/venues/components/venue-list/**`
+- [ ] S7: Convert the menu library list's handlers (`setSort`, clear/escape, search); keep its own page chrome for now — `src/app/pages/menu-library/components/menu-library-list/**`
+- [ ] S9: Move the venue list onto `app-list-shell layout="cards"` (header, search, selection bar, empty state into shell slots) — `src/app/pages/venues/components/venue-list/**`
+- [ ] S10: Move the menu library (event library card grid) onto `app-list-shell layout="cards"` — `src/app/pages/menu-library/components/menu-library-list/**`
+- [ ] S11: Move the trash page onto the cards layout, reusing `app-empty-state` and `app-row-actions-menu` — `src/app/pages/trash/trash.page.ts`, `src/app/pages/trash/trash.page.html`, `src/app/pages/trash/trash.page.scss`
+- [ ] S13: Run the build, all specs, the grep and frozen-file checks; write the run file with the validation cards — `docs/mvp/runs/453.md`
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).
