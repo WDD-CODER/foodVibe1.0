@@ -5,9 +5,9 @@ import {
   Injector,
   TemplateRef,
   afterNextRender,
+  afterRenderEffect,
   computed,
   contentChild,
-  effect,
   inject,
   input,
   model,
@@ -205,9 +205,9 @@ export class SearchComboboxComponent<T> {
 
   constructor() {
     // A long name typed or set by the page: keep the textarea as tall as its text.
-    effect(() => {
+    afterRenderEffect(() => {
       this.query()
-      if (this.multiline()) afterNextRender(() => this.fitHeight_(), { injector: this.injector })
+      if (this.multiline()) this.fitHeight_()
     })
   }
 
@@ -278,7 +278,9 @@ export class SearchComboboxComponent<T> {
         this.escaped.emit()
       },
       onHighlightMove: () =>
-        afterNextRender(() => scrollHighlightIntoView(this.hostRef.nativeElement), { injector: this.injector }),
+        afterNextRender(() => scrollHighlightIntoView(this.hostRef.nativeElement, '.is-highlighted'), {
+          injector: this.injector
+        }),
       onTab: this.handleTab()
         ? (ke) => {
             this.open.set(false)

@@ -33,7 +33,7 @@ describe('PreparationSearchComponent', () => {
 
   /** Lets the add window's promise chain finish. */
   const settle = async (): Promise<void> => {
-    await fixture.whenStable()
+    await new Promise<void>((resolve) => setTimeout(resolve, 0))
     fixture.detectChanges()
   }
 

@@ -186,6 +186,14 @@ describe('SearchComboboxComponent', () => {
       expect(rows().at(-1)?.classList).toContain('search-combobox__option--add')
     })
 
+    it('scrolls the highlighted row into view when an arrow moves it', () => {
+      const spy = spyOn(Element.prototype, 'scrollIntoView').and.callThrough()
+      press('ArrowDown')
+      fixture.detectChanges()
+      expect(spy).toHaveBeenCalled()
+      expect(spy.calls.mostRecent().object).toBe(rows()[highlighted()])
+    })
+
     it('Enter picks the highlighted row and closes the list', () => {
       press('ArrowDown')
       const e = press('Enter')
