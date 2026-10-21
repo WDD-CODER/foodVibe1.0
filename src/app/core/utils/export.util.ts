@@ -3,6 +3,8 @@
  * Plan: 102-unified-export-refactor, 107-export-localization-design.
  */
 
+import type { MissingItem } from '../engine/event-plan.types'
+
 /** Hebrew labels for export column/field headers (fallback without async dictionary). */
 export const EXPORT_HEADER_HE: Record<string, string> = {
   field: 'שדה',
@@ -171,6 +173,8 @@ export interface RecipeSheetLabels {
 
 /** Payload for paper-style preview and for building Excel (single source of truth). */
 export interface ExportPayload {
+  /** Items that make the totals partial (plan 444): the preview shows the "חלקי" badge when non-empty. */
+  missing?: MissingItem[]
   title: string
   subtitle?: string
   exportedAt?: string

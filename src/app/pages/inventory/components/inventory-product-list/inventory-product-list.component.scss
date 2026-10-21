@@ -270,6 +270,12 @@
     background: var(--bg-warning-soft); // rgba(254, 243, 199, 0.5) — soft amber
   }
 
+  .unpriced-badge {
+    margin-inline-end: 0.35rem;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
   // ── Validation badge (inline in col-name) ─────────────────────────────────
   .validation-badge {
     position: relative;

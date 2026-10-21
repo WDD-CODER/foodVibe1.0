@@ -12,6 +12,7 @@ import {
 } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
+import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import type { RawLine } from 'src/app/core/engine/event-plan.types'
 import { EventPlanService } from 'src/app/core/engine/event-plan.service'
@@ -40,7 +41,7 @@ import { UserService } from '@services/user.service'
 @Component({
   selector: 'app-supplier-orders',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent],
+  imports: [LucideAngularModule, TranslatePipe, EmptyStateComponent, PartialCostBadgeComponent],
   templateUrl: './supplier-orders.component.html',
   styleUrl: './supplier-orders.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,6 +73,14 @@ export class SupplierOrdersComponent {
   protected readonly orders_ = computed(() =>
     buildSupplierOrders(this.plan_(), this.kitchenState_.productsById_(), this.kitchenState_.suppliersById_(), this.t_)
   )
+  /** Per card: the plan's unpriced products that are lines of that card (plan 444). */
+  protected readonly cardMissing_ = computed(() => {
+    const unpriced = this.plan_().missing.filter((m) => m.kind === 'unpriced')
+    return this.orders_().cards.map((card) => {
+      const ids = new Set(card.lines.map((l) => l.productId))
+      return unpriced.filter((m) => !!m.productId && ids.has(m.productId))
+    })
+  })
   protected readonly empty_ = computed(() => this.plan_().rawLines.length === 0)
   private readonly header_ = computed<OrderHeader>(() => {
     const event = this.event()

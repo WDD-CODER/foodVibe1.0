@@ -200,6 +200,12 @@
               </span>
             </span>
           }
+          @if (row.unpriced) {
+            <span class="c-chip amber unpriced-badge">
+              <lucide-icon name="coins" [size]="11"></lucide-icon>
+              {{ 'product_unpriced' | translatePipe }}
+            </span>
+          }
           {{ row.product.nameHebrew }}
           @if (row.product.nutritionPer100g) {
             <app-nutrition-badge [nutrition]="row.product.nutritionPer100g"></app-nutrition-badge>
@@ -292,6 +298,11 @@
           <input type="checkbox" [checked]="showIncompleteOnly_()" (change)="toggleShowIncompleteOnly()" />
           <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
           <span>{{ 'filter_incomplete' | translatePipe }}</span>
+        </label>
+        <label class="c-toggle-chip validation-filter-option validation-filter-option--incomplete">
+          <input type="checkbox" [checked]="showUnpricedOnly_()" (change)="toggleShowUnpricedOnly()" />
+          <lucide-icon name="coins" [size]="13"></lucide-icon>
+          <span>{{ 'filter_unpriced' | translatePipe }}</span>
         </label>
         <label class="c-toggle-chip nutrition-filter-option nutrition-filter-option--has">
           <input type="checkbox" [checked]="nutritionFilter_() === 'has'" (change)="toggleNutritionFilter('has')" />

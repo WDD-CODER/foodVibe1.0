@@ -1,14 +1,8 @@
-/**
- * Menu export domain service.
- * Handles all menu-scoped Excel exports and preview payloads.
- * Plan: refactor/split-export-service
- */
+/** Menu export domain service: all menu-scoped Excel exports and preview payloads (plan refactor/split-export-service). */
 
 import { Injectable, inject } from '@angular/core'
-// Type-only — erased at compile time, so importing it costs zero bytes. The runtime
-// ExcelJS module is pulled in via `await import('exceljs')` at each point of use below
-// a value import here would drag the ~1 MB library into the boot bundle for every user,
-// including the ones who never click Export (plan 302 M4b).
+// Type-only (erased): a value import would drag the ~1 MB library into the boot bundle (plan 302 M4b)
+// the runtime module comes from `await import('exceljs')` at each point of use.
 import type { Workbook } from 'exceljs'
 
 import { Recipe } from '@models/recipe.model'
@@ -17,6 +11,7 @@ import { Product } from '@models/product.model'
 import { KitchenStateService } from './kitchen-state.service'
 import { StationRegistryService } from './station-registry.service'
 import { EventPlanService } from '../engine/event-plan.service'
+import type { MissingItem } from '../engine/event-plan.types'
 import { TranslationService } from './translation.service'
 import {
   buildExportFileName,
@@ -227,7 +222,8 @@ export class MenuExportService {
       title: `${menu.name ?? 'Menu'} — Shopping list`,
       exportedAt: new Date().toISOString(),
       sections: [{ headerRow: table.headerRow, rows: [...table.rows, table.totalRow] }],
-      summary: table.notes.map((note) => ({ label: note, value: '' }))
+      summary: table.notes.map((note) => ({ label: note, value: '' })),
+      missing: table.missing
     }
   }
 
@@ -351,7 +347,9 @@ export class MenuExportService {
   }
 
   /** The one shopping-list table every preview and Excel export of a menu reads (plan 434). */
-  private shoppingListTable_(menu: MenuEvent, products: Product[]): ShoppingListTable {
-    return buildShoppingListTable(this.eventPlan_.planFor(menu), products, (key) => this.translation_.translate(key))
+  private shoppingListTable_(menu: MenuEvent, products: Product[]): ShoppingListTable & { missing: MissingItem[] } {
+    const plan = this.eventPlan_.planFor(menu)
+    const table = buildShoppingListTable(plan, products, (key) => this.translation_.translate(key))
+    return { ...table, missing: plan.missing }
   }
 }

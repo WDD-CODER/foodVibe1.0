@@ -33,7 +33,7 @@
       <app-empty-state messageKey="supplier_orders_nothing" icon="truck" />
     } @else {
       <div class="so-grid">
-        @for (card of orders_().cards; track card.supplierId ?? 'none') {
+        @for (card of orders_().cards; track card.supplierId ?? 'none'; let i = $index) {
           <article class="so-card c-glass-panel">
             <header class="so-card-head">
               <h4 class="so-card-name">{{ card.name }}</h4>
@@ -57,9 +57,7 @@
             </ul>
             <p class="so-total">
               {{ 'supplier_orders_est_total' | translatePipe }}: {{ money(card.total) }}
-              @if (card.partial) {
-                <span class="so-partial">{{ 'partial_total' | translatePipe }}</span>
-              }
+              <app-partial-cost-badge class="so-partial" [missing]="cardMissing_()[i]"></app-partial-cost-badge>
             </p>
             <div class="so-actions">
               <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="copyCard(card)">

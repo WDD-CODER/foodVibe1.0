@@ -52,6 +52,7 @@ import { optionRateInBase } from '@utils/purchase-option-rate.util'
 import {
   getProductValidationStatus,
   getProductMissingFields,
+  isProductUnpriced,
   VALIDATION_FIELD_ICONS,
   ProductValidationStatus
 } from 'src/app/core/utils/product-validation.util'
@@ -130,6 +131,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected lowStockOnly_ = signal<boolean>(false)
   protected showInvalidOnly_ = signal<boolean>(false)
   protected showIncompleteOnly_ = signal<boolean>(false)
+  protected showUnpricedOnly_ = signal<boolean>(false)
   protected nutritionFilter_ = signal<'all' | 'has' | 'missing'>('all')
   protected deletingId_ = signal<string | null>(null)
   protected savingPriceId_ = signal<string | null>(null)
@@ -174,6 +176,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
       { urlParam: 'filters', signal: this.activeFilters_, serializer: FilterRecordParam },
       { urlParam: 'lowStock', signal: this.lowStockOnly_, serializer: BooleanParam },
+      { urlParam: 'unpriced', signal: this.showUnpricedOnly_, serializer: BooleanParam },
       { urlParam: 'nutrition', signal: this.nutritionFilter_, serializer: StringParam },
       { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
@@ -301,17 +304,19 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const lowStockOnly = this.lowStockOnly_()
     const showInvalidOnly = this.showInvalidOnly_()
     const showIncompleteOnly = this.showIncompleteOnly_()
+    const showUnpricedOnly = this.showUnpricedOnly_()
     const nutritionFilter = this.nutritionFilter_()
 
     if (lowStockOnly) {
       products = products.filter((p) => (p.minStockLevel ?? 0) > 0)
     }
 
-    if (showInvalidOnly || showIncompleteOnly) {
+    if (showInvalidOnly || showIncompleteOnly || showUnpricedOnly) {
       products = products.filter((p) => {
         const status = getProductValidationStatus(p)
         if (showInvalidOnly && status === 'invalid') return true
         if (showIncompleteOnly && status === 'incomplete') return true
+        if (showUnpricedOnly && isProductUnpriced(p)) return true
         return false
       })
     }
@@ -369,6 +374,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       return {
         product,
         validationStatus,
+        unpriced: isProductUnpriced(product),
         missingFields: validationStatus === 'valid' ? [] : this.getMissingFields(product),
         category: this.getCategoryDisplay(product.categories),
         supplierNames: this.getProductSupplierNames(product),
@@ -478,6 +484,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     this.lowStockOnly_.set(false)
     this.showInvalidOnly_.set(false)
     this.showIncompleteOnly_.set(false)
+    this.showUnpricedOnly_.set(false)
     this.nutritionFilter_.set('all')
     this.activeFilters_.set({})
   }
@@ -511,11 +518,16 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     this.showIncompleteOnly_.update((v) => !v)
   }
 
+  protected toggleShowUnpricedOnly(): void {
+    this.showUnpricedOnly_.update((v) => !v)
+  }
+
   protected hasActiveFilters_ = computed(
     () =>
       this.lowStockOnly_() ||
       this.showInvalidOnly_() ||
       this.showIncompleteOnly_() ||
+      this.showUnpricedOnly_() ||
       this.nutritionFilter_() !== 'all' ||
       Object.values(this.activeFilters_()).some((arr) => arr.length > 0)
   )
