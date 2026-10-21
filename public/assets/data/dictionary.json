@@ -1155,6 +1155,25 @@
     "setup_step_staff": "חבר צוות",
     "setup_optional": "רשות",
     "setup_progress": "מתוך 4",
-    "hide": "הסתר"
+    "hide": "הסתר",
+    "import_products": "ייבוא מוצרים",
+    "import_paste_hint": "הדבק כאן רשימת מחירים מ-WhatsApp או עמודות מ-Excel – מוצר בכל שורה",
+    "import_supplier_optional": "ספק (רשות)",
+    "import_no_supplier": "ללא ספק",
+    "import_parse": "נתח",
+    "import_save_all": "שמור הכל",
+    "import_status_new": "חדש",
+    "import_status_update": "קיים – עדכן מחיר",
+    "import_status_same": "ללא שינוי",
+    "import_flag_review": "לבדיקה",
+    "import_flag_duplicate": "כפול",
+    "import_col_purchase_unit": "יחידת רכש",
+    "import_created": "נוצרו",
+    "import_updated": "עודכנו",
+    "import_skipped": "דולגו",
+    "import_truncated": "נלקחו רק 200 השורות הראשונות",
+    "import_nothing_found": "לא זוהו מוצרים בטקסט",
+    "import_ai_failed": "הניתוח נכשל – הטקסט נשמר, נסה שוב",
+    "import_back_to_inventory": "חזרה למלאי"
   }
 }

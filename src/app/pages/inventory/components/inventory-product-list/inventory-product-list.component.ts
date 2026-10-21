@@ -206,13 +206,19 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.heroFab.setPageActions(
-      [
-        { labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) },
-        { labelKey: 'ai_product_create_new', icon: 'sparkles', run: () => this.openAiCreateModal() }
-      ],
-      'replace'
-    )
+    const actions = [
+      { labelKey: 'add_product', icon: 'plus', run: () => this.router.navigate(['/inventory/add']) },
+      { labelKey: 'ai_product_create_new', icon: 'sparkles', run: () => this.openAiCreateModal() }
+    ]
+    // Plan 432: prices are money, so the price-list import is the owner's only.
+    if (this.permission.can('editMoney', { type: 'products' })) {
+      actions.push({
+        labelKey: 'import_products',
+        icon: 'clipboard-list',
+        run: () => this.router.navigate(['/inventory/import'])
+      })
+    }
+    this.heroFab.setPageActions(actions, 'replace')
   }
 
   private openAiCreateModal(): void {
