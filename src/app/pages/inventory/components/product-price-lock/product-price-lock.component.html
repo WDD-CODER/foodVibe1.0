@@ -3,7 +3,8 @@
     <lucide-icon name="lock" [size]="14" />
     {{ 'view_only_not_yours' | translatePipe }}
   </p>
-} @else if (pricesLocked()) {
+}
+@if (pricesLocked()) {
   <p class="price-lock-note" role="note" data-testid="product-prices-locked-note">
     <lucide-icon name="lock" [size]="14" />
     {{ 'prices_locked_owner_only' | translatePipe }}

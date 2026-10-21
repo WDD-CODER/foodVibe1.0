@@ -10,4 +10,11 @@ function isValidUsername(name) {
   return trimmed.length >= 3 && trimmed.length <= 20 && USERNAME_REGEX.test(trimmed)
 }
 
-module.exports = { isValidUsername, USERNAME_REGEX }
+const PBKDF2_FORMAT = /^[0-9a-f]{32}:[0-9a-f]{64}$/
+
+/** True when `value` is a client-hashed password in `salt:hash` hex form. */
+function isValidPasswordHash(value) {
+  return typeof value === 'string' && PBKDF2_FORMAT.test(value)
+}
+
+module.exports = { isValidUsername, isValidPasswordHash }

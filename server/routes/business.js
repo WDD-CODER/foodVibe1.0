@@ -5,14 +5,12 @@ const rateLimit = require('express-rate-limit')
 const { verifyToken } = require('../middleware/auth')
 const { getBusiness } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
-const { isValidUsername } = require('../utils/username')
+const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
 
 const router = Router()
 
-// Same salted-hash shape the sign-up route accepts (client hashPassword()).
-const PBKDF2_FORMAT = /^[0-9a-f]{32}:[0-9a-f]{64}$/
 const STAFF_EMAIL_DOMAIN = '@staff.foodvibe.invalid'
 
 // Team routes are not under the /api/v1/data write limiter, and POST creates accounts, so POST is rate limited.
@@ -70,7 +68,7 @@ router.post('/team', verifyToken, ownerOnly, teamLimiter, async (req, res) => {
   try {
     const { name, password } = req.body || {}
     if (!isValidUsername(name)) return res.status(400).json({ error: 'INVALID_USERNAME' })
-    if (typeof password !== 'string' || !PBKDF2_FORMAT.test(password)) {
+    if (!isValidPasswordHash(password)) {
       return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' })
     }
     const trimmed = name.trim()
@@ -98,8 +96,11 @@ router.post('/team', verifyToken, ownerOnly, teamLimiter, async (req, res) => {
     req.log.info({ event: 'business.team.added', staffId: _id })
     res.status(201).json(toTeamRow(created.toObject()))
   } catch (err) {
+    if (err.code === 11000) {
+      req.log.info({ event: 'business.team.failed', action: 'add', reason: 'username_taken' })
+      return res.status(409).json({ error: 'USERNAME_TAKEN' })
+    }
     req.log.error({ err, event: 'business.team.failed', action: 'add' })
-    if (err.code === 11000) return res.status(409).json({ error: 'USERNAME_TAKEN' })
     res.status(500).json({ error: 'Server error' })
   }
 })

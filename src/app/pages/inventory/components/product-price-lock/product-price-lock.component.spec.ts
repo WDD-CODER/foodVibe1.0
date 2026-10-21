@@ -71,9 +71,10 @@ describe('ProductPriceLockComponent', () => {
     expect(form.getRawValue().buy_price_global_).toBe(12)
   })
 
-  it("staff on another member's product: the whole form is read-only with the view-only note", () => {
+  it("staff on another member's product: the whole form is read-only with both notes", () => {
     setup(STAFF, { _id: 'p1', createdBy: 'o1' })
     expect(form.disabled).toBeTrue()
     expect(fixture.nativeElement.querySelector('[data-testid="product-view-only-note"]')).not.toBeNull()
+    expect(fixture.nativeElement.querySelector('[data-testid="product-prices-locked-note"]')).not.toBeNull()
   })
 })

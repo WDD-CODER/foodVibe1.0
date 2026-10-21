@@ -56,7 +56,6 @@ import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-
 import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
 import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
 @Component({

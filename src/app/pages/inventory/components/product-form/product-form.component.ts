@@ -299,7 +299,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.destroyRef.onDestroy(() => this.heroFab_.clearPageActions())
 
     runInInjectionContext(this.injector, () => {
-      this.formValue_ = toSignal(this.productForm_.valueChanges, {
+      this.formValue_ = toSignal(this.productForm_.valueChanges.pipe(map(() => this.productForm_.getRawValue())), {
         initialValue: this.productForm_.getRawValue()
       })
     })
@@ -356,7 +356,6 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   /** Last real base unit (never 'NEW_UNIT'): what a cancelled "add new unit" restores. */
   private previousBaseUnit_ = ''
 
-  // RESTORED WASTE LOGIC
   private setupWasteLogic(): void {
     const percentCtrl = this.productForm_.get('waste_percent_')
     const yieldCtrl = this.productForm_.get('yieldFactor')

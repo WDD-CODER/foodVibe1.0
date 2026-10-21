@@ -1,7 +1,7 @@
 import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { ActivatedRoute, Router } from '@angular/router'
-import { BehaviorSubject } from 'rxjs'
+import { of } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { UserService } from '@services/user.service'
@@ -19,21 +19,19 @@ const OWNER: User = { _id: 'o1', name: 'owner', email: 'o@x', businessId: 'b1', 
 describe('SettingsPage', () => {
   let fixture: ComponentFixture<SettingsPage>
   let router: jasmine.SpyObj<Router>
-  let query$: BehaviorSubject<Record<string, string>>
   const user_ = signal<User | null>(null)
 
   function setup(user: User, query: Record<string, string> = {}): void {
     user_.set(user)
     router = jasmine.createSpyObj('Router', ['navigate'])
     router.navigate.and.returnValue(Promise.resolve(true))
-    query$ = new BehaviorSubject(query)
     TestBed.configureTestingModule({
       imports: [SettingsPage, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         { provide: UserService, useValue: { user_, isOwner_: computed(() => user_()?.businessRole === 'owner') } },
         { provide: TranslationService, useValue: { translate: (key: string) => key } },
         { provide: Router, useValue: router },
-        { provide: ActivatedRoute, useValue: { queryParams: query$.asObservable(), snapshot: { queryParams: query } } }
+        { provide: ActivatedRoute, useValue: { queryParams: of(query), snapshot: { queryParams: query } } }
       ]
     }).overrideComponent(SettingsPage, { remove: { imports: [TeamTabComponent] }, add: { imports: [TeamTabStub] } })
     fixture = TestBed.createComponent(SettingsPage)

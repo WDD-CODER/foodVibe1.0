@@ -7,7 +7,7 @@ const { cloneMasterDataToBusiness } = require('../services/clone-master');
 const { syncMasterToBusiness } = require('../services/sync-master');
 const { getMasterVersion } = require('../services/master-version');
 const { newId } = require('../utils/id');
-const { isValidUsername } = require('../utils/username');
+const { isValidUsername, isValidPasswordHash } = require('../utils/username');
 const { NAME_MAX_LENGTH } = require('../generated/schemas/base.schema');
 const { createBusinessFor, ensureBusinessForUser, getBusiness, setBusinessSyncedVersion } = require('../services/business');
 
@@ -187,8 +187,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
 
     // Angular already hashed the password client-side (PBKDF2 saltHex:hashHex).
     // Validate format before storing — reject anything that doesn't match.
-    const PBKDF2_FORMAT = /^[0-9a-f]{32}:[0-9a-f]{64}$/;
-    if (!PBKDF2_FORMAT.test(password)) {
+    if (!isValidPasswordHash(password)) {
       return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' });
     }
     const passwordHash = password;

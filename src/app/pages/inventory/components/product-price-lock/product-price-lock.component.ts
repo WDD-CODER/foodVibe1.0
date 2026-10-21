@@ -13,7 +13,7 @@ import type { Product } from '@models/product.model'
  * The server (plan 427) is still the one that refuses; this only stops the user hitting that refusal.
  */
 @Component({
-  selector: 'product-price-lock',
+  selector: 'app-product-price-lock',
   standalone: true,
   imports: [LucideAngularModule, TranslatePipe],
   templateUrl: './product-price-lock.component.html',

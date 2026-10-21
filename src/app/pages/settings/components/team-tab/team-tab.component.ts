@@ -6,8 +6,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TeamService, TeamMember } from '../../services/team.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { TranslationService } from '@services/translation.service'
-import { validatePassword, validateUsername } from '../../../../core/utils/auth-validation.util'
-import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.component'
+import { validatePassword, validateUsername } from 'src/app/core/utils/auth-validation.util'
+import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 
 @Component({
   selector: 'app-team-tab',
@@ -19,12 +19,12 @@ import { EmptyStateComponent } from '../../../../shared/empty-state/empty-state.
 })
 export class TeamTabComponent implements OnInit {
   // 1. INJECTED
-  private readonly business = inject(TeamService)
+  private readonly teamService = inject(TeamService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly translation = inject(TranslationService)
 
   // 4. SIGNALS & CONSTANTS
-  readonly team = this.business.team_
+  readonly team = this.teamService.team_
   readonly name_ = signal('')
   readonly password_ = signal('')
   readonly formOpen_ = signal(false)
@@ -36,7 +36,7 @@ export class TeamTabComponent implements OnInit {
   readonly hasStaff = computed(() => this.team().some((member) => member.businessRole === 'staff'))
 
   ngOnInit(): void {
-    void this.business.loadTeam()
+    void this.teamService.loadTeam()
   }
 
   // 6. METHODS in CRDUL order
@@ -50,7 +50,7 @@ export class TeamTabComponent implements OnInit {
     }
     this.saving_.set(true)
     this.errorKey_.set(null)
-    const result = await this.business.addStaff(name, this.password_())
+    const result = await this.teamService.addStaff(name, this.password_())
     this.saving_.set(false)
     if (!result.ok) {
       this.errorKey_.set(result.errorKey)
@@ -64,7 +64,7 @@ export class TeamTabComponent implements OnInit {
       variant: 'danger',
       title: 'remove'
     })
-    if (confirmed) await this.business.removeStaff(member._id)
+    if (confirmed) await this.teamService.removeStaff(member._id)
   }
 
   openForm(): void {

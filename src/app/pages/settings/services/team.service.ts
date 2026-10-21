@@ -43,7 +43,10 @@ export class TeamService {
     try {
       this._team_.set(await firstValueFrom(this.http.get<TeamMember[]>(TEAM_URL)))
     } catch (err) {
-      this.logging.warn('Team could not be loaded', { err: String(err) })
+      this.logging.error('Team could not be loaded', { err: String(err) })
+      // A 403 already got the "no permission" toast from the interceptor.
+      if ((err as { status?: number }).status !== 403)
+        this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
     }
   }
 
@@ -58,7 +61,7 @@ export class TeamService {
     } catch (err) {
       const status = (err as { status?: number }).status
       const errorKey = status === 409 ? 'username_taken' : status === 400 ? 'username_invalid_chars' : 'server_error'
-      this.logging.warn('Team member could not be added', { status: String(status) })
+      this.logging.error('Team member could not be added', { status: String(status) })
       return { ok: false, errorKey }
     }
   }
@@ -72,7 +75,7 @@ export class TeamService {
       return true
     } catch (err) {
       const status = (err as { status?: number }).status
-      this.logging.warn('Team member could not be removed', { status: String(status) })
+      this.logging.error('Team member could not be removed', { status: String(status) })
       // A 403 already got the "no permission" toast from the interceptor.
       if (status !== 403) this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
       return false
