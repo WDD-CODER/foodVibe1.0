@@ -26,7 +26,7 @@
     </div>
 
     <div class="form-section form-section--basic">
-      <div class="form-group form-group--active form-group--full">
+      <div class="venue-active">
         <div class="c-chip-group">
           <label class="c-chip c-chip--toggle">
             <input type="checkbox" formControlName="active" />
@@ -34,8 +34,7 @@
           </label>
         </div>
       </div>
-      <div class="form-group">
-        <label for="nameHebrew">{{ 'name' | translatePipe }}</label>
+      <app-form-field label="name" forId="nameHebrew" [error]="nameError()">
         <input
           id="nameHebrew"
           type="text"
@@ -44,15 +43,8 @@
           [class.c-input--invalid]="validationErrors_()['nameHebrew']"
           [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
         />
-        @if (venueForm_.get('nameHebrew')?.errors?.['duplicateName'] && venueForm_.get('nameHebrew')?.touched) {
-          <span class="form-error">{{ 'duplicate_venue_name' | translatePipe }}</span>
-        }
-        @if (validationErrors_()['nameHebrew']) {
-          <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
-        }
-      </div>
-      <div class="form-group">
-        <label for="environmentType">{{ 'environment_type' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="environment_type" forId="environmentType">
         <app-custom-select
           triggerId="environmentType"
           formControlName="environmentType"
@@ -60,27 +52,22 @@
           [placeholder]="'environment_type'"
           [typeToFilter]="true"
         />
-      </div>
-      <div class="form-group form-group--full">
-        <label for="notes">{{ 'notes' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="notes" forId="notes" layout="full">
         <textarea id="notes" formControlName="notes" rows="2" class="c-input"></textarea>
-      </div>
-      <div class="form-group">
-        <label for="address">{{ 'address' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="address" forId="address">
         <input id="address" type="text" formControlName="address" class="c-input" />
-      </div>
-      <div class="form-group">
-        <label for="capacity">{{ 'capacity' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="capacity" forId="capacity">
         <input id="capacity" type="number" formControlName="capacity" min="0" class="c-input" />
-      </div>
-      <div class="form-group">
-        <label for="contactName">{{ 'contact_name' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="contact_name" forId="contactName">
         <input id="contactName" type="text" formControlName="contactName" class="c-input" />
-      </div>
-      <div class="form-group">
-        <label for="contactPhone">{{ 'contact_phone' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="contact_phone" forId="contactPhone">
         <input id="contactPhone" type="tel" formControlName="contactPhone" class="c-input" />
-      </div>
+      </app-form-field>
     </div>
 
     <div class="form-section infra-section" formArrayName="operatingHours">

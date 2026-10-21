@@ -54,6 +54,7 @@ import { UserService } from '@services/user.service'
 import { RecipeAiFlowService } from './services/recipe-ai-flow.service'
 import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
 @Component({
@@ -118,8 +119,12 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** Bumped when ingredients change so cost/weight computeds re-run (form is not a signal). */
   private ingredientsFormVersion_ = signal(0)
 
-  /** Snapshot of form value when user entered the page (for hasRealChanges). */
-  private initialRecipeSnapshot_: string | null = null
+  /** Snapshot of the form when the user entered the page (for hasRealChanges); an applied AI draft counts as a change too. */
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.recipeForm_,
+    snapshot: () => this.getRecipeSnapshotForComparison(),
+    extra: () => this.unsavedAiDraft_
+  })
   /** True after an AI draft was applied to a new recipe and not yet saved — the draft itself is unsaved work. */
   private unsavedAiDraft_ = false
   /** Original recipe_type when the record was loaded — used to detect type-change saves. */
@@ -498,7 +503,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       // whenever the computed yield differs from the stored yieldAmount.
       runInInjectionContext(this.injector_, () => {
         afterNextRender(() => {
-          this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
+          this.unsaved_.markSaved()
           this.recipeForm_.markAsPristine()
         })
       })
@@ -608,13 +613,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the page. */
   hasRealChanges(): boolean {
     if (this.historyViewMode_() || this.recipeForm_.disabled) return false
-
-    // New and existing recipes share the snapshot comparison: every field change
-    // (label, course, rating, free-text ingredient…) counts as unsaved.
-    if (this.unsavedAiDraft_) return true
-    if (this.initialRecipeSnapshot_ === null) return this.recipeForm_.dirty === true
-    const current = this.getRecipeSnapshotForComparison()
-    return current !== this.initialRecipeSnapshot_
+    // New and existing recipes share the snapshot comparison: every field change counts as unsaved.
+    return this.unsaved_.hasChanges()
   }
 
   /** For pendingChangesGuard: save the recipe and resolve once done. */
@@ -928,7 +928,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       }
       // Refresh the entry-time snapshot so the pending-changes guard does not
       // fire when the user navigates away after a successful in-place save.
-      this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
+      this.unsaved_.markSaved()
       this.unsavedAiDraft_ = false
       this.initialRecipeType_ = saved.recipeType === 'dish' ? 'dish' : 'preparation'
       this.recipeForm_.markAsPristine()

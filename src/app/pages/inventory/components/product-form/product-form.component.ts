@@ -51,6 +51,8 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ChipSearchDropdownComponent } from 'src/app/shared/chip-search-dropdown/chip-search-dropdown.component'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 import { ProductAiFlowService } from 'src/app/pages/inventory/services/product-ai-flow.service'
 import type { AiProductDraft } from '@models/ai-product-draft.model'
@@ -96,7 +98,8 @@ interface ProductFormValue {
     LoaderComponent,
     CustomSelectComponent,
     ChipSearchDropdownComponent,
-    ProductPriceLockComponent
+    ProductPriceLockComponent,
+    FormFieldComponent
   ],
   providers: [ProductAiFlowService],
   templateUrl: './product-form.component.html',
@@ -160,8 +163,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   //SIMPLE VALUES
   private formValue_!: Signal<ProductFormValue>
   protected productForm_!: FormGroup
-  /** Snapshot of form value when user entered the item (for hasRealChanges). */
-  private initialFormSnapshot_: string | null = null
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.productForm_,
+    snapshot: () => this.getFormSnapshotForComparison()
+  })
   isSubmitted = false
 
   // Tracks per-row state for purchase options (e.g., whether a manual override was confirmed)
@@ -315,7 +320,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           this.isEditMode_.set(false)
           this.curProduct_.set(this.utilService.getEmptyProduct())
           this.productForm_.patchValue({ baseUnit: 'kg' })
-          this.initialFormSnapshot_ = this.getFormSnapshotForComparison()
+          this.unsaved_.markSaved()
         }
       })
     }
@@ -653,36 +658,31 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the item. */
   hasRealChanges(): boolean {
-    if (!this.productForm_ || this.initialFormSnapshot_ === null) return this.productForm_?.dirty ?? false
-    return this.getFormSnapshotForComparison() !== this.initialFormSnapshot_
+    return this.unsaved_.hasChanges()
   }
 
   /** Normalized form value for comparison (sorted arrays, comparable purchaseOptions). */
   private getFormSnapshotForComparison(): string {
     const raw = this.productForm_.getRawValue()
-    const opts = (raw?.purchaseOptions ?? []) as Array<{
-      unitSymbol?: string
-      conversionRate?: number
-      uom?: string
-      priceOverride?: number
-    }>
+    type Opt = { unitSymbol?: string; conversionRate?: number; uom?: string; priceOverride?: number }
+    const opts = (raw?.purchaseOptions ?? []) as Opt[]
     const normalized = {
       productName: raw?.productName ?? '',
       baseUnit: raw?.baseUnit ?? '',
       buy_price_global_: Number(raw?.buy_price_global_) || 0,
       categories: [...((raw?.categories ?? []) as string[])].sort(),
       supplierIds_: [...(raw?.supplierIds_ ?? [])].sort(),
-      minStockLevel: Number(raw?.minStockLevel) ?? 0,
-      expiryDaysDefault: Number(raw?.expiryDaysDefault) ?? 0,
-      yieldFactor: Number(raw?.yieldFactor) ?? 1,
-      waste_percent_: Number(raw?.waste_percent_) ?? 0,
+      minStockLevel: Number(raw?.minStockLevel),
+      expiryDaysDefault: Number(raw?.expiryDaysDefault),
+      yieldFactor: Number(raw?.yieldFactor),
+      waste_percent_: Number(raw?.waste_percent_),
       allergens: [...((raw?.allergens ?? []) as string[])].sort(),
       purchaseOptions: opts
         .map((o) => ({
           unitSymbol: o?.unitSymbol ?? '',
-          conversionRate: Number(o?.conversionRate) ?? 0,
+          conversionRate: Number(o?.conversionRate),
           uom: o?.uom ?? '',
-          priceOverride: Number(o?.priceOverride) ?? 0
+          priceOverride: Number(o?.priceOverride)
         }))
         .sort((a, b) => (a.unitSymbol || '').localeCompare(b.unitSymbol || ''))
     }
@@ -878,7 +878,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       })
     }
 
-    this.initialFormSnapshot_ = this.getFormSnapshotForComparison()
+    this.unsaved_.markSaved()
   }
   private validateForm_(): boolean {
     const errors: Record<string, string> = {}

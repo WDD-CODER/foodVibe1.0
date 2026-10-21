@@ -1,0 +1,8 @@
+<label [attr.for]="forId()">{{ label() | translatePipe }}</label>
+<ng-content />
+@if (hint(); as hintKey) {
+  <p class="form-field__hint">{{ hintKey | translatePipe }}</p>
+}
+@if (error(); as errorKey) {
+  <span class="c-field-error" role="alert">{{ errorKey | translatePipe }}</span>
+}

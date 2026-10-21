@@ -21,6 +21,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `custom-multi-select/` | Multi-select CVA | CustomMultiSelectComponent |
 | `custom-select/` | Select CVA | CustomSelectComponent |
 | `edit-gate/` | Shows its content only when the user may save the opened document, else a view-only note | EditGateComponent |
+| `form-field/` | Label + projected control + error/hint slot for entity forms (`layout`, `labelStyle`) | FormFieldComponent |
 | `empty-state/` | Empty list placeholder | EmptyStateComponent |
 | `export-preview/` | Export preview panel | ExportPreviewComponent |
 | `export-toolbar-overlay/` | Export toolbar overlay | ExportToolbarOverlayComponent |

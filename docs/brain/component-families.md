@@ -111,25 +111,21 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Known copies: not counted.
 
 ### form-field — label, input, error
-- Status: converging — plan 455 adds a shared form-field component
-- Use: CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
+- Status: stable — plan 455 built `app-form-field`; the equipment, supplier, venue and product forms are on it
+- Use: `src/app/shared/form-field/` · `app-form-field` (`label`, `forId`, `error`, `hint`, `layout`, `labelStyle`; the control is projected) on the
+  CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
   clear button: `src/app/shared/input-clear/` (`app-input-clear`).
-- When: any form input.
-- Known copies (`.form-group` defined locally in 4 files):
-  `src/app/pages/equipment/components/equipment-form/equipment-form.component.scss`,
-  `src/app/pages/inventory/components/product-form/product-form.component.scss`,
-  `src/app/pages/suppliers/components/supplier-form/supplier-form.component.scss`,
-  `src/app/pages/venues/components/venue-form/venue-form.component.scss`.
+- When: any form input with a label.
+- Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
+  label or content, not a plain label + input).
 
 ### entity-form — name validation and unsaved-changes check
-- Status: converging — plan 455 adds one unsaved-changes helper
-- Use: `src/app/core/validators/item.validators.ts` · `duplicateNameValidator`, `duplicateEntityNameValidator`;
+- Status: stable — plan 455 built one unsaved-changes helper
+- Use: `src/app/core/utils/unsaved-changes.ts` · `useUnsavedChanges({ form, snapshot?, extra? })`; each page keeps `hasRealChanges()` as a one-line
+  delegation; `src/app/core/validators/item.validators.ts` · `duplicateEntityNameValidator` (`duplicateNameValidator` wraps it for products);
   leave-page guard: `src/app/core/guards/pending-changes.guard.ts`.
 - When: a form edits a named entity, or must warn before leaving with unsaved changes.
-- Known copies (`hasRealChanges` implemented in 5 pages): `src/app/pages/cook-view/cook-view.page.ts`,
-  `src/app/pages/inventory/components/product-form/product-form.component.ts`,
-  `src/app/pages/menu-intelligence/menu-intelligence.page.ts`, `src/app/pages/recipe-builder/recipe-builder.page.ts`,
-  `src/app/pages/venues/components/venue-form/venue-form.component.ts`.
+- Known copies: none.
 
 ### chip — chips, badges, pills
 - Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it

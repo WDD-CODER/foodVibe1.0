@@ -13,8 +13,17 @@
     </header>
 
     <div class="form-section form-section--mandatory">
-      <div class="form-group">
-        <label>{{ 'product_name' | translatePipe }}</label>
+      <app-form-field
+        label="product_name"
+        labelStyle="caps"
+        [error]="
+          productForm_.get('productName')?.touched && productForm_.get('productName')?.errors?.['duplicateName']
+            ? 'duplicate_product_name_error'
+            : validationErrors_()['productName']
+              ? 'field_name_required'
+              : null
+        "
+      >
         <input
           #productNameInput
           formControlName="productName"
@@ -28,19 +37,9 @@
           autocapitalize="off"
           spellcheck="false"
         />
-        @if (
-          productForm_.get('productName')?.invalid &&
-          productForm_.get('productName')?.touched &&
-          productForm_.get('productName')?.errors?.['duplicateName']
-        ) {
-          <span class="form-error">{{ 'duplicate_product_name_error' | translatePipe }}</span>
-        }
-        @if (validationErrors_()['productName']) {
-          <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
-        }
-      </div>
+      </app-form-field>
 
-      <div class="form-group" [class.c-input--invalid]="validationErrors_()['categories']">
+      <div class="product-field" [class.c-input--invalid]="validationErrors_()['categories']">
         <label class="label-row collapsible-field__label-with-icon">
           <lucide-icon name="tags" class="icon-xs icon-muted"></lucide-icon>
           {{ 'category' | translatePipe }}
@@ -62,8 +61,7 @@
 
       <app-product-price-lock [form]="productForm_" />
 
-      <div class="form-group">
-        <label>{{ 'buy_price' | translatePipe }}</label>
+      <app-form-field label="buy_price" labelStyle="caps">
         <div class="relative-input">
           <input
             SelectOnFocus
@@ -77,10 +75,13 @@
           />
           <span class="prefix">₪</span>
         </div>
-      </div>
+      </app-form-field>
 
-      <div class="form-group">
-        <label>{{ 'base_unit' | translatePipe }}</label>
+      <app-form-field
+        label="base_unit"
+        labelStyle="caps"
+        [error]="validationErrors_()['baseUnit'] ? 'field_unit_required' : null"
+      >
         <app-custom-select
           formControlName="baseUnit"
           [options]="baseUnitOptions_()"
@@ -92,10 +93,7 @@
           [class.c-input--invalid]="validationErrors_()['baseUnit']"
           (valueChange)="onBaseUnitValueChange($event)"
         />
-        @if (validationErrors_()['baseUnit']) {
-          <span class="c-field-error">{{ 'field_unit_required' | translatePipe }}</span>
-        }
-      </div>
+      </app-form-field>
     </div>
 
     <div class="form-section form-section--purchase border-top" formArrayName="purchaseOptions">
@@ -108,7 +106,7 @@
       <div
         *ngFor="let option of purchaseOptions_.controls; let idx = index"
         [formGroupName]="idx"
-        class="form-group scaling-box"
+        class="product-field scaling-box"
         [class.row-invalid]="option.invalid && (option.dirty || isSubmitted)"
       >
         <div class="scaling-row">
@@ -209,7 +207,7 @@
     <div class="form-section form-section--optional border-top">
       <!-- Optional fields heading kept hidden by design -->
 
-      <div class="form-group collapsible-field">
+      <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedSupplier_()"
@@ -247,7 +245,7 @@
         </div>
       </div>
 
-      <div class="form-group allergen-container collapsible-field">
+      <div class="product-field allergen-container collapsible-field">
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedAllergens_()"
@@ -285,7 +283,7 @@
         </div>
       </div>
 
-      <div class="form-group collapsible-field">
+      <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedWasteYield_()"
@@ -296,7 +294,7 @@
             <span class="label-text">{{ 'waste_yield_logic' | translatePipe }}</span>
           </div>
           <div class="two-col-grid">
-            <div class="form-group yield-logic">
+            <div class="product-field yield-logic">
               <label>{{ 'waste_percent' | translatePipe }}</label>
               <div class="relative-input">
                 <input
@@ -313,7 +311,7 @@
               <p class="helper-text">{{ 'waste_percent_help_text' | translatePipe }}</p>
             </div>
 
-            <div class="form-group yield-logic">
+            <div class="product-field yield-logic">
               <label>{{ 'yield_factor' | translatePipe }}</label>
               <div class="relative-input">
                 <input
@@ -348,7 +346,7 @@
           <span>{{ 'waste_yield_logic' | translatePipe }}</span>
         </div>
       </div>
-      <div class="form-group collapsible-field">
+      <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedMinStock_()"
@@ -374,7 +372,7 @@
         </div>
       </div>
 
-      <div class="form-group collapsible-field">
+      <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedExpiryDays_()"

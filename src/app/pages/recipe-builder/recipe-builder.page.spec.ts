@@ -59,7 +59,9 @@ describe('RecipeBuilderComponent', () => {
   describe('hasRealChanges() on a new recipe', () => {
     it('captures a baseline snapshot for a new recipe', async () => {
       const page = await createPage()
-      expect(page.initialRecipeSnapshot_).not.toBeNull()
+      // A baseline exists when marking the form dirty alone (no value change) is not a change.
+      page.recipeForm_.markAsDirty()
+      expect(component.hasRealChanges()).toBeFalse()
     })
 
     it('is false for a blank new recipe', async () => {
