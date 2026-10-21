@@ -60,6 +60,7 @@ import { EventStageBarComponent } from './components/event-stage-bar/event-stage
 import { EventNotesLogComponent } from './components/event-notes-log/event-notes-log.component'
 import { MenuExportSheetComponent } from './components/menu-export-sheet/menu-export-sheet.component'
 import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.component'
+import { PrepSheetsComponent, type PrepSheetsMode } from './components/prep-sheets/prep-sheets.component'
 import { SupplierOrdersComponent } from './components/supplier-orders/supplier-orders.component'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
@@ -101,6 +102,7 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     ExportPreviewComponent,
     MenuDishRowComponent,
     MenuExportSheetComponent,
+    PrepSheetsComponent,
     SupplierOrdersComponent,
     VenueLinkChipComponent,
     InputClearComponent,
@@ -147,10 +149,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** "צ'קליסט והדפסות" top sheet, toggled from the hero FAB (plan 344). */
   protected readonly exportSheetOpen_ = signal(false)
   protected readonly supplierOrdersEvent_ = signal<MenuEvent | null>(null)
+  protected readonly prepSheets_ = signal<{ event: MenuEvent; mode: PrepSheetsMode } | null>(null)
   /** Export preview (View before export). */
   protected readonly exportPreviewPayload_ = signal<ExportPayload | null>(null)
-  private exportPreviewType_: 'menu-info' | 'menu-shopping-list' | 'menu-checklist' | 'menu-all' | null = null
-  private exportChecklistMode_: 'by_dish' | 'by_category' | 'by_station' | null = null
+  private exportPreviewType_: 'menu-info' | 'menu-shopping-list' | 'menu-all' | null = null
 
   protected readonly sectionSearchOpen_ = signal<number | null>(null)
   /** Currently active dish search (for keyboard nav); null when none focused/has query. */
@@ -308,6 +310,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private closeAllExportOverlays(): void {
     this.exportSheetOpen_.set(false)
     this.supplierOrdersEvent_.set(null)
+    this.prepSheets_.set(null)
     this.exportPreviewPayload_.set(null)
     this.exportPreviewType_ = null
   }
@@ -1238,18 +1241,15 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected onExportFromPreview(): void {
     const type = this.exportPreviewType_
-    const mode = this.exportChecklistMode_
     if (!type) return
     const menu = this.getCurrentMenuForExport()
     if (type === 'menu-info') this.exportService.exportMenuInfo(menu, this.recipes_())
     else if (type === 'menu-shopping-list')
       this.exportService.exportMenuShoppingList(menu, this.recipes_(), this.products_())
-    else if (type === 'menu-checklist' && mode) this.exportService.exportChecklist(menu, this.recipes_(), mode)
     else if (type === 'menu-all')
       this.exportService.exportAllTogetherMenu(menu, this.recipes_(), this.products_(), 'by_category')
     this.exportPreviewPayload_.set(null)
     this.exportPreviewType_ = null
-    this.exportChecklistMode_ = null
   }
 
   protected onPrintFromPreview(): void {
@@ -1259,14 +1259,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected onCloseExportPreview(): void {
     this.exportPreviewPayload_.set(null)
     this.exportPreviewType_ = null
-    this.exportChecklistMode_ = null
   }
 
-  protected onViewChecklist(mode: 'by_dish' | 'by_category' | 'by_station'): void {
-    const menu = this.getCurrentMenuForExport()
-    this.exportPreviewPayload_.set(this.exportService.getMenuChecklistPreviewPayload(menu, this.recipes_(), mode))
-    this.exportPreviewType_ = 'menu-checklist'
-    this.exportChecklistMode_ = mode
+  protected onViewChecklist(mode: PrepSheetsMode): void {
+    this.prepSheets_.set({ event: this.getCurrentMenuForExport(), mode })
   }
 
   protected async onExportChecklist(mode: 'by_dish' | 'by_category' | 'by_station'): Promise<void> {

@@ -1242,6 +1242,21 @@
     "import_truncated": "נלקחו רק 200 השורות הראשונות",
     "import_nothing_found": "לא זוהו מוצרים בטקסט",
     "import_ai_failed": "הניתוח נכשל – הטקסט נשמר, נסה שוב",
-    "import_back_to_inventory": "חזרה למלאי"
+    "import_back_to_inventory": "חזרה למלאי",
+    "prep_sheets": "דפי הכנה",
+    "prep_sheets_by_supplier": "לפי ספק",
+    "prep_sheets_print": "הדפס",
+    "prep_sheets_choose": "בחר מה להדפיס",
+    "prep_sheets_for_dish": "למנה",
+    "prep_sheets_no_preps": "אין הכנות במנה זו",
+    "prep_sheets_nothing": "אין מה להדפיס",
+    "prep_sheets_page_footer": "עמוד {x} מתוך {y} · {group}",
+    "prep_sheets_guests": "{n} סועדים",
+    "prep_sheets_col_prep": "הכנה",
+    "prep_sheets_col_product": "מוצר",
+    "prep_sheets_col_qty": "כמות",
+    "prep_sheets_col_unit": "יחידה",
+    "prep_sheets_col_note": "הערה",
+    "prep_sheets_col_purchase": "יחידות רכש"
   }
 }

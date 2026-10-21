@@ -1,6 +1,6 @@
 # Plan 437 — Printed prep sheets per station, category or dish, one page per group
 
-Status: draft
+Status: active
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 Track: code
 
@@ -18,8 +18,8 @@ pages with no page header or footer. After plan 436 every recipe has a real stat
   on-screen preview and Excel — all quantities from the engine (plan 433).
 
 Done when:
-- [auto] `npx ng build` exits 0.
-- [auto] `npx ng test --watch=false --include='src/app/core/utils/prep-sheet-groups.util.spec.ts' --include='src/app/pages/menu-intelligence/components/prep-sheets/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/menu-export-sheet/**/*.spec.ts' --include='src/app/core/services/export.service.spec.ts'`
+- [x] [auto] `npx ng build` exits 0.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/utils/prep-sheet-groups.util.spec.ts' --include='src/app/pages/menu-intelligence/components/prep-sheets/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/menu-export-sheet/**/*.spec.ts' --include='src/app/core/services/export.service.spec.ts'`
   passes (0 failures), including, on the plan-433 fixture with סלט `defaultStation: 'קר'` and פסטה `''`:
   - by station → exactly one group "קר" with one row: name "רוטב", qty 2, unit `kg`, `forDishes` `['סלט']`; no "כללי"
     group (פסטה has no preps — empty groups are dropped).
@@ -35,11 +35,11 @@ Done when:
     content contains the group name; both are removed on close.
   - Excel: `prepSheetTableRows(group, t)` (the rows the Excel helper writes, one worksheet per group) equals the
     group's on-screen rows cell for cell — name, qty, unit label, "למנה" text, note — on the by-station fixture.
-- [auto] `git diff --numstat origin/main...HEAD -- src/app/pages/menu-intelligence/menu-intelligence.page.ts src/app/core/services/menu-export.service.ts`
+- [x] [auto] `git diff --numstat origin/main...HEAD -- src/app/pages/menu-intelligence/menu-intelligence.page.ts src/app/core/services/menu-export.service.ts`
   shows added ≤ deleted for both (growth-frozen).
-- [auto] `git grep -n "getScaledPrepItems\|getMenuChecklistPreviewPayload" -- src/app/core/services/menu-export.service.ts src/app/core/services/export.service.ts src/app/pages/menu-intelligence` → no output.
-- [auto] `git diff origin/main...HEAD -- src/styles.scss` shows only added lines (append-only hotspot).
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `git grep -n "getScaledPrepItems\|getMenuChecklistPreviewPayload" -- src/app/core/services/menu-export.service.ts src/app/core/services/export.service.ts src/app/pages/menu-intelligence` → no output.
+- [x] [auto] `git diff origin/main...HEAD -- src/styles.scss` shows only added lines (append-only hotspot).
+- [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Chrome print preview on desktop and on Android shows one clean page per group, only the chosen groups,
   no app chrome, checkboxes on every row, no row cut between pages (cards ①–⑥ below).
 
@@ -102,6 +102,7 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 ```scope
 src/app/core/utils/prep-sheet-groups.util.ts
 src/app/core/utils/prep-sheet-groups.util.spec.ts
+src/app/core/utils/supplier-orders.util.ts
 src/app/core/services/menu-export.service.ts
 src/app/core/services/export.service.ts
 src/app/core/services/export.service.spec.ts
@@ -146,22 +147,22 @@ existing `@media print` blocks in `src/styles.scss`. Print `ok` / `conflict: <wh
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] One pure group builder from the engine plan for by dish / by category / by station, plus supplier pages from
+- [x] One pure group builder from the engine plan for by dish / by category / by station, plus supplier pages from
       `buildSupplierOrders`; used by the screen, print and Excel.
-- [ ] Group rules: prep row belongs to the serving dish's station; station `''` → "כללי"; category from the prep line
+- [x] Group rules: prep row belongs to the serving dish's station; station `''` → "כללי"; category from the prep line
       (`''` → "כללי"); same prep (id + unit) in one group → one row, summed, all dishes in "למנה"; empty
       category/station groups dropped; a dish with no preps still appears in "by dish" with "אין הכנות במנה זו".
-- [ ] Order: stations in their list order then "כללי"; categories alphabetical (he) then "כללי"; dishes in menu order;
+- [x] Order: stations in their list order then "כללי"; categories alphabetical (he) then "כללי"; dishes in menu order;
       rows alphabetical (he).
-- [ ] Page header per group: group name (large, bold) · event name · date · guests · serving type. Row: ☐ · name ·
+- [x] Page header per group: group name (large, bold) · event name · date · guests · serving type. Row: ☐ · name ·
       qty · unit · "למנה" (category/station sheets) · note.
-- [ ] Group checkboxes (all checked on open) choose what "הדפס" prints; unchecked groups stay visible on screen,
+- [x] Group checkboxes (all checked on open) choose what "הדפס" prints; unchecked groups stay visible on screen,
       dimmed, and never print.
-- [ ] Print: A4 portrait, RTL, body ≥ 14pt, group title ≥ 20pt, black on white, no backgrounds, no app chrome or
+- [x] Print: A4 portrait, RTL, body ≥ 14pt, group title ≥ 20pt, black on white, no backgrounds, no app chrome or
       buttons, each group starts on a new page, rows never split, table header repeats, footer
       "עמוד X מתוך Y · [group]".
-- [ ] Excel (`exportChecklist`, and the checklist sheets of `exportAllTogetherMenu`): one worksheet per group, same rows.
-- [ ] The old flattened checklist preview (`getMenuChecklistPreviewPayload`) and its three `getScaledPrepItems`
+- [x] Excel (`exportChecklist`, and the checklist sheets of `exportAllTogetherMenu`): one worksheet per group, same rows.
+- [x] The old flattened checklist preview (`getMenuChecklistPreviewPayload`) and its three `getScaledPrepItems`
       copies are removed.
 
 ## UI/UX Notes
@@ -207,18 +208,18 @@ existing `@media print` blocks in `src/styles.scss`. Print `ok` / `conflict: <wh
   `no_supplier` (435), `export`, `view`, `close`.
 
 ## Atomic Sub-tasks
-- [ ] P1: Build the printed groups once from the engine so screen, paper and Excel match — buildPrepSheetGroups(plan, event, recipesById, mode, t, stationOrder) → PrepSheetGroup[] { key, title, rows { name, qty, unit, forDishes, note }, emptyText? }; aggregate by prepId+unit before formatQty; rules and order from P0; prepSheetTableRows(group, t) gives the header + cell rows both the template and Excel use — src/app/core/utils/prep-sheet-groups.util.ts
-- [ ] P2: Turn supplier orders into printable pages — buildSupplierSheetGroups(orders, t): one group per card (review card excluded), rows product · qty · unit · purchase text, no prices — src/app/core/utils/prep-sheet-groups.util.ts
-- [ ] P3: Test grouping, dish station, merging, empty groups and supplier pages on the 04.1 fixture — cases in Done when — src/app/core/utils/prep-sheet-groups.util.spec.ts
-- [ ] P4: Show the prep sheets as printed pages with a checkbox per group — PrepSheetsComponent: groups computed from EventPlanService + StationRegistryService order; selected_ signal (all on open); mode tabs; header block per page; body class + runtime @page style via Renderer2/DOCUMENT, removed in ngOnDestroy; Escape closes — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.ts, .html, .scss
-- [ ] P5: Print only the chosen groups, cleanly on A4 — print() → window.print(); component print SCSS; append the body-class rule to the global stylesheet — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.scss, src/styles.scss
-- [ ] P6: Add supplier pages to the same screen — by_supplier mode reads buildSupplierOrders (plan 435) and buildSupplierSheetGroups; no Excel button in this mode — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.ts, .html
-- [ ] P7: Test the component's selection, print call and page-footer style — spec with window.print spied and a stub EventPlanService — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.spec.ts
-- [ ] P8: Make the Excel prep sheets the same rows as the screen and drop the old copies — exportChecklist and the checklist part of exportAllTogetherMenu write one worksheet per group from buildPrepSheetGroups + prepSheetTableRows via one private helper; delete getMenuChecklistPreviewPayload, the ScalingService prep calls and (if unused) the ScalingService inject; remove the facade method; net lines ≤ 0 — src/app/core/services/menu-export.service.ts, src/app/core/services/export.service.ts, src/app/core/services/export.service.spec.ts
-- [ ] P9: Rename the sheet's checklist group to prep sheets and add the supplier mode — prep_sheets title, by_supplier row (view only), ChecklistMode union; the exportChecklist output stays typed Exclude<ChecklistMode, 'by_supplier'> so ExportService.exportChecklist keeps its signature; spec — src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.ts, .html, .spec.ts
-- [ ] P10: Open prep sheets from the menu without growing the frozen page — prepSheets_ signal; onViewChecklist sets { event: getCurrentMenuForExport(), mode }; remove the 'menu-checklist' preview branch and exportChecklistMode_; closeAllExportOverlays clears prepSheets_; lazy @defer block in html; added ≤ deleted — src/app/pages/menu-intelligence/menu-intelligence.page.ts, menu-intelligence.page.html
-- [ ] P11: Add the Hebrew texts for the prep sheets — keys listed in UI/UX Notes — public/assets/data/dictionary.json
-- [ ] P12: Build, test, check frozen files and the stylesheet append, then hand over the print checks — ng build, ng test include list, numstat, git grep, styles diff, log-query; cards ①–⑥ — this plan file
+- [x] P1: Build the printed groups once from the engine so screen, paper and Excel match — buildPrepSheetGroups(plan, event, recipesById, mode, t, stationOrder) → PrepSheetGroup[] { key, title, rows { name, qty, unit, forDishes, note }, emptyText? }; aggregate by prepId+unit before formatQty; rules and order from P0; prepSheetTableRows(group, t) gives the header + cell rows both the template and Excel use — src/app/core/utils/prep-sheet-groups.util.ts
+- [x] P2: Turn supplier orders into printable pages — buildSupplierSheetGroups(orders, t): one group per card (review card excluded), rows product · qty · unit · purchase text, no prices — src/app/core/utils/prep-sheet-groups.util.ts
+- [x] P3: Test grouping, dish station, merging, empty groups and supplier pages on the 04.1 fixture — cases in Done when — src/app/core/utils/prep-sheet-groups.util.spec.ts
+- [x] P4: Show the prep sheets as printed pages with a checkbox per group — PrepSheetsComponent: groups computed from EventPlanService + StationRegistryService order; selected_ signal (all on open); mode tabs; header block per page; body class + runtime @page style via Renderer2/DOCUMENT, removed in ngOnDestroy; Escape closes — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.ts, .html, .scss
+- [x] P5: Print only the chosen groups, cleanly on A4 — print() → window.print(); component print SCSS; append the body-class rule to the global stylesheet — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.scss, src/styles.scss
+- [x] P6: Add supplier pages to the same screen — by_supplier mode reads buildSupplierOrders (plan 435) and buildSupplierSheetGroups; no Excel button in this mode — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.ts, .html
+- [x] P7: Test the component's selection, print call and page-footer style — spec with window.print spied and a stub EventPlanService — src/app/pages/menu-intelligence/components/prep-sheets/prep-sheets.component.spec.ts
+- [x] P8: Make the Excel prep sheets the same rows as the screen and drop the old copies — exportChecklist and the checklist part of exportAllTogetherMenu write one worksheet per group from buildPrepSheetGroups + prepSheetTableRows via one private helper; delete getMenuChecklistPreviewPayload, the ScalingService prep calls and (if unused) the ScalingService inject; remove the facade method; net lines ≤ 0 — src/app/core/services/menu-export.service.ts, src/app/core/services/export.service.ts, src/app/core/services/export.service.spec.ts
+- [x] P9: Rename the sheet's checklist group to prep sheets and add the supplier mode — prep_sheets title, by_supplier row (view only), ChecklistMode union; the exportChecklist output stays typed Exclude<ChecklistMode, 'by_supplier'> so ExportService.exportChecklist keeps its signature; spec — src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.ts, .html, .spec.ts
+- [x] P10: Open prep sheets from the menu without growing the frozen page — prepSheets_ signal; onViewChecklist sets { event: getCurrentMenuForExport(), mode }; remove the 'menu-checklist' preview branch and exportChecklistMode_; closeAllExportOverlays clears prepSheets_; lazy @defer block in html; added ≤ deleted — src/app/pages/menu-intelligence/menu-intelligence.page.ts, menu-intelligence.page.html
+- [x] P11: Add the Hebrew texts for the prep sheets — keys listed in UI/UX Notes — public/assets/data/dictionary.json
+- [x] P12: Build, test, check frozen files and the stylesheet append, then hand over the print checks — ng build, ng test include list, numstat, git grep, styles diff, log-query; cards ①–⑥ — this plan file
 
 ## Technical Considerations
 - Dependencies: `EventPlanService` (433), `buildSupplierOrders` (435), `StationRegistryService` (436),

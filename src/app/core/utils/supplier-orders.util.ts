@@ -99,7 +99,7 @@ export function toWhatsAppPhone(raw: string | null | undefined): string | null {
   return null
 }
 
-function unitLabel(unit: string, t: Translate): string {
+export function unitLabel(unit: string, t: Translate): string {
   return unit === 'unit' ? t('unit_short_unit') : t(unit)
 }
 

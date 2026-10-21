@@ -63,13 +63,6 @@ export class ExportService {
   getMenuShoppingListPreviewPayload(menu: MenuEvent, recipes: Recipe[], products: Product[]): ExportPayload {
     return this.menuExport_.getMenuShoppingListPreviewPayload(menu, recipes, products)
   }
-  getMenuChecklistPreviewPayload(
-    menu: MenuEvent,
-    recipes: Recipe[],
-    mode: 'by_dish' | 'by_category' | 'by_station'
-  ): ExportPayload {
-    return this.menuExport_.getMenuChecklistPreviewPayload(menu, recipes, mode)
-  }
   getMenuAllViewPreviewPayload(menu: MenuEvent, recipes: Recipe[]): ExportPayload {
     return this.menuExport_.getMenuAllViewPreviewPayload(menu, recipes)
   }

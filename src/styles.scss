@@ -2346,3 +2346,15 @@ body.kb-open {
     color: var(--color-primary-hover);
   }
 }
+
+/* Plan 437: while prep sheets are open, print only them */
+@media print {
+  body.prep-sheets-open *:not(:has(app-prep-sheets)):not(app-prep-sheets):not(app-prep-sheets *) {
+    display: none !important;
+  }
+
+  body.prep-sheets-open app-prep-sheets,
+  body.prep-sheets-open app-prep-sheets * {
+    visibility: visible;
+  }
+}
