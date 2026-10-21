@@ -11,7 +11,7 @@ import {
 } from '@angular/core'
 import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
-import { RouterLink } from '@angular/router'
+import { ActivatedRoute, RouterLink } from '@angular/router'
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
@@ -34,6 +34,8 @@ import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.c
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
 import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
+import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
+import { RecipeCostService } from '@services/recipe-cost.service'
 
 /**
  * Inline stand-in for the 120x120 image thumbnail before a photo is uploaded.
@@ -67,6 +69,7 @@ const IMAGE_PLACEHOLDER_SVG =
     ScalingChipComponent,
     ScrollIndicatorsDirective,
     RatingStarsComponent,
+    PartialCostBadgeComponent,
     RouterLink
   ],
   templateUrl: './recipe-header.component.html',
@@ -88,6 +91,8 @@ export class RecipeHeaderComponent {
   private stationRegistry = inject(StationRegistryService)
   private addItemModal = inject(AddItemModalService)
   private logging = inject(LoggingService)
+  private recipeCost = inject(RecipeCostService)
+  private route = inject(ActivatedRoute, { optional: true })
 
   // INPUTS
   form = input.required<FormGroup>()
@@ -116,6 +121,30 @@ export class RecipeHeaderComponent {
   ratingChange = output<number>()
   /** Fires whenever the user actively changes the primary yield amount or unit. */
   yieldManuallyChanged = output<void>()
+
+  // PARTIAL COST (plan 444)
+  /** Bumped when the ingredient rows change, so the missing list re-reads the (non-signal) form. */
+  private readonly ingredientsVersion_ = signal(0)
+
+  /** The recipe being edited: its saved id, or a stand-in while it is new. */
+  private readonly ownerRecipeId_ = (): string => this.route?.snapshot?.paramMap?.get('id') || 'form'
+
+  /** What keeps the header cost from being final: unpriced, unlinked and deleted ingredients, through preps. */
+  protected readonly missing_ = computed(() => {
+    this.currentCost()
+    this.ingredientsVersion_()
+    const rows = (this.form().getRawValue()?.ingredients ?? []) as {
+      referenceId?: string
+      item_type?: string
+      nameHebrew?: string
+    }[]
+    return this.recipeCost.findMissing(rows, this.ownerRecipeId_())
+  })
+
+  protected readonly ownRecipeNames_ = computed(() => {
+    this.ingredientsVersion_()
+    return { [this.ownerRecipeId_()]: (this.form().get('nameHebrew')?.value ?? '').toString() }
+  })
 
   // YIELD WRAPPERS — emit yieldManuallyChanged so the parent can reset netoConfirmed
   onPrimaryAmountChange(val: number): void {
@@ -156,6 +185,12 @@ export class RecipeHeaderComponent {
       if (computed !== null && !this.yield.isManualOverride_() && !this.netoConfirmed()) {
         this.yield.syncYieldFromMetrics()
       }
+    })
+    effect((onCleanup) => {
+      const ingredients = this.form().get('ingredients')
+      if (!ingredients) return
+      const sub = ingredients.valueChanges.subscribe(() => this.ingredientsVersion_.update((v) => v + 1))
+      onCleanup(() => sub.unsubscribe())
     })
     effect((onCleanup) => {
       const ctrl = this.form().get('course')

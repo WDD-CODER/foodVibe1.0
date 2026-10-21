@@ -12,7 +12,7 @@ import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { StationRegistryService } from '@services/station-registry.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
-import { signal, WritableSignal } from '@angular/core'
+import { computed, signal, WritableSignal } from '@angular/core'
 
 describe('RecipeHeaderComponent', () => {
   let component: RecipeHeaderComponent
@@ -287,5 +287,42 @@ describe('RecipeHeaderComponent', () => {
     fixture.detectChanges()
     expect(conversions.length).toBe(1)
     expect(component.yield.availableSecondaryUnits_()).toContain('liter')
+  })
+  describe('partial cost badge (plan 444)', () => {
+    it('shows the badge for an unpriced ingredient and hides it when every row is priced', () => {
+      const kitchen = TestBed.inject(KitchenStateService) as unknown as Record<string, unknown>
+      const products = signal<unknown[]>([
+        { _id: 'oil', nameHebrew: 'שמן בדיקה', baseUnit: 'kg', sources: [], purchaseOptions: [] }
+      ])
+      kitchen['productsById_'] = computed(() => new Map(products().map((p) => [(p as { _id: string })._id, p])))
+      kitchen['recipesById_'] = computed(() => new Map())
+      const form = fb.group({
+        recipe_type: ['preparation'],
+        serving_portions: [1],
+        yield_conversions: fb.array([fb.group({ unit: ['gram'], amount: [1] })]),
+        nameHebrew: ['סלט'],
+        total_weight_g: [0],
+        labels: [[] as string[]],
+        course: [''],
+        default_station: [''],
+        ingredients: fb.array([fb.group({ referenceId: ['oil'], item_type: ['product'], nameHebrew: ['שמן בדיקה'] })])
+      })
+      fixture.componentRef.setInput('form', form)
+      fixture.detectChanges()
+      const el = fixture.nativeElement as HTMLElement
+      expect(el.querySelector('.partial-chip')).not.toBeNull()
+
+      products.set([
+        {
+          _id: 'oil',
+          nameHebrew: 'שמן בדיקה',
+          baseUnit: 'kg',
+          sources: [{ supplierId: '', price: 20 }],
+          purchaseOptions: []
+        }
+      ])
+      fixture.detectChanges()
+      expect(el.querySelector('.partial-chip')).toBeNull()
+    })
   })
 })

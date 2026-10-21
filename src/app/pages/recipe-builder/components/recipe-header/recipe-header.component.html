@@ -187,6 +187,7 @@
     <div class="metric-group">
       <span class="label">{{ 'cost' | translatePipe }}</span>
       <span class="value">₪{{ currentCost() | number: '1.2-2' }}</span>
+      <app-partial-cost-badge [missing]="missing_()" [recipeNames]="ownRecipeNames_()"></app-partial-cost-badge>
     </div>
     <div class="divider"></div>
     <div

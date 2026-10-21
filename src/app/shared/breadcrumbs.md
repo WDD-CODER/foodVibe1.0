@@ -33,6 +33,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `list-shell/` | Reusable list/table shell | ListShellComponent |
 | `loader/` | Loading indicator | LoaderComponent |
 | `nutrition-badge/` | Per-100g nutrition badge/tooltip | NutritionBadgeComponent |
+| `partial-cost-badge/` | "חלקי" badge + missing-prices popover (owner can price in place) | PartialCostBadgeComponent |
 | `page-header/` | Standard page title bar: title, subtitle, result-count pill, back link | PageHeaderComponent |
 | `quick-add-product-modal/` | Quick add product | QuickAddProductModalComponent |
 | `quick-edit-product-modal/` | Quick edit product modal | QuickEditProductModalComponent |

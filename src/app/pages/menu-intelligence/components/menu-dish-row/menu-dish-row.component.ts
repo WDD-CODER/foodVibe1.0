@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
@@ -10,6 +10,8 @@ import { EventPlanService } from '../../../../core/engine/event-plan.service'
 import { formatCoefficient, isValidCoefficient, type ItemPortions } from '../../../../core/engine/portions'
 import { roundMoney } from '../../../../core/engine/rounding'
 import { TranslationService } from '@services/translation.service'
+import { RecipeCostService } from '@services/recipe-cost.service'
+import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
@@ -29,7 +31,8 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
     SelectOnFocusDirective,
     ScrollableDropdownComponent,
     ScrollRailComponent,
-    InputClearComponent
+    InputClearComponent,
+    PartialCostBadgeComponent
   ],
   templateUrl: './menu-dish-row.component.html',
   styleUrl: './menu-dish-row.component.scss',
@@ -39,6 +42,7 @@ export class MenuDishRowComponent {
   // ── Injected ──────────────────────────────────────────────────────────────
   private readonly eventPlan_ = inject(EventPlanService)
   private readonly translation_ = inject(TranslationService)
+  private readonly recipeCost_ = inject(RecipeCostService)
 
   // ── Inputs ────────────────────────────────────────────────────────────────
   readonly itemGroup = input.required<FormGroup>()
@@ -60,6 +64,24 @@ export class MenuDishRowComponent {
   protected readonly coefficientText_ = computed(
     () => this.coefficientDraft_() ?? formatCoefficient(this.portionInfo()?.coefficient ?? 1)
   )
+
+  /** Id of the dish in this row, kept in step with the form control (the form is not a signal). */
+  private readonly recipeId_ = signal('')
+
+  /** What keeps this dish's cost from being final: unpriced, unlinked and deleted ingredients, through preps. */
+  protected readonly missing_ = computed(() => {
+    const recipe = this.recipes().find((r) => r._id === this.recipeId_())
+    return recipe ? this.recipeCost_.computeRecipeCostStatus(recipe).missing : []
+  })
+
+  constructor() {
+    effect((onCleanup) => {
+      const ctrl = this.itemGroup().get('recipeId')
+      this.recipeId_.set((ctrl?.value as string | undefined) ?? '')
+      const sub = ctrl?.valueChanges.subscribe((v: string | null) => this.recipeId_.set(v ?? ''))
+      onCleanup(() => sub?.unsubscribe())
+    })
+  }
 
   // ── Outputs ───────────────────────────────────────────────────────────────
   readonly remove = output<void>()

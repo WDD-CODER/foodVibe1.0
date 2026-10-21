@@ -36,6 +36,7 @@ import {
 } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
+import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { EventPlanService } from '../../core/engine/event-plan.service'
 import { roundMoney } from '../../core/engine/rounding'
 import { ExportService } from '@services/export.service'
@@ -96,6 +97,7 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
+    PartialCostBadgeComponent,
     ClickOutSideDirective,
     ScrollableDropdownComponent,
     CustomSelectComponent,
@@ -205,11 +207,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return [...this.sectionsArray.controls]
   })
 
-  protected readonly eventCost_ = computed(() => {
+  /** The whole `EventPlan` of the live form: cost, partial and missing items (plan 444). */
+  protected readonly menuPlan_ = computed(() => {
     this.formValueVersion_() // depend on form changes
-    const event = this.buildEventFromForm()
-    return this.eventPlan_.planFor(event).eventFoodCost
+    return this.eventPlan_.planFor(this.buildEventFromForm())
   })
+  protected readonly eventCost_ = computed(() => this.menuPlan_().eventFoodCost)
 
   protected readonly foodCostPct_ = computed(() => {
     this.formValueVersion_() // depend on form changes
@@ -1005,15 +1008,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected stopEditField(): void {
     this.editingField_.set(null)
-  }
-
-  protected getServingTypeLabel(): string {
-    const map: Record<string, string> = {
-      buffet_family: 'Buffet / Family Style',
-      plated_course: 'Plated / Course Based',
-      cocktail_passed: 'Cocktail / Passed'
-    }
-    return map[this.form_.value.servingType || 'plated_course'] || ''
   }
 
   protected async save(): Promise<void> {

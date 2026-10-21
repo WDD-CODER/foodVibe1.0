@@ -141,6 +141,12 @@ describe('ExportService', () => {
       expect(total[5]).toBe(157.75)
     })
 
+    it('carries the plan missing items so the preview can show the partial badge (plan 444)', () => {
+      const payload = service.getMenuShoppingListPreviewPayload(menu, [], fixtureInput.products)
+      expect(payload.missing).toEqual(fixturePlan.missing)
+      expect(payload.missing?.some((m) => m.kind === 'unpriced' && m.name === 'לימון')).toBeTrue()
+    })
+
     it('lists the prep products and no row named after the prep', () => {
       const rows = service.getMenuShoppingListPreviewPayload(menu, [], fixtureInput.products).sections[0].rows
       expect(rows.some((r) => r[1] === 'שמן זית')).toBeTrue()

@@ -326,6 +326,7 @@
     <div class="fin-metric">
       <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
       <span class="fin-value">₪{{ eventCost_() | number:'1.2-2' }}</span>
+      <app-partial-cost-badge [missing]="menuPlan_().missing" placement="above"></app-partial-cost-badge>
     </div>
     <div class="fin-metric">
       <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>

@@ -6,6 +6,8 @@ import { UnitRegistryService } from './unit-registry.service'
 import { Recipe } from '../models/recipe.model'
 import { Product } from '../models/product.model'
 import { Ingredient } from '../models/ingredient.model'
+import { computeEventPlan } from '../engine/event-plan.engine'
+import { makeEvent, makeInput } from '../engine/testing/event-plan.fixture'
 
 describe('RecipeCostService', () => {
   let service: RecipeCostService
@@ -347,6 +349,121 @@ describe('RecipeCostService', () => {
       const weightUnit = service.computeTotalWeightG([rowUnit])
       expect(weightUnit).toBe(weightGram)
       expect(weightGram).toBe(446)
+    })
+  })
+  describe('computeRecipeCostStatus (plan 444)', () => {
+    const tomato = (): Product =>
+      createProduct({ _id: 'tomato', nameHebrew: 'עגבנייה', baseUnit: 'kg', sources: [{ supplierId: 's1', price: 5 }] })
+    const oil = (): Product => createProduct({ _id: 'oil', nameHebrew: 'שמן', baseUnit: 'kg' })
+    const ing = (
+      referenceId: string,
+      amount: number,
+      unit: string,
+      type: 'product' | 'recipe' = 'product'
+    ): Ingredient => ({
+      _id: `i-${referenceId}`,
+      referenceId,
+      type,
+      amount,
+      unit
+    })
+    const salad = (): Recipe =>
+      createRecipe({
+        _id: 'salad',
+        nameHebrew: 'סלט',
+        ingredients: [ing('tomato', 1, 'kg'), ing('oil', 100, 'gram')]
+      })
+
+    it('reports the unpriced oil of a recipe and still returns the known cost', () => {
+      productsSignal.set([tomato(), oil()])
+      const status = service.computeRecipeCostStatus(salad())
+      expect(status.cost).toBe(5)
+      expect(status.partial).toBe(true)
+      expect(status.missing).toEqual([{ kind: 'unpriced', productId: 'oil', name: 'שמן', recipeIds: ['salad'] }])
+    })
+
+    it('is not partial when every product is priced', () => {
+      productsSignal.set([tomato()])
+      const status = service.computeRecipeCostStatus(createRecipe({ _id: 'r', ingredients: [ing('tomato', 1, 'kg')] }))
+      expect(status).toEqual({ cost: 5, partial: false, missing: [] })
+    })
+
+    it('a dish using the salad as a prep carries the same oil entry with the prep id', () => {
+      productsSignal.set([tomato(), oil()])
+      const dish = createRecipe({ _id: 'dish', nameHebrew: 'מנה', ingredients: [ing('salad', 1, 'unit', 'recipe')] })
+      recipesSignal.set([salad(), dish])
+      const status = service.computeRecipeCostStatus(dish)
+      expect(status.partial).toBe(true)
+      expect(status.missing).toEqual([{ kind: 'unpriced', productId: 'oil', name: 'שמן', recipeIds: ['salad'] }])
+    })
+
+    it('a free-text row is unlinked and a deleted product id is deleted', () => {
+      productsSignal.set([])
+      const recipe = createRecipe({
+        _id: 'r',
+        ingredients: [
+          { _id: 'a', amount: 1, unit: 'unit', nameSnapshot: 'קצת פטרוזיליה' },
+          { _id: 'b', referenceId: 'gone', type: 'product', amount: 1, unit: 'kg', nameSnapshot: 'נעלם' }
+        ]
+      })
+      expect(service.computeRecipeCostStatus(recipe).missing).toEqual([
+        { kind: 'unlinked', name: 'קצת פטרוזיליה', recipeIds: ['r'] },
+        { kind: 'deleted', productId: 'gone', name: 'נעלם', recipeIds: ['r'] }
+      ])
+    })
+
+    it('the same unpriced product in two preps of one dish is one entry with both recipe ids', () => {
+      productsSignal.set([oil()])
+      const prepA = createRecipe({ _id: 'a', ingredients: [ing('oil', 10, 'gram')] })
+      const prepB = createRecipe({ _id: 'b', ingredients: [ing('oil', 20, 'gram')] })
+      const dish = createRecipe({
+        _id: 'dish',
+        ingredients: [ing('a', 1, 'unit', 'recipe'), ing('b', 1, 'unit', 'recipe')]
+      })
+      recipesSignal.set([prepA, prepB, dish])
+      const missing = service.computeRecipeCostStatus(dish).missing
+      expect(missing.length).toBe(1)
+      expect(missing[0].recipeIds).toEqual(['a', 'b'])
+    })
+
+    it('does not loop on a recipe that contains itself', () => {
+      productsSignal.set([oil()])
+      const loop = createRecipe({ _id: 'loop', ingredients: [ing('loop', 1, 'unit', 'recipe'), ing('oil', 1, 'gram')] })
+      recipesSignal.set([loop])
+      expect(service.computeRecipeCostStatus(loop).missing.length).toBe(1)
+    })
+
+    it('reads blank builder form rows without a reference as nothing', () => {
+      expect(service.findMissing([{ referenceId: '', item_type: '', nameHebrew: '' }], 'r')).toEqual([])
+    })
+
+    it('agrees with the event engine on which products are unpriced, including a purchase-option price', () => {
+      const boxOnly = createProduct({
+        _id: 'box',
+        nameHebrew: 'שקית',
+        baseUnit: 'kg',
+        purchaseOptions: [{ unitSymbol: 'ארגז', conversionRate: 10, uom: 'kg', priceOverride: 12 }]
+      })
+      const products = [tomato(), oil(), boxOnly]
+      const recipe = createRecipe({
+        _id: 'dish',
+        nameHebrew: 'מנה',
+        recipeType: 'dish',
+        yieldAmount: 10,
+        yieldUnit: 'portion',
+        ingredients: [ing('tomato', 1, 'kg'), ing('oil', 100, 'gram'), ing('box', 1, 'kg')]
+      })
+      productsSignal.set(products)
+      recipesSignal.set([recipe])
+      const event = makeEvent([{ recipeId: 'dish', derivedPortions: 10 }])
+      const plan = computeEventPlan(makeInput(event, products, [recipe]))
+      const engineIds = plan.missing.filter((m) => m.kind === 'unpriced').map((m) => m.productId)
+      const costIds = service
+        .computeRecipeCostStatus(recipe)
+        .missing.filter((m) => m.kind === 'unpriced')
+        .map((m) => m.productId)
+      expect(engineIds).toEqual(['oil'])
+      expect(costIds).toEqual(engineIds)
     })
   })
 })

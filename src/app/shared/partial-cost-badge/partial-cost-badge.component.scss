@@ -1,0 +1,133 @@
+$break-mobile: 768px; // mirrors src/styles.scss
+
+@layer components.partial-cost-badge {
+  .partial-cost {
+    position: relative;
+    display: inline-block;
+  }
+
+  .partial-chip {
+    cursor: pointer;
+  }
+
+  .partial-popover {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-start: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    inline-size: min(22rem, calc(100vw - 2rem));
+    max-block-size: min(24rem, 70vh);
+    overflow-y: auto;
+
+    color: var(--color-text-main);
+    font-size: var(--fs-sm);
+    text-align: start;
+
+    padding: var(--space-3);
+    background: var(--bg-card-solid);
+    border: 1px solid var(--border-default);
+    border-block-start: var(--space-1) solid transparent;
+    border-radius: var(--radius-md);
+    background-clip: padding-box;
+
+    box-shadow: var(--shadow-modal);
+
+    &.partial-popover--above {
+      inset-block: auto 100%;
+
+      border-block: 1px solid var(--border-default);
+      border-block-end: var(--space-1) solid transparent;
+    }
+
+    @media (max-width: $break-mobile) {
+      position: fixed;
+      inset-block: auto var(--space-4);
+      inset-inline: var(--space-4);
+      inline-size: auto;
+    }
+  }
+
+  .partial-title {
+    margin: 0;
+
+    font-size: var(--fs-base);
+    font-weight: 600;
+  }
+
+  .partial-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .partial-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    padding-block-end: var(--space-2);
+    border-block-end: 1px solid var(--border-default);
+
+    &:last-child {
+      padding-block-end: 0;
+      border-block-end: 0;
+    }
+  }
+
+  .partial-row-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .partial-name {
+    font-weight: 600;
+  }
+
+  .partial-tag {
+    color: var(--text-warning);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-used-in {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-awaiting {
+    color: var(--text-warning);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-price {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+  }
+
+  .partial-price-label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-price-input {
+    inline-size: 100%;
+  }
+
+  .partial-open {
+    align-self: flex-start;
+  }
+}

@@ -144,6 +144,10 @@
     padding: 10px 0;
   }
 
+  .export-preview-partial {
+    margin-block-start: var(--space-4);
+  }
+
   .export-preview-summary {
     display: flex;
     flex-direction: column;

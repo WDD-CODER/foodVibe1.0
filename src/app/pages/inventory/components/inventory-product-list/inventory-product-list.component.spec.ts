@@ -104,6 +104,37 @@ describe('InventoryProductListComponent', () => {
     expect(names).toContain('Allergens')
   })
 
+  it('the unpriced filter keeps only products with no price anywhere', () => {
+    const state = TestBed.inject(KitchenStateService) as unknown as { products_: ReturnType<typeof signal<Product[]>> }
+    state.products_.set([
+      {
+        _id: 'u',
+        nameHebrew: 'Oil',
+        categories: ['Pantry'],
+        sources: [],
+        purchaseOptions: [],
+        allergens: [],
+        baseUnit: 'liter'
+      } as unknown as Product,
+      {
+        _id: 'c',
+        nameHebrew: 'Salt',
+        categories: [],
+        sources: [{ supplierId: 'Supplier A', price: 3 }],
+        purchaseOptions: [],
+        allergens: [],
+        baseUnit: 'kg'
+      } as unknown as Product
+    ])
+    ;(component as any).searchQuery_.set('')
+    ;(component as any).activeFilters_.set({})
+    ;(component as any).showUnpricedOnly_.set(true)
+    const results = (component as any).filteredProducts_() as Product[]
+    expect(results.map((p) => p._id)).toEqual(['u'])
+    const row = (component as any).displayRows_()[0]
+    expect(row.unpriced).toBe(true)
+  })
+
   it('should filter items when a filter is toggled', () => {
     // Ensure no state leaks from URL/list-state persistence.
     ;(component as any).searchQuery_.set('')

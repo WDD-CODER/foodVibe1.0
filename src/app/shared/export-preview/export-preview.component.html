@@ -127,6 +127,11 @@
                 }
               </div>
             }
+            @if (data.missing?.length) {
+              <div class="export-preview-partial no-print">
+                <app-partial-cost-badge [missing]="data.missing ?? []"></app-partial-cost-badge>
+              </div>
+            }
             @if (data.summary?.length) {
               <div class="export-preview-summary">
                 @for (item of data.summary; track item.label) {

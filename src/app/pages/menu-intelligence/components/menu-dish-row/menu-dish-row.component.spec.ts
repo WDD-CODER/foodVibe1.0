@@ -5,6 +5,14 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { MenuDishRowComponent } from './menu-dish-row.component'
 import { EventPlanService } from '../../../../core/engine/event-plan.service'
 import { TranslationService } from '@services/translation.service'
+import { RecipeCostService } from '@services/recipe-cost.service'
+import { KitchenStateService } from '@services/kitchen-state.service'
+import { ProductDataService } from '@services/product-data.service'
+import type { Recipe } from '@models/recipe.model'
+import type { MissingItem } from 'src/app/core/engine/event-plan.types'
+import { computed, signal } from '@angular/core'
+
+const missing_ = signal<MissingItem[]>([])
 
 describe('MenuDishRowComponent coefficient (plan 441)', () => {
   let fixture: ComponentFixture<MenuDishRowComponent>
@@ -25,6 +33,17 @@ describe('MenuDishRowComponent coefficient (plan 441)', () => {
       imports: [MenuDishRowComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         { provide: EventPlanService, useValue: { costFor: () => ({ cost: 0, partial: false }) } },
+        {
+          provide: RecipeCostService,
+          useValue: {
+            computeRecipeCostStatus: () => ({ cost: 0, partial: missing_().length > 0, missing: missing_() })
+          }
+        },
+        {
+          provide: KitchenStateService,
+          useValue: { productsById_: computed(() => new Map()), recipesById_: computed(() => new Map()) }
+        },
+        { provide: ProductDataService, useValue: { updateProduct: () => Promise.resolve() } },
         {
           provide: TranslationService,
           useValue: { translate: (k: string) => (k === 'per_diner_in_unit' ? '{{unit}} לסועד' : k) }
@@ -105,5 +124,47 @@ describe('MenuDishRowComponent coefficient (plan 441)', () => {
     fixture.componentRef.setInput('recipes', [{ _id: 'p1', nameHebrew: 'רוטב', yieldUnit: 'liter' }])
     fixture.detectChanges()
     expect(component.getFieldLabel('serving_portions')).toBe('liter לסועד')
+  })
+})
+
+describe('MenuDishRowComponent partial badge (plan 444)', () => {
+  it('shows the חלקי badge only while the dish has a missing price', async () => {
+    missing_.set([{ kind: 'unpriced', productId: 'oil', name: 'שמן', recipeIds: ['r1'] }])
+    await TestBed.configureTestingModule({
+      imports: [MenuDishRowComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        { provide: EventPlanService, useValue: { costFor: () => ({ cost: 0, partial: false }) } },
+        {
+          provide: RecipeCostService,
+          useValue: { computeRecipeCostStatus: () => ({ cost: 0, partial: true, missing: missing_() }) }
+        },
+        {
+          provide: KitchenStateService,
+          useValue: { productsById_: computed(() => new Map()), recipesById_: computed(() => new Map()) }
+        },
+        { provide: ProductDataService, useValue: { updateProduct: () => Promise.resolve() } },
+        { provide: TranslationService, useValue: { translate: (k: string) => k } }
+      ]
+    }).compileComponents()
+    const group = TestBed.inject(FormBuilder).group({
+      recipeId: ['r1'],
+      recipeType: ['dish'],
+      sell_price: [0],
+      food_cost_money: [0],
+      serving_portions: [1],
+      coefficient_override: [null as number | null]
+    })
+    const fixture = TestBed.createComponent(MenuDishRowComponent)
+    fixture.componentRef.setInput('itemGroup', group)
+    fixture.componentRef.setInput('sectionIndex', 0)
+    fixture.componentRef.setInput('itemIndex', 0)
+    fixture.componentRef.setInput('recipes', [{ _id: 'r1', nameHebrew: 'סלט', ingredients: [] } as unknown as Recipe])
+    fixture.detectChanges()
+    const el = fixture.nativeElement as HTMLElement
+    expect(el.querySelector('.partial-chip')).not.toBeNull()
+    missing_.set([])
+    fixture.componentRef.setInput('recipes', [{ _id: 'r1', nameHebrew: 'סלט', ingredients: [] } as unknown as Recipe])
+    fixture.detectChanges()
+    expect(el.querySelector('.partial-chip')).toBeNull()
   })
 })

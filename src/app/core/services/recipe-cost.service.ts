@@ -5,6 +5,8 @@ import { Recipe } from '../models/recipe.model'
 import { Product } from '../models/product.model'
 import { Ingredient } from '../models/ingredient.model'
 import { getEffectivePrice } from '../utils/product-source.util'
+import { isProductUnpriced } from '../utils/product-validation.util'
+import type { MissingItem } from '../engine/event-plan.types'
 import { optionRateInBase } from '../utils/purchase-option-rate.util'
 import { MAX_RECURSION_DEPTH, UNIT_ALIASES, MASS_UNITS, VOLUME_OR_WEIGHT_KEYS } from '../utils/recipe-cost.constants'
 
@@ -14,6 +16,22 @@ export type IngredientWeightRow = {
   referenceId?: string
   item_type?: string
   nameHebrew?: string
+}
+
+/** The part of an ingredient row `findMissing` reads: a stored `Ingredient` or a recipe-builder form row. */
+export interface MissingScanRow {
+  referenceId?: string
+  type?: string
+  item_type?: string
+  nameSnapshot?: string
+  nameHebrew?: string
+}
+
+/** A recipe cost plus what keeps it from being final (plan 444). */
+export interface RecipeCostStatus {
+  cost: number
+  partial: boolean
+  missing: MissingItem[]
 }
 
 @Injectable({ providedIn: 'root' })
@@ -40,6 +58,78 @@ export class RecipeCostService {
       const cost = this.computeIngredientCost(ing, depth)
       return acc + (cost ?? 0)
     }, 0)
+  }
+
+  /**
+   * The recipe's cost plus everything that makes it partial: unpriced products, free-text (unlinked)
+   * ingredients and references to deleted products or preps, recursively through preps (plan 444).
+   */
+  computeRecipeCostStatus(recipe: Recipe): RecipeCostStatus {
+    const missing = this.findMissing(recipe?.ingredients ?? [], recipe?._id ?? '')
+    return { cost: this.computeRecipeCost(recipe), partial: missing.length > 0, missing }
+  }
+
+  /**
+   * Walks ingredient rows (and, through prep rows, the preps' rows) and lists what is missing, once per item:
+   * an unpriced product (merged by product id), an unlinked row or a deleted reference (merged by name).
+   * `recipeIds` holds the ids of the recipes whose own rows hold the item. Same rules as the event engine.
+   */
+  findMissing(
+    rows: readonly MissingScanRow[],
+    ownerRecipeId: string,
+    depth = 0,
+    path: readonly string[] = [ownerRecipeId]
+  ): MissingItem[] {
+    const found: MissingItem[] = []
+    this.collectMissing(rows, ownerRecipeId, depth, path, found)
+    return found
+  }
+
+  private collectMissing(
+    rows: readonly MissingScanRow[],
+    ownerId: string,
+    depth: number,
+    path: readonly string[],
+    found: MissingItem[]
+  ): void {
+    if (depth >= MAX_RECURSION_DEPTH || !rows.length) return
+    const products = this.kitchenState_.productsById_()
+    const recipes = this.kitchenState_.recipesById_()
+    const add = (item: MissingItem): void => {
+      const same = found.find((m) => m.kind === item.kind && m.name === item.name && m.productId === item.productId)
+      if (!same) found.push(item)
+      else if (!same.recipeIds.includes(ownerId)) same.recipeIds.push(ownerId)
+    }
+
+    for (const row of rows) {
+      const name = (row.nameSnapshot ?? row.nameHebrew ?? '').trim()
+      const ref = row.referenceId
+      if (!ref) {
+        if (name) add({ kind: 'unlinked', name, recipeIds: [ownerId] })
+        continue
+      }
+      const kind = row.type ?? row.item_type
+      const product = kind === 'recipe' ? undefined : (products.get(ref) as Product | undefined)
+      if (product) {
+        if (isProductUnpriced(product)) {
+          add({ kind: 'unpriced', productId: product._id, name: product.nameHebrew, recipeIds: [ownerId] })
+        }
+        continue
+      }
+      const prep = kind === 'product' ? undefined : (recipes.get(ref) as Recipe | undefined)
+      if (prep) {
+        if (path.includes(prep._id)) continue
+        const inner: MissingItem[] = []
+        this.collectMissing(prep.ingredients ?? [], prep._id, depth + 1, [...path, prep._id], inner)
+        for (const item of inner) {
+          const same = found.find((m) => m.kind === item.kind && m.name === item.name && m.productId === item.productId)
+          if (!same) found.push(item)
+          else for (const id of item.recipeIds) if (!same.recipeIds.includes(id)) same.recipeIds.push(id)
+        }
+        continue
+      }
+      add({ kind: 'deleted', productId: ref, name: name || ref, recipeIds: [ownerId] })
+    }
   }
 
   /**

@@ -11,6 +11,7 @@ import {
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from '../../core/pipes/translation-pipe.pipe'
+import { PartialCostBadgeComponent } from '../partial-cost-badge/partial-cost-badge.component'
 import type { ExportPayload } from '../../core/utils/export.util'
 
 const BODY_PRINT_CLASS = 'export-preview-visible'
@@ -18,7 +19,7 @@ const BODY_PRINT_CLASS = 'export-preview-visible'
 @Component({
   selector: 'app-export-preview',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, PartialCostBadgeComponent],
   templateUrl: './export-preview.component.html',
   styleUrl: './export-preview.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

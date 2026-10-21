@@ -1277,6 +1277,15 @@
     "platform_back_to_table": "חזרה לטבלה",
     "never": "אף פעם",
     "platform_idle_7": "לא פעיל 7+",
-    "platform_idle_14": "לא פעיל 14+"
+    "platform_idle_14": "לא פעיל 14+",
+    "product_unpriced": "לא סגור סופית",
+    "filter_unpriced": "לא סגור סופית",
+    "missing_prices_title": "חסרים מחירים",
+    "missing_used_in": "בשימוש ב:",
+    "quick_price_per_unit": "מחיר ל{{unit}}",
+    "quick_price_save": "שמור מחיר",
+    "quick_price_saved": "המחיר נשמר",
+    "awaiting_owner_price": "ממתין לתמחור של הבעלים",
+    "open_recipe": "פתח מתכון"
   }
 }

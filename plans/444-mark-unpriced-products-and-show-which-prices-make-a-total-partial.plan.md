@@ -1,6 +1,6 @@
 # Plan 444 — Mark unpriced products and show which prices make a total partial
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -27,8 +27,8 @@ nothing shows them. This plan:
 place they noticed it.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/core/utils/product-validation.util.spec.ts' --include='src/app/core/utils/quick-price.util.spec.ts' --include='src/app/core/services/recipe-cost.service.spec.ts' --include='src/app/shared/partial-cost-badge/**/*.spec.ts' --include='src/app/pages/inventory/components/inventory-product-list/**/*.spec.ts'`
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/utils/product-validation.util.spec.ts' --include='src/app/core/utils/quick-price.util.spec.ts' --include='src/app/core/services/recipe-cost.service.spec.ts' --include='src/app/shared/partial-cost-badge/**/*.spec.ts' --include='src/app/pages/inventory/components/inventory-product-list/**/*.spec.ts'`
   passes, including the new specs (spec 03.3 acceptance as fixtures):
   - `isProductUnpriced`: no sources and no purchase options → `true`; a source with price 5 → `false`; sources
     all 0 but one purchase option with `priceOverride: 12` → `false`; deprecated `buy_price_global_: 3` → `false`.
@@ -46,11 +46,11 @@ Done when:
     "ממתין לתמחור של הבעלים", no input; unlinked row text "לא מקושר"; deleted row "נמחק" with «פתח מתכון».
   - Inventory filter "לא סגור סופית" on a fixture of [unpriced+categorized, priced+no category] → only the
     unpriced one.
-- [auto] Engine and recipe-cost agree on "unpriced": a spec in `recipe-cost.service.spec.ts` runs the
+- [x] [auto] Engine and recipe-cost agree on "unpriced": a spec in `recipe-cost.service.spec.ts` runs the
   plan-433 engine (`computeEventPlan`) and `computeRecipeCostStatus` on the same fixture (including a product priced
   only by a purchase-option `priceOverride`) and asserts the same set of unpriced product ids — engine side taken
   from `plan.missing` entries with `kind: 'unpriced'`, never from `chooseSupplier`.
-- [auto] Net line count of `src/app/pages/menu-intelligence/menu-intelligence.page.ts` and
+- [x] [auto] Net line count of `src/app/pages/menu-intelligence/menu-intelligence.page.ts` and
   `src/app/core/services/menu-export.service.ts` ≤ 0 for this plan: `git diff --numstat origin/mvp -- <file>`
   prints added ≤ deleted for each.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
@@ -121,6 +121,8 @@ src/app/core/utils/export.util.ts
 src/app/core/services/recipe-cost.service.ts
 src/app/core/services/recipe-cost.service.spec.ts
 src/app/core/services/menu-export.service.ts
+src/app/core/services/export.service.spec.ts
+src/app/shared/breadcrumbs.md
 src/app/shared/partial-cost-badge/**
 src/app/shared/export-preview/**
 src/app/pages/inventory/components/inventory-product-list/**
@@ -231,15 +233,15 @@ Runs when `scope-check.mjs --drift` reports drift (it will). Check by symbol, pr
 Reused, not added: `partial_total` "חלקי", `line_status_unlinked` "לא מקושר", `line_status_deleted` "נמחק" (plan 434).
 
 ## Atomic Sub-tasks
-- [ ] P1: Give an unpriced product its own status, separate from missing category or supplier — isProductUnpriced(product) (sources, purchaseOptions priceOverride, buy_price_global_); getProductValidationStatus and getProductMissingFields stop counting price + spec — src/app/core/utils/product-validation.util.ts, src/app/core/utils/product-validation.util.spec.ts
-- [ ] P2: Show "לא סגור סופית" in the inventory list and let the chef filter by it — label in the validation cell; showUnpricedOnly_ signal + chip + useListState urlParam unpriced (BooleanParam); filter in the products computed + spec — src/app/pages/inventory/components/inventory-product-list/**
-- [ ] P3: Make recipe costs report what is missing, through every prep — RecipeCostService.computeRecipeCostStatus(recipe) → { cost, partial, missing: MissingItem[] } and findMissing(ingredients, ownerRecipeId, depth) (unpriced via isProductUnpriced, unlinked = no referenceId, deleted = id not in productsById_/recipesById_; merges by productId or name; stops at MAX_RECURSION_DEPTH); computeRecipeCost unchanged; engine-agreement spec — src/app/core/services/recipe-cost.service.ts, src/app/core/services/recipe-cost.service.spec.ts
-- [ ] P4: Add one badge with a missing-prices popover that the owner can price from — PartialCostBadgeComponent (input missing; owner check PermissionService.can('editMoney', { type: 'products', doc }); save = ProductDataService.updateProduct(withQuickPrice(product, price)) then toast quick_price_saved; staff text awaiting_owner_price; unlinked/deleted rows navigate to /recipe-builder/<recipeId>); pure withQuickPrice(product, price) util + specs — src/app/shared/partial-cost-badge/**, src/app/core/utils/quick-price.util.ts, src/app/core/utils/quick-price.util.spec.ts
-- [ ] P5: Mark the recipe and dish builder cost as partial — recipe-header computes missing from form().getRawValue().ingredients via RecipeCostService.findMissing (re-read when currentCost or KitchenStateService.products_ change) and shows the badge next to the cost; the builder page itself is not edited — src/app/pages/recipe-builder/components/recipe-header/**
-- [ ] P6: Mark each dish in a menu and the menu total as partial — menu-dish-row shows the badge from computeRecipeCostStatus(its recipe).missing; page .ts adds menuPlan_ (eventCost_ reads it), the import, and deletes getServingTypeLabel (net ≤ 0); template puts the badge beside the total in .financial-footnote bound to menuPlan_().missing — src/app/pages/menu-intelligence/components/menu-dish-row/**, src/app/pages/menu-intelligence/menu-intelligence.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.ts
-- [ ] P7: Mark the shopping list and each supplier order as partial — ExportPayload gains optional missing?: MissingItem[]; getMenuShoppingListPreviewPayload sets missing: plan.missing on the payload it builds from buildShoppingListTable (no net growth in menu-export.service.ts); export-preview renders the badge beside the summary when missing is non-empty; each SupplierOrderCard in SupplierOrdersComponent shows the badge with the plan.missing items whose productId is in card.lines (replaces 435's partial_total text) — src/app/core/utils/export.util.ts, src/app/core/services/menu-export.service.ts, src/app/shared/export-preview/**, src/app/pages/menu-intelligence/components/supplier-orders/**
-- [ ] P8: Add the Hebrew labels — keys from UI/UX Notes, appended — public/assets/data/dictionary.json
-- [ ] P9: Build, test, check both frozen-file budgets and the error log, then hand over the checks — ng build, the Done-when ng test command, git diff --numstat for both files, log-query; slot servers up; [human] cards — this plan file
+- [x] P1: Give an unpriced product its own status, separate from missing category or supplier — isProductUnpriced(product) (sources, purchaseOptions priceOverride, buy_price_global_); getProductValidationStatus and getProductMissingFields stop counting price + spec — src/app/core/utils/product-validation.util.ts, src/app/core/utils/product-validation.util.spec.ts
+- [x] P2: Show "לא סגור סופית" in the inventory list and let the chef filter by it — label in the validation cell; showUnpricedOnly_ signal + chip + useListState urlParam unpriced (BooleanParam); filter in the products computed + spec — src/app/pages/inventory/components/inventory-product-list/**
+- [x] P3: Make recipe costs report what is missing, through every prep — RecipeCostService.computeRecipeCostStatus(recipe) → { cost, partial, missing: MissingItem[] } and findMissing(ingredients, ownerRecipeId, depth) (unpriced via isProductUnpriced, unlinked = no referenceId, deleted = id not in productsById_/recipesById_; merges by productId or name; stops at MAX_RECURSION_DEPTH); computeRecipeCost unchanged; engine-agreement spec — src/app/core/services/recipe-cost.service.ts, src/app/core/services/recipe-cost.service.spec.ts
+- [x] P4: Add one badge with a missing-prices popover that the owner can price from — PartialCostBadgeComponent (input missing; owner check PermissionService.can('editMoney', { type: 'products', doc }); save = ProductDataService.updateProduct(withQuickPrice(product, price)) then toast quick_price_saved; staff text awaiting_owner_price; unlinked/deleted rows navigate to /recipe-builder/<recipeId>); pure withQuickPrice(product, price) util + specs — src/app/shared/partial-cost-badge/**, src/app/core/utils/quick-price.util.ts, src/app/core/utils/quick-price.util.spec.ts
+- [x] P5: Mark the recipe and dish builder cost as partial — recipe-header computes missing from form().getRawValue().ingredients via RecipeCostService.findMissing (re-read when currentCost or KitchenStateService.products_ change) and shows the badge next to the cost; the builder page itself is not edited — src/app/pages/recipe-builder/components/recipe-header/**
+- [x] P6: Mark each dish in a menu and the menu total as partial — menu-dish-row shows the badge from computeRecipeCostStatus(its recipe).missing; page .ts adds menuPlan_ (eventCost_ reads it), the import, and deletes getServingTypeLabel (net ≤ 0); template puts the badge beside the total in .financial-footnote bound to menuPlan_().missing — src/app/pages/menu-intelligence/components/menu-dish-row/**, src/app/pages/menu-intelligence/menu-intelligence.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.ts
+- [x] P7: Mark the shopping list and each supplier order as partial — ExportPayload gains optional missing?: MissingItem[]; getMenuShoppingListPreviewPayload sets missing: plan.missing on the payload it builds from buildShoppingListTable (no net growth in menu-export.service.ts); export-preview renders the badge beside the summary when missing is non-empty; each SupplierOrderCard in SupplierOrdersComponent shows the badge with the plan.missing items whose productId is in card.lines (replaces 435's partial_total text) — src/app/core/utils/export.util.ts, src/app/core/services/menu-export.service.ts, src/app/shared/export-preview/**, src/app/pages/menu-intelligence/components/supplier-orders/**
+- [x] P8: Add the Hebrew labels — keys from UI/UX Notes, appended — public/assets/data/dictionary.json
+- [x] P9: Build, test, check both frozen-file budgets and the error log, then hand over the checks — ng build, the Done-when ng test command, git diff --numstat for both files, log-query; slot servers up; [human] cards — this plan file
 
 ## Technical Considerations
 - Dependencies: `KitchenStateService` (`productsById_`, `recipesById_`, `products_`), `ProductDataService.updateProduct`,

@@ -13,6 +13,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { BusinessService } from '@services/business.service'
 import { UserService } from '@services/user.service'
+import { ProductDataService } from '@services/product-data.service'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { SupplierOrdersComponent } from './supplier-orders.component'
 
@@ -65,6 +66,7 @@ describe('SupplierOrdersComponent', () => {
           }
         },
         { provide: TranslationService, useValue: translation },
+        { provide: ProductDataService, useValue: { updateProduct: () => Promise.resolve() } },
         { provide: UserMsgService, useValue: userMsg },
         { provide: BusinessService, useValue: { business_: signal({ name: 'מטבח בדיקה' }) } },
         { provide: UserService, useValue: { user_: signal({ name: 'שם האדם' }) } }
@@ -101,6 +103,17 @@ describe('SupplierOrdersComponent', () => {
     const names = fixture.debugElement.queryAll(By.css('.so-card-name')).map((e) => e.nativeElement.textContent.trim())
     expect(names).toEqual(['ירקן', 'ללא ספק'])
     expect(fixture.debugElement.queryAll(By.css('.c-btn-primary')).length).toBe(1)
+  })
+
+  it('puts the partial badge only on the card that holds the unpriced lemon (plan 444)', () => {
+    create()
+    const badges = fixture.debugElement.queryAll(By.css('.so-card app-partial-cost-badge'))
+    expect(badges.length).toBe(2)
+    const chips = fixture.debugElement.queryAll(By.css('.so-card .partial-chip'))
+    expect(chips.length).toBe(1)
+    const cardMissing = component['cardMissing_']()
+    expect(cardMissing[0]).toEqual([])
+    expect(cardMissing[1].map((m) => m.name)).toEqual(['לימון'])
   })
 
   it('opens WhatsApp on a valid mobile number with the encoded message', async () => {
