@@ -25,6 +25,7 @@ Distilled project knowledge: history and reasoning, not current state. **Current
 | Where to save or find an open plan (design vs code) | [[0020-plans-design-folder]] — open design plans in `plans/design/`, others in `plans/`; closed plans go to `plans/<range>/` |
 | Business, tenant, who owns an item, `businessId` / `createdBy`, platform admin vs owner | [[0023-business-is-the-tenant]] — the business is the clone unit; every item has one `businessId` + `createdBy`; `server/utils/business-scope.js` is the only scoping path |
 | Deleting, Trash, restore, or per-user state like favorites | [[0022-soft-delete-user-prefs]] — `deletedAt` on the doc, Trash routes on the server, 30-day purge; favorites are a flag on the user's own copy |
+| About to build a component, util, pipe, service or `.c-*` class | `component-families.md` — which shared piece to use for each job, and its known copies; ladder in `docs/agent/standards-reuse.md`, why in [[0024-reuse-layer]] |
 | Building or changing a dropdown / search picker | `patterns/dropdown-add-option.md` — one add option + shared `KeyedPickerSearch`; the add-option rule lives in `docs/agent/standards-domain.md` |
 | Unfamiliar domain term | `glossary.md` |
 | Need rules/conventions (not history) | `AGENTS.md` and `docs/agent/*.md` — not this folder |

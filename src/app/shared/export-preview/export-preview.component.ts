@@ -10,7 +10,7 @@ import {
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
-import { TranslatePipe } from '../../core/pipes/translation-pipe.pipe'
+import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { PartialCostBadgeComponent } from '../partial-cost-badge/partial-cost-badge.component'
 import type { ExportPayload } from '../../core/utils/export.util'
 

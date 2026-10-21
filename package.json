@@ -9,6 +9,7 @@
     "watch": "ng build --watch --configuration development",
     "lint:icons": "node scripts/check-lucide-icons.mjs",
     "lint:no-native-select": "node scripts/check-no-native-select.mjs",
+    "lint:reuse": "node scripts/reuse-lint.mjs",
     "todo": "node scripts/todo-query.mjs",
     "test": "ng test",
     "test:scripts": "node --test scripts/test/*.test.mjs",

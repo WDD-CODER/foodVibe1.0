@@ -9,6 +9,13 @@ manages.
 - Every plan that touches app or server code has this `[auto]` Done-when item:
   `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 
+## Reuse Check
+- Every plan has a `## Reuse Check` section: one line per new component, util, pipe, service or `.c-*` class —
+  `- <piece> — family: <id|none> — rung: <1-4> — why: <…>` — or `- none — <why>`. Families and the decision ladder:
+  `docs/brain/component-families.md`, `docs/agent/standards-reuse.md`. Gate:
+  `node scripts/scope-check.mjs --reuse --plan=<path>` exits 0. A plan that renames or removes a registered piece
+  updates the registry (`node scripts/reuse-lint.mjs --check-registry` exits 0).
+
 ## User stories
 - Write stories from the chef's side: "As a chef, I want [goal] so that [benefit]".
 
