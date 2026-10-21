@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { FormGroup, ReactiveFormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
 import { EventPlanService } from '../../../../core/engine/event-plan.service'
 import { formatCoefficient, isValidCoefficient, type ItemPortions } from '../../../../core/engine/portions'
 import { roundMoney } from '../../../../core/engine/rounding'
@@ -14,9 +14,7 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
-import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
-import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 @Component({
   selector: 'app-menu-dish-row',
@@ -24,14 +22,12 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule,
     LucideAngularModule,
     TranslatePipe,
     ClickOutSideDirective,
     SelectOnFocusDirective,
-    ScrollableDropdownComponent,
+    SearchComboboxComponent,
     ScrollRailComponent,
-    InputClearComponent,
     PartialCostBadgeComponent
   ],
   templateUrl: './menu-dish-row.component.html',
@@ -51,7 +47,6 @@ export class MenuDishRowComponent {
   readonly recipes = input<Recipe[]>([])
   readonly activeFields = input<DishFieldKey[]>([])
   readonly dishSearchQuery = input<string>('')
-  readonly highlightedIndex = input<number>(0)
   readonly isMetaExpanded = input<boolean>(false)
   readonly editingDishField = input<string | null>(null)
   /** Portions, coefficient and override flag of this row, from `MenuPortionsService` (null = unknown row). */
@@ -93,7 +88,8 @@ export class MenuDishRowComponent {
   readonly editDishFieldCommit = output<void>()
   readonly sellPriceKeydown = output<KeyboardEvent>()
   readonly dishFieldKeydown = output<{ fieldKey: string; event: KeyboardEvent }>()
-  readonly dishSearchKeydown = output<KeyboardEvent>()
+  /** Tab / Shift+Tab in the dish search: the page moves focus (and restores a renamed dish). */
+  readonly dishSearchTab = output<KeyboardEvent>()
   readonly clearSearch = output<void>()
 
   // ── Read ──────────────────────────────────────────────────────────────────
@@ -182,10 +178,14 @@ export class MenuDishRowComponent {
     return this.recipes().find((r) => r._id === id)?.yieldUnit ?? ''
   }
 
-  getFilteredRecipes(): Recipe[] {
-    const raw = this.dishSearchQuery().trim()
-    if (!raw) return []
-    const filtered = filterOptionsByLabel(this.recipes(), raw, (r) => r.nameHebrew ?? '')
-    return filtered.slice(0, 12)
+  protected readonly recipeLabel_ = (recipe: Recipe): string => recipe.nameHebrew ?? ''
+  protected readonly recipeKey_ = (recipe: Recipe): string => recipe._id
+
+  /** Escape with no list showing still ends the search (and restores a renamed dish), like click-outside. */
+  protected onSearchKeyUnhandled(e: KeyboardEvent): void {
+    if (e.key !== 'Escape') return
+    e.preventDefault()
+    e.stopPropagation()
+    this.clearSearch.emit()
   }
 }

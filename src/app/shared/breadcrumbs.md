@@ -35,6 +35,8 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `nutrition-badge/` | Per-100g nutrition badge/tooltip | NutritionBadgeComponent |
 | `partial-cost-badge/` | "חלקי" badge + missing-prices popover (owner can price in place) | PartialCostBadgeComponent |
 | `page-header/` | Standard page title bar: title, subtitle, result-count pill, back link | PageHeaderComponent |
+| `search-combobox/` | Search box with a results list, keyboard (rule K) and one add option (family search-combobox) | SearchComboboxComponent, SearchPick, SearchAddPick |
+| `add-option-row/` | Icon + label of a dropdown's single add option | AddOptionRowComponent |
 | `quick-add-product-modal/` | Quick add product | QuickAddProductModalComponent |
 | `quick-edit-product-modal/` | Quick edit product modal | QuickEditProductModalComponent |
 | `quick-edit-product-panel/` | Quick edit product inline panel | QuickEditProductPanelComponent |

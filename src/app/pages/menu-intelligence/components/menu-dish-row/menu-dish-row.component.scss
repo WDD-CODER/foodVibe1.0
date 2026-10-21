@@ -260,32 +260,20 @@
   position: relative;
   flex: 1;
   min-width: 0;
+
   text-align: center;
 
-  app-scrollable-dropdown {
-    width: 80%;
-    margin-inline: auto;
-  }
-}
-
-.dish-search-input {
-  width: 100%;
-  padding: 4px 8px;
-  text-align: center;
-  font-family: var(--font-serif);
-  font-size: 1rem;
-  color: var(--color-ink);
-  background: transparent;
-  border: none;
-  outline: none;
-
-  &::placeholder {
-    color: var(--color-text-muted);
-  }
-
-  &:focus {
-    border-radius: var(--radius-xs);
-    box-shadow: none;
+  /* The shared search box (plan 452): paper look through its CSS variables. */
+  app-search-combobox {
+    --search-combobox-input-padding: 4px 8px;
+    --search-combobox-input-text-align: center;
+    --search-combobox-input-font: var(--font-serif);
+    --search-combobox-input-font-size: 1rem;
+    --search-combobox-input-color: var(--color-ink);
+    --search-combobox-placeholder-color: var(--color-text-muted);
+    --search-combobox-option-font: var(--font-serif);
+    --search-combobox-highlight-ring: inset 0 0 0 1px var(--border-focus);
+    --search-combobox-list-inset: 10%;
   }
 }
 
@@ -332,43 +320,6 @@
   &:focus {
     border-bottom-color: var(--border-focus);
   }
-}
-
-.dropdown-item {
-  display: block;
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  text-align: right;
-  font-family: var(--font-serif);
-  font-size: 0.875rem;
-  color: var(--color-text-main);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: var(--bg-glass-hover);
-  }
-
-  &.highlighted {
-    background: var(--color-primary-soft);
-    box-shadow: inset 0 0 0 1px var(--border-focus);
-  }
-
-  &.add-new {
-    color: var(--color-primary);
-    font-weight: 600;
-    border-top: 1px solid var(--border-default);
-  }
-}
-
-.dropdown-empty {
-  display: block;
-  padding: 8px 12px;
-  font-size: 0.8125rem;
-  color: var(--color-text-muted-light);
-  text-align: center;
 }
 
 /* Plan 441: coefficient box, "changed by hand" tag and reset button inside the details rail. */

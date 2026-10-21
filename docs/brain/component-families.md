@@ -22,30 +22,37 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 
 ## UI families
 
-### search-combobox — single-value search picker
-- Status: converging — plan 452 removes the page-local shells
-- Use: `src/app/shared/custom-select/` · `app-custom-select` (CVA)
-- When: the user picks one value from a list, with or without typing to filter, with or without "add new".
-- Inputs / variants: `typeToFilter`, `allowTypedAdd`, `addNewValue`, `addNewLabelKey`, `variant: 'default' | 'chip'`,
-  `compact`, `translateLabels`, `maxHeight`. Keyboard + search logic: `KeyedPickerSearch` in
+### search-combobox — a search box with a results list
+- Status: stable — plan 452 moved the six page-local shells onto it
+- Use: `src/app/shared/search-combobox/` · `app-search-combobox` — a text field, a clear (X), a listbox of results and one
+  add option. It owns the keyboard (rule K: first row highlighted, arrows stop at the ends, Enter picks, Escape closes,
+  Tab closes), rule F (contains, prefix first), rule X (an exact name hides the add row) and the add label; the page owns
+  what a pick or an add does (`(picked)`, `(addChosen)`: rule W opens the add window, rule M announces it).
+- Pick one value of a short fixed list instead: `src/app/shared/custom-select/` · `app-custom-select` (CVA;
+  `typeToFilter`, `allowTypedAdd`, `addNewValue`, `addNewLabelKey`, `variant`).
+- When: the user types to find an item (or a new one) and picks it — recipe/product/ingredient search, dish and category
+  pickers, equipment search. Server searches pass `[clientFilter]="false"`; rich rows use an `<ng-template>` child.
+- Inputs / variants: `options`, `[(query)]`, `[(open)]`, `labelOf`, `keyOf`, `clientFilter`, `minChars`, `maxResults`,
+  `knownOptions`, `addLabelKey`, `addOnlyTyped`, `emptyKey`, `groupOf`, `variant: 'box' | 'plain'`, `listPosition`,
+  `multiline`, `handleTab`, `closeOnOutsideClick`. Keyboard + search logic: `KeyedPickerSearch` in
   `src/app/core/utils/keyed-picker-search.util.ts`; the add option: `src/app/core/utils/add-option.util.ts`
   (add-option rule in `docs/agent/standards-domain.md`).
 - Building blocks (use only inside a shared base, never in a page): `src/app/shared/scrollable-dropdown/`
   (`app-scrollable-dropdown`), `src/app/shared/add-option-row/` (`app-add-option-row`).
-- Known copies (7 hand-built `input + app-scrollable-dropdown` shells in 6 templates, plus the page-local search state in
-  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts`):
-  `src/app/pages/menu-intelligence/menu-intelligence.page.html` (event type + section category),
-  `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`,
-  `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html` (ingredient filter),
+- Known copies: none page-local. Users: `src/app/pages/menu-intelligence/menu-intelligence.page.html` (event type + section
+  category), `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`,
+  `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html`,
   `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.html`,
   `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.html`,
-  `src/app/pages/recipe-builder/recipe-builder.page.html` (logistics picker, with
-  `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`).
+  `src/app/pages/recipe-builder/recipe-builder.page.html` (with
+  `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`). The page-local dish text store is
+  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts`.
 
 ### multi-pick — pick several values, shown as chips
-- Status: converging — plan 452 picks one base
-- Use: `src/app/shared/custom-multi-select/` · `app-custom-multi-select` (CVA) — prefer this for new code.
-- Second base (same job): `src/app/shared/chip-search-dropdown/` · `app-chip-search-dropdown` (events, product form).
+- Status: converging — plan 452 kept both bases; `chip-search-dropdown` is deprecated pending the Human's answer (ADR 0025)
+- Use: `src/app/shared/custom-multi-select/` · `app-custom-multi-select` (CVA) — the base for new code.
+- Second base (same job, **deprecated**): `src/app/shared/chip-search-dropdown/` · `app-chip-search-dropdown` (product form:
+  category, supplier, allergens). It converts to `custom-multi-select` only after the behaviours listed in ADR 0025 exist there.
 - When: the value is a list (allergens, labels, categories) and the user adds/removes chips.
 - Known copies: none page-local; two bases for one job.
 

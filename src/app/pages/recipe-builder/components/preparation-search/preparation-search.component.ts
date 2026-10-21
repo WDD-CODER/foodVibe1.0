@@ -7,56 +7,36 @@ import {
   computed,
   output,
   effect,
-  viewChild,
-  ElementRef,
-  Injector,
-  afterNextRender
+  viewChild
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { PreparationRegistryService, type PreparationEntry } from '@services/preparation-registry.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
-import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
-import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
-import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
-import { AddOptionLabel, addOptionLabel, notifyItemAdded } from 'src/app/core/utils/add-option.util'
+import {
+  SearchComboboxComponent,
+  type SearchAddPick,
+  type SearchPick
+} from 'src/app/shared/search-combobox/search-combobox.component'
+import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { KeyedPickerSearch, scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
-
-/** KeyedPickerSearch key — one picker per component instance. */
-const PICKER_KEY = 0
-/** Per-instance id prefix for option ids (aria-activedescendant). */
-let nextPrepSearchId = 0
 
 @Component({
   selector: 'app-preparation-search',
   standalone: true,
-  imports: [
-    CommonModule,
-    LucideAngularModule,
-    ClickOutSideDirective,
-    TranslatePipe,
-    ScrollableDropdownComponent,
-    SelectOnFocusDirective,
-    InputClearComponent,
-    AddOptionRowComponent
-  ],
+  imports: [CommonModule, LucideAngularModule, ClickOutSideDirective, TranslatePipe, SearchComboboxComponent],
   templateUrl: './preparation-search.component.html',
   styleUrl: './preparation-search.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PreparationSearchComponent {
   private readonly prepRegistry = inject(PreparationRegistryService)
-  private readonly injector = inject(Injector)
   private readonly addItemModal = inject(AddItemModalService)
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
-  private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
 
   /** Category from the row's category dropdown; used when adding a new preparation. */
   selectedCategory = input<string>('')
@@ -73,13 +53,13 @@ export class PreparationSearchComponent {
   /** Enter saved this row's preparation — parent opens a new row. */
   addNewRowRequested = output<void>()
 
-  protected searchInputRef = viewChild<ElementRef<HTMLTextAreaElement>>('searchInput')
+  protected searchBox_ = viewChild<SearchComboboxComponent<PreparationEntry>>(SearchComboboxComponent)
   searchQuery_ = signal<string>('')
   protected showResults_ = signal(false)
-  /** Keyboard state (add-option rule 5): first option highlighted, no wrap, focus stays in the box. */
-  private readonly picker_ = new KeyedPickerSearch()
-  protected highlightedIndex_ = computed(() => this.picker_.highlighted(PICKER_KEY))
-  protected readonly optionIdPrefix = `prep-search-${++nextPrepSearchId}-opt-`
+  protected readonly preparations_ = this.prepRegistry.allPreparations_
+  protected readonly preparationLabel_ = (entry: PreparationEntry): string => entry.name
+  protected readonly preparationKey_ = (entry: PreparationEntry): string => entry.category + '/' + entry.name
+  protected readonly preparationCategory_ = (entry: PreparationEntry): string => entry.category
 
   private lastHandledFocusTrigger: number | null = null
 
@@ -99,63 +79,15 @@ export class PreparationSearchComponent {
       if (q) {
         this.searchQuery_.set(q)
         this.showResults_.set(true)
-        setTimeout(() => {
-          this.fitHeight_()
-          this.focusSearch()
-        }, 0)
+        setTimeout(() => this.focusSearch(), 0)
       }
     })
   }
 
   /** Focus the search input (e.g. after adding a new row). */
   focusSearch(): void {
-    this.searchInputRef()?.nativeElement?.focus()
+    this.searchBox_()?.focus()
   }
-
-  /** Grow the search textarea to its content (one line when short), so long names wrap. */
-  protected fitHeight_(): void {
-    const el = this.searchInputRef()?.nativeElement
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
-  }
-
-  protected filteredResults_ = computed(() => {
-    const raw = this.searchQuery_().trim()
-    if (raw.length < 2) return []
-
-    const preps = this.prepRegistry.allPreparations_()
-    return filterOptionsByLabel(preps, raw, (p) => p.name)
-  })
-
-  /** Results grouped by category; each entry carries its keyboard index (display order). */
-  protected groupedResults_ = computed(() => {
-    const byCategory = new Map<string, PreparationEntry[]>()
-    for (const p of this.filteredResults_()) {
-      const list = byCategory.get(p.category) ?? []
-      list.push(p)
-      byCategory.set(p.category, list)
-    }
-    let index = 0
-    return Array.from(byCategory.entries()).map(
-      ([category, entries]) => [category, entries.map((entry) => ({ entry, index: index++ }))] as const
-    )
-  })
-
-  /** Results in display (keyboard) order. */
-  protected flatResults_ = computed(() => this.groupedResults_().flatMap(([, items]) => items.map((i) => i.entry)))
-
-  /** Add label: a typed name that isn't an existing preparation (rules 2–3). */
-  protected addLabel_ = computed<AddOptionLabel>(() =>
-    addOptionLabel(this.searchQuery_(), this.prepRegistry.allPreparations_(), (p) => p.name, 'add_new_preparation')
-  )
-
-  /** One add option, last — only for a new typed name: preparations are added directly, there is no add modal. */
-  protected showAddOption_ = computed(() => this.searchQuery_().trim().length >= 2 && this.addLabel_().kind === 'typed')
-
-  protected listOpen_ = computed(() => this.showResults_() && (this.flatResults_().length > 0 || this.showAddOption_()))
-
-  protected optionCount_ = computed(() => this.flatResults_().length + (this.showAddOption_() ? 1 : 0))
 
   protected categories = computed(() => this.prepRegistry.preparationCategories_())
 
@@ -165,60 +97,30 @@ export class PreparationSearchComponent {
     this.showResults_.set(false)
   }
 
-  protected onQueryInput(value: string): void {
-    this.searchQuery_.set(value)
-    this.showResults_.set(true)
-    this.picker_.onQueryChange(PICKER_KEY, value)
-    this.fitHeight_()
+  /** A click only selects; Enter selects and also asks for the next row (rule K). */
+  protected onPicked(pick: SearchPick<PreparationEntry>): void {
+    this.selectPreparation(pick.option)
+    if (pick.source === 'keyboard') this.addNewRowRequested.emit()
   }
 
-  protected onSearchFocus(): void {
-    this.showResults_.set(true)
-    this.picker_.setHighlighted(PICKER_KEY, 0)
+  protected async onAddChosen(pick: SearchAddPick): Promise<void> {
+    const saved = await this.addPreparationViaWindow(pick.typed)
+    if (saved && pick.source === 'keyboard') this.addNewRowRequested.emit()
   }
 
-  /** Rule 5 via KeyedPickerSearch. Enter saves the row with the highlighted option and asks for a new row. */
-  protected onSearchKeydown(e: KeyboardEvent): void {
+  /** Enter with no list never types a line break; Escape with no list clears a non-empty field (plan 363). */
+  protected onSearchKeyUnhandled(e: KeyboardEvent): void {
     if (e.key === 'Enter') {
-      void this.onEnter(e)
-      return
+      e.preventDefault()
+    } else if (e.key === 'Escape' && this.searchQuery_()) {
+      e.preventDefault()
+      e.stopPropagation()
+      this.searchQuery_.set('')
     }
-    if (e.key === 'Escape') {
-      this.onSearchEscape(e)
-      return
-    }
-    if (!this.listOpen_()) return
-    if (e.key === 'Tab') {
-      this.showResults_.set(false)
-      return
-    }
-    this.picker_.handleKeydown(PICKER_KEY, e, {
-      optionCount: this.optionCount_(),
-      onSelect: () => undefined,
-      onClose: () => this.showResults_.set(false),
-      onHighlightMove: () =>
-        afterNextRender(() => scrollHighlightIntoView(this.hostRef.nativeElement), { injector: this.injector })
-    })
-  }
-
-  /** Enter saves the row (highlighted match, or adds the typed name) and asks for a new row. */
-  protected async onEnter(event: Event): Promise<void> {
-    event.preventDefault()
-    const results = this.flatResults_()
-    const count = this.optionCount_()
-    if (count === 0) return
-    const idx = Math.min(this.highlightedIndex_(), count - 1)
-    if (idx < results.length) {
-      this.selectPreparation(results[idx])
-      this.addNewRowRequested.emit()
-      return
-    }
-    if (await this.addPreparationViaWindow()) this.addNewRowRequested.emit()
   }
 
   /** Add a preparation: always through the add window, prefilled with the typed name (rule W). */
-  async addPreparationViaWindow(): Promise<boolean> {
-    const typed = this.searchQuery_().trim()
+  async addPreparationViaWindow(typed: string): Promise<boolean> {
     const cats = this.categories()
     const category = this.selectedCategory().trim() || (cats.length > 0 ? cats[0] : '')
     if (!category) return false
@@ -246,27 +148,5 @@ export class PreparationSearchComponent {
     this.preparationSelected.emit(entry)
     this.searchQuery_.set('')
     return true
-  }
-
-  /** Search clear (X): empty the field, close the results, keep focus in the field (plan 363). */
-  protected onClearSearch(): void {
-    this.searchQuery_.set('')
-    this.showResults_.set(false)
-    this.focusSearch()
-    setTimeout(() => this.fitHeight_(), 0)
-  }
-
-  /** Escape closes an open list first (rule 5f); then clears a non-empty field; then bubbles (plan 363). */
-  protected onSearchEscape(event: Event): void {
-    if (this.listOpen_()) {
-      event.preventDefault()
-      event.stopPropagation()
-      this.showResults_.set(false)
-      return
-    }
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch()
   }
 }

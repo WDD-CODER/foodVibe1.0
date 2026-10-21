@@ -388,45 +388,21 @@
     }
     <div class="search-section">
       <div class="ingredient-search-block">
-        <div class="ingredient-search-input-wrap">
-          <lucide-icon name="search" [size]="18"></lucide-icon>
-          <input
-            #ingredientSearchInput
-            type="text"
-            [ngModel]="ingredientSearchQuery_()"
-            (ngModelChange)="onIngredientQueryChange($event)"
-            (keydown)="onIngredientSearchKeydown($event)"
-            [placeholder]="'search_by_ingredients' | translatePipe"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
-          />
-          <app-input-clear
-            [visible]="!!ingredientSearchQuery_()"
-            (clear)="ingredientSearchQuery_.set(''); ingredientSearchInput.focus()"
-          />
-        </div>
-        @if (ingredientSearchQuery_().trim()) {
-          <app-scrollable-dropdown [maxHeight]="200">
-            <ul class="ingredient-dropdown-list" role="listbox">
-              @if (filteredProductsForIngredientSearch_().length === 0) {
-                <li class="no-dropdown-results">{{ 'no_ingredients_found' | translatePipe }}</li>
-              }
-              @for (p of filteredProductsForIngredientSearch_(); track p._id; let i = $index) {
-                <li
-                  role="option"
-                  [class.highlighted]="ingredientPicker_.highlighted(0) === i"
-                  [attr.aria-selected]="ingredientPicker_.highlighted(0) === i"
-                  (mousedown)="$event.preventDefault()"
-                  (click)="addIngredientProduct(p)"
-                >
-                  {{ p.nameHebrew }}
-                </li>
-              }
-            </ul>
-          </app-scrollable-dropdown>
-        }
+        <app-search-combobox
+          icon="search"
+          placeholder="search_by_ingredients"
+          emptyKey="no_ingredients_found"
+          [query]="ingredientSearchQuery_()"
+          (queryChange)="ingredientSearchQuery_.set($event)"
+          [options]="filteredProductsForIngredientSearch_()"
+          [labelOf]="productLabel_"
+          [keyOf]="productKey_"
+          [clientFilter]="false"
+          [minChars]="1"
+          [maxHeight]="200"
+          (picked)="addIngredientProduct($event.option)"
+          (escaped)="ingredientSearchQuery_.set('')"
+        />
         <div class="ingredient-chips-wrap">
           @for (p of getSelectedProducts(); track p._id) {
             <button type="button" class="c-filter-chip" (click)="removeIngredientProduct(p._id)">

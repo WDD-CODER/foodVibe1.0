@@ -26,6 +26,11 @@ let nextChipSearchDropdownId = 0
 /** KeyedPickerSearch key — one picker per component instance. */
 const PICKER_KEY = 0
 
+/**
+ * @deprecated Plan 452 / ADR 0025: new code uses `app-custom-multi-select`. This stays only for the product form (category,
+ * supplier, allergens) until `custom-multi-select` gains the inline chip box, `showAddNewAlways`, `noOptionsLabel` and a
+ * caller filter. Do not add new users.
+ */
 @Component({
   selector: 'app-chip-search-dropdown',
   standalone: true,
