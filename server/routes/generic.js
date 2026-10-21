@@ -1,7 +1,5 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const { verifyToken, optionalToken, requirePlatformAdmin } = require('../middleware/auth');
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types');
 const { SEARCHABLE_ENTITY_TYPES } = require('../constants/searchable-entity-types');
@@ -9,6 +7,7 @@ const { bumpMasterVersion } = require('../services/master-version');
 const { newId: makeId } = require('../utils/id');
 const { hasSchema: hasV2Schema } = require('../utils/schema-check');
 const { checkStoredDoc } = require('../middleware/validate');
+const { dataWriteLimiter } = require('../middleware/write-limit');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
 const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-stage');
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
@@ -20,41 +19,8 @@ const router = Router();
 
 // Write routes (POST/PUT/DELETE) require a valid JWT. Reads are public.
 
-// Plan 321 Phase 1 — moderate rate limit on writes (POST/PUT/DELETE); reads (GET) are
-// skipped since master-catalog/search reads are meant to be cheap and frequent.
-// Plan 385 — the bucket is per user (verified JWT), not per IP, so users behind one IP
-// don't share a budget; anonymous writes fall back to the IP. DATA_WRITE_LIMIT_MAX sets
-// the budget (default 1000); 0 turns the limiter off. Never gate this on NODE_ENV —
-// `npm run dev` runs as NODE_ENV=production.
-const DATA_WRITE_LIMIT_MAX = Number(process.env.DATA_WRITE_LIMIT_MAX ?? 1000);
-
-/** Bucket key: `user:<id>` for a verified Bearer token, else the IPv6-safe IP key. */
-function writeLimitKey(req) {
-  const header = req.headers['authorization'] || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-  if (token) {
-    try {
-      const { userId } = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-      if (userId) return `user:${userId}`;
-    } catch {
-      // Invalid/expired token: verifyToken rejects the write anyway; bucket it by IP.
-    }
-  }
-  return ipKeyGenerator(req.ip);
-}
-
-if (DATA_WRITE_LIMIT_MAX > 0) {
-  const dataWriteLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: DATA_WRITE_LIMIT_MAX,
-    standardHeaders: true,
-    legacyHeaders: false,
-    keyGenerator: writeLimitKey,
-    skip: (req) => req.method === 'GET',
-    message: { error: 'Too many requests, please try again later' },
-  });
-  router.use(dataWriteLimiter);
-}
+// Writes share one rate limit with the events router (server/middleware/write-limit.js).
+router.use(dataWriteLimiter);
 
 // Only known user-data entity types may be read/written through the generic data API.
 // Everything else (auth's signed-users-db/users, ai.js's GEMINI_SHOTS/GEMINI_USAGE,

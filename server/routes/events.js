@@ -6,10 +6,9 @@
  */
 const { Router } = require('express')
 const mongoose = require('mongoose')
-const jwt = require('jsonwebtoken')
-const { rateLimit, ipKeyGenerator } = require('express-rate-limit')
 const { verifyToken } = require('../middleware/auth')
 const { checkStoredDoc } = require('../middleware/validate')
+const { dataWriteLimiter } = require('../middleware/write-limit')
 const { scopeFilter } = require('../utils/business-scope')
 const { assertCan } = require('../utils/permissions')
 const { applyStageChange, newNote } = require('../utils/event-stage')
@@ -20,35 +19,8 @@ const TYPE = 'menuEvents'
 const FORBIDDEN = { error: 'FORBIDDEN', messageKey: 'no_permission' }
 const router = Router()
 
-// Same write budget as the data router (DATA_WRITE_LIMIT_MAX per 15 minutes per user; 0 turns it off).
-const WRITE_LIMIT_MAX = Number(process.env.DATA_WRITE_LIMIT_MAX ?? 1000)
-
-/** Bucket key: `user:<id>` for a verified Bearer token, else the IPv6-safe IP key. */
-function limitKey(req) {
-  const header = req.headers['authorization'] || ''
-  const token = header.startsWith('Bearer ') ? header.slice(7) : ''
-  if (token) {
-    try {
-      const { userId } = jwt.verify(token, process.env.JWT_ACCESS_SECRET)
-      if (userId) return `user:${userId}`
-    } catch {
-      // Invalid or expired token: verifyToken rejects the write anyway; bucket it by IP.
-    }
-  }
-  return ipKeyGenerator(req.ip)
-}
-
-if (WRITE_LIMIT_MAX > 0) {
-  router.use(rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: WRITE_LIMIT_MAX,
-    standardHeaders: true,
-    legacyHeaders: false,
-    keyGenerator: limitKey,
-    skip: req => req.method === 'GET',
-    message: { error: 'Too many requests, please try again later' },
-  }))
-}
+// Same write budget as the data router: the one shared limiter instance (server/middleware/write-limit.js).
+router.use(dataWriteLimiter)
 
 const events = () => mongoose.connection.db.collection(TYPE)
 const actorOf = req => ({ userId: req.user.userId, name: req.user.name ?? '' })
@@ -87,12 +59,16 @@ router.put('/:id/stage', verifyToken, async (req, res) => {
 
     const merged = { ...event, ...change.set, updatedAt: now, stageHistory: [...(event.stageHistory ?? []), change.push] }
     if (!validMerged(res, merged)) return
+    // Conditional on the stage that was read, so two concurrent moves cannot both write (closedAt stays the first one).
     const result = await events().findOneAndUpdate(
-      scopeOf(req),
+      { ...scopeOf(req), stage: event.stage ?? { $exists: false } },
       { $set: { ...change.set, updatedAt: now }, $push: { stageHistory: change.push } },
       { returnDocument: 'after' },
     )
-    if (!result) return res.status(404).json({ error: 'Event not found' })
+    if (!result) {
+      const still = await events().findOne(scopeOf(req), { projection: { _id: 1 } })
+      return still ? res.status(409).json({ error: 'STAGE_CHANGED' }) : res.status(404).json({ error: 'Event not found' })
+    }
     req.log.info({ event: 'events.stage.changed', from: event.stage ?? 'inquiry', to: change.set.stage })
     res.json(result)
   } catch (err) {

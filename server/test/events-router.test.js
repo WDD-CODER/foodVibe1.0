@@ -178,3 +178,14 @@ describe('generic data API keeps stage and notes server-only', () => {
     }
   })
 })
+
+describe('plan 427 locked-kind finding stays closed', () => {
+  it('staff cannot move a term into a locked kind with a PUT', async () => {
+    await testDb().collection('taxonomyTerms').deleteMany({})
+    const term = { _id: 't1', schemaVersion: 2, kind: 'label', key: 'x1', sortOrder: 0, color: '#78716C', userId: 'st1', businessId: 'b1', createdBy: 'st1', createdAt: 1, updatedAt: 1 }
+    await testDb().collection('taxonomyTerms').insertOne(term)
+    const res = await request(app).put('/api/v1/data/taxonomyTerms/t1').set(as(STAFF)).send({ kind: 'eventType' })
+    expect(res.status).toBe(400)
+    expect((await testDb().collection('taxonomyTerms').findOne({ _id: 't1' })).kind).toBe('label')
+  })
+})
