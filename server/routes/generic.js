@@ -13,6 +13,7 @@ const { TERM_REFERENCES } = require('../generated/schemas/entities');
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
+const { assertCan, stripMoneyFields, moneyFieldsChanged, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES } = require('../utils/permissions');
 
 const router = Router();
 
@@ -102,6 +103,39 @@ function termWriteOwner(req) {
 
 /** Businesses whose documents a term's key reaches: everyone for a shared term, else its own business. */
 const termScope = term => (term.businessId === MASTER ? { $exists: true } : term.businessId);
+
+/** Plan 427: permission action for changing or deleting a stored doc (locked taxonomy kinds are owner-only). */
+const writeAction = (type, doc, fallback) =>
+  type === TAXONOMY && LOCKED_TAXONOMY_KINDS.includes(doc?.kind) ? 'editTaxonomy' : fallback;
+
+/** Plan 427: may this caller delete `doc`? Sends the 403 and returns false when not. System collections are exempt. */
+function authorizeDelete(req, res, type, doc) {
+  if (SYSTEM_TYPES.includes(type)) return true;
+  return assertCan(req, res, writeAction(type, doc, 'delete'), { type, doc });
+}
+
+/**
+ * Plan 427: may this caller change `current` into `merged`? `edit` on the stored doc, plus `editMoney`
+ * when a money field differs. Sends the 403 and returns false when not.
+ */
+function authorizeEdit(req, res, type, current, merged) {
+  if (SYSTEM_TYPES.includes(type)) return true;
+  if (!assertCan(req, res, writeAction(type, current, 'edit'), { type, doc: current })) return false;
+  if (moneyFieldsChanged(type, current, merged)) return assertCan(req, res, 'editMoney', { type, doc: current });
+  return true;
+}
+
+/**
+ * Plan 427: extra Trash filter by role. Owner: whole Trash. Staff: only items they created. Any other role is
+ * refused (403 sent, `null` returned).
+ */
+function trashOwnerFilter(req, res) {
+  const role = req.user?.businessRole;
+  if (role === 'owner') return {};
+  if (role === 'staff') return { createdBy: req.user.userId };
+  assertCan(req, res, 'delete', {});
+  return null;
+}
 
 /** Splits a TERM_REFERENCES path: `labels[]` -> { field: 'labels', isList: true }. */
 const refPath = p => ({ field: p.replace(/\[\]$/, ''), isList: p.endsWith('[]') });
@@ -340,8 +374,10 @@ router.get('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
 
 router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (req, res) => {
   try {
+    const own = trashOwnerFilter(req, res);
+    if (!own) return;
     const result = await col(req.params.type).updateMany(
-      { ...scopeFilter(req), ...IN_TRASH },
+      { ...scopeFilter(req), ...own, ...IN_TRASH },
       { $unset: { deletedAt: '', deletedBy: '' } }
     );
     res.json({ ok: true, restored: result.modifiedCount });
@@ -353,6 +389,9 @@ router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (re
 
 router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res) => {
   try {
+    const inTrash = await col(req.params.type).findOne({ _id: req.params.id, ...scopeFilter(req), ...IN_TRASH });
+    if (!inTrash) return res.status(404).json({ error: `Item ${req.params.id} is not in Trash` });
+    if (!authorizeDelete(req, res, req.params.type, inTrash)) return;
     const restored = await col(req.params.type).findOneAndUpdate(
       { _id: req.params.id, ...scopeFilter(req), ...IN_TRASH },
       { $unset: { deletedAt: '', deletedBy: '' } },
@@ -410,6 +449,17 @@ router.post('/:type', verifyToken, async (req, res) => {
     let safeEntity = body;
     if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
     if (shared && !isAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
+    // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
+    if (!SYSTEM_TYPES.includes(entityType)) {
+      if (!assertCan(req, res, writeAction(entityType, safeEntity, 'create'), { type: entityType })) return;
+      if (req.user.businessRole === 'staff') {
+        safeEntity = stripMoneyFields(entityType, safeEntity);
+        // A supplier source is only valid with its price (product schema), so a stripped source is dropped.
+        if (entityType === 'products' && Array.isArray(safeEntity.sources)) {
+          safeEntity.sources = safeEntity.sources.filter(src => typeof src?.price === 'number');
+        }
+      }
+    }
 
     const now = Date.now();
     const doc = stampNew(req, {
@@ -534,6 +584,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       staleNulls = Object.keys(current).filter(k => current[k] === null && !(k in updatable));
       const merged = { ...current, ...updatable, ...stamps };
       for (const k of staleNulls) delete merged[k];
+      if (!authorizeEdit(req, res, req.params.type, current, merged)) return;
       const check = checkStoredDoc(req.params.type, merged);
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
       // After validation, so the new key is a known plain string before it reaches a query.
@@ -543,6 +594,10 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
         }
         rekeyed = current;
       }
+    } else if (!SYSTEM_TYPES.includes(req.params.type)) {
+      // Types without a v2 schema skip the merge above; the permission check still needs the stored doc.
+      const current = await col(req.params.type).findOne(filter);
+      if (current && !authorizeEdit(req, res, req.params.type, current, { ...current, ...updatable })) return;
     }
 
     const result = await col(req.params.type).findOneAndUpdate(
@@ -1030,6 +1085,12 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Each id must be a non-empty string' });
     }
 
+    // Plan 427: every doc must be deletable by the caller, else nothing is deleted.
+    if (!SYSTEM_TYPES.includes(req.params.type)) {
+      const docs = await col(req.params.type).find({ _id: { $in: ids }, ...scopeFilter(req) }).toArray();
+      for (const doc of docs) if (!authorizeDelete(req, res, req.params.type, doc)) return;
+    }
+
     if (req.params.type === TAXONOMY) {
       const terms = await col(TAXONOMY).find({ _id: { $in: ids }, ...scopeFilter(req) }).toArray();
       for (const term of terms) {
@@ -1062,8 +1123,10 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
 // ---------------------------------------------------------------------------
 router.delete('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
   try {
+    const own = trashOwnerFilter(req, res);
+    if (!own) return;
     const docs = await col(req.params.type)
-      .find({ ...scopeFilter(req), ...IN_TRASH }, { projection: { _id: 1, userId: 1, businessId: 1, _masterId: 1, deletedAt: 1, deletedBy: 1 } })
+      .find({ ...scopeFilter(req), ...own, ...IN_TRASH }, { projection: { _id: 1, userId: 1, businessId: 1, _masterId: 1, deletedAt: 1, deletedBy: 1 } })
       .toArray();
     const now = Date.now();
     for (const doc of docs) await disposeDoc(col(req.params.type), doc, now);
@@ -1093,6 +1156,7 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
     if (!existing) {
       return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${type} does not exist` });
     }
+    if (!authorizeDelete(req, res, type, existing)) return;
 
     // A1: referential integrity — block deleting a live product that a live recipe/dish uses.
     // Prevents orphaned ingredient referenceIds in recipes and dishes.
