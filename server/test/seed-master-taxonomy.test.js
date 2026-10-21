@@ -83,3 +83,18 @@ describe('ensureDefaultStations (plan 436)', () => {
     expect(await stations()).toHaveLength(1);
   });
 });
+
+describe('seedMasterData (plan 431)', () => {
+  it('seeds the master taxonomy on an empty database and logs no seed.master.file_skipped', async () => {
+    const { logger } = require('../logger');
+    const spy = vi.spyOn(logger, 'warn');
+    await testDb().collection('taxonomyTerms').deleteMany({});
+    const { seedMasterData } = require('../services/seed-master');
+    const seeded = await seedMasterData();
+    const terms = await testDb().collection('taxonomyTerms').countDocuments({ businessId: '__master__' });
+    expect(seeded).toBeGreaterThan(0);
+    expect(terms).toBe(seeded);
+    expect(spy.mock.calls.some(([arg]) => arg?.event === 'seed.master.file_skipped')).toBe(false);
+    spy.mockRestore();
+  });
+});

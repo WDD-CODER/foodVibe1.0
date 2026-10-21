@@ -101,4 +101,35 @@ describe('BusinessService', () => {
     await expectAsync(done).toBeRejected()
     expect(service.business_()?.settings).toBeUndefined()
   })
+
+  it('updateBaseline PUTs the filled fields and puts the returned baseline into business_', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    const done = service.updateBaseline({ eventsClosedPerMonth: 4 })
+    const req = http.expectOne(`${URL}/baseline`)
+    expect(req.request.method).toBe('PUT')
+    expect(req.request.body).toEqual({ eventsClosedPerMonth: 4 })
+    req.flush({ baseline: { eventsClosedPerMonth: 4, filledAt: 123 } })
+    await done
+    expect(service.business_()?.baseline).toEqual({ eventsClosedPerMonth: 4, filledAt: 123 })
+  })
+
+  it('updateBaseline rejects on a refusal and leaves business_ unchanged', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    const done = service.updateBaseline({ estProfitPct: 100 })
+    http.expectOne(`${URL}/baseline`).flush({ error: 'Validation failed' }, { status: 400, statusText: 'Bad Request' })
+    await expectAsync(done).toBeRejected()
+    expect(service.business_()?.baseline).toBeUndefined()
+  })
+
+  it('loadSetupStatus GETs the counts', async () => {
+    const done = service.loadSetupStatus()
+    const req = http.expectOne(`${URL}/setup-status`)
+    expect(req.request.method).toBe('GET')
+    req.flush({ pricedProducts: 3, suppliers: 1, recipes: 0, events: 0, staff: 0 })
+    expect((await done).pricedProducts).toBe(3)
+  })
 })
