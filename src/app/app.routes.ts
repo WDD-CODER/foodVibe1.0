@@ -204,6 +204,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/trash/trash.page').then(m => m.TrashPage),
     canActivate: [authGuard],
   },
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage),
+    canActivate: [authGuard],
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },
 ]

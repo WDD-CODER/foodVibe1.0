@@ -181,6 +181,9 @@
           <span class="event-chip-sep">·</span>
           <app-venue-link-chip class="event-chip-select" [eventId]="editingId_()" />
         </div>
+        @if (getGuestCount() <= 0) {
+        <span class="c-field-error guest-hint no-print" role="alert">{{ 'enter_guest_count' | translatePipe }}</span>
+        }
 
         <!-- Ornamental rule -->
         <div class="info-menu-divider">✦</div>
@@ -269,9 +272,7 @@
                 [highlightedIndex]="getDishSearchHighlightedIndex(sectionIndex, itemIndex)"
                 [isMetaExpanded]="isDishMetaExpanded(sectionIndex, itemIndex)"
                 [editingDishField]="editingDishField_()"
-                [servingType]="form_.value.servingType || 'plated_course'"
-                [guestCount]="getGuestCount()"
-                [piecesPerPerson]="getPiecesPerPerson()"
+                [portionInfo]="menuPortions_.at(sectionIndex, itemIndex)"
                 (remove)="removeItem(sectionIndex, itemIndex)"
                 (selectRecipe)="selectRecipe(sectionIndex, itemIndex, $event.recipe)"
                 (startEditName)="startEditDishName(sectionIndex, itemIndex)"

@@ -1,6 +1,6 @@
 # Plan 436 — Kitchen stations as a managed list, picked in the recipe header
 
-Status: draft
+Status: active
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 Track: code
 
@@ -18,8 +18,8 @@ catch `''`, so every recipe lands in an unnamed group. There is no taxonomy kind
   a recipe without a station groups under "כללי".
 
 Done when:
-- [auto] `npx ng build` exits 0.
-- [auto] `npm --prefix server test` passes (0 failures), including new cases:
+- [x] [auto] `npx ng build` exits 0.
+- [x] [auto] `npm --prefix server test` passes (0 failures), including new cases:
   - `taxonomy-term-schema.test.js`: a plain `{ kind: 'station', key: 'חם' }` term is valid; a station with `color` is rejected.
   - `seed-master-taxonomy.test.js`: `ensureDefaultStations()` on a database whose master terms exist but have no
     station inserts exactly 5 master `station` terms with keys `חם, קר, מאפה, קינוחים, הגשה` (sortOrder 0–4), each
@@ -27,13 +27,13 @@ Done when:
   - `taxonomy-terms-api.test.js`: renaming a user's own `station` term `גריל` → `גריל פחמים` re-keys
     `defaultStation` on that user's recipes and dishes in the same request; deleting a station still used by a
     recipe returns 409 with `referencedBy`.
-- [auto] `npx ng test --watch=false --include='src/app/core/services/station-registry.service.spec.ts' --include='src/app/pages/metadata-manager/components/station-manager/**/*.spec.ts' --include='src/app/pages/recipe-builder/components/recipe-header/**/*.spec.ts' --include='src/app/pages/recipe-builder/services/recipe-form.service.spec.ts'`
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/services/station-registry.service.spec.ts' --include='src/app/pages/metadata-manager/components/station-manager/**/*.spec.ts' --include='src/app/pages/recipe-builder/components/recipe-header/**/*.spec.ts' --include='src/app/pages/recipe-builder/services/recipe-form.service.spec.ts'`
   passes (0 failures), including: `buildRecipeFromForm` with `default_station: 'קר'` saves `defaultStation: 'קר'`;
   with an unknown key saves `''`; `patchFormFromRecipe` fills `default_station` from `recipe.defaultStation`; the
   header's station options start with `{ value: '', label: 'general_group' }` and list the station keys; choosing
   the add option opens the add window prefilled with the typed name and selects the stored key after save.
-- [auto] `git grep -n "defaultStation ?? 'כללי'" -- src` → no output; `git grep -c "defaultStation || 'כללי'" -- src/app/core/services/menu-export.service.ts` → `3`.
-- [auto] `git diff --numstat origin/main...HEAD -- src/app/pages/recipe-builder/recipe-builder.page.ts src/app/core/services/menu-export.service.ts`
+- [x] [auto] `git grep -n "defaultStation ?? 'כללי'" -- src` → no output; `git grep -c "defaultStation || 'כללי'" -- src/app/core/services/menu-export.service.ts` → `3`.
+- [x] [auto] `git diff --numstat origin/main...HEAD -- src/app/pages/recipe-builder/recipe-builder.page.ts src/app/core/services/menu-export.service.ts`
   shows added ≤ deleted for both (growth-frozen).
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Stations list, station picker and by-station grouping work on desktop and on a phone (cards ①–④ below).
@@ -120,6 +120,7 @@ src/app/core/services/menu-export.service.ts
 src/app/pages/metadata-manager/components/station-manager/**
 src/app/pages/metadata-manager/metadata-manager.page.component.ts
 src/app/pages/metadata-manager/metadata-manager.page.component.html
+src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
 src/app/pages/recipe-builder/components/recipe-header/**
 src/app/pages/recipe-builder/services/recipe-form.service.ts
 src/app/pages/recipe-builder/services/recipe-form.service.spec.ts
@@ -169,14 +170,14 @@ in `generic.js`; `TaxonomyStore.terms/add/updateByKey/removeByKey/canEdit/errorM
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Taxonomy kind `station` in the shared schema, referenced by `recipes.defaultStation` and `dishes.defaultStation`.
-- [ ] Default master stations חם, קר, מאפה, קינוחים, הגשה, seeded once (fresh and live databases).
-- [ ] Metadata manager section "תחנות עבודה": list, add, inline rename, remove; shared defaults read-only except for
+- [x] Taxonomy kind `station` in the shared schema, referenced by `recipes.defaultStation` and `dishes.defaultStation`.
+- [x] Default master stations חם, קר, מאפה, קינוחים, הגשה, seeded once (fresh and live databases).
+- [x] Metadata manager section "תחנות עבודה": list, add, inline rename, remove; shared defaults read-only except for
       an admin (same rule and message as other kinds); used station → removal refused with the names.
-- [ ] Recipe header station picker (recipes and dishes): "כללי" (empty) first, then stations; one add option
+- [x] Recipe header station picker (recipes and dishes): "כללי" (empty) first, then stations; one add option
       (add-option rule, keyboard rule K via the shared `app-custom-select`); saved to `defaultStation`, restored on load,
       counted by the unsaved-changes check.
-- [ ] `defaultStation: ''` → "כללי" in the by-station checklist (`||` instead of `??`, 3 places).
+- [x] `defaultStation: ''` → "כללי" in the by-station checklist (`||` instead of `??`, 3 places).
 
 ## UI/UX Notes
 - New child component `pages/metadata-manager/components/station-manager/` (`app-station-manager`), modelled on
@@ -198,16 +199,16 @@ in `generic.js`; `TaxonomyStore.terms/add/updateByKey/removeByKey/canEdit/errorM
 - No new icons.
 
 ## Atomic Sub-tasks
-- [ ] T1: Add stations as their own taxonomy kind that recipes and dishes point to — 'station' in TAXONOMY_KINDS and plainKinds; TERM_REFERENCES.station = { recipes: ['defaultStation'], dishes: ['defaultStation'] }; schema test cases — shared/schemas/entities/taxonomy-term.schema.ts, server/test/taxonomy-term-schema.test.js
-- [ ] T2: Seed the five default stations once, on fresh and existing databases — ensureDefaultStations(): no master station term → insert חם, קר, מאפה, קינוחים, הגשה (sortOrder 0–4, schemaVersion 2, master owner fields, parseV2-checked); called at the end of both seedMasterData paths; exported; tests — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
-- [ ] T3: Prove renaming and deleting a station is handled on the server for recipes and dishes — rename re-keys defaultStation; delete of a used station → 409 — server/test/taxonomy-terms-api.test.js
-- [ ] T4: Give the app one place to read and change stations — StationRegistryService: stations_ (keys in sortOrder), addStation(name) (trimmed, duplicate → returns existing key), renameStation(old, new) via updateByKey, removeStation(key) via removeByKey, canEdit(key); spec — src/app/core/services/station-registry.service.ts, station-registry.service.spec.ts, src/app/core/services/breadcrumbs.md
-- [ ] T5: Let the owner manage stations in the metadata manager — StationManagerComponent (add / inline rename with confirm / remove with confirm; TaxonomyStore.errorMessage for read-only and in-use; sign-in guard; permission gate when 428 merged); spec; page tag + jumpSections entry + import — src/app/pages/metadata-manager/components/station-manager/**, metadata-manager.page.component.ts, metadata-manager.page.component.html
-- [ ] T6: Save and restore the recipe's station instead of always wiping it — buildRecipeFromForm: defaultStation = raw default_station if it is a known station key, else ''; patchFormFromRecipe: default_station = recipe.defaultStation ?? ''; spec cases — src/app/pages/recipe-builder/services/recipe-form.service.ts, recipe-form.service.spec.ts
-- [ ] T7: Add the station control to the frozen recipe page without growing it — default_station: [''] in recipeForm_ and in the dirty-check normalized object; offset by collapsing the 4-line "Signal-backed state…" comment in the dirty check (`getRecipeSnapshotForComparison`) to 2 lines; added ≤ deleted — src/app/pages/recipe-builder/recipe-builder.page.ts
-- [ ] T8: Let the chef pick or add a station in the recipe header — stationSelectOptions_ computed, stationControl getter, add-option flow via AddItemModalService + notifyItemAdded; spec cases — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts, .html, .spec.ts
-- [ ] T9: Put recipes without a station under "כללי" on the station checklist — replace the three defaultStation ?? 'כללי' with defaultStation || 'כללי' (same line count) — src/app/core/services/menu-export.service.ts
-- [ ] T10: Add the Hebrew texts for the station list and picker — keys listed in UI/UX Notes — public/assets/data/dictionary.json
+- [x] T1: Add stations as their own taxonomy kind that recipes and dishes point to — 'station' in TAXONOMY_KINDS and plainKinds; TERM_REFERENCES.station = { recipes: ['defaultStation'], dishes: ['defaultStation'] }; schema test cases — shared/schemas/entities/taxonomy-term.schema.ts, server/test/taxonomy-term-schema.test.js
+- [x] T2: Seed the five default stations once, on fresh and existing databases — ensureDefaultStations(): no master station term → insert חם, קר, מאפה, קינוחים, הגשה (sortOrder 0–4, schemaVersion 2, master owner fields, parseV2-checked); called at the end of both seedMasterData paths; exported; tests — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js
+- [x] T3: Prove renaming and deleting a station is handled on the server for recipes and dishes — rename re-keys defaultStation; delete of a used station → 409 — server/test/taxonomy-terms-api.test.js
+- [x] T4: Give the app one place to read and change stations — StationRegistryService: stations_ (keys in sortOrder), addStation(name) (trimmed, duplicate → returns existing key), renameStation(old, new) via updateByKey, removeStation(key) via removeByKey, canEdit(key); spec — src/app/core/services/station-registry.service.ts, station-registry.service.spec.ts, src/app/core/services/breadcrumbs.md
+- [x] T5: Let the owner manage stations in the metadata manager — StationManagerComponent (add / inline rename with confirm / remove with confirm; TaxonomyStore.errorMessage for read-only and in-use; sign-in guard; permission gate when 428 merged); spec; page tag + jumpSections entry + import — src/app/pages/metadata-manager/components/station-manager/**, metadata-manager.page.component.ts, metadata-manager.page.component.html
+- [x] T6: Save and restore the recipe's station instead of always wiping it — buildRecipeFromForm: defaultStation = raw default_station if it is a known station key, else ''; patchFormFromRecipe: default_station = recipe.defaultStation ?? ''; spec cases — src/app/pages/recipe-builder/services/recipe-form.service.ts, recipe-form.service.spec.ts
+- [x] T7: Add the station control to the frozen recipe page without growing it — default_station: [''] in recipeForm_ and in the dirty-check normalized object; offset by collapsing the 4-line "Signal-backed state…" comment in the dirty check (`getRecipeSnapshotForComparison`) to 2 lines; added ≤ deleted — src/app/pages/recipe-builder/recipe-builder.page.ts
+- [x] T8: Let the chef pick or add a station in the recipe header — stationSelectOptions_ computed, stationControl getter, add-option flow via AddItemModalService + notifyItemAdded; spec cases — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts, .html, .spec.ts
+- [x] T9: Put recipes without a station under "כללי" on the station checklist — replace the three defaultStation ?? 'כללי' with defaultStation || 'כללי' (same line count) — src/app/core/services/menu-export.service.ts
+- [x] T10: Add the Hebrew texts for the station list and picker — keys listed in UI/UX Notes — public/assets/data/dictionary.json
 - [ ] T11: Build, run server and client tests and the log check, then hand over the station checks — ng build, npm --prefix server test, ng test include list, git grep, numstat, log-query; cards ①–④ + production check — this plan file
 
 ## Technical Considerations

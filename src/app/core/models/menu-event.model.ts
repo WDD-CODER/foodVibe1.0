@@ -1,6 +1,31 @@
 import type { EventLogistics } from './logistics.model'
 
-/** Dynamic menu types from registry; legacy values buffet_family | plated_course | cocktail_passed still drive derivePortions logic. */
+/** Plan 442: pipeline stage keys (mirror of shared/schemas/entities/event-stage.ts). */
+export type EventStage =
+  'inquiry' | 'quote_sent' | 'deposit_paid' | 'ordering' | 'execution' | 'post_production' | 'finished' | 'not_closed'
+
+export type NotClosedReason = 'price' | 'date_taken' | 'no_reply' | 'other'
+
+export interface EventStageEntry {
+  stage: EventStage
+  at: number
+  by: string
+  byName: string
+  reason?: NotClosedReason
+  reasonText?: string
+}
+
+export interface EventNote {
+  _id: string
+  /** 1 to 2,000 characters, plain text */
+  text: string
+  at: number
+  by: string
+  byName: string
+  editedAt?: number
+}
+
+/** Dynamic menu types from registry; legacy values buffet_family | plated_course | cocktail_passed still name the serving styles. */
 export type ServingType = string
 
 export type DishFieldKey =
@@ -31,14 +56,27 @@ export interface MenuPerformanceTags {
   primaryServingStyle: ServingType
 }
 
+/** Plan 440: the name and coefficient of an event type / serving type, copied when it was selected. */
+export interface TypeSnapshot {
+  key: string
+  name: string
+  coefficient: number
+}
+
 export interface MenuItemSelection {
   recipeId: string
   recipeType: 'dish' | 'preparation'
-  predictedTakeRate: number
+  /** @deprecated legacy since plan 440, unused */
+  predictedTakeRate?: number
   derivedPortions: number
   sellPrice?: number
   foodCostOverride?: number
+  /** @deprecated replaced by portionsPerDiner (plan 440); read only as a fallback */
   servingPortions?: number
+  /** Plan 440: portions of this item per diner (before the coefficient) */
+  portionsPerDiner?: number
+  /** Plan 440: replaces the event's default coefficient for this item (> 0, at most 2 decimals) */
+  coefficientOverride?: number
 }
 
 export interface MenuSection {
@@ -54,7 +92,10 @@ export interface MenuEvent {
   eventType: string
   eventDate?: string
   servingType: ServingType
+  eventTypeSnapshot?: TypeSnapshot
+  servingTypeSnapshot?: TypeSnapshot
   guestCount: number
+  /** @deprecated legacy since plan 440, unused */
   piecesPerPerson?: number
   sections: MenuSection[]
   financialTargets?: MenuFinancialTargets
@@ -65,4 +106,18 @@ export interface MenuEvent {
   createdFromTemplateId?: string
   /** Resolved equipment + venue context (contextual logistics) */
   logistics?: EventLogistics
+  /** Plan 442: set and changed only by the server (`/api/v1/events`) */
+  stage?: EventStage
+  stageHistory?: EventStageEntry[]
+  /** First move to deposit_paid or later; never changes */
+  closedAt?: number
+  notClosedAt?: number
+  notClosedReason?: NotClosedReason
+  notClosedText?: string
+  /** Events that existed before stages ("ישן"); dashboards never count them */
+  legacy?: boolean
+  notes?: EventNote[]
+  clientName?: string
+  clientPhone?: string
+  deposit?: { amount?: number; date?: string }
 }

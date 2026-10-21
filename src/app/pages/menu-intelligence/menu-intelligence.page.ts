@@ -62,6 +62,7 @@ import { SupplierOrdersComponent } from './components/supplier-orders/supplier-o
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { AiMenuModalService } from '../../shared/ai-menu-modal/ai-menu-modal.service'
 import { MenuAiFlowService } from './services/menu-ai-flow.service'
+import { MenuPortionsService } from './services/menu-portions.service'
 import { MenuPickerSearchService } from './services/menu-picker-search.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
@@ -70,7 +71,7 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
 type MenuItemForm = {
   recipeId: string
   recipeType: 'dish' | 'preparation'
-  predictedTakeRate: number
+  coefficient_override?: number | null
   sell_price?: number
   food_cost_money?: number
   food_cost_pct?: number
@@ -106,7 +107,7 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [MenuAiFlowService, MenuPickerSearchService]
+  providers: [MenuAiFlowService, MenuPickerSearchService, MenuPortionsService]
 })
 export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder)
@@ -128,6 +129,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly aiMenuModal_ = inject(AiMenuModalService)
   private readonly menuAiFlow_ = inject(MenuAiFlowService)
   protected readonly pickerSearch_ = inject(MenuPickerSearchService)
+  protected readonly menuPortions_ = inject(MenuPortionsService)
 
   /** Bumped when form value changes so footer computeds re-run (form is not a signal). */
   private readonly formValueVersion_ = signal(0)
@@ -258,6 +260,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   })
 
   constructor() {
+    this.menuPortions_.bind(this.form_, this.formValueVersion_)
     this.form_.valueChanges
       .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.formValueVersion_.update((v) => v + 1))
@@ -674,7 +677,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.fb.group({
         recipeId: ['', Validators.required],
         recipeType: ['dish'],
-        predictedTakeRate: [0.4, [Validators.required, Validators.min(0), Validators.max(1)]],
+        coefficient_override: [null as number | null],
         sell_price: [0],
         food_cost_money: [0],
         food_cost_pct: [0],
@@ -695,22 +698,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return recipe.recipeType === 'dish' || !!(recipe.prepItems?.length || recipe.prepCategories?.length)
   }
 
-  protected getPiecesPerPerson(): number {
-    return (this.form_.value as { piecesPerPerson?: number }).piecesPerPerson ?? 1
-  }
-
   private getAutoFoodCost(sectionIndex: number, itemIndex: number): number {
     const item = this.getItemsArray(sectionIndex).at(itemIndex)
     const recipeId = item?.get('recipeId')?.value as string | undefined
     if (!recipeId) return 0
-    const derivedPortions = this.menuIntelligence.derivePortions(
-      this.form_.value.servingType as ServingType,
-      this.getGuestCount(),
-      Number(item.get('predictedTakeRate')?.value ?? 0),
-      this.getPiecesPerPerson(),
-      Number(item.get('serving_portions')?.value ?? 1)
+    return roundMoney(
+      this.eventPlan_.costFor(recipeId, this.menuPortions_.at(sectionIndex, itemIndex)?.portions ?? 0).cost
     )
-    return roundMoney(this.eventPlan_.costFor(recipeId, derivedPortions).cost)
   }
 
   private dishKey(sectionIndex: number, itemIndex: number): string {
@@ -806,13 +800,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected selectRecipe(sectionIndex: number, itemIndex: number, recipe: Recipe): void {
     const items = this.getItemsArray(sectionIndex)
     const group = items.at(itemIndex)
-    const derivedPortions = this.menuIntelligence.derivePortions(
-      this.form_.value.servingType as ServingType,
-      Number(this.form_.value.guestCount || 0),
-      Number(group.get('predictedTakeRate')?.value ?? 0.4),
-      Number((this.form_.value as { piecesPerPerson?: number }).piecesPerPerson ?? 1),
-      Number(group.get('serving_portions')?.value ?? 1)
-    )
+    const derivedPortions = this.menuPortions_.at(sectionIndex, itemIndex)?.portions ?? 0
     group.patchValue({
       recipeId: recipe._id,
       recipeType: this.isRecipeDish(recipe) ? 'dish' : 'preparation',
@@ -1078,6 +1066,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   private async loadEvent(id: string): Promise<void> {
     const event = await this.menuEventData.getMenuEventById(id)
+    this.menuPortions_.remember(event)
     this.form_.patchValue({
       name: event.name,
       eventType: event.eventType,
@@ -1100,11 +1089,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           this.fb.group({
             recipeId: [item.recipeId, Validators.required],
             recipeType: [item.recipeType],
-            predictedTakeRate: [item.predictedTakeRate, [Validators.required, Validators.min(0), Validators.max(1)]],
+            coefficient_override: [item.coefficientOverride ?? null],
             sell_price: [item.sellPrice ?? 0],
             food_cost_money: [item.foodCostOverride ?? 0],
             food_cost_pct: [0],
-            serving_portions: [item.servingPortions ?? 0],
+            serving_portions: [item.portionsPerDiner ?? item.servingPortions ?? 1],
             serving_portions_pct: [0]
           })
         )
@@ -1141,7 +1130,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           name?: string
           items?: {
             recipeId?: string
-            predictedTakeRate?: number
             serving_portions?: number
             sell_price?: number
           }[]
@@ -1149,7 +1137,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           category: sec.name ?? '',
           items: (sec.items ?? []).map((item) => ({
             nameHebrew: '',
-            predictedTakeRate: item.predictedTakeRate ?? 0.4,
             serving_portions: item.serving_portions ?? 1,
             sell_price: item.sell_price ?? 0
           }))
@@ -1169,15 +1156,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       sortOrder: sectionIndex + 1,
       items: (section.items || []).flatMap((item: MenuItemForm, itemIndex: number) => {
         if (!item.recipeId) return []
-        const sp = Number(item.serving_portions || 1)
         return {
           recipeId: item.recipeId,
           recipeType: item.recipeType,
-          predictedTakeRate: Number(item.predictedTakeRate || 0),
-          derivedPortions: sp * guestCount,
+          derivedPortions: 0,
           sellPrice: item.sell_price ?? undefined,
           foodCostOverride: this.getAutoFoodCost(sectionIndex, itemIndex) || undefined,
-          servingPortions: sp
+          portionsPerDiner: Number(item.serving_portions ?? 0),
+          coefficientOverride: Number(item.coefficient_override) > 0 ? Number(item.coefficient_override) : undefined
         }
       })
     }))
@@ -1189,6 +1175,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       eventDate: raw.eventDate || '',
       servingType: servingType,
       guestCount: guestCount,
+      ...this.menuPortions_.snapshots(raw.eventType || '', servingType),
       sections: sections,
       financialTargets: {
         targetFoodCostPct: 30,

@@ -14,6 +14,7 @@ import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { UserService } from '@services/user.service'
 
 describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent
@@ -74,12 +75,41 @@ describe('MetadataManagerPageComponent', () => {
 
     fixture = TestBed.createComponent(MetadataManagerComponent)
     component = fixture.componentInstance
+    // The page lists all 12 sections for a platform admin; plan 426 tests below flip this.
+    TestBed.inject(UserService)._saveUserLocal({ _id: 'u1', name: 'u', email: 'u@x', isPlatformAdmin: true })
 
     fixture.detectChanges()
   })
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  describe('platform-admin sections (plan 426)', () => {
+    const setPlatformAdmin = (isPlatformAdmin: boolean) => {
+      TestBed.inject(UserService)._saveUserLocal({ _id: 'u1', name: 'u', email: 'u@x', isPlatformAdmin })
+      fixture.detectChanges()
+    }
+    const tabLabels = () =>
+      fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill')).map((b) => b.nativeElement.textContent.trim())
+
+    it('hides user management, AI models and their jump tabs when the user is not a platform admin', () => {
+      setPlatformAdmin(false)
+      const host: HTMLElement = fixture.nativeElement
+      expect(host.querySelector('#mm-sec-user')).toBeNull()
+      expect(host.querySelector('#mm-sec-ai-models')).toBeNull()
+      expect(tabLabels()).not.toContain('user_management')
+      expect(tabLabels()).not.toContain('ai_model_manager')
+    })
+
+    it('shows them, and their jump tabs, for a platform admin', () => {
+      setPlatformAdmin(true)
+      const host: HTMLElement = fixture.nativeElement
+      expect(host.querySelector('#mm-sec-user')).not.toBeNull()
+      expect(host.querySelector('#mm-sec-ai-models')).not.toBeNull()
+      expect(tabLabels()).toContain('user_management')
+      expect(tabLabels()).toContain('ai_model_manager')
+    })
   })
 
   // Plan 385: the server re-keys referencing documents, so a rename is one term write + a reload.
@@ -253,15 +283,17 @@ describe('MetadataManagerPageComponent', () => {
     'mm-sec-label',
     'mm-sec-course',
     'mm-sec-menu-type',
+    'mm-sec-coefficients',
     'mm-sec-preparation',
     'mm-sec-section',
+    'mm-sec-station',
     'mm-sec-user',
     'mm-sec-ai-models'
   ]
 
-  it('should render exactly 10 jump-nav tabs in page order', () => {
+  it('should render exactly 12 jump-nav tabs in page order', () => {
     const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))
-    expect(tabs.length).toBe(10)
+    expect(tabs.length).toBe(12)
     expect(tabs.map((t) => t.nativeElement.textContent.trim())).toEqual([
       'metadata_units_and_conversions_title',
       'metadata_product_categories_title',
@@ -269,14 +301,16 @@ describe('MetadataManagerPageComponent', () => {
       'metadata_recipe_labels_title',
       'metadata_recipe_courses_title',
       'metadata_menu_types_title',
+      'metadata_coefficients_title',
       'metadata_prep_categories',
       'metadata_section_categories_title',
+      'metadata_stations_title',
       'user_management',
       'ai_model_manager'
     ])
   })
 
-  it('should give each of the 10 sections a matching stable id', () => {
+  it('should give each of the 12 sections a matching stable id', () => {
     for (const id of JUMP_SECTION_IDS) {
       expect(fixture.debugElement.query(By.css(`#${id}`)))
         .withContext(id)
@@ -299,7 +333,7 @@ describe('MetadataManagerPageComponent', () => {
     expect(tab.nativeElement.classList.contains('active')).toBeTrue()
     // Everyone else keeps their natural relative order.
     expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('1')
-    expect(fixture.debugElement.query(By.css('#mm-sec-user')).nativeElement.style.order).toBe('9')
+    expect(fixture.debugElement.query(By.css('#mm-sec-user')).nativeElement.style.order).toBe('11')
   })
 
   it('should swap directly to a different section when its tab is clicked while another is front', () => {
@@ -316,7 +350,7 @@ describe('MetadataManagerPageComponent', () => {
   it("renders the jump-nav tabs inside the shared scroll rail (plan 350 — arrows are the rail's job)", () => {
     const rail = fixture.debugElement.query(By.css('app-scroll-rail.mm-jump-nav'))
     expect(rail).not.toBeNull()
-    expect(rail.queryAll(By.css('.c-tab-pill')).length).toBe(10)
+    expect(rail.queryAll(By.css('.c-tab-pill')).length).toBe(12)
     expect(fixture.debugElement.query(By.css('.mm-jump-nav-arrow'))).toBeNull()
   })
 })

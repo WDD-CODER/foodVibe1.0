@@ -1,0 +1,36 @@
+<div class="settings-shell" dir="rtl">
+  <app-page-header titleKey="settings" />
+
+  @if (visibleTabs_().length === 0) {
+  <app-empty-state data-testid="settings-owner-only" messageKey="settings_owner_only" icon="lock" />
+  } @else {
+  <div class="settings-tabs" role="tablist">
+    <app-scroll-rail>
+      @for (tab of visibleTabs_(); track tab.key) {
+      <button
+        type="button"
+        role="tab"
+        class="c-tab-pill"
+        [class.active]="activeTab_() === tab.key"
+        [attr.aria-selected]="activeTab_() === tab.key"
+        [attr.data-testid]="'settings-tab-' + tab.key"
+        (click)="setTab(tab.key)"
+      >
+        <lucide-icon [name]="tab.icon" [size]="16" />
+        {{ tab.labelKey | translatePipe }}
+      </button>
+      }
+    </app-scroll-rail>
+  </div>
+
+  <div class="settings-content" role="tabpanel">
+    @switch (activeTab_()) { @case ('team') {
+    <app-team-tab />
+    } @case ('business') {
+    <app-business-settings-tab />
+    } @case ('baseline') {
+    <app-baseline-tab />
+    } }
+  </div>
+  }
+</div>

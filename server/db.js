@@ -73,12 +73,41 @@ async function connectDb() {
   )
   logger.debug({ event: 'mongo.index.ensured', index: 'ingredients.referenceId' })
 
+  // Plan 425: every read and write is scoped by businessId, so each index is led by it. The old
+  // userId indexes above stay (migration 0003's --verify checks kind_key_user_unique; dropping is out of scope).
+  await Promise.all(
+    CLONEABLE_TYPES.map(type => db.collection(type).createIndex({ businessId: 1 }, { background: true }))
+  )
+  await db.collection('VERSION_HISTORY').createIndex({ businessId: 1, entityType: 1, entityId: 1 }, { background: true })
+  await Promise.all(
+    SEARCHABLE_ENTITY_TYPES.map(type =>
+      db.collection(type).createIndex({ businessId: 1, nameHebrew: 1 }, { background: true })
+    )
+  )
+  await db.collection('products').createIndex({ businessId: 1, minStockLevel: 1 }, { background: true })
+  await Promise.all(
+    ['recipes', 'dishes'].flatMap(type => [
+      db.collection(type).createIndex({ businessId: 1, isApproved: 1 }, { background: true }),
+      db.collection(type).createIndex({ businessId: 1, 'ingredients.referenceId': 1 }, { background: true }),
+    ])
+  )
+  logger.debug({ event: 'mongo.index.ensured', index: 'businessId' })
+
   // Plan 424: one document per business; looked up by its owner.
   await db.collection('businesses').createIndex({ ownerId: 1 }, { name: 'business_owner' })
+
+  // Plan 430: per-user-per-day activity records; dashboards read them by business and date. No TTL.
+  await db.collection('usageDays').createIndex({ businessId: 1, date: 1 }, { name: 'business_date' })
 
   // Plan 321 Phase 3: one term per (kind, key, owner); same names as migration 0003 so both are idempotent.
   await db.collection('taxonomyTerms').createIndex({ kind: 1, key: 1, userId: 1 }, { unique: true, name: 'kind_key_user_unique' })
   await db.collection('taxonomyTerms').createIndex({ userId: 1, kind: 1, sortOrder: 1 }, { name: 'user_kind_order' })
+  // Plan 425: terms are unique per (kind, key, business). Partial, so an orphan doc without the field can't break startup.
+  await db.collection('taxonomyTerms').createIndex(
+    { kind: 1, key: 1, businessId: 1 },
+    { unique: true, name: 'kind_key_business_unique', partialFilterExpression: { businessId: { $exists: true } } }
+  )
+  await db.collection('taxonomyTerms').createIndex({ businessId: 1, kind: 1, sortOrder: 1 }, { name: 'business_kind_order' })
   logger.debug({ event: 'mongo.index.ensured', index: 'taxonomyTerms' })
 
   // Plan 382: app_logs — 90-day TTL + level/event/userId lookups (server/services/log-sink.js).

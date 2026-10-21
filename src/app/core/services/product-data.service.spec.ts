@@ -61,6 +61,13 @@ describe('ProductDataService', () => {
     expect(storageSpy.query).toHaveBeenCalledWith(ENTITY)
   })
 
+  it('keeps createdBy on a loaded product (staff edit lock needs the creator id)', fakeAsync(() => {
+    storageSpy.query.and.returnValue(Promise.resolve([{ ...mockProducts[0], createdBy: 'u1' }]))
+    const fresh = TestBed.runInInjectionContext(() => new ProductDataService())
+    tick()
+    expect(fresh.allProducts_()[0].createdBy).toBe('u1')
+  }))
+
   describe('Computed Signals', () => {
     it('should compute allTopCategories_ correctly without duplicates', () => {
       expect(service.allTopCategories_()).toEqual(['Veg'])

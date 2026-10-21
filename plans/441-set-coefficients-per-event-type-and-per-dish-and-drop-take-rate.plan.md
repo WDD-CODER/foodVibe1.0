@@ -1,6 +1,6 @@
 # Plan 441 — Set coefficients per event type and per dish, and drop take rate
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -30,10 +30,10 @@ the math; every list gets its portions from `computePortions`.
   every engine list; the chef can see and override the coefficient per dish.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `git diff --numstat origin/mvp -- src/app/pages/menu-intelligence/menu-intelligence.page.ts src/app/core/services/menu-export.service.ts`
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `git diff --numstat origin/mvp -- src/app/pages/menu-intelligence/menu-intelligence.page.ts src/app/core/services/menu-export.service.ts`
   shows deletions ≥ insertions for each file (growth-frozen files, net ≤ 0; base branch per MVP run mode).
-- [auto] `npx ng test --watch=false --include='src/app/core/engine/**' --include='src/app/core/services/menu-intelligence.service.spec.ts' --include='src/app/core/services/event-type-snapshot.service.spec.ts' --include='src/app/pages/menu-intelligence/**' --include='src/app/pages/metadata-manager/**' --include='src/app/core/services/export.service.spec.ts'`
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/engine/**' --include='src/app/core/services/menu-intelligence.service.spec.ts' --include='src/app/core/services/event-type-snapshot.service.spec.ts' --include='src/app/pages/menu-intelligence/**' --include='src/app/pages/metadata-manager/**' --include='src/app/core/services/export.service.spec.ts'`
   passes, including:
   - `menu-intelligence.service.spec.ts`: the take-rate / pieces-per-person cases are removed; `hydrateDerivedPortions`
     on an event with snapshots private 1.15 × cocktail 3, 50 guests, 1 per diner → `derivedPortions` **173**;
@@ -48,9 +48,9 @@ Done when:
     clears it; typing `1.111` or `0` shows the invalid message and keeps the old value;
   - coefficient manager: adding event type "בר מצווה" with 1.25 calls `TaxonomyStore.add('eventType', 'בר מצווה', { coefficient: 1.25 })`;
     a shared term's input is disabled for a non-admin.
-- [auto] `grep -rn "derivePortions\|getPiecesPerPerson\|portionsFromDerived" src/app --include=*.ts` → no matches.
-- [auto] `grep -rn "take_rate\|pieces_per_person\|predictedTakeRate" src/app/pages src/app/core/services/menu-export.service.ts --include=*.ts --include=*.html` → no matches.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `grep -rn "derivePortions\|getPiecesPerPerson\|portionsFromDerived" src/app --include=*.ts` → no matches.
+- [x] [auto] `grep -rn "take_rate\|pieces_per_person\|predictedTakeRate" src/app/pages src/app/core/services/menu-export.service.ts --include=*.ts --include=*.html` → no matches.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Desktop: dashboard → «מטא-דאטה» tab → «מקדמים» card → event types list shows עסקי 1.1, פרטי 1.15,
   חתונה 1.2, מסיבה 1.1, כנסים 0.9; serving types show 1, 1.1, 2, 3. Add «בר מצווה» with 1.25 → it appears.
 - [human] Desktop: `/menu-intelligence` (new menu) → event type «פרטי», serving «בופה», 100 guests, add one dish
@@ -103,6 +103,9 @@ src/app/core/engine/event-plan.service.spec.ts
 src/app/core/engine/portions-plan.spec.ts
 src/app/core/engine/portions-from-derived.ts
 src/app/core/engine/portions-from-derived.spec.ts
+src/app/core/engine/testing/event-plan.fixture.ts
+src/app/core/models/ai-menu-draft.model.ts
+src/app/core/models/menu-event.model.ts
 src/app/core/services/menu-intelligence.service.ts
 src/app/core/services/menu-intelligence.service.spec.ts
 src/app/core/services/event-type-snapshot.service.ts
@@ -120,8 +123,11 @@ src/app/pages/menu-intelligence/services/menu-ai-flow.service.ts
 src/app/pages/menu-library/menu-library.page.ts
 src/app/pages/metadata-manager/metadata-manager.page.component.ts
 src/app/pages/metadata-manager/metadata-manager.page.component.html
+src/app/pages/metadata-manager/metadata-manager.page.component.spec.ts
 src/app/pages/metadata-manager/components/coefficient-manager/**
 public/assets/data/dictionary.json
+src/app/core/breadcrumbs.md
+src/app/core/services/breadcrumbs.md
 ```
 
 ## Read Scope
@@ -173,18 +179,18 @@ Runs always (plans 433, 434, 440 and possibly 428 change these files). Check by 
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Metadata manager «מקדמים» card: event types (name + coefficient; add, change coefficient, delete own) and
+- [x] Metadata manager «מקדמים» card: event types (name + coefficient; add, change coefficient, delete own) and
   serving types (coefficient). Shared terms editable only by the platform admin (`TaxonomyStore.canEdit`); staff
   locked when `PermissionService` exists.
-- [ ] Each event stores the name + coefficient of its event type and serving type when chosen; a later change to
+- [x] Each event stores the name + coefficient of its event type and serving type when chosen; a later change to
   the type never changes a saved event (`EventTypeSnapshotService`).
-- [ ] Dish row: «מקדם המנה» (2-decimal display), portions, override input (> 0, ≤ 2 decimals), «שונה ידנית»,
+- [x] Dish row: «מקדם המנה» (2-decimal display), portions, override input (> 0, ≤ 2 decimals), «שונה ידנית»,
   «חזור לברירת מחדל»; prep items show the per-diner amount in the prep's yield unit.
-- [ ] Changing event type / serving type updates only dishes without an override (follows from the formula).
-- [ ] Guests 0 → all 0 + "הזן מספר אורחים"; portions per diner 0 → 0 + warning; no 0 → 1 coercion.
-- [ ] Take rate and pieces per person removed from form, dish row, page, AI menu flow, library AI import,
+- [x] Changing event type / serving type updates only dishes without an override (follows from the formula).
+- [x] Guests 0 → all 0 + "הזן מספר אורחים"; portions per diner 0 → 0 + warning; no 0 → 1 coercion.
+- [x] Take rate and pieces per person removed from form, dish row, page, AI menu flow, library AI import,
   exports and `MenuIntelligenceService`; spec updated.
-- [ ] `EventPlanService.planFor` uses `computePortions`; `portionsFromDerived` deleted.
+- [x] `EventPlanService.planFor` uses `computePortions`; `portionsFromDerived` deleted.
 
 ### Should Have (P1)
 - none
@@ -239,17 +245,17 @@ Runs always (plans 433, 434, 440 and possibly 428 change these files). Check by 
 - Before 427 merges: every signed-in user counts as owner.
 
 ## Atomic Sub-tasks
-- [ ] K1: Feed every engine list the portions from the one formula — EventPlanService.planFor builds portionsByItem from computePortions(event, recipes) (portions only); delete portions-from-derived.ts and its spec, and the service spec cases that used it; new portions-plan.spec.ts (cocktail → rawLines not empty) — src/app/core/engine/event-plan.service.ts, event-plan.service.spec.ts, portions-plan.spec.ts, portions-from-derived.ts, portions-from-derived.spec.ts
-- [ ] K2: Make the menu service use the one formula and drop take rate — delete derivePortions; hydrateDerivedPortions sets derivedPortions from computePortions(event, kitchenState.recipes_()); rewrite the locked spec cases per Done-when — src/app/core/services/menu-intelligence.service.ts, menu-intelligence.service.spec.ts
-- [ ] K3: Freeze an event's type coefficients when the chef picks them — EventTypeSnapshotService.snapshotFor(kind, key, stored?): stored kept when stored.key === key, else { key, name: translate(key), coefficient: term?.coefficient ?? 1 } from TaxonomyStore; spec — src/app/core/services/event-type-snapshot.service.ts, event-type-snapshot.service.spec.ts
-- [ ] K4: Hold the menu's portions logic outside the frozen page — page-provided MenuPortionsService: bind(form, version signal); remember(event) keeps loaded snapshots; snapshots(eventTypeKey, servingTypeKey) → { eventTypeSnapshot?, servingTypeSnapshot? }; byItem computed = computePortions(minimal event from the raw form, recipes); at(sectionIndex, itemIndex) → ItemPortions | null; spec — src/app/pages/menu-intelligence/services/menu-portions.service.ts, menu-portions.service.spec.ts
-- [ ] K5: Rewire the menu page to the portions service and drop take rate, without growing the file — provide + inject MenuPortionsService, bind in the constructor; replace the derivePortions blocks in getAutoFoodCost and selectRecipe with menuPortions_.at(...)?.portions ?? 0; delete getPiecesPerPerson and every predictedTakeRate control/field (addItem, loadEvent, buildEventFromForm, buildAiMenuSnapshot_); add coefficient_override control in addItem/loadEvent; loadEvent: serving_portions = portionsPerDiner ?? servingPortions ?? 1 and remember(event); buildEventFromForm: portionsPerDiner = Number(serving_portions ?? 0) (no || 1), coefficientOverride, spread snapshots(...); template: dish row gets [portionInfo] instead of servingType/guestCount/piecesPerPerson, guest-count-0 hint; net lines in .ts ≤ 0 — src/app/pages/menu-intelligence/menu-intelligence.page.ts, .html, .scss
-- [ ] K6: Show and override each dish's coefficient on the menu row — inputs servingType/guestCount/piecesPerPerson replaced by portionInfo; getDerivedPortions/getAutoFoodCost use portionInfo; coefficient input with isValidCoefficient → itemGroup.patchValue({ coefficient_override }), «שונה ידנית» chip, «חזור לברירת מחדל» → null, invalid message, per-diner-zero warning, prep yield-unit label; spec — src/app/pages/menu-intelligence/components/menu-dish-row/**
-- [ ] K7: Stop the AI menu flows from writing take rate — menu-ai-flow: drop predictedTakeRate from the MatchedDish mapping (~L39) and from the form group (~L98), serving_portions kept, coefficient_override null; menu-library AI import builds items with portionsPerDiner = dish.servingPortions ?? 1 and derivedPortions from hydrateDerivedPortions — src/app/pages/menu-intelligence/services/menu-ai-flow.service.ts, src/app/pages/menu-library/menu-library.page.ts
-- [ ] K8: Remove take rate and pieces per person from the exports — delete the pieces_per_person rows and the take_rate column in every sheet/preview; replace any remaining derivePortions call with menuIntelligence hydrate / EventPlanService portions; net lines ≤ 0; spec — src/app/core/services/menu-export.service.ts, src/app/core/services/export.service.spec.ts
-- [ ] K9: Let the owner set coefficients for event types and serving types in the metadata manager — new CoefficientManagerComponent (both lists, add/delete own event types, coefficient save on change via TaxonomyStore.updateByKey, canEdit + optional PermissionService gate, TaxonomyStore.errorMessage on failure); addEventType(name, coefficient = 1) in MenuEventTypeService; page: import + SECTIONS entry `mm-sec-coefficients` + tag; spec — src/app/pages/metadata-manager/components/coefficient-manager/**, metadata-manager.page.component.ts/.html, src/app/core/services/menu-event-type.service.ts
-- [ ] K10: Add the new texts — 13 dictionary keys above — public/assets/data/dictionary.json
-- [ ] K11: Build, run the listed specs and greps, check the error log, then hand over the app checks — ng build, git diff --numstat on the two frozen files, ng test (listed), both greps, log-query — this plan file
+- [x] K1: Feed every engine list the portions from the one formula — EventPlanService.planFor builds portionsByItem from computePortions(event, recipes) (portions only); delete portions-from-derived.ts and its spec, and the service spec cases that used it; new portions-plan.spec.ts (cocktail → rawLines not empty) — src/app/core/engine/event-plan.service.ts, event-plan.service.spec.ts, portions-plan.spec.ts, portions-from-derived.ts, portions-from-derived.spec.ts
+- [x] K2: Make the menu service use the one formula and drop take rate — delete derivePortions; hydrateDerivedPortions sets derivedPortions from computePortions(event, kitchenState.recipes_()); rewrite the locked spec cases per Done-when — src/app/core/services/menu-intelligence.service.ts, menu-intelligence.service.spec.ts
+- [x] K3: Freeze an event's type coefficients when the chef picks them — EventTypeSnapshotService.snapshotFor(kind, key, stored?): stored kept when stored.key === key, else { key, name: translate(key), coefficient: term?.coefficient ?? 1 } from TaxonomyStore; spec — src/app/core/services/event-type-snapshot.service.ts, event-type-snapshot.service.spec.ts
+- [x] K4: Hold the menu's portions logic outside the frozen page — page-provided MenuPortionsService: bind(form, version signal); remember(event) keeps loaded snapshots; snapshots(eventTypeKey, servingTypeKey) → { eventTypeSnapshot?, servingTypeSnapshot? }; byItem computed = computePortions(minimal event from the raw form, recipes); at(sectionIndex, itemIndex) → ItemPortions | null; spec — src/app/pages/menu-intelligence/services/menu-portions.service.ts, menu-portions.service.spec.ts
+- [x] K5: Rewire the menu page to the portions service and drop take rate, without growing the file — provide + inject MenuPortionsService, bind in the constructor; replace the derivePortions blocks in getAutoFoodCost and selectRecipe with menuPortions_.at(...)?.portions ?? 0; delete getPiecesPerPerson and every predictedTakeRate control/field (addItem, loadEvent, buildEventFromForm, buildAiMenuSnapshot_); add coefficient_override control in addItem/loadEvent; loadEvent: serving_portions = portionsPerDiner ?? servingPortions ?? 1 and remember(event); buildEventFromForm: portionsPerDiner = Number(serving_portions ?? 0) (no || 1), coefficientOverride, spread snapshots(...); template: dish row gets [portionInfo] instead of servingType/guestCount/piecesPerPerson, guest-count-0 hint; net lines in .ts ≤ 0 — src/app/pages/menu-intelligence/menu-intelligence.page.ts, .html, .scss
+- [x] K6: Show and override each dish's coefficient on the menu row — inputs servingType/guestCount/piecesPerPerson replaced by portionInfo; getDerivedPortions/getAutoFoodCost use portionInfo; coefficient input with isValidCoefficient → itemGroup.patchValue({ coefficient_override }), «שונה ידנית» chip, «חזור לברירת מחדל» → null, invalid message, per-diner-zero warning, prep yield-unit label; spec — src/app/pages/menu-intelligence/components/menu-dish-row/**
+- [x] K7: Stop the AI menu flows from writing take rate — menu-ai-flow: drop predictedTakeRate from the MatchedDish mapping (~L39) and from the form group (~L98), serving_portions kept, coefficient_override null; menu-library AI import builds items with portionsPerDiner = dish.servingPortions ?? 1 and derivedPortions from hydrateDerivedPortions — src/app/pages/menu-intelligence/services/menu-ai-flow.service.ts, src/app/pages/menu-library/menu-library.page.ts
+- [x] K8: Remove take rate and pieces per person from the exports — delete the pieces_per_person rows and the take_rate column in every sheet/preview; replace any remaining derivePortions call with menuIntelligence hydrate / EventPlanService portions; net lines ≤ 0; spec — src/app/core/services/menu-export.service.ts, src/app/core/services/export.service.spec.ts
+- [x] K9: Let the owner set coefficients for event types and serving types in the metadata manager — new CoefficientManagerComponent (both lists, add/delete own event types, coefficient save on change via TaxonomyStore.updateByKey, canEdit + optional PermissionService gate, TaxonomyStore.errorMessage on failure); addEventType(name, coefficient = 1) in MenuEventTypeService; page: import + SECTIONS entry `mm-sec-coefficients` + tag; spec — src/app/pages/metadata-manager/components/coefficient-manager/**, metadata-manager.page.component.ts/.html, src/app/core/services/menu-event-type.service.ts
+- [x] K10: Add the new texts — 13 dictionary keys above — public/assets/data/dictionary.json
+- [x] K11: Build, run the listed specs and greps, check the error log, then hand over the app checks — ng build, git diff --numstat on the two frozen files, ng test (listed), both greps, log-query — this plan file
 
 ## Technical Considerations
 - Dependencies: `computePortions` / `formatCoefficient` / `isValidCoefficient` (440), `EventPlanService` +

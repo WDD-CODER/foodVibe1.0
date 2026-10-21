@@ -17,7 +17,7 @@ App-wide building blocks: layout components (header, footer, FAB, auth modal, us
 | `pipes/` | Translation and quantity formatting | TranslatePipe, FormatQuantityPipe |
 | `directives/` | Focus, scroll, click-outside, textarea grow | SelectOnFocusDirective, FocusByRowDirective, ClickOutSideDirective, ScrollIndicatorsDirective, TextareaAutoGrowDirective |
 | `validators/item.validators.ts` | Duplicate-name checks for forms | duplicateNameValidator, duplicateEntityNameValidator |
-| `engine/` | Pure quantity and cost engine for event lists (plan 433): raw/prep lines, dish and event cost, rounding helpers; its shared 04.1 test fixture lives in the testing folder | computeEventPlan, EventPlanService, chooseSupplier, roundPortions, formatQty, formatMoney, portionsFromDerived |
+| `engine/` | Pure quantity and cost engine for event lists (plan 433): raw/prep lines, dish and event cost, rounding helpers; its shared 04.1 test fixture lives in the testing folder | computeEventPlan, EventPlanService, chooseSupplier, roundPortions, formatQty, formatMoney, computePortions |
 | `utils/` | Pure helpers: auth, export, lists, quantities | require-auth.util, auth-crypto, export.util, list-state.util, panel-preference.util, quantity-step.util, filter-starts-with.util, saving-state.util |
 
 ## Architecture Context

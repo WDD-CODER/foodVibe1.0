@@ -45,4 +45,24 @@ async function ensureBusinessForUser(user) {
   return (await createBusinessFor(user))._id
 }
 
-module.exports = { createBusinessFor, ensureBusinessForUser, defaultBusinessName }
+/** The `businesses` document, or null. */
+async function getBusiness(id) {
+  return id ? col().findOne({ _id: String(id) }) : null
+}
+
+/** Records the master version a business has been synced to (the refresh sync gate). */
+async function setBusinessSyncedVersion(id, version) {
+  await col().updateOne({ _id: String(id) }, { $set: { lastSyncedMasterVersion: version } })
+}
+
+/** Plan 429: replaces the business's settings (already validated by the route). Returns the update result. */
+async function setBusinessSettings(id, settings) {
+  return col().updateOne({ _id: String(id) }, { $set: { settings } })
+}
+
+/** Plan 431: replaces the business's opening baseline (already validated by the route). */
+async function setBusinessBaseline(id, baseline) {
+  return col().updateOne({ _id: String(id) }, { $set: { baseline } })
+}
+
+module.exports = { setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

@@ -1,6 +1,6 @@
 /**
- * Clones all master documents into a new user's namespace.
- * Called once at signup — gives the user a full starter-kit copy.
+ * Clones all master documents into a new business.
+ * Called once when a business is created (signup) — gives it a full starter-kit copy.
  *
  * Architecture note:
  *   Documents are stored flat in per-type native MongoDB collections.
@@ -20,6 +20,7 @@ const mongoose = require('mongoose');
 const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 const { newId: makeId } = require('../utils/id');
 const { LIVE } = require('../jobs/purge-deleted');
+const { MASTER_BUSINESS_ID } = require('../utils/business-scope');
 
 /** Remap ingredient referenceIds from master IDs to user-scoped IDs. */
 function remapIngredients(ingredients, idMap) {
@@ -32,14 +33,15 @@ function remapIngredients(ingredients, idMap) {
 }
 
 /**
- * Clones all `userId: '__master__'` documents from every CLONEABLE_TYPES collection
- * into the given user's namespace.
+ * Clones all `businessId: '__master__'` documents from every CLONEABLE_TYPES collection
+ * into the given business (plan 425).
  *
- * @param {string} userId  — the new user's _id
- * @param {{ businessId?: string }} [opts]  — plan 424: the business the clones belong to
+ * @param {string} businessId  — the new business's _id
+ * @param {{ createdBy: string }} opts  — the business owner; stamped as `createdBy` / `userId` on every clone
  * @returns {Promise<number>} total number of documents cloned
  */
-async function cloneMasterDataToUser(userId, { businessId } = {}) {
+async function cloneMasterDataToBusiness(businessId, { createdBy } = {}) {
+  if (!businessId || !createdBy) throw new Error('cloneMasterDataToBusiness needs a businessId and a createdBy')
   const db = mongoose.connection.db;
   let totalCloned = 0;
 
@@ -51,7 +53,7 @@ async function cloneMasterDataToUser(userId, { businessId } = {}) {
   for (const entityType of CLONEABLE_TYPES) {
     const col = db.collection(entityType);
     // Soft-deleted master items (plan 407) are not handed out.
-    const masterDocs = await col.find({ userId: '__master__', ...LIVE }).toArray();
+    const masterDocs = await col.find({ businessId: MASTER_BUSINESS_ID, ...LIVE }).toArray();
 
     if (masterDocs.length === 0) continue;
 
@@ -62,9 +64,9 @@ async function cloneMasterDataToUser(userId, { businessId } = {}) {
       const clone = {
         ...rest,
         _id: newId,
-        userId,
-        ...(businessId && { businessId }),
-        createdBy: userId,
+        userId: createdBy,
+        businessId,
+        createdBy,
         _masterId: String(masterId),
         _userModified: false,
       };
@@ -106,4 +108,4 @@ async function cloneMasterDataToUser(userId, { businessId } = {}) {
   return totalCloned;
 }
 
-module.exports = { cloneMasterDataToUser };
+module.exports = { cloneMasterDataToBusiness };

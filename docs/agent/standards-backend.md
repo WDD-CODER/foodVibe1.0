@@ -94,23 +94,40 @@ When modifying an existing feature:
 
 Write routes (`POST`/`PUT`/`DELETE`) require `Authorization: Bearer <token>`. `GET` reads
 are intentionally public/optional-auth (`optionalToken` middleware): an authenticated
-request returns the caller's own documents; an anonymous request returns `__master__`
+request returns the caller's business's documents (every member of a business shares one copy;
+scoping goes through `server/utils/business-scope.js`, never `userId`); an anonymous request returns `__master__`
 (shared catalog) documents. This is a deliberate product decision (confirmed 2026-09-29,
 Plan 321 Phase 1) — not the drift it used to look like against an earlier, incorrect
 version of this section (and of `standards-security.md §9`, corrected the same day).
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| `GET` | `/api/v1/data/:type` | optional | List all — authed: own docs; anonymous: `__master__` docs |
+| `GET` | `/api/v1/data/:type` | optional | List all — authed: the caller's business's docs (taxonomy: master ∪ the business's); anonymous: `__master__` docs |
 | `GET` | `/api/v1/data/:type/:id` | optional | Get one — same auth split as above |
 | `GET` | `/api/v1/data/:type/search` | optional | Lean prefix-match typeahead, `SEARCHABLE_ENTITY_TYPES` only |
 | `GET` | `/api/v1/data/:type/count` | optional | Lightweight count, `filter=lowStock\|unapproved` |
 | `POST` | `/api/v1/data/:type` | required | Create. Server generates `_id` unless the body already supplies one (Plan 321 Phase 1 — a client-supplied id is still honored, e.g. `appendExisting`/trash-restore) |
 | `PUT` | `/api/v1/data/:type/:id` | required | Replace one — mirrors `StorageService.put()` |
-| `PUT` | `/api/v1/data/:type/:id/push-to-master` | required | **Deliberately open to any signed-in user for now** — see the route's own doc comment in `generic.js` |
+| `PUT` | `/api/v1/data/:type/:id/push-to-master` | required | Platform admin only (`requirePlatformAdmin`, `isPlatformAdmin` in the token) — as are delete-from-master, purge-ingredient-everywhere and shared-term writes |
 | `PUT` | `/api/v1/data/:type` | required | Replace all (requires `X-Confirm-Replace: true` header) — restricted (Plan 321 Phase 1) to `REPLACEABLE_TYPES` in `generic.js`, not every entity type |
 | `DELETE` | `/api/v1/data/:type/bulk` | required | Remove many by id |
 | `DELETE` | `/api/v1/data/:type/:id` | required | Remove one |
+| `PUT` | `/api/v1/events/:id/stage` | required | Plan 442: move an event to another stage `{ stage, reason?, reasonText? }`. C-PERM `changeStage` (owner, or the event's creator). Errors: `BAD_STAGE`, `EVENT_FINISHED` (409), `USE_FINISH`, `NOT_CLOSED_FROM_STAGE`, `REASON_REQUIRED`, `DATE_REQUIRED` |
+| `POST` | `/api/v1/events/:id/notes` | required | Plan 442: add a note `{ text }` (1 to 2,000 chars; `NOTE_EMPTY`, `NOTE_TOO_LONG`). C-PERM `addNote` (any member) |
+| `PUT` / `DELETE` | `/api/v1/events/:id/notes/:noteId` | required | Plan 442: edit (`editedAt` set) or delete a note - its author only (403 otherwise) |
+| `GET` | `/api/v1/business` | required | The caller's `businesses` document (any member) |
+| `GET` | `/api/v1/admin/users` | platform admin | Users with `businessId`, `businessName`, `businessRole`, `isPlatformAdmin` |
+| `DELETE` | `/api/v1/admin/users/:userId` | platform admin | Owner: deletes the whole business (data, users, business doc); staff: only that user; own business → 403 |
+
+Why a dedicated `/api/v1/events` router (plan 442): an event's stage history, `closedAt` and notes are server-owned.
+The actor (`by`, `byName`) comes from the token and each change is one atomic write (`$push` / `$pull` / `$set`
+with `arrayFilters`), so the generic API strips `EVENT_SERVER_FIELDS` (`shared/schemas/entities/event-stage.ts`)
+from every `menuEvents` POST and PUT, and a generic POST starts the event in `inquiry`. Pure rules live in
+`server/utils/event-stage.js`. Plan 446 adds `closing`, `finish`, `reopen`, `refresh-plan` to the same router.
+
+A token without `businessId` is refused with 401 on every route that verifies a token (the client
+refreshes silently). Login for a user with no business → 403 `NO_BUSINESS`, removed user → 403
+`USER_REMOVED`; refresh answers 401 with the same `error` and clears the cookie.
 
 Plan 321 Phase 1 also added rate limiting: a moderate write limit on `/api/v1/data`
 (300 req/15 min, writes only) and a strict per-user limit on `/api/v1/ai` (20 req/15 min,

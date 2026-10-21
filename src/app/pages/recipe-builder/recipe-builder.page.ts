@@ -29,8 +29,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
-import { VersionHistoryService } from '@services/version-history.service'
-import type { VersionEntityType } from '@services/version-history.service'
+import { VersionHistoryService, type VersionEntityType } from '@services/version-history.service'
 import { Recipe } from '@models/recipe.model'
 import { MasterPushService, ScopeEntity } from '@services/master-push.service'
 import { RecipeDataService } from '@services/recipe-data.service'
@@ -57,8 +56,8 @@ import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-
 import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
+import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
 @Component({
   selector: 'app-recipe-builder-page',
   standalone: true,
@@ -79,7 +78,8 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     ApproveStampComponent,
     CounterComponent,
     InputClearComponent,
-    AddOptionRowComponent
+    AddOptionRowComponent,
+    EditGateComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
@@ -214,6 +214,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       total_cost: [0],
       labels: [[] as string[]],
       course: [''],
+      default_station: [''],
       logistics: this.fb.group({
         baseline: this.fb.array([])
       })
@@ -781,14 +782,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       serving_portions: Number(raw?.['serving_portions'] ?? 1),
       labels: normalizedLabels,
       course: (raw?.['course'] ?? '').toString(),
+      default_station: (raw?.['default_station'] ?? '').toString(),
       yield_conversions: yieldNorm,
       ingredients: ingNorm,
       workflow_items: workflowNorm,
       logistics_baseline: baselineNorm,
-      // Signal-backed state that buildRecipeFromForm() persists but the form
-      // group never holds. Anything saved from a signal has to be mirrored
-      // here or the dirty check cannot see it: changing only the rating left
-      // the snapshot identical, so leaving the page never prompted to save.
+      // Signal-backed state saved by buildRecipeFromForm() but not held by the form:
+      // mirror it here or the dirty check cannot see it (a rating-only change went unnoticed).
       imageUrl: this.recipeImageUrl_() ?? null,
       rating: this.recipeRating_(),
       isApproved: this.isApproved_(),

@@ -1,0 +1,105 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { provideRouter } from '@angular/router'
+import { of, throwError } from 'rxjs'
+import { LucideAngularModule } from 'lucide-angular'
+import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { AuthModalComponent } from './auth-modal.component'
+import { AuthModalService } from '@services/auth-modal.service'
+import { UserService } from '@services/user.service'
+import { CloudinaryService } from '@services/cloudinary.service'
+import { TranslationService } from '@services/translation.service'
+
+type Internals = {
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
+  businessName: string
+  errorKey: () => string | null
+  onSubmit: () => void
+}
+
+describe('AuthModalComponent (business name and block messages)', () => {
+  let fixture: ComponentFixture<AuthModalComponent>
+  let c: Internals
+  let userService: jasmine.SpyObj<UserService>
+
+  beforeEach(async () => {
+    userService = jasmine.createSpyObj<UserService>('UserService', ['signup', 'login', 'loginAsGuestBackend'])
+    await TestBed.configureTestingModule({
+      imports: [AuthModalComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        provideRouter([]),
+        { provide: UserService, useValue: userService },
+        { provide: CloudinaryService, useValue: {} },
+        { provide: TranslationService, useValue: { translate: (k: string) => k } }
+      ]
+    }).compileComponents()
+    TestBed.inject(AuthModalService).open('sign-up')
+    fixture = TestBed.createComponent(AuthModalComponent)
+    fixture.detectChanges()
+    c = fixture.componentInstance as unknown as Internals
+    c.name = 'neo'
+    c.email = 'neo@x.com'
+    c.password = 'Password1'
+    c.confirmPassword = 'Password1'
+  })
+
+  it('shows the business name field in sign-up mode only', () => {
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelector('#auth-business-name')).not.toBeNull()
+    expect(host.querySelector('#auth-business-name')?.getAttribute('maxlength')).toBe('200')
+    TestBed.inject(AuthModalService).mode.set('sign-in')
+    fixture.detectChanges()
+    expect(host.querySelector('#auth-business-name')).toBeNull()
+  })
+
+  it('an empty business name -> business_name_required and no request', () => {
+    c.businessName = '   '
+    c.onSubmit()
+    expect(c.errorKey()).toBe('business_name_required')
+    expect(userService.signup).not.toHaveBeenCalled()
+  })
+
+  it('201 characters -> business_name_too_long and no request', () => {
+    c.businessName = 'x'.repeat(201)
+    c.onSubmit()
+    expect(c.errorKey()).toBe('business_name_too_long')
+    expect(userService.signup).not.toHaveBeenCalled()
+  })
+
+  it('sends the trimmed business name to signup', () => {
+    userService.signup.and.returnValue(of({ name: 'neo', email: 'neo@x.com' }))
+    c.businessName = '  מטבח בדיקה '
+    c.onSubmit()
+    expect(userService.signup).toHaveBeenCalledWith(
+      jasmine.objectContaining({ name: 'neo', email: 'neo@x.com' }),
+      'Password1',
+      'מטבח בדיקה'
+    )
+  })
+
+  it('maps the server business-name error', () => {
+    userService.signup.and.returnValue(throwError(() => new Error('BUSINESS_NAME_REQUIRED')))
+    c.businessName = 'x'
+    c.onSubmit()
+    expect(c.errorKey()).toBe('business_name_required')
+  })
+
+  const signInWith = (code: string): string | null => {
+    TestBed.inject(AuthModalService).mode.set('sign-in')
+    userService.login.and.returnValue(throwError(() => new Error(code)))
+    c.name = 'neo'
+    c.password = 'Password1'
+    c.onSubmit()
+    return c.errorKey()
+  }
+
+  it('Error NO_BUSINESS -> no_business', () => {
+    expect(signInWith('NO_BUSINESS')).toBe('no_business')
+  })
+
+  it('Error USER_REMOVED -> user_removed', () => {
+    expect(signInWith('USER_REMOVED')).toBe('user_removed')
+  })
+})

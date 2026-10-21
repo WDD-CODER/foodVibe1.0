@@ -50,6 +50,8 @@
               errorKey() === 'username_too_long' ||
               errorKey() === 'username_invalid_chars' ||
               errorKey() === 'account_locked' ||
+              errorKey() === 'no_business' ||
+              errorKey() === 'user_removed' ||
               errorKey() === 'rate_limited' ||
               errorKey() === 'server_error'
             ) {
@@ -58,6 +60,30 @@
           </div>
 
           @if (isSignUp) {
+            <!-- Business name (sign-up only) -->
+            <div class="c-input-stack">
+              <label for="auth-business-name">{{ 'business_name' | translatePipe }}</label>
+              <input
+                id="auth-business-name"
+                type="text"
+                [(ngModel)]="businessName"
+                (input)="errorKey.set(null)"
+                name="businessName"
+                autocomplete="organization"
+                maxlength="200"
+                required
+                [class.c-input--invalid]="
+                  errorKey() === 'business_name_required' || errorKey() === 'business_name_too_long'
+                "
+                [attr.aria-invalid]="
+                  errorKey() === 'business_name_required' || errorKey() === 'business_name_too_long' ? true : null
+                "
+              />
+              @if (errorKey() === 'business_name_required' || errorKey() === 'business_name_too_long') {
+                <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
+              }
+            </div>
+
             <!-- Email (sign-up only) -->
             <div class="c-input-stack">
               <label for="auth-email">{{ 'email' | translatePipe }}</label>

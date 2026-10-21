@@ -141,7 +141,17 @@ describe('ProductFormComponent', () => {
       fixture.detectChanges()
 
       // Formula in code: price / yieldFactor => 100 / 0.8 = 125
-      expect((component as any).netUnitCost_()).toBe(125)
+      expect(component['netUnitCost_']()).toBe(125)
+    }))
+
+    it('keeps the net cost when the price control is disabled (staff price lock)', fakeAsync(() => {
+      component['productForm_'].patchValue({ buy_price_global_: 12, yieldFactor: 1 })
+      component['productForm_'].get('buy_price_global_')!.disable({ emitEvent: false })
+
+      component['productForm_'].patchValue({ yieldFactor: 0.5 })
+      tick()
+
+      expect(component['netUnitCost_']()).toBe(24)
     }))
   })
 

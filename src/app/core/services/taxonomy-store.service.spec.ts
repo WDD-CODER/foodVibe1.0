@@ -22,10 +22,10 @@ const term = (userId: string, kind: string, key: string, sortOrder = 0, extra: R
 describe('TaxonomyStore', () => {
   let store: TaxonomyStore
   let storage: jasmine.SpyObj<StorageService>
-  const user = signal<User | null>({ _id: 'u1', name: 'u', email: 'u@x', role: 'user' })
+  const user = signal<User | null>({ _id: 'u1', name: 'u', email: 'u@x' })
 
   beforeEach(() => {
-    user.set({ _id: 'u1', name: 'u', email: 'u@x', role: 'user' })
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
     storage = jasmine.createSpyObj<StorageService>('StorageService', ['query', 'post', 'put', 'remove'])
     storage.query.and.returnValue(
       Promise.resolve([
@@ -47,7 +47,7 @@ describe('TaxonomyStore', () => {
       providers: [
         TaxonomyStore,
         { provide: StorageService, useValue: storage },
-        { provide: UserService, useValue: { user_: user, isAdmin_: computed(() => user()?.role === 'admin') } },
+        { provide: UserService, useValue: { user_: user, isAdmin_: computed(() => user()?.isPlatformAdmin === true) } },
         { provide: TranslationService, useValue: translation }
       ]
     })
@@ -104,7 +104,7 @@ describe('TaxonomyStore', () => {
       const own = store.find('allergen', 'lupin')!
       expect(store.canEdit(own)).toBeTrue()
       expect(store.canEdit(shared)).toBeFalse()
-      user.set({ _id: 'boss', name: 'b', email: 'b@x', role: 'admin' })
+      user.set({ _id: 'boss', name: 'b', email: 'b@x', isPlatformAdmin: true })
       expect(store.canEdit(shared)).toBeTrue()
     })
 
@@ -166,7 +166,7 @@ describe('TaxonomyStore', () => {
     })
 
     it('a shared term re-keyed by an admin folds an own term that already had the new key', async () => {
-      user.set({ _id: 'boss', name: 'b', email: 'b@x', role: 'admin' })
+      user.set({ _id: 'boss', name: 'b', email: 'b@x', isPlatformAdmin: true })
       await store.ensureLoaded()
       storage.put.and.returnValue(
         Promise.resolve({ ...term('__master__', 'allergen', 'lupin', 1), _id: 'allergen:__master__:nuts' } as never)

@@ -5,7 +5,6 @@ import type { Recipe } from '@models/recipe.model'
 import type { Supplier } from '@models/supplier.model'
 import { SYSTEM_UNITS } from '@services/unit-registry.service'
 import type { EventPlanInput, UnitConversion } from '../event-plan.types'
-import { portionsFromDerived } from '../portions-from-derived'
 
 /** Ids of the 04.1 fixture, so specs of later plans (434, 435, 437) assert the same objects. */
 export const FIXTURE_IDS = {
@@ -98,7 +97,6 @@ export function makeEvent(
         items: items.map((i) => ({
           recipeId: i.recipeId,
           recipeType: i.recipeType ?? 'dish',
-          predictedTakeRate: 1,
           derivedPortions: i.derivedPortions
         }))
       }
@@ -106,9 +104,18 @@ export function makeEvent(
   }
 }
 
+/** Item key → the item's stored `derivedPortions` (missing → 0): the fixture states its portions directly. */
+export function derivedPortionsByItem(event: Pick<MenuEvent, 'sections'>): Map<string, number> {
+  const out = new Map<string, number>()
+  for (const section of event.sections ?? []) {
+    ;(section.items ?? []).forEach((item, i) => out.set(`${section._id}|${i}`, item.derivedPortions ?? 0))
+  }
+  return out
+}
+
 /** A plan input around the given event with the shared units; used by the edge-case specs. */
 export function makeInput(event: MenuEvent, products: Product[], recipes: Recipe[]): EventPlanInput {
-  return { event, portionsByItem: portionsFromDerived(event), products, recipes, units: FIXTURE_UNITS }
+  return { event, portionsByItem: derivedPortionsByItem(event), products, recipes, units: FIXTURE_UNITS }
 }
 
 /**

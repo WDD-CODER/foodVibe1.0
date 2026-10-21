@@ -64,8 +64,7 @@ export class MenuExportService {
       [heHeader('menu_name'), menu.name ?? ''],
       [heHeader('event_type'), menu.eventType ?? ''],
       [heHeader('date'), menu.eventDate ?? ''],
-      [heHeader('guest_count'), menu.guestCount ?? 0],
-      [heHeader('pieces_per_person'), menu.piecesPerPerson ?? '']
+      [heHeader('guest_count'), menu.guestCount ?? 0]
     ]
     coverData.forEach((row) => coverWs.addRow(row))
     coverWs.getColumn(1).width = 18
@@ -77,7 +76,7 @@ export class MenuExportService {
     sections.forEach((section: MenuSection) => {
       const sheetName = (section.name ?? `Section_${section._id}`).slice(0, 31)
       const ws = wb.addWorksheet(sheetName)
-      ws.addRow([heHeader('dish_name'), heHeader('portions'), heHeader('take_rate'), heHeader('sell_price')])
+      ws.addRow([heHeader('dish_name'), heHeader('portions'), heHeader('sell_price')])
       styleHeaderRow(ws, 1)
       let rowNum = 2
       ;(section.items ?? []).forEach((item: MenuItemSelection) => {
@@ -86,7 +85,6 @@ export class MenuExportService {
         ws.addRow([
           name,
           roundExportNumber(item.derivedPortions ?? 0),
-          roundExportNumber(item.predictedTakeRate ?? 0),
           item.sellPrice !== undefined && item.sellPrice !== null ? roundExportNumber(Number(item.sellPrice)) : ''
         ])
         styleDataRow(ws, rowNum++)
@@ -94,7 +92,6 @@ export class MenuExportService {
       ws.getColumn(1).width = 32
       ws.getColumn(2).width = 12
       ws.getColumn(3).width = 12
-      ws.getColumn(4).width = 12
     })
 
     const fileName = buildExportFileName('menu-info', menu.name ?? 'menu', { includeDate: false })
@@ -200,7 +197,7 @@ export class MenuExportService {
           const factor = yieldAmount > 0 ? portions / yieldAmount : 0
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
           prepRows.forEach((pr) => {
-            const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+            const key = isByStation ? recipe.defaultStation || 'כללי' : (pr.categoryName ?? 'כללי')
             addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.categoryName ?? '') : undefined)
           })
         })
@@ -280,7 +277,6 @@ export class MenuExportService {
     coverWs.addRow([heHeader('event_type'), menu.eventType ?? ''])
     coverWs.addRow([heHeader('date'), menu.eventDate ?? ''])
     coverWs.addRow([heHeader('guest_count'), menu.guestCount ?? 0])
-    coverWs.addRow([heHeader('pieces_per_person'), menu.piecesPerPerson ?? ''])
     styleHeaderRow(coverWs, 1)
     coverWs.getColumn(1).width = 18
     coverWs.getColumn(2).width = 24
@@ -289,7 +285,7 @@ export class MenuExportService {
     sections.forEach((section: MenuSection) => {
       const sheetName = (section.name ?? `Section_${section._id}`).slice(0, 31)
       const ws = wb.addWorksheet(sheetName, { views: [{ rightToLeft: true }] })
-      ws.addRow([heHeader('dish_name'), heHeader('portions'), heHeader('take_rate'), heHeader('sell_price')])
+      ws.addRow([heHeader('dish_name'), heHeader('portions'), heHeader('sell_price')])
       styleHeaderRow(ws, 1)
       let rowNum = 2
       ;(section.items ?? []).forEach((item: MenuItemSelection) => {
@@ -298,7 +294,6 @@ export class MenuExportService {
         ws.addRow([
           name,
           roundExportNumber(item.derivedPortions ?? 0),
-          roundExportNumber(item.predictedTakeRate ?? 0),
           item.sellPrice !== undefined && item.sellPrice !== null ? roundExportNumber(Number(item.sellPrice)) : ''
         ])
         styleDataRow(ws, rowNum++)
@@ -306,7 +301,6 @@ export class MenuExportService {
       ws.getColumn(1).width = 32
       ws.getColumn(2).width = 12
       ws.getColumn(3).width = 12
-      ws.getColumn(4).width = 12
     })
 
     this.addChecklistSheetsToWorkbook(wb, menu, recipeMap, checklistMode)
@@ -327,8 +321,7 @@ export class MenuExportService {
       [heHeader('menu_name'), menu.name ?? ''],
       [heHeader('event_type'), menu.eventType ?? ''],
       [heHeader('date'), menu.eventDate ?? ''],
-      [heHeader('guest_count'), menu.guestCount ?? 0],
-      [heHeader('pieces_per_person'), menu.piecesPerPerson ?? '']
+      [heHeader('guest_count'), menu.guestCount ?? 0]
     ]
     const sections = (menu.sections ?? []).slice().sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     const exportSections: ExportSection[] = [
@@ -341,13 +334,12 @@ export class MenuExportService {
         return [
           name,
           roundExportNumber(item.derivedPortions ?? 0),
-          roundExportNumber(item.predictedTakeRate ?? 0),
           item.sellPrice !== undefined && item.sellPrice !== null ? roundExportNumber(Number(item.sellPrice)) : ''
         ]
       })
       exportSections.push({
         title: section.name ?? 'Section',
-        headerRow: [heHeader('dish_name'), heHeader('portions'), heHeader('take_rate'), heHeader('sell_price')],
+        headerRow: [heHeader('dish_name'), heHeader('portions'), heHeader('sell_price')],
         rows: sectionRows
       })
     })
@@ -446,7 +438,7 @@ export class MenuExportService {
         const factor = yieldAmount > 0 ? portions / yieldAmount : 0
         const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
         prepRows.forEach((pr) => {
-          const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+          const key = isByStation ? recipe.defaultStation || 'כללי' : (pr.categoryName ?? 'כללי')
           addPrep(key, pr.name, pr.amount, pr.unit, isByStation ? (pr.categoryName ?? '') : undefined)
         })
       })
@@ -492,8 +484,7 @@ export class MenuExportService {
       [heHeader('menu_name'), menu.name ?? ''],
       [heHeader('event_type'), menu.eventType ?? ''],
       [heHeader('date'), menu.eventDate ?? ''],
-      [heHeader('guest_count'), menu.guestCount ?? 0],
-      [heHeader('pieces_per_person'), menu.piecesPerPerson ?? '']
+      [heHeader('guest_count'), menu.guestCount ?? 0]
     ]
     const exportSections: ExportSection[] = [
       { title: heHeader('menu_info'), headerRow: [heHeader('field'), heHeader('value')], rows: coverRows }
@@ -616,7 +607,7 @@ export class MenuExportService {
           const prepRows = this.scaling_.getScaledPrepItems(recipe, factor)
           const dishName = recipe.nameHebrew ?? item.recipeId
           prepRows.forEach((pr) => {
-            const key = isByStation ? (recipe.defaultStation ?? 'כללי') : (pr.categoryName ?? 'כללי')
+            const key = isByStation ? recipe.defaultStation || 'כללי' : (pr.categoryName ?? 'כללי')
             addPrep(key, pr.name, pr.amount, pr.unit, dishName, isByStation ? (pr.categoryName ?? '') : undefined)
           })
         })

@@ -68,7 +68,9 @@
   color: var(--color-text-muted);
   opacity: 0.7;
   cursor: pointer;
-  transition: opacity 0.2s ease, color 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    color 0.2s ease;
 
   &:hover {
     color: var(--color-primary);
@@ -127,7 +129,9 @@
   text-align: inherit;
 
   cursor: pointer;
-  transition: color 0.15s ease, text-decoration 0.15s ease;
+  transition:
+    color 0.15s ease,
+    text-decoration 0.15s ease;
 
   &:hover {
     text-decoration: underline;
@@ -155,7 +159,9 @@
   padding: 0.25rem;
   color: var(--color-text-muted-light);
   cursor: pointer;
-  transition: opacity 0.2s ease, color 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    color 0.2s ease;
 
   .dish-name-cell:hover & {
     opacity: 1;
@@ -229,9 +235,11 @@
   border-radius: var(--radius-xs);
   text-align: right;
   min-width: 4ch;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 
-  &[type="number"] {
+  &[type='number'] {
     -moz-appearance: textfield;
   }
 
@@ -361,4 +369,41 @@
   font-size: 0.8125rem;
   color: var(--color-text-muted-light);
   text-align: center;
+}
+
+/* Plan 441: coefficient box, "changed by hand" tag and reset button inside the details rail. */
+.dish-coefficient {
+  cursor: default;
+
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+.dish-coefficient-input {
+  inline-size: 5ch;
+  text-align: center;
+}
+
+.dish-coefficient-tag {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.dish-coefficient-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 0 0 auto;
+
+  min-block-size: 2rem;
+}
+
+.dish-coefficient-error {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.dish-portions-value {
+  font-weight: 600;
 }

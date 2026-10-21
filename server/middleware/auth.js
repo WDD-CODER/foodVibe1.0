@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { recordUsage } = require('./usage');
 
 const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 
@@ -6,9 +7,13 @@ const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
  * Verifies the access token onto req.user and binds `userId` onto `req.log` — the pino-http
  * request logger, Plan 383 — so every handler log line after auth carries it. userId only.
  */
-function attachUser(req, token) {
-  req.user = jwt.verify(token, ACCESS_SECRET);
+function attachUser(req, res, token) {
+  const payload = jwt.verify(token, ACCESS_SECRET);
+  // Plan 425: a token without a business can't be scoped to any data. The client refreshes and retries.
+  if (payload?.userId && !payload.businessId) throw new Error('NO_BUSINESS_IN_TOKEN');
+  req.user = payload;
   if (req.log && req.user?.userId) req.log = req.log.child({ userId: req.user.userId });
+  recordUsage(req, res); // Plan 430: non-blocking, runs after the response is sent
 }
 
 /**
@@ -29,7 +34,7 @@ function verifyToken(req, res, next) {
   }
 
   try {
-    attachUser(req, token);
+    attachUser(req, res, token);
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
@@ -56,25 +61,19 @@ function optionalToken(req, res, next) {
   }
 
   try {
-    attachUser(req, token);
+    attachUser(req, res, token);
     next();
   } catch {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 
-/**
- * Plan 424: platform-admin gate. Until plan 425 drops the legacy `role` fallback, a token with
- * `role: 'admin'` counts as a platform admin too.
- */
+/** Platform-admin gate (plan 425): only the `isPlatformAdmin` flag counts; the legacy `role` is never read. */
 function requirePlatformAdmin(req, res, next) {
-  if (!req.user || !(req.user.isPlatformAdmin === true || req.user.role === 'admin')) {
+  if (!req.user || req.user.isPlatformAdmin !== true) {
     return res.status(403).json({ error: 'Admin access required' });
   }
   next();
 }
 
-/** Alias kept until plan 425 replaces every use. */
-const requireAdmin = requirePlatformAdmin;
-
-module.exports = { verifyToken, optionalToken, requireAdmin, requirePlatformAdmin };
+module.exports = { verifyToken, optionalToken, requirePlatformAdmin };

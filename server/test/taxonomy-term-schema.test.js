@@ -10,6 +10,8 @@ const base = {
   _id: 't1',
   schemaVersion: 2,
   userId: '__master__',
+  businessId: '__master__',
+  createdBy: '__master__',
   createdAt: 1700000000000,
   updatedAt: 1700000000000,
   sortOrder: 0
@@ -47,6 +49,11 @@ describe('taxonomyTermSchema', () => {
     expect(ok({ ...base, kind: 'unit', key: 'kg' })).toBe(false);
     expect(ok({ ...base, kind: 'allergen', key: 'nuts', color: '#10B981' })).toBe(false);
     expect(ok({ ...base, kind: 'menuType', key: 'x', fields: ['not_a_field'] })).toBe(false);
+  });
+
+  test('a station is a plain term: no color allowed (plan 436)', () => {
+    expect(ok({ ...base, kind: 'station', key: 'חם' })).toBe(true);
+    expect(ok({ ...base, kind: 'station', key: 'חם', color: '#10B981' })).toBe(false);
   });
 
   test('rejects an unknown kind, an empty key and a bad color', () => {

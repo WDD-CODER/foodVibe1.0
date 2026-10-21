@@ -1,0 +1,46 @@
+<section class="baseline-tab" dir="rtl">
+  <form class="baseline-form c-glass-panel" data-testid="baseline-form" [formGroup]="form" (ngSubmit)="save()">
+    <p class="baseline-intro">{{ 'baseline_intro' | translatePipe }}</p>
+    @for (field of fields; track field.key) {
+      <label class="baseline-field">
+        <span class="baseline-field__label">{{ field.labelKey | translatePipe }}</span>
+        <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
+          <input
+            type="number"
+            inputmode="decimal"
+            step="any"
+            dir="ltr"
+            [formControlName]="field.key"
+            [attr.data-testid]="'baseline-' + field.key"
+            [attr.aria-invalid]="hasError(field.key)"
+          />
+          @if (field.suffix) {
+            <span class="baseline-field__suffix" aria-hidden="true">{{ field.suffix }}</span>
+          }
+        </span>
+        @if (hasError(field.key)) {
+          <span class="c-field-error" role="alert" [attr.data-testid]="'baseline-error-' + field.key">
+            {{ 'baseline_value_invalid' | translatePipe }}
+          </span>
+        }
+      </label>
+    }
+    <p class="baseline-updated" data-testid="baseline-updated">
+      @if (filledAt(); as at) {
+        {{ 'baseline_updated_at' | translatePipe }}{{ at | date: 'dd/MM/yyyy' }}
+      } @else {
+        {{ 'baseline_not_filled' | translatePipe }}
+      }
+    </p>
+    <div class="c-form-actions">
+      <button type="submit" class="c-btn-primary" data-testid="baseline-save" [disabled]="!canSave()">
+        {{ 'save' | translatePipe }}
+      </button>
+      @if (first()) {
+        <button type="button" class="c-btn-ghost" data-testid="baseline-skip" [disabled]="saving_()" (click)="skip()">
+          {{ 'skip' | translatePipe }}
+        </button>
+      }
+    </div>
+  </form>
+</section>

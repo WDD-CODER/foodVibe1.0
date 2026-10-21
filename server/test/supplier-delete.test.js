@@ -28,12 +28,12 @@ beforeEach(async () => {
   );
 });
 
-const ADMIN = { userId: 'admin1', role: 'admin' };
+const ADMIN = { userId: 'admin1', businessId: 'b_admin1', role: 'admin' };
 const tokenAdmin = () => signTestToken(ADMIN);
 const tokenUser = (userId) => signTestToken({ userId, role: 'user' });
 
 const source = (supplierId) => ({ supplierId, price: 10 });
-const product = (_id, userId, supplierIds) => ({ _id, userId, nameHebrew: _id, sources: supplierIds.map(source) });
+const product = (_id, userId, supplierIds) => ({ _id, userId, businessId: userId === '__master__' ? '__master__' : `b_${userId}`, nameHebrew: _id, sources: supplierIds.map(source) });
 
 async function sourcesOf(_id) {
   const doc = await testDb().collection('products').findOne({ _id });
@@ -42,7 +42,7 @@ async function sourcesOf(_id) {
 
 describe('DELETE /api/v1/data/suppliers/:id — own products unlinked', () => {
   it('pulls the deleted supplier from the caller\'s products only', async () => {
-    await testDb().collection('suppliers').insertOne({ _id: 's1', userId: 'userA', nameHebrew: 'ספק' });
+    await testDb().collection('suppliers').insertOne({ _id: 's1', userId: 'userA', businessId: 'b_userA', nameHebrew: 'ספק' });
     await testDb().collection('products').insertMany([
       product('pA1', 'userA', ['s1', 's2']),
       product('pA2', 'userA', ['s1']),
@@ -60,7 +60,7 @@ describe('DELETE /api/v1/data/suppliers/:id — own products unlinked', () => {
   });
 
   it('unlinks a master clone too (soft-deleted into Trash, plan 407)', async () => {
-    await testDb().collection('suppliers').insertOne({ _id: 's1', userId: 'userA', _masterId: 'm1', nameHebrew: 'ספק' });
+    await testDb().collection('suppliers').insertOne({ _id: 's1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', nameHebrew: 'ספק' });
     await testDb().collection('products').insertOne(product('pA1', 'userA', ['s1']));
 
     await request(app)
@@ -74,8 +74,8 @@ describe('DELETE /api/v1/data/suppliers/:id — own products unlinked', () => {
 
   it('bulk delete unlinks every deleted supplier from the caller\'s products', async () => {
     await testDb().collection('suppliers').insertMany([
-      { _id: 's1', userId: 'userA' },
-      { _id: 's2', userId: 'userA' },
+      { _id: 's1', userId: 'userA', businessId: 'b_userA' },
+      { _id: 's2', userId: 'userA', businessId: 'b_userA' },
     ]);
     await testDb().collection('products').insertOne(product('pA1', 'userA', ['s1', 's2', 's3']));
 
@@ -92,11 +92,11 @@ describe('DELETE /api/v1/data/suppliers/:id — own products unlinked', () => {
 describe('PUT /api/v1/data/suppliers/:id/delete-from-master — delete for everyone', () => {
   async function seedShared() {
     await testDb().collection('suppliers').insertMany([
-      { _id: 'm1', userId: '__master__', nameHebrew: 'ספק' },
-      { _id: 'sAdmin', userId: 'admin1', _masterId: 'm1', nameHebrew: 'ספק' },
-      { _id: 'sB', userId: 'userB', _masterId: 'm1', nameHebrew: 'ספק' },
-      { _id: 'sC', userId: 'userC', _masterId: 'm1', deletedAt: 7, purgedAt: 8 },
-      { _id: 'other', userId: 'userB', _masterId: 'm2', nameHebrew: 'אחר' },
+      { _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'ספק' },
+      { _id: 'sAdmin', userId: 'admin1', businessId: 'b_admin1', _masterId: 'm1', nameHebrew: 'ספק' },
+      { _id: 'sB', userId: 'userB', businessId: 'b_userB', _masterId: 'm1', nameHebrew: 'ספק' },
+      { _id: 'sC', userId: 'userC', businessId: 'b_userC', _masterId: 'm1', deletedAt: 7, purgedAt: 8 },
+      { _id: 'other', userId: 'userB', businessId: 'b_userB', _masterId: 'm2', nameHebrew: 'אחר' },
     ]);
     await testDb().collection('products').insertMany([
       product('pMaster', '__master__', ['m1']),
@@ -169,7 +169,7 @@ describe('PUT /api/v1/data/suppliers/:id/delete-from-master — delete for every
   });
 
   it('a supplier with no master link is a 400', async () => {
-    await testDb().collection('suppliers').insertOne({ _id: 'own', userId: 'admin1' });
+    await testDb().collection('suppliers').insertOne({ _id: 'own', userId: 'admin1', businessId: 'b_admin1' });
     const res = await request(app)
       .put('/api/v1/data/suppliers/own/delete-from-master')
       .set('Authorization', `Bearer ${tokenAdmin()}`);
