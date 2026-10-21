@@ -5,8 +5,8 @@
  * broken rule. Changing what these assert means changing an invariant — that needs the
  * Human's "approve arch change INV-n" and a superseding ADR, never a quiet test edit.
  *
- * Plan 425 made INV-1 / INV-2 real (business-scoped reads and writes). The one remaining it.todo
- * is the owner/staff permission rule, which arrives with plan 427.
+ * Plan 425 made INV-1 / INV-2 real (business-scoped reads and writes). Plan 427 added the owner/staff
+ * permission rule (server/utils/permissions.js).
  */
 
 const request = require('supertest');
@@ -127,7 +127,37 @@ describe('INV-1 Ownership', () => {
     expect((await testDb().collection('taxonomyTerms').findOne({ _id: 'shared' })).sortOrder).toBe(0);
   });
 
-  it.todo('INV-1 staff change only what they created and never money fields (plan 427)');
+  describe('INV-1 staff', () => {
+    const pricedBody = () => productBody({ sources: [{ supplierId: 's1', price: 5 }] });
+    const seedStaff = async (type, body, _id, createdBy) =>
+      testDb().collection(type).insertOne(stored(body, { _id, userId: createdBy, businessId: 'b_userA', createdBy, _masterId: _id, _userModified: false }));
+
+    it('INV-1 staff edits his own item', async () => {
+      await seedStaff('recipes', recipeBody(), 'mine', 'staffA');
+      const res = await request(app).put('/api/v1/data/recipes/mine').set(as(STAFF_A)).send({ nameHebrew: 'שלי' });
+      expect(res.status).toBe(200);
+    });
+
+    it("INV-1 staff can't edit or delete the owner's item (403, unchanged)", async () => {
+      await seedStaff('recipes', recipeBody(), 'owners', 'userA');
+      const before = await testDb().collection('recipes').findOne({ _id: 'owners' });
+      const edited = await request(app).put('/api/v1/data/recipes/owners').set(as(STAFF_A)).send({ nameHebrew: 'שלי' });
+      const removed = await request(app).delete('/api/v1/data/recipes/owners').set(as(STAFF_A));
+      expect([edited.status, removed.status]).toEqual([403, 403]);
+      expect(edited.body).toEqual({ error: 'FORBIDDEN', messageKey: 'no_permission' });
+      expect(await testDb().collection('recipes').findOne({ _id: 'owners' })).toEqual(before);
+    });
+
+    it("INV-1 staff can't change a product price, the owner can", async () => {
+      await seedStaff('products', pricedBody(), 'p1', 'staffA');
+      const staff = await request(app).put('/api/v1/data/products/p1').set(as(STAFF_A)).send({ sources: [{ supplierId: 's1', price: 9 }] });
+      expect(staff.status).toBe(403);
+      expect((await testDb().collection('products').findOne({ _id: 'p1' })).sources[0].price).toBe(5);
+      const owner = await request(app).put('/api/v1/data/products/p1').set(as(USER_A)).send({ sources: [{ supplierId: 's1', price: 9 }] });
+      expect(owner.status).toBe(200);
+      expect(owner.body.sources[0].price).toBe(9);
+    });
+  });
 });
 
 describe('INV-2 Tenancy', () => {
