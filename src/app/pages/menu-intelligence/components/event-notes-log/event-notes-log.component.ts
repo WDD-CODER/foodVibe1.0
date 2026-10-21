@@ -8,6 +8,7 @@ import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
 import { UserService } from '@services/user.service'
+import { NOTE_MAX_LENGTH } from '@schemas/entities'
 import type { EventNote } from '@models/menu-event.model'
 
 /**
@@ -34,7 +35,7 @@ export class EventNotesLogComponent {
   readonly eventId = input<string | null>(null)
 
   // 4. SIGNALS & CONSTANTS
-  protected readonly maxLength = 2000
+  protected readonly maxLength = NOTE_MAX_LENGTH
   protected readonly draft_ = signal('')
   protected readonly editText_ = signal('')
   protected readonly editingId_ = signal<string | null>(null)

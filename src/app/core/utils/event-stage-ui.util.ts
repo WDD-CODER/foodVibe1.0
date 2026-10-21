@@ -1,22 +1,17 @@
 import type { EventStage } from '@models/menu-event.model'
 
-/** Plan 443: the stage rules the screens need. Mirrors `shared/schemas/entities/event-stage.ts` (the client does not import `shared/`). */
-export const EVENT_STAGE_ORDER: readonly EventStage[] = [
-  'inquiry',
-  'quote_sent',
-  'deposit_paid',
-  'ordering',
-  'execution',
-  'post_production',
-  'finished',
-  'not_closed'
-]
+import { CLOSED_FROM_INDEX, EVENT_STAGES, NOT_CLOSED_FROM } from '@schemas/entities'
 
-/** "לא נסגר" can be entered only from these stages. */
-const NOT_CLOSED_FROM: readonly EventStage[] = ['inquiry', 'quote_sent']
+/** Plan 443: the stage rules the screens need; the rules themselves live in plan 442's shared event-stage file. */
+export const EVENT_STAGE_ORDER: readonly EventStage[] = EVENT_STAGES
 
-/** Moving to this stage or a later one (except "not closed") needs an event date. */
-const DATE_FROM_INDEX = EVENT_STAGE_ORDER.indexOf('deposit_paid')
+const CLIENT_PHONE_PATTERN = /^[0-9+\-\s()]{7,20}$/
+
+/** Client phone check shared by the new-inquiry dialog and the stage bar. Empty is valid. */
+export function isValidClientPhone(value: string): boolean {
+  const phone = value.trim()
+  return phone === '' || CLIENT_PHONE_PATTERN.test(phone)
+}
 
 /** Server error code (plan 442 / 427) to dictionary key. */
 const ERROR_KEYS: Record<string, string> = {
@@ -44,7 +39,7 @@ export function canPickNotClosed(current: EventStage): boolean {
 /** True when moving to `target` is refused for lack of an event date. */
 export function needsDateFor(target: EventStage, eventDate: string | undefined): boolean {
   if (target === 'not_closed') return false
-  return EVENT_STAGE_ORDER.indexOf(target) >= DATE_FROM_INDEX && !eventDate
+  return EVENT_STAGE_ORDER.indexOf(target) >= CLOSED_FROM_INDEX && !eventDate
 }
 
 /** Live event: not finished and not lost. An event with no stage yet counts as live. */

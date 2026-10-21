@@ -21,6 +21,7 @@ describe('EventStageBarComponent', () => {
   let userMsg: jasmine.SpyObj<UserMsgService>
   let eventData: { allMenuEvents_: unknown; updateMenuEvent: jasmine.Spy }
   let allowed: Record<string, boolean>
+  let confirmAnswer: boolean
 
   const base: MenuEvent = {
     _id: 'e1',
@@ -43,6 +44,7 @@ describe('EventStageBarComponent', () => {
   }
 
   beforeEach(async () => {
+    confirmAnswer = true
     allowed = { changeStage: true, edit: true, editMoney: true }
     store = signal<MenuEvent[]>([base])
     pipeline = jasmine.createSpyObj<EventPipelineService>('EventPipelineService', ['changeStage'])
@@ -62,7 +64,7 @@ describe('EventStageBarComponent', () => {
         { provide: PermissionService, useValue: { can: (action: string) => allowed[action] } },
         { provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } },
         { provide: UserMsgService, useValue: userMsg },
-        { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(true) } }
+        { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(confirmAnswer) } }
       ]
     }).compileComponents()
     fixture = TestBed.createComponent(EventStageBarComponent)

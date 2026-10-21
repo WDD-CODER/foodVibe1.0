@@ -1,6 +1,7 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, inject, output, signal } from '@angular/core'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { NOT_CLOSED_REASONS } from '@schemas/entities'
 import type { NotClosedReason } from '@models/menu-event.model'
 
 export interface NotClosedAnswer {
@@ -30,7 +31,7 @@ export class NotClosedDialogComponent {
   readonly cancelled = output<void>()
 
   // 4. SIGNALS & CONSTANTS
-  protected readonly reasons: readonly NotClosedReason[] = ['price', 'date_taken', 'no_reply', 'other']
+  protected readonly reasons: readonly NotClosedReason[] = NOT_CLOSED_REASONS
   protected readonly maxText = 500
   protected readonly reason_ = signal<NotClosedReason | null>(null)
   protected readonly text_ = signal('')

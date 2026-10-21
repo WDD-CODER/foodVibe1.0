@@ -17,11 +17,12 @@ import { MenuEventDataService } from '@services/menu-event-data.service'
 import { MenuEventTypeService } from '@services/menu-event-type.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { NOTE_MAX_LENGTH } from '@schemas/entities'
+import { isValidClientPhone } from 'src/app/core/utils/event-stage-ui.util'
 import type { MenuEvent } from '@models/menu-event.model'
 
 const NAME_MAX = 200
-const NOTE_MAX = 2000
-const PHONE_PATTERN = /^[0-9+\-\s()]{7,20}$/
+const NOTE_MAX = NOTE_MAX_LENGTH
 
 /**
  * Plan 443: "פנייה חדשה", a short form that logs a phone inquiry without building a menu.
@@ -70,9 +71,7 @@ export class NewInquiryDialogComponent {
   protected readonly nameValid_ = computed(
     () => this.name_().trim().length > 0 && this.name_().trim().length <= NAME_MAX
   )
-  protected readonly phoneValid_ = computed(
-    () => this.phone_().trim() === '' || PHONE_PATTERN.test(this.phone_().trim())
-  )
+  protected readonly phoneValid_ = computed(() => isValidClientPhone(this.phone_()))
   protected readonly guestsValid_ = computed(() => {
     const raw = this.guests_().trim()
     return raw === '' || (/^\d+$/.test(raw) && Number(raw) <= 100000)

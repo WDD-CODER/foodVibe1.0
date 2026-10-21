@@ -10,7 +10,13 @@
           [class.is-locked]="stage === 'finished' || !canChangeStage_()"
           [attr.aria-current]="stage === current_() ? 'step' : null"
           [attr.aria-disabled]="stage === 'finished' || !canChangeStage_() ? 'true' : null"
-          [attr.title]="stage === 'finished' ? ('stage_finished_hint' | translatePipe) : null"
+          [attr.title]="
+            stage === 'finished'
+              ? ('stage_finished_hint' | translatePipe)
+              : !canChangeStage_()
+                ? ('stage_not_allowed' | translatePipe)
+                : null
+          "
           (click)="pick(stage)"
         >
           {{ stageLabelKey(stage) | translatePipe }}

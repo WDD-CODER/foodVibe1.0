@@ -5,6 +5,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import {
   EVENT_STAGE_ORDER,
   canPickNotClosed,
+  isValidClientPhone,
   needsDateFor,
   stageLabelKey
 } from 'src/app/core/utils/event-stage-ui.util'
@@ -16,8 +17,6 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import { NotClosedAnswer, NotClosedDialogComponent } from '../not-closed-dialog/not-closed-dialog.component'
-
-const PHONE_PATTERN = /^[0-9+\-\s()]{7,20}$/
 
 /**
  * Plan 443: the stage bar at the top of the event screen. Click a stage to move the event; "לא נסגר" asks why
@@ -109,7 +108,7 @@ export class EventStageBarComponent {
     const event = this.event_()
     const clientPhone = value.trim()
     if (!event) return
-    this.phoneInvalid_.set(clientPhone !== '' && !PHONE_PATTERN.test(clientPhone))
+    this.phoneInvalid_.set(!isValidClientPhone(clientPhone))
     if (this.phoneInvalid_() || clientPhone === (event.clientPhone ?? '')) return
     void this.saveFields(event, { clientPhone })
   }
