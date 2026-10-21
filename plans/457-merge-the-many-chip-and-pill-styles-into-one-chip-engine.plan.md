@@ -4,7 +4,7 @@ Status: draft
 Track: code
 Depends-on: 450
 Conflicts-with: 451, 452, 453, 455
-Snapshot: 69238122fa52cabda78a87b1229ff70a7b26b32b
+Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
 
 ## Problem Statement
 Small pill-shaped controls (filter toggles, tag chips, tab pills, removable tags, status pills) are styled
