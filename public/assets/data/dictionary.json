@@ -1257,6 +1257,26 @@
     "prep_sheets_col_qty": "כמות",
     "prep_sheets_col_unit": "יחידה",
     "prep_sheets_col_note": "הערה",
-    "prep_sheets_col_purchase": "יחידות רכש"
+    "prep_sheets_col_purchase": "יחידות רכש",
+    "platform_dashboard": "דאשבורד מערכת",
+    "platform_col_business": "עסק",
+    "platform_col_owner": "בעלים",
+    "platform_col_staff": "צוות",
+    "platform_col_joined": "הצטרף",
+    "platform_col_last_activity": "פעילות אחרונה",
+    "platform_col_active_days_7": "ימי שימוש (7 ימים)",
+    "platform_col_events_total": "מספר אירועים",
+    "platform_col_events_active": "פעילים",
+    "platform_col_events_closed": "נסגרו",
+    "platform_col_events_finished": "הסתיימו",
+    "platform_col_close_rate": "אחוז סגירה",
+    "platform_col_last_event": "אירוע אחרון",
+    "platform_col_internal": "פנימי",
+    "platform_totals": "סה\"כ (ללא עסקים פנימיים)",
+    "platform_no_businesses": "אין עסקים עדיין",
+    "platform_back_to_table": "חזרה לטבלה",
+    "never": "אף פעם",
+    "platform_idle_7": "לא פעיל 7+",
+    "platform_idle_14": "לא פעיל 14+"
   }
 }

@@ -1,6 +1,6 @@
 # Plan 448 — Give the platform admin a table of every business's activity and events
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -28,8 +28,8 @@ last activity, 7/14-day inactivity colours, an internal toggle excluded from tot
 read-only drill-down to the performance cards.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npm --prefix server test -- test/admin-businesses.test.js` passes, with a fixture of two businesses
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npm --prefix server test -- test/admin-businesses.test.js` passes, with a fixture of two businesses
   (A: owner + 2 staff, one removed; B: owner only) and events / usage days seeded directly:
   - `GET /api/v1/admin/businesses` as platform admin → 2 rows; A: `ownerName`, `staffCount: 1`, `createdAt`,
     `lastActivityAt` = latest `usageDays.lastAt` of any A member, `activeDays7` = distinct Israel dates in the last 7
@@ -45,16 +45,16 @@ Done when:
     `internal: true`; `{ internal: 'yes' }` → 400; unknown id → 404;
   - (only when 447 is merged) `GET /api/v1/admin/businesses/<A>/performance?period=30` → the same payload 447's
     own endpoint returns for A's owner; owner token → 403.
-- [auto] `npm --prefix server test` passes (whole server suite).
-- [auto] `npx ng test --watch=false --include='src/app/pages/platform-dashboard/**/*.spec.ts'` passes, covering:
+- [x] [auto] `npm --prefix server test` passes (whole server suite).
+- [x] [auto] `npx ng test --watch=false --include='src/app/pages/platform-dashboard/**/*.spec.ts'` passes, covering:
   default sort = last activity, newest first, never-active last; clicking a header sorts by it and a second click
   reverses; `lastActivityAt` 8 days ago → row class `is-idle-7`, 15 days → `is-idle-14`, `null` → `is-idle-14`;
   the totals line sums only rows with `internal: false`; close rate shown through `formatPctInt` (57.14 → «57%»),
   `null` → «—».
-- [auto] (only when 447 is merged) `npx ng test --watch=false --include='src/app/pages/dashboard/components/business-performance/**/*.spec.ts'`
+- [-] [auto] (447 not merged, n/a) `npx ng test --watch=false --include='src/app/pages/dashboard/components/business-performance/**/*.spec.ts'`
   passes, plus a new case: with `readonly` true and a `statsSource` fixture the cards render the fixture numbers and
   no funnel link / «צור פנייה ראשונה» button is rendered; with the defaults the owner dashboard behaves as before.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [ ] [auto] (deferred: local MongoDB down) `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Desktop, platform admin (Dandan's account): header link «דאשבורד מערכת» → table with one row per test
   business; numbers match what you know of them (events, last activity); the table is sorted by «פעילות אחרונה».
 - [human] Desktop, platform admin: click «מספר אירועים» header → sorted by it; click again → reversed. A business
@@ -284,15 +284,15 @@ Add `ArrowUpDown` (sort headers) to `src/app/app.config.ts`. `Activity`, `Chevro
 - RTL, logical properties only; run `cssLayer` before `.scss`.
 
 ## Atomic Sub-tasks
-- [ ] P1: Compute one row per business from members, activity and events, never their content — GET /businesses with five grouped queries, PUT /businesses/:id/internal — server/routes/admin.js
-- [ ] P2: Prove the numbers, the internal flag and the admin-only lock with server tests — two-business fixture, every Done-when case — server/test/admin-businesses.test.js
-- [ ] P3: Keep the screen to the platform admin and load its data — platform-admin guard (or 426's), PlatformAdminService — src/app/core/guards/platform-admin.guard.ts, src/app/core/services/platform-admin.service.ts
-- [ ] P4: Show the sortable business table with idle colours, internal toggle and totals — PlatformDashboardPage, lazy /platform route, spec — src/app/pages/platform-dashboard/**, src/app/app.routes.ts
-- [ ] P5: Link the screen from the header for the platform admin only — side menu + mobile profile menu — src/app/core/components/header/**
-- [ ] P6: (Only if 447 merged) Serve one business's performance numbers to the platform admin — GET /businesses/:id/performance running 447's builders (computeBusinessStats wrapper if needed), test case — server/routes/admin.js, server/services/business-stats.js, server/test/admin-businesses.test.js
-- [ ] P7: (Only if 447 merged) Open a business's performance cards read-only from the table — BusinessPerformanceViewComponent, platform/business/:id route, readonly + statsSource inputs on 447's cards — src/app/pages/platform-dashboard/components/business-performance-view/**, src/app/pages/dashboard/components/business-performance/**
-- [ ] P8: Add the Hebrew texts, the sort icon and the folder map entry — 18 dictionary keys, ArrowUpDown, pages breadcrumbs — public/assets/data/dictionary.json, src/app/app.config.ts, src/app/pages/breadcrumbs.md
-- [ ] P9: Build, test and hand over the admin dashboard checks — ng build, server suite, listed specs, log-query; Human runs the [human] items — this plan file
+- [x] P1: Compute one row per business from members, activity and events, never their content — GET /businesses with five grouped queries, PUT /businesses/:id/internal — server/routes/admin.js
+- [x] P2: Prove the numbers, the internal flag and the admin-only lock with server tests — two-business fixture, every Done-when case — server/test/admin-businesses.test.js
+- [x] P3: Keep the screen to the platform admin and load its data — platform-admin guard (or 426's), PlatformAdminService — src/app/core/guards/platform-admin.guard.ts, src/app/core/services/platform-admin.service.ts
+- [x] P4: Show the sortable business table with idle colours, internal toggle and totals — PlatformDashboardPage, lazy /platform route, spec — src/app/pages/platform-dashboard/**, src/app/app.routes.ts
+- [x] P5: Link the screen from the header for the platform admin only — side menu + mobile profile menu — src/app/core/components/header/**
+- [-] P6: skipped: 447 not merged - (Only if 447 merged) Serve one business's performance numbers to the platform admin — GET /businesses/:id/performance running 447's builders (computeBusinessStats wrapper if needed), test case — server/routes/admin.js, server/services/business-stats.js, server/test/admin-businesses.test.js
+- [-] P7: skipped: 447 not merged - (Only if 447 merged) Open a business's performance cards read-only from the table — BusinessPerformanceViewComponent, platform/business/:id route, readonly + statsSource inputs on 447's cards — src/app/pages/platform-dashboard/components/business-performance-view/**, src/app/pages/dashboard/components/business-performance/**
+- [x] P8: Add the Hebrew texts, the sort icon and the folder map entry — 18 dictionary keys, ArrowUpDown, pages breadcrumbs — public/assets/data/dictionary.json, src/app/app.config.ts, src/app/pages/breadcrumbs.md
+- [x] P9: Build, test and hand over the admin dashboard checks — ng build, server suite, listed specs, log-query; Human runs the [human] items — this plan file
 
 ## Technical Considerations
 - Dependencies: `requirePlatformAdmin` (424/425), `usageDays` + `activeDaysByBusiness` + `jerusalemDate` (430),

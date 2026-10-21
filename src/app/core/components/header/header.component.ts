@@ -16,6 +16,8 @@ const NAV_LINKS = [
 ]
 /** Only the business owner gets this one (plan 428). */
 const SETTINGS_LINK = { path: '/settings', key: 'settings', icon: 'sliders-vertical' }
+/** Only the platform admin gets this one (plan 448). */
+const PLATFORM_LINK = { path: '/platform', key: 'platform_dashboard', icon: 'activity' }
 
 @Component({
   selector: 'app-header',
@@ -38,7 +40,11 @@ export class HeaderComponent {
   protected readonly user_ = this.userService.user_
   protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
   protected readonly isOwner_ = this.userService.isOwner_
-  protected readonly navLinks_ = computed(() => (this.isOwner_() ? [...NAV_LINKS, SETTINGS_LINK] : NAV_LINKS))
+  protected readonly navLinks_ = computed(() => [
+    ...NAV_LINKS,
+    ...(this.isOwner_() ? [SETTINGS_LINK] : []),
+    ...(this.isPlatformAdmin_() ? [PLATFORM_LINK] : [])
+  ])
   protected readonly business_ = this.businessService.business_
   // Resets whenever the stored photo URL changes (new user, re-login, profile update).
   protected readonly imgFailed_ = linkedSignal({ source: () => this.user_()?.imgUrl, computation: () => false })

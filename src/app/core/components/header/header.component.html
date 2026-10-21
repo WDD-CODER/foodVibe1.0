@@ -133,6 +133,12 @@
               {{ 'settings' | translatePipe }}
             </a>
           }
+          @if (isPlatformAdmin_()) {
+            <a class="profile-menu__item" role="menuitem" routerLink="/platform" (click)="toggleMobileAvatar()">
+              <lucide-icon name="activity" size="16"></lucide-icon>
+              {{ 'platform_dashboard' | translatePipe }}
+            </a>
+          }
           <button type="button" class="profile-menu__logout" role="menuitem" (click)="logout()">
             <lucide-icon name="log-out" [size]="16"></lucide-icon>
             {{ 'log_out' | translatePipe }}

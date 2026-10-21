@@ -1,0 +1,87 @@
+@layer components.platform-dashboard {
+  :host {
+    display: block;
+  }
+
+  .platform-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+
+    max-inline-size: 90rem;
+
+    margin-inline: auto;
+    padding: var(--space-4);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+  }
+
+  .platform-table {
+    inline-size: 100%;
+    border-collapse: collapse;
+
+    font-size: var(--fs-sm);
+    text-align: start;
+
+    th,
+    td {
+      padding-block: var(--space-2);
+      padding-inline: var(--space-3);
+
+      text-align: start;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-block-start: 1px solid var(--border-default);
+    }
+
+    .sticky-col {
+      position: sticky;
+      inset-inline-start: 0;
+
+      background: var(--bg-card-solid);
+      font-weight: var(--fw-medium, 500);
+    }
+
+    .is-idle-7 {
+      background: var(--bg-warning-soft);
+    }
+
+    .is-idle-14 {
+      background: var(--bg-danger-subtle);
+    }
+  }
+
+  .sort-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    padding: 0;
+    border: 0;
+
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .idle-label {
+    margin-inline-start: var(--space-2);
+
+    color: var(--color-warning-ink);
+    font-size: var(--fs-xs);
+  }
+
+  .platform-totals,
+  .platform-empty {
+    color: var(--color-text-secondary);
+    font-size: var(--fs-sm);
+  }
+}
