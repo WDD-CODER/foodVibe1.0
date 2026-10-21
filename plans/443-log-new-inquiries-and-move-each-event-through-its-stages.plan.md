@@ -193,7 +193,7 @@ symbol and print `ok` or `conflict: <what>`:
   skips; "הסתיים" never selectable; "לא נסגר" only from "פנייה" or "הצעת מחיר נשלחה" and only with a reason.
 - [x] Moving to "מקדמה שולמה" or later without an event date is refused with a message.
 - [x] Stage changes allowed for the owner and for the event's creator; others see the bar read-only.
-- [ ] Entering "הזמנות" offers to open «הזמנות לספקים» (plan 435). Skipped: plan 435 is not merged (see docs/mvp/runs/443.md Decisions).
+- [x] Entering "הזמנות" offers to open «הזמנות לספקים» (plan 435); wired after plan 435 merged (see docs/mvp/runs/443.md Decisions).
 - [x] Stage history visible from the bar: stage, date-time, who, reason.
 - [x] Client name and phone editable on the event screen; deposit amount + date editable only by the owner
   (`editMoney`), visible to all.
