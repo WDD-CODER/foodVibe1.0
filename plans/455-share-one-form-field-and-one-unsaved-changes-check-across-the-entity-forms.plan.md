@@ -4,7 +4,7 @@ Status: draft
 Track: code
 Depends-on: 450
 Conflicts-with: 452, 453, 454, 456, 457
-Snapshot: 9da0a4eaf5a23ab252ab80c3d7d84789a9469e27
+Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
 
 ## Problem Statement
 Every entity form rebuilds the same field by hand and the same "did anything change?" check (audit 2026-10-20, family "Form field" and "Entity form behaviour"):
