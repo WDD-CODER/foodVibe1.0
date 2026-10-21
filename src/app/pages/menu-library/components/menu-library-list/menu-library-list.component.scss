@@ -220,6 +220,30 @@
     }
   }
 
+  &.stage {
+    background: var(--color-primary-soft);
+    color: var(--color-primary-hover);
+    border-color: var(--color-primary);
+
+    &.stage--lost {
+      background: var(--bg-danger-subtle);
+      color: var(--color-danger);
+      border-color: var(--color-danger);
+    }
+
+    &.stage--done {
+      background: var(--bg-muted);
+      color: var(--color-text-muted);
+      border-color: var(--border-strong);
+    }
+  }
+
+  &.legacy {
+    background: var(--bg-muted);
+    color: var(--color-text-muted);
+    border-color: var(--border-default);
+  }
+
   &.guests {
     background: var(--bg-glass);
     color: var(--color-text-secondary);
@@ -319,5 +343,13 @@
       padding-block-start: 0.5rem;
       border-block-start: 1px solid var(--border-default);
     }
+  }
+}
+
+// The FAB carries "פנייה חדשה" on phones; the header button would not fit next to the title.
+$break-mobile: 768px; // mirrors src/styles.scss
+@media (max-width: $break-mobile) {
+  .header-inquiry-btn {
+    display: none;
   }
 }

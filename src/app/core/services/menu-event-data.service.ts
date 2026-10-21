@@ -108,6 +108,18 @@ export class MenuEventDataService {
     }
   }
 
+  /**
+   * Puts an event the server already saved (a stage move, a note, a new inquiry) into the store,
+   * replacing the one with the same id or adding it. No request is made.
+   */
+  applyServerEvent(event: MenuEvent): void {
+    this.eventsStore_.update((events) =>
+      events.some((e) => e._id === event._id)
+        ? events.map((e) => (e._id === event._id ? event : e))
+        : [...events, event]
+    )
+  }
+
   async deleteMenuEvent(_id: string): Promise<void> {
     try {
       // Plan 407: the server stamps deletedAt; the item now sits in Trash.

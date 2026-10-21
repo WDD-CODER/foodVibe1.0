@@ -1,4 +1,4 @@
-<div class="menu-editor-shell" dir="rtl">
+<div class="menu-editor-shell" [class.has-notes]="!!editingId_()" dir="rtl">
   <!-- Pill toolbar row — always visible above paper. Export / checklist / print options live in
        the hero-FAB "צ'קליסט והדפסות" top sheet (plan 344). -->
   <div class="pill-row no-print">
@@ -13,6 +13,14 @@
       {{ 'supplier_orders' | translatePipe }}
     </button>
   </div>
+
+  @if (editingId_()) {
+  <app-event-stage-bar
+    [eventId]="editingId_()"
+    [supplierOrdersAvailable]="true"
+    (openSupplierOrders)="openSupplierOrders()"
+  />
+  }
 
   <!-- Paper in the middle of the screen -->
   <div class="paper-outer">
@@ -308,6 +316,10 @@
       </div>
     </div>
   </div>
+
+  @if (editingId_()) {
+  <app-event-notes-log [eventId]="editingId_()" />
+  }
 
   <!-- Financial footnote — fixed bar, always visible while scrolling -->
   <div class="financial-footnote no-print">

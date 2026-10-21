@@ -31,6 +31,7 @@ export class MenuLibraryPage implements OnInit, OnDestroy {
     this.heroFab.setPageActions(
       [
         { labelKey: 'menu_new_event', icon: 'file-plus', run: () => void this.router.navigate(['/menu-intelligence']) },
+        { labelKey: 'new_inquiry', icon: 'file-plus', run: () => void this.openInquiryForm() },
         { labelKey: 'ai_menu_create_new', icon: 'sparkles', run: () => this.openAiCreateModal() }
       ],
       'replace'
@@ -39,6 +40,11 @@ export class MenuLibraryPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.heroFab.clearPageActions()
+  }
+
+  /** Opens the "פנייה חדשה" form: the list shows it while the URL carries `?new=inquiry`. */
+  private openInquiryForm(): Promise<boolean> {
+    return this.router.navigate(['/menu-library'], { queryParams: { new: 'inquiry' }, queryParamsHandling: 'merge' })
   }
 
   private openAiCreateModal(): void {

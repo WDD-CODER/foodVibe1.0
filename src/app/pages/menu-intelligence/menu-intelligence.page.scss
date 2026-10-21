@@ -6,3 +6,51 @@
 .guest-hint {
   text-align: center;
 }
+
+/* Plan 443: stage bar above the paper, notes log beside it (desktop) or below it (phone and tablet). */
+$break-notes: 1024px; // side column from this width; no global $break-* equals it
+
+app-event-stage-bar,
+app-event-notes-log {
+  max-inline-size: 720px;
+}
+
+app-event-stage-bar {
+  margin-block-end: 1rem;
+}
+
+app-event-notes-log {
+  margin-block-start: 1.5rem;
+}
+
+@media (min-width: $break-notes) {
+  .menu-editor-shell.has-notes {
+    display: grid;
+    grid-template-columns: minmax(0, 720px) 20rem;
+    justify-content: center;
+    align-items: start;
+    column-gap: 1.5rem;
+
+    max-inline-size: 1120px;
+
+    .pill-row,
+    app-event-stage-bar {
+      grid-column: 1 / -1;
+      justify-self: center;
+      inline-size: 100%;
+      max-inline-size: 720px;
+    }
+
+    .paper-outer {
+      grid-column: 1;
+    }
+
+    app-event-notes-log {
+      grid-column: 2;
+      position: sticky;
+      inset-block-start: 1rem;
+      margin-block-start: 0;
+      max-inline-size: none;
+    }
+  }
+}

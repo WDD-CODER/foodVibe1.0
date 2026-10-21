@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { Router } from '@angular/router'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { MenuEventDataService } from '@services/menu-event-data.service'
@@ -15,11 +16,22 @@ import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
-import { useListState, StringParam } from 'src/app/core/utils/list-state.util'
+import { useListState, StringParam, ParamSerializer } from 'src/app/core/utils/list-state.util'
+import { EVENT_STAGE_ORDER, isActiveStage, stageLabelKey } from 'src/app/core/utils/event-stage-ui.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { NewInquiryDialogComponent } from '../new-inquiry-dialog/new-inquiry-dialog.component'
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
+
+/** Plan 443: `active` (live events, the default), `all`, or one stage key. */
+const STAGE_FILTER_VALUES: readonly string[] = ['active', 'all', ...EVENT_STAGE_ORDER]
+const StageFilterParam: ParamSerializer<string> = {
+  toUrl: (v) => (v === 'active' ? null : v),
+  fromUrl: (r) => (STAGE_FILTER_VALUES.includes(r) ? r : 'active'),
+  toSession: (v) => v,
+  fromSession: (r) => (typeof r === 'string' && STAGE_FILTER_VALUES.includes(r) ? r : 'active')
+}
 
 @Component({
   selector: 'app-menu-library-list',
@@ -33,7 +45,8 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
     CustomSelectComponent,
     EmptyStateComponent,
     InputClearComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    NewInquiryDialogComponent
   ],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
@@ -41,6 +54,7 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 })
 export class MenuLibraryListComponent {
   private readonly router = inject(Router)
+  private readonly route = inject(ActivatedRoute)
   private readonly menuEventData = inject(MenuEventDataService)
   private readonly menuIntelligence = inject(MenuIntelligenceService)
   private readonly confirmModal = inject(ConfirmModalService)
@@ -57,6 +71,10 @@ export class MenuLibraryListComponent {
   protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc')
   protected readonly cloningId_ = signal<string | null>(null)
   protected readonly deletingId_ = signal<string | null>(null)
+  protected readonly stageFilter_ = signal('active')
+  /** The "פנייה חדשה" form is open while the URL carries `?new=inquiry` (the FAB action and the header button both set it). */
+  protected readonly inquiryOpen_ = signal(false)
+  protected readonly stageLabelKey = stageLabelKey
 
   constructor() {
     useListState('menu-library', [
@@ -65,8 +83,12 @@ export class MenuLibraryListComponent {
       { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
       { urlParam: 'eventType', signal: this.eventTypeFilter_, serializer: StringParam },
       { urlParam: 'style', signal: this.servingStyleFilter_, serializer: StringParam },
-      { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: StringParam }
+      { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: StringParam },
+      { urlParam: 'stage', signal: this.stageFilter_, serializer: StageFilterParam }
     ])
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed())
+      .subscribe((params) => this.inquiryOpen_.set(params.get('new') === 'inquiry'))
   }
 
   protected readonly events_ = this.menuEventData.allMenuEvents_
@@ -90,6 +112,12 @@ export class MenuLibraryListComponent {
     this.eventTypeOptions_().map((t) => ({ value: t, label: t }))
   )
 
+  protected readonly stageOptions_: { value: string; label: string }[] = [
+    { value: 'active', label: 'stage_filter_active' },
+    { value: 'all', label: 'stage_filter_all' },
+    ...EVENT_STAGE_ORDER.map((stage) => ({ value: stage, label: stageLabelKey(stage) }))
+  ]
+
   protected readonly sortBySelectOptions_: { value: SortField; label: string }[] = [
     { value: 'date', label: 'sort_by_date' },
     { value: 'name', label: 'sort_by_name' },
@@ -102,12 +130,15 @@ export class MenuLibraryListComponent {
     const type = this.eventTypeFilter_()
     const style = this.servingStyleFilter_()
     const from = this.dateFrom_()
+    const stage = this.stageFilter_()
     const sortBy = this.sortBy_()
     const sortOrder = this.sortOrder_()
 
     let events = this.events_().filter((event) => {
       if (type !== 'all' && event.eventType !== type) return false
       if (style !== 'all' && event.servingType !== style) return false
+      if (stage === 'active' ? !isActiveStage(event.stage) : stage !== 'all' && (event.stage ?? 'inquiry') !== stage)
+        return false
       if (from && (!event.eventDate || event.eventDate < from)) return false
       if (query) {
         const haystack = [event.name, event.eventType, event.eventDate || '', ...(event.cuisineTags || [])]
@@ -157,6 +188,18 @@ export class MenuLibraryListComponent {
 
   protected onCreateNew(): void {
     this.router.navigate(['/menu-intelligence'])
+  }
+
+  protected openInquiry(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { new: 'inquiry' },
+      queryParamsHandling: 'merge'
+    })
+  }
+
+  protected closeInquiry(): void {
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { new: null }, queryParamsHandling: 'merge' })
   }
 
   protected onOpen(event: MenuEvent): void {

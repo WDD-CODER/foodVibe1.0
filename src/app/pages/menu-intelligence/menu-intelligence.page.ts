@@ -56,6 +56,8 @@ import type { ExportPayload } from 'src/app/core/utils/export.util'
 import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-preview.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { EventStageBarComponent } from './components/event-stage-bar/event-stage-bar.component'
+import { EventNotesLogComponent } from './components/event-notes-log/event-notes-log.component'
 import { MenuExportSheetComponent } from './components/menu-export-sheet/menu-export-sheet.component'
 import { MenuDishRowComponent } from './components/menu-dish-row/menu-dish-row.component'
 import { SupplierOrdersComponent } from './components/supplier-orders/supplier-orders.component'
@@ -102,7 +104,9 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     SupplierOrdersComponent,
     VenueLinkChipComponent,
     InputClearComponent,
-    AddOptionRowComponent
+    AddOptionRowComponent,
+    EventStageBarComponent,
+    EventNotesLogComponent
   ],
   templateUrl: './menu-intelligence.page.html',
   styleUrl: './menu-intelligence.page.scss',
@@ -459,10 +463,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     this.stopEditField()
     this.closeEventTypeDropdown()
     this.focusField(next)
-  }
-
-  protected goBack(): void {
-    this.router.navigate(['/menu-library'])
   }
 
   /** Event types: from persisted registry + existing menus */
