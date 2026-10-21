@@ -10,6 +10,7 @@ const { newId: makeId } = require('../utils/id');
 const { hasSchema: hasV2Schema } = require('../utils/schema-check');
 const { checkStoredDoc } = require('../middleware/validate');
 const { TERM_REFERENCES } = require('../generated/schemas/entities');
+const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-stage');
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
@@ -103,6 +104,15 @@ function termWriteOwner(req) {
 
 /** Businesses whose documents a term's key reaches: everyone for a shared term, else its own business. */
 const termScope = term => (term.businessId === MASTER ? { $exists: true } : term.businessId);
+
+const EVENTS = 'menuEvents';
+
+/** Plan 442: `body` without the event fields only the server writes (stage, history, notes ...). */
+function withoutServerEventFields(body) {
+  const copy = { ...body };
+  for (const key of EVENT_SERVER_FIELDS) delete copy[key];
+  return copy;
+}
 
 /** Plan 427: permission action for changing or deleting a stored doc (locked taxonomy kinds are owner-only). */
 const writeAction = (type, doc, fallback) =>
@@ -448,6 +458,8 @@ router.post('/:type', verifyToken, async (req, res) => {
     let shared = false;
     let safeEntity = body;
     if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
+    // Plan 442: a client never sets an event's stage, history or notes; the server starts every event in "inquiry".
+    if (entityType === EVENTS) safeEntity = withoutServerEventFields(safeEntity);
     if (shared && !isAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
@@ -474,6 +486,11 @@ router.post('/:type', verifyToken, async (req, res) => {
         updatedAt: now,
       }),
     });
+    if (entityType === EVENTS) {
+      doc.stage = 'inquiry';
+      doc.stageHistory = [{ stage: 'inquiry', at: now, by: req.user.userId, byName: req.user.name ?? '' }];
+      doc.notes = [];
+    }
     // Plan 424: a shared term belongs to the master catalog, not to the admin's own business.
     if (shared) doc.businessId = MASTER_BUSINESS_ID;
 
@@ -566,7 +583,9 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       ...(!isTerm && { _userModified: true }),
     };
     // createdAt is server-owned: a client PUT never rewrites it.
-    const { createdAt: _ca, ...updatable } = safeBody;
+    const { createdAt: _ca, ...clientUpdatable } = safeBody;
+    // Plan 442: stage, history, closedAt and notes survive a client PUT unchanged (the events router owns them).
+    const updatable = req.params.type === EVENTS ? withoutServerEventFields(clientUpdatable) : clientUpdatable;
     let rekeyed = null;
     // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
     // rejects null on optional keys, and a PUT validates the merge over the stored doc, so one

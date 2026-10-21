@@ -112,9 +112,18 @@ version of this section (and of `standards-security.md §9`, corrected the same 
 | `PUT` | `/api/v1/data/:type` | required | Replace all (requires `X-Confirm-Replace: true` header) — restricted (Plan 321 Phase 1) to `REPLACEABLE_TYPES` in `generic.js`, not every entity type |
 | `DELETE` | `/api/v1/data/:type/bulk` | required | Remove many by id |
 | `DELETE` | `/api/v1/data/:type/:id` | required | Remove one |
+| `PUT` | `/api/v1/events/:id/stage` | required | Plan 442: move an event to another stage `{ stage, reason?, reasonText? }`. C-PERM `changeStage` (owner, or the event's creator). Errors: `BAD_STAGE`, `EVENT_FINISHED` (409), `USE_FINISH`, `NOT_CLOSED_FROM_STAGE`, `REASON_REQUIRED`, `DATE_REQUIRED` |
+| `POST` | `/api/v1/events/:id/notes` | required | Plan 442: add a note `{ text }` (1 to 2,000 chars; `NOTE_EMPTY`, `NOTE_TOO_LONG`). C-PERM `addNote` (any member) |
+| `PUT` / `DELETE` | `/api/v1/events/:id/notes/:noteId` | required | Plan 442: edit (`editedAt` set) or delete a note - its author only (403 otherwise) |
 | `GET` | `/api/v1/business` | required | The caller's `businesses` document (any member) |
 | `GET` | `/api/v1/admin/users` | platform admin | Users with `businessId`, `businessName`, `businessRole`, `isPlatformAdmin` |
 | `DELETE` | `/api/v1/admin/users/:userId` | platform admin | Owner: deletes the whole business (data, users, business doc); staff: only that user; own business → 403 |
+
+Why a dedicated `/api/v1/events` router (plan 442): an event's stage history, `closedAt` and notes are server-owned.
+The actor (`by`, `byName`) comes from the token and each change is one atomic write (`$push` / `$pull` / `$set`
+with `arrayFilters`), so the generic API strips `EVENT_SERVER_FIELDS` (`shared/schemas/entities/event-stage.ts`)
+from every `menuEvents` POST and PUT, and a generic POST starts the event in `inquiry`. Pure rules live in
+`server/utils/event-stage.js`. Plan 446 adds `closing`, `finish`, `reopen`, `refresh-plan` to the same router.
 
 A token without `businessId` is refused with 401 on every route that verifies a token (the client
 refreshes silently). Login for a user with no business → 403 `NO_BUSINESS`, removed user → 403
