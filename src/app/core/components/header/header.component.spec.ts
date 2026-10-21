@@ -153,4 +153,12 @@ describe('HeaderComponent business and platform admin (plan 426)', () => {
     fixture.detectChanges()
     expect(host.querySelector('.profile-menu__item')).not.toBeNull()
   })
+
+  it('shows the platform dashboard link only to the platform admin (plan 448)', () => {
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelectorAll('a[href="/platform"]').length).toBe(0)
+    isPlatformAdmin.set(true)
+    fixture.detectChanges()
+    expect(host.querySelectorAll('a[href="/platform"]').length).toBe(2)
+  })
 })

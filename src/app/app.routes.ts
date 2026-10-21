@@ -12,6 +12,7 @@ import { kitchenDataEnsureLoadedResolver } from './core/resolvers/kitchen-data-e
 import { supplierResolver } from './core/resolvers/supplier.resolver'
 import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
+import { platformAdminGuard } from './core/guards/platform-admin.guard'
 
 export const routes: Routes = [
   // Plan 338: equipment lives only under /inventory/equipment — old URLs redirect.
@@ -213,6 +214,11 @@ export const routes: Routes = [
     path: 'settings',
     loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage),
     canActivate: [authGuard],
+  },
+  {
+    path: 'platform',
+    loadComponent: () => import('./pages/platform-dashboard/platform-dashboard.page').then(m => m.PlatformDashboardPage),
+    canActivate: [authGuard, platformAdminGuard],
   },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'dashboard' },

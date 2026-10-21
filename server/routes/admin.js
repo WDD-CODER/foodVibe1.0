@@ -3,6 +3,9 @@ const mongoose = require('mongoose')
 const { verifyToken, requirePlatformAdmin } = require('../middleware/auth')
 const User = require('../models/user.model')
 const { ALL_USER_ENTITY_TYPES } = require('../constants/all-user-entity-types')
+const { LIVE } = require('../jobs/purge-deleted')
+const { jerusalemDate } = require('../middleware/usage')
+const { activeDaysByBusiness } = require('../utils/usage-stats')
 
 const router = Router()
 
@@ -61,6 +64,83 @@ router.delete('/users/:userId', verifyToken, requirePlatformAdmin, async (req, r
     res.json({ ok: true, deletedBusiness: wholeBusiness, usersDeleted })
   } catch (err) {
     req.log.error({ err, event: 'admin.users_delete.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+const DAY_MS = 86400000
+
+/**
+ * Plan 448: one row per business - members, activity and event-pipeline counts, never content.
+ * Five grouped queries, no per-business loop. Legacy and deleted events never count.
+ */
+router.get('/businesses', verifyToken, requirePlatformAdmin, async (req, res) => {
+  try {
+    const now = Date.now()
+    const [businesses, members, usage, activeDays, events] = await Promise.all([
+      col('businesses').find({ _id: { $ne: '__master__' } }, { projection: { name: 1, ownerId: 1, createdAt: 1, internal: 1 } }).toArray(),
+      col('users').aggregate([
+        { $match: { businessId: { $type: 'string' } } },
+        { $group: {
+          _id: '$businessId',
+          ownerName: { $max: { $cond: [{ $eq: ['$businessRole', 'owner'] }, '$name', null] } },
+          staffCount: { $sum: { $cond: [{ $and: [{ $eq: ['$businessRole', 'staff'] }, { $eq: [{ $type: '$removedAt' }, 'missing'] }] }, 1, 0] } },
+        } },
+      ]).toArray(),
+      col('usageDays').aggregate([{ $group: { _id: '$businessId', lastActivityAt: { $max: '$lastAt' } } }]).toArray(),
+      activeDaysByBusiness(mongoose.connection.db, { from: jerusalemDate(now - 6 * DAY_MS), to: jerusalemDate(now) }),
+      col('menuEvents').aggregate([
+        { $match: { ...LIVE, legacy: { $ne: true } } },
+        { $group: {
+          _id: '$businessId',
+          total: { $sum: 1 },
+          active: { $sum: { $cond: [{ $in: ['$stage', ['finished', 'not_closed']] }, 0, 1] } },
+          closed: { $sum: { $cond: [{ $ifNull: ['$closedAt', false] }, 1, 0] } },
+          finished: { $sum: { $cond: [{ $eq: ['$stage', 'finished'] }, 1, 0] } },
+          notClosed: { $sum: { $cond: [{ $eq: ['$stage', 'not_closed'] }, 1, 0] } },
+          lastEventDate: { $max: '$eventDate' },
+        } },
+      ]).toArray(),
+    ])
+    const memberBy = new Map(members.map(m => [m._id, m]))
+    const usageBy = new Map(usage.map(u => [u._id, u.lastActivityAt]))
+    const eventsBy = new Map(events.map(e => [e._id, e]))
+    const rows = businesses.map((b) => {
+      const m = memberBy.get(b._id)
+      const e = eventsBy.get(b._id)
+      const closed = e?.closed ?? 0
+      const notClosed = e?.notClosed ?? 0
+      return {
+        _id: b._id,
+        name: b.name,
+        ownerName: m?.ownerName ?? null,
+        staffCount: m?.staffCount ?? 0,
+        createdAt: b.createdAt ?? null,
+        internal: b.internal === true,
+        lastActivityAt: usageBy.get(b._id) ?? null,
+        activeDays7: activeDays.get(b._id) ?? 0,
+        events: { total: e?.total ?? 0, active: e?.active ?? 0, closed, finished: e?.finished ?? 0 },
+        closeRate: closed + notClosed > 0 ? closed / (closed + notClosed) : null,
+        lastEventDate: e?.lastEventDate ?? null,
+      }
+    })
+    res.json({ rows })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.businesses_list.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.put('/businesses/:id/internal', verifyToken, requirePlatformAdmin, async (req, res) => {
+  const { internal } = req.body ?? {}
+  if (typeof internal !== 'boolean') return res.status(400).json({ error: 'internal must be a boolean' })
+  try {
+    const result = await col('businesses').updateOne({ _id: req.params.id }, { $set: { internal } })
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
+    req.log.info({ event: 'admin.business.internal_set', internal })
+    res.json({ ok: true, internal })
+  } catch (err) {
+    req.log.error({ err, event: 'admin.business_internal.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })
