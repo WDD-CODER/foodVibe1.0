@@ -139,13 +139,13 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Known copies: 51 distinct local `*chip*` selectors in component `.scss` files (audit: ~80 local chip classes).
 
 ### feedback — loading, toasts, errors shown to the user
-- Status: converging — plan 456 converges messages and errors
+- Status: stable — plan 456 moved every toast text into the dictionary
 - Use: `src/app/shared/loader/` (`app-loader`), `src/app/core/services/loading.service.ts` (`LoadingService`),
   `src/app/core/services/user-msg.service.ts` (`UserMsgService`), `src/app/core/services/logging.service.ts`
   (`logging.error`). Pattern: `logging.error(...)` + `userMsg.onSet*Msg(translate(key))`.
 - When: any wait, success or error the user must see.
-- Known copies: 52 `onSet*Msg(...)` calls pass a raw Hebrew literal instead of a dictionary key (audit: 47).
-- Dead pieces (no user): `src/app/shared/change-popover/`, `src/app/shared/floating-info-container/`.
+- Known copies: none (plan 456: no `onSet*Msg` call takes a string literal; the two dead popover folders were deleted).
+- Backend paths: one `API` map in `src/app/core/services/http-storage.adapter.ts` (plan 456).
 
 ### edit-gate — show a save button only to someone who may save
 - Status: stable (MVP, plan 428)

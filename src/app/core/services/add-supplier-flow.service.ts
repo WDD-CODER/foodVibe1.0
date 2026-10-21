@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core'
 import { Supplier } from '@models/supplier.model'
 import { SupplierDataService } from './supplier-data.service'
 import { UserMsgService } from './user-msg.service'
+import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from './translation-key-modal.service'
 import { AddItemModalService } from './add-item-modal.service'
@@ -10,6 +11,7 @@ import { AddItemModalService } from './add-item-modal.service'
 export class AddSupplierFlowService {
   private supplierDataService = inject(SupplierDataService)
   private userMsgService = inject(UserMsgService)
+  private logging = inject(LoggingService)
   private translationService = inject(TranslationService)
   private translationKeyModal = inject(TranslationKeyModalService)
   private addItemModal = inject(AddItemModalService)
@@ -37,10 +39,13 @@ export class AddSupplierFlowService {
         leadTimeDays: 0,
         deliveryDays: []
       })
-      this.userMsgService.onSetSuccessMsg(`הספק "${nameHebrew}" נוסף בהצלחה`)
+      this.userMsgService.onSetSuccessMsg(
+        this.translationService.translate('supplier_added').replace('{name}', nameHebrew)
+      )
       return saved
-    } catch {
-      this.userMsgService.onSetErrorMsg('שגיאה בהוספת הספק')
+    } catch (err) {
+      this.logging.error({ event: 'crud.suppliers.add_error', message: 'Supplier add error', context: { err } })
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('supplier_add_error'))
       return null
     }
   }

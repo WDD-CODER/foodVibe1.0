@@ -12,7 +12,6 @@ import type { AiRecipePatch } from '@services/gemini.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import {
   getGeminiUsage,
-  fetchGeminiUsageFromServer,
   geminiModelAvailability,
   geminiUsageStatus,
   geminiBudgetUsedPercent
@@ -128,7 +127,7 @@ export class AiRecipeModalComponent implements OnInit {
 
   refreshUsage(): void {
     this.geminiUsage_.set(getGeminiUsage()) // show local cache instantly
-    fetchGeminiUsageFromServer().then((usage) => {
+    this.gemini.fetchUsage().then((usage) => {
       // then update with real server count
       this.geminiUsage_.set(usage)
     })

@@ -8,14 +8,15 @@ import { AuthModalService } from '@services/auth-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { environment } from '../../../environments/environment'
+import { API } from '@services/http-storage.adapter'
 
-const REFRESH_URL = '/api/v1/auth/refresh'
-const LOGIN_URL = '/api/v1/auth/login'
-const LOG_PATH = '/api/v1/log'
+const REFRESH_URL = API.auth('refresh')
+const LOGIN_URL = API.auth('login')
+const LOG_PATH = API.log
 const REFRESH_TIMEOUT_MS = 10_000
 // Generic data API: its write limiter (server/routes/generic.js) answers 429. Auth and AI
 // endpoints show their own 429 messages, so the toast is limited to this path.
-const DATA_API_PATH = '/api/v1/data/'
+const DATA_API_PATH = API.data('')
 
 // Guard against concurrent 401s: only one refresh call in-flight at a time.
 // Every 401 that arrives while it is pending subscribes to the same shared refresh and

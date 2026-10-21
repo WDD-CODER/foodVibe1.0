@@ -15,7 +15,6 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `ai-recipe-modal/` | AI-drafted recipe modal + service | AiRecipeModalComponent, AiRecipeModalService |
 | `approve-stamp/` | Approval stamp UI | ApproveStampComponent |
 | `column-carousel/` | Mobile column carousel for list tables (header + cells, shared index) | ColumnCarouselGroupDirective, ColumnCarouselHeaderComponent, ColumnCarouselCellComponent, ColumnSlideDirective |
-| `change-popover/` | Inline change preview popover | ChangePopoverComponent |
 | `chip-search-dropdown/` | Searchable chip-select dropdown | ChipSearchDropdownComponent |
 | `confirm-modal/` | Confirm/cancel | ConfirmModalComponent |
 | `counter/` | Numeric counter control | CounterComponent |
@@ -25,7 +24,6 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `empty-state/` | Empty list placeholder | EmptyStateComponent |
 | `export-preview/` | Export preview panel | ExportPreviewComponent |
 | `export-toolbar-overlay/` | Export toolbar overlay | ExportToolbarOverlayComponent |
-| `floating-info-container/` | Floating info host | FloatingInfoContainerComponent |
 | `input-clear/` | Clear (×) button shown inside a text input | InputClearComponent |
 | `global-specific-modal/` | Global vs specific choice | GlobalSpecificModalComponent |
 | `label-creation-modal/` | Label editor + `LabelCreationModalService` | LabelCreationModalComponent |

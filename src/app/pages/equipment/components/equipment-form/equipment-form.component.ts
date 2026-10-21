@@ -151,8 +151,8 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
         this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
         const msg =
           err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
-            ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
-            : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
+            ? this.translation.translate('duplicate_equipment_name')
+            : this.translation.translate('save_failed')
         this.userMsg.onSetErrorMsg(msg)
       }
     })

@@ -59,9 +59,9 @@ export class MenuSectionCategoriesService {
       await op()
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.logError('persist', err)
       const msg = this.taxonomy.errorMessage(err)
       if (msg) this.userMsgService.onSetErrorMsg(msg)
-      this.logError('persist', err)
     }
   }
 

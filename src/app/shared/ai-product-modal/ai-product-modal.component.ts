@@ -12,7 +12,6 @@ import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { resolveDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
 import {
   getGeminiUsage,
-  fetchGeminiUsageFromServer,
   geminiModelAvailability,
   geminiUsageStatus,
   geminiBudgetUsedPercent
@@ -141,7 +140,7 @@ export class AiProductModalComponent implements OnInit {
 
   private refreshUsage_(): void {
     this.geminiUsage_.set(getGeminiUsage())
-    fetchGeminiUsageFromServer().then((usage) => this.geminiUsage_.set(usage))
+    this.gemini_.fetchUsage().then((usage) => this.geminiUsage_.set(usage))
   }
 
   // ─── Draft editing ───────────────────────────────────────────────

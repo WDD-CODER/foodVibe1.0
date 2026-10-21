@@ -1,6 +1,6 @@
 # Plan 456 — Show every message and error the same way, and remove the duplicated plumbing behind them
 
-Status: draft
+Status: active
 Track: code
 Depends-on: 450, 454
 Conflicts-with: 451, 452, 453, 454, 455
@@ -108,6 +108,18 @@ server/routes/business.js
 server/routes/product-import.js
 server/test/**
 docs/mvp/runs/456.md
+src/app/core/services/business-stats.service.ts
+src/app/shared/ai-menu-modal/ai-menu-modal.component.ts
+src/app/shared/ai-product-modal/ai-product-modal.component.ts
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts
+src/app/core/services/kitchen-state.service.spec.ts
+src/app/core/services/unit-registry.service.spec.ts
+src/app/core/services/metadata-registry.service.spec.ts
+src/app/core/services/preparation-registry.service.spec.ts
+src/app/core/resolvers/product.resolver.spec.ts
+src/app/core/utils/add-option.util.spec.ts
+docs/brain/component-families.md
 ```
 
 ## Read Scope
