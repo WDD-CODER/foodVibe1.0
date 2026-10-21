@@ -81,7 +81,6 @@ router.put('/baseline', verifyToken, async (req, res) => {
   }
 })
 
-/** Items created inside the business: no master lineage, or the lineage marker is the item's own id (not cloned from master). */
 /** The card only needs "reached or not", so no count goes past this. */
 const SETUP_COUNT_CAP = 10
 

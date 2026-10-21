@@ -26,9 +26,9 @@
           @if (step.done) {
             <span class="setup-step__label">{{ step.labelKey | translatePipe }}</span>
           } @else {
-            <button type="button" class="link-btn setup-step__label" (click)="go(step)">
+            <a class="setup-step__link" [routerLink]="step.path" [queryParams]="step.queryParams">
               {{ step.labelKey | translatePipe }}
-            </button>
+            </a>
           }
           @if (step.optional) {
             <span class="setup-step__optional">({{ 'setup_optional' | translatePipe }})</span>

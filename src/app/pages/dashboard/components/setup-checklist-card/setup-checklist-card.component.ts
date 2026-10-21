@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core'
-import { Router } from '@angular/router'
+import { Router, RouterLink } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { BusinessService, type SetupStatus } from '@services/business.service'
@@ -23,7 +23,7 @@ const HIDDEN_KEY_PREFIX = 'fv_setup_card_hidden_'
 @Component({
   selector: 'app-setup-checklist-card',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, RouterLink, TranslatePipe],
   templateUrl: './setup-checklist-card.component.html',
   styleUrl: './setup-checklist-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -112,10 +112,6 @@ export class SetupChecklistCardComponent {
   }
 
   // 6. METHODS (UI handlers)
-  protected go(step: SetupStep): void {
-    void this.router.navigate([step.path], step.queryParams ? { queryParams: step.queryParams } : undefined)
-  }
-
   /** Hides the card on this device for good. Storage may be blocked: the card then hides until the page reloads. */
   protected hide(): void {
     this.hidden_.set(true)

@@ -86,20 +86,14 @@ $break-mobile: 768px; // mirrors src/styles.scss
     font-size: var(--fs-xs);
   }
 
-  .link-btn {
+  .setup-step__link {
     display: inline-flex;
     align-items: center;
     padding-block: var(--space-1);
-    padding-inline: 0;
-
-    border: none;
-
-    background: none;
 
     color: inherit;
-    font-size: var(--fs-sm);
     font-weight: var(--fw-semibold);
-    cursor: pointer;
+    text-decoration: none;
 
     &:hover {
       text-decoration: underline;
@@ -107,7 +101,7 @@ $break-mobile: 768px; // mirrors src/styles.scss
   }
 
   @media (max-width: $break-mobile) {
-    .link-btn {
+    .setup-step__link {
       min-block-size: 44px;
     }
   }

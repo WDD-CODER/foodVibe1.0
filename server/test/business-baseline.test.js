@@ -2,7 +2,9 @@
 /** Plan 431 - opening baseline (owner-only, whole replace, server-set filledAt) and setup status (own items only). */
 
 const request = require('supertest')
+const crypto = require('crypto')
 const { buildTestApp, teardownTestApp, signTestToken, testDb } = require('./helpers/app')
+const { productBody, recipeBody, supplierBody, menuEventBody } = require('./helpers/v2-docs')
 
 let app
 
@@ -14,6 +16,8 @@ afterAll(async () => {
   await teardownTestApp()
 })
 
+const SALT = 'b'.repeat(32)
+const HASH = SALT + ':' + crypto.pbkdf2Sync('pw', Buffer.from(SALT, 'hex'), 100000, 32, 'sha256').toString('hex')
 const as = user => ({ Authorization: `Bearer ${signTestToken(user)}` })
 const OWNER = { userId: 'own1', name: 'owner1', businessId: 'b1', businessRole: 'owner' }
 const STAFF = { userId: 'st1', name: 'staff1', businessId: 'b1', businessRole: 'staff' }
@@ -106,21 +110,25 @@ describe('GET /api/v1/business/setup-status', () => {
     expect((await status()).body).toEqual({ pricedProducts: 0, suppliers: 0, recipes: 0, events: 0, staff: 0 })
   })
 
-  it('counts items made in the business and staff; ignores deleted, free and other-business items', async () => {
+  it('counts items the owner creates through the data API and a staff member added through the team route', async () => {
     const db = testDb()
-    const products = Array.from({ length: 10 }, (_, i) => own(`p${i}`, { sources: [{ price: 3 }] }))
-    products.push(own('pDel', { sources: [{ price: 3 }], deletedAt: 5 }))
-    products.push(own('pFree', { sources: [{ price: 0 }] }))
-    products.push({ ...own('pOther', { sources: [{ price: 3 }] }), businessId: 'b2' })
-    await db.collection('products').insertMany(products)
-    await db.collection('suppliers').insertMany([own('s1'), { ...own('s2'), businessId: 'b2' }])
-    await db.collection('recipes').insertMany([own('r1')])
-    await db.collection('menuEvents').insertMany([own('e1')])
-    await db.collection('users').insertMany([
-      { _id: 'st1', name: 'staff1', email: 'a@x', businessId: 'b1', businessRole: 'staff' },
-      { _id: 'st2', name: 'staff2', email: 'b@x', businessId: 'b1', businessRole: 'staff', removedAt: 9 },
-      { _id: 'st3', name: 'staff3', email: 'c@x', businessId: 'b2', businessRole: 'staff' },
-    ])
+    const data = (type, who, body) => request(app).post(`/api/v1/data/${type}`).set(as(who)).send(body)
+    const priced = (n, price) => productBody({ nameHebrew: `product ${n}`, sources: [{ supplierId: 'sup', price }] })
+    for (let i = 0; i < 10; i++) expect((await data('products', OWNER, priced(i, 3))).status).toBe(201)
+    expect((await data('products', OWNER, priced('free', 0))).status).toBe(201)
+    const deleted = await data('products', OWNER, priced('deleted', 3))
+    expect(deleted.status).toBe(201)
+    await db.collection('products').updateOne({ _id: deleted.body._id }, { $set: { deletedAt: 5 } })
+    expect((await data('suppliers', OWNER, supplierBody({ nameHebrew: 'supplier 1' }))).status).toBe(201)
+    expect((await data('recipes', OWNER, recipeBody({ nameHebrew: 'recipe 1' }))).status).toBe(201)
+    expect((await data('menuEvents', OWNER, menuEventBody({ name: 'event 1' }))).status).toBe(201)
+    const staff = await request(app).post(`${URL}/team`).set(as(OWNER)).send({ name: 'cook1', password: HASH })
+    expect(staff.status).toBe(201)
+    // Another business owner's priced product and supplier must not count here.
+    const other = { userId: 'own2', name: 'owner2', businessId: 'b2', businessRole: 'owner' }
+    expect((await data('products', other, priced('other', 3))).status).toBe(201)
+    expect((await data('suppliers', other, supplierBody({ nameHebrew: 'supplier 2' }))).status).toBe(201)
+    await db.collection('users').insertOne({ _id: 'st-gone', name: 'gone', email: 'g@x', businessId: 'b1', businessRole: 'staff', removedAt: 9 })
     const res = await status()
     expect(res.status).toBe(200)
     expect(res.body).toEqual({ pricedProducts: 10, suppliers: 1, recipes: 1, events: 1, staff: 1 })
