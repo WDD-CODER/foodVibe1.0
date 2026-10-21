@@ -3,7 +3,7 @@
 Status: draft
 Track: code
 Depends-on: 450, 451, 452, 453, 454, 455, 456, 457
-Snapshot: ccc0dd107dcafec8db644c588191ee0ad0be0067
+Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
 
 ## Problem Statement
 Code written before the rules hardened drifts from `AGENTS.md` / `_shared/tech-stack.md`. Counts on `main` before the MVP merge (re-measure in S1):
