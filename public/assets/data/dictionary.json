@@ -1097,7 +1097,6 @@
     "supplier_orders_review": "לבדיקה",
     "supplier_orders_est_total": "סה״כ משוער",
     "supplier_orders_manual_copy": "ההעתקה נחסמה – סמן את הטקסט והעתק ידנית",
-    "supplier_orders_open": "פתח",
     "order_msg_title": "הזמנה – {business}",
     "order_msg_event": "לאירוע: {event}",
     "order_msg_thanks": "תודה!",

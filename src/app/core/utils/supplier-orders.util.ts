@@ -59,7 +59,7 @@ function makeCard(supplierId: string | null, name: string, phone: string | null,
 
 export function buildSupplierOrders(
   plan: EventPlan,
-  _productsById: Map<string, Product>,
+  _productsById: Map<string, Product>, // reserved for the plan contract signature; unused
   suppliersById: Map<string, Supplier>,
   t: Translate = (key) => key
 ): SupplierOrders {
