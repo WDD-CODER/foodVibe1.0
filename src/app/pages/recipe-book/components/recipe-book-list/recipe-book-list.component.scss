@@ -210,37 +210,6 @@
     }
   }
 
-  .allergen-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0.25rem 0.625rem;
-
-    font-size: 0.75rem;
-    font-weight: 500;
-    background: var(--bg-danger-subtle);
-    color: var(--color-allergen-text);
-
-    border-radius: var(--radius-xs);
-    backdrop-filter: var(--blur-glass);
-  }
-
-  .label-chip {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0.25rem 0.625rem;
-
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-text-on-primary);
-    line-height: 1.2;
-
-    border-radius: var(--radius-xs);
-  }
-
   /* Filter panel content */
   .search-section {
     margin-block-end: 1.25rem;

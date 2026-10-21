@@ -239,9 +239,11 @@
                 @if (labelsExpand.isExpanded(row.recipe._id)) {
                   <div class="c-dense-chip-grid">
                     @for (label of row.labels; track label) {
-                      <span class="label-chip" [style.background-color]="getLabelColor(label)">{{
-                        label | translatePipe
-                      }}</span>
+                      <span
+                        class="c-chip c-chip--tag c-chip--square c-chip--solid"
+                        [style.background-color]="getLabelColor(label)"
+                        >{{ label | translatePipe }}</span
+                      >
                     }
                   </div>
                 }
@@ -268,7 +270,7 @@
                 @if (allergenExpand.isExpanded(row.recipe._id)) {
                   <div class="c-dense-chip-grid">
                     @for (a of row.allergens; track a) {
-                      <span class="allergen-pill">{{ a | translatePipe }}</span>
+                      <span class="c-chip c-chip--tag c-chip--square c-chip--allergen">{{ a | translatePipe }}</span>
                     }
                   </div>
                 }

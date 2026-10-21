@@ -41,8 +41,8 @@
       @for (key of readonlyChips(); track key) {
         @let opt = getOptionForValue(key);
         <span
-          class="custom-multi-select-chip custom-multi-select-chip--readonly"
-          [class.custom-multi-select-chip--colored]="opt.color"
+          class="c-chip c-chip--removable"
+          [class.c-chip--colored]="opt.color"
           [style.background-color]="opt.color || null"
           [style.color]="opt.color ? getChipTextColor(opt.color) : null"
         >
@@ -57,8 +57,8 @@
         @let opt = getOptionForValue(key);
         <button
           type="button"
-          class="custom-multi-select-chip custom-multi-select-chip--removable"
-          [class.custom-multi-select-chip--colored]="opt.color"
+          class="c-chip c-chip--removable"
+          [class.c-chip--colored]="opt.color"
           [style.background-color]="opt.color || null"
           [style.color]="opt.color ? getChipTextColor(opt.color) : null"
           (click)="removeOption(key); $event.stopPropagation()"

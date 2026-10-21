@@ -302,9 +302,16 @@
               <label class="editor-label">{{ 'ai_product_categories_label' | translatePipe }}</label>
               <div class="editor-chips-row">
                 @for (cat of draft_()!.categories; track cat) {
-                  <span class="ai-product-chip">
+                  <span class="c-chip c-chip--removable">
                     {{ cat | translatePipe }}
-                    <button type="button" class="chip-remove" (click)="removeCategory(cat)">×</button>
+                    <button
+                      type="button"
+                      class="c-chip__remove"
+                      (click)="removeCategory(cat)"
+                      [attr.aria-label]="'remove' | translatePipe"
+                    >
+                      ×
+                    </button>
                   </span>
                 }
                 <div class="editor-chip-add">
@@ -332,9 +339,16 @@
               <label class="editor-label">{{ 'ai_product_allergens_label' | translatePipe }}</label>
               <div class="editor-chips-row">
                 @for (al of draft_()!.allergens; track al) {
-                  <span class="ai-product-chip ai-product-chip--allergen">
+                  <span class="c-chip c-chip--removable c-chip--amber">
                     {{ al | translatePipe }}
-                    <button type="button" class="chip-remove" (click)="removeAllergen(al)">×</button>
+                    <button
+                      type="button"
+                      class="c-chip__remove"
+                      (click)="removeAllergen(al)"
+                      [attr.aria-label]="'remove' | translatePipe"
+                    >
+                      ×
+                    </button>
                   </span>
                 }
                 <div class="editor-chip-add">

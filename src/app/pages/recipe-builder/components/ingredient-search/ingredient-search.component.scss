@@ -17,24 +17,3 @@
   font-weight: 500;
   color: var(--color-text-secondary);
 }
-
-.type-pill {
-  flex-shrink: 0;
-
-  padding: 0.125rem 0.5rem;
-
-  font-size: 0.7rem;
-  font-weight: 600;
-
-  border-radius: var(--radius-xs);
-
-  &.product {
-    background-color: var(--color-primary-soft);
-    color: var(--color-primary-hover);
-  }
-
-  &.recipe {
-    background-color: var(--bg-success);
-    color: var(--text-success);
-  }
-}

@@ -2407,6 +2407,67 @@ body.kb-open {
   }
 }
 
+/* A value chip that is itself the remove button (custom-multi-select): click anywhere removes it. */
+button.c-chip--removable {
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+/* Background and text color come from data (inline style); glass edge so a pale color still reads. */
+.c-chip--colored {
+  border: 1px solid var(--border-glass);
+
+  box-shadow: var(--shadow-glass);
+}
+
+/* Static tag (plan 457 S7-S11): a small read-only label pill, e.g. an allergen, a status, a type.
+   Sizes: default, `--sm` (dropdown rows, tooltips). Shapes: full pill (default), `--soft`
+   (radius-sm), `--square` (radius-xs). Tones below (`--teal`, `--amber`, `--red`, `--green`,
+   `--allergen`, `--glass`, `--solid`) set only color and background. */
+.c-chip--tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  gap: 0.25rem;
+
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+
+  background: var(--bg-muted);
+
+  padding-inline: 0.625rem;
+  padding-block: 0.25rem;
+  border: 0 solid transparent;
+  border-radius: var(--radius-full);
+
+  lucide-icon {
+    flex-shrink: 0;
+  }
+}
+
+.c-chip--sm {
+  font-size: 0.6875rem;
+
+  padding-inline: 0.5rem;
+  padding-block: 0.125rem;
+}
+
+.c-chip--soft {
+  border-radius: var(--radius-sm);
+}
+
+.c-chip--square {
+  border-radius: var(--radius-xs);
+}
+
 .c-chip--teal {
   color: var(--color-primary-hover);
 
@@ -2429,6 +2490,31 @@ body.kb-open {
   background: var(--bg-danger-subtle);
 
   border-color: color-mix(in srgb, var(--color-danger) 20%, transparent);
+}
+
+.c-chip--green {
+  color: var(--text-success);
+
+  background: var(--bg-success);
+
+  border-color: color-mix(in srgb, var(--color-success) 20%, transparent);
+}
+
+.c-chip--allergen {
+  color: var(--color-allergen-text);
+
+  background: var(--bg-danger-subtle);
+
+  border-color: color-mix(in srgb, var(--color-allergen-text) 20%, transparent);
+}
+
+.c-chip--glass {
+  background: var(--bg-glass-strong);
+}
+
+/* Background comes from data (inline style), text stays light on it. */
+.c-chip--solid {
+  color: var(--color-text-on-primary);
 }
 
 @media (max-width: $break-phone-max) {

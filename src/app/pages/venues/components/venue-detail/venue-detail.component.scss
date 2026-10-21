@@ -144,18 +144,9 @@
     font-weight: 700;
   }
 
-  .venue-env-chip {
+  // Environment tag (c-chip c-chip--tag): only its placement in the stats column is local.
+  .detail-env {
     align-self: flex-start;
-
-    padding-inline: 0.75rem;
-    padding-block: 0.3125rem;
-
-    color: var(--color-text-muted);
-    font-size: 0.75rem;
-    font-weight: 600;
-
-    background: var(--bg-glass-strong);
-    border-radius: var(--radius-full);
   }
 
   .detail-cards {

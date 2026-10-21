@@ -180,7 +180,7 @@
               <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
               <span class="validation-tooltip">
                 @for (field of row.missingFields; track field) {
-                  <span class="tooltip-chip tooltip-chip--invalid">
+                  <span class="c-chip c-chip--tag c-chip--sm c-chip--square c-chip--red">
                     <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
                     {{ field | translatePipe }}
                   </span>
@@ -192,7 +192,7 @@
               <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
               <span class="validation-tooltip">
                 @for (field of row.missingFields; track field) {
-                  <span class="tooltip-chip tooltip-chip--incomplete">
+                  <span class="c-chip c-chip--tag c-chip--sm c-chip--square c-chip--amber">
                     <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
                     {{ field | translatePipe }}
                   </span>
@@ -229,7 +229,7 @@
                 @if (allergenExpandAll_() || allergenPopoverProductId_() === row.product._id) {
                   <div class="allergen-expanded dense-grid">
                     @for (a of row.product.allergens; track a) {
-                      <span class="allergen-pill">{{ a | translatePipe }}</span>
+                      <span class="c-chip c-chip--tag c-chip--square c-chip--amber">{{ a | translatePipe }}</span>
                     }
                   </div>
                 }

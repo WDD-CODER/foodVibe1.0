@@ -20,7 +20,9 @@
   >
     <ng-template #optionTemplate let-entry>
       <span class="item-name">{{ entry.name }}</span>
-      <span class="category-pill">{{ entry.category | translatePipe }}</span>
+      <span class="c-chip c-chip--tag c-chip--sm c-chip--square c-chip--teal">{{
+        entry.category | translatePipe
+      }}</span>
     </ng-template>
   </app-search-combobox>
 </div>

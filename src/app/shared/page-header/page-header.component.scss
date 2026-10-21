@@ -49,7 +49,7 @@
   }
 }
 
-// Uses the .c-chip tokens (primary-soft pill).
+// Count badge, not a chip: same tokens as .c-chip--teal, plus its own pop-in animation (plan 457: stays).
 .ph-count {
   flex-shrink: 0;
 
