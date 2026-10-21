@@ -66,6 +66,12 @@
         ></lucide-icon>
         <span>{{ 'stage_history' | translatePipe }}</span>
       </button>
+      @if (canOpenClosing_()) {
+        <button type="button" class="stage-link" (click)="openClosing()">
+          <lucide-icon name="clipboard-list" [size]="16"></lucide-icon>
+          <span>{{ 'event_closing_open' | translatePipe }}</span>
+        </button>
+      }
     </div>
 
     @if (detailsOpen_()) {
@@ -144,6 +150,10 @@
       </ul>
     }
   </section>
+
+  @if (closingOpen_()) {
+    <app-event-closing-dialog [eventId]="event._id" (closed)="closingOpen_.set(false)" />
+  }
 
   @if (notClosedDialogOpen_()) {
     <app-not-closed-dialog (confirmed)="onNotClosed($event)" (cancelled)="notClosedDialogOpen_.set(false)" />

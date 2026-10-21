@@ -1,6 +1,6 @@
 # Plan 446 — Freeze the event plan and close each event with what was really paid
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -33,8 +33,8 @@ dialog lives inside plan 443's stage bar, and the save path goes through plan 44
 longer moves, how far the real profit landed from the planned one.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/core/engine/plan-snapshot.spec.ts' --include='src/app/core/engine/event-closing.spec.ts' --include='src/app/core/services/plan-snapshot.service.spec.ts' --include='src/app/core/services/event-pipeline.service.spec.ts' --include='src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts' --include='src/app/pages/menu-intelligence/components/event-closing-dialog/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/event-stage-bar/**/*.spec.ts'`
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/engine/plan-snapshot.spec.ts' --include='src/app/core/engine/event-closing.spec.ts' --include='src/app/core/services/plan-snapshot.service.spec.ts' --include='src/app/core/services/event-pipeline.service.spec.ts' --include='src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts' --include='src/app/pages/menu-intelligence/components/event-closing-dialog/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/event-stage-bar/**/*.spec.ts'`
   passes, including spec 08.1 acceptance numbers in `event-closing.spec.ts` (snapshot: revenue 10,000; suppliers
   A planned 1,000, B planned 2,000; extra 1,000):
   - planned profit 6,000, planned profit % 60;
@@ -54,7 +54,7 @@ Done when:
   - `MenuEventSaveService.prepareForSave`: stored stage `ordering`, not frozen → result has a fresh `planSnapshot`;
     stored `planSnapshot.frozenAt` set → result has no `planSnapshot` key; stored stage `quote_sent` → no
     `planSnapshot`.
-- [auto] `npm --prefix server test -- events-closing` passes (in-memory DB, owner and staff tokens of one
+- [x] [auto] `npm --prefix server test -- events-closing` passes (in-memory DB, owner and staff tokens of one
   business, per plan 425/427 test helpers):
   - `PUT /api/v1/events/:id/stage` to `ordering` with a `planSnapshot` → stored, no `frozenAt`; to `execution` →
     `frozenAt` set; back to `ordering` with a different snapshot → stored snapshot unchanged;
@@ -70,7 +70,7 @@ Done when:
   - `POST /:id/reopen` by owner → `stage: 'post_production'`, new history entry, `closing.finishedAt` removed;
   - `POST /:id/refresh-plan` by staff → 403; by owner on a frozen event → snapshot replaced, `frozenAt` kept;
   - a closing photo URL that is not `https://res.cloudinary.com/...` → 400.
-- [auto] `git diff --name-only origin/mvp -- src/app/pages/menu-intelligence/menu-intelligence.page.ts` prints
+- [x] [auto] `git diff --name-only origin/mvp -- src/app/pages/menu-intelligence/menu-intelligence.page.ts` prints
   nothing (the frozen page is untouched).
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Desktop, an event with dishes from suppliers at `/menu-intelligence/<id>`: move it to "הזמנות", then
@@ -203,26 +203,26 @@ Runs when `scope-check.mjs --drift` reports drift (it will). Check by symbol, pr
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Snapshot rules exactly as in Problem Statement §1, enforced on the server (freeze, no unfreeze, frozen
+- [x] Snapshot rules exactly as in Problem Statement §1, enforced on the server (freeze, no unfreeze, frozen
   snapshot never replaced except by «רענן תכנון»).
-- [ ] Snapshot content: per supplier Σ `lineCost` of the engine's raw lines (null supplier → "ללא ספק" row),
+- [x] Snapshot content: per supplier Σ `lineCost` of the engine's raw lines (null supplier → "ללא ספק" row),
   extra costs, planned revenue, profit and profit % from `computeEventPricing`. Σ planned rows = food cost.
-- [ ] Closing dialog opens on entering "פוסט-פרודקשן" and from «סגירת אירוע» (shown from "ביצוע" onward).
-- [ ] Row per supplier: planned ₪ · actual paid ₪ · ☐ הגיע · ☐ יש חשבונית · photos (camera or file, several,
+- [x] Closing dialog opens on entering "פוסט-פרודקשן" and from «סגירת אירוע» (shown from "ביצוע" onward).
+- [x] Row per supplier: planned ₪ · actual paid ₪ · ☐ הגיע · ☐ יש חשבונית · photos (camera or file, several,
   max 10 per row). «הוסף ספק» (planned 0). "ללא ספק" row.
-- [ ] Actual extra costs (one amount, default = planned) and actual revenue (default = planned, editable).
-- [ ] Overrun: |actual − planned| ÷ planned > threshold → red "חריגה של X% (Y ₪)"; a decrease → grey with its %;
+- [x] Actual extra costs (one amount, default = planned) and actual revenue (default = planned, editable).
+- [x] Overrun: |actual − planned| ÷ planned > threshold → red "חריגה של X% (Y ₪)"; a decrease → grey with its %;
   planned 0 → amount only.
-- [ ] Footer: planned vs actual profit (₪ and %) and the difference; "חלקית" while any supplier amount is empty
+- [x] Footer: planned vs actual profit (₪ and %) and the difference; "חלקית" while any supplier amount is empty
   (empty counts as planned).
-- [ ] «סיים אירוע» (owner) → "הסתיים", data locked, warning "חסרים סכומים ל-X ספקים" when amounts are missing.
+- [x] «סיים אירוע» (owner) → "הסתיים", data locked, warning "חסרים סכומים ל-X ספקים" when amounts are missing.
   «פתח מחדש» (owner) → "פוסט-פרודקשן". Both in stage history.
-- [ ] Amounts owner only; arrived, invoice, photo also staff. Server decides.
-- [ ] Accuracy per finished event = actual profit % − planned profit % (points) — computed by
+- [x] Amounts owner only; arrived, invoice, photo also staff. Server decides.
+- [x] Accuracy per finished event = actual profit % − planned profit % (points) — computed by
   `computeClosingResult`, shown in the footer; plan 447 recomputes it on the server with the same formula.
 
 ### Should Have (P1)
-- [ ] «רענן תכנון» (owner) in the dialog header, with a confirm "התכנון יחושב מחדש לפי המחירים של היום".
+- [x] «רענן תכנון» (owner) in the dialog header, with a confirm "התכנון יחושב מחדש לפי המחירים של היום".
 
 ### Nice to Have (P2)
 - [ ] none.
@@ -321,14 +321,14 @@ Server (`server/routes/events.js`, `server/utils/closing-rules.js`):
 Reused, not added: `no_supplier` "ללא ספק" (plan 434), `event_finished_locked` (plan 443).
 
 ## Atomic Sub-tasks
-- [ ] S1: Build the planning snapshot and its freeze rules as tested pure code — buildPlanSnapshot(cards from 435's buildSupplierOrders), snapshotOnStageChange, shouldRefreshOnSave + spec on the plan-433 fixture — src/app/core/engine/plan-snapshot.ts, src/app/core/engine/plan-snapshot.spec.ts
-- [ ] S2: Compute overruns, actual profit and pricing accuracy in one tested place — initClosing, supplierVariance, computeClosingResult + spec with the spec 08.1 acceptance numbers — src/app/core/engine/event-closing.ts, src/app/core/engine/event-closing.spec.ts
-- [ ] S3: Let an event store its frozen plan and its closing data — planSnapshot and closing strict objects in menuEventSchema (C-SNAPSHOT shapes, amount and photo limits); client MenuEvent model — shared/schemas/entities/menu-event.schema.ts, src/app/core/models/menu-event.model.ts
-- [ ] S4: Freeze the plan and save closings on the server, with owner-only amounts — events.js: planSnapshot on PUT /:id/stage, PUT /:id/closing, POST /:id/finish, POST /:id/reopen, POST /:id/refresh-plan per Design; closing-rules.js: applySnapshotOnStage, diffClosing, finishPatch; append 'closing' to EVENT_SERVER_FIELDS; generic.js: drop a frozen planSnapshot on menuEvents PUT; server test — server/routes/events.js, server/utils/closing-rules.js, shared/schemas/entities/event-stage.ts, server/routes/generic.js, server/test/events-closing.test.js
-- [ ] S5: Build the snapshot in the app and keep it fresh on save until execution — PlanSnapshotService.buildFor; MenuEventSaveService.prepareForSave adds planSnapshot when shouldRefreshOnSave; EventPipelineService gains planSnapshot on changeStage plus saveClosing/finish/reopen/refreshPlan + specs — src/app/core/services/plan-snapshot.service.ts, src/app/core/services/plan-snapshot.service.spec.ts, src/app/pages/menu-intelligence/services/menu-event-save.service.ts, src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts, src/app/core/services/event-pipeline.service.ts, src/app/core/services/event-pipeline.service.spec.ts
-- [ ] S6: Add the closing dialog with per-supplier payments, photos and the profit comparison — EventClosingDialogComponent (input eventId; rows from closing ?? initClosing(planSnapshot); variance per row with BusinessService overrunThresholdPct (default 10); photo = downscaleImage → CloudinaryService.upload → append URL → saveClosing; amounts disabled unless PermissionService.can('editMoney', …); arrived/invoice/photo need can('markArrival', …); finish with missing-amount confirm; reopen; refresh plan; locked when finished; "אין תכנון שמור" + refresh for events without a snapshot) + spec — src/app/pages/menu-intelligence/components/event-closing-dialog/**
-- [ ] S7: Take the snapshot on stage moves and open the closing dialog from the stage bar — attach planSnapshot per snapshotOnStageChange; open the dialog on entering post_production; «סגירת אירוע» button from execution on; host <event-closing-dialog> in the stage bar template; "הסתיים" pill reflects finish + spec — src/app/pages/menu-intelligence/components/event-stage-bar/**
-- [ ] S8: Add the Hebrew labels — keys from UI/UX Notes, appended — public/assets/data/dictionary.json
+- [x] S1: Build the planning snapshot and its freeze rules as tested pure code — buildPlanSnapshot(cards from 435's buildSupplierOrders), snapshotOnStageChange, shouldRefreshOnSave + spec on the plan-433 fixture — src/app/core/engine/plan-snapshot.ts, src/app/core/engine/plan-snapshot.spec.ts
+- [x] S2: Compute overruns, actual profit and pricing accuracy in one tested place — initClosing, supplierVariance, computeClosingResult + spec with the spec 08.1 acceptance numbers — src/app/core/engine/event-closing.ts, src/app/core/engine/event-closing.spec.ts
+- [x] S3: Let an event store its frozen plan and its closing data — planSnapshot and closing strict objects in menuEventSchema (C-SNAPSHOT shapes, amount and photo limits); client MenuEvent model — shared/schemas/entities/menu-event.schema.ts, src/app/core/models/menu-event.model.ts
+- [x] S4: Freeze the plan and save closings on the server, with owner-only amounts — events.js: planSnapshot on PUT /:id/stage, PUT /:id/closing, POST /:id/finish, POST /:id/reopen, POST /:id/refresh-plan per Design; closing-rules.js: applySnapshotOnStage, diffClosing, finishPatch; append 'closing' to EVENT_SERVER_FIELDS; generic.js: drop a frozen planSnapshot on menuEvents PUT; server test — server/routes/events.js, server/utils/closing-rules.js, shared/schemas/entities/event-stage.ts, server/routes/generic.js, server/test/events-closing.test.js
+- [x] S5: Build the snapshot in the app and keep it fresh on save until execution — PlanSnapshotService.buildFor; MenuEventSaveService.prepareForSave adds planSnapshot when shouldRefreshOnSave; EventPipelineService gains planSnapshot on changeStage plus saveClosing/finish/reopen/refreshPlan + specs — src/app/core/services/plan-snapshot.service.ts, src/app/core/services/plan-snapshot.service.spec.ts, src/app/pages/menu-intelligence/services/menu-event-save.service.ts, src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts, src/app/core/services/event-pipeline.service.ts, src/app/core/services/event-pipeline.service.spec.ts
+- [x] S6: Add the closing dialog with per-supplier payments, photos and the profit comparison — EventClosingDialogComponent (input eventId; rows from closing ?? initClosing(planSnapshot); variance per row with BusinessService overrunThresholdPct (default 10); photo = downscaleImage → CloudinaryService.upload → append URL → saveClosing; amounts disabled unless PermissionService.can('editMoney', …); arrived/invoice/photo need can('markArrival', …); finish with missing-amount confirm; reopen; refresh plan; locked when finished; "אין תכנון שמור" + refresh for events without a snapshot) + spec — src/app/pages/menu-intelligence/components/event-closing-dialog/**
+- [x] S7: Take the snapshot on stage moves and open the closing dialog from the stage bar — attach planSnapshot per snapshotOnStageChange; open the dialog on entering post_production; «סגירת אירוע» button from execution on; host <event-closing-dialog> in the stage bar template; "הסתיים" pill reflects finish + spec — src/app/pages/menu-intelligence/components/event-stage-bar/**
+- [x] S8: Add the Hebrew labels — keys from UI/UX Notes, appended — public/assets/data/dictionary.json
 - [ ] S9: Build, test client and server, confirm the page is untouched, then hand over the checks — ng build, the Done-when ng test and server test commands, git diff --name-only on the page, log-query; slot servers up; [human] cards — this plan file
 
 ## Technical Considerations

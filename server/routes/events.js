@@ -12,6 +12,9 @@ const { dataWriteLimiter } = require('../middleware/write-limit')
 const { scopeFilter } = require('../utils/business-scope')
 const { assertCan } = require('../utils/permissions')
 const { applyStageChange, newNote } = require('../utils/event-stage')
+const {
+  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, finishPatch,
+} = require('../utils/closing-rules')
 const { newId } = require('../utils/id')
 const { LIVE } = require('../jobs/purge-deleted')
 
@@ -46,7 +49,7 @@ function fail(req, res, name, err) {
   res.status(500).json({ error: 'Server error' })
 }
 
-// PUT /api/v1/events/:id/stage  { stage, reason?, reasonText? }
+// PUT /api/v1/events/:id/stage  { stage, reason?, reasonText?, planSnapshot? }
 router.put('/:id/stage', verifyToken, async (req, res) => {
   try {
     const event = await loadEvent(req, res)
@@ -57,6 +60,9 @@ router.put('/:id/stage', verifyToken, async (req, res) => {
     if (!change.ok) return res.status(change.status).json({ error: change.error })
     if (!change.push) return res.json(event)
 
+    // Plan 446: the planning snapshot is stored / frozen by the stage it enters (same rule as the client's).
+    const snapshot = applySnapshotOnStage(event, change.set.stage, req.body?.planSnapshot, now)
+    if (snapshot) change.set.planSnapshot = snapshot
     const merged = { ...event, ...change.set, updatedAt: now, stageHistory: [...(event.stageHistory ?? []), change.push] }
     if (!validMerged(res, merged)) return
     // Conditional on the stage that was read, so two concurrent moves cannot both write (closedAt stays the first one).
@@ -155,6 +161,114 @@ router.delete('/:id/notes/:noteId', verifyToken, async (req, res) => {
     res.json(result)
   } catch (err) {
     fail(req, res, 'note.delete', err)
+  }
+})
+
+const finishedLocked = res => res.status(409).json({ error: 'EVENT_FINISHED', messageKey: 'event_finished_locked' })
+
+/** Writes `$set` / `$unset` / `$push` on an event read at `stage`; sends the result, 404 or the 409 of a concurrent move. */
+async function writeConditional(req, res, event, update, logEvent, status = 200) {
+  const result = await events().findOneAndUpdate(
+    { ...scopeOf(req), stage: event.stage ?? { $exists: false } },
+    update,
+    { returnDocument: 'after' },
+  )
+  if (!result) {
+    const still = await events().findOne(scopeOf(req), { projection: { _id: 1 } })
+    return still ? res.status(409).json({ error: 'STAGE_CHANGED' }) : res.status(404).json({ error: 'Event not found' })
+  }
+  req.log.info({ event: logEvent })
+  return res.status(status).json(result)
+}
+
+// PUT /api/v1/events/:id/closing  { closing }  amounts: owner (editMoney); arrived, invoice, photos: staff too (markArrival)
+router.put('/:id/closing', verifyToken, async (req, res) => {
+  try {
+    const event = await loadEvent(req, res)
+    if (!event) return
+    if (event.stage === 'finished') return finishedLocked(res)
+    const incoming = req.body?.closing
+    if (!incoming || typeof incoming !== 'object') return res.status(400).json({ error: 'BAD_CLOSING' })
+    const base = event.closing ?? (event.planSnapshot ? initClosing(event.planSnapshot) : null)
+    if (!base) return res.status(400).json({ error: 'NO_PLAN' })
+    const diff = diffClosing(base, incoming)
+    if (!diff.ok) return res.status(400).json({ error: diff.error })
+    if (diff.money && !assertCan(req, res, 'editMoney', { type: TYPE, doc: event })) return
+    if (diff.arrival && !assertCan(req, res, 'markArrival', { type: TYPE, doc: event })) return
+    const now = Date.now()
+    const closing = mergeClosing(base, incoming)
+    if (!validMerged(res, { ...event, closing })) return
+    await writeConditional(req, res, event, { $set: { closing, updatedAt: now } }, 'events.closing.saved')
+  } catch (err) {
+    fail(req, res, 'closing', err)
+  }
+})
+
+// POST /api/v1/events/:id/finish  (owner, from "ביצוע" or "פוסט-פרודקשן")
+router.post('/:id/finish', verifyToken, async (req, res) => {
+  try {
+    const event = await loadEvent(req, res)
+    if (!event) return
+    if (!assertCan(req, res, 'editMoney', { type: TYPE, doc: event })) return
+    if (event.stage === 'finished') return finishedLocked(res)
+    if (!CLOSING_STAGES.includes(event.stage)) return res.status(400).json({ error: 'FINISH_FROM_STAGE' })
+    const now = Date.now()
+    const { set, push } = finishPatch(event, actorOf(req), now)
+    const merged = { ...event, ...set, updatedAt: now, stageHistory: [...(event.stageHistory ?? []), push] }
+    if (!validMerged(res, merged)) return
+    await writeConditional(
+      req, res, event, { $set: { ...set, updatedAt: now }, $push: { stageHistory: push } }, 'events.finished',
+    )
+  } catch (err) {
+    fail(req, res, 'finish', err)
+  }
+})
+
+// POST /api/v1/events/:id/reopen  (owner, only a finished event)
+router.post('/:id/reopen', verifyToken, async (req, res) => {
+  try {
+    const event = await loadEvent(req, res)
+    if (!event) return
+    if (!assertCan(req, res, 'editMoney', { type: TYPE, doc: event })) return
+    if (event.stage !== 'finished') return res.status(400).json({ error: 'REOPEN_FROM_STAGE' })
+    const now = Date.now()
+    const actor = actorOf(req)
+    const push = { stage: 'post_production', at: now, by: actor.userId, byName: actor.name }
+    const { finishedAt: _a, finishedBy: _b, ...closing } = event.closing ?? {}
+    const merged = { ...event, stage: 'post_production', closing, updatedAt: now, stageHistory: [...(event.stageHistory ?? []), push] }
+    if (!event.closing) delete merged.closing
+    if (!validMerged(res, merged)) return
+    await writeConditional(
+      req, res, event,
+      {
+        $set: { stage: 'post_production', updatedAt: now },
+        $unset: { 'closing.finishedAt': '', 'closing.finishedBy': '' },
+        $push: { stageHistory: push },
+      },
+      'events.reopened',
+    )
+  } catch (err) {
+    fail(req, res, 'reopen', err)
+  }
+})
+
+// POST /api/v1/events/:id/refresh-plan  { planSnapshot }  (owner): replaces the snapshot, `frozenAt` kept
+router.post('/:id/refresh-plan', verifyToken, async (req, res) => {
+  try {
+    const event = await loadEvent(req, res)
+    if (!event) return
+    if (!assertCan(req, res, 'editMoney', { type: TYPE, doc: event })) return
+    if (event.stage === 'finished') return finishedLocked(res)
+    const incoming = req.body?.planSnapshot
+    if (!incoming || typeof incoming !== 'object') return res.status(400).json({ error: 'BAD_SNAPSHOT' })
+    const now = Date.now()
+    const planSnapshot = refreshedSnapshot(event, incoming, now)
+    const set = { planSnapshot, updatedAt: now }
+    if (event.closing) set.closing = syncClosingPlanned(event.closing, planSnapshot)
+    if (!validMerged(res, { ...event, ...set })) return
+    await writeConditional(req, res, event, { $set: set }, 'events.plan.refreshed')
+  } catch (err) {
+    fail(req, res, 'refresh', err)
   }
 })
 

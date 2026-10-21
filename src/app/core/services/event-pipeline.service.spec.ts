@@ -131,4 +131,58 @@ describe('EventPipelineService', () => {
     await odd
     expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('T:server_error')
   })
+
+  describe('closing (plan 446)', () => {
+    const snapshot = { at: 1, suppliers: [], extraCosts: 0, plannedRevenue: 0, plannedProfit: 0, plannedProfitPct: 0 }
+
+    it('changeStage can carry the planning snapshot', async () => {
+      const done = service.changeStage('e1', { stage: 'ordering', planSnapshot: snapshot })
+      const req = backend.expectOne(`${BASE}/api/v1/events/e1/stage`)
+      expect(req.request.body).toEqual({ stage: 'ordering', planSnapshot: snapshot })
+      req.flush({ ...inquiry, _id: 'e1', stage: 'ordering' })
+      expect((await done).ok).toBeTrue()
+    })
+
+    it('saveClosing PUTs the closing and keeps the returned event', async () => {
+      const closing = { suppliers: [] }
+      const done = service.saveClosing('e1', closing)
+      const req = backend.expectOne(`${BASE}/api/v1/events/e1/closing`)
+      expect(req.request.method).toBe('PUT')
+      expect(req.request.body).toEqual({ closing })
+      req.flush({ ...inquiry, _id: 'e1', closing })
+      await done
+      expect(data.allMenuEvents_().find((e) => e._id === 'e1')?.closing).toEqual(closing)
+    })
+
+    it('finish and reopen POST to their routes and write the new stage', async () => {
+      const finish = service.finish('e1')
+      const finishReq = backend.expectOne(`${BASE}/api/v1/events/e1/finish`)
+      expect(finishReq.request.method).toBe('POST')
+      finishReq.flush({ ...inquiry, _id: 'e1', stage: 'finished' })
+      await finish
+      expect(stageOfStore()).toBe('finished')
+
+      const reopen = service.reopen('e1')
+      backend.expectOne(`${BASE}/api/v1/events/e1/reopen`).flush({ ...inquiry, _id: 'e1', stage: 'post_production' })
+      await reopen
+      expect(stageOfStore()).toBe('post_production')
+    })
+
+    it('refreshPlan POSTs the new snapshot', async () => {
+      const done = service.refreshPlan('e1', snapshot)
+      const req = backend.expectOne(`${BASE}/api/v1/events/e1/refresh-plan`)
+      expect(req.request.body).toEqual({ planSnapshot: snapshot })
+      req.flush({ ...inquiry, _id: 'e1', planSnapshot: snapshot })
+      expect((await done).ok).toBeTrue()
+    })
+
+    it('a locked event shows the translated "finished" text', async () => {
+      const done = service.saveClosing('e1', { suppliers: [] })
+      backend
+        .expectOne(`${BASE}/api/v1/events/e1/closing`)
+        .flush({ error: 'EVENT_FINISHED' }, { status: 409, statusText: 'Conflict' })
+      expect(await done).toEqual({ ok: false, code: 'EVENT_FINISHED' })
+      expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('T:event_finished_locked')
+    })
+  })
 })

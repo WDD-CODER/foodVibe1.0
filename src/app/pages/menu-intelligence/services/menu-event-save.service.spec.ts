@@ -3,6 +3,7 @@ import type { MenuEvent } from '@models/menu-event.model'
 import { BusinessService } from '@services/business.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
+import { PlanSnapshotService } from '@services/plan-snapshot.service'
 import { computeEventPricing, toPricingEvent } from '../../../core/engine/event-pricing'
 import { computePortions } from '../../../core/engine/portions'
 import { MenuEventSaveService } from './menu-event-save.service'
@@ -10,6 +11,15 @@ import { MenuEventSaveService } from './menu-event-save.service'
 describe('MenuEventSaveService', () => {
   const logistics = { venueId: 'v1' } as unknown as MenuEvent['logistics']
   let settings: { profitTargetPct: number; safetyMarginPct: number } | undefined
+  let stored: Partial<MenuEvent>
+  const freshSnapshot = {
+    at: 7,
+    suppliers: [],
+    extraCosts: 0,
+    plannedRevenue: 1,
+    plannedProfit: 1,
+    plannedProfitPct: 100
+  }
 
   const event = (over: Partial<MenuEvent> = {}): Omit<MenuEvent, '_id'> => ({
     name: 'x',
@@ -32,11 +42,13 @@ describe('MenuEventSaveService', () => {
 
   beforeEach(() => {
     settings = { profitTargetPct: 25, safetyMarginPct: 10 }
+    stored = { logistics }
     TestBed.configureTestingModule({
       providers: [
         { provide: KitchenStateService, useValue: { recipes_: () => [] } },
         { provide: BusinessService, useValue: { business_: () => (settings ? { settings } : null) } },
-        { provide: MenuEventDataService, useValue: { allMenuEvents_: () => [{ _id: 'e1', logistics }] } }
+        { provide: MenuEventDataService, useValue: { allMenuEvents_: () => [{ _id: 'e1', ...stored }] } },
+        { provide: PlanSnapshotService, useValue: { buildFor: () => freshSnapshot } }
       ]
     })
   })
@@ -71,5 +83,34 @@ describe('MenuEventSaveService', () => {
     const service = TestBed.inject(MenuEventSaveService)
     expect(service.prepareForSave(event(), { eventFoodCost: 1, partial: false }, 'e1').logistics).toEqual(logistics)
     expect(service.prepareForSave(event(), { eventFoodCost: 1, partial: false }, null).logistics).toBeUndefined()
+  })
+
+  describe('planning snapshot (plan 446)', () => {
+    const plan = { eventFoodCost: 1, partial: false }
+    const old = { ...freshSnapshot, at: 1, plannedProfit: 99 }
+
+    it('a stored event in "ordering" that is not frozen gets a fresh snapshot', () => {
+      stored = { stage: 'ordering', planSnapshot: old }
+      const out = TestBed.inject(MenuEventSaveService).prepareForSave(event(), plan, 'e1')
+      expect(out.planSnapshot).toEqual(freshSnapshot)
+    })
+
+    it('a frozen snapshot is not sent', () => {
+      stored = { stage: 'execution', planSnapshot: { ...old, frozenAt: 5 } }
+      const out = TestBed.inject(MenuEventSaveService).prepareForSave(event(), plan, 'e1')
+      expect('planSnapshot' in out).toBeFalse()
+    })
+
+    it('an event before "ordering" gets none', () => {
+      stored = { stage: 'quote_sent' }
+      const out = TestBed.inject(MenuEventSaveService).prepareForSave(event(), plan, 'e1')
+      expect('planSnapshot' in out).toBeFalse()
+    })
+
+    it('a new event gets none, and a snapshot the form carried is dropped', () => {
+      const withSnapshot = { ...event(), planSnapshot: old }
+      const out = TestBed.inject(MenuEventSaveService).prepareForSave(withSnapshot, plan, null)
+      expect('planSnapshot' in out).toBeFalse()
+    })
   })
 })

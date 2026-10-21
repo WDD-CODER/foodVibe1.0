@@ -14,6 +14,38 @@ const typeSnapshotSchema = z.strictObject({
 /** Plan 445: a per-event override of the business profit target / safety margin (each 0 <= x < 100). */
 const pctBelow100 = z.number().min(0).lt(100)
 
+/** Plan 446 (C-SNAPSHOT): the plan as it stood when the event went into execution. Amounts are non-negative. */
+const planSnapshotSchema = z.strictObject({
+  at: z.number(),
+  frozenAt: z.number().optional(),
+  suppliers: z.array(z.strictObject({
+    supplierId: z.string().nullable(),
+    name: nameField,
+    plannedCost: z.number().min(0)
+  })).max(200),
+  extraCosts: z.number().min(0),
+  plannedRevenue: z.number().min(0),
+  plannedProfit: z.number(),
+  plannedProfitPct: z.number()
+})
+
+/** Plan 446 (C-SNAPSHOT): what was really paid. Photos are Cloudinary URLs only, at most 10 per supplier row. */
+const closingSchema = z.strictObject({
+  suppliers: z.array(z.strictObject({
+    supplierId: z.string().nullable(),
+    name: nameField,
+    planned: z.number().min(0),
+    actualPaid: z.number().min(0).optional(),
+    arrived: z.boolean(),
+    hasInvoice: z.boolean(),
+    photos: z.array(z.string().url().max(500).startsWith('https://res.cloudinary.com/')).max(10)
+  })).max(200),
+  actualExtraCosts: z.number().min(0).optional(),
+  actualRevenue: z.number().min(0).optional(),
+  finishedAt: z.number().optional(),
+  finishedBy: z.string().optional()
+})
+
 export const menuEventSchema = z.strictObject({
   ...baseDocShape,
   name: nameField,
@@ -99,6 +131,10 @@ export const menuEventSchema = z.strictObject({
     byName: z.string(),
     editedAt: z.number().optional()
   })).optional(),
+  /** Plan 446: the planning snapshot; refreshed by saves until "ביצוע", then frozen by the server. */
+  planSnapshot: planSnapshotSchema.optional(),
+  /** Plan 446 (money fields): what each supplier was really paid. Server-owned (events router). */
+  closing: closingSchema.optional(),
   clientName: nameField.optional(),
   clientPhone: z.string().max(30).optional(),
   deposit: z.strictObject({

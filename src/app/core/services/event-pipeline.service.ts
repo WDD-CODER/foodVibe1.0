@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom, Observable } from 'rxjs'
 import { environment } from '../../../environments/environment'
-import type { EventStage, MenuEvent, NotClosedReason } from '@models/menu-event.model'
+import type { EventClosing, EventStage, MenuEvent, NotClosedReason, PlanSnapshot } from '@models/menu-event.model'
 import { stageErrorKey } from '../utils/event-stage-ui.util'
 import { LoggingService } from './logging.service'
 import { MenuEventDataService } from './menu-event-data.service'
@@ -15,6 +15,8 @@ export interface StageChange {
   stage: EventStage
   reason?: NotClosedReason
   reasonText?: string
+  /** Plan 446: the planning snapshot the server stores or freezes for this move */
+  planSnapshot?: PlanSnapshot
 }
 
 /** The updated event (already in the store), or the server's error code (null when there was none). */
@@ -36,6 +38,30 @@ export class EventPipelineService {
   changeStage(eventId: string, change: StageChange): Promise<PipelineResult> {
     return this.run('stage.change', 'stage_change_failed', () =>
       this.http.put<MenuEvent>(`${EVENTS_URL}/${eventId}/stage`, change)
+    )
+  }
+
+  /** Plan 446: saves the closing (amounts: owner; arrived, invoice, photos: staff too; the server decides). */
+  saveClosing(eventId: string, closing: EventClosing): Promise<PipelineResult> {
+    return this.run('closing.save', 'server_error', () =>
+      this.http.put<MenuEvent>(`${EVENTS_URL}/${eventId}/closing`, { closing })
+    )
+  }
+
+  /** Plan 446: owner only; locks the closing and moves the event to "הסתיים". */
+  finish(eventId: string): Promise<PipelineResult> {
+    return this.run('finish', 'server_error', () => this.http.post<MenuEvent>(`${EVENTS_URL}/${eventId}/finish`, {}))
+  }
+
+  /** Plan 446: owner only; a finished event goes back to "פוסט-פרודקשן". */
+  reopen(eventId: string): Promise<PipelineResult> {
+    return this.run('reopen', 'server_error', () => this.http.post<MenuEvent>(`${EVENTS_URL}/${eventId}/reopen`, {}))
+  }
+
+  /** Plan 446: owner only; replaces the frozen plan with one built from today's prices. */
+  refreshPlan(eventId: string, planSnapshot: PlanSnapshot): Promise<PipelineResult> {
+    return this.run('plan.refresh', 'server_error', () =>
+      this.http.post<MenuEvent>(`${EVENTS_URL}/${eventId}/refresh-plan`, { planSnapshot })
     )
   }
 
