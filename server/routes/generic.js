@@ -80,6 +80,20 @@ function withoutServerEventFields(body) {
   return copy;
 }
 
+/**
+ * Plan 446: the planning snapshot a client may send with a save. Only a stored snapshot that is not frozen is
+ * replaced, and a client never sets `frozenAt` (the events router freezes). `stored` is the doc being updated, or
+ * null on a create (a new event has no plan to snapshot yet).
+ */
+function withSavedSnapshot(body, stored) {
+  if (!('planSnapshot' in body)) return body;
+  const { planSnapshot, ...rest } = body;
+  if (!stored || stored.planSnapshot?.frozenAt !== undefined) return rest;
+  if (!planSnapshot || typeof planSnapshot !== 'object') return rest;
+  const { frozenAt: _ignored, ...content } = planSnapshot;
+  return { ...rest, planSnapshot: content };
+}
+
 /** Plan 427: permission action for changing or deleting a stored doc (locked taxonomy kinds are owner-only). */
 const writeAction = (type, doc, fallback) =>
   type === TAXONOMY && LOCKED_TAXONOMY_KINDS.includes(doc?.kind) ? 'editTaxonomy' : fallback;
@@ -427,7 +441,7 @@ router.post('/:type', verifyToken, async (req, res) => {
     let safeEntity = body;
     if (entityType === TAXONOMY) ({ shared = false, ...safeEntity } = body);
     // Plan 442: a client never sets an event's stage, history or notes; the server starts every event in "inquiry".
-    if (entityType === EVENTS) safeEntity = withoutServerEventFields(safeEntity);
+    if (entityType === EVENTS) safeEntity = withSavedSnapshot(withoutServerEventFields(safeEntity), null);
     if (shared && !isAdmin(req)) return res.status(403).json({ error: 'Only an admin can add a shared term' });
     // Plan 427: permission before any write; a staff member's new doc is saved without money fields.
     if (!SYSTEM_TYPES.includes(entityType)) {
@@ -553,7 +567,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     // createdAt is server-owned: a client PUT never rewrites it.
     const { createdAt: _ca, ...clientUpdatable } = safeBody;
     // Plan 442: stage, history, closedAt and notes survive a client PUT unchanged (the events router owns them).
-    const updatable = req.params.type === EVENTS ? withoutServerEventFields(clientUpdatable) : clientUpdatable;
+    let updatable = req.params.type === EVENTS ? withoutServerEventFields(clientUpdatable) : clientUpdatable;
     let rekeyed = null;
     // Plan 403: stored keys holding a stale `null` that this request didn't send. The schema
     // rejects null on optional keys, and a PUT validates the merge over the stored doc, so one
@@ -568,6 +582,8 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       if (isTerm && updatable.kind !== undefined && updatable.kind !== current.kind) {
         return res.status(400).json({ error: "A term's kind cannot change" });
       }
+      // Plan 446: a frozen planning snapshot survives a client save unchanged.
+      if (req.params.type === EVENTS) updatable = withSavedSnapshot(updatable, current);
       staleNulls = Object.keys(current).filter(k => current[k] === null && !(k in updatable));
       const merged = { ...current, ...updatable, ...stamps };
       for (const k of staleNulls) delete merged[k];

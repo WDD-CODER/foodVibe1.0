@@ -96,6 +96,39 @@ export interface MenuSection {
   items: MenuItemSelection[]
 }
 
+/** Plan 446 (C-SNAPSHOT): the plan as it stood when the event went into execution. */
+export interface PlanSnapshot {
+  at: number
+  /** Set by the server when the snapshot is frozen */
+  frozenAt?: number
+  suppliers: { supplierId: string | null; name: string; plannedCost: number }[]
+  extraCosts: number
+  plannedRevenue: number
+  plannedProfit: number
+  plannedProfitPct: number
+}
+
+export interface ClosingSupplier {
+  supplierId: string | null
+  name: string
+  planned: number
+  /** Empty = not typed yet; counts as the planned amount */
+  actualPaid?: number
+  arrived: boolean
+  hasInvoice: boolean
+  /** Cloudinary URLs, at most 10 */
+  photos: string[]
+}
+
+/** Plan 446 (C-SNAPSHOT): what was really paid. Written only through `/api/v1/events/:id/closing`. */
+export interface EventClosing {
+  suppliers: ClosingSupplier[]
+  actualExtraCosts?: number
+  actualRevenue?: number
+  finishedAt?: number
+  finishedBy?: string
+}
+
 export interface MenuEvent {
   _id: string
   name: string
@@ -134,6 +167,9 @@ export interface MenuEvent {
   /** Events that existed before stages ("ישן"); dashboards never count them */
   legacy?: boolean
   notes?: EventNote[]
+  /** Plan 446 */
+  planSnapshot?: PlanSnapshot
+  closing?: EventClosing
   clientName?: string
   clientPhone?: string
   deposit?: { amount?: number; date?: string }

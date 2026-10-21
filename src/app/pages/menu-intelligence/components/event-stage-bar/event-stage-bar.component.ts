@@ -9,25 +9,28 @@ import {
   needsDateFor,
   stageLabelKey
 } from 'src/app/core/utils/event-stage-ui.util'
+import { snapshotOnStageChange } from 'src/app/core/engine/plan-snapshot'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
+import { PlanSnapshotService } from '@services/plan-snapshot.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import { NotClosedAnswer, NotClosedDialogComponent } from '../not-closed-dialog/not-closed-dialog.component'
+import { EventClosingDialogComponent } from '../event-closing-dialog/event-closing-dialog.component'
 
 /**
  * Plan 443: the stage bar at the top of the event screen. Click a stage to move the event; "לא נסגר" asks why
- * "הסתיים" is shown but never picked here (plan 446 finishes an event). Also holds the client details
+ * "הסתיים" is shown but never picked here (plan 446 finishes an event in the closing dialog, which this bar hosts). Also holds the client details
  * (name, phone, and the deposit for whoever may see money edits) and the stage history.
  * The server decides every move (plan 442); this component only hides or locks what the user may not do.
  */
 @Component({
   selector: 'app-event-stage-bar',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, TranslatePipe, NotClosedDialogComponent],
+  imports: [DatePipe, LucideAngularModule, TranslatePipe, NotClosedDialogComponent, EventClosingDialogComponent],
   templateUrl: './event-stage-bar.component.html',
   styleUrl: './event-stage-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,6 +40,7 @@ export class EventStageBarComponent {
   private readonly eventData = inject(MenuEventDataService)
   private readonly pipeline = inject(EventPipelineService)
   private readonly permission = inject(PermissionService)
+  private readonly snapshots = inject(PlanSnapshotService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
@@ -53,6 +57,7 @@ export class EventStageBarComponent {
   protected readonly flowStages: readonly EventStage[] = EVENT_STAGE_ORDER.filter((stage) => stage !== 'not_closed')
   protected readonly stageLabelKey = stageLabelKey
   protected readonly notClosedDialogOpen_ = signal(false)
+  protected readonly closingOpen_ = signal(false)
   protected readonly detailsOpen_ = signal(false)
   protected readonly historyOpen_ = signal(false)
   protected readonly phoneInvalid_ = signal(false)
@@ -67,6 +72,10 @@ export class EventStageBarComponent {
   protected readonly canChangeStage_ = computed(() => this.can('changeStage'))
   protected readonly canEdit_ = computed(() => this.can('edit'))
   protected readonly canEditMoney_ = computed(() => this.can('editMoney'))
+  /** «סגירת אירוע» is offered from "ביצוע" on (a finished event too: to look at it, or to reopen it). */
+  protected readonly canOpenClosing_ = computed(() =>
+    ['execution', 'post_production', 'finished'].includes(this.current_())
+  )
   protected readonly history_ = computed(() => [...(this.event_()?.stageHistory ?? [])].sort((a, b) => b.at - a.at))
   protected readonly detailsSummary_ = computed(() => {
     const event = this.event_()
@@ -130,6 +139,10 @@ export class EventStageBarComponent {
     void this.saveFields(event, { deposit: this.depositWith(event, { date }) })
   }
 
+  protected openClosing(): void {
+    this.closingOpen_.set(true)
+  }
+
   protected toggleDetails(): void {
     this.detailsOpen_.update((open) => !open)
   }
@@ -146,10 +159,16 @@ export class EventStageBarComponent {
 
   private async move(event: MenuEvent, change: Parameters<EventPipelineService['changeStage']>[1]): Promise<void> {
     this.busy_.set(true)
-    const result = await this.pipeline.changeStage(event._id, change)
+    // Plan 446: entering "הזמנות" / "ביצוע" / "פוסט-פרודקשן" stores or freezes the planning snapshot (the server applies the same rule).
+    const withSnapshot =
+      snapshotOnStageChange(change.stage, event.planSnapshot) === 'none'
+        ? change
+        : { ...change, planSnapshot: this.snapshots.buildFor(event) }
+    const result = await this.pipeline.changeStage(event._id, withSnapshot)
     this.busy_.set(false)
     if (!result.ok) return
     this.userMsg.onSetSuccessMsg(this.translation.translate('stage_changed'))
+    if (change.stage === 'post_production') this.closingOpen_.set(true)
     if (change.stage === 'ordering' && this.supplierOrdersAvailable()) {
       if (await this.confirmModal.open('open_supplier_orders_prompt', { saveLabel: 'yes' }))
         this.openSupplierOrders.emit()

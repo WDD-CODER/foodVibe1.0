@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { signal } from '@angular/core'
+import { Component, input, output, signal } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { provideHttpClient } from '@angular/common/http'
@@ -8,10 +8,18 @@ import { EventStageBarComponent } from './event-stage-bar.component'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
+import { PlanSnapshotService } from '@services/plan-snapshot.service'
+import { EventClosingDialogComponent } from '../event-closing-dialog/event-closing-dialog.component'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import type { MenuEvent } from '@models/menu-event.model'
+
+@Component({ selector: 'app-event-closing-dialog', standalone: true, template: '<i class="closing-stub"></i>' })
+class ClosingDialogStub {
+  readonly eventId = input.required<string>()
+  readonly closed = output<void>()
+}
 
 describe('EventStageBarComponent', () => {
   let fixture: ComponentFixture<EventStageBarComponent>
@@ -22,6 +30,8 @@ describe('EventStageBarComponent', () => {
   let eventData: { allMenuEvents_: unknown; updateMenuEvent: jasmine.Spy }
   let allowed: Record<string, boolean>
   let confirmAnswer: boolean
+  let snapshots: { buildFor: jasmine.Spy }
+  const snapshot = { at: 9, suppliers: [], extraCosts: 0, plannedRevenue: 0, plannedProfit: 0, plannedProfitPct: 0 }
 
   const base: MenuEvent = {
     _id: 'e1',
@@ -47,6 +57,7 @@ describe('EventStageBarComponent', () => {
     confirmAnswer = true
     allowed = { changeStage: true, edit: true, editMoney: true }
     store = signal<MenuEvent[]>([base])
+    snapshots = { buildFor: jasmine.createSpy('buildFor').and.returnValue(snapshot) }
     pipeline = jasmine.createSpyObj<EventPipelineService>('EventPipelineService', ['changeStage'])
     pipeline.changeStage.and.resolveTo({ ok: true, event: base })
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg', 'onSetSuccessMsg'])
@@ -61,12 +72,18 @@ describe('EventStageBarComponent', () => {
         provideHttpClientTesting(),
         { provide: MenuEventDataService, useValue: eventData },
         { provide: EventPipelineService, useValue: pipeline },
+        { provide: PlanSnapshotService, useValue: snapshots },
         { provide: PermissionService, useValue: { can: (action: string) => allowed[action] } },
         { provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } },
         { provide: UserMsgService, useValue: userMsg },
         { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(confirmAnswer) } }
       ]
-    }).compileComponents()
+    })
+      .overrideComponent(EventStageBarComponent, {
+        remove: { imports: [EventClosingDialogComponent] },
+        add: { imports: [ClosingDialogStub] }
+      })
+      .compileComponents()
     fixture = TestBed.createComponent(EventStageBarComponent)
     fixture.componentRef.setInput('eventId', 'e1')
     el = fixture.nativeElement
@@ -160,5 +177,57 @@ describe('EventStageBarComponent', () => {
     fixture.detectChanges()
     const rows = Array.from(el.querySelectorAll('.stage-history-stage')).map((r) => r.textContent?.trim())
     expect(rows).toEqual(['T:event_stage_quote_sent', 'T:event_stage_inquiry'])
+  })
+
+  describe('closing (plan 446)', () => {
+    const closingLink = () =>
+      Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-link')).find((b) =>
+        b.textContent?.includes('T:event_closing_open')
+      )
+
+    it('attaches the planning snapshot when entering "ordering"', async () => {
+      await setup({ ...base, stage: 'deposit_paid' })
+      pill('ordering').click()
+      expect(snapshots.buildFor).toHaveBeenCalled()
+      expect(pipeline.changeStage).toHaveBeenCalledWith('e1', { stage: 'ordering', planSnapshot: snapshot })
+    })
+
+    it('attaches nothing for a stage that keeps no snapshot', async () => {
+      await setup()
+      pill('quote_sent').click()
+      expect(pipeline.changeStage).toHaveBeenCalledWith('e1', { stage: 'quote_sent' })
+    })
+
+    it('does not rebuild a frozen snapshot', async () => {
+      await setup({ ...base, stage: 'execution', planSnapshot: { ...snapshot, frozenAt: 5 } })
+      pill('ordering').click()
+      expect(snapshots.buildFor).not.toHaveBeenCalled()
+      expect(pipeline.changeStage).toHaveBeenCalledWith('e1', { stage: 'ordering' })
+    })
+
+    it('opens the closing dialog by itself after entering "post_production"', async () => {
+      await setup({ ...base, stage: 'execution' })
+      pill('post_production').click()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(el.querySelector('app-event-closing-dialog')).toBeTruthy()
+    })
+
+    it('shows «סגירת אירוע» from "execution" on, not before', async () => {
+      await setup({ ...base, stage: 'ordering' })
+      expect(closingLink()).toBeUndefined()
+      store.set([{ ...base, stage: 'execution' }])
+      fixture.detectChanges()
+      expect(closingLink()).toBeTruthy()
+      closingLink()!.click()
+      fixture.detectChanges()
+      expect(el.querySelector('app-event-closing-dialog')).toBeTruthy()
+    })
+
+    it('marks "finished" as the current stage once the event is finished', async () => {
+      await setup({ ...base, stage: 'finished' })
+      expect(pill('finished').classList).toContain('is-current')
+      expect(closingLink()).toBeTruthy()
+    })
   })
 })
