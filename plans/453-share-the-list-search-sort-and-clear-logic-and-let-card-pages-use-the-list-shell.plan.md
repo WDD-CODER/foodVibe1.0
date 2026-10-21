@@ -18,7 +18,7 @@ This plan adds one logic helper, one `layout: 'cards'` mode, and converts one pa
 - Primary: one source for list search/sort/clear logic; card-grid pages built on `app-list-shell`; no visible change.
 - Success:
   - [x] [auto] `npx ng build` passes after every sub-task. (evidence: docs/mvp/runs/453.md)
-  - [x] [auto] `npx ng test --watch=false` passes (only pre-existing failures, see run file), including new specs for `list-controls.util` and the `cards` layout of `list-shell`; existing `supplier-list`, `equipment-list` and `list-shell` specs unchanged and green.
+  - [x] [auto] `npx ng test --watch=false` passes, including new specs for `list-controls.util` and the `cards` layout of `list-shell`; existing `supplier-list`, `equipment-list` and `list-shell` specs unchanged and green.
   - [x] [auto] `grep -rnE "protected (onClearSearch|onSearchEscape|setSort|clearAllFilters)\(" src/app/pages` → only handlers that delegate to `listControls` (one line each); no copied bodies remain in the converted pages.
   - [x] [auto] Frozen files (`product-form.component.ts`, `menu-intelligence.page.ts`, `menu-export.service.ts`, `recipe-builder.page.ts`, `cook-view.page.ts`) have net lines <= 0: `git diff --numstat origin/main -- <each>` → added <= removed (none are in scope; expected empty).
   - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down`).
