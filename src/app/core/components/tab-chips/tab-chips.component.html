@@ -3,8 +3,8 @@
     <app-scroll-rail snap="proximity">
       @for (chip of chips_(); track chip.id) {
         <a
-          class="c-tab-pill"
-          [class.c-tab-pill--home]="chip.home"
+          class="c-chip c-chip--tab"
+          [class.c-chip--home]="chip.home"
           [routerLink]="chip.path"
           [queryParams]="chip.queryParams ?? null"
           [routerLinkActive]="chip.home ? [] : 'active'"

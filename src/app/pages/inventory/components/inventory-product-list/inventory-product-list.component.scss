@@ -86,7 +86,7 @@
       flex-shrink: 0;
     }
 
-    .c-toggle-chip:has(> input:checked) lucide-icon {
+    > :has(> input:checked) lucide-icon {
       color: inherit;
     }
   }

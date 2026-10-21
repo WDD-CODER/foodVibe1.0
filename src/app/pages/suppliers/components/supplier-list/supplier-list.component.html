@@ -196,9 +196,9 @@
           ></lucide-icon>
         </button>
         @if (filterCategories.isExpanded('delivery_days')) {
-          <div class="c-toggle-chip-group">
+          <div class="c-chip-group">
             @for (day of [0, 1, 2, 3, 4, 5, 6]; track day) {
-              <label class="c-toggle-chip">
+              <label class="c-chip c-chip--toggle">
                 <input type="checkbox" [checked]="selectedDays_().has(day)" (change)="toggleDay(day)" />
                 <span>{{ deliveryDaysDisplay([day]) }}</span>
               </label>
@@ -206,8 +206,8 @@
           </div>
         }
       </div>
-      <div class="c-toggle-chip-group linked-only-toggle">
-        <label class="c-toggle-chip">
+      <div class="c-chip-group linked-only-toggle">
+        <label class="c-chip c-chip--toggle">
           <input type="checkbox" [checked]="hasLinkedOnly_()" (change)="hasLinkedOnly_.set(!hasLinkedOnly_())" />
           <span>{{ 'linked_products' | translatePipe }}</span>
         </label>

@@ -91,7 +91,7 @@ describe('MetadataManagerPageComponent', () => {
       fixture.detectChanges()
     }
     const tabLabels = () =>
-      fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill')).map((b) => b.nativeElement.textContent.trim())
+      fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab')).map((b) => b.nativeElement.textContent.trim())
 
     it('hides user management, AI models and their jump tabs when the user is not a platform admin', () => {
       setPlatformAdmin(false)
@@ -229,18 +229,18 @@ describe('MetadataManagerPageComponent', () => {
 
   it('renders every metadata card as tap chips with no per-item action buttons', () => {
     const card = fixture.debugElement.query(By.css('#mm-sec-category'))
-    const chips = card.queryAll(By.css('button.c-tap-chip'))
+    const chips = card.queryAll(By.css('button.c-chip--tap'))
     expect(chips.map((c) => c.nativeElement.textContent.trim())).toEqual(['vegetables', 'meat'])
     expect(fixture.debugElement.queryAll(By.css('.manager-card .c-icon-btn')).length).toBe(0)
     // System units are locked, not tappable.
     const unitCard = fixture.debugElement.query(By.css('#mm-sec-unit'))
-    expect(unitCard.queryAll(By.css('button.c-tap-chip')).length).toBe(0)
-    expect(unitCard.queryAll(By.css('.c-tap-chip.is-locked')).length).toBe(2)
+    expect(unitCard.queryAll(By.css('button.c-chip--tap')).length).toBe(0)
+    expect(unitCard.queryAll(By.css('.c-chip--tap.is-locked')).length).toBe(2)
   })
 
   it('tapping a chip opens edit/delete; delete routes to onRemoveMetadata and closes the menu', () => {
     const removeSpy = spyOn(component, 'onRemoveMetadata').and.resolveTo()
-    const chip = fixture.debugElement.query(By.css('#mm-sec-category button.c-tap-chip')).nativeElement as HTMLElement
+    const chip = fixture.debugElement.query(By.css('#mm-sec-category button.c-chip--tap')).nativeElement as HTMLElement
     chip.click()
     fixture.detectChanges()
 
@@ -261,7 +261,7 @@ describe('MetadataManagerPageComponent', () => {
     metadataRegistrySpy.updateMenuType = jasmine.createSpy().and.resolveTo()
     fixture.detectChanges()
 
-    const chips = fixture.debugElement.queryAll(By.css('.menu-type-row .c-toggle-chip input'))
+    const chips = fixture.debugElement.queryAll(By.css('.menu-type-row .c-chip--toggle input'))
     expect(chips.length).toBe(5)
     expect(chips.map((c) => (c.nativeElement as HTMLInputElement).checked)).toEqual([false, false, false, true, false])
 
@@ -292,7 +292,7 @@ describe('MetadataManagerPageComponent', () => {
   ]
 
   it('should render exactly 12 jump-nav tabs in page order', () => {
-    const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))
+    const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))
     expect(tabs.length).toBe(12)
     expect(tabs.map((t) => t.nativeElement.textContent.trim())).toEqual([
       'metadata_units_and_conversions_title',
@@ -325,7 +325,7 @@ describe('MetadataManagerPageComponent', () => {
   })
 
   it('should bring the target section to the front (order 0) when its jump-nav tab is clicked, without disturbing the others', () => {
-    const tab = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))[5] // Menu Types
+    const tab = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))[5] // Menu Types
     tab.nativeElement.click()
     fixture.detectChanges()
 
@@ -337,7 +337,7 @@ describe('MetadataManagerPageComponent', () => {
   })
 
   it('should swap directly to a different section when its tab is clicked while another is front', () => {
-    const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))
+    const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))
     tabs[5].nativeElement.click() // Menu Types
     fixture.detectChanges()
     tabs[0].nativeElement.click() // Units
@@ -350,7 +350,7 @@ describe('MetadataManagerPageComponent', () => {
   it("renders the jump-nav tabs inside the shared scroll rail (plan 350 — arrows are the rail's job)", () => {
     const rail = fixture.debugElement.query(By.css('app-scroll-rail.mm-jump-nav'))
     expect(rail).not.toBeNull()
-    expect(rail.queryAll(By.css('.c-tab-pill')).length).toBe(12)
+    expect(rail.queryAll(By.css('.c-chip--tab')).length).toBe(12)
     expect(fixture.debugElement.query(By.css('.mm-jump-nav-arrow'))).toBeNull()
   })
 })

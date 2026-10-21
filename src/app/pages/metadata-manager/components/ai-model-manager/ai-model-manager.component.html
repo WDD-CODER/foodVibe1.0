@@ -43,7 +43,7 @@
             </span>
           </div>
 
-          <label class="c-toggle-chip model-toggle">
+          <label class="c-chip c-chip--toggle model-toggle">
             <input type="checkbox" [checked]="model.enabled" (change)="onToggle(model.name)" />
             <span>{{ 'ai_model_on' | translatePipe }}</span>
           </label>
@@ -60,7 +60,7 @@
               <span class="model-name" dir="ltr">{{ model.name }}</span>
               <span class="model-usage model-removed">{{ 'ai_model_removed' | translatePipe }}</span>
             </div>
-            <label class="c-toggle-chip model-toggle">
+            <label class="c-chip c-chip--toggle model-toggle">
               <input type="checkbox" [checked]="false" disabled />
               <span>{{ 'ai_model_on' | translatePipe }}</span>
             </label>

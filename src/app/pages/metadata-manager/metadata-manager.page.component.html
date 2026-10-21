@@ -5,7 +5,7 @@
   <nav class="mm-jump-nav-row" [attr.aria-label]="'metadata_manager' | translatePipe">
     <app-scroll-rail class="mm-jump-nav">
       @for (s of jumpSections(); track s.id) {
-        <button type="button" class="c-tab-pill" [class.active]="isFront(s.id)" (click)="bringToFront(s.id)">
+        <button type="button" class="c-chip c-chip--tab" [class.active]="isFront(s.id)" (click)="bringToFront(s.id)">
           {{ s.labelKey | translatePipe }}
         </button>
       }
@@ -115,14 +115,14 @@
                 } @else if (canEditTerm('menuType', def.key)) {
                   <button
                     type="button"
-                    class="c-tap-chip menu-type-name"
+                    class="c-chip c-chip--tap menu-type-name"
                     [attr.aria-expanded]="menuTypeMenuKey_() === def.key"
                     (click)="openMenuTypeMenu($event, def.key)"
                   >
                     {{ def.key }}
                   </button>
                 } @else {
-                  <span class="c-tap-chip is-locked menu-type-name">
+                  <span class="c-chip c-chip--tap is-locked menu-type-name">
                     {{ def.key }}
                     <lucide-icon
                       name="lock"
@@ -132,9 +132,9 @@
                     ></lucide-icon>
                   </span>
                 }
-                <div class="c-toggle-chip-group menu-type-fields">
+                <div class="c-chip-group menu-type-fields">
                   @for (f of ALL_DISH_FIELDS; track f.key) {
-                    <label class="c-toggle-chip">
+                    <label class="c-chip c-chip--toggle">
                       <input
                         type="checkbox"
                         [checked]="def.fields.includes(f.key)"
