@@ -1,6 +1,6 @@
 # Plan 430 — Record each user's active days on the server
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -25,7 +25,7 @@ User stories:
 first/last time and a write count; the Team list shows each member's last activity.
 
 Done when:
-- [auto] `npm --prefix server test -- test/usage-days.test.js` passes, covering:
+- [x] [auto] `npm --prefix server test -- test/usage-days.test.js` passes, covering:
   - a user (token with `businessId`) `POST /api/v1/data/recipes` and `POST /api/v1/data/products` → exactly one
     `usageDays` doc `_id: '<userId>:<today Asia/Jerusalem>'` with `writeCount: 2`, `businessId` from the token,
     `firstAt ≤ lastAt`;
@@ -41,11 +41,11 @@ Done when:
   - `activeDays(db, { businessId, from: '2026-10-18', to: '2026-10-24' })` with records Sunday 18 + Tuesday 20
     → 2; owner and staff both active on the 20th → still counted once for the business;
   - `lastActiveByUser(db, businessId)` → `Map(userId → max lastAt)`.
-- [auto] `npm --prefix server test -- test/business-team.test.js` passes with the updated expectation: a member with
+- [x] [auto] `npm --prefix server test -- test/business-team.test.js` passes with the updated expectation: a member with
   usage records gets `lastActiveAt` = their latest `lastAt`; a member with none gets `null`.
-- [auto] `npm --prefix server test` passes (whole server suite).
-- [auto] `npm --prefix server run lint` passes (no `console.*` in middleware).
-- [auto] `npx ng build` passes (no client change expected; guards against an accidental one).
+- [x] [auto] `npm --prefix server test` passes (whole server suite).
+- [x] [auto] `npm --prefix server run lint` passes (no `console.*` in middleware).
+- [x] [auto] `npx ng build` passes (no client change expected; guards against an accidental one).
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Desktop: as owner, open and save any recipe, then as staff open the app. Owner → «הגדרות» → «צוות» →
   both rows show today's date and time under «כניסה אחרונה» instead of «—».
@@ -196,13 +196,13 @@ The Team tab from plan 428 already renders a number as date + time and `null` as
 - No new dictionary keys, no icons.
 
 ## Atomic Sub-tasks
-- [ ] U1: Record one active-day entry per user per Israel day after each signed-in request — usage.js with jerusalemDate, isCountedWrite, recordUsage on finish, throttle — server/middleware/usage.js
-- [ ] U2: Call the recorder from token checking so every signed-in request is seen — attachUser(req, res, token) → recordUsage — server/middleware/auth.js
-- [ ] U3: Index the new collection by business and date for the dashboards — business_date index — server/db.js
-- [ ] U4: Add read helpers for last activity and active days per business — lastActiveByUser, activeDays, activeDaysByBusiness, weekBounds — server/utils/usage-stats.js
-- [ ] U5: Show each team member's real last activity instead of a dash — GET /team fills lastActiveAt — server/routes/business.js
-- [ ] U6: Prove counting, throttling, Israel midnight and the helpers with server tests — every Done-when case; update the team test's lastActiveAt expectation — server/test/usage-days.test.js, server/test/business-team.test.js
-- [ ] U7: Build, test, lint and hand over the Team-tab check — server suite, lint, ng build, log-query; Human runs the two [human] items — this plan file
+- [x] U1: Record one active-day entry per user per Israel day after each signed-in request — usage.js with jerusalemDate, isCountedWrite, recordUsage on finish, throttle — server/middleware/usage.js
+- [x] U2: Call the recorder from token checking so every signed-in request is seen — attachUser(req, res, token) → recordUsage — server/middleware/auth.js
+- [x] U3: Index the new collection by business and date for the dashboards — business_date index — server/db.js
+- [x] U4: Add read helpers for last activity and active days per business — lastActiveByUser, activeDays, activeDaysByBusiness, weekBounds — server/utils/usage-stats.js
+- [x] U5: Show each team member's real last activity instead of a dash — GET /team fills lastActiveAt — server/routes/business.js
+- [x] U6: Prove counting, throttling, Israel midnight and the helpers with server tests — every Done-when case; update the team test's lastActiveAt expectation — server/test/usage-days.test.js, server/test/business-team.test.js
+- [x] U7: Build, test, lint and hand over the Team-tab check — server suite, lint, ng build, log-query; Human runs the two [human] items — this plan file
 
 ## Technical Considerations
 - Dependencies: `jsonwebtoken` verify in `attachUser`; `mongoose.connection.db`; `logger` from `server/logger.js`.

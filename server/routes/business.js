@@ -9,6 +9,8 @@ const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
 const { businessSettingsSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
+const mongoose = require('mongoose')
+const { lastActiveByUser } = require('../utils/usage-stats')
 
 const router = Router()
 
@@ -62,12 +64,12 @@ function ownerOnly(req, res, next) {
 }
 
 /** The row shape every team response uses. `lastActiveAt` is filled from usageDays by plan 430. */
-const toTeamRow = user => ({
+const toTeamRow = (user, lastActive = null) => ({
   _id: user._id,
   name: user.name,
   businessRole: user.businessRole,
   createdAt: user.createdAt ?? null,
-  lastActiveAt: null,
+  lastActiveAt: lastActive,
 })
 
 // GET /api/v1/business/team — the owner and the active staff of the caller's business.
@@ -77,7 +79,8 @@ router.get('/team', verifyToken, ownerOnly, async (req, res) => {
       .select('_id name businessRole createdAt').lean()
     const rank = user => (user.businessRole === 'owner' ? 0 : 1)
     users.sort((a, b) => rank(a) - rank(b) || String(a.name).localeCompare(String(b.name)))
-    res.json(users.map(toTeamRow))
+    const lastActive = await lastActiveByUser(mongoose.connection.db, req.user.businessId)
+    res.json(users.map(u => toTeamRow(u, lastActive.get(u._id) ?? null)))
   } catch (err) {
     req.log.error({ err, event: 'business.team.failed', action: 'list' })
     res.status(500).json({ error: 'Server error' })
