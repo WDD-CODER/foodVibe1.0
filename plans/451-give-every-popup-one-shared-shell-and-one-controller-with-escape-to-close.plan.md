@@ -4,7 +4,7 @@ Status: draft
 Track: code
 Depends-on: 450
 Conflicts-with: 454, 456, 457
-Snapshot: e86117ff9782be034c2b117b28056ed82bb90869
+Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
 
 ## Problem Statement
 Popups (modals) are built 21 different ways. Per `docs/mvp/reuse-audit-2026-10-20.md`: 11 have no Escape key, only 4 of 21 have `role="dialog"`, and 13 hand-written controller services come in three shapes:
