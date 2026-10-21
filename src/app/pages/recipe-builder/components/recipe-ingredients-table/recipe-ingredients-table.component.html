@@ -89,6 +89,7 @@
                   [title]="'unlinked_ingredient_hint' | translatePipe"
                 >
                   <lucide-icon name="link" [size]="14"></lucide-icon>
+                  <span class="badge-label">{{ 'ingredient_not_ready' | translatePipe }}</span>
                 </button>
               } @else if (group.get('referenceId')?.value) {
                 <button
@@ -198,4 +199,17 @@
       </div>
     }
   </div>
+
+  @if (!ingredientsFormArray().disabled) {
+    <button type="button" class="paste-ingredients-btn c-btn-ghost--sm" (click)="pasteOpen_.set(true)">
+      <lucide-icon name="clipboard-paste" [size]="16"></lucide-icon>
+      {{ 'paste_ingredients' | translatePipe }}
+    </button>
+  }
+
+  <app-paste-ingredients-dialog
+    [open]="pasteOpen_()"
+    (submitted)="onPasteIngredients($event)"
+    (closed)="pasteOpen_.set(false)"
+  />
 </div>
