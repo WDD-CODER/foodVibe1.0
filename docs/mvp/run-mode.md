@@ -56,3 +56,7 @@ The big reuse refactor (audit §4, P1–P9) is NOT part of the MVP run. But no M
 - If a plan needs a missing shared piece, build it in `shared/` (rung 3/4 of the audit's ladder) only when the plan
   scope allows; otherwise use the closest existing family and log the decision.
 The checker treats a new page-local duplicate of an existing shared family as a major problem.
+
+## Live notes from the coordinator (read every time)
+- **2026-10-21 03:50 — local MongoDB is down** (the Windows service crashed and needs an admin restart; Dandan restarts it in the morning). Server tests use the in-memory Mongo and MUST still pass. `node scripts/log-query.mjs …` and local-DB migration rehearsals cannot run: record them in the run file as `deferred: local MongoDB down` under Evidence and add them to `## Final gate`. Checkers: do not fail a plan for that alone.
+- **Open security finding (plan 427, `server/routes/generic.js` `writeAction`)**: the locked-taxonomy-kind rule is evaluated only on the stored doc, so a staff member could PUT a term from an unlocked kind into `eventType` / `menuType` / `station`. Fix: treat the write as `editTaxonomy` when the stored OR the resulting (merged) doc has a locked kind (or reject any `kind` change by non-owners), with a server test. Plan 427's builder/checker: this is a MAJOR item. If 427 already merged, the next plan whose scope includes `server/routes/generic.js` fixes it and logs it.
