@@ -2,6 +2,7 @@
   <app-page-header titleKey="dashboard" subtitleKey="dashboard_subtitle" />
 
   <main class="dashboard-main">
+    <app-business-performance />
     <app-setup-checklist-card />
     <section class="kpi-grid">
       <!-- Total Products -->
@@ -45,16 +46,6 @@
             {{ 'view_recipes' | translatePipe }}
             <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
           </button>
-          <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
-            <path
-              d="M0 12 L10 13 L20 10 L30 11 L40 7 L50 8 L60 4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
         </div>
       </article>
 
@@ -72,16 +63,6 @@
             {{ 'view_inventory' | translatePipe }}
             <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
           </button>
-          <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
-            <path
-              d="M0 8 L10 10 L20 7 L30 12 L40 11 L50 15 L60 14"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
         </div>
       </article>
 
@@ -99,16 +80,6 @@
             {{ 'view_recipes' | translatePipe }}
             <lucide-icon name="chevron-left" [size]="11"></lucide-icon>
           </button>
-          <svg width="60" height="18" viewBox="0 0 60 18" aria-hidden="true" class="kpi-sparkline">
-            <path
-              d="M0 10 L10 9 L20 11 L30 8 L40 9 L50 6 L60 5"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
         </div>
       </article>
     </section>

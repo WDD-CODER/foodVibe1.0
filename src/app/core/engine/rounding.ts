@@ -47,3 +47,8 @@ export function formatPct1(n: number): string {
 export function formatPctInt(n: number): string {
   return Math.round(n) + '%'
 }
+
+/** One decimal, a trailing ".0" dropped (days per week: 3.5, 4). */
+export function formatDecimal1(n: number): string {
+  return String(roundTo(n, 1))
+}
