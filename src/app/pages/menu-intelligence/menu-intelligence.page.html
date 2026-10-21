@@ -321,34 +321,12 @@
   <app-event-notes-log [eventId]="editingId_()" />
   }
 
-  <!-- Financial footnote — fixed bar, always visible while scrolling -->
-  <div class="financial-footnote no-print">
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
-      <span class="fin-value">₪{{ eventCost_() | number:'1.2-2' }}</span>
-      <app-partial-cost-badge [missing]="menuPlan_().missing" placement="above"></app-partial-cost-badge>
-    </div>
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>
-      <span class="fin-value" [class.fin-value--warning]="totalRevenue_() > 0 && foodCostPct_() > 33">
-        @if (totalRevenue_() > 0) { {{ foodCostPct_() | number:'1.1-1' }}% } @else { — }
-      </span>
-    </div>
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
-      <span class="fin-value">₪{{ totalRevenue_() | number:'1.2-2' }}</span>
-    </div>
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_cost_per_guest' | translatePipe }}</span>
-      <span class="fin-value">₪{{ costPerGuest_() | number:'1.2-2' }}</span>
-    </div>
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_profit_per_guest' | translatePipe }}</span>
-      <span class="fin-value" [class.fin-value--warning]="totalRevenue_() > 0 && profitPerGuest_() < 0"
-        >₪{{ profitPerGuest_() | number:'1.2-2' }}</span
-      >
-    </div>
-  </div>
+  <app-pricing-meter
+    [event]="liveEvent_()"
+    [plan]="menuPlan_()"
+    [moneyForm]="form_.controls.money"
+    [eventId]="editingId_()"
+  />
 
   @if (exportPreviewPayload_(); as payload) {
   <app-export-preview

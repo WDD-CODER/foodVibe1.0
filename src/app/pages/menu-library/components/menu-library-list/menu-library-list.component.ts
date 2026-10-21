@@ -6,12 +6,12 @@ import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { MenuEventDataService } from '@services/menu-event-data.service'
-import { MenuIntelligenceService } from '@services/menu-intelligence.service'
 import { MenuEvent } from '@models/menu-event.model'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -56,7 +56,6 @@ export class MenuLibraryListComponent {
   private readonly router = inject(Router)
   private readonly route = inject(ActivatedRoute)
   private readonly menuEventData = inject(MenuEventDataService)
-  private readonly menuIntelligence = inject(MenuIntelligenceService)
   private readonly confirmModal = inject(ConfirmModalService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly userMsg = inject(UserMsgService)
@@ -150,6 +149,12 @@ export class MenuLibraryListComponent {
     })
 
     events = [...events].sort((a, b) => {
+      if (sortBy === 'food_cost') {
+        // Events without a pricing summary (or without revenue) sort last, whichever the direction.
+        const x = this.foodCostRatio(a)
+        const y = this.foodCostRatio(b)
+        if (x === null || y === null) return x === y ? 0 : x === null ? 1 : -1
+      }
       const cmp = this.compareEvents(a, b, sortBy)
       return sortOrder === 'asc' ? cmp : -cmp
     })
@@ -157,9 +162,10 @@ export class MenuLibraryListComponent {
     return events
   })
 
-  private getFoodCostPctForSort(event: MenuEvent): number {
-    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event)
-    return this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated)
+  /** Plan 445: food cost ÷ revenue from the pricing summary stored on save; null when there is none. */
+  private foodCostRatio(event: MenuEvent): number | null {
+    const pricing = event.pricing
+    return pricing && pricing.revenue > 0 ? pricing.foodCost / pricing.revenue : null
   }
 
   private compareEvents(a: MenuEvent, b: MenuEvent, field: SortField): number {
@@ -169,7 +175,7 @@ export class MenuLibraryListComponent {
       case 'date':
         return (a.eventDate || '').localeCompare(b.eventDate || '')
       case 'food_cost':
-        return this.getFoodCostPctForSort(a) - this.getFoodCostPctForSort(b)
+        return (this.foodCostRatio(a) ?? 0) - (this.foodCostRatio(b) ?? 0)
       case 'guest_count':
         return (a.guestCount ?? 0) - (b.guestCount ?? 0)
       default:
@@ -231,31 +237,16 @@ export class MenuLibraryListComponent {
     }
   }
 
-  /** Food cost % from actual revenue (same logic as menu-intelligence page). Computed live so card matches detail view. */
+  /** Food cost % of the revenue, both read from the pricing summary stored on save ("—" when there is none). */
   protected getFoodCostPctDisplay(event: MenuEvent): string {
-    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event)
-    const pct = this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated)
-    return `${pct.toFixed(1)}%`
+    const ratio = this.foodCostRatio(event)
+    return ratio === null ? '—' : formatPct1(ratio * 100)
   }
 
-  /** Total sale price (revenue): sum of sell_price × derived_portions for all items. */
+  /** Revenue as the pricing meter showed it on the last save ("—" when there is none). */
   protected getTotalSalePriceDisplay(event: MenuEvent): string {
-    const total = this.computeEventRevenue(event)
-    if (total <= 0) return '—'
-    return `₪${total.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
-  }
-
-  private computeEventRevenue(event: MenuEvent): number {
-    let sum = 0
-    const guestCount = event.guestCount ?? 0
-    for (const section of event.sections || []) {
-      for (const item of section.items || []) {
-        const price = item.sellPrice ?? 0
-        const portions = item.derivedPortions ?? guestCount * (item.servingPortions ?? 1)
-        sum += price * portions
-      }
-    }
-    return sum
+    const revenue = event.pricing?.revenue ?? 0
+    return revenue > 0 ? formatMoney(revenue) : '—'
   }
 
   protected getGuestCountDisplay(event: MenuEvent): string {

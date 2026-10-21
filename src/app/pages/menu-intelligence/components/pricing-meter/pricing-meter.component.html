@@ -1,0 +1,174 @@
+<div class="pricing-meter no-print" [class.expanded]="expanded_()" [formGroup]="moneyForm()">
+  <button type="button" class="meter-summary" [attr.aria-expanded]="expanded_()" (click)="toggleExpanded()">
+    <span class="summary-price" dir="ltr">{{ pricePerGuest_() }}</span>
+    <span class="summary-pct" dir="ltr">{{ profitPct_() }}</span>
+    @if (hasProfitPct_()) {
+      @if (result_().meetsTarget) {
+        <span class="verdict ok"
+          ><lucide-icon name="circle-check" [size]="14"></lucide-icon>{{ 'meets_target' | translatePipe }}</span
+        >
+      } @else {
+        <span class="verdict bad"
+          ><lucide-icon name="alert-triangle" [size]="14"></lucide-icon>{{ shortLabel_() }}</span
+        >
+      }
+    }
+    <lucide-icon [name]="expanded_() ? 'chevron-down' : 'chevron-up'" [size]="16"></lucide-icon>
+  </button>
+
+  <div class="meter-body">
+    <div class="meter-inputs">
+      <label class="meter-field">
+        <span class="fin-label">
+          {{ 'price_per_guest_client' | translatePipe }}
+          @if (result_().revenueIsComputed) {
+            <span class="computed-tag">{{ 'price_computed' | translatePipe }}</span>
+          }
+        </span>
+        <span
+          class="c-input-wrapper"
+          [class.invalid]="moneyForm().controls.pricePerGuest.invalid && moneyForm().controls.pricePerGuest.touched"
+        >
+          @if (!canEditMoney_()) {
+            <lucide-icon name="lock" [size]="14"></lucide-icon>
+          }
+          <input
+            type="number"
+            min="0"
+            inputmode="decimal"
+            dir="ltr"
+            formControlName="pricePerGuest"
+            [placeholder]="result_().revenueIsComputed ? pricePerGuest_() : ''"
+            [attr.title]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
+          />
+        </span>
+      </label>
+
+      <label class="meter-field">
+        <span class="fin-label">{{ 'extra_costs' | translatePipe }}</span>
+        <span
+          class="c-input-wrapper"
+          [class.invalid]="moneyForm().controls.extraCostAmount.invalid && moneyForm().controls.extraCostAmount.touched"
+        >
+          @if (!canEditMoney_()) {
+            <lucide-icon name="lock" [size]="14"></lucide-icon>
+          }
+          <input
+            type="number"
+            min="0"
+            inputmode="decimal"
+            dir="ltr"
+            formControlName="extraCostAmount"
+            [attr.title]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
+          />
+        </span>
+        @if (moneyForm().controls.extraCostAmount.invalid && moneyForm().controls.extraCostAmount.touched) {
+          <span class="field-error" role="alert">{{ 'extra_costs_negative' | translatePipe }}</span>
+        }
+      </label>
+
+      <label class="meter-field">
+        <span class="fin-label">{{ 'extra_costs_note' | translatePipe }}</span>
+        <span class="c-input-wrapper">
+          <input type="text" maxlength="200" formControlName="extraCostNote" />
+        </span>
+      </label>
+
+      <button
+        type="button"
+        class="c-chip targets-toggle"
+        [attr.aria-expanded]="targetsOpen_()"
+        (click)="toggleTargets()"
+      >
+        {{ 'event_target_toggle' | translatePipe }}
+      </button>
+
+      @if (targetsOpen_()) {
+        <label class="meter-field">
+          <span class="fin-label">{{ 'profit_target_pct' | translatePipe }}</span>
+          <span
+            class="c-input-wrapper"
+            [class.invalid]="
+              moneyForm().controls.profitTargetPct.invalid && moneyForm().controls.profitTargetPct.touched
+            "
+          >
+            <input type="number" min="0" max="99.99" inputmode="decimal" dir="ltr" formControlName="profitTargetPct" />
+          </span>
+          @if (moneyForm().controls.profitTargetPct.errors?.['targetTooHigh']) {
+            <span class="field-error" role="alert">{{ 'target_too_high' | translatePipe }}</span>
+          }
+        </label>
+        <label class="meter-field">
+          <span class="fin-label">{{ 'safety_margin_pct' | translatePipe }}</span>
+          <span
+            class="c-input-wrapper"
+            [class.invalid]="
+              moneyForm().controls.safetyMarginPct.invalid && moneyForm().controls.safetyMarginPct.touched
+            "
+          >
+            <input type="number" min="0" max="99.99" inputmode="decimal" dir="ltr" formControlName="safetyMarginPct" />
+          </span>
+          @if (moneyForm().controls.safetyMarginPct.errors?.['targetTooHigh']) {
+            <span class="field-error" role="alert">{{ 'target_too_high' | translatePipe }}</span>
+          }
+        </label>
+      }
+    </div>
+
+    <div class="meter-numbers">
+      <div class="fin-metric">
+        <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
+        <span class="fin-value" dir="ltr">{{ foodCost_() }}</span>
+        <app-partial-cost-badge [missing]="plan().missing" placement="above"></app-partial-cost-badge>
+      </div>
+      <div class="fin-metric">
+        <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
+        <span class="fin-value" dir="ltr">{{ revenue_() }}</span>
+        @if (partial_()) {
+          <span class="partial-tag">{{ 'partial_total' | translatePipe }}</span>
+        }
+      </div>
+      <div class="fin-metric">
+        <span class="fin-label">{{ 'profit_per_guest' | translatePipe }}</span>
+        <span class="fin-value" dir="ltr" [class.fin-value--bad]="result_().profitPerGuest < 0">{{
+          profitPerGuest_()
+        }}</span>
+        @if (partial_()) {
+          <span class="partial-tag">{{ 'partial_total' | translatePipe }}</span>
+        }
+      </div>
+      <div class="fin-metric">
+        <span class="fin-label">{{ 'profit_pct' | translatePipe }}</span>
+        <span class="fin-value" dir="ltr">{{ profitPct_() }}</span>
+        @if (partial_()) {
+          <span class="partial-tag">{{ 'partial_total' | translatePipe }}</span>
+        }
+      </div>
+      <div class="fin-metric">
+        @if (hasProfitPct_()) {
+          @if (result_().meetsTarget) {
+            <span class="verdict ok"
+              ><lucide-icon name="circle-check" [size]="14"></lucide-icon>{{ 'meets_target' | translatePipe }}</span
+            >
+          } @else {
+            <span class="verdict bad"
+              ><lucide-icon name="alert-triangle" [size]="14"></lucide-icon>{{ shortLabel_() }}</span
+            >
+          }
+        } @else {
+          <span class="fin-value">—</span>
+        }
+      </div>
+      <div class="fin-metric">
+        <span class="fin-label">{{ 'min_price_per_guest' | translatePipe }}</span>
+        <span class="fin-value" dir="ltr">{{ minPrice_() }}</span>
+        @if (partial_()) {
+          <span class="partial-tag">{{ 'partial_total' | translatePipe }}</span>
+        }
+      </div>
+      <div class="fin-metric">
+        <span class="margin-hint">{{ marginLabel_() }}</span>
+      </div>
+    </div>
+  </div>
+</div>
