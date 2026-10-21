@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const { verifyToken, requirePlatformAdmin } = require('../middleware/auth');
 const dns = require('node:dns').promises;
+const { assertCan } = require('../utils/permissions');
+const { MAX_IMPORT_TEXT, normalizePriceListRows } = require('../utils/price-list-import');
 
 // Plan 321 Phase 1 — strict per-user limit on the Gemini-backed AI routes (they cost
 // real money per call). Keyed by userId, not IP, since verifyToken has already run by
@@ -434,6 +436,77 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
     return res.json({ result: parsed.value });
   } catch (err) {
     req.log.error({ err, event: 'ai.parse_text.failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /parse-price-list (plan 432)
+// Accepts { rawText: string, knownCategories?: string[] } — a supplier price list (WhatsApp text or
+// columns pasted from Excel). One Gemini call turns it into product rows; the pure helper in
+// utils/price-list-import.js cleans them (units, per-unit price, duplicates, 200-row cap).
+// Owner only (prices are money): the permission check runs BEFORE the limiter, so staff never burn quota.
+// Response: { rows: ImportRow[], truncated: boolean }
+// ---------------------------------------------------------------------------
+
+const PRICE_LIST_SYSTEM_PROMPT = `You read a supplier price list written in Hebrew (a WhatsApp message or columns pasted from Excel) for a catering kitchen and turn it into product rows.
+
+Return ONLY a JSON object, no commentary:
+{ "rows": [ { "name": string, "unit": string|null, "price": number|null, "pricePer": "unit"|"purchaseUnit", "purchaseUnit": string|null, "purchaseQty": number|null, "category": string|null } ] }
+
+Rules:
+- One row per product line. Keep the product name exactly as written, including numbers that belong to the name (for example "שמנת 32%": the 32% is part of the name, never a price).
+- "unit" is the unit the price refers to: "לק\"ג" means kg, "לליטר" means liter, "ליחידה" means unit, grams means gram, milliliters means ml. Write it as one of: kg, gram, liter, ml, unit. If the line does not say, use null.
+- "price" is a plain number (no currency sign). If the line has no price, use null.
+- "pricePer" is "unit" when the price is for one "unit" above. It is "purchaseUnit" only when the price is for a whole pack, crate or box (for example a crate of 10 kg for 50): then set "purchaseUnit" to the pack word as written and "purchaseQty" to how many "unit" it holds (10); otherwise purchaseUnit and purchaseQty are null.
+- Never invent products or prices. Skip lines that are greetings, headings, dates or phone numbers.
+- "category": one of the existing categories listed below, written exactly as listed, otherwise null.`;
+
+router.post('/parse-price-list', verifyToken, (req, res, next) => {
+  if (assertCan(req, res, 'editMoney', { type: 'products' })) next();
+}, aiLimiter, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { rawText } = req.body;
+  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
+    return res.status(400).json({ error: 'rawText is required' });
+  }
+  if (rawText.length > MAX_IMPORT_TEXT) {
+    return res.status(400).json({ error: 'TEXT_TOO_LONG', max: MAX_IMPORT_TEXT });
+  }
+
+  try {
+    const call = await callGemini({
+      body: {
+        system_instruction: { parts: [{ text: appendKnownMetadata(PRICE_LIST_SYSTEM_PROMPT, { knownCategories: req.body.knownCategories }) }] },
+        contents: [{ role: 'user', parts: [{ text: rawText.trim() }] }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 8192 },
+      },
+      timeoutMs: 45000,
+      log: req.log,
+      eventPrefix: 'ai.parse_price_list',
+      model: requestedModel(req),
+    });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
+
+    const raw = responseText(call.data);
+
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(200).json({ rows: [], truncated: false });
+    }
+    if (parsed.error === 'invalid') {
+      // Length only: the text holds the business's product names and prices.
+      req.log.error({ event: 'ai.parse_price_list.parse_failed', rawLength: raw.length });
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    return res.json(normalizePriceListRows(parsed.value));
+  } catch (err) {
+    req.log.error({ err, event: 'ai.parse_price_list.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });

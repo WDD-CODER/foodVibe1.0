@@ -1,6 +1,6 @@
 # Plan 432 — Import products from a pasted supplier price list
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -29,15 +29,15 @@ User stories:
 prices of existing ones, owner only, ≤ 200 rows.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npm --prefix server test -- test/price-list-import.test.js` passes (pure helper, no AI), covering:
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npm --prefix server test -- test/price-list-import.test.js` passes (pure helper, no AI), covering:
   - `normalizePriceListRows({ rows: [...] })`: row without name dropped; name longer than 200 chars cut to 200;
     unit missing → `'unit'` + `needsReview: true`; unknown unit (`'ארגזון'`) → `'unit'` + `needsReview: true`;
     Hebrew unit words map to keys (`'ק"ג'`/`'קילו'` → `kg`, `'גרם'` → `gram`, `'ליטר'` → `liter`, `'מ"ל'` → `ml`,
     `'יח''`/`'יחידה'` → `unit`); price ≤ 0 / NaN → `null`; `pricePer: 'purchaseUnit'` with `purchaseQty: 10` and
     price 50 → `price: 5`; two rows «עגבנייה» → one row (the last), `duplicate: true`; 201 rows → 200 + `truncated: true`;
   - `normalizeProductName('  שמנת   32% ')` → `'שמנת 32%'` (trim, single spaces, lower-case Latin).
-- [auto] `npm --prefix server test -- test/product-import-route.test.js` passes, covering:
+- [x] [auto] `npm --prefix server test -- test/product-import-route.test.js` passes, covering:
   - `POST /api/v1/ai/parse-price-list` without token → 401; staff token → 403 `no_permission` **before** any Gemini
     call (usage count unchanged); empty `rawText` → 400; `rawText` over 20 000 chars → 400 `TEXT_TOO_LONG`;
   - `POST /api/v1/product-import/apply` as owner with supplier «ירקן» and rows עגבנייה kg 5.9 / מלפפון kg 4.5 /
@@ -50,8 +50,8 @@ Done when:
     with `sources: []`;
   - staff → 403; 201 rows → 400 `TOO_MANY_ROWS`; a `supplierId` from another business → 400 `UNKNOWN_SUPPLIER`;
     a product of another business with the same name is never updated (a new one is created in this business).
-- [auto] `npm --prefix server test` passes (whole server suite).
-- [auto] `npx ng test --watch=false --include='src/app/pages/inventory/components/product-import/**/*.spec.ts' --include='src/app/core/utils/product-name.util.spec.ts'`
+- [x] [auto] `npm --prefix server test` passes (whole server suite).
+- [x] [auto] `npx ng test --watch=false --include='src/app/pages/inventory/components/product-import/**/*.spec.ts' --include='src/app/core/utils/product-name.util.spec.ts'`
   passes, covering: preview marks a row matching an existing product «קיים – עדכן מחיר», same price «ללא שינוי»,
   otherwise «חדש»; deleting a row adds 1 to «דולגו» in the summary; «שמור הכל» sends one apply request with the
   kept rows; on an AI 429 the pasted text stays in the box and `ai_daily_limit_reached_all` is shown;
@@ -305,14 +305,14 @@ Add `ClipboardPaste` to `src/app/app.config.ts` (import list + `pick`). `Trash2`
   translation-key modal for unknown values), per `docs/agent/standards-domain.md`.
 
 ## Atomic Sub-tasks
-- [ ] I1: Clean the AI's rows into a safe preview list — normalizeProductName, Hebrew unit map, dedupe, 200 cap, per-unit price — server/utils/price-list-import.js
-- [ ] I2: Let the owner turn pasted price-list text into rows with one AI call — POST /parse-price-list, PRICE_LIST_SYSTEM_PROMPT, assertCan before aiLimiter — server/routes/ai.js
-- [ ] I3: Save a whole import in one server request: create new products, update only prices — product-import.js /apply with match, skip, stampNew, checkStoredDoc, insertMany/bulkWrite; mount in app.js — server/routes/product-import.js, server/app.js
-- [ ] I4: Prove the cleaning rules and the apply route with server tests — every Done-when case — server/test/price-list-import.test.js, server/test/product-import-route.test.js
-- [ ] I5: Give the browser the same name-matching rule and the two calls — normalizeProductName + spec, GeminiService.parsePriceList, ProductImportService.apply — src/app/core/utils/product-name.util.ts, src/app/core/services/gemini.service.ts, src/app/core/services/product-import.service.ts
-- [ ] I6: Build the paste, preview and save screen — ProductImportComponent (paste, supplier, preview, statuses, row delete, category resolution, summary), spec — src/app/pages/inventory/components/product-import/**
-- [ ] I7: Open the import screen from inventory for the owner only — lazy inventory/import route, HeroFab action gated by editMoney — src/app/app.routes.ts, inventory-product-list.component.ts
-- [ ] I8: Add the Hebrew texts and the paste icon — 19 dictionary keys, ClipboardPaste — public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] I1: Clean the AI's rows into a safe preview list — normalizeProductName, Hebrew unit map, dedupe, 200 cap, per-unit price — server/utils/price-list-import.js
+- [x] I2: Let the owner turn pasted price-list text into rows with one AI call — POST /parse-price-list, PRICE_LIST_SYSTEM_PROMPT, assertCan before aiLimiter — server/routes/ai.js
+- [x] I3: Save a whole import in one server request: create new products, update only prices — product-import.js /apply with match, skip, stampNew, checkStoredDoc, insertMany/bulkWrite; mount in app.js — server/routes/product-import.js, server/app.js
+- [x] I4: Prove the cleaning rules and the apply route with server tests — every Done-when case — server/test/price-list-import.test.js, server/test/product-import-route.test.js
+- [x] I5: Give the browser the same name-matching rule and the two calls — normalizeProductName + spec, GeminiService.parsePriceList, ProductImportService.apply — src/app/core/utils/product-name.util.ts, src/app/core/services/gemini.service.ts, src/app/core/services/product-import.service.ts
+- [x] I6: Build the paste, preview and save screen — ProductImportComponent (paste, supplier, preview, statuses, row delete, category resolution, summary), spec — src/app/pages/inventory/components/product-import/**
+- [x] I7: Open the import screen from inventory for the owner only — lazy inventory/import route, HeroFab action gated by editMoney — src/app/app.routes.ts, inventory-product-list.component.ts
+- [x] I8: Add the Hebrew texts and the paste icon — 19 dictionary keys, ClipboardPaste — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] I9: Build, test and hand over the import checks — ng build, server suite, listed specs, log-query; Human runs the [human] items on desktop and mobile — this plan file
 
 ## Technical Considerations

@@ -10,6 +10,7 @@ import type { AiMenuDraft, AiMenuPatch } from '@models/ai-menu-draft.model'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { MetadataRegistryService } from './metadata-registry.service'
 import { TranslationService } from './translation.service'
+import type { ImportRow } from './product-import.service'
 
 /** One model in the admin's AI model chain (plan 395): today's status plus on/off. */
 export interface GeminiChainModel extends GeminiModelStatus {
@@ -123,6 +124,15 @@ export class GeminiService {
           return res.result
         })
       )
+  }
+
+  /** Owner only (plan 432): one AI call turns a pasted supplier price list into cleaned product rows. The caller counts the usage (incrementGeminiUsage) on success. */
+  parsePriceList(rawText: string, knownCategories: string[]): Observable<{ rows: ImportRow[]; truncated: boolean }> {
+    return this.http_.post<{ rows: ImportRow[]; truncated: boolean }>(`${this.authBase_}/api/v1/ai/parse-price-list`, {
+      rawText,
+      knownCategories,
+      ...this.modelParam_()
+    })
   }
 
   async generateFromImage(file: File): Promise<AiRecipeDraft> {

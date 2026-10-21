@@ -69,6 +69,11 @@ export const routes: Routes = [
         canDeactivate: [pendingChangesGuard],
       },
       {
+        path: 'import',
+        loadComponent: () => import('./pages/inventory/components/product-import/product-import.component').then(m => m.ProductImportComponent),
+        canActivate: [authGuard],
+      },
+      {
         path: 'edit/:id',
         loadComponent: () => import('./pages/inventory/components/product-form/product-form.component').then(m => m.ProductFormComponent),
         resolve: { product: productResolver },
