@@ -1,5 +1,5 @@
 @if (isOpen_()) {
-  <app-modal-shell size="md" labelledBy="unit-creator-title" (dismissed)="resetAndClose()">
+  <app-modal-shell size="md" labelledBy="unit-creator-title" [dismissible]="!isSaving_()" (dismissed)="resetAndClose()">
     <h3 id="unit-creator-title">{{ titleText_() }}</h3>
 
     <div class="c-modal-body unit-creator-formula-grid">

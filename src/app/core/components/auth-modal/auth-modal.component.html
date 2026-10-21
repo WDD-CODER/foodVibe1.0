@@ -2,7 +2,7 @@
   <app-modal-shell
     size="md"
     [labelKey]="isSignUp ? 'sign_up' : 'sign_in'"
-    [dismissible]="!isSubmitting()"
+    [dismissible]="!isSubmitting() && !uploadingImage_()"
     (dismissed)="onClose()"
   >
     <div class="auth-tabs">

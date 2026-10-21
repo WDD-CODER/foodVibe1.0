@@ -64,12 +64,15 @@ src/app/shared/modal-shell/breadcrumbs.md
 src/app/shared/ai-menu-modal/ai-menu-modal.service.ts
 src/app/shared/ai-menu-modal/ai-menu-modal.component.ts
 src/app/shared/ai-menu-modal/ai-menu-modal.component.html
+src/app/shared/ai-menu-modal/ai-menu-modal.component.scss
 src/app/shared/ai-product-modal/ai-product-modal.service.ts
 src/app/shared/ai-product-modal/ai-product-modal.component.ts
 src/app/shared/ai-product-modal/ai-product-modal.component.html
+src/app/shared/ai-product-modal/ai-product-modal.component.scss
 src/app/shared/ai-recipe-modal/ai-recipe-modal.service.ts
 src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts
 src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.scss
 src/app/shared/label-creation-modal/label-creation-modal.service.ts
 src/app/shared/label-creation-modal/label-creation-modal.component.ts
 src/app/shared/label-creation-modal/label-creation-modal.component.html

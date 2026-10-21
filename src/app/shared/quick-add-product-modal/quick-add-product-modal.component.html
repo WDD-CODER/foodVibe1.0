@@ -1,5 +1,10 @@
 @if (isOpen_()) {
-  <app-modal-shell size="md" labelledBy="quick-add-title" (dismissed)="onCancel()">
+  <app-modal-shell
+    size="md"
+    labelledBy="quick-add-title"
+    [dismissible]="!isSubmitting_() && !aiLoading_()"
+    (dismissed)="onCancel()"
+  >
     <h3 id="quick-add-title" class="quick-add-product-modal__title">
       {{ 'quick_add_product' | translatePipe }}
     </h3>
