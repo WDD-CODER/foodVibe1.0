@@ -1,0 +1,40 @@
+@if (visible()) {
+  <section
+    class="setup-card c-glass-panel"
+    data-testid="setup-card"
+    dir="rtl"
+    [attr.aria-label]="'setup_card_title' | translatePipe"
+  >
+    <header class="setup-card__head">
+      <span class="setup-card__icon"><lucide-icon name="clipboard-list" [size]="16" /></span>
+      <h2 class="setup-card__title">{{ 'setup_card_title' | translatePipe }}</h2>
+      <span class="setup-card__progress" data-testid="setup-progress">
+        {{ doneRequired() }} {{ 'setup_progress' | translatePipe }}
+      </span>
+      <button type="button" class="c-btn-ghost--sm" data-testid="setup-hide" (click)="hide()">
+        {{ 'hide' | translatePipe }}
+      </button>
+    </header>
+    <ul class="setup-card__steps">
+      @for (step of steps(); track step.key) {
+        <li class="setup-step" [class.setup-step--done]="step.done" [attr.data-testid]="'setup-step-' + step.key">
+          @if (step.done) {
+            <lucide-icon class="setup-step__mark" name="circle-check" [size]="18" data-testid="setup-step-done" />
+          } @else {
+            <span class="setup-step__mark setup-step__mark--empty" aria-hidden="true"></span>
+          }
+          @if (step.done) {
+            <span class="setup-step__label">{{ step.labelKey | translatePipe }}</span>
+          } @else {
+            <a class="setup-step__link" [routerLink]="step.path" [queryParams]="step.queryParams">
+              {{ step.labelKey | translatePipe }}
+            </a>
+          }
+          @if (step.optional) {
+            <span class="setup-step__optional">({{ 'setup_optional' | translatePipe }})</span>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}

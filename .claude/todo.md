@@ -496,6 +496,13 @@
 - [ ] P8: Add the Hebrew texts, the sort icon and the folder map entry — 18 dictionary keys, ArrowUpDown, pages breadcrumbs — public/assets/data/dictionary.json, src/app/app.config.ts, src/app/pages/breadcrumbs.md
 - [ ] P9: Build, test and hand over the admin dashboard checks — ng build, server suite, listed specs, log-query; Human runs the [human] items — this plan file
 
+### Plan 449 — Close three staff permission holes found by the security review (`plans/449-close-three-staff-permission-holes-found-by-the-security-review.plan.md`)
+
+- [ ] S1: Stop staff from moving a category into an owner-only list such as event types — in `authorizeEdit`, use `editTaxonomy` when the stored OR the merged doc has a kind in `LOCKED_TAXONOMY_KINDS`; server test — `server/routes/generic.js`, `server/test/**`
+- [ ] S2: Catch staff moving a price between suppliers or purchase units — `moneySignature` keys values by `sources[].supplierId` / `purchaseOptions[].unitSymbol`, maps 0/null/absent to one value; unit + route tests — `server/utils/permissions.js`, `server/test/**`
+- [ ] S3: Allow only the owner to replace a whole list at once — owner check at the top of `router.put('/:type')`, `withoutServerEventFields` for menuEvents; tests for staff 403 / owner 200 — `server/routes/generic.js`, `server/test/**`
+- [ ] S4: Build, run all server tests, write the run file with the validation card — `docs/mvp/runs/449.md`
+
 ## Where things live
 
 - **Open work** — numbered groups §1–§6 above (this file only).

@@ -3,11 +3,13 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/user.model');
-const { cloneMasterDataToUser } = require('../services/clone-master');
-const { syncMasterToUser } = require('../services/sync-master');
+const { cloneMasterDataToBusiness } = require('../services/clone-master');
+const { syncMasterToBusiness } = require('../services/sync-master');
 const { getMasterVersion } = require('../services/master-version');
 const { newId } = require('../utils/id');
-const { createBusinessFor, ensureBusinessForUser } = require('../services/business');
+const { isValidUsername, isValidPasswordHash } = require('../utils/username');
+const { NAME_MAX_LENGTH } = require('../generated/schemas/base.schema');
+const { createBusinessFor, ensureBusinessForUser, getBusiness, setBusinessSyncedVersion } = require('../services/business');
 
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -68,17 +70,17 @@ function isDbUnavailableError(err) {
 }
 
 /**
- * Plan 424: the one place an access token is signed. Carries the business fields next to the
- * legacy `role` (plan 426 removes the last client read of it; plan 425 drops the role fallback).
+ * The one place an access token is signed. Plan 426: the payload is exactly the C-USER contract
+ * (`userId, name, businessId, businessRole, isPlatformAdmin`) — no `role`. Platform-admin power comes
+ * from the `isPlatformAdmin` flag only.
  */
 function signAccess(user) {
   const payload = {
     userId: String(user._id),
     name: user.name,
-    role: user.role || 'user',
     businessId: user.businessId ?? null,
     businessRole: user.businessRole ?? null,
-    isPlatformAdmin: user.isPlatformAdmin === true || user.role === 'admin',
+    isPlatformAdmin: user.isPlatformAdmin === true,
   };
   return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
 }
@@ -90,11 +92,25 @@ function toPublicUser(user) {
     name: user.name,
     email: user.email,
     imgUrl: user.imgUrl || '',
-    role: user.role || 'user',
     businessId: user.businessId ?? null,
     businessRole: user.businessRole ?? null,
-    isPlatformAdmin: user.isPlatformAdmin === true || user.role === 'admin',
+    isPlatformAdmin: user.isPlatformAdmin === true,
   };
+}
+
+/** Why this user may not hold a session, or null: no business yet, or removed from it. */
+function blockedReason(user) {
+  if (!user.businessId) return 'NO_BUSINESS';
+  if (user.removedAt) return 'USER_REMOVED';
+  return null;
+}
+
+/** Syncs the user's business with the master catalog and records the version on the business. */
+async function syncBusinessOf(user, masterVersion) {
+  const business = await getBusiness(user.businessId);
+  if (!business) return;
+  await syncMasterToBusiness(business._id, { createdBy: business.ownerId });
+  await setBusinessSyncedVersion(business._id, masterVersion ?? await getMasterVersion());
 }
 
 /**
@@ -134,16 +150,14 @@ function verifyPbkdf2(plain, stored) {
 
 router.post('/signup', signupLimiter, async (req, res) => {
   try {
-    const { name, email, imgUrl, password } = req.body;
+    const { name, email, imgUrl, password, businessName } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'name, email, and password are required' });
     }
 
     // Validate username format: trimmed, 3–20 chars, alphanumeric + _ and -
-    const trimmedName = name.trim();
-    const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-    if (trimmedName.length < 3 || trimmedName.length > 20 || !USERNAME_REGEX.test(trimmedName)) {
+    if (!isValidUsername(name)) {
       return res.status(400).json({ error: 'INVALID_USERNAME' });
     }
 
@@ -152,6 +166,11 @@ router.post('/signup', signupLimiter, async (req, res) => {
     if (!EMAIL_REGEX.test(email.trim())) {
       return res.status(400).json({ error: 'INVALID_EMAIL' });
     }
+
+    // Plan 426: the business name is required (1–200 chars after trim).
+    const trimmedBusinessName = typeof businessName === 'string' ? businessName.trim() : '';
+    if (!trimmedBusinessName) return res.status(400).json({ error: 'BUSINESS_NAME_REQUIRED' });
+    if (trimmedBusinessName.length > NAME_MAX_LENGTH) return res.status(400).json({ error: 'BUSINESS_NAME_TOO_LONG' });
 
     // Note: password strength (min length, letter+digit, username/email check) is enforced
     // client-side only. The password arrives pre-hashed (saltHex:hashHex) from the Angular
@@ -168,8 +187,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
 
     // Angular already hashed the password client-side (PBKDF2 saltHex:hashHex).
     // Validate format before storing — reject anything that doesn't match.
-    const PBKDF2_FORMAT = /^[0-9a-f]{32}:[0-9a-f]{64}$/;
-    if (!PBKDF2_FORMAT.test(password)) {
+    if (!isValidPasswordHash(password)) {
       return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' });
     }
     const passwordHash = password;
@@ -179,9 +197,8 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const user = created.toObject();
 
     // Plan 424: every new user starts as the owner of their own business.
-    await createBusinessFor(user, { masterVersion });
-    await cloneMasterDataToUser(_id, { businessId: user.businessId });
-    await User.updateOne({ _id }, { lastSyncedMasterVersion: masterVersion });
+    const business = await createBusinessFor(user, { name: trimmedBusinessName, masterVersion });
+    await cloneMasterDataToBusiness(business._id, { createdBy: String(_id) });
 
     const token = signAccess(user);
     const refreshToken = jwt.sign({ userId: _id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
@@ -242,6 +259,10 @@ router.post('/login', loginLimiter, async (req, res) => {
       await User.updateOne({ _id: user._id }, { failedAttempts: 0, lockedUntil: null });
     }
 
+    // Plan 425: no session for a user without a business or removed from it (no token, no cookie).
+    const blocked = blockedReason(user);
+    if (blocked) return res.status(403).json({ error: blocked });
+
     const token = signAccess(user);
     const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
@@ -253,9 +274,7 @@ router.post('/login', loginLimiter, async (req, res) => {
     });
 
     try {
-      await syncMasterToUser(user._id, { businessId: user.businessId ?? undefined });
-      const masterVersion = await getMasterVersion();
-      await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
+      await syncBusinessOf(user);
     } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.login.sync_failed' }); }
 
     const publicUser = toPublicUser(user);
@@ -287,6 +306,13 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     const user = await User.findById(payload.userId).lean();
     if (!user) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
+    // Plan 425: the existing client interceptor signs the user out on a 401 refresh.
+    const blocked = blockedReason(user);
+    if (blocked) {
+      res.clearCookie(REFRESH_COOKIE, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+      return res.status(401).json({ error: blocked });
+    }
+
     const token = signAccess(user);
 
     const newRefreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
@@ -302,15 +328,16 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     // Version-gated (plan 309 M2): master docs are only ever written by seed-master.js or a
     // manually-run legacy-import/fix script (see master-version.js) — never by a live user
     // flow — so most refreshes have nothing to sync. Skip the full multi-collection diff
-    // when this user's last-synced version already matches the current one.
-    getMasterVersion()
-      .then(async (masterVersion) => {
-        if ((user.lastSyncedMasterVersion || 0) === masterVersion) {
+    // when this user's business was last synced to the current version (plan 425: gate on the business).
+    Promise.all([getMasterVersion(), getBusiness(user.businessId)])
+      .then(async ([masterVersion, business]) => {
+        if (!business) return;
+        if ((business.lastSyncedMasterVersion || 0) === masterVersion) {
           req.log.debug({ event: 'auth.refresh.sync_skipped', userId: String(user._id) });
           return;
         }
-        await syncMasterToUser(user._id, { businessId: user.businessId ?? undefined });
-        await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
+        await syncMasterToBusiness(business._id, { createdBy: business.ownerId });
+        await setBusinessSyncedVersion(business._id, masterVersion);
       })
       .catch(syncErr => req.log.error({ err: syncErr, event: 'auth.refresh.sync_failed' }));
 
@@ -370,9 +397,7 @@ router.post('/guest', async (req, res) => {
     });
 
     try {
-      await syncMasterToUser('dev-guest', { businessId: guest.businessId });
-      const masterVersion = await getMasterVersion();
-      await User.updateOne({ _id: 'dev-guest' }, { lastSyncedMasterVersion: masterVersion });
+      await syncBusinessOf(guest);
     } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.guest.sync_failed' }); }
 
     return res.json({

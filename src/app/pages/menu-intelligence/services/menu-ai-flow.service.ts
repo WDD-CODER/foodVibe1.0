@@ -36,7 +36,6 @@ export class MenuAiFlowService {
           status,
           recipeId: status === 'matched' ? (bestMatch?.recipeId ?? null) : null,
           candidates,
-          predictedTakeRate: dish.predictedTakeRate,
           servingPortions: dish.serving_portions,
           sellPrice: dish.sell_price
         }
@@ -95,10 +94,7 @@ export class MenuAiFlowService {
         const itemGroup = this.fb_.group({
           recipeId: [recipeId ?? '', Validators.required],
           recipeType: ['dish'],
-          predictedTakeRate: [
-            dish.predictedTakeRate ?? 0.4,
-            [Validators.required, Validators.min(0), Validators.max(1)]
-          ],
+          coefficient_override: [null as number | null],
           sell_price: [dish.sellPrice ?? 0],
           food_cost_money: [0],
           food_cost_pct: [0],

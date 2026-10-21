@@ -29,17 +29,17 @@ beforeEach(async () => {
 });
 
 // push-to-master is admin-only since Plan 322 (requireAdmin); userA is the admin caller.
-const USER_A = { userId: 'userA', role: 'admin' };
+const USER_A = { userId: 'userA', businessId: 'b_userA', role: 'admin' };
 const tokenA = () => signTestToken(USER_A);
-const tokenPlain = () => signTestToken({ userId: 'userA', role: 'user' });
+const tokenPlain = () => signTestToken({ userId: 'userA', businessId: 'b_userA', role: 'user' });
 
 describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
   it('a plain non-admin user is rejected with 403 (admin-only since Plan 322)', async () => {
     await testDb().collection('products').insertOne({
-      _id: 'm1', userId: '__master__', nameHebrew: 'old master value',
+      _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'old master value',
     });
     await testDb().collection('products').insertOne({
-      _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true, nameHebrew: 'my edit',
+      _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: true, nameHebrew: 'my edit',
     });
     const res = await request(app)
       .put('/api/v1/data/products/u1/push-to-master')
@@ -48,24 +48,24 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
   });
 
   it('CHARACTERIZATION: pushing overwrites the linked master document\'s content', async () => {
-    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'old' });
-    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true, nameHebrew: 'new' });
+    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'old' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: true, nameHebrew: 'new' });
     await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
-    const master = await testDb().collection('products').findOne({ _id: 'm1', userId: '__master__' });
+    const master = await testDb().collection('products').findOne({ _id: 'm1', userId: '__master__', businessId: '__master__' });
     expect(master.nameHebrew).toBe('new');
   });
 
   it('CHARACTERIZATION: pushing resets the caller\'s own _userModified back to false', async () => {
-    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'old' });
-    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true, nameHebrew: 'new' });
+    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'old' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: true, nameHebrew: 'new' });
     await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
     const mine = await testDb().collection('products').findOne({ _id: 'u1' });
     expect(mine._userModified).toBe(false);
   });
 
   it('CHARACTERIZATION: pushing bumps the master version', async () => {
-    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__' });
-    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true });
+    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', businessId: '__master__' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: true });
     const before = await testDb().collection('MASTER_META').findOne({ _id: 'version' });
     await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
     const after = await testDb().collection('MASTER_META').findOne({ _id: 'version' });
@@ -74,12 +74,12 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
 
   it('CHARACTERIZATION: reverse-remaps ingredient referenceId from the user\'s product id back to the master product id', async () => {
     await testDb().collection('products').insertMany([
-      { _id: 'mp1', userId: '__master__', nameHebrew: 'קמח' },
-      { _id: 'up1', userId: 'userA', _masterId: 'mp1', nameHebrew: 'קמח' },
+      { _id: 'mp1', userId: '__master__', businessId: '__master__', nameHebrew: 'קמח' },
+      { _id: 'up1', userId: 'userA', businessId: 'b_userA', _masterId: 'mp1', nameHebrew: 'קמח' },
     ]);
     await testDb().collection('recipes').insertMany([
-      { _id: 'mr1', userId: '__master__', nameHebrew: 'לחם' },
-      { _id: 'ur1', userId: 'userA', _masterId: 'mr1', _userModified: true, nameHebrew: 'לחם', ingredients: [{ referenceId: 'up1', type: 'product', nameSnapshot: 'קמח' }] },
+      { _id: 'mr1', userId: '__master__', businessId: '__master__', nameHebrew: 'לחם' },
+      { _id: 'ur1', userId: 'userA', businessId: 'b_userA', _masterId: 'mr1', _userModified: true, nameHebrew: 'לחם', ingredients: [{ referenceId: 'up1', type: 'product', nameSnapshot: 'קמח' }] },
     ]);
     await request(app).put('/api/v1/data/recipes/ur1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
     const master = await testDb().collection('recipes').findOne({ _id: 'mr1' });
@@ -87,39 +87,39 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
   });
 
   it('pushing a product never adds an ingredients field to the master copy (update path)', async () => {
-    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'old' });
-    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'm1', _userModified: true, nameHebrew: 'new' });
+    await testDb().collection('products').insertOne({ _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'old' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: true, nameHebrew: 'new' });
     await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
-    const master = await testDb().collection('products').findOne({ _id: 'm1', userId: '__master__' });
+    const master = await testDb().collection('products').findOne({ _id: 'm1', userId: '__master__', businessId: '__master__' });
     expect(master.nameHebrew).toBe('new');
     expect(master).not.toHaveProperty('ingredients');
   });
 
   it('pushing a self-linked product never adds an ingredients field to the new master copy (first-push path)', async () => {
-    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'u1', nameHebrew: 'חדש' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'u1', nameHebrew: 'חדש' });
     await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
     const mine = await testDb().collection('products').findOne({ _id: 'u1' });
-    const master = await testDb().collection('products').findOne({ _id: mine._masterId, userId: '__master__' });
+    const master = await testDb().collection('products').findOne({ _id: mine._masterId, userId: '__master__', businessId: '__master__' });
     expect(master).toBeTruthy();
     expect(master).not.toHaveProperty('ingredients');
   });
 
   it('first push of a recipe whose name a master dish already has is rejected with 409, master unchanged (plan 379)', async () => {
-    await testDb().collection('dishes').insertOne({ _id: 'md1', userId: '__master__', nameHebrew: 'רוטב' });
-    await testDb().collection('recipes').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'u1', nameHebrew: ' רוטב ' });
+    await testDb().collection('dishes').insertOne({ _id: 'md1', userId: '__master__', businessId: '__master__', nameHebrew: 'רוטב' });
+    await testDb().collection('recipes').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'u1', nameHebrew: ' רוטב ' });
     const res = await request(app).put('/api/v1/data/recipes/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
     expect(res.status).toBe(409);
-    expect(await testDb().collection('recipes').countDocuments({ userId: '__master__' })).toBe(0);
+    expect(await testDb().collection('recipes').countDocuments({ userId: '__master__', businessId: '__master__' })).toBe(0);
     const mine = await testDb().collection('recipes').findOne({ _id: 'u1' });
     expect(mine._masterId).toBe('u1');
   });
 
   it('first push of a product whose name master already has is rejected with 409 (plan 379)', async () => {
-    await testDb().collection('products').insertOne({ _id: 'mp1', userId: '__master__', nameHebrew: 'טחינה' });
-    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: 'u1', nameHebrew: 'טחינה' });
+    await testDb().collection('products').insertOne({ _id: 'mp1', userId: '__master__', businessId: '__master__', nameHebrew: 'טחינה' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: 'u1', nameHebrew: 'טחינה' });
     const res = await request(app).put('/api/v1/data/products/u1/push-to-master').set('Authorization', `Bearer ${tokenA()}`);
     expect(res.status).toBe(409);
-    expect(await testDb().collection('products').countDocuments({ userId: '__master__' })).toBe(1);
+    expect(await testDb().collection('products').countDocuments({ userId: '__master__', businessId: '__master__' })).toBe(1);
   });
 
   it('CHARACTERIZATION: pushing an unsupported type is rejected with 400', async () => {
@@ -130,7 +130,7 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
   });
 
   it('CHARACTERIZATION: pushing a document the caller does not own returns 404', async () => {
-    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userB', _masterId: 'm1' });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userB', businessId: 'b_userB', _masterId: 'm1' });
     const res = await request(app)
       .put('/api/v1/data/products/u1/push-to-master')
       .set('Authorization', `Bearer ${tokenA()}`);
@@ -138,7 +138,7 @@ describe('PUT /api/v1/data/:type/:id/push-to-master', () => {
   });
 
   it('CHARACTERIZATION: pushing a document with no linked master (_masterId not a string) is rejected with 400', async () => {
-    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', _masterId: null });
+    await testDb().collection('products').insertOne({ _id: 'u1', userId: 'userA', businessId: 'b_userA', _masterId: null });
     const res = await request(app)
       .put('/api/v1/data/products/u1/push-to-master')
       .set('Authorization', `Bearer ${tokenA()}`);

@@ -12,6 +12,8 @@ const authRouter = require('./routes/auth');
 const genericRouter = require('./routes/generic');
 const aiRouter = require('./routes/ai')
 const adminRouter = require('./routes/admin');
+const businessRouter = require('./routes/business');
+const eventsRouter = require('./routes/events');
 const logRouter = require('./routes/log');
 const { logger } = require('./logger');
 
@@ -178,8 +180,10 @@ app.use(cookieParser());
 // ---------------------------------------------------------------------------
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/data', genericRouter);
+app.use('/api/v1/events', eventsRouter);
 app.use('/api/v1/ai', aiRouter)
 app.use('/api/v1/admin', adminRouter);
+app.use('/api/v1/business', businessRouter);
 
 app.get('/api/v1/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 

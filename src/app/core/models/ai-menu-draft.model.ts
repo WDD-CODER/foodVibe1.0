@@ -1,6 +1,7 @@
 export interface AiMenuDishDraft {
   nameHebrew: string
-  predictedTakeRate: number | null
+  /** @deprecated plan 441: the AI may still send it; nothing reads it */
+  predictedTakeRate?: number | null
   serving_portions: number | null
   sell_price: number | null
 }

@@ -32,16 +32,16 @@ beforeEach(async () => {
   );
 });
 
-const USER_A = { userId: 'userA', role: 'user' };
-const USER_B = { userId: 'userB', role: 'user' };
+const USER_A = { userId: 'userA', businessId: 'b_userA', role: 'user' };
+const USER_B = { userId: 'userB', businessId: 'b_userB', role: 'user' };
 const tokenA = () => signTestToken(USER_A);
 const tokenB = () => signTestToken(USER_B);
 
 describe('GET /api/v1/data/:type', () => {
   it('CHARACTERIZATION: anonymous request returns __master__ documents', async () => {
     await testDb().collection('products').insertMany([
-      { _id: 'm1', userId: '__master__', nameHebrew: 'מלח' },
-      { _id: 'u1', userId: 'userA', nameHebrew: 'פלפל' },
+      { _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'מלח' },
+      { _id: 'u1', userId: 'userA', businessId: 'b_userA', nameHebrew: 'פלפל' },
     ]);
     const res = await request(app).get('/api/v1/data/products');
     expect(res.status).toBe(200);
@@ -50,9 +50,9 @@ describe('GET /api/v1/data/:type', () => {
 
   it('CHARACTERIZATION: authenticated request returns only that user\'s own documents', async () => {
     await testDb().collection('products').insertMany([
-      { _id: 'm1', userId: '__master__', nameHebrew: 'מלח' },
-      { _id: 'a1', userId: 'userA', nameHebrew: 'פלפל' },
-      { _id: 'b1', userId: 'userB', nameHebrew: 'סוכר' },
+      { _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'מלח' },
+      { _id: 'a1', userId: 'userA', businessId: 'b_userA', nameHebrew: 'פלפל' },
+      { _id: 'b1', userId: 'userB', businessId: 'b_userB', nameHebrew: 'סוכר' },
     ]);
     const res = await request(app)
       .get('/api/v1/data/products')
@@ -63,9 +63,9 @@ describe('GET /api/v1/data/:type', () => {
 
   it('plan 407: soft-deleted docs (in Trash or purged stubs) are excluded from reads', async () => {
     await testDb().collection('products').insertMany([
-      { _id: 'a1', userId: 'userA', nameHebrew: 'פלפל' },
-      { _id: 'a2', userId: 'userA', nameHebrew: 'שום', deletedAt: 1, deletedBy: 'userA' },
-      { _id: 'a3', userId: 'userA', _masterId: 'm3', deletedAt: 1, purgedAt: 2 },
+      { _id: 'a1', userId: 'userA', businessId: 'b_userA', nameHebrew: 'פלפל' },
+      { _id: 'a2', userId: 'userA', businessId: 'b_userA', nameHebrew: 'שום', deletedAt: 1, deletedBy: 'userA' },
+      { _id: 'a3', userId: 'userA', businessId: 'b_userA', _masterId: 'm3', deletedAt: 1, purgedAt: 2 },
     ]);
     const res = await request(app)
       .get('/api/v1/data/products')
@@ -88,7 +88,7 @@ describe('GET /api/v1/data/:type/:id', () => {
   });
 
   it('CHARACTERIZATION: does not return another user\'s document by id', async () => {
-    await testDb().collection('products').insertOne({ _id: 'b1', userId: 'userB', nameHebrew: 'סוכר' });
+    await testDb().collection('products').insertOne({ _id: 'b1', userId: 'userB', businessId: 'b_userB', nameHebrew: 'סוכר' });
     const res = await request(app)
       .get('/api/v1/data/products/b1')
       .set('Authorization', `Bearer ${tokenA()}`);
@@ -104,7 +104,7 @@ describe('GET /api/v1/data/:type/search', () => {
 
   it('CHARACTERIZATION: case-insensitive Latin prefix match, lean projection only', async () => {
     await testDb().collection('products').insertOne({
-      _id: 'a1', userId: 'userA', nameHebrew: 'Apple', baseUnit: 'kg', purchaseOptions: [], extra_field_: 'should not leak',
+      _id: 'a1', userId: 'userA', businessId: 'b_userA', nameHebrew: 'Apple', baseUnit: 'kg', purchaseOptions: [], extra_field_: 'should not leak',
     });
     const res = await request(app)
       .get('/api/v1/data/products/search?q=app')
@@ -133,9 +133,9 @@ describe('GET /api/v1/data/:type/count', () => {
 
   it('CHARACTERIZATION: filter=unapproved counts only this user\'s unapproved recipes', async () => {
     await testDb().collection('recipes').insertMany([
-      { _id: 'r1', userId: 'userA', isApproved: false },
-      { _id: 'r2', userId: 'userA', isApproved: true },
-      { _id: 'r3', userId: 'userB', isApproved: false },
+      { _id: 'r1', userId: 'userA', businessId: 'b_userA', isApproved: false },
+      { _id: 'r2', userId: 'userA', businessId: 'b_userA', isApproved: true },
+      { _id: 'r3', userId: 'userB', businessId: 'b_userB', isApproved: false },
     ]);
     const res = await request(app)
       .get('/api/v1/data/recipes/count?filter=unapproved')
@@ -160,7 +160,7 @@ describe('POST /api/v1/data/:type', () => {
     const res = await request(app)
       .post('/api/v1/data/products')
       .set('Authorization', `Bearer ${tokenA()}`)
-      .send(productBody({ _id: 'p1', userId: 'someone-else', _userModified: true }));
+      .send(productBody({ _id: 'p1', userId: 'someone-else', businessId: 'b_someone-else', _userModified: true }));
     expect(res.status).toBe(201);
     expect(res.body.userId).toBe('userA');
     expect(res.body._masterId).toBe('p1');
@@ -177,7 +177,7 @@ describe('POST /api/v1/data/:type', () => {
   });
 
   it('CHARACTERIZATION: duplicate _id for the same collection returns 409', async () => {
-    await testDb().collection('products').insertOne(stored(productBody(), { _id: 'dup', userId: 'userA' }));
+    await testDb().collection('products').insertOne(stored(productBody(), { _id: 'dup', userId: 'userA', businessId: 'b_userA' }));
     const res = await request(app)
       .post('/api/v1/data/products')
       .set('Authorization', `Bearer ${tokenA()}`)
@@ -193,7 +193,7 @@ describe('POST /api/v1/data/:type', () => {
 
 describe('PUT /api/v1/data/:type/:id', () => {
   it('CHARACTERIZATION: updates fields and sets _userModified: true', async () => {
-    await testDb().collection('products').insertOne(stored(productBody({ nameHebrew: 'old' }), { _id: 'p1', userId: 'userA', _userModified: false }));
+    await testDb().collection('products').insertOne(stored(productBody({ nameHebrew: 'old' }), { _id: 'p1', userId: 'userA', businessId: 'b_userA', _userModified: false }));
     const res = await request(app)
       .put('/api/v1/data/products/p1')
       .set('Authorization', `Bearer ${tokenA()}`)
@@ -204,18 +204,18 @@ describe('PUT /api/v1/data/:type/:id', () => {
   });
 
   it('CHARACTERIZATION: client-supplied userId/_masterId/_userModified in the body are ignored', async () => {
-    await testDb().collection('products').insertOne(stored(productBody(), { _id: 'p1', userId: 'userA', _masterId: 'm1', _userModified: false }));
+    await testDb().collection('products').insertOne(stored(productBody(), { _id: 'p1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: false }));
     const res = await request(app)
       .put('/api/v1/data/products/p1')
       .set('Authorization', `Bearer ${tokenA()}`)
-      .send({ userId: 'attacker', _masterId: 'spoofed', _userModified: false, nameHebrew: 'ok' });
+      .send({ userId: 'attacker', businessId: 'b_attacker', _masterId: 'spoofed', _userModified: false, nameHebrew: 'ok' });
     expect(res.body.userId).toBe('userA');
     expect(res.body._masterId).toBe('m1');
     expect(res.body._userModified).toBe(true);
   });
 
   it('CHARACTERIZATION: 404 when updating another user\'s document', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userB' });
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userB', businessId: 'b_userB' });
     const res = await request(app)
       .put('/api/v1/data/products/p1')
       .set('Authorization', `Bearer ${tokenA()}`)
@@ -224,7 +224,7 @@ describe('PUT /api/v1/data/:type/:id', () => {
   });
 
   it('CHARACTERIZATION: recipes/dishes reject an ingredient with referenceId but no nameSnapshot', async () => {
-    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA' }));
+    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', businessId: 'b_userA' }));
     const res = await request(app)
       .put('/api/v1/data/recipes/r1')
       .set('Authorization', `Bearer ${tokenA()}`)
@@ -234,7 +234,7 @@ describe('PUT /api/v1/data/:type/:id', () => {
   });
 
   it('CHARACTERIZATION: an ingredient with referenceId AND nameSnapshot is accepted', async () => {
-    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA' }));
+    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', businessId: 'b_userA' }));
     const res = await request(app)
       .put('/api/v1/data/recipes/r1')
       .set('Authorization', `Bearer ${tokenA()}`)
@@ -243,7 +243,7 @@ describe('PUT /api/v1/data/:type/:id', () => {
   });
 
   it('plan 403: a stale stored logistics: null the request did not send is unset, the save succeeds', async () => {
-    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', logistics: null }));
+    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', businessId: 'b_userA', logistics: null }));
     const res = await request(app)
       .put('/api/v1/data/recipes/r1')
       .set('Authorization', `Bearer ${tokenA()}`)
@@ -255,7 +255,7 @@ describe('PUT /api/v1/data/:type/:id', () => {
   });
 
   it('plan 403: logistics: null sent in the body is still rejected (schema not loosened)', async () => {
-    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', logistics: null }));
+    await testDb().collection('recipes').insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', businessId: 'b_userA', logistics: null }));
     const res = await request(app)
       .put('/api/v1/data/recipes/r1')
       .set('Authorization', `Bearer ${tokenA()}`)
@@ -268,7 +268,7 @@ describe('PUT /api/v1/data/:type/:id', () => {
 
 describe('DELETE /api/v1/data/:type/:id', () => {
   it('plan 407: delete sets deletedAt/deletedBy and keeps the whole doc (own item)', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', nameHebrew: 'x' });
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', businessId: 'b_userA', nameHebrew: 'x' });
     const before = Date.now();
     const res = await request(app)
       .delete('/api/v1/data/products/p1')
@@ -280,14 +280,14 @@ describe('DELETE /api/v1/data/:type/:id', () => {
   });
 
   it('plan 407: a master clone is soft-deleted the same way, lineage kept', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', _masterId: 'm1', nameHebrew: 'x' });
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', nameHebrew: 'x' });
     await request(app).delete('/api/v1/data/products/p1').set('Authorization', `Bearer ${tokenA()}`);
     const doc = await testDb().collection('products').findOne({ _id: 'p1' });
     expect(doc).toMatchObject({ _masterId: 'm1', nameHebrew: 'x', deletedBy: 'userA' });
   });
 
   it('plan 407: ?permanent=true hard-deletes an own item, even from Trash', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', deletedAt: 5 });
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', businessId: 'b_userA', deletedAt: 5 });
     const res = await request(app)
       .delete('/api/v1/data/products/p1?permanent=true')
       .set('Authorization', `Bearer ${tokenA()}`);
@@ -296,7 +296,7 @@ describe('DELETE /api/v1/data/:type/:id', () => {
   });
 
   it('plan 407: ?permanent=true shrinks a master clone to a stub that sync never re-clones', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', _masterId: 'm1', nameHebrew: 'x', deletedAt: 5, deletedBy: 'userA' });
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', nameHebrew: 'x', deletedAt: 5, deletedBy: 'userA' });
     await request(app).delete('/api/v1/data/products/p1?permanent=true').set('Authorization', `Bearer ${tokenA()}`);
     const stub = await testDb().collection('products').findOne({ _id: 'p1' });
     expect(stub).toMatchObject({ _masterId: 'm1', deletedAt: 5, deletedBy: 'userA', _userModified: true });
@@ -305,21 +305,21 @@ describe('DELETE /api/v1/data/:type/:id', () => {
   });
 
   it('plan 407: a plain delete of a doc already in Trash is a 404', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', deletedAt: 5 });
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', businessId: 'b_userA', deletedAt: 5 });
     const res = await request(app).delete('/api/v1/data/products/p1').set('Authorization', `Bearer ${tokenA()}`);
     expect(res.status).toBe(404);
   });
 
   it('plan 407: a non-Trash collection is still hard-deleted', async () => {
-    await testDb().collection('activity_log').insertOne({ _id: 'l1', userId: 'userA' });
+    await testDb().collection('activity_log').insertOne({ _id: 'l1', userId: 'userA', businessId: 'b_userA' });
     await request(app).delete('/api/v1/data/activity_log/l1').set('Authorization', `Bearer ${tokenA()}`);
     expect(await testDb().collection('activity_log').findOne({ _id: 'l1' })).toBeNull();
   });
 
   it('CHARACTERIZATION: deleting a product referenced by a recipe ingredient is blocked with 409', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA' });
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', businessId: 'b_userA' });
     await testDb().collection('recipes').insertOne({
-      _id: 'r1', userId: 'userA', nameHebrew: 'מרק', ingredients: [{ referenceId: 'p1', nameSnapshot: 'x' }],
+      _id: 'r1', userId: 'userA', businessId: 'b_userA', nameHebrew: 'מרק', ingredients: [{ referenceId: 'p1', nameSnapshot: 'x' }],
     });
     const res = await request(app)
       .delete('/api/v1/data/products/p1')
@@ -329,7 +329,7 @@ describe('DELETE /api/v1/data/:type/:id', () => {
   });
 
   it('CHARACTERIZATION: an unreferenced product deletes normally', async () => {
-    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA' });
+    await testDb().collection('products').insertOne({ _id: 'p1', userId: 'userA', businessId: 'b_userA' });
     const res = await request(app)
       .delete('/api/v1/data/products/p1')
       .set('Authorization', `Bearer ${tokenA()}`);
@@ -340,9 +340,9 @@ describe('DELETE /api/v1/data/:type/:id', () => {
 describe('DELETE /api/v1/data/:type/bulk', () => {
   it('CHARACTERIZATION: deletes only the ids owned by the caller', async () => {
     await testDb().collection('products').insertMany([
-      { _id: 'a1', userId: 'userA' },
-      { _id: 'a2', userId: 'userA' },
-      { _id: 'b1', userId: 'userB' },
+      { _id: 'a1', userId: 'userA', businessId: 'b_userA' },
+      { _id: 'a2', userId: 'userA', businessId: 'b_userA' },
+      { _id: 'b1', userId: 'userB', businessId: 'b_userB' },
     ]);
     const res = await request(app)
       .delete('/api/v1/data/products/bulk')
@@ -375,8 +375,8 @@ describe('PUT /api/v1/data/:type (whole-collection replace)', () => {
 
   it('CHARACTERIZATION: replaces the caller\'s entire collection, reassigns a colliding id', async () => {
     await testDb().collection('VERSION_HISTORY').insertMany([
-      { _id: 'old1', userId: 'userA' },
-      { _id: 'taken', userId: 'userB' },
+      { _id: 'old1', userId: 'userA', businessId: 'b_userA' },
+      { _id: 'taken', userId: 'userB', businessId: 'b_userB' },
     ]);
     const res = await request(app)
       .put('/api/v1/data/VERSION_HISTORY')
@@ -384,10 +384,10 @@ describe('PUT /api/v1/data/:type (whole-collection replace)', () => {
       .set('X-Confirm-Replace', 'true')
       .send([{ _id: 'taken', nameHebrew: 'x' }]);
     expect(res.status).toBe(200);
-    const mine = await testDb().collection('VERSION_HISTORY').find({ userId: 'userA' }).toArray();
+    const mine = await testDb().collection('VERSION_HISTORY').find({ userId: 'userA', businessId: 'b_userA' }).toArray();
     expect(mine).toHaveLength(1);
     expect(mine[0]._id).not.toBe('taken'); // reassigned — 'taken' still belongs to userB
-    const othersStillIntact = await testDb().collection('VERSION_HISTORY').findOne({ _id: 'taken', userId: 'userB' });
+    const othersStillIntact = await testDb().collection('VERSION_HISTORY').findOne({ _id: 'taken', userId: 'userB', businessId: 'b_userB' });
     expect(othersStillIntact).not.toBeNull();
   });
 });

@@ -1,3 +1,8 @@
 @use 'layout';
 @use 'paper-ui';
 @use 'toolbar';
+
+/* Plan 441: "enter guest count" hint under the meta line (the .c-field-error engine does the look). */
+.guest-hint {
+  text-align: center;
+}

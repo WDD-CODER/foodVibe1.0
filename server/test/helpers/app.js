@@ -37,9 +37,18 @@ async function teardownTestApp() {
   if (mongod) await mongod.stop();
 }
 
-/** Signs a test-only access token for the given user payload, e.g. { userId, role }. */
+/**
+ * Signs a test-only access token for the given user payload, e.g. { userId, role }.
+ * Plan 425: defaults to a one-person business `b_<userId>` owned by that user; every default is overridable
+ * (pass `businessId` / `businessRole` / `isPlatformAdmin`). `isPlatformAdmin` defaults to `role === 'admin'`.
+ */
 function signTestToken(payload) {
-  return jwt.sign(payload, TEST_JWT_ACCESS_SECRET);
+  return jwt.sign({
+    businessId: 'b_' + payload.userId,
+    businessRole: 'owner',
+    isPlatformAdmin: payload.role === 'admin',
+    ...payload,
+  }, TEST_JWT_ACCESS_SECRET);
 }
 
 /** Direct handle to the underlying native db, for seeding fixtures / asserting raw state. */

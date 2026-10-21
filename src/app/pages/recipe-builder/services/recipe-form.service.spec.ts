@@ -4,6 +4,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { FormArray, FormBuilder } from '@angular/forms'
 import { signal } from '@angular/core'
 import { RecipeCostService } from '@services/recipe-cost.service'
+import { StationRegistryService } from '@services/station-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import type { Product } from '@models/product.model'
 import type { Recipe } from '@models/recipe.model'
@@ -111,6 +112,69 @@ describe('RecipeFormService.patchFormFromRecipe ingredient cost', () => {
     const f = form()
     service.patchFormFromRecipe(f, recipe('missing'))
     expect((f.get('ingredients') as FormArray).at(0).get('total_cost')?.value).toBe(5)
+  })
+})
+
+// Plan 436 — the station chosen in the recipe header is saved and restored.
+describe('RecipeFormService default station', () => {
+  let service: RecipeFormService
+  let fb: FormBuilder
+
+  beforeEach(() => {
+    const stations = jasmine.createSpyObj<StationRegistryService>('StationRegistryService', ['hasStation'])
+    stations.hasStation.and.callFake((k: string) => ['חם', 'קר'].includes(k))
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: StationRegistryService, useValue: stations }
+      ]
+    })
+    service = TestBed.inject(RecipeFormService)
+    fb = TestBed.inject(FormBuilder)
+  })
+
+  const form = (station: string) =>
+    fb.group({
+      nameHebrew: ['x'],
+      recipe_type: ['preparation'],
+      serving_portions: [1],
+      yield_conversions: fb.array([fb.group({ amount: [1], unit: ['gram'] })]),
+      ingredients: fb.array([]),
+      workflow_items: fb.array([]),
+      total_weight_g: [0],
+      total_cost: [0],
+      labels: [[] as string[]],
+      course: [''],
+      default_station: [station],
+      logistics: fb.group({ baseline: fb.array([]) })
+    })
+
+  it('saves a known station key', () => {
+    expect(service.buildRecipeFromForm(form('קר'), 'r1', false).defaultStation).toBe('קר')
+  })
+
+  it('saves an empty station for an unknown key', () => {
+    expect(service.buildRecipeFromForm(form('לא קיימת'), 'r1', false).defaultStation).toBe('')
+  })
+
+  it('saves an empty station when none is chosen', () => {
+    expect(service.buildRecipeFromForm(form(''), 'r1', false).defaultStation).toBe('')
+  })
+
+  it('fills default_station from the recipe when the form is patched', () => {
+    const f = form('')
+    service.patchFormFromRecipe(f, {
+      _id: 'r1',
+      nameHebrew: 'מתכון',
+      ingredients: [],
+      steps: [],
+      yieldAmount: 1,
+      yieldUnit: 'gram',
+      defaultStation: 'קר',
+      isApproved: false
+    } as unknown as Recipe)
+    expect(f.get('default_station')?.value).toBe('קר')
   })
 })
 

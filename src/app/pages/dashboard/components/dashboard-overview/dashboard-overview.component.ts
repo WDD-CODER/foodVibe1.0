@@ -14,6 +14,7 @@ import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directi
 import { ActivityValuePipe } from 'src/app/core/pipes/activity-value.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import type { DashboardTab } from '../../dashboard.page'
+import { SetupChecklistCardComponent } from '../setup-checklist-card/setup-checklist-card.component'
 
 const ENTITY_ICONS: Record<ActivityEntityType, string> = {
   product: 'package',
@@ -36,7 +37,8 @@ interface ActivityDayGroup {
     TranslatePipe,
     ActivityValuePipe,
     ScrollIndicatorsDirective,
-    PageHeaderComponent
+    PageHeaderComponent,
+    SetupChecklistCardComponent
   ],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',

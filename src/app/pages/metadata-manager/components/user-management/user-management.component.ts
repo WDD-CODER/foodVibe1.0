@@ -3,6 +3,7 @@ import { UserAdminService } from '@services/user-admin.service'
 import { UserService } from '@services/user.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
 import { AdminUser } from '@models/admin-user.model'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -20,15 +21,16 @@ export class UserManagementComponent {
   private confirmModal = inject(ConfirmModalService)
   private userMsg = inject(UserMsgService)
   private userService = inject(UserService)
+  private translation = inject(TranslationService)
 
   protected users_ = signal<AdminUser[]>([])
   protected isLoading_ = signal(false)
-  protected isAdmin = this.userService.isAdmin_
-  protected currentUserId = computed(() => this.userService.user_()?._id ?? '')
+  protected isPlatformAdmin_ = this.userService.isPlatformAdmin_
+  protected currentBusinessId = computed(() => this.userService.user_()?.businessId ?? '')
 
   constructor() {
     effect(() => {
-      if (this.isAdmin()) this.loadUsers()
+      if (this.isPlatformAdmin_()) this.loadUsers()
     })
   }
 
@@ -45,18 +47,34 @@ export class UserManagementComponent {
     })
   }
 
+  /** The admin's own business can't be deleted (the server refuses it too). */
+  protected isOwnBusiness(user: AdminUser): boolean {
+    return !!user.businessId && user.businessId === this.currentBusinessId()
+  }
+
   async onDeleteUser(user: AdminUser): Promise<void> {
-    const confirmed = await this.confirmModal.open(`מחיקת המשתמש "${user.name}" תמחק את כל הנתונים שלו לצמיתות.`, {
-      variant: 'danger',
-      saveLabel: 'remove'
-    })
-    if (!confirmed) return
+    const isOwner = user.businessRole === 'owner'
+    const nameInQuotes = ` "${isOwner ? (user.businessName ?? user.name) : user.name}"`
+    const first = await this.confirmModal.open(
+      this.translation.translate(isOwner ? 'delete_business_confirm' : 'delete_staff_user_confirm') + nameInQuotes,
+      { variant: 'danger', saveLabel: 'remove' }
+    )
+    if (!first) return
+    if (isOwner) {
+      const second = await this.confirmModal.open(this.translation.translate('delete_business_confirm_final'), {
+        variant: 'danger',
+        saveLabel: 'remove'
+      })
+      if (!second) return
+    }
     this.userAdmin.deleteUser(user._id).subscribe({
-      next: () => {
-        this.userMsg.onSetSuccessMsg('המשתמש נמחק בהצלחה')
+      next: (res) => {
+        this.userMsg.onSetSuccessMsg(
+          this.translation.translate(res.deletedBusiness ? 'business_deleted' : 'user_deleted')
+        )
         this.loadUsers()
       },
-      error: () => this.userMsg.onSetErrorMsg('שגיאה במחיקת המשתמש')
+      error: () => this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
     })
   }
 }

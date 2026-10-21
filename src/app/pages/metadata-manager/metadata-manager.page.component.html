@@ -4,7 +4,7 @@
        shared scroll rail (plan 350) shows an arrow only on the side with more tabs. -->
   <nav class="mm-jump-nav-row" [attr.aria-label]="'metadata_manager' | translatePipe">
     <app-scroll-rail class="mm-jump-nav">
-      @for (s of jumpSections; track s.id) {
+      @for (s of jumpSections(); track s.id) {
         <button type="button" class="c-tab-pill" [class.active]="isFront(s.id)" (click)="bringToFront(s.id)">
           {{ s.labelKey | translatePipe }}
         </button>
@@ -154,10 +154,14 @@
       </div>
     </section>
 
+    <app-coefficient-manager id="mm-sec-coefficients" [style.order]="orderFor('mm-sec-coefficients')" />
     <app-preparation-category-manager id="mm-sec-preparation" [style.order]="orderFor('mm-sec-preparation')" />
     <app-section-category-manager id="mm-sec-section" [style.order]="orderFor('mm-sec-section')" />
-    <app-user-management id="mm-sec-user" [style.order]="orderFor('mm-sec-user')" />
-    <app-ai-model-manager id="mm-sec-ai-models" [style.order]="orderFor('mm-sec-ai-models')" />
+    <app-station-manager id="mm-sec-station" [style.order]="orderFor('mm-sec-station')" />
+    @if (isPlatformAdmin_()) {
+      <app-user-management id="mm-sec-user" [style.order]="orderFor('mm-sec-user')" />
+      <app-ai-model-manager id="mm-sec-ai-models" [style.order]="orderFor('mm-sec-ai-models')" />
+    }
   </div>
 
   @if (editingUnit_(); as unit) {

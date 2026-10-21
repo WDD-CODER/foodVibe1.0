@@ -4,7 +4,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { computeEventPlan } from './event-plan.engine'
 import type { EventPlan, EventPlanInput, UnitConversion } from './event-plan.types'
-import { portionsFromDerived } from './portions-from-derived'
+import { computePortions } from './portions'
 
 /** Plan 433 — the Angular entry point to the engine: builds its input from the kitchen state and the unit registry. */
 @Injectable({ providedIn: 'root' })
@@ -15,7 +15,9 @@ export class EventPlanService {
   /** The full plan of an event; accepts the unsaved shape the menu page builds. */
   planFor(event: MenuEvent | Omit<MenuEvent, '_id'>): EventPlan {
     const full: MenuEvent = { ...event, _id: '_id' in event ? event._id : '' }
-    return computeEventPlan(this.buildInput(full, portionsFromDerived(full)))
+    const portions = computePortions(full, this.kitchenState_.recipes_())
+    const portionsByItem = new Map([...portions].map(([key, p]) => [key, p.portions]))
+    return computeEventPlan(this.buildInput(full, portionsByItem))
   }
 
   /** One dish alone for the given portions — its cost and whether it is partial. */
@@ -36,7 +38,6 @@ export class EventPlanService {
             {
               recipeId,
               recipeType: recipe?.recipeType ?? 'dish',
-              predictedTakeRate: 1,
               derivedPortions: portions
             }
           ]

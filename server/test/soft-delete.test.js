@@ -26,16 +26,16 @@ beforeEach(async () => {
 });
 
 const DAY = 24 * 60 * 60 * 1000;
-const tokenA = () => signTestToken({ userId: 'userA', role: 'user' });
-const tokenB = () => signTestToken({ userId: 'userB', role: 'user' });
-const tokenAdmin = () => signTestToken({ userId: 'userA', role: 'admin' });
+const tokenA = () => signTestToken({ userId: 'userA', businessId: 'b_userA', role: 'user' });
+const tokenB = () => signTestToken({ userId: 'userB', businessId: 'b_userB', role: 'user' });
+const tokenAdmin = () => signTestToken({ userId: 'userA', businessId: 'b_userA', role: 'admin' });
 const auth = (req, token = tokenA()) => req.set('Authorization', `Bearer ${token}`);
 const recipes = () => testDb().collection('recipes');
 const lazy = mod => require(mod);
 
 describe('Trash routes', () => {
   it('delete → listed in Trash, gone from the list → restore brings it back', async () => {
-    await recipes().insertOne(stored(recipeBody({ nameHebrew: 'מרק' }), { _id: 'r1', userId: 'userA' }));
+    await recipes().insertOne(stored(recipeBody({ nameHebrew: 'מרק' }), { _id: 'r1', userId: 'userA', businessId: 'b_userA' }));
 
     expect((await auth(request(app).delete('/api/v1/data/recipes/r1'))).status).toBe(200);
     expect((await auth(request(app).get('/api/v1/data/recipes'))).body).toEqual([]);
@@ -53,7 +53,7 @@ describe('Trash routes', () => {
   });
 
   it('a restored doc can be edited again (passes the schema)', async () => {
-    await recipes().insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', deletedAt: 5, deletedBy: 'userA' }));
+    await recipes().insertOne(stored(recipeBody(), { _id: 'r1', userId: 'userA', businessId: 'b_userA', deletedAt: 5, deletedBy: 'userA' }));
     await auth(request(app).put('/api/v1/data/recipes/r1/restore'));
     const res = await auth(request(app).put('/api/v1/data/recipes/r1')).send(recipeBody({ nameHebrew: 'חדש' }));
     expect(res.status).toBe(200);
@@ -61,10 +61,10 @@ describe('Trash routes', () => {
 
   it('Trash shows only the caller\'s deleted docs, never stubs', async () => {
     await recipes().insertMany([
-      stored(recipeBody(), { _id: 'a1', userId: 'userA', deletedAt: Date.now() }),
-      stored(recipeBody(), { _id: 'a2', userId: 'userA' }),
-      { _id: 'a3', schemaVersion: 2, userId: 'userA', _masterId: 'm3', deletedAt: Date.now(), purgedAt: Date.now() },
-      stored(recipeBody(), { _id: 'b1', userId: 'userB', deletedAt: Date.now() }),
+      stored(recipeBody(), { _id: 'a1', userId: 'userA', businessId: 'b_userA', deletedAt: Date.now() }),
+      stored(recipeBody(), { _id: 'a2', userId: 'userA', businessId: 'b_userA' }),
+      { _id: 'a3', schemaVersion: 2, userId: 'userA', businessId: 'b_userA', _masterId: 'm3', deletedAt: Date.now(), purgedAt: Date.now() },
+      stored(recipeBody(), { _id: 'b1', userId: 'userB', businessId: 'b_userB', deletedAt: Date.now() }),
     ]);
     const res = await auth(request(app).get('/api/v1/data/recipes/trash'));
     expect(res.body.map(d => d._id)).toEqual(['a1']);
@@ -72,8 +72,8 @@ describe('Trash routes', () => {
 
   it('restore of another user\'s doc, or a live one, is a 404', async () => {
     await recipes().insertMany([
-      stored(recipeBody(), { _id: 'b1', userId: 'userB', deletedAt: 5 }),
-      stored(recipeBody(), { _id: 'a1', userId: 'userA' }),
+      stored(recipeBody(), { _id: 'b1', userId: 'userB', businessId: 'b_userB', deletedAt: 5 }),
+      stored(recipeBody(), { _id: 'a1', userId: 'userA', businessId: 'b_userA' }),
     ]);
     expect((await auth(request(app).put('/api/v1/data/recipes/b1/restore'))).status).toBe(404);
     expect((await auth(request(app).put('/api/v1/data/recipes/a1/restore'))).status).toBe(404);
@@ -82,15 +82,15 @@ describe('Trash routes', () => {
   it('restore-all and empty Trash act on the caller\'s Trash only', async () => {
     const now = Date.now();
     await recipes().insertMany([
-      stored(recipeBody(), { _id: 'a1', userId: 'userA', deletedAt: now }),
-      stored(recipeBody(), { _id: 'a2', userId: 'userA', deletedAt: now, _masterId: 'm2' }),
-      stored(recipeBody(), { _id: 'b1', userId: 'userB', deletedAt: now }),
+      stored(recipeBody(), { _id: 'a1', userId: 'userA', businessId: 'b_userA', deletedAt: now }),
+      stored(recipeBody(), { _id: 'a2', userId: 'userA', businessId: 'b_userA', deletedAt: now, _masterId: 'm2' }),
+      stored(recipeBody(), { _id: 'b1', userId: 'userB', businessId: 'b_userB', deletedAt: now }),
     ]);
     const all = await auth(request(app).put('/api/v1/data/recipes/trash/restore-all'));
     expect(all.body).toEqual({ ok: true, restored: 2 });
     expect(await recipes().countDocuments({ deletedAt: { $exists: true } })).toBe(1);
 
-    await recipes().updateMany({ userId: 'userA' }, { $set: { deletedAt: now } });
+    await recipes().updateMany({ userId: 'userA', businessId: 'b_userA' }, { $set: { deletedAt: now } });
     const empty = await auth(request(app).delete('/api/v1/data/recipes/trash'));
     expect(empty.body).toEqual({ ok: true, disposed: 2 });
     expect(await recipes().findOne({ _id: 'a1' })).toBeNull();
@@ -107,10 +107,10 @@ describe('purgeExpired (30 days from the original delete date)', () => {
   it('removes only docs deleted more than 30 days ago; a master clone becomes a stub', async () => {
     const now = Date.now();
     await recipes().insertMany([
-      stored(recipeBody(), { _id: 'old-own', userId: 'userA', deletedAt: now - 31 * DAY }),
-      stored(recipeBody(), { _id: 'old-clone', userId: 'userA', _masterId: 'm1', deletedAt: now - 31 * DAY, deletedBy: 'userA' }),
-      stored(recipeBody(), { _id: 'young', userId: 'userA', deletedAt: now - 29 * DAY }),
-      stored(recipeBody(), { _id: 'live', userId: 'userA' }),
+      stored(recipeBody(), { _id: 'old-own', userId: 'userA', businessId: 'b_userA', deletedAt: now - 31 * DAY }),
+      stored(recipeBody(), { _id: 'old-clone', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', deletedAt: now - 31 * DAY, deletedBy: 'userA' }),
+      stored(recipeBody(), { _id: 'young', userId: 'userA', businessId: 'b_userA', deletedAt: now - 29 * DAY }),
+      stored(recipeBody(), { _id: 'live', userId: 'userA', businessId: 'b_userA' }),
     ]);
     const { purgeExpired } = lazy('../jobs/purge-deleted');
     const counts = await purgeExpired(testDb(), { now });
@@ -118,7 +118,7 @@ describe('purgeExpired (30 days from the original delete date)', () => {
     expect(await recipes().findOne({ _id: 'old-own' })).toBeNull();
     const stub = await recipes().findOne({ _id: 'old-clone' });
     expect(stub).toEqual({
-      _id: 'old-clone', schemaVersion: 2, userId: 'userA', _masterId: 'm1', _userModified: true,
+      _id: 'old-clone', schemaVersion: 2, userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: true,
       deletedAt: now - 31 * DAY, deletedBy: 'userA', purgedAt: now,
     });
     expect(await recipes().findOne({ _id: 'young' })).not.toBeNull();
@@ -130,12 +130,12 @@ describe('purgeExpired (30 days from the original delete date)', () => {
   it('the stub passes the stored-doc schema check', async () => {
     const { toStub } = lazy('../jobs/purge-deleted');
     const { checkStoredDoc } = lazy('../middleware/validate');
-    const stub = toStub({ _id: 'x', userId: 'u', _masterId: 'm', deletedAt: 1 }, 2);
+    const stub = toStub({ _id: 'x', userId: 'u', businessId: 'b_u', _masterId: 'm', deletedAt: 1 }, 2);
     expect(checkStoredDoc('recipes', stub).ok).toBe(true);
   });
 
   it('opening Trash runs the purge for that user', async () => {
-    await recipes().insertOne(stored(recipeBody(), { _id: 'old', userId: 'userA', deletedAt: Date.now() - 40 * DAY }));
+    await recipes().insertOne(stored(recipeBody(), { _id: 'old', userId: 'userA', businessId: 'b_userA', deletedAt: Date.now() - 40 * DAY }));
     const res = await auth(request(app).get('/api/v1/data/recipes/trash'));
     expect(res.body).toEqual([]);
     expect(await recipes().findOne({ _id: 'old' })).toBeNull();
@@ -143,40 +143,40 @@ describe('purgeExpired (30 days from the original delete date)', () => {
 });
 
 describe('master sync with deleted docs', () => {
-  const sync = userId => lazy('../services/sync-master').syncMasterToUser(userId);
+  const sync = userId => lazy('../services/sync-master').syncMasterToBusiness('b_' + userId, { createdBy: userId });
 
   it('never re-clones a master item whose clone the user deleted or purged', async () => {
     await testDb().collection('venues').insertMany([
-      { _id: 'm1', userId: '__master__', nameHebrew: 'א' },
-      { _id: 'm2', userId: '__master__', nameHebrew: 'ב' },
-      { _id: 'c1', userId: 'userA', _masterId: 'm1', _userModified: false, nameHebrew: 'א', deletedAt: 1 },
-      { _id: 'c2', userId: 'userA', _masterId: 'm2', deletedAt: 1, purgedAt: 2 },
+      { _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'א' },
+      { _id: 'm2', userId: '__master__', businessId: '__master__', nameHebrew: 'ב' },
+      { _id: 'c1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: false, nameHebrew: 'א', deletedAt: 1 },
+      { _id: 'c2', userId: 'userA', businessId: 'b_userA', _masterId: 'm2', deletedAt: 1, purgedAt: 2 },
     ]);
     const result = await sync('userA');
     expect(result.inserted).toBe(0);
-    expect(await testDb().collection('venues').countDocuments({ userId: 'userA' })).toBe(2);
+    expect(await testDb().collection('venues').countDocuments({ userId: 'userA', businessId: 'b_userA' })).toBe(2);
   });
 
   it('does not refresh a deleted clone from master (it stays as the user left it)', async () => {
     await testDb().collection('venues').insertMany([
-      { _id: 'm1', userId: '__master__', nameHebrew: 'חדש' },
-      { _id: 'c1', userId: 'userA', _masterId: 'm1', _userModified: false, nameHebrew: 'ישן', deletedAt: 1 },
+      { _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'חדש' },
+      { _id: 'c1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: false, nameHebrew: 'ישן', deletedAt: 1 },
     ]);
     await sync('userA');
     expect((await testDb().collection('venues').findOne({ _id: 'c1' })).nameHebrew).toBe('ישן');
   });
 
   it('skips a master item deleted from master (sync and signup clone)', async () => {
-    await testDb().collection('venues').insertOne({ _id: 'm1', userId: '__master__', nameHebrew: 'א', deletedAt: 1 });
+    await testDb().collection('venues').insertOne({ _id: 'm1', userId: '__master__', businessId: '__master__', nameHebrew: 'א', deletedAt: 1 });
     expect((await sync('userA')).inserted).toBe(0);
-    const { cloneMasterDataToUser } = lazy('../services/clone-master');
-    expect(await cloneMasterDataToUser('userB')).toBe(0);
+    const { cloneMasterDataToBusiness } = lazy('../services/clone-master');
+    expect(await cloneMasterDataToBusiness('b_userB', { createdBy: 'userB' })).toBe(0);
   });
 
   it('delete-from-master soft-deletes the master doc', async () => {
     await recipes().insertMany([
-      stored(recipeBody({ nameHebrew: 'משותף' }), { _id: 'm1', userId: '__master__' }),
-      stored(recipeBody({ nameHebrew: 'משותף' }), { _id: 'a1', userId: 'userA', _masterId: 'm1' }),
+      stored(recipeBody({ nameHebrew: 'משותף' }), { _id: 'm1', userId: '__master__', businessId: '__master__' }),
+      stored(recipeBody({ nameHebrew: 'משותף' }), { _id: 'a1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1' }),
     ]);
     const res = await auth(request(app).put('/api/v1/data/recipes/a1/delete-from-master'), tokenAdmin());
     expect(res.status).toBe(200);
@@ -188,22 +188,22 @@ describe('master sync with deleted docs', () => {
 describe('favorites are per user (plan 407)', () => {
   it('user A\'s favorite mark never reaches user B through push-to-master + sync', async () => {
     await recipes().insertMany([
-      stored(recipeBody({ nameHebrew: 'משותף' }), { _id: 'm1', userId: '__master__', _masterId: 'm1' }),
-      stored(recipeBody({ nameHebrew: 'משותף', favorite: true }), { _id: 'a1', userId: 'userA', _masterId: 'm1', _userModified: true }),
-      stored(recipeBody({ nameHebrew: 'משותף' }), { _id: 'b1', userId: 'userB', _masterId: 'm1', _userModified: false }),
+      stored(recipeBody({ nameHebrew: 'משותף' }), { _id: 'm1', userId: '__master__', businessId: '__master__', _masterId: 'm1' }),
+      stored(recipeBody({ nameHebrew: 'משותף', favorite: true }), { _id: 'a1', userId: 'userA', businessId: 'b_userA', _masterId: 'm1', _userModified: true }),
+      stored(recipeBody({ nameHebrew: 'משותף' }), { _id: 'b1', userId: 'userB', businessId: 'b_userB', _masterId: 'm1', _userModified: false }),
     ]);
     const push = await auth(request(app).put('/api/v1/data/recipes/a1/push-to-master'), tokenAdmin());
     expect(push.status).toBe(200);
     expect((await recipes().findOne({ _id: 'm1' })).favorite).toBeUndefined();
 
-    await lazy('../services/sync-master').syncMasterToUser('userB');
+    await lazy('../services/sync-master').syncMasterToBusiness('b_userB', { createdBy: 'userB' });
     const bList = await auth(request(app).get('/api/v1/data/recipes'), tokenB());
     expect(bList.body.map(r => r.favorite)).toEqual([undefined]);
     expect((await recipes().findOne({ _id: 'a1' })).favorite).toBe(true);
   });
 
   it('the old favoritedBy / hiddenBy arrays are rejected by the schema', async () => {
-    await recipes().insertOne(stored(recipeBody(), { _id: 'a1', userId: 'userA' }));
+    await recipes().insertOne(stored(recipeBody(), { _id: 'a1', userId: 'userA', businessId: 'b_userA' }));
     const res = await auth(request(app).put('/api/v1/data/recipes/a1')).send(recipeBody({ favoritedBy: ['userA'] }));
     expect(res.status).toBe(400);
   });

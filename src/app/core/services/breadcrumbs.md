@@ -28,6 +28,8 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `menu-event-data.service.ts` | Menu events CRUD | MenuEventDataService |
 | `menu-intelligence.service.ts` | Menu intelligence logic | MenuIntelligenceService |
 | `trash.service.ts` | Trash/restore | TrashService |
+| `business.service.ts` | The signed-in user's business (`business_`) | BusinessService |
+| `permission.service.ts` | Client mirror of the server permission checker; UI hides/locks by the same rules | PermissionService, PermissionAction |
 | `activity-log.service.ts` | Activity log | ActivityLogService, ActivityEntry, ACTIVITY_STORAGE_KEY |
 | `version-history.service.ts` | Version history | VersionHistoryService, VersionEntry |
 | `translation.service.ts` | Dictionary / Hebrew resolution | TranslationService |
@@ -60,10 +62,12 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `http-storage.adapter.ts` | HTTP-backed storage adapter | HttpStorageAdapter |
 | `master-push.service.ts` | Push local entity to master/global | MasterPushService |
 | `menu-event-type.service.ts` | Menu event type registry | MenuEventTypeService |
+| `event-type-snapshot.service.ts` | Freezes an event's event-type and serving-type coefficients when picked (plan 441) | EventTypeSnapshotService |
 | `menu-export.service.ts` | Menu export orchestration | MenuExportService |
 | `quick-edit-product-modal.service.ts` | Quick-edit product modal orchestration | QuickEditProductModalService |
 | `recipe-export.service.ts` | Recipe export orchestration | RecipeExportService |
 | `server-heartbeat.service.ts` | Server availability heartbeat | ServerHeartbeatService |
+| `station-registry.service.ts` | Kitchen stations (taxonomy kind `station`) for the recipe header and metadata manager | StationRegistryService |
 | `user-admin.service.ts` | User admin management | UserAdminService |
 | `loading.service.ts` | Global loading indicator state | LoadingService |
 

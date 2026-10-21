@@ -24,6 +24,7 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { TranslationService } from '@services/translation.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserService } from '@services/user.service'
+import { PermissionService } from '@services/permission.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { Recipe } from '@models/recipe.model'
@@ -113,6 +114,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly translationService = inject(TranslationService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly userService = inject(UserService)
+  private readonly permission = inject(PermissionService)
   private readonly heroFab = inject(HeroFabService)
   private readonly aiRecipeModal = inject(AiRecipeModalService)
   protected readonly rowActions = inject(RecipeRowActionsService)
@@ -120,6 +122,9 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoggedIn = this.userService.isLoggedIn
+  /** Staff may delete only the recipes and dishes they created (plan 428). */
+  protected readonly canDelete_ = (recipe: Recipe): boolean =>
+    this.permission.can('delete', { type: recipe.recipeType === 'dish' ? 'dishes' : 'recipes', doc: recipe })
   protected readonly isAdmin_ = this.userService.isAdmin_
   protected activeFilters_ = signal<Record<string, string[]>>({})
   protected searchQuery_ = signal<string>('')

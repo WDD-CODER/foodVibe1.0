@@ -1,0 +1,33 @@
+<section class="business-tab" dir="rtl">
+  <form class="business-form c-glass-panel" data-testid="business-settings-form" [formGroup]="form" (ngSubmit)="save()">
+    @for (field of fields; track field.key) {
+      <label class="business-field">
+        <span class="business-field__label">{{ field.labelKey | translatePipe }}</span>
+        <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
+          <input
+            type="number"
+            inputmode="decimal"
+            step="0.1"
+            dir="ltr"
+            [formControlName]="field.key"
+            [attr.data-testid]="'business-' + field.key"
+            [attr.aria-invalid]="hasError(field.key)"
+          />
+          <span class="business-field__suffix" aria-hidden="true">%</span>
+        </span>
+        @if (hasError(field.key)) {
+          <span class="c-field-error" role="alert" [attr.data-testid]="'business-error-' + field.key">
+            {{ field.errorKey | translatePipe }}
+          </span>
+        } @else {
+          <span class="business-field__help">{{ field.helpKey | translatePipe }}</span>
+        }
+      </label>
+    }
+    <div class="c-form-actions">
+      <button type="submit" class="c-btn-primary" data-testid="business-settings-save" [disabled]="!canSave()">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </form>
+</section>
