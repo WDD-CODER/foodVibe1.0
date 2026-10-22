@@ -5,11 +5,12 @@
     (keydown.escape)="close()"
     (mouseenter)="onEnter()"
     (mouseleave)="onLeave()"
-    (focusin)="pin()"
+    (focusin)="pin($event)"
   >
     <button
       type="button"
       class="c-chip amber partial-chip"
+      #chip
       aria-haspopup="dialog"
       [attr.aria-expanded]="isOpen_()"
       (click)="toggle()"
@@ -19,64 +20,68 @@
     </button>
     @if (isOpen_()) {
       <div
+        #popover
+        popover="manual"
         class="partial-popover"
-        [class.partial-popover--above]="placement() === 'above'"
+        [class.partial-popover--below]="isBelow_()"
         role="dialog"
         [attr.aria-label]="'missing_prices_title' | translatePipe"
       >
-        <h4 class="partial-title">{{ 'missing_prices_title' | translatePipe }}</h4>
-        <ul class="partial-list">
-          @for (row of rows_(); track row.key) {
-            <li class="partial-row" [attr.data-kind]="row.item.kind">
-              <div class="partial-row-head">
-                <span class="partial-name">{{ row.item.name }}</span>
-                @if (row.item.kind === 'unlinked') {
-                  <span class="partial-tag">{{ 'line_status_unlinked' | translatePipe }}</span>
-                } @else if (row.item.kind === 'deleted') {
-                  <span class="partial-tag">{{ 'line_status_deleted' | translatePipe }}</span>
+        <div #body class="partial-body">
+          <h4 class="partial-title">{{ 'missing_prices_title' | translatePipe }}</h4>
+          <ul class="partial-list">
+            @for (row of rows_(); track row.key) {
+              <li class="partial-row" [attr.data-kind]="row.item.kind">
+                <div class="partial-row-head">
+                  <span class="partial-name">{{ row.item.name }}</span>
+                  @if (row.item.kind === 'unlinked') {
+                    <span class="partial-tag">{{ 'line_status_unlinked' | translatePipe }}</span>
+                  } @else if (row.item.kind === 'deleted') {
+                    <span class="partial-tag">{{ 'line_status_deleted' | translatePipe }}</span>
+                  }
+                </div>
+                @if (row.recipeNames) {
+                  <span class="partial-used-in">{{ 'missing_used_in' | translatePipe }} {{ row.recipeNames }}</span>
                 }
-              </div>
-              @if (row.recipeNames) {
-                <span class="partial-used-in">{{ 'missing_used_in' | translatePipe }} {{ row.recipeNames }}</span>
-              }
-              @if (row.item.kind === 'unpriced') {
-                @if (row.canPrice) {
-                  <div class="partial-price">
-                    <label class="partial-price-label">
-                      <span>{{ perUnitLabel(row) }}</span>
-                      <input
-                        class="c-input partial-price-input"
-                        type="number"
-                        inputmode="decimal"
-                        min="0"
-                        step="0.01"
-                        [value]="drafts_()[row.key] || ''"
-                        (input)="onDraft(row, $event)"
-                        (keydown.enter)="save(row)"
-                      />
-                    </label>
-                    <button
-                      type="button"
-                      class="c-btn-primary partial-save"
-                      [disabled]="!canSave(row)"
-                      [attr.aria-label]="'quick_price_save' | translatePipe"
-                      (click)="save(row)"
-                    >
-                      {{ 'save' | translatePipe }}
-                    </button>
-                  </div>
-                } @else {
-                  <span class="partial-awaiting">{{ 'awaiting_owner_price' | translatePipe }}</span>
+                @if (row.item.kind === 'unpriced') {
+                  @if (row.canPrice) {
+                    <div class="partial-price">
+                      <label class="partial-price-label">
+                        <span>{{ perUnitLabel(row) }}</span>
+                        <input
+                          class="c-input partial-price-input"
+                          type="number"
+                          inputmode="decimal"
+                          min="0"
+                          step="0.01"
+                          [value]="drafts_()[row.key] || ''"
+                          (input)="onDraft(row, $event)"
+                          (keydown.enter)="save(row)"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        class="c-btn-primary partial-save"
+                        [disabled]="!canSave(row)"
+                        [attr.aria-label]="'quick_price_save' | translatePipe"
+                        (click)="save(row)"
+                      >
+                        {{ 'save' | translatePipe }}
+                      </button>
+                    </div>
+                  } @else {
+                    <span class="partial-awaiting">{{ 'awaiting_owner_price' | translatePipe }}</span>
+                  }
+                } @else if (row.openRecipeId) {
+                  <button type="button" class="c-btn-ghost--sm partial-open" (click)="openRecipe(row)">
+                    {{ 'open_recipe' | translatePipe }}
+                    <lucide-icon name="chevron-left" [size]="12"></lucide-icon>
+                  </button>
                 }
-              } @else if (row.openRecipeId) {
-                <button type="button" class="c-btn-ghost--sm partial-open" (click)="openRecipe(row)">
-                  {{ 'open_recipe' | translatePipe }}
-                  <lucide-icon name="chevron-left" [size]="12"></lucide-icon>
-                </button>
-              }
-            </li>
-          }
-        </ul>
+              </li>
+            }
+          </ul>
+        </div>
       </div>
     }
   </span>

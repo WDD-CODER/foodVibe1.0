@@ -10,45 +10,65 @@ $break-mobile: 768px; // mirrors src/styles.scss
     cursor: pointer;
   }
 
+  // Rendered in the browser top layer via `popover`; `inset`, `margin` and `overflow` undo the user-agent
+  // popover defaults. The TS places the box in viewport coordinates (see place_).
   .partial-popover {
-    position: absolute;
-    inset-block-start: 100%;
-    inset-inline-start: 0;
+    position: fixed;
+    inset: auto;
     z-index: 1000;
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
 
     inline-size: min(22rem, calc(100vw - 2rem));
     max-block-size: min(24rem, 70vh);
-    overflow-y: auto;
+    margin: 0;
+    overflow: visible;
 
     color: var(--color-text-main);
     font-size: var(--fs-sm);
     text-align: start;
 
-    padding: var(--space-3);
+    padding: 0;
     background: var(--bg-card-solid);
     border: 1px solid var(--border-default);
-    border-block-start: var(--space-1) solid transparent;
     border-radius: var(--radius-md);
-    background-clip: padding-box;
 
     box-shadow: var(--shadow-modal);
 
-    &.partial-popover--above {
-      inset-block: auto 100%;
+    // Invisible bridge over the gap to the chip, so moving the mouse onto the popover does not close it.
+    &::before {
+      content: '';
 
-      border-block: 1px solid var(--border-default);
-      border-block-end: var(--space-1) solid transparent;
+      position: absolute;
+      inset-inline: 0;
+      inset-block-start: 100%;
+      block-size: var(--space-2);
+    }
+
+    &.partial-popover--below::before {
+      inset-block: auto 100%;
     }
 
     @media (max-width: $break-mobile) {
-      position: fixed;
       inset-block: auto var(--space-4);
       inset-inline: var(--space-4);
       inline-size: auto;
+
+      &::before {
+        content: none;
+      }
     }
+  }
+
+  .partial-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    min-block-size: 0;
+    overflow-y: auto;
+    padding: var(--space-3);
   }
 
   .partial-title {

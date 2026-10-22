@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { formatCoefficient, isValidCoefficient } from '../../../../core/engine/portions'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { MenuEventTypeService } from '@services/menu-event-type.service'
@@ -20,7 +21,7 @@ type CoefficientKind = 'eventType' | 'menuType'
 @Component({
   selector: 'app-coefficient-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe],
+  imports: [LucideAngularModule, TranslatePipe, SelectOnFocusDirective],
   templateUrl: './coefficient-manager.component.html',
   styleUrl: './coefficient-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

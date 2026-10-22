@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+  viewChild
+} from '@angular/core'
 import { Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import type { MissingItem } from 'src/app/core/engine/event-plan.types'
@@ -12,6 +22,10 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { isValidQuickPrice, withQuickPrice } from 'src/app/core/utils/quick-price.util'
+import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
+
+/** Below this width the popover is a full-width bottom sheet (mirrors `$break-mobile` in the scss). */
+const MOBILE_QUERY = '(max-width: 768px)'
 
 interface MissingRow {
   key: string
@@ -51,7 +65,12 @@ export class PartialCostBadgeComponent {
   /** Names for recipe ids the kitchen state does not know yet (a recipe being built and not saved). */
   readonly recipeNames = input<Record<string, string>>({})
 
+  private readonly chipRef_ = viewChild<ElementRef<HTMLElement>>('chip')
+  private readonly popoverRef_ = viewChild<ElementRef<HTMLElement>>('popover')
+
   protected readonly isOpen_ = signal(false)
+  /** True when the popover ended up under the chip (it flips from the preferred side when that side is too tight). */
+  protected readonly isBelow_ = signal(true)
   protected readonly drafts_ = signal<Record<string, string>>({})
   protected readonly savingKey_ = signal<string | null>(null)
   /** True once the popover was opened by a click or a focus, so the mouse leaving does not close it. */
@@ -81,6 +100,33 @@ export class PartialCostBadgeComponent {
     })
   })
 
+  constructor() {
+    // The popover lives in the browser top layer, so an ancestor's overflow, transform or backdrop-filter can
+    // neither clip it nor shift it. It is placed in viewport coordinates against the chip.
+    effect((onCleanup) => {
+      const el = this.popoverRef_()?.nativeElement
+      if (!el) return
+      if (!el.matches(':popover-open')) el.showPopover()
+      this.place_(el)
+
+      const reposition = (event?: Event): void => {
+        // Scrolling the popover's own list is not a page scroll.
+        if (event?.target instanceof Node && el.contains(event.target)) return
+        this.place_(el)
+      }
+      // The list shrinks when a saved price drops out of it; the popover is re-placed against the chip then.
+      const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => this.place_(el))
+      observer?.observe(el)
+      window.addEventListener('scroll', reposition, true)
+      window.addEventListener('resize', reposition)
+      onCleanup(() => {
+        observer?.disconnect()
+        window.removeEventListener('scroll', reposition, true)
+        window.removeEventListener('resize', reposition)
+      })
+    })
+  }
+
   protected toggle(): void {
     if (this.isOpen_() && !this.isPinned_) {
       this.isPinned_ = true
@@ -105,7 +151,14 @@ export class PartialCostBadgeComponent {
     this.isPinned_ = false
   }
 
-  protected pin(): void {
+  /**
+   * Focus moving into the popover (its price box or buttons) pins it, so the mouse leaving does not close it.
+   * Focus landing on the chip itself does not: a mouse press focuses the chip just before its click, and pinning
+   * there would make that click close a popover the hover had just opened.
+   */
+  protected pin(event: FocusEvent): void {
+    const chip = this.chipRef_()?.nativeElement
+    if (chip && event.target instanceof Node && chip.contains(event.target)) return
     this.isPinned_ = true
   }
 
@@ -159,6 +212,39 @@ export class PartialCostBadgeComponent {
   private hoverCapable(): boolean {
     try {
       return typeof matchMedia === 'function' && matchMedia('(hover: hover)').matches
+    } catch {
+      return false
+    }
+  }
+
+  private place_(popover: HTMLElement): void {
+    const chip = this.chipRef_()?.nativeElement
+    if (!chip) return
+    if (this.isMobile_()) {
+      // Full-width bottom sheet: the scss pins it to the viewport, so no inline position.
+      popover.style.top = ''
+      popover.style.left = ''
+      popover.style.maxBlockSize = ''
+      this.isBelow_.set(false)
+      return
+    }
+    popover.style.maxBlockSize = ''
+    const { width, height } = popover.getBoundingClientRect()
+    const placed = placeInViewport({
+      anchor: chip.getBoundingClientRect(),
+      panel: { width, height },
+      viewport: { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight },
+      prefer: this.placement()
+    })
+    this.isBelow_.set(placed.below)
+    popover.style.maxBlockSize = placed.maxHeight === null ? '' : `${placed.maxHeight}px`
+    popover.style.top = `${placed.top}px`
+    popover.style.left = `${placed.left}px`
+  }
+
+  private isMobile_(): boolean {
+    try {
+      return typeof matchMedia === 'function' && matchMedia(MOBILE_QUERY).matches
     } catch {
       return false
     }
