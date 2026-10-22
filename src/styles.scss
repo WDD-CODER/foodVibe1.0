@@ -2557,11 +2557,12 @@ button.c-chip--removable {
    backdrop-filter makes every .c-glass-panel / .c-modal-card its own stacking context, so a list opened inside
    one (z-index 9999 there) is still painted as part of that panel and a later sibling panel covers it.
    .c-dropdown exists in the DOM only while a list is open; lifting that panel above its siblings fixes it.
-   20 stays below the app header (z-index 100). */
+   20 stays below the app header (z-index 100). The tablet/phone modal variant (.inline-edit-panel.as-modal,
+   position: fixed, z-index 1001) is excluded: it already sits above its backdrop and must stay fixed. */
 .c-glass-panel:has(.c-dropdown),
 .c-modal-card:has(.c-dropdown),
 .c-modal-body:has(.c-dropdown),
-.inline-edit-panel:has(.c-dropdown) {
+.inline-edit-panel:not(.as-modal):has(.c-dropdown) {
   position: relative;
   z-index: 20;
 }
