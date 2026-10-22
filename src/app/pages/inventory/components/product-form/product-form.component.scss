@@ -245,11 +245,34 @@
     .scaling-row {
       // Constrain cols 1 and 4 via minmax so the delete button never overflows in RTL
       display: grid;
-      grid-template-columns: minmax(90px, 9rem) auto minmax(90px, 1fr) minmax(auto, 12rem) min-content;
+      // Plan 461: children are placed by class (not child order) because the quantity, compare-to and
+      // special-price blocks are only rendered once a unit is chosen. Column 2 holds the whole «כמות נטו».
+      grid-template-columns: minmax(90px, 9rem) minmax(7rem, 9rem) minmax(90px, 1fr) minmax(auto, 12rem) min-content;
+      grid-template-areas: 'unit qty uom price del';
       align-items: center;
       gap: var(--space-3);
       margin-block-start: var(--space-2);
       overflow: visible;
+
+      > .row-unit {
+        grid-area: unit;
+      }
+
+      > .row-qty {
+        grid-area: qty;
+      }
+
+      > .row-uom {
+        grid-area: uom;
+      }
+
+      > .price-override-wrapper {
+        grid-area: price;
+      }
+
+      > .row-del {
+        grid-area: del;
+      }
 
       // Fix 4a: app-custom-select min-width only; grid column handles the max
       app-custom-select {
@@ -270,6 +293,12 @@
         &::-webkit-inner-spin-button {
           display: none; // Cleaner look for small inputs
         }
+      }
+
+      // The quantity box fills its column (it used to be a fixed 70px and cut its placeholder)
+      .row-qty input {
+        inline-size: 100%;
+        min-inline-size: 0;
       }
 
       .math-text {
@@ -483,28 +512,37 @@
       'unit qty uom .'
       'price price price del';
 
-    > :nth-child(1) {
-      grid-area: unit;
-    }
-
-    > :nth-child(2) {
-      grid-area: qty;
-    }
-
-    > :nth-child(3) {
-      grid-area: uom;
+    &.scaling-row--empty {
+      grid-template-areas: 'unit . . del';
     }
 
     > .price-override-wrapper {
-      grid-area: price;
       margin-inline-end: 0;
       padding-inline-end: 0;
       border-inline-end: none;
     }
 
     > .c-icon-btn.danger {
-      grid-area: del;
       justify-self: end;
+    }
+
+    // Unit, quantity and compare-to boxes share one layout: a narrow column for «=» / «:» (empty for the
+    // unit box), then the box filling the rest, so the three boxes have the same width and start edge.
+    > .row-unit,
+    > .row-qty,
+    > .row-uom {
+      display: grid;
+      grid-template-columns: 1.5rem minmax(0, 1fr);
+      column-gap: var(--space-3);
+      align-items: center;
+    }
+
+    > .row-unit app-custom-select {
+      grid-column: 2;
+    }
+
+    .label-row {
+      display: contents;
     }
 
     app-custom-select,
@@ -549,8 +587,8 @@
       'uom uom'
       'price del';
 
-    .label-row {
-      inline-size: 100%;
+    &.scaling-row--empty {
+      grid-template-areas: 'unit del';
     }
   }
 

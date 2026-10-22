@@ -24,6 +24,23 @@ describe('duplicateNameValidator', () => {
     expect(validator(control)).toEqual({ duplicateName: true })
   })
 
+  it('treats extra inner spaces as the same name (the one name rule)', () => {
+    const spaced = [{ _id: 'p1', nameHebrew: 'עגבניה  שרי' }] as Product[]
+    const control = new FormControl('  עגבניה   שרי ')
+    expect(duplicateNameValidator(() => spaced, 'p2')(control)).toEqual({ duplicateName: true })
+  })
+
+  it('does not clash with its own product even with extra spaces', () => {
+    const spaced = [{ _id: 'p1', nameHebrew: 'עגבניה שרי' }] as Product[]
+    const control = new FormControl('עגבניה   שרי')
+    expect(
+      duplicateNameValidator(
+        () => spaced,
+        () => 'p1'
+      )(control)
+    ).toBeNull()
+  })
+
   it('should return null for non-existent names', () => {
     const control = new FormControl('Cucumber')
     const validator = duplicateNameValidator(productsSignal)

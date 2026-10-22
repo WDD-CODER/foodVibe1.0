@@ -325,6 +325,47 @@ describe('ProductFormComponent', () => {
     }))
   })
 
+  describe('Plan 461 - purchase row and failed save', () => {
+    const rowEl = (sel: string) => (fixture.nativeElement as HTMLElement).querySelector(sel)
+
+    it('a new purchase row shows only the unit box until a unit is chosen', () => {
+      component['addPurchaseOption']()
+      fixture.detectChanges()
+      expect(rowEl('.row-unit')).not.toBeNull()
+      expect(rowEl('.row-qty')).toBeNull()
+      expect(rowEl('.row-uom')).toBeNull()
+      expect(rowEl('.price-override-wrapper')).toBeNull()
+      expect(rowEl('.row-del')).not.toBeNull()
+      component['purchaseOptions_'].at(0).get('unitSymbol')?.setValue('gram')
+      fixture.detectChanges()
+      expect(rowEl('.row-qty')).not.toBeNull()
+      expect(rowEl('.row-uom')).not.toBeNull()
+      expect(rowEl('.price-override-wrapper')).not.toBeNull()
+    })
+
+    it('a failed save names the invalid fields, stays on the page and marks the rows', async () => {
+      const onSetErrorMsg = jasmine.createSpy('onSetErrorMsg')
+      component['userMsgService'].onSetErrorMsg = onSetErrorMsg
+      component['addPurchaseOption']()
+      const saved = await component.saveAndWait()
+      expect(saved).toBeFalse()
+      expect(onSetErrorMsg).toHaveBeenCalledWith('form_has_errors_fields')
+      expect(component.isSubmitted).toBeTrue()
+    })
+
+    it('the name box shows the duplicate message when the name is taken', () => {
+      const name = component['productForm_'].get('productName')
+      name?.setValue('עגבניה')
+      name?.setErrors({ duplicateName: true })
+      name?.markAsDirty()
+      fixture.detectChanges()
+      expect((fixture.nativeElement as HTMLElement).querySelector('.c-field-error')?.textContent?.trim()).toBe(
+        'duplicate_product_name_error'
+      )
+      expect((fixture.nativeElement as HTMLElement).querySelector('input.c-input--invalid')).not.toBeNull()
+    })
+  })
+
   describe('Allergen Management', () => {
     it('should toggle allergens in the form control', () => {
       const ctrl = component['productForm_'].get('allergens')
