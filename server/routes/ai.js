@@ -444,18 +444,27 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
 // Response: { rows: ImportRow[], truncated: boolean }
 // ---------------------------------------------------------------------------
 
-const PRICE_LIST_SYSTEM_PROMPT = `You read a supplier price list written in Hebrew (a WhatsApp message or columns pasted from Excel) for a catering kitchen and turn it into product rows.
+const PRICE_LIST_SYSTEM_PROMPT = `You read a supplier price list written in Hebrew (a WhatsApp message or columns pasted from Excel) for a catering kitchen and turn it into product rows. The lists are messy: typos, mixed order, free text.
 
 Return ONLY a JSON object, no commentary:
 { "rows": [ { "name": string, "unit": string|null, "price": number|null, "pricePer": "unit"|"purchaseUnit", "purchaseUnit": string|null, "purchaseQty": number|null, "category": string|null } ] }
 
 Rules:
-- One row per product line. Keep the product name exactly as written, including numbers that belong to the name (for example "שמנת 32%": the 32% is part of the name, never a price).
-- "unit" is the unit the price refers to: "לק\"ג" means kg, "לליטר" means liter, "ליחידה" means unit, grams means gram, milliliters means ml. Write it as one of: kg, gram, liter, ml, unit. If the line does not say, use null.
-- "price" is a plain number (no currency sign). If the line has no price, use null.
-- "pricePer" is "unit" when the price is for one "unit" above. It is "purchaseUnit" only when the price is for a whole pack, crate or box (for example a crate of 10 kg for 50): then set "purchaseUnit" to the pack word as written and "purchaseQty" to how many "unit" it holds (10); otherwise purchaseUnit and purchaseQty are null.
+- One row per product line. Keep the product name as written, including numbers that belong to the name (for example "שמנת 32%": the 32% is part of the name, never a price). The name never contains the price, the price word, the unit word or the pack word.
+- ORDER DOES NOT MATTER. The product, the price, the unit and a pack word can appear in any order and on either side of each other ("מלפפון 5.9 לק\"ג", "5.9 ₪ לק\"ג - מלפפון", "קילו בצל 3.5 שקל", "ארגז 10 ק\"ג תפוחי אדמה 45"). Read the whole line before deciding which number is which.
+- Price words: "עולה", "עלות", "במחיר", "מחיר" (and close misspellings such as "עוהל", "עולא") only mark that the number after them is the price. They are never a unit, a pack word or part of the name.
+- "price" is a plain number (no currency sign). It is the number next to ₪ / שח / ש"ח / שקל / ש\"ח, or the number after a price word, or the number that is not tied to a unit word. If the line has no price, use null.
+- "N kilo / ק\"ג / ליטר / גרם" (a number beside a unit word) is a quantity, never the price. "1 קילו" means the price is for 1 kg.
+- "unit" is the unit the price refers to: "לק\"ג" or "קילו" means kg, "לליטר" means liter, "ליחידה" means unit, grams means gram, milliliters means ml. Write it as one of: kg, gram, liter, ml, unit. If the line does not say, use null.
+- Any OTHER word with a number beside it ("קרטון 24", "ארגז 10 ק\"ג", "24 יח' בקרטון") is a pack word. Always fill "purchaseUnit" with the pack word as written and "purchaseQty" with how many of the "unit" it holds (the written number), and set "pricePer" to "purchaseUnit" when the price is for the whole pack. Never drop a pack word. When the line has no pack word, purchaseUnit and purchaseQty are null and "pricePer" is "unit".
 - Never invent products or prices. Skip lines that are greetings, headings, dates or phone numbers.
-- "category": one of the existing categories listed below, written exactly as listed, otherwise null.`;
+- "category": one of the existing categories listed below, written exactly as listed, otherwise null.
+
+Examples:
+1. "עגבניה ניסיון 1 קילו 1 עוהל 50 שח" -> { "name": "עגבניה ניסיון", "unit": "kg", "price": 50, "pricePer": "unit", "purchaseUnit": null, "purchaseQty": null, "category": null } ("עוהל" is a typo of "עולה" = costs; there is no pack).
+2. "5.9 ₪ לק\"ג - מלפפון" -> { "name": "מלפפון", "unit": "kg", "price": 5.9, "pricePer": "unit", "purchaseUnit": null, "purchaseQty": null, "category": null }
+3. "ארגז 10 ק\"ג תפוחי אדמה 45" -> { "name": "תפוחי אדמה", "unit": "kg", "price": 45, "pricePer": "purchaseUnit", "purchaseUnit": "ארגז", "purchaseQty": 10, "category": null }
+4. "24 יח' בייגלה בקרטון 150" -> { "name": "בייגלה", "unit": "unit", "price": 150, "pricePer": "purchaseUnit", "purchaseUnit": "קרטון", "purchaseQty": 24, "category": null }`;
 
 router.post('/parse-price-list', verifyToken, (req, res, next) => {
   if (assertCan(req, res, 'editMoney', { type: 'products' })) next();
@@ -1429,3 +1438,4 @@ router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
 
 module.exports = router;
 module.exports.appendKnownMetadata = appendKnownMetadata;
+module.exports.PRICE_LIST_SYSTEM_PROMPT = PRICE_LIST_SYSTEM_PROMPT;

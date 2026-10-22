@@ -109,4 +109,19 @@ describe('UserManagementComponent', () => {
     )
     expect(buttons.map((b) => b.disabled)).toEqual([true, false, false])
   })
+
+  // Plan 468 - the trash icon sits under the email, inside the card, never over it.
+  it('puts the email and the remove button on separate rows, the button last in the card', () => {
+    const items = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('.list-item.group'))
+    expect(items.length).toBe(3)
+    for (const item of items) {
+      const info = item.querySelector<HTMLElement>('.user-info')!
+      const actions = item.querySelector<HTMLElement>('.item-actions')!
+      expect(info.contains(actions)).toBeFalse()
+      expect(info.querySelector('.user-email')).not.toBeNull()
+      expect(info.querySelector('button')).toBeNull()
+      expect(actions.querySelector('button.c-icon-btn.danger')).not.toBeNull()
+      expect(item.lastElementChild).toBe(actions)
+    }
+  })
 })

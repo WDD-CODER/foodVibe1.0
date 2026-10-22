@@ -39,17 +39,10 @@
         @for (item of items(); track item) {
           @let lockKey = lockReason()(item);
           @if (editingItem_() === item) {
-            <input
-              #renameInput
-              type="text"
-              class="inline-edit-input"
+            <app-inline-rename-field
               [value]="renameValue()(item)"
-              (blur)="onRenameBlur(item, renameInput.value)"
-              (keydown.enter)="renameInput.blur()"
-              autocomplete="off"
-              autocorrect="off"
-              autocapitalize="off"
-              spellcheck="false"
+              (saved)="onRenameSaved(item, $event)"
+              (cancelled)="editingItem_.set(null)"
             />
           } @else if (lockKey) {
             <span class="c-chip c-chip--tap is-locked">

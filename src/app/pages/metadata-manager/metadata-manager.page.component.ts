@@ -1,16 +1,5 @@
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  Injector,
-  OnInit,
-  signal,
-  computed,
-  viewChild
-} from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed, viewChild } from '@angular/core'
+import { CommonModule, DOCUMENT } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
@@ -41,6 +30,7 @@ import { StationManagerComponent } from './components/station-manager/station-ma
 import { CoefficientManagerComponent } from './components/coefficient-manager/coefficient-manager.component'
 import { UserManagementComponent } from './components/user-management/user-management.component'
 import { AiModelManagerComponent } from './components/ai-model-manager/ai-model-manager.component'
+import { InlineRenameFieldComponent } from 'src/app/shared/inline-rename-field/inline-rename-field.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { UnitEditDialogComponent, type UnitEditValue } from './components/unit-edit-dialog/unit-edit-dialog.component'
@@ -72,6 +62,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     UserManagementComponent,
     AiModelManagerComponent,
     ScrollRailComponent,
+    InlineRenameFieldComponent,
     RowActionsMenuComponent,
     UnitEditDialogComponent
   ],
@@ -99,7 +90,7 @@ export class MetadataManagerComponent implements OnInit {
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
   private readonly taxonomy = inject(TaxonomyStore)
-  private readonly injector = inject(Injector)
+  private readonly document = inject(DOCUMENT)
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
@@ -136,7 +127,7 @@ export class MetadataManagerComponent implements OnInit {
   readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS
 
   private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
-  private readonly renameInput = viewChild<ElementRef<HTMLInputElement>>('renameInput')
+  private readonly jumpRail = viewChild(ScrollRailComponent)
 
   /**
    * Mobile/tablet jump-nav destinations, in page order. Built from the app's real 8 sections
@@ -164,24 +155,20 @@ export class MetadataManagerComponent implements OnInit {
       : this._allJumpSections.filter((s) => s.id !== 'mm-sec-user' && s.id !== 'mm-sec-ai-models')
   )
 
-  /** Which section (if any) has been brought to the front of the grid; null = natural page order. */
-  protected readonly frontSectionId_ = signal<string | null>(null)
+  /** The section whose chip was tapped last (highlighted chip); null until a chip is tapped. */
+  protected readonly activeSectionId_ = signal<string | null>(null)
 
-  protected bringToFront(id: string): void {
-    this.frontSectionId_.set(id)
+  protected isActive(id: string): boolean {
+    return this.activeSectionId_() === id
   }
 
-  protected isFront(id: string): boolean {
-    return this.frontSectionId_() === id
-  }
-
-  /** CSS `order` for a jump-nav section: 0 (first) when it's the front one, else its natural
-   *  page-order position (1-10) — so bringing one to the front never disturbs the relative order
-   *  of the rest. */
-  protected orderFor(id: string): number {
-    if (this.isFront(id)) return 0
-    const index = this.jumpSections().findIndex((s) => s.id === id)
-    return index === -1 ? 1 : index + 1
+  /** Plan 468: a chip scrolls its section to the top (under the header and the chip bar) and
+   *  glides itself to the middle of the chip carousel. */
+  protected jumpTo(id: string, chip: HTMLElement): void {
+    this.activeSectionId_.set(id)
+    const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    this.document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
+    this.jumpRail()?.centerChild(chip)
   }
 
   protected readonly labelColor = (key: string): string => this.metadataRegistry.getLabelColor(key)
@@ -868,7 +855,6 @@ export class MetadataManagerComponent implements OnInit {
   private onStartRenameMenuType(key: string): void {
     if (!this.requireSignIn()) return
     this.renamingMenuTypeKey_.set(key)
-    afterNextRender(() => this.renameInput()?.nativeElement.select(), { injector: this.injector })
   }
 
   async onRemoveMenuType(key: string): Promise<void> {
@@ -881,7 +867,8 @@ export class MetadataManagerComponent implements OnInit {
     await this.metadataRegistry.deleteMenuType(key)
   }
 
-  async onMenuTypeNameBlur(oldKey: string, newName: string): Promise<void> {
+  /** Save pressed (or Enter) in the menu type's rename field. */
+  async onMenuTypeRenameSaved(oldKey: string, newName: string): Promise<void> {
     this.renamingMenuTypeKey_.set(null)
     if (!this.requireSignIn()) return
     const trimmed = (newName ?? '').trim()

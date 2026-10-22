@@ -13,6 +13,10 @@ import { PermissionService } from '@services/permission.service'
 import { ImportRow, ProductImportService } from '@services/product-import.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { NameMatchItem, NameMatchResult, ProductNameMatcherService } from '@services/product-name-matcher.service'
+import { UnitRegistryService } from '@services/unit-registry.service'
+import { matchProductName } from '@utils/product-name-match.util'
+import { Product } from '@models/product.model'
 import { ProductImportComponent } from './product-import.component'
 
 const row = (name: string, price: number | null, extra: Partial<ImportRow> = {}): ImportRow => ({
@@ -29,8 +33,9 @@ const row = (name: string, price: number | null, extra: Partial<ImportRow> = {})
 
 const PRODUCTS = [
   { _id: 'p1', nameHebrew: 'עגבנייה', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 5 }] },
-  { _id: 'p2', nameHebrew: 'מלפפון', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 4.5 }] }
-]
+  { _id: 'p2', nameHebrew: 'מלפפון', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 4.5 }] },
+  { _id: 'p3', nameHebrew: 'פטרוזיליה', baseUnit: 'kg', sources: [{ supplierId: 'sup1', price: 7 }] }
+] as unknown as Product[]
 
 describe('ProductImportComponent', () => {
   let fixture: ComponentFixture<ProductImportComponent>
@@ -38,9 +43,15 @@ describe('ProductImportComponent', () => {
   let apply: jasmine.Spy
   let onSetSuccessMsg: jasmine.Spy
   let allowed: boolean
+  let matchNames: jasmine.Spy
 
-  async function setup(parsed: Observable<unknown>, can = true): Promise<void> {
+  async function setup(
+    parsed: Observable<unknown>,
+    can = true,
+    aiAnswer: () => Promise<Map<string, NameMatchResult>> = () => Promise.resolve(new Map())
+  ): Promise<void> {
     allowed = can
+    matchNames = jasmine.createSpy('matchNames').and.callFake((_items: NameMatchItem[]) => aiAnswer())
     parsePriceList = jasmine.createSpy('parsePriceList').and.returnValue(parsed)
     apply = jasmine.createSpy('apply').and.resolveTo({ created: 1, updated: 1, skipped: 1, skippedRows: [] })
     onSetSuccessMsg = jasmine.createSpy('onSetSuccessMsg')
@@ -50,6 +61,11 @@ describe('ProductImportComponent', () => {
         provideRouter([]),
         { provide: GeminiService, useValue: { parsePriceList } },
         { provide: ProductImportService, useValue: { apply } },
+        {
+          provide: ProductNameMatcherService,
+          useValue: { matchExact: (name: string) => matchProductName(name, PRODUCTS), matchNames }
+        },
+        { provide: UnitRegistryService, useValue: { allUnitKeys_: signal(['crate']) } },
         {
           provide: KitchenStateService,
           useValue: {
@@ -174,6 +190,125 @@ describe('ProductImportComponent', () => {
     await pasteAndParse()
     expect(byId('import-flag-review')).not.toBeNull()
     expect(byId('import-flag-duplicate')).not.toBeNull()
+  })
+
+  it('shows the old price next to the new one and keeps the name an input', async () => {
+    await setup(of({ rows: [row('עגבניות', 6.2)], truncated: false }))
+    fixture.componentInstance['supplierId_'].set('sup1')
+    await pasteAndParse()
+    expect(all('import-status').map((chip) => chip.textContent?.trim())).toEqual(['import_status_update'])
+    expect(byId('import-old-price')?.textContent?.replace(/\s+/g, ' ').trim()).toBe('import_old_price ₪5.00')
+    expect(byId('import-name')?.tagName).toBe('INPUT')
+    expect(byId('import-matches')?.textContent).toContain('עגבנייה')
+  })
+
+  it('re-matches while typing in the same input, and a nonsense name goes back to new', async () => {
+    await setup(of({ rows: [row('פטרוזליה', 7)], truncated: false }))
+    fixture.componentInstance['supplierId_'].set('sup1')
+    await pasteAndParse()
+    const input = byId<HTMLInputElement>('import-name')!
+    const type = (value: string) => {
+      input.value = value
+      input.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+    }
+    // the misspelling is a spelling variant of the stored name: matched at once (same price -> same)
+    expect(all('import-status')[0].textContent?.trim()).toBe('import_status_same')
+    type('גבגדכשדגכ')
+    expect(all('import-status')[0].textContent?.trim()).toBe('import_status_new')
+    type('פטרוזיליה')
+    expect(all('import-status')[0].textContent?.trim()).toBe('import_status_same')
+    expect(byId<HTMLInputElement>('import-name')).toBe(input)
+    fixture.componentInstance['setPrice'](fixture.componentInstance['rows_']()[0].id, 8)
+    fixture.detectChanges()
+    expect(all('import-status')[0].textContent?.trim()).toBe('import_status_update')
+    expect(byId('import-old-price')?.textContent).toContain('₪7.00')
+  })
+
+  it('marks a row the AI matched, and editing the name drops the AI link', async () => {
+    await setup(of({ rows: [row('xyz', 6)], truncated: false }), true, () =>
+      Promise.resolve(new Map([['1', { product: PRODUCTS[1], via: 'ai' as const }]]))
+    )
+    fixture.componentInstance['supplierId_'].set('sup1')
+    await pasteAndParse()
+    expect(matchNames).toHaveBeenCalledTimes(1)
+    expect(all('import-status')[0].textContent?.trim()).toBe('import_status_update')
+    expect(byId('import-matches')?.textContent).toContain('מלפפון')
+    fixture.componentInstance['updateRow'](fixture.componentInstance['rows_']()[0].id, { name: 'xyzw' })
+    fixture.detectChanges()
+    expect(all('import-status')[0].textContent?.trim()).toBe('import_status_new')
+    expect(byId('import-matches')).toBeNull()
+  })
+
+  it('saves the matched product own name for a variant row and the typed name for a new row', async () => {
+    await setup(of({ rows: [row('עגבניות', 6.2), row('בצל', 3)], truncated: false }))
+    await pasteAndParse()
+    byId<HTMLButtonElement>('import-save')!.click()
+    await fixture.whenStable()
+    const sent = apply.calls.mostRecent().args[1] as { name: string }[]
+    expect(sent.map((r) => r.name)).toEqual(['עגבנייה', 'בצל'])
+  })
+
+  it('disables save and shows import_matching while the AI step runs', async () => {
+    let release: (m: Map<string, NameMatchResult>) => void = () => undefined
+    await setup(
+      of({ rows: [row('בצל', 3)], truncated: false }),
+      true,
+      () => new Promise((resolve) => (release = resolve))
+    )
+    await pasteAndParse()
+    expect(byId('import-matching')?.textContent?.trim()).toBe('import_matching')
+    expect(byId<HTMLButtonElement>('import-save')!.disabled).toBeTrue()
+    release(new Map())
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(byId('import-matching')).toBeNull()
+    expect(byId<HTMLButtonElement>('import-save')!.disabled).toBeFalse()
+  })
+
+  it('shows import_match_failed and keeps the rows new when the AI step fails', async () => {
+    await setup(of({ rows: [row('בצל', 3)], truncated: false }))
+    matchNames.and.callFake(async (_items: NameMatchItem[], options?: { onAiFailure?: (e: unknown) => void }) => {
+      options?.onAiFailure?.(new Error('x'))
+      return new Map()
+    })
+    await pasteAndParse()
+    expect(byId('import-match-failed')?.textContent?.trim()).toBe('import_match_failed')
+    expect(all('import-status')[0].textContent?.trim()).toBe('import_status_new')
+  })
+
+  it('flags an unknown pack word on a new row only', async () => {
+    await setup(
+      of({
+        rows: [
+          row('בצל', 3, { purchaseUnit: 'עוהל', purchaseQty: 1 }),
+          row('חסה', 2, { purchaseUnit: 'crate', purchaseQty: 10 })
+        ],
+        truncated: false
+      })
+    )
+    await pasteAndParse()
+    expect(all('import-flag-unknown-unit').length).toBe(1)
+    expect(all('import-row')[0].querySelector('[data-testid="import-flag-unknown-unit"]')).not.toBeNull()
+  })
+
+  it('hasRealChanges: false when empty, true with text or rows, false after a save', async () => {
+    await setup(of({ rows: [row('בצל', 3)], truncated: false }))
+    const cmp = fixture.componentInstance
+    expect(cmp.hasRealChanges()).toBeFalse()
+    const box = byId<HTMLTextAreaElement>('import-text')!
+    box.value = 'בצל 3'
+    box.dispatchEvent(new Event('input'))
+    expect(cmp.hasRealChanges()).toBeTrue()
+    fixture.detectChanges()
+    byId<HTMLButtonElement>('import-parse')!.click()
+    await fixture.whenStable()
+    cmp['text_'].set('')
+    expect(cmp.hasRealChanges()).toBeTrue()
+    fixture.detectChanges()
+    byId<HTMLButtonElement>('import-save')!.click()
+    await fixture.whenStable()
+    expect(cmp.hasRealChanges()).toBeFalse()
   })
 
   it('for a user without editMoney shows only the no-permission message', async () => {
