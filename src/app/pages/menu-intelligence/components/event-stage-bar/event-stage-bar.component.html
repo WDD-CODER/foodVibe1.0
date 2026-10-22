@@ -1,39 +1,41 @@
 @if (event_(); as event) {
   <section class="stage-bar no-print" dir="rtl">
-    <div class="stage-row" role="group" [attr.aria-label]="'stage_filter' | translatePipe">
-      @for (stage of flowStages; track stage; let i = $index) {
+    <app-scroll-rail snap="proximity" arrows="auto">
+      <div class="stage-row" role="group" [attr.aria-label]="'stage_filter' | translatePipe">
+        @for (stage of flowStages; track stage; let i = $index) {
+          <button
+            type="button"
+            class="stage-pill"
+            [class.is-current]="stage === current_()"
+            [class.is-past]="i < currentIndex_()"
+            [class.is-locked]="stage === 'finished' || !canChangeStage_()"
+            [attr.aria-current]="stage === current_() ? 'step' : null"
+            [attr.aria-disabled]="stage === 'finished' || !canChangeStage_() ? 'true' : null"
+            [attr.title]="
+              stage === 'finished'
+                ? ('stage_finished_hint' | translatePipe)
+                : !canChangeStage_()
+                  ? ('stage_not_allowed' | translatePipe)
+                  : null
+            "
+            (click)="pick(stage)"
+          >
+            {{ stageLabelKey(stage) | translatePipe }}
+          </button>
+        }
         <button
           type="button"
-          class="stage-pill"
-          [class.is-current]="stage === current_()"
-          [class.is-past]="i < currentIndex_()"
-          [class.is-locked]="stage === 'finished' || !canChangeStage_()"
-          [attr.aria-current]="stage === current_() ? 'step' : null"
-          [attr.aria-disabled]="stage === 'finished' || !canChangeStage_() ? 'true' : null"
-          [attr.title]="
-            stage === 'finished'
-              ? ('stage_finished_hint' | translatePipe)
-              : !canChangeStage_()
-                ? ('stage_not_allowed' | translatePipe)
-                : null
-          "
-          (click)="pick(stage)"
+          class="stage-pill stage-pill--danger"
+          [class.is-current]="current_() === 'not_closed'"
+          [class.is-locked]="!canChangeStage_()"
+          [attr.aria-current]="current_() === 'not_closed' ? 'step' : null"
+          [attr.aria-disabled]="!canChangeStage_() ? 'true' : null"
+          (click)="pick('not_closed')"
         >
-          {{ stageLabelKey(stage) | translatePipe }}
+          {{ stageLabelKey('not_closed') | translatePipe }}
         </button>
-      }
-      <button
-        type="button"
-        class="stage-pill stage-pill--danger"
-        [class.is-current]="current_() === 'not_closed'"
-        [class.is-locked]="!canChangeStage_()"
-        [attr.aria-current]="current_() === 'not_closed' ? 'step' : null"
-        [attr.aria-disabled]="!canChangeStage_() ? 'true' : null"
-        (click)="pick('not_closed')"
-      >
-        {{ stageLabelKey('not_closed') | translatePipe }}
-      </button>
-    </div>
+      </div>
+    </app-scroll-rail>
 
     @if (current_() === 'not_closed' && event.notClosedReason) {
       <p class="stage-reason">
@@ -119,12 +121,11 @@
         </div>
         <div class="c-input-stack">
           <label for="stage-deposit-date">{{ 'deposit_date' | translatePipe }}</label>
-          <input
-            id="stage-deposit-date"
-            type="date"
+          <app-date-field
+            inputId="stage-deposit-date"
             [value]="event.deposit?.date ?? ''"
             [disabled]="!canEditMoney_()"
-            (change)="onDepositDateChange($any($event.target).value)"
+            (committed)="onDepositDateChange($event)"
           />
         </div>
       </div>
@@ -153,6 +154,14 @@
 
   @if (isClosingOpen_()) {
     <app-event-closing-dialog [eventId]="event._id" (closed)="isClosingOpen_.set(false)" />
+  }
+
+  @if (isDepositDialogOpen_()) {
+    <app-deposit-paid-dialog
+      [deposit]="event.deposit"
+      (confirmed)="onDepositPaid($event)"
+      (cancelled)="isDepositDialogOpen_.set(false)"
+    />
   }
 
   @if (isNotClosedDialogOpen_()) {

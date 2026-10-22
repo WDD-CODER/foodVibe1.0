@@ -12,17 +12,18 @@
     min-inline-size: 0;
   }
 
-  /* On phones the row scrolls inside its own box; the page does not scroll sideways. */
+  /* Plan 467: the pills sit in the shared scroll rail (edge fade + arrows). The row is as wide as its pills and
+     at least as wide as the rail, so on desktop «לא נסגר» keeps its place at the far end. */
   .stage-row {
     display: flex;
     align-items: center;
     gap: var(--space-2);
 
-    max-inline-size: 100%;
-    padding-block: var(--space-1);
+    flex: 0 0 auto;
 
-    overflow-x: auto;
-    scrollbar-width: thin;
+    inline-size: max-content;
+    min-inline-size: 100%;
+    padding-block: var(--space-1);
   }
 
   .stage-pill {

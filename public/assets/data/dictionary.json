@@ -1529,6 +1529,10 @@
     "ai_recipe_tab_paste": "הדבקת מתכון שלי",
     "ai_recipe_tab_image": "מתמונה",
     "ai_recipe_tab_url": "מקישור",
-    "ai_recipe_paste_hint": "המתכון נשמר כמו שכתבת – ה-AI רק מסדר אותו לשדות, בלי להמציא"
+    "ai_recipe_paste_hint": "המתכון נשמר כמו שכתבת – ה-AI רק מסדר אותו לשדות, בלי להמציא",
+    "date_invalid": "תאריך לא תקין",
+    "open_calendar": "פתח לוח שנה",
+    "deposit_paid_title": "מקדמה שולמה",
+    "deposit_amount_required": "יש להזין סכום מקדמה"
   }
 }
