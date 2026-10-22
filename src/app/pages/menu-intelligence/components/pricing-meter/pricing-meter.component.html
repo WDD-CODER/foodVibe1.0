@@ -124,8 +124,8 @@
       <div class="fin-metric">
         <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
         <span class="fin-value" dir="ltr">{{ revenue_() }}</span>
-        @if (partial_()) {
-          <span class="partial-tag">{{ 'partial_total' | translatePipe }}</span>
+        @if (revenueNotSet_()) {
+          <span class="partial-tag">{{ 'revenue_not_set' | translatePipe }}</span>
         }
       </div>
       <div class="fin-metric">
@@ -169,6 +169,14 @@
       <div class="fin-metric">
         <span class="margin-hint">{{ marginLabel_() }}</span>
       </div>
+      @if (partialReasons_().length > 0) {
+        <div class="partial-reasons" role="status">
+          <span class="partial-reasons-title">{{ 'partial_reason_title' | translatePipe }}</span>
+          @for (reason of partialReasons_(); track $index) {
+            <span class="partial-reason">{{ reason }}</span>
+          }
+        </div>
+      }
     </div>
   </div>
 </div>
