@@ -26,6 +26,8 @@ export const EXCEPTIONS = {
   R2: 'all unlayered files that style a button/input/select/textarea/img/svg/lucide-icon or a .c-* element',
   // R3: OnPush left off the two growth-frozen pages (S11).
   R3: ['src/app/pages/cook-view/cook-view.page.ts', 'src/app/pages/recipe-builder/recipe-builder.page.ts'],
+  // R7: private writable source of a public is*/has* readonly signal (`isLoaded_ = this.loaded_.asReadonly()`).
+  R7: ['src/app/core/services/taxonomy-store.service.ts loaded_'],
   // R9: canonical data — Hebrew values that are data, not UI text (unit symbols, parser tokens, Gemini/export data).
   R9: [
     'src/app/core/utils/recipe-cost.constants.ts',
@@ -124,7 +126,7 @@ for (const f of ts) {
 for (const f of ts) {
   lines(f).forEach((l, i) => {
     const m = l.match(/^\s*(?:(?:protected|private|public|readonly)\s+)*([a-zA-Z0-9_]+)\s*=\s*signal(?:<boolean>)?\((?:true|false)\)/)
-    if (m && !/^_?(is|has|can|should)[A-Z]/.test(m[1])) hit('R7', f, i + 1, l)
+    if (m && !/^_?(is|has|can|should)[A-Z]/.test(m[1])) hit('R7', f, i + 1, l, EXCEPTIONS.R7.includes(`${f} ${m[1]}`))
   })
 }
 

@@ -4,7 +4,7 @@
       @if (isEditMode_()) {
         <h2 class="form-header__title">
           {{ 'edit_product_title' | translatePipe }}:
-          {{ productForm_.get('productName')?.value ?? initialProduct_()?.nameHebrew ?? '' }}
+          {{ productForm_.get('productName')?.value ?? initialProduct()?.nameHebrew ?? '' }}
         </h2>
       } @else {
         <h2 class="form-header__title">{{ 'add_product_inventory_title' | translatePipe }}</h2>

@@ -107,7 +107,7 @@ interface ProductFormValue {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductFormComponent implements OnInit, AfterViewInit {
-  initialProduct_ = input<Product | null>(null)
+  initialProduct = input<Product | null>(null)
 
   private readonly productNameInputRef = viewChild<ElementRef<HTMLInputElement>>('productNameInput')
 
@@ -309,7 +309,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       })
     })
 
-    const productData = this.initialProduct_()
+    const productData = this.initialProduct()
     if (productData) {
       this.hydrateForm(productData)
     } else {
