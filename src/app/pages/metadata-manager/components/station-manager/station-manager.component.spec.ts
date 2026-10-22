@@ -124,6 +124,8 @@ describe('StationManagerComponent', () => {
     it('asks before saving only after Save is pressed', async () => {
       const input = openField()
       input.value = 'קרח'
+      input.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
       await fixture.whenStable()
       expect(confirm.open).not.toHaveBeenCalled()
       host().querySelector<HTMLButtonElement>('app-inline-rename-field button')!.click()

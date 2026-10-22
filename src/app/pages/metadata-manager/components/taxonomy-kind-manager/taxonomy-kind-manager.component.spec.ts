@@ -45,6 +45,8 @@ describe('TaxonomyKindManagerComponent inline rename', () => {
 
   it('Save closes the field and emits renamed with the new text', () => {
     field()!.value = 'קרח'
+    field()!.dispatchEvent(new Event('input'))
+    fixture.detectChanges()
     button(0).click()
     fixture.detectChanges()
     expect(renamed).toEqual([{ item: 'קר', value: 'קרח' }])

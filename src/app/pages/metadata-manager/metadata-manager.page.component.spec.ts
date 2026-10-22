@@ -182,7 +182,10 @@ describe('MetadataManagerPageComponent', () => {
 
       comp.renamingMenuTypeKey_.set('buffet')
       fixture.detectChanges()
-      host.querySelector<HTMLInputElement>(sel + ' input')!.value = 'banquet'
+      const renameInput = host.querySelector<HTMLInputElement>(sel + ' input')!
+      renameInput.value = 'banquet'
+      renameInput.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
       host.querySelector<HTMLButtonElement>(sel + ' button')!.click()
       await fixture.whenStable()
       expect(metadataRegistrySpy.renameMenuType).toHaveBeenCalledOnceWith('buffet', 'banquet')
