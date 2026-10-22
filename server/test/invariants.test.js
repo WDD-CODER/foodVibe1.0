@@ -148,7 +148,7 @@ describe('INV-1 Ownership', () => {
       expect(await testDb().collection('recipes').findOne({ _id: 'owners' })).toEqual(before);
     });
 
-    // Plan 477 (ADR 0024): the one exception to "members read all of their business's items".
+    // Plan 477 (ADR 0026): the one exception to "members read all of their business's items".
     it('INV-1 staff read events only in the stages the owner allowed, plus events they created', async () => {
       const db = testDb();
       await db.collection('businesses').deleteMany({ _id: 'b_userA' });

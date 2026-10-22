@@ -1,6 +1,6 @@
 'use strict'
 /**
- * Plan 477 (ADR 0024) - staff read events only in the stages the owner allowed, plus events they created.
+ * Plan 477 (ADR 0026) - staff read events only in the stages the owner allowed, plus events they created.
  * Every server route that returns or acts on events applies the rule; owners see everything.
  */
 

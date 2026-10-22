@@ -1,6 +1,6 @@
 'use strict'
 /**
- * Plan 477 (ADR 0024, INV-1): the one rule that decides which events a staff member may read.
+ * Plan 477 (ADR 0026, INV-1): the one rule that decides which events a staff member may read.
  * The owner picks the stages staff see (`businesses.staffVisibleStages`, absent = every stage). A staff member
  * reads an event when its stage is in that list (an event with no stage counts as `inquiry`) or when he created it.
  * Owners, platform-admin routes and every other item type are untouched.
