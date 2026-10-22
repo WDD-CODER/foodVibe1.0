@@ -11,6 +11,7 @@ import {
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { EventTypeSnapshotService } from '@services/event-type-snapshot.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
@@ -32,7 +33,7 @@ const NOTE_MAX = NOTE_MAX_LENGTH
 @Component({
   selector: 'app-new-inquiry-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, CustomSelectComponent],
+  imports: [FormsModule, TranslatePipe, CustomSelectComponent, DateFieldComponent],
   templateUrl: './new-inquiry-dialog.component.html',
   styleUrl: './new-inquiry-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +59,7 @@ export class NewInquiryDialogComponent {
   protected readonly name_ = signal('')
   protected readonly phone_ = signal('')
   protected readonly date_ = signal('')
+  protected readonly dateInvalid_ = signal(false)
   protected readonly guests_ = signal('')
   protected readonly eventType_ = signal('')
   protected readonly note_ = signal('')
@@ -78,7 +80,7 @@ export class NewInquiryDialogComponent {
   })
   protected readonly noteValid_ = computed(() => this.note_().length <= NOTE_MAX)
   protected readonly valid_ = computed(
-    () => this.nameValid_() && this.phoneValid_() && this.guestsValid_() && this.noteValid_()
+    () => this.nameValid_() && this.phoneValid_() && this.guestsValid_() && this.noteValid_() && !this.dateInvalid_()
   )
 
   constructor() {
