@@ -56,7 +56,7 @@
   .list-stack {
     display: grid;
     grid-auto-flow: dense;
-    grid-template-columns: repeat(auto-fit, minmax(150px, auto));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), auto));
 
     gap: 0.5rem;
   }
@@ -85,18 +85,22 @@
       border-color: var(--border-default);
     }
 
+    // Plan 468: the info, then an actions row under it - the trash icon never floats over the email.
     &.group {
       display: grid;
-      grid-template-columns: 1fr auto;
+      grid-template-columns: minmax(0, 1fr);
 
       gap: 0.5rem;
+      padding-block-end: 0.5rem;
     }
   }
 
   .item-actions {
     display: flex;
     align-items: center;
-    align-self: center;
+    justify-content: flex-end;
+    // Room for the hover wiggle (scale 1.12, rotate 8deg) so it is never clipped by the card.
+    padding: 0.125rem;
 
     gap: 0.25rem;
   }

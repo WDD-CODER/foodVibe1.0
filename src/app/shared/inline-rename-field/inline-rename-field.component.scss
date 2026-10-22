@@ -1,0 +1,41 @@
+@layer components.inline-rename-field {
+  :host {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    gap: 0.5rem;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .irf-input {
+    flex: 1 1 8rem;
+
+    min-block-size: 2rem;
+    min-inline-size: 0;
+
+    color: var(--color-text-main);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    background: var(--bg-glass);
+
+    padding-inline: 0.75rem;
+    border: none;
+    border-radius: var(--radius-full);
+    outline: none;
+
+    box-shadow: 0 0 0 1px var(--border-focus);
+  }
+
+  .irf-btn {
+    flex: 0 0 auto;
+
+    min-block-size: 2rem;
+    padding-block: 0.25rem;
+    padding-inline: 0.875rem;
+
+    font-size: var(--fs-sm);
+  }
+}

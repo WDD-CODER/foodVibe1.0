@@ -1,18 +1,8 @@
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  Injector,
-  input,
-  output,
-  signal,
-  viewChild
-} from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, input, output, signal, viewChild } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
+import { InlineRenameFieldComponent } from 'src/app/shared/inline-rename-field/inline-rename-field.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 
 /** What an add asks for: the typed text and the input, so the owner can clear it on success. */
@@ -35,7 +25,7 @@ export interface TaxonomyRenameEvent {
 @Component({
   selector: 'app-taxonomy-kind-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, RowActionsMenuComponent],
+  imports: [LucideAngularModule, TranslatePipe, RowActionsMenuComponent, InlineRenameFieldComponent],
   templateUrl: './taxonomy-kind-manager.component.html',
   styleUrl: './taxonomy-kind-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -43,7 +33,6 @@ export interface TaxonomyRenameEvent {
 export class TaxonomyKindManagerComponent {
   //INJECTED
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
-  private readonly injector = inject(Injector)
 
   //INPUTS
   readonly items = input.required<string[]>()
@@ -81,7 +70,6 @@ export class TaxonomyKindManagerComponent {
   protected readonly editingItem_ = signal<string | null>(null)
 
   private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
-  private readonly renameInput = viewChild<ElementRef<HTMLInputElement>>('renameInput')
 
   //CREATE
   protected onAdd(inputEl: HTMLInputElement): void {
@@ -109,10 +97,10 @@ export class TaxonomyKindManagerComponent {
       return
     }
     this.editingItem_.set(item)
-    afterNextRender(() => this.renameInput()?.nativeElement.select(), { injector: this.injector })
   }
 
-  protected onRenameBlur(item: string, value: string): void {
+  /** Save pressed (or Enter): close the field and hand the new text to the parent. Cancel and blur never get here. */
+  protected onRenameSaved(item: string, value: string): void {
     this.editingItem_.set(null)
     this.renamed.emit({ item, value })
   }

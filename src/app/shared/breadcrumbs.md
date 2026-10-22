@@ -44,7 +44,8 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `row-actions-menu/` | Per-row actions menu | RowActionsMenuComponent |
 | `scaling-chip/` | Recipe scaling chip | ScalingChipComponent |
 | `scrollable-dropdown/` | Scrollable dropdown | ScrollableDropdownComponent |
-| `scroll-rail/` | Horizontal scroll strip with edge fades and arrow buttons | ScrollRailComponent |
+| `scroll-rail/` | Horizontal scroll strip with edge fades and arrow buttons; `centerChild(el)` glides a tapped chip to the middle | ScrollRailComponent |
+| `inline-rename-field/` | Inline rename input with Save and Cancel buttons (Enter saves, Escape cancels, blur does nothing) | InlineRenameFieldComponent |
 | `selection-bar/` | Bulk selection bar | SelectionBarComponent |
 | `translation-key-modal/` | Hebrew → English key | TranslationKeyModalComponent |
 | `unit-creator/` | Unit registry editor | UnitCreatorModal |
