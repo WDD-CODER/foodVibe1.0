@@ -177,4 +177,52 @@ describe('MenuDishRowComponent partial badge (plan 444)', () => {
     fixture.detectChanges()
     expect(el.querySelector('.partial-chip')).toBeNull()
   })
+
+  it('the חלקי chip, sell price and trash never overlap on a wide screen (plan 481)', async () => {
+    missing_.set([{ kind: 'deleted', productId: 'gone', name: 'נעלם', recipeIds: ['r1'] }])
+    await TestBed.configureTestingModule({
+      imports: [MenuDishRowComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        { provide: EventPlanService, useValue: { costFor: () => ({ cost: 0, partial: false }) } },
+        {
+          provide: RecipeCostService,
+          useValue: { computeRecipeCostStatus: () => ({ cost: 0, partial: true, missing: missing_() }) }
+        },
+        {
+          provide: KitchenStateService,
+          useValue: { productsById_: computed(() => new Map()), recipesById_: computed(() => new Map()) }
+        },
+        { provide: ProductDataService, useValue: { updateProduct: () => Promise.resolve() } },
+        { provide: TranslationService, useValue: { translate: (k: string) => k } }
+      ]
+    }).compileComponents()
+    const group = TestBed.inject(FormBuilder).group({
+      recipeId: ['r1'],
+      recipeType: ['dish'],
+      sell_price: [500],
+      food_cost_money: [0],
+      serving_portions: [1],
+      coefficient_override: [null as number | null]
+    })
+    const fixture = TestBed.createComponent(MenuDishRowComponent)
+    fixture.componentRef.setInput('itemGroup', group)
+    fixture.componentRef.setInput('sectionIndex', 0)
+    fixture.componentRef.setInput('itemIndex', 0)
+    fixture.componentRef.setInput('recipes', [{ _id: 'r1', nameHebrew: 'סלט', ingredients: [] } as unknown as Recipe])
+    const host = document.createElement('div')
+    host.style.inlineSize = '900px'
+    host.appendChild(fixture.nativeElement as HTMLElement)
+    document.body.appendChild(host)
+    fixture.detectChanges()
+    const el = fixture.nativeElement as HTMLElement
+    const box = (s: string): DOMRect => (el.querySelector(s) as HTMLElement).getBoundingClientRect()
+    const apart = (a: DOMRect, b: DOMRect): boolean => a.right <= b.left || b.right <= a.left
+    const chip = box('.partial-chip')
+    const price = box('.dish-sell-price')
+    const trash = box('.dish-remove')
+    expect(apart(chip, price)).withContext('chip vs price').toBeTrue()
+    expect(apart(price, trash)).withContext('price vs trash').toBeTrue()
+    expect(apart(chip, trash)).withContext('chip vs trash').toBeTrue()
+    host.remove()
+  })
 })

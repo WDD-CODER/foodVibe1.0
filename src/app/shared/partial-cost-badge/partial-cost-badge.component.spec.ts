@@ -134,6 +134,36 @@ describe('PartialCostBadgeComponent', () => {
     expect(el.querySelector('app-custom-select')).toBeNull()
   })
 
+  it('a deleted row is structured: icon, name, red «נמחק» pill, the note, no button (plan 481)', async () => {
+    const el = await setup([deleted])
+    openPopover(el)
+    const row = el.querySelector('.partial-row[data-kind="deleted"]') as HTMLElement
+    expect(row.querySelector('.partial-row-head lucide-icon.partial-icon')).not.toBeNull()
+    expect(row.querySelector('.partial-name')?.textContent?.trim()).toBe('נעלם')
+    const pill = row.querySelector('.partial-tag') as HTMLElement
+    expect(pill.classList).toContain('c-chip')
+    expect(pill.classList).toContain('red')
+    expect(pill.textContent?.trim()).toBe('line_status_deleted')
+    expect(row.querySelector('.partial-note')?.textContent?.trim()).toBe('partial_deleted_note')
+    expect(row.querySelector('button')).toBeNull()
+  })
+
+  it('a deleted row known only by its id shows a readable fallback, not the raw id (plan 481)', async () => {
+    const el = await setup([{ kind: 'deleted', productId: 'x9Kq2', name: 'x9Kq2', recipeIds: ['salad'] }])
+    openPopover(el)
+    const name = el.querySelector('.partial-row[data-kind="deleted"] .partial-name')?.textContent?.trim()
+    expect(name).toBe('partial_unnamed_item')
+    expect(el.querySelector('.partial-body')?.textContent).not.toContain('x9Kq2')
+  })
+
+  it('every row kind gets its own icon and the unlinked tag is an amber pill (plan 481)', async () => {
+    const el = await setup([unpriced, unlinked, deleted])
+    openPopover(el)
+    expect(el.querySelectorAll('.partial-row .partial-icon svg').length).toBe(3)
+    const unlinkedPill = el.querySelector('.partial-row[data-kind="unlinked"] .partial-tag') as HTMLElement
+    expect(unlinkedPill.classList).toContain('amber')
+  })
+
   it('a user who cannot edit one of the recipes sees the no-permission note instead of the field', async () => {
     canLink = false
     const el = await setup([unlinked])

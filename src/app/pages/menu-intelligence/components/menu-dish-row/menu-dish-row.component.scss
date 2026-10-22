@@ -14,6 +14,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  gap: 0.375rem;
   padding: 0.375rem 0;
   min-height: 2.25rem;
 
@@ -117,12 +118,10 @@
   }
 }
 
+/* Plan 481: the «חלקי» chip, sell price and trash sit in the row's flow (no absolute overlay), so they never
+   overlap each other. */
 .dish-remove {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  inset-inline-end: 0.25rem;
-
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -251,11 +250,7 @@
 }
 
 .dish-sell-price {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  inset-inline-end: 2.25rem;
-
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 0.125rem;

@@ -1096,6 +1096,7 @@
     "partial_deleted_note": "המוצר נמחק. הסירו אותו מהמתכון או בחרו מוצר אחר.",
     "partial_linked": "המוצר קושר",
     "partial_link_no_permission": "אין הרשאה לשנות את המתכון הזה",
+    "partial_unnamed_item": "פריט ללא שם",
     "shopping_total": "סה״כ",
     "engine_error_cycle": "הכנה מעגלית: {name}",
     "engine_error_no_yield": "חסרה תפוקה במתכון: {name}",
