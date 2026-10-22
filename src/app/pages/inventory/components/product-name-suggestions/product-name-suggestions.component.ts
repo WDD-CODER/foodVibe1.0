@@ -3,6 +3,7 @@ import { Router } from '@angular/router'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
+import { normalizeProductName } from 'src/app/core/utils/product-name.util'
 
 const MIN_LETTERS = 2
 const MAX_SUGGESTIONS = 5
@@ -36,7 +37,12 @@ export class ProductNameSuggestionsComponent {
     const text = (this.query() ?? '').trim()
     if (text.length < MIN_LETTERS || this.dismissedFor_() === text) return []
     const others = this.kitchenState.products_().filter((p) => p._id !== this.currentId())
-    return filterOptionsByLabel(others, text, (p) => p.nameHebrew ?? '').slice(0, MAX_SUGGESTIONS)
+    // Plan 484: exact twins first, so a duplicate name is always visible in the list.
+    const exact = normalizeProductName(text)
+    const ranked = filterOptionsByLabel(others, text, (p) => p.nameHebrew ?? '')
+    const twins = ranked.filter((p) => normalizeProductName(p.nameHebrew) === exact)
+    const rest = ranked.filter((p) => normalizeProductName(p.nameHebrew) !== exact)
+    return [...twins, ...rest].slice(0, MAX_SUGGESTIONS)
   })
 
   protected open_(id: string): void {

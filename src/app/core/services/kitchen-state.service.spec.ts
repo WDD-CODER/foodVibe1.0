@@ -123,6 +123,27 @@ describe('KitchenStateService', () => {
       })
     })
 
+    it('plan 484: an update that keeps the name saves even when a twin has it', async () => {
+      const mine = { ...createMockProduct('p1'), nameHebrew: 'מלפפון' }
+      const twin = { ...createMockProduct('p2'), nameHebrew: 'מלפפון' }
+      mockAllItemsSignal.set([mine, twin])
+      TestBed.flushEffects()
+      productDataSpy.updateProduct.and.returnValue(Promise.resolve())
+      await service.saveProduct({ ...mine, buy_price_global_: 5 } as Product)
+      expect(productDataSpy.updateProduct).toHaveBeenCalled()
+      expect(userMsgSpy.onSetErrorMsg).not.toHaveBeenCalledWith('product_duplicate_name_error')
+    })
+
+    it('plan 484: an update renamed to a taken name is refused', async () => {
+      const mine = { ...createMockProduct('p1'), nameHebrew: 'מלפפון' }
+      const other = { ...createMockProduct('p2'), nameHebrew: 'כרובית' }
+      mockAllItemsSignal.set([mine, other])
+      TestBed.flushEffects()
+      await expectAsync(service.saveProduct({ ...mine, nameHebrew: ' כרובית' })).toBeRejected()
+      expect(productDataSpy.updateProduct).not.toHaveBeenCalled()
+      expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('product_duplicate_name_error')
+    })
+
     it('should delete product if exists and show success', (done) => {
       const mockProduct = createMockProduct('p-del')
       mockAllItemsSignal.set([mockProduct])

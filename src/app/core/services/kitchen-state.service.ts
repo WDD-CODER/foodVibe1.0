@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, inject } from '@angular/core'
+import { normalizeProductName } from 'src/app/core/utils/product-name.util'
 import { Product } from '../models/product.model'
 import { Recipe } from '../models/recipe.model'
 import { Supplier } from '@models/supplier.model'
@@ -49,9 +50,12 @@ export class KitchenStateService {
   async saveProduct(product: Product): Promise<Product> {
     const isUpdate = !!(product._id && product._id.trim() !== '')
 
-    const isDuplicate = this.products_().some(
-      (p) => p.nameHebrew.trim() === product.nameHebrew.trim() && p._id !== product._id
-    )
+    // Plan 484: same name rule as the form; an update that keeps the saved name is never refused.
+    const name = normalizeProductName(product.nameHebrew)
+    const saved = isUpdate ? this.products_().find((p) => p._id === product._id) : undefined
+    const keepsName = !!saved && normalizeProductName(saved.nameHebrew) === name
+    const isDuplicate =
+      !keepsName && this.products_().some((p) => normalizeProductName(p.nameHebrew) === name && p._id !== product._id)
 
     if (isDuplicate) {
       this.userMsgService.onSetErrorMsg(this.translation.translate('product_duplicate_name_error'))

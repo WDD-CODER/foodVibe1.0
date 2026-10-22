@@ -3,6 +3,41 @@ import { duplicateNameValidator, duplicateEntityNameValidator } from './item.val
 import { Product } from '@models/product.model'
 
 describe('duplicateNameValidator', () => {
+  describe('plan 484: a product whose name already has a twin', () => {
+    const twins = [
+      { _id: 'p1', nameHebrew: 'מלפפון' },
+      { _id: 'p2', nameHebrew: 'מלפפון' },
+      { _id: 'p3', nameHebrew: 'כרובית' }
+    ] as Product[]
+
+    it('can keep its saved name (price-only edit)', () => {
+      expect(
+        duplicateNameValidator(
+          () => twins,
+          () => 'p1'
+        )(new FormControl(' מלפפון '))
+      ).toBeNull()
+    })
+
+    it('is still refused when renamed to a taken name', () => {
+      expect(
+        duplicateNameValidator(
+          () => twins,
+          () => 'p1'
+        )(new FormControl('כרובית'))
+      ).toEqual({ duplicateName: true })
+    })
+
+    it('a new product with that name is refused', () => {
+      expect(
+        duplicateNameValidator(
+          () => twins,
+          () => null
+        )(new FormControl('מלפפון'))
+      ).toEqual({ duplicateName: true })
+    })
+  })
+
   const products = [{ _id: 'p1', nameHebrew: 'Tomato' }] as Product[]
   const productsSignal = () => products
 
