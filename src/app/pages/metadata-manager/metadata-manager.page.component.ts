@@ -29,6 +29,8 @@ import { PreparationCategoryManagerComponent } from './components/preparation-ca
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { StationManagerComponent } from './components/station-manager/station-manager.component'
 import { CoefficientManagerComponent } from './components/coefficient-manager/coefficient-manager.component'
+import { StaffStagesManagerComponent } from './components/staff-stages-manager/staff-stages-manager.component'
+import { PermissionService } from '@services/permission.service'
 import { UserManagementComponent } from './components/user-management/user-management.component'
 import { AiModelManagerComponent } from './components/ai-model-manager/ai-model-manager.component'
 import { InlineRenameFieldComponent } from 'src/app/shared/inline-rename-field/inline-rename-field.component'
@@ -60,6 +62,7 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     SectionCategoryManagerComponent,
     StationManagerComponent,
     CoefficientManagerComponent,
+    StaffStagesManagerComponent,
     UserManagementComponent,
     AiModelManagerComponent,
     ScrollRailComponent,
@@ -88,6 +91,9 @@ export class MetadataManagerComponent implements OnInit {
   private readonly userService = inject(UserService)
   protected readonly isLoggedIn = this.userService.isLoggedIn
   protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
+  private readonly permission = inject(PermissionService)
+  /** Plan 477: the staff-stages card is the owner's (editSettings). */
+  protected readonly canEditSettings_ = computed(() => this.permission.can('editSettings'))
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
   private readonly taxonomy = inject(TaxonomyStore)
@@ -142,6 +148,7 @@ export class MetadataManagerComponent implements OnInit {
     { id: 'mm-sec-course', labelKey: 'metadata_recipe_courses_title' },
     { id: 'mm-sec-menu-type', labelKey: 'metadata_menu_types_title' },
     { id: 'mm-sec-coefficients', labelKey: 'metadata_coefficients_title' },
+    { id: 'mm-sec-staff-stages', labelKey: 'metadata_staff_stages_title' },
     { id: 'mm-sec-preparation', labelKey: 'metadata_prep_categories' },
     { id: 'mm-sec-section', labelKey: 'metadata_section_categories_title' },
     { id: 'mm-sec-station', labelKey: 'metadata_stations_title' },
@@ -149,12 +156,15 @@ export class MetadataManagerComponent implements OnInit {
     { id: 'mm-sec-ai-models', labelKey: 'ai_model_manager' }
   ] as const
 
-  /** User management and AI models are platform-admin screens: no tab for anyone else. */
-  protected readonly jumpSections = computed(() =>
-    this.isPlatformAdmin_()
-      ? this._allJumpSections
-      : this._allJumpSections.filter((s) => s.id !== 'mm-sec-user' && s.id !== 'mm-sec-ai-models')
-  )
+  /** User management and AI models are platform-admin screens; the staff-stages card is the owner's. No tab for anyone else. */
+  protected readonly jumpSections = computed(() => {
+    const admin = this.isPlatformAdmin_()
+    const owner = this.canEditSettings_()
+    return this._allJumpSections.filter(
+      (s) =>
+        (admin || (s.id !== 'mm-sec-user' && s.id !== 'mm-sec-ai-models')) && (owner || s.id !== 'mm-sec-staff-stages')
+    )
+  })
 
   /** The section whose chip was tapped last (highlighted chip); null until a chip is tapped. */
   protected readonly activeSectionId_ = signal<string | null>(null)

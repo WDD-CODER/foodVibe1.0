@@ -148,6 +148,22 @@ describe('INV-1 Ownership', () => {
       expect(await testDb().collection('recipes').findOne({ _id: 'owners' })).toEqual(before);
     });
 
+    // Plan 477 (ADR 0024): the one exception to "members read all of their business's items".
+    it('INV-1 staff read events only in the stages the owner allowed, plus events they created', async () => {
+      const db = testDb();
+      await db.collection('businesses').deleteMany({ _id: 'b_userA' });
+      await db.collection('businesses').insertOne({ _id: 'b_userA', name: 'A', ownerId: 'userA', createdAt: 1, internal: false, lastSyncedMasterVersion: 0, staffVisibleStages: ['ordering'] });
+      await seedStaff('menuEvents', menuEventBody({ stage: 'inquiry' }), 'hidden', 'userA');
+      await seedStaff('menuEvents', menuEventBody({ stage: 'ordering' }), 'shown', 'userA');
+      await seedStaff('menuEvents', menuEventBody({ stage: 'inquiry' }), 'own', 'staffA');
+      const staff = await request(app).get('/api/v1/data/menuEvents').set(as(STAFF_A));
+      expect(staff.body.map((e) => e._id).sort()).toEqual(['own', 'shown']);
+      expect((await request(app).get('/api/v1/data/menuEvents/hidden').set(as(STAFF_A))).status).toBe(404);
+      const owner = await request(app).get('/api/v1/data/menuEvents').set(as(USER_A));
+      expect(owner.body.map((e) => e._id).sort()).toEqual(['hidden', 'own', 'shown']);
+      await db.collection('businesses').deleteMany({ _id: 'b_userA' });
+    });
+
     it("INV-1 staff can't change a product price, the owner can", async () => {
       await seedStaff('products', pricedBody(), 'p1', 'staffA');
       const staff = await request(app).put('/api/v1/data/products/p1').set(as(STAFF_A)).send({ sources: [{ supplierId: 's1', price: 9 }] });

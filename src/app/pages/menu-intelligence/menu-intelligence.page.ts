@@ -11,6 +11,7 @@ import {
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
+import { HttpErrorResponse } from '@angular/common/http'
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -857,7 +858,18 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private async loadEvent(id: string): Promise<void> {
-    const event = await this.menuEventData.getMenuEventById(id)
+    let event: MenuEvent
+    try {
+      event = await this.menuEventData.getMenuEventById(id)
+    } catch (err: unknown) {
+      // Plan 477: an event the server does not show this user (hidden stage, removed, other business) is a 404.
+      if (err instanceof HttpErrorResponse && err.status === 404) {
+        this.userMsg.onSetErrorMsg(this.translation.translate('event_not_available'))
+        void this.router.navigate(['/menu-library'])
+        return
+      }
+      throw err
+    }
     this.menuPortions_.remember(event)
     this.form_.patchValue({
       name: event.name,
