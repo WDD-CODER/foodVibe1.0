@@ -184,12 +184,11 @@ describe('SetupChecklistCardComponent', () => {
     expect(loadSetupStatus).toHaveBeenCalledTimes(1)
   })
 
-  it('staff without a baseline: no navigation, no card, no banner, no status request', async () => {
+  it('staff without a baseline: no navigation, no card, no status request', async () => {
     await setup(EMPTY, false, { ...BUSINESS, baseline: undefined })
     expect(navigate).not.toHaveBeenCalled()
     expect(loadSetupStatus).not.toHaveBeenCalled()
     expect(card()).toBeNull()
-    expect(el().querySelector('app-opening-details-banner')).toBeNull()
   })
 
   it('with a baseline there is no redirect and the status loads once', async () => {

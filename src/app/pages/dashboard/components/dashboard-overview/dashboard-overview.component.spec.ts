@@ -24,6 +24,7 @@ describe('DashboardOverviewComponent', () => {
   let fixture: ComponentFixture<DashboardOverviewComponent>
   let component: DashboardOverviewComponent
   let mockRouter: jasmine.SpyObj<Router>
+  let mockLoadSetupStatus: jasmine.Spy
   let mockActivityLog: jasmine.SpyObj<ActivityLogService>
   let mockProducts: WritableSignal<Product[]>
   let mockRecipes: WritableSignal<Recipe[]>
@@ -53,6 +54,9 @@ describe('DashboardOverviewComponent', () => {
     mockBusiness = signal<Business | null>(null)
 
     mockRouter = jasmine.createSpyObj('Router', ['navigate'])
+    mockLoadSetupStatus = jasmine
+      .createSpy('loadSetupStatus')
+      .and.returnValue(Promise.resolve({ pricedProducts: 0, suppliers: 0, recipes: 0, events: 0, staff: 0 }))
     mockRouter.navigate.and.returnValue(Promise.resolve(true))
 
     mockActivityLog = jasmine.createSpyObj('ActivityLogService', ['syncFromStorage', 'getRecentEntriesFromStorage'])
@@ -101,7 +105,7 @@ describe('DashboardOverviewComponent', () => {
           provide: BusinessService,
           useValue: {
             business_: mockBusiness.asReadonly(),
-            loadSetupStatus: () => Promise.resolve({ pricedProducts: 0, suppliers: 0, recipes: 0, events: 0, staff: 0 })
+            loadSetupStatus: mockLoadSetupStatus
           }
         },
         { provide: Router, useValue: mockRouter },
@@ -367,12 +371,14 @@ describe('DashboardOverviewComponent', () => {
       expect(performance()).not.toBeNull()
     })
 
-    it('staff never sees the banner, even without opening details', () => {
+    it('staff without opening details: no banner, no navigation, no setup-status request, performance area shows', () => {
       mockIsOwner.set(false)
       mockBusiness.set({ ...BUSINESS, baseline: undefined })
       fixture.detectChanges()
       expect(banner()).toBeNull()
       expect(performance()).not.toBeNull()
+      expect(mockRouter.navigate).not.toHaveBeenCalled()
+      expect(mockLoadSetupStatus).not.toHaveBeenCalled()
     })
 
     it('shows the performance area while the business is still loading', () => {
