@@ -1245,6 +1245,7 @@
     "import_status_new": "חדש",
     "import_status_update": "קיים – עדכן מחיר",
     "import_status_same": "ללא שינוי",
+    "import_status_matching": "בודק…",
     "import_flag_review": "לבדיקה",
     "import_flag_duplicate": "כפול",
     "import_old_price": "היה",

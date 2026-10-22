@@ -161,6 +161,10 @@
                   <td>
                     @if (item.match) {
                       <span class="import-readonly">{{ item.match.baseUnit | translatePipe }}</span>
+                    } @else if (item.status === 'matching') {
+                      <span class="import-readonly" data-testid="import-unit-pending">{{
+                        item.row.baseUnit | translatePipe
+                      }}</span>
                     } @else {
                       <app-custom-select
                         [ngModel]="item.row.baseUnit"
@@ -191,7 +195,7 @@
                     }
                   </td>
                   <td>
-                    @if (item.match) {
+                    @if (item.match || item.status === 'matching') {
                       <span class="import-readonly">–</span>
                     } @else {
                       <div class="import-purchase">
@@ -219,7 +223,7 @@
                     }
                   </td>
                   <td>
-                    @if (item.match) {
+                    @if (item.match || item.status === 'matching') {
                       <span class="import-readonly">–</span>
                     } @else {
                       <app-custom-select
@@ -235,8 +239,8 @@
                   <td class="import-flags">
                     <span
                       class="c-chip"
-                      [class.teal]="item.status === 'new'"
-                      [class.amber]="item.status === 'update'"
+                      [class.c-chip--teal]="item.status === 'new'"
+                      [class.c-chip--amber]="item.status === 'update'"
                       data-testid="import-status"
                     >
                       {{ statusKey(item.status) | translatePipe }}

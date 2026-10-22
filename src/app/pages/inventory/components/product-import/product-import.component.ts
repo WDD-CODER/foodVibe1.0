@@ -29,7 +29,8 @@ import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.direct
 /** The base units a product may have (same list as the server). */
 const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
 
-export type ImportRowStatus = 'new' | 'update' | 'same'
+/** `matching`: the AI step has not settled this row yet, so neither `new` nor an existing status is claimed. */
+export type ImportRowStatus = 'new' | 'update' | 'same' | 'matching'
 
 /** One editable line of the preview. `id` keeps the row stable while its siblings are deleted. */
 interface PreviewRow {
@@ -96,6 +97,8 @@ export class ProductImportComponent {
   /** True while the AI name-matching step runs after a parse. */
   protected readonly isMatching_ = signal(false)
   protected readonly hasMatchFailed_ = signal(false)
+  /** Ids of the rows sent to the AI step and not answered yet; they show a neutral status instead of `new`. */
+  protected readonly pendingIds_ = signal<ReadonlySet<number>>(new Set())
   protected readonly formatMoney = formatMoney
   /** Rows the user removed from the preview; they count as skipped in the summary. */
   protected readonly deleted_ = signal(0)
@@ -132,16 +135,17 @@ export class ProductImportComponent {
     const supplierKey = this.supplierId_()
     const products = this.kitchenState_.products_()
     const knownUnits = this.knownPurchaseUnits_()
+    const pendingIds = this.pendingIds_()
     return this.rows_().map((row) => {
       const match = this.matchOf_(row, products)
-      let status: ImportRowStatus = 'new'
+      let status: ImportRowStatus = !match && pendingIds.has(row.id) ? 'matching' : 'new'
       let oldPrice: number | null = null
       if (match) {
         oldPrice = match.sources?.find((source) => source.supplierId === supplierKey)?.price ?? null
         status = row.price === null || oldPrice === row.price ? 'same' : 'update'
       }
       const unitText = row.purchaseUnit.trim()
-      const hasUnknownPurchaseUnit = !match && unitText !== '' && !knownUnits.has(unitText)
+      const hasUnknownPurchaseUnit = !match && status !== 'matching' && unitText !== '' && !knownUnits.has(unitText)
       return { row, status, match, oldPrice, hasUnknownPurchaseUnit }
     })
   })
@@ -268,6 +272,10 @@ export class ProductImportComponent {
     // A new name is matched by name only; the AI link belonged to the old text.
     const next = 'name' in patch ? { ...patch, matchedId: null } : patch
     this.rows_.update((rows) => rows.map((row) => (row.id === id ? { ...row, ...next } : row)))
+    // The AI answer for the old text is ignored, so the row stops waiting for it.
+    if ('name' in patch && this.pendingIds_().has(id)) {
+      this.pendingIds_.update((ids) => new Set([...ids].filter((pendingId) => pendingId !== id)))
+    }
   }
 
   protected setPrice(id: number, value: string | number | null): void {
@@ -300,7 +308,12 @@ export class ProductImportComponent {
   }
 
   protected statusKey(status: ImportRowStatus): string {
-    return { new: 'import_status_new', update: 'import_status_update', same: 'import_status_same' }[status]
+    return {
+      new: 'import_status_new',
+      update: 'import_status_update',
+      same: 'import_status_same',
+      matching: 'import_status_matching'
+    }[status]
   }
 
   private toPreviewRow_(row: ImportRow): PreviewRow {
@@ -333,6 +346,7 @@ export class ProductImportComponent {
     const products = this.kitchenState_.products_()
     const pending = this.rows_().filter((row) => !this.matchOf_(row, products))
     if (pending.length === 0) return
+    this.pendingIds_.set(new Set(pending.map((row) => row.id)))
     this.isMatching_.set(true)
     try {
       const found = await this.matcher_.matchNames(
@@ -347,6 +361,7 @@ export class ProductImportComponent {
         })
       )
     } finally {
+      this.pendingIds_.set(new Set())
       this.isMatching_.set(false)
     }
   }

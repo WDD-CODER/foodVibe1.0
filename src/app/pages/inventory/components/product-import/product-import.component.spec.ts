@@ -269,6 +269,43 @@ describe('ProductImportComponent', () => {
     expect(byId<HTMLButtonElement>('import-save')!.disabled).toBeFalse()
   })
 
+  it('plan 478: unsettled rows show matching until the AI answers, then their final status, never new first', async () => {
+    let release: (m: Map<string, NameMatchResult>) => void = () => undefined
+    await setup(
+      of({ rows: [row('xyz', 6), row('qqq', 3), row('מלפפון', 4.5)], truncated: false }),
+      true,
+      () => new Promise((resolve) => (release = resolve))
+    )
+    fixture.componentInstance['supplierId_'].set('sup1')
+    const seen: string[][] = []
+    const snap = () => seen.push(all('import-status').map((chip) => chip.textContent?.trim() ?? ''))
+    await pasteAndParse()
+    snap()
+    expect(seen[0]).toEqual(['import_status_matching', 'import_status_matching', 'import_status_same'])
+    expect(all('import-unit').length).toBe(0)
+    expect(all('import-category').length).toBe(0)
+    expect(all('import-purchase-unit').length).toBe(0)
+    release(new Map([['1', { product: PRODUCTS[0], via: 'ai' as const }]]))
+    await fixture.whenStable()
+    fixture.detectChanges()
+    snap()
+    expect(seen[1]).toEqual(['import_status_update', 'import_status_new', 'import_status_same'])
+    expect(seen[0]).not.toContain('import_status_new')
+    expect(all('import-unit').length).toBe(1)
+  })
+
+  it('plan 478: a failed AI call turns matching rows into new and shows the failure hint', async () => {
+    await setup(of({ rows: [row('בצל', 3)], truncated: false }))
+    matchNames.and.callFake(async (_items: NameMatchItem[], options?: { onAiFailure?: (e: unknown) => void }) => {
+      await Promise.resolve()
+      options?.onAiFailure?.(new Error('x'))
+      return new Map()
+    })
+    await pasteAndParse()
+    expect(all('import-status')[0].textContent?.trim()).toBe('import_status_new')
+    expect(byId('import-match-failed')?.textContent?.trim()).toBe('import_match_failed')
+  })
+
   it('shows import_match_failed and keeps the rows new when the AI step fails', async () => {
     await setup(of({ rows: [row('בצל', 3)], truncated: false }))
     matchNames.and.callFake(async (_items: NameMatchItem[], options?: { onAiFailure?: (e: unknown) => void }) => {
