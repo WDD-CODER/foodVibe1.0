@@ -1,4 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core'
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  ElementRef,
+  inject,
+  Injector,
+  input,
+  output,
+  signal,
+  viewChild
+} from '@angular/core'
 import { DatePipe } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -17,9 +30,12 @@ import { PermissionService } from '@services/permission.service'
 import { PlanSnapshotService } from '@services/plan-snapshot.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
+import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import { NotClosedAnswer, NotClosedDialogComponent } from '../not-closed-dialog/not-closed-dialog.component'
 import { EventClosingDialogComponent } from '../event-closing-dialog/event-closing-dialog.component'
+import { DepositPaidAnswer, DepositPaidDialogComponent } from '../deposit-paid-dialog/deposit-paid-dialog.component'
 
 /**
  * Plan 443: the stage bar at the top of the event screen. Click a stage to move the event; "לא נסגר" asks why
@@ -30,7 +46,16 @@ import { EventClosingDialogComponent } from '../event-closing-dialog/event-closi
 @Component({
   selector: 'app-event-stage-bar',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, TranslatePipe, NotClosedDialogComponent, EventClosingDialogComponent],
+  imports: [
+    DatePipe,
+    LucideAngularModule,
+    TranslatePipe,
+    ScrollRailComponent,
+    DateFieldComponent,
+    NotClosedDialogComponent,
+    EventClosingDialogComponent,
+    DepositPaidDialogComponent
+  ],
   templateUrl: './event-stage-bar.component.html',
   styleUrl: './event-stage-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -44,6 +69,9 @@ export class EventStageBarComponent {
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly userMsg = inject(UserMsgService)
   private readonly translation = inject(TranslationService)
+  private readonly injector = inject(Injector)
+  private readonly host_ = inject<ElementRef<HTMLElement>>(ElementRef)
+  private readonly rail_ = viewChild(ScrollRailComponent)
 
   // 2. INPUTS
   readonly eventId = input<string | null>(null)
@@ -57,6 +85,7 @@ export class EventStageBarComponent {
   protected readonly flowStages: readonly EventStage[] = EVENT_STAGE_ORDER.filter((stage) => stage !== 'not_closed')
   protected readonly stageLabelKey = stageLabelKey
   protected readonly isNotClosedDialogOpen_ = signal(false)
+  protected readonly isDepositDialogOpen_ = signal(false)
   protected readonly isClosingOpen_ = signal(false)
   protected readonly isDetailsOpen_ = signal(false)
   protected readonly isHistoryOpen_ = signal(false)
@@ -82,6 +111,22 @@ export class EventStageBarComponent {
     return [event?.clientName, event?.clientPhone].filter(Boolean).join(' · ')
   })
 
+  constructor() {
+    // On a phone the rail scrolls: bring the current stage to the middle when the screen opens and when the stage changes.
+    effect(() => {
+      const rail = this.rail_()
+      this.current_()
+      if (!rail) return
+      afterNextRender(
+        () => {
+          const pill = this.host_.nativeElement.querySelector<HTMLElement>('.stage-pill.is-current')
+          if (pill) rail.centerChild(pill)
+        },
+        { injector: this.injector }
+      )
+    })
+  }
+
   // 6. METHODS
   /** Moves the event to `stage` after the checks the screen can make itself; the server has the last word. */
   protected async pick(stage: EventStage): Promise<void> {
@@ -96,7 +141,22 @@ export class EventStageBarComponent {
       return
     }
     if (needsDateFor(stage, event.eventDate)) return this.showError('stage_needs_date')
+    if (stage === 'deposit_paid' && this.canEditMoney_()) {
+      // Plan 467: the owner says what was paid first; staff (no money edit) move straight through.
+      this.isDepositDialogOpen_.set(true)
+      return
+    }
     await this.move(event, { stage })
+  }
+
+  /** Moves the stage first; only when that worked is the deposit saved (a refused move saves nothing). */
+  protected async onDepositPaid(answer: DepositPaidAnswer): Promise<void> {
+    const event = this.event_()
+    this.isDepositDialogOpen_.set(false)
+    if (!event) return
+    if (!(await this.move(event, { stage: 'deposit_paid' }))) return
+    const latest = this.event_() ?? event
+    await this.saveFields(latest, { deposit: this.depositWith(latest, { date: answer.date, amount: answer.amount }) })
   }
 
   protected async onNotClosed(answer: NotClosedAnswer): Promise<void> {
@@ -157,7 +217,7 @@ export class EventStageBarComponent {
     return !!event && this.permission.can(action, { type: 'menuEvents', doc: event })
   }
 
-  private async move(event: MenuEvent, change: Parameters<EventPipelineService['changeStage']>[1]): Promise<void> {
+  private async move(event: MenuEvent, change: Parameters<EventPipelineService['changeStage']>[1]): Promise<boolean> {
     this.isBusy_.set(true)
     // Plan 446: entering "הזמנות" / "ביצוע" / "פוסט-פרודקשן" stores or freezes the planning snapshot (the server applies the same rule).
     const withSnapshot =
@@ -166,13 +226,14 @@ export class EventStageBarComponent {
         : { ...change, planSnapshot: this.snapshots.buildFor(event) }
     const result = await this.pipeline.changeStage(event._id, withSnapshot)
     this.isBusy_.set(false)
-    if (!result.ok) return
+    if (!result.ok) return false
     this.userMsg.onSetSuccessMsg(this.translation.translate('stage_changed'))
     if (change.stage === 'post_production') this.isClosingOpen_.set(true)
     if (change.stage === 'ordering' && this.supplierOrdersAvailable()) {
       if (await this.confirmModal.open('open_supplier_orders_prompt', { saveLabel: 'yes' }))
         this.openSupplierOrders.emit()
     }
+    return true
   }
 
   private depositWith(event: MenuEvent, part: { amount?: number; date?: string }): { amount?: number; date?: string } {

@@ -30,8 +30,8 @@ export class MenuLibraryPage implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.heroFab.setPageActions(
       [
-        { labelKey: 'menu_new_event', icon: 'file-plus', run: () => void this.router.navigate(['/menu-intelligence']) },
-        { labelKey: 'new_inquiry', icon: 'file-plus', run: () => void this.openInquiryForm() },
+        { labelKey: 'menu_new_event', icon: 'book-plus', run: () => void this.router.navigate(['/menu-intelligence']) },
+        { labelKey: 'new_inquiry', icon: 'phone-incoming', run: () => void this.openInquiryForm() },
         { labelKey: 'ai_menu_create_new', icon: 'sparkles', run: () => this.openAiCreateModal() }
       ],
       'replace'

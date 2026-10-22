@@ -1,0 +1,32 @@
+<div class="date-field">
+  <input
+    type="text"
+    class="date-field-text"
+    inputmode="numeric"
+    dir="ltr"
+    autocomplete="off"
+    placeholder="dd/mm/yyyy"
+    maxlength="10"
+    [id]="inputId() || null"
+    [class.c-input--invalid]="showError_()"
+    [attr.aria-label]="ariaLabelKey() ? (ariaLabelKey()! | translatePipe) : null"
+    [attr.aria-invalid]="showError_() ? 'true' : null"
+    [disabled]="disabled()"
+    [value]="text_()"
+    (input)="onType($event)"
+    (change)="onCommit()"
+  />
+  <button
+    type="button"
+    class="c-icon-btn date-field-btn"
+    [disabled]="disabled()"
+    [attr.aria-label]="'open_calendar' | translatePipe"
+    (click)="openCalendar()"
+  >
+    <lucide-icon name="calendar-days" [size]="18"></lucide-icon>
+  </button>
+  <input #picker type="date" class="date-field-picker" tabindex="-1" aria-hidden="true" (change)="onPicked($event)" />
+</div>
+@if (showError_()) {
+  <span class="c-field-error" role="alert">{{ 'date_invalid' | translatePipe }}</span>
+}

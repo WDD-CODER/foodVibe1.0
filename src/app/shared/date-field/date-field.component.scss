@@ -1,0 +1,38 @@
+@layer components.date-field {
+  :host {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+  }
+
+  .date-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .date-field-text {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    text-align: start;
+  }
+
+  .date-field-btn {
+    flex: 0 0 auto;
+    opacity: 1;
+  }
+
+  /* The native date input is only the picker: invisible, no tab stop, anchored under the button. */
+  .date-field-picker {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+}

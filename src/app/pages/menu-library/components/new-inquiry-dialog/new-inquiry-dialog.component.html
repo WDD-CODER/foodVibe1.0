@@ -44,7 +44,7 @@
       <div class="inquiry-row">
         <div class="c-input-stack">
           <label for="inquiry-date">{{ 'date_filter' | translatePipe }}</label>
-          <input id="inquiry-date" type="date" [ngModel]="date_()" (ngModelChange)="date_.set($event)" />
+          <app-date-field inputId="inquiry-date" [(value)]="date_" [(invalid)]="dateInvalid_" />
         </div>
         <div class="c-input-stack">
           <label for="inquiry-guests">{{ 'menu_guest_count' | translatePipe }}</label>
