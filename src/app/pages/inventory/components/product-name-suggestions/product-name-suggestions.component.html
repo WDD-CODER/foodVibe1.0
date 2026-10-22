@@ -1,0 +1,19 @@
+@if (matches_().length > 0) {
+  <div
+    class="name-suggestions"
+    role="group"
+    [attr.aria-label]="'product_name_similar' | translatePipe"
+    (keydown.escape)="dismiss()"
+  >
+    <p class="name-suggestions__title">{{ 'product_name_similar' | translatePipe }}</p>
+    <ul class="c-chip-group name-suggestions__list">
+      @for (product of matches_(); track product._id) {
+        <li>
+          <button type="button" class="c-chip c-chip--tap" (click)="open_(product._id)">
+            {{ product.nameHebrew }}
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+}

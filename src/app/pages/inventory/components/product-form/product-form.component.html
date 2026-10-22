@@ -13,29 +13,30 @@
     </header>
 
     <div class="form-section form-section--mandatory">
-      <app-form-field
-        label="product_name"
-        labelStyle="caps"
-        [error]="
-          productForm_.get('productName')?.touched && productForm_.get('productName')?.errors?.['duplicateName']
-            ? 'duplicate_product_name_error'
-            : validationErrors_()['productName']
-              ? 'field_name_required'
-              : null
-        "
-      >
+      @let nameControl = productForm_.get('productName');
+      @let nameError =
+        (nameControl?.errors?.['duplicateName'] && (nameControl?.dirty || nameControl?.touched)
+          ? 'duplicate_product_name_error'
+          : null) || validationErrors_()['productName'];
+      <app-form-field label="product_name" labelStyle="caps" [error]="nameError">
         <input
           #productNameInput
           formControlName="productName"
           type="text"
           class="c-input"
           [placeholder]="'product_name_example_placeholder' | translatePipe"
-          [class.c-input--invalid]="validationErrors_()['productName']"
-          [attr.aria-invalid]="validationErrors_()['productName'] ? true : null"
+          [class.c-input--invalid]="!!nameError"
+          [attr.aria-invalid]="nameError ? true : null"
+          (keydown.escape)="nameSuggestions.dismiss()"
           autocomplete="off"
           autocorrect="off"
           autocapitalize="off"
           spellcheck="false"
+        />
+        <app-product-name-suggestions
+          #nameSuggestions
+          [query]="nameControl?.value ?? ''"
+          [currentId]="curProduct_()?._id ?? null"
         />
       </app-form-field>
 
@@ -109,9 +110,9 @@
           class="product-field scaling-box"
           [class.row-invalid]="option.invalid && (option.dirty || isSubmitted)"
         >
-          <div class="scaling-row">
+          <div class="scaling-row" [class.scaling-row--empty]="!option.get('unitSymbol')?.value">
             <div
-              class="input-wrapper"
+              class="input-wrapper row-unit"
               [class.field-error]="
                 option.get('unitSymbol')?.invalid && (option.get('unitSymbol')?.dirty || isSubmitted)
               "
@@ -128,70 +129,72 @@
               />
             </div>
 
-            <div
-              class="input-wrapper"
-              [class.field-error]="
-                option.get('conversionRate')?.invalid && (option.get('conversionRate')?.dirty || isSubmitted)
-              "
-            >
-              <label class="label-row">
-                <span class="math-text">=</span>
-                <input
-                  appSelectOnFocus
-                  type="number"
-                  formControlName="conversionRate"
-                  [placeholder]="'quantity' | translatePipe"
-                  [attr.aria-label]="'quantity' | translatePipe"
-                  step="any"
-                  min="0.0001"
-                  class="c-input"
-                />
-              </label>
-            </div>
+            @if (option.get('unitSymbol')?.value) {
+              <div
+                class="input-wrapper row-qty"
+                [class.field-error]="
+                  option.get('conversionRate')?.invalid && (option.get('conversionRate')?.dirty || isSubmitted)
+                "
+              >
+                <label class="label-row">
+                  <span class="math-text">=</span>
+                  <input
+                    appSelectOnFocus
+                    type="number"
+                    formControlName="conversionRate"
+                    [placeholder]="'quantity' | translatePipe"
+                    [attr.aria-label]="'quantity' | translatePipe"
+                    step="any"
+                    min="0.0001"
+                    class="c-input"
+                  />
+                </label>
+              </div>
 
-            <div
-              class="input-wrapper"
-              [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)"
-            >
-              <label class="label-row">
-                <span class="math-text">:</span>
+              <div
+                class="input-wrapper row-uom"
+                [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)"
+              >
+                <label class="label-row">
+                  <span class="math-text">:</span>
 
-                <app-custom-select
-                  formControlName="uom"
-                  [options]="uomOptions_()"
-                  [placeholder]="productForm_.get('baseUnit')?.value || 'compare_to_unit'"
-                  [typeToFilter]="true"
-                  [addNewValue]="'NEW_UNIT'"
-                  [allowTypedAdd]="true"
-                  (addNewChosen)="pendingAddName_.set($event)"
-                  (valueChange)="onUomValueChange($event, idx)"
-                />
-              </label>
-            </div>
+                  <app-custom-select
+                    formControlName="uom"
+                    [options]="uomOptions_()"
+                    [placeholder]="productForm_.get('baseUnit')?.value || 'compare_to_unit'"
+                    [typeToFilter]="true"
+                    [addNewValue]="'NEW_UNIT'"
+                    [allowTypedAdd]="true"
+                    (addNewChosen)="pendingAddName_.set($event)"
+                    (valueChange)="onUomValueChange($event, idx)"
+                  />
+                </label>
+              </div>
 
-            <div class="price-override-wrapper">
-              <label class="c-chip c-chip--toggle">
-                <input type="checkbox" formControlName="show_special_price_" />
-                <span>{{ 'special_purchase_price' | translatePipe }}</span>
-              </label>
-              @if (option.get('show_special_price_')?.value) {
-                <input
-                  appSelectOnFocus
-                  type="number"
-                  formControlName="priceOverride"
-                  [placeholder]="'price' | translatePipe"
-                  class="override-input c-input"
-                  step="0.01"
-                  min="0"
-                  (blur)="onPriceOverrideBlur(option)"
-                />
-                <span class="math-text">₪</span>
-              }
-            </div>
+              <div class="price-override-wrapper">
+                <label class="c-chip c-chip--toggle">
+                  <input type="checkbox" formControlName="show_special_price_" />
+                  <span>{{ 'special_purchase_price' | translatePipe }}</span>
+                </label>
+                @if (option.get('show_special_price_')?.value) {
+                  <input
+                    appSelectOnFocus
+                    type="number"
+                    formControlName="priceOverride"
+                    [placeholder]="'price' | translatePipe"
+                    class="override-input c-input"
+                    step="0.01"
+                    min="0"
+                    (blur)="onPriceOverrideBlur(option)"
+                  />
+                  <span class="math-text">₪</span>
+                }
+              </div>
+            }
 
             <button
               type="button"
-              class="c-icon-btn danger"
+              class="c-icon-btn danger row-del"
               (click)="onDeletePurchaseOption(idx)"
               [attr.aria-label]="'remove' | translatePipe"
             >

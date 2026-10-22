@@ -12,7 +12,6 @@
           (ngModelChange)="onUnitNameChange($event)"
           [placeholder]="'unit_name_placeholder' | translatePipe"
           (keydown.enter)="onNameLeave($event)"
-          (keydown.tab)="onNameLeave($event)"
           autocomplete="off"
           autocorrect="off"
           autocapitalize="off"
@@ -37,8 +36,7 @@
             min="0.0001"
             [ngModel]="newUnitValue_()"
             (ngModelChange)="newUnitValue_.set($event)"
-            (keydown.enter)="$event.preventDefault(); focusBasisUnitSelect()"
-            (keydown.tab)="$event.preventDefault(); focusBasisUnitSelect()"
+            (keydown.enter)="onAmountEnter($event)"
           />
         </div>
       </div>
@@ -56,21 +54,16 @@
       </div>
     </div>
 
-    @if (netUnitCost() > 0) {
+    @if (netUnitCost() > 0 && unitCostPreview_() > 0) {
       <div class="cost-preview">
         <span class="label">{{ 'net_cost_calculated' | translatePipe }}</span>
-        <span class="value">₪{{ netUnitCost() * newUnitValue_() | number: '1.2-2' }}</span>
+        <span class="value">₪{{ unitCostPreview_() | number: '1.2-2' }}</span>
       </div>
     }
 
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="resetAndClose()">{{ 'cancel' | translatePipe }}</button>
-      <button
-        type="button"
-        class="c-btn-primary"
-        (click)="save()"
-        [disabled]="!newUnitName_() || newUnitValue_() <= 0 || !basisUnit_() || isSaving_()"
-      >
+      <button type="button" class="c-btn-primary" (click)="save()" [disabled]="!canSave_() || isSaving_()">
         {{ 'approve_and_save_unit' | translatePipe }}
       </button>
     </div>

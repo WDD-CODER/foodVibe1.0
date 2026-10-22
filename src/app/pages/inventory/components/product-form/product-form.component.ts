@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   inject,
   OnInit,
@@ -47,6 +48,7 @@ import { map } from 'rxjs'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
+import { failedSaveMessage } from 'src/app/core/utils/product-form-errors.util'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ChipSearchDropdownComponent } from 'src/app/shared/chip-search-dropdown/chip-search-dropdown.component'
@@ -61,6 +63,7 @@ import { MasterPushService } from '@services/master-push.service'
 import { HeroFabService } from '@services/hero-fab.service'
 import { registerDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
 import { ProductPriceLockComponent } from '../product-price-lock/product-price-lock.component'
+import { ProductNameSuggestionsComponent } from '../product-name-suggestions/product-name-suggestions.component'
 
 /**
  * Plan 423 — units whose size is a physical constant: choosing one in a purchase row fills the exact amount.
@@ -99,6 +102,7 @@ interface ProductFormValue {
     CustomSelectComponent,
     ChipSearchDropdownComponent,
     ProductPriceLockComponent,
+    ProductNameSuggestionsComponent,
     FormFieldComponent
   ],
   providers: [ProductAiFlowService],
@@ -131,6 +135,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   private readonly userService_ = inject(UserService)
   private readonly masterPush_ = inject(MasterPushService)
   private readonly heroFab_ = inject(HeroFabService)
+  private readonly cdr_ = inject(ChangeDetectorRef)
 
   unitRegistry = inject(UnitRegistryService)
   private readonly isAdmin_ = this.userService_.isAdmin_
@@ -496,6 +501,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (!alive) return
     if (added) onAdded(added)
     else control?.setValue(previous, { emitEvent: false })
+    this.cdr_.markForCheck() // the row shows its amount boxes only while it has a unit
   }
 
   protected onBaseUnitValueChange(value: string): void {
@@ -745,15 +751,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           : null
         const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0
 
-        // 1. Get the actual base unit selected at the top of the form (e.g., 'gram')
-        const currentBaseUnit = this.productForm_.get('baseUnit')?.value ?? ''
         const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv ?? 0)
 
         // 2. Patch the row so the "UOM" (middle dropdown) is no longer empty
         group.patchValue(
           {
             conversionRate: suggestedConv,
-            uom: currentBaseUnit, // 👈 This fills the empty slot next to 5000
+            uom: baseUnitKey, // the base unit selected at the top of the form fills the compare-to box
             priceOverride: suggestedPrice
           },
           { emitEvent: false }
@@ -897,14 +901,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   /** For pendingChangesGuard: save and resolve true on success, false on failure. */
   async saveAndWait(): Promise<boolean> {
-    if (!this.validateForm_()) {
+    if (!this.validateForm_() || !this.productForm_.valid) {
+      this.isSubmitted = true // invalid purchase rows get marked
       this.productForm_.markAllAsTouched()
-      this.userMsgService.onSetErrorMsg(this.translationService.translate('form_has_errors'))
-      return false
-    }
-    if (!this.productForm_.valid) {
-      this.productForm_.markAllAsTouched()
-      this.userMsgService.onSetErrorMsg(this.translationService.translate('form_has_errors'))
+      this.userMsgService.onSetErrorMsg(failedSaveMessage(this.productForm_.controls, this.translationService))
       return false
     }
     const val = this.productForm_.getRawValue()
