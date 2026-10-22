@@ -219,8 +219,14 @@ HOW TO VALIDATE — 14 checks on 9 pages · reply: done | not yet | failed: <num
 
 - Screenshots for each plan are in `C:\coding projects\Cursor\mvp-review-evidence\<plan>\`, and each run file's "UI validation" section names the file for every card.
 - Cards: 199 run by the browser agents; 185 passed, 2 failed (457 card 15, 468 card 4), 12 unsure. The 14 non-passing cards are section 5.
-- A final sweep left 400 screenshots in `C:\coding projects\Cursor\mvp-review-evidence\final\`, but its verdicts were not in the data given to this report, so no sweep regressions are listed here.
+- Final sweep (checked in the run journal on 2026-10-22): 193 cards re-run after all merges; 179 passed, 2 failed (the same two look defects, 457 card 15 and 468 card 4), the rest unsure. No regressions. Screenshots in `C:ding projectsCursormvp-review-evidenceinal`.
 - Rerun 2026-10-22: 31 more cards (451: 23, 461: 8), all 31 passed; screenshots in the same `451` and `461` folders.
 - Merged list checked with `git log origin/mvp-review --merges`: 26 plan merges (450–470, 472, 474–477).
 
 Model: claude-opus-5-5
+
+## 8. After the run — slow loading and duplicate suppliers (2026-10-22)
+
+- **Cause (local database only):** the local shared supplier list (`__master__`) held each of its 38 suppliers 5 times since 2026-10-01, before this run. Every new business copied all of them. The run also created 9 extra test businesses (about 129,000 records), which made local pages slow.
+- **Local cleanup (done):** 9 test businesses, 11 test users and 129,340 records deleted; the shared supplier list cut from 187 to 38, and 3,729 shared products pointed at the kept supplier. The test accounts in `accounts.json` were kept. Guest Admin and QA Review Kitchen still carry their old 5× copies.
+- **Atlas (read-only check, nothing written):** 152 suppliers and 5,900 products. The shared list and each of the 3 user accounts have 38 suppliers with 38 different names. Atlas has no duplicate suppliers, so the final Atlas gate needs no supplier cleanup first.
