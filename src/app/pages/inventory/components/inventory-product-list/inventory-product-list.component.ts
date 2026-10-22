@@ -50,7 +50,7 @@ import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-
 import { optionRateInBase } from '@utils/purchase-option-rate.util'
 import {
   getProductValidationStatus,
-  getProductMissingFields,
+  getProductStatusFields,
   isProductUnpriced,
   VALIDATION_FIELD_ICONS,
   ProductValidationStatus
@@ -132,6 +132,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   /** Filter-category open state: all collapsed on mobile (≤1023px), all expanded on desktop (plan 345). */
   protected readonly filterCategories = useCollapsibleCategories()
   protected allergenPopoverProductId_ = signal<string | null>(null)
+  /** Product whose status tooltip is pinned open by a tap (touch devices; hover opens it by CSS). */
+  protected openStatusId_ = signal<string | null>(null)
   protected isAllergenAllExpanded_ = signal<boolean>(false)
   protected isLowStockOnly_ = signal<boolean>(false)
   protected shouldShowInvalidOnly_ = signal<boolean>(false)
@@ -376,11 +378,13 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected readonly displayRows_ = computed(() =>
     this.filteredProducts_().map((product) => {
       const validationStatus = this.getValidationStatus(product)
+      const unpriced = isProductUnpriced(product)
       return {
         product,
         validationStatus,
-        unpriced: isProductUnpriced(product),
-        missingFields: validationStatus === 'valid' ? [] : this.getMissingFields(product),
+        unpriced,
+        statusKind: this.getStatusKind(validationStatus, unpriced),
+        statusFields: getProductStatusFields(product),
         category: this.getCategoryDisplay(product.categories),
         supplierNames: this.getProductSupplierNames(product),
         pricePerUnit: this.getPricePerUnit(product, product.baseUnit)
@@ -503,8 +507,29 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     return getProductValidationStatus(product)
   }
 
-  protected getMissingFields(product: Product): string[] {
-    return getProductMissingFields(product)
+  /** One mark per row: red circle, else the amber unpriced chip, else the amber triangle, else none. */
+  protected getStatusKind(
+    status: ProductValidationStatus,
+    unpriced: boolean
+  ): 'invalid' | 'unpriced' | 'incomplete' | null {
+    if (status === 'invalid') return 'invalid'
+    if (unpriced) return 'unpriced'
+    return status === 'incomplete' ? 'incomplete' : null
+  }
+
+  protected toggleStatus(productId: string | undefined): void {
+    const id = productId ?? ''
+    this.openStatusId_.update((open) => (open === id ? null : id))
+  }
+
+  /** Closes only this product's box, so a tap on another row's mark is not undone by the document click. */
+  protected closeStatus(productId?: string): void {
+    if (productId !== undefined && this.openStatusId_() !== productId) return
+    this.openStatusId_.set(null)
+  }
+
+  protected statusLabel(fields: string[]): string {
+    return fields.map((f) => this.translationService.translate(f)).join(', ')
   }
 
   protected getFieldIcon(fieldKey: string): string {
@@ -556,6 +581,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       el.closest('button') ||
       el.closest('a') ||
       el.closest('.allergen-btn-wrapper') ||
+      el.closest('.validation-badge') ||
       el.closest('app-list-row-checkbox')
     )
       return

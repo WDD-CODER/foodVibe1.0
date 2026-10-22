@@ -175,35 +175,49 @@
               'low_stock' | translatePipe
             }}</span>
           }
-          @if (row.validationStatus === 'invalid') {
-            <span class="validation-badge validation-badge--invalid">
-              <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
-              <span class="validation-tooltip">
-                @for (field of row.missingFields; track field) {
-                  <span class="c-chip c-chip--tag c-chip--sm c-chip--square c-chip--red">
+          @if (row.statusKind) {
+            <span
+              class="validation-badge validation-badge--{{ row.statusKind }}"
+              (appClickOutside)="closeStatus(row.product._id)"
+              (keydown.escape)="closeStatus(row.product._id)"
+            >
+              <button
+                type="button"
+                class="row-status"
+                aria-haspopup="true"
+                [attr.aria-expanded]="openStatusId_() === row.product._id"
+                [attr.aria-label]="statusLabel(row.statusFields)"
+                (click)="toggleStatus(row.product._id)"
+                (keydown.enter)="$event.stopPropagation()"
+                (keydown.space)="$event.stopPropagation()"
+              >
+                @switch (row.statusKind) {
+                  @case ('invalid') {
+                    <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
+                  }
+                  @case ('unpriced') {
+                    <span class="c-chip amber unpriced-badge">
+                      <lucide-icon name="coins" [size]="11"></lucide-icon>
+                      <span class="unpriced-badge__label">{{ 'product_unpriced' | translatePipe }}</span>
+                    </span>
+                  }
+                  @default {
+                    <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
+                  }
+                }
+              </button>
+              <span class="validation-tooltip" role="tooltip">
+                @for (field of row.statusFields; track field) {
+                  <span
+                    class="c-chip c-chip--tag c-chip--sm c-chip--square"
+                    [class.c-chip--red]="row.statusKind === 'invalid'"
+                    [class.c-chip--amber]="row.statusKind !== 'invalid'"
+                  >
                     <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
                     {{ field | translatePipe }}
                   </span>
                 }
               </span>
-            </span>
-          } @else if (row.validationStatus === 'incomplete') {
-            <span class="validation-badge validation-badge--incomplete">
-              <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
-              <span class="validation-tooltip">
-                @for (field of row.missingFields; track field) {
-                  <span class="c-chip c-chip--tag c-chip--sm c-chip--square c-chip--amber">
-                    <lucide-icon [name]="getFieldIcon(field)" [size]="11"></lucide-icon>
-                    {{ field | translatePipe }}
-                  </span>
-                }
-              </span>
-            </span>
-          }
-          @if (row.unpriced) {
-            <span class="c-chip amber unpriced-badge">
-              <lucide-icon name="coins" [size]="11"></lucide-icon>
-              {{ 'product_unpriced' | translatePipe }}
             </span>
           }
           {{ row.product.nameHebrew }}
