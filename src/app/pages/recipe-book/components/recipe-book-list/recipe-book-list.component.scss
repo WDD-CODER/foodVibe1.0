@@ -81,21 +81,7 @@
     }
   }
 
-  /* Chip container: flex wrap, centered, chips width = content */
-  .c-dense-chip-grid {
-    display: flex;
-    flex-wrap: wrap;
-    align-content: center;
-    align-items: center;
-    justify-content: center;
-
-    gap: 0.25rem;
-    width: 100%;
-  }
-
   /* Labels & allergens columns (header + body) */
-  .c-dense-chip-col.col-labels,
-  .c-dense-chip-col.col-allergens,
   .col-labels,
   .col-allergens {
     position: relative;
