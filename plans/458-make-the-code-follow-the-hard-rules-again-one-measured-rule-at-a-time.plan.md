@@ -1,6 +1,6 @@
 # Plan 458 — Make the code follow the hard rules again, one measured rule at a time
 
-Status: draft
+Status: active
 Track: code
 Depends-on: 450, 451, 452, 453, 454, 455, 456, 457
 Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
@@ -20,9 +20,9 @@ Code written before the rules hardened drifts from `AGENTS.md` / `_shared/tech-s
 ## Goals & Success Criteria
 - Primary: every listed rule is at zero violations (or, for a rule with a documented exception list, at zero unlisted violations), with no behaviour change.
 - Success:
-  - [ ] [auto] `docs/refactor/runs/458.md` has a baseline count per rule (S1) and a new count after each rule's sub-task; every rule row ends at `0` or `0 + N documented exceptions`.
-  - [ ] [auto] `npx ng build` and `npx ng test --watch=false` pass after every sub-task (same pass count as baseline, no new skips).
-  - [ ] [auto] `node scripts/scope-check.mjs --plan=458` passes; `git diff --numstat` shows net lines <= 0 for each frozen file (`product-form.component.ts`, `menu-intelligence.page.ts`, `menu-export.service.ts`, `recipe-builder.page.ts`, `cook-view.page.ts`); hotspots only gain lines.
+  - [x] [auto] `docs/refactor/runs/458.md` has a baseline count per rule (S1) and a new count after each rule's sub-task; every rule row ends at `0` or `0 + N documented exceptions`.
+  - [x] [auto] `npx ng build` and `npx ng test --watch=false` pass after every sub-task (same pass count as baseline, no new skips).
+  - [x] [auto] `node scripts/scope-check.mjs --plan=458` passes; `git diff --numstat` shows net lines <= 0 for each frozen file (`product-form.component.ts`, `menu-intelligence.page.ts`, `menu-export.service.ts`, `recipe-builder.page.ts`, `cook-view.page.ts`); hotspots only gain lines.
   - [ ] [auto] `node scripts/breadcrumbs-check.mjs` passes (no files moved).
   - [ ] [human] Each touched page opens and works as before — inventory (product form, product list), equipment, suppliers, venues, recipe book, recipe builder, cook view, metadata manager, menu intelligence — and the shared dropdowns/modals (custom select, multi-select, confirm, AI modals) still open, close on Escape and focus their search box. The cards are listed in `docs/refactor/runs/458.md`.
 
@@ -230,6 +230,8 @@ append the path to the scope block above and retry.
 - INV-2: preserves — no tenancy or master-data change.
 - INV-3: preserves — no cascades added or moved.
 - INV-4: preserves — no schema change.
+- INV-5: preserves — no taxonomy change.
+- INV-6: preserves — the AI modals only change how their labels are worded (dictionary keys); every AI call still goes through `server/routes/ai.js`.
 
 ## Backend Impact
 - Collections affected: none
@@ -246,28 +248,28 @@ Runs first, before S1, because the MVP and plans 450–457 changed many files. F
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Per-rule baseline and after-count recorded in `docs/refactor/runs/458.md`.
-- [ ] Rules 1, 2, 4, 5, 6 reach zero; rules 7 and 9 reach zero unlisted violations; rule 8 documented; rule 3 decided (S5).
+- [x] Per-rule baseline and after-count recorded in `docs/refactor/runs/458.md`.
+- [x] Rules 1, 2, 4, 5, 6 reach zero; rules 7 and 9 reach zero unlisted violations; rule 8 documented; rule 3 decided (S5).
 ### Should Have (P1)
-- [ ] `scripts/rule-sweep-count.mjs` prints all counts in one table so later plans can re-run it (skipped if `reuse-lint.mjs` already does).
+- [x] `scripts/rule-sweep-count.mjs` prints all counts in one table so later plans can re-run it (skipped if `reuse-lint.mjs` already does).
 
 ## UI/UX Notes
 - No visual change. Every touched page gets a [human] smoke card (same screens as before, same clicks). Moving `.c-*` blocks into `styles.scss` must keep specificity: place them inside the existing `@layer` order used there.
 
 ## Atomic Sub-tasks
 Checkpoints (build + tests + run-file row, then pause for the Human's `continue`): after S1, S3, S5, S7, S10.
-- [ ] S1: Step 0, then record the baseline for all 9 rules in a table (rule · how measured · file list · count); classify each Hebrew hit as `bug` / `canonical data (keep)` / `comment`; add `scripts/rule-sweep-count.mjs` only if `reuse-lint.mjs` lacks a rule — `docs/refactor/runs/458.md`, `scripts/rule-sweep-count.mjs`
-- [ ] S2: Move the `.c-*` rule blocks out of the 14 component SCSS files into `src/styles.scss` (append-only, one commented block per source file; if a class already exists there, delete the duplicate and keep the existing one); component keeps its own local classes — the 14 component `.scss` files listed in Problem 1, `src/styles.scss`, `docs/refactor/runs/458.md`
-- [ ] S3: Wrap the remaining component SCSS in the project layer (`@layer`, same layer name the compliant files use — read `.claude/skills/cssLayer/SKILL.md` first), in batches of 10 files, building after each batch; compare a before/after screenshot of one page per batch — the SCSS files named by S1 (added via `approved:`), `docs/refactor/runs/458.md`
-- [ ] S4: Replace `@ViewChild`/`@ViewChildren` with `viewChild()`/`viewChildren()` (reads become `ref()?.nativeElement`; `QueryList` iteration becomes array iteration) — `equipment-form.component.ts`, `product-form.component.ts`, `recipe-ingredients-table.component.ts`, `recipe-workflow.component.ts`, `chip-search-dropdown.component.ts`, `counter.component.ts`, `custom-multi-select.component.ts`, `custom-select.component.ts`, `scaling-chip.component.ts`, `docs/refactor/runs/458.md`
-- [ ] S5: Replace `@HostListener` with `host: {}` bindings or `fromEvent` + `takeUntilDestroyed` where the listener is on `document`/`window` (Escape in the four modals/preview/row-actions menu, outside-click in nutrition-badge and `click-out-side.ts`, scroll/resize in `scroll-indicators.directive.ts`, `cook-view.page.ts` lines ~928 and ~1153) — the files in Problem 4, `src/app/core/directives/*.ts`, `docs/refactor/runs/458.md`
-- [ ] S6: Convert `*ngIf`/`*ngFor`/`*ngSwitch` in the product form template to `@if/@for/@switch` (every `@for` gets a `track`; keep `else` branches identical), drop now-unused `NgIf/NgFor` imports so the file does not grow — `product-form.component.html`, `product-form.component.ts`, `docs/refactor/runs/458.md`
-- [ ] S7: Add `app-` to the 9 component selectors and `app` prefixed names to the 8 attribute directives, updating every template call-site found in Step 0 (known: `appRoot/app.component.html`, `inventory.page.html`, `recipe-book.page.html`; modals opened from code need no template edit) — the selector files in Problem 6, `src/app/core/directives/*.ts`, `inventory.page.html`, `recipe-book.page.html`, `app.component.html`, `docs/refactor/runs/458.md`
-- [ ] S8: Rename non-`is/has/can/should` boolean signals and fields found by S1, with their template uses, one file per commit; skip public `input()` names that a parent binds unless every parent is in scope — files from S1 (added via `approved:`), `docs/refactor/runs/458.md`
-- [ ] S9: Document the input naming convention in `docs/agent/conventions.md`: private state keeps the trailing `_`; public `input()`/`output()`/`model()` names are the plain API name (171 of 173 today already follow this); fix the 2 outliers only if they have a single binding site — `docs/agent/conventions.md`, `docs/refactor/runs/458.md`
-- [ ] S10: Raw Hebrew: for each S1 `bug` row, replace the string with a `translatePipe` / `TranslationService` key and append the key to `public/assets/data/dictionary.json` (append-only; Hebrew value is the old string verbatim); `canonical data (keep)` rows stay and are listed as the exception list in the run file — files from S1 (added via `approved:`), `public/assets/data/dictionary.json`, `docs/refactor/runs/458.md`
-- [ ] S11: OnPush on `cook-view.page.ts` and `recipe-builder.page.ts`: first count what the change adds (import + `changeDetection` = +2 lines each) and what can be deleted in the same file to pay for it; if the file can end at net <= 0 and all reads in the template are signals, add OnPush, run the page's spec, and record it; if not, do NOT add it — record `blocked: frozen-file growth` and raise Critical Question 1 — `cook-view.page.ts`, `recipe-builder.page.ts`, `docs/refactor/runs/458.md`
-- [ ] S12: Final pass: re-run every rule's measure, fill the "after" column, build, run all tests, write the validation cards for the touched pages — `docs/refactor/runs/458.md`
+- [x] S1: Step 0, then record the baseline for all 9 rules in a table (rule · how measured · file list · count); classify each Hebrew hit as `bug` / `canonical data (keep)` / `comment`; add `scripts/rule-sweep-count.mjs` only if `reuse-lint.mjs` lacks a rule — `docs/refactor/runs/458.md`, `scripts/rule-sweep-count.mjs`
+- [x] S2: Move the `.c-*` rule blocks out of the 14 component SCSS files into `src/styles.scss` (append-only, one commented block per source file; if a class already exists there, delete the duplicate and keep the existing one); component keeps its own local classes — the 14 component `.scss` files listed in Problem 1, `src/styles.scss`, `docs/refactor/runs/458.md`
+- [x] S3: Wrap the remaining component SCSS in the project layer (`@layer`, same layer name the compliant files use — read `.claude/skills/cssLayer/SKILL.md` first), in batches of 10 files, building after each batch; compare a before/after screenshot of one page per batch — the SCSS files named by S1 (added via `approved:`), `docs/refactor/runs/458.md` — run 458: 10 layer-safe files wrapped, 58 listed as exceptions (Decision 1)
+- [x] S4: Replace `@ViewChild`/`@ViewChildren` with `viewChild()`/`viewChildren()` (reads become `ref()?.nativeElement`; `QueryList` iteration becomes array iteration) — `equipment-form.component.ts`, `product-form.component.ts`, `recipe-ingredients-table.component.ts`, `recipe-workflow.component.ts`, `chip-search-dropdown.component.ts`, `counter.component.ts`, `custom-multi-select.component.ts`, `custom-select.component.ts`, `scaling-chip.component.ts`, `docs/refactor/runs/458.md`
+- [x] S5: Replace `@HostListener` with `host: {}` bindings or `fromEvent` + `takeUntilDestroyed` where the listener is on `document`/`window` (Escape in the four modals/preview/row-actions menu, outside-click in nutrition-badge and `click-out-side.ts`, scroll/resize in `scroll-indicators.directive.ts`, `cook-view.page.ts` lines ~928 and ~1153) — the files in Problem 4, `src/app/core/directives/*.ts`, `docs/refactor/runs/458.md`
+- [x] S6: Convert `*ngIf`/`*ngFor`/`*ngSwitch` in the product form template to `@if/@for/@switch` (every `@for` gets a `track`; keep `else` branches identical), drop now-unused `NgIf/NgFor` imports so the file does not grow — `product-form.component.html`, `product-form.component.ts`, `docs/refactor/runs/458.md`
+- [x] S7: Add `app-` to the 9 component selectors and `app` prefixed names to the 8 attribute directives, updating every template call-site found in Step 0 (known: `appRoot/app.component.html`, `inventory.page.html`, `recipe-book.page.html`; modals opened from code need no template edit) — the selector files in Problem 6, `src/app/core/directives/*.ts`, `inventory.page.html`, `recipe-book.page.html`, `app.component.html`, `docs/refactor/runs/458.md`
+- [x] S8: Rename non-`is/has/can/should` boolean signals and fields found by S1, with their template uses, one file per commit; skip public `input()` names that a parent binds unless every parent is in scope — files from S1 (added via `approved:`), `docs/refactor/runs/458.md`
+- [x] S9: Document the input naming convention in `docs/agent/conventions.md`: private state keeps the trailing `_`; public `input()`/`output()`/`model()` names are the plain API name (171 of 173 today already follow this); fix the 2 outliers only if they have a single binding site — `docs/agent/conventions.md`, `docs/refactor/runs/458.md`
+- [x] S10: Raw Hebrew: for each S1 `bug` row, replace the string with a `translatePipe` / `TranslationService` key and append the key to `public/assets/data/dictionary.json` (append-only; Hebrew value is the old string verbatim); `canonical data (keep)` rows stay and are listed as the exception list in the run file — files from S1 (added via `approved:`), `public/assets/data/dictionary.json`, `docs/refactor/runs/458.md`
+- [x] S11: OnPush on `cook-view.page.ts` and `recipe-builder.page.ts`: first count what the change adds (import + `changeDetection` = +2 lines each) and what can be deleted in the same file to pay for it; if the file can end at net <= 0 and all reads in the template are signals, add OnPush, run the page's spec, and record it; if not, do NOT add it — record `blocked: frozen-file growth` and raise Critical Question 1 — `cook-view.page.ts`, `recipe-builder.page.ts`, `docs/refactor/runs/458.md` — run 458: not added, template reads plain state (Decision 2)
+- [x] S12: Final pass: re-run every rule's measure, fill the "after" column, build, run all tests, write the validation cards for the touched pages — `docs/refactor/runs/458.md`
 
 ## Technical Considerations
 - Dependencies: `scripts/reuse-lint.mjs` (plan 450), `scripts/scope-check.mjs`, `.claude/skills/cssLayer/SKILL.md`, `.claude/skills/angularComponentStructure/SKILL.md`.
