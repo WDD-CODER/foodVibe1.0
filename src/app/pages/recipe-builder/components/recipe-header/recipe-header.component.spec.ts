@@ -102,6 +102,7 @@ describe('RecipeHeaderComponent', () => {
     const ingredients = fb.array([row('פטרוזיליה'), row('פטרוזיליה', 'p9'), row('מלח')])
     const form = fb.group({ ...createRecipeForm().controls, ingredients })
     fixture.componentRef.setInput('form', form)
+    spyOn(component['recipeCost'], 'getCostForIngredient').and.returnValue(0)
 
     component['onLinked']({ name: 'פטרוזיליה', product: { _id: 'p1', nameHebrew: 'פטרוזיליה טרייה' } as never })
 
@@ -110,6 +111,28 @@ describe('RecipeHeaderComponent', () => {
     )
     expect(ingredients.at(1).value.referenceId).toBe('p9')
     expect(ingredients.at(2).value.referenceId).toBe('')
+  })
+
+  it('prices a linked row so the cost recomputes (plan 466)', () => {
+    const row = fb.group({
+      nameHebrew: ['פטרוזיליה'],
+      referenceId: [''],
+      item_type: [''],
+      nameSnapshot: [''],
+      amount_net: [200],
+      unit: ['gram'],
+      total_cost: [0]
+    })
+    const form = fb.group({ ...createRecipeForm().controls, ingredients: fb.array([row]) })
+    fixture.componentRef.setInput('form', form)
+    const costSpy = spyOn(component['recipeCost'], 'getCostForIngredient').and.returnValue(12.5)
+
+    component['onLinked']({ name: 'פטרוזיליה', product: { _id: 'p1', nameHebrew: 'פטרוזיליה טרייה' } as never })
+
+    expect(costSpy).toHaveBeenCalledWith(
+      jasmine.objectContaining({ referenceId: 'p1', type: 'product', amount: 200, unit: 'gram' })
+    )
+    expect(row.value.total_cost).toBe(12.5)
   })
 
   it('should create', () => {

@@ -204,15 +204,30 @@ describe('PartialCostBadgeComponent', () => {
       expect(success).not.toHaveBeenCalled()
     })
 
-    it('a failed write logs and shows the error toast', async () => {
+    it('a failed write adds no second log or toast (saveRecipe already reports it)', async () => {
       const el = await setup([unlinked])
       link.and.rejectWith(new Error('boom'))
       const logging = TestBed.inject(LoggingService)
       openPopover(el)
       select(el).triggerLink('oil')
       await flush()
-      expect(logging.error).toHaveBeenCalled()
-      expect(error).toHaveBeenCalledWith('server_error')
+      expect(logging.error).not.toHaveBeenCalled()
+      expect(error).not.toHaveBeenCalled()
+      expect(success).not.toHaveBeenCalled()
+    })
+
+    it('takes the popover out of the top layer while the create window is open, then puts it back', async () => {
+      let finish: (p: Product | null) => void = () => undefined
+      const el = await setup([unlinked])
+      openModal.and.returnValue(new Promise<Product | null>((resolve) => (finish = resolve)))
+      openPopover(el)
+      const popover = el.querySelector('.partial-popover') as HTMLElement
+      expect(popover.matches(':popover-open')).toBeTrue()
+      select(el).addNew('x')
+      expect(popover.matches(':popover-open')).toBeFalse()
+      finish(null)
+      await flush()
+      expect(popover.matches(':popover-open')).toBeTrue()
     })
 
     it('keeps the popover open on a click outside while the create window is open', async () => {

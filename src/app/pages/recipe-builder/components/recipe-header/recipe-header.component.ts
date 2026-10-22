@@ -37,6 +37,7 @@ import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.c
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import type { Product } from '@models/product.model'
+import type { Ingredient } from '@models/ingredient.model'
 
 /**
  * Inline stand-in for the 120x120 image thumbnail before a photo is uploaded.
@@ -151,7 +152,17 @@ export class RecipeHeaderComponent {
       const name = (value.nameSnapshot || value.nameHebrew || '').trim()
       if (value.referenceId || name !== link.name) continue
       group.patchValue({ referenceId: link.product._id, item_type: 'product', nameSnapshot: link.product.nameHebrew })
+      // The ingredients table only prices a row when its item is picked or the catalogues change, so price it here.
+      const raw = group.getRawValue() as { amount_net?: number; unit?: string }
+      const totalCost = this.recipeCost.getCostForIngredient({
+        referenceId: link.product._id,
+        type: 'product',
+        amount: Number(raw.amount_net) || 0,
+        unit: raw.unit || ''
+      } as Ingredient)
+      group.get('total_cost')?.setValue(totalCost)
     }
+    rows.parent?.updateValueAndValidity()
   }
 
   protected readonly ownRecipeNames_ = computed(() => {

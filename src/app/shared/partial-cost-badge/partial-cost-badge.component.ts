@@ -242,10 +242,17 @@ export class PartialCostBadgeComponent {
   /** «Add "<typed>"»: the create window opens with the typed text (or the row's name); the saved product is linked. */
   protected async addNew(row: MissingRow, typed: string): Promise<void> {
     this.modalOpen_.set(true)
+    // The popover sits in the browser top layer and would cover the create window: take it out while that is open.
+    const popover = this.popoverRef_()?.nativeElement
+    if (popover?.matches(':popover-open')) popover.hidePopover()
     let product: Product | null = null
     try {
       product = await this.quickAddModal_.open({ prefillName: typed.trim() || row.item.name })
     } finally {
+      if (popover?.isConnected) {
+        if (!popover.matches(':popover-open')) popover.showPopover()
+        this.place_(popover)
+      }
       // Released after the click that closed the window has finished bubbling, so it is not a click outside.
       setTimeout(() => this.modalOpen_.set(false))
     }
@@ -262,13 +269,8 @@ export class PartialCostBadgeComponent {
     try {
       await this.linkService_.link({ name, product, recipeIds, skipRecipeId: this.formRecipeId() })
       this.userMsg_.onSetSuccessMsg(this.translation_.translate('partial_linked'))
-    } catch (err) {
-      this.logging_.error({
-        event: 'crud.recipe.link_unlinked_error',
-        message: 'Failed to link an unlinked ingredient to a product',
-        context: { err, name, productId: product._id }
-      })
-      this.userMsg_.onSetErrorMsg(this.translation_.translate('server_error'))
+    } catch {
+      // saveRecipe already logged the failure and showed the server's error toast.
     }
   }
 
