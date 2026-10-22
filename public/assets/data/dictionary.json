@@ -1524,6 +1524,11 @@
     "nutrition_fat": "שומן",
     "nutrition_fiber": "סיבים",
     "nutrition_sodium": "נתרן",
-    "nutrition_per_100g": "100 גר׳"
+    "nutrition_per_100g": "100 גר׳",
+    "business_name_default": "העסק של {{name}}",
+    "business_name_default_hint": "לא חובה. אם תשאירו ריק, העסק ייקרא בשם המשתמש – אפשר לשנות בהגדרות.",
+    "signup_staff_hint": "עובדים במטבח לא נרשמים כאן – בעל העסק מוסיף אותם בהגדרות ← צוות.",
+    "settings_business_name_help": "השם של העסק, כפי שהוא מופיע בהזמנות לספקים",
+    "business_name_saved": "שם העסק נשמר"
   }
 }

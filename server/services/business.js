@@ -60,9 +60,14 @@ async function setBusinessSettings(id, settings) {
   return col().updateOne({ _id: String(id) }, { $set: { settings } })
 }
 
+/** Plan 472: renames the business (already validated by the route). Returns the update result. */
+async function setBusinessName(id, name) {
+  return col().updateOne({ _id: String(id) }, { $set: { name } })
+}
+
 /** Plan 431: replaces the business's opening baseline (already validated by the route). */
 async function setBusinessBaseline(id, baseline) {
   return col().updateOne({ _id: String(id) }, { $set: { baseline } })
 }
 
-module.exports = { setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+module.exports = { setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

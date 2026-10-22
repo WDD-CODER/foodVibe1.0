@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, u
 import { toSignal } from '@angular/core/rxjs-interop'
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
+import { BusinessNameFormComponent } from '../business-name-form/business-name-form.component'
 import { BusinessService } from '@services/business.service'
 import { LoggingService } from '@services/logging.service'
 import { TranslationService } from '@services/translation.service'
@@ -21,7 +22,7 @@ interface FieldDef {
 @Component({
   selector: 'app-business-settings-tab',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, BusinessNameFormComponent],
   templateUrl: './business-settings-tab.component.html',
   styleUrl: './business-settings-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
