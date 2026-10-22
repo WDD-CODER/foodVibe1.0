@@ -1533,6 +1533,11 @@
     "date_invalid": "תאריך לא תקין",
     "open_calendar": "פתח לוח שנה",
     "deposit_paid_title": "מקדמה שולמה",
-    "deposit_amount_required": "יש להזין סכום מקדמה"
+    "deposit_amount_required": "יש להזין סכום מקדמה",
+    "business_name_default": "העסק של {{name}}",
+    "business_name_default_hint": "לא חובה. אם תשאירו ריק, העסק ייקרא בשם המשתמש – אפשר לשנות בהגדרות.",
+    "signup_staff_hint": "עובדים במטבח לא נרשמים כאן – בעל העסק מוסיף אותם בהגדרות ← צוות.",
+    "settings_business_name_help": "השם של העסק, כפי שהוא מופיע בהזמנות לספקים",
+    "business_name_saved": "שם העסק נשמר"
   }
 }
