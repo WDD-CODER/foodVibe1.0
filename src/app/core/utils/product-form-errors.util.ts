@@ -12,10 +12,16 @@ const FIELD_LABEL_KEYS: Readonly<Record<string, string>> = {
   expiryDaysDefault: 'expiry_days_default'
 }
 
-/** Label keys of the invalid fields of a product form, in the order of the page. */
-export function invalidFieldLabelKeys(controls: Record<string, AbstractControl>): string[] {
+/**
+ * Label keys of the invalid fields of a product form, in the order of the page. `extraInvalid`
+ * names controls the save check rejected although their validators pass (a name of only spaces).
+ */
+export function invalidFieldLabelKeys(
+  controls: Record<string, AbstractControl>,
+  extraInvalid: readonly string[] = []
+): string[] {
   return Object.keys(FIELD_LABEL_KEYS)
-    .filter((name) => controls[name]?.invalid)
+    .filter((name) => controls[name]?.invalid || extraInvalid.includes(name))
     .map((name) => FIELD_LABEL_KEYS[name])
 }
 
@@ -25,10 +31,11 @@ export function invalidFieldLabelKeys(controls: Record<string, AbstractControl>)
  */
 export function failedSaveMessage(
   controls: Record<string, AbstractControl>,
-  translator: { translate(key: string): string }
+  translator: { translate(key: string): string },
+  extraInvalid: readonly string[] = []
 ): string {
   const translate = (key: string) => translator.translate(key)
-  const labels = invalidFieldLabelKeys(controls).map(translate)
+  const labels = invalidFieldLabelKeys(controls, extraInvalid).map(translate)
   if (labels.length === 0) return translate('form_has_errors')
   return translate('form_has_errors_fields').replace('{{fields}}', labels.join(', '))
 }

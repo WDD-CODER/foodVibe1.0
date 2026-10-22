@@ -13,7 +13,7 @@ describe('ProductNameSuggestionsComponent', () => {
 
   const names = (...list: string[]): Product[] => list.map((n, i) => ({ _id: `p${i}`, nameHebrew: n }) as Product)
   const rows = (): string[] =>
-    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.name-suggestions__item')).map((b) =>
+    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.name-suggestions__list .c-chip')).map((b) =>
       (b.textContent ?? '').trim()
     )
 
@@ -65,7 +65,7 @@ describe('ProductNameSuggestionsComponent', () => {
 
   it('opens the product on click', () => {
     show('בצל')
-    ;(fixture.nativeElement.querySelector('.name-suggestions__item') as HTMLButtonElement).click()
+    ;(fixture.nativeElement.querySelector('.name-suggestions__list .c-chip') as HTMLButtonElement).click()
     expect(router.navigate).toHaveBeenCalledWith(['/inventory/edit', 'p2'])
   })
 

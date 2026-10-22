@@ -41,4 +41,9 @@ describe('product-form-errors.util', () => {
     const form = makeForm('עגבניה', 'kg', 0)
     expect(failedSaveMessage(form.controls, translate)).toBe('יש לתקן את השדות המסומנים')
   })
+
+  it('names the name box when the save check rejected a name of only spaces', () => {
+    const form = makeForm('   ', 'kg', 0)
+    expect(failedSaveMessage(form.controls, translate, ['productName'])).toBe('יש לתקן: שם הפריט')
+  })
 })

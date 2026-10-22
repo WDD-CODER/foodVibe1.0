@@ -15,10 +15,9 @@
     <div class="form-section form-section--mandatory">
       @let nameControl = productForm_.get('productName');
       @let nameError =
-        validationErrors_()['productName'] ||
         (nameControl?.errors?.['duplicateName'] && (nameControl?.dirty || nameControl?.touched)
           ? 'duplicate_product_name_error'
-          : null);
+          : null) || validationErrors_()['productName'];
       <app-form-field label="product_name" labelStyle="caps" [error]="nameError">
         <input
           #productNameInput
