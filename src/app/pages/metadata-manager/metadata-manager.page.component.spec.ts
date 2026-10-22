@@ -15,6 +15,7 @@ import { DishDataService } from '@services/dish-data.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
 
 describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent
@@ -244,6 +245,42 @@ describe('MetadataManagerPageComponent', () => {
       await page().onUnitEditSaved({ key: 'crate', hebrewLabel: 'קרטון', gramRate: 750 })
       expect(unitRegistrySpy.updateUnitRate).not.toHaveBeenCalled()
       expect(translationMock.updateDictionary).not.toHaveBeenCalled()
+    })
+
+    // Plan 475 — two units may not show the same Hebrew name.
+    it('refuses a Hebrew name another unit already shows, and writes nothing', async () => {
+      const errorSpy = spyOn(TestBed.inject(UserMsgService), 'onSetErrorMsg')
+      const original = translationMock.translate
+      translationMock.translate = (k: string) => (k === 'gram' ? 'גרם' : original(k))
+      page().editingUnit_.set(jar)
+      await page().onUnitEditSaved({ ...jar, hebrewLabel: ' גרם ' })
+      translationMock.translate = original
+      expect(errorSpy).toHaveBeenCalledOnceWith('unit_name_taken')
+      expect(translationMock.updateDictionary).not.toHaveBeenCalled()
+      expect(unitRegistrySpy.renameUnit).not.toHaveBeenCalled()
+      expect(unitRegistrySpy.updateUnitRate).not.toHaveBeenCalled()
+    })
+
+    it('a key another unit has is refused with unit_name_taken', async () => {
+      const errorSpy = spyOn(TestBed.inject(UserMsgService), 'onSetErrorMsg')
+      page().editingUnit_.set(jar)
+      await page().onUnitEditSaved({ ...jar, key: 'ml' })
+      expect(errorSpy).toHaveBeenCalledOnceWith('unit_name_taken')
+      expect(unitRegistrySpy.renameUnit).not.toHaveBeenCalled()
+    })
+
+    it('counts a product that uses the unit only as a purchase basis', () => {
+      const products = mockProducts as unknown as { set: (v: unknown[]) => void }
+      products.set([
+        { _id: 'p1', baseUnit: 'kg', purchaseOptions: [{ unitSymbol: 'box', conversionRate: 500, uom: 'jar' }] },
+        { _id: 'p2', baseUnit: 'kg', purchaseOptions: [{ unitSymbol: 'bag', conversionRate: 2, uom: 'kg' }] }
+      ])
+      const count = (component as unknown as { getAffectedCount: (t: string, k: string) => number }).getAffectedCount(
+        'unit',
+        'jar'
+      )
+      products.set([])
+      expect(count).toBe(1)
     })
 
     it('a system unit never opens the edit dialog', async () => {

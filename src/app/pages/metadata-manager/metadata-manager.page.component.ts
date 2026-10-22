@@ -20,6 +20,7 @@ import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
+import { normalizeHebrew } from '@utils/recipe-match.util'
 import type { TaxonomyKind } from '@models/v2'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
@@ -512,7 +513,9 @@ export class MetadataManagerComponent implements OnInit {
   private unitUsage(key: string): { products: number; recipes: number } {
     const products = this.productData
       .allProducts_()
-      .filter((p) => p.baseUnit === key || (p.purchaseOptions ?? []).some((o) => o.unitSymbol === key)).length
+      .filter(
+        (p) => p.baseUnit === key || (p.purchaseOptions ?? []).some((o) => o.unitSymbol === key || o.uom === key)
+      ).length
     const recipes = this.kitchenState
       .recipes_()
       .filter(
@@ -748,6 +751,15 @@ export class MetadataManagerComponent implements OnInit {
     }
   }
 
+  /** Plan 475: another unit already shows this Hebrew name, so the two would look the same. */
+  private unitLabelTaken(prevKey: string, next: UnitEditValue): boolean {
+    const name = normalizeHebrew(next.hebrewLabel ?? '')
+    if (!name) return false
+    return this.allUnitKeys_().some(
+      (k) => k !== prevKey && k !== next.key && normalizeHebrew(this.translationService.translate(k)) === name
+    )
+  }
+
   /** Save from the unit edit dialog. Both confirms are asked before anything is written, so a
    *  cancel never leaves half an edit. Key first, then the rate on the new key. */
   async onUnitEditSaved(next: UnitEditValue): Promise<void> {
@@ -759,8 +771,11 @@ export class MetadataManagerComponent implements OnInit {
     const labelChanged = next.hebrewLabel !== prev.hebrewLabel
     if (!keyChanged && !rateChanged && !labelChanged) return
 
-    if (keyChanged && this.registryHasKey('unit', next.key)) {
-      this.userMsgService.onSetErrorMsg(this.msg('metadata_unit_exists', { type: 'unit', name: next.key }))
+    if (
+      (keyChanged && this.registryHasKey('unit', next.key)) ||
+      (labelChanged && this.unitLabelTaken(prev.key, next))
+    ) {
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_name_taken'))
       return
     }
     const usage = this.unitUsage(prev.key)

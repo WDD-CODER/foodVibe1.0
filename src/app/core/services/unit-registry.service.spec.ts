@@ -7,6 +7,7 @@ import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { UserService } from './user.service'
 import { signal } from '@angular/core'
+import { HttpErrorResponse } from '@angular/common/http'
 
 /** Fake taxonomyTerms backend: query returns the given terms; post echoes the body as a stored term. */
 function fakeTermStorage(terms: Record<string, unknown>[] = []): jasmine.SpyObj<StorageService> {
@@ -223,6 +224,22 @@ describe('UnitRegistryService — edit a custom unit', () => {
     expect(results).toEqual([false, false, false])
     expect(storageSpy.put).not.toHaveBeenCalled()
     expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledTimes(3)
+    expect(userMsgSpy.onSetErrorMsg.calls.mostRecent().args[0]).toBe('unit_name_taken')
+  }))
+
+  // Plan 475 — the server's clash (another unit of the business has the key) is shown by its reason.
+  it('shows the server clash reason and keeps the old key', fakeAsync(() => {
+    storageSpy.put.and.returnValue(
+      Promise.reject(
+        new HttpErrorResponse({ status: 409, error: { error: 'TERM_KEY_TAKEN', messageKey: 'unit_name_taken' } })
+      )
+    )
+    let ok: boolean | undefined
+    service.renameUnit('jar', 'tray').then((r) => (ok = r))
+    tick()
+    expect(ok).toBe(false)
+    expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledOnceWith('unit_name_taken')
+    expect(service.allUnitKeys_()).toContain('jar')
   }))
 
   it('changes a custom unit conversion', fakeAsync(() => {

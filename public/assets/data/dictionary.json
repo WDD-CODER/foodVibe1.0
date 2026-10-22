@@ -1368,6 +1368,7 @@
     "unit_delete_server_error": "שגיאה במחיקת היחידה מהשרת",
     "unit_base_cannot_edit": "לא ניתן לערוך יחידות בסיס",
     "unit_exists_named": "היחידה {name} כבר קיימת",
+    "unit_name_taken": "כבר קיימת יחידה בשם הזה",
     "unit_rate_must_be_positive": "ההמרה חייבת להיות גדולה מאפס",
     "unit_not_found_named": "היחידה {name} לא נמצאה",
     "menu_type_save_error": "שגיאה בשמירת סוג התפריט",

@@ -591,8 +591,18 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
       // After validation, so the new key is a known plain string before it reaches a query.
       if (isTerm && updatable.key !== undefined && updatable.key !== current.key) {
+        // Plan 475: units name the clash with a message the chef can read (other kinds keep their client checks).
+        const clashKey = current.kind === 'unit' ? { messageKey: 'unit_name_taken' } : {};
         if (current.businessId !== MASTER && await masterHasTerm(current.kind, updatable.key)) {
-          return res.status(409).json({ error: 'This term already exists for everyone', kind: current.kind, key: updatable.key });
+          return res.status(409).json({ error: 'This term already exists for everyone', kind: current.kind, key: updatable.key, ...clashKey });
+        }
+        // Plan 475: a clash with another term of the same business is refused before anything is written.
+        const sameScope = await col(TAXONOMY).findOne(
+          { businessId: current.businessId, kind: current.kind, key: updatable.key, _id: { $ne: current._id } },
+          { projection: { _id: 1 } }
+        );
+        if (sameScope) {
+          return res.status(409).json({ error: 'TERM_KEY_TAKEN', kind: current.kind, key: updatable.key, ...clashKey });
         }
         rekeyed = current;
       }

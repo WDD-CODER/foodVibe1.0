@@ -227,6 +227,11 @@ export class TaxonomyStore {
       const names = err.referencedBy.map((r) => r.name).join(', ')
       return this.translation.translate('taxonomy_term_in_use').replace('{names}', names)
     }
+    // Plan 475: a server refusal (409 clash, 403 not allowed) that names its reason.
+    if (err instanceof HttpErrorResponse && (err.status === 409 || err.status === 403)) {
+      const messageKey: unknown = (err.error as { messageKey?: unknown } | null)?.messageKey
+      if (typeof messageKey === 'string' && messageKey) return this.translation.translate(messageKey)
+    }
     return null
   }
 
