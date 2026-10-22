@@ -314,6 +314,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
       this.isFocusFromMouse_ = false
       return
     }
+    if (this.triggerRef()?.nativeElement.hasAttribute('data-restore-focus')) return
     if (!this._isDisabled() && !this.isOpen()) {
       this.openDropdown()
     }

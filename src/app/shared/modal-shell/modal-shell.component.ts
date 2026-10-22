@@ -129,7 +129,10 @@ export class ModalShellComponent {
     if (focusMovedElsewhere) return
     const opener = this.opener_
     if (opener && opener.isConnected && typeof opener.focus === 'function') {
+      // Marks the focus as programmatic so a custom-select opener does not pop its list open again.
+      opener.setAttribute('data-restore-focus', '')
       opener.focus({ preventScroll: true })
+      opener.removeAttribute('data-restore-focus')
     }
   }
 }
