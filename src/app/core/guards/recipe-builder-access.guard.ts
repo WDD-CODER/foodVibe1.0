@@ -30,7 +30,7 @@ export const recipeBuilderAccessGuard: CanActivateFn = async (route) => {
   if (!item || !permission.isReadOnlyRecipe(item)) return true
 
   logging.info({
-    event: 'recipe_builder.staff_redirect',
+    event: 'recipeBuilder.staff_redirect',
     message: 'Staff sent to Cook View for a recipe they did not create',
     context: { id: item._id }
   })
