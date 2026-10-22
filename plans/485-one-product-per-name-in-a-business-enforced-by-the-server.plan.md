@@ -75,7 +75,8 @@ Entire repo.
 Writing outside the scope block: log path + change + why under `## Decisions`, add it to the scope block, continue.
 
 ## Architecture Impact
-- INV-1, INV-2: preserves — the check runs inside the caller's business scope only.
+- INV-1: preserves — same permission checks run before the name check; no ownership change.
+- INV-2: preserves — the name check reads only the caller's business scope (`scopeFilter`); another business may use the same name.
 - INV-3: preserves — the rule lives on the server, in the same request as the write.
 - INV-4: preserves — schemas unchanged; the name rule is an extra server check after schema validation.
 - INV-5, INV-6: preserves.
