@@ -147,7 +147,12 @@ $break-mobile: 768px; // mirrors src/styles.scss
     inline-size: 100%;
   }
 
-  .partial-open {
-    align-self: flex-start;
+  .partial-note {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-link {
+    display: block;
   }
 }

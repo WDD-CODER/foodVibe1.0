@@ -12,7 +12,7 @@ import {
 import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
 import { ActivatedRoute, RouterLink } from '@angular/router'
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { take } from 'rxjs/operators'
@@ -36,6 +36,7 @@ import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { RecipeCostService } from '@services/recipe-cost.service'
+import type { Product } from '@models/product.model'
 
 /**
  * Inline stand-in for the 120x120 image thumbnail before a photo is uploaded.
@@ -127,7 +128,7 @@ export class RecipeHeaderComponent {
   private readonly ingredientsVersion_ = signal(0)
 
   /** The recipe being edited: its saved id, or a stand-in while it is new. */
-  private readonly ownerRecipeId_ = (): string => this.route?.snapshot?.paramMap?.get('id') || 'form'
+  protected readonly ownerRecipeId_ = (): string => this.route?.snapshot?.paramMap?.get('id') || 'form'
 
   /** What keeps the header cost from being final: unpriced, unlinked and deleted ingredients, through preps. */
   protected readonly missing_ = computed(() => {
@@ -140,6 +141,18 @@ export class RecipeHeaderComponent {
     }[]
     return this.recipeCost.findMissing(rows, this.ownerRecipeId_())
   })
+
+  /** The badge linked a free-text ingredient to a product: show it in the unsaved form right away (plan 466). */
+  protected onLinked(link: { name: string; product: Product }): void {
+    const rows = this.form().get('ingredients')
+    if (!(rows instanceof FormArray)) return
+    for (const group of rows.controls) {
+      const value = group.getRawValue() as { referenceId?: string; nameHebrew?: string; nameSnapshot?: string }
+      const name = (value.nameSnapshot || value.nameHebrew || '').trim()
+      if (value.referenceId || name !== link.name) continue
+      group.patchValue({ referenceId: link.product._id, item_type: 'product', nameSnapshot: link.product.nameHebrew })
+    }
+  }
 
   protected readonly ownRecipeNames_ = computed(() => {
     this.ingredientsVersion_()

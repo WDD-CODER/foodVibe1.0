@@ -96,6 +96,22 @@ describe('RecipeHeaderComponent', () => {
     fixture.detectChanges()
   })
 
+  it('patches only the unlinked ingredient rows with the linked name when the badge emits linked (plan 466)', () => {
+    const row = (nameHebrew: string, referenceId = '') =>
+      fb.group({ nameHebrew: [nameHebrew], referenceId: [referenceId], item_type: [''], nameSnapshot: [''] })
+    const ingredients = fb.array([row('פטרוזיליה'), row('פטרוזיליה', 'p9'), row('מלח')])
+    const form = fb.group({ ...createRecipeForm().controls, ingredients })
+    fixture.componentRef.setInput('form', form)
+
+    component['onLinked']({ name: 'פטרוזיליה', product: { _id: 'p1', nameHebrew: 'פטרוזיליה טרייה' } as never })
+
+    expect(ingredients.at(0).value).toEqual(
+      jasmine.objectContaining({ referenceId: 'p1', item_type: 'product', nameSnapshot: 'פטרוזיליה טרייה' })
+    )
+    expect(ingredients.at(1).value.referenceId).toBe('p9')
+    expect(ingredients.at(2).value.referenceId).toBe('')
+  })
+
   it('should create', () => {
     expect(component).toBeTruthy()
   })

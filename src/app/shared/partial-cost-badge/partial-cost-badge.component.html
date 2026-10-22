@@ -1,7 +1,7 @@
 @if (missing().length) {
   <span
     class="partial-cost"
-    (appClickOutside)="close()"
+    (appClickOutside)="onClickOutside()"
     (keydown.escape)="close()"
     (mouseenter)="onEnter()"
     (mouseleave)="onLeave()"
@@ -72,11 +72,26 @@
                   } @else {
                     <span class="partial-awaiting">{{ 'awaiting_owner_price' | translatePipe }}</span>
                   }
-                } @else if (row.openRecipeId) {
-                  <button type="button" class="c-btn-ghost--sm partial-open" (click)="openRecipe(row)">
-                    {{ 'open_recipe' | translatePipe }}
-                    <lucide-icon name="chevron-left" [size]="12"></lucide-icon>
-                  </button>
+                } @else if (row.isUnlinked) {
+                  <span class="partial-note">{{ 'partial_unlinked_note' | translatePipe }}</span>
+                  @if (row.canLink) {
+                    <app-custom-select
+                      class="partial-link"
+                      [options]="linkOptions_()"
+                      [translateLabels]="false"
+                      [typeToFilter]="true"
+                      [allowTypedAdd]="true"
+                      addNewValue="__add_product__"
+                      addNewLabelKey="add_new_ingredient"
+                      [placeholder]="'partial_link_placeholder' | translatePipe"
+                      (valueChange)="onLinkPicked(row, $event)"
+                      (addNewChosen)="addNew(row, $event)"
+                    ></app-custom-select>
+                  } @else {
+                    <span class="partial-awaiting">{{ 'partial_link_no_permission' | translatePipe }}</span>
+                  }
+                } @else {
+                  <span class="partial-note">{{ 'partial_deleted_note' | translatePipe }}</span>
                 }
               </li>
             }
