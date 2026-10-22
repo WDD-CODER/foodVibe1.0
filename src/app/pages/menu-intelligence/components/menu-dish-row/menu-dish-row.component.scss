@@ -83,33 +83,6 @@
   }
 }
 
-@media (max-width: 768px) {
-  // Sub-fix 3: info icon always visible on touch devices
-  .dish-meta-toggle {
-    opacity: 1;
-  }
-
-  // Sub-fix 3: delete + sell price always reserved/visible on mobile
-  .dish-remove {
-    opacity: 1;
-    position: static;
-    transform: none;
-    inset-inline-end: unset;
-    flex-shrink: 0;
-  }
-
-  .dish-sell-price {
-    position: static;
-    transform: none;
-    inset-inline-end: unset;
-    flex-shrink: 0;
-  }
-
-  .dish-name-cell {
-    gap: 0.375rem;
-  }
-}
-
 .dish-name {
   font-family: var(--font-serif);
   font-size: 1.05rem;
@@ -357,4 +330,65 @@
 
 .dish-portions-value {
   font-weight: 600;
+}
+
+/* Phones (plan 470): this block stays LAST so its overrides beat the base `.dish-remove` / `.dish-sell-price`
+   (absolute) rules above — same specificity, later wins. Name, info icon, price and delete sit in one row. */
+@media (max-width: 768px) {
+  .dish-name-cell {
+    gap: 0.375rem;
+  }
+
+  .dish-name-meta-wrap {
+    flex: 1 1 0;
+    min-inline-size: 0;
+    justify-content: flex-start;
+  }
+
+  .dish-name-meta {
+    justify-content: flex-start;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .dish-name-meta-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .dish-name-btn {
+    display: block;
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dish-meta-toggle {
+    position: static;
+    transform: none;
+    margin-inline-start: 0;
+    flex: 0 0 auto;
+    inline-size: 2rem;
+    block-size: 2rem;
+    opacity: 1;
+  }
+
+  .dish-remove {
+    opacity: 1;
+    position: static;
+    transform: none;
+    inset-inline-end: unset;
+    flex-shrink: 0;
+  }
+
+  .dish-sell-price {
+    position: static;
+    transform: none;
+    inset-inline-end: unset;
+    flex-shrink: 0;
+  }
 }

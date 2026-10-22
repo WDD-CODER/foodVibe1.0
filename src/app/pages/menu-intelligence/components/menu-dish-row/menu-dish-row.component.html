@@ -130,7 +130,7 @@
       </div>
       <div class="dish-field read-only">
         <span class="dish-field-label">{{ 'event_portions' | translatePipe }}:</span>
-        <span class="dish-field-value dish-portions-value">{{ getDerivedPortions() }}</span>
+        <span class="dish-field-value dish-portions-value">{{ portionsText_() }}</span>
       </div>
       @if (isCoefficientInvalid_()) {
         <span class="c-field-error dish-coefficient-error" role="alert">{{

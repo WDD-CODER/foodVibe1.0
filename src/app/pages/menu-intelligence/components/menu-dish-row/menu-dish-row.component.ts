@@ -8,7 +8,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
 import { EventPlanService } from '../../../../core/engine/event-plan.service'
 import { formatCoefficient, isValidCoefficient, type ItemPortions } from '../../../../core/engine/portions'
-import { roundMoney } from '../../../../core/engine/rounding'
+import { cleanFloat, roundMoney } from '../../../../core/engine/rounding'
 import { TranslationService } from '@services/translation.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
@@ -56,6 +56,8 @@ export class MenuDishRowComponent {
   /** Text being typed in the coefficient box (null = show the stored value). */
   protected readonly coefficientDraft_ = signal<string | null>(null)
   protected readonly isCoefficientInvalid_ = signal(false)
+  /** Portions as shown: float noise gone, at most 2 decimals (cost maths keeps the exact value). */
+  protected readonly portionsText_ = computed(() => String(cleanFloat(this.portionInfo()?.portions ?? 0, 2)))
   protected readonly coefficientText_ = computed(
     () => this.coefficientDraft_() ?? formatCoefficient(this.portionInfo()?.coefficient ?? 1)
   )
