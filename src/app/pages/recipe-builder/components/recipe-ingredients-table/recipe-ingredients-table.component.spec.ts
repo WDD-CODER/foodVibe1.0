@@ -10,6 +10,8 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslationService } from '@services/translation.service'
 import { Product } from '@models/product.model'
 import { ProductUnitAdded } from '@services/unit-registry.service'
+import { GeminiService } from '@services/gemini.service'
+import { UserMsgService } from '@services/user-msg.service'
 
 describe('RecipeIngredientsTableComponent', () => {
   let component: RecipeIngredientsTableComponent
@@ -119,6 +121,7 @@ describe('RecipeIngredientsTableComponent', () => {
     const rows = () => component.ingredientsFormArray().controls
 
     beforeEach(() => {
+      spyOn(TestBed.inject(GeminiService), 'matchProductNames').and.resolveTo([])
       spyOn(TestBed.inject(KitchenStateService), 'products_').and.returnValue(products)
       spyOn(TestBed.inject(TranslationService), 'resolveUnit').and.callFake((t: string) =>
         t === 'גרם' ? 'gram' : null
@@ -157,6 +160,105 @@ describe('RecipeIngredientsTableComponent', () => {
     it('does nothing for blank text', () => {
       component.onPasteIngredients('  \n ')
       expect(rows().length).toBe(1)
+    })
+  })
+
+  // Plan 463 - a pasted name that exists in the inventory (any plural / spelling) links; the AI step handles the rest.
+  describe('paste matching (plan 463)', () => {
+    const products = [
+      { _id: 'p1', nameHebrew: 'עגבנייה', baseUnit: 'kg' },
+      { _id: 'p2', nameHebrew: 'מלח', baseUnit: 'kg' },
+      { _id: 'p3', nameHebrew: 'פטרוזיליה', baseUnit: 'kg' }
+    ] as unknown as Product[]
+    const rows = () => component.ingredientsFormArray().controls
+    let matchProductNames: jasmine.Spy
+
+    const flush = async () => {
+      for (let i = 0; i < 5; i++) await Promise.resolve()
+    }
+
+    beforeEach(() => {
+      matchProductNames = spyOn(TestBed.inject(GeminiService), 'matchProductNames')
+      spyOn(TestBed.inject(KitchenStateService), 'products_').and.returnValue(products)
+      spyOn(TestBed.inject(TranslationService), 'resolveUnit').and.callFake((t: string) =>
+        t === 'גרם' ? 'gram' : null
+      )
+      spyOn(component, 'updateLineCalculations')
+    })
+
+    it('links a plural and a known product at once and never calls the AI step', async () => {
+      matchProductNames.and.resolveTo([])
+      component.onPasteIngredients('2 ק"ג עגבניות\n200 גרם מלח')
+      await flush()
+      expect(rows()[0].get('referenceId')?.value).toBe('p1')
+      expect(rows()[0].get('nameHebrew')?.value).toBe('עגבנייה')
+      expect(rows()[1].get('referenceId')?.value).toBe('p2')
+      expect(matchProductNames).not.toHaveBeenCalled()
+    })
+
+    it('adds an unmatched line unlinked, then links it when the AI answer arrives, keeping the amount', async () => {
+      let answer!: (m: { i: number; product: number }[]) => void
+      matchProductNames.and.returnValue(new Promise((resolve) => (answer = resolve)))
+      component.onPasteIngredients('1 צרור פטרוזיליה')
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+      answer([{ i: 0, product: 2 }])
+      await flush()
+      expect(matchProductNames).toHaveBeenCalledTimes(1)
+      expect(rows()[0].get('referenceId')?.value).toBe('p3')
+      expect(rows()[0].get('item_type')?.value).toBe('product')
+      expect(rows()[0].get('nameHebrew')?.value).toBe('פטרוזיליה')
+      expect(rows()[0].get('nameSnapshot')?.value).toBe('פטרוזיליה')
+      expect(rows()[0].get('amount_net')?.value).toBe(1)
+      expect(component.updateLineCalculations).toHaveBeenCalledWith(0)
+    })
+
+    it('leaves a row alone when its name was edited before the answer arrived', async () => {
+      let answer!: (m: { i: number; product: number }[]) => void
+      matchProductNames.and.returnValue(new Promise((resolve) => (answer = resolve)))
+      component.onPasteIngredients('1 צרור פטרוזיליה')
+      rows()[0].patchValue({ nameHebrew: 'שמיר' })
+      answer([{ i: 0, product: 2 }])
+      await flush()
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+      expect(rows()[0].get('nameHebrew')?.value).toBe('שמיר')
+    })
+
+    it('leaves a row alone when it was removed before the answer arrived', async () => {
+      let answer!: (m: { i: number; product: number }[]) => void
+      matchProductNames.and.returnValue(new Promise((resolve) => (answer = resolve)))
+      component.onPasteIngredients('1 צרור פטרוזיליה\n3 ק"ג שום')
+      component.ingredientsFormArray().removeAt(0)
+      answer([{ i: 0, product: 2 }])
+      await flush()
+      expect(rows().length).toBe(1)
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+    })
+
+    it('never sends a text-only line to the AI step', async () => {
+      matchProductNames.and.resolveTo([])
+      component.onPasteIngredients('קצת פטרוזיליה')
+      await flush()
+      expect(matchProductNames).not.toHaveBeenCalled()
+    })
+
+    it('shows one calm message and leaves the row red when the AI step fails', async () => {
+      matchProductNames.and.rejectWith(new Error('502'))
+      const warn = spyOn(TestBed.inject(UserMsgService), 'onSetWarningMsg')
+      spyOn(TestBed.inject(TranslationService), 'translate').and.callFake((k?: string) => `he:${k}`)
+      component.onPasteIngredients('1 צרור שום')
+      await flush()
+      expect(warn).toHaveBeenCalledOnceWith('he:paste_ingredients_match_failed')
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+    })
+
+    it('shows no message when the AI answers that nothing fits', async () => {
+      matchProductNames.and.resolveTo([])
+      const warn = spyOn(TestBed.inject(UserMsgService), 'onSetWarningMsg')
+      component.onPasteIngredients('שום יבש בכמות קטנה')
+      component.onPasteIngredients('2 גרם שום יבש')
+      await flush()
+      expect(warn).not.toHaveBeenCalled()
+      expect(rows().every((r) => !r.get('referenceId')?.value)).toBeTrue()
     })
   })
 })

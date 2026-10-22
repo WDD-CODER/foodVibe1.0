@@ -69,3 +69,42 @@ describe('GeminiService.generateProductFromImage', () => {
     await result
   })
 })
+
+describe('GeminiService.matchProductNames', () => {
+  const MATCH_URL = `${environment.authApiUrl}/api/v1/ai/match-product-names`
+  let service: GeminiService
+  let http: HttpTestingController
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: MetadataRegistryService, useValue: { allCategories_: () => [], allAllergens_: () => [] } },
+        { provide: TranslationService, useValue: { translate: (key: string) => key } }
+      ]
+    })
+    service = TestBed.inject(GeminiService)
+    http = TestBed.inject(HttpTestingController)
+  })
+
+  afterEach(() => http.verify())
+
+  it('posts names and products and returns the matches', async () => {
+    const names = [{ name: 'פטרוזליה', unit: 'unit' }]
+    const products = [{ name: 'פטרוזיליה', unit: 'kg' }]
+    const result = service.matchProductNames(names, products)
+
+    const req = http.expectOne(MATCH_URL)
+    expect(req.request.method).toBe('POST')
+    expect(req.request.body).toEqual({ names, products })
+    req.flush({ matches: [{ i: 0, product: 0 }] })
+    expect(await result).toEqual([{ i: 0, product: 0 }])
+  })
+
+  it('rejects on an HTTP error', async () => {
+    const result = service.matchProductNames([{ name: 'א', unit: '' }], [{ name: 'ב', unit: '' }])
+    http.expectOne(MATCH_URL).flush({ error: 'x' }, { status: 502, statusText: 'Bad Gateway' })
+    await expectAsync(result).toBeRejected()
+  })
+})

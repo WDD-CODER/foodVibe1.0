@@ -18,6 +18,7 @@ import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.mo
 import { MetadataRegistryService } from './metadata-registry.service'
 import { TranslationService } from './translation.service'
 import type { ImportRow } from './product-import.service'
+import type { ProductNameMatchRequest, ProductNameMatchResponse } from '@schemas/ai-product-match.schema'
 
 /** One model in the admin's AI model chain (plan 395): today's status plus on/off. */
 export interface GeminiChainModel extends GeminiModelStatus {
@@ -143,6 +144,25 @@ export class GeminiService {
         ...this.modelParam_()
       }
     )
+  }
+
+  /**
+   * Plan 463: one AI call links pasted ingredient names to products. Sends names and units only; the answer is
+   * positions in the two lists (`i` in names, `product` in products), never ids. Throws on an HTTP error.
+   */
+  async matchProductNames(
+    names: ProductNameMatchRequest['names'],
+    products: ProductNameMatchRequest['products']
+  ): Promise<ProductNameMatchResponse['matches']> {
+    const data = await firstValueFrom(
+      this.http_.post<ProductNameMatchResponse>(`${this.authBase_}${API.ai('match-product-names')}`, {
+        names,
+        products,
+        ...this.modelParam_()
+      })
+    )
+    incrementGeminiUsage()
+    return data.matches
   }
 
   async generateFromImage(file: File): Promise<AiRecipeDraft> {
