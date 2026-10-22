@@ -129,7 +129,10 @@ describe('MetadataManagerPageComponent', () => {
 
   // Plan 421 - a refused menu-type rename must not touch any menu; the server re-keys on success.
   describe('renaming a menu type', () => {
-    type MenuTypeRename = { requireSignIn: () => boolean; onMenuTypeNameBlur: (o: string, n: string) => Promise<void> }
+    type MenuTypeRename = {
+      requireSignIn: () => boolean
+      onMenuTypeRenameSaved: (o: string, n: string) => Promise<void>
+    }
     const page = (): MenuTypeRename => component as unknown as MenuTypeRename
     let menuReload: jasmine.Spy
     let menuWrite: jasmine.Spy
@@ -144,7 +147,7 @@ describe('MetadataManagerPageComponent', () => {
 
     it('a refused rename (to an existing type) writes no menu and does not reload', async () => {
       metadataRegistrySpy.renameMenuType.and.resolveTo(false)
-      await page().onMenuTypeNameBlur('buffet', 'plated')
+      await page().onMenuTypeRenameSaved('buffet', 'plated')
       expect(metadataRegistrySpy.renameMenuType).toHaveBeenCalledOnceWith('buffet', 'plated')
       expect(menuWrite).not.toHaveBeenCalled()
       expect(menuReload).not.toHaveBeenCalled()
@@ -152,9 +155,37 @@ describe('MetadataManagerPageComponent', () => {
 
     it('a successful rename reloads the menus once and writes none from the client', async () => {
       metadataRegistrySpy.renameMenuType.and.resolveTo(true)
-      await page().onMenuTypeNameBlur('buffet', 'banquet')
+      await page().onMenuTypeRenameSaved('buffet', 'banquet')
       expect(menuReload).toHaveBeenCalledTimes(1)
       expect(menuWrite).not.toHaveBeenCalled()
+    })
+
+    it('Save in the rename field renames; Cancel and blur call nothing', async () => {
+      metadataRegistrySpy.renameMenuType.and.resolveTo(true)
+      mockMenuTypes.set([{ key: 'buffet', fields: [] }])
+      const host = fixture.nativeElement as HTMLElement
+      const comp = component as unknown as { renamingMenuTypeKey_: { set: (v: string | null) => void } }
+      const sel = '.menu-type-row app-inline-rename-field'
+      comp.renamingMenuTypeKey_.set('buffet')
+      fixture.detectChanges()
+      const input = host.querySelector<HTMLInputElement>(sel + ' input')
+      expect(input).not.toBeNull()
+      input!.value = 'banquet'
+      input!.dispatchEvent(new FocusEvent('blur'))
+      await fixture.whenStable()
+      expect(metadataRegistrySpy.renameMenuType).not.toHaveBeenCalled()
+
+      host.querySelectorAll<HTMLButtonElement>(sel + ' button')[1].click()
+      fixture.detectChanges()
+      expect(host.querySelector(sel)).toBeNull()
+      expect(metadataRegistrySpy.renameMenuType).not.toHaveBeenCalled()
+
+      comp.renamingMenuTypeKey_.set('buffet')
+      fixture.detectChanges()
+      host.querySelector<HTMLInputElement>(sel + ' input')!.value = 'banquet'
+      host.querySelector<HTMLButtonElement>(sel + ' button')!.click()
+      await fixture.whenStable()
+      expect(metadataRegistrySpy.renameMenuType).toHaveBeenCalledOnceWith('buffet', 'banquet')
     })
 
     it('MenuEventDataService no longer has updateServingTypeForAll', () => {
@@ -318,33 +349,42 @@ describe('MetadataManagerPageComponent', () => {
     }
   })
 
-  it('should default every section to its natural page order (no page scroll ever involved)', () => {
-    JUMP_SECTION_IDS.forEach((id, index) => {
-      expect(fixture.debugElement.query(By.css(`#${id}`)).nativeElement.style.order).toBe(String(index + 1))
-    })
+  it('keeps every section in natural page order (no CSS order is ever set)', () => {
+    for (const id of JUMP_SECTION_IDS) {
+      expect(fixture.debugElement.query(By.css(`#${id}`)).nativeElement.style.order)
+        .withContext(id)
+        .toBe('')
+    }
   })
 
-  it('should bring the target section to the front (order 0) when its jump-nav tab is clicked, without disturbing the others', () => {
+  it('scrolls the target section to the top and centres the tapped chip when its jump-nav tab is clicked', () => {
+    const section = fixture.debugElement.query(By.css('#mm-sec-menu-type')).nativeElement as HTMLElement
+    const sectionSpy = spyOn(section, 'scrollIntoView')
     const tab = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))[5] // Menu Types
+    const chipSpy = spyOn(tab.nativeElement as HTMLElement, 'scrollIntoView')
     tab.nativeElement.click()
     fixture.detectChanges()
 
-    expect(fixture.debugElement.query(By.css('#mm-sec-menu-type')).nativeElement.style.order).toBe('0')
+    expect(sectionSpy).toHaveBeenCalledTimes(1)
+    expect((sectionSpy.calls.mostRecent().args[0] as ScrollIntoViewOptions).block).toBe('start')
+    expect(chipSpy).toHaveBeenCalledTimes(1)
+    expect((chipSpy.calls.mostRecent().args[0] as ScrollIntoViewOptions).inline).toBe('center')
     expect(tab.nativeElement.classList.contains('active')).toBeTrue()
-    // Everyone else keeps their natural relative order.
-    expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('1')
-    expect(fixture.debugElement.query(By.css('#mm-sec-user')).nativeElement.style.order).toBe('11')
   })
 
-  it('should swap directly to a different section when its tab is clicked while another is front', () => {
+  it('highlights only the last tapped chip', () => {
     const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))
-    tabs[5].nativeElement.click() // Menu Types
+    for (const id of ['#mm-sec-menu-type', '#mm-sec-unit']) {
+      spyOn(fixture.debugElement.query(By.css(id)).nativeElement as HTMLElement, 'scrollIntoView')
+    }
+    tabs.forEach((t) => spyOn(t.nativeElement as HTMLElement, 'scrollIntoView'))
+    tabs[5].nativeElement.click()
     fixture.detectChanges()
-    tabs[0].nativeElement.click() // Units
+    tabs[0].nativeElement.click()
     fixture.detectChanges()
 
-    expect(fixture.debugElement.query(By.css('#mm-sec-menu-type')).nativeElement.style.order).toBe('6')
-    expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('0')
+    expect(tabs[5].nativeElement.classList.contains('active')).toBeFalse()
+    expect(tabs[0].nativeElement.classList.contains('active')).toBeTrue()
   })
 
   it("renders the jump-nav tabs inside the shared scroll rail (plan 350 — arrows are the rail's job)", () => {
