@@ -110,6 +110,12 @@ src/app/appRoot/app.component.ts
 docs/brain/component-families.md
 scripts/lib/registry-families.mjs
 docs/mvp/runs/451.md
+src/app/shared/ai-menu-modal/ai-menu-modal.component.scss
+src/app/shared/ai-product-modal/ai-product-modal.component.scss
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.scss
+src/app/shared/custom-select/custom-select.component.ts
+src/app/shared/custom-select/custom-select.component.html
+src/app/shared/custom-select/custom-select.component.spec.ts
 ```
 
 ## Read Scope
