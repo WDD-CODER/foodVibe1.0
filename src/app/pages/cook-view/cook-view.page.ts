@@ -18,6 +18,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { UserService } from '@services/user.service'
+import { PermissionService } from '@services/permission.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TranslationService } from '@services/translation.service'
@@ -99,6 +100,9 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   // ---- SIGNALS & CONSTANTS ----
   protected recipe_ = signal<Recipe | null>(null)
+  private readonly permission = inject(PermissionService)
+  /** Staff on someone else's recipe or dish: Cook View is view-only (plan 476). */
+  protected readonly readOnly_ = computed(() => this.permission.isReadOnlyRecipe(this.recipe_()))
   protected targetQuantity_ = signal<number>(1)
   protected selectedUnit_ = signal<string>('')
   /** Per-row unit override (index -> unit key). */
@@ -983,11 +987,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected toggleStepPeek(index: number): void {
     if (index === this.activeStepIndex_()) return
     this.peekedStepIndex_.set(this.peekedStepIndex_() === index ? null : index)
-  }
-
-  protected onEdit(): void {
-    const recipe = this.recipe_()
-    if (recipe) this.router.navigate(['/recipe-builder', recipe._id])
   }
 
   protected setUnitOverride(rowIndex: number, unit: string): void {

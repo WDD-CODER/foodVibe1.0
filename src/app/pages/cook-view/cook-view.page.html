@@ -6,7 +6,7 @@
     <ng-template #exportMenu let-withEdit="withEdit">
       <div class="cv-menu-scrim" (click)="cookExport.closeAllExportOverlays()"></div>
       <div class="cv-menu" role="menu" (keydown.escape)="cookExport.closeAllExportOverlays()">
-        @if (withEdit) {
+        @if (withEdit && !readOnly_()) {
         <button
           type="button"
           class="cv-menu-item"
@@ -236,7 +236,7 @@
           <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
           {{ 'undo_changes' | translatePipe }}
         </button>
-        } @else {
+        } @else { @if (!readOnly_()) {
         <button
           type="button"
           class="cv-pill-btn"
@@ -247,6 +247,7 @@
           <lucide-icon name="pencil" [size]="16"></lucide-icon>
           {{ 'edit' | translatePipe }}
         </button>
+        }
         <span class="cv-menu-wrap">
           <button
             type="button"

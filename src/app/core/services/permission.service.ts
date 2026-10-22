@@ -1,4 +1,5 @@
 import { computed, inject, Injectable } from '@angular/core'
+import { Recipe } from '../models/recipe.model'
 import { UserService } from './user.service'
 
 /** The 10 actions of contract C-PERM (mirrors `server/utils/permissions.js`). */
@@ -52,5 +53,11 @@ export class PermissionService {
     if (action === 'changeStage') return isCreator
     // addNote, markArrival: any event of the business.
     return true
+  }
+
+  /** True only for a signed-in staff member looking at a recipe or dish someone else created (plan 476): Cook View only. */
+  isReadOnlyRecipe(recipe: Recipe | null | undefined): boolean {
+    if (!recipe || !this.isStaff_()) return false
+    return !this.can('edit', { type: recipe.recipeType === 'dish' ? 'dishes' : 'recipes', doc: recipe })
   }
 }
