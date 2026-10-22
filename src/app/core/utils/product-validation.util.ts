@@ -6,9 +6,10 @@ export type ProductValidationStatus = 'invalid' | 'incomplete' | 'valid'
 /** Maps a missing-field key to its Lucide icon name. */
 export const VALIDATION_FIELD_ICONS: Record<string, string> = {
   missing_name: 'type',
-  missing_unit: 'ruler',
+  missing_unit: 'scale',
   missing_category: 'tag',
-  missing_supplier: 'truck'
+  missing_supplier: 'truck',
+  missing_price: 'coins'
 }
 
 /**
@@ -44,4 +45,13 @@ export function getProductMissingFields(product: Product): string[] {
   if (!product.categories?.length) missing.push('missing_category')
   if (!getSupplierIds(product).length) missing.push('missing_supplier')
   return missing
+}
+
+/**
+ * Every gap shown in a row's status tooltip: the price first (only when the product has none anywhere),
+ * then the four fields of `getProductMissingFields`.
+ */
+export function getProductStatusFields(product: Product): string[] {
+  const fields = getProductMissingFields(product)
+  return isProductUnpriced(product) ? ['missing_price', ...fields] : fields
 }

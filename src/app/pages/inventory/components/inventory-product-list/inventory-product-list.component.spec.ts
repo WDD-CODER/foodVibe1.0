@@ -229,4 +229,114 @@ describe('InventoryProductListComponent', () => {
       expect(confirmOpen).not.toHaveBeenCalled()
     })
   })
+  describe('one status mark per row (plan 462)', () => {
+    const base = {
+      nameHebrew: 'Item',
+      categories: ['Pantry'],
+      sources: [{ supplierId: 'Supplier A', price: 5 }],
+      purchaseOptions: [],
+      allergens: [],
+      baseUnit: 'kg'
+    }
+    const setProducts = (...products: Record<string, unknown>[]): void => {
+      const state = TestBed.inject(KitchenStateService) as unknown as {
+        products_: ReturnType<typeof signal<Product[]>>
+      }
+      state.products_.set(products as unknown as Product[])
+      ;(component as any).searchQuery_.set('')
+      ;(component as any).activeFilters_.set({})
+      fixture.detectChanges()
+    }
+    const root = (): HTMLElement => fixture.nativeElement as HTMLElement
+    const chips = (): string[] =>
+      Array.from(root().querySelectorAll('.validation-tooltip .c-chip')).map((c) => c.textContent?.trim() ?? '')
+
+    it('three gaps (price, category, supplier) render one amber chip mark with three chips and no triangle', () => {
+      setProducts({ ...base, _id: 'a', categories: [], sources: [] })
+      expect(root().querySelectorAll('.row-status').length).toBe(1)
+      expect(root().querySelectorAll('.validation-badge--incomplete').length).toBe(0)
+      expect(root().querySelectorAll('.validation-badge--unpriced').length).toBe(1)
+      expect(root().querySelector('.row-status .unpriced-badge')).not.toBeNull()
+      expect(chips()).toEqual(['missing_price', 'missing_category', 'missing_supplier'])
+    })
+
+    it('a priced product with no supplier renders one triangle mark with one chip', () => {
+      setProducts({ ...base, _id: 'b', sources: [], buy_price_global_: 4 })
+      expect(root().querySelectorAll('.row-status').length).toBe(1)
+      expect(root().querySelectorAll('.validation-badge--incomplete').length).toBe(1)
+      expect(root().querySelector('.row-status .unpriced-badge')).toBeNull()
+      expect(chips()).toEqual(['missing_supplier'])
+    })
+
+    it('a complete product renders no mark', () => {
+      setProducts({ ...base, _id: 'c' })
+      expect(root().querySelectorAll('.row-status').length).toBe(0)
+      expect(root().querySelectorAll('.validation-tooltip').length).toBe(0)
+    })
+
+    it('a product with no unit renders the red circle only, with a price chip when also unpriced', () => {
+      setProducts({ ...base, _id: 'd', baseUnit: '', sources: [] })
+      expect(root().querySelectorAll('.row-status').length).toBe(1)
+      expect(root().querySelectorAll('.validation-badge--invalid').length).toBe(1)
+      expect(root().querySelector('.row-status .unpriced-badge')).toBeNull()
+      expect(chips()).toEqual(['missing_price', 'missing_unit', 'missing_supplier'])
+    })
+
+    it('keeps the filter results: invalid, incomplete and unpriced return the same products as before', () => {
+      setProducts(
+        { ...base, _id: 'inv', baseUnit: '' },
+        { ...base, _id: 'inc', categories: [] },
+        { ...base, _id: 'unp', sources: [{ supplierId: 'Supplier A', price: 0 }] },
+        { ...base, _id: 'ok' }
+      )
+      const c = component as any
+      c.shouldShowInvalidOnly_.set(true)
+      expect(c.filteredProducts_().map((p: Product) => p._id)).toEqual(['inv'])
+      c.shouldShowInvalidOnly_.set(false)
+      c.shouldShowIncompleteOnly_.set(true)
+      expect(c.filteredProducts_().map((p: Product) => p._id)).toEqual(['inc'])
+      c.shouldShowIncompleteOnly_.set(false)
+      c.shouldShowUnpricedOnly_.set(true)
+      expect(c.filteredProducts_().map((p: Product) => p._id)).toEqual(['unp'])
+    })
+
+    it('a tap on the mark opens the box without opening the edit page; a second tap closes it', () => {
+      setProducts({ ...base, _id: 'a', sources: [] })
+      mockRouter.navigate.calls.reset()
+      const btn = root().querySelector<HTMLButtonElement>('.row-status') as HTMLButtonElement
+      btn.click()
+      fixture.detectChanges()
+      expect(btn.getAttribute('aria-expanded')).toBe('true')
+      expect(mockRouter.navigate).not.toHaveBeenCalled()
+      btn.click()
+      fixture.detectChanges()
+      expect(btn.getAttribute('aria-expanded')).toBe('false')
+      expect(mockRouter.navigate).not.toHaveBeenCalled()
+    })
+
+    it('a tap outside and Escape close the box; a tap in the box does not open the edit page', () => {
+      setProducts({ ...base, _id: 'a', sources: [] })
+      mockRouter.navigate.calls.reset()
+      const btn = root().querySelector<HTMLButtonElement>('.row-status') as HTMLButtonElement
+      btn.click()
+      fixture.detectChanges()
+      root().querySelector<HTMLElement>('.validation-tooltip')?.click()
+      expect(mockRouter.navigate).not.toHaveBeenCalled()
+      document.body.click()
+      fixture.detectChanges()
+      expect(btn.getAttribute('aria-expanded')).toBe('false')
+      btn.click()
+      fixture.detectChanges()
+      btn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+      fixture.detectChanges()
+      expect(btn.getAttribute('aria-expanded')).toBe('false')
+    })
+
+    it('a tap on the product name still opens the edit page', () => {
+      setProducts({ ...base, _id: 'a', sources: [] })
+      mockRouter.navigate.calls.reset()
+      root().querySelector<HTMLElement>('.product-grid-row .col-name')?.click()
+      expect(mockRouter.navigate).toHaveBeenCalledWith(['/inventory/edit', 'a'])
+    })
+  })
 })

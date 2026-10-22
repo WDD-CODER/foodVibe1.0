@@ -1,5 +1,10 @@
 import { Product } from '@models/product.model'
-import { getProductMissingFields, getProductValidationStatus, isProductUnpriced } from './product-validation.util'
+import {
+  getProductMissingFields,
+  getProductStatusFields,
+  getProductValidationStatus,
+  isProductUnpriced
+} from './product-validation.util'
 
 function product(patch: Partial<Product> = {}): Product {
   return {
@@ -58,5 +63,31 @@ describe('getProductMissingFields', () => {
   it('never returns missing_price', () => {
     const p = product({ sources: [], categories: [] })
     expect(getProductMissingFields(p)).toEqual(['missing_category', 'missing_supplier'])
+  })
+})
+
+describe('getProductStatusFields', () => {
+  it('lists the price first, then category and supplier, for a product with nothing', () => {
+    const p = product({ sources: [], categories: [] })
+    expect(getProductStatusFields(p)).toEqual(['missing_price', 'missing_category', 'missing_supplier'])
+  })
+
+  it('lists only the supplier for a priced product without one', () => {
+    const p = product({ sources: [], buy_price_global_: 4 })
+    expect(getProductStatusFields(p)).toEqual(['missing_supplier'])
+  })
+
+  it('lists only the price for an unpriced product with category and supplier', () => {
+    const p = product({ sources: [{ supplierId: 's1', price: 0 }] })
+    expect(getProductStatusFields(p)).toEqual(['missing_price'])
+  })
+
+  it('is empty for a complete product', () => {
+    expect(getProductStatusFields(product())).toEqual([])
+  })
+
+  it('puts the price before the name and unit gaps', () => {
+    const p = product({ nameHebrew: '', baseUnit: '', sources: [{ supplierId: 's1', price: 0 }] })
+    expect(getProductStatusFields(p)).toEqual(['missing_price', 'missing_name', 'missing_unit'])
   })
 })
