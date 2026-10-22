@@ -18,7 +18,7 @@ The cards use the `.c-modal-overlay` / `.c-modal-card` engines in `src/styles.sc
 - Success:
   - [ ] [auto] `npx ng build` passes and `npx ng test --watch=false` passes (existing `global-specific-modal.component.spec.ts`, `unit-creator.component.spec.ts`, `app.component.spec.ts` keep their meaning) plus the new `modal-controller.spec.ts` and `modal-shell.component.spec.ts`.
   - [ ] [auto] `grep -rn "firstValueFrom\|new Subject" src/app/core/services/*-modal.service.ts src/app/shared/*-modal/*.service.ts` → no matches.
-  - [ ] [auto] `grep -rLn "app-modal-shell" <every modal template listed in the scope>` → empty (the shell renders `role="dialog" aria-modal="true"`).
+  - [ ] [auto] `grep -rLn "app-modal-shell" <every modal template listed in the scope, except menu-export-sheet and export-preview>` → empty (the shell renders `role="dialog" aria-modal="true"`).
   - [ ] [auto] `git diff --numstat main -- src/app/pages/cook-view/cook-view.page.ts src/app/pages/menu-intelligence/menu-intelligence.page.ts src/app/pages/recipe-builder/recipe-builder.page.ts src/app/pages/inventory/components/product-form/product-form.component.ts src/app/pages/menu-intelligence/services/menu-export.service.ts` → no file has net added lines (callers need no edit; public `open()` signatures stay).
   - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down` per run mode).
   - [ ] [human] Smoke each touched page (list in UI/UX Notes): open each popup, press Escape — it closes with the same result as pressing Cancel; open, save and cancel work exactly as before.
@@ -30,6 +30,7 @@ The cards use the `.c-modal-overlay` / `.c-modal-card` engines in `src/styles.sc
 - Isolated DB: no
 
 ## Execution Notes
+- Planner 2026-10-22: the two export windows (`menu-export-sheet`, `export-preview`) are OUT of this plan — the Human froze every export/print/preview change for this run; plan 471 moves them onto the shell later. S6 covers the other dialogs only; leave both export files exactly as on origin/mvp-review.
 - Depends on: the MVP merge to main (branch `mvp`) and plan 450 (reuse layer: component-families registry, `@utils`/`@pipes` aliases, `reuse-lint`). Not on 452–457.
 - Refactor rule: no behaviour change except Escape/ARIA/focus. Every converted service keeps its public API (`open(...)`, `isOpen_` / `isOpen`, confirm/close methods) as a thin wrapper, so no caller outside the scope is edited. Frozen files (`cook-view.page.ts`, `menu-intelligence.page.ts`, `recipe-builder.page.ts`, `product-form.component.ts`, `menu-export.service.ts`) are in no scope and may only shrink.
 - Hotspots append-only: `styles.scss` and `dictionary.json` get additions only (new shell rules appended; a `close` key only if missing).
@@ -104,10 +105,6 @@ src/app/shared/unit-creator/unit-creator.component.scss
 src/app/shared/unit-creator/unit-creator.component.spec.ts
 src/app/pages/metadata-manager/components/unit-edit-dialog/unit-edit-dialog.component.ts
 src/app/pages/metadata-manager/components/unit-edit-dialog/unit-edit-dialog.component.html
-src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.ts
-src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.html
-src/app/shared/export-preview/export-preview.component.ts
-src/app/shared/export-preview/export-preview.component.html
 src/app/appRoot/app.component.html
 src/app/appRoot/app.component.ts
 docs/mvp/runs/451.md
