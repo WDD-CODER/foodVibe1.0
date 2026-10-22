@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router'
 import { filter } from 'rxjs/operators'
 import { LucideAngularModule } from 'lucide-angular'
+import { PermissionService } from '@services/permission.service'
+import { KitchenStateService } from '@services/kitchen-state.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 
@@ -107,6 +109,8 @@ function currentDashboardChipId(url: string): string | null {
 export class TabChipsComponent {
   private readonly router = inject(Router)
   private readonly destroyRef = inject(DestroyRef)
+  private readonly permission = inject(PermissionService)
+  private readonly kitchenState = inject(KitchenStateService)
 
   private readonly currentUrl_ = signal(this.router.url)
 
@@ -128,8 +132,12 @@ export class TabChipsComponent {
     // "/recipe-builder" (new recipe) or "/cook" (last-viewed recipe) routes.
     const openRecipeId = path.match(/^\/(?:recipe-builder|cook)\/([^/]+)$/)?.[1]
     if (!openRecipeId) return chips
+    // Staff on someone else's recipe cannot use the builder for it: that chip stays on a new recipe (plan 476).
+    const readOnly = this.permission.isReadOnlyRecipe(this.kitchenState.recipesById_().get(openRecipeId) ?? null)
     return chips.map((chip) =>
-      chip.id === 'recipe-builder' || chip.id === 'cook-view' ? { ...chip, path: `${chip.path}/${openRecipeId}` } : chip
+      (chip.id === 'recipe-builder' && !readOnly) || chip.id === 'cook-view'
+        ? { ...chip, path: `${chip.path}/${openRecipeId}` }
+        : chip
     )
   })
 
