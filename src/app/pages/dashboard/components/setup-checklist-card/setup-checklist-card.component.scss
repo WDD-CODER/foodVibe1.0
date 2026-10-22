@@ -81,6 +81,11 @@ $break-mobile: 768px; // mirrors src/styles.scss
     border-radius: var(--radius-full);
   }
 
+  .setup-step__count {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
   .setup-step__optional {
     color: var(--color-text-muted);
     font-size: var(--fs-xs);

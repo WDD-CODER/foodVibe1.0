@@ -14,6 +14,9 @@ import { DishDataService } from '@services/dish-data.service'
 import { ActivityLogService, ActivityEntry, ActivityAction, ActivityEntityType } from '@services/activity-log.service'
 import { UserService } from '@services/user.service'
 import { TranslationService } from '@services/translation.service'
+import { BusinessService } from '@services/business.service'
+import { PermissionService } from '@services/permission.service'
+import type { Business } from '@schemas/entities'
 import { Product } from '@models/product.model'
 import { Recipe } from '@models/recipe.model'
 
@@ -26,6 +29,8 @@ describe('DashboardOverviewComponent', () => {
   let mockRecipes: WritableSignal<Recipe[]>
   let mockLowStock: WritableSignal<Product[]>
   let mockIsLoggedIn: WritableSignal<boolean>
+  let mockIsOwner: WritableSignal<boolean>
+  let mockBusiness: WritableSignal<Business | null>
   let mockRecipeData: jasmine.SpyObj<Pick<RecipeDataService, 'getCount'>>
   let mockDishData: jasmine.SpyObj<Pick<DishDataService, 'getCount'>>
 
@@ -44,6 +49,8 @@ describe('DashboardOverviewComponent', () => {
     mockRecipes = signal<Recipe[]>([])
     mockLowStock = signal<Product[]>([])
     mockIsLoggedIn = signal<boolean>(true)
+    mockIsOwner = signal(false)
+    mockBusiness = signal<Business | null>(null)
 
     mockRouter = jasmine.createSpyObj('Router', ['navigate'])
     mockRouter.navigate.and.returnValue(Promise.resolve(true))
@@ -88,6 +95,14 @@ describe('DashboardOverviewComponent', () => {
           provide: UserService,
           // user_/isOwner_: the setup card (plan 431) reads them through PermissionService and BusinessService.
           useValue: { isLoggedIn: mockIsLoggedIn, user_: signal(null), isOwner_: signal(false) }
+        },
+        { provide: PermissionService, useValue: { isOwner_: mockIsOwner.asReadonly() } },
+        {
+          provide: BusinessService,
+          useValue: {
+            business_: mockBusiness.asReadonly(),
+            loadSetupStatus: () => Promise.resolve({ pricedProducts: 0, suppliers: 0, recipes: 0, events: 0, staff: 0 })
+          }
         },
         { provide: Router, useValue: mockRouter },
         { provide: TranslationService, useValue: mockTranslation }
@@ -315,5 +330,56 @@ describe('DashboardOverviewComponent', () => {
     fixture.detectChanges()
     const btn = fixture.debugElement.query(By.css('[data-testid="btn-add-product"]'))
     expect(btn.nativeElement.getAttribute('title')).toBeNull()
+  })
+
+  // --- Opening details banner (plan 469) ---
+
+  describe('opening details banner', () => {
+    const BUSINESS = {
+      _id: 'b1',
+      name: 'x',
+      ownerId: 'o1',
+      createdAt: 1,
+      internal: false,
+      lastSyncedMasterVersion: 0
+    } as Business
+    const banner = () => fixture.debugElement.query(By.css('app-opening-details-banner'))
+    const performance = () => fixture.debugElement.query(By.css('app-business-performance'))
+
+    it('owner without opening details sees the banner instead of the performance area, and is not redirected', () => {
+      mockIsOwner.set(true)
+      mockBusiness.set({ ...BUSINESS, baseline: undefined })
+      fixture.detectChanges()
+      expect(banner()).not.toBeNull()
+      expect(performance()).toBeNull()
+      expect(mockRouter.navigate).not.toHaveBeenCalled()
+    })
+
+    it('owner with a skipped ({}) or filled baseline sees the performance area and no banner', () => {
+      mockIsOwner.set(true)
+      mockBusiness.set({ ...BUSINESS, baseline: {} as Business['baseline'] })
+      fixture.detectChanges()
+      expect(banner()).toBeNull()
+      expect(performance()).not.toBeNull()
+      mockBusiness.set({ ...BUSINESS, baseline: { filledAt: 2, inquiriesPerMonth: 4 } })
+      fixture.detectChanges()
+      expect(banner()).toBeNull()
+      expect(performance()).not.toBeNull()
+    })
+
+    it('staff never sees the banner, even without opening details', () => {
+      mockIsOwner.set(false)
+      mockBusiness.set({ ...BUSINESS, baseline: undefined })
+      fixture.detectChanges()
+      expect(banner()).toBeNull()
+      expect(performance()).not.toBeNull()
+    })
+
+    it('shows the performance area while the business is still loading', () => {
+      mockIsOwner.set(true)
+      fixture.detectChanges()
+      expect(banner()).toBeNull()
+      expect(performance()).not.toBeNull()
+    })
   })
 })

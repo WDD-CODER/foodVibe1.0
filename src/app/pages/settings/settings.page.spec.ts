@@ -51,6 +51,23 @@ describe('SettingsPage', () => {
 
   const el = () => fixture.nativeElement as HTMLElement
 
+  it('owner: the tab row fills the page width so its chips sit in the middle (plan 469 H1)', () => {
+    setup(OWNER)
+    const host = el()
+    host.style.display = 'block'
+    host.style.inlineSize = '1280px'
+    document.body.appendChild(host)
+    try {
+      const tabs = host.querySelector('.settings-tabs') as HTMLElement
+      const rail = tabs.querySelector('app-scroll-rail') as HTMLElement
+      expect(getComputedStyle(tabs).justifyContent).toBe('center')
+      expect(getComputedStyle(rail).flexGrow).toBe('1')
+      expect(rail.getBoundingClientRect().width).toBeGreaterThan(host.getBoundingClientRect().width / 2)
+    } finally {
+      host.remove()
+    }
+  })
+
   it('staff: the owner-only empty state and no tabs', () => {
     setup(STAFF)
     expect(el().querySelector('[data-testid="settings-owner-only"]')).not.toBeNull()

@@ -1,0 +1,23 @@
+<section class="opening-banner c-glass-panel" data-testid="opening-details-banner" dir="rtl">
+  <button type="button" class="opening-banner__main" data-testid="opening-banner-main" (click)="open()">
+    <span class="opening-banner__icon"><lucide-icon name="clipboard-list" [size]="20" /></span>
+    <span class="opening-banner__copy">
+      <span class="opening-banner__title">{{ 'opening_details_banner_title' | translatePipe }}</span>
+      <span class="opening-banner__text">{{ 'opening_details_banner_text' | translatePipe }}</span>
+    </span>
+  </button>
+  <div class="opening-banner__actions">
+    <button type="button" class="c-btn-primary" data-testid="opening-banner-open" (click)="open()">
+      {{ 'opening_details_banner_action' | translatePipe }}
+    </button>
+    <button
+      type="button"
+      class="c-btn-ghost--sm"
+      data-testid="opening-banner-skip"
+      [disabled]="isSaving_()"
+      (click)="skip()"
+    >
+      {{ 'skip' | translatePipe }}
+    </button>
+  </div>
+</section>
