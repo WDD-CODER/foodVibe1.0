@@ -1,7 +1,7 @@
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
-import type { BaselineInput, Business, BusinessSettings } from '@schemas/entities'
+import type { BaselineInput, Business, BusinessNameInput, BusinessSettings } from '@schemas/entities'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import { LoggingService } from './logging.service'
@@ -36,6 +36,11 @@ export class BusinessService {
     })
   }
 
+  /** Owner only: renames the business and puts the stored (trimmed) name into `business_`. Throws on any refusal. */
+  updateName(name: string): Promise<void> {
+    return this._put('name', { name })
+  }
+
   /** Owner only: saves the three business numbers and puts the stored result into `business_`. Throws on any refusal. */
   updateSettings(settings: BusinessSettings): Promise<void> {
     return this._put('settings', settings)
@@ -52,7 +57,10 @@ export class BusinessService {
   }
 
   /** PUTs one owner-only part of the business and puts the stored reply into `business_`. */
-  private async _put<K extends 'settings' | 'baseline'>(key: K, body: BusinessSettings | BaselineInput): Promise<void> {
+  private async _put<K extends 'name' | 'settings' | 'baseline'>(
+    key: K,
+    body: BusinessNameInput | BusinessSettings | BaselineInput
+  ): Promise<void> {
     const res = await firstValueFrom(
       this.http.put<Pick<Business, K>>(`${environment.apiUrl}${API.business(key)}`, body)
     )

@@ -451,13 +451,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
           run: () => {
             void this.aiRecipeModal.open()
           }
-        },
-        {
-          labelKey: 'paste_recipe',
-          icon: 'clipboard-paste',
-          run: () => {
-            this.aiRecipeModal.open('create', undefined, undefined, 'paste')
-          }
         }
       ],
       'replace'

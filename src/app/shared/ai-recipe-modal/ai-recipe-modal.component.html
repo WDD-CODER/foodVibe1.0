@@ -120,44 +120,55 @@
         @if (!draft_()) {
           <div class="ai-prompt-panel">
             <!-- Input mode tabs -->
-            <div class="ai-input-mode-tabs">
+            <div class="ai-input-mode-tabs" role="tablist" [attr.aria-label]="'ai_recipe_modal_title' | translatePipe">
               <button
                 type="button"
-                class="ai-tab-btn"
-                [class.ai-tab-btn--active]="inputMode_() === 'text'"
+                role="tab"
+                class="c-chip c-chip--tab ai-mode-tab"
+                [class.active]="inputMode_() === 'text'"
+                [attr.aria-selected]="inputMode_() === 'text'"
                 (click)="inputMode_.set('text')"
-                [title]="'ai_recipe_input_text_mode' | translatePipe"
               >
-                <lucide-icon name="type" [size]="16"></lucide-icon>
+                <lucide-icon name="type" [size]="14"></lucide-icon>
+                {{ 'ai_recipe_tab_describe' | translatePipe }}
               </button>
               <button
                 type="button"
-                class="ai-tab-btn"
-                [class.ai-tab-btn--active]="inputMode_() === 'image'"
-                (click)="inputMode_.set('image')"
-                [title]="'ai_recipe_input_image_mode' | translatePipe"
-              >
-                <lucide-icon name="camera" [size]="16"></lucide-icon>
-              </button>
-              <button
-                type="button"
-                class="ai-tab-btn"
-                [class.ai-tab-btn--active]="inputMode_() === 'url'"
-                (click)="inputMode_.set('url')"
-                [title]="'ai_recipe_input_url_mode' | translatePipe"
-              >
-                <lucide-icon name="link" [size]="16"></lucide-icon>
-              </button>
-              <button
-                type="button"
-                class="ai-tab-btn"
-                [class.ai-tab-btn--active]="inputMode_() === 'paste'"
+                role="tab"
+                class="c-chip c-chip--tab ai-mode-tab"
+                [class.active]="inputMode_() === 'paste'"
+                [attr.aria-selected]="inputMode_() === 'paste'"
                 (click)="inputMode_.set('paste')"
-                [title]="'paste_recipe' | translatePipe"
               >
-                <lucide-icon name="clipboard-paste" [size]="16"></lucide-icon>
+                <lucide-icon name="clipboard-paste" [size]="14"></lucide-icon>
+                {{ 'ai_recipe_tab_paste' | translatePipe }}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                class="c-chip c-chip--tab ai-mode-tab"
+                [class.active]="inputMode_() === 'image'"
+                [attr.aria-selected]="inputMode_() === 'image'"
+                (click)="inputMode_.set('image')"
+              >
+                <lucide-icon name="camera" [size]="14"></lucide-icon>
+                {{ 'ai_recipe_tab_image' | translatePipe }}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                class="c-chip c-chip--tab ai-mode-tab"
+                [class.active]="inputMode_() === 'url'"
+                [attr.aria-selected]="inputMode_() === 'url'"
+                (click)="inputMode_.set('url')"
+              >
+                <lucide-icon name="link" [size]="14"></lucide-icon>
+                {{ 'ai_recipe_tab_url' | translatePipe }}
               </button>
             </div>
+            @if (inputMode_() === 'paste') {
+              <p class="ai-paste-hint">{{ 'ai_recipe_paste_hint' | translatePipe }}</p>
+            }
 
             <!-- Text input (also the paste tab: same box, different placeholder and button) -->
             @if (inputMode_() === 'text' || inputMode_() === 'paste') {

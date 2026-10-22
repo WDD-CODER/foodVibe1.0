@@ -3,12 +3,12 @@
 const { Router } = require('express')
 const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
-const { getBusiness, setBusinessSettings, setBusinessBaseline } = require('../services/business')
+const { getBusiness, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
 const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
-const { businessSettingsSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
+const { businessSettingsSchema, businessNameInputSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 const mongoose = require('mongoose')
 const { lastActiveByUser } = require('../utils/usage-stats')
 const { scopeFilter } = require('../utils/business-scope')
@@ -54,6 +54,25 @@ router.put('/settings', verifyToken, async (req, res) => {
     res.json({ settings: parsed.data })
   } catch (err) {
     req.log.error({ err, event: 'business.settings.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// PUT /api/v1/business/name — the owner renames the business (plan 472). Only ever writes the caller's own business.
+router.put('/name', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const parsed = businessNameInputSchema.safeParse(req.body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.name.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
+    }
+    const result = await setBusinessName(req.user.businessId, parsed.data.name)
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
+    req.log.info({ event: 'business.name.saved' })
+    res.json({ name: parsed.data.name })
+  } catch (err) {
+    req.log.error({ err, event: 'business.name.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })

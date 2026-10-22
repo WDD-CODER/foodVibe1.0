@@ -76,6 +76,19 @@ describe('BusinessService', () => {
     expect(service.business_()).toBeNull()
   })
 
+  it('updateName PUTs the name and puts the stored name into business_', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'old' })
+    const done = service.updateName('new name')
+    const req = http.expectOne(`${URL}/name`)
+    expect(req.request.method).toBe('PUT')
+    expect(req.request.body).toEqual({ name: 'new name' })
+    req.flush({ name: 'new name' })
+    await done
+    expect(service.business_()?.name).toBe('new name')
+  })
+
   it('updateSettings PUTs the numbers and puts the stored settings into business_', async () => {
     user.set({ _id: 'u1', name: 'u', email: 'u@x' })
     TestBed.flushEffects()

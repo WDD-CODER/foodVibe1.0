@@ -92,6 +92,12 @@ describe('RecipeBookListComponent', () => {
     expect(component).toBeTruthy()
   })
 
+  it('offers one add-recipe action (AI window) and no separate paste entry (plan 474)', () => {
+    const heroFab = TestBed.inject(HeroFabService) as unknown as { setPageActions: jasmine.Spy }
+    const actions = heroFab.setPageActions.calls.mostRecent().args[0] as { labelKey: string }[]
+    expect(actions.map((a) => a.labelKey)).toEqual(['add_recipe_ai'])
+  })
+
   it('should compute filtered recipes from kitchen state', () => {
     const filtered = (component as any).filteredRecipes_()
     expect(filtered.length).toBe(1)
