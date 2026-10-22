@@ -113,6 +113,7 @@
           [class.highlighted]="highlightedIndex() === i"
           role="option"
           [attr.aria-selected]="value.includes(opt.value)"
+          (mousedown)="$event.preventDefault()"
           (click)="onOptionClick(opt)"
         >
           @if (translateLabels()) {
@@ -131,6 +132,7 @@
           [class.highlighted]="highlightedIndex() === dropdownOptions_().length"
           role="option"
           [attr.aria-selected]="false"
+          (mousedown)="$event.preventDefault()"
           (click)="onOptionClick(addOpt)"
         >
           <app-add-option-row [label]="addLabel_()" />

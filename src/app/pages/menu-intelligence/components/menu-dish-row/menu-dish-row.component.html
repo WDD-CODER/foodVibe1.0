@@ -60,7 +60,6 @@
           [minChars]="1"
           [maxResults]="12"
           [maxHeight]="200"
-          [selectOnSpace]="true"
           [handleTab]="true"
           (picked)="selectRecipe.emit({ recipe: $event.option })"
           (escaped)="clearSearch.emit()"
