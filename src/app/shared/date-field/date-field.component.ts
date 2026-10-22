@@ -21,7 +21,7 @@ const FULL_LENGTH = 10
  * Plan 467: a date you can type as day/month/year (`25/12/2026`) with a calendar button beside it.
  * A native `<input type="date">` draws itself in the browser's language (US order on an English phone),
  * so it is only used as the hidden picker. `value` is an ISO date (`yyyy-mm-dd`) or an empty string; a
- * half-typed or impossible date leaves it empty and sets `invalid` once all ten characters are there.
+ * impossible date leaves it empty and sets `invalid` once all ten characters are there; a half-typed date sets `invalid` when the user leaves the field.
  */
 @Component({
   selector: 'app-date-field',
@@ -69,6 +69,8 @@ export class DateFieldComponent {
     const iso = parseDmy(this.text_())
     if (iso !== null) this.committed.emit(iso)
     else if (this.text_() === '') this.committed.emit('')
+    // Leaving the field with half a date (e.g. 25/12/26) must not look saved: flag it so parents block saving.
+    else this.invalid.set(true)
   }
 
   protected openCalendar(): void {

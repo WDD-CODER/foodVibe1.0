@@ -62,6 +62,17 @@ describe('DateFieldComponent', () => {
     expect(host.bad_()).toBeFalse()
   })
 
+  it('flags a half-typed date once the user leaves the field', () => {
+    type('251226')
+    expect(text().value).toBe('25/12/26')
+    expect(host.bad_()).toBeFalse()
+    text().dispatchEvent(new Event('change'))
+    fixture.detectChanges()
+    expect(host.iso_()).toBe('')
+    expect(host.bad_()).toBeTrue()
+    expect(el.querySelector('.c-field-error')?.textContent).toContain('T:date_invalid')
+  })
+
   it('flags an impossible date and emits nothing', () => {
     type('31022026')
     expect(text().value).toBe('31/02/2026')

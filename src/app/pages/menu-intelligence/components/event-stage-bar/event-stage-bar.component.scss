@@ -24,10 +24,14 @@
     inline-size: max-content;
     min-inline-size: 100%;
     padding-block: var(--space-1);
+
+    /* The wrapper is wider than the rail: only the pills are snap targets, like the metadata chips. */
+    scroll-snap-align: none;
   }
 
   .stage-pill {
     flex: 0 0 auto;
+    scroll-snap-align: center;
 
     min-block-size: 2.25rem;
     padding-inline: var(--space-4);
