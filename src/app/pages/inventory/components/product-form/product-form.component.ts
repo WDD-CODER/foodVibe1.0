@@ -11,7 +11,7 @@ import {
   Injector,
   ElementRef,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   DestroyRef
 } from '@angular/core'
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
@@ -109,7 +109,7 @@ interface ProductFormValue {
 export class ProductFormComponent implements OnInit, AfterViewInit {
   initialProduct_ = input<Product | null>(null)
 
-  @ViewChild('productNameInput') private productNameInputRef?: ElementRef<HTMLInputElement>
+  private readonly productNameInputRef = viewChild<ElementRef<HTMLInputElement>>('productNameInput')
 
   private readonly fb_ = inject(FormBuilder)
   private readonly conversionService = inject(ConversionService)
@@ -290,7 +290,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.productNameInputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.productNameInputRef()?.nativeElement?.focus(), 0)
   }
 
   ngOnInit(): void {

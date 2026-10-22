@@ -5,8 +5,7 @@ import {
   output,
   signal,
   computed,
-  HostListener,
-  ViewChild,
+  viewChild,
   ElementRef,
   inject,
   afterNextRender,
@@ -33,7 +32,7 @@ const PICKER_KEY = 0
 @Component({
   selector: 'app-custom-select',
   standalone: true,
-  host: { tabIndex: '-1' },
+  host: { tabIndex: '-1', '(focus)': 'onHostFocus()', '(keydown)': 'onKeydown($event)' },
   imports: [
     CommonModule,
     TranslatePipe,
@@ -80,8 +79,8 @@ export class CustomSelectComponent implements ControlValueAccessor {
   private readonly injector = inject(Injector)
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
 
-  @ViewChild('triggerRef') protected triggerRef?: ElementRef<HTMLButtonElement>
-  @ViewChild('inputRef') protected inputRef?: ElementRef<HTMLInputElement>
+  protected readonly triggerRef = viewChild<ElementRef<HTMLButtonElement>>('triggerRef')
+  protected readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef')
 
   protected open = signal(false)
   private readonly picker_ = new KeyedPickerSearch()
@@ -95,12 +94,11 @@ export class CustomSelectComponent implements ControlValueAccessor {
   private _focusFromMouse = false
 
   /** When host receives programmatic focus (e.g. from FocusByRowDirective), forward to trigger. */
-  @HostListener('focus')
   protected onHostFocus(): void {
     if (this.typeToFilter()) {
-      this.inputRef?.nativeElement?.focus()
+      this.inputRef()?.nativeElement?.focus()
     } else {
-      this.triggerRef?.nativeElement?.focus()
+      this.triggerRef()?.nativeElement?.focus()
     }
   }
 
@@ -230,7 +228,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
     this.open.set(true)
     this.searchQuery_.set('')
     this.setHighlight_(0)
-    setTimeout(() => this.inputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.inputRef()?.nativeElement?.focus(), 0)
   }
 
   /** Search clear (X, type-to-filter only): empty the filter, keep the list open with every option (plan 364). */
@@ -238,7 +236,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
     this.clearCloseTimeout()
     this.searchQuery_.set('')
     this.setHighlight_(0)
-    this.inputRef?.nativeElement?.focus()
+    this.inputRef()?.nativeElement?.focus()
   }
 
   protected onInputInput(value: string): void {
@@ -330,7 +328,6 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   /** Button-mode keys: bound on the trigger, and on the host for keys from inside the open list. */
-  @HostListener('keydown', ['$event'])
   protected onKeydown(e: KeyboardEvent): void {
     if (this.typeToFilter() && (e.target as HTMLElement)?.tagName === 'INPUT') return
     // Keys the list uses are its own: stop them on the trigger so a page's (keydown) on this host

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, HostListener, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
@@ -22,6 +22,7 @@ type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 
 @Component({
   selector: 'app-ai-menu-modal',
+  host: { '(document:keydown.escape)': 'onEscapeKey()' },
   standalone: true,
   imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './ai-menu-modal.component.html',
@@ -225,7 +226,6 @@ export class AiMenuModalComponent implements OnInit {
 
   // ─── Shared ──────────────────────────────────────────────────────
 
-  @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.modalService.isOpen()) this.onClose()
   }

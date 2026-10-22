@@ -1,15 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  HostListener,
-  inject,
-  signal,
-  computed,
-  effect,
-  OnInit,
-  OnDestroy
-} from '@angular/core'
+import { Component, DestroyRef, ElementRef, inject, signal, computed, effect, OnInit, OnDestroy } from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
@@ -59,6 +48,7 @@ const MULTIPLIER_CHIPS = [
 
 @Component({
   selector: 'app-cook-view-page',
+  host: { '(window:scroll)': 'onWindowScroll()', '(document:pointerdown)': 'onDocumentPointerDown($event)' },
   standalone: true,
   imports: [
     CommonModule,
@@ -920,7 +910,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   /** Scroll spy (<768): ingredients come first; steps become active once their pane top reaches the bars, or at the page end. */
-  @HostListener('window:scroll')
   protected onWindowScroll(): void {
     if (!this.isStackedLayout()) return
     const steps = this.el.nativeElement.querySelector('.cv-step-pane') as HTMLElement | null
@@ -1148,7 +1137,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   /** Click outside the open row closes its expander. */
-  @HostListener('document:pointerdown', ['$event'])
   protected onDocumentPointerDown(event: PointerEvent): void {
     const open = this.openIngredientIndex_()
     if (open === null) return

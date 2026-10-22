@@ -1,19 +1,18 @@
-import { Directive, ElementRef, HostListener, AfterViewInit } from '@angular/core'
+import { Directive, ElementRef, AfterViewInit, inject } from '@angular/core'
 
 /** Sets textarea height to fit content (auto-grow) on input and on init. */
 @Directive({
   selector: 'textarea[textareaAutoGrow]',
+  host: { '(input)': 'onInput()', '(change)': 'onInput()' },
   standalone: true
 })
 export class TextareaAutoGrowDirective implements AfterViewInit {
-  constructor(private el: ElementRef<HTMLTextAreaElement>) {}
+  private readonly el = inject<ElementRef<HTMLTextAreaElement>>(ElementRef)
 
   ngAfterViewInit(): void {
     this.resize()
   }
 
-  @HostListener('input')
-  @HostListener('change')
   onInput(): void {
     this.resize()
   }

@@ -1,14 +1,4 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  ElementRef,
-  HostListener,
-  effect,
-  inject,
-  input,
-  signal,
-  viewChild
-} from '@angular/core'
+import { Component, ChangeDetectionStrategy, ElementRef, effect, inject, input, signal, viewChild } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionPer100g } from '@models/product.model'
@@ -53,6 +43,7 @@ const AUTO_SCROLL_PX = 3
 
 @Component({
   selector: 'app-nutrition-badge',
+  host: { '(document:click)': 'onDocumentClick($event)' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, LucideAngularModule],
@@ -292,7 +283,6 @@ export class NutritionBadgeComponent {
   }
 
   /** Tap outside closes it (touch has no pointerleave). The tooltip is a DOM child of the host. */
-  @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: MouseEvent): void {
     if (!this.showTooltip_()) return
     const host = this.elRef_.nativeElement as HTMLElement

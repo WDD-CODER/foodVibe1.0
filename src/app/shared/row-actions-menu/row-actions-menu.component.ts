@@ -2,7 +2,6 @@ import {
   Component,
   ChangeDetectionStrategy,
   signal,
-  HostListener,
   DestroyRef,
   ElementRef,
   Injector,
@@ -31,7 +30,7 @@ const VIEWPORT_MARGIN = 8
   templateUrl: './row-actions-menu.component.html',
   styleUrl: './row-actions-menu.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { '[class.is-anchored]': 'anchored()' }
+  host: { '[class.is-anchored]': 'anchored()', '(document:keydown.escape)': 'onEscape()' }
 })
 export class RowActionsMenuComponent {
   private readonly el = inject(ElementRef)
@@ -126,7 +125,6 @@ export class RowActionsMenuComponent {
     this.isPlaced.set(true)
   }
 
-  @HostListener('document:keydown.escape')
   protected onEscape(): void {
     if (this.isOpen()) this.close()
   }

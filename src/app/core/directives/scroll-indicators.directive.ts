@@ -1,7 +1,8 @@
-import { AfterViewInit, DestroyRef, Directive, ElementRef, HostListener, inject } from '@angular/core'
+import { AfterViewInit, DestroyRef, Directive, ElementRef, inject } from '@angular/core'
 
 @Directive({
   selector: '[scrollIndicators]',
+  host: { '(scroll)': 'onScroll()', '(window:resize)': 'onResize()' },
   standalone: true
 })
 export class ScrollIndicatorsDirective implements AfterViewInit {
@@ -27,12 +28,10 @@ export class ScrollIndicatorsDirective implements AfterViewInit {
     })
   }
 
-  @HostListener('scroll')
   onScroll(): void {
     this.update()
   }
 
-  @HostListener('window:resize')
   onResize(): void {
     this.update()
   }

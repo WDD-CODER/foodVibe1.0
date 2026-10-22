@@ -1,13 +1,4 @@
-import {
-  Component,
-  input,
-  output,
-  effect,
-  HostListener,
-  ChangeDetectionStrategy,
-  DestroyRef,
-  inject
-} from '@angular/core'
+import { Component, input, output, effect, ChangeDetectionStrategy, DestroyRef, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
@@ -18,6 +9,7 @@ const BODY_PRINT_CLASS = 'export-preview-visible'
 
 @Component({
   selector: 'app-export-preview',
+  host: { '(document:keydown.escape)': 'onEscape()' },
   standalone: true,
   imports: [CommonModule, LucideAngularModule, TranslatePipe, PartialCostBadgeComponent],
   templateUrl: './export-preview.component.html',
@@ -45,7 +37,6 @@ export class ExportPreviewComponent {
     })
   }
 
-  @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.payload()) this.close.emit()
   }

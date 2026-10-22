@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, HostListener, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
@@ -36,6 +36,7 @@ const CANONICAL_UNITS = [
 
 @Component({
   selector: 'app-ai-product-modal',
+  host: { '(document:keydown.escape)': 'onEscapeKey()' },
   standalone: true,
   imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './ai-product-modal.component.html',
@@ -267,7 +268,6 @@ export class AiProductModalComponent implements OnInit {
 
   // ─── Shared ──────────────────────────────────────────────────────
 
-  @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.modalService.isOpen()) this.onClose()
   }

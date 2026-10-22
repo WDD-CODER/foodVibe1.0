@@ -5,8 +5,7 @@ import {
   output,
   signal,
   computed,
-  HostListener,
-  ViewChild,
+  viewChild,
   ElementRef,
   inject,
   afterNextRender,
@@ -44,7 +43,7 @@ const PICKER_KEY = 0
 @Component({
   selector: 'app-custom-multi-select',
   standalone: true,
-  host: { tabIndex: '-1' },
+  host: { tabIndex: '-1', '(focus)': 'onHostFocus()', '(keydown)': 'onKeydown($event)' },
   imports: [
     CommonModule,
     TranslatePipe,
@@ -96,8 +95,8 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   private _onTouched: () => void = () => {}
   private _disabled = signal(false)
 
-  @ViewChild('triggerRef') protected triggerRef?: ElementRef<HTMLButtonElement>
-  @ViewChild('searchInputRef') protected searchInputRef?: ElementRef<HTMLInputElement>
+  protected readonly triggerRef = viewChild<ElementRef<HTMLButtonElement>>('triggerRef')
+  protected readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInputRef')
 
   protected open = signal(false)
   private closeTimeout: ReturnType<typeof setTimeout> | null = null
@@ -148,9 +147,8 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     return addOptionLabel(typed, all, (o) => this.getDisplayText_(o.label), this.addNewLabelKey())
   })
 
-  @HostListener('focus')
   protected onHostFocus(): void {
-    this.triggerRef?.nativeElement?.focus()
+    this.triggerRef()?.nativeElement?.focus()
   }
 
   writeValue(value: string[] | null): void {
@@ -276,7 +274,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   protected onClearSearch(): void {
     this.searchQuery_.set('')
     this.setHighlight_(0)
-    this.searchInputRef?.nativeElement?.focus()
+    this.searchInputRef()?.nativeElement?.focus()
   }
 
   protected onSearchInput(q: string): void {
@@ -299,7 +297,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
         this.close()
         // Focus stays on the field without reopening the list (rule 5f).
         this._focusFromMouse = true
-        this.triggerRef?.nativeElement?.focus()
+        this.triggerRef()?.nativeElement?.focus()
       },
       onHighlightMove: () => this.scrollHighlightIntoView_()
     })
@@ -324,7 +322,6 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   /** Trigger keys (no search box): same keyboard rules; Space toggles like Enter. */
-  @HostListener('keydown', ['$event'])
   protected onKeydown(e: KeyboardEvent): void {
     if (!this.open()) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
@@ -372,7 +369,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   private focusSearchInput_(): void {
     afterNextRender(
       () => {
-        this.searchInputRef?.nativeElement?.focus()
+        this.searchInputRef()?.nativeElement?.focus()
       },
       { injector: this._injector }
     )

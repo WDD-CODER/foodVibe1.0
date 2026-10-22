@@ -5,7 +5,7 @@ import {
   output,
   signal,
   computed,
-  ViewChild,
+  viewChild,
   ElementRef,
   inject,
   afterNextRender,
@@ -74,7 +74,7 @@ export class ChipSearchDropdownComponent {
   blurred = output<void>()
 
   // ── View refs ────────────────────────────────────────────────────────────────
-  @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>
+  private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput')
 
   // ── Internal state ───────────────────────────────────────────────────────────
   protected readonly instanceId = `csd-${++nextChipSearchDropdownId}`
@@ -143,13 +143,13 @@ export class ChipSearchDropdownComponent {
     this.searchQuery_.set('')
     this.picker_.onQueryChange(PICKER_KEY, '')
     this.showDropdown_.set(true)
-    this.searchInputRef?.nativeElement?.focus()
+    this.searchInputRef()?.nativeElement?.focus()
   }
 
   protected onBoxClick(ev: MouseEvent): void {
     if ((ev.target as HTMLElement).closest?.('.chipe')) return
     this.openDropdown()
-    setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.searchInputRef()?.nativeElement?.focus(), 0)
   }
 
   protected onBlurred(): void {

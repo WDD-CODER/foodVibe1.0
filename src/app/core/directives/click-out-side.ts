@@ -1,7 +1,8 @@
-import { Directive, ElementRef, output, HostListener, inject } from '@angular/core'
+import { Directive, ElementRef, output, inject } from '@angular/core'
 
 @Directive({
   selector: '[clickOutside]',
+  host: { '(document:click)': 'onClick($event.target)' },
   standalone: true
 })
 export class ClickOutSideDirective {
@@ -9,7 +10,6 @@ export class ClickOutSideDirective {
 
   clickOutside = output<HTMLElement>()
 
-  @HostListener('document:click', ['$event.target'])
   public onClick(target: EventTarget | null): void {
     if (!(target instanceof HTMLElement) || !target.isConnected) return
 
