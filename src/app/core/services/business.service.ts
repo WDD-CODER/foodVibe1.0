@@ -1,7 +1,14 @@
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
-import type { BaselineInput, Business, BusinessNameInput, BusinessSettings } from '@schemas/entities'
+import type {
+  BaselineInput,
+  Business,
+  BusinessNameInput,
+  BusinessSettings,
+  EventStage,
+  StaffVisibleStagesInput
+} from '@schemas/entities'
 import { environment } from '../../../environments/environment'
 import { API } from './http-storage.adapter'
 import { LoggingService } from './logging.service'
@@ -51,18 +58,23 @@ export class BusinessService {
     return this._put('baseline', input)
   }
 
+  /** Owner only (plan 477): the event stages staff may see; puts the stored list into `business_`. Throws on any refusal. */
+  updateStaffVisibleStages(stages: EventStage[]): Promise<void> {
+    return this._put('staff-visible-stages', { stages })
+  }
+
   /** Owner only: which setup steps are done. Not cached: the setup card asks every time it is created. */
   loadSetupStatus(): Promise<SetupStatus> {
     return firstValueFrom(this.http.get<SetupStatus>(`${environment.apiUrl}${API.business('setup-status')}`))
   }
 
   /** PUTs one owner-only part of the business and puts the stored reply into `business_`. */
-  private async _put<K extends 'name' | 'settings' | 'baseline'>(
-    key: K,
-    body: BusinessNameInput | BusinessSettings | BaselineInput
+  private async _put(
+    path: 'name' | 'settings' | 'baseline' | 'staff-visible-stages',
+    body: BusinessNameInput | BusinessSettings | BaselineInput | StaffVisibleStagesInput
   ): Promise<void> {
     const res = await firstValueFrom(
-      this.http.put<Pick<Business, K>>(`${environment.apiUrl}${API.business(key)}`, body)
+      this.http.put<Partial<Business>>(`${environment.apiUrl}${API.business(path)}`, body)
     )
     this._business_.update((business) => (business ? { ...business, ...res } : business))
   }

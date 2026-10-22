@@ -145,4 +145,28 @@ describe('BusinessService', () => {
     req.flush({ pricedProducts: 3, suppliers: 1, recipes: 0, events: 0, staff: 0 })
     expect((await done).pricedProducts).toBe(3)
   })
+  it('updateStaffVisibleStages PUTs the stages and puts the stored list into business_', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    const done = service.updateStaffVisibleStages(['ordering', 'execution'])
+    const req = http.expectOne(`${URL}/staff-visible-stages`)
+    expect(req.request.method).toBe('PUT')
+    expect(req.request.body).toEqual({ stages: ['ordering', 'execution'] })
+    req.flush({ staffVisibleStages: ['ordering', 'execution'] })
+    await done
+    expect(service.business_()?.staffVisibleStages).toEqual(['ordering', 'execution'])
+  })
+
+  it('updateStaffVisibleStages rejects on a refusal and leaves business_ unchanged', async () => {
+    user.set({ _id: 'u1', name: 'u', email: 'u@x' })
+    TestBed.flushEffects()
+    http.expectOne(URL).flush({ _id: 'b1', name: 'x' })
+    const done = service.updateStaffVisibleStages(['inquiry'])
+    http
+      .expectOne(`${URL}/staff-visible-stages`)
+      .flush({ error: 'FORBIDDEN' }, { status: 403, statusText: 'Forbidden' })
+    await expectAsync(done).toBeRejected()
+    expect(service.business_()?.staffVisibleStages).toBeUndefined()
+  })
 })

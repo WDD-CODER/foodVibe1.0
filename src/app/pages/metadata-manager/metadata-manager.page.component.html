@@ -149,6 +149,9 @@
     </section>
 
     <app-coefficient-manager id="mm-sec-coefficients" />
+    @if (canEditSettings_()) {
+      <app-staff-stages-manager id="mm-sec-staff-stages" />
+    }
     <app-preparation-category-manager id="mm-sec-preparation" />
     <app-section-category-manager id="mm-sec-section" />
     <app-station-manager id="mm-sec-station" />

@@ -1,14 +1,14 @@
 'use strict'
-/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Plan 431: owner-only opening baseline and setup status. */
+/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Plan 431: owner-only opening baseline and setup status. Plan 477: owner-only stages staff may see. */
 const { Router } = require('express')
 const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
-const { getBusiness, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
+const { getBusiness, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
 const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
-const { businessSettingsSchema, businessNameInputSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
+const { businessSettingsSchema, businessNameInputSchema, staffVisibleStagesInputSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 const mongoose = require('mongoose')
 const { lastActiveByUser } = require('../utils/usage-stats')
 const { scopeFilter } = require('../utils/business-scope')
@@ -73,6 +73,25 @@ router.put('/name', verifyToken, async (req, res) => {
     res.json({ name: parsed.data.name })
   } catch (err) {
     req.log.error({ err, event: 'business.name.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// PUT /api/v1/business/staff-visible-stages — the owner picks the event stages staff may see (plan 477). Only the caller's own business.
+router.put('/staff-visible-stages', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const parsed = staffVisibleStagesInputSchema.safeParse(req.body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.staff_stages.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
+    }
+    const result = await setStaffVisibleStages(req.user.businessId, parsed.data.stages)
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
+    req.log.info({ event: 'business.staff_stages.saved', count: result.staffVisibleStages.length })
+    res.json({ staffVisibleStages: result.staffVisibleStages })
+  } catch (err) {
+    req.log.error({ err, event: 'business.staff_stages.failed' })
     res.status(500).json({ error: 'Server error' })
   }
 })

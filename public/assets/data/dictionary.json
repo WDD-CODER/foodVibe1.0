@@ -1544,6 +1544,10 @@
     "business_name_default_hint": "לא חובה. אם תשאירו ריק, העסק ייקרא בשם המשתמש – אפשר לשנות בהגדרות.",
     "signup_staff_hint": "עובדים במטבח לא נרשמים כאן – בעל העסק מוסיף אותם בהגדרות ← צוות.",
     "settings_business_name_help": "השם של העסק, כפי שהוא מופיע בהזמנות לספקים",
-    "business_name_saved": "שם העסק נשמר"
+    "business_name_saved": "שם העסק נשמר",
+    "metadata_staff_stages_title": "שלבי אירוע שהצוות רואה",
+    "metadata_staff_stages_desc": "אנשי הצוות רואים רק אירועים בשלבים המסומנים, וגם אירועים שהם יצרו בעצמם.",
+    "staff_stages_save_error": "שמירת השלבים נכשלה",
+    "event_not_available": "האירוע הזה לא זמין לך"
   }
 }

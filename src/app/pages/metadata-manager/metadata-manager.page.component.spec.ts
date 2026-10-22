@@ -76,8 +76,14 @@ describe('MetadataManagerPageComponent', () => {
 
     fixture = TestBed.createComponent(MetadataManagerComponent)
     component = fixture.componentInstance
-    // The page lists all 12 sections for a platform admin; plan 426 tests below flip this.
-    TestBed.inject(UserService)._saveUserLocal({ _id: 'u1', name: 'u', email: 'u@x', isPlatformAdmin: true })
+    // The page lists all 13 sections for an owner who is the platform admin; plan 426 / 477 tests below flip this.
+    TestBed.inject(UserService)._saveUserLocal({
+      _id: 'u1',
+      name: 'u',
+      email: 'u@x',
+      isPlatformAdmin: true,
+      businessRole: 'owner'
+    })
 
     fixture.detectChanges()
   })
@@ -110,6 +116,31 @@ describe('MetadataManagerPageComponent', () => {
       expect(host.querySelector('#mm-sec-ai-models')).not.toBeNull()
       expect(tabLabels()).toContain('user_management')
       expect(tabLabels()).toContain('ai_model_manager')
+    })
+  })
+
+  describe('staff-stages card (plan 477)', () => {
+    const setRole = (businessRole: 'owner' | 'staff') => {
+      TestBed.inject(UserService)._saveUserLocal({ _id: 'u1', name: 'u', email: 'u@x', businessRole })
+      fixture.detectChanges()
+    }
+    const tabLabels = () =>
+      fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab')).map((b) => b.nativeElement.textContent.trim())
+
+    it('shows the card and its jump tab to the owner, after the coefficients card', () => {
+      setRole('owner')
+      const host: HTMLElement = fixture.nativeElement
+      const card = host.querySelector('#mm-sec-staff-stages')
+      expect(card).not.toBeNull()
+      expect(host.querySelector('#mm-sec-coefficients')?.nextElementSibling).toBe(card)
+      expect(tabLabels()).toContain('metadata_staff_stages_title')
+    })
+
+    it('hides the card and its jump tab from staff', () => {
+      setRole('staff')
+      const host: HTMLElement = fixture.nativeElement
+      expect(host.querySelector('#mm-sec-staff-stages')).toBeNull()
+      expect(tabLabels()).not.toContain('metadata_staff_stages_title')
     })
   })
 
@@ -355,6 +386,7 @@ describe('MetadataManagerPageComponent', () => {
     'mm-sec-course',
     'mm-sec-menu-type',
     'mm-sec-coefficients',
+    'mm-sec-staff-stages',
     'mm-sec-preparation',
     'mm-sec-section',
     'mm-sec-station',
@@ -362,9 +394,9 @@ describe('MetadataManagerPageComponent', () => {
     'mm-sec-ai-models'
   ]
 
-  it('should render exactly 12 jump-nav tabs in page order', () => {
+  it('should render exactly 13 jump-nav tabs in page order', () => {
     const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))
-    expect(tabs.length).toBe(12)
+    expect(tabs.length).toBe(13)
     expect(tabs.map((t) => t.nativeElement.textContent.trim())).toEqual([
       'metadata_units_and_conversions_title',
       'metadata_product_categories_title',
@@ -373,6 +405,7 @@ describe('MetadataManagerPageComponent', () => {
       'metadata_recipe_courses_title',
       'metadata_menu_types_title',
       'metadata_coefficients_title',
+      'metadata_staff_stages_title',
       'metadata_prep_categories',
       'metadata_section_categories_title',
       'metadata_stations_title',
@@ -381,7 +414,7 @@ describe('MetadataManagerPageComponent', () => {
     ])
   })
 
-  it('should give each of the 12 sections a matching stable id', () => {
+  it('should give each of the 13 sections a matching stable id', () => {
     for (const id of JUMP_SECTION_IDS) {
       expect(fixture.debugElement.query(By.css(`#${id}`)))
         .withContext(id)
@@ -430,7 +463,7 @@ describe('MetadataManagerPageComponent', () => {
   it("renders the jump-nav tabs inside the shared scroll rail (plan 350 — arrows are the rail's job)", () => {
     const rail = fixture.debugElement.query(By.css('app-scroll-rail.mm-jump-nav'))
     expect(rail).not.toBeNull()
-    expect(rail.queryAll(By.css('.c-chip--tab')).length).toBe(12)
+    expect(rail.queryAll(By.css('.c-chip--tab')).length).toBe(13)
     expect(fixture.debugElement.query(By.css('.mm-jump-nav-arrow'))).toBeNull()
   })
 })

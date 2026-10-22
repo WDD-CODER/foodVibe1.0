@@ -11,6 +11,7 @@ import {
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
+import { HttpErrorResponse } from '@angular/common/http'
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
@@ -492,22 +493,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** For pendingChangesGuard — enables ternary modal with "Save & Leave" option */
   async saveAndWait(): Promise<boolean> {
-    if (!this.form_.value.name?.trim()) {
-      this.form_.patchValue({ name: this.generateDateName() })
-    }
-
     try {
-      const id = this.editingId_()
-      // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
-      const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
-      const now = Date.now()
-      if (id) {
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now })
-      } else {
-        const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
-        this.editingId_.set(created._id)
-      }
-      this.unsaved_.markSaved()
+      await this.persist_()
       this.isSubmitted = true
       return true
     } catch {
@@ -813,26 +800,27 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.userMsg.onSetErrorMsg(missingMenuFieldsMessage(this.form_, this.translation))
       return
     }
-
-    if (!this.form_.value.name?.trim()) {
-      this.form_.patchValue({ name: this.generateDateName() })
-    }
-
     await this.saving.withSaving(async () => {
-      const id = this.editingId_()
-      // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
-      const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
-      const now = Date.now()
-      if (id) {
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now })
-      } else {
-        const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
-        this.editingId_.set(created._id)
-      }
-      this.unsaved_.markSaved()
+      await this.persist_()
       this.userMsg.onSetSuccessMsg(this.translation.translate('menu_saved'))
       this.router.navigate(['/menu-library'])
     })
+  }
+
+  /** Names an unnamed menu, creates or updates it, and marks the form saved (shared by save and saveAndWait). */
+  private async persist_(): Promise<void> {
+    if (!this.form_.value.name?.trim()) this.form_.patchValue({ name: this.generateDateName() })
+    const id = this.editingId_()
+    // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
+    const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
+    const now = Date.now()
+    if (id) {
+      await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now })
+    } else {
+      const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
+      this.editingId_.set(created._id)
+    }
+    this.unsaved_.markSaved()
   }
 
   private generateDateName(): string {
@@ -857,7 +845,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private async loadEvent(id: string): Promise<void> {
-    const event = await this.menuEventData.getMenuEventById(id)
+    // Plan 477: an event the server does not show this user (hidden stage, removed, other business) is a 404.
+    const event = await this.menuEventData.getMenuEventById(id).catch((err: unknown) => {
+      if (!(err instanceof HttpErrorResponse && err.status === 404)) throw err
+      this.userMsg.onSetErrorMsg(this.translation.translate('event_not_available'))
+      void this.router.navigate(['/menu-library'])
+      return null
+    })
+    if (!event) return
     this.menuPortions_.remember(event)
     this.form_.patchValue({
       name: event.name,
