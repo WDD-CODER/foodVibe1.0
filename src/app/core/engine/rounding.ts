@@ -11,6 +11,11 @@ export function roundPortions(x: number): number {
   return Math.ceil(roundTo(x, 6))
 }
 
+/** Drops float noise (110.00000000000001 -> 110) keeping real decimals (5.2 stays 5.2). */
+export function cleanFloat(n: number, decimals = 6): number {
+  return roundTo(n, decimals)
+}
+
 /** Money as a number with 2 decimals (Excel cells). */
 export function roundMoney(n: number): number {
   return roundTo(n, 2)

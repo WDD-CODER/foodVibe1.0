@@ -58,6 +58,23 @@ export class PricingMeterComponent {
   )
   readonly hasProfitPct_ = computed(() => this.result_().profitPct !== null)
   readonly partial_ = computed(() => this.result_().partial)
+  /** Revenue is 0 for lack of prices (no dish price, no price per guest) while guests are set. */
+  readonly revenueNotSet_ = computed(() => this.result_().revenue === 0 && (this.event().guestCount ?? 0) > 0)
+  /**
+   * Why the plan is partial when no product is missing (the cost badge explains `missing`): engine errors and
+   * ingredient lines without a unit conversion. Empty when not partial or when products are missing.
+   */
+  readonly partialReasons_ = computed<string[]>(() => {
+    const plan = this.plan()
+    if (!this.partial_() || plan.missing.length > 0) return []
+    const errors = plan.errors.map((e) =>
+      this.translation_.translate(`engine_error_${e.kind}`).replace('{name}', e.name)
+    )
+    const lines = plan.rawLines
+      .filter((l) => l.status === 'no_conversion')
+      .map((l) => `${this.translation_.translate('line_status_no_conversion')}: ${l.name}`)
+    return [...errors, ...lines]
+  })
   readonly pricePerGuest_ = computed(() => formatMoney(this.result_().pricePerGuest))
   readonly profitPerGuest_ = computed(() => formatMoney(this.result_().profitPerGuest))
   readonly profitPct_ = computed(() => {

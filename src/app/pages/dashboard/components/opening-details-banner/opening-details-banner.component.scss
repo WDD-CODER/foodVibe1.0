@@ -1,0 +1,66 @@
+@layer components.opening-details-banner {
+  :host {
+    display: block;
+  }
+
+  .opening-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    padding: var(--space-4);
+  }
+
+  .opening-banner__main {
+    display: flex;
+    flex: 1 1 18rem;
+    align-items: center;
+    gap: var(--space-3);
+
+    min-inline-size: 0;
+    padding: 0;
+    border: none;
+    background: none;
+
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .opening-banner__icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+
+    color: var(--color-primary);
+  }
+
+  .opening-banner__copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    min-inline-size: 0;
+  }
+
+  .opening-banner__title {
+    color: var(--color-text-main);
+    font-size: var(--fs-md);
+    font-weight: 700;
+  }
+
+  .opening-banner__text {
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .opening-banner__actions {
+    display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+}

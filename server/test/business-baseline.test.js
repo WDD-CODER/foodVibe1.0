@@ -114,7 +114,7 @@ describe('GET /api/v1/business/setup-status', () => {
     const db = testDb()
     const data = (type, who, body) => request(app).post(`/api/v1/data/${type}`).set(as(who)).send(body)
     const priced = (n, price) => productBody({ nameHebrew: `product ${n}`, sources: [{ supplierId: 'sup', price }] })
-    for (let i = 0; i < 10; i++) expect((await data('products', OWNER, priced(i, 3))).status).toBe(201)
+    for (let i = 0; i < 7; i++) expect((await data('products', OWNER, priced(i, 3))).status).toBe(201)
     expect((await data('products', OWNER, priced('free', 0))).status).toBe(201)
     const deleted = await data('products', OWNER, priced('deleted', 3))
     expect(deleted.status).toBe(201)
@@ -131,7 +131,16 @@ describe('GET /api/v1/business/setup-status', () => {
     await db.collection('users').insertOne({ _id: 'st-gone', name: 'gone', email: 'g@x', businessId: 'b1', businessRole: 'staff', removedAt: 9 })
     const res = await status()
     expect(res.status).toBe(200)
-    expect(res.body).toEqual({ pricedProducts: 10, suppliers: 1, recipes: 1, events: 1, staff: 1 })
+    expect(res.body).toEqual({ pricedProducts: 5, suppliers: 1, recipes: 1, events: 1, staff: 1 })
+  })
+
+  it('caps the priced-product count at the setup goal: exactly 5 gives 5, 4 gives 4', async () => {
+    const db = testDb()
+    const priced = n => own('cap' + n, { sources: [{ price: 3 }] })
+    await db.collection('products').insertMany([0, 1, 2, 3].map(priced))
+    expect((await status()).body.pricedProducts).toBe(4)
+    await db.collection('products').insertMany([priced(4)])
+    expect((await status()).body.pricedProducts).toBe(5)
   })
 
   it('counts a product priced only in purchaseOptions, and dishes count with recipes', async () => {

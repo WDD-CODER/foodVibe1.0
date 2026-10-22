@@ -101,6 +101,19 @@ $break-mobile: 768px; // mirrors src/styles.scss
     font-size: 0.65rem;
   }
 
+  .partial-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1 1 100%;
+    color: var(--text-warning);
+    font-size: 0.75rem;
+  }
+
+  .partial-reasons-title {
+    font-weight: 600;
+  }
+
   .verdict {
     display: inline-flex;
     align-items: center;

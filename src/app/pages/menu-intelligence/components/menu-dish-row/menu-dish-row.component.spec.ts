@@ -76,6 +76,16 @@ describe('MenuDishRowComponent coefficient (plan 441)', () => {
     expect(text()).not.toContain('coefficient_manual')
   })
 
+  it('shows portions without a float tail', () => {
+    fixture.componentRef.setInput('portionInfo', { portions: 110.00000000000001, coefficient: 1.1, overridden: false })
+    fixture.detectChanges()
+    const value = (fixture.nativeElement as HTMLElement).querySelector('.dish-portions-value')!
+    expect(value.textContent?.trim()).toBe('110')
+    fixture.componentRef.setInput('portionInfo', { portions: 5.25, coefficient: 1, overridden: false })
+    fixture.detectChanges()
+    expect(value.textContent?.trim()).toBe('5.25')
+  })
+
   it('typing 1.1 sets coefficient_override and shows the manual tag and reset button', () => {
     type('1.1')
     expect(group.get('coefficient_override')?.value).toBe(1.1)

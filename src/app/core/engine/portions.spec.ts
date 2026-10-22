@@ -87,6 +87,28 @@ describe('computePortions', () => {
     expect(computePortions(e, [sauce]).get('s1|0')!.portions).toBeCloseTo(5, 6)
   })
 
+  it('a kg preparation, 1 per diner, 100 guests, coefficient 1.1 -> exactly 110', () => {
+    const sauce = makeRecipe({ _id: 'sauce', nameHebrew: 'רוטב', yieldUnit: 'kg', recipeType: 'preparation' })
+    const e = event(
+      100,
+      [{ recipeId: 'sauce', recipeType: 'preparation', portionsPerDiner: 1 }],
+      snap('a', 1.1),
+      snap('b', 1)
+    )
+    expect(computePortions(e, [sauce]).get('s1|0')!.portions).toBe(110)
+  })
+
+  it('a kg preparation, 0.07 per diner, 100 guests -> exactly 7', () => {
+    const sauce = makeRecipe({ _id: 'sauce', nameHebrew: 'רוטב', yieldUnit: 'kg', recipeType: 'preparation' })
+    const e = event(
+      100,
+      [{ recipeId: 'sauce', recipeType: 'preparation', portionsPerDiner: 0.07 }],
+      snap('a', 1),
+      snap('b', 1)
+    )
+    expect(computePortions(e, [sauce]).get('s1|0')!.portions).toBe(7)
+  })
+
   it('a weight or volume preparation keeps decimals, a per-unit preparation is rounded up', () => {
     const kg = makeRecipe({ _id: 'kg', nameHebrew: 'א', yieldUnit: 'kg' })
     const hebrewKg = makeRecipe({ _id: 'hkg', nameHebrew: 'ב', yieldUnit: 'ק"ג' })

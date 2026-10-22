@@ -4,6 +4,7 @@ import { provideRouter, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { BusinessService, type SetupStatus } from '@services/business.service'
+import { KitchenStateService } from '@services/kitchen-state.service'
 import { LoggingService } from '@services/logging.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
@@ -27,12 +28,14 @@ describe('SetupChecklistCardComponent', () => {
   let business_: ReturnType<typeof signal<Business | null>>
   let isOwner_: ReturnType<typeof signal<boolean>>
   let loadSetupStatus: jasmine.Spy
+  let products_: ReturnType<typeof signal<unknown[]>>
   let router: Router
   let navigate: jasmine.Spy
 
   async function setup(status: SetupStatus = EMPTY, owner = true, business: Business | null = BUSINESS): Promise<void> {
     business_ = signal<Business | null>(business)
     isOwner_ = signal(owner)
+    products_ = signal<unknown[]>([])
     loadSetupStatus = jasmine.createSpy('loadSetupStatus').and.resolveTo(status)
     TestBed.configureTestingModule({
       imports: [SetupChecklistCardComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
@@ -40,7 +43,11 @@ describe('SetupChecklistCardComponent', () => {
         { provide: BusinessService, useValue: { business_: business_.asReadonly(), loadSetupStatus } },
         { provide: PermissionService, useValue: { isOwner_: isOwner_.asReadonly() } },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['warn']) },
-        { provide: TranslationService, useValue: { translate: (key: string) => key } },
+        { provide: KitchenStateService, useValue: { products_: products_.asReadonly() } },
+        {
+          provide: TranslationService,
+          useValue: { translate: (key: string) => (key === 'setup_products_progress' ? '{{done}} מתוך {{goal}}' : key) }
+        },
         provideRouter([])
       ]
     })
@@ -74,12 +81,43 @@ describe('SetupChecklistCardComponent', () => {
     expect(navigate).not.toHaveBeenCalled()
   })
 
-  it('10 priced products tick step 1, 9 do not', async () => {
-    await setup({ ...EMPTY, pricedProducts: 10 })
+  const progressText = () => step('products').querySelector('[data-testid="setup-step-progress"]')?.textContent?.trim()
+
+  it('5 priced products tick step 1, 4 do not and the step reads "4 מתוך 5"', async () => {
+    await setup({ ...EMPTY, pricedProducts: 5 })
     expect(isDone('products')).toBeTrue()
+    expect(progressText()).toBeUndefined()
     TestBed.resetTestingModule()
-    await setup({ ...EMPTY, pricedProducts: 9 })
+    await setup({ ...EMPTY, pricedProducts: 4 })
     expect(isDone('products')).toBeFalse()
+    expect(progressText()).toBe('4 מתוך 5')
+  })
+
+  it('one priced product moves the card to "1 מתוך 5" (plan 469 H3-1)', async () => {
+    await setup({ ...EMPTY, pricedProducts: 1 })
+    expect(progressText()).toBe('1 מתוך 5')
+  })
+
+  it('adding a product while the card stays open asks for the status once more', async () => {
+    await setup()
+    expect(loadSetupStatus).toHaveBeenCalledTimes(1)
+    expect(progressText()).toBe('0 מתוך 5')
+    loadSetupStatus.and.resolveTo({ ...EMPTY, pricedProducts: 1 })
+    products_.set([{}])
+    fixture.detectChanges()
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(loadSetupStatus).toHaveBeenCalledTimes(2)
+    expect(progressText()).toBe('1 מתוך 5')
+  })
+
+  it('a hidden card does not reload when products change', async () => {
+    localStorage.setItem(KEY, '1')
+    await setup()
+    products_.set([{}])
+    fixture.detectChanges()
+    await fixture.whenStable()
+    expect(loadSetupStatus).not.toHaveBeenCalled()
   })
 
   it('ticks each step from the status and counts only the four required', async () => {
@@ -92,7 +130,7 @@ describe('SetupChecklistCardComponent', () => {
   })
 
   it('is hidden when the four required steps are done even if staff is 0', async () => {
-    await setup({ pricedProducts: 10, suppliers: 1, recipes: 1, events: 1, staff: 0 })
+    await setup({ pricedProducts: 5, suppliers: 1, recipes: 1, events: 1, staff: 0 })
     expect(card()).toBeNull()
   })
 
@@ -125,22 +163,32 @@ describe('SetupChecklistCardComponent', () => {
     expect(href('supplier')).toBe('/suppliers/add')
   })
 
-  it('owner without a baseline is sent to the baseline screen once, without loading the status', async () => {
+  it('owner without a baseline is NOT sent anywhere and the status still loads once (plan 469, replaces the 431 redirect test)', async () => {
     await setup(EMPTY, true, { ...BUSINESS, baseline: undefined })
-    expect(navigate).toHaveBeenCalledOnceWith(['/settings'], { queryParams: { tab: 'baseline', first: 1 } })
+    expect(navigate).not.toHaveBeenCalled()
+    expect(loadSetupStatus).toHaveBeenCalledTimes(1)
+    expect(card()).not.toBeNull()
     business_.set({ ...BUSINESS, baseline: undefined, name: 'renamed' })
     fixture.detectChanges()
-    expect(navigate).toHaveBeenCalledTimes(1)
-    expect(loadSetupStatus).not.toHaveBeenCalled()
-    expect(card()).toBeNull()
+    expect(navigate).not.toHaveBeenCalled()
+    expect(loadSetupStatus).toHaveBeenCalledTimes(1)
   })
 
-  it('redirects when the business arrives after the card was created', async () => {
+  it('does not navigate when the business arrives after the card was created, then loads the status (replaces the 431 redirect test)', async () => {
     await setup(EMPTY, true, null)
-    expect(navigate).not.toHaveBeenCalled()
+    expect(loadSetupStatus).not.toHaveBeenCalled()
     business_.set({ ...BUSINESS, baseline: undefined })
     fixture.detectChanges()
-    expect(navigate).toHaveBeenCalledOnceWith(['/settings'], { queryParams: { tab: 'baseline', first: 1 } })
+    await fixture.whenStable()
+    expect(navigate).not.toHaveBeenCalled()
+    expect(loadSetupStatus).toHaveBeenCalledTimes(1)
+  })
+
+  it('staff without a baseline: no navigation, no card, no status request', async () => {
+    await setup(EMPTY, false, { ...BUSINESS, baseline: undefined })
+    expect(navigate).not.toHaveBeenCalled()
+    expect(loadSetupStatus).not.toHaveBeenCalled()
+    expect(card()).toBeNull()
   })
 
   it('with a baseline there is no redirect and the status loads once', async () => {
