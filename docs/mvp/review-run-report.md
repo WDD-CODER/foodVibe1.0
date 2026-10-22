@@ -1,19 +1,21 @@
+> Update 2026-10-22: rerun of 451, 461 — both merged into `mvp-review`; all 31 of their browser cards passed, so no new checks for you.
+
 # MVP review run — final report for Dandan
 
 Written 2026-10-22 from the orchestrator's results, every `docs/mvp/runs/<plan>.md` on `origin/mvp-review` and the merge log of `origin/mvp-review`. Nothing reached `main` or `mvp`, and nothing was written to Atlas.
 
 ## 1. Result
 
-- **24 plans merged** into `mvp-review`, **2 parked** (451, 461), **0 stopped** by environment trouble. Plans 471 and 473 were parked before the run started, as agreed.
+- **26 plans merged** into `mvp-review` (451 and 461 merged on the 2026-10-22 rerun), **0 parked**, **0 stopped** by environment trouble. Plans 471 and 473 were parked before the run started, as agreed.
 - Browser agents ran 199 validation cards: 185 passed, 2 failed, 12 were unsure. The two failures (457 card 15, 468 card 4) are small look-and-feel defects in merged plans, not broken features.
-- **What you must do:** walk the 14 cards in section 5 (about 15 minutes), decide the two parked plans (section 3), then do the final-gate steps in section 6 before `mvp-review` goes to `main`.
+- **What you must do:** walk the 14 cards in section 5 (about 15 minutes), then do the final-gate steps in section 6 before `mvp-review` goes to `main`.
 
 ## 2. Plans
 
 | Plan | Title | Status | Fix rounds | What changed for the chef |
 | --- | --- | --- | --- | --- |
 | 450 | Reuse layer: component registry and checks | merged | 2 | Nothing on screen. Agents now get a list of shared pieces to reuse instead of copying code. |
-| 451 | One shared shell for every popup | **parked** | 2 | — (not merged) |
+| 451 | One shared shell for every popup | merged (rerun) | 3 | Every popup closes with Escape (only the top one when two are open), keeps Tab inside, and ignores Escape while an AI request is sending. The two export windows are unchanged. |
 | 452 | One shared search box for seven search dropdowns | merged | 2 | Event type, section, dish, ingredient, preparation and tool searches all behave the same way with keyboard and mouse. |
 | 453 | Shared list search, sort and clear | merged | 2 | Lists (suppliers, inventory, recipes, equipment, venues, menus) search the same way and ignore Hebrew spelling variants. Venue cards sit in the shared list frame. |
 | 454 | One data-service base | merged | 1 | Nothing visible. Saving, loading and the new-unit window run on one shared path. |
@@ -23,7 +25,7 @@ Written 2026-10-22 from the orchestrator's results, every `docs/mvp/runs/<plan>.
 | 458 | Code follows the hard rules again | merged | 2 | Nothing visible. Some leftover English/hard-coded texts now come from the dictionary. |
 | 459 | Dropdown lists click reliably and sit on top | merged | 3 | A dropdown list is no longer hidden behind the next panel, a slow click still picks, and Space types in the dish search. |
 | 460 | Popovers, number boxes, paste boxes, leave guard | merged | 3 | The «חלקי» popover stays on screen, number boxes select their value on tap, paste boxes grow with the text. |
-| 461 | Product form: purchase-unit row and new-unit window | **parked** | 2 | — (not merged) |
+| 461 | Product form: purchase-unit row and new-unit window | merged (rerun) | 1 | The new purchase-unit row shows only the unit at first, the quantity box is wide enough and lines up on a phone, the new-unit window starts with an empty quantity, and a duplicate product name is refused with a clear message. |
 | 462 | One clear status mark on each inventory row | merged | 3 | Each product row shows one mark (red or amber) with one box explaining what is missing. |
 | 463 | Link pasted ingredient names to existing products | merged | 1 | Pasted ingredients link to products you already have, with AI help for misspellings. |
 | 464 | Fix the product import page | merged | 1 | Import recognises misspelled products, shows the old price, handles messy lists and asks before you leave. |
@@ -43,12 +45,13 @@ Written 2026-10-22 from the orchestrator's results, every `docs/mvp/runs/<plan>.
 
 ## 3. Parked plans
 
-**451 — one shared popup shell.** The two export windows (menu export sheet and recipe export preview) were not moved onto the shared shell, so the plan's own "every popup uses the shell" check fails. Everything else in the plan was done.
-- **Recommended:** a short follow-up plan that finishes those two windows on top of today's `mvp-review` (plan 458 already changed the export preview, so the old branch will not merge cleanly).
-- Alternative: accept the smaller plan, reword the check, and merge the branch after a re-check.
+None left. Both plans parked in the first pass merged on the 2026-10-22 rerun:
 
-**461 — product form purchase-unit row and new-unit window.** The work is done; the only blocker is that an automatic code formatter made a growth-frozen file 2 lines longer.
-- **Recommended:** a builder removes those 2 lines, the checker re-runs, and the branch merges. This is a small fix.
+**451 — one shared popup shell (merged, 3 fix rounds).** The two export windows (menu export sheet and recipe export preview) stay as they were; the Planner moved them to parked plan 471. The first browser round found that Escape closed both popups when two were open; the fix was re-run in the browser and all 23 cards passed. Escape on a popup with typed, unsaved text closes it without asking. The full test run has 9 failures, all already on `mvp-review` or passing when run alone.
+- **Next step:** nothing for this plan. Decide later whether to un-park 471 for the two export windows.
+
+**461 — product form purchase-unit row and new-unit window (merged, 1 fix round).** The 2 extra lines in the growth-frozen file were removed (net change 0). In the new-unit window the quantity starts empty only when opened from the product form; elsewhere it still starts at 1. The server still accepts duplicate product names that arrive by other paths (left for a later plan). All 8 browser cards passed.
+- **Next step:** nothing for this plan.
 
 ## 4. Decisions the agents took on their own
 
@@ -204,10 +207,10 @@ HOW TO VALIDATE — 14 checks on 9 pages · reply: done | not yet | failed: <num
 
 ## 6. Before `mvp-review` can go to `main`
 
-1. **No new Atlas migration.** Every one of the 24 merged run files says "no data, schema or migration change" under "Final gate — Atlas".
+1. **No new Atlas migration.** Every one of the 26 merged run files says "no data, schema or migration change" under "Final gate — Atlas".
 2. **The open migrations from the first MVP run still apply**, because `mvp-review` contains `mvp`: 0006 (business tenant), 0007 (coefficients) and 0008 (event stages), in that order, each with backup → dry run → your `go <number>` → write → verify. The steps are in `docs/mvp/final-report.md` section 2(c).
 3. **Optional read-only check (475):** count purchase units whose unit is not a known unit. The `mongosh` query is in `docs/mvp/runs/475.md` under "Final gate — Atlas". It writes nothing.
-4. **Deferred log checks:** plans 462, 464, 466 and 469 could not run their error-log check because local MongoDB was down. After you walk the cards, run `node scripts/log-query.mjs --since=2h --level=error`; expect no new errors from these pages.
+4. **Deferred log checks:** plans 451, 461, 462, 464, 466 and 469 could not run their error-log check because local MongoDB was down. After you walk the cards, run `node scripts/log-query.mjs --since=2h --level=error`; expect no new errors from these pages.
 5. **Known test failures that were already there before this run:** `code-qa-api.test.mjs` (fixture schema), the `v2-types upgradeV1toV2` spec, and flaky `RowActionsMenu`, `ProductForm` and `HeaderComponent` specs. No plan made them worse.
 6. **Small leftovers the agents found (not blocking):** the add-option icon `assets/images/add_ingrediant.png` is missing (404), and the log event `product_name_match.ai_failed` is rejected by the server log (needs a camelCase name, like the 465 fix).
 7. Then merge `mvp-review` into `main`. That merge is yours.
@@ -217,6 +220,7 @@ HOW TO VALIDATE — 14 checks on 9 pages · reply: done | not yet | failed: <num
 - Screenshots for each plan are in `C:\coding projects\Cursor\mvp-review-evidence\<plan>\`, and each run file's "UI validation" section names the file for every card.
 - Cards: 199 run by the browser agents; 185 passed, 2 failed (457 card 15, 468 card 4), 12 unsure. The 14 non-passing cards are section 5.
 - A final sweep left 400 screenshots in `C:\coding projects\Cursor\mvp-review-evidence\final\`, but its verdicts were not in the data given to this report, so no sweep regressions are listed here.
-- Merged list checked with `git log origin/mvp-review --merges`: 24 plan merges (450, 452–460, 462–470, 472, 474–477).
+- Rerun 2026-10-22: 31 more cards (451: 23, 461: 8), all 31 passed; screenshots in the same `451` and `461` folders.
+- Merged list checked with `git log origin/mvp-review --merges`: 26 plan merges (450–470, 472, 474–477).
 
 Model: claude-opus-5-5
