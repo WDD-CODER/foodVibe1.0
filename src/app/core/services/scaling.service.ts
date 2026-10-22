@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core'
 import { KitchenStateService } from './kitchen-state.service'
 import { Recipe } from '../models/recipe.model'
 import { PrepCategory } from '../models/recipe.model'
+import { TranslationService } from '@services/translation.service'
 
 export interface ScaledIngredientRow {
   name: string
@@ -27,6 +28,7 @@ export interface ScaledPrepRow {
 @Injectable({ providedIn: 'root' })
 export class ScalingService {
   private readonly kitchenState_ = inject(KitchenStateService)
+  private readonly translation_ = inject(TranslationService)
 
   /**
    * Scale factor for a recipe: targetQuantity / recipe yield.
@@ -49,7 +51,7 @@ export class ScalingService {
     return ingredients.map((ing) => {
       if (!ing.referenceId) {
         return {
-          name: ing.nameSnapshot || '(ללא שם)',
+          name: ing.nameSnapshot || this.translation_.translate('unnamed_item'),
           amount: (ing.amount ?? 0) * factor,
           unit: ing.unit ?? '',
           availableUnits: [ing.unit ?? ''],

@@ -74,10 +74,10 @@ export class AiMenuModalComponent implements OnInit {
   })
 
   private static readonly SERVING_TYPE_LABELS: Record<string, string> = {
-    plated_course: 'מנות אישיות',
-    buffet: 'בופה',
-    finger_food: 'פינגר פוד',
-    family_style: 'מנות משפחתיות'
+    plated_course: 'ai_serving_plated_course',
+    buffet: 'ai_serving_buffet',
+    finger_food: 'ai_serving_finger_food',
+    family_style: 'ai_serving_family_style'
   }
 
   protected readonly diffEntries_ = computed(() => {
@@ -85,21 +85,49 @@ export class AiMenuModalComponent implements OnInit {
     const current = this.modalService.getEditContext()
     if (!patch || !current) return []
     const entries: { label: string; from: string; to: string }[] = []
-    if ('name' in patch) entries.push({ label: 'שם', from: current.name || '—', to: String(patch['name'] ?? '—') })
+    if ('name' in patch)
+      entries.push({
+        label: this.translation_.translate('name'),
+        from: current.name || '—',
+        to: String(patch['name'] ?? '—')
+      })
     if ('eventType' in patch)
-      entries.push({ label: 'סוג אירוע', from: current.eventType || '—', to: String(patch['eventType'] ?? '—') })
+      entries.push({
+        label: this.translation_.translate('menu_event_type'),
+        from: current.eventType || '—',
+        to: String(patch['eventType'] ?? '—')
+      })
     if ('guestCount' in patch)
-      entries.push({ label: 'אורחים', from: String(current.guestCount), to: String(patch['guestCount'] ?? '—') })
+      entries.push({
+        label: this.translation_.translate('menu_guests'),
+        from: String(current.guestCount),
+        to: String(patch['guestCount'] ?? '—')
+      })
     if ('servingType' in patch) {
-      const fmt = (k: unknown) => AiMenuModalComponent.SERVING_TYPE_LABELS[String(k)] ?? String(k)
-      entries.push({ label: 'סגנון הגשה', from: fmt(current.servingType), to: fmt(patch['servingType']) })
+      const fmt = (k: unknown) => {
+        const key = AiMenuModalComponent.SERVING_TYPE_LABELS[String(k)]
+        return key ? this.translation_.translate(key) : String(k)
+      }
+      entries.push({
+        label: this.translation_.translate('menu_serving_style'),
+        from: fmt(current.servingType),
+        to: fmt(patch['servingType'])
+      })
     }
     if ('eventDate' in patch)
-      entries.push({ label: 'תאריך', from: current.eventDate ?? '—', to: String(patch['eventDate'] ?? '—') })
+      entries.push({
+        label: this.translation_.translate('date_filter'),
+        from: current.eventDate ?? '—',
+        to: String(patch['eventDate'] ?? '—')
+      })
     if ('sections' in patch) {
       const newSections = patch['sections'] as { category: string; items: unknown[] }[] | undefined
       const count = Array.isArray(newSections) ? newSections.length : 0
-      entries.push({ label: 'סעיפים', from: String(current.sections.length), to: String(count) })
+      entries.push({
+        label: this.translation_.translate('ai_patch_sections'),
+        from: String(current.sections.length),
+        to: String(count)
+      })
     }
     return entries
   })

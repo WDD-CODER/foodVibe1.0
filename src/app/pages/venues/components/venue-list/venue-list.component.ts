@@ -34,6 +34,7 @@ import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.compone
 import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { formatVenueHours, VenueHoursSummary } from 'src/app/core/utils/venue-hours.util'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
+import { TranslationService } from '@services/translation.service'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environmentType'
@@ -63,6 +64,7 @@ const KEEP_SELECTION_TARGETS = '.venue-card, app-selection-bar, .select-all-pill
 })
 export class VenueListComponent implements OnInit, OnDestroy {
   private readonly venueData = inject(VenueDataService)
+  private readonly translation_ = inject(TranslationService)
   private readonly router = inject(Router)
   private readonly heroFab = inject(HeroFabService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
@@ -227,7 +229,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open(`למחוק ${ids.length} מיקומים?`, { variant: 'danger' }))) return
+    const message = this.translation_.translate('confirm_bulk_delete_venues').replace('{n}', String(ids.length))
+    if (!(await this.confirmModal.open(message, { variant: 'danger' }))) return
     for (const id of ids) {
       this.deletingId_.set(id)
       try {
@@ -243,8 +246,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   async onDelete(item: VenueProfile): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open('למחוק את המיקום "' + (item.nameHebrew ?? '') + '"?', { variant: 'danger' })))
-      return
+    const message = this.translation_.translate('confirm_delete_venue_named').replace('{name}', item.nameHebrew ?? '')
+    if (!(await this.confirmModal.open(message, { variant: 'danger' }))) return
     this.deletingId_.set(item._id)
     try {
       await this.venueData.deleteVenue(item._id)

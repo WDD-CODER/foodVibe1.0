@@ -984,10 +984,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     const name = (this.recipeForm_.get('nameHebrew')?.value ?? '').toString().trim()
     if (this.recipeForm_.get('nameHebrew')?.errors?.['duplicateName']) {
-      errors.push(isDish ? 'שם מנה זה כבר קיים' : 'שם מתכון זה כבר קיים')
+      errors.push(this.translation_.translate(isDish ? 'duplicate_dish_name' : 'duplicate_recipe_name'))
     }
     if (!name) {
-      errors.push(isDish ? 'שם המנה חסר' : 'שם המתכון חסר')
+      errors.push(this.translation_.translate(isDish ? 'dish_name_missing' : 'recipe_name_missing'))
     }
 
     const raw = this.recipeForm_.getRawValue() as {
@@ -997,25 +997,25 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const ingredients = raw?.ingredients || []
     const hasAnyIngredient = ingredients.some((ing: { referenceId?: string }) => !!ing?.referenceId)
     if (!hasAnyIngredient) {
-      errors.push('חסר מרכיב: יש לבחור לפחות מוצר או מתכון אחד')
+      errors.push(this.translation_.translate('missing_ingredient_error'))
     }
     ingredients.forEach(
       (ing: { referenceId?: string; amount_net?: number | string; nameHebrew?: string }, i: number) => {
         if (!ing?.referenceId) return
         const amt = ing.amount_net
         const numAmt = typeof amt === 'number' ? amt : Number(amt)
-        const label = ing.nameHebrew || `מרכיב ${i + 1}`
+        const label = ing.nameHebrew || this.translation_.translate('ingredient_n').replace('{n}', String(i + 1))
         if (amt == null || amt === '' || isNaN(numAmt) || numAmt < 0) {
-          errors.push(`כמות חסרה עבור "${label}"`)
+          errors.push(this.translation_.translate('qty_missing_for').replace('{name}', label))
         } else if (numAmt === 0) {
-          errors.push(`כמות עבור "${label}" חייבת להיות גדולה מ-0`)
+          errors.push(this.translation_.translate('qty_positive_for').replace('{name}', label))
         }
       }
     )
 
     const portions = this.recipeForm_.get('serving_portions')?.value
     if (isDish && (portions == null || Number(portions) < 1)) {
-      errors.push('מספר מנות חסר או לא תקין (נדרש לפחות 1)')
+      errors.push(this.translation_.translate('servings_invalid_error'))
     }
 
     const workflowRows = raw?.workflow_items || []
@@ -1025,19 +1025,18 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
           if (!row?.preparationName?.trim()) return
           const qty = typeof row.quantity === 'number' ? row.quantity : Number(row.quantity)
           if (row.quantity == null || row.quantity === '' || isNaN(qty) || qty < 0) {
-            errors.push(`כמות חסרה עבור ההכנה "${row.preparationName}"`)
+            errors.push(this.translation_.translate('prep_qty_missing').replace('{name}', row.preparationName))
           }
           if (!row?.unit?.trim()) {
-            errors.push(`יחידה חסרה עבור ההכנה "${row.preparationName}"`)
+            errors.push(this.translation_.translate('prep_unit_missing').replace('{name}', row.preparationName))
           }
         }
       )
     }
 
-    if (errors.length === 0) {
-      return 'יש למלא את כל השדות הנדרשים'
-    }
-    return errors.length === 1 ? errors[0] : `חסרים: ${errors.join('; ')}`
+    if (errors.length === 0) return this.translation_.translate('fill_required_fields')
+    if (errors.length === 1) return errors[0]
+    return this.translation_.translate('missing_fields_list').replace('{list}', errors.join('; '))
   }
 
   /** Admin scope-prompt noun (plan 365): follows the form's current recipe type. */

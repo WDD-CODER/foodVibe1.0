@@ -9,6 +9,7 @@ import { VersionHistoryPanelComponent } from 'src/app/shared/version-history-pan
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import type { VersionEntityType } from '@services/version-history.service'
+import { TranslationService } from '@services/translation.service'
 
 @Component({
   selector: 'app-trash-page',
@@ -29,6 +30,7 @@ export class TrashPage implements OnInit {
   private readonly trash = inject(TrashService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly logging = inject(LoggingService)
+  private readonly translation_ = inject(TranslationService)
 
   readonly isLoading = signal(true)
   readonly loadError = signal<string | null>(null)
@@ -54,7 +56,7 @@ export class TrashPage implements OnInit {
       await this.trash.loadTrash()
     } catch (err) {
       this.logging.error({ event: 'trash.load_error', message: 'Trash load error', context: { err } })
-      this.loadError.set(err instanceof Error ? err.message : 'שגיאה בטעינת האשפה')
+      this.loadError.set(err instanceof Error ? err.message : this.translation_.translate('trash_load_error'))
     } finally {
       this.isLoading.set(false)
     }

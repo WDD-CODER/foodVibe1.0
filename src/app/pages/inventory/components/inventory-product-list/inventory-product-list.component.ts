@@ -587,7 +587,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
     const confirmMessage =
       affected.length > 0
-        ? `חומר הגלם הזה בשימוש ב-${affected.length} מתכונים/מנות. מחיקה תסיר אותו מכולם. להמשיך?`
+        ? this.translationService.translate('confirm_delete_product_in_use').replace('{n}', String(affected.length))
         : 'confirm_delete_product'
     if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
 
@@ -630,8 +630,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
     const confirmMessage =
       inUseCount > 0
-        ? `${inUseCount} מתוך ${ids.length} המוצרים שנבחרו בשימוש ב-${totalAffected} מתכונים/מנות בסך הכל. מחיקה תסיר אותם מכולם. להמשיך?`
-        : `למחוק ${ids.length} מוצרים?`
+        ? this.translationService
+            .translate('confirm_bulk_delete_products_in_use')
+            .replace('{inUse}', String(inUseCount))
+            .replace('{total}', String(ids.length))
+            .replace('{affected}', String(totalAffected))
+        : this.translationService.translate('confirm_bulk_delete_products').replace('{n}', String(ids.length))
     if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
 
     const masterLinkedProduct = ids.map((id) => productsById.get(id)).find((p) => p?._masterId)

@@ -1,5 +1,5 @@
 @if (chips_().length) {
-  <nav class="c-tab-chips" dir="rtl" aria-label="מסכי משנה">
+  <nav class="c-tab-chips" dir="rtl" [attr.aria-label]="'sub_screens' | translatePipe">
     <app-scroll-rail snap="proximity">
       @for (chip of chips_(); track chip.id) {
         <a

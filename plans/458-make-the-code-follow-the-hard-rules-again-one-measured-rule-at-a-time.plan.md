@@ -200,6 +200,16 @@ src/app/shared/translation-key-modal/translation-key-modal.component.html
 src/app/shared/unit-creator/unit-creator.component.html
 src/app/shared/version-history-panel/version-history-panel.component.html
 src/app/shared/version-history-panel/version-history-panel.component.ts
+src/app/core/components/tab-chips/tab-chips.component.html
+src/app/core/services/scaling.service.spec.ts
+src/app/core/services/scaling.service.ts
+src/app/core/services/translation.service.ts
+src/app/core/services/version-history.service.ts
+src/app/pages/equipment/components/equipment-list/equipment-list.component.ts
+src/app/pages/recipe-book/components/recipe-book-list/services/recipe-row-actions.service.ts
+src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts
+src/app/pages/suppliers/components/supplier-list/supplier-list.component.ts
+src/app/pages/venues/components/venue-list/venue-list.component.ts
 ```
 
 `**/*.scss` files that only lack `@layer` (S4) and the files holding boolean names (S8) or raw Hebrew (S9) are listed per sub-task by S1 in `docs/refactor/runs/458.md`; the Worker adds each one to this scope block with an `approved: <path>` reply before touching it (Escalation Protocol), never a glob.

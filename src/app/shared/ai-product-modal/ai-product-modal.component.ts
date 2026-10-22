@@ -103,32 +103,44 @@ export class AiProductModalComponent implements OnInit {
     if (!patch || !current) return []
     const entries: { label: string; from: string; to: string }[] = []
     if ('nameHebrew' in patch)
-      entries.push({ label: 'שם', from: current.nameHebrew ?? '—', to: String(patch.nameHebrew ?? '—') })
+      entries.push({
+        label: this.translation_.translate('name'),
+        from: current.nameHebrew ?? '—',
+        to: String(patch.nameHebrew ?? '—')
+      })
     if ('baseUnit' in patch)
-      entries.push({ label: 'יחידת בסיס', from: current.baseUnit ?? '—', to: String(patch.baseUnit ?? '—') })
+      entries.push({
+        label: this.translation_.translate('base_unit'),
+        from: current.baseUnit ?? '—',
+        to: String(patch.baseUnit ?? '—')
+      })
     if ('yieldFactor' in patch)
-      entries.push({ label: 'יחידת תפוקה', from: String(current.yieldFactor), to: String(patch.yieldFactor ?? '—') })
+      entries.push({
+        label: this.translation_.translate('ai_patch_yield_unit'),
+        from: String(current.yieldFactor),
+        to: String(patch.yieldFactor ?? '—')
+      })
     if ('categories' in patch)
       entries.push({
-        label: 'קטגוריות',
+        label: this.translation_.translate('ai_product_categories_label'),
         from: this.labels_(current.categories),
         to: this.labels_(patch.categories)
       })
     if ('allergens' in patch)
       entries.push({
-        label: 'אלרגנים',
+        label: this.translation_.translate('allergens'),
         from: this.labels_(current.allergens),
         to: this.labels_(patch.allergens)
       })
     if ('minStockLevel' in patch)
       entries.push({
-        label: 'מינימום מלאי',
+        label: this.translation_.translate('ai_patch_min_stock'),
         from: String(current.minStockLevel),
         to: String(patch.minStockLevel ?? '—')
       })
     if ('expiryDaysDefault' in patch)
       entries.push({
-        label: 'ימי תפוגה',
+        label: this.translation_.translate('ai_patch_expiry_days'),
         from: String(current.expiryDaysDefault),
         to: String(patch.expiryDaysDefault ?? '—')
       })

@@ -15,6 +15,13 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
 
+// Dictionary text for the in-use confirms (plan 458 moved them to dictionary keys).
+const IN_USE_TEXT: Record<string, string> = {
+  confirm_delete_product_in_use: 'חומר הגלם הזה בשימוש ב-{n} מתכונים/מנות. מחיקה תסיר אותו מכולם. להמשיך?',
+  confirm_bulk_delete_products_in_use:
+    '{inUse} מתוך {total} המוצרים שנבחרו בשימוש ב-{affected} מתכונים/מנות בסך הכל. מחיקה תסיר אותם מכולם. להמשיך?'
+}
+
 describe('InventoryProductListComponent', () => {
   let component: InventoryProductListComponent
   let fixture: ComponentFixture<InventoryProductListComponent>
@@ -81,7 +88,7 @@ describe('InventoryProductListComponent', () => {
           provide: ActivatedRoute,
           useValue: { queryParams: of({}), params: of({}), snapshot: { queryParams: {}, params: {} } }
         },
-        { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
+        { provide: TranslationService, useValue: { translate: (k: string) => IN_USE_TEXT[k] ?? (k || '') } },
         { provide: UnitRegistryService, useValue: mockUnitRegistry },
         {
           provide: ConfirmModalService,

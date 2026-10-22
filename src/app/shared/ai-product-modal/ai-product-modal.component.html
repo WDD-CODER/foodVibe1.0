@@ -87,7 +87,9 @@
                 </li>
               }
               @if (diffEntries_().length === 0) {
-                <li class="ai-product-patch-item ai-product-patch-item--empty">אין שינויים זוהו</li>
+                <li class="ai-product-patch-item ai-product-patch-item--empty">
+                  {{ 'ai_no_changes_detected' | translatePipe }}
+                </li>
               }
             </ul>
             <div class="ai-product-footer">
@@ -228,7 +230,7 @@
           <div class="ai-product-editor">
             <!-- Name -->
             <div class="editor-field">
-              <label class="editor-label">שם המוצר</label>
+              <label class="editor-label">{{ 'ai_product_name_field' | translatePipe }}</label>
               <input
                 class="c-input"
                 [value]="draft_()!.nameHebrew"
@@ -276,7 +278,7 @@
             <!-- Min stock + expiry -->
             <div class="editor-field-row">
               <div class="editor-field editor-field--half">
-                <label class="editor-label">מינימום מלאי</label>
+                <label class="editor-label">{{ 'ai_patch_min_stock' | translatePipe }}</label>
                 <input
                   class="c-input editor-num-input"
                   type="number"
@@ -286,7 +288,7 @@
                 />
               </div>
               <div class="editor-field editor-field--half">
-                <label class="editor-label">ימי תפוגה</label>
+                <label class="editor-label">{{ 'ai_patch_expiry_days' | translatePipe }}</label>
                 <input
                   class="c-input editor-num-input"
                   type="number"
@@ -320,7 +322,7 @@
                     [value]="newCategory_()"
                     (input)="newCategory_.set($any($event.target).value)"
                     (keydown.enter)="addCategory(); $event.preventDefault()"
-                    placeholder="הוסף קטגוריה"
+                    [placeholder]="'metadata_add_category' | translatePipe"
                     dir="rtl"
                     autocomplete="off"
                     autocorrect="off"
@@ -357,7 +359,7 @@
                     [value]="newAllergen_()"
                     (input)="newAllergen_.set($any($event.target).value)"
                     (keydown.enter)="addAllergen(); $event.preventDefault()"
-                    placeholder="הוסף אלרגן"
+                    [placeholder]="'add_new_allergen' | translatePipe"
                     dir="rtl"
                     autocomplete="off"
                     autocorrect="off"

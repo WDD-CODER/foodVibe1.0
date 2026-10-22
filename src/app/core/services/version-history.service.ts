@@ -8,6 +8,7 @@ import { ActivityChange } from './activity-log.service'
 import { RecipeDataService } from './recipe-data.service'
 import { DishDataService } from './dish-data.service'
 import { ProductDataService } from './product-data.service'
+import { TranslationService } from '@services/translation.service'
 
 export type VersionEntityType = 'recipe' | 'dish' | 'product'
 
@@ -27,6 +28,7 @@ const MAX_VERSIONS_PER_ENTITY = 20
 export class VersionHistoryService {
   private readonly storage = inject(StorageService)
   private readonly logging = inject(LoggingService)
+  private readonly translation_ = inject(TranslationService)
   private readonly recipeData = inject(RecipeDataService)
   private readonly dishData = inject(DishDataService)
   private readonly productData = inject(ProductDataService)
@@ -138,7 +140,7 @@ export class VersionHistoryService {
       throw new Error('addVersionAsNewRecipe only supports recipe and dish')
     }
     const recipe = snapshot as Recipe
-    const copyName = `${recipe.nameHebrew} (עותק)`
+    const copyName = `${recipe.nameHebrew} ${this.translation_.translate('copy_suffix')}`
     const { _id: _, ...rest } = recipe
     const newRecipe: Omit<Recipe, '_id'> = {
       ...rest,

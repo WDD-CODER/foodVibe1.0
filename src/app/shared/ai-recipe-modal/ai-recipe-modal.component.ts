@@ -104,13 +104,22 @@ export class AiRecipeModalComponent implements OnInit {
     const p = this.patch_()
     if (!p) return []
     const items: string[] = []
-    if (p.nameHebrew !== undefined) items.push(`שם: ${p.nameHebrew}`)
-    if (p.ingredients !== undefined) items.push(`מרכיבים: ${p.ingredients.length} פריטים`)
-    if (p.steps !== undefined) items.push(`שלבים: ${p.steps.length} שלבים`)
+    if (p.nameHebrew !== undefined)
+      items.push(this.translation.translate('ai_patch_name_value').replace('{value}', p.nameHebrew))
+    if (p.ingredients !== undefined)
+      items.push(this.translation.translate('ai_patch_ingredients_count').replace('{n}', String(p.ingredients.length)))
+    if (p.steps !== undefined)
+      items.push(this.translation.translate('ai_patch_steps_count').replace('{n}', String(p.steps.length)))
     if (p.yield_amount !== undefined || p.yield_unit !== undefined) {
-      items.push(`תפוקה: ${p.yield_amount ?? ''} ${p.yield_unit ?? ''}`.trim())
+      items.push(
+        this.translation
+          .translate('ai_patch_yield_value')
+          .replace('{value}', `${p.yield_amount ?? ''} ${p.yield_unit ?? ''}`)
+          .trim()
+      )
     }
-    if (p.equipment !== undefined) items.push(`ציוד: ${p.equipment.length} פריטים`)
+    if (p.equipment !== undefined)
+      items.push(this.translation.translate('ai_patch_equipment_count').replace('{n}', String(p.equipment.length)))
     return items
   })
 

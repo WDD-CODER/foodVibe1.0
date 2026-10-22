@@ -108,8 +108,8 @@ export class RecipeLogisticsPickerService {
       })
       const msg =
         err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
-          ? (this.translation_.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
-          : 'שגיאה בהוספת הכלי'
+          ? this.translation_.translate('duplicate_equipment_name')
+          : this.translation_.translate('equipment_add_error')
       this.userMsg_.onSetErrorMsg(msg)
     }
   }

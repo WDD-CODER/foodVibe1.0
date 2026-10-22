@@ -237,7 +237,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     const suppliers = this.supplierData.allSuppliers_().filter((s) => idSet.has(s._id))
     // askDeleteScope only inspects _masterId, so the first master-linked supplier is enough.
     const masterLinked = suppliers.find((s) => s._masterId) ?? null
-    const fallback = `למחוק ${ids.length} ספקים?`
+    const fallback = this.translation.translate('confirm_bulk_delete_suppliers').replace('{n}', String(ids.length))
     if (!(await this.confirmDelete_(count, fallback, this.masterPush.willAskDeleteScope(masterLinked)))) return
     const scope = await this.masterPush.askDeleteScope(masterLinked, { entity: 'supplier', count: ids.length })
     if (scope === 'cancel') return
