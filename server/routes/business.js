@@ -79,8 +79,8 @@ router.put('/baseline', verifyToken, async (req, res) => {
   }
 })
 
-/** The card only needs "reached or not", so no count goes past this. */
-const SETUP_COUNT_CAP = 10
+/** The card shows at most "5 of 5" (priced-products goal, plan 469), so no count goes past this. */
+const SETUP_COUNT_CAP = 5
 
 // GET /api/v1/business/setup-status — what the owner has set up so far, counting only items made in this business.
 router.get('/setup-status', verifyToken, async (req, res) => {
