@@ -14,6 +14,7 @@ import { VersionHistoryService } from './version-history.service'
 import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { getEffectivePrice, getSupplierIds } from '../utils/product-source.util'
+import { isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 
 @Injectable({
   providedIn: 'root'
@@ -96,7 +97,10 @@ export class KitchenStateService {
         return product
       } catch (err) {
         this.logging.error({ event: 'crud.products.update_error', message: 'Product update error', context: { err } })
-        this.userMsgService.onSetErrorMsg(this.translation.translate('product_update_error'))
+        // Plan 485: the server names a name clash; show it instead of the generic error.
+        this.userMsgService.onSetErrorMsg(
+          this.translation.translate(isProductNameTaken(err) ? 'product_duplicate_name_error' : 'product_update_error')
+        )
         throw err
       }
     }
@@ -115,7 +119,9 @@ export class KitchenStateService {
       return saved
     } catch (err) {
       this.logging.error({ event: 'crud.products.add_error', message: 'Product add error', context: { err } })
-      this.userMsgService.onSetErrorMsg(this.translation.translate('product_add_error'))
+      this.userMsgService.onSetErrorMsg(
+        this.translation.translate(isProductNameTaken(err) ? 'product_duplicate_name_error' : 'product_add_error')
+      )
       throw err
     }
   }

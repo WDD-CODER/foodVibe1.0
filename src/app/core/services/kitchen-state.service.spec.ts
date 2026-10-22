@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { TestBed } from '@angular/core/testing'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { provideHttpClient } from '@angular/common/http'
@@ -141,6 +142,16 @@ describe('KitchenStateService', () => {
       TestBed.flushEffects()
       await expectAsync(service.saveProduct({ ...mine, nameHebrew: ' כרובית' })).toBeRejected()
       expect(productDataSpy.updateProduct).not.toHaveBeenCalled()
+      expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('product_duplicate_name_error')
+    })
+
+    it('plan 485: a server name clash shows the duplicate-name message', async () => {
+      mockAllItemsSignal.set([])
+      TestBed.flushEffects()
+      productDataSpy.addProduct.and.returnValue(
+        Promise.reject(new HttpErrorResponse({ status: 409, error: { error: 'PRODUCT_NAME_TAKEN' } }))
+      )
+      await expectAsync(service.saveProduct({ ...createMockProduct(''), nameHebrew: 'מלפפון' })).toBeRejected()
       expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('product_duplicate_name_error')
     })
 

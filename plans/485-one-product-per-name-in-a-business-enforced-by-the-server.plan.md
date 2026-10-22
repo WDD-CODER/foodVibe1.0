@@ -61,6 +61,7 @@ src/app/core/services/kitchen-state.service.spec.ts
 src/app/core/services/product-data.service.ts
 src/app/core/services/version-history.service.ts
 src/app/core/utils/product-name-error.util.ts
+src/app/core/utils/product-name-error.util.spec.ts
 src/app/shared/quick-add-product-modal/**
 src/app/shared/quick-edit-product-panel/**
 src/app/pages/inventory/components/inventory-product-list/**
