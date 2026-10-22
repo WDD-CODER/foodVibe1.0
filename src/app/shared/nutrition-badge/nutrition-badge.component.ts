@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionPer100g } from '@models/product.model'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
+import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
 
 interface MacroSegment {
   key: string
@@ -33,12 +34,6 @@ const MACRO_COLORS: Record<string, string> = {
   fiber: '#10b981'
 }
 
-/** Gap between the badge and the tooltip, and the minimum breathing room kept
- *  against every viewport edge. */
-const GAP_PX = 8
-const VIEWPORT_MARGIN_PX = 8
-/** Smallest height the tooltip is squeezed to before it stops shrinking. */
-const MIN_HEIGHT_PX = 80
 const SCROLL_STEP_PX = 60
 const AUTO_SCROLL_PX = 3
 
@@ -105,24 +100,18 @@ export class NutritionBadgeComponent {
     const viewW = document.documentElement.clientWidth
     const viewH = document.documentElement.clientHeight
 
-    const roomAbove = badge.top - VIEWPORT_MARGIN_PX
-    const roomBelow = viewH - badge.bottom - VIEWPORT_MARGIN_PX
-    const needed = naturalH + GAP_PX
-    // Prefer above; drop below only when above cannot fit and below is roomier.
-    const below = roomAbove < needed && roomBelow > roomAbove
-    this.isBelow_.set(below)
+    const placed = placeInViewport({
+      anchor: badge,
+      panel: { width: tipW, height: naturalH },
+      viewport: { width: viewW, height: viewH },
+      prefer: 'above'
+    })
+    this.isBelow_.set(placed.below)
 
-    // Too tall for the chosen side (e.g. a landscape phone): cap the height; the content then
+    // Too tall for the chosen side (e.g. a landscape phone): the height is capped; the content then
     // scrolls behind the up/down hint arrows instead of a scrollbar.
-    const room = Math.max(MIN_HEIGHT_PX, Math.floor((below ? roomBelow : roomAbove) - GAP_PX))
-    const tipH = Math.min(naturalH, room)
-    tooltip.style.maxHeight = tipH < naturalH ? `${tipH}px` : ''
-
-    const wantedTop = below ? badge.bottom + GAP_PX : badge.top - GAP_PX - tipH
-    const top = Math.max(VIEWPORT_MARGIN_PX, Math.min(viewH - VIEWPORT_MARGIN_PX - tipH, wantedTop))
-
-    const badgeCenterX = badge.left + badge.width / 2
-    const left = Math.max(VIEWPORT_MARGIN_PX, Math.min(viewW - VIEWPORT_MARGIN_PX - tipW, badgeCenterX - tipW / 2))
+    tooltip.style.maxHeight = placed.maxHeight === null ? '' : `${placed.maxHeight}px`
+    const { top, left, anchorCenterX: badgeCenterX } = placed
 
     tooltip.style.top = `${top}px`
     tooltip.style.left = `${left}px`

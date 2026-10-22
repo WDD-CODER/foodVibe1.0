@@ -121,4 +121,68 @@ describe('PartialCostBadgeComponent', () => {
     fixture.detectChanges()
     expect(el.querySelector('.partial-popover')).toBeNull()
   })
+
+  describe('placement (plan 460)', () => {
+    const popover = (el: HTMLElement): HTMLElement => el.querySelector('.partial-popover') as HTMLElement
+    const viewW = (): number => document.documentElement.clientWidth
+    const viewH = (): number => document.documentElement.clientHeight
+
+    /** The Karma frame can be narrower than the phone breakpoint; pick the layout the spec is about. */
+    function forceLayout(mobile: boolean): void {
+      const real = window.matchMedia.bind(window)
+      spyOn(window, 'matchMedia').and.callFake((query: string) =>
+        query.includes('max-width') ? ({ matches: mobile } as MediaQueryList) : real(query)
+      )
+    }
+
+    function pinHost(el: HTMLElement, css: string): void {
+      el.style.cssText = `position: fixed; ${css}`
+    }
+
+    it('renders the popover in the browser top layer', async () => {
+      const el = await setup([unpriced])
+      openPopover(el)
+      expect(popover(el).getAttribute('popover')).toBe('manual')
+      expect(popover(el).matches(':popover-open')).toBeTrue()
+    })
+
+    it('keeps a popover for a chip at the left edge on screen', async () => {
+      forceLayout(false)
+      const el = await setup([unpriced])
+      pinHost(el, 'left: 0; top: 300px')
+      openPopover(el)
+      const left = parseFloat(popover(el).style.left)
+      expect(left).toBeGreaterThanOrEqual(8)
+      expect(left + popover(el).offsetWidth).toBeLessThanOrEqual(viewW())
+    })
+
+    it('keeps a popover for a chip at the right edge on screen', async () => {
+      forceLayout(false)
+      const el = await setup([unpriced])
+      pinHost(el, 'right: 0; top: 300px')
+      openPopover(el)
+      const left = parseFloat(popover(el).style.left)
+      expect(left).toBeGreaterThanOrEqual(8)
+      expect(left + popover(el).offsetWidth).toBeLessThanOrEqual(viewW() - 8 + 0.5)
+    })
+
+    it('keeps the popover inside the viewport vertically for a chip at the top', async () => {
+      forceLayout(false)
+      const el = await setup([unpriced])
+      pinHost(el, 'left: 100px; top: 0')
+      openPopover(el)
+      const top = parseFloat(popover(el).style.top)
+      expect(top).toBeGreaterThanOrEqual(8)
+      expect(top + popover(el).offsetHeight).toBeLessThanOrEqual(viewH())
+    })
+
+    it('leaves the inline position unset on a phone, where the scss pins a full-width bottom sheet', async () => {
+      forceLayout(true)
+      const el = await setup([unpriced])
+      pinHost(el, 'left: 0; top: 300px')
+      openPopover(el)
+      expect(popover(el).style.left).toBe('')
+      expect(popover(el).style.top).toBe('')
+    })
+  })
 })

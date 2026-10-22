@@ -20,6 +20,7 @@
               </div>
               <textarea
                 appScrollIndicators
+                appTextareaAutoGrow
                 class="ai-prompt-textarea"
                 dir="auto"
                 [placeholder]="'ai_recipe_edit_placeholder' | translatePipe"
@@ -167,6 +168,7 @@
                   </div>
                   <textarea
                     appScrollIndicators
+                    appTextareaAutoGrow
                     class="ai-prompt-textarea"
                     [placeholder]="
                       (inputMode_() === 'paste' ? 'paste_recipe_placeholder' : 'ai_recipe_prompt_placeholder')

@@ -21,6 +21,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { normalizeProductName } from '@utils/product-name.util'
 import { incrementGeminiUsage } from '@utils/gemini-usage.util'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
+import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
 
 /** The base units a product may have (same list as the server). */
 const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
@@ -56,7 +57,8 @@ interface ImportSummary {
     TranslatePipe,
     CustomSelectComponent,
     EmptyStateComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    TextareaAutoGrowDirective
   ],
   templateUrl: './product-import.component.html',
   styleUrl: './product-import.component.scss',

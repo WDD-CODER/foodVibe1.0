@@ -3,6 +3,13 @@ import { inject } from '@angular/core'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { AbstractControl } from '@angular/forms'
 
+/**
+ * How a page opts in: add `canDeactivate: [pendingChangesGuard]` to its route and implement this on the
+ * page component. A page with a form exposes it as `readProductForm_` / `recipeForm_` (its `dirty` flag is then
+ * used). A form-less page implements only `hasRealChanges()` (see `useUnsavedChanges`). Add `saveAndWait()` to get
+ * the three-button "save and leave" modal. For reload / tab close, also call `warnBeforeUnload` from
+ * `core/utils/leave-warning.util.ts` with the same `hasRealChanges` check.
+ */
 export interface PendingChangesComponent {
   readProductForm_?: AbstractControl
   recipeForm_?: AbstractControl

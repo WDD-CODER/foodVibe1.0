@@ -194,8 +194,8 @@
       </article>
     }
   </div>
-
-  @if (isInquiryOpen_()) {
-    <app-new-inquiry-dialog (saved)="closeInquiry()" (cancelled)="closeInquiry()" />
-  }
 </div>
+
+@if (isInquiryOpen_()) {
+  <app-new-inquiry-dialog (saved)="closeInquiry()" (cancelled)="closeInquiry()" />
+}
