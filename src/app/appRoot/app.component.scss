@@ -1,16 +1,18 @@
-.app-content {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-// ≤620px: the header hides its top bar and shows only the fixed bottom tab bar
-// (which also holds the avatar). Same breakpoint as the bottom bar, so 621–767px
-// doesn't reserve space for a bar that isn't shown. Top: safe area only.
-@media (max-width: 620px) {
+@layer components.app {
   .app-content {
-    padding-block-start: env(safe-area-inset-top, 0px);
-    padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+  }
+
+  // ≤620px: the header hides its top bar and shows only the fixed bottom tab bar
+  // (which also holds the avatar). Same breakpoint as the bottom bar, so 621–767px
+  // doesn't reserve space for a bar that isn't shown. Top: safe area only.
+  @media (max-width: 620px) {
+    .app-content {
+      padding-block-start: env(safe-area-inset-top, 0px);
+      padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    }
   }
 }
