@@ -11,6 +11,8 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { GeminiService } from '@services/gemini.service'
+import { ProductNameMatcherService } from '@services/product-name-matcher.service'
+import { UnitRegistryService } from '@services/unit-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { LoggingService } from '@services/logging.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
@@ -18,7 +20,8 @@ import { PermissionService } from '@services/permission.service'
 import { ApplyRow, ImportRow, ProductImportService } from '@services/product-import.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { normalizeProductName } from '@utils/product-name.util'
+import { formatMoney } from 'src/app/core/engine/rounding'
+import { warnBeforeUnload } from '@utils/leave-warning.util'
 import { incrementGeminiUsage } from '@utils/gemini-usage.util'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
@@ -39,6 +42,8 @@ interface PreviewRow {
   category: string
   needsReview: boolean
   duplicate: boolean
+  /** The product the AI step linked this row to; dropped as soon as the name is edited. */
+  matchedId: string | null
 }
 
 interface ImportSummary {
@@ -74,6 +79,8 @@ export class ProductImportComponent {
   private readonly translation_ = inject(TranslationService)
   private readonly userMsg_ = inject(UserMsgService)
   private readonly logging_ = inject(LoggingService)
+  private readonly matcher_ = inject(ProductNameMatcherService)
+  private readonly unitRegistry_ = inject(UnitRegistryService)
 
   // 4. SIGNALS & CONSTANTS
   protected readonly maxRows = 200
@@ -84,11 +91,19 @@ export class ProductImportComponent {
   protected readonly isTruncated_ = signal(false)
   protected readonly isParsing_ = signal(false)
   protected readonly isSaving_ = signal(false)
+  /** True while the AI name-matching step runs after a parse. */
+  protected readonly isMatching_ = signal(false)
+  protected readonly hasMatchFailed_ = signal(false)
+  protected readonly formatMoney = formatMoney
   /** Rows the user removed from the preview; they count as skipped in the summary. */
   protected readonly deleted_ = signal(0)
   protected readonly errorKey_ = signal<string | null>(null)
   protected readonly summary_ = signal<ImportSummary | null>(null)
   private nextRowId_ = 1
+
+  constructor() {
+    warnBeforeUnload(() => this.hasRealChanges())
+  }
 
   // 5. COMPUTED
   protected readonly allowed_ = computed(() => this.permission_.can('editMoney', { type: 'products' }))
@@ -100,38 +115,45 @@ export class ProductImportComponent {
 
   protected readonly unitOptions_ = BASE_UNITS.map((unit) => ({ value: unit, label: unit }))
 
-  /** First live product per normalized name; the key the server matches by. */
-  private readonly productsByName_ = computed(() => {
-    const map = new Map<string, Product>()
-    for (const product of this.kitchenState_.products_()) {
-      const key = normalizeProductName(product.nameHebrew)
-      if (!map.has(key)) map.set(key, product)
-    }
-    return map
-  })
-
   protected readonly categoryOptions_ = computed(() => [
     { value: '', label: 'general_group' },
     ...this.metadataRegistry_.allCategories_().map((key) => ({ value: key, label: key }))
   ])
 
+  /** Pack words the server can store: a base unit or a unit in the registry. */
+  private readonly knownPurchaseUnits_ = computed(
+    () => new Set<string>([...BASE_UNITS, ...this.unitRegistry_.allUnitKeys_()])
+  )
+
   /** The preview rows with what the save would do to each: create, update the price, or nothing. */
   protected readonly view_ = computed(() => {
     const supplierKey = this.supplierId_()
+    const products = this.kitchenState_.products_()
+    const knownUnits = this.knownPurchaseUnits_()
     return this.rows_().map((row) => {
-      const match = this.productsByName_().get(normalizeProductName(row.name)) ?? null
+      const match = this.matchOf_(row, products)
       let status: ImportRowStatus = 'new'
+      let oldPrice: number | null = null
       if (match) {
-        const current = match.sources?.find((source) => source.supplierId === supplierKey)?.price ?? null
-        status = row.price === null || current === row.price ? 'same' : 'update'
+        oldPrice = match.sources?.find((source) => source.supplierId === supplierKey)?.price ?? null
+        status = row.price === null || oldPrice === row.price ? 'same' : 'update'
       }
-      return { row, status, match }
+      const unitText = row.purchaseUnit.trim()
+      const hasUnknownPurchaseUnit = !match && unitText !== '' && !knownUnits.has(unitText)
+      return { row, status, match, oldPrice, hasUnknownPurchaseUnit }
     })
   })
 
-  protected readonly canSave_ = computed(() => this.rows_().length > 0 && !this.isSaving_() && !this.isParsing_())
+  protected readonly canSave_ = computed(
+    () => this.rows_().length > 0 && !this.isSaving_() && !this.isParsing_() && !this.isMatching_()
+  )
 
   // 6. METHODS
+  /** True when there is text in the box or a preview that a save has not cleared (plan 464, leave guard). */
+  hasRealChanges(): boolean {
+    return this.text_().trim() !== '' || this.rows_().length > 0
+  }
+
   /** Reads the pasted list with one AI call; the text stays in the box whatever happens. */
   protected async parse(): Promise<void> {
     const text = this.text_().trim()
@@ -139,6 +161,7 @@ export class ProductImportComponent {
     this.isParsing_.set(true)
     this.errorKey_.set(null)
     this.summary_.set(null)
+    this.hasMatchFailed_.set(false)
     try {
       const result = await firstValueFrom(this.gemini_.parsePriceList(text, this.metadataRegistry_.allCategories_()))
       incrementGeminiUsage()
@@ -147,6 +170,7 @@ export class ProductImportComponent {
       this.deleted_.set(0)
       this.isParsed_.set(true)
       if (result.rows.length === 0) this.errorKey_.set('import_nothing_found')
+      else await this.matchWithAi_()
     } catch (err) {
       const status = err instanceof HttpErrorResponse ? err.status : 0
       const code = err instanceof HttpErrorResponse ? String(err.error?.error ?? '') : ''
@@ -169,8 +193,8 @@ export class ProductImportComponent {
     this.isSaving_.set(true)
     try {
       const categoryKeys = await this.resolveCategories_()
-      const rows: ApplyRow[] = this.view_().map(({ row, status }) => ({
-        name: row.name.trim(),
+      const rows: ApplyRow[] = this.view_().map(({ row, status, match }) => ({
+        name: match ? match.nameHebrew : row.name.trim(),
         baseUnit: row.baseUnit,
         price: row.price,
         category: status === 'new' ? (categoryKeys.get(row.category) ?? null) : null,
@@ -207,7 +231,9 @@ export class ProductImportComponent {
   }
 
   protected updateRow(id: number, patch: Partial<PreviewRow>): void {
-    this.rows_.update((rows) => rows.map((row) => (row.id === id ? { ...row, ...patch } : row)))
+    // A new name is matched by name only; the AI link belonged to the old text.
+    const next = 'name' in patch ? { ...patch, matchedId: null } : patch
+    this.rows_.update((rows) => rows.map((row) => (row.id === id ? { ...row, ...next } : row)))
   }
 
   protected setPrice(id: number, value: string | number | null): void {
@@ -253,7 +279,41 @@ export class ProductImportComponent {
       purchaseQty: row.purchaseQty,
       category: row.category ?? '',
       needsReview: row.needsReview,
-      duplicate: row.duplicate
+      duplicate: row.duplicate,
+      matchedId: null
+    }
+  }
+
+  /** The existing product a row stands for: its AI link, else an exact or variant name match (ambiguous counts as none). */
+  private matchOf_(row: PreviewRow, products: readonly Product[]): Product | null {
+    if (row.matchedId) {
+      const linked = products.find((product) => product._id === row.matchedId)
+      if (linked) return linked
+    }
+    const hit = this.matcher_.matchExact(row.name)
+    return hit && hit.kind !== 'ambiguous' ? hit.product : null
+  }
+
+  /** One AI call for the names that exact and variant matching could not settle; failure leaves them as new. */
+  private async matchWithAi_(): Promise<void> {
+    const products = this.kitchenState_.products_()
+    const pending = this.rows_().filter((row) => !this.matchOf_(row, products))
+    if (pending.length === 0) return
+    this.isMatching_.set(true)
+    try {
+      const found = await this.matcher_.matchNames(
+        pending.map((row) => ({ key: String(row.id), name: row.name, unit: row.baseUnit })),
+        { onAiFailure: () => this.hasMatchFailed_.set(true) }
+      )
+      this.rows_.update((rows) =>
+        rows.map((row) => {
+          const hit = found.get(String(row.id))
+          const unchanged = pending.some((p) => p.id === row.id && p.name === row.name)
+          return hit && unchanged ? { ...row, matchedId: hit.product._id } : row
+        })
+      )
+    } finally {
+      this.isMatching_.set(false)
     }
   }
 
