@@ -198,7 +198,7 @@
                   @case ('unpriced') {
                     <span class="c-chip amber unpriced-badge">
                       <lucide-icon name="coins" [size]="11"></lucide-icon>
-                      {{ 'product_unpriced' | translatePipe }}
+                      <span class="unpriced-badge__label">{{ 'product_unpriced' | translatePipe }}</span>
                     </span>
                   }
                   @default {

@@ -231,10 +231,21 @@
   }
 
   .unpriced-badge {
+    flex-shrink: 0;
     margin-inline-end: 0.35rem;
-    max-inline-size: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
+    white-space: nowrap;
+  }
+
+  // Phone width: the name cell is ~120px, too narrow for the chip text — show the coin
+  // icon only (the button's aria-label still names the status) so the chip stays one line.
+  @media (max-width: 768px) {
+    .unpriced-badge {
+      padding-inline: 0.375rem;
+    }
+
+    .unpriced-badge__label {
+      display: none;
+    }
   }
 
   .validation-tooltip {
