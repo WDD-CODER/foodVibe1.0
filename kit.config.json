@@ -134,7 +134,7 @@
     },
     {
       "path": "docs/agent/conventions.md",
-      "reason": "FoodVibe translation rules (TranslationService resolvers, Lucide)"
+      "reason": "FoodVibe translation rules (TranslationService resolvers, Lucide) and naming rules (app- selector prefix, is/has/can/should booleans, input names without _, measured by scripts/rule-sweep-count.mjs; plan 458)"
     },
     {
       "path": "scripts/pre-commit-security-grep.mjs",

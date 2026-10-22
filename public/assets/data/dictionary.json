@@ -1461,7 +1461,6 @@
     "validating_please_wait": "אנא המתן לסיום האימות",
     "sub_screens": "מסכי משנה",
     "unnamed_item": "(ללא שם)",
-    "copy_suffix": "(עותק)",
     "translation_key_in_use": "המפתח \"{key}\" כבר בשימוש עבור \"{value}\".",
     "translation_label_in_use": "השם \"{label}\" כבר בשימוש (מפתח \"{key}\").",
     "confirm_delete_equipment_named": "האם למחוק את פריט הציוד \"{name}\"?",
@@ -1500,6 +1499,19 @@
     "ai_patch_ingredients_count": "מרכיבים: {n} פריטים",
     "ai_patch_steps_count": "שלבים: {n} שלבים",
     "ai_patch_yield_value": "תפוקה: {value}",
-    "ai_patch_equipment_count": "ציוד: {n} פריטים"
+    "ai_patch_equipment_count": "ציוד: {n} פריטים",
+    "ai_shot_warning_few_ingredients": "מתכון עם מעט מרכיבים — ייתכן שהבינה הצליחה לחלץ חלקית בלבד",
+    "ai_shot_warning_high_yield": "כמות מנות גבוהה במיוחד — בדוק שהתפוקה הגיונית",
+    "ai_shot_warning_few_steps": "מספר שלבים נמוך — ייתכן שחסרות הוראות",
+    "ai_shot_warning_dish_unit": "יחידת תפוקה לא סבירה למנה",
+    "ai_shot_warning_implausible_amounts": "כמויות הרכיבים לא סבירות ביחס למספר המנות",
+    "nutrition_calories": "קלוריות",
+    "nutrition_protein": "חלבון",
+    "nutrition_carbs": "פחמימות",
+    "nutrition_sugars": "מהם סוכרים",
+    "nutrition_fat": "שומן",
+    "nutrition_fiber": "סיבים",
+    "nutrition_sodium": "נתרן",
+    "nutrition_per_100g": "100 גר׳"
   }
 }

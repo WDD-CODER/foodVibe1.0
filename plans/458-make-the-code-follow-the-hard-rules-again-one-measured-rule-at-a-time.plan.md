@@ -210,6 +210,15 @@ src/app/pages/recipe-book/components/recipe-book-list/services/recipe-row-action
 src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts
 src/app/pages/suppliers/components/supplier-list/supplier-list.component.ts
 src/app/pages/venues/components/venue-list/venue-list.component.ts
+# added by the builder, fix round 1 (R7 boolean fields, R9 warnings/nutrition labels, conventions.md override reason)
+kit.config.json
+docs/workflow-kit/drift-classification.md
+src/app/core/services/base-entity-data.service.ts
+src/app/core/services/keyboard-inset.service.ts
+src/app/core/services/server-heartbeat.service.ts
+src/app/core/services/gemini-shots.service.ts
+src/app/core/services/gemini-shots.service.spec.ts
+src/app/shared/list-selection/touch-row-selection.ts
 ```
 
 `**/*.scss` files that only lack `@layer` (S4) and the files holding boolean names (S8) or raw Hebrew (S9) are listed per sub-task by S1 in `docs/refactor/runs/458.md`; the Worker adds each one to this scope block with an `approved: <path>` reply before touching it (Escalation Protocol), never a glob.
@@ -249,7 +258,7 @@ Runs first, before S1, because the MVP and plans 450–457 changed many files. F
 
 ### Must Have (P0)
 - [x] Per-rule baseline and after-count recorded in `docs/refactor/runs/458.md`.
-- [x] Rules 1, 2, 4, 5, 6 reach zero; rules 7 and 9 reach zero unlisted violations; rule 8 documented; rule 3 decided (S5).
+- [ ] Rules 1, 2, 4, 5, 6 reach zero; rules 7 and 9 reach zero unlisted violations; rule 8 documented; rule 3 decided (S5). — run 458: open, waiting on the Human. R1, R4, R5, R6, R8 = 0; R7 = 0 + 2 exceptions, R9 = 0 + 95 canonical-data lines; R2 = 10 layered, 58 exceptions pending the Human's decision (Decision 1); R3 = 2 exceptions (Decision 2).
 ### Should Have (P1)
 - [x] `scripts/rule-sweep-count.mjs` prints all counts in one table so later plans can re-run it (skipped if `reuse-lint.mjs` already does).
 
@@ -260,7 +269,7 @@ Runs first, before S1, because the MVP and plans 450–457 changed many files. F
 Checkpoints (build + tests + run-file row, then pause for the Human's `continue`): after S1, S3, S5, S7, S10.
 - [x] S1: Step 0, then record the baseline for all 9 rules in a table (rule · how measured · file list · count); classify each Hebrew hit as `bug` / `canonical data (keep)` / `comment`; add `scripts/rule-sweep-count.mjs` only if `reuse-lint.mjs` lacks a rule — `docs/refactor/runs/458.md`, `scripts/rule-sweep-count.mjs`
 - [x] S2: Move the `.c-*` rule blocks out of the 14 component SCSS files into `src/styles.scss` (append-only, one commented block per source file; if a class already exists there, delete the duplicate and keep the existing one); component keeps its own local classes — the 14 component `.scss` files listed in Problem 1, `src/styles.scss`, `docs/refactor/runs/458.md`
-- [x] S3: Wrap the remaining component SCSS in the project layer (`@layer`, same layer name the compliant files use — read `.claude/skills/cssLayer/SKILL.md` first), in batches of 10 files, building after each batch; compare a before/after screenshot of one page per batch — the SCSS files named by S1 (added via `approved:`), `docs/refactor/runs/458.md` — run 458: 10 layer-safe files wrapped, 58 listed as exceptions (Decision 1)
+- [x] S3: Wrap the remaining component SCSS in the project layer (`@layer`, same layer name the compliant files use — read `.claude/skills/cssLayer/SKILL.md` first), in batches of 10 files, building after each batch; compare a before/after screenshot of one page per batch — the SCSS files named by S1 (added via `approved:`), `docs/refactor/runs/458.md` — run 458: 10 layer-safe files wrapped, 58 listed as exceptions (Decision 1); the before/after screenshot per batch is taken by the UI validator (run file cards 4, 5, 9, 14, 17)
 - [x] S4: Replace `@ViewChild`/`@ViewChildren` with `viewChild()`/`viewChildren()` (reads become `ref()?.nativeElement`; `QueryList` iteration becomes array iteration) — `equipment-form.component.ts`, `product-form.component.ts`, `recipe-ingredients-table.component.ts`, `recipe-workflow.component.ts`, `chip-search-dropdown.component.ts`, `counter.component.ts`, `custom-multi-select.component.ts`, `custom-select.component.ts`, `scaling-chip.component.ts`, `docs/refactor/runs/458.md`
 - [x] S5: Replace `@HostListener` with `host: {}` bindings or `fromEvent` + `takeUntilDestroyed` where the listener is on `document`/`window` (Escape in the four modals/preview/row-actions menu, outside-click in nutrition-badge and `click-out-side.ts`, scroll/resize in `scroll-indicators.directive.ts`, `cook-view.page.ts` lines ~928 and ~1153) — the files in Problem 4, `src/app/core/directives/*.ts`, `docs/refactor/runs/458.md`
 - [x] S6: Convert `*ngIf`/`*ngFor`/`*ngSwitch` in the product form template to `@if/@for/@switch` (every `@for` gets a `track`; keep `else` branches identical), drop now-unused `NgIf/NgFor` imports so the file does not grow — `product-form.component.html`, `product-form.component.ts`, `docs/refactor/runs/458.md`

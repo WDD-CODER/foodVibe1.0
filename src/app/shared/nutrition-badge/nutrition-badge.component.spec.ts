@@ -3,6 +3,8 @@ import { By } from '@angular/platform-browser'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionBadgeComponent } from './nutrition-badge.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { provideHttpClient } from '@angular/common/http'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
 
 describe('NutritionBadgeComponent (tap, hover and scroll hints, plan 348)', () => {
   let fixture: ComponentFixture<NutritionBadgeComponent>
@@ -10,7 +12,8 @@ describe('NutritionBadgeComponent (tap, hover and scroll hints, plan 348)', () =
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NutritionBadgeComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)]
+      imports: [NutritionBadgeComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents()
     fixture = TestBed.createComponent(NutritionBadgeComponent)
     component = fixture.componentInstance

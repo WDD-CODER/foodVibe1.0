@@ -27,17 +27,24 @@ export const EXCEPTIONS = {
   // R3: OnPush left off the two growth-frozen pages (S11).
   R3: ['src/app/pages/cook-view/cook-view.page.ts', 'src/app/pages/recipe-builder/recipe-builder.page.ts'],
   // R7: private writable source of a public is*/has* readonly signal (`isLoaded_ = this.loaded_.asReadonly()`).
-  R7: ['src/app/core/services/taxonomy-store.service.ts loaded_'],
+  // R7 also: venue-list's `embeddedInDashboard` is a public input (declared in `inputs: []`), bound by name from
+  // dashboard.page.html and shared with venue-form's `embeddedInDashboard = input(false)`: an input name is API, not state.
+  R7: [
+    'src/app/core/services/taxonomy-store.service.ts loaded_',
+    'src/app/pages/venues/components/venue-list/venue-list.component.ts embeddedInDashboard',
+  ],
   // R9: canonical data — Hebrew values that are data, not UI text (unit symbols, parser tokens, Gemini/export data).
   R9: [
     'src/app/core/utils/recipe-cost.constants.ts',
     'src/app/core/utils/quantity-step.util.ts',
     'src/app/core/utils/ingredient-line-parser.util.ts',
-    'src/app/core/services/gemini-shots.service.ts',
+    'src/app/core/services/gemini-shots.service.ts', // only the egg-name parser token (/ביצ/); warnings are dictionary keys
     'src/app/core/engine/testing/event-plan.fixture.ts',
     'src/app/core/utils/export.util.ts',
     'src/app/core/services/recipe-export.service.ts',
     'src/app/pages/recipe-builder/services/recipe-form.service.ts',
+    'src/app/core/services/version-history.service.ts', // "(עותק)" is saved into the copied recipe's name (data)
+    // nutrition badge: only the unit symbols compared in code (ג, מג, קק"ל); labels and header are dictionary keys
     'src/app/shared/nutrition-badge/nutrition-badge.component.ts',
     'src/app/shared/nutrition-badge/nutrition-badge.component.html',
   ],
@@ -122,11 +129,20 @@ for (const f of ts) {
   })
 }
 
-// R7 — boolean signals not named is*/has*/can*/should*.
+// R7 — boolean signals and boolean class fields not named is*/has*/can*/should*.
+// Signals: `x = signal(true|false)` anywhere. Fields: a class member (2-space indent inside a `class` body)
+// initialised to `true`/`false` or declared `: boolean`. Interface/type members are data shapes (often
+// persisted or API payloads, e.g. `partial: boolean`) and are not counted.
+const R7_SIGNAL = /^\s*(?:(?:protected|private|public|readonly)\s+)*([a-zA-Z0-9_]+)\s*=\s*signal(?:<boolean>)?\((?:true|false)\)/
+const R7_FIELD = /^  (?:(?:protected|private|public|readonly|static|override)\s+)*([a-zA-Z0-9_]+)\s*(?::\s*boolean\s*(?:=\s*(?:true|false))?|=\s*(?:true|false))\s*;?\s*$/
+const R7_OK = /^_?(is|has|can|should)[A-Z]/
 for (const f of ts) {
+  let inClass = false
   lines(f).forEach((l, i) => {
-    const m = l.match(/^\s*(?:(?:protected|private|public|readonly)\s+)*([a-zA-Z0-9_]+)\s*=\s*signal(?:<boolean>)?\((?:true|false)\)/)
-    if (m && !/^_?(is|has|can|should)[A-Z]/.test(m[1])) hit('R7', f, i + 1, l, EXCEPTIONS.R7.includes(`${f} ${m[1]}`))
+    if (/^(export\s+)?(default\s+)?(abstract\s+)?class\b/.test(l)) inClass = true
+    else if (/^(export\s+)?(declare\s+)?(interface|type|enum|function|const|let)\b/.test(l)) inClass = false
+    const m = l.match(R7_SIGNAL) || (inClass ? l.match(R7_FIELD) : null)
+    if (m && !R7_OK.test(m[1])) hit('R7', f, i + 1, l, EXCEPTIONS.R7.includes(`${f} ${m[1]}`))
   })
 }
 
@@ -164,7 +180,7 @@ const RULES = {
   R4: '@ViewChild/@ViewChildren/@HostListener/@HostBinding',
   R5: '*ngIf/*ngFor/*ngSwitch in templates',
   R6: 'selector without app prefix',
-  R7: 'boolean signal not is/has/can/should',
+  R7: 'boolean signal/field not is/has/can/should',
   R8: 'input()/model() with trailing _',
   R9: 'raw Hebrew in .ts/.html (non-comment lines)',
 }

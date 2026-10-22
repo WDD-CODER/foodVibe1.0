@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, ElementRef, effect, inject, input, 
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionPer100g } from '@models/product.model'
+import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 
 interface MacroSegment {
   key: string
@@ -46,7 +47,7 @@ const AUTO_SCROLL_PX = 3
   host: { '(document:click)': 'onDocumentClick($event)' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe],
   templateUrl: './nutrition-badge.component.html',
   styleUrl: './nutrition-badge.component.scss'
 })
@@ -177,7 +178,7 @@ export class NutritionBadgeComponent {
       n.energyKcal != null
         ? {
             key: 'calories',
-            label: 'קלוריות',
+            label: 'nutrition_calories',
             value: n.energyKcal,
             unit: 'קק"ל',
             iconType: 'lucide',
@@ -189,7 +190,7 @@ export class NutritionBadgeComponent {
       n.proteinG != null
         ? {
             key: 'protein',
-            label: 'חלבון',
+            label: 'nutrition_protein',
             value: n.proteinG,
             unit: 'ג',
             iconType: 'lucide',
@@ -201,7 +202,7 @@ export class NutritionBadgeComponent {
       n.carbsG != null
         ? {
             key: 'carbs',
-            label: 'פחמימות',
+            label: 'nutrition_carbs',
             value: n.carbsG,
             unit: 'ג',
             iconType: 'lucide',
@@ -213,7 +214,7 @@ export class NutritionBadgeComponent {
       n.sugarsG != null
         ? {
             key: 'sugars',
-            label: 'מהם סוכרים',
+            label: 'nutrition_sugars',
             value: n.sugarsG,
             unit: 'ג',
             iconType: 'lucide',
@@ -223,12 +224,20 @@ export class NutritionBadgeComponent {
           }
         : null,
       n.fatG != null
-        ? { key: 'fat', label: 'שומן', value: n.fatG, unit: 'ג', iconType: 'fat-svg', iconColor: '#ef4444', sub: false }
+        ? {
+            key: 'fat',
+            label: 'nutrition_fat',
+            value: n.fatG,
+            unit: 'ג',
+            iconType: 'fat-svg',
+            iconColor: '#ef4444',
+            sub: false
+          }
         : null,
       n.fiberG != null
         ? {
             key: 'fiber',
-            label: 'סיבים',
+            label: 'nutrition_fiber',
             value: n.fiberG,
             unit: 'ג',
             iconType: 'lucide',
@@ -240,7 +249,7 @@ export class NutritionBadgeComponent {
       n.sodiumG != null
         ? {
             key: 'sodium',
-            label: 'נתרן',
+            label: 'nutrition_sodium',
             value: n.sodiumG * 1000,
             unit: 'מג',
             iconType: 'lucide',

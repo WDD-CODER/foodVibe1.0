@@ -71,11 +71,11 @@ export class IngredientSearchComponent {
 
   private lastHandledFocusTrigger: number | null = null
   /** True for one microtask after the component is created — prevents the triggering click from immediately re-closing. */
-  private ignoreFirstClickOutside = true
+  private shouldIgnoreFirstClickOutside = true
 
   constructor() {
     setTimeout(() => {
-      this.ignoreFirstClickOutside = false
+      this.shouldIgnoreFirstClickOutside = false
     }, 0)
     effect(() => {
       const trigger = this.focusTrigger()
@@ -98,7 +98,7 @@ export class IngredientSearchComponent {
   }
 
   protected onClickOutside(): void {
-    if (this.ignoreFirstClickOutside) return
+    if (this.shouldIgnoreFirstClickOutside) return
     this.shouldShowResults_.set(false)
     this.cancelSearch.emit()
   }

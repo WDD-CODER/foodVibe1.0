@@ -91,7 +91,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   protected searchQuery_ = signal('')
   private closeTimeout: ReturnType<typeof setTimeout> | null = null
   /** When true, next trigger focus came from mouse (click); do not auto-open dropdown. */
-  private _focusFromMouse = false
+  private isFocusFromMouse_ = false
 
   /** When host receives programmatic focus (e.g. from FocusByRowDirective), forward to trigger. */
   protected onHostFocus(): void {
@@ -305,13 +305,13 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   protected onTriggerMousedown(): void {
-    this._focusFromMouse = true
+    this.isFocusFromMouse_ = true
   }
 
   /** Open dropdown when trigger receives focus from Tab or programmatic focus; skip when focus came from click. */
   protected onTriggerFocus(): void {
-    if (this._focusFromMouse) {
-      this._focusFromMouse = false
+    if (this.isFocusFromMouse_) {
+      this.isFocusFromMouse_ = false
       return
     }
     if (!this._isDisabled() && !this.isOpen()) {

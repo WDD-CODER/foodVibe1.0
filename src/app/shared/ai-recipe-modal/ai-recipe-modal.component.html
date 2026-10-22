@@ -307,7 +307,7 @@
               @for (w of shotWarnings_(); track w) {
                 <div class="ai-shot-warning-item">
                   <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
-                  <span>{{ w }}</span>
+                  <span>{{ w | translatePipe }}</span>
                 </div>
               }
             </div>

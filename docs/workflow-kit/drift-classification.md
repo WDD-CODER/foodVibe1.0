@@ -72,7 +72,7 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | packs/angular/.claude/skills/auth-and-logging/SKILL.md | intended | `{{project.name}}` | — |
 | packs/angular/.claude/skills/cssLayer/SKILL.md | intended | kit 1.3.0: "The UI is Hebrew RTL" renders from `project.uiDirection: rtl` + `project.uiLocale`; override dropped (byte-identical) | 30ee30f |
 | packs/angular/.lintstagedrc.mjs | intended | BOM + `\|quoted` filter | — |
-| packs/angular/docs/agent/conventions.md | override | FoodVibe's translation rules (Hebrew, TranslationService resolvers, Lucide) vs generic kit text | — |
+| packs/angular/docs/agent/conventions.md | override | FoodVibe's translation rules (Hebrew, TranslationService resolvers, Lucide) and naming rules (`app-` selector prefix, is/has/can/should booleans, input names without `_`, measured by `scripts/rule-sweep-count.mjs`; plan 458) vs generic kit text | — |
 | packs/angular/docs/agent/standards-angular.md | intended | kit 1.3.0: the **Logic** line renders from `docs.domainSummary`; override dropped (byte-identical) | 30ee30f |
 | packs/angular/eslint.config.mjs | intended | BOM only | — |
 | packs/angular/knip.json | intended | `\|dquoted` filter | — |

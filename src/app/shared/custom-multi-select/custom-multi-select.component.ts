@@ -100,7 +100,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   protected isOpen = signal(false)
   private closeTimeout: ReturnType<typeof setTimeout> | null = null
-  private _focusFromMouse = false
+  private isFocusFromMouse_ = false
   protected searchQuery_ = signal('')
   private readonly picker_ = new KeyedPickerSearch()
   private readonly instanceId_ = `cms-${++nextMultiSelectId}`
@@ -296,7 +296,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
       onClose: () => {
         this.close()
         // Focus stays on the field without reopening the list (rule 5f).
-        this._focusFromMouse = true
+        this.isFocusFromMouse_ = true
         this.triggerRef()?.nativeElement?.focus()
       },
       onHighlightMove: () => this.scrollHighlightIntoView_()
@@ -304,12 +304,12 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   protected onTriggerMousedown(): void {
-    this._focusFromMouse = true
+    this.isFocusFromMouse_ = true
   }
 
   protected onTriggerFocus(): void {
-    if (this._focusFromMouse) {
-      this._focusFromMouse = false
+    if (this.isFocusFromMouse_) {
+      this.isFocusFromMouse_ = false
       return
     }
     if (!this._isDisabled() && !this.isOpen()) {

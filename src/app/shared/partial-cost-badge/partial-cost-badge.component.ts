@@ -55,7 +55,7 @@ export class PartialCostBadgeComponent {
   protected readonly drafts_ = signal<Record<string, string>>({})
   protected readonly savingKey_ = signal<string | null>(null)
   /** True once the popover was opened by a click or a focus, so the mouse leaving does not close it. */
-  private pinned_ = false
+  private isPinned_ = false
 
   protected readonly rows_ = computed<MissingRow[]>(() => {
     const productsById = this.kitchenState_.productsById_()
@@ -82,31 +82,31 @@ export class PartialCostBadgeComponent {
   })
 
   protected toggle(): void {
-    if (this.isOpen_() && !this.pinned_) {
-      this.pinned_ = true
+    if (this.isOpen_() && !this.isPinned_) {
+      this.isPinned_ = true
       return
     }
-    this.pinned_ = true
+    this.isPinned_ = true
     this.isOpen_.update((v) => !v)
   }
 
   protected onEnter(): void {
     if (this.isOpen_() || !this.hoverCapable()) return
-    this.pinned_ = false
+    this.isPinned_ = false
     this.isOpen_.set(true)
   }
 
   protected onLeave(): void {
-    if (!this.pinned_) this.isOpen_.set(false)
+    if (!this.isPinned_) this.isOpen_.set(false)
   }
 
   protected close(): void {
     this.isOpen_.set(false)
-    this.pinned_ = false
+    this.isPinned_ = false
   }
 
   protected pin(): void {
-    this.pinned_ = true
+    this.isPinned_ = true
   }
 
   protected perUnitLabel(row: MissingRow): string {
