@@ -219,14 +219,16 @@
             @if (row.product.allergens.length) {
               <div
                 class="allergen-btn-wrapper"
-                [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === row.product._id"
+                [class.allergen-expanded-open]="
+                  isAllergenAllExpanded_() || allergenPopoverProductId_() === row.product._id
+                "
                 (appClickOutside)="closeAllergenView($event)"
               >
                 <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(row.product._id)">
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
                   {{ row.product.allergens.length }}
                 </button>
-                @if (allergenExpandAll_() || allergenPopoverProductId_() === row.product._id) {
+                @if (isAllergenAllExpanded_() || allergenPopoverProductId_() === row.product._id) {
                   <div class="allergen-expanded dense-grid">
                     @for (a of row.product.allergens; track a) {
                       <span class="c-chip c-chip--tag c-chip--square c-chip--amber">{{ a | translatePipe }}</span>
@@ -286,21 +288,21 @@
     <div class="c-filter-section">
       <div class="c-chip-group quick-toggles">
         <label class="c-chip c-chip--toggle">
-          <input type="checkbox" [checked]="lowStockOnly_()" (change)="toggleLowStockOnly()" />
+          <input type="checkbox" [checked]="isLowStockOnly_()" (change)="toggleLowStockOnly()" />
           <span>{{ 'low_stock' | translatePipe }}</span>
         </label>
         <label class="c-chip c-chip--toggle validation-filter-option validation-filter-option--invalid">
-          <input type="checkbox" [checked]="showInvalidOnly_()" (change)="toggleShowInvalidOnly()" />
+          <input type="checkbox" [checked]="shouldShowInvalidOnly_()" (change)="toggleShowInvalidOnly()" />
           <lucide-icon name="alert-circle" [size]="13"></lucide-icon>
           <span>{{ 'filter_invalid' | translatePipe }}</span>
         </label>
         <label class="c-chip c-chip--toggle validation-filter-option validation-filter-option--incomplete">
-          <input type="checkbox" [checked]="showIncompleteOnly_()" (change)="toggleShowIncompleteOnly()" />
+          <input type="checkbox" [checked]="shouldShowIncompleteOnly_()" (change)="toggleShowIncompleteOnly()" />
           <lucide-icon name="alert-triangle" [size]="13"></lucide-icon>
           <span>{{ 'filter_incomplete' | translatePipe }}</span>
         </label>
         <label class="c-chip c-chip--toggle validation-filter-option validation-filter-option--incomplete">
-          <input type="checkbox" [checked]="showUnpricedOnly_()" (change)="toggleShowUnpricedOnly()" />
+          <input type="checkbox" [checked]="shouldShowUnpricedOnly_()" (change)="toggleShowUnpricedOnly()" />
           <lucide-icon name="coins" [size]="13"></lucide-icon>
           <span>{{ 'filter_unpriced' | translatePipe }}</span>
         </label>

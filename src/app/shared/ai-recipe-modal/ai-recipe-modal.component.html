@@ -275,7 +275,7 @@
                 type="button"
                 class="c-btn-primary"
                 [disabled]="
-                  loading_() ||
+                  isLoading_() ||
                   ((inputMode_() === 'text' || inputMode_() === 'paste') && !prompt_().trim()) ||
                   (inputMode_() === 'image' && !imageFile_()) ||
                   (inputMode_() === 'url' && !urlInput_().trim())
@@ -290,7 +290,7 @@
                         : onGenerate()
                 "
               >
-                @if (loading_()) {
+                @if (isLoading_()) {
                   <app-loader size="small" [inline]="true" />
                 } @else {
                   <lucide-icon name="sparkles" [size]="16"></lucide-icon>
@@ -301,7 +301,7 @@
           </div>
         } @else {
           <!-- Create preview — interactive editor or warning confirmation -->
-          @if (awaitingWarningConfirm_()) {
+          @if (isAwaitingWarningConfirm_()) {
             <div class="ai-shot-warnings">
               <p class="ai-patch-preview-label">{{ 'ai_recipe_quality_warnings' | translatePipe }}</p>
               @for (w of shotWarnings_(); track w) {

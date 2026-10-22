@@ -40,9 +40,9 @@
                   type="button"
                   class="c-icon-btn"
                   (click)="onAiFill()"
-                  [disabled]="!name().trim() || aiLoading_()"
+                  [disabled]="!name().trim() || isAiLoading_()"
                 >
-                  @if (aiLoading_()) {
+                  @if (isAiLoading_()) {
                     <app-loader size="small" [inline]="true" />
                   } @else {
                     <lucide-icon name="sparkles" [size]="16"></lucide-icon>
@@ -52,7 +52,7 @@
               @if (nameError_()) {
                 <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
               }
-              @if (aiError_()) {
+              @if (hasAiError_()) {
                 <span class="field-error-msg">{{ 'ai_product_error' | translatePipe }}</span>
               }
             </div>
@@ -112,14 +112,14 @@
         </section>
 
         <button type="button" class="quick-add-product-modal__toggle" (click)="toggleExpanded()">
-          @if (expanded_()) {
+          @if (isExpanded_()) {
             {{ 'hide_details' | translatePipe }}
           } @else {
             {{ 'show_more_details' | translatePipe }}
           }
         </button>
 
-        @if (expanded_()) {
+        @if (isExpanded_()) {
           <section
             class="quick-add-product-modal__section quick-add-product-modal__section--optional"
             aria-label="Optional details"

@@ -55,7 +55,7 @@ export class MenuDishRowComponent {
   // ── State ─────────────────────────────────────────────────────────────────
   /** Text being typed in the coefficient box (null = show the stored value). */
   protected readonly coefficientDraft_ = signal<string | null>(null)
-  protected readonly coefficientInvalid_ = signal(false)
+  protected readonly isCoefficientInvalid_ = signal(false)
   protected readonly coefficientText_ = computed(
     () => this.coefficientDraft_() ?? formatCoefficient(this.portionInfo()?.coefficient ?? 1)
   )
@@ -148,28 +148,28 @@ export class MenuDishRowComponent {
     this.coefficientDraft_.set(text)
     const trimmed = text.trim()
     if (!trimmed) {
-      this.coefficientInvalid_.set(false)
+      this.isCoefficientInvalid_.set(false)
       return
     }
     const value = Number(trimmed.replace(',', '.'))
     if (!isValidCoefficient(value)) {
-      this.coefficientInvalid_.set(true)
+      this.isCoefficientInvalid_.set(true)
       return
     }
-    this.coefficientInvalid_.set(false)
+    this.isCoefficientInvalid_.set(false)
     this.itemGroup().patchValue({ coefficient_override: value })
   }
 
   /** Leaving the box shows the stored value again. */
   onCoefficientBlur(): void {
     this.coefficientDraft_.set(null)
-    this.coefficientInvalid_.set(false)
+    this.isCoefficientInvalid_.set(false)
   }
 
   resetCoefficient(): void {
     this.itemGroup().patchValue({ coefficient_override: null })
     this.coefficientDraft_.set(null)
-    this.coefficientInvalid_.set(false)
+    this.isCoefficientInvalid_.set(false)
   }
 
   private prepYieldUnit(): string {

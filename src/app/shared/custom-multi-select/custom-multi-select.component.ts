@@ -93,12 +93,12 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   private _value = signal<string[]>([])
   private _onChange: (value: string[]) => void = () => {}
   private _onTouched: () => void = () => {}
-  private _disabled = signal(false)
+  private _isDisabled = signal(false)
 
   protected readonly triggerRef = viewChild<ElementRef<HTMLButtonElement>>('triggerRef')
   protected readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInputRef')
 
-  protected open = signal(false)
+  protected isOpen = signal(false)
   private closeTimeout: ReturnType<typeof setTimeout> | null = null
   private _focusFromMouse = false
   protected searchQuery_ = signal('')
@@ -164,7 +164,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this._disabled.set(isDisabled)
+    this._isDisabled.set(isDisabled)
   }
 
   protected get value(): string[] {
@@ -172,7 +172,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   protected get disabled(): boolean {
-    return this._disabled()
+    return this._isDisabled()
   }
 
   // CREATE
@@ -220,10 +220,10 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   // UI HANDLERS
   protected toggle(): void {
-    if (this._disabled()) return
+    if (this._isDisabled()) return
     this.clearCloseTimeout()
-    const next = !this.open()
-    this.open.set(next)
+    const next = !this.isOpen()
+    this.isOpen.set(next)
     if (next) {
       this.setHighlight_(0)
       if (this.searchable()) this.focusSearchInput_()
@@ -232,21 +232,21 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   protected close(): void {
     this.clearCloseTimeout()
-    this.open.set(false)
+    this.isOpen.set(false)
     this.searchQuery_.set('')
     this._onTouched()
   }
 
   protected openDropdown(): void {
-    if (this._disabled()) return
+    if (this._isDisabled()) return
     this.clearCloseTimeout()
-    this.open.set(true)
+    this.isOpen.set(true)
     this.setHighlight_(0)
     if (this.searchable()) this.focusSearchInput_()
   }
 
   protected onTriggerBlur(): void {
-    if (!this.open()) return
+    if (!this.isOpen()) return
     this.closeTimeout = setTimeout(() => {
       this.closeTimeout = null
       this.close()
@@ -312,7 +312,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
       this._focusFromMouse = false
       return
     }
-    if (!this._disabled() && !this.open()) {
+    if (!this._isDisabled() && !this.isOpen()) {
       this.openDropdown()
     }
   }
@@ -323,7 +323,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   /** Trigger keys (no search box): same keyboard rules; Space toggles like Enter. */
   protected onKeydown(e: KeyboardEvent): void {
-    if (!this.open()) {
+    if (!this.isOpen()) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
         this.toggle()

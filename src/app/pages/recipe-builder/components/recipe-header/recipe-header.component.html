@@ -220,7 +220,7 @@
             [title]="'items_not_convertible' | translatePipe"
           ></lucide-icon>
         </span>
-        @if (metricsNoticeOpen_()) {
+        @if (isMetricsNoticeOpen_()) {
           <div
             class="metrics-notice-floating"
             (click)="$event.stopPropagation()"

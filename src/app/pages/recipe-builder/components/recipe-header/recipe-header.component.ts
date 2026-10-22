@@ -237,7 +237,7 @@ export class RecipeHeaderComponent {
 
   // SIGNALS & CONSTANTS
   readonly placeholderPath = `data:image/svg+xml,${encodeURIComponent(IMAGE_PLACEHOLDER_SVG)}`
-  readonly uploadingImage_ = signal(false)
+  readonly isUploadingImage_ = signal(false)
 
   // LABELS
   protected labelMultiSelectOptions_ = computed(() => {
@@ -382,19 +382,19 @@ export class RecipeHeaderComponent {
 
   // METRICS
   metricsDisplayMode_ = signal<'weight' | 'volume'>('weight')
-  metricsNoticeOpen_ = signal(false)
+  isMetricsNoticeOpen_ = signal(false)
 
   toggleMetricsDisplayMode(): void {
     this.metricsDisplayMode_.update((m) => (m === 'weight' ? 'volume' : 'weight'))
-    this.metricsNoticeOpen_.set(false)
+    this.isMetricsNoticeOpen_.set(false)
   }
 
   toggleMetricsNotice(): void {
-    this.metricsNoticeOpen_.update((v) => !v)
+    this.isMetricsNoticeOpen_.update((v) => !v)
   }
 
   closeMetricsNotice(): void {
-    this.metricsNoticeOpen_.set(false)
+    this.isMetricsNoticeOpen_.set(false)
   }
 
   private metricsNoticeCloseTimeout_: ReturnType<typeof setTimeout> | null = null
@@ -405,7 +405,7 @@ export class RecipeHeaderComponent {
       this.metricsNoticeCloseTimeout_ = null
     }
     if (this.unconvertibleNamesFiltered_().length > 0) {
-      this.metricsNoticeOpen_.set(true)
+      this.isMetricsNoticeOpen_.set(true)
     }
   }
 
@@ -415,7 +415,7 @@ export class RecipeHeaderComponent {
     }
     this.metricsNoticeCloseTimeout_ = setTimeout(() => {
       this.metricsNoticeCloseTimeout_ = null
-      this.metricsNoticeOpen_.set(false)
+      this.isMetricsNoticeOpen_.set(false)
     }, 150)
   }
 
@@ -459,17 +459,17 @@ export class RecipeHeaderComponent {
     if (this.readonlyMode()) return
     const file = (event.target as HTMLInputElement).files?.[0]
     if (!file) return
-    this.uploadingImage_.set(true)
+    this.isUploadingImage_.set(true)
     this.cloudinary
       .upload(file)
       .pipe(take(1))
       .subscribe({
         next: (url) => {
           this.imageChange.emit(url)
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
         },
         error: () => {
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
           this.userMsg.onSetErrorMsg(this.translationService.translate('image_upload_failed'))
         }
       })

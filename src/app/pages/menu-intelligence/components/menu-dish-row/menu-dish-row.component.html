@@ -111,7 +111,7 @@
           class="dish-field-input-inline dish-coefficient-input"
           [id]="'dish-coef-' + sectionIndex() + '-' + itemIndex()"
           [value]="coefficientText_()"
-          [attr.aria-invalid]="coefficientInvalid_() ? 'true' : null"
+          [attr.aria-invalid]="isCoefficientInvalid_() ? 'true' : null"
           appSelectOnFocus
           (input)="onCoefficientInput($any($event.target).value)"
           (blur)="onCoefficientBlur()"
@@ -133,7 +133,7 @@
         <span class="dish-field-label">{{ 'event_portions' | translatePipe }}:</span>
         <span class="dish-field-value dish-portions-value">{{ getDerivedPortions() }}</span>
       </div>
-      @if (coefficientInvalid_()) {
+      @if (isCoefficientInvalid_()) {
         <span class="c-field-error dish-coefficient-error" role="alert">{{
           'coefficient_invalid' | translatePipe
         }}</span>

@@ -67,7 +67,7 @@ export class AiProductModalComponent implements OnInit {
   protected readonly patch_ = signal<AiProductPatch | null>(null)
 
   // Shared
-  protected readonly loading_ = signal(false)
+  protected readonly isLoading_ = signal(false)
   protected readonly status_ = signal<GenerationStatus>('idle')
   protected readonly errorKey_ = signal('ai_product_error')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
@@ -199,7 +199,7 @@ export class AiProductModalComponent implements OnInit {
     if (!this.canGenerate_()) return
     const file = this.imageFile_()
     const text = this.prompt_().trim()
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     this.errorKey_.set('ai_product_error')
     try {
@@ -213,7 +213,7 @@ export class AiProductModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage_()
     }
   }
@@ -236,7 +236,7 @@ export class AiProductModalComponent implements OnInit {
   async onEdit(): Promise<void> {
     const currentProduct = this.modalService.getEditContext()
     if (!currentProduct) return
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     this.errorKey_.set('ai_product_error')
     try {
@@ -247,7 +247,7 @@ export class AiProductModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage_()
     }
   }
@@ -308,7 +308,7 @@ export class AiProductModalComponent implements OnInit {
     this.newAllergen_.set('')
     this.instruction.set('')
     this.patch_.set(null)
-    this.loading_.set(false)
+    this.isLoading_.set(false)
     this.status_.set('idle')
     this.errorKey_.set('ai_product_error')
   }

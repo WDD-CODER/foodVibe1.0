@@ -40,15 +40,15 @@ export class PricingMeterComponent {
   readonly eventId = input<string | null>(null)
 
   // 4. SIGNALS
-  private readonly targetsOpened_ = signal(false)
-  readonly expanded_ = signal(false)
+  private readonly isTargetsOpened_ = signal(false)
+  readonly isExpanded_ = signal(false)
 
   // 5. COMPUTED
   readonly canEditMoney_ = computed(() =>
     this.permission_.can('editMoney', { type: 'menuEvents', doc: this.eventId() ? { _id: this.eventId() } : undefined })
   )
   /** The target inputs show when the chef opened them or the event already has its own target. */
-  readonly targetsOpen_ = computed(() => this.targetsOpened_() || !!this.event().targetsOverride)
+  readonly targetsOpen_ = computed(() => this.isTargetsOpened_() || !!this.event().targetsOverride)
   readonly result_ = computed(() =>
     computeEventPricing(
       this.plan(),
@@ -86,10 +86,10 @@ export class PricingMeterComponent {
 
   // 6. UI HANDLERS
   toggleTargets(): void {
-    this.targetsOpened_.update((open) => !open)
+    this.isTargetsOpened_.update((open) => !open)
   }
 
   toggleExpanded(): void {
-    this.expanded_.update((open) => !open)
+    this.isExpanded_.update((open) => !open)
   }
 }

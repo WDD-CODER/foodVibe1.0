@@ -213,7 +213,7 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedSupplier_()"
+          [class.collapsible-field__content--hidden]="!isExpandedSupplier_()"
           (appClickOutside)="onSupplierBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
@@ -236,7 +236,7 @@
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedSupplier_()"
+          [class.collapsible-field__header--hidden]="isExpandedSupplier_()"
           (click)="toggleSupplier()"
           (keydown.enter)="toggleSupplier()"
           (keydown.space)="toggleSupplier(); $event.preventDefault()"
@@ -251,7 +251,7 @@
       <div class="product-field allergen-container collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedAllergens_()"
+          [class.collapsible-field__content--hidden]="!isExpandedAllergens_()"
           (appClickOutside)="onAllergensBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
@@ -274,7 +274,7 @@
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedAllergens_()"
+          [class.collapsible-field__header--hidden]="isExpandedAllergens_()"
           (click)="toggleAllergens()"
           (keydown.enter)="toggleAllergens()"
           (keydown.space)="toggleAllergens(); $event.preventDefault()"
@@ -289,7 +289,7 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedWasteYield_()"
+          [class.collapsible-field__content--hidden]="!isExpandedWasteYield_()"
           (appClickOutside)="onWasteYieldBlur($event)"
         >
           <div class="collapsible-field__label-with-icon">
@@ -341,7 +341,7 @@
 
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedWasteYield_()"
+          [class.collapsible-field__header--hidden]="isExpandedWasteYield_()"
           (click)="toggleWasteYield()"
           (keydown.enter)="toggleWasteYield()"
           role="button"
@@ -354,7 +354,7 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedMinStock_()"
+          [class.collapsible-field__content--hidden]="!isExpandedMinStock_()"
           (appClickOutside)="onMinStockBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
@@ -365,7 +365,7 @@
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedMinStock_()"
+          [class.collapsible-field__header--hidden]="isExpandedMinStock_()"
           (click)="toggleMinStock()"
           (keydown.enter)="toggleMinStock()"
           (keydown.space)="toggleMinStock(); $event.preventDefault()"
@@ -380,7 +380,7 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedExpiryDays_()"
+          [class.collapsible-field__content--hidden]="!isExpandedExpiryDays_()"
           (appClickOutside)="onExpiryDaysBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
@@ -391,7 +391,7 @@
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedExpiryDays_()"
+          [class.collapsible-field__header--hidden]="isExpandedExpiryDays_()"
           (click)="toggleExpiryDays()"
           (keydown.enter)="toggleExpiryDays()"
           (keydown.space)="toggleExpiryDays(); $event.preventDefault()"

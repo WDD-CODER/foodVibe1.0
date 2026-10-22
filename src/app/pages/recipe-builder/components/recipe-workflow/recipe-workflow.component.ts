@@ -71,7 +71,7 @@ export class RecipeWorkflowComponent {
   removeItem = output<number>()
   focusRowDone = output<void>()
 
-  showAddCategoryPicker_ = signal(false)
+  shouldShowAddCategoryPicker_ = signal(false)
   /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
   protected readonly pendingAddName_ = signal('')
 
@@ -114,11 +114,11 @@ export class RecipeWorkflowComponent {
   }
 
   toggleAddCategoryPicker() {
-    this.showAddCategoryPicker_.update((v) => !v)
+    this.shouldShowAddCategoryPicker_.update((v) => !v)
   }
 
   onAddWithCategory(category: string) {
-    this.showAddCategoryPicker_.set(false)
+    this.shouldShowAddCategoryPicker_.set(false)
     this.addItem.emit(category)
   }
 

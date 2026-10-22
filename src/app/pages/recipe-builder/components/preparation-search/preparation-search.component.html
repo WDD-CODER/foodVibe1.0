@@ -1,4 +1,4 @@
-<div class="search-container" dir="rtl" (appClickOutside)="showResults_.set(false)">
+<div class="search-container" dir="rtl" (appClickOutside)="shouldShowResults_.set(false)">
   <!-- Multi-line field so a long preparation name wraps and grows; Enter saves the row and opens a new one. -->
   <app-search-combobox
     icon="search"
@@ -7,7 +7,7 @@
     [addOnlyTyped]="true"
     [multiline]="true"
     [(query)]="searchQuery_"
-    [(open)]="showResults_"
+    [(open)]="shouldShowResults_"
     [options]="preparations_()"
     [labelOf]="preparationLabel_"
     [keyOf]="preparationKey_"

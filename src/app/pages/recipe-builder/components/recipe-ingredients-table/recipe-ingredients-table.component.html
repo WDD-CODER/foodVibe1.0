@@ -201,15 +201,15 @@
   </div>
 
   @if (!ingredientsFormArray().disabled) {
-    <button type="button" class="paste-ingredients-btn c-btn-ghost--sm" (click)="pasteOpen_.set(true)">
+    <button type="button" class="paste-ingredients-btn c-btn-ghost--sm" (click)="isPasteOpen_.set(true)">
       <lucide-icon name="clipboard-paste" [size]="16"></lucide-icon>
       {{ 'paste_ingredients' | translatePipe }}
     </button>
   }
 
   <app-paste-ingredients-dialog
-    [open]="pasteOpen_()"
+    [open]="isPasteOpen_()"
     (submitted)="onPasteIngredients($event)"
-    (closed)="pasteOpen_.set(false)"
+    (closed)="isPasteOpen_.set(false)"
   />
 </div>

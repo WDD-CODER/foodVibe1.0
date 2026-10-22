@@ -59,7 +59,7 @@ export class QuickEditProductPanelComponent {
   protected selectedSupplierIds_ = signal<string[]>([])
   protected error_ = signal<string | null>(null)
   protected isSubmitting_ = signal(false)
-  protected showUnsavedConfirm_ = signal(false)
+  protected shouldShowUnsavedConfirm_ = signal(false)
   protected nameError_ = signal('')
   protected unitError_ = signal('')
 
@@ -195,22 +195,22 @@ export class QuickEditProductPanelComponent {
 
   protected onCancel(): void {
     if (this.isDirty_()) {
-      this.showUnsavedConfirm_.set(true)
+      this.shouldShowUnsavedConfirm_.set(true)
     } else {
       this.cancelled.emit()
     }
   }
 
   protected onDiscardAndClose(): void {
-    this.showUnsavedConfirm_.set(false)
+    this.shouldShowUnsavedConfirm_.set(false)
     this.cancelled.emit()
   }
 
   /** Called by the parent before closing (e.g. clickOutside on the accordion). */
   requestClose(): void {
-    if (this.showUnsavedConfirm_()) return
+    if (this.shouldShowUnsavedConfirm_()) return
     if (this.isDirty_()) {
-      this.showUnsavedConfirm_.set(true)
+      this.shouldShowUnsavedConfirm_.set(true)
     } else {
       this.cancelled.emit()
     }

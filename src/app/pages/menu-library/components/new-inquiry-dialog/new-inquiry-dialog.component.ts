@@ -61,8 +61,8 @@ export class NewInquiryDialogComponent {
   protected readonly guests_ = signal('')
   protected readonly eventType_ = signal('')
   protected readonly note_ = signal('')
-  protected readonly saving_ = signal(false)
-  protected readonly touched_ = signal(false)
+  protected readonly isSaving_ = signal(false)
+  protected readonly isTouched_ = signal(false)
 
   // 5. COMPUTED
   protected readonly eventTypeOptions_ = computed(() =>
@@ -87,9 +87,9 @@ export class NewInquiryDialogComponent {
 
   // 6. METHODS
   protected async onSave(): Promise<void> {
-    this.touched_.set(true)
-    if (!this.valid_() || this.saving_()) return
-    this.saving_.set(true)
+    this.isTouched_.set(true)
+    if (!this.valid_() || this.isSaving_()) return
+    this.isSaving_.set(true)
     try {
       const created = await this.eventData.addMenuEvent(this.buildBody())
       const note = this.note_().trim()
@@ -102,7 +102,7 @@ export class NewInquiryDialogComponent {
       if ((err as { status?: number }).status !== 403)
         this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
     } finally {
-      this.saving_.set(false)
+      this.isSaving_.set(false)
     }
   }
 

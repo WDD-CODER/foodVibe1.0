@@ -45,24 +45,24 @@
     }
 
     <div class="stage-links">
-      <button type="button" class="stage-link" [attr.aria-expanded]="detailsOpen_()" (click)="toggleDetails()">
+      <button type="button" class="stage-link" [attr.aria-expanded]="isDetailsOpen_()" (click)="toggleDetails()">
         <lucide-icon
           name="chevron-left"
           [size]="16"
           class="stage-link-icon"
-          [class.is-open]="detailsOpen_()"
+          [class.is-open]="isDetailsOpen_()"
         ></lucide-icon>
         <span>{{ 'client_details' | translatePipe }}</span>
         @if (detailsSummary_()) {
           <span class="stage-link-summary">{{ detailsSummary_() }}</span>
         }
       </button>
-      <button type="button" class="stage-link" [attr.aria-expanded]="historyOpen_()" (click)="toggleHistory()">
+      <button type="button" class="stage-link" [attr.aria-expanded]="isHistoryOpen_()" (click)="toggleHistory()">
         <lucide-icon
           name="chevron-left"
           [size]="16"
           class="stage-link-icon"
-          [class.is-open]="historyOpen_()"
+          [class.is-open]="isHistoryOpen_()"
         ></lucide-icon>
         <span>{{ 'stage_history' | translatePipe }}</span>
       </button>
@@ -74,7 +74,7 @@
       }
     </div>
 
-    @if (detailsOpen_()) {
+    @if (isDetailsOpen_()) {
       <div class="client-details">
         <div class="c-input-stack">
           <label for="stage-client-name">{{ 'client_name' | translatePipe }}</label>
@@ -96,12 +96,12 @@
             dir="ltr"
             maxlength="20"
             autocomplete="off"
-            [class.c-input--invalid]="phoneInvalid_()"
+            [class.c-input--invalid]="isPhoneInvalid_()"
             [value]="event.clientPhone ?? ''"
             [disabled]="!canEdit_()"
             (change)="onClientPhoneChange($any($event.target).value)"
           />
-          @if (phoneInvalid_()) {
+          @if (isPhoneInvalid_()) {
             <span class="c-field-error">{{ 'client_phone_invalid' | translatePipe }}</span>
           }
         </div>
@@ -130,7 +130,7 @@
       </div>
     }
 
-    @if (historyOpen_()) {
+    @if (isHistoryOpen_()) {
       <ul class="stage-history">
         @for (entry of history_(); track entry.at + entry.stage) {
           <li class="stage-history-row">
@@ -151,11 +151,11 @@
     }
   </section>
 
-  @if (closingOpen_()) {
-    <app-event-closing-dialog [eventId]="event._id" (closed)="closingOpen_.set(false)" />
+  @if (isClosingOpen_()) {
+    <app-event-closing-dialog [eventId]="event._id" (closed)="isClosingOpen_.set(false)" />
   }
 
-  @if (notClosedDialogOpen_()) {
-    <app-not-closed-dialog (confirmed)="onNotClosed($event)" (cancelled)="notClosedDialogOpen_.set(false)" />
+  @if (isNotClosedDialogOpen_()) {
+    <app-not-closed-dialog (confirmed)="onNotClosed($event)" (cancelled)="isNotClosedDialogOpen_.set(false)" />
   }
 }

@@ -73,7 +73,7 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   protected validationErrors_ = signal<Record<string, string>>({})
   /** design-port session 6 — Cloudinary-hosted venue photo, same pattern as recipe-header's imageUrl. */
   protected readonly photoUrl_ = signal<string | null>(null)
-  protected readonly uploadingPhoto_ = signal(false)
+  protected readonly isUploadingPhoto_ = signal(false)
 
   /** pendingChangesGuard contract (plan 371): true once a save succeeded, so leaving doesn't prompt. */
   isSubmitted = false
@@ -185,17 +185,17 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   protected onPhotoSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0]
     if (!file) return
-    this.uploadingPhoto_.set(true)
+    this.isUploadingPhoto_.set(true)
     this.cloudinary
       .upload(file)
       .pipe(take(1))
       .subscribe({
         next: (url) => {
           this.photoUrl_.set(url)
-          this.uploadingPhoto_.set(false)
+          this.isUploadingPhoto_.set(false)
         },
         error: () => {
-          this.uploadingPhoto_.set(false)
+          this.isUploadingPhoto_.set(false)
           this.userMsg.onSetErrorMsg(this.translation.translate('image_upload_failed'))
         }
       })

@@ -132,11 +132,11 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   /** Filter-category open state: all collapsed on mobile (≤1023px), all expanded on desktop (plan 345). */
   protected readonly filterCategories = useCollapsibleCategories()
   protected allergenPopoverProductId_ = signal<string | null>(null)
-  protected allergenExpandAll_ = signal<boolean>(false)
-  protected lowStockOnly_ = signal<boolean>(false)
-  protected showInvalidOnly_ = signal<boolean>(false)
-  protected showIncompleteOnly_ = signal<boolean>(false)
-  protected showUnpricedOnly_ = signal<boolean>(false)
+  protected isAllergenAllExpanded_ = signal<boolean>(false)
+  protected isLowStockOnly_ = signal<boolean>(false)
+  protected shouldShowInvalidOnly_ = signal<boolean>(false)
+  protected shouldShowIncompleteOnly_ = signal<boolean>(false)
+  protected shouldShowUnpricedOnly_ = signal<boolean>(false)
   protected nutritionFilter_ = signal<'all' | 'has' | 'missing'>('all')
   protected deletingId_ = signal<string | null>(null)
   protected savingPriceId_ = signal<string | null>(null)
@@ -180,8 +180,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       { urlParam: 'sort', signal: this.sortBy_, serializer: NullableStringParam },
       { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
       { urlParam: 'filters', signal: this.activeFilters_, serializer: FilterRecordParam },
-      { urlParam: 'lowStock', signal: this.lowStockOnly_, serializer: BooleanParam },
-      { urlParam: 'unpriced', signal: this.showUnpricedOnly_, serializer: BooleanParam },
+      { urlParam: 'lowStock', signal: this.isLowStockOnly_, serializer: BooleanParam },
+      { urlParam: 'unpriced', signal: this.shouldShowUnpricedOnly_, serializer: BooleanParam },
       { urlParam: 'nutrition', signal: this.nutritionFilter_, serializer: StringParam },
       { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
@@ -306,10 +306,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const search = this.searchQuery_().trim()
     const sortBy = this.sortBy_()
     const sortOrder = this.sortOrder_()
-    const lowStockOnly = this.lowStockOnly_()
-    const showInvalidOnly = this.showInvalidOnly_()
-    const showIncompleteOnly = this.showIncompleteOnly_()
-    const showUnpricedOnly = this.showUnpricedOnly_()
+    const lowStockOnly = this.isLowStockOnly_()
+    const showInvalidOnly = this.shouldShowInvalidOnly_()
+    const showIncompleteOnly = this.shouldShowIncompleteOnly_()
+    const showUnpricedOnly = this.shouldShowUnpricedOnly_()
     const nutritionFilter = this.nutritionFilter_()
 
     if (lowStockOnly) {
@@ -442,12 +442,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleAllergenExpandAll(): void {
-    this.allergenExpandAll_.update((v) => !v)
+    this.isAllergenAllExpanded_.update((v) => !v)
     this.allergenPopoverProductId_.set(null)
   }
 
   protected toggleAllergenPopover(productId: string): void {
-    this.allergenExpandAll_.set(false)
+    this.isAllergenAllExpanded_.set(false)
     this.allergenPopoverProductId_.update((id) => (id === productId ? null : productId))
   }
 
@@ -455,7 +455,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const el = clickTarget instanceof HTMLElement ? clickTarget : null
     if (el?.closest('thead .col-allergens')) return
     this.allergenPopoverProductId_.set(null)
-    this.allergenExpandAll_.set(false)
+    this.isAllergenAllExpanded_.set(false)
   }
 
   protected sortIconFor_(field: SortField): 'arrow-up' | 'arrow-down' | 'arrow-up-down' {
@@ -481,10 +481,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
   protected clearAllFilters(): void {
     this.listControls.clearAll(
-      () => this.lowStockOnly_.set(false),
-      () => this.showInvalidOnly_.set(false),
-      () => this.showIncompleteOnly_.set(false),
-      () => this.showUnpricedOnly_.set(false),
+      () => this.isLowStockOnly_.set(false),
+      () => this.shouldShowInvalidOnly_.set(false),
+      () => this.shouldShowIncompleteOnly_.set(false),
+      () => this.shouldShowUnpricedOnly_.set(false),
       () => this.nutritionFilter_.set('all'),
       () => this.activeFilters_.set({})
     )
@@ -512,29 +512,29 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleShowInvalidOnly(): void {
-    this.showInvalidOnly_.update((v) => !v)
+    this.shouldShowInvalidOnly_.update((v) => !v)
   }
 
   protected toggleShowIncompleteOnly(): void {
-    this.showIncompleteOnly_.update((v) => !v)
+    this.shouldShowIncompleteOnly_.update((v) => !v)
   }
 
   protected toggleShowUnpricedOnly(): void {
-    this.showUnpricedOnly_.update((v) => !v)
+    this.shouldShowUnpricedOnly_.update((v) => !v)
   }
 
   protected hasActiveFilters_ = computed(
     () =>
-      this.lowStockOnly_() ||
-      this.showInvalidOnly_() ||
-      this.showIncompleteOnly_() ||
-      this.showUnpricedOnly_() ||
+      this.isLowStockOnly_() ||
+      this.shouldShowInvalidOnly_() ||
+      this.shouldShowIncompleteOnly_() ||
+      this.shouldShowUnpricedOnly_() ||
       this.nutritionFilter_() !== 'all' ||
       Object.values(this.activeFilters_()).some((arr) => arr.length > 0)
   )
 
   protected toggleLowStockOnly(): void {
-    this.lowStockOnly_.update((v) => !v)
+    this.isLowStockOnly_.update((v) => !v)
   }
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {

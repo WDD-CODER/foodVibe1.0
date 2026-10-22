@@ -83,7 +83,7 @@ describe('TeamTabComponent', () => {
     cmp['password_'].set('abcdefg1')
     await cmp.addMember()
     expect(team.addStaff).toHaveBeenCalledWith('cook2', 'abcdefg1')
-    expect(cmp['formOpen_']()).toBeFalse()
+    expect(cmp['isFormOpen_']()).toBeFalse()
   })
 
   it('a taken username keeps the form open with the error', async () => {
@@ -94,6 +94,6 @@ describe('TeamTabComponent', () => {
     cmp['password_'].set('abcdefg1')
     await cmp.addMember()
     expect(cmp['errorKey_']()).toBe('username_taken')
-    expect(cmp['formOpen_']()).toBeTrue()
+    expect(cmp['isFormOpen_']()).toBeTrue()
   })
 })

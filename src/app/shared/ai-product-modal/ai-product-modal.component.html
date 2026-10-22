@@ -65,9 +65,9 @@
                 type="button"
                 class="c-btn-primary"
                 (click)="onEdit()"
-                [disabled]="loading_() || !instruction().trim()"
+                [disabled]="isLoading_() || !instruction().trim()"
               >
-                @if (loading_()) {
+                @if (isLoading_()) {
                   <app-loader size="small" [inline]="true" />
                 }
                 {{ 'ai_product_generate' | translatePipe }}
@@ -214,9 +214,9 @@
                 type="button"
                 class="c-btn-primary"
                 (click)="onGenerate()"
-                [disabled]="loading_() || !canGenerate_()"
+                [disabled]="isLoading_() || !canGenerate_()"
               >
-                @if (loading_()) {
+                @if (isLoading_()) {
                   <app-loader size="small" [inline]="true" />
                 }
                 {{ 'ai_product_generate' | translatePipe }}

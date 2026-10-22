@@ -57,7 +57,7 @@ export class NutritionBadgeComponent {
 
   private readonly tooltipRef_ = viewChild<ElementRef<HTMLElement>>('tooltip')
   private readonly scrollerRef_ = viewChild<ElementRef<HTMLElement>>('scroller')
-  readonly showTooltip_ = signal(false)
+  readonly shouldShowTooltip_ = signal(false)
   readonly isBelow_ = signal(false)
   /** Opened by a tap/click (not a mouse hover): the tooltip takes pointer input (scroll, arrows). */
   readonly isPinned_ = signal(false)
@@ -257,8 +257,8 @@ export class NutritionBadgeComponent {
 
   /** Mouse only — a touch tap also fires enter/leave, which would open and instantly re-close it. */
   onPointerEnter(event: PointerEvent): void {
-    if (event.pointerType !== 'mouse' || this.showTooltip_()) return
-    this.showTooltip_.set(true)
+    if (event.pointerType !== 'mouse' || this.shouldShowTooltip_()) return
+    this.shouldShowTooltip_.set(true)
   }
 
   onPointerLeave(event: PointerEvent): void {
@@ -270,21 +270,21 @@ export class NutritionBadgeComponent {
    *  become usable); clicking a pinned one closes it. */
   onBadgeClick(event: MouseEvent): void {
     event.stopPropagation()
-    if (this.showTooltip_() && !this.isPinned_()) {
+    if (this.shouldShowTooltip_() && !this.isPinned_()) {
       this.isPinned_.set(true)
       return
     }
-    if (this.showTooltip_()) {
+    if (this.shouldShowTooltip_()) {
       this.close_()
       return
     }
     this.isPinned_.set(true)
-    this.showTooltip_.set(true)
+    this.shouldShowTooltip_.set(true)
   }
 
   /** Tap outside closes it (touch has no pointerleave). The tooltip is a DOM child of the host. */
   protected onDocumentClick(event: MouseEvent): void {
-    if (!this.showTooltip_()) return
+    if (!this.shouldShowTooltip_()) return
     const host = this.elRef_.nativeElement as HTMLElement
     if (event.target instanceof Node && host.contains(event.target)) return
     this.close_()
@@ -293,7 +293,7 @@ export class NutritionBadgeComponent {
   private close_(): void {
     this.stopAutoScroll()
     this.isPinned_.set(false)
-    this.showTooltip_.set(false)
+    this.shouldShowTooltip_.set(false)
   }
 
   // ── Scroll hints ───────────────────────────────────────────────────────────

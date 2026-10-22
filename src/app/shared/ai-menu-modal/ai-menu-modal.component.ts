@@ -47,7 +47,7 @@ export class AiMenuModalComponent implements OnInit {
   protected readonly patch_ = signal<Record<string, unknown> | null>(null)
 
   // Shared
-  protected readonly loading_ = signal(false)
+  protected readonly isLoading_ = signal(false)
   protected readonly status_ = signal<GenerationStatus>('idle')
   protected readonly errorKey_ = signal('ai_menu_error')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
@@ -118,7 +118,7 @@ export class AiMenuModalComponent implements OnInit {
   async onGenerate(): Promise<void> {
     const text = this.prompt_().trim()
     if (!text) return
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     this.errorKey_.set('ai_menu_error')
     try {
@@ -131,7 +131,7 @@ export class AiMenuModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage_()
     }
   }
@@ -194,7 +194,7 @@ export class AiMenuModalComponent implements OnInit {
   async onEdit(): Promise<void> {
     const currentMenu = this.modalService.getEditContext()
     if (!currentMenu) return
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     this.errorKey_.set('ai_menu_error')
     try {
@@ -205,7 +205,7 @@ export class AiMenuModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage_()
     }
   }
@@ -260,7 +260,7 @@ export class AiMenuModalComponent implements OnInit {
     this.userResolutions_.set(new Map())
     this.instruction.set('')
     this.patch_.set(null)
-    this.loading_.set(false)
+    this.isLoading_.set(false)
     this.status_.set('idle')
     this.errorKey_.set('ai_menu_error')
   }

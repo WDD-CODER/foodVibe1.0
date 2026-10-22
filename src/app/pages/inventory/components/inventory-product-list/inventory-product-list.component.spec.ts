@@ -128,7 +128,7 @@ describe('InventoryProductListComponent', () => {
     ])
     ;(component as any).searchQuery_.set('')
     ;(component as any).activeFilters_.set({})
-    ;(component as any).showUnpricedOnly_.set(true)
+    ;(component as any).shouldShowUnpricedOnly_.set(true)
     const results = (component as any).filteredProducts_() as Product[]
     expect(results.map((p) => p._id)).toEqual(['u'])
     const row = (component as any).displayRows_()[0]
@@ -138,7 +138,7 @@ describe('InventoryProductListComponent', () => {
   it('should filter items when a filter is toggled', () => {
     // Ensure no state leaks from URL/list-state persistence.
     ;(component as any).searchQuery_.set('')
-    ;(component as any).lowStockOnly_.set(false)
+    ;(component as any).isLowStockOnly_.set(false)
     ;(component as any).activeFilters_.set({})
 
     ;(component as any).toggleFilter('Category', 'Dairy')

@@ -35,13 +35,13 @@
               type="button"
               class="event-chip"
               id="menu-focus-eventType"
-              [attr.aria-expanded]="eventTypeDropdownOpen_()"
+              [attr.aria-expanded]="isEventTypeDropdownOpen_()"
               (click)="openEventTypeDropdown()"
               (keydown)="onMetaKeydown('eventType', $event)"
             >
               {{ ((form_.value.eventType ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
             </button>
-            @if (eventTypeDropdownOpen_()) {
+            @if (isEventTypeDropdownOpen_()) {
             <div class="event-type-dropdown">
               <app-search-combobox
                 class="event-type-search"
@@ -274,8 +274,8 @@
 
 <app-menu-export-sheet
   class="no-print"
-  [open]="exportSheetOpen_()"
-  (close)="exportSheetOpen_.set(false)"
+  [open]="isExportSheetOpen_()"
+  (close)="isExportSheetOpen_.set(false)"
   (viewChecklist)="onViewChecklist($event)"
   (exportChecklist)="onExportChecklist($event)"
   (viewShoppingList)="onViewMenuShoppingList()"

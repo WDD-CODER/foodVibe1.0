@@ -25,7 +25,7 @@ export class ConfirmModalService {
   private readonly message_ = signal('')
   private readonly saveLabel_ = signal('save')
   private readonly variant_ = signal<ConfirmModalVariant>('default')
-  private readonly showSaveButton_ = signal(false)
+  private readonly shouldShowSaveButton_ = signal(false)
   private readonly saveButtonLabel_ = signal('save')
   private readonly headerKey_ = signal<string | null>(null)
 
@@ -36,7 +36,7 @@ export class ConfirmModalService {
   readonly message = this.message_.asReadonly()
   readonly saveLabel = this.saveLabel_.asReadonly()
   readonly variant = this.variant_.asReadonly()
-  readonly showSaveButton = this.showSaveButton_.asReadonly()
+  readonly showSaveButton = this.shouldShowSaveButton_.asReadonly()
   readonly saveButtonLabel = this.saveButtonLabel_.asReadonly()
   readonly headerKey = this.headerKey_.asReadonly()
 
@@ -49,7 +49,7 @@ export class ConfirmModalService {
     const label = this.resolveSaveLabel(options)
     this.saveLabel_.set(label)
     this.variant_.set(options?.variant ?? 'default')
-    this.showSaveButton_.set(false)
+    this.shouldShowSaveButton_.set(false)
     this.headerKey_.set(options?.headerKey ?? null)
     this.isOpen_.set(true)
     return new Promise((resolve) => {
@@ -66,7 +66,7 @@ export class ConfirmModalService {
     const label = this.resolveSaveLabel(options)
     this.saveLabel_.set(label)
     this.variant_.set(options?.variant ?? 'default')
-    this.showSaveButton_.set(true)
+    this.shouldShowSaveButton_.set(true)
     this.saveButtonLabel_.set(options?.saveButtonLabel ?? 'save')
     this.headerKey_.set(options?.headerKey ?? null)
     this.isOpen_.set(true)
@@ -97,7 +97,7 @@ export class ConfirmModalService {
     this.message_.set('')
     this.saveLabel_.set('save')
     this.variant_.set('default')
-    this.showSaveButton_.set(false)
+    this.shouldShowSaveButton_.set(false)
     this.saveButtonLabel_.set('save')
     this.headerKey_.set(null)
   }

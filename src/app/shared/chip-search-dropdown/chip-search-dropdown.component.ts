@@ -79,7 +79,7 @@ export class ChipSearchDropdownComponent {
   // ── Internal state ───────────────────────────────────────────────────────────
   protected readonly instanceId = `csd-${++nextChipSearchDropdownId}`
   protected searchQuery_ = signal('')
-  protected showDropdown_ = signal(false)
+  protected shouldShowDropdown_ = signal(false)
   private readonly picker_ = new KeyedPickerSearch()
 
   // ── Computed ─────────────────────────────────────────────────────────────────
@@ -122,12 +122,12 @@ export class ChipSearchDropdownComponent {
 
   // ── Protected methods ─────────────────────────────────────────────────────────
   protected openDropdown(): void {
-    this.showDropdown_.set(true)
+    this.shouldShowDropdown_.set(true)
     this.picker_.setHighlighted(PICKER_KEY, 0)
   }
 
   protected closeDropdown(): void {
-    this.showDropdown_.set(false)
+    this.shouldShowDropdown_.set(false)
     this.picker_.onQueryChange(PICKER_KEY, '')
     this.searchQuery_.set('')
   }
@@ -135,14 +135,14 @@ export class ChipSearchDropdownComponent {
   protected onQueryInput(value: string): void {
     this.searchQuery_.set(value)
     this.picker_.onQueryChange(PICKER_KEY, value)
-    if (!this.showDropdown_()) this.showDropdown_.set(true)
+    if (!this.shouldShowDropdown_()) this.shouldShowDropdown_.set(true)
   }
 
   /** Search clear (X): empty the query, keep the list open with every option, refocus (plan 364). */
   protected onClearSearch(): void {
     this.searchQuery_.set('')
     this.picker_.onQueryChange(PICKER_KEY, '')
-    this.showDropdown_.set(true)
+    this.shouldShowDropdown_.set(true)
     this.searchInputRef()?.nativeElement?.focus()
   }
 
@@ -164,7 +164,7 @@ export class ChipSearchDropdownComponent {
 
   /** Search-box keys (rule 5): focus stays in the input; no wrap; Tab closes and lets the browser move focus. */
   protected onInputKeydown(ev: KeyboardEvent): void {
-    if (!this.showDropdown_()) {
+    if (!this.shouldShowDropdown_()) {
       if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
         ev.preventDefault()
         this.openDropdown()

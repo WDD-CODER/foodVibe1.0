@@ -1,6 +1,6 @@
 <fieldset
   class="custom-multi-select-wrap"
-  [class.open]="open()"
+  [class.open]="isOpen()"
   [class.custom-multi-select-wrap--chip]="variant() === 'chip'"
   [class.custom-multi-select-wrap--titled]="triggerTitle()"
   (appClickOutside)="close()"
@@ -26,15 +26,15 @@
     class="c-select custom-select-trigger custom-multi-select-trigger"
     [class.custom-select-trigger--compact]="compact()"
     [class.custom-select-trigger--chip]="variant() === 'chip'"
-    [class.open]="open()"
+    [class.open]="isOpen()"
     [disabled]="disabled"
     (mousedown)="onTriggerMousedown()"
     (focus)="onTriggerFocus()"
     (click)="onTriggerClick()"
     (blur)="onTriggerBlur()"
-    [attr.aria-expanded]="open()"
+    [attr.aria-expanded]="isOpen()"
     aria-haspopup="listbox"
-    [attr.aria-activedescendant]="open() && !searchable() ? optionIdPrefix_() + highlightedIndex() : null"
+    [attr.aria-activedescendant]="isOpen() && !searchable() ? optionIdPrefix_() + highlightedIndex() : null"
     [attr.aria-label]="placeholder() | translatePipe"
   >
     <span class="custom-multi-select-trigger-inner">
@@ -80,7 +80,7 @@
     <lucide-icon name="chevron-down" [size]="variant() === 'chip' ? 10 : 14"></lucide-icon>
   </button>
 
-  @if (open()) {
+  @if (isOpen()) {
     <app-scrollable-dropdown [maxHeight]="maxHeight()" role="listbox" aria-multiselectable="true">
       @if (searchable()) {
         <div class="custom-multi-select-search-wrap">

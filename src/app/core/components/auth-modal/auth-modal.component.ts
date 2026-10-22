@@ -51,15 +51,15 @@ export class AuthModalComponent {
   protected password = ''
   protected confirmPassword = ''
   protected imgPreview = signal<string | null>(null)
-  protected uploadingImage_ = signal(false)
+  protected isUploadingImage_ = signal(false)
   protected errorKey = signal<string | null>(null)
   protected isSubmitting = signal(false)
-  protected showPassword_ = signal(false)
-  protected showConfirmPassword_ = signal(false)
-  protected nameTouched_ = signal(false)
-  protected emailTouched_ = signal(false)
-  protected passwordTouched_ = signal(false)
-  protected confirmTouched_ = signal(false)
+  protected shouldShowPassword_ = signal(false)
+  protected shouldShowConfirmPassword_ = signal(false)
+  protected isNameTouched_ = signal(false)
+  protected isEmailTouched_ = signal(false)
+  protected isPasswordTouched_ = signal(false)
+  protected isConfirmTouched_ = signal(false)
 
   protected readonly isDev = environment.localDev
 
@@ -79,7 +79,7 @@ export class AuthModalComponent {
     const file = input.files?.[0]
     if (!file) return
     this.errorKey.set(null)
-    this.uploadingImage_.set(true)
+    this.isUploadingImage_.set(true)
     this.cdr.markForCheck()
     this.cloudinary
       .upload(file)
@@ -88,11 +88,11 @@ export class AuthModalComponent {
         next: (url) => {
           this.imgCloudinaryUrl = url
           this.imgPreview.set(url)
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
           this.cdr.markForCheck()
         },
         error: () => {
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
           this.errorKey.set('image_upload_failed')
           this.cdr.markForCheck()
         }
@@ -101,19 +101,19 @@ export class AuthModalComponent {
 
   protected onNameBlur(): void {
     if (!this.name.trim()) return
-    this.nameTouched_.set(true)
+    this.isNameTouched_.set(true)
     const err = validateUsername(this.name)
     if (err) this.errorKey.set(err)
   }
 
   protected onEmailBlur(): void {
-    this.emailTouched_.set(true)
+    this.isEmailTouched_.set(true)
     const err = validateEmail(this.email)
     if (err) this.errorKey.set(err)
   }
 
   protected onPasswordBlur(): void {
-    this.passwordTouched_.set(true)
+    this.isPasswordTouched_.set(true)
     if (!this.isSignUp) {
       if (!this.password.trim()) this.errorKey.set('password_required')
       return
@@ -123,12 +123,12 @@ export class AuthModalComponent {
   }
 
   protected onConfirmBlur(): void {
-    this.confirmTouched_.set(true)
+    this.isConfirmTouched_.set(true)
     if (this.password !== this.confirmPassword) this.errorKey.set('passwords_do_not_match')
   }
 
   protected onSubmit(): void {
-    if (this.isSubmitting() || this.uploadingImage_()) return
+    if (this.isSubmitting() || this.isUploadingImage_()) return
 
     const nameErr = validateUsername(this.name)
     if (nameErr) {
@@ -260,14 +260,14 @@ export class AuthModalComponent {
     this.email = ''
     this.password = ''
     this.confirmPassword = ''
-    this.showPassword_.set(false)
-    this.showConfirmPassword_.set(false)
+    this.shouldShowPassword_.set(false)
+    this.shouldShowConfirmPassword_.set(false)
     this.imgCloudinaryUrl = null
     this.imgPreview.set(null)
     this.errorKey.set(null)
-    this.nameTouched_.set(false)
-    this.emailTouched_.set(false)
-    this.passwordTouched_.set(false)
-    this.confirmTouched_.set(false)
+    this.isNameTouched_.set(false)
+    this.isEmailTouched_.set(false)
+    this.isPasswordTouched_.set(false)
+    this.isConfirmTouched_.set(false)
   }
 }

@@ -53,8 +53,8 @@ export class BusinessPerformanceComponent {
   private readonly period_ = signal<StatsPeriod>('30')
   readonly period = this.period_.asReadonly()
   private readonly stats_ = signal<BusinessStats | null>(null)
-  private readonly loading_ = signal(true)
-  readonly loading = this.loading_.asReadonly()
+  private readonly isLoading_ = signal(true)
+  readonly loading = this.isLoading_.asReadonly()
   /** Answers of an older period that arrive late are dropped. */
   private requestId = 0
 
@@ -160,7 +160,7 @@ export class BusinessPerformanceComponent {
 
   private async load(period: StatsPeriod): Promise<void> {
     const id = ++this.requestId
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     try {
       const result = await this.stats.get(period)
       if (id === this.requestId) this.stats_.set(result)
@@ -173,7 +173,7 @@ export class BusinessPerformanceComponent {
       })
       this.userMsg.onSetErrorMsg(this.t('save_failed'))
     } finally {
-      if (id === this.requestId) this.loading_.set(false)
+      if (id === this.requestId) this.isLoading_.set(false)
     }
   }
 

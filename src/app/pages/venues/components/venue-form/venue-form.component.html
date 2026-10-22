@@ -18,7 +18,7 @@
             {{ 'venue_photo' | translatePipe }}
           </span>
         }
-        @if (uploadingPhoto_()) {
+        @if (isUploadingPhoto_()) {
           <app-loader size="small" [inline]="true" class="venue-photo-loader" />
         }
         <input type="file" accept="image/*" class="venue-photo-file-input" (change)="onPhotoSelected($event)" />

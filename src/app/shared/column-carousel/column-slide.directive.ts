@@ -9,12 +9,12 @@ import { Directive, input, signal } from '@angular/core'
   standalone: true,
   host: {
     class: 'column-slide',
-    '[class.column-slide--active]': 'active()'
+    '[class.column-slide--active]': 'isActive()'
   }
 })
 export class ColumnSlideDirective {
   /** Label shown for this column on mobile (a dictionary key or an already-translated string). */
   readonly label = input<string>('')
   /** Set by the owning header/cell. */
-  readonly active = signal(false)
+  readonly isActive = signal(false)
 }

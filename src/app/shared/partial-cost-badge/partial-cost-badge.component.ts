@@ -51,7 +51,7 @@ export class PartialCostBadgeComponent {
   /** Names for recipe ids the kitchen state does not know yet (a recipe being built and not saved). */
   readonly recipeNames = input<Record<string, string>>({})
 
-  protected readonly open_ = signal(false)
+  protected readonly isOpen_ = signal(false)
   protected readonly drafts_ = signal<Record<string, string>>({})
   protected readonly savingKey_ = signal<string | null>(null)
   /** True once the popover was opened by a click or a focus, so the mouse leaving does not close it. */
@@ -82,26 +82,26 @@ export class PartialCostBadgeComponent {
   })
 
   protected toggle(): void {
-    if (this.open_() && !this.pinned_) {
+    if (this.isOpen_() && !this.pinned_) {
       this.pinned_ = true
       return
     }
     this.pinned_ = true
-    this.open_.update((v) => !v)
+    this.isOpen_.update((v) => !v)
   }
 
   protected onEnter(): void {
-    if (this.open_() || !this.hoverCapable()) return
+    if (this.isOpen_() || !this.hoverCapable()) return
     this.pinned_ = false
-    this.open_.set(true)
+    this.isOpen_.set(true)
   }
 
   protected onLeave(): void {
-    if (!this.pinned_) this.open_.set(false)
+    if (!this.pinned_) this.isOpen_.set(false)
   }
 
   protected close(): void {
-    this.open_.set(false)
+    this.isOpen_.set(false)
     this.pinned_ = false
   }
 

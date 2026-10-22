@@ -1,7 +1,7 @@
 <section class="platform-page">
   <app-page-header titleKey="platform_dashboard" class="platform-header" />
 
-  @if (loading_()) {
+  @if (isLoading_()) {
   <app-loader />
   } @else if (!rows_().length) {
   <p class="platform-empty">{{ "platform_no_businesses" | translatePipe }}</p>

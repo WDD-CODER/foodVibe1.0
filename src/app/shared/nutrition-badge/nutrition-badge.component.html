@@ -7,7 +7,7 @@
   >
     <lucide-icon name="leaf" [size]="14" class="nb-leaf" [style.color]="dominantColor"></lucide-icon>
 
-    @if (showTooltip_()) {
+    @if (shouldShowTooltip_()) {
       <div
         #tooltip
         popover="manual"

@@ -30,7 +30,7 @@ export class TrashPage implements OnInit {
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly logging = inject(LoggingService)
 
-  readonly loading = signal(true)
+  readonly isLoading = signal(true)
   readonly loadError = signal<string | null>(null)
 
   readonly sections = TRASH_SECTIONS
@@ -48,7 +48,7 @@ export class TrashPage implements OnInit {
   }
 
   private async loadTrashInternal(): Promise<void> {
-    this.loading.set(true)
+    this.isLoading.set(true)
     this.loadError.set(null)
     try {
       await this.trash.loadTrash()
@@ -56,7 +56,7 @@ export class TrashPage implements OnInit {
       this.logging.error({ event: 'trash.load_error', message: 'Trash load error', context: { err } })
       this.loadError.set(err instanceof Error ? err.message : 'שגיאה בטעינת האשפה')
     } finally {
-      this.loading.set(false)
+      this.isLoading.set(false)
     }
   }
 

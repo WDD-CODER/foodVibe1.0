@@ -65,9 +65,9 @@
                 type="button"
                 class="c-btn-primary"
                 (click)="onEdit()"
-                [disabled]="loading_() || !instruction().trim()"
+                [disabled]="isLoading_() || !instruction().trim()"
               >
-                @if (loading_()) {
+                @if (isLoading_()) {
                   <app-loader size="small" [inline]="true" />
                 }
                 {{ 'ai_menu_generate' | translatePipe }}
@@ -142,9 +142,9 @@
                 type="button"
                 class="c-btn-primary"
                 (click)="onGenerate()"
-                [disabled]="loading_() || !prompt_().trim()"
+                [disabled]="isLoading_() || !prompt_().trim()"
               >
-                @if (loading_()) {
+                @if (isLoading_()) {
                   <app-loader size="small" [inline]="true" />
                 }
                 {{ 'ai_menu_generate' | translatePipe }}

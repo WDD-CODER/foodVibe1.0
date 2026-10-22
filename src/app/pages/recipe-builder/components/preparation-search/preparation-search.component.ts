@@ -55,7 +55,7 @@ export class PreparationSearchComponent {
 
   protected searchBox_ = viewChild<SearchComboboxComponent<PreparationEntry>>(SearchComboboxComponent)
   searchQuery_ = signal<string>('')
-  protected showResults_ = signal(false)
+  protected shouldShowResults_ = signal(false)
   protected readonly preparations_ = this.prepRegistry.allPreparations_
   protected readonly preparationLabel_ = (entry: PreparationEntry): string => entry.name
   protected readonly preparationKey_ = (entry: PreparationEntry): string => entry.category + '/' + entry.name
@@ -78,7 +78,7 @@ export class PreparationSearchComponent {
       const q = this.initialQuery()?.trim() ?? ''
       if (q) {
         this.searchQuery_.set(q)
-        this.showResults_.set(true)
+        this.shouldShowResults_.set(true)
         setTimeout(() => this.focusSearch(), 0)
       }
     })
@@ -94,7 +94,7 @@ export class PreparationSearchComponent {
   selectPreparation(entry: PreparationEntry): void {
     this.preparationSelected.emit(entry)
     this.searchQuery_.set('')
-    this.showResults_.set(false)
+    this.shouldShowResults_.set(false)
   }
 
   /** A click only selects; Enter selects and also asks for the next row (rule K). */
@@ -124,7 +124,7 @@ export class PreparationSearchComponent {
     const cats = this.categories()
     const category = this.selectedCategory().trim() || (cats.length > 0 ? cats[0] : '')
     if (!category) return false
-    this.showResults_.set(false)
+    this.shouldShowResults_.set(false)
     const name = (
       (await this.addItemModal.open({
         title: 'add_new_preparation',

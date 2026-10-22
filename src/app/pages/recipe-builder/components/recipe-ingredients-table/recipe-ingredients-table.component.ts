@@ -158,7 +158,7 @@ export class RecipeIngredientsTableComponent {
   protected quickEditRowTier_ = signal<'invalid' | 'incomplete' | null>(null)
 
   /** True while the "paste ingredients" window is open. */
-  protected pasteOpen_ = signal(false)
+  protected isPasteOpen_ = signal(false)
 
   /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
   protected getProductForGroup(group: FormGroup): Product | null {
@@ -212,7 +212,7 @@ export class RecipeIngredientsTableComponent {
    */
   onPasteIngredients(text: string): void {
     const lines = parseIngredientLines(text, this.pastedUnitResolver_)
-    this.pasteOpen_.set(false)
+    this.isPasteOpen_.set(false)
     if (lines.length === 0) return
     const array = this.ingredientsFormArray()
     while (array.length > 0 && this.isEmptyRow_(array.at(array.length - 1) as FormGroup)) {
