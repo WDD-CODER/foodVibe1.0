@@ -73,6 +73,7 @@ export const routes: Routes = [
         path: 'import',
         loadComponent: () => import('./pages/inventory/components/product-import/product-import.component').then(m => m.ProductImportComponent),
         canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'edit/:id',
