@@ -58,6 +58,23 @@ describe('ProductNameSuggestionsComponent', () => {
     expect(rows()).toContain('עגבניה')
   })
 
+  it('plan 484: lists exact twins first even when 5 longer names start with the text', () => {
+    products_.set(
+      names(
+        'מלפפון במלח קטנים 13',
+        'מלפפון 18/25 במלח',
+        'מלפפון 18/25 בחומץ',
+        'מלפפון 7/9 בחומץ',
+        'מלפפון בחומץ 10-12',
+        'מלפפון',
+        'מלפפון'
+      )
+    )
+    show('מלפפון', 'p9')
+    expect(rows().slice(0, 2)).toEqual(['מלפפון', 'מלפפון'])
+    expect(rows().length).toBe(5)
+  })
+
   it('never suggests the product being edited', () => {
     show('בצל', 'p2')
     expect(rows()).toEqual([])
