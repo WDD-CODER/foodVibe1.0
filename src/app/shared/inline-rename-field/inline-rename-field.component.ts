@@ -3,7 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  computed,
   input,
+  linkedSignal,
   output,
   viewChild
 } from '@angular/core'
@@ -32,6 +34,14 @@ export class InlineRenameFieldComponent {
   readonly saved = output<string>()
   readonly cancelled = output<void>()
 
+  /** What is typed right now; resets to the opening value. */
+  private readonly text_ = linkedSignal(() => this.value())
+  /** Save is allowed only when the trimmed text is not empty and differs from the opening value. */
+  protected readonly canSave_ = computed(() => {
+    const t = this.text_().trim()
+    return t !== '' && t !== this.value()
+  })
+
   private readonly field = viewChild.required<ElementRef<HTMLInputElement>>('field')
 
   constructor() {
@@ -42,8 +52,13 @@ export class InlineRenameFieldComponent {
     })
   }
 
+  protected onInput(event: Event): void {
+    this.text_.set((event.target as HTMLInputElement).value)
+  }
+
   protected onSave(): void {
-    this.saved.emit(this.field().nativeElement.value.trim())
+    if (!this.canSave_()) return
+    this.saved.emit(this.text_().trim())
   }
 
   protected onCancel(): void {

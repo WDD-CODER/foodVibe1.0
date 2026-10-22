@@ -10,6 +10,12 @@ describe('InlineRenameFieldComponent', () => {
   const input = (): HTMLInputElement => fixture.nativeElement.querySelector('input')
   const buttons = (): HTMLButtonElement[] => Array.from(fixture.nativeElement.querySelectorAll('button'))
 
+  const type = (text: string): void => {
+    input().value = text
+    input().dispatchEvent(new Event('input'))
+    fixture.detectChanges()
+  }
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [InlineRenameFieldComponent],
@@ -30,16 +36,34 @@ describe('InlineRenameFieldComponent', () => {
   })
 
   it('emits the trimmed text on Save', () => {
-    input().value = '  new  '
+    type('  new  ')
     buttons()[0].click()
     expect(saved).toEqual(['new'])
     expect(cancelled).toBe(0)
   })
 
   it('emits the trimmed text on Enter', () => {
-    input().value = ' x '
+    type(' x ')
     input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
     expect(saved).toEqual(['x'])
+  })
+
+  it('disables Save and ignores Enter when the text is empty', () => {
+    type('   ')
+    expect(buttons()[0].disabled).toBe(true)
+    buttons()[0].click()
+    input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
+    expect(saved).toEqual([])
+  })
+
+  it('disables Save and ignores Enter when the text is unchanged', () => {
+    expect(buttons()[0].disabled).toBe(true)
+    type(' old ')
+    expect(buttons()[0].disabled).toBe(true)
+    input().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
+    expect(saved).toEqual([])
+    type('other')
+    expect(buttons()[0].disabled).toBe(false)
   })
 
   it('emits cancelled on Cancel and on Escape, and no text', () => {
@@ -50,7 +74,7 @@ describe('InlineRenameFieldComponent', () => {
   })
 
   it('emits nothing when it loses focus', () => {
-    input().value = 'changed'
+    type('changed')
     input().dispatchEvent(new FocusEvent('blur'))
     input().dispatchEvent(new FocusEvent('focusout'))
     expect(saved).toEqual([])

@@ -4,6 +4,7 @@
   class="irf-input"
   [value]="value()"
   [attr.aria-label]="ariaLabelKey() | translatePipe"
+  (input)="onInput($event)"
   (keydown.enter)="onSave(); $event.preventDefault()"
   (keydown.escape)="onCancel()"
   autocomplete="off"
@@ -11,5 +12,7 @@
   autocapitalize="off"
   spellcheck="false"
 />
-<button type="button" class="c-btn-primary irf-btn" (click)="onSave()">{{ 'save' | translatePipe }}</button>
+<button type="button" class="c-btn-primary irf-btn" [disabled]="!canSave_()" (click)="onSave()">
+  {{ 'save' | translatePipe }}
+</button>
 <button type="button" class="c-btn-ghost--sm irf-btn" (click)="onCancel()">{{ 'cancel' | translatePipe }}</button>
