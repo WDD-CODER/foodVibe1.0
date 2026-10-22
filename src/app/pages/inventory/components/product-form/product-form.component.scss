@@ -247,7 +247,7 @@
       display: grid;
       // Plan 461: children are placed by class (not child order) because the quantity, compare-to and
       // special-price blocks are only rendered once a unit is chosen. Column 2 holds the whole «כמות נטו».
-      grid-template-columns: minmax(90px, 9rem) minmax(7rem, 9rem) minmax(90px, 1fr) minmax(auto, 12rem) min-content;
+      grid-template-columns: minmax(90px, 8rem) minmax(6rem, 8rem) minmax(9rem, 1fr) minmax(auto, 10rem) min-content;
       grid-template-areas: 'unit qty uom price del';
       align-items: center;
       gap: var(--space-3);
@@ -264,6 +264,13 @@
 
       > .row-uom {
         grid-area: uom;
+        min-inline-size: 0;
+
+        // Round 1 fix: the compare-to name must stay readable next to the chevron and clear button
+        app-custom-select {
+          min-inline-size: 8rem;
+          flex: 1 1 auto;
+        }
       }
 
       > .price-override-wrapper {
