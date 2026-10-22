@@ -64,7 +64,7 @@
       <app-form-field label="buy_price" labelStyle="caps">
         <div class="relative-input">
           <input
-            SelectOnFocus
+            appSelectOnFocus
             type="number"
             formControlName="buy_price_global_"
             placeholder="0.00"
@@ -214,7 +214,7 @@
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedSupplier_()"
-          (clickOutside)="onSupplierBlur($event)"
+          (appClickOutside)="onSupplierBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
             <lucide-icon name="truck" class="icon-xs icon-muted"></lucide-icon>
@@ -252,7 +252,7 @@
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedAllergens_()"
-          (clickOutside)="onAllergensBlur($event)"
+          (appClickOutside)="onAllergensBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
             <lucide-icon name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
@@ -290,7 +290,7 @@
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedWasteYield_()"
-          (clickOutside)="onWasteYieldBlur($event)"
+          (appClickOutside)="onWasteYieldBlur($event)"
         >
           <div class="collapsible-field__label-with-icon">
             <lucide-icon name="flask-conical" class="icon-xs icon-primary"></lucide-icon>
@@ -301,7 +301,7 @@
               <label>{{ 'waste_percent' | translatePipe }}</label>
               <div class="relative-input">
                 <input
-                  SelectOnFocus
+                  appSelectOnFocus
                   type="number"
                   formControlName="waste_percent_"
                   placeholder="0"
@@ -319,7 +319,7 @@
               <div class="relative-input">
                 <input
                   class="yield-factor-input c-input"
-                  SelectOnFocus
+                  appSelectOnFocus
                   type="number"
                   formControlName="yieldFactor"
                   step="0.001"
@@ -355,7 +355,7 @@
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedMinStock_()"
-          (clickOutside)="onMinStockBlur($event)"
+          (appClickOutside)="onMinStockBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
             <lucide-icon name="package" class="icon-xs icon-muted"></lucide-icon>
@@ -381,7 +381,7 @@
         <div
           class="collapsible-field__content"
           [class.collapsible-field__content--hidden]="!expandedExpiryDays_()"
-          (clickOutside)="onExpiryDaysBlur($event)"
+          (appClickOutside)="onExpiryDaysBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
             <lucide-icon name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>

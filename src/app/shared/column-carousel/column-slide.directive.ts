@@ -5,7 +5,7 @@ import { Directive, input, signal } from '@angular/core'
  * On desktop every slide is a normal grid cell; on mobile only the active one shows.
  */
 @Directive({
-  selector: '[columnSlide]',
+  selector: '[appColumnSlide]',
   standalone: true,
   host: {
     class: 'column-slide',

@@ -36,7 +36,7 @@
           step="1"
           [id]="'dish-sell-' + sectionIndex() + '-' + itemIndex()"
           class="dish-sell-input"
-          SelectOnFocus
+          appSelectOnFocus
           [style.width]="getInputWidth(itemGroup().get('sell_price')?.value)"
           (click)="$event.stopPropagation()"
           (keydown)="sellPriceKeydown.emit($event)"
@@ -46,7 +46,7 @@
         <lucide-icon name="trash-2" [size]="14"></lucide-icon>
       </button>
     } @else {
-      <div class="dish-search-wrap" (clickOutside)="clearSearch.emit()">
+      <div class="dish-search-wrap" (appClickOutside)="clearSearch.emit()">
         <app-search-combobox
           variant="plain"
           placeholder="menu_search_dish"
@@ -90,7 +90,7 @@
               min="0"
               step="0.01"
               class="dish-field-input-inline"
-              SelectOnFocus
+              appSelectOnFocus
               [style.width]="getInputWidth(itemGroup().get(fieldKey)?.value)"
               (blur)="editDishFieldCommit.emit()"
               (keydown.enter)="editDishFieldCommit.emit()"
@@ -112,7 +112,7 @@
           [id]="'dish-coef-' + sectionIndex() + '-' + itemIndex()"
           [value]="coefficientText_()"
           [attr.aria-invalid]="coefficientInvalid_() ? 'true' : null"
-          SelectOnFocus
+          appSelectOnFocus
           (input)="onCoefficientInput($any($event.target).value)"
           (blur)="onCoefficientBlur()"
           (click)="$event.stopPropagation()"

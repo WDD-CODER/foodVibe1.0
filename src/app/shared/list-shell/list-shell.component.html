@@ -31,7 +31,7 @@
     <!-- Plan 453: cards layout — same header, selection bar, filter panel and arrows; the pinned table top
          is replaced by a plain scroll area that lays the projected cards out as a responsive grid. -->
     <section class="table-area table-area--cards">
-      <div class="table-body table-body--cards" scrollIndicators>
+      <div class="table-body table-body--cards" appScrollIndicators>
         <ng-content select="[shell-cards]"></ng-content>
       </div>
       <!-- More-to-scroll arrows: grid items laid over the body's cell, not inside the body, so they
@@ -55,7 +55,7 @@
           <ng-content select="[shell-table-header]"></ng-content>
         </div>
       </div>
-      <div class="table-body" #tableBody scrollIndicators>
+      <div class="table-body" #tableBody appScrollIndicators>
         <ng-content select="[shell-table-body]"></ng-content>
       </div>
       <!-- More-to-scroll arrows: grid items laid over the body's cell, not inside the body, so they
@@ -69,7 +69,7 @@
     </section>
   }
 
-  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()" scrollIndicators>
+  <aside class="filter-panel" [class.collapsed]="!isPanelOpen()" appScrollIndicators>
     <div class="panel-content">
       <!-- Out of flow on purpose: a hidden or shown clear button never reserves space or shifts the filters. -->
       <div class="panel-filter-clear">

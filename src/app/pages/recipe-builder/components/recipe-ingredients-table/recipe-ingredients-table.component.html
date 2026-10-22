@@ -122,7 +122,7 @@
             [options]="getUnitOptions(group)"
             placeholder="unit"
             [triggerId]="'unit-row-' + $index"
-            focusByRow
+            appFocusByRow
             [rowIndex]="$index"
             kind="unit"
             (valueChange)="onUnitChange(group, $index, $event)"
@@ -142,11 +142,11 @@
             </button>
             <input
               type="number"
-              SelectOnFocus
+              appSelectOnFocus
               formControlName="amount_net"
               (input)="updateLineCalculations($index)"
               (keydown)="onQuantityKeydown($event, $index)"
-              focusByRow
+              appFocusByRow
               [rowIndex]="$index"
               kind="qty"
               class="grid-input qty-input"
@@ -184,7 +184,7 @@
           !isMobile_() &&
           getProductForGroup(group)
         ) {
-          <div class="quick-edit-accordion" (clickOutside)="onAccordionClickOutside()">
+          <div class="quick-edit-accordion" (appClickOutside)="onAccordionClickOutside()">
             <app-quick-edit-product-panel
               [product]="getProductForGroup(group)!"
               [tier]="quickEditRowTier_() ?? 'incomplete'"

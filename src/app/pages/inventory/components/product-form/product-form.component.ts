@@ -85,7 +85,7 @@ interface ProductFormValue {
 }
 
 @Component({
-  selector: 'product-form',
+  selector: 'app-product-form',
   standalone: true,
   imports: [
     CommonModule,

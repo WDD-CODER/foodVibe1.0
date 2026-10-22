@@ -2,7 +2,7 @@ import { Directive, ElementRef, AfterViewInit, inject } from '@angular/core'
 
 /** Sets textarea height to fit content (auto-grow) on input and on init. */
 @Directive({
-  selector: 'textarea[textareaAutoGrow]',
+  selector: 'textarea[appTextareaAutoGrow]',
   host: { '(input)': 'onInput()', '(change)': 'onInput()' },
   standalone: true
 })

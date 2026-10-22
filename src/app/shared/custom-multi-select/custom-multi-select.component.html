@@ -3,7 +3,7 @@
   [class.open]="open()"
   [class.custom-multi-select-wrap--chip]="variant() === 'chip'"
   [class.custom-multi-select-wrap--titled]="triggerTitle()"
-  (clickOutside)="close()"
+  (appClickOutside)="close()"
 >
   @if (triggerTitle()) {
     <legend class="custom-multi-select-legend">

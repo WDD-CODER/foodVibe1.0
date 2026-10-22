@@ -81,7 +81,7 @@ const INGREDIENT_SEARCH_MIN_LENGTH = 2
 const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
 
 @Component({
-  selector: 'recipe-book-list',
+  selector: 'app-recipe-book-list',
   standalone: true,
   imports: [
     CommonModule,

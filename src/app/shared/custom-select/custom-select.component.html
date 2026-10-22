@@ -2,7 +2,7 @@
   class="custom-select-wrap"
   [class.open]="open()"
   [class.custom-select-wrap--chip]="variant() === 'chip'"
-  (clickOutside)="close()"
+  (appClickOutside)="close()"
 >
   @if (typeToFilter()) {
     <div

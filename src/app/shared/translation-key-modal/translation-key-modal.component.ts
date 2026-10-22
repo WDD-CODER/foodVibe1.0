@@ -18,7 +18,7 @@ import { TranslationKeyModalService } from '@services/translation-key-modal.serv
 import { finalizeEnglishKey } from '@utils/english-key.util'
 
 @Component({
-  selector: 'translation-key-modal',
+  selector: 'app-translation-key-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, ClickOutSideDirective, EnglishKeyInputDirective, TranslatePipe],
   templateUrl: './translation-key-modal.component.html',

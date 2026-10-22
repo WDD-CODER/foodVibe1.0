@@ -6,7 +6,7 @@ import { SelectOnFocusDirective } from './select-on-focus.directive'
 @Component({
   standalone: true,
   imports: [SelectOnFocusDirective],
-  template: '<input SelectOnFocus #inputField>'
+  template: '<input appSelectOnFocus #inputField>'
 })
 class TestHostComponent {
   @ViewChild('inputField') inputElement!: ElementRef<HTMLInputElement>
@@ -32,13 +32,13 @@ describe('SelectOnFocusDirective', () => {
 
   it('should select the text when the input is focused', () => {
     const inputEl = hostComponent.inputElement.nativeElement
-    
+
     // Create a spy on the native select method
     const selectSpy = spyOn(inputEl, 'select')
 
     // Trigger the focus event
     inputEl.dispatchEvent(new Event('focus'))
-    
+
     // Assert the spy was called
     expect(selectSpy).toHaveBeenCalled()
   })

@@ -1,5 +1,5 @@
 <app-list-shell
-  columnCarouselGroup
+  appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="onPanelToggled()"
   [gridTemplate]="'2fr 1fr 1fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
@@ -87,7 +87,7 @@
     <app-column-carousel-header>
       <div
         class="col-category c-grid-header-cell c-sortable-header"
-        columnSlide
+        appColumnSlide
         label="category"
         (click)="setSort('category')"
         (keydown.enter)="setSort('category')"
@@ -99,7 +99,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header"
-        columnSlide
+        appColumnSlide
         label="allergens"
         (click)="toggleAllergenExpandAll()"
         (keydown.enter)="toggleAllergenExpandAll()"
@@ -111,7 +111,7 @@
       </div>
       <div
         class="col-supplier c-grid-header-cell c-sortable-header"
-        columnSlide
+        appColumnSlide
         label="supplier"
         (click)="setSort('supplier')"
         (keydown.enter)="setSort('supplier')"
@@ -121,7 +121,7 @@
       >
         {{ 'supplier' | translatePipe }}
       </div>
-      <div class="col-unit c-grid-header-cell" columnSlide label="unit" role="presentation">
+      <div class="col-unit c-grid-header-cell" appColumnSlide label="unit" role="presentation">
         {{ 'unit' | translatePipe }}
       </div>
     </app-column-carousel-header>
@@ -212,15 +212,15 @@
           }
         </div>
         <app-column-carousel-cell>
-          <div class="col-category c-list-body-cell" columnSlide [label]="'category' | translatePipe">
+          <div class="col-category c-list-body-cell" appColumnSlide [label]="'category' | translatePipe">
             {{ row.category || '—' }}
           </div>
-          <div class="col-allergens c-list-body-cell" columnSlide [label]="'allergens' | translatePipe">
+          <div class="col-allergens c-list-body-cell" appColumnSlide [label]="'allergens' | translatePipe">
             @if (row.product.allergens.length) {
               <div
                 class="allergen-btn-wrapper"
                 [class.allergen-expanded-open]="allergenExpandAll_() || allergenPopoverProductId_() === row.product._id"
-                (clickOutside)="closeAllergenView($event)"
+                (appClickOutside)="closeAllergenView($event)"
               >
                 <button type="button" class="allergen-btn" (click)="toggleAllergenPopover(row.product._id)">
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
@@ -238,10 +238,10 @@
               <span class="placeholder-dash">—</span>
             }
           </div>
-          <div class="col-supplier c-list-body-cell" columnSlide [label]="'supplier' | translatePipe">
+          <div class="col-supplier c-list-body-cell" appColumnSlide [label]="'supplier' | translatePipe">
             {{ row.supplierNames || '—' }}
           </div>
-          <div class="col-unit c-list-body-cell" columnSlide [label]="'unit' | translatePipe">
+          <div class="col-unit c-list-body-cell" appColumnSlide [label]="'unit' | translatePipe">
             {{ row.product.baseUnit | translatePipe }}
           </div>
         </app-column-carousel-cell>

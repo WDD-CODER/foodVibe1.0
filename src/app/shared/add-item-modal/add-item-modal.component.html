@@ -1,6 +1,6 @@
 @if (isOpen_()) {
   <div class="c-modal-overlay" (click)="resetAndClose()">
-    <div class="c-modal-card" dir="rtl" (click)="$event.stopPropagation()" (clickOutside)="resetAndClose()">
+    <div class="c-modal-card" dir="rtl" (click)="$event.stopPropagation()" (appClickOutside)="resetAndClose()">
       @if (config(); as cfg) {
         <h3>{{ cfg.title | translatePipe }}</h3>
 

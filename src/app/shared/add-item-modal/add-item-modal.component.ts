@@ -6,7 +6,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { AddItemModalService } from '@services/add-item-modal.service'
 
 @Component({
-  selector: 'add-item-modal',
+  selector: 'app-add-item-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, ClickOutSideDirective, TranslatePipe],
   templateUrl: './add-item-modal.component.html',

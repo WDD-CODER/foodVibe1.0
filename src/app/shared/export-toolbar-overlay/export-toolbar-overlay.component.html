@@ -1,4 +1,4 @@
-<div class="export-toolbar-overlay no-print" (clickOutside)="closeRequest.emit()">
+<div class="export-toolbar-overlay no-print" (appClickOutside)="closeRequest.emit()">
   <div class="toolbar-export-grid" (click)="$event.stopPropagation()">
     <ng-content></ng-content>
   </div>

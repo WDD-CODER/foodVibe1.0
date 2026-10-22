@@ -1,5 +1,5 @@
 <app-list-shell
-  columnCarouselGroup
+  appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
   [gridTemplate]="
@@ -100,7 +100,7 @@
     <app-column-carousel-header>
       <div
         class="col-labels c-grid-header-cell c-sortable-header c-dense-chip-col"
-        columnSlide
+        appColumnSlide
         label="labels"
         (click)="labelsExpand.toggleAll()"
         (keydown.enter)="labelsExpand.toggleAll()"
@@ -112,7 +112,7 @@
       </div>
       <div
         class="col-allergens c-grid-header-cell c-sortable-header c-dense-chip-col"
-        columnSlide
+        appColumnSlide
         label="allergens"
         (click)="allergenExpand.toggleAll()"
         (keydown.enter)="allergenExpand.toggleAll()"
@@ -125,7 +125,7 @@
       @if (!hideDateColumn_()) {
         <div
           class="col-date c-grid-header-cell c-sortable-header"
-          columnSlide
+          appColumnSlide
           label="date_added"
           (click)="setSort('dateAdded')"
           (keydown.enter)="setSort('dateAdded')"
@@ -138,7 +138,7 @@
       }
       <div
         class="col-rating c-grid-header-cell c-sortable-header"
-        columnSlide
+        appColumnSlide
         label="rating"
         (click)="setSort('rating')"
         (keydown.enter)="setSort('rating')"
@@ -150,7 +150,7 @@
       </div>
       <div
         class="col-cost c-grid-header-cell c-sortable-header"
-        columnSlide
+        appColumnSlide
         label="cost"
         (click)="setSort('cost')"
         (keydown.enter)="setSort('cost')"
@@ -220,13 +220,13 @@
           {{ (isRecipeDish(row.recipe) ? 'dish' : 'preparation') | translatePipe }}
         </div>
         <app-column-carousel-cell>
-          <div class="col-labels c-list-body-cell c-dense-chip-col" columnSlide [label]="'labels' | translatePipe">
+          <div class="col-labels c-list-body-cell c-dense-chip-col" appColumnSlide [label]="'labels' | translatePipe">
             @if (row.labels.length) {
               <div
                 class="labels-btn-wrapper"
                 [class.labels-expanded-open]="labelsExpand.isExpanded(row.recipe._id)"
                 (click)="labelsExpand.toggleOne(row.recipe._id); $event.stopPropagation()"
-                (clickOutside)="closeLabelsView($event)"
+                (appClickOutside)="closeLabelsView($event)"
                 role="button"
                 tabindex="0"
                 (keydown.enter)="labelsExpand.toggleOne(row.recipe._id)"
@@ -254,14 +254,14 @@
           </div>
           <div
             class="col-allergens c-list-body-cell c-dense-chip-col"
-            columnSlide
+            appColumnSlide
             [label]="'allergens' | translatePipe"
           >
             @if (row.allergens.length) {
               <div
                 class="allergen-btn-wrapper"
                 [class.allergen-expanded-open]="allergenExpand.isExpanded(row.recipe._id)"
-                (clickOutside)="closeAllergenView($event)"
+                (appClickOutside)="closeAllergenView($event)"
               >
                 <button type="button" class="allergen-btn" (click)="allergenExpand.toggleOne(row.recipe._id)">
                   <lucide-icon name="shield-alert" [size]="16"></lucide-icon>
@@ -282,7 +282,7 @@
           @if (!hideDateColumn_()) {
             <div
               class="col-date c-list-body-cell date-cell-wrap"
-              columnSlide
+              appColumnSlide
               [label]="'date_added' | translatePipe"
               (mouseenter)="tooltips.showDate(row.recipe._id, $event)"
               (mouseleave)="tooltips.hideDate()"
@@ -295,7 +295,7 @@
           }
           <div
             class="col-rating c-list-body-cell"
-            columnSlide
+            appColumnSlide
             [label]="'rating' | translatePipe"
             (click)="$event.stopPropagation()"
           >
@@ -308,7 +308,7 @@
           </div>
           <div
             class="col-cost c-list-body-cell cost-cell-wrap"
-            columnSlide
+            appColumnSlide
             [label]="'cost' | translatePipe"
             (mouseenter)="tooltips.showCost(row.recipe._id, $event)"
             (mouseleave)="tooltips.hideCost()"
@@ -514,7 +514,7 @@
     <div
       class="cost-tooltip cost-tooltip-fixed"
       [id]="'cost-tooltip-' + recipe._id"
-      (clickOutside)="tooltips.closeCostTap()"
+      (appClickOutside)="tooltips.closeCostTap()"
       [style.top.px]="anchor.bottom + 4"
       [style.left.px]="anchor.left + anchor.width / 2"
     >

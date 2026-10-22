@@ -6,19 +6,19 @@
   }
   <router-outlet></router-outlet>
 </div>
-<user-msg />
+<app-user-msg />
 
 @defer (when unitRegistry.isCreatorOpen_()) {
-  <unit-creator-modal />
+  <app-unit-creator-modal />
 }
 @defer (when translationKeyModal.isOpen_()) {
-  <translation-key-modal />
+  <app-translation-key-modal />
 }
 @defer (when labelCreationModal.isOpen_()) {
   <app-label-creation-modal />
 }
 @defer (when addItemModal.isOpen_()) {
-  <add-item-modal />
+  <app-add-item-modal />
 }
 @defer (when quickAddProductModal.isOpen_()) {
   <app-quick-add-product-modal />
@@ -27,7 +27,7 @@
   <app-quick-edit-product-modal />
 }
 @defer (when addEquipmentModal.isOpen_()) {
-  <add-equipment-modal />
+  <app-add-equipment-modal />
 }
 @defer (when globalSpecificModal.isOpen()) {
   <app-global-specific-modal />

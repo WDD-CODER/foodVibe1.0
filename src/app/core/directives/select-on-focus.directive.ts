@@ -1,7 +1,7 @@
 import { Directive, ElementRef, inject } from '@angular/core'
 
 @Directive({
-  selector: '[SelectOnFocus]',
+  selector: '[appSelectOnFocus]',
   host: { '(focus)': 'onFocus()' },
   standalone: true
 })

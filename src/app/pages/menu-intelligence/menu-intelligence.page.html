@@ -30,7 +30,7 @@
 
         <!-- Tag line: event type · serving type -->
         <div class="event-tag-line">
-          <div class="event-type-chip-wrap" (clickOutside)="closeEventTypeDropdown()">
+          <div class="event-type-chip-wrap" (appClickOutside)="closeEventTypeDropdown()">
             <button
               type="button"
               class="event-chip"
@@ -169,7 +169,7 @@
 
             <div class="section-header">
               @if (sectionSearchOpen_() === sectionIndex) {
-              <div class="section-search-wrap" (clickOutside)="closeSectionSearch()">
+              <div class="section-search-wrap" (appClickOutside)="closeSectionSearch()">
                 <app-search-combobox
                   class="section-search"
                   variant="plain"

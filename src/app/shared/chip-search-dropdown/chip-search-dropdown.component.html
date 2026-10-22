@@ -1,7 +1,7 @@
 <div
   class="csd-box"
   [class.no-chips]="selected().length === 0"
-  (clickOutside)="onBlurred()"
+  (appClickOutside)="onBlurred()"
   (click)="onBoxClick($event)"
 >
   <div class="csd-chips-and-input">

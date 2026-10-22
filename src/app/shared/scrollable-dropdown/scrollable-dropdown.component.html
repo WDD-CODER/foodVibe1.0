@@ -1,8 +1,5 @@
 <div class="c-dropdown">
-  <div
-    class="c-dropdown__list"
-    scrollIndicators
-    [style.max-height.px]="maxHeight()">
+  <div class="c-dropdown__list" appScrollIndicators [style.max-height.px]="maxHeight()">
     <ng-content></ng-content>
   </div>
   <ng-content select="[slot=footer]"></ng-content>

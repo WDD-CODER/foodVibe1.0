@@ -72,7 +72,7 @@ export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
 
 @Component({
-  selector: 'inventory-product-list',
+  selector: 'app-inventory-product-list',
   standalone: true,
   imports: [
     CommonModule,

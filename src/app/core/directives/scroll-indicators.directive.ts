@@ -1,7 +1,7 @@
 import { AfterViewInit, DestroyRef, Directive, ElementRef, inject } from '@angular/core'
 
 @Directive({
-  selector: '[scrollIndicators]',
+  selector: '[appScrollIndicators]',
   host: { '(scroll)': 'onScroll()', '(window:resize)': 'onResize()' },
   standalone: true
 })

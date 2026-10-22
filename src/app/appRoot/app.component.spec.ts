@@ -16,7 +16,7 @@ import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 
 // 1. Rigorous Mock to replace the problematic production component
 @Component({
-  selector: 'unit-creator-modal',
+  selector: 'app-unit-creator-modal',
   standalone: true,
   template: '<div class="mock-modal">Mock Unit Modal</div>'
 })
@@ -77,7 +77,7 @@ describe('AppComponent', () => {
     // Eager shell only — unit-creator-modal is behind @defer (when isCreatorOpen_)
     expect(compiled.querySelector('app-header')).toBeTruthy()
     expect(compiled.querySelector('router-outlet')).toBeTruthy()
-    expect(compiled.querySelector('user-msg')).toBeTruthy()
+    expect(compiled.querySelector('app-user-msg')).toBeTruthy()
     expect(compiled.querySelector('app-confirm-modal')).toBeTruthy()
     expect(compiled.querySelector('app-hero-fab')).toBeTruthy()
   })

@@ -11,17 +11,17 @@ import { swipeDirection } from './column-carousel-swipe'
   standalone: true,
   imports: [...COLUMN_CAROUSEL],
   template: `
-    <div columnCarouselGroup #group="columnCarouselGroup" dir="rtl">
+    <div appColumnCarouselGroup #group="columnCarouselGroup" dir="rtl">
       <app-column-carousel-header>
-        <div columnSlide label="a">A</div>
-        <div columnSlide label="b">B</div>
-        <div columnSlide label="c">C</div>
+        <div appColumnSlide label="a">A</div>
+        <div appColumnSlide label="b">B</div>
+        <div appColumnSlide label="c">C</div>
       </app-column-carousel-header>
       @for (row of rows; track row) {
         <app-column-carousel-cell>
-          <div columnSlide label="a">{{ row }}-a</div>
-          <div columnSlide label="b">{{ row }}-b</div>
-          <div columnSlide label="c">{{ row }}-c</div>
+          <div appColumnSlide label="a">{{ row }}-a</div>
+          <div appColumnSlide label="b">{{ row }}-b</div>
+          <div appColumnSlide label="c">{{ row }}-c</div>
         </app-column-carousel-cell>
       }
     </div>

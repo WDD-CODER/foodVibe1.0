@@ -9,24 +9,23 @@
     (mouseup)="onCtrlMouseUp()"
     (mouseleave)="onCtrlMouseLeave()"
     [attr.aria-label]="'decrease' | translatePipe"
-  >−</button>
-
-  <div
-    class="value-cell"
-    [style.--value-width.px]="valueWidthPx_()"
   >
-    <span #mirrorSpan class="value-mirror" aria-hidden="true">{{ (inputValue_() || displayValue_()) }}</span>
+    −
+  </button>
+
+  <div class="value-cell" [style.--value-width.px]="valueWidthPx_()">
+    <span #mirrorSpan class="value-mirror" aria-hidden="true">{{ inputValue_() || displayValue_() }}</span>
     <input
       #valueInput
       type="number"
       class="value-input"
-      SelectOnFocus
+      appSelectOnFocus
       [value]="value()"
       (input)="onInput($event)"
       (blur)="onBlur($event)"
       (keydown)="onKeydown($event)"
       (keydown.enter)="onEnterKey($event)"
-      [step]="stepOptions()?.integerOnly ? 1 : (stepOptions()?.unit ? 0.01 : 0.001)"
+      [step]="stepOptions()?.integerOnly ? 1 : stepOptions()?.unit ? 0.01 : 0.001"
     />
   </div>
 
@@ -40,5 +39,7 @@
     (mouseup)="onCtrlMouseUp()"
     (mouseleave)="onCtrlMouseLeave()"
     [attr.aria-label]="'increase' | translatePipe"
-  >+</button>
+  >
+    +
+  </button>
 </div>

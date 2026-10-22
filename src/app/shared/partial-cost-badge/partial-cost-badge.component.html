@@ -1,7 +1,7 @@
 @if (missing().length) {
   <span
     class="partial-cost"
-    (clickOutside)="close()"
+    (appClickOutside)="close()"
     (keydown.escape)="close()"
     (mouseenter)="onEnter()"
     (mouseleave)="onLeave()"
