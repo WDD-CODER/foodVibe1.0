@@ -1,4 +1,5 @@
-.ai-menu-modal-card {
+/* The card lives in app-modal-shell (its own view), so reach it through :host */
+:host ::ng-deep .ai-menu-modal-card {
   inline-size: min(640px, 94vw);
   max-block-size: 88dvh;
   overflow-y: auto;

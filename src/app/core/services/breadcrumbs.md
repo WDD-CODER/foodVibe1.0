@@ -37,6 +37,7 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `keyboard-inset.service.ts` | Detects the on-screen keyboard (visualViewport) and exposes the inset as `--kb-inset` / `kb-open` | KeyboardInsetService, KEYBOARD_OPEN_THRESHOLD_PX |
 | `user-msg.service.ts` | Global user messages | UserMsgService |
 | `logging.service.ts` | App-wide logging | LoggingService, LogEvent |
+| `modal-controller.ts` | Signal-only open/close/result controller every popup service composes + the shell stack for Escape | ModalController, pushModalShell, popModalShell, isTopModalShell |
 | `add-item-modal.service.ts` | Add-item modal orchestration | AddItemModalService, AddItemConfig |
 | `add-supplier-flow.service.ts` | Add-supplier from product form | AddSupplierFlowService |
 | `add-equipment-modal.service.ts` | Add-equipment modal | AddEquipmentModalService |

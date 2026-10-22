@@ -25,11 +25,20 @@ import { Product } from '@models/product.model'
 import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { LoaderComponent } from '../loader/loader.component'
 import { GeminiService } from '@services/gemini.service'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
   selector: 'app-quick-add-product-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent, LoaderComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    LoaderComponent,
+    ModalShellComponent
+  ],
   templateUrl: './quick-add-product-modal.component.html',
   styleUrl: './quick-add-product-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

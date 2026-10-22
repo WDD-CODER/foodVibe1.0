@@ -1,389 +1,392 @@
 @if (modalService.isOpen()) {
-  <div class="c-modal-overlay" (click)="onClose()">
-    <div class="c-modal-card ai-product-modal-card" dir="rtl" (click)="$event.stopPropagation()">
-      <div class="ai-product-header">
-        <h2 class="ai-product-title">
-          {{ (modalService.mode() === 'edit' ? 'ai_product_title_edit' : 'ai_product_title_create') | translatePipe }}
-        </h2>
-        <button type="button" class="c-icon-btn" (click)="onClose()">
-          <lucide-icon name="x" [size]="20"></lucide-icon>
-        </button>
-      </div>
+  <app-modal-shell
+    cardClass="ai-product-modal-card"
+    labelledBy="ai-product-modal-title"
+    [dismissible]="status_() !== 'sending'"
+    (dismissed)="onClose()"
+  >
+    <div class="ai-product-header">
+      <h2 id="ai-product-modal-title" class="ai-product-title">
+        {{ (modalService.mode() === 'edit' ? 'ai_product_title_edit' : 'ai_product_title_create') | translatePipe }}
+      </h2>
+      <button type="button" class="c-icon-btn" (click)="onClose()">
+        <lucide-icon name="x" [size]="20"></lucide-icon>
+      </button>
+    </div>
 
-      <!-- Usage indicator -->
-      <div class="ai-product-usage-bar" [attr.data-status]="usageColor_()">
-        <span class="ai-product-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
-        <span class="ai-product-usage-count">
-          {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
-          @if (modelsAvailableLabel_()) {
-            · {{ modelsAvailableLabel_() }}
+    <!-- Usage indicator -->
+    <div class="ai-product-usage-bar" [attr.data-status]="usageColor_()">
+      <span class="ai-product-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
+      <span class="ai-product-usage-count">
+        {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
+        @if (modelsAvailableLabel_()) {
+          · {{ modelsAvailableLabel_() }}
+        }
+      </span>
+      <div class="ai-product-usage-track">
+        <div class="ai-product-usage-fill" [style.width.%]="usageFillPercent_()"></div>
+      </div>
+    </div>
+
+    @if (modalService.mode() === 'edit') {
+      <!-- ── Edit mode ── -->
+      @if (!patch_()) {
+        <div class="ai-product-prompt-panel">
+          <textarea
+            class="ai-product-textarea"
+            dir="auto"
+            [placeholder]="'ai_product_instruction_placeholder' | translatePipe"
+            [value]="instruction()"
+            (input)="instruction.set($any($event.target).value)"
+            rows="4"
+            [disabled]="status_() === 'sending'"
+          ></textarea>
+
+          @if (status_() !== 'idle') {
+            <div
+              class="ai-product-status-bar"
+              [class.ai-product-status--sending]="status_() === 'sending'"
+              [class.ai-product-status--error]="status_() === 'error'"
+            >
+              @if (status_() === 'sending') {
+                <app-loader size="small" [inline]="true" />
+                <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
+              } @else if (status_() === 'error') {
+                <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                <span>{{ errorKey_() | translatePipe }}</span>
+                @if (modelSwitchLabel_()) {
+                  <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
+                    {{ modelSwitchLabel_() }}
+                  </button>
+                }
+              }
+            </div>
           }
-        </span>
-        <div class="ai-product-usage-track">
-          <div class="ai-product-usage-fill" [style.width.%]="usageFillPercent_()"></div>
-        </div>
-      </div>
 
-      @if (modalService.mode() === 'edit') {
-        <!-- ── Edit mode ── -->
-        @if (!patch_()) {
-          <div class="ai-product-prompt-panel">
+          <div class="ai-product-footer">
+            <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
+            <button
+              type="button"
+              class="c-btn-primary"
+              (click)="onEdit()"
+              [disabled]="isLoading_() || !instruction().trim()"
+            >
+              @if (isLoading_()) {
+                <app-loader size="small" [inline]="true" />
+              }
+              {{ 'ai_product_generate' | translatePipe }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Patch diff preview -->
+        <div class="ai-product-patch-panel">
+          <ul class="ai-product-patch-list">
+            @for (entry of diffEntries_(); track entry.label) {
+              <li class="ai-product-patch-item">
+                <span class="ai-product-patch-label">{{ entry.label }}</span>
+                <span class="ai-product-patch-from">{{ entry.from }}</span>
+                <span class="ai-product-patch-arrow">→</span>
+                <span class="ai-product-patch-to">{{ entry.to }}</span>
+              </li>
+            }
+            @if (diffEntries_().length === 0) {
+              <li class="ai-product-patch-item ai-product-patch-item--empty">
+                {{ 'ai_no_changes_detected' | translatePipe }}
+              </li>
+            }
+          </ul>
+          <div class="ai-product-footer">
+            <button type="button" class="c-btn-ghost" (click)="onEditAgain()">
+              {{ 'ai_product_generate_again' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onApplyPatch()">
+              {{ 'ai_product_apply' | translatePipe }}
+            </button>
+          </div>
+        </div>
+      }
+    } @else {
+      <!-- ── Create mode ── -->
+      @if (!draft_()) {
+        <div class="ai-product-prompt-panel">
+          <!-- Input mode toggle -->
+          <div class="ai-product-mode-toggle" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab"
+              [class.active]="inputMode_() === 'text'"
+              [attr.aria-selected]="inputMode_() === 'text'"
+              [disabled]="status_() === 'sending'"
+              (click)="inputMode_.set('text')"
+            >
+              <lucide-icon name="type" [size]="14"></lucide-icon>
+              {{ 'ai_product_from_text' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab"
+              [class.active]="inputMode_() === 'image'"
+              [attr.aria-selected]="inputMode_() === 'image'"
+              [disabled]="status_() === 'sending'"
+              (click)="inputMode_.set('image')"
+            >
+              <lucide-icon name="camera" [size]="14"></lucide-icon>
+              {{ 'ai_product_from_image' | translatePipe }}
+            </button>
+          </div>
+
+          @if (inputMode_() === 'text') {
             <textarea
               class="ai-product-textarea"
               dir="auto"
-              [placeholder]="'ai_product_instruction_placeholder' | translatePipe"
-              [value]="instruction()"
-              (input)="instruction.set($any($event.target).value)"
+              [placeholder]="'ai_product_prompt_placeholder' | translatePipe"
+              [value]="prompt_()"
+              (input)="prompt_.set($any($event.target).value)"
               rows="4"
               [disabled]="status_() === 'sending'"
             ></textarea>
-
-            @if (status_() !== 'idle') {
-              <div
-                class="ai-product-status-bar"
-                [class.ai-product-status--sending]="status_() === 'sending'"
-                [class.ai-product-status--error]="status_() === 'error'"
+          } @else {
+            <div class="ai-product-image-row">
+              <label
+                class="ai-product-image-upload"
+                [class.ai-product-image-upload--disabled]="status_() === 'sending'"
               >
-                @if (status_() === 'sending') {
-                  <app-loader size="small" [inline]="true" />
-                  <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
-                } @else if (status_() === 'error') {
-                  <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                  <span>{{ errorKey_() | translatePipe }}</span>
-                  @if (modelSwitchLabel_()) {
-                    <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
-                      {{ modelSwitchLabel_() }}
-                    </button>
-                  }
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  hidden
+                  [disabled]="status_() === 'sending'"
+                  (change)="onImageSelected($event)"
+                />
+                @if (imagePreviewUrl_()) {
+                  <img
+                    class="ai-product-image-preview"
+                    [src]="imagePreviewUrl_()!"
+                    [alt]="'ai_product_photo_alt' | translatePipe"
+                  />
+                } @else {
+                  <lucide-icon name="camera" [size]="32"></lucide-icon>
+                  <span>{{ 'ai_product_photo_hint' | translatePipe }}</span>
                 }
-              </div>
-            }
+              </label>
+              @if (imageFile_() && status_() !== 'sending') {
+                <button type="button" class="c-icon-btn" (click)="onClearImage()">
+                  <lucide-icon name="x" [size]="16"></lucide-icon>
+                </button>
+              }
+            </div>
+            <input
+              class="c-input"
+              dir="auto"
+              [placeholder]="'ai_product_photo_hint_placeholder' | translatePipe"
+              [value]="imageHint_()"
+              (input)="imageHint_.set($any($event.target).value)"
+              [disabled]="status_() === 'sending'"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+          }
 
-            <div class="ai-product-footer">
-              <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
-              <button
-                type="button"
-                class="c-btn-primary"
-                (click)="onEdit()"
-                [disabled]="isLoading_() || !instruction().trim()"
-              >
-                @if (isLoading_()) {
-                  <app-loader size="small" [inline]="true" />
+          @if (status_() !== 'idle') {
+            <div
+              class="ai-product-status-bar"
+              [class.ai-product-status--sending]="status_() === 'sending'"
+              [class.ai-product-status--error]="status_() === 'error'"
+            >
+              @if (status_() === 'sending') {
+                <app-loader size="small" [inline]="true" />
+                <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
+              } @else if (status_() === 'error') {
+                <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                <span>{{ errorKey_() | translatePipe }}</span>
+                @if (modelSwitchLabel_()) {
+                  <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
+                    {{ modelSwitchLabel_() }}
+                  </button>
                 }
-                {{ 'ai_product_generate' | translatePipe }}
-              </button>
-            </div>
-          </div>
-        } @else {
-          <!-- Patch diff preview -->
-          <div class="ai-product-patch-panel">
-            <ul class="ai-product-patch-list">
-              @for (entry of diffEntries_(); track entry.label) {
-                <li class="ai-product-patch-item">
-                  <span class="ai-product-patch-label">{{ entry.label }}</span>
-                  <span class="ai-product-patch-from">{{ entry.from }}</span>
-                  <span class="ai-product-patch-arrow">→</span>
-                  <span class="ai-product-patch-to">{{ entry.to }}</span>
-                </li>
               }
-              @if (diffEntries_().length === 0) {
-                <li class="ai-product-patch-item ai-product-patch-item--empty">
-                  {{ 'ai_no_changes_detected' | translatePipe }}
-                </li>
-              }
-            </ul>
-            <div class="ai-product-footer">
-              <button type="button" class="c-btn-ghost" (click)="onEditAgain()">
-                {{ 'ai_product_generate_again' | translatePipe }}
-              </button>
-              <button type="button" class="c-btn-primary" (click)="onApplyPatch()">
-                {{ 'ai_product_apply' | translatePipe }}
-              </button>
             </div>
+          }
+
+          <div class="ai-product-footer">
+            <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
+            <button
+              type="button"
+              class="c-btn-primary"
+              (click)="onGenerate()"
+              [disabled]="isLoading_() || !canGenerate_()"
+            >
+              @if (isLoading_()) {
+                <app-loader size="small" [inline]="true" />
+              }
+              {{ 'ai_product_generate' | translatePipe }}
+            </button>
           </div>
-        }
+        </div>
       } @else {
-        <!-- ── Create mode ── -->
-        @if (!draft_()) {
-          <div class="ai-product-prompt-panel">
-            <!-- Input mode toggle -->
-            <div class="ai-product-mode-toggle" role="tablist">
-              <button
-                type="button"
-                role="tab"
-                class="c-chip c-chip--tab"
-                [class.active]="inputMode_() === 'text'"
-                [attr.aria-selected]="inputMode_() === 'text'"
-                [disabled]="status_() === 'sending'"
-                (click)="inputMode_.set('text')"
-              >
-                <lucide-icon name="type" [size]="14"></lucide-icon>
-                {{ 'ai_product_from_text' | translatePipe }}
-              </button>
-              <button
-                type="button"
-                role="tab"
-                class="c-chip c-chip--tab"
-                [class.active]="inputMode_() === 'image'"
-                [attr.aria-selected]="inputMode_() === 'image'"
-                [disabled]="status_() === 'sending'"
-                (click)="inputMode_.set('image')"
-              >
-                <lucide-icon name="camera" [size]="14"></lucide-icon>
-                {{ 'ai_product_from_image' | translatePipe }}
-              </button>
-            </div>
+        <!-- Draft editor — editable before applying -->
+        <div class="ai-product-editor">
+          <!-- Name -->
+          <div class="editor-field">
+            <label class="editor-label">{{ 'ai_product_name_field' | translatePipe }}</label>
+            <input
+              class="c-input"
+              [value]="draft_()!.nameHebrew"
+              (input)="setDraftField('nameHebrew', $any($event.target).value)"
+              dir="rtl"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+            />
+          </div>
 
-            @if (inputMode_() === 'text') {
-              <textarea
-                class="ai-product-textarea"
-                dir="auto"
-                [placeholder]="'ai_product_prompt_placeholder' | translatePipe"
-                [value]="prompt_()"
-                (input)="prompt_.set($any($event.target).value)"
-                rows="4"
-                [disabled]="status_() === 'sending'"
-              ></textarea>
-            } @else {
-              <div class="ai-product-image-row">
-                <label
-                  class="ai-product-image-upload"
-                  [class.ai-product-image-upload--disabled]="status_() === 'sending'"
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    capture="environment"
-                    hidden
-                    [disabled]="status_() === 'sending'"
-                    (change)="onImageSelected($event)"
-                  />
-                  @if (imagePreviewUrl_()) {
-                    <img
-                      class="ai-product-image-preview"
-                      [src]="imagePreviewUrl_()!"
-                      [alt]="'ai_product_photo_alt' | translatePipe"
-                    />
-                  } @else {
-                    <lucide-icon name="camera" [size]="32"></lucide-icon>
-                    <span>{{ 'ai_product_photo_hint' | translatePipe }}</span>
-                  }
-                </label>
-                @if (imageFile_() && status_() !== 'sending') {
-                  <button type="button" class="c-icon-btn" (click)="onClearImage()">
-                    <lucide-icon name="x" [size]="16"></lucide-icon>
-                  </button>
-                }
-              </div>
+          <!-- Base unit -->
+          <div class="editor-field">
+            <label class="editor-label">{{ 'ai_product_base_unit_label' | translatePipe }}</label>
+            <select
+              class="c-input editor-select"
+              [value]="draft_()!.baseUnit"
+              (change)="setDraftField('baseUnit', $any($event.target).value)"
+              dir="ltr"
+            >
+              @for (unit of CANONICAL_UNITS; track unit) {
+                <option [value]="unit">{{ unit }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Yield factor -->
+          <div class="editor-field">
+            <label class="editor-label">{{ 'ai_product_yield_label' | translatePipe }}</label>
+            <div class="editor-num-row">
               <input
-                class="c-input"
-                dir="auto"
-                [placeholder]="'ai_product_photo_hint_placeholder' | translatePipe"
-                [value]="imageHint_()"
-                (input)="imageHint_.set($any($event.target).value)"
-                [disabled]="status_() === 'sending'"
-                autocomplete="off"
-                autocorrect="off"
-                autocapitalize="off"
-                spellcheck="false"
+                class="c-input editor-num-input"
+                type="number"
+                min="0"
+                max="1"
+                step="0.01"
+                [value]="draft_()!.yieldFactor"
+                (input)="setDraftField('yieldFactor', +$any($event.target).value)"
               />
-            }
-
-            @if (status_() !== 'idle') {
-              <div
-                class="ai-product-status-bar"
-                [class.ai-product-status--sending]="status_() === 'sending'"
-                [class.ai-product-status--error]="status_() === 'error'"
-              >
-                @if (status_() === 'sending') {
-                  <app-loader size="small" [inline]="true" />
-                  <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
-                } @else if (status_() === 'error') {
-                  <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                  <span>{{ errorKey_() | translatePipe }}</span>
-                  @if (modelSwitchLabel_()) {
-                    <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
-                      {{ modelSwitchLabel_() }}
-                    </button>
-                  }
-                }
-              </div>
-            }
-
-            <div class="ai-product-footer">
-              <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
-              <button
-                type="button"
-                class="c-btn-primary"
-                (click)="onGenerate()"
-                [disabled]="isLoading_() || !canGenerate_()"
-              >
-                @if (isLoading_()) {
-                  <app-loader size="small" [inline]="true" />
-                }
-                {{ 'ai_product_generate' | translatePipe }}
-              </button>
+              <span class="editor-num-hint">{{ (draft_()!.yieldFactor * 100).toFixed(0) }}%</span>
             </div>
           </div>
-        } @else {
-          <!-- Draft editor — editable before applying -->
-          <div class="ai-product-editor">
-            <!-- Name -->
-            <div class="editor-field">
-              <label class="editor-label">{{ 'ai_product_name_field' | translatePipe }}</label>
+
+          <!-- Min stock + expiry -->
+          <div class="editor-field-row">
+            <div class="editor-field editor-field--half">
+              <label class="editor-label">{{ 'ai_patch_min_stock' | translatePipe }}</label>
               <input
-                class="c-input"
-                [value]="draft_()!.nameHebrew"
-                (input)="setDraftField('nameHebrew', $any($event.target).value)"
-                dir="rtl"
-                autocomplete="off"
-                autocorrect="off"
-                autocapitalize="off"
-                spellcheck="false"
+                class="c-input editor-num-input"
+                type="number"
+                min="0"
+                [value]="draft_()!.minStockLevel"
+                (input)="setDraftField('minStockLevel', +$any($event.target).value)"
               />
             </div>
-
-            <!-- Base unit -->
-            <div class="editor-field">
-              <label class="editor-label">{{ 'ai_product_base_unit_label' | translatePipe }}</label>
-              <select
-                class="c-input editor-select"
-                [value]="draft_()!.baseUnit"
-                (change)="setDraftField('baseUnit', $any($event.target).value)"
-                dir="ltr"
-              >
-                @for (unit of CANONICAL_UNITS; track unit) {
-                  <option [value]="unit">{{ unit }}</option>
-                }
-              </select>
-            </div>
-
-            <!-- Yield factor -->
-            <div class="editor-field">
-              <label class="editor-label">{{ 'ai_product_yield_label' | translatePipe }}</label>
-              <div class="editor-num-row">
-                <input
-                  class="c-input editor-num-input"
-                  type="number"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  [value]="draft_()!.yieldFactor"
-                  (input)="setDraftField('yieldFactor', +$any($event.target).value)"
-                />
-                <span class="editor-num-hint">{{ (draft_()!.yieldFactor * 100).toFixed(0) }}%</span>
-              </div>
-            </div>
-
-            <!-- Min stock + expiry -->
-            <div class="editor-field-row">
-              <div class="editor-field editor-field--half">
-                <label class="editor-label">{{ 'ai_patch_min_stock' | translatePipe }}</label>
-                <input
-                  class="c-input editor-num-input"
-                  type="number"
-                  min="0"
-                  [value]="draft_()!.minStockLevel"
-                  (input)="setDraftField('minStockLevel', +$any($event.target).value)"
-                />
-              </div>
-              <div class="editor-field editor-field--half">
-                <label class="editor-label">{{ 'ai_patch_expiry_days' | translatePipe }}</label>
-                <input
-                  class="c-input editor-num-input"
-                  type="number"
-                  min="0"
-                  [value]="draft_()!.expiryDaysDefault"
-                  (input)="setDraftField('expiryDaysDefault', +$any($event.target).value)"
-                />
-              </div>
-            </div>
-
-            <!-- Categories -->
-            <div class="editor-field">
-              <label class="editor-label">{{ 'ai_product_categories_label' | translatePipe }}</label>
-              <div class="editor-chips-row">
-                @for (cat of draft_()!.categories; track cat) {
-                  <span class="c-chip c-chip--removable">
-                    {{ cat | translatePipe }}
-                    <button
-                      type="button"
-                      class="c-chip__remove"
-                      (click)="removeCategory(cat)"
-                      [attr.aria-label]="'remove' | translatePipe"
-                    >
-                      ×
-                    </button>
-                  </span>
-                }
-                <div class="editor-chip-add">
-                  <input
-                    class="editor-chip-input"
-                    [value]="newCategory_()"
-                    (input)="newCategory_.set($any($event.target).value)"
-                    (keydown.enter)="addCategory(); $event.preventDefault()"
-                    [placeholder]="'metadata_add_category' | translatePipe"
-                    dir="rtl"
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                  />
-                  <button type="button" class="c-icon-btn" (click)="addCategory()" [disabled]="!newCategory_().trim()">
-                    <lucide-icon name="plus" [size]="14"></lucide-icon>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Allergens -->
-            <div class="editor-field">
-              <label class="editor-label">{{ 'ai_product_allergens_label' | translatePipe }}</label>
-              <div class="editor-chips-row">
-                @for (al of draft_()!.allergens; track al) {
-                  <span class="c-chip c-chip--removable c-chip--amber">
-                    {{ al | translatePipe }}
-                    <button
-                      type="button"
-                      class="c-chip__remove"
-                      (click)="removeAllergen(al)"
-                      [attr.aria-label]="'remove' | translatePipe"
-                    >
-                      ×
-                    </button>
-                  </span>
-                }
-                <div class="editor-chip-add">
-                  <input
-                    class="editor-chip-input"
-                    [value]="newAllergen_()"
-                    (input)="newAllergen_.set($any($event.target).value)"
-                    (keydown.enter)="addAllergen(); $event.preventDefault()"
-                    [placeholder]="'add_new_allergen' | translatePipe"
-                    dir="rtl"
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                  />
-                  <button type="button" class="c-icon-btn" (click)="addAllergen()" [disabled]="!newAllergen_().trim()">
-                    <lucide-icon name="plus" [size]="14"></lucide-icon>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="ai-product-footer">
-              <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
-                {{ 'ai_product_generate_again' | translatePipe }}
-              </button>
-              <button type="button" class="c-btn-primary" (click)="onApply()">
-                {{ 'ai_product_apply' | translatePipe }}
-              </button>
+            <div class="editor-field editor-field--half">
+              <label class="editor-label">{{ 'ai_patch_expiry_days' | translatePipe }}</label>
+              <input
+                class="c-input editor-num-input"
+                type="number"
+                min="0"
+                [value]="draft_()!.expiryDaysDefault"
+                (input)="setDraftField('expiryDaysDefault', +$any($event.target).value)"
+              />
             </div>
           </div>
-        }
+
+          <!-- Categories -->
+          <div class="editor-field">
+            <label class="editor-label">{{ 'ai_product_categories_label' | translatePipe }}</label>
+            <div class="editor-chips-row">
+              @for (cat of draft_()!.categories; track cat) {
+                <span class="c-chip c-chip--removable">
+                  {{ cat | translatePipe }}
+                  <button
+                    type="button"
+                    class="c-chip__remove"
+                    (click)="removeCategory(cat)"
+                    [attr.aria-label]="'remove' | translatePipe"
+                  >
+                    ×
+                  </button>
+                </span>
+              }
+              <div class="editor-chip-add">
+                <input
+                  class="editor-chip-input"
+                  [value]="newCategory_()"
+                  (input)="newCategory_.set($any($event.target).value)"
+                  (keydown.enter)="addCategory(); $event.preventDefault()"
+                  [placeholder]="'metadata_add_category' | translatePipe"
+                  dir="rtl"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                />
+                <button type="button" class="c-icon-btn" (click)="addCategory()" [disabled]="!newCategory_().trim()">
+                  <lucide-icon name="plus" [size]="14"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Allergens -->
+          <div class="editor-field">
+            <label class="editor-label">{{ 'ai_product_allergens_label' | translatePipe }}</label>
+            <div class="editor-chips-row">
+              @for (al of draft_()!.allergens; track al) {
+                <span class="c-chip c-chip--removable c-chip--amber">
+                  {{ al | translatePipe }}
+                  <button
+                    type="button"
+                    class="c-chip__remove"
+                    (click)="removeAllergen(al)"
+                    [attr.aria-label]="'remove' | translatePipe"
+                  >
+                    ×
+                  </button>
+                </span>
+              }
+              <div class="editor-chip-add">
+                <input
+                  class="editor-chip-input"
+                  [value]="newAllergen_()"
+                  (input)="newAllergen_.set($any($event.target).value)"
+                  (keydown.enter)="addAllergen(); $event.preventDefault()"
+                  [placeholder]="'add_new_allergen' | translatePipe"
+                  dir="rtl"
+                  autocomplete="off"
+                  autocorrect="off"
+                  autocapitalize="off"
+                  spellcheck="false"
+                />
+                <button type="button" class="c-icon-btn" (click)="addAllergen()" [disabled]="!newAllergen_().trim()">
+                  <lucide-icon name="plus" [size]="14"></lucide-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-product-footer">
+            <button type="button" class="c-btn-ghost" (click)="onGenerateAgain()">
+              {{ 'ai_product_generate_again' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onApply()">
+              {{ 'ai_product_apply' | translatePipe }}
+            </button>
+          </div>
+        </div>
       }
-    </div>
-  </div>
+    }
+  </app-modal-shell>
 }

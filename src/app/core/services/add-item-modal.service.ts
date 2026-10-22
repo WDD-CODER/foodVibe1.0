@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core'
-import { Subject, firstValueFrom } from 'rxjs'
+import { ModalController } from './modal-controller'
 
 export interface AddItemConfig {
   title: string
@@ -12,32 +12,29 @@ export interface AddItemConfig {
 
 @Injectable({ providedIn: 'root' })
 export class AddItemModalService {
-  private readonly resultSubject = new Subject<string | null>()
+  private readonly controller_ = new ModalController<string | null>(null)
   private readonly config_ = signal<AddItemConfig | null>(null)
 
-  readonly isOpen_ = signal(false)
+  readonly isOpen_ = this.controller_.isOpen_
   readonly config = this.config_.asReadonly()
 
   open(config: AddItemConfig): Promise<string | null> {
     this.config_.set(config)
-    this.isOpen_.set(true)
-    return firstValueFrom(this.resultSubject)
+    return this.controller_.open()
   }
 
   save(value: string): void {
     const trimmed = value.trim()
     if (!trimmed) return
-    this.resultSubject.next(trimmed)
-    this.close()
+    this.close(trimmed)
   }
 
   cancel(): void {
-    this.resultSubject.next(null)
-    this.close()
+    this.close(null)
   }
 
-  private close(): void {
-    this.isOpen_.set(false)
+  private close(result: string | null): void {
+    this.controller_.close(result)
     this.config_.set(null)
   }
 }

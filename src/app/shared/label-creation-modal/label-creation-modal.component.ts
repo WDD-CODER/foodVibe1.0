@@ -1,18 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject, computed, signal, effect, untracked } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { ClickOutSideDirective } from '@directives/click-out-side'
 import { EnglishKeyInputDirective } from '@directives/english-key-input.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LabelCreationModalService } from './label-creation-modal.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { LABEL_COLOR_PALETTE } from '@models/label.model'
 import { finalizeEnglishKey } from '@utils/english-key.util'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
   selector: 'app-label-creation-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ClickOutSideDirective, EnglishKeyInputDirective, TranslatePipe],
+  imports: [CommonModule, FormsModule, EnglishKeyInputDirective, TranslatePipe, ModalShellComponent],
   templateUrl: './label-creation-modal.component.html',
   styleUrl: './label-creation-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -70,10 +70,6 @@ export class LabelCreationModalComponent {
     this.validationError_.set(null)
     this.englishKey_.set('')
     this.modal.cancel()
-  }
-
-  protected resetAndClose(): void {
-    this.cancel()
   }
 
   protected toggleTrigger(value: string): void {

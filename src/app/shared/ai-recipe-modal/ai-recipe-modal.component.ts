@@ -25,6 +25,7 @@ import { createUnitWordResolver } from '@utils/ingredient-line-parser.util'
 import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = AiModalInputMode
@@ -39,7 +40,8 @@ type InputMode = AiModalInputMode
     LoaderComponent,
     AiDraftEditorComponent,
     ScrollIndicatorsDirective,
-    TextareaAutoGrowDirective
+    TextareaAutoGrowDirective,
+    ModalShellComponent
   ],
   templateUrl: './ai-recipe-modal.component.html',
   styleUrl: './ai-recipe-modal.component.scss',

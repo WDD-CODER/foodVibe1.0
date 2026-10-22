@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core'
 import type { AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import { UserService } from '@services/user.service'
+import { ModalController } from '@services/modal-controller'
 import { AuthModalService } from '@services/auth-modal.service'
 
 export type AiModalMode = 'create' | 'edit'
@@ -13,13 +14,13 @@ export class AiRecipeModalService {
   private readonly userService = inject(UserService)
   private readonly authModal = inject(AuthModalService)
 
-  private readonly isOpen_ = signal(false)
+  private readonly controller_ = new ModalController<void>(undefined)
   private readonly mode_ = signal<AiModalMode>('create')
   private readonly initialInputMode_ = signal<AiModalInputMode>('text')
   private currentRecipe_: AiRecipeDraft | null = null
   private onPatch_: ((patch: AiRecipePatch) => void) | null = null
 
-  readonly isOpen = this.isOpen_.asReadonly()
+  readonly isOpen = this.controller_.isOpen_
   readonly mode = this.mode_.asReadonly()
   readonly initialInputMode = this.initialInputMode_.asReadonly()
 
@@ -37,7 +38,7 @@ export class AiRecipeModalService {
     this.currentRecipe_ = currentRecipe ?? null
     this.onPatch_ = onPatch ?? null
     this.initialInputMode_.set(inputMode)
-    this.isOpen_.set(true)
+    void this.controller_.open()
   }
 
   getEditContext(): AiRecipeDraft | null {
@@ -50,7 +51,7 @@ export class AiRecipeModalService {
   }
 
   close(): void {
-    this.isOpen_.set(false)
+    this.controller_.close()
     this.currentRecipe_ = null
     this.onPatch_ = null
   }

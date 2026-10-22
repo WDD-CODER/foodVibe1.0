@@ -261,4 +261,35 @@ describe('CustomSelectComponent', () => {
       expect(values).toEqual([])
     })
   })
+
+  describe('focus handed back by a closing popup (plan 451 P0)', () => {
+    const isOpen = (): boolean => (component as unknown as { isOpen: () => boolean }).isOpen()
+
+    it('a type-to-filter input does not reopen its list when focus is restored to it', () => {
+      fixture.componentRef.setInput('typeToFilter', true)
+      fixture.detectChanges()
+      const input = (fixture.nativeElement as HTMLElement).querySelector(
+        'input.custom-select-input'
+      ) as HTMLInputElement
+      input.setAttribute('data-restore-focus', '')
+      input.dispatchEvent(new Event('focus'))
+      input.removeAttribute('data-restore-focus')
+      fixture.detectChanges()
+      expect(isOpen()).toBeFalse()
+      input.dispatchEvent(new Event('focus'))
+      fixture.detectChanges()
+      expect(isOpen()).toBeTrue()
+    })
+
+    it('a button trigger does not reopen its list when focus is restored to it', () => {
+      const trigger = (fixture.nativeElement as HTMLElement).querySelector(
+        'button.custom-select-trigger'
+      ) as HTMLButtonElement
+      trigger.setAttribute('data-restore-focus', '')
+      trigger.dispatchEvent(new Event('focus'))
+      trigger.removeAttribute('data-restore-focus')
+      fixture.detectChanges()
+      expect(isOpen()).toBeFalse()
+    })
+  })
 })

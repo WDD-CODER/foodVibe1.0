@@ -57,24 +57,37 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Known copies: none page-local; two bases for one job.
 
 ### modal-shell — the popup frame
-- Status: converging — plan 451 adds a shared popup shell
-- Use: CSS engines in `src/styles.scss`: `.c-modal-overlay`, `.c-modal-card`, `.c-modal-body`, `.c-modal-actions`;
-  simple yes/no: `src/app/shared/confirm-modal/` · `app-confirm-modal`.
-- When: any popup. Every popup closes on Escape and has `role="dialog"` + `aria-modal="true"`.
-- Known copies: 22 templates draw `.c-modal-overlay` by hand; 11 templates carry `role="dialog"` (the rest lack it).
+- Status: converged (plan 451) for the engine-based popups; 7 hand-drawn dialogs remain (follow-up plan)
+- Use: `src/app/shared/modal-shell/` · `app-modal-shell` (role=dialog, aria-modal, Escape for the top-most
+  popup only, focus in / trap / restore, `dismissible` while busy, `titleKey` / `labelledBy` / `labelKey` for the
+  accessible name). It renders the `.c-modal-overlay` / `.c-modal-card` engines from `src/styles.scss`; put
+  `.c-modal-body` / `.c-modal-actions` inside it. Simple yes/no: `src/app/shared/confirm-modal/` · `app-confirm-modal`.
+- When: any popup. Render the shell inside the owner's `@if (isOpen)`; never draw `.c-modal-overlay` by hand.
+- Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
+  quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
+- Lint: `reuse-lint` rule `hand-drawn-modal-overlay` warns on a new `class="… c-modal-overlay"` in a template.
+- Known copies (hand-drawn `.c-modal-overlay` with their own document Escape listener):
+  `src/app/pages/menu-intelligence/components/event-closing-dialog/`,
+  `src/app/pages/menu-intelligence/components/not-closed-dialog/`,
+  `src/app/pages/menu-intelligence/components/prep-sheets/`,
+  `src/app/pages/menu-intelligence/components/supplier-orders/`,
+  `src/app/pages/menu-library/components/new-inquiry-dialog/`,
+  `src/app/pages/recipe-builder/components/paste-ingredients-dialog/`,
+  `src/app/pages/equipment/components/equipment-list/` (side panel).
+  Not engine-based (own `role="dialog"` + Escape, kept off the shell to keep their look):
+  `src/app/pages/menu-intelligence/components/menu-export-sheet/` (bottom sheet), `src/app/shared/export-preview/`.
 
 ### modal-controller — open a popup and get its answer
-- Status: converging — plan 451 adds one `ModalController` shape
-- Use (until 451): the signal-only shape with a stored resolver, e.g.
-  `src/app/core/services/confirm-modal.service.ts` (no RxJS).
+- Status: converged (plan 451)
+- Use: `ModalController<TResult>` in `src/app/core/services/modal-controller.ts` — each popup service creates
+  `new ModalController<Result>(cancelValue)`, exposes its read-only `isOpen_`, and calls `open()` (a Promise of the
+  result; a second open cancels the first) and `close(result)`. Signals only, no `Subject` / `firstValueFrom`.
+  The Escape stack (`pushModalShell` / `popModalShell` / `isTopModalShell`) lives in the same file.
 - When: code needs to open a popup and await the result.
-- Known copies (13 hand-written services, 3 shapes): `src/app/core/services/add-equipment-modal.service.ts`,
-  `src/app/core/services/add-item-modal.service.ts`, `src/app/core/services/auth-modal.service.ts`,
-  `src/app/core/services/confirm-modal.service.ts`, `src/app/core/services/global-specific-modal.service.ts`,
-  `src/app/core/services/quick-add-product-modal.service.ts`, `src/app/core/services/quick-edit-product-modal.service.ts`,
-  `src/app/core/services/restore-choice-modal.service.ts`, `src/app/core/services/translation-key-modal.service.ts`,
-  `src/app/shared/ai-menu-modal/ai-menu-modal.service.ts`, `src/app/shared/ai-product-modal/ai-product-modal.service.ts`,
-  `src/app/shared/ai-recipe-modal/ai-recipe-modal.service.ts`, `src/app/shared/label-creation-modal/label-creation-modal.service.ts`.
+- Users (13 services): in `src/app/core/services/` the add-equipment, add-item, auth, confirm, global-specific,
+  quick-add-product, quick-edit-product, restore-choice and translation-key `*-modal.service.ts`; in `src/app/shared/`
+  the ai-menu, ai-product, ai-recipe and label-creation `*-modal/*.service.ts`.
+- Known copies: none (the 7 hand-drawn dialogs above are opened by a page-local signal, not a service).
 
 ### list-page — a list screen (header, search, filters, rows, selection)
 - Status: converging — plan 453 adds a cards layout and moves the remaining pages on
