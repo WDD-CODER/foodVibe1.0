@@ -1,0 +1,40 @@
+@layer components.form-field {
+  :host {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+
+    min-inline-size: 0;
+  }
+
+  label {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .form-field__hint {
+    margin: 0;
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  :host(.form-field--full) {
+    grid-column: 1 / -1;
+  }
+
+  :host(.form-field--caps) {
+    gap: var(--space-2);
+
+    label {
+      block-size: var(--space-6);
+      place-content: baseline;
+
+      color: var(--color-text-muted);
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-semibold);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+  }
+}

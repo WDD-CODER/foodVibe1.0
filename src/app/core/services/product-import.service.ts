@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 import { ProductDataService } from './product-data.service'
 
 /** One product line of a supplier price list, as the server cleaned it (plan 432). */
@@ -41,7 +42,7 @@ export class ProductImportService {
 
   async apply(supplierId: string | null, rows: ApplyRow[]): Promise<ApplyResult> {
     const result = await firstValueFrom(
-      this.http_.post<ApplyResult>(`${environment.authApiUrl}/api/v1/product-import/apply`, { supplierId, rows })
+      this.http_.post<ApplyResult>(`${environment.authApiUrl}${API.productImport('apply')}`, { supplierId, rows })
     )
     await this.productData_.reloadFromStorage()
     return result

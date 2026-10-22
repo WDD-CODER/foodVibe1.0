@@ -136,40 +136,6 @@
   color: var(--color-text-muted);
 }
 
-.custom-multi-select-chip {
-  display: inline-flex;
-  align-items: center;
-
-  padding-inline: 0.5rem;
-  padding-block: 0.2rem;
-
-  font-size: 0.8125rem;
-  border-radius: var(--radius-md);
-
-  border: none;
-
-  cursor: default;
-
-  &.custom-multi-select-chip--colored {
-    // Background and color set dynamically for option-based chip color (single exception)
-    border: 1px solid var(--border-glass);
-    box-shadow: var(--shadow-glass);
-  }
-
-  &:not(.custom-multi-select-chip--colored) {
-    background: var(--bg-muted);
-    color: var(--color-text-main);
-  }
-
-  &.custom-multi-select-chip--removable {
-    cursor: pointer;
-
-    &:hover {
-      opacity: 0.9;
-    }
-  }
-}
-
 .custom-select-option {
   display: block;
   width: 100%;

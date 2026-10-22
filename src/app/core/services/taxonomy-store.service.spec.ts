@@ -5,6 +5,8 @@ import { TaxonomyStore, TermInUseError, TermReadOnlyError } from './taxonomy-sto
 import { StorageService } from './async-storage.service'
 import { UserService } from './user.service'
 import { TranslationService } from './translation.service'
+import { LoggingService } from './logging.service'
+import { LoadingService } from './loading.service'
 import type { User } from '../models/user.model'
 
 const term = (userId: string, kind: string, key: string, sortOrder = 0, extra: Record<string, unknown> = {}) => ({
@@ -235,6 +237,63 @@ describe('TaxonomyStore', () => {
         )
       ).toBe('in use: א, ב')
       expect(store.errorMessage(new Error('x'))).toBeNull()
+    })
+
+    // Plan 475 — a server refusal that names its reason is shown as that key's text.
+    it('shows the messageKey of a 409 or 403 reply, null without one', () => {
+      const reply = (status: number, error: unknown) => new HttpErrorResponse({ status, error })
+      expect(store.errorMessage(reply(409, { error: 'TERM_KEY_TAKEN', messageKey: 'unit_name_taken' }))).toBe(
+        'unit_name_taken'
+      )
+      expect(store.errorMessage(reply(403, { error: 'FORBIDDEN', messageKey: 'no_permission' }))).toBe('no_permission')
+      expect(store.errorMessage(reply(409, { error: 'Entity already exists' }))).toBeNull()
+      expect(store.errorMessage(reply(500, { messageKey: 'unit_name_taken' }))).toBeNull()
+      expect(store.errorMessage(reply(403, null))).toBeNull()
+    })
+  })
+
+  // Plan 454 — one logging path for the registry facades' loads.
+  describe('loadSafely / reloadSafely', () => {
+    const log = { event: 'crud.test.hydrate_error', message: 'Failed to load test' }
+
+    it('loadSafely loads once and logs nothing on success', async () => {
+      const error = spyOn(TestBed.inject(LoggingService), 'error')
+      await store.loadSafely(log)
+      await store.loadSafely(log)
+      expect(storage.query).toHaveBeenCalledTimes(1)
+      expect(store.isLoaded_()).toBeTrue()
+      expect(error).not.toHaveBeenCalled()
+    })
+
+    it('loadSafely never throws: a failed load is logged with the given event and message', async () => {
+      const boom = new Error('boom')
+      storage.query.and.returnValue(Promise.reject(boom))
+      const error = spyOn(TestBed.inject(LoggingService), 'error')
+      await expectAsync(store.loadSafely(log)).toBeResolved()
+      expect(error).toHaveBeenCalledOnceWith({ event: log.event, message: log.message, context: { err: boom } })
+    })
+
+    it('loadSafely with track runs the load through the loading indicator', async () => {
+      const track = spyOn(TestBed.inject(LoadingService), 'track').and.callThrough()
+      await store.loadSafely(log, { track: true })
+      expect(track).toHaveBeenCalledTimes(1)
+    })
+
+    it('reloadSafely re-reads storage and logs a failure instead of throwing', async () => {
+      await store.ensureLoaded()
+      const boom = new Error('boom')
+      storage.query.and.returnValue(Promise.reject(boom))
+      const error = spyOn(TestBed.inject(LoggingService), 'error')
+      await expectAsync(store.reloadSafely(log)).toBeResolved()
+      expect(storage.query).toHaveBeenCalledTimes(2)
+      expect(error).toHaveBeenCalledOnceWith({ event: log.event, message: log.message, context: { err: boom } })
+    })
+
+    it('a signed-out load (401) is neither thrown nor logged', async () => {
+      storage.query.and.returnValue(Promise.reject(new HttpErrorResponse({ status: 401 })))
+      const error = spyOn(TestBed.inject(LoggingService), 'error')
+      await store.reloadSafely(log)
+      expect(error).not.toHaveBeenCalled()
     })
   })
 })

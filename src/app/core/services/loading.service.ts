@@ -20,11 +20,11 @@ const SHOW_DEBOUNCE_MS = 200
 @Injectable({ providedIn: 'root' })
 export class LoadingService {
   private readonly pendingCount_ = signal(0)
-  private readonly visible_ = signal(false)
+  private readonly isVisible_ = signal(false)
   private showTimer_: ReturnType<typeof setTimeout> | null = null
 
   /** True once at least one tracked operation has stayed pending past the debounce window. */
-  readonly isLoading_ = this.visible_.asReadonly()
+  readonly isLoading_ = this.isVisible_.asReadonly()
 
   /** Wrap an async operation whose pendency should count toward the global loading overlay. */
   async track<T>(work: Promise<T>): Promise<T> {
@@ -42,7 +42,7 @@ export class LoadingService {
     if (next === 1 && this.showTimer_ === null) {
       this.showTimer_ = setTimeout(() => {
         this.showTimer_ = null
-        if (this.pendingCount_() > 0) this.visible_.set(true)
+        if (this.pendingCount_() > 0) this.isVisible_.set(true)
       }, SHOW_DEBOUNCE_MS)
     }
   }
@@ -55,7 +55,7 @@ export class LoadingService {
         clearTimeout(this.showTimer_)
         this.showTimer_ = null
       }
-      this.visible_.set(false)
+      this.isVisible_.set(false)
     }
   }
 }

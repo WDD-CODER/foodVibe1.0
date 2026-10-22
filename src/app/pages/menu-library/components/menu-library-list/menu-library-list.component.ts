@@ -21,6 +21,7 @@ import { EVENT_STAGE_ORDER, isActiveStage, stageLabelKey } from 'src/app/core/ut
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import { NewInquiryDialogComponent } from '../new-inquiry-dialog/new-inquiry-dialog.component'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 
@@ -68,11 +69,16 @@ export class MenuLibraryListComponent {
   protected readonly dateFrom_ = signal('')
   protected readonly sortBy_ = signal<SortField>('date')
   protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc')
+  protected readonly listControls = useListControls<SortField>({
+    search: this.searchQuery_,
+    sortBy: this.sortBy_,
+    sortOrder: this.sortOrder_
+  })
   protected readonly cloningId_ = signal<string | null>(null)
   protected readonly deletingId_ = signal<string | null>(null)
   protected readonly stageFilter_ = signal('active')
   /** The "פנייה חדשה" form is open while the URL carries `?new=inquiry` (the FAB action and the header button both set it). */
-  protected readonly inquiryOpen_ = signal(false)
+  protected readonly isInquiryOpen_ = signal(false)
   protected readonly stageLabelKey = stageLabelKey
 
   constructor() {
@@ -87,7 +93,7 @@ export class MenuLibraryListComponent {
     ])
     this.route.queryParamMap
       .pipe(takeUntilDestroyed())
-      .subscribe((params) => this.inquiryOpen_.set(params.get('new') === 'inquiry'))
+      .subscribe((params) => this.isInquiryOpen_.set(params.get('new') === 'inquiry'))
   }
 
   protected readonly events_ = this.menuEventData.allMenuEvents_
@@ -125,7 +131,7 @@ export class MenuLibraryListComponent {
   ]
 
   protected readonly filteredEvents_ = computed(() => {
-    const query = this.searchQuery_().trim().toLowerCase()
+    const query = this.searchQuery_().trim()
     const type = this.eventTypeFilter_()
     const style = this.servingStyleFilter_()
     const from = this.dateFrom_()
@@ -140,10 +146,8 @@ export class MenuLibraryListComponent {
         return false
       if (from && (!event.eventDate || event.eventDate < from)) return false
       if (query) {
-        const haystack = [event.name, event.eventType, event.eventDate || '', ...(event.cuisineTags || [])]
-          .join(' ')
-          .toLowerCase()
-        if (!haystack.includes(query)) return false
+        if (!matchesSearch(query, event.name, event.eventType, event.eventDate, ...(event.cuisineTags || [])))
+          return false
       }
       return true
     })
@@ -184,12 +188,7 @@ export class MenuLibraryListComponent {
   }
 
   protected setSort(field: SortField): void {
-    if (this.sortBy_() === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
+    this.listControls.setSort(field)
   }
 
   protected onCreateNew(): void {
@@ -287,17 +286,11 @@ export class MenuLibraryListComponent {
     }
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }

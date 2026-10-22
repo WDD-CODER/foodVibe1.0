@@ -15,7 +15,7 @@ import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 const ADD_NEW_VALUE = '__add_new__'
 
 @Component({
-  selector: 'add-equipment-modal',
+  selector: 'app-add-equipment-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe, CustomSelectComponent, ModalShellComponent],
   templateUrl: './add-equipment-modal.component.html',

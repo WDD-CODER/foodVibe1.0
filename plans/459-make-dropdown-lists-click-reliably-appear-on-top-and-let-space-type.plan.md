@@ -1,6 +1,6 @@
 # Plan 459 — Make dropdown lists click reliably, appear on top and let Space type
 
-Status: draft
+Status: active
 Track: code
 Snapshot: b7d21fb021191304a54e3d351bb595e648d73dfa
 
@@ -15,10 +15,10 @@ Nothing here was reproduced in a browser; the causes are from reading code.
 ## Goals & Success Criteria
 - Primary: every option of every select dropdown can be chosen with a normal mouse press (short or long); an open list sits above all page panels; Space types a space in the dish search.
 - Success:
-  - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down` per run mode).
-  - [ ] [auto] `npx ng build` passes.
-  - [ ] [auto] `npx ng test --watch=false --include='src/app/shared/custom-select/**' --include='src/app/shared/custom-multi-select/**' --include='src/app/core/utils/keyed-picker-search.util.spec.ts'` passes, including the new specs: pressing the mouse on an option is default-prevented (focus stays on the trigger), a long press (`tick(500)` after the mousedown, no blur) leaves the list open and the later click selects, and Space in a type-to-filter box types and never selects.
-  - [ ] [auto] `git diff --numstat origin/mvp -- src/app/pages/menu-intelligence/menu-intelligence.page.ts` shows net added lines ≤ 0 (growth-frozen file).
+  - [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down` per run mode).
+  - [x] [auto] `npx ng build` passes.
+  - [x] [auto] `npx ng test --watch=false --include='src/app/shared/custom-select/**' --include='src/app/shared/custom-multi-select/**' --include='src/app/core/utils/keyed-picker-search.util.spec.ts'` passes, including the new specs: pressing the mouse on an option is default-prevented (focus stays on the trigger), a long press (`tick(500)` after the mousedown, no blur) leaves the list open and the later click selects, and Space in a type-to-filter box types and never selects.
+  - [x] [auto] `git diff --numstat origin/mvp -- src/app/pages/menu-intelligence/menu-intelligence.page.ts` shows net added lines ≤ 0 (growth-frozen file).
   - [ ] [human] Open the inventory import page (`/inventory/import`), click the supplier box under the paste box with some text pasted or a preview shown below → the whole supplier list shows on top of the preview panel, not cut off behind it.
   - [ ] [human] In any form with a select (for example product form «ספק»), press an option with the mouse and hold it for about a second before releasing → the option is chosen. Repeat with a quick click.
   - [ ] [human] In the menu editor, click a dish name field, type «חזה עוף» with a space → the space appears and no dish is picked; press Enter or click a suggestion → it is picked.
@@ -46,6 +46,7 @@ src/app/shared/custom-select/**
 src/app/shared/custom-multi-select/**
 src/app/core/utils/keyed-picker-search.util.spec.ts
 src/app/pages/menu-intelligence/menu-intelligence.page.ts
+src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html
 docs/mvp/runs/459.md
 ```
 
@@ -91,14 +92,14 @@ Runs only when `scope-check.mjs --drift` reports drift. On `origin/mvp` find: `o
 - No new dictionary keys.
 
 ## Atomic Sub-tasks
-- [ ] A1a: Make clicking a select option work every time — press on an option no longer pulls focus away, so the list stays open until the click lands — add `(mousedown)="$event.preventDefault()"` to the option button (html line ~90) and to the add-new option button (line ~109) in the single-select; leave `onTriggerBlur` as is for Tab-away — `src/app/shared/custom-select/custom-select.component.html`
-- [ ] A1b: Do the same for the multi-select so picking several items by mouse is reliable — same `(mousedown)` prevent on the option button (line ~116) and the add-new button (line ~134); the search box inside the list keeps normal mouse behaviour (do not put the prevent on the wrapper) — `src/app/shared/custom-multi-select/custom-multi-select.component.html`
-- [ ] A1c: Prove the slow click in a test — new specs: mousedown on `.custom-select-option` is `defaultPrevented`; in a `fakeAsync` test open the list, mousedown, `tick(500)` without a blur, list still open, then click selects and emits `valueChange`; the same for the add option (still emits the typed name then the sentinel) and for `custom-multi-select` (option click adds the value after `tick(500)`) — `src/app/shared/custom-select/custom-select.component.spec.ts`, `src/app/shared/custom-multi-select/custom-multi-select.component.spec.ts`
-- [ ] A2a: Find every container that traps an open list — in the run file list each `.c-glass-panel`/`.c-modal-card` (and page-local class with `backdrop-filter`, 40 component scss files have it) that holds a `custom-select`, `custom-multi-select` or `app-scrollable-dropdown`, and the sibling after it that paints over; record file:line — `docs/mvp/runs/459.md`
-- [ ] A2b: Lift a panel above its neighbours while a list is open inside it — append to the hotspot a rule `.c-glass-panel:has(.c-dropdown), .c-modal-card:has(.c-dropdown) { position: relative; z-index: 20 }` with a comment naming the stacking-context cause (the `.c-dropdown` node exists in the DOM only while a list is open; the app header is z-index 100, so 20 stays below it); if the audit in A2a finds another engine class with the same trap, add it to the same selector list; page-local containers outside the scope are reported in the run file, not edited — `src/styles.scss`
-- [ ] A3a: Make Space type a space in the dish search — delete the `selectOnSpace: true,` line in `onDishSearchKeydown` and update its doc comment to "Enter picks"; do not touch the other `selectOnSpace` user, the trigger-key handler of the multi-select, which is correct — `src/app/pages/menu-intelligence/menu-intelligence.page.ts`
-- [ ] A3b: Lock the Space rule in tests — add specs: in `custom-select` with `typeToFilter` pressing Space in the input is not default-prevented and picks nothing; in `keyed-picker-search.util.spec.ts` keep "Space selects only when selectOnSpace is set" and add that a typed-in picker without the option never calls `onSelect` for Space — `src/app/shared/custom-select/custom-select.component.spec.ts`, `src/app/core/utils/keyed-picker-search.util.spec.ts`
-- [ ] A9: Build, run the specs, write the run file with the validation cards — `npx ng build`, the `ng test` command from Goals, `git diff --numstat` for the frozen page, then the cards (supplier list on import page, slow click, Space in dish search) — `docs/mvp/runs/459.md`
+- [x] A1a: Make clicking a select option work every time — press on an option no longer pulls focus away, so the list stays open until the click lands — add `(mousedown)="$event.preventDefault()"` to the option button (html line ~90) and to the add-new option button (line ~109) in the single-select; leave `onTriggerBlur` as is for Tab-away — `src/app/shared/custom-select/custom-select.component.html`
+- [x] A1b: Do the same for the multi-select so picking several items by mouse is reliable — same `(mousedown)` prevent on the option button (line ~116) and the add-new button (line ~134); the search box inside the list keeps normal mouse behaviour (do not put the prevent on the wrapper) — `src/app/shared/custom-multi-select/custom-multi-select.component.html`
+- [x] A1c: Prove the slow click in a test — new specs: mousedown on `.custom-select-option` is `defaultPrevented`; in a `fakeAsync` test open the list, mousedown, `tick(500)` without a blur, list still open, then click selects and emits `valueChange`; the same for the add option (still emits the typed name then the sentinel) and for `custom-multi-select` (option click adds the value after `tick(500)`) — `src/app/shared/custom-select/custom-select.component.spec.ts`, `src/app/shared/custom-multi-select/custom-multi-select.component.spec.ts`
+- [x] A2a: Find every container that traps an open list — in the run file list each `.c-glass-panel`/`.c-modal-card` (and page-local class with `backdrop-filter`, 40 component scss files have it) that holds a `custom-select`, `custom-multi-select` or `app-scrollable-dropdown`, and the sibling after it that paints over; record file:line — `docs/mvp/runs/459.md`
+- [x] A2b: Lift a panel above its neighbours while a list is open inside it — append to the hotspot a rule `.c-glass-panel:has(.c-dropdown), .c-modal-card:has(.c-dropdown) { position: relative; z-index: 20 }` with a comment naming the stacking-context cause (the `.c-dropdown` node exists in the DOM only while a list is open; the app header is z-index 100, so 20 stays below it); if the audit in A2a finds another engine class with the same trap, add it to the same selector list; page-local containers outside the scope are reported in the run file, not edited — `src/styles.scss`
+- [x] A3a: Make Space type a space in the dish search — delete the `selectOnSpace: true,` line in `onDishSearchKeydown` and update its doc comment to "Enter picks"; do not touch the other `selectOnSpace` user, the trigger-key handler of the multi-select, which is correct — moved by refactor 452 to `menu-dish-row.component.html` (see run file)
+- [x] A3b: Lock the Space rule in tests — add specs: in `custom-select` with `typeToFilter` pressing Space in the input is not default-prevented and picks nothing; in `keyed-picker-search.util.spec.ts` keep "Space selects only when selectOnSpace is set" and add that a typed-in picker without the option never calls `onSelect` for Space — `src/app/shared/custom-select/custom-select.component.spec.ts`, `src/app/core/utils/keyed-picker-search.util.spec.ts`
+- [x] A9: Build, run the specs, write the run file with the validation cards — `npx ng build`, the `ng test` command from Goals, `git diff --numstat` for the frozen page, then the cards (supplier list on import page, slow click, Space in dish search) — `docs/mvp/runs/459.md`
 
 ## Technical Considerations
 - Dependencies: none new. The `(mousedown)` + `preventDefault` pattern already exists in `chip-search-dropdown.component.html` and `ingredient-search.component.html`; reuse it, do not invent a new mechanism.

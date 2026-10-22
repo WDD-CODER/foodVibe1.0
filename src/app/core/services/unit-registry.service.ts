@@ -5,7 +5,6 @@ import { LoggingService } from './logging.service'
 import { TranslationService } from './translation.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { TaxonomyStore } from './taxonomy-store.service'
-import { Observable, Subject, take, takeUntil } from 'rxjs'
 
 export type RegisterUnitResult =
   { success: true; alreadyInRegistry?: boolean } | { success: false; alreadyOnProduct?: boolean; error?: string }
@@ -24,6 +23,9 @@ export interface ProductUnitAdded {
   /** Unit the amount is typed in (the «:» unit of the purchase row). */
   basis: string
 }
+
+/** Log entry for a failed unit load (plan 454: logged by TaxonomyStore.loadSafely / reloadSafely). */
+const UNIT_LOAD_LOG = { event: 'crud.units.hydrate_error', message: 'Failed to hydrate units' }
 
 /** System units: constant, non-removable, values never overwritten. */
 export const SYSTEM_UNITS: Readonly<Record<string, number>> = {
@@ -53,11 +55,10 @@ export class UnitRegistryService {
   private readonly keyResolution = inject(KeyResolutionService)
   private readonly taxonomy = inject(TaxonomyStore)
 
-  public readonly unitAdded$ = new Subject<string>()
-  /** Plan 423 — fires (before unitAdded$) when a unit was added in product mode, with that product's own amount. */
-  public readonly productUnitAdded$ = new Subject<ProductUnitAdded>()
-  /** Fires whenever the unit creator closes (saved or cancelled). */
-  private readonly creatorClosed$ = new Subject<void>()
+  /** Plan 454 — callers waiting for the unit saved in the creator; settled on save, or with null on close. */
+  private unitWaiters_: ((key: string | null) => void)[] = []
+  /** Plan 423 — callers waiting for a product-mode unit (the unit plus that product's own amount). */
+  private productUnitWaiters_: ((added: ProductUnitAdded | null) => void)[] = []
 
   /**
    * existingUnitSymbols: this product's purchase unit symbols, so duplicate names can be rejected in-modal.
@@ -85,7 +86,7 @@ export class UnitRegistryService {
   allUnitKeys_ = computed(() => Object.keys(this.globalUnits_()))
 
   constructor() {
-    this.taxonomy.ensureLoaded().catch((err: unknown) => this.logLoadError(err))
+    void this.taxonomy.loadSafely(UNIT_LOAD_LOG)
   }
 
   // UI CONTROL
@@ -97,29 +98,39 @@ export class UnitRegistryService {
   closeUnitCreator() {
     this.isCreatorOpen.set(false)
     this.unitCreatorContext.set(null)
-    this.creatorClosed$.next()
+    this.settleUnitWaiters(null, null)
   }
 
   /**
-   * The unit saved in the creator, once. Completes with no value when the creator closes without a save,
-   * so a cancelled field is never filled by a unit added later elsewhere. Subscribe when opening the creator.
-   * (save() emits unitAdded$ before it closes the creator, so a save still delivers.)
+   * The unit saved in the creator, once. Resolves null when the creator closes without a save,
+   * so a cancelled field is never filled by a unit added later elsewhere. Call when opening the creator.
+   * (A save resolves before the creator closes, so a save still delivers.)
    */
-  awaitUnitCreated(): Observable<string> {
-    return this.unitAdded$.pipe(take(1), takeUntil(this.creatorClosed$))
+  awaitUnitCreated(): Promise<string | null> {
+    return new Promise((resolve) => this.unitWaiters_.push(resolve))
   }
 
   /**
-   * Product mode: the unit and this product's own amount, once. Completes with no value when the window
-   * closes without a save. Subscribe when opening the creator with `forProduct`.
+   * Product mode: the unit and this product's own amount, once. Resolves null when the window
+   * closes without a save. Call when opening the creator with `forProduct`.
    */
-  awaitProductUnitAdded(): Observable<ProductUnitAdded> {
-    return this.productUnitAdded$.pipe(take(1), takeUntil(this.creatorClosed$))
+  awaitProductUnitAdded(): Promise<ProductUnitAdded | null> {
+    return new Promise((resolve) => this.productUnitWaiters_.push(resolve))
+  }
+
+  /** Resolves every waiter once and forgets them (a later unit never reaches an earlier caller). */
+  private settleUnitWaiters(key: string | null, productUnit: ProductUnitAdded | null): void {
+    const productWaiters = this.productUnitWaiters_
+    const unitWaiters = this.unitWaiters_
+    this.productUnitWaiters_ = []
+    this.unitWaiters_ = []
+    productWaiters.forEach((resolve) => resolve(productUnit))
+    unitWaiters.forEach((resolve) => resolve(key))
   }
 
   /** Re-load units from storage so dropdowns show the latest (e.g. after add in another tab or previous session). */
   async refreshFromStorage(): Promise<void> {
-    await this.taxonomy.reload().catch((err: unknown) => this.logLoadError(err))
+    await this.taxonomy.reloadSafely(UNIT_LOAD_LOG)
   }
 
   /** Reload from storage after a backup import/restore. */
@@ -160,11 +171,8 @@ export class UnitRegistryService {
     //    (product mode never takes this shortcut silently: the amount typed for this product is delivered too)
     if (this.globalUnits_()[key]) {
       this.refreshFromStorage()
-      if (context?.forProduct) {
-        this.productUnitAdded$.next({ key, amount: rate, basis: basisUnitKey || context.forProduct.baseUnit })
-      }
-      this.unitAdded$.next(key)
-      this.userMsgService.onSetSuccessMsg('נוספה לרשימת יחידות הרכש של המוצר.')
+      this.deliverUnit(key, rate, basisUnitKey, context)
+      this.userMsgService.onSetSuccessMsg(this.translationService.translate('unit_added_to_product_purchase'))
       return { success: true, alreadyInRegistry: true }
     }
 
@@ -174,33 +182,50 @@ export class UnitRegistryService {
 
     try {
       await this.taxonomy.add('unit', key, { gramRate })
-      if (context?.forProduct) {
-        this.productUnitAdded$.next({ key, amount: rate, basis: basisUnitKey || context.forProduct.baseUnit })
-      }
-      this.unitAdded$.next(key)
-      this.userMsgService.onSetSuccessMsg(`היחידה ${key} נוספה בהצלחה`)
+      this.deliverUnit(key, rate, basisUnitKey, context)
+      this.userMsgService.onSetSuccessMsg(this.translationService.translate('unit_added_named').replace('{name}', key))
       return { success: true }
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return { success: false, error: 'unit_save_error' }
-      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? 'שגיאה בשמירת היחידה במערכת')
       this.logging.error({ event: 'crud.units.save_error', message: 'Unit save error', context: { err } })
+      this.userMsgService.onSetErrorMsg(
+        this.taxonomy.errorMessage(err) ?? this.translationService.translate('unit_save_error')
+      )
       return { success: false, error: 'unit_save_error' }
     }
+  }
+
+  /**
+   * Hands the saved unit to every waiter. In product mode the product waiters get the unit with this
+   * product's own amount; without product mode they get null (as before: nothing was emitted for them).
+   */
+  private deliverUnit(
+    key: string,
+    rate: number,
+    basisUnitKey: string | undefined,
+    context: UnitCreatorContext | null
+  ): void {
+    const forProduct = context?.forProduct
+    this.settleUnitWaiters(key, forProduct ? { key, amount: rate, basis: basisUnitKey || forProduct.baseUnit } : null)
   }
 
   /** Deletes a custom unit. System units (kg, liter, gram, ml, unit, dish, ...) cannot be removed. */
   async deleteUnit(unitKey: string): Promise<void> {
     if (unitKey in SYSTEM_UNITS) {
-      this.userMsgService.onSetErrorMsg('לא ניתן למחוק יחידות בסיס')
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_base_cannot_delete'))
       return
     }
     try {
       if (await this.taxonomy.removeByKey('unit', unitKey))
-        this.userMsgService.onSetSuccessMsg(`היחידה ${unitKey} הוסרה`)
+        this.userMsgService.onSetSuccessMsg(
+          this.translationService.translate('unit_removed_named').replace('{name}', unitKey)
+        )
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? 'שגיאה במחיקת היחידה מהשרת')
       this.logging.error({ event: 'crud.units.delete_error', message: 'Unit delete error', context: { err } })
+      this.userMsgService.onSetErrorMsg(
+        this.taxonomy.errorMessage(err) ?? this.translationService.translate('unit_delete_server_error')
+      )
     }
   }
 
@@ -211,7 +236,7 @@ export class UnitRegistryService {
   async renameUnit(oldKey: string, newKey: string): Promise<boolean> {
     const next = (newKey ?? '').trim().toLowerCase()
     if (oldKey in SYSTEM_UNITS) {
-      this.userMsgService.onSetErrorMsg('לא ניתן לערוך יחידות בסיס')
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_base_cannot_edit'))
       return false
     }
     if (!next) {
@@ -220,7 +245,7 @@ export class UnitRegistryService {
     }
     if (next === oldKey) return true
     if (next in this.globalUnits_()) {
-      this.userMsgService.onSetErrorMsg(`היחידה ${next} כבר קיימת`)
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_name_taken'))
       return false
     }
     return this.saveUnitChange(oldKey, { key: next }, 'crud.units.rename_error')
@@ -229,11 +254,11 @@ export class UnitRegistryService {
   /** Plan 377 — changes a custom unit's gram-equivalent rate. False when refused or the save failed. */
   async updateUnitRate(key: string, gramRate: number): Promise<boolean> {
     if (key in SYSTEM_UNITS) {
-      this.userMsgService.onSetErrorMsg('לא ניתן לערוך יחידות בסיס')
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_base_cannot_edit'))
       return false
     }
     if (!Number.isFinite(gramRate) || gramRate <= 0) {
-      this.userMsgService.onSetErrorMsg('ההמרה חייבת להיות גדולה מאפס')
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_rate_must_be_positive'))
       return false
     }
     return this.saveUnitChange(key, { gramRate }, 'crud.units.rate_error')
@@ -246,17 +271,17 @@ export class UnitRegistryService {
   ): Promise<boolean> {
     try {
       if (await this.taxonomy.updateByKey('unit', key, changes)) return true
-      this.userMsgService.onSetErrorMsg(`היחידה ${key} לא נמצאה`)
+      this.userMsgService.onSetErrorMsg(
+        this.translationService.translate('unit_not_found_named').replace('{name}', key)
+      )
       return false
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return false
-      this.userMsgService.onSetErrorMsg(this.taxonomy.errorMessage(err) ?? 'שגיאה בשמירת היחידה במערכת')
       this.logging.error({ event, message: 'Unit update error', context: { err } })
+      this.userMsgService.onSetErrorMsg(
+        this.taxonomy.errorMessage(err) ?? this.translationService.translate('unit_save_error')
+      )
       return false
     }
-  }
-
-  private logLoadError(err: unknown): void {
-    this.logging.error({ event: 'crud.units.hydrate_error', message: 'Failed to hydrate units', context: { err } })
   }
 }

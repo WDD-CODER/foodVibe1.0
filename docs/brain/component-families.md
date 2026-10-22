@@ -22,30 +22,37 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 
 ## UI families
 
-### search-combobox — single-value search picker
-- Status: converging — plan 452 removes the page-local shells
-- Use: `src/app/shared/custom-select/` · `app-custom-select` (CVA)
-- When: the user picks one value from a list, with or without typing to filter, with or without "add new".
-- Inputs / variants: `typeToFilter`, `allowTypedAdd`, `addNewValue`, `addNewLabelKey`, `variant: 'default' | 'chip'`,
-  `compact`, `translateLabels`, `maxHeight`. Keyboard + search logic: `KeyedPickerSearch` in
+### search-combobox — a search box with a results list
+- Status: stable — plan 452 moved the six page-local shells onto it
+- Use: `src/app/shared/search-combobox/` · `app-search-combobox` — a text field, a clear (X), a listbox of results and one
+  add option. It owns the keyboard (rule K: first row highlighted, arrows stop at the ends, Enter picks, Escape closes,
+  Tab closes), rule F (contains, prefix first), rule X (an exact name hides the add row) and the add label; the page owns
+  what a pick or an add does (`(picked)`, `(addChosen)`: rule W opens the add window, rule M announces it).
+- Pick one value of a short fixed list instead: `src/app/shared/custom-select/` · `app-custom-select` (CVA;
+  `typeToFilter`, `allowTypedAdd`, `addNewValue`, `addNewLabelKey`, `variant`).
+- When: the user types to find an item (or a new one) and picks it — recipe/product/ingredient search, dish and category
+  pickers, equipment search. Server searches pass `[clientFilter]="false"`; rich rows use an `<ng-template>` child.
+- Inputs / variants: `options`, `[(query)]`, `[(open)]`, `labelOf`, `keyOf`, `clientFilter`, `minChars`, `maxResults`,
+  `knownOptions`, `addLabelKey`, `addOnlyTyped`, `emptyKey`, `groupOf`, `variant: 'box' | 'plain'`, `listPosition`,
+  `multiline`, `handleTab`, `closeOnOutsideClick`. Keyboard + search logic: `KeyedPickerSearch` in
   `src/app/core/utils/keyed-picker-search.util.ts`; the add option: `src/app/core/utils/add-option.util.ts`
   (add-option rule in `docs/agent/standards-domain.md`).
 - Building blocks (use only inside a shared base, never in a page): `src/app/shared/scrollable-dropdown/`
   (`app-scrollable-dropdown`), `src/app/shared/add-option-row/` (`app-add-option-row`).
-- Known copies (7 hand-built `input + app-scrollable-dropdown` shells in 6 templates, plus the page-local search state in
-  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts`):
-  `src/app/pages/menu-intelligence/menu-intelligence.page.html` (event type + section category),
-  `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`,
-  `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html` (ingredient filter),
+- Known copies: none page-local. Users: `src/app/pages/menu-intelligence/menu-intelligence.page.html` (event type + section
+  category), `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`,
+  `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html`,
   `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.html`,
   `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.html`,
-  `src/app/pages/recipe-builder/recipe-builder.page.html` (logistics picker, with
-  `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`).
+  `src/app/pages/recipe-builder/recipe-builder.page.html` (with
+  `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`). The page-local dish text store is
+  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts`.
 
 ### multi-pick — pick several values, shown as chips
-- Status: converging — plan 452 picks one base
-- Use: `src/app/shared/custom-multi-select/` · `app-custom-multi-select` (CVA) — prefer this for new code.
-- Second base (same job): `src/app/shared/chip-search-dropdown/` · `app-chip-search-dropdown` (events, product form).
+- Status: converging — plan 452 kept both bases; `chip-search-dropdown` is deprecated pending the Human's answer (ADR 0025)
+- Use: `src/app/shared/custom-multi-select/` · `app-custom-multi-select` (CVA) — the base for new code.
+- Second base (same job, **deprecated**): `src/app/shared/chip-search-dropdown/` · `app-chip-search-dropdown` (product form:
+  category, supplier, allergens). It converts to `custom-multi-select` only after the behaviours listed in ADR 0025 exist there.
 - When: the value is a list (allergens, labels, categories) and the user adds/removes chips.
 - Known copies: none page-local; two bases for one job.
 
@@ -117,41 +124,43 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Known copies: not counted.
 
 ### form-field — label, input, error
-- Status: converging — plan 455 adds a shared form-field component
-- Use: CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
+- Status: stable — plan 455 built `app-form-field`; the equipment, supplier, venue and product forms are on it
+- Use: `src/app/shared/form-field/` · `app-form-field` (`label`, `forId`, `error`, `hint`, `layout`, `labelStyle`; the control is projected) on the
+  CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
   clear button: `src/app/shared/input-clear/` (`app-input-clear`).
-- When: any form input.
-- Known copies (`.form-group` defined locally in 4 files):
-  `src/app/pages/equipment/components/equipment-form/equipment-form.component.scss`,
-  `src/app/pages/inventory/components/product-form/product-form.component.scss`,
-  `src/app/pages/suppliers/components/supplier-form/supplier-form.component.scss`,
-  `src/app/pages/venues/components/venue-form/venue-form.component.scss`.
+- When: any form input with a label.
+- Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
+  label or content, not a plain label + input).
 
 ### entity-form — name validation and unsaved-changes check
-- Status: converging — plan 455 adds one unsaved-changes helper
-- Use: `src/app/core/validators/item.validators.ts` · `duplicateNameValidator`, `duplicateEntityNameValidator`;
+- Status: stable — plan 455 built one unsaved-changes helper
+- Use: `src/app/core/utils/unsaved-changes.ts` · `useUnsavedChanges({ form, snapshot?, extra? })`; each page keeps `hasRealChanges()` as a one-line
+  delegation; `src/app/core/validators/item.validators.ts` · `duplicateEntityNameValidator` (`duplicateNameValidator` wraps it for products);
   leave-page guard: `src/app/core/guards/pending-changes.guard.ts`.
 - When: a form edits a named entity, or must warn before leaving with unsaved changes.
-- Known copies (`hasRealChanges` implemented in 5 pages): `src/app/pages/cook-view/cook-view.page.ts`,
-  `src/app/pages/inventory/components/product-form/product-form.component.ts`,
-  `src/app/pages/menu-intelligence/menu-intelligence.page.ts`, `src/app/pages/recipe-builder/recipe-builder.page.ts`,
-  `src/app/pages/venues/components/venue-form/venue-form.component.ts`.
+- Known copies: none.
 
 ### chip — chips, badges, pills
-- Status: converging — plan 457 adds one chip engine
-- Use: CSS engines in `src/styles.scss`: `.c-chip`, `.c-toggle-chip`, `.c-tap-chip`, `.c-tab-pill`, `.c-filter-chip`;
-  tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
-- When: a small rounded label, toggle or filter.
-- Known copies: 51 distinct local `*chip*` selectors in component `.scss` files (audit: ~80 local chip classes).
+- Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it
+- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal/.amber/.red` or `--teal|--amber|--red`) plus variants
+  `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
+  `--removable` (+ `.c-chip__remove`), `--tab` (+ `.active`, `.c-chip--home`, `.trash`); sub-parts `.c-chip__count` (+ `--zero`),
+  `.c-chip__dot`; wrapper `.c-chip-group`. Markup: `class="c-chip c-chip--toggle"`. Tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
+  Static tag: `.c-chip--tag` (size `--sm`; shape `--soft` radius-sm, `--square` radius-xs; tones `--teal|--amber|--red|--green|--allergen|--glass`,
+  `--solid` = light text on a data color). Data-colored value chip: `--colored` (background/color inline).
+- When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
+- Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
+  (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
+  header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.
 
 ### feedback — loading, toasts, errors shown to the user
-- Status: converging — plan 456 converges messages and errors
+- Status: stable — plan 456 moved every toast text into the dictionary
 - Use: `src/app/shared/loader/` (`app-loader`), `src/app/core/services/loading.service.ts` (`LoadingService`),
   `src/app/core/services/user-msg.service.ts` (`UserMsgService`), `src/app/core/services/logging.service.ts`
   (`logging.error`). Pattern: `logging.error(...)` + `userMsg.onSet*Msg(translate(key))`.
 - When: any wait, success or error the user must see.
-- Known copies: 52 `onSet*Msg(...)` calls pass a raw Hebrew literal instead of a dictionary key (audit: 47).
-- Dead pieces (no user): `src/app/shared/change-popover/`, `src/app/shared/floating-info-container/`.
+- Known copies: none (plan 456: no `onSet*Msg` call takes a string literal; the two dead popover folders were deleted).
+- Backend paths: one `API` map in `src/app/core/services/http-storage.adapter.ts` (plan 456).
 
 ### edit-gate — show a save button only to someone who may save
 - Status: stable (MVP, plan 428)
@@ -175,26 +184,28 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 ## Logic families
 
 ### entity-data-service — load and save one entity type
-- Status: converging — plan 454 moves the rest onto the base
+- Status: stable — plan 454 moved the last copies onto the base
 - Use: `src/app/core/services/base-entity-data.service.ts` · `BaseEntityDataService<T>` (users:
   `src/app/core/services/equipment-data.service.ts`, `src/app/core/services/supplier-data.service.ts`,
-  `src/app/core/services/venue-data.service.ts`).
-- When: a new entity type needs a client data service.
-- Known copies (copy the load block): `src/app/core/services/recipe-data.service.ts`,
+  `src/app/core/services/venue-data.service.ts`, `src/app/core/services/recipe-data.service.ts`,
   `src/app/core/services/dish-data.service.ts`, `src/app/core/services/product-data.service.ts`,
-  `src/app/core/services/menu-event-data.service.ts`.
+  `src/app/core/services/menu-event-data.service.ts`). A service's own log event and "empty the list on
+  reload" go in `EntityLoadOptions`; a legacy-field migration goes in a `normalizeRow` override.
+- When: a new entity type needs a client data service.
+- Known copies: none.
 
 ### kitchen-state — app-wide signal state
-- Status: converging — plan 454 drops the Promise→Observable wrapping
+- Status: stable — save/delete methods return Promises (plan 454)
 - Use: `src/app/core/services/kitchen-state.service.ts` (signals).
 - When: state that several pages read or change (the loaded entity collections); never a page-local copy.
-- Known copies: its methods wrap Promises into Observables; callers `.subscribe` to them.
+- Known copies: none.
 
 ### taxonomy — categories, units, labels, kinds
 - Status: stable
 - Use: `src/app/core/services/taxonomy-store.service.ts` · `TaxonomyStore`.
 - When: a page reads or adds a category, unit, label or kind.
-- Known copies: `src/app/core/services/unit-registry.service.ts` still exposes an RxJS `unitAdded$`.
+- Facades load through `loadSafely` / `reloadSafely` (one logging path, plan 454).
+- Known copies: none.
 
 ### page-entry-loading — data ready before a page opens
 - Status: stable

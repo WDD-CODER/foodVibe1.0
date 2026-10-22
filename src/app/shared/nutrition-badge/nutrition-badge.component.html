@@ -7,7 +7,7 @@
   >
     <lucide-icon name="leaf" [size]="14" class="nb-leaf" [style.color]="dominantColor"></lucide-icon>
 
-    @if (showTooltip_()) {
+    @if (shouldShowTooltip_()) {
       <div
         #tooltip
         popover="manual"
@@ -32,7 +32,7 @@
         }
 
         <div #scroller class="nb-scroll-body" (scroll)="updateScrollHints()">
-          <div class="nb-header">100 גר׳</div>
+          <div class="nb-header">{{ 'nutrition_per_100g' | translatePipe }}</div>
 
           <!-- Macro bar strip -->
           <div class="nb-bar">
@@ -110,7 +110,7 @@
                   </svg>
                 }
               </span>
-              <span class="nb-row-label">{{ row.label }}</span>
+              <span class="nb-row-label">{{ row.label | translatePipe }}</span>
               <span class="nb-row-val">
                 @if (row.unit === 'קק"ל') {
                   {{ row.value | number: '1.0-0' }}

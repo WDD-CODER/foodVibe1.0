@@ -36,22 +36,6 @@
     gap: 1rem;
   }
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-
-    > label {
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    input.c-input,
-    textarea.c-input {
-      width: 100%;
-    }
-  }
-
   .c-form-actions {
     padding-block-start: 1rem;
   }

@@ -1,14 +1,14 @@
 'use strict'
-/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Plan 431: owner-only opening baseline and setup status. */
+/** Plan 425: the caller's business. Plan 428: the owner's team (list, add, remove). Plan 429: owner-only settings. Plan 431: owner-only opening baseline and setup status. Plan 477: owner-only stages staff may see. */
 const { Router } = require('express')
-const rateLimit = require('express-rate-limit')
+const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
-const { getBusiness, setBusinessSettings, setBusinessBaseline } = require('../services/business')
+const { getBusiness, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
 const { isValidUsername, isValidPasswordHash } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
-const { businessSettingsSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
+const { businessSettingsSchema, businessNameInputSchema, staffVisibleStagesInputSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
 const mongoose = require('mongoose')
 const { lastActiveByUser } = require('../utils/usage-stats')
 const { scopeFilter } = require('../utils/business-scope')
@@ -19,14 +19,12 @@ const router = Router()
 const STAFF_EMAIL_DOMAIN = '@staff.foodvibe.invalid'
 
 // Team routes are not under the /api/v1/data write limiter, and POST creates accounts, so POST is rate limited.
-const teamLimiter = rateLimit({
+const teamLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
   keyGenerator: req => String(req.user?.userId ?? 'anonymous'),
   validate: { keyGeneratorIpFallback: false },
-  message: { error: 'Too many team requests, please try again later' },
+  message: 'Too many team requests, please try again later',
 })
 
 // GET /api/v1/business — the business document of the signed-in user; `settings` always has the defaults filled in (nothing is written on read). Any member may read it.
@@ -60,6 +58,44 @@ router.put('/settings', verifyToken, async (req, res) => {
   }
 })
 
+// PUT /api/v1/business/name — the owner renames the business (plan 472). Only ever writes the caller's own business.
+router.put('/name', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const parsed = businessNameInputSchema.safeParse(req.body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.name.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
+    }
+    const result = await setBusinessName(req.user.businessId, parsed.data.name)
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
+    req.log.info({ event: 'business.name.saved' })
+    res.json({ name: parsed.data.name })
+  } catch (err) {
+    req.log.error({ err, event: 'business.name.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+// PUT /api/v1/business/staff-visible-stages — the owner picks the event stages staff may see (plan 477). Only the caller's own business.
+router.put('/staff-visible-stages', verifyToken, async (req, res) => {
+  try {
+    if (!assertCan(req, res, 'editSettings', { type: 'businesses' })) return
+    const parsed = staffVisibleStagesInputSchema.safeParse(req.body)
+    if (!parsed.success) {
+      req.log.info({ event: 'business.staff_stages.failed', reason: 'validation' })
+      return res.status(400).json({ error: 'Validation failed', issues: parsed.error.issues.map(i => ({ path: i.path.join('.'), code: i.code, message: i.message })) })
+    }
+    const result = await setStaffVisibleStages(req.user.businessId, parsed.data.stages)
+    if (!result.matchedCount) return res.status(404).json({ error: 'Business not found' })
+    req.log.info({ event: 'business.staff_stages.saved', count: result.staffVisibleStages.length })
+    res.json({ staffVisibleStages: result.staffVisibleStages })
+  } catch (err) {
+    req.log.error({ err, event: 'business.staff_stages.failed' })
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
 // PUT /api/v1/business/baseline — the owner stores how the business ran before FoodVibe. Whole replace; `filledAt` is always server-set.
 router.put('/baseline', verifyToken, async (req, res) => {
   try {
@@ -81,8 +117,8 @@ router.put('/baseline', verifyToken, async (req, res) => {
   }
 })
 
-/** The card only needs "reached or not", so no count goes past this. */
-const SETUP_COUNT_CAP = 10
+/** The card shows at most "5 of 5" (priced-products goal, plan 469), so no count goes past this. */
+const SETUP_COUNT_CAP = 5
 
 // GET /api/v1/business/setup-status — what the owner has set up so far, counting only items made in this business.
 router.get('/setup-status', verifyToken, async (req, res) => {

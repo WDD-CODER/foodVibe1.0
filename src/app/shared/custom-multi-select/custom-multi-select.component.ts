@@ -5,8 +5,7 @@ import {
   output,
   signal,
   computed,
-  HostListener,
-  ViewChild,
+  viewChild,
   ElementRef,
   inject,
   afterNextRender,
@@ -44,7 +43,7 @@ const PICKER_KEY = 0
 @Component({
   selector: 'app-custom-multi-select',
   standalone: true,
-  host: { tabIndex: '-1' },
+  host: { tabIndex: '-1', '(focus)': 'onHostFocus()', '(keydown)': 'onKeydown($event)' },
   imports: [
     CommonModule,
     TranslatePipe,
@@ -94,14 +93,14 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   private _value = signal<string[]>([])
   private _onChange: (value: string[]) => void = () => {}
   private _onTouched: () => void = () => {}
-  private _disabled = signal(false)
+  private _isDisabled = signal(false)
 
-  @ViewChild('triggerRef') protected triggerRef?: ElementRef<HTMLButtonElement>
-  @ViewChild('searchInputRef') protected searchInputRef?: ElementRef<HTMLInputElement>
+  protected readonly triggerRef = viewChild<ElementRef<HTMLButtonElement>>('triggerRef')
+  protected readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInputRef')
 
-  protected open = signal(false)
+  protected isOpen = signal(false)
   private closeTimeout: ReturnType<typeof setTimeout> | null = null
-  private _focusFromMouse = false
+  private isFocusFromMouse_ = false
   protected searchQuery_ = signal('')
   private readonly picker_ = new KeyedPickerSearch()
   private readonly instanceId_ = `cms-${++nextMultiSelectId}`
@@ -148,9 +147,8 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
     return addOptionLabel(typed, all, (o) => this.getDisplayText_(o.label), this.addNewLabelKey())
   })
 
-  @HostListener('focus')
   protected onHostFocus(): void {
-    this.triggerRef?.nativeElement?.focus()
+    this.triggerRef()?.nativeElement?.focus()
   }
 
   writeValue(value: string[] | null): void {
@@ -166,7 +164,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this._disabled.set(isDisabled)
+    this._isDisabled.set(isDisabled)
   }
 
   protected get value(): string[] {
@@ -174,7 +172,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   protected get disabled(): boolean {
-    return this._disabled()
+    return this._isDisabled()
   }
 
   // CREATE
@@ -222,10 +220,10 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   // UI HANDLERS
   protected toggle(): void {
-    if (this._disabled()) return
+    if (this._isDisabled()) return
     this.clearCloseTimeout()
-    const next = !this.open()
-    this.open.set(next)
+    const next = !this.isOpen()
+    this.isOpen.set(next)
     if (next) {
       this.setHighlight_(0)
       if (this.searchable()) this.focusSearchInput_()
@@ -234,21 +232,21 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
 
   protected close(): void {
     this.clearCloseTimeout()
-    this.open.set(false)
+    this.isOpen.set(false)
     this.searchQuery_.set('')
     this._onTouched()
   }
 
   protected openDropdown(): void {
-    if (this._disabled()) return
+    if (this._isDisabled()) return
     this.clearCloseTimeout()
-    this.open.set(true)
+    this.isOpen.set(true)
     this.setHighlight_(0)
     if (this.searchable()) this.focusSearchInput_()
   }
 
   protected onTriggerBlur(): void {
-    if (!this.open()) return
+    if (!this.isOpen()) return
     this.closeTimeout = setTimeout(() => {
       this.closeTimeout = null
       this.close()
@@ -276,7 +274,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   protected onClearSearch(): void {
     this.searchQuery_.set('')
     this.setHighlight_(0)
-    this.searchInputRef?.nativeElement?.focus()
+    this.searchInputRef()?.nativeElement?.focus()
   }
 
   protected onSearchInput(q: string): void {
@@ -298,23 +296,23 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
       onClose: () => {
         this.close()
         // Focus stays on the field without reopening the list (rule 5f).
-        this._focusFromMouse = true
-        this.triggerRef?.nativeElement?.focus()
+        this.isFocusFromMouse_ = true
+        this.triggerRef()?.nativeElement?.focus()
       },
       onHighlightMove: () => this.scrollHighlightIntoView_()
     })
   }
 
   protected onTriggerMousedown(): void {
-    this._focusFromMouse = true
+    this.isFocusFromMouse_ = true
   }
 
   protected onTriggerFocus(): void {
-    if (this._focusFromMouse) {
-      this._focusFromMouse = false
+    if (this.isFocusFromMouse_) {
+      this.isFocusFromMouse_ = false
       return
     }
-    if (!this._disabled() && !this.open()) {
+    if (!this._isDisabled() && !this.isOpen()) {
       this.openDropdown()
     }
   }
@@ -324,9 +322,8 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   }
 
   /** Trigger keys (no search box): same keyboard rules; Space toggles like Enter. */
-  @HostListener('keydown', ['$event'])
   protected onKeydown(e: KeyboardEvent): void {
-    if (!this.open()) {
+    if (!this.isOpen()) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
         this.toggle()
@@ -372,7 +369,7 @@ export class CustomMultiSelectComponent implements ControlValueAccessor {
   private focusSearchInput_(): void {
     afterNextRender(
       () => {
-        this.searchInputRef?.nativeElement?.focus()
+        this.searchInputRef()?.nativeElement?.focus()
       },
       { injector: this._injector }
     )

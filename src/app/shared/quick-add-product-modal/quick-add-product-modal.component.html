@@ -2,7 +2,7 @@
   <app-modal-shell
     size="md"
     labelledBy="quick-add-title"
-    [dismissible]="!isSubmitting_() && !aiLoading_()"
+    [dismissible]="!isSubmitting_() && !isAiLoading_()"
     (dismissed)="onCancel()"
   >
     <h3 id="quick-add-title" class="quick-add-product-modal__title">
@@ -32,8 +32,13 @@
                 autocapitalize="off"
                 spellcheck="false"
               />
-              <button type="button" class="c-icon-btn" (click)="onAiFill()" [disabled]="!name().trim() || aiLoading_()">
-                @if (aiLoading_()) {
+              <button
+                type="button"
+                class="c-icon-btn"
+                (click)="onAiFill()"
+                [disabled]="!name().trim() || isAiLoading_()"
+              >
+                @if (isAiLoading_()) {
                   <app-loader size="small" [inline]="true" />
                 } @else {
                   <lucide-icon name="sparkles" [size]="16"></lucide-icon>
@@ -43,7 +48,7 @@
             @if (nameError_()) {
               <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
             }
-            @if (aiError_()) {
+            @if (hasAiError_()) {
               <span class="field-error-msg">{{ 'ai_product_error' | translatePipe }}</span>
             }
           </div>
@@ -103,14 +108,14 @@
       </section>
 
       <button type="button" class="quick-add-product-modal__toggle" (click)="toggleExpanded()">
-        @if (expanded_()) {
+        @if (isExpanded_()) {
           {{ 'hide_details' | translatePipe }}
         } @else {
           {{ 'show_more_details' | translatePipe }}
         }
       </button>
 
-      @if (expanded_()) {
+      @if (isExpanded_()) {
         <section
           class="quick-add-product-modal__section quick-add-product-modal__section--optional"
           aria-label="Optional details"
@@ -157,9 +162,9 @@
             </div>
             <div class="quick-add-product-modal__field quick-add-product-modal__field--span">
               <span class="quick-add-product-modal__label">{{ 'allergens' | translatePipe }}</span>
-              <div class="c-toggle-chip-group quick-add-product-modal__allergens">
+              <div class="c-chip-group quick-add-product-modal__allergens">
                 @for (key of allergens(); track key) {
-                  <label class="c-toggle-chip">
+                  <label class="c-chip c-chip--toggle">
                     <input type="checkbox" [checked]="isAllergenSelected(key)" (change)="toggleAllergen(key)" />
                     <span>{{ key | translatePipe }}</span>
                   </label>

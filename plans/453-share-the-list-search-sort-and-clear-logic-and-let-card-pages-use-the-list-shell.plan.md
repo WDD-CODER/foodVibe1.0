@@ -1,6 +1,6 @@
 # Plan 453 — Share the list search, sort and clear logic and let card pages use the list shell
 
-Status: draft
+Status: active
 Track: code
 Depends-on: 450
 Conflicts-with: 452, 454, 455, 456, 457
@@ -17,10 +17,10 @@ This plan adds one logic helper, one `layout: 'cards'` mode, and converts one pa
 ## Goals & Success Criteria
 - Primary: one source for list search/sort/clear logic; card-grid pages built on `app-list-shell`; no visible change.
 - Success:
-  - [ ] [auto] `npx ng build` passes after every sub-task.
-  - [ ] [auto] `npx ng test --watch=false` passes, including new specs for `list-controls.util` and the `cards` layout of `list-shell`; existing `supplier-list`, `equipment-list` and `list-shell` specs unchanged and green.
-  - [ ] [auto] `grep -rnE "protected (onClearSearch|onSearchEscape|setSort|clearAllFilters)\(" src/app/pages` → only handlers that delegate to `listControls` (one line each); no copied bodies remain in the converted pages.
-  - [ ] [auto] Frozen files (`product-form.component.ts`, `menu-intelligence.page.ts`, `menu-export.service.ts`, `recipe-builder.page.ts`, `cook-view.page.ts`) have net lines <= 0: `git diff --numstat origin/main -- <each>` → added <= removed (none are in scope; expected empty).
+  - [x] [auto] `npx ng build` passes after every sub-task. (evidence: docs/mvp/runs/453.md)
+  - [x] [auto] `npx ng test --watch=false` passes, including new specs for `list-controls.util` and the `cards` layout of `list-shell`; existing `supplier-list`, `equipment-list` and `list-shell` specs unchanged and green.
+  - [x] [auto] `grep -rnE "protected (onClearSearch|onSearchEscape|setSort|clearAllFilters)\(" src/app/pages` → only handlers that delegate to `listControls` (one line each); no copied bodies remain in the converted pages.
+  - [x] [auto] Frozen files (`product-form.component.ts`, `menu-intelligence.page.ts`, `menu-export.service.ts`, `recipe-builder.page.ts`, `cook-view.page.ts`) have net lines <= 0: `git diff --numstat origin/main -- <each>` → added <= removed (none are in scope; expected empty).
   - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down`).
   - [ ] [human] Smoke each touched page (suppliers, equipment, inventory, recipe book, venues, menu library, trash, metadata manager): search, clear (X), Escape in search, sort by clicking a column, clear filters, select rows, empty state, RTL layout — all behave exactly as before.
 
@@ -115,19 +115,19 @@ The MVP changed many files, so this step always runs (also when `scope-check.mjs
 - Logical CSS properties only; any new SCSS for `cards` lives in `list-shell.component.scss` inside `@layer` as the neighbours do (`.cssLayer` skill). No new `.c-*` engine, no new dictionary keys (`translatePipe` existing keys only).
 
 ## Atomic Sub-tasks
-- [ ] S1: Write the shared list logic and its spec — `core/utils/list-controls.util.ts` with `useListControls` and `matchesSearch`; spec covers toggle-then-reset sort, clear keeps focus, Escape only acts on non-empty search, Hebrew niqqud match — `src/app/core/utils/list-controls.util.ts`, `src/app/core/utils/list-controls.util.spec.ts`
-- [ ] S2 (checkpoint): Convert the supplier list, the smallest table page — replace its `onClearSearch` / `onSearchEscape` / `clearAllFilters` bodies and the `toLowerCase` search (`nameHebrew`, `contactPerson`); keep `supplier-list.component.spec.ts` green — `src/app/pages/suppliers/components/supplier-list/**`
-- [ ] S3: Convert the equipment list (`setSort`, clear/escape, search on `nameHebrew`) — `src/app/pages/equipment/components/equipment-list/**`
-- [ ] S4: Convert the inventory product list (`setSort`, clear/escape, `clearAllFilters`, search on `nameHebrew`; leave its `internalName` map alone) — `src/app/pages/inventory/components/inventory-product-list/**`
-- [ ] S5: Convert the recipe book list (`setSort` plus the two date presets that call it, clear/escape, `clearAllFilters`, search) — `src/app/pages/recipe-book/components/recipe-book-list/**`
-- [ ] S6: Convert the venue list's handlers (`clearAllFilters`, clear/escape, search on `nameHebrew` and `environmentType`); keep its own page chrome for now — `src/app/pages/venues/components/venue-list/**`
-- [ ] S7: Convert the menu library list's handlers (`setSort`, clear/escape, search); keep its own page chrome for now — `src/app/pages/menu-library/components/menu-library-list/**`
-- [ ] S8 (checkpoint): Add `layout: 'cards'` and `cardMin` to `app-list-shell`, projecting `[shell-cards]`; spec asserts `table` DOM unchanged and `cards` renders the grid and slots; update the shared breadcrumbs — `src/app/shared/list-shell/list-shell.component.ts`, `src/app/shared/list-shell/list-shell.component.html`, `src/app/shared/list-shell/list-shell.component.scss`, `src/app/shared/list-shell/list-shell.component.spec.ts`, `src/app/shared/breadcrumbs.md`
-- [ ] S9: Move the venue list onto `app-list-shell layout="cards"` (header, search, selection bar, empty state into shell slots) — `src/app/pages/venues/components/venue-list/**`
-- [ ] S10: Move the menu library (event library card grid) onto `app-list-shell layout="cards"` — `src/app/pages/menu-library/components/menu-library-list/**`
-- [ ] S11: Move the trash page onto the cards layout, reusing `app-empty-state` and `app-row-actions-menu` — `src/app/pages/trash/trash.page.ts`, `src/app/pages/trash/trash.page.html`, `src/app/pages/trash/trash.page.scss`
-- [ ] S12 (checkpoint): Move the metadata manager page chrome onto the cards layout (its manager sub-components stay as they are) — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `src/app/pages/metadata-manager/metadata-manager.page.component.html`, `src/app/pages/metadata-manager/metadata-manager.page.component.scss`
-- [ ] S13: Run the build, all specs, the grep and frozen-file checks; write the run file with the validation cards — `docs/mvp/runs/453.md`
+- [x] S1: Write the shared list logic and its spec — `core/utils/list-controls.util.ts` with `useListControls` and `matchesSearch`; spec covers toggle-then-reset sort, clear keeps focus, Escape only acts on non-empty search, Hebrew niqqud match — `src/app/core/utils/list-controls.util.ts`, `src/app/core/utils/list-controls.util.spec.ts`
+- [x] S2 (checkpoint): Convert the supplier list, the smallest table page — replace its `onClearSearch` / `onSearchEscape` / `clearAllFilters` bodies and the `toLowerCase` search (`nameHebrew`, `contactPerson`); keep `supplier-list.component.spec.ts` green — `src/app/pages/suppliers/components/supplier-list/**`
+- [x] S3: Convert the equipment list (`setSort`, clear/escape, search on `nameHebrew`) — `src/app/pages/equipment/components/equipment-list/**`
+- [x] S4: Convert the inventory product list (`setSort`, clear/escape, `clearAllFilters`, search on `nameHebrew`; leave its `internalName` map alone) — `src/app/pages/inventory/components/inventory-product-list/**`
+- [x] S5: Convert the recipe book list (`setSort` plus the two date presets that call it, clear/escape, `clearAllFilters`, search) — `src/app/pages/recipe-book/components/recipe-book-list/**`
+- [x] S6: Convert the venue list's handlers (`clearAllFilters`, clear/escape, search on `nameHebrew` and `environmentType`); keep its own page chrome for now — `src/app/pages/venues/components/venue-list/**`
+- [x] S7: Convert the menu library list's handlers (`setSort`, clear/escape, search); keep its own page chrome for now — `src/app/pages/menu-library/components/menu-library-list/**`
+- [x] S8 (checkpoint): Add `layout: 'cards'` and `cardMin` to `app-list-shell`, projecting `[shell-cards]`; spec asserts `table` DOM unchanged and `cards` renders the grid and slots; update the shared breadcrumbs — `src/app/shared/list-shell/list-shell.component.ts`, `src/app/shared/list-shell/list-shell.component.html`, `src/app/shared/list-shell/list-shell.component.scss`, `src/app/shared/list-shell/list-shell.component.spec.ts`, `src/app/shared/breadcrumbs.md`
+- [x] S9: Move the venue list onto `app-list-shell layout="cards"` (header, search, selection bar, empty state into shell slots) — `src/app/pages/venues/components/venue-list/**`
+- [ ] S10 (skipped, see run file): Move the menu library (event library card grid) onto `app-list-shell layout="cards"` — `src/app/pages/menu-library/components/menu-library-list/**`
+- [ ] S11 (skipped, see run file): Move the trash page onto the cards layout, reusing `app-empty-state` and `app-row-actions-menu` — `src/app/pages/trash/trash.page.ts`, `src/app/pages/trash/trash.page.html`, `src/app/pages/trash/trash.page.scss`
+- [ ] S12 (skipped, see run file): Move the metadata manager page chrome onto the cards layout (its manager sub-components stay as they are) — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `src/app/pages/metadata-manager/metadata-manager.page.component.html`, `src/app/pages/metadata-manager/metadata-manager.page.component.scss`
+- [x] S13: Run the build, all specs, the grep and frozen-file checks; write the run file with the validation cards — `docs/mvp/runs/453.md`
 
 ## Technical Considerations
 - Dependencies: `normalizeHebrew` (`core/utils/recipe-match.util.ts`), existing `list-state.util.ts` (URL/session param sync — leave as is), `app-page-header`, `app-selection-bar`, `app-row-actions-menu`, `app-empty-state`, `app-column-carousel`, `app-list-row-checkbox`.

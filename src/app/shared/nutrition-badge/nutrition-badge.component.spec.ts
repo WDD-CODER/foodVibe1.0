@@ -3,6 +3,8 @@ import { By } from '@angular/platform-browser'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionBadgeComponent } from './nutrition-badge.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
+import { provideHttpClient } from '@angular/common/http'
+import { provideHttpClientTesting } from '@angular/common/http/testing'
 
 describe('NutritionBadgeComponent (tap, hover and scroll hints, plan 348)', () => {
   let fixture: ComponentFixture<NutritionBadgeComponent>
@@ -10,7 +12,8 @@ describe('NutritionBadgeComponent (tap, hover and scroll hints, plan 348)', () =
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [NutritionBadgeComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)]
+      imports: [NutritionBadgeComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents()
     fixture = TestBed.createComponent(NutritionBadgeComponent)
     component = fixture.componentInstance
@@ -25,7 +28,7 @@ describe('NutritionBadgeComponent (tap, hover and scroll hints, plan 348)', () =
   it('a tap opens it pinned, in the top layer', () => {
     wrap().click()
     fixture.detectChanges()
-    expect(component.showTooltip_()).toBeTrue()
+    expect(component.shouldShowTooltip_()).toBeTrue()
     expect(component.isPinned_()).toBeTrue()
     expect(tooltip()!.matches(':popover-open')).toBeTrue()
   })
@@ -33,33 +36,33 @@ describe('NutritionBadgeComponent (tap, hover and scroll hints, plan 348)', () =
   it('a second tap closes it', () => {
     wrap().click()
     wrap().click()
-    expect(component.showTooltip_()).toBeFalse()
+    expect(component.shouldShowTooltip_()).toBeFalse()
   })
 
   it('a tap outside closes it', () => {
     wrap().click()
     document.body.click()
-    expect(component.showTooltip_()).toBeFalse()
+    expect(component.shouldShowTooltip_()).toBeFalse()
   })
 
   it('touch enter/leave do not open it (only the tap does)', () => {
     wrap().dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'touch' }))
-    expect(component.showTooltip_()).toBeFalse()
+    expect(component.shouldShowTooltip_()).toBeFalse()
   })
 
   it('mouse hover opens it unpinned and leaving the leaf closes it', () => {
     wrap().dispatchEvent(mouse('pointerenter'))
-    expect(component.showTooltip_()).toBeTrue()
+    expect(component.shouldShowTooltip_()).toBeTrue()
     expect(component.isPinned_()).toBeFalse()
     wrap().dispatchEvent(mouse('pointerleave'))
-    expect(component.showTooltip_()).toBeFalse()
+    expect(component.shouldShowTooltip_()).toBeFalse()
   })
 
   it('clicking a hover-opened tooltip pins it, so leaving no longer closes it', () => {
     wrap().dispatchEvent(mouse('pointerenter'))
     wrap().click()
     wrap().dispatchEvent(mouse('pointerleave'))
-    expect(component.showTooltip_()).toBeTrue()
+    expect(component.shouldShowTooltip_()).toBeTrue()
     expect(component.isPinned_()).toBeTrue()
   })
 

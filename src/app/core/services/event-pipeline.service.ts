@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom, Observable } from 'rxjs'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 import type { EventClosing, EventStage, MenuEvent, NotClosedReason, PlanSnapshot } from '@models/menu-event.model'
 import { stageErrorKey } from '../utils/event-stage-ui.util'
 import { LoggingService } from './logging.service'
@@ -9,7 +10,7 @@ import { MenuEventDataService } from './menu-event-data.service'
 import { TranslationService } from './translation.service'
 import { UserMsgService } from './user-msg.service'
 
-const EVENTS_URL = `${environment.apiUrl}/api/v1/events`
+const EVENTS_URL = `${environment.apiUrl}${API.events}`
 
 export interface StageChange {
   stage: EventStage
@@ -23,7 +24,7 @@ export interface StageChange {
 export type PipelineResult = { ok: true; event: MenuEvent } | { ok: false; code: string | null }
 
 /**
- * Plan 443: the client of plan 442's `/api/v1/events` routes: stage moves and notes. Every call writes the
+ * Plan 443: the client of plan 442's `API.events` routes: stage moves and notes. Every call writes the
  * event the server returns into `MenuEventDataService`, so the library and the event screen update without a reload.
  * A refused call shows the translated reason itself; a 403 is left to the interceptor's "no permission" toast.
  */

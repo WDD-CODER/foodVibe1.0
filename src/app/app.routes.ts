@@ -12,6 +12,7 @@ import { kitchenDataEnsureLoadedResolver } from './core/resolvers/kitchen-data-e
 import { supplierResolver } from './core/resolvers/supplier.resolver'
 import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
+import { recipeBuilderAccessGuard } from './core/guards/recipe-builder-access.guard'
 import { platformAdminGuard } from './core/guards/platform-admin.guard'
 
 export const routes: Routes = [
@@ -73,6 +74,7 @@ export const routes: Routes = [
         path: 'import',
         loadComponent: () => import('./pages/inventory/components/product-import/product-import.component').then(m => m.ProductImportComponent),
         canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'edit/:id',
@@ -128,7 +130,7 @@ export const routes: Routes = [
       preparationsLoaded: preparationsEnsureLoadedResolver,
       kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
     },
-    canActivate: [authGuard],
+    canActivate: [authGuard, recipeBuilderAccessGuard],
     canDeactivate: [pendingChangesGuard],
   },
   {

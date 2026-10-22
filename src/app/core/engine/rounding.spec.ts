@@ -1,4 +1,13 @@
-import { formatDecimal1, formatMoney, formatPct1, formatPctInt, formatQty, roundMoney, roundPortions } from './rounding'
+import {
+  cleanFloat,
+  formatDecimal1,
+  formatMoney,
+  formatPct1,
+  formatPctInt,
+  formatQty,
+  roundMoney,
+  roundPortions
+} from './rounding'
 
 describe('rounding', () => {
   it('roundPortions drops float noise before rounding up', () => {
@@ -38,5 +47,13 @@ describe('rounding', () => {
     expect(formatDecimal1(3)).toBe('3')
     expect(formatDecimal1(0.7)).toBe('0.7')
     expect(formatDecimal1(6.96)).toBe('7')
+  })
+
+  it('cleanFloat drops float noise and keeps real decimals', () => {
+    expect(cleanFloat(1.1 * 100)).toBe(110)
+    expect(cleanFloat(0.07 * 100)).toBe(7)
+    expect(cleanFloat(5.2)).toBe(5.2)
+    expect(cleanFloat(110.00000000000001, 2)).toBe(110)
+    expect(cleanFloat(5.25, 2)).toBe(5.25)
   })
 })

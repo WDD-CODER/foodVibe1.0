@@ -6,7 +6,7 @@ import {
   OnInit,
   signal,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   ElementRef
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
@@ -19,6 +19,7 @@ import { Equipment, EquipmentCategory } from '@models/equipment.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
@@ -42,14 +43,15 @@ const CATEGORIES: EquipmentCategory[] = [
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    CustomSelectComponent
+    CustomSelectComponent,
+    FormFieldComponent
   ],
   templateUrl: './equipment-form.component.html',
   styleUrl: './equipment-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EquipmentFormComponent implements OnInit, AfterViewInit {
-  @ViewChild('nameInput') private nameInputRef?: ElementRef<HTMLInputElement>
+  private readonly nameInputRef = viewChild<ElementRef<HTMLInputElement>>('nameInput')
 
   private readonly fb = inject(FormBuilder)
   private readonly route = inject(ActivatedRoute)
@@ -80,7 +82,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.nameInputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.nameInputRef()?.nativeElement?.focus(), 0)
   }
 
   private buildForm(): void {
@@ -151,8 +153,8 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
         this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
         const msg =
           err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
-            ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
-            : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
+            ? this.translation.translate('duplicate_equipment_name')
+            : this.translation.translate('save_failed')
         this.userMsg.onSetErrorMsg(msg)
       }
     })

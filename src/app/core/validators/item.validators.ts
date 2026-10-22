@@ -1,19 +1,12 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms'
 import { Product } from '@models/product.model'
 
+/** Product name check: `duplicateEntityNameValidator` over products. */
 export function duplicateNameValidator(
   productsSignal: () => Product[],
   currentId?: string | null | (() => string | null)
 ): ValidatorFn {
-  return (control: AbstractControl): ValidationErrors | null => {
-    const val = control.value?.trim().toLowerCase()
-    if (!val) return null
-
-    const id = typeof currentId === 'function' ? currentId() : (currentId ?? null)
-    const isDuplicate = productsSignal().some((p) => p.nameHebrew.trim().toLowerCase() === val && p._id !== id)
-
-    return isDuplicate ? { duplicateName: true } : null
-  }
+  return duplicateEntityNameValidator(productsSignal, currentId)
 }
 
 export function duplicateEntityNameValidator<T extends { nameHebrew: string; _id: string }>(

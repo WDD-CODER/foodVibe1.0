@@ -1,0 +1,48 @@
+$break-mobile: 768px; // mirrors src/styles.scss
+
+@layer components.staff-stages-manager {
+  :host {
+    display: block;
+  }
+
+  .manager-card {
+    block-size: fit-content;
+
+    padding: 1.5rem;
+
+    @media (max-width: $break-mobile) {
+      padding: 1rem;
+    }
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+
+    gap: 0.75rem;
+    margin-block-end: 1rem;
+    padding-block-end: 1rem;
+
+    border-block-end: 1px solid var(--border-default);
+
+    h2 {
+      margin: 0;
+
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--color-text-main);
+    }
+  }
+
+  .card-desc {
+    margin-block: 0 1rem;
+    margin-inline: 0;
+
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+  }
+
+  .icon-primary {
+    color: var(--color-primary);
+  }
+}

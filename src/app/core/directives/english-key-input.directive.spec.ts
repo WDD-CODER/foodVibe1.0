@@ -6,7 +6,7 @@ import { EnglishKeyInputDirective } from './english-key-input.directive'
 @Component({
   standalone: true,
   imports: [FormsModule, EnglishKeyInputDirective],
-  template: '<input #field englishKeyInput [ngModel]="key_()" (ngModelChange)="key_.set($event)" />'
+  template: '<input #field appEnglishKeyInput [ngModel]="key_()" (ngModelChange)="key_.set($event)" />'
 })
 class TestHostComponent {
   readonly key_ = signal('')

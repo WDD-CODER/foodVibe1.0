@@ -23,7 +23,8 @@
               <div class="ai-scroll-indicator"><lucide-icon name="chevron-up" [size]="12" /></div>
             </div>
             <textarea
-              scrollIndicators
+              appScrollIndicators
+              appTextareaAutoGrow
               class="ai-prompt-textarea"
               dir="auto"
               [placeholder]="'ai_recipe_edit_placeholder' | translatePipe"
@@ -123,44 +124,55 @@
       @if (!draft_()) {
         <div class="ai-prompt-panel">
           <!-- Input mode tabs -->
-          <div class="ai-input-mode-tabs">
+          <div class="ai-input-mode-tabs" role="tablist" [attr.aria-label]="'ai_recipe_modal_title' | translatePipe">
             <button
               type="button"
-              class="ai-tab-btn"
-              [class.ai-tab-btn--active]="inputMode_() === 'text'"
+              role="tab"
+              class="c-chip c-chip--tab ai-mode-tab"
+              [class.active]="inputMode_() === 'text'"
+              [attr.aria-selected]="inputMode_() === 'text'"
               (click)="inputMode_.set('text')"
-              [title]="'ai_recipe_input_text_mode' | translatePipe"
             >
-              <lucide-icon name="type" [size]="16"></lucide-icon>
+              <lucide-icon name="type" [size]="14"></lucide-icon>
+              {{ 'ai_recipe_tab_describe' | translatePipe }}
             </button>
             <button
               type="button"
-              class="ai-tab-btn"
-              [class.ai-tab-btn--active]="inputMode_() === 'image'"
-              (click)="inputMode_.set('image')"
-              [title]="'ai_recipe_input_image_mode' | translatePipe"
-            >
-              <lucide-icon name="camera" [size]="16"></lucide-icon>
-            </button>
-            <button
-              type="button"
-              class="ai-tab-btn"
-              [class.ai-tab-btn--active]="inputMode_() === 'url'"
-              (click)="inputMode_.set('url')"
-              [title]="'ai_recipe_input_url_mode' | translatePipe"
-            >
-              <lucide-icon name="link" [size]="16"></lucide-icon>
-            </button>
-            <button
-              type="button"
-              class="ai-tab-btn"
-              [class.ai-tab-btn--active]="inputMode_() === 'paste'"
+              role="tab"
+              class="c-chip c-chip--tab ai-mode-tab"
+              [class.active]="inputMode_() === 'paste'"
+              [attr.aria-selected]="inputMode_() === 'paste'"
               (click)="inputMode_.set('paste')"
-              [title]="'paste_recipe' | translatePipe"
             >
-              <lucide-icon name="clipboard-paste" [size]="16"></lucide-icon>
+              <lucide-icon name="clipboard-paste" [size]="14"></lucide-icon>
+              {{ 'ai_recipe_tab_paste' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab ai-mode-tab"
+              [class.active]="inputMode_() === 'image'"
+              [attr.aria-selected]="inputMode_() === 'image'"
+              (click)="inputMode_.set('image')"
+            >
+              <lucide-icon name="camera" [size]="14"></lucide-icon>
+              {{ 'ai_recipe_tab_image' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab ai-mode-tab"
+              [class.active]="inputMode_() === 'url'"
+              [attr.aria-selected]="inputMode_() === 'url'"
+              (click)="inputMode_.set('url')"
+            >
+              <lucide-icon name="link" [size]="14"></lucide-icon>
+              {{ 'ai_recipe_tab_url' | translatePipe }}
             </button>
           </div>
+          @if (inputMode_() === 'paste') {
+            <p class="ai-paste-hint">{{ 'ai_recipe_paste_hint' | translatePipe }}</p>
+          }
 
           <!-- Text input (also the paste tab: same box, different placeholder and button) -->
           @if (inputMode_() === 'text' || inputMode_() === 'paste') {
@@ -170,7 +182,8 @@
                   <div class="ai-scroll-indicator"><lucide-icon name="chevron-up" [size]="12" /></div>
                 </div>
                 <textarea
-                  scrollIndicators
+                  appScrollIndicators
+                  appTextareaAutoGrow
                   class="ai-prompt-textarea"
                   [placeholder]="
                     (inputMode_() === 'paste' ? 'paste_recipe_placeholder' : 'ai_recipe_prompt_placeholder')
@@ -279,7 +292,7 @@
               type="button"
               class="c-btn-primary"
               [disabled]="
-                loading_() ||
+                isLoading_() ||
                 ((inputMode_() === 'text' || inputMode_() === 'paste') && !prompt_().trim()) ||
                 (inputMode_() === 'image' && !imageFile_()) ||
                 (inputMode_() === 'url' && !urlInput_().trim())
@@ -294,7 +307,7 @@
                       : onGenerate()
               "
             >
-              @if (loading_()) {
+              @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />
               } @else {
                 <lucide-icon name="sparkles" [size]="16"></lucide-icon>
@@ -305,13 +318,13 @@
         </div>
       } @else {
         <!-- Create preview — interactive editor or warning confirmation -->
-        @if (awaitingWarningConfirm_()) {
+        @if (isAwaitingWarningConfirm_()) {
           <div class="ai-shot-warnings">
             <p class="ai-patch-preview-label">{{ 'ai_recipe_quality_warnings' | translatePipe }}</p>
             @for (w of shotWarnings_(); track w) {
               <div class="ai-shot-warning-item">
                 <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
-                <span>{{ w }}</span>
+                <span>{{ w | translatePipe }}</span>
               </div>
             }
           </div>

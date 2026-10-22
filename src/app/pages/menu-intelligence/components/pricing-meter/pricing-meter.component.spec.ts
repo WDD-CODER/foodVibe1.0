@@ -96,9 +96,43 @@ describe('PricingMeterComponent', () => {
     expect(text()).toContain('—')
   })
 
-  it('marks every number partial when the plan is partial', () => {
+  it('marks profit per guest, profit % and minimum price partial, never revenue', () => {
     create(event({ pricePerGuest: 200 }), plan({ partial: true }))
-    expect(fixture.nativeElement.querySelectorAll('.partial-tag').length).toBeGreaterThanOrEqual(4)
+    const metrics = Array.from(fixture.nativeElement.querySelectorAll('.fin-metric')) as HTMLElement[]
+    const withTag = metrics.filter((m) => m.querySelector('.partial-tag'))
+    expect(withTag.length).toBe(3)
+    const revenue = metrics.find((m) => m.textContent?.includes('menu_total_revenue'))!
+    expect(revenue.querySelector('.partial-tag')).toBeNull()
+  })
+
+  it('shows the engine reason and no revenue tag when partial with an empty missing list', () => {
+    create(event({ pricePerGuest: 200 }), plan({ partial: true, errors: [{ kind: 'no_yield', name: 'רוטב' }] }))
+    expect(fixture.nativeElement.querySelector('.partial-reasons')).toBeTruthy()
+    expect(text()).toContain('partial_reason_title')
+    expect(text()).toContain('engine_error_no_yield')
+    const revenue = (Array.from(fixture.nativeElement.querySelectorAll('.fin-metric')) as HTMLElement[]).find((m) =>
+      m.textContent?.includes('menu_total_revenue')
+    )!
+    expect(revenue.querySelector('.partial-tag')).toBeNull()
+  })
+
+  it('shows no reason list when a product is missing or the plan is not partial', () => {
+    create(
+      event({ pricePerGuest: 200 }),
+      plan({
+        partial: true,
+        errors: [{ kind: 'no_yield', name: 'x' }],
+        missing: [{ kind: 'unpriced', name: 'p', recipeIds: [] }]
+      })
+    )
+    expect(fixture.nativeElement.querySelector('.partial-reasons')).toBeNull()
+    create(event({ pricePerGuest: 200 }), plan({ partial: false, errors: [{ kind: 'no_yield', name: 'x' }] }))
+    expect(fixture.nativeElement.querySelector('.partial-reasons')).toBeNull()
+  })
+
+  it('tags revenue as not set when it is 0 with guests', () => {
+    create(event({ guestCount: 50, pricePerGuest: undefined }), plan())
+    expect(text()).toContain('revenue_not_set')
   })
 
   it('locks the money inputs without editMoney', () => {

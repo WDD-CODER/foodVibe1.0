@@ -38,7 +38,8 @@ describe('ScrollRailComponent', () => {
     fixture.detectChanges()
   })
 
-  const rail = (): ScrollRailComponent => fixture.debugElement.query(By.directive(ScrollRailComponent)).componentInstance
+  const rail = (): ScrollRailComponent =>
+    fixture.debugElement.query(By.directive(ScrollRailComponent)).componentInstance
   const arrow = (side: 'prev' | 'next'): HTMLElement =>
     fixture.debugElement.query(By.css(`.sr-arrow--${side}`)).nativeElement
   const scroller = (): HTMLElement => fixture.debugElement.query(By.css('.sr-scroller')).nativeElement
@@ -83,6 +84,36 @@ describe('ScrollRailComponent', () => {
     refresh()
     expect(arrow('prev').classList).not.toContain('is-hidden')
     expect(arrow('next').classList).toContain('is-hidden')
+  })
+
+  describe('centerChild (plan 468)', () => {
+    beforeEach(() => {
+      fixture.componentInstance.items.set([1, 2, 3, 4, 5, 6, 7, 8])
+      fixture.detectChanges()
+      refresh()
+    })
+
+    it('asks the browser to centre the child horizontally and not move the page vertically', () => {
+      const child = scroller().children[7] as HTMLElement
+      const spy = spyOn(child, 'scrollIntoView')
+      rail().centerChild(child)
+      expect(spy).toHaveBeenCalledTimes(1)
+      const opts = spy.calls.mostRecent().args[0] as ScrollIntoViewOptions
+      expect(opts.inline).toBe('center')
+      expect(opts.block).toBe('nearest')
+    })
+
+    it('puts the fifth of eight children in the middle of a 300 px rail', async () => {
+      const child = scroller().children[4] as HTMLElement
+      rail().centerChild(child)
+      const centred = (): boolean => {
+        const r = scroller().getBoundingClientRect()
+        const c = child.getBoundingClientRect()
+        return Math.abs(c.left + c.width / 2 - (r.left + r.width / 2)) <= 2
+      }
+      for (let i = 0; i < 60 && !centred(); i++) await new Promise((res) => setTimeout(res, 50))
+      expect(centred()).toBeTrue()
+    })
   })
 })
 

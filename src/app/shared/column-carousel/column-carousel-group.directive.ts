@@ -8,7 +8,7 @@ import { Directive, computed, model, signal } from '@angular/core'
  * (e.g. to persist the slide).
  */
 @Directive({
-  selector: '[columnCarouselGroup]',
+  selector: '[appColumnCarouselGroup]',
   standalone: true,
   exportAs: 'columnCarouselGroup'
 })

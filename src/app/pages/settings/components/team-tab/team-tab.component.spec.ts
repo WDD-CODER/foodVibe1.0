@@ -83,7 +83,7 @@ describe('TeamTabComponent', () => {
     cmp['password_'].set('abcdefg1')
     await cmp.addMember()
     expect(team.addStaff).toHaveBeenCalledWith('cook2', 'abcdefg1')
-    expect(cmp['formOpen_']()).toBeFalse()
+    expect(cmp['isFormOpen_']()).toBeFalse()
   })
 
   it('a taken username keeps the form open with the error', async () => {
@@ -94,6 +94,21 @@ describe('TeamTabComponent', () => {
     cmp['password_'].set('abcdefg1')
     await cmp.addMember()
     expect(cmp['errorKey_']()).toBe('username_taken')
-    expect(cmp['formOpen_']()).toBeTrue()
+    expect(cmp['isFormOpen_']()).toBeTrue()
+  })
+
+  it('the form is centred in a wide page: equal, positive inline margins (plan 469 H1)', () => {
+    const host = fixture.nativeElement as HTMLElement
+    host.style.display = 'block'
+    host.style.inlineSize = '1280px'
+    document.body.appendChild(host)
+    try {
+      const root = host.querySelector('.team-tab') as HTMLElement
+      const style = getComputedStyle(root)
+      expect(parseFloat(style.marginInlineStart)).toBeGreaterThan(0)
+      expect(style.marginInlineStart).toBe(style.marginInlineEnd)
+    } finally {
+      host.remove()
+    }
   })
 })

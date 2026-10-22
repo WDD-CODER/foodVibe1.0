@@ -69,9 +69,9 @@
               type="button"
               class="c-btn-primary"
               (click)="onEdit()"
-              [disabled]="loading_() || !instruction().trim()"
+              [disabled]="isLoading_() || !instruction().trim()"
             >
-              @if (loading_()) {
+              @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />
               }
               {{ 'ai_menu_generate' | translatePipe }}
@@ -92,7 +92,9 @@
               </li>
             }
             @if (diffEntries_().length === 0) {
-              <li class="ai-menu-patch-item ai-menu-patch-item--empty">אין שינויים זוהו</li>
+              <li class="ai-menu-patch-item ai-menu-patch-item--empty">
+                {{ 'ai_no_changes_detected' | translatePipe }}
+              </li>
             }
           </ul>
           <div class="ai-menu-footer">
@@ -146,9 +148,9 @@
               type="button"
               class="c-btn-primary"
               (click)="onGenerate()"
-              [disabled]="loading_() || !prompt_().trim()"
+              [disabled]="isLoading_() || !prompt_().trim()"
             >
-              @if (loading_()) {
+              @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />
               }
               {{ 'ai_menu_generate' | translatePipe }}

@@ -28,11 +28,11 @@ export class KeyboardInsetService {
   readonly inset = this.inset_.asReadonly()
   readonly isOpen = this.isOpen_.asReadonly()
 
-  private started = false
+  private isStarted = false
 
   start(win: KeyboardInsetWindow | null = this.document.defaultView): void {
-    if (this.started || !win?.visualViewport) return
-    this.started = true
+    if (this.isStarted || !win?.visualViewport) return
+    this.isStarted = true
     const vv = win.visualViewport
     const update = (): void => this.update(win, vv)
     vv.addEventListener('resize', update, { passive: true })

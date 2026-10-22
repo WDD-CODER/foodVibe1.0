@@ -17,15 +17,15 @@
       <label class="import-field" for="import-text">
         <span class="import-field__label">{{ 'import_paste_hint' | translatePipe }}</span>
         <textarea
+          appTextareaAutoGrow
           id="import-text"
           class="c-input import-paste__box"
-          rows="6"
           dir="auto"
           maxlength="20000"
           data-testid="import-text"
           [ngModel]="text_()"
           (ngModelChange)="text_.set($event)"
-          [disabled]="parsing_() || saving_()"
+          [disabled]="isParsing_() || isSaving_()"
         ></textarea>
       </label>
 
@@ -41,17 +41,56 @@
             data-testid="import-supplier"
           />
         </div>
+        <input
+          #cameraInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="environment"
+          hidden
+          data-testid="import-photo-camera-input"
+          (change)="onPhotoChosen($event)"
+        />
+        <input
+          #uploadInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          data-testid="import-photo-upload-input"
+          (change)="onPhotoChosen($event)"
+        />
+        <button
+          type="button"
+          class="c-btn-ghost import-photo-btn"
+          data-testid="import-photo-camera"
+          [disabled]="isParsing_() || isSaving_()"
+          (click)="cameraInput.click()"
+        >
+          <lucide-icon name="camera" [size]="16" />
+          {{ 'import_photo_camera' | translatePipe }}
+        </button>
+        <button
+          type="button"
+          class="c-btn-ghost import-photo-btn"
+          data-testid="import-photo-upload"
+          [disabled]="isParsing_() || isSaving_()"
+          (click)="uploadInput.click()"
+        >
+          <lucide-icon name="image" [size]="16" />
+          {{ 'import_photo_upload' | translatePipe }}
+        </button>
         <button
           type="button"
           class="c-btn-primary"
           data-testid="import-parse"
-          [disabled]="!text_().trim() || parsing_() || saving_()"
+          [disabled]="!text_().trim() || isParsing_() || isSaving_()"
           (click)="parse()"
         >
           <lucide-icon name="sparkles" [size]="16" />
           {{ 'import_parse' | translatePipe }}
         </button>
       </div>
+
+      <p class="import-hint" data-testid="import-photo-privacy">{{ 'import_photo_privacy' | translatePipe }}</p>
 
       @if (errorKey_(); as errorKey) {
         <p class="import-message import-message--error" role="alert" data-testid="import-error">
@@ -61,13 +100,26 @@
     </section>
 
     @if (rows_().length > 0) {
-      @if (truncated_()) {
+      @if (isTruncated_()) {
         <p class="import-message import-message--warning" role="status" data-testid="import-truncated">
           {{ 'import_truncated' | translatePipe }}
         </p>
       }
 
       <section class="import-preview c-glass-panel" data-testid="import-preview">
+        @if (isFromPhoto_()) {
+          <p class="import-hint" role="status" data-testid="import-photo-hint">
+            {{ 'import_photo_check_hint' | translatePipe }}
+          </p>
+        }
+        @if (isMatching_()) {
+          <p class="import-hint" role="status" data-testid="import-matching">{{ 'import_matching' | translatePipe }}</p>
+        }
+        @if (hasMatchFailed_()) {
+          <p class="import-hint import-hint--warning" role="status" data-testid="import-match-failed">
+            {{ 'import_match_failed' | translatePipe }}
+          </p>
+        }
         <div class="import-table-wrap">
           <table class="import-table">
             <thead>
@@ -91,20 +143,19 @@
                   [class.import-row--same]="item.status === 'same'"
                 >
                   <td class="import-table__name">
+                    <input
+                      type="text"
+                      class="c-input"
+                      maxlength="200"
+                      data-testid="import-name"
+                      [attr.aria-label]="'name' | translatePipe"
+                      [ngModel]="item.row.name"
+                      (ngModelChange)="updateRow(item.row.id, { name: $event })"
+                    />
                     @if (item.match) {
-                      <span class="import-readonly" data-testid="import-name-readonly">{{
-                        item.match.nameHebrew
-                      }}</span>
-                    } @else {
-                      <input
-                        type="text"
-                        class="c-input"
-                        maxlength="200"
-                        data-testid="import-name"
-                        [attr.aria-label]="'name' | translatePipe"
-                        [ngModel]="item.row.name"
-                        (ngModelChange)="updateRow(item.row.id, { name: $event })"
-                      />
+                      <span class="import-matches" data-testid="import-matches">
+                        {{ 'import_matches_existing' | translatePipe }} {{ item.match.nameHebrew }}
+                      </span>
                     }
                   </td>
                   <td>
@@ -133,6 +184,11 @@
                       [ngModel]="item.row.price"
                       (ngModelChange)="setPrice(item.row.id, $event)"
                     />
+                    @if (item.status === 'update' && item.oldPrice !== null) {
+                      <span class="import-old-price" dir="ltr" data-testid="import-old-price">
+                        {{ 'import_old_price' | translatePipe }} {{ formatMoney(item.oldPrice) }}
+                      </span>
+                    }
                   </td>
                   <td>
                     @if (item.match) {
@@ -188,6 +244,11 @@
                     @if (item.row.needsReview) {
                       <span class="c-chip amber" data-testid="import-flag-review">
                         {{ 'import_flag_review' | translatePipe }}
+                      </span>
+                    }
+                    @if (item.hasUnknownPurchaseUnit) {
+                      <span class="c-chip amber" data-testid="import-flag-unknown-unit">
+                        {{ 'import_flag_unknown_unit' | translatePipe }}
                       </span>
                     }
                     @if (item.row.duplicate) {

@@ -6,7 +6,7 @@ import { AddItemModalService } from '@services/add-item-modal.service'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
-  selector: 'add-item-modal',
+  selector: 'app-add-item-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe, ModalShellComponent],
   templateUrl: './add-item-modal.component.html',

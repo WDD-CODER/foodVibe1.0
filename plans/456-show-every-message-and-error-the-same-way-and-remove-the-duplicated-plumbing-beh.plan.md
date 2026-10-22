@@ -1,6 +1,6 @@
 # Plan 456 — Show every message and error the same way, and remove the duplicated plumbing behind them
 
-Status: draft
+Status: active
 Track: code
 Depends-on: 450, 454
 Conflicts-with: 451, 452, 453, 454, 455
@@ -28,14 +28,14 @@ instead of shared. Counts below are from `mvp` at drafting; Step 0 re-counts on 
 - Primary: one way to show an error/toast, one place for API paths, one helper each for token verify, admin check,
   rate limiting and request validation. **No behaviour change** other than wording moving into the dictionary.
 - Success:
-  - [ ] [auto] `npx ng build` and `npx ng test --watch=false` pass; `npm --prefix server test` passes with the same or more tests than before.
-  - [ ] [auto] `rg "onSet(Success|Error|Warning)Msg\(\s*['\"\`]" src/app --glob "!*.spec.ts"` → no matches.
-  - [ ] [auto] `rg "fetch\(" src/app --glob "!*.spec.ts"` → only `logging.service.ts` (deliberate: must not recurse through the interceptor).
-  - [ ] [auto] `rg "'/api/v1|\`[^\`]*/api/v1" src/app --glob "!*.spec.ts"` → matches only in `http-storage.adapter.ts`.
-  - [ ] [auto] `rg "jwt\.verify" server/routes server/middleware` → only the shared helper (and the refresh-token call in `auth.js`); `rg "const isAdmin" server` → none; `rg "rateLimit\(" server` → only the factory; `rg -c "status\(400\)" server/routes/ai.js` is lower than before and each remaining 400 has a reason in the plan evidence.
-  - [ ] [auto] `src/app/shared/change-popover` and `src/app/shared/floating-info-container` no longer exist and `npx ng build` still passes.
-  - [ ] [auto] Frozen files `recipe-builder.page.ts` (1 toast) net lines <= 0 (`git diff --numstat`); hotspots `dictionary.json` only gains lines.
-  - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down` per run mode).
+  - [x] [auto] `npx ng build` and `npx ng test --watch=false` pass; `npm --prefix server test` passes with the same or more tests than before.
+  - [x] [auto] `rg "onSet(Success|Error|Warning)Msg\(\s*['\"\`]" src/app --glob "!*.spec.ts"` → no matches.
+  - [x] [auto] `rg "fetch\(" src/app --glob "!*.spec.ts"` → only `logging.service.ts` (deliberate: must not recurse through the interceptor).
+  - [x] [auto] `rg "'/api/v1|\`[^\`]*/api/v1" src/app --glob "!*.spec.ts"` → matches only in `http-storage.adapter.ts`.
+  - [x] [auto] `rg "jwt\.verify" server/routes server/middleware` → only the shared helper (and the refresh-token call in `auth.js`); `rg "const isAdmin" server` → none; `rg "rateLimit\(" server` → only the factory; `rg -c "status\(400\)" server/routes/ai.js` is lower than before and each remaining 400 has a reason in the plan evidence.
+  - [x] [auto] `src/app/shared/change-popover` and `src/app/shared/floating-info-container` no longer exist and `npx ng build` still passes.
+  - [x] [auto] Frozen files `recipe-builder.page.ts` (1 toast) net lines <= 0 (`git diff --numstat`); hotspots `dictionary.json` only gains lines.
+  - [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down` per run mode).
   - [ ] [human] Smoke each touched page with `ng serve -c local`: Settings/metadata manager (add, duplicate, delete a term; unit add/delete), recipe/dish delete + restore, supplier add from a product, version history restore, AI modal usage counter, login/logout. Every message still appears, now in Hebrew from the dictionary, with the same meaning.
 
 ## Execution Mode
@@ -108,6 +108,22 @@ server/routes/business.js
 server/routes/product-import.js
 server/test/**
 docs/mvp/runs/456.md
+src/app/core/services/business-stats.service.ts
+src/app/shared/ai-menu-modal/ai-menu-modal.component.ts
+src/app/shared/ai-product-modal/ai-product-modal.component.ts
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.spec.ts
+src/app/core/services/kitchen-state.service.spec.ts
+src/app/core/services/unit-registry.service.spec.ts
+src/app/core/services/metadata-registry.service.spec.ts
+src/app/core/services/preparation-registry.service.spec.ts
+src/app/core/resolvers/product.resolver.spec.ts
+src/app/core/utils/add-option.util.spec.ts
+docs/brain/component-families.md
+src/app/core/models/menu-event.model.ts
+src/app/core/models/business-stats.model.ts
+src/app/core/utils/id.util.ts
+src/app/core/services/breadcrumbs.md
 ```
 
 ## Read Scope
@@ -149,11 +165,11 @@ Any conflict → stop and report before editing.
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] No `onSet*Msg` call receives a string literal; every toast text is `translate('<key>')` with the key appended to `dictionary.json`.
-- [ ] Every caught error that shows a toast also calls `logging.error('<domain.action.result>', ...)` first; no catch swallows silently.
-- [ ] One API-path map in `http-storage.adapter.ts`; all other client files import it; `gemini-usage.util` goes through `HttpClient` (so the interceptor adds the token and handles refresh).
-- [ ] Server: one access-token verify helper, one platform-admin predicate, one `createRateLimiter(options)` factory, one `badRequest`/field-check helper for `ai.js`.
-- [ ] Dead folders removed together with their `breadcrumbs.md` lines.
+- [x] No `onSet*Msg` call receives a string literal; every toast text is `translate('<key>')` with the key appended to `dictionary.json`.
+- [x] Every caught error that shows a toast also calls `logging.error('<domain.action.result>', ...)` first; no catch swallows silently.
+- [x] One API-path map in `http-storage.adapter.ts`; all other client files import it; `gemini-usage.util` goes through `HttpClient` (so the interceptor adds the token and handles refresh).
+- [x] Server: one access-token verify helper, one platform-admin predicate, one `createRateLimiter(options)` factory, one `badRequest`/field-check helper for `ai.js`.
+- [x] Dead folders removed together with their `breadcrumbs.md` lines.
 
 ## UI/UX Notes
 - Wording is moved, not rewritten. Messages built from variables (`exists(trimmed)`, `success(name)` in `metadata-registry.service.ts`) use a dictionary key with a `{name}` style placeholder only if `translate` already supports params; otherwise concatenate `translate(key) + ' ' + name` as the current text does — check the existing pattern in `translation.service.ts` first.
@@ -162,19 +178,19 @@ Any conflict → stop and report before editing.
 ## Atomic Sub-tasks
 
 Group C — client
-- [ ] C0 (checkpoint): Step 0 Reality Check; record the real toast list, `/api/v1` literal list and `fetch` list in the run file — `docs/mvp/runs/456.md`
-- [ ] C1: Move the literal toasts in the core services into the dictionary — add keys, switch `onSet*Msg('…')` to `translate(key)`: `unit-registry`, `metadata-registry`, `preparation-registry`, `kitchen-state` (frozen-file rule does not apply), `add-supplier-flow`, `menu-section-categories`, `add-option.util`, the four `*.resolver.ts` — `src/app/core/services/unit-registry.service.ts`, `src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/preparation-registry.service.ts`, `src/app/core/services/kitchen-state.service.ts`, `src/app/core/services/add-supplier-flow.service.ts`, `src/app/core/services/menu-section-categories.service.ts`, `src/app/core/utils/add-option.util.ts`, `src/app/core/resolvers/supplier.resolver.ts`, `src/app/core/resolvers/recipe.resolver.ts`, `src/app/core/resolvers/product.resolver.ts`, `src/app/core/resolvers/equipment.resolver.ts`, `public/assets/data/dictionary.json`
-- [ ] C2 (checkpoint): Same for pages and shared components — `metadata-manager` (16), `user-management`, `version-history-panel` (3), `quick-edit-product-panel`, `quick-add-product-modal`, `recipe-builder.page.ts` (frozen: net lines <= 0), `cook-view.page.ts` / `equipment-form` only if Step 0 finds literal text there; then the literal-toast grep must be empty — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `src/app/pages/metadata-manager/components/user-management/user-management.component.ts`, `src/app/shared/version-history-panel/version-history-panel.component.ts`, `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts`, `src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts`, `src/app/pages/recipe-builder/recipe-builder.page.ts`, `src/app/pages/cook-view/cook-view.page.ts`, `src/app/pages/equipment/components/equipment-form/equipment-form.component.ts`, `public/assets/data/dictionary.json`
-- [ ] C3: One error path — for each catch that toasts, add the missing `logging.error(...)` (event name `domain.action.result`) and make sure the toast uses a key; add one `UserMsgService` unit test that a key-translated message is shown — `src/app/core/services/user-msg.service.ts`, `src/app/core/services/user-msg.service.spec.ts`, `src/app/core/services/kitchen-state.service.ts`, `src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/unit-registry.service.ts`
-- [ ] C4 (checkpoint): API paths in one place — export a typed `API` map/builders (`data(type)`, `ai(path)`, `auth(path)`, `admin(path)`, `log`, `health`) from the adapter; switch the 13 files; `logging.service.ts` and `auth.interceptor.ts` import the same constants — `src/app/core/services/http-storage.adapter.ts`, `src/app/core/interceptors/auth.interceptor.ts`, `src/app/core/services/logging.service.ts`, `src/app/core/services/gemini.service.ts`, `src/app/core/services/gemini-shots.service.ts`, `src/app/core/services/user.service.ts`, `src/app/core/services/user-admin.service.ts`, `src/app/core/services/platform-admin.service.ts`, `src/app/core/services/business.service.ts`, `src/app/core/services/product-import.service.ts`, `src/app/core/services/event-pipeline.service.ts`, `src/app/core/services/server-heartbeat.service.ts`, `src/app/pages/settings/services/team.service.ts`
-- [ ] C5: Put the Gemini usage call behind the interceptor — replace `fetch` in `gemini-usage.util.ts` with `HttpClient` (via `inject` in an injection context or a method on `gemini.service.ts`), same return type and error handling — `src/app/core/utils/gemini-usage.util.ts`, `src/app/core/services/gemini.service.ts`
-- [ ] C6: Delete the dead components and their breadcrumb lines (after the Step 0 grep still shows no consumer) — `src/app/shared/change-popover/**`, `src/app/shared/floating-info-container/**`, `src/app/shared/breadcrumbs.md`
+- [x] C0 (checkpoint): Step 0 Reality Check; record the real toast list, `/api/v1` literal list and `fetch` list in the run file — `docs/mvp/runs/456.md`
+- [x] C1: Move the literal toasts in the core services into the dictionary — add keys, switch `onSet*Msg('…')` to `translate(key)`: `unit-registry`, `metadata-registry`, `preparation-registry`, `kitchen-state` (frozen-file rule does not apply), `add-supplier-flow`, `menu-section-categories`, `add-option.util`, the four `*.resolver.ts` — `src/app/core/services/unit-registry.service.ts`, `src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/preparation-registry.service.ts`, `src/app/core/services/kitchen-state.service.ts`, `src/app/core/services/add-supplier-flow.service.ts`, `src/app/core/services/menu-section-categories.service.ts`, `src/app/core/utils/add-option.util.ts`, `src/app/core/resolvers/supplier.resolver.ts`, `src/app/core/resolvers/recipe.resolver.ts`, `src/app/core/resolvers/product.resolver.ts`, `src/app/core/resolvers/equipment.resolver.ts`, `public/assets/data/dictionary.json`
+- [x] C2 (checkpoint): Same for pages and shared components — `metadata-manager` (16), `user-management`, `version-history-panel` (3), `quick-edit-product-panel`, `quick-add-product-modal`, `recipe-builder.page.ts` (frozen: net lines <= 0), `cook-view.page.ts` / `equipment-form` only if Step 0 finds literal text there; then the literal-toast grep must be empty — `src/app/pages/metadata-manager/metadata-manager.page.component.ts`, `src/app/pages/metadata-manager/components/user-management/user-management.component.ts`, `src/app/shared/version-history-panel/version-history-panel.component.ts`, `src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts`, `src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts`, `src/app/pages/recipe-builder/recipe-builder.page.ts`, `src/app/pages/cook-view/cook-view.page.ts`, `src/app/pages/equipment/components/equipment-form/equipment-form.component.ts`, `public/assets/data/dictionary.json`
+- [x] C3: One error path — for each catch that toasts, add the missing `logging.error(...)` (event name `domain.action.result`) and make sure the toast uses a key; add one `UserMsgService` unit test that a key-translated message is shown — `src/app/core/services/user-msg.service.ts`, `src/app/core/services/user-msg.service.spec.ts`, `src/app/core/services/kitchen-state.service.ts`, `src/app/core/services/metadata-registry.service.ts`, `src/app/core/services/unit-registry.service.ts`
+- [x] C4 (checkpoint): API paths in one place — export a typed `API` map/builders (`data(type)`, `ai(path)`, `auth(path)`, `admin(path)`, `log`, `health`) from the adapter; switch the 13 files; `logging.service.ts` and `auth.interceptor.ts` import the same constants — `src/app/core/services/http-storage.adapter.ts`, `src/app/core/interceptors/auth.interceptor.ts`, `src/app/core/services/logging.service.ts`, `src/app/core/services/gemini.service.ts`, `src/app/core/services/gemini-shots.service.ts`, `src/app/core/services/user.service.ts`, `src/app/core/services/user-admin.service.ts`, `src/app/core/services/platform-admin.service.ts`, `src/app/core/services/business.service.ts`, `src/app/core/services/product-import.service.ts`, `src/app/core/services/event-pipeline.service.ts`, `src/app/core/services/server-heartbeat.service.ts`, `src/app/pages/settings/services/team.service.ts`
+- [x] C5: Put the Gemini usage call behind the interceptor — replace `fetch` in `gemini-usage.util.ts` with `HttpClient` (via `inject` in an injection context or a method on `gemini.service.ts`), same return type and error handling — `src/app/core/utils/gemini-usage.util.ts`, `src/app/core/services/gemini.service.ts`
+- [x] C6: Delete the dead components and their breadcrumb lines (after the Step 0 grep still shows no consumer) — `src/app/shared/change-popover/**`, `src/app/shared/floating-info-container/**`, `src/app/shared/breadcrumbs.md`
 
 Group V — server
-- [ ] V1: Shared token verify and platform-admin check — add `verifyAccessToken(req)` (returns payload or null) and `isPlatformAdmin(req)` beside `requirePlatformAdmin` in `middleware/auth.js`; use them in `routes/log.js`, `middleware/write-limit.js`, `routes/generic.js` (delete local `isAdmin`); refresh-token verify stays; tests for both helpers — `server/middleware/auth.js`, `server/middleware/write-limit.js`, `server/routes/log.js`, `server/routes/generic.js`, `server/test/**`
-- [ ] V2: Rate-limiter factory — `createRateLimiter({ windowMs, max, messageKey })` in `server/middleware/rate-limit.js` with the default headers/handler; convert each limiter keeping its exact numbers; existing `data-write-limit*.test.js` and `log-route.test.js` must pass unchanged — `server/middleware/rate-limit.js`, `server/middleware/write-limit.js`, `server/routes/ai.js`, `server/routes/auth.js`, `server/routes/log.js`, `server/routes/business.js`, `server/routes/product-import.js`
-- [ ] V3: Request-validation helper for `ai.js` — `requireFields(res, body, rules)` / `badRequest(res, messageKey)` in `middleware/validate.js` returning the identical `{ error, ... }` bodies; convert the ~30 `status(400)` checks one handler at a time; keep checks that are not plain presence/type/length as they are — `server/middleware/validate.js`, `server/routes/ai.js`, `server/test/**`
-- [ ] V4 (checkpoint): Run all server tests, `ng build`, `ng test`, `log-query`; write the run file with the validation card — `docs/mvp/runs/456.md`
+- [x] V1: Shared token verify and platform-admin check — add `verifyAccessToken(req)` (returns payload or null) and `isPlatformAdmin(req)` beside `requirePlatformAdmin` in `middleware/auth.js`; use them in `routes/log.js`, `middleware/write-limit.js`, `routes/generic.js` (delete local `isAdmin`); refresh-token verify stays; tests for both helpers — `server/middleware/auth.js`, `server/middleware/write-limit.js`, `server/routes/log.js`, `server/routes/generic.js`, `server/test/**`
+- [x] V2: Rate-limiter factory — `createRateLimiter({ windowMs, max, messageKey })` in `server/middleware/rate-limit.js` with the default headers/handler; convert each limiter keeping its exact numbers; existing `data-write-limit*.test.js` and `log-route.test.js` must pass unchanged — `server/middleware/rate-limit.js`, `server/middleware/write-limit.js`, `server/routes/ai.js`, `server/routes/auth.js`, `server/routes/log.js`, `server/routes/business.js`, `server/routes/product-import.js`
+- [x] V3: Request-validation helper for `ai.js` — `requireFields(res, body, rules)` / `badRequest(res, messageKey)` in `middleware/validate.js` returning the identical `{ error, ... }` bodies; convert the ~30 `status(400)` checks one handler at a time; keep checks that are not plain presence/type/length as they are — `server/middleware/validate.js`, `server/routes/ai.js`, `server/test/**`
+- [x] V4 (checkpoint): Run all server tests, `ng build`, `ng test`, `log-query`; write the run file with the validation card — `docs/mvp/runs/456.md`
 
 ## Technical Considerations
 - Dependencies: `TranslationService.translate`, `UserMsgService`, `LoggingService`, `checkStoredDoc`, `requirePlatformAdmin` (all exist on `mvp`).

@@ -35,16 +35,18 @@ describe('RecipeBookListComponent', () => {
     } as Recipe
   ])
 
+  const mockUserSignal = signal<Record<string, unknown>>({ _id: 'u1', role: 'admin' })
   const mockProductsSignal = signal([{ _id: 'p1', allergens: ['gluten'] }])
 
   beforeEach(async () => {
     sessionStorage.removeItem('list-state:recipe-book')
+    mockUserSignal.set({ _id: 'u1', role: 'admin' })
     const mockKitchenState = {
       recipes_: mockRecipesSignal,
       products_: mockProductsSignal,
       recipesById_: computed(() => new Map(mockRecipesSignal().map((r) => [r._id, r]))),
       productsById_: computed(() => new Map(mockProductsSignal().map((p) => [p._id, p]))),
-      deleteRecipe: jasmine.createSpy('deleteRecipe').and.returnValue({ subscribe: () => {} })
+      deleteRecipe: jasmine.createSpy('deleteRecipe').and.returnValue(Promise.resolve())
     }
 
     await TestBed.configureTestingModule({
@@ -60,7 +62,7 @@ describe('RecipeBookListComponent', () => {
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
         {
           provide: UserService,
-          useValue: { isLoggedIn: () => true, user_: signal({ _id: 'u1', role: 'admin' }), isAdmin_: signal(true) }
+          useValue: { isLoggedIn: () => true, user_: mockUserSignal, isAdmin_: signal(true) }
         },
         { provide: UserMsgService, useValue: { onSetWarningMsg: () => {} } },
         { provide: AuthModalService, useValue: { open: () => {} } },
@@ -90,6 +92,12 @@ describe('RecipeBookListComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  it('offers one add-recipe action (AI window) and no separate paste entry (plan 474)', () => {
+    const heroFab = TestBed.inject(HeroFabService) as unknown as { setPageActions: jasmine.Spy }
+    const actions = heroFab.setPageActions.calls.mostRecent().args[0] as { labelKey: string }[]
+    expect(actions.map((a) => a.labelKey)).toEqual(['add_recipe_ai'])
   })
 
   it('should compute filtered recipes from kitchen state', () => {
@@ -151,7 +159,7 @@ describe('RecipeBookListComponent', () => {
     const confirmModal = TestBed.inject(ConfirmModalService)
     ;(confirmModal.open as jasmine.Spy).and.returnValue(Promise.resolve(true))
     const stateService = TestBed.inject(KitchenStateService)
-    ;(stateService.deleteRecipe as jasmine.Spy).and.returnValue({ subscribe: () => {} })
+    ;(stateService.deleteRecipe as jasmine.Spy).and.returnValue(Promise.resolve())
 
     const recipe = mockRecipesSignal()[0]
     await (component as any).rowActions.remove(recipe)
@@ -169,5 +177,29 @@ describe('RecipeBookListComponent', () => {
     await (component as any).rowActions.remove(recipe)
 
     expect(stateService.deleteRecipe).not.toHaveBeenCalled()
+  })
+
+  describe('opening a recipe (plan 476)', () => {
+    const open = (createdBy: string) => {
+      const router = TestBed.inject(Router) as unknown as jasmine.SpyObj<Router>
+      router.navigate.calls.reset()
+      ;(component as any).onEditRecipe({ _id: 'r9', createdBy } as Recipe)
+      return router.navigate
+    }
+
+    it("staff on someone else's recipe go to Cook View", () => {
+      mockUserSignal.set({ _id: 's1', businessRole: 'staff' })
+      expect(open('o1')).toHaveBeenCalledWith(['/cook', 'r9'])
+    })
+
+    it('staff on their own recipe go to the builder', () => {
+      mockUserSignal.set({ _id: 's1', businessRole: 'staff' })
+      expect(open('s1')).toHaveBeenCalledWith(['/recipe-builder', 'r9'])
+    })
+
+    it('owners go to the builder for any recipe', () => {
+      mockUserSignal.set({ _id: 'o1', businessRole: 'owner' })
+      expect(open('s1')).toHaveBeenCalledWith(['/recipe-builder', 'r9'])
+    })
   })
 })

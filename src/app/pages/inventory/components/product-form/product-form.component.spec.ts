@@ -10,7 +10,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { UtilService } from '@services/util.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { ActivatedRoute, Router } from '@angular/router'
-import { of, Subject, take, takeUntil } from 'rxjs'
+import { firstValueFrom, of, Subject, take, takeUntil } from 'rxjs'
 import { signal, computed } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
@@ -25,10 +25,10 @@ describe('ProductFormComponent', () => {
   let mockRouter: jasmine.SpyObj<Router>
   let mockConversionService: jasmine.SpyObj<ConversionService>
   let mockUnitRegistry: jasmine.SpyObj<UnitRegistryService>
-  // Same semantics as UnitRegistryService.awaitUnitCreated: one saved unit, nothing after the window closes.
-  let unitAdded$: Subject<string>
-  let productUnitAdded$: Subject<{ key: string; amount: number; basis: string }>
-  let creatorClosed$: Subject<void>
+  // Same semantics as UnitRegistryService.awaitUnitCreated: one saved unit, null once the window closes.
+  let unitSaved$: Subject<string>
+  let productUnitSaved$: Subject<{ key: string; amount: number; basis: string }>
+  let windowClosed$: Subject<void>
 
   // Signal Mocks for SoT
   const mockCategories = signal(['meat', 'dairy'])
@@ -46,22 +46,23 @@ describe('ProductFormComponent', () => {
     mockConversionService.handleWasteChange.and.returnValue({ yieldFactor: 1 })
     mockConversionService.handleYieldChange.and.returnValue({ wastePercent: 0 })
     mockConversionService.getSuggestedPurchasePrice.and.returnValue(0)
-    unitAdded$ = new Subject<string>()
-    creatorClosed$ = new Subject<void>()
-    productUnitAdded$ = new Subject<{ key: string; amount: number; basis: string }>()
+    unitSaved$ = new Subject<string>()
+    windowClosed$ = new Subject<void>()
+    productUnitSaved$ = new Subject<{ key: string; amount: number; basis: string }>()
     mockUnitRegistry = jasmine.createSpyObj(
       'UnitRegistryService',
       ['getConversion', 'openUnitCreator', 'refreshFromStorage', 'awaitUnitCreated', 'awaitProductUnitAdded'],
       {
         allUnitKeys_: mockUnitKeys,
-        isCreatorOpen_: mockIsCreatorOpen,
-        unitAdded$
+        isCreatorOpen_: mockIsCreatorOpen
       }
     )
     mockUnitRegistry.refreshFromStorage.and.returnValue(Promise.resolve())
-    mockUnitRegistry.awaitUnitCreated.and.callFake(() => unitAdded$.pipe(take(1), takeUntil(creatorClosed$)))
+    mockUnitRegistry.awaitUnitCreated.and.callFake(() =>
+      firstValueFrom(unitSaved$.pipe(take(1), takeUntil(windowClosed$)), { defaultValue: null })
+    )
     mockUnitRegistry.awaitProductUnitAdded.and.callFake(() =>
-      productUnitAdded$.pipe(take(1), takeUntil(creatorClosed$))
+      firstValueFrom(productUnitSaved$.pipe(take(1), takeUntil(windowClosed$)), { defaultValue: null })
     )
 
     const mockMetadata = jasmine.createSpyObj('MetadataRegistryService', ['registerCategory'], {
@@ -97,7 +98,7 @@ describe('ProductFormComponent', () => {
         {
           provide: KitchenStateService,
           useValue: {
-            saveProduct: () => of(null),
+            saveProduct: () => Promise.resolve(null),
             products_: signal<Product[]>([]),
             suppliers_: mockSuppliersSignal,
             suppliersById_: computed(() => new Map(mockSuppliersSignal().map((s) => [s._id, s])))
@@ -182,7 +183,7 @@ describe('ProductFormComponent', () => {
   describe('Special purchase price on save', () => {
     it('saves priceOverride only for rows with "special price" ticked', async () => {
       const kitchen = TestBed.inject(KitchenStateService)
-      const saveSpy = spyOn(kitchen, 'saveProduct').and.returnValue(of(null as unknown as Product))
+      const saveSpy = spyOn(kitchen, 'saveProduct').and.returnValue(Promise.resolve(null as unknown as Product))
       const form = component['productForm_']
       form.patchValue({ productName: 'בצל', baseUnit: 'kg', buy_price_global_: 10, categories: ['vegetables'] })
       const add = (component as unknown as { addPurchaseOption: (o: object) => void }).addPurchaseOption.bind(component)
@@ -201,7 +202,7 @@ describe('ProductFormComponent', () => {
   describe('Lean entry (plan 438)', () => {
     it('saves with only a name and a base unit', async () => {
       const kitchen = TestBed.inject(KitchenStateService)
-      const saveSpy = spyOn(kitchen, 'saveProduct').and.returnValue(of(null as unknown as Product))
+      const saveSpy = spyOn(kitchen, 'saveProduct').and.returnValue(Promise.resolve(null as unknown as Product))
       component['productForm_'].patchValue({ productName: 'בצל ירוק', baseUnit: 'kg', buy_price_global_: null })
       expect(await component.saveAndWait()).toBe(true)
       const saved = saveSpy.calls.mostRecent().args[0] as Product
@@ -239,21 +240,24 @@ describe('ProductFormComponent', () => {
       expect(component['pendingAddName_']()).toBe('')
     })
 
-    it('fills the base unit with the unit saved in the window', () => {
+    it('fills the base unit with the unit saved in the window', fakeAsync(() => {
       component['onBaseUnitValueChange']('NEW_UNIT')
-      unitAdded$.next('jar')
+      unitSaved$.next('jar')
+      tick()
       expect(component['productForm_'].get('baseUnit')?.value).toBe('jar')
-    })
+    }))
 
-    it('after a cancel, a unit added later elsewhere does not fill the cancelled field', () => {
+    it('after a cancel, a unit added later elsewhere does not fill the cancelled field', fakeAsync(() => {
       component['addPurchaseOption']()
       component['onBaseUnitValueChange']('NEW_UNIT')
-      creatorClosed$.next() // cancel
+      windowClosed$.next() // cancel
+      tick()
       component['onUomValueChange']('NEW_UNIT', 0)
-      unitAdded$.next('jar')
+      unitSaved$.next('jar')
+      tick()
       expect(component['productForm_'].get('baseUnit')?.value).toBe('kg') // restored, a string
       expect(component.purchaseOptions_.at(0).get('uom')?.value).toBe('jar')
-    })
+    }))
   })
 
   // Plan 423 - a purchase unit's weight belongs to the product it is added to.
@@ -288,33 +292,37 @@ describe('ProductFormComponent', () => {
       )
     })
 
-    it('add new unit then add: the row holds the typed amount, its basis and the new key', () => {
+    it('add new unit then add: the row holds the typed amount, its basis and the new key', fakeAsync(() => {
       component['addPurchaseOption']()
       component['onUnitSymbolValueChange']('NEW_UNIT', 0)
-      productUnitAdded$.next({ key: 'jar', amount: 350, basis: 'gram' })
+      productUnitSaved$.next({ key: 'jar', amount: 350, basis: 'gram' })
+      tick()
       expect(rowAt(0).value).toEqual(jasmine.objectContaining({ unitSymbol: 'jar', conversionRate: 350, uom: 'gram' }))
-    })
+    }))
 
-    it('add new unit then cancel: the row keeps its previous unit, amount and basis (strings, not numbers)', () => {
+    it('add new unit then cancel: the row keeps its previous unit, amount and basis (strings, not numbers)', fakeAsync(() => {
       component['addPurchaseOption']({ unitSymbol: 'gram', conversionRate: 1, uom: 'gram' })
       rowAt(0).get('unitSymbol')?.setValue('NEW_UNIT')
       component['onUnitSymbolValueChange']('NEW_UNIT', 0)
       expect(rowAt(0).get('unitSymbol')?.value).toBe('')
-      creatorClosed$.next() // cancel
+      windowClosed$.next() // cancel
+      tick()
       expect(rowAt(0).get('unitSymbol')?.value).toBe('gram')
       expect(rowAt(0).get('conversionRate')?.value).toBe(1)
       expect(rowAt(0).get('uom')?.value).toBe('gram')
-    })
+    }))
 
-    it('base unit: add new unit then cancel keeps what it showed; then add selects the new unit', () => {
+    it('base unit: add new unit then cancel keeps what it showed; then add selects the new unit', fakeAsync(() => {
       component['onBaseUnitValueChange']('NEW_UNIT')
       expect(component['productForm_'].get('baseUnit')?.value).toBe('')
-      creatorClosed$.next()
+      windowClosed$.next()
+      tick()
       expect(component['productForm_'].get('baseUnit')?.value).toBe('kg')
       component['onBaseUnitValueChange']('NEW_UNIT')
-      unitAdded$.next('crate')
+      unitSaved$.next('crate')
+      tick()
       expect(component['productForm_'].get('baseUnit')?.value).toBe('crate')
-    })
+    }))
   })
 
   describe('Allergen Management', () => {

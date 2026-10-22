@@ -5,9 +5,8 @@ import {
   output,
   inject,
   signal,
-  ViewChildren,
-  ViewChild,
-  QueryList,
+  viewChildren,
+  viewChild,
   effect,
   ChangeDetectorRef
 } from '@angular/core'
@@ -44,6 +43,8 @@ import { PasteIngredientsDialogComponent } from '../paste-ingredients-dialog/pas
 import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
 import { createUnitWordResolver, parseIngredientLines } from '@utils/ingredient-line-parser.util'
 import { findIngredientMatch } from '@utils/ingredient-match.util'
+import { ProductNameMatcherService, type NameMatchItem } from '@services/product-name-matcher.service'
+import { UserMsgService } from '@services/user-msg.service'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
@@ -90,6 +91,8 @@ export class RecipeIngredientsTableComponent {
   private readonly router_ = inject(Router)
   private readonly translation_ = inject(TranslationService)
   private readonly recipeFormService_ = inject(RecipeFormService)
+  private readonly nameMatcher_ = inject(ProductNameMatcherService)
+  private readonly userMsg_ = inject(UserMsgService)
   private readonly pastedUnitResolver_ = createUnitWordResolver({
     aliases: UNIT_ALIASES,
     translate: (token) => this.translation_.resolveUnit(token),
@@ -100,8 +103,8 @@ export class RecipeIngredientsTableComponent {
     initialValue: false
   })
 
-  @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>
-  @ViewChild(QuickEditProductPanelComponent) private quickEditPanelRef_?: QuickEditProductPanelComponent
+  private readonly focusByRowRefs = viewChildren(FocusByRowDirective)
+  private readonly quickEditPanelRef_ = viewChild(QuickEditProductPanelComponent)
 
   constructor() {
     // OnPush: rows changed from outside (AI patch, history restore) must redraw the table.
@@ -159,7 +162,7 @@ export class RecipeIngredientsTableComponent {
   protected quickEditRowTier_ = signal<'invalid' | 'incomplete' | null>(null)
 
   /** True while the "paste ingredients" window is open. */
-  protected pasteOpen_ = signal(false)
+  protected isPasteOpen_ = signal(false)
 
   /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
   protected getProductForGroup(group: FormGroup): Product | null {
@@ -213,13 +216,14 @@ export class RecipeIngredientsTableComponent {
    */
   onPasteIngredients(text: string): void {
     const lines = parseIngredientLines(text, this.pastedUnitResolver_)
-    this.pasteOpen_.set(false)
+    this.isPasteOpen_.set(false)
     if (lines.length === 0) return
     const array = this.ingredientsFormArray()
     while (array.length > 0 && this.isEmptyRow_(array.at(array.length - 1) as FormGroup)) {
       array.removeAt(array.length - 1)
     }
     const firstNewIndex = array.length
+    const awaitingAi: { group: FormGroup; name: string; item: NameMatchItem }[] = []
     for (const line of lines) {
       const row = this.recipeFormService_.createIngredientGroup()
       if (line.kind === 'parsed') {
@@ -236,6 +240,13 @@ export class RecipeIngredientsTableComponent {
           unit: line.unit,
           ...(match && { referenceId: match.entity._id, item_type: match.type })
         })
+        if (!match) {
+          awaitingAi.push({
+            group: row,
+            name: line.name,
+            item: { key: String(awaitingAi.length), name: line.name, unit: line.unit }
+          })
+        }
       } else {
         row.patchValue({ nameHebrew: line.text, nameSnapshot: line.text, amount_net: null, unit: 'unit' })
       }
@@ -247,6 +258,44 @@ export class RecipeIngredientsTableComponent {
     array.markAsDirty()
     array.updateValueAndValidity()
     this.cdr.markForCheck()
+    if (awaitingAi.length > 0) void this.linkPastedByAi_(awaitingAi)
+  }
+
+  /**
+   * Plan 463: the pasted lines no exact/variant match could link get ONE shared-matcher call (the AI step). A row is
+   * patched only if it is still in the table, still unlinked and still has the pasted name; otherwise it is left alone.
+   */
+  private async linkPastedByAi_(pending: { group: FormGroup; name: string; item: NameMatchItem }[]): Promise<void> {
+    let failure: unknown = null
+    const matches = await this.nameMatcher_.matchNames(
+      pending.map((p) => p.item),
+      { onAiFailure: (err) => (failure = err) }
+    )
+    if (failure !== null) {
+      const status = (failure as { status?: number }).status
+      const text = (failure as { error?: { error?: string } }).error?.error ?? ''
+      const key =
+        status === 429 || text.includes('daily_limit_reached')
+          ? 'ai_daily_limit_reached_all'
+          : 'paste_ingredients_match_failed'
+      this.userMsg_.onSetWarningMsg(this.translation_.translate(key))
+    }
+    const array = this.ingredientsFormArray()
+    for (const p of pending) {
+      const hit = matches.get(p.item.key)
+      const index = array.controls.indexOf(p.group)
+      if (!hit || index < 0) continue
+      if (p.group.get('referenceId')?.value || p.group.get('nameHebrew')?.value !== p.name) continue
+      p.group.patchValue({
+        referenceId: hit.product._id,
+        item_type: 'product',
+        nameHebrew: hit.product.nameHebrew,
+        nameSnapshot: hit.product.nameHebrew
+      })
+      this.updateLineCalculations(index)
+    }
+    array.updateValueAndValidity()
+    this.cdr.markForCheck()
   }
 
   private isEmptyRow_(group: FormGroup): boolean {
@@ -255,8 +304,9 @@ export class RecipeIngredientsTableComponent {
 
   /** Called by clickOutside on the accordion div — defers to panel if it has unsaved changes. */
   protected onAccordionClickOutside(): void {
-    if (this.quickEditPanelRef_) {
-      this.quickEditPanelRef_.requestClose()
+    const quickEditPanel = this.quickEditPanelRef_()
+    if (quickEditPanel) {
+      quickEditPanel.requestClose()
     } else {
       this.closeQuickEditWithAnimation()
     }
@@ -384,13 +434,13 @@ export class RecipeIngredientsTableComponent {
   }
 
   focusQuantityAtRow(rowIndex: number): void {
-    const refs = this.focusByRowRefs?.toArray() ?? []
+    const refs = this.focusByRowRefs()
     const ref = refs.find((r) => r.rowIndex() === rowIndex && r.kind() === 'qty')
     ref?.focus()
   }
 
   focusUnitAtRow(rowIndex: number): void {
-    const refs = this.focusByRowRefs?.toArray() ?? []
+    const refs = this.focusByRowRefs()
     const ref = refs.find((r) => r.rowIndex() === rowIndex && r.kind() === 'unit')
     ref?.focus()
   }
@@ -623,7 +673,7 @@ export class RecipeIngredientsTableComponent {
       }
       if (!product?._id) {
         setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, prefillName }), 0)
-        this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => setUnitAndUpdate(newUnit))
+        void this.unitRegistry.awaitUnitCreated().then((newUnit) => newUnit && setUnitAndUpdate(newUnit))
         return
       }
       // Plan 423: the window asks how much one unit of THIS product weighs; that typed amount is what is saved.
@@ -632,7 +682,9 @@ export class RecipeIngredientsTableComponent {
         () => this.unitRegistry.openUnitCreator({ existingUnitSymbols: existingSymbols, prefillName, forProduct }),
         0
       )
-      this.unitRegistry.awaitProductUnitAdded().subscribe(({ key, amount, basis }) => {
+      void this.unitRegistry.awaitProductUnitAdded().then(async (added) => {
+        if (!added) return
+        const { key, amount, basis } = added
         const current = (this.getItemMetadata(group) as Product | undefined) ?? product
         if (current.purchaseOptions?.some((o) => o.unitSymbol === key)) {
           setUnitAndUpdate(key)
@@ -645,10 +697,8 @@ export class RecipeIngredientsTableComponent {
             { unitSymbol: key, conversionRate: amount, uom: basis, priceOverride: 0 }
           ]
         }
-        this.kitchenStateService.saveProduct(updated).subscribe({
-          next: () => setUnitAndUpdate(key),
-          error: () => setUnitAndUpdate(key)
-        })
+        await this.kitchenStateService.saveProduct(updated).catch(() => {})
+        setUnitAndUpdate(key)
       })
     } else {
       group.get('unit')?.setValue(val)

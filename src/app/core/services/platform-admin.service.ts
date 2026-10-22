@@ -2,6 +2,7 @@ import { inject, Injectable, signal } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 
 /** One line of the platform admin's table (plan 448): counts and dates only, never a business's content. */
 export interface BusinessRow {
@@ -29,7 +30,7 @@ export class PlatformAdminService {
 
   async load(): Promise<void> {
     const res = await firstValueFrom(
-      this.http.get<{ rows: BusinessRow[] }>(`${environment.apiUrl}/api/v1/admin/businesses`)
+      this.http.get<{ rows: BusinessRow[] }>(`${environment.apiUrl}${API.admin('businesses')}`)
     )
     this._rows_.set(res.rows)
   }
@@ -39,7 +40,9 @@ export class PlatformAdminService {
     const before = this._rows_()
     this._rows_.set(before.map((row) => (row._id === id ? { ...row, internal } : row)))
     try {
-      await firstValueFrom(this.http.put(`${environment.apiUrl}/api/v1/admin/businesses/${id}/internal`, { internal }))
+      await firstValueFrom(
+        this.http.put(`${environment.apiUrl}${API.admin(`businesses/${id}/internal`)}`, { internal })
+      )
     } catch (err) {
       this._rows_.set(before)
       throw err

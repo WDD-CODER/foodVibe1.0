@@ -103,7 +103,7 @@
         grid-column: 1 / -1;
       }
 
-      .form-group.scaling-box {
+      .product-field.scaling-box {
         grid-column: 1 / -1;
         overflow: visible;
       }
@@ -115,8 +115,8 @@
     }
   }
 
-  // Input & Label Groups
-  .form-group {
+  // Wrapper blocks that hold a custom label or content (collapsible fields, scaling rows); plain label + input fields use app-form-field
+  .product-field {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -135,21 +135,21 @@
       }
     }
 
-    // Fix 2: remove spinner arrows from number inputs in regular form groups
-    input[type='number'] {
-      -moz-appearance: textfield;
-
-      &::-webkit-inner-spin-button,
-      &::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-      }
-    }
-
     &.yield-logic {
       display: grid;
       grid-template-rows: repeat(auto-fit, minmax(24px, 1fr));
       place-content: center;
+    }
+  }
+
+  // Fix 2: remove spinner arrows from number inputs
+  input[type='number'] {
+    -moz-appearance: textfield;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
   }
 

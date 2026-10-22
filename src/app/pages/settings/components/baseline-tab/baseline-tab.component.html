@@ -37,7 +37,7 @@
         {{ 'save' | translatePipe }}
       </button>
       @if (first()) {
-        <button type="button" class="c-btn-ghost" data-testid="baseline-skip" [disabled]="saving_()" (click)="skip()">
+        <button type="button" class="c-btn-ghost" data-testid="baseline-skip" [disabled]="isSaving_()" (click)="skip()">
           {{ 'skip' | translatePipe }}
         </button>
       }

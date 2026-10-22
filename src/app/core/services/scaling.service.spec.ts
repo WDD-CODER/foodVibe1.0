@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing'
 import { signal } from '@angular/core'
 import { ScalingService } from './scaling.service'
 import { KitchenStateService } from './kitchen-state.service'
+import { TranslationService } from './translation.service'
 import { Recipe } from '../models/recipe.model'
 import { Product } from '../models/product.model'
 
@@ -18,7 +19,11 @@ describe('ScalingService', () => {
       recipes_: recipesSignal
     })
     TestBed.configureTestingModule({
-      providers: [ScalingService, { provide: KitchenStateService, useValue: kitchenSpy }]
+      providers: [
+        ScalingService,
+        { provide: KitchenStateService, useValue: kitchenSpy },
+        { provide: TranslationService, useValue: { translate: (k: string) => k } }
+      ]
     })
     service = TestBed.inject(ScalingService)
   })

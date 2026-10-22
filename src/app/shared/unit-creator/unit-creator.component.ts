@@ -22,7 +22,7 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
-  selector: 'unit-creator-modal',
+  selector: 'app-unit-creator-modal',
   standalone: true,
   imports: [
     CommonModule,

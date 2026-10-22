@@ -40,6 +40,7 @@ import { getSupplierIds } from '@utils/product-source.util'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 const DAY_LABELS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 type SupplierBulkField = 'deliveryDays' | 'leadTimeDays'
@@ -79,6 +80,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   private readonly masterPush = inject(MasterPushService)
 
   protected searchQuery_ = signal('')
+  protected readonly listControls = useListControls<never>({ search: this.searchQuery_ })
   protected deletingId_ = signal<string | null>(null)
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
@@ -145,15 +147,12 @@ export class SupplierListComponent implements OnInit, OnDestroy {
 
   protected filteredSuppliers_ = computed(() => {
     let list = this.supplierData.allSuppliers_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const days = this.selectedDays_()
     const linkedOnly = this.hasLinkedOnly_()
 
     if (search) {
-      list = list.filter(
-        (s) =>
-          (s.nameHebrew ?? '').toLowerCase().includes(search) || (s.contactPerson ?? '').toLowerCase().includes(search)
-      )
+      list = list.filter((s) => matchesSearch(search, s.nameHebrew, s.contactPerson))
     }
     if (days.size > 0) {
       list = list.filter((s) => (s.deliveryDays ?? []).some((d) => days.has(d)))
@@ -185,8 +184,10 @@ export class SupplierListComponent implements OnInit, OnDestroy {
   }
 
   protected clearAllFilters(): void {
-    this.selectedDays_.set(new Set())
-    this.hasLinkedOnly_.set(false)
+    this.listControls.clearAll(
+      () => this.selectedDays_.set(new Set()),
+      () => this.hasLinkedOnly_.set(false)
+    )
   }
 
   protected linkedProductCount_(supplierId: string): number {
@@ -236,7 +237,7 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     const suppliers = this.supplierData.allSuppliers_().filter((s) => idSet.has(s._id))
     // askDeleteScope only inspects _masterId, so the first master-linked supplier is enough.
     const masterLinked = suppliers.find((s) => s._masterId) ?? null
-    const fallback = `למחוק ${ids.length} ספקים?`
+    const fallback = this.translation.translate('confirm_bulk_delete_suppliers').replace('{n}', String(ids.length))
     if (!(await this.confirmDelete_(count, fallback, this.masterPush.willAskDeleteScope(masterLinked)))) return
     const scope = await this.masterPush.askDeleteScope(masterLinked, { entity: 'supplier', count: ids.length })
     if (scope === 'cancel') return
@@ -309,17 +310,11 @@ export class SupplierListComponent implements OnInit, OnDestroy {
     return days.map((d) => this.translation.translate(DAY_LABELS[d]) || String(d)).join(', ')
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }

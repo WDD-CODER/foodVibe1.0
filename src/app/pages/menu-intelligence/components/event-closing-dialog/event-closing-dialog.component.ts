@@ -72,8 +72,8 @@ export class EventClosingDialogComponent {
   // 4. SIGNALS & CONSTANTS
   protected readonly draft_ = signal<EventClosing | null>(null)
   protected readonly uploading_ = signal<ReadonlySet<string>>(new Set())
-  protected readonly picking_ = signal(false)
-  protected readonly busy_ = signal(false)
+  protected readonly isPicking_ = signal(false)
+  protected readonly isBusy_ = signal(false)
   protected readonly maxPhotos = MAX_CLOSING_PHOTOS
   protected readonly formatMoney = formatMoney
   protected readonly formatPct1 = formatPct1
@@ -131,7 +131,7 @@ export class EventClosingDialogComponent {
         ? this.translation.translate('no_supplier')
         : (this.kitchenState.suppliersById_().get(supplierId)?.nameHebrew ?? '')
     const row: ClosingSupplier = { supplierId, name, planned: 0, arrived: false, hasInvoice: false, photos: [] }
-    this.picking_.set(false)
+    this.isPicking_.set(false)
     void this.commit({ ...closing, suppliers: [...closing.suppliers, row] })
   }
 
@@ -163,34 +163,34 @@ export class EventClosingDialogComponent {
 
   protected async finish(): Promise<void> {
     const result = this.result_()
-    if (!result || this.busy_()) return
+    if (!result || this.isBusy_()) return
     if (
       result.missingAmounts > 0 &&
       !(await this.confirmModal.open(this.missingText_(), { saveLabel: 'closing_finish' }))
     )
       return
-    this.busy_.set(true)
+    this.isBusy_.set(true)
     await this.saveChain_
     const done = await this.pipeline.finish(this.eventId())
-    this.busy_.set(false)
+    this.isBusy_.set(false)
     if (done.ok) this.userMsg.onSetSuccessMsg(this.translation.translate('closing_saved'))
   }
 
   protected async reopen(): Promise<void> {
-    if (this.busy_()) return
-    this.busy_.set(true)
+    if (this.isBusy_()) return
+    this.isBusy_.set(true)
     await this.pipeline.reopen(this.eventId())
-    this.busy_.set(false)
+    this.isBusy_.set(false)
   }
 
   protected async refreshPlan(): Promise<void> {
     const event = this.event_()
-    if (!event || this.busy_()) return
+    if (!event || this.isBusy_()) return
     if (!(await this.confirmModal.open('closing_refresh_confirm', { saveLabel: 'closing_refresh_plan' }))) return
-    this.busy_.set(true)
+    this.isBusy_.set(true)
     await this.pipeline.refreshPlan(event._id, this.snapshots.buildFor(event))
     this.draft_.set(null)
-    this.busy_.set(false)
+    this.isBusy_.set(false)
   }
 
   // UI handlers
@@ -222,7 +222,7 @@ export class EventClosingDialogComponent {
   }
 
   protected togglePicker(): void {
-    this.picking_.update((open) => !open)
+    this.isPicking_.update((open) => !open)
   }
 
   protected isUploading(key: string): boolean {

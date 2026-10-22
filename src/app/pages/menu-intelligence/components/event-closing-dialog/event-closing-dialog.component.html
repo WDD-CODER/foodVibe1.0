@@ -12,7 +12,7 @@
         <h3 id="closing-title">{{ 'event_closing_title' | translatePipe }} · {{ event.name }}</h3>
         <div class="header-actions">
           @if (canMoney_() && !locked_()) {
-            <button type="button" class="c-btn-ghost" [disabled]="busy_()" (click)="refreshPlan()">
+            <button type="button" class="c-btn-ghost" [disabled]="isBusy_()" (click)="refreshPlan()">
               <lucide-icon name="refresh-cw" [size]="16"></lucide-icon>
               <span>{{ 'closing_refresh_plan' | translatePipe }}</span>
             </button>
@@ -141,7 +141,7 @@
                 <lucide-icon name="plus" [size]="16"></lucide-icon>
                 <span>{{ 'closing_add_supplier' | translatePipe }}</span>
               </button>
-              @if (picking_()) {
+              @if (isPicking_()) {
                 <app-custom-select
                   [options]="supplierOptions_()"
                   [translateLabels]="false"
@@ -222,12 +222,12 @@
               <button type="button" class="c-btn-ghost" (click)="closed.emit()">{{ 'close' | translatePipe }}</button>
               @if (canMoney_()) {
                 @if (locked_()) {
-                  <button type="button" class="c-btn-ghost" [disabled]="busy_()" (click)="reopen()">
+                  <button type="button" class="c-btn-ghost" [disabled]="isBusy_()" (click)="reopen()">
                     <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
                     <span>{{ 'closing_reopen' | translatePipe }}</span>
                   </button>
                 } @else if (canFinish_()) {
-                  <button type="button" class="c-btn-primary" [disabled]="busy_()" (click)="finish()">
+                  <button type="button" class="c-btn-primary" [disabled]="isBusy_()" (click)="finish()">
                     <lucide-icon name="check" [size]="16"></lucide-icon>
                     <span>{{ 'closing_finish' | translatePipe }}</span>
                   </button>
@@ -240,7 +240,7 @@
         <div class="closing-body">
           <p class="no-plan">{{ 'closing_no_plan' | translatePipe }}</p>
           @if (canMoney_() && !locked_()) {
-            <button type="button" class="c-btn-primary" [disabled]="busy_()" (click)="refreshPlan()">
+            <button type="button" class="c-btn-primary" [disabled]="isBusy_()" (click)="refreshPlan()">
               <lucide-icon name="refresh-cw" [size]="16"></lucide-icon>
               <span>{{ 'closing_refresh_plan' | translatePipe }}</span>
             </button>

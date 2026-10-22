@@ -1,4 +1,4 @@
-import { Component } from '@angular/core'
+import { Component, computed, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideRouter, Router, RouterLink } from '@angular/router'
 import { By } from '@angular/platform-browser'
@@ -7,6 +7,10 @@ import { LucideAngularModule, Wrench } from 'lucide-angular'
 import { TabChipsComponent } from './tab-chips.component'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { TranslationService } from '@services/translation.service'
+import { KitchenStateService } from '@services/kitchen-state.service'
+import { UserService } from '@services/user.service'
+import type { Recipe } from '@models/recipe.model'
+import type { User } from '@models/user.model'
 
 @Component({ selector: 'app-blank-stub', template: '', standalone: true })
 class BlankStubComponent {}
@@ -74,13 +78,13 @@ describe('TabChipsComponent', () => {
   })
 
   const chipIds = (): string[] =>
-    fixture.debugElement.queryAll(By.css('a.c-tab-pill')).map((de) => de.injector.get(RouterLink).href ?? '')
+    fixture.debugElement.queryAll(By.css('a.c-chip--tab')).map((de) => de.injector.get(RouterLink).href ?? '')
 
   it('shows the 4 sub-page chips (no home chip) on the dashboard overview', async () => {
     await router.navigateByUrl('/dashboard')
     fixture.detectChanges()
     expect(chipIds()).toEqual(['/venues', '/dashboard?tab=metadata', '/suppliers', '/trash'])
-    expect(fixture.debugElement.query(By.css('.c-tab-pill--home'))).toBeNull()
+    expect(fixture.debugElement.query(By.css('.c-chip--home'))).toBeNull()
   })
 
   it('replaces the current sub-page chip with the dashboard chip, in the same position', async () => {
@@ -94,9 +98,9 @@ describe('TabChipsComponent', () => {
       await router.navigateByUrl(url)
       fixture.detectChanges()
       expect(chipIds()).withContext(url).toEqual(expected)
-      const home = fixture.debugElement.query(By.css('.c-tab-pill--home'))
+      const home = fixture.debugElement.query(By.css('.c-chip--home'))
       expect(home).withContext(url).not.toBeNull()
-      expect(fixture.debugElement.query(By.css('a.c-tab-pill.active')))
+      expect(fixture.debugElement.query(By.css('a.c-chip--tab.active')))
         .withContext(url)
         .toBeNull()
     }
@@ -124,5 +128,55 @@ describe('TabChipsComponent', () => {
     spyOn(chip, 'scrollIntoView')
     chip.click()
     expect(chip.scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', inline: 'nearest', behavior: 'smooth' })
+  })
+})
+
+describe('TabChipsComponent builder chip for staff (plan 476)', () => {
+  const user_ = signal<User | null>(null)
+  const recipes = [
+    { _id: 'r1', createdBy: 'o1' },
+    { _id: 'r2', createdBy: 's1' }
+  ] as Recipe[]
+
+  const chipPaths = async (url: string): Promise<string[]> => {
+    const router = TestBed.inject(Router)
+    const fixture = TestBed.createComponent(TabChipsComponent)
+    await router.navigateByUrl(url)
+    fixture.detectChanges()
+    return fixture.debugElement.queryAll(By.css('a.c-chip--tab')).map((d) => d.injector.get(RouterLink).href ?? '')
+  }
+
+  beforeEach(async () => {
+    user_.set(null)
+    await TestBed.configureTestingModule({
+      imports: [TabChipsComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      providers: [
+        provideRouter([
+          { path: 'cook/:id', component: BlankStubComponent },
+          { path: 'recipe-builder/:id', component: BlankStubComponent }
+        ]),
+        { provide: TranslationService, useValue: { translate: (k: string) => k } },
+        {
+          provide: KitchenStateService,
+          useValue: { recipesById_: computed(() => new Map(recipes.map((r) => [r._id, r]))) }
+        },
+        { provide: UserService, useValue: { user_, isOwner_: computed(() => user_()?.businessRole === 'owner') } }
+      ]
+    }).compileComponents()
+  })
+
+  it("points the builder chip at a new recipe for staff on someone else's recipe", async () => {
+    user_.set({ _id: 's1', name: 'c', email: 'c@x', businessId: 'b1', businessRole: 'staff' })
+    expect(await chipPaths('/cook/r1')).toEqual(['/recipe-builder', '/cook/r1'])
+  })
+
+  it('keeps the recipe on the builder chip for staff on their own recipe', async () => {
+    user_.set({ _id: 's1', name: 'c', email: 'c@x', businessId: 'b1', businessRole: 'staff' })
+    expect(await chipPaths('/cook/r2')).toEqual(['/recipe-builder/r2', '/cook/r2'])
+  })
+
+  it('keeps the recipe on the builder chip for an owner', async () => {
+    user_.set({ _id: 'o1', name: 'o', email: 'o@x', businessId: 'b1', businessRole: 'owner' })
+    expect(await chipPaths('/cook/r1')).toEqual(['/recipe-builder/r1', '/cook/r1'])
   })
 })

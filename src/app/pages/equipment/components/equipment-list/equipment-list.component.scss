@@ -3,27 +3,6 @@
     display: block;
   }
 
-  /* Consumable status chip — matches Equipment.dc.html:348-350,676-679 */
-  .consumable-chip {
-    display: inline-flex;
-    align-items: center;
-
-    padding-inline: 0.625rem;
-    padding-block: 0.1875rem;
-
-    font-size: var(--fs-xs);
-    font-weight: 600;
-    color: var(--color-text-muted);
-    background: var(--bg-muted);
-
-    border-radius: var(--radius-sm);
-
-    &.consumable-chip--yes {
-      color: var(--color-primary-hover);
-      background: var(--color-primary-soft);
-    }
-  }
-
   .c-sortable-header {
     cursor: pointer;
 

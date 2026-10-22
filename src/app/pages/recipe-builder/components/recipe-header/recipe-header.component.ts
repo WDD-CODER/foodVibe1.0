@@ -12,7 +12,7 @@ import {
 import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
 import { ActivatedRoute, RouterLink } from '@angular/router'
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { take } from 'rxjs/operators'
@@ -36,6 +36,8 @@ import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { RecipeCostService } from '@services/recipe-cost.service'
+import type { Product } from '@models/product.model'
+import type { Ingredient } from '@models/ingredient.model'
 
 /**
  * Inline stand-in for the 120x120 image thumbnail before a photo is uploaded.
@@ -127,7 +129,7 @@ export class RecipeHeaderComponent {
   private readonly ingredientsVersion_ = signal(0)
 
   /** The recipe being edited: its saved id, or a stand-in while it is new. */
-  private readonly ownerRecipeId_ = (): string => this.route?.snapshot?.paramMap?.get('id') || 'form'
+  protected readonly ownerRecipeId_ = (): string => this.route?.snapshot?.paramMap?.get('id') || 'form'
 
   /** What keeps the header cost from being final: unpriced, unlinked and deleted ingredients, through preps. */
   protected readonly missing_ = computed(() => {
@@ -140,6 +142,28 @@ export class RecipeHeaderComponent {
     }[]
     return this.recipeCost.findMissing(rows, this.ownerRecipeId_())
   })
+
+  /** The badge linked a free-text ingredient to a product: show it in the unsaved form right away (plan 466). */
+  protected onLinked(link: { name: string; product: Product }): void {
+    const rows = this.form().get('ingredients')
+    if (!(rows instanceof FormArray)) return
+    for (const group of rows.controls) {
+      const value = group.getRawValue() as { referenceId?: string; nameHebrew?: string; nameSnapshot?: string }
+      const name = (value.nameSnapshot || value.nameHebrew || '').trim()
+      if (value.referenceId || name !== link.name) continue
+      group.patchValue({ referenceId: link.product._id, item_type: 'product', nameSnapshot: link.product.nameHebrew })
+      // The ingredients table only prices a row when its item is picked or the catalogues change, so price it here.
+      const raw = group.getRawValue() as { amount_net?: number; unit?: string }
+      const totalCost = this.recipeCost.getCostForIngredient({
+        referenceId: link.product._id,
+        type: 'product',
+        amount: Number(raw.amount_net) || 0,
+        unit: raw.unit || ''
+      } as Ingredient)
+      group.get('total_cost')?.setValue(totalCost)
+    }
+    rows.parent?.updateValueAndValidity()
+  }
 
   protected readonly ownRecipeNames_ = computed(() => {
     this.ingredientsVersion_()
@@ -237,7 +261,7 @@ export class RecipeHeaderComponent {
 
   // SIGNALS & CONSTANTS
   readonly placeholderPath = `data:image/svg+xml,${encodeURIComponent(IMAGE_PLACEHOLDER_SVG)}`
-  readonly uploadingImage_ = signal(false)
+  readonly isUploadingImage_ = signal(false)
 
   // LABELS
   protected labelMultiSelectOptions_ = computed(() => {
@@ -370,7 +394,8 @@ export class RecipeHeaderComponent {
   /** prefillName: the unit name typed in the yield dropdown (rule W); '' opens the window empty. */
   protected onCreateUnit(prefillName = '', secondaryChipIndex?: number): void {
     this.unitRegistryService.openUnitCreator({ prefillName })
-    this.unitRegistryService.awaitUnitCreated().subscribe((newUnit) => {
+    void this.unitRegistryService.awaitUnitCreated().then((newUnit) => {
+      if (!newUnit) return
       if (secondaryChipIndex === undefined) {
         this.yield.setPrimaryUnit(newUnit)
       } else {
@@ -381,19 +406,19 @@ export class RecipeHeaderComponent {
 
   // METRICS
   metricsDisplayMode_ = signal<'weight' | 'volume'>('weight')
-  metricsNoticeOpen_ = signal(false)
+  isMetricsNoticeOpen_ = signal(false)
 
   toggleMetricsDisplayMode(): void {
     this.metricsDisplayMode_.update((m) => (m === 'weight' ? 'volume' : 'weight'))
-    this.metricsNoticeOpen_.set(false)
+    this.isMetricsNoticeOpen_.set(false)
   }
 
   toggleMetricsNotice(): void {
-    this.metricsNoticeOpen_.update((v) => !v)
+    this.isMetricsNoticeOpen_.update((v) => !v)
   }
 
   closeMetricsNotice(): void {
-    this.metricsNoticeOpen_.set(false)
+    this.isMetricsNoticeOpen_.set(false)
   }
 
   private metricsNoticeCloseTimeout_: ReturnType<typeof setTimeout> | null = null
@@ -404,7 +429,7 @@ export class RecipeHeaderComponent {
       this.metricsNoticeCloseTimeout_ = null
     }
     if (this.unconvertibleNamesFiltered_().length > 0) {
-      this.metricsNoticeOpen_.set(true)
+      this.isMetricsNoticeOpen_.set(true)
     }
   }
 
@@ -414,7 +439,7 @@ export class RecipeHeaderComponent {
     }
     this.metricsNoticeCloseTimeout_ = setTimeout(() => {
       this.metricsNoticeCloseTimeout_ = null
-      this.metricsNoticeOpen_.set(false)
+      this.isMetricsNoticeOpen_.set(false)
     }, 150)
   }
 
@@ -458,17 +483,17 @@ export class RecipeHeaderComponent {
     if (this.readonlyMode()) return
     const file = (event.target as HTMLInputElement).files?.[0]
     if (!file) return
-    this.uploadingImage_.set(true)
+    this.isUploadingImage_.set(true)
     this.cloudinary
       .upload(file)
       .pipe(take(1))
       .subscribe({
         next: (url) => {
           this.imageChange.emit(url)
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
         },
         error: () => {
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
           this.userMsg.onSetErrorMsg(this.translationService.translate('image_upload_failed'))
         }
       })

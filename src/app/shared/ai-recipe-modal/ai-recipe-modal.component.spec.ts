@@ -8,6 +8,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { of, throwError } from 'rxjs'
 import { GeminiService } from '@services/gemini.service'
+import { getGeminiUsage } from '@utils/gemini-usage.util'
 import { GeminiShotsService } from '@services/gemini-shots.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import type { ParsedResult } from '@models/parsed-result.model'
@@ -48,8 +49,9 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
     spyOn(window, 'fetch').and.rejectWith(new Error('offline'))
     isOpen_.set(false)
     initialInputMode_.set('text')
-    gemini = jasmine.createSpyObj<GeminiService>('GeminiService', ['parseText', 'offerModelSwitch'])
+    gemini = jasmine.createSpyObj<GeminiService>('GeminiService', ['parseText', 'offerModelSwitch', 'fetchUsage'])
     gemini.offerModelSwitch.and.returnValue(false)
+    gemini.fetchUsage.and.callFake(() => Promise.resolve(getGeminiUsage()))
     shots = jasmine.createSpyObj<GeminiShotsService>('GeminiShotsService', ['saveShot', 'computeWarnings'])
     shots.saveShot.and.returnValue(of({ saved: true, warnings: [] }))
     shots.computeWarnings.and.returnValue([])
@@ -136,5 +138,50 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
     internals().onDraftApproved(internals().draft_()!)
     expect(shots.saveShot).not.toHaveBeenCalled()
     expect(draftService.draft()?.nameHebrew).toBe('רוטב')
+  })
+  describe('tabs (plan 474)', () => {
+    const openCreate = () => {
+      isOpen_.set(true)
+      fixture.detectChanges()
+    }
+    const tabs = (): HTMLButtonElement[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('[role="tablist"] [role="tab"]')
+      )
+    const hint = () => (fixture.nativeElement as HTMLElement).querySelector('.ai-paste-hint')
+
+    it('shows four tabs with visible text in the order describe, paste, photo, link', () => {
+      openCreate()
+      const t = tabs()
+      expect(t.length).toBe(4)
+      t.forEach((b) => expect((b.textContent ?? '').trim().length).toBeGreaterThan(0))
+      expect(t.every((b) => !b.hasAttribute('title'))).toBeTrue()
+      const modes: string[] = []
+      t.forEach((b) => {
+        b.click()
+        fixture.detectChanges()
+        modes.push(internals().inputMode_())
+      })
+      expect(modes).toEqual(['text', 'paste', 'image', 'url'])
+    })
+
+    it('marks only the active tab with aria-selected and starts on describe', () => {
+      openCreate()
+      expect(tabs().map((b) => b.getAttribute('aria-selected'))).toEqual(['true', 'false', 'false', 'false'])
+      tabs()[1].click()
+      fixture.detectChanges()
+      expect(tabs().map((b) => b.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false', 'false'])
+    })
+
+    it('shows the keep-as-written hint on the paste tab only', () => {
+      openCreate()
+      expect(hint()).toBeNull()
+      tabs()[1].click()
+      fixture.detectChanges()
+      expect(hint()).not.toBeNull()
+      tabs()[2].click()
+      fixture.detectChanges()
+      expect(hint()).toBeNull()
+    })
   })
 })

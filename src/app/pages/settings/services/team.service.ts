@@ -2,12 +2,13 @@ import { inject, Injectable, signal } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { firstValueFrom } from 'rxjs'
 import { environment } from '../../../../environments/environment'
+import { API } from '@services/http-storage.adapter'
 import { LoggingService } from '@services/logging.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { hashPassword } from '../../../core/utils/auth-crypto'
 
-/** One row of the owner's team list (`GET /api/v1/business/team`). */
+/** One row of the owner's team list (`GET` on `API.business('team')`). */
 export interface TeamMember {
   _id: string
   name: string
@@ -20,7 +21,7 @@ export interface TeamMember {
 /** Why adding a team member failed, as a dictionary key the Team tab shows. */
 export type AddStaffResult = { ok: true } | { ok: false; errorKey: string }
 
-const TEAM_URL = `${environment.apiUrl}/api/v1/business/team`
+const TEAM_URL = `${environment.apiUrl}${API.business('team')}`
 
 /**
  * The owner's team: list, add, remove (plan 428). Lives with the lazy settings page so the initial bundle

@@ -11,7 +11,6 @@ import {
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { firstValueFrom } from 'rxjs'
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 
@@ -51,7 +50,7 @@ import { getPricePerUnit, calcBuyPriceGlobal } from 'src/app/core/utils/product-
 import { optionRateInBase } from '@utils/purchase-option-rate.util'
 import {
   getProductValidationStatus,
-  getProductMissingFields,
+  getProductStatusFields,
   isProductUnpriced,
   VALIDATION_FIELD_ICONS,
   ProductValidationStatus
@@ -67,12 +66,13 @@ import { resolveDraftMetadata, registerDraftMetadata } from '../../services/ai-d
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
 
 @Component({
-  selector: 'inventory-product-list',
+  selector: 'app-inventory-product-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -122,16 +122,23 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected searchQuery_ = signal<string>('')
   protected sortBy_ = signal<SortField | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
+  protected readonly listControls = useListControls<SortField>({
+    search: this.searchQuery_,
+    sortBy: this.sortBy_,
+    sortOrder: this.sortOrder_
+  })
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
   /** Filter-category open state: all collapsed on mobile (≤1023px), all expanded on desktop (plan 345). */
   protected readonly filterCategories = useCollapsibleCategories()
   protected allergenPopoverProductId_ = signal<string | null>(null)
-  protected allergenExpandAll_ = signal<boolean>(false)
-  protected lowStockOnly_ = signal<boolean>(false)
-  protected showInvalidOnly_ = signal<boolean>(false)
-  protected showIncompleteOnly_ = signal<boolean>(false)
-  protected showUnpricedOnly_ = signal<boolean>(false)
+  /** Product whose status tooltip is pinned open by a tap (touch devices; hover opens it by CSS). */
+  protected openStatusId_ = signal<string | null>(null)
+  protected isAllergenAllExpanded_ = signal<boolean>(false)
+  protected isLowStockOnly_ = signal<boolean>(false)
+  protected shouldShowInvalidOnly_ = signal<boolean>(false)
+  protected shouldShowIncompleteOnly_ = signal<boolean>(false)
+  protected shouldShowUnpricedOnly_ = signal<boolean>(false)
   protected nutritionFilter_ = signal<'all' | 'has' | 'missing'>('all')
   protected deletingId_ = signal<string | null>(null)
   protected savingPriceId_ = signal<string | null>(null)
@@ -175,8 +182,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       { urlParam: 'sort', signal: this.sortBy_, serializer: NullableStringParam },
       { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
       { urlParam: 'filters', signal: this.activeFilters_, serializer: FilterRecordParam },
-      { urlParam: 'lowStock', signal: this.lowStockOnly_, serializer: BooleanParam },
-      { urlParam: 'unpriced', signal: this.showUnpricedOnly_, serializer: BooleanParam },
+      { urlParam: 'lowStock', signal: this.isLowStockOnly_, serializer: BooleanParam },
+      { urlParam: 'unpriced', signal: this.shouldShowUnpricedOnly_, serializer: BooleanParam },
       { urlParam: 'nutrition', signal: this.nutritionFilter_, serializer: StringParam },
       { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
@@ -298,13 +305,13 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected filteredProducts_ = computed(() => {
     let products = this.kitchenStateService.products_()
     const filters = this.activeFilters_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const sortBy = this.sortBy_()
     const sortOrder = this.sortOrder_()
-    const lowStockOnly = this.lowStockOnly_()
-    const showInvalidOnly = this.showInvalidOnly_()
-    const showIncompleteOnly = this.showIncompleteOnly_()
-    const showUnpricedOnly = this.showUnpricedOnly_()
+    const lowStockOnly = this.isLowStockOnly_()
+    const showInvalidOnly = this.shouldShowInvalidOnly_()
+    const showIncompleteOnly = this.shouldShowIncompleteOnly_()
+    const showUnpricedOnly = this.shouldShowUnpricedOnly_()
     const nutritionFilter = this.nutritionFilter_()
 
     if (lowStockOnly) {
@@ -342,7 +349,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
     // 2. Apply search (within filtered results)
     if (search) {
-      products = products.filter((p) => (p.nameHebrew ?? '').toLowerCase().includes(search))
+      products = products.filter((p) => matchesSearch(search, p.nameHebrew))
     }
 
     // 3. Apply sort
@@ -371,11 +378,13 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   protected readonly displayRows_ = computed(() =>
     this.filteredProducts_().map((product) => {
       const validationStatus = this.getValidationStatus(product)
+      const unpriced = isProductUnpriced(product)
       return {
         product,
         validationStatus,
-        unpriced: isProductUnpriced(product),
-        missingFields: validationStatus === 'valid' ? [] : this.getMissingFields(product),
+        unpriced,
+        statusKind: this.getStatusKind(validationStatus, unpriced),
+        statusFields: getProductStatusFields(product),
         category: this.getCategoryDisplay(product.categories),
         supplierNames: this.getProductSupplierNames(product),
         pricePerUnit: this.getPricePerUnit(product, product.baseUnit)
@@ -433,22 +442,16 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected setSort(field: SortField): void {
-    const current = this.sortBy_()
-    if (current === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
+    this.listControls.setSort(field)
   }
 
   protected toggleAllergenExpandAll(): void {
-    this.allergenExpandAll_.update((v) => !v)
+    this.isAllergenAllExpanded_.update((v) => !v)
     this.allergenPopoverProductId_.set(null)
   }
 
   protected toggleAllergenPopover(productId: string): void {
-    this.allergenExpandAll_.set(false)
+    this.isAllergenAllExpanded_.set(false)
     this.allergenPopoverProductId_.update((id) => (id === productId ? null : productId))
   }
 
@@ -456,7 +459,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     const el = clickTarget instanceof HTMLElement ? clickTarget : null
     if (el?.closest('thead .col-allergens')) return
     this.allergenPopoverProductId_.set(null)
-    this.allergenExpandAll_.set(false)
+    this.isAllergenAllExpanded_.set(false)
   }
 
   protected sortIconFor_(field: SortField): 'arrow-up' | 'arrow-down' | 'arrow-up-down' {
@@ -481,12 +484,14 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected clearAllFilters(): void {
-    this.lowStockOnly_.set(false)
-    this.showInvalidOnly_.set(false)
-    this.showIncompleteOnly_.set(false)
-    this.showUnpricedOnly_.set(false)
-    this.nutritionFilter_.set('all')
-    this.activeFilters_.set({})
+    this.listControls.clearAll(
+      () => this.isLowStockOnly_.set(false),
+      () => this.shouldShowInvalidOnly_.set(false),
+      () => this.shouldShowIncompleteOnly_.set(false),
+      () => this.shouldShowUnpricedOnly_.set(false),
+      () => this.nutritionFilter_.set('all'),
+      () => this.activeFilters_.set({})
+    )
   }
 
   protected toggleNutritionFilter(value: 'has' | 'missing'): void {
@@ -502,8 +507,29 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     return getProductValidationStatus(product)
   }
 
-  protected getMissingFields(product: Product): string[] {
-    return getProductMissingFields(product)
+  /** One mark per row: red circle, else the amber unpriced chip, else the amber triangle, else none. */
+  protected getStatusKind(
+    status: ProductValidationStatus,
+    unpriced: boolean
+  ): 'invalid' | 'unpriced' | 'incomplete' | null {
+    if (status === 'invalid') return 'invalid'
+    if (unpriced) return 'unpriced'
+    return status === 'incomplete' ? 'incomplete' : null
+  }
+
+  protected toggleStatus(productId: string | undefined): void {
+    const id = productId ?? ''
+    this.openStatusId_.update((open) => (open === id ? null : id))
+  }
+
+  /** Closes only this product's box, so a tap on another row's mark is not undone by the document click. */
+  protected closeStatus(productId?: string): void {
+    if (productId !== undefined && this.openStatusId_() !== productId) return
+    this.openStatusId_.set(null)
+  }
+
+  protected statusLabel(fields: string[]): string {
+    return fields.map((f) => this.translationService.translate(f)).join(', ')
   }
 
   protected getFieldIcon(fieldKey: string): string {
@@ -511,29 +537,29 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected toggleShowInvalidOnly(): void {
-    this.showInvalidOnly_.update((v) => !v)
+    this.shouldShowInvalidOnly_.update((v) => !v)
   }
 
   protected toggleShowIncompleteOnly(): void {
-    this.showIncompleteOnly_.update((v) => !v)
+    this.shouldShowIncompleteOnly_.update((v) => !v)
   }
 
   protected toggleShowUnpricedOnly(): void {
-    this.showUnpricedOnly_.update((v) => !v)
+    this.shouldShowUnpricedOnly_.update((v) => !v)
   }
 
   protected hasActiveFilters_ = computed(
     () =>
-      this.lowStockOnly_() ||
-      this.showInvalidOnly_() ||
-      this.showIncompleteOnly_() ||
-      this.showUnpricedOnly_() ||
+      this.isLowStockOnly_() ||
+      this.shouldShowInvalidOnly_() ||
+      this.shouldShowIncompleteOnly_() ||
+      this.shouldShowUnpricedOnly_() ||
       this.nutritionFilter_() !== 'all' ||
       Object.values(this.activeFilters_()).some((arr) => arr.length > 0)
   )
 
   protected toggleLowStockOnly(): void {
-    this.lowStockOnly_.update((v) => !v)
+    this.isLowStockOnly_.update((v) => !v)
   }
 
   protected selectedCountInCategory(category: { options: { checked_: boolean }[] }): number {
@@ -555,6 +581,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       el.closest('button') ||
       el.closest('a') ||
       el.closest('.allergen-btn-wrapper') ||
+      el.closest('.validation-badge') ||
       el.closest('app-list-row-checkbox')
     )
       return
@@ -586,7 +613,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
     const confirmMessage =
       affected.length > 0
-        ? `חומר הגלם הזה בשימוש ב-${affected.length} מתכונים/מנות. מחיקה תסיר אותו מכולם. להמשיך?`
+        ? this.translationService.translate('confirm_delete_product_in_use').replace('{n}', String(affected.length))
         : 'confirm_delete_product'
     if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
 
@@ -598,7 +625,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       if (affected.length > 0) {
         await this.kitchenStateService.cascadeRemoveIngredientForAll(_id)
       }
-      await firstValueFrom(this.kitchenStateService.deleteProduct(_id))
+      await this.kitchenStateService.deleteProduct(_id)
       if (scope === 'everyone' && product?._masterId) {
         this.masterPush_.deleteProductFromMaster(product)
         this.masterPush_.purgeProductIngredientEverywhere(product)
@@ -629,8 +656,12 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
 
     const confirmMessage =
       inUseCount > 0
-        ? `${inUseCount} מתוך ${ids.length} המוצרים שנבחרו בשימוש ב-${totalAffected} מתכונים/מנות בסך הכל. מחיקה תסיר אותם מכולם. להמשיך?`
-        : `למחוק ${ids.length} מוצרים?`
+        ? this.translationService
+            .translate('confirm_bulk_delete_products_in_use')
+            .replace('{inUse}', String(inUseCount))
+            .replace('{total}', String(ids.length))
+            .replace('{affected}', String(totalAffected))
+        : this.translationService.translate('confirm_bulk_delete_products').replace('{n}', String(ids.length))
     if (!(await this.confirmModal.open(confirmMessage, { variant: 'danger' }))) return
 
     const masterLinkedProduct = ids.map((id) => productsById.get(id)).find((p) => p?._masterId)
@@ -646,7 +677,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         if (affectedByProduct.has(id)) {
           await this.kitchenStateService.cascadeRemoveIngredientForAll(id)
         }
-        await firstValueFrom(this.kitchenStateService.deleteProduct(id))
+        await this.kitchenStateService.deleteProduct(id)
         if (scope === 'everyone' && product?._masterId) {
           this.masterPush_.deleteProductFromMaster(product)
           this.masterPush_.purgeProductIngredientEverywhere(product)
@@ -712,7 +743,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       purchaseOptions: (product.purchaseOptions ?? []).map((o) => ({ ...o, uom: o.uom || oldBase })),
       sources: newSources.length ? newSources : [{ supplierId: '', price: newPrice, addedAt: Date.now() }]
     }
-    this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} })
+    void this.kitchenStateService.saveProduct(updated).catch(() => {})
   }
 
   protected onPriceFocus(product: Product, displayUnit: string): void {
@@ -761,7 +792,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       } else {
         updated = { ...product, baseUnit: event.value }
       }
-      this.kitchenStateService.saveProduct(updated).subscribe({ next: () => {}, error: () => {} })
+      void this.kitchenStateService.saveProduct(updated).catch(() => {})
     }
   }
 
@@ -774,27 +805,17 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       sources: newSources.length ? newSources : [{ supplierId: '', price: buyPriceGlobal, addedAt: Date.now() }]
     }
     this.savingPriceId_.set(product._id ?? '')
-    this.kitchenStateService.saveProduct(updated).subscribe({
-      next: () => {
-        this.savingPriceId_.set(null)
-      },
-      error: () => {
-        this.savingPriceId_.set(null)
-      }
-    })
+    void this.kitchenStateService
+      .saveProduct(updated)
+      .catch(() => {})
+      .finally(() => this.savingPriceId_.set(null))
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }

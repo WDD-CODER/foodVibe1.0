@@ -27,8 +27,8 @@ export class TeamTabComponent implements OnInit {
   readonly team_ = this.teamService.teamList_
   protected readonly name_ = signal('')
   protected readonly password_ = signal('')
-  protected readonly formOpen_ = signal(false)
-  protected readonly saving_ = signal(false)
+  protected readonly isFormOpen_ = signal(false)
+  protected readonly isSaving_ = signal(false)
   /** Dictionary key of the last failed check, or null. */
   protected readonly errorKey_ = signal<string | null>(null)
 
@@ -41,17 +41,17 @@ export class TeamTabComponent implements OnInit {
 
   // 6. METHODS in CRDUL order
   async addMember(): Promise<void> {
-    if (this.saving_()) return
+    if (this.isSaving_()) return
     const name = this.name_().trim()
     const error = validateUsername(name) ?? validatePassword(this.password_(), name, '')
     if (error) {
       this.errorKey_.set(error)
       return
     }
-    this.saving_.set(true)
+    this.isSaving_.set(true)
     this.errorKey_.set(null)
     const result = await this.teamService.addStaff(name, this.password_())
-    this.saving_.set(false)
+    this.isSaving_.set(false)
     if (!result.ok) {
       this.errorKey_.set(result.errorKey)
       return
@@ -68,11 +68,11 @@ export class TeamTabComponent implements OnInit {
   }
 
   openForm(): void {
-    this.formOpen_.set(true)
+    this.isFormOpen_.set(true)
   }
 
   closeForm(): void {
-    this.formOpen_.set(false)
+    this.isFormOpen_.set(false)
     this.name_.set('')
     this.password_.set('')
     this.errorKey_.set(null)

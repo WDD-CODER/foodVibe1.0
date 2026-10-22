@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const rateLimit = require('express-rate-limit');
+const { createRateLimiter } = require('../middleware/rate-limit');
 const User = require('../models/user.model');
 const { cloneMasterDataToBusiness } = require('../services/clone-master');
 const { syncMasterToBusiness } = require('../services/sync-master');
@@ -27,28 +27,22 @@ const REFRESH_COOKIE = process.env.NODE_ENV === 'development'
 // Rate limiters
 // ---------------------------------------------------------------------------
 
-const loginLimiter = rateLimit({
+const loginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many login attempts, please try again later' },
+  message: 'Too many login attempts, please try again later',
 });
 
-const signupLimiter = rateLimit({
+const signupLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many signup attempts, please try again later' },
+  message: 'Too many signup attempts, please try again later',
 });
 
-const refreshLimiter = rateLimit({
+const refreshLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many refresh attempts, please try again later' },
+  message: 'Too many refresh attempts, please try again later',
 });
 
 // ---------------------------------------------------------------------------
@@ -167,9 +161,8 @@ router.post('/signup', signupLimiter, async (req, res) => {
       return res.status(400).json({ error: 'INVALID_EMAIL' });
     }
 
-    // Plan 426: the business name is required (1–200 chars after trim).
+    // Plan 426/472: the business name is optional (max 200 chars after trim); empty falls back to the default name.
     const trimmedBusinessName = typeof businessName === 'string' ? businessName.trim() : '';
-    if (!trimmedBusinessName) return res.status(400).json({ error: 'BUSINESS_NAME_REQUIRED' });
     if (trimmedBusinessName.length > NAME_MAX_LENGTH) return res.status(400).json({ error: 'BUSINESS_NAME_TOO_LONG' });
 
     // Note: password strength (min length, letter+digit, username/email check) is enforced
@@ -197,7 +190,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const user = created.toObject();
 
     // Plan 424: every new user starts as the owner of their own business.
-    const business = await createBusinessFor(user, { name: trimmedBusinessName, masterVersion });
+    const business = await createBusinessFor(user, { name: trimmedBusinessName || undefined, masterVersion });
     await cloneMasterDataToBusiness(business._id, { createdBy: String(_id) });
 
     const token = signAccess(user);

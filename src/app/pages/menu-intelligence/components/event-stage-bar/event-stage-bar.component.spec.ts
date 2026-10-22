@@ -179,6 +179,125 @@ describe('EventStageBarComponent', () => {
     expect(rows).toEqual(['T:event_stage_quote_sent', 'T:event_stage_inquiry'])
   })
 
+  describe('deposit paid (plan 467)', () => {
+    const dialog = () => el.querySelector('app-deposit-paid-dialog')
+    const fill = async (date: string, amount: string): Promise<void> => {
+      const d = el.querySelector<HTMLInputElement>('app-deposit-paid-dialog #deposit-paid-date')!
+      d.value = date
+      d.dispatchEvent(new Event('input'))
+      const a = el.querySelector<HTMLInputElement>('app-deposit-paid-dialog #deposit-paid-amount')!
+      a.value = amount
+      a.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+    }
+    const save = () => el.querySelector<HTMLButtonElement>('app-deposit-paid-dialog .c-modal-actions .c-btn-primary')!
+
+    let order: string[]
+
+    beforeEach(() => {
+      order = []
+      eventData.updateMenuEvent.and.callFake(async () => {
+        order.push('deposit')
+        return base
+      })
+      pipeline.changeStage.and.callFake(async (_id, change) => {
+        order.push('stage')
+        store.update((list) => list.map((e) => ({ ...e, stage: change.stage })))
+        return { ok: true, event: base }
+      })
+    })
+
+    it('asks the owner for the payment and moves nothing until it is saved', async () => {
+      await setup({ ...base, stage: 'quote_sent' })
+      pill('deposit_paid').click()
+      fixture.detectChanges()
+      await fixture.whenStable()
+      expect(dialog()).toBeTruthy()
+      expect(pipeline.changeStage).not.toHaveBeenCalled()
+      expect(eventData.updateMenuEvent).not.toHaveBeenCalled()
+    })
+
+    it('saves the stage move first and then the deposit', async () => {
+      await setup({ ...base, stage: 'quote_sent' })
+      pill('deposit_paid').click()
+      fixture.detectChanges()
+      await fixture.whenStable()
+      await fill('05012027', '500')
+      save().click()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(pipeline.changeStage).toHaveBeenCalledWith('e1', { stage: 'deposit_paid' })
+      expect(eventData.updateMenuEvent).toHaveBeenCalledTimes(1)
+      const sent = eventData.updateMenuEvent.calls.mostRecent().args[0] as MenuEvent
+      expect(sent.deposit).toEqual({ date: '2027-01-05', amount: 500 })
+      expect(sent.stage).toBe('deposit_paid')
+      expect(order).toEqual(['stage', 'deposit'])
+      expect(dialog()).toBeNull()
+    })
+
+    it('keeps the amount already on the event when only the date is new', async () => {
+      await setup({ ...base, stage: 'quote_sent', deposit: { amount: 100, date: '2026-01-01' } })
+      pill('deposit_paid').click()
+      fixture.detectChanges()
+      await fixture.whenStable()
+      await fill('05012027', '300')
+      save().click()
+      await fixture.whenStable()
+      const sent = eventData.updateMenuEvent.calls.mostRecent().args[0] as MenuEvent
+      expect(sent.deposit).toEqual({ date: '2027-01-05', amount: 300 })
+    })
+
+    it('saves no deposit when the stage move fails', async () => {
+      pipeline.changeStage.and.resolveTo({ ok: false } as never)
+      await setup({ ...base, stage: 'quote_sent' })
+      pill('deposit_paid').click()
+      fixture.detectChanges()
+      await fixture.whenStable()
+      await fill('05012027', '500')
+      save().click()
+      await fixture.whenStable()
+      expect(pipeline.changeStage).toHaveBeenCalled()
+      expect(eventData.updateMenuEvent).not.toHaveBeenCalled()
+    })
+
+    it('moves nothing when the owner cancels', async () => {
+      await setup({ ...base, stage: 'quote_sent' })
+      pill('deposit_paid').click()
+      fixture.detectChanges()
+      await fixture.whenStable()
+      el.querySelector<HTMLButtonElement>('app-deposit-paid-dialog .c-btn-ghost')!.click()
+      fixture.detectChanges()
+      expect(dialog()).toBeNull()
+      expect(pipeline.changeStage).not.toHaveBeenCalled()
+      expect(eventData.updateMenuEvent).not.toHaveBeenCalled()
+    })
+
+    it('lets staff (no money edit) move straight through with no dialog', async () => {
+      allowed['editMoney'] = false
+      await setup({ ...base, stage: 'quote_sent' })
+      pill('deposit_paid').click()
+      fixture.detectChanges()
+      expect(dialog()).toBeNull()
+      expect(pipeline.changeStage).toHaveBeenCalledWith('e1', { stage: 'deposit_paid' })
+      expect(eventData.updateMenuEvent).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('scroll rail (plan 467)', () => {
+    it('puts the stage pills in the shared scroll rail', async () => {
+      await setup()
+      expect(el.querySelectorAll('app-scroll-rail .stage-pill').length).toBe(8)
+    })
+
+    it('brings the current stage into view when the screen opens', async () => {
+      const spy = spyOn(Element.prototype, 'scrollIntoView')
+      await setup({ ...base, stage: 'ordering' })
+      await fixture.whenStable()
+      const current = el.querySelector('.stage-pill.is-current')!
+      expect(spy.calls.all().some((c) => c.object === current)).toBeTrue()
+    })
+  })
+
   describe('closing (plan 446)', () => {
     const closingLink = () =>
       Array.from(el.querySelectorAll<HTMLButtonElement>('.stage-link')).find((b) =>

@@ -2,7 +2,11 @@
   <app-page-header titleKey="dashboard" subtitleKey="dashboard_subtitle" />
 
   <main class="dashboard-main">
-    <app-business-performance />
+    @if (needsOpeningDetails_()) {
+      <app-opening-details-banner />
+    } @else {
+      <app-business-performance />
+    }
     <app-setup-checklist-card />
     <section class="kpi-grid">
       <!-- Total Products -->
@@ -92,7 +96,7 @@
       @let groups = activityGroups();
       @if (groups.length) {
         <div class="activity-list-scroll-wrap">
-          <div class="activity-list" data-testid="activity-list" scrollIndicators>
+          <div class="activity-list" data-testid="activity-list" appScrollIndicators>
             @for (group of groups; track group.key) {
               @if (groups.length > 1) {
                 <h3 class="act-day">{{ group.label }}</h3>

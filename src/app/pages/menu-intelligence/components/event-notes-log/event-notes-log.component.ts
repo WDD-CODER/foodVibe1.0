@@ -39,7 +39,7 @@ export class EventNotesLogComponent {
   protected readonly draft_ = signal('')
   protected readonly editText_ = signal('')
   protected readonly editingId_ = signal<string | null>(null)
-  protected readonly busy_ = signal(false)
+  protected readonly isBusy_ = signal(false)
 
   // 5. COMPUTED
   private readonly event_ = computed(
@@ -56,10 +56,10 @@ export class EventNotesLogComponent {
   protected async add(): Promise<void> {
     const id = this.eventId()
     const text = this.draft_().trim()
-    if (!id || !text || this.busy_()) return
-    this.busy_.set(true)
+    if (!id || !text || this.isBusy_()) return
+    this.isBusy_.set(true)
     const result = await this.pipeline.addNote(id, text)
-    this.busy_.set(false)
+    this.isBusy_.set(false)
     if (result.ok) this.draft_.set('')
   }
 
@@ -79,20 +79,20 @@ export class EventNotesLogComponent {
   protected async saveEdit(note: EventNote): Promise<void> {
     const id = this.eventId()
     const text = this.editText_().trim()
-    if (!id || !text || this.busy_()) return
-    this.busy_.set(true)
+    if (!id || !text || this.isBusy_()) return
+    this.isBusy_.set(true)
     const result = await this.pipeline.editNote(id, note._id, text)
-    this.busy_.set(false)
+    this.isBusy_.set(false)
     if (result.ok) this.editingId_.set(null)
   }
 
   protected async remove(note: EventNote): Promise<void> {
     const id = this.eventId()
-    if (!id || this.busy_()) return
+    if (!id || this.isBusy_()) return
     const ok = await this.confirmModal.open('notes_confirm_delete', { saveLabel: 'delete', variant: 'danger' })
     if (!ok) return
-    this.busy_.set(true)
+    this.isBusy_.set(true)
     await this.pipeline.deleteNote(id, note._id)
-    this.busy_.set(false)
+    this.isBusy_.set(false)
   }
 }

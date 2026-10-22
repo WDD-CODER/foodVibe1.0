@@ -54,7 +54,7 @@ export function resolveAddedKey(
   return added[0]
 }
 
-/** Shows the success message after an add window saved (rule M): `"<name>" נוסף`. */
+/** Shows the success message after an add window saved (rule M): `"<name>" נוסף` (`item_added_named`). */
 export function notifyItemAdded(
   userMsg: { onSetSuccessMsg: (txt: string) => void },
   translate: (key: string) => string,
@@ -62,5 +62,5 @@ export function notifyItemAdded(
 ): void {
   const label = (name ?? '').trim()
   if (!label) return
-  userMsg.onSetSuccessMsg(`"${label}" ${translate('item_added_suffix')}`)
+  userMsg.onSetSuccessMsg(translate('item_added_named').replace('{name}', label))
 }

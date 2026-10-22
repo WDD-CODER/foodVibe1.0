@@ -69,9 +69,9 @@
               type="button"
               class="c-btn-primary"
               (click)="onEdit()"
-              [disabled]="loading_() || !instruction().trim()"
+              [disabled]="isLoading_() || !instruction().trim()"
             >
-              @if (loading_()) {
+              @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />
               }
               {{ 'ai_product_generate' | translatePipe }}
@@ -91,7 +91,9 @@
               </li>
             }
             @if (diffEntries_().length === 0) {
-              <li class="ai-product-patch-item ai-product-patch-item--empty">אין שינויים זוהו</li>
+              <li class="ai-product-patch-item ai-product-patch-item--empty">
+                {{ 'ai_no_changes_detected' | translatePipe }}
+              </li>
             }
           </ul>
           <div class="ai-product-footer">
@@ -113,7 +115,7 @@
             <button
               type="button"
               role="tab"
-              class="c-tab-pill"
+              class="c-chip c-chip--tab"
               [class.active]="inputMode_() === 'text'"
               [attr.aria-selected]="inputMode_() === 'text'"
               [disabled]="status_() === 'sending'"
@@ -125,7 +127,7 @@
             <button
               type="button"
               role="tab"
-              class="c-tab-pill"
+              class="c-chip c-chip--tab"
               [class.active]="inputMode_() === 'image'"
               [attr.aria-selected]="inputMode_() === 'image'"
               [disabled]="status_() === 'sending'"
@@ -218,9 +220,9 @@
               type="button"
               class="c-btn-primary"
               (click)="onGenerate()"
-              [disabled]="loading_() || !canGenerate_()"
+              [disabled]="isLoading_() || !canGenerate_()"
             >
-              @if (loading_()) {
+              @if (isLoading_()) {
                 <app-loader size="small" [inline]="true" />
               }
               {{ 'ai_product_generate' | translatePipe }}
@@ -232,7 +234,7 @@
         <div class="ai-product-editor">
           <!-- Name -->
           <div class="editor-field">
-            <label class="editor-label">שם המוצר</label>
+            <label class="editor-label">{{ 'ai_product_name_field' | translatePipe }}</label>
             <input
               class="c-input"
               [value]="draft_()!.nameHebrew"
@@ -280,7 +282,7 @@
           <!-- Min stock + expiry -->
           <div class="editor-field-row">
             <div class="editor-field editor-field--half">
-              <label class="editor-label">מינימום מלאי</label>
+              <label class="editor-label">{{ 'ai_patch_min_stock' | translatePipe }}</label>
               <input
                 class="c-input editor-num-input"
                 type="number"
@@ -290,7 +292,7 @@
               />
             </div>
             <div class="editor-field editor-field--half">
-              <label class="editor-label">ימי תפוגה</label>
+              <label class="editor-label">{{ 'ai_patch_expiry_days' | translatePipe }}</label>
               <input
                 class="c-input editor-num-input"
                 type="number"
@@ -306,9 +308,16 @@
             <label class="editor-label">{{ 'ai_product_categories_label' | translatePipe }}</label>
             <div class="editor-chips-row">
               @for (cat of draft_()!.categories; track cat) {
-                <span class="ai-product-chip">
+                <span class="c-chip c-chip--removable">
                   {{ cat | translatePipe }}
-                  <button type="button" class="chip-remove" (click)="removeCategory(cat)">×</button>
+                  <button
+                    type="button"
+                    class="c-chip__remove"
+                    (click)="removeCategory(cat)"
+                    [attr.aria-label]="'remove' | translatePipe"
+                  >
+                    ×
+                  </button>
                 </span>
               }
               <div class="editor-chip-add">
@@ -317,7 +326,7 @@
                   [value]="newCategory_()"
                   (input)="newCategory_.set($any($event.target).value)"
                   (keydown.enter)="addCategory(); $event.preventDefault()"
-                  placeholder="הוסף קטגוריה"
+                  [placeholder]="'metadata_add_category' | translatePipe"
                   dir="rtl"
                   autocomplete="off"
                   autocorrect="off"
@@ -336,9 +345,16 @@
             <label class="editor-label">{{ 'ai_product_allergens_label' | translatePipe }}</label>
             <div class="editor-chips-row">
               @for (al of draft_()!.allergens; track al) {
-                <span class="ai-product-chip ai-product-chip--allergen">
+                <span class="c-chip c-chip--removable c-chip--amber">
                   {{ al | translatePipe }}
-                  <button type="button" class="chip-remove" (click)="removeAllergen(al)">×</button>
+                  <button
+                    type="button"
+                    class="c-chip__remove"
+                    (click)="removeAllergen(al)"
+                    [attr.aria-label]="'remove' | translatePipe"
+                  >
+                    ×
+                  </button>
                 </span>
               }
               <div class="editor-chip-add">
@@ -347,7 +363,7 @@
                   [value]="newAllergen_()"
                   (input)="newAllergen_.set($any($event.target).value)"
                   (keydown.enter)="addAllergen(); $event.preventDefault()"
-                  placeholder="הוסף אלרגן"
+                  [placeholder]="'add_new_allergen' | translatePipe"
                   dir="rtl"
                   autocomplete="off"
                   autocorrect="off"

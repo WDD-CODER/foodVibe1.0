@@ -1,6 +1,6 @@
 'use strict'
 /**
- * Plan 426 — signup requires a business name, and neither the access token nor the signup / login / guest
+ * Plan 426/472 — signup business name is optional (default: the username), and neither the access token nor the signup / login / guest
  * `user` objects carry the legacy `role`. Own file: the signup limiter allows 5 requests per app instance,
  * and auth-business.test.js already uses all 5 of its own.
  */
@@ -30,15 +30,18 @@ const HASH = SALT + ':' + crypto.pbkdf2Sync('pw', Buffer.from(SALT, 'hex'), 1000
 const post = body => request(app).post('/api/v1/auth/signup').send({ name: 'chefone', email: 'c@x.com', password: HASH, ...body })
 
 describe('signup businessName (plan 426)', () => {
-  it('missing or blank -> 400 BUSINESS_NAME_REQUIRED, and no user or business is created', async () => {
+  it('missing or blank -> 201 and the business is named after the username (plan 472)', async () => {
     const missing = await post({})
-    expect(missing.status).toBe(400)
-    expect(missing.body).toEqual({ error: 'BUSINESS_NAME_REQUIRED' })
+    expect(missing.status).toBe(201)
+    expect(await testDb().collection('businesses').findOne({ _id: missing.body.user.businessId })).toMatchObject({ name: 'העסק של chefone' })
+    expect(await testDb().collection('users').countDocuments()).toBe(1)
+    expect(await testDb().collection('businesses').countDocuments()).toBe(1)
+  })
+
+  it('spaces only -> 201 with the same default name', async () => {
     const blank = await post({ businessName: '   ' })
-    expect(blank.status).toBe(400)
-    expect(blank.body).toEqual({ error: 'BUSINESS_NAME_REQUIRED' })
-    expect(await testDb().collection('users').countDocuments()).toBe(0)
-    expect(await testDb().collection('businesses').countDocuments()).toBe(0)
+    expect(blank.status).toBe(201)
+    expect(await testDb().collection('businesses').findOne({ _id: blank.body.user.businessId })).toMatchObject({ name: 'העסק של chefone' })
   })
 
   it('201 characters -> 400 BUSINESS_NAME_TOO_LONG', async () => {

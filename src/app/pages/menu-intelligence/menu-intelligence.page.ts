@@ -11,7 +11,8 @@ import {
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms'
+import { HttpErrorResponse } from '@angular/common/http'
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { filter, startWith } from 'rxjs'
@@ -41,21 +42,14 @@ import { roundMoney } from '../../core/engine/rounding'
 import { ExportService } from '@services/export.service'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
-import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
-import {
-  AddOptionLabel,
-  addOptionLabel,
-  findOptionByLabel,
-  notifyItemAdded,
-  resolveAddedKey
-} from 'src/app/core/utils/add-option.util'
-import { scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { notifyItemAdded, resolveAddedKey } from 'src/app/core/utils/add-option.util'
+import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import type { ExportPayload } from 'src/app/core/utils/export.util'
 import { ExportPreviewComponent } from 'src/app/shared/export-preview/export-preview.component'
 import { HeroFabService } from '@services/hero-fab.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { EventStageBarComponent } from './components/event-stage-bar/event-stage-bar.component'
 import { EventNotesLogComponent } from './components/event-notes-log/event-notes-log.component'
 import { MenuExportSheetComponent } from './components/menu-export-sheet/menu-export-sheet.component'
@@ -72,7 +66,6 @@ import { createMoneyGroup, moneyFieldsFromForm, moneyFormFromEvent } from './men
 import { MenuPickerSearchService } from './services/menu-picker-search.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
-import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 
 type MenuItemForm = {
   recipeId: string
@@ -88,20 +81,18 @@ type MenuItemForm = {
 /** Raw section shape from form getRawValue() before mapping to MenuSection. */
 type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] }
 
-import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
 @Component({
   selector: 'app-menu-intelligence-page',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule,
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
     PricingMeterComponent,
     ClickOutSideDirective,
-    ScrollableDropdownComponent,
+    SearchComboboxComponent,
     CustomSelectComponent,
     ExportPreviewComponent,
     MenuDishRowComponent,
@@ -109,8 +100,6 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     PrepSheetsComponent,
     SupplierOrdersComponent,
     VenueLinkChipComponent,
-    InputClearComponent,
-    AddOptionRowComponent,
     EventStageBarComponent,
     EventNotesLogComponent
   ],
@@ -152,7 +141,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
   /** "צ'קליסט והדפסות" top sheet, toggled from the hero FAB (plan 344). */
-  protected readonly exportSheetOpen_ = signal(false)
+  protected readonly isExportSheetOpen_ = signal(false)
   protected readonly supplierOrdersEvent_ = signal<MenuEvent | null>(null)
   protected readonly prepSheets_ = signal<{ event: MenuEvent; mode: PrepSheetsMode } | null>(null)
   /** Export preview (View before export). */
@@ -176,8 +165,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private static readonly GUEST_REPEAT_INTERVAL_MS = 80
   private guestHoldTimer_: ReturnType<typeof setTimeout> | null = null
 
-  /** Track saved snapshot for dirty detection */
-  private savedSnapshot_ = ''
+  private readonly unsaved_ = useUnsavedChanges({ form: () => this.form_ })
   /** For pendingChangesGuard: prevents re-triggering after a successful save */
   isSubmitted = false
 
@@ -200,8 +188,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Which dish field is in edit mode (key: "sectionIndex-itemIndex-fieldKey") */
   protected readonly editingDishField_ = signal<string | null>(null)
-  /** Event type dropdown open; its query + highlight live in pickerSearch_.eventType (key 0). */
-  protected readonly eventTypeDropdownOpen_ = signal(false)
+  /** Event type dropdown open; its query + highlight live in the shared search box. */
+  protected readonly isEventTypeDropdownOpen_ = signal(false)
   /** Focus order for keyboard navigation */
   protected readonly FOCUS_ORDER = ['name', 'eventType', 'servingType', 'guestCount', 'eventDate'] as const
 
@@ -245,7 +233,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       void this.loadEvent(id)
     } else {
       this.addSection()
-      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+      this.unsaved_.markSaved()
     }
   }
 
@@ -269,14 +257,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
           this.closeAllExportOverlays()
         }
       })
-
-    // Capture phase: intercept keydown before inputs consume arrows/enter; the handler skips text fields.
-    document.addEventListener('keydown', this._boundOnDocumentKeydown, { capture: true })
   }
 
   /** Close export toolbar and all sub-modals so state is clean when user navigates away. */
   private closeAllExportOverlays(): void {
-    this.exportSheetOpen_.set(false)
+    this.isExportSheetOpen_.set(false)
     this.supplierOrdersEvent_.set(null)
     this.prepSheets_.set(null)
     this.exportPreviewPayload_.set(null)
@@ -284,7 +269,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    document.removeEventListener('keydown', this._boundOnDocumentKeydown, { capture: true })
     this.closeAllExportOverlays()
     this.heroFab.clearPageActions()
     this.stopGuestHold()
@@ -426,8 +410,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.closeEventTypeDropdown()
       this.openSectionSearch(0)
       setTimeout(() => {
-        const input = document.querySelector('.section-search-input') as HTMLInputElement
-        input?.focus()
+        document.getElementById('section-search-input')?.focus()
       }, 50)
       return
     }
@@ -446,112 +429,29 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return Array.from(set)
   })
 
-  /** Event types matching the query by the Hebrew label shown on screen, not the stored key (rule 3). */
-  protected getFilteredEventTypes(): string[] {
-    const raw = this.pickerSearch_.eventType.query(0).trim()
-    const list = this.eventTypeOptions_()
-    if (!raw) return list
-    return filterOptionsByLabel(list, raw, (t) => this.translation.translate(t))
-  }
-
-  /** One add option, last: `הוסף "<typed>"` for a new name, else `add_new_event_type` (rules 1–2). */
-  protected eventTypeAddLabel(): AddOptionLabel {
-    return addOptionLabel(
-      this.pickerSearch_.eventType.query(0),
-      this.eventTypeOptions_(),
-      (t) => this.translation.translate(t),
-      'add_new_event_type'
-    )
-  }
-
-  /** The add option shows with an empty search or a new name — never when the search names a type exactly (rule X). */
-  protected eventTypeShowsAdd(): boolean {
-    const q = this.pickerSearch_.eventType.query(0)
-    return !findOptionByLabel(q, this.eventTypeOptions_(), (t) => this.translation.translate(t))
-  }
+  /** On-screen text of an option key — the shared search boxes filter and match by it (rule 3). */
+  protected readonly translateLabel_ = (key: string): string => this.translation.translate(key)
 
   protected openEventTypeDropdown(): void {
-    this.eventTypeDropdownOpen_.set(true)
-    this.pickerSearch_.eventType.onQueryChange(0, '')
+    this.isEventTypeDropdownOpen_.set(true)
     this.startEditField('event_type')
     setTimeout(() => document.getElementById('menu-focus-event_type_search')?.focus(), 50)
   }
 
   protected closeEventTypeDropdown(): void {
-    this.eventTypeDropdownOpen_.set(false)
-    this.pickerSearch_.eventType.onQueryChange(0, '')
+    this.isEventTypeDropdownOpen_.set(false)
   }
 
-  /** Rule 5 via the shared KeyedPickerSearch; Tab / Shift+Tab move to serving type / the event-type chip. */
-  protected onEventTypeSearchKeydown(e: KeyboardEvent): void {
-    const list = this.getFilteredEventTypes()
-    this.pickerSearch_.eventType.handleKeydown(0, e, {
-      optionCount: list.length + (this.eventTypeShowsAdd() ? 1 : 0),
-      onSelect: (idx) => {
-        if (idx < list.length) this.selectEventType(list[idx])
-        else void this.addNewEventType()
-      },
-      onClose: () => {
-        this.closeEventTypeDropdown()
-        this.focusField('eventType')
-      },
-      onHighlightMove: () =>
-        setTimeout(() => scrollHighlightIntoView(document.querySelector('.event-type-dropdown')), 0),
-      onTab: (ke) => {
-        this.closeEventTypeDropdown()
-        this.focusField(ke.shiftKey ? 'eventType' : 'servingType')
-      }
-    })
+  /** Escape: close the list and give focus back to the chip. */
+  protected onEventTypeEscape(): void {
+    this.closeEventTypeDropdown()
+    this.focusField('eventType')
   }
 
-  private scrollDropdownHighlightIntoView(containerClass: string): void {
-    setTimeout(() => {
-      const el = document.querySelector(`${containerClass} .dropdown-item.highlighted`)
-      el?.scrollIntoView({ block: 'nearest' })
-    }, 0)
-  }
-
-  // Bound reference kept so removeEventListener can identify the exact listener.
-  private readonly _boundOnDocumentKeydown = (e: KeyboardEvent) => this.onDocumentKeydown(e)
-
-  private onDocumentKeydown(e: KeyboardEvent): void {
-    const key = e.key
-    if (key !== 'ArrowDown' && key !== 'ArrowUp' && key !== 'Enter') return
-
-    // Skip when focus is inside a plain text-entry element (typing in inputs/textareas).
-    const target = e.target as HTMLElement
-    const tag = target.tagName
-    const isTextInput =
-      (tag === 'INPUT' &&
-        !['button', 'checkbox', 'radio', 'submit', 'reset'].includes((target as HTMLInputElement).type)) ||
-      tag === 'TEXTAREA' ||
-      target.isContentEditable
-
-    // Bail out when typing in a text field outside our managed dropdown search boxes.
-    const el = e.target as Element
-    const inManagedDropdown =
-      el.closest('.event-type-dropdown') || el.closest('.section-search-wrap') || el.closest('.dish-search-wrap')
-    if (isTextInput && !inManagedDropdown) return
-
-    if (el.closest('.event-type-dropdown') && this.eventTypeDropdownOpen_()) {
-      e.preventDefault()
-      e.stopPropagation()
-      this.onEventTypeSearchKeydown(e)
-      return
-    }
-    const sectionOpen = this.sectionSearchOpen_()
-    if (el.closest('.section-search-wrap') && sectionOpen !== null) {
-      e.preventDefault()
-      e.stopPropagation()
-      this.onSectionSearchKeydown(sectionOpen, e)
-      return
-    }
-    const activeDish = this.activeDishSearch_()
-    if (el.closest('.dish-search-wrap') && activeDish !== null) {
-      e.preventDefault()
-      e.stopPropagation()
-      this.onDishSearchKeydown(activeDish.sectionIndex, activeDish.itemIndex, e)
-    }
+  /** Tab / Shift+Tab move to serving type / the event-type chip. */
+  protected onEventTypeTab(e: KeyboardEvent): void {
+    this.closeEventTypeDropdown()
+    this.focusField(e.shiftKey ? 'eventType' : 'servingType')
   }
 
   protected selectEventType(value: string): void {
@@ -562,15 +462,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   /** Always opens the add window, prefilled with a typed new name (rule W). Selects the stored key, nothing on cancel. */
-  protected async addNewEventType(): Promise<void> {
-    const label = this.eventTypeAddLabel()
+  protected async addNewEventType(typed: string): Promise<void> {
     const name = (
       (await this.addItemModal.open({
         title: 'add_new_event_type',
         label: 'menu_event_type',
         placeholder: 'menu_event_type',
         saveLabel: 'save',
-        initialValue: label.kind === 'typed' ? label.text : ''
+        initialValue: typed
       })) ?? ''
     ).trim()
     if (!name) return
@@ -589,27 +488,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** For pendingChangesGuard — method name must match PendingChangesComponent interface */
   hasRealChanges(): boolean {
-    return JSON.stringify(this.form_.getRawValue()) !== this.savedSnapshot_
+    return this.unsaved_.hasChanges()
   }
 
   /** For pendingChangesGuard — enables ternary modal with "Save & Leave" option */
   async saveAndWait(): Promise<boolean> {
-    if (!this.form_.value.name?.trim()) {
-      this.form_.patchValue({ name: this.generateDateName() })
-    }
-
     try {
-      const id = this.editingId_()
-      // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
-      const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
-      const now = Date.now()
-      if (id) {
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now })
-      } else {
-        const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
-        this.editingId_.set(created._id)
-      }
-      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+      await this.persist_()
       this.isSubmitted = true
       return true
     } catch {
@@ -820,31 +705,8 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     }
   }
 
-  protected getDishSearchHighlightedIndex(sectionIndex: number, itemIndex: number): number {
-    return this.pickerSearch_.dish.highlighted(this.dishKey(sectionIndex, itemIndex))
-  }
-
-  private getFilteredRecipes(sectionIndex: number, itemIndex: number): Recipe[] {
-    const raw = this.getDishSearchQuery(sectionIndex, itemIndex).trim()
-    if (!raw) return []
-    const filtered = filterOptionsByLabel(this.recipes_(), raw, (r) => r.nameHebrew ?? '')
-    return filtered.slice(0, 12)
-  }
-
-  /** Arrows move the highlight, Enter/Space picks, Escape clears, Tab hands focus on. */
-  protected onDishSearchKeydown(sectionIndex: number, itemIndex: number, e: KeyboardEvent): void {
-    const recipes = this.getFilteredRecipes(sectionIndex, itemIndex)
-    this.pickerSearch_.dish.handleKeydown(this.dishKey(sectionIndex, itemIndex), e, {
-      optionCount: recipes.length,
-      selectOnSpace: true,
-      onSelect: (i) => this.selectRecipe(sectionIndex, itemIndex, recipes[i]),
-      onClose: () => this.clearDishSearch(sectionIndex, itemIndex),
-      onHighlightMove: () => this.scrollDropdownHighlightIntoView('.dish-search-wrap'),
-      onTab: (ke) => this.focusAfterDishSearchTab(sectionIndex, itemIndex, ke.shiftKey)
-    })
-  }
-
-  private focusAfterDishSearchTab(s: number, i: number, backwards: boolean): void {
+  /** Tab / Shift+Tab out of the dish search: restore a renamed dish, then move focus on. */
+  protected focusAfterDishSearchTab(s: number, i: number, backwards: boolean): void {
     // Tabbing out of a rename without picking restores the old dish, same as click-outside.
     const edit = this.editingDishAt_()
     if (edit && edit.sectionIndex === s && edit.itemIndex === i) this.clearDishSearch(s, i)
@@ -866,37 +728,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected openSectionSearch(index: number): void {
     this.sectionSearchOpen_.set(index)
-    this.pickerSearch_.section.onQueryChange(index, '')
-    setTimeout(() => {
-      const input = document.querySelector('.section-search-wrap .section-search-input') as HTMLInputElement
-      input?.focus()
-    }, 0)
+    setTimeout(() => document.getElementById('section-search-input')?.focus(), 0)
   }
 
   protected closeSectionSearch(): void {
     this.sectionSearchOpen_.set(null)
-  }
-
-  /** Options: filtered categories, then one "add" — hidden when the search names a category exactly (rule X). */
-  protected getSectionCategoryOptionCount(sectionIndex: number): number {
-    return this.getFilteredSectionCategories(sectionIndex).length + (this.sectionShowsAdd(sectionIndex) ? 1 : 0)
-  }
-
-  /** The add option shows with an empty search or a new name. */
-  protected sectionShowsAdd(index: number): boolean {
-    return !this.pickerSearch_.section.query(index).trim() || !!this.getNewSectionCategoryName(index)
-  }
-
-  /** Typed text that is not already a category (by key or Hebrew label); '' when none. */
-  protected getNewSectionCategoryName(index: number): string {
-    const name = this.pickerSearch_.section.query(index).trim()
-    return name && !this.findSectionCategoryKey(name) ? name : ''
-  }
-
-  /** The section dropdown's single add option label (shared add-option rule). */
-  protected sectionCategoryAddLabel(index: number): AddOptionLabel {
-    const name = this.getNewSectionCategoryName(index)
-    return name ? { kind: 'typed', text: name } : addOptionLabel('', [], (k: string) => k, 'add_new_category')
   }
 
   private findSectionCategoryKey(name: string): string | undefined {
@@ -906,36 +742,18 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     )
   }
 
-  protected onSectionSearchKeydown(sectionIndex: number, e: KeyboardEvent): void {
-    const cats = this.getFilteredSectionCategories(sectionIndex)
-    this.pickerSearch_.section.handleKeydown(sectionIndex, e, {
-      optionCount: this.getSectionCategoryOptionCount(sectionIndex),
-      onSelect: (idx) => {
-        if (idx < cats.length) this.selectSectionCategory(sectionIndex, cats[idx])
-        else void this.openAddCategoryModal(sectionIndex)
-        this.closeSectionSearch()
-      },
-      onClose: () => this.closeSectionSearch(),
-      onHighlightMove: () => this.scrollDropdownHighlightIntoView('.section-search-wrap'),
-      onTab: (ke) => {
-        this.closeSectionSearch()
-        setTimeout(() => {
-          if (ke.shiftKey) {
-            document.getElementById('section-title-' + sectionIndex)?.focus()
-          } else {
-            const firstDish = document.getElementById('dish-search-' + sectionIndex + '-0')
-            const addDish = document.getElementById('add-dish-' + sectionIndex)
-            ;(firstDish ?? addDish)?.focus()
-          }
-        }, 0)
+  /** Tab / Shift+Tab out of the category search: back to the title, or on to the first dish. */
+  protected onSectionSearchTab(sectionIndex: number, e: KeyboardEvent): void {
+    this.closeSectionSearch()
+    setTimeout(() => {
+      if (e.shiftKey) {
+        document.getElementById('section-title-' + sectionIndex)?.focus()
+      } else {
+        const firstDish = document.getElementById('dish-search-' + sectionIndex + '-0')
+        const addDish = document.getElementById('add-dish-' + sectionIndex)
+        ;(firstDish ?? addDish)?.focus()
       }
-    })
-  }
-
-  protected getFilteredSectionCategories(index: number): string[] {
-    const raw = this.pickerSearch_.section.query(index).trim()
-    if (!raw) return this.sectionCategories_()
-    return filterOptionsByLabel(this.sectionCategories_(), raw, (c) => this.translation.translate(c))
+    }, 0)
   }
 
   protected selectSectionCategory(index: number, category: string): void {
@@ -955,13 +773,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   /** Always the add window, prefilled with a typed new name (rule W). */
-  protected async openAddCategoryModal(sectionIndex: number): Promise<void> {
+  protected async openAddCategoryModal(sectionIndex: number, typed: string): Promise<void> {
+    this.closeSectionSearch()
     const result = await this.addItemModal.open({
       title: 'add_new_category',
       label: 'menu_search_category',
       placeholder: 'menu_search_category',
       saveLabel: 'save',
-      initialValue: this.getNewSectionCategoryName(sectionIndex)
+      initialValue: typed
     })
     if (result?.trim()) await this.addAndSelectSectionCategory(sectionIndex, result.trim())
   }
@@ -981,26 +800,27 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.userMsg.onSetErrorMsg(missingMenuFieldsMessage(this.form_, this.translation))
       return
     }
-
-    if (!this.form_.value.name?.trim()) {
-      this.form_.patchValue({ name: this.generateDateName() })
-    }
-
     await this.saving.withSaving(async () => {
-      const id = this.editingId_()
-      // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
-      const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
-      const now = Date.now()
-      if (id) {
-        await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now })
-      } else {
-        const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
-        this.editingId_.set(created._id)
-      }
-      this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+      await this.persist_()
       this.userMsg.onSetSuccessMsg(this.translation.translate('menu_saved'))
       this.router.navigate(['/menu-library'])
     })
+  }
+
+  /** Names an unnamed menu, creates or updates it, and marks the form saved (shared by save and saveAndWait). */
+  private async persist_(): Promise<void> {
+    if (!this.form_.value.name?.trim()) this.form_.patchValue({ name: this.generateDateName() })
+    const id = this.editingId_()
+    // Adds the pricing cache and keeps the stored logistics (the form has no logistics control).
+    const event = this.menuEventSave_.prepareForSave(this.buildEventFromForm(), this.menuPlan_(), id)
+    const now = Date.now()
+    if (id) {
+      await this.menuEventData.updateMenuEvent({ ...event, _id: id, updatedAt: now })
+    } else {
+      const created = await this.menuEventData.addMenuEvent({ ...event, createdAt: now, updatedAt: now })
+      this.editingId_.set(created._id)
+    }
+    this.unsaved_.markSaved()
   }
 
   private generateDateName(): string {
@@ -1017,7 +837,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected toggleExportSheet(): void {
-    this.exportSheetOpen_.update((v) => !v)
+    this.isExportSheetOpen_.update((v) => !v)
   }
 
   protected printMenu(): void {
@@ -1025,7 +845,14 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private async loadEvent(id: string): Promise<void> {
-    const event = await this.menuEventData.getMenuEventById(id)
+    // Plan 477: an event the server does not show this user (hidden stage, removed, other business) is a 404.
+    const event = await this.menuEventData.getMenuEventById(id).catch((err: unknown) => {
+      if (!(err instanceof HttpErrorResponse && err.status === 404)) throw err
+      this.userMsg.onSetErrorMsg(this.translation.translate('event_not_available'))
+      void this.router.navigate(['/menu-library'])
+      return null
+    })
+    if (!event) return
     this.menuPortions_.remember(event)
     this.form_.patchValue({
       name: event.name,
@@ -1062,7 +889,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       this.sectionsArray.push(sectionGroup)
     })
 
-    this.savedSnapshot_ = JSON.stringify(this.form_.getRawValue())
+    this.unsaved_.markSaved()
   }
 
   protected openAiMenuModal(): void {

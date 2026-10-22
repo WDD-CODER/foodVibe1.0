@@ -1,16 +1,19 @@
 import { Injectable, computed, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LoggingService } from './logging.service'
-import { LoadingService } from './loading.service'
 import { KeyResolutionService } from './key-resolution.service'
 import { UserMsgService } from './user-msg.service'
 import { TaxonomyStore } from './taxonomy-store.service'
+
+const LOAD_LOG = {
+  event: 'crud.menuSectionCategories.hydrate_error',
+  message: 'Failed to hydrate menu section categories'
+}
 
 /** Plan 321 Phase 3 — menu section categories as a thin facade over TaxonomyStore (`sectionCategory` terms). */
 @Injectable({ providedIn: 'root' })
 export class MenuSectionCategoriesService {
   private readonly logging = inject(LoggingService)
-  private readonly loading_ = inject(LoadingService)
   private readonly keyResolution = inject(KeyResolutionService)
   private readonly userMsgService = inject(UserMsgService)
   private readonly taxonomy = inject(TaxonomyStore)
@@ -26,12 +29,12 @@ export class MenuSectionCategoriesService {
   }
 
   async ensureLoaded(): Promise<void> {
-    await this.loading_.track(this.taxonomy.ensureLoaded()).catch((err: unknown) => this.logError('hydrate', err))
+    await this.taxonomy.loadSafely(LOAD_LOG, { track: true })
   }
 
   /** Re-read from storage (e.g. after backup restore). */
   async reloadFromStorage(): Promise<void> {
-    await this.taxonomy.reload().catch((err: unknown) => this.logError('hydrate', err))
+    await this.taxonomy.reloadSafely(LOAD_LOG)
   }
 
   /** Add a section category if not already present; resolves Hebrew to key, or opens translation-key modal for English key. */
@@ -56,13 +59,13 @@ export class MenuSectionCategoriesService {
       await op()
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) return
+      this.logError('persist', err)
       const msg = this.taxonomy.errorMessage(err)
       if (msg) this.userMsgService.onSetErrorMsg(msg)
-      this.logError('persist', err)
     }
   }
 
-  private logError(what: 'hydrate' | 'persist', err: unknown): void {
+  private logError(what: 'persist', err: unknown): void {
     this.logging.error({
       event: `crud.menuSectionCategories.${what}_error`,
       message: `Failed to ${what} menu section categories`,

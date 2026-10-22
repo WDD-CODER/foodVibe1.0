@@ -2,7 +2,7 @@
   <app-modal-shell
     size="md"
     [labelKey]="isSignUp ? 'sign_up' : 'sign_in'"
-    [dismissible]="!isSubmitting() && !uploadingImage_()"
+    [dismissible]="!isSubmitting() && !isUploadingImage_()"
     (dismissed)="onClose()"
   >
     <div class="auth-tabs">
@@ -16,6 +16,10 @@
 
     <form (ngSubmit)="onSubmit()" (keydown.enter)="onSubmit()" class="c-modal-body">
       <div class="auth-form-fields">
+        @if (isSignUp) {
+          <p class="auth-hint" data-testid="signup-staff-hint">{{ 'signup_staff_hint' | translatePipe }}</p>
+        }
+
         <!-- Username -->
         <div class="c-input-stack">
           <label for="auth-name">{{ 'username' | translatePipe }}</label>
@@ -75,7 +79,7 @@
               name="businessName"
               autocomplete="organization"
               maxlength="200"
-              required
+              [placeholder]="businessNamePlaceholder"
               [class.c-input--invalid]="
                 errorKey() === 'business_name_required' || errorKey() === 'business_name_too_long'
               "
@@ -85,6 +89,10 @@
             />
             @if (errorKey() === 'business_name_required' || errorKey() === 'business_name_too_long') {
               <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
+            } @else {
+              <p class="auth-hint" data-testid="business-name-hint">
+                {{ 'business_name_default_hint' | translatePipe }}
+              </p>
             }
           </div>
 
@@ -121,7 +129,7 @@
           <div class="password-field-wrap">
             <input
               id="auth-password"
-              [type]="showPassword_() ? 'text' : 'password'"
+              [type]="shouldShowPassword_() ? 'text' : 'password'"
               [(ngModel)]="password"
               (input)="errorKey.set(null)"
               (blur)="onPasswordBlur()"
@@ -148,10 +156,10 @@
             <button
               type="button"
               class="password-toggle"
-              (click)="showPassword_.set(!showPassword_())"
-              [attr.aria-label]="(showPassword_() ? 'hide_password' : 'show_password') | translatePipe"
+              (click)="shouldShowPassword_.set(!shouldShowPassword_())"
+              [attr.aria-label]="(shouldShowPassword_() ? 'hide_password' : 'show_password') | translatePipe"
             >
-              <lucide-icon [name]="showPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+              <lucide-icon [name]="shouldShowPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
             </button>
           </div>
           @if (
@@ -172,7 +180,7 @@
             <div class="password-field-wrap">
               <input
                 id="auth-confirm-password"
-                [type]="showConfirmPassword_() ? 'text' : 'password'"
+                [type]="shouldShowConfirmPassword_() ? 'text' : 'password'"
                 [(ngModel)]="confirmPassword"
                 (input)="errorKey.set(null)"
                 (blur)="onConfirmBlur()"
@@ -185,10 +193,10 @@
               <button
                 type="button"
                 class="password-toggle"
-                (click)="showConfirmPassword_.set(!showConfirmPassword_())"
-                [attr.aria-label]="(showConfirmPassword_() ? 'hide_password' : 'show_password') | translatePipe"
+                (click)="shouldShowConfirmPassword_.set(!shouldShowConfirmPassword_())"
+                [attr.aria-label]="(shouldShowConfirmPassword_() ? 'hide_password' : 'show_password') | translatePipe"
               >
-                <lucide-icon [name]="showConfirmPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
+                <lucide-icon [name]="shouldShowConfirmPassword_() ? 'eye-off' : 'eye'" [size]="16"></lucide-icon>
               </button>
             </div>
             @if (errorKey() === 'passwords_do_not_match') {
@@ -200,7 +208,7 @@
           <div class="c-input-stack">
             <label>{{ 'profile_image' | translatePipe }}</label>
             <div class="image-upload-area">
-              @if (uploadingImage_()) {
+              @if (isUploadingImage_()) {
                 <div class="image-placeholder image-placeholder--loading">
                   <lucide-icon name="refresh-cw" [size]="24"></lucide-icon>
                 </div>
@@ -211,7 +219,7 @@
                   <lucide-icon name="image" [size]="24"></lucide-icon>
                 </div>
               }
-              <label class="image-upload-btn" for="auth-img" [class.disabled]="uploadingImage_()">
+              <label class="image-upload-btn" for="auth-img" [class.disabled]="isUploadingImage_()">
                 {{ 'choose_image' | translatePipe }}
               </label>
               <input
@@ -219,7 +227,7 @@
                 type="file"
                 accept="image/*"
                 (change)="onFileSelected($event)"
-                [disabled]="uploadingImage_()"
+                [disabled]="isUploadingImage_()"
                 class="visually-hidden"
               />
             </div>
@@ -238,7 +246,12 @@
       <button type="button" class="c-btn-ghost" (click)="onClose()">
         {{ 'cancel' | translatePipe }}
       </button>
-      <button type="button" class="c-btn-primary" [disabled]="isSubmitting() || uploadingImage_()" (click)="onSubmit()">
+      <button
+        type="button"
+        class="c-btn-primary"
+        [disabled]="isSubmitting() || isUploadingImage_()"
+        (click)="onSubmit()"
+      >
         @if (isSubmitting()) {
           {{ 'saving' | translatePipe }}
         } @else if (isSignUp) {

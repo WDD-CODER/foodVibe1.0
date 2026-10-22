@@ -32,7 +32,7 @@
           type="text"
           [ngModel]="englishKey_()"
           (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
-          englishKeyInput
+          appEnglishKeyInput
           placeholder="olive_oil"
           (keydown.enter)="save()"
         />

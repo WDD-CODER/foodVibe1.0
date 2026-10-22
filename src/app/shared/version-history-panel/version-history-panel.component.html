@@ -1,9 +1,11 @@
 <div class="version-history-panel" dir="rtl">
   <div class="panel-header">
     <h3>{{ 'history' | translatePipe }}</h3>
-    <button type="button" class="c-btn-ghost--sm" (click)="close()" [attr.aria-label]="'close' | translatePipe">×</button>
+    <button type="button" class="c-btn-ghost--sm" (click)="close()" [attr.aria-label]="'close' | translatePipe">
+      ×
+    </button>
   </div>
-  @if (loading()) {
+  @if (isLoading()) {
     <app-loader size="medium" label="loader_loading" />
   } @else if (loadError()) {
     <p class="panel-error">{{ loadError() }}</p>
@@ -13,7 +15,9 @@
     <ul class="version-list">
       @for (entry of versions(); track entry.versionAt) {
         <li class="version-item">
-          <span class="version-date">{{ 'history_version_at' | translatePipe }}: {{ formatDate(entry.versionAt) }}</span>
+          <span class="version-date"
+            >{{ 'history_version_at' | translatePipe }}: {{ formatDate(entry.versionAt) }}</span
+          >
           @if (entry.changes?.length) {
             <span class="version-summary">{{ entry.changes?.length }} {{ 'activity_updated' | translatePipe }}</span>
           }

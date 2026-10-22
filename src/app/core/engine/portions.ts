@@ -1,7 +1,7 @@
 import type { MenuEvent } from '@models/menu-event.model'
 import type { Recipe } from '@models/recipe.model'
 import { UNIT_ALIASES, VOLUME_OR_WEIGHT_KEYS } from '../utils/recipe-cost.constants'
-import { roundPortions } from './rounding'
+import { cleanFloat, roundPortions } from './rounding'
 
 /** Contract C-PORTIONS (plan 440): the only place the portions of a menu item are computed. */
 export type ItemPortions = { portions: number; coefficient: number; overridden: boolean }
@@ -40,7 +40,7 @@ function isPortionUnitItem(recipeType: 'dish' | 'preparation', recipe: Recipe | 
  * Portions of every item of an event, keyed `${section._id}|${itemIndex}`:
  * portionsPerDiner × guests × coefficient. The coefficient is the item's own override, else the event
  * type's times the serving type's. Portion-unit items are rounded up by `roundPortions`; weight and
- * volume preparations keep the exact amount (display rounding is `formatQty`'s job).
+ * volume preparations keep their decimals with float noise dropped by `cleanFloat` (display rounding is `formatQty`'s job).
  */
 export function computePortions(event: MenuEvent, recipes: Recipe[]): Map<string, ItemPortions> {
   const out = new Map<string, ItemPortions>()
@@ -54,7 +54,9 @@ export function computePortions(event: MenuEvent, recipes: Recipe[]): Map<string
       const overridden = override != null && override > 0
       const coefficient = overridden ? override : fallback
       const raw = perDiner * guests * coefficient
-      const portions = isPortionUnitItem(item.recipeType, recipeById.get(item.recipeId)) ? roundPortions(raw) : raw
+      const portions = isPortionUnitItem(item.recipeType, recipeById.get(item.recipeId))
+        ? roundPortions(raw)
+        : cleanFloat(raw)
       out.set(`${section._id}|${index}`, { portions, coefficient, overridden })
     })
   }

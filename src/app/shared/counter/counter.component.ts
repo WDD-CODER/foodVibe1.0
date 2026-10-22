@@ -6,7 +6,7 @@ import {
   signal,
   computed,
   effect,
-  ViewChild,
+  viewChild,
   ElementRef,
   AfterViewChecked,
   OnDestroy
@@ -72,8 +72,8 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     return w > 0 ? w : undefined
   })
 
-  @ViewChild('mirrorSpan') mirrorSpan?: ElementRef<HTMLSpanElement>
-  @ViewChild('valueInput') valueInput?: ElementRef<HTMLInputElement>
+  readonly mirrorSpan = viewChild<ElementRef<HTMLSpanElement>>('mirrorSpan')
+  readonly valueInput = viewChild<ElementRef<HTMLInputElement>>('valueInput')
 
   private repeatTimeoutId: ReturnType<typeof setTimeout> | null = null
   private repeatIntervalId: ReturnType<typeof setInterval> | null = null
@@ -137,7 +137,7 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
   }
 
   private measureValueWidth(): void {
-    const span = this.mirrorSpan?.nativeElement
+    const span = this.mirrorSpan()?.nativeElement
     if (!span) return
     const w = span.offsetWidth
     const current = this.valueWidth_()

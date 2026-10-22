@@ -1,11 +1,17 @@
 <div class="metadata-page" dir="rtl">
-  <!-- Mobile/tablet-only jump nav — tapping a tab makes that section the first one in the grid
-       below (real CSS order change, no scroll, no overlay). Desktop hides this entirely. The
-       shared scroll rail (plan 350) shows an arrow only on the side with more tabs. -->
+  <!-- Mobile/tablet-only jump nav (plan 468) — tapping a chip scrolls that section to the top and
+       glides the chip to the middle of the carousel. Desktop hides this entirely. The shared
+       scroll rail (plan 350) shows an arrow only on the side with more tabs. -->
   <nav class="mm-jump-nav-row" [attr.aria-label]="'metadata_manager' | translatePipe">
     <app-scroll-rail class="mm-jump-nav">
       @for (s of jumpSections(); track s.id) {
-        <button type="button" class="c-tab-pill" [class.active]="isFront(s.id)" (click)="bringToFront(s.id)">
+        <button
+          #chip
+          type="button"
+          class="c-chip c-chip--tab"
+          [class.active]="isActive(s.id)"
+          (click)="jumpTo(s.id, chip)"
+        >
           {{ s.labelKey | translatePipe }}
         </button>
       }
@@ -15,7 +21,6 @@
   <div class="admin-grid">
     <app-taxonomy-kind-manager
       id="mm-sec-unit"
-      [style.order]="orderFor('mm-sec-unit')"
       [items]="allUnitKeys_()"
       titleKey="metadata_units_and_conversions_title"
       icon="scale"
@@ -28,7 +33,6 @@
 
     <app-taxonomy-kind-manager
       id="mm-sec-category"
-      [style.order]="orderFor('mm-sec-category')"
       [items]="allCategories_()"
       titleKey="metadata_product_categories_title"
       icon="tag"
@@ -41,7 +45,6 @@
 
     <app-taxonomy-kind-manager
       id="mm-sec-allergen"
-      [style.order]="orderFor('mm-sec-allergen')"
       [items]="allAllergens_()"
       titleKey="metadata_global_allergens_title"
       icon="alert-triangle"
@@ -54,7 +57,6 @@
 
     <app-taxonomy-kind-manager
       id="mm-sec-label"
-      [style.order]="orderFor('mm-sec-label')"
       [items]="allLabelKeys_()"
       titleKey="metadata_recipe_labels_title"
       icon="tags"
@@ -68,7 +70,6 @@
 
     <app-taxonomy-kind-manager
       id="mm-sec-course"
-      [style.order]="orderFor('mm-sec-course')"
       [items]="allCourseKeys_()"
       titleKey="metadata_recipe_courses_title"
       icon="utensils"
@@ -79,7 +80,7 @@
       (removeRequested)="onRemoveMetadata($event, 'course')"
     />
 
-    <section class="manager-card menu-types-card" id="mm-sec-menu-type" [style.order]="orderFor('mm-sec-menu-type')">
+    <section class="manager-card menu-types-card" id="mm-sec-menu-type">
       <div class="card-title">
         <lucide-icon name="utensils-crossed" class="icon-primary"></lucide-icon>
         <h2>{{ 'metadata_menu_types_title' | translatePipe }}</h2>
@@ -100,29 +101,22 @@
             @for (def of allMenuTypes_(); track def.key) {
               <div class="list-item menu-type-row">
                 @if (renamingMenuTypeKey_() === def.key) {
-                  <input
-                    #renameInput
-                    type="text"
-                    class="menu-type-key-input"
+                  <app-inline-rename-field
                     [value]="def.key"
-                    (blur)="onMenuTypeNameBlur(def.key, renameInput.value)"
-                    (keydown.enter)="renameInput.blur()"
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false"
+                    (saved)="onMenuTypeRenameSaved(def.key, $event)"
+                    (cancelled)="renamingMenuTypeKey_.set(null)"
                   />
                 } @else if (canEditTerm('menuType', def.key)) {
                   <button
                     type="button"
-                    class="c-tap-chip menu-type-name"
+                    class="c-chip c-chip--tap menu-type-name"
                     [attr.aria-expanded]="menuTypeMenuKey_() === def.key"
                     (click)="openMenuTypeMenu($event, def.key)"
                   >
                     {{ def.key }}
                   </button>
                 } @else {
-                  <span class="c-tap-chip is-locked menu-type-name">
+                  <span class="c-chip c-chip--tap is-locked menu-type-name">
                     {{ def.key }}
                     <lucide-icon
                       name="lock"
@@ -132,9 +126,9 @@
                     ></lucide-icon>
                   </span>
                 }
-                <div class="c-toggle-chip-group menu-type-fields">
+                <div class="c-chip-group menu-type-fields">
                   @for (f of ALL_DISH_FIELDS; track f.key) {
-                    <label class="c-toggle-chip">
+                    <label class="c-chip c-chip--toggle">
                       <input
                         type="checkbox"
                         [checked]="def.fields.includes(f.key)"
@@ -154,13 +148,16 @@
       </div>
     </section>
 
-    <app-coefficient-manager id="mm-sec-coefficients" [style.order]="orderFor('mm-sec-coefficients')" />
-    <app-preparation-category-manager id="mm-sec-preparation" [style.order]="orderFor('mm-sec-preparation')" />
-    <app-section-category-manager id="mm-sec-section" [style.order]="orderFor('mm-sec-section')" />
-    <app-station-manager id="mm-sec-station" [style.order]="orderFor('mm-sec-station')" />
+    <app-coefficient-manager id="mm-sec-coefficients" />
+    @if (canEditSettings_()) {
+      <app-staff-stages-manager id="mm-sec-staff-stages" />
+    }
+    <app-preparation-category-manager id="mm-sec-preparation" />
+    <app-section-category-manager id="mm-sec-section" />
+    <app-station-manager id="mm-sec-station" />
     @if (isPlatformAdmin_()) {
-      <app-user-management id="mm-sec-user" [style.order]="orderFor('mm-sec-user')" />
-      <app-ai-model-manager id="mm-sec-ai-models" [style.order]="orderFor('mm-sec-ai-models')" />
+      <app-user-management id="mm-sec-user" />
+      <app-ai-model-manager id="mm-sec-ai-models" />
     }
   </div>
 

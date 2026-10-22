@@ -11,7 +11,7 @@ import {
   Injector,
   ElementRef,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   DestroyRef
 } from '@angular/core'
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
@@ -43,7 +43,7 @@ import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service'
 import { LoggingService } from '@services/logging.service'
-import { map, Observable } from 'rxjs'
+import { map } from 'rxjs'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
@@ -51,6 +51,8 @@ import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ChipSearchDropdownComponent } from 'src/app/shared/chip-search-dropdown/chip-search-dropdown.component'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 import { ProductAiFlowService } from 'src/app/pages/inventory/services/product-ai-flow.service'
 import type { AiProductDraft } from '@models/ai-product-draft.model'
@@ -83,7 +85,7 @@ interface ProductFormValue {
 }
 
 @Component({
-  selector: 'product-form',
+  selector: 'app-product-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -96,7 +98,8 @@ interface ProductFormValue {
     LoaderComponent,
     CustomSelectComponent,
     ChipSearchDropdownComponent,
-    ProductPriceLockComponent
+    ProductPriceLockComponent,
+    FormFieldComponent
   ],
   providers: [ProductAiFlowService],
   templateUrl: './product-form.component.html',
@@ -104,9 +107,9 @@ interface ProductFormValue {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductFormComponent implements OnInit, AfterViewInit {
-  initialProduct_ = input<Product | null>(null)
+  initialProduct = input<Product | null>(null)
 
-  @ViewChild('productNameInput') private productNameInputRef?: ElementRef<HTMLInputElement>
+  private readonly productNameInputRef = viewChild<ElementRef<HTMLInputElement>>('productNameInput')
 
   private readonly fb_ = inject(FormBuilder)
   private readonly conversionService = inject(ConversionService)
@@ -160,8 +163,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   //SIMPLE VALUES
   private formValue_!: Signal<ProductFormValue>
   protected productForm_!: FormGroup
-  /** Snapshot of form value when user entered the item (for hasRealChanges). */
-  private initialFormSnapshot_: string | null = null
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.productForm_,
+    snapshot: () => this.getFormSnapshotForComparison()
+  })
   isSubmitted = false
 
   // Tracks per-row state for purchase options (e.g., whether a manual override was confirmed)
@@ -203,33 +208,33 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected readonly translateFn = (key: string) => this.translationService.translate(key)
   protected readonly supplierDisplayFn = (id: string) => this.getSupplierName(id)
 
-  protected expandedMinStock_ = signal(false)
-  protected expandedExpiryDays_ = signal(false)
-  protected expandedWasteYield_ = signal(false)
-  protected expandedAllergens_ = signal(false)
-  protected expandedSupplier_ = signal(false)
+  protected isExpandedMinStock_ = signal(false)
+  protected isExpandedExpiryDays_ = signal(false)
+  protected isExpandedWasteYield_ = signal(false)
+  protected isExpandedAllergens_ = signal(false)
+  protected isExpandedSupplier_ = signal(false)
 
   protected toggleMinStock(): void {
-    this.expandedMinStock_.update((v) => !v)
+    this.isExpandedMinStock_.update((v) => !v)
   }
   protected toggleExpiryDays(): void {
-    this.expandedExpiryDays_.update((v) => !v)
+    this.isExpandedExpiryDays_.update((v) => !v)
   }
   protected toggleWasteYield(): void {
-    this.expandedWasteYield_.update((v) => !v)
+    this.isExpandedWasteYield_.update((v) => !v)
   }
   protected toggleAllergens(): void {
-    this.expandedAllergens_.update((v) => !v)
+    this.isExpandedAllergens_.update((v) => !v)
   }
   protected toggleSupplier(): void {
-    this.expandedSupplier_.update((v) => !v)
+    this.isExpandedSupplier_.update((v) => !v)
   }
 
   protected onSupplierBlur(clickTarget?: HTMLElement): void {
     if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     if (this.selectedSupplierIds_().length === 0) {
-      this.expandedSupplier_.set(false)
+      this.isExpandedSupplier_.set(false)
     }
   }
 
@@ -238,7 +243,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const val = this.productForm_.get('minStockLevel')?.value
     if (val == null || val === 0 || val === '') {
-      this.expandedMinStock_.set(false)
+      this.isExpandedMinStock_.set(false)
     }
   }
 
@@ -247,7 +252,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const val = this.productForm_.get('expiryDaysDefault')?.value
     if (val == null || val === 0 || val === '') {
-      this.expandedExpiryDays_.set(false)
+      this.isExpandedExpiryDays_.set(false)
     }
   }
 
@@ -256,7 +261,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const allergens = (this.productForm_.get('allergens')?.value || []) as string[]
     if (allergens.length === 0) {
-      this.expandedAllergens_.set(false)
+      this.isExpandedAllergens_.set(false)
     }
   }
 
@@ -267,7 +272,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const yieldVal = this.productForm_.get('yieldFactor')?.value
     const isDefault = (waste == null || waste === 0) && (yieldVal == null || yieldVal === 1)
     if (isDefault) {
-      this.expandedWasteYield_.set(false)
+      this.isExpandedWasteYield_.set(false)
     }
   }
 
@@ -285,7 +290,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.productNameInputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.productNameInputRef()?.nativeElement?.focus(), 0)
   }
 
   ngOnInit(): void {
@@ -304,7 +309,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       })
     })
 
-    const productData = this.initialProduct_()
+    const productData = this.initialProduct()
     if (productData) {
       this.hydrateForm(productData)
     } else {
@@ -315,7 +320,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           this.isEditMode_.set(false)
           this.curProduct_.set(this.utilService.getEmptyProduct())
           this.productForm_.patchValue({ baseUnit: 'kg' })
-          this.initialFormSnapshot_ = this.getFormSnapshotForComparison()
+          this.unsaved_.markSaved()
         }
       })
     }
@@ -474,27 +479,23 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
    * delivers the unit that was saved (`onAdded`) or, when the window closes without a save, puts `previous`
    * (a string, never a number) back. Takes the first result only and ends with the component.
    */
-  private pickNewUnit_(
+  private async pickNewUnit_(
     control: AbstractControl | null | undefined,
     previous: string,
     context: UnitCreatorContext,
     onAdded: (added: { key: string; amount?: number; basis?: string }) => void
-  ): void {
+  ): Promise<void> {
     control?.setValue('', { emitEvent: false })
     this.unitRegistry.openUnitCreator(context)
-    const added$: Observable<{ key: string; amount?: number; basis?: string }> = context.forProduct
+    let alive = true
+    const stopWatching = this.destroyRef.onDestroy(() => (alive = false))
+    const added = await (context.forProduct
       ? this.unitRegistry.awaitProductUnitAdded()
-      : this.unitRegistry.awaitUnitCreated().pipe(map((key) => ({ key })))
-    let didAdd = false
-    added$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (added) => {
-        didAdd = true
-        onAdded(added)
-      },
-      complete: () => {
-        if (!didAdd) control?.setValue(previous, { emitEvent: false })
-      }
-    })
+      : this.unitRegistry.awaitUnitCreated().then((key) => (key ? { key } : null)))
+    stopWatching()
+    if (!alive) return
+    if (added) onAdded(added)
+    else control?.setValue(previous, { emitEvent: false })
   }
 
   protected onBaseUnitValueChange(value: string): void {
@@ -657,36 +658,31 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the item. */
   hasRealChanges(): boolean {
-    if (!this.productForm_ || this.initialFormSnapshot_ === null) return this.productForm_?.dirty ?? false
-    return this.getFormSnapshotForComparison() !== this.initialFormSnapshot_
+    return this.unsaved_.hasChanges()
   }
 
   /** Normalized form value for comparison (sorted arrays, comparable purchaseOptions). */
   private getFormSnapshotForComparison(): string {
     const raw = this.productForm_.getRawValue()
-    const opts = (raw?.purchaseOptions ?? []) as Array<{
-      unitSymbol?: string
-      conversionRate?: number
-      uom?: string
-      priceOverride?: number
-    }>
+    type Opt = { unitSymbol?: string; conversionRate?: number; uom?: string; priceOverride?: number }
+    const opts = (raw?.purchaseOptions ?? []) as Opt[]
     const normalized = {
       productName: raw?.productName ?? '',
       baseUnit: raw?.baseUnit ?? '',
       buy_price_global_: Number(raw?.buy_price_global_) || 0,
       categories: [...((raw?.categories ?? []) as string[])].sort(),
       supplierIds_: [...(raw?.supplierIds_ ?? [])].sort(),
-      minStockLevel: Number(raw?.minStockLevel) ?? 0,
-      expiryDaysDefault: Number(raw?.expiryDaysDefault) ?? 0,
-      yieldFactor: Number(raw?.yieldFactor) ?? 1,
-      waste_percent_: Number(raw?.waste_percent_) ?? 0,
+      minStockLevel: Number(raw?.minStockLevel),
+      expiryDaysDefault: Number(raw?.expiryDaysDefault),
+      yieldFactor: Number(raw?.yieldFactor),
+      waste_percent_: Number(raw?.waste_percent_),
       allergens: [...((raw?.allergens ?? []) as string[])].sort(),
       purchaseOptions: opts
         .map((o) => ({
           unitSymbol: o?.unitSymbol ?? '',
-          conversionRate: Number(o?.conversionRate) ?? 0,
+          conversionRate: Number(o?.conversionRate),
           uom: o?.uom ?? '',
-          priceOverride: Number(o?.priceOverride) ?? 0
+          priceOverride: Number(o?.priceOverride)
         }))
         .sort((a, b) => (a.unitSymbol || '').localeCompare(b.unitSymbol || ''))
     }
@@ -867,11 +863,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       allergens: data.allergens || []
     })
 
-    if ((data.minStockLevel ?? 0) > 0) this.expandedMinStock_.set(true)
-    if ((data.expiryDaysDefault ?? 0) > 0) this.expandedExpiryDays_.set(true)
-    if (Math.abs((data.yieldFactor ?? 1) - 1) > 0.001) this.expandedWasteYield_.set(true)
-    if ((data.allergens?.length ?? 0) > 0) this.expandedAllergens_.set(true)
-    if (getSupplierIds(data).length > 0) this.expandedSupplier_.set(true)
+    if ((data.minStockLevel ?? 0) > 0) this.isExpandedMinStock_.set(true)
+    if ((data.expiryDaysDefault ?? 0) > 0) this.isExpandedExpiryDays_.set(true)
+    if (Math.abs((data.yieldFactor ?? 1) - 1) > 0.001) this.isExpandedWasteYield_.set(true)
+    if ((data.allergens?.length ?? 0) > 0) this.isExpandedAllergens_.set(true)
+    if (getSupplierIds(data).length > 0) this.isExpandedSupplier_.set(true)
 
     this.purchaseOptions_.clear()
 
@@ -882,7 +878,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       })
     }
 
-    this.initialFormSnapshot_ = this.getFormSnapshotForComparison()
+    this.unsaved_.markSaved()
   }
   private validateForm_(): boolean {
     const errors: Record<string, string> = {}
@@ -970,23 +966,20 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
 
     this.saving.setSaving(true)
-    return new Promise<boolean>((resolve) => {
-      this.kitchenStateService.saveProduct(productToSave).subscribe({
-        next: (saved) => {
-          this.saving.setSaving(false)
-          this.validationErrors_.set({})
-          this.isSubmitted = true
-          if (pushToMasterAfterSave) this.masterPush_.pushProductToMaster(saved)
-          // Categories/allergens enter Metadata only once the product is actually saved.
-          void registerDraftMetadata({ categories, allergens: val.allergens ?? [] }, this.metadataRegistry)
-          resolve(true)
-        },
-        error: () => {
-          this.saving.setSaving(false)
-          resolve(false)
-        }
-      })
-    })
+    let saved: Product
+    try {
+      saved = await this.kitchenStateService.saveProduct(productToSave)
+    } catch {
+      this.saving.setSaving(false)
+      return false
+    }
+    this.saving.setSaving(false)
+    this.validationErrors_.set({})
+    this.isSubmitted = true
+    if (pushToMasterAfterSave) this.masterPush_.pushProductToMaster(saved)
+    // Categories/allergens enter Metadata only once the product is actually saved.
+    void registerDraftMetadata({ categories, allergens: val.allergens ?? [] }, this.metadataRegistry)
+    return true
   }
 
   protected onCancel(): void {

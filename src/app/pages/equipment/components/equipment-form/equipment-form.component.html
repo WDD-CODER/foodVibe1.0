@@ -9,8 +9,11 @@
 
   <form [formGroup]="equipmentForm_" (ngSubmit)="onSubmit()" class="form-body">
     <div class="form-section">
-      <div class="form-group">
-        <label for="nameHebrew">{{ 'name' | translatePipe }}</label>
+      <app-form-field
+        label="name"
+        forId="nameHebrew"
+        [error]="validationErrors_()['nameHebrew'] ? 'field_name_required' : null"
+      >
         <input
           #nameInput
           id="nameHebrew"
@@ -20,12 +23,12 @@
           [class.c-input--invalid]="validationErrors_()['nameHebrew']"
           [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
         />
-        @if (validationErrors_()['nameHebrew']) {
-          <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
-        }
-      </div>
-      <div class="form-group">
-        <label for="category">{{ 'category' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field
+        label="category"
+        forId="category"
+        [error]="validationErrors_()['category'] ? 'field_category_required' : null"
+      >
         <app-custom-select
           triggerId="category"
           formControlName="category"
@@ -34,26 +37,19 @@
           [typeToFilter]="true"
           [class.c-input--invalid]="validationErrors_()['category']"
         />
-        @if (validationErrors_()['category']) {
-          <span class="c-field-error">{{ 'field_category_required' | translatePipe }}</span>
-        }
-      </div>
-      <div class="form-group">
-        <label for="ownedQuantity">{{ 'owned_quantity' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="owned_quantity" forId="ownedQuantity">
         <input id="ownedQuantity" type="number" formControlName="ownedQuantity" min="0" class="c-input" />
+      </app-form-field>
+      <div class="c-chip-group">
+        <label class="c-chip c-chip--toggle">
+          <input type="checkbox" formControlName="isConsumable" />
+          <span>{{ 'is_consumable' | translatePipe }}</span>
+        </label>
       </div>
-      <div class="form-group">
-        <div class="c-toggle-chip-group">
-          <label class="c-toggle-chip">
-            <input type="checkbox" formControlName="isConsumable" />
-            <span>{{ 'is_consumable' | translatePipe }}</span>
-          </label>
-        </div>
-      </div>
-      <div class="form-group">
-        <label for="notes">{{ 'notes' | translatePipe }}</label>
+      <app-form-field label="notes" forId="notes">
         <textarea id="notes" formControlName="notes" rows="2" class="c-input"></textarea>
-      </div>
+      </app-form-field>
     </div>
 
     <div class="c-form-actions">

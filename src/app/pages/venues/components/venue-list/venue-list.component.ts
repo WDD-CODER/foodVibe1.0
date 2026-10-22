@@ -1,4 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, OnInit, OnDestroy } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  WritableSignal,
+  computed,
+  inject,
+  output,
+  signal,
+  OnInit,
+  OnDestroy
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { Router } from '@angular/router'
@@ -6,7 +16,6 @@ import { LucideAngularModule } from 'lucide-angular'
 import { VenueDataService } from '@services/venue-data.service'
 import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { TranslationService } from '@services/translation.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoggingService } from '@services/logging.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
@@ -21,8 +30,11 @@ import { BulkEditableField } from 'src/app/shared/selection-bar/bulk-editable-fi
 import { useListState, StringParam, StringSetParam } from 'src/app/core/utils/list-state.util'
 import { HeroFabService } from '@services/hero-fab.service'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
+import { useResponsivePanelState } from 'src/app/core/utils/panel-preference.util'
 import { formatVenueHours, VenueHoursSummary } from 'src/app/core/utils/venue-hours.util'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
+import { TranslationService } from '@services/translation.service'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 type VenueBulkField = 'environmentType'
@@ -43,7 +55,7 @@ const KEEP_SELECTION_TARGETS = '.venue-card, app-selection-bar, .select-all-pill
     ListRowCheckboxComponent,
     SelectionBarComponent,
     InputClearComponent,
-    PageHeaderComponent
+    ListShellComponent
   ],
   templateUrl: './venue-list.component.html',
   styleUrl: './venue-list.component.scss',
@@ -52,12 +64,12 @@ const KEEP_SELECTION_TARGETS = '.venue-card, app-selection-bar, .select-all-pill
 })
 export class VenueListComponent implements OnInit, OnDestroy {
   private readonly venueData = inject(VenueDataService)
+  private readonly translation_ = inject(TranslationService)
   private readonly router = inject(Router)
   private readonly heroFab = inject(HeroFabService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly requireAuthService = inject(RequireAuthService)
   private readonly userMsg = inject(UserMsgService)
-  private readonly translation = inject(TranslationService)
   private readonly logging = inject(LoggingService)
   private readonly confirmModal = inject(ConfirmModalService)
 
@@ -66,6 +78,7 @@ export class VenueListComponent implements OnInit, OnDestroy {
   readonly addVenueClick = output<void>()
 
   protected searchQuery_ = signal('')
+  protected readonly listControls = useListControls<never>({ search: this.searchQuery_ })
   protected deletingId_ = signal<string | null>(null)
   protected selectedEnvTypes_ = signal<Set<EnvironmentType>>(new Set())
   protected selection = new ListSelectionState()
@@ -87,15 +100,16 @@ export class VenueListComponent implements OnInit, OnDestroy {
     }
   ])
 
-  /** "N מתוך M פריטים" under the title — same wording as the list-shell chassis. */
-  protected resultCountText_ = computed(() =>
-    this.translation
-      .translate('list_result_count')
-      .replace('{n}', String(this.filteredVenues_().length))
-      .replace('{m}', String(this.venueData.allVenues_().length))
-  )
+  protected totalVenues_ = computed(() => this.venueData.allVenues_().length)
+
+  protected readonly isPanelOpen_: WritableSignal<boolean>
+  private readonly togglePanelState_: () => void
 
   constructor() {
+    const panel = useResponsivePanelState('venues')
+    this.isPanelOpen_ = panel.isPanelOpen_
+    this.togglePanelState_ = panel.togglePanel
+
     if (!this.embeddedInDashboard) {
       useListState('venues', [
         { urlParam: 'q', signal: this.searchQuery_, serializer: StringParam },
@@ -122,10 +136,14 @@ export class VenueListComponent implements OnInit, OnDestroy {
     })
   }
 
+  protected togglePanel(): void {
+    this.togglePanelState_()
+  }
+
   protected hasActiveFilters_ = computed(() => this.selectedEnvTypes_().size > 0)
 
   protected clearAllFilters(): void {
-    this.selectedEnvTypes_.set(new Set())
+    this.listControls.clearAll(() => this.selectedEnvTypes_.set(new Set()))
   }
 
   /** Visible venue IDs for header select-all. */
@@ -137,14 +155,10 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   protected filteredVenues_ = computed(() => {
     let list = this.venueData.allVenues_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const selectedEnv = this.selectedEnvTypes_()
     if (search) {
-      list = list.filter(
-        (v) =>
-          (v.nameHebrew ?? '').toLowerCase().includes(search) ||
-          (v.environmentType ?? '').toLowerCase().includes(search)
-      )
+      list = list.filter((v) => matchesSearch(search, v.nameHebrew, v.environmentType))
     }
     if (selectedEnv.size > 0) {
       list = list.filter((v) => selectedEnv.has(v.environmentType))
@@ -215,7 +229,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open(`למחוק ${ids.length} מיקומים?`, { variant: 'danger' }))) return
+    const message = this.translation_.translate('confirm_bulk_delete_venues').replace('{n}', String(ids.length))
+    if (!(await this.confirmModal.open(message, { variant: 'danger' }))) return
     for (const id of ids) {
       this.deletingId_.set(id)
       try {
@@ -231,8 +246,8 @@ export class VenueListComponent implements OnInit, OnDestroy {
 
   async onDelete(item: VenueProfile): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open('למחוק את המיקום "' + (item.nameHebrew ?? '') + '"?', { variant: 'danger' })))
-      return
+    const message = this.translation_.translate('confirm_delete_venue_named').replace('{name}', item.nameHebrew ?? '')
+    if (!(await this.confirmModal.open(message, { variant: 'danger' }))) return
     this.deletingId_.set(item._id)
     try {
       await this.venueData.deleteVenue(item._id)
@@ -243,17 +258,11 @@ export class VenueListComponent implements OnInit, OnDestroy {
     }
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }

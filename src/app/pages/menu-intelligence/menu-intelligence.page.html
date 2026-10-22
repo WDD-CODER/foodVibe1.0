@@ -30,72 +30,35 @@
 
         <!-- Tag line: event type · serving type -->
         <div class="event-tag-line">
-          <div class="event-type-chip-wrap" (clickOutside)="closeEventTypeDropdown()">
+          <div class="event-type-chip-wrap" (appClickOutside)="closeEventTypeDropdown()">
             <button
               type="button"
               class="event-chip"
               id="menu-focus-eventType"
-              [attr.aria-expanded]="eventTypeDropdownOpen_()"
+              [attr.aria-expanded]="isEventTypeDropdownOpen_()"
               (click)="openEventTypeDropdown()"
               (keydown)="onMetaKeydown('eventType', $event)"
             >
               {{ ((form_.value.eventType ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
             </button>
-            @if (eventTypeDropdownOpen_()) {
+            @if (isEventTypeDropdownOpen_()) {
             <div class="event-type-dropdown">
-              <div class="c-picker-search-row">
-                <input
-                  #eventTypeSearchInput
-                  id="menu-focus-event_type_search"
-                  type="text"
-                  class="event-type-search"
-                  autocomplete="off"
-                  autocorrect="off"
-                  autocapitalize="off"
-                  spellcheck="false"
-                  [ngModel]="pickerSearch_.eventType.query(0)"
-                  [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="pickerSearch_.eventType.onQueryChange(0, $event)"
-                  [placeholder]="'search' | translatePipe"
-                  (keydown)="onEventTypeSearchKeydown($event)"
-                  role="combobox"
-                  aria-autocomplete="list"
-                  aria-expanded="true"
-                  [attr.aria-activedescendant]="'event-type-opt-' + pickerSearch_.eventType.highlighted(0)"
-                />
-                <app-input-clear
-                  [visible]="!!pickerSearch_.eventType.query(0)"
-                  (clear)="pickerSearch_.eventType.onQueryChange(0, ''); eventTypeSearchInput.focus()"
-                  (click)="$event.stopPropagation()"
-                />
-              </div>
-              <app-scrollable-dropdown [maxHeight]="200">
-                @for (t of getFilteredEventTypes(); track t; let i = $index) {
-                <button
-                  type="button"
-                  class="dropdown-item"
-                  role="option"
-                  [id]="'event-type-opt-' + i"
-                  [class.highlighted]="pickerSearch_.eventType.highlighted(0) === i"
-                  (mousedown)="$event.preventDefault()"
-                  (click)="selectEventType(t)"
-                >
-                  {{ t | translatePipe }}
-                </button>
-                } @if (eventTypeShowsAdd()) {
-                <button
-                  type="button"
-                  class="dropdown-item add-new"
-                  role="option"
-                  [id]="'event-type-opt-' + getFilteredEventTypes().length"
-                  [class.highlighted]="pickerSearch_.eventType.highlighted(0) === getFilteredEventTypes().length"
-                  (mousedown)="$event.preventDefault()"
-                  (click)="addNewEventType()"
-                >
-                  <app-add-option-row [label]="eventTypeAddLabel()" />
-                </button>
-                }
-              </app-scrollable-dropdown>
+              <app-search-combobox
+                class="event-type-search"
+                variant="plain"
+                listPosition="inline"
+                placeholder="search"
+                inputId="menu-focus-event_type_search"
+                addLabelKey="add_new_event_type"
+                [options]="eventTypeOptions_()"
+                [labelOf]="translateLabel_"
+                [maxHeight]="200"
+                [handleTab]="true"
+                (picked)="selectEventType($event.option)"
+                (addChosen)="addNewEventType($event.typed)"
+                (escaped)="onEventTypeEscape()"
+                (tab)="onEventTypeTab($event)"
+              />
             </div>
             }
           </div>
@@ -206,50 +169,22 @@
 
             <div class="section-header">
               @if (sectionSearchOpen_() === sectionIndex) {
-              <div class="section-search-wrap" (clickOutside)="closeSectionSearch()">
-                <div class="c-picker-search-row">
-                  <input
-                    #sectionSearchInput
-                    type="text"
-                    class="section-search-input"
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                    [ngModel]="pickerSearch_.section.query(sectionIndex)"
-                    [ngModelOptions]="{ standalone: true }"
-                    (ngModelChange)="pickerSearch_.section.onQueryChange(sectionIndex, $event)"
-                    [placeholder]="'menu_search_category' | translatePipe"
-                    (keydown)="onSectionSearchKeydown(sectionIndex, $event)"
-                  />
-                  <app-input-clear
-                    [visible]="!!pickerSearch_.section.query(sectionIndex)"
-                    (clear)="pickerSearch_.section.onQueryChange(sectionIndex, ''); sectionSearchInput.focus()"
-                    (click)="$event.stopPropagation()"
-                  />
-                </div>
-                <app-scrollable-dropdown [maxHeight]="200">
-                  @for (cat of getFilteredSectionCategories(sectionIndex); track cat; let ci = $index) {
-                  <button
-                    type="button"
-                    class="dropdown-item"
-                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === ci"
-                    (click)="selectSectionCategory(sectionIndex, cat)"
-                  >
-                    {{ cat | translatePipe }}
-                  </button>
-                  } @if (sectionShowsAdd(sectionIndex)) {
-                  <button
-                    type="button"
-                    class="dropdown-item add-new"
-                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="openAddCategoryModal(sectionIndex)"
-                  >
-                    <app-add-option-row [label]="sectionCategoryAddLabel(sectionIndex)" />
-                  </button>
-                  }
-                </app-scrollable-dropdown>
+              <div class="section-search-wrap" (appClickOutside)="closeSectionSearch()">
+                <app-search-combobox
+                  class="section-search"
+                  variant="plain"
+                  placeholder="menu_search_category"
+                  inputId="section-search-input"
+                  addLabelKey="add_new_category"
+                  [options]="sectionCategories_()"
+                  [labelOf]="translateLabel_"
+                  [maxHeight]="200"
+                  [handleTab]="true"
+                  (picked)="selectSectionCategory(sectionIndex, $event.option)"
+                  (addChosen)="openAddCategoryModal(sectionIndex, $event.typed)"
+                  (escaped)="closeSectionSearch()"
+                  (tab)="onSectionSearchTab(sectionIndex, $event)"
+                />
               </div>
               } @else {
               <button
@@ -277,7 +212,6 @@
                 [recipes]="recipes_()"
                 [activeFields]="activeMenuTypeFields_()"
                 [dishSearchQuery]="getDishSearchQuery(sectionIndex, itemIndex)"
-                [highlightedIndex]="getDishSearchHighlightedIndex(sectionIndex, itemIndex)"
                 [isMetaExpanded]="isDishMetaExpanded(sectionIndex, itemIndex)"
                 [editingDishField]="editingDishField_()"
                 [portionInfo]="menuPortions_.at(sectionIndex, itemIndex)"
@@ -290,7 +224,7 @@
                 (editDishFieldCommit)="commitEditDishField()"
                 (sellPriceKeydown)="onSellPriceKeydown(sectionIndex, itemIndex, $event)"
                 (dishFieldKeydown)="onDishFieldKeydown(sectionIndex, itemIndex, $event.fieldKey, $event.event)"
-                (dishSearchKeydown)="onDishSearchKeydown(sectionIndex, itemIndex, $event)"
+                (dishSearchTab)="focusAfterDishSearchTab(sectionIndex, itemIndex, $event.shiftKey)"
                 (clearSearch)="clearDishSearch(sectionIndex, itemIndex)"
               />
               }
@@ -340,8 +274,8 @@
 
 <app-menu-export-sheet
   class="no-print"
-  [open]="exportSheetOpen_()"
-  (close)="exportSheetOpen_.set(false)"
+  [open]="isExportSheetOpen_()"
+  (close)="isExportSheetOpen_.set(false)"
   (viewChecklist)="onViewChecklist($event)"
   (exportChecklist)="onExportChecklist($event)"
   (viewShoppingList)="onViewMenuShoppingList()"

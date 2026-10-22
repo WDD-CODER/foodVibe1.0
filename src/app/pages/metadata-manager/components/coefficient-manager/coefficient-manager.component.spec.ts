@@ -40,7 +40,9 @@ describe('CoefficientManagerComponent', () => {
       'isShared',
       'errorMessage',
       'ensureLoaded',
-      'reload'
+      'reload',
+      'loadSafely',
+      'reloadSafely'
     ])
     store.terms.and.callFake(((kind: string) => signal(kind === 'eventType' ? eventTypes : servingTypes)) as never)
     store.find.and.callFake(((kind: string, key: string) =>
@@ -52,6 +54,8 @@ describe('CoefficientManagerComponent', () => {
     store.removeByKey.and.returnValue(Promise.resolve(true))
     store.errorMessage.and.returnValue(null)
     store.ensureLoaded.and.returnValue(Promise.resolve())
+    store.loadSafely.and.returnValue(Promise.resolve())
+    store.reloadSafely.and.returnValue(Promise.resolve())
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
 
     await TestBed.configureTestingModule({

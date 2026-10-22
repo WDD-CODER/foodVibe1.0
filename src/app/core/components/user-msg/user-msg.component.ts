@@ -4,7 +4,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
 @Component({
-  selector: 'user-msg',
+  selector: 'app-user-msg',
   standalone: true,
   templateUrl: './user-msg.component.html',
   styleUrl: './user-msg.component.scss',

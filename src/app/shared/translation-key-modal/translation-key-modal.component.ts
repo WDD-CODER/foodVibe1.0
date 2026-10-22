@@ -18,7 +18,7 @@ import { finalizeEnglishKey } from '@utils/english-key.util'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
-  selector: 'translation-key-modal',
+  selector: 'app-translation-key-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, EnglishKeyInputDirective, TranslatePipe, ModalShellComponent],
   templateUrl: './translation-key-modal.component.html',
