@@ -505,6 +505,89 @@ router.post('/parse-price-list', verifyToken, (req, res, next) => {
 });
 
 // ---------------------------------------------------------------------------
+// POST /match-product-names (plan 463)
+// Accepts { names: [{ name, unit }], products: [{ name, unit }], model? } — pasted ingredient names the browser
+// could not match exactly, plus the candidate product names. One Gemini call answers with POSITIONS in those two
+// lists (never ids), so nothing outside what the caller sent can be selected and no database read is needed.
+// Any signed-in member may call it (staff paste ingredients too). Names are never logged, only counts.
+// Response: { matches: [{ i, product }] } — only real links; unsure names are simply absent.
+// ---------------------------------------------------------------------------
+
+const { productNameMatchRequestSchema, productNameMatchResponseSchema } = require('../generated/schemas/ai-product-match.schema');
+
+const PRODUCT_MATCH_SYSTEM_PROMPT = `You match ingredient names written in Hebrew by a chef to the products of the kitchen's inventory.
+
+You receive two numbered lists: NAMES (ingredient names with the unit used) and PRODUCTS (product names with their base unit). Numbering starts at 0.
+
+For each name, find the product that is the SAME food. Allow typos, plural or singular, spelling variants, and a leading pack or measure word such as "צרור" or "קופסת".
+Answer null for a name when no product is the same food, when the product only looks similar (for example "חלב" is not "חלבה"), and whenever you are unsure.
+
+Return ONLY a JSON object, no commentary:
+{ "matches": [ { "i": number, "product": number|null } ] }
+"i" is the number of the name, "product" is the number of the product or null. One entry per name.`;
+
+/** Keeps only valid, first-seen, in-range links from the model's answer. Pure. */
+function cleanProductMatches(value, nameCount, productCount) {
+  const parsed = productNameMatchResponseSchema.safeParse(value);
+  if (!parsed.success) return null;
+  const seen = new Set();
+  const matches = [];
+  for (const m of parsed.data.matches) {
+    if (m.i >= nameCount || seen.has(m.i)) continue;
+    seen.add(m.i);
+    if (m.product === null || m.product >= productCount) continue;
+    matches.push({ i: m.i, product: m.product });
+  }
+  return matches;
+}
+
+router.post('/match-product-names', verifyToken, aiLimiter, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const body = productNameMatchRequestSchema.safeParse(req.body);
+  if (!body.success) return badRequest(res, 'INVALID_REQUEST');
+  const { names, products } = body.data;
+
+  const list = (items) => items.map((it, n) => `${n}. ${JSON.stringify(it.name)}${it.unit ? ` (${it.unit})` : ''}`).join('\n');
+
+  try {
+    const call = await callGemini({
+      body: {
+        system_instruction: { parts: [{ text: PRODUCT_MATCH_SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: `NAMES:\n${list(names)}\n\nPRODUCTS:\n${list(products)}` }] }],
+        generationConfig: { temperature: 0, maxOutputTokens: 4096 },
+      },
+      timeoutMs: 30000,
+      log: req.log,
+      eventPrefix: 'ai.match_product_names',
+      model: requestedModel(req),
+    });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
+
+    const raw = responseText(call.data);
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+    const matches = parsed.error ? null : cleanProductMatches(parsed.value, names.length, products.length);
+    if (!matches) {
+      // Length only: the text holds the business's product names.
+      req.log.error({ event: 'ai.match_product_names.parse_failed', rawLength: raw.length });
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    req.log.info({ event: 'ai.match_product_names.done', names: names.length, products: products.length, matched: matches.length });
+    return res.json({ matches });
+  } catch (err) {
+    req.log.error({ err, event: 'ai.match_product_names.failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // POST /patch-recipe
 // Accepts { currentRecipe: AiRecipeDraft, instruction: string }.
 // Gemini reads the current recipe + user instruction and returns ONLY the
