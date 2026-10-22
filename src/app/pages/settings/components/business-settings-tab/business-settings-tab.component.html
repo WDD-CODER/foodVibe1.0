@@ -1,4 +1,5 @@
 <section class="business-tab" dir="rtl">
+  <app-business-name-form />
   <form class="business-form c-glass-panel" data-testid="business-settings-form" [formGroup]="form" (ngSubmit)="save()">
     @for (field of fields; track field.key) {
       <label class="business-field">

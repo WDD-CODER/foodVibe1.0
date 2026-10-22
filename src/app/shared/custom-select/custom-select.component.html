@@ -20,7 +20,7 @@
         [value]="inputDisplayValue_()"
         [attr.size]="variant() === 'chip' ? chipInputSize_() : null"
         (input)="onInputInput($any($event.target).value)"
-        (focus)="openDropdown()"
+        (focus)="onInputFocus()"
         (blur)="onTriggerBlur()"
         (keydown)="onInputKeydown($event)"
         [attr.aria-expanded]="isOpen()"

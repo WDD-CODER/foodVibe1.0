@@ -1,6 +1,7 @@
 /* Uses engine: .c-modal-overlay, .c-modal-card */
 
-.quick-edit-product-modal {
+/* The card lives in app-modal-shell (its own view), so reach it through :host */
+:host ::ng-deep .quick-edit-product-modal {
   padding: 0;
   overflow: hidden;
 }

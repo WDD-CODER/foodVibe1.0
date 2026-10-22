@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core'
+import { ModalController } from './modal-controller'
 
 export interface GlobalSpecificModalConfig {
   preparationName: string
@@ -6,27 +7,23 @@ export interface GlobalSpecificModalConfig {
   newCategory: string
 }
 
+type GlobalSpecificChoice = 'global' | 'specific' | null
+
 @Injectable({ providedIn: 'root' })
 export class GlobalSpecificModalService {
-  private readonly isOpen_ = signal(false)
+  private readonly controller_ = new ModalController<GlobalSpecificChoice>(null)
   private readonly config_ = signal<GlobalSpecificModalConfig | null>(null)
-  private resolve_: ((value: 'global' | 'specific' | null) => void) | null = null
 
-  readonly isOpen = this.isOpen_.asReadonly()
+  readonly isOpen = this.controller_.isOpen_
   readonly config = this.config_.asReadonly()
 
-  open(config: GlobalSpecificModalConfig): Promise<'global' | 'specific' | null> {
+  open(config: GlobalSpecificModalConfig): Promise<GlobalSpecificChoice> {
     this.config_.set(config)
-    this.isOpen_.set(true)
-    return new Promise(resolve => {
-      this.resolve_ = resolve
-    })
+    return this.controller_.open()
   }
 
-  choose(choice: 'global' | 'specific' | null): void {
-    this.resolve_?.(choice)
-    this.resolve_ = null
-    this.isOpen_.set(false)
+  choose(choice: GlobalSpecificChoice): void {
+    this.controller_.close(choice)
     this.config_.set(null)
   }
 }

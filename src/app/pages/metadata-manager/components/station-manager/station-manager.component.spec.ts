@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { signal } from '@angular/core'
+import { signal, type WritableSignal } from '@angular/core'
+import { By } from '@angular/platform-browser'
+import { TaxonomyKindManagerComponent } from '../taxonomy-kind-manager/taxonomy-kind-manager.component'
 import { LucideAngularModule } from 'lucide-angular'
 import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { StationManagerComponent } from './station-manager.component'
@@ -107,6 +109,39 @@ describe('StationManagerComponent', () => {
     confirm.open.and.returnValue(Promise.resolve(false))
     await component.onRenameBlur('גריל', 'גריל פחמים')
     expect(registry.renameStation).not.toHaveBeenCalled()
+  })
+
+  describe('inline rename in the card (plan 468)', () => {
+    const host = (): HTMLElement => fixture.nativeElement as HTMLElement
+    const openField = (): HTMLInputElement => {
+      const card = fixture.debugElement.query(By.directive(TaxonomyKindManagerComponent))
+        .componentInstance as unknown as { editingItem_: WritableSignal<string | null> }
+      card.editingItem_.set('קר')
+      fixture.detectChanges()
+      return host().querySelector('app-inline-rename-field input') as HTMLInputElement
+    }
+
+    it('asks before saving only after Save is pressed', async () => {
+      const input = openField()
+      input.value = 'קרח'
+      input.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+      await fixture.whenStable()
+      expect(confirm.open).not.toHaveBeenCalled()
+      host().querySelector<HTMLButtonElement>('app-inline-rename-field button')!.click()
+      await fixture.whenStable()
+      expect(confirm.open).toHaveBeenCalled()
+      expect(registry.renameStation).toHaveBeenCalledWith('קר', 'קרח')
+    })
+
+    it('does not ask or rename when the field loses focus', async () => {
+      const input = openField()
+      input.value = 'קרח'
+      input.dispatchEvent(new FocusEvent('blur'))
+      await fixture.whenStable()
+      expect(confirm.open).not.toHaveBeenCalled()
+      expect(registry.renameStation).not.toHaveBeenCalled()
+    })
   })
 
   it('removes after the confirm', async () => {

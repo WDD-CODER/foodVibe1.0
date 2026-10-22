@@ -70,7 +70,7 @@ describe('NewInquiryDialogComponent', () => {
   it('sends a body with no stage, stageHistory or notes, then adds the first note through the notes route', async () => {
     type('#inquiry-name', 'בדיקה 443')
     type('#inquiry-phone', '050-1234567')
-    type('#inquiry-date', '2026-12-01')
+    type('#inquiry-date', '01122026')
     type('#inquiry-guests', '80')
     type('#inquiry-note', 'התקשרה בבוקר')
     saveButton().click()
@@ -104,6 +104,21 @@ describe('NewInquiryDialogComponent', () => {
     type('#inquiry-name', 'דנה')
     type('#inquiry-phone', 'abc')
     expect(el.querySelector('.c-field-error')).toBeTruthy()
+    saveButton().click()
+    await fixture.whenStable()
+    expect(eventData.addMenuEvent).not.toHaveBeenCalled()
+  })
+
+  it('shows a typed date as day/month/year', () => {
+    type('#inquiry-date', '25122026')
+    expect(el.querySelector<HTMLInputElement>('#inquiry-date')!.value).toBe('25/12/2026')
+    expect(el.querySelector('.c-field-error')).toBeNull()
+  })
+
+  it('blocks an impossible date and says why', async () => {
+    type('#inquiry-name', 'דנה')
+    type('#inquiry-date', '31022026')
+    expect(el.querySelector('.c-field-error')?.textContent).toContain('date_invalid')
     saveButton().click()
     await fixture.whenStable()
     expect(eventData.addMenuEvent).not.toHaveBeenCalled()

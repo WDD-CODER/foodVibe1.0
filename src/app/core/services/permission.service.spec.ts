@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing'
 import { PermissionAction, PermissionService } from './permission.service'
 import { UserService } from './user.service'
 import type { User } from '../models/user.model'
+import type { Recipe } from '../models/recipe.model'
 
 const OWNER: User = { _id: 'o1', name: 'owner', email: 'o@x', businessId: 'b1', businessRole: 'owner' }
 const STAFF: User = { _id: 's1', name: 'cook', email: 's@x', businessId: 'b1', businessRole: 'staff' }
@@ -78,5 +79,42 @@ describe('PermissionService.can', () => {
       expect(service.can('markArrival', { type: 'menuEvents', doc: { createdBy: 'o1' } })).toBeTrue()
       expect(service.can('addNote', { type: 'recipes' })).toBeFalse()
     })
+  })
+})
+
+describe('PermissionService.isReadOnlyRecipe (plan 476)', () => {
+  const user_ = signal<User | null>(null)
+  let service: PermissionService
+
+  beforeEach(() => {
+    user_.set(null)
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: UserService, useValue: { user_, isOwner_: computed(() => user_()?.businessRole === 'owner') } }
+      ]
+    })
+    service = TestBed.inject(PermissionService)
+  })
+
+  const recipe = (createdBy: string, recipeType?: 'dish') => ({ _id: 'x', createdBy, recipeType }) as unknown as Recipe
+
+  it('is false for an owner, a signed-out visitor and null', () => {
+    expect(service.isReadOnlyRecipe(recipe('s1'))).toBeFalse()
+    user_.set(OWNER)
+    expect(service.isReadOnlyRecipe(recipe('s1'))).toBeFalse()
+    user_.set(STAFF)
+    expect(service.isReadOnlyRecipe(null)).toBeFalse()
+  })
+
+  it('is false for staff on a recipe or dish he created', () => {
+    user_.set(STAFF)
+    expect(service.isReadOnlyRecipe(recipe('s1'))).toBeFalse()
+    expect(service.isReadOnlyRecipe(recipe('s1', 'dish'))).toBeFalse()
+  })
+
+  it('is true for staff on a recipe or dish someone else created', () => {
+    user_.set(STAFF)
+    expect(service.isReadOnlyRecipe(recipe('o1'))).toBeTrue()
+    expect(service.isReadOnlyRecipe(recipe('o1', 'dish'))).toBeTrue()
   })
 })

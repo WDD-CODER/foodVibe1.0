@@ -1,197 +1,192 @@
 @if (isOpen_()) {
-  <div class="c-modal-overlay" (click)="onCancel()" (keydown.escape)="onCancel()">
-    <div
-      class="c-modal-card c-modal-card--md quick-add-product-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="quick-add-title"
-      dir="rtl"
-      (click)="$event.stopPropagation()"
-      (keydown.escape)="onCancel()"
-    >
-      <h3 id="quick-add-title" class="quick-add-product-modal__title">
-        {{ 'quick_add_product' | translatePipe }}
-      </h3>
+  <app-modal-shell
+    size="md"
+    labelledBy="quick-add-title"
+    [dismissible]="!isSubmitting_() && !isAiLoading_()"
+    (dismissed)="onCancel()"
+  >
+    <h3 id="quick-add-title" class="quick-add-product-modal__title">
+      {{ 'quick_add_product' | translatePipe }}
+    </h3>
 
-      <form (ngSubmit)="onSave()" class="c-modal-body quick-add-product-modal__form">
-        <section
-          class="quick-add-product-modal__section quick-add-product-modal__section--required"
-          aria-label="Required fields"
-        >
-          <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
-            <div class="quick-add-product-modal__field" [class.field--error]="nameError_()">
-              <label for="quick-add-name">{{ 'product_name' | translatePipe }}</label>
-              <div class="quick-add-name-row">
-                <input
-                  id="quick-add-name"
-                  #nameEl
-                  type="text"
-                  [class.input--error]="nameError_()"
-                  [ngModel]="name()"
-                  (ngModelChange)="name.set($event)"
-                  name="nameHebrew"
-                  (keydown.enter)="advanceFocus(baseUnitRef()?.nativeElement); $event.preventDefault()"
-                  autocomplete="off"
-                  autocorrect="off"
-                  autocapitalize="off"
-                  spellcheck="false"
-                />
-                <button
-                  type="button"
-                  class="c-icon-btn"
-                  (click)="onAiFill()"
-                  [disabled]="!name().trim() || isAiLoading_()"
-                >
-                  @if (isAiLoading_()) {
-                    <app-loader size="small" [inline]="true" />
-                  } @else {
-                    <lucide-icon name="sparkles" [size]="16"></lucide-icon>
-                  }
-                </button>
-              </div>
-              @if (nameError_()) {
-                <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
-              }
-              @if (hasAiError_()) {
-                <span class="field-error-msg">{{ 'ai_product_error' | translatePipe }}</span>
-              }
-            </div>
-            <div class="quick-add-product-modal__field" [class.field--error]="unitError_()">
-              <label for="quick-add-base-unit">{{ 'base_unit' | translatePipe }}</label>
-              <app-custom-select
-                #baseUnitSelect
-                triggerId="quick-add-base-unit"
-                [typeToFilter]="true"
-                [compact]="true"
-                [addNewValue]="'__add_unit__'"
-                [allowTypedAdd]="true"
-                (addNewChosen)="pendingAddName_.set($event)"
-                [options]="baseUnitOptions_()"
-                [placeholder]="'choose_unit' | translatePipe"
-                [ngModel]="baseUnit_()"
-                (ngModelChange)="onBaseUnitChange($event)"
-                name="baseUnit"
-              />
-              @if (unitError_()) {
-                <span class="field-error-msg">{{ unitError_() | translatePipe }}</span>
-              }
-            </div>
-            <div class="quick-add-product-modal__field">
-              <label for="quick-add-price">{{ 'buy_price' | translatePipe }}</label>
+    <form (ngSubmit)="onSave()" class="c-modal-body quick-add-product-modal__form">
+      <section
+        class="quick-add-product-modal__section quick-add-product-modal__section--required"
+        aria-label="Required fields"
+      >
+        <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
+          <div class="quick-add-product-modal__field" [class.field--error]="nameError_()">
+            <label for="quick-add-name">{{ 'product_name' | translatePipe }}</label>
+            <div class="quick-add-name-row">
               <input
-                id="quick-add-price"
-                #buyPriceEl
+                id="quick-add-name"
+                #nameEl
+                type="text"
+                [class.input--error]="nameError_()"
+                [ngModel]="name()"
+                (ngModelChange)="name.set($event)"
+                name="nameHebrew"
+                (keydown.enter)="advanceFocus(baseUnitRef()?.nativeElement); $event.preventDefault()"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+              />
+              <button
+                type="button"
+                class="c-icon-btn"
+                (click)="onAiFill()"
+                [disabled]="!name().trim() || isAiLoading_()"
+              >
+                @if (isAiLoading_()) {
+                  <app-loader size="small" [inline]="true" />
+                } @else {
+                  <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+                }
+              </button>
+            </div>
+            @if (nameError_()) {
+              <span class="field-error-msg">{{ nameError_() | translatePipe }}</span>
+            }
+            @if (hasAiError_()) {
+              <span class="field-error-msg">{{ 'ai_product_error' | translatePipe }}</span>
+            }
+          </div>
+          <div class="quick-add-product-modal__field" [class.field--error]="unitError_()">
+            <label for="quick-add-base-unit">{{ 'base_unit' | translatePipe }}</label>
+            <app-custom-select
+              #baseUnitSelect
+              triggerId="quick-add-base-unit"
+              [typeToFilter]="true"
+              [compact]="true"
+              [addNewValue]="'__add_unit__'"
+              [allowTypedAdd]="true"
+              (addNewChosen)="pendingAddName_.set($event)"
+              [options]="baseUnitOptions_()"
+              [placeholder]="'choose_unit' | translatePipe"
+              [ngModel]="baseUnit_()"
+              (ngModelChange)="onBaseUnitChange($event)"
+              name="baseUnit"
+            />
+            @if (unitError_()) {
+              <span class="field-error-msg">{{ unitError_() | translatePipe }}</span>
+            }
+          </div>
+          <div class="quick-add-product-modal__field">
+            <label for="quick-add-price">{{ 'buy_price' | translatePipe }}</label>
+            <input
+              id="quick-add-price"
+              #buyPriceEl
+              type="number"
+              min="0"
+              step="0.01"
+              [ngModel]="buyPrice_()"
+              (ngModelChange)="buyPrice_.set($any($event))"
+              (keydown.enter)="advanceFocus(getNextFocusAfterBuyPrice()); $event.preventDefault()"
+              name="buy_price_global_"
+            />
+          </div>
+          <div class="quick-add-product-modal__field">
+            <label for="quick-add-category">{{ 'category' | translatePipe }}</label>
+            <app-custom-select
+              #categorySelect
+              triggerId="quick-add-category"
+              [typeToFilter]="true"
+              [compact]="true"
+              [addNewValue]="'__add_category__'"
+              addNewLabelKey="add_new_category"
+              [allowTypedAdd]="true"
+              (addNewChosen)="pendingAddName_.set($event)"
+              [options]="categoryOptions_()"
+              [placeholder]="'choose_category' | translatePipe"
+              [ngModel]="category()"
+              (ngModelChange)="onCategoryChange($event)"
+              name="category"
+            />
+          </div>
+        </div>
+      </section>
+
+      <button type="button" class="quick-add-product-modal__toggle" (click)="toggleExpanded()">
+        @if (isExpanded_()) {
+          {{ 'hide_details' | translatePipe }}
+        } @else {
+          {{ 'show_more_details' | translatePipe }}
+        }
+      </button>
+
+      @if (isExpanded_()) {
+        <section
+          class="quick-add-product-modal__section quick-add-product-modal__section--optional"
+          aria-label="Optional details"
+        >
+          <h4 class="quick-add-product-modal__section-title">{{ 'show_more_details' | translatePipe }}</h4>
+          <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
+            <div class="quick-add-product-modal__field">
+              <label for="quick-add-yield">{{ 'yield_factor' | translatePipe }}</label>
+              <input
+                id="quick-add-yield"
+                #yieldFactorEl
                 type="number"
                 min="0"
-                step="0.01"
-                [ngModel]="buyPrice_()"
-                (ngModelChange)="buyPrice_.set($any($event))"
-                (keydown.enter)="advanceFocus(getNextFocusAfterBuyPrice()); $event.preventDefault()"
-                name="buy_price_global_"
+                step="0.001"
+                [ngModel]="yieldFactor_()"
+                (ngModelChange)="yieldFactor_.set($any($event))"
+                name="yieldFactor"
+                (keydown.enter)="advanceFocus(getNextFocusAfterYield()); $event.preventDefault()"
               />
             </div>
             <div class="quick-add-product-modal__field">
-              <label for="quick-add-category">{{ 'category' | translatePipe }}</label>
-              <app-custom-select
-                #categorySelect
-                triggerId="quick-add-category"
-                [typeToFilter]="true"
-                [compact]="true"
-                [addNewValue]="'__add_category__'"
-                addNewLabelKey="add_new_category"
-                [allowTypedAdd]="true"
-                (addNewChosen)="pendingAddName_.set($event)"
-                [options]="categoryOptions_()"
-                [placeholder]="'choose_category' | translatePipe"
-                [ngModel]="category()"
-                (ngModelChange)="onCategoryChange($event)"
-                name="category"
+              <label for="quick-add-min-stock">{{ 'min_stock_level' | translatePipe }}</label>
+              <input
+                id="quick-add-min-stock"
+                type="number"
+                min="0"
+                [ngModel]="minStock_()"
+                (ngModelChange)="minStock_.set($any($event))"
+                name="minStockLevel"
+                (keydown.enter)="onSave()"
               />
+            </div>
+            <div class="quick-add-product-modal__field">
+              <label for="quick-add-expiry">{{ 'expiry_days_default' | translatePipe }}</label>
+              <input
+                id="quick-add-expiry"
+                type="number"
+                min="0"
+                [ngModel]="expiryDays_()"
+                (ngModelChange)="expiryDays_.set($any($event))"
+                name="expiryDaysDefault"
+                (keydown.enter)="onSave()"
+              />
+            </div>
+            <div class="quick-add-product-modal__field quick-add-product-modal__field--span">
+              <span class="quick-add-product-modal__label">{{ 'allergens' | translatePipe }}</span>
+              <div class="c-chip-group quick-add-product-modal__allergens">
+                @for (key of allergens(); track key) {
+                  <label class="c-chip c-chip--toggle">
+                    <input type="checkbox" [checked]="isAllergenSelected(key)" (change)="toggleAllergen(key)" />
+                    <span>{{ key | translatePipe }}</span>
+                  </label>
+                }
+              </div>
             </div>
           </div>
         </section>
+      }
+    </form>
 
-        <button type="button" class="quick-add-product-modal__toggle" (click)="toggleExpanded()">
-          @if (isExpanded_()) {
-            {{ 'hide_details' | translatePipe }}
-          } @else {
-            {{ 'show_more_details' | translatePipe }}
-          }
-        </button>
-
-        @if (isExpanded_()) {
-          <section
-            class="quick-add-product-modal__section quick-add-product-modal__section--optional"
-            aria-label="Optional details"
-          >
-            <h4 class="quick-add-product-modal__section-title">{{ 'show_more_details' | translatePipe }}</h4>
-            <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
-              <div class="quick-add-product-modal__field">
-                <label for="quick-add-yield">{{ 'yield_factor' | translatePipe }}</label>
-                <input
-                  id="quick-add-yield"
-                  #yieldFactorEl
-                  type="number"
-                  min="0"
-                  step="0.001"
-                  [ngModel]="yieldFactor_()"
-                  (ngModelChange)="yieldFactor_.set($any($event))"
-                  name="yieldFactor"
-                  (keydown.enter)="advanceFocus(getNextFocusAfterYield()); $event.preventDefault()"
-                />
-              </div>
-              <div class="quick-add-product-modal__field">
-                <label for="quick-add-min-stock">{{ 'min_stock_level' | translatePipe }}</label>
-                <input
-                  id="quick-add-min-stock"
-                  type="number"
-                  min="0"
-                  [ngModel]="minStock_()"
-                  (ngModelChange)="minStock_.set($any($event))"
-                  name="minStockLevel"
-                  (keydown.enter)="onSave()"
-                />
-              </div>
-              <div class="quick-add-product-modal__field">
-                <label for="quick-add-expiry">{{ 'expiry_days_default' | translatePipe }}</label>
-                <input
-                  id="quick-add-expiry"
-                  type="number"
-                  min="0"
-                  [ngModel]="expiryDays_()"
-                  (ngModelChange)="expiryDays_.set($any($event))"
-                  name="expiryDaysDefault"
-                  (keydown.enter)="onSave()"
-                />
-              </div>
-              <div class="quick-add-product-modal__field quick-add-product-modal__field--span">
-                <span class="quick-add-product-modal__label">{{ 'allergens' | translatePipe }}</span>
-                <div class="c-chip-group quick-add-product-modal__allergens">
-                  @for (key of allergens(); track key) {
-                    <label class="c-chip c-chip--toggle">
-                      <input type="checkbox" [checked]="isAllergenSelected(key)" (change)="toggleAllergen(key)" />
-                      <span>{{ key | translatePipe }}</span>
-                    </label>
-                  }
-                </div>
-              </div>
-            </div>
-          </section>
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="onCancel()">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      <button type="button" #saveBtnEl class="c-btn-primary" [disabled]="isSubmitting_()" (click)="onSave()">
+        @if (isSubmitting_()) {
+          {{ 'saving' | translatePipe }}
+        } @else {
+          {{ 'save_product' | translatePipe }}
         }
-      </form>
-
-      <div class="c-modal-actions">
-        <button type="button" class="c-btn-ghost" (click)="onCancel()">
-          {{ 'cancel' | translatePipe }}
-        </button>
-        <button type="button" #saveBtnEl class="c-btn-primary" [disabled]="isSubmitting_()" (click)="onSave()">
-          @if (isSubmitting_()) {
-            {{ 'saving' | translatePipe }}
-          } @else {
-            {{ 'save_product' | translatePipe }}
-          }
-        </button>
-      </div>
+      </button>
     </div>
-  </div>
+  </app-modal-shell>
 }

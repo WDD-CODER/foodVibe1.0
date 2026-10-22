@@ -1,16 +1,5 @@
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  Injector,
-  OnInit,
-  signal,
-  computed,
-  viewChild
-} from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed, viewChild } from '@angular/core'
+import { CommonModule, DOCUMENT } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
@@ -31,6 +20,7 @@ import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
+import { normalizeHebrew } from '@utils/recipe-match.util'
 import type { TaxonomyKind } from '@models/v2'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
@@ -39,8 +29,11 @@ import { PreparationCategoryManagerComponent } from './components/preparation-ca
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
 import { StationManagerComponent } from './components/station-manager/station-manager.component'
 import { CoefficientManagerComponent } from './components/coefficient-manager/coefficient-manager.component'
+import { StaffStagesManagerComponent } from './components/staff-stages-manager/staff-stages-manager.component'
+import { PermissionService } from '@services/permission.service'
 import { UserManagementComponent } from './components/user-management/user-management.component'
 import { AiModelManagerComponent } from './components/ai-model-manager/ai-model-manager.component'
+import { InlineRenameFieldComponent } from 'src/app/shared/inline-rename-field/inline-rename-field.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { UnitEditDialogComponent, type UnitEditValue } from './components/unit-edit-dialog/unit-edit-dialog.component'
@@ -69,9 +62,11 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     SectionCategoryManagerComponent,
     StationManagerComponent,
     CoefficientManagerComponent,
+    StaffStagesManagerComponent,
     UserManagementComponent,
     AiModelManagerComponent,
     ScrollRailComponent,
+    InlineRenameFieldComponent,
     RowActionsMenuComponent,
     UnitEditDialogComponent
   ],
@@ -96,10 +91,13 @@ export class MetadataManagerComponent implements OnInit {
   private readonly userService = inject(UserService)
   protected readonly isLoggedIn = this.userService.isLoggedIn
   protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
+  private readonly permission = inject(PermissionService)
+  /** Plan 477: the staff-stages card is the owner's (editSettings). */
+  protected readonly canEditSettings_ = computed(() => this.permission.can('editSettings'))
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
   private readonly taxonomy = inject(TaxonomyStore)
-  private readonly injector = inject(Injector)
+  private readonly document = inject(DOCUMENT)
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
@@ -136,7 +134,7 @@ export class MetadataManagerComponent implements OnInit {
   readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS
 
   private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
-  private readonly renameInput = viewChild<ElementRef<HTMLInputElement>>('renameInput')
+  private readonly jumpRail = viewChild(ScrollRailComponent)
 
   /**
    * Mobile/tablet jump-nav destinations, in page order. Built from the app's real 8 sections
@@ -150,6 +148,7 @@ export class MetadataManagerComponent implements OnInit {
     { id: 'mm-sec-course', labelKey: 'metadata_recipe_courses_title' },
     { id: 'mm-sec-menu-type', labelKey: 'metadata_menu_types_title' },
     { id: 'mm-sec-coefficients', labelKey: 'metadata_coefficients_title' },
+    { id: 'mm-sec-staff-stages', labelKey: 'metadata_staff_stages_title' },
     { id: 'mm-sec-preparation', labelKey: 'metadata_prep_categories' },
     { id: 'mm-sec-section', labelKey: 'metadata_section_categories_title' },
     { id: 'mm-sec-station', labelKey: 'metadata_stations_title' },
@@ -157,31 +156,30 @@ export class MetadataManagerComponent implements OnInit {
     { id: 'mm-sec-ai-models', labelKey: 'ai_model_manager' }
   ] as const
 
-  /** User management and AI models are platform-admin screens: no tab for anyone else. */
-  protected readonly jumpSections = computed(() =>
-    this.isPlatformAdmin_()
-      ? this._allJumpSections
-      : this._allJumpSections.filter((s) => s.id !== 'mm-sec-user' && s.id !== 'mm-sec-ai-models')
-  )
+  /** User management and AI models are platform-admin screens; the staff-stages card is the owner's. No tab for anyone else. */
+  protected readonly jumpSections = computed(() => {
+    const admin = this.isPlatformAdmin_()
+    const owner = this.canEditSettings_()
+    return this._allJumpSections.filter(
+      (s) =>
+        (admin || (s.id !== 'mm-sec-user' && s.id !== 'mm-sec-ai-models')) && (owner || s.id !== 'mm-sec-staff-stages')
+    )
+  })
 
-  /** Which section (if any) has been brought to the front of the grid; null = natural page order. */
-  protected readonly frontSectionId_ = signal<string | null>(null)
+  /** The section whose chip was tapped last (highlighted chip); null until a chip is tapped. */
+  protected readonly activeSectionId_ = signal<string | null>(null)
 
-  protected bringToFront(id: string): void {
-    this.frontSectionId_.set(id)
+  protected isActive(id: string): boolean {
+    return this.activeSectionId_() === id
   }
 
-  protected isFront(id: string): boolean {
-    return this.frontSectionId_() === id
-  }
-
-  /** CSS `order` for a jump-nav section: 0 (first) when it's the front one, else its natural
-   *  page-order position (1-10) — so bringing one to the front never disturbs the relative order
-   *  of the rest. */
-  protected orderFor(id: string): number {
-    if (this.isFront(id)) return 0
-    const index = this.jumpSections().findIndex((s) => s.id === id)
-    return index === -1 ? 1 : index + 1
+  /** Plan 468: a chip scrolls its section to the top (under the header and the chip bar) and
+   *  glides itself to the middle of the chip carousel. */
+  protected jumpTo(id: string, chip: HTMLElement): void {
+    this.activeSectionId_.set(id)
+    const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    this.document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
+    this.jumpRail()?.centerChild(chip)
   }
 
   protected readonly labelColor = (key: string): string => this.metadataRegistry.getLabelColor(key)
@@ -525,7 +523,9 @@ export class MetadataManagerComponent implements OnInit {
   private unitUsage(key: string): { products: number; recipes: number } {
     const products = this.productData
       .allProducts_()
-      .filter((p) => p.baseUnit === key || (p.purchaseOptions ?? []).some((o) => o.unitSymbol === key)).length
+      .filter(
+        (p) => p.baseUnit === key || (p.purchaseOptions ?? []).some((o) => o.unitSymbol === key || o.uom === key)
+      ).length
     const recipes = this.kitchenState
       .recipes_()
       .filter(
@@ -761,6 +761,15 @@ export class MetadataManagerComponent implements OnInit {
     }
   }
 
+  /** Plan 475: another unit already shows this Hebrew name, so the two would look the same. */
+  private unitLabelTaken(prevKey: string, next: UnitEditValue): boolean {
+    const name = normalizeHebrew(next.hebrewLabel ?? '')
+    if (!name) return false
+    return this.allUnitKeys_().some(
+      (k) => k !== prevKey && k !== next.key && normalizeHebrew(this.translationService.translate(k)) === name
+    )
+  }
+
   /** Save from the unit edit dialog. Both confirms are asked before anything is written, so a
    *  cancel never leaves half an edit. Key first, then the rate on the new key. */
   async onUnitEditSaved(next: UnitEditValue): Promise<void> {
@@ -772,8 +781,11 @@ export class MetadataManagerComponent implements OnInit {
     const labelChanged = next.hebrewLabel !== prev.hebrewLabel
     if (!keyChanged && !rateChanged && !labelChanged) return
 
-    if (keyChanged && this.registryHasKey('unit', next.key)) {
-      this.userMsgService.onSetErrorMsg(this.msg('metadata_unit_exists', { type: 'unit', name: next.key }))
+    if (
+      (keyChanged && this.registryHasKey('unit', next.key)) ||
+      (labelChanged && this.unitLabelTaken(prev.key, next))
+    ) {
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_name_taken'))
       return
     }
     const usage = this.unitUsage(prev.key)
@@ -868,7 +880,6 @@ export class MetadataManagerComponent implements OnInit {
   private onStartRenameMenuType(key: string): void {
     if (!this.requireSignIn()) return
     this.renamingMenuTypeKey_.set(key)
-    afterNextRender(() => this.renameInput()?.nativeElement.select(), { injector: this.injector })
   }
 
   async onRemoveMenuType(key: string): Promise<void> {
@@ -881,7 +892,8 @@ export class MetadataManagerComponent implements OnInit {
     await this.metadataRegistry.deleteMenuType(key)
   }
 
-  async onMenuTypeNameBlur(oldKey: string, newName: string): Promise<void> {
+  /** Save pressed (or Enter) in the menu type's rename field. */
+  async onMenuTypeRenameSaved(oldKey: string, newName: string): Promise<void> {
     this.renamingMenuTypeKey_.set(null)
     if (!this.requireSignIn()) return
     const trimmed = (newName ?? '').trim()

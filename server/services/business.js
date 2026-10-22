@@ -4,7 +4,7 @@
 const mongoose = require('mongoose')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
-const { businessSchema } = require('../generated/schemas/entities')
+const { businessSchema, EVENT_STAGES } = require('../generated/schemas/entities')
 const { getMasterVersion } = require('./master-version')
 
 const col = () => mongoose.connection.db.collection('businesses')
@@ -60,9 +60,21 @@ async function setBusinessSettings(id, settings) {
   return col().updateOne({ _id: String(id) }, { $set: { settings } })
 }
 
+/** Plan 472: renames the business (already validated by the route). Returns the update result. */
+async function setBusinessName(id, name) {
+  return col().updateOne({ _id: String(id) }, { $set: { name } })
+}
+
 /** Plan 431: replaces the business's opening baseline (already validated by the route). */
 async function setBusinessBaseline(id, baseline) {
   return col().updateOne({ _id: String(id) }, { $set: { baseline } })
 }
 
-module.exports = { setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }
+/** Plan 477: stores the stages staff may see (already validated by the route), de-duplicated, in pipeline order. */
+async function setStaffVisibleStages(id, stages) {
+  const staffVisibleStages = EVENT_STAGES.filter(stage => stages.includes(stage))
+  const result = await col().updateOne({ _id: String(id) }, { $set: { staffVisibleStages } })
+  return { matchedCount: result.matchedCount, staffVisibleStages }
+}
+
+module.exports = { setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline, createBusinessFor, ensureBusinessForUser, defaultBusinessName, getBusiness, setBusinessSyncedVersion }

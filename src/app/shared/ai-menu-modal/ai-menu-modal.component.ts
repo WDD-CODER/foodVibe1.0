@@ -17,14 +17,14 @@ import {
 } from '../../core/utils/gemini-usage.util'
 import { matchRecipeName } from '../../core/utils/recipe-match.util'
 import type { AiMenuDraft, MatchedMenu, MatchedSection, MatchedDish } from '@models/ai-menu-draft.model'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 
 @Component({
   selector: 'app-ai-menu-modal',
-  host: { '(document:keydown.escape)': 'onEscapeKey()' },
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent, ModalShellComponent],
   templateUrl: './ai-menu-modal.component.html',
   styleUrl: './ai-menu-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -253,10 +253,6 @@ export class AiMenuModalComponent implements OnInit {
   }
 
   // ─── Shared ──────────────────────────────────────────────────────
-
-  onEscapeKey(): void {
-    if (this.modalService.isOpen()) this.onClose()
-  }
 
   onClose(): void {
     this.modalService.close()

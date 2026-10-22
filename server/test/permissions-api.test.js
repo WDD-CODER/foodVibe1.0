@@ -226,3 +226,36 @@ describe('plan 449: closed permission holes', () => {
     expect(await raw('VERSION_HISTORY', 'h1')).toBeNull()
   })
 })
+
+describe('plan 475: staff renames only units he created', () => {
+  const unitTerm = (_id, key, createdBy) =>
+    stored({ kind: 'unit', key, gramRate: 5000, sortOrder: 0 }, { _id, userId: createdBy, businessId: 'b1', createdBy })
+  const productUsing = (key) =>
+    stored(productBody({ baseUnit: key, purchaseOptions: [{ unitSymbol: 'box', conversionRate: 500, uom: key }] }), {
+      _id: 'p-unit',
+      userId: 'own1',
+      businessId: 'b1',
+      createdBy: 'own1'
+    })
+
+  it('re-keying a unit the owner created is 403 and no document changes', async () => {
+    await testDb().collection('taxonomyTerms').insertOne(unitTerm('u-own', 'crate', 'own1'))
+    await testDb().collection('products').insertOne(productUsing('crate'))
+    const before = await raw('products', 'p-unit')
+    const res = await request(app).put(url('taxonomyTerms', 'u-own')).set(as(STAFF)).send({ key: 'carton' })
+    expect(res.status).toBe(403)
+    expect(res.body).toEqual(FORBIDDEN)
+    expect((await raw('taxonomyTerms', 'u-own')).key).toBe('crate')
+    expect(await raw('products', 'p-unit')).toEqual(before)
+  })
+
+  it('re-keying a unit he created is 200 and the product follows', async () => {
+    await testDb().collection('taxonomyTerms').insertOne(unitTerm('u-st', 'crate', 'st1'))
+    await testDb().collection('products').insertOne(productUsing('crate'))
+    const res = await request(app).put(url('taxonomyTerms', 'u-st')).set(as(STAFF)).send({ key: 'carton' })
+    expect(res.status).toBe(200)
+    const product = await raw('products', 'p-unit')
+    expect(product.baseUnit).toBe('carton')
+    expect(product.purchaseOptions[0].uom).toBe('carton')
+  })
+})

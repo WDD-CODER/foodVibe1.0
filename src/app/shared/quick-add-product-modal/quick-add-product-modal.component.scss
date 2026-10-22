@@ -1,13 +1,11 @@
 /* Uses engine: .c-modal-overlay, .c-modal-card, .c-modal-body, .c-modal-actions, .c-btn-ghost, .c-btn-primary */
 
-.quick-add-product-modal {
-  .quick-add-product-modal__title {
-    margin: 0 0 0.75rem 0;
+.quick-add-product-modal__title {
+  margin: 0 0 0.75rem 0;
 
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--color-text-main);
-  }
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-main);
 }
 
 .quick-add-product-modal__form {

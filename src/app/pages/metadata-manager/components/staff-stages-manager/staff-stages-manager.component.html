@@ -1,0 +1,22 @@
+<section class="manager-card c-glass-panel" data-testid="staff-stages-card">
+  <div class="card-title">
+    <lucide-icon name="eye" class="icon-primary"></lucide-icon>
+    <h2>{{ 'metadata_staff_stages_title' | translatePipe }}</h2>
+  </div>
+  <p class="card-desc">{{ 'metadata_staff_stages_desc' | translatePipe }}</p>
+
+  <div class="c-chip-group">
+    @for (stage of stages; track stage) {
+      <label class="c-chip c-chip--toggle" [attr.data-testid]="'staff-stage-' + stage">
+        <input
+          #box
+          type="checkbox"
+          [checked]="checked().has(stage)"
+          [disabled]="saving()"
+          (change)="onToggle(stage, box)"
+        />
+        <span>{{ stageLabelKey(stage) | translatePipe }}</span>
+      </label>
+    }
+  </div>
+</section>

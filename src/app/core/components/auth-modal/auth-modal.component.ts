@@ -14,16 +14,18 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { AuthModalService } from '@services/auth-modal.service'
 import { UserService } from '@services/user.service'
+import { TranslationService } from '@services/translation.service'
 import { CloudinaryService } from '@services/cloudinary.service'
 import { environment } from '../../../../environments/environment'
 import { validateUsername, validateEmail, validatePassword } from '../../utils/auth-validation.util'
 import { take } from 'rxjs/operators'
 import { NAME_MAX_LENGTH } from '@schemas/base.schema'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [FormsModule, LucideAngularModule, TranslatePipe, ModalShellComponent],
   templateUrl: './auth-modal.component.html',
   styleUrl: './auth-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -34,6 +36,7 @@ export class AuthModalComponent {
   private readonly router = inject(Router)
   private readonly cloudinary = inject(CloudinaryService)
   private readonly cdr = inject(ChangeDetectorRef)
+  private readonly translation = inject(TranslationService)
 
   protected nameInput = viewChild<ElementRef>('nameInput')
 
@@ -64,6 +67,12 @@ export class AuthModalComponent {
   protected readonly isDev = environment.localDev
 
   private imgCloudinaryUrl: string | null = null
+
+  /** Preview of the name the server gives a business left unnamed: «העסק של <username>». */
+  protected get businessNamePlaceholder(): string {
+    const typed = this.name.trim() || this.translation.translate('username')
+    return this.translation.translate('business_name_default').replace('{{name}}', typed)
+  }
 
   protected get isSignUp(): boolean {
     return this.modalService.mode() === 'sign-up'
@@ -138,10 +147,6 @@ export class AuthModalComponent {
 
     if (this.isSignUp) {
       const businessName = this.businessName.trim()
-      if (!businessName) {
-        this.errorKey.set('business_name_required')
-        return
-      }
       if (businessName.length > NAME_MAX_LENGTH) {
         this.errorKey.set('business_name_too_long')
         return

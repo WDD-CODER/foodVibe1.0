@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input, linkedSignal, output } from 
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 
 /** What the edit dialog starts from and hands back. */
 export interface UnitEditValue {
@@ -17,7 +18,7 @@ export interface UnitEditValue {
 @Component({
   selector: 'app-unit-edit-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, SelectOnFocusDirective],
+  imports: [FormsModule, TranslatePipe, SelectOnFocusDirective, ModalShellComponent],
   templateUrl: './unit-edit-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

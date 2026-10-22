@@ -904,9 +904,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (!this.validateForm_() || !this.productForm_.valid) {
       this.isSubmitted = true // invalid purchase rows get marked
       this.productForm_.markAllAsTouched()
-      this.userMsgService.onSetErrorMsg(
-        failedSaveMessage(this.productForm_.controls, this.translationService, Object.keys(this.validationErrors_()))
-      )
+      this.userMsgService.onSetErrorMsg(failedSaveMessage(this.productForm_.controls, this.translationService))
       return false
     }
     const val = this.productForm_.getRawValue()

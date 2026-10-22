@@ -15,9 +15,9 @@ Each section below is parsed by `scripts/lib/invariants.mjs` — keep the exact 
 `## INV-n — <title>`, then the five `- Field:` lines. `Touches` globs are backticked.
 
 ## INV-1 — Ownership
-- Rule: every item belongs to exactly one business. Members read all of their business's items and nothing from another business; every write is authorized through `server/utils/permissions.js` (`can` / `assertCan`): the owner may do everything in the business, staff create anything but change only what they created and never money fields, business settings, the team or event/serving types (until plan 427 merges every member counts as owner). Only a platform admin writes shared `__master__` items.
-- Source: ADR 0023 (plan 424), `server/utils/business-scope.js`, `server/utils/permissions.js`
-- Touches: `server/routes/generic.js`, `server/utils/business-scope.js`, `server/utils/permissions.js`, `server/middleware/**`, `src/app/core/services/permission.service.ts`, `src/app/core/services/taxonomy-store.service.ts`, `src/app/core/services/*-data.service.ts`
+- Rule: every item belongs to exactly one business. Members read all of their business's items, except that staff read events only in the stages the owner allowed (`staffVisibleStages`, default all) plus events they created, and nothing from another business; every write is authorized through `server/utils/permissions.js` (`can` / `assertCan`): the owner may do everything in the business, staff create anything but change only what they created and never money fields, business settings, the team or event/serving types (until plan 427 merges every member counts as owner). Only a platform admin writes shared `__master__` items.
+- Source: ADR 0023 (plan 424), ADR 0026 (plan 477, staff event stages), `server/utils/business-scope.js`, `server/utils/permissions.js`
+- Touches: `server/routes/generic.js`, `server/utils/business-scope.js`, `server/utils/permissions.js`, `server/utils/event-visibility.js`, `server/routes/events.js`, `server/routes/stats.js`, `server/middleware/**`, `src/app/core/services/permission.service.ts`, `src/app/core/services/taxonomy-store.service.ts`, `src/app/core/services/*-data.service.ts`
 - Users lose if broken: a cook sees or changes another kitchen's recipes and prices, or a staff member changes prices, settings or the team that only the owner may change; the platform admin can't fix the shared default lists.
 - Test: server/test/invariants.test.js "INV-1 …"
 

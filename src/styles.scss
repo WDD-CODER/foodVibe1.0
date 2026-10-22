@@ -2581,3 +2581,8 @@ button.c-chip--removable {
   overflow: visible;
   color: inherit;
 }
+
+/* Plan 451: app-modal-shell moves focus onto the card (tabindex -1) when a popup opens — no ring on the card itself */
+.c-modal-card:focus {
+  outline: none;
+}

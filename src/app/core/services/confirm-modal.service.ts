@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core'
+import { ModalController } from './modal-controller'
 
 type ConfirmModalVariant = 'default' | 'danger' | 'warning'
 export type ConfirmModalResult = 'cancel' | 'confirm' | 'save'
@@ -21,7 +22,7 @@ export interface TernaryModalOptions extends ConfirmModalOptions {
 
 @Injectable({ providedIn: 'root' })
 export class ConfirmModalService {
-  private readonly isOpen_ = signal(false)
+  private readonly controller_ = new ModalController<ConfirmModalResult>('cancel')
   private readonly message_ = signal('')
   private readonly saveLabel_ = signal('save')
   private readonly variant_ = signal<ConfirmModalVariant>('default')
@@ -29,10 +30,7 @@ export class ConfirmModalService {
   private readonly saveButtonLabel_ = signal('save')
   private readonly headerKey_ = signal<string | null>(null)
 
-  /** Internal resolver — accepts both boolean (legacy) and string (ternary). */
-  private resolve_: ((value: ConfirmModalResult | boolean) => void) | null = null
-
-  readonly isOpen = this.isOpen_.asReadonly()
+  readonly isOpen = this.controller_.isOpen_
   readonly message = this.message_.asReadonly()
   readonly saveLabel = this.saveLabel_.asReadonly()
   readonly variant = this.variant_.asReadonly()
@@ -51,10 +49,7 @@ export class ConfirmModalService {
     this.variant_.set(options?.variant ?? 'default')
     this.shouldShowSaveButton_.set(false)
     this.headerKey_.set(options?.headerKey ?? null)
-    this.isOpen_.set(true)
-    return new Promise((resolve) => {
-      this.resolve_ = (val) => resolve(typeof val === 'boolean' ? val : val === 'confirm')
-    })
+    return this.controller_.open().then((result) => result === 'confirm')
   }
 
   /**
@@ -69,16 +64,7 @@ export class ConfirmModalService {
     this.shouldShowSaveButton_.set(true)
     this.saveButtonLabel_.set(options?.saveButtonLabel ?? 'save')
     this.headerKey_.set(options?.headerKey ?? null)
-    this.isOpen_.set(true)
-    return new Promise((resolve) => {
-      this.resolve_ = (val) => {
-        if (typeof val === 'boolean') {
-          resolve(val ? 'confirm' : 'cancel')
-        } else {
-          resolve(val)
-        }
-      }
-    })
+    return this.controller_.open()
   }
 
   /**
@@ -87,13 +73,8 @@ export class ConfirmModalService {
    * - ConfirmModalResult string: 'cancel' | 'confirm' | 'save'
    */
   choose(value: boolean | ConfirmModalResult): void {
-    if (typeof value === 'boolean') {
-      this.resolve_?.(value ? 'confirm' : 'cancel')
-    } else {
-      this.resolve_?.(value)
-    }
-    this.resolve_ = null
-    this.isOpen_.set(false)
+    const result: ConfirmModalResult = typeof value === 'boolean' ? (value ? 'confirm' : 'cancel') : value
+    this.controller_.close(result)
     this.message_.set('')
     this.saveLabel_.set('save')
     this.variant_.set('default')

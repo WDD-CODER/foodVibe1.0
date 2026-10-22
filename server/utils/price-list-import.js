@@ -64,7 +64,7 @@ function normalizePriceListRows(payload) {
     const purchaseUnit = cleanText(item.purchaseUnit, 40)
     const qty = positiveNumber(item.purchaseQty)
     const hasPurchase = purchaseUnit !== null && qty !== null
-    let needsReview = unitKey === null
+    let needsReview = unitKey === null || item.needsReview === true
     let price = positiveNumber(item.price)
     if (price !== null && item.pricePer === 'purchaseUnit') {
       if (qty !== null) {
@@ -93,4 +93,48 @@ function normalizePriceListRows(payload) {
   return { rows: all.slice(0, MAX_IMPORT_ROWS), truncated: all.length > MAX_IMPORT_ROWS }
 }
 
-module.exports = { MAX_IMPORT_ROWS, MAX_IMPORT_TEXT, MAX_NAME_LENGTH, BASE_UNITS, HEBREW_UNIT_MAP, normalizeProductName, toBaseUnit, normalizePriceListRows }
+/** A printed unit price and a printed line total that differ by more than this share are in conflict (plan 465). */
+const RECEIPT_MISMATCH_TOLERANCE = 0.05
+
+/**
+ * Plan 465: receipt lines as the AI read them ({ name, quantity, unit, unitPrice, lineTotal, category }) -> the same
+ * preview rows as a pasted price list, with the price PER UNIT. Pure: no database, no AI call.
+ *  - unit price printed -> that; else line total / quantity;
+ *  - both printed and more than 5% apart -> line total / quantity, flagged for review;
+ *  - a total without a quantity -> the total as the price of one, flagged for review;
+ *  - no usable number -> no price, flagged for review.
+ * Units, duplicates, names and the 200-row cap are then done by `normalizePriceListRows`.
+ * @param {{ rows?: unknown[] }} payload
+ */
+function normalizeReceiptRows(payload) {
+  const input = Array.isArray(payload?.rows) ? payload.rows : []
+  const rows = []
+  for (const item of input) {
+    if (item === null || typeof item !== 'object') continue
+    const quantity = positiveNumber(item.quantity)
+    const unitPrice = positiveNumber(item.unitPrice)
+    const lineTotal = positiveNumber(item.lineTotal)
+    let price = null
+    let needsReview = false
+    if (unitPrice !== null) {
+      price = unitPrice
+      if (lineTotal !== null && quantity !== null) {
+        if (Math.abs(unitPrice * quantity - lineTotal) / lineTotal > RECEIPT_MISMATCH_TOLERANCE) {
+          price = round4(lineTotal / quantity)
+          needsReview = true
+        }
+      }
+    } else if (lineTotal !== null && quantity !== null) {
+      price = round4(lineTotal / quantity)
+    } else if (lineTotal !== null) {
+      price = lineTotal
+      needsReview = true
+    } else {
+      needsReview = true
+    }
+    rows.push({ name: item.name, unit: item.unit, price, pricePer: 'unit', category: item.category, needsReview })
+  }
+  return normalizePriceListRows({ rows })
+}
+
+module.exports = { MAX_IMPORT_ROWS, MAX_IMPORT_TEXT, MAX_NAME_LENGTH, BASE_UNITS, HEBREW_UNIT_MAP, normalizeProductName, toBaseUnit, normalizePriceListRows, normalizeReceiptRows }

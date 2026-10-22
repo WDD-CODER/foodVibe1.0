@@ -451,13 +451,6 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
           run: () => {
             void this.aiRecipeModal.open()
           }
-        },
-        {
-          labelKey: 'paste_recipe',
-          icon: 'clipboard-paste',
-          run: () => {
-            this.aiRecipeModal.open('create', undefined, undefined, 'paste')
-          }
         }
       ],
       'replace'
@@ -518,6 +511,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected onEditRecipe(recipe: Recipe): void {
+    // Staff open someone else's recipe or dish in Cook View only (plan 476).
+    if (this.permission.isReadOnlyRecipe(recipe)) {
+      this.onCookRecipe(recipe)
+      return
+    }
     this.router.navigate(['/recipe-builder', recipe._id])
   }
 

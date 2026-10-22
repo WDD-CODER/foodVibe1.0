@@ -38,6 +38,14 @@ export const REUSE_RULES = [
     hint: 'import through the alias: @utils/*, @pipes/*, @services/*'
   },
   {
+    id: 'hand-drawn-modal-overlay',
+    family: 'modal-shell',
+    files: ['src/app/**/*.html'],
+    exclude: ['src/app/shared/modal-shell/**'],
+    pattern: /class="[^"]*c-modal-overlay/,
+    hint: 'wrap the popup in app-modal-shell (src/app/shared/modal-shell/) instead of drawing .c-modal-overlay by hand'
+  },
+  {
     id: 'page-list-logic',
     family: 'list-logic',
     files: ['src/app/pages/**/*.ts'],

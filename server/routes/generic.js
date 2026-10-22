@@ -13,6 +13,8 @@ const { EVENT_SERVER_FIELDS } = require('../generated/schemas/entities/event-sta
 const { SOFT_DELETE_TYPES } = require('../constants/collections');
 const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-deleted');
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
+// Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
+const { withEventVisibility } = require('../utils/event-visibility');
 const { assertCan, stripMoneyFields, moneyFieldsChanged, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES } = require('../utils/permissions');
 
 const router = Router();
@@ -224,7 +226,7 @@ router.get('/:type', optionalToken, async (req, res) => {
     }
     const findStart = perfLog ? Date.now() : 0;
     const docs = await col(req.params.type)
-      .find(filter)
+      .find(await withEventVisibility(req, req.params.type, filter))
       .skip(skip)
       .limit(limit)
       .toArray();
@@ -320,7 +322,7 @@ router.get('/:type/count', optionalToken, async (req, res) => {
     } else if (filterName) {
       return res.status(400).json({ error: `Unknown filter: ${filterName}` });
     }
-    const count = await col(req.params.type).countDocuments(filter);
+    const count = await col(req.params.type).countDocuments(await withEventVisibility(req, req.params.type, filter));
     res.json({ count });
   } catch (err) {
     req.log.error({ err, event: 'data.count.failed' });
@@ -353,7 +355,7 @@ router.get('/:type/trash', verifyToken, requireSoftDelete, async (req, res) => {
   try {
     await purgeExpired(mongoose.connection.db, { businessIds: [scopeFilter(req).businessId, MASTER], types: [req.params.type] });
     const docs = await col(req.params.type)
-      .find({ ...scopeFilter(req), ...IN_TRASH })
+      .find(await withEventVisibility(req, req.params.type, { ...scopeFilter(req), ...IN_TRASH }))
       .sort({ deletedAt: -1 })
       .toArray();
     res.json(docs);
@@ -380,11 +382,12 @@ router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (re
 
 router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res) => {
   try {
-    const inTrash = await col(req.params.type).findOne({ _id: req.params.id, ...scopeFilter(req), ...IN_TRASH });
+    const trashFilter = await withEventVisibility(req, req.params.type, { _id: req.params.id, ...scopeFilter(req), ...IN_TRASH });
+    const inTrash = await col(req.params.type).findOne(trashFilter);
     if (!inTrash) return res.status(404).json({ error: `Item ${req.params.id} is not in Trash` });
     if (!authorizeDelete(req, res, req.params.type, inTrash)) return;
     const restored = await col(req.params.type).findOneAndUpdate(
-      { _id: req.params.id, ...scopeFilter(req), ...IN_TRASH },
+      trashFilter,
       { $unset: { deletedAt: '', deletedBy: '' } },
       { returnDocument: 'after' }
     );
@@ -403,11 +406,11 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
 // ---------------------------------------------------------------------------
 router.get('/:type/:id', optionalToken, async (req, res) => {
   try {
-    const doc = await col(req.params.type).findOne({
+    const doc = await col(req.params.type).findOne(await withEventVisibility(req, req.params.type, {
       _id: req.params.id,
       ...readScope(req, req.params.type),
       ...LIVE,
-    });
+    }));
     if (!doc) {
       return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist` });
     }
@@ -558,7 +561,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     const { userId: _, businessId: _bid, createdBy: _cby, _masterId: __, _userModified: ___, ...safeBody } = req.body;
 
     const isTerm = req.params.type === TAXONOMY;
-    const filter = { _id: req.params.id, ...(isTerm ? termWriteOwner(req) : scopeFilter(req)), ...LIVE };
+    const filter = await withEventVisibility(req, req.params.type, { _id: req.params.id, ...(isTerm ? termWriteOwner(req) : scopeFilter(req)), ...LIVE });
     const stamps = {
       ...(hasV2Schema(req.params.type) && { schemaVersion: 2, updatedAt: Date.now() }),
       ...(!isTerm && { _userModified: true }),
@@ -591,8 +594,18 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
       // After validation, so the new key is a known plain string before it reaches a query.
       if (isTerm && updatable.key !== undefined && updatable.key !== current.key) {
+        // Plan 475: units name the clash with a message the chef can read (other kinds keep their client checks).
+        const clashKey = current.kind === 'unit' ? { messageKey: 'unit_name_taken' } : {};
         if (current.businessId !== MASTER && await masterHasTerm(current.kind, updatable.key)) {
-          return res.status(409).json({ error: 'This term already exists for everyone', kind: current.kind, key: updatable.key });
+          return res.status(409).json({ error: 'This term already exists for everyone', kind: current.kind, key: updatable.key, ...clashKey });
+        }
+        // Plan 475: a clash with another term of the same business is refused before anything is written.
+        const sameScope = await col(TAXONOMY).findOne(
+          { businessId: current.businessId, kind: current.kind, key: updatable.key, _id: { $ne: current._id } },
+          { projection: { _id: 1 } }
+        );
+        if (sameScope) {
+          return res.status(409).json({ error: 'TERM_KEY_TAKEN', kind: current.kind, key: updatable.key, ...clashKey });
         }
         rekeyed = current;
       }
@@ -1090,9 +1103,11 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Each id must be a non-empty string' });
     }
 
+    // Plan 477: a hidden event is neither checked nor deleted (it does not exist for this caller).
+    const bulkFilter = await withEventVisibility(req, req.params.type, { _id: { $in: ids }, ...scopeFilter(req) });
     // Plan 427: every doc must be deletable by the caller, else nothing is deleted.
     if (!SYSTEM_TYPES.includes(req.params.type)) {
-      const docs = await col(req.params.type).find({ _id: { $in: ids }, ...scopeFilter(req) }).toArray();
+      const docs = await col(req.params.type).find(bulkFilter).toArray();
       for (const doc of docs) if (!authorizeDelete(req, res, req.params.type, doc)) return;
     }
 
@@ -1104,10 +1119,7 @@ router.delete('/:type/bulk', verifyToken, async (req, res) => {
       }
     }
 
-    const result = await col(req.params.type).deleteMany({
-      _id: { $in: ids },
-      ...scopeFilter(req),
-    });
+    const result = await col(req.params.type).deleteMany(bulkFilter);
     // Plan 366: a deleted supplier leaves no dangling ids in the caller's products.
     if (req.params.type === 'suppliers') await unlinkSuppliersFromProducts(scopeFilter(req).businessId, ids);
 
@@ -1153,11 +1165,11 @@ router.delete('/:type/:id', verifyToken, async (req, res) => {
     const type = req.params.type;
     const softType = SOFT_DELETE.has(type);
     const permanent = req.query.permanent === 'true';
-    const existing = await col(type).findOne({
+    const existing = await col(type).findOne(await withEventVisibility(req, type, {
       _id: req.params.id,
       ...(type === TAXONOMY ? termWriteOwner(req) : scopeFilter(req)),
       ...(softType && permanent ? { purgedAt: { $exists: false } } : LIVE),
-    });
+    }));
     if (!existing) {
       return res.status(404).json({ error: `Cannot remove, item ${req.params.id} of type: ${type} does not exist` });
     }

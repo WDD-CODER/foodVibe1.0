@@ -12,16 +12,14 @@ const FIELD_LABEL_KEYS: Readonly<Record<string, string>> = {
   expiryDaysDefault: 'expiry_days_default'
 }
 
-/**
- * Label keys of the invalid fields of a product form, in the order of the page. `extraInvalid`
- * names controls the save check rejected although their validators pass (a name of only spaces).
- */
-export function invalidFieldLabelKeys(
-  controls: Record<string, AbstractControl>,
-  extraInvalid: readonly string[] = []
-): string[] {
+/** Text boxes the save check also rejects when they hold only spaces, although their validators pass. */
+const BLANK_CHECKED = ['productName', 'baseUnit']
+
+/** Label keys of the invalid fields of a product form, in the order of the page. */
+export function invalidFieldLabelKeys(controls: Record<string, AbstractControl>): string[] {
+  const isBlank = (name: string) => BLANK_CHECKED.includes(name) && !String(controls[name]?.value ?? '').trim()
   return Object.keys(FIELD_LABEL_KEYS)
-    .filter((name) => controls[name]?.invalid || extraInvalid.includes(name))
+    .filter((name) => controls[name]?.invalid || isBlank(name))
     .map((name) => FIELD_LABEL_KEYS[name])
 }
 
@@ -31,11 +29,10 @@ export function invalidFieldLabelKeys(
  */
 export function failedSaveMessage(
   controls: Record<string, AbstractControl>,
-  translator: { translate(key: string): string },
-  extraInvalid: readonly string[] = []
+  translator: { translate(key: string): string }
 ): string {
   const translate = (key: string) => translator.translate(key)
-  const labels = invalidFieldLabelKeys(controls, extraInvalid).map(translate)
+  const labels = invalidFieldLabelKeys(controls).map(translate)
   if (labels.length === 0) return translate('form_has_errors')
   return translate('form_has_errors_fields').replace('{{fields}}', labels.join(', '))
 }

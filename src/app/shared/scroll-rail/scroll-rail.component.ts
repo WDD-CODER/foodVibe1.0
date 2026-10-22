@@ -107,6 +107,16 @@ export class ScrollRailComponent {
     el.scrollBy({ left: sign * amount, behavior: 'smooth' })
   }
 
+  /**
+   * Plan 468: slides the rail so `el` (one of its children) sits in the middle, animated. The browser
+   * does the maths, so it is right in LTR and RTL. Only the rail scrolls, never the page (`block: 'nearest'`
+   * on a child that already fits vertically). Reduced motion jumps instead of gliding.
+   */
+  centerChild(el: HTMLElement): void {
+    const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    el.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', inline: 'center', block: 'nearest' })
+  }
+
   /** P1: on desktop a vertical wheel over an overflowing rail scrolls it sideways (unless Shift). */
   protected onWheel(event: WheelEvent): void {
     if (event.shiftKey || !(this.canPrev_() || this.canNext_())) return

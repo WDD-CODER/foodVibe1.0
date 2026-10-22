@@ -22,6 +22,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `custom-select/` | Select CVA | CustomSelectComponent |
 | `edit-gate/` | Shows its content only when the user may save the opened document, else a view-only note | EditGateComponent |
 | `form-field/` | Label + projected control + error/hint slot for entity forms (`layout`, `labelStyle`) | FormFieldComponent |
+| `date-field/` | Day/month/year text field with a calendar button; `value` is an ISO date, `invalid` flags an impossible one (plan 467) | DateFieldComponent |
 | `empty-state/` | Empty list placeholder | EmptyStateComponent |
 | `export-preview/` | Export preview panel | ExportPreviewComponent |
 | `export-toolbar-overlay/` | Export toolbar overlay | ExportToolbarOverlayComponent |
@@ -31,6 +32,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `list-selection/` | Row selection + `ListSelectionState` | ListRowCheckboxComponent, ListSelectionState |
 | `list-shell/` | Reusable list shell: `layout="table"` (default, pinned header grid) or `layout="cards"` (projects `[shell-cards]`, `cardMin`); list search/sort/clear handlers live in `core/utils/list-controls.util.ts` | ListShellComponent |
 | `loader/` | Loading indicator | LoaderComponent |
+| `modal-shell/` | The one popup shell: engines + dialog role, Escape (top-most only), focus trap | ModalShellComponent |
 | `nutrition-badge/` | Per-100g nutrition badge/tooltip | NutritionBadgeComponent |
 | `partial-cost-badge/` | "חלקי" badge + missing-prices popover (owner can price in place) | PartialCostBadgeComponent |
 | `page-header/` | Standard page title bar: title, subtitle, result-count pill, back link | PageHeaderComponent |
@@ -44,7 +46,8 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `row-actions-menu/` | Per-row actions menu | RowActionsMenuComponent |
 | `scaling-chip/` | Recipe scaling chip | ScalingChipComponent |
 | `scrollable-dropdown/` | Scrollable dropdown | ScrollableDropdownComponent |
-| `scroll-rail/` | Horizontal scroll strip with edge fades and arrow buttons | ScrollRailComponent |
+| `scroll-rail/` | Horizontal scroll strip with edge fades and arrow buttons; `centerChild(el)` glides a tapped chip to the middle | ScrollRailComponent |
+| `inline-rename-field/` | Inline rename input with Save and Cancel buttons (Enter saves, Escape cancels, blur does nothing) | InlineRenameFieldComponent |
 | `selection-bar/` | Bulk selection bar | SelectionBarComponent |
 | `translation-key-modal/` | Hebrew → English key | TranslationKeyModalComponent |
 | `unit-creator/` | Unit registry editor | UnitCreatorModal |
