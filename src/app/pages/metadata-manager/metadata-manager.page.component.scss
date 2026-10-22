@@ -49,6 +49,18 @@
     }
   }
 
+  // Phones (<=620px): the header hides its top bar (bottom tab bar only), so the chip bar sticks
+  // flush to the top (safe area only) and a jumped-to section stops just under it. Plan 480.
+  @media (max-width: 620px) {
+    .mm-jump-nav-row {
+      inset-block-start: env(safe-area-inset-top, 0px);
+    }
+
+    .admin-grid > * {
+      scroll-margin-block-start: calc(4.25rem + env(safe-area-inset-top, 0px));
+    }
+  }
+
   // The dashboard already pads its content 1.5rem; on small phones do not pad again (plan 468, G1).
   @media (max-width: 430px) {
     padding-inline: 0;
