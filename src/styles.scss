@@ -2559,7 +2559,9 @@ button.c-chip--removable {
    .c-dropdown exists in the DOM only while a list is open; lifting that panel above its siblings fixes it.
    20 stays below the app header (z-index 100). */
 .c-glass-panel:has(.c-dropdown),
-.c-modal-card:has(.c-dropdown) {
+.c-modal-card:has(.c-dropdown),
+.c-modal-body:has(.c-dropdown),
+.inline-edit-panel:has(.c-dropdown) {
   position: relative;
   z-index: 20;
 }

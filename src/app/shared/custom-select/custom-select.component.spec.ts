@@ -221,18 +221,25 @@ describe('CustomSelectComponent', () => {
     }))
 
     it('the add option is also protected and still emits the typed name, then the sentinel', fakeAsync(() => {
-      const chosen: string[] = []
-      const values: string[] = []
-      component.addNewChosen.subscribe((v: string) => chosen.push(v))
-      component.valueChange.subscribe((v: string) => values.push(v))
+      trigger.click()
+      fixture.componentRef.setInput('typeToFilter', true)
+      fixture.detectChanges()
+      const input = root().querySelector('input.custom-select-input') as HTMLInputElement
+      input.dispatchEvent(new Event('focus'))
+      fixture.detectChanges()
+      input.value = 'Cherry'
+      input.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+      const log: string[] = []
+      component.addNewChosen.subscribe((v: string) => log.push('chosen:' + v))
+      component.valueChange.subscribe((v: string) => log.push('value:' + v))
       const add = root().querySelector('.custom-select-option--add-new') as HTMLElement
       const e = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
       add.dispatchEvent(e)
       expect(e.defaultPrevented).toBeTrue()
       tick(500)
       add.click()
-      expect(values).toEqual(['__add_new__'])
-      expect(chosen.length).toBe(1)
+      expect(log).toEqual(['chosen:Cherry', 'value:__add_new__'])
     }))
   })
 
