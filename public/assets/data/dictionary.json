@@ -1083,6 +1083,7 @@
     "paste_ingredients": "הדבק מצרכים",
     "paste_ingredients_hint": "שורה אחת לכל מצרך, למשל: 2 ק\"ג עגבניות",
     "paste_ingredients_add": "הוסף",
+    "paste_ingredients_match_failed": "לא הצלחנו לחבר חלק מהמצרכים למוצרים קיימים – הם נשארו אדומים",
     "ingredient_not_ready": "לא מוכן",
     "general_group": "כללי",
     "line_status_unlinked": "לא מקושר",
