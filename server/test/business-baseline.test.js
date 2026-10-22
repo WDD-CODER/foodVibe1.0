@@ -134,6 +134,15 @@ describe('GET /api/v1/business/setup-status', () => {
     expect(res.body).toEqual({ pricedProducts: 5, suppliers: 1, recipes: 1, events: 1, staff: 1 })
   })
 
+  it('caps the priced-product count at the setup goal: exactly 5 gives 5, 4 gives 4', async () => {
+    const db = testDb()
+    const priced = n => own('cap' + n, { sources: [{ price: 3 }] })
+    await db.collection('products').insertMany([0, 1, 2, 3].map(priced))
+    expect((await status()).body.pricedProducts).toBe(4)
+    await db.collection('products').insertMany([priced(4)])
+    expect((await status()).body.pricedProducts).toBe(5)
+  })
+
   it('counts a product priced only in purchaseOptions, and dishes count with recipes', async () => {
     const db = testDb()
     await db.collection('products').insertMany([
