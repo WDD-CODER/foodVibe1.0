@@ -151,7 +151,14 @@ export class PartialCostBadgeComponent {
     this.isPinned_ = false
   }
 
-  protected pin(): void {
+  /**
+   * Focus moving into the popover (its price box or buttons) pins it, so the mouse leaving does not close it.
+   * Focus landing on the chip itself does not: a mouse press focuses the chip just before its click, and pinning
+   * there would make that click close a popover the hover had just opened.
+   */
+  protected pin(event: FocusEvent): void {
+    const chip = this.chipRef_()?.nativeElement
+    if (chip && event.target instanceof Node && chip.contains(event.target)) return
     this.isPinned_ = true
   }
 

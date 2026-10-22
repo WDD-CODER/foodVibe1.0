@@ -122,6 +122,44 @@ describe('PartialCostBadgeComponent', () => {
     expect(el.querySelector('.partial-popover')).toBeNull()
   })
 
+  it('stays open when a mouse user hovers the chip and then clicks it (hover, focus, click)', async () => {
+    const real = window.matchMedia.bind(window)
+    spyOn(window, 'matchMedia').and.callFake((query: string) =>
+      query.includes('hover') ? ({ matches: true } as MediaQueryList) : real(query)
+    )
+    const el = await setup([unpriced])
+    const host = el.querySelector('.partial-cost') as HTMLElement
+    const chip = el.querySelector('.partial-chip') as HTMLButtonElement
+    host.dispatchEvent(new MouseEvent('mouseenter'))
+    fixture.detectChanges()
+    expect(el.querySelector('.partial-popover')).not.toBeNull()
+    chip.focus()
+    chip.click()
+    fixture.detectChanges()
+    expect(el.querySelector('.partial-popover')).not.toBeNull()
+    host.dispatchEvent(new MouseEvent('mouseleave'))
+    fixture.detectChanges()
+    expect(el.querySelector('.partial-popover')).withContext('the click pinned it').not.toBeNull()
+    chip.click()
+    fixture.detectChanges()
+    expect(el.querySelector('.partial-popover')).withContext('a second click closes it').toBeNull()
+  })
+
+  it('pins the popover when focus moves into it, so the mouse leaving does not close it', async () => {
+    const real = window.matchMedia.bind(window)
+    spyOn(window, 'matchMedia').and.callFake((query: string) =>
+      query.includes('hover') ? ({ matches: true } as MediaQueryList) : real(query)
+    )
+    const el = await setup([unpriced])
+    const host = el.querySelector('.partial-cost') as HTMLElement
+    host.dispatchEvent(new MouseEvent('mouseenter'))
+    fixture.detectChanges()
+    ;(el.querySelector('.partial-price-input') as HTMLInputElement).focus()
+    host.dispatchEvent(new MouseEvent('mouseleave'))
+    fixture.detectChanges()
+    expect(el.querySelector('.partial-popover')).not.toBeNull()
+  })
+
   describe('placement (plan 460)', () => {
     const popover = (el: HTMLElement): HTMLElement => el.querySelector('.partial-popover') as HTMLElement
     const viewW = (): number => document.documentElement.clientWidth

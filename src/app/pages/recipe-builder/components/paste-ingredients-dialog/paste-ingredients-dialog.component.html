@@ -1,5 +1,5 @@
 @if (open()) {
-  <div class="c-modal-overlay" (click)="onClose()" (keydown.escape)="onClose()">
+  <div #overlay class="c-modal-overlay" popover="manual" (click)="onClose()" (keydown.escape)="onClose()">
     <div
       class="c-modal-card paste-ingredients-card"
       dir="rtl"
