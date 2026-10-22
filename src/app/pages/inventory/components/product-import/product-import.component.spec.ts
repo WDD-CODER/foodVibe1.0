@@ -17,6 +17,7 @@ import { NameMatchItem, NameMatchResult, ProductNameMatcherService } from '@serv
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { matchProductName } from '@utils/product-name-match.util'
 import { Product } from '@models/product.model'
+import { getGeminiUsage } from '@utils/gemini-usage.util'
 import { ProductImportComponent } from './product-import.component'
 
 const row = (name: string, price: number | null, extra: Partial<ImportRow> = {}): ImportRow => ({
@@ -44,6 +45,7 @@ describe('ProductImportComponent', () => {
   let onSetSuccessMsg: jasmine.Spy
   let allowed: boolean
   let matchNames: jasmine.Spy
+  let parseReceiptPhoto: jasmine.Spy
 
   async function setup(
     parsed: Observable<unknown>,
@@ -53,13 +55,14 @@ describe('ProductImportComponent', () => {
     allowed = can
     matchNames = jasmine.createSpy('matchNames').and.callFake((_items: NameMatchItem[]) => aiAnswer())
     parsePriceList = jasmine.createSpy('parsePriceList').and.returnValue(parsed)
+    parseReceiptPhoto = jasmine.createSpy('parseReceiptPhoto').and.resolveTo({ rows: [], truncated: false })
     apply = jasmine.createSpy('apply').and.resolveTo({ created: 1, updated: 1, skipped: 1, skippedRows: [] })
     onSetSuccessMsg = jasmine.createSpy('onSetSuccessMsg')
     TestBed.configureTestingModule({
       imports: [ProductImportComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         provideRouter([]),
-        { provide: GeminiService, useValue: { parsePriceList } },
+        { provide: GeminiService, useValue: { parsePriceList, parseReceiptPhoto } },
         { provide: ProductImportService, useValue: { apply } },
         {
           provide: ProductNameMatcherService,
@@ -315,5 +318,107 @@ describe('ProductImportComponent', () => {
     await setup(of({ rows: [], truncated: false }), false)
     expect(byId('import-forbidden')?.textContent).toContain('no_permission')
     expect(byId('import-text')).toBeNull()
+  })
+
+  describe('receipt photo (plan 465)', () => {
+    const receiptFile = () => new File(['x'], 'receipt.jpg', { type: 'image/jpeg' })
+
+    async function choosePhoto(
+      testId: 'import-photo-camera-input' | 'import-photo-upload-input',
+      file = receiptFile()
+    ) {
+      const input = byId<HTMLInputElement>(testId)!
+      const transfer = new DataTransfer()
+      transfer.items.add(file)
+      input.files = transfer.files
+      input.dispatchEvent(new Event('change'))
+      await fixture.whenStable()
+      fixture.detectChanges()
+    }
+
+    it('shows a camera button (capture) and an upload button (no capture), both for jpg, png and webp', async () => {
+      await setup(of({ rows: [], truncated: false }))
+      const camera = byId<HTMLInputElement>('import-photo-camera-input')!
+      const upload = byId<HTMLInputElement>('import-photo-upload-input')!
+      expect(camera.getAttribute('capture')).toBe('environment')
+      expect(camera.getAttribute('accept')).toBe('image/jpeg,image/png,image/webp')
+      expect(upload.hasAttribute('capture')).toBeFalse()
+      expect(upload.getAttribute('accept')).toBe('image/jpeg,image/png,image/webp')
+      expect(byId('import-photo-camera')?.textContent).toContain('import_photo_camera')
+      expect(byId('import-photo-upload')?.textContent).toContain('import_photo_upload')
+      expect(byId('import-photo-privacy')?.textContent?.trim()).toBe('import_photo_privacy')
+    })
+
+    it('a chosen photo is read once, fills the preview, shows the hint, counts one use and leaves the text box alone', async () => {
+      await setup(of({ rows: [], truncated: false }))
+      parseReceiptPhoto.and.resolveTo({ rows: [row('בצל', 3.5), row('גזר', 4)], truncated: false })
+      const box = byId<HTMLTextAreaElement>('import-text')!
+      box.value = 'my pasted text'
+      box.dispatchEvent(new Event('input'))
+      const before = getGeminiUsage().count
+
+      const file = receiptFile()
+      await choosePhoto('import-photo-camera-input', file)
+
+      expect(parseReceiptPhoto).toHaveBeenCalledTimes(1)
+      expect(parseReceiptPhoto.calls.mostRecent().args[0]).toBe(file)
+      expect(all('import-row').length).toBe(2)
+      expect(byId('import-photo-hint')?.textContent?.trim()).toBe('import_photo_check_hint')
+      expect(getGeminiUsage().count).toBe(before + 1)
+      expect(byId<HTMLTextAreaElement>('import-text')!.value).toBe('my pasted text')
+      expect(parsePriceList).not.toHaveBeenCalled()
+    })
+
+    it('the hint goes away after the next pasted-text read', async () => {
+      await setup(of({ rows: [row('בצל', 3)], truncated: false }))
+      parseReceiptPhoto.and.resolveTo({ rows: [row('גזר', 4)], truncated: false })
+      await choosePhoto('import-photo-upload-input')
+      expect(byId('import-photo-hint')).not.toBeNull()
+      await pasteAndParse('בצל 3')
+      expect(byId('import-photo-hint')).toBeNull()
+    })
+
+    it('photo rows get the same name matching as pasted rows', async () => {
+      await setup(of({ rows: [], truncated: false }))
+      parseReceiptPhoto.and.resolveTo({ rows: [row('עגבניות', 6.2)], truncated: false })
+      await choosePhoto('import-photo-upload-input')
+      expect(all('import-status').map((chip) => chip.textContent?.trim())).toEqual(['import_status_update'])
+    })
+
+    const failures: [string, () => Promise<never>, string][] = [
+      ['HTTP 429', () => Promise.reject(new HttpErrorResponse({ status: 429 })), 'ai_daily_limit_reached_all'],
+      [
+        'daily_limit_reached',
+        () => Promise.reject(new HttpErrorResponse({ status: 400, error: { error: 'daily_limit_reached' } })),
+        'ai_daily_limit_reached_all'
+      ],
+      ['IMAGE_TOO_LARGE', () => Promise.reject(new Error('IMAGE_TOO_LARGE')), 'import_photo_too_big'],
+      ['IMAGE_TYPE_UNSUPPORTED', () => Promise.reject(new Error('IMAGE_TYPE_UNSUPPORTED')), 'import_photo_unsupported'],
+      ['any other failure', () => Promise.reject(new HttpErrorResponse({ status: 502 })), 'import_photo_failed']
+    ]
+    for (const [label, fail, messageKey] of failures) {
+      it(`${label} shows ${messageKey} and keeps the existing preview rows`, async () => {
+        await setup(of({ rows: [row('בצל', 3), row('גזר', 4)], truncated: false }))
+        await pasteAndParse('בצל 3')
+        expect(all('import-row').length).toBe(2)
+
+        parseReceiptPhoto.and.callFake(fail)
+        await choosePhoto('import-photo-camera-input')
+
+        expect(byId('import-error')?.textContent?.trim()).toBe(messageKey)
+        expect(all('import-row').length).toBe(2)
+        expect(byId('import-photo-hint')).toBeNull()
+      })
+    }
+
+    it('an empty photo result shows import_nothing_found and the paste box still works', async () => {
+      await setup(of({ rows: [row('בצל', 3)], truncated: false }))
+      parseReceiptPhoto.and.resolveTo({ rows: [], truncated: false })
+      await choosePhoto('import-photo-camera-input')
+      expect(byId('import-error')?.textContent?.trim()).toBe('import_nothing_found')
+      await pasteAndParse('בצל 3')
+      expect(all('import-row').length).toBe(1)
+      expect(byId('import-error')).toBeNull()
+    })
   })
 })

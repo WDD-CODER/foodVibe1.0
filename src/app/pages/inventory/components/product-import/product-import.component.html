@@ -41,6 +41,43 @@
             data-testid="import-supplier"
           />
         </div>
+        <input
+          #cameraInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="environment"
+          hidden
+          data-testid="import-photo-camera-input"
+          (change)="onPhotoChosen($event)"
+        />
+        <input
+          #uploadInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          data-testid="import-photo-upload-input"
+          (change)="onPhotoChosen($event)"
+        />
+        <button
+          type="button"
+          class="c-btn-ghost import-photo-btn"
+          data-testid="import-photo-camera"
+          [disabled]="isParsing_() || isSaving_()"
+          (click)="cameraInput.click()"
+        >
+          <lucide-icon name="camera" [size]="16" />
+          {{ 'import_photo_camera' | translatePipe }}
+        </button>
+        <button
+          type="button"
+          class="c-btn-ghost import-photo-btn"
+          data-testid="import-photo-upload"
+          [disabled]="isParsing_() || isSaving_()"
+          (click)="uploadInput.click()"
+        >
+          <lucide-icon name="image" [size]="16" />
+          {{ 'import_photo_upload' | translatePipe }}
+        </button>
         <button
           type="button"
           class="c-btn-primary"
@@ -52,6 +89,8 @@
           {{ 'import_parse' | translatePipe }}
         </button>
       </div>
+
+      <p class="import-hint" data-testid="import-photo-privacy">{{ 'import_photo_privacy' | translatePipe }}</p>
 
       @if (errorKey_(); as errorKey) {
         <p class="import-message import-message--error" role="alert" data-testid="import-error">
@@ -68,6 +107,11 @@
       }
 
       <section class="import-preview c-glass-panel" data-testid="import-preview">
+        @if (isFromPhoto_()) {
+          <p class="import-hint" role="status" data-testid="import-photo-hint">
+            {{ 'import_photo_check_hint' | translatePipe }}
+          </p>
+        }
         @if (isMatching_()) {
           <p class="import-hint" role="status" data-testid="import-matching">{{ 'import_matching' | translatePipe }}</p>
         }

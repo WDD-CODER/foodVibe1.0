@@ -90,6 +90,8 @@ export class ProductImportComponent {
   protected readonly isParsed_ = signal(false)
   protected readonly isTruncated_ = signal(false)
   protected readonly isParsing_ = signal(false)
+  /** True when the rows in the preview were read from a receipt photo (shows the "check every line" note). */
+  protected readonly isFromPhoto_ = signal(false)
   protected readonly isSaving_ = signal(false)
   /** True while the AI name-matching step runs after a parse. */
   protected readonly isMatching_ = signal(false)
@@ -158,15 +160,39 @@ export class ProductImportComponent {
   protected async parse(): Promise<void> {
     const text = this.text_().trim()
     if (!text || this.isParsing_()) return
+    await this.readAndFill_(
+      () => firstValueFrom(this.gemini_.parsePriceList(text, this.metadataRegistry_.allCategories_())),
+      false
+    )
+  }
+
+  /** Plan 465: reads a photo of a receipt (camera or file) with one AI call; the text box is left untouched. */
+  protected async onPhotoChosen(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement
+    const file = input.files?.[0] ?? null
+    input.value = '' // the same photo can be chosen again
+    if (!file || this.isParsing_() || this.isSaving_()) return
+    await this.readAndFill_(() => this.gemini_.parseReceiptPhoto(file, this.metadataRegistry_.allCategories_()), true)
+  }
+
+  /**
+   * The one read-and-fill path for pasted text and for a photo: runs the AI call, counts the usage, fills the
+   * preview, matches against the inventory, and maps a failure to a message. Existing rows are kept on failure.
+   */
+  private async readAndFill_(
+    call: () => Promise<{ rows: ImportRow[]; truncated: boolean }>,
+    fromPhoto: boolean
+  ): Promise<void> {
     this.isParsing_.set(true)
     this.errorKey_.set(null)
     this.summary_.set(null)
     this.hasMatchFailed_.set(false)
     try {
-      const result = await firstValueFrom(this.gemini_.parsePriceList(text, this.metadataRegistry_.allCategories_()))
+      const result = await call()
       incrementGeminiUsage()
       this.rows_.set(result.rows.map((row) => this.toPreviewRow_(row)))
       this.isTruncated_.set(result.truncated)
+      this.isFromPhoto_.set(fromPhoto)
       this.deleted_.set(0)
       this.isParsed_.set(true)
       if (result.rows.length === 0) this.errorKey_.set('import_nothing_found')
@@ -174,17 +200,24 @@ export class ProductImportComponent {
     } catch (err) {
       const status = err instanceof HttpErrorResponse ? err.status : 0
       const code = err instanceof HttpErrorResponse ? String(err.error?.error ?? '') : ''
-      this.errorKey_.set(
-        status === 429 || code.includes('daily_limit_reached') ? 'ai_daily_limit_reached_all' : 'import_ai_failed'
-      )
+      const reason = err instanceof Error ? err.message : ''
+      this.errorKey_.set(this.errorKeyFor_(fromPhoto, status, code, reason))
       this.logging_.error({
-        event: 'product_import.parse_failed',
-        message: 'Price list parse failed',
+        event: fromPhoto ? 'productImport.photo_failed' : 'productImport.parse_failed',
+        message: fromPhoto ? 'Receipt photo read failed' : 'Price list parse failed',
         context: { status }
       })
     } finally {
       this.isParsing_.set(false)
     }
+  }
+
+  private errorKeyFor_(fromPhoto: boolean, status: number, code: string, reason: string): string {
+    if (status === 429 || code.includes('daily_limit_reached')) return 'ai_daily_limit_reached_all'
+    if (!fromPhoto) return 'import_ai_failed'
+    if (reason === 'IMAGE_TOO_LARGE' || code === 'IMAGE_TOO_LARGE') return 'import_photo_too_big'
+    if (reason === 'IMAGE_TYPE_UNSUPPORTED') return 'import_photo_unsupported'
+    return 'import_photo_failed'
   }
 
   /** Saves every kept row in one request. */
@@ -212,10 +245,11 @@ export class ProductImportComponent {
       this.userMsg_.onSetSuccessMsg(this.summaryText_(summary))
       this.rows_.set([])
       this.isParsed_.set(false)
+      this.isFromPhoto_.set(false)
       this.text_.set('')
     } catch (err) {
       this.logging_.error({
-        event: 'product_import.apply_failed',
+        event: 'productImport.apply_failed',
         message: 'Price list apply failed',
         context: { status: err instanceof HttpErrorResponse ? err.status : 0 }
       })
