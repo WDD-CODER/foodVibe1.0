@@ -147,7 +147,20 @@ $break-mobile: 768px; // mirrors src/styles.scss
     inline-size: 100%;
   }
 
-  .partial-open {
-    align-self: flex-start;
+  .partial-note {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
   }
+
+  .partial-link {
+    display: block;
+  }
+}
+
+/* Outside the layer: the engine's .c-dropdown is unlayered, so this must be too to beat it.
+   The popover body scrolls (overflow-y: auto) and would clip an overlaid list, so the link list sits in flow
+   under the field, like search-combobox's inline mode. */
+.partial-link ::ng-deep .c-dropdown {
+  position: static;
+  margin-block-start: var(--space-1);
 }
