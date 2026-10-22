@@ -1,17 +1,8 @@
-import {
-  Component,
-  ChangeDetectionStrategy,
-  ElementRef,
-  HostListener,
-  effect,
-  inject,
-  input,
-  signal,
-  viewChild
-} from '@angular/core'
+import { Component, ChangeDetectionStrategy, ElementRef, effect, inject, input, signal, viewChild } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { NutritionPer100g } from '@models/product.model'
+import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 
 interface MacroSegment {
   key: string
@@ -53,9 +44,10 @@ const AUTO_SCROLL_PX = 3
 
 @Component({
   selector: 'app-nutrition-badge',
+  host: { '(document:click)': 'onDocumentClick($event)' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe],
   templateUrl: './nutrition-badge.component.html',
   styleUrl: './nutrition-badge.component.scss'
 })
@@ -66,7 +58,7 @@ export class NutritionBadgeComponent {
 
   private readonly tooltipRef_ = viewChild<ElementRef<HTMLElement>>('tooltip')
   private readonly scrollerRef_ = viewChild<ElementRef<HTMLElement>>('scroller')
-  readonly showTooltip_ = signal(false)
+  readonly shouldShowTooltip_ = signal(false)
   readonly isBelow_ = signal(false)
   /** Opened by a tap/click (not a mouse hover): the tooltip takes pointer input (scroll, arrows). */
   readonly isPinned_ = signal(false)
@@ -186,7 +178,7 @@ export class NutritionBadgeComponent {
       n.energyKcal != null
         ? {
             key: 'calories',
-            label: 'קלוריות',
+            label: 'nutrition_calories',
             value: n.energyKcal,
             unit: 'קק"ל',
             iconType: 'lucide',
@@ -198,7 +190,7 @@ export class NutritionBadgeComponent {
       n.proteinG != null
         ? {
             key: 'protein',
-            label: 'חלבון',
+            label: 'nutrition_protein',
             value: n.proteinG,
             unit: 'ג',
             iconType: 'lucide',
@@ -210,7 +202,7 @@ export class NutritionBadgeComponent {
       n.carbsG != null
         ? {
             key: 'carbs',
-            label: 'פחמימות',
+            label: 'nutrition_carbs',
             value: n.carbsG,
             unit: 'ג',
             iconType: 'lucide',
@@ -222,7 +214,7 @@ export class NutritionBadgeComponent {
       n.sugarsG != null
         ? {
             key: 'sugars',
-            label: 'מהם סוכרים',
+            label: 'nutrition_sugars',
             value: n.sugarsG,
             unit: 'ג',
             iconType: 'lucide',
@@ -232,12 +224,20 @@ export class NutritionBadgeComponent {
           }
         : null,
       n.fatG != null
-        ? { key: 'fat', label: 'שומן', value: n.fatG, unit: 'ג', iconType: 'fat-svg', iconColor: '#ef4444', sub: false }
+        ? {
+            key: 'fat',
+            label: 'nutrition_fat',
+            value: n.fatG,
+            unit: 'ג',
+            iconType: 'fat-svg',
+            iconColor: '#ef4444',
+            sub: false
+          }
         : null,
       n.fiberG != null
         ? {
             key: 'fiber',
-            label: 'סיבים',
+            label: 'nutrition_fiber',
             value: n.fiberG,
             unit: 'ג',
             iconType: 'lucide',
@@ -249,7 +249,7 @@ export class NutritionBadgeComponent {
       n.sodiumG != null
         ? {
             key: 'sodium',
-            label: 'נתרן',
+            label: 'nutrition_sodium',
             value: n.sodiumG * 1000,
             unit: 'מג',
             iconType: 'lucide',
@@ -266,8 +266,8 @@ export class NutritionBadgeComponent {
 
   /** Mouse only — a touch tap also fires enter/leave, which would open and instantly re-close it. */
   onPointerEnter(event: PointerEvent): void {
-    if (event.pointerType !== 'mouse' || this.showTooltip_()) return
-    this.showTooltip_.set(true)
+    if (event.pointerType !== 'mouse' || this.shouldShowTooltip_()) return
+    this.shouldShowTooltip_.set(true)
   }
 
   onPointerLeave(event: PointerEvent): void {
@@ -279,22 +279,21 @@ export class NutritionBadgeComponent {
    *  become usable); clicking a pinned one closes it. */
   onBadgeClick(event: MouseEvent): void {
     event.stopPropagation()
-    if (this.showTooltip_() && !this.isPinned_()) {
+    if (this.shouldShowTooltip_() && !this.isPinned_()) {
       this.isPinned_.set(true)
       return
     }
-    if (this.showTooltip_()) {
+    if (this.shouldShowTooltip_()) {
       this.close_()
       return
     }
     this.isPinned_.set(true)
-    this.showTooltip_.set(true)
+    this.shouldShowTooltip_.set(true)
   }
 
   /** Tap outside closes it (touch has no pointerleave). The tooltip is a DOM child of the host. */
-  @HostListener('document:click', ['$event'])
   protected onDocumentClick(event: MouseEvent): void {
-    if (!this.showTooltip_()) return
+    if (!this.shouldShowTooltip_()) return
     const host = this.elRef_.nativeElement as HTMLElement
     if (event.target instanceof Node && host.contains(event.target)) return
     this.close_()
@@ -303,7 +302,7 @@ export class NutritionBadgeComponent {
   private close_(): void {
     this.stopAutoScroll()
     this.isPinned_.set(false)
-    this.showTooltip_.set(false)
+    this.shouldShowTooltip_.set(false)
   }
 
   // ── Scroll hints ───────────────────────────────────────────────────────────

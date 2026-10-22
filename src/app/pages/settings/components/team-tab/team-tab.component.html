@@ -1,6 +1,6 @@
 <section class="team-tab" dir="rtl">
   <div class="team-actions">
-    @if (!formOpen_()) {
+    @if (!isFormOpen_()) {
       <button type="button" class="c-btn-primary" data-testid="team-add-open" (click)="openForm()">
         <lucide-icon name="plus" [size]="16" />
         {{ 'team_add_member' | translatePipe }}
@@ -8,7 +8,7 @@
     }
   </div>
 
-  @if (formOpen_()) {
+  @if (isFormOpen_()) {
     <form class="team-form c-glass-panel" data-testid="team-add-form" (ngSubmit)="addMember()">
       <label class="team-field">
         <span>{{ 'username' | translatePipe }}</span>
@@ -39,7 +39,7 @@
         <span class="c-field-error" role="alert" data-testid="team-add-error">{{ key | translatePipe }}</span>
       }
       <div class="team-form__buttons">
-        <button type="submit" class="c-btn-primary" [disabled]="saving_()" data-testid="team-add-save">
+        <button type="submit" class="c-btn-primary" [disabled]="isSaving_()" data-testid="team-add-save">
           {{ 'add' | translatePipe }}
         </button>
         <button type="button" class="c-btn-ghost" (click)="closeForm()">{{ 'cancel' | translatePipe }}</button>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output, effect, signal, ViewChild, OnDestroy } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, output, effect, signal, viewChild, OnDestroy } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormControl, ReactiveFormsModule } from '@angular/forms'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -39,7 +39,7 @@ export class ScalingChipComponent implements OnDestroy {
   createUnit = output<string>()
   remove = output<void>()
 
-  @ViewChild(CustomSelectComponent) customSelect?: CustomSelectComponent
+  readonly customSelect = viewChild(CustomSelectComponent)
 
   readonly unitControl = new FormControl<string>('', { nonNullable: true })
   private subscription: { unsubscribe: () => void } | null = null

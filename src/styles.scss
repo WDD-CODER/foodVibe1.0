@@ -2529,3 +2529,26 @@ button.c-chip--removable {
     min-block-size: 2.75rem;
   }
 }
+
+/* ---- Moved from recipe-book-list.component.scss (plan 458 S2) ---- */
+/* Chip container: flex wrap, centered, chips width = content */
+.c-dense-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.25rem;
+  width: 100%;
+}
+
+/* ---- Moved from confirm-modal.component.scss (plan 458 S2) ---- */
+/* .c-modal-card qualifier keeps these above the modal's own .confirm-modal-message rule, as before the move. */
+.c-modal-card.c-modal-card--danger .confirm-modal-message {
+  color: var(--color-text-main);
+}
+
+.c-modal-card.c-modal-card--warning .confirm-modal-message {
+  color: var(--text-warning);
+}

@@ -67,7 +67,7 @@ export class PlatformDashboardPage implements OnInit {
   // 4. SIGNALS & CONSTANTS
   protected readonly sortKey_ = signal<SortKey>('lastActivityAt')
   protected readonly sortDir_ = signal<SortDir>('desc')
-  protected readonly loading_ = signal(true)
+  protected readonly isLoading_ = signal(true)
   protected readonly columns: Column[] = [
     { key: 'name', labelKey: 'platform_col_business' },
     { key: 'ownerName', labelKey: 'platform_col_owner' },
@@ -131,7 +131,7 @@ export class PlatformDashboardPage implements OnInit {
       })
       this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
     }
   }
 

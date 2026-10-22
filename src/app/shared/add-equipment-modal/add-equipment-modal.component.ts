@@ -14,7 +14,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 const ADD_NEW_VALUE = '__add_new__'
 
 @Component({
-  selector: 'add-equipment-modal',
+  selector: 'app-add-equipment-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe, CustomSelectComponent],
   templateUrl: './add-equipment-modal.component.html',

@@ -1,4 +1,4 @@
-<div class="cook-view-container" dir="rtl" [class.is-editing]="editMode_()">
+<div class="cook-view-container" dir="rtl" [class.is-editing]="isEditMode_()">
   @if (recipe_(); as recipe) {
   <div class="cv-shell">
     <!-- Export menu (more-actions on phone, "export" pill on desktop): edit + view/download per
@@ -126,23 +126,23 @@
         <button
           type="button"
           class="cv-icon-btn"
-          [class.is-on]="cookExport.exportBarExpanded_()"
+          [class.is-on]="cookExport.isExportBarExpanded_()"
           (click)="cookExport.toggleExportBar()"
           [attr.aria-label]="'more_actions' | translatePipe"
-          [attr.aria-expanded]="cookExport.exportBarExpanded_()"
+          [attr.aria-expanded]="cookExport.isExportBarExpanded_()"
         >
           <lucide-icon name="more-vertical" [size]="22"></lucide-icon>
         </button>
-        @if (cookExport.exportBarExpanded_()) {
-        <ng-container *ngTemplateOutlet="exportMenu; context: { withEdit: !editMode_() }"></ng-container>
+        @if (cookExport.isExportBarExpanded_()) {
+        <ng-container *ngTemplateOutlet="exportMenu; context: { withEdit: !isEditMode_() }"></ng-container>
         }
       </span>
     </div>
 
     <!-- Mode banners sit under the phone top bar (they were hidden behind it) -->
-    @if (editMode_()) {
+    @if (isEditMode_()) {
     <div class="edit-mode-banner" role="status"><i aria-hidden="true"></i>{{ 'edit_mode' | translatePipe }}</div>
-    } @if (!editMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
+    } @if (!isEditMode_() && isScaledView_() && scaledViewRow_(); as scaledRow) {
     <div class="scaled-view-banner">
       <span class="scaled-view-text">
         <lucide-icon name="scale" [size]="18"></lucide-icon>
@@ -224,7 +224,7 @@
       </div>
       <div class="cv-ph-acts">
         <span class="cv-ph-theme"><ng-container *ngTemplateOutlet="themeToggle"></ng-container></span>
-        @if (editMode_()) {
+        @if (isEditMode_()) {
         <button type="button" class="cv-pill-btn cv-pill-btn--primary" (click)="saveEdits()" [disabled]="isSaving_()">
           @if (isSaving_()) {
           <app-loader size="small" [inline]="true" />
@@ -251,15 +251,15 @@
           <button
             type="button"
             class="cv-pill-btn"
-            [class.cv-pill-btn--primary]="cookExport.exportBarExpanded_()"
+            [class.cv-pill-btn--primary]="cookExport.isExportBarExpanded_()"
             (click)="cookExport.toggleExportBar()"
-            [attr.aria-expanded]="cookExport.exportBarExpanded_()"
+            [attr.aria-expanded]="cookExport.isExportBarExpanded_()"
           >
             <lucide-icon name="download" [size]="16"></lucide-icon>
             {{ 'export' | translatePipe }}
             <lucide-icon name="chevron-down" [size]="14"></lucide-icon>
           </button>
-          @if (cookExport.exportBarExpanded_()) {
+          @if (cookExport.isExportBarExpanded_()) {
           <ng-container *ngTemplateOutlet="exportMenu; context: { withEdit: false }"></ng-container>
           }
         </span>
@@ -320,7 +320,7 @@
           <!-- Quantity controls: multiplier chips (view mode) + counter + yield unit; hidden while scaled -->
           @if (!isScaledView_()) {
           <div class="cv-scale-bar">
-            @if (!editMode_()) {
+            @if (!isEditMode_()) {
             <div class="cv-multiplier-chips">
               @for (chip of multiplierChips; track chip.factor) {
               <button
@@ -358,14 +358,14 @@
               <span class="conversion-badge cv-num"> ×{{ scaleFactor_() | number: '1.2-2' }} </span>
               }
             </div>
-            @if (!editMode_()) {
+            @if (!isEditMode_()) {
             <p class="cv-long-press-hint">{{ 'long_press_ingredient_hint' | translatePipe }}</p>
             }
           </div>
           }
 
           <div class="cv-ing-body">
-            @if (editMode_()) {
+            @if (isEditMode_()) {
             <!-- Edit mode: one row per ingredient — name · − amount + · unit · delete -->
             <div class="cv-ied-list">
               @for (row of scaledIngredients_(); track (row.referenceId ?? 'u') + row.unit + ':' + $index; let i =
@@ -555,7 +555,7 @@
         </div>
 
         <div class="cv-step-body">
-          @if (editMode_()) {
+          @if (isEditMode_()) {
           <!-- Edit mode: original workflow editor -->
           <app-recipe-workflow
             [workflowFormArray]="workflowFormArray"
@@ -817,7 +817,7 @@
       </section>
     </div>
   </div>
-  @if (editMode_()) {
+  @if (isEditMode_()) {
   <div class="cv-editbar">
     <button type="button" class="cv-pill-btn cv-pill-btn--primary" (click)="saveEdits()" [disabled]="isSaving_()">
       @if (isSaving_()) {

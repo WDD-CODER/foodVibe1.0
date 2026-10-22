@@ -6,7 +6,7 @@ import {
   OnInit,
   signal,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   ElementRef
 } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
@@ -51,7 +51,7 @@ const CATEGORIES: EquipmentCategory[] = [
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EquipmentFormComponent implements OnInit, AfterViewInit {
-  @ViewChild('nameInput') private nameInputRef?: ElementRef<HTMLInputElement>
+  private readonly nameInputRef = viewChild<ElementRef<HTMLInputElement>>('nameInput')
 
   private readonly fb = inject(FormBuilder)
   private readonly route = inject(ActivatedRoute)
@@ -82,7 +82,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.nameInputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.nameInputRef()?.nativeElement?.focus(), 0)
   }
 
   private buildForm(): void {

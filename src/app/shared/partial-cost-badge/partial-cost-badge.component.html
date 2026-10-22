@@ -1,7 +1,7 @@
 @if (missing().length) {
   <span
     class="partial-cost"
-    (clickOutside)="close()"
+    (appClickOutside)="close()"
     (keydown.escape)="close()"
     (mouseenter)="onEnter()"
     (mouseleave)="onLeave()"
@@ -11,13 +11,13 @@
       type="button"
       class="c-chip amber partial-chip"
       aria-haspopup="dialog"
-      [attr.aria-expanded]="open_()"
+      [attr.aria-expanded]="isOpen_()"
       (click)="toggle()"
     >
       <lucide-icon name="alert-triangle" [size]="12"></lucide-icon>
       {{ 'partial_total' | translatePipe }}
     </button>
-    @if (open_()) {
+    @if (isOpen_()) {
       <div
         class="partial-popover"
         [class.partial-popover--above]="placement() === 'above'"

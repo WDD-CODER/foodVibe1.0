@@ -50,7 +50,7 @@ export class QuickAddProductModalComponent {
 
   protected name = signal('')
   protected baseUnit_ = signal('gram')
-  protected expanded_ = signal(false)
+  protected isExpanded_ = signal(false)
   /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
   protected readonly pendingAddName_ = signal('')
   protected buyPrice_ = signal(0)
@@ -62,8 +62,8 @@ export class QuickAddProductModalComponent {
   protected isSubmitting_ = signal(false)
   protected nameError_ = signal('')
   protected unitError_ = signal('')
-  protected aiLoading_ = signal(false)
-  protected aiError_ = signal(false)
+  protected isAiLoading_ = signal(false)
+  protected hasAiError_ = signal(false)
 
   protected nameRef = viewChild<ElementRef<HTMLInputElement>>('nameEl')
   protected baseUnitRef = viewChild<ElementRef<HTMLElement>>('baseUnitSelect')
@@ -92,7 +92,7 @@ export class QuickAddProductModalComponent {
       if (cfg) {
         this.name.set(cfg.prefillName)
         this.baseUnit_.set('gram')
-        this.expanded_.set(false)
+        this.isExpanded_.set(false)
         this.buyPrice_.set(0)
         this.category.set('')
         this.yieldFactor_.set(1)
@@ -182,7 +182,7 @@ export class QuickAddProductModalComponent {
   }
 
   protected getNextFocusAfterCategory(): HTMLElement | null {
-    if (this.expanded_()) return this.yieldFactorRef()?.nativeElement ?? null
+    if (this.isExpanded_()) return this.yieldFactorRef()?.nativeElement ?? null
     return this.saveBtnRef()?.nativeElement ?? null
   }
 
@@ -257,20 +257,20 @@ export class QuickAddProductModalComponent {
 
   protected async onAiFill(): Promise<void> {
     const name = this.name().trim()
-    if (!name || this.aiLoading_()) return
-    this.aiLoading_.set(true)
-    this.aiError_.set(false)
+    if (!name || this.isAiLoading_()) return
+    this.isAiLoading_.set(true)
+    this.hasAiError_.set(false)
     try {
       const draft = await this.gemini_.generateProduct(name)
       if (draft.baseUnit) this.baseUnit_.set(draft.baseUnit)
       if (draft.categories?.length) this.category.set(draft.categories[0])
       if (draft.allergens?.length) this.selectedAllergens_.set(new Set(draft.allergens))
       if (draft.yieldFactor && draft.yieldFactor !== 1) this.yieldFactor_.set(draft.yieldFactor)
-      this.expanded_.set(true)
+      this.isExpanded_.set(true)
     } catch {
-      this.aiError_.set(true)
+      this.hasAiError_.set(true)
     } finally {
-      this.aiLoading_.set(false)
+      this.isAiLoading_.set(false)
     }
   }
 
@@ -279,6 +279,6 @@ export class QuickAddProductModalComponent {
   }
 
   protected toggleExpanded(): void {
-    this.expanded_.update((v) => !v)
+    this.isExpanded_.update((v) => !v)
   }
 }

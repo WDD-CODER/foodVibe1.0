@@ -1,15 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  HostListener,
-  inject,
-  signal,
-  computed,
-  effect,
-  OnInit,
-  OnDestroy
-} from '@angular/core'
+import { Component, DestroyRef, ElementRef, inject, signal, computed, effect, OnInit, OnDestroy } from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
@@ -59,6 +48,7 @@ const MULTIPLIER_CHIPS = [
 
 @Component({
   selector: 'app-cook-view-page',
+  host: { '(window:scroll)': 'onWindowScroll()', '(document:pointerdown)': 'onDocumentPointerDown($event)' },
   standalone: true,
   imports: [
     CommonModule,
@@ -113,7 +103,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected selectedUnit_ = signal<string>('')
   /** Per-row unit override (index -> unit key). */
   protected unitOverrides_ = signal<Record<number, string>>({})
-  protected editMode_ = signal<boolean>(false)
+  protected isEditMode_ = signal<boolean>(false)
   /** Kitchen dark-mode skin (design's default is dark). Session-only, not persisted. */
   protected isDarkTheme_ = signal<boolean>(true)
   /** Kitchen mode retints the whole viewport: mirror it as `theme-kitchen` on <html> (removed on destroy). */
@@ -122,7 +112,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   })
   /** Edit mode on <html> (`cv-editing`): on phones the FAB hides and the stamp lifts above the edit bar. */
   private readonly syncEditingFlag_ = effect(() => {
-    this.document.documentElement.classList.toggle('cv-editing', this.editMode_())
+    this.document.documentElement.classList.toggle('cv-editing', this.isEditMode_())
   })
   /** Snapshot when entering edit mode; restored on Undo. */
   private originalRecipe_ = signal<Recipe | null>(null)
@@ -362,7 +352,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (recipe) {
       this.recipe_.set(recipe)
       this.originalRecipe_.set(null)
-      this.editMode_.set(false)
+      this.isEditMode_.set(false)
       this.activeStepIndex_.set(0)
       this.stepDoneSet_.set(new Set())
       this.checkedIngredients_.set(new Set())
@@ -587,7 +577,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     const recipe = this.recipe_()
     if (!recipe) return
     this.originalRecipe_.set(JSON.parse(JSON.stringify(recipe)))
-    this.editMode_.set(true)
+    this.isEditMode_.set(true)
     this.unitOverrides_.set({})
     this.buildWorkflowFormFromRecipe(recipe)
   }
@@ -619,7 +609,7 @@ export class CookViewPage implements OnInit, OnDestroy {
         const saved = await this.kitchenState.saveRecipe(recipe)
         if (pushToMasterAfterSave) this.masterPush.pushToMaster(saved ?? recipe)
         this.originalRecipe_.set(null)
-        this.editMode_.set(false)
+        this.isEditMode_.set(false)
         this.saving.setSaving(false)
       } catch {
         this.saving.setSaving(false)
@@ -640,7 +630,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (orig) {
       this.recipe_.set(orig)
       this.originalRecipe_.set(null)
-      this.editMode_.set(false)
+      this.isEditMode_.set(false)
       this.unitOverrides_.set({})
     }
   }
@@ -683,7 +673,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (scope === 'everyone') this.masterPush.pushToMaster(saved)
     this.recipe_.set(saved)
     this.originalRecipe_.set(null)
-    this.editMode_.set(false)
+    this.isEditMode_.set(false)
     this.saving.setSaving(false)
     this.userMsg.onSetSuccessMsg(
       this.translation.translate(saved.isApproved ? 'approval_success' : 'unapproval_success')
@@ -763,7 +753,7 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   /** For route guard (PendingChangesComponent interface): true when in edit mode with unsaved changes. */
   hasRealChanges(): boolean {
-    if (!this.editMode_() || !this.originalRecipe_() || !this.recipe_()) return false
+    if (!this.isEditMode_() || !this.originalRecipe_() || !this.recipe_()) return false
     return this.unsaved_.hasChanges()
   }
 
@@ -920,7 +910,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   /** Scroll spy (<768): ingredients come first; steps become active once their pane top reaches the bars, or at the page end. */
-  @HostListener('window:scroll')
   protected onWindowScroll(): void {
     if (!this.isStackedLayout()) return
     const steps = this.el.nativeElement.querySelector('.cv-step-pane') as HTMLElement | null
@@ -1148,7 +1137,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   /** Click outside the open row closes its expander. */
-  @HostListener('document:pointerdown', ['$event'])
   protected onDocumentPointerDown(event: PointerEvent): void {
     const open = this.openIngredientIndex_()
     if (open === null) return
@@ -1230,7 +1218,7 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   private applyWorkflowFormToRecipe(): void {
     const recipe = this.recipe_()
-    if (!recipe || !this.editMode_()) return
+    if (!recipe || !this.isEditMode_()) return
     const raw = this.workflowFormArray.getRawValue() as Record<string, unknown>[]
     const isDish = this.isDish_()
     if (isDish) {

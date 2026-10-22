@@ -21,7 +21,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 
 @Component({
-  selector: 'unit-creator-modal',
+  selector: 'app-unit-creator-modal',
   standalone: true,
   imports: [
     CommonModule,

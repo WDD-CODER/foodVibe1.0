@@ -302,13 +302,19 @@ export class TranslationService {
     if (!isOwnKey) {
       const existing = dict[sanitized]
       if (existing !== undefined && existing !== label) {
-        return { valid: false, error: `המפתח "${sanitized}" כבר בשימוש עבור "${existing}".` }
+        return {
+          valid: false,
+          error: this.translate('translation_key_in_use').replace('{key}', sanitized).replace('{value}', existing)
+        }
       }
     }
 
     const duplicateKey = Object.keys(dict).find((k) => k !== sanitized && k !== excludeKey && dict[k] === label)
     if (label && duplicateKey) {
-      return { valid: false, error: `השם "${label}" כבר בשימוש (מפתח "${duplicateKey}").` }
+      return {
+        valid: false,
+        error: this.translate('translation_label_in_use').replace('{label}', label).replace('{key}', duplicateKey)
+      }
     }
 
     return { valid: true }

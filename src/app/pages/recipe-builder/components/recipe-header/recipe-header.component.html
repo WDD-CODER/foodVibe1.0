@@ -193,7 +193,7 @@
     <div
       class="metric-group metric-group-weight-volume"
       (click)="toggleMetricsDisplayMode()"
-      (clickOutside)="closeMetricsNotice()"
+      (appClickOutside)="closeMetricsNotice()"
       (mouseenter)="onMetricsNoticeZoneEnter()"
       (mouseleave)="onMetricsNoticeZoneLeave()"
     >
@@ -220,7 +220,7 @@
             [title]="'items_not_convertible' | translatePipe"
           ></lucide-icon>
         </span>
-        @if (metricsNoticeOpen_()) {
+        @if (isMetricsNoticeOpen_()) {
           <div
             class="metrics-notice-floating"
             (click)="$event.stopPropagation()"
@@ -229,7 +229,7 @@
           >
             <p class="metrics-notice-title">{{ 'not_convertible' | translatePipe }}</p>
             <div class="metrics-notice-list-wrap">
-              <div class="metrics-notice-list" scrollIndicators>
+              <div class="metrics-notice-list" appScrollIndicators>
                 @for (name of unconvertibleNamesFiltered_(); track name) {
                   <div class="metrics-notice-item">{{ name }}</div>
                 }

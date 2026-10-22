@@ -30,18 +30,18 @@
 
         <!-- Tag line: event type · serving type -->
         <div class="event-tag-line">
-          <div class="event-type-chip-wrap" (clickOutside)="closeEventTypeDropdown()">
+          <div class="event-type-chip-wrap" (appClickOutside)="closeEventTypeDropdown()">
             <button
               type="button"
               class="event-chip"
               id="menu-focus-eventType"
-              [attr.aria-expanded]="eventTypeDropdownOpen_()"
+              [attr.aria-expanded]="isEventTypeDropdownOpen_()"
               (click)="openEventTypeDropdown()"
               (keydown)="onMetaKeydown('eventType', $event)"
             >
               {{ ((form_.value.eventType ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
             </button>
-            @if (eventTypeDropdownOpen_()) {
+            @if (isEventTypeDropdownOpen_()) {
             <div class="event-type-dropdown">
               <app-search-combobox
                 class="event-type-search"
@@ -169,7 +169,7 @@
 
             <div class="section-header">
               @if (sectionSearchOpen_() === sectionIndex) {
-              <div class="section-search-wrap" (clickOutside)="closeSectionSearch()">
+              <div class="section-search-wrap" (appClickOutside)="closeSectionSearch()">
                 <app-search-combobox
                   class="section-search"
                   variant="plain"
@@ -274,8 +274,8 @@
 
 <app-menu-export-sheet
   class="no-print"
-  [open]="exportSheetOpen_()"
-  (close)="exportSheetOpen_.set(false)"
+  [open]="isExportSheetOpen_()"
+  (close)="isExportSheetOpen_.set(false)"
   (viewChecklist)="onViewChecklist($event)"
   (exportChecklist)="onExportChecklist($event)"
   (viewShoppingList)="onViewMenuShoppingList()"

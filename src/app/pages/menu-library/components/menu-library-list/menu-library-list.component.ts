@@ -78,7 +78,7 @@ export class MenuLibraryListComponent {
   protected readonly deletingId_ = signal<string | null>(null)
   protected readonly stageFilter_ = signal('active')
   /** The "פנייה חדשה" form is open while the URL carries `?new=inquiry` (the FAB action and the header button both set it). */
-  protected readonly inquiryOpen_ = signal(false)
+  protected readonly isInquiryOpen_ = signal(false)
   protected readonly stageLabelKey = stageLabelKey
 
   constructor() {
@@ -93,7 +93,7 @@ export class MenuLibraryListComponent {
     ])
     this.route.queryParamMap
       .pipe(takeUntilDestroyed())
-      .subscribe((params) => this.inquiryOpen_.set(params.get('new') === 'inquiry'))
+      .subscribe((params) => this.isInquiryOpen_.set(params.get('new') === 'inquiry'))
   }
 
   protected readonly events_ = this.menuEventData.allMenuEvents_

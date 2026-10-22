@@ -25,7 +25,7 @@
           data-testid="import-text"
           [ngModel]="text_()"
           (ngModelChange)="text_.set($event)"
-          [disabled]="parsing_() || saving_()"
+          [disabled]="isParsing_() || isSaving_()"
         ></textarea>
       </label>
 
@@ -45,7 +45,7 @@
           type="button"
           class="c-btn-primary"
           data-testid="import-parse"
-          [disabled]="!text_().trim() || parsing_() || saving_()"
+          [disabled]="!text_().trim() || isParsing_() || isSaving_()"
           (click)="parse()"
         >
           <lucide-icon name="sparkles" [size]="16" />
@@ -61,7 +61,7 @@
     </section>
 
     @if (rows_().length > 0) {
-      @if (truncated_()) {
+      @if (isTruncated_()) {
         <p class="import-message import-message--warning" role="status" data-testid="import-truncated">
           {{ 'import_truncated' | translatePipe }}
         </p>

@@ -4,7 +4,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { GeminiShotsService, estimateGramsPerPortion } from './gemini-shots.service'
 import type { AiRecipeDraft } from './ai-recipe-draft.service'
 
-const IMPLAUSIBLE = 'כמויות הרכיבים לא סבירות ביחס למספר המנות'
+const IMPLAUSIBLE = 'ai_shot_warning_implausible_amounts'
 
 function draft(overrides: Partial<AiRecipeDraft> = {}): AiRecipeDraft {
   return {

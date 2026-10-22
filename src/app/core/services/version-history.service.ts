@@ -138,6 +138,7 @@ export class VersionHistoryService {
       throw new Error('addVersionAsNewRecipe only supports recipe and dish')
     }
     const recipe = snapshot as Recipe
+    // The copy suffix is saved into the recipe name (data), so it stays a fixed literal, not a dictionary key (run 458).
     const copyName = `${recipe.nameHebrew} (עותק)`
     const { _id: _, ...rest } = recipe
     const newRecipe: Omit<Recipe, '_id'> = {

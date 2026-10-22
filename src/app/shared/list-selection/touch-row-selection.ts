@@ -40,13 +40,13 @@ export class TouchRowSelection {
   private longPressTimer_: ReturnType<typeof setTimeout> | null = null
   private longPressStart_: { x: number; y: number } | null = null
   /** The click that follows a completed long press must not also navigate or toggle. */
-  private suppressNextClick_ = false
+  private shouldSuppressNextClick_ = false
   /** True while our selection-mode history entry is on top of the stack. */
-  private historyPushed_ = false
+  private isHistoryPushed_ = false
 
   private readonly onPopState_ = (): void => {
-    if (!this.historyPushed_) return
-    this.historyPushed_ = false
+    if (!this.isHistoryPushed_) return
+    this.isHistoryPushed_ = false
     this.selection.clear()
   }
 
@@ -70,11 +70,11 @@ export class TouchRowSelection {
     // clearing any other way (selection bar, last row unchecked) pops it.
     effect(() => {
       const selecting = this.selection.selectionMode()
-      if (selecting && !this.historyPushed_) {
+      if (selecting && !this.isHistoryPushed_) {
         history.pushState({ ...history.state, [this.historyKey]: true }, '')
-        this.historyPushed_ = true
-      } else if (!selecting && this.historyPushed_) {
-        this.historyPushed_ = false
+        this.isHistoryPushed_ = true
+      } else if (!selecting && this.isHistoryPushed_) {
+        this.isHistoryPushed_ = false
         history.back()
       }
     })
@@ -84,14 +84,14 @@ export class TouchRowSelection {
       document.removeEventListener('click', this.onDocumentClick_)
       this.cancel()
       // Leaving the page while selecting: the pushed entry stays as a harmless same-URL step.
-      this.historyPushed_ = false
+      this.isHistoryPushed_ = false
     })
   }
 
   /** Bind to the row's `(pointerdown)`. */
   onPointerDown(id: string, event: PointerEvent): void {
     // A long press on touch often ends without a click, so a stale flag is reset by the next press.
-    this.suppressNextClick_ = false
+    this.shouldSuppressNextClick_ = false
     if (!this.isTouch || event.button !== 0) return
     if ((event.target as HTMLElement).closest(INTERACTIVE_TARGETS)) return
     this.cancel()
@@ -99,7 +99,7 @@ export class TouchRowSelection {
     this.longPressTimer_ = setTimeout(() => {
       this.longPressTimer_ = null
       this.longPressStart_ = null
-      this.suppressNextClick_ = true
+      this.shouldSuppressNextClick_ = true
       this.selection.toggle(id)
       navigator.vibrate?.(30)
     }, LONG_PRESS_MS)
@@ -122,13 +122,13 @@ export class TouchRowSelection {
 
   /** Bind to `(contextmenu)`: stops the phone's long-press menu opening over the selection. */
   onContextMenu(event: Event): void {
-    if (this.suppressNextClick_ || this.selection.selectionMode()) event.preventDefault()
+    if (this.shouldSuppressNextClick_ || this.selection.selectionMode()) event.preventDefault()
   }
 
   /** Call first in the row click handler; true means the click ended a long press and is spent. */
   consumeClick(): boolean {
-    if (!this.suppressNextClick_) return false
-    this.suppressNextClick_ = false
+    if (!this.shouldSuppressNextClick_) return false
+    this.shouldSuppressNextClick_ = false
     return true
   }
 }

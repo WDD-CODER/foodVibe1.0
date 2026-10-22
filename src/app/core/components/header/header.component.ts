@@ -34,7 +34,7 @@ export class HeaderComponent {
   private readonly router = inject(Router)
 
   isMobileMenuOpen = signal(false)
-  mobileAvatarOpen = signal(false)
+  isMobileAvatarOpen = signal(false)
 
   protected readonly isLoggedIn = this.userService.isLoggedIn
   protected readonly user_ = this.userService.user_
@@ -63,17 +63,17 @@ export class HeaderComponent {
   }
 
   toggleMobileAvatar(): void {
-    this.mobileAvatarOpen.update((v) => !v)
+    this.isMobileAvatarOpen.update((v) => !v)
   }
 
   protected openAuth(mode: AuthMode): void {
     this.closeMobileMenu()
-    this.mobileAvatarOpen.set(false)
+    this.isMobileAvatarOpen.set(false)
     this.authModal.open(mode)
   }
 
   protected async logout(): Promise<void> {
-    this.mobileAvatarOpen.set(false)
+    this.isMobileAvatarOpen.set(false)
     this.closeMobileMenu()
     if (this._isCurrentRouteProtected()) {
       // Navigate to a public page first so Angular can run canDeactivate guards.

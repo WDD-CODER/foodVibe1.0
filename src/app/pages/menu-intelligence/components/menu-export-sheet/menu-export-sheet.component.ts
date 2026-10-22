@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostListener, input, output } from '@angular/core'
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 
@@ -12,6 +12,7 @@ export type ChecklistMode = 'by_dish' | 'by_category' | 'by_station' | 'by_suppl
  */
 @Component({
   selector: 'app-menu-export-sheet',
+  host: { '(document:keydown.escape)': 'onEscape()' },
   standalone: true,
   imports: [LucideAngularModule, TranslatePipe],
   templateUrl: './menu-export-sheet.component.html',
@@ -38,7 +39,6 @@ export class MenuExportSheetComponent {
     { mode: 'by_supplier', labelKey: 'prep_sheets_by_supplier' }
   ]
 
-  @HostListener('document:keydown.escape')
   protected onEscape(): void {
     if (this.open()) this.close.emit()
   }

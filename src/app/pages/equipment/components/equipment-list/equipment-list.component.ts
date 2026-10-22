@@ -370,10 +370,10 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     if (!this.requireAuthService.requireAuth()) return
     const currentId = this.editingId_()
     if (currentId !== null && currentId !== item._id && this.editForm_.dirty) {
-      const saveFirst = await this.confirmModal.open(
-        this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. שמור לפני מעבר?',
-        { variant: 'warning', saveLabel: 'save' }
-      )
+      const saveFirst = await this.confirmModal.open(this.translation.translate('unsaved_changes_confirm'), {
+        variant: 'warning',
+        saveLabel: 'save'
+      })
       if (saveFirst) {
         await this.saveCurrentInlineEdit()
       }
@@ -406,8 +406,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
       const msg =
         err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
-          ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
-          : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
+          ? this.translation.translate('duplicate_equipment_name')
+          : this.translation.translate('save_failed')
       this.userMsg.onSetErrorMsg(msg)
       return false
     } finally {
@@ -442,10 +442,10 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
    * click doesn't need re-confirming, only an accidental outside-click does. */
   protected async onInlinePanelClickOutside(): Promise<void> {
     if (this.editForm_.dirty) {
-      const discard = await this.confirmModal.open(
-        this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
-        { variant: 'warning', saveLabel: 'leave_without_saving' }
-      )
+      const discard = await this.confirmModal.open(this.translation.translate('unsaved_changes_confirm'), {
+        variant: 'warning',
+        saveLabel: 'leave_without_saving'
+      })
       if (!discard) return
     }
     this.closeWithAnimation()
@@ -454,9 +454,12 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   async onDelete(item: Equipment): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
     if (
-      !(await this.confirmModal.open('האם למחוק את פריט הציוד "' + (item.nameHebrew ?? '') + '"?', {
-        variant: 'danger'
-      }))
+      !(await this.confirmModal.open(
+        this.translation.translate('confirm_delete_equipment_named').replace('{name}', item.nameHebrew ?? ''),
+        {
+          variant: 'danger'
+        }
+      ))
     )
       return
     this.deletingId_.set(item._id)
@@ -488,7 +491,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open(`למחוק ${ids.length} פריטי ציוד?`, { variant: 'danger' }))) return
+    const message = this.translation.translate('confirm_bulk_delete_equipment').replace('{n}', String(ids.length))
+    if (!(await this.confirmModal.open(message, { variant: 'danger' }))) return
     for (const id of ids) {
       this.deletingId_.set(id)
       try {

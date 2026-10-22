@@ -52,7 +52,7 @@ export class BaselineTabComponent {
     { key: 'avgRevenuePerEvent', labelKey: 'baseline_avg_revenue_per_event', suffix: '₪' },
     { key: 'estProfitPct', labelKey: 'baseline_est_profit_pct', suffix: '%' }
   ]
-  protected readonly saving_ = signal(false)
+  protected readonly isSaving_ = signal(false)
   private readonly queryParams_ = toSignal(this.route.queryParams, { initialValue: {} as Record<string, string> })
   private readonly value_ = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() })
 
@@ -68,7 +68,7 @@ export class BaselineTabComponent {
   protected readonly canSave = computed(() => {
     const value = this.value_()
     return (
-      !this.saving_() && this.form.valid && (this.form.dirty || this.fields.some((field) => value[field.key] != null))
+      !this.isSaving_() && this.form.valid && (this.form.dirty || this.fields.some((field) => value[field.key] != null))
     )
   })
 
@@ -107,7 +107,7 @@ export class BaselineTabComponent {
 
   /** Skip: stores an empty baseline so the screen never opens by itself again, then goes to the dashboard. */
   async skip(): Promise<void> {
-    if (this.saving_()) return
+    if (this.isSaving_()) return
     if (await this.send({})) void this.router.navigate(['/dashboard'])
   }
 
@@ -117,7 +117,7 @@ export class BaselineTabComponent {
   }
 
   private async send(input: BaselineInput): Promise<boolean> {
-    this.saving_.set(true)
+    this.isSaving_.set(true)
     try {
       await this.businessService.updateBaseline(input)
       return true
@@ -133,7 +133,7 @@ export class BaselineTabComponent {
       }
       return false
     } finally {
-      this.saving_.set(false)
+      this.isSaving_.set(false)
     }
   }
 }

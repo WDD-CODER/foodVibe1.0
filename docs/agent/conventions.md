@@ -11,7 +11,8 @@
 * `inject()` for all DI — never constructor injection.
 * Component API: `input()`, `input.required()`, `output()`, `model()` — never `@Input()` / `@Output()`.
 * No `any`. Single quotes in `.ts`, no semicolons. Double quotes in `.html`.
-* Selectors kebab-case; `app-` prefix only for native HTML collisions. Filename matches selector. Classes PascalCase. Booleans use `is` / `has` prefix.
+* Selectors kebab-case with the `app-` prefix (components `app-foo`, attribute directives `[appFoo]`, plan 458). Filename matches selector. Classes PascalCase. Boolean signals and fields use an `is` / `has` / `can` / `should` prefix.
+* Naming: private state keeps the trailing `_` (`items_ = signal(...)`); public `input()` / `output()` / `model()` names are the plain API name with no `_` (`label = input('')`), because the name is what parents bind. Measure: `node scripts/rule-sweep-count.mjs` (rules R1–R9).
 * Services: `src/app/core/services/`, suffix `.service.ts`, `@Injectable({ providedIn: 'root' })`, signals + `AsyncStorageService` + `UserMsgService`.
 * Folder structure: `core/` (services, models, guards, pipes, directives), `shared/` (reusable UI), `pages/[name]/` (routed views + local `components/`). Path aliases: `@services/*`, `@models/*`, `@directives/*`.
 * Shared helpers → `util.service.ts` or `core/utils/` — pure functions only.

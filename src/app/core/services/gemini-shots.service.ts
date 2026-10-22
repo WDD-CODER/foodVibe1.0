@@ -50,26 +50,27 @@ export class GeminiShotsService {
   private readonly authBase_ = environment.authApiUrl
 
   /**
-   * Computes soft quality warnings for a draft client-side before saving.
+   * Computes soft quality warnings for a draft client-side before saving, as dictionary keys
+   * (the AI recipe modal shows them through translatePipe).
    * Mirrors the server-side `computeSoftWarnings` logic in ai.js.
    */
   computeWarnings(draft: AiRecipeDraft): string[] {
     const warnings: string[] = []
     if (draft.ingredients.length < 3) {
-      warnings.push('מתכון עם מעט מרכיבים — ייתכן שהבינה הצליחה לחלץ חלקית בלבד')
+      warnings.push('ai_shot_warning_few_ingredients')
     }
     if (draft.yield_amount > 20) {
-      warnings.push('כמות מנות גבוהה במיוחד — בדוק שהתפוקה הגיונית')
+      warnings.push('ai_shot_warning_high_yield')
     }
     if (draft.steps.length < 2) {
-      warnings.push('מספר שלבים נמוך — ייתכן שחסרות הוראות')
+      warnings.push('ai_shot_warning_few_steps')
     }
     if (draft.recipe_type === 'dish' && draft.yield_unit === 'unit') {
-      warnings.push('יחידת תפוקה לא סבירה למנה')
+      warnings.push('ai_shot_warning_dish_unit')
     }
     const perPortion = estimateGramsPerPortion(draft)
     if (perPortion !== null && (perPortion < MIN_GRAMS_PER_PORTION || perPortion > MAX_GRAMS_PER_PORTION)) {
-      warnings.push('כמויות הרכיבים לא סבירות ביחס למספר המנות')
+      warnings.push('ai_shot_warning_implausible_amounts')
     }
     return warnings
   }

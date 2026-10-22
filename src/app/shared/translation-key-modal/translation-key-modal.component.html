@@ -4,7 +4,7 @@
       class="c-modal-card c-modal-card--md"
       dir="rtl"
       (click)="$event.stopPropagation()"
-      (clickOutside)="resetAndClose()"
+      (appClickOutside)="resetAndClose()"
     >
       <h3>{{ title_() | translatePipe }}</h3>
 
@@ -40,7 +40,7 @@
             type="text"
             [ngModel]="englishKey_()"
             (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
-            englishKeyInput
+            appEnglishKeyInput
             placeholder="olive_oil"
             (keydown.enter)="save()"
           />

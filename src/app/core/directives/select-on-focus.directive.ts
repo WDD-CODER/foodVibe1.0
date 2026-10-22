@@ -1,13 +1,13 @@
-import { Directive, HostListener, ElementRef } from '@angular/core'
+import { Directive, ElementRef, inject } from '@angular/core'
 
 @Directive({
-  selector: '[SelectOnFocus]',
+  selector: '[appSelectOnFocus]',
+  host: { '(focus)': 'onFocus()' },
   standalone: true
 })
 export class SelectOnFocusDirective {
-  constructor(private el: ElementRef<HTMLInputElement | HTMLTextAreaElement>) {}
+  private readonly el = inject<ElementRef<HTMLInputElement | HTMLTextAreaElement>>(ElementRef)
 
-  @HostListener('focus')
   onFocus() {
     this.el.nativeElement.select()
   }

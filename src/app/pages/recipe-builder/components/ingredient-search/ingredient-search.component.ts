@@ -65,17 +65,17 @@ export class IngredientSearchComponent {
 
   protected searchBox_ = viewChild<SearchComboboxComponent<SearchableItem>>(SearchComboboxComponent)
   searchQuery_ = signal<string>('')
-  protected showResults_ = signal(false)
+  protected shouldShowResults_ = signal(false)
   protected readonly itemLabel_ = (item: SearchableItem): string => item.nameHebrew ?? ''
   protected readonly itemKey_ = (item: SearchableItem): string => item.item_type_ + item._id
 
   private lastHandledFocusTrigger: number | null = null
   /** True for one microtask after the component is created — prevents the triggering click from immediately re-closing. */
-  private ignoreFirstClickOutside = true
+  private shouldIgnoreFirstClickOutside = true
 
   constructor() {
     setTimeout(() => {
-      this.ignoreFirstClickOutside = false
+      this.shouldIgnoreFirstClickOutside = false
     }, 0)
     effect(() => {
       const trigger = this.focusTrigger()
@@ -91,15 +91,15 @@ export class IngredientSearchComponent {
       const q = this.initialQuery()?.trim() ?? ''
       if (q && !untracked(() => this.searchQuery_())) {
         this.searchQuery_.set(q)
-        this.showResults_.set(true)
+        this.shouldShowResults_.set(true)
         setTimeout(() => this.focus(), 0)
       }
     })
   }
 
   protected onClickOutside(): void {
-    if (this.ignoreFirstClickOutside) return
-    this.showResults_.set(false)
+    if (this.shouldIgnoreFirstClickOutside) return
+    this.shouldShowResults_.set(false)
     this.cancelSearch.emit()
   }
 
@@ -144,12 +144,12 @@ export class IngredientSearchComponent {
   selectItem(item: SearchableItem) {
     this.itemSelected.emit(item)
     this.searchQuery_.set('')
-    this.showResults_.set(false)
+    this.shouldShowResults_.set(false)
   }
 
   /** Enter with the list closed asks the parent for a new row; Escape with it closed cancels the edit. */
   protected onSearchKeyUnhandled(e: KeyboardEvent): void {
-    if (this.showResults_() && this.searchQuery_().trim()) return
+    if (this.shouldShowResults_() && this.searchQuery_().trim()) return
     if (e.key === 'Enter') {
       e.preventDefault()
       this.addNewRowRequested.emit()

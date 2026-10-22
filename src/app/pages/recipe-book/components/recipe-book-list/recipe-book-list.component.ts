@@ -81,7 +81,7 @@ const INGREDIENT_SEARCH_MIN_LENGTH = 2
 const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
 
 @Component({
-  selector: 'recipe-book-list',
+  selector: 'app-recipe-book-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -139,15 +139,15 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly togglePanelState_: () => void
   protected dateFrom_ = signal<string | null>(null)
   protected dateTo_ = signal<string | null>(null)
-  protected showFavoritesOnly_ = signal<boolean>(false)
+  protected shouldShowFavoritesOnly_ = signal<boolean>(false)
   /** When true: show items in range by creation OR by update. When false: by creation only. */
-  protected dateIncludeByUpdated_ = signal<boolean>(false)
+  protected isDateIncludeByUpdated_ = signal<boolean>(false)
   protected ingredientSearchQuery_ = signal<string>('')
   protected readonly productLabel_ = (product: Product): string => product.nameHebrew
   protected readonly productKey_ = (product: Product): string => product._id
   protected selectedProductIds_ = signal<string[]>([])
   /** Set to false to show the "date added" column again. */
-  protected hideDateColumn_ = signal(true)
+  protected shouldHideDateColumn_ = signal(true)
 
   /** Filter-category open state (plan 345): all collapsed on mobile (≤1023px). On desktop every
    *  group starts expanded except 'Date', which the mockup doesn't show — it stays collapsed so it
@@ -287,7 +287,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
     const dateFrom = this.dateFrom_()
     const dateTo = this.dateTo_()
-    const includeByUpdated = this.dateIncludeByUpdated_()
+    const includeByUpdated = this.isDateIncludeByUpdated_()
     if (dateFrom != null || dateTo != null) {
       const fromMs = dateFrom != null ? parseDateToStartOfDay(dateFrom) : null
       const toMs = dateTo != null ? parseDateToEndOfDay(dateTo) : null
@@ -303,7 +303,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       })
     }
 
-    if (this.showFavoritesOnly_()) {
+    if (this.shouldShowFavoritesOnly_()) {
       const uid = this.currentUserId_()
       recipes = uid ? recipes.filter((r) => r.favorite === true) : []
     }
@@ -377,7 +377,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       Object.values(this.activeFilters_()).some((arr) => arr.length > 0) ||
       this.dateFrom_() != null ||
       this.dateTo_() != null ||
-      this.showFavoritesOnly_() ||
+      this.shouldShowFavoritesOnly_() ||
       this.selectedProductIds_().length > 0
   )
 
@@ -394,8 +394,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       { urlParam: 'ingredients', signal: this.selectedProductIds_, serializer: StringArrayParam },
       { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: NullableStringParam },
       { urlParam: 'dateTo', signal: this.dateTo_, serializer: NullableStringParam },
-      { urlParam: 'dateByUpdated', signal: this.dateIncludeByUpdated_, serializer: BooleanParam },
-      { urlParam: 'favorites', signal: this.showFavoritesOnly_, serializer: BooleanParam },
+      { urlParam: 'dateByUpdated', signal: this.isDateIncludeByUpdated_, serializer: BooleanParam },
+      { urlParam: 'favorites', signal: this.shouldShowFavoritesOnly_, serializer: BooleanParam },
       { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
 
@@ -584,8 +584,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       () => this.activeFilters_.set({}),
       () => this.dateFrom_.set(null),
       () => this.dateTo_.set(null),
-      () => this.dateIncludeByUpdated_.set(false),
-      () => this.showFavoritesOnly_.set(false),
+      () => this.isDateIncludeByUpdated_.set(false),
+      () => this.shouldShowFavoritesOnly_.set(false),
       () => this.selectedProductIds_.set([])
     )
   }

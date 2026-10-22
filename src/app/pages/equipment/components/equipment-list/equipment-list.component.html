@@ -1,5 +1,5 @@
 <app-list-shell
-  columnCarouselGroup
+  appColumnCarouselGroup
   [isPanelOpen]="isPanelOpen_()"
   (panelToggle)="togglePanel()"
   [gridTemplate]="'2fr 1fr minmax(48px, 0.8fr) 0.8fr 80px auto'"
@@ -67,7 +67,7 @@
     <app-column-carousel-header>
       <div
         class="col-category c-grid-header-cell c-sortable-header"
-        columnSlide
+        appColumnSlide
         label="category"
         (click)="setSort('category')"
         (keydown.enter)="setSort('category')"
@@ -79,7 +79,7 @@
       </div>
       <div
         class="col-owned c-grid-header-cell c-sortable-header"
-        columnSlide
+        appColumnSlide
         label="owned_quantity"
         (click)="setSort('owned')"
         (keydown.enter)="setSort('owned')"
@@ -89,7 +89,7 @@
       >
         {{ 'owned_quantity' | translatePipe }}
       </div>
-      <div class="col-consumable c-grid-header-cell" columnSlide label="is_consumable" role="presentation">
+      <div class="col-consumable c-grid-header-cell" appColumnSlide label="is_consumable" role="presentation">
         {{ 'is_consumable' | translatePipe }}
       </div>
     </app-column-carousel-header>
@@ -126,13 +126,13 @@
       >
         <div class="col-name c-list-body-cell" role="cell">{{ item.nameHebrew }}</div>
         <app-column-carousel-cell>
-          <div class="col-category c-list-body-cell" columnSlide [label]="'category' | translatePipe">
+          <div class="col-category c-list-body-cell" appColumnSlide [label]="'category' | translatePipe">
             {{ item.category | translatePipe }}
           </div>
-          <div class="col-owned c-list-body-cell" columnSlide [label]="'owned_quantity' | translatePipe">
+          <div class="col-owned c-list-body-cell" appColumnSlide [label]="'owned_quantity' | translatePipe">
             {{ item.ownedQuantity }}
           </div>
-          <div class="col-consumable c-list-body-cell" columnSlide [label]="'is_consumable' | translatePipe">
+          <div class="col-consumable c-list-body-cell" appColumnSlide [label]="'is_consumable' | translatePipe">
             <span class="c-chip c-chip--tag c-chip--soft" [class.c-chip--teal]="item.isConsumable">
               {{ item.isConsumable ? ('approved_yes' | translatePipe) : ('approved_no' | translatePipe) }}
             </span>
@@ -162,7 +162,7 @@
         <div
           class="inline-edit-panel"
           [class.closing]="closingId_() === item._id"
-          (clickOutside)="onInlinePanelClickOutside()"
+          (appClickOutside)="onInlinePanelClickOutside()"
         >
           <ng-container [ngTemplateOutlet]="panelBody" [ngTemplateOutletContext]="{ item }"></ng-container>
         </div>
@@ -178,7 +178,7 @@
       <div
         class="inline-edit-panel as-modal"
         [class.closing]="closingId_() === item._id"
-        (clickOutside)="onInlinePanelClickOutside()"
+        (appClickOutside)="onInlinePanelClickOutside()"
       >
         <ng-container [ngTemplateOutlet]="panelBody" [ngTemplateOutletContext]="{ item }"></ng-container>
       </div>

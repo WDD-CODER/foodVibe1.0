@@ -78,10 +78,10 @@ export class ProductImportComponent {
   protected readonly text_ = signal('')
   protected readonly supplierId_ = signal('')
   protected readonly rows_ = signal<PreviewRow[]>([])
-  protected readonly parsed_ = signal(false)
-  protected readonly truncated_ = signal(false)
-  protected readonly parsing_ = signal(false)
-  protected readonly saving_ = signal(false)
+  protected readonly isParsed_ = signal(false)
+  protected readonly isTruncated_ = signal(false)
+  protected readonly isParsing_ = signal(false)
+  protected readonly isSaving_ = signal(false)
   /** Rows the user removed from the preview; they count as skipped in the summary. */
   protected readonly deleted_ = signal(0)
   protected readonly errorKey_ = signal<string | null>(null)
@@ -127,23 +127,23 @@ export class ProductImportComponent {
     })
   })
 
-  protected readonly canSave_ = computed(() => this.rows_().length > 0 && !this.saving_() && !this.parsing_())
+  protected readonly canSave_ = computed(() => this.rows_().length > 0 && !this.isSaving_() && !this.isParsing_())
 
   // 6. METHODS
   /** Reads the pasted list with one AI call; the text stays in the box whatever happens. */
   protected async parse(): Promise<void> {
     const text = this.text_().trim()
-    if (!text || this.parsing_()) return
-    this.parsing_.set(true)
+    if (!text || this.isParsing_()) return
+    this.isParsing_.set(true)
     this.errorKey_.set(null)
     this.summary_.set(null)
     try {
       const result = await firstValueFrom(this.gemini_.parsePriceList(text, this.metadataRegistry_.allCategories_()))
       incrementGeminiUsage()
       this.rows_.set(result.rows.map((row) => this.toPreviewRow_(row)))
-      this.truncated_.set(result.truncated)
+      this.isTruncated_.set(result.truncated)
       this.deleted_.set(0)
-      this.parsed_.set(true)
+      this.isParsed_.set(true)
       if (result.rows.length === 0) this.errorKey_.set('import_nothing_found')
     } catch (err) {
       const status = err instanceof HttpErrorResponse ? err.status : 0
@@ -157,14 +157,14 @@ export class ProductImportComponent {
         context: { status }
       })
     } finally {
-      this.parsing_.set(false)
+      this.isParsing_.set(false)
     }
   }
 
   /** Saves every kept row in one request. */
   protected async saveAll(): Promise<void> {
     if (!this.canSave_()) return
-    this.saving_.set(true)
+    this.isSaving_.set(true)
     try {
       const categoryKeys = await this.resolveCategories_()
       const rows: ApplyRow[] = this.view_().map(({ row, status }) => ({
@@ -185,7 +185,7 @@ export class ProductImportComponent {
       this.summary_.set(summary)
       this.userMsg_.onSetSuccessMsg(this.summaryText_(summary))
       this.rows_.set([])
-      this.parsed_.set(false)
+      this.isParsed_.set(false)
       this.text_.set('')
     } catch (err) {
       this.logging_.error({
@@ -195,7 +195,7 @@ export class ProductImportComponent {
       })
       this.userMsg_.onSetErrorMsg(this.translation_.translate('save_failed'))
     } finally {
-      this.saving_.set(false)
+      this.isSaving_.set(false)
     }
   }
 

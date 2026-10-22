@@ -1,11 +1,11 @@
 <div class="trash-page" dir="rtl">
   <app-page-header class="trash-header" titleKey="trash">
-    <button header-actions type="button" class="btn-refresh" (click)="refresh()" [disabled]="loading()">
-      {{ loading() ? ('pending' | translatePipe) : ('refresh' | translatePipe) }}
+    <button header-actions type="button" class="btn-refresh" (click)="refresh()" [disabled]="isLoading()">
+      {{ isLoading() ? ('pending' | translatePipe) : ('refresh' | translatePipe) }}
     </button>
   </app-page-header>
 
-  @if (loading()) {
+  @if (isLoading()) {
   <app-loader size="medium" label="loader_loading" />
   } @else if (loadError()) {
   <p class="trash-error">{{ loadError() }}</p>

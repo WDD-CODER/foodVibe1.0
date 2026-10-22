@@ -56,14 +56,20 @@ export class ScrollRailComponent {
 
   protected readonly canPrev_ = signal(false)
   protected readonly canNext_ = signal(false)
-  private readonly rtl_ = signal(false)
+  private readonly isRtl_ = signal(false)
 
-  protected readonly showPrev = computed(() => this.arrows() === 'always' || (this.arrows() === 'auto' && this.canPrev_()))
-  protected readonly showNext = computed(() => this.arrows() === 'always' || (this.arrows() === 'auto' && this.canNext_()))
+  protected readonly showPrev = computed(
+    () => this.arrows() === 'always' || (this.arrows() === 'auto' && this.canPrev_())
+  )
+  protected readonly showNext = computed(
+    () => this.arrows() === 'always' || (this.arrows() === 'auto' && this.canNext_())
+  )
 
   /** Fade widths for the physical left/right edges (the mask is written in physical terms). */
-  protected readonly fadeLeft = computed(() => `${(this.rtl_() ? this.canNext_() : this.canPrev_()) ? FADE_PX : 0}px`)
-  protected readonly fadeRight = computed(() => `${(this.rtl_() ? this.canPrev_() : this.canNext_()) ? FADE_PX : 0}px`)
+  protected readonly fadeLeft = computed(() => `${(this.isRtl_() ? this.canNext_() : this.canPrev_()) ? FADE_PX : 0}px`)
+  protected readonly fadeRight = computed(
+    () => `${(this.isRtl_() ? this.canPrev_() : this.canNext_()) ? FADE_PX : 0}px`
+  )
 
   constructor() {
     afterNextRender(() => {
@@ -87,7 +93,7 @@ export class ScrollRailComponent {
     const rtl = getComputedStyle(el).direction === 'rtl'
     const max = Math.max(0, el.scrollWidth - el.clientWidth)
     const pos = normalizedScrollStart(el.scrollLeft, rtl)
-    this.rtl_.set(rtl)
+    this.isRtl_.set(rtl)
     this.canPrev_.set(pos > EDGE_EPSILON_PX)
     this.canNext_.set(pos < max - EDGE_EPSILON_PX)
   }
@@ -97,7 +103,7 @@ export class ScrollRailComponent {
     const step = this.step()
     const amount = step === 'page' ? Math.max(40, el.clientWidth * 0.8) : step
     // Toward the inline end is +x in LTR and -x in RTL.
-    const sign = (direction === 'next' ? 1 : -1) * (this.rtl_() ? -1 : 1)
+    const sign = (direction === 'next' ? 1 : -1) * (this.isRtl_() ? -1 : 1)
     el.scrollBy({ left: sign * amount, behavior: 'smooth' })
   }
 
@@ -106,7 +112,7 @@ export class ScrollRailComponent {
     if (event.shiftKey || !(this.canPrev_() || this.canNext_())) return
     if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return
     const el = this.scroller().nativeElement
-    el.scrollLeft += this.rtl_() ? -event.deltaY : event.deltaY
+    el.scrollLeft += this.isRtl_() ? -event.deltaY : event.deltaY
     event.preventDefault()
   }
 }

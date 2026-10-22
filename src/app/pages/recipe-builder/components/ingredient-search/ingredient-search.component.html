@@ -1,10 +1,10 @@
-<div class="search-container" dir="rtl" (clickOutside)="onClickOutside()">
+<div class="search-container" dir="rtl" (appClickOutside)="onClickOutside()">
   <app-search-combobox
     icon="search"
     placeholder="search_product_or_recipe"
     addLabelKey="add_new_ingredient"
     [(query)]="searchQuery_"
-    [(open)]="showResults_"
+    [(open)]="shouldShowResults_"
     [options]="filteredResults_()"
     [knownOptions]="searchResults_()"
     [labelOf]="itemLabel_"

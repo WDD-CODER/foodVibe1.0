@@ -7,8 +7,7 @@ import {
   signal,
   computed,
   effect,
-  ViewChildren,
-  QueryList,
+  viewChildren,
   ElementRef
 } from '@angular/core'
 import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
@@ -72,7 +71,7 @@ export class RecipeWorkflowComponent {
   removeItem = output<number>()
   focusRowDone = output<void>()
 
-  showAddCategoryPicker_ = signal(false)
+  shouldShowAddCategoryPicker_ = signal(false)
   /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
   protected readonly pendingAddName_ = signal('')
 
@@ -115,17 +114,17 @@ export class RecipeWorkflowComponent {
   }
 
   toggleAddCategoryPicker() {
-    this.showAddCategoryPicker_.update((v) => !v)
+    this.shouldShowAddCategoryPicker_.update((v) => !v)
   }
 
   onAddWithCategory(category: string) {
-    this.showAddCategoryPicker_.set(false)
+    this.shouldShowAddCategoryPicker_.set(false)
     this.addItem.emit(category)
   }
 
-  @ViewChildren('instructionField') instructionFields!: QueryList<ElementRef<HTMLTextAreaElement>>
-  @ViewChildren('laborTimeInput') laborTimeInputs!: QueryList<ElementRef<HTMLInputElement>>
-  @ViewChildren('cookTimeInput') cookTimeInputs!: QueryList<ElementRef<HTMLInputElement>>
+  readonly instructionFields = viewChildren<ElementRef<HTMLTextAreaElement>>('instructionField')
+  readonly laborTimeInputs = viewChildren<ElementRef<HTMLInputElement>>('laborTimeInput')
+  readonly cookTimeInputs = viewChildren<ElementRef<HTMLInputElement>>('cookTimeInput')
 
   editingLaborTimeIndex_ = signal<number | null>(null)
   editingCookTimeIndex_ = signal<number | null>(null)
@@ -140,7 +139,7 @@ export class RecipeWorkflowComponent {
       if (idx === null || idx === undefined) return
       if (this.type() !== 'preparation') return
       setTimeout(() => {
-        const el = this.instructionFields?.get(idx)?.nativeElement
+        const el = this.instructionFields()[idx]?.nativeElement
         if (el) {
           el.focus()
           this.focusRowDone.emit()
@@ -269,7 +268,7 @@ export class RecipeWorkflowComponent {
   enterLaborTimeEdit(index: number, currentMinutes: number): void {
     this.laborTimeEditStr_.set(this.formatMinutesToClock(currentMinutes))
     this.editingLaborTimeIndex_.set(index)
-    setTimeout(() => this.laborTimeInputs?.get(0)?.nativeElement?.focus(), 0)
+    setTimeout(() => this.laborTimeInputs()[0]?.nativeElement?.focus(), 0)
   }
 
   onLaborTimeKeydown(event: Event, group: FormGroup): void {
@@ -300,7 +299,7 @@ export class RecipeWorkflowComponent {
   enterCookTimeEdit(index: number, currentSecs: number): void {
     this.cookTimeEditStr_.set(this.formatSecsToHms(currentSecs))
     this.editingCookTimeIndex_.set(index)
-    setTimeout(() => this.cookTimeInputs?.get(0)?.nativeElement?.focus(), 0)
+    setTimeout(() => this.cookTimeInputs()[0]?.nativeElement?.focus(), 0)
   }
 
   onCookTimeKeydown(event: Event, group: FormGroup): void {

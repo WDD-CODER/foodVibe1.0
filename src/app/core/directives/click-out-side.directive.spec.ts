@@ -6,7 +6,7 @@ import { By } from '@angular/platform-browser'
 @Component({
   standalone: true,
   template: `
-    <div id="target" (clickOutside)="onOut()">
+    <div id="target" (appClickOutside)="onOut()">
       <span id="inside">Inside Content</span>
     </div>
     <button id="outside">Outside Button</button>

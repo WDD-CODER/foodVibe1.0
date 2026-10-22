@@ -37,10 +37,10 @@ export class SetupChecklistCardComponent {
 
   // 4. SIGNALS & CONSTANTS
   private readonly status_ = signal<SetupStatus | null>(null)
-  private readonly hidden_ = signal(false)
+  private readonly isHidden_ = signal(false)
   /** One-shot guards: the first-visit redirect and the status request each happen once per card. */
-  private readonly redirected_ = signal(false)
-  private readonly statusRequested_ = signal(false)
+  private readonly isRedirected_ = signal(false)
+  private readonly isStatusRequested_ = signal(false)
 
   // 5. COMPUTED
   protected readonly steps = computed<SetupStep[]>(() => {
@@ -87,7 +87,7 @@ export class SetupChecklistCardComponent {
   protected readonly doneRequired = computed(() => this.steps().filter((step) => !step.optional && step.done).length)
   /** Shown only to the owner, after the status arrived, until the four required steps are done or the owner hides it. */
   protected readonly visible = computed(
-    () => this.permission.isOwner_() && this.status_() !== null && !this.hidden_() && this.doneRequired() < 4
+    () => this.permission.isOwner_() && this.status_() !== null && !this.isHidden_() && this.doneRequired() < 4
   )
 
   constructor() {
@@ -97,15 +97,15 @@ export class SetupChecklistCardComponent {
       untracked(() => {
         // `''` redirects to /dashboard and sign-in happens in a modal on top of it, so the business may arrive after the card exists.
         if (business.baseline === undefined) {
-          if (this.redirected_()) return
-          this.redirected_.set(true)
+          if (this.isRedirected_()) return
+          this.isRedirected_.set(true)
           void this.router.navigate(['/settings'], { queryParams: { tab: 'baseline', first: 1 } })
           return
         }
-        this.hidden_.set(this.readHidden(business._id))
-        if (this.hidden_()) return
-        if (this.statusRequested_()) return
-        this.statusRequested_.set(true)
+        this.isHidden_.set(this.readHidden(business._id))
+        if (this.isHidden_()) return
+        if (this.isStatusRequested_()) return
+        this.isStatusRequested_.set(true)
         void this.loadStatus()
       })
     })
@@ -114,7 +114,7 @@ export class SetupChecklistCardComponent {
   // 6. METHODS (UI handlers)
   /** Hides the card on this device for good. Storage may be blocked: the card then hides until the page reloads. */
   protected hide(): void {
-    this.hidden_.set(true)
+    this.isHidden_.set(true)
     const id = this.businessService.business_()?._id
     if (!id) return
     try {

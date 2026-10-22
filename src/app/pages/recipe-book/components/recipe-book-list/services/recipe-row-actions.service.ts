@@ -5,6 +5,7 @@ import { MasterPushService, bulkScopeEntity, recipeScopeEntity } from '@services
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { Recipe } from '@models/recipe.model'
+import { TranslationService } from '@services/translation.service'
 
 type RecipeBulkField = 'labels' | 'recipeType'
 
@@ -18,6 +19,7 @@ export class RecipeRowActionsService {
   private readonly kitchenState = inject(KitchenStateService)
   private readonly masterPush = inject(MasterPushService)
   private readonly confirmModal = inject(ConfirmModalService)
+  private readonly translation_ = inject(TranslationService)
   private readonly requireAuthService = inject(RequireAuthService)
 
   private readonly removingId_ = signal<string | null>(null)
@@ -48,7 +50,8 @@ export class RecipeRowActionsService {
     // When the admin scope prompt will show, it is the only dialog (its cancel is the safety).
     const masterLinked = recipes.find((r) => r._masterId)
     if (!this.masterPush.willAskDeleteScope(masterLinked)) {
-      if (!(await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' }))) return false
+      const message = this.translation_.translate('confirm_bulk_delete_recipes').replace('{n}', String(ids.length))
+      if (!(await this.confirmModal.open(message, { variant: 'danger' }))) return false
     }
     const scope = await this.masterPush.askDeleteScope(masterLinked, {
       entity: bulkScopeEntity(recipes),

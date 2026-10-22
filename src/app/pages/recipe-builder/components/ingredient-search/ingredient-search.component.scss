@@ -1,19 +1,21 @@
-.search-container {
-  position: relative;
+@layer components.ingredient-search {
+  .search-container {
+    position: relative;
 
-  width: 100%;
+    width: 100%;
 
-  /* Result rows sit over the table below (shared search box, plan 452). */
-  app-search-combobox {
-    --search-combobox-z-index: 250;
+    /* Result rows sit over the table below (shared search box, plan 452). */
+    app-search-combobox {
+      --search-combobox-z-index: 250;
+    }
   }
-}
 
-.item-name {
-  flex: 1;
-  min-width: 0;
+  .item-name {
+    flex: 1;
+    min-width: 0;
 
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
 }

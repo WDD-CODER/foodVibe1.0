@@ -36,7 +36,7 @@
           step="1"
           [id]="'dish-sell-' + sectionIndex() + '-' + itemIndex()"
           class="dish-sell-input"
-          SelectOnFocus
+          appSelectOnFocus
           [style.width]="getInputWidth(itemGroup().get('sell_price')?.value)"
           (click)="$event.stopPropagation()"
           (keydown)="sellPriceKeydown.emit($event)"
@@ -46,7 +46,7 @@
         <lucide-icon name="trash-2" [size]="14"></lucide-icon>
       </button>
     } @else {
-      <div class="dish-search-wrap" (clickOutside)="clearSearch.emit()">
+      <div class="dish-search-wrap" (appClickOutside)="clearSearch.emit()">
         <app-search-combobox
           variant="plain"
           placeholder="menu_search_dish"
@@ -90,7 +90,7 @@
               min="0"
               step="0.01"
               class="dish-field-input-inline"
-              SelectOnFocus
+              appSelectOnFocus
               [style.width]="getInputWidth(itemGroup().get(fieldKey)?.value)"
               (blur)="editDishFieldCommit.emit()"
               (keydown.enter)="editDishFieldCommit.emit()"
@@ -111,8 +111,8 @@
           class="dish-field-input-inline dish-coefficient-input"
           [id]="'dish-coef-' + sectionIndex() + '-' + itemIndex()"
           [value]="coefficientText_()"
-          [attr.aria-invalid]="coefficientInvalid_() ? 'true' : null"
-          SelectOnFocus
+          [attr.aria-invalid]="isCoefficientInvalid_() ? 'true' : null"
+          appSelectOnFocus
           (input)="onCoefficientInput($any($event.target).value)"
           (blur)="onCoefficientBlur()"
           (click)="$event.stopPropagation()"
@@ -133,7 +133,7 @@
         <span class="dish-field-label">{{ 'event_portions' | translatePipe }}:</span>
         <span class="dish-field-value dish-portions-value">{{ getDerivedPortions() }}</span>
       </div>
-      @if (coefficientInvalid_()) {
+      @if (isCoefficientInvalid_()) {
         <span class="c-field-error dish-coefficient-error" role="alert">{{
           'coefficient_invalid' | translatePipe
         }}</span>

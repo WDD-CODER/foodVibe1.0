@@ -7,7 +7,7 @@ import { codeToEnglishChar, finalizeEnglishKey, liveEnglishKey } from '@utils/en
  * Every value change dispatches `input` so a bound `ngModel` sees it.
  */
 @Directive({
-  selector: 'input[englishKeyInput]',
+  selector: 'input[appEnglishKeyInput]',
   standalone: true,
   host: {
     dir: 'ltr',

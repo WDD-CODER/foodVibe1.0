@@ -5,9 +5,8 @@ import {
   output,
   inject,
   signal,
-  ViewChildren,
-  ViewChild,
-  QueryList,
+  viewChildren,
+  viewChild,
   effect,
   ChangeDetectorRef
 } from '@angular/core'
@@ -100,8 +99,8 @@ export class RecipeIngredientsTableComponent {
     initialValue: false
   })
 
-  @ViewChildren(FocusByRowDirective) private focusByRowRefs!: QueryList<FocusByRowDirective>
-  @ViewChild(QuickEditProductPanelComponent) private quickEditPanelRef_?: QuickEditProductPanelComponent
+  private readonly focusByRowRefs = viewChildren(FocusByRowDirective)
+  private readonly quickEditPanelRef_ = viewChild(QuickEditProductPanelComponent)
 
   constructor() {
     // OnPush: rows changed from outside (AI patch, history restore) must redraw the table.
@@ -159,7 +158,7 @@ export class RecipeIngredientsTableComponent {
   protected quickEditRowTier_ = signal<'invalid' | 'incomplete' | null>(null)
 
   /** True while the "paste ingredients" window is open. */
-  protected pasteOpen_ = signal(false)
+  protected isPasteOpen_ = signal(false)
 
   /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
   protected getProductForGroup(group: FormGroup): Product | null {
@@ -213,7 +212,7 @@ export class RecipeIngredientsTableComponent {
    */
   onPasteIngredients(text: string): void {
     const lines = parseIngredientLines(text, this.pastedUnitResolver_)
-    this.pasteOpen_.set(false)
+    this.isPasteOpen_.set(false)
     if (lines.length === 0) return
     const array = this.ingredientsFormArray()
     while (array.length > 0 && this.isEmptyRow_(array.at(array.length - 1) as FormGroup)) {
@@ -255,8 +254,9 @@ export class RecipeIngredientsTableComponent {
 
   /** Called by clickOutside on the accordion div — defers to panel if it has unsaved changes. */
   protected onAccordionClickOutside(): void {
-    if (this.quickEditPanelRef_) {
-      this.quickEditPanelRef_.requestClose()
+    const quickEditPanel = this.quickEditPanelRef_()
+    if (quickEditPanel) {
+      quickEditPanel.requestClose()
     } else {
       this.closeQuickEditWithAnimation()
     }
@@ -384,13 +384,13 @@ export class RecipeIngredientsTableComponent {
   }
 
   focusQuantityAtRow(rowIndex: number): void {
-    const refs = this.focusByRowRefs?.toArray() ?? []
+    const refs = this.focusByRowRefs()
     const ref = refs.find((r) => r.rowIndex() === rowIndex && r.kind() === 'qty')
     ref?.focus()
   }
 
   focusUnitAtRow(rowIndex: number): void {
-    const refs = this.focusByRowRefs?.toArray() ?? []
+    const refs = this.focusByRowRefs()
     const ref = refs.find((r) => r.rowIndex() === rowIndex && r.kind() === 'unit')
     ref?.focus()
   }

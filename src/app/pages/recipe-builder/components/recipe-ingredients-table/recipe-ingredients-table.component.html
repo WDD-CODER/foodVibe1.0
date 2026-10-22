@@ -122,7 +122,7 @@
             [options]="getUnitOptions(group)"
             placeholder="unit"
             [triggerId]="'unit-row-' + $index"
-            focusByRow
+            appFocusByRow
             [rowIndex]="$index"
             kind="unit"
             (valueChange)="onUnitChange(group, $index, $event)"
@@ -142,11 +142,11 @@
             </button>
             <input
               type="number"
-              SelectOnFocus
+              appSelectOnFocus
               formControlName="amount_net"
               (input)="updateLineCalculations($index)"
               (keydown)="onQuantityKeydown($event, $index)"
-              focusByRow
+              appFocusByRow
               [rowIndex]="$index"
               kind="qty"
               class="grid-input qty-input"
@@ -184,7 +184,7 @@
           !isMobile_() &&
           getProductForGroup(group)
         ) {
-          <div class="quick-edit-accordion" (clickOutside)="onAccordionClickOutside()">
+          <div class="quick-edit-accordion" (appClickOutside)="onAccordionClickOutside()">
             <app-quick-edit-product-panel
               [product]="getProductForGroup(group)!"
               [tier]="quickEditRowTier_() ?? 'incomplete'"
@@ -201,15 +201,15 @@
   </div>
 
   @if (!ingredientsFormArray().disabled) {
-    <button type="button" class="paste-ingredients-btn c-btn-ghost--sm" (click)="pasteOpen_.set(true)">
+    <button type="button" class="paste-ingredients-btn c-btn-ghost--sm" (click)="isPasteOpen_.set(true)">
       <lucide-icon name="clipboard-paste" [size]="16"></lucide-icon>
       {{ 'paste_ingredients' | translatePipe }}
     </button>
   }
 
   <app-paste-ingredients-dialog
-    [open]="pasteOpen_()"
+    [open]="isPasteOpen_()"
     (submitted)="onPasteIngredients($event)"
-    (closed)="pasteOpen_.set(false)"
+    (closed)="isPasteOpen_.set(false)"
   />
 </div>

@@ -30,7 +30,7 @@ export abstract class BaseEntityDataService<T> {
   private readonly loading_ = inject(LoadingService)
 
   private readonly store_ = signal<T[]>([])
-  private loaded_ = false
+  private isLoaded_ = false
   private loadPromise_: Promise<void> | null = null
 
   /** Read-only view of the entity list. Subclasses may alias this under a domain name. */
@@ -48,19 +48,19 @@ export abstract class BaseEntityDataService<T> {
 
   /** True after at least one successful (or attempted) hydrate. */
   hasLoaded(): boolean {
-    return this.loaded_
+    return this.isLoaded_
   }
 
   /**
    * Loads from storage once. Safe to call repeatedly — concurrent callers share one promise.
    */
   async ensureLoaded(): Promise<void> {
-    if (this.loaded_) return
+    if (this.isLoaded_) return
     if (this.loadPromise_) return this.loadPromise_
     this.loadPromise_ = this.loadInitialData()
       .catch(() => {})
       .finally(() => {
-        this.loaded_ = true
+        this.isLoaded_ = true
         this.loadPromise_ = null
       })
     return this.loadPromise_
@@ -75,7 +75,7 @@ export abstract class BaseEntityDataService<T> {
       await this.loadPromise_
       return
     }
-    this.loaded_ = false
+    this.isLoaded_ = false
     this.loadPromise_ = null
     if (this.loadOptions_.clearOnReload) this.store_.set([])
     await this.ensureLoaded()

@@ -1,6 +1,6 @@
 # Plan 458 — Make the code follow the hard rules again, one measured rule at a time
 
-Status: draft
+Status: active
 Track: code
 Depends-on: 450, 451, 452, 453, 454, 455, 456, 457
 Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
@@ -20,9 +20,9 @@ Code written before the rules hardened drifts from `AGENTS.md` / `_shared/tech-s
 ## Goals & Success Criteria
 - Primary: every listed rule is at zero violations (or, for a rule with a documented exception list, at zero unlisted violations), with no behaviour change.
 - Success:
-  - [ ] [auto] `docs/refactor/runs/458.md` has a baseline count per rule (S1) and a new count after each rule's sub-task; every rule row ends at `0` or `0 + N documented exceptions`.
-  - [ ] [auto] `npx ng build` and `npx ng test --watch=false` pass after every sub-task (same pass count as baseline, no new skips).
-  - [ ] [auto] `node scripts/scope-check.mjs --plan=458` passes; `git diff --numstat` shows net lines <= 0 for each frozen file (`product-form.component.ts`, `menu-intelligence.page.ts`, `menu-export.service.ts`, `recipe-builder.page.ts`, `cook-view.page.ts`); hotspots only gain lines.
+  - [x] [auto] `docs/refactor/runs/458.md` has a baseline count per rule (S1) and a new count after each rule's sub-task; every rule row ends at `0` or `0 + N documented exceptions`.
+  - [x] [auto] `npx ng build` and `npx ng test --watch=false` pass after every sub-task (same pass count as baseline, no new skips).
+  - [x] [auto] `node scripts/scope-check.mjs --plan=458` passes; `git diff --numstat` shows net lines <= 0 for each frozen file (`product-form.component.ts`, `menu-intelligence.page.ts`, `menu-export.service.ts`, `recipe-builder.page.ts`, `cook-view.page.ts`); hotspots only gain lines.
   - [ ] [auto] `node scripts/breadcrumbs-check.mjs` passes (no files moved).
   - [ ] [human] Each touched page opens and works as before — inventory (product form, product list), equipment, suppliers, venues, recipe book, recipe builder, cook view, metadata manager, menu intelligence — and the shared dropdowns/modals (custom select, multi-select, confirm, AI modals) still open, close on Escape and focus their search box. The cards are listed in `docs/refactor/runs/458.md`.
 
@@ -94,6 +94,131 @@ src/app/shared/scaling-chip/scaling-chip.component.ts
 src/app/core/directives/*.ts
 src/app/core/components/user-msg/user-msg.component.ts
 src/app/appRoot/app.component.html
+# added by the builder (run 458, run-mode scope rule: mechanical call-site / rename / layer edits the sub-tasks need)
+docs/mvp/runs/458.md
+src/app/appRoot/app.component.scss
+src/app/appRoot/app.component.spec.ts
+src/app/core/components/auth-modal/auth-modal.component.html
+src/app/core/components/auth-modal/auth-modal.component.ts
+src/app/core/components/header/header.component.html
+src/app/core/components/header/header.component.ts
+src/app/core/components/update-banner/update-banner.component.html
+src/app/core/services/app-update.service.ts
+src/app/core/services/confirm-modal.service.ts
+src/app/core/services/loading.service.ts
+src/app/core/utils/cell-expand-state.util.ts
+src/app/pages/cook-view/cook-view.page.html
+src/app/pages/cook-view/services/cook-view-export.service.ts
+src/app/pages/dashboard/components/business-performance/business-performance.component.ts
+src/app/pages/dashboard/components/dashboard-header/dashboard-header.component.scss
+src/app/pages/dashboard/components/dashboard-overview/dashboard-overview.component.html
+src/app/pages/dashboard/components/setup-checklist-card/setup-checklist-card.component.ts
+src/app/pages/dashboard/dashboard.page.scss
+src/app/pages/equipment/components/equipment-list/equipment-list.component.html
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.html
+src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.spec.ts
+src/app/pages/inventory/components/product-import/product-import.component.html
+src/app/pages/inventory/components/product-import/product-import.component.ts
+src/app/pages/inventory/inventory.page.scss
+src/app/pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog.component.html
+src/app/pages/menu-intelligence/components/event-closing-dialog/event-closing-dialog.component.ts
+src/app/pages/menu-intelligence/components/event-notes-log/event-notes-log.component.html
+src/app/pages/menu-intelligence/components/event-notes-log/event-notes-log.component.ts
+src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.html
+src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.ts
+src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html
+src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts
+src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.html
+src/app/pages/menu-intelligence/components/pricing-meter/pricing-meter.component.ts
+src/app/pages/menu-intelligence/menu-intelligence.page.html
+src/app/pages/menu-intelligence/menu-intelligence.page.ts
+src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.html
+src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.ts
+src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.html
+src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.ts
+src/app/pages/menu-library/menu-library.page.scss
+src/app/pages/metadata-manager/components/unit-edit-dialog/unit-edit-dialog.component.html
+src/app/pages/platform-dashboard/platform-dashboard.page.html
+src/app/pages/platform-dashboard/platform-dashboard.page.ts
+src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html
+src/app/pages/recipe-book/recipe-book.page.scss
+src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.html
+src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.scss
+src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.ts
+src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.html
+src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.scss
+src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.ts
+src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html
+src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.ts
+src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.html
+src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.html
+src/app/pages/recipe-builder/recipe-builder.page.html
+src/app/pages/recipe-builder/services/recipe-builder-export.service.spec.ts
+src/app/pages/recipe-builder/services/recipe-builder-export.service.ts
+src/app/pages/settings/components/baseline-tab/baseline-tab.component.html
+src/app/pages/settings/components/baseline-tab/baseline-tab.component.ts
+src/app/pages/settings/components/business-settings-tab/business-settings-tab.component.ts
+src/app/pages/settings/components/team-tab/team-tab.component.html
+src/app/pages/settings/components/team-tab/team-tab.component.spec.ts
+src/app/pages/settings/components/team-tab/team-tab.component.ts
+src/app/pages/suppliers/components/supplier-list/supplier-list.component.html
+src/app/pages/trash/trash.page.html
+src/app/pages/trash/trash.page.ts
+src/app/pages/venues/components/venue-form/venue-form.component.html
+src/app/pages/venues/components/venue-form/venue-form.component.ts
+src/app/shared/add-item-modal/add-item-modal.component.html
+src/app/shared/ai-menu-modal/ai-menu-modal.component.html
+src/app/shared/ai-product-modal/ai-product-modal.component.html
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.html
+src/app/shared/ai-recipe-modal/ai-recipe-modal.component.ts
+src/app/shared/chip-search-dropdown/chip-search-dropdown.component.html
+src/app/shared/column-carousel/column-carousel-cell.component.ts
+src/app/shared/column-carousel/column-carousel-group.directive.ts
+src/app/shared/column-carousel/column-carousel-header.component.ts
+src/app/shared/column-carousel/column-carousel.spec.ts
+src/app/shared/column-carousel/column-slide.directive.ts
+src/app/shared/counter/counter.component.html
+src/app/shared/custom-multi-select/custom-multi-select.component.html
+src/app/shared/custom-select/custom-select.component.html
+src/app/shared/export-toolbar-overlay/export-toolbar-overlay.component.html
+src/app/shared/export-toolbar-overlay/export-toolbar-overlay.component.scss
+src/app/shared/form-field/form-field.component.scss
+src/app/shared/label-creation-modal/label-creation-modal.component.html
+src/app/shared/list-shell/list-shell.component.html
+src/app/shared/nutrition-badge/nutrition-badge.component.html
+src/app/shared/nutrition-badge/nutrition-badge.component.spec.ts
+src/app/shared/partial-cost-badge/partial-cost-badge.component.html
+src/app/shared/partial-cost-badge/partial-cost-badge.component.ts
+src/app/shared/quick-add-product-modal/quick-add-product-modal.component.html
+src/app/shared/quick-add-product-modal/quick-add-product-modal.component.ts
+src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.html
+src/app/shared/quick-edit-product-panel/quick-edit-product-panel.component.ts
+src/app/shared/scroll-rail/scroll-rail.component.ts
+src/app/shared/scrollable-dropdown/scrollable-dropdown.component.html
+src/app/shared/search-combobox/search-combobox.component.html
+src/app/shared/translation-key-modal/translation-key-modal.component.html
+src/app/shared/unit-creator/unit-creator.component.html
+src/app/shared/version-history-panel/version-history-panel.component.html
+src/app/shared/version-history-panel/version-history-panel.component.ts
+src/app/core/components/tab-chips/tab-chips.component.html
+src/app/core/services/scaling.service.spec.ts
+src/app/core/services/scaling.service.ts
+src/app/core/services/translation.service.ts
+src/app/core/services/version-history.service.ts
+src/app/pages/equipment/components/equipment-list/equipment-list.component.ts
+src/app/pages/recipe-book/components/recipe-book-list/services/recipe-row-actions.service.ts
+src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts
+src/app/pages/suppliers/components/supplier-list/supplier-list.component.ts
+src/app/pages/venues/components/venue-list/venue-list.component.ts
+# added by the builder, fix round 1 (R7 boolean fields, R9 warnings/nutrition labels, conventions.md override reason)
+kit.config.json
+docs/workflow-kit/drift-classification.md
+src/app/core/services/base-entity-data.service.ts
+src/app/core/services/keyboard-inset.service.ts
+src/app/core/services/server-heartbeat.service.ts
+src/app/core/services/gemini-shots.service.ts
+src/app/core/services/gemini-shots.service.spec.ts
+src/app/shared/list-selection/touch-row-selection.ts
 ```
 
 `**/*.scss` files that only lack `@layer` (S4) and the files holding boolean names (S8) or raw Hebrew (S9) are listed per sub-task by S1 in `docs/refactor/runs/458.md`; the Worker adds each one to this scope block with an `approved: <path>` reply before touching it (Escalation Protocol), never a glob.
@@ -114,6 +239,8 @@ append the path to the scope block above and retry.
 - INV-2: preserves — no tenancy or master-data change.
 - INV-3: preserves — no cascades added or moved.
 - INV-4: preserves — no schema change.
+- INV-5: preserves — no taxonomy change.
+- INV-6: preserves — the AI modals only change how their labels are worded (dictionary keys); every AI call still goes through `server/routes/ai.js`.
 
 ## Backend Impact
 - Collections affected: none
@@ -130,28 +257,28 @@ Runs first, before S1, because the MVP and plans 450–457 changed many files. F
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Per-rule baseline and after-count recorded in `docs/refactor/runs/458.md`.
-- [ ] Rules 1, 2, 4, 5, 6 reach zero; rules 7 and 9 reach zero unlisted violations; rule 8 documented; rule 3 decided (S5).
+- [x] Per-rule baseline and after-count recorded in `docs/refactor/runs/458.md`.
+- [ ] Rules 1, 2, 4, 5, 6 reach zero; rules 7 and 9 reach zero unlisted violations; rule 8 documented; rule 3 decided (S5). — run 458: open, waiting on the Human. R1, R4, R5, R6, R8 = 0; R7 = 0 + 2 exceptions, R9 = 0 + 95 canonical-data lines; R2 = 10 layered, 58 exceptions pending the Human's decision (Decision 1); R3 = 2 exceptions (Decision 2).
 ### Should Have (P1)
-- [ ] `scripts/rule-sweep-count.mjs` prints all counts in one table so later plans can re-run it (skipped if `reuse-lint.mjs` already does).
+- [x] `scripts/rule-sweep-count.mjs` prints all counts in one table so later plans can re-run it (skipped if `reuse-lint.mjs` already does).
 
 ## UI/UX Notes
 - No visual change. Every touched page gets a [human] smoke card (same screens as before, same clicks). Moving `.c-*` blocks into `styles.scss` must keep specificity: place them inside the existing `@layer` order used there.
 
 ## Atomic Sub-tasks
 Checkpoints (build + tests + run-file row, then pause for the Human's `continue`): after S1, S3, S5, S7, S10.
-- [ ] S1: Step 0, then record the baseline for all 9 rules in a table (rule · how measured · file list · count); classify each Hebrew hit as `bug` / `canonical data (keep)` / `comment`; add `scripts/rule-sweep-count.mjs` only if `reuse-lint.mjs` lacks a rule — `docs/refactor/runs/458.md`, `scripts/rule-sweep-count.mjs`
-- [ ] S2: Move the `.c-*` rule blocks out of the 14 component SCSS files into `src/styles.scss` (append-only, one commented block per source file; if a class already exists there, delete the duplicate and keep the existing one); component keeps its own local classes — the 14 component `.scss` files listed in Problem 1, `src/styles.scss`, `docs/refactor/runs/458.md`
-- [ ] S3: Wrap the remaining component SCSS in the project layer (`@layer`, same layer name the compliant files use — read `.claude/skills/cssLayer/SKILL.md` first), in batches of 10 files, building after each batch; compare a before/after screenshot of one page per batch — the SCSS files named by S1 (added via `approved:`), `docs/refactor/runs/458.md`
-- [ ] S4: Replace `@ViewChild`/`@ViewChildren` with `viewChild()`/`viewChildren()` (reads become `ref()?.nativeElement`; `QueryList` iteration becomes array iteration) — `equipment-form.component.ts`, `product-form.component.ts`, `recipe-ingredients-table.component.ts`, `recipe-workflow.component.ts`, `chip-search-dropdown.component.ts`, `counter.component.ts`, `custom-multi-select.component.ts`, `custom-select.component.ts`, `scaling-chip.component.ts`, `docs/refactor/runs/458.md`
-- [ ] S5: Replace `@HostListener` with `host: {}` bindings or `fromEvent` + `takeUntilDestroyed` where the listener is on `document`/`window` (Escape in the four modals/preview/row-actions menu, outside-click in nutrition-badge and `click-out-side.ts`, scroll/resize in `scroll-indicators.directive.ts`, `cook-view.page.ts` lines ~928 and ~1153) — the files in Problem 4, `src/app/core/directives/*.ts`, `docs/refactor/runs/458.md`
-- [ ] S6: Convert `*ngIf`/`*ngFor`/`*ngSwitch` in the product form template to `@if/@for/@switch` (every `@for` gets a `track`; keep `else` branches identical), drop now-unused `NgIf/NgFor` imports so the file does not grow — `product-form.component.html`, `product-form.component.ts`, `docs/refactor/runs/458.md`
-- [ ] S7: Add `app-` to the 9 component selectors and `app` prefixed names to the 8 attribute directives, updating every template call-site found in Step 0 (known: `appRoot/app.component.html`, `inventory.page.html`, `recipe-book.page.html`; modals opened from code need no template edit) — the selector files in Problem 6, `src/app/core/directives/*.ts`, `inventory.page.html`, `recipe-book.page.html`, `app.component.html`, `docs/refactor/runs/458.md`
-- [ ] S8: Rename non-`is/has/can/should` boolean signals and fields found by S1, with their template uses, one file per commit; skip public `input()` names that a parent binds unless every parent is in scope — files from S1 (added via `approved:`), `docs/refactor/runs/458.md`
-- [ ] S9: Document the input naming convention in `docs/agent/conventions.md`: private state keeps the trailing `_`; public `input()`/`output()`/`model()` names are the plain API name (171 of 173 today already follow this); fix the 2 outliers only if they have a single binding site — `docs/agent/conventions.md`, `docs/refactor/runs/458.md`
-- [ ] S10: Raw Hebrew: for each S1 `bug` row, replace the string with a `translatePipe` / `TranslationService` key and append the key to `public/assets/data/dictionary.json` (append-only; Hebrew value is the old string verbatim); `canonical data (keep)` rows stay and are listed as the exception list in the run file — files from S1 (added via `approved:`), `public/assets/data/dictionary.json`, `docs/refactor/runs/458.md`
-- [ ] S11: OnPush on `cook-view.page.ts` and `recipe-builder.page.ts`: first count what the change adds (import + `changeDetection` = +2 lines each) and what can be deleted in the same file to pay for it; if the file can end at net <= 0 and all reads in the template are signals, add OnPush, run the page's spec, and record it; if not, do NOT add it — record `blocked: frozen-file growth` and raise Critical Question 1 — `cook-view.page.ts`, `recipe-builder.page.ts`, `docs/refactor/runs/458.md`
-- [ ] S12: Final pass: re-run every rule's measure, fill the "after" column, build, run all tests, write the validation cards for the touched pages — `docs/refactor/runs/458.md`
+- [x] S1: Step 0, then record the baseline for all 9 rules in a table (rule · how measured · file list · count); classify each Hebrew hit as `bug` / `canonical data (keep)` / `comment`; add `scripts/rule-sweep-count.mjs` only if `reuse-lint.mjs` lacks a rule — `docs/refactor/runs/458.md`, `scripts/rule-sweep-count.mjs`
+- [x] S2: Move the `.c-*` rule blocks out of the 14 component SCSS files into `src/styles.scss` (append-only, one commented block per source file; if a class already exists there, delete the duplicate and keep the existing one); component keeps its own local classes — the 14 component `.scss` files listed in Problem 1, `src/styles.scss`, `docs/refactor/runs/458.md`
+- [x] S3: Wrap the remaining component SCSS in the project layer (`@layer`, same layer name the compliant files use — read `.claude/skills/cssLayer/SKILL.md` first), in batches of 10 files, building after each batch; compare a before/after screenshot of one page per batch — the SCSS files named by S1 (added via `approved:`), `docs/refactor/runs/458.md` — run 458: 10 layer-safe files wrapped, 58 listed as exceptions (Decision 1); the before/after screenshot per batch is taken by the UI validator (run file cards 4, 5, 9, 14, 17)
+- [x] S4: Replace `@ViewChild`/`@ViewChildren` with `viewChild()`/`viewChildren()` (reads become `ref()?.nativeElement`; `QueryList` iteration becomes array iteration) — `equipment-form.component.ts`, `product-form.component.ts`, `recipe-ingredients-table.component.ts`, `recipe-workflow.component.ts`, `chip-search-dropdown.component.ts`, `counter.component.ts`, `custom-multi-select.component.ts`, `custom-select.component.ts`, `scaling-chip.component.ts`, `docs/refactor/runs/458.md`
+- [x] S5: Replace `@HostListener` with `host: {}` bindings or `fromEvent` + `takeUntilDestroyed` where the listener is on `document`/`window` (Escape in the four modals/preview/row-actions menu, outside-click in nutrition-badge and `click-out-side.ts`, scroll/resize in `scroll-indicators.directive.ts`, `cook-view.page.ts` lines ~928 and ~1153) — the files in Problem 4, `src/app/core/directives/*.ts`, `docs/refactor/runs/458.md`
+- [x] S6: Convert `*ngIf`/`*ngFor`/`*ngSwitch` in the product form template to `@if/@for/@switch` (every `@for` gets a `track`; keep `else` branches identical), drop now-unused `NgIf/NgFor` imports so the file does not grow — `product-form.component.html`, `product-form.component.ts`, `docs/refactor/runs/458.md`
+- [x] S7: Add `app-` to the 9 component selectors and `app` prefixed names to the 8 attribute directives, updating every template call-site found in Step 0 (known: `appRoot/app.component.html`, `inventory.page.html`, `recipe-book.page.html`; modals opened from code need no template edit) — the selector files in Problem 6, `src/app/core/directives/*.ts`, `inventory.page.html`, `recipe-book.page.html`, `app.component.html`, `docs/refactor/runs/458.md`
+- [x] S8: Rename non-`is/has/can/should` boolean signals and fields found by S1, with their template uses, one file per commit; skip public `input()` names that a parent binds unless every parent is in scope — files from S1 (added via `approved:`), `docs/refactor/runs/458.md`
+- [x] S9: Document the input naming convention in `docs/agent/conventions.md`: private state keeps the trailing `_`; public `input()`/`output()`/`model()` names are the plain API name (171 of 173 today already follow this); fix the 2 outliers only if they have a single binding site — `docs/agent/conventions.md`, `docs/refactor/runs/458.md`
+- [x] S10: Raw Hebrew: for each S1 `bug` row, replace the string with a `translatePipe` / `TranslationService` key and append the key to `public/assets/data/dictionary.json` (append-only; Hebrew value is the old string verbatim); `canonical data (keep)` rows stay and are listed as the exception list in the run file — files from S1 (added via `approved:`), `public/assets/data/dictionary.json`, `docs/refactor/runs/458.md`
+- [x] S11: OnPush on `cook-view.page.ts` and `recipe-builder.page.ts`: first count what the change adds (import + `changeDetection` = +2 lines each) and what can be deleted in the same file to pay for it; if the file can end at net <= 0 and all reads in the template are signals, add OnPush, run the page's spec, and record it; if not, do NOT add it — record `blocked: frozen-file growth` and raise Critical Question 1 — `cook-view.page.ts`, `recipe-builder.page.ts`, `docs/refactor/runs/458.md` — run 458: not added, template reads plain state (Decision 2)
+- [x] S12: Final pass: re-run every rule's measure, fill the "after" column, build, run all tests, write the validation cards for the touched pages — `docs/refactor/runs/458.md`
 
 ## Technical Considerations
 - Dependencies: `scripts/reuse-lint.mjs` (plan 450), `scripts/scope-check.mjs`, `.claude/skills/cssLayer/SKILL.md`, `.claude/skills/angularComponentStructure/SKILL.md`.

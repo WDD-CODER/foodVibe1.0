@@ -1,5 +1,5 @@
-<div class="pricing-meter no-print" [class.expanded]="expanded_()" [formGroup]="moneyForm()">
-  <button type="button" class="meter-summary" [attr.aria-expanded]="expanded_()" (click)="toggleExpanded()">
+<div class="pricing-meter no-print" [class.expanded]="isExpanded_()" [formGroup]="moneyForm()">
+  <button type="button" class="meter-summary" [attr.aria-expanded]="isExpanded_()" (click)="toggleExpanded()">
     <span class="summary-price" dir="ltr">{{ pricePerGuest_() }}</span>
     <span class="summary-pct" dir="ltr">{{ profitPct_() }}</span>
     @if (hasProfitPct_()) {
@@ -13,7 +13,7 @@
         >
       }
     }
-    <lucide-icon [name]="expanded_() ? 'chevron-down' : 'chevron-up'" [size]="16"></lucide-icon>
+    <lucide-icon [name]="isExpanded_() ? 'chevron-down' : 'chevron-up'" [size]="16"></lucide-icon>
   </button>
 
   <div class="meter-body">

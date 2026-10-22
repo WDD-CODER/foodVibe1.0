@@ -73,7 +73,7 @@ export class BusinessSettingsTabComponent {
       errorKey: 'pct_range_overrun'
     }
   ]
-  protected readonly saving_ = signal(false)
+  protected readonly isSaving_ = signal(false)
   private readonly value_ = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() })
 
   // 5. COMPUTED
@@ -87,7 +87,7 @@ export class BusinessSettingsTabComponent {
   protected readonly canSave = computed(() => {
     const value = this.value_()
     const stored = this.stored()
-    return !this.saving_() && this.form.valid && this.fields.some((field) => value[field.key] !== stored[field.key])
+    return !this.isSaving_() && this.form.valid && this.fields.some((field) => value[field.key] !== stored[field.key])
   })
 
   constructor() {
@@ -103,7 +103,7 @@ export class BusinessSettingsTabComponent {
   // 6. METHODS (UI handlers)
   async save(): Promise<void> {
     if (!this.canSave()) return
-    this.saving_.set(true)
+    this.isSaving_.set(true)
     try {
       await this.businessService.updateSettings(this.form.getRawValue())
       this.form.reset(this.stored())
@@ -119,7 +119,7 @@ export class BusinessSettingsTabComponent {
         this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
       }
     } finally {
-      this.saving_.set(false)
+      this.isSaving_.set(false)
     }
   }
 

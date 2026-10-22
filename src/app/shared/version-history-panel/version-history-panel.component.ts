@@ -36,7 +36,7 @@ export class VersionHistoryPanelComponent {
   readonly restored = output<void>()
 
   readonly versions = signal<VersionEntry[]>([])
-  readonly loading = signal(false)
+  readonly isLoading = signal(false)
   readonly loadError = signal<string | null>(null)
 
   constructor() {
@@ -48,7 +48,7 @@ export class VersionHistoryPanelComponent {
   }
 
   private async loadVersions(entityType: VersionEntityType, entityId: string): Promise<void> {
-    this.loading.set(true)
+    this.isLoading.set(true)
     this.loadError.set(null)
     try {
       const list = await this.versionHistory.getVersions(entityType, entityId)
@@ -61,7 +61,7 @@ export class VersionHistoryPanelComponent {
       })
       this.loadError.set(this.translation.translate('history_load_error'))
     } finally {
-      this.loading.set(false)
+      this.isLoading.set(false)
     }
   }
 

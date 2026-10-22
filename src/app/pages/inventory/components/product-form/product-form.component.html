@@ -4,7 +4,7 @@
       @if (isEditMode_()) {
         <h2 class="form-header__title">
           {{ 'edit_product_title' | translatePipe }}:
-          {{ productForm_.get('productName')?.value ?? initialProduct_()?.nameHebrew ?? '' }}
+          {{ productForm_.get('productName')?.value ?? initialProduct()?.nameHebrew ?? '' }}
         </h2>
       } @else {
         <h2 class="form-header__title">{{ 'add_product_inventory_title' | translatePipe }}</h2>
@@ -64,7 +64,7 @@
       <app-form-field label="buy_price" labelStyle="caps">
         <div class="relative-input">
           <input
-            SelectOnFocus
+            appSelectOnFocus
             type="number"
             formControlName="buy_price_global_"
             placeholder="0.00"
@@ -103,105 +103,108 @@
         </button>
       </label>
 
-      <div
-        *ngFor="let option of purchaseOptions_.controls; let idx = index"
-        [formGroupName]="idx"
-        class="product-field scaling-box"
-        [class.row-invalid]="option.invalid && (option.dirty || isSubmitted)"
-      >
-        <div class="scaling-row">
-          <div
-            class="input-wrapper"
-            [class.field-error]="option.get('unitSymbol')?.invalid && (option.get('unitSymbol')?.dirty || isSubmitted)"
-          >
-            <app-custom-select
-              formControlName="unitSymbol"
-              [options]="unitSymbolOptions_()"
-              placeholder="choose_unit"
-              [typeToFilter]="true"
-              [addNewValue]="'NEW_UNIT'"
-              [allowTypedAdd]="true"
-              (addNewChosen)="pendingAddName_.set($event)"
-              (valueChange)="onUnitSymbolValueChange($event, idx)"
-            />
-          </div>
-
-          <div
-            class="input-wrapper"
-            [class.field-error]="
-              option.get('conversionRate')?.invalid && (option.get('conversionRate')?.dirty || isSubmitted)
-            "
-          >
-            <label class="label-row">
-              <span class="math-text">=</span>
-              <input
-                type="number"
-                formControlName="conversionRate"
-                [placeholder]="'quantity' | translatePipe"
-                [attr.aria-label]="'quantity' | translatePipe"
-                step="any"
-                min="0.0001"
-                class="c-input"
-              />
-            </label>
-          </div>
-
-          <div
-            class="input-wrapper"
-            [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)"
-          >
-            <label class="label-row">
-              <span class="math-text">:</span>
-
+      @for (option of purchaseOptions_.controls; track option; let idx = $index) {
+        <div
+          [formGroupName]="idx"
+          class="product-field scaling-box"
+          [class.row-invalid]="option.invalid && (option.dirty || isSubmitted)"
+        >
+          <div class="scaling-row">
+            <div
+              class="input-wrapper"
+              [class.field-error]="
+                option.get('unitSymbol')?.invalid && (option.get('unitSymbol')?.dirty || isSubmitted)
+              "
+            >
               <app-custom-select
-                formControlName="uom"
-                [options]="uomOptions_()"
-                [placeholder]="productForm_.get('baseUnit')?.value || 'compare_to_unit'"
+                formControlName="unitSymbol"
+                [options]="unitSymbolOptions_()"
+                placeholder="choose_unit"
                 [typeToFilter]="true"
                 [addNewValue]="'NEW_UNIT'"
                 [allowTypedAdd]="true"
                 (addNewChosen)="pendingAddName_.set($event)"
-                (valueChange)="onUomValueChange($event, idx)"
+                (valueChange)="onUnitSymbolValueChange($event, idx)"
               />
-            </label>
+            </div>
+
+            <div
+              class="input-wrapper"
+              [class.field-error]="
+                option.get('conversionRate')?.invalid && (option.get('conversionRate')?.dirty || isSubmitted)
+              "
+            >
+              <label class="label-row">
+                <span class="math-text">=</span>
+                <input
+                  type="number"
+                  formControlName="conversionRate"
+                  [placeholder]="'quantity' | translatePipe"
+                  [attr.aria-label]="'quantity' | translatePipe"
+                  step="any"
+                  min="0.0001"
+                  class="c-input"
+                />
+              </label>
+            </div>
+
+            <div
+              class="input-wrapper"
+              [class.field-error]="option.get('uom')?.invalid && (option.get('uom')?.dirty || isSubmitted)"
+            >
+              <label class="label-row">
+                <span class="math-text">:</span>
+
+                <app-custom-select
+                  formControlName="uom"
+                  [options]="uomOptions_()"
+                  [placeholder]="productForm_.get('baseUnit')?.value || 'compare_to_unit'"
+                  [typeToFilter]="true"
+                  [addNewValue]="'NEW_UNIT'"
+                  [allowTypedAdd]="true"
+                  (addNewChosen)="pendingAddName_.set($event)"
+                  (valueChange)="onUomValueChange($event, idx)"
+                />
+              </label>
+            </div>
+
+            <div class="price-override-wrapper">
+              <label class="c-chip c-chip--toggle">
+                <input type="checkbox" formControlName="show_special_price_" />
+                <span>{{ 'special_purchase_price' | translatePipe }}</span>
+              </label>
+              @if (option.get('show_special_price_')?.value) {
+                <input
+                  type="number"
+                  formControlName="priceOverride"
+                  [placeholder]="'price' | translatePipe"
+                  class="override-input c-input"
+                  step="0.01"
+                  min="0"
+                  (blur)="onPriceOverrideBlur(option)"
+                />
+                <span class="math-text">₪</span>
+              }
+            </div>
+
+            <button
+              type="button"
+              class="c-icon-btn danger"
+              (click)="onDeletePurchaseOption(idx)"
+              [attr.aria-label]="'remove' | translatePipe"
+            >
+              <lucide-icon name="trash-2" class="icon-sm"></lucide-icon>
+            </button>
           </div>
 
-          <div class="price-override-wrapper">
-            <label class="c-chip c-chip--toggle">
-              <input type="checkbox" formControlName="show_special_price_" />
-              <span>{{ 'special_purchase_price' | translatePipe }}</span>
-            </label>
-            @if (option.get('show_special_price_')?.value) {
-              <input
-                type="number"
-                formControlName="priceOverride"
-                [placeholder]="'price' | translatePipe"
-                class="override-input c-input"
-                step="0.01"
-                min="0"
-                (blur)="onPriceOverrideBlur(option)"
-              />
-              <span class="math-text">₪</span>
-            }
-          </div>
-
-          <button
-            type="button"
-            class="c-icon-btn danger"
-            (click)="onDeletePurchaseOption(idx)"
-            [attr.aria-label]="'remove' | translatePipe"
-          >
-            <lucide-icon name="trash-2" class="icon-sm"></lucide-icon>
-          </button>
+          @if (option.invalid && (option.dirty || isSubmitted)) {
+            <div class="error-message-row">
+              <lucide-icon name="alert-circle" class="icon-xs"></lucide-icon>
+              {{ 'purchase_unit_details_invalid' | translatePipe }}
+            </div>
+          }
         </div>
-
-        @if (option.invalid && (option.dirty || isSubmitted)) {
-          <div class="error-message-row">
-            <lucide-icon name="alert-circle" class="icon-xs"></lucide-icon>
-            {{ 'purchase_unit_details_invalid' | translatePipe }}
-          </div>
-        }
-      </div>
+      }
     </div>
 
     <div class="form-section form-section--optional border-top">
@@ -210,8 +213,8 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedSupplier_()"
-          (clickOutside)="onSupplierBlur($event)"
+          [class.collapsible-field__content--hidden]="!isExpandedSupplier_()"
+          (appClickOutside)="onSupplierBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
             <lucide-icon name="truck" class="icon-xs icon-muted"></lucide-icon>
@@ -233,7 +236,7 @@
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedSupplier_()"
+          [class.collapsible-field__header--hidden]="isExpandedSupplier_()"
           (click)="toggleSupplier()"
           (keydown.enter)="toggleSupplier()"
           (keydown.space)="toggleSupplier(); $event.preventDefault()"
@@ -248,8 +251,8 @@
       <div class="product-field allergen-container collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedAllergens_()"
-          (clickOutside)="onAllergensBlur($event)"
+          [class.collapsible-field__content--hidden]="!isExpandedAllergens_()"
+          (appClickOutside)="onAllergensBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
             <lucide-icon name="shield-alert" class="icon-xs icon-warning"></lucide-icon>
@@ -271,7 +274,7 @@
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedAllergens_()"
+          [class.collapsible-field__header--hidden]="isExpandedAllergens_()"
           (click)="toggleAllergens()"
           (keydown.enter)="toggleAllergens()"
           (keydown.space)="toggleAllergens(); $event.preventDefault()"
@@ -286,8 +289,8 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedWasteYield_()"
-          (clickOutside)="onWasteYieldBlur($event)"
+          [class.collapsible-field__content--hidden]="!isExpandedWasteYield_()"
+          (appClickOutside)="onWasteYieldBlur($event)"
         >
           <div class="collapsible-field__label-with-icon">
             <lucide-icon name="flask-conical" class="icon-xs icon-primary"></lucide-icon>
@@ -298,7 +301,7 @@
               <label>{{ 'waste_percent' | translatePipe }}</label>
               <div class="relative-input">
                 <input
-                  SelectOnFocus
+                  appSelectOnFocus
                   type="number"
                   formControlName="waste_percent_"
                   placeholder="0"
@@ -316,7 +319,7 @@
               <div class="relative-input">
                 <input
                   class="yield-factor-input c-input"
-                  SelectOnFocus
+                  appSelectOnFocus
                   type="number"
                   formControlName="yieldFactor"
                   step="0.001"
@@ -328,15 +331,17 @@
             </div>
           </div>
 
-          <div class="cost-impact-alert" *ngIf="productForm_.get('buy_price_global_')?.value > 0">
-            <span class="cost-alert__label">{{ 'net_cost_calculated_with_waste' | translatePipe }}</span>
-            <span class="cost-alert__value">₪{{ netUnitCost_() | number: '1.2-2' }}</span>
-          </div>
+          @if (productForm_.get('buy_price_global_')?.value > 0) {
+            <div class="cost-impact-alert">
+              <span class="cost-alert__label">{{ 'net_cost_calculated_with_waste' | translatePipe }}</span>
+              <span class="cost-alert__value">₪{{ netUnitCost_() | number: '1.2-2' }}</span>
+            </div>
+          }
         </div>
 
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedWasteYield_()"
+          [class.collapsible-field__header--hidden]="isExpandedWasteYield_()"
           (click)="toggleWasteYield()"
           (keydown.enter)="toggleWasteYield()"
           role="button"
@@ -349,8 +354,8 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedMinStock_()"
-          (clickOutside)="onMinStockBlur($event)"
+          [class.collapsible-field__content--hidden]="!isExpandedMinStock_()"
+          (appClickOutside)="onMinStockBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
             <lucide-icon name="package" class="icon-xs icon-muted"></lucide-icon>
@@ -360,7 +365,7 @@
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedMinStock_()"
+          [class.collapsible-field__header--hidden]="isExpandedMinStock_()"
           (click)="toggleMinStock()"
           (keydown.enter)="toggleMinStock()"
           (keydown.space)="toggleMinStock(); $event.preventDefault()"
@@ -375,8 +380,8 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
-          [class.collapsible-field__content--hidden]="!expandedExpiryDays_()"
-          (clickOutside)="onExpiryDaysBlur($event)"
+          [class.collapsible-field__content--hidden]="!isExpandedExpiryDays_()"
+          (appClickOutside)="onExpiryDaysBlur($event)"
         >
           <label class="collapsible-field__label-with-icon">
             <lucide-icon name="calendar-clock" class="icon-xs icon-muted"></lucide-icon>
@@ -386,7 +391,7 @@
         </div>
         <div
           class="collapsible-field__header collapsible-field__header--btn"
-          [class.collapsible-field__header--hidden]="expandedExpiryDays_()"
+          [class.collapsible-field__header--hidden]="isExpandedExpiryDays_()"
           (click)="toggleExpiryDays()"
           (keydown.enter)="toggleExpiryDays()"
           (keydown.space)="toggleExpiryDays(); $event.preventDefault()"

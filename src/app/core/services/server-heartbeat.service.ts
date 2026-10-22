@@ -20,7 +20,7 @@ export class ServerHeartbeatService {
   private readonly http_ = inject(HttpClient)
   private readonly destroyRef_ = inject(DestroyRef)
 
-  private started_ = false
+  private isStarted_ = false
   private intervalId_: ReturnType<typeof setInterval> | null = null
   private hiddenTimerId_: ReturnType<typeof setTimeout> | null = null
 
@@ -29,8 +29,8 @@ export class ServerHeartbeatService {
   }
 
   start(): void {
-    if (this.started_) return
-    this.started_ = true
+    if (this.isStarted_) return
+    this.isStarted_ = true
     this.handleVisibility_()
     document.addEventListener('visibilitychange', this.onVisibility_)
     this.destroyRef_.onDestroy(() => this.stop_())
@@ -68,7 +68,7 @@ export class ServerHeartbeatService {
     document.removeEventListener('visibilitychange', this.onVisibility_)
     this.clearHiddenTimer_()
     this.stopInterval_()
-    this.started_ = false
+    this.isStarted_ = false
   }
 
   private ping_(): void {

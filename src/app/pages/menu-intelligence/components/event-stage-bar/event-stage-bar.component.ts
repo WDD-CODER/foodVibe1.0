@@ -56,12 +56,12 @@ export class EventStageBarComponent {
   // 4. SIGNALS & CONSTANTS
   protected readonly flowStages: readonly EventStage[] = EVENT_STAGE_ORDER.filter((stage) => stage !== 'not_closed')
   protected readonly stageLabelKey = stageLabelKey
-  protected readonly notClosedDialogOpen_ = signal(false)
-  protected readonly closingOpen_ = signal(false)
-  protected readonly detailsOpen_ = signal(false)
-  protected readonly historyOpen_ = signal(false)
-  protected readonly phoneInvalid_ = signal(false)
-  protected readonly busy_ = signal(false)
+  protected readonly isNotClosedDialogOpen_ = signal(false)
+  protected readonly isClosingOpen_ = signal(false)
+  protected readonly isDetailsOpen_ = signal(false)
+  protected readonly isHistoryOpen_ = signal(false)
+  protected readonly isPhoneInvalid_ = signal(false)
+  protected readonly isBusy_ = signal(false)
 
   // 5. COMPUTED
   protected readonly event_ = computed(
@@ -86,13 +86,13 @@ export class EventStageBarComponent {
   /** Moves the event to `stage` after the checks the screen can make itself; the server has the last word. */
   protected async pick(stage: EventStage): Promise<void> {
     const event = this.event_()
-    if (!event || this.busy_()) return
+    if (!event || this.isBusy_()) return
     if (stage === 'finished') return this.showError('stage_finished_hint')
     if (!this.canChangeStage_()) return this.showError('stage_not_allowed')
     if (stage === this.current_()) return
     if (stage === 'not_closed') {
       if (!canPickNotClosed(this.current_())) return this.showError('stage_not_closed_from')
-      this.notClosedDialogOpen_.set(true)
+      this.isNotClosedDialogOpen_.set(true)
       return
     }
     if (needsDateFor(stage, event.eventDate)) return this.showError('stage_needs_date')
@@ -101,7 +101,7 @@ export class EventStageBarComponent {
 
   protected async onNotClosed(answer: NotClosedAnswer): Promise<void> {
     const event = this.event_()
-    this.notClosedDialogOpen_.set(false)
+    this.isNotClosedDialogOpen_.set(false)
     if (!event) return
     await this.move(event, { stage: 'not_closed', reason: answer.reason, reasonText: answer.reasonText })
   }
@@ -117,8 +117,8 @@ export class EventStageBarComponent {
     const event = this.event_()
     const clientPhone = value.trim()
     if (!event) return
-    this.phoneInvalid_.set(!isValidClientPhone(clientPhone))
-    if (this.phoneInvalid_() || clientPhone === (event.clientPhone ?? '')) return
+    this.isPhoneInvalid_.set(!isValidClientPhone(clientPhone))
+    if (this.isPhoneInvalid_() || clientPhone === (event.clientPhone ?? '')) return
     void this.saveFields(event, { clientPhone })
   }
 
@@ -140,15 +140,15 @@ export class EventStageBarComponent {
   }
 
   protected openClosing(): void {
-    this.closingOpen_.set(true)
+    this.isClosingOpen_.set(true)
   }
 
   protected toggleDetails(): void {
-    this.detailsOpen_.update((open) => !open)
+    this.isDetailsOpen_.update((open) => !open)
   }
 
   protected toggleHistory(): void {
-    this.historyOpen_.update((open) => !open)
+    this.isHistoryOpen_.update((open) => !open)
   }
 
   /** True when the user may do `action` on this event (the server decides again). */
@@ -158,17 +158,17 @@ export class EventStageBarComponent {
   }
 
   private async move(event: MenuEvent, change: Parameters<EventPipelineService['changeStage']>[1]): Promise<void> {
-    this.busy_.set(true)
+    this.isBusy_.set(true)
     // Plan 446: entering "הזמנות" / "ביצוע" / "פוסט-פרודקשן" stores or freezes the planning snapshot (the server applies the same rule).
     const withSnapshot =
       snapshotOnStageChange(change.stage, event.planSnapshot) === 'none'
         ? change
         : { ...change, planSnapshot: this.snapshots.buildFor(event) }
     const result = await this.pipeline.changeStage(event._id, withSnapshot)
-    this.busy_.set(false)
+    this.isBusy_.set(false)
     if (!result.ok) return
     this.userMsg.onSetSuccessMsg(this.translation.translate('stage_changed'))
-    if (change.stage === 'post_production') this.closingOpen_.set(true)
+    if (change.stage === 'post_production') this.isClosingOpen_.set(true)
     if (change.stage === 'ordering' && this.supplierOrdersAvailable()) {
       if (await this.confirmModal.open('open_supplier_orders_prompt', { saveLabel: 'yes' }))
         this.openSupplierOrders.emit()

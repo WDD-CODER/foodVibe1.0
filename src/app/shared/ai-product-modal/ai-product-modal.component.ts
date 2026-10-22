@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, HostListener, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
@@ -36,6 +36,7 @@ const CANONICAL_UNITS = [
 
 @Component({
   selector: 'app-ai-product-modal',
+  host: { '(document:keydown.escape)': 'onEscapeKey()' },
   standalone: true,
   imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent],
   templateUrl: './ai-product-modal.component.html',
@@ -66,7 +67,7 @@ export class AiProductModalComponent implements OnInit {
   protected readonly patch_ = signal<AiProductPatch | null>(null)
 
   // Shared
-  protected readonly loading_ = signal(false)
+  protected readonly isLoading_ = signal(false)
   protected readonly status_ = signal<GenerationStatus>('idle')
   protected readonly errorKey_ = signal('ai_product_error')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
@@ -102,32 +103,44 @@ export class AiProductModalComponent implements OnInit {
     if (!patch || !current) return []
     const entries: { label: string; from: string; to: string }[] = []
     if ('nameHebrew' in patch)
-      entries.push({ label: 'שם', from: current.nameHebrew ?? '—', to: String(patch.nameHebrew ?? '—') })
+      entries.push({
+        label: this.translation_.translate('name'),
+        from: current.nameHebrew ?? '—',
+        to: String(patch.nameHebrew ?? '—')
+      })
     if ('baseUnit' in patch)
-      entries.push({ label: 'יחידת בסיס', from: current.baseUnit ?? '—', to: String(patch.baseUnit ?? '—') })
+      entries.push({
+        label: this.translation_.translate('base_unit'),
+        from: current.baseUnit ?? '—',
+        to: String(patch.baseUnit ?? '—')
+      })
     if ('yieldFactor' in patch)
-      entries.push({ label: 'יחידת תפוקה', from: String(current.yieldFactor), to: String(patch.yieldFactor ?? '—') })
+      entries.push({
+        label: this.translation_.translate('ai_patch_yield_unit'),
+        from: String(current.yieldFactor),
+        to: String(patch.yieldFactor ?? '—')
+      })
     if ('categories' in patch)
       entries.push({
-        label: 'קטגוריות',
+        label: this.translation_.translate('ai_product_categories_label'),
         from: this.labels_(current.categories),
         to: this.labels_(patch.categories)
       })
     if ('allergens' in patch)
       entries.push({
-        label: 'אלרגנים',
+        label: this.translation_.translate('allergens'),
         from: this.labels_(current.allergens),
         to: this.labels_(patch.allergens)
       })
     if ('minStockLevel' in patch)
       entries.push({
-        label: 'מינימום מלאי',
+        label: this.translation_.translate('ai_patch_min_stock'),
         from: String(current.minStockLevel),
         to: String(patch.minStockLevel ?? '—')
       })
     if ('expiryDaysDefault' in patch)
       entries.push({
-        label: 'ימי תפוגה',
+        label: this.translation_.translate('ai_patch_expiry_days'),
         from: String(current.expiryDaysDefault),
         to: String(patch.expiryDaysDefault ?? '—')
       })
@@ -198,7 +211,7 @@ export class AiProductModalComponent implements OnInit {
     if (!this.canGenerate_()) return
     const file = this.imageFile_()
     const text = this.prompt_().trim()
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     this.errorKey_.set('ai_product_error')
     try {
@@ -212,7 +225,7 @@ export class AiProductModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage_()
     }
   }
@@ -235,7 +248,7 @@ export class AiProductModalComponent implements OnInit {
   async onEdit(): Promise<void> {
     const currentProduct = this.modalService.getEditContext()
     if (!currentProduct) return
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     this.errorKey_.set('ai_product_error')
     try {
@@ -246,7 +259,7 @@ export class AiProductModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage_()
     }
   }
@@ -267,7 +280,6 @@ export class AiProductModalComponent implements OnInit {
 
   // ─── Shared ──────────────────────────────────────────────────────
 
-  @HostListener('document:keydown.escape')
   onEscapeKey(): void {
     if (this.modalService.isOpen()) this.onClose()
   }
@@ -308,7 +320,7 @@ export class AiProductModalComponent implements OnInit {
     this.newAllergen_.set('')
     this.instruction.set('')
     this.patch_.set(null)
-    this.loading_.set(false)
+    this.isLoading_.set(false)
     this.status_.set('idle')
     this.errorKey_.set('ai_product_error')
   }

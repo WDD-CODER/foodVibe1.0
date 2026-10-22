@@ -1,14 +1,16 @@
-.search-container {
-  position: relative;
+@layer components.preparation-search {
+  .search-container {
+    position: relative;
 
-  width: 100%;
-}
+    width: 100%;
+  }
 
-.item-name {
-  flex: 1;
-  min-width: 0;
+  .item-name {
+    flex: 1;
+    min-width: 0;
 
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
 }

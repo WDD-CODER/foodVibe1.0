@@ -17,7 +17,7 @@
           type="text"
           autocomplete="off"
           [maxLength]="nameMax"
-          [class.c-input--invalid]="touched_() && !nameValid_()"
+          [class.c-input--invalid]="isTouched_() && !nameValid_()"
           [ngModel]="name_()"
           (ngModelChange)="name_.set($event)"
           (keydown.enter)="onSave()"
@@ -88,7 +88,7 @@
 
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
-      <button type="button" class="c-btn-primary" [disabled]="saving_()" (click)="onSave()">
+      <button type="button" class="c-btn-primary" [disabled]="isSaving_()" (click)="onSave()">
         {{ 'save' | translatePipe }}
       </button>
     </div>

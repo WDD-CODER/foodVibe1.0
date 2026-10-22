@@ -140,7 +140,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
   /** "צ'קליסט והדפסות" top sheet, toggled from the hero FAB (plan 344). */
-  protected readonly exportSheetOpen_ = signal(false)
+  protected readonly isExportSheetOpen_ = signal(false)
   protected readonly supplierOrdersEvent_ = signal<MenuEvent | null>(null)
   protected readonly prepSheets_ = signal<{ event: MenuEvent; mode: PrepSheetsMode } | null>(null)
   /** Export preview (View before export). */
@@ -188,7 +188,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   /** Which dish field is in edit mode (key: "sectionIndex-itemIndex-fieldKey") */
   protected readonly editingDishField_ = signal<string | null>(null)
   /** Event type dropdown open; its query + highlight live in the shared search box. */
-  protected readonly eventTypeDropdownOpen_ = signal(false)
+  protected readonly isEventTypeDropdownOpen_ = signal(false)
   /** Focus order for keyboard navigation */
   protected readonly FOCUS_ORDER = ['name', 'eventType', 'servingType', 'guestCount', 'eventDate'] as const
 
@@ -260,7 +260,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Close export toolbar and all sub-modals so state is clean when user navigates away. */
   private closeAllExportOverlays(): void {
-    this.exportSheetOpen_.set(false)
+    this.isExportSheetOpen_.set(false)
     this.supplierOrdersEvent_.set(null)
     this.prepSheets_.set(null)
     this.exportPreviewPayload_.set(null)
@@ -432,13 +432,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly translateLabel_ = (key: string): string => this.translation.translate(key)
 
   protected openEventTypeDropdown(): void {
-    this.eventTypeDropdownOpen_.set(true)
+    this.isEventTypeDropdownOpen_.set(true)
     this.startEditField('event_type')
     setTimeout(() => document.getElementById('menu-focus-event_type_search')?.focus(), 50)
   }
 
   protected closeEventTypeDropdown(): void {
-    this.eventTypeDropdownOpen_.set(false)
+    this.isEventTypeDropdownOpen_.set(false)
   }
 
   /** Escape: close the list and give focus back to the chip. */
@@ -849,7 +849,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected toggleExportSheet(): void {
-    this.exportSheetOpen_.update((v) => !v)
+    this.isExportSheetOpen_.update((v) => !v)
   }
 
   protected printMenu(): void {

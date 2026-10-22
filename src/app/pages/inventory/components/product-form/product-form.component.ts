@@ -11,7 +11,7 @@ import {
   Injector,
   ElementRef,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   DestroyRef
 } from '@angular/core'
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
@@ -85,7 +85,7 @@ interface ProductFormValue {
 }
 
 @Component({
-  selector: 'product-form',
+  selector: 'app-product-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -107,9 +107,9 @@ interface ProductFormValue {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductFormComponent implements OnInit, AfterViewInit {
-  initialProduct_ = input<Product | null>(null)
+  initialProduct = input<Product | null>(null)
 
-  @ViewChild('productNameInput') private productNameInputRef?: ElementRef<HTMLInputElement>
+  private readonly productNameInputRef = viewChild<ElementRef<HTMLInputElement>>('productNameInput')
 
   private readonly fb_ = inject(FormBuilder)
   private readonly conversionService = inject(ConversionService)
@@ -208,33 +208,33 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected readonly translateFn = (key: string) => this.translationService.translate(key)
   protected readonly supplierDisplayFn = (id: string) => this.getSupplierName(id)
 
-  protected expandedMinStock_ = signal(false)
-  protected expandedExpiryDays_ = signal(false)
-  protected expandedWasteYield_ = signal(false)
-  protected expandedAllergens_ = signal(false)
-  protected expandedSupplier_ = signal(false)
+  protected isExpandedMinStock_ = signal(false)
+  protected isExpandedExpiryDays_ = signal(false)
+  protected isExpandedWasteYield_ = signal(false)
+  protected isExpandedAllergens_ = signal(false)
+  protected isExpandedSupplier_ = signal(false)
 
   protected toggleMinStock(): void {
-    this.expandedMinStock_.update((v) => !v)
+    this.isExpandedMinStock_.update((v) => !v)
   }
   protected toggleExpiryDays(): void {
-    this.expandedExpiryDays_.update((v) => !v)
+    this.isExpandedExpiryDays_.update((v) => !v)
   }
   protected toggleWasteYield(): void {
-    this.expandedWasteYield_.update((v) => !v)
+    this.isExpandedWasteYield_.update((v) => !v)
   }
   protected toggleAllergens(): void {
-    this.expandedAllergens_.update((v) => !v)
+    this.isExpandedAllergens_.update((v) => !v)
   }
   protected toggleSupplier(): void {
-    this.expandedSupplier_.update((v) => !v)
+    this.isExpandedSupplier_.update((v) => !v)
   }
 
   protected onSupplierBlur(clickTarget?: HTMLElement): void {
     if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     if (this.selectedSupplierIds_().length === 0) {
-      this.expandedSupplier_.set(false)
+      this.isExpandedSupplier_.set(false)
     }
   }
 
@@ -243,7 +243,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const val = this.productForm_.get('minStockLevel')?.value
     if (val == null || val === 0 || val === '') {
-      this.expandedMinStock_.set(false)
+      this.isExpandedMinStock_.set(false)
     }
   }
 
@@ -252,7 +252,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const val = this.productForm_.get('expiryDaysDefault')?.value
     if (val == null || val === 0 || val === '') {
-      this.expandedExpiryDays_.set(false)
+      this.isExpandedExpiryDays_.set(false)
     }
   }
 
@@ -261,7 +261,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const allergens = (this.productForm_.get('allergens')?.value || []) as string[]
     if (allergens.length === 0) {
-      this.expandedAllergens_.set(false)
+      this.isExpandedAllergens_.set(false)
     }
   }
 
@@ -272,7 +272,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const yieldVal = this.productForm_.get('yieldFactor')?.value
     const isDefault = (waste == null || waste === 0) && (yieldVal == null || yieldVal === 1)
     if (isDefault) {
-      this.expandedWasteYield_.set(false)
+      this.isExpandedWasteYield_.set(false)
     }
   }
 
@@ -290,7 +290,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.productNameInputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.productNameInputRef()?.nativeElement?.focus(), 0)
   }
 
   ngOnInit(): void {
@@ -309,7 +309,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       })
     })
 
-    const productData = this.initialProduct_()
+    const productData = this.initialProduct()
     if (productData) {
       this.hydrateForm(productData)
     } else {
@@ -863,11 +863,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       allergens: data.allergens || []
     })
 
-    if ((data.minStockLevel ?? 0) > 0) this.expandedMinStock_.set(true)
-    if ((data.expiryDaysDefault ?? 0) > 0) this.expandedExpiryDays_.set(true)
-    if (Math.abs((data.yieldFactor ?? 1) - 1) > 0.001) this.expandedWasteYield_.set(true)
-    if ((data.allergens?.length ?? 0) > 0) this.expandedAllergens_.set(true)
-    if (getSupplierIds(data).length > 0) this.expandedSupplier_.set(true)
+    if ((data.minStockLevel ?? 0) > 0) this.isExpandedMinStock_.set(true)
+    if ((data.expiryDaysDefault ?? 0) > 0) this.isExpandedExpiryDays_.set(true)
+    if (Math.abs((data.yieldFactor ?? 1) - 1) > 0.001) this.isExpandedWasteYield_.set(true)
+    if ((data.allergens?.length ?? 0) > 0) this.isExpandedAllergens_.set(true)
+    if (getSupplierIds(data).length > 0) this.isExpandedSupplier_.set(true)
 
     this.purchaseOptions_.clear()
 
