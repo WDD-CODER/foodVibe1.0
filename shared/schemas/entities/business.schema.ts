@@ -14,6 +14,11 @@ export const businessSettingsSchema = z.strictObject({
 
 export type BusinessSettings = z.infer<typeof businessSettingsSchema>
 
+/** Plan 472: the owner renames the business. Trimmed, 1–200 characters. */
+export const businessNameInputSchema = z.strictObject({ name: nameField.trim().min(1) })
+
+export type BusinessNameInput = z.infer<typeof businessNameInputSchema>
+
 /** Plan 431: how the business ran before FoodVibe (monthly averages of the last 3 months). Every number is optional. */
 export const baselineInputSchema = z.strictObject({
   inquiriesPerMonth: z.number().min(0).optional(),

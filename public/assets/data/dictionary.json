@@ -1529,6 +1529,11 @@
     "ai_recipe_tab_paste": "הדבקת מתכון שלי",
     "ai_recipe_tab_image": "מתמונה",
     "ai_recipe_tab_url": "מקישור",
-    "ai_recipe_paste_hint": "המתכון נשמר כמו שכתבת – ה-AI רק מסדר אותו לשדות, בלי להמציא"
+    "ai_recipe_paste_hint": "המתכון נשמר כמו שכתבת – ה-AI רק מסדר אותו לשדות, בלי להמציא",
+    "business_name_default": "העסק של {{name}}",
+    "business_name_default_hint": "לא חובה. אם תשאירו ריק, העסק ייקרא בשם המשתמש – אפשר לשנות בהגדרות.",
+    "signup_staff_hint": "עובדים במטבח לא נרשמים כאן – בעל העסק מוסיף אותם בהגדרות ← צוות.",
+    "settings_business_name_help": "השם של העסק, כפי שהוא מופיע בהזמנות לספקים",
+    "business_name_saved": "שם העסק נשמר"
   }
 }

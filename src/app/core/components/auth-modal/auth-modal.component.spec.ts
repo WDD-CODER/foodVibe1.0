@@ -32,7 +32,10 @@ describe('AuthModalComponent (business name and block messages)', () => {
         provideRouter([]),
         { provide: UserService, useValue: userService },
         { provide: CloudinaryService, useValue: {} },
-        { provide: TranslationService, useValue: { translate: (k: string) => k } }
+        {
+          provide: TranslationService,
+          useValue: { translate: (k: string) => (k === 'business_name_default' ? 'Biz of {{name}}' : k) }
+        }
       ]
     }).compileComponents()
     TestBed.inject(AuthModalService).open('sign-up')
@@ -54,11 +57,37 @@ describe('AuthModalComponent (business name and block messages)', () => {
     expect(host.querySelector('#auth-business-name')).toBeNull()
   })
 
-  it('an empty business name -> business_name_required and no request', () => {
+  it('an empty business name sends the sign-up request with an empty string and shows no error', () => {
+    userService.signup.and.returnValue(of({ name: 'neo', email: 'neo@x.com' }))
     c.businessName = '   '
     c.onSubmit()
-    expect(c.errorKey()).toBe('business_name_required')
-    expect(userService.signup).not.toHaveBeenCalled()
+    expect(c.errorKey()).toBeNull()
+    expect(userService.signup).toHaveBeenCalledWith(jasmine.objectContaining({ name: 'neo' }), 'Password1', '')
+  })
+
+  it('the business name box is not required and its placeholder follows the typed username', () => {
+    const host: HTMLElement = fixture.nativeElement
+    const input = host.querySelector('#auth-business-name') as HTMLInputElement
+    const typeUsername = (text: string): void => {
+      const nameBox = host.querySelector('#auth-name') as HTMLInputElement
+      nameBox.value = text
+      nameBox.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+    }
+    expect(input.required).toBeFalse()
+    typeUsername('chef472')
+    expect(input.placeholder).toBe('Biz of chef472')
+    typeUsername('')
+    expect(input.placeholder).toBe('Biz of username')
+    expect(host.querySelector('[data-testid="business-name-hint"]')).not.toBeNull()
+  })
+
+  it('the staff hint shows in sign-up and not in sign-in', () => {
+    const host: HTMLElement = fixture.nativeElement
+    expect(host.querySelector('[data-testid="signup-staff-hint"]')).not.toBeNull()
+    TestBed.inject(AuthModalService).mode.set('sign-in')
+    fixture.detectChanges()
+    expect(host.querySelector('[data-testid="signup-staff-hint"]')).toBeNull()
   })
 
   it('201 characters -> business_name_too_long and no request', () => {

@@ -161,9 +161,8 @@ router.post('/signup', signupLimiter, async (req, res) => {
       return res.status(400).json({ error: 'INVALID_EMAIL' });
     }
 
-    // Plan 426: the business name is required (1–200 chars after trim).
+    // Plan 426/472: the business name is optional (max 200 chars after trim); empty falls back to the default name.
     const trimmedBusinessName = typeof businessName === 'string' ? businessName.trim() : '';
-    if (!trimmedBusinessName) return res.status(400).json({ error: 'BUSINESS_NAME_REQUIRED' });
     if (trimmedBusinessName.length > NAME_MAX_LENGTH) return res.status(400).json({ error: 'BUSINESS_NAME_TOO_LONG' });
 
     // Note: password strength (min length, letter+digit, username/email check) is enforced
@@ -191,7 +190,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
     const user = created.toObject();
 
     // Plan 424: every new user starts as the owner of their own business.
-    const business = await createBusinessFor(user, { name: trimmedBusinessName, masterVersion });
+    const business = await createBusinessFor(user, { name: trimmedBusinessName || undefined, masterVersion });
     await cloneMasterDataToBusiness(business._id, { createdBy: String(_id) });
 
     const token = signAccess(user);

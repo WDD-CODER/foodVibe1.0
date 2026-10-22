@@ -12,6 +12,10 @@
 
       <form (ngSubmit)="onSubmit()" (keydown.enter)="onSubmit()" class="c-modal-body">
         <div class="auth-form-fields">
+          @if (isSignUp) {
+            <p class="auth-hint" data-testid="signup-staff-hint">{{ 'signup_staff_hint' | translatePipe }}</p>
+          }
+
           <!-- Username -->
           <div class="c-input-stack">
             <label for="auth-name">{{ 'username' | translatePipe }}</label>
@@ -71,7 +75,7 @@
                 name="businessName"
                 autocomplete="organization"
                 maxlength="200"
-                required
+                [placeholder]="businessNamePlaceholder"
                 [class.c-input--invalid]="
                   errorKey() === 'business_name_required' || errorKey() === 'business_name_too_long'
                 "
@@ -81,6 +85,10 @@
               />
               @if (errorKey() === 'business_name_required' || errorKey() === 'business_name_too_long') {
                 <p class="auth-error">{{ errorKey()! | translatePipe }}</p>
+              } @else {
+                <p class="auth-hint" data-testid="business-name-hint">
+                  {{ 'business_name_default_hint' | translatePipe }}
+                </p>
               }
             </div>
 
