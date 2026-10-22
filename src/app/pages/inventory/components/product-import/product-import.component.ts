@@ -203,7 +203,7 @@ export class ProductImportComponent {
       const reason = err instanceof Error ? err.message : ''
       this.errorKey_.set(this.errorKeyFor_(fromPhoto, status, code, reason))
       this.logging_.error({
-        event: fromPhoto ? 'product_import.photo_failed' : 'product_import.parse_failed',
+        event: fromPhoto ? 'productImport.photo_failed' : 'productImport.parse_failed',
         message: fromPhoto ? 'Receipt photo read failed' : 'Price list parse failed',
         context: { status }
       })
@@ -249,7 +249,7 @@ export class ProductImportComponent {
       this.text_.set('')
     } catch (err) {
       this.logging_.error({
-        event: 'product_import.apply_failed',
+        event: 'productImport.apply_failed',
         message: 'Price list apply failed',
         context: { status: err instanceof HttpErrorResponse ? err.status : 0 }
       })
