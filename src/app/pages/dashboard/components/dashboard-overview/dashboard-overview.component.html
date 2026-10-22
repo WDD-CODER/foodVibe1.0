@@ -2,7 +2,11 @@
   <app-page-header titleKey="dashboard" subtitleKey="dashboard_subtitle" />
 
   <main class="dashboard-main">
-    <app-business-performance />
+    @if (needsOpeningDetails_()) {
+      <app-opening-details-banner />
+    } @else {
+      <app-business-performance />
+    }
     <app-setup-checklist-card />
     <section class="kpi-grid">
       <!-- Total Products -->

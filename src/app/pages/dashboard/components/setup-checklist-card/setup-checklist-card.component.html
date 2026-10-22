@@ -30,6 +30,9 @@
               {{ step.labelKey | translatePipe }}
             </a>
           }
+          @if (step.progress && !step.done) {
+            <span class="setup-step__count" data-testid="setup-step-progress">{{ step.progress }}</span>
+          }
           @if (step.optional) {
             <span class="setup-step__optional">({{ 'setup_optional' | translatePipe }})</span>
           }

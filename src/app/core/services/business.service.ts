@@ -7,7 +7,7 @@ import { API } from './http-storage.adapter'
 import { LoggingService } from './logging.service'
 import { UserService } from './user.service'
 
-/** What the owner has set up so far (plan 431); the server caps each count at 10. */
+/** What the owner has set up so far (plan 431); the server caps each count at 5. */
 export interface SetupStatus {
   pricedProducts: number
   suppliers: number
