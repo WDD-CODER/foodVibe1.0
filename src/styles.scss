@@ -2552,3 +2552,14 @@ button.c-chip--removable {
 .c-modal-card.c-modal-card--warning .confirm-modal-message {
   color: var(--text-warning);
 }
+
+/* ---- Plan 459 A2: an open dropdown list stays above the next panel ----
+   backdrop-filter makes every .c-glass-panel / .c-modal-card its own stacking context, so a list opened inside
+   one (z-index 9999 there) is still painted as part of that panel and a later sibling panel covers it.
+   .c-dropdown exists in the DOM only while a list is open; lifting that panel above its siblings fixes it.
+   20 stays below the app header (z-index 100). */
+.c-glass-panel:has(.c-dropdown),
+.c-modal-card:has(.c-dropdown) {
+  position: relative;
+  z-index: 20;
+}

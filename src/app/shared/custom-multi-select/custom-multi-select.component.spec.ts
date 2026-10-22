@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
 import { LucideAngularModule, ChevronDown, ChevronUp, X } from 'lucide-angular'
 import { CustomMultiSelectComponent } from './custom-multi-select.component'
 import { TranslationService } from '@services/translation.service'
@@ -115,5 +115,41 @@ describe('CustomMultiSelectComponent', () => {
       const space = press(' ')
       expect(space.defaultPrevented).toBeFalse()
     })
+  })
+
+  describe('slow mouse click on an option (plan 459 A1)', () => {
+    const root = (): HTMLElement => fixture.nativeElement as HTMLElement
+
+    beforeEach(() => {
+      fixture.componentRef.setInput('options', [
+        { value: 'a', label: 'Apple' },
+        { value: 'b', label: 'Banana' },
+        { value: '__add_label__', label: 'create_new_label' }
+      ])
+      fixture.componentRef.setInput('addNewValue', '__add_label__')
+      fixture.detectChanges()
+      ;(root().querySelector('button.custom-multi-select-trigger') as HTMLButtonElement).click()
+      fixture.detectChanges()
+    })
+
+    it('mousedown on an option and on the add option is default-prevented', () => {
+      for (const el of Array.from(root().querySelectorAll('.custom-select-option'))) {
+        const e = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
+        el.dispatchEvent(e)
+        expect(e.defaultPrevented).toBeTrue()
+      }
+    })
+
+    it('a long press keeps the list open and the later click adds the value', fakeAsync(() => {
+      const values: string[][] = []
+      component.valueChange.subscribe((v: string[]) => values.push(v))
+      const opt = root().querySelectorAll('.custom-select-option')[1] as HTMLElement
+      opt.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }))
+      tick(500)
+      fixture.detectChanges()
+      expect(root().querySelector('app-scrollable-dropdown')).not.toBeNull()
+      opt.click()
+      expect(values).toEqual([['b']])
+    }))
   })
 })
