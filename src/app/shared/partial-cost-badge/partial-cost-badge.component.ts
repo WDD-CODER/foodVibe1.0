@@ -232,6 +232,13 @@ export class PartialCostBadgeComponent {
     this.close()
   }
 
+  /** The link list opens in the popover's own flow; scroll the popover body so the whole list is in view. */
+  protected revealLinkList(event: Event): void {
+    const host = event.currentTarget as HTMLElement | null
+    if (!host) return
+    requestAnimationFrame(() => host.querySelector('.c-dropdown')?.scrollIntoView?.({ block: 'nearest' }))
+  }
+
   /** An existing product was picked in the link field. The «add new» sentinel is handled by `addNew`. */
   protected onLinkPicked(row: MissingRow, productId: string): void {
     if (productId === ADD_PRODUCT_VALUE) return

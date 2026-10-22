@@ -87,6 +87,9 @@
                       [placeholder]="'partial_link_placeholder' | translatePipe"
                       (valueChange)="onLinkPicked(row, $event)"
                       (addNewChosen)="addNew(row, $event)"
+                      (focusin)="revealLinkList($event)"
+                      (input)="revealLinkList($event)"
+                      (click)="revealLinkList($event)"
                     ></app-custom-select>
                   } @else {
                     <span class="partial-awaiting">{{ 'partial_link_no_permission' | translatePipe }}</span>
