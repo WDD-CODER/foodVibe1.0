@@ -7,6 +7,7 @@
   .paste-ingredients-card {
     inline-size: min(32rem, 92vw);
     max-block-size: 90dvh;
+    overflow-y: auto;
   }
 
   .paste-box {

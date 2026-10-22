@@ -41,6 +41,8 @@ export class SelectOnFocusDirective {
   onMouseUp(event: MouseEvent): void {
     if (!this.isFreshFocus_) return
     this.isFreshFocus_ = false
+    // A multi-line text box keeps the normal caret placement: a click into existing text must not select it all.
+    if (this.el.nativeElement instanceof HTMLTextAreaElement) return
     event.preventDefault()
   }
 

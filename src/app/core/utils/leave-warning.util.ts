@@ -9,6 +9,7 @@ import { DestroyRef, inject } from '@angular/core'
  * and a tab switch inside one route is not a navigation, so the page must ask for confirmation itself.
  */
 export function warnBeforeUnload(isDirty: () => boolean): void {
+  const destroyRef = inject(DestroyRef)
   const onBeforeUnload = (event: BeforeUnloadEvent): void => {
     if (!isDirty()) return
     event.preventDefault()
@@ -16,5 +17,5 @@ export function warnBeforeUnload(isDirty: () => boolean): void {
     event.returnValue = ''
   }
   window.addEventListener('beforeunload', onBeforeUnload)
-  inject(DestroyRef).onDestroy(() => window.removeEventListener('beforeunload', onBeforeUnload))
+  destroyRef.onDestroy(() => window.removeEventListener('beforeunload', onBeforeUnload))
 }

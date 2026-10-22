@@ -114,9 +114,13 @@ export class PartialCostBadgeComponent {
         if (event?.target instanceof Node && el.contains(event.target)) return
         this.place_(el)
       }
+      // The list shrinks when a saved price drops out of it; the popover is re-placed against the chip then.
+      const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(() => this.place_(el))
+      observer?.observe(el)
       window.addEventListener('scroll', reposition, true)
       window.addEventListener('resize', reposition)
       onCleanup(() => {
+        observer?.disconnect()
         window.removeEventListener('scroll', reposition, true)
         window.removeEventListener('resize', reposition)
       })
