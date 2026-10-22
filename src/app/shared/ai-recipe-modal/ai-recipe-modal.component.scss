@@ -260,42 +260,14 @@
 
 .ai-input-mode-tabs {
   display: flex;
-  gap: 0.25rem;
+  flex-wrap: wrap;
+  gap: var(--space-2);
 }
 
-.ai-tab-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 2.25rem;
-  height: 2.25rem;
-
+.ai-paste-hint {
+  margin-block: 0;
   color: var(--color-text-muted);
-
-  padding-block: 0;
-  padding-inline: 0;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  cursor: pointer;
-
-  transition:
-    color 0.15s,
-    background 0.15s,
-    border-color 0.15s;
-
-  &:hover {
-    color: var(--color-text-main);
-    background: var(--color-primary-soft);
-  }
-
-  &.ai-tab-btn--active {
-    color: var(--color-primary);
-
-    border-color: var(--color-primary-glow);
-    background: var(--color-primary-soft);
-  }
+  font-size: 0.8125rem;
 }
 
 .ai-image-upload {

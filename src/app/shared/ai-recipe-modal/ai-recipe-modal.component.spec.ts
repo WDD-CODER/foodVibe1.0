@@ -139,4 +139,49 @@ describe('AiRecipeModalComponent paste tab (plan 439)', () => {
     expect(shots.saveShot).not.toHaveBeenCalled()
     expect(draftService.draft()?.nameHebrew).toBe('רוטב')
   })
+  describe('tabs (plan 474)', () => {
+    const openCreate = () => {
+      isOpen_.set(true)
+      fixture.detectChanges()
+    }
+    const tabs = (): HTMLButtonElement[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('[role="tablist"] [role="tab"]')
+      )
+    const hint = () => (fixture.nativeElement as HTMLElement).querySelector('.ai-paste-hint')
+
+    it('shows four tabs with visible text in the order describe, paste, photo, link', () => {
+      openCreate()
+      const t = tabs()
+      expect(t.length).toBe(4)
+      t.forEach((b) => expect((b.textContent ?? '').trim().length).toBeGreaterThan(0))
+      expect(t.every((b) => !b.hasAttribute('title'))).toBeTrue()
+      const modes: string[] = []
+      t.forEach((b) => {
+        b.click()
+        fixture.detectChanges()
+        modes.push(internals().inputMode_())
+      })
+      expect(modes).toEqual(['text', 'paste', 'image', 'url'])
+    })
+
+    it('marks only the active tab with aria-selected and starts on describe', () => {
+      openCreate()
+      expect(tabs().map((b) => b.getAttribute('aria-selected'))).toEqual(['true', 'false', 'false', 'false'])
+      tabs()[1].click()
+      fixture.detectChanges()
+      expect(tabs().map((b) => b.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false', 'false'])
+    })
+
+    it('shows the keep-as-written hint on the paste tab only', () => {
+      openCreate()
+      expect(hint()).toBeNull()
+      tabs()[1].click()
+      fixture.detectChanges()
+      expect(hint()).not.toBeNull()
+      tabs()[2].click()
+      fixture.detectChanges()
+      expect(hint()).toBeNull()
+    })
+  })
 })
