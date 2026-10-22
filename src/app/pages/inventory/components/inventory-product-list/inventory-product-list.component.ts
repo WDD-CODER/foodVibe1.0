@@ -67,6 +67,7 @@ import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-act
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
+import { findProductByName, isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 
 export type SortField = 'name' | 'category' | 'allergens' | 'supplier' | 'date'
 type ProductBulkField = 'categories' | 'supplierIds_' | 'allergens' | 'baseUnit'
@@ -246,7 +247,19 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         purchaseOptions: [],
         sources: []
       }
-      const created = await this.productData_.addProduct(payload)
+      // Plan 485: one product per name - a taken name is refused with a clear message.
+      if (findProductByName(this.productData_.allProducts_(), draft.nameHebrew)) {
+        this.userMsg.onSetErrorMsg(this.translationService.translate('product_duplicate_name_error'))
+        return
+      }
+      let created: Product
+      try {
+        created = await this.productData_.addProduct(payload)
+      } catch (err) {
+        if (!isProductNameTaken(err)) throw err
+        this.userMsg.onSetErrorMsg(this.translationService.translate('product_duplicate_name_error'))
+        return
+      }
       // Confirming the AI create IS the save — only now do the values enter Metadata.
       await registerDraftMetadata({ categories, allergens }, this.metadataRegistry)
       void this.router.navigate(['/inventory/edit', created._id])

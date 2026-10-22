@@ -24,6 +24,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
+const { normalizeProductName } = require('../utils/price-list-import');
 const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 const { newId: makeId } = require('../utils/id');
 const { logger } = require('../logger');
@@ -249,7 +250,8 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
           userByMasterId.delete(String(sc._masterId));
         }
       }
-      allProductNames = new Set(allUserDocs.map(d => d.nameHebrew?.trim()).filter(Boolean));
+      // Plan 485: names compare by the one name rule (spaces / case), like the server guard on writes.
+      allProductNames = new Set(allUserDocs.map(d => normalizeProductName(d.nameHebrew)).filter(Boolean));
     }
 
     const toInsert = [];
@@ -278,11 +280,13 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
         }
         // Skip if the user already has a product with the same name (any origin).
         if (entityType === 'products') {
-          const masterName = master.nameHebrew?.trim();
+          const masterName = normalizeProductName(master.nameHebrew);
           if (masterName && allProductNames.has(masterName)) {
             productNameCollisions++;
             continue;
           }
+          // Plan 485: a later master doc with the same name is not cloned a second time.
+          if (masterName) allProductNames.add(masterName);
         }
         const newId = NAMED_TYPES.has(entityType) ? newCloneId.get(masterId) : makeId();
         const { _id: _mid, userId: _u, _masterId: _m, _userModified: _um, businessId: _b, createdBy: _cb, ...rest } = master;
@@ -344,6 +348,12 @@ async function syncMasterToBusiness(businessId, { createdBy } = {}) {
             s => !s.supplierId || !existingSupplierIds.has(s.supplierId)
           );
           masterRest.sources = [...existingSources, ...newSources];
+          // Plan 485: a master rename never gives this clone a name another product of the business has.
+          const nextName = normalizeProductName(masterRest.nameHebrew);
+          if (nextName && nextName !== normalizeProductName(existing.nameHebrew)) {
+            if (allProductNames.has(nextName)) delete masterRest.nameHebrew;
+            else { allProductNames.delete(normalizeProductName(existing.nameHebrew)); allProductNames.add(nextName); }
+          }
         }
 
         toUpdate.push({

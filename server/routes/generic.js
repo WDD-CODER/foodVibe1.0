@@ -15,6 +15,7 @@ const { LIVE, IN_TRASH, disposeDoc, purgeExpired } = require('../jobs/purge-dele
 const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../utils/business-scope');
 // Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
 const { withEventVisibility } = require('../utils/event-visibility');
+const { PRODUCT_NAME_TAKEN, findProductNameClash, isRename } = require('../utils/product-name-guard');
 const { assertCan, stripMoneyFields, moneyFieldsChanged, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES } = require('../utils/permissions');
 
 const router = Router();
@@ -369,8 +370,24 @@ router.put('/:type/trash/restore-all', verifyToken, requireSoftDelete, async (re
   try {
     const own = trashOwnerFilter(req, res);
     if (!own) return;
+    const trashFilter = { ...scopeFilter(req), ...own, ...IN_TRASH };
+    if (req.params.type === 'products') {
+      // Plan 485: a trashed product whose name a live product (or one restored before it) now has stays in Trash.
+      const trashed = await col('products').find(trashFilter, { projection: { _id: 1, nameHebrew: 1 } }).toArray();
+      let restored = 0;
+      const skipped = [];
+      for (const doc of trashed) {
+        if (await findProductNameClash(col('products'), scopeFilter(req), doc.nameHebrew, doc._id)) {
+          skipped.push({ _id: doc._id, nameHebrew: doc.nameHebrew });
+          continue;
+        }
+        const r = await col('products').updateOne({ ...trashFilter, _id: doc._id }, { $unset: { deletedAt: '', deletedBy: '' } });
+        restored += r.modifiedCount;
+      }
+      return res.json({ ok: true, restored, skipped });
+    }
     const result = await col(req.params.type).updateMany(
-      { ...scopeFilter(req), ...own, ...IN_TRASH },
+      trashFilter,
       { $unset: { deletedAt: '', deletedBy: '' } }
     );
     res.json({ ok: true, restored: result.modifiedCount });
@@ -386,6 +403,10 @@ router.put('/:type/:id/restore', verifyToken, requireSoftDelete, async (req, res
     const inTrash = await col(req.params.type).findOne(trashFilter);
     if (!inTrash) return res.status(404).json({ error: `Item ${req.params.id} is not in Trash` });
     if (!authorizeDelete(req, res, req.params.type, inTrash)) return;
+    // Plan 485: a product comes back only while no live product has its name.
+    if (req.params.type === 'products' && await findProductNameClash(col('products'), scopeFilter(req), inTrash.nameHebrew, inTrash._id)) {
+      return res.status(409).json({ ...PRODUCT_NAME_TAKEN, nameHebrew: inTrash.nameHebrew });
+    }
     const restored = await col(req.params.type).findOneAndUpdate(
       trashFilter,
       { $unset: { deletedAt: '', deletedBy: '' } },
@@ -484,6 +505,11 @@ router.post('/:type', verifyToken, async (req, res) => {
     // After validation, so kind/key are known plain strings before they reach a query.
     if (entityType === TAXONOMY && !shared && await masterHasTerm(doc.kind, doc.key)) {
       return res.status(409).json({ error: 'This term already exists for everyone', kind: doc.kind, key: doc.key });
+    }
+
+    // Plan 485: one live product per name in a business.
+    if (entityType === 'products' && await findProductNameClash(col('products'), { businessId: doc.businessId }, doc.nameHebrew)) {
+      return res.status(409).json({ ...PRODUCT_NAME_TAKEN, nameHebrew: doc.nameHebrew });
     }
 
     await col(entityType).insertOne(doc);
@@ -592,6 +618,12 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       if (!authorizeEdit(req, res, req.params.type, current, merged)) return;
       const check = checkStoredDoc(req.params.type, merged);
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
+      // Plan 485: renaming a product to a name another live product of the business has is refused.
+      // Keeping the saved name is always allowed (old twins must not block price or unit saves).
+      if (req.params.type === 'products' && isRename(current.nameHebrew, merged.nameHebrew)
+        && await findProductNameClash(col('products'), { businessId: current.businessId }, merged.nameHebrew, current._id)) {
+        return res.status(409).json({ ...PRODUCT_NAME_TAKEN, nameHebrew: merged.nameHebrew });
+      }
       // After validation, so the new key is a known plain string before it reaches a query.
       if (isTerm && updatable.key !== undefined && updatable.key !== current.key) {
         // Plan 475: units name the clash with a message the chef can read (other kinds keep their client checks).
@@ -736,7 +768,10 @@ async function pushDocToMasterRecursive(type, id, businessId, visited, pusherId)
     if (name) {
       const namespace = hasIngredients ? ['recipes', 'dishes'] : [type];
       for (const t of namespace) {
-        const twin = await col(t).findOne({ businessId: MASTER_BUSINESS_ID, nameHebrew: name, ...LIVE }, { projection: { _id: 1 } });
+        // Plan 485: products compare by the one name rule (spaces / case), not the exact text.
+        const twin = t === 'products'
+          ? await findProductNameClash(col(t), { businessId: MASTER_BUSINESS_ID }, name)
+          : await col(t).findOne({ businessId: MASTER_BUSINESS_ID, nameHebrew: name, ...LIVE }, { projection: { _id: 1 } });
         if (twin) throw new MasterNameTakenError(name);
       }
     }

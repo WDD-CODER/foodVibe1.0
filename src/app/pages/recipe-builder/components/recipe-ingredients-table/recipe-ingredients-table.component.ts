@@ -45,6 +45,7 @@ import { createUnitWordResolver, parseIngredientLines } from '@utils/ingredient-
 import { findIngredientMatch } from '@utils/ingredient-match.util'
 import { ProductNameMatcherService, type NameMatchItem } from '@services/product-name-matcher.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { findProductByName, isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
@@ -192,6 +193,13 @@ export class RecipeIngredientsTableComponent {
   protected onUnlinkedBadgeClick(group: FormGroup, index: number): void {
     const name = ((group.get('nameHebrew')?.value as string) ?? '').trim()
     if (!name) return
+    // Plan 485: a product with this name already exists - link it instead of creating a second one.
+    const existing = findProductByName(this.productDataService.allProducts_(), name)
+    if (existing) {
+      group.patchValue({ referenceId: existing._id, item_type: 'product', nameSnapshot: existing.nameHebrew })
+      this.onQuickEditBadgeClick(group, index, 'incomplete')
+      return
+    }
     const stub: Omit<Product, '_id'> = {
       nameHebrew: name,
       baseUnit: 'gram',
@@ -203,10 +211,17 @@ export class RecipeIngredientsTableComponent {
       minStockLevel: 0,
       expiryDaysDefault: 0
     }
-    void this.productDataService.addProduct(stub).then((saved) => {
-      group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.nameHebrew })
-      this.onQuickEditBadgeClick(group, index, 'incomplete')
-    })
+    void this.productDataService
+      .addProduct(stub)
+      .then((saved) => {
+        group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.nameHebrew })
+        this.onQuickEditBadgeClick(group, index, 'incomplete')
+      })
+      .catch((err: unknown) => {
+        this.userMsg_.onSetErrorMsg(
+          this.translation_.translate(isProductNameTaken(err) ? 'product_duplicate_name_error' : 'product_save_error')
+        )
+      })
   }
 
   /**

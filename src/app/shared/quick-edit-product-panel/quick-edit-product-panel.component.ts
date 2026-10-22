@@ -24,6 +24,7 @@ import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
 import { Product, ProductSource } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
+import { isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 
 @Component({
   selector: 'app-quick-edit-product-panel',
@@ -189,6 +190,11 @@ export class QuickEditProductPanelComponent {
         context: { err }
       })
       this.isSubmitting_.set(false)
+      // Plan 485: a rename to a taken name is shown on the name box.
+      if (isProductNameTaken(err)) {
+        this.nameError_.set('duplicate_product_name_error')
+        return
+      }
       this.error_.set(this.translation.translate('product_save_error'))
     }
   }

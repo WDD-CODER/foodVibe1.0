@@ -26,6 +26,7 @@ import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { LoaderComponent } from '../loader/loader.component'
 import { GeminiService } from '@services/gemini.service'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { findProductByName, isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 
 @Component({
   selector: 'app-quick-add-product-modal',
@@ -224,6 +225,11 @@ export class QuickAddProductModalComponent {
       this.nameError_.set('field_name_required')
       return
     }
+    // Plan 485: one product per name - refuse a taken name before asking the server.
+    if (findProductByName(this.productData.allProducts_(), name)) {
+      this.nameError_.set('duplicate_product_name_error')
+      return
+    }
     if (!baseUnit) {
       this.unitError_.set('field_unit_required')
       this.baseUnitRef()?.nativeElement?.focus()
@@ -259,6 +265,10 @@ export class QuickAddProductModalComponent {
           context: { err }
         })
         this.isSubmitting_.set(false)
+        if (isProductNameTaken(err)) {
+          this.nameError_.set('duplicate_product_name_error')
+          return
+        }
         this.userMsg.onSetErrorMsg(this.translation.translate('product_save_error'))
       }
     )
