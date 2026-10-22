@@ -41,6 +41,10 @@ $break-mobile: 768px; // mirrors src/styles.scss
     gap: var(--space-3);
   }
 
+  .import-photo-btn {
+    min-block-size: 44px;
+  }
+
   .import-field {
     display: flex;
     flex-direction: column;

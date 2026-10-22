@@ -19,6 +19,7 @@ import { MetadataRegistryService } from './metadata-registry.service'
 import { TranslationService } from './translation.service'
 import type { ImportRow } from './product-import.service'
 import type { ProductNameMatchRequest, ProductNameMatchResponse } from '@schemas/ai-product-match.schema'
+import { RECEIPT_IMAGE_MAX_BASE64, RECEIPT_IMAGE_MIME_TYPES } from '@schemas/ai-receipt-photo.schema'
 
 /** One model in the admin's AI model chain (plan 395): today's status plus on/off. */
 export interface GeminiChainModel extends GeminiModelStatus {
@@ -143,6 +144,26 @@ export class GeminiService {
         knownCategories,
         ...this.modelParam_()
       }
+    )
+  }
+
+  /**
+   * Owner only (plan 465): one AI call reads a photo of a supplier receipt into cleaned product rows. The photo is
+   * shrunk to fit the server's body limit (second, smaller attempt when still too big) and never kept. Rejects with
+   * an Error whose message is `IMAGE_TYPE_UNSUPPORTED` (not jpeg, png or webp) or `IMAGE_TOO_LARGE` before any
+   * request. The caller counts the usage (incrementGeminiUsage) on success.
+   */
+  async parseReceiptPhoto(file: File, knownCategories: string[]): Promise<{ rows: ImportRow[]; truncated: boolean }> {
+    if (!(RECEIPT_IMAGE_MIME_TYPES as readonly string[]).includes(file.type)) throw new Error('IMAGE_TYPE_UNSUPPORTED')
+    let image = await this.encodeImage_(file, 2000, 0.75)
+    if (image.imageBase64.length > RECEIPT_IMAGE_MAX_BASE64) image = await this.encodeImage_(file, 1400, 0.6)
+    if (image.imageBase64.length > RECEIPT_IMAGE_MAX_BASE64) throw new Error('IMAGE_TOO_LARGE')
+    return firstValueFrom(
+      this.http_.post<{ rows: ImportRow[]; truncated: boolean }>(`${this.authBase_}${API.ai('parse-receipt-photo')}`, {
+        ...image,
+        knownCategories,
+        ...this.modelParam_()
+      })
     )
   }
 
@@ -336,8 +357,12 @@ export class GeminiService {
   }
 
   /** Downscales the photo (server body limit is 2MB) and returns it as raw base64 + MIME type. */
-  private async encodeImage_(file: File): Promise<{ imageBase64: string; mimeType: string }> {
-    const image = await downscaleImage(file)
+  private async encodeImage_(
+    file: File,
+    maxEdge?: number,
+    quality?: number
+  ): Promise<{ imageBase64: string; mimeType: string }> {
+    const image = await downscaleImage(file, maxEdge, quality)
     const dataUrl = await new Promise<string>((resolve, reject) => {
       const reader = new FileReader()
       reader.onload = () => resolve(reader.result as string)

@@ -108,3 +108,60 @@ describe('GeminiService.matchProductNames', () => {
     await expectAsync(result).toBeRejected()
   })
 })
+
+describe('GeminiService.parseReceiptPhoto', () => {
+  const RECEIPT_URL = `${environment.authApiUrl}/api/v1/ai/parse-receipt-photo`
+  let service: GeminiService
+  let http: HttpTestingController
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: MetadataRegistryService, useValue: { allCategories_: () => [], allAllergens_: () => [] } },
+        { provide: TranslationService, useValue: { translate: (key: string) => key } }
+      ]
+    })
+    service = TestBed.inject(GeminiService)
+    http = TestBed.inject(HttpTestingController)
+  })
+
+  afterEach(() => http.verify())
+
+  /** Resolves once the service has finished encoding and sent its request. */
+  async function nextRequest() {
+    for (let i = 0; i < 50; i++) {
+      const pending = http.match(RECEIPT_URL)
+      if (pending.length) return pending[0]
+      await new Promise((r) => setTimeout(r, 10))
+    }
+    throw new Error(`no request to ${RECEIPT_URL}`)
+  }
+
+  it('posts the photo with the known categories and returns { rows, truncated }', async () => {
+    const file = new File(['hello'], 'receipt.jpg', { type: 'image/jpeg' })
+    const result = service.parseReceiptPhoto(file, ['dairy'])
+
+    const req = await nextRequest()
+    expect(req.request.method).toBe('POST')
+    expect(req.request.body).toEqual({ imageBase64: btoa('hello'), mimeType: 'image/jpeg', knownCategories: ['dairy'] })
+
+    const answer = { rows: [{ name: 'חלב', baseUnit: 'liter', price: 5 }], truncated: false }
+    req.flush(answer)
+    expect(await result).toEqual(answer as never)
+  })
+
+  it('rejects a PDF with IMAGE_TYPE_UNSUPPORTED and sends no request', async () => {
+    const file = new File(['%PDF'], 'receipt.pdf', { type: 'application/pdf' })
+    await expectAsync(service.parseReceiptPhoto(file, [])).toBeRejectedWithError('IMAGE_TYPE_UNSUPPORTED')
+    http.expectNone(RECEIPT_URL)
+  })
+
+  it('rejects a photo that stays above 1,800,000 characters after both shrink attempts with IMAGE_TOO_LARGE', async () => {
+    // Not a decodable image, so the shrink step hands the file back unchanged: 1.4 MB -> about 1.87 million characters.
+    const file = new File([new Uint8Array(1_400_000)], 'receipt.jpg', { type: 'image/jpeg' })
+    await expectAsync(service.parseReceiptPhoto(file, [])).toBeRejectedWithError('IMAGE_TOO_LARGE')
+    http.expectNone(RECEIPT_URL)
+  })
+})
