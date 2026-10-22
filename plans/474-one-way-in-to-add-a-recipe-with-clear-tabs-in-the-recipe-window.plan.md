@@ -1,6 +1,6 @@
 # Plan 474 — One way in to add a recipe, with clear tabs in the recipe window
 
-Status: draft
+Status: active
 Track: code
 Snapshot: feb9f3da29fafafdacf2f3f12cfd22a5791d58f6
 
@@ -32,9 +32,9 @@ Verified in code on `feb9f3da`:
 ## Goals & Success Criteria
 - Primary: one entry adds a recipe; inside the window each way in has a readable name, and the paste way says it keeps the chef's text.
 - Success:
-  - [ ] [auto] `npx ng test --watch=false --include='src/app/shared/ai-recipe-modal/**/*.spec.ts' --include='src/app/pages/recipe-book/components/recipe-book-list/**/*.spec.ts'` passes, including new specs: the recipe book sets exactly one recipe-window page action (`add_recipe_ai`) and none with `paste_recipe`; the create window shows four tabs with visible text in the order describe / paste / photo / link; the paste tab shows the `ai_recipe_paste_hint` line and the describe tab does not; the active tab has `aria-selected="true"`.
-  - [ ] [auto] `grep -rn "'paste_recipe'" src/app --include=*.ts --exclude=*.spec.ts` → no entries (the menu entry is gone).
-  - [ ] [auto] `npx ng build` passes.
+  - [x] [auto] `npx ng test --watch=false --include='src/app/shared/ai-recipe-modal/**/*.spec.ts' --include='src/app/pages/recipe-book/components/recipe-book-list/**/*.spec.ts'` passes, including new specs: the recipe book sets exactly one recipe-window page action (`add_recipe_ai`) and none with `paste_recipe`; the create window shows four tabs with visible text in the order describe / paste / photo / link; the paste tab shows the `ai_recipe_paste_hint` line and the describe tab does not; the active tab has `aria-selected="true"`.
+  - [x] [auto] `grep -rn "'paste_recipe'" src/app --include=*.ts --exclude=*.spec.ts` → no entries (the menu entry is gone).
+  - [x] [auto] `npx ng build` passes.
   - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down` per run mode).
   - [ ] [human] Replay E1: open `/recipe-book`, open the flame («+») menu. There is «הוסף מתכון עם AI» and no «הדבק מתכון».
   - [ ] [human] Choose «הוסף מתכון עם AI»: the window shows four labelled tabs — «תיאור מתכון חדש», «הדבקת מתכון שלי», «מתמונה», «מקישור» — with «תיאור מתכון חדש» selected. Tap «הדבקת מתכון שלי»: one line under the tabs says the recipe is kept as written and the AI only sorts it into fields. Paste a short recipe and press «זהה מתכון»: the draft shows your own name, ingredients and steps.
@@ -124,13 +124,13 @@ Print `ok` or `conflict: <what>` per symbol. If plan 460 merged, its textarea ch
 - Not a dropdown, so the add-option rule does not apply.
 
 ## Atomic Sub-tasks
-- [ ] T1: Remove the separate paste entry from the recipe book menu — delete the `paste_recipe` page action from `ngOnInit`, keep `add_recipe_ai`; spec: `setPageActions` gets one action with `add_recipe_ai` and none with `paste_recipe` — `recipe-book-list.component.ts`, `recipe-book-list.component.spec.ts`
-- [ ] T2: Give the window's four tabs visible names in the agreed order — rebuild the tab row as a `role="tablist"` of four `c-tab-pill` buttons (`role="tab"`, `[class.active]`, `[attr.aria-selected]`), icon plus text from the new keys, order describe / paste / photo / link; drop the `title` tooltips — `ai-recipe-modal.component.html`, `public/assets/data/dictionary.json`
-- [ ] T3: Say on the paste tab that the recipe is kept as written — `@if` the paste mode is active, one muted line `ai_recipe_paste_hint` under the tab row — `ai-recipe-modal.component.html`, `public/assets/data/dictionary.json`
-- [ ] T4: Restyle the tab row for phones — the row wraps with a gap; remove the unused `.ai-tab-btn` rules; add the hint line's small local class; logical properties only — `ai-recipe-modal.component.scss`
-- [ ] T5: Tidy the window class comment that names the removed entry — the constructor comment «Opening the window from "הדבק מתכון"…» now says the window opens on the tab the caller asks for (default describe); no logic change — `ai-recipe-modal.component.ts`
-- [ ] T6: Spec the tabs — four tabs with text in order; clicking each sets the mode; paste shows the hint and describe does not; `aria-selected` follows the active tab; keep the existing paste and parse specs green — `ai-recipe-modal.component.spec.ts`
-- [ ] T7: Build, run the specs, check at 375px and 1280px, write the run file with the validation cards — `docs/mvp/runs/474.md`
+- [x] T1: Remove the separate paste entry from the recipe book menu — delete the `paste_recipe` page action from `ngOnInit`, keep `add_recipe_ai`; spec: `setPageActions` gets one action with `add_recipe_ai` and none with `paste_recipe` — `recipe-book-list.component.ts`, `recipe-book-list.component.spec.ts`
+- [x] T2: Give the window's four tabs visible names in the agreed order — rebuild the tab row as a `role="tablist"` of four `c-tab-pill` buttons (`role="tab"`, `[class.active]`, `[attr.aria-selected]`), icon plus text from the new keys, order describe / paste / photo / link; drop the `title` tooltips — `ai-recipe-modal.component.html`, `public/assets/data/dictionary.json`
+- [x] T3: Say on the paste tab that the recipe is kept as written — `@if` the paste mode is active, one muted line `ai_recipe_paste_hint` under the tab row — `ai-recipe-modal.component.html`, `public/assets/data/dictionary.json`
+- [x] T4: Restyle the tab row for phones — the row wraps with a gap; remove the unused `.ai-tab-btn` rules; add the hint line's small local class; logical properties only — `ai-recipe-modal.component.scss`
+- [x] T5: Tidy the window class comment that names the removed entry — the constructor comment «Opening the window from "הדבק מתכון"…» now says the window opens on the tab the caller asks for (default describe); no logic change — `ai-recipe-modal.component.ts`
+- [x] T6: Spec the tabs — four tabs with text in order; clicking each sets the mode; paste shows the hint and describe does not; `aria-selected` follows the active tab; keep the existing paste and parse specs green — `ai-recipe-modal.component.spec.ts`
+- [x] T7: Build, run the specs, check at 375px and 1280px, write the run file with the validation cards — `docs/mvp/runs/474.md`
 
 ## Technical Considerations
 - Dependencies: `HeroFabService.setPageActions`, `AiRecipeModalService.open`, `.c-tab-pill` (`src/styles.scss:1001`).

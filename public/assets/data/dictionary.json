@@ -1524,6 +1524,11 @@
     "nutrition_fat": "שומן",
     "nutrition_fiber": "סיבים",
     "nutrition_sodium": "נתרן",
-    "nutrition_per_100g": "100 גר׳"
+    "nutrition_per_100g": "100 גר׳",
+    "ai_recipe_tab_describe": "תיאור מתכון חדש",
+    "ai_recipe_tab_paste": "הדבקת מתכון שלי",
+    "ai_recipe_tab_image": "מתמונה",
+    "ai_recipe_tab_url": "מקישור",
+    "ai_recipe_paste_hint": "המתכון נשמר כמו שכתבת – ה-AI רק מסדר אותו לשדות, בלי להמציא"
   }
 }

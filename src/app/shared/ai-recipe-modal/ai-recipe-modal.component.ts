@@ -126,7 +126,7 @@ export class AiRecipeModalComponent implements OnInit {
   })
 
   constructor() {
-    // Opening the window from "הדבק מתכון" lands on the paste tab.
+    // The window opens on the tab the caller asks for (default: describe).
     effect(() => {
       if (this.modalService.isOpen()) this.inputMode_.set(this.modalService.initialInputMode())
     })
