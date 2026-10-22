@@ -137,6 +137,7 @@
               <label class="label-row">
                 <span class="math-text">=</span>
                 <input
+                  appSelectOnFocus
                   type="number"
                   formControlName="conversionRate"
                   [placeholder]="'quantity' | translatePipe"
@@ -175,6 +176,7 @@
               </label>
               @if (option.get('show_special_price_')?.value) {
                 <input
+                  appSelectOnFocus
                   type="number"
                   formControlName="priceOverride"
                   [placeholder]="'price' | translatePipe"

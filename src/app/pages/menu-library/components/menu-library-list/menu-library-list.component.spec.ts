@@ -131,4 +131,17 @@ describe('MenuLibraryListComponent stage filter', () => {
       expect(names()).toEqual(['אירוע high', 'אירוע low', 'אירוע none'])
     })
   })
+
+  describe('new-inquiry window placement (plan 460)', () => {
+    it('renders the dialog outside .menu-library-container, whose backdrop-filter would shrink its overlay', () => {
+      const open = component as unknown as { isInquiryOpen_: { set(v: boolean): void } }
+      expect(fixture.nativeElement.querySelector('app-new-inquiry-dialog')).toBeNull()
+      open.isInquiryOpen_.set(true)
+      fixture.detectChanges()
+      const dialog = fixture.nativeElement.querySelector('app-new-inquiry-dialog') as HTMLElement | null
+      expect(dialog).not.toBeNull()
+      expect(dialog?.closest('.menu-library-container')).toBeNull()
+      expect(dialog?.querySelector('.c-modal-overlay')).not.toBeNull()
+    })
+  })
 })

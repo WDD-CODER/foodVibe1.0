@@ -2566,3 +2566,18 @@ button.c-chip--removable {
   position: relative;
   z-index: 20;
 }
+
+/* ---- Plan 460 fix round 2: a .c-modal-overlay shown in the browser top layer ----
+   A modal rendered inside a backdrop-filter / transform ancestor opts in with popover="manual" + showPopover(),
+   so its fixed overlay covers the whole window. These undo the browser's own [popover] box styles. */
+.c-modal-overlay[popover] {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  color: inherit;
+}
