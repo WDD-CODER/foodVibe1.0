@@ -238,6 +238,18 @@ describe('TaxonomyStore', () => {
       ).toBe('in use: א, ב')
       expect(store.errorMessage(new Error('x'))).toBeNull()
     })
+
+    // Plan 475 — a server refusal that names its reason is shown as that key's text.
+    it('shows the messageKey of a 409 or 403 reply, null without one', () => {
+      const reply = (status: number, error: unknown) => new HttpErrorResponse({ status, error })
+      expect(store.errorMessage(reply(409, { error: 'TERM_KEY_TAKEN', messageKey: 'unit_name_taken' }))).toBe(
+        'unit_name_taken'
+      )
+      expect(store.errorMessage(reply(403, { error: 'FORBIDDEN', messageKey: 'no_permission' }))).toBe('no_permission')
+      expect(store.errorMessage(reply(409, { error: 'Entity already exists' }))).toBeNull()
+      expect(store.errorMessage(reply(500, { messageKey: 'unit_name_taken' }))).toBeNull()
+      expect(store.errorMessage(reply(403, null))).toBeNull()
+    })
   })
 
   // Plan 454 — one logging path for the registry facades' loads.

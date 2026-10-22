@@ -58,7 +58,7 @@ export const TERM_REFERENCES: Record<TaxonomyKind, Partial<Record<'products' | '
   label: { recipes: ['labels[]', 'autoLabels[]'], dishes: ['labels[]', 'autoLabels[]'] },
   course: { recipes: ['course'], dishes: ['course'] },
   unit: {
-    products: ['baseUnit', 'purchaseOptions.unitSymbol'],
+    products: ['baseUnit', 'purchaseOptions.unitSymbol', 'purchaseOptions.uom'],
     recipes: ['ingredients.unit', 'yieldUnit', 'yieldConversions.unit', 'prepItems.unit', 'prepCategories.items.unit'],
     dishes: ['ingredients.unit', 'yieldUnit', 'yieldConversions.unit', 'prepItems.unit', 'prepCategories.items.unit']
   },

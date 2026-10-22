@@ -245,7 +245,7 @@ export class UnitRegistryService {
     }
     if (next === oldKey) return true
     if (next in this.globalUnits_()) {
-      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_exists_named').replace('{name}', next))
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_name_taken'))
       return false
     }
     return this.saveUnitChange(oldKey, { key: next }, 'crud.units.rename_error')

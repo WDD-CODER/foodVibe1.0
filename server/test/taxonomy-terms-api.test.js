@@ -258,3 +258,81 @@ describe('`shared` is only meaningful for taxonomy terms', () => {
     expect(await testDb().collection('products').countDocuments({ userId: '__master__', businessId: '__master__' })).toBe(0);
   });
 });
+
+describe('plan 475: a unit rename reaches every place that uses it', () => {
+  const crateUser = () => term('userA', 'unit', 'crate', { gramRate: 5000 });
+  const productWithCrate = (userId, _id) => stored(productBody({
+    baseUnit: 'crate',
+    purchaseOptions: [
+      { unitSymbol: 'crate', conversionRate: 1 },
+      { unitSymbol: 'box', conversionRate: 500, uom: 'crate' },
+      { unitSymbol: 'bag', conversionRate: 2, uom: 'kg' },
+    ],
+  }), { _id, userId, businessId: `b_${userId}` });
+
+  it('one PUT re-keys products (incl. purchase basis), recipes and dishes; another business keeps the old key', async () => {
+    const db = testDb();
+    await db.collection('taxonomyTerms').insertOne(crateUser());
+    await db.collection('products').insertMany([productWithCrate('userA', 'p1'), productWithCrate('userB', 'p2')]);
+    await db.collection('recipes').insertOne(stored(recipeBody({
+      yieldUnit: 'crate', ingredients: [{ _id: 'i1', amount: 1, unit: 'crate' }],
+    }), { _id: 'r1', userId: 'userA', businessId: 'b_userA' }));
+    await db.collection('dishes').insertOne(stored(recipeBody({
+      ingredients: [{ _id: 'i1', amount: 2, unit: 'crate' }],
+    }), { _id: 'd1', userId: 'userA', businessId: 'b_userA' }));
+
+    const res = await auth(request(app).put(`${URL}/unit:userA:crate`)).send({ key: 'carton' });
+    expect(res.status).toBe(200);
+
+    const p1 = await db.collection('products').findOne({ _id: 'p1' });
+    expect(p1.baseUnit).toBe('carton');
+    expect(p1.purchaseOptions.map(o => o.unitSymbol)).toEqual(['carton', 'box', 'bag']);
+    expect(p1.purchaseOptions.map(o => o.uom)).toEqual([undefined, 'carton', 'kg']);
+    const r1 = await db.collection('recipes').findOne({ _id: 'r1' });
+    expect(r1.yieldUnit).toBe('carton');
+    expect(r1.ingredients[0].unit).toBe('carton');
+    expect((await db.collection('dishes').findOne({ _id: 'd1' })).ingredients[0].unit).toBe('carton');
+    const p2 = await db.collection('products').findOne({ _id: 'p2' });
+    expect(p2.baseUnit).toBe('crate');
+    expect(p2.purchaseOptions[1].uom).toBe('crate');
+  });
+
+  it('a unit used only as a purchase basis cannot be deleted (409 referencedBy)', async () => {
+    const db = testDb();
+    await db.collection('taxonomyTerms').insertOne(crateUser());
+    await db.collection('products').insertOne(stored(productBody({
+      purchaseOptions: [{ unitSymbol: 'box', conversionRate: 500, uom: 'crate' }],
+    }), { _id: 'p1', userId: 'userA', businessId: 'b_userA' }));
+    const res = await auth(request(app).delete(`${URL}/unit:userA:crate`));
+    expect(res.status).toBe(409);
+    expect(res.body.referencedBy[0]).toMatchObject({ type: 'products', _id: 'p1' });
+    expect(await db.collection('taxonomyTerms').countDocuments()).toBe(1);
+  });
+
+  it('re-keying onto another own unit is a 409 with unit_name_taken and changes nothing', async () => {
+    const db = testDb();
+    await db.collection('taxonomyTerms').insertMany([crateUser(), term('userA', 'unit', 'tray', { gramRate: 300 })]);
+    await db.collection('products').insertOne(productWithCrate('userA', 'p1'));
+    const beforeTerms = await db.collection('taxonomyTerms').find().sort({ _id: 1 }).toArray();
+    const beforeProduct = await db.collection('products').findOne({ _id: 'p1' });
+
+    const res = await auth(request(app).put(`${URL}/unit:userA:crate`)).send({ key: 'tray' });
+    expect(res.status).toBe(409);
+    expect(res.body).toMatchObject({ error: 'TERM_KEY_TAKEN', kind: 'unit', key: 'tray', messageKey: 'unit_name_taken' });
+    expect(await db.collection('taxonomyTerms').find().sort({ _id: 1 }).toArray()).toEqual(beforeTerms);
+    expect(await db.collection('products').findOne({ _id: 'p1' })).toEqual(beforeProduct);
+  });
+
+  it('re-keying a unit onto a master unit key carries unit_name_taken; other kinds do not', async () => {
+    await testDb().collection('taxonomyTerms').insertMany([
+      term('__master__', 'unit', 'liter', { gramRate: 1000 }), crateUser(),
+      term('__master__', 'allergen', 'nuts'), term('userA', 'allergen', 'lupin'),
+    ]);
+    const unit = await auth(request(app).put(`${URL}/unit:userA:crate`)).send({ key: 'liter' });
+    expect(unit.status).toBe(409);
+    expect(unit.body.messageKey).toBe('unit_name_taken');
+    const allergen = await auth(request(app).put(`${URL}/allergen:userA:lupin`)).send({ key: 'nuts' });
+    expect(allergen.status).toBe(409);
+    expect(allergen.body.messageKey).toBeUndefined();
+  });
+});
