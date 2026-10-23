@@ -102,6 +102,21 @@ function mergeClosing(stored, incoming) {
 }
 
 /**
+ * Plan 488: the closing to store for a caller who may not change money. The stored closing is kept whole (amounts,
+ * totals, row set, names, planned, finish stamps); only `arrived`, `hasInvoice` and `photos` of rows present in both
+ * are taken from the incoming copy. Rows only in the incoming copy are ignored, rows only in the stored one stay.
+ */
+function arrivalOnly(stored, incoming) {
+  const from = new Map((incoming?.suppliers ?? []).map(r => [rowKey(r), r]))
+  const suppliers = stored.suppliers.map(row => {
+    const hit = from.get(rowKey(row))
+    if (!hit) return row
+    return { ...row, arrived: hit.arrived ?? row.arrived, hasInvoice: hit.hasInvoice ?? row.hasInvoice, photos: hit.photos ?? row.photos }
+  })
+  return { ...stored, suppliers }
+}
+
+/**
  * The update that finishes an event: stage, history entry, finish stamps, and `closedAt` when it was never set.
  * @returns {{ set: object, push: object }}
  */
@@ -113,5 +128,5 @@ function finishPatch(event, actor, now) {
 }
 
 module.exports = {
-  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, finishPatch,
+  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
 }
