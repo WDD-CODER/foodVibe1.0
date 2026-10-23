@@ -9,12 +9,16 @@ import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-c
 import { EventPlanService } from '../../../../core/engine/event-plan.service'
 import { formatCoefficient, isValidCoefficient, type ItemPortions } from '../../../../core/engine/portions'
 import { cleanFloat, roundMoney } from '../../../../core/engine/rounding'
+import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
+
+/** Detail fields that show money (plan 487: hidden from staff). */
+const MONEY_DISH_FIELDS: readonly DishFieldKey[] = ['sell_price', 'food_cost_money', 'food_cost_pct']
 
 @Component({
   selector: 'app-menu-dish-row',
@@ -39,6 +43,7 @@ export class MenuDishRowComponent {
   private readonly eventPlan_ = inject(EventPlanService)
   private readonly translation_ = inject(TranslationService)
   private readonly recipeCost_ = inject(RecipeCostService)
+  private readonly permission_ = inject(PermissionService)
 
   // ── Inputs ────────────────────────────────────────────────────────────────
   readonly itemGroup = input.required<FormGroup>()
@@ -60,6 +65,13 @@ export class MenuDishRowComponent {
   protected readonly portionsText_ = computed(() => String(cleanFloat(this.portionInfo()?.portions ?? 0, 2)))
   protected readonly coefficientText_ = computed(
     () => this.coefficientDraft_() ?? formatCoefficient(this.portionInfo()?.coefficient ?? 1)
+  )
+
+  /** Plan 487: a signed-in staff member sees no price, food cost or cost warning on the row. */
+  protected readonly isMoneyHidden_ = computed(() => this.permission_.isStaff_())
+  /** The detail fields to show: the serving type's list, without the money fields for staff. */
+  protected readonly visibleFields_ = computed(() =>
+    this.isMoneyHidden_() ? this.activeFields().filter((key) => !MONEY_DISH_FIELDS.includes(key)) : this.activeFields()
   )
 
   /** Id of the dish in this row, kept in step with the form control (the form is not a signal). */

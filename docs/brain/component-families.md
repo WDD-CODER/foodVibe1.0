@@ -63,6 +63,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
   accessible name). It renders the `.c-modal-overlay` / `.c-modal-card` engines from `src/styles.scss`; put
   `.c-modal-body` / `.c-modal-actions` inside it. Simple yes/no: `src/app/shared/confirm-modal/` · `app-confirm-modal`.
 - When: any popup. Render the shell inside the owner's `@if (isOpen)`; never draw `.c-modal-overlay` by hand.
+- Phone bottom sheet: `[sheet]="true"` adds the phone-only `.m-sheet` / `.m-sheet-card` helpers (plan 487, pricing meter); wider screens keep the centred popup.
 - Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
   quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
 - Lint: `reuse-lint` rule `hand-drawn-modal-overlay` warns on a new `class="… c-modal-overlay"` in a template.

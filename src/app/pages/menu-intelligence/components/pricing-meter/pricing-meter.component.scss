@@ -1,4 +1,5 @@
 $break-mobile: 768px; // mirrors src/styles.scss
+$break-tabbar: 620px; // mirrors header.component.scss (the phone bottom tab bar)
 
 @layer components.pricing-meter {
   :host {
@@ -21,20 +22,6 @@ $break-mobile: 768px; // mirrors src/styles.scss
     backdrop-filter: var(--blur-glass);
   }
 
-  .meter-summary {
-    display: none;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-
-    padding-block: var(--space-2);
-    background: transparent;
-    border: none;
-    color: var(--color-text-main);
-    font-weight: var(--fw-semibold, 600);
-    cursor: pointer;
-  }
-
   .meter-body {
     display: flex;
     flex-direction: column;
@@ -50,10 +37,18 @@ $break-mobile: 768px; // mirrors src/styles.scss
     gap: var(--space-4);
   }
 
+  /* Plan 487: every field reserves the room of its error line, so an error never moves a box. */
+  .meter-inputs {
+    --meter-error-h: 1.75rem;
+  }
+
   .meter-field {
     display: flex;
     flex-direction: column;
+    position: relative;
     gap: 2px;
+
+    padding-block-end: var(--meter-error-h);
 
     .c-input-wrapper {
       padding-block: var(--space-1);
@@ -131,8 +126,17 @@ $break-mobile: 768px; // mirrors src/styles.scss
   }
 
   .field-error {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+
+    max-block-size: var(--meter-error-h);
+
     color: var(--color-danger);
     font-size: 0.7rem;
+    line-height: 1.2;
+
+    overflow: hidden;
   }
 
   .margin-hint {
@@ -144,24 +148,37 @@ $break-mobile: 768px; // mirrors src/styles.scss
     cursor: pointer;
   }
 
-  @media (max-width: $break-mobile) {
-    .pricing-meter {
-      padding-inline: var(--space-4);
-    }
+  /* The phone bottom sheet (plan 487): one column of full-width boxes. */
+  .sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
 
-    .meter-summary {
-      display: flex;
-      min-block-size: 44px;
+    h3 {
+      margin: 0;
     }
+  }
 
-    .meter-body {
-      display: none;
-      max-block-size: 60vh;
-      overflow-y: auto;
-    }
+  .sheet-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
 
-    .pricing-meter.expanded .meter-body {
-      display: flex;
+    color: var(--color-text-main);
+    font-weight: 600;
+
+    padding-block: var(--space-3);
+  }
+
+  .sheet-body {
+    max-block-size: 70dvh;
+
+    overflow-y: auto;
+
+    .meter-inputs {
+      --meter-error-h: 1.1rem;
     }
 
     .meter-inputs,
@@ -169,8 +186,57 @@ $break-mobile: 768px; // mirrors src/styles.scss
       justify-content: flex-start;
     }
 
+    .meter-field {
+      flex: 1 1 100%;
+    }
+
     .meter-field .c-input-wrapper {
       inline-size: 100%;
     }
+
+    .meter-field--chip {
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: $break-mobile) {
+    .pricing-meter {
+      display: none;
+    }
+  }
+}
+
+/*
+ * Unlayered on purpose (plan 487): the FAB is a raw <button>, and the global button reset in src/styles.scss is
+ * unlayered, so a layered background / border / padding would lose to it (same as hero-fab.component.scss).
+ */
+.pricing-fab {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset-inline-start: 0.75rem;
+  inset-block-end: 0.75rem;
+  z-index: 210;
+
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+
+  color: var(--color-text-on-primary);
+
+  padding: 0;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+
+  box-shadow: var(--shadow-glow), var(--shadow-card);
+  cursor: pointer;
+
+  @media (max-width: $break-mobile) {
+    display: inline-flex;
+  }
+
+  @media (max-width: $break-tabbar) {
+    inset-block-end: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
   }
 }
