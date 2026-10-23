@@ -26,22 +26,24 @@
           </span>
         </div>
       </div>
-      <app-partial-cost-badge class="no-print" [missing]="missing_()"></app-partial-cost-badge>
-      <span class="dish-sell-price no-print">
-        <span class="dish-sell-currency">₪</span>
-        <input
-          type="number"
-          formControlName="sell_price"
-          min="0"
-          step="1"
-          [id]="'dish-sell-' + sectionIndex() + '-' + itemIndex()"
-          class="dish-sell-input"
-          appSelectOnFocus
-          [style.width]="getInputWidth(itemGroup().get('sell_price')?.value)"
-          (click)="$event.stopPropagation()"
-          (keydown)="sellPriceKeydown.emit($event)"
-        />
-      </span>
+      @if (!isMoneyHidden_()) {
+        <app-partial-cost-badge class="no-print" [missing]="missing_()"></app-partial-cost-badge>
+        <span class="dish-sell-price no-print">
+          <span class="dish-sell-currency">₪</span>
+          <input
+            type="number"
+            formControlName="sell_price"
+            min="0"
+            step="1"
+            [id]="'dish-sell-' + sectionIndex() + '-' + itemIndex()"
+            class="dish-sell-input"
+            appSelectOnFocus
+            [style.width]="getInputWidth(itemGroup().get('sell_price')?.value)"
+            (click)="$event.stopPropagation()"
+            (keydown)="sellPriceKeydown.emit($event)"
+          />
+        </span>
+      }
       <button type="button" class="dish-remove no-print" (click)="remove.emit()">
         <lucide-icon name="trash-2" [size]="14"></lucide-icon>
       </button>
@@ -71,7 +73,7 @@
   </div>
   @if (itemGroup().get('recipeId')?.value && isMetaExpanded()) {
     <app-scroll-rail class="dish-data" snap="mandatory" arrows="auto">
-      @for (fieldKey of activeFields(); track fieldKey) {
+      @for (fieldKey of visibleFields_(); track fieldKey) {
         <div
           class="dish-field"
           (click)="!isDishFieldReadOnly(fieldKey) && !isEditingField(fieldKey) && editDishFieldStart.emit(fieldKey)"
@@ -140,10 +142,12 @@
       @if (isPerDinerZero()) {
         <span class="c-field-error dish-coefficient-error">{{ 'portions_per_diner_zero' | translatePipe }}</span>
       }
-      <div class="dish-field read-only">
-        <span class="dish-field-label">{{ 'dish_food_cost_per_portion' | translatePipe }}</span>
-        <span class="dish-field-value">₪{{ getFoodCostPerPortion() }}</span>
-      </div>
+      @if (!isMoneyHidden_()) {
+        <div class="dish-field read-only">
+          <span class="dish-field-label">{{ 'dish_food_cost_per_portion' | translatePipe }}</span>
+          <span class="dish-field-value">₪{{ getFoodCostPerPortion() }}</span>
+        </div>
+      }
     </app-scroll-rail>
   }
 </div>

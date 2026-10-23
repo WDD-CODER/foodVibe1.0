@@ -15,6 +15,7 @@ import { ModalShellComponent, ModalShellSize } from './modal-shell.component'
         [size]="size_()"
         [titleKey]="'cancel'"
         [dismissible]="dismissible_()"
+        [sheet]="sheet_()"
         (dismissed)="onDismissed()"
       >
         <input id="first" type="text" />
@@ -33,6 +34,7 @@ class HostComponent {
   readonly secondOpen_ = signal(false)
   readonly size_ = signal<ModalShellSize>('sm')
   readonly dismissible_ = signal(true)
+  readonly sheet_ = signal(false)
   readonly dismissed_ = signal(0)
   readonly secondDismissed_ = signal(0)
 
@@ -94,6 +96,16 @@ describe('ModalShellComponent', () => {
     host.size_.set('fluid')
     fixture.detectChanges()
     expect(query('.c-modal-card')!.classList.contains('c-modal-card--fluid')).toBeTrue()
+  })
+
+  it('sheet=true adds the phone bottom-sheet helpers, the default adds neither (plan 487)', () => {
+    expect(query('.c-modal-overlay')!.classList.contains('m-sheet')).toBeFalse()
+    expect(query('.c-modal-card')!.classList.contains('m-sheet-card')).toBeFalse()
+    host.sheet_.set(true)
+    fixture.detectChanges()
+    expect(query('.c-modal-overlay')!.classList.contains('m-sheet')).toBeTrue()
+    expect(query('.c-modal-card')!.classList.contains('m-sheet-card')).toBeTrue()
+    expect(query('.c-modal-card')!.classList.contains('c-modal-card')).toBeTrue()
   })
 
   it('Escape emits dismissed once', () => {

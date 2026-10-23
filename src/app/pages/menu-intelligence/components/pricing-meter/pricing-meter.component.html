@@ -1,21 +1,58 @@
-<div class="pricing-meter no-print" [class.expanded]="isExpanded_()" [formGroup]="moneyForm()">
-  <button type="button" class="meter-summary" [attr.aria-expanded]="isExpanded_()" (click)="toggleExpanded()">
-    <span class="summary-price" dir="ltr">{{ pricePerGuest_() }}</span>
-    <span class="summary-pct" dir="ltr">{{ profitPct_() }}</span>
-    @if (hasProfitPct_()) {
-      @if (result_().meetsTarget) {
-        <span class="verdict ok"
-          ><lucide-icon name="circle-check" [size]="14"></lucide-icon>{{ 'meets_target' | translatePipe }}</span
-        >
-      } @else {
-        <span class="verdict bad"
-          ><lucide-icon name="alert-triangle" [size]="14"></lucide-icon>{{ shortLabel_() }}</span
-        >
-      }
-    }
-    <lucide-icon [name]="isExpanded_() ? 'chevron-down' : 'chevron-up'" [size]="16"></lucide-icon>
+@if (!isMoneyHidden_()) {
+  <!-- One body at a time: two boxes on one control do not echo each other's typing, so the bar's boxes are
+       re-created (with the current values) when the sheet closes. -->
+  @if (!isSheetOpen()) {
+    <div class="pricing-meter no-print">
+      <ng-container [ngTemplateOutlet]="meterBody" />
+    </div>
+  }
+
+  <button
+    type="button"
+    class="pricing-fab no-print"
+    [attr.aria-label]="'pricing_meter_open' | translatePipe"
+    [attr.aria-expanded]="isSheetOpen()"
+    (click)="openSheet()"
+  >
+    <lucide-icon name="coins" [size]="22"></lucide-icon>
   </button>
 
+  @if (isSheetOpen()) {
+    <app-modal-shell [sheet]="true" labelledBy="pricing-sheet-title" (dismissed)="closeSheet()">
+      <div class="sheet-head">
+        <h3 id="pricing-sheet-title">{{ 'pricing_meter_open' | translatePipe }}</h3>
+        <button
+          type="button"
+          class="c-icon-btn sheet-close"
+          [attr.aria-label]="'close' | translatePipe"
+          (click)="closeSheet()"
+        >
+          <lucide-icon name="x" [size]="18"></lucide-icon>
+        </button>
+      </div>
+      <div class="sheet-summary">
+        <span class="summary-price" dir="ltr">{{ pricePerGuest_() }}</span>
+        <span class="summary-pct" dir="ltr">{{ profitPct_() }}</span>
+        @if (hasProfitPct_()) {
+          @if (result_().meetsTarget) {
+            <span class="verdict ok"
+              ><lucide-icon name="circle-check" [size]="14"></lucide-icon>{{ 'meets_target' | translatePipe }}</span
+            >
+          } @else {
+            <span class="verdict bad"
+              ><lucide-icon name="alert-triangle" [size]="14"></lucide-icon>{{ shortLabel_() }}</span
+            >
+          }
+        }
+      </div>
+      <div class="sheet-body">
+        <ng-container [ngTemplateOutlet]="meterBody" />
+      </div>
+    </app-modal-shell>
+  }
+}
+
+<ng-template #meterBody>
   <div class="meter-body">
     <div class="meter-inputs">
       <label class="meter-field">
@@ -37,7 +74,8 @@
             min="0"
             inputmode="decimal"
             dir="ltr"
-            formControlName="pricePerGuest"
+            [formControl]="moneyForm().controls.pricePerGuest"
+            name="pricePerGuest"
             [placeholder]="result_().revenueIsComputed ? pricePerGuest_() : ''"
             [attr.title]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
           />
@@ -58,7 +96,8 @@
             min="0"
             inputmode="decimal"
             dir="ltr"
-            formControlName="extraCostAmount"
+            [formControl]="moneyForm().controls.extraCostAmount"
+            name="extraCostAmount"
             [attr.title]="canEditMoney_() ? null : ('money_locked_hint' | translatePipe)"
           />
         </span>
@@ -70,18 +109,21 @@
       <label class="meter-field">
         <span class="fin-label">{{ 'extra_costs_note' | translatePipe }}</span>
         <span class="c-input-wrapper">
-          <input type="text" maxlength="200" formControlName="extraCostNote" />
+          <input type="text" maxlength="200" [formControl]="moneyForm().controls.extraCostNote" name="extraCostNote" />
         </span>
       </label>
 
-      <button
-        type="button"
-        class="c-chip targets-toggle"
-        [attr.aria-expanded]="targetsOpen_()"
-        (click)="toggleTargets()"
-      >
-        {{ 'event_target_toggle' | translatePipe }}
-      </button>
+      <div class="meter-field meter-field--chip">
+        <button
+          type="button"
+          class="c-chip targets-toggle"
+          [class.teal]="targetsHaveData_()"
+          [attr.aria-expanded]="targetsOpen_()"
+          (click)="toggleTargets()"
+        >
+          {{ 'event_target_toggle' | translatePipe }}
+        </button>
+      </div>
 
       @if (targetsOpen_()) {
         <label class="meter-field">
@@ -92,7 +134,15 @@
               moneyForm().controls.profitTargetPct.invalid && moneyForm().controls.profitTargetPct.touched
             "
           >
-            <input type="number" min="0" max="99.99" inputmode="decimal" dir="ltr" formControlName="profitTargetPct" />
+            <input
+              type="number"
+              min="0"
+              max="99.99"
+              inputmode="decimal"
+              dir="ltr"
+              [formControl]="moneyForm().controls.profitTargetPct"
+              name="profitTargetPct"
+            />
           </span>
           @if (moneyForm().controls.profitTargetPct.errors?.['targetTooHigh']) {
             <span class="field-error" role="alert">{{ 'target_too_high' | translatePipe }}</span>
@@ -106,7 +156,15 @@
               moneyForm().controls.safetyMarginPct.invalid && moneyForm().controls.safetyMarginPct.touched
             "
           >
-            <input type="number" min="0" max="99.99" inputmode="decimal" dir="ltr" formControlName="safetyMarginPct" />
+            <input
+              type="number"
+              min="0"
+              max="99.99"
+              inputmode="decimal"
+              dir="ltr"
+              [formControl]="moneyForm().controls.safetyMarginPct"
+              name="safetyMarginPct"
+            />
           </span>
           @if (moneyForm().controls.safetyMarginPct.errors?.['targetTooHigh']) {
             <span class="field-error" role="alert">{{ 'target_too_high' | translatePipe }}</span>
@@ -179,4 +237,4 @@
       }
     </div>
   </div>
-</div>
+</ng-template>

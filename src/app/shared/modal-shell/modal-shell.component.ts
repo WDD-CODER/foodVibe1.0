@@ -63,6 +63,8 @@ export class ModalShellComponent {
   readonly dismissible = input(true)
   /** Stacking order override for a popup opened from inside another popup. */
   readonly zIndex = input<number | null>(null)
+  /** Plan 487: on a phone the popup opens as a bottom sheet (the `.m-sheet` / `.m-sheet-card` helpers). */
+  readonly sheet = input(false)
   /** Escape or a backdrop click, for the top-most dismissible popup only. */
   readonly dismissed = output<void>()
 
