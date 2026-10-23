@@ -5,7 +5,7 @@ const { createRateLimiter } = require('../middleware/rate-limit')
 const { verifyToken } = require('../middleware/auth')
 const { getBusiness, setStaffVisibleStages, setBusinessName, setBusinessSettings, setBusinessBaseline } = require('../services/business')
 const { assertCan } = require('../utils/permissions')
-const { isValidUsername, isValidPasswordHash } = require('../utils/username')
+const { isValidUsername, isValidPasswordHash, releasedUsername } = require('../utils/username')
 const { newId } = require('../utils/id')
 const User = require('../models/user.model')
 const { businessSettingsSchema, businessNameInputSchema, staffVisibleStagesInputSchema, baselineInputSchema, BUSINESS_SETTINGS_DEFAULTS } = require('../generated/schemas/entities')
@@ -214,7 +214,8 @@ router.post('/team', verifyToken, ownerOnly, teamLimiter, async (req, res) => {
   }
 })
 
-// DELETE /api/v1/business/team/:userId — block a staff member's login. Never deletes the user or their items.
+// DELETE /api/v1/business/team/:userId — block a staff member's login and free his username (plan 492:
+// the name moves to `removedName`, `name` becomes a tombstone). Never deletes the user or their items.
 router.delete('/team/:userId', verifyToken, ownerOnly, async (req, res) => {
   try {
     const targetId = String(req.params.userId)
@@ -222,8 +223,10 @@ router.delete('/team/:userId', verifyToken, ownerOnly, async (req, res) => {
     if (!target) return res.status(404).json({ error: 'NOT_FOUND' })
     if (targetId === String(req.user.userId)) return res.status(403).json({ error: 'CANNOT_REMOVE_SELF' })
     if (target.businessRole === 'owner') return res.status(403).json({ error: 'CANNOT_REMOVE_OWNER' })
-    if (!target.removedAt) {
-      await User.updateOne({ _id: targetId }, { $set: { removedAt: Date.now() } })
+    if (!target.removedAt || !target.removedName) {
+      const $set = { removedName: target.name, name: releasedUsername(target.name, targetId) }
+      if (!target.removedAt) $set.removedAt = Date.now()
+      await User.updateOne({ _id: targetId }, { $set })
       req.log.info({ event: 'business.team.removed', staffId: targetId })
     }
     res.json({ ok: true })
