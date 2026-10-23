@@ -130,12 +130,88 @@ describe('PUT /:id/closing', () => {
     expect(ok.status).toBe(200)
     expect((await raw('e1')).closing.suppliers[0]).toMatchObject({ arrived: true, hasInvoice: true, photos: [PHOTO] })
 
-    const money = baseClosing()
+    // Amount-only change on the copy just stored (plan 488: a copy that also carried a tick would merge the tick only).
+    const money = structuredClone(closing)
     money.suppliers[0].actualPaid = 5
     const denied = await put('e1', '/closing', STAFF, { closing: money })
     expect(denied.status).toBe(403)
     expect(denied.body).toEqual(FORBIDDEN)
     expect((await raw('e1')).closing.suppliers[0].actualPaid).toBeUndefined()
+  })
+
+  // Plan 488: a staff copy older than the owner's last change never drops the tick and never writes money.
+  const ownerClosing = () => {
+    const closing = { ...baseClosing(), actualExtraCosts: 900, actualRevenue: 9000 }
+    closing.suppliers[0].actualPaid = 1150
+    return closing
+  }
+
+  it('a staff tick on an older copy (no amounts) is kept, the owner amounts stay', async () => {
+    await seed('e1', { stage: 'post_production', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }), closing: ownerClosing() })
+    const stale = baseClosing()
+    stale.suppliers[0].arrived = true
+    const res = await put('e1', '/closing', STAFF, { closing: stale })
+    expect(res.status).toBe(200)
+    const after = (await raw('e1')).closing
+    expect(after.suppliers[0]).toMatchObject({ arrived: true, actualPaid: 1150 })
+    expect(after.actualRevenue).toBe(9000)
+    expect(after.actualExtraCosts).toBe(900)
+  })
+
+  it('a staff tick on a copy without the row the owner added keeps that row', async () => {
+    const closing = ownerClosing()
+    closing.suppliers.push({ supplierId: 's3', name: 'דגים', planned: 0, arrived: false, hasInvoice: false, photos: [] })
+    await seed('e1', { stage: 'post_production', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }), closing })
+    const stale = baseClosing()
+    stale.suppliers[1].hasInvoice = true
+    const res = await put('e1', '/closing', STAFF, { closing: stale })
+    expect(res.status).toBe(200)
+    const after = (await raw('e1')).closing
+    expect(after.suppliers.map(r => r.supplierId)).toEqual(['s1', 's2', 's3'])
+    expect(after.suppliers[1].hasInvoice).toBe(true)
+    expect(after.suppliers[0].actualPaid).toBe(1150)
+  })
+
+  it('a staff tick on an older copy keeps the ticks and photos the owner added on other rows (fix round 1)', async () => {
+    const closing = ownerClosing()
+    closing.suppliers[1] = { ...closing.suppliers[1], actualPaid: 1100, hasInvoice: true, photos: [PHOTO] }
+    await seed('e1', { stage: 'post_production', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }), closing })
+    const stale = baseClosing()
+    stale.suppliers[0].arrived = true
+    const res = await put('e1', '/closing', STAFF, { closing: stale })
+    expect(res.status).toBe(200)
+    const after = (await raw('e1')).closing
+    expect(after.suppliers[0]).toMatchObject({ arrived: true, actualPaid: 1150 })
+    expect(after.suppliers[1]).toMatchObject({ actualPaid: 1100, hasInvoice: true, photos: [PHOTO] })
+  })
+
+  it('a staff photo on an older copy is added next to the photo the owner stored on the same row', async () => {
+    const OTHER = 'https://res.cloudinary.com/demo/image/upload/other.jpg'
+    const closing = ownerClosing()
+    closing.suppliers[0] = { ...closing.suppliers[0], photos: [PHOTO] }
+    await seed('e1', { stage: 'post_production', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }), closing })
+    const stale = baseClosing()
+    stale.suppliers[0].photos = [OTHER]
+    const res = await put('e1', '/closing', STAFF, { closing: stale })
+    expect(res.status).toBe(200)
+    expect((await raw('e1')).closing.suppliers[0].photos).toEqual([PHOTO, OTHER])
+  })
+
+  it('a staff copy with an extra row: no tick → 403 and nothing stored; with a tick → only the tick is stored', async () => {
+    await seed('e1', { stage: 'post_production', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }), closing: baseClosing() })
+    const extra = baseClosing()
+    extra.suppliers.push({ supplierId: 's9', name: 'זר', planned: 0, arrived: true, hasInvoice: false, photos: [] })
+    const denied = await put('e1', '/closing', STAFF, { closing: extra })
+    expect(denied.status).toBe(403)
+    expect(denied.body).toEqual(FORBIDDEN)
+    expect((await raw('e1')).closing).toEqual(baseClosing())
+
+    extra.suppliers[0].arrived = true
+    const ok = await put('e1', '/closing', STAFF, { closing: extra })
+    expect(ok.status).toBe(200)
+    const after = (await raw('e1')).closing
+    expect(after.suppliers.map(r => r.supplierId)).toEqual(['s1', 's2'])
+    expect(after.suppliers[0].arrived).toBe(true)
   })
 
   it('the owner changes amounts', async () => {

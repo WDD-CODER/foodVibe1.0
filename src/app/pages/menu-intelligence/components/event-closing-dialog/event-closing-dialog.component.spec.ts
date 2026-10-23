@@ -222,20 +222,72 @@ describe('EventClosingDialogComponent', () => {
     expect(pipeline.reopen).toHaveBeenCalledWith('e1')
   })
 
-  it('staff may tick arrival and photos but not type amounts, and cannot finish', async () => {
-    allowed['editMoney'] = false
+  it('owner: every row has planned and paid, the totals and profit footer render, finish shows', async () => {
     await setup()
-    expect(paid(0).disabled).toBeTrue()
-    const [arrived] = Array.from(rows()[0].querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
+    for (const row of rows()) {
+      expect(row.querySelector('.row-planned')).toBeTruthy()
+      expect(row.querySelector('.row-paid input')).toBeTruthy()
+    }
+    expect(el.querySelector('.totals')).toBeTruthy()
+    expect(el.querySelector('.profit')).toBeTruthy()
+    expect(el.querySelector('.closing-body')!.classList).not.toContain('no-money')
+    expect(button('closing_finish')).toBeTruthy()
+  })
+
+  it('staff (plan 488): no money in the DOM, ticks enabled and saved, no finish / reopen / refresh / add supplier', async () => {
+    allowed['editMoney'] = false
+    const closing: EventClosing = {
+      suppliers: [
+        {
+          supplierId: 'a',
+          name: 'ירקן',
+          planned: 1000,
+          actualPaid: 1500,
+          arrived: false,
+          hasInvoice: false,
+          photos: []
+        },
+        { supplierId: 'b', name: 'קצב', planned: 2000, arrived: false, hasInvoice: false, photos: [] }
+      ],
+      actualRevenue: 9000
+    }
+    await setup({ ...base, closing })
+    for (const selector of ['.row-planned', '.row-paid', '.totals', '.profit', '.add-supplier', '.is-over']) {
+      expect(el.querySelector(selector)).withContext(selector).toBeNull()
+    }
+    expect(el.querySelectorAll('input[type="number"]').length).toBe(0)
+    expect(text()).not.toContain('₪')
+    expect(el.querySelector('.closing-body')!.classList).toContain('no-money')
+    expect(button('closing_finish')).toBeUndefined()
+    expect(button('closing_reopen')).toBeUndefined()
+    expect(button('closing_refresh_plan')).toBeUndefined()
+
+    const [arrived, invoice] = Array.from(rows()[0].querySelectorAll<HTMLInputElement>('input[type="checkbox"]'))
     expect(arrived.disabled).toBeFalse()
+    expect(invoice.disabled).toBeFalse()
     arrived.checked = true
     arrived.dispatchEvent(new Event('change'))
     await fixture.whenStable()
     const sent = pipeline.saveClosing.calls.mostRecent().args[1] as EventClosing
     expect(sent.suppliers[0].arrived).toBeTrue()
     expect(rows()[0].querySelector('.photo-add')).toBeTruthy()
-    expect(button('closing_finish')).toBeUndefined()
-    expect(button('closing_refresh_plan')).toBeUndefined()
+  })
+
+  it('staff on a finished event sees no reopen', async () => {
+    allowed['editMoney'] = false
+    await setup({ ...base, stage: 'finished', closing: { suppliers: [], finishedAt: 5 } })
+    expect(button('closing_reopen')).toBeUndefined()
+    expect(el.querySelector('.profit')).toBeNull()
+  })
+
+  it('the photo trigger is a small camera icon button with an aria-label and no visible text', async () => {
+    await setup()
+    const trigger = rows()[0].querySelector<HTMLElement>('label.photo-add.c-icon-btn')!
+    expect(trigger).toBeTruthy()
+    expect(trigger.getAttribute('aria-label')).toBe('T:closing_add_photo')
+    expect(trigger.textContent?.trim()).toBe('')
+    expect(trigger.querySelector('lucide-icon[name="camera"]')).toBeTruthy()
+    expect(trigger.querySelector('input[type="file"]')).toBeTruthy()
   })
 
   it('uploads a delivery-note photo and adds its URL to that row', async () => {

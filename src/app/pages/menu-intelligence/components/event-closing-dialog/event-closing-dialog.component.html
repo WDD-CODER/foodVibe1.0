@@ -31,47 +31,53 @@
       }
 
       @if (closing_(); as closing) {
-        <div class="closing-body">
+        <div class="closing-body" [class.no-money]="!canMoney_()">
           <div class="rows-head" aria-hidden="true">
             <span>{{ 'supplier' | translatePipe }}</span>
-            <span>{{ 'closing_planned' | translatePipe }}</span>
-            <span>{{ 'closing_actual_paid' | translatePipe }}</span>
+            @if (canMoney_()) {
+              <span>{{ 'closing_planned' | translatePipe }}</span>
+              <span>{{ 'closing_actual_paid' | translatePipe }}</span>
+            }
             <span>{{ 'closing_arrived' | translatePipe }} / {{ 'closing_has_invoice' | translatePipe }}</span>
             <span>{{ 'closing_photos' | translatePipe }}</span>
           </div>
 
           @for (view of rows_(); track view.key) {
-            <section class="closing-row" [class.is-over]="view.level === 'over'">
+            <section class="closing-row" [class.is-over]="canMoney_() && view.level === 'over'">
               <h4 class="row-name">{{ view.row.name }}</h4>
 
-              <span class="row-planned" dir="ltr">
-                <span class="cell-label">{{ 'closing_planned' | translatePipe }}</span>
-                {{ formatMoney(view.row.planned) }}
-              </span>
+              @if (canMoney_()) {
+                <span class="row-planned" dir="ltr">
+                  <span class="cell-label">{{ 'closing_planned' | translatePipe }}</span>
+                  {{ formatMoney(view.row.planned) }}
+                </span>
 
-              <div class="row-paid c-input-stack">
-                <label [for]="'paid-' + view.key" class="cell-label">{{ 'closing_actual_paid' | translatePipe }}</label>
-                <input
-                  [id]="'paid-' + view.key"
-                  class="c-input"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  dir="ltr"
-                  [value]="view.row.actualPaid ?? ''"
-                  [disabled]="!canMoney_() || locked_()"
-                  (change)="onPaidChange(view.key, $any($event.target).value)"
-                />
-                @if (view.remark) {
-                  <span
-                    class="remark"
-                    [class.remark--over]="view.level === 'over'"
-                    [class.remark--under]="view.level === 'under'"
-                  >
-                    {{ view.remark }}
-                  </span>
-                }
-              </div>
+                <div class="row-paid c-input-stack">
+                  <label [for]="'paid-' + view.key" class="cell-label">{{
+                    'closing_actual_paid' | translatePipe
+                  }}</label>
+                  <input
+                    [id]="'paid-' + view.key"
+                    class="c-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    dir="ltr"
+                    [value]="view.row.actualPaid ?? ''"
+                    [disabled]="locked_()"
+                    (change)="onPaidChange(view.key, $any($event.target).value)"
+                  />
+                  @if (view.remark) {
+                    <span
+                      class="remark"
+                      [class.remark--over]="view.level === 'over'"
+                      [class.remark--under]="view.level === 'under'"
+                    >
+                      {{ view.remark }}
+                    </span>
+                  }
+                </div>
+              }
 
               <div class="row-checks">
                 <label class="check">
@@ -118,9 +124,13 @@
                   </span>
                 }
                 @if (canArrival_() && !locked_() && view.row.photos.length < maxPhotos) {
-                  <label class="photo-add" [class.is-busy]="isUploading(view.key)">
+                  <label
+                    class="photo-add c-icon-btn"
+                    [class.is-busy]="isUploading(view.key)"
+                    [attr.aria-label]="'closing_add_photo' | translatePipe"
+                    [attr.title]="'closing_add_photo' | translatePipe"
+                  >
                     <lucide-icon name="camera" [size]="18"></lucide-icon>
-                    <span>{{ 'closing_add_photo' | translatePipe }}</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -153,70 +163,74 @@
             </div>
           }
 
-          <div class="totals">
-            <div class="c-input-stack">
-              <label for="closing-extra">{{ 'closing_actual_extra' | translatePipe }}</label>
-              <input
-                id="closing-extra"
-                class="c-input"
-                type="number"
-                min="0"
-                step="0.01"
-                dir="ltr"
-                [value]="closing.actualExtraCosts ?? snapshot_()?.extraCosts ?? ''"
-                [disabled]="!canMoney_() || locked_()"
-                (change)="onExtraChange($any($event.target).value)"
-              />
+          @if (canMoney_()) {
+            <div class="totals">
+              <div class="c-input-stack">
+                <label for="closing-extra">{{ 'closing_actual_extra' | translatePipe }}</label>
+                <input
+                  id="closing-extra"
+                  class="c-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  dir="ltr"
+                  [value]="closing.actualExtraCosts ?? snapshot_()?.extraCosts ?? ''"
+                  [disabled]="locked_()"
+                  (change)="onExtraChange($any($event.target).value)"
+                />
+              </div>
+              <div class="c-input-stack">
+                <label for="closing-revenue">{{ 'closing_actual_revenue' | translatePipe }}</label>
+                <input
+                  id="closing-revenue"
+                  class="c-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  dir="ltr"
+                  [value]="closing.actualRevenue ?? snapshot_()?.plannedRevenue ?? ''"
+                  [disabled]="locked_()"
+                  (change)="onRevenueChange($any($event.target).value)"
+                />
+              </div>
             </div>
-            <div class="c-input-stack">
-              <label for="closing-revenue">{{ 'closing_actual_revenue' | translatePipe }}</label>
-              <input
-                id="closing-revenue"
-                class="c-input"
-                type="number"
-                min="0"
-                step="0.01"
-                dir="ltr"
-                [value]="closing.actualRevenue ?? snapshot_()?.plannedRevenue ?? ''"
-                [disabled]="!canMoney_() || locked_()"
-                (change)="onRevenueChange($any($event.target).value)"
-              />
-            </div>
-          </div>
+          }
         </div>
 
         @if (result_(); as result) {
           <footer class="closing-footer">
-            <dl class="profit">
-              <div>
-                <dt>{{ 'closing_planned_profit' | translatePipe }}</dt>
-                <dd dir="ltr">{{ formatMoney(result.plannedProfit) }} · {{ formatPct1(result.plannedProfitPct) }}</dd>
-              </div>
-              <div>
-                <dt>
-                  {{ 'closing_actual_profit' | translatePipe }}
-                  @if (result.partial) {
-                    <span class="partial-tag">{{ 'closing_partial' | translatePipe }}</span>
-                  }
-                </dt>
-                <dd dir="ltr">
-                  {{ formatMoney(result.actualProfit) }}
-                  @if (result.actualProfitPct !== null) {
-                    · {{ formatPct1(result.actualProfitPct) }}
-                  }
-                </dd>
-              </div>
-              <div>
-                <dt>{{ 'closing_difference' | translatePipe }}</dt>
-                <dd dir="ltr" [class.is-bad]="result.profitDiff < 0">{{ formatMoney(result.profitDiff) }}</dd>
-              </div>
-              @if (result.accuracyPts !== null) {
+            @if (canMoney_()) {
+              <dl class="profit">
                 <div>
-                  <dt>{{ 'closing_accuracy' | translatePipe }}</dt>
-                  <dd dir="ltr">{{ formatPct1(result.accuracyPts) }}</dd>
+                  <dt>{{ 'closing_planned_profit' | translatePipe }}</dt>
+                  <dd dir="ltr">{{ formatMoney(result.plannedProfit) }} · {{ formatPct1(result.plannedProfitPct) }}</dd>
                 </div>
-              }
-            </dl>
+                <div>
+                  <dt>
+                    {{ 'closing_actual_profit' | translatePipe }}
+                    @if (result.partial) {
+                      <span class="partial-tag">{{ 'closing_partial' | translatePipe }}</span>
+                    }
+                  </dt>
+                  <dd dir="ltr">
+                    {{ formatMoney(result.actualProfit) }}
+                    @if (result.actualProfitPct !== null) {
+                      · {{ formatPct1(result.actualProfitPct) }}
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ 'closing_difference' | translatePipe }}</dt>
+                  <dd dir="ltr" [class.is-bad]="result.profitDiff < 0">{{ formatMoney(result.profitDiff) }}</dd>
+                </div>
+                @if (result.accuracyPts !== null) {
+                  <div>
+                    <dt>{{ 'closing_accuracy' | translatePipe }}</dt>
+                    <dd dir="ltr">{{ formatPct1(result.accuracyPts) }}</dd>
+                  </div>
+                }
+              </dl>
+            }
 
             <div class="c-modal-actions closing-actions">
               <button type="button" class="c-btn-ghost" (click)="closed.emit()">{{ 'close' | translatePipe }}</button>

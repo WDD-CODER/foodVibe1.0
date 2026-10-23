@@ -101,6 +101,34 @@ function mergeClosing(stored, incoming) {
   return { ...content, ...keep }
 }
 
+/** The most delivery-note photos one row keeps (same cap as the menu-event schema). */
+const MAX_ROW_PHOTOS = 10
+
+/**
+ * Plan 488: the closing to store for a caller who may not change money, whose copy is older than the stored one.
+ * The stored closing is kept whole (amounts, totals, row set, names, planned, finish stamps). From the incoming copy
+ * only additions are taken, on rows present in both: a tick (`arrived` / `hasInvoice` true) and photos the stored row
+ * does not have yet. Nothing stored is ever cleared here — an old copy cannot tell "the cook unticked" from "someone
+ * ticked since", so an untick or photo removal on this path waits for the next save on the fresh copy the route
+ * returns. Rows only in the incoming copy are ignored, rows only in the stored one stay.
+ */
+function arrivalOnly(stored, incoming) {
+  const from = new Map((incoming?.suppliers ?? []).map(r => [rowKey(r), r]))
+  const suppliers = stored.suppliers.map(row => {
+    const hit = from.get(rowKey(row))
+    if (!hit) return row
+    const have = row.photos ?? []
+    const added = (Array.isArray(hit.photos) ? hit.photos : []).filter(p => !have.includes(p))
+    return {
+      ...row,
+      arrived: row.arrived === true || hit.arrived === true,
+      hasInvoice: row.hasInvoice === true || hit.hasInvoice === true,
+      photos: [...have, ...added].slice(0, Math.max(have.length, MAX_ROW_PHOTOS)),
+    }
+  })
+  return { ...stored, suppliers }
+}
+
 /**
  * The update that finishes an event: stage, history entry, finish stamps, and `closedAt` when it was never set.
  * @returns {{ set: object, push: object }}
@@ -113,5 +141,5 @@ function finishPatch(event, actor, now) {
 }
 
 module.exports = {
-  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, finishPatch,
+  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
 }

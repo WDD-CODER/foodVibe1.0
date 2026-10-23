@@ -10,11 +10,11 @@ const { verifyToken } = require('../middleware/auth')
 const { checkStoredDoc } = require('../middleware/validate')
 const { dataWriteLimiter } = require('../middleware/write-limit')
 const { scopeFilter } = require('../utils/business-scope')
-const { assertCan } = require('../utils/permissions')
+const { assertCan, can } = require('../utils/permissions')
 const { isEventVisible, visibleStagesFor } = require('../utils/event-visibility')
 const { applyStageChange, newNote } = require('../utils/event-stage')
 const {
-  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, finishPatch,
+  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
 } = require('../utils/closing-rules')
 const { newId } = require('../utils/id')
 const { LIVE } = require('../jobs/purge-deleted')
@@ -183,7 +183,10 @@ async function writeConditional(req, res, event, update, logEvent, status = 200)
   return res.status(status).json(result)
 }
 
-// PUT /api/v1/events/:id/closing  { closing }  amounts: owner (editMoney); arrived, invoice, photos: staff too (markArrival)
+// PUT /api/v1/events/:id/closing  { closing }  amounts: owner (editMoney); arrived, invoice, photos: staff too (markArrival).
+// Plan 488: a caller without editMoney whose (older) copy also carries a tick gets an arrival-only merge — the stored
+// money and row set are kept, only new ticks and new photos of shared rows are added (nothing stored is cleared) —
+// instead of a 403 that drops the tick.
 router.put('/:id/closing', verifyToken, async (req, res) => {
   try {
     const event = await loadEvent(req, res)
@@ -195,10 +198,13 @@ router.put('/:id/closing', verifyToken, async (req, res) => {
     if (!base) return res.status(400).json({ error: 'NO_PLAN' })
     const diff = diffClosing(base, incoming)
     if (!diff.ok) return res.status(400).json({ error: diff.error })
-    if (diff.money && !assertCan(req, res, 'editMoney', { type: TYPE, doc: event })) return
-    if (diff.arrival && !assertCan(req, res, 'markArrival', { type: TYPE, doc: event })) return
+    const ctx = { type: TYPE, doc: event }
+    const arrivalOnlyWrite = diff.money && diff.arrival && !can(req.user, 'editMoney', ctx).ok
+    if (diff.money && !arrivalOnlyWrite && !assertCan(req, res, 'editMoney', ctx)) return
+    if (diff.arrival && !assertCan(req, res, 'markArrival', ctx)) return
+    if (arrivalOnlyWrite) req.log.warn({ event: 'events.closing.money_ignored', eventId: event._id })
     const now = Date.now()
-    const closing = mergeClosing(base, incoming)
+    const closing = arrivalOnlyWrite ? arrivalOnly(base, incoming) : mergeClosing(base, incoming)
     if (!validMerged(res, { ...event, closing })) return
     await writeConditional(req, res, event, { $set: { closing, updatedAt: now } }, 'events.closing.saved')
   } catch (err) {
