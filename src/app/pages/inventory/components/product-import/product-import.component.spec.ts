@@ -332,6 +332,68 @@ describe('ProductImportComponent', () => {
     expect(all('import-row')[0].querySelector('[data-testid="import-flag-unknown-unit"]')).not.toBeNull()
   })
 
+  it('plan 489: a row trashed while the AI step runs never reaches the save request', async () => {
+    let release: (m: Map<string, NameMatchResult>) => void = () => undefined
+    await setup(
+      of({ rows: [row('גזר', 3), row('כרפס', 2, { baseUnit: 'unit' })], truncated: false }),
+      true,
+      () => new Promise((resolve) => (release = resolve))
+    )
+    await pasteAndParse('גזר 3\nכרפס 2')
+    expect(byId('import-matching')).not.toBeNull()
+    all('import-delete')[0].click()
+    fixture.detectChanges()
+    release(new Map())
+    await fixture.whenStable()
+    fixture.detectChanges()
+    const comp = fixture.componentInstance as unknown as {
+      updateRow: (id: number, patch: { baseUnit: string }) => void
+      view_: () => { row: { id: number } }[]
+    }
+    comp.updateRow(comp.view_()[0].row.id, { baseUnit: 'gram' })
+    fixture.detectChanges()
+    byId<HTMLButtonElement>('import-save')!.click()
+    await fixture.whenStable()
+    expect(apply).toHaveBeenCalledTimes(1)
+    const sent = apply.calls.mostRecent().args[1] as { name: string; baseUnit: string }[]
+    expect(sent.length).toBe(1)
+    expect(sent[0].name).toBe('כרפס')
+    expect(sent[0].baseUnit).toBe('gram')
+    expect(onSetSuccessMsg).toHaveBeenCalled()
+    expect(fixture.componentInstance['summary_']()?.skipped).toBe(2)
+  })
+
+  it('plan 489: while saving, row controls are disabled and removeRow changes nothing', async () => {
+    await setup(of({ rows: [row('גזר', 3), row('כרפס', 2)], truncated: false }))
+    let finish: (v: unknown) => void = () => undefined
+    apply.and.returnValue(new Promise((resolve) => (finish = resolve)))
+    await pasteAndParse('גזר 3\nכרפס 2')
+    byId<HTMLButtonElement>('import-save')!.click()
+    fixture.detectChanges()
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(all('import-delete').every((b) => (b as HTMLButtonElement).disabled)).toBeTrue()
+    expect(all('import-name').every((b) => (b as HTMLInputElement).disabled)).toBeTrue()
+    expect(all('import-price').every((b) => (b as HTMLInputElement).disabled)).toBeTrue()
+    const comp = fixture.componentInstance as unknown as {
+      removeRow: (id: number) => void
+      rows_: () => { id: number }[]
+      deleted_: () => number
+    }
+    comp.removeRow(comp.rows_()[0].id)
+    expect(comp.rows_().length).toBe(2)
+    expect(comp.deleted_()).toBe(0)
+    finish({ created: 2, updated: 0, skipped: 0, skippedRows: [] })
+    await fixture.whenStable()
+  })
+
+  it('plan 489: the header delete label uses visually-hidden, not a page-local class', async () => {
+    await setup(of({ rows: [row('גזר', 3)], truncated: false }))
+    await pasteAndParse('גזר 3')
+    expect(el().querySelector('th .visually-hidden')).not.toBeNull()
+    expect(el().querySelector('[class*="sr-only"]')).toBeNull()
+  })
+
   it('hasRealChanges: false when empty, true with text or rows, false after a save', async () => {
     await setup(of({ rows: [row('בצל', 3)], truncated: false }))
     const cmp = fixture.componentInstance

@@ -131,7 +131,7 @@
                 <th scope="col">{{ 'category' | translatePipe }}</th>
                 <th scope="col"></th>
                 <th scope="col">
-                  <span class="import-sr-only">{{ 'delete' | translatePipe }}</span>
+                  <span class="visually-hidden">{{ 'delete' | translatePipe }}</span>
                 </th>
               </tr>
             </thead>
@@ -142,12 +142,13 @@
                   [attr.data-testid]="'import-row'"
                   [class.import-row--same]="item.status === 'same'"
                 >
-                  <td class="import-table__name">
+                  <td class="import-table__name" [attr.data-label]="'name' | translatePipe">
                     <input
                       type="text"
                       class="c-input"
                       maxlength="200"
                       data-testid="import-name"
+                      [disabled]="isSaving_()"
                       [attr.aria-label]="'name' | translatePipe"
                       [ngModel]="item.row.name"
                       (ngModelChange)="updateRow(item.row.id, { name: $event })"
@@ -158,7 +159,7 @@
                       </span>
                     }
                   </td>
-                  <td>
+                  <td [attr.data-label]="'unit' | translatePipe">
                     @if (item.match) {
                       <span class="import-readonly">{{ item.match.baseUnit | translatePipe }}</span>
                     } @else if (item.status === 'matching') {
@@ -172,10 +173,11 @@
                         [options]="unitOptions_"
                         [compact]="true"
                         data-testid="import-unit"
+                        [disabled]="isSaving_()"
                       />
                     }
                   </td>
-                  <td>
+                  <td [attr.data-label]="'price' | translatePipe">
                     <input
                       type="number"
                       class="c-input import-num"
@@ -184,6 +186,7 @@
                       min="0"
                       step="any"
                       data-testid="import-price"
+                      [disabled]="isSaving_()"
                       [attr.aria-label]="'price' | translatePipe"
                       [ngModel]="item.row.price"
                       (ngModelChange)="setPrice(item.row.id, $event)"
@@ -194,7 +197,7 @@
                       </span>
                     }
                   </td>
-                  <td>
+                  <td [attr.data-label]="'import_col_purchase_unit' | translatePipe">
                     @if (item.match || item.status === 'matching') {
                       <span class="import-readonly">–</span>
                     } @else {
@@ -204,6 +207,7 @@
                           class="c-input import-purchase__unit"
                           maxlength="40"
                           data-testid="import-purchase-unit"
+                          [disabled]="isSaving_()"
                           [attr.aria-label]="'import_col_purchase_unit' | translatePipe"
                           [ngModel]="item.row.purchaseUnit"
                           (ngModelChange)="updateRow(item.row.id, { purchaseUnit: $event })"
@@ -216,13 +220,14 @@
                           min="0"
                           step="any"
                           data-testid="import-purchase-qty"
+                          [disabled]="isSaving_()"
                           [ngModel]="item.row.purchaseQty"
                           (ngModelChange)="setPurchaseQty(item.row.id, $event)"
                         />
                       </div>
                     }
                   </td>
-                  <td>
+                  <td [attr.data-label]="'category' | translatePipe">
                     @if (item.match || item.status === 'matching') {
                       <span class="import-readonly">–</span>
                     } @else {
@@ -233,6 +238,7 @@
                         [compact]="true"
                         [typeToFilter]="true"
                         data-testid="import-category"
+                        [disabled]="isSaving_()"
                       />
                     }
                   </td>
@@ -267,6 +273,7 @@
                       class="c-btn-ghost--sm import-delete"
                       data-testid="import-delete"
                       [attr.aria-label]="'delete' | translatePipe"
+                      [disabled]="isSaving_()"
                       (click)="removeRow(item.row.id)"
                     >
                       <lucide-icon name="trash-2" [size]="16" />
