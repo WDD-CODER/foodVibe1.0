@@ -26,6 +26,7 @@
               [focusTrigger]="focusSearchAtRow()"
               [excludeNames]="editingNameAtRow_() === $index ? getExcludeNamesForRow($index) : existingIngredientNames"
               [initialQuery]="editingNameAtRow_() === $index ? (group.get('nameHebrew')?.value ?? '') : ''"
+              [suggestions]="editingNameAtRow_() === $index ? suggestionsFor(group) : []"
               (itemSelected)="onItemSelected($event, group)"
               (focusDone)="focusSearchDone.emit()"
               (addNewRowRequested)="addIngredient.emit()"

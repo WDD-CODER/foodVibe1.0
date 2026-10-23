@@ -1085,6 +1085,7 @@
     "paste_ingredients_add": "הוסף",
     "paste_ingredients_match_failed": "לא הצלחנו לחבר חלק מהמצרכים למוצרים קיימים – הם נשארו אדומים",
     "ingredient_not_ready": "לא מוכן",
+    "ingredient_suggestion": "הצעה מהמלאי",
     "general_group": "כללי",
     "line_status_unlinked": "לא מקושר",
     "line_status_deleted": "נמחק",

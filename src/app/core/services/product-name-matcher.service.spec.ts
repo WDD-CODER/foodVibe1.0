@@ -114,4 +114,81 @@ describe('ProductNameMatcherService', () => {
     const candidates = gemini.matchProductNames.calls.mostRecent().args[1]
     expect(candidates.map((c) => c.name)).toEqual(['שמן זית', 'שמנת'])
   })
+
+  describe('matchNamesWithOptions (plan 490)', () => {
+    it('links tier 1-2 hits and AI product answers, and maps AI options back to products', async () => {
+      products_.set([
+        product('p1', 'עגבנייה'),
+        product('p2', 'מלח שולחן'),
+        product('p3', 'מלח גס'),
+        product('p4', 'פטרוזיליה')
+      ])
+      gemini.matchProductNames.and.resolveTo([
+        { i: 0, product: null, options: [1, 2] },
+        { i: 1, product: 3 }
+      ])
+      const out = await service.matchNamesWithOptions([
+        { key: 'a', name: 'עגבניות' },
+        { key: 'b', name: 'salt' },
+        { key: 'c', name: 'parsley' }
+      ])
+      expect(out.linked.get('a')?.via).toBe('variant')
+      expect(out.linked.get('c')).toEqual({ product: products_()[3], via: 'ai' })
+      expect(out.options.get('b')?.map((p) => p._id)).toEqual(['p2', 'p3'])
+      expect(out.linked.has('b')).toBeFalse()
+    })
+
+    it('drops out-of-range positions and keeps at most 5 options', async () => {
+      products_.set(Array.from({ length: 8 }, (_, n) => product('m' + n, 'מוצר ' + n)))
+      gemini.matchProductNames.and.resolveTo([{ i: 0, product: null, options: [-1, 99, 0, 1, 2, 3, 4, 5, 6] }])
+      const out = await service.matchNamesWithOptions([{ key: 'a', name: 'salt' }])
+      expect(out.options.get('a')?.map((p) => p._id)).toEqual(['m0', 'm1', 'm2', 'm3', 'm4'])
+    })
+
+    it('turns local ambiguous candidates into options when the AI does not settle the name', async () => {
+      products_.set([product('p1', 'עגבנייה'), product('p2', 'עגבניה')])
+      gemini.matchProductNames.and.resolveTo([{ i: 0, product: null }])
+      const out = await service.matchNamesWithOptions([{ key: 'a', name: 'עגבניות' }])
+      expect(out.linked.size).toBe(0)
+      expect(out.options.get('a')?.map((p) => p._id)).toEqual(['p1', 'p2'])
+    })
+
+    it('never links a linkable:false item — an AI product answer becomes a one-item option', async () => {
+      gemini.matchProductNames.and.resolveTo([{ i: 0, product: 1 }])
+      const out = await service.matchNamesWithOptions([{ key: 'a', name: 'קצת פטרוזיליה', linkable: false }])
+      expect(out.linked.has('a')).toBeFalse()
+      expect(out.options.get('a')).toEqual([products_()[1]])
+    })
+
+    it('a linkable:false item with a local exact hit gets it as an option, with no AI call', async () => {
+      const out = await service.matchNamesWithOptions([{ key: 'a', name: 'מלח', linkable: false }])
+      expect(gemini.matchProductNames).not.toHaveBeenCalled()
+      expect(out.linked.size).toBe(0)
+      expect(out.options.get('a')).toEqual([products_()[2]])
+    })
+
+    it('matchNames still returns exactly the linked map', async () => {
+      gemini.matchProductNames.and.resolveTo([
+        { i: 0, product: null, options: [0, 1] },
+        { i: 1, product: 1 }
+      ])
+      const out = await service.matchNames([
+        { key: 'a', name: 'salt' },
+        { key: 'b', name: 'parsley' },
+        { key: 'c', name: 'מלח' }
+      ])
+      expect([...out.keys()].sort()).toEqual(['b', 'c'])
+      expect(out.get('b')).toEqual({ product: products_()[1], via: 'ai' })
+    })
+
+    it('on an HTTP error reports once, keeps the local ambiguous options and does not throw', async () => {
+      products_.set([product('p1', 'עגבנייה'), product('p2', 'עגבניה')])
+      gemini.matchProductNames.and.rejectWith(new Error('503'))
+      const onAiFailure = jasmine.createSpy('onAiFailure')
+      const out = await service.matchNamesWithOptions([{ key: 'a', name: 'עגבניות' }], { onAiFailure })
+      expect(onAiFailure).toHaveBeenCalledTimes(1)
+      expect(out.linked.size).toBe(0)
+      expect(out.options.get('a')?.map((p) => p._id)).toEqual(['p1', 'p2'])
+    })
+  })
 })

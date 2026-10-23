@@ -5,8 +5,8 @@
     addLabelKey="add_new_ingredient"
     [(query)]="searchQuery_"
     [(open)]="shouldShowResults_"
-    [options]="filteredResults_()"
-    [knownOptions]="searchResults_()"
+    [options]="listedOptions_()"
+    [knownOptions]="knownOptions_()"
     [labelOf]="itemLabel_"
     [keyOf]="itemKey_"
     [clientFilter]="false"
@@ -19,6 +19,9 @@
   >
     <ng-template #optionTemplate let-item>
       <span class="item-name">{{ item.nameHebrew }}</span>
+      @if (isSuggestion_(item)) {
+        <span class="c-chip c-chip--tag c-chip--sm c-chip--amber">{{ 'ingredient_suggestion' | translatePipe }}</span>
+      }
       <span
         class="c-chip c-chip--tag c-chip--sm c-chip--square"
         [class.c-chip--green]="item.item_type_ === 'recipe'"

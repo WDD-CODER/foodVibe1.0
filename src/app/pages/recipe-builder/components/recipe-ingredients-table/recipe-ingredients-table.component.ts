@@ -43,15 +43,19 @@ import { PasteIngredientsDialogComponent } from '../paste-ingredients-dialog/pas
 import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
 import { createUnitWordResolver, parseIngredientLines } from '@utils/ingredient-line-parser.util'
 import { findIngredientMatch } from '@utils/ingredient-match.util'
+import { matchProductName } from '@utils/product-name-match.util'
 import { ProductNameMatcherService, type NameMatchItem } from '@services/product-name-matcher.service'
 import { UserMsgService } from '@services/user-msg.service'
-import { findProductByName, isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
+import { findProductByName } from 'src/app/core/utils/product-name-error.util'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
  * since plan 348, landscape too (touch device with a short viewport).
  */
 const MOBILE_QUICK_EDIT_QUERY = '(max-width: 767px), (hover: none) and (max-height: 500px)'
+
+/** Plan 490: most inventory suggestions shown for one unlinked row (mirrors PRODUCT_MATCH_MAX_OPTIONS). */
+const MAX_ROW_SUGGESTIONS = 5
 
 @Component({
   selector: 'app-recipe-ingredients-table',
@@ -165,6 +169,9 @@ export class RecipeIngredientsTableComponent {
   /** True while the "paste ingredients" window is open. */
   protected isPasteOpen_ = signal(false)
 
+  /** Plan 490: per unlinked pasted row, the products it could mean (from the AI step); replaced, never mutated. */
+  private readonly rowOptions_ = signal<ReadonlyMap<FormGroup, readonly Product[]>>(new Map())
+
   /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
   protected getProductForGroup(group: FormGroup): Product | null {
     const refId = group.get('referenceId')?.value as string | null
@@ -189,7 +196,10 @@ export class RecipeIngredientsTableComponent {
     }
   }
 
-  /** Create a stub product from the unlinked ingredient name, link it, then open Quick-Edit panel. */
+  /**
+   * «לא מוכן»: a product with exactly this name is linked (plan 485); otherwise the row opens the search with its
+   * name and the inventory's options first (plan 490). Nothing is saved — a new product comes only from quick-add's «שמור».
+   */
   protected onUnlinkedBadgeClick(group: FormGroup, index: number): void {
     const name = ((group.get('nameHebrew')?.value as string) ?? '').trim()
     if (!name) return
@@ -197,31 +207,35 @@ export class RecipeIngredientsTableComponent {
     const existing = findProductByName(this.productDataService.allProducts_(), name)
     if (existing) {
       group.patchValue({ referenceId: existing._id, item_type: 'product', nameSnapshot: existing.nameHebrew })
+      this.dropRowOptions_(group)
       this.onQuickEditBadgeClick(group, index, 'incomplete')
       return
     }
-    const stub: Omit<Product, '_id'> = {
-      nameHebrew: name,
-      baseUnit: 'gram',
-      sources: [],
-      purchaseOptions: [],
-      categories: [],
-      yieldFactor: 1,
-      allergens: [],
-      minStockLevel: 0,
-      expiryDaysDefault: 0
+    this.editingNameAtRow_.set(index)
+  }
+
+  /**
+   * Plan 490 — what the search lists first for an unlinked row: its stored options (AI step), then the local
+   * exact / variant / ambiguous products for its name, no duplicates, max 5.
+   */
+  protected suggestionsFor(group: FormGroup): readonly Product[] {
+    if (group.get('referenceId')?.value) return []
+    const name = ((group.get('nameHebrew')?.value as string) ?? '').trim()
+    const stored = this.rowOptions_().get(group) ?? []
+    const hit = name ? matchProductName(name, this.kitchenStateService.products_()) : null
+    const local = !hit ? [] : hit.kind === 'ambiguous' ? hit.candidates : [hit.product]
+    const list: Product[] = []
+    for (const p of [...stored, ...local]) {
+      if (list.length < MAX_ROW_SUGGESTIONS && !list.some((x) => x._id === p._id)) list.push(p)
     }
-    void this.productDataService
-      .addProduct(stub)
-      .then((saved) => {
-        group.patchValue({ referenceId: saved._id, item_type: 'product', nameSnapshot: saved.nameHebrew })
-        this.onQuickEditBadgeClick(group, index, 'incomplete')
-      })
-      .catch((err: unknown) => {
-        this.userMsg_.onSetErrorMsg(
-          this.translation_.translate(isProductNameTaken(err) ? 'product_duplicate_name_error' : 'product_save_error')
-        )
-      })
+    return list
+  }
+
+  private dropRowOptions_(group: FormGroup): void {
+    if (!this.rowOptions_().has(group)) return
+    const next = new Map(this.rowOptions_())
+    next.delete(group)
+    this.rowOptions_.set(next)
   }
 
   /**
@@ -264,6 +278,12 @@ export class RecipeIngredientsTableComponent {
         }
       } else {
         row.patchValue({ nameHebrew: line.text, nameSnapshot: line.text, amount_net: null, unit: 'unit' })
+        // Plan 490: a line without an amount is never linked by itself — it goes to the matcher for options only.
+        awaitingAi.push({
+          group: row,
+          name: line.text,
+          item: { key: String(awaitingAi.length), name: line.text, linkable: false }
+        })
       }
       array.push(row)
     }
@@ -279,10 +299,11 @@ export class RecipeIngredientsTableComponent {
   /**
    * Plan 463: the pasted lines no exact/variant match could link get ONE shared-matcher call (the AI step). A row is
    * patched only if it is still in the table, still unlinked and still has the pasted name; otherwise it is left alone.
+   * Plan 490: the same rule decides which rows keep the products they could mean (`rowOptions_`) for «לא מוכן».
    */
   private async linkPastedByAi_(pending: { group: FormGroup; name: string; item: NameMatchItem }[]): Promise<void> {
     let failure: unknown = null
-    const matches = await this.nameMatcher_.matchNames(
+    const { linked: matches, options } = await this.nameMatcher_.matchNamesWithOptions(
       pending.map((p) => p.item),
       { onAiFailure: (err) => (failure = err) }
     )
@@ -296,11 +317,18 @@ export class RecipeIngredientsTableComponent {
       this.userMsg_.onSetWarningMsg(this.translation_.translate(key))
     }
     const array = this.ingredientsFormArray()
+    const rowOptions = new Map(this.rowOptions_())
     for (const p of pending) {
       const hit = matches.get(p.item.key)
       const index = array.controls.indexOf(p.group)
-      if (!hit || index < 0) continue
+      if (index < 0) continue
       if (p.group.get('referenceId')?.value || p.group.get('nameHebrew')?.value !== p.name) continue
+      const rowList = options.get(p.item.key)
+      if (!hit) {
+        if (rowList?.length) rowOptions.set(p.group, rowList)
+        continue
+      }
+      rowOptions.delete(p.group)
       p.group.patchValue({
         referenceId: hit.product._id,
         item_type: 'product',
@@ -309,6 +337,7 @@ export class RecipeIngredientsTableComponent {
       })
       this.updateLineCalculations(index)
     }
+    this.rowOptions_.set(rowOptions)
     array.updateValueAndValidity()
     this.cdr.markForCheck()
   }
@@ -417,18 +446,25 @@ export class RecipeIngredientsTableComponent {
     const isEditingName = this.editingNameAtRow_() === index
     const product = item.item_type_ === 'product' ? (item as Product) : null
     const hasPurchaseOptions = product?.purchaseOptions?.length
-    const unit = hasPurchaseOptions
-      ? (product!.purchaseOptions![0].unitSymbol ?? product!.baseUnit ?? '')
-      : 'baseUnit' in item
-        ? (item.baseUnit ?? '')
-        : 'yieldUnit' in item
-          ? (item.yieldUnit ?? '')
-          : ''
+    // Plan 490: an unlinked row that already has an amount (a pasted «200 גרם salt») keeps its amount and unit.
+    const keptAmount = Number(group.get('amount_net')?.value) || 0
+    const keptUnit = (group.get('unit')?.value as string | null) ?? ''
+    const keepsPasted = isEditingName && !group.get('referenceId')?.value && keptAmount > 0 && !!keptUnit
+    const unit = keepsPasted
+      ? keptUnit
+      : hasPurchaseOptions
+        ? (product!.purchaseOptions![0].unitSymbol ?? product!.baseUnit ?? '')
+        : 'baseUnit' in item
+          ? (item.baseUnit ?? '')
+          : 'yieldUnit' in item
+            ? (item.yieldUnit ?? '')
+            : ''
     const amount_net = isEditingName
       ? (group.get('amount_net')?.value ?? (hasPurchaseOptions ? 1 : 0))
       : hasPurchaseOptions
         ? 1
         : 0
+    this.dropRowOptions_(group)
     group.patchValue({
       nameHebrew: item.nameHebrew,
       nameSnapshot: item.nameHebrew,
@@ -489,6 +525,7 @@ export class RecipeIngredientsTableComponent {
   }
 
   clearIngredient(group: FormGroup): void {
+    this.dropRowOptions_(group)
     group.patchValue({
       referenceId: null,
       nameHebrew: '',

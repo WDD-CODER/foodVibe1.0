@@ -84,6 +84,68 @@ describe('POST /match-product-names', () => {
     expect(res.body.matches).toEqual([{ i: 0, product: 1 }]);
   });
 
+  // Plan 490 — options when the model cannot tell which product a name means.
+  const BODY_8 = {
+    names: [
+      { name: 'salt', unit: 'gram' },
+      { name: 'פטרוזליה', unit: 'unit' },
+    ],
+    products: Array.from({ length: 8 }, (_, n) => ({ name: `מוצר ${n}`, unit: 'kg' })),
+  };
+
+  it('keeps an options list on an entry without a product', async () => {
+    fetchMock.mockResolvedValue(modelAnswer('{"matches":[{"i":0,"product":null,"options":[1,2]}]}'));
+    const res = await post(BODY_8);
+    expect(res.status).toBe(200);
+    expect(res.body.matches).toEqual([{ i: 0, product: null, options: [1, 2] }]);
+  });
+
+  it('drops out-of-range, repeated and over-5 options but keeps the rest of the answer', async () => {
+    fetchMock.mockResolvedValue(
+      modelAnswer('{"matches":[{"i":0,"product":null,"options":[-1,0,0,8,1,2,3,4,5,6]},{"i":1,"product":7}]}')
+    );
+    const res = await post(BODY_8);
+    expect(res.status).toBe(200);
+    expect(res.body.matches).toEqual([
+      { i: 0, product: null, options: [0, 1, 2, 3, 4] },
+      { i: 1, product: 7 },
+    ]);
+  });
+
+  it('keeps the other links when one name lists 7 options', async () => {
+    fetchMock.mockResolvedValue(
+      modelAnswer('{"matches":[{"i":0,"product":null,"options":[0,1,2,3,4,5,6]},{"i":1,"product":3}]}')
+    );
+    const res = await post(BODY_8);
+    expect(res.status).toBe(200);
+    expect(res.body.matches[0].options).toHaveLength(5);
+    expect(res.body.matches[1]).toEqual({ i: 1, product: 3 });
+  });
+
+  it('drops an entry with product null and no (valid) options', async () => {
+    fetchMock.mockResolvedValue(
+      modelAnswer('{"matches":[{"i":0,"product":null},{"i":1,"product":null,"options":[99,-2]}]}')
+    );
+    const res = await post(BODY_8);
+    expect(res.status).toBe(200);
+    expect(res.body.matches).toEqual([]);
+  });
+
+  it('keeps the product and drops options when an entry has both', async () => {
+    fetchMock.mockResolvedValue(modelAnswer('{"matches":[{"i":0,"product":2,"options":[1,3]}]}'));
+    const res = await post(BODY_8);
+    expect(res.body.matches).toEqual([{ i: 0, product: 2 }]);
+  });
+
+  it('tells the model names may be in any language and how to give options', async () => {
+    fetchMock.mockResolvedValue(modelAnswer('{"matches":[]}'));
+    await post(BODY_8);
+    const sent = JSON.parse(fetchMock.mock.calls[0][1].body);
+    const prompt = sent.system_instruction.parts[0].text;
+    expect(prompt).toContain('any language');
+    expect(prompt).toContain('options');
+  });
+
   it.each([
     ['empty names', { ...BODY, names: [] }],
     ['no products', { ...BODY, products: [] }],

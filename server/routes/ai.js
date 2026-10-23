@@ -599,20 +599,41 @@ router.post('/parse-receipt-photo', verifyToken, (req, res, next) => {
 // Response: { matches: [{ i, product }] } — only real links; unsure names are simply absent.
 // ---------------------------------------------------------------------------
 
-const { productNameMatchRequestSchema, productNameMatchResponseSchema } = require('../generated/schemas/ai-product-match.schema');
+const {
+  productNameMatchRequestSchema,
+  productNameMatchResponseSchema,
+  PRODUCT_MATCH_MAX_OPTIONS,
+} = require('../generated/schemas/ai-product-match.schema');
 
-const PRODUCT_MATCH_SYSTEM_PROMPT = `You match ingredient names written in Hebrew by a chef to the products of the kitchen's inventory.
+const PRODUCT_MATCH_SYSTEM_PROMPT = `You match ingredient names written by a chef, in any language (Hebrew, English or another), to the products of the kitchen's inventory.
 
 You receive two numbered lists: NAMES (ingredient names with the unit used) and PRODUCTS (product names with their base unit). Numbering starts at 0.
 
-For each name, find the product that is the SAME food. Allow typos, plural or singular, spelling variants, and a leading pack or measure word such as "צרור" or "קופסת".
-Answer null for a name when no product is the same food, when the product only looks similar (for example "חלב" is not "חלבה"), and whenever you are unsure.
+A name may carry an amount, a leading pack or measure word such as "צרור" or "קופסת", or a remark such as "קצת" or "לפי הטעם" — ignore those and look at the food itself.
+For each name, find the product that is the SAME food, in whatever language either is written. Allow typos, plural or singular, spelling variants and translations (for example "salt" is "מלח").
+Set "product" only when exactly one product is clearly the same food. A product that only looks similar is not the same food (for example "חלב" is not "חלבה").
+When two to ${PRODUCT_MATCH_MAX_OPTIONS} products could be that food and you cannot tell which one the chef meant (for example "מלח שולחן" and "מלח גס" for "salt"), set "product" to null and list their numbers in "options".
+Otherwise set "product" to null and give no options.
 
 Return ONLY a JSON object, no commentary:
-{ "matches": [ { "i": number, "product": number|null } ] }
-"i" is the number of the name, "product" is the number of the product or null. One entry per name.`;
+{ "matches": [ { "i": number, "product": number|null, "options": [number] } ] }
+"i" is the number of the name, "product" is the number of the product or null, "options" (only when "product" is null) lists the possible products' numbers. One entry per name.`;
 
-/** Keeps only valid, first-seen, in-range links from the model's answer. Pure. */
+/** Plan 490 — in-range, first-seen option positions, at most PRODUCT_MATCH_MAX_OPTIONS. Pure. */
+function cleanOptions(options, productCount) {
+  const out = [];
+  for (const p of options ?? []) {
+    if (p < 0 || p >= productCount || out.includes(p)) continue;
+    out.push(p);
+    if (out.length === PRODUCT_MATCH_MAX_OPTIONS) break;
+  }
+  return out;
+}
+
+/**
+ * Keeps only valid, first-seen, in-range links from the model's answer, plus (plan 490) cleaned `options` on
+ * entries without a product. An entry with a product drops its options; one with neither is dropped. Pure.
+ */
 function cleanProductMatches(value, nameCount, productCount) {
   const parsed = productNameMatchResponseSchema.safeParse(value);
   if (!parsed.success) return null;
@@ -621,8 +642,12 @@ function cleanProductMatches(value, nameCount, productCount) {
   for (const m of parsed.data.matches) {
     if (m.i >= nameCount || seen.has(m.i)) continue;
     seen.add(m.i);
-    if (m.product === null || m.product >= productCount) continue;
-    matches.push({ i: m.i, product: m.product });
+    if (m.product !== null && m.product < productCount) {
+      matches.push({ i: m.i, product: m.product });
+      continue;
+    }
+    const options = cleanOptions(m.options, productCount);
+    if (options.length > 0) matches.push({ i: m.i, product: null, options });
   }
   return matches;
 }
@@ -665,7 +690,14 @@ router.post('/match-product-names', verifyToken, aiLimiter, async (req, res) => 
       return res.status(502).json({ error: 'Gemini returned invalid JSON' });
     }
 
-    req.log.info({ event: 'ai.match_product_names.done', names: names.length, products: products.length, matched: matches.length });
+    const linked = matches.filter((m) => m.product !== null).length;
+    req.log.info({
+      event: 'ai.match_product_names.done',
+      names: names.length,
+      products: products.length,
+      matched: linked,
+      options: matches.length - linked,
+    });
     return res.json({ matches });
   } catch (err) {
     req.log.error({ err, event: 'ai.match_product_names.failed' });
