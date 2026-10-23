@@ -1,4 +1,5 @@
 $break-mobile: 768px; // mirrors src/styles.scss
+$break-tabbar: 620px; // mirrors the bottom tab bar breakpoint in core/components/header/header.component.scss
 
 @layer components.partial-cost-badge {
   .partial-cost {
@@ -58,6 +59,11 @@ $break-mobile: 768px; // mirrors src/styles.scss
         content: none;
       }
     }
+
+    // Plan 481: the bottom sheet sits above the shell's bottom tab bar, so its last line is never under it.
+    @media (max-width: $break-tabbar) {
+      inset-block-end: calc(var(--tabbar-h) + var(--space-2) + env(safe-area-inset-bottom, 0px));
+    }
   }
 
   .partial-body {
@@ -108,13 +114,32 @@ $break-mobile: 768px; // mirrors src/styles.scss
     gap: var(--space-2);
   }
 
-  .partial-name {
-    font-weight: 600;
+  .partial-icon {
+    flex-shrink: 0;
+
+    color: var(--color-text-muted);
   }
 
-  .partial-tag {
+  .partial-row[data-kind='deleted'] .partial-icon {
+    color: var(--color-danger);
+  }
+
+  .partial-row[data-kind='unlinked'] .partial-icon {
     color: var(--text-warning);
-    font-size: var(--fs-xs);
+  }
+
+  .partial-name {
+    flex: 1;
+
+    min-inline-size: 0;
+
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  // The pill look comes from the .c-chip engine (red / amber).
+  .partial-tag {
+    flex-shrink: 0;
   }
 
   .partial-used-in {

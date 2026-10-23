@@ -44,7 +44,13 @@ interface MissingRow {
   /** The user may edit every stored recipe that holds the row, so linking it is allowed. */
   canLink: boolean
   unitLabel: string
+  /** Lucide icon per kind: deleted / unlinked / unpriced. */
+  icon: string
+  /** The item's name, or a readable fallback when only its id is known. */
+  displayName: string
 }
+
+const ROW_ICONS: Record<MissingItem['kind'], string> = { deleted: 'circle-x', unlinked: 'link', unpriced: 'tag' }
 
 /**
  * Plan 444 — the one "חלקי" badge. Shows nothing when `missing` is empty; otherwise an amber chip that opens
@@ -109,6 +115,7 @@ export class PartialCostBadgeComponent {
         .map((id) => recipesById.get(id)?.nameHebrew ?? extraNames[id] ?? '')
         .filter((n) => !!n)
         .join(', ')
+      const rawId = !item.name || item.name === item.productId || recipeIds.includes(item.name)
       const product = item.kind === 'unpriced' && item.productId ? (productsById.get(item.productId) ?? null) : null
       return {
         key: `${item.kind}|${item.productId ?? item.name}`,
@@ -118,7 +125,9 @@ export class PartialCostBadgeComponent {
         canPrice: !!product && this.permission_.can('editMoney', { type: 'products', doc: product }),
         isUnlinked: item.kind === 'unlinked',
         canLink: item.kind === 'unlinked' && this.linkService_.canLink(recipeIds, this.formRecipeId()),
-        unitLabel: product ? this.translation_.translate(product.baseUnit) : ''
+        unitLabel: product ? this.translation_.translate(product.baseUnit) : '',
+        icon: ROW_ICONS[item.kind],
+        displayName: rawId ? this.translation_.translate('partial_unnamed_item') : item.name
       }
     })
   })
