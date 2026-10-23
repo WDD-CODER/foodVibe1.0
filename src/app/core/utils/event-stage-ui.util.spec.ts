@@ -53,6 +53,7 @@ describe('event-stage-ui.util', () => {
     expect(stageErrorKey('REASON_REQUIRED')).toBe('stage_reason_required')
     expect(stageErrorKey('NOT_CLOSED_FROM_STAGE')).toBe('stage_not_closed_from')
     expect(stageErrorKey('USE_FINISH')).toBe('stage_finished_hint')
+    expect(stageErrorKey('FINISH_FROM_STAGE')).toBe('stage_finish_from_not_closed')
     expect(stageErrorKey('EVENT_FINISHED')).toBe('event_finished_locked')
     expect(stageErrorKey('NOTE_EMPTY')).toBe('notes_empty_error')
     expect(stageErrorKey('NOTE_TOO_LONG')).toBe('notes_too_long')

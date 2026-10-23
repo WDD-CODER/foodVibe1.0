@@ -3,7 +3,7 @@
  * Plan 446 (contract C-SNAPSHOT): the pure rules for the planning snapshot and the event closing.
  * `routes/events.js` is the only caller; nothing here touches the database.
  */
-const { snapshotActionOnStage } = require('../generated/schemas/entities/event-stage')
+const { snapshotActionOnStage, EVENT_STAGES, CLOSED_FROM_INDEX } = require('../generated/schemas/entities/event-stage')
 
 const ROW_NONE = '__none__'
 const rowKey = row => row.supplierId ?? ROW_NONE
@@ -140,6 +140,19 @@ function finishPatch(event, actor, now) {
   return { set, push: { stage: 'finished', at: now, by: actor.userId, byName: actor.name } }
 }
 
+/**
+ * Plan 493: why an event may not be finished now (the owner finishes from any live stage), or null.
+ * `FINISH_FROM_STAGE`: a lost deal ("לא נסגר") is brought back to a live stage first; `DATE_REQUIRED`: before
+ * "מקדמה שולמה" the event needs a date, the same rule as any move that closes the deal.
+ * @returns {'FINISH_FROM_STAGE' | 'DATE_REQUIRED' | null}
+ */
+function finishRefusal(event) {
+  const stage = event.stage ?? 'inquiry'
+  if (stage === 'not_closed') return 'FINISH_FROM_STAGE'
+  if (EVENT_STAGES.indexOf(stage) < CLOSED_FROM_INDEX && !event.eventDate) return 'DATE_REQUIRED'
+  return null
+}
+
 module.exports = {
-  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
+  CLOSING_STAGES, finishRefusal, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
 }

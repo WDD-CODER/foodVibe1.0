@@ -14,7 +14,7 @@ const { assertCan, can } = require('../utils/permissions')
 const { isEventVisible, visibleStagesFor } = require('../utils/event-visibility')
 const { applyStageChange, newNote } = require('../utils/event-stage')
 const {
-  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
+  initClosing, finishRefusal, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
 } = require('../utils/closing-rules')
 const { newId } = require('../utils/id')
 const { LIVE } = require('../jobs/purge-deleted')
@@ -212,16 +212,21 @@ router.put('/:id/closing', verifyToken, async (req, res) => {
   }
 })
 
-// POST /api/v1/events/:id/finish  (owner, from "ביצוע" or "פוסט-פרודקשן")
+// POST /api/v1/events/:id/finish  { planSnapshot? }  (owner, from any live stage; plan 493)
+// An event with no frozen plan gets the client's snapshot stored and frozen here, so the closing has its supplier rows
+// and the dashboard keeps its planned revenue. A frozen snapshot is never replaced.
 router.post('/:id/finish', verifyToken, async (req, res) => {
   try {
     const event = await loadEvent(req, res)
     if (!event) return
     if (!assertCan(req, res, 'editMoney', { type: TYPE, doc: event })) return
     if (event.stage === 'finished') return finishedLocked(res)
-    if (!CLOSING_STAGES.includes(event.stage)) return res.status(400).json({ error: 'FINISH_FROM_STAGE' })
+    const refusal = finishRefusal(event)
+    if (refusal) return res.status(400).json({ error: refusal })
     const now = Date.now()
-    const { set, push } = finishPatch(event, actorOf(req), now)
+    const snapshot = applySnapshotOnStage(event, 'post_production', req.body?.planSnapshot, now)
+    const { set, push } = finishPatch(snapshot ? { ...event, planSnapshot: snapshot } : event, actorOf(req), now)
+    if (snapshot) set.planSnapshot = snapshot
     const merged = { ...event, ...set, updatedAt: now, stageHistory: [...(event.stageHistory ?? []), push] }
     if (!validMerged(res, merged)) return
     await writeConditional(

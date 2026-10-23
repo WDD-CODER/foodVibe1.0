@@ -19,6 +19,7 @@ const ERROR_KEYS: Record<string, string> = {
   REASON_REQUIRED: 'stage_reason_required',
   NOT_CLOSED_FROM_STAGE: 'stage_not_closed_from',
   USE_FINISH: 'stage_finished_hint',
+  FINISH_FROM_STAGE: 'stage_finish_from_not_closed',
   EVENT_FINISHED: 'event_finished_locked',
   NOTE_EMPTY: 'notes_empty_error',
   NOTE_TOO_LONG: 'notes_too_long',

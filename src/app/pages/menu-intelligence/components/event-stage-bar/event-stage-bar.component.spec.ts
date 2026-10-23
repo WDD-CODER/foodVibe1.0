@@ -31,6 +31,7 @@ describe('EventStageBarComponent', () => {
   let allowed: Record<string, boolean>
   let confirmAnswer: boolean
   let snapshots: { buildFor: jasmine.Spy }
+  let confirmOpen: jasmine.Spy
   const snapshot = { at: 9, suppliers: [], extraCosts: 0, plannedRevenue: 0, plannedProfit: 0, plannedProfitPct: 0 }
 
   const base: MenuEvent = {
@@ -55,11 +56,13 @@ describe('EventStageBarComponent', () => {
 
   beforeEach(async () => {
     confirmAnswer = true
+    confirmOpen = jasmine.createSpy('open').and.callFake(() => Promise.resolve(confirmAnswer))
     allowed = { changeStage: true, edit: true, editMoney: true }
     store = signal<MenuEvent[]>([base])
     snapshots = { buildFor: jasmine.createSpy('buildFor').and.returnValue(snapshot) }
-    pipeline = jasmine.createSpyObj<EventPipelineService>('EventPipelineService', ['changeStage'])
+    pipeline = jasmine.createSpyObj<EventPipelineService>('EventPipelineService', ['changeStage', 'finish'])
     pipeline.changeStage.and.resolveTo({ ok: true, event: base })
+    pipeline.finish.and.resolveTo({ ok: true, event: base })
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetErrorMsg', 'onSetSuccessMsg'])
     eventData = {
       allMenuEvents_: store.asReadonly(),
@@ -76,7 +79,7 @@ describe('EventStageBarComponent', () => {
         { provide: PermissionService, useValue: { can: (action: string) => allowed[action] } },
         { provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } },
         { provide: UserMsgService, useValue: userMsg },
-        { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(confirmAnswer) } }
+        { provide: ConfirmModalService, useValue: { open: confirmOpen } }
       ]
     })
       .overrideComponent(EventStageBarComponent, {
@@ -102,12 +105,75 @@ describe('EventStageBarComponent', () => {
     expect(pipeline.changeStage).toHaveBeenCalledWith('e1', { stage: 'quote_sent' })
   })
 
-  it('never moves to "finished" and says why', async () => {
-    await setup()
-    expect(pill('finished').getAttribute('aria-disabled')).toBe('true')
-    pill('finished').click()
-    expect(pipeline.changeStage).not.toHaveBeenCalled()
-    expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('T:stage_finished_hint')
+  describe('finish from the bar (plan 493)', () => {
+    const click = async () => {
+      pill('finished').click()
+      await fixture.whenStable()
+    }
+
+    it('lets the owner pick "finished" on a live event: the pill is not locked', async () => {
+      await setup()
+      expect(pill('finished').classList).not.toContain('is-locked')
+      expect(pill('finished').getAttribute('aria-disabled')).toBeNull()
+    })
+
+    it('asks first, and on yes finishes with the snapshot when the event has no frozen one', async () => {
+      await setup()
+      await click()
+      expect(confirmOpen).toHaveBeenCalledWith('stage_finish_confirm', { saveLabel: 'closing_finish' })
+      expect(pipeline.finish).toHaveBeenCalledWith('e1', snapshot)
+      expect(pipeline.changeStage).not.toHaveBeenCalled()
+      expect(userMsg.onSetSuccessMsg).toHaveBeenCalledWith('T:stage_changed')
+      fixture.detectChanges()
+      expect(el.querySelector('app-event-closing-dialog')).toBeNull()
+    })
+
+    it('sends no snapshot when the event already has a frozen one', async () => {
+      await setup({ ...base, stage: 'execution', planSnapshot: { ...snapshot, frozenAt: 5 } })
+      await click()
+      expect(snapshots.buildFor).not.toHaveBeenCalled()
+      expect(pipeline.finish).toHaveBeenCalledWith('e1', undefined)
+    })
+
+    it('on no calls nothing', async () => {
+      confirmAnswer = false
+      await setup()
+      await click()
+      expect(pipeline.finish).not.toHaveBeenCalled()
+      expect(pipeline.changeStage).not.toHaveBeenCalled()
+    })
+
+    it('staff (no editMoney) get the owner-only toast and no confirm, and the pill is locked', async () => {
+      allowed['editMoney'] = false
+      await setup()
+      expect(pill('finished').classList).toContain('is-locked')
+      expect(pill('finished').getAttribute('aria-disabled')).toBe('true')
+      await click()
+      expect(confirmOpen).not.toHaveBeenCalled()
+      expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('T:stage_finish_owner_only')
+    })
+
+    it('an event with no date before "deposit paid" gets the date toast and no confirm', async () => {
+      await setup({ ...base, eventDate: undefined })
+      await click()
+      expect(confirmOpen).not.toHaveBeenCalled()
+      expect(pipeline.finish).not.toHaveBeenCalled()
+      expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('T:stage_finish_needs_date')
+    })
+
+    it('a lost deal ("not closed") gets its own toast and no confirm', async () => {
+      await setup({ ...base, stage: 'not_closed' })
+      await click()
+      expect(confirmOpen).not.toHaveBeenCalled()
+      expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('T:stage_finish_from_not_closed')
+    })
+
+    it('a finished event ignores the click', async () => {
+      await setup({ ...base, stage: 'finished' })
+      await click()
+      expect(confirmOpen).not.toHaveBeenCalled()
+      expect(userMsg.onSetErrorMsg).not.toHaveBeenCalled()
+    })
   })
 
   it('refuses "deposit paid" for an event with no date, without calling the server', async () => {

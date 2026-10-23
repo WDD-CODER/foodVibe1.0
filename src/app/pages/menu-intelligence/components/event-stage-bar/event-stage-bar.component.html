@@ -8,12 +8,16 @@
             class="stage-pill"
             [class.is-current]="stage === current_()"
             [class.is-past]="i < currentIndex_()"
-            [class.is-locked]="stage === 'finished' || !canChangeStage_()"
+            [class.is-locked]="stage === 'finished' ? finishRefusal_() !== null : !canChangeStage_()"
             [attr.aria-current]="stage === current_() ? 'step' : null"
-            [attr.aria-disabled]="stage === 'finished' || !canChangeStage_() ? 'true' : null"
+            [attr.aria-disabled]="
+              (stage === 'finished' ? finishRefusal_() !== null : !canChangeStage_()) ? 'true' : null
+            "
             [attr.title]="
               stage === 'finished'
-                ? ('stage_finished_hint' | translatePipe)
+                ? finishRefusal_()
+                  ? (finishRefusal_()! | translatePipe)
+                  : null
                 : !canChangeStage_()
                   ? ('stage_not_allowed' | translatePipe)
                   : null
