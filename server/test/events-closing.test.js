@@ -276,16 +276,86 @@ describe('finish, reopen and refresh', () => {
     expect(viaStage.status).toBe(409)
   })
 
-  it('keeps closedAt when it was set, and refuses to finish from a stage before "ביצוע"', async () => {
+  it('keeps closedAt when it was set, and finishes from an early stage only with a date (plan 493)', async () => {
     await seed('e1', { stage: 'execution', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }) })
     expect((await post('e1', '/finish', OWNER)).body.closedAt).toBe(5)
-    await seed('e2', { stage: 'quote_sent' })
+    await seed('e2', { stage: 'quote_sent', eventDate: undefined })
     const early = await post('e2', '/finish', OWNER)
     expect(early.status).toBe(400)
-    expect(early.body.error).toBe('FINISH_FROM_STAGE')
+    expect(early.body.error).toBe('DATE_REQUIRED')
+    await seed('e3', { stage: 'quote_sent' })
+    expect((await post('e3', '/finish', OWNER)).status).toBe(200)
     const viaStage = await put('e2', '/stage', OWNER, { stage: 'finished' })
     expect(viaStage.status).toBe(400)
     expect(viaStage.body.error).toBe('USE_FINISH')
+  })
+
+  describe('finish from any live stage (plan 493)', () => {
+    it('from "פנייה" with a snapshot: stored frozen, closing built from it, closedAt set, history ends "finished"', async () => {
+      await seed('e1', { stage: 'inquiry' })
+      const res = await post('e1', '/finish', OWNER, { planSnapshot: snapshot({ frozenAt: 1 }) })
+      expect(res.status).toBe(200)
+      expect(res.body.stage).toBe('finished')
+      expect(res.body.planSnapshot.frozenAt).toEqual(expect.any(Number))
+      expect(res.body.planSnapshot.frozenAt).not.toBe(1)
+      expect(res.body.closing.suppliers.map(s => [s.supplierId, s.planned])).toEqual([['s1', 1000], ['s2', 2000]])
+      expect(res.body.closing.finishedBy).toBe('own1')
+      expect(res.body.closedAt).toEqual(expect.any(Number))
+      expect(res.body.stageHistory.at(-1)).toMatchObject({ stage: 'finished', by: 'own1' })
+    })
+
+    it('from "פנייה" with no snapshot at all still finishes, with an empty closing', async () => {
+      await seed('e1', { stage: 'inquiry' })
+      const res = await post('e1', '/finish', OWNER)
+      expect(res.status).toBe(200)
+      expect(res.body.closing.suppliers).toEqual([])
+    })
+
+    it('a snapshot in the body of a frozen event is ignored: the stored one stays', async () => {
+      await seed('e1', { stage: 'execution', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3, plannedRevenue: 777 }) })
+      const res = await post('e1', '/finish', OWNER, { planSnapshot: snapshot({ plannedRevenue: 1 }) })
+      expect(res.status).toBe(200)
+      expect(res.body.planSnapshot.plannedRevenue).toBe(777)
+      expect(res.body.planSnapshot.frozenAt).toBe(3)
+    })
+
+    it('from "ordering" with a stored unfrozen snapshot freezes it', async () => {
+      await seed('e1', { stage: 'ordering', closedAt: 5, planSnapshot: snapshot() })
+      const res = await post('e1', '/finish', OWNER)
+      expect(res.status).toBe(200)
+      expect(res.body.planSnapshot.frozenAt).toEqual(expect.any(Number))
+      expect(res.body.closing.suppliers).toHaveLength(2)
+    })
+
+    it('refuses "לא נסגר", a dateless early event and staff; the stage route still says USE_FINISH', async () => {
+      await seed('e1', { stage: 'not_closed' })
+      const lost = await post('e1', '/finish', OWNER)
+      expect(lost.status).toBe(400)
+      expect(lost.body.error).toBe('FINISH_FROM_STAGE')
+      await seed('e2', { stage: 'inquiry', eventDate: undefined })
+      const dateless = await post('e2', '/finish', OWNER, { planSnapshot: snapshot() })
+      expect(dateless.status).toBe(400)
+      expect(dateless.body.error).toBe('DATE_REQUIRED')
+      expect((await raw('e2')).stage).toBe('inquiry')
+      await seed('e3', { stage: 'inquiry' })
+      expect((await post('e3', '/finish', STAFF)).status).toBe(403)
+      const viaStage = await put('e3', '/stage', OWNER, { stage: 'finished' })
+      expect(viaStage.status).toBe(400)
+      expect(viaStage.body.error).toBe('USE_FINISH')
+    })
+
+    it('a second finish is a 409 and reopen of an event finished from "פנייה" goes to "פוסט-פרודקשן" without stamps', async () => {
+      await seed('e1', { stage: 'inquiry' })
+      await post('e1', '/finish', OWNER, { planSnapshot: snapshot() })
+      expect((await post('e1', '/finish', OWNER)).status).toBe(409)
+      const res = await post('e1', '/reopen', OWNER)
+      expect(res.status).toBe(200)
+      expect(res.body.stage).toBe('post_production')
+      expect(res.body.closing.finishedAt).toBeUndefined()
+      expect(res.body.closing.finishedBy).toBeUndefined()
+      expect(res.body.closing.suppliers).toHaveLength(2)
+      expect(res.body.stageHistory.map(h => h.stage)).toEqual(['finished', 'post_production'])
+    })
   })
 
   it('reopen goes back to "פוסט-פרודקשן" and removes the finish stamps', async () => {

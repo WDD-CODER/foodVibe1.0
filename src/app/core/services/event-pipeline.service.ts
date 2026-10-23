@@ -49,9 +49,14 @@ export class EventPipelineService {
     )
   }
 
-  /** Plan 446: owner only; locks the closing and moves the event to "הסתיים". */
-  finish(eventId: string): Promise<PipelineResult> {
-    return this.run('finish', 'server_error', () => this.http.post<MenuEvent>(`${EVENTS_URL}/${eventId}/finish`, {}))
+  /**
+   * Plan 446: owner only; locks the closing and moves the event to "הסתיים".
+   * Plan 493: from any live stage; `planSnapshot` is sent when the event has no frozen plan yet (the server freezes it).
+   */
+  finish(eventId: string, planSnapshot?: PlanSnapshot): Promise<PipelineResult> {
+    return this.run('finish', 'server_error', () =>
+      this.http.post<MenuEvent>(`${EVENTS_URL}/${eventId}/finish`, planSnapshot ? { planSnapshot } : {})
+    )
   }
 
   /** Plan 446: owner only; a finished event goes back to "פוסט-פרודקשן". */
