@@ -17,6 +17,7 @@ import { PricingMeterComponent } from './pricing-meter.component'
 describe('PricingMeterComponent', () => {
   let fixture: ComponentFixture<PricingMeterComponent>
   let canEditMoney: boolean
+  let isStaff: boolean
 
   const plan = (over: Partial<EventPlan> = {}): EventPlan => ({
     rawLines: [],
@@ -49,6 +50,7 @@ describe('PricingMeterComponent', () => {
 
   beforeEach(() => {
     canEditMoney = true
+    isStaff = false
     TestBed.configureTestingModule({
       imports: [PricingMeterComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
@@ -60,7 +62,7 @@ describe('PricingMeterComponent', () => {
           provide: BusinessService,
           useValue: { business_: () => ({ settings: { profitTargetPct: 25, safetyMarginPct: 10 } }) }
         },
-        { provide: PermissionService, useValue: { can: () => canEditMoney } },
+        { provide: PermissionService, useValue: { can: () => canEditMoney, isStaff_: () => isStaff } },
         { provide: TranslationService, useValue: { translate: (k: string) => k } }
       ]
     })
@@ -146,12 +148,12 @@ describe('PricingMeterComponent', () => {
 
   it('unlocks the money inputs for the owner and shows the target inputs on demand', () => {
     create(event({ pricePerGuest: 200 }))
-    const price = fixture.nativeElement.querySelector('input[formControlName="pricePerGuest"]') as HTMLInputElement
+    const price = fixture.nativeElement.querySelector('input[name="pricePerGuest"]') as HTMLInputElement
     expect(price.disabled).toBeFalse()
-    expect(fixture.nativeElement.querySelector('input[formControlName="profitTargetPct"]')).toBeNull()
+    expect(fixture.nativeElement.querySelector('input[name="profitTargetPct"]')).toBeNull()
     ;(fixture.nativeElement.querySelector('.targets-toggle') as HTMLButtonElement).click()
     fixture.detectChanges()
-    expect(fixture.nativeElement.querySelector('input[formControlName="profitTargetPct"]')).toBeTruthy()
+    expect(fixture.nativeElement.querySelector('input[name="profitTargetPct"]')).toBeTruthy()
   })
 
   it('shows the error under an extra cost below 0', () => {
@@ -163,12 +165,134 @@ describe('PricingMeterComponent', () => {
     expect(text()).toContain('extra_costs_negative')
   })
 
-  it('the phone summary line expands on tap', () => {
-    create(event({ pricePerGuest: 200 }))
-    const root = fixture.nativeElement.querySelector('.pricing-meter') as HTMLElement
-    expect(root.classList.contains('expanded')).toBeFalse()
-    ;(fixture.nativeElement.querySelector('.meter-summary') as HTMLButtonElement).click()
+  const root = (): HTMLElement => fixture.nativeElement as HTMLElement
+  const chip = (): HTMLButtonElement => root().querySelector('.targets-toggle') as HTMLButtonElement
+  const targetBox = (): HTMLInputElement | null => root().querySelector('input[name="profitTargetPct"]')
+  const click = (el: HTMLElement): void => {
+    el.click()
     fixture.detectChanges()
-    expect(root.classList.contains('expanded')).toBeTrue()
+  }
+
+  describe('staff (plan 487)', () => {
+    it('renders nothing of the meter for staff and keeps the money form disabled', () => {
+      isStaff = true
+      canEditMoney = false
+      create(event({ pricePerGuest: 200 }))
+      expect(root().querySelector('.pricing-meter')).toBeNull()
+      expect(root().querySelector('.pricing-fab')).toBeNull()
+      expect(root().querySelector('input')).toBeNull()
+      expect(text()).not.toContain(fixture.componentInstance.foodCost_())
+      expect(text().trim()).toBe('')
+      expect(fixture.componentInstance.moneyForm().disabled).toBeTrue()
+    })
+
+    it('renders the bar for the owner and for a signed-out visitor', () => {
+      create(event({ pricePerGuest: 200 }))
+      expect(root().querySelector('.pricing-meter')).toBeTruthy()
+      expect(root().querySelector('.pricing-fab')).toBeTruthy()
+      canEditMoney = false
+      create(event({ pricePerGuest: 200 }))
+      expect(root().querySelector('.pricing-meter input')).toBeTruthy()
+      expect(text()).toContain('menu_total_cost')
+    })
+  })
+
+  describe('target chip (plan 487)', () => {
+    it('starts closed even when the event has its own target, then shows and hides the boxes', () => {
+      create(event({ pricePerGuest: 120, targetsOverride: { profitTargetPct: 15 } }))
+      expect(targetBox()).toBeNull()
+      expect(chip().getAttribute('aria-expanded')).toBe('false')
+      click(chip())
+      expect(targetBox()).toBeTruthy()
+      expect(root().querySelector('input[name="safetyMarginPct"]')).toBeTruthy()
+      click(chip())
+      expect(targetBox()).toBeNull()
+      expect(root().querySelector('.meter-numbers .verdict.ok')).toBeTruthy()
+    })
+
+    it('is teal exactly when the event holds a target or margin', () => {
+      create(event())
+      expect(chip().classList.contains('teal')).toBeFalse()
+      fixture.componentRef.setInput('event', event({ targetsOverride: { safetyMarginPct: 5 } }))
+      fixture.detectChanges()
+      expect(chip().classList.contains('teal')).toBeTrue()
+      fixture.componentRef.setInput('event', event())
+      fixture.detectChanges()
+      expect(chip().classList.contains('teal')).toBeFalse()
+    })
+
+    it('cannot hide the boxes while a target holds a refused value', () => {
+      create(event())
+      click(chip())
+      const form = fixture.componentInstance.moneyForm()
+      form.controls.profitTargetPct.setValue(100)
+      fixture.componentRef.setInput('event', event({ targetsOverride: { profitTargetPct: 100 } }))
+      fixture.detectChanges()
+      click(chip())
+      expect(targetBox()).toBeTruthy()
+      expect(text()).toContain('target_too_high')
+    })
+  })
+
+  describe('error slot (plan 487)', () => {
+    it('renders each error inside its own field, and the chip sits in a field too', () => {
+      create(event())
+      click(chip())
+      const form = fixture.componentInstance.moneyForm()
+      form.controls.profitTargetPct.setValue(100)
+      form.controls.extraCostAmount.setValue(-50)
+      form.controls.extraCostAmount.markAsTouched()
+      fixture.componentRef.setInput('event', event({ targetsOverride: { profitTargetPct: 100 } }))
+      fixture.detectChanges()
+      const errors = Array.from(root().querySelectorAll('.field-error')) as HTMLElement[]
+      expect(errors.length).toBe(2)
+      const targetField = targetBox()!.closest('.meter-field')!
+      const extraField = root().querySelector('input[name="extraCostAmount"]')!.closest('.meter-field')!
+      expect(targetField.querySelector('.field-error')?.textContent).toContain('target_too_high')
+      expect(extraField.querySelector('.field-error')?.textContent).toContain('extra_costs_negative')
+      expect(chip().parentElement?.classList.contains('meter-field')).toBeTrue()
+    })
+  })
+
+  describe('phone sheet (plan 487)', () => {
+    const sheetCard = (): HTMLElement | null => root().querySelector('app-modal-shell .c-modal-card.m-sheet-card')
+
+    it('the coins button opens the pricing in a bottom sheet', () => {
+      create(event({ pricePerGuest: 200 }))
+      expect(root().querySelector('app-modal-shell')).toBeNull()
+      click(root().querySelector('.pricing-fab') as HTMLButtonElement)
+      const card = sheetCard()!
+      expect(card).toBeTruthy()
+      expect(card.querySelector('h3')?.textContent).toContain('pricing_meter_open')
+      expect(card.querySelector('.sheet-summary')?.textContent).toContain('meets_target')
+      expect(card.querySelector('.sheet-body input[name="pricePerGuest"]')).toBeTruthy()
+      expect(card.querySelector('.sheet-body .meter-numbers')?.textContent).toContain('menu_total_cost')
+      expect(card.querySelector('.sheet-body .targets-toggle')).toBeTruthy()
+      expect(card.querySelector('.sheet-summary')?.tagName).toBe('DIV')
+    })
+
+    it('typing in the sheet updates the form, and the bar shows it after the sheet closes', () => {
+      create(event())
+      click(root().querySelector('.pricing-fab') as HTMLButtonElement)
+      const box = sheetCard()!.querySelector('input[name="pricePerGuest"]') as HTMLInputElement
+      box.value = '120'
+      box.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+      expect(fixture.componentInstance.moneyForm().controls.pricePerGuest.value).toBe(120)
+      expect(root().querySelector('.pricing-meter')).toBeNull()
+      click(sheetCard()!.querySelector('.sheet-close') as HTMLButtonElement)
+      const barBox = root().querySelector('.pricing-meter input[name="pricePerGuest"]') as HTMLInputElement
+      expect(barBox.value).toBe('120')
+    })
+
+    it('the close button and the shell dismiss close the sheet', () => {
+      create(event())
+      click(root().querySelector('.pricing-fab') as HTMLButtonElement)
+      click(sheetCard()!.querySelector('.sheet-close') as HTMLButtonElement)
+      expect(root().querySelector('app-modal-shell')).toBeNull()
+      click(root().querySelector('.pricing-fab') as HTMLButtonElement)
+      click(root().querySelector('.c-modal-overlay') as HTMLElement)
+      expect(root().querySelector('app-modal-shell')).toBeNull()
+    })
   })
 })
