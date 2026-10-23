@@ -17,4 +17,12 @@ function isValidPasswordHash(value) {
   return typeof value === 'string' && PBKDF2_FORMAT.test(value)
 }
 
-module.exports = { isValidUsername, isValidPasswordHash }
+/**
+ * Plan 492: the placeholder name a removed staff member gets so his username can be reused.
+ * `~` never passes isValidUsername and the id keeps it unique, so it can never collide with a real name.
+ */
+function releasedUsername(name, id) {
+  return `${name}~removed~${id}`
+}
+
+module.exports = { isValidUsername, isValidPasswordHash, releasedUsername }

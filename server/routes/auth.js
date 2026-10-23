@@ -229,7 +229,15 @@ router.post('/login', loginLimiter, async (req, res) => {
       return res.status(400).json({ error: 'name and password are required' });
     }
 
-    const user = await User.findOne({ name }).lean();
+    let user = await User.findOne({ name }).lean();
+    if (!user && typeof name === 'string') {
+      // Plan 492: a removed cook's name is released; keep telling him he was removed (no lockout counting).
+      const removed = await User.findOne({ removedName: name, removedAt: { $ne: null } }).sort({ removedAt: -1 }).lean();
+      if (removed?.passwordHash && (await verifyPbkdf2(password, removed.passwordHash))) {
+        return res.status(403).json({ error: 'USER_REMOVED' });
+      }
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     if (!user || (user.lockedUntil && user.lockedUntil > Date.now())) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
