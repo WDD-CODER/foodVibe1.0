@@ -185,7 +185,8 @@ async function writeConditional(req, res, event, update, logEvent, status = 200)
 
 // PUT /api/v1/events/:id/closing  { closing }  amounts: owner (editMoney); arrived, invoice, photos: staff too (markArrival).
 // Plan 488: a caller without editMoney whose (older) copy also carries a tick gets an arrival-only merge — the stored
-// money and row set are kept, only the ticks and photos of shared rows are taken — instead of a 403 that drops the tick.
+// money and row set are kept, only new ticks and new photos of shared rows are added (nothing stored is cleared) —
+// instead of a 403 that drops the tick.
 router.put('/:id/closing', verifyToken, async (req, res) => {
   try {
     const event = await loadEvent(req, res)

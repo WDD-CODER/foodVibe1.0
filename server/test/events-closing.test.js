@@ -172,6 +172,31 @@ describe('PUT /:id/closing', () => {
     expect(after.suppliers[0].actualPaid).toBe(1150)
   })
 
+  it('a staff tick on an older copy keeps the ticks and photos the owner added on other rows (fix round 1)', async () => {
+    const closing = ownerClosing()
+    closing.suppliers[1] = { ...closing.suppliers[1], actualPaid: 1100, hasInvoice: true, photos: [PHOTO] }
+    await seed('e1', { stage: 'post_production', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }), closing })
+    const stale = baseClosing()
+    stale.suppliers[0].arrived = true
+    const res = await put('e1', '/closing', STAFF, { closing: stale })
+    expect(res.status).toBe(200)
+    const after = (await raw('e1')).closing
+    expect(after.suppliers[0]).toMatchObject({ arrived: true, actualPaid: 1150 })
+    expect(after.suppliers[1]).toMatchObject({ actualPaid: 1100, hasInvoice: true, photos: [PHOTO] })
+  })
+
+  it('a staff photo on an older copy is added next to the photo the owner stored on the same row', async () => {
+    const OTHER = 'https://res.cloudinary.com/demo/image/upload/other.jpg'
+    const closing = ownerClosing()
+    closing.suppliers[0] = { ...closing.suppliers[0], photos: [PHOTO] }
+    await seed('e1', { stage: 'post_production', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }), closing })
+    const stale = baseClosing()
+    stale.suppliers[0].photos = [OTHER]
+    const res = await put('e1', '/closing', STAFF, { closing: stale })
+    expect(res.status).toBe(200)
+    expect((await raw('e1')).closing.suppliers[0].photos).toEqual([PHOTO, OTHER])
+  })
+
   it('a staff copy with an extra row: no tick → 403 and nothing stored; with a tick → only the tick is stored', async () => {
     await seed('e1', { stage: 'post_production', closedAt: 5, planSnapshot: snapshot({ frozenAt: 3 }), closing: baseClosing() })
     const extra = baseClosing()
