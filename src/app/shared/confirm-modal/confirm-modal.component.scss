@@ -15,6 +15,18 @@
   text-align: center;
 }
 
+.confirm-modal-typed {
+  margin-block-end: 1.25rem;
+}
+
+.confirm-modal-typed__expected {
+  display: block;
+  margin-block-end: 0.5rem;
+
+  overflow-wrap: anywhere;
+  color: var(--color-text-main);
+}
+
 .confirm-modal-message--danger {
   color: var(--color-text-main);
 }

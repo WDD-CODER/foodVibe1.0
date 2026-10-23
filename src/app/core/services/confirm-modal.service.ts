@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core'
+import { computed, Injectable, signal } from '@angular/core'
 import { ModalController } from './modal-controller'
 
 type ConfirmModalVariant = 'default' | 'danger' | 'warning'
@@ -13,6 +13,15 @@ export interface ConfirmModalOptions {
   variant?: ConfirmModalVariant
   /** Optional translation key for a bold header displayed above the message. */
   headerKey?: string
+  /** The confirm button stays locked until the user types `expected` (trimmed at both ends). */
+  typedConfirm?: TypedConfirm
+}
+
+export interface TypedConfirm {
+  /** The exact text the user must type. */
+  expected: string
+  /** Translation key of the label above the text box. */
+  labelKey: string
 }
 
 export interface TernaryModalOptions extends ConfirmModalOptions {
@@ -29,6 +38,8 @@ export class ConfirmModalService {
   private readonly shouldShowSaveButton_ = signal(false)
   private readonly saveButtonLabel_ = signal('save')
   private readonly headerKey_ = signal<string | null>(null)
+  private readonly typedConfirm_ = signal<TypedConfirm | null>(null)
+  private readonly typedText_ = signal('')
 
   readonly isOpen = this.controller_.isOpen_
   readonly message = this.message_.asReadonly()
@@ -37,6 +48,19 @@ export class ConfirmModalService {
   readonly showSaveButton = this.shouldShowSaveButton_.asReadonly()
   readonly saveButtonLabel = this.saveButtonLabel_.asReadonly()
   readonly headerKey = this.headerKey_.asReadonly()
+  readonly typedConfirm = this.typedConfirm_.asReadonly()
+  readonly typedText = this.typedText_.asReadonly()
+  /** True when no typed text is required, or the typed text matches (an empty expected never matches). */
+  readonly canConfirm = computed(() => {
+    const typed = this.typedConfirm_()
+    if (!typed) return true
+    const expected = typed.expected.trim()
+    return expected !== '' && this.typedText_().trim() === expected
+  })
+
+  setTypedText(value: string): void {
+    this.typedText_.set(value)
+  }
 
   /**
    * Binary confirm: returns true (confirm) or false (cancel).
@@ -49,6 +73,8 @@ export class ConfirmModalService {
     this.variant_.set(options?.variant ?? 'default')
     this.shouldShowSaveButton_.set(false)
     this.headerKey_.set(options?.headerKey ?? null)
+    this.typedConfirm_.set(options?.typedConfirm ?? null)
+    this.typedText_.set('')
     return this.controller_.open().then((result) => result === 'confirm')
   }
 
@@ -64,6 +90,8 @@ export class ConfirmModalService {
     this.shouldShowSaveButton_.set(true)
     this.saveButtonLabel_.set(options?.saveButtonLabel ?? 'save')
     this.headerKey_.set(options?.headerKey ?? null)
+    this.typedConfirm_.set(options?.typedConfirm ?? null)
+    this.typedText_.set('')
     return this.controller_.open()
   }
 
@@ -74,6 +102,7 @@ export class ConfirmModalService {
    */
   choose(value: boolean | ConfirmModalResult): void {
     const result: ConfirmModalResult = typeof value === 'boolean' ? (value ? 'confirm' : 'cancel') : value
+    if (result === 'confirm' && !this.canConfirm()) return
     this.controller_.close(result)
     this.message_.set('')
     this.saveLabel_.set('save')
@@ -81,6 +110,8 @@ export class ConfirmModalService {
     this.shouldShowSaveButton_.set(false)
     this.saveButtonLabel_.set('save')
     this.headerKey_.set(null)
+    this.typedConfirm_.set(null)
+    this.typedText_.set('')
   }
 
   private resolveSaveLabel(options?: ConfirmModalOptions): string {

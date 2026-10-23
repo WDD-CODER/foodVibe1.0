@@ -56,8 +56,10 @@ export class UserManagementComponent {
   }
 
   async onDeleteUser(user: AdminUser): Promise<void> {
-    const isOwner = user.businessRole === 'owner'
-    const nameInQuotes = ` "${isOwner ? (user.businessName ?? user.name) : user.name}"`
+    // Same rule as the server (admin.js): a business user who is not staff deletes the whole business.
+    const isOwner = !!user.businessId && user.businessRole !== 'staff'
+    const businessLabel = user.businessName?.trim() || user.name
+    const nameInQuotes = ` "${isOwner ? businessLabel : user.name}"`
     const first = await this.confirmModal.open(
       this.translation.translate(isOwner ? 'delete_business_confirm' : 'delete_staff_user_confirm') + nameInQuotes,
       { variant: 'danger', saveLabel: 'remove' }
@@ -66,7 +68,8 @@ export class UserManagementComponent {
     if (isOwner) {
       const second = await this.confirmModal.open(this.translation.translate('delete_business_confirm_final'), {
         variant: 'danger',
-        saveLabel: 'remove'
+        saveLabel: 'remove',
+        typedConfirm: { expected: businessLabel, labelKey: 'delete_business_type_name' }
       })
       if (!second) return
     }
