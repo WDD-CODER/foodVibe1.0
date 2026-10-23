@@ -10,7 +10,8 @@ $break-mobile: 768px; // mirrors src/styles.scss
     flex-direction: column;
     gap: var(--space-4);
 
-    padding-block: var(--space-4);
+    /* clears the fixed round add button (3.5rem + 0.75rem offset) so it never covers the save button */
+    padding-block: var(--space-4) calc(4.25rem + var(--space-4));
     padding-inline: var(--space-4);
   }
 
@@ -85,6 +86,8 @@ $break-mobile: 768px; // mirrors src/styles.scss
   }
 
   .import-table-wrap {
+    position: relative;
+
     max-inline-size: 100%;
     overflow-x: auto;
   }
@@ -179,16 +182,6 @@ $break-mobile: 768px; // mirrors src/styles.scss
     justify-content: flex-end;
   }
 
-  .import-sr-only {
-    position: absolute;
-
-    inline-size: 1px;
-    block-size: 1px;
-
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-
   @media (max-width: $break-mobile) {
     .product-import {
       padding-inline: var(--space-2);
@@ -202,6 +195,89 @@ $break-mobile: 768px; // mirrors src/styles.scss
 
     .import-actions .c-btn-primary {
       inline-size: 100%;
+    }
+
+    .import-table-wrap {
+      overflow: visible;
+    }
+
+    .import-table,
+    .import-table tbody,
+    .import-table tr,
+    .import-table td {
+      display: block;
+    }
+
+    .import-table {
+      min-inline-size: 0;
+    }
+
+    .import-table thead {
+      position: absolute;
+
+      inline-size: 1px;
+      block-size: 1px;
+
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    .import-row {
+      display: grid;
+      gap: var(--space-2);
+
+      padding-block: var(--space-3);
+
+      border-block-start: 1px solid var(--border-default);
+    }
+
+    .import-table td {
+      display: grid;
+      grid-template-columns: 7rem minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-2);
+
+      min-inline-size: 0;
+
+      padding-inline: 0;
+
+      border-block-start: 0;
+    }
+
+    .import-table td[data-label]::before {
+      content: attr(data-label);
+
+      color: var(--color-text-muted);
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-medium);
+    }
+
+    .import-table td.import-table__name {
+      position: static;
+
+      inline-size: auto;
+      min-inline-size: 0;
+
+      background: transparent;
+    }
+
+    .import-table td.import-flags {
+      display: flex;
+      min-inline-size: 0;
+    }
+
+    .import-num,
+    .import-purchase__unit {
+      inline-size: 100%;
+      min-inline-size: 0;
+    }
+
+    .import-purchase {
+      min-inline-size: 0;
+    }
+
+    .import-delete {
+      justify-self: end;
     }
   }
 }

@@ -264,11 +264,13 @@ export class ProductImportComponent {
   }
 
   protected removeRow(id: number): void {
+    if (this.isSaving_()) return
     this.rows_.update((rows) => rows.filter((row) => row.id !== id))
     this.deleted_.update((count) => count + 1)
   }
 
   protected updateRow(id: number, patch: Partial<PreviewRow>): void {
+    if (this.isSaving_()) return
     // A new name is matched by name only; the AI link belonged to the old text.
     const next = 'name' in patch ? { ...patch, matchedId: null } : patch
     this.rows_.update((rows) => rows.map((row) => (row.id === id ? { ...row, ...next } : row)))
