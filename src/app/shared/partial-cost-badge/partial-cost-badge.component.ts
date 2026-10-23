@@ -115,6 +115,7 @@ export class PartialCostBadgeComponent {
         .map((id) => recipesById.get(id)?.nameHebrew ?? extraNames[id] ?? '')
         .filter((n) => !!n)
         .join(', ')
+      const rawId = !item.name || item.name === item.productId || recipeIds.includes(item.name)
       const product = item.kind === 'unpriced' && item.productId ? (productsById.get(item.productId) ?? null) : null
       return {
         key: `${item.kind}|${item.productId ?? item.name}`,
@@ -126,8 +127,7 @@ export class PartialCostBadgeComponent {
         canLink: item.kind === 'unlinked' && this.linkService_.canLink(recipeIds, this.formRecipeId()),
         unitLabel: product ? this.translation_.translate(product.baseUnit) : '',
         icon: ROW_ICONS[item.kind],
-        displayName:
-          item.name && item.name !== item.productId ? item.name : this.translation_.translate('partial_unnamed_item')
+        displayName: rawId ? this.translation_.translate('partial_unnamed_item') : item.name
       }
     })
   })

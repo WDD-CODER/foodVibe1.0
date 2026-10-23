@@ -142,7 +142,7 @@ describe('PartialCostBadgeComponent', () => {
     expect(row.querySelector('.partial-name')?.textContent?.trim()).toBe('נעלם')
     const pill = row.querySelector('.partial-tag') as HTMLElement
     expect(pill.classList).toContain('c-chip')
-    expect(pill.classList).toContain('red')
+    expect(pill.classList).toContain('c-chip--red')
     expect(pill.textContent?.trim()).toBe('line_status_deleted')
     expect(row.querySelector('.partial-note')?.textContent?.trim()).toBe('partial_deleted_note')
     expect(row.querySelector('button')).toBeNull()
@@ -156,12 +156,19 @@ describe('PartialCostBadgeComponent', () => {
     expect(el.querySelector('.partial-body')?.textContent).not.toContain('x9Kq2')
   })
 
+  it('a deleted dish known only by its recipe id shows a readable fallback (plan 481)', async () => {
+    const el = await setup([{ kind: 'deleted', name: 'r9', recipeIds: ['r9'] }])
+    openPopover(el)
+    const name = el.querySelector('.partial-row[data-kind="deleted"] .partial-name')?.textContent?.trim()
+    expect(name).toBe('partial_unnamed_item')
+  })
+
   it('every row kind gets its own icon and the unlinked tag is an amber pill (plan 481)', async () => {
     const el = await setup([unpriced, unlinked, deleted])
     openPopover(el)
     expect(el.querySelectorAll('.partial-row .partial-icon svg').length).toBe(3)
     const unlinkedPill = el.querySelector('.partial-row[data-kind="unlinked"] .partial-tag') as HTMLElement
-    expect(unlinkedPill.classList).toContain('amber')
+    expect(unlinkedPill.classList).toContain('c-chip--amber')
   })
 
   it('a user who cannot edit one of the recipes sees the no-permission note instead of the field', async () => {

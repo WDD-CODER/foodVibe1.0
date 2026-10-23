@@ -36,11 +36,13 @@
                   <lucide-icon class="partial-icon" [name]="row.icon" [size]="14" aria-hidden="true"></lucide-icon>
                   <span class="partial-name">{{ row.displayName }}</span>
                   @if (row.item.kind === 'unlinked') {
-                    <span class="c-chip c-chip--sm amber partial-tag">{{
+                    <span class="c-chip c-chip--sm c-chip--amber partial-tag">{{
                       'line_status_unlinked' | translatePipe
                     }}</span>
                   } @else if (row.item.kind === 'deleted') {
-                    <span class="c-chip c-chip--sm red partial-tag">{{ 'line_status_deleted' | translatePipe }}</span>
+                    <span class="c-chip c-chip--sm c-chip--red partial-tag">{{
+                      'line_status_deleted' | translatePipe
+                    }}</span>
                   }
                 </div>
                 @if (row.recipeNames) {
