@@ -231,11 +231,21 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     let user = await User.findOne({ name }).lean();
     if (!user && typeof name === 'string') {
-      // Plan 492: a removed cook's name is released; keep telling him he was removed (no lockout counting).
+      // Plan 492: a removed cook's name is released; keep telling him he was removed.
+      // Same lockout as a live user, so the removed record can't be used to guess passwords.
       const removed = await User.findOne({ removedName: name, removedAt: { $ne: null } }).sort({ removedAt: -1 }).lean();
-      if (removed?.passwordHash && (await verifyPbkdf2(password, removed.passwordHash))) {
+      if (!removed?.passwordHash || (removed.lockedUntil && removed.lockedUntil > Date.now())) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      if (await verifyPbkdf2(password, removed.passwordHash)) {
+        if (removed.failedAttempts) {
+          await User.updateOne({ _id: removed._id }, { failedAttempts: 0, lockedUntil: null });
+        }
         return res.status(403).json({ error: 'USER_REMOVED' });
       }
+      const failedAttempts = (removed.failedAttempts || 0) + 1;
+      const lockedUntil = failedAttempts >= 5 ? Date.now() + 15 * 60 * 1000 : null;
+      await User.updateOne({ _id: removed._id }, { failedAttempts, lockedUntil });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
     if (!user || (user.lockedUntil && user.lockedUntil > Date.now())) {
