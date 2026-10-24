@@ -4,7 +4,7 @@ import { UNIT_ALIASES, VOLUME_OR_WEIGHT_KEYS } from '../utils/recipe-cost.consta
 import { cleanFloat, roundPortions } from './rounding'
 
 /** Contract C-PORTIONS (plan 440): the only place the portions of a menu item are computed. */
-export type ItemPortions = { portions: number; coefficient: number; overridden: boolean }
+export type ItemPortions = { portions: number; coefficient: number; overridden: boolean; defaultCoefficient: number }
 
 /** Float noise (126.49999999999999) is dropped before any rounding. */
 function clean(n: number, decimals: number): number {
@@ -26,6 +26,11 @@ export function isValidCoefficient(x: number): boolean {
 /** Display only: half-up to 2 decimals, no trailing zeros (1.265 -> '1.27', 1.1 -> '1.1', 1 -> '1'). */
 export function formatCoefficient(x: number): string {
   return String(Math.round(clean(x, 2)) / 100)
+}
+
+/** A typed coefficient equals the default when both show the same 2-decimal value (1.27 matches 1.265). */
+export function isDefaultCoefficient(value: number, fallback: number): boolean {
+  return formatCoefficient(value) === formatCoefficient(fallback)
 }
 
 /** Weight or volume preparations are not whole portions; everything else (dishes, per-unit preparations) is. */
@@ -51,13 +56,13 @@ export function computePortions(event: MenuEvent, recipes: Recipe[]): Map<string
     ;(section.items ?? []).forEach((item, index) => {
       const perDiner = item.portionsPerDiner ?? item.servingPortions ?? 1
       const override = item.coefficientOverride
-      const overridden = override != null && override > 0
+      const overridden = override != null && override > 0 && !isDefaultCoefficient(override, fallback)
       const coefficient = overridden ? override : fallback
       const raw = perDiner * guests * coefficient
       const portions = isPortionUnitItem(item.recipeType, recipeById.get(item.recipeId))
         ? roundPortions(raw)
         : cleanFloat(raw)
-      out.set(`${section._id}|${index}`, { portions, coefficient, overridden })
+      out.set(`${section._id}|${index}`, { portions, coefficient, overridden, defaultCoefficient: fallback })
     })
   }
   return out

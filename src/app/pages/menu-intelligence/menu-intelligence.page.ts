@@ -18,7 +18,7 @@ import { LucideAngularModule } from 'lucide-angular'
 import { filter, startWith } from 'rxjs'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { TranslationService } from '@services/translation.service'
-import { missingMenuFieldsMessage, pruneBlankMenuItems } from './menu-form.util'
+import { blankMenuItemIndex, missingMenuFieldsMessage, pruneBlankMenuItems } from './menu-form.util'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { MenuIntelligenceService } from '@services/menu-intelligence.service'
@@ -66,6 +66,7 @@ import { createMoneyGroup, moneyFieldsFromForm, moneyFormFromEvent } from './men
 import { MenuPickerSearchService } from './services/menu-picker-search.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 type MenuItemForm = {
   recipeId: string
@@ -85,6 +86,7 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
   selector: 'app-menu-intelligence-page',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,
@@ -528,21 +530,25 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   protected addItem(sectionIndex: number): void {
     const items = this.getItemsArray(sectionIndex)
-    items.push(
-      this.fb.group({
-        recipeId: ['', Validators.required],
-        recipeType: ['dish'],
-        coefficient_override: [null as number | null],
-        sell_price: [0],
-        food_cost_money: [0],
-        food_cost_pct: [0],
-        serving_portions: [1],
-        serving_portions_pct: [0]
-      })
-    )
-    const newItemIndex = items.length - 1
-    this.pickerSearch_.dish.setQuery(this.dishKey(sectionIndex, newItemIndex), '')
-    this.focusDishSearchInput(sectionIndex, newItemIndex)
+    const edit = this.editingDishAt_()
+    let i = blankMenuItemIndex(items, edit?.sectionIndex === sectionIndex ? edit.itemIndex : -1)
+    if (i < 0) {
+      items.push(
+        this.fb.group({
+          recipeId: ['', Validators.required],
+          recipeType: ['dish'],
+          coefficient_override: [null as number | null],
+          sell_price: [0],
+          food_cost_money: [0],
+          food_cost_pct: [0],
+          serving_portions: [1],
+          serving_portions_pct: [0]
+        })
+      )
+      i = items.length - 1
+      this.pickerSearch_.dish.setQuery(this.getDishMetaKey(sectionIndex, i), '')
+    }
+    this.focusDishSearchInput(sectionIndex, i)
   }
 
   protected removeItem(sectionIndex: number, itemIndex: number): void {
@@ -560,10 +566,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     return roundMoney(
       this.eventPlan_.costFor(recipeId, this.menuPortions_.at(sectionIndex, itemIndex)?.portions ?? 0).cost
     )
-  }
-
-  private dishKey(sectionIndex: number, itemIndex: number): string {
-    return `${sectionIndex}-${itemIndex}`
   }
 
   protected getDishMetaKey(sectionIndex: number, itemIndex: number): string {
@@ -643,11 +645,11 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected getDishSearchQuery(sectionIndex: number, itemIndex: number): string {
-    return this.pickerSearch_.dish.query(this.dishKey(sectionIndex, itemIndex))
+    return this.pickerSearch_.dish.query(this.getDishMetaKey(sectionIndex, itemIndex))
   }
 
   protected onDishSearchQueryChange(sectionIndex: number, itemIndex: number, value: string): void {
-    this.pickerSearch_.dish.onQueryChange(this.dishKey(sectionIndex, itemIndex), value)
+    this.pickerSearch_.dish.onQueryChange(this.getDishMetaKey(sectionIndex, itemIndex), value)
     // Emptying the text while renaming keeps the row open for a fresh name; Escape / click-outside restore.
     this.activeDishSearch_.set(value.trim().length > 0 ? { sectionIndex, itemIndex } : null)
   }
@@ -662,7 +664,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
       food_cost_money: roundMoney(this.eventPlan_.costFor(recipe._id, derivedPortions).cost),
       serving_portions: 1
     })
-    this.pickerSearch_.dish.setQuery(this.dishKey(sectionIndex, itemIndex), '')
+    this.pickerSearch_.dish.setQuery(this.getDishMetaKey(sectionIndex, itemIndex), '')
     this.activeDishSearch_.set(null)
     const editing = this.editingDishAt_()
     if (editing && editing.sectionIndex === sectionIndex && editing.itemIndex === itemIndex) {
@@ -680,7 +682,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const currentName = this.recipes_().find((r) => r._id === recipeId)?.nameHebrew || ''
     this.editingDishAt_.set({ sectionIndex, itemIndex, previousRecipeId: recipeId })
     group.patchValue({ recipeId: '' })
-    this.pickerSearch_.dish.onQueryChange(this.dishKey(sectionIndex, itemIndex), currentName)
+    this.pickerSearch_.dish.onQueryChange(this.getDishMetaKey(sectionIndex, itemIndex), currentName)
     this.activeDishSearch_.set({ sectionIndex, itemIndex })
     this.focusDishSearchInput(sectionIndex, itemIndex)
   }
@@ -695,7 +697,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
 
   /** Clear dish search query (closes dropdown); used by clickOutside and Escape. */
   protected clearDishSearch(sectionIndex: number, itemIndex: number): void {
-    this.pickerSearch_.dish.setQuery(this.dishKey(sectionIndex, itemIndex), '')
+    this.pickerSearch_.dish.setQuery(this.getDishMetaKey(sectionIndex, itemIndex), '')
     this.activeDishSearch_.set(null)
     const edit = this.editingDishAt_()
     if (edit && edit.sectionIndex === sectionIndex && edit.itemIndex === itemIndex && edit.previousRecipeId) {

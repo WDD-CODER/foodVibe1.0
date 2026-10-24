@@ -3,7 +3,7 @@
  * Plan 446 (contract C-SNAPSHOT): the pure rules for the planning snapshot and the event closing.
  * `routes/events.js` is the only caller; nothing here touches the database.
  */
-const { snapshotActionOnStage } = require('../generated/schemas/entities/event-stage')
+const { snapshotActionOnStage, EVENT_STAGES, CLOSED_FROM_INDEX } = require('../generated/schemas/entities/event-stage')
 
 const ROW_NONE = '__none__'
 const rowKey = row => row.supplierId ?? ROW_NONE
@@ -101,6 +101,34 @@ function mergeClosing(stored, incoming) {
   return { ...content, ...keep }
 }
 
+/** The most delivery-note photos one row keeps (same cap as the menu-event schema). */
+const MAX_ROW_PHOTOS = 10
+
+/**
+ * Plan 488: the closing to store for a caller who may not change money, whose copy is older than the stored one.
+ * The stored closing is kept whole (amounts, totals, row set, names, planned, finish stamps). From the incoming copy
+ * only additions are taken, on rows present in both: a tick (`arrived` / `hasInvoice` true) and photos the stored row
+ * does not have yet. Nothing stored is ever cleared here — an old copy cannot tell "the cook unticked" from "someone
+ * ticked since", so an untick or photo removal on this path waits for the next save on the fresh copy the route
+ * returns. Rows only in the incoming copy are ignored, rows only in the stored one stay.
+ */
+function arrivalOnly(stored, incoming) {
+  const from = new Map((incoming?.suppliers ?? []).map(r => [rowKey(r), r]))
+  const suppliers = stored.suppliers.map(row => {
+    const hit = from.get(rowKey(row))
+    if (!hit) return row
+    const have = row.photos ?? []
+    const added = (Array.isArray(hit.photos) ? hit.photos : []).filter(p => !have.includes(p))
+    return {
+      ...row,
+      arrived: row.arrived === true || hit.arrived === true,
+      hasInvoice: row.hasInvoice === true || hit.hasInvoice === true,
+      photos: [...have, ...added].slice(0, Math.max(have.length, MAX_ROW_PHOTOS)),
+    }
+  })
+  return { ...stored, suppliers }
+}
+
 /**
  * The update that finishes an event: stage, history entry, finish stamps, and `closedAt` when it was never set.
  * @returns {{ set: object, push: object }}
@@ -112,6 +140,19 @@ function finishPatch(event, actor, now) {
   return { set, push: { stage: 'finished', at: now, by: actor.userId, byName: actor.name } }
 }
 
+/**
+ * Plan 493: why an event may not be finished now (the owner finishes from any live stage), or null.
+ * `FINISH_FROM_STAGE`: a lost deal ("לא נסגר") is brought back to a live stage first; `DATE_REQUIRED`: before
+ * "מקדמה שולמה" the event needs a date, the same rule as any move that closes the deal.
+ * @returns {'FINISH_FROM_STAGE' | 'DATE_REQUIRED' | null}
+ */
+function finishRefusal(event) {
+  const stage = event.stage ?? 'inquiry'
+  if (stage === 'not_closed') return 'FINISH_FROM_STAGE'
+  if (EVENT_STAGES.indexOf(stage) < CLOSED_FROM_INDEX && !event.eventDate) return 'DATE_REQUIRED'
+  return null
+}
+
 module.exports = {
-  CLOSING_STAGES, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, finishPatch,
+  CLOSING_STAGES, finishRefusal, initClosing, applySnapshotOnStage, refreshedSnapshot, syncClosingPlanned, diffClosing, mergeClosing, arrivalOnly, finishPatch,
 }

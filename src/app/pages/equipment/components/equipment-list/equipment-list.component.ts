@@ -43,6 +43,7 @@ import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-act
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
@@ -53,6 +54,7 @@ type EquipmentBulkField = 'category' | 'isConsumable'
   selector: 'app-equipment-list',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,

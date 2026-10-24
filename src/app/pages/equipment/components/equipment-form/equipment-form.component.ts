@@ -24,6 +24,7 @@ import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -38,6 +39,7 @@ const CATEGORIES: EquipmentCategory[] = [
   selector: 'app-equipment-form',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,

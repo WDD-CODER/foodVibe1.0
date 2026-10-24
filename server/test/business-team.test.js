@@ -188,3 +188,88 @@ describe('staff save their own product again (zero prices)', () => {
     expect(priced.body).toEqual(FORBIDDEN)
   })
 })
+
+describe('plan 492 - a removed staff member frees the username', () => {
+  // teamLimiter keys on the owner id: a fresh owner id per test keeps these adds out of the 10-per-window budget.
+  let n = 0
+  let owner = OWNER
+  beforeEach(() => { owner = { ...OWNER, userId: `own1-492-${++n}` } })
+  const addO = name => add(name, HASH, owner)
+  const del = id => request(app).delete(`${TEAM}/${id}`).set(as(owner))
+  const users = () => testDb().collection('users')
+  const login = (name, password = 'pw') => request(app).post('/api/v1/auth/login').send({ name, password })
+
+  it('remove then add the same name: new id, old record kept with the tombstone, new cook logs in, old refresh is refused', async () => {
+    const agent = request.agent(app)
+    const oldId = (await addO('cook1')).body._id
+    expect((await agent.post('/api/v1/auth/login').send({ name: 'cook1', password: 'pw' })).status).toBe(200)
+    await testDb().collection('recipes').insertOne({ _id: 'r-old', businessId: 'b1', userId: oldId, createdBy: oldId, nameHebrew: 'recipe' })
+    expect((await del(oldId)).status).toBe(200)
+
+    const again = await addO('cook1')
+    expect(again.status).toBe(201)
+    expect(again.body._id).not.toBe(oldId)
+    expect(await users().findOne({ _id: oldId })).toMatchObject({ removedName: 'cook1', name: `cook1~removed~${oldId}`, removedAt: expect.any(Number) })
+
+    const res = await login('cook1')
+    expect(res.status).toBe(200)
+    expect(jwt.decode(res.body.token).userId).toBe(again.body._id)
+    const refresh = await agent.post('/api/v1/auth/refresh')
+    expect(refresh.status).toBe(401)
+    expect(refresh.body).toEqual({ error: 'USER_REMOVED' })
+
+    const list = await request(app).get(TEAM).set(as(owner))
+    expect(list.body.filter(r => r.name === 'cook1')).toHaveLength(1)
+    expect(list.body.find(r => r.name === 'cook1')._id).toBe(again.body._id)
+    expect((await request(app).get('/api/v1/data/recipes/r-old').set(as(OWNER))).status).toBe(200)
+  })
+
+  it('a removed name not re-added: right password -> 403 USER_REMOVED, wrong -> 401 without USER_REMOVED, counted like a live user', async () => {
+    const id = (await addO('cook1')).body._id
+    await del(id)
+    const ok = await login('cook1')
+    expect(ok.status).toBe(403)
+    expect(ok.body).toEqual({ error: 'USER_REMOVED' })
+    for (let i = 0; i < 3; i++) {
+      const bad = await login('cook1', 'nope')
+      expect(bad.status).toBe(401)
+      expect(bad.body.error).not.toBe('USER_REMOVED')
+    }
+    expect(await users().findOne({ _id: id })).toMatchObject({ failedAttempts: 3 })
+    expect((await login('cook1')).status).toBe(403)
+    expect(await users().findOne({ _id: id })).toMatchObject({ failedAttempts: 0, lockedUntil: null })
+  })
+
+  it('a removed name locks after 5 wrong passwords: the right one then gets 401, not USER_REMOVED', async () => {
+    const id = (await addO('cook1')).body._id
+    await del(id)
+    // Own client IP (trust proxy is on) so the IP-keyed login limiter, spent by earlier tests, isn't what answers.
+    const loginIp = (password = 'pw') => login('cook1', password).set('X-Forwarded-For', '10.0.0.92')
+    for (let i = 0; i < 5; i++) expect((await loginIp('nope')).status).toBe(401)
+    expect(await users().findOne({ _id: id })).toMatchObject({ failedAttempts: 5, lockedUntil: expect.any(Number) })
+    const locked = await loginIp()
+    expect(locked.status).toBe(401)
+    expect(locked.body.error).not.toBe('USER_REMOVED')
+  })
+
+  it('DELETE twice changes nothing; a legacy removed user (removedAt, no removedName) releases its name', async () => {
+    const id = (await addO('cook1')).body._id
+    await del(id)
+    const first = await users().findOne({ _id: id })
+    expect((await del(id)).status).toBe(200)
+    expect(await users().findOne({ _id: id })).toEqual(first)
+
+    await users().insertOne({ _id: 'legacy1', name: 'oldcook', email: 'l@x.com', businessId: 'b1', businessRole: 'staff', removedAt: 99, passwordHash: HASH })
+    expect((await addO('oldcook')).status).toBe(409)
+    expect((await del('legacy1')).status).toBe(200)
+    expect(await users().findOne({ _id: 'legacy1' })).toMatchObject({ removedAt: 99, removedName: 'oldcook', name: 'oldcook~removed~legacy1' })
+    expect((await addO('oldcook')).status).toBe(201)
+  })
+
+  it('sign-up with a released name -> 201', async () => {
+    const id = (await addO('cook1')).body._id
+    await del(id)
+    const res = await request(app).post('/api/v1/auth/signup').send({ name: 'cook1', email: 'new@x.com', password: HASH, businessName: 'biz' })
+    expect(res.status).toBe(201)
+  })
+})

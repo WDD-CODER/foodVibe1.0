@@ -154,10 +154,20 @@ describe('EventPipelineService', () => {
       expect(data.allMenuEvents_().find((e) => e._id === 'e1')?.closing).toEqual(closing)
     })
 
+    it('finish(id, snapshot) posts the plan snapshot in the body', async () => {
+      const snap = { at: 9, suppliers: [], extraCosts: 0, plannedRevenue: 0, plannedProfit: 0, plannedProfitPct: 0 }
+      const finish = service.finish('e1', snap)
+      const req = backend.expectOne(`${BASE}/api/v1/events/e1/finish`)
+      expect(req.request.body).toEqual({ planSnapshot: snap })
+      req.flush({ ...inquiry, _id: 'e1', stage: 'finished' })
+      await finish
+    })
+
     it('finish and reopen POST to their routes and write the new stage', async () => {
       const finish = service.finish('e1')
       const finishReq = backend.expectOne(`${BASE}/api/v1/events/e1/finish`)
       expect(finishReq.request.method).toBe('POST')
+      expect(finishReq.request.body).toEqual({})
       finishReq.flush({ ...inquiry, _id: 'e1', stage: 'finished' })
       await finish
       expect(stageOfStore()).toBe('finished')

@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core'
+import { NgTemplateOutlet } from '@angular/common'
 import { ReactiveFormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import type { MenuEvent } from '@models/menu-event.model'
 import { BusinessService } from '@services/business.service'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import type { EventPlan } from '../../../../core/engine/event-plan.types'
@@ -12,15 +14,26 @@ import { computeEventPricing, DEFAULT_PRICING_SETTINGS, toPricingEvent } from '.
 import { formatMoney, formatPct1 } from '../../../../core/engine/rounding'
 import type { MoneyForm } from '../../menu-money-form.util'
 import { MenuPortionsService } from '../../services/menu-portions.service'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 /**
  * Plan 445 — the live pricing meter at the bottom of the menu page. It only displays what
  * `computeEventPricing` returns for the live form, and owns the money inputs (locked without `editMoney`).
+ * Plan 487: a staff member sees nothing of it (the form stays locked); on a phone a round button opens the
+ * same body in a bottom sheet instead of the fixed bar.
  */
 @Component({
   selector: 'app-pricing-meter',
   standalone: true,
-  imports: [ReactiveFormsModule, LucideAngularModule, TranslatePipe, PartialCostBadgeComponent],
+  imports: [
+    SelectOnFocusDirective,
+    NgTemplateOutlet,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    ModalShellComponent,
+    PartialCostBadgeComponent
+  ],
   templateUrl: './pricing-meter.component.html',
   styleUrl: './pricing-meter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -41,14 +54,28 @@ export class PricingMeterComponent {
 
   // 4. SIGNALS
   private readonly isTargetsOpened_ = signal(false)
-  readonly isExpanded_ = signal(false)
+  private readonly isSheetOpen_ = signal(false)
+  readonly isSheetOpen = this.isSheetOpen_.asReadonly()
 
   // 5. COMPUTED
   readonly canEditMoney_ = computed(() =>
     this.permission_.can('editMoney', { type: 'menuEvents', doc: this.eventId() ? { _id: this.eventId() } : undefined })
   )
-  /** The target inputs show when the chef opened them or the event already has its own target. */
-  readonly targetsOpen_ = computed(() => this.isTargetsOpened_() || !!this.event().targetsOverride)
+  /** Plan 487: a signed-in staff member sees no pricing at all (owners and signed-out visitors keep the bar). */
+  readonly isMoneyHidden_ = computed(() => this.permission_.isStaff_())
+  /** The event holds its own target or margin (the chip turns teal). */
+  readonly targetsHaveData_ = computed(() => !!this.event().targetsOverride)
+  /**
+   * A refused target value keeps its boxes open so the error is never out of sight. Reads `event()` so it
+   * recomputes on every form change (the form itself is not a signal).
+   */
+  readonly targetsInvalid_ = computed(() => {
+    this.event()
+    const controls = this.moneyForm().controls
+    return controls.profitTargetPct.invalid || controls.safetyMarginPct.invalid
+  })
+  /** The chip alone shows / hides the target boxes; it starts closed even when the event has a target. */
+  readonly targetsOpen_ = computed(() => this.isTargetsOpened_() || this.targetsInvalid_())
   readonly result_ = computed(() =>
     computeEventPricing(
       this.plan(),
@@ -106,7 +133,11 @@ export class PricingMeterComponent {
     this.isTargetsOpened_.update((open) => !open)
   }
 
-  toggleExpanded(): void {
-    this.isExpanded_.update((open) => !open)
+  openSheet(): void {
+    this.isSheetOpen_.set(true)
+  }
+
+  closeSheet(): void {
+    this.isSheetOpen_.set(false)
   }
 }

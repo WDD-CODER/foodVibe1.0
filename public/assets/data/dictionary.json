@@ -738,6 +738,7 @@
     "business_role_staff": "צוות",
     "delete_business_confirm": "מחיקת בעל העסק מוחקת את כל העסק – כל הנתונים וכל המשתמשים שלו. העסק:",
     "delete_business_confirm_final": "המחיקה סופית ואי אפשר לשחזר אותה. למחוק את העסק?",
+    "delete_business_type_name": "כדי למחוק, יש להזין את שם העסק:",
     "delete_staff_user_confirm": "המשתמש יימחק. הפריטים שיצר יישארו בעסק. המשתמש:",
     "business_deleted": "העסק נמחק",
     "user_deleted": "המשתמש נמחק",
@@ -1097,6 +1098,7 @@
     "partial_deleted_note": "המוצר נמחק. הסירו אותו מהמתכון או בחרו מוצר אחר.",
     "partial_linked": "המוצר קושר",
     "partial_link_no_permission": "אין הרשאה לשנות את המתכון הזה",
+    "partial_unnamed_item": "פריט ללא שם",
     "shopping_total": "סה״כ",
     "engine_error_cycle": "הכנה מעגלית: {name}",
     "engine_error_no_yield": "חסרה תפוקה במתכון: {name}",
@@ -1183,6 +1185,10 @@
     "stage_needs_date": "יש להזין תאריך אירוע לפני מעבר ל\"מקדמה שולמה\"",
     "stage_not_allowed": "רק הבעלים או מי שיצר את האירוע יכולים לשנות שלב",
     "stage_finished_hint": "\"הסתיים\" נקבע רק דרך \"סיים אירוע\"",
+    "stage_finish_confirm": "האם אתה בטוח שברצונך לסגור את האירוע ללא פוסט-פרודקשן?",
+    "stage_finish_owner_only": "רק הבעלים יכול לסגור אירוע",
+    "stage_finish_needs_date": "יש להזין תאריך אירוע לפני סגירת האירוע",
+    "stage_finish_from_not_closed": "אירוע שלא נסגר לא יכול לעבור ל\"הסתיים\" – החזירו אותו קודם לשלב פעיל",
     "not_closed_title": "למה האירוע לא נסגר?",
     "not_closed_reason_price": "מחיר",
     "not_closed_reason_date_taken": "תאריך תפוס",
@@ -1550,7 +1556,6 @@
     "ai_recipe_tab_url": "מקישור",
     "ai_recipe_paste_hint": "המתכון נשמר כמו שכתבת – ה-AI רק מסדר אותו לשדות, בלי להמציא",
     "date_invalid": "תאריך לא תקין",
-    "open_calendar": "פתח לוח שנה",
     "deposit_paid_title": "מקדמה שולמה",
     "deposit_amount_required": "יש להזין סכום מקדמה",
     "business_name_default": "העסק של {{name}}",
@@ -1561,6 +1566,8 @@
     "metadata_staff_stages_title": "שלבי אירוע שהצוות רואה",
     "metadata_staff_stages_desc": "אנשי הצוות רואים רק אירועים בשלבים המסומנים, וגם אירועים שהם יצרו בעצמם.",
     "staff_stages_save_error": "שמירת השלבים נכשלה",
-    "event_not_available": "האירוע הזה לא זמין לך"
+    "event_not_available": "האירוע הזה לא זמין לך",
+    "pricing_meter_open": "תמחור האירוע",
+    "coefficients_unsaved_hint": "יש שינויים שלא נשמרו"
   }
 }

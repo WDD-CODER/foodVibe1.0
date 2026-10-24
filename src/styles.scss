@@ -2586,3 +2586,17 @@ button.c-chip--removable {
 .c-modal-card:focus {
   outline: none;
 }
+
+/* Plan 482: no browser up/down arrows on any number box, app-wide. Outside any @layer so it beats layered
+   component styles. The arrows ran the value away on desktop (each step fired a save). */
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+
+  -webkit-appearance: none;
+}

@@ -37,8 +37,8 @@ Verified in code on `mvp-qa-fixes` (`ea6af7b0`):
 - As a chef on my phone, I want the station picker inside the recipe card so that I can see and change it without the
   page sliding sideways.
 - Success:
-  - [ ] [auto] `npx ng build` passes (exit 0).
-  - [ ] [auto] `npx ng test --watch=false --include=src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.spec.ts` → all specs pass (no behaviour change; proves the template still binds).
+  - [x] [auto] `npx ng build` passes (exit 0).
+  - [x] [auto] `npx ng test --watch=false --include=src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.spec.ts` → all specs pass (no behaviour change; proves the template still binds).
   - [ ] [auto] Geometry, gstack `browse` on the slot app at viewport 390x844 and again at 375x812, owner logged in, on `/recipe-builder/<id of an existing recipe>`: a JS evaluation returns `true` for `document.documentElement.scrollWidth <= innerWidth` and for each of `#course` and `#station` (their `.custom-select-trigger`): `trigger.left >= card.left && trigger.right <= card.right`, where `card` = `.header-dashboard-container` rect. Numbers + result pasted in the run file.
   - [ ] [auto] Desktop unchanged, same tool at 1440x900 on the same recipe: the two pickers' rects (x, y, width) are equal to the values measured on `origin/mvp-qa-fixes` before the change (± 1 px), measured in Step 0.
   - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
@@ -111,9 +111,9 @@ Print `ok` / `conflict: <what>`. If the bug does not reproduce, record the numbe
 `## Decisions` and mark the plan done with evidence.
 
 ## Atomic Sub-tasks
-- [ ] S1: Give the station picker its own class so the phone layout can place it by name — course-select → station-select on the station app-custom-select — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html
-- [ ] S2: Put the course and station pickers on their own full-width rows inside the phone header card — in the max-width 40.625rem block add areas 'course course' and 'station station' after 'labels labels'; .course-select grid-area course, .station-select grid-area station; both justify-self stretch, inline-size 100%, min-inline-size 0; logical properties only — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.scss
-- [ ] S3: Keep the desktop header exactly as it was — if the new station-select class changes desktop placement, add it to the desktop min-width 40.626rem block so it sits where course-select's sibling sat; otherwise no desktop rule — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.scss
+- [x] S1: Give the station picker its own class so the phone layout can place it by name — course-select → station-select on the station app-custom-select — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html
+- [x] S2: Put the course and station pickers on their own full-width rows inside the phone header card — in the max-width 40.625rem block add areas 'course course' and 'station station' after 'labels labels'; .course-select grid-area course, .station-select grid-area station; both justify-self stretch, inline-size 100%, min-inline-size 0; logical properties only — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.scss
+- [x] S3: Keep the desktop header exactly as it was — if the new station-select class changes desktop placement, add it to the desktop min-width 40.626rem block so it sits where course-select's sibling sat; otherwise no desktop rule — src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.scss
 - [ ] V1: Prove it fits on phones and nothing else moved — build, header spec, browse geometry at 390, 375 and 1440, open the station list at 375, screenshots after-390.png / after-375.png / after-1440.png in the evidence folder, human cards and results in docs/mvp/runs/491.md
 
 ## Out of Scope

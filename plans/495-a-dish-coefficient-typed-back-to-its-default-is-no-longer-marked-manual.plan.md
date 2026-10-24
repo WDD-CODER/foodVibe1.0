@@ -44,8 +44,8 @@ Verified in code on `mvp-qa-fixes` (`ea6af7b0`):
   «שונה ידנית» tag, no reset button, nothing stored, and the dish follows the event type again; passed check 67
   («שונה ידנית» on 1.1, reset brings it back) works exactly as before.
 - Success:
-  - [ ] [auto] `npx ng build` passes.
-  - [ ] [auto] `npx ng test --watch=false --browsers=ChromeHeadless --include='src/app/core/engine/**/*.spec.ts' --include='src/app/pages/menu-intelligence/**/*.spec.ts' --include='src/app/core/services/menu-intelligence.service.spec.ts'` → all SUCCESS, covering:
+  - [x] [auto] `npx ng build` passes.
+  - [x] [auto] `npx ng test --watch=false --browsers=ChromeHeadless --include='src/app/core/engine/**/*.spec.ts' --include='src/app/pages/menu-intelligence/**/*.spec.ts' --include='src/app/core/services/menu-intelligence.service.spec.ts'` → all SUCCESS, covering:
     (a) `isDefaultCoefficient(1.27, 1.265)` → true, `(1.26, 1.265)` → false, `(1.1, 1.1)` → true, `(1.32, 1.2 * 1.1)` → true;
     (b) `computePortions` private 1.15 × buffet 1.1, 100 guests, override 1.27 → `overridden: false`, coefficient ≈ 1.265, portions 127, `defaultCoefficient` ≈ 1.265; override 1.1 → `overridden: true`, 110, `defaultCoefficient` ≈ 1.265 (existing 1.1 / wedding tests unchanged);
     (c) dish row with `portionInfo` default 1.265: typing `1.27` stores `coefficient_override` `null` and shows no `coefficient_manual`; typing `1.1` stores 1.1 (existing test); from an override of 1.1, typing `1.27` stores `null`; the reset test, the `1.111` and `0` tests unchanged;
@@ -156,10 +156,10 @@ Find `ItemPortions`, `defaultCoefficient`, `formatCoefficient`, `isValidCoeffici
 `conflict: <what>` in `docs/mvp/runs/495.md`.
 
 ## Atomic Sub-tasks
-- [ ] T1: Let the engine tell a typed default from a real change and pass the default on — add `export function isDefaultCoefficient(value: number, fallback: number): boolean` (`formatCoefficient(value) === formatCoefficient(fallback)`); `ItemPortions` gains `defaultCoefficient: number`; in `computePortions` `overridden = override != null && override > 0 && !isDefaultCoefficient(override, fallback)`, `coefficient = overridden ? override : fallback`, set `defaultCoefficient: fallback` on every item — src/app/core/engine/portions.ts
-- [ ] T2: Typing the default coefficient on a dish stores no override — in `onCoefficientInput`, after the valid check: when `portionInfo()` is set and `isDefaultCoefficient(value, portionInfo().defaultCoefficient)`, `patchValue({ coefficient_override: null })`, else store `value` as today; blank and invalid paths unchanged — src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts
-- [ ] T3: Cover the rule in the engine, the dish row and the menu portions service — cases (a)–(d) in Done-when; add `defaultCoefficient` to the existing `portionInfo` objects in the dish-row spec and to the `toEqual` in the service spec — src/app/core/engine/portions.spec.ts, src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.spec.ts, src/app/pages/menu-intelligence/services/menu-portions.service.spec.ts
-- [ ] T4: Note the new field and rule in the portions contract so later plans read it — C-PORTIONS lines: `ItemPortions` adds `defaultCoefficient`; an override equal to the default at 2 decimals is not an override (plan 495) — docs/mvp/mvp-map.md
+- [x] T1: Let the engine tell a typed default from a real change and pass the default on — add `export function isDefaultCoefficient(value: number, fallback: number): boolean` (`formatCoefficient(value) === formatCoefficient(fallback)`); `ItemPortions` gains `defaultCoefficient: number`; in `computePortions` `overridden = override != null && override > 0 && !isDefaultCoefficient(override, fallback)`, `coefficient = overridden ? override : fallback`, set `defaultCoefficient: fallback` on every item — src/app/core/engine/portions.ts
+- [x] T2: Typing the default coefficient on a dish stores no override — in `onCoefficientInput`, after the valid check: when `portionInfo()` is set and `isDefaultCoefficient(value, portionInfo().defaultCoefficient)`, `patchValue({ coefficient_override: null })`, else store `value` as today; blank and invalid paths unchanged — src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts
+- [x] T3: Cover the rule in the engine, the dish row and the menu portions service — cases (a)–(d) in Done-when; add `defaultCoefficient` to the existing `portionInfo` objects in the dish-row spec and to the `toEqual` in the service spec — src/app/core/engine/portions.spec.ts, src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.spec.ts, src/app/pages/menu-intelligence/services/menu-portions.service.spec.ts
+- [x] T4: Note the new field and rule in the portions contract so later plans read it — C-PORTIONS lines: `ItemPortions` adds `defaultCoefficient`; an override equal to the default at 2 decimals is not an override (plan 495) — docs/mvp/mvp-map.md
 - [ ] V1: Build, run the specs and the log check, replay cards ①–④ in the browser and write the run file — docs/mvp/runs/495.md
 
 ## Out of Scope

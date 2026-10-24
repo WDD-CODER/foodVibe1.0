@@ -25,6 +25,7 @@ import { warnBeforeUnload } from '@utils/leave-warning.util'
 import { incrementGeminiUsage } from '@utils/gemini-usage.util'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 /** The base units a product may have (same list as the server). */
 const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
@@ -57,6 +58,7 @@ interface ImportSummary {
   selector: 'app-product-import',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     FormsModule,
     RouterLink,
     LucideAngularModule,
@@ -264,11 +266,13 @@ export class ProductImportComponent {
   }
 
   protected removeRow(id: number): void {
+    if (this.isSaving_()) return
     this.rows_.update((rows) => rows.filter((row) => row.id !== id))
     this.deleted_.update((count) => count + 1)
   }
 
   protected updateRow(id: number, patch: Partial<PreviewRow>): void {
+    if (this.isSaving_()) return
     // A new name is matched by name only; the AI link belonged to the old text.
     const next = 'name' in patch ? { ...patch, matchedId: null } : patch
     this.rows_.update((rows) => rows.map((row) => (row.id === id ? { ...row, ...next } : row)))

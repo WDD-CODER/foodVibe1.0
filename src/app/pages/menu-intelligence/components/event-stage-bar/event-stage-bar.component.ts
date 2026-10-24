@@ -36,10 +36,12 @@ import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import { NotClosedAnswer, NotClosedDialogComponent } from '../not-closed-dialog/not-closed-dialog.component'
 import { EventClosingDialogComponent } from '../event-closing-dialog/event-closing-dialog.component'
 import { DepositPaidAnswer, DepositPaidDialogComponent } from '../deposit-paid-dialog/deposit-paid-dialog.component'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 /**
- * Plan 443: the stage bar at the top of the event screen. Click a stage to move the event; "לא נסגר" asks why
- * "הסתיים" is shown but never picked here (plan 446 finishes an event in the closing dialog, which this bar hosts). Also holds the client details
+ * Plan 443: the stage bar at the top of the event screen. Click a stage to move the event; "לא נסגר" asks why.
+ * Plan 493: "הסתיים" asks "close without post-production?" and, on yes, finishes through the finish route (never the
+ * stage route); the closing dialog this bar hosts finishes too (plan 446). Also holds the client details
  * (name, phone, and the deposit for whoever may see money edits) and the stage history.
  * The server decides every move (plan 442); this component only hides or locks what the user may not do.
  */
@@ -47,6 +49,7 @@ import { DepositPaidAnswer, DepositPaidDialogComponent } from '../deposit-paid-d
   selector: 'app-event-stage-bar',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     DatePipe,
     LucideAngularModule,
     TranslatePipe,
@@ -101,6 +104,20 @@ export class EventStageBarComponent {
   protected readonly canChangeStage_ = computed(() => this.can('changeStage'))
   protected readonly canEdit_ = computed(() => this.can('edit'))
   protected readonly canEditMoney_ = computed(() => this.can('editMoney'))
+  /** Why the owner's click on «הסתיים» is refused (a dictionary key), or null. One rule for the click and the pill. */
+  protected readonly finishRefusal_ = computed<string | null>(() => {
+    const event = this.event_()
+    const current = this.current_()
+    if (!event || current === 'finished') return null
+    if (!this.canEditMoney_()) return 'stage_finish_owner_only'
+    if (current === 'not_closed') return 'stage_finish_from_not_closed'
+    if (
+      EVENT_STAGE_ORDER.indexOf(current) < EVENT_STAGE_ORDER.indexOf('deposit_paid') &&
+      needsDateFor('deposit_paid', event.eventDate)
+    )
+      return 'stage_finish_needs_date'
+    return null
+  })
   /** «סגירת אירוע» is offered from "ביצוע" on (a finished event too: to look at it, or to reopen it). */
   protected readonly canOpenClosing_ = computed(() =>
     ['execution', 'post_production', 'finished'].includes(this.current_())
@@ -132,7 +149,7 @@ export class EventStageBarComponent {
   protected async pick(stage: EventStage): Promise<void> {
     const event = this.event_()
     if (!event || this.isBusy_()) return
-    if (stage === 'finished') return this.showError('stage_finished_hint')
+    if (stage === 'finished') return this.finishFromBar(event)
     if (!this.canChangeStage_()) return this.showError('stage_not_allowed')
     if (stage === this.current_()) return
     if (stage === 'not_closed') {
@@ -147,6 +164,23 @@ export class EventStageBarComponent {
       return
     }
     await this.move(event, { stage })
+  }
+
+  /** Plan 493: the owner closes the event without post-production, after a yes. The finish route does the rest. */
+  private async finishFromBar(event: MenuEvent): Promise<void> {
+    if (this.current_() === 'finished') return
+    const refusal = this.finishRefusal_()
+    if (refusal) return this.showError(refusal)
+    if (!(await this.confirmModal.open('stage_finish_confirm', { saveLabel: 'closing_finish' }))) return
+    this.isBusy_.set(true)
+    // Same rule as a move into "פוסט-פרודקשן": send the plan only when the event has no frozen one.
+    const snapshot =
+      snapshotOnStageChange('post_production', event.planSnapshot) === 'none'
+        ? undefined
+        : this.snapshots.buildFor(event)
+    const result = await this.pipeline.finish(event._id, snapshot)
+    this.isBusy_.set(false)
+    if (result.ok) this.userMsg.onSetSuccessMsg(this.translation.translate('stage_changed'))
   }
 
   /** Moves the stage first; only when that worked is the deposit saved (a refused move saves nothing). */

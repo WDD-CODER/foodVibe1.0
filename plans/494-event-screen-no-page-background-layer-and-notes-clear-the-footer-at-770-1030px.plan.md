@@ -46,19 +46,19 @@ so that nothing I wrote is hidden behind the price bar.
   width where the meter stops wrapping (at least 1030 px) the last note and the «הוסף הערה» area scroll fully above the
   pricing footer with a visible gap.
 - Success:
-  - [ ] [auto] `npx ng build` passes (exit 0).
-  - [ ] [auto] `grep -n "background" src/app/pages/menu-intelligence/_layout.scss` → no line inside the screen `:host`
+  - [x] [auto] `npx ng build` passes (exit 0).
+  - [x] [auto] `grep -n "background" src/app/pages/menu-intelligence/_layout.scss` → no line inside the screen `:host`
     block (prints nothing at all); `grep -n "bg-pure" src/app/pages/menu-intelligence/_toolbar.scss` → still prints the
     print-only line; `grep -n "@media screen and (min-width: \$break-meter-full)" src/app/pages/menu-intelligence/menu-intelligence.page.scss`
     → prints exactly one line (the new padding is screen-only, so the print rule `.menu-editor-shell { padding: 0 }`
     in `_toolbar.scss` still wins on paper).
-  - [ ] [auto] Browser measurement written to the run file (gstack `browse`, owner account, an event with ≥ 3 notes,
+  - [x] [auto] Browser measurement written to the run file (gstack `browse`, owner account, an event with ≥ 3 notes,
     scrolled to the very bottom): at widths 769, 800, 900, 1000, 1024, 1030 px —
     `document.querySelector('.pricing-meter').getBoundingClientRect().top` −
     `document.querySelector('app-event-notes-log').getBoundingClientRect().bottom` ≥ `16` for every width (both
     numbers and the gap listed per width); at 1440 px and 375 px the shell's computed `padding-block-end` is
     unchanged (`96px`).
-  - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+  - [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
   - [ ] [human] **Background replay (desktop 1440 px, owner).** SETUP: any saved event. Open `/menu-library`, note the
     soft teal glow at the top-left corner of the page background. Then open the event (`/menu-intelligence/<id>`).
     SEE ✓ the same soft teal glow shows around the white menu paper on the event screen. FAIL ✗ the area around the
@@ -143,9 +143,9 @@ meter height, notes bottom vs meter top after scrolling to the end. Print `ok` /
 overlap range.
 
 ## Atomic Sub-tasks
-- [ ] A1: Let the app's own background glow show through on the event screen — remove the opaque background line from the page host, keep the print rule — src/app/pages/menu-intelligence/_layout.scss
-- [ ] A2: Give the event screen enough room under the notes so the last note scrolls above the price bar at 769-1030 px — screen-only, width-ranged padding-block-end on .menu-editor-shell, value from the step 0 measurement — src/app/pages/menu-intelligence/menu-intelligence.page.scss
-- [ ] V1: Prove both fixes in a real browser and record the numbers and screenshots — build, measurement at every listed width, 375 and 1440 regression look, human cards — docs/mvp/runs/494.md
+- [x] A1: Let the app's own background glow show through on the event screen — remove the opaque background line from the page host, keep the print rule — src/app/pages/menu-intelligence/_layout.scss
+- [x] A2: Give the event screen enough room under the notes so the last note scrolls above the price bar at 769-1030 px — screen-only, width-ranged padding-block-end on .menu-editor-shell, value from the step 0 measurement — src/app/pages/menu-intelligence/menu-intelligence.page.scss
+- [x] V1: Prove both fixes in a real browser and record the numbers and screenshots — build, measurement at every listed width, 375 and 1440 regression look, human cards — docs/mvp/runs/494.md
 
 ## Out of Scope
 - Any change to the pricing meter itself (height, phone FAB, target toggle, staff hiding) — plan 487.

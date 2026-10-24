@@ -18,6 +18,8 @@ const userSchema = new Schema(
     businessRole: { type: String, enum: ['owner', 'staff'], default: null },
     isPlatformAdmin: { type: Boolean, default: false },
     removedAt: { type: Number, default: null },
+    // Plan 492: the username a removed staff member had; `name` then holds a tombstone (releasedUsername).
+    removedName: { type: String },
     createdAt: { type: Number, default: null },
   },
   { timestamps: false }

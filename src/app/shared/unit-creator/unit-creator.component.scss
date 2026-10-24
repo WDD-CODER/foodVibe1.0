@@ -33,12 +33,8 @@
   gap: 0.5rem;
 }
 
-.unit-creator-amount .c-input-stack input[type="number"] {
+.unit-creator-amount .c-input-stack input[type='number'] {
   text-align: center;
-
-  &::-webkit-inner-spin-button {
-    display: none;
-  }
 }
 
 @media (max-width: 768px) {

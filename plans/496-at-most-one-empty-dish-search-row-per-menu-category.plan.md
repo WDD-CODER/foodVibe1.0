@@ -46,16 +46,16 @@ Verified in code on `mvp-qa-fixes` (`ea6af7b0`):
 - Primary: a course (category) never holds more than one empty dish search row from the chef's actions; an empty row
   is never saved and never printed.
 - Success:
-  - [ ] [auto] `npx ng build` passes.
-  - [ ] [auto] `npx ng test --watch=false --include=src/app/pages/menu-intelligence/menu-form.util.spec.ts` passes. New
+  - [x] [auto] `npx ng build` passes.
+  - [x] [auto] `npx ng test --watch=false --include=src/app/pages/menu-intelligence/menu-form.util.spec.ts` passes. New
     cases for `blankMenuItemIndex`: no blank row → `-1`; one blank row at index 1 → `1`; blank row at the skipped
     (renamed) index only → `-1`; blank rows at 0 and 2 with skip 0 → `2`; `pruneBlankMenuItems` still removes every
     blank row.
   - [ ] [auto] `npx ng test --watch=false --include=src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.spec.ts --include=src/app/pages/menu-intelligence/services/menu-picker-search.service.spec.ts`
     passes (unchanged neighbours still green).
-  - [ ] [auto] `git diff --numstat origin/mvp-qa-fixes -- src/app/pages/menu-intelligence/menu-intelligence.page.ts`
+  - [x] [auto] `git diff --numstat origin/mvp-qa-fixes -- src/app/pages/menu-intelligence/menu-intelligence.page.ts`
     → added ≤ removed (growth-frozen file).
-  - [ ] [auto] `grep -c "class.no-print" src/app/pages/menu-intelligence/menu-intelligence.page.html` → at least `1`,
+  - [x] [auto] `grep -c "class.no-print" src/app/pages/menu-intelligence/menu-intelligence.page.html` → at least `1`,
     and the match is on the `<app-menu-dish-row` element.
   - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
   - [ ] [human] Replay of the bug, desktop 1440 px, owner: open `/menu-intelligence` (new menu). Click «לחץ לבחור
@@ -158,11 +158,11 @@ On `origin/mvp-qa-fixes`, find: `addItem(sectionIndex` in `menu-intelligence.pag
 `.no-print,` and `.dish-search-wrap {` inside `@media print` blocks in `src/styles.scss`. Print `ok` / `conflict: <what>` in the run file.
 
 ## Atomic Sub-tasks
-- [ ] U1: Add one helper that finds the open empty dish row of a course, ignoring a row being renamed — `blankMenuItemIndex(items: FormArray, skipIndex = -1): number` returns the first index whose `recipeId` is empty and is not `skipIndex`, else `-1`; JSDoc names plan 496 — src/app/pages/menu-intelligence/menu-form.util.ts
-- [ ] U2: Cover the helper and the existing blank-row pruning with unit tests — new spec with the five cases in Done-when, using `FormBuilder` groups like the page — src/app/pages/menu-intelligence/menu-form.util.spec.ts
-- [ ] P1: Make «הוסף מנה» and the after-pick step focus the open empty row instead of adding a second one — in `addItem`, `const edit = this.editingDishAt_()`; `let i = blankMenuItemIndex(items, edit?.sectionIndex === sectionIndex ? edit.itemIndex : -1)`; push the new group only when `i < 0` (then `i = items.length - 1`); keep the `setQuery(..., '')` and `focusDishSearchInput(sectionIndex, i)` calls on `i` — src/app/pages/menu-intelligence/menu-intelligence.page.ts
-- [ ] P2: Keep the growth-frozen menu page from getting longer — remove `private dishKey` and call `getDishMetaKey` at its call sites; add the import on the existing line 21; confirm the numstat gate — src/app/pages/menu-intelligence/menu-intelligence.page.ts
-- [ ] P3: Remove the blank line an empty dish row leaves on the printed menu — on `<app-menu-dish-row>` add `[class.no-print]="!item.get('recipeId')?.value"` (the search box is already hidden in print by `styles.scss:1990-1994`; this removes the row box around it) — src/app/pages/menu-intelligence/menu-intelligence.page.html
+- [x] U1: Add one helper that finds the open empty dish row of a course, ignoring a row being renamed — `blankMenuItemIndex(items: FormArray, skipIndex = -1): number` returns the first index whose `recipeId` is empty and is not `skipIndex`, else `-1`; JSDoc names plan 496 — src/app/pages/menu-intelligence/menu-form.util.ts
+- [x] U2: Cover the helper and the existing blank-row pruning with unit tests — new spec with the five cases in Done-when, using `FormBuilder` groups like the page — src/app/pages/menu-intelligence/menu-form.util.spec.ts
+- [x] P1: Make «הוסף מנה» and the after-pick step focus the open empty row instead of adding a second one — in `addItem`, `const edit = this.editingDishAt_()`; `let i = blankMenuItemIndex(items, edit?.sectionIndex === sectionIndex ? edit.itemIndex : -1)`; push the new group only when `i < 0` (then `i = items.length - 1`); keep the `setQuery(..., '')` and `focusDishSearchInput(sectionIndex, i)` calls on `i` — src/app/pages/menu-intelligence/menu-intelligence.page.ts
+- [x] P2: Keep the growth-frozen menu page from getting longer — remove `private dishKey` and call `getDishMetaKey` at its call sites; add the import on the existing line 21; confirm the numstat gate — src/app/pages/menu-intelligence/menu-intelligence.page.ts
+- [x] P3: Remove the blank line an empty dish row leaves on the printed menu — on `<app-menu-dish-row>` add `[class.no-print]="!item.get('recipeId')?.value"` (the search box is already hidden in print by `styles.scss:1990-1994`; this removes the row box around it) — src/app/pages/menu-intelligence/menu-intelligence.page.html
 - [ ] V1: Build, run the specs and the line-count gate, run the print-emulation `[auto]` check, replay the five human cards in a browser on this slot (desktop 1440 px and phone 375 px; for the print card use print-media emulation and a screenshot, or mark it unsure), write the run file — docs/mvp/runs/496.md
 
 ## Out of Scope

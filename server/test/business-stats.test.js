@@ -132,6 +132,18 @@ describe('GET /api/v1/stats/business', () => {
     expect(cards.accuracy.avgAccuracyPts).toBeCloseTo(-4, 9)
   })
 
+  it('an event finished straight from "פנייה" counts once in closed, with its snapshot revenue (plan 493)', async () => {
+    await testDb().collection('menuEvents').insertOne(event('direct1', {
+      stage: 'finished', closedAt: ago(1), eventDate: dateAgo(2),
+      planSnapshot: { ...snapshot, plannedRevenue: 7000, frozenAt: ago(1) },
+      closing: { suppliers: [{ supplierId: 's1', name: 'S', planned: 5000, arrived: false, hasInvoice: false, photos: [] }], finishedAt: ago(1), finishedBy: 'ownerA' },
+    }))
+    const res = await get(OWNER)
+    expect(res.status).toBe(200)
+    expect(res.body.cards.closed.value).toBe(5)
+    expect(res.body.cards.revenue.value).toBe(55000)
+  })
+
   it('staff get the funnel and the upcoming list, and no cards', async () => {
     const res = await get(STAFF)
     expect(res.status).toBe(200)

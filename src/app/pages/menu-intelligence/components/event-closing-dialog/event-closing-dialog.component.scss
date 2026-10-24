@@ -1,4 +1,5 @@
 $break-mobile: 768px; // mirrors src/styles.scss
+$above-mobile: $break-mobile + 1; // first width past the phone layout
 
 @layer components.event-closing-dialog {
   :host {
@@ -12,7 +13,6 @@ $break-mobile: 768px; // mirrors src/styles.scss
     gap: var(--space-3);
 
     inline-size: 100%;
-    max-inline-size: 60rem;
     max-block-size: 92dvh;
 
     padding: var(--space-4);
@@ -72,12 +72,22 @@ $break-mobile: 768px; // mirrors src/styles.scss
   .rows-head,
   .closing-row {
     display: grid;
-    grid-template-columns: 1.4fr 0.8fr 1.2fr 1.2fr 2fr;
+    grid-template-columns: 1.4fr 0.8fr 1.4fr 1.2fr 1.2fr;
     align-items: center;
     gap: var(--space-3);
 
     @media (max-width: $break-mobile) {
       grid-template-columns: 1fr;
+    }
+  }
+
+  /* Plan 488: staff see no money — name, ticks, photos. Desktop only; phones keep the one-column card. */
+  .no-money {
+    .rows-head,
+    .closing-row {
+      @media (min-width: $above-mobile) {
+        grid-template-columns: 1.4fr 1.2fr 1.2fr;
+      }
     }
   }
 
@@ -98,6 +108,11 @@ $break-mobile: 768px; // mirrors src/styles.scss
 
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
+
+    /* Plan 488: phones — a little lighter than the modal so each supplier card stands out. Before is-over so red wins. */
+    @media (max-width: $break-mobile) {
+      background: var(--bg-glass-hover);
+    }
 
     &.is-over {
       background: var(--bg-danger-subtle);
@@ -124,6 +139,10 @@ $break-mobile: 768px; // mirrors src/styles.scss
 
   .row-paid {
     min-inline-size: 0;
+
+    input {
+      min-inline-size: 8rem;
+    }
   }
 
   .remark {
@@ -193,23 +212,13 @@ $break-mobile: 768px; // mirrors src/styles.scss
     cursor: pointer;
   }
 
+  /* Plan 488: the camera trigger is a .c-icon-btn; the file input inside it is visually hidden. */
   .photo-add {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
+    position: relative;
 
-    min-block-size: 2.25rem;
-    padding-inline: var(--space-3);
-
-    border: 1px dashed var(--border-default);
-    border-radius: var(--radius-md);
-    color: var(--color-primary-hover);
-    font-size: var(--fs-sm);
-    cursor: pointer;
-
-    &.is-busy {
-      opacity: 0.5;
-      cursor: progress;
+    &:focus-within {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
     }
   }
 
@@ -283,4 +292,19 @@ $break-mobile: 768px; // mirrors src/styles.scss
     border-block-start: 0;
     padding-block-start: 0;
   }
+}
+
+/*
+ * Plan 488 — outside any @layer on purpose: an unlayered declaration beats every layered one, so these would
+ * silently lose inside @layer components.event-closing-dialog.
+ * - max-inline-size: beats the unlayered .c-modal-card { max-width: 28rem } (src/styles.scss:658).
+ * - busy camera: beats the unlayered .c-icon-btn { opacity; cursor } (src/styles.scss:904).
+ */
+.closing-card {
+  max-inline-size: 60rem;
+}
+
+.photo-add.is-busy {
+  cursor: progress;
+  opacity: 0.5;
 }

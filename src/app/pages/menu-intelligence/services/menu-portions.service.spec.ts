@@ -62,7 +62,20 @@ describe('MenuPortionsService', () => {
   it('uses the item override and flags it', () => {
     form.get('sections.0.items.0.coefficient_override')?.setValue(1.1)
     bump()
-    expect(service.at(0, 0)).toEqual({ portions: 110, coefficient: 1.1, overridden: true })
+    expect(service.at(0, 0)).toEqual({
+      portions: 110,
+      coefficient: 1.1,
+      overridden: true,
+      defaultCoefficient: jasmine.any(Number) as unknown as number
+    })
+    expect(service.at(0, 0)?.defaultCoefficient).toBeCloseTo(1.265, 9)
+  })
+
+  it('an override equal to the default is not flagged', () => {
+    form.get('sections.0.items.0.coefficient_override')?.setValue(1.27)
+    bump()
+    expect(service.at(0, 0)?.overridden).toBeFalse()
+    expect(service.at(0, 0)?.portions).toBe(127)
   })
 
   it('changing the event type moves only dishes without an override', () => {

@@ -89,6 +89,33 @@ describe('UserManagementComponent', () => {
     expect(msg.onSetSuccessMsg).toHaveBeenCalledWith('business_deleted')
   })
 
+  it('the second question for an owner asks for the business name', async () => {
+    await component.onDeleteUser(OWNER)
+    expect(confirm.open.calls.argsFor(1)[1]?.typedConfirm).toEqual({
+      expected: 'מטבח בדיקה',
+      labelKey: 'delete_business_type_name'
+    })
+    expect(confirm.open.calls.argsFor(0)[1]?.typedConfirm).toBeUndefined()
+  })
+
+  it('falls back to the user name when the business name is missing or blank', async () => {
+    await component.onDeleteUser({ ...OWNER, businessName: undefined })
+    await component.onDeleteUser({ ...OWNER, businessName: '   ' })
+    expect(confirm.open.calls.argsFor(1)[1]?.typedConfirm?.expected).toBe('dana')
+    expect(confirm.open.calls.argsFor(3)[1]?.typedConfirm?.expected).toBe('dana')
+  })
+
+  it('a business user with no role gets both questions and the typed name (server rule)', async () => {
+    await component.onDeleteUser({ ...OWNER, businessRole: undefined })
+    expect(confirm.open).toHaveBeenCalledTimes(2)
+    expect(confirm.open.calls.argsFor(1)[1]?.typedConfirm?.expected).toBe('מטבח בדיקה')
+  })
+
+  it('a staff delete has no typed confirm', async () => {
+    await component.onDeleteUser(STAFF)
+    expect(confirm.open.calls.argsFor(0)[1]?.typedConfirm).toBeUndefined()
+  })
+
   it('does not delete when the second question is declined', async () => {
     confirm.open.and.returnValues(Promise.resolve(true), Promise.resolve(false))
     await component.onDeleteUser(OWNER)

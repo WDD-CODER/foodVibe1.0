@@ -17,7 +17,13 @@ describe('ConfirmModalComponent', () => {
     showSaveButton: () => boolean
     saveButtonLabel: () => string
     choose: jasmine.Spy
+    typedConfirm: WritableSignal<{ expected: string; labelKey: string } | null>
+    typedText: WritableSignal<string>
+    canConfirm: () => boolean
+    setTypedText: jasmine.Spy
   }
+  let typedConfirm: WritableSignal<{ expected: string; labelKey: string } | null>
+  let typedText: WritableSignal<string>
 
   beforeEach(async () => {
     const isOpen = signal(false)
@@ -27,7 +33,13 @@ describe('ConfirmModalComponent', () => {
     const variant = signal<'default' | 'danger' | 'warning'>('default')
     const showSaveButton = signal(false)
     const saveButtonLabel = signal('save')
+    typedConfirm = signal<{ expected: string; labelKey: string } | null>(null)
+    typedText = signal('')
     mockModalService = {
+      typedConfirm,
+      typedText,
+      canConfirm: () => !typedConfirm() || typedText().trim() === typedConfirm()!.expected.trim(),
+      setTypedText: jasmine.createSpy('setTypedText'),
       isOpen,
       message,
       saveLabel,
@@ -70,5 +82,45 @@ describe('ConfirmModalComponent', () => {
     const confirmBtn = fixture.nativeElement.querySelector('.c-btn-primary')
     confirmBtn?.click()
     expect(mockModalService.choose).toHaveBeenCalledWith('confirm')
+  })
+
+  it('shows no text box without typedConfirm', () => {
+    mockModalService.isOpen.set(true)
+    fixture.detectChanges()
+    expect(fixture.nativeElement.querySelector('#confirm-modal-typed')).toBeNull()
+  })
+
+  describe('with typedConfirm', () => {
+    beforeEach(() => {
+      typedConfirm.set({ expected: 'מטבח', labelKey: 'delete_business_type_name' })
+      mockModalService.isOpen.set(true)
+      fixture.detectChanges()
+    })
+
+    const confirmBtn = (): HTMLButtonElement => fixture.nativeElement.querySelector('.c-btn-primary')
+    const box = (): HTMLInputElement => fixture.nativeElement.querySelector('#confirm-modal-typed')
+
+    it('shows the box and the expected name, and locks confirm', () => {
+      expect(box()).not.toBeNull()
+      expect(fixture.nativeElement.querySelector('.confirm-modal-typed__expected').textContent).toContain('מטבח')
+      expect(confirmBtn().disabled).toBeTrue()
+    })
+
+    it('reports typing to the service and unlocks confirm on a match', () => {
+      box().value = 'מטבח'
+      box().dispatchEvent(new Event('input'))
+      expect(mockModalService.setTypedText).toHaveBeenCalledWith('מטבח')
+      typedText.set('מטבח')
+      fixture.detectChanges()
+      expect(confirmBtn().disabled).toBeFalse()
+    })
+
+    it('Enter confirms only on a match', () => {
+      box().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
+      expect(mockModalService.choose).not.toHaveBeenCalled()
+      typedText.set('מטבח')
+      box().dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
+      expect(mockModalService.choose).toHaveBeenCalledWith('confirm')
+    })
   })
 })

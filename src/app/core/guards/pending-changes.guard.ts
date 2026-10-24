@@ -18,6 +18,11 @@ export interface PendingChangesComponent {
   hasRealChanges?: () => boolean
   /** Optional: save the entity and wait for completion. Return true if save succeeded. */
   saveAndWait?: () => Promise<boolean>
+  /**
+   * Optional (plan 482): the page asks the leave question itself — true = leave, false = stay. Used when the page
+   * can also ask without a navigation (a click outside a card) and both must share one popup.
+   */
+  confirmLeave?: () => Promise<boolean>
 }
 
 /**
@@ -36,6 +41,7 @@ export const pendingChangesGuard: CanDeactivateFn<PendingChangesComponent> = asy
   const form = component?.readProductForm_ ?? component?.recipeForm_
   if (component?.isSubmitted) return true
   if (form?.disabled) return true
+  if (typeof component?.confirmLeave === 'function') return component.confirmLeave()
 
   const hasRealChanges =
     typeof component?.hasRealChanges === 'function' ? component.hasRealChanges() : (form?.dirty ?? false)

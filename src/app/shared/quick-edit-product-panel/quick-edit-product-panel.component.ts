@@ -25,11 +25,19 @@ import { LoggingService } from '@services/logging.service'
 import { Product, ProductSource } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 @Component({
   selector: 'app-quick-edit-product-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './quick-edit-product-panel.component.html',
   styleUrl: './quick-edit-product-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
