@@ -1,7 +1,5 @@
 import { Component, signal } from '@angular/core'
 import { ComponentFixture, TestBed } from '@angular/core/testing'
-import { LucideAngularModule } from 'lucide-angular'
-import { TEST_LUCIDE_ICONS } from 'src/testing/test-lucide-icons'
 import { TranslationService } from '@services/translation.service'
 import { DateFieldComponent } from './date-field.component'
 
@@ -36,15 +34,22 @@ describe('DateFieldComponent', () => {
     fixture.detectChanges()
   }
 
-  beforeEach(async () => {
+  const create = async (coarse: boolean) => {
+    const fake = (query: string) => ({ matches: coarse && query.includes('coarse'), media: query }) as MediaQueryList
+    if (jasmine.isSpy(window.matchMedia)) (window.matchMedia as jasmine.Spy).and.callFake(fake)
+    else spyOn(window, 'matchMedia').and.callFake(fake)
     await TestBed.configureTestingModule({
-      imports: [HostComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
+      imports: [HostComponent],
       providers: [{ provide: TranslationService, useValue: { translate: (key: string) => `T:${key}` } }]
     }).compileComponents()
     fixture = TestBed.createComponent(HostComponent)
     host = fixture.componentInstance
     el = fixture.nativeElement
     fixture.detectChanges()
+  }
+
+  beforeEach(async () => {
+    await create(false)
   })
 
   it('shows typed digits as day/month/year and emits the ISO date', () => {
@@ -104,10 +109,24 @@ describe('DateFieldComponent', () => {
     expect(text().value).toBe('04/03/2026')
   })
 
-  it('opens the picker from the calendar button', () => {
+  it('has no calendar button', () => {
+    expect(el.querySelector('.date-field-btn')).toBeNull()
+    expect(el.querySelector('button')).toBeNull()
+  })
+
+  it('opens the browser picker when the field is clicked on a fine pointer', () => {
     const spy = spyOn(picker(), 'showPicker' as never)
-    el.querySelector<HTMLButtonElement>('.date-field-btn')!.click()
+    text().click()
     expect(spy).toHaveBeenCalled()
+    expect(text().readOnly).toBeFalse()
+  })
+
+  it('opens nothing when a disabled field is clicked', () => {
+    host.disabled_.set(true)
+    fixture.detectChanges()
+    const spy = spyOn(picker(), 'showPicker' as never)
+    text().click()
+    expect(spy).not.toHaveBeenCalled()
   })
 
   it('commits only when the user finishes, not on every key', () => {
@@ -123,10 +142,50 @@ describe('DateFieldComponent', () => {
     expect(host.commits_).toEqual(['2026-12-25', '', '2026-03-04'])
   })
 
-  it('disables the text and the button', () => {
+  it('disables the text and the native picker', () => {
     host.disabled_.set(true)
     fixture.detectChanges()
     expect(text().disabled).toBeTrue()
-    expect(el.querySelector<HTMLButtonElement>('.date-field-btn')!.disabled).toBeTrue()
+    expect(picker().disabled).toBeTrue()
+  })
+
+  describe('on a coarse pointer (phone)', () => {
+    beforeEach(() => {
+      TestBed.resetTestingModule()
+    })
+
+    beforeEach(async () => {
+      await create(true)
+    })
+
+    it('stretches the native date input over the field and makes the text display-only', () => {
+      expect(picker().classList).toContain('date-field-picker--touch')
+      expect(picker().tabIndex).not.toBe(-1)
+      expect(picker().id).toBe('d')
+      expect(text().readOnly).toBeTrue()
+      expect(text().getAttribute('inputmode')).toBeNull()
+      expect(text().id).toBe('')
+    })
+
+    it('does not call showPicker on a tap: the tap reaches the native input itself', () => {
+      const spy = spyOn(picker(), 'showPicker' as never)
+      text().click()
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('sets the value, the dd/mm/yyyy text and commits when a day is picked', () => {
+      picker().value = '2026-03-04'
+      picker().dispatchEvent(new Event('change'))
+      fixture.detectChanges()
+      expect(host.iso_()).toBe('2026-03-04')
+      expect(text().value).toBe('04/03/2026')
+      expect(host.commits_).toEqual(['2026-03-04'])
+    })
+
+    it('opens nothing when disabled', () => {
+      host.disabled_.set(true)
+      fixture.detectChanges()
+      expect(picker().disabled).toBeTrue()
+    })
   })
 })

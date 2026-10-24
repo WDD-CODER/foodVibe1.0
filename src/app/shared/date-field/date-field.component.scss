@@ -9,7 +9,6 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: var(--space-1);
   }
 
   .date-field-text {
@@ -18,12 +17,7 @@
     text-align: start;
   }
 
-  .date-field-btn {
-    flex: 0 0 auto;
-    opacity: 1;
-  }
-
-  /* The native date input is only the picker: invisible, no tab stop, anchored under the button. */
+  /* Desktop: the native date input is only the picker: invisible, no tab stop, anchored at the field's end. */
   .date-field-picker {
     position: absolute;
     inset-block-end: 0;
@@ -34,5 +28,14 @@
     border: 0;
     opacity: 0;
     pointer-events: none;
+  }
+
+  /* Touch: the invisible native input covers the whole field, so a tap lands on it and the phone opens its own picker. */
+  .date-field-picker--touch {
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: auto;
+    cursor: pointer;
   }
 }
