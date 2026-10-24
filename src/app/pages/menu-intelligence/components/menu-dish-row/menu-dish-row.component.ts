@@ -7,7 +7,12 @@ import { ClickOutSideDirective } from '@directives/click-out-side'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
 import { EventPlanService } from '../../../../core/engine/event-plan.service'
-import { formatCoefficient, isValidCoefficient, type ItemPortions } from '../../../../core/engine/portions'
+import {
+  formatCoefficient,
+  isDefaultCoefficient,
+  isValidCoefficient,
+  type ItemPortions
+} from '../../../../core/engine/portions'
 import { cleanFloat, roundMoney } from '../../../../core/engine/rounding'
 import { PermissionService } from '@services/permission.service'
 import { TranslationService } from '@services/translation.service'
@@ -171,7 +176,9 @@ export class MenuDishRowComponent {
       return
     }
     this.isCoefficientInvalid_.set(false)
-    this.itemGroup().patchValue({ coefficient_override: value })
+    const info = this.portionInfo()
+    const isDefault = info != null && isDefaultCoefficient(value, info.defaultCoefficient)
+    this.itemGroup().patchValue({ coefficient_override: isDefault ? null : value })
   }
 
   /** Leaving the box shows the stored value again. */

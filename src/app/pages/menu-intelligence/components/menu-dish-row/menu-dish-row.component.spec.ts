@@ -66,7 +66,12 @@ describe('MenuDishRowComponent coefficient (plan 441)', () => {
     fixture.componentRef.setInput('itemIndex', 0)
     fixture.componentRef.setInput('isMetaExpanded', true)
     fixture.componentRef.setInput('activeFields', ['serving_portions'])
-    fixture.componentRef.setInput('portionInfo', { portions: 127, coefficient: 1.265, overridden: false })
+    fixture.componentRef.setInput('portionInfo', {
+      portions: 127,
+      coefficient: 1.265,
+      overridden: false,
+      defaultCoefficient: 1.265
+    })
     fixture.detectChanges()
   })
 
@@ -78,11 +83,21 @@ describe('MenuDishRowComponent coefficient (plan 441)', () => {
   })
 
   it('shows portions without a float tail', () => {
-    fixture.componentRef.setInput('portionInfo', { portions: 110.00000000000001, coefficient: 1.1, overridden: false })
+    fixture.componentRef.setInput('portionInfo', {
+      portions: 110.00000000000001,
+      coefficient: 1.1,
+      overridden: false,
+      defaultCoefficient: 1.265
+    })
     fixture.detectChanges()
     const value = (fixture.nativeElement as HTMLElement).querySelector('.dish-portions-value')!
     expect(value.textContent?.trim()).toBe('110')
-    fixture.componentRef.setInput('portionInfo', { portions: 5.25, coefficient: 1, overridden: false })
+    fixture.componentRef.setInput('portionInfo', {
+      portions: 5.25,
+      coefficient: 1,
+      overridden: false,
+      defaultCoefficient: 1.265
+    })
     fixture.detectChanges()
     expect(value.textContent?.trim()).toBe('5.25')
   })
@@ -90,16 +105,38 @@ describe('MenuDishRowComponent coefficient (plan 441)', () => {
   it('typing 1.1 sets coefficient_override and shows the manual tag and reset button', () => {
     type('1.1')
     expect(group.get('coefficient_override')?.value).toBe(1.1)
-    fixture.componentRef.setInput('portionInfo', { portions: 110, coefficient: 1.1, overridden: true })
+    fixture.componentRef.setInput('portionInfo', {
+      portions: 110,
+      coefficient: 1.1,
+      overridden: true,
+      defaultCoefficient: 1.265
+    })
     fixture.detectChanges()
     expect(text()).toContain('coefficient_manual')
     expect(text()).toContain('coefficient_reset')
     expect(text()).toContain('110')
   })
 
+  it('typing the default 1.27 stores no override and no manual tag', () => {
+    type('1.27')
+    expect(group.get('coefficient_override')?.value).toBeNull()
+    expect(text()).not.toContain('coefficient_manual')
+  })
+
+  it('from an override of 1.1, typing 1.27 clears it', () => {
+    group.patchValue({ coefficient_override: 1.1 })
+    type('1.27')
+    expect(group.get('coefficient_override')?.value).toBeNull()
+  })
+
   it('the reset button clears the override', () => {
     group.patchValue({ coefficient_override: 1.1 })
-    fixture.componentRef.setInput('portionInfo', { portions: 110, coefficient: 1.1, overridden: true })
+    fixture.componentRef.setInput('portionInfo', {
+      portions: 110,
+      coefficient: 1.1,
+      overridden: true,
+      defaultCoefficient: 1.265
+    })
     fixture.detectChanges()
     const reset = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('.dish-coefficient-reset')!
     reset.click()
@@ -125,7 +162,12 @@ describe('MenuDishRowComponent coefficient (plan 441)', () => {
 
   it('warns when portions per diner is 0', () => {
     group.patchValue({ serving_portions: 0 })
-    fixture.componentRef.setInput('portionInfo', { portions: 0, coefficient: 1.265, overridden: false })
+    fixture.componentRef.setInput('portionInfo', {
+      portions: 0,
+      coefficient: 1.265,
+      overridden: false,
+      defaultCoefficient: 1.265
+    })
     fixture.detectChanges()
     expect(text()).toContain('portions_per_diner_zero')
   })
@@ -278,7 +320,12 @@ describe('MenuDishRowComponent money for staff (plan 487)', () => {
       'food_cost_pct',
       'serving_portions'
     ])
-    fixture.componentRef.setInput('portionInfo', { portions: 50, coefficient: 1, overridden: false })
+    fixture.componentRef.setInput('portionInfo', {
+      portions: 50,
+      coefficient: 1,
+      overridden: false,
+      defaultCoefficient: 1.265
+    })
     fixture.componentRef.setInput('recipes', [{ _id: 'r1', nameHebrew: 'סלט', ingredients: [] } as unknown as Recipe])
     fixture.detectChanges()
   }

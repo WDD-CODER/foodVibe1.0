@@ -1,5 +1,11 @@
 import type { MenuEvent, TypeSnapshot } from '@models/menu-event.model'
-import { computePortions, defaultCoefficient, formatCoefficient, isValidCoefficient } from './portions'
+import {
+  computePortions,
+  defaultCoefficient,
+  formatCoefficient,
+  isDefaultCoefficient,
+  isValidCoefficient
+} from './portions'
 import { makeRecipe } from './testing/event-plan.fixture'
 
 type ItemInput = {
@@ -41,7 +47,35 @@ function event(guests: number, items: ItemInput[], eventType?: TypeSnapshot, ser
 
 const first = (e: MenuEvent) => computePortions(e, []).get('s1|0')!
 
+describe('isDefaultCoefficient', () => {
+  it('compares at the shown 2 decimals', () => {
+    expect(isDefaultCoefficient(1.27, 1.265)).toBe(true)
+    expect(isDefaultCoefficient(1.26, 1.265)).toBe(false)
+    expect(isDefaultCoefficient(1.1, 1.1)).toBe(true)
+    expect(isDefaultCoefficient(1.32, 1.2 * 1.1)).toBe(true)
+  })
+})
+
 describe('computePortions', () => {
+  it('an override equal to the default (1.27 on 1.265) is not manual', () => {
+    const r = first(
+      event(100, [{ portionsPerDiner: 1, coefficientOverride: 1.27 }], snap('private', 1.15), snap('buffet', 1.1))
+    )
+    expect(r.overridden).toBe(false)
+    expect(r.coefficient).toBeCloseTo(1.265, 9)
+    expect(r.portions).toBe(127)
+    expect(r.defaultCoefficient).toBeCloseTo(1.265, 9)
+  })
+
+  it('an override of 1.1 on default 1.265 stays manual and reports the default', () => {
+    const r = first(
+      event(100, [{ portionsPerDiner: 1, coefficientOverride: 1.1 }], snap('private', 1.15), snap('buffet', 1.1))
+    )
+    expect(r.overridden).toBe(true)
+    expect(r.portions).toBe(110)
+    expect(r.defaultCoefficient).toBeCloseTo(1.265, 9)
+  })
+
   it('private 1.15 x buffet 1.1, 100 guests -> coefficient 1.265 (not rounded), portions 127', () => {
     const r = first(event(100, [{ portionsPerDiner: 1 }], snap('private', 1.15), snap('buffet', 1.1)))
     expect(r.coefficient).toBeCloseTo(1.265, 9)
