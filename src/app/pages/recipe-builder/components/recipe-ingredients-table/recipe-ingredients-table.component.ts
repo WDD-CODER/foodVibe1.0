@@ -307,7 +307,9 @@ export class RecipeIngredientsTableComponent {
       pending.map((p) => p.item),
       { onAiFailure: (err) => (failure = err) }
     )
-    if (failure !== null) {
+    // A batch of only amount-less lines was never going to link anything — its rows stay red, no toast.
+    const anyLinkable = pending.some((p) => p.item.linkable !== false)
+    if (failure !== null && anyLinkable) {
       const status = (failure as { status?: number }).status
       const text = (failure as { error?: { error?: string } }).error?.error ?? ''
       const key =

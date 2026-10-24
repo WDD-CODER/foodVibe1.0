@@ -261,6 +261,17 @@ describe('RecipeIngredientsTableComponent', () => {
       expect(rows()[0].get('referenceId')?.value).toBeFalsy()
     })
 
+    it('shows no message when the AI step fails for a paste of only text lines', async () => {
+      matchProductNames.and.rejectWith(new Error('502'))
+      const warn = spyOn(TestBed.inject(UserMsgService), 'onSetWarningMsg')
+      component.onPasteIngredients('קצת פטרוזיליה')
+      await flush()
+      expect(matchProductNames).toHaveBeenCalledTimes(1)
+      expect(warn).not.toHaveBeenCalled()
+      expect(rows()[0].get('nameHebrew')?.value).toBe('קצת פטרוזיליה')
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+    })
+
     it('shows no message when the AI answers that nothing fits', async () => {
       matchProductNames.and.resolveTo([])
       const warn = spyOn(TestBed.inject(UserMsgService), 'onSetWarningMsg')

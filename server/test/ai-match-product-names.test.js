@@ -137,6 +137,24 @@ describe('POST /match-product-names', () => {
     expect(res.body.matches).toEqual([{ i: 0, product: 2 }]);
   });
 
+  it('keeps the link when a linked entry says "options": null', async () => {
+    fetchMock.mockResolvedValue(
+      modelAnswer('{"matches":[{"i":0,"product":1,"options":null},{"i":1,"product":null,"options":[0,2]}]}')
+    );
+    const res = await post(BODY_8);
+    expect(res.status).toBe(200);
+    expect(res.body.matches).toEqual([{ i: 0, product: 1 }, { i: 1, product: null, options: [0, 2] }]);
+  });
+
+  it('ignores non-number options and a non-list options value without failing the answer', async () => {
+    fetchMock.mockResolvedValue(
+      modelAnswer('{"matches":[{"i":0,"product":null,"options":[1,"x",2.5,3]},{"i":1,"product":4,"options":"a"}]}')
+    );
+    const res = await post(BODY_8);
+    expect(res.status).toBe(200);
+    expect(res.body.matches).toEqual([{ i: 0, product: null, options: [1, 3] }, { i: 1, product: 4 }]);
+  });
+
   it('tells the model names may be in any language and how to give options', async () => {
     fetchMock.mockResolvedValue(modelAnswer('{"matches":[]}'));
     await post(BODY_8);
