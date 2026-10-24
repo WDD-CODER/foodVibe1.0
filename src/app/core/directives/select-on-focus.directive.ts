@@ -7,9 +7,12 @@ const RANGE_TYPES = new Set(['text', 'search', 'url', 'tel', 'password'])
  * Selects the whole value when the box gets focus, so what the user types replaces it.
  * Browsers put the caret at the pointer on the `mouseup` right after a tap/click focus, which drops the
  * selection; the first `mouseup` after a focus is therefore default-prevented once.
+ * Plan 482: on a desktop mouse click Chromium also moves the caret during the `mousedown` default action, after
+ * `focus` already selected, so that first `mouseup` selects the whole value again. Every number box gets this
+ * through the `input[type=number]` selector (its component still has to import the directive).
  */
 @Directive({
-  selector: '[appSelectOnFocus]',
+  selector: '[appSelectOnFocus], input[type=number]',
   host: {
     '(focus)': 'onFocus()',
     '(mousedown)': 'onMouseDown()',
@@ -42,8 +45,10 @@ export class SelectOnFocusDirective {
     if (!this.isFreshFocus_) return
     this.isFreshFocus_ = false
     // A multi-line text box keeps the normal caret placement: a click into existing text must not select it all.
-    if (this.el.nativeElement instanceof HTMLTextAreaElement) return
+    const box = this.el.nativeElement
+    if (box instanceof HTMLTextAreaElement) return
     event.preventDefault()
+    box.select()
   }
 
   onBlur(): void {

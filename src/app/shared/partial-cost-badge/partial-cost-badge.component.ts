@@ -26,6 +26,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { isValidQuickPrice, withQuickPrice } from 'src/app/core/utils/quick-price.util'
 import { placeInViewport } from 'src/app/core/utils/viewport-placement.util'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 /** Below this width the popover is a full-width bottom sheet (mirrors `$break-mobile` in the scss). */
 const MOBILE_QUERY = '(max-width: 768px)'
@@ -59,7 +60,7 @@ const ROW_ICONS: Record<MissingItem['kind'], string> = { deleted: 'circle-x', un
 @Component({
   selector: 'app-partial-cost-badge',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, ClickOutSideDirective, CustomSelectComponent],
+  imports: [LucideAngularModule, TranslatePipe, ClickOutSideDirective, CustomSelectComponent, SelectOnFocusDirective],
   templateUrl: './partial-cost-badge.component.html',
   styleUrl: './partial-cost-badge.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

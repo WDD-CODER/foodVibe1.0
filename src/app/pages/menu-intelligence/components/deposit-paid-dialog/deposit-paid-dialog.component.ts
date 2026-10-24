@@ -12,6 +12,7 @@ import {
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { todayIso } from 'src/app/core/utils/date-input.util'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 export interface DepositPaidAnswer {
   /** ISO date (`yyyy-mm-dd`) the deposit was paid. */
@@ -28,7 +29,7 @@ export interface DepositPaidAnswer {
 @Component({
   selector: 'app-deposit-paid-dialog',
   standalone: true,
-  imports: [TranslatePipe, DateFieldComponent],
+  imports: [TranslatePipe, DateFieldComponent, SelectOnFocusDirective],
   templateUrl: './deposit-paid-dialog.component.html',
   styleUrl: './deposit-paid-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

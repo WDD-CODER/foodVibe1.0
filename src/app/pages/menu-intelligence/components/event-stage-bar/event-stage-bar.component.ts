@@ -36,6 +36,7 @@ import type { EventStage, MenuEvent } from '@models/menu-event.model'
 import { NotClosedAnswer, NotClosedDialogComponent } from '../not-closed-dialog/not-closed-dialog.component'
 import { EventClosingDialogComponent } from '../event-closing-dialog/event-closing-dialog.component'
 import { DepositPaidAnswer, DepositPaidDialogComponent } from '../deposit-paid-dialog/deposit-paid-dialog.component'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 /**
  * Plan 443: the stage bar at the top of the event screen. Click a stage to move the event; "לא נסגר" asks why.
@@ -48,6 +49,7 @@ import { DepositPaidAnswer, DepositPaidDialogComponent } from '../deposit-paid-d
   selector: 'app-event-stage-bar',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     DatePipe,
     LucideAngularModule,
     TranslatePipe,

@@ -18,6 +18,7 @@ import {
 } from '../../core/utils/gemini-usage.util'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = 'text' | 'image'
@@ -38,7 +39,14 @@ const CANONICAL_UNITS = [
 @Component({
   selector: 'app-ai-product-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent, ModalShellComponent],
+  imports: [
+    CommonModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    ModalShellComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './ai-product-modal.component.html',
   styleUrl: './ai-product-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

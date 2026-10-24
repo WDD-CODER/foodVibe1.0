@@ -45,6 +45,16 @@ describe('pendingChangesGuard', () => {
     expect(open).not.toHaveBeenCalled()
   })
 
+  it('lets a page ask the leave question itself (plan 482: confirmLeave)', async () => {
+    const confirmLeave = jasmine.createSpy('confirmLeave').and.resolveTo(false)
+    expect(await run({ hasRealChanges: () => true, confirmLeave })).toBeFalse()
+    expect(confirmLeave).toHaveBeenCalledTimes(1)
+    expect(open).not.toHaveBeenCalled()
+    expect(openTernary).not.toHaveBeenCalled()
+    confirmLeave.and.resolveTo(true)
+    expect(await run({ hasRealChanges: () => true, confirmLeave })).toBeTrue()
+  })
+
   it('uses hasRealChanges over the form dirty flag', async () => {
     expect(await run({ readProductForm_: dirtyForm(), hasRealChanges: () => false })).toBeTrue()
     expect(open).not.toHaveBeenCalled()

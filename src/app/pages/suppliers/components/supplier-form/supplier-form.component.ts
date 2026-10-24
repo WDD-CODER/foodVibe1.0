@@ -14,6 +14,7 @@ import { Supplier } from '@models/supplier.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 
@@ -21,7 +22,14 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
 @Component({
   selector: 'app-supplier-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe, FormFieldComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    FormFieldComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './supplier-form.component.html',
   styleUrl: './supplier-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

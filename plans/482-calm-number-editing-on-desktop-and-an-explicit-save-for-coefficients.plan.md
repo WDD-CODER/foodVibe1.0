@@ -43,10 +43,10 @@ Verified in code on `origin/mvp-review` (`ae9dc090`):
 ## Goals & Success Criteria
 - Primary: number boxes on desktop are calm and select-all on click; coefficients save only on «שמור», and leaving with unsaved changes asks first.
 - Success:
-  - [ ] [auto] `npx ng build` passes.
-  - [ ] [auto] `npx ng test --watch=false` for the changed specs passes: select-on-focus directive selects all after a real mousedown→focus→mouseup order (desktop) and after focus alone (touch); coefficient manager does NOT call `updateByKey` on input/change, enables «שמור» only when a value changed and is valid, saves all changed values on «שמור» and shows the success message once; leaving with changes opens the ternary confirm (save and leave / leave without saving / stay).
-  - [ ] [auto] One global rule in `src/styles.scss` hides number spin buttons app-wide (`::-webkit-inner-spin-button`/`outer` + `appearance: textfield`); the local copies listed above are removed; `grep -rn "inner-spin-button" src/app` → empty.
-  - [ ] [auto] Every `input[type=number]` in `src/app/**/*.html` has select-on-focus (the directive's selector covers `input[type=number]`, or the attribute is added) — command + count in the run file.
+  - [x] [auto] `npx ng build` passes.
+  - [x] [auto] `npx ng test --watch=false` for the changed specs passes: select-on-focus directive selects all after a real mousedown→focus→mouseup order (desktop) and after focus alone (touch); coefficient manager does NOT call `updateByKey` on input/change, enables «שמור» only when a value changed and is valid, saves all changed values on «שמור» and shows the success message once; leaving with changes opens the ternary confirm (save and leave / leave without saving / stay).
+  - [x] [auto] One global rule in `src/styles.scss` hides number spin buttons app-wide (`::-webkit-inner-spin-button`/`outer` + `appearance: textfield`); the local copies listed above are removed; `grep -rn "inner-spin-button" src/app` → empty.
+  - [x] [auto] Every `input[type=number]` in `src/app/**/*.html` has select-on-focus (the directive's selector covers `input[type=number]`, or the attribute is added) — command + count in the run file.
   - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or deferred).
   - [ ] [human] Desktop replay: `/dashboard?tab=metadata` → «מקדמים». No up/down arrows on the number boxes. Click a coefficient: its whole value is selected; type 1.25: nothing is saved yet and a «שמור» button becomes active in the card. Click «שמור»: one success message, the value stays 1.25 after a page reload.
   - [ ] [human] Leave warning replay: change a coefficient, don't save, then (a) click another card on the page, (b) switch to another dashboard tab, (c) click a menu link to another page. Each time a warning asks to save, leave without saving, or stay; «הישאר» keeps your change in the box.
@@ -85,6 +85,9 @@ src/app/**/*.html
 src/app/**/*.scss
 src/app/**/*.component.ts
 docs/mvp/runs/482.md
+src/app/core/guards/pending-changes.guard.spec.ts
+src/app/pages/cook-view/cook-view.page.ts
+src/app/pages/menu-intelligence/menu-intelligence.page.ts
 ```
 The broad `**/*.html|scss|component.ts` lines are only for (1) removing the local spin-button copies and (2) adding
 select-on-focus to number boxes (attribute + import). No other change in those files.
@@ -109,11 +112,11 @@ Find `onCoefficientChange`, `appSelectOnFocus` selector, `pendingChangesGuard`, 
 `warnBeforeUnload`, `setTab` in `dashboard.page.ts`, the `dashboard` route. Print `ok` / `conflict: <what>`.
 
 ## Atomic Sub-tasks
-- [ ] G1: Global spin-button hiding in `src/styles.scss` (append, unlayered or in the base layer per cssLayer skill); remove the local copies listed above.
-- [ ] G2: Desktop select-all — fix `SelectOnFocusDirective` so a mouse click selects all (re-select on the first `mouseup` after a fresh focus, or in a rAF after focus), keep touch behaviour; widen its selector to also match `input[type=number]` (preferred over editing ~20 templates) — or add the attribute where the selector can't reach; spec for real event order.
-- [ ] G3: Coefficients — drafts in a signal map; inputs update the draft only (no save on input/change); «שמור» button in the card (`c-btn-primary`, disabled until dirty and valid, busy while saving) saving changed terms, one success toast; «ביטול» resets drafts (`c-btn-ghost--sm`); a small "unsaved changes" hint like ai-model-manager.
-- [ ] G4: Leave warning — card click-outside + dashboard tab switch + `canDeactivate` on the dashboard route + `warnBeforeUnload`, all through the existing confirm keys (see Execution Notes).
-- [ ] G5: Specs (see Done-when).
+- [x] G1: Global spin-button hiding in `src/styles.scss` (append, unlayered or in the base layer per cssLayer skill); remove the local copies listed above.
+- [x] G2: Desktop select-all — fix `SelectOnFocusDirective` so a mouse click selects all (re-select on the first `mouseup` after a fresh focus, or in a rAF after focus), keep touch behaviour; widen its selector to also match `input[type=number]` (preferred over editing ~20 templates) — or add the attribute where the selector can't reach; spec for real event order.
+- [x] G3: Coefficients — drafts in a signal map; inputs update the draft only (no save on input/change); «שמור» button in the card (`c-btn-primary`, disabled until dirty and valid, busy while saving) saving changed terms, one success toast; «ביטול» resets drafts (`c-btn-ghost--sm`); a small "unsaved changes" hint like ai-model-manager.
+- [x] G4: Leave warning — card click-outside + dashboard tab switch + `canDeactivate` on the dashboard route + `warnBeforeUnload`, all through the existing confirm keys (see Execution Notes).
+- [x] G5: Specs (see Done-when).
 - [ ] V1: Build, tests, desktop browser replay (and a 375 px check that mobile still selects and saves only on «שמור»), write `docs/mvp/runs/482.md`.
 
 ## Out of Scope

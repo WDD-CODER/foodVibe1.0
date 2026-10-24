@@ -142,17 +142,6 @@
     }
   }
 
-  // Fix 2: remove spinner arrows from number inputs
-  input[type='number'] {
-    -moz-appearance: textfield;
-
-    &::-webkit-inner-spin-button,
-    &::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-  }
-
   // Specialized Input Containers
   .relative-input {
     position: relative;
@@ -296,10 +285,6 @@
       input {
         width: 70px;
         text-align: center;
-
-        &::-webkit-inner-spin-button {
-          display: none; // Cleaner look for small inputs
-        }
       }
 
       // The quantity box fills its column (it used to be a fixed 70px and cut its placeholder)

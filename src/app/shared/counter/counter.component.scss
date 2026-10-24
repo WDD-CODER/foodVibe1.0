@@ -101,11 +101,6 @@
 
         border: none;
         outline: none;
-        appearance: textfield;
-
-        &::-webkit-inner-spin-button {
-          appearance: none;
-        }
       }
     }
   }
