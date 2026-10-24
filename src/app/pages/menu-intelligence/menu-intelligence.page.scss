@@ -54,3 +54,14 @@ app-event-notes-log {
     }
   }
 }
+
+/* Plan 494: the fixed pricing meter shows its full body above 768px and is up to 270px tall (targets open), so the last
+   note or the add-note area sat under it. Screen only, so the print rule in _toolbar.scss (padding: 0) still wins. */
+$break-meter-full: 769px; // pricing-meter.component.scss: full body above 768px
+$break-meter-clear: 1030px; // widest width where the report still saw notes hidden
+
+@media screen and (min-width: $break-meter-full) and (max-width: $break-meter-clear) {
+  .menu-editor-shell {
+    padding-block-end: calc(17rem + var(--space-6));
+  }
+}
