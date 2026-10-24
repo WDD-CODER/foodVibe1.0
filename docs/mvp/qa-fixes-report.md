@@ -1,5 +1,7 @@
 # mvp-qa-fixes — run report (2026-10-24)
 
+> **Update 2026-10-24:** plan 490 was rerun. The checker found one major problem and it was fixed (`e3d6989f`); the second check was clean. 490 is merged (`4cbd65fd`) with **no browser pass**: Dandan runs the UI checks himself from now on. Its cards are in `docs/mvp/runs/490.md` → "## Human checks". Cards 1, 2 and 5 need the AI key, so check them on a deployment that has it. Plan 492 also got a security follow-up (`8a17df64`): a removed cook's wrong passwords now count toward the 5-try lockout, and a locked removed name gets the normal wrong-login answer. Head is now `4cbd65fd`: **14 of 14 plans merged.**
+
 ## 1. Result
 - **13 plans merged** into `mvp-qa-fixes`, **0 parked or rejected**, **1 stopped by the test environment** (plan 490, AI ingredient paste). Head of the branch: `5e8980bf`.
 - Agents replayed 58 of the 62 hand checks in a real browser and all 58 passed. None failed. 4 are marked unsure because a headless browser can't do them: a real finger tap, a script only you may run, and one card whose wording is wrong.
@@ -17,7 +19,7 @@ Counts come from `git log origin/mvp-qa-fixes --merges` (13 lines) and the run d
 | 8 Pricing bar (92–95) | 487 | merged | 1 | The target chip now opens and closes the boxes, and turns teal when a target is set. Errors no longer move the boxes. On a phone a coins button opens a pricing sheet. Staff see no prices at all. |
 | 9 Event closing dialog (97, 100, 101) | 488 | merged | 2 | The dialog is wider, so «שולם בפועל» fits. Photos are added with a small camera icon. Staff can tick and add photos without seeing any money. On a phone the supplier cards are lighter than the dialog. |
 | 11 Import delete row · 12 Import on phones (35, 37) | 489 | merged | 1 | Rows can't be trashed or edited while saving. On a phone each row is a card and the page doesn't scroll sideways. |
-| 13 AI ingredient paste (43) | 490 | **stopped (environment)** | – | Built but not merged. Pasted lines would match existing products first, offer options for unclear names, and «לא מוכן» would no longer save a product. |
+| 13 AI ingredient paste (43) | 490 | merged (rerun, no browser pass) | 2 | Pasted lines match existing products first and offer options for unclear names. «לא מוכן» no longer saves a product. |
 | 14 Station picker on phones (45) | 491 | merged | 1 | On a phone, «סוג מנה» and «תחנה» each get their own full-width line inside the card. |
 | 15 Deleted staff frees the username (50/118) | 492 | merged | 1 | A removed cook's username can be given to a new cook. The removed cook still gets the friendly refusal at login. |
 | 17 Close event from the stage bar (60) | 493 | merged | 1 | The owner can click «הסתיים» and confirm in a popup. The dashboard still counts the event once. Staff stay locked. |
