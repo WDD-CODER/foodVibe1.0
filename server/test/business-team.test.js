@@ -224,7 +224,7 @@ describe('plan 492 - a removed staff member frees the username', () => {
     expect((await request(app).get('/api/v1/data/recipes/r-old').set(as(OWNER))).status).toBe(200)
   })
 
-  it('a removed name not re-added: right password -> 403 USER_REMOVED, wrong -> 401 without USER_REMOVED, no lockout counting', async () => {
+  it('a removed name not re-added: right password -> 403 USER_REMOVED, wrong -> 401 without USER_REMOVED, counted like a live user', async () => {
     const id = (await addO('cook1')).body._id
     await del(id)
     const ok = await login('cook1')
@@ -235,8 +235,21 @@ describe('plan 492 - a removed staff member frees the username', () => {
       expect(bad.status).toBe(401)
       expect(bad.body.error).not.toBe('USER_REMOVED')
     }
-    expect(await users().findOne({ _id: id })).toMatchObject({ failedAttempts: 0 })
+    expect(await users().findOne({ _id: id })).toMatchObject({ failedAttempts: 3 })
     expect((await login('cook1')).status).toBe(403)
+    expect(await users().findOne({ _id: id })).toMatchObject({ failedAttempts: 0, lockedUntil: null })
+  })
+
+  it('a removed name locks after 5 wrong passwords: the right one then gets 401, not USER_REMOVED', async () => {
+    const id = (await addO('cook1')).body._id
+    await del(id)
+    // Own client IP (trust proxy is on) so the IP-keyed login limiter, spent by earlier tests, isn't what answers.
+    const loginIp = (password = 'pw') => login('cook1', password).set('X-Forwarded-For', '10.0.0.92')
+    for (let i = 0; i < 5; i++) expect((await loginIp('nope')).status).toBe(401)
+    expect(await users().findOne({ _id: id })).toMatchObject({ failedAttempts: 5, lockedUntil: expect.any(Number) })
+    const locked = await loginIp()
+    expect(locked.status).toBe(401)
+    expect(locked.body.error).not.toBe('USER_REMOVED')
   })
 
   it('DELETE twice changes nothing; a legacy removed user (removedAt, no removedName) releases its name', async () => {
