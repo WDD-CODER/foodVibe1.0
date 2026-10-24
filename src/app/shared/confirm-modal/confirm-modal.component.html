@@ -15,6 +15,24 @@
     >
       {{ modalService.message() | translatePipe }}
     </p>
+    @if (modalService.typedConfirm(); as typed) {
+      <div class="confirm-modal-typed">
+        <app-form-field [label]="typed.labelKey" forId="confirm-modal-typed">
+          <strong class="confirm-modal-typed__expected" dir="auto">{{ typed.expected }}</strong>
+          <input
+            #typedInput
+            id="confirm-modal-typed"
+            class="c-input"
+            type="text"
+            autocomplete="off"
+            dir="auto"
+            [value]="modalService.typedText()"
+            (input)="onTypedInput($event)"
+            (keydown.enter)="onTypedEnter()"
+          />
+        </app-form-field>
+      </div>
+    }
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="modalService.choose('cancel')">
         {{ 'cancel' | translatePipe }}
@@ -29,6 +47,7 @@
         class="c-btn-primary"
         [class.c-btn-primary--danger]="modalService.variant() === 'danger'"
         [class.c-btn-primary--warning]="modalService.variant() === 'warning'"
+        [disabled]="!modalService.canConfirm()"
         (click)="modalService.choose('confirm')"
       >
         {{ modalService.saveLabel() | translatePipe }}

@@ -738,6 +738,7 @@
     "business_role_staff": "צוות",
     "delete_business_confirm": "מחיקת בעל העסק מוחקת את כל העסק – כל הנתונים וכל המשתמשים שלו. העסק:",
     "delete_business_confirm_final": "המחיקה סופית ואי אפשר לשחזר אותה. למחוק את העסק?",
+    "delete_business_type_name": "כדי למחוק, יש להזין את שם העסק:",
     "delete_staff_user_confirm": "המשתמש יימחק. הפריטים שיצר יישארו בעסק. המשתמש:",
     "business_deleted": "העסק נמחק",
     "user_deleted": "המשתמש נמחק",
