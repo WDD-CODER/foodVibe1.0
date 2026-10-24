@@ -206,6 +206,7 @@
             <div class="dish-list" formArrayName="items">
               @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
               <app-menu-dish-row
+                [class.no-print]="!item.get('recipeId')?.value"
                 [itemGroup]="item"
                 [sectionIndex]="sectionIndex"
                 [itemIndex]="itemIndex"

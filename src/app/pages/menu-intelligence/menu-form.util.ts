@@ -11,6 +11,17 @@ export function pruneBlankMenuItems(sections: FormArray): void {
   }
 }
 
+/**
+ * Plan 496: index of the first empty dish row (no recipeId) in a course, ignoring skipIndex (a row being renamed), else -1.
+ * Reads "blank" exactly like pruneBlankMenuItems.
+ */
+export function blankMenuItemIndex(items: FormArray, skipIndex = -1): number {
+  for (let i = 0; i < items.length; i++) {
+    if (i !== skipIndex && !items.at(i).get('recipeId')?.value) return i
+  }
+  return -1
+}
+
 /** Hebrew message naming exactly which required fields are missing. */
 export function missingMenuFieldsMessage(form: FormGroup, translation: TranslationService): string {
   const t = (key: string) => translation.translate(key)
