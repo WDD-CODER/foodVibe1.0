@@ -27,9 +27,9 @@ Verified in code on `origin/mvp-review` (`ae9dc090`):
 - Primary: on a phone, one tap anywhere on a date field opens the native date picker; no calendar button; the field
   still shows the date as dd/mm/yyyy.
 - Success:
-  - [ ] [auto] `npx ng build` passes.
-  - [ ] [auto] `npx ng test --watch=false --include=src/app/shared/date-field/date-field.component.spec.ts` passes with updated specs: no `.date-field-btn`; on a coarse pointer a tap on the field reaches the native picker; picking a date sets the value, the dd/mm/yyyy text and emits `committed`; a disabled field opens nothing.
-  - [ ] [auto] Dictionary key `open_calendar` removed if no longer used (`grep -rn "open_calendar" src` → empty) — or kept with a logged reason.
+  - [x] [auto] `npx ng build` passes.
+  - [x] [auto] `npx ng test --watch=false --include=src/app/shared/date-field/date-field.component.spec.ts` passes with updated specs: no `.date-field-btn`; on a coarse pointer a tap on the field reaches the native picker; picking a date sets the value, the dd/mm/yyyy text and emits `committed`; a disabled field opens nothing.
+  - [x] [auto] Dictionary key `open_calendar` removed if no longer used (`grep -rn "open_calendar" src` → empty) — or kept with a logged reason.
   - [ ] [human] Phone replay: menu library → new inquiry → tap the date field on its placeholder text: the phone's date picker opens at once (no keyboard, no button next to the field). Pick a date: the field shows it as dd/mm/yyyy. Repeat on an event's deposit date (stage bar) and in the "deposit paid" window.
   - [ ] [human] Desktop sanity: the same date fields still work on a desktop (click opens the browser's picker or typing dd/mm/yyyy works) and there is no calendar button.
 
@@ -74,10 +74,10 @@ Writing outside the scope block: log path + change + why under `## Decisions`, a
 Find `openCalendar`, `onPicked`, `.date-field-btn`, `.date-field-picker`, the three usages. Print `ok` / `conflict: <what>`.
 
 ## Atomic Sub-tasks
-- [ ] F1: Remove the calendar button and `openCalendar`'s button wiring — `date-field.component.html/.ts/.scss`
-- [ ] F2: Touch: native date input covers the field; text input readonly on coarse pointer — `.html/.scss/.ts`
-- [ ] F3: Desktop: typing kept; click on the field opens `showPicker()` when supported — `.ts`
-- [ ] F4: Specs updated (see Done-when); `open_calendar` key cleanup.
+- [x] F1: Remove the calendar button and `openCalendar`'s button wiring — `date-field.component.html/.ts/.scss`
+- [x] F2: Touch: native date input covers the field; text input readonly on coarse pointer — `.html/.scss/.ts`
+- [x] F3: Desktop: typing kept; click on the field opens `showPicker()` when supported — `.ts`
+- [x] F4: Specs updated (see Done-when); `open_calendar` key cleanup.
 - [ ] V1: Build, tests, browser replay at 375 px with touch emulation and at 1440 px, write `docs/mvp/runs/483.md`.
 
 ## Out of Scope
