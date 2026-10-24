@@ -479,9 +479,27 @@
       'img metrics'
       'rating rating'
       'scaling scaling'
-      'labels labels';
+      'labels labels'
+      'course course'
+      'station station';
     gap: 1.5rem;
     place-items: center;
+  }
+
+  /* Course and station pickers: one full-width row each inside the card */
+  .course-select,
+  .station-select {
+    justify-self: stretch;
+    inline-size: 100%;
+    min-inline-size: 0;
+  }
+
+  .course-select {
+    grid-area: course;
+  }
+
+  .station-select {
+    grid-area: station;
   }
 
   /* Assigning Grid Areas */
