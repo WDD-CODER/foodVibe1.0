@@ -1,8 +1,12 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { IngredientSearchComponent } from './ingredient-search.component'
 import { LucideAngularModule, Search, X, ChevronUp, ChevronDown } from 'lucide-angular'
+import { ProductDataService } from '@services/product-data.service'
+import { RecipeDataService } from '@services/recipe-data.service'
+import { QuickAddProductModalService } from '@services/quick-add-product-modal.service'
+import type { Product } from '@models/product.model'
 
 describe('IngredientSearchComponent', () => {
   let component: IngredientSearchComponent
@@ -78,5 +82,69 @@ describe('IngredientSearchComponent', () => {
       press('Escape')
       expect(cancel).toHaveBeenCalledTimes(2)
     })
+  })
+
+  // Plan 490 - a not-ready row's inventory options are listed first, marked, while the query is the opening one.
+  describe('suggestions (plan 490)', () => {
+    const product = (_id: string, nameHebrew: string): Product =>
+      ({ _id, nameHebrew, baseUnit: 'gram' }) as unknown as Product
+    const ids = (): string[] =>
+      (component as unknown as { listedOptions_: () => { _id: string }[] }).listedOptions_().map((x) => x._id)
+
+    beforeEach(() => {
+      spyOn(TestBed.inject(ProductDataService), 'searchProducts').and.resolveTo([
+        product('p2', 'מלח גס'),
+        product('p9', 'salty crackers')
+      ])
+      spyOn(TestBed.inject(RecipeDataService), 'searchRecipes').and.resolveTo([])
+    })
+
+    /** The query reaches the debounced server search through effects: settle them, wait the debounce, settle again. */
+    function settle(): void {
+      fixture.detectChanges()
+      TestBed.flushEffects()
+      tick(300)
+      flush()
+      fixture.detectChanges()
+    }
+
+    /** Created inside fakeAsync so the debounce timer of the server search is a fake one. */
+    function open(): void {
+      fixture.destroy()
+      fixture = TestBed.createComponent(IngredientSearchComponent)
+      component = fixture.componentInstance
+      fixture.componentRef.setInput('suggestions', [product('p1', 'מלח שולחן'), product('p2', 'מלח גס')])
+      fixture.componentRef.setInput('initialQuery', 'salt')
+      fixture.detectChanges()
+      settle()
+    }
+
+    it('lists the suggestions first, then server results without the same product', fakeAsync(() => {
+      open()
+      expect(ids()).toEqual(['p1', 'p2', 'p9'])
+      const options = root().querySelectorAll('li[role="option"]')
+      expect(options[0].querySelector('.c-chip--amber')).not.toBeNull()
+      expect(options[2].querySelector('.c-chip--amber')).toBeNull()
+      expect(options[options.length - 1].textContent).toContain('salt')
+    }))
+
+    it('drops the suggestions once the user types something else', fakeAsync(() => {
+      open()
+      field().value = 'מלח'
+      field().dispatchEvent(new Event('input'))
+      settle()
+      expect(ids()).toEqual(['p2', 'p9'])
+    }))
+
+    it('the add option opens quick-add prefilled, and cancelling it selects nothing', fakeAsync(() => {
+      const openModal = spyOn(TestBed.inject(QuickAddProductModalService), 'open').and.resolveTo(null)
+      open()
+      const picked = jasmine.createSpy('picked')
+      component.itemSelected.subscribe(picked)
+      void (component as unknown as { addNewProduct: (t: string) => Promise<void> }).addNewProduct('salt')
+      flush()
+      expect(openModal).toHaveBeenCalledWith({ prefillName: 'salt' })
+      expect(picked).not.toHaveBeenCalled()
+    }))
   })
 })

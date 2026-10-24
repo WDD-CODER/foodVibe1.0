@@ -56,6 +56,12 @@ export class IngredientSearchComponent {
   /** Optional initial search query (e.g. when editing an existing ingredient name). */
   initialQuery = input<string>('')
 
+  /**
+   * Plan 490 — inventory products the row's name could mean (a not-ready pasted row). Listed first, marked as
+   * suggestions, while the query is still the opening one; gone once the user types something else.
+   */
+  suggestions = input<readonly Product[]>([])
+
   itemSelected = output<SearchableItem>()
   focusDone = output<void>()
   /** Emit when user presses Enter in search with no selection (e.g. add new row). */
@@ -133,13 +139,47 @@ export class IngredientSearchComponent {
     { initialValue: [] as SearchableItem[] }
   )
 
+  private readonly excludeSet_ = computed(
+    () => new Set((this.excludeNames() ?? []).map((n) => (n ?? '').trim().toLowerCase()).filter(Boolean))
+  )
+
   // Exclude ingredients already in the recipe — layered as its own computed() so it
   // re-runs on excludeNames() changes without triggering a new network search.
   protected filteredResults_ = computed(() => {
     if ((this.searchQuery_() ?? '').trim().length < MIN_QUERY_LENGTH) return []
-    const excludeSet = new Set((this.excludeNames() ?? []).map((n) => (n ?? '').trim().toLowerCase()).filter(Boolean))
+    const excludeSet = this.excludeSet_()
     return this.searchResults_().filter((item) => !excludeSet.has((item.nameHebrew ?? '').trim().toLowerCase()))
   })
+
+  /** Plan 490: the suggestions to list now — only while the query equals the opening query, minus excluded names. */
+  protected readonly suggestionItems_ = computed<SearchableItem[]>(() => {
+    const opening = (this.initialQuery() ?? '').trim()
+    if (!opening || (this.searchQuery_() ?? '').trim() !== opening) return []
+    const excludeSet = this.excludeSet_()
+    return this.suggestions()
+      .filter((p) => !excludeSet.has((p.nameHebrew ?? '').trim().toLowerCase()))
+      .map((p) => ({ ...p, item_type_: 'product' as const }))
+  })
+
+  private readonly suggestionIds_ = computed(() => new Set(this.suggestionItems_().map((p) => p._id)))
+
+  /** Suggestions first, then the server results without the same product. */
+  protected readonly listedOptions_ = computed<SearchableItem[]>(() => {
+    const suggested = this.suggestionItems_()
+    if (suggested.length === 0) return this.filteredResults_()
+    const ids = this.suggestionIds_()
+    return [...suggested, ...this.filteredResults_().filter((r) => !(r.item_type_ === 'product' && ids.has(r._id)))]
+  })
+
+  /** What rule X compares against: an exact suggestion name hides the add row too. */
+  protected readonly knownOptions_ = computed<SearchableItem[]>(() => [
+    ...this.suggestionItems_(),
+    ...this.searchResults_()
+  ])
+
+  protected isSuggestion_(item: SearchableItem): boolean {
+    return item.item_type_ === 'product' && this.suggestionIds_().has(item._id)
+  }
 
   selectItem(item: SearchableItem) {
     this.itemSelected.emit(item)

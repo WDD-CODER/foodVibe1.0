@@ -12,6 +12,9 @@ import { Product } from '@models/product.model'
 import { ProductUnitAdded } from '@services/unit-registry.service'
 import { GeminiService } from '@services/gemini.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { ProductDataService } from '@services/product-data.service'
+import { By } from '@angular/platform-browser'
+import { IngredientSearchComponent } from '../ingredient-search/ingredient-search.component'
 
 describe('RecipeIngredientsTableComponent', () => {
   let component: RecipeIngredientsTableComponent
@@ -234,11 +237,18 @@ describe('RecipeIngredientsTableComponent', () => {
       expect(rows()[0].get('referenceId')?.value).toBeFalsy()
     })
 
-    it('never sends a text-only line to the AI step', async () => {
-      matchProductNames.and.resolveTo([])
+    // Plan 490: a text-only line goes to the matcher for options only — never linked.
+    it('sends a text-only line for options only and never links it', async () => {
+      matchProductNames.and.resolveTo([{ i: 0, product: 2 }])
       component.onPasteIngredients('קצת פטרוזיליה')
       await flush()
-      expect(matchProductNames).not.toHaveBeenCalled()
+      expect(matchProductNames).toHaveBeenCalledTimes(1)
+      expect(matchProductNames.calls.mostRecent().args[0]).toEqual([{ name: 'קצת פטרוזיליה', unit: '' }])
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+      expect(rows()[0].get('nameHebrew')?.value).toBe('קצת פטרוזיליה')
+      const suggestionsFor = (component as unknown as { suggestionsFor: (g: FormGroup) => readonly Product[] })
+        .suggestionsFor
+      expect(suggestionsFor.call(component, rows()[0] as FormGroup).map((x) => x._id)).toEqual(['p3'])
     })
 
     it('shows one calm message and leaves the row red when the AI step fails', async () => {
@@ -251,6 +261,17 @@ describe('RecipeIngredientsTableComponent', () => {
       expect(rows()[0].get('referenceId')?.value).toBeFalsy()
     })
 
+    it('shows no message when the AI step fails for a paste of only text lines', async () => {
+      matchProductNames.and.rejectWith(new Error('502'))
+      const warn = spyOn(TestBed.inject(UserMsgService), 'onSetWarningMsg')
+      component.onPasteIngredients('קצת פטרוזיליה')
+      await flush()
+      expect(matchProductNames).toHaveBeenCalledTimes(1)
+      expect(warn).not.toHaveBeenCalled()
+      expect(rows()[0].get('nameHebrew')?.value).toBe('קצת פטרוזיליה')
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+    })
+
     it('shows no message when the AI answers that nothing fits', async () => {
       matchProductNames.and.resolveTo([])
       const warn = spyOn(TestBed.inject(UserMsgService), 'onSetWarningMsg')
@@ -259,6 +280,93 @@ describe('RecipeIngredientsTableComponent', () => {
       await flush()
       expect(warn).not.toHaveBeenCalled()
       expect(rows().every((r) => !r.get('referenceId')?.value)).toBeTrue()
+    })
+  })
+
+  // Plan 490 - «לא מוכן» saves nothing; it opens the search with the inventory's options first.
+  describe('not ready opens options, saves nothing (plan 490)', () => {
+    const products = [
+      { _id: 'p1', nameHebrew: 'מלח שולחן', baseUnit: 'gram' },
+      { _id: 'p2', nameHebrew: 'מלח גס', baseUnit: 'gram' },
+      {
+        _id: 'p3',
+        nameHebrew: 'מלח',
+        baseUnit: 'kg',
+        purchaseOptions: [{ unitSymbol: 'box', conversionRate: 1, uom: 'kg' }]
+      }
+    ] as unknown as Product[]
+    const rows = () => component.ingredientsFormArray().controls as FormGroup[]
+    let matchProductNames: jasmine.Spy
+    let addProduct: jasmine.Spy
+    let saveProduct: jasmine.Spy
+    type Internals = {
+      onUnlinkedBadgeClick: (g: FormGroup, i: number) => void
+      editingNameAtRow_: () => number | null
+      suggestionsFor: (g: FormGroup) => readonly Product[]
+    }
+    const internals = () => component as unknown as Internals
+    const flush = async () => {
+      for (let i = 0; i < 5; i++) await Promise.resolve()
+    }
+
+    beforeEach(() => {
+      matchProductNames = spyOn(TestBed.inject(GeminiService), 'matchProductNames')
+      spyOn(TestBed.inject(KitchenStateService), 'products_').and.returnValue(products)
+      const productData = TestBed.inject(ProductDataService)
+      spyOn(productData, 'allProducts_').and.returnValue(products)
+      addProduct = spyOn(productData, 'addProduct')
+      saveProduct = spyOn(TestBed.inject(KitchenStateService), 'saveProduct')
+      spyOn(TestBed.inject(TranslationService), 'resolveUnit').and.callFake((t: string) =>
+        t === 'גרם' ? 'gram' : null
+      )
+      spyOn(component, 'updateLineCalculations')
+    })
+
+    it('clicking «לא מוכן» with no same-name product saves nothing and opens the search on that row', async () => {
+      matchProductNames.and.resolveTo([])
+      component.onPasteIngredients('2 כף שום יבש קלוי')
+      await flush()
+      internals().onUnlinkedBadgeClick(rows()[0], 0)
+      expect(addProduct).not.toHaveBeenCalled()
+      expect(saveProduct).not.toHaveBeenCalled()
+      expect(internals().editingNameAtRow_()).toBe(0)
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+    })
+
+    it('a row whose name equals an existing product is linked as before (plan 485)', () => {
+      rows()[0].patchValue({ nameHebrew: 'מלח', referenceId: '' })
+      internals().onUnlinkedBadgeClick(rows()[0], 0)
+      expect(rows()[0].get('referenceId')?.value).toBe('p3')
+      expect(addProduct).not.toHaveBeenCalled()
+    })
+
+    it('stores the AI options for the row and passes them to the search while that row is edited', async () => {
+      matchProductNames.and.resolveTo([{ i: 0, product: null, options: [0, 1] }])
+      component.onPasteIngredients('200 גרם salt')
+      await flush()
+      expect(rows()[0].get('referenceId')?.value).toBeFalsy()
+      expect(
+        internals()
+          .suggestionsFor(rows()[0])
+          .map((p) => p._id)
+      ).toEqual(['p1', 'p2'])
+      internals().onUnlinkedBadgeClick(rows()[0], 0)
+      fixture.detectChanges()
+      const search = fixture.debugElement.query(By.directive(IngredientSearchComponent))
+        .componentInstance as IngredientSearchComponent
+      expect(search.suggestions().map((p) => p._id)).toEqual(['p1', 'p2'])
+    })
+
+    it('picking a product on an unlinked pasted row keeps its amount and unit', async () => {
+      matchProductNames.and.resolveTo([])
+      component.onPasteIngredients('200 גרם salt')
+      await flush()
+      internals().onUnlinkedBadgeClick(rows()[0], 0)
+      component.onItemSelected({ ...products[2], item_type_: 'product' }, rows()[0])
+      expect(rows()[0].get('referenceId')?.value).toBe('p3')
+      expect(rows()[0].get('amount_net')?.value).toBe(200)
+      expect(rows()[0].get('unit')?.value).toBe('gram')
+      expect(internals().suggestionsFor(rows()[0])).toEqual([])
     })
   })
 })

@@ -11,17 +11,27 @@ const MAX_PRODUCTS = 1000
 const MAX_NAME_CHARS = 200
 const MAX_UNIT_CHARS = 40
 const PREFIX_LENGTH = 2
+/** Mirrors PRODUCT_MATCH_MAX_OPTIONS in shared/schemas/ai-product-match.schema.ts (plan 490). */
+const MAX_OPTIONS = 5
 
 export interface NameMatchItem {
   /** Caller's own handle for this name (a row id, an import line number). */
   key: string
   name: string
   unit?: string
+  /** Plan 490: false = never link this name, only collect options for it (a pasted line without an amount). */
+  linkable?: boolean
 }
 
 export interface NameMatchResult {
   product: Product
   via: 'exact' | 'variant' | 'ai'
+}
+
+/** Plan 490 — the links plus, per unlinked key, the products the name could mean (max 5, best first). */
+export interface NameMatchOutcome {
+  linked: Map<string, NameMatchResult>
+  options: Map<string, Product[]>
 }
 
 export interface NameMatchOptions {
@@ -48,47 +58,79 @@ export class ProductNameMatcherService {
   /**
    * Tier 1-2 for every item, then one AI call for the rest. Never throws. Items with no result are
    * absent from the map (no call when nothing is left to ask or there are no products).
+   * Plan 490: delegates to `matchNamesWithOptions` and keeps only the links (the import page ignores options).
    */
   async matchNames(
     items: readonly NameMatchItem[],
     options: NameMatchOptions = {}
   ): Promise<Map<string, NameMatchResult>> {
-    const result = new Map<string, NameMatchResult>()
+    return (await this.matchNamesWithOptions(items, options)).linked
+  }
+
+  /**
+   * Plan 490 — like `matchNames`, plus the products a name COULD mean when nothing links it: the AI's `options`
+   * (model order) then the local tier-2 ambiguous candidates, max 5. A `linkable: false` item is never linked:
+   * its exact/variant/AI product becomes a one-item option. An AI failure still returns the local options.
+   */
+  async matchNamesWithOptions(
+    items: readonly NameMatchItem[],
+    options: NameMatchOptions = {}
+  ): Promise<NameMatchOutcome> {
+    const linked = new Map<string, NameMatchResult>()
+    const local = new Map<string, Product[]>()
+    const ai = new Map<string, Product[]>()
     const products = this.kitchenState_.products_()
     const leftover: NameMatchItem[] = []
     for (const item of items) {
       if (!item.name.trim()) continue
       const hit = matchProductName(item.name, products)
-      if (hit && hit.kind !== 'ambiguous') result.set(item.key, { product: hit.product, via: hit.kind })
-      else leftover.push(item)
-    }
-    if (leftover.length === 0 || products.length === 0) return result
-
-    const asked = leftover.slice(0, MAX_NAMES)
-    const candidates = this.candidates_(products, asked)
-    if (candidates.length === 0) return result
-    try {
-      const matches = await this.gemini_.matchProductNames(
-        asked.map((it) => ({ name: it.name.slice(0, MAX_NAME_CHARS), unit: (it.unit ?? '').slice(0, MAX_UNIT_CHARS) })),
-        candidates.map((p) => ({
-          name: p.nameHebrew.slice(0, MAX_NAME_CHARS),
-          unit: (p.baseUnit ?? '').slice(0, MAX_UNIT_CHARS)
-        }))
-      )
-      for (const m of matches) {
-        const item = asked[m.i]
-        const product = m.product === null ? undefined : candidates[m.product]
-        if (item && product && !result.has(item.key)) result.set(item.key, { product, via: 'ai' })
+      if (hit?.kind === 'ambiguous') local.set(item.key, hit.candidates)
+      else if (hit) {
+        if (item.linkable === false) local.set(item.key, [hit.product])
+        else linked.set(item.key, { product: hit.product, via: hit.kind })
+        continue
       }
-    } catch (err) {
-      this.logging_.error({
-        event: 'product_name_match.ai_failed',
-        message: 'AI product name matching failed',
-        context: { names: asked.length, products: candidates.length }
-      })
-      options.onAiFailure?.(err)
+      leftover.push(item)
     }
-    return result
+    const asked = leftover.slice(0, MAX_NAMES)
+    const candidates = asked.length > 0 ? this.candidates_(products, asked) : []
+    if (candidates.length > 0) {
+      try {
+        const matches = await this.gemini_.matchProductNames(
+          asked.map((it) => ({
+            name: it.name.slice(0, MAX_NAME_CHARS),
+            unit: (it.unit ?? '').slice(0, MAX_UNIT_CHARS)
+          })),
+          candidates.map((p) => ({
+            name: p.nameHebrew.slice(0, MAX_NAME_CHARS),
+            unit: (p.baseUnit ?? '').slice(0, MAX_UNIT_CHARS)
+          }))
+        )
+        for (const m of matches) {
+          const item = asked[m.i]
+          if (!item || linked.has(item.key) || ai.has(item.key)) continue
+          const product = m.product === null ? undefined : candidates[m.product]
+          if (product && item.linkable !== false) linked.set(item.key, { product, via: 'ai' })
+          else ai.set(item.key, product ? [product] : (m.options ?? []).map((n) => candidates[n]))
+        }
+      } catch (err) {
+        this.logging_.error({
+          event: 'product_name_match.ai_failed',
+          message: 'AI product name matching failed',
+          context: { names: asked.length, products: candidates.length }
+        })
+        options.onAiFailure?.(err)
+      }
+    }
+    // AI options first (model order), then the local ones; no duplicate _id, max 5, none for a linked key.
+    const merged = new Map<string, Product[]>()
+    for (const [key, list] of [...ai, ...local]) {
+      if (linked.has(key)) continue
+      const all = [...(merged.get(key) ?? []), ...list].filter((p) => !!p)
+      const unique = all.filter((p, n) => all.findIndex((x) => x._id === p._id) === n).slice(0, MAX_OPTIONS)
+      if (unique.length > 0) merged.set(key, unique)
+    }
+    return { linked, options: merged }
   }
 
   /** The product list the AI may choose from: all of it, or (over 1000) those sharing a name start with a leftover name. */
