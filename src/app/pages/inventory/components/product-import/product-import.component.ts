@@ -25,6 +25,7 @@ import { warnBeforeUnload } from '@utils/leave-warning.util'
 import { incrementGeminiUsage } from '@utils/gemini-usage.util'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 /** The base units a product may have (same list as the server). */
 const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
@@ -57,6 +58,7 @@ interface ImportSummary {
   selector: 'app-product-import',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     FormsModule,
     RouterLink,
     LucideAngularModule,

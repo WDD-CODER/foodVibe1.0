@@ -15,6 +15,7 @@ import {
   CdkDragHandle,
   CdkDragPlaceholder
 } from '@angular/cdk/drag-drop'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 export interface DraftIngredient {
   id: number
@@ -35,6 +36,7 @@ export interface DraftWorkflowItem {
   selector: 'app-ai-draft-editor',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     CommonModule,
     FormsModule,
     LucideAngularModule,

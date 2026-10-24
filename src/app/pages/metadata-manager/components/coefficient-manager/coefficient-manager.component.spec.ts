@@ -17,6 +17,7 @@ describe('CoefficientManagerComponent', () => {
   let store: jasmine.SpyObj<TaxonomyStore>
   let userMsg: jasmine.SpyObj<UserMsgService>
   let isAdmin: boolean
+  let openTernary: jasmine.Spy
 
   const eventTypes: Term[] = [
     { key: 'פרטי', userId: '__master__', coefficient: 1.15 },
@@ -56,13 +57,14 @@ describe('CoefficientManagerComponent', () => {
     store.ensureLoaded.and.returnValue(Promise.resolve())
     store.loadSafely.and.returnValue(Promise.resolve())
     store.reloadSafely.and.returnValue(Promise.resolve())
+    openTernary = jasmine.createSpy('openTernary').and.resolveTo('cancel')
     userMsg = jasmine.createSpyObj<UserMsgService>('UserMsgService', ['onSetSuccessMsg', 'onSetErrorMsg'])
 
     await TestBed.configureTestingModule({
       imports: [CoefficientManagerComponent, LucideAngularModule.pick(TEST_LUCIDE_ICONS)],
       providers: [
         { provide: TaxonomyStore, useValue: store },
-        { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(true) } },
+        { provide: ConfirmModalService, useValue: { open: () => Promise.resolve(true), openTernary } },
         { provide: UserMsgService, useValue: userMsg },
         { provide: TranslationService, useValue: { translate: (k: string) => k } },
         { provide: LoggingService, useValue: jasmine.createSpyObj('LoggingService', ['error']) }
@@ -108,20 +110,119 @@ describe('CoefficientManagerComponent', () => {
     expect(component['invalid_']()).toEqual({ row: 'new', key: 'metadata_event_type_exists' })
   })
 
-  it('saves a changed coefficient with one updateByKey', async () => {
-    const input = document.createElement('input')
-    input.value = '1.35'
-    await component.onCoefficientChange('eventType', eventTypes[2] as never, input)
-    expect(store.updateByKey.calls.count()).toBe(1)
-    expect(store.updateByKey.calls.mostRecent().args).toEqual(['eventType', 'שלי', { coefficient: 1.35 } as never])
+  // Plan 482: the own term 'שלי' is the third box; typing only keeps a draft.
+  const typeInto = (index: number, text: string): HTMLInputElement => {
+    const box = inputs()[index]
+    box.value = text
+    box.dispatchEvent(new Event('input'))
+    box.dispatchEvent(new Event('change'))
+    fixture.detectChanges()
+    return box
+  }
+  const saveButton = (): HTMLButtonElement =>
+    Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>('.coef-actions button')).at(
+      -1
+    )!
+
+  it('does not save on input or change; «שמור» turns on only for a changed valid value', () => {
+    expect(saveButton().disabled).toBeTrue()
+    typeInto(2, '1.35')
+    expect(store.updateByKey).not.toHaveBeenCalled()
+    expect(saveButton().disabled).toBeFalse()
+    expect(component.hasRealChanges()).toBeTrue()
+    typeInto(2, '1.3')
+    expect(saveButton().disabled).toBeTrue()
+    expect(component.hasRealChanges()).toBeFalse()
   })
 
-  it('puts the stored value back and saves nothing for 0', async () => {
-    const input = document.createElement('input')
-    input.value = '0'
-    await component.onCoefficientChange('eventType', eventTypes[2] as never, input)
-    expect(store.updateByKey).not.toHaveBeenCalled()
-    expect(input.value).toBe('1.3')
+  it('keeps «שמור» off and shows the error for 0 or 3 decimals', () => {
+    typeInto(2, '0')
+    expect(saveButton().disabled).toBeTrue()
+    expect(component.hasRealChanges()).toBeTrue()
+    expect((fixture.nativeElement as HTMLElement).querySelector('.c-field-error')).not.toBeNull()
+    typeInto(2, '1.255')
+    expect(saveButton().disabled).toBeTrue()
+  })
+
+  it('«שמור» saves every changed value, one updateByKey each, and shows one success message', async () => {
+    isAdmin = true
+    typeInto(0, '1.25')
+    typeInto(2, '1.35')
+    saveButton().click()
+    await fixture.whenStable()
+    expect(store.updateByKey.calls.allArgs()).toEqual([
+      ['eventType', 'פרטי', { coefficient: 1.25 } as never],
+      ['eventType', 'שלי', { coefficient: 1.35 } as never]
+    ])
+    expect(userMsg.onSetSuccessMsg).toHaveBeenCalledTimes(1)
+    expect(component.hasRealChanges()).toBeFalse()
+  })
+
+  it('shows the store message when a save is refused and keeps the draft', async () => {
+    store.updateByKey.and.returnValue(Promise.reject(new Error('read only')))
+    store.errorMessage.and.returnValue('taxonomy_shared_admin_only')
+    typeInto(2, '1.4')
+    expect(await component.onSave()).toBeFalse()
+    expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('taxonomy_shared_admin_only')
+    expect(userMsg.onSetSuccessMsg).not.toHaveBeenCalled()
+    expect(component.hasRealChanges()).toBeTrue()
+  })
+
+  it('«ביטול» drops the drafts and puts the stored value back', () => {
+    const box = typeInto(2, '1.9')
+    component.onDiscard()
+    fixture.detectChanges()
+    expect(box.value).toBe('1.3')
+    expect(component.hasRealChanges()).toBeFalse()
+  })
+
+  it('leaving with changes asks the ternary question; cancel stays and keeps the typed value', async () => {
+    const box = typeInto(2, '1.35')
+    expect(await component.confirmLeave()).toBeFalse()
+    expect(openTernary).toHaveBeenCalledOnceWith('unsaved_changes_confirm', {
+      variant: 'warning',
+      saveLabel: 'leave_without_saving',
+      saveButtonLabel: 'save_and_leave'
+    })
+    expect(box.value).toBe('1.35')
+    expect(component.hasRealChanges()).toBeTrue()
+  })
+
+  it('leaving: «שמור וצא» saves then leaves; «יציאה בלי לשמור» drops the drafts', async () => {
+    typeInto(2, '1.35')
+    openTernary.and.resolveTo('save')
+    expect(await component.confirmLeave()).toBeTrue()
+    expect(store.updateByKey).toHaveBeenCalledOnceWith('eventType', 'שלי', { coefficient: 1.35 } as never)
+    typeInto(2, '1.5')
+    openTernary.and.resolveTo('confirm')
+    expect(await component.confirmLeave()).toBeTrue()
+    expect(store.updateByKey.calls.count()).toBe(1)
+    expect(component.hasRealChanges()).toBeFalse()
+  })
+
+  it('leaving without changes does not ask', async () => {
+    expect(await component.confirmLeave()).toBeTrue()
+    expect(openTernary).not.toHaveBeenCalled()
+  })
+
+  it('a click outside the card and the route guard for the same click share one question', async () => {
+    typeInto(2, '1.35')
+    document.body.click()
+    const fromGuard = component.confirmLeave()
+    expect(await fromGuard).toBeFalse()
+    expect(openTernary).toHaveBeenCalledTimes(1)
+  })
+
+  it('a click inside the card or inside a popup does not ask', () => {
+    typeInto(2, '1.35')
+    inputs()[2].click()
+    const shell = document.createElement('app-modal-shell')
+    const button = document.createElement('button')
+    shell.appendChild(button)
+    document.body.appendChild(shell)
+    button.click()
+    shell.remove()
+    expect(openTernary).not.toHaveBeenCalled()
   })
 
   it('disables a shared term input for a non-admin and enables it for an admin', () => {
@@ -133,16 +234,6 @@ describe('CoefficientManagerComponent', () => {
     fixture = TestBed.createComponent(CoefficientManagerComponent)
     fixture.detectChanges()
     expect(inputs()[0].disabled).toBeFalse()
-  })
-
-  it('shows the store message when a save is refused', async () => {
-    store.updateByKey.and.returnValue(Promise.reject(new Error('read only')))
-    store.errorMessage.and.returnValue('taxonomy_shared_admin_only')
-    const input = document.createElement('input')
-    input.value = '1.4'
-    await component.onCoefficientChange('eventType', eventTypes[2] as never, input)
-    expect(userMsg.onSetErrorMsg).toHaveBeenCalledWith('taxonomy_shared_admin_only')
-    expect(input.value).toBe('1.3')
   })
 
   it('deletes an own event type after the confirm', async () => {

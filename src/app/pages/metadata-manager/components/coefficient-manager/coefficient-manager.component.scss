@@ -109,4 +109,25 @@ $break-mobile: 768px; // mirrors src/styles.scss
     min-inline-size: 0;
     min-block-size: 2.25rem;
   }
+
+  // Plan 482: the explicit save row at the bottom of the card.
+  .coef-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+
+    margin-block-start: 1.25rem;
+    padding-block-start: 1rem;
+
+    border-block-start: 1px solid var(--border-default);
+  }
+
+  .coef-unsaved {
+    margin-inline-end: auto;
+
+    font-size: 0.875rem;
+    color: var(--text-warning);
+  }
 }

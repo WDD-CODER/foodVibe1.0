@@ -135,6 +135,16 @@ export class MetadataManagerComponent implements OnInit {
 
   private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
   private readonly jumpRail = viewChild(ScrollRailComponent)
+  /** Plan 482: the «מקדמים» card keeps unsaved drafts until «שמור»; the dashboard asks through these two. */
+  private readonly coefficients = viewChild(CoefficientManagerComponent)
+
+  hasRealChanges(): boolean {
+    return this.coefficients()?.hasRealChanges() ?? false
+  }
+
+  confirmLeave(): Promise<boolean> {
+    return this.coefficients()?.confirmLeave() ?? Promise.resolve(true)
+  }
 
   /**
    * Mobile/tablet jump-nav destinations, in page order. Built from the app's real 8 sections

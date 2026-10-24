@@ -1,4 +1,4 @@
-<section class="manager-card c-glass-panel">
+<section class="manager-card c-glass-panel" (appClickOutside)="onClickOutside($event)">
   <div class="card-title">
     <lucide-icon name="scale" class="icon-primary"></lucide-icon>
     <h2>{{ 'metadata_coefficients_title' | translatePipe }}</h2>
@@ -27,10 +27,12 @@
           min="0.01"
           class="c-input coef-input"
           [attr.aria-label]="'coefficient_label' | translatePipe"
-          [attr.aria-invalid]="invalidRowId_() === 'eventType:' + term.key ? 'true' : null"
+          [attr.data-coef-row]="rowId('eventType', term)"
+          [attr.aria-invalid]="isRowInvalid(rowId('eventType', term)) ? 'true' : null"
           [value]="formatCoefficient(term.coefficient ?? 1)"
           [disabled]="!canEdit(term)"
-          (change)="onCoefficientChange('eventType', term, coefInput)"
+          (input)="onDraftInput('eventType', term, coefInput.value)"
+          (keyup.enter)="onSave()"
         />
         @if (canEdit(term)) {
           <button
@@ -44,7 +46,7 @@
           </button>
         }
       </li>
-      @if (invalidRowId_() === 'eventType:' + term.key) {
+      @if (isRowInvalid(rowId('eventType', term))) {
         <li class="c-field-error">{{ 'coefficient_invalid' | translatePipe }}</li>
       }
     }
@@ -70,14 +72,14 @@
       class="c-input coef-input"
       value="1"
       [attr.aria-label]="'coefficient_label' | translatePipe"
-      [attr.aria-invalid]="invalidRowId_() === 'new' ? 'true' : null"
+      [attr.aria-invalid]="invalidRowId() === 'new' ? 'true' : null"
       (keyup.enter)="onAddEventType(newName, newCoef)"
     />
     <button type="button" class="c-btn-primary" (click)="onAddEventType(newName, newCoef)">
       {{ 'metadata_add' | translatePipe }}
     </button>
   </div>
-  @if (invalidRowId_() === 'new') {
+  @if (invalidRowId() === 'new') {
     <p class="c-field-error">{{ invalid_()?.key ?? 'coefficient_invalid' | translatePipe }}</p>
   }
 
@@ -103,15 +105,35 @@
           min="0.01"
           class="c-input coef-input"
           [attr.aria-label]="'coefficient_label' | translatePipe"
-          [attr.aria-invalid]="invalidRowId_() === 'menuType:' + term.key ? 'true' : null"
+          [attr.data-coef-row]="rowId('menuType', term)"
+          [attr.aria-invalid]="isRowInvalid(rowId('menuType', term)) ? 'true' : null"
           [value]="formatCoefficient(term.coefficient ?? 1)"
           [disabled]="!canEdit(term)"
-          (change)="onCoefficientChange('menuType', term, servingInput)"
+          (input)="onDraftInput('menuType', term, servingInput.value)"
+          (keyup.enter)="onSave()"
         />
       </li>
-      @if (invalidRowId_() === 'menuType:' + term.key) {
+      @if (isRowInvalid(rowId('menuType', term))) {
         <li class="c-field-error">{{ 'coefficient_invalid' | translatePipe }}</li>
       }
     }
   </ul>
+
+  <div class="coef-actions">
+    @if (isDirty()) {
+      <span class="coef-unsaved" role="status">{{ 'coefficients_unsaved_hint' | translatePipe }}</span>
+      <button type="button" class="c-btn-ghost" [disabled]="isSaving()" (click)="onDiscard()">
+        {{ 'cancel' | translatePipe }}
+      </button>
+    }
+    <button
+      type="button"
+      class="c-btn-primary"
+      [disabled]="!canSave()"
+      [attr.aria-busy]="isSaving() ? 'true' : null"
+      (click)="onSave()"
+    >
+      {{ 'save' | translatePipe }}
+    </button>
+  </div>
 </section>

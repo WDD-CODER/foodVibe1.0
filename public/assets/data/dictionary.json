@@ -1566,6 +1566,7 @@
     "metadata_staff_stages_desc": "אנשי הצוות רואים רק אירועים בשלבים המסומנים, וגם אירועים שהם יצרו בעצמם.",
     "staff_stages_save_error": "שמירת השלבים נכשלה",
     "event_not_available": "האירוע הזה לא זמין לך",
-    "pricing_meter_open": "תמחור האירוע"
+    "pricing_meter_open": "תמחור האירוע",
+    "coefficients_unsaved_hint": "יש שינויים שלא נשמרו"
   }
 }

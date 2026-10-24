@@ -206,6 +206,9 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
+    // Plan 482: unsaved coefficients ask before leaving; query-param changes count so a ?tab= switch asks too.
+    canDeactivate: [pendingChangesGuard],
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
   },
   {
     path: 'trash',

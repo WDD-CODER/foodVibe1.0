@@ -30,6 +30,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 
@@ -37,6 +38,7 @@ const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', '
   selector: 'app-venue-form',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,
