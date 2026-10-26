@@ -1,6 +1,6 @@
 # Plan 423 — Give each product its own weight for its purchase units
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: 8d7997e5b732007392f50cc07f40b2aa430f37d6
 
@@ -200,7 +200,7 @@ Exit 0 always (it is a report, not a gate).
 - [x] Adding a unit to a product anywhere asks that product's amount; an existing unit name never skips it.
 - [x] Choosing an existing custom unit in a purchase row does not pre-fill another product's number.
 - [x] The unit window never writes a number into a unit field; cancel restores the previous unit.
-- [ ] Read-only check of existing products and recipe lines, local and Atlas.
+- [x] Read-only check of existing products and recipe lines, local and Atlas.
 
 ### Won't Have (this plan)
 - Removing the shared `gramRate` from unit terms (schema change, INV-4/INV-5).
@@ -213,7 +213,7 @@ Exit 0 always (it is a report, not a gate).
 - [x] U3: Make the product form use this product's own number for every purchase unit — product-mode add, no shared pre-fill for custom units, pickNewUnit_ replaces the close effect (INVF-C06), specs — src/app/pages/inventory/components/product-form/**
 - [x] U4: Ask the product's own weight when a unit is added from a recipe line or cook view — product mode, save the typed amount, drop the shared-rate math, specs — recipe-ingredients-table.component.ts, cook-view.page.ts and their specs
 - [x] U5: Add a read-only check that lists products and recipe lines the old behavior may have got wrong — three sections, local and Atlas — server/scripts/check-unit-weights.js
-- [ ] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
+- [x] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
 
 ## Technical Considerations
 - Dependencies: `toObservable` from `@angular/core/rxjs-interop` (already used in the app).
