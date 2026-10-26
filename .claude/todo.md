@@ -108,9 +108,9 @@
 - [ ] S5: Open a PR with each night's skill improvement — PR creation + body template — `../ai-workflow-kit/tools/skill-improver/pr.mjs`
 - [ ] S6: Schedule the nightly run and document it — Scheduler script (PS5) + README/CHANGELOG section — `../ai-workflow-kit/kit-skill-improver.ps1`, `../ai-workflow-kit/README.md`, `../ai-workflow-kit/CHANGELOG.md`
 - [ ] S7: Try a full run by hand, including the budget stop and the safety stop — Manual end-to-end run on one skill + budget-stop test + out-of-scope test — kit repo
-- [ ] S8: Turn on the nightly schedule after your go and receive the first PR — Register the task (Dandan's go), receive one nightly PR — local machine
-- [ ] S9: Note the skill improver in FoodVibe's manifest and ship — FoodVibe manifest note; `/ship` — `docs/workflow-kit/manifest.md`
-- [ ] S10: Review after one month whether the improvements helped — One-month review (2026-11-17 or later) — `plans/410-skill-improver-nightly-evidence-driven-skill-upgrades.plan.md`
+- [x] S8: Turn on the nightly schedule after your go and receive the first PR — Register the task (Dandan's go), receive one nightly PR — local machine
+- [x] S9: Note the skill improver in FoodVibe's manifest and ship — FoodVibe manifest note; `/ship` — `docs/workflow-kit/manifest.md`
+- [x] S10: Review after one month whether the improvements helped — One-month review (2026-11-17 or later) — `plans/410-skill-improver-nightly-evidence-driven-skill-upgrades.plan.md`
 
 ### Plan 411 — Workflow Scout: Weekly Claude Code and Community Update Page
 - [ ] C0: Check the plan is still right and test a cloud routine before building — Step 0 reality check + routine spike, findings written here — `plans/411-workflow-scout-weekly-claude-code-and-community-update-page.plan.md`
@@ -157,31 +157,6 @@
 - [x] U4: Ask the product's own weight when a unit is added from a recipe line or cook view — product mode, save the typed amount, drop the shared-rate math, specs — recipe-ingredients-table.component.ts, cook-view.page.ts and their specs
 - [x] U5: Add a read-only check that lists products and recipe lines the old behavior may have got wrong — three sections, local and Atlas — server/scripts/check-unit-weights.js
 - [ ] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
-
-### Plan 440 — Store event and serving coefficients and compute portions in one place (`plans/440-store-event-and-serving-coefficients-and-compute-portions-in-one-place.plan.md`)
-
-- [ ] Schema: `coefficient` on `eventType` and `menuType` terms; event snapshots; item `portionsPerDiner`,
-- [x] C1: Add coefficients to event and serving types, and type snapshots to events, in the schema — coefficientSchema, eventType member, menuType coefficient, typeSnapshotSchema, item portionsPerDiner / coefficientOverride, predictedTakeRate optional; npm run build:schemas; schema tests — shared/schemas/entities/taxonomy-term.schema.ts, shared/schemas/entities/menu-event.schema.ts, server/test/coefficient-schema.test.js
-- [x] C2: Mirror the new event fields in the client model so the app keeps compiling — TypeSnapshot, eventTypeSnapshot / servingTypeSnapshot, portionsPerDiner, coefficientOverride, predictedTakeRate optional; `item.predictedTakeRate ?? 0` in hydrateDerivedPortions — src/app/core/models/menu-event.model.ts, src/app/core/services/menu-intelligence.service.ts
-- [x] C3: Compute every menu item's portions in one pure function with the agreed rounding — computePortions, defaultCoefficient, isValidCoefficient, formatCoefficient per Design; spec with every acceptance number in Done-when — src/app/core/engine/portions.ts, src/app/core/engine/portions.spec.ts
-- [x] C4: Write migration 0007 that seeds coefficients and gives old events snapshots of 1.0 — pure functions + plan / write / verify / main per Design, dry run default, --write=yes + --backup-dir, --db scratch, --confirm-host, --verify=yes; vitest on fixtures incl. second run = 0 changes — server/migrations/0007-coefficients.js, server/test/migration-0007-coefficients.test.js
-- [x] C5: Seed a fresh database with the default event and serving types and their coefficients — defaultMasterRegistries + seedMasterTaxonomy; add chef_plated_front to the dictionary; seed test — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js, public/assets/data/dictionary.json
-- [x] C6: Rehearse migration 0007 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB: dry → write → dry (0) → verify; db-backup atlas → db-restore into foodvibe_scratch_0007 → same sequence; Atlas dry run with --confirm-host; paste counts, folds and portions-change list into session state; STOP for `go 0007` — this plan file, docs/session-state-<branch>.md
-- [ ] C7: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
-- [x] C8: Build, run the specs and server tests, check the error log — ng build, ng test (listed specs), npm --prefix server test, log-query — this plan file
-
-### Plan 442 — Give every event a stage, a stage history and a notes log on the server (`plans/442-give-every-event-a-stage-a-stage-history-and-a-notes-log-on-the-server.plan.md`)
-
-- [x] S1: Define the event stages and the server-owned event fields once, for client and server — EVENT_STAGES, NOT_CLOSED_REASONS, NOT_CLOSED_FROM, CLOSED_FROM_INDEX, NOTE_MAX_LENGTH, EVENT_SERVER_FIELDS; re-export from the entities index — shared/schemas/entities/event-stage.ts, shared/schemas/entities/index.ts
-- [x] S2: Add stage, history, notes, customer and deposit fields to the event schema and model — per Design; npm run build:schemas; schema tests — shared/schemas/entities/menu-event.schema.ts, src/app/core/models/menu-event.model.ts, server/test/event-stage-schema.test.js
-- [x] S3: Encode every stage-move and note rule in pure functions — applyStageChange, newNote per Design; tests for every case in Done-when — server/utils/event-stage.js, server/test/event-stage.test.js
-- [x] S4: Serve stage moves and notes from a dedicated events router — routes per Design with scopeFilter, assertCan, author check, rate limit, logging; mount at /api/v1/events; router tests — server/routes/events.js, server/app.js, server/test/events-router.test.js
-- [x] S5: Keep stages and notes server-only in the generic data API — POST stamps inquiry + first history + empty notes; POST and PUT drop EVENT_SERVER_FIELDS for menuEvents; tests in events-router.test.js — server/routes/generic.js
-- [x] S6: Write migration 0008 that gives every existing event a stage and marks it old — pure functions, plan / write / verify / main, modes per Design; vitest incl. second run = 0 — server/migrations/0008-event-stages.js, server/test/migration-0008-event-stages.test.js
-- [x] S7: Document the events endpoints for the next plans — add the /api/v1/events rows and why a dedicated router (server-owned history) to §5 — docs/agent/standards-backend.md
-- [ ] S8: Rehearse migration 0008 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB dry → write → dry (0) → verify; restored copy foodvibe_scratch_0008 same; Atlas dry run with --confirm-host; counts into session state; STOP for `go 0008` — this plan file, docs/session-state-<branch>.md
-- [ ] S9: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
-- [ ] S10: Build, run server tests, check the error log — ng build, npm --prefix server test, log-query — this plan file
 
 ### Plan 450 — Add the reuse layer: a component registry, a decision ladder and checks that catch a new copy (`plans/450-add-the-reuse-layer-a-component-registry-a-decision-ladder-and-checks-that-catch.plan.md`)
 

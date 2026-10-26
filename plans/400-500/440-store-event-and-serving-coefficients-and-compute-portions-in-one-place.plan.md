@@ -1,6 +1,6 @@
 # Plan 440 — Store event and serving coefficients and compute portions in one place
 
-Status: active
+Status: done
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -280,7 +280,7 @@ its coefficient.
 - [x] C4: Write migration 0007 that seeds coefficients and gives old events snapshots of 1.0 — pure functions + plan / write / verify / main per Design, dry run default, --write=yes + --backup-dir, --db scratch, --confirm-host, --verify=yes; vitest on fixtures incl. second run = 0 changes — server/migrations/0007-coefficients.js, server/test/migration-0007-coefficients.test.js
 - [x] C5: Seed a fresh database with the default event and serving types and their coefficients — defaultMasterRegistries + seedMasterTaxonomy; add chef_plated_front to the dictionary; seed test — server/services/seed-master.js, server/test/seed-master-taxonomy.test.js, public/assets/data/dictionary.json
 - [x] C6: Rehearse migration 0007 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB: dry → write → dry (0) → verify; db-backup atlas → db-restore into foodvibe_scratch_0007 → same sequence; Atlas dry run with --confirm-host; paste counts, folds and portions-change list into session state; STOP for `go 0007` — this plan file, docs/session-state-<branch>.md
-- [ ] C7: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
+- [x] C7: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
 - [x] C8: Build, run the specs and server tests, check the error log — ng build, ng test (listed specs), npm --prefix server test, log-query — this plan file
 
 ## Technical Considerations
@@ -311,3 +311,6 @@ its coefficient.
 
 ## Critical Questions
 none (Q1 decided by the Planner — see Execution Notes).
+
+## Close-out (2026-10-26)
+Atlas already carried migration 0007 (applied outside this slot). Checked read-only on `foodvibe` with snapshot `atlas-2026-10-26T17-40-55`: dry run 0 changes on every step, `--verify=yes` exit 0. Closed on the Human's `close 440`.

@@ -1,6 +1,6 @@
 # Plan 442 — Give every event a stage, a stage history and a notes log on the server
 
-Status: active
+Status: done
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -271,9 +271,9 @@ event gets one from the server), `stageHistory: z.array(z.strictObject({ stage: 
 - [x] S5: Keep stages and notes server-only in the generic data API — POST stamps inquiry + first history + empty notes; POST and PUT drop EVENT_SERVER_FIELDS for menuEvents; tests in events-router.test.js — server/routes/generic.js
 - [x] S6: Write migration 0008 that gives every existing event a stage and marks it old — pure functions, plan / write / verify / main, modes per Design; vitest incl. second run = 0 — server/migrations/0008-event-stages.js, server/test/migration-0008-event-stages.test.js
 - [x] S7: Document the events endpoints for the next plans — add the /api/v1/events rows and why a dedicated router (server-owned history) to §5 — docs/agent/standards-backend.md
-- [ ] S8: Rehearse migration 0008 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB dry → write → dry (0) → verify; restored copy foodvibe_scratch_0008 same; Atlas dry run with --confirm-host; counts into session state; STOP for `go 0008` — this plan file, docs/session-state-<branch>.md
-- [ ] S9: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
-- [ ] S10: Build, run server tests, check the error log — ng build, npm --prefix server test, log-query — this plan file
+- [x] S8: Rehearse migration 0008 locally and on an Atlas copy, then hand Dandan the Atlas dry run — slot DB dry → write → dry (0) → verify; restored copy foodvibe_scratch_0008 same; Atlas dry run with --confirm-host; counts into session state; STOP for `go 0008` — this plan file, docs/session-state-<branch>.md
+- [x] S9: After Dandan's go, write Atlas and verify — fresh atlas backup (< 24 h) → --write=yes --backup-dir → --verify=yes exit 0 — this plan file
+- [x] S10: Build, run server tests, check the error log — ng build, npm --prefix server test, log-query — this plan file
 
 ## Technical Considerations
 - Dependencies: `scopeFilter` (425), `assertCan` (427), `verifyToken`, `checkStoredDoc`, `newId`,
@@ -306,3 +306,6 @@ event gets one from the server), `stageHistory: z.array(z.strictObject({ stage: 
 
 ## Critical Questions
 none
+
+## Close-out (2026-10-26)
+Atlas already carried migration 0008. Checked read-only on `foodvibe` with snapshot `atlas-2026-10-26T17-40-55`: dry run `events to give a stage: 0`, `--verify=yes` exit 0. Server tests 63 files / 774 passed, `npx ng build` exit 0, error log: no 442-related entries. Closed on the Human's `close 442`.
