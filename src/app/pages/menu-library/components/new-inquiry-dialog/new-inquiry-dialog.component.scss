@@ -1,0 +1,17 @@
+@layer components.new-inquiry-dialog {
+  :host {
+    display: contents;
+  }
+
+  .inquiry-row {
+    display: grid;
+    /* Two columns only when each can hold a full dd/mm/yyyy date plus the calendar button; stacks on phones. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-3);
+  }
+
+  textarea {
+    inline-size: 100%;
+    resize: vertical;
+  }
+}

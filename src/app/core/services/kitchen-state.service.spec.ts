@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http'
 import { TestBed } from '@angular/core/testing'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { provideHttpClient } from '@angular/common/http'
@@ -115,12 +116,43 @@ describe('KitchenStateService', () => {
       productDataSpy.addProduct.and.returnValue(Promise.resolve(savedProduct))
 
       // FIXED: Method name in service is saveProduct
-      service.saveProduct(product).subscribe(() => {
+      void service.saveProduct(product).then(() => {
         expect(productDataSpy.addProduct).toHaveBeenCalled()
-        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('חומר גלם נוסף בהצלחה')
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('product_added_success')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
         done()
       })
+    })
+
+    it('plan 484: an update that keeps the name saves even when a twin has it', async () => {
+      const mine = { ...createMockProduct('p1'), nameHebrew: 'מלפפון' }
+      const twin = { ...createMockProduct('p2'), nameHebrew: 'מלפפון' }
+      mockAllItemsSignal.set([mine, twin])
+      TestBed.flushEffects()
+      productDataSpy.updateProduct.and.returnValue(Promise.resolve())
+      await service.saveProduct({ ...mine, buy_price_global_: 5 } as Product)
+      expect(productDataSpy.updateProduct).toHaveBeenCalled()
+      expect(userMsgSpy.onSetErrorMsg).not.toHaveBeenCalledWith('product_duplicate_name_error')
+    })
+
+    it('plan 484: an update renamed to a taken name is refused', async () => {
+      const mine = { ...createMockProduct('p1'), nameHebrew: 'מלפפון' }
+      const other = { ...createMockProduct('p2'), nameHebrew: 'כרובית' }
+      mockAllItemsSignal.set([mine, other])
+      TestBed.flushEffects()
+      await expectAsync(service.saveProduct({ ...mine, nameHebrew: ' כרובית' })).toBeRejected()
+      expect(productDataSpy.updateProduct).not.toHaveBeenCalled()
+      expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('product_duplicate_name_error')
+    })
+
+    it('plan 485: a server name clash shows the duplicate-name message', async () => {
+      mockAllItemsSignal.set([])
+      TestBed.flushEffects()
+      productDataSpy.addProduct.and.returnValue(
+        Promise.reject(new HttpErrorResponse({ status: 409, error: { error: 'PRODUCT_NAME_TAKEN' } }))
+      )
+      await expectAsync(service.saveProduct({ ...createMockProduct(''), nameHebrew: 'מלפפון' })).toBeRejected()
+      expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('product_duplicate_name_error')
     })
 
     it('should delete product if exists and show success', (done) => {
@@ -130,9 +162,9 @@ describe('KitchenStateService', () => {
       // FIXED: ProductDataService uses deleteProduct
       productDataSpy.deleteProduct.and.returnValue(Promise.resolve())
 
-      service.deleteProduct('p-del').subscribe(() => {
+      void service.deleteProduct('p-del').then(() => {
         expect(productDataSpy.deleteProduct).toHaveBeenCalledWith('p-del')
-        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('חומר הגלם נמחק בהצלחה')
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('product_deleted_success')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
         done()
       })
@@ -142,13 +174,11 @@ describe('KitchenStateService', () => {
       mockAllItemsSignal.set([])
       TestBed.flushEffects()
 
-      service.deleteProduct('none').subscribe({
-        error: (err) => {
-          expect(err.message).toBe('NOT_FOUND')
-          // FIX: Align with the actual string in kitchen-state.service.ts
-          expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('הפריט לא נמצא')
-          done()
-        }
+      service.deleteProduct('none').catch((err: Error) => {
+        expect(err.message).toBe('NOT_FOUND')
+        // FIX: Align with the actual string in kitchen-state.service.ts
+        expect(userMsgSpy.onSetErrorMsg).toHaveBeenCalledWith('item_not_found_error')
+        done()
       })
     })
   })
@@ -167,9 +197,9 @@ describe('KitchenStateService', () => {
       } as Recipe
       recipeDataSpy.addRecipe.and.returnValue(Promise.resolve({ ...recipe, _id: 'r1' }))
 
-      service.saveRecipe(recipe).subscribe(() => {
+      void service.saveRecipe(recipe).then(() => {
         expect(recipeDataSpy.addRecipe).toHaveBeenCalled()
-        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המתכון נשמר בהצלחה')
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('recipe_saved_success')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
         done()
       })
@@ -190,9 +220,9 @@ describe('KitchenStateService', () => {
       const dishDataSpy = TestBed.inject(DishDataService) as jasmine.SpyObj<DishDataService>
       dishDataSpy.addDish.and.returnValue(Promise.resolve({ ...dish, _id: 'd1' }))
 
-      service.saveRecipe(dish).subscribe(() => {
+      void service.saveRecipe(dish).then(() => {
         expect(dishDataSpy.addDish).toHaveBeenCalled()
-        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('המנה נשמרה בהצלחה')
+        expect(userMsgSpy.onSetSuccessMsg).toHaveBeenCalledWith('dish_saved_success')
         expect(activityLogSpy.recordActivity).toHaveBeenCalled()
         done()
       })
@@ -212,7 +242,7 @@ describe('KitchenStateService', () => {
       } as unknown as Recipe
       recipeDataSpy.updateRecipe.and.callFake((r: Recipe) => Promise.resolve(r))
 
-      service.saveRecipe(legacy).subscribe(() => {
+      void service.saveRecipe(legacy).then(() => {
         expect(recipeDataSpy.updateRecipe).toHaveBeenCalledWith(
           jasmine.objectContaining({ logistics: { baseline: [] } })
         )

@@ -1,0 +1,23 @@
+<div class="c-modal-overlay" [class.m-sheet]="sheet()" [style.z-index]="zIndex()" (click)="onBackdropClick()">
+  <div
+    #card
+    class="c-modal-card"
+    [class.c-modal-card--md]="size() === 'md'"
+    [class.c-modal-card--fluid]="size() === 'fluid'"
+    [class]="cardClass()"
+    [class.m-sheet-card]="sheet()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-labelledby]="titleKey() ? titleId : labelledBy()"
+    [attr.aria-label]="labelKey() ? (labelKey()! | translatePipe) : null"
+    dir="rtl"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="onCardKeydown($event)"
+  >
+    @if (titleKey(); as key) {
+      <h3 [id]="titleId">{{ key | translatePipe }}</h3>
+    }
+    <ng-content />
+  </div>
+</div>

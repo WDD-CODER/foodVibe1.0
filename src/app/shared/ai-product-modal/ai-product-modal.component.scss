@@ -1,4 +1,5 @@
-.ai-product-modal-card {
+/* The card lives in app-modal-shell (its own view), so reach it through :host */
+:host ::ng-deep .ai-product-modal-card {
   max-inline-size: 560px;
   inline-size: 90vw;
   max-block-size: 85dvh;
@@ -248,36 +249,6 @@
 }
 
 // ── Chips ─────────────────────────────────────────────────────────────────────
-
-.ai-product-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.125rem 0.5rem;
-  background: var(--c-surface-2, #e5e7eb);
-  border-radius: 999px;
-  font-size: 0.8125rem;
-}
-
-.ai-product-chip--allergen {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.chip-remove {
-  background: none;
-  border: none;
-  padding: 0;
-  line-height: 1;
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: inherit;
-  opacity: 0.6;
-
-  &:hover {
-    opacity: 1;
-  }
-}
 
 // ── Patch list ────────────────────────────────────────────────────────────────
 

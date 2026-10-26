@@ -26,16 +26,16 @@ describe('RecipeBuilderExportService', () => {
 
   it('opens the toolbar on the next tick and closes it with its dropdown', fakeAsync(() => {
     service.openToolbar()
-    expect(service.exportToolbarOpen_()).toBeFalse()
+    expect(service.isExportToolbarOpen_()).toBeFalse()
     tick()
-    expect(service.exportToolbarOpen_()).toBeTrue()
+    expect(service.isExportToolbarOpen_()).toBeTrue()
     service.openViewExportModal('shopping-list')
     expect(service.viewExportModal_()).toBe('shopping-list')
     service.openViewExportModal('shopping-list')
     expect(service.viewExportModal_()).toBeNull()
     service.openViewExportModal('all')
     service.closeToolbar()
-    expect(service.exportToolbarOpen_()).toBeFalse()
+    expect(service.isExportToolbarOpen_()).toBeFalse()
     expect(service.viewExportModal_()).toBeNull()
   }))
 
@@ -49,11 +49,11 @@ describe('RecipeBuilderExportService', () => {
   })
 
   it('closeAllExportOverlays leaves nothing open', () => {
-    service.exportToolbarOpen_.set(true)
+    service.isExportToolbarOpen_.set(true)
     service.openViewExportModal('recipe-info')
     service.onViewShoppingList()
     service.closeAllExportOverlays()
-    expect(service.exportToolbarOpen_()).toBeFalse()
+    expect(service.isExportToolbarOpen_()).toBeFalse()
     expect(service.viewExportModal_()).toBeNull()
     expect(service.exportPreviewPayload_()).toBeNull()
   })

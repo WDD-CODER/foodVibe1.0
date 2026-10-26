@@ -1,25 +1,38 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { Router } from '@angular/router'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { MenuEventDataService } from '@services/menu-event-data.service'
-import { MenuIntelligenceService } from '@services/menu-intelligence.service'
 import { MenuEvent } from '@models/menu-event.model'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UserService } from '@services/user.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { formatMoney, formatPct1 } from 'src/app/core/engine/rounding'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { EmptyStateComponent } from 'src/app/shared/empty-state/empty-state.component'
-import { useListState, StringParam } from 'src/app/core/utils/list-state.util'
+import { useListState, StringParam, ParamSerializer } from 'src/app/core/utils/list-state.util'
+import { EVENT_STAGE_ORDER, isActiveStage, stageLabelKey } from 'src/app/core/utils/event-stage-ui.util'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
+import { NewInquiryDialogComponent } from '../new-inquiry-dialog/new-inquiry-dialog.component'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
+
+/** Plan 443: `active` (live events, the default), `all`, or one stage key. */
+const STAGE_FILTER_VALUES: readonly string[] = ['active', 'all', ...EVENT_STAGE_ORDER]
+const StageFilterParam: ParamSerializer<string> = {
+  toUrl: (v) => (v === 'active' ? null : v),
+  fromUrl: (r) => (STAGE_FILTER_VALUES.includes(r) ? r : 'active'),
+  toSession: (v) => v,
+  fromSession: (r) => (typeof r === 'string' && STAGE_FILTER_VALUES.includes(r) ? r : 'active')
+}
 
 @Component({
   selector: 'app-menu-library-list',
@@ -33,7 +46,8 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
     CustomSelectComponent,
     EmptyStateComponent,
     InputClearComponent,
-    PageHeaderComponent
+    PageHeaderComponent,
+    NewInquiryDialogComponent
   ],
   templateUrl: './menu-library-list.component.html',
   styleUrl: './menu-library-list.component.scss',
@@ -41,8 +55,8 @@ export type SortField = 'name' | 'date' | 'food_cost' | 'guest_count'
 })
 export class MenuLibraryListComponent {
   private readonly router = inject(Router)
+  private readonly route = inject(ActivatedRoute)
   private readonly menuEventData = inject(MenuEventDataService)
-  private readonly menuIntelligence = inject(MenuIntelligenceService)
   private readonly confirmModal = inject(ConfirmModalService)
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly userMsg = inject(UserMsgService)
@@ -55,8 +69,17 @@ export class MenuLibraryListComponent {
   protected readonly dateFrom_ = signal('')
   protected readonly sortBy_ = signal<SortField>('date')
   protected readonly sortOrder_ = signal<'asc' | 'desc'>('desc')
+  protected readonly listControls = useListControls<SortField>({
+    search: this.searchQuery_,
+    sortBy: this.sortBy_,
+    sortOrder: this.sortOrder_
+  })
   protected readonly cloningId_ = signal<string | null>(null)
   protected readonly deletingId_ = signal<string | null>(null)
+  protected readonly stageFilter_ = signal('active')
+  /** The "פנייה חדשה" form is open while the URL carries `?new=inquiry` (the FAB action and the header button both set it). */
+  protected readonly isInquiryOpen_ = signal(false)
+  protected readonly stageLabelKey = stageLabelKey
 
   constructor() {
     useListState('menu-library', [
@@ -65,8 +88,12 @@ export class MenuLibraryListComponent {
       { urlParam: 'order', signal: this.sortOrder_, serializer: StringParam },
       { urlParam: 'eventType', signal: this.eventTypeFilter_, serializer: StringParam },
       { urlParam: 'style', signal: this.servingStyleFilter_, serializer: StringParam },
-      { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: StringParam }
+      { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: StringParam },
+      { urlParam: 'stage', signal: this.stageFilter_, serializer: StageFilterParam }
     ])
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed())
+      .subscribe((params) => this.isInquiryOpen_.set(params.get('new') === 'inquiry'))
   }
 
   protected readonly events_ = this.menuEventData.allMenuEvents_
@@ -90,6 +117,12 @@ export class MenuLibraryListComponent {
     this.eventTypeOptions_().map((t) => ({ value: t, label: t }))
   )
 
+  protected readonly stageOptions_: { value: string; label: string }[] = [
+    { value: 'active', label: 'stage_filter_active' },
+    { value: 'all', label: 'stage_filter_all' },
+    ...EVENT_STAGE_ORDER.map((stage) => ({ value: stage, label: stageLabelKey(stage) }))
+  ]
+
   protected readonly sortBySelectOptions_: { value: SortField; label: string }[] = [
     { value: 'date', label: 'sort_by_date' },
     { value: 'name', label: 'sort_by_name' },
@@ -98,27 +131,34 @@ export class MenuLibraryListComponent {
   ]
 
   protected readonly filteredEvents_ = computed(() => {
-    const query = this.searchQuery_().trim().toLowerCase()
+    const query = this.searchQuery_().trim()
     const type = this.eventTypeFilter_()
     const style = this.servingStyleFilter_()
     const from = this.dateFrom_()
+    const stage = this.stageFilter_()
     const sortBy = this.sortBy_()
     const sortOrder = this.sortOrder_()
 
     let events = this.events_().filter((event) => {
       if (type !== 'all' && event.eventType !== type) return false
       if (style !== 'all' && event.servingType !== style) return false
+      if (stage === 'active' ? !isActiveStage(event.stage) : stage !== 'all' && (event.stage ?? 'inquiry') !== stage)
+        return false
       if (from && (!event.eventDate || event.eventDate < from)) return false
       if (query) {
-        const haystack = [event.name, event.eventType, event.eventDate || '', ...(event.cuisineTags || [])]
-          .join(' ')
-          .toLowerCase()
-        if (!haystack.includes(query)) return false
+        if (!matchesSearch(query, event.name, event.eventType, event.eventDate, ...(event.cuisineTags || [])))
+          return false
       }
       return true
     })
 
     events = [...events].sort((a, b) => {
+      if (sortBy === 'food_cost') {
+        // Events without a pricing summary (or without revenue) sort last, whichever the direction.
+        const x = this.foodCostRatio(a)
+        const y = this.foodCostRatio(b)
+        if (x === null || y === null) return x === y ? 0 : x === null ? 1 : -1
+      }
       const cmp = this.compareEvents(a, b, sortBy)
       return sortOrder === 'asc' ? cmp : -cmp
     })
@@ -126,9 +166,10 @@ export class MenuLibraryListComponent {
     return events
   })
 
-  private getFoodCostPctForSort(event: MenuEvent): number {
-    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event)
-    return this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated)
+  /** Plan 445: food cost ÷ revenue from the pricing summary stored on save; null when there is none. */
+  private foodCostRatio(event: MenuEvent): number | null {
+    const pricing = event.pricing
+    return pricing && pricing.revenue > 0 ? pricing.foodCost / pricing.revenue : null
   }
 
   private compareEvents(a: MenuEvent, b: MenuEvent, field: SortField): number {
@@ -138,7 +179,7 @@ export class MenuLibraryListComponent {
       case 'date':
         return (a.eventDate || '').localeCompare(b.eventDate || '')
       case 'food_cost':
-        return this.getFoodCostPctForSort(a) - this.getFoodCostPctForSort(b)
+        return (this.foodCostRatio(a) ?? 0) - (this.foodCostRatio(b) ?? 0)
       case 'guest_count':
         return (a.guestCount ?? 0) - (b.guestCount ?? 0)
       default:
@@ -147,16 +188,23 @@ export class MenuLibraryListComponent {
   }
 
   protected setSort(field: SortField): void {
-    if (this.sortBy_() === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
+    this.listControls.setSort(field)
   }
 
   protected onCreateNew(): void {
     this.router.navigate(['/menu-intelligence'])
+  }
+
+  protected openInquiry(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { new: 'inquiry' },
+      queryParamsHandling: 'merge'
+    })
+  }
+
+  protected closeInquiry(): void {
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { new: null }, queryParamsHandling: 'merge' })
   }
 
   protected onOpen(event: MenuEvent): void {
@@ -188,31 +236,16 @@ export class MenuLibraryListComponent {
     }
   }
 
-  /** Food cost % from actual revenue (same logic as menu-intelligence page). Computed live so card matches detail view. */
+  /** Food cost % of the revenue, both read from the pricing summary stored on save ("—" when there is none). */
   protected getFoodCostPctDisplay(event: MenuEvent): string {
-    const hydrated = this.menuIntelligence.hydrateDerivedPortions(event)
-    const pct = this.menuIntelligence.computeFoodCostPctFromActualRevenue(hydrated)
-    return `${pct.toFixed(1)}%`
+    const ratio = this.foodCostRatio(event)
+    return ratio === null ? '—' : formatPct1(ratio * 100)
   }
 
-  /** Total sale price (revenue): sum of sell_price × derived_portions for all items. */
+  /** Revenue as the pricing meter showed it on the last save ("—" when there is none). */
   protected getTotalSalePriceDisplay(event: MenuEvent): string {
-    const total = this.computeEventRevenue(event)
-    if (total <= 0) return '—'
-    return `₪${total.toLocaleString('he-IL', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
-  }
-
-  private computeEventRevenue(event: MenuEvent): number {
-    let sum = 0
-    const guestCount = event.guestCount ?? 0
-    for (const section of event.sections || []) {
-      for (const item of section.items || []) {
-        const price = item.sellPrice ?? 0
-        const portions = item.derivedPortions ?? guestCount * (item.servingPortions ?? 1)
-        sum += price * portions
-      }
-    }
-    return sum
+    const revenue = event.pricing?.revenue ?? 0
+    return revenue > 0 ? formatMoney(revenue) : '—'
   }
 
   protected getGuestCountDisplay(event: MenuEvent): string {
@@ -253,17 +286,11 @@ export class MenuLibraryListComponent {
     }
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }

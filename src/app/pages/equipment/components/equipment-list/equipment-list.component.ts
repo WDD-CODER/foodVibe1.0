@@ -42,6 +42,8 @@ import { EquipmentCategoryRegistryService } from '@services/equipment-category-r
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
@@ -52,6 +54,7 @@ type EquipmentBulkField = 'category' | 'isConsumable'
   selector: 'app-equipment-list',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
@@ -149,6 +152,11 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected sortBy_ = signal<SortField>('name')
   protected deletingId_ = signal<string | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
+  protected readonly listControls = useListControls<SortField>({
+    search: this.searchQuery_,
+    sortBy: this.sortBy_,
+    sortOrder: this.sortOrder_
+  })
   protected editingId_ = signal<string | null>(null)
   protected closingId_ = signal<string | null>(null)
   protected selection = new ListSelectionState()
@@ -182,14 +190,14 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   protected filteredEquipment_ = computed(() => {
     let list = this.equipmentData.allEquipment_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const cats = this.selectedCategories_()
     const consumableOnly = this.consumableFilter_()
     const sortBy = this.sortBy_()
     const order = this.sortOrder_()
 
     if (search) {
-      list = list.filter((e) => (e.nameHebrew ?? '').toLowerCase().includes(search))
+      list = list.filter((e) => matchesSearch(search, e.nameHebrew))
     }
     if (cats.size > 0) {
       list = list.filter((e) => cats.has(e.category))
@@ -317,17 +325,14 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected clearAllFilters(): void {
-    this.selectedCategories_.set(new Set())
-    this.consumableFilter_.set(null)
+    this.listControls.clearAll(
+      () => this.selectedCategories_.set(new Set()),
+      () => this.consumableFilter_.set(null)
+    )
   }
 
   protected setSort(field: SortField): void {
-    if (this.sortBy_() === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
+    this.listControls.setSort(field)
   }
 
   protected onAdd(): void {
@@ -367,10 +372,10 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     if (!this.requireAuthService.requireAuth()) return
     const currentId = this.editingId_()
     if (currentId !== null && currentId !== item._id && this.editForm_.dirty) {
-      const saveFirst = await this.confirmModal.open(
-        this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. שמור לפני מעבר?',
-        { variant: 'warning', saveLabel: 'save' }
-      )
+      const saveFirst = await this.confirmModal.open(this.translation.translate('unsaved_changes_confirm'), {
+        variant: 'warning',
+        saveLabel: 'save'
+      })
       if (saveFirst) {
         await this.saveCurrentInlineEdit()
       }
@@ -403,8 +408,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
       const msg =
         err instanceof Error && err.message === ERR_DUPLICATE_EQUIPMENT_NAME
-          ? (this.translation.translate('duplicate_equipment_name') ?? 'כלי עם שם זה כבר קיים')
-          : (this.translation.translate('save_failed') ?? 'שגיאה בשמירה')
+          ? this.translation.translate('duplicate_equipment_name')
+          : this.translation.translate('save_failed')
       this.userMsg.onSetErrorMsg(msg)
       return false
     } finally {
@@ -439,10 +444,10 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
    * click doesn't need re-confirming, only an accidental outside-click does. */
   protected async onInlinePanelClickOutside(): Promise<void> {
     if (this.editForm_.dirty) {
-      const discard = await this.confirmModal.open(
-        this.translation.translate('unsaved_changes_confirm') ?? 'יש שינויים שלא נשמרו. האם אתה בטוח שברצונך לצאת?',
-        { variant: 'warning', saveLabel: 'leave_without_saving' }
-      )
+      const discard = await this.confirmModal.open(this.translation.translate('unsaved_changes_confirm'), {
+        variant: 'warning',
+        saveLabel: 'leave_without_saving'
+      })
       if (!discard) return
     }
     this.closeWithAnimation()
@@ -451,9 +456,12 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   async onDelete(item: Equipment): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
     if (
-      !(await this.confirmModal.open('האם למחוק את פריט הציוד "' + (item.nameHebrew ?? '') + '"?', {
-        variant: 'danger'
-      }))
+      !(await this.confirmModal.open(
+        this.translation.translate('confirm_delete_equipment_named').replace('{name}', item.nameHebrew ?? ''),
+        {
+          variant: 'danger'
+        }
+      ))
     )
       return
     this.deletingId_.set(item._id)
@@ -485,7 +493,8 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   protected async onBulkDeleteSelected(ids: string[]): Promise<void> {
     if (ids.length === 0) return
     if (!this.requireAuthService.requireAuth()) return
-    if (!(await this.confirmModal.open(`למחוק ${ids.length} פריטי ציוד?`, { variant: 'danger' }))) return
+    const message = this.translation.translate('confirm_bulk_delete_equipment').replace('{n}', String(ids.length))
+    if (!(await this.confirmModal.open(message, { variant: 'danger' }))) return
     for (const id of ids) {
       this.deletingId_.set(id)
       try {
@@ -499,17 +508,11 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     this.selection.clear()
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 }

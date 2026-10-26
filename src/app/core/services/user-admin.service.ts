@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http'
 import { Observable } from 'rxjs'
 import { AdminUser } from '../models/admin-user.model'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 
 @Injectable({ providedIn: 'root' })
 export class UserAdminService {
@@ -10,10 +11,12 @@ export class UserAdminService {
   private base = environment.apiUrl
 
   getUsers(): Observable<AdminUser[]> {
-    return this.http.get<AdminUser[]>(`${this.base}/api/v1/admin/users`)
+    return this.http.get<AdminUser[]>(`${this.base}${API.admin('users')}`)
   }
 
-  deleteUser(userId: string): Observable<{ ok: boolean }> {
-    return this.http.delete<{ ok: boolean }>(`${this.base}/api/v1/admin/users/${userId}`)
+  deleteUser(userId: string): Observable<{ ok: boolean; deletedBusiness?: boolean; usersDeleted?: number }> {
+    return this.http.delete<{ ok: boolean; deletedBusiness?: boolean; usersDeleted?: number }>(
+      `${this.base}${API.admin(`users/${userId}`)}`
+    )
   }
 }

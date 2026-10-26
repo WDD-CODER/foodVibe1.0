@@ -19,7 +19,9 @@
   border-radius: var(--radius-full);
 
   overflow: visible;
-  transition: border-color 0.2s ease, background 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease;
 
   cursor: default;
 
@@ -34,27 +36,5 @@
 
   &.scaling-chip--has-remove {
     padding-inline-end: 0.25rem;
-  }
-}
-
-.scaling-chip-remove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  width: 1.25rem;
-  height: 1.25rem;
-  padding: 0;
-
-  background: var(--bg-danger-subtle);
-  color: var(--color-danger);
-
-  border: none;
-  border-radius: var(--radius-full);
-
-  cursor: pointer;
-
-  &:hover {
-    filter: brightness(0.95);
   }
 }

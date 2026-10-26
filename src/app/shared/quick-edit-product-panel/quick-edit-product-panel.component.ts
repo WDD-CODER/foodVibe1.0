@@ -20,13 +20,24 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
+import { LoggingService } from '@services/logging.service'
 import { Product, ProductSource } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
+import { isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 @Component({
   selector: 'app-quick-edit-product-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './quick-edit-product-panel.component.html',
   styleUrl: './quick-edit-product-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -37,6 +48,8 @@ export class QuickEditProductPanelComponent {
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly kitchenState = inject(KitchenStateService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly logging = inject(LoggingService)
 
   // INPUTS / OUTPUTS
   product = input.required<Product>()
@@ -55,7 +68,7 @@ export class QuickEditProductPanelComponent {
   protected selectedSupplierIds_ = signal<string[]>([])
   protected error_ = signal<string | null>(null)
   protected isSubmitting_ = signal(false)
-  protected showUnsavedConfirm_ = signal(false)
+  protected shouldShowUnsavedConfirm_ = signal(false)
   protected nameError_ = signal('')
   protected unitError_ = signal('')
 
@@ -175,33 +188,43 @@ export class QuickEditProductPanelComponent {
 
     try {
       await this.productData.updateProduct(updated)
-      this.userMsg.onSetSuccessMsg('המוצר נשמר')
+      this.userMsg.onSetSuccessMsg(this.translation.translate('product_saved'))
       this.isSubmitting_.set(false)
       this.saved.emit()
-    } catch {
+    } catch (err) {
+      this.logging.error({
+        event: 'crud.products.quick_edit_error',
+        message: 'Quick edit save error',
+        context: { err }
+      })
       this.isSubmitting_.set(false)
-      this.error_.set('שגיאה בשמירת המוצר')
+      // Plan 485: a rename to a taken name is shown on the name box.
+      if (isProductNameTaken(err)) {
+        this.nameError_.set('duplicate_product_name_error')
+        return
+      }
+      this.error_.set(this.translation.translate('product_save_error'))
     }
   }
 
   protected onCancel(): void {
     if (this.isDirty_()) {
-      this.showUnsavedConfirm_.set(true)
+      this.shouldShowUnsavedConfirm_.set(true)
     } else {
       this.cancelled.emit()
     }
   }
 
   protected onDiscardAndClose(): void {
-    this.showUnsavedConfirm_.set(false)
+    this.shouldShowUnsavedConfirm_.set(false)
     this.cancelled.emit()
   }
 
   /** Called by the parent before closing (e.g. clickOutside on the accordion). */
   requestClose(): void {
-    if (this.showUnsavedConfirm_()) return
+    if (this.shouldShowUnsavedConfirm_()) return
     if (this.isDirty_()) {
-      this.showUnsavedConfirm_.set(true)
+      this.shouldShowUnsavedConfirm_.set(true)
     } else {
       this.cancelled.emit()
     }

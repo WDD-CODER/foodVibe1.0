@@ -4,6 +4,7 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
+import { StationRegistryService } from '@services/station-registry.service'
 import { TranslationService } from '@services/translation.service'
 import { Recipe, RecipeStep, FlatPrepItem, PrepCategory } from '@models/recipe.model'
 import { Ingredient } from '@models/ingredient.model'
@@ -25,16 +26,25 @@ export class RecipeFormService {
   private readonly state = inject(KitchenStateService)
   private readonly recipeCost = inject(RecipeCostService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
+  private readonly stationRegistry = inject(StationRegistryService)
   private readonly translation = inject(TranslationService)
 
   // ─── Validators ───────────────────────────────────────────────────
 
-  /** Require amount > 0 when referenceId or nameHebrew is set; empty rows are valid. */
+  /**
+   * A linked row needs amount > 0; empty rows are valid. An unlinked ("not ready") row — a name with no
+   * product behind it — may have no amount yet, so a pasted line the app could not read still saves.
+   */
   ingredientRowValidator(control: AbstractControl): ValidationErrors | null {
     const refId = control.get('referenceId')?.value
     const name = control.get('nameHebrew')?.value?.trim()
     if (!refId && !name) return null
     const amount = control.get('amount_net')?.value
+    if (!refId) {
+      if (amount == null || amount === '') return null
+      const numUnlinked = typeof amount === 'number' ? amount : Number(amount)
+      return isNaN(numUnlinked) || numUnlinked < 0 ? { min: true } : null
+    }
     if (amount == null || amount === '') return { required: true }
     const numAmt = typeof amount === 'number' ? amount : Number(amount)
     if (isNaN(numAmt) || numAmt <= 0) return { min: true }
@@ -190,8 +200,8 @@ export class RecipeFormService {
     const ingredients: Ingredient[] = rawIngredients
       .filter((ing) => {
         if (ing?.referenceId) return true
-        if (ing?.nameHebrew?.trim() && (ing.amount_net ?? 0) > 0) return true
-        return false
+        // An unlinked row keeps its text even without an amount — nothing the chef pasted is dropped.
+        return !!ing?.nameHebrew?.trim()
       })
       .map((ing) => ({
         _id: 'ing_' + Math.random().toString(36).slice(2, 9),
@@ -273,6 +283,9 @@ export class RecipeFormService {
     const rawCourse = ((raw['course'] as string | undefined) ?? '').trim()
     const course = this.metadataRegistry.courses_().some((c) => c.key === rawCourse) ? rawCourse : ''
 
+    const rawStation = ((raw['default_station'] as string | undefined) ?? '').trim()
+    const defaultStation = this.stationRegistry.hasStation(rawStation) ? rawStation : ''
+
     return {
       _id: (recipeId ?? '') as string,
       nameHebrew: (raw['nameHebrew'] as string)?.trim() ?? '',
@@ -281,7 +294,7 @@ export class RecipeFormService {
       yieldAmount: yieldAmount,
       yieldUnit: yieldUnit,
       ...(yieldConversions.length > 0 ? { yieldConversions: yieldConversions } : {}),
-      defaultStation: '',
+      defaultStation: defaultStation,
       isApproved: isApproved,
       recipeType: isDish ? 'dish' : 'preparation',
       labels: labels,
@@ -332,7 +345,8 @@ export class RecipeFormService {
         total_weight_g: 0,
         total_cost: 0,
         labels: normalizedLabels,
-        course: recipe.course ?? ''
+        course: recipe.course ?? '',
+        default_station: recipe.defaultStation ?? ''
       },
       { emitEvent: false }
     )

@@ -10,7 +10,12 @@ export const nameField = z.string().max(NAME_MAX_LENGTH)
 export const baseDocShape = {
   _id: z.string().min(1),
   schemaVersion: z.literal(2),
-  userId: z.string().min(1),
+  /** Legacy owner field (plan 425): still written, never read for scoping. */
+  userId: z.string().min(1).optional(),
+  /** The business (tenant) that owns the item; `'__master__'` for shared master items. */
+  businessId: z.string().min(1),
+  /** userId of whoever created the item. */
+  createdBy: z.string().min(1),
   createdAt: z.number(),
   updatedAt: z.number(),
   deletedAt: z.number().optional(),
@@ -25,7 +30,9 @@ export const baseDocShape = {
 export const tombstoneSchema = z.strictObject({
   _id: z.string().min(1),
   schemaVersion: z.literal(2),
-  userId: z.string().min(1),
+  userId: z.string().min(1).optional(),
+  businessId: z.string().min(1),
+  createdBy: z.string().min(1).optional(),
   _masterId: z.string().min(1),
   _userModified: z.boolean().optional(),
   deletedAt: z.number(),

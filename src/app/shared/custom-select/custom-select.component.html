@@ -1,15 +1,15 @@
 <div
   class="custom-select-wrap"
-  [class.open]="open()"
+  [class.open]="isOpen()"
   [class.custom-select-wrap--chip]="variant() === 'chip'"
-  (clickOutside)="close()"
+  (appClickOutside)="close()"
 >
   @if (typeToFilter()) {
     <div
       class="custom-select-trigger custom-select-trigger--input"
       [class.custom-select-trigger--compact]="compact()"
       [class.custom-select-trigger--chip]="variant() === 'chip'"
-      [class.open]="open()"
+      [class.open]="isOpen()"
       (click)="openDropdown()"
     >
       <input
@@ -20,12 +20,14 @@
         [value]="inputDisplayValue_()"
         [attr.size]="variant() === 'chip' ? chipInputSize_() : null"
         (input)="onInputInput($any($event.target).value)"
-        (focus)="openDropdown()"
+        (focus)="onInputFocus()"
         (blur)="onTriggerBlur()"
         (keydown)="onInputKeydown($event)"
-        [attr.aria-expanded]="open()"
+        [attr.aria-expanded]="isOpen()"
         aria-haspopup="listbox"
-        [attr.aria-activedescendant]="open() && highlightedIndex() >= 0 ? optionIdPrefix_() + highlightedIndex() : null"
+        [attr.aria-activedescendant]="
+          isOpen() && highlightedIndex() >= 0 ? optionIdPrefix_() + highlightedIndex() : null
+        "
         autocomplete="off"
         autocorrect="off"
         autocapitalize="off"
@@ -35,7 +37,7 @@
       />
       @if (variant() !== 'chip') {
         <app-input-clear
-          [visible]="open() && !!searchQuery_()"
+          [visible]="isOpen() && !!searchQuery_()"
           (clear)="onClearSearch()"
           (click)="$event.stopPropagation()"
         />
@@ -50,14 +52,14 @@
       class="c-select custom-select-trigger"
       [class.custom-select-trigger--compact]="compact()"
       [class.custom-select-trigger--chip]="variant() === 'chip'"
-      [class.open]="open()"
+      [class.open]="isOpen()"
       [disabled]="disabled"
       (mousedown)="onTriggerMousedown()"
       (focus)="onTriggerFocus()"
       (click)="onTriggerClick()"
       (keydown)="onKeydown($event)"
       (blur)="onTriggerBlur()"
-      [attr.aria-expanded]="open()"
+      [attr.aria-expanded]="isOpen()"
       aria-haspopup="listbox"
       [attr.aria-label]="placeholder() | translatePipe"
     >
@@ -76,7 +78,7 @@
     </button>
   }
 
-  @if (open()) {
+  @if (isOpen()) {
     <app-scrollable-dropdown [maxHeight]="maxHeight()" role="listbox">
       @for (opt of visibleOptions_(); track opt.value; let i = $index) {
         <button
@@ -87,6 +89,7 @@
           [class.highlighted]="highlightedIndex() === i"
           role="option"
           [attr.aria-selected]="value === opt.value"
+          (mousedown)="$event.preventDefault()"
           (click)="onOptionClick(opt)"
         >
           @if (translateLabels()) {
@@ -106,6 +109,7 @@
             [class.highlighted]="highlightedIndex() === visibleOptions_().length"
             role="option"
             [attr.aria-selected]="false"
+            (mousedown)="$event.preventDefault()"
             (click)="onOptionClick(addNewOption_()!)"
           >
             <app-add-option-row [label]="addLabel_()" />

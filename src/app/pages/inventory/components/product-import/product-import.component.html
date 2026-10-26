@@ -1,0 +1,302 @@
+<div class="product-import" dir="rtl">
+  <app-page-header titleKey="import_products" backLink="/inventory/list" backLabelKey="import_back_to_inventory" />
+
+  @if (!allowed_()) {
+    <app-empty-state messageKey="no_permission" icon="lock" data-testid="import-forbidden" />
+  } @else {
+    @if (summary_(); as summary) {
+      <section class="import-summary c-glass-panel" data-testid="import-summary" role="status">
+        <p class="import-summary__text">{{ summaryText_(summary) }}</p>
+        <a class="c-btn-primary" routerLink="/inventory/list" data-testid="import-back">
+          {{ 'import_back_to_inventory' | translatePipe }}
+        </a>
+      </section>
+    }
+
+    <section class="import-paste c-glass-panel" [class.import-paste--compact]="rows_().length > 0">
+      <label class="import-field" for="import-text">
+        <span class="import-field__label">{{ 'import_paste_hint' | translatePipe }}</span>
+        <textarea
+          appTextareaAutoGrow
+          id="import-text"
+          class="c-input import-paste__box"
+          dir="auto"
+          maxlength="20000"
+          data-testid="import-text"
+          [ngModel]="text_()"
+          (ngModelChange)="text_.set($event)"
+          [disabled]="isParsing_() || isSaving_()"
+        ></textarea>
+      </label>
+
+      <div class="import-paste__row">
+        <div class="import-field import-field--supplier">
+          <span class="import-field__label">{{ 'import_supplier_optional' | translatePipe }}</span>
+          <app-custom-select
+            [ngModel]="supplierId_()"
+            (ngModelChange)="supplierId_.set($event)"
+            [options]="supplierOptions_()"
+            placeholder="import_no_supplier"
+            [typeToFilter]="true"
+            data-testid="import-supplier"
+          />
+        </div>
+        <input
+          #cameraInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="environment"
+          hidden
+          data-testid="import-photo-camera-input"
+          (change)="onPhotoChosen($event)"
+        />
+        <input
+          #uploadInput
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          data-testid="import-photo-upload-input"
+          (change)="onPhotoChosen($event)"
+        />
+        <button
+          type="button"
+          class="c-btn-ghost import-photo-btn"
+          data-testid="import-photo-camera"
+          [disabled]="isParsing_() || isSaving_()"
+          (click)="cameraInput.click()"
+        >
+          <lucide-icon name="camera" [size]="16" />
+          {{ 'import_photo_camera' | translatePipe }}
+        </button>
+        <button
+          type="button"
+          class="c-btn-ghost import-photo-btn"
+          data-testid="import-photo-upload"
+          [disabled]="isParsing_() || isSaving_()"
+          (click)="uploadInput.click()"
+        >
+          <lucide-icon name="image" [size]="16" />
+          {{ 'import_photo_upload' | translatePipe }}
+        </button>
+        <button
+          type="button"
+          class="c-btn-primary"
+          data-testid="import-parse"
+          [disabled]="!text_().trim() || isParsing_() || isSaving_()"
+          (click)="parse()"
+        >
+          <lucide-icon name="sparkles" [size]="16" />
+          {{ 'import_parse' | translatePipe }}
+        </button>
+      </div>
+
+      <p class="import-hint" data-testid="import-photo-privacy">{{ 'import_photo_privacy' | translatePipe }}</p>
+
+      @if (errorKey_(); as errorKey) {
+        <p class="import-message import-message--error" role="alert" data-testid="import-error">
+          {{ errorKey | translatePipe }}
+        </p>
+      }
+    </section>
+
+    @if (rows_().length > 0) {
+      @if (isTruncated_()) {
+        <p class="import-message import-message--warning" role="status" data-testid="import-truncated">
+          {{ 'import_truncated' | translatePipe }}
+        </p>
+      }
+
+      <section class="import-preview c-glass-panel" data-testid="import-preview">
+        @if (isFromPhoto_()) {
+          <p class="import-hint" role="status" data-testid="import-photo-hint">
+            {{ 'import_photo_check_hint' | translatePipe }}
+          </p>
+        }
+        @if (isMatching_()) {
+          <p class="import-hint" role="status" data-testid="import-matching">{{ 'import_matching' | translatePipe }}</p>
+        }
+        @if (hasMatchFailed_()) {
+          <p class="import-hint import-hint--warning" role="status" data-testid="import-match-failed">
+            {{ 'import_match_failed' | translatePipe }}
+          </p>
+        }
+        <div class="import-table-wrap">
+          <table class="import-table">
+            <thead>
+              <tr>
+                <th scope="col" class="import-table__name">{{ 'name' | translatePipe }}</th>
+                <th scope="col">{{ 'unit' | translatePipe }}</th>
+                <th scope="col">{{ 'price' | translatePipe }} (₪)</th>
+                <th scope="col">{{ 'import_col_purchase_unit' | translatePipe }}</th>
+                <th scope="col">{{ 'category' | translatePipe }}</th>
+                <th scope="col"></th>
+                <th scope="col">
+                  <span class="visually-hidden">{{ 'delete' | translatePipe }}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of view_(); track item.row.id) {
+                <tr
+                  class="import-row"
+                  [attr.data-testid]="'import-row'"
+                  [class.import-row--same]="item.status === 'same'"
+                >
+                  <td class="import-table__name" [attr.data-label]="'name' | translatePipe">
+                    <input
+                      type="text"
+                      class="c-input"
+                      maxlength="200"
+                      data-testid="import-name"
+                      [disabled]="isSaving_()"
+                      [attr.aria-label]="'name' | translatePipe"
+                      [ngModel]="item.row.name"
+                      (ngModelChange)="updateRow(item.row.id, { name: $event })"
+                    />
+                    @if (item.match) {
+                      <span class="import-matches" data-testid="import-matches">
+                        {{ 'import_matches_existing' | translatePipe }} {{ item.match.nameHebrew }}
+                      </span>
+                    }
+                  </td>
+                  <td [attr.data-label]="'unit' | translatePipe">
+                    @if (item.match) {
+                      <span class="import-readonly">{{ item.match.baseUnit | translatePipe }}</span>
+                    } @else if (item.status === 'matching') {
+                      <span class="import-readonly" data-testid="import-unit-pending">{{
+                        item.row.baseUnit | translatePipe
+                      }}</span>
+                    } @else {
+                      <app-custom-select
+                        [ngModel]="item.row.baseUnit"
+                        (ngModelChange)="updateRow(item.row.id, { baseUnit: $event })"
+                        [options]="unitOptions_"
+                        [compact]="true"
+                        data-testid="import-unit"
+                        [disabled]="isSaving_()"
+                      />
+                    }
+                  </td>
+                  <td [attr.data-label]="'price' | translatePipe">
+                    <input
+                      type="number"
+                      class="c-input import-num"
+                      dir="ltr"
+                      inputmode="decimal"
+                      min="0"
+                      step="any"
+                      data-testid="import-price"
+                      [disabled]="isSaving_()"
+                      [attr.aria-label]="'price' | translatePipe"
+                      [ngModel]="item.row.price"
+                      (ngModelChange)="setPrice(item.row.id, $event)"
+                    />
+                    @if (item.status === 'update' && item.oldPrice !== null) {
+                      <span class="import-old-price" dir="ltr" data-testid="import-old-price">
+                        {{ 'import_old_price' | translatePipe }} {{ formatMoney(item.oldPrice) }}
+                      </span>
+                    }
+                  </td>
+                  <td [attr.data-label]="'import_col_purchase_unit' | translatePipe">
+                    @if (item.match || item.status === 'matching') {
+                      <span class="import-readonly">–</span>
+                    } @else {
+                      <div class="import-purchase">
+                        <input
+                          type="text"
+                          class="c-input import-purchase__unit"
+                          maxlength="40"
+                          data-testid="import-purchase-unit"
+                          [disabled]="isSaving_()"
+                          [attr.aria-label]="'import_col_purchase_unit' | translatePipe"
+                          [ngModel]="item.row.purchaseUnit"
+                          (ngModelChange)="updateRow(item.row.id, { purchaseUnit: $event })"
+                        />
+                        <input
+                          type="number"
+                          class="c-input import-num"
+                          dir="ltr"
+                          inputmode="decimal"
+                          min="0"
+                          step="any"
+                          data-testid="import-purchase-qty"
+                          [disabled]="isSaving_()"
+                          [ngModel]="item.row.purchaseQty"
+                          (ngModelChange)="setPurchaseQty(item.row.id, $event)"
+                        />
+                      </div>
+                    }
+                  </td>
+                  <td [attr.data-label]="'category' | translatePipe">
+                    @if (item.match || item.status === 'matching') {
+                      <span class="import-readonly">–</span>
+                    } @else {
+                      <app-custom-select
+                        [ngModel]="item.row.category"
+                        (ngModelChange)="updateRow(item.row.id, { category: $event })"
+                        [options]="categoryOptions_()"
+                        [compact]="true"
+                        [typeToFilter]="true"
+                        data-testid="import-category"
+                        [disabled]="isSaving_()"
+                      />
+                    }
+                  </td>
+                  <td class="import-flags">
+                    <span
+                      class="c-chip"
+                      [class.c-chip--teal]="item.status === 'new'"
+                      [class.c-chip--amber]="item.status === 'update'"
+                      data-testid="import-status"
+                    >
+                      {{ statusKey(item.status) | translatePipe }}
+                    </span>
+                    @if (item.row.needsReview) {
+                      <span class="c-chip amber" data-testid="import-flag-review">
+                        {{ 'import_flag_review' | translatePipe }}
+                      </span>
+                    }
+                    @if (item.hasUnknownPurchaseUnit) {
+                      <span class="c-chip amber" data-testid="import-flag-unknown-unit">
+                        {{ 'import_flag_unknown_unit' | translatePipe }}
+                      </span>
+                    }
+                    @if (item.row.duplicate) {
+                      <span class="c-chip amber" data-testid="import-flag-duplicate">
+                        {{ 'import_flag_duplicate' | translatePipe }}
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="c-btn-ghost--sm import-delete"
+                      data-testid="import-delete"
+                      [attr.aria-label]="'delete' | translatePipe"
+                      [disabled]="isSaving_()"
+                      (click)="removeRow(item.row.id)"
+                    >
+                      <lucide-icon name="trash-2" [size]="16" />
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="import-actions">
+          <button
+            type="button"
+            class="c-btn-primary"
+            data-testid="import-save"
+            [disabled]="!canSave_()"
+            (click)="saveAll()"
+          >
+            {{ 'import_save_all' | translatePipe }}
+          </button>
+        </div>
+      </section>
+    }
+  }
+</div>

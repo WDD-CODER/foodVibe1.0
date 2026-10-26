@@ -1,4 +1,4 @@
-<div class="menu-editor-shell" dir="rtl">
+<div class="menu-editor-shell" [class.has-notes]="!!editingId_()" dir="rtl">
   <!-- Pill toolbar row — always visible above paper. Export / checklist / print options live in
        the hero-FAB "צ'קליסט והדפסות" top sheet (plan 344). -->
   <div class="pill-row no-print">
@@ -8,7 +8,19 @@
       <app-loader size="small" [inline]="true" />
       } {{ isSaving_() ? ('saving' | translatePipe) : ('menu_save' | translatePipe) }}
     </button>
+    <button type="button" class="pill" (click)="openSupplierOrders()">
+      <lucide-icon name="truck" [size]="16"></lucide-icon>
+      {{ 'supplier_orders' | translatePipe }}
+    </button>
   </div>
+
+  @if (editingId_()) {
+  <app-event-stage-bar
+    [eventId]="editingId_()"
+    [supplierOrdersAvailable]="true"
+    (openSupplierOrders)="openSupplierOrders()"
+  />
+  }
 
   <!-- Paper in the middle of the screen -->
   <div class="paper-outer">
@@ -18,72 +30,35 @@
 
         <!-- Tag line: event type · serving type -->
         <div class="event-tag-line">
-          <div class="event-type-chip-wrap" (clickOutside)="closeEventTypeDropdown()">
+          <div class="event-type-chip-wrap" (appClickOutside)="closeEventTypeDropdown()">
             <button
               type="button"
               class="event-chip"
               id="menu-focus-eventType"
-              [attr.aria-expanded]="eventTypeDropdownOpen_()"
+              [attr.aria-expanded]="isEventTypeDropdownOpen_()"
               (click)="openEventTypeDropdown()"
               (keydown)="onMetaKeydown('eventType', $event)"
             >
               {{ ((form_.value.eventType ?? '') | translatePipe) || ('menu_event_type' | translatePipe) }}
             </button>
-            @if (eventTypeDropdownOpen_()) {
+            @if (isEventTypeDropdownOpen_()) {
             <div class="event-type-dropdown">
-              <div class="c-picker-search-row">
-                <input
-                  #eventTypeSearchInput
-                  id="menu-focus-event_type_search"
-                  type="text"
-                  class="event-type-search"
-                  autocomplete="off"
-                  autocorrect="off"
-                  autocapitalize="off"
-                  spellcheck="false"
-                  [ngModel]="pickerSearch_.eventType.query(0)"
-                  [ngModelOptions]="{ standalone: true }"
-                  (ngModelChange)="pickerSearch_.eventType.onQueryChange(0, $event)"
-                  [placeholder]="'search' | translatePipe"
-                  (keydown)="onEventTypeSearchKeydown($event)"
-                  role="combobox"
-                  aria-autocomplete="list"
-                  aria-expanded="true"
-                  [attr.aria-activedescendant]="'event-type-opt-' + pickerSearch_.eventType.highlighted(0)"
-                />
-                <app-input-clear
-                  [visible]="!!pickerSearch_.eventType.query(0)"
-                  (clear)="pickerSearch_.eventType.onQueryChange(0, ''); eventTypeSearchInput.focus()"
-                  (click)="$event.stopPropagation()"
-                />
-              </div>
-              <app-scrollable-dropdown [maxHeight]="200">
-                @for (t of getFilteredEventTypes(); track t; let i = $index) {
-                <button
-                  type="button"
-                  class="dropdown-item"
-                  role="option"
-                  [id]="'event-type-opt-' + i"
-                  [class.highlighted]="pickerSearch_.eventType.highlighted(0) === i"
-                  (mousedown)="$event.preventDefault()"
-                  (click)="selectEventType(t)"
-                >
-                  {{ t | translatePipe }}
-                </button>
-                } @if (eventTypeShowsAdd()) {
-                <button
-                  type="button"
-                  class="dropdown-item add-new"
-                  role="option"
-                  [id]="'event-type-opt-' + getFilteredEventTypes().length"
-                  [class.highlighted]="pickerSearch_.eventType.highlighted(0) === getFilteredEventTypes().length"
-                  (mousedown)="$event.preventDefault()"
-                  (click)="addNewEventType()"
-                >
-                  <app-add-option-row [label]="eventTypeAddLabel()" />
-                </button>
-                }
-              </app-scrollable-dropdown>
+              <app-search-combobox
+                class="event-type-search"
+                variant="plain"
+                listPosition="inline"
+                placeholder="search"
+                inputId="menu-focus-event_type_search"
+                addLabelKey="add_new_event_type"
+                [options]="eventTypeOptions_()"
+                [labelOf]="translateLabel_"
+                [maxHeight]="200"
+                [handleTab]="true"
+                (picked)="selectEventType($event.option)"
+                (addChosen)="addNewEventType($event.typed)"
+                (escaped)="onEventTypeEscape()"
+                (tab)="onEventTypeTab($event)"
+              />
             </div>
             }
           </div>
@@ -177,6 +152,9 @@
           <span class="event-chip-sep">·</span>
           <app-venue-link-chip class="event-chip-select" [eventId]="editingId_()" />
         </div>
+        @if (getGuestCount() <= 0) {
+        <span class="c-field-error guest-hint no-print" role="alert">{{ 'enter_guest_count' | translatePipe }}</span>
+        }
 
         <!-- Ornamental rule -->
         <div class="info-menu-divider">✦</div>
@@ -191,50 +169,22 @@
 
             <div class="section-header">
               @if (sectionSearchOpen_() === sectionIndex) {
-              <div class="section-search-wrap" (clickOutside)="closeSectionSearch()">
-                <div class="c-picker-search-row">
-                  <input
-                    #sectionSearchInput
-                    type="text"
-                    class="section-search-input"
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                    [ngModel]="pickerSearch_.section.query(sectionIndex)"
-                    [ngModelOptions]="{ standalone: true }"
-                    (ngModelChange)="pickerSearch_.section.onQueryChange(sectionIndex, $event)"
-                    [placeholder]="'menu_search_category' | translatePipe"
-                    (keydown)="onSectionSearchKeydown(sectionIndex, $event)"
-                  />
-                  <app-input-clear
-                    [visible]="!!pickerSearch_.section.query(sectionIndex)"
-                    (clear)="pickerSearch_.section.onQueryChange(sectionIndex, ''); sectionSearchInput.focus()"
-                    (click)="$event.stopPropagation()"
-                  />
-                </div>
-                <app-scrollable-dropdown [maxHeight]="200">
-                  @for (cat of getFilteredSectionCategories(sectionIndex); track cat; let ci = $index) {
-                  <button
-                    type="button"
-                    class="dropdown-item"
-                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === ci"
-                    (click)="selectSectionCategory(sectionIndex, cat)"
-                  >
-                    {{ cat | translatePipe }}
-                  </button>
-                  } @if (sectionShowsAdd(sectionIndex)) {
-                  <button
-                    type="button"
-                    class="dropdown-item add-new"
-                    [class.highlighted]="pickerSearch_.section.highlighted(sectionIndex) === getSectionCategoryOptionCount(sectionIndex) - 1"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="openAddCategoryModal(sectionIndex)"
-                  >
-                    <app-add-option-row [label]="sectionCategoryAddLabel(sectionIndex)" />
-                  </button>
-                  }
-                </app-scrollable-dropdown>
+              <div class="section-search-wrap" (appClickOutside)="closeSectionSearch()">
+                <app-search-combobox
+                  class="section-search"
+                  variant="plain"
+                  placeholder="menu_search_category"
+                  inputId="section-search-input"
+                  addLabelKey="add_new_category"
+                  [options]="sectionCategories_()"
+                  [labelOf]="translateLabel_"
+                  [maxHeight]="200"
+                  [handleTab]="true"
+                  (picked)="selectSectionCategory(sectionIndex, $event.option)"
+                  (addChosen)="openAddCategoryModal(sectionIndex, $event.typed)"
+                  (escaped)="closeSectionSearch()"
+                  (tab)="onSectionSearchTab(sectionIndex, $event)"
+                />
               </div>
               } @else {
               <button
@@ -256,18 +206,16 @@
             <div class="dish-list" formArrayName="items">
               @for (item of getItemsArray(sectionIndex).controls; track $index; let itemIndex = $index) {
               <app-menu-dish-row
+                [class.no-print]="!item.get('recipeId')?.value"
                 [itemGroup]="item"
                 [sectionIndex]="sectionIndex"
                 [itemIndex]="itemIndex"
                 [recipes]="recipes_()"
                 [activeFields]="activeMenuTypeFields_()"
                 [dishSearchQuery]="getDishSearchQuery(sectionIndex, itemIndex)"
-                [highlightedIndex]="getDishSearchHighlightedIndex(sectionIndex, itemIndex)"
                 [isMetaExpanded]="isDishMetaExpanded(sectionIndex, itemIndex)"
                 [editingDishField]="editingDishField_()"
-                [servingType]="form_.value.servingType || 'plated_course'"
-                [guestCount]="getGuestCount()"
-                [piecesPerPerson]="getPiecesPerPerson()"
+                [portionInfo]="menuPortions_.at(sectionIndex, itemIndex)"
                 (remove)="removeItem(sectionIndex, itemIndex)"
                 (selectRecipe)="selectRecipe(sectionIndex, itemIndex, $event.recipe)"
                 (startEditName)="startEditDishName(sectionIndex, itemIndex)"
@@ -277,7 +225,7 @@
                 (editDishFieldCommit)="commitEditDishField()"
                 (sellPriceKeydown)="onSellPriceKeydown(sectionIndex, itemIndex, $event)"
                 (dishFieldKeydown)="onDishFieldKeydown(sectionIndex, itemIndex, $event.fieldKey, $event.event)"
-                (dishSearchKeydown)="onDishSearchKeydown(sectionIndex, itemIndex, $event)"
+                (dishSearchTab)="focusAfterDishSearchTab(sectionIndex, itemIndex, $event.shiftKey)"
                 (clearSearch)="clearDishSearch(sectionIndex, itemIndex)"
               />
               }
@@ -304,33 +252,16 @@
     </div>
   </div>
 
-  <!-- Financial footnote — fixed bar, always visible while scrolling -->
-  <div class="financial-footnote no-print">
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_total_cost' | translatePipe }}</span>
-      <span class="fin-value">₪{{ eventCost_() | number:'1.2-2' }}</span>
-    </div>
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_food_cost' | translatePipe }} %</span>
-      <span class="fin-value" [class.fin-value--warning]="totalRevenue_() > 0 && foodCostPct_() > 33">
-        @if (totalRevenue_() > 0) { {{ foodCostPct_() | number:'1.1-1' }}% } @else { — }
-      </span>
-    </div>
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_total_revenue' | translatePipe }}</span>
-      <span class="fin-value">₪{{ totalRevenue_() | number:'1.2-2' }}</span>
-    </div>
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_cost_per_guest' | translatePipe }}</span>
-      <span class="fin-value">₪{{ costPerGuest_() | number:'1.2-2' }}</span>
-    </div>
-    <div class="fin-metric">
-      <span class="fin-label">{{ 'menu_profit_per_guest' | translatePipe }}</span>
-      <span class="fin-value" [class.fin-value--warning]="totalRevenue_() > 0 && profitPerGuest_() < 0"
-        >₪{{ profitPerGuest_() | number:'1.2-2' }}</span
-      >
-    </div>
-  </div>
+  @if (editingId_()) {
+  <app-event-notes-log [eventId]="editingId_()" />
+  }
+
+  <app-pricing-meter
+    [event]="liveEvent_()"
+    [plan]="menuPlan_()"
+    [moneyForm]="form_.controls.money"
+    [eventId]="editingId_()"
+  />
 
   @if (exportPreviewPayload_(); as payload) {
   <app-export-preview
@@ -344,8 +275,8 @@
 
 <app-menu-export-sheet
   class="no-print"
-  [open]="exportSheetOpen_()"
-  (close)="exportSheetOpen_.set(false)"
+  [open]="isExportSheetOpen_()"
+  (close)="isExportSheetOpen_.set(false)"
   (viewChecklist)="onViewChecklist($event)"
   (exportChecklist)="onExportChecklist($event)"
   (viewShoppingList)="onViewMenuShoppingList()"
@@ -353,4 +284,11 @@
   (viewAll)="onViewAll()"
   (exportAll)="onExportAllTogether()"
   (print)="printMenu()"
+  (openSupplierOrders)="openSupplierOrders()"
 />
+
+@if (prepSheets_(); as ps) { @defer {
+<app-prep-sheets [event]="ps.event" [mode]="ps.mode" (close)="prepSheets_.set(null)" />
+} } @if (supplierOrdersEvent_(); as ev) { @defer {
+<app-supplier-orders class="no-print" [event]="ev" (close)="supplierOrdersEvent_.set(null)" />
+} }

@@ -1,85 +1,37 @@
-import { Injectable, signal, inject, computed } from '@angular/core'
+import { Injectable, Signal, computed } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
-import { LoggingService } from './logging.service'
-import { LoadingService } from './loading.service'
+import { BaseEntityDataService } from './base-entity-data.service'
 import { Product, ProductSource } from '../models/product.model'
 
 const ENTITY = 'products'
 
 @Injectable({ providedIn: 'root' })
-export class ProductDataService {
-  private storage = inject(StorageService)
-  private logging = inject(LoggingService)
-  private loading_ = inject(LoadingService)
-
-  // Signal now stores Product objects
-  private ProductsStore_ = signal<Product[]>([])
-  readonly allProducts_ = this.ProductsStore_.asReadonly()
+export class ProductDataService extends BaseEntityDataService<Product> {
+  /** Domain alias for the base-class signal. */
+  readonly allProducts_: Signal<Product[]> = this.all_
 
   readonly allTopCategories_ = computed(() => {
-    const Products = this.ProductsStore_()
+    const Products = this.allProducts_()
     const categories = Products.flatMap((p) => p.categories ?? []).filter((cat): cat is string => !!cat)
     return Array.from(new Set(categories))
   })
 
   readonly allAllergens_ = computed(() => {
-    const Products = this.ProductsStore_()
+    const Products = this.allProducts_()
     const allergens = Products.flatMap((Product) => Product.allergens || []) // Refactored
     return Array.from(new Set(allergens))
   })
 
-  private loaded_ = false
-  private loadPromise_: Promise<void> | null = null
-
+  // Loads in the constructor (autoLoad), unlike recipes and dishes.
   constructor() {
-    void this.ensureLoaded()
-  }
-
-  /** True after at least one successful (or attempted) hydrate. */
-  hasLoaded(): boolean {
-    return this.loaded_
-  }
-
-  /** Loads from storage once. Safe to call repeatedly — concurrent callers share one promise. */
-  async ensureLoaded(): Promise<void> {
-    if (this.loaded_) return
-    if (this.loadPromise_) return this.loadPromise_
-    this.loadPromise_ = this.loadInitialData()
-      .catch(() => {})
-      .finally(() => {
-        this.loaded_ = true
-        this.loadPromise_ = null
-      })
-    return this.loadPromise_
-  }
-
-  /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
-  async reloadFromStorage(): Promise<void> {
-    if (this.loadPromise_) {
-      // A load is already in flight — e.g. this service was just constructed via
-      // injector.get() and its constructor's ensureLoaded() hasn't resolved yet.
-      // Await it instead of firing a redundant concurrent fetch for the same data.
-      await this.loadPromise_
-      return
-    }
-    this.loaded_ = false
-    this.loadPromise_ = null
-    await this.loadInitialData()
-    this.loaded_ = true
+    super(ENTITY, true, { errorEvent: 'crud.products.hydrate_error', errorMessage: 'Failed to load products' })
   }
 
   // LIST
 
-  private async loadInitialData(): Promise<void> {
-    try {
-      const raw = await this.loading_.track(this.storage.query<Record<string, unknown>>(ENTITY))
-      const products = raw.map((row) => this.normalizeProduct(row))
-      this.ProductsStore_.set(products)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.products.hydrate_error', message: 'Failed to load products', context: { err } })
-    }
+  /** Stored rows may carry legacy fields: the base load runs each one through normalizeProduct. */
+  protected override normalizeRow(row: Product): Product {
+    return this.normalizeProduct(row as unknown as Record<string, unknown>)
   }
 
   private normalizeProduct(row: Record<string, unknown>): Product {
@@ -117,6 +69,7 @@ export class ProductDataService {
       minStockLevel: legacy.minStockLevel ?? 0,
       expiryDaysDefault: legacy.expiryDaysDefault ?? 0,
       createdAt: legacy.createdAt,
+      createdBy: legacy.createdBy,
       updatedAt: legacy.updatedAt,
       nameEnglish: legacy.nameEnglish,
       seeded: legacy.seeded,
@@ -172,7 +125,7 @@ export class ProductDataService {
       if (wasMerged) {
         // Silent merge: update existing product in store instead of appending
         const normalized = this.normalizeProduct(saved as unknown as Record<string, unknown>)
-        this.ProductsStore_.update((products) => {
+        this.updateItems((products) => {
           const idx = products.findIndex((p) => p._id === normalized._id)
           return idx >= 0 ? products.map((p, i) => (i === idx ? normalized : p)) : [...products, normalized]
         })
@@ -182,7 +135,7 @@ export class ProductDataService {
           context: { entityType: ENTITY, id: saved._id }
         })
       } else {
-        this.ProductsStore_.update((products) => [...products, saved])
+        this.updateItems((products) => [...products, saved])
         this.logging.info({
           event: 'crud.product.create',
           message: 'Product created',
@@ -206,7 +159,7 @@ export class ProductDataService {
         updatedAt: Date.now()
       }
       const updated = await this.storage.put<Product>(ENTITY, toSave)
-      this.ProductsStore_.update((products) => products.map((p) => (p._id === updated._id ? updated : p)))
+      this.updateItems((products) => products.map((p) => (p._id === updated._id ? updated : p)))
       this.logging.info({
         event: 'crud.product.update',
         message: 'Product updated',
@@ -223,7 +176,7 @@ export class ProductDataService {
     try {
       // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
-      this.ProductsStore_.update((products) => products.filter((p) => p._id !== _id))
+      this.updateItems((products) => products.filter((p) => p._id !== _id))
       this.logging.info({
         event: 'crud.product.delete',
         message: 'Product deleted',
@@ -248,7 +201,7 @@ export class ProductDataService {
    *  _masterId (or none) and silently skipped the admin ternary. Call this
    *  after pushToMaster resolves to keep the in-memory copy in sync. */
   patchMasterId(id: string, masterId: string): void {
-    this.ProductsStore_.update((products) =>
+    this.updateItems((products) =>
       products.map((p) => (p._id === id ? { ...p, _masterId: masterId, _userModified: false } : p))
     )
   }
@@ -257,7 +210,7 @@ export class ProductDataService {
    *  deleted them — mirror that in the local store so no row shows a dead supplier. */
   unlinkSuppliersLocally(supplierIds: string[]): void {
     const removed = new Set(supplierIds)
-    this.ProductsStore_.update((products) =>
+    this.updateItems((products) =>
       products.map((p) => {
         const sources = p.sources ?? []
         const legacy = p.supplierIds_ ?? []

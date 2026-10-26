@@ -4,7 +4,7 @@
  *
  * Deleting stamps `deletedAt` / `deletedBy` on the document itself; Trash lists those, restore
  * unsets them. Removing a document for good ("dispose", empty Trash, or the 30-day purge) hard-
- * deletes it, except a user's copy of a shared (__master__) item: that one shrinks to a stub
+ * deletes it, except a business's copy of a shared (__master__) item: that one shrinks to a stub
  * (`_masterId` + `deletedAt` + `purgedAt`) so the login sync never clones it back.
  */
 
@@ -21,15 +21,19 @@ const IN_TRASH = Object.freeze({ deletedAt: { $exists: true }, purgedAt: { $exis
 
 /** True for a user's copy of a shared item (its `_masterId` points at another doc). */
 function isMasterClone(doc) {
-  return doc.userId !== MASTER && typeof doc._masterId === 'string' && doc._masterId !== doc._id;
+  return doc.businessId !== MASTER && typeof doc._masterId === 'string' && doc._masterId !== doc._id;
 }
+
+/** Query form of `!isMasterClone(doc)`: items created inside the business (`_masterId` absent, null or equal to `_id`). */
+const NOT_MASTER_CLONE = Object.freeze({ $or: [{ _masterId: { $exists: false } }, { _masterId: null }, { $expr: { $eq: ['$_masterId', '$_id'] } }] });
 
 /** The stub a purged master clone leaves behind. */
 function toStub(doc, now) {
   return {
     _id: doc._id,
     schemaVersion: 2,
-    userId: doc.userId,
+    ...(doc.userId !== undefined && { userId: doc.userId }),
+    businessId: doc.businessId,
     _masterId: doc._masterId,
     _userModified: true,
     deletedAt: typeof doc.deletedAt === 'number' ? doc.deletedAt : now,
@@ -41,31 +45,31 @@ function toStub(doc, now) {
 /** Removes one document for good: a stub for a master clone, a hard delete otherwise. */
 async function disposeDoc(collection, doc, now = Date.now()) {
   if (isMasterClone(doc)) {
-    await collection.replaceOne({ _id: doc._id, userId: doc.userId }, toStub(doc, now));
+    await collection.replaceOne({ _id: doc._id, businessId: doc.businessId }, toStub(doc, now));
   } else {
-    await collection.deleteOne({ _id: doc._id, userId: doc.userId });
+    await collection.deleteOne({ _id: doc._id, businessId: doc.businessId });
   }
 }
 
 /**
  * Disposes every document deleted more than PURGE_AFTER_DAYS ago (counted from its own
- * `deletedAt`). `owners` limits it to some userIds (the Trash read passes the caller + master).
+ * `deletedAt`). `businessIds` limits it to some businesses (the Trash read passes the caller's + master).
  * @returns {Promise<Record<string, number>>} disposed count per collection
  */
-async function purgeExpired(db, { owners, types = SOFT_DELETE_TYPES, now = Date.now(), days = PURGE_AFTER_DAYS } = {}) {
+async function purgeExpired(db, { businessIds, types = SOFT_DELETE_TYPES, now = Date.now(), days = PURGE_AFTER_DAYS } = {}) {
   const counts = {};
   const filter = {
     deletedAt: { $lt: now - days * DAY_MS },
     purgedAt: { $exists: false },
-    ...(owners && { userId: { $in: owners } }),
+    ...(businessIds && { businessId: { $in: businessIds } }),
   };
   for (const type of types) {
     const col = db.collection(type);
-    const docs = await col.find(filter, { projection: { _id: 1, userId: 1, _masterId: 1, deletedAt: 1, deletedBy: 1 } }).toArray();
+    const docs = await col.find(filter, { projection: { _id: 1, userId: 1, businessId: 1, _masterId: 1, deletedAt: 1, deletedBy: 1 } }).toArray();
     for (const doc of docs) await disposeDoc(col, doc, now);
     counts[type] = docs.length;
   }
   return counts;
 }
 
-module.exports = { LIVE, IN_TRASH, MASTER, PURGE_AFTER_DAYS, isMasterClone, toStub, disposeDoc, purgeExpired };
+module.exports = { LIVE, NOT_MASTER_CLONE, IN_TRASH, MASTER, PURGE_AFTER_DAYS, isMasterClone, toStub, disposeDoc, purgeExpired };

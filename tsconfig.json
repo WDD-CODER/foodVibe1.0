@@ -20,6 +20,9 @@
       "@schemas/*": [
         "shared/schemas/*"
       ],
+      "@pipes/*": [
+        "src/app/core/pipes/*"
+      ],
       "@utils/*": [
         "src/app/core/utils/*"
       ],

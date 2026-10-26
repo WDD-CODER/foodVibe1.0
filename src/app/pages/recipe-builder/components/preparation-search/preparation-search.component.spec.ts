@@ -14,6 +14,29 @@ describe('PreparationSearchComponent', () => {
   let addItemModal: jasmine.SpyObj<AddItemModalService>
   let windowResult: string | null | undefined
 
+  const root = (): HTMLElement => fixture.nativeElement as HTMLElement
+  const field = (): HTMLTextAreaElement => root().querySelector('textarea')!
+  const options = (): HTMLElement[] => Array.from(root().querySelectorAll('li[role="option"]'))
+
+  function type(text: string): void {
+    field().value = text
+    field().dispatchEvent(new Event('input'))
+    fixture.detectChanges()
+  }
+
+  function press(key: string): KeyboardEvent {
+    const e = new KeyboardEvent('keydown', { key, cancelable: true })
+    field().dispatchEvent(e)
+    fixture.detectChanges()
+    return e
+  }
+
+  /** Lets the add window's promise chain finish. */
+  const settle = async (): Promise<void> => {
+    await new Promise<void>((resolve) => setTimeout(resolve, 0))
+    fixture.detectChanges()
+  }
+
   beforeEach(async () => {
     const prepRegistrySpy = jasmine.createSpyObj('PreparationRegistryService', [
       'registerCategory',
@@ -54,21 +77,37 @@ describe('PreparationSearchComponent', () => {
     expect(component).toBeTruthy()
   })
 
-  it('should show add option when query has 2+ chars and no matches', () => {
-    component['searchQuery_'].set('xyz')
-    fixture.detectChanges()
-    expect(component['showAddOption_']()).toBe(true)
+  it('should show the add option when the query has 2+ chars and no matches', () => {
+    type('xyz')
+    expect(options().length).toBe(1)
+    expect(options()[0].textContent?.trim()).toBe('add "xyz"')
   })
 
-  it('Enter selects the first match and asks for a new row', async () => {
+  it('shows nothing for a single character', () => {
+    type('ר')
+    expect(options().length).toBe(0)
+  })
+
+  it('Enter selects the first match and asks for a new row', () => {
     const selected = jasmine.createSpy('selected')
     const newRow = jasmine.createSpy('newRow')
     component.preparationSelected.subscribe(selected)
     component.addNewRowRequested.subscribe(newRow)
-    component['searchQuery_'].set('רוטב')
-    await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    type('רוטב')
+    press('Enter')
     expect(selected).toHaveBeenCalledWith({ name: 'רוטב עגבניות', category: 'מטבח' })
     expect(newRow).toHaveBeenCalled()
+  })
+
+  it('a click selects without asking for a new row', () => {
+    const selected = jasmine.createSpy('selected')
+    const newRow = jasmine.createSpy('newRow')
+    component.preparationSelected.subscribe(selected)
+    component.addNewRowRequested.subscribe(newRow)
+    type('רוטב')
+    options()[0].click()
+    expect(selected).toHaveBeenCalled()
+    expect(newRow).not.toHaveBeenCalled()
   })
 
   it('Enter on an unknown name opens the add window prefilled, then adds and asks for a new row (rule W)', async () => {
@@ -76,8 +115,9 @@ describe('PreparationSearchComponent', () => {
     const newRow = jasmine.createSpy('newRow')
     component.preparationAdded.subscribe(added)
     component.addNewRowRequested.subscribe(newRow)
-    component['searchQuery_'].set('בצל מטוגן')
-    await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    type('בצל מטוגן')
+    press('Enter')
+    await settle()
     expect(addItemModal.open).toHaveBeenCalledWith(jasmine.objectContaining({ initialValue: 'בצל מטוגן' }))
     expect(added).toHaveBeenCalledWith({ name: 'בצל מטוגן', category: 'מטבח' })
     expect(newRow).toHaveBeenCalled()
@@ -87,62 +127,56 @@ describe('PreparationSearchComponent', () => {
     const added = jasmine.createSpy('added')
     component.preparationAdded.subscribe(added)
     windowResult = null
-    component['searchQuery_'].set('בצל מטוגן')
-    await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    type('בצל מטוגן')
+    press('Enter')
+    await settle()
     expect(added).not.toHaveBeenCalled()
   })
 
-  it('Enter on an empty box does not open a new row', async () => {
+  it('Enter on an empty box does not open a new row and never types a line break', () => {
     const newRow = jasmine.createSpy('newRow')
     component.addNewRowRequested.subscribe(newRow)
-    await component['onEnter'](new KeyboardEvent('keydown', { key: 'Enter' }))
+    expect(press('Enter').defaultPrevented).toBeTrue()
     expect(newRow).not.toHaveBeenCalled()
   })
 
   describe('add option + keyboard (add-option rule)', () => {
-    const key = (k: string): KeyboardEvent => new KeyboardEvent('keydown', { key: k, cancelable: true })
-
-    function type(text: string): void {
-      component['onQueryInput'](text)
-      fixture.detectChanges()
-    }
-
     it('shows matches plus one add "<typed>" option for a new name, last', () => {
       type('רוטב')
-      const root = fixture.nativeElement as HTMLElement
-      const items = root.querySelectorAll('li[role="option"]')
-      expect(items.length).toBe(2)
-      expect(items[1].classList).toContain('result-item--add')
-      expect(items[1].textContent?.trim()).toBe('add "רוטב"')
+      expect(options().length).toBe(2)
+      expect(options()[1].classList).toContain('search-combobox__option--add')
+      expect(options()[1].textContent?.trim()).toBe('add "רוטב"')
     })
 
     it('an exact name shows no add option', () => {
       type('רוטב עגבניות')
-      expect(component['showAddOption_']()).toBeFalse()
+      expect(options().length).toBe(1)
     })
 
     it('arrows stop at the ends; Enter on the add option adds the typed name', async () => {
       const added = jasmine.createSpy('added')
       component.preparationAdded.subscribe(added)
       type('רוטב')
-      component['onSearchKeydown'](key('ArrowUp'))
-      expect(component['highlightedIndex_']()).toBe(0)
-      for (let i = 0; i < 4; i++) component['onSearchKeydown'](key('ArrowDown'))
-      expect(component['highlightedIndex_']()).toBe(1)
-      await component['onEnter'](key('Enter'))
+      press('ArrowUp')
+      expect(options()[0].classList).toContain('is-highlighted')
+      for (let i = 0; i < 4; i++) press('ArrowDown')
+      expect(options()[1].classList).toContain('is-highlighted')
+      press('Enter')
+      await settle()
       expect(added).toHaveBeenCalledWith({ name: 'רוטב', category: 'מטבח' })
     })
 
     it('Escape closes the open list before clearing the text; Tab is not blocked', () => {
       type('רוטב')
-      const tab = key('Tab')
-      component['onSearchKeydown'](tab)
+      const tab = press('Tab')
       expect(tab.defaultPrevented).toBeFalse()
-      expect(component['listOpen_']()).toBeFalse()
+      expect(options().length).toBe(0)
       type('רוטב')
-      component['onSearchKeydown'](key('Escape'))
-      expect(component['listOpen_']()).toBeFalse()
-      expect(component['searchQuery_']()).toBe('רוטב')
+      press('Escape')
+      expect(options().length).toBe(0)
+      expect(component.searchQuery_()).toBe('רוטב')
+      press('Escape')
+      expect(component.searchQuery_()).toBe('')
     })
   })
 })

@@ -1,56 +1,52 @@
-<div class="c-modal-overlay" (click)="cancelled.emit()">
-  <div class="c-modal-card c-modal-card--md" dir="rtl" (click)="$event.stopPropagation()">
-    <h3>{{ 'unit_edit' | translatePipe }}</h3>
-
-    <div class="c-modal-body">
-      <div class="c-input-stack">
-        <label for="unit-edit-hebrew">{{ 'unit_name' | translatePipe }}</label>
-        <input
-          id="unit-edit-hebrew"
-          type="text"
-          [ngModel]="hebrewLabel_()"
-          (ngModelChange)="hebrewLabel_.set($event)"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-        />
-      </div>
-
-      <div class="c-input-stack">
-        <label for="unit-edit-key">{{ 'english_key_label' | translatePipe }}</label>
-        <input
-          id="unit-edit-key"
-          type="text"
-          dir="ltr"
-          [ngModel]="key_()"
-          (ngModelChange)="key_.set($event)"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-        />
-      </div>
-
-      <div class="c-input-stack">
-        <label for="unit-edit-rate">{{ 'unit_gram_rate_label' | translatePipe }}</label>
-        <input
-          id="unit-edit-rate"
-          SelectOnFocus
-          type="number"
-          min="0.0001"
-          [ngModel]="gramRate_()"
-          (ngModelChange)="gramRate_.set($event)"
-          (keydown.enter)="onSave()"
-        />
-      </div>
+<app-modal-shell size="md" titleKey="unit_edit" (dismissed)="cancelled.emit()">
+  <div class="c-modal-body">
+    <div class="c-input-stack">
+      <label for="unit-edit-hebrew">{{ 'unit_name' | translatePipe }}</label>
+      <input
+        id="unit-edit-hebrew"
+        type="text"
+        [ngModel]="hebrewLabel_()"
+        (ngModelChange)="hebrewLabel_.set($event)"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
     </div>
 
-    <div class="c-modal-actions">
-      <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
-      <button type="button" class="c-btn-primary" (click)="onSave()" [disabled]="!isValid()">
-        {{ 'save' | translatePipe }}
-      </button>
+    <div class="c-input-stack">
+      <label for="unit-edit-key">{{ 'english_key_label' | translatePipe }}</label>
+      <input
+        id="unit-edit-key"
+        type="text"
+        dir="ltr"
+        [ngModel]="key_()"
+        (ngModelChange)="key_.set($event)"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+    </div>
+
+    <div class="c-input-stack">
+      <label for="unit-edit-rate">{{ 'unit_gram_rate_label' | translatePipe }}</label>
+      <input
+        id="unit-edit-rate"
+        appSelectOnFocus
+        type="number"
+        min="0.0001"
+        [ngModel]="gramRate_()"
+        (ngModelChange)="gramRate_.set($event)"
+        (keydown.enter)="onSave()"
+      />
     </div>
   </div>
-</div>
+
+  <div class="c-modal-actions">
+    <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
+    <button type="button" class="c-btn-primary" (click)="onSave()" [disabled]="!isValid()">
+      {{ 'save' | translatePipe }}
+    </button>
+  </div>
+</app-modal-shell>

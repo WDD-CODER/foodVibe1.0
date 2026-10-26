@@ -45,7 +45,7 @@ export class ColumnCarouselCellComponent {
       const slides = this.slides()
       this.group.registerCount(slides.length)
       const index = this.group.index()
-      slides.forEach((s, i) => s.active.set(i === index))
+      slides.forEach((s, i) => s.isActive.set(i === index))
     })
   }
 

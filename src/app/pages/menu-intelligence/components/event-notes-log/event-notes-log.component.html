@@ -1,0 +1,88 @@
+<section class="notes-log no-print" dir="rtl" [attr.aria-label]="'notes_title' | translatePipe">
+  <h2 class="notes-title">
+    <lucide-icon name="message-square" [size]="18"></lucide-icon>
+    <span>{{ 'notes_title' | translatePipe }}</span>
+  </h2>
+
+  @if (canAdd_()) {
+    <div class="notes-add">
+      <textarea
+        class="c-input"
+        rows="3"
+        [maxLength]="maxLength"
+        [ngModel]="draft_()"
+        (ngModelChange)="draft_.set($event)"
+        [placeholder]="'notes_placeholder' | translatePipe"
+        [attr.aria-label]="'notes_add' | translatePipe"
+      ></textarea>
+      <div class="notes-add-row">
+        <span class="notes-counter" dir="ltr">{{ draft_().length }} / {{ maxLength }}</span>
+        <button type="button" class="c-btn-primary" [disabled]="isBusy_() || !draft_().trim()" (click)="add()">
+          {{ 'notes_add' | translatePipe }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (notes_().length === 0) {
+    <p class="notes-empty">{{ 'notes_empty' | translatePipe }}</p>
+  } @else {
+    <ul class="notes-list">
+      @for (note of notes_(); track note._id) {
+        <li class="note">
+          <div class="note-meta">
+            <span class="note-author">{{ note.byName }}</span>
+            <span class="note-date" dir="ltr">{{ note.at | date: 'dd/MM/yyyy HH:mm' }}</span>
+            @if (note.editedAt) {
+              <span class="note-edited">({{ 'notes_edited' | translatePipe }})</span>
+            }
+            @if (isOwn(note) && editingId_() !== note._id) {
+              <span class="note-actions">
+                <button
+                  type="button"
+                  class="note-btn note-edit"
+                  [attr.aria-label]="'edit' | translatePipe"
+                  (click)="startEdit(note)"
+                >
+                  <lucide-icon name="pencil" [size]="16"></lucide-icon>
+                </button>
+                <button
+                  type="button"
+                  class="note-btn note-delete"
+                  [attr.aria-label]="'delete' | translatePipe"
+                  (click)="remove(note)"
+                >
+                  <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                </button>
+              </span>
+            }
+          </div>
+          @if (editingId_() === note._id) {
+            <textarea
+              class="c-input"
+              rows="3"
+              [maxLength]="maxLength"
+              [ngModel]="editText_()"
+              (ngModelChange)="editText_.set($event)"
+              (keydown.escape)="cancelEdit(); $event.stopPropagation()"
+              [attr.aria-label]="'edit' | translatePipe"
+            ></textarea>
+            <div class="notes-add-row">
+              <button type="button" class="c-btn-ghost" (click)="cancelEdit()">{{ 'cancel' | translatePipe }}</button>
+              <button
+                type="button"
+                class="c-btn-primary"
+                [disabled]="isBusy_() || !editText_().trim()"
+                (click)="saveEdit(note)"
+              >
+                {{ 'save' | translatePipe }}
+              </button>
+            </div>
+          } @else {
+            <p class="note-text">{{ note.text }}</p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

@@ -19,17 +19,17 @@ export class CookViewExportService {
   /** Which export type is shown in preview (so we know what to run on Export click). */
   private exportPreviewType_: ExportPreviewType | null = null
   /** Floating export bar expanded. */
-  exportBarExpanded_ = signal<boolean>(false)
+  isExportBarExpanded_ = signal<boolean>(false)
 
   /** Close export bar and preview so state is clean when user navigates away. */
   closeAllExportOverlays(): void {
-    this.exportBarExpanded_.set(false)
+    this.isExportBarExpanded_.set(false)
     this.exportPreviewPayload_.set(null)
     this.exportPreviewType_ = null
   }
 
   toggleExportBar(): void {
-    this.exportBarExpanded_.update((v: boolean) => !v)
+    this.isExportBarExpanded_.update((v: boolean) => !v)
   }
 
   async onExportInfo(recipe: Recipe | null, qty: number): Promise<void> {
@@ -45,7 +45,7 @@ export class CookViewExportService {
     const payload = this.exportService.getRecipeInfoPreviewPayload(recipe, qty)
     this.exportPreviewType_ = 'recipe-info'
     this.exportPreviewPayload_.set(payload)
-    this.exportBarExpanded_.set(false)
+    this.isExportBarExpanded_.set(false)
   }
 
   onViewShoppingList(recipe: Recipe | null, qty: number): void {
@@ -53,7 +53,7 @@ export class CookViewExportService {
     const payload = this.exportService.getShoppingListPreviewPayload(recipe, qty)
     this.exportPreviewType_ = 'shopping-list'
     this.exportPreviewPayload_.set(payload)
-    this.exportBarExpanded_.set(false)
+    this.isExportBarExpanded_.set(false)
   }
 
   onExportPreviewClose(): void {
@@ -84,7 +84,7 @@ export class CookViewExportService {
     const payload = this.exportService.getCookingStepsPreviewPayload(recipe, qty)
     this.exportPreviewType_ = 'cooking-steps'
     this.exportPreviewPayload_.set(payload)
-    this.exportBarExpanded_.set(false)
+    this.isExportBarExpanded_.set(false)
   }
 
   onViewDishChecklist(recipe: Recipe | null, qty: number): void {
@@ -92,7 +92,7 @@ export class CookViewExportService {
     const payload = this.exportService.getDishChecklistPreviewPayload(recipe, qty)
     this.exportPreviewType_ = 'dish-checklist'
     this.exportPreviewPayload_.set(payload)
-    this.exportBarExpanded_.set(false)
+    this.isExportBarExpanded_.set(false)
   }
 
   async onExportCookingSteps(recipe: Recipe | null, qty: number): Promise<void> {

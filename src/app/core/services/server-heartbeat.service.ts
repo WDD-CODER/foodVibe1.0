@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, inject } from '@angular/core'
 import { HttpClient } from '@angular/common/http'
 import { catchError, of } from 'rxjs'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 
 /** Ping interval — well under Render Free ~15 min idle sleep. */
 const PING_INTERVAL_MS = 4 * 60 * 1000
@@ -19,7 +20,7 @@ export class ServerHeartbeatService {
   private readonly http_ = inject(HttpClient)
   private readonly destroyRef_ = inject(DestroyRef)
 
-  private started_ = false
+  private isStarted_ = false
   private intervalId_: ReturnType<typeof setInterval> | null = null
   private hiddenTimerId_: ReturnType<typeof setTimeout> | null = null
 
@@ -28,8 +29,8 @@ export class ServerHeartbeatService {
   }
 
   start(): void {
-    if (this.started_) return
-    this.started_ = true
+    if (this.isStarted_) return
+    this.isStarted_ = true
     this.handleVisibility_()
     document.addEventListener('visibilitychange', this.onVisibility_)
     this.destroyRef_.onDestroy(() => this.stop_())
@@ -67,12 +68,12 @@ export class ServerHeartbeatService {
     document.removeEventListener('visibilitychange', this.onVisibility_)
     this.clearHiddenTimer_()
     this.stopInterval_()
-    this.started_ = false
+    this.isStarted_ = false
   }
 
   private ping_(): void {
     this.http_
-      .get<{ ok: boolean; ts: number }>(`${environment.authApiUrl}/api/v1/health`)
+      .get<{ ok: boolean; ts: number }>(`${environment.authApiUrl}${API.health}`)
       .pipe(catchError(() => of(null)))
       .subscribe()
   }

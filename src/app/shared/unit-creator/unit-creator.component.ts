@@ -19,9 +19,10 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
-  selector: 'unit-creator-modal',
+  selector: 'app-unit-creator-modal',
   standalone: true,
   imports: [
     CommonModule,
@@ -29,7 +30,8 @@ import { useSavingState } from 'src/app/core/utils/saving-state.util'
     LucideAngularModule,
     SelectOnFocusDirective,
     CustomSelectComponent,
-    TranslatePipe
+    TranslatePipe,
+    ModalShellComponent
   ],
   templateUrl: './unit-creator.component.html',
   styleUrl: './unit-creator.component.scss',
@@ -46,6 +48,12 @@ export class UnitCreatorModal {
       if (this.isOpen_()) {
         // Open with the name the chef typed in the dropdown (rule W); read untracked so typing never resets it.
         this.newUnitName_.set(untracked(() => this.unitRegistryService.creatorPrefillName_()))
+        // Plan 423: product mode asks this product's own amount, in the product's base unit by default.
+        const forProduct = untracked(() => this.unitRegistryService.creatorForProduct_())
+        if (forProduct) {
+          this.newUnitValue_.set(null)
+          this.basisUnit_.set(forProduct.baseUnit)
+        }
         setTimeout(() => document.getElementById('unit-creator-name')?.focus(), 0)
       }
     })
@@ -57,8 +65,17 @@ export class UnitCreatorModal {
 
   // Technical Keys for logic
   newUnitName_ = signal('')
-  newUnitValue_ = signal(1)
+  newUnitValue_ = signal<number | null>(1)
   basisUnit_ = signal<string>('') // 🛠️ REFACTORED: Use technical key 'gram'
+
+  /** Product the window was opened for, or null in plain mode. */
+  protected forProduct_ = this.unitRegistryService.creatorForProduct_
+  protected titleKey_ = computed(() => (this.forProduct_() ? 'unit_creator_title_for_product' : 'unit_creator_title'))
+  protected titleText_ = computed(() => this.fillPlaceholders_(this.translationService.translate(this.titleKey_())))
+  protected amountLabel_ = computed(() => {
+    if (!this.forProduct_()) return this.translationService.translate('amount')
+    return this.fillPlaceholders_(this.translationService.translate('unit_amount_in_base_for_product'))
+  })
 
   protected basisOptions_ = this.unitRegistryService.allUnitKeys_
   protected basisUnitOptions_ = computed(() => this.basisOptions_().map((k) => ({ value: k, label: k })))
@@ -67,11 +84,20 @@ export class UnitCreatorModal {
   protected readonly isSaving_ = this.saving.isSaving_
   protected errorMessage_ = signal<string | null>(null)
 
+  /** Name, a quantity above zero and a base unit are all filled. */
+  protected canSave_ = computed(() => {
+    const value = this.newUnitValue_()
+    return !!this.newUnitName_().trim() && value != null && value > 0 && !!this.basisUnit_()
+  })
+
+  /** Estimated cost of one new unit; 0 while the quantity is empty. */
+  protected unitCostPreview_ = computed(() => this.netUnitCost() * (this.newUnitValue_() ?? 0))
+
   async save(): Promise<void> {
     const name = this.newUnitName_()
-    const value = this.newUnitValue_()
+    const value = this.newUnitValue_() as number
     const basis = this.basisUnit_()
-    if (!name || value <= 0 || !basis || this.isSaving_()) return
+    if (!this.canSave_() || this.isSaving_()) return
     this.errorMessage_.set(null)
     await this.saving.withSaving(async () => {
       try {
@@ -97,6 +123,17 @@ export class UnitCreatorModal {
     this.resetFields()
   }
 
+  /** Fills {{name}} (the product) and {{unit}} (the unit being typed) in a product-mode text. */
+  private fillPlaceholders_(text: string): string {
+    const unitName = this.newUnitName_().trim() || this.translationService.translate('unit_name')
+    const basis = this.basisUnit_()
+    const baseLabel = basis ? this.translationService.translate(basis) : this.translationService.translate('base_unit')
+    return text
+      .replace('{{name}}', this.forProduct_()?.name ?? '')
+      .replace('{{unit}}', unitName)
+      .replace('{{base}}', baseLabel)
+  }
+
   private resetFields() {
     this.errorMessage_.set(null)
     this.newUnitName_.set('')
@@ -119,13 +156,20 @@ export class UnitCreatorModal {
     document.getElementById('unit-creator-basis-unit')?.focus()
   }
 
+  /** Enter in the quantity box: save when the window is complete, otherwise move to the base-unit box. */
+  onAmountEnter(event: Event): void {
+    event.preventDefault()
+    if (this.canSave_()) void this.save()
+    else this.focusBasisUnitSelect()
+  }
+
   /** Focus the amount input (after name resolution). */
   focusAmountInput(): void {
     document.getElementById('unit-creator-amount')?.focus()
   }
 
   /**
-   * On Enter/Tab from name: if name is empty or resolves to a key, focus amount
+   * On Enter from name (Tab only moves focus): if name is empty or resolves to a key, focus amount
    * else open translation modal; on confirm focus amount, on cancel stay on name.
    */
   async onNameLeave(event: Event): Promise<void> {

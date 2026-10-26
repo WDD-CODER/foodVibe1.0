@@ -5,7 +5,7 @@ import {
   output,
   signal,
   computed,
-  ViewChild,
+  viewChild,
   ElementRef,
   inject,
   afterNextRender,
@@ -26,6 +26,11 @@ let nextChipSearchDropdownId = 0
 /** KeyedPickerSearch key — one picker per component instance. */
 const PICKER_KEY = 0
 
+/**
+ * @deprecated Plan 452 / ADR 0025: new code uses `app-custom-multi-select`. This stays only for the product form (category,
+ * supplier, allergens) until `custom-multi-select` gains the inline chip box, `showAddNewAlways`, `noOptionsLabel` and a
+ * caller filter. Do not add new users.
+ */
 @Component({
   selector: 'app-chip-search-dropdown',
   standalone: true,
@@ -69,12 +74,12 @@ export class ChipSearchDropdownComponent {
   blurred = output<void>()
 
   // ── View refs ────────────────────────────────────────────────────────────────
-  @ViewChild('searchInput') private searchInputRef?: ElementRef<HTMLInputElement>
+  private readonly searchInputRef = viewChild<ElementRef<HTMLInputElement>>('searchInput')
 
   // ── Internal state ───────────────────────────────────────────────────────────
   protected readonly instanceId = `csd-${++nextChipSearchDropdownId}`
   protected searchQuery_ = signal('')
-  protected showDropdown_ = signal(false)
+  protected shouldShowDropdown_ = signal(false)
   private readonly picker_ = new KeyedPickerSearch()
 
   // ── Computed ─────────────────────────────────────────────────────────────────
@@ -117,12 +122,12 @@ export class ChipSearchDropdownComponent {
 
   // ── Protected methods ─────────────────────────────────────────────────────────
   protected openDropdown(): void {
-    this.showDropdown_.set(true)
+    this.shouldShowDropdown_.set(true)
     this.picker_.setHighlighted(PICKER_KEY, 0)
   }
 
   protected closeDropdown(): void {
-    this.showDropdown_.set(false)
+    this.shouldShowDropdown_.set(false)
     this.picker_.onQueryChange(PICKER_KEY, '')
     this.searchQuery_.set('')
   }
@@ -130,21 +135,21 @@ export class ChipSearchDropdownComponent {
   protected onQueryInput(value: string): void {
     this.searchQuery_.set(value)
     this.picker_.onQueryChange(PICKER_KEY, value)
-    if (!this.showDropdown_()) this.showDropdown_.set(true)
+    if (!this.shouldShowDropdown_()) this.shouldShowDropdown_.set(true)
   }
 
   /** Search clear (X): empty the query, keep the list open with every option, refocus (plan 364). */
   protected onClearSearch(): void {
     this.searchQuery_.set('')
     this.picker_.onQueryChange(PICKER_KEY, '')
-    this.showDropdown_.set(true)
-    this.searchInputRef?.nativeElement?.focus()
+    this.shouldShowDropdown_.set(true)
+    this.searchInputRef()?.nativeElement?.focus()
   }
 
   protected onBoxClick(ev: MouseEvent): void {
     if ((ev.target as HTMLElement).closest?.('.chipe')) return
     this.openDropdown()
-    setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.searchInputRef()?.nativeElement?.focus(), 0)
   }
 
   protected onBlurred(): void {
@@ -159,7 +164,7 @@ export class ChipSearchDropdownComponent {
 
   /** Search-box keys (rule 5): focus stays in the input; no wrap; Tab closes and lets the browser move focus. */
   protected onInputKeydown(ev: KeyboardEvent): void {
-    if (!this.showDropdown_()) {
+    if (!this.shouldShowDropdown_()) {
       if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
         ev.preventDefault()
         this.openDropdown()

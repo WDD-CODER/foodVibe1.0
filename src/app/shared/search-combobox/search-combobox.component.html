@@ -1,0 +1,102 @@
+<div
+  class="search-combobox"
+  [class.search-combobox--inline]="listPosition() === 'inline'"
+  (appClickOutside)="onOutsideClick()"
+>
+  <div
+    class="search-combobox__field"
+    [class.c-input-wrapper]="variant() === 'box'"
+    [class.c-picker-search-row]="variant() === 'plain'"
+  >
+    @if (icon()) {
+      <lucide-icon [name]="icon()!" [size]="18"></lucide-icon>
+    }
+    @if (multiline()) {
+      <textarea
+        #fieldRef
+        rows="1"
+        class="search-combobox__input"
+        [id]="inputId() || null"
+        [value]="query()"
+        [placeholder]="placeholder() | translatePipe"
+        [attr.aria-label]="placeholder() | translatePipe"
+        role="combobox"
+        aria-autocomplete="list"
+        [attr.aria-expanded]="visible()"
+        [attr.aria-activedescendant]="visible() ? optionIdPrefix() + highlightedIndex() : null"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        (input)="onInput($any($event.target).value)"
+        (focus)="onFocus()"
+        (keydown)="onKeydown($event)"
+      ></textarea>
+    } @else {
+      <input
+        #fieldRef
+        type="text"
+        class="search-combobox__input"
+        [id]="inputId() || null"
+        [value]="query()"
+        [placeholder]="placeholder() | translatePipe"
+        [attr.aria-label]="placeholder() | translatePipe"
+        role="combobox"
+        aria-autocomplete="list"
+        [attr.aria-expanded]="visible()"
+        [attr.aria-activedescendant]="visible() ? optionIdPrefix() + highlightedIndex() : null"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        (input)="onInput($any($event.target).value)"
+        (focus)="onFocus()"
+        (keydown)="onKeydown($event)"
+      />
+    }
+    <app-input-clear [visible]="!!query()" (clear)="onClear()" (click)="$event.stopPropagation()" />
+  </div>
+
+  @if (visible()) {
+    <app-scrollable-dropdown [maxHeight]="maxHeight()">
+      <ul class="search-combobox__list" role="listbox">
+        @for (row of rows(); track keyOfOption(row.option)) {
+          @if (row.header !== null) {
+            <li class="search-combobox__group" role="presentation">{{ row.header | translatePipe }}</li>
+          }
+          <li
+            class="search-combobox__option"
+            role="option"
+            [id]="optionIdPrefix() + row.index"
+            [class.is-highlighted]="highlightedIndex() === row.index"
+            [attr.aria-selected]="highlightedIndex() === row.index"
+            (mousedown)="$event.preventDefault()"
+            (click)="onRowClick(row.index)"
+          >
+            @if (optionTemplate(); as template) {
+              <ng-container *ngTemplateOutlet="template; context: { $implicit: row.option }"></ng-container>
+            } @else {
+              {{ labelOf()(row.option) }}
+            }
+          </li>
+        }
+        @if (showsAdd()) {
+          <li
+            class="search-combobox__option search-combobox__option--add"
+            role="option"
+            [id]="optionIdPrefix() + rows().length"
+            [class.is-highlighted]="highlightedIndex() === rows().length"
+            [attr.aria-selected]="highlightedIndex() === rows().length"
+            (mousedown)="$event.preventDefault()"
+            (click)="onAddClick()"
+          >
+            <app-add-option-row [label]="addLabel()" />
+          </li>
+        }
+        @if (rows().length === 0 && !showsAdd() && emptyKey()) {
+          <li class="search-combobox__empty" role="presentation">{{ emptyKey()! | translatePipe }}</li>
+        }
+      </ul>
+    </app-scrollable-dropdown>
+  }
+</div>

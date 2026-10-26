@@ -1,5 +1,6 @@
 import { inject, Injectable, signal } from '@angular/core'
 import { UserService } from '@services/user.service'
+import { ModalController } from '@services/modal-controller'
 import { AuthModalService } from '@services/auth-modal.service'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 
@@ -10,20 +11,20 @@ export class AiProductModalService {
   private readonly userService_ = inject(UserService)
   private readonly authModal_ = inject(AuthModalService)
 
-  private readonly isOpen_ = signal(false)
+  private readonly controller_ = new ModalController<void>(undefined)
   private readonly mode_ = signal<AiProductModalMode>('create')
   private currentProduct_: AiProductDraft | null = null
   private onResult_: ((draft: AiProductDraft) => void) | null = null
   private onPatch_: ((patch: AiProductPatch) => void) | null = null
 
-  readonly isOpen = this.isOpen_.asReadonly()
+  readonly isOpen = this.controller_.isOpen_
   readonly mode = this.mode_.asReadonly()
 
   open(
     mode: AiProductModalMode,
     currentProduct?: AiProductDraft,
     onResult?: (draft: AiProductDraft) => void,
-    onPatch?: (patch: AiProductPatch) => void,
+    onPatch?: (patch: AiProductPatch) => void
   ): void {
     if (!this.userService_.isLoggedIn()) {
       this.authModal_.open('sign-in')
@@ -33,7 +34,7 @@ export class AiProductModalService {
     this.currentProduct_ = currentProduct ?? null
     this.onResult_ = onResult ?? null
     this.onPatch_ = onPatch ?? null
-    this.isOpen_.set(true)
+    void this.controller_.open()
   }
 
   getEditContext(): AiProductDraft | null {
@@ -51,7 +52,7 @@ export class AiProductModalService {
   }
 
   close(): void {
-    this.isOpen_.set(false)
+    this.controller_.close()
     this.currentProduct_ = null
     this.onResult_ = null
     this.onPatch_ = null

@@ -1,12 +1,12 @@
 <div class="recipe-builder-container" dir="rtl">
-  @if (historyViewMode_()) {
+  @if (isHistoryViewMode_()) {
   <div class="history-view-banner">
     <span>{{ 'history_view_only_banner' | translatePipe }}</span>
     <button type="button" class="btn-back" (click)="navigateBackFromHistory()">
       {{ 'back_to_list' | translatePipe }}
     </button>
   </div>
-  } @if (recipeExport.exportToolbarOpen_()) {
+  } @if (recipeExport.isExportToolbarOpen_()) {
   <app-export-toolbar-overlay (closeRequest)="recipeExport.closeToolbar()">
     <div class="view-export-wrap">
       <button
@@ -23,7 +23,7 @@
       <div
         class="view-export-modal"
         (click)="$event.stopPropagation()"
-        (clickOutside)="recipeExport.closeViewExportModal()"
+        (appClickOutside)="recipeExport.closeViewExportModal()"
       >
         <button
           type="button"
@@ -59,7 +59,7 @@
       <div
         class="view-export-modal"
         (click)="$event.stopPropagation()"
-        (clickOutside)="recipeExport.closeViewExportModal()"
+        (appClickOutside)="recipeExport.closeViewExportModal()"
       >
         <button
           type="button"
@@ -96,7 +96,7 @@
       <div
         class="view-export-modal"
         (click)="$event.stopPropagation()"
-        (clickOutside)="recipeExport.closeViewExportModal()"
+        (appClickOutside)="recipeExport.closeViewExportModal()"
       >
         <button
           type="button"
@@ -133,7 +133,7 @@
       <div
         class="view-export-modal"
         (click)="$event.stopPropagation()"
-        (clickOutside)="recipeExport.closeViewExportModal()"
+        (appClickOutside)="recipeExport.closeViewExportModal()"
       >
         <button
           type="button"
@@ -170,7 +170,7 @@
       <div
         class="view-export-modal"
         (click)="$event.stopPropagation()"
-        (clickOutside)="recipeExport.closeViewExportModal()"
+        (appClickOutside)="recipeExport.closeViewExportModal()"
       >
         <button
           type="button"
@@ -220,21 +220,21 @@
         (openUnitCreator)="onOpenUnitCreator()"
         [imageUrl]="recipeImageUrl_()"
         (imageChange)="onImageChange($event)"
-        [readonlyMode]="historyViewMode_()"
+        [readonlyMode]="isHistoryViewMode_()"
         [rating]="recipeRating_()"
         (ratingChange)="recipeRating_.set($event)"
-        [netoConfirmed]="netoConfirmed_()"
+        [netoConfirmed]="isNetoConfirmed_()"
         [savedPortions]="savedPortions_()"
         [isExistingRecord]="isExistingRecord_()"
-        (yieldManuallyChanged)="netoConfirmed_.set(false)"
+        (yieldManuallyChanged)="isNetoConfirmed_.set(false)"
       ></app-recipe-header>
     </section>
 
     <section class="builder-section">
       <div
         class="section-card collapsible table-logic"
-        [class.is-collapsed]="tableLogicCollapsed_()"
-        (click)="tableLogicCollapsed_() && toggleTableLogic()"
+        [class.is-collapsed]="isTableLogicCollapsed_()"
+        (click)="isTableLogicCollapsed_() && toggleTableLogic()"
       >
         <div
           class="section-card-header"
@@ -250,9 +250,9 @@
             class="section-toggle-btn"
             tabindex="-1"
             (click)="toggleTableLogic(); $event.stopPropagation()"
-            [attr.aria-expanded]="!tableLogicCollapsed_()"
+            [attr.aria-expanded]="!isTableLogicCollapsed_()"
           >
-            <lucide-icon [name]="tableLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
+            <lucide-icon [name]="isTableLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
           </button>
         </div>
         <div class="section-card-body" (click)="$event.stopPropagation()">
@@ -266,7 +266,7 @@
           >
           </app-recipe-ingredients-table>
 
-          @if (!historyViewMode_()) {
+          @if (!isHistoryViewMode_()) {
           <button type="button" class="add-row-btn" (click)="addNewIngredientRow();$event.stopPropagation()">
             <lucide-icon name="plus" [size]="18"></lucide-icon>
             {{ 'add_row' | translatePipe }}
@@ -278,8 +278,8 @@
     <section class="builder-section">
       <div
         class="section-card collapsible workflow-logic"
-        [class.is-collapsed]="workflowLogicCollapsed_()"
-        (click)="workflowLogicCollapsed_() && toggleWorkflowLogic()"
+        [class.is-collapsed]="isWorkflowLogicCollapsed_()"
+        (click)="isWorkflowLogicCollapsed_() && toggleWorkflowLogic()"
       >
         <div
           class="section-card-header"
@@ -297,9 +297,9 @@
             class="section-toggle-btn"
             tabindex="-1"
             (click)="toggleWorkflowLogic(); $event.stopPropagation()"
-            [attr.aria-expanded]="!workflowLogicCollapsed_()"
+            [attr.aria-expanded]="!isWorkflowLogicCollapsed_()"
           >
-            <lucide-icon [name]="workflowLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
+            <lucide-icon [name]="isWorkflowLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
           </button>
         </div>
         <div class="section-card-body" (click)="$event.stopPropagation()">
@@ -317,12 +317,12 @@
       </div>
     </section>
 
-    @if (!historyViewMode_()) {
+    @if (!isHistoryViewMode_()) {
     <section class="builder-section">
       <div
         class="section-card collapsible logistics-logic"
-        [class.is-collapsed]="logisticsLogicCollapsed_()"
-        (click)="logisticsLogicCollapsed_() && toggleLogisticsLogic()"
+        [class.is-collapsed]="isLogisticsLogicCollapsed_()"
+        (click)="isLogisticsLogicCollapsed_() && toggleLogisticsLogic()"
       >
         <div
           class="section-card-header"
@@ -338,43 +338,37 @@
             class="section-toggle-btn"
             tabindex="-1"
             (click)="toggleLogisticsLogic(); $event.stopPropagation()"
-            [attr.aria-expanded]="!logisticsLogicCollapsed_()"
+            [attr.aria-expanded]="!isLogisticsLogicCollapsed_()"
           >
-            <lucide-icon [name]="logisticsLogicCollapsed_() ? 'chevron-down' : 'chevron-up'" [size]="20"></lucide-icon>
+            <lucide-icon
+              [name]="isLogisticsLogicCollapsed_() ? 'chevron-down' : 'chevron-up'"
+              [size]="20"
+            ></lucide-icon>
           </button>
         </div>
         <div class="section-card-body" (click)="$event.stopPropagation()">
-          <div
-            class="logistics-grid"
-            [formGroup]="recipeForm_"
-            (clickOutside)="logisticsPicker.dropdownOpen_.set(false)"
-          >
+          <div class="logistics-grid" [formGroup]="recipeForm_">
             <div class="logistics-add-wrap">
               <div class="logistics-add-inner">
-                <div class="logistics-tool-search-wrap">
-                  <lucide-icon name="search" class="logistics-search-icon" [size]="18"></lucide-icon>
-                  <input
-                    #logisticsSearchInput
-                    type="text"
-                    class="logistics-tool-search"
-                    [value]="logisticsPicker.searchQuery_()"
-                    (input)="logisticsPicker.onSearchInput($any($event.target).value)"
-                    (keydown)="logisticsPicker.onSearchKeydown($event)"
-                    role="combobox"
-                    aria-autocomplete="list"
-                    [attr.aria-expanded]="logisticsPicker.dropdownOpen_()"
-                    [attr.aria-activedescendant]="logisticsPicker.dropdownOpen_() ? 'logistics-tool-opt-' + logisticsPicker.highlightedIndex_() : null"
-                    [placeholder]="'search_tool_placeholder' | translatePipe"
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                  />
-                  <app-input-clear
-                    [visible]="!!logisticsPicker.searchQuery_()"
-                    (clear)="logisticsPicker.onSearchInput(''); logisticsSearchInput.focus()"
-                  />
-                </div>
+                <app-search-combobox
+                  class="logistics-tool-search-wrap"
+                  icon="search"
+                  placeholder="search_tool_placeholder"
+                  addLabelKey="add_new_tool"
+                  [query]="logisticsPicker.searchQuery_()"
+                  (queryChange)="logisticsPicker.onSearchInput($event)"
+                  [options]="logisticsPicker.searchOptions_()"
+                  [knownOptions]="logisticsPicker.allTools_()"
+                  [labelOf]="logisticsPicker.toolLabel_"
+                  [keyOf]="logisticsPicker.toolKey_"
+                  [clientFilter]="false"
+                  [minChars]="1"
+                  [maxHeight]="220"
+                  [openOnFocus]="false"
+                  [closeOnOutsideClick]="true"
+                  (picked)="logisticsPicker.selectOption($event.option)"
+                  (addChosen)="logisticsPicker.openAddNewToolModal($event.typed)"
+                />
                 <app-counter
                   [value]="logisticsPicker.quantity_()"
                   [min]="1"
@@ -390,37 +384,6 @@
                   {{ 'add' | translatePipe }}
                 </button>
               </div>
-              @if (logisticsPicker.dropdownOpen_()) {
-              <app-scrollable-dropdown [maxHeight]="220" class="logistics-tool-dropdown">
-                <ul role="listbox">
-                  @for (opt of logisticsPicker.searchOptions_(); track opt._id; let i = $index) {
-                  <li
-                    role="option"
-                    class="logistics-tool-option"
-                    [id]="'logistics-tool-opt-' + i"
-                    [class.highlighted]="logisticsPicker.highlightedIndex_() === i"
-                    [attr.aria-selected]="logisticsPicker.highlightedIndex_() === i"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="logisticsPicker.selectOption(opt)"
-                  >
-                    {{ opt.nameHebrew }}
-                  </li>
-                  } @if (logisticsPicker.showsAdd_()) {
-                  <li
-                    role="option"
-                    class="logistics-tool-option logistics-tool-add-new"
-                    [id]="'logistics-tool-opt-' + logisticsPicker.searchOptions_().length"
-                    [class.highlighted]="logisticsPicker.highlightedIndex_() === logisticsPicker.searchOptions_().length"
-                    [attr.aria-selected]="logisticsPicker.highlightedIndex_() === logisticsPicker.searchOptions_().length"
-                    (mousedown)="$event.preventDefault()"
-                    (click)="logisticsPicker.openAddNewToolModal()"
-                  >
-                    <app-add-option-row [label]="logisticsPicker.addLabel_()" />
-                  </li>
-                  }
-                </ul>
-              </app-scrollable-dropdown>
-              }
             </div>
             <div class="logistics-chips-wrap" formGroupName="logistics">
               <div class="logistics-chips" formArrayName="baseline">
@@ -449,21 +412,23 @@
         </div>
       </div>
     </section>
-    } @if (!historyViewMode_()) {
+    } @if (!isHistoryViewMode_()) {
     <footer class="action-footer">
-      @if (blockingIngredientsError_()) {
+      @if (hasBlockingIngredientsError_()) {
       <p class="blocking-ingredients-error">{{ 'blocking_ingredients_error' | translatePipe }}</p>
       }
-      <button class="c-btn-primary main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
-        @if (isSaving_()) {
-        <app-loader size="small" [inline]="true" />
-        } {{ (isSaving_() ? 'saving' : (recipeType_() === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
-      </button>
+      <app-edit-gate [type]="recipeType_() === 'dish' ? 'dishes' : 'recipes'">
+        <button class="c-btn-primary main-submit-btn" [disabled]="isSaving_()" (click)="saveRecipe()">
+          @if (isSaving_()) {
+          <app-loader size="small" [inline]="true" />
+          } {{ (isSaving_() ? 'saving' : (recipeType_() === 'dish' ? 'save_dish' : 'save_recipe')) | translatePipe }}
+        </button>
+      </app-edit-gate>
     </footer>
     }
   </div>
 
-  @if (!historyViewMode_()) {
+  @if (!isHistoryViewMode_()) {
   <app-approve-stamp [approved]="isApproved_()" [disabled]="isSaving_()" (approve)="onApproveStamp()" />
   } @if (recipeExport.exportPreviewPayload_(); as payload) {
   <app-export-preview

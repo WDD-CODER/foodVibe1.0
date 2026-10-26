@@ -1,6 +1,6 @@
 # Plan 433 — One quantity and cost engine for every event list, with fixture tests
 
-Status: draft
+Status: active
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 Track: code
 
@@ -23,8 +23,8 @@ hand-computed fixture tests. No screen changes here; plan 434 wires the screens.
   comes out exactly as hand-computed.
 
 Done when:
-- [auto] `npx ng build` exits 0.
-- [auto] `npx ng test --watch=false --include='src/app/core/engine/**/*.spec.ts' --include='src/app/core/utils/purchase-option-rate.util.spec.ts'`
+- [x] [auto] `npx ng build` exits 0.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/engine/**/*.spec.ts' --include='src/app/core/utils/purchase-option-rate.util.spec.ts'`
   passes (0 failures), and the run includes these named cases:
   - **04.1 fixture** (`event-plan.engine.spec.ts`, data from `testing/event-plan.fixture.ts`): dish "סלט" yield 10
     portions = 500 g tomato + 200 g prep "רוטב"; prep "רוטב" yield 1 kg = 800 g olive oil + 0.2 kg lemon; dish
@@ -60,8 +60,8 @@ Done when:
   is not rounded.
   - **Service**: `EventPlanService.planFor(event)` with a stubbed `KitchenStateService` returns the same plan as
     `computeEventPlan` on the fixture input; `costFor(<סלט id>, 100)` → `{ cost: 95.25, partial: true }`.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-- [auto] `git diff --name-only origin/main...HEAD` lists only paths inside the Read-Write Scope below.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `git diff --name-only origin/main...HEAD` lists only paths inside the Read-Write Scope below.
 
 No `[human]` item: this plan has no screen; plan 434 carries the on-screen checks.
 
@@ -171,23 +171,23 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Recursive expansion of preps inside dishes and preps, no depth limit, factor = needed qty in the prep's
+- [x] Recursive expansion of preps inside dishes and preps, no depth limit, factor = needed qty in the prep's
       yield unit ÷ prep `yieldAmount`.
-- [ ] Cycle detection (direct or indirect) with an `EngineError`, never an infinite loop.
-- [ ] Raw lines aggregated by product id in the product's base unit; preps never become raw lines.
-- [ ] Waste: `buyQty = netQty ÷ yieldFactor`; `yieldFactor` 0, negative or missing → 1.
-- [ ] Purchase units through `optionRateInBase`; `purchase.count = buyQty ÷ rate` (unrounded).
-- [ ] Unlinked rows never merge with product rows; deleted references flagged; unconvertible units on their own line.
-- [ ] Yield 0/empty is an error, not a silent 1; the same yield division for cost and quantity.
-- [ ] Supplier choice: cheapest positive price per base unit, tie → first source, no priced supplier → global
+- [x] Cycle detection (direct or indirect) with an `EngineError`, never an infinite loop.
+- [x] Raw lines aggregated by product id in the product's base unit; preps never become raw lines.
+- [x] Waste: `buyQty = netQty ÷ yieldFactor`; `yieldFactor` 0, negative or missing → 1.
+- [x] Purchase units through `optionRateInBase`; `purchase.count = buyQty ÷ rate` (unrounded).
+- [x] Unlinked rows never merge with product rows; deleted references flagged; unconvertible units on their own line.
+- [x] Yield 0/empty is an error, not a silent 1; the same yield division for cost and quantity.
+- [x] Supplier choice: cheapest positive price per base unit, tie → first source, no priced supplier → global
       price (`supplierId: ''` source, then a purchase option `priceOverride` converted to base) with
       `supplierId: null`.
-- [ ] `lineCost = buyQty × pricePerBaseUnit` (after waste, before purchase rounding); `eventFoodCost` = Σ line costs
+- [x] `lineCost = buyQty × pricePerBaseUnit` (after waste, before purchase rounding); `eventFoodCost` = Σ line costs
       = Σ dish costs.
-- [ ] Rounding helpers as in the contract; the engine itself never rounds except `roundPortions` on dish items.
+- [x] Rounding helpers as in the contract; the engine itself never rounds except `roundPortions` on dish items.
 
 ### Should Have (P1)
-- [ ] A reusable fixture builder so plans 434/435/437 specs assert the same numbers.
+- [x] A reusable fixture builder so plans 434/435/437 specs assert the same numbers.
 
 ## UI/UX Notes
 - No UI. Dictionary keys for engine statuses and errors are added by the plans that show them (434, 435, 437).
@@ -263,16 +263,16 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check by symb
   `EventPlanInput`; the engine only returns `supplierId`).
 
 ## Atomic Sub-tasks
-- [ ] E1: Define the engine's input and output shapes so every later screen shares one vocabulary — contract types plus the listed extensions — src/app/core/engine/event-plan.types.ts
-- [ ] E2: Add one place for quantity, money and percent rounding, with the 121-not-122 float check — roundPortions, formatQty, formatMoney, formatPct1, formatPctInt, roundMoney + spec — src/app/core/engine/rounding.ts, rounding.spec.ts
-- [ ] E3: Pick each product's supplier by the cheapest price, with a fallback to the general price — chooseSupplier + spec — src/app/core/engine/supplier-choice.ts, supplier-choice.spec.ts
-- [ ] E4: Convert amounts into the product's base unit or the prep's yield unit, or flag it — toBase, toYield, unitFamily; widen optionRateInBase's registry parameter to Pick<UnitRegistryService, 'getConversion'> — src/app/core/engine/units.ts, src/app/core/utils/purchase-option-rate.util.ts (+ spec case with a plain object)
-- [ ] E5: Expand preps inside dishes into raw lines, prep lines and dish costs, stopping on cycles — computeEventPlan per the Design steps 1–6 — src/app/core/engine/event-plan.engine.ts
-- [ ] E6: Write the 04.1 fixture once and test every listed case against hand-computed numbers — buildFixtureInput + engine spec (fixture, cost, cycle, no conversion, deleted, unlinked, waste, purchase unit, no yield, no ingredients) — src/app/core/engine/testing/event-plan.fixture.ts, event-plan.engine.spec.ts
-- [ ] E7: Read today's stored portions until the coefficients plan lands — portionsFromDerived + spec — src/app/core/engine/portions-from-derived.ts, portions-from-derived.spec.ts
-- [ ] E8: Give screens one Angular entry point to the engine for a whole event or a single dish — EventPlanService.planFor, costFor + spec with stubbed KitchenStateService and UnitRegistryService — src/app/core/engine/event-plan.service.ts, event-plan.service.spec.ts
-- [ ] E9: Note the new engine folder in the core map so the next agent finds it — breadcrumbs skill — src/app/core/breadcrumbs.md
-- [ ] E10: Build, run the engine specs and the log check, and report the evidence — ng build, ng test include list, log-query — this plan file
+- [x] E1: Define the engine's input and output shapes so every later screen shares one vocabulary — contract types plus the listed extensions — src/app/core/engine/event-plan.types.ts
+- [x] E2: Add one place for quantity, money and percent rounding, with the 121-not-122 float check — roundPortions, formatQty, formatMoney, formatPct1, formatPctInt, roundMoney + spec — src/app/core/engine/rounding.ts, rounding.spec.ts
+- [x] E3: Pick each product's supplier by the cheapest price, with a fallback to the general price — chooseSupplier + spec — src/app/core/engine/supplier-choice.ts, supplier-choice.spec.ts
+- [x] E4: Convert amounts into the product's base unit or the prep's yield unit, or flag it — toBase, toYield, unitFamily; widen optionRateInBase's registry parameter to Pick<UnitRegistryService, 'getConversion'> — src/app/core/engine/units.ts, src/app/core/utils/purchase-option-rate.util.ts (+ spec case with a plain object)
+- [x] E5: Expand preps inside dishes into raw lines, prep lines and dish costs, stopping on cycles — computeEventPlan per the Design steps 1–6 — src/app/core/engine/event-plan.engine.ts
+- [x] E6: Write the 04.1 fixture once and test every listed case against hand-computed numbers — buildFixtureInput + engine spec (fixture, cost, cycle, no conversion, deleted, unlinked, waste, purchase unit, no yield, no ingredients) — src/app/core/engine/testing/event-plan.fixture.ts, event-plan.engine.spec.ts
+- [x] E7: Read today's stored portions until the coefficients plan lands — portionsFromDerived + spec — src/app/core/engine/portions-from-derived.ts, portions-from-derived.spec.ts
+- [x] E8: Give screens one Angular entry point to the engine for a whole event or a single dish — EventPlanService.planFor, costFor + spec with stubbed KitchenStateService and UnitRegistryService — src/app/core/engine/event-plan.service.ts, event-plan.service.spec.ts
+- [x] E9: Note the new engine folder in the core map so the next agent finds it — breadcrumbs skill — src/app/core/breadcrumbs.md
+- [x] E10: Build, run the engine specs and the log check, and report the evidence — ng build, ng test include list, log-query — this plan file
 
 ## Technical Considerations
 - Dependencies: `optionRateInBase` (plan 423), `UNIT_ALIASES` / `MASS_UNITS` / `VOLUME_UNITS`

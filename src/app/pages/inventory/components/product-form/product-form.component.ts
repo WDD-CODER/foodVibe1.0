@@ -1,5 +1,6 @@
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   inject,
   OnInit,
@@ -11,10 +12,10 @@ import {
   Injector,
   ElementRef,
   AfterViewInit,
-  ViewChild,
+  viewChild,
   DestroyRef
 } from '@angular/core'
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import {
   ReactiveFormsModule,
@@ -35,7 +36,7 @@ import { Product, PurchaseOption_, ProductSource } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { UtilService } from '@services/util.service'
-import { UnitRegistryService } from '@services/unit-registry.service'
+import { UnitRegistryService, UnitCreatorContext, ProductUnitAdded } from '@services/unit-registry.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { TranslationService } from '@services/translation.service'
@@ -43,14 +44,17 @@ import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service'
 import { LoggingService } from '@services/logging.service'
-import { toSignal } from '@angular/core/rxjs-interop'
+import { map } from 'rxjs'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { duplicateNameValidator } from 'src/app/core/validators/item.validators'
+import { failedSaveMessage } from 'src/app/core/utils/product-form-errors.util'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { ChipSearchDropdownComponent } from 'src/app/shared/chip-search-dropdown/chip-search-dropdown.component'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { AiProductModalService } from 'src/app/shared/ai-product-modal/ai-product-modal.service'
 import { ProductAiFlowService } from 'src/app/pages/inventory/services/product-ai-flow.service'
 import type { AiProductDraft } from '@models/ai-product-draft.model'
@@ -58,6 +62,21 @@ import { UserService } from '@services/user.service'
 import { MasterPushService } from '@services/master-push.service'
 import { HeroFabService } from '@services/hero-fab.service'
 import { registerDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
+import { ProductPriceLockComponent } from '../product-price-lock/product-price-lock.component'
+import { ProductNameSuggestionsComponent } from '../product-name-suggestions/product-name-suggestions.component'
+
+/**
+ * Plan 423 — units whose size is a physical constant: choosing one in a purchase row fills the exact amount.
+ * Any other unit (jar, box, ...) weighs something different for every product, so its amount is typed per product.
+ */
+const PREFILLED_UNITS: ReadonlySet<string> = new Set(['kg', 'gram', 'liter', 'ml', 'tablespoon', 'teaspoon', 'cup'])
+
+interface PurchaseOptionState {
+  overrideConfirmed: boolean
+  /** Last real unit of the row (never 'NEW_UNIT'): what a cancelled "add new unit" restores. */
+  previousUnit?: string
+  previousUom?: string
+}
 
 interface ProductFormValue {
   buy_price_global_?: number
@@ -69,7 +88,7 @@ interface ProductFormValue {
 }
 
 @Component({
-  selector: 'product-form',
+  selector: 'app-product-form',
   standalone: true,
   imports: [
     CommonModule,
@@ -81,7 +100,10 @@ interface ProductFormValue {
     TranslatePipe,
     LoaderComponent,
     CustomSelectComponent,
-    ChipSearchDropdownComponent
+    ChipSearchDropdownComponent,
+    ProductPriceLockComponent,
+    ProductNameSuggestionsComponent,
+    FormFieldComponent
   ],
   providers: [ProductAiFlowService],
   templateUrl: './product-form.component.html',
@@ -89,9 +111,9 @@ interface ProductFormValue {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductFormComponent implements OnInit, AfterViewInit {
-  initialProduct_ = input<Product | null>(null)
+  initialProduct = input<Product | null>(null)
 
-  @ViewChild('productNameInput') private productNameInputRef?: ElementRef<HTMLInputElement>
+  private readonly productNameInputRef = viewChild<ElementRef<HTMLInputElement>>('productNameInput')
 
   private readonly fb_ = inject(FormBuilder)
   private readonly conversionService = inject(ConversionService)
@@ -113,6 +135,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   private readonly userService_ = inject(UserService)
   private readonly masterPush_ = inject(MasterPushService)
   private readonly heroFab_ = inject(HeroFabService)
+  private readonly cdr_ = inject(ChangeDetectorRef)
 
   unitRegistry = inject(UnitRegistryService)
   private readonly isAdmin_ = this.userService_.isAdmin_
@@ -145,12 +168,14 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   //SIMPLE VALUES
   private formValue_!: Signal<ProductFormValue>
   protected productForm_!: FormGroup
-  /** Snapshot of form value when user entered the item (for hasRealChanges). */
-  private initialFormSnapshot_: string | null = null
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.productForm_,
+    snapshot: () => this.getFormSnapshotForComparison()
+  })
   isSubmitted = false
 
   // Tracks per-row state for purchase options (e.g., whether a manual override was confirmed)
-  private readonly purchaseOptionState_ = new WeakMap<FormGroup, { overrideConfirmed: boolean }>()
+  private readonly purchaseOptionState_ = new WeakMap<FormGroup, PurchaseOptionState>()
 
   //COMPUTED
   protected netUnitCost_ = computed(() => {
@@ -188,33 +213,33 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected readonly translateFn = (key: string) => this.translationService.translate(key)
   protected readonly supplierDisplayFn = (id: string) => this.getSupplierName(id)
 
-  protected expandedMinStock_ = signal(false)
-  protected expandedExpiryDays_ = signal(false)
-  protected expandedWasteYield_ = signal(false)
-  protected expandedAllergens_ = signal(false)
-  protected expandedSupplier_ = signal(false)
+  protected isExpandedMinStock_ = signal(false)
+  protected isExpandedExpiryDays_ = signal(false)
+  protected isExpandedWasteYield_ = signal(false)
+  protected isExpandedAllergens_ = signal(false)
+  protected isExpandedSupplier_ = signal(false)
 
   protected toggleMinStock(): void {
-    this.expandedMinStock_.update((v) => !v)
+    this.isExpandedMinStock_.update((v) => !v)
   }
   protected toggleExpiryDays(): void {
-    this.expandedExpiryDays_.update((v) => !v)
+    this.isExpandedExpiryDays_.update((v) => !v)
   }
   protected toggleWasteYield(): void {
-    this.expandedWasteYield_.update((v) => !v)
+    this.isExpandedWasteYield_.update((v) => !v)
   }
   protected toggleAllergens(): void {
-    this.expandedAllergens_.update((v) => !v)
+    this.isExpandedAllergens_.update((v) => !v)
   }
   protected toggleSupplier(): void {
-    this.expandedSupplier_.update((v) => !v)
+    this.isExpandedSupplier_.update((v) => !v)
   }
 
   protected onSupplierBlur(clickTarget?: HTMLElement): void {
     if (!this.productForm_) return
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     if (this.selectedSupplierIds_().length === 0) {
-      this.expandedSupplier_.set(false)
+      this.isExpandedSupplier_.set(false)
     }
   }
 
@@ -223,7 +248,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const val = this.productForm_.get('minStockLevel')?.value
     if (val == null || val === 0 || val === '') {
-      this.expandedMinStock_.set(false)
+      this.isExpandedMinStock_.set(false)
     }
   }
 
@@ -232,7 +257,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const val = this.productForm_.get('expiryDaysDefault')?.value
     if (val == null || val === 0 || val === '') {
-      this.expandedExpiryDays_.set(false)
+      this.isExpandedExpiryDays_.set(false)
     }
   }
 
@@ -241,7 +266,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     if (clickTarget?.closest?.('.collapsible-field__header--btn')) return
     const allergens = (this.productForm_.get('allergens')?.value || []) as string[]
     if (allergens.length === 0) {
-      this.expandedAllergens_.set(false)
+      this.isExpandedAllergens_.set(false)
     }
   }
 
@@ -252,7 +277,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const yieldVal = this.productForm_.get('yieldFactor')?.value
     const isDefault = (waste == null || waste === 0) && (yieldVal == null || yieldVal === 1)
     if (isDefault) {
-      this.expandedWasteYield_.set(false)
+      this.isExpandedWasteYield_.set(false)
     }
   }
 
@@ -270,7 +295,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => this.productNameInputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.productNameInputRef()?.nativeElement?.focus(), 0)
   }
 
   ngOnInit(): void {
@@ -284,12 +309,12 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     this.destroyRef.onDestroy(() => this.heroFab_.clearPageActions())
 
     runInInjectionContext(this.injector, () => {
-      this.formValue_ = toSignal(this.productForm_.valueChanges, {
+      this.formValue_ = toSignal(this.productForm_.valueChanges.pipe(map(() => this.productForm_.getRawValue())), {
         initialValue: this.productForm_.getRawValue()
       })
     })
 
-    const productData = this.initialProduct_()
+    const productData = this.initialProduct()
     if (productData) {
       this.hydrateForm(productData)
     } else {
@@ -300,7 +325,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
           this.isEditMode_.set(false)
           this.curProduct_.set(this.utilService.getEmptyProduct())
           this.productForm_.patchValue({ baseUnit: 'kg' })
-          this.initialFormSnapshot_ = this.getFormSnapshotForComparison()
+          this.unsaved_.markSaved()
         }
       })
     }
@@ -319,8 +344,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         ]
       ],
       baseUnit: ['', Validators.required],
-      buy_price_global_: [0, [Validators.required, Validators.min(0)]],
-      categories: [[], [Validators.required, Validators.minLength(1)]],
+      buy_price_global_: [0, [Validators.min(0)]],
+      categories: [[]],
       supplierIds_: [[]],
       minStockLevel: [0, [Validators.min(0)]],
       expiryDaysDefault: [0, [Validators.min(0)]],
@@ -329,10 +354,18 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       allergens: [[]],
       purchaseOptions: this.fb_.array([])
     })
+    this.productForm_
+      .get('baseUnit')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v: string | null) => {
+        if (v && v !== 'NEW_UNIT') this.previousBaseUnit_ = v
+      })
     this.setupWasteLogic()
   }
 
-  // RESTORED WASTE LOGIC
+  /** Last real base unit (never 'NEW_UNIT'): what a cancelled "add new unit" restores. */
+  private previousBaseUnit_ = ''
+
   private setupWasteLogic(): void {
     const percentCtrl = this.productForm_.get('waste_percent_')
     const yieldCtrl = this.productForm_.get('yieldFactor')
@@ -446,68 +479,92 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     return typed
   }
 
+  /**
+   * Plan 423 - one flow for every "add new unit" in the form. Clears the control, opens the window, then
+   * delivers the unit that was saved (`onAdded`) or, when the window closes without a save, puts `previous`
+   * (a string, never a number) back. Takes the first result only and ends with the component.
+   */
+  private async pickNewUnit_(
+    control: AbstractControl | null | undefined,
+    previous: string,
+    context: UnitCreatorContext,
+    onAdded: (added: { key: string; amount?: number; basis?: string }) => void
+  ): Promise<void> {
+    control?.setValue('', { emitEvent: false })
+    this.unitRegistry.openUnitCreator(context)
+    let alive = true
+    const stopWatching = this.destroyRef.onDestroy(() => (alive = false))
+    const added = await (context.forProduct
+      ? this.unitRegistry.awaitProductUnitAdded()
+      : this.unitRegistry.awaitUnitCreated().then((key) => (key ? { key } : null)))
+    stopWatching()
+    if (!alive) return
+    if (added) onAdded(added)
+    else control?.setValue(previous, { emitEvent: false })
+    this.cdr_.markForCheck() // the row shows its amount boxes only while it has a unit
+  }
+
   protected onBaseUnitValueChange(value: string): void {
-    if (value === 'NEW_UNIT') {
-      this.unitRegistry.openUnitCreator({ prefillName: this.takePendingAddName_() })
-      this.productForm_.patchValue({ baseUnit: '' })
-      this.unitRegistry
-        .awaitUnitCreated()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((newUnit) => {
-          this.productForm_.patchValue({ baseUnit: newUnit })
-        })
-    }
+    if (value !== 'NEW_UNIT') return
+    const control = this.productForm_.get('baseUnit')
+    this.pickNewUnit_(control, this.previousBaseUnit_, { prefillName: this.takePendingAddName_() }, ({ key }) => {
+      control?.setValue(key)
+    })
   }
 
   protected onUnitSymbolValueChange(value: string, index: number): void {
-    if (value === 'NEW_UNIT') {
-      const existingSymbols =
-        ((this.purchaseOptions_.value as { unitSymbol?: string }[])
-          ?.map((o) => o?.unitSymbol)
-          ?.filter(Boolean) as string[]) ?? []
-      this.unitRegistry.openUnitCreator({
+    if (value !== 'NEW_UNIT') return
+    const row = this.purchaseOptions_.at(index) as FormGroup | undefined
+    if (!row) return
+    const existingSymbols =
+      ((this.purchaseOptions_.value as { unitSymbol?: string }[])
+        ?.map((o) => o?.unitSymbol)
+        ?.filter(Boolean) as string[]) ?? []
+    const productName = String(this.productForm_.get('productName')?.value ?? '').trim()
+    const baseUnit = String(this.productForm_.get('baseUnit')?.value ?? '')
+    const previous = this.purchaseOptionState_.get(row)?.previousUnit ?? ''
+    this.pickNewUnit_(
+      row.get('unitSymbol'),
+      previous,
+      {
         existingUnitSymbols: existingSymbols,
-        prefillName: this.takePendingAddName_()
-      })
-      this.purchaseOptions_.at(index)?.patchValue({ unitSymbol: '' })
-      this.unitRegistry
-        .awaitUnitCreated()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((unitKey) => this.applyNewPurchaseUnit_(index, unitKey))
-    }
+        prefillName: this.takePendingAddName_(),
+        forProduct: { name: productName, baseUnit }
+      },
+      (added) => this.applyNewPurchaseUnit_(index, added as ProductUnitAdded)
+    )
   }
 
-  /** Fill a purchase row with a just-created unit: symbol, base uom, conversion rate and suggested price. */
-  private applyNewPurchaseUnit_(index: number, unitKey: string): void {
-    const row = this.purchaseOptions_.at(index)
+  /** Fill a purchase row with a just-added unit: this product's own amount, the unit it was typed in, suggested price. */
+  private applyNewPurchaseUnit_(index: number, added: ProductUnitAdded): void {
+    const row = this.purchaseOptions_.at(index) as FormGroup | undefined
     if (!row) return
-    const baseUnit = this.productForm_.get('baseUnit')?.value ?? ''
-    const baseFactor = this.unitRegistry.getConversion(baseUnit) || 1
-    const unitFactor = this.unitRegistry.getConversion(unitKey) || 1
-    // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
-    const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
     const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(
       this.productForm_.get('buy_price_global_')?.value || 0,
-      conversionRate
+      added.amount
     )
     row.patchValue(
-      { unitSymbol: unitKey, uom: baseUnit, conversionRate, priceOverride: suggestedPrice },
+      { unitSymbol: added.key, uom: added.basis, conversionRate: added.amount, priceOverride: suggestedPrice },
       { emitEvent: false }
     )
+    const state = this.purchaseOptionState_.get(row) ?? { overrideConfirmed: false }
+    this.purchaseOptionState_.set(row, {
+      ...state,
+      overrideConfirmed: false,
+      previousUnit: added.key,
+      previousUom: added.basis
+    })
     this.productForm_.markAsDirty()
   }
 
   protected onUomValueChange(value: string, index: number): void {
-    if (value === 'NEW_UNIT') {
-      this.unitRegistry.openUnitCreator({ prefillName: this.takePendingAddName_() })
-      this.purchaseOptions_.at(index)?.patchValue({ uom: '' })
-      this.unitRegistry
-        .awaitUnitCreated()
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((newUnit) => {
-          this.purchaseOptions_.at(index)?.patchValue({ uom: newUnit })
-        })
-    }
+    if (value !== 'NEW_UNIT') return
+    const row = this.purchaseOptions_.at(index) as FormGroup | undefined
+    if (!row) return
+    const previous = this.purchaseOptionState_.get(row)?.previousUom ?? ''
+    this.pickNewUnit_(row.get('uom'), previous, { prefillName: this.takePendingAddName_() }, ({ key }) => {
+      row.get('uom')?.setValue(key)
+    })
   }
 
   protected toggleAllergen(allergen: string): void {
@@ -607,36 +664,31 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the item. */
   hasRealChanges(): boolean {
-    if (!this.productForm_ || this.initialFormSnapshot_ === null) return this.productForm_?.dirty ?? false
-    return this.getFormSnapshotForComparison() !== this.initialFormSnapshot_
+    return this.unsaved_.hasChanges()
   }
 
   /** Normalized form value for comparison (sorted arrays, comparable purchaseOptions). */
   private getFormSnapshotForComparison(): string {
     const raw = this.productForm_.getRawValue()
-    const opts = (raw?.purchaseOptions ?? []) as Array<{
-      unitSymbol?: string
-      conversionRate?: number
-      uom?: string
-      priceOverride?: number
-    }>
+    type Opt = { unitSymbol?: string; conversionRate?: number; uom?: string; priceOverride?: number }
+    const opts = (raw?.purchaseOptions ?? []) as Opt[]
     const normalized = {
       productName: raw?.productName ?? '',
       baseUnit: raw?.baseUnit ?? '',
       buy_price_global_: Number(raw?.buy_price_global_) || 0,
       categories: [...((raw?.categories ?? []) as string[])].sort(),
       supplierIds_: [...(raw?.supplierIds_ ?? [])].sort(),
-      minStockLevel: Number(raw?.minStockLevel) ?? 0,
-      expiryDaysDefault: Number(raw?.expiryDaysDefault) ?? 0,
-      yieldFactor: Number(raw?.yieldFactor) ?? 1,
-      waste_percent_: Number(raw?.waste_percent_) ?? 0,
+      minStockLevel: Number(raw?.minStockLevel),
+      expiryDaysDefault: Number(raw?.expiryDaysDefault),
+      yieldFactor: Number(raw?.yieldFactor),
+      waste_percent_: Number(raw?.waste_percent_),
       allergens: [...((raw?.allergens ?? []) as string[])].sort(),
       purchaseOptions: opts
         .map((o) => ({
           unitSymbol: o?.unitSymbol ?? '',
-          conversionRate: Number(o?.conversionRate) ?? 0,
+          conversionRate: Number(o?.conversionRate),
           uom: o?.uom ?? '',
-          priceOverride: Number(o?.priceOverride) ?? 0
+          priceOverride: Number(o?.priceOverride)
         }))
         .sort((a, b) => (a.unitSymbol || '').localeCompare(b.unitSymbol || ''))
     }
@@ -658,13 +710,24 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     })
 
     // Initialize state for this row
-    this.purchaseOptionState_.set(group, { overrideConfirmed: false })
+    this.purchaseOptionState_.set(group, { overrideConfirmed: false, previousUnit: unit, previousUom: uomValue })
+
+    group
+      .get('uom')
+      ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((v: string | null) => {
+        if (!v || v === 'NEW_UNIT') return
+        const state = this.purchaseOptionState_.get(group) ?? { overrideConfirmed: false }
+        this.purchaseOptionState_.set(group, { ...state, previousUom: v })
+      })
 
     group
       .get('unitSymbol')
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((newUnit: string | null) => {
-        if (!newUnit || newUnit === 'NEW_UNIT') {
+        // 'NEW_UNIT': the row stays as it was until the window answers (a cancel restores the previous unit)
+        if (newUnit === 'NEW_UNIT') return
+        if (!newUnit) {
           group.patchValue(
             {
               conversionRate: null,
@@ -679,28 +742,30 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
         const baseUnitKey = this.productForm_.get('baseUnit')?.value ?? ''
         const baseFactor = this.unitRegistry.getConversion(baseUnitKey) || 1
         const unitFactor = this.unitRegistry.getConversion(newUnit) || 1
-        // conversionRate = base units per 1 purchase unit (e.g. 0.33 kg per jar when 1 jar = 330g)
-        const suggestedConv = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
+        // Plan 423: only physical-constant units are pre-filled (kg, gram, ...). A custom unit (jar, box)
+        // weighs something different for every product, so another product's number is never copied in.
+        const suggestedConv: number | null = PREFILLED_UNITS.has(newUnit)
+          ? baseFactor > 0 && unitFactor > 0
+            ? unitFactor / baseFactor
+            : 1
+          : null
         const currentGlobal = this.productForm_.get('buy_price_global_')?.value || 0
 
-        // 1. Get the actual base unit selected at the top of the form (e.g., 'gram')
-        const currentBaseUnit = this.productForm_.get('baseUnit')?.value ?? ''
-        const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv)
+        const suggestedPrice = this.conversionService.getSuggestedPurchasePrice(currentGlobal, suggestedConv ?? 0)
 
         // 2. Patch the row so the "UOM" (middle dropdown) is no longer empty
         group.patchValue(
           {
             conversionRate: suggestedConv,
-            uom: currentBaseUnit, // 👈 This fills the empty slot next to 5000
+            uom: baseUnitKey, // the base unit selected at the top of the form fills the compare-to box
             priceOverride: suggestedPrice
           },
           { emitEvent: false }
         )
 
         // Reset override state when unit changes
-        const state = this.purchaseOptionState_.get(group) || { overrideConfirmed: false }
-        state.overrideConfirmed = false
-        this.purchaseOptionState_.set(group, state)
+        const state = this.purchaseOptionState_.get(group) ?? { overrideConfirmed: false }
+        this.purchaseOptionState_.set(group, { ...state, overrideConfirmed: false, previousUnit: newUnit })
 
         // 3. Mark for check to ensure the UI refreshes the calculation
         group.get('priceOverride')?.markAsDirty()
@@ -711,7 +776,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       ?.valueChanges.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((newConv: number | null | undefined) => {
         if (newConv === null || newConv === undefined) return
-        const state = this.purchaseOptionState_.get(group) || { overrideConfirmed: false }
+        const state = this.purchaseOptionState_.get(group) ?? { overrideConfirmed: false }
         if (state.overrideConfirmed) {
           return
         }
@@ -746,7 +811,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     const group = control as FormGroup | null
     if (!group) return
 
-    const state = this.purchaseOptionState_.get(group) || { overrideConfirmed: false }
+    const state = this.purchaseOptionState_.get(group) ?? { overrideConfirmed: false }
     const conventional = this.getConventionalPriceForGroup_(group)
     const current = group.get('priceOverride')?.value
     const epsilon = 0.0001
@@ -802,11 +867,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       allergens: data.allergens || []
     })
 
-    if ((data.minStockLevel ?? 0) > 0) this.expandedMinStock_.set(true)
-    if ((data.expiryDaysDefault ?? 0) > 0) this.expandedExpiryDays_.set(true)
-    if (Math.abs((data.yieldFactor ?? 1) - 1) > 0.001) this.expandedWasteYield_.set(true)
-    if ((data.allergens?.length ?? 0) > 0) this.expandedAllergens_.set(true)
-    if (getSupplierIds(data).length > 0) this.expandedSupplier_.set(true)
+    if ((data.minStockLevel ?? 0) > 0) this.isExpandedMinStock_.set(true)
+    if ((data.expiryDaysDefault ?? 0) > 0) this.isExpandedExpiryDays_.set(true)
+    if (Math.abs((data.yieldFactor ?? 1) - 1) > 0.001) this.isExpandedWasteYield_.set(true)
+    if ((data.allergens?.length ?? 0) > 0) this.isExpandedAllergens_.set(true)
+    if (getSupplierIds(data).length > 0) this.isExpandedSupplier_.set(true)
 
     this.purchaseOptions_.clear()
 
@@ -817,15 +882,13 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       })
     }
 
-    this.initialFormSnapshot_ = this.getFormSnapshotForComparison()
+    this.unsaved_.markSaved()
   }
   private validateForm_(): boolean {
     const errors: Record<string, string> = {}
     const val = this.productForm_.getRawValue()
     if (!val.productName?.trim()) errors['productName'] = 'field_name_required'
     if (!val.baseUnit?.trim()) errors['baseUnit'] = 'field_unit_required'
-    if (val.buy_price_global_ == null || val.buy_price_global_ < 0) errors['buy_price_global_'] = 'field_price_required'
-    if (!val.categories?.length) errors['categories'] = 'field_category_required'
     this.validationErrors_.set(errors)
     return Object.keys(errors).length === 0
   }
@@ -838,14 +901,10 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   /** For pendingChangesGuard: save and resolve true on success, false on failure. */
   async saveAndWait(): Promise<boolean> {
-    if (!this.validateForm_()) {
+    if (!this.validateForm_() || !this.productForm_.valid) {
+      this.isSubmitted = true // invalid purchase rows get marked
       this.productForm_.markAllAsTouched()
-      this.userMsgService.onSetErrorMsg(this.translationService.translate('form_has_errors'))
-      return false
-    }
-    if (!this.productForm_.valid) {
-      this.productForm_.markAllAsTouched()
-      this.userMsgService.onSetErrorMsg(this.translationService.translate('form_has_errors'))
+      this.userMsgService.onSetErrorMsg(failedSaveMessage(this.productForm_.controls, this.translationService))
       return false
     }
     const val = this.productForm_.getRawValue()
@@ -907,23 +966,20 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
 
     this.saving.setSaving(true)
-    return new Promise<boolean>((resolve) => {
-      this.kitchenStateService.saveProduct(productToSave).subscribe({
-        next: (saved) => {
-          this.saving.setSaving(false)
-          this.validationErrors_.set({})
-          this.isSubmitted = true
-          if (pushToMasterAfterSave) this.masterPush_.pushProductToMaster(saved)
-          // Categories/allergens enter Metadata only once the product is actually saved.
-          void registerDraftMetadata({ categories, allergens: val.allergens ?? [] }, this.metadataRegistry)
-          resolve(true)
-        },
-        error: () => {
-          this.saving.setSaving(false)
-          resolve(false)
-        }
-      })
-    })
+    let saved: Product
+    try {
+      saved = await this.kitchenStateService.saveProduct(productToSave)
+    } catch {
+      this.saving.setSaving(false)
+      return false
+    }
+    this.saving.setSaving(false)
+    this.validationErrors_.set({})
+    this.isSubmitted = true
+    if (pushToMasterAfterSave) this.masterPush_.pushProductToMaster(saved)
+    // Categories/allergens enter Metadata only once the product is actually saved.
+    void registerDraftMetadata({ categories, allergens: val.allergens ?? [] }, this.metadataRegistry)
+    return true
   }
 
   protected onCancel(): void {

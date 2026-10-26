@@ -35,26 +35,19 @@
 
   <div class="list-container">
     @if (items().length > 0) {
-      <div class="c-tap-chip-group">
+      <div class="c-chip-group">
         @for (item of items(); track item) {
           @let lockKey = lockReason()(item);
           @if (editingItem_() === item) {
-            <input
-              #renameInput
-              type="text"
-              class="inline-edit-input"
+            <app-inline-rename-field
               [value]="renameValue()(item)"
-              (blur)="onRenameBlur(item, renameInput.value)"
-              (keydown.enter)="renameInput.blur()"
-              autocomplete="off"
-              autocorrect="off"
-              autocapitalize="off"
-              spellcheck="false"
+              (saved)="onRenameSaved(item, $event)"
+              (cancelled)="editingItem_.set(null)"
             />
           } @else if (lockKey) {
-            <span class="c-tap-chip is-locked">
+            <span class="c-chip c-chip--tap is-locked">
               @if (dotColor(); as color) {
-                <span class="c-tap-chip__dot" [style.background-color]="color(item)"></span>
+                <span class="c-chip__dot" [style.background-color]="color(item)"></span>
               }
               {{ item | translatePipe }}
               <lucide-icon
@@ -67,13 +60,13 @@
           } @else {
             <button
               type="button"
-              class="c-tap-chip"
+              class="c-chip c-chip--tap"
               [attr.aria-expanded]="menuItem_() === item"
               (click)="onOpenMenu($event, item)"
               (dblclick)="inlineRename() && onMenuEdit(item)"
             >
               @if (dotColor(); as color) {
-                <span class="c-tap-chip__dot" [style.background-color]="color(item)"></span>
+                <span class="c-chip__dot" [style.background-color]="color(item)"></span>
               }
               {{ item | translatePipe }}
             </button>

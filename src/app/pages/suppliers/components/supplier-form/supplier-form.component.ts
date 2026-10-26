@@ -13,6 +13,8 @@ import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { Supplier } from '@models/supplier.model'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 
@@ -20,7 +22,14 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
 @Component({
   selector: 'app-supplier-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, TranslatePipe],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    FormFieldComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './supplier-form.component.html',
   styleUrl: './supplier-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -96,6 +105,13 @@ export class SupplierFormComponent implements OnInit {
       minOrderMov: s.minOrderMov ?? 0,
       leadTimeDays: s.leadTimeDays ?? 0
     })
+  }
+
+  /** Error key under the name field: duplicate name (after leaving the field) or required. */
+  protected nameError(): string | null {
+    const ctrl = this.supplierForm_.get('nameHebrew')
+    if (ctrl?.errors?.['duplicateName'] && ctrl.touched) return 'duplicate_supplier_name'
+    return this.validationErrors_()['nameHebrew'] ? 'field_name_required' : null
   }
 
   private validateForm_(): boolean {

@@ -1,69 +1,18 @@
-import { Injectable, inject, signal } from '@angular/core'
+import { Injectable, Signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
-import { LoggingService } from './logging.service'
-import { LoadingService } from './loading.service'
+import { BaseEntityDataService } from './base-entity-data.service'
 import { MenuEvent } from '@models/menu-event.model'
 
 const ENTITY = 'menuEvents'
 
 @Injectable({ providedIn: 'root' })
-export class MenuEventDataService {
-  private readonly storage = inject(StorageService)
-  private readonly logging = inject(LoggingService)
-  private readonly loading_ = inject(LoadingService)
-
-  private readonly eventsStore_ = signal<MenuEvent[]>([])
-  readonly allMenuEvents_ = this.eventsStore_.asReadonly()
-
-  private loaded_ = false
-  private loadPromise_: Promise<void> | null = null
+export class MenuEventDataService extends BaseEntityDataService<MenuEvent> {
+  /** Domain alias for the base-class signal. */
+  readonly allMenuEvents_: Signal<MenuEvent[]> = this.all_
 
   constructor() {
     // Deferred: load on ensureLoaded() via menu-library / menu-intelligence / metadata routes.
-  }
-
-  hasLoaded(): boolean {
-    return this.loaded_
-  }
-
-  async ensureLoaded(): Promise<void> {
-    if (this.loaded_) return
-    if (this.loadPromise_) return this.loadPromise_
-    this.loadPromise_ = this.loadInitialData()
-      .catch(() => {})
-      .finally(() => {
-        this.loaded_ = true
-        this.loadPromise_ = null
-      })
-    return this.loadPromise_
-  }
-
-  async reloadFromStorage(): Promise<void> {
-    if (this.loadPromise_) {
-      // A load is already in flight — e.g. this service was just constructed via
-      // injector.get() and its constructor's ensureLoaded() hasn't resolved yet.
-      // Await it instead of firing a redundant concurrent fetch for the same data.
-      await this.loadPromise_
-      return
-    }
-    this.loaded_ = false
-    this.loadPromise_ = null
-    await this.ensureLoaded()
-  }
-
-  private async loadInitialData(): Promise<void> {
-    try {
-      const data = await this.loading_.track(this.storage.query<MenuEvent>(ENTITY))
-      this.eventsStore_.set(data)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({
-        event: 'crud.menuEvents.hydrate_error',
-        message: 'Failed to load menu events',
-        context: { err }
-      })
-    }
+    super(ENTITY, false, { errorEvent: 'crud.menuEvents.hydrate_error', errorMessage: 'Failed to load menu events' })
   }
 
   async getMenuEventById(_id: string): Promise<MenuEvent> {
@@ -79,7 +28,7 @@ export class MenuEventDataService {
   async addMenuEvent(newEvent: Omit<MenuEvent, '_id'>): Promise<MenuEvent> {
     try {
       const saved = await this.storage.post<MenuEvent>(ENTITY, newEvent as MenuEvent)
-      this.eventsStore_.update((events) => [...events, saved])
+      this.updateItems((events) => [...events, saved])
       return saved
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -95,7 +44,7 @@ export class MenuEventDataService {
   async updateMenuEvent(event: MenuEvent): Promise<MenuEvent> {
     try {
       const updated = await this.storage.put<MenuEvent>(ENTITY, event)
-      this.eventsStore_.update((events) => events.map((e) => (e._id === updated._id ? updated : e)))
+      this.updateItems((events) => events.map((e) => (e._id === updated._id ? updated : e)))
       return updated
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -108,11 +57,23 @@ export class MenuEventDataService {
     }
   }
 
+  /**
+   * Puts an event the server already saved (a stage move, a note, a new inquiry) into the store,
+   * replacing the one with the same id or adding it. No request is made.
+   */
+  applyServerEvent(event: MenuEvent): void {
+    this.updateItems((events) =>
+      events.some((e) => e._id === event._id)
+        ? events.map((e) => (e._id === event._id ? event : e))
+        : [...events, event]
+    )
+  }
+
   async deleteMenuEvent(_id: string): Promise<void> {
     try {
       // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
-      this.eventsStore_.update((events) => events.filter((e) => e._id !== _id))
+      this.updateItems((events) => events.filter((e) => e._id !== _id))
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({
@@ -133,15 +94,5 @@ export class MenuEventDataService {
       createdFromTemplateId: source._id
     }
     return this.addMenuEvent(cloned)
-  }
-
-  /** Updates all menu events that use oldServingType to newServingType. */
-  async updateServingTypeForAll(oldServingType: string, newServingType: string): Promise<void> {
-    if (oldServingType === newServingType) return
-    const events = this.eventsStore_()
-    const toUpdate = events.filter((e) => e.servingType === oldServingType)
-    for (const event of toUpdate) {
-      await this.updateMenuEvent({ ...event, servingType: newServingType })
-    }
   }
 }

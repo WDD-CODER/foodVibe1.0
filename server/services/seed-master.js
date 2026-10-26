@@ -1,80 +1,24 @@
 /**
  * Auto-seeds master data on server boot.
  *
- * Reads demo JSON files from public/assets/data/ and inserts them as
- * userId: '__master__' documents. Idempotent — skips if master data
- * already exists (checks products for any __master__ doc).
+ * Seeds the shared master taxonomy terms and the default kitchen stations.
+ * Idempotent: each step skips when its master documents already exist.
+ * (Plan 431: the old read of demo JSON files was dead code and is gone.)
  *
  * Called once from server/index.js after MongoDB connects.
  */
 
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
 const mongoose = require('mongoose');
-const { CLONEABLE_TYPES } = require('../constants/cloneable-types');
 const { newId: makeId } = require('../utils/id');
 const { logger } = require('../logger');
-
-const ASSETS_DIR = path.resolve(__dirname, '..', '..', 'public', 'assets', 'data');
-
-/**
- * Maps demo JSON filenames to their entity-type collection names.
- * Only types that have a demo JSON file are seeded.
- */
-const DEMO_FILE_MAP = {
-  products:             'demo-products.json',
-  recipes:              'demo-recipes.json',
-  dishes:                'demo-dishes.json',
-  suppliers:        'demo-suppliers.json',
-  equipment:           'demo-equipment.json',
-  venues:           'demo-venues.json',
-  menuEvents:          'demo-menu-events.json',
-};
-
-/**
- * Reads a demo JSON file and returns parsed array, or [] if missing/invalid.
- */
-function readDemoFile(filename) {
-  const filePath = path.join(ASSETS_DIR, filename);
-  try {
-    const raw = fs.readFileSync(filePath, 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      logger.warn({ event: 'seed.master.file_skipped', filename, reason: 'not an array' });
-      return [];
-    }
-    return parsed;
-  } catch (err) {
-    logger.warn({ event: 'seed.master.file_skipped', filename, err });
-    return [];
-  }
-}
-
-const { upgradeV1toV2 } = require('../generated/schemas/upgrade/upgrade');
-const { COLLECTION_RENAMES } = require('../generated/schemas/field-map.v1-to-v2');
-
-/** v1-shaped demo entity -> v2 document (timestamps default to now, like the migration). */
-function upgradeDemoEntity(entityType, entity) {
-  const legacyName = Object.keys(COLLECTION_RENAMES).find(k => COLLECTION_RENAMES[k] === entityType);
-  if (!legacyName) return entity;
-  const { doc } = upgradeV1toV2(legacyName, entity);
-  const now = Date.now();
-  if (doc.createdAt === undefined) doc.createdAt = now;
-  if (doc.updatedAt === undefined) doc.updatedAt = doc.createdAt;
-  return doc;
-}
 
 // ---------------------------------------------------------------------------
 // Plan 321 Phase 3 — default shared taxonomy terms. Before Phase 3 the client seeded these
 // into each user's own registry docs on first load; terms are now shared (master ∪ own), so
 // a fresh database gets them once, as master terms. Same values the client used to seed.
 // ---------------------------------------------------------------------------
-const LABEL_COLOR_PALETTE = [
-  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899',
-  '#14B8A6', '#F97316', '#6366F1', '#84CC16', '#06B6D4', '#78716C',
-];
 /** Plan 376: real dish types only (Dandan, 2026-10-10). Same list as MAPPING.keep in scripts/cleanup-dish-types.js. */
 const DEFAULT_COURSES = [
   'amuse_bouche', 'bread_focaccia_savory_baking', 'cakes_cookies_tarts', 'charcuterie_meat_mass_meat_preps',
@@ -89,13 +33,14 @@ const DEFAULT_COURSES = [
   'vegetables_snacks_add_ons', 'vinaigrettes_mayonnaise_emulsion', 'גלייז', 'רוטב',
 ];
 const DEFAULT_DISH_FIELDS = ['sell_price', 'food_cost_money', 'serving_portions'];
+const EVENT_TYPE_KEYS = ['עסקי', 'פרטי', 'חתונה', 'מסיבה', 'כנסים'];
 const SYSTEM_UNITS = {
   kg: 1000, liter: 1000, gram: 1, ml: 1, unit: 1, dish: 1, tablespoon: 15, teaspoon: 5, cup: 240, pinch: 1, portion: 1,
 };
 
 /** The default master registries, in the v1 registry shape migration 0003 explodes into terms. */
 function defaultMasterRegistries() {
-  const master = fields => [{ _id: 'default', userId: '__master__', ...fields }];
+  const master = fields => [{ _id: 'default', userId: '__master__', businessId: '__master__', createdBy: '__master__', ...fields }];
   return {
     KITCHEN_CATEGORIES: master({ items: ['vegetables', 'dairy', 'meat', 'dry', 'fish', 'spices'] }),
     KITCHEN_ALLERGENS: master({
@@ -103,16 +48,18 @@ function defaultMasterRegistries() {
     }),
     KITCHEN_LABELS: [],
     KITCHEN_COURSES: master({
-      items: DEFAULT_COURSES.map((key, i) => ({ key, color: LABEL_COLOR_PALETTE[i % LABEL_COLOR_PALETTE.length] })),
+      items: DEFAULT_COURSES.map(key => ({ key })),
     }),
     MENU_TYPES: master({
       items: [
         { key: 'buffet_family', fields: DEFAULT_DISH_FIELDS },
         { key: 'plated_course', fields: DEFAULT_DISH_FIELDS },
         { key: 'cocktail_passed', fields: ['food_cost_pct', 'serving_portions_pct'] },
+        { key: 'chef_plated_front', fields: DEFAULT_DISH_FIELDS },
       ],
     }),
-    MENU_EVENT_TYPES: [],
+    // Plan 440: the five default event types, keyed by their Hebrew names (the coefficients come from migration 0007).
+    MENU_EVENT_TYPES: master({ items: EVENT_TYPE_KEYS }),
     MENU_SECTION_CATEGORIES: master({
       items: ['Amuse-Bouche', 'Appetizers', 'Soups', 'Salads', 'Main Course', 'Sides', 'Desserts', 'Beverages'],
     }),
@@ -129,106 +76,56 @@ function defaultMasterRegistries() {
  */
 async function seedMasterTaxonomy() {
   const db = mongoose.connection.db;
-  if (await db.collection('taxonomyTerms').findOne({ userId: '__master__' })) return 0;
+  if (await db.collection('taxonomyTerms').findOne({ businessId: '__master__' })) return 0;
   // Required lazily: the migration module pulls in the generated schemas.
   const { buildTerms } = require('../migrations/0003-taxonomy-terms');
+  const { termPatch } = require('../migrations/0007-coefficients');
   const { terms } = buildTerms(defaultMasterRegistries(), Date.now());
-  await db.collection('taxonomyTerms').insertMany(terms, { ordered: false });
+  // Plan 440: every seeded eventType / menuType term carries its coefficient (same table as migration 0007).
+  const stamped = terms.map(t => ({ ...t, ...termPatch(t)?.$set, businessId: '__master__', createdBy: '__master__' }));
+  await db.collection('taxonomyTerms').insertMany(stamped, { ordered: false });
   logger.info({ event: 'seed.master.taxonomy_seeded', count: terms.length });
   return terms.length;
 }
 
+/** Plan 436: the default kitchen stations, keyed by their Hebrew names. */
+const DEFAULT_STATIONS = ['חם', 'קר', 'מאפה', 'קינוחים', 'הגשה'];
+
 /**
- * Seeds master data from demo JSON files into MongoDB.
- * Idempotent — skips entirely if any __master__ doc exists in products.
- *
- * @returns {Promise<number>} total documents seeded (0 if skipped)
+ * Plan 436: inserts the five default master `station` terms when no master station term exists
+ * (fresh and live databases alike). Idempotent. Never touches an existing document.
+ * @returns {Promise<number>} terms inserted (0 if skipped)
  */
-async function seedMasterData() {
-  const db = mongoose.connection.db;
-
-  // Ordering guard: products must appear before recipes/dishes so the
-  // productIdMap is fully built before ingredient referenceIds are remapped.
-  const _pidx = CLONEABLE_TYPES.indexOf('products');
-  const _ridx = CLONEABLE_TYPES.indexOf('recipes');
-  const _didx = CLONEABLE_TYPES.indexOf('dishes');
-  if (_pidx === -1 || _ridx === -1 || _pidx > _ridx || (_didx !== -1 && _pidx > _didx)) {
-    throw new Error('[seed-master] CLONEABLE_TYPES ordering violation: products must precede recipes and dishes');
-  }
-
-  // Idempotency check: if master products already exist, skip
-  const existing = await db.collection('products').findOne({ userId: '__master__' });
-  if (existing) {
-    logger.info({ event: 'seed.master.skipped' }, 'master data already exists');
-    return seedMasterTaxonomy();
-  }
-
-  logger.info({ event: 'seed.master.begin', assetsDir: ASSETS_DIR, assetsDirExists: fs.existsSync(ASSETS_DIR) }, 'no master data found — seeding from demo JSON files');
-  let totalSeeded = 0;
-
-  // Pass 1: build an originalId → newMasterId map for products so that
-  // recipes / dishes ingredient referenceIds can be remapped in Pass 2.
-  const productIdMap = new Map(); // originalId → newMasterId
-
-  for (const entityType of CLONEABLE_TYPES) {
-    const filename = DEMO_FILE_MAP[entityType];
-    if (!filename) continue;
-
-    const entities = readDemoFile(filename);
-    if (entities.length === 0) continue;
-
-    const docs = entities.map(entity => {
-      // Always generate a fresh _id to avoid collisions with any existing user data.
-      const newId = makeId();
-      if (entityType === 'products') {
-        productIdMap.set(String(entity._id), newId);
-      }
-
-      // Demo JSON files are still v1-shaped — upgrade each to the v2 document shape.
-      const upgraded = upgradeDemoEntity(entityType, entity);
-      const doc = {
-        ...upgraded,
-        _id: newId,
-        userId: '__master__',
-        _masterId: null,
-        _userModified: false,
-      };
-
-      // Remap ingredient referenceIds so they point to the new master product IDs
-      if ((entityType === 'recipes' || entityType === 'dishes') && Array.isArray(doc.ingredients)) {
-        doc.ingredients = doc.ingredients.map(ing => {
-          if (!ing.referenceId) return ing;
-          const remapped = productIdMap.get(String(ing.referenceId));
-          return remapped ? { ...ing, referenceId: remapped } : ing;
-        });
-      }
-
-      // Normalized name for product collision detection
-      if (entityType === 'products' && doc.nameHebrew) {
-        doc.nameHebrewNormalized = (doc.nameHebrew || '').trim().replace(/\s+/g, ' ').toLowerCase();
-      }
-
-      return doc;
-    });
-
-    try {
-      await db.collection(entityType).insertMany(docs, { ordered: false });
-      totalSeeded += docs.length;
-      logger.info({ event: 'seed.master.collection_seeded', entityType, inserted: docs.length });
-    } catch (err) {
-      if (err.code === 11000) {
-        const inserted = err.result?.insertedCount ?? 0;
-        totalSeeded += inserted;
-        logger.info({ event: 'seed.master.collection_seeded', entityType, inserted, duplicatesSkipped: docs.length - inserted });
-      } else {
-        logger.error({ err, event: 'seed.master.collection_failed', entityType });
-      }
-    }
-  }
-
-  totalSeeded += await seedMasterTaxonomy();
-  logger.info({ event: 'seed.master.done', totalSeeded });
-  return totalSeeded;
+async function ensureDefaultStations() {
+  const col = mongoose.connection.db.collection('taxonomyTerms');
+  if (await col.findOne({ kind: 'station', businessId: '__master__' })) return 0;
+  const now = Date.now();
+  const terms = DEFAULT_STATIONS.map((key, sortOrder) => ({
+    _id: makeId(),
+    schemaVersion: 2,
+    kind: 'station',
+    key,
+    sortOrder,
+    userId: '__master__',
+    businessId: '__master__',
+    createdBy: '__master__',
+    createdAt: now,
+    updatedAt: now,
+  }));
+  await col.insertMany(terms, { ordered: false });
+  logger.info({ event: 'seed.master.stations_seeded', count: terms.length });
+  return terms.length;
 }
 
-module.exports = { seedMasterData, seedMasterTaxonomy };
+/**
+ * Seeds the master taxonomy terms and default stations. Idempotent.
+ *
+ * @returns {Promise<number>} total documents seeded (0 if nothing was missing)
+ */
+async function seedMasterData() {
+  const seeded = (await seedMasterTaxonomy()) + (await ensureDefaultStations());
+  logger.info({ event: 'seed.master.done', totalSeeded: seeded });
+  return seeded;
+}
+
+module.exports = { seedMasterData, seedMasterTaxonomy, ensureDefaultStations };

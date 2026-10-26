@@ -12,6 +12,10 @@ import { signal } from '@angular/core'
 import { TranslationService } from '@services/translation.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
+import { MenuEventDataService } from '@services/menu-event-data.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
 
 describe('MetadataManagerPageComponent', () => {
   let component: MetadataManagerComponent
@@ -43,7 +47,7 @@ describe('MetadataManagerPageComponent', () => {
 
     metadataRegistrySpy = jasmine.createSpyObj(
       'MetadataRegistryService',
-      ['registerAllergen', 'getLabelColor', 'renameCategory'],
+      ['registerAllergen', 'getLabelColor', 'renameCategory', 'renameMenuType'],
       {
         allAllergens_: mockAllergens,
         allCategories_: mockCategories,
@@ -72,12 +76,72 @@ describe('MetadataManagerPageComponent', () => {
 
     fixture = TestBed.createComponent(MetadataManagerComponent)
     component = fixture.componentInstance
+    // The page lists all 13 sections for an owner who is the platform admin; plan 426 / 477 tests below flip this.
+    TestBed.inject(UserService)._saveUserLocal({
+      _id: 'u1',
+      name: 'u',
+      email: 'u@x',
+      isPlatformAdmin: true,
+      businessRole: 'owner'
+    })
 
     fixture.detectChanges()
   })
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  describe('platform-admin sections (plan 426)', () => {
+    const setPlatformAdmin = (isPlatformAdmin: boolean) => {
+      TestBed.inject(UserService)._saveUserLocal({ _id: 'u1', name: 'u', email: 'u@x', isPlatformAdmin })
+      fixture.detectChanges()
+    }
+    const tabLabels = () =>
+      fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab')).map((b) => b.nativeElement.textContent.trim())
+
+    it('hides user management, AI models and their jump tabs when the user is not a platform admin', () => {
+      setPlatformAdmin(false)
+      const host: HTMLElement = fixture.nativeElement
+      expect(host.querySelector('#mm-sec-user')).toBeNull()
+      expect(host.querySelector('#mm-sec-ai-models')).toBeNull()
+      expect(tabLabels()).not.toContain('user_management')
+      expect(tabLabels()).not.toContain('ai_model_manager')
+    })
+
+    it('shows them, and their jump tabs, for a platform admin', () => {
+      setPlatformAdmin(true)
+      const host: HTMLElement = fixture.nativeElement
+      expect(host.querySelector('#mm-sec-user')).not.toBeNull()
+      expect(host.querySelector('#mm-sec-ai-models')).not.toBeNull()
+      expect(tabLabels()).toContain('user_management')
+      expect(tabLabels()).toContain('ai_model_manager')
+    })
+  })
+
+  describe('staff-stages card (plan 477)', () => {
+    const setRole = (businessRole: 'owner' | 'staff') => {
+      TestBed.inject(UserService)._saveUserLocal({ _id: 'u1', name: 'u', email: 'u@x', businessRole })
+      fixture.detectChanges()
+    }
+    const tabLabels = () =>
+      fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab')).map((b) => b.nativeElement.textContent.trim())
+
+    it('shows the card and its jump tab to the owner, after the coefficients card', () => {
+      setRole('owner')
+      const host: HTMLElement = fixture.nativeElement
+      const card = host.querySelector('#mm-sec-staff-stages')
+      expect(card).not.toBeNull()
+      expect(host.querySelector('#mm-sec-coefficients')?.nextElementSibling).toBe(card)
+      expect(tabLabels()).toContain('metadata_staff_stages_title')
+    })
+
+    it('hides the card and its jump tab from staff', () => {
+      setRole('staff')
+      const host: HTMLElement = fixture.nativeElement
+      expect(host.querySelector('#mm-sec-staff-stages')).toBeNull()
+      expect(tabLabels()).not.toContain('metadata_staff_stages_title')
+    })
   })
 
   // Plan 385: the server re-keys referencing documents, so a rename is one term write + a reload.
@@ -93,6 +157,75 @@ describe('MetadataManagerPageComponent', () => {
     expect(await rename('category', 'meat', 'fish', 'me')).toBe(true)
     expect(metadataRegistrySpy.renameCategory).toHaveBeenCalledOnceWith('meat', 'fish')
     expect(productDataSpy.reloadFromStorage).toHaveBeenCalledTimes(1)
+  })
+
+  // Plan 421 - a refused menu-type rename must not touch any menu; the server re-keys on success.
+  describe('renaming a menu type', () => {
+    type MenuTypeRename = {
+      requireSignIn: () => boolean
+      onMenuTypeRenameSaved: (o: string, n: string) => Promise<void>
+    }
+    const page = (): MenuTypeRename => component as unknown as MenuTypeRename
+    let menuReload: jasmine.Spy
+    let menuWrite: jasmine.Spy
+
+    beforeEach(() => {
+      spyOn(page(), 'requireSignIn').and.returnValue(true)
+      spyOn(TestBed.inject(ConfirmModalService), 'open').and.resolveTo(true)
+      const menus = TestBed.inject(MenuEventDataService)
+      menuReload = spyOn(menus, 'reloadFromStorage').and.resolveTo()
+      menuWrite = spyOn(menus, 'updateMenuEvent').and.resolveTo()
+    })
+
+    it('a refused rename (to an existing type) writes no menu and does not reload', async () => {
+      metadataRegistrySpy.renameMenuType.and.resolveTo(false)
+      await page().onMenuTypeRenameSaved('buffet', 'plated')
+      expect(metadataRegistrySpy.renameMenuType).toHaveBeenCalledOnceWith('buffet', 'plated')
+      expect(menuWrite).not.toHaveBeenCalled()
+      expect(menuReload).not.toHaveBeenCalled()
+    })
+
+    it('a successful rename reloads the menus once and writes none from the client', async () => {
+      metadataRegistrySpy.renameMenuType.and.resolveTo(true)
+      await page().onMenuTypeRenameSaved('buffet', 'banquet')
+      expect(menuReload).toHaveBeenCalledTimes(1)
+      expect(menuWrite).not.toHaveBeenCalled()
+    })
+
+    it('Save in the rename field renames; Cancel and blur call nothing', async () => {
+      metadataRegistrySpy.renameMenuType.and.resolveTo(true)
+      mockMenuTypes.set([{ key: 'buffet', fields: [] }])
+      const host = fixture.nativeElement as HTMLElement
+      const comp = component as unknown as { renamingMenuTypeKey_: { set: (v: string | null) => void } }
+      const sel = '.menu-type-row app-inline-rename-field'
+      comp.renamingMenuTypeKey_.set('buffet')
+      fixture.detectChanges()
+      const input = host.querySelector<HTMLInputElement>(sel + ' input')
+      expect(input).not.toBeNull()
+      input!.value = 'banquet'
+      input!.dispatchEvent(new FocusEvent('blur'))
+      await fixture.whenStable()
+      expect(metadataRegistrySpy.renameMenuType).not.toHaveBeenCalled()
+
+      host.querySelectorAll<HTMLButtonElement>(sel + ' button')[1].click()
+      fixture.detectChanges()
+      expect(host.querySelector(sel)).toBeNull()
+      expect(metadataRegistrySpy.renameMenuType).not.toHaveBeenCalled()
+
+      comp.renamingMenuTypeKey_.set('buffet')
+      fixture.detectChanges()
+      const renameInput = host.querySelector<HTMLInputElement>(sel + ' input')!
+      renameInput.value = 'banquet'
+      renameInput.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+      host.querySelector<HTMLButtonElement>(sel + ' button')!.click()
+      await fixture.whenStable()
+      expect(metadataRegistrySpy.renameMenuType).toHaveBeenCalledOnceWith('buffet', 'banquet')
+    })
+
+    it('MenuEventDataService no longer has updateServingTypeForAll', () => {
+      expect('updateServingTypeForAll' in TestBed.inject(MenuEventDataService)).toBeFalse()
+    })
   })
 
   // Plan 377 — the unit edit dialog's save path.
@@ -145,6 +278,42 @@ describe('MetadataManagerPageComponent', () => {
       expect(translationMock.updateDictionary).not.toHaveBeenCalled()
     })
 
+    // Plan 475 — two units may not show the same Hebrew name.
+    it('refuses a Hebrew name another unit already shows, and writes nothing', async () => {
+      const errorSpy = spyOn(TestBed.inject(UserMsgService), 'onSetErrorMsg')
+      const original = translationMock.translate
+      translationMock.translate = (k: string) => (k === 'gram' ? 'גרם' : original(k))
+      page().editingUnit_.set(jar)
+      await page().onUnitEditSaved({ ...jar, hebrewLabel: ' גרם ' })
+      translationMock.translate = original
+      expect(errorSpy).toHaveBeenCalledOnceWith('unit_name_taken')
+      expect(translationMock.updateDictionary).not.toHaveBeenCalled()
+      expect(unitRegistrySpy.renameUnit).not.toHaveBeenCalled()
+      expect(unitRegistrySpy.updateUnitRate).not.toHaveBeenCalled()
+    })
+
+    it('a key another unit has is refused with unit_name_taken', async () => {
+      const errorSpy = spyOn(TestBed.inject(UserMsgService), 'onSetErrorMsg')
+      page().editingUnit_.set(jar)
+      await page().onUnitEditSaved({ ...jar, key: 'ml' })
+      expect(errorSpy).toHaveBeenCalledOnceWith('unit_name_taken')
+      expect(unitRegistrySpy.renameUnit).not.toHaveBeenCalled()
+    })
+
+    it('counts a product that uses the unit only as a purchase basis', () => {
+      const products = mockProducts as unknown as { set: (v: unknown[]) => void }
+      products.set([
+        { _id: 'p1', baseUnit: 'kg', purchaseOptions: [{ unitSymbol: 'box', conversionRate: 500, uom: 'jar' }] },
+        { _id: 'p2', baseUnit: 'kg', purchaseOptions: [{ unitSymbol: 'bag', conversionRate: 2, uom: 'kg' }] }
+      ])
+      const count = (component as unknown as { getAffectedCount: (t: string, k: string) => number }).getAffectedCount(
+        'unit',
+        'jar'
+      )
+      products.set([])
+      expect(count).toBe(1)
+    })
+
     it('a system unit never opens the edit dialog', async () => {
       await component.onRenameMetadata('gram', 'unit')
       expect(page().editingUnit_()).toBeNull()
@@ -162,18 +331,18 @@ describe('MetadataManagerPageComponent', () => {
 
   it('renders every metadata card as tap chips with no per-item action buttons', () => {
     const card = fixture.debugElement.query(By.css('#mm-sec-category'))
-    const chips = card.queryAll(By.css('button.c-tap-chip'))
+    const chips = card.queryAll(By.css('button.c-chip--tap'))
     expect(chips.map((c) => c.nativeElement.textContent.trim())).toEqual(['vegetables', 'meat'])
     expect(fixture.debugElement.queryAll(By.css('.manager-card .c-icon-btn')).length).toBe(0)
     // System units are locked, not tappable.
     const unitCard = fixture.debugElement.query(By.css('#mm-sec-unit'))
-    expect(unitCard.queryAll(By.css('button.c-tap-chip')).length).toBe(0)
-    expect(unitCard.queryAll(By.css('.c-tap-chip.is-locked')).length).toBe(2)
+    expect(unitCard.queryAll(By.css('button.c-chip--tap')).length).toBe(0)
+    expect(unitCard.queryAll(By.css('.c-chip--tap.is-locked')).length).toBe(2)
   })
 
   it('tapping a chip opens edit/delete; delete routes to onRemoveMetadata and closes the menu', () => {
     const removeSpy = spyOn(component, 'onRemoveMetadata').and.resolveTo()
-    const chip = fixture.debugElement.query(By.css('#mm-sec-category button.c-tap-chip')).nativeElement as HTMLElement
+    const chip = fixture.debugElement.query(By.css('#mm-sec-category button.c-chip--tap')).nativeElement as HTMLElement
     chip.click()
     fixture.detectChanges()
 
@@ -194,7 +363,7 @@ describe('MetadataManagerPageComponent', () => {
     metadataRegistrySpy.updateMenuType = jasmine.createSpy().and.resolveTo()
     fixture.detectChanges()
 
-    const chips = fixture.debugElement.queryAll(By.css('.menu-type-row .c-toggle-chip input'))
+    const chips = fixture.debugElement.queryAll(By.css('.menu-type-row .c-chip--toggle input'))
     expect(chips.length).toBe(5)
     expect(chips.map((c) => (c.nativeElement as HTMLInputElement).checked)).toEqual([false, false, false, true, false])
 
@@ -216,15 +385,18 @@ describe('MetadataManagerPageComponent', () => {
     'mm-sec-label',
     'mm-sec-course',
     'mm-sec-menu-type',
+    'mm-sec-coefficients',
+    'mm-sec-staff-stages',
     'mm-sec-preparation',
     'mm-sec-section',
+    'mm-sec-station',
     'mm-sec-user',
     'mm-sec-ai-models'
   ]
 
-  it('should render exactly 10 jump-nav tabs in page order', () => {
-    const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))
-    expect(tabs.length).toBe(10)
+  it('should render exactly 13 jump-nav tabs in page order', () => {
+    const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))
+    expect(tabs.length).toBe(13)
     expect(tabs.map((t) => t.nativeElement.textContent.trim())).toEqual([
       'metadata_units_and_conversions_title',
       'metadata_product_categories_title',
@@ -232,14 +404,17 @@ describe('MetadataManagerPageComponent', () => {
       'metadata_recipe_labels_title',
       'metadata_recipe_courses_title',
       'metadata_menu_types_title',
+      'metadata_coefficients_title',
+      'metadata_staff_stages_title',
       'metadata_prep_categories',
       'metadata_section_categories_title',
+      'metadata_stations_title',
       'user_management',
       'ai_model_manager'
     ])
   })
 
-  it('should give each of the 10 sections a matching stable id', () => {
+  it('should give each of the 13 sections a matching stable id', () => {
     for (const id of JUMP_SECTION_IDS) {
       expect(fixture.debugElement.query(By.css(`#${id}`)))
         .withContext(id)
@@ -247,39 +422,48 @@ describe('MetadataManagerPageComponent', () => {
     }
   })
 
-  it('should default every section to its natural page order (no page scroll ever involved)', () => {
-    JUMP_SECTION_IDS.forEach((id, index) => {
-      expect(fixture.debugElement.query(By.css(`#${id}`)).nativeElement.style.order).toBe(String(index + 1))
-    })
+  it('keeps every section in natural page order (no CSS order is ever set)', () => {
+    for (const id of JUMP_SECTION_IDS) {
+      expect(fixture.debugElement.query(By.css(`#${id}`)).nativeElement.style.order)
+        .withContext(id)
+        .toBe('')
+    }
   })
 
-  it('should bring the target section to the front (order 0) when its jump-nav tab is clicked, without disturbing the others', () => {
-    const tab = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))[5] // Menu Types
+  it('scrolls the target section to the top and centres the tapped chip when its jump-nav tab is clicked', () => {
+    const section = fixture.debugElement.query(By.css('#mm-sec-menu-type')).nativeElement as HTMLElement
+    const sectionSpy = spyOn(section, 'scrollIntoView')
+    const tab = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))[5] // Menu Types
+    const chipSpy = spyOn(tab.nativeElement as HTMLElement, 'scrollIntoView')
     tab.nativeElement.click()
     fixture.detectChanges()
 
-    expect(fixture.debugElement.query(By.css('#mm-sec-menu-type')).nativeElement.style.order).toBe('0')
+    expect(sectionSpy).toHaveBeenCalledTimes(1)
+    expect((sectionSpy.calls.mostRecent().args[0] as ScrollIntoViewOptions).block).toBe('start')
+    expect(chipSpy).toHaveBeenCalledTimes(1)
+    expect((chipSpy.calls.mostRecent().args[0] as ScrollIntoViewOptions).inline).toBe('center')
     expect(tab.nativeElement.classList.contains('active')).toBeTrue()
-    // Everyone else keeps their natural relative order.
-    expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('1')
-    expect(fixture.debugElement.query(By.css('#mm-sec-user')).nativeElement.style.order).toBe('9')
   })
 
-  it('should swap directly to a different section when its tab is clicked while another is front', () => {
-    const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-tab-pill'))
-    tabs[5].nativeElement.click() // Menu Types
+  it('highlights only the last tapped chip', () => {
+    const tabs = fixture.debugElement.queryAll(By.css('.mm-jump-nav .c-chip--tab'))
+    for (const id of ['#mm-sec-menu-type', '#mm-sec-unit']) {
+      spyOn(fixture.debugElement.query(By.css(id)).nativeElement as HTMLElement, 'scrollIntoView')
+    }
+    tabs.forEach((t) => spyOn(t.nativeElement as HTMLElement, 'scrollIntoView'))
+    tabs[5].nativeElement.click()
     fixture.detectChanges()
-    tabs[0].nativeElement.click() // Units
+    tabs[0].nativeElement.click()
     fixture.detectChanges()
 
-    expect(fixture.debugElement.query(By.css('#mm-sec-menu-type')).nativeElement.style.order).toBe('6')
-    expect(fixture.debugElement.query(By.css('#mm-sec-unit')).nativeElement.style.order).toBe('0')
+    expect(tabs[5].nativeElement.classList.contains('active')).toBeFalse()
+    expect(tabs[0].nativeElement.classList.contains('active')).toBeTrue()
   })
 
   it("renders the jump-nav tabs inside the shared scroll rail (plan 350 — arrows are the rail's job)", () => {
     const rail = fixture.debugElement.query(By.css('app-scroll-rail.mm-jump-nav'))
     expect(rail).not.toBeNull()
-    expect(rail.queryAll(By.css('.c-tab-pill')).length).toBe(10)
+    expect(rail.queryAll(By.css('.c-chip--tab')).length).toBe(13)
     expect(fixture.debugElement.query(By.css('.mm-jump-nav-arrow'))).toBeNull()
   })
 })

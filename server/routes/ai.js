@@ -1,8 +1,11 @@
 const { Router } = require('express');
 const mongoose = require('mongoose');
-const rateLimit = require('express-rate-limit');
-const { verifyToken, requireAdmin } = require('../middleware/auth');
+const { verifyToken, requirePlatformAdmin } = require('../middleware/auth');
+const { createRateLimiter } = require('../middleware/rate-limit');
+const { badRequest, requireFields } = require('../middleware/validate');
 const dns = require('node:dns').promises;
+const { assertCan } = require('../utils/permissions');
+const { MAX_IMPORT_TEXT, normalizePriceListRows, normalizeReceiptRows } = require('../utils/price-list-import');
 
 // Plan 321 Phase 1 — strict per-user limit on the Gemini-backed AI routes (they cost
 // real money per call). Keyed by userId, not IP, since verifyToken has already run by
@@ -10,13 +13,11 @@ const dns = require('node:dns').promises;
 // not throttle every user on it together. The daily cap is Google's own per-model free
 // quota, handled by the model chain in services/gemini-client.js (plan 395); this one
 // caps how fast any single account can burn through it.
-const aiLimiter = rateLimit({
+const aiLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
   keyGenerator: (req) => req.user?.userId || req.ip,
-  message: { error: 'Too many AI requests, please try again later' },
+  message: 'Too many AI requests, please try again later',
 });
 
 const PRIVATE_IP_RANGES = [
@@ -76,14 +77,14 @@ router.get('/usage', async (_req, res) => {
 // The model chain for all users: every selectable model in order, on/off, with today's
 // budget. PUT { models: [{ name, enabled }] } saves it; DELETE goes back to the default.
 // ---------------------------------------------------------------------------
-router.get('/models', verifyToken, requireAdmin, async (_req, res) => {
+router.get('/models', verifyToken, requirePlatformAdmin, async (_req, res) => {
   res.json({ models: await getChainSettings() });
 });
 
-router.put('/models', verifyToken, requireAdmin, async (req, res) => {
+router.put('/models', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     const error = await saveChainSettings(req.body?.models);
-    if (error) return res.status(400).json({ error });
+    if (error) return badRequest(res, error);
     req.log.info({ event: 'ai.models.saved' });
     return res.json({ models: await getChainSettings() });
   } catch (err) {
@@ -92,7 +93,7 @@ router.put('/models', verifyToken, requireAdmin, async (req, res) => {
   }
 });
 
-router.delete('/models', verifyToken, requireAdmin, async (req, res) => {
+router.delete('/models', verifyToken, requirePlatformAdmin, async (req, res) => {
   try {
     await saveChainSettings(null);
     req.log.info({ event: 'ai.models.reset' });
@@ -282,7 +283,7 @@ function respondFromGeminiFailure(res, result) {
     case 'all_exhausted':
       return res.status(429).json({ error: 'daily_limit_reached', resetAt: result.resetAt });
     case 'model_removed':
-      return res.status(400).json({ error: 'model_removed', model: result.model });
+      return badRequest(res, 'model_removed', { model: result.model });
     case 'gemini_error':
       return res.status(502).json({ error: `Gemini API error: ${result.status}`, geminiMessage: result.message });
     case 'timeout':
@@ -321,9 +322,7 @@ router.post('/generate', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { prompt } = req.body;
-  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
-    return res.status(400).json({ error: 'prompt is required' });
-  }
+  if (!requireFields(res, req.body, { prompt: 'text' })) return;
 
   const shots = selectShots(await getApprovedShots(), prompt, FEW_SHOT_COUNT);
   const requestBody = {
@@ -404,9 +403,7 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { rawText } = req.body;
-  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
-    return res.status(400).json({ error: 'rawText is required' });
-  }
+  if (!requireFields(res, req.body, { rawText: 'text' })) return;
 
   try {
     const call = await callGemini({
@@ -434,6 +431,276 @@ router.post('/parse-text', verifyToken, aiLimiter, async (req, res) => {
     return res.json({ result: parsed.value });
   } catch (err) {
     req.log.error({ err, event: 'ai.parse_text.failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /parse-price-list (plan 432)
+// Accepts { rawText: string, knownCategories?: string[] } — a supplier price list (WhatsApp text or
+// columns pasted from Excel). One Gemini call turns it into product rows; the pure helper in
+// utils/price-list-import.js cleans them (units, per-unit price, duplicates, 200-row cap).
+// Owner only (prices are money): the permission check runs BEFORE the limiter, so staff never burn quota.
+// Response: { rows: ImportRow[], truncated: boolean }
+// ---------------------------------------------------------------------------
+
+const PRICE_LIST_SYSTEM_PROMPT = `You read a supplier price list written in Hebrew (a WhatsApp message or columns pasted from Excel) for a catering kitchen and turn it into product rows. The lists are messy: typos, mixed order, free text.
+
+Return ONLY a JSON object, no commentary:
+{ "rows": [ { "name": string, "unit": string|null, "price": number|null, "pricePer": "unit"|"purchaseUnit", "purchaseUnit": string|null, "purchaseQty": number|null, "category": string|null } ] }
+
+Rules:
+- One row per product line. Keep the product name as written, including numbers that belong to the name (for example "שמנת 32%": the 32% is part of the name, never a price). The name never contains the price, the price word, the unit word or the pack word.
+- ORDER DOES NOT MATTER. The product, the price, the unit and a pack word can appear in any order and on either side of each other ("מלפפון 5.9 לק\"ג", "5.9 ₪ לק\"ג - מלפפון", "קילו בצל 3.5 שקל", "ארגז 10 ק\"ג תפוחי אדמה 45"). Read the whole line before deciding which number is which.
+- Price words: "עולה", "עלות", "במחיר", "מחיר" (and close misspellings such as "עוהל", "עולא") only mark that the number after them is the price. They are never a unit, a pack word or part of the name.
+- "price" is a plain number (no currency sign). It is the number next to ₪ / שח / ש"ח / שקל / ש\"ח, or the number after a price word, or the number that is not tied to a unit word. If the line has no price, use null.
+- "N kilo / ק\"ג / ליטר / גרם" (a number beside a unit word) is a quantity, never the price. "1 קילו" means the price is for 1 kg.
+- "unit" is the unit the price refers to: "לק\"ג" or "קילו" means kg, "לליטר" means liter, "ליחידה" means unit, grams means gram, milliliters means ml. Write it as one of: kg, gram, liter, ml, unit. If the line does not say, use null.
+- Any OTHER word with a number beside it ("קרטון 24", "ארגז 10 ק\"ג", "24 יח' בקרטון") is a pack word. Always fill "purchaseUnit" with the pack word as written and "purchaseQty" with how many of the "unit" it holds (the written number), and set "pricePer" to "purchaseUnit" when the price is for the whole pack. Never drop a pack word. When the line has no pack word, purchaseUnit and purchaseQty are null and "pricePer" is "unit".
+- Never invent products or prices. Skip lines that are greetings, headings, dates or phone numbers.
+- "category": one of the existing categories listed below, written exactly as listed, otherwise null.
+
+Examples:
+1. "עגבניה ניסיון 1 קילו 1 עוהל 50 שח" -> { "name": "עגבניה ניסיון", "unit": "kg", "price": 50, "pricePer": "unit", "purchaseUnit": null, "purchaseQty": null, "category": null } ("עוהל" is a typo of "עולה" = costs; there is no pack).
+2. "5.9 ₪ לק\"ג - מלפפון" -> { "name": "מלפפון", "unit": "kg", "price": 5.9, "pricePer": "unit", "purchaseUnit": null, "purchaseQty": null, "category": null }
+3. "ארגז 10 ק\"ג תפוחי אדמה 45" -> { "name": "תפוחי אדמה", "unit": "kg", "price": 45, "pricePer": "purchaseUnit", "purchaseUnit": "ארגז", "purchaseQty": 10, "category": null }
+4. "24 יח' בייגלה בקרטון 150" -> { "name": "בייגלה", "unit": "unit", "price": 150, "pricePer": "purchaseUnit", "purchaseUnit": "קרטון", "purchaseQty": 24, "category": null }`;
+
+router.post('/parse-price-list', verifyToken, (req, res, next) => {
+  if (assertCan(req, res, 'editMoney', { type: 'products' })) next();
+}, aiLimiter, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const { rawText } = req.body;
+  if (!requireFields(res, req.body, { rawText: 'text' })) return;
+  if (rawText.length > MAX_IMPORT_TEXT) {
+    return badRequest(res, 'TEXT_TOO_LONG', { max: MAX_IMPORT_TEXT });
+  }
+
+  try {
+    const call = await callGemini({
+      body: {
+        system_instruction: { parts: [{ text: appendKnownMetadata(PRICE_LIST_SYSTEM_PROMPT, { knownCategories: req.body.knownCategories }) }] },
+        contents: [{ role: 'user', parts: [{ text: rawText.trim() }] }],
+        generationConfig: { temperature: 0.2, maxOutputTokens: 8192 },
+      },
+      timeoutMs: 45000,
+      log: req.log,
+      eventPrefix: 'ai.parse_price_list',
+      model: requestedModel(req),
+    });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
+
+    const raw = responseText(call.data);
+
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(200).json({ rows: [], truncated: false });
+    }
+    if (parsed.error === 'invalid') {
+      // Length only: the text holds the business's product names and prices.
+      req.log.error({ event: 'ai.parse_price_list.parse_failed', rawLength: raw.length });
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    return res.json(normalizePriceListRows(parsed.value));
+  } catch (err) {
+    req.log.error({ err, event: 'ai.parse_price_list.failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /parse-receipt-photo (plan 465)
+// Accepts { imageBase64, mimeType, knownCategories? } — a photo of a supplier receipt or invoice. One vision
+// Gemini call reads what is PRINTED per line; utils/price-list-import.js `normalizeReceiptRows` turns it into the
+// per-unit price and the same cleaned rows as the pasted price list (200-row cap, units, duplicates).
+// Owner only (prices are money), checked BEFORE the limiter so staff never burn quota. The photo is never stored
+// and never logged — only its mime type and size.
+// Response: { rows: ImportRow[], truncated: boolean }
+// ---------------------------------------------------------------------------
+
+const { receiptPhotoRequestSchema, RECEIPT_IMAGE_MAX_BASE64 } = require('../generated/schemas/ai-receipt-photo.schema');
+
+const RECEIPT_PHOTO_SYSTEM_PROMPT = `You read a photo of a supplier receipt or invoice written in Hebrew for a catering kitchen.
+
+Return ONLY a JSON object, no commentary:
+{ "rows": [ { "name": string, "quantity": number|null, "unit": string|null, "unitPrice": number|null, "lineTotal": number|null, "category": string|null } ] }
+
+Rules:
+- One row per product line. Keep the product name as printed.
+- Copy the numbers EXACTLY as printed. "quantity" is the amount bought, "unitPrice" is the price of one unit as printed, "lineTotal" is the total of that line as printed. Use null for a number that is not printed. Never compute or invent a price.
+- "unit" is the unit of the quantity: one of kg, gram, liter, ml, unit. Use null when the line does not say.
+- Skip totals, VAT lines, payment lines, dates, phone numbers, the supplier header and anything that is not a product line.
+- "category": one of the existing categories listed below, written exactly as listed, otherwise null.`;
+
+router.post('/parse-receipt-photo', verifyToken, (req, res, next) => {
+  if (assertCan(req, res, 'editMoney', { type: 'products' })) next();
+}, aiLimiter, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  if (typeof req.body?.imageBase64 === 'string' && req.body.imageBase64.length > RECEIPT_IMAGE_MAX_BASE64) {
+    return badRequest(res, 'IMAGE_TOO_LARGE', { max: RECEIPT_IMAGE_MAX_BASE64 });
+  }
+  const body = receiptPhotoRequestSchema.safeParse(req.body);
+  if (!body.success) return badRequest(res, 'INVALID_REQUEST');
+  const { imageBase64, mimeType, knownCategories } = body.data;
+
+  try {
+    const call = await callGemini({
+      body: {
+        system_instruction: { parts: [{ text: appendKnownMetadata(RECEIPT_PHOTO_SYSTEM_PROMPT, { knownCategories }) }] },
+        contents: [{ role: 'user', parts: [
+          { text: 'Read the lines of this receipt.' },
+          { inlineData: { mimeType, data: imageBase64 } },
+        ] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 8192 },
+      },
+      timeoutMs: 45000,
+      log: req.log,
+      eventPrefix: 'ai.parse_receipt_photo',
+      needsVision: true,
+      model: requestedModel(req),
+    });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
+
+    const raw = responseText(call.data);
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(200).json({ rows: [], truncated: false });
+    }
+    if (parsed.error === 'invalid') {
+      // Length only: the text holds the business's purchases.
+      req.log.error({ event: 'ai.parse_receipt_photo.parse_failed', rawLength: raw.length });
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    const result = normalizeReceiptRows(parsed.value);
+    req.log.info({ event: 'ai.parse_receipt_photo.done', mimeType, base64Length: imageBase64.length, rows: result.rows.length });
+    return res.json(result);
+  } catch (err) {
+    req.log.error({ err, event: 'ai.parse_receipt_photo.failed' });
+    return res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /match-product-names (plan 463)
+// Accepts { names: [{ name, unit }], products: [{ name, unit }], model? } — pasted ingredient names the browser
+// could not match exactly, plus the candidate product names. One Gemini call answers with POSITIONS in those two
+// lists (never ids), so nothing outside what the caller sent can be selected and no database read is needed.
+// Any signed-in member may call it (staff paste ingredients too). Names are never logged, only counts.
+// Response: { matches: [{ i, product }] } — only real links; unsure names are simply absent.
+// ---------------------------------------------------------------------------
+
+const {
+  productNameMatchRequestSchema,
+  productNameMatchResponseSchema,
+  PRODUCT_MATCH_MAX_OPTIONS,
+} = require('../generated/schemas/ai-product-match.schema');
+
+const PRODUCT_MATCH_SYSTEM_PROMPT = `You match ingredient names written by a chef, in any language (Hebrew, English or another), to the products of the kitchen's inventory.
+
+You receive two numbered lists: NAMES (ingredient names with the unit used) and PRODUCTS (product names with their base unit). Numbering starts at 0.
+
+A name may carry an amount, a leading pack or measure word such as "צרור" or "קופסת", or a remark such as "קצת" or "לפי הטעם" — ignore those and look at the food itself.
+For each name, find the product that is the SAME food, in whatever language either is written. Allow typos, plural or singular, spelling variants and translations (for example "salt" is "מלח").
+Set "product" only when exactly one product is clearly the same food. A product that only looks similar is not the same food (for example "חלב" is not "חלבה").
+When two to ${PRODUCT_MATCH_MAX_OPTIONS} products could be that food and you cannot tell which one the chef meant (for example "מלח שולחן" and "מלח גס" for "salt"), set "product" to null and list their numbers in "options".
+Otherwise set "product" to null and give no options.
+
+Return ONLY a JSON object, no commentary:
+{ "matches": [ { "i": number, "product": number|null, "options": [number] } ] }
+"i" is the number of the name, "product" is the number of the product or null, "options" (only when "product" is null) lists the possible products' numbers. One entry per name.`;
+
+/** Plan 490 — in-range, first-seen option positions, at most PRODUCT_MATCH_MAX_OPTIONS. Pure. */
+function cleanOptions(options, productCount) {
+  const out = [];
+  for (const p of options ?? []) {
+    if (p < 0 || p >= productCount || out.includes(p)) continue;
+    out.push(p);
+    if (out.length === PRODUCT_MATCH_MAX_OPTIONS) break;
+  }
+  return out;
+}
+
+/**
+ * Keeps only valid, first-seen, in-range links from the model's answer, plus (plan 490) cleaned `options` on
+ * entries without a product. An entry with a product drops its options; one with neither is dropped. Pure.
+ */
+function cleanProductMatches(value, nameCount, productCount) {
+  const parsed = productNameMatchResponseSchema.safeParse(value);
+  if (!parsed.success) return null;
+  const seen = new Set();
+  const matches = [];
+  for (const m of parsed.data.matches) {
+    if (m.i >= nameCount || seen.has(m.i)) continue;
+    seen.add(m.i);
+    if (m.product !== null && m.product < productCount) {
+      matches.push({ i: m.i, product: m.product });
+      continue;
+    }
+    const options = cleanOptions(m.options, productCount);
+    if (options.length > 0) matches.push({ i: m.i, product: null, options });
+  }
+  return matches;
+}
+
+router.post('/match-product-names', verifyToken, aiLimiter, async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI generation is not configured on this server' });
+  }
+
+  const body = productNameMatchRequestSchema.safeParse(req.body);
+  if (!body.success) return badRequest(res, 'INVALID_REQUEST');
+  const { names, products } = body.data;
+
+  const list = (items) => items.map((it, n) => `${n}. ${JSON.stringify(it.name)}${it.unit ? ` (${it.unit})` : ''}`).join('\n');
+
+  try {
+    const call = await callGemini({
+      body: {
+        system_instruction: { parts: [{ text: PRODUCT_MATCH_SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: `NAMES:\n${list(names)}\n\nPRODUCTS:\n${list(products)}` }] }],
+        generationConfig: { temperature: 0, maxOutputTokens: 4096 },
+      },
+      timeoutMs: 30000,
+      log: req.log,
+      eventPrefix: 'ai.match_product_names',
+      model: requestedModel(req),
+    });
+    if (call.kind !== 'ok') return respondFromGeminiFailure(res, call);
+
+    const raw = responseText(call.data);
+    const parsed = extractJsonPayload(raw);
+    if (parsed.error === 'empty') {
+      return res.status(502).json({ error: 'Gemini returned an empty response' });
+    }
+    const matches = parsed.error ? null : cleanProductMatches(parsed.value, names.length, products.length);
+    if (!matches) {
+      // Length only: the text holds the business's product names.
+      req.log.error({ event: 'ai.match_product_names.parse_failed', rawLength: raw.length });
+      return res.status(502).json({ error: 'Gemini returned invalid JSON' });
+    }
+
+    const linked = matches.filter((m) => m.product !== null).length;
+    req.log.info({
+      event: 'ai.match_product_names.done',
+      names: names.length,
+      products: products.length,
+      matched: linked,
+      options: matches.length - linked,
+    });
+    return res.json({ matches });
+  } catch (err) {
+    req.log.error({ err, event: 'ai.match_product_names.failed' });
     return res.status(500).json({ error: 'Server error' });
   }
 });
@@ -501,12 +768,7 @@ router.post('/patch-recipe', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { currentRecipe, instruction } = req.body;
-  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
-    return res.status(400).json({ error: 'instruction is required' });
-  }
-  if (!currentRecipe || typeof currentRecipe !== 'object') {
-    return res.status(400).json({ error: 'currentRecipe is required' });
-  }
+  if (!requireFields(res, req.body, { instruction: 'text', currentRecipe: 'object' })) return;
 
   const userContent = `CURRENT RECIPE:\n${JSON.stringify(currentRecipe, null, 2)}\n\nUSER INSTRUCTION:\n${instruction.trim()}`;
 
@@ -644,9 +906,7 @@ router.post('/generate-menu', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { rawText } = req.body;
-  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
-    return res.status(400).json({ error: 'rawText is required' });
-  }
+  if (!requireFields(res, req.body, { rawText: 'text' })) return;
 
   const menuShots = await getApprovedMenuShots(2);
 
@@ -742,12 +1002,7 @@ router.post('/patch-menu', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { currentMenu, instruction } = req.body;
-  if (!currentMenu || typeof currentMenu !== 'object') {
-    return res.status(400).json({ error: 'currentMenu is required' });
-  }
-  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
-    return res.status(400).json({ error: 'instruction is required' });
-  }
+  if (!requireFields(res, req.body, { currentMenu: 'object', instruction: 'text' })) return;
 
   try {
     const userMessage = `CURRENT MENU:\n${JSON.stringify(currentMenu, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
@@ -872,9 +1127,7 @@ router.post('/generate-product', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { rawText } = req.body;
-  if (!rawText || typeof rawText !== 'string' || !rawText.trim()) {
-    return res.status(400).json({ error: 'rawText is required' });
-  }
+  if (!requireFields(res, req.body, { rawText: 'text' })) return;
 
   try {
     const call = await callGemini({
@@ -963,12 +1216,7 @@ router.post('/patch-product', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { currentProduct, instruction } = req.body;
-  if (!currentProduct || typeof currentProduct !== 'object') {
-    return res.status(400).json({ error: 'currentProduct is required' });
-  }
-  if (!instruction || typeof instruction !== 'string' || !instruction.trim()) {
-    return res.status(400).json({ error: 'instruction is required' });
-  }
+  if (!requireFields(res, req.body, { currentProduct: 'object', instruction: 'text' })) return;
 
   try {
     const userMessage = `CURRENT PRODUCT:\n${JSON.stringify(currentProduct, null, 2)}\n\nUSER INSTRUCTION:\n${instruction}`;
@@ -1024,11 +1272,9 @@ router.post('/generate-from-image', verifyToken, aiLimiter, async (req, res) => 
   }
 
   const { imageBase64, mimeType } = req.body;
-  if (!imageBase64 || typeof imageBase64 !== 'string' || !imageBase64.trim()) {
-    return res.status(400).json({ error: 'imageBase64 is required' });
-  }
+  if (!requireFields(res, req.body, { imageBase64: 'text' })) return;
   if (!mimeType || typeof mimeType !== 'string' || !mimeType.startsWith('image/')) {
-    return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
+    return badRequest(res, 'mimeType must be a valid image MIME type');
   }
 
   // No request text to match approved examples against (selectShots would pick none),
@@ -1074,11 +1320,9 @@ router.post('/generate-product-from-image', verifyToken, aiLimiter, async (req, 
   }
 
   const { imageBase64, mimeType, hint } = req.body;
-  if (!imageBase64 || typeof imageBase64 !== 'string' || !imageBase64.trim()) {
-    return res.status(400).json({ error: 'imageBase64 is required' });
-  }
+  if (!requireFields(res, req.body, { imageBase64: 'text' })) return;
   if (!mimeType || typeof mimeType !== 'string' || !mimeType.startsWith('image/')) {
-    return res.status(400).json({ error: 'mimeType must be a valid image MIME type' });
+    return badRequest(res, 'mimeType must be a valid image MIME type');
   }
 
   const parts = [{ text: PRODUCT_FROM_IMAGE_INSTRUCTION }];
@@ -1175,15 +1419,13 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
   }
 
   const { url } = req.body;
-  if (!url || typeof url !== 'string' || !url.trim()) {
-    return res.status(400).json({ error: 'url is required' });
-  }
+  if (!requireFields(res, req.body, { url: 'text' })) return;
   if (!/^https?:\/\//i.test(url.trim())) {
-    return res.status(400).json({ error: 'url must start with http:// or https://' });
+    return badRequest(res, 'url must start with http:// or https://');
   }
   const safe = await isSafeUrl(url.trim());
   if (!safe) {
-    return res.status(400).json({ error: 'url resolves to a disallowed address' });
+    return badRequest(res, 'url resolves to a disallowed address');
   }
 
   let pageText;
@@ -1241,17 +1483,12 @@ router.post('/generate-from-url', verifyToken, aiLimiter, async (req, res) => {
 router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
   const { prompt, draft, status, source } = req.body;
 
-  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
-    return res.status(400).json({ error: 'prompt is required' });
-  }
-  if (!draft || typeof draft !== 'object') {
-    return res.status(400).json({ error: 'draft is required' });
-  }
+  if (!requireFields(res, req.body, { prompt: 'text', draft: 'object' })) return;
   if (status !== 'approved' && status !== 'rejected') {
-    return res.status(400).json({ error: 'status must be "approved" or "rejected"' });
+    return badRequest(res, 'status must be "approved" or "rejected"');
   }
   if (!['text', 'image', 'url'].includes(source)) {
-    return res.status(400).json({ error: 'source must be "text", "image", or "url"' });
+    return badRequest(res, 'source must be "text", "image", or "url"');
   }
 
   // Hard structural validation — only block approved shots with broken structure
@@ -1283,15 +1520,10 @@ router.post('/shots', verifyToken, aiLimiter, async (req, res) => {
 
 router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
   const { prompt, menu } = req.body;
-  if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
-    return res.status(400).json({ error: 'prompt is required' });
-  }
-  if (!menu || typeof menu !== 'object') {
-    return res.status(400).json({ error: 'menu is required' });
-  }
+  if (!requireFields(res, req.body, { prompt: 'text', menu: 'object' })) return;
   const validationErrors = validateMenuDraft(menu);
   if (validationErrors.length > 0) {
-    return res.status(400).json({ error: 'invalid menu draft', details: validationErrors });
+    return badRequest(res, 'invalid menu draft', { details: validationErrors });
   }
   try {
     await menuShotsCol().insertOne({ prompt: prompt.trim(), menu, createdAt: new Date() });
@@ -1315,3 +1547,4 @@ router.post('/save-menu-shot', verifyToken, aiLimiter, async (req, res) => {
 
 module.exports = router;
 module.exports.appendKnownMetadata = appendKnownMetadata;
+module.exports.PRICE_LIST_SYSTEM_PROMPT = PRICE_LIST_SYSTEM_PROMPT;

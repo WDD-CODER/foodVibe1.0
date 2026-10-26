@@ -168,18 +168,37 @@
       [options]="courseSelectOptions_()"
       placeholder="course"
     />
+
+    <app-custom-select
+      class="station-select"
+      triggerId="station"
+      [formControl]="stationControl"
+      [options]="stationSelectOptions_()"
+      placeholder="station"
+      [typeToFilter]="true"
+      addNewValue="__add_station__"
+      addNewLabelKey="add_new_station"
+      [allowTypedAdd]="true"
+      (addNewChosen)="onAddStation($event)"
+    />
   </div>
 
   <div class="metrics-square">
     <div class="metric-group">
       <span class="label">{{ 'cost' | translatePipe }}</span>
       <span class="value">₪{{ currentCost() | number: '1.2-2' }}</span>
+      <app-partial-cost-badge
+        [missing]="missing_()"
+        [recipeNames]="ownRecipeNames_()"
+        [formRecipeId]="ownerRecipeId_()"
+        (linked)="onLinked($event)"
+      ></app-partial-cost-badge>
     </div>
     <div class="divider"></div>
     <div
       class="metric-group metric-group-weight-volume"
       (click)="toggleMetricsDisplayMode()"
-      (clickOutside)="closeMetricsNotice()"
+      (appClickOutside)="closeMetricsNotice()"
       (mouseenter)="onMetricsNoticeZoneEnter()"
       (mouseleave)="onMetricsNoticeZoneLeave()"
     >
@@ -206,7 +225,7 @@
             [title]="'items_not_convertible' | translatePipe"
           ></lucide-icon>
         </span>
-        @if (metricsNoticeOpen_()) {
+        @if (isMetricsNoticeOpen_()) {
           <div
             class="metrics-notice-floating"
             (click)="$event.stopPropagation()"
@@ -215,7 +234,7 @@
           >
             <p class="metrics-notice-title">{{ 'not_convertible' | translatePipe }}</p>
             <div class="metrics-notice-list-wrap">
-              <div class="metrics-notice-list" scrollIndicators>
+              <div class="metrics-notice-list" appScrollIndicators>
                 @for (name of unconvertibleNamesFiltered_(); track name) {
                   <div class="metrics-notice-item">{{ name }}</div>
                 }

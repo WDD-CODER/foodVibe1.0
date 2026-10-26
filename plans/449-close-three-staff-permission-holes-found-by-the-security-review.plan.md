@@ -1,6 +1,6 @@
 # Plan 449 — Close three staff permission holes found by the security review
 
-Status: draft
+Status: active
 Track: code
 Snapshot: f2914519b8e4ee325bffd28f9a038902c9e542e5
 
@@ -18,9 +18,9 @@ checker on branch `mvp` (code from plans 425/427):
 ## Goals & Success Criteria
 - Primary: staff can no longer change locked taxonomy kinds, move prices, or replace a collection.
 - Success:
-  - [ ] [auto] `npm --prefix server test` passes, including new tests: staff PUT changing a term's `kind` from `ingredientCategory` to `eventType` → 403 and the term is unchanged; staff PUT moving a price from supplier A's row to supplier B's row of a product they created → 403; staff PUT /:type (replace-all) → 403 and the collection is unchanged; owner PUT /:type still works.
-  - [ ] [auto] `npx ng build` passes.
-  - [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down` per run mode).
+  - [x] [auto] `npm --prefix server test` passes, including new tests: staff PUT changing a term's `kind` from `ingredientCategory` to `eventType` → 403 and the term is unchanged; staff PUT moving a price from supplier A's row to supplier B's row of a product they created → 403; staff PUT /:type (replace-all) → 403 and the collection is unchanged; owner PUT /:type still works.
+  - [x] [auto] `npx ng build` passes.
+  - [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries (or `deferred: local MongoDB down` per run mode).
   - [ ] [human] As a staff user, open a product created by staff and try to change a supplier's price → the price fields are locked; the owner can still change it.
 
 ## Execution Mode
@@ -80,18 +80,18 @@ Runs only when `scope-check.mjs --drift` reports drift. Find `writeAction`, `aut
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Locked-kind rule checks both the stored and the resulting term.
-- [ ] Money change detection compares prices per supplier / purchase unit, not as a filtered list.
-- [ ] Replace-all is owner-only and strips server-owned event fields.
+- [x] Locked-kind rule checks both the stored and the resulting term.
+- [x] Money change detection compares prices per supplier / purchase unit, not as a filtered list.
+- [x] Replace-all is owner-only and strips server-owned event fields.
 
 ## UI/UX Notes
 - None (server only). No new dictionary keys: the 403 reuses `no_permission`.
 
 ## Atomic Sub-tasks
-- [ ] S1: Stop staff from moving a category into an owner-only list such as event types — in `authorizeEdit`, use `editTaxonomy` when the stored OR the merged doc has a kind in `LOCKED_TAXONOMY_KINDS`; server test — `server/routes/generic.js`, `server/test/**`
-- [ ] S2: Catch staff moving a price between suppliers or purchase units — `moneySignature` keys values by `sources[].supplierId` / `purchaseOptions[].unitSymbol`, maps 0/null/absent to one value; unit + route tests — `server/utils/permissions.js`, `server/test/**`
-- [ ] S3: Allow only the owner to replace a whole list at once — owner check at the top of `router.put('/:type')`, `withoutServerEventFields` for menuEvents; tests for staff 403 / owner 200 — `server/routes/generic.js`, `server/test/**`
-- [ ] S4: Build, run all server tests, write the run file with the validation card — `docs/mvp/runs/449.md`
+- [x] S1: Stop staff from moving a category into an owner-only list such as event types — in `authorizeEdit`, use `editTaxonomy` when the stored OR the merged doc has a kind in `LOCKED_TAXONOMY_KINDS`; server test — `server/routes/generic.js`, `server/test/**`
+- [x] S2: Catch staff moving a price between suppliers or purchase units — `moneySignature` keys values by `sources[].supplierId` / `purchaseOptions[].unitSymbol`, maps 0/null/absent to one value; unit + route tests — `server/utils/permissions.js`, `server/test/**`
+- [x] S3: Allow only the owner to replace a whole list at once — owner check at the top of `router.put('/:type')`, `withoutServerEventFields` for menuEvents; tests for staff 403 / owner 200 — `server/routes/generic.js`, `server/test/**`
+- [x] S4: Build, run all server tests, write the run file with the validation card — `docs/mvp/runs/449.md`
 
 ## Technical Considerations
 - Dependencies: `assertCan`, `LOCKED_TAXONOMY_KINDS`, `MONEY_FIELDS`, `withoutServerEventFields` (plan 442) already exist on `mvp`.

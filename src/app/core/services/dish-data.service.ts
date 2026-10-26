@@ -1,33 +1,27 @@
-import { Injectable, signal, inject } from '@angular/core'
+import { Injectable, Signal, inject } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
-import { StorageService } from './async-storage.service'
+import { BaseEntityDataService } from './base-entity-data.service'
 import { UserService } from './user.service'
-import { LoggingService } from './logging.service'
-import { LoadingService } from './loading.service'
 import { Recipe, PrepCategory } from '../models/recipe.model'
 
 const ENTITY = 'dishes'
 
 @Injectable({ providedIn: 'root' })
-export class DishDataService {
-  private storage = inject(StorageService)
+export class DishDataService extends BaseEntityDataService<Recipe> {
   private userService = inject(UserService)
-  private logging = inject(LoggingService)
-  private loading_ = inject(LoadingService)
 
-  private dishesStore_ = signal<Recipe[]>([])
-  readonly allDishes_ = this.dishesStore_.asReadonly()
-
-  private loaded_ = false
-  private loadPromise_: Promise<void> | null = null
+  /** Domain alias for the base-class signal. */
+  readonly allDishes_: Signal<Recipe[]> = this.all_
 
   // Deferred: load on ensureLoaded() via kitchenDataEnsureLoadedResolver (recipe-builder,
   // recipe-book, cook, menu-library, menu-intelligence routes) — see plan 304 M2.
-  constructor() {}
-
-  /** True after at least one successful (or attempted) hydrate. */
-  hasLoaded(): boolean {
-    return this.loaded_
+  // A reload empties the list before re-reading (kept by plan 454).
+  constructor() {
+    super(ENTITY, false, {
+      errorEvent: 'crud.dishes.hydrate_error',
+      errorMessage: 'Failed to load dishes',
+      clearOnReload: true
+    })
   }
 
   /** Lightweight count — does not require the full collection to be loaded (plan 304 M2). */
@@ -35,54 +29,15 @@ export class DishDataService {
     return this.storage.count(ENTITY, filter)
   }
 
-  /** Loads from storage once. Safe to call repeatedly — concurrent callers share one promise. */
-  async ensureLoaded(): Promise<void> {
-    if (this.loaded_) return
-    if (this.loadPromise_) return this.loadPromise_
-    this.loadPromise_ = this.loadInitialData()
-      .catch(() => {})
-      .finally(() => {
-        this.loaded_ = true
-        this.loadPromise_ = null
-      })
-    return this.loadPromise_
-  }
-
-  /** Re-read from storage and refresh the signal. Used by demo loader after replacing data. */
-  async reloadFromStorage(): Promise<void> {
-    if (this.loadPromise_) {
-      // A load is already in flight — e.g. this service was just constructed via
-      // injector.get() and its constructor's ensureLoaded() hasn't resolved yet.
-      // Await it instead of firing a redundant concurrent fetch for the same data.
-      await this.loadPromise_
-      return
-    }
-    this.loaded_ = false
-    this.loadPromise_ = null
-    this.dishesStore_.set([])
-    await this.loadInitialData()
-    this.loaded_ = true
-  }
-
   /** Normalize legacy mise_categories_ into prepCategories when loading from storage. */
-  private normalizeDish(d: Recipe & { mise_categories_?: PrepCategory[] }): Recipe {
+  protected override normalizeRow(row: Recipe): Recipe {
+    const d = row as Recipe & { mise_categories_?: PrepCategory[] }
     if (d.mise_categories_?.length && !d.prepCategories?.length) {
       const { mise_categories_, ...rest } = d
       return { ...rest, prepCategories: mise_categories_ }
     }
     const { mise_categories_: _m, ...rest } = d
     return rest as Recipe
-  }
-
-  private async loadInitialData(): Promise<void> {
-    try {
-      const data = await this.loading_.track(this.storage.query<Recipe & { mise_categories_?: PrepCategory[] }>(ENTITY))
-      const normalized = data.map((d) => this.normalizeDish(d))
-      this.dishesStore_.set(normalized)
-    } catch (err) {
-      if (err instanceof HttpErrorResponse && err.status === 401) return
-      this.logging.error({ event: 'crud.dishes.hydrate_error', message: 'Failed to load dishes', context: { err } })
-    }
   }
 
   async getDishById(_id: string): Promise<Recipe> {
@@ -107,7 +62,7 @@ export class DishDataService {
         ...(userId ? { createdBy: userId } : {})
       } as Recipe
       const saved = await this.storage.post<Recipe>(ENTITY, toCreate)
-      this.dishesStore_.update((dishes) => [...dishes, saved])
+      this.updateItems((dishes) => [...dishes, saved])
       return saved
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -125,7 +80,7 @@ export class DishDataService {
    *  server just resolved it to (see product-data.service.ts's patchMasterId
    *  for the full reasoning — same fix, dish side). */
   patchMasterId(id: string, masterId: string): void {
-    this.dishesStore_.update((dishes) =>
+    this.updateItems((dishes) =>
       dishes.map((d) => (d._id === id ? { ...d, _masterId: masterId, _userModified: false } : d))
     )
   }
@@ -146,7 +101,7 @@ export class DishDataService {
         createdBy: existing?.createdBy ?? dish.createdBy
       }
       const updated = await this.storage.put<Recipe>(ENTITY, toSave)
-      this.dishesStore_.update((dishes) => dishes.map((d) => (d._id === updated._id ? updated : d)))
+      this.updateItems((dishes) => dishes.map((d) => (d._id === updated._id ? updated : d)))
       return updated
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
@@ -158,7 +113,7 @@ export class DishDataService {
   async permanentlyDeleteDish(_id: string): Promise<void> {
     try {
       await this.storage.removePermanently(ENTITY, _id)
-      this.dishesStore_.update((dishes) => dishes.filter((d) => d._id !== _id))
+      this.updateItems((dishes) => dishes.filter((d) => d._id !== _id))
       this.logging.info({
         event: 'crud.dish.hardDelete',
         message: 'Dish permanently deleted',
@@ -179,7 +134,7 @@ export class DishDataService {
     try {
       // Plan 407: the server stamps deletedAt; the item now sits in Trash.
       await this.storage.remove(ENTITY, _id)
-      this.dishesStore_.update((dishes) => dishes.filter((d) => d._id !== _id))
+      this.updateItems((dishes) => dishes.filter((d) => d._id !== _id))
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 401) throw err
       this.logging.error({ event: 'crud.dish.delete_error', message: 'Failed to delete dish', context: { err } })

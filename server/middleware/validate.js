@@ -15,4 +15,39 @@ function checkStoredDoc(type, doc) {
   return { ok: success, issues };
 }
 
-module.exports = { checkStoredDoc };
+// ---------------------------------------------------------------------------
+// Plan 456 — request-body checks for the AI routes. They answer exactly what the
+// hand-written checks answered: 400 with `{ error, ...extra }`.
+// ---------------------------------------------------------------------------
+
+/** Sends 400 `{ error, ...extra }`. Returns the response so a handler can `return badRequest(...)`. */
+function badRequest(res, error, extra = {}) {
+  return res.status(400).json({ error, ...extra });
+}
+
+/** True when `value` passes `kind`: 'text' = a string that is not blank, 'object' = any non-null object. */
+function passesField(value, kind) {
+  if (kind === 'text') return typeof value === 'string' && value.trim() !== '';
+  if (kind === 'object') return !!value && typeof value === 'object';
+  throw new Error(`requireFields: unknown kind "${kind}"`);
+}
+
+/**
+ * Checks `rules` ({ field: 'text' | 'object' }) in order against `body`. On the first field that
+ * fails it sends 400 `{ error: '<field> is required' }` and returns false; true when all pass.
+ *
+ * @param {import('express').Response} res
+ * @param {Record<string, unknown> | undefined} body
+ * @param {Record<string, 'text' | 'object'>} rules
+ */
+function requireFields(res, body, rules) {
+  for (const [field, kind] of Object.entries(rules)) {
+    if (!passesField(body?.[field], kind)) {
+      badRequest(res, `${field} is required`);
+      return false;
+    }
+  }
+  return true;
+}
+
+module.exports = { checkStoredDoc, badRequest, requireFields };

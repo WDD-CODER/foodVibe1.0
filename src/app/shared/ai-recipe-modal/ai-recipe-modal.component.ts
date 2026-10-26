@@ -1,17 +1,17 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { Router } from '@angular/router'
 import { HttpErrorResponse } from '@angular/common/http'
+import { firstValueFrom } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from '../loader/loader.component'
-import { AiRecipeModalService } from './ai-recipe-modal.service'
+import { AiRecipeModalService, type AiModalInputMode } from './ai-recipe-modal.service'
 import { GeminiService } from '@services/gemini.service'
 import type { AiRecipePatch } from '@services/gemini.service'
 import { AiRecipeDraftService, type AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import {
   getGeminiUsage,
-  fetchGeminiUsageFromServer,
   geminiModelAvailability,
   geminiUsageStatus,
   geminiBudgetUsedPercent
@@ -20,9 +20,15 @@ import { GeminiShotsService } from '@services/gemini-shots.service'
 import { TranslationService } from '@services/translation.service'
 import { AiDraftEditorComponent } from './ai-draft-editor/ai-draft-editor.component'
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
+import { parsedResultToDraft } from '@utils/parsed-result-draft.util'
+import { createUnitWordResolver } from '@utils/ingredient-line-parser.util'
+import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
+import { UnitRegistryService } from '@services/unit-registry.service'
+import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
-type InputMode = 'text' | 'image' | 'url'
+type InputMode = AiModalInputMode
 
 @Component({
   selector: 'app-ai-recipe-modal',
@@ -33,7 +39,9 @@ type InputMode = 'text' | 'image' | 'url'
     TranslatePipe,
     LoaderComponent,
     AiDraftEditorComponent,
-    ScrollIndicatorsDirective
+    ScrollIndicatorsDirective,
+    TextareaAutoGrowDirective,
+    ModalShellComponent
   ],
   templateUrl: './ai-recipe-modal.component.html',
   styleUrl: './ai-recipe-modal.component.scss',
@@ -46,6 +54,12 @@ export class AiRecipeModalComponent implements OnInit {
   private readonly router = inject(Router)
   private readonly shots = inject(GeminiShotsService)
   private readonly translation = inject(TranslationService)
+  private readonly unitRegistry = inject(UnitRegistryService)
+  private readonly pastedUnitResolver_ = createUnitWordResolver({
+    aliases: UNIT_ALIASES,
+    translate: (token) => this.translation.resolveUnit(token),
+    knownKeys: () => this.unitRegistry.allUnitKeys_()
+  })
 
   // Create mode
   protected readonly inputMode_ = signal<InputMode>('text')
@@ -61,11 +75,11 @@ export class AiRecipeModalComponent implements OnInit {
 
   // Shot quality warnings
   protected readonly shotWarnings_ = signal<string[]>([])
-  protected readonly awaitingWarningConfirm_ = signal(false)
+  protected readonly isAwaitingWarningConfirm_ = signal(false)
   private readonly pendingApprovedDraft_ = signal<AiRecipeDraft | null>(null)
 
   // Shared
-  protected readonly loading_ = signal(false)
+  protected readonly isLoading_ = signal(false)
   protected readonly status_ = signal<GenerationStatus>('idle')
   protected readonly errorKey_ = signal('ai_recipe_error')
   protected readonly geminiUsage_ = signal(getGeminiUsage())
@@ -94,15 +108,31 @@ export class AiRecipeModalComponent implements OnInit {
     const p = this.patch_()
     if (!p) return []
     const items: string[] = []
-    if (p.nameHebrew !== undefined) items.push(`שם: ${p.nameHebrew}`)
-    if (p.ingredients !== undefined) items.push(`מרכיבים: ${p.ingredients.length} פריטים`)
-    if (p.steps !== undefined) items.push(`שלבים: ${p.steps.length} שלבים`)
+    if (p.nameHebrew !== undefined)
+      items.push(this.translation.translate('ai_patch_name_value').replace('{value}', p.nameHebrew))
+    if (p.ingredients !== undefined)
+      items.push(this.translation.translate('ai_patch_ingredients_count').replace('{n}', String(p.ingredients.length)))
+    if (p.steps !== undefined)
+      items.push(this.translation.translate('ai_patch_steps_count').replace('{n}', String(p.steps.length)))
     if (p.yield_amount !== undefined || p.yield_unit !== undefined) {
-      items.push(`תפוקה: ${p.yield_amount ?? ''} ${p.yield_unit ?? ''}`.trim())
+      items.push(
+        this.translation
+          .translate('ai_patch_yield_value')
+          .replace('{value}', `${p.yield_amount ?? ''} ${p.yield_unit ?? ''}`)
+          .trim()
+      )
     }
-    if (p.equipment !== undefined) items.push(`ציוד: ${p.equipment.length} פריטים`)
+    if (p.equipment !== undefined)
+      items.push(this.translation.translate('ai_patch_equipment_count').replace('{n}', String(p.equipment.length)))
     return items
   })
+
+  constructor() {
+    // The window opens on the tab the caller asks for (default: describe).
+    effect(() => {
+      if (this.modalService.isOpen()) this.inputMode_.set(this.modalService.initialInputMode())
+    })
+  }
 
   ngOnInit(): void {
     this.refreshUsage()
@@ -110,7 +140,7 @@ export class AiRecipeModalComponent implements OnInit {
 
   refreshUsage(): void {
     this.geminiUsage_.set(getGeminiUsage()) // show local cache instantly
-    fetchGeminiUsageFromServer().then((usage) => {
+    this.gemini.fetchUsage().then((usage) => {
       // then update with real server count
       this.geminiUsage_.set(usage)
     })
@@ -119,7 +149,7 @@ export class AiRecipeModalComponent implements OnInit {
   // ─── Create mode ─────────────────────────────────────────────────
 
   async onGenerate(): Promise<void> {
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     try {
       const draft = await this.gemini.generateRecipe(this.prompt_())
@@ -129,23 +159,55 @@ export class AiRecipeModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage()
     }
+  }
+
+  /** Pasted recipe text goes through the server parser (`parse-text`); nothing readable → an error line, no draft. */
+  async onParsePasted(): Promise<void> {
+    const text = this.prompt_().trim()
+    if (!text) return
+    this.isLoading_.set(true)
+    this.status_.set('sending')
+    this.errorKey_.set('ai_recipe_error')
+    try {
+      const draft = parsedResultToDraft(await firstValueFrom(this.gemini.parseText(text)), this.pastedUnitResolver_)
+      if (draft) {
+        this.draft_.set(draft)
+        this.status_.set('done')
+      } else {
+        this.errorKey_.set('paste_recipe_not_recognized')
+        this.status_.set('error')
+      }
+    } catch (err) {
+      this.errorKey_.set(this.resolveErrorKey_(err))
+      this.status_.set('error')
+    } finally {
+      this.isLoading_.set(false)
+      this.refreshUsage()
+    }
+  }
+
+  /** Few-shot curation applies to AI-written drafts only; pasted recipes are the chef's own text (INV-6 plan 439). */
+  private saveShot_(draft: AiRecipeDraft, status: 'approved' | 'rejected'): void {
+    const mode = this.inputMode_()
+    if (mode === 'paste') return
+    this.shots.saveShot(this.prompt_(), draft, status, mode).subscribe({
+      error: () => {
+        /* non-blocking */
+      }
+    })
   }
 
   onGenerateAgain(): void {
     const draft = this.draft_()
     if (draft) {
-      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe({
-        error: () => {
-          /* non-blocking */
-        }
-      })
+      this.saveShot_(draft, 'rejected')
     }
     this.draft_.set(null)
     this.shotWarnings_.set([])
-    this.awaitingWarningConfirm_.set(false)
+    this.isAwaitingWarningConfirm_.set(false)
     this.status_.set('idle')
     this.errorKey_.set('ai_recipe_error')
     this.imageFile_.set(null)
@@ -169,7 +231,7 @@ export class AiRecipeModalComponent implements OnInit {
   async onGenerateFromImage(): Promise<void> {
     const file = this.imageFile_()
     if (!file) return
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     try {
       const draft = await this.gemini.generateFromImage(file)
@@ -179,7 +241,7 @@ export class AiRecipeModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage()
     }
   }
@@ -187,7 +249,7 @@ export class AiRecipeModalComponent implements OnInit {
   async onGenerateFromUrl(): Promise<void> {
     const url = this.urlInput_().trim()
     if (!url) return
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     this.errorKey_.set('ai_recipe_error')
     try {
@@ -198,7 +260,7 @@ export class AiRecipeModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage()
     }
   }
@@ -238,15 +300,11 @@ export class AiRecipeModalComponent implements OnInit {
     this.pendingApprovedDraft_.set(draft)
     // Shot curation is fire-and-forget — reaching the recipe builder must never
     // depend on (or wait for) whether the background shot save succeeds.
-    this.shots.saveShot(this.prompt_(), draft, 'approved', this.inputMode_()).subscribe({
-      error: () => {
-        /* non-blocking — approval must not depend on shot curation */
-      }
-    })
+    this.saveShot_(draft, 'approved')
     const warnings = this.shots.computeWarnings(draft)
     if (warnings.length) {
       this.shotWarnings_.set(warnings)
-      this.awaitingWarningConfirm_.set(true)
+      this.isAwaitingWarningConfirm_.set(true)
     } else {
       this.navigateToBuilder_(draft)
     }
@@ -259,7 +317,7 @@ export class AiRecipeModalComponent implements OnInit {
   }
 
   onBackFromWarnings(): void {
-    this.awaitingWarningConfirm_.set(false)
+    this.isAwaitingWarningConfirm_.set(false)
     this.shotWarnings_.set([])
     this.pendingApprovedDraft_.set(null)
   }
@@ -274,15 +332,11 @@ export class AiRecipeModalComponent implements OnInit {
   onClearDraft(): void {
     const draft = this.draft_()
     if (draft) {
-      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe({
-        error: () => {
-          /* non-blocking */
-        }
-      })
+      this.saveShot_(draft, 'rejected')
     }
     this.draft_.set(null)
     this.shotWarnings_.set([])
-    this.awaitingWarningConfirm_.set(false)
+    this.isAwaitingWarningConfirm_.set(false)
     this.status_.set('idle')
     this.prompt_.set('')
     this.imageFile_.set(null)
@@ -307,7 +361,7 @@ export class AiRecipeModalComponent implements OnInit {
   async onEdit(): Promise<void> {
     const currentRecipe = this.modalService.getEditContext()
     if (!currentRecipe) return
-    this.loading_.set(true)
+    this.isLoading_.set(true)
     this.status_.set('sending')
     try {
       const patch = await this.gemini.patchRecipe(currentRecipe, this.instruction())
@@ -317,7 +371,7 @@ export class AiRecipeModalComponent implements OnInit {
       this.errorKey_.set(this.resolveErrorKey_(err))
       this.status_.set('error')
     } finally {
-      this.loading_.set(false)
+      this.isLoading_.set(false)
       this.refreshUsage()
     }
   }
@@ -341,11 +395,7 @@ export class AiRecipeModalComponent implements OnInit {
   onClose(): void {
     const draft = this.draft_()
     if (draft) {
-      this.shots.saveShot(this.prompt_(), draft, 'rejected', this.inputMode_()).subscribe({
-        error: () => {
-          /* non-blocking */
-        }
-      })
+      this.saveShot_(draft, 'rejected')
     }
     this.modalService.close()
     this.resetLocalState_()
@@ -355,7 +405,7 @@ export class AiRecipeModalComponent implements OnInit {
     this.draft_.set(null)
     this.patch_.set(null)
     this.shotWarnings_.set([])
-    this.awaitingWarningConfirm_.set(false)
+    this.isAwaitingWarningConfirm_.set(false)
     this.pendingApprovedDraft_.set(null)
     this.prompt_.set('')
     this.instruction.set('')
@@ -363,7 +413,7 @@ export class AiRecipeModalComponent implements OnInit {
     this.imagePreviewUrl_.set(null)
     this.urlInput_.set('')
     this.inputMode_.set('text')
-    this.loading_.set(false)
+    this.isLoading_.set(false)
     this.status_.set('idle')
     this.errorKey_.set('ai_recipe_error')
   }

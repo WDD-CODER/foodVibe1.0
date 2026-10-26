@@ -26,6 +26,7 @@
               [focusTrigger]="focusSearchAtRow()"
               [excludeNames]="editingNameAtRow_() === $index ? getExcludeNamesForRow($index) : existingIngredientNames"
               [initialQuery]="editingNameAtRow_() === $index ? (group.get('nameHebrew')?.value ?? '') : ''"
+              [suggestions]="editingNameAtRow_() === $index ? suggestionsFor(group) : []"
               (itemSelected)="onItemSelected($event, group)"
               (focusDone)="focusSearchDone.emit()"
               (addNewRowRequested)="addIngredient.emit()"
@@ -89,6 +90,7 @@
                   [title]="'unlinked_ingredient_hint' | translatePipe"
                 >
                   <lucide-icon name="link" [size]="14"></lucide-icon>
+                  <span class="badge-label">{{ 'ingredient_not_ready' | translatePipe }}</span>
                 </button>
               } @else if (group.get('referenceId')?.value) {
                 <button
@@ -121,7 +123,7 @@
             [options]="getUnitOptions(group)"
             placeholder="unit"
             [triggerId]="'unit-row-' + $index"
-            focusByRow
+            appFocusByRow
             [rowIndex]="$index"
             kind="unit"
             (valueChange)="onUnitChange(group, $index, $event)"
@@ -141,11 +143,11 @@
             </button>
             <input
               type="number"
-              SelectOnFocus
+              appSelectOnFocus
               formControlName="amount_net"
               (input)="updateLineCalculations($index)"
               (keydown)="onQuantityKeydown($event, $index)"
-              focusByRow
+              appFocusByRow
               [rowIndex]="$index"
               kind="qty"
               class="grid-input qty-input"
@@ -183,7 +185,7 @@
           !isMobile_() &&
           getProductForGroup(group)
         ) {
-          <div class="quick-edit-accordion" (clickOutside)="onAccordionClickOutside()">
+          <div class="quick-edit-accordion" (appClickOutside)="onAccordionClickOutside()">
             <app-quick-edit-product-panel
               [product]="getProductForGroup(group)!"
               [tier]="quickEditRowTier_() ?? 'incomplete'"
@@ -198,4 +200,17 @@
       </div>
     }
   </div>
+
+  @if (!ingredientsFormArray().disabled) {
+    <button type="button" class="paste-ingredients-btn c-btn-ghost--sm" (click)="isPasteOpen_.set(true)">
+      <lucide-icon name="clipboard-paste" [size]="16"></lucide-icon>
+      {{ 'paste_ingredients' | translatePipe }}
+    </button>
+  }
+
+  <app-paste-ingredients-dialog
+    [open]="isPasteOpen_()"
+    (submitted)="onPasteIngredients($event)"
+    (closed)="isPasteOpen_.set(false)"
+  />
 </div>

@@ -1,0 +1,266 @@
+@if (event_(); as event) {
+  <div class="c-modal-overlay" (click)="closed.emit()">
+    <div
+      class="c-modal-card closing-card"
+      dir="rtl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="closing-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="closing-header">
+        <h3 id="closing-title">{{ 'event_closing_title' | translatePipe }} · {{ event.name }}</h3>
+        <div class="header-actions">
+          @if (canMoney_() && !locked_()) {
+            <button type="button" class="c-btn-ghost" [disabled]="isBusy_()" (click)="refreshPlan()">
+              <lucide-icon name="refresh-cw" [size]="16"></lucide-icon>
+              <span>{{ 'closing_refresh_plan' | translatePipe }}</span>
+            </button>
+          }
+          <button type="button" class="c-btn-ghost" [attr.aria-label]="'close' | translatePipe" (click)="closed.emit()">
+            <lucide-icon name="x" [size]="16"></lucide-icon>
+          </button>
+        </div>
+      </header>
+
+      @if (locked_()) {
+        <p class="locked-note">
+          <lucide-icon name="lock" [size]="16"></lucide-icon>
+          <span>{{ 'event_finished_locked' | translatePipe }}</span>
+        </p>
+      }
+
+      @if (closing_(); as closing) {
+        <div class="closing-body" [class.no-money]="!canMoney_()">
+          <div class="rows-head" aria-hidden="true">
+            <span>{{ 'supplier' | translatePipe }}</span>
+            @if (canMoney_()) {
+              <span>{{ 'closing_planned' | translatePipe }}</span>
+              <span>{{ 'closing_actual_paid' | translatePipe }}</span>
+            }
+            <span>{{ 'closing_arrived' | translatePipe }} / {{ 'closing_has_invoice' | translatePipe }}</span>
+            <span>{{ 'closing_photos' | translatePipe }}</span>
+          </div>
+
+          @for (view of rows_(); track view.key) {
+            <section class="closing-row" [class.is-over]="canMoney_() && view.level === 'over'">
+              <h4 class="row-name">{{ view.row.name }}</h4>
+
+              @if (canMoney_()) {
+                <span class="row-planned" dir="ltr">
+                  <span class="cell-label">{{ 'closing_planned' | translatePipe }}</span>
+                  {{ formatMoney(view.row.planned) }}
+                </span>
+
+                <div class="row-paid c-input-stack">
+                  <label [for]="'paid-' + view.key" class="cell-label">{{
+                    'closing_actual_paid' | translatePipe
+                  }}</label>
+                  <input
+                    [id]="'paid-' + view.key"
+                    class="c-input"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    dir="ltr"
+                    [value]="view.row.actualPaid ?? ''"
+                    [disabled]="locked_()"
+                    (change)="onPaidChange(view.key, $any($event.target).value)"
+                  />
+                  @if (view.remark) {
+                    <span
+                      class="remark"
+                      [class.remark--over]="view.level === 'over'"
+                      [class.remark--under]="view.level === 'under'"
+                    >
+                      {{ view.remark }}
+                    </span>
+                  }
+                </div>
+              }
+
+              <div class="row-checks">
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    [checked]="view.row.arrived"
+                    [disabled]="!canArrival_() || locked_()"
+                    (change)="onArrivedChange(view.key, $any($event.target).checked)"
+                  />
+                  <span>{{ 'closing_arrived' | translatePipe }}</span>
+                </label>
+                <label class="check">
+                  <input
+                    type="checkbox"
+                    [checked]="view.row.hasInvoice"
+                    [disabled]="!canArrival_() || locked_()"
+                    (change)="onInvoiceChange(view.key, $any($event.target).checked)"
+                  />
+                  <span>{{ 'closing_has_invoice' | translatePipe }}</span>
+                </label>
+              </div>
+
+              <div class="row-photos">
+                @for (url of view.row.photos; track url) {
+                  <span class="photo">
+                    <a
+                      [href]="url"
+                      target="_blank"
+                      rel="noopener"
+                      [attr.aria-label]="'closing_photo_open' | translatePipe"
+                    >
+                      <img [src]="url" alt="" loading="lazy" />
+                    </a>
+                    @if (canArrival_() && !locked_()) {
+                      <button
+                        type="button"
+                        class="photo-remove"
+                        [attr.aria-label]="'closing_photo_remove' | translatePipe"
+                        (click)="removePhoto(view.key, url)"
+                      >
+                        <lucide-icon name="x" [size]="12"></lucide-icon>
+                      </button>
+                    }
+                  </span>
+                }
+                @if (canArrival_() && !locked_() && view.row.photos.length < maxPhotos) {
+                  <label
+                    class="photo-add c-icon-btn"
+                    [class.is-busy]="isUploading(view.key)"
+                    [attr.aria-label]="'closing_add_photo' | translatePipe"
+                    [attr.title]="'closing_add_photo' | translatePipe"
+                  >
+                    <lucide-icon name="camera" [size]="18"></lucide-icon>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      class="visually-hidden"
+                      [disabled]="isUploading(view.key)"
+                      (change)="onFilesChosen(view.key, $any($event.target))"
+                    />
+                  </label>
+                }
+              </div>
+            </section>
+          }
+
+          @if (canMoney_() && !locked_()) {
+            <div class="add-supplier">
+              <button type="button" class="c-btn-ghost" (click)="togglePicker()">
+                <lucide-icon name="plus" [size]="16"></lucide-icon>
+                <span>{{ 'closing_add_supplier' | translatePipe }}</span>
+              </button>
+              @if (isPicking_()) {
+                <app-custom-select
+                  [options]="supplierOptions_()"
+                  [translateLabels]="false"
+                  [typeToFilter]="true"
+                  placeholder="closing_pick_supplier"
+                  (valueChange)="addSupplier($event)"
+                />
+              }
+            </div>
+          }
+
+          @if (canMoney_()) {
+            <div class="totals">
+              <div class="c-input-stack">
+                <label for="closing-extra">{{ 'closing_actual_extra' | translatePipe }}</label>
+                <input
+                  id="closing-extra"
+                  class="c-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  dir="ltr"
+                  [value]="closing.actualExtraCosts ?? snapshot_()?.extraCosts ?? ''"
+                  [disabled]="locked_()"
+                  (change)="onExtraChange($any($event.target).value)"
+                />
+              </div>
+              <div class="c-input-stack">
+                <label for="closing-revenue">{{ 'closing_actual_revenue' | translatePipe }}</label>
+                <input
+                  id="closing-revenue"
+                  class="c-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  dir="ltr"
+                  [value]="closing.actualRevenue ?? snapshot_()?.plannedRevenue ?? ''"
+                  [disabled]="locked_()"
+                  (change)="onRevenueChange($any($event.target).value)"
+                />
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (result_(); as result) {
+          <footer class="closing-footer">
+            @if (canMoney_()) {
+              <dl class="profit">
+                <div>
+                  <dt>{{ 'closing_planned_profit' | translatePipe }}</dt>
+                  <dd dir="ltr">{{ formatMoney(result.plannedProfit) }} · {{ formatPct1(result.plannedProfitPct) }}</dd>
+                </div>
+                <div>
+                  <dt>
+                    {{ 'closing_actual_profit' | translatePipe }}
+                    @if (result.partial) {
+                      <span class="partial-tag">{{ 'closing_partial' | translatePipe }}</span>
+                    }
+                  </dt>
+                  <dd dir="ltr">
+                    {{ formatMoney(result.actualProfit) }}
+                    @if (result.actualProfitPct !== null) {
+                      · {{ formatPct1(result.actualProfitPct) }}
+                    }
+                  </dd>
+                </div>
+                <div>
+                  <dt>{{ 'closing_difference' | translatePipe }}</dt>
+                  <dd dir="ltr" [class.is-bad]="result.profitDiff < 0">{{ formatMoney(result.profitDiff) }}</dd>
+                </div>
+                @if (result.accuracyPts !== null) {
+                  <div>
+                    <dt>{{ 'closing_accuracy' | translatePipe }}</dt>
+                    <dd dir="ltr">{{ formatPct1(result.accuracyPts) }}</dd>
+                  </div>
+                }
+              </dl>
+            }
+
+            <div class="c-modal-actions closing-actions">
+              <button type="button" class="c-btn-ghost" (click)="closed.emit()">{{ 'close' | translatePipe }}</button>
+              @if (canMoney_()) {
+                @if (locked_()) {
+                  <button type="button" class="c-btn-ghost" [disabled]="isBusy_()" (click)="reopen()">
+                    <lucide-icon name="rotate-ccw" [size]="16"></lucide-icon>
+                    <span>{{ 'closing_reopen' | translatePipe }}</span>
+                  </button>
+                } @else if (canFinish_()) {
+                  <button type="button" class="c-btn-primary" [disabled]="isBusy_()" (click)="finish()">
+                    <lucide-icon name="check" [size]="16"></lucide-icon>
+                    <span>{{ 'closing_finish' | translatePipe }}</span>
+                  </button>
+                }
+              }
+            </div>
+          </footer>
+        }
+      } @else {
+        <div class="closing-body">
+          <p class="no-plan">{{ 'closing_no_plan' | translatePipe }}</p>
+          @if (canMoney_() && !locked_()) {
+            <button type="button" class="c-btn-primary" [disabled]="isBusy_()" (click)="refreshPlan()">
+              <lucide-icon name="refresh-cw" [size]="16"></lucide-icon>
+              <span>{{ 'closing_refresh_plan' | translatePipe }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

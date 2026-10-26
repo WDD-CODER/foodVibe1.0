@@ -38,6 +38,7 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 | Auth guards, interceptors, user services, HTTP CRUD, hashing/tokens in `auth-crypto.ts` | `.claude/skills/auth-and-logging/SKILL.md` |
 | New `pages/<x>/` or top-level subtree; files moved/deleted; before a PR that reshaped folders | `.claude/skills/breadcrumbs/SKILL.md` (+ `scripts/breadcrumbs-check.mjs`) |
 | Before any `.scss` / `.css` edit in `src/` | `.claude/skills/cssLayer/SKILL.md` |
+| Before creating any new component, util, pipe, service or `.c-*` class → find its family, climb the decision ladder | `docs/agent/standards-reuse.md` + `docs/brain/component-families.md` (`scripts/reuse-lint.mjs`) |
 | New dropdown / search picker, or changing one → follow the add-option rule (incl. keyboard) | `docs/agent/standards-domain.md` → Add-option rule |
 | Session start or after time away (once/day) | `.claude/skills/github-sync/SKILL.md` (gate: `scripts/github-sync-gate.mjs`) |
 | Before dev server / browser / database workflows | `.claude/skills/preflight/SKILL.md` (`node scripts/preflight.mjs`) |
@@ -63,6 +64,7 @@ Preserve across `/compact`: current plan number + branch, open todos, and any fa
 | `docs/agent/conventions.md` | Editing components, templates, SCSS/CSS, or translation keys |
 | `docs/agent/standards-angular.md` | Components, pipes, directives, SCSS, folder structure |
 | `docs/agent/standards-security.md` | Auth, guards, interceptors, storage, crypto, security reviews |
+| `docs/agent/standards-reuse.md` | Before any new component, util, pipe, service or `.c-*` class; writing a plan's `## Reuse Check` |
 | `docs/agent/standards-domain.md` | Translation keys, Hebrew values, Lucide icons, ingredient ledger |
 | `docs/agent/standards-backend.md` | New entity types, persisted fields, CRUD, backend API contract |
 | `docs/agent/standards-git.md` | Any git write; mandatory Post-push Merge Gate + brain capture |

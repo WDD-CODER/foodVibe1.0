@@ -12,6 +12,8 @@ import { kitchenDataEnsureLoadedResolver } from './core/resolvers/kitchen-data-e
 import { supplierResolver } from './core/resolvers/supplier.resolver'
 import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
+import { recipeBuilderAccessGuard } from './core/guards/recipe-builder-access.guard'
+import { platformAdminGuard } from './core/guards/platform-admin.guard'
 
 export const routes: Routes = [
   // Plan 338: equipment lives only under /inventory/equipment — old URLs redirect.
@@ -69,6 +71,12 @@ export const routes: Routes = [
         canDeactivate: [pendingChangesGuard],
       },
       {
+        path: 'import',
+        loadComponent: () => import('./pages/inventory/components/product-import/product-import.component').then(m => m.ProductImportComponent),
+        canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
+      },
+      {
         path: 'edit/:id',
         loadComponent: () => import('./pages/inventory/components/product-form/product-form.component').then(m => m.ProductFormComponent),
         resolve: { product: productResolver },
@@ -122,7 +130,7 @@ export const routes: Routes = [
       preparationsLoaded: preparationsEnsureLoadedResolver,
       kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
     },
-    canActivate: [authGuard],
+    canActivate: [authGuard, recipeBuilderAccessGuard],
     canDeactivate: [pendingChangesGuard],
   },
   {
@@ -198,11 +206,25 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     loadComponent: () => import('./pages/dashboard/dashboard.page').then(m => m.DashboardPage),
+    // Plan 482: unsaved coefficients ask before leaving; query-param changes count so a ?tab= switch asks too.
+    canDeactivate: [pendingChangesGuard],
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
   },
   {
     path: 'trash',
     loadComponent: () => import('./pages/trash/trash.page').then(m => m.TrashPage),
     canActivate: [authGuard],
   },
+  {
+    path: 'settings',
+    loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'platform',
+    loadComponent: () => import('./pages/platform-dashboard/platform-dashboard.page').then(m => m.PlatformDashboardPage),
+    canActivate: [authGuard, platformAdminGuard],
+  },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: '**', redirectTo: 'dashboard' },
 ]

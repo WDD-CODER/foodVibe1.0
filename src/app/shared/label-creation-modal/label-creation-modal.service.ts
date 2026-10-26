@@ -1,7 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core'
-import { Subject, firstValueFrom } from 'rxjs'
 import { TranslationService } from '@services/translation.service'
 import { sanitizeKey } from '../../core/utils/sanitize-key.util'
+import { ModalController } from '@services/modal-controller'
 
 interface LabelCreationResult {
   key: string
@@ -13,9 +13,9 @@ interface LabelCreationResult {
 @Injectable({ providedIn: 'root' })
 export class LabelCreationModalService {
   private translationService = inject(TranslationService)
-  private resultSubject = new Subject<LabelCreationResult | null>()
+  private controller_ = new ModalController<LabelCreationResult | null>(null)
 
-  isOpen_ = signal(false)
+  readonly isOpen_ = this.controller_.isOpen_
   hebrewLabel_ = signal('')
   englishKey_ = signal('')
   selectedColor_ = signal('#3B82F6')
@@ -36,8 +36,7 @@ export class LabelCreationModalService {
     this.selectedColor_.set(prefill?.color ?? '#3B82F6')
     this.selectedTriggers_.set(prefill?.autoTriggers ?? [])
     this.originalKey_.set(prefill?.englishKey ?? '')
-    this.isOpen_.set(true)
-    return firstValueFrom(this.resultSubject)
+    return this.controller_.open()
   }
 
   save(englishKey: string, hebrewLabel: string, color: string, autoTriggers: string[]): void {
@@ -47,22 +46,20 @@ export class LabelCreationModalService {
     if (!validation.valid) {
       throw new Error(validation.error)
     }
-    this.resultSubject.next({
+    this.close({
       key: sanitizedKey,
       hebrewLabel: label,
       color: color || '#78716C',
       autoTriggers: autoTriggers ?? []
     })
-    this.close()
   }
 
   cancel(): void {
-    this.resultSubject.next(null)
-    this.close()
+    this.close(null)
   }
 
-  close(): void {
-    this.isOpen_.set(false)
+  close(result: LabelCreationResult | null = null): void {
+    this.controller_.close(result)
     this.hebrewLabel_.set('')
     this.englishKey_.set('')
     this.selectedColor_.set('#3B82F6')

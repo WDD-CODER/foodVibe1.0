@@ -1,16 +1,5 @@
-import {
-  afterNextRender,
-  ChangeDetectionStrategy,
-  Component,
-  ElementRef,
-  inject,
-  Injector,
-  OnInit,
-  signal,
-  computed,
-  viewChild
-} from '@angular/core'
-import { CommonModule } from '@angular/common'
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed, viewChild } from '@angular/core'
+import { CommonModule, DOCUMENT } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { UnitRegistryService, SYSTEM_UNITS } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
@@ -31,14 +20,20 @@ import { UserService } from '@services/user.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { LoggingService } from '@services/logging.service'
 import { TaxonomyStore } from '@services/taxonomy-store.service'
+import { normalizeHebrew } from '@utils/recipe-match.util'
 import type { TaxonomyKind } from '@models/v2'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { ALL_DISH_FIELDS, DEFAULT_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { TaxonomyKindManagerComponent } from './components/taxonomy-kind-manager/taxonomy-kind-manager.component'
 import { PreparationCategoryManagerComponent } from './components/preparation-category-manager/preparation-category-manager.component'
 import { SectionCategoryManagerComponent } from './components/section-category-manager/section-category-manager.component'
+import { StationManagerComponent } from './components/station-manager/station-manager.component'
+import { CoefficientManagerComponent } from './components/coefficient-manager/coefficient-manager.component'
+import { StaffStagesManagerComponent } from './components/staff-stages-manager/staff-stages-manager.component'
+import { PermissionService } from '@services/permission.service'
 import { UserManagementComponent } from './components/user-management/user-management.component'
 import { AiModelManagerComponent } from './components/ai-model-manager/ai-model-manager.component'
+import { InlineRenameFieldComponent } from 'src/app/shared/inline-rename-field/inline-rename-field.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { UnitEditDialogComponent, type UnitEditValue } from './components/unit-edit-dialog/unit-edit-dialog.component'
@@ -65,9 +60,13 @@ const KIND_BY_TYPE: Record<MetadataType | 'menuType', TaxonomyKind> = {
     TaxonomyKindManagerComponent,
     PreparationCategoryManagerComponent,
     SectionCategoryManagerComponent,
+    StationManagerComponent,
+    CoefficientManagerComponent,
+    StaffStagesManagerComponent,
     UserManagementComponent,
     AiModelManagerComponent,
     ScrollRailComponent,
+    InlineRenameFieldComponent,
     RowActionsMenuComponent,
     UnitEditDialogComponent
   ],
@@ -91,11 +90,14 @@ export class MetadataManagerComponent implements OnInit {
   private addItemModal = inject(AddItemModalService)
   private readonly userService = inject(UserService)
   protected readonly isLoggedIn = this.userService.isLoggedIn
-  protected readonly isAdmin = this.userService.isAdmin_
+  protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
+  private readonly permission = inject(PermissionService)
+  /** Plan 477: the staff-stages card is the owner's (editSettings). */
+  protected readonly canEditSettings_ = computed(() => this.permission.can('editSettings'))
   private readonly authModal = inject(AuthModalService)
   private readonly logging = inject(LoggingService)
   private readonly taxonomy = inject(TaxonomyStore)
-  private readonly injector = inject(Injector)
+  private readonly document = inject(DOCUMENT)
 
   ngOnInit(): void {
     void this.menuEventData.ensureLoaded()
@@ -132,43 +134,62 @@ export class MetadataManagerComponent implements OnInit {
   readonly ALL_DISH_FIELDS = ALL_DISH_FIELDS
 
   private readonly itemMenu = viewChild.required(RowActionsMenuComponent)
-  private readonly renameInput = viewChild<ElementRef<HTMLInputElement>>('renameInput')
+  private readonly jumpRail = viewChild(ScrollRailComponent)
+  /** Plan 482: the «מקדמים» card keeps unsaved drafts until «שמור»; the dashboard asks through these two. */
+  private readonly coefficients = viewChild(CoefficientManagerComponent)
+
+  hasRealChanges(): boolean {
+    return this.coefficients()?.hasRealChanges() ?? false
+  }
+
+  confirmLeave(): Promise<boolean> {
+    return this.coefficients()?.confirmLeave() ?? Promise.resolve(true)
+  }
 
   /**
    * Mobile/tablet jump-nav destinations, in page order. Built from the app's real 8 sections
    * (not the design's tab list).
    */
-  protected readonly jumpSections = [
+  private readonly _allJumpSections = [
     { id: 'mm-sec-unit', labelKey: 'metadata_units_and_conversions_title' },
     { id: 'mm-sec-category', labelKey: 'metadata_product_categories_title' },
     { id: 'mm-sec-allergen', labelKey: 'metadata_global_allergens_title' },
     { id: 'mm-sec-label', labelKey: 'metadata_recipe_labels_title' },
     { id: 'mm-sec-course', labelKey: 'metadata_recipe_courses_title' },
     { id: 'mm-sec-menu-type', labelKey: 'metadata_menu_types_title' },
+    { id: 'mm-sec-coefficients', labelKey: 'metadata_coefficients_title' },
+    { id: 'mm-sec-staff-stages', labelKey: 'metadata_staff_stages_title' },
     { id: 'mm-sec-preparation', labelKey: 'metadata_prep_categories' },
     { id: 'mm-sec-section', labelKey: 'metadata_section_categories_title' },
+    { id: 'mm-sec-station', labelKey: 'metadata_stations_title' },
     { id: 'mm-sec-user', labelKey: 'user_management' },
     { id: 'mm-sec-ai-models', labelKey: 'ai_model_manager' }
   ] as const
 
-  /** Which section (if any) has been brought to the front of the grid; null = natural page order. */
-  protected readonly frontSectionId_ = signal<string | null>(null)
+  /** User management and AI models are platform-admin screens; the staff-stages card is the owner's. No tab for anyone else. */
+  protected readonly jumpSections = computed(() => {
+    const admin = this.isPlatformAdmin_()
+    const owner = this.canEditSettings_()
+    return this._allJumpSections.filter(
+      (s) =>
+        (admin || (s.id !== 'mm-sec-user' && s.id !== 'mm-sec-ai-models')) && (owner || s.id !== 'mm-sec-staff-stages')
+    )
+  })
 
-  protected bringToFront(id: string): void {
-    this.frontSectionId_.set(id)
+  /** The section whose chip was tapped last (highlighted chip); null until a chip is tapped. */
+  protected readonly activeSectionId_ = signal<string | null>(null)
+
+  protected isActive(id: string): boolean {
+    return this.activeSectionId_() === id
   }
 
-  protected isFront(id: string): boolean {
-    return this.frontSectionId_() === id
-  }
-
-  /** CSS `order` for a jump-nav section: 0 (first) when it's the front one, else its natural
-   *  page-order position (1-10) — so bringing one to the front never disturbs the relative order
-   *  of the rest. */
-  protected orderFor(id: string): number {
-    if (this.isFront(id)) return 0
-    const index = this.jumpSections.findIndex((s) => s.id === id)
-    return index === -1 ? 1 : index + 1
+  /** Plan 468: a chip scrolls its section to the top (under the header and the chip bar) and
+   *  glides itself to the middle of the chip carousel. */
+  protected jumpTo(id: string, chip: HTMLElement): void {
+    this.activeSectionId_.set(id)
+    const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    this.document.getElementById(id)?.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' })
+    this.jumpRail()?.centerChild(chip)
   }
 
   protected readonly labelColor = (key: string): string => this.metadataRegistry.getLabelColor(key)
@@ -248,11 +269,11 @@ export class MetadataManagerComponent implements OnInit {
       if (pushFailed) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {
-        this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.msg('metadata_saved_success'))
       }
     } catch (err) {
       this.logging.error({ event: 'metadata.sync_error', message: 'Metadata sync error (add label)', context: { err } })
-      this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים')
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_sync_error'))
     }
   }
 
@@ -270,7 +291,7 @@ export class MetadataManagerComponent implements OnInit {
     const existingLabels = currentIds.map((id) => this.translationService.translate(id))
 
     if (existingLabels.includes(sanitizedHebrew)) {
-      this.userMsgService.onSetErrorMsg(`הערך "${sanitizedHebrew}" כבר קיים ברשימה הזו.`)
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_value_exists', { name: sanitizedHebrew }))
       return
     }
 
@@ -327,7 +348,7 @@ export class MetadataManagerComponent implements OnInit {
       if (pushFailed) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {
-        this.userMsgService.onSetSuccessMsg('הנתונים נשמרו בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.msg('metadata_saved_success'))
       }
     } catch (err) {
       this.logging.error({
@@ -335,17 +356,28 @@ export class MetadataManagerComponent implements OnInit {
         message: 'Metadata sync error (add metadata)',
         context: { err }
       })
-      this.userMsgService.onSetErrorMsg('שגיאה בסנכרון הנתונים')
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_sync_error'))
     }
   }
 
   //DELETE
-  private readonly metadataTypeNames: Record<MetadataType, string> = {
-    unit: 'היחידה',
-    allergen: 'האלרגן',
-    category: 'הקטגוריה',
-    label: 'התווית',
-    course: 'סוג המנה'
+  /** Dictionary keys of the type names used inside messages ("היחידה", "האלרגן", ...). */
+  private readonly metadataTypeKeys: Record<MetadataType, string> = {
+    unit: 'metadata_type_unit',
+    allergen: 'metadata_type_allergen',
+    category: 'metadata_type_category',
+    label: 'metadata_type_label',
+    course: 'metadata_type_course'
+  }
+
+  /** Dictionary text for `key` with `{type}`, `{name}` and `{n}` filled in. */
+  private msg(key: string, params: { type?: MetadataType; name?: string; n?: number } = {}): string {
+    let text = this.translationService.translate(key)
+    if (params.type)
+      text = text.replace('{type}', this.translationService.translate(this.metadataTypeKeys[params.type]))
+    if (params.name !== undefined) text = text.replace('{name}', params.name)
+    if (params.n !== undefined) text = text.replace('{n}', String(params.n))
+    return text
   }
 
   async onRemoveMetadata(item: string, type: MetadataType) {
@@ -361,7 +393,11 @@ export class MetadataManagerComponent implements OnInit {
 
       if (affected.length > 0) {
         const confirmed = await this.confirmModal.open(
-          `מחיקת ${this.metadataTypeNames[type]} "${this.translationService.translate(item)}" תעדכן ${affected.length} מתכונים/מנות ותסיר אותה מכולם. להמשיך?`,
+          this.msg('metadata_cascade_delete_confirm', {
+            type,
+            name: this.translationService.translate(item),
+            n: affected.length
+          }),
           { variant: 'danger' }
         )
         if (!confirmed) return
@@ -388,7 +424,7 @@ export class MetadataManagerComponent implements OnInit {
           if (pushFailed) {
             this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
           } else {
-            this.userMsgService.onSetSuccessMsg(`נמחק בהצלחה ועודכנו ${updatedCount} מתכונים/מנות`)
+            this.userMsgService.onSetSuccessMsg(this.msg('metadata_deleted_updated_count', { n: updatedCount }))
           }
         } catch (err) {
           this.logging.error({
@@ -396,7 +432,7 @@ export class MetadataManagerComponent implements OnInit {
             message: `Failed to cascade-delete ${type}`,
             context: { err }
           })
-          this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת')
+          this.userMsgService.onSetErrorMsg(this.msg('metadata_delete_server_error'))
         }
         return
       }
@@ -423,7 +459,7 @@ export class MetadataManagerComponent implements OnInit {
     // 2. BLOCK DELETION IF IN USE
     if (isUsed) {
       this.userMsgService.onSetErrorMsg(
-        `לא ניתן למחוק את ${this.metadataTypeNames[type]} "${this.translationService.translate(item)}" - היא נמצאת בשימוש במלאי`
+        this.msg('metadata_in_use_cannot_delete', { type, name: this.translationService.translate(item) })
       )
       return
     }
@@ -463,11 +499,11 @@ export class MetadataManagerComponent implements OnInit {
       if (pushFailed) {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {
-        this.userMsgService.onSetSuccessMsg('המחיקה בוצעה בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.msg('metadata_delete_success'))
       }
     } catch (err) {
       this.logging.error({ event: 'crud.metadata.delete_error', message: `Failed to delete ${type}`, context: { err } })
-      this.userMsgService.onSetErrorMsg('שגיאה בביצוע המחיקה מול השרת')
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_delete_server_error'))
     }
   }
 
@@ -497,7 +533,9 @@ export class MetadataManagerComponent implements OnInit {
   private unitUsage(key: string): { products: number; recipes: number } {
     const products = this.productData
       .allProducts_()
-      .filter((p) => p.baseUnit === key || (p.purchaseOptions ?? []).some((o) => o.unitSymbol === key)).length
+      .filter(
+        (p) => p.baseUnit === key || (p.purchaseOptions ?? []).some((o) => o.unitSymbol === key || o.uom === key)
+      ).length
     const recipes = this.kitchenState
       .recipes_()
       .filter(
@@ -549,7 +587,7 @@ export class MetadataManagerComponent implements OnInit {
     }
   }
 
-  private async registryRename(type: MetadataType, oldKey: string, newKey: string): Promise<void> {
+  private async registryRename(type: MetadataType, oldKey: string, newKey: string): Promise<boolean> {
     switch (type) {
       case 'label':
         return this.metadataRegistry.renameLabel(oldKey, newKey)
@@ -559,6 +597,8 @@ export class MetadataManagerComponent implements OnInit {
         return this.metadataRegistry.renameCategory(oldKey, newKey)
       case 'allergen':
         return this.metadataRegistry.renameAllergen(oldKey, newKey)
+      default:
+        return false
     }
   }
 
@@ -581,7 +621,10 @@ export class MetadataManagerComponent implements OnInit {
       this.userMsgService.onSetErrorMsg(this.translationService.translate('taxonomy_shared_admin_only'))
       return null
     }
-    if (!this.isAdmin() || !(type === 'label' || type === 'course' || type === 'category' || type === 'allergen')) {
+    if (
+      !this.isPlatformAdmin_() ||
+      !(type === 'label' || type === 'course' || type === 'category' || type === 'allergen')
+    ) {
       return 'me'
     }
     // Plan 365: wording follows the action (add → publish, rename/text fix → update, remove → delete).
@@ -604,13 +647,13 @@ export class MetadataManagerComponent implements OnInit {
     scope: 'me' | 'everyone'
   ): Promise<boolean> {
     if (this.registryHasKey(type, newKey)) {
-      this.userMsgService.onSetErrorMsg(`${this.metadataTypeNames[type]} "${newKey}" כבר קיים`)
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_item_exists', { type, name: newKey }))
       return false
     }
     const affected = this.getAffectedCount(type, oldKey)
     if (affected > 0) {
       const confirmed = await this.confirmModal.open(
-        `שינוי שם ${this.metadataTypeNames[type]} "${this.translationService.translate(oldKey)}" יעדכן ${affected} פריטים. להמשיך?`
+        this.msg('metadata_rename_confirm', { type, name: this.translationService.translate(oldKey), n: affected })
       )
       if (!confirmed) return false
     }
@@ -644,7 +687,9 @@ export class MetadataManagerComponent implements OnInit {
         this.userMsgService.onSetErrorMsg(this.translationService.translate('push_registry_master_error'))
       } else {
         this.userMsgService.onSetSuccessMsg(
-          affected > 0 ? `שונה בהצלחה ועודכנו ${affected} פריטים` : 'השינוי בוצע בהצלחה'
+          affected > 0
+            ? this.msg('metadata_renamed_updated_count', { n: affected })
+            : this.msg('metadata_change_success')
         )
       }
       return true
@@ -654,7 +699,7 @@ export class MetadataManagerComponent implements OnInit {
         message: `Failed to cascade-rename ${type}`,
         context: { err }
       })
-      this.userMsgService.onSetErrorMsg('שגיאה בביצוע השינוי מול השרת')
+      this.userMsgService.onSetErrorMsg(this.msg('metadata_change_server_error'))
       return false
     }
   }
@@ -717,13 +762,22 @@ export class MetadataManagerComponent implements OnInit {
       if (!scope) return
       if (result.englishKey === item) {
         this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)
-        this.userMsgService.onSetSuccessMsg('העדכון בוצע בהצלחה')
+        this.userMsgService.onSetSuccessMsg(this.msg('metadata_update_success'))
         return
       }
       const ok = await this.confirmAndCascadeRename(type, item, result.englishKey, scope)
       if (!ok) return
       this.translationService.updateDictionary(result.englishKey, result.hebrewLabel, scope)
     }
+  }
+
+  /** Plan 475: another unit already shows this Hebrew name, so the two would look the same. */
+  private unitLabelTaken(prevKey: string, next: UnitEditValue): boolean {
+    const name = normalizeHebrew(next.hebrewLabel ?? '')
+    if (!name) return false
+    return this.allUnitKeys_().some(
+      (k) => k !== prevKey && k !== next.key && normalizeHebrew(this.translationService.translate(k)) === name
+    )
   }
 
   /** Save from the unit edit dialog. Both confirms are asked before anything is written, so a
@@ -737,8 +791,11 @@ export class MetadataManagerComponent implements OnInit {
     const labelChanged = next.hebrewLabel !== prev.hebrewLabel
     if (!keyChanged && !rateChanged && !labelChanged) return
 
-    if (keyChanged && this.registryHasKey('unit', next.key)) {
-      this.userMsgService.onSetErrorMsg(`${this.metadataTypeNames.unit} "${next.key}" כבר קיימת`)
+    if (
+      (keyChanged && this.registryHasKey('unit', next.key)) ||
+      (labelChanged && this.unitLabelTaken(prev.key, next))
+    ) {
+      this.userMsgService.onSetErrorMsg(this.translationService.translate('unit_name_taken'))
       return
     }
     const usage = this.unitUsage(prev.key)
@@ -760,7 +817,7 @@ export class MetadataManagerComponent implements OnInit {
     if (keyChanged || labelChanged) this.translationService.updateDictionary(next.key, next.hebrewLabel, scope)
     const rateSaved = !rateChanged || (await this.unitRegistry.updateUnitRate(next.key, next.gramRate))
     if (keyChanged) await this.reloadAfterRename('unit')
-    if (rateSaved) this.userMsgService.onSetSuccessMsg('העדכון בוצע בהצלחה')
+    if (rateSaved) this.userMsgService.onSetSuccessMsg(this.msg('metadata_update_success'))
   }
 
   //HELPERS
@@ -813,7 +870,7 @@ export class MetadataManagerComponent implements OnInit {
     if (result?.trim()) {
       const key = result.trim()
       if (this.allMenuTypes_().some((t) => t.key === key)) {
-        this.userMsgService.onSetErrorMsg(`סוג תפריט "${key}" כבר קיים`)
+        this.userMsgService.onSetErrorMsg(this.msg('menu_type_exists', { name: key }))
         return
       }
       await this.metadataRegistry.registerMenuType({ key, fields: [...DEFAULT_DISH_FIELDS] })
@@ -833,20 +890,20 @@ export class MetadataManagerComponent implements OnInit {
   private onStartRenameMenuType(key: string): void {
     if (!this.requireSignIn()) return
     this.renamingMenuTypeKey_.set(key)
-    afterNextRender(() => this.renameInput()?.nativeElement.select(), { injector: this.injector })
   }
 
   async onRemoveMenuType(key: string): Promise<void> {
     if (!this.requireSignIn()) return
     const isUsed = this.menuEventData.allMenuEvents_().some((e) => e.servingType === key)
     if (isUsed) {
-      this.userMsgService.onSetErrorMsg(`לא ניתן למחוק: סוג התפריט "${key}" בשימוש בתפריטים שמורים`)
+      this.userMsgService.onSetErrorMsg(this.msg('menu_type_in_use_cannot_delete', { name: key }))
       return
     }
     await this.metadataRegistry.deleteMenuType(key)
   }
 
-  async onMenuTypeNameBlur(oldKey: string, newName: string): Promise<void> {
+  /** Save pressed (or Enter) in the menu type's rename field. */
+  async onMenuTypeRenameSaved(oldKey: string, newName: string): Promise<void> {
     this.renamingMenuTypeKey_.set(null)
     if (!this.requireSignIn()) return
     const trimmed = (newName ?? '').trim()
@@ -854,7 +911,8 @@ export class MetadataManagerComponent implements OnInit {
     const msg = this.translationService.translate('menu_type_rename_confirm')
     const confirmed = await this.confirmModal.open(msg, { saveLabel: 'save' })
     if (!confirmed) return
-    await this.metadataRegistry.renameMenuType(oldKey, trimmed)
-    await this.menuEventData.updateServingTypeForAll(oldKey, trimmed)
+    const renamed = await this.metadataRegistry.renameMenuType(oldKey, trimmed)
+    // The server re-keys menuEvents.servingType; reload so the menus show the new name.
+    if (renamed) await this.menuEventData.reloadFromStorage()
   }
 }

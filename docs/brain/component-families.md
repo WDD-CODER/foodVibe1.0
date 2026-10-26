@@ -1,0 +1,247 @@
+# Component families — what to reuse before you build
+
+The single list of FoodVibe's shared pieces ("families"): for each job, which piece to use, where it lives, and
+the page-local copies that still exist. Before you create any component, util, pipe, service or `.c-*` class,
+find its family here and follow the decision ladder in `docs/agent/standards-reuse.md`. ADR:
+`docs/brain/decisions/0024-reuse-layer.md`.
+
+Reuse enforced from plan: 459
+
+How this file is checked:
+- `node scripts/reuse-lint.mjs --check-registry` fails when a backticked repo path below no longer exists, or when a
+  lint rule in `scripts/lib/registry-families.mjs` names a family that has no `###` heading here. A plan that
+  renames, moves or removes a listed piece (451–458) updates this file in the same branch.
+- `node scripts/reuse-lint.mjs --diff=<base>` warns when a diff adds a new copy of a family (rules in
+  `scripts/lib/registry-families.mjs`).
+- `node scripts/scope-check.mjs --reuse --plan=<p>` blocks a plan (numbered 459 or later, or any plan that has the
+  section) whose `## Reuse Check` is missing or incomplete.
+
+Each family: `Status` (`stable` = use it as is; `converging` = a refactor plan is removing the copies) · `Use` (base
+path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (counted on `origin/mvp-review`
+`1953dcb5`, 2026-10-21; the audit numbers were from `8ffda3d2`) and the plan that removes them.
+
+## UI families
+
+### search-combobox — a search box with a results list
+- Status: stable — plan 452 moved the six page-local shells onto it
+- Use: `src/app/shared/search-combobox/` · `app-search-combobox` — a text field, a clear (X), a listbox of results and one
+  add option. It owns the keyboard (rule K: first row highlighted, arrows stop at the ends, Enter picks, Escape closes,
+  Tab closes), rule F (contains, prefix first), rule X (an exact name hides the add row) and the add label; the page owns
+  what a pick or an add does (`(picked)`, `(addChosen)`: rule W opens the add window, rule M announces it).
+- Pick one value of a short fixed list instead: `src/app/shared/custom-select/` · `app-custom-select` (CVA;
+  `typeToFilter`, `allowTypedAdd`, `addNewValue`, `addNewLabelKey`, `variant`).
+- When: the user types to find an item (or a new one) and picks it — recipe/product/ingredient search, dish and category
+  pickers, equipment search. Server searches pass `[clientFilter]="false"`; rich rows use an `<ng-template>` child.
+- Inputs / variants: `options`, `[(query)]`, `[(open)]`, `labelOf`, `keyOf`, `clientFilter`, `minChars`, `maxResults`,
+  `knownOptions`, `addLabelKey`, `addOnlyTyped`, `emptyKey`, `groupOf`, `variant: 'box' | 'plain'`, `listPosition`,
+  `multiline`, `handleTab`, `closeOnOutsideClick`. Keyboard + search logic: `KeyedPickerSearch` in
+  `src/app/core/utils/keyed-picker-search.util.ts`; the add option: `src/app/core/utils/add-option.util.ts`
+  (add-option rule in `docs/agent/standards-domain.md`).
+- Building blocks (use only inside a shared base, never in a page): `src/app/shared/scrollable-dropdown/`
+  (`app-scrollable-dropdown`), `src/app/shared/add-option-row/` (`app-add-option-row`).
+- Known copies: none page-local. Users: `src/app/pages/menu-intelligence/menu-intelligence.page.html` (event type + section
+  category), `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`,
+  `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html`,
+  `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.html`,
+  `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.html`,
+  `src/app/pages/recipe-builder/recipe-builder.page.html` (with
+  `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`). The page-local dish text store is
+  `src/app/pages/menu-intelligence/services/menu-picker-search.service.ts`.
+
+### multi-pick — pick several values, shown as chips
+- Status: converging — plan 452 kept both bases; `chip-search-dropdown` is deprecated pending the Human's answer (ADR 0025)
+- Use: `src/app/shared/custom-multi-select/` · `app-custom-multi-select` (CVA) — the base for new code.
+- Second base (same job, **deprecated**): `src/app/shared/chip-search-dropdown/` · `app-chip-search-dropdown` (product form:
+  category, supplier, allergens). It converts to `custom-multi-select` only after the behaviours listed in ADR 0025 exist there.
+- When: the value is a list (allergens, labels, categories) and the user adds/removes chips.
+- Known copies: none page-local; two bases for one job.
+
+### modal-shell — the popup frame
+- Status: converged (plan 451) for the engine-based popups; 7 hand-drawn dialogs remain (follow-up plan)
+- Use: `src/app/shared/modal-shell/` · `app-modal-shell` (role=dialog, aria-modal, Escape for the top-most
+  popup only, focus in / trap / restore, `dismissible` while busy, `titleKey` / `labelledBy` / `labelKey` for the
+  accessible name). It renders the `.c-modal-overlay` / `.c-modal-card` engines from `src/styles.scss`; put
+  `.c-modal-body` / `.c-modal-actions` inside it. Simple yes/no: `src/app/shared/confirm-modal/` · `app-confirm-modal`.
+  `ConfirmModalService.open(msg, { typedConfirm })` — confirm waits for an exact typed text (plan 486).
+- When: any popup. Render the shell inside the owner's `@if (isOpen)`; never draw `.c-modal-overlay` by hand.
+- Phone bottom sheet: `[sheet]="true"` adds the phone-only `.m-sheet` / `.m-sheet-card` helpers (plan 487, pricing meter); wider screens keep the centred popup.
+- Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
+  quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
+- Lint: `reuse-lint` rule `hand-drawn-modal-overlay` warns on a new `class="… c-modal-overlay"` in a template.
+- Known copies (hand-drawn `.c-modal-overlay` with their own document Escape listener):
+  `src/app/pages/menu-intelligence/components/event-closing-dialog/`,
+  `src/app/pages/menu-intelligence/components/not-closed-dialog/`,
+  `src/app/pages/menu-intelligence/components/prep-sheets/`,
+  `src/app/pages/menu-intelligence/components/supplier-orders/`,
+  `src/app/pages/menu-library/components/new-inquiry-dialog/`,
+  `src/app/pages/recipe-builder/components/paste-ingredients-dialog/`,
+  `src/app/pages/equipment/components/equipment-list/` (side panel).
+  Not engine-based (own `role="dialog"` + Escape, kept off the shell to keep their look):
+  `src/app/pages/menu-intelligence/components/menu-export-sheet/` (bottom sheet), `src/app/shared/export-preview/`.
+
+### modal-controller — open a popup and get its answer
+- Status: converged (plan 451)
+- Use: `ModalController<TResult>` in `src/app/core/services/modal-controller.ts` — each popup service creates
+  `new ModalController<Result>(cancelValue)`, exposes its read-only `isOpen_`, and calls `open()` (a Promise of the
+  result; a second open cancels the first) and `close(result)`. Signals only, no `Subject` / `firstValueFrom`.
+  The Escape stack (`pushModalShell` / `popModalShell` / `isTopModalShell`) lives in the same file.
+- When: code needs to open a popup and await the result.
+- Users (13 services): in `src/app/core/services/` the add-equipment, add-item, auth, confirm, global-specific,
+  quick-add-product, quick-edit-product, restore-choice and translation-key `*-modal.service.ts`; in `src/app/shared/`
+  the ai-menu, ai-product, ai-recipe and label-creation `*-modal/*.service.ts`.
+- Known copies: none (the 7 hand-drawn dialogs above are opened by a page-local signal, not a service).
+
+### list-page — a list screen (header, search, filters, rows, selection)
+- Status: converging — plan 453 adds a cards layout and moves the remaining pages on
+- Use: `src/app/shared/list-shell/` · `app-list-shell` (named slots) with `src/app/shared/page-header/`
+  (`app-page-header`), `src/app/shared/selection-bar/` (`app-selection-bar`), `src/app/shared/row-actions-menu/`
+  (`app-row-actions-menu`), `src/app/shared/column-carousel/` (`app-column-carousel-header`,
+  `app-column-carousel-cell`), `src/app/shared/list-selection/` (`app-list-row-checkbox`, `list-selection.state.ts`).
+- When: any screen that lists entities.
+- Users today (4): equipment, inventory products, recipe book, suppliers.
+- Known copies (4 list pages not on the shell): `src/app/pages/menu-library/components/menu-library-list/`,
+  `src/app/pages/venues/components/venue-list/`, `src/app/pages/trash/`, `src/app/pages/metadata-manager/`
+  (card grids need a `layout: 'cards'` first).
+
+### list-logic — search / sort / filter state of a list
+- Status: converging — plan 453 adds a shared list-controls helper
+- Use: `src/app/core/utils/list-state.util.ts` · `useListState()` (URL-synced list state); search matching:
+  `normalizeHebrew` in `src/app/core/utils/recipe-match.util.ts`; option filtering:
+  `src/app/core/utils/option-filter.util.ts` · `filterOptionsByLabel`.
+- When: a list needs search, sort, filters or "clear all".
+- Known copies (`onClearSearch` / `onSearchEscape` defined in 8 page files):
+  `src/app/pages/equipment/components/equipment-list/equipment-list.component.ts`,
+  `src/app/pages/inventory/components/inventory-product-list/inventory-product-list.component.ts`,
+  `src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.ts`,
+  `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts`,
+  `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.ts`,
+  `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.ts`,
+  `src/app/pages/suppliers/components/supplier-list/supplier-list.component.ts`,
+  `src/app/pages/venues/components/venue-list/venue-list.component.ts`.
+
+### empty-state — nothing here / no results
+- Status: stable
+- Use: `src/app/shared/empty-state/` · `app-empty-state` (+ `.c-empty-state` in `src/styles.scss`).
+- When: an empty list or a search with no results.
+- Known copies: not counted.
+
+### form-field — label, input, error
+- Status: stable — plan 455 built `app-form-field`; the equipment, supplier, venue and product forms are on it
+- Use: `src/app/shared/form-field/` · `app-form-field` (`label`, `forId`, `error`, `hint`, `layout`, `labelStyle`; the control is projected) on the
+  CSS engines in `src/styles.scss`: `.c-input`, `.c-input-wrapper`, `.c-input-stack`, `.c-field-error`;
+  clear button: `src/app/shared/input-clear/` (`app-input-clear`).
+- When: any form input with a label.
+- Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
+  label or content, not a plain label + input).
+
+### entity-form — name validation and unsaved-changes check
+- Status: stable — plan 455 built one unsaved-changes helper
+- Use: `src/app/core/utils/unsaved-changes.ts` · `useUnsavedChanges({ form, snapshot?, extra? })`; each page keeps `hasRealChanges()` as a one-line
+  delegation; `src/app/core/validators/item.validators.ts` · `duplicateEntityNameValidator` (`duplicateNameValidator` wraps it for products);
+  leave-page guard: `src/app/core/guards/pending-changes.guard.ts`.
+- When: a form edits a named entity, or must warn before leaving with unsaved changes.
+- Known copies: none.
+
+### chip — chips, badges, pills
+- Status: stable — plan 457 built one chip engine; tab, toggle, tap, filter, removable chips and static tags are on it
+- Use: ONE engine in `src/styles.scss`: `.c-chip` (static label, tones `.teal/.amber/.red` or `--teal|--amber|--red`) plus variants
+  `.c-chip--toggle` (label > input + span), `--tap` (button, aria-expanded, `.is-locked`), `--filter` (applied-filter chip),
+  `--removable` (+ `.c-chip__remove`), `--tab` (+ `.active`, `.c-chip--home`, `.trash`); sub-parts `.c-chip__count` (+ `--zero`),
+  `.c-chip__dot`; wrapper `.c-chip-group`. Markup: `class="c-chip c-chip--toggle"`. Tab chips: `src/app/core/components/tab-chips/` (`app-tab-chips`).
+  Static tag: `.c-chip--tag` (size `--sm`; shape `--soft` radius-sm, `--square` radius-xs; tones `--teal|--amber|--red|--green|--allergen|--glass`,
+  `--solid` = light text on a data color). Data-colored value chip: `--colored` (background/color inline).
+- When: a small rounded label, toggle, tab or filter. Do not add a page-local chip: pick a variant. The old `c-toggle-chip`, `c-tap-chip`, `c-tab-pill`, `c-filter-chip` classes no longer exist.
+- Known copies: none that are plain pills. Kept on purpose (bespoke, reasons in `docs/mvp/runs/457.md`): menu-intelligence paper skin
+  (`event-chip*`, `counter-pill*`, toolbar `.pill`), cook-view ink set (`cv-chip*`, `cv-row-pill`, `cv-source-pill`, `cv-pill-btn`, `cv-mult-chip`),
+  header `nav-pill` / `user-chip`, recipe-builder `logistics-chip`, `scaling-chip` shell, `venue-status-pill`, `select-all-pill`, `act-chip`.
+
+### feedback — loading, toasts, errors shown to the user
+- Status: stable — plan 456 moved every toast text into the dictionary
+- Use: `src/app/shared/loader/` (`app-loader`), `src/app/core/services/loading.service.ts` (`LoadingService`),
+  `src/app/core/services/user-msg.service.ts` (`UserMsgService`), `src/app/core/services/logging.service.ts`
+  (`logging.error`). Pattern: `logging.error(...)` + `userMsg.onSet*Msg(translate(key))`.
+- When: any wait, success or error the user must see.
+- Known copies: none (plan 456: no `onSet*Msg` call takes a string literal; the two dead popover folders were deleted).
+- Backend paths: one `API` map in `src/app/core/services/http-storage.adapter.ts` (plan 456).
+
+### edit-gate — show a save button only to someone who may save
+- Status: stable (MVP, plan 428)
+- Use: `src/app/shared/edit-gate/` · `app-edit-gate`; rules: `src/app/core/services/permission.service.ts`
+  (`PermissionService`). The server still decides every write (`server/utils/permissions.js`).
+- When: a page offers save/edit on a business item.
+- Known copies: none.
+
+### cost-badge — partial / missing cost warning
+- Status: stable (MVP)
+- Use: `src/app/shared/partial-cost-badge/` · `app-partial-cost-badge`.
+- When: a cost is shown that may be missing prices.
+- Known copies: none.
+
+### engine-classes — shared `.c-*` CSS engines
+- Status: stable (plan 458 sweeps the copies)
+- Use: `src/styles.scss` — every `.c-*` class is defined there and only there (`docs/agent/conventions.md`).
+- When: a style used by more than one component (buttons, inputs, modals, chips, empty state).
+- Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
+
+## Logic families
+
+### entity-data-service — load and save one entity type
+- Status: stable — plan 454 moved the last copies onto the base
+- Use: `src/app/core/services/base-entity-data.service.ts` · `BaseEntityDataService<T>` (users:
+  `src/app/core/services/equipment-data.service.ts`, `src/app/core/services/supplier-data.service.ts`,
+  `src/app/core/services/venue-data.service.ts`, `src/app/core/services/recipe-data.service.ts`,
+  `src/app/core/services/dish-data.service.ts`, `src/app/core/services/product-data.service.ts`,
+  `src/app/core/services/menu-event-data.service.ts`). A service's own log event and "empty the list on
+  reload" go in `EntityLoadOptions`; a legacy-field migration goes in a `normalizeRow` override.
+- When: a new entity type needs a client data service.
+- Known copies: none.
+
+### kitchen-state — app-wide signal state
+- Status: stable — save/delete methods return Promises (plan 454)
+- Use: `src/app/core/services/kitchen-state.service.ts` (signals).
+- When: state that several pages read or change (the loaded entity collections); never a page-local copy.
+- Known copies: none.
+
+### taxonomy — categories, units, labels, kinds
+- Status: stable
+- Use: `src/app/core/services/taxonomy-store.service.ts` · `TaxonomyStore`.
+- When: a page reads or adds a category, unit, label or kind.
+- Facades load through `loadSafely` / `reloadSafely` (one logging path, plan 454).
+- Known copies: none.
+
+### page-entry-loading — data ready before a page opens
+- Status: stable
+- Use: route resolvers `src/app/core/resolvers/*-ensure-loaded.resolver.ts`.
+- When: a route needs its collection loaded first.
+- Known copies: none.
+
+### helpers — pure functions
+- Status: stable
+- Use: `src/app/core/utils/` (one file per topic, each with a spec); money / quantity / percent rounding and
+  formatting only from `src/app/core/engine/rounding.ts`; Hebrew-insensitive matching: `normalizeHebrew` in
+  `src/app/core/utils/recipe-match.util.ts`. Import through `@utils/*` (and pipes through `@pipes/*`).
+- When: any pure helper (time, number, text). Never page-local.
+- Known copies: time / date / percent / debounce helpers copied page-locally (audit; not recounted).
+
+### http — talking to the server
+- Status: stable
+- Use: `src/app/core/services/http-storage.adapter.ts`; auth header and errors: `src/app/core/interceptors/auth.interceptor.ts`.
+- When: any call to the server API; never a raw `fetch` or a hand-built `/api/v1` URL.
+- Known copies: `src/app/core/utils/gemini-usage.util.ts` uses a raw `fetch` that bypasses the interceptor;
+  `/api/v1` literals in `src/app/core/services/logging.service.ts` and the interceptor.
+
+### event-plan — event costing and planning engine
+- Status: stable (MVP)
+- Use: `src/app/core/engine/event-plan.engine.ts` with `src/app/core/engine/event-plan.service.ts`; units:
+  `src/app/core/engine/units.ts`; portions: `src/app/core/engine/portions.ts`.
+- When: anything that computes quantities, costs or prices for an event.
+- Known copies: none.
+
+### server-auth — who is calling the server
+- Status: converging — plan 458 (rule sweep) decides
+- Use: `server/middleware/auth.js` (token check), `server/utils/business-scope.js` (the only tenant-scoping path,
+  ADR 0023), `server/utils/permissions.js` (the only write-permission path), `server/middleware/write-limit.js`.
+- When: a server route checks who is calling, scopes data to a business, checks a write permission or limits a rate.
+- Known copies: `jwt.verify` also in `server/routes/auth.js` and `server/routes/log.js`; `isAdmin` re-declared in
+  `server/routes/generic.js`; rate limiters built per file in `server/routes/ai.js`, `server/routes/auth.js`,
+  `server/routes/business.js`, `server/routes/log.js`, `server/routes/product-import.js`.

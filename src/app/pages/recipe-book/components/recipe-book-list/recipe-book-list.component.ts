@@ -24,12 +24,13 @@ import { RecipeCostService } from '@services/recipe-cost.service'
 import { TranslationService } from '@services/translation.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserService } from '@services/user.service'
+import { PermissionService } from '@services/permission.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { Recipe } from '@models/recipe.model'
 import { Product } from '@models/product.model'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
 import { ListShellComponent } from 'src/app/shared/list-shell/list-shell.component'
 import { ListSelectionState } from 'src/app/shared/list-selection/list-selection.state'
 import { TouchRowSelection } from 'src/app/shared/list-selection/touch-row-selection'
@@ -55,7 +56,6 @@ import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.c
 import { RowActionsMenuComponent } from 'src/app/shared/row-actions-menu/row-actions-menu.component'
 import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-import { KeyedPickerSearch, scrollHighlightIntoView } from 'src/app/core/utils/keyed-picker-search.util'
 import {
   SortField,
   RECIPE_FILTER_CATEGORIES,
@@ -73,6 +73,7 @@ import {
 } from './utils/recipe-book-list.util'
 import { RecipeRowActionsService } from './services/recipe-row-actions.service'
 import { RecipeListTooltipsService } from './services/recipe-list-tooltips.service'
+import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 
 /** Ingredient-filter typeahead search (plan 301, Milestone 1) — same tuning as ingredient-search.component.ts. */
 const INGREDIENT_SEARCH_LIMIT = 25
@@ -80,7 +81,7 @@ const INGREDIENT_SEARCH_MIN_LENGTH = 2
 const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
 
 @Component({
-  selector: 'recipe-book-list',
+  selector: 'app-recipe-book-list',
   standalone: true,
   imports: [
     CommonModule,
@@ -89,7 +90,7 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
     TranslatePipe,
     ClickOutSideDirective,
     LoaderComponent,
-    ScrollableDropdownComponent,
+    SearchComboboxComponent,
     ListShellComponent,
     ListRowCheckboxComponent,
     SelectionBarComponent,
@@ -113,6 +114,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   private readonly translationService = inject(TranslationService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly userService = inject(UserService)
+  private readonly permission = inject(PermissionService)
   private readonly heroFab = inject(HeroFabService)
   private readonly aiRecipeModal = inject(AiRecipeModalService)
   protected readonly rowActions = inject(RecipeRowActionsService)
@@ -120,24 +122,32 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   // 4. SIGNALS & CONSTANTS
   protected readonly isLoggedIn = this.userService.isLoggedIn
+  /** Staff may delete only the recipes and dishes they created (plan 428). */
+  protected readonly canDelete_ = (recipe: Recipe): boolean =>
+    this.permission.can('delete', { type: recipe.recipeType === 'dish' ? 'dishes' : 'recipes', doc: recipe })
   protected readonly isAdmin_ = this.userService.isAdmin_
   protected activeFilters_ = signal<Record<string, string[]>>({})
   protected searchQuery_ = signal<string>('')
   protected sortBy_ = signal<SortField | null>(null)
   protected sortOrder_ = signal<'asc' | 'desc'>('asc')
+  protected readonly listControls = useListControls<SortField>({
+    search: this.searchQuery_,
+    sortBy: this.sortBy_,
+    sortOrder: this.sortOrder_
+  })
   protected readonly isPanelOpen_: WritableSignal<boolean>
   private readonly togglePanelState_: () => void
   protected dateFrom_ = signal<string | null>(null)
   protected dateTo_ = signal<string | null>(null)
-  protected showFavoritesOnly_ = signal<boolean>(false)
+  protected shouldShowFavoritesOnly_ = signal<boolean>(false)
   /** When true: show items in range by creation OR by update. When false: by creation only. */
-  protected dateIncludeByUpdated_ = signal<boolean>(false)
+  protected isDateIncludeByUpdated_ = signal<boolean>(false)
   protected ingredientSearchQuery_ = signal<string>('')
-  /** Keyboard state for the ingredient filter search (rule K). */
-  protected readonly ingredientPicker_ = new KeyedPickerSearch()
+  protected readonly productLabel_ = (product: Product): string => product.nameHebrew
+  protected readonly productKey_ = (product: Product): string => product._id
   protected selectedProductIds_ = signal<string[]>([])
   /** Set to false to show the "date added" column again. */
-  protected hideDateColumn_ = signal(true)
+  protected shouldHideDateColumn_ = signal(true)
 
   /** Filter-category open state (plan 345): all collapsed on mobile (≤1023px). On desktop every
    *  group starts expanded except 'Date', which the mockup doesn't show — it stays collapsed so it
@@ -247,7 +257,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   protected filteredRecipes_ = computed(() => {
     let recipes = this.kitchenState.recipes_()
     const filters = this.activeFilters_()
-    const search = this.searchQuery_().trim().toLowerCase()
+    const search = this.searchQuery_().trim()
     const sortBy = this.sortBy_()
     const sortOrder = this.sortOrder_()
     const selectedIds = this.selectedProductIds_()
@@ -272,12 +282,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     }
 
     if (search) {
-      recipes = recipes.filter((r) => (r.nameHebrew ?? '').toLowerCase().includes(search))
+      recipes = recipes.filter((r) => matchesSearch(search, r.nameHebrew))
     }
 
     const dateFrom = this.dateFrom_()
     const dateTo = this.dateTo_()
-    const includeByUpdated = this.dateIncludeByUpdated_()
+    const includeByUpdated = this.isDateIncludeByUpdated_()
     if (dateFrom != null || dateTo != null) {
       const fromMs = dateFrom != null ? parseDateToStartOfDay(dateFrom) : null
       const toMs = dateTo != null ? parseDateToEndOfDay(dateTo) : null
@@ -293,7 +303,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       })
     }
 
-    if (this.showFavoritesOnly_()) {
+    if (this.shouldShowFavoritesOnly_()) {
       const uid = this.currentUserId_()
       recipes = uid ? recipes.filter((r) => r.favorite === true) : []
     }
@@ -367,7 +377,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       Object.values(this.activeFilters_()).some((arr) => arr.length > 0) ||
       this.dateFrom_() != null ||
       this.dateTo_() != null ||
-      this.showFavoritesOnly_() ||
+      this.shouldShowFavoritesOnly_() ||
       this.selectedProductIds_().length > 0
   )
 
@@ -384,8 +394,8 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
       { urlParam: 'ingredients', signal: this.selectedProductIds_, serializer: StringArrayParam },
       { urlParam: 'dateFrom', signal: this.dateFrom_, serializer: NullableStringParam },
       { urlParam: 'dateTo', signal: this.dateTo_, serializer: NullableStringParam },
-      { urlParam: 'dateByUpdated', signal: this.dateIncludeByUpdated_, serializer: BooleanParam },
-      { urlParam: 'favorites', signal: this.showFavoritesOnly_, serializer: BooleanParam },
+      { urlParam: 'dateByUpdated', signal: this.isDateIncludeByUpdated_, serializer: BooleanParam },
+      { urlParam: 'favorites', signal: this.shouldShowFavoritesOnly_, serializer: BooleanParam },
       { urlParam: 'page', signal: this.currentPage_, serializer: NumberParam }
     ])
 
@@ -501,6 +511,11 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected onEditRecipe(recipe: Recipe): void {
+    // Staff open someone else's recipe or dish in Cook View only (plan 476).
+    if (this.permission.isReadOnlyRecipe(recipe)) {
+      this.onCookRecipe(recipe)
+      return
+    }
     this.router.navigate(['/recipe-builder', recipe._id])
   }
 
@@ -533,13 +548,7 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
 
   // UI handlers — sort, filters, search, panel, paging
   protected setSort(field: SortField): void {
-    const current = this.sortBy_()
-    if (current === field) {
-      this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-    } else {
-      this.sortBy_.set(field)
-      this.sortOrder_.set('asc')
-    }
+    this.listControls.setSort(field)
   }
 
   /** Set sort to date (newest first). */
@@ -569,12 +578,14 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
   }
 
   protected clearAllFilters(): void {
-    this.activeFilters_.set({})
-    this.dateFrom_.set(null)
-    this.dateTo_.set(null)
-    this.dateIncludeByUpdated_.set(false)
-    this.showFavoritesOnly_.set(false)
-    this.selectedProductIds_.set([])
+    this.listControls.clearAll(
+      () => this.activeFilters_.set({}),
+      () => this.dateFrom_.set(null),
+      () => this.dateTo_.set(null),
+      () => this.isDateIncludeByUpdated_.set(false),
+      () => this.shouldShowFavoritesOnly_.set(false),
+      () => this.selectedProductIds_.set([])
+    )
   }
 
   protected toggleFilterCategory(name: string): void {
@@ -589,28 +600,10 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.togglePanelState_()
   }
 
-  protected onIngredientQueryChange(value: string): void {
-    this.ingredientSearchQuery_.set(value)
-    this.ingredientPicker_.onQueryChange(0, value)
-  }
-
-  /** ↑/↓ move through the results, Enter picks, Esc clears the search (rule K). */
-  protected onIngredientSearchKeydown(e: KeyboardEvent): void {
-    if (!this.ingredientSearchQuery_().trim()) return
-    const results = this.filteredProductsForIngredientSearch_()
-    this.ingredientPicker_.handleKeydown(0, e, {
-      optionCount: results.length,
-      onSelect: (idx) => this.addIngredientProduct(results[idx]),
-      onClose: () => this.onIngredientQueryChange(''),
-      onHighlightMove: () =>
-        setTimeout(() => scrollHighlightIntoView(document.querySelector('.ingredient-dropdown-list')), 0)
-    })
-  }
-
   protected addIngredientProduct(product: Product): void {
     if (this.selectedProductIds_().includes(product._id)) return
     this.selectedProductIds_.update((ids) => [...ids, product._id])
-    this.onIngredientQueryChange('')
+    this.ingredientSearchQuery_.set('')
   }
 
   protected removeIngredientProduct(productId: string): void {
@@ -621,18 +614,12 @@ export class RecipeBookListComponent implements OnInit, OnDestroy {
     this.selectedProductIds_.set([])
   }
 
-  /** Search clear (X) — same effect as deleting the text; keeps focus in the field (plan 363). */
   protected onClearSearch(input: HTMLInputElement): void {
-    this.searchQuery_.set('')
-    input.focus()
+    this.listControls.onClearSearch(input)
   }
 
-  /** Escape in a non-empty search clears it, like the X (plan 363). */
   protected onSearchEscape(event: Event, input: HTMLInputElement): void {
-    if (!this.searchQuery_()) return
-    event.preventDefault()
-    event.stopPropagation()
-    this.onClearSearch(input)
+    this.listControls.onSearchEscape(event, input)
   }
 
   protected goToPrevPage(): void {

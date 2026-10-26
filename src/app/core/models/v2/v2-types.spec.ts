@@ -22,7 +22,8 @@ describe('v2 inferred types', () => {
       addedAt_: 1,
       updatedAt_: 2
     })
-    const parsed = recipeSchema.safeParse(doc)
+    // businessId and createdBy are stamped by migration 0006, after the v1 upgrade (plan 424)
+    const parsed = recipeSchema.safeParse({ ...doc, businessId: 'b1', createdBy: 'u1' })
     expect(parsed.success).toBe(true)
     if (parsed.success) {
       const recipe: Recipe = parsed.data

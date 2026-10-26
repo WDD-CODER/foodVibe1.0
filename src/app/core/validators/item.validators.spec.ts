@@ -3,6 +3,41 @@ import { duplicateNameValidator, duplicateEntityNameValidator } from './item.val
 import { Product } from '@models/product.model'
 
 describe('duplicateNameValidator', () => {
+  describe('plan 484: a product whose name already has a twin', () => {
+    const twins = [
+      { _id: 'p1', nameHebrew: 'מלפפון' },
+      { _id: 'p2', nameHebrew: 'מלפפון' },
+      { _id: 'p3', nameHebrew: 'כרובית' }
+    ] as Product[]
+
+    it('can keep its saved name (price-only edit)', () => {
+      expect(
+        duplicateNameValidator(
+          () => twins,
+          () => 'p1'
+        )(new FormControl(' מלפפון '))
+      ).toBeNull()
+    })
+
+    it('is still refused when renamed to a taken name', () => {
+      expect(
+        duplicateNameValidator(
+          () => twins,
+          () => 'p1'
+        )(new FormControl('כרובית'))
+      ).toEqual({ duplicateName: true })
+    })
+
+    it('a new product with that name is refused', () => {
+      expect(
+        duplicateNameValidator(
+          () => twins,
+          () => null
+        )(new FormControl('מלפפון'))
+      ).toEqual({ duplicateName: true })
+    })
+  })
+
   const products = [{ _id: 'p1', nameHebrew: 'Tomato' }] as Product[]
   const productsSignal = () => products
 
@@ -22,6 +57,23 @@ describe('duplicateNameValidator', () => {
     const control = new FormControl('tomato')
     const validator = duplicateNameValidator(productsSignal, 'p2')
     expect(validator(control)).toEqual({ duplicateName: true })
+  })
+
+  it('treats extra inner spaces as the same name (the one name rule)', () => {
+    const spaced = [{ _id: 'p1', nameHebrew: 'עגבניה  שרי' }] as Product[]
+    const control = new FormControl('  עגבניה   שרי ')
+    expect(duplicateNameValidator(() => spaced, 'p2')(control)).toEqual({ duplicateName: true })
+  })
+
+  it('does not clash with its own product even with extra spaces', () => {
+    const spaced = [{ _id: 'p1', nameHebrew: 'עגבניה שרי' }] as Product[]
+    const control = new FormControl('עגבניה   שרי')
+    expect(
+      duplicateNameValidator(
+        () => spaced,
+        () => 'p1'
+      )(control)
+    ).toBeNull()
   })
 
   it('should return null for non-existent names', () => {

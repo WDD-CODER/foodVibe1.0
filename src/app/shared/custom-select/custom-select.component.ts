@@ -5,8 +5,7 @@ import {
   output,
   signal,
   computed,
-  HostListener,
-  ViewChild,
+  viewChild,
   ElementRef,
   inject,
   afterNextRender,
@@ -33,7 +32,7 @@ const PICKER_KEY = 0
 @Component({
   selector: 'app-custom-select',
   standalone: true,
-  host: { tabIndex: '-1' },
+  host: { tabIndex: '-1', '(focus)': 'onHostFocus()', '(keydown)': 'onKeydown($event)' },
   imports: [
     CommonModule,
     TranslatePipe,
@@ -75,15 +74,15 @@ export class CustomSelectComponent implements ControlValueAccessor {
   private _value = signal<string>('')
   private _onChange: (value: string) => void = () => {}
   private _onTouched: () => void = () => {}
-  private _disabled = signal(false)
+  private _isDisabled = signal(false)
   private readonly translationService = inject(TranslationService)
   private readonly injector = inject(Injector)
   private readonly hostRef = inject<ElementRef<HTMLElement>>(ElementRef)
 
-  @ViewChild('triggerRef') protected triggerRef?: ElementRef<HTMLButtonElement>
-  @ViewChild('inputRef') protected inputRef?: ElementRef<HTMLInputElement>
+  protected readonly triggerRef = viewChild<ElementRef<HTMLButtonElement>>('triggerRef')
+  protected readonly inputRef = viewChild<ElementRef<HTMLInputElement>>('inputRef')
 
-  protected open = signal(false)
+  protected isOpen = signal(false)
   private readonly picker_ = new KeyedPickerSearch()
   protected highlightedIndex = computed(() => this.picker_.highlighted(PICKER_KEY))
   private readonly instanceId_ = `cs-${++nextCustomSelectId}`
@@ -92,15 +91,14 @@ export class CustomSelectComponent implements ControlValueAccessor {
   protected searchQuery_ = signal('')
   private closeTimeout: ReturnType<typeof setTimeout> | null = null
   /** When true, next trigger focus came from mouse (click); do not auto-open dropdown. */
-  private _focusFromMouse = false
+  private isFocusFromMouse_ = false
 
   /** When host receives programmatic focus (e.g. from FocusByRowDirective), forward to trigger. */
-  @HostListener('focus')
   protected onHostFocus(): void {
     if (this.typeToFilter()) {
-      this.inputRef?.nativeElement?.focus()
+      this.inputRef()?.nativeElement?.focus()
     } else {
-      this.triggerRef?.nativeElement?.focus()
+      this.triggerRef()?.nativeElement?.focus()
     }
   }
 
@@ -158,7 +156,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   /** Input display value: when open show search query, when closed show selected label (translated if needed). */
   protected inputDisplayValue_ = computed(() => {
-    if (this.open()) return this.searchQuery_()
+    if (this.isOpen()) return this.searchQuery_()
     const v = this._value()
     if (!v) return ''
     const label = this.selectedLabel()
@@ -195,7 +193,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this._disabled.set(isDisabled)
+    this._isDisabled.set(isDisabled)
   }
 
   protected get value(): string {
@@ -203,14 +201,14 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   protected get disabled(): boolean {
-    return this._disabled()
+    return this._isDisabled()
   }
 
   protected toggle(): void {
-    if (this._disabled()) return
+    if (this._isDisabled()) return
     this.clearCloseTimeout()
-    const next = !this.open()
-    this.open.set(next)
+    const next = !this.isOpen()
+    this.isOpen.set(next)
     if (next) {
       const idx = this.keyboardOptions_().findIndex((o) => o.value === this._value())
       this.setHighlight_(idx >= 0 ? idx : 0)
@@ -219,18 +217,18 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   protected close(): void {
     this.clearCloseTimeout()
-    this.open.set(false)
+    this.isOpen.set(false)
     if (this.typeToFilter()) this.searchQuery_.set('')
     this._onTouched()
   }
 
   protected openDropdown(): void {
-    if (this._disabled() || this.open()) return
+    if (this._isDisabled() || this.isOpen()) return
     this.clearCloseTimeout()
-    this.open.set(true)
+    this.isOpen.set(true)
     this.searchQuery_.set('')
     this.setHighlight_(0)
-    setTimeout(() => this.inputRef?.nativeElement?.focus(), 0)
+    setTimeout(() => this.inputRef()?.nativeElement?.focus(), 0)
   }
 
   /** Search clear (X, type-to-filter only): empty the filter, keep the list open with every option (plan 364). */
@@ -238,18 +236,18 @@ export class CustomSelectComponent implements ControlValueAccessor {
     this.clearCloseTimeout()
     this.searchQuery_.set('')
     this.setHighlight_(0)
-    this.inputRef?.nativeElement?.focus()
+    this.inputRef()?.nativeElement?.focus()
   }
 
   protected onInputInput(value: string): void {
     this.searchQuery_.set(value ?? '')
-    if (!this.open()) this.open.set(true)
+    if (!this.isOpen()) this.isOpen.set(true)
     this.setHighlight_(0)
   }
 
   /** Search-box keys (rule 5): shared KeyedPickerSearch; Tab closes and lets the browser move focus. */
   protected onInputKeydown(e: KeyboardEvent): void {
-    if (!this.open()) {
+    if (!this.isOpen()) {
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
         this.openDropdown()
@@ -285,7 +283,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
 
   /** Close after a short delay so option click can run first when focus moves on mousedown. */
   protected onTriggerBlur(): void {
-    if (!this.open()) return
+    if (!this.isOpen()) return
     this.closeTimeout = setTimeout(() => {
       this.closeTimeout = null
       this.close()
@@ -307,18 +305,25 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   protected onTriggerMousedown(): void {
-    this._focusFromMouse = true
+    this.isFocusFromMouse_ = true
   }
 
   /** Open dropdown when trigger receives focus from Tab or programmatic focus; skip when focus came from click. */
   protected onTriggerFocus(): void {
-    if (this._focusFromMouse) {
-      this._focusFromMouse = false
+    if (this.isFocusFromMouse_) {
+      this.isFocusFromMouse_ = false
       return
     }
-    if (!this._disabled() && !this.open()) {
+    if (this.triggerRef()?.nativeElement.hasAttribute('data-restore-focus')) return
+    if (!this._isDisabled() && !this.isOpen()) {
       this.openDropdown()
     }
+  }
+
+  /** Type-to-filter input: open on focus, except when a closing popup hands focus back to it. */
+  protected onInputFocus(): void {
+    if (this.inputRef()?.nativeElement.hasAttribute('data-restore-focus')) return
+    this.openDropdown()
   }
 
   protected onTriggerClick(): void {
@@ -330,15 +335,14 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
 
   /** Button-mode keys: bound on the trigger, and on the host for keys from inside the open list. */
-  @HostListener('keydown', ['$event'])
   protected onKeydown(e: KeyboardEvent): void {
     if (this.typeToFilter() && (e.target as HTMLElement)?.tagName === 'INPUT') return
     // Keys the list uses are its own: stop them on the trigger so a page's (keydown) on this host
     // doesn't also move focus (rule K). Tab and a closed-list Escape still bubble.
-    if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key) || (e.key === 'Escape' && this.open())) {
+    if (['Enter', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key) || (e.key === 'Escape' && this.isOpen())) {
       e.stopPropagation()
     }
-    if (!this.open()) {
+    if (!this.isOpen()) {
       if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault()
         this.toggle()

@@ -1,0 +1,41 @@
+@layer components.date-field {
+  :host {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+  }
+
+  .date-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .date-field-text {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+    text-align: start;
+  }
+
+  /* Desktop: the native date input is only the picker: invisible, no tab stop, anchored at the field's end. */
+  .date-field-picker {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline-end: 0;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Touch: the invisible native input covers the whole field, so a tap lands on it and the phone opens its own picker. */
+  .date-field-picker--touch {
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}

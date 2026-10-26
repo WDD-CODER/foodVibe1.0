@@ -1,12 +1,15 @@
 const { Router } = require('express');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const rateLimit = require('express-rate-limit');
+const { createRateLimiter } = require('../middleware/rate-limit');
 const User = require('../models/user.model');
-const { cloneMasterDataToUser } = require('../services/clone-master');
-const { syncMasterToUser } = require('../services/sync-master');
+const { cloneMasterDataToBusiness } = require('../services/clone-master');
+const { syncMasterToBusiness } = require('../services/sync-master');
 const { getMasterVersion } = require('../services/master-version');
 const { newId } = require('../utils/id');
+const { isValidUsername, isValidPasswordHash } = require('../utils/username');
+const { NAME_MAX_LENGTH } = require('../generated/schemas/base.schema');
+const { createBusinessFor, ensureBusinessForUser, getBusiness, setBusinessSyncedVersion } = require('../services/business');
 
 const router = Router();
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -24,28 +27,22 @@ const REFRESH_COOKIE = process.env.NODE_ENV === 'development'
 // Rate limiters
 // ---------------------------------------------------------------------------
 
-const loginLimiter = rateLimit({
+const loginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many login attempts, please try again later' },
+  message: 'Too many login attempts, please try again later',
 });
 
-const signupLimiter = rateLimit({
+const signupLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many signup attempts, please try again later' },
+  message: 'Too many signup attempts, please try again later',
 });
 
-const refreshLimiter = rateLimit({
+const refreshLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many refresh attempts, please try again later' },
+  message: 'Too many refresh attempts, please try again later',
 });
 
 // ---------------------------------------------------------------------------
@@ -64,6 +61,50 @@ function isDbUnavailableError(err) {
     err.name === 'MongoServerSelectionError' ||
     /buffering timed out/i.test(err.message || '')
   );
+}
+
+/**
+ * The one place an access token is signed. Plan 426: the payload is exactly the C-USER contract
+ * (`userId, name, businessId, businessRole, isPlatformAdmin`) — no `role`. Platform-admin power comes
+ * from the `isPlatformAdmin` flag only.
+ */
+function signAccess(user) {
+  const payload = {
+    userId: String(user._id),
+    name: user.name,
+    businessId: user.businessId ?? null,
+    businessRole: user.businessRole ?? null,
+    isPlatformAdmin: user.isPlatformAdmin === true,
+  };
+  return jwt.sign(payload, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+}
+
+/** The user object login/signup/guest hand to the client. */
+function toPublicUser(user) {
+  return {
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    imgUrl: user.imgUrl || '',
+    businessId: user.businessId ?? null,
+    businessRole: user.businessRole ?? null,
+    isPlatformAdmin: user.isPlatformAdmin === true,
+  };
+}
+
+/** Why this user may not hold a session, or null: no business yet, or removed from it. */
+function blockedReason(user) {
+  if (!user.businessId) return 'NO_BUSINESS';
+  if (user.removedAt) return 'USER_REMOVED';
+  return null;
+}
+
+/** Syncs the user's business with the master catalog and records the version on the business. */
+async function syncBusinessOf(user, masterVersion) {
+  const business = await getBusiness(user.businessId);
+  if (!business) return;
+  await syncMasterToBusiness(business._id, { createdBy: business.ownerId });
+  await setBusinessSyncedVersion(business._id, masterVersion ?? await getMasterVersion());
 }
 
 /**
@@ -103,16 +144,14 @@ function verifyPbkdf2(plain, stored) {
 
 router.post('/signup', signupLimiter, async (req, res) => {
   try {
-    const { name, email, imgUrl, password } = req.body;
+    const { name, email, imgUrl, password, businessName } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'name, email, and password are required' });
     }
 
     // Validate username format: trimmed, 3–20 chars, alphanumeric + _ and -
-    const trimmedName = name.trim();
-    const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-    if (trimmedName.length < 3 || trimmedName.length > 20 || !USERNAME_REGEX.test(trimmedName)) {
+    if (!isValidUsername(name)) {
       return res.status(400).json({ error: 'INVALID_USERNAME' });
     }
 
@@ -121,6 +160,10 @@ router.post('/signup', signupLimiter, async (req, res) => {
     if (!EMAIL_REGEX.test(email.trim())) {
       return res.status(400).json({ error: 'INVALID_EMAIL' });
     }
+
+    // Plan 426/472: the business name is optional (max 200 chars after trim); empty falls back to the default name.
+    const trimmedBusinessName = typeof businessName === 'string' ? businessName.trim() : '';
+    if (trimmedBusinessName.length > NAME_MAX_LENGTH) return res.status(400).json({ error: 'BUSINESS_NAME_TOO_LONG' });
 
     // Note: password strength (min length, letter+digit, username/email check) is enforced
     // client-side only. The password arrives pre-hashed (saltHex:hashHex) from the Angular
@@ -137,19 +180,20 @@ router.post('/signup', signupLimiter, async (req, res) => {
 
     // Angular already hashed the password client-side (PBKDF2 saltHex:hashHex).
     // Validate format before storing — reject anything that doesn't match.
-    const PBKDF2_FORMAT = /^[0-9a-f]{32}:[0-9a-f]{64}$/;
-    if (!PBKDF2_FORMAT.test(password)) {
+    if (!isValidPasswordHash(password)) {
       return res.status(400).json({ error: 'INVALID_PASSWORD_FORMAT' });
     }
     const passwordHash = password;
     const _id = newId();
-    await User.create({ _id, name, email, imgUrl: imgUrl || '', passwordHash });
-
-    await cloneMasterDataToUser(_id);
     const masterVersion = await getMasterVersion();
-    await User.updateOne({ _id }, { lastSyncedMasterVersion: masterVersion });
+    const created = await User.create({ _id, name, email, imgUrl: imgUrl || '', passwordHash });
+    const user = created.toObject();
 
-    const token = jwt.sign({ userId: _id, name, role: 'user' }, ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRY });
+    // Plan 424: every new user starts as the owner of their own business.
+    const business = await createBusinessFor(user, { name: trimmedBusinessName || undefined, masterVersion });
+    await cloneMasterDataToBusiness(business._id, { createdBy: String(_id) });
+
+    const token = signAccess(user);
     const refreshToken = jwt.sign({ userId: _id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -159,7 +203,7 @@ router.post('/signup', signupLimiter, async (req, res) => {
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
-    const publicUser = { _id, name, email, imgUrl: imgUrl || '', role: 'user' };
+    const publicUser = toPublicUser(user);
     return res.status(201).json({ token, user: publicUser });
   } catch (err) {
     req.log.error({ err, event: 'auth.signup.failed' });
@@ -185,7 +229,25 @@ router.post('/login', loginLimiter, async (req, res) => {
       return res.status(400).json({ error: 'name and password are required' });
     }
 
-    const user = await User.findOne({ name }).lean();
+    let user = await User.findOne({ name }).lean();
+    if (!user && typeof name === 'string') {
+      // Plan 492: a removed cook's name is released; keep telling him he was removed.
+      // Same lockout as a live user, so the removed record can't be used to guess passwords.
+      const removed = await User.findOne({ removedName: name, removedAt: { $ne: null } }).sort({ removedAt: -1 }).lean();
+      if (!removed?.passwordHash || (removed.lockedUntil && removed.lockedUntil > Date.now())) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
+      if (await verifyPbkdf2(password, removed.passwordHash)) {
+        if (removed.failedAttempts) {
+          await User.updateOne({ _id: removed._id }, { failedAttempts: 0, lockedUntil: null });
+        }
+        return res.status(403).json({ error: 'USER_REMOVED' });
+      }
+      const failedAttempts = (removed.failedAttempts || 0) + 1;
+      const lockedUntil = failedAttempts >= 5 ? Date.now() + 15 * 60 * 1000 : null;
+      await User.updateOne({ _id: removed._id }, { failedAttempts, lockedUntil });
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
     if (!user || (user.lockedUntil && user.lockedUntil > Date.now())) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -208,11 +270,11 @@ router.post('/login', loginLimiter, async (req, res) => {
       await User.updateOne({ _id: user._id }, { failedAttempts: 0, lockedUntil: null });
     }
 
-    const token = jwt.sign(
-      { userId: user._id, name: user.name, role: user.role || 'user' },
-      ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_EXPIRY }
-    );
+    // Plan 425: no session for a user without a business or removed from it (no token, no cookie).
+    const blocked = blockedReason(user);
+    if (blocked) return res.status(403).json({ error: blocked });
+
+    const token = signAccess(user);
     const refreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -223,12 +285,10 @@ router.post('/login', loginLimiter, async (req, res) => {
     });
 
     try {
-      await syncMasterToUser(user._id);
-      const masterVersion = await getMasterVersion();
-      await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
+      await syncBusinessOf(user);
     } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.login.sync_failed' }); }
 
-    const publicUser = { _id: user._id, name: user.name, email: user.email, imgUrl: user.imgUrl, role: user.role || 'user' };
+    const publicUser = toPublicUser(user);
     return res.json({ token, user: publicUser });
   } catch (err) {
     req.log.error({ err, event: 'auth.login.failed' });
@@ -257,11 +317,14 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     const user = await User.findById(payload.userId).lean();
     if (!user) return res.status(401).json({ error: 'USER_NOT_FOUND' });
 
-    const token = jwt.sign(
-      { userId: user._id, name: user.name, role: user.role || 'user' },
-      ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_EXPIRY }
-    );
+    // Plan 425: the existing client interceptor signs the user out on a 401 refresh.
+    const blocked = blockedReason(user);
+    if (blocked) {
+      res.clearCookie(REFRESH_COOKIE, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
+      return res.status(401).json({ error: blocked });
+    }
+
+    const token = signAccess(user);
 
     const newRefreshToken = jwt.sign({ userId: user._id }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
     res.cookie(REFRESH_COOKIE, newRefreshToken, {
@@ -276,15 +339,16 @@ router.post('/refresh', refreshLimiter, async (req, res) => {
     // Version-gated (plan 309 M2): master docs are only ever written by seed-master.js or a
     // manually-run legacy-import/fix script (see master-version.js) — never by a live user
     // flow — so most refreshes have nothing to sync. Skip the full multi-collection diff
-    // when this user's last-synced version already matches the current one.
-    getMasterVersion()
-      .then(async (masterVersion) => {
-        if ((user.lastSyncedMasterVersion || 0) === masterVersion) {
+    // when this user's business was last synced to the current version (plan 425: gate on the business).
+    Promise.all([getMasterVersion(), getBusiness(user.businessId)])
+      .then(async ([masterVersion, business]) => {
+        if (!business) return;
+        if ((business.lastSyncedMasterVersion || 0) === masterVersion) {
           req.log.debug({ event: 'auth.refresh.sync_skipped', userId: String(user._id) });
           return;
         }
-        await syncMasterToUser(user._id);
-        await User.updateOne({ _id: user._id }, { lastSyncedMasterVersion: masterVersion });
+        await syncMasterToBusiness(business._id, { createdBy: business.ownerId });
+        await setBusinessSyncedVersion(business._id, masterVersion);
       })
       .catch(syncErr => req.log.error({ err: syncErr, event: 'auth.refresh.sync_failed' }));
 
@@ -325,17 +389,15 @@ router.post('/guest', async (req, res) => {
   }
 
   try {
-    await User.findOneAndUpdate(
+    const guestDoc = await User.findOneAndUpdate(
       { _id: 'dev-guest' },
-      { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin', passwordHash: null },
+      { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin', isPlatformAdmin: true, passwordHash: null },
       { upsert: true, new: true }
     );
+    const guest = guestDoc.toObject();
+    await ensureBusinessForUser(guest);
 
-    const token = jwt.sign(
-      { userId: 'dev-guest', name: 'Guest Admin', role: 'admin' },
-      ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_EXPIRY }
-    );
+    const token = signAccess(guest);
     const refreshToken = jwt.sign({ userId: 'dev-guest' }, REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRY });
 
     res.cookie(REFRESH_COOKIE, refreshToken, {
@@ -346,14 +408,12 @@ router.post('/guest', async (req, res) => {
     });
 
     try {
-      await syncMasterToUser('dev-guest');
-      const masterVersion = await getMasterVersion();
-      await User.updateOne({ _id: 'dev-guest' }, { lastSyncedMasterVersion: masterVersion });
+      await syncBusinessOf(guest);
     } catch (syncErr) { req.log.error({ err: syncErr, event: 'auth.guest.sync_failed' }); }
 
     return res.json({
       token,
-      user: { _id: 'dev-guest', name: 'Guest Admin', email: 'guest@dev.local', role: 'admin' },
+      user: toPublicUser(guest),
     });
   } catch (err) {
     req.log.error({ err, event: 'auth.guest.failed' });

@@ -1,9 +1,9 @@
 <fieldset
   class="custom-multi-select-wrap"
-  [class.open]="open()"
+  [class.open]="isOpen()"
   [class.custom-multi-select-wrap--chip]="variant() === 'chip'"
   [class.custom-multi-select-wrap--titled]="triggerTitle()"
-  (clickOutside)="close()"
+  (appClickOutside)="close()"
 >
   @if (triggerTitle()) {
     <legend class="custom-multi-select-legend">
@@ -26,23 +26,23 @@
     class="c-select custom-select-trigger custom-multi-select-trigger"
     [class.custom-select-trigger--compact]="compact()"
     [class.custom-select-trigger--chip]="variant() === 'chip'"
-    [class.open]="open()"
+    [class.open]="isOpen()"
     [disabled]="disabled"
     (mousedown)="onTriggerMousedown()"
     (focus)="onTriggerFocus()"
     (click)="onTriggerClick()"
     (blur)="onTriggerBlur()"
-    [attr.aria-expanded]="open()"
+    [attr.aria-expanded]="isOpen()"
     aria-haspopup="listbox"
-    [attr.aria-activedescendant]="open() && !searchable() ? optionIdPrefix_() + highlightedIndex() : null"
+    [attr.aria-activedescendant]="isOpen() && !searchable() ? optionIdPrefix_() + highlightedIndex() : null"
     [attr.aria-label]="placeholder() | translatePipe"
   >
     <span class="custom-multi-select-trigger-inner">
       @for (key of readonlyChips(); track key) {
         @let opt = getOptionForValue(key);
         <span
-          class="custom-multi-select-chip custom-multi-select-chip--readonly"
-          [class.custom-multi-select-chip--colored]="opt.color"
+          class="c-chip c-chip--removable"
+          [class.c-chip--colored]="opt.color"
           [style.background-color]="opt.color || null"
           [style.color]="opt.color ? getChipTextColor(opt.color) : null"
         >
@@ -57,8 +57,8 @@
         @let opt = getOptionForValue(key);
         <button
           type="button"
-          class="custom-multi-select-chip custom-multi-select-chip--removable"
-          [class.custom-multi-select-chip--colored]="opt.color"
+          class="c-chip c-chip--removable"
+          [class.c-chip--colored]="opt.color"
           [style.background-color]="opt.color || null"
           [style.color]="opt.color ? getChipTextColor(opt.color) : null"
           (click)="removeOption(key); $event.stopPropagation()"
@@ -80,7 +80,7 @@
     <lucide-icon name="chevron-down" [size]="variant() === 'chip' ? 10 : 14"></lucide-icon>
   </button>
 
-  @if (open()) {
+  @if (isOpen()) {
     <app-scrollable-dropdown [maxHeight]="maxHeight()" role="listbox" aria-multiselectable="true">
       @if (searchable()) {
         <div class="custom-multi-select-search-wrap">
@@ -113,6 +113,7 @@
           [class.highlighted]="highlightedIndex() === i"
           role="option"
           [attr.aria-selected]="value.includes(opt.value)"
+          (mousedown)="$event.preventDefault()"
           (click)="onOptionClick(opt)"
         >
           @if (translateLabels()) {
@@ -131,6 +132,7 @@
           [class.highlighted]="highlightedIndex() === dropdownOptions_().length"
           role="option"
           [attr.aria-selected]="false"
+          (mousedown)="$event.preventDefault()"
           (click)="onOptionClick(addOpt)"
         >
           <app-add-option-row [label]="addLabel_()" />

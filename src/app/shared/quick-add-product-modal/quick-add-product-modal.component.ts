@@ -19,16 +19,29 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
+import { LoggingService } from '@services/logging.service'
 import { AddItemModalService } from '@services/add-item-modal.service'
 import { Product } from '@models/product.model'
 import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { LoaderComponent } from '../loader/loader.component'
 import { GeminiService } from '@services/gemini.service'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { findProductByName, isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 @Component({
   selector: 'app-quick-add-product-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, TranslatePipe, CustomSelectComponent, LoaderComponent],
+  imports: [
+    SelectOnFocusDirective,
+    CommonModule,
+    FormsModule,
+    LucideAngularModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    LoaderComponent,
+    ModalShellComponent
+  ],
   templateUrl: './quick-add-product-modal.component.html',
   styleUrl: './quick-add-product-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -39,6 +52,7 @@ export class QuickAddProductModalComponent {
   private readonly unitRegistry = inject(UnitRegistryService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly logging = inject(LoggingService)
   private readonly translation = inject(TranslationService)
   private readonly addItemModal = inject(AddItemModalService)
   private readonly gemini_ = inject(GeminiService)
@@ -48,7 +62,7 @@ export class QuickAddProductModalComponent {
 
   protected name = signal('')
   protected baseUnit_ = signal('gram')
-  protected expanded_ = signal(false)
+  protected isExpanded_ = signal(false)
   /** Typed name from the add option (addNewChosen), read by the add flow (add-option rule 2). */
   protected readonly pendingAddName_ = signal('')
   protected buyPrice_ = signal(0)
@@ -60,8 +74,8 @@ export class QuickAddProductModalComponent {
   protected isSubmitting_ = signal(false)
   protected nameError_ = signal('')
   protected unitError_ = signal('')
-  protected aiLoading_ = signal(false)
-  protected aiError_ = signal(false)
+  protected isAiLoading_ = signal(false)
+  protected hasAiError_ = signal(false)
 
   protected nameRef = viewChild<ElementRef<HTMLInputElement>>('nameEl')
   protected baseUnitRef = viewChild<ElementRef<HTMLElement>>('baseUnitSelect')
@@ -90,7 +104,7 @@ export class QuickAddProductModalComponent {
       if (cfg) {
         this.name.set(cfg.prefillName)
         this.baseUnit_.set('gram')
-        this.expanded_.set(false)
+        this.isExpanded_.set(false)
         this.buyPrice_.set(0)
         this.category.set('')
         this.yieldFactor_.set(1)
@@ -160,7 +174,8 @@ export class QuickAddProductModalComponent {
       this.pendingAddName_.set('')
       this.baseUnit_.set('')
       this.unitRegistry.openUnitCreator({ prefillName: typed })
-      this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => {
+      void this.unitRegistry.awaitUnitCreated().then((newUnit) => {
+        if (!newUnit) return
         this.baseUnit_.set(newUnit)
         this.onSelectChange(this.getNextFocusAfterBaseUnit())
       })
@@ -179,7 +194,7 @@ export class QuickAddProductModalComponent {
   }
 
   protected getNextFocusAfterCategory(): HTMLElement | null {
-    if (this.expanded_()) return this.yieldFactorRef()?.nativeElement ?? null
+    if (this.isExpanded_()) return this.yieldFactorRef()?.nativeElement ?? null
     return this.saveBtnRef()?.nativeElement ?? null
   }
 
@@ -212,6 +227,11 @@ export class QuickAddProductModalComponent {
       this.nameError_.set('field_name_required')
       return
     }
+    // Plan 485: one product per name - refuse a taken name before asking the server.
+    if (findProductByName(this.productData.allProducts_(), name)) {
+      this.nameError_.set('duplicate_product_name_error')
+      return
+    }
     if (!baseUnit) {
       this.unitError_.set('field_unit_required')
       this.baseUnitRef()?.nativeElement?.focus()
@@ -240,29 +260,38 @@ export class QuickAddProductModalComponent {
         notifyItemAdded(this.userMsg, (k) => this.translation.translate(k), saved.nameHebrew)
         this.modalService.save(saved)
       },
-      () => {
+      (err: unknown) => {
+        this.logging.error({
+          event: 'crud.products.quick_add_error',
+          message: 'Quick add save error',
+          context: { err }
+        })
         this.isSubmitting_.set(false)
-        this.userMsg.onSetErrorMsg('שגיאה בשמירת המוצר')
+        if (isProductNameTaken(err)) {
+          this.nameError_.set('duplicate_product_name_error')
+          return
+        }
+        this.userMsg.onSetErrorMsg(this.translation.translate('product_save_error'))
       }
     )
   }
 
   protected async onAiFill(): Promise<void> {
     const name = this.name().trim()
-    if (!name || this.aiLoading_()) return
-    this.aiLoading_.set(true)
-    this.aiError_.set(false)
+    if (!name || this.isAiLoading_()) return
+    this.isAiLoading_.set(true)
+    this.hasAiError_.set(false)
     try {
       const draft = await this.gemini_.generateProduct(name)
       if (draft.baseUnit) this.baseUnit_.set(draft.baseUnit)
       if (draft.categories?.length) this.category.set(draft.categories[0])
       if (draft.allergens?.length) this.selectedAllergens_.set(new Set(draft.allergens))
       if (draft.yieldFactor && draft.yieldFactor !== 1) this.yieldFactor_.set(draft.yieldFactor)
-      this.expanded_.set(true)
+      this.isExpanded_.set(true)
     } catch {
-      this.aiError_.set(true)
+      this.hasAiError_.set(true)
     } finally {
-      this.aiLoading_.set(false)
+      this.isAiLoading_.set(false)
     }
   }
 
@@ -271,6 +300,6 @@ export class QuickAddProductModalComponent {
   }
 
   protected toggleExpanded(): void {
-    this.expanded_.update((v) => !v)
+    this.isExpanded_.update((v) => !v)
   }
 }

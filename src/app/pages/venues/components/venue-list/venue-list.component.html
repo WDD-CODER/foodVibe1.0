@@ -1,34 +1,36 @@
-<div class="venue-grid-container" dir="rtl">
-  <app-page-header
-    class="venue-header"
-    titleKey="venue_list"
-    [listLayout]="true"
-    [count]="filteredVenues_().length"
-    [countLabel]="resultCountText_()"
-  >
-    <div header-search class="search-wrap">
-      <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
-      <div class="c-input-wrapper">
-        <lucide-icon name="search" [size]="18"></lucide-icon>
-        <input
-          #searchInput
-          id="venue-search"
-          type="text"
-          [ngModel]="searchQuery_()"
-          (ngModelChange)="searchQuery_.set($event)"
-          [placeholder]="'search' | translatePipe"
-          autocomplete="off"
-          autocorrect="off"
-          autocapitalize="off"
-          spellcheck="false"
-          (keydown.escape)="onSearchEscape($event, searchInput)"
-        />
-        <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
-      </div>
-    </div>
+<app-list-shell
+  layout="cards"
+  cardMin="17.5rem"
+  [isPanelOpen]="isPanelOpen_()"
+  (panelToggle)="togglePanel()"
+  [resultCount]="filteredVenues_().length"
+  [resultTotal]="totalVenues_()"
+>
+  <ng-container shell-title>{{ 'venue_list' | translatePipe }}</ng-container>
 
+  <ng-container shell-search>
+    <label class="visually-hidden" for="venue-search">{{ 'search' | translatePipe }}</label>
+    <div class="c-input-wrapper">
+      <lucide-icon name="search" [size]="18"></lucide-icon>
+      <input
+        #searchInput
+        id="venue-search"
+        type="text"
+        [ngModel]="searchQuery_()"
+        (ngModelChange)="searchQuery_.set($event)"
+        [placeholder]="'search' | translatePipe"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        (keydown.escape)="onSearchEscape($event, searchInput)"
+      />
+      <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch(searchInput)" />
+    </div>
+  </ng-container>
+
+  <ng-container shell-actions>
     <button
-      header-actions
       type="button"
       class="c-btn-primary"
       (click)="onAddPlace()"
@@ -38,9 +40,26 @@
       <lucide-icon name="plus" [size]="18"></lucide-icon>
       <span class="btn-label">{{ 'add' | translatePipe }}</span>
     </button>
-  </app-page-header>
+  </ng-container>
 
-  <div class="filters-bar">
+  <ng-container shell-selection-bar>
+    <app-selection-bar
+      [selectionState]="selection"
+      [editableFields]="editableFields_()"
+      (bulkDelete)="onBulkDeleteSelected($event)"
+      (bulkEdit)="onBulkEdit($event)"
+    />
+  </ng-container>
+
+  <ng-container shell-filter-clear>
+    @if (hasActiveFilters_()) {
+      <button type="button" class="c-btn-ghost--sm c-filter-clear" (click)="clearAllFilters()">
+        {{ 'clear_filters' | translatePipe }}
+      </button>
+    }
+  </ng-container>
+
+  <ng-container shell-filters>
     @if (filteredVenueIds_().length > 0) {
       <label class="select-all-pill">
         <app-list-row-checkbox
@@ -50,27 +69,17 @@
         <span>{{ 'select_all' | translatePipe }}</span>
       </label>
     }
-    @for (env of envTypes; track env) {
-      <label class="c-toggle-chip">
-        <input type="checkbox" [checked]="selectedEnvTypes_().has(env)" (change)="toggleEnvType(env)" />
-        <span>{{ env | translatePipe }}</span>
-      </label>
-    }
-    @if (hasActiveFilters_()) {
-      <button type="button" class="c-btn-ghost--sm c-filter-clear filters-clear" (click)="clearAllFilters()">
-        {{ 'clear_filters' | translatePipe }}
-      </button>
-    }
-  </div>
+    <div class="c-chip-group">
+      @for (env of envTypes; track env) {
+        <label class="c-chip c-chip--toggle">
+          <input type="checkbox" [checked]="selectedEnvTypes_().has(env)" (change)="toggleEnvType(env)" />
+          <span>{{ env | translatePipe }}</span>
+        </label>
+      }
+    </div>
+  </ng-container>
 
-  <app-selection-bar
-    [selectionState]="selection"
-    [editableFields]="editableFields_()"
-    (bulkDelete)="onBulkDeleteSelected($event)"
-    (bulkEdit)="onBulkEdit($event)"
-  />
-
-  <div class="venues-grid">
+  <ng-container shell-cards>
     @if (filteredVenues_().length === 0) {
       <div class="no-results">{{ 'no_venues_match' | translatePipe }}</div>
     }
@@ -126,7 +135,7 @@
             </p>
           }
           <div class="venue-card-meta">
-            <span class="venue-env-chip">{{ item.environmentType | translatePipe }}</span>
+            <span class="c-chip c-chip--tag c-chip--glass">{{ item.environmentType | translatePipe }}</span>
             @if (item.capacity) {
               <span class="venue-capacity">
                 <lucide-icon name="users" [size]="14"></lucide-icon>
@@ -168,5 +177,5 @@
         </div>
       </article>
     }
-  </div>
-</div>
+  </ng-container>
+</app-list-shell>

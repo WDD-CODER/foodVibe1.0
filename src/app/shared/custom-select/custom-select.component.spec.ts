@@ -1,5 +1,5 @@
 import { Component } from '@angular/core'
-import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing'
 import { LucideAngularModule, ChevronDown, ChevronUp, X } from 'lucide-angular'
 import { CustomSelectComponent } from './custom-select.component'
 import { TranslationService } from '@services/translation.service'
@@ -177,6 +177,119 @@ describe('CustomSelectComponent', () => {
       expect(host.componentInstance.pageKeys).toEqual([])
       press('Tab')
       expect(host.componentInstance.pageKeys).toEqual(['Tab'])
+    })
+  })
+
+  describe('slow mouse click on an option (plan 459 A1)', () => {
+    const root = (): HTMLElement => fixture.nativeElement as HTMLElement
+    let trigger: HTMLElement
+
+    beforeEach(() => {
+      fixture.componentRef.setInput('options', [
+        { value: 'a', label: 'Apple' },
+        { value: 'b', label: 'Banana' },
+        { value: '__add_new__', label: 'x' }
+      ])
+      fixture.componentRef.setInput('addNewValue', '__add_new__')
+      fixture.componentRef.setInput('allowTypedAdd', true)
+      fixture.detectChanges()
+      trigger = root().querySelector('button.custom-select-trigger') as HTMLElement
+      trigger.click()
+      fixture.detectChanges()
+    })
+
+    function option(i: number): HTMLElement {
+      return root().querySelectorAll('.custom-select-option')[i] as HTMLElement
+    }
+
+    it('mousedown on an option is default-prevented so focus stays on the trigger', () => {
+      const e = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
+      option(0).dispatchEvent(e)
+      expect(e.defaultPrevented).toBeTrue()
+    })
+
+    it('a long press keeps the list open and the later click selects', fakeAsync(() => {
+      const values: string[] = []
+      component.valueChange.subscribe((v: string) => values.push(v))
+      option(1).dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }))
+      tick(500)
+      fixture.detectChanges()
+      expect(root().querySelector('app-scrollable-dropdown')).not.toBeNull()
+      option(1).click()
+      fixture.detectChanges()
+      expect(values).toEqual(['b'])
+    }))
+
+    it('the add option is also protected and still emits the typed name, then the sentinel', fakeAsync(() => {
+      trigger.click()
+      fixture.componentRef.setInput('typeToFilter', true)
+      fixture.detectChanges()
+      const input = root().querySelector('input.custom-select-input') as HTMLInputElement
+      input.dispatchEvent(new Event('focus'))
+      fixture.detectChanges()
+      input.value = 'Cherry'
+      input.dispatchEvent(new Event('input'))
+      fixture.detectChanges()
+      const log: string[] = []
+      component.addNewChosen.subscribe((v: string) => log.push('chosen:' + v))
+      component.valueChange.subscribe((v: string) => log.push('value:' + v))
+      const add = root().querySelector('.custom-select-option--add-new') as HTMLElement
+      const e = new MouseEvent('mousedown', { bubbles: true, cancelable: true })
+      add.dispatchEvent(e)
+      expect(e.defaultPrevented).toBeTrue()
+      tick(500)
+      add.click()
+      expect(log).toEqual(['chosen:Cherry', 'value:__add_new__'])
+    }))
+  })
+
+  describe('Space in a type-to-filter box (plan 459 A3)', () => {
+    it('types a space: not default-prevented and nothing is picked', () => {
+      fixture.componentRef.setInput('typeToFilter', true)
+      fixture.detectChanges()
+      const input = (fixture.nativeElement as HTMLElement).querySelector(
+        'input.custom-select-input'
+      ) as HTMLInputElement
+      input.dispatchEvent(new Event('focus'))
+      fixture.detectChanges()
+      const values: string[] = []
+      component.valueChange.subscribe((v: string) => values.push(v))
+      const e = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true })
+      input.dispatchEvent(e)
+      fixture.detectChanges()
+      expect(e.defaultPrevented).toBeFalse()
+      expect(values).toEqual([])
+    })
+  })
+
+  describe('focus handed back by a closing popup (plan 451 P0)', () => {
+    const isOpen = (): boolean => (component as unknown as { isOpen: () => boolean }).isOpen()
+
+    it('a type-to-filter input does not reopen its list when focus is restored to it', () => {
+      fixture.componentRef.setInput('typeToFilter', true)
+      fixture.detectChanges()
+      const input = (fixture.nativeElement as HTMLElement).querySelector(
+        'input.custom-select-input'
+      ) as HTMLInputElement
+      input.setAttribute('data-restore-focus', '')
+      input.dispatchEvent(new Event('focus'))
+      input.removeAttribute('data-restore-focus')
+      fixture.detectChanges()
+      expect(isOpen()).toBeFalse()
+      input.dispatchEvent(new Event('focus'))
+      fixture.detectChanges()
+      expect(isOpen()).toBeTrue()
+    })
+
+    it('a button trigger does not reopen its list when focus is restored to it', () => {
+      const trigger = (fixture.nativeElement as HTMLElement).querySelector(
+        'button.custom-select-trigger'
+      ) as HTMLButtonElement
+      trigger.setAttribute('data-restore-focus', '')
+      trigger.dispatchEvent(new Event('focus'))
+      trigger.removeAttribute('data-restore-focus')
+      fixture.detectChanges()
+      expect(isOpen()).toBeFalse()
     })
   })
 })

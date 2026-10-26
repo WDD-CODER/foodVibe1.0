@@ -1,6 +1,6 @@
 # Plan 445 — Show live profit against the target while the chef builds a menu
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -30,8 +30,8 @@ they add.
 how much it falls short; the same revenue appears in the meter, the menu library and (later) the dashboard.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/core/engine/event-pricing.spec.ts' --include='src/app/pages/menu-intelligence/menu-money-form.util.spec.ts' --include='src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts' --include='src/app/pages/menu-intelligence/components/pricing-meter/**/*.spec.ts' --include='src/app/pages/menu-library/**/*.spec.ts' --include='src/app/core/services/menu-intelligence.service.spec.ts'`
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/engine/event-pricing.spec.ts' --include='src/app/pages/menu-intelligence/menu-money-form.util.spec.ts' --include='src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts' --include='src/app/pages/menu-intelligence/components/pricing-meter/**/*.spec.ts' --include='src/app/pages/menu-library/**/*.spec.ts' --include='src/app/core/services/menu-intelligence.service.spec.ts'`
   passes, including the spec 03.2 acceptance numbers in `event-pricing.spec.ts` (plan stub
   `eventFoodCost: 4000, partial: false`; event 50 guests, `extraCosts.amount: 1000`; settings `{ profitTargetPct:
   25, safetyMarginPct: 10 }`):
@@ -50,15 +50,15 @@ Done when:
   - `MenuEventSaveService.prepareForSave` adds `pricing { foodCost, revenue, profit, profitPct, partial,
     computedAt }` equal to `computeEventPricing` for the same inputs.
   - library card revenue reads `event.pricing.revenue` (shows "—" when `pricing` is absent).
-- [auto] `npm --prefix server test -- menu-event-pricing` passes: create a `menuEvents` doc with
+- [x] [auto] `npm --prefix server test -- menu-event-pricing` passes: create a `menuEvents` doc with
   `targetsOverride.profitTargetPct: 100` → 400; `extraCosts.amount: -1` → 400; valid money fields and a `pricing`
   object → 201 and stored as sent; a staff token changing `pricePerGuest` on an event that same staff member
   created → 403 `FORBIDDEN` (`editMoney`, plan 427 rule, regression check); the same staff token saving that event
   with only `pricing` changed → 200 (`pricing` is a derived cache, not in `MONEY_FIELDS`). (A staff edit of the
   owner's event is already 403 by C-PERM's creator rule, so it cannot isolate the money check.)
-- [auto] `grep -n "> 33" src/app/pages/menu-intelligence/menu-intelligence.page.html` and
+- [x] [auto] `grep -n "> 33" src/app/pages/menu-intelligence/menu-intelligence.page.html` and
   `grep -n "targetFoodCostPct: 30" src/app/pages/menu-intelligence/menu-intelligence.page.ts` print nothing.
-- [auto] Net line count of `menu-intelligence.page.ts` ≤ 0 for this plan: `git diff --numstat origin/mvp --
+- [x] [auto] Net line count of `menu-intelligence.page.ts` ≤ 0 for this plan: `git diff --numstat origin/mvp --
   src/app/pages/menu-intelligence/menu-intelligence.page.ts` prints added ≤ deleted.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] Desktop, open an event with dishes at `/menu-intelligence/<id>`: the meter at the bottom shows price per
@@ -120,6 +120,7 @@ src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts
 src/app/pages/menu-intelligence/menu-intelligence.page.html
 src/app/pages/menu-intelligence/menu-intelligence.page.scss
 src/app/pages/menu-intelligence/menu-intelligence.page.ts
+src/app/pages/menu-intelligence/_paper-ui.scss
 src/app/pages/menu-library/components/menu-library-list/**
 public/assets/data/dictionary.json
 ```
@@ -269,15 +270,15 @@ Page wiring (frozen file, net ≤ 0):
 | `money_locked_hint` | רק הבעלים יכולים לשנות סכומים |
 
 ## Atomic Sub-tasks
-- [ ] M1: Compute every profit number in one tested place — event-pricing.ts: PricingEvent, toPricingEvent, computeEventPricing, toPricingCache per Design; spec with the spec 03.2 acceptance numbers — src/app/core/engine/event-pricing.ts, src/app/core/engine/event-pricing.spec.ts
-- [ ] M2: Let an event store its price per guest, extra costs, own target and a pricing summary — menuEventSchema: pricePerGuest z.number().min(0).optional(), extraCosts strictObject { amount min(0), note max(200) optional }, targetsOverride strictObject { profitTargetPct, safetyMarginPct: min(0).lt(100) optional }, pricing strictObject { foodCost, revenue, profit, profitPct nullable, partial boolean, computedAt } optional; client MenuEvent model; server test — shared/schemas/entities/menu-event.schema.ts, src/app/core/models/menu-event.model.ts, server/test/menu-event-pricing.test.js
-- [ ] M3: Add the money fields to the menu form and keep empty fields out of the saved event — createMoneyGroup, moneyFormFromEvent, moneyFieldsFromForm, targetTooHigh validator + spec — src/app/pages/menu-intelligence/menu-money-form.util.ts, src/app/pages/menu-intelligence/menu-money-form.util.spec.ts
-- [ ] M4: Store the pricing summary on every save so other screens show the same revenue — MenuEventSaveService.prepareForSave(event, plan, editingId: string | null) (providedIn root; computePortions + BusinessService settings + computeEventPricing + toPricingCache) + spec — src/app/pages/menu-intelligence/services/menu-event-save.service.ts, src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts
-- [ ] M5: Replace the footer with a live pricing meter that answers "does this price meet my target" — PricingMeterComponent (inputs event, plan, moneyForm, eventId; computed result from computeEventPricing with live form values and BusinessService settings; "חלקי" on each number + partial-cost-badge when plan.partial; inputs disabled unless PermissionService.can('editMoney', { type: 'menuEvents', doc }); phone summary line) + spec — src/app/pages/menu-intelligence/components/pricing-meter/**
-- [ ] M6: Wire the meter and the money fields into the frozen menu page while shrinking it — form_ money group, loadEvent patch, buildEventFromForm spread replacing financialTargets {30,0}, save via prepareForSave, template swap of .financial-footnote (33% warning gone), delete the old footer computeds; net lines ≤ 0 — src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/pages/menu-intelligence/menu-intelligence.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.scss
-- [ ] M7: Make the library show the meter's revenue and drop the duplicate revenue code — card revenue and food-cost tag from event.pricing (formatMoney / formatPct1, "—" when absent, "חלקי" when pricing.partial); food_cost sort from pricing; delete the component's private computeEventRevenue and MenuIntelligenceService.computeEventRevenue when no caller remains (update its spec) — src/app/pages/menu-library/components/menu-library-list/**, src/app/core/services/menu-intelligence.service.ts, src/app/core/services/menu-intelligence.service.spec.ts
-- [ ] M8: Add the Hebrew labels — keys from UI/UX Notes, appended — public/assets/data/dictionary.json
-- [ ] M9: Build, test client and server, confirm hard-codes gone and page not grown, hand over — ng build, the Done-when ng test and server test commands, the two greps, git diff --numstat, log-query; slot servers up; [human] cards — this plan file
+- [x] M1: Compute every profit number in one tested place — event-pricing.ts: PricingEvent, toPricingEvent, computeEventPricing, toPricingCache per Design; spec with the spec 03.2 acceptance numbers — src/app/core/engine/event-pricing.ts, src/app/core/engine/event-pricing.spec.ts
+- [x] M2: Let an event store its price per guest, extra costs, own target and a pricing summary — menuEventSchema: pricePerGuest z.number().min(0).optional(), extraCosts strictObject { amount min(0), note max(200) optional }, targetsOverride strictObject { profitTargetPct, safetyMarginPct: min(0).lt(100) optional }, pricing strictObject { foodCost, revenue, profit, profitPct nullable, partial boolean, computedAt } optional; client MenuEvent model; server test — shared/schemas/entities/menu-event.schema.ts, src/app/core/models/menu-event.model.ts, server/test/menu-event-pricing.test.js
+- [x] M3: Add the money fields to the menu form and keep empty fields out of the saved event — createMoneyGroup, moneyFormFromEvent, moneyFieldsFromForm, targetTooHigh validator + spec — src/app/pages/menu-intelligence/menu-money-form.util.ts, src/app/pages/menu-intelligence/menu-money-form.util.spec.ts
+- [x] M4: Store the pricing summary on every save so other screens show the same revenue — MenuEventSaveService.prepareForSave(event, plan, editingId: string | null) (providedIn root; computePortions + BusinessService settings + computeEventPricing + toPricingCache) + spec — src/app/pages/menu-intelligence/services/menu-event-save.service.ts, src/app/pages/menu-intelligence/services/menu-event-save.service.spec.ts
+- [x] M5: Replace the footer with a live pricing meter that answers "does this price meet my target" — PricingMeterComponent (inputs event, plan, moneyForm, eventId; computed result from computeEventPricing with live form values and BusinessService settings; "חלקי" on each number + partial-cost-badge when plan.partial; inputs disabled unless PermissionService.can('editMoney', { type: 'menuEvents', doc }); phone summary line) + spec — src/app/pages/menu-intelligence/components/pricing-meter/**
+- [x] M6: Wire the meter and the money fields into the frozen menu page while shrinking it — form_ money group, loadEvent patch, buildEventFromForm spread replacing financialTargets {30,0}, save via prepareForSave, template swap of .financial-footnote (33% warning gone), delete the old footer computeds; net lines ≤ 0 — src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/pages/menu-intelligence/menu-intelligence.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.scss
+- [x] M7: Make the library show the meter's revenue and drop the duplicate revenue code — card revenue and food-cost tag from event.pricing (formatMoney / formatPct1, "—" when absent, "חלקי" when pricing.partial); food_cost sort from pricing; delete the component's private computeEventRevenue and MenuIntelligenceService.computeEventRevenue when no caller remains (update its spec) — src/app/pages/menu-library/components/menu-library-list/**, src/app/core/services/menu-intelligence.service.ts, src/app/core/services/menu-intelligence.service.spec.ts
+- [x] M8: Add the Hebrew labels — keys from UI/UX Notes, appended — public/assets/data/dictionary.json
+- [x] M9: Build, test client and server, confirm hard-codes gone and page not grown, hand over — ng build, the Done-when ng test and server test commands, the two greps, git diff --numstat, log-query; slot servers up; [human] cards — this plan file
 
 ## Technical Considerations
 - Dependencies: `EventPlan` + `rounding.ts` (433), `menuPlan_` (444), `MenuPortionsService` (441), `computePortions` (440),

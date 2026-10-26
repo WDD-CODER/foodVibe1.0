@@ -1,6 +1,6 @@
 # Plan 452 — Replace the seven copy-pasted search dropdowns with one shared search box
 
-Status: draft
+Status: active
 Track: code
 Depends-on: 450
 Conflicts-with: 453, 454, 455, 456, 457
@@ -21,11 +21,11 @@ Chip bases: `chip-search-dropdown` used by `product-form.component.html` (3 plac
 ## Goals & Success Criteria
 - Primary: every search-style picker above renders through one shared component; the page-local `scrollable-dropdown + listbox + add-option-row` shells are gone; no page behaviour changes.
 - Success:
-  - [ ] [auto] `npx ng build` and `npx ng test --watch=false` pass after every sub-task (exact exit codes in the run notes).
-  - [ ] [auto] `grep -rl "app-add-option-row" src/app/pages` returns no file in the six call-site files above (only `src/app/shared/**` remains).
-  - [ ] [auto] Net line count of each frozen file touched (`menu-intelligence.page.ts`, `recipe-builder.page.ts`) is <= 0: `git diff --numstat main -- <file>` added <= deleted.
-  - [ ] [auto] New/updated specs cover rule K (first option highlighted, Arrow stops at ends, Enter picks, Escape closes, Tab closes), rule X (exact name hides the add row) and rule W (add opens its window, never adds typed text) on the shared component.
-  - [ ] [auto] `node scripts/scope-check.mjs --diff=main` passes; `node scripts/breadcrumbs-check.mjs` passes.
+  - [x] [auto] `npx ng build` and `npx ng test --watch=false` pass after every sub-task (exact exit codes in the run notes).
+  - [x] [auto] `grep -rl "app-add-option-row" src/app/pages` returns no file in the six call-site files above (only `src/app/shared/**` remains).
+  - [x] [auto] Net line count of each frozen file touched (`menu-intelligence.page.ts`, `recipe-builder.page.ts`) is <= 0: `git diff --numstat main -- <file>` added <= deleted.
+  - [x] [auto] New/updated specs cover rule K (first option highlighted, Arrow stops at ends, Enter picks, Escape closes, Tab closes), rule X (exact name hides the add row) and rule W (add opens its window, never adds typed text) on the shared component.
+  - [x] [auto] `node scripts/scope-check.mjs --diff=main` passes; `node scripts/breadcrumbs-check.mjs` passes.
   - [ ] [human] Smoke check per touched page (one card each, S2–S8): menu-intelligence (event type + section category + dish row), recipe-book list ingredient filter, recipe-builder ingredient search, preparation search, logistics tools — type, arrow, Enter, Escape, add new; identical to before.
   - [ ] [human] Product form and recipe header chip pickers still add/remove chips as before (S9).
 
@@ -88,6 +88,14 @@ src/app/pages/recipe-builder/services/recipe-logistics-picker.service.spec.ts
 src/app/pages/inventory/components/product-form/product-form.component.html
 src/app/pages/inventory/components/product-form/product-form.component.ts
 docs/brain/component-families.md
+docs/brain/decisions/0025-search-combobox-and-one-multi-pick-base.md
+docs/agent/standards-domain.md
+docs/agent/standards-reuse.md
+scripts/lib/registry-families.mjs
+src/app/pages/menu-intelligence/_paper-ui.scss
+src/app/pages/menu-intelligence/services/menu-picker-search.service.ts
+src/app/pages/menu-intelligence/services/menu-picker-search.service.spec.ts
+docs/mvp/runs/452.md
 ```
 
 ## Read Scope
@@ -135,17 +143,17 @@ Mandatory for this plan (the MVP merge changed many files). Before S1, on curren
 - No new Hebrew strings; existing `add_new_<thing>` keys keep being used.
 
 ## Atomic Sub-tasks
-- [ ] S0: Run Step 0, print ok/conflict per item, record frozen-file baselines — (read only)
-- [ ] S1: Extend the shared search component so all seven copies can use it: `optionTemplate` input for rich rows, `typeToFilter` already filtering by label; if more than 3 new flags, build `shared/search-combobox` instead (S1b); specs for rules K, X, F, W — `src/app/shared/custom-select/custom-select.component.ts`, `src/app/shared/custom-select/custom-select.component.html`, `src/app/shared/custom-select/custom-select.component.scss`, `src/app/shared/custom-select/custom-select.component.spec.ts`, `src/app/shared/search-combobox/**`
-- [ ] S2: Convert the menu-dish-row picker (simplest, no add row) — `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`, `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts`, `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.scss`
-- [ ] S3: Convert the menu-intelligence event-type picker; delete its handlers (net lines <= 0) — `src/app/pages/menu-intelligence/menu-intelligence.page.html`, `src/app/pages/menu-intelligence/menu-intelligence.page.ts`, `src/app/pages/menu-intelligence/menu-intelligence.page.scss`
-- [ ] S4: Convert the menu-intelligence section-category picker; delete its handlers (net lines <= 0) — `src/app/pages/menu-intelligence/menu-intelligence.page.html`, `src/app/pages/menu-intelligence/menu-intelligence.page.ts`, `src/app/pages/menu-intelligence/menu-intelligence.page.scss`
-- [ ] S5: Convert the recipe-book list ingredient filter — `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html`, `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts`, `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss`, `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.spec.ts`
-- [ ] S6: Convert the recipe-builder ingredient search — `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.html`, `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.ts`, `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.scss`, `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.spec.ts`
-- [ ] S7: Convert the recipe-builder preparation search — `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.html`, `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.ts`, `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.scss`, `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.spec.ts`
-- [ ] S8: Convert the recipe-builder logistics tool picker; drop highlight/open state the shared component now owns from the service; frozen page `.ts` net <= 0 — `src/app/pages/recipe-builder/recipe-builder.page.html`, `src/app/pages/recipe-builder/recipe-builder.page.ts`, `src/app/pages/recipe-builder/recipe-builder.page.scss`, `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`, `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.spec.ts`
-- [ ] S9: Choose the single multi-pick base: gap-list `chip-search-dropdown` vs `custom-multi-select` (CVA); migrate product-form's three chip pickers if no behaviour change, else mark `chip-search-dropdown` `@deprecated`; product-form `.ts` net <= 0 — `src/app/shared/custom-multi-select/custom-multi-select.component.ts`, `src/app/shared/custom-multi-select/custom-multi-select.component.html`, `src/app/shared/custom-multi-select/custom-multi-select.component.scss`, `src/app/shared/custom-multi-select/custom-multi-select.component.spec.ts`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.ts`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.html`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.spec.ts`, `src/app/pages/inventory/components/product-form/product-form.component.html`, `src/app/pages/inventory/components/product-form/product-form.component.ts`
-- [ ] S10: Final grep proof, registry + breadcrumbs update, `ng build`, tests, validation cards — `docs/brain/component-families.md`, `src/app/shared/breadcrumbs.md`
+- [x] S0: Run Step 0, print ok/conflict per item, record frozen-file baselines — (read only)
+- [x] S1: Extend the shared search component so all seven copies can use it: `optionTemplate` input for rich rows, `typeToFilter` already filtering by label; if more than 3 new flags, build `shared/search-combobox` instead (S1b); specs for rules K, X, F, W — `src/app/shared/custom-select/custom-select.component.ts`, `src/app/shared/custom-select/custom-select.component.html`, `src/app/shared/custom-select/custom-select.component.scss`, `src/app/shared/custom-select/custom-select.component.spec.ts`, `src/app/shared/search-combobox/**`
+- [x] S2: Convert the menu-dish-row picker (simplest, no add row) — `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html`, `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.ts`, `src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.scss`
+- [x] S3: Convert the menu-intelligence event-type picker; delete its handlers (net lines <= 0) — `src/app/pages/menu-intelligence/menu-intelligence.page.html`, `src/app/pages/menu-intelligence/menu-intelligence.page.ts`, `src/app/pages/menu-intelligence/menu-intelligence.page.scss`
+- [x] S4: Convert the menu-intelligence section-category picker; delete its handlers (net lines <= 0) — `src/app/pages/menu-intelligence/menu-intelligence.page.html`, `src/app/pages/menu-intelligence/menu-intelligence.page.ts`, `src/app/pages/menu-intelligence/menu-intelligence.page.scss`
+- [x] S5: Convert the recipe-book list ingredient filter — `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.html`, `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.ts`, `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.scss`, `src/app/pages/recipe-book/components/recipe-book-list/recipe-book-list.component.spec.ts`
+- [x] S6: Convert the recipe-builder ingredient search — `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.html`, `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.ts`, `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.scss`, `src/app/pages/recipe-builder/components/ingredient-search/ingredient-search.component.spec.ts`
+- [x] S7: Convert the recipe-builder preparation search — `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.html`, `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.ts`, `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.scss`, `src/app/pages/recipe-builder/components/preparation-search/preparation-search.component.spec.ts`
+- [x] S8: Convert the recipe-builder logistics tool picker; drop highlight/open state the shared component now owns from the service; frozen page `.ts` net <= 0 — `src/app/pages/recipe-builder/recipe-builder.page.html`, `src/app/pages/recipe-builder/recipe-builder.page.ts`, `src/app/pages/recipe-builder/recipe-builder.page.scss`, `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts`, `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.spec.ts`
+- [x] S9: Choose the single multi-pick base: gap-list `chip-search-dropdown` vs `custom-multi-select` (CVA); migrate product-form's three chip pickers if no behaviour change, else mark `chip-search-dropdown` `@deprecated`; product-form `.ts` net <= 0 — `src/app/shared/custom-multi-select/custom-multi-select.component.ts`, `src/app/shared/custom-multi-select/custom-multi-select.component.html`, `src/app/shared/custom-multi-select/custom-multi-select.component.scss`, `src/app/shared/custom-multi-select/custom-multi-select.component.spec.ts`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.ts`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.html`, `src/app/shared/chip-search-dropdown/chip-search-dropdown.component.spec.ts`, `src/app/pages/inventory/components/product-form/product-form.component.html`, `src/app/pages/inventory/components/product-form/product-form.component.ts`
+- [x] S10: Final grep proof, registry + breadcrumbs update, `ng build`, tests, validation cards — `docs/brain/component-families.md`, `src/app/shared/breadcrumbs.md`
 
 ## Technical Considerations
 - Dependencies: `filterOptionsByLabel` (`core/utils/option-filter.util.ts`), `core/utils/add-option.util.ts`, `shared/add-option-row`, `shared/scrollable-dropdown`, `KeyResolutionService` (search by translated label).

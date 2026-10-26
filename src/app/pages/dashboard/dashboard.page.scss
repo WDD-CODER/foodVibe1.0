@@ -1,31 +1,33 @@
-.dashboard-shell {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  padding: 0;
-  // min-height: 100dvh;
-}
-
-.dashboard-content {
-  flex: 1;
-  min-height: 0;
-  padding: 1.5rem;
-
-  &--list {
+@layer components.dashboard {
+  .dashboard-shell {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
     padding: 0;
+    // min-height: 100dvh;
   }
-}
 
-.dashboard-metadata-layout {
-  display: flex;
-  flex-direction: column;
-
-  gap: 1.5rem;
-}
-
-/* Plan 278 — bottom nav occlusion */
-@media (max-width: 620px) {
   .dashboard-content {
-    padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    flex: 1;
+    min-height: 0;
+    padding: 1.5rem;
+
+    &--list {
+      padding: 0;
+    }
+  }
+
+  .dashboard-metadata-layout {
+    display: flex;
+    flex-direction: column;
+
+    gap: 1.5rem;
+  }
+
+  /* Plan 278 — bottom nav occlusion */
+  @media (max-width: 620px) {
+    .dashboard-content {
+      padding-block-end: calc(3.5rem + env(safe-area-inset-bottom, 0px));
+    }
   }
 }

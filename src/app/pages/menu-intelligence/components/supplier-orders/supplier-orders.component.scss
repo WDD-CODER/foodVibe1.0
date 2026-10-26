@@ -1,0 +1,145 @@
+@layer components.supplier-orders {
+  $break-mobile: 768px; // mirrors src/styles.scss
+
+  .so-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+
+    max-inline-size: 56rem;
+    max-block-size: 90dvh;
+
+    overflow-y: auto;
+  }
+
+  .so-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .so-title {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--space-2);
+
+    margin: 0;
+
+    font-size: var(--fs-lg);
+    font-weight: var(--fw-bold);
+    color: var(--color-text-main);
+  }
+
+  .so-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+
+    @media (min-width: $break-mobile) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .so-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    padding: var(--space-3);
+  }
+
+  .so-card--review {
+    border-style: dashed;
+  }
+
+  .so-card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .so-card-name {
+    margin: 0;
+
+    font-size: var(--fs-base);
+    font-weight: var(--fw-semibold);
+    color: var(--color-text-main);
+  }
+
+  .so-card-phone {
+    font-size: var(--fs-sm);
+    color: var(--color-text-muted);
+  }
+
+  .so-lines {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+  }
+
+  .so-line {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+
+    font-size: var(--fs-sm);
+    color: var(--color-text-main);
+  }
+
+  .so-line-qty {
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  .so-total {
+    margin: 0;
+
+    font-size: var(--fs-sm);
+    font-weight: var(--fw-semibold);
+    color: var(--color-text-main);
+  }
+
+  .so-partial {
+    margin-inline-start: var(--space-1);
+  }
+
+  .so-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .so-manual {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .so-manual-note {
+    margin: 0;
+
+    font-size: var(--fs-sm);
+    color: var(--text-warning);
+  }
+
+  .so-manual-text {
+    inline-size: 100%;
+
+    padding: var(--space-2);
+
+    font: inherit;
+    font-size: var(--fs-sm);
+    color: var(--color-text-main);
+
+    background: var(--bg-glass);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+  }
+}

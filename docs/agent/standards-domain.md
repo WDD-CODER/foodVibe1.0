@@ -47,7 +47,9 @@ paths:
 ## Add-option rule (dropdowns)
 
 Every dropdown in the app follows one rule (plans 398–401, 416). Shared selects
-(`custom-select`, `custom-multi-select`, `chip-search-dropdown`) already do it — pass the right inputs.
+(`search-combobox`, `custom-select`, `custom-multi-select`, `chip-search-dropdown`) already do it — pass the right inputs.
+A search box with a results list (type, see matches, add a new one) is `app-search-combobox`; never hand-build
+`input + app-scrollable-dropdown + app-add-option-row` in a page.
 
 1. **One add option**, always last in the list and in keyboard order — never two "הוסף" buttons.
 2. **Label:** typed text that isn't an existing option → `הוסף "<typed>"`. Nothing typed → the generic
@@ -81,7 +83,8 @@ Every dropdown in the app follows one rule (plans 398–401, 416). Shared select
 Use `core/utils/add-option.util.ts` (`addOptionLabel`, `findOptionByLabel`, `resolveAddedKey`) and
 render the row with `shared/add-option-row` (`<app-add-option-row [label]="…" />`). Shared-select
 inputs: `addNewValue` (sentinel), `addNewLabelKey`, `allowTypedAdd`; output `addNewChosen` /
-`addNew` carries the typed name (`''` for the generic add). New `add_new_<thing>` keys go in
+`addNew` carries the typed name (`''` for the generic add). `app-search-combobox`: `addLabelKey` turns the add
+option on, `(addChosen)` carries `{ typed, source }`. New `add_new_<thing>` keys go in
 `dictionary.json` → `general` (append-only).
 
 ### Keyboard (rule K — every dropdown and picker in the app, search box or not)

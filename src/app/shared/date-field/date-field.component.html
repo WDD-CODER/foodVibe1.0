@@ -1,0 +1,39 @@
+<div class="date-field">
+  <input
+    type="text"
+    class="date-field-text"
+    [attr.inputmode]="coarse_() ? null : 'numeric'"
+    dir="ltr"
+    autocomplete="off"
+    placeholder="dd/mm/yyyy"
+    maxlength="10"
+    [readonly]="coarse_()"
+    [attr.id]="coarse_() ? null : inputId() || null"
+    [class.c-input--invalid]="showError_()"
+    [attr.aria-label]="ariaLabelKey() ? (ariaLabelKey()! | translatePipe) : null"
+    [attr.aria-invalid]="showError_() ? 'true' : null"
+    [attr.aria-hidden]="coarse_() ? 'true' : null"
+    [attr.tabindex]="coarse_() ? -1 : null"
+    [disabled]="disabled()"
+    [value]="text_()"
+    (input)="onType($event)"
+    (change)="onCommit()"
+    (click)="onTextClick()"
+  />
+  <input
+    #picker
+    type="date"
+    class="date-field-picker"
+    [class.date-field-picker--touch]="coarse_()"
+    [attr.id]="coarse_() ? inputId() || null : null"
+    [attr.aria-label]="coarse_() && ariaLabelKey() ? (ariaLabelKey()! | translatePipe) : null"
+    [attr.tabindex]="coarse_() ? null : -1"
+    [attr.aria-hidden]="coarse_() ? null : 'true'"
+    [disabled]="disabled()"
+    [value]="value()"
+    (change)="onPicked($event)"
+  />
+</div>
+@if (showError_()) {
+  <span class="c-field-error" role="alert">{{ 'date_invalid' | translatePipe }}</span>
+}

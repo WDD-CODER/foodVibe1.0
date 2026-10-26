@@ -7,6 +7,8 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { RecipeDataService } from '@services/recipe-data.service'
 import { DishDataService } from '@services/dish-data.service'
 import { UserService } from '@services/user.service'
+import { BusinessService } from '@services/business.service'
+import { PermissionService } from '@services/permission.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ActivityLogService, ActivityEntry, ActivityChange, ActivityEntityType } from '@services/activity-log.service'
 import { TranslationService } from '@services/translation.service'
@@ -14,6 +16,9 @@ import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directi
 import { ActivityValuePipe } from 'src/app/core/pipes/activity-value.pipe'
 import { PageHeaderComponent } from 'src/app/shared/page-header/page-header.component'
 import type { DashboardTab } from '../../dashboard.page'
+import { SetupChecklistCardComponent } from '../setup-checklist-card/setup-checklist-card.component'
+import { BusinessPerformanceComponent } from '../business-performance/business-performance.component'
+import { OpeningDetailsBannerComponent } from '../opening-details-banner/opening-details-banner.component'
 
 const ENTITY_ICONS: Record<ActivityEntityType, string> = {
   product: 'package',
@@ -36,7 +41,10 @@ interface ActivityDayGroup {
     TranslatePipe,
     ActivityValuePipe,
     ScrollIndicatorsDirective,
-    PageHeaderComponent
+    PageHeaderComponent,
+    SetupChecklistCardComponent,
+    BusinessPerformanceComponent,
+    OpeningDetailsBannerComponent
   ],
   templateUrl: './dashboard-overview.component.html',
   styleUrl: './dashboard-overview.component.scss',
@@ -53,6 +61,8 @@ export class DashboardOverviewComponent {
   private readonly router = inject(Router)
   private readonly activityLog = inject(ActivityLogService)
   private readonly translation = inject(TranslationService)
+  private readonly businessService = inject(BusinessService)
+  private readonly permission = inject(PermissionService)
   private readonly relativeTimeFormat = new Intl.RelativeTimeFormat('he', { numeric: 'auto', style: 'short' })
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   /** Activity entry whose change chips are open (mobile only — desktop always shows them). */
@@ -75,6 +85,14 @@ export class DashboardOverviewComponent {
       ([recipes, dishes]) => this.unapprovedCount_.set(recipes + dishes)
     )
   }
+
+  /** Owner whose opening details were never answered (`undefined`; `{}` = skipped): a banner stands where the performance area would be. */
+  protected readonly needsOpeningDetails_ = computed(
+    () =>
+      this.permission.isOwner_() &&
+      this.businessService.business_()?.baseline === undefined &&
+      this.businessService.business_() !== null
+  )
 
   protected readonly totalProducts_ = computed(() => this.kitchenState.products_().length)
 

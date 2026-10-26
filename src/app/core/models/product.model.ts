@@ -37,6 +37,8 @@ export interface Product {
   expiryDaysDefault: number
   /** Epoch ms when the product was first added (set on create, preserved on update) */
   createdAt?: number
+  /** Id of the team member who created it (plan 428: staff may edit only their own). */
+  createdBy?: string
   updatedAt?: number
   /** English translation of the product name — populated by catalog seeder */
   nameEnglish?: string

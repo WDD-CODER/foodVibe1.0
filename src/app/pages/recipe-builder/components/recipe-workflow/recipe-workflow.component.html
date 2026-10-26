@@ -26,8 +26,8 @@
                 #instructionField
                 formControlName="instruction"
                 class="workflow-textarea"
-                SelectOnFocus
-                textareaAutoGrow
+                appSelectOnFocus
+                appTextareaAutoGrow
                 placeholder="{{ 'instruction_placeholder' | translatePipe }}"
                 (keydown.enter)="onInstructionEnter($event)"
               ></textarea>
@@ -86,7 +86,7 @@
                       [value]="laborTimeEditStr_()"
                       (input)="laborTimeEditStr_.set($any($event.target).value)"
                       placeholder="0:00"
-                      SelectOnFocus
+                      appSelectOnFocus
                       (blur)="exitLaborTimeEdit(group)"
                       (keydown.enter)="exitLaborTimeEdit(group); $event.preventDefault()"
                       autocomplete="off"
@@ -133,7 +133,7 @@
                       [value]="cookTimeEditStr_()"
                       (input)="cookTimeEditStr_.set($any($event.target).value)"
                       placeholder="00:00:00"
-                      SelectOnFocus
+                      appSelectOnFocus
                       (blur)="exitCookTimeEdit(group)"
                       (keydown.enter)="exitCookTimeEdit(group); $event.preventDefault()"
                       autocomplete="off"

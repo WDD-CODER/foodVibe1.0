@@ -1,16 +1,6 @@
-import {
-  Component,
-  DestroyRef,
-  ElementRef,
-  HostListener,
-  inject,
-  signal,
-  computed,
-  effect,
-  OnInit,
-  OnDestroy
-} from '@angular/core'
+import { Component, DestroyRef, ElementRef, inject, signal, computed, effect, OnInit, OnDestroy } from '@angular/core'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
@@ -28,6 +18,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { UserService } from '@services/user.service'
+import { PermissionService } from '@services/permission.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { AuthModalService } from '@services/auth-modal.service'
 import { TranslationService } from '@services/translation.service'
@@ -46,6 +37,7 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.service'
 import { CookTimerService } from './services/cook-timer.service'
 import { CookViewExportService } from './services/cook-view-export.service'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -58,8 +50,10 @@ const MULTIPLIER_CHIPS = [
 
 @Component({
   selector: 'app-cook-view-page',
+  host: { '(window:scroll)': 'onWindowScroll()', '(document:pointerdown)': 'onDocumentPointerDown($event)' },
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
@@ -108,11 +102,14 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   // ---- SIGNALS & CONSTANTS ----
   protected recipe_ = signal<Recipe | null>(null)
+  private readonly permission = inject(PermissionService)
+  /** Staff on someone else's recipe or dish: Cook View is view-only (plan 476). */
+  protected readonly readOnly_ = computed(() => this.permission.isReadOnlyRecipe(this.recipe_()))
   protected targetQuantity_ = signal<number>(1)
   protected selectedUnit_ = signal<string>('')
   /** Per-row unit override (index -> unit key). */
   protected unitOverrides_ = signal<Record<number, string>>({})
-  protected editMode_ = signal<boolean>(false)
+  protected isEditMode_ = signal<boolean>(false)
   /** Kitchen dark-mode skin (design's default is dark). Session-only, not persisted. */
   protected isDarkTheme_ = signal<boolean>(true)
   /** Kitchen mode retints the whole viewport: mirror it as `theme-kitchen` on <html> (removed on destroy). */
@@ -121,7 +118,7 @@ export class CookViewPage implements OnInit, OnDestroy {
   })
   /** Edit mode on <html> (`cv-editing`): on phones the FAB hides and the stamp lifts above the edit bar. */
   private readonly syncEditingFlag_ = effect(() => {
-    this.document.documentElement.classList.toggle('cv-editing', this.editMode_())
+    this.document.documentElement.classList.toggle('cv-editing', this.isEditMode_())
   })
   /** Snapshot when entering edit mode; restored on Undo. */
   private originalRecipe_ = signal<Recipe | null>(null)
@@ -132,8 +129,11 @@ export class CookViewPage implements OnInit, OnDestroy {
   /** Focus workflow row at index (for add step/prep); cleared after focus. */
   protected focusWorkflowRowAt_ = signal<number | null>(null)
   private workflowResetTrigger_ = 0
-  /** Steps / prep editor value right after it was built — edits to step text count as changes. */
-  private workflowSnapshot_ = ''
+  /** Steps / prep editor as built, plus the recipe copy vs the original — either differing counts as a change. */
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.workflowFormArray,
+    extra: () => JSON.stringify(this.recipe_()) !== JSON.stringify(this.originalRecipe_())
+  })
 
   /** Scale-by-ingredient: index and amount we scaled by (null = normal view). */
   protected scaleByIngredientIndex_ = signal<number | null>(null)
@@ -358,7 +358,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (recipe) {
       this.recipe_.set(recipe)
       this.originalRecipe_.set(null)
-      this.editMode_.set(false)
+      this.isEditMode_.set(false)
       this.activeStepIndex_.set(0)
       this.stepDoneSet_.set(new Set())
       this.checkedIngredients_.set(new Set())
@@ -427,8 +427,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (newUnit === '__add_unit__') {
       const prefillName = this.takePendingAddName_()
       setTimeout(() => this.unitRegistry.openUnitCreator({ prefillName }), 0)
-      this.unitRegistry.awaitUnitCreated().subscribe((unit) => {
-        this.onYieldUnitChange(unit)
+      void this.unitRegistry.awaitUnitCreated().then((unit) => {
+        if (unit) this.onYieldUnitChange(unit)
       })
       return
     }
@@ -583,7 +583,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     const recipe = this.recipe_()
     if (!recipe) return
     this.originalRecipe_.set(JSON.parse(JSON.stringify(recipe)))
-    this.editMode_.set(true)
+    this.isEditMode_.set(true)
     this.unitOverrides_.set({})
     this.buildWorkflowFormFromRecipe(recipe)
   }
@@ -611,17 +611,15 @@ export class CookViewPage implements OnInit, OnDestroy {
       const recipe = this.recipe_()
       if (!recipe) return
       this.saving.setSaving(true)
-      this.kitchenState.saveRecipe(recipe).subscribe({
-        next: (saved) => {
-          if (pushToMasterAfterSave) this.masterPush.pushToMaster(saved ?? recipe)
-          this.originalRecipe_.set(null)
-          this.editMode_.set(false)
-          this.saving.setSaving(false)
-        },
-        error: () => {
-          this.saving.setSaving(false)
-        }
-      })
+      try {
+        const saved = await this.kitchenState.saveRecipe(recipe)
+        if (pushToMasterAfterSave) this.masterPush.pushToMaster(saved ?? recipe)
+        this.originalRecipe_.set(null)
+        this.isEditMode_.set(false)
+        this.saving.setSaving(false)
+      } catch {
+        this.saving.setSaving(false)
+      }
     }
   }
 
@@ -638,7 +636,7 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (orig) {
       this.recipe_.set(orig)
       this.originalRecipe_.set(null)
-      this.editMode_.set(false)
+      this.isEditMode_.set(false)
       this.unitOverrides_.set({})
     }
   }
@@ -670,22 +668,22 @@ export class CookViewPage implements OnInit, OnDestroy {
     const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     this.saving.setSaving(true)
-    this.kitchenState.saveRecipe({ ...recipe, isApproved: !recipe.isApproved }).subscribe({
-      next: (saved) => {
-        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
-        this.recipe_.set(saved)
-        this.originalRecipe_.set(null)
-        this.editMode_.set(false)
-        this.saving.setSaving(false)
-        this.userMsg.onSetSuccessMsg(
-          this.translation.translate(saved.isApproved ? 'approval_success' : 'unapproval_success')
-        )
-      },
-      error: () => {
-        this.saving.setSaving(false)
-        this.userMsg.onSetErrorMsg(this.translation.translate('approval_error'))
-      }
-    })
+    let saved: Recipe
+    try {
+      saved = await this.kitchenState.saveRecipe({ ...recipe, isApproved: !recipe.isApproved })
+    } catch {
+      this.saving.setSaving(false)
+      this.userMsg.onSetErrorMsg(this.translation.translate('approval_error'))
+      return
+    }
+    if (scope === 'everyone') this.masterPush.pushToMaster(saved)
+    this.recipe_.set(saved)
+    this.originalRecipe_.set(null)
+    this.isEditMode_.set(false)
+    this.saving.setSaving(false)
+    this.userMsg.onSetSuccessMsg(
+      this.translation.translate(saved.isApproved ? 'approval_success' : 'unapproval_success')
+    )
   }
 
   protected async onRatingChange(value: number): Promise<void> {
@@ -695,11 +693,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (scope === 'cancel') return
     const updated = { ...recipe, rating: value }
     this.recipe_.set(updated)
-    this.kitchenState.saveRecipe(updated).subscribe({
-      next: (saved) => {
-        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
-      }
-    })
+    const saved = await this.kitchenState.saveRecipe(updated)
+    if (scope === 'everyone') this.masterPush.pushToMaster(saved)
   }
 
   protected async onExportInfo(): Promise<void> {
@@ -764,12 +759,8 @@ export class CookViewPage implements OnInit, OnDestroy {
 
   /** For route guard (PendingChangesComponent interface): true when in edit mode with unsaved changes. */
   hasRealChanges(): boolean {
-    const edit = this.editMode_()
-    const orig = this.originalRecipe_()
-    const current = this.recipe_()
-    if (!edit || !orig || !current) return false
-    if (JSON.stringify(this.workflowFormArray.getRawValue()) !== this.workflowSnapshot_) return true
-    return JSON.stringify(current) !== JSON.stringify(orig)
+    if (!this.isEditMode_() || !this.originalRecipe_() || !this.recipe_()) return false
+    return this.unsaved_.hasChanges()
   }
 
   protected getEditAmountStep(currentAmount: number, delta: number, rowUnit?: string): number {
@@ -799,8 +790,8 @@ export class CookViewPage implements OnInit, OnDestroy {
     if (unit === '__add_unit__') {
       const prefillName = this.takePendingAddName_()
       setTimeout(() => this.unitRegistry.openUnitCreator({ prefillName }), 0)
-      this.unitRegistry.awaitUnitCreated().subscribe((newUnit) => {
-        this.setIngredientUnit(index, newUnit)
+      void this.unitRegistry.awaitUnitCreated().then((newUnit) => {
+        if (newUnit) this.setIngredientUnit(index, newUnit)
       })
       return
     }
@@ -925,7 +916,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   /** Scroll spy (<768): ingredients come first; steps become active once their pane top reaches the bars, or at the page end. */
-  @HostListener('window:scroll')
   protected onWindowScroll(): void {
     if (!this.isStackedLayout()) return
     const steps = this.el.nativeElement.querySelector('.cv-step-pane') as HTMLElement | null
@@ -999,11 +989,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   protected toggleStepPeek(index: number): void {
     if (index === this.activeStepIndex_()) return
     this.peekedStepIndex_.set(this.peekedStepIndex_() === index ? null : index)
-  }
-
-  protected onEdit(): void {
-    const recipe = this.recipe_()
-    if (recipe) this.router.navigate(['/recipe-builder', recipe._id])
   }
 
   protected setUnitOverride(rowIndex: number, unit: string): void {
@@ -1083,27 +1068,30 @@ export class CookViewPage implements OnInit, OnDestroy {
         ? this.kitchenState.products_().find((p: Product) => p._id === row.referenceId)
         : undefined
     const existingUnitSymbols = product?.purchaseOptions?.map((o) => o.unitSymbol) ?? []
-    setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols }), 0)
-    this.unitRegistry.awaitUnitCreated().subscribe((unit) => {
-      if (!product?._id || product.purchaseOptions?.some((o) => o.unitSymbol === unit)) {
-        this.chooseUnit(index, unit)
+    if (!product?._id) {
+      setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols }), 0)
+      void this.unitRegistry.awaitUnitCreated().then((unit) => unit && this.chooseUnit(index, unit))
+      return
+    }
+    // Plan 423: the window asks how much one unit of THIS product weighs; that typed amount is what is saved.
+    const forProduct = { name: product.nameHebrew, baseUnit: product.baseUnit }
+    setTimeout(() => this.unitRegistry.openUnitCreator({ existingUnitSymbols, forProduct }), 0)
+    void this.unitRegistry.awaitProductUnitAdded().then(async (added) => {
+      if (!added) return
+      const { key, amount, basis } = added
+      if (product.purchaseOptions?.some((o) => o.unitSymbol === key)) {
+        this.chooseUnit(index, key)
         return
       }
-      const baseFactor = this.unitRegistry.getConversion(product.baseUnit) || 1
-      const unitFactor = this.unitRegistry.getConversion(unit) || 1
-      // conversionRate = base units per 1 of the new unit (e.g. 0.33 kg per jar when 1 jar = 330 g)
-      const conversionRate = baseFactor > 0 && unitFactor > 0 ? unitFactor / baseFactor : 1
       const updated: Product = {
         ...product,
         purchaseOptions: [
           ...(product.purchaseOptions ?? []),
-          { unitSymbol: unit, conversionRate, uom: product.baseUnit, priceOverride: 0 }
+          { unitSymbol: key, conversionRate: amount, uom: basis, priceOverride: 0 }
         ]
       }
-      this.kitchenState.saveProduct(updated).subscribe({
-        next: () => this.chooseUnit(index, unit),
-        error: () => this.chooseUnit(index, unit)
-      })
+      await this.kitchenState.saveProduct(updated).catch(() => {})
+      this.chooseUnit(index, key)
     })
   }
 
@@ -1150,7 +1138,6 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   /** Click outside the open row closes its expander. */
-  @HostListener('document:pointerdown', ['$event'])
   protected onDocumentPointerDown(event: PointerEvent): void {
     const open = this.openIngredientIndex_()
     if (open === null) return
@@ -1226,13 +1213,13 @@ export class CookViewPage implements OnInit, OnDestroy {
         arr.push(this.recipeFormService.createStepGroup(1))
       }
     }
-    this.workflowSnapshot_ = JSON.stringify(arr.getRawValue())
+    this.unsaved_.markSaved()
     this.workflowResetTrigger_ += 1
   }
 
   private applyWorkflowFormToRecipe(): void {
     const recipe = this.recipe_()
-    if (!recipe || !this.editMode_()) return
+    if (!recipe || !this.isEditMode_()) return
     const raw = this.workflowFormArray.getRawValue() as Record<string, unknown>[]
     const isDish = this.isDish_()
     if (isDish) {

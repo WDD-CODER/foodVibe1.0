@@ -28,6 +28,10 @@ export class ListShellComponent {
   readonly gridTemplate = input('')
   readonly mobileGridTemplate = input('')
   readonly dir = input<'rtl' | 'ltr'>('rtl')
+  /** `table` is the pinned-header grid; `cards` projects `[shell-cards]` as a responsive card grid (plan 453). */
+  readonly layout = input<'table' | 'cards'>('table')
+  /** Minimum card width for the `cards` layout. */
+  readonly cardMin = input('16rem')
   /** Visible row count and unfiltered total — when both are set, the header shows the count as a
    *  pill next to the title, with "N מתוך M פריטים" as its screen-reader label (plan 352). */
   readonly resultCount = input<number | null>(null)
@@ -74,6 +78,7 @@ export class ListShellComponent {
 
     effect(() => {
       host.style.setProperty('--list-grid', this.gridTemplate())
+      host.style.setProperty('--card-min', this.cardMin())
       host.style.setProperty('--list-grid-mobile', this.mobileGridTemplate())
       // Touch selects by long press, so its grid drops the trailing checkbox track. The SCSS picks
       // between the two with the same (hover: none) query that hides the checkbox cells — a JS

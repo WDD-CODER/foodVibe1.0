@@ -10,13 +10,14 @@ import { TranslationService } from '@services/translation.service'
 import { TranslationKeyModalService, isTranslationKeyResult } from '@services/translation-key-modal.service'
 import { EquipmentCategory } from 'src/app/core/models/equipment.model'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 const ADD_NEW_VALUE = '__add_new__'
 
 @Component({
-  selector: 'add-equipment-modal',
+  selector: 'app-add-equipment-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, CustomSelectComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, CustomSelectComponent, ModalShellComponent],
   templateUrl: './add-equipment-modal.component.html',
   styleUrl: './add-equipment-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -100,10 +101,6 @@ export class AddEquipmentModalComponent {
   protected cancel(): void {
     this.modalService.cancel()
     this.reset()
-  }
-
-  protected resetAndClose(): void {
-    this.cancel()
   }
 
   private reset(): void {

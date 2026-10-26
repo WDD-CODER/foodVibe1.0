@@ -5,6 +5,7 @@ import { MasterPushService, bulkScopeEntity, recipeScopeEntity } from '@services
 import { ConfirmModalService } from '@services/confirm-modal.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
 import { Recipe } from '@models/recipe.model'
+import { TranslationService } from '@services/translation.service'
 
 type RecipeBulkField = 'labels' | 'recipeType'
 
@@ -18,6 +19,7 @@ export class RecipeRowActionsService {
   private readonly kitchenState = inject(KitchenStateService)
   private readonly masterPush = inject(MasterPushService)
   private readonly confirmModal = inject(ConfirmModalService)
+  private readonly translation_ = inject(TranslationService)
   private readonly requireAuthService = inject(RequireAuthService)
 
   private readonly removingId_ = signal<string | null>(null)
@@ -29,15 +31,13 @@ export class RecipeRowActionsService {
     const scope = await this.masterPush.askDeleteScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     this.removingId_.set(recipe._id)
-    this.kitchenState.deleteRecipe(recipe).subscribe({
-      next: () => {
-        this.removingId_.set(null)
-        if (scope === 'everyone') this.masterPush.deleteFromMaster(recipe)
-      },
-      error: () => {
-        this.removingId_.set(null)
-      }
-    })
+    try {
+      await this.kitchenState.deleteRecipe(recipe)
+      this.removingId_.set(null)
+      if (scope === 'everyone') this.masterPush.deleteFromMaster(recipe)
+    } catch {
+      this.removingId_.set(null)
+    }
   }
 
   /** Resolves true when the delete went ahead (caller then clears its selection). */
@@ -50,7 +50,8 @@ export class RecipeRowActionsService {
     // When the admin scope prompt will show, it is the only dialog (its cancel is the safety).
     const masterLinked = recipes.find((r) => r._masterId)
     if (!this.masterPush.willAskDeleteScope(masterLinked)) {
-      if (!(await this.confirmModal.open(`למחוק ${ids.length} מתכונים?`, { variant: 'danger' }))) return false
+      const message = this.translation_.translate('confirm_bulk_delete_recipes').replace('{n}', String(ids.length))
+      if (!(await this.confirmModal.open(message, { variant: 'danger' }))) return false
     }
     const scope = await this.masterPush.askDeleteScope(masterLinked, {
       entity: bulkScopeEntity(recipes),
@@ -58,12 +59,12 @@ export class RecipeRowActionsService {
     })
     if (scope === 'cancel') return false
     recipes.forEach((recipe) => {
-      this.kitchenState.deleteRecipe(recipe).subscribe({
-        next: () => {
+      this.kitchenState
+        .deleteRecipe(recipe)
+        .then(() => {
           if (scope === 'everyone' && recipe._masterId) this.masterPush.deleteFromMaster(recipe)
-        },
-        error: () => {}
-      })
+        })
+        .catch(() => {})
     })
     return true
   }
@@ -71,29 +72,23 @@ export class RecipeRowActionsService {
   async rate(recipe: Recipe, value: number): Promise<void> {
     const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
-    this.kitchenState.saveRecipe({ ...recipe, rating: value }).subscribe({
-      next: (saved) => {
-        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
-      }
-    })
+    const saved = await this.kitchenState.saveRecipe({ ...recipe, rating: value })
+    if (scope === 'everyone') this.masterPush.pushToMaster(saved)
   }
 
   async toggleApproval(recipe: Recipe): Promise<void> {
     const scope = await this.masterPush.askScope(recipe, { entity: recipeScopeEntity(recipe) })
     if (scope === 'cancel') return
     const updated = { ...recipe, isApproved: !recipe.isApproved }
-    this.kitchenState.saveRecipe(updated).subscribe({
-      next: (saved) => {
-        if (scope === 'everyone') this.masterPush.pushToMaster(saved)
-      }
-    })
+    const saved = await this.kitchenState.saveRecipe(updated)
+    if (scope === 'everyone') this.masterPush.pushToMaster(saved)
   }
 
   toggleFavorite(recipe: Recipe, uid: string | null): void {
     if (!uid) return
     // The mark lives on the user's own copy (plan 407); push-to-master never carries it.
     const updated: Recipe = { ...recipe, favorite: !recipe.favorite }
-    this.kitchenState.saveRecipe(updated).subscribe()
+    void this.kitchenState.saveRecipe(updated)
   }
 
   async bulkEdit(event: { field: string; value: string; ids: string[] }): Promise<void> {
@@ -123,12 +118,12 @@ export class RecipeRowActionsService {
       } else {
         updated = { ...recipe, recipeType: event.value as 'dish' | 'preparation' }
       }
-      this.kitchenState.saveRecipe(updated).subscribe({
-        next: (saved) => {
+      this.kitchenState
+        .saveRecipe(updated)
+        .then((saved) => {
           if (scope === 'everyone' && saved._masterId) this.masterPush.pushToMaster(saved)
-        },
-        error: () => {}
-      })
+        })
+        .catch(() => {})
     }
   }
 

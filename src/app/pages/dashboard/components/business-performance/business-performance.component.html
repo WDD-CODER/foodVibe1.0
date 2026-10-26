@@ -1,0 +1,122 @@
+<section
+  class="perf"
+  data-testid="business-performance"
+  dir="rtl"
+  [attr.aria-label]="'performance_title' | translatePipe"
+>
+  <header class="perf__head">
+    <h2 class="perf__title">{{ 'performance_title' | translatePipe }}</h2>
+    @if (cards().length) {
+      <div class="c-chip-group perf__periods" role="radiogroup" [attr.aria-label]="'performance_title' | translatePipe">
+        @for (option of periods; track option.value) {
+          <label class="c-chip c-chip--toggle" [attr.data-testid]="'period-' + option.value">
+            <input
+              type="radio"
+              name="performance-period"
+              [value]="option.value"
+              [checked]="period() === option.value"
+              (change)="selectPeriod(option.value)"
+            />
+            <span>{{ option.labelKey | translatePipe }}</span>
+          </label>
+        }
+      </div>
+    }
+  </header>
+
+  @if (hasStats()) {
+    @if (cards().length) {
+      <div class="perf__cards" [class.is-loading]="loading()">
+        @for (card of cards(); track card.key) {
+          <article class="perf-card c-glass-panel" [attr.data-testid]="'stat-' + card.key">
+            <div class="perf-card__top">
+              <span class="perf-card__icon"><lucide-icon [name]="card.icon" [size]="13" /></span>
+              <h3 class="perf-card__label">{{ card.labelKey | translatePipe }}</h3>
+            </div>
+            <p class="perf-card__value" data-testid="stat-value">{{ card.value }}</p>
+            @if (card.note) {
+              <p class="perf-card__note" data-testid="stat-note">{{ card.note }}</p>
+            }
+            @if (card.change) {
+              <p
+                class="perf-card__change"
+                data-testid="stat-change"
+                [class.is-good]="card.change.good"
+                [class.is-bad]="!card.change.good"
+              >
+                <lucide-icon
+                  [name]="card.change.good ? 'trending-up' : 'trending-down'"
+                  [size]="12"
+                  aria-hidden="true"
+                />
+                {{ card.change.text }}
+              </p>
+            }
+          </article>
+        }
+      </div>
+    }
+
+    @if (isEmpty()) {
+      <div class="perf__empty c-glass-panel" data-testid="perf-empty">
+        <button type="button" class="c-btn-ghost--sm" data-testid="create-first-inquiry" (click)="createFirstInquiry()">
+          {{ 'create_first_inquiry' | translatePipe }}
+        </button>
+      </div>
+    }
+
+    <div class="perf__lists">
+      <section class="perf-panel c-glass-panel" data-testid="funnel">
+        <h3 class="perf-panel__title">{{ 'funnel_title' | translatePipe }}</h3>
+        <ul class="funnel">
+          @for (row of funnel(); track row.stage) {
+            <li>
+              <button
+                type="button"
+                class="funnel__row"
+                [attr.data-testid]="'funnel-' + row.stage"
+                (click)="openStage(row.stage)"
+              >
+                <span class="funnel__name">{{ stageKey(row.stage) | translatePipe }}</span>
+                <span class="funnel__track" aria-hidden="true">
+                  <span class="funnel__bar" [style.inline-size.%]="row.share"></span>
+                </span>
+                <span class="funnel__count">{{ row.count }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="perf-panel c-glass-panel" data-testid="upcoming">
+        <h3 class="perf-panel__title">{{ 'upcoming_title' | translatePipe }}</h3>
+        @if (upcoming().length) {
+          <ul class="upcoming">
+            @for (event of upcoming(); track event._id) {
+              <li>
+                <button type="button" class="upcoming__row" data-testid="upcoming-row" (click)="openEvent(event._id)">
+                  <span class="upcoming__date">{{ event.eventDate | date: 'dd/MM' }}</span>
+                  <span class="upcoming__name">{{ event.name }}</span>
+                  @if (event.guestCount !== null) {
+                    <span class="upcoming__guests">
+                      <lucide-icon name="users" [size]="12" aria-hidden="true" />
+                      {{ event.guestCount }}
+                    </span>
+                  }
+                  @if (event.stage) {
+                    <span class="c-chip teal">{{ stageKey(event.stage) | translatePipe }}</span>
+                  }
+                  @if (event.legacy) {
+                    <span class="c-chip amber">{{ 'event_legacy' | translatePipe }}</span>
+                  }
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="perf-panel__empty" data-testid="upcoming-empty">{{ 'upcoming_empty' | translatePipe }}</p>
+        }
+      </section>
+    </div>
+  }
+</section>

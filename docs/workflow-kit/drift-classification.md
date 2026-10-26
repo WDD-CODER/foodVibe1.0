@@ -72,7 +72,7 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | packs/angular/.claude/skills/auth-and-logging/SKILL.md | intended | `{{project.name}}` | — |
 | packs/angular/.claude/skills/cssLayer/SKILL.md | intended | kit 1.3.0: "The UI is Hebrew RTL" renders from `project.uiDirection: rtl` + `project.uiLocale`; override dropped (byte-identical) | 30ee30f |
 | packs/angular/.lintstagedrc.mjs | intended | BOM + `\|quoted` filter | — |
-| packs/angular/docs/agent/conventions.md | override | FoodVibe's translation rules (Hebrew, TranslationService resolvers, Lucide) vs generic kit text | — |
+| packs/angular/docs/agent/conventions.md | override | FoodVibe's translation rules (Hebrew, TranslationService resolvers, Lucide) and naming rules (`app-` selector prefix, is/has/can/should booleans, input names without `_`, measured by `scripts/rule-sweep-count.mjs`; plan 458) vs generic kit text | — |
 | packs/angular/docs/agent/standards-angular.md | intended | kit 1.3.0: the **Logic** line renders from `docs.domainSummary`; override dropped (byte-identical) | 30ee30f |
 | packs/angular/eslint.config.mjs | intended | BOM only | — |
 | packs/angular/knip.json | intended | `\|dquoted` filter | — |
@@ -100,3 +100,15 @@ with FoodVibe's values and compares with FoodVibe's files (`kit-drift.ps1`). Tha
   arrows fixed, plan-number and ADR back-references dropped, Playwright MCP and the deprecated husky lines gone.
 - Result: `KIT_DRIFT: ok — 0 undeclared differences, 19 overrides` (the 19 `override` rows above, including
   `preflight/SKILL.md`; each has its reason in `kit.config.json`).
+
+## Plan 450 — reuse layer (2026-10-21)
+
+Three kit-owned files carry the reuse layer until the kit absorbs it (kit PR + release, ADR 0021). Each has an
+`overrides` entry in `kit.config.json`; the logic lives in FoodVibe-owned files (`scripts/lib/reuse-check.mjs`,
+`scripts/lib/registry-families.mjs`, `scripts/reuse-lint.mjs`, `docs/agent/standards-reuse.md`).
+
+| Path (kit side) | Class | Notes | Kit commit |
+| --- | --- | --- | --- |
+| core/scripts/scope-check.mjs | override | plan 450: `import { runReuseCheck }` + one `--reuse` dispatch line; queued for a kit PR | — |
+| core/.claude/references/prd-template.md | override | plan 450: `## Reuse Check` block; queued for a kit PR | — |
+| core/.claude/skills/save-plan/SKILL.md | override | plan 450: reuse-gate checklist line + Phase 2 rule; queued for a kit PR | — |

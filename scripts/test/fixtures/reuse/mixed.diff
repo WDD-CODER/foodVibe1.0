@@ -1,0 +1,20 @@
+diff --git a/src/app/pages/orders/orders.component.ts b/src/app/pages/orders/orders.component.ts
+--- a/src/app/pages/orders/orders.component.ts
++++ b/src/app/pages/orders/orders.component.ts
+@@ -1,0 +2,2 @@
++import { TranslatePipe } from '../../core/pipes/translation-pipe.pipe'
++import { formatMoney } from '@utils/money.util'
+@@ -40,0 +42,3 @@
++  onClearSearch(): void {
++    this.query_.set('')
++  }
+diff --git a/src/app/shared/custom-select/custom-select.component.html b/src/app/shared/custom-select/custom-select.component.html
+--- a/src/app/shared/custom-select/custom-select.component.html
++++ b/src/app/shared/custom-select/custom-select.component.html
+@@ -5,0 +6 @@
++<app-scrollable-dropdown [open]="isOpen()"></app-scrollable-dropdown>
+diff --git a/src/styles.scss b/src/styles.scss
+--- a/src/styles.scss
++++ b/src/styles.scss
+@@ -100,0 +101 @@
++.c-order-chip {

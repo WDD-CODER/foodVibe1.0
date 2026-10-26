@@ -17,6 +17,8 @@ import { LucideAngularModule } from 'lucide-angular'
 import { take } from 'rxjs/operators'
 import { duplicateEntityNameValidator } from 'src/app/core/validators/item.validators'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
+import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { VenueDataService } from '@services/venue-data.service'
 import { EquipmentDataService } from '@services/equipment-data.service'
 import { RequireAuthService } from 'src/app/core/utils/require-auth.util'
@@ -28,6 +30,7 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { UserMsgService } from '@services/user-msg.service'
 import { TranslationService } from '@services/translation.service'
 import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
+import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', 'client_home', 'popup_venue']
 
@@ -35,12 +38,14 @@ const ENV_TYPES: EnvironmentType[] = ['professional_kitchen', 'outdoor_field', '
   selector: 'app-venue-form',
   standalone: true,
   imports: [
+    SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    CustomSelectComponent
+    CustomSelectComponent,
+    FormFieldComponent
   ],
   templateUrl: './venue-form.component.html',
   styleUrl: './venue-form.component.scss',
@@ -70,12 +75,15 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   protected validationErrors_ = signal<Record<string, string>>({})
   /** design-port session 6 — Cloudinary-hosted venue photo, same pattern as recipe-header's imageUrl. */
   protected readonly photoUrl_ = signal<string | null>(null)
-  protected readonly uploadingPhoto_ = signal(false)
+  protected readonly isUploadingPhoto_ = signal(false)
 
   /** pendingChangesGuard contract (plan 371): true once a save succeeded, so leaving doesn't prompt. */
   isSubmitted = false
   /** Form + photo as loaded (add: empty form; edit: after hydrateForm) — compared by hasRealChanges(). */
-  private initialSnapshot_ = ''
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.venueForm_,
+    snapshot: () => JSON.stringify({ form: this.venueForm_.getRawValue(), photoUrl: this.photoUrl_() })
+  })
 
   protected get infraArray(): FormArray {
     return this.venueForm_?.get('availableInfrastructure') as FormArray
@@ -104,22 +112,18 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
         this.isEditMode_.set(true)
         this.hydrateForm(venue)
       }
-      this.initialSnapshot_ = this.currentSnapshot_()
+      this.unsaved_.markSaved()
     })
   }
 
   /** pendingChangesGuard: anything changed since the form was loaded (fields or photo)? */
   hasRealChanges(): boolean {
-    return !!this.venueForm_ && this.currentSnapshot_() !== this.initialSnapshot_
+    return this.unsaved_.hasChanges()
   }
 
   /** pendingChangesGuard "save and leave": saves without navigating; the guard then lets the navigation through. */
   saveAndWait(): Promise<boolean> {
     return this.persist_()
-  }
-
-  private currentSnapshot_(): string {
-    return JSON.stringify({ form: this.venueForm_.getRawValue(), photoUrl: this.photoUrl_() })
   }
 
   private buildForm(): void {
@@ -183,17 +187,17 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   protected onPhotoSelected(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0]
     if (!file) return
-    this.uploadingPhoto_.set(true)
+    this.isUploadingPhoto_.set(true)
     this.cloudinary
       .upload(file)
       .pipe(take(1))
       .subscribe({
         next: (url) => {
           this.photoUrl_.set(url)
-          this.uploadingPhoto_.set(false)
+          this.isUploadingPhoto_.set(false)
         },
         error: () => {
-          this.uploadingPhoto_.set(false)
+          this.isUploadingPhoto_.set(false)
           this.userMsg.onSetErrorMsg(this.translation.translate('image_upload_failed'))
         }
       })
@@ -223,6 +227,13 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
 
   protected removeHoursRow(index: number): void {
     this.hoursArray.removeAt(index)
+  }
+
+  /** Error key under the name field: duplicate name (after leaving the field) or required. */
+  protected nameError(): string | null {
+    const ctrl = this.venueForm_.get('nameHebrew')
+    if (ctrl?.errors?.['duplicateName'] && ctrl.touched) return 'duplicate_venue_name'
+    return this.validationErrors_()['nameHebrew'] ? 'field_name_required' : null
   }
 
   private validateForm_(): boolean {

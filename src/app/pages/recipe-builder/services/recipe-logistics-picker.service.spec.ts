@@ -8,6 +8,7 @@ import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { RecipeLogisticsPickerService } from './recipe-logistics-picker.service'
 
+// The search box, its keyboard and its add row are covered by shared/search-combobox/search-combobox.component.spec.ts.
 describe('RecipeLogisticsPickerService', () => {
   const equipment = [
     { _id: 'e1', nameHebrew: 'סיר' },
@@ -36,19 +37,19 @@ describe('RecipeLogisticsPickerService', () => {
     service.connect(baseline)
   })
 
-  const key = (k: string): KeyboardEvent => new KeyboardEvent('keydown', { key: k, cancelable: true })
-
-  it('arrow keys + Enter select an option without adding it yet', () => {
+  it('typing lists matching tools; picking one selects it without adding it yet', () => {
     service.onSearchInput('ס')
-    expect(service.dropdownOpen_()).toBeTrue()
-    expect(service.highlightedIndex_()).toBe(0)
-    service.onSearchKeydown(key('ArrowDown'))
-    expect(service.highlightedIndex_()).toBe(1)
-    service.onSearchKeydown(key('Enter'))
+    expect(service.searchOptions_().map((e) => e._id)).toEqual(['e1', 'e2'])
+    service.selectOption(equipment[1])
     expect(service.selectedToolId_()).toBe('e2')
     expect(service.searchQuery_()).toBe('סכין')
-    expect(service.dropdownOpen_()).toBeFalse()
     expect(baseline.length).toBe(0)
+  })
+
+  it('editing the text after a pick drops the selection', () => {
+    service.selectOption(equipment[1])
+    service.onSearchInput('סכינ')
+    expect(service.selectedToolId_()).toBeNull()
   })
 
   it('Add puts the selected tool in the baseline and hides it from search', () => {
@@ -64,10 +65,16 @@ describe('RecipeLogisticsPickerService', () => {
     expect(service.searchOptions_().map((e) => e._id)).toEqual(['e2'])
   })
 
-  it('Add with only typed text opens the add-new-tool modal', async () => {
+  it('Add with only typed text opens the add-new-tool modal prefilled with it (rule W)', () => {
     service.onSearchInput('מחבת')
     service.onAddClick()
     expect(modalOpen).toHaveBeenCalledWith('מחבת')
+  })
+
+  it('Add with the exact name of an existing tool opens the modal empty (generic add)', () => {
+    service.onSearchInput('סיר')
+    service.onAddClick()
+    expect(modalOpen).toHaveBeenCalledWith(undefined)
   })
 
   it('removeBaselineRow removes the chip', () => {
@@ -77,36 +84,11 @@ describe('RecipeLogisticsPickerService', () => {
     expect(baseline.length).toBe(0)
   })
 
-  it('stops at the add option (no wrap) and Enter on it opens the modal with the typed name', () => {
-    service.onSearchInput('ס')
-    for (let i = 0; i < 5; i++) service.onSearchKeydown(key('ArrowDown'))
-    expect(service.highlightedIndex_()).toBe(2)
-    service.onSearchKeydown(key('ArrowUp'))
-    service.onSearchKeydown(key('ArrowUp'))
-    service.onSearchKeydown(key('ArrowUp'))
-    expect(service.highlightedIndex_()).toBe(0)
-    for (let i = 0; i < 5; i++) service.onSearchKeydown(key('ArrowDown'))
-    service.onSearchKeydown(key('Enter'))
+  it('the add option opens the modal with the typed name, or empty for the generic add', async () => {
+    await service.openAddNewToolModal('ס')
     expect(modalOpen).toHaveBeenCalledWith('ס')
-  })
-
-  it('add label: typed new name vs exact match (generic add_new_tool)', () => {
-    service.onSearchInput('מחבת')
-    expect(service.addLabel_()).toEqual({ kind: 'typed', text: 'מחבת' })
-    service.onSearchInput('סיר')
-    expect(service.addLabel_()).toEqual({ kind: 'generic', key: 'add_new_tool' })
-  })
-
-  it('Tab closes the list without blocking the browser focus move; Escape closes', () => {
-    service.onSearchInput('ס')
-    const tab = key('Tab')
-    service.onSearchKeydown(tab)
-    expect(tab.defaultPrevented).toBeFalse()
-    expect(service.dropdownOpen_()).toBeFalse()
-    service.onSearchKeydown(key('ArrowDown'))
-    expect(service.dropdownOpen_()).toBeTrue()
-    service.onSearchKeydown(key('Escape'))
-    expect(service.dropdownOpen_()).toBeFalse()
+    await service.openAddNewToolModal('')
+    expect(modalOpen).toHaveBeenCalledWith(undefined)
   })
 
   it('a newly added tool lands selected and keeps the chosen quantity', async () => {
@@ -115,7 +97,7 @@ describe('RecipeLogisticsPickerService', () => {
     modalOpen.and.resolveTo({ name: 'מחבת', category: 'tool' })
     service.quantity_.set(4)
     service.onSearchInput('מחבת')
-    await service.openAddNewToolModal()
+    await service.openAddNewToolModal('מחבת')
     expect(service.selectedToolId_()).toBe('e9')
     expect(service.quantity_()).toBe(4)
   })

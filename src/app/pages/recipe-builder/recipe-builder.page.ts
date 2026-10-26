@@ -29,8 +29,7 @@ import { KitchenStateService } from '@services/kitchen-state.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
-import { VersionHistoryService } from '@services/version-history.service'
-import type { VersionEntityType } from '@services/version-history.service'
+import { VersionHistoryService, type VersionEntityType } from '@services/version-history.service'
 import { Recipe } from '@models/recipe.model'
 import { MasterPushService, ScopeEntity } from '@services/master-push.service'
 import { RecipeDataService } from '@services/recipe-data.service'
@@ -44,7 +43,7 @@ import { RecipeIngredientsTableComponent } from './components/recipe-ingredients
 import { RecipeWorkflowComponent } from './components/recipe-workflow/recipe-workflow.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from 'src/app/shared/loader/loader.component'
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { HeroFabService, type HeroFabAction } from '@services/hero-fab.service'
 import { ExportPreviewComponent } from '../../shared/export-preview/export-preview.component'
@@ -55,10 +54,9 @@ import { UserService } from '@services/user.service'
 import { RecipeAiFlowService } from './services/recipe-ai-flow.service'
 import { findDuplicateName } from './utils/find-duplicate-name.util'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
-import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
-
-import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-row.component'
+import { EditGateComponent } from 'src/app/shared/edit-gate/edit-gate.component'
 @Component({
   selector: 'app-recipe-builder-page',
   standalone: true,
@@ -72,14 +70,13 @@ import { AddOptionRowComponent } from 'src/app/shared/add-option-row/add-option-
     LucideAngularModule,
     TranslatePipe,
     LoaderComponent,
-    ScrollableDropdownComponent,
+    SearchComboboxComponent,
     ClickOutSideDirective,
     ExportPreviewComponent,
     ExportToolbarOverlayComponent,
     ApproveStampComponent,
     CounterComponent,
-    InputClearComponent,
-    AddOptionRowComponent
+    EditGateComponent
   ],
   templateUrl: './recipe-builder.page.html',
   styleUrl: './recipe-builder.page.scss'
@@ -122,10 +119,14 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   /** Bumped when ingredients change so cost/weight computeds re-run (form is not a signal). */
   private ingredientsFormVersion_ = signal(0)
 
-  /** Snapshot of form value when user entered the page (for hasRealChanges). */
-  private initialRecipeSnapshot_: string | null = null
+  /** Snapshot of the form when the user entered the page (for hasRealChanges); an applied AI draft counts as a change too. */
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.recipeForm_,
+    snapshot: () => this.getRecipeSnapshotForComparison(),
+    extra: () => this.hasUnsavedAiDraft_
+  })
   /** True after an AI draft was applied to a new recipe and not yet saved — the draft itself is unsaved work. */
-  private unsavedAiDraft_ = false
+  private hasUnsavedAiDraft_ = false
   /** Original recipe_type when the record was loaded — used to detect type-change saves. */
   private initialRecipeType_: 'dish' | 'preparation' | null = null
   /** TEMPORARY (dev-process-only, see chat 2026-09-26): source master doc's _id, if any. */
@@ -140,16 +141,16 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   protected focusWorkflowRowAt_ = signal<number | null>(null)
 
   /** True when viewing an old version from history (read-only, no save). */
-  protected historyViewMode_ = signal(false)
+  protected isHistoryViewMode_ = signal(false)
 
   /** Set when save is blocked due to invalid ingredient rows — cleared once user resolves them. */
-  protected blockingIngredientsError_ = signal(false)
+  protected hasBlockingIngredientsError_ = signal(false)
 
   /** Whether the current recipe is marked approved (stamp sets this; used in buildRecipeFromForm and for stamp UI). */
   protected isApproved_ = signal(false)
 
   /** True once user has explicitly confirmed the manual yield amount as neto. */
-  protected netoConfirmed_ = signal(false)
+  protected isNetoConfirmed_ = signal(false)
 
   /** Last-saved serving_portions for existing dish recipes. Null for new dishes (hides the reset button). */
   protected savedPortions_ = signal<number | null>(null)
@@ -162,23 +163,23 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** Section cards expanded by default (matches the design) — collapsed only once the
    *  user closes one, which persists via localStorage below (true = collapsed). */
-  protected tableLogicCollapsed_ = signal(false)
-  protected workflowLogicCollapsed_ = signal(false)
-  protected logisticsLogicCollapsed_ = signal(false)
+  protected isTableLogicCollapsed_ = signal(false)
+  protected isWorkflowLogicCollapsed_ = signal(false)
+  protected isLogisticsLogicCollapsed_ = signal(false)
 
   protected toggleTableLogic(): void {
-    const next = !this.tableLogicCollapsed_()
-    this.tableLogicCollapsed_.set(next)
+    const next = !this.isTableLogicCollapsed_()
+    this.isTableLogicCollapsed_.set(next)
     localStorage.setItem('rb_col_ingredients', JSON.stringify(next))
   }
   protected toggleWorkflowLogic(): void {
-    const next = !this.workflowLogicCollapsed_()
-    this.workflowLogicCollapsed_.set(next)
+    const next = !this.isWorkflowLogicCollapsed_()
+    this.isWorkflowLogicCollapsed_.set(next)
     localStorage.setItem('rb_col_workflow', JSON.stringify(next))
   }
   protected toggleLogisticsLogic(): void {
-    const next = !this.logisticsLogicCollapsed_()
-    this.logisticsLogicCollapsed_.set(next)
+    const next = !this.isLogisticsLogicCollapsed_()
+    this.isLogisticsLogicCollapsed_.set(next)
     localStorage.setItem('rb_col_logistics', JSON.stringify(next))
   }
 
@@ -214,6 +215,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       total_cost: [0],
       labels: [[] as string[]],
       course: [''],
+      default_station: [''],
       logistics: this.fb.group({
         baseline: this.fb.array([])
       })
@@ -354,9 +356,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeRating_.set(0)
     this.recipeId_.set(null)
     this.isApproved_.set(false)
-    this.netoConfirmed_.set(false)
+    this.isNetoConfirmed_.set(false)
     this.savedPortions_.set(null)
-    this.unsavedAiDraft_ = false
+    this.hasUnsavedAiDraft_ = false
     this.cachedPrepItems_ = []
     this.cachedSteps_ = []
 
@@ -404,13 +406,13 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     // Reset guard flag so canDeactivate works correctly if the component is reused
     // (Angular may reuse the same instance when navigating between recipe-builder/:id routes).
     this.isSubmitted = false
-    this.unsavedAiDraft_ = false
+    this.hasUnsavedAiDraft_ = false
     const lsIngredients = localStorage.getItem('rb_col_ingredients')
-    if (lsIngredients !== null) this.tableLogicCollapsed_.set(JSON.parse(lsIngredients))
+    if (lsIngredients !== null) this.isTableLogicCollapsed_.set(JSON.parse(lsIngredients))
     const lsWorkflow = localStorage.getItem('rb_col_workflow')
-    if (lsWorkflow !== null) this.workflowLogicCollapsed_.set(JSON.parse(lsWorkflow))
+    if (lsWorkflow !== null) this.isWorkflowLogicCollapsed_.set(JSON.parse(lsWorkflow))
     const lsLogistics = localStorage.getItem('rb_col_logistics')
-    if (lsLogistics !== null) this.logisticsLogicCollapsed_.set(JSON.parse(lsLogistics))
+    if (lsLogistics !== null) this.isLogisticsLogicCollapsed_.set(JSON.parse(lsLogistics))
 
     const q = this.route_.snapshot.queryParams
     const view = q['view']
@@ -425,17 +427,17 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         if (entry && (entry.entityType === 'recipe' || entry.entityType === 'dish')) {
           const snapshot = entry.snapshot as Recipe
           this.patchFormFromRecipe(snapshot)
-          this.historyViewMode_.set(true)
+          this.isHistoryViewMode_.set(true)
           this.recipeForm_.disable()
         } else {
-          this.userMsg_.onSetErrorMsg('גרסה לא נמצאה')
+          this.userMsg_.onSetErrorMsg(this.translation_.translate('version_not_found'))
         }
       }
     } else {
       this.aiFlow_.init({
         recipeForm: this.recipeForm_,
         ingredientsFormVersion_: this.ingredientsFormVersion_,
-        netoConfirmed_: this.netoConfirmed_,
+        netoConfirmed_: this.isNetoConfirmed_,
         addNewIngredientRow: () => this.addNewIngredientRow()
       })
 
@@ -448,7 +450,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         const gotDraft = this.aiFlow_.applyPendingDraft()
         // The draft lands in the baseline snapshot below, so flag it explicitly:
         // an applied draft is unsaved work until the recipe is saved.
-        this.unsavedAiDraft_ = gotDraft
+        this.hasUnsavedAiDraft_ = gotDraft
         if (!gotDraft) {
           const type = this.route_.snapshot.queryParams['type'] as string | undefined
           if (type === 'dish') {
@@ -494,14 +496,14 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     // Clear any stale async-validation errors left over from a previous recipe on
     // this reused component instance, and run a fresh check with the correct ID.
     this.recipeForm_.get('nameHebrew')?.updateValueAndValidity()
-    if (!this.historyViewMode_() && !this.recipeForm_.disabled) {
+    if (!this.isHistoryViewMode_() && !this.recipeForm_.disabled) {
       // Defer snapshot capture to after the first render so that child component effects
       // (e.g. RecipeHeaderComponent auto-syncs yield from ingredient metrics) have already
       // run. Capturing the snapshot before effects fire causes false-positive dirty guards
       // whenever the computed yield differs from the stored yieldAmount.
       runInInjectionContext(this.injector_, () => {
         afterNextRender(() => {
-          this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
+          this.unsaved_.markSaved()
           this.recipeForm_.markAsPristine()
         })
       })
@@ -579,7 +581,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeFormService_.patchFormFromRecipe(this.recipeForm_, recipe)
     this.recipeImageUrl_.set(recipe.imageUrl ?? null)
     this.recipeRating_.set(recipe.rating ?? 0)
-    this.netoConfirmed_.set(recipe.netoConfirmed ?? false)
+    this.isNetoConfirmed_.set(recipe.netoConfirmed ?? false)
     // Capture saved portions for the dish reset button (only for existing dishes).
     const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish'
     this.savedPortions_.set(isDish ? (recipe.yieldAmount ?? null) : null)
@@ -610,14 +612,9 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
   /** For pendingChangesGuard: true when current form value differs from initial state when user entered the page. */
   hasRealChanges(): boolean {
-    if (this.historyViewMode_() || this.recipeForm_.disabled) return false
-
-    // New and existing recipes share the snapshot comparison: every field change
-    // (label, course, rating, free-text ingredient…) counts as unsaved.
-    if (this.unsavedAiDraft_) return true
-    if (this.initialRecipeSnapshot_ === null) return this.recipeForm_.dirty === true
-    const current = this.getRecipeSnapshotForComparison()
-    return current !== this.initialRecipeSnapshot_
+    if (this.isHistoryViewMode_() || this.recipeForm_.disabled) return false
+    // New and existing recipes share the snapshot comparison: every field change counts as unsaved.
+    return this.unsaved_.hasChanges()
   }
 
   /** For pendingChangesGuard: save the recipe and resolve once done. */
@@ -626,7 +623,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     // Neto/portions confirmation gate.
     const headerRef = this.recipeHeaderRef_()
-    if (headerRef?.isYieldManualOverride() && !this.netoConfirmed_()) {
+    if (headerRef?.isYieldManualOverride() && !this.isNetoConfirmed_()) {
       const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish'
       const confirmed = await this.confirmModal_.open(
         isDish ? 'dish_portions_confirm_message' : 'neto_confirm_message',
@@ -636,7 +633,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         }
       )
       if (!confirmed) return false
-      this.netoConfirmed_.set(true)
+      this.isNetoConfirmed_.set(true)
     }
 
     // Type-change confirmation gate — same check as in saveRecipe().
@@ -695,21 +692,17 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const recipe = this.buildRecipeFromForm()
     recipe.autoLabels = this.recipeFormService_.computeAutoLabels(recipe)
 
-    return new Promise<boolean>((resolve) => {
-      this.state_.saveRecipe(recipe).subscribe({
-        next: (saved) => {
-          if (scope === 'everyone' && saved) this.masterPush_.pushToMaster(saved)
-          this.saving.setSaving(false)
-          this.isSubmitted = true
-          resolve(true)
-        },
-        error: () => {
-          this.saving.setSaving(false)
-          this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'))
-          resolve(false)
-        }
-      })
-    })
+    try {
+      const saved = await this.state_.saveRecipe(recipe)
+      if (scope === 'everyone' && saved) this.masterPush_.pushToMaster(saved)
+      this.saving.setSaving(false)
+      this.isSubmitted = true
+      return true
+    } catch {
+      this.saving.setSaving(false)
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('error_saving_recipe'))
+      return false
+    }
   }
 
   /** Normalized form value for comparison (numbers coerced, labels sorted). */
@@ -781,18 +774,17 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       serving_portions: Number(raw?.['serving_portions'] ?? 1),
       labels: normalizedLabels,
       course: (raw?.['course'] ?? '').toString(),
+      default_station: (raw?.['default_station'] ?? '').toString(),
       yield_conversions: yieldNorm,
       ingredients: ingNorm,
       workflow_items: workflowNorm,
       logistics_baseline: baselineNorm,
-      // Signal-backed state that buildRecipeFromForm() persists but the form
-      // group never holds. Anything saved from a signal has to be mirrored
-      // here or the dirty check cannot see it: changing only the rating left
-      // the snapshot identical, so leaving the page never prompted to save.
+      // Signal-backed state saved by buildRecipeFromForm() but not held by the form:
+      // mirror it here or the dirty check cannot see it (a rating-only change went unnoticed).
       imageUrl: this.recipeImageUrl_() ?? null,
       rating: this.recipeRating_(),
       isApproved: this.isApproved_(),
-      netoConfirmed: this.netoConfirmed_()
+      netoConfirmed: this.isNetoConfirmed_()
     }
     return JSON.stringify(normalized)
   }
@@ -835,7 +827,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const headerValid = this.recipeHeaderRef_()?.validate() ?? true
     if (this.recipeForm_.pending) {
       // Async validators (duplicate-name check) still running — block save to avoid racing
-      this.userMsg_.onSetErrorMsg(this.translation_.translate('validating_please_wait') ?? 'אנא המתן לסיום האימות')
+      this.userMsg_.onSetErrorMsg(this.translation_.translate('validating_please_wait'))
       return
     }
     if (this.recipeForm_.invalid || !headerValid) {
@@ -846,14 +838,14 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     }
 
     if (this.ingredientsTableRef_()?.hasBlockingRows()) {
-      this.blockingIngredientsError_.set(true)
+      this.hasBlockingIngredientsError_.set(true)
       this.userMsg_.onSetErrorMsg(this.translation_.translate('blocking_ingredients_error'))
       setTimeout(() => {
         document.querySelector('.incomplete-row')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 100)
       return
     }
-    this.blockingIngredientsError_.set(false)
+    this.hasBlockingIngredientsError_.set(false)
 
     // Unlinked ingredients confirmation gate
     if (this.ingredientsTableRef_()?.hasUnlinkedRows()) {
@@ -863,7 +855,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     // Neto/portions confirmation gate
     const headerRef = this.recipeHeaderRef_()
-    if (headerRef?.isYieldManualOverride() && !this.netoConfirmed_()) {
+    if (headerRef?.isYieldManualOverride() && !this.isNetoConfirmed_()) {
       const isDish = this.recipeForm_.get('recipe_type')?.value === 'dish'
       const confirmed = await this.confirmModal_.open(
         isDish ? 'dish_portions_confirm_message' : 'neto_confirm_message',
@@ -873,7 +865,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
         }
       )
       if (!confirmed) return
-      this.netoConfirmed_.set(true)
+      this.isNetoConfirmed_.set(true)
     }
 
     // Type-change confirmation gate — only fires when editing an existing record
@@ -914,42 +906,40 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const recipe = this.buildRecipeFromForm()
     recipe.autoLabels = this.recipeFormService_.computeAutoLabels(recipe)
 
-    this.state_.saveRecipe(recipe).subscribe({
-      next: (saved) => {
-        this.saving.setSaving(false)
-        if (pushToMasterAfterSave) this.masterPush_.pushToMaster(saved)
-        if (navigateOnSuccess) {
-          this.isSubmitted = true
-          this.resetToNewForm_()
-          this.router_.navigate(['/recipe-book'])
-        } else {
-          // If a type-change caused a new _id to be assigned, update recipeId_ so the
-          // duplicate-name validator does not flag the same recipe as a conflict.
-          if (saved._id && saved._id !== this.recipeId_()) {
-            this.recipeId_.set(saved._id)
-          }
-          // Refresh the entry-time snapshot so the pending-changes guard does not
-          // fire when the user navigates away after a successful in-place save.
-          this.initialRecipeSnapshot_ = this.getRecipeSnapshotForComparison()
-          this.unsavedAiDraft_ = false
-          this.initialRecipeType_ = saved.recipeType === 'dish' ? 'dish' : 'preparation'
-          this.recipeForm_.markAsPristine()
-          // Update savedPortions_ so the reset button reflects the newly saved value.
-          if (saved.recipeType === 'dish') {
-            this.savedPortions_.set(saved.yieldAmount ?? null)
-          }
-          this.userMsg_.onSetSuccessMsg(
-            this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
-          )
-        }
-      },
-      error: () => {
-        this.saving.setSaving(false)
-        if (!navigateOnSuccess) {
-          this.userMsg_.onSetErrorMsg(this.translation_.translate('approval_error'))
-        }
+    let saved: Recipe
+    try {
+      saved = await this.state_.saveRecipe(recipe)
+    } catch {
+      this.saving.setSaving(false)
+      if (!navigateOnSuccess) this.userMsg_.onSetErrorMsg(this.translation_.translate('approval_error'))
+      return
+    }
+    this.saving.setSaving(false)
+    if (pushToMasterAfterSave) this.masterPush_.pushToMaster(saved)
+    if (navigateOnSuccess) {
+      this.isSubmitted = true
+      this.resetToNewForm_()
+      this.router_.navigate(['/recipe-book'])
+    } else {
+      // If a type-change caused a new _id to be assigned, update recipeId_ so the
+      // duplicate-name validator does not flag the same recipe as a conflict.
+      if (saved._id && saved._id !== this.recipeId_()) {
+        this.recipeId_.set(saved._id)
       }
-    })
+      // Refresh the entry-time snapshot so the pending-changes guard does not
+      // fire when the user navigates away after a successful in-place save.
+      this.unsaved_.markSaved()
+      this.hasUnsavedAiDraft_ = false
+      this.initialRecipeType_ = saved.recipeType === 'dish' ? 'dish' : 'preparation'
+      this.recipeForm_.markAsPristine()
+      // Update savedPortions_ so the reset button reflects the newly saved value.
+      if (saved.recipeType === 'dish') {
+        this.savedPortions_.set(saved.yieldAmount ?? null)
+      }
+      this.userMsg_.onSetSuccessMsg(
+        this.translation_.translate(this.isApproved_() ? 'approval_success' : 'unapproval_success')
+      )
+    }
   }
 
   protected onApproveStamp(): void {
@@ -994,10 +984,10 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
 
     const name = (this.recipeForm_.get('nameHebrew')?.value ?? '').toString().trim()
     if (this.recipeForm_.get('nameHebrew')?.errors?.['duplicateName']) {
-      errors.push(isDish ? 'שם מנה זה כבר קיים' : 'שם מתכון זה כבר קיים')
+      errors.push(this.translation_.translate(isDish ? 'duplicate_dish_name' : 'duplicate_recipe_name'))
     }
     if (!name) {
-      errors.push(isDish ? 'שם המנה חסר' : 'שם המתכון חסר')
+      errors.push(this.translation_.translate(isDish ? 'dish_name_missing' : 'recipe_name_missing'))
     }
 
     const raw = this.recipeForm_.getRawValue() as {
@@ -1007,25 +997,25 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     const ingredients = raw?.ingredients || []
     const hasAnyIngredient = ingredients.some((ing: { referenceId?: string }) => !!ing?.referenceId)
     if (!hasAnyIngredient) {
-      errors.push('חסר מרכיב: יש לבחור לפחות מוצר או מתכון אחד')
+      errors.push(this.translation_.translate('missing_ingredient_error'))
     }
     ingredients.forEach(
       (ing: { referenceId?: string; amount_net?: number | string; nameHebrew?: string }, i: number) => {
         if (!ing?.referenceId) return
         const amt = ing.amount_net
         const numAmt = typeof amt === 'number' ? amt : Number(amt)
-        const label = ing.nameHebrew || `מרכיב ${i + 1}`
+        const label = ing.nameHebrew || this.translation_.translate('ingredient_n').replace('{n}', String(i + 1))
         if (amt == null || amt === '' || isNaN(numAmt) || numAmt < 0) {
-          errors.push(`כמות חסרה עבור "${label}"`)
+          errors.push(this.translation_.translate('qty_missing_for').replace('{name}', label))
         } else if (numAmt === 0) {
-          errors.push(`כמות עבור "${label}" חייבת להיות גדולה מ-0`)
+          errors.push(this.translation_.translate('qty_positive_for').replace('{name}', label))
         }
       }
     )
 
     const portions = this.recipeForm_.get('serving_portions')?.value
     if (isDish && (portions == null || Number(portions) < 1)) {
-      errors.push('מספר מנות חסר או לא תקין (נדרש לפחות 1)')
+      errors.push(this.translation_.translate('servings_invalid_error'))
     }
 
     const workflowRows = raw?.workflow_items || []
@@ -1035,19 +1025,18 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
           if (!row?.preparationName?.trim()) return
           const qty = typeof row.quantity === 'number' ? row.quantity : Number(row.quantity)
           if (row.quantity == null || row.quantity === '' || isNaN(qty) || qty < 0) {
-            errors.push(`כמות חסרה עבור ההכנה "${row.preparationName}"`)
+            errors.push(this.translation_.translate('prep_qty_missing').replace('{name}', row.preparationName))
           }
           if (!row?.unit?.trim()) {
-            errors.push(`יחידה חסרה עבור ההכנה "${row.preparationName}"`)
+            errors.push(this.translation_.translate('prep_unit_missing').replace('{name}', row.preparationName))
           }
         }
       )
     }
 
-    if (errors.length === 0) {
-      return 'יש למלא את כל השדות הנדרשים'
-    }
-    return errors.length === 1 ? errors[0] : `חסרים: ${errors.join('; ')}`
+    if (errors.length === 0) return this.translation_.translate('fill_required_fields')
+    if (errors.length === 1) return errors[0]
+    return this.translation_.translate('missing_fields_list').replace('{list}', errors.join('; '))
   }
 
   /** Admin scope-prompt noun (plan 365): follows the form's current recipe type. */
@@ -1063,7 +1052,7 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
       ...recipe,
       ...(url ? { imageUrl: url } : {}),
       ...(rating > 0 ? { rating: rating } : {}),
-      netoConfirmed: this.netoConfirmed_()
+      netoConfirmed: this.isNetoConfirmed_()
     }
   }
 

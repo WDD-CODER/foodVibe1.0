@@ -998,63 +998,8 @@ textarea.c-input {
   }
 }
 
-/* ---- Engine: Tab Filter Pill ---- */
-.c-tab-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-
-  padding-inline: 0.875rem;
-  padding-block: 0.4375rem;
-
-  background: var(--bg-chrome);
-  color: var(--color-text-muted);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  white-space: nowrap;
-
-  border: 1px solid var(--border-chrome);
-  border-radius: var(--radius-full);
-  backdrop-filter: var(--blur-glass);
-  box-shadow: inset 0 1px 0 var(--border-glass-strong);
-
-  cursor: pointer;
-  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
-
-  lucide-icon {
-    opacity: 0.7;
-    transition: opacity 0.18s ease;
-  }
-
-  &:hover {
-    color: var(--color-text-main);
-    background: var(--bg-card-solid);
-
-    lucide-icon { opacity: 1; }
-  }
-
-  &.active {
-    background: linear-gradient(180deg, var(--color-active-a), var(--color-active-b));
-    color: var(--color-active-fg);
-    border-color: transparent;
-    box-shadow: var(--shadow-active);
-
-    lucide-icon { opacity: 1; }
-  }
-
-  &.trash {
-    color: var(--color-danger);
-    border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
-
-    &:hover {
-      color: var(--color-danger-hover);
-      border-color: color-mix(in srgb, var(--color-danger) 50%, transparent);
-    }
-  }
-}
-
 /* ---- Engine: Tab chip row (plan 305 M3) — contextual sub-nav under the top-level tabs.
-   Composes .c-tab-pill for each chip. Plan 350: the chips live in an <app-scroll-rail>, which
+   Composes .c-chip--tab for each chip. Plan 350: the chips live in an <app-scroll-rail>, which
    owns the horizontal scroll, snap, edge fade and arrows; this rule only owns the row's
    spacing. The rail centers the chips while they fit (`safe center`, so an overflowing row
    starts at its first chip instead of pushing it off-screen). ---- */
@@ -1763,7 +1708,7 @@ textarea.c-input {
    short and long labels alike into the same track width, cutting text off —
    flex-wrap lets every item keep its own natural width. Engine-level so it
    applies automatically wherever `.c-filter-section` is used — no per-screen
-   opt-in needed. Filter and form options render as `.c-toggle-chip` (plans
+   opt-in needed. Filter and form options render as `.c-chip--toggle` (plans
    339 and 342). ---- */
 @media (max-width: $break-tablet-max) {
   .c-filter-section {
@@ -1774,7 +1719,7 @@ textarea.c-input {
     gap: 0.5rem 0.875rem;
   }
 
-  .c-filter-section > .c-toggle-chip-group,
+  .c-filter-section > .c-chip-group,
   .c-filter-category {
     flex: 1 0 100%;
   }
@@ -1782,228 +1727,9 @@ textarea.c-input {
 }
 
 
-.c-filter-chip {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.35rem;
-  padding: 0.25rem 0.625rem;
-
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.3;
-  color: var(--color-primary-hover);
-  background: var(--color-primary-soft);
-
-  border: 1px solid rgba(20, 184, 166, 0.2);
-  border-radius: var(--radius-full);
-
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s var(--ease-spring);
-
-  &:hover {
-    background: rgba(20, 184, 166, 0.2);
-    transform: scale(0.97);
-  }
-}
-
-/* ---- Engine: Toggle Chip (plan 339) ----
-   A pill the user taps on and off — neutral when off, filled with the primary
-   color when on. Markup: `label.c-toggle-chip > input[type=checkbox|radio] + span`.
-   The input stays in the DOM, focusable and announced (clip-path, never
-   display:none), so Tab + Space and screen readers work exactly as with a
-   checkbox. Selected state comes from `:has(input:checked)`; `.is-on` is the
-   fallback for chips without an input. Wrap chips in `.c-toggle-chip-group`. */
-.c-toggle-chip-group {
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: var(--space-2);
-  padding-block: 1rem;
-}
-
 /* "Clear filters" button in a filter panel/bar — pairs with `.c-btn-ghost--sm`. */
 .c-filter-clear {
   padding: 0.55rem 0.625rem;
-}
-
-.c-toggle-chip {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.375rem;
-  min-block-size: 2rem;
-
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  line-height: 1.2;
-  color: var(--color-text-secondary);
-  background: var(--bg-glass);
-  user-select: none;
-
-  padding-inline: 0.75rem;
-  padding-block: 0.25rem;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-
-  cursor: pointer;
-  transition:
-    background 0.15s var(--ease-smooth),
-    color 0.15s var(--ease-smooth),
-    border-color 0.15s var(--ease-smooth);
-
-  > input {
-    position: absolute;
-
-    inline-size: 1px;
-    block-size: 1px;
-
-    margin: 0;
-
-    appearance: none;
-    opacity: 0;
-    clip-path: inset(50%);
-    pointer-events: none;
-  }
-
-  &:hover {
-    color: var(--color-text-main);
-    background: var(--bg-glass-hover);
-    border-color: var(--color-primary);
-  }
-
-  &:has(> input:focus-visible) {
-    outline: 2px solid var(--border-focus);
-    outline-offset: 2px;
-  }
-
-  &:has(> input:checked),
-  &.is-on {
-    color: var(--color-text-on-primary);
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-
-    .c-toggle-chip__count {
-      color: inherit;
-
-      opacity: 0.85;
-    }
-
-    .c-toggle-chip__dot {
-      box-shadow: 0 0 0 1.5px var(--color-text-on-primary);
-    }
-  }
-
-  &:has(> input:disabled) {
-    cursor: not-allowed;
-
-    opacity: 0.5;
-  }
-}
-
-.c-toggle-chip__dot {
-  flex-shrink: 0;
-
-  inline-size: 0.5rem;
-  block-size: 0.5rem;
-
-  border-radius: var(--radius-full);
-}
-
-.c-toggle-chip__count {
-  flex-shrink: 0;
-
-  font-size: var(--fs-xs);
-  font-weight: var(--fw-semibold);
-  color: var(--color-text-muted);
-
-  &.c-toggle-chip__count--zero {
-    opacity: 0.5;
-  }
-}
-
-@media (max-width: $break-phone-max) {
-  /* ≥44px tap target on phones. */
-  .c-toggle-chip {
-    padding-block: 0.375rem;
-    min-block-size: 2.75rem;
-  }
-}
-
-/* ---- Engine: Tap Chip (plan 340) ----
-   A compact item pill that opens an actions menu when tapped (`.c-icon-btn` edit /
-   delete in `app-row-actions-menu [anchored]`), so no per-item buttons take space. Markup:
-   `button.c-tap-chip` inside `.c-tap-chip-group`; set `aria-expanded` while its
-   menu is open. Read-only items use `span.c-tap-chip.is-locked` (plus a lock icon). */
-.c-tap-chip-group {
-  display: flex;
-  flex-wrap: wrap;
-
-  gap: var(--space-2);
-}
-
-.c-tap-chip {
-  display: inline-flex;
-  align-items: center;
-
-  gap: 0.375rem;
-  min-block-size: 2rem;
-
-  font-family: inherit;
-  font-size: var(--fs-sm);
-  font-weight: var(--fw-semibold);
-  line-height: 1.2;
-  color: var(--color-text-main);
-  background: var(--bg-glass-strong);
-
-  padding-inline: 0.75rem;
-  padding-block: 0.25rem;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-
-  cursor: pointer;
-  transition:
-    background 0.15s var(--ease-smooth),
-    border-color 0.15s var(--ease-smooth);
-
-  &:hover,
-  &[aria-expanded='true'] {
-    background: var(--bg-glass-hover);
-    border-color: var(--color-primary);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--border-focus);
-    outline-offset: 2px;
-  }
-
-  &.is-locked {
-    color: var(--color-text-secondary);
-
-    cursor: default;
-
-    &:hover {
-      background: var(--bg-glass-strong);
-      border-color: var(--border-default);
-    }
-  }
-}
-
-.c-tap-chip__dot {
-  flex-shrink: 0;
-
-  inline-size: 0.625rem;
-  block-size: 0.625rem;
-
-  border-radius: var(--radius-full);
-}
-
-@media (max-width: $break-phone-max) {
-  /* ≥44px tap target on phones. */
-  .c-tap-chip {
-    min-block-size: 2.75rem;
-  }
 }
 
 /* ============================================================
@@ -2029,8 +1755,8 @@ textarea.c-input {
      desktop footprint. Higher specificity than the per-screen rules, so this is
      the single source of truth for phone checkbox size. Toggle-chip inputs are
      visually hidden and must stay 1px — excluded. */
-  app-root input[type="checkbox"]:not(.c-toggle-chip > input),
-  app-root input[type="radio"]:not(.c-toggle-chip > input) {
+  app-root input[type="checkbox"]:not(.c-chip--toggle > input),
+  app-root input[type="radio"]:not(.c-chip--toggle > input) {
     flex: none !important;
 
     width: 0.875rem !important;
@@ -2041,7 +1767,7 @@ textarea.c-input {
     border-radius: var(--radius-xs) !important;
   }
 
-  app-root input[type="radio"]:not(.c-toggle-chip > input) {
+  app-root input[type="radio"]:not(.c-chip--toggle > input) {
     border-radius: var(--radius-full) !important;
   }
 
@@ -2328,12 +2054,297 @@ body.kb-open {
   }
 }
 
-/* ---- Engine modifier: Tab pill "home" (plan 367) — the "לוח בקרה" chip that replaces the
-   current dashboard sub-page's chip. Outlined in the primary color so it reads as "back",
-   not as another section. ---- */
-.c-tab-pill--home {
-  background: transparent;
+/* Plan 437: while prep sheets are open, print only them */
+@media print {
+  body.prep-sheets-open *:not(:has(app-prep-sheets)):not(app-prep-sheets):not(app-prep-sheets *) {
+    display: none !important;
+  }
+
+  body.prep-sheets-open app-prep-sheets,
+  body.prep-sheets-open app-prep-sheets * {
+    visibility: visible;
+  }
+}
+
+/* Plan 437: the engine overlay is unlayered, so its print reset must be unlayered too (a layered rule loses) */
+@media print {
+  body.prep-sheets-open .prep-overlay {
+    position: static;
+
+    display: block;
+    overflow: visible;
+
+    background: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ============================================================
+   Plan 457 — Chip engine. ONE `.c-chip` family: base `.c-chip` (static label) plus variants.
+   Markup: `class="c-chip c-chip--toggle"` etc. Variants repeat every value they need (the base
+   sets its own colors/size, so a variant never relies on it). Sub-parts: `__count`, `__dot`,
+   `__remove`. Group wrapper: `.c-chip-group`. Do not add a page-local chip: pick a variant.
+     --toggle     label > input[checkbox|radio] + span; on-state from :has(> input:checked) or .is-on
+     --tap        button (aria-expanded) that opens a menu; read-only item = span.is-locked
+     --filter     applied-filter chip (clickable, removes the filter)
+     --removable  value chip with a trailing `__remove` button (at inline-end)
+     --tab        tab pill (.active, --home, .trash)
+     --teal|--amber|--red  tones (same colors as the legacy .teal/.amber/.red)
+   ============================================================ */
+.c-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: var(--space-2);
+}
+
+/* Toggle groups sat in filter panels and forms with block padding (plans 339/340). */
+.c-chip-group:has(> .c-chip--toggle) {
+  padding-block: 1rem;
+}
+
+.c-chip__dot {
+  flex-shrink: 0;
+
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+
+  border-radius: var(--radius-full);
+}
+
+.c-chip__count {
+  flex-shrink: 0;
+
+  color: var(--color-text-muted);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+
+  &.c-chip__count--zero {
+    opacity: 0.5;
+  }
+}
+
+.c-chip--toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.375rem;
+  min-block-size: 2rem;
+
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  line-height: 1.2;
+  user-select: none;
+
+  background: var(--bg-glass);
+
+  padding-inline: 0.75rem;
+  padding-block: 0.25rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease-smooth),
+    color 0.15s var(--ease-smooth),
+    border-color 0.15s var(--ease-smooth);
+
+  > input {
+    position: absolute;
+
+    inline-size: 1px;
+    block-size: 1px;
+
+    margin: 0;
+
+    appearance: none;
+    opacity: 0;
+    clip-path: inset(50%);
+    pointer-events: none;
+  }
+
+  &:hover {
+    color: var(--color-text-main);
+    background: var(--bg-glass-hover);
+    border-color: var(--color-primary);
+  }
+
+  &:has(> input:focus-visible) {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  &:has(> input:checked),
+  &.is-on {
+    color: var(--color-text-on-primary);
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+
+    .c-chip__count {
+      color: inherit;
+
+      opacity: 0.85;
+    }
+
+    .c-chip__dot {
+      box-shadow: 0 0 0 1.5px var(--color-text-on-primary);
+    }
+  }
+
+  &:has(> input:disabled) {
+    cursor: not-allowed;
+
+    opacity: 0.5;
+  }
+}
+
+.c-chip--tap {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.375rem;
+  min-block-size: 2rem;
+
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+
+  background: var(--bg-glass-strong);
+
+  padding-inline: 0.75rem;
+  padding-block: 0.25rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease-smooth),
+    border-color 0.15s var(--ease-smooth);
+
+  &:hover,
+  &[aria-expanded='true'] {
+    background: var(--bg-glass-hover);
+    border-color: var(--color-primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  &.is-locked {
+    color: var(--color-text-secondary);
+
+    cursor: default;
+
+    &:hover {
+      background: var(--bg-glass-strong);
+      border-color: var(--border-default);
+    }
+  }
+
+  .c-chip__dot {
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+  }
+}
+
+.c-chip--filter {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.35rem;
+
   color: var(--color-primary-hover);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.3;
+
+  background: var(--color-primary-soft);
+
+  padding-inline: 0.625rem;
+  padding-block: 0.25rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s var(--ease-spring);
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+    transform: scale(0.97);
+  }
+}
+
+.c-chip--tab {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.375rem;
+
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: inherit;
+  white-space: nowrap;
+
+  background: var(--bg-chrome);
+
+  padding-inline: 0.875rem;
+  padding-block: 0.4375rem;
+  border: 1px solid var(--border-chrome);
+  border-radius: var(--radius-full);
+
+  backdrop-filter: var(--blur-glass);
+  cursor: pointer;
+  transition: color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: inset 0 1px 0 var(--border-glass-strong);
+
+  lucide-icon {
+    opacity: 0.7;
+    transition: opacity 0.18s ease;
+  }
+
+  &:hover {
+    color: var(--color-text-main);
+    background: var(--bg-card-solid);
+
+    lucide-icon { opacity: 1; }
+  }
+
+  &.active {
+    color: var(--color-active-fg);
+    background: linear-gradient(180deg, var(--color-active-a), var(--color-active-b));
+    border-color: transparent;
+    box-shadow: var(--shadow-active);
+
+    lucide-icon { opacity: 1; }
+  }
+
+  &.trash {
+    color: var(--color-danger);
+    border-color: color-mix(in srgb, var(--color-danger) 30%, transparent);
+
+    &:hover {
+      color: var(--color-danger-hover);
+      border-color: color-mix(in srgb, var(--color-danger) 50%, transparent);
+    }
+  }
+}
+
+/* "Back to overview" tab: outlined in the primary color so it reads as "back", not as a section (plan 367). */
+.c-chip--tab.c-chip--home {
+  color: var(--color-primary-hover);
+
+  background: transparent;
+
   border-color: color-mix(in srgb, var(--color-primary) 45%, transparent);
   box-shadow: none;
 
@@ -2342,7 +2353,250 @@ body.kb-open {
   }
 
   &:hover {
-    background: var(--color-primary-soft);
     color: var(--color-primary-hover);
+    background: var(--color-primary-soft);
   }
+}
+
+/* Value chip with a trailing remove button at inline-end (RTL-safe). Sub-part: `__remove`. */
+.c-chip--removable {
+  display: inline-flex;
+  align-items: center;
+
+  gap: 0.375rem;
+
+  color: var(--color-text-main);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.2;
+
+  background: var(--bg-muted);
+
+  padding-inline: 0.5rem;
+  padding-block: 0.2rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+}
+
+.c-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+
+  color: var(--color-danger);
+
+  background: var(--bg-danger-subtle);
+
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(0.95);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+}
+
+/* A value chip that is itself the remove button (custom-multi-select): click anywhere removes it. */
+button.c-chip--removable {
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+/* Background and text color come from data (inline style); glass edge so a pale color still reads. */
+.c-chip--colored {
+  border: 1px solid var(--border-glass);
+
+  box-shadow: var(--shadow-glass);
+}
+
+/* Static tag (plan 457 S7-S11): a small read-only label pill, e.g. an allergen, a status, a type.
+   Sizes: default, `--sm` (dropdown rows, tooltips). Shapes: full pill (default), `--soft`
+   (radius-sm), `--square` (radius-xs). Tones below (`--teal`, `--amber`, `--red`, `--green`,
+   `--allergen`, `--glass`, `--solid`) set only color and background. */
+.c-chip--tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  gap: 0.25rem;
+
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  line-height: 1.2;
+
+  background: var(--bg-muted);
+
+  padding-inline: 0.625rem;
+  padding-block: 0.25rem;
+  border: 0 solid transparent;
+  border-radius: var(--radius-full);
+
+  lucide-icon {
+    flex-shrink: 0;
+  }
+}
+
+.c-chip--sm {
+  font-size: 0.6875rem;
+
+  padding-inline: 0.5rem;
+  padding-block: 0.125rem;
+}
+
+.c-chip--soft {
+  border-radius: var(--radius-sm);
+}
+
+.c-chip--square {
+  border-radius: var(--radius-xs);
+}
+
+.c-chip--teal {
+  color: var(--color-primary-hover);
+
+  background: var(--color-primary-soft);
+
+  border-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.c-chip--amber {
+  color: var(--text-warning);
+
+  background: var(--bg-warning-soft);
+
+  border-color: color-mix(in srgb, var(--color-warning) 25%, transparent);
+}
+
+.c-chip--red {
+  color: var(--color-danger);
+
+  background: var(--bg-danger-subtle);
+
+  border-color: color-mix(in srgb, var(--color-danger) 20%, transparent);
+}
+
+.c-chip--green {
+  color: var(--text-success);
+
+  background: var(--bg-success);
+
+  border-color: color-mix(in srgb, var(--color-success) 20%, transparent);
+}
+
+.c-chip--allergen {
+  color: var(--color-allergen-text);
+
+  background: var(--bg-danger-subtle);
+
+  border-color: color-mix(in srgb, var(--color-allergen-text) 20%, transparent);
+}
+
+.c-chip--glass {
+  background: var(--bg-glass-strong);
+}
+
+/* Background comes from data (inline style), text stays light on it. */
+.c-chip--solid {
+  color: var(--color-text-on-primary);
+}
+
+@media (max-width: $break-phone-max) {
+  /* >=44px tap target on phones. */
+  .c-chip--toggle {
+    min-block-size: 2.75rem;
+
+    padding-block: 0.375rem;
+  }
+
+  .c-chip--tap {
+    min-block-size: 2.75rem;
+  }
+}
+
+/* ---- Moved from recipe-book-list.component.scss (plan 458 S2) ---- */
+/* Chip container: flex wrap, centered, chips width = content */
+.c-dense-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.25rem;
+  width: 100%;
+}
+
+/* ---- Moved from confirm-modal.component.scss (plan 458 S2) ---- */
+/* .c-modal-card qualifier keeps these above the modal's own .confirm-modal-message rule, as before the move. */
+.c-modal-card.c-modal-card--danger .confirm-modal-message {
+  color: var(--color-text-main);
+}
+
+.c-modal-card.c-modal-card--warning .confirm-modal-message {
+  color: var(--text-warning);
+}
+
+/* ---- Plan 459 A2: an open dropdown list stays above the next panel ----
+   backdrop-filter makes every .c-glass-panel / .c-modal-card its own stacking context, so a list opened inside
+   one (z-index 9999 there) is still painted as part of that panel and a later sibling panel covers it.
+   .c-dropdown exists in the DOM only while a list is open; lifting that panel above its siblings fixes it.
+   20 stays below the app header (z-index 100). The tablet/phone modal variant (.inline-edit-panel.as-modal,
+   position: fixed, z-index 1001) is excluded: it already sits above its backdrop and must stay fixed. */
+.c-glass-panel:has(.c-dropdown),
+.c-modal-card:has(.c-dropdown),
+.c-modal-body:has(.c-dropdown),
+.inline-edit-panel:not(.as-modal):has(.c-dropdown) {
+  position: relative;
+  z-index: 20;
+}
+
+/* ---- Plan 460 fix round 2: a .c-modal-overlay shown in the browser top layer ----
+   A modal rendered inside a backdrop-filter / transform ancestor opts in with popover="manual" + showPopover(),
+   so its fixed overlay covers the whole window. These undo the browser's own [popover] box styles. */
+.c-modal-overlay[popover] {
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  color: inherit;
+}
+
+/* Plan 451: app-modal-shell moves focus onto the card (tabindex -1) when a popup opens — no ring on the card itself */
+.c-modal-card:focus {
+  outline: none;
+}
+
+/* Plan 482: no browser up/down arrows on any number box, app-wide. Outside any @layer so it beats layered
+   component styles. The arrows ran the value away on desktop (each step fired a save). */
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  margin: 0;
+
+  -webkit-appearance: none;
 }

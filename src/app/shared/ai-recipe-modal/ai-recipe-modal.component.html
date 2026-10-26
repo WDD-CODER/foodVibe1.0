@@ -1,318 +1,349 @@
 @if (modalService.isOpen()) {
-  <div class="c-modal-overlay" (click)="onClose()">
-    <div class="c-modal-card ai-recipe-modal-card" dir="rtl" (click)="$event.stopPropagation()">
-      <div class="ai-modal-header">
-        <h2 class="ai-modal-title">
-          {{ (modalService.mode() === 'edit' ? 'ai_recipe_edit_title' : 'ai_recipe_modal_title') | translatePipe }}
-        </h2>
-        <button type="button" class="c-icon-btn" (click)="onClose()">
-          <lucide-icon name="x" [size]="20"></lucide-icon>
-        </button>
-      </div>
+  <app-modal-shell
+    cardClass="ai-recipe-modal-card"
+    labelledBy="ai-recipe-modal-title"
+    [dismissible]="status_() !== 'sending'"
+    (dismissed)="onClose()"
+  >
+    <div class="ai-modal-header">
+      <h2 id="ai-recipe-modal-title" class="ai-modal-title">
+        {{ (modalService.mode() === 'edit' ? 'ai_recipe_edit_title' : 'ai_recipe_modal_title') | translatePipe }}
+      </h2>
+      <button type="button" class="c-icon-btn" (click)="onClose()">
+        <lucide-icon name="x" [size]="20"></lucide-icon>
+      </button>
+    </div>
 
-      @if (modalService.mode() === 'edit') {
-        <!-- ── Edit mode ── -->
-        @if (!patch_()) {
-          <div class="ai-prompt-panel">
-            <div class="ai-textarea-scroll-wrap">
-              <div class="ai-scroll-zone ai-scroll-zone--top">
-                <div class="ai-scroll-indicator"><lucide-icon name="chevron-up" [size]="12" /></div>
-              </div>
-              <textarea
-                scrollIndicators
-                class="ai-prompt-textarea"
-                dir="auto"
-                [placeholder]="'ai_recipe_edit_placeholder' | translatePipe"
-                [value]="instruction()"
-                (input)="instruction.set($any($event.target).value)"
-                rows="4"
-                [disabled]="status_() === 'sending'"
-              ></textarea>
-              <div class="ai-scroll-zone ai-scroll-zone--bottom">
-                <div class="ai-scroll-indicator"><lucide-icon name="chevron-down" [size]="12" /></div>
-              </div>
+    @if (modalService.mode() === 'edit') {
+      <!-- ── Edit mode ── -->
+      @if (!patch_()) {
+        <div class="ai-prompt-panel">
+          <div class="ai-textarea-scroll-wrap">
+            <div class="ai-scroll-zone ai-scroll-zone--top">
+              <div class="ai-scroll-indicator"><lucide-icon name="chevron-up" [size]="12" /></div>
             </div>
-
-            @if (status_() !== 'idle') {
-              <div
-                class="ai-status-bar"
-                [class.ai-status--sending]="status_() === 'sending'"
-                [class.ai-status--done]="status_() === 'done'"
-                [class.ai-status--error]="status_() === 'error'"
-              >
-                @if (status_() === 'sending') {
-                  <app-loader size="small" [inline]="true" />
-                  <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
-                } @else if (status_() === 'error') {
-                  <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                  <span>{{ errorKey_() | translatePipe }}</span>
-                  @if (modelSwitchLabel_()) {
-                    <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
-                      {{ modelSwitchLabel_() }}
-                    </button>
-                  }
-                }
-              </div>
-            }
-
-            <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-              <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
-              <span class="ai-usage-count">
-                {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
-                @if (modelsAvailableLabel_()) {
-                  · {{ modelsAvailableLabel_() }}
-                }
-              </span>
-              <div class="ai-usage-track">
-                <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
-              </div>
+            <textarea
+              appScrollIndicators
+              appTextareaAutoGrow
+              class="ai-prompt-textarea"
+              dir="auto"
+              [placeholder]="'ai_recipe_edit_placeholder' | translatePipe"
+              [value]="instruction()"
+              (input)="instruction.set($any($event.target).value)"
+              rows="4"
+              [disabled]="status_() === 'sending'"
+            ></textarea>
+            <div class="ai-scroll-zone ai-scroll-zone--bottom">
+              <div class="ai-scroll-indicator"><lucide-icon name="chevron-down" [size]="12" /></div>
             </div>
+          </div>
 
-            <div class="ai-modal-footer">
-              <button type="button" class="c-btn-ghost" (click)="onClose()">
-                {{ 'cancel' | translatePipe }}
-              </button>
-              @if (status_() === 'error') {
-                <button type="button" class="c-btn-primary" (click)="status_.set('idle')">
-                  {{ 'retry' | translatePipe }}
-                </button>
-              } @else {
-                <button
-                  type="button"
-                  class="c-btn-primary"
-                  [disabled]="!instruction().trim() || status_() === 'sending'"
-                  (click)="onEdit()"
-                >
-                  @if (status_() === 'sending') {
-                    <app-loader size="small" [inline]="true" />
-                  } @else {
-                    <lucide-icon name="sparkles" [size]="16"></lucide-icon>
-                  }
-                  {{ 'ai_recipe_edit_send' | translatePipe }}
-                </button>
+          @if (status_() !== 'idle') {
+            <div
+              class="ai-status-bar"
+              [class.ai-status--sending]="status_() === 'sending'"
+              [class.ai-status--done]="status_() === 'done'"
+              [class.ai-status--error]="status_() === 'error'"
+            >
+              @if (status_() === 'sending') {
+                <app-loader size="small" [inline]="true" />
+                <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
+              } @else if (status_() === 'error') {
+                <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                <span>{{ errorKey_() | translatePipe }}</span>
+                @if (modelSwitchLabel_()) {
+                  <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
+                    {{ modelSwitchLabel_() }}
+                  </button>
+                }
               }
             </div>
+          }
+
+          <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
+            <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
+            <span class="ai-usage-count">
+              {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
+              @if (modelsAvailableLabel_()) {
+                · {{ modelsAvailableLabel_() }}
+              }
+            </span>
+            <div class="ai-usage-track">
+              <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
+            </div>
           </div>
-        } @else {
-          <!-- Patch preview -->
-          <div class="ai-draft-preview">
-            <p class="ai-patch-preview-label">{{ 'ai_recipe_patch_preview' | translatePipe }}</p>
-            @for (item of patchSummary_(); track item) {
-              <div class="ai-patch-item">
-                <lucide-icon name="check" [size]="14"></lucide-icon>
-                <span>{{ item }}</span>
-              </div>
-            }
-          </div>
+
           <div class="ai-modal-footer">
-            <button type="button" class="c-btn-ghost" (click)="onEditAgain()">
-              {{ 'ai_recipe_generate_again' | translatePipe }}
+            <button type="button" class="c-btn-ghost" (click)="onClose()">
+              {{ 'cancel' | translatePipe }}
             </button>
-            <button type="button" class="c-btn-primary" (click)="onApplyPatch()">
-              <lucide-icon name="check" [size]="16"></lucide-icon>
-              {{ 'ai_recipe_apply_patch' | translatePipe }}
-            </button>
-          </div>
-        }
-      } @else {
-        <!-- ── Create mode ── -->
-        @if (!draft_()) {
-          <div class="ai-prompt-panel">
-            <!-- Input mode tabs -->
-            <div class="ai-input-mode-tabs">
-              <button
-                type="button"
-                class="ai-tab-btn"
-                [class.ai-tab-btn--active]="inputMode_() === 'text'"
-                (click)="inputMode_.set('text')"
-                [title]="'ai_recipe_input_text_mode' | translatePipe"
-              >
-                <lucide-icon name="type" [size]="16"></lucide-icon>
+            @if (status_() === 'error') {
+              <button type="button" class="c-btn-primary" (click)="status_.set('idle')">
+                {{ 'retry' | translatePipe }}
               </button>
-              <button
-                type="button"
-                class="ai-tab-btn"
-                [class.ai-tab-btn--active]="inputMode_() === 'image'"
-                (click)="inputMode_.set('image')"
-                [title]="'ai_recipe_input_image_mode' | translatePipe"
-              >
-                <lucide-icon name="camera" [size]="16"></lucide-icon>
-              </button>
-              <button
-                type="button"
-                class="ai-tab-btn"
-                [class.ai-tab-btn--active]="inputMode_() === 'url'"
-                (click)="inputMode_.set('url')"
-                [title]="'ai_recipe_input_url_mode' | translatePipe"
-              >
-                <lucide-icon name="link" [size]="16"></lucide-icon>
-              </button>
-            </div>
-
-            <!-- Text input -->
-            @if (inputMode_() === 'text') {
-              <div class="ai-input-wrapper">
-                <div class="ai-textarea-scroll-wrap">
-                  <div class="ai-scroll-zone ai-scroll-zone--top">
-                    <div class="ai-scroll-indicator"><lucide-icon name="chevron-up" [size]="12" /></div>
-                  </div>
-                  <textarea
-                    scrollIndicators
-                    class="ai-prompt-textarea"
-                    [placeholder]="'ai_recipe_prompt_placeholder' | translatePipe"
-                    [value]="prompt_()"
-                    (input)="prompt_.set($any($event.target).value)"
-                    rows="4"
-                  ></textarea>
-                  <div class="ai-scroll-zone ai-scroll-zone--bottom">
-                    <div class="ai-scroll-indicator"><lucide-icon name="chevron-down" [size]="12" /></div>
-                  </div>
-                </div>
-                @if (prompt_().trim()) {
-                  <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
-                    <lucide-icon name="x" [size]="14"></lucide-icon>
-                  </button>
-                }
-              </div>
-            }
-
-            <!-- Image input -->
-            @if (inputMode_() === 'image') {
-              <div class="ai-input-wrapper">
-                <label class="ai-image-upload">
-                  <input type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
-                  @if (imagePreviewUrl_()) {
-                    <img
-                      class="ai-image-preview"
-                      [src]="imagePreviewUrl_()!"
-                      [alt]="'ai_recipe_image_preview_alt' | translatePipe"
-                    />
-                  } @else {
-                    <lucide-icon name="image" [size]="32"></lucide-icon>
-                    <span>{{ 'ai_recipe_upload_image_hint' | translatePipe }}</span>
-                  }
-                </label>
-                @if (imageFile_()) {
-                  <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
-                    <lucide-icon name="x" [size]="14"></lucide-icon>
-                  </button>
-                }
-              </div>
-            }
-
-            <!-- URL input -->
-            @if (inputMode_() === 'url') {
-              <div class="ai-input-wrapper">
-                <input
-                  type="url"
-                  class="ai-url-input"
-                  placeholder="https://example.com/recipe"
-                  dir="ltr"
-                  [value]="urlInput_()"
-                  (input)="urlInput_.set($any($event.target).value)"
-                />
-                @if (urlInput_().trim()) {
-                  <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
-                    <lucide-icon name="x" [size]="14"></lucide-icon>
-                  </button>
-                }
-              </div>
-            }
-
-            @if (status_() !== 'idle') {
-              <div
-                class="ai-status-bar"
-                [class.ai-status--sending]="status_() === 'sending'"
-                [class.ai-status--done]="status_() === 'done'"
-                [class.ai-status--error]="status_() === 'error'"
-              >
-                @if (status_() === 'sending') {
-                  <app-loader size="small" [inline]="true" />
-                  <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
-                } @else if (status_() === 'done') {
-                  <lucide-icon name="circle-check" [size]="16"></lucide-icon>
-                  <span>{{ 'ai_recipe_response_received' | translatePipe }}</span>
-                } @else if (status_() === 'error') {
-                  <lucide-icon name="circle-x" [size]="16"></lucide-icon>
-                  <span>{{ errorKey_() | translatePipe }}</span>
-                  @if (modelSwitchLabel_()) {
-                    <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
-                      {{ modelSwitchLabel_() }}
-                    </button>
-                  }
-                }
-              </div>
-            }
-
-            <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
-              <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
-              <span class="ai-usage-count">
-                {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
-                @if (modelsAvailableLabel_()) {
-                  · {{ modelsAvailableLabel_() }}
-                }
-              </span>
-              <div class="ai-usage-track">
-                <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
-              </div>
-            </div>
-
-            <div class="ai-modal-footer">
+            } @else {
               <button
                 type="button"
                 class="c-btn-primary"
-                [disabled]="
-                  loading_() ||
-                  (inputMode_() === 'text' && !prompt_().trim()) ||
-                  (inputMode_() === 'image' && !imageFile_()) ||
-                  (inputMode_() === 'url' && !urlInput_().trim())
-                "
-                (click)="
-                  inputMode_() === 'image'
-                    ? onGenerateFromImage()
-                    : inputMode_() === 'url'
-                      ? onGenerateFromUrl()
-                      : onGenerate()
-                "
+                [disabled]="!instruction().trim() || status_() === 'sending'"
+                (click)="onEdit()"
               >
-                @if (loading_()) {
+                @if (status_() === 'sending') {
                   <app-loader size="small" [inline]="true" />
                 } @else {
                   <lucide-icon name="sparkles" [size]="16"></lucide-icon>
                 }
-                {{ 'ai_recipe_generate' | translatePipe }}
+                {{ 'ai_recipe_edit_send' | translatePipe }}
               </button>
-            </div>
+            }
           </div>
-        } @else {
-          <!-- Create preview — interactive editor or warning confirmation -->
-          @if (awaitingWarningConfirm_()) {
-            <div class="ai-shot-warnings">
-              <p class="ai-patch-preview-label">{{ 'ai_recipe_quality_warnings' | translatePipe }}</p>
-              @for (w of shotWarnings_(); track w) {
-                <div class="ai-shot-warning-item">
-                  <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
-                  <span>{{ w }}</span>
+        </div>
+      } @else {
+        <!-- Patch preview -->
+        <div class="ai-draft-preview">
+          <p class="ai-patch-preview-label">{{ 'ai_recipe_patch_preview' | translatePipe }}</p>
+          @for (item of patchSummary_(); track item) {
+            <div class="ai-patch-item">
+              <lucide-icon name="check" [size]="14"></lucide-icon>
+              <span>{{ item }}</span>
+            </div>
+          }
+        </div>
+        <div class="ai-modal-footer">
+          <button type="button" class="c-btn-ghost" (click)="onEditAgain()">
+            {{ 'ai_recipe_generate_again' | translatePipe }}
+          </button>
+          <button type="button" class="c-btn-primary" (click)="onApplyPatch()">
+            <lucide-icon name="check" [size]="16"></lucide-icon>
+            {{ 'ai_recipe_apply_patch' | translatePipe }}
+          </button>
+        </div>
+      }
+    } @else {
+      <!-- ── Create mode ── -->
+      @if (!draft_()) {
+        <div class="ai-prompt-panel">
+          <!-- Input mode tabs -->
+          <div class="ai-input-mode-tabs" role="tablist" [attr.aria-label]="'ai_recipe_modal_title' | translatePipe">
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab ai-mode-tab"
+              [class.active]="inputMode_() === 'text'"
+              [attr.aria-selected]="inputMode_() === 'text'"
+              (click)="inputMode_.set('text')"
+            >
+              <lucide-icon name="type" [size]="14"></lucide-icon>
+              {{ 'ai_recipe_tab_describe' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab ai-mode-tab"
+              [class.active]="inputMode_() === 'paste'"
+              [attr.aria-selected]="inputMode_() === 'paste'"
+              (click)="inputMode_.set('paste')"
+            >
+              <lucide-icon name="clipboard-paste" [size]="14"></lucide-icon>
+              {{ 'ai_recipe_tab_paste' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab ai-mode-tab"
+              [class.active]="inputMode_() === 'image'"
+              [attr.aria-selected]="inputMode_() === 'image'"
+              (click)="inputMode_.set('image')"
+            >
+              <lucide-icon name="camera" [size]="14"></lucide-icon>
+              {{ 'ai_recipe_tab_image' | translatePipe }}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              class="c-chip c-chip--tab ai-mode-tab"
+              [class.active]="inputMode_() === 'url'"
+              [attr.aria-selected]="inputMode_() === 'url'"
+              (click)="inputMode_.set('url')"
+            >
+              <lucide-icon name="link" [size]="14"></lucide-icon>
+              {{ 'ai_recipe_tab_url' | translatePipe }}
+            </button>
+          </div>
+          @if (inputMode_() === 'paste') {
+            <p class="ai-paste-hint">{{ 'ai_recipe_paste_hint' | translatePipe }}</p>
+          }
+
+          <!-- Text input (also the paste tab: same box, different placeholder and button) -->
+          @if (inputMode_() === 'text' || inputMode_() === 'paste') {
+            <div class="ai-input-wrapper">
+              <div class="ai-textarea-scroll-wrap">
+                <div class="ai-scroll-zone ai-scroll-zone--top">
+                  <div class="ai-scroll-indicator"><lucide-icon name="chevron-up" [size]="12" /></div>
                 </div>
+                <textarea
+                  appScrollIndicators
+                  appTextareaAutoGrow
+                  class="ai-prompt-textarea"
+                  [placeholder]="
+                    (inputMode_() === 'paste' ? 'paste_recipe_placeholder' : 'ai_recipe_prompt_placeholder')
+                      | translatePipe
+                  "
+                  [attr.dir]="inputMode_() === 'paste' ? 'auto' : null"
+                  [value]="prompt_()"
+                  (input)="prompt_.set($any($event.target).value)"
+                  [rows]="inputMode_() === 'paste' ? 8 : 4"
+                ></textarea>
+                <div class="ai-scroll-zone ai-scroll-zone--bottom">
+                  <div class="ai-scroll-indicator"><lucide-icon name="chevron-down" [size]="12" /></div>
+                </div>
+              </div>
+              @if (prompt_().trim()) {
+                <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
+                  <lucide-icon name="x" [size]="14"></lucide-icon>
+                </button>
               }
             </div>
-            <div class="ai-modal-footer">
-              <button type="button" class="c-btn-ghost" (click)="onBackFromWarnings()">
-                {{ 'back' | translatePipe }}
-              </button>
-              <button type="button" class="c-btn-primary" (click)="onConfirmWarnings()">
-                {{ 'ai_recipe_continue_anyway' | translatePipe }}
-              </button>
-            </div>
-          } @else {
-            <app-ai-draft-editor
-              [draft]="draft_()!"
-              (approved)="onDraftApproved($event)"
-              (generateAgain)="onGenerateAgain()"
-            />
           }
+
+          <!-- Image input -->
+          @if (inputMode_() === 'image') {
+            <div class="ai-input-wrapper">
+              <label class="ai-image-upload">
+                <input type="file" accept="image/*" hidden (change)="onImageSelected($event)" />
+                @if (imagePreviewUrl_()) {
+                  <img
+                    class="ai-image-preview"
+                    [src]="imagePreviewUrl_()!"
+                    [alt]="'ai_recipe_image_preview_alt' | translatePipe"
+                  />
+                } @else {
+                  <lucide-icon name="image" [size]="32"></lucide-icon>
+                  <span>{{ 'ai_recipe_upload_image_hint' | translatePipe }}</span>
+                }
+              </label>
+              @if (imageFile_()) {
+                <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
+                  <lucide-icon name="x" [size]="14"></lucide-icon>
+                </button>
+              }
+            </div>
+          }
+
+          <!-- URL input -->
+          @if (inputMode_() === 'url') {
+            <div class="ai-input-wrapper">
+              <input
+                type="url"
+                class="ai-url-input"
+                placeholder="https://example.com/recipe"
+                dir="ltr"
+                [value]="urlInput_()"
+                (input)="urlInput_.set($any($event.target).value)"
+              />
+              @if (urlInput_().trim()) {
+                <button type="button" class="ai-clear-input-btn" (click)="onClearInput()">
+                  <lucide-icon name="x" [size]="14"></lucide-icon>
+                </button>
+              }
+            </div>
+          }
+
+          @if (status_() !== 'idle') {
+            <div
+              class="ai-status-bar"
+              [class.ai-status--sending]="status_() === 'sending'"
+              [class.ai-status--done]="status_() === 'done'"
+              [class.ai-status--error]="status_() === 'error'"
+            >
+              @if (status_() === 'sending') {
+                <app-loader size="small" [inline]="true" />
+                <span>{{ 'ai_recipe_sending_request' | translatePipe }}</span>
+              } @else if (status_() === 'done') {
+                <lucide-icon name="circle-check" [size]="16"></lucide-icon>
+                <span>{{ 'ai_recipe_response_received' | translatePipe }}</span>
+              } @else if (status_() === 'error') {
+                <lucide-icon name="circle-x" [size]="16"></lucide-icon>
+                <span>{{ errorKey_() | translatePipe }}</span>
+                @if (modelSwitchLabel_()) {
+                  <button type="button" class="c-btn-ghost--sm" (click)="onSwitchModel()">
+                    {{ modelSwitchLabel_() }}
+                  </button>
+                }
+              }
+            </div>
+          }
+
+          <div class="ai-usage-bar" [attr.data-status]="usageColor_()">
+            <span class="ai-usage-label">{{ 'ai_daily_budget' | translatePipe }}</span>
+            <span class="ai-usage-count">
+              {{ geminiUsage_().used }} / {{ geminiUsage_().budget }} · {{ budgetLeftLabel_() }}
+              @if (modelsAvailableLabel_()) {
+                · {{ modelsAvailableLabel_() }}
+              }
+            </span>
+            <div class="ai-usage-track">
+              <div class="ai-usage-fill" [style.width.%]="usageFillPercent_()"></div>
+            </div>
+          </div>
+
+          <div class="ai-modal-footer">
+            <button
+              type="button"
+              class="c-btn-primary"
+              [disabled]="
+                isLoading_() ||
+                ((inputMode_() === 'text' || inputMode_() === 'paste') && !prompt_().trim()) ||
+                (inputMode_() === 'image' && !imageFile_()) ||
+                (inputMode_() === 'url' && !urlInput_().trim())
+              "
+              (click)="
+                inputMode_() === 'image'
+                  ? onGenerateFromImage()
+                  : inputMode_() === 'url'
+                    ? onGenerateFromUrl()
+                    : inputMode_() === 'paste'
+                      ? onParsePasted()
+                      : onGenerate()
+              "
+            >
+              @if (isLoading_()) {
+                <app-loader size="small" [inline]="true" />
+              } @else {
+                <lucide-icon name="sparkles" [size]="16"></lucide-icon>
+              }
+              {{ (inputMode_() === 'paste' ? 'paste_recipe_parse' : 'ai_recipe_generate') | translatePipe }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <!-- Create preview — interactive editor or warning confirmation -->
+        @if (isAwaitingWarningConfirm_()) {
+          <div class="ai-shot-warnings">
+            <p class="ai-patch-preview-label">{{ 'ai_recipe_quality_warnings' | translatePipe }}</p>
+            @for (w of shotWarnings_(); track w) {
+              <div class="ai-shot-warning-item">
+                <lucide-icon name="alert-triangle" [size]="14"></lucide-icon>
+                <span>{{ w | translatePipe }}</span>
+              </div>
+            }
+          </div>
+          <div class="ai-modal-footer">
+            <button type="button" class="c-btn-ghost" (click)="onBackFromWarnings()">
+              {{ 'back' | translatePipe }}
+            </button>
+            <button type="button" class="c-btn-primary" (click)="onConfirmWarnings()">
+              {{ 'ai_recipe_continue_anyway' | translatePipe }}
+            </button>
+          </div>
+        } @else {
+          <app-ai-draft-editor
+            [draft]="draft_()!"
+            (approved)="onDraftApproved($event)"
+            (generateAgain)="onGenerateAgain()"
+          />
         }
       }
-    </div>
-  </div>
+    }
+  </app-modal-shell>
 }

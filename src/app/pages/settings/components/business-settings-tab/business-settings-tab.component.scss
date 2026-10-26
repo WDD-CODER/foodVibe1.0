@@ -1,0 +1,39 @@
+@layer components.business-settings-tab {
+  :host {
+    display: block;
+  }
+
+  .business-tab {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .business-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+
+    inline-size: 100%;
+    max-inline-size: 28rem;
+    margin-inline: auto;
+    padding: var(--space-4);
+  }
+
+  .business-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+  }
+
+  .business-field__label {
+    color: var(--color-text-main);
+    font-weight: 600;
+  }
+
+  .business-field__suffix {
+    color: var(--color-text-muted);
+  }
+}

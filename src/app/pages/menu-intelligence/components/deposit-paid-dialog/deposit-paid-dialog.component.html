@@ -1,0 +1,45 @@
+<div class="c-modal-overlay" (click)="cancelled.emit()">
+  <div
+    class="c-modal-card c-modal-card--md"
+    dir="rtl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="deposit-paid-title"
+    (click)="$event.stopPropagation()"
+  >
+    <h3 id="deposit-paid-title">{{ 'deposit_paid_title' | translatePipe }}</h3>
+
+    <div class="c-modal-body">
+      <div class="c-input-stack">
+        <label for="deposit-paid-date">{{ 'deposit_date' | translatePipe }}</label>
+        <app-date-field inputId="deposit-paid-date" [(value)]="date_" [(invalid)]="dateInvalid_" />
+      </div>
+
+      <div class="c-input-stack">
+        <label for="deposit-paid-amount">{{ 'deposit_amount' | translatePipe }}</label>
+        <input
+          id="deposit-paid-amount"
+          type="number"
+          min="0"
+          step="any"
+          inputmode="decimal"
+          dir="ltr"
+          [class.c-input--invalid]="showAmountError_()"
+          [value]="amountText_()"
+          (input)="onAmountInput($event)"
+          (keydown.enter)="onSave()"
+        />
+        @if (showAmountError_()) {
+          <span class="c-field-error" role="alert">{{ 'deposit_amount_required' | translatePipe }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
+      <button type="button" class="c-btn-primary" [disabled]="!valid_()" (click)="onSave()">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </div>
+</div>

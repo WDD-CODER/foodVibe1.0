@@ -1,86 +1,77 @@
 @if (modal.isOpen_()) {
-  <div class="c-modal-overlay" (click)="resetAndClose()">
-    <div
-      class="c-modal-card c-modal-card--md"
-      dir="rtl"
-      (click)="$event.stopPropagation()"
-      (clickOutside)="resetAndClose()"
-    >
-      <h3>{{ titleKey_() | translatePipe }}</h3>
-
-      <div class="c-modal-body">
-        <div class="c-input-stack full-width">
-          <label>{{ 'label_name_hebrew' | translatePipe }}</label>
-          <input
-            type="text"
-            [ngModel]="modal.hebrewLabel_()"
-            (ngModelChange)="modal.hebrewLabel_.set($event)"
-            [placeholder]="'label_name_example_placeholder' | translatePipe"
-            autocomplete="off"
-            autocorrect="off"
-            autocapitalize="off"
-            spellcheck="false"
-          />
-        </div>
-        <div class="c-input-stack full-width">
-          <label>{{ 'english_key_example_label' | translatePipe }}</label>
-          <input
-            type="text"
-            [ngModel]="englishKey_()"
-            (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
-            englishKeyInput
-            placeholder="dairy"
-            (keydown.enter)="save()"
-          />
-          @if (validationError_()) {
-            <span class="label-creation-validation-error">{{ validationError_() }}</span>
+  <app-modal-shell size="md" [titleKey]="titleKey_()" (dismissed)="cancel()">
+    <div class="c-modal-body">
+      <div class="c-input-stack full-width">
+        <label>{{ 'label_name_hebrew' | translatePipe }}</label>
+        <input
+          type="text"
+          [ngModel]="modal.hebrewLabel_()"
+          (ngModelChange)="modal.hebrewLabel_.set($event)"
+          [placeholder]="'label_name_example_placeholder' | translatePipe"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        />
+      </div>
+      <div class="c-input-stack full-width">
+        <label>{{ 'english_key_example_label' | translatePipe }}</label>
+        <input
+          type="text"
+          [ngModel]="englishKey_()"
+          (ngModelChange)="englishKey_.set($event); validationError_.set(null)"
+          appEnglishKeyInput
+          placeholder="dairy"
+          (keydown.enter)="save()"
+        />
+        @if (validationError_()) {
+          <span class="label-creation-validation-error">{{ validationError_() }}</span>
+        }
+      </div>
+      <div class="c-input-stack full-width">
+        <label>{{ 'label_color' | translatePipe }}</label>
+        <div class="color-swatches">
+          @for (c of palette; track c) {
+            <button
+              type="button"
+              class="color-swatch"
+              [style.background-color]="c"
+              [class.selected]="modal.selectedColor_() === c"
+              (click)="selectColor(c)"
+            >
+              @if (modal.selectedColor_() === c) {
+                <span class="check" aria-hidden="true">✓</span>
+              }
+            </button>
           }
         </div>
-        <div class="c-input-stack full-width">
-          <label>{{ 'label_color' | translatePipe }}</label>
-          <div class="color-swatches">
-            @for (c of palette; track c) {
-              <button
-                type="button"
-                class="color-swatch"
-                [style.background-color]="c"
-                [class.selected]="modal.selectedColor_() === c"
-                (click)="selectColor(c)"
-              >
-                @if (modal.selectedColor_() === c) {
-                  <span class="check" aria-hidden="true">✓</span>
-                }
-              </button>
-            }
-          </div>
-        </div>
-        <div class="input-stack full-width">
-          <label>{{ 'auto_trigger_sources' | translatePipe }}</label>
-          <div class="c-toggle-chip-group trigger-checklist">
-            @for (opt of triggerOptions_(); track opt.value) {
-              <label class="c-toggle-chip">
-                <input type="checkbox" [checked]="isTriggerSelected(opt.value)" (change)="toggleTrigger(opt.value)" />
-                <span>{{ opt.value | translatePipe }}</span>
-              </label>
-            }
-            @if (triggerOptions_().length === 0) {
-              <span class="trigger-empty">{{ 'no_category' | translatePipe }} / {{ 'allergens' | translatePipe }}</span>
-            }
-          </div>
-        </div>
       </div>
-
-      <div class="c-modal-actions">
-        <button type="button" class="c-btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
-        <button
-          type="button"
-          class="c-btn-primary"
-          (click)="save()"
-          [disabled]="!englishKey_().trim() || !modal.hebrewLabel_().trim()"
-        >
-          {{ 'save_label' | translatePipe }}
-        </button>
+      <div class="input-stack full-width">
+        <label>{{ 'auto_trigger_sources' | translatePipe }}</label>
+        <div class="c-chip-group trigger-checklist">
+          @for (opt of triggerOptions_(); track opt.value) {
+            <label class="c-chip c-chip--toggle">
+              <input type="checkbox" [checked]="isTriggerSelected(opt.value)" (change)="toggleTrigger(opt.value)" />
+              <span>{{ opt.value | translatePipe }}</span>
+            </label>
+          }
+          @if (triggerOptions_().length === 0) {
+            <span class="trigger-empty">{{ 'no_category' | translatePipe }} / {{ 'allergens' | translatePipe }}</span>
+          }
+        </div>
       </div>
     </div>
-  </div>
+
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="cancel()">{{ 'cancel' | translatePipe }}</button>
+      <button
+        type="button"
+        class="c-btn-primary"
+        (click)="save()"
+        [disabled]="!englishKey_().trim() || !modal.hebrewLabel_().trim()"
+      >
+        {{ 'save_label' | translatePipe }}
+      </button>
+    </div>
+  </app-modal-shell>
 }

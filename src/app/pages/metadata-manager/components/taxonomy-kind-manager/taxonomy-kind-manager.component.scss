@@ -58,6 +58,7 @@
 
   input {
     flex: 1;
+    min-inline-size: 0;
 
     padding-inline: 0.75rem;
     padding-block: 0.625rem;
@@ -88,25 +89,6 @@
 
 .list-container {
   margin-block-start: 1.5rem;
-
-  // Inline rename field, shown in place of the tapped chip (plan 340).
-  .inline-edit-input {
-    min-block-size: 2rem;
-    min-inline-size: 8rem;
-
-    color: var(--color-text-main);
-    font: inherit;
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    background: var(--bg-glass);
-
-    padding-inline: 0.75rem;
-    border: none;
-    border-radius: var(--radius-full);
-    outline: none;
-
-    box-shadow: 0 0 0 1px var(--border-focus);
-  }
 }
 
 .empty-state {

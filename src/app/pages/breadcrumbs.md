@@ -16,9 +16,11 @@ One folder per lazy-loaded route segment (loaded from `app.routes.ts`). Each pag
 | `menu-intelligence/` | `/menu-intelligence/:id` — menu editor and costing views |
 | `metadata-manager/` | Categories, allergens, units, preparations (`metadata-manager/metadata-manager.page.component.ts`) |
 | `trash/` | `/trash` — soft-deleted items and restore |
+| `platform-dashboard/` | `/platform` — platform-admin-only table of every business (activity, events, internal flag) |
+| `settings/` | `/settings` — owner-only tabs chosen by `?tab=`; the Team tab adds and removes staff |
 
 ## Key exports
-`DashboardPage`, `InventoryPage`, `VenuesPage`, `SuppliersPage`, `RecipeBookPage`, `RecipeBuilderPage`, `CookViewPage`, `MenuLibraryPage`, `MenuIntelligencePage`, `MetadataManagerComponent`, `TrashPage`
+`DashboardPage`, `InventoryPage`, `VenuesPage`, `SuppliersPage`, `RecipeBookPage`, `RecipeBuilderPage`, `CookViewPage`, `MenuLibraryPage`, `MenuIntelligencePage`, `MetadataManagerComponent`, `TrashPage`, `PlatformDashboardPage`, `SettingsPage`
 
 ---
 *Updated by: breadcrumbs*

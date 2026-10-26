@@ -1,0 +1,73 @@
+<section class="platform-page">
+  <app-page-header titleKey="platform_dashboard" class="platform-header" />
+
+  @if (isLoading_()) {
+  <app-loader />
+  } @else if (!rows_().length) {
+  <p class="platform-empty">{{ "platform_no_businesses" | translatePipe }}</p>
+  } @else {
+  <div class="table-scroll">
+    <table class="platform-table">
+      <thead>
+        <tr>
+          @for (col of columns; track col.key) {
+          <th scope="col" [attr.aria-sort]="ariaSort(col.key)" [class.sticky-col]="col.key === 'name'">
+            <button type="button" class="sort-btn" (click)="sortBy(col.key)">
+              {{ col.labelKey | translatePipe }}
+              <lucide-icon name="arrow-up-down" [size]="12"></lucide-icon>
+            </button>
+          </th>
+          }
+          <th scope="col">{{ "platform_col_internal" | translatePipe }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of sortedRows_(); track row._id) {
+        <tr [class]="idleClass(row)">
+          <th scope="row" class="sticky-col">
+            {{ row.name }} @if (idleClass(row) === "is-idle-14") {
+            <span class="idle-label">{{ "platform_idle_14" | translatePipe }}</span>
+            } @else if (idleClass(row) === "is-idle-7") {
+            <span class="idle-label">{{ "platform_idle_7" | translatePipe }}</span>
+            }
+          </th>
+          <td>{{ row.ownerName ?? "—" }}</td>
+          <td>{{ row.staffCount }}</td>
+          <td>{{ row.createdAt ? (row.createdAt | date: "dd/MM/yyyy") : "—" }}</td>
+          <td>
+            @if (row.lastActivityAt) { {{ row.lastActivityAt | date: "dd/MM/yyyy" }} } @else { {{ "never" |
+            translatePipe }} }
+          </td>
+          <td>{{ row.activeDays7 }}</td>
+          <td>{{ row.events.total }}</td>
+          <td>{{ row.events.active }}</td>
+          <td>{{ row.events.closed }}</td>
+          <td>{{ row.events.finished }}</td>
+          <td>{{ rate(row.closeRate) }}</td>
+          <td>{{ row.lastEventDate ? (row.lastEventDate | date: "dd/MM/yyyy") : "—" }}</td>
+          <td>
+            <input
+              type="checkbox"
+              class="internal-toggle"
+              [checked]="row.internal"
+              [attr.aria-label]="'platform_col_internal' | translatePipe"
+              (change)="toggleInternal(row, $event)"
+            />
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @let totals = totals_();
+  <p class="platform-totals">
+    {{ "platform_totals" | translatePipe }}: {{ "platform_col_business" | translatePipe }} {{ totals.businesses }} · {{
+    "platform_col_staff" | translatePipe }} {{ totals.staff }} · {{ "platform_col_events_total" | translatePipe }} {{
+    totals.total }} · {{ "platform_col_events_active" | translatePipe }} {{ totals.active }} · {{
+    "platform_col_events_closed" | translatePipe }} {{ totals.closed }} · {{ "platform_col_events_finished" |
+    translatePipe }} {{ totals.finished }} · {{ "platform_col_close_rate" | translatePipe }} {{ rate(totals.closeRate)
+    }}
+  </p>
+  }
+</section>

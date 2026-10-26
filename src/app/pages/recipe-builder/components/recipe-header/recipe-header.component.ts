@@ -11,8 +11,8 @@ import {
 } from '@angular/core'
 import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
-import { RouterLink } from '@angular/router'
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
+import { ActivatedRoute, RouterLink } from '@angular/router'
+import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { take } from 'rxjs/operators'
@@ -23,6 +23,9 @@ import { UnitRegistryService } from '@services/unit-registry.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { TranslationService } from '@services/translation.service'
 import { ConfirmModalService } from '@services/confirm-modal.service'
+import { StationRegistryService } from '@services/station-registry.service'
+import { AddItemModalService } from '@services/add-item-modal.service'
+import { LoggingService } from '@services/logging.service'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LabelCreationModalService } from 'src/app/shared/label-creation-modal/label-creation-modal.service'
 import { CustomMultiSelectComponent } from 'src/app/shared/custom-multi-select/custom-multi-select.component'
@@ -31,6 +34,10 @@ import { ScalingChipComponent } from 'src/app/shared/scaling-chip/scaling-chip.c
 import { ScrollIndicatorsDirective } from '@directives/scroll-indicators.directive'
 import { RecipeYieldManager } from 'src/app/core/utils/recipe-yield-manager.util'
 import { RatingStarsComponent } from 'src/app/shared/rating-stars/rating-stars.component'
+import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
+import { RecipeCostService } from '@services/recipe-cost.service'
+import type { Product } from '@models/product.model'
+import type { Ingredient } from '@models/ingredient.model'
 
 /**
  * Inline stand-in for the 120x120 image thumbnail before a photo is uploaded.
@@ -64,6 +71,7 @@ const IMAGE_PLACEHOLDER_SVG =
     ScalingChipComponent,
     ScrollIndicatorsDirective,
     RatingStarsComponent,
+    PartialCostBadgeComponent,
     RouterLink
   ],
   templateUrl: './recipe-header.component.html',
@@ -82,6 +90,11 @@ export class RecipeHeaderComponent {
   private confirmModal = inject(ConfirmModalService)
   private cloudinary = inject(CloudinaryService)
   private userMsg = inject(UserMsgService)
+  private stationRegistry = inject(StationRegistryService)
+  private addItemModal = inject(AddItemModalService)
+  private logging = inject(LoggingService)
+  private recipeCost = inject(RecipeCostService)
+  private route = inject(ActivatedRoute, { optional: true })
 
   // INPUTS
   form = input.required<FormGroup>()
@@ -110,6 +123,52 @@ export class RecipeHeaderComponent {
   ratingChange = output<number>()
   /** Fires whenever the user actively changes the primary yield amount or unit. */
   yieldManuallyChanged = output<void>()
+
+  // PARTIAL COST (plan 444)
+  /** Bumped when the ingredient rows change, so the missing list re-reads the (non-signal) form. */
+  private readonly ingredientsVersion_ = signal(0)
+
+  /** The recipe being edited: its saved id, or a stand-in while it is new. */
+  protected readonly ownerRecipeId_ = (): string => this.route?.snapshot?.paramMap?.get('id') || 'form'
+
+  /** What keeps the header cost from being final: unpriced, unlinked and deleted ingredients, through preps. */
+  protected readonly missing_ = computed(() => {
+    this.currentCost()
+    this.ingredientsVersion_()
+    const rows = (this.form().getRawValue()?.ingredients ?? []) as {
+      referenceId?: string
+      item_type?: string
+      nameHebrew?: string
+    }[]
+    return this.recipeCost.findMissing(rows, this.ownerRecipeId_())
+  })
+
+  /** The badge linked a free-text ingredient to a product: show it in the unsaved form right away (plan 466). */
+  protected onLinked(link: { name: string; product: Product }): void {
+    const rows = this.form().get('ingredients')
+    if (!(rows instanceof FormArray)) return
+    for (const group of rows.controls) {
+      const value = group.getRawValue() as { referenceId?: string; nameHebrew?: string; nameSnapshot?: string }
+      const name = (value.nameSnapshot || value.nameHebrew || '').trim()
+      if (value.referenceId || name !== link.name) continue
+      group.patchValue({ referenceId: link.product._id, item_type: 'product', nameSnapshot: link.product.nameHebrew })
+      // The ingredients table only prices a row when its item is picked or the catalogues change, so price it here.
+      const raw = group.getRawValue() as { amount_net?: number; unit?: string }
+      const totalCost = this.recipeCost.getCostForIngredient({
+        referenceId: link.product._id,
+        type: 'product',
+        amount: Number(raw.amount_net) || 0,
+        unit: raw.unit || ''
+      } as Ingredient)
+      group.get('total_cost')?.setValue(totalCost)
+    }
+    rows.parent?.updateValueAndValidity()
+  }
+
+  protected readonly ownRecipeNames_ = computed(() => {
+    this.ingredientsVersion_()
+    return { [this.ownerRecipeId_()]: (this.form().get('nameHebrew')?.value ?? '').toString() }
+  })
 
   // YIELD WRAPPERS — emit yieldManuallyChanged so the parent can reset netoConfirmed
   onPrimaryAmountChange(val: number): void {
@@ -152,10 +211,27 @@ export class RecipeHeaderComponent {
       }
     })
     effect((onCleanup) => {
+      const ingredients = this.form().get('ingredients')
+      if (!ingredients) return
+      const sub = ingredients.valueChanges.subscribe(() => this.ingredientsVersion_.update((v) => v + 1))
+      onCleanup(() => sub.unsubscribe())
+    })
+    effect((onCleanup) => {
       const ctrl = this.form().get('course')
       if (!ctrl) return
       this.courseValue_.set(ctrl.value ?? '')
       const sub = ctrl.valueChanges.subscribe((v: string | null) => this.courseValue_.set(v ?? ''))
+      onCleanup(() => sub.unsubscribe())
+    })
+    effect((onCleanup) => {
+      const ctrl = this.form().get('default_station')
+      if (!ctrl) return
+      this.stationValue_.set(ctrl.value ?? '')
+      this.lastStation_ = ctrl.value ?? ''
+      const sub = ctrl.valueChanges.subscribe((v: string | null) => {
+        this.stationValue_.set(v ?? '')
+        if (v !== RecipeHeaderComponent.ADD_STATION_VALUE) this.lastStation_ = v ?? ''
+      })
       onCleanup(() => sub.unsubscribe())
     })
   }
@@ -185,7 +261,7 @@ export class RecipeHeaderComponent {
 
   // SIGNALS & CONSTANTS
   readonly placeholderPath = `data:image/svg+xml,${encodeURIComponent(IMAGE_PLACEHOLDER_SVG)}`
-  readonly uploadingImage_ = signal(false)
+  readonly isUploadingImage_ = signal(false)
 
   // LABELS
   protected labelMultiSelectOptions_ = computed(() => {
@@ -231,6 +307,59 @@ export class RecipeHeaderComponent {
     return this.form().get('course') as FormControl<string>
   }
 
+  // STATION (plan 436)
+  private static readonly ADD_STATION_VALUE = '__add_station__'
+  private readonly stationValue_ = signal('')
+  /** The last real station value, so a cancelled add window can put it back. */
+  private lastStation_ = ''
+
+  /** "כללי" (no station) first, then the stations, then the add option. A station deleted elsewhere shows as "כללי". */
+  protected stationSelectOptions_ = computed(() => {
+    const keys = this.stationRegistry.stations_()
+    const current = this.stationValue_()
+    const isStale =
+      !!current && current !== RecipeHeaderComponent.ADD_STATION_VALUE && keys.length > 0 && !keys.includes(current)
+    return [
+      { value: '', label: 'general_group' },
+      ...(isStale ? [{ value: current, label: 'general_group' }] : []),
+      ...keys.map((key) => ({ value: key, label: key })),
+      { value: RecipeHeaderComponent.ADD_STATION_VALUE, label: 'add_new_station' }
+    ]
+  })
+
+  protected get stationControl(): FormControl<string> {
+    return this.form().get('default_station') as FormControl<string>
+  }
+
+  /** Add-option flow: the typed name prefills the add window; the key that was stored gets selected; cancel restores the old value. */
+  protected async onAddStation(typed: string): Promise<void> {
+    const previous = this.lastStation_
+    const ctrl = this.stationControl
+    const name = (
+      (await this.addItemModal.open({
+        title: 'add_new_station',
+        label: 'station',
+        placeholder: 'station',
+        saveLabel: 'save',
+        initialValue: typed
+      })) ?? ''
+    ).trim()
+    if (!name) {
+      ctrl.setValue(previous)
+      return
+    }
+    try {
+      const existed = this.stationRegistry.hasStation(name)
+      const key = await this.stationRegistry.addStation(name)
+      ctrl.setValue(key || previous)
+      if (key && !existed) notifyItemAdded(this.userMsg, (k) => this.translationService.translate(k), key)
+    } catch (err) {
+      ctrl.setValue(previous)
+      this.logging.error({ event: 'crud.stations.persist_error', message: 'Failed to add station', context: { err } })
+      this.userMsg.onSetErrorMsg(this.translationService.translate('server_error'))
+    }
+  }
+
   // WRAPPERS — CDR / output handling
 
   /** Existing records are confirmed once, at save time; a new record with content gets one confirm here. */
@@ -265,7 +394,8 @@ export class RecipeHeaderComponent {
   /** prefillName: the unit name typed in the yield dropdown (rule W); '' opens the window empty. */
   protected onCreateUnit(prefillName = '', secondaryChipIndex?: number): void {
     this.unitRegistryService.openUnitCreator({ prefillName })
-    this.unitRegistryService.awaitUnitCreated().subscribe((newUnit) => {
+    void this.unitRegistryService.awaitUnitCreated().then((newUnit) => {
+      if (!newUnit) return
       if (secondaryChipIndex === undefined) {
         this.yield.setPrimaryUnit(newUnit)
       } else {
@@ -276,19 +406,19 @@ export class RecipeHeaderComponent {
 
   // METRICS
   metricsDisplayMode_ = signal<'weight' | 'volume'>('weight')
-  metricsNoticeOpen_ = signal(false)
+  isMetricsNoticeOpen_ = signal(false)
 
   toggleMetricsDisplayMode(): void {
     this.metricsDisplayMode_.update((m) => (m === 'weight' ? 'volume' : 'weight'))
-    this.metricsNoticeOpen_.set(false)
+    this.isMetricsNoticeOpen_.set(false)
   }
 
   toggleMetricsNotice(): void {
-    this.metricsNoticeOpen_.update((v) => !v)
+    this.isMetricsNoticeOpen_.update((v) => !v)
   }
 
   closeMetricsNotice(): void {
-    this.metricsNoticeOpen_.set(false)
+    this.isMetricsNoticeOpen_.set(false)
   }
 
   private metricsNoticeCloseTimeout_: ReturnType<typeof setTimeout> | null = null
@@ -299,7 +429,7 @@ export class RecipeHeaderComponent {
       this.metricsNoticeCloseTimeout_ = null
     }
     if (this.unconvertibleNamesFiltered_().length > 0) {
-      this.metricsNoticeOpen_.set(true)
+      this.isMetricsNoticeOpen_.set(true)
     }
   }
 
@@ -309,7 +439,7 @@ export class RecipeHeaderComponent {
     }
     this.metricsNoticeCloseTimeout_ = setTimeout(() => {
       this.metricsNoticeCloseTimeout_ = null
-      this.metricsNoticeOpen_.set(false)
+      this.isMetricsNoticeOpen_.set(false)
     }, 150)
   }
 
@@ -353,17 +483,17 @@ export class RecipeHeaderComponent {
     if (this.readonlyMode()) return
     const file = (event.target as HTMLInputElement).files?.[0]
     if (!file) return
-    this.uploadingImage_.set(true)
+    this.isUploadingImage_.set(true)
     this.cloudinary
       .upload(file)
       .pipe(take(1))
       .subscribe({
         next: (url) => {
           this.imageChange.emit(url)
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
         },
         error: () => {
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
           this.userMsg.onSetErrorMsg(this.translationService.translate('image_upload_failed'))
         }
       })

@@ -8,7 +8,7 @@
           } @else {
             <span class="avatar-initials">{{ userInitial() }}</span>
           }
-          @if (user_()?.role === 'admin') {
+          @if (isPlatformAdmin_()) {
             <span class="role-badge" aria-label="admin">
               <lucide-icon name="crown" [size]="10"></lucide-icon>
             </span>
@@ -23,6 +23,9 @@
           >
             {{ user_()!.name }}
           </button>
+          @if (business_(); as business) {
+            <span class="business-name">{{ business.name }}</span>
+          }
         </div>
       </div>
     } @else {
@@ -43,22 +46,12 @@
   </button>
 
   <div class="nav-pills">
-    <a class="nav-pill" routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
-      {{ 'dashboard' | translatePipe }}
-      <lucide-icon name="layout-dashboard" [size]="16"></lucide-icon>
-    </a>
-    <a class="nav-pill" routerLink="/inventory" routerLinkActive="active" (click)="closeMobileMenu()">
-      {{ 'inventory' | translatePipe }}
-      <lucide-icon name="package" [size]="16"></lucide-icon>
-    </a>
-    <a class="nav-pill" routerLink="/recipe-book" routerLinkActive="active" (click)="closeMobileMenu()">
-      {{ 'recipe_book' | translatePipe }}
-      <lucide-icon name="book-open" [size]="16"></lucide-icon>
-    </a>
-    <a class="nav-pill" routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
-      {{ 'menu_library' | translatePipe }}
-      <lucide-icon name="library" [size]="16"></lucide-icon>
-    </a>
+    @for (link of navLinks_(); track link.path) {
+      <a class="nav-pill" [routerLink]="link.path" routerLinkActive="active" (click)="closeMobileMenu()">
+        {{ link.key | translatePipe }}
+        <lucide-icon [name]="link.icon" size="16"></lucide-icon>
+      </a>
+    }
   </div>
 
   <!-- Opposite end from the user chip — matches the design's header layout
@@ -82,30 +75,14 @@
         <lucide-icon name="x" size="24"></lucide-icon>
       </button>
     </li>
-    <li>
-      <a routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">
-        <lucide-icon name="layout-dashboard" [size]="16"></lucide-icon>
-        {{ 'dashboard' | translatePipe }}
-      </a>
-    </li>
-    <li>
-      <a routerLink="/inventory" routerLinkActive="active" (click)="closeMobileMenu()">
-        <lucide-icon name="package" [size]="16"></lucide-icon>
-        {{ 'inventory' | translatePipe }}
-      </a>
-    </li>
-    <li>
-      <a routerLink="/recipe-book" routerLinkActive="active" (click)="closeMobileMenu()">
-        <lucide-icon name="book-open" [size]="16"></lucide-icon>
-        {{ 'recipe_book' | translatePipe }}
-      </a>
-    </li>
-    <li>
-      <a routerLink="/menu-library" routerLinkActive="active" (click)="closeMobileMenu()">
-        <lucide-icon name="library" [size]="16"></lucide-icon>
-        {{ 'menu_library' | translatePipe }}
-      </a>
-    </li>
+    @for (link of navLinks_(); track link.path) {
+      <li>
+        <a [routerLink]="link.path" routerLinkActive="active" (click)="closeMobileMenu()">
+          <lucide-icon [name]="link.icon" size="16"></lucide-icon>
+          {{ link.key | translatePipe }}
+        </a>
+      </li>
+    }
 
     <li class="mobile-auth-section">
       @if (isLoggedIn()) {
@@ -135,7 +112,7 @@
         type="button"
         class="bottom-nav__item"
         (click)="toggleMobileAvatar()"
-        [attr.aria-expanded]="mobileAvatarOpen()"
+        [attr.aria-expanded]="isMobileAvatarOpen()"
         aria-haspopup="menu"
       >
         <span class="avatar-wrapper">
@@ -147,9 +124,21 @@
         </span>
         <span>{{ 'profile' | translatePipe }}</span>
       </button>
-      @if (mobileAvatarOpen()) {
+      @if (isMobileAvatarOpen()) {
         <div class="profile-menu" role="menu">
           <span class="profile-menu__name">{{ user_()!.name }}</span>
+          @if (isOwner_()) {
+            <a class="profile-menu__item" role="menuitem" routerLink="/settings" (click)="toggleMobileAvatar()">
+              <lucide-icon name="sliders-vertical" size="16"></lucide-icon>
+              {{ 'settings' | translatePipe }}
+            </a>
+          }
+          @if (isPlatformAdmin_()) {
+            <a class="profile-menu__item" role="menuitem" routerLink="/platform" (click)="toggleMobileAvatar()">
+              <lucide-icon name="activity" size="16"></lucide-icon>
+              {{ 'platform_dashboard' | translatePipe }}
+            </a>
+          }
           <button type="button" class="profile-menu__logout" role="menuitem" (click)="logout()">
             <lucide-icon name="log-out" [size]="16"></lucide-icon>
             {{ 'log_out' | translatePipe }}

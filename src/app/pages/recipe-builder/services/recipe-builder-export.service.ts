@@ -25,7 +25,7 @@ export class RecipeBuilderExportService {
   private source_: RecipeBuilderExportSource | null = null
 
   /** Export toolbar overlay (blur header, same pattern as menu-intelligence). */
-  readonly exportToolbarOpen_ = signal(false)
+  readonly isExportToolbarOpen_ = signal(false)
   /** Which View/Export dropdown is open in the toolbar. */
   readonly viewExportModal_ = signal<RecipeBuilderExportView | null>(null)
   /** Payload for the export preview popup (null = closed). */
@@ -38,11 +38,11 @@ export class RecipeBuilderExportService {
 
   openToolbar(): void {
     // Defer to next tick so the opening click is not interpreted as click-outside
-    setTimeout(() => this.exportToolbarOpen_.set(true), 0)
+    setTimeout(() => this.isExportToolbarOpen_.set(true), 0)
   }
 
   closeToolbar(): void {
-    this.exportToolbarOpen_.set(false)
+    this.isExportToolbarOpen_.set(false)
     this.viewExportModal_.set(null)
   }
 
@@ -56,7 +56,7 @@ export class RecipeBuilderExportService {
 
   /** Close export toolbar and preview so state is clean when user navigates away. */
   closeAllExportOverlays(): void {
-    this.exportToolbarOpen_.set(false)
+    this.isExportToolbarOpen_.set(false)
     this.viewExportModal_.set(null)
     this.closePreview()
   }

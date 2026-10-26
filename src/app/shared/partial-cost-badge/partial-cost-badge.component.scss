@@ -1,0 +1,191 @@
+$break-mobile: 768px; // mirrors src/styles.scss
+$break-tabbar: 620px; // mirrors the bottom tab bar breakpoint in core/components/header/header.component.scss
+
+@layer components.partial-cost-badge {
+  .partial-cost {
+    position: relative;
+    display: inline-block;
+  }
+
+  .partial-chip {
+    cursor: pointer;
+  }
+
+  // Rendered in the browser top layer via `popover`; `inset`, `margin` and `overflow` undo the user-agent
+  // popover defaults. The TS places the box in viewport coordinates (see place_).
+  .partial-popover {
+    position: fixed;
+    inset: auto;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+
+    inline-size: min(22rem, calc(100vw - 2rem));
+    max-block-size: min(24rem, 70vh);
+    margin: 0;
+    overflow: visible;
+
+    color: var(--color-text-main);
+    font-size: var(--fs-sm);
+    text-align: start;
+
+    padding: 0;
+    background: var(--bg-card-solid);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+
+    box-shadow: var(--shadow-modal);
+
+    // Invisible bridge over the gap to the chip, so moving the mouse onto the popover does not close it.
+    &::before {
+      content: '';
+
+      position: absolute;
+      inset-inline: 0;
+      inset-block-start: 100%;
+      block-size: var(--space-2);
+    }
+
+    &.partial-popover--below::before {
+      inset-block: auto 100%;
+    }
+
+    @media (max-width: $break-mobile) {
+      inset-block: auto var(--space-4);
+      inset-inline: var(--space-4);
+      inline-size: auto;
+
+      &::before {
+        content: none;
+      }
+    }
+
+    // Plan 481: the bottom sheet sits above the shell's bottom tab bar, so its last line is never under it.
+    @media (max-width: $break-tabbar) {
+      inset-block-end: calc(var(--tabbar-h) + var(--space-2) + env(safe-area-inset-bottom, 0px));
+    }
+  }
+
+  .partial-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    min-block-size: 0;
+    overflow-y: auto;
+    padding: var(--space-3);
+  }
+
+  .partial-title {
+    margin: 0;
+
+    font-size: var(--fs-base);
+    font-weight: 600;
+  }
+
+  .partial-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .partial-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    padding-block-end: var(--space-2);
+    border-block-end: 1px solid var(--border-default);
+
+    &:last-child {
+      padding-block-end: 0;
+      border-block-end: 0;
+    }
+  }
+
+  .partial-row-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .partial-icon {
+    flex-shrink: 0;
+
+    color: var(--color-text-muted);
+  }
+
+  .partial-row[data-kind='deleted'] .partial-icon {
+    color: var(--color-danger);
+  }
+
+  .partial-row[data-kind='unlinked'] .partial-icon {
+    color: var(--text-warning);
+  }
+
+  .partial-name {
+    flex: 1;
+
+    min-inline-size: 0;
+
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  // The pill look comes from the .c-chip engine (red / amber).
+  .partial-tag {
+    flex-shrink: 0;
+  }
+
+  .partial-used-in {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-awaiting {
+    color: var(--text-warning);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-price {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+  }
+
+  .partial-price-label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--space-1);
+
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-price-input {
+    inline-size: 100%;
+  }
+
+  .partial-note {
+    color: var(--color-text-muted);
+    font-size: var(--fs-xs);
+  }
+
+  .partial-link {
+    display: block;
+  }
+}
+
+/* Outside the layer: the engine's .c-dropdown is unlayered, so this must be too to beat it.
+   The popover body scrolls (overflow-y: auto) and would clip an overlaid list, so the link list sits in flow
+   under the field, like search-combobox's inline mode. */
+.partial-link ::ng-deep .c-dropdown {
+  position: static;
+  margin-block-start: var(--space-1);
+}

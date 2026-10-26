@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core'
 import { environment } from '../../../environments/environment'
+import { API } from './http-storage.adapter'
 
 export type LogContext = Record<string, unknown> | undefined
 
@@ -15,7 +16,7 @@ type LogLevel = 'info' | 'warn' | 'error'
 // Same sessionStorage key UserService.storeToken() writes. Read directly: the auth interceptor
 // injects this service, so injecting UserService or HttpClient here would be a DI cycle.
 const TOKEN_KEY = 'fv_token'
-const LOG_PATH = '/api/v1/log'
+const LOG_PATH = API.log
 const BACKOFF_MS = 60_000
 const FLOOD_WINDOW_MS = 60_000
 const FLOOD_MAX = 30

@@ -15,17 +15,17 @@ Each section below is parsed by `scripts/lib/invariants.mjs` — keep the exact 
 `## INV-n — <title>`, then the five `- Field:` lines. `Touches` globs are backticked.
 
 ## INV-1 — Ownership
-- Rule: every user can create, edit and delete his own items; the admin can also do so for shared `__master__` items. Write routes authorize through `server/utils/can-write.js`.
-- Source: ADR 0019 (plan 386), `server/utils/can-write.js`
-- Touches: `server/routes/generic.js`, `server/utils/can-write.js`, `server/middleware/**`, `src/app/core/services/permission.service.ts`, `src/app/core/services/taxonomy-store.service.ts`, `src/app/core/services/*-data.service.ts`
-- Users lose if broken: a cook can't change or delete his own recipes and products, or can change someone else's; the admin can't fix the shared default lists.
+- Rule: every item belongs to exactly one business. Members read all of their business's items, except that staff read events only in the stages the owner allowed (`staffVisibleStages`, default all) plus events they created, and nothing from another business; every write is authorized through `server/utils/permissions.js` (`can` / `assertCan`): the owner may do everything in the business, staff create anything but change only what they created and never money fields, business settings, the team or event/serving types (until plan 427 merges every member counts as owner). Only a platform admin writes shared `__master__` items.
+- Source: ADR 0023 (plan 424), ADR 0026 (plan 477, staff event stages), `server/utils/business-scope.js`, `server/utils/permissions.js`
+- Touches: `server/routes/generic.js`, `server/utils/business-scope.js`, `server/utils/permissions.js`, `server/utils/event-visibility.js`, `server/routes/events.js`, `server/routes/stats.js`, `server/middleware/**`, `src/app/core/services/permission.service.ts`, `src/app/core/services/taxonomy-store.service.ts`, `src/app/core/services/*-data.service.ts`
+- Users lose if broken: a cook sees or changes another kitchen's recipes and prices, or a staff member changes prices, settings or the team that only the owner may change; the platform admin can't fix the shared default lists.
 - Test: server/test/invariants.test.js "INV-1 …"
 
 ## INV-2 — Tenancy
-- Rule: shared master data plus per-user overrides, created lazily on "change/remove only for me". A user's ability to customize shared data is never removed without a replacement in the same release.
-- Source: ADR 0008 D1 + ADR 0019 (plan 386)
-- Touches: `server/routes/generic.js`, `server/services/**`, `server/migrations/**`, `src/app/core/services/taxonomy-store.service.ts`, `src/app/core/services/master-push.service.ts`
-- Users lose if broken: a cook can no longer hide or rename a default category, unit or label for himself — he's stuck with the shared list, or his change leaks to everyone.
+- Rule: the business is the tenant. A new business gets its own full copy of the shared `__master__` catalog; master sync runs per business and never overwrites an item the business changed or deleted; taxonomy is read as master ∪ the business's own terms; owner and staff share that one copy. The global master (`businessId: '__master__'`) belongs to no business and only a platform admin changes it. Every scoped query goes through `server/utils/business-scope.js`.
+- Source: ADR 0023 (plan 424; supersedes ADR 0008 D1)
+- Touches: `server/routes/generic.js`, `server/utils/business-scope.js`, `server/services/**`, `server/migrations/**`, `server/jobs/**`, `src/app/core/services/taxonomy-store.service.ts`, `src/app/core/services/master-push.service.ts`
+- Users lose if broken: one kitchen's products or prices show up in another kitchen's lists, the owner and staff end up on different copies, or a master update overwrites a kitchen's own edit.
 - Test: server/test/invariants.test.js "INV-2 …"
 
 ## INV-3 — The server owns cross-document consistency

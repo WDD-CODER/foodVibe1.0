@@ -1,6 +1,6 @@
 # Plan 435 — Supplier orders per menu, copied or sent to WhatsApp
 
-Status: draft
+Status: active
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 Track: code
 
@@ -15,8 +15,8 @@ carry `nameHebrew`, `phone`, `phone2`, `contactPerson` (`supplier.schema.ts`).
   sends each order to that supplier's WhatsApp (or copies it) in one tap, with the exact message format of spec 04.2.
 
 Done when:
-- [auto] `npx ng build` exits 0.
-- [auto] `npx ng test --watch=false --include='src/app/core/utils/supplier-orders.util.spec.ts' --include='src/app/pages/menu-intelligence/components/supplier-orders/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/menu-export-sheet/**/*.spec.ts'`
+- [x] [auto] `npx ng build` exits 0.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/utils/supplier-orders.util.spec.ts' --include='src/app/pages/menu-intelligence/components/supplier-orders/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/menu-export-sheet/**/*.spec.ts'`
   passes (0 failures), including, on the plan-433 fixture (`buildFixtureInput()`, `FIXTURE_SUPPLIERS`):
   - `buildSupplierOrders`: card "ירקן" holds עגבנייה and שמן זית; card "ספק א" does not exist (tomato is cheaper at
     "ירקן"); a "ללא ספק" card holds לימון with `partial` true; estimated total of "ירקן" = 157.75.
@@ -35,11 +35,11 @@ Done when:
     `supplier_orders_invalid_phone`; `clipboard.writeText` rejecting → shows the manual-copy textarea holding the message.
   - Empty plan (no raw lines) → the `supplier_orders_nothing` text, no cards.
   - Export sheet: the new "הזמנות לספקים" button emits `openSupplierOrders` after `close`.
-- [auto] `git diff --numstat origin/mvp...HEAD -- src/app/pages/menu-intelligence/menu-intelligence.page.ts` shows
+- [x] [auto] `git diff --numstat origin/mvp...HEAD -- src/app/pages/menu-intelligence/menu-intelligence.page.ts` shows
   added ≤ deleted (growth-frozen).
-- [auto] Every icon name added to the new templates (`grep -o 'name="[a-z0-9-]*"'`) appears in both the
+- [x] [auto] Every icon name added to the new templates (`grep -o 'name="[a-z0-9-]*"'`) appears in both the
   `lucide-angular` import and `LucideAngularModule.pick` in `src/app/app.config.ts`.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [human] WhatsApp opens with the order ready on Android, on iPhone and on desktop; copy and "העתק הכל" paste
   correctly right-to-left (cards ①–⑥ below).
 
@@ -154,21 +154,21 @@ outputs (434 state); `KitchenStateService.productsById_` / `suppliersById_`; `Us
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] Entry from the page toolbar (pill "הזמנות לספקים"), from the hero FAB and from the "צ׳קליסט והדפסות" sheet,
+- [x] Entry from the page toolbar (pill "הזמנות לספקים"), from the hero FAB and from the "צ׳קליסט והדפסות" sheet,
       on mobile and desktop.
-- [ ] One card per chosen supplier (engine `supplierId`), ordered by supplier name; then "ללא ספק" (lines with
+- [x] One card per chosen supplier (engine `supplierId`), ordered by supplier name; then "ללא ספק" (lines with
       `supplierId` null, status `ok`); then "לבדיקה" (status `unlinked`, `no_conversion`, `deleted`), never sendable.
-- [ ] Card: name, phone (if any), lines `name · qty · unit` (+ purchase units), "סה״כ משוער" ₪ with "חלקי" when any
+- [x] Card: name, phone (if any), lines `name · qty · unit` (+ purchase units), "סה״כ משוער" ₪ with "חלקי" when any
       line has no cost; buttons "העתק" and (not on "ללא ספק") "שלח ב-WhatsApp". Top: "העתק הכל".
-- [ ] Message: exact spec format, RLM at the start of every non-empty line, no prices, no emoji, short Hebrew units,
+- [x] Message: exact spec format, RLM at the start of every non-empty line, no prices, no emoji, short Hebrew units,
       `formatQty` rounding, purchase units in parentheses.
-- [ ] WhatsApp: valid Israeli mobile → `https://wa.me/9725XXXXXXXX?text=…` in a new tab/app; no phone → native share
+- [x] WhatsApp: valid Israeli mobile → `https://wa.me/9725XXXXXXXX?text=…` in a new tab/app; no phone → native share
       sheet; no share support → copy; invalid phone → copy + "מספר לא תקין – הועתק להדבקה".
-- [ ] Copy → toast "הועתק – הדבק ב-WhatsApp"; clipboard blocked → a selected read-only textarea for manual copy.
-- [ ] No raw lines → "אין מה להזמין".
+- [x] Copy → toast "הועתק – הדבק ב-WhatsApp"; clipboard blocked → a selected read-only textarea for manual copy.
+- [x] No raw lines → "אין מה להזמין".
 
 ### Should Have (P1)
-- [ ] `phone` empty but `phone2` set → use `phone2`.
+- [x] `phone` empty but `phone2` set → use `phone2`.
 
 ## UI/UX Notes
 - New child component `pages/menu-intelligence/components/supplier-orders/` (`app-supplier-orders`): full-screen
@@ -191,16 +191,16 @@ outputs (434 state); `KitchenStateService.productsById_` / `suppliersById_`; `Us
   `line_status_deleted`, `line_status_no_conversion`.
 
 ## Atomic Sub-tasks
-- [ ] S1: Group the engine's lines into one order per supplier plus "no supplier" and "to check" — buildSupplierOrders(plan, productsById, suppliersById); card totals and partial; review = unlinked/no_conversion/deleted — src/app/core/utils/supplier-orders.util.ts
-- [ ] S2: Write the order message exactly as specified, right-to-left safe — buildOrderMessage(header, card, t), buildAllOrdersMessage(header, cards, t); RLM per non-empty line; short units: unit → t('unit_short_unit'), else t(unit) from the units group; formatQty; purchase in parentheses; DD.MM.YYYY — src/app/core/utils/supplier-orders.util.ts
-- [ ] S3: Turn an Israeli mobile number into a WhatsApp number or reject it — toWhatsAppPhone: strip non-digits and a leading +; 05XXXXXXXX (10 digits) → 9725XXXXXXXX; 9725XXXXXXXX (12) kept; else null — src/app/core/utils/supplier-orders.util.ts
-- [ ] S4: Test the grouping, the exact message and the phone rule on the 04.1 fixture — cases listed in Done when — src/app/core/utils/supplier-orders.util.spec.ts
-- [ ] S5: Show the supplier-order cards with copy, copy-all and WhatsApp — SupplierOrdersComponent: input event, computed plan via EventPlanService, orders via buildSupplierOrders; send(card) with wa.me / navigator.share / copy fallbacks; copy with clipboard → toast, rejection → manual-copy textarea (selected on open); "אין מה להזמין"; output close; Escape closes — src/app/pages/menu-intelligence/components/supplier-orders/supplier-orders.component.ts, .html, .scss
-- [ ] S6: Test the send and copy fallbacks without a real phone — window.open, navigator.share and navigator.clipboard stubbed — src/app/pages/menu-intelligence/components/supplier-orders/supplier-orders.component.spec.ts
-- [ ] S7: Add "הזמנות לספקים" to the menu's print sheet — new group with one button, output openSupplierOrders emitted after close; spec case — src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.ts, .html, .spec.ts
-- [ ] S8: Open supplier orders from the toolbar, FAB and print sheet without growing the frozen page — supplierOrdersEvent_ signal; getCurrentMenuForExport made protected; FAB action { labelKey: 'supplier_orders', icon: 'truck' }; closeAllExportOverlays also clears it; pill-row button and the lazy @defer block in html; offset the added lines (e.g. collapse the multi-line comments on sectionControls_ and profitPerGuest_) so added ≤ deleted — src/app/pages/menu-intelligence/menu-intelligence.page.ts, menu-intelligence.page.html
-- [ ] S9: Register the WhatsApp icon and add the Hebrew texts — MessageCircle in app.config.ts; dictionary keys listed in UI/UX Notes — src/app/app.config.ts, public/assets/data/dictionary.json
-- [ ] S10: Build, test, check the frozen page and icons, then hand over the six device checks — ng build, ng test include list, numstat, icon grep, log-query; cards ①–⑥ — this plan file
+- [x] S1: Group the engine's lines into one order per supplier plus "no supplier" and "to check" — buildSupplierOrders(plan, productsById, suppliersById); card totals and partial; review = unlinked/no_conversion/deleted — src/app/core/utils/supplier-orders.util.ts
+- [x] S2: Write the order message exactly as specified, right-to-left safe — buildOrderMessage(header, card, t), buildAllOrdersMessage(header, cards, t); RLM per non-empty line; short units: unit → t('unit_short_unit'), else t(unit) from the units group; formatQty; purchase in parentheses; DD.MM.YYYY — src/app/core/utils/supplier-orders.util.ts
+- [x] S3: Turn an Israeli mobile number into a WhatsApp number or reject it — toWhatsAppPhone: strip non-digits and a leading +; 05XXXXXXXX (10 digits) → 9725XXXXXXXX; 9725XXXXXXXX (12) kept; else null — src/app/core/utils/supplier-orders.util.ts
+- [x] S4: Test the grouping, the exact message and the phone rule on the 04.1 fixture — cases listed in Done when — src/app/core/utils/supplier-orders.util.spec.ts
+- [x] S5: Show the supplier-order cards with copy, copy-all and WhatsApp — SupplierOrdersComponent: input event, computed plan via EventPlanService, orders via buildSupplierOrders; send(card) with wa.me / navigator.share / copy fallbacks; copy with clipboard → toast, rejection → manual-copy textarea (selected on open); "אין מה להזמין"; output close; Escape closes — src/app/pages/menu-intelligence/components/supplier-orders/supplier-orders.component.ts, .html, .scss
+- [x] S6: Test the send and copy fallbacks without a real phone — window.open, navigator.share and navigator.clipboard stubbed — src/app/pages/menu-intelligence/components/supplier-orders/supplier-orders.component.spec.ts
+- [x] S7: Add "הזמנות לספקים" to the menu's print sheet — new group with one button, output openSupplierOrders emitted after close; spec case — src/app/pages/menu-intelligence/components/menu-export-sheet/menu-export-sheet.component.ts, .html, .spec.ts
+- [x] S8: Open supplier orders from the toolbar, FAB and print sheet without growing the frozen page — supplierOrdersEvent_ signal; getCurrentMenuForExport made protected; FAB action { labelKey: 'supplier_orders', icon: 'truck' }; closeAllExportOverlays also clears it; pill-row button and the lazy @defer block in html; offset the added lines (e.g. collapse the multi-line comments on sectionControls_ and profitPerGuest_) so added ≤ deleted — src/app/pages/menu-intelligence/menu-intelligence.page.ts, menu-intelligence.page.html
+- [x] S9: Register the WhatsApp icon and add the Hebrew texts — MessageCircle in app.config.ts; dictionary keys listed in UI/UX Notes — src/app/app.config.ts, public/assets/data/dictionary.json
+- [x] S10: Build, test, check the frozen page and icons, then hand over the six device checks — ng build, ng test include list, numstat, icon grep, log-query; cards ①–⑥ — this plan file
 
 ## Technical Considerations
 - Dependencies: `EventPlanService` (433), `KitchenStateService.productsById_` / `suppliersById_`,

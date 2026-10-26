@@ -1,6 +1,8 @@
-/* menu-library.page — cssLayer: global token, five-group vertical rhythm */
-:host {
-  display: block;
+@layer components.menu-library {
+  /* menu-library.page — cssLayer: global token, five-group vertical rhythm */
+  :host {
+    display: block;
 
-  min-height: 100vh;
+    min-height: 100vh;
+  }
 }

@@ -9,8 +9,7 @@
 
   <form [formGroup]="supplierForm_" (ngSubmit)="onSubmit()" class="form-body">
     <div class="form-section">
-      <div class="form-group">
-        <label for="nameHebrew">{{ 'name' | translatePipe }}</label>
+      <app-form-field label="name" forId="nameHebrew" [error]="nameError()">
         <input
           id="nameHebrew"
           type="text"
@@ -19,36 +18,26 @@
           [class.c-input--invalid]="validationErrors_()['nameHebrew']"
           [attr.aria-invalid]="validationErrors_()['nameHebrew'] ? true : null"
         />
-        @if (supplierForm_.get('nameHebrew')?.errors?.['duplicateName'] && supplierForm_.get('nameHebrew')?.touched) {
-          <span class="form-error">{{ 'duplicate_supplier_name' | translatePipe }}</span>
-        }
-        @if (validationErrors_()['nameHebrew']) {
-          <span class="c-field-error">{{ 'field_name_required' | translatePipe }}</span>
-        }
-      </div>
-      <div class="form-group">
-        <label for="contactPerson">{{ 'contact_person' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="contact_person" forId="contactPerson">
         <input id="contactPerson" type="text" formControlName="contactPerson" class="c-input" />
-      </div>
-      <div class="form-group">
-        <label for="phone">{{ 'phone' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="phone" forId="phone">
         <input id="phone" type="tel" formControlName="phone" class="c-input" />
-      </div>
-      <div class="form-group">
-        <label for="minOrderMov">{{ 'min_order' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="min_order" forId="minOrderMov">
         <input id="minOrderMov" type="number" formControlName="minOrderMov" min="0" class="c-input" />
-      </div>
-      <div class="form-group">
-        <label for="leadTimeDays">{{ 'lead_time' | translatePipe }}</label>
+      </app-form-field>
+      <app-form-field label="lead_time" forId="leadTimeDays">
         <input id="leadTimeDays" type="number" formControlName="leadTimeDays" min="0" class="c-input" />
-      </div>
+      </app-form-field>
     </div>
 
     <div class="form-section days-section">
       <h3>{{ 'delivery_days' | translatePipe }}</h3>
-      <div class="c-toggle-chip-group" formArrayName="deliveryDays">
+      <div class="c-chip-group" formArrayName="deliveryDays">
         @for (ctrl of deliveryDaysArray.controls; track $index) {
-          <label class="c-toggle-chip">
+          <label class="c-chip c-chip--toggle">
             <input type="checkbox" [formControlName]="$index" />
             <span>{{ dayKeys[$index] | translatePipe }}</span>
           </label>

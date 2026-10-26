@@ -1,3 +1,5 @@
-:host {
-  display: block;
+@layer components.dashboard-header {
+  :host {
+    display: block;
+  }
 }

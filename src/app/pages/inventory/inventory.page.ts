@@ -3,7 +3,7 @@ import { RouterOutlet } from '@angular/router'
 import { KitchenStateService } from '@services/kitchen-state.service'
 
 @Component({
-  selector: 'inventory-page',
+  selector: 'app-inventory-page',
   standalone: true,
   imports: [RouterOutlet],
   templateUrl: './inventory.page.html',

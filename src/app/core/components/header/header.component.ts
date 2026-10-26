@@ -3,8 +3,21 @@ import { ActivatedRouteSnapshot, Router, RouterLink, RouterLinkActive } from '@a
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { UserService } from '@services/user.service'
+import { BusinessService } from '@services/business.service'
 import { AuthModalService, AuthMode } from '@services/auth-modal.service'
 import { authGuard } from '../../guards/auth.guard'
+
+/** The top-level pages every signed-in or guest user can open (desktop pills and drawer). */
+const NAV_LINKS = [
+  { path: '/dashboard', key: 'dashboard', icon: 'layout-dashboard' },
+  { path: '/inventory', key: 'inventory', icon: 'package' },
+  { path: '/recipe-book', key: 'recipe_book', icon: 'book-open' },
+  { path: '/menu-library', key: 'menu_library', icon: 'library' }
+]
+/** Only the business owner gets this one (plan 428). */
+const SETTINGS_LINK = { path: '/settings', key: 'settings', icon: 'sliders-vertical' }
+/** Only the platform admin gets this one (plan 448). */
+const PLATFORM_LINK = { path: '/platform', key: 'platform_dashboard', icon: 'activity' }
 
 @Component({
   selector: 'app-header',
@@ -16,14 +29,23 @@ import { authGuard } from '../../guards/auth.guard'
 })
 export class HeaderComponent {
   private readonly userService = inject(UserService)
+  private readonly businessService = inject(BusinessService)
   private readonly authModal = inject(AuthModalService)
   private readonly router = inject(Router)
 
   isMobileMenuOpen = signal(false)
-  mobileAvatarOpen = signal(false)
+  isMobileAvatarOpen = signal(false)
 
   protected readonly isLoggedIn = this.userService.isLoggedIn
   protected readonly user_ = this.userService.user_
+  protected readonly isPlatformAdmin_ = this.userService.isPlatformAdmin_
+  protected readonly isOwner_ = this.userService.isOwner_
+  protected readonly navLinks_ = computed(() => [
+    ...NAV_LINKS,
+    ...(this.isOwner_() ? [SETTINGS_LINK] : []),
+    ...(this.isPlatformAdmin_() ? [PLATFORM_LINK] : [])
+  ])
+  protected readonly business_ = this.businessService.business_
   // Resets whenever the stored photo URL changes (new user, re-login, profile update).
   protected readonly imgFailed_ = linkedSignal({ source: () => this.user_()?.imgUrl, computation: () => false })
   protected readonly showAvatarImg = computed(() => !!this.user_()?.imgUrl && !this.imgFailed_())
@@ -41,17 +63,17 @@ export class HeaderComponent {
   }
 
   toggleMobileAvatar(): void {
-    this.mobileAvatarOpen.update((v) => !v)
+    this.isMobileAvatarOpen.update((v) => !v)
   }
 
   protected openAuth(mode: AuthMode): void {
     this.closeMobileMenu()
-    this.mobileAvatarOpen.set(false)
+    this.isMobileAvatarOpen.set(false)
     this.authModal.open(mode)
   }
 
   protected async logout(): Promise<void> {
-    this.mobileAvatarOpen.set(false)
+    this.isMobileAvatarOpen.set(false)
     this.closeMobileMenu()
     if (this._isCurrentRouteProtected()) {
       // Navigate to a public page first so Angular can run canDeactivate guards.

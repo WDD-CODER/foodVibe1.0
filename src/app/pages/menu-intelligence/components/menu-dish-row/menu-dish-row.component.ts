@@ -1,18 +1,29 @@
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { FormGroup, ReactiveFormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
-import { ScrollableDropdownComponent } from 'src/app/shared/scrollable-dropdown/scrollable-dropdown.component'
+import { SearchComboboxComponent } from 'src/app/shared/search-combobox/search-combobox.component'
+import { EventPlanService } from '../../../../core/engine/event-plan.service'
+import {
+  formatCoefficient,
+  isDefaultCoefficient,
+  isValidCoefficient,
+  type ItemPortions
+} from '../../../../core/engine/portions'
+import { cleanFloat, roundMoney } from '../../../../core/engine/rounding'
+import { PermissionService } from '@services/permission.service'
+import { TranslationService } from '@services/translation.service'
 import { RecipeCostService } from '@services/recipe-cost.service'
-import { MenuIntelligenceService } from '@services/menu-intelligence.service'
+import { PartialCostBadgeComponent } from 'src/app/shared/partial-cost-badge/partial-cost-badge.component'
 import { ALL_DISH_FIELDS, type DishFieldKey } from '@models/menu-event.model'
 import { Recipe } from '@models/recipe.model'
-import { filterOptionsByLabel } from 'src/app/core/utils/option-filter.util'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
-import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
+
+/** Detail fields that show money (plan 487: hidden from staff). */
+const MONEY_DISH_FIELDS: readonly DishFieldKey[] = ['sell_price', 'food_cost_money', 'food_cost_pct']
 
 @Component({
   selector: 'app-menu-dish-row',
@@ -20,14 +31,13 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    FormsModule,
     LucideAngularModule,
     TranslatePipe,
     ClickOutSideDirective,
     SelectOnFocusDirective,
-    ScrollableDropdownComponent,
+    SearchComboboxComponent,
     ScrollRailComponent,
-    InputClearComponent
+    PartialCostBadgeComponent
   ],
   templateUrl: './menu-dish-row.component.html',
   styleUrl: './menu-dish-row.component.scss',
@@ -35,8 +45,10 @@ import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.comp
 })
 export class MenuDishRowComponent {
   // ── Injected ──────────────────────────────────────────────────────────────
-  private readonly recipeCostService = inject(RecipeCostService)
-  private readonly menuIntelligence = inject(MenuIntelligenceService)
+  private readonly eventPlan_ = inject(EventPlanService)
+  private readonly translation_ = inject(TranslationService)
+  private readonly recipeCost_ = inject(RecipeCostService)
+  private readonly permission_ = inject(PermissionService)
 
   // ── Inputs ────────────────────────────────────────────────────────────────
   readonly itemGroup = input.required<FormGroup>()
@@ -45,12 +57,45 @@ export class MenuDishRowComponent {
   readonly recipes = input<Recipe[]>([])
   readonly activeFields = input<DishFieldKey[]>([])
   readonly dishSearchQuery = input<string>('')
-  readonly highlightedIndex = input<number>(0)
   readonly isMetaExpanded = input<boolean>(false)
   readonly editingDishField = input<string | null>(null)
-  readonly servingType = input<string>('plated_course')
-  readonly guestCount = input<number>(0)
-  readonly piecesPerPerson = input<number>(1)
+  /** Portions, coefficient and override flag of this row, from `MenuPortionsService` (null = unknown row). */
+  readonly portionInfo = input<ItemPortions | null>(null)
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  /** Text being typed in the coefficient box (null = show the stored value). */
+  protected readonly coefficientDraft_ = signal<string | null>(null)
+  protected readonly isCoefficientInvalid_ = signal(false)
+  /** Portions as shown: float noise gone, at most 2 decimals (cost maths keeps the exact value). */
+  protected readonly portionsText_ = computed(() => String(cleanFloat(this.portionInfo()?.portions ?? 0, 2)))
+  protected readonly coefficientText_ = computed(
+    () => this.coefficientDraft_() ?? formatCoefficient(this.portionInfo()?.coefficient ?? 1)
+  )
+
+  /** Plan 487: a signed-in staff member sees no price, food cost or cost warning on the row. */
+  protected readonly isMoneyHidden_ = computed(() => this.permission_.isStaff_())
+  /** The detail fields to show: the serving type's list, without the money fields for staff. */
+  protected readonly visibleFields_ = computed(() =>
+    this.isMoneyHidden_() ? this.activeFields().filter((key) => !MONEY_DISH_FIELDS.includes(key)) : this.activeFields()
+  )
+
+  /** Id of the dish in this row, kept in step with the form control (the form is not a signal). */
+  private readonly recipeId_ = signal('')
+
+  /** What keeps this dish's cost from being final: unpriced, unlinked and deleted ingredients, through preps. */
+  protected readonly missing_ = computed(() => {
+    const recipe = this.recipes().find((r) => r._id === this.recipeId_())
+    return recipe ? this.recipeCost_.computeRecipeCostStatus(recipe).missing : []
+  })
+
+  constructor() {
+    effect((onCleanup) => {
+      const ctrl = this.itemGroup().get('recipeId')
+      this.recipeId_.set((ctrl?.value as string | undefined) ?? '')
+      const sub = ctrl?.valueChanges.subscribe((v: string | null) => this.recipeId_.set(v ?? ''))
+      onCleanup(() => sub?.unsubscribe())
+    })
+  }
 
   // ── Outputs ───────────────────────────────────────────────────────────────
   readonly remove = output<void>()
@@ -62,7 +107,8 @@ export class MenuDishRowComponent {
   readonly editDishFieldCommit = output<void>()
   readonly sellPriceKeydown = output<KeyboardEvent>()
   readonly dishFieldKeydown = output<{ fieldKey: string; event: KeyboardEvent }>()
-  readonly dishSearchKeydown = output<KeyboardEvent>()
+  /** Tab / Shift+Tab in the dish search: the page moves focus (and restores a renamed dish). */
+  readonly dishSearchTab = output<KeyboardEvent>()
   readonly clearSearch = output<void>()
 
   // ── Read ──────────────────────────────────────────────────────────────────
@@ -88,28 +134,9 @@ export class MenuDishRowComponent {
   }
 
   getAutoFoodCost(): number {
-    const item = this.itemGroup()
-    const recipeId = item?.get('recipeId')?.value as string | undefined
+    const recipeId = this.itemGroup()?.get('recipeId')?.value as string | undefined
     if (!recipeId) return 0
-    const recipe = this.recipes().find((r) => r._id === recipeId)
-    if (!recipe) return 0
-    const derivedPortions = this.menuIntelligence.derivePortions(
-      this.servingType(),
-      this.guestCount(),
-      Number(item.get('predictedTakeRate')?.value ?? 0),
-      this.piecesPerPerson(),
-      Number(item.get('serving_portions')?.value ?? 1)
-    )
-    const baseYield = Math.max(1, recipe.yieldAmount || 1)
-    const multiplier = derivedPortions / baseYield
-    const scaledCost = this.recipeCostService.computeRecipeCost({
-      ...recipe,
-      ingredients: recipe.ingredients.map((ing) => ({
-        ...ing,
-        amount: (ing.amount || 0) * multiplier
-      }))
-    })
-    return Math.round(scaledCost * 100) / 100
+    return roundMoney(this.eventPlan_.costFor(recipeId, this.getDerivedPortions()).cost)
   }
 
   getFoodCostPerPortion(): number {
@@ -119,20 +146,67 @@ export class MenuDishRowComponent {
   }
 
   getDerivedPortions(): number {
-    const item = this.itemGroup()
-    return this.menuIntelligence.derivePortions(
-      this.servingType(),
-      this.guestCount(),
-      Number(item.get('predictedTakeRate')?.value ?? 0),
-      this.piecesPerPerson(),
-      Number(item.get('serving_portions')?.value ?? 1)
-    )
+    return this.portionInfo()?.portions ?? 0
   }
 
-  getFilteredRecipes(): Recipe[] {
-    const raw = this.dishSearchQuery().trim()
-    if (!raw) return []
-    const filtered = filterOptionsByLabel(this.recipes(), raw, (r) => r.nameHebrew ?? '')
-    return filtered.slice(0, 12)
+  /** Label of a detail field: a preparation counts per diner in its own yield unit, a dish in portions. */
+  getFieldLabel(fieldKey: DishFieldKey): string {
+    const unit = this.prepYieldUnit()
+    if (fieldKey === 'serving_portions' && unit) {
+      return this.translation_.translate('per_diner_in_unit').replace('{{unit}}', this.translation_.translate(unit))
+    }
+    return this.translation_.translate(this.getDishFieldLabelKey(fieldKey))
+  }
+
+  isPerDinerZero(): boolean {
+    return Number(this.itemGroup().get('serving_portions')?.value ?? 1) === 0
+  }
+
+  /** Typing a coefficient: valid → stored as this dish's override; invalid → message, old value kept. */
+  onCoefficientInput(text: string): void {
+    this.coefficientDraft_.set(text)
+    const trimmed = text.trim()
+    if (!trimmed) {
+      this.isCoefficientInvalid_.set(false)
+      return
+    }
+    const value = Number(trimmed.replace(',', '.'))
+    if (!isValidCoefficient(value)) {
+      this.isCoefficientInvalid_.set(true)
+      return
+    }
+    this.isCoefficientInvalid_.set(false)
+    const info = this.portionInfo()
+    const isDefault = info != null && isDefaultCoefficient(value, info.defaultCoefficient)
+    this.itemGroup().patchValue({ coefficient_override: isDefault ? null : value })
+  }
+
+  /** Leaving the box shows the stored value again. */
+  onCoefficientBlur(): void {
+    this.coefficientDraft_.set(null)
+    this.isCoefficientInvalid_.set(false)
+  }
+
+  resetCoefficient(): void {
+    this.itemGroup().patchValue({ coefficient_override: null })
+    this.coefficientDraft_.set(null)
+    this.isCoefficientInvalid_.set(false)
+  }
+
+  private prepYieldUnit(): string {
+    if (this.itemGroup().get('recipeType')?.value !== 'preparation') return ''
+    const id = this.itemGroup().get('recipeId')?.value as string | undefined
+    return this.recipes().find((r) => r._id === id)?.yieldUnit ?? ''
+  }
+
+  protected readonly recipeLabel_ = (recipe: Recipe): string => recipe.nameHebrew ?? ''
+  protected readonly recipeKey_ = (recipe: Recipe): string => recipe._id
+
+  /** Escape with no list showing still ends the search (and restores a renamed dish), like click-outside. */
+  protected onSearchKeyUnhandled(e: KeyboardEvent): void {
+    if (e.key !== 'Escape') return
+    e.preventDefault()
+    e.stopPropagation()
+    this.clearSearch.emit()
   }
 }

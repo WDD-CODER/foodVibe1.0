@@ -1,30 +1,57 @@
 @if (modalService.isOpen()) {
-  <div class="c-modal-overlay" (click)="modalService.choose('cancel')">
-    <div class="c-modal-card"
-      [class.c-modal-card--danger]="modalService.variant() === 'danger'"
-      [class.c-modal-card--warning]="modalService.variant() === 'warning'"
-      dir="rtl"
-      (click)="$event.stopPropagation()">
-      @if (modalService.headerKey()) {
-        <h3 class="confirm-modal-header">{{ modalService.headerKey()! | translatePipe }}</h3>
-      }
-      <p class="confirm-modal-message">{{ modalService.message() | translatePipe }}</p>
-      <div class="c-modal-actions">
-        <button type="button" class="c-btn-ghost" (click)="modalService.choose('cancel')">
-          {{ 'cancel' | translatePipe }}
-        </button>
-        @if (modalService.showSaveButton()) {
-          <button type="button" class="c-btn-primary" (click)="modalService.choose('save')">
-            {{ modalService.saveButtonLabel() | translatePipe }}
-          </button>
-        }
-        <button type="button" class="c-btn-primary"
-          [class.c-btn-primary--danger]="modalService.variant() === 'danger'"
-          [class.c-btn-primary--warning]="modalService.variant() === 'warning'"
-          (click)="modalService.choose('confirm')">
-          {{ modalService.saveLabel() | translatePipe }}
-        </button>
+  <app-modal-shell
+    [cardClass]="cardClass_()"
+    [labelledBy]="modalService.headerKey() ? 'confirm-modal-header' : 'confirm-modal-message'"
+    (dismissed)="modalService.choose('cancel')"
+  >
+    @if (modalService.headerKey()) {
+      <h3 id="confirm-modal-header" class="confirm-modal-header">{{ modalService.headerKey()! | translatePipe }}</h3>
+    }
+    <p
+      id="confirm-modal-message"
+      class="confirm-modal-message"
+      [class.confirm-modal-message--danger]="modalService.variant() === 'danger'"
+      [class.confirm-modal-message--warning]="modalService.variant() === 'warning'"
+    >
+      {{ modalService.message() | translatePipe }}
+    </p>
+    @if (modalService.typedConfirm(); as typed) {
+      <div class="confirm-modal-typed">
+        <app-form-field [label]="typed.labelKey" forId="confirm-modal-typed">
+          <strong class="confirm-modal-typed__expected" dir="auto">{{ typed.expected }}</strong>
+          <input
+            #typedInput
+            id="confirm-modal-typed"
+            class="c-input"
+            type="text"
+            autocomplete="off"
+            dir="auto"
+            [value]="modalService.typedText()"
+            (input)="onTypedInput($event)"
+            (keydown.enter)="onTypedEnter()"
+          />
+        </app-form-field>
       </div>
+    }
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="modalService.choose('cancel')">
+        {{ 'cancel' | translatePipe }}
+      </button>
+      @if (modalService.showSaveButton()) {
+        <button type="button" class="c-btn-primary" (click)="modalService.choose('save')">
+          {{ modalService.saveButtonLabel() | translatePipe }}
+        </button>
+      }
+      <button
+        type="button"
+        class="c-btn-primary"
+        [class.c-btn-primary--danger]="modalService.variant() === 'danger'"
+        [class.c-btn-primary--warning]="modalService.variant() === 'warning'"
+        [disabled]="!modalService.canConfirm()"
+        (click)="modalService.choose('confirm')"
+      >
+        {{ modalService.saveLabel() | translatePipe }}
+      </button>
     </div>
-  </div>
+  </app-modal-shell>
 }

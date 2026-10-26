@@ -10,34 +10,22 @@
 'use strict';
 
 const { Router, json } = require('express');
-const jwt = require('jsonwebtoken');
-const rateLimit = require('express-rate-limit');
+const { verifyAccessToken } = require('../middleware/auth');
+const { createRateLimiter } = require('../middleware/rate-limit');
 const { logEventSchema } = require('../generated/schemas/entities/log-event.schema');
 const sink = require('../services/log-sink');
 
 const router = Router();
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET;
 
-const logLimiter = rateLimit({
+const logLimiter = createRateLimiter({
   windowMs: 60 * 1000,
   max: 60,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many log events, please slow down' },
+  message: 'Too many log events, please slow down',
 });
 
-/** Like optionalToken, but a bad token degrades to anonymous instead of 401. */
+/** Like optionalToken, but a bad token degrades to anonymous (expired/invalid → null) instead of 401. */
 function lenientUser(req, _res, next) {
-  const header = req.headers['authorization'] || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : '';
-  req.user = null;
-  if (token) {
-    try {
-      req.user = jwt.verify(token, ACCESS_SECRET);
-    } catch {
-      // expired/invalid → anonymous
-    }
-  }
+  req.user = verifyAccessToken(req);
   next();
 }
 

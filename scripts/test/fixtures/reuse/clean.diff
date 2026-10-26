@@ -1,0 +1,6 @@
+diff --git a/src/app/pages/orders/orders.component.html b/src/app/pages/orders/orders.component.html
+--- a/src/app/pages/orders/orders.component.html
++++ b/src/app/pages/orders/orders.component.html
+@@ -10,0 +11,2 @@
++<app-custom-select [typeToFilter]="true" [options]="options()" />
++<app-empty-state [messageKey]="'no_results'" />

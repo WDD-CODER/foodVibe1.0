@@ -48,6 +48,16 @@ in chat first — never write `Arch-approved:` without it.
 - INV-n: changes — ADR docs/brain/decisions/NNNN-[slug].md — Arch-approved: Human YYYY-MM-DD
 - INV-none: preserves — [why no invariant is touched]
 
+## Reuse Check
+
+One line per new component, util, pipe, service or `.c-*` class this plan creates. Search
+`docs/brain/component-families.md` first; climb the ladder in `docs/agent/standards-reuse.md`
+(1 use as is · 2 existing inputs · 3 extend the family · 4 new family + why). Gate:
+`node scripts/scope-check.mjs --reuse --plan=<this file>`.
+
+- [new piece] — family: [family-id | none] — rung: [1-4] — why: [one line; required for rung 4]
+- none — [why this plan creates no new piece]
+
 ## Step 0 — Reality Check
 
 Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Check the listed commits

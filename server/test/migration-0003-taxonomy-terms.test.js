@@ -72,7 +72,7 @@ describe('0003 buildTerms', () => {
         { _id: 'u', userId: 'u1', items: ['seafood'] },
         { _id: 'x', items: ['gluten'] },
       ],
-      KITCHEN_COURSES: [{ _id: 'c', userId: M, items: [{ key: 'main' }] }],
+      KITCHEN_COURSES: [{ _id: 'c', userId: M, items: [{ key: 'main', color: 'blue' }] }],
     });
     expect(ids(terms)).toEqual(['allergen:__master__:nuts', 'allergen:__master__:sea_food', 'allergen:u1:seafood']);
     expect(report.duplicates).toHaveLength(1);

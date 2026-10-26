@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core'
+import { computed, Injectable, signal } from '@angular/core'
+import { ModalController } from './modal-controller'
 
 type ConfirmModalVariant = 'default' | 'danger' | 'warning'
 export type ConfirmModalResult = 'cancel' | 'confirm' | 'save'
@@ -12,6 +13,15 @@ export interface ConfirmModalOptions {
   variant?: ConfirmModalVariant
   /** Optional translation key for a bold header displayed above the message. */
   headerKey?: string
+  /** The confirm button stays locked until the user types `expected` (trimmed at both ends). */
+  typedConfirm?: TypedConfirm
+}
+
+export interface TypedConfirm {
+  /** The exact text the user must type. */
+  expected: string
+  /** Translation key of the label above the text box. */
+  labelKey: string
 }
 
 export interface TernaryModalOptions extends ConfirmModalOptions {
@@ -21,24 +31,36 @@ export interface TernaryModalOptions extends ConfirmModalOptions {
 
 @Injectable({ providedIn: 'root' })
 export class ConfirmModalService {
-  private readonly isOpen_ = signal(false)
+  private readonly controller_ = new ModalController<ConfirmModalResult>('cancel')
   private readonly message_ = signal('')
   private readonly saveLabel_ = signal('save')
   private readonly variant_ = signal<ConfirmModalVariant>('default')
-  private readonly showSaveButton_ = signal(false)
+  private readonly shouldShowSaveButton_ = signal(false)
   private readonly saveButtonLabel_ = signal('save')
   private readonly headerKey_ = signal<string | null>(null)
+  private readonly typedConfirm_ = signal<TypedConfirm | null>(null)
+  private readonly typedText_ = signal('')
 
-  /** Internal resolver — accepts both boolean (legacy) and string (ternary). */
-  private resolve_: ((value: ConfirmModalResult | boolean) => void) | null = null
-
-  readonly isOpen = this.isOpen_.asReadonly()
+  readonly isOpen = this.controller_.isOpen_
   readonly message = this.message_.asReadonly()
   readonly saveLabel = this.saveLabel_.asReadonly()
   readonly variant = this.variant_.asReadonly()
-  readonly showSaveButton = this.showSaveButton_.asReadonly()
+  readonly showSaveButton = this.shouldShowSaveButton_.asReadonly()
   readonly saveButtonLabel = this.saveButtonLabel_.asReadonly()
   readonly headerKey = this.headerKey_.asReadonly()
+  readonly typedConfirm = this.typedConfirm_.asReadonly()
+  readonly typedText = this.typedText_.asReadonly()
+  /** True when no typed text is required, or the typed text matches (an empty expected never matches). */
+  readonly canConfirm = computed(() => {
+    const typed = this.typedConfirm_()
+    if (!typed) return true
+    const expected = typed.expected.trim()
+    return expected !== '' && this.typedText_().trim() === expected
+  })
+
+  setTypedText(value: string): void {
+    this.typedText_.set(value)
+  }
 
   /**
    * Binary confirm: returns true (confirm) or false (cancel).
@@ -49,12 +71,11 @@ export class ConfirmModalService {
     const label = this.resolveSaveLabel(options)
     this.saveLabel_.set(label)
     this.variant_.set(options?.variant ?? 'default')
-    this.showSaveButton_.set(false)
+    this.shouldShowSaveButton_.set(false)
     this.headerKey_.set(options?.headerKey ?? null)
-    this.isOpen_.set(true)
-    return new Promise((resolve) => {
-      this.resolve_ = (val) => resolve(typeof val === 'boolean' ? val : val === 'confirm')
-    })
+    this.typedConfirm_.set(options?.typedConfirm ?? null)
+    this.typedText_.set('')
+    return this.controller_.open().then((result) => result === 'confirm')
   }
 
   /**
@@ -66,19 +87,12 @@ export class ConfirmModalService {
     const label = this.resolveSaveLabel(options)
     this.saveLabel_.set(label)
     this.variant_.set(options?.variant ?? 'default')
-    this.showSaveButton_.set(true)
+    this.shouldShowSaveButton_.set(true)
     this.saveButtonLabel_.set(options?.saveButtonLabel ?? 'save')
     this.headerKey_.set(options?.headerKey ?? null)
-    this.isOpen_.set(true)
-    return new Promise((resolve) => {
-      this.resolve_ = (val) => {
-        if (typeof val === 'boolean') {
-          resolve(val ? 'confirm' : 'cancel')
-        } else {
-          resolve(val)
-        }
-      }
-    })
+    this.typedConfirm_.set(options?.typedConfirm ?? null)
+    this.typedText_.set('')
+    return this.controller_.open()
   }
 
   /**
@@ -87,19 +101,17 @@ export class ConfirmModalService {
    * - ConfirmModalResult string: 'cancel' | 'confirm' | 'save'
    */
   choose(value: boolean | ConfirmModalResult): void {
-    if (typeof value === 'boolean') {
-      this.resolve_?.(value ? 'confirm' : 'cancel')
-    } else {
-      this.resolve_?.(value)
-    }
-    this.resolve_ = null
-    this.isOpen_.set(false)
+    const result: ConfirmModalResult = typeof value === 'boolean' ? (value ? 'confirm' : 'cancel') : value
+    if (result === 'confirm' && !this.canConfirm()) return
+    this.controller_.close(result)
     this.message_.set('')
     this.saveLabel_.set('save')
     this.variant_.set('default')
-    this.showSaveButton_.set(false)
+    this.shouldShowSaveButton_.set(false)
     this.saveButtonLabel_.set('save')
     this.headerKey_.set(null)
+    this.typedConfirm_.set(null)
+    this.typedText_.set('')
   }
 
   private resolveSaveLabel(options?: ConfirmModalOptions): string {

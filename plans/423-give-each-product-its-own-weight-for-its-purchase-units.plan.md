@@ -1,6 +1,6 @@
 # Plan 423 — Give each product its own weight for its purchase units
 
-Status: draft
+Status: active
 Track: code — here (not design)
 Snapshot: 8d7997e5b732007392f50cc07f40b2aa430f37d6
 
@@ -48,8 +48,8 @@ User stories:
 weight typed for that product; no product ever receives another product's weight; the «:» unit is respected in
 every calculation; the unit window never writes a number into a unit field.
 
-- [auto] `ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/core/utils/purchase-option-rate.util.spec.ts' --include='src/app/core/services/recipe-cost.service.spec.ts' --include='src/app/core/services/unit-registry.service.spec.ts' --include='src/app/shared/unit-creator/**' --include='src/app/pages/inventory/components/**' --include='src/app/pages/recipe-builder/components/recipe-ingredients-table/**' --include='src/app/pages/cook-view/**'`
+- [x] [auto] `ng build` passes.
+- [x] [auto] `npx ng test --watch=false --include='src/app/core/utils/purchase-option-rate.util.spec.ts' --include='src/app/core/services/recipe-cost.service.spec.ts' --include='src/app/core/services/unit-registry.service.spec.ts' --include='src/app/shared/unit-creator/**' --include='src/app/pages/inventory/components/**' --include='src/app/pages/recipe-builder/components/recipe-ingredients-table/**' --include='src/app/pages/cook-view/**'`
   passes, including the new specs:
   - `optionRateInBase`: base kg, `{ conversionRate: 500, uom: 'gram' }` → `0.5`; base gram, same option → `500`;
     `uom` missing → `conversionRate` unchanged;
@@ -61,8 +61,8 @@ every calculation; the unit window never writes a number into a unit field.
     then cancel → the field holds its previous value (a string); then add → the new unit's key;
   - recipe line and cook view: «add unit» for a product opens the window in product mode and saves the typed
     amount on that product, never the shared rate.
-- [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-- [auto] `node server/scripts/check-unit-weights.js --target=local` exits 0 and prints the three sections of the
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `node server/scripts/check-unit-weights.js --target=local` exits 0 and prints the three sections of the
   Design (`uom differs`, `copied from shared`, `recipe lines on a unit the product lacks`) with a count each.
 - [human] The Human runs `node server/scripts/check-unit-weights.js --target=atlas` (agents may not read
   production) and reviews the lists. A non-zero `uom differs` line means those products' costs will change after
@@ -196,10 +196,10 @@ Exit 0 always (it is a report, not a gate).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] One helper reads a purchase row in base units, honoring its «:» unit, used by every reader.
-- [ ] Adding a unit to a product anywhere asks that product's amount; an existing unit name never skips it.
-- [ ] Choosing an existing custom unit in a purchase row does not pre-fill another product's number.
-- [ ] The unit window never writes a number into a unit field; cancel restores the previous unit.
+- [x] One helper reads a purchase row in base units, honoring its «:» unit, used by every reader.
+- [x] Adding a unit to a product anywhere asks that product's amount; an existing unit name never skips it.
+- [x] Choosing an existing custom unit in a purchase row does not pre-fill another product's number.
+- [x] The unit window never writes a number into a unit field; cancel restores the previous unit.
 - [ ] Read-only check of existing products and recipe lines, local and Atlas.
 
 ### Won't Have (this plan)
@@ -208,11 +208,11 @@ Exit 0 always (it is a report, not a gate).
 - Rewriting existing product data.
 
 ## Atomic Sub-tasks
-- [ ] U1: Read every purchase unit in the product's base unit, honoring the unit after the colon — optionRateInBase util + spec; use it in recipe-cost, product-price, ingredients-table line cost, inventory list unit change — src/app/core/utils/purchase-option-rate.util.ts, src/app/core/services/recipe-cost.service.ts, src/app/core/utils/product-price.util.ts, recipe-ingredients-table.component.ts, inventory-product-list.component.ts
-- [ ] U2: Let the unit window ask how much one unit of this product weighs, also for an existing unit name — forProduct context, productUnitAdded$, product-mode title and label, two dictionary keys, specs — src/app/core/services/unit-registry.service.ts, src/app/shared/unit-creator/**, public/assets/data/dictionary.json
-- [ ] U3: Make the product form use this product's own number for every purchase unit — product-mode add, no shared pre-fill for custom units, pickNewUnit_ replaces the close effect (INVF-C06), specs — src/app/pages/inventory/components/product-form/**
-- [ ] U4: Ask the product's own weight when a unit is added from a recipe line or cook view — product mode, save the typed amount, drop the shared-rate math, specs — recipe-ingredients-table.component.ts, cook-view.page.ts and their specs
-- [ ] U5: Add a read-only check that lists products and recipe lines the old behavior may have got wrong — three sections, local and Atlas — server/scripts/check-unit-weights.js
+- [x] U1: Read every purchase unit in the product's base unit, honoring the unit after the colon — optionRateInBase util + spec; use it in recipe-cost, product-price, ingredients-table line cost, inventory list unit change — src/app/core/utils/purchase-option-rate.util.ts, src/app/core/services/recipe-cost.service.ts, src/app/core/utils/product-price.util.ts, recipe-ingredients-table.component.ts, inventory-product-list.component.ts
+- [x] U2: Let the unit window ask how much one unit of this product weighs, also for an existing unit name — forProduct context, productUnitAdded$, product-mode title and label, two dictionary keys, specs — src/app/core/services/unit-registry.service.ts, src/app/shared/unit-creator/**, public/assets/data/dictionary.json
+- [x] U3: Make the product form use this product's own number for every purchase unit — product-mode add, no shared pre-fill for custom units, pickNewUnit_ replaces the close effect (INVF-C06), specs — src/app/pages/inventory/components/product-form/**
+- [x] U4: Ask the product's own weight when a unit is added from a recipe line or cook view — product mode, save the typed amount, drop the shared-rate math, specs — recipe-ingredients-table.component.ts, cook-view.page.ts and their specs
+- [x] U5: Add a read-only check that lists products and recipe lines the old behavior may have got wrong — three sections, local and Atlas — server/scripts/check-unit-weights.js
 - [ ] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
 
 ## Technical Considerations

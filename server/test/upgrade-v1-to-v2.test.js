@@ -97,17 +97,20 @@ describe('upgradeV1toV2', () => {
   })
 })
 
+// A v1 doc has no businessId / createdBy yet: migration 0006 stamps them (plan 425 made them required).
+const withoutTenantFields = issues => issues.filter(i => i.path !== 'businessId' && i.path !== 'createdBy')
+
 describe('checkDoc (v2 schema, observe semantics)', () => {
   it('accepts a complete v1 product once upgraded', () => {
     const { unmapped, issues } = checkDoc('PRODUCT_LIST', V1_PRODUCT)
     expect(unmapped).toEqual([])
-    expect(issues).toEqual([])
+    expect(withoutTenantFields(issues)).toEqual([])
   })
 
   it('accepts a complete v1 recipe once upgraded', () => {
     const { unmapped, issues } = checkDoc('RECIPE_LIST', V1_RECIPE)
     expect(unmapped).toEqual([])
-    expect(issues).toEqual([])
+    expect(withoutTenantFields(issues)).toEqual([])
   })
 
   it('flags nulls and missing required fields instead of loosening the schema', () => {

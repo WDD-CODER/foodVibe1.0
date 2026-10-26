@@ -3,6 +3,8 @@
  * Plan: 102-unified-export-refactor, 107-export-localization-design.
  */
 
+import type { MissingItem } from '../engine/event-plan.types'
+
 /** Hebrew labels for export column/field headers (fallback without async dictionary). */
 export const EXPORT_HEADER_HE: Record<string, string> = {
   field: 'שדה',
@@ -53,6 +55,10 @@ export const EXPORT_HEADER_HE: Record<string, string> = {
   /** Menu all view: total food cost (₪), cost per 1 portion */
   food_cost_money: 'עלות מזון (₪)',
   dish_food_cost_per_portion: 'עלות למנה',
+  /** Plan 434: engine shopping list */
+  buy_qty: 'כמות לקנייה',
+  purchase_units: 'יחידות רכש',
+  note: 'הערה'
 }
 
 /** Map English base unit keys to Hebrew display (matches dictionary units). */
@@ -65,7 +71,7 @@ export const UNIT_HE: Record<string, string> = {
   gram: 'גרם',
   cup: 'כוס',
   tbsp: 'כף',
-  tsp: 'כפית',
+  tsp: 'כפית'
 }
 
 /** Return Hebrew header for export column/field key, or key if not mapped. */
@@ -105,13 +111,7 @@ export function exportDateStr(): string {
   return new Date().toISOString().slice(0, 10)
 }
 
-export type ExportListType =
-  | 'recipe-info'
-  | 'shopping-list'
-  | 'cooking-steps'
-  | 'check-list'
-  | 'menu-info'
-  | 'all'
+export type ExportListType = 'recipe-info' | 'shopping-list' | 'cooking-steps' | 'check-list' | 'menu-info' | 'all'
 
 /**
  * Build export filename per plan: {list-type}[_{variant}]_{item-name}[_{date}].xlsx
@@ -173,6 +173,8 @@ export interface RecipeSheetLabels {
 
 /** Payload for paper-style preview and for building Excel (single source of truth). */
 export interface ExportPayload {
+  /** Items that make the totals partial (plan 444): the preview shows the "חלקי" badge when non-empty. */
+  missing?: MissingItem[]
   title: string
   subtitle?: string
   exportedAt?: string

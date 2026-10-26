@@ -1,0 +1,48 @@
+<div class="c-modal-overlay" (click)="cancelled.emit()">
+  <div
+    class="c-modal-card c-modal-card--md"
+    dir="rtl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="not-closed-title"
+    (click)="$event.stopPropagation()"
+  >
+    <h3 id="not-closed-title">{{ 'not_closed_title' | translatePipe }}</h3>
+
+    <div class="c-modal-body">
+      <div class="c-chip-group reason-group" role="radiogroup" [attr.aria-labelledby]="'not-closed-title'">
+        @for (reason of reasons; track reason) {
+          <label class="c-chip c-chip--toggle">
+            <input
+              type="radio"
+              name="not-closed-reason"
+              [value]="reason"
+              [checked]="reason_() === reason"
+              (change)="reason_.set(reason)"
+            />
+            <span>{{ 'not_closed_reason_' + reason | translatePipe }}</span>
+          </label>
+        }
+      </div>
+
+      <div class="c-input-stack">
+        <label for="not-closed-text">{{ 'not_closed_text' | translatePipe }}</label>
+        <textarea
+          id="not-closed-text"
+          class="c-input"
+          rows="3"
+          [maxLength]="maxText"
+          [ngModel]="text_()"
+          (ngModelChange)="text_.set($event)"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
+      <button type="button" class="c-btn-primary" [disabled]="!reason_()" (click)="onSave()">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -61,6 +61,14 @@ describe('KeyedPickerSearch', () => {
     expect(opts.onSelect).toHaveBeenCalledOnceWith(2)
   })
 
+  it('a typed-in picker (no selectOnSpace) never selects on Space and leaves the key alone', () => {
+    const e = key(' ')
+    search.handleKeydown(0, e, opts)
+    search.handleKeydown(0, key(' '), { ...opts, selectOnSpace: false })
+    expect(opts.onSelect).not.toHaveBeenCalled()
+    expect(e.defaultPrevented).toBeFalse()
+  })
+
   it('Space selects only when selectOnSpace is set', () => {
     search.handleKeydown(0, key(' '), opts)
     expect(opts.onSelect).not.toHaveBeenCalled()

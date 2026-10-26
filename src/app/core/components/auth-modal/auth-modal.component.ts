@@ -14,15 +14,18 @@ import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { AuthModalService } from '@services/auth-modal.service'
 import { UserService } from '@services/user.service'
+import { TranslationService } from '@services/translation.service'
 import { CloudinaryService } from '@services/cloudinary.service'
 import { environment } from '../../../../environments/environment'
 import { validateUsername, validateEmail, validatePassword } from '../../utils/auth-validation.util'
 import { take } from 'rxjs/operators'
+import { NAME_MAX_LENGTH } from '@schemas/base.schema'
+import { ModalShellComponent } from 'src/app/shared/modal-shell/modal-shell.component'
 
 @Component({
   selector: 'app-auth-modal',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, TranslatePipe],
+  imports: [FormsModule, LucideAngularModule, TranslatePipe, ModalShellComponent],
   templateUrl: './auth-modal.component.html',
   styleUrl: './auth-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,6 +36,7 @@ export class AuthModalComponent {
   private readonly router = inject(Router)
   private readonly cloudinary = inject(CloudinaryService)
   private readonly cdr = inject(ChangeDetectorRef)
+  private readonly translation = inject(TranslationService)
 
   protected nameInput = viewChild<ElementRef>('nameInput')
 
@@ -45,23 +49,30 @@ export class AuthModalComponent {
   }
 
   protected name = ''
+  protected businessName = ''
   protected email = ''
   protected password = ''
   protected confirmPassword = ''
   protected imgPreview = signal<string | null>(null)
-  protected uploadingImage_ = signal(false)
+  protected isUploadingImage_ = signal(false)
   protected errorKey = signal<string | null>(null)
   protected isSubmitting = signal(false)
-  protected showPassword_ = signal(false)
-  protected showConfirmPassword_ = signal(false)
-  protected nameTouched_ = signal(false)
-  protected emailTouched_ = signal(false)
-  protected passwordTouched_ = signal(false)
-  protected confirmTouched_ = signal(false)
+  protected shouldShowPassword_ = signal(false)
+  protected shouldShowConfirmPassword_ = signal(false)
+  protected isNameTouched_ = signal(false)
+  protected isEmailTouched_ = signal(false)
+  protected isPasswordTouched_ = signal(false)
+  protected isConfirmTouched_ = signal(false)
 
   protected readonly isDev = environment.localDev
 
   private imgCloudinaryUrl: string | null = null
+
+  /** Preview of the name the server gives a business left unnamed: «העסק של <username>». */
+  protected get businessNamePlaceholder(): string {
+    const typed = this.name.trim() || this.translation.translate('username')
+    return this.translation.translate('business_name_default').replace('{{name}}', typed)
+  }
 
   protected get isSignUp(): boolean {
     return this.modalService.mode() === 'sign-up'
@@ -77,7 +88,7 @@ export class AuthModalComponent {
     const file = input.files?.[0]
     if (!file) return
     this.errorKey.set(null)
-    this.uploadingImage_.set(true)
+    this.isUploadingImage_.set(true)
     this.cdr.markForCheck()
     this.cloudinary
       .upload(file)
@@ -86,11 +97,11 @@ export class AuthModalComponent {
         next: (url) => {
           this.imgCloudinaryUrl = url
           this.imgPreview.set(url)
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
           this.cdr.markForCheck()
         },
         error: () => {
-          this.uploadingImage_.set(false)
+          this.isUploadingImage_.set(false)
           this.errorKey.set('image_upload_failed')
           this.cdr.markForCheck()
         }
@@ -99,19 +110,19 @@ export class AuthModalComponent {
 
   protected onNameBlur(): void {
     if (!this.name.trim()) return
-    this.nameTouched_.set(true)
+    this.isNameTouched_.set(true)
     const err = validateUsername(this.name)
     if (err) this.errorKey.set(err)
   }
 
   protected onEmailBlur(): void {
-    this.emailTouched_.set(true)
+    this.isEmailTouched_.set(true)
     const err = validateEmail(this.email)
     if (err) this.errorKey.set(err)
   }
 
   protected onPasswordBlur(): void {
-    this.passwordTouched_.set(true)
+    this.isPasswordTouched_.set(true)
     if (!this.isSignUp) {
       if (!this.password.trim()) this.errorKey.set('password_required')
       return
@@ -121,12 +132,12 @@ export class AuthModalComponent {
   }
 
   protected onConfirmBlur(): void {
-    this.confirmTouched_.set(true)
+    this.isConfirmTouched_.set(true)
     if (this.password !== this.confirmPassword) this.errorKey.set('passwords_do_not_match')
   }
 
   protected onSubmit(): void {
-    if (this.isSubmitting() || this.uploadingImage_()) return
+    if (this.isSubmitting() || this.isUploadingImage_()) return
 
     const nameErr = validateUsername(this.name)
     if (nameErr) {
@@ -135,6 +146,12 @@ export class AuthModalComponent {
     }
 
     if (this.isSignUp) {
+      const businessName = this.businessName.trim()
+      if (businessName.length > NAME_MAX_LENGTH) {
+        this.errorKey.set('business_name_too_long')
+        return
+      }
+
       const emailErr = validateEmail(this.email)
       if (emailErr) {
         this.errorKey.set(emailErr)
@@ -167,10 +184,10 @@ export class AuthModalComponent {
           {
             name: this.name.trim(),
             email: this.email.trim(),
-            imgUrl: this.imgCloudinaryUrl ?? undefined,
-            role: 'user'
+            imgUrl: this.imgCloudinaryUrl ?? undefined
           },
-          this.password.trim()
+          this.password.trim(),
+          this.businessName.trim()
         )
         .subscribe({
           next: () => this._onSuccess(),
@@ -219,6 +236,14 @@ export class AuthModalComponent {
       this.errorKey.set('username_invalid_chars')
     } else if (err.message === 'INVALID_EMAIL') {
       this.errorKey.set('email_invalid')
+    } else if (err.message === 'BUSINESS_NAME_REQUIRED') {
+      this.errorKey.set('business_name_required')
+    } else if (err.message === 'BUSINESS_NAME_TOO_LONG') {
+      this.errorKey.set('business_name_too_long')
+    } else if (err.message === 'NO_BUSINESS') {
+      this.errorKey.set('no_business')
+    } else if (err.message === 'USER_REMOVED') {
+      this.errorKey.set('user_removed')
     } else if (err.message === 'PASSWORD_REQUIRED') {
       this.errorKey.set('password_required')
     } else if (err.message === 'ACCOUNT_LOCKED') {
@@ -236,17 +261,18 @@ export class AuthModalComponent {
 
   private _reset(): void {
     this.name = ''
+    this.businessName = ''
     this.email = ''
     this.password = ''
     this.confirmPassword = ''
-    this.showPassword_.set(false)
-    this.showConfirmPassword_.set(false)
+    this.shouldShowPassword_.set(false)
+    this.shouldShowConfirmPassword_.set(false)
     this.imgCloudinaryUrl = null
     this.imgPreview.set(null)
     this.errorKey.set(null)
-    this.nameTouched_.set(false)
-    this.emailTouched_.set(false)
-    this.passwordTouched_.set(false)
-    this.confirmTouched_.set(false)
+    this.isNameTouched_.set(false)
+    this.isEmailTouched_.set(false)
+    this.isPasswordTouched_.set(false)
+    this.isConfirmTouched_.set(false)
   }
 }

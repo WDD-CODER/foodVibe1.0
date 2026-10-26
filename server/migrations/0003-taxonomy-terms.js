@@ -22,7 +22,11 @@
  */
 
 const { parseArgs, connect } = require('./tools/_connect');
-const { parseV2 } = require('../utils/schema-check');
+const { parseV2: parseV2Strict } = require('../utils/schema-check');
+
+// Plan 425: the schema now requires businessId / createdBy, which migration 0006 stamps AFTER this one.
+// Validate the term's own shape with placeholders so this migration keeps working on a pre-0006 database.
+const parseV2 = (collection, doc) => parseV2Strict(collection, { businessId: '_', createdBy: '_', ...doc });
 const { checkBackup } = require('./0001-v2-schema');
 
 const MIGRATION_ID = '0003-taxonomy-terms';

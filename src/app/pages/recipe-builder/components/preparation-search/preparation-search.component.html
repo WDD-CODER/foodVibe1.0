@@ -1,62 +1,28 @@
-<div class="search-container" dir="rtl" (clickOutside)="showResults_.set(false)">
-  <div class="input-wrapper">
-    <lucide-icon name="search" size="18"></lucide-icon>
-    <!-- Textarea so a long preparation name wraps and grows; Enter saves the row and opens a new one. -->
-    <textarea
-      #searchInput
-      rows="1"
-      SelectOnFocus
-      [value]="searchQuery_()"
-      (input)="onQueryInput($any($event.target).value)"
-      (focus)="onSearchFocus()"
-      (keydown)="onSearchKeydown($event)"
-      role="combobox"
-      aria-autocomplete="list"
-      [attr.aria-expanded]="listOpen_()"
-      [attr.aria-activedescendant]="listOpen_() ? optionIdPrefix + highlightedIndex_() : null"
-      placeholder="{{ 'search_preparation' | translatePipe }}"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="off"
-      spellcheck="false"
-    ></textarea>
-    <app-input-clear [visible]="!!searchQuery_()" (clear)="onClearSearch()" />
-  </div>
-
-  @if (listOpen_()) {
-    <app-scrollable-dropdown [maxHeight]="240">
-      <ul role="listbox">
-        @for (group of groupedResults_(); track group[0]) {
-          <li class="category-header" role="presentation">{{ group[0] | translatePipe }}</li>
-          @for (item of group[1]; track item.entry.name + item.entry.category) {
-            <li
-              role="option"
-              class="result-item"
-              [id]="optionIdPrefix + item.index"
-              [class.highlighted]="highlightedIndex_() === item.index"
-              [attr.aria-selected]="highlightedIndex_() === item.index"
-              (mousedown)="$event.preventDefault()"
-              (click)="selectPreparation(item.entry)"
-            >
-              <span class="item-name">{{ item.entry.name }}</span>
-              <span class="category-pill">{{ item.entry.category | translatePipe }}</span>
-            </li>
-          }
-        }
-        @if (showAddOption_()) {
-          <li
-            role="option"
-            class="result-item result-item--add"
-            [id]="optionIdPrefix + flatResults_().length"
-            [class.highlighted]="highlightedIndex_() === flatResults_().length"
-            [attr.aria-selected]="highlightedIndex_() === flatResults_().length"
-            (mousedown)="$event.preventDefault()"
-            (click)="addPreparationViaWindow()"
-          >
-            <app-add-option-row [label]="addLabel_()" />
-          </li>
-        }
-      </ul>
-    </app-scrollable-dropdown>
-  }
+<div class="search-container" dir="rtl" (appClickOutside)="shouldShowResults_.set(false)">
+  <!-- Multi-line field so a long preparation name wraps and grows; Enter saves the row and opens a new one. -->
+  <app-search-combobox
+    icon="search"
+    placeholder="search_preparation"
+    addLabelKey="add_new_preparation"
+    [addOnlyTyped]="true"
+    [multiline]="true"
+    [(query)]="searchQuery_"
+    [(open)]="shouldShowResults_"
+    [options]="preparations_()"
+    [labelOf]="preparationLabel_"
+    [keyOf]="preparationKey_"
+    [groupOf]="preparationCategory_"
+    [minChars]="2"
+    [selectOnFocus]="true"
+    (picked)="onPicked($event)"
+    (addChosen)="onAddChosen($event)"
+    (unhandledKeydown)="onSearchKeyUnhandled($event)"
+  >
+    <ng-template #optionTemplate let-entry>
+      <span class="item-name">{{ entry.name }}</span>
+      <span class="c-chip c-chip--tag c-chip--sm c-chip--square c-chip--teal">{{
+        entry.category | translatePipe
+      }}</span>
+    </ng-template>
+  </app-search-combobox>
 </div>

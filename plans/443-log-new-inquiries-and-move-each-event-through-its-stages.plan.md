@@ -1,6 +1,6 @@
 # Plan 443 — Log new inquiries and move each event through its stages
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 8ffda3d2c4d8f3ab5137bfee30e9d80026d28110
 
@@ -28,8 +28,8 @@ component imports only, and the plan deletes dead page code to keep the file's n
 keeps notes on it, and the library opens on live events only.
 
 Done when:
-- [auto] `npx ng build` passes.
-- [auto] `npx ng test --watch=false --include='src/app/core/utils/event-stage-ui.util.spec.ts' --include='src/app/core/services/event-pipeline.service.spec.ts' --include='src/app/pages/menu-library/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/event-stage-bar/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/event-notes-log/**/*.spec.ts'`
+- [auto] [x] `npx ng build` passes. (evidence: docs/mvp/runs/443.md)
+- [auto] [x] `npx ng test --watch=false --include='src/app/core/utils/event-stage-ui.util.spec.ts' --include='src/app/core/services/event-pipeline.service.spec.ts' --include='src/app/pages/menu-library/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/event-stage-bar/**/*.spec.ts' --include='src/app/pages/menu-intelligence/components/event-notes-log/**/*.spec.ts'`
   passes, including the new specs:
   - `event-stage-ui.util`: `selectableStages('inquiry')` excludes `finished`; `canPickNotClosed('inquiry')` and
     `canPickNotClosed('quote_sent')` → `true`, `canPickNotClosed('deposit_paid')` → `false`;
@@ -49,7 +49,7 @@ Done when:
   - new inquiry: the body sent to `addMenuEvent` carries no `stage`, `stageHistory` or `notes` (plan 442's generic
     POST strips `EVENT_SERVER_FIELDS` and stamps `stage: 'inquiry'`); the first note goes through
     `EventPipelineService.addNote`.
-- [auto] Net line count of `src/app/pages/menu-intelligence/menu-intelligence.page.ts` ≤ 0 for this plan:
+- [auto] [x] Net line count of `src/app/pages/menu-intelligence/menu-intelligence.page.ts` ≤ 0 for this plan:
   `git diff --numstat origin/mvp -- src/app/pages/menu-intelligence/menu-intelligence.page.ts` prints
   added ≤ deleted.
 - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
@@ -123,6 +123,8 @@ src/app/pages/menu-intelligence/menu-intelligence.page.scss
 src/app/pages/menu-intelligence/menu-intelligence.page.ts
 src/app/app.config.ts
 public/assets/data/dictionary.json
+src/app/core/breadcrumbs.md
+src/app/core/services/breadcrumbs.md
 ```
 
 ## Read Scope
@@ -184,25 +186,25 @@ symbol and print `ok` or `conflict: <what>`:
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] "פנייה חדשה" short form: name (required, ≤ 200), client phone (optional), date (optional), guests
+- [x] "פנייה חדשה" short form: name (required, ≤ 200), client phone (optional), date (optional), guests
   (whole number ≥ 0), event type (from the event-type list), first note (optional, ≤ 2,000) → event created in
   "פנייה", no menu; the first note is saved through the notes route.
-- [ ] Stage bar on the event screen with the 7 stages in order plus "לא נסגר"; click moves forward, backward or
+- [x] Stage bar on the event screen with the 7 stages in order plus "לא נסגר"; click moves forward, backward or
   skips; "הסתיים" never selectable; "לא נסגר" only from "פנייה" or "הצעת מחיר נשלחה" and only with a reason.
-- [ ] Moving to "מקדמה שולמה" or later without an event date is refused with a message.
-- [ ] Stage changes allowed for the owner and for the event's creator; others see the bar read-only.
-- [ ] Entering "הזמנות" offers to open «הזמנות לספקים» (plan 435).
-- [ ] Stage history visible from the bar: stage, date-time, who, reason.
-- [ ] Client name and phone editable on the event screen; deposit amount + date editable only by the owner
+- [x] Moving to "מקדמה שולמה" or later without an event date is refused with a message.
+- [x] Stage changes allowed for the owner and for the event's creator; others see the bar read-only.
+- [x] Entering "הזמנות" offers to open «הזמנות לספקים» (plan 435); wired after plan 435 merged (see docs/mvp/runs/443.md Decisions).
+- [x] Stage history visible from the bar: stage, date-time, who, reason.
+- [x] Client name and phone editable on the event screen; deposit amount + date editable only by the owner
   (`editMoney`), visible to all.
-- [ ] Notes log: add in any stage; newest first with date and author name; edit/delete own notes only; ≤ 2,000
+- [x] Notes log: add in any stage; newest first with date and author name; edit/delete own notes only; ≤ 2,000
   characters.
-- [ ] Library: stage chip on each card; stage filter (`פעילים` default, `הכל`, each stage); "ישן" tag on legacy
+- [x] Library: stage chip on each card; stage filter (`פעילים` default, `הכל`, each stage); "ישן" tag on legacy
   events; filter value kept in the URL (`?stage=`).
-- [ ] `/menu-library?new=inquiry` opens the "פנייה חדשה" form (used by plan 447's empty-dashboard link).
+- [x] `/menu-library?new=inquiry` opens the "פנייה חדשה" form (used by plan 447's empty-dashboard link).
 
 ### Should Have (P1)
-- [ ] The library's "פנייה חדשה" also sits in the page-header actions next to the existing «תפריט חדש» button.
+- [x] The library's "פנייה חדשה" also sits in the page-header actions next to the existing «תפריט חדש» button.
 
 ### Nice to Have (P2)
 - [ ] none.
@@ -276,15 +278,15 @@ symbol and print `ok` or `conflict: <what>`:
 (`event_finished_locked` is reused by plan 446; `no_permission` comes from plan 428.)
 
 ## Atomic Sub-tasks
-- [ ] A1: Put the stage rules the screens need in one small tested helper — selectableStages, canPickNotClosed, needsDateFor, isActiveStage, stageLabelKey, stageErrorKey (reads EVENT_STAGES, NOT_CLOSED_FROM, CLOSED_FROM_INDEX from plan 442's event-stage.ts; error-code map per Done-when) + spec — src/app/core/utils/event-stage-ui.util.ts, src/app/core/utils/event-stage-ui.util.spec.ts
-- [ ] A2: Add one client service for stage moves and notes that keeps the event list in sync — EventPipelineService.changeStage/addNote/editNote/deleteNote over `${environment.apiUrl}/api/v1/events/...`, each writes the returned event via new MenuEventDataService.applyServerEvent(event); an error body's `error` code is returned for stageErrorKey + spec — src/app/core/services/event-pipeline.service.ts, src/app/core/services/event-pipeline.service.spec.ts, src/app/core/services/menu-event-data.service.ts
-- [ ] A3: Let a chef log a new inquiry from the library in a short form — NewInquiryDialogComponent (fields and limits per P0; eventType options from MetadataRegistryService event-type terms; save = MenuEventDataService.addMenuEvent({ name, clientName: name, clientPhone, eventDate, guestCount, eventType, servingType: '', sections: [], createdAt, updatedAt }) — no stage, stageHistory or notes in the body (plan 442's POST stamps inquiry); keep the server's returned event in the store (applyServerEvent when addMenuEvent does not) — then EventPipelineService.addNote when a first note was typed; toast new_inquiry_saved; stays on the library); open it from a new HeroFab action (labelKey new_inquiry, icon file-plus) in MenuLibraryPage.ngOnInit, a header button, and ?new=inquiry — src/app/pages/menu-library/components/new-inquiry-dialog/**, src/app/pages/menu-library/menu-library.page.ts, src/app/pages/menu-library/components/menu-library-list/**
-- [ ] A4: Show each event's stage on its library card and open the library on live events only — stage chip + "ישן" tag in the card template; stageFilter_ signal ('active' default, 'all', or a stage key) added to useListState as urlParam stage; filteredEvents_ applies it with isActiveStage; a stage select in .filters-bar + spec — src/app/pages/menu-library/components/menu-library-list/**
-- [ ] A5: Ask why an event did not close before marking it lost — NotClosedDialogComponent: four reason radios (price, date_taken, no_reply, other), optional text ≤ 500, «שמור» disabled until a reason; emits { reason, reasonText } or cancel + spec — src/app/pages/menu-intelligence/components/not-closed-dialog/**
-- [ ] A6: Add the stage bar at the top of the event screen with client details and stage history — EventStageBarComponent, input eventId (reads the event from MenuEventDataService.allMenuEvents_ like VenueLinkChipComponent); click → needsDateFor check → EventPipelineService.changeStage; "לא נסגר" opens NotClosedDialog; locked when !PermissionService.can('changeStage', { type: 'menuEvents', doc }); client name/phone saved on blur via MenuEventDataService.updateMenuEvent with only those fields changed; deposit amount/date disabled unless can('editMoney', …); on entering ordering, ConfirmModalService.open('open_supplier_orders_prompt') → «כן» emits output openSupplierOrders (only when plan 435 is merged); refused moves show t(stageErrorKey(code)) + spec — src/app/pages/menu-intelligence/components/event-stage-bar/**
-- [ ] A7: Add the notes log beside the menu so the team shares what the client said — EventNotesLogComponent, input eventId; textarea with 2,000-char counter, «הוסף הערה»; list newest first with byName and date (and נערך when editedAt); edit/delete only when note.by === UserService.user_()?._id; delete asks notes_confirm_delete + spec — src/app/pages/menu-intelligence/components/event-notes-log/**
-- [ ] A8: Wire the stage bar and notes log into the event screen without growing the frozen page — template: <event-stage-bar [eventId]="editingId_()" (openSupplierOrders)="<the same expression as 435's pill-row button>"> above .paper-outer and <event-notes-log [eventId]="editingId_()"> beside it, both inside @if (editingId_()); page .scss grid for the side column; page .ts: 2 imports + 2 imports[] entries, delete goBack() (or another verified-unused member) so net lines ≤ 0 — src/app/pages/menu-intelligence/menu-intelligence.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.scss, src/app/pages/menu-intelligence/menu-intelligence.page.ts
-- [ ] A9: Add the new Hebrew labels and the notes icon — dictionary keys from UI/UX Notes (append, skip existing), MessageSquare in LucideAngularModule.pick — public/assets/data/dictionary.json, src/app/app.config.ts
+- [x] A1: Put the stage rules the screens need in one small tested helper — selectableStages, canPickNotClosed, needsDateFor, isActiveStage, stageLabelKey, stageErrorKey (reads EVENT_STAGES, NOT_CLOSED_FROM, CLOSED_FROM_INDEX from plan 442's event-stage.ts; error-code map per Done-when) + spec — src/app/core/utils/event-stage-ui.util.ts, src/app/core/utils/event-stage-ui.util.spec.ts
+- [x] A2: Add one client service for stage moves and notes that keeps the event list in sync — EventPipelineService.changeStage/addNote/editNote/deleteNote over `${environment.apiUrl}/api/v1/events/...`, each writes the returned event via new MenuEventDataService.applyServerEvent(event); an error body's `error` code is returned for stageErrorKey + spec — src/app/core/services/event-pipeline.service.ts, src/app/core/services/event-pipeline.service.spec.ts, src/app/core/services/menu-event-data.service.ts
+- [x] A3: Let a chef log a new inquiry from the library in a short form — NewInquiryDialogComponent (fields and limits per P0; eventType options from MetadataRegistryService event-type terms; save = MenuEventDataService.addMenuEvent({ name, clientName: name, clientPhone, eventDate, guestCount, eventType, servingType: '', sections: [], createdAt, updatedAt }) — no stage, stageHistory or notes in the body (plan 442's POST stamps inquiry); keep the server's returned event in the store (applyServerEvent when addMenuEvent does not) — then EventPipelineService.addNote when a first note was typed; toast new_inquiry_saved; stays on the library); open it from a new HeroFab action (labelKey new_inquiry, icon file-plus) in MenuLibraryPage.ngOnInit, a header button, and ?new=inquiry — src/app/pages/menu-library/components/new-inquiry-dialog/**, src/app/pages/menu-library/menu-library.page.ts, src/app/pages/menu-library/components/menu-library-list/**
+- [x] A4: Show each event's stage on its library card and open the library on live events only — stage chip + "ישן" tag in the card template; stageFilter_ signal ('active' default, 'all', or a stage key) added to useListState as urlParam stage; filteredEvents_ applies it with isActiveStage; a stage select in .filters-bar + spec — src/app/pages/menu-library/components/menu-library-list/**
+- [x] A5: Ask why an event did not close before marking it lost — NotClosedDialogComponent: four reason radios (price, date_taken, no_reply, other), optional text ≤ 500, «שמור» disabled until a reason; emits { reason, reasonText } or cancel + spec — src/app/pages/menu-intelligence/components/not-closed-dialog/**
+- [x] A6: Add the stage bar at the top of the event screen with client details and stage history — EventStageBarComponent, input eventId (reads the event from MenuEventDataService.allMenuEvents_ like VenueLinkChipComponent); click → needsDateFor check → EventPipelineService.changeStage; "לא נסגר" opens NotClosedDialog; locked when !PermissionService.can('changeStage', { type: 'menuEvents', doc }); client name/phone saved on blur via MenuEventDataService.updateMenuEvent with only those fields changed; deposit amount/date disabled unless can('editMoney', …); on entering ordering, ConfirmModalService.open('open_supplier_orders_prompt') → «כן» emits output openSupplierOrders (only when plan 435 is merged); refused moves show t(stageErrorKey(code)) + spec — src/app/pages/menu-intelligence/components/event-stage-bar/**
+- [x] A7: Add the notes log beside the menu so the team shares what the client said — EventNotesLogComponent, input eventId; textarea with 2,000-char counter, «הוסף הערה»; list newest first with byName and date (and נערך when editedAt); edit/delete only when note.by === UserService.user_()?._id; delete asks notes_confirm_delete + spec — src/app/pages/menu-intelligence/components/event-notes-log/**
+- [x] A8: Wire the stage bar and notes log into the event screen without growing the frozen page — template: <event-stage-bar [eventId]="editingId_()" (openSupplierOrders)="<the same expression as 435's pill-row button>"> above .paper-outer and <event-notes-log [eventId]="editingId_()"> beside it, both inside @if (editingId_()); page .scss grid for the side column; page .ts: 2 imports + 2 imports[] entries, delete goBack() (or another verified-unused member) so net lines ≤ 0 — src/app/pages/menu-intelligence/menu-intelligence.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.scss, src/app/pages/menu-intelligence/menu-intelligence.page.ts
+- [x] A9: Add the new Hebrew labels and the notes icon — dictionary keys from UI/UX Notes (append, skip existing), MessageSquare in LucideAngularModule.pick — public/assets/data/dictionary.json, src/app/app.config.ts
 - [ ] A10: Build, test, check the frozen-page budget and the error log, then hand over the checks — ng build, the Done-when ng test command, git diff --numstat, log-query; start the slot servers and give the Human the [human] cards — this plan file
 
 ## Technical Considerations

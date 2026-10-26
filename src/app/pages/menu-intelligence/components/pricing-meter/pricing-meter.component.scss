@@ -1,0 +1,242 @@
+$break-mobile: 768px; // mirrors src/styles.scss
+$break-tabbar: 620px; // mirrors header.component.scss (the phone bottom tab bar)
+
+@layer components.pricing-meter {
+  :host {
+    display: contents;
+  }
+
+  .pricing-meter {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+
+    padding-inline: var(--space-6);
+    padding-block: var(--space-2);
+    background: var(--bg-glass-strong);
+    border-block-start: 1px solid var(--border-default);
+    box-shadow: var(--shadow-nav);
+    backdrop-filter: var(--blur-glass);
+  }
+
+  .meter-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .meter-inputs,
+  .meter-numbers {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--space-4);
+  }
+
+  /* Plan 487: every field reserves the room of its error line, so an error never moves a box. */
+  .meter-inputs {
+    --meter-error-h: 1.75rem;
+  }
+
+  .meter-field {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    gap: 2px;
+
+    padding-block-end: var(--meter-error-h);
+
+    .c-input-wrapper {
+      padding-block: var(--space-1);
+      inline-size: 8rem;
+
+      &.invalid {
+        border-color: var(--color-danger);
+      }
+    }
+
+    input {
+      inline-size: 100%;
+      color: var(--color-text-main);
+    }
+  }
+
+  .fin-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .fin-label {
+    color: var(--color-text-muted);
+    font-size: 0.7rem;
+  }
+
+  .fin-value {
+    color: var(--color-text-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .fin-value--bad {
+    color: var(--color-danger);
+  }
+
+  .computed-tag,
+  .partial-tag {
+    padding-inline: var(--space-2);
+    background: var(--bg-warning-soft);
+    border-radius: var(--radius-full);
+    color: var(--text-warning);
+    font-size: 0.65rem;
+  }
+
+  .partial-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    flex: 1 1 100%;
+    color: var(--text-warning);
+    font-size: 0.75rem;
+  }
+
+  .partial-reasons-title {
+    font-weight: 600;
+  }
+
+  .verdict {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+
+    font-weight: 600;
+
+    &.ok {
+      color: var(--color-success-emphasis);
+    }
+
+    &.bad {
+      color: var(--color-danger);
+    }
+  }
+
+  .field-error {
+    position: absolute;
+    inset-block-end: 0;
+    inset-inline: 0;
+
+    max-block-size: var(--meter-error-h);
+
+    color: var(--color-danger);
+    font-size: 0.7rem;
+    line-height: 1.2;
+
+    overflow: hidden;
+  }
+
+  .margin-hint {
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+  }
+
+  .targets-toggle {
+    cursor: pointer;
+  }
+
+  /* The phone bottom sheet (plan 487): one column of full-width boxes. */
+  .sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    h3 {
+      margin: 0;
+    }
+  }
+
+  .sheet-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+
+    color: var(--color-text-main);
+    font-weight: 600;
+
+    padding-block: var(--space-3);
+  }
+
+  .sheet-body {
+    max-block-size: 70dvh;
+
+    overflow-y: auto;
+
+    .meter-inputs {
+      --meter-error-h: 1.1rem;
+    }
+
+    .meter-inputs,
+    .meter-numbers {
+      justify-content: flex-start;
+    }
+
+    .meter-field {
+      flex: 1 1 100%;
+    }
+
+    .meter-field .c-input-wrapper {
+      inline-size: 100%;
+    }
+
+    .meter-field--chip {
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: $break-mobile) {
+    .pricing-meter {
+      display: none;
+    }
+  }
+}
+
+/*
+ * Unlayered on purpose (plan 487): the FAB is a raw <button>, and the global button reset in src/styles.scss is
+ * unlayered, so a layered background / border / padding would lose to it (same as hero-fab.component.scss).
+ */
+.pricing-fab {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  inset-inline-start: 0.75rem;
+  inset-block-end: 0.75rem;
+  z-index: 210;
+
+  inline-size: 3.5rem;
+  block-size: 3.5rem;
+
+  color: var(--color-text-on-primary);
+
+  padding: 0;
+  background: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-full);
+
+  box-shadow: var(--shadow-glow), var(--shadow-card);
+  cursor: pointer;
+
+  @media (max-width: $break-mobile) {
+    display: inline-flex;
+  }
+
+  @media (max-width: $break-tabbar) {
+    inset-block-end: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+}

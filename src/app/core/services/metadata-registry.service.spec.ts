@@ -181,6 +181,7 @@ describe('MetadataRegistryService', () => {
     ])
     translationSpy.validateKeyForHebrew.and.returnValue({ valid: true })
     translationSpy.resolveAllergen.and.callFake((s: string) => s?.trim().toLowerCase().replace(/\s+/g, '_') ?? null)
+    translationSpy.translate.and.callFake((k: string) => k)
     const keyResolutionSpy = jasmine.createSpyObj('KeyResolutionService', ['ensureKeyForContext'])
     keyResolutionSpy.ensureKeyForContext.and.callFake((v: string) =>
       Promise.resolve(v?.trim() ? v.trim().toLowerCase().replace(/\s+/g, '_') : null)
@@ -206,6 +207,33 @@ describe('MetadataRegistryService', () => {
 
   it('should be created', () => {
     expect(service).toBeTruthy()
+  })
+
+  // Plan 421 - rename methods say whether anything was renamed.
+  describe('rename results', () => {
+    it('is false when the new name already exists, and shows the error', fakeAsync(() => {
+      const msgs = TestBed.inject(UserMsgService) as jasmine.SpyObj<UserMsgService>
+      let result: boolean | undefined
+      service.renameCategory('vegetables', 'dairy').then((r) => (result = r))
+      tick()
+      expect(result).toBeFalse()
+      expect(msgs.onSetErrorMsg).toHaveBeenCalled()
+    }))
+
+    it('is false for an empty or unchanged name', fakeAsync(() => {
+      const results: boolean[] = []
+      service.renameCategory('vegetables', '  ').then((r) => results.push(r))
+      service.renameCategory('vegetables', 'vegetables').then((r) => results.push(r))
+      tick()
+      expect(results).toEqual([false, false])
+    }))
+
+    it('is false when the write fails (read-only shared term)', fakeAsync(() => {
+      let result: boolean | undefined
+      service.renameCategory('vegetables', 'greens').then((r) => (result = r))
+      tick()
+      expect(result).toBeFalse()
+    }))
   })
 
   describe('Signal Management', () => {
@@ -241,21 +269,18 @@ describe('MetadataRegistryService', () => {
       expect(service.courses_()).toEqual([{ key: 'starter' }])
     })
 
-    it('registers every new course with the same neutral color, whatever is already stored', fakeAsync(() => {
+    it('registers a new course with no color key', fakeAsync(() => {
       const storage = TestBed.inject(StorageService) as jasmine.SpyObj<StorageService>
       service.registerCourse('brunch')
       tick()
-      service.registerCourse('dessert')
-      tick()
       const courseBodies = storage.post.calls
         .allArgs()
-        .map(([, body]) => body as { kind: string; key: string; color: string })
-        .filter((b) => b.kind === 'course')
-      expect(courseBodies.map((b) => [b.key, b.color])).toEqual([
-        ['brunch', '#78716C'],
-        ['dessert', '#78716C']
-      ])
-      expect(service.courses_().map((c) => c.key)).toEqual(['starter', 'brunch', 'dessert'])
+        .map(([, body]) => body as Record<string, unknown>)
+        .filter((b) => b['kind'] === 'course')
+      expect(courseBodies.length).toBe(1)
+      expect(courseBodies[0]['key']).toBe('brunch')
+      expect('color' in courseBodies[0]).toBe(false)
+      expect(service.courses_().map((c) => c.key)).toEqual(['starter', 'brunch'])
     }))
   })
 

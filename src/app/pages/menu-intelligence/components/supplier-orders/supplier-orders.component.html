@@ -1,0 +1,95 @@
+<div class="c-modal-overlay" (click)="onOverlayClick($event)">
+  <section
+    class="c-modal-card c-modal-card--md so-sheet"
+    dir="rtl"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="'supplier_orders' | translatePipe"
+  >
+    <header class="so-header">
+      <h3 class="so-title">
+        <lucide-icon name="truck" [size]="18"></lucide-icon>
+        {{ 'supplier_orders' | translatePipe }}
+      </h3>
+      @if (orders_().cards.length > 0) {
+        <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="copyAll()">
+          <lucide-icon name="copy" [size]="16"></lucide-icon>
+          {{ 'supplier_orders_copy_all' | translatePipe }}
+        </button>
+      }
+      <button type="button" class="c-icon-btn" (click)="close.emit()" [attr.aria-label]="'close' | translatePipe">
+        <lucide-icon name="x" [size]="18"></lucide-icon>
+      </button>
+    </header>
+
+    @if (manualCopy_(); as manualText) {
+      <div class="so-manual">
+        <p class="so-manual-note">{{ 'supplier_orders_manual_copy' | translatePipe }}</p>
+        <textarea #manual class="so-manual-text" readonly rows="8" dir="rtl" [value]="manualText"></textarea>
+      </div>
+    }
+
+    @if (empty_()) {
+      <app-empty-state messageKey="supplier_orders_nothing" icon="truck" />
+    } @else {
+      <div class="so-grid">
+        @for (card of orders_().cards; track card.supplierId ?? 'none'; let i = $index) {
+          <article class="so-card c-glass-panel">
+            <header class="so-card-head">
+              <h4 class="so-card-name">{{ card.name }}</h4>
+              @if (card.phone) {
+                <span class="so-card-phone" dir="ltr">{{ card.phone }}</span>
+              }
+            </header>
+            <ul class="so-lines">
+              @for (line of card.lines; track $index) {
+                @let v = view(line);
+                <li class="so-line">
+                  <bdi class="so-line-name">{{ v.name }}</bdi>
+                  <span class="so-line-qty"
+                    >{{ v.qty }} {{ v.unit }}
+                    @if (v.purchase) {
+                      ({{ v.purchase }})
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+            <p class="so-total">
+              {{ 'supplier_orders_est_total' | translatePipe }}: {{ money(card.total) }}
+              <app-partial-cost-badge class="so-partial" [missing]="cardMissing_()[i]"></app-partial-cost-badge>
+            </p>
+            <div class="so-actions">
+              <button type="button" class="c-btn-ghost c-btn-ghost--sm" (click)="copyCard(card)">
+                <lucide-icon name="copy" [size]="16"></lucide-icon>
+                {{ 'supplier_orders_copy' | translatePipe }}
+              </button>
+              @if (card.supplierId) {
+                <button type="button" class="c-btn-primary" (click)="send(card)">
+                  <lucide-icon name="message-circle" [size]="16"></lucide-icon>
+                  {{ 'supplier_orders_whatsapp' | translatePipe }}
+                </button>
+              }
+            </div>
+          </article>
+        }
+
+        @if (orders_().review.length > 0) {
+          <article class="so-card so-card--review c-glass-panel">
+            <header class="so-card-head">
+              <h4 class="so-card-name">{{ 'supplier_orders_review' | translatePipe }}</h4>
+            </header>
+            <ul class="so-lines">
+              @for (line of orders_().review; track $index) {
+                <li class="so-line">
+                  <bdi class="so-line-name">{{ line.name }}</bdi>
+                  <span class="so-line-qty">{{ statusKey(line) | translatePipe }}</span>
+                </li>
+              }
+            </ul>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>
