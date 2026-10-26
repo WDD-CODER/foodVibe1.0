@@ -28,6 +28,10 @@ Triggers: "execute plan NNN", "take plan NNN" (only meaningful inside a wt-N slo
    Ask the Human how to proceed. Common cases:
    - plan has no readable scope (neither a ```` ```scope ```` block nor a `**Scope:**` list of
      backticked globs) → the Planner fixes the plan on `main`; nothing was claimed.
+   - `NOT_READY: plan NNN (<title>) is not merged` → this plan's `Depends-on:` (or a legacy
+     `Prerequisite: plan NNN` line) names a plan that is not merged into `main` yet. Tell the Human
+     which plan it waits on (number and title) and take another plan; `node scripts/plan-order.mjs <NNN>`
+     shows what is ready. Nothing was claimed. `--ignore-order` only when the Human says so.
    - a port is held by a program that is not a dev server → the Human frees it.
    - `… fails the architecture gate` plus `ARCH: …` lines → the plan's `## Architecture Impact`
      misses an invariant or an approval; the Planner fixes it on main. Nothing was claimed.
@@ -42,13 +46,37 @@ Triggers: "execute plan NNN", "take plan NNN" (only meaningful inside a wt-N slo
      → start executing, no go needed. **STOP for a go** only on a `conflict` (a symbol, line or
      file the plan names was removed, renamed or rewritten).
 
+   Before the first sub-task read `docs/brain/agent-rules.md` (short rules from decisions the Human graded wrong;
+   never `docs/brain/decision-log.md`).
+
+   **No invented behaviour.** A behaviour the plan does not describe — what happens on edit, on leave, on cancel, on
+   error; a new dialog, a new confirmation, an automatic action — gets the simplest option (nothing extra). Log each
+   one in the plan's `## Execution Notes` as `- decision: behaviour: <what you chose> — reverse: <one line>`, and a
+   defect you noticed but are not fixing as `- decision: seen: <file:line or page + steps> — <what is wrong>`.
+   `/ship` shows these as `D1…Dn` for the Human to grade (`docs/agent/decision-review.md`).
+
 4. **Open with the plan brief, before any work.** Right after reading the plan, print a
    **PLAN BRIEF** to the Human — 2–3 plain lines, no more: what the plan changes and why it matters.
-   Not the plan's title restated, not a milestone list, no jargon. Then start executing. Validation
-   cards come later, at close-out (`/done`, `/ship`), per `docs/agent/job-validation.md`.
+   Not the plan's title restated, not a milestone list, no jargon. Then start executing. No validation
+   cards here — nothing can be checked before the work exists.
+
+5. **Close-out — the last step of every executed plan, before `/ship`.** When the plan's sub-tasks are
+   done (`docs/agent/job-validation.md` → "HOW TO VALIDATE checklist — the hand-off at the end of the work"):
+   - Run every `[auto]` Done-when check and print `VERIFIED BY AGENT` (raw command + output).
+   - All `[auto]` → no cards, no servers; go on to `/ship`.
+   - Any `[human]` item → start the servers (`node scripts/slot-serve.mjs`) and open every page URL the cards
+     will name; fix a failed start before going on. Then show the HOW TO VALIDATE cards (plain terminal text, grouped by place; every value to
+     type alone on its own line, in English unless it is literal app-language data) and the
+     JOB DONE block, and **wait** for `ok: <numbers>` / `done` / `verified` / `not yet` / `failed: <numbers>`, answered page by page: start fixing a `failed:` card at once (`job-validation.md` → "Faster hand-off"); print the "Open all pages" line after the servers answer. No `/ship`, PR or
+     merge before that reply.
+   - Several plans in one session: each plan gets its own close-out (or one combined set of cards before the
+     first `/ship`) — never a prose checklist instead of cards.
+   - **Exception — merges pre-approved:** when the Human said "merges pre-approved" for this run, ship and merge
+     first, then run "Servers first" and show the cards in the final message; the `[human]` items stay `[ ]`
+     until the Human replies (`job-validation.md` → "Validated after the merge").
 
 **Dev servers on demand.** Start them only when a step needs the running app — a browser check,
-a validation click-list for the Human, `/remote`, preflight — or when the Human says "start servers":
+the close-out cards (step 5 — there they are required), `/remote`, preflight — or when the Human says "start servers":
 `node scripts/slot-serve.mjs` (prints `SLOT_SERVE: be=<port> started|kept, fe=<port> started|kept`).
 If it fails, only that step is blocked: show the printed log tail, then carry on with the steps that
 don't need the app. Stop them with `node scripts/slot-stop.mjs`; the merge, `free-merged-slots.mjs` and
