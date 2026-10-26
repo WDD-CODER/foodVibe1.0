@@ -11,6 +11,28 @@
 * `git-agent` prepares diff + commit message only — never runs commit/push itself unless Human explicitly asks and approves after prep.
 * GitHub MCP = read only. Write ops are Human-run unless explicitly overridden.
 * **`gh`/git write ops in agent sessions:** Claude Code scopes agentic shells to a limited `GITHUB_TOKEN` (fine-grained PAT, no push/merge permission on this repo) even though the keyring holds a full-scope `repo`+`workflow` OAuth token (`gho_...`, inactive while `GITHUB_TOKEN` is set). Prefix `git push`, `gh pr create`, and `gh pr merge` with an inline empty assignment — `GITHUB_TOKEN= gh pr create …` — so they run against the keyring credential instead of 403ing/retrying against the scoped one. Keep these commands simple so Claude Code's built-in Bash safety check can verify them: no `env -u` wrapper, no `cd <dir> &&` prefix (run from the session's own folder, or use `git -C <path>` / `gh -R <owner>/<repo>`), and long PR text via `--body-file <file>` rather than inline quoting. A command the check can't parse is refused outright, even with `Bash(*)` allowed. Confirm with `gh auth status` if unsure which credential is active. See [[github-token-precedence]] memory for history.
+* **Shell writes are guarded like Edit/Write.** The `branch-guard` and `scope-guard` hooks also run on `Bash`: a
+  redirect (`>`, `>>`, a heredoc), `tee`, `sed -i`, or a `cp`/`mv` target on `main` or outside the plan's
+  Read-Write Scope is refused the same way (`BRANCH_GUARD:` / `SCOPE_GUARD:`). Write to a literal path — a `$VAR` or
+  `$(...)` target is refused where a write needs a check. Outside a slot, a branch that names a plan (`feat/NNN-<slug>`,
+  or `.worktree-plan` in a run's merge folder) is held to that plan's scope. An out-of-scope need goes to the Human as
+  `approved: <path>`, never round the guard.
+* **Strict mode for complex shell writes.** On a guarded folder, a Bash command that writes and uses `$(…)`, `${…}`,
+  backticks, `<(…)`/`>(…)`, `[[`, `((`, `$'…'`/`$"…"` or `eval` is refused ("the guard cannot verify every target")
+  unless every write in it is a top-level redirect, `tee`, `cp`/`mv`/`install`/`ln`, `touch`, `truncate` or
+  `sed -i`/`perl -i` to a plain literal path the reader found — no write inside a substitution, a process
+  substitution or an unquoted here-document. Such a command is judged deny by default: it is also refused when any
+  word in it (quoted or not) is a shell (`bash`, `sh`, `zsh`, `fish`, `busybox` …, in any `-c`/`-ce`/`-o x -c` form or
+  reading stdin), `eval`, `source`/`.`, `exec`, `let`, `dd`, `sed`/`perl` (other than the top-level `-i` command),
+  `awk`, `python*`, `node`, `ruby` or a wrapper (`env`, `sudo`, `xargs`, `find`, `timeout`, `nice`, `nohup`,
+  `command`, `builtin` …), or a write command anywhere but as the top-level command name; when a `((…))`, `$((…))`,
+  `$[…]` or `[[ … ]]` holds a name (a variable can hold `a[$(cmd)]`, which bash runs) — only numbers and operators
+  pass; and when a `$(…)`/backtick body holds a `>` redirect (a `2>&1` duplication is fine) or a `<(…)`/`>(…)`.
+  A `<`/`>` inside `[[ … ]]`/`((…))` is a comparison, not a write: `if [[ $a > $b ]]; then :; fi` passes. Why: shell
+  parsing kept producing new ways to hide a write from the reader; this rule fails closed instead. Instead: write the
+  file with the Write/Edit tool, or use a
+  plain redirect to a literal path (`echo "$(date)" > notes.md` is fine). Commands without those constructs are judged
+  as before.
 * Secrets live in `.env` only. Never stage, commit, or print secrets. Never weaken `.gitignore`.
 * Build gate: `npm run build` must pass before any commit.
 * Lint gate: `npm run lint` must pass before milestone sign-off.

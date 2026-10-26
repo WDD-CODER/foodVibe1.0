@@ -1,11 +1,11 @@
 ---
-description: Session end — build, review, commit approval, conditional state/todo (inline, no subagent)
-allowed-tools: Read, Grep, Glob, Bash, Edit, Write
+description: Session end — build, review, commit approval, conditional state/todo (inline; kit-runner runs the build gate)
+allowed-tools: Read, Grep, Glob, Bash, Edit, Write, Agent
 ---
 
 # /ship — Session end (inline pipeline)
 
-Closes the current session. Repo root = **workspace cwd**. No subagent spawns — all phases run inline.
+Closes the current session. Repo root = **workspace cwd**. One sub-agent only: `kit-runner` runs the Phase 1 build gate (`docs/agent/model-routing.md`). Review, staging, approvals and every decision run inline.
 
 **Aliases:** `/ship`, `/end-session`, "wrap up", "ship", "ship it".
 
@@ -34,12 +34,16 @@ Run `node scripts/ship-prep.mjs` (`--mode regular` for `/ship regular`) and act 
 
 ## Phase 1 — Build gate (UNCONDITIONAL hard stop)
 
+Hand both commands to the `kit-runner` agent (`.claude/agents/kit-runner.md`), the ledger check marked `[capture]` (its
+advisory warnings exit 0), and act on its `RUN` / `OUTPUT` / `FAILED` blocks. In Cursor (no sub-agents) run them inline.
+
 ```bash
 npm run build
-node scripts/plan-ledger-check.mjs
+node scripts/plan-ledger-check.mjs   # [capture]
 ```
 
-- **Fail** (either command) → stop. Do not commit. Fix, then re-run `/ship`.
+- **Fail** (either command, a `FAILED` block) → stop. Do not commit. Fix from the error lines it copied, then re-run `/ship`.
+- `ESCALATE`, or no `RUN` line for a command, or no `OUTPUT` block for the ledger check → run the two commands inline yourself; a build result you did not see is not a pass.
 - Never conditional. Ledger exit 1 (missing plan refs) blocks like a failed build; duplicate-NNN / stray-name warnings are advisory only.
 
 ---
@@ -100,40 +104,55 @@ Also proposing a brain entry:   # only when durable; may be 2 lines (pattern + p
   docs/brain/{gotchas/<domain>.md | patterns/*.md | decisions/NNNN-*.md} — "one-line title"
 
 VALIDATED BY HUMAN                      # the usual case: the close-out cards were answered before /ship
-  - ✓ ① {card title} — "{reply word}" (this chat)
-  - ✓ ② …
+  - ✓ [1] {card title} — "{reply word}" (this chat)
+  - ✓ [2] …
 
-  — or, only when no close-out happened before /ship (this gate is the first ask) —
+  — or, only when no close-out happened before /ship (servers started first; Y alone does not validate these) —
 
-HOW TO VALIDATE — {N} checks · app: {url or window} · reply: Y | edit list | abort
-  ① {plain title}
-     WHY     {what changed and what this check proves}
-     WHERE   {window / page — and how to get there}
-     SETUP   {only when needed}
-     DO      {action}  — or —  paste:  {exact text}
-     SEE ✓   {success}
-     FAIL ✗  {failure}
-  ② …
+HOW TO VALIDATE - {N} checks on {P} places
+Reply any time, page by page: ok: <numbers> | failed: <numbers> <what you saw> | done | not yet
+Open all pages (paste in PowerShell):
+Start-Process "{url 1}"; Start-Process "{url 2}"
+  PAGE: {Page name}
+  URL:  {full URL}
+  [1] {plain title}
+      Before: {only when needed}
+      Do:
+        a) {action}, paste:
+           {exact value, alone on its line}
+      Expect: {success}
+      Fail:   {only when needed}
+  [2] …
+  PLACE: {exact window}
+  [3] …
+  (full layout and card rules: docs/agent/job-validation.md → Format and Card rules)
 
-Approve? (Y / merge / edit list / abort)   # Y = commit + push (+ PR); only "merge" merges
+Approve? (Y / merge / edit list / abort)   # Y = commit + push (+ PR); only "merge" merges; with cards above: "done Y"
 ~~~
 
-Every Done-when item `[auto]` → replace HOW TO VALIDATE with:
+Every Done-when item `[auto]` or `[ui]` → replace HOW TO VALIDATE with:
 
 ~~~text
 VERIFIED BY AGENT
   - ✓ [auto] {item} — `{command}` → {output / exit code}
+  - ✓ [ui] {item} — `{its e2e test}` → pass; screenshot `{path}`
 ~~~
+
+A `[ui]` item is agent-checked with evidence: its own short e2e test (the project's e2e command, `commands.e2e`) passing, plus the
+screenshot path (`docs/agent/job-validation.md` Tier 1b). A `[ui]` item whose test fails, or that no test can check,
+falls back to `[human]` (`⚠ [ui→human] {item} — {why}`) and gets a card; a plan-drift result is listed apart, not as a bug.
 
 Phase 4 shows exactly one of these, never none:
 - **VALIDATED BY HUMAN** — the Human already answered the HOW TO VALIDATE cards in this session (end-of-job close-out, `/done`, or a validation word such as `done` / `verified` / `approved`). List each card with the reply word. **Never repeat cards the Human already answered** — the commit gate records validation, it does not re-run it.
-- **HOW TO VALIDATE** — no close-out happened before `/ship`, so this gate is the first ask. One card per check (WHY / WHERE / SETUP / DO / SEE ✓ / FAIL ✗, plain words, exact paste text when a terminal is needed) per `docs/agent/job-validation.md` → Card rules; happy path + any edge/failure rule introduced; one line if no user-visible effect.
-- **VERIFIED BY AGENT** — every Done-when item is `[auto]`.
+- **HOW TO VALIDATE** — `[human]` items and no answered cards in this session: the close-out was skipped, so this gate shows the cards first. Run "Servers first" (`job-validation.md`: every page URL answers), then the cards grouped by page per `docs/agent/job-validation.md` → Format and Card rules; happy path + any edge/failure rule introduced; one line if no user-visible effect. Say in the tree that **Y** alone does not validate them: commit/push waits for a validation word (`done`, `verified`, `approved` — `done Y` answers both). `not yet` / `failed: <numbers>` → no commit; fix and re-show.
+- **VERIFIED BY AGENT** — every Done-when item is `[auto]` or `[ui]` with its evidence.
 A mix (some cards answered, some not) shows VALIDATED BY HUMAN with the unanswered cards repeated beneath it. Rules: `docs/agent/job-validation.md` → "When that moment is".
 
 Matching open todos: list *before* Y (still `[ ]`). On **Y**, mark `[x]` and stage in the **same** commit — never a second push for checkboxes. Chat-only jobs (no ship): `docs/agent/job-validation.md` Path B / `/done`.
 
 A proposed brain entry: print its **full draft body** fenced below the tree (tree line carries only path + title).
+
+**Decisions to grade (Worker plan only):** when the plan's `## Execution Notes` hold `- decision:` lines and the Human has not graded them in this session, print them under the tree as `D1…Dn` — `behaviour:` first, then `seen:`, one line each (`D2 · behaviour: … — reverse: …`) — and end with the reply format: `decisions: ok` or `D<n> ✗ <what I'd choose>` (several on one line, comma-separated). The grade may ride on the `Y` reply (`Y, D2 ✗ no dialog`). No decisions, or already graded → print nothing.
 
 ### Brain-entry capture (no new gate)
 
@@ -147,10 +166,11 @@ On `feat/session-*`: `git log main..HEAD --oneline` + `git diff --stat main..HEA
 
 ### On approval (order is hard — do not reorder)
 
-Approve **Y** (or `--yes`) = commit/push consent, and Human validation of any `[human]` items. Then:
+Approve **Y** (or `--yes`) = commit/push consent. It validates `[human]` items only together with a validation word for cards the Human was shown (VALIDATED BY HUMAN, or `done Y` at this gate) — never on its own. Then:
 
 1. **Todo sync (when items match):** mechanics (wt-N slot vs outside, exact commands, never-invent rule) → `docs/agent/job-validation.md` Path A step 2.
 2. **Write brain drafts** (if proposed, not dropped) — verbatim to `docs/brain/**`.
+   **Learning step (no command from the Human):** run `node scripts/decision-log.mjs learn --reply "<the Human's replies this session>"`. `LEARNING: nothing to record` → one line, no model call, go on. `LEARNING: record` → follow `docs/agent/decision-review.md`: log every `✗` decision and every `failed:` card to `docs/brain/decision-log.md`, add a rule to `docs/brain/agent-rules.md` when the same kind of mistake repeats (`no rule` in the reply skips it), and send each generic lesson to the kit (`scripts/kit-feedback.mjs`). The two `docs/brain` files join the commit in step 3.
 3. **`git add` only listed paths** (todo/plan/brain included) — one commit with job + todos (+ brain), never job-then-todos-later.
 4. **`git commit`** (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable).
 5. **Session-state fold (before push)** — see Phase 5: write `docs/session-state-${BRANCH}.md`, `git add`, **`git commit --amend --no-edit`** (ours, not yet pushed). Never leave it dirty after ship.
@@ -218,6 +238,7 @@ PR path: PR proposed (Done-when met | user override/confirmed) | Checkpoint (bri
 PR: {url or N/A}
 Merge: offered | merged {sha} | deferred | N/A (checkpoint)
 Brain review: {summary} | N/A (checkpoint, not run)
+Learning: nothing to record | {n} logged, rule {added|none}, kit feedback {PR url|none}
 Todo: {n marked} | no matching open items — skipped
 Session state: {path} (append | full rewrite)
 ```
