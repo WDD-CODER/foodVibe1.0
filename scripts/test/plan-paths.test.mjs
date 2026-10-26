@@ -103,7 +103,10 @@ test('branch-guard on main: Planner may write plans/design/*, not a range folder
   const root = gitRepo()
   try {
     mkdirSync(join(root, 'scripts'))
-    copyFileSync(join(repoRoot, 'scripts/branch-guard.sh'), join(root, 'scripts/branch-guard.sh'))
+    mkdirSync(join(root, 'scripts/lib'))
+    for (const f of ['branch-guard.sh', 'lib/guard.mjs', 'lib/plan-paths.mjs']) {
+      copyFileSync(join(repoRoot, 'scripts', f), join(root, 'scripts', f))
+    }
     assert.equal(branchGuard(root, 'plans/design/999-x.plan.md'), 'allow')
     assert.equal(branchGuard(root, 'plans/999-x.plan.md'), 'allow')
     assert.equal(branchGuard(root, 'plans/300-400/999-x.plan.md'), 'deny')
