@@ -1,25 +1,12 @@
-# Session State
+## Session Summary (2026-10-26, Planner)
 
-## Branch
-chore/validate-code-qa-413-415
-
-## Date
-2026-10-20
-
-## Session Summary
-- Planned Code QA (plans 413-415, since merged) and recorded the Human's validation of their now-checkable items; the night-dependent checks stay open|Added a machine-wide validation hand-off: rule + page-grouped card template in ~/.claude/CLAUDE.md, hook ~/.claude/hooks/validation-handoff.mjs (Stop + PreToolUse) registered in ~/.claude/settings.json|Kit plan 009 (validation hand-off in kit files) merged as kit PR #30
-
-## Files Modified
- ...13-code-qa-part-1-nightly-code-gates-and-headless-page-sweep.plan.md | 2 +-
- plans/400-500/414-code-qa-part-2-api-and-data-checks.plan.md            | 2 +-
- ...de-qa-part-3-ai-code-review-agent-with-nightly-page-rotation.plan.md | 2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
-
-## Commit
-e5a0c04a
-
-## PR
-N/A
+- Open plans on `main` after PRs #456/#459: grouped list saved in `docs/open-plans-by-group.md` (PR #457, merged).
+- `/orchestrate 377,423,473` (run-377-473): readiness only, nothing built. 377 and 423 were already built; 473 is a draft that must be rewritten before any run.
+- Human validated 377 A8 and all four 423 app checks; accepted the Atlas result (only מלח ים, 4 records, 0.5 : box on kg, changes cost). 377 closed to `plans/300-400/`, 423 closed to `plans/400-500/`.
+- Old stashes (480, 432, lint-staged backup of 439) dropped; dev servers stopped.
 
 ## Next Steps
-- Write a /fix plan for the 7 API failures in C:/dev/foodVibe-qa/bugs/qa-runs/code-qa/2026-10-20/pre-qa.md (server accepts bad input: expected 400, got 201)|Run kit plan 009 after kit plan 008 merges|After tonight: check .nightly.log CODE-QA lines and the UI agent report (413/415 night checks)
+
+1. Open plans: 409, 410, 411, 412, 419, 422, 450, 471, 473, 490, 497 and 372–374 in `plans/design/`.
+2. Candidate next run: group 4 from the list (497, 419, 412) — run readiness first. 450 and 490 likely just need closing; 473 needs a rewrite session; 410/411 may belong in the kit repo.
+3. Final MVP gate stays with Dandan: Atlas migrations, then `mvp` → `main`.
