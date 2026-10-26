@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "1.7.0"
+    "version": "1.7.1"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v1.7.0",
-  "commit": "6e3f56e1f71af251cb4860fb9bbdce540b42d538",
+  "ref": "v1.7.1",
+  "commit": "dc7893fb3b9027ed3e62c6a4af0c35a150917c81",
   "packs": [
     "angular",
     "node-express"
@@ -258,7 +258,7 @@
       "source": "packs/angular/.claude/workflows/deploy.yml"
     },
     ".claude/workflows/orchestrate.js": {
-      "sha256": "0348ded47954768125bbb1ab057fd225625efe6e4f0875e68fe9326d2eb4359e",
+      "sha256": "261bd7c139becf78de553e2fb6d970a0f6bfe925e29da18b1494caa499e1305c",
       "kind": "managed",
       "source": "core/.claude/workflows/orchestrate.js"
     },
@@ -543,7 +543,7 @@
       "source": "core/docs/agent/brain-capture.md"
     },
     "docs/agent/decision-review.md": {
-      "sha256": "89c8f90b71667af61534709fe1f2d7568113d18f3ff3e48594aa69003c22de06",
+      "sha256": "2bac3e9d684fe68eea55726d8ef6a1421135812938b5c5cff79e412952daf437",
       "kind": "managed",
       "source": "core/docs/agent/decision-review.md"
     },
@@ -558,7 +558,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "880c7df8137e539c9b7f1f44049c4b6b7f4a697c7ab98b3d364deb4ab006395f",
+      "sha256": "17a13f0079965aead4dc1afdf86840bb2ba228ca0962c394aa89d352176f8c84",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -783,7 +783,7 @@
       "source": "core/scripts/handoff-check.sh"
     },
     "scripts/kit-feedback.mjs": {
-      "sha256": "670be7815f8b26a8dea1e4402d38535b086efcdc384a1bf89ed5a8633bffb569",
+      "sha256": "9566af2520c9ab314e34f36c9052474e6d2ef3cda8172d5c69d0564578d9309f",
       "kind": "managed",
       "source": "core/scripts/kit-feedback.mjs"
     },
