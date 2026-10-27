@@ -1,6 +1,6 @@
 # Plan 450 — Add the reuse layer: a component registry, a decision ladder and checks that catch a new copy
 
-Status: active
+Status: done
 Track: code
 Depends-on: mvp-merge
 Snapshot: 34c560fc8db9272f41a85c57c5eb8d3407b3caed
@@ -28,8 +28,8 @@ This plan adds the layer that stops the drift. It changes no behaviour:
   - [x] [auto] `npx ng build` and `npm test` (`ng test`) pass; `import { TranslatePipe } from '@pipes/translation-pipe.pipe'` compiles in `src/app/shared/export-preview/export-preview.component.ts`. (run 450: build passes; `ng test` 1145/1147 — the 2 failures are the known pre-existing `v2-types.spec.ts:26` and `row-actions-menu.component.spec.ts:208`, see `docs/mvp/runs/450.md`)
   - [x] [auto] `git diff --stat main -- src/` shows only `tsconfig.json`, `export-preview.component.ts`, `change-popover.component.ts` (import lines only; frozen files untouched, net lines <= 0 in each).
   - [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries. (run 450: no entry from this plan's code — the listed entries come from other slots / ports or a backend-unreachable status 0; see `docs/mvp/runs/450.md`)
-  - [ ] [human] Open the recipe book list and the export preview of any recipe in the app: both pages look and behave exactly as before (the only app change is two import lines).
-  - [ ] [human] Read `docs/brain/component-families.md` and confirm each family names the right shared piece (you know the app; the Worker cannot judge this).
+  - [x] [human] Open the recipe book list and the export preview of any recipe in the app: both pages look and behave exactly as before (the only app change is two import lines).
+  - [x] [human] Read `docs/brain/component-families.md` and confirm each family names the right shared piece (you know the app; the Worker cannot judge this).
 
 ## Execution Mode
 - Parallel: no — runs first; 451–457 read the registry and add to it, so they start only after 450 is merged.
@@ -121,7 +121,7 @@ Mandatory: this plan runs after the MVP merge, which changed many files. Before 
 ## Atomic Sub-tasks
 - [x] S1: Reality check — print ok/conflict per symbol listed in Step 0 and record current copy counts — `docs/mvp/runs/450.md`
 - [x] S2: Write the registry from the audit family map plus MVP-added families, with the current copy counts and which plan (451–457) removes each copy — `docs/brain/component-families.md`, `docs/brain/index.md`
-- [ ] S3: CHECKPOINT — Human reads the registry and says `approved registry` or lists corrections — `docs/brain/component-families.md`
+- [x] S3: CHECKPOINT — Human reads the registry and says `approved registry` or lists corrections — `docs/brain/component-families.md`
 - [x] S4: Write the decision ladder and sibling rule, add the Standards-index row and the Skill-trigger row, and the ADR — `docs/agent/standards-reuse.md`, `AGENTS.md`, `docs/brain/decisions/0024-reuse-layer.md`
 - [x] S5: Add the `## Reuse Check` section to the plan template, plan checks and save-plan checklist; add the `overrides` entries — `.claude/references/prd-template.md`, `docs/agent/plan-checks.md`, `.claude/skills/save-plan/SKILL.md`, `kit.config.json`, `docs/workflow-kit/drift-classification.md`
 - [x] S6: Build `--reuse` (parser in `scripts/lib/reuse-check.mjs`, one import + one dispatch line in `scope-check.mjs`) with fixture plans and tests — `scripts/scope-check.mjs`, `scripts/lib/reuse-check.mjs`, `scripts/test/reuse-check.test.mjs`, `scripts/test/fixtures/reuse/**`

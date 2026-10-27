@@ -158,17 +158,6 @@
 - [x] U5: Add a read-only check that lists products and recipe lines the old behavior may have got wrong — three sections, local and Atlas — server/scripts/check-unit-weights.js
 - [ ] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
 
-### Plan 450 — Add the reuse layer: a component registry, a decision ladder and checks that catch a new copy (`plans/450-add-the-reuse-layer-a-component-registry-a-decision-ladder-and-checks-that-catch.plan.md`)
-
-- [x] S1: Reality check — print ok/conflict per symbol listed in Step 0 and record current copy counts — `docs/mvp/runs/450.md`
-- [x] S2: Write the registry from the audit family map plus MVP-added families, with the current copy counts and which plan (451–457) removes each copy — `docs/brain/component-families.md`, `docs/brain/index.md`
-- [ ] S3: CHECKPOINT — Human reads the registry and says `approved registry` or lists corrections — `docs/brain/component-families.md`
-- [x] S4: Write the decision ladder and sibling rule, add the Standards-index row and the Skill-trigger row, and the ADR — `docs/agent/standards-reuse.md`, `AGENTS.md`, `docs/brain/decisions/0024-reuse-layer.md`
-- [x] S5: Add the `## Reuse Check` section to the plan template, plan checks and save-plan checklist; add the `overrides` entries — `.claude/references/prd-template.md`, `docs/agent/plan-checks.md`, `.claude/skills/save-plan/SKILL.md`, `kit.config.json`, `docs/workflow-kit/drift-classification.md`
-- [x] S6: Build `--reuse` (parser in `scripts/lib/reuse-check.mjs`, one import + one dispatch line in `scope-check.mjs`) with fixture plans and tests — `scripts/scope-check.mjs`, `scripts/lib/reuse-check.mjs`, `scripts/test/reuse-check.test.mjs`, `scripts/test/fixtures/reuse/**`
-- [x] S7: Build `reuse-lint.mjs` with the rules table, `--diff`, `--check-registry` and `npm run lint:reuse`; tests on fixture diffs — `scripts/reuse-lint.mjs`, `scripts/lib/registry-families.mjs`, `scripts/test/reuse-lint.test.mjs`, `scripts/test/fixtures/reuse/**`, `package.json`
-- [x] S8: Add `@pipes/*` to `tsconfig.json`, convert the two relative pipe imports, run `ng build`, `ng test`, `npm run test:scripts`, log-query; write the run file with the validation cards — `tsconfig.json`, `src/app/shared/export-preview/export-preview.component.ts`, `src/app/shared/change-popover/change-popover.component.ts`, `docs/mvp/runs/450.md`
-
 ### Plan 490 — Pasted ingredient lines match existing products first and Not Ready never saves (`plans/490-pasted-ingredient-lines-match-existing-products-first-and-not-ready-never-saves.plan.md`)
 
 - [x] S1: Let the AI matching answer carry a short list of options when it is unsure — `productNameMatchResponseSchema` entries get optional `options: z.array(z.number().int()).optional()` with **no `.max()` / `.min(0)` on the array or its items** (the same schema parses the model's raw answer, so one over-long or out-of-range options list must not make `safeParse` reject the whole answer; `cleanProductMatches` does the capping and range check); export `PRODUCT_MATCH_MAX_OPTIONS = 5`; run `npm run build:schemas` — shared/schemas/ai-product-match.schema.ts
