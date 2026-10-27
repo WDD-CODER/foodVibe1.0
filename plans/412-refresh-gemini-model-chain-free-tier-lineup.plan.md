@@ -32,6 +32,11 @@ Research (2026-10-19; ai.google.dev changelog / models / pricing / rate-limits):
 ## Execution Mode
 Worker in a `wt-N` slot, single Worker. A1 needs the real key in the slot's `server/.env` (read by the script, never printed). C1 needs the Human's ai.dev/rate-limit screenshot.
 
+## Execution Notes
+- Orchestrator readiness (2026-10-27): C1 daily budgets → the Human sent the ai.dev/rate-limit screenshots (project on Tier 1, "Compare: Free tier" column). The shared key will come from a project with no billing, so set each `MODEL_DAILY_BUDGETS` value to the FREE-tier requests per day: gemini-3.5-flash-lite 500, gemini-3.1-flash-lite 500, gemini-2.5-flash-lite 20, gemini-2.5-flash 20, gemini-3-flash 20, gemini-3.6-flash 20, gemini-3.8-flash 20, gemma-4-26b and gemma-4-31b 14400. Skip any model that is not in the chain. The comment states the source and date: ai.dev/rate-limit screenshot 2026-10-27, free-tier values read from the compare column (approximate). Tick C1.
+- Orchestrator readiness (2026-10-27): the two [human] Done-when checks (recipe and product from a photo on the new first model; admin chain screen shows removed models as removed) → leave both unticked for the Human.
+- Orchestrator readiness (2026-10-27): plan drift (A1, B1, D1, D2, E1, E2, E3, F1, G1 already ticked, work in fe266724) → treat the plan as nearly done: re-run its checks, do not redo ticked items.
+
 ## Read-Write Scope
 
 Always allowed regardless of the list below: this plan file itself, its own

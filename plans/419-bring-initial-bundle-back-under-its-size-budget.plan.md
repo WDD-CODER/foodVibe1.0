@@ -126,3 +126,4 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Re-measure be
 - Backend, API, auth, schemas, data migration: none.
 
 ## Execution Notes
+- Orchestrator readiness (2026-10-27): no questions. Re-measured on main: Initial total 564.41 kB (budget 560 kB, over by 4.41 kB), so the ≤ 550 kB target needs about 14.4 kB of trimming. The [human] check stays unticked for the Human.
