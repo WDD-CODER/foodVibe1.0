@@ -1,6 +1,6 @@
 # Plan 412 — Refresh Gemini Model Chain to Google's Oct-2026 Free-Tier Lineup
 
-Status: active
+Status: done
 Snapshot: 5e0342575a4765db9400ae169d3b3473e87eca4e
 
 ## Problem Statement
