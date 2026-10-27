@@ -30,6 +30,10 @@ Snapshot: 73efca9b0d5ba57ad57cc10f845068411d18be9b
 - Isolated DB: no
 
 ## Execution Notes
+- Orchestrator readiness (2026-10-27): S6 repo setting delete_branch_on_merge → approved by the Human: run `gh api -X PATCH repos/WDD-CODER/foodVibe1.0 -f delete_branch_on_merge=true` during the run (prefix `GITHUB_TOKEN=` per the gh token memory), record the output as evidence, and record the setting in `docs/agent/standards-git.md`.
+- Orchestrator readiness (2026-10-27): S7 and the three GitHub-only [human] checks (throwaway PR goes red, merged-branch auto-delete, Run workflow on stale-branches) → leave unticked for the Human.
+- Orchestrator readiness (2026-10-27): S1 AI product modal base-unit select → same behaviour as the native select today: choosing a unit updates the draft baseUnit via setDraftField, closing or cancelling discards the draft, no new error state, no add-option row (fixed CANONICAL_UNITS).
+- Orchestrator readiness (2026-10-27): stale snapshot 73efca9b (kit sync 495ff0c4, v1.7.0) → re-run the five checks first and classify only what is actually unclassified; a file outside the Read-Write Scope → escalate, do not widen.
 - The MVP is already on `main`, so nothing blocks this plan. On arrival, re-run the five checks first (counts above drift as plans merge); any already at exit 0 mark done with that output as evidence.
 - `ci.yml`, `security.yml`, `todo-sync.yml` and `brain-capture-reminder.yml` are kit-owned (`docs/workflow-kit/kit-owned.json`) — do not edit them here. The new gates live in two NEW FoodVibe-only workflow files (`rules.yml`, `stale-branches.yml`). Sharing them with other kit projects, if wanted, is a separate plan in `../ai-workflow-kit/plans/`.
 - `rules.yml` is not behind the docs-only skip in `ci.yml`: plan-ledger, kit-manifest and breadcrumbs checks matter exactly for docs/plans/`.claude` PRs, and each check takes seconds.

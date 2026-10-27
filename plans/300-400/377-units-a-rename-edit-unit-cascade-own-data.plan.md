@@ -1,6 +1,6 @@
 # Plan 377 — Units A: edit a custom unit's name and conversion in the metadata manager
 
-Status: active
+Status: done
 Validated: Human "done" 2026-10-20 (Metadata ①–③, product-form prefill + special price, recipe live cost + row prefill)
 Track: code — here (not design)
 Snapshot: d601af5a9c761146f41191f6c49fb56b732774d6
