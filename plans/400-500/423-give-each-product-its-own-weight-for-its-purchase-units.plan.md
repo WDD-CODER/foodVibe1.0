@@ -67,13 +67,13 @@ every calculation; the unit window never writes a number into a unit field.
 - [x] [human] The Human runs `node server/scripts/check-unit-weights.js --target=atlas` (agents may not read
   production) and reviews the lists. A non-zero `uom differs` line means those products' costs will change after
   the merge (they were wrong) — the Human decides before merge. Human ran it 2026-10-26: only מלח ים (4 records, 0.5 : box on kg) changes cost; accepted.
-- [human] `/inventory`: yellow onion → «הוסף יחידת רכש» → «הוסף יחידה חדשה» "צנצנת" = 500 גרם → save. Pickles →
+- [x] [human] `/inventory`: yellow onion → «הוסף יחידת רכש» → «הוסף יחידה חדשה» "צנצנת" = 500 גרם → save. Pickles →
   «הוסף יחידת רכש» → choose "צנצנת" → the amount is empty; type 350 → save. Reopen both: onion shows 500, pickles 350.
-- [human] A recipe with 1 צנצנת onion and 1 צנצנת pickles → the weight shows 850 g and each line's cost matches
+- [x] [human] A recipe with 1 צנצנת onion and 1 צנצנת pickles → the weight shows 850 g and each line's cost matches
   its own product.
-- [human] In the recipe builder, add "צנצנת" to a third product from its line's unit list → the window asks
+- [x] [human] In the recipe builder, add "צנצנת" to a third product from its line's unit list → the window asks
   «כמה שוקלת צנצנת אחת של <product>?» before saving.
-- [human] `/inventory/add`: base unit → «הוסף יחידה חדשה» → «ביטול» → the base unit still shows what it showed
+- [x] [human] `/inventory/add`: base unit → «הוסף יחידה חדשה» → «ביטול» → the base unit still shows what it showed
   before; repeat and add a unit → the new unit is selected; the product saves.
 
 ## Execution Mode

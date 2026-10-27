@@ -150,25 +150,6 @@
 - [ ] H6: Explain the morning report and the shorter nights in the QA docs — Every morning section, due/skipped rule, file table — docs/qa/README.md, docs/qa/code-qa.md
 - [ ] H7: Test, run the report on the real QA folder and hand you the two morning checks — npm run test:scripts, morning-report --out=- on C:/dev/foodVibe-qa, ng build; Human checks the first and second mornings — this plan file
 
-### Plan 423 — Give each product its own weight for its purchase units
-- [x] U1: Read every purchase unit in the product's base unit, honoring the unit after the colon — optionRateInBase util + spec; use it in recipe-cost, product-price, ingredients-table line cost, inventory list unit change — src/app/core/utils/purchase-option-rate.util.ts, src/app/core/services/recipe-cost.service.ts, src/app/core/utils/product-price.util.ts, recipe-ingredients-table.component.ts, inventory-product-list.component.ts
-- [x] U2: Let the unit window ask how much one unit of this product weighs, also for an existing unit name — forProduct context, productUnitAdded$, product-mode title and label, two dictionary keys, specs — src/app/core/services/unit-registry.service.ts, src/app/shared/unit-creator/**, public/assets/data/dictionary.json
-- [x] U3: Make the product form use this product's own number for every purchase unit — product-mode add, no shared pre-fill for custom units, pickNewUnit_ replaces the close effect (INVF-C06), specs — src/app/pages/inventory/components/product-form/**
-- [x] U4: Ask the product's own weight when a unit is added from a recipe line or cook view — product mode, save the typed amount, drop the shared-rate math, specs — recipe-ingredients-table.component.ts, cook-view.page.ts and their specs
-- [x] U5: Add a read-only check that lists products and recipe lines the old behavior may have got wrong — three sections, local and Atlas — server/scripts/check-unit-weights.js
-- [ ] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
-
-### Plan 450 — Add the reuse layer: a component registry, a decision ladder and checks that catch a new copy (`plans/450-add-the-reuse-layer-a-component-registry-a-decision-ladder-and-checks-that-catch.plan.md`)
-
-- [x] S1: Reality check — print ok/conflict per symbol listed in Step 0 and record current copy counts — `docs/mvp/runs/450.md`
-- [x] S2: Write the registry from the audit family map plus MVP-added families, with the current copy counts and which plan (451–457) removes each copy — `docs/brain/component-families.md`, `docs/brain/index.md`
-- [ ] S3: CHECKPOINT — Human reads the registry and says `approved registry` or lists corrections — `docs/brain/component-families.md`
-- [x] S4: Write the decision ladder and sibling rule, add the Standards-index row and the Skill-trigger row, and the ADR — `docs/agent/standards-reuse.md`, `AGENTS.md`, `docs/brain/decisions/0024-reuse-layer.md`
-- [x] S5: Add the `## Reuse Check` section to the plan template, plan checks and save-plan checklist; add the `overrides` entries — `.claude/references/prd-template.md`, `docs/agent/plan-checks.md`, `.claude/skills/save-plan/SKILL.md`, `kit.config.json`, `docs/workflow-kit/drift-classification.md`
-- [x] S6: Build `--reuse` (parser in `scripts/lib/reuse-check.mjs`, one import + one dispatch line in `scope-check.mjs`) with fixture plans and tests — `scripts/scope-check.mjs`, `scripts/lib/reuse-check.mjs`, `scripts/test/reuse-check.test.mjs`, `scripts/test/fixtures/reuse/**`
-- [x] S7: Build `reuse-lint.mjs` with the rules table, `--diff`, `--check-registry` and `npm run lint:reuse`; tests on fixture diffs — `scripts/reuse-lint.mjs`, `scripts/lib/registry-families.mjs`, `scripts/test/reuse-lint.test.mjs`, `scripts/test/fixtures/reuse/**`, `package.json`
-- [x] S8: Add `@pipes/*` to `tsconfig.json`, convert the two relative pipe imports, run `ng build`, `ng test`, `npm run test:scripts`, log-query; write the run file with the validation cards — `tsconfig.json`, `src/app/shared/export-preview/export-preview.component.ts`, `src/app/shared/change-popover/change-popover.component.ts`, `docs/mvp/runs/450.md`
-
 ### Plan 490 — Pasted ingredient lines match existing products first and Not Ready never saves (`plans/490-pasted-ingredient-lines-match-existing-products-first-and-not-ready-never-saves.plan.md`)
 
 - [x] S1: Let the AI matching answer carry a short list of options when it is unsure — `productNameMatchResponseSchema` entries get optional `options: z.array(z.number().int()).optional()` with **no `.max()` / `.min(0)` on the array or its items** (the same schema parses the model's raw answer, so one over-long or out-of-range options list must not make `safeParse` reject the whole answer; `cleanProductMatches` does the capping and range check); export `PRODUCT_MATCH_MAX_OPTIONS = 5`; run `npm run build:schemas` — shared/schemas/ai-product-match.schema.ts
