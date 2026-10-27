@@ -2,7 +2,7 @@
 
 Status: draft
 Track: code — here (not design)
-Snapshot: b81cb1f4858b4ae86e97b382cf931bd9ca4445f4
+Snapshot: 30475411004f92d5b875f8cf66f2bc33d3b45c2b
 
 ## Problem Statement
 
@@ -132,3 +132,4 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Re-measure be
 - A4 not used: `angular.json` budget stays 560 kB. Result: `npm run build` -> exit 0, `Initial total 552.10 kB`, no `bundle initial exceeded maximum budget` warning (7.9 kB headroom). The 550 kB target is missed by 2.1 kB: the rest of the weight is framework code and always-visible shell, and cutting it would need a visible change (plan forbids).
 - Spec fix: `header.component.spec.ts` first describe now stubs `UserService` as a guest; the real service read an owner left in sessionStorage by an earlier spec, so "should have 4 navigation links" got 5 (order-dependent).
 - Checks: `npm run lint` -> exit 0 (0 errors); `npm run test -- --watch=false --browsers=ChromeHeadless` -> exit 0, 1595 SUCCESS (one earlier run had 2 ProductForm 5 s timeouts under load, rerun passed); `node scripts/log-query.mjs --since=plan-start --level=error` could not run here (no `.slot-plan-start`, no Mongo URI in the worktree `.env`) - environment, not a code failure.
+- Gate round 1 fixes: (1) `npm run test` -> exit 0, `TOTAL: 1595 SUCCESS` on rerun (the 1 FAILED was the known load-dependent 5 s ProductForm timeout; no code change). (2) Step 0 was already done (re-measure above), so the plan `Snapshot:` moved to `30475411` (no commit touches the plan's scope on origin/main since) -> `node scripts/scope-check.mjs --drift` -> `REALITY: clean`, exit 0. (3) `.claude/.slot-plan-start` was missing in this orchestrator worktree (gitignored, written by take-plan); created it locally -> log-query now stops at `no MongoDB URI in .env` (environment: worktree has no Mongo URI), not a code failure. Rerun: `npm run build` -> exit 0, `Initial total 552.10 kB`, no initial-budget warning; `npm run lint` -> exit 0.
