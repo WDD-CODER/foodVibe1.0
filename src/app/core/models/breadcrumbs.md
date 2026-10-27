@@ -23,6 +23,7 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `admin-user.model.ts` | Admin user entity | AdminUser |
 | `ai-menu-draft.model.ts` | AI-drafted menu + match types | AiMenuDraft, AiMenuSectionDraft, AiMenuDishDraft, AiMenuPatch, MatchedMenu, MatchedSection, MatchedDish |
 | `ai-product-draft.model.ts` | AI-drafted product | AiProductDraft, AiProductPatch |
+| `business-stats.model.ts` | Dashboard read model of the business stats route (plan 447) | StatsPeriod, BusinessStats, BusinessStatsCards, CountCard, FunnelStage, UpcomingEvent |
 | `parsed-result.model.ts` | Parsed recipe/dish import result | ParsedResult, ParsedResultType, ParsedRecipe, ParsedDish, ParsedIngredient, ParsedStep |
 | `v2/` | v2 entity types inferred from the shared Zod schemas; `v2/conformance.ts` locks them to the client interfaces at compile time | V2ConformsToClient |
 

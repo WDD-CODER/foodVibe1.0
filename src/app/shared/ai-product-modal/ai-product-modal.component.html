@@ -250,16 +250,14 @@
           <!-- Base unit -->
           <div class="editor-field">
             <label class="editor-label">{{ 'ai_product_base_unit_label' | translatePipe }}</label>
-            <select
-              class="c-input editor-select"
-              [value]="draft_()!.baseUnit"
-              (change)="setDraftField('baseUnit', $any($event.target).value)"
+            <app-custom-select
               dir="ltr"
-            >
-              @for (unit of CANONICAL_UNITS; track unit) {
-                <option [value]="unit">{{ unit }}</option>
-              }
-            </select>
+              [options]="unitOptions"
+              [translateLabels]="false"
+              [compact]="true"
+              [ngModel]="draft_()!.baseUnit"
+              (ngModelChange)="setDraftField('baseUnit', $event)"
+            />
           </div>
 
           <!-- Yield factor -->

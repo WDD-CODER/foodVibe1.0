@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { FormsModule } from '@angular/forms'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -18,6 +19,7 @@ import {
 } from '../../core/utils/gemini-usage.util'
 import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.model'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
@@ -41,7 +43,9 @@ const CANONICAL_UNITS = [
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     LucideAngularModule,
+    CustomSelectComponent,
     TranslatePipe,
     LoaderComponent,
     ModalShellComponent,
@@ -58,7 +62,8 @@ export class AiProductModalComponent implements OnInit {
   private readonly translation_ = inject(TranslationService)
   private readonly metadataRegistry_ = inject(MetadataRegistryService)
 
-  protected readonly CANONICAL_UNITS = CANONICAL_UNITS
+  /** Fixed list, so the picker has no add-option row. */
+  protected readonly unitOptions = CANONICAL_UNITS.map((unit) => ({ value: unit, label: unit }))
   protected readonly newCategory_ = signal('')
   protected readonly newAllergen_ = signal('')
 
