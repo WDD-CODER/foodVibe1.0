@@ -6,7 +6,9 @@
   }
   <router-outlet></router-outlet>
 </div>
-<app-user-msg />
+@defer (when userMsg.msg_(); prefetch on idle) {
+  <app-user-msg />
+}
 
 @defer (when unitRegistry.isCreatorOpen_()) {
   <app-unit-creator-modal />
@@ -33,8 +35,10 @@
   <app-global-specific-modal />
 }
 
-<!-- Eager: confirm used early in typical sessions. Auth moved to @defer with prefetch-on-idle below (plan 312) — kept the chunk warm without paying its ~61.5kB in the initial bundle. -->
-<app-confirm-modal />
+<!-- Confirm and the message toast (plan 419) are deferred with prefetch-on-idle, like auth below (plan 312): the chunk is warm before first use without sitting in the initial bundle. -->
+@defer (when confirmModal.isOpen(); prefetch on idle) {
+  <app-confirm-modal />
+}
 @defer (when aiRecipeModal.isOpen()) {
   <app-ai-recipe-modal />
 }

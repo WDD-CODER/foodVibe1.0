@@ -64,13 +64,18 @@ Singleton services for data, state, modals, HTTP concerns, logging, export, and 
 | `http-storage.adapter.ts` | HTTP-backed storage adapter | HttpStorageAdapter |
 | `master-push.service.ts` | Push local entity to master/global | MasterPushService |
 | `menu-event-type.service.ts` | Menu event type registry | MenuEventTypeService |
-| `event-pipeline.service.ts` | Client of `API.events`: stage moves and notes; writes the returned event into the store (plan 443) | EventPipelineService |
+| `event-pipeline.service.ts` | Client of the events API routes (`API` in `http-storage.adapter`): stage moves and notes; writes the returned event into the store (plan 443) | EventPipelineService |
 | `event-type-snapshot.service.ts` | Freezes an event's event-type and serving-type coefficients when picked (plan 441) | EventTypeSnapshotService |
 | `menu-export.service.ts` | Menu export orchestration | MenuExportService |
 | `quick-edit-product-modal.service.ts` | Quick-edit product modal orchestration | QuickEditProductModalService |
 | `recipe-export.service.ts` | Recipe export orchestration | RecipeExportService |
 | `server-heartbeat.service.ts` | Server availability heartbeat | ServerHeartbeatService |
 | `station-registry.service.ts` | Kitchen stations (taxonomy kind `station`) for the recipe header and metadata manager | StationRegistryService |
+| `business-stats.service.ts` | The dashboard numbers for the signed-in business, computed by the server (plan 447) | BusinessStatsService |
+| `plan-snapshot.service.ts` | Builds an event's planning snapshot from today's prices and the supplier orders (plan 446) | PlanSnapshotService, LivePlan |
+| `platform-admin.service.ts` | Cross-business counts for the platform admin; the server refuses everyone else (plan 448) | PlatformAdminService, BusinessRow |
+| `product-import.service.ts` | Supplier price-list import: cleaned rows from the server, then apply (plan 432) | ProductImportService, ImportRow, ApplyRow, ApplyResult |
+| `unlinked-ingredient-link.service.ts` | Turns a free-text ingredient into a product-linked one in the stored recipes and dishes (plan 466) | UnlinkedIngredientLinkService, LinkUnlinkedRequest |
 | `user-admin.service.ts` | User admin management | UserAdminService |
 | `loading.service.ts` | Global loading indicator state | LoadingService |
 

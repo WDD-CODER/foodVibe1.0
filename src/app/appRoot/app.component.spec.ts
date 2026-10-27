@@ -7,6 +7,7 @@ import { provideServiceWorker } from '@angular/service-worker'
 import { HeaderComponent } from '../core/components/header/header.component'
 import { UserMsg } from 'src/app/core/components/user-msg/user-msg.component'
 import { UserMsgService } from '@services/user-msg.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 import { UnitRegistryService } from '@services/unit-registry.service'
 import { ConversionService } from '@services/conversion.service'
 import { UnitCreatorModal } from 'src/app/shared/unit-creator/unit-creator.component'
@@ -77,8 +78,23 @@ describe('AppComponent', () => {
     // Eager shell only — unit-creator-modal is behind @defer (when isCreatorOpen_)
     expect(compiled.querySelector('app-header')).toBeTruthy()
     expect(compiled.querySelector('router-outlet')).toBeTruthy()
-    expect(compiled.querySelector('app-user-msg')).toBeTruthy()
-    expect(compiled.querySelector('app-confirm-modal')).toBeTruthy()
+    // The toast and the confirm popup are behind @defer (plan 419): absent until a message or a confirm is open.
+    expect(compiled.querySelector('app-user-msg')).toBeNull()
+    expect(compiled.querySelector('app-confirm-modal')).toBeNull()
     expect(compiled.querySelector('app-hero-fab')).toBeTruthy()
+  })
+
+  it('mounts the confirm popup once a confirm is open', async () => {
+    const fixture = TestBed.createComponent(AppComponent)
+    fixture.detectChanges()
+    void TestBed.inject(ConfirmModalService).open('are you sure')
+    fixture.detectChanges()
+    // The deferred chunk resolves on a later tick: poll for it instead of waiting for zone stability.
+    const host = fixture.nativeElement as HTMLElement
+    for (let i = 0; i < 40 && !host.querySelector('app-confirm-modal'); i++) {
+      await new Promise((resolve) => setTimeout(resolve, 25))
+      fixture.detectChanges()
+    }
+    expect(host.querySelector('app-confirm-modal')).toBeTruthy()
   })
 })

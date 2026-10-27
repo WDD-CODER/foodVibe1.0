@@ -20,10 +20,10 @@ const mongoose = require('mongoose');
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 
 /**
- * Free-tier requests per day, per model, for our key's project. Google no longer publishes
- * these (ai.dev/rate-limit shows them only to the signed-in owner); values come from 429
- * `quotaValue`s — ours for gemini-2.5-flash-lite (2026-10-08), aiplug.work's measurements
- * (2026-09-02) for the rest. A model missing here has an unknown budget.
+ * Free-tier requests per day, per model, for the shared key's project (no billing). Source:
+ * ai.dev/rate-limit screenshot 2026-10-27, free-tier values read from the "Compare: Free tier"
+ * column (approximate; Google does not guarantee them). Models with no entry have an unknown
+ * budget. gemini-3-flash-preview uses the screenshot's gemini-3-flash row.
  * Informational: the chain reacts to the real 429, not to these.
  */
 const MODEL_DAILY_BUDGETS = {
@@ -33,6 +33,7 @@ const MODEL_DAILY_BUDGETS = {
   'gemini-2.5-flash': 20,
   'gemini-3.6-flash': 20,
   'gemini-3.8-flash': 20,
+  'gemini-3-flash-preview': 20,
 };
 
 /**

@@ -1,0 +1,520 @@
+{
+  "run": "run-412-497",
+  "branch": "orch/run-412-497",
+  "base": "main",
+  "startedAt": "2026-10-27T13:35:07Z",
+  "mainShaAtStart": "30475411004f92d5b875f8cf66f2bc33d3b45c2b",
+  "plans": {
+    "412": {
+      "nnn": "412",
+      "title": "Refresh Gemini Model Chain to Google's Oct-2026 Free-Tier Lineup",
+      "branch": "feat/412-refresh-gemini-model-chain",
+      "state": "parked",
+      "round": 0,
+      "tier": "judgment",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Generate a recipe, and a product from a photo, on the new first model.",
+        "The admin chain screen shows no removed models; an old saved chain shows them as removed."
+      ],
+      "history": [
+        {
+          "at": "2026-10-27T13:36:36.234Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T13:48:28.374Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T13:48:38.905Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T13:49:07.938Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T14:50:21.413Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T14:58:46.386Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T14:58:53.910Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "freeDiskGb": 34,
+      "reason": "environment, again after one retry: gate env-fail: npm run test",
+      "sha": "de76b32b"
+    },
+    "419": {
+      "nnn": "419",
+      "title": "Bring the initial bundle back under its size budget",
+      "branch": "feat/419-bring-initial-bundle-back",
+      "state": "parked",
+      "round": 1,
+      "tier": "judgment",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Dashboard and recipe builder load and work as before: header menus, tab chips scroll, the + button, and"
+      ],
+      "history": [
+        {
+          "at": "2026-10-27T13:36:37.023Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T14:46:48.476Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T15:01:08.319Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T15:01:17.243Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T15:01:44.643Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T15:05:45.905Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T15:14:13.499Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T15:14:21.082Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-10-27T15:18:54.349Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-10-27T15:19:03.224Z",
+          "state": "parked",
+          "round": 1
+        }
+      ],
+      "freeDiskGb": 33.7,
+      "sha": "6c86105f",
+      "reason": "environment, again after one retry: builder: environment failure"
+    },
+    "497": {
+      "nnn": "497",
+      "title": "Run the project rule checks on every pull request and clean up merged branches",
+      "branch": "feat/497-run-the-project-rule",
+      "state": "parked",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "A throwaway PR that adds a native `<select>` to any template shows the `rules` check red with the file named in the log; closing that PR leaves main untouched.",
+        "After the Human runs the repo-setting command (S6), merging any PR removes its branch on GitHub without a manual delete.",
+        "Running the `stale-branches` workflow from the Actions tab (Run workflow) creates or updates one issue titled \"Stale branches\" that lists branches unmerged for 30+ days; nothing is deleted.",
+        "The throwaway-PR, merged-branch-deletes and stale-branches-issue checks in Success Criteria pass."
+      ],
+      "history": [
+        {
+          "at": "2026-10-27T13:36:36.215Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T14:31:57.708Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T14:35:10.652Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-27T14:35:18.616Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-10-27T14:43:59.817Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-10-27T15:16:21.023Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-10-27T15:16:49.250Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-10-27T15:25:11.067Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-10-27T15:27:53.503Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-10-27T15:28:03.102Z",
+          "state": "parked",
+          "round": 2
+        }
+      ],
+      "freeDiskGb": 33.6,
+      "sha": "742fc856",
+      "reason": "gate: npm run test, npm run lint:icons, npm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/kit-manifest-check.mjs, node scripts/breadcrumbs-check.mjs, node --test scripts/test/ci-scope-check.test.mjs, node scripts/scope-check.mjs --arch --plan=plans/497-run-the-project-rule-checks-on-every-pull-request-and-clean-up-merged-branches.plan.md, node scripts/log-que"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-10-27T13:36:11.936Z",
+      "plan": "419",
+      "text": "starts on the judgment tier: Architecture Impact names INV-6"
+    },
+    {
+      "at": "2026-10-27T13:36:12.111Z",
+      "plan": "412",
+      "text": "starts on the judgment tier: Architecture Impact names INV-6, INV-2, INV-3, INV-4"
+    },
+    {
+      "at": "2026-10-27T13:36:12.180Z",
+      "plan": "497",
+      "text": "starts on the judgment tier: Architecture Impact names INV-6, INV-1, INV-2, INV-3, INV-4, INV-5"
+    },
+    {
+      "at": "2026-10-27T15:01:36.257Z",
+      "plan": "419",
+      "text": "environment failure (gate env-fail: node scripts/scope-check.mjs --drift --plan=plans/419-bring-initial-bundle-back-under-its-size-budget.plan.md, node scripts/log-query.mjs --since=plan-start --level=error); the environment check passed, retried once without a fix round"
+    },
+    {
+      "at": "2026-10-27T15:16:41.347Z",
+      "plan": "497",
+      "text": "escalated to a fresh judgment-tier builder (round 2): gate: npm run test, npm run lint:icons, npm run lint:no-native-select, node scripts/plan-ledger-check.mjs, node scripts/kit-manifest-check.mjs, node scripts/breadcrumbs-check.mjs, node --test scripts/test/ci-scope-check.test.mjs, node scripts/scope-check.mjs --arch --plan=plans/497-run-the-project-rule-checks-on-every-pull-request-and-cl"
+    },
+    {
+      "at": "2026-10-27T15:28:19.625Z",
+      "plan": "412",
+      "text": "D1 behaviour: mapped the screenshot's gemini-3-flash 20 to gemini-3-flash-preview, the chain's name for it. To reverse, drop that line from MODEL_DAILY_BUDGETS."
+    },
+    {
+      "at": "2026-10-27T15:28:29.091Z",
+      "plan": "412",
+      "text": "D2 behaviour: The Done-when rg check ('no matches in server src') still hits ai-eval-recipes.js and the tests. I kept those matches: the probe needs the deprecated names to show the auto-routing, and the tests need them to prove stale chains are skipped. To reverse it, remove the two names from the probe candidate list and rename the test fixtures."
+    },
+    {
+      "at": "2026-10-27T15:28:37.232Z",
+      "plan": "412",
+      "text": "D3 behaviour: gemini-3-flash-preview budget set to 20, taken from the screenshot's gemini-3-flash row, as the readiness answer instructed."
+    },
+    {
+      "at": "2026-10-27T15:28:46.281Z",
+      "plan": "412",
+      "text": "D4 seen: the worktree C:/coding projects/Cursor/foodVibe1.0-orch-run-412-497-412 was created without node_modules, so the scope-guard hook (scripts/scope-check.mjs, needs picomatch) blocks every Edit until npm ci finishes. Worktree setup should install dependencies."
+    },
+    {
+      "at": "2026-10-27T15:28:54.134Z",
+      "plan": "412",
+      "text": "D5 seen: server/test/business-stats.test.js and server/test/admin-businesses.test.js fail intermittently in a full  cd server; npm test  run (E11000 dup key on foodvibe_test.users). The shared test DB is likely hit by concurrent worktree runs. Both pass alone."
+    },
+    {
+      "at": "2026-10-27T15:29:02.686Z",
+      "plan": "412",
+      "text": "D6 seen:  ng test  through karma does not exit by itself under --watch=false --browsers=ChromeHeadless on this machine. It prints the TOTAL line and then hangs."
+    },
+    {
+      "at": "2026-10-27T15:29:10.395Z",
+      "plan": "412",
+      "text": "D7 Frontend test and build checks ran because the frontend files from fe266724 are part of this branch."
+    },
+    {
+      "at": "2026-10-27T15:29:17.848Z",
+      "plan": "412",
+      "text": "D8 Ran each command from C:/coding projects/Cursor/foodVibe1.0-orch-run-412-497-412 via Bash with output redirected to the temp folder."
+    },
+    {
+      "at": "2026-10-27T15:29:25.785Z",
+      "plan": "412",
+      "text": "D9 npm run build: background run bhgwv0glk completed with exit code 0."
+    },
+    {
+      "at": "2026-10-27T15:29:35.423Z",
+      "plan": "412",
+      "text": "D10 npm run lint: exit 0 in the foreground."
+    },
+    {
+      "at": "2026-10-27T15:29:44.105Z",
+      "plan": "412",
+      "text": "D11 npm run test: started as background run b2pijnvx3 and had not exited after roughly four minutes with empty output. Waiting needs a Monitor until-loop, which is not available to this role, and I did not start a second copy. The test result is unknown and needs a rerun or a check of that task. Marked env-fail as a placeholder, not as a confirmed environment failure, and not r"
+    },
+    {
+      "at": "2026-10-27T15:29:52.209Z",
+      "plan": "412",
+      "text": "D12 pass is false because the test result is not confirmed as pass."
+    },
+    {
+      "at": "2026-10-27T15:30:02.002Z",
+      "plan": "419",
+      "text": "D13 behaviour: the confirm popup and the toast are now mounted on first use, with the chunk prefetched on idle. They look the same, and the first use is instant once idle prefetch finished. To reverse, restore the eager <app-confirm-modal /> and <app-user-msg /> in app.component.html."
+    },
+    {
+      "at": "2026-10-27T15:30:09.449Z",
+      "plan": "419",
+      "text": "D14 behaviour: the confirm popup and message toast load on idle or when first needed, not at startup. To reverse, remove the @defer wrappers in app.component.html."
+    },
+    {
+      "at": "2026-10-27T15:30:18.951Z",
+      "plan": "419",
+      "text": "D15 A4 not used: the budget stays at 560 kB. The build warning is gone and the shell gets no more trimming without visible changes, which the plan forbids. The reason is in the plan's Execution Notes. To reverse it, raise maximumWarning in angular.json per A4."
+    },
+    {
+      "at": "2026-10-27T15:30:28.827Z",
+      "plan": "419",
+      "text": "D16 Header, tab-chips, scroll-rail, hero-fab and loader are on screen at first paint, so I deferred nothing in them. Header menus are plain markup in the same component, so a @defer would create no chunk."
+    },
+    {
+      "at": "2026-10-27T15:30:38.075Z",
+      "plan": "419",
+      "text": "D17 seen: src/app/core/components/header/header.component.spec.ts:50 - first describe used the real UserService, so a user left in sessionStorage by another spec made 'should have 4 navigation links' fail. I fixed it by stubbing a guest user (in scope, header/**)."
+    },
+    {
+      "at": "2026-10-27T15:30:45.907Z",
+      "plan": "419",
+      "text": "D18 seen: src/app/pages/product-form (ProductFormComponent specs 'Special purchase price on save' and 'Lean entry (plan 438)') timed out at 5 s in one full test run under load, and passed on rerun. This looks like a flaky timeout."
+    },
+    {
+      "at": "2026-10-27T15:30:56.246Z",
+      "plan": "419",
+      "text": "D19 Commands 1-3 ran in order from C:/coding projects/Cursor/foodVibe1.0-orch-run-412-497-419 with output redirected to /tmp/tmp.QuEBpPPutA/out{1,2,3}.txt. The shell ran them through a single background loop, so the runner waited on each output file."
+    },
+    {
+      "at": "2026-10-27T15:31:06.233Z",
+      "plan": "419",
+      "text": "D20 npm run test reported 2 FAILED of 1595 in its TOTAL line, so it is recorded as fail even though its exit code was not observed. Its process did not exit after reporting TOTAL."
+    },
+    {
+      "at": "2026-10-27T15:31:14.173Z",
+      "plan": "419",
+      "text": "D21 Commands 4 and 5 were not executed because the chained loop never reached them. They are recorded as env-fail with no output, not as pass or fail. The runner did not kill the hung test process."
+    },
+    {
+      "at": "2026-10-27T15:31:22.927Z",
+      "plan": "419",
+      "text": "D22 No command was retried, and no files were edited."
+    },
+    {
+      "at": "2026-10-27T15:31:31.862Z",
+      "plan": "419",
+      "text": "D23 A4 not used: the angular.json budget stays at 560 kB. 7.9 kB of headroom remains and the 550 kB target is missed by 2.1 kB. Reaching 550 kB would need a visible change."
+    },
+    {
+      "at": "2026-10-27T15:31:40.132Z",
+      "plan": "419",
+      "text": "D24 seen: src/app/core/components/header/header.component.spec.ts had an order-dependent failure. The real UserService read an owner left in sessionStorage by an earlier spec, so 'should have 4 navigation links' got 5. I stubbed UserService as a guest in that describe, inside the header scope."
+    },
+    {
+      "at": "2026-10-27T15:31:49.019Z",
+      "plan": "419",
+      "text": "D25 Ran all five commands in the given folder in order, output redirected to /tmp/tmp.4RjDGQ34rR/N.log."
+    },
+    {
+      "at": "2026-10-27T15:31:57.986Z",
+      "plan": "419",
+      "text": "D26 The npm run test process was moved to background by the tool; its log shows the Karma summary (1 FAILED, 1594 SUCCESS) but no EXIT line, so its exit code was not captured. Recorded as fail on the evidence; not retried."
+    },
+    {
+      "at": "2026-10-27T15:32:05.920Z",
+      "plan": "419",
+      "text": "D27 log-query failure is a missing plan-start marker, not an environment problem, so it is a fail and not an env-fail; not rerun."
+    },
+    {
+      "at": "2026-10-27T15:32:13.692Z",
+      "plan": "419",
+      "text": "D28 No env-fail results, so no reruns were done. Nothing edited. Build and lint passed; pass is false because test, scope-check and log-query did not pass."
+    },
+    {
+      "at": "2026-10-27T15:32:23.384Z",
+      "plan": "419",
+      "text": "D29 Moved the plan's Snapshot to 30475411 instead of re-running Step 0: Step 0 (the re-measure) was already recorded in Execution Notes, and no commit touches the plan's scope on origin/main since. To reverse, restore Snapshot: b81cb1f4858b4ae86e97b382cf931bd9ca4445f4."
+    },
+    {
+      "at": "2026-10-27T15:32:34.508Z",
+      "plan": "419",
+      "text": "D30 Created .claude/.slot-plan-start locally (gitignored, normally written by take-plan) so log-query could run. It still exits 1 because this worktree's .env has no Mongo URI, so the log-query check needs an environment with a database."
+    },
+    {
+      "at": "2026-10-27T15:32:45.842Z",
+      "plan": "419",
+      "text": "D31 seen: scripts/scope-check.mjs --drift reports drift forever after Step 0 unless the Snapshot line is refreshed. The orchestrator should refresh the Snapshot, or the gate should skip the drift check, once Step 0 is logged."
+    },
+    {
+      "at": "2026-10-27T15:32:53.575Z",
+      "plan": "497",
+      "text": "D32 behaviour: AI product modal base-unit dropdown now uses app-custom-select with the same behaviour as the native select (choosing a unit calls setDraftField('baseUnit'), cancel discards the draft, no add-option row). To reverse: restore the native select from git history."
+    },
+    {
+      "at": "2026-10-27T15:33:02.534Z",
+      "plan": "497",
+      "text": "D33 kit-synced files in docs/workflow-kit/manifest.json were classified project/stay with a note, after re-running the check, because 89 files were unclassified rather than the 56 in the plan snapshot."
+    },
+    {
+      "at": "2026-10-27T15:33:14.186Z",
+      "plan": "497",
+      "text": "D34 S6: the repo-setting command was denied twice by the classifier, so only the doc part is in docs/agent/standards-git.md. Run it yourself: GITHUB_TOKEN= gh api -X PATCH repos/WDD-CODER/foodVibe1.0 -f delete_branch_on_merge=true"
+    },
+    {
+      "at": "2026-10-27T15:33:24.218Z",
+      "plan": "497",
+      "text": "D35 S7 and the three GitHub-only [human] checks are left unticked for the Human, per the readiness answers."
+    },
+    {
+      "at": "2026-10-27T15:33:32.970Z",
+      "plan": "497",
+      "text": "D36 Run was incomplete. Commands 1-2 (build, lint) exited 0. Command 3 (npm run test) never returned an exit code; it was still running after more than 10 minutes with output stalled at the bundle step. Recorded as fail because no exit 0 was observed. Not retried, per the no-retry rule."
+    },
+    {
+      "at": "2026-10-27T15:33:42.021Z",
+      "plan": "497",
+      "text": "D37 Commands 4-11 (lint:icons, lint:no-native-select, plan-ledger-check, kit-manifest-check, breadcrumbs-check, ci-scope-check test, scope-check --arch for plan 497, log-query) were not run because the sequential loop was blocked at command 3. They are unreported, not passed."
+    },
+    {
+      "at": "2026-10-27T15:33:50.921Z",
+      "plan": "497",
+      "text": "D38 The sequential loop was started in the background and its temp logs are under /tmp/tmp.HDdKl1mmi5/. Its process may still be running and should be stopped before rerunning the gate."
+    },
+    {
+      "at": "2026-10-27T15:33:59.170Z",
+      "plan": "497",
+      "text": "D39 Pass is false because the gate did not complete all commands and was not all pass."
+    },
+    {
+      "at": "2026-10-27T15:34:08.753Z",
+      "plan": "497",
+      "text": "D40 seen: package.json:14  test  script is watch-mode  ng test , so the gate's  npm run test  cannot finish unattended; the gate should use  npx ng test --watch=false --browsers=ChromeHeadless  as ci.yml:114 does. package.json is outside this plan's scope, so I did not change it."
+    },
+    {
+      "at": "2026-10-27T15:34:17.630Z",
+      "plan": "497",
+      "text": "D41 seen: header.component.spec.ts:55 ('should have 4 navigation links', got 6) and two product-form specs (5000ms timeouts) failed once in a full-suite run and passed on rerun; likely order or load flakiness, not caused by this plan."
+    },
+    {
+      "at": "2026-10-27T15:34:29.196Z",
+      "plan": "497",
+      "text": "D42 seen: the  log-query --since=plan-start  check needs  .claude/.slot-plan-start  and a MongoDB URI in  .env ; neither exists in an orchestrator worktree."
+    },
+    {
+      "at": "2026-10-27T15:34:37.559Z",
+      "plan": "497",
+      "text": "D43 Ran commands 1-3 in order from C:/coding projects/Cursor/foodVibe1.0-orch-run-412-497-497, output redirected to /tmp/tmp.WkcrncgHvH/cmd1.log to cmd3.log."
+    },
+    {
+      "at": "2026-10-27T15:34:46.245Z",
+      "plan": "497",
+      "text": "D44 npm run test reported TOTAL: 7 FAILED, 1590 SUCCESS, but the process did not exit after reporting (log last written 16:54, still no exit code 20+ minutes later), so its exit code was not captured. Recorded as fail based on the reported failures."
+    },
+    {
+      "at": "2026-10-27T15:34:55.527Z",
+      "plan": "497",
+      "text": "D45 Commands 4-11 (npm run lint:icons, lint:no-native-select, plan-ledger-check, kit-manifest-check, breadcrumbs-check, ci-scope-check test, scope-check --arch, log-query) were NOT run to completion. They are omitted from results rather than reported as pass or fail."
+    },
+    {
+      "at": "2026-10-27T15:35:03.744Z",
+      "plan": "497",
+      "text": "D46 I tried to stop the hung test process and run commands 4-11 separately. That action was denied by the auto-mode permission classifier (Interfere With Workloads), so I did not retry it. Background task b4vz7p4cn may still be running and holding the gate sequence."
+    },
+    {
+      "at": "2026-10-27T15:35:12.679Z",
+      "plan": "497",
+      "text": "D47 No command was retried, no flags were added, and no files were edited. Escalating: the test run hangs after reporting 7 failures, and the user needs to decide whether to stop the hung process and rerun commands 4-11."
+    },
+    {
+      "at": "2026-10-27T15:35:22.397Z",
+      "plan": "497",
+      "text": "D48 seen: package.json:14  test  script is watch-mode  ng test , so  npm run test  never exits on its own and runs in a windowed Chrome where the 7 failures appeared. The gate should run  npx ng test --watch=false --browsers=ChromeHeadless , as CI does. package.json is outside this plan's scope, so I left it unchanged."
+    },
+    {
+      "at": "2026-10-27T15:35:30.866Z",
+      "plan": "497",
+      "text": "D49 seen:  log-query --since=plan-start  cannot pass in an orchestrator worktree (no .claude/.slot-plan-start, no .env). The gate should treat it as an environment failure."
+    },
+    {
+      "at": "2026-10-27T15:35:38.946Z",
+      "plan": "497",
+      "text": "D50 S6 (delete_branch_on_merge command) is not run: the permission classifier denied it earlier. Human runs  GITHUB_TOKEN= gh api -X PATCH repos/WDD-CODER/foodVibe1.0 -f delete_branch_on_merge=true . The doc part of S6 is already in docs/agent/standards-git.md. To reverse the setting, run the same command with  -f delete_branch_on_merge=false ."
+    },
+    {
+      "at": "2026-10-27T15:35:48.730Z",
+      "plan": "497",
+      "text": "D51 Gate run is incomplete: the 11-command loop was auto-backgrounded (ID boc26047w) after exceeding the 120s tool timeout. Commands 1 and 2 are confirmed exit 0. Command 3 (npm run test) was still running at last check, and commands 4-11 have not started or reported. A waiter (ID by6xmy0ht) was started to block until the loop prints its line for command 11, but its result was "
+    },
+    {
+      "at": "2026-10-27T15:35:57.974Z",
+      "plan": "497",
+      "text": "D52 No command was retried or edited. Output logs are under /tmp/tmp.DRmTGP6eLD/ (out1.txt, out2.txt, out3.txt, ...)."
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "lastStartedAt": "2026-10-27T13:35:07Z",
+  "freeDiskGb": 33.6,
+  "updatedAt": "2026-10-27T15:36:09.344Z",
+  "stopReason": "wave 1 parked 412, 419, 497 — later waves not started",
+  "finishedAt": "2026-10-27T15:36:09.343Z"
+}
