@@ -53,6 +53,28 @@
   body to a file, then `gh api -X PATCH repos/<owner>/<repo>/pulls/<n> -F body=@<file>` (`-f title=<title>` for the
   title). The same call works for an issue: `repos/<owner>/<repo>/issues/<n>`.
 
+### Pull-request checks and branch clean-up (plan 497)
+
+* **`rules` check** (`.github/workflows/rules.yml`, runs on every PR and every push to `main`, not skipped for docs-only
+  changes): `npm run lint:icons`, `npm run lint:no-native-select`, `node scripts/plan-ledger-check.mjs`,
+  `node scripts/kit-manifest-check.mjs`, `node scripts/breadcrumbs-check.mjs`, and on PRs
+  `node scripts/ci-scope-check.mjs`. Run the same commands locally before a PR; a red `rules` check names the file in
+  its log.
+* **Scope check:** a `feat/NNN-*` branch is held to its `plans/NNN-*.plan.md` `## Read-Write Scope` (`scope-check.mjs
+  --diff` against the PR base). Any other branch name is skipped. An out-of-scope file is added to the plan's scope
+  block with the Human's `approved: <path>`, or dropped.
+* **Not required yet.** Neither `ci` nor `rules` is a required check on `main`; making them required is a Human decision
+  after a week of green runs. `ci.yml`, `security.yml`, `todo-sync.yml` and `brain-capture-reminder.yml` are kit-owned;
+  `rules.yml` and `stale-branches.yml` are project-only (not in the kit).
+* **Merged branches delete themselves** once the repo setting "Automatically delete head branches"
+  (`delete_branch_on_merge`) is on. The Human sets it once:
+  `GITHUB_TOKEN= gh api -X PATCH repos/<owner>/<repo> -f delete_branch_on_merge=true`; check it with
+  `GITHUB_TOKEN= gh api repos/<owner>/<repo> --jq .delete_branch_on_merge` (expect `true`). It only removes the
+  branch of a merged PR, so a branch merged without a PR still needs `git push origin --delete <branch>`.
+* **Weekly stale-branch report.** `.github/workflows/stale-branches.yml` (Mondays 06:00 UTC, or Actions tab, Run
+  workflow) creates or updates one issue titled "Stale branches" that lists unmerged branches with no commit for 30+
+  days. It never deletes anything.
+
 ---
 
 ## Post-push Merge Gate (mandatory)

@@ -2277,6 +2277,12 @@
           "strings": [
             "wt-n"
           ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4200"
+          ]
         }
       ],
       "refs": [
@@ -3769,8 +3775,21 @@
     {
       "path": "scripts/plan-name-similarity.mjs",
       "tier": "core",
-      "action": "copy",
-      "params": [],
+      "action": "parameterize",
+      "params": [
+        {
+          "key": "paths.serverRoot",
+          "strings": [
+            "server/routes/foo.js"
+          ]
+        },
+        {
+          "key": "paths.srcRoot",
+          "strings": [
+            "src/app/foo"
+          ]
+        }
+      ],
       "refs": [],
       "notes": "Plan-name collision check used by save-plan."
     },
@@ -4911,6 +4930,762 @@
       "tier": "core",
       "action": "copy",
       "notes": "Kit 1.0.5: runs the session-manifest hook with the first working python3/python/py, else a quiet no-op."
+    },
+    {
+      "path": ".claude/agents/kit-prevalidate.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/kit-runner.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-builder.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-check-bugs.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-check-plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-check-rules.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-gate.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-merge.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-readiness.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-report.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-security.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-ui.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/orch-verify.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/commands/kit-feedback.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/commands/orchestrate.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/workflows/orchestrate.js",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/agent-evals.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/agent-roles.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/decision-review.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/model-routing.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/orchestrator.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/standards-reuse.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe reuse standard (plan 4xx reuse layer, ADR 0024): decision ladder before any new component, util, pipe, service or .c-* class."
+    },
+    {
+      "path": "docs/brain/agent-rules.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit seed (.kit/install.json, kit 1.7.1): installed once, then owned by FoodVibe."
+    },
+    {
+      "path": "docs/brain/component-families.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe component-family registry read by reuse-lint and reuse-check (ADR 0024)."
+    },
+    {
+      "path": "docs/brain/decision-log.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit seed (.kit/install.json, kit 1.7.1): installed once, then owned by FoodVibe."
+    },
+    {
+      "path": "docs/brain/decisions/0022-soft-delete-user-prefs.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0022 (soft delete of user preferences)."
+    },
+    {
+      "path": "docs/brain/decisions/0023-business-is-the-tenant.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0023 (the business is the tenant)."
+    },
+    {
+      "path": "docs/brain/decisions/0024-reuse-layer.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0024 (reuse layer: registry, ladder, lint)."
+    },
+    {
+      "path": "docs/brain/decisions/0025-search-combobox-and-one-multi-pick-base.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0025 (search combobox and one multi-pick base)."
+    },
+    {
+      "path": "docs/brain/decisions/0026-staff-see-events-only-in-the-stages-the-owner-chose.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0026 (staff see events only in the stages the owner chose)."
+    },
+    {
+      "path": "scripts/decision-log.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/kit-feedback.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/done-when.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/guard.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/orch-run.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/plan-deps.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/plan-graph.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/registry-families.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe: parses docs/brain/component-families.md for the reuse tools."
+    },
+    {
+      "path": "scripts/lib/reuse-check.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe: checks a plan's ## Reuse Check section against the family registry."
+    },
+    {
+      "path": "scripts/orch-preflight.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/orch-state.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/plan-order.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/qa/code-qa/api-cases.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/api-fixtures.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/api-layer.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/common.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/findings.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/gates.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/plan-checks.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/rotation.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/run.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/code-qa/static-checks.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/lib/qa-login.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA: logs in with the QA account from .env."
+    },
+    {
+      "path": "scripts/qa/qa-code-merge.ps1",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA run: merges the QA findings branch."
+    },
+    {
+      "path": "scripts/reuse-lint.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe: lints a diff for new components, utils and .c-* classes that skip the reuse ladder."
+    },
+    {
+      "path": "scripts/rule-sweep-count.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe: counts hard-rule violations across the repo for the rule sweep."
+    },
+    {
+      "path": "scripts/test/code-qa-api.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe script test (node --test) for the code-QA tool."
+    },
+    {
+      "path": "scripts/test/code-qa-findings.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe script test (node --test) for the code-QA tool."
+    },
+    {
+      "path": "scripts/test/code-qa-rotation.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe script test (node --test) for the code-QA tool."
+    },
+    {
+      "path": "scripts/test/code-qa-static.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe script test (node --test) for the code-QA tool."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/api/docs/qa/code-qa-api-cases.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/app/docs/qa/code-qa-pages.json",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/app/docs/qa/qa-plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/app/public/assets/data/dictionary.json",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/app/src/app/app.routes.ts",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/app/src/app/pages/home/home.page.html",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/app/src/app/pages/home/home.page.scss",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/app/src/app/pages/home/home.page.ts",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/app/tsconfig.json",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/rotation/repo/docs/qa/code-qa-pages.json",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/rotation/repo/docs/qa/qa-plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/code-qa/rotation/reviews/review-RB.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the code-QA script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/100-grandfathered.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/500-empty.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/500-filled.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/500-missing.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/500-none.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/500-rung4-no-why.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/500-table.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/500-template.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/500-unknown-family.plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/clean.diff",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/combobox.diff",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/engine-class.diff",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/mixed.diff",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/registry-broken.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/registry.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/reuse-check.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe script test (node --test) for the reuse tools."
+    },
+    {
+      "path": "scripts/test/reuse-lint.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe script test (node --test) for the reuse tools."
+    },
+    {
+      "path": ".github/workflows/rules.yml",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/ci-scope-check.mjs",
+        "scripts/check-lucide-icons.mjs",
+        "scripts/check-no-native-select.mjs",
+        "scripts/plan-ledger-check.mjs",
+        "scripts/kit-manifest-check.mjs",
+        "scripts/breadcrumbs-check.mjs"
+      ],
+      "notes": "Plan 497: runs the project rule checks (icons, native select, plan ledger, kit manifest, breadcrumbs, Worker-branch scope) on every PR and push to main. FoodVibe-only; sharing it with other kit projects is a separate kit plan."
+    },
+    {
+      "path": ".github/workflows/stale-branches.yml",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Plan 497: weekly report-only issue \"Stale branches\" (unmerged, no commit for 30+ days); deletes nothing."
+    },
+    {
+      "path": "scripts/ci-scope-check.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/scope-check.mjs",
+        "scripts/lib/plan-paths.mjs"
+      ],
+      "notes": "Plan 497: CI wrapper that maps a feat/NNN-* head branch to its plan and runs scope-check --diff against the PR base; other branch names are skipped."
+    },
+    {
+      "path": "scripts/test/ci-scope-check.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [
+        "scripts/ci-scope-check.mjs"
+      ],
+      "notes": "Plan 497: node tests for scripts/ci-scope-check.mjs (in scope, out of scope, skipped branch)."
     }
   ]
 }

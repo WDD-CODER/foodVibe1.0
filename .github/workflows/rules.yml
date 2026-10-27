@@ -1,0 +1,45 @@
+name: rules
+
+# The project's own rule checks, on every pull request and every push to main.
+# Not behind ci.yml's docs-only skip: the ledger, manifest and breadcrumbs checks matter
+# exactly for docs / plans / .claude changes, and each check takes seconds.
+# No MongoDB, Atlas or running app is needed. Read-only: contents: read, no secrets.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install script dependencies (picomatch for scope-check)
+        run: npm ci --prefix scripts
+      - name: Lucide icons are registered
+        run: npm run lint:icons
+      - name: No native select
+        run: npm run lint:no-native-select
+      - name: Plan ledger
+        run: node scripts/plan-ledger-check.mjs
+      - name: Kit manifest
+        run: node scripts/kit-manifest-check.mjs
+      - name: Breadcrumbs
+        run: node scripts/breadcrumbs-check.mjs
+      # A Worker branch (feat/NNN-*) may only change files inside its plan's Read-Write Scope.
+      # The head branch name is untrusted input: it goes through env, never into the run line.
+      - name: Plan scope (Worker branches)
+        if: github.event_name == 'pull_request'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/ci-scope-check.mjs --checkout-branch
