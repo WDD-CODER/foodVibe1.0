@@ -1,6 +1,6 @@
 # Plan 423 — Give each product its own weight for its purchase units
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: 8d7997e5b732007392f50cc07f40b2aa430f37d6
 
@@ -64,16 +64,16 @@ every calculation; the unit window never writes a number into a unit field.
 - [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 - [x] [auto] `node server/scripts/check-unit-weights.js --target=local` exits 0 and prints the three sections of the
   Design (`uom differs`, `copied from shared`, `recipe lines on a unit the product lacks`) with a count each.
-- [human] The Human runs `node server/scripts/check-unit-weights.js --target=atlas` (agents may not read
+- [x] [human] The Human runs `node server/scripts/check-unit-weights.js --target=atlas` (agents may not read
   production) and reviews the lists. A non-zero `uom differs` line means those products' costs will change after
   the merge (they were wrong) — the Human decides before merge.
-- [human] `/inventory`: yellow onion → «הוסף יחידת רכש» → «הוסף יחידה חדשה» "צנצנת" = 500 גרם → save. Pickles →
+- [x] [human] `/inventory`: yellow onion → «הוסף יחידת רכש» → «הוסף יחידה חדשה» "צנצנת" = 500 גרם → save. Pickles →
   «הוסף יחידת רכש» → choose "צנצנת" → the amount is empty; type 350 → save. Reopen both: onion shows 500, pickles 350.
-- [human] A recipe with 1 צנצנת onion and 1 צנצנת pickles → the weight shows 850 g and each line's cost matches
+- [x] [human] A recipe with 1 צנצנת onion and 1 צנצנת pickles → the weight shows 850 g and each line's cost matches
   its own product.
-- [human] In the recipe builder, add "צנצנת" to a third product from its line's unit list → the window asks
+- [x] [human] In the recipe builder, add "צנצנת" to a third product from its line's unit list → the window asks
   «כמה שוקלת צנצנת אחת של <product>?» before saving.
-- [human] `/inventory/add`: base unit → «הוסף יחידה חדשה» → «ביטול» → the base unit still shows what it showed
+- [x] [human] `/inventory/add`: base unit → «הוסף יחידה חדשה» → «ביטול» → the base unit still shows what it showed
   before; repeat and add a unit → the new unit is selected; the product saves.
 
 ## Execution Mode
@@ -200,7 +200,7 @@ Exit 0 always (it is a report, not a gate).
 - [x] Adding a unit to a product anywhere asks that product's amount; an existing unit name never skips it.
 - [x] Choosing an existing custom unit in a purchase row does not pre-fill another product's number.
 - [x] The unit window never writes a number into a unit field; cancel restores the previous unit.
-- [ ] Read-only check of existing products and recipe lines, local and Atlas.
+- [x] Read-only check of existing products and recipe lines, local and Atlas.
 
 ### Won't Have (this plan)
 - Removing the shared `gramRate` from unit terms (schema change, INV-4/INV-5).
@@ -213,7 +213,7 @@ Exit 0 always (it is a report, not a gate).
 - [x] U3: Make the product form use this product's own number for every purchase unit — product-mode add, no shared pre-fill for custom units, pickNewUnit_ replaces the close effect (INVF-C06), specs — src/app/pages/inventory/components/product-form/**
 - [x] U4: Ask the product's own weight when a unit is added from a recipe line or cook view — product mode, save the typed amount, drop the shared-rate math, specs — recipe-ingredients-table.component.ts, cook-view.page.ts and their specs
 - [x] U5: Add a read-only check that lists products and recipe lines the old behavior may have got wrong — three sections, local and Atlas — server/scripts/check-unit-weights.js
-- [ ] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
+- [x] U6: Build, test, run the local check and hand you the Atlas check and the onion/pickles checks — ng build, the listed specs, log-query, check script on local; Human runs Atlas and the four app checks — this plan file
 
 ## Technical Considerations
 - Dependencies: `toObservable` from `@angular/core/rxjs-interop` (already used in the app).
