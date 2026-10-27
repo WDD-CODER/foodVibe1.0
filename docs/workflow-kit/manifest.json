@@ -4028,24 +4028,6 @@
       "notes": "SessionStart hook; no stack terms found."
     },
     {
-      "path": "scripts/session-state-path.mjs",
-      "tier": "core",
-      "action": "copy",
-      "params": [
-        {
-          "key": "git.mainBranch",
-          "strings": [
-            "origin/main"
-          ]
-        }
-      ],
-      "refs": [
-        "docs/session-state.md",
-        "plans/326-planner-worker-workflow.plan.md"
-      ],
-      "notes": "Resolves docs/session-state-<branch>.md path."
-    },
-    {
       "path": "scripts/ship-prep.mjs",
       "tier": "core",
       "action": "parameterize",
@@ -4208,24 +4190,6 @@
         "package.json"
       ],
       "notes": "One-off FoodVibe data/DB tooling (Mongo/Atlas, labels, recipes). Never part of the kit."
-    },
-    {
-      "path": "scripts/write-session-state.mjs",
-      "tier": "core",
-      "action": "copy",
-      "params": [
-        {
-          "key": "git.mainBranch",
-          "strings": [
-            "origin/main"
-          ]
-        }
-      ],
-      "refs": [
-        ".claude/commands/ship.md",
-        "plans/324-ship-prep-and-write-session-state-scripts.plan.md"
-      ],
-      "notes": "Writes session state."
     },
     {
       "path": "server/package.json",
