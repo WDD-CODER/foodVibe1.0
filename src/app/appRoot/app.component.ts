@@ -43,6 +43,8 @@ import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
 import { GlobalSpecificModalService } from '@services/global-specific-modal.service'
 import { RestoreChoiceModalService } from '@services/restore-choice-modal.service'
 import { AuthModalService } from '@services/auth-modal.service'
+import { ConfirmModalService } from '@services/confirm-modal.service'
+import { UserMsgService } from '@services/user-msg.service'
 import { AppUpdateService } from '@services/app-update.service'
 import { UpdateBannerComponent } from '../core/components/update-banner/update-banner.component'
 import { KeyboardInsetService } from '@services/keyboard-inset.service'
@@ -99,6 +101,8 @@ export class AppComponent {
   protected readonly restoreChoiceModal = inject(RestoreChoiceModalService)
   protected readonly authModal = inject(AuthModalService)
   protected readonly appUpdate = inject(AppUpdateService)
+  protected readonly confirmModal = inject(ConfirmModalService)
+  protected readonly userMsg = inject(UserMsgService)
 
   protected isRouteLoading = signal(false)
   protected isDataReloading_ = this.userService.isDataReloading_
