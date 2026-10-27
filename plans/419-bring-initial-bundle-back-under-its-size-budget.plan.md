@@ -113,9 +113,9 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Re-measure be
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Measure what fills the first download and pick what to cut — stats-json breakdown, top 15 and chosen cuts in Execution Notes — angular.json (read), build output
-- [ ] A2: Load the header's click-only parts on first use instead of at startup — @defer / lazy pieces, unused imports removed — src/app/core/components/header/**
-- [ ] A3: Trim the other always-on shell parts and unused icons — tab-chips, scroll-rail, hero-fab, Lucide pick — src/app/core/components/tab-chips/**, hero-fab/**, src/app/shared/scroll-rail/**, src/app/app.config.ts
+- [x] A1: Measure what fills the first download and pick what to cut — stats-json breakdown, top 15 and chosen cuts in Execution Notes — angular.json (read), build output
+- [x] A2: Load the header's click-only parts on first use instead of at startup — @defer / lazy pieces, unused imports removed — src/app/core/components/header/**
+- [x] A3: Trim the other always-on shell parts and unused icons — tab-chips, scroll-rail, hero-fab, Lucide pick — src/app/core/components/tab-chips/**, hero-fab/**, src/app/shared/scroll-rail/**, src/app/app.config.ts
 - [ ] A4: Raise the warning budget on purpose only if trimming was not enough — new value + one-line reason — angular.json
 
 ## Out of Scope
@@ -127,3 +127,8 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Re-measure be
 
 ## Execution Notes
 - Orchestrator readiness (2026-10-27): no questions. Re-measured on main: Initial total 564.41 kB (budget 560 kB, over by 4.41 kB), so the ≤ 550 kB target needs about 14.4 kB of trimming. The [human] check stays unticked for the Human.
+- A1 measure (`ng build --stats-json`, initial chunk = main + its static imports, 50 chunks, 458.5 kB of JS inputs). Top 15: @angular/core 135.8, @angular/router 70.1, @angular/common 37.5, lucide-angular 24.5, rxjs 24.5, header.component.ts 20.4, @angular/platform-browser 14.9, kitchen-state.service 11.7, user.service 7.1, scroll-rail 5.9, translation.service 5.4, hero-fab 5.3, @angular/service-worker 5.1, unit-registry.service 4.9, loader 4.8. Chosen cuts: defer the confirm popup and the message toast (prefetch on idle), drop picked icons no template uses.
+- A2/A3 done (commit caa41bcb plus this round): `app.component.html` defers `<app-confirm-modal />` and `<app-user-msg />` with `@defer (when ...; prefetch on idle)`; `app.config.ts` drops the unused `FilePlus` and `CalendarDays` icons; `app.component.spec.ts` covers both. Header: every part is on screen at first paint (menus are plain markup in the same component, no chunk to split), so nothing deferred; no unused imports or CSS classes found. Tab-chips / scroll-rail / hero-fab are on screen at first paint, left as is. A strict search finds no other unused picked icon.
+- A4 not used: `angular.json` budget stays 560 kB. Result: `npm run build` -> exit 0, `Initial total 552.10 kB`, no `bundle initial exceeded maximum budget` warning (7.9 kB headroom). The 550 kB target is missed by 2.1 kB: the rest of the weight is framework code and always-visible shell, and cutting it would need a visible change (plan forbids).
+- Spec fix: `header.component.spec.ts` first describe now stubs `UserService` as a guest; the real service read an owner left in sessionStorage by an earlier spec, so "should have 4 navigation links" got 5 (order-dependent).
+- Checks: `npm run lint` -> exit 0 (0 errors); `npm run test -- --watch=false --browsers=ChromeHeadless` -> exit 0, 1595 SUCCESS (one earlier run had 2 ProductForm 5 s timeouts under load, rerun passed); `node scripts/log-query.mjs --since=plan-start --level=error` could not run here (no `.slot-plan-start`, no Mongo URI in the worktree `.env`) - environment, not a code failure.
