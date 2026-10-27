@@ -24,7 +24,18 @@ describe('HeaderComponent', () => {
           { path: 'inventory', redirectTo: '' },
           { path: 'recipe-builder', redirectTo: '' },
           { path: 'recipe-book', redirectTo: '' }
-        ])
+        ]),
+        // A stub guest: the real service reads a user left in sessionStorage by an earlier spec, which adds the owner's settings link.
+        {
+          provide: UserService,
+          useValue: {
+            isLoggedIn: () => false,
+            user_: signal(null),
+            isPlatformAdmin_: signal(false),
+            isOwner_: signal(false),
+            logout: () => of(null)
+          }
+        }
       ]
     }).compileComponents()
 
