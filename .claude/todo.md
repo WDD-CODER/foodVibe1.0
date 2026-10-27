@@ -215,3 +215,7 @@
 - [ ] C5: Give every save button one saving state: disabled with a busy label while it runs, enabled again on error — one signal name and one button state; fix the ten screens without a flag — src/styles.scss, the dialogs and tabs in scope
 - [ ] C6: Warn when a native date input, a template `toFixed` or a bare textarea is added, and register the families — `reuse-lint` rules with fixtures; update the `form-field` and `engine-classes` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
 - [ ] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
+
+- [ ] A1: Add a one-shot headless test command so the whole suite can run and exit — new test:ci npm script next to test — package.json
+- [ ] A2: Point the orchestrator's test gate at that command so it stops hanging in watch mode — commands.test becomes test:ci; confirm no other reader expects watch mode — kit.config.json
+- [ ] A3: Prove the gate returns on both a green tree and a deliberately failing spec — run test:ci twice, paste exit codes, revert the failing spec — this plan file
