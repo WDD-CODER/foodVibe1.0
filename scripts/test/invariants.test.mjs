@@ -145,10 +145,10 @@ test('diff warnings: touched invariant without a plan entry', () => {
   assert.deepEqual(diffArchWarnings({ changedFiles: changed, registry, planText: plan(['x'], '- INV-1: preserves — y') }), [])
 })
 
-test('decision-without-adr: only in session-state / plan files, only without INV-n or an ADR', () => {
+test('decision-without-adr: only in plan files, only without INV-n or an ADR', () => {
   const added = parseAddedLines([
-    'diff --git a/docs/session-state-x.md b/docs/session-state-x.md',
-    '+++ b/docs/session-state-x.md',
+    'diff --git a/plans/x.plan.md b/plans/x.plan.md',
+    '+++ b/plans/x.plan.md',
     '@@ -3,0 +4,3 @@',
     '+- Human decision: shared terms admin-only',
     '+- Human decision: keep INV-2 overrides',
@@ -157,7 +157,7 @@ test('decision-without-adr: only in session-state / plan files, only without INV
     '@@ -1,0 +2 @@',
     '+// Human decision in code is ignored'
   ].join('\n'))
-  assert.deepEqual(decisionWithoutAdr(added), ['ARCH: warn decision-without-adr docs/session-state-x.md:4'])
+  assert.deepEqual(decisionWithoutAdr(added), ['ARCH: warn decision-without-adr plans/x.plan.md:4'])
 })
 
 function cli(planPath) {
