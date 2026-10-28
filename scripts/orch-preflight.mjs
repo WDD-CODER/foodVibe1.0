@@ -43,7 +43,7 @@ const MIN_FREE_GB = 5
 const DEV = 'start'
 const PM = 'npm' === 'pnpm' ? 'pnpm' : 'npm'
 // The script the gate runs: commands.testCi when the project set it, else commands.test.
-const TEST_SCRIPT = '' || 'test'
+const TEST_SCRIPT = '' || 'test:ci'
 // A project's own regular expression for its framework's watch-mode test command (orchestrator.watchTestPattern).
 const WATCH_PATTERN = ""
 const LIVE_MS = 2 * 60 * 60 * 1000

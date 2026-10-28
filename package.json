@@ -12,6 +12,7 @@
     "lint:reuse": "node scripts/reuse-lint.mjs",
     "todo": "node scripts/todo-query.mjs",
     "test": "ng test",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
     "test:scripts": "node --test scripts/test/*.test.mjs",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",

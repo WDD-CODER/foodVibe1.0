@@ -10,7 +10,7 @@ Use this path for code cleanup, dead code removal, pattern consolidation, and te
 
 ## Invokes
 
-  (`CI / npm run test` + `pre-commit security grep + CI`). Not an execution dispatcher.
+  (`CI / npm run test:ci` + `pre-commit security grep + CI`). Not an execution dispatcher.
 
 ## Typical flow
 

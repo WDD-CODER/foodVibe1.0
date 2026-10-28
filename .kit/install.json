@@ -133,7 +133,7 @@
       "source": "core/.claude/commands/plan.md"
     },
     ".claude/commands/refactor.md": {
-      "sha256": "4db91eca28541f09c7a4656c5dd6fda2b1ad3ad5637f114cb54792f623109a38",
+      "sha256": "32d1796760e321fafcf31fc1b78478aea95d101a3eaf20242e85680aee3fd4c8",
       "kind": "managed",
       "source": "core/.claude/commands/refactor.md"
     },
@@ -258,7 +258,7 @@
       "source": "packs/angular/.claude/workflows/deploy.yml"
     },
     ".claude/workflows/orchestrate.js": {
-      "sha256": "754c9b676b198717d5ee709934ec32960b65c0427f2545fa7a39f7c47b4918ce",
+      "sha256": "c87f6e0cce5eadce1ec79b31ed77dfc6c785043939bb331cd92bb914295f3f2b",
       "kind": "managed",
       "source": "core/.claude/workflows/orchestrate.js"
     },
@@ -863,7 +863,7 @@
       "source": "core/scripts/next-plan-number.mjs"
     },
     "scripts/orch-preflight.mjs": {
-      "sha256": "e52ea17c3643a82d94998d7284fc7c2fb66899f01186c463abc7ca01502407a4",
+      "sha256": "8e7747e14baabb7b4544214758c7862c4ff04764bf62ef3f12f5c0c582015d0b",
       "kind": "managed",
       "source": "core/scripts/orch-preflight.mjs"
     },

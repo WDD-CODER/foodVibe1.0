@@ -27,7 +27,7 @@ const CONCURRENCY = 2
 const GATE_TIMEOUT_MIN = 15
 // The gate runs commands.testCi when the project set it (a test command that exits), else commands.test: a watch-mode
 // test script prints its totals and never returns.
-const TEST_SCRIPT = "" || "test"
+const TEST_SCRIPT = "" || "test:ci"
 const PROJECT_CHECKS = ["build", "lint", TEST_SCRIPT].filter((s) => typeof s === 'string' && s !== '').map((s) => `${PM} run ${s}`)
 const FAILING = ['blocker', 'major']
 const KEEP_THRESHOLD = 80

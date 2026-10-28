@@ -28,7 +28,7 @@
     "buildProd": "build:render",
     "dev": "start",
     "devLocal": "dev:local",
-    "test": "test",
+    "test": "test:ci",
     "lint": "lint",
     "e2e": "e2e",
     "codegen": "build:schemas",
