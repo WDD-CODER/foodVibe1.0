@@ -139,14 +139,12 @@
     "scripts/session-manifest-hook.py",
     "scripts/session-manifest-ship.py",
     "scripts/session-startup.sh",
-    "scripts/session-state-path.mjs",
     "scripts/ship-prep.mjs",
     "scripts/slot-serve.mjs",
     "scripts/slot-stop.mjs",
     "scripts/take-plan.mjs",
     "scripts/techdebt-report.mjs",
     "scripts/todo-archive.mjs",
-    "scripts/todo-query.mjs",
-    "scripts/write-session-state.mjs"
+    "scripts/todo-query.mjs"
   ]
 }
