@@ -219,3 +219,8 @@
 - [ ] A1: Add a one-shot headless test command so the whole suite can run and exit — new test:ci npm script next to test — package.json
 - [ ] A2: Point the orchestrator's test gate at that command so it stops hanging in watch mode — commands.test becomes test:ci; confirm no other reader expects watch mode — kit.config.json
 - [ ] A3: Prove the gate returns on both a green tree and a deliberately failing spec — run test:ci twice, paste exit codes, revert the failing spec — this plan file
+
+- [ ] A1: Find out whether the unclassified-file failure must be fixed in the kit or can be fixed here — check if the manifest is kit-owned and what the kit's v1.9.0 manifest says — docs/workflow-kit/manifest.json, ../ai-workflow-kit
+- [ ] A2: Make the rules check pass again by classifying the new orchestrator folders helper — through the kit release if kit-owned, else a local override — docs/workflow-kit/manifest.json, kit.config.json
+- [ ] A3: Find why the supplier test fixture lacks the owner fields and bring it in line with the schema — businessId and createdBy; say whether v1.9.0 or an earlier plan caused it — scripts/test/code-qa-api.test.mjs, scripts/test/fixtures/**
+- [ ] A4: Run both checks and the build and paste the results — kit-manifest-check, test:scripts, ng build, arch and reuse gates — this plan file
