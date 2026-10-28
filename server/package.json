@@ -6,12 +6,13 @@
   "engines": {
     "node": ">=22"
   },
+  "packageManager": "pnpm@10.34.6",
   "scripts": {
     "start": "node index.js",
     "dev": "cross-env NODE_ENV=production node --watch index.js",
     "dev:local": "cross-env NODE_ENV=development node --watch index.js",
     "dev:remote": "cross-env NODE_ENV=production node --watch index.js",
-    "pretest": "npm --prefix .. run build:schemas",
+    "pretest": "pnpm --dir .. run build:schemas",
     "test": "vitest run",
     "lint": "eslint app.js db.js index.js logger.js routes services middleware"
   },
@@ -39,5 +40,10 @@
   },
   "allowScripts": {
     "mongodb-memory-server@11.3.0": true
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "mongodb-memory-server"
+    ]
   }
 }

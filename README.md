@@ -2,6 +2,18 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.20.
 
+## Setup (pnpm)
+
+FoodVibe installs with [pnpm](https://pnpm.io) (the version is pinned in `package.json` → `packageManager`). Install pnpm once, then install the app and the server:
+
+```powershell
+npm install -g pnpm@10.34.6
+pnpm install
+pnpm --dir server install
+```
+
+pnpm keeps one shared package store and links each `node_modules` from it. The store must be on the same drive as the project folders (`C:`); on another drive pnpm silently copies instead of linking. The `scripts/` folder (kit-managed) stays on npm: `npm ci --prefix scripts`.
+
 ## Development server
 
 To start a local development server, run:

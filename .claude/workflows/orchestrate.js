@@ -21,7 +21,7 @@ const RUN_PREFIX = "orch/"
 const PILOT_SIZE = 3
 // A checking agent gets at most this many items (docs/agent/agent-roles.md rule 10): the UI validator's cards go in batches.
 const UI_BATCH = 5
-const PM = "npm" === 'pnpm' ? 'pnpm' : 'npm'
+const PM = "pnpm" === 'pnpm' ? 'pnpm' : 'npm'
 // How many builders run at once, and how long one gate command may run (minutes) before the gate stops it.
 const CONCURRENCY = 2
 const GATE_TIMEOUT_MIN = 15

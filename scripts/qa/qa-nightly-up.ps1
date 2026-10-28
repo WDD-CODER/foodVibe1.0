@@ -38,7 +38,7 @@ function Invoke-Step([string] $label, [string] $dir, [string] $exe, [string[]] $
 
 # sha256 of a lockfile, remembered per checkout so npm ci only runs when it changed.
 function Test-LockChanged([string] $dir, [string] $stateName) {
-  $lock = Join-Path $dir 'package-lock.json'
+  $lock = Join-Path $dir 'pnpm-lock.yaml'
   if (-not (Test-Path $lock)) { return $false }
   $state = Join-Path $Root ".claude\$stateName"
   $hash = (Get-FileHash $lock -Algorithm SHA256).Hash
@@ -61,13 +61,13 @@ if ($ff -ne 0) { Write-Log 'not fast-forwardable - continuing on the current tre
 
 $changed = @(@(@($Root, 'qa-lock-root.sha256'), @((Join-Path $Root 'server'), 'qa-lock-server.sha256')) |
   Where-Object { Test-LockChanged $_[0] $_[1] })
-# Servers left running hold node_modules files (esbuild.exe): npm ci then fails with EPERM halfway
+# Servers left running hold node_modules files (esbuild.exe): pnpm install then fails with EPERM halfway
 # through and leaves node_modules broken. Stop them first; qa-up starts them again below.
 if ($changed.Count) {
-  Invoke-Step 'qa-down.ps1 (before npm ci)' $Root 'powershell.exe' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $Root 'scripts\qa\qa-down.ps1'), '-Root', $Root) | Out-Null
+  Invoke-Step 'qa-down.ps1 (before pnpm install)' $Root 'powershell.exe' @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', (Join-Path $Root 'scripts\qa\qa-down.ps1'), '-Root', $Root) | Out-Null
 }
 foreach ($pair in $changed) {
-  $code = Invoke-Step "npm ci ($($pair[0]))" $pair[0] 'npm.cmd' @('ci')
+  $code = Invoke-Step "pnpm install ($($pair[0]))" $pair[0] 'pnpm.cmd' @('install', '--frozen-lockfile')
   if ($code -ne 0) { Remove-Item (Join-Path $Root ".claude\$($pair[1])") -ErrorAction SilentlyContinue }
 }
 

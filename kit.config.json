@@ -5,6 +5,7 @@
     "repoName": "foodVibe1.0",
     "uiLocale": "Hebrew RTL",
     "uiDirection": "rtl",
+    "packageManager": "pnpm",
     "i18nFile": "public/assets/data/dictionary.json",
     "icons": {
       "library": "Lucide",
@@ -46,6 +47,9 @@
   },
   "git": {
     "mainBranch": "main"
+  },
+  "ci": {
+    "install": "pnpm install --frozen-lockfile"
   },
   "slots": {
     "count": 3,
@@ -106,7 +110,11 @@
     },
     {
       "path": ".github/workflows/ci.yml",
-      "reason": "root npm ci for build:schemas; Angular build cache"
+      "reason": "pnpm: root pnpm install for build:schemas, server installed with pnpm --dir server; Angular build cache keyed on pnpm-lock.yaml"
+    },
+    {
+      "path": ".github/workflows/security.yml",
+      "reason": "pnpm: root and server production audit run pnpm audit --prod (kit v1.9.0 still renders npm audit, which needs a package-lock.json); drop this override when a kit release renders pnpm audit"
     },
     {
       "path": "docs/agent/standards-security.md",

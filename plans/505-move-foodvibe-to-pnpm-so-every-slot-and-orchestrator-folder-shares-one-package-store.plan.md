@@ -62,6 +62,8 @@ scripts/take-plan.mjs
 .claude/skills/worktree-setup/SKILL.md
 docs/agent/orchestrator.md
 docs/workflow-kit/**
+.claude/workflows/orchestrate.js
+.kit/install.json
 ```
 
 The `scripts/…`, `.claude/skills/worktree-setup/…` and `docs/agent/orchestrator.md` lines are there only for what the kit
@@ -109,13 +111,13 @@ by symbol and print one line per commit: `ok` or `conflict: <what>`. STOP only o
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Install pnpm once and pin its version so the Human, CI, Render and slots all use the same one — packageManager field — package.json, server/package.json (the Human runs the install)
-- [ ] A2: Create pnpm lockfiles at today's exact package versions and remove the npm ones — npm ls before, pnpm import, no workspace file — pnpm-lock.yaml, server/pnpm-lock.yaml, package-lock.json, server/package-lock.json
-- [ ] A3: Make the app and server build and test under pnpm's strict layout, adding any undeclared dependency — node-linker=hoisted only as fallback — package.json, server/package.json, .npmrc
-- [ ] A4: Switch the package scripts and the Render build to pnpm, keeping dev tools installed on Render — --prod=false because NODE_ENV=production — package.json, server/package.json, render.yaml
-- [ ] A5: Switch CI, the security audit and the slot and orchestrator installs to pnpm — packageManager setting + kit-sync; ci.yml is an override, edited by hand — kit.config.json, .github/workflows/**, kit-rendered files
-- [ ] A6: Make the nightly QA install use pnpm so it does not break on the missing npm lockfile — scripts/qa/qa-nightly-up.ps1
-- [ ] B1: Tell people to set up with pnpm in the readme and record the switch in the changelog — README.md, CHANGELOG.md
+- [x] A1: Install pnpm once and pin its version so the Human, CI, Render and slots all use the same one — packageManager field — package.json, server/package.json (the Human runs the install)
+- [x] A2: Create pnpm lockfiles at today's exact package versions and remove the npm ones — npm ls before, pnpm import, no workspace file — pnpm-lock.yaml, server/pnpm-lock.yaml, package-lock.json, server/package-lock.json
+- [x] A3: Make the app and server build and test under pnpm's strict layout, adding any undeclared dependency — node-linker=hoisted only as fallback — package.json, server/package.json, .npmrc
+- [x] A4: Switch the package scripts and the Render build to pnpm, keeping dev tools installed on Render — --prod=false because NODE_ENV=production — package.json, server/package.json, render.yaml
+- [x] A5: Switch CI, the security audit and the slot and orchestrator installs to pnpm — packageManager setting + kit-sync; ci.yml is an override, edited by hand — kit.config.json, .github/workflows/**, kit-rendered files
+- [x] A6: Make the nightly QA install use pnpm so it does not break on the missing npm lockfile — scripts/qa/qa-nightly-up.ps1
+- [x] B1: Tell people to set up with pnpm in the readme and record the switch in the changelog — README.md, CHANGELOG.md
 
 ## Technical Considerations
 - Dependencies: kit v1.9.0 synced (plan 504). The Worker checks that `kit.config.json` with `packageManager: pnpm` passes the kit's validation (the sync refuses a bad value).
@@ -145,4 +147,22 @@ by symbol and print one line per commit: `ok` or `conflict: <what>`. STOP only o
 - Added A6 (`qa-nightly-up.ps1` runs `npm ci`), server tests and server version checks, and a kit drift check.
 
 ## Execution Notes
-[Written while the plan runs.]
+
+- pnpm pinned: `pnpm@10.34.6` (`packageManager` in both `package.json` files). Run here through `corepack pnpm@10.34.6` (pnpm not yet on the Human's PATH).
+- Versions before (npm ls) → after (pnpm list), identical: root `@angular/core` 19.2.21, `rxjs` 7.8.2, `zod` 4.6.5; server `express` 4.22.3, `mongoose` 8.24.5. All 64 direct dependencies (46 root, 18 server) compared between `package-lock.json` and `pnpm-lock.yaml`: 0 differences.
+- Checks, npm baseline → pnpm run 1 → pnpm run 2:
+  - `build`, `lint`: exit 0 / 0 / 0
+  - `test:ci`: 1598/1598 / 1598/1598 / 1598/1598
+  - `test:scripts`: 128/128 / 128/128 / 128/128
+  - server `test`: 769/774 (5 fail, admin-businesses) / 761/774 (13 fail, business-stats) / 774/774. Every failure is the same pre-existing flake (`E11000 duplicate key … users index: email_1 dup key: { email: null }`), on a different file each run; not pnpm-related (see seen-decision below).
+- A3 strict layout: no missing-package failure; no `.npmrc`, no `node-linker=hoisted`. pnpm 10 skips dependency install scripts by default → `pnpm.onlyBuiltDependencies` lists the ones npm used to run: root `@parcel/watcher`, `esbuild`, `lmdb`, `msgpackr-extract`; server `mongodb-memory-server` (npm's `allowScripts` entry).
+- A4 changed lines: `build:render`, `serve:prod`, `dev:local`, `deploy:gh-pages` (root), `pretest` (server); `render.yaml` buildCommand → `npm install -g pnpm@10.34.6 && pnpm install --frozen-lockfile --prod=false && pnpm --dir server install --frozen-lockfile && pnpm run build:render`. Start command unchanged (`node server/index.js`).
+- Critical question (Render + corepack): Render lists `pnpm install` as a Node build command; Node 25+ no longer ships corepack and `engines` is `>=22`, so the build uses the plan's fallback (`npm install -g pnpm@<pinned>`) instead of `corepack enable`. This is the one `npm install` line the grep Done-when prints outside `scripts/`: it installs pnpm itself, not the app.
+- A5 kit sync (`tools/sync.mjs --ref v1.9.0 --apply`): 7 kit-update — `.claude/skills/worktree-setup/SKILL.md`, `.claude/workflows/orchestrate.js` (approved: out of scope), `.github/workflows/security.yml`, `docs/agent/orchestrator.md`, `scripts/lib/slot-procs.mjs`, `scripts/orch-preflight.mjs`, `scripts/orch-state.mjs`; plus `.kit/install.json` (approved). `kit.config.json`: `project.packageManager: pnpm`, `ci.install: pnpm install --frozen-lockfile` (the kit refuses pnpm with an npm `ci.install`).
+- A5 gap: kit v1.9.0 `security.yml` renders pnpm installs but still `npm audit` for root and server (fails with no `package-lock.json`). Human chose `override security.yml`: now a FoodVibe override (kit.config.json + drift-classification.md) running `pnpm audit --prod --audit-level critical`; local run exits 0 (root 17 high / 12 moderate, server 2 high / 2 moderate, 0 critical). Kit follow-up: render pnpm audit in `core/.github/workflows/security.yml`, then drop the override.
+- Drift check: `KIT_DRIFT` lists only `docs/agent/standards-git.md` (drift before this plan, untouched); no drift on the synced files.
+- decision: behaviour: pinned pnpm 10.34.6 (mature 10.x line, a month old) instead of the 12.x `latest` (days old, rewritten CLI) — reverse: set `packageManager` to `pnpm@12.x` in both package.json files, `render.yaml` and README, then reinstall.
+- decision: behaviour: Render build installs pnpm with `npm install -g pnpm@10.34.6` instead of `corepack enable` (Node 25+ has no corepack) — reverse: swap that prefix for `corepack enable` and pin Node to 24 on Render.
+- decision: seen: server/test/admin-businesses.test.js:36 and server/test/business-stats.test.js — tests insert users without an email while a unique `email_1` index exists; which file fails depends on order, so server tests are flaky on npm and pnpm alike.
+- decision: seen: .claude/commands/review.md:15-21 — the review diff excludes `package-lock.json` only; `pnpm-lock.yaml` / `server/pnpm-lock.yaml` hunks will now show in full (kit-owned file).
+- decision: seen: scripts/pre-commit-secret-scan.mjs:19 skips `package-lock.json` only; the pnpm lockfiles currently match no secret pattern (checked), so nothing breaks today.
