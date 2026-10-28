@@ -1,6 +1,6 @@
 # Plan 504 — Fix the failing rules check and script test after the kit v1.9.0 sync
 
-Status: draft
+Status: done
 Track: code
 Depends-on: none
 Snapshot: 3cfb996aa3ae659bf261d6ae43b56dd60eb31d45
@@ -13,10 +13,10 @@ After the kit v1.9.0 sync (PR #466, `29c27bb5`) two checks are red on `main`:
 ## Goals & Success Criteria
 - Primary: both checks green on `main`, with the fix in the right repo (kit-owned files change in the kit, ADR 0021).
 - Success:
-  - [ ] [auto] `node scripts/kit-manifest-check.mjs` exits 0 (`0 unclassified`).
-  - [ ] [auto] `npm run test:scripts` exits 0.
-  - [ ] [auto] `node scripts/scope-check.mjs --arch --plan=<this plan>` and `--reuse --plan=<this plan>` exit 0; `npx ng build` passes.
-  - [ ] [human] A pull request opened after this merges shows the `rules` check green on GitHub.
+  - [x] [auto] `node scripts/kit-manifest-check.mjs` exits 0 (`0 unclassified`).
+  - [x] [auto] `npm run test:scripts` exits 0.
+  - [x] [auto] `node scripts/scope-check.mjs --arch --plan=<this plan>` and `--reuse --plan=<this plan>` exit 0; `npx ng build` passes.
+  - [x] [human] A pull request opened after this merges shows the `rules` check green on GitHub.
 
 ## Execution Mode
 - Parallel: no
@@ -33,6 +33,7 @@ After the kit v1.9.0 sync (PR #466, `29c27bb5`) two checks are red on `main`:
 - scope extended: scripts/qa/code-qa/api-fixtures.mjs — validateFixture() holds the stamped owner fields the test uses; the fixture data sent to the API is untouched (the server stamps businessId/createdBy).
 - Cause: plans 424/425 (2e968500, 60fef5e7) made businessId and createdBy required in shared/schemas/base.schema.ts; validateFixture() (plan 414, 91236548) stamped only userId. Not v1.9.0. It stayed hidden because the test skips until build:schemas has produced server/generated/schemas (gitignored). Fix: stamp businessId and createdBy; schema unchanged.
 - Manifest: docs/workflow-kit/manifest.json is a project-owned file; added a project/stay entry for scripts/lib/orch-folders.mjs (shape of orch-run.mjs, kit 1.9.0). kit-owned.json regenerated: it also dropped scripts/session-state-path.mjs and scripts/write-session-state.mjs (stale since the v1.9.0 sync removed those files). No kit release needed.
+- Closed 2026-10-28 (Human: "close 503 and 504"). Merged in PR #467 (e706b5cd); all 10 CI checks green including `rules`, which satisfies the [human] item. On main: `kit-manifest-check` 342 classified, 0 unclassified.
 
 ## Reuse Check
 - Manifest entry and fixture fix — family: none — rung: 4 — why: data-file and test-fixture edits; the registry covers Angular and server code only
@@ -89,5 +90,5 @@ Other orchestrator lessons for the kit, and any change to the shared schemas.
 - [x] A4: Run both checks and the build and paste the results — kit-manifest-check, test:scripts, ng build, arch and reuse gates — this plan file
 
 ## Done when
-- [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
-- [ ] [human] The `[human]` item under Success Criteria passes.
+- [x] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
+- [x] [human] The `[human]` item under Success Criteria passes.
