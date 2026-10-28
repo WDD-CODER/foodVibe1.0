@@ -25,9 +25,9 @@ and every check that passed on npm passes on pnpm.
 - [auto] `git grep -nE "npm (ci|install|audit)|cache: npm" -- .github render.yaml` prints only lines for the kit-managed `scripts/` folder (`npm ci --prefix scripts` and its report-only audit).
 - [auto] The versions in `pnpm-lock.yaml` equal the old `package-lock.json` for `@angular/core`, `zod` and `rxjs`, and in `server/pnpm-lock.yaml` for `express` and `mongoose` (Worker runs `pnpm list` before deleting the npm lockfiles and after; output in Execution Notes).
 - [auto] `node <kit>/tools/drift-check.mjs --target .` (or `kit-drift.ps1 -Target .`) reports no `drift` for the files the sync re-rendered.
-- [human] All CI checks are green on the PR.
-- [human] After the merge, the Human changes the Render build command in the Render dashboard to the one in `render.yaml` (the live service does not read `render.yaml`), and the next deploy builds and starts (the app opens at https://foodvibe1-0-1-frankfurt.onrender.com).
-- [human] In a fresh slot or orchestrator folder, the install finishes in well under a minute and the folder's `node_modules` takes little new space (folder size in Explorer before and after).
+- [x] [human] All CI checks are green on the PR.
+- [x] [human] After the merge, the Human changes the Render build command in the Render dashboard to the one in `render.yaml` (the live service does not read `render.yaml`), and the next deploy builds and starts (the app opens at https://foodvibe1-0-1-frankfurt.onrender.com).
+- [x] [human] In a fresh slot or orchestrator folder, the install finishes in well under a minute and the folder's `node_modules` takes little new space (folder size in Explorer before and after).
 
 ## Execution Mode
 - Parallel: no
