@@ -108,7 +108,7 @@ export function loadSchemas(root) {
 
 /** [] when `fixture` parses as a stored `entity` doc, else the Zod issue lines. */
 export function validateFixture(schemas, entity, fixture) {
-  const stamped = { ...fixture, _id: 'qa-fixture', schemaVersion: 2, userId: 'qa-user', createdAt: 0, updatedAt: 0 }
+  const stamped = { ...fixture, _id: 'qa-fixture', schemaVersion: 2, userId: 'qa-user', businessId: 'qa-business', createdBy: 'qa-user', createdAt: 0, updatedAt: 0 }
   const r = schemas[entity].safeParse(stamped)
   return r.success ? [] : r.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`)
 }

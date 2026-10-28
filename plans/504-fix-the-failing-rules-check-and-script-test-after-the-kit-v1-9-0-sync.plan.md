@@ -30,6 +30,10 @@ After the kit v1.9.0 sync (PR #466, `29c27bb5`) two checks are red on `main`:
 - Orchestrator readiness (2026-10-28): The [human] rules-check-green-on-a-PR item can only be checked after merge on GitHub. → ok, leave it pending and report it
 - Orchestrator readiness (2026-10-28): Fixture fix scope. → yes, edit only the suppliers fixture data (businessId, createdBy), never loosen the schema, and report which commit caused it
 
+- scope extended: scripts/qa/code-qa/api-fixtures.mjs — validateFixture() holds the stamped owner fields the test uses; the fixture data sent to the API is untouched (the server stamps businessId/createdBy).
+- Cause: plans 424/425 (2e968500, 60fef5e7) made businessId and createdBy required in shared/schemas/base.schema.ts; validateFixture() (plan 414, 91236548) stamped only userId. Not v1.9.0. It stayed hidden because the test skips until build:schemas has produced server/generated/schemas (gitignored). Fix: stamp businessId and createdBy; schema unchanged.
+- Manifest: docs/workflow-kit/manifest.json is a project-owned file; added a project/stay entry for scripts/lib/orch-folders.mjs (shape of orch-run.mjs, kit 1.9.0). kit-owned.json regenerated: it also dropped scripts/session-state-path.mjs and scripts/write-session-state.mjs (stale since the v1.9.0 sync removed those files). No kit release needed.
+
 ## Reuse Check
 - Manifest entry and fixture fix — family: none — rung: 4 — why: data-file and test-fixture edits; the registry covers Angular and server code only
 
@@ -47,6 +51,7 @@ kit.config.json
 scripts/test/code-qa-api.test.mjs
 scripts/test/fixtures/**
 scripts/lib/code-qa-*.mjs
+scripts/qa/code-qa/api-fixtures.mjs
 ```
 
 ## Read Scope
@@ -78,10 +83,10 @@ Other orchestrator lessons for the kit, and any change to the shared schemas.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Find out whether the unclassified-file failure must be fixed in the kit or can be fixed here — check if the manifest is kit-owned and what the kit's v1.9.0 manifest says — docs/workflow-kit/manifest.json, ../ai-workflow-kit
-- [ ] A2: Make the rules check pass again by classifying the new orchestrator folders helper — through the kit release if kit-owned, else a local override — docs/workflow-kit/manifest.json, kit.config.json
-- [ ] A3: Find why the supplier test fixture lacks the owner fields and bring it in line with the schema — businessId and createdBy; say whether v1.9.0 or an earlier plan caused it — scripts/test/code-qa-api.test.mjs, scripts/test/fixtures/**
-- [ ] A4: Run both checks and the build and paste the results — kit-manifest-check, test:scripts, ng build, arch and reuse gates — this plan file
+- [x] A1: Find out whether the unclassified-file failure must be fixed in the kit or can be fixed here — check if the manifest is kit-owned and what the kit's v1.9.0 manifest says — docs/workflow-kit/manifest.json, ../ai-workflow-kit
+- [x] A2: Make the rules check pass again by classifying the new orchestrator folders helper — through the kit release if kit-owned, else a local override — docs/workflow-kit/manifest.json, kit.config.json
+- [x] A3: Find why the supplier test fixture lacks the owner fields and bring it in line with the schema — businessId and createdBy; say whether v1.9.0 or an earlier plan caused it — scripts/test/code-qa-api.test.mjs, scripts/test/fixtures/**
+- [x] A4: Run both checks and the build and paste the results — kit-manifest-check, test:scripts, ng build, arch and reuse gates — this plan file
 
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
