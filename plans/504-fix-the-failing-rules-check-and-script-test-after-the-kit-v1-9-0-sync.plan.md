@@ -26,6 +26,9 @@ After the kit v1.9.0 sync (PR #466, `29c27bb5`) two checks are red on `main`:
 ## Execution Notes
 - `docs/workflow-kit/manifest.json` and `kit-owned.json` are generated from the kit (`scripts/kit-owned.mjs --write`; kit-owned.json says "Do not edit"). If the manifest is kit-owned, the real fix is a kit PR in `../ai-workflow-kit` (classify `scripts/lib/orch-folders.mjs`), a new release, then `kit-sync` here (ADR 0021). The Worker checks which it is first; if a kit release is needed, stop and report with `approved:` options rather than hand-editing a generated file. A FoodVibe-only fallback is an `overrides` entry in `kit.config.json`.
 - Fixture failure: read `scripts/test/code-qa-api.test.mjs:40` and the `suppliers` fixture. Likely the shared supplier schema gained required `businessId` / `createdBy` and the fixture was not updated. Check `git log` for the schema and the fixture to say whether v1.9.0 or an earlier plan caused it. Fix the fixture to match the schema; do not loosen the schema.
+- Orchestrator readiness (2026-10-28): May the builder add a local manifest entry for scripts/lib/orch-folders.mjs (shape of the orch-run.mjs entry) and regenerate kit-owned.json with scripts/kit-owned.mjs --write? → yes (stop and report with approved: options if the generator or kit-manifest-check rejects it)
+- Orchestrator readiness (2026-10-28): The [human] rules-check-green-on-a-PR item can only be checked after merge on GitHub. → ok, leave it pending and report it
+- Orchestrator readiness (2026-10-28): Fixture fix scope. → yes, edit only the suppliers fixture data (businessId, createdBy), never loosen the schema, and report which commit caused it
 
 ## Reuse Check
 - Manifest entry and fixture fix — family: none — rung: 4 — why: data-file and test-fixture edits; the registry covers Angular and server code only
