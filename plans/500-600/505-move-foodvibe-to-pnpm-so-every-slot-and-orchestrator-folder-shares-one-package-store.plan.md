@@ -1,6 +1,6 @@
 # Plan 505 — Move FoodVibe to pnpm so every slot and orchestrator folder shares one package store
 
-Status: active
+Status: done
 Depends-on: none
 Snapshot: b71412a2a9ee86c50e47b5dd65001a84f00b5048
 
