@@ -215,3 +215,12 @@
 - [ ] C5: Give every save button one saving state: disabled with a busy label while it runs, enabled again on error — one signal name and one button state; fix the ten screens without a flag — src/styles.scss, the dialogs and tabs in scope
 - [ ] C6: Warn when a native date input, a template `toFixed` or a bare textarea is added, and register the families — `reuse-lint` rules with fixtures; update the `form-field` and `engine-classes` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
 - [ ] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
+
+### Plan 505 — Move FoodVibe to pnpm so every slot and orchestrator folder shares one package store
+- [ ] A1: Install pnpm once and pin its version so the Human, CI, Render and slots all use the same one — packageManager field — package.json, server/package.json (the Human runs the install)
+- [ ] A2: Create pnpm lockfiles at today's exact package versions and remove the npm ones — npm ls before, pnpm import, no workspace file — pnpm-lock.yaml, server/pnpm-lock.yaml, package-lock.json, server/package-lock.json
+- [ ] A3: Make the app and server build and test under pnpm's strict layout, adding any undeclared dependency — node-linker=hoisted only as fallback — package.json, server/package.json, .npmrc
+- [ ] A4: Switch the package scripts and the Render build to pnpm, keeping dev tools installed on Render — --prod=false because NODE_ENV=production — package.json, server/package.json, render.yaml
+- [ ] A5: Switch CI, the security audit and the slot and orchestrator installs to pnpm — packageManager setting + kit-sync; ci.yml is an override, edited by hand — kit.config.json, .github/workflows/**, kit-rendered files
+- [ ] A6: Make the nightly QA install use pnpm so it does not break on the missing npm lockfile — scripts/qa/qa-nightly-up.ps1
+- [ ] B1: Tell people to set up with pnpm in the readme and record the switch in the changelog — README.md, CHANGELOG.md
