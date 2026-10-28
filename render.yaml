@@ -6,7 +6,7 @@ services:
     name: foodvibe1-0-1-frankfurt
     runtime: node
     plan: free
-    buildCommand: npm ci --include=dev && npm install --prefix server && npm run build:render
+    buildCommand: npm install -g pnpm@10.34.6 && pnpm install --frozen-lockfile --prod=false && pnpm --dir server install --frozen-lockfile && pnpm run build:render
     startCommand: node server/index.js
     envVars:
       - key: NODE_ENV

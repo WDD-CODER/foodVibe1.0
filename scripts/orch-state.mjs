@@ -47,7 +47,7 @@ const MAIN = 'main'
 const PREFIX = 'orch/'
 const MIN_FREE_GB = 5
 const REPO = 'foodVibe1.0'
-const PM = 'npm' === 'pnpm' ? 'pnpm' : 'npm'
+const PM = 'pnpm' === 'pnpm' ? 'pnpm' : 'npm'
 const USE_SLOTS = true !== false
 const SERVER_ROOT = 'server/'
 // Sensitive paths (the security reviewer runs on them): the same reading as ship-prep — a regex string replaces the

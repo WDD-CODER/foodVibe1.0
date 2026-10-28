@@ -11,6 +11,7 @@ All notable changes to FoodVibe are documented here.
 - `npm --prefix server run lint` (runtime files only) with a `no-console` rule. Not wired into `/ship` — `ship.md` doesn't run server lint today; CI changes belong to Plan 321 §7d
 
 ### Changed
+- **pnpm instead of npm** (Plan 505) — the root and `server/` install with `pnpm install --frozen-lockfile` from `pnpm-lock.yaml` (same package versions as the old `package-lock.json`); slots and orchestrator folders share one package store. CI, the security audit (`pnpm audit`), the Render build and the nightly QA use pnpm; `scripts/` stays on npm
 - `PERF_LOG` replaced by the `data.query.perf` debug event (`LOG_LEVEL=debug`); removed from `render.yaml`. Server ESLint `quotes`/`semi` downgraded to warnings (legacy files predate them)
 
 ### Fixed

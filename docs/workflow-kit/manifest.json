@@ -1724,22 +1724,22 @@
         {
           "key": "commands.npm",
           "strings": [
-            "npm ci",
-            "npm run lint",
-            "npx ng"
+            "pnpm install --frozen-lockfile",
+            "pnpm run lint",
+            "pnpm exec ng"
           ]
         },
         {
           "key": "commands.test",
           "strings": [
             "ng test",
-            "npx ng test --watch=false --browsers=ChromeHeadless"
+            "pnpm exec ng test --watch=false --browsers=ChromeHeadless"
           ]
         },
         {
           "key": "paths.serverRoot",
           "strings": [
-            "server/package-lock.json"
+            "server/pnpm-lock.yaml"
           ]
         },
         {
@@ -1753,10 +1753,10 @@
         ".angular/cache/",
         "AGENTS.md",
         "CLAUDE.md",
-        "package-lock.json",
-        "server/package-lock.json"
+        "pnpm-lock.yaml",
+        "server/pnpm-lock.yaml"
       ],
-      "notes": "Generic: checkout/node setup, secret scan, lint, server install. Angular: `.angular/cache` caching, `npx ng build`, `npx ng test --watch=false --browsers=ChromeHeadless`, `server/package-lock.json` cache path. Job split by stack in phase 3."
+      "notes": "Generic: checkout/node setup, secret scan, lint, server install. Angular: `.angular/cache` caching, `pnpm exec ng build`, `pnpm exec ng test --watch=false --browsers=ChromeHeadless`, `server/pnpm-lock.yaml` cache path. Job split by stack in phase 3."
     },
     {
       "path": ".github/workflows/security.yml",

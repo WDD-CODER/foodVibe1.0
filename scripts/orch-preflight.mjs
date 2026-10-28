@@ -41,7 +41,7 @@ const root = resolve(__dirname, '..')
 const MAIN = 'main'
 const MIN_FREE_GB = 5
 const DEV = 'start'
-const PM = 'npm' === 'pnpm' ? 'pnpm' : 'npm'
+const PM = 'pnpm' === 'pnpm' ? 'pnpm' : 'npm'
 // The script the gate runs: commands.testCi when the project set it, else commands.test.
 const TEST_SCRIPT = '' || 'test:ci'
 // A project's own regular expression for its framework's watch-mode test command (orchestrator.watchTestPattern).

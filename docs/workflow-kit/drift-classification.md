@@ -38,8 +38,8 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | core/.claude/skills/save-plan/evals/evals.json | intended | example plan number `395` → `NNN` | — |
 | core/.claude/skills/save-plan/SKILL.md | intended | placeholders + `{{plans.openDirs}}` wording (landed in kit PR #9) | 51874c1 |
 | core/.claude/skills/techdebt/SKILL.md | override | FoodVibe-specific greps (`@Input`, `BehaviorSubject`, knip) vs kit PACK marker | — |
-| core/.github/workflows/ci.yml | override | root `npm ci` for `build:schemas`; build-cache step is a PACK marker; BOM | — |
-| core/.github/workflows/security.yml | intended | BOM only | — |
+| core/.github/workflows/ci.yml | override | pnpm (plan 505): root `pnpm install` for `build:schemas`, server via `pnpm --dir server`; build-cache step is a PACK marker; BOM | — |
+| core/.github/workflows/security.yml | override | pnpm (plan 505): root and server audit run `pnpm audit --prod --audit-level critical` (kit v1.9.0 still renders `npm audit`); drop when a kit release renders pnpm audit | — |
 | core/.github/workflows/todo-sync.yml | intended | `{{git.mainBranch}}` | — |
 | core/.husky/pre-commit | drift-fixed (kit right) | FoodVibe keeps the deprecated `husky.sh` lines (husky prints a v10 warning) | — |
 | core/.husky/pre-push | intended | `{{plans.openDirs\|alt}}` filter | — |

@@ -58,16 +58,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
+          cache: pnpm
       - name: Install
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: ESLint
-        run: npm run lint
+        run: pnpm run lint
+      # The workflow scripts' own dependencies live in scripts/package.json (kit-managed, npm); pnpm does not
+      # hoist them into the root node_modules the way npm did, so install them inside scripts/ first.
+      - name: Install workflow script dependencies
+        if: hashFiles('scripts/package-lock.json') != ''
+        working-directory: scripts
+        run: npm ci --no-audit --no-fund
       - name: Workflow script tests
-        run: npm run test:scripts --if-present
+        run: pnpm run --if-present test:scripts
 
   build:
     needs: changes
@@ -75,21 +82,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
+          cache: pnpm
       - name: Cache Angular build
         uses: actions/cache@v4
         with:
           path: .angular/cache
-          key: angular-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             angular-${{ runner.os }}-
       - name: Install
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Build
-        run: npx ng build
+        run: pnpm exec ng build
 
   test:
     needs: changes
@@ -97,21 +105,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
+          cache: pnpm
       - name: Cache Angular build
         uses: actions/cache@v4
         with:
           path: .angular/cache
-          key: angular-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          key: angular-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             angular-${{ runner.os }}-
       - name: Install
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Unit tests
-        run: npx ng test --watch=false --browsers=ChromeHeadless
+        run: pnpm exec ng test --watch=false --browsers=ChromeHeadless
 
   server-tests:
     needs: changes
@@ -119,19 +128,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: npm
+          cache: pnpm
           cache-dependency-path: |
-            package-lock.json
-            server/package-lock.json
+            pnpm-lock.yaml
+            server/pnpm-lock.yaml
       - name: Install root (typescript + zod for build:schemas)
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: Install server
-        run: npm ci --prefix server
+        run: pnpm --dir server install --frozen-lockfile
       - name: Server tests
-        run: npm test --prefix server
+        run: pnpm --dir server test
 
   gitleaks:
     runs-on: ubuntu-latest

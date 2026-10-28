@@ -505,7 +505,7 @@ export function installNeed(dir, hashPath) {
 }
 
 // project.packageManager (npm or pnpm) for the project's own folders; the kit-managed scripts/ package is always npm.
-const PROJECT_PM = 'npm' === 'pnpm' ? 'pnpm' : 'npm'
+const PROJECT_PM = 'pnpm' === 'pnpm' ? 'pnpm' : 'npm'
 const packageManagerOf = (dir) => (basename(dir) === 'scripts' ? 'npm' : PROJECT_PM)
 const lockNameOf = (pm) => (pm === 'pnpm' ? 'pnpm-lock.yaml' : 'package-lock.json')
 

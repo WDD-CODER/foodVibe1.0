@@ -31,3 +31,11 @@ Scope: `.github/workflows/*`, `ng build`/`angular.json`, `npm audit`, and other 
 **Why the obvious fix is wrong:** Editing the literal in a new commit does not help: the action scans every commit in the PR range, so the first commit still trips it. Amending and force-pushing breaks the repo's never-force-push rule.
 
 **What to do instead:** Never commit a token-shaped literal, fake or not — build it at runtime (`['eyJ…', 'eyJ…', 'sig'].join('.')`). If one already landed in a pushed commit, add its fingerprint from the gitleaks log (`<commit>:<file>:<rule>:<line>`) to `.gitleaksignore` in a follow-up commit.
+
+## pnpm 10 silently skips dependency install scripts that npm ran
+
+**What hurt:** Moving to pnpm (plan 505), `pnpm install` exited 0 but printed "Ignored build scripts: @parcel/watcher, esbuild, lmdb, msgpackr-extract". npm had always run these packages' install steps. The skipped steps leave native add-ons unbuilt or unchecked.
+
+**Why the obvious fix is wrong:** `pnpm approve-builds` is interactive and only writes local config: CI, Render and fresh slots would still skip them. `node-linker=hoisted` or `--unsafe-perm` don't touch this at all.
+
+**What to do instead:** List the packages under `"pnpm": { "onlyBuiltDependencies": [...] }` in the `package.json` of the folder that installs them (root and `server/` separately; `server/` needs `mongodb-memory-server`). After any dependency change, re-run `pnpm install` and check the warning box is gone.

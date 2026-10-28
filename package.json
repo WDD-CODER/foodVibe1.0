@@ -20,21 +20,22 @@
     "qa:down": "powershell -ExecutionPolicy Bypass -File scripts/qa/qa-down.ps1",
     "qa:code": "node scripts/qa/code-qa/run.mjs",
     "build:schemas": "tsc -p shared/schemas/tsconfig.cjs.json",
-    "build:render": "npm run build:schemas && npx ng build --configuration=production",
-    "serve:prod": "npm run build:schemas && ng build && cd server && node index.js",
-    "dev:local": "npm run build:schemas && ng serve -c local",
+    "build:render": "pnpm run build:schemas && pnpm exec ng build --configuration=production",
+    "serve:prod": "pnpm run build:schemas && ng build && cd server && node index.js",
+    "dev:local": "pnpm run build:schemas && ng serve -c local",
     "dev:remote": "ng serve -c remote",
     "repair:backup": "node scripts/backup-before-repair.mjs",
     "repair:diagnose": "node scripts/diagnose-broken-refs.mjs",
     "repair:refs": "node scripts/repair-recipe-references.mjs",
     "build:gh-pages": "ng build --configuration=gh-pages",
-    "deploy:gh-pages": "npm run build:gh-pages && npx gh-pages -d dist/food-vibe1.0/browser",
+    "deploy:gh-pages": "pnpm run build:gh-pages && pnpm exec gh-pages -d dist/food-vibe1.0/browser",
     "lint": "eslint --no-error-on-unmatched-pattern \"src/app/**/*.{ts,html}\"",
     "lint:fix": "eslint --fix --no-error-on-unmatched-pattern \"src/app/**/*.{ts,html}\"",
     "audit:deadcode": "knip && depcheck && depcheck server",
     "prepare": "husky"
   },
   "private": true,
+  "packageManager": "pnpm@10.34.6",
   "engines": {
     "node": ">=22"
   },
@@ -87,5 +88,13 @@
     "prettier": "^3.9.5",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.63.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "lmdb",
+      "msgpackr-extract"
+    ]
   }
 }

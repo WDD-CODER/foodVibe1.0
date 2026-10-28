@@ -248,7 +248,7 @@
       "source": "core/.claude/skills/save-plan/reference/mid-flight-sync.md"
     },
     ".claude/skills/worktree-setup/SKILL.md": {
-      "sha256": "38d3fdb34e9bc169be7bff7b5d389b350e703e6f6c152daddb207cdd576ed8e3",
+      "sha256": "a41078fbf144b256b8c8b0fd5de2c1e3743dfeeed1072436224b17a1f06c3f43",
       "kind": "managed",
       "source": "core/.claude/skills/worktree-setup/SKILL.md"
     },
@@ -258,7 +258,7 @@
       "source": "packs/angular/.claude/workflows/deploy.yml"
     },
     ".claude/workflows/orchestrate.js": {
-      "sha256": "c87f6e0cce5eadce1ec79b31ed77dfc6c785043939bb331cd92bb914295f3f2b",
+      "sha256": "650ee258577a8664b7f248689f0bba672cb42466840031463fe385a6a10ce78c",
       "kind": "managed",
       "source": "core/.claude/workflows/orchestrate.js"
     },
@@ -438,7 +438,7 @@
       "source": "core/.github/workflows/brain-capture-reminder.yml"
     },
     ".github/workflows/security.yml": {
-      "sha256": "4387ec26b089b98378d86a4548fa0b0dd11027bc9cdd0b39bdc9a7feac2ae042",
+      "sha256": "b7795c63ee9b35398503dc65f6811a44a9d1e8541dfc71476f2ae6454c05014a",
       "kind": "managed",
       "source": "core/.github/workflows/security.yml"
     },
@@ -558,7 +558,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "42a949251a55fcd861765c21d56a5b3747987b1feb683e675beed9ba57588782",
+      "sha256": "87c0a2a49d315b8ee6733a9d294d9e96e3193f0869591c713e93e93e15965a55",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -838,7 +838,7 @@
       "source": "core/scripts/lib/plan-scope.mjs"
     },
     "scripts/lib/slot-procs.mjs": {
-      "sha256": "cdeaf421201e2a43c5655d2ef79efa25ebf5a1cdea9bfdb712c3b7cb67208b9f",
+      "sha256": "4606a57ff15202181787f52d84d0845568eedbf6c7f6dc3f58ae5cd82e5b9420",
       "kind": "managed",
       "source": "core/scripts/lib/slot-procs.mjs"
     },
@@ -863,12 +863,12 @@
       "source": "core/scripts/next-plan-number.mjs"
     },
     "scripts/orch-preflight.mjs": {
-      "sha256": "8e7747e14baabb7b4544214758c7862c4ff04764bf62ef3f12f5c0c582015d0b",
+      "sha256": "6f82658c1679a87b745d0889194f7c28f57db04bd3ca72d30ef9a6fb1e2db9f7",
       "kind": "managed",
       "source": "core/scripts/orch-preflight.mjs"
     },
     "scripts/orch-state.mjs": {
-      "sha256": "f1413a07c2f4f08be98186547cf07260a50856ccd445b157abc62e2319ecc040",
+      "sha256": "3e0855b3ec43eac3b91e222a453cce531d730de757635e3dc7935e1b2231be11",
       "kind": "managed",
       "source": "core/scripts/orch-state.mjs"
     },

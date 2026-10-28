@@ -47,9 +47,9 @@ branch himself.
      Packages are never linked in from the main folder: on Windows git follows a junction when it removes a worktree
      and would delete the main folder's packages. At most `orchestrator.concurrency` builders run at once (default 2);
    - gate (`orch-gate`): the project checks (`commands.build`, `commands.lint`, and `commands.testCi` when set, else
-     `commands.test`; run with `npm run`; each stopped after `orchestrator.gateTimeoutMin`
+     `commands.test`; run with `pnpm run`; each stopped after `orchestrator.gateTimeoutMin`
      minutes and reported as a fail, never a hang — a watch-mode test script is the usual cause, and preflight warns about
-     it) plus the plan's own check commands from readiness — only `npm run
+     it) plus the plan's own check commands from readiness — only `pnpm run
      <script in package.json>`, `node tools/…`, `node scripts/…` or `node --test <files>` (any other is dropped with
      a run note). A kit script that pushes, opens a pull request or writes run, plan or slot state (`kit-feedback`,
      `orch-state`, `decision-log`, `take-plan`, `slot-serve`, `sync`, …) is never a check, whatever its folder; the
