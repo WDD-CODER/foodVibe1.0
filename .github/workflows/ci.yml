@@ -67,6 +67,12 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: ESLint
         run: pnpm run lint
+      # The workflow scripts' own dependencies live in scripts/package.json (kit-managed, npm); pnpm does not
+      # hoist them into the root node_modules the way npm did, so install them inside scripts/ first.
+      - name: Install workflow script dependencies
+        if: hashFiles('scripts/package-lock.json') != ''
+        working-directory: scripts
+        run: npm ci --no-audit --no-fund
       - name: Workflow script tests
         run: pnpm run --if-present test:scripts
 
