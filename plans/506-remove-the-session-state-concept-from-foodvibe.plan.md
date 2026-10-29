@@ -2,7 +2,7 @@
 
 Status: draft
 Depends-on: 497, 419
-Snapshot: c5e6916634cf8f1aad1a7acf852e0642a876e072
+Snapshot: e3aaeccee802013a946a5ea2f76edcc0313197db
 
 ## Problem Statement
 
@@ -119,12 +119,12 @@ by symbol and print one line per commit: `ok` or `conflict: <what>`. STOP only o
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Delete the 140 old per-branch state files from git and the local pointer file so no agent reads stale status again — git rm the 140 tracked state files under docs/; delete the untracked pointer file under .claude/ — docs/ (the old per-branch state files)
-- [ ] A2: Rebuild the two kit-override files from kit v1.9.0 and put only the reuse layer back, so they stop allowing a state file and gain the kit's newer checks — render placeholders by hand; keep import + --reuse dispatch; keep ## Reuse Check block; update override reasons — scripts/scope-check.mjs, .claude/references/prd-template.md, kit.config.json
-- [ ] A3: Rewrite the rules and brain docs so they say where work status lives now instead of naming the old file — AGENTS.md compaction rule with the kit's wording; brain points to plans, todo, git and PR; gitignore lines 62 and 73–78 removed; workflow map rows for dead scripts removed — AGENTS.md, .gitignore, docs/brain/index.md, docs/brain/glossary.md, docs/brain/projectbrief.md, docs/brain/how-it-works.md, docs/brain/gotchas.md, docs/brain/gotchas/agent-workflow.md, docs/brain/gotchas/git-workflow.md, docs/agent/workflow-map.md, docs/workflow-kit/parameters.md
-- [ ] A4: Make the CI scope-check test prove the branch naming without relying on a state file being allowed — header comment reworded; test at line 145 commits an in-scope fixture file — scripts/ci-scope-check.mjs, scripts/test/ci-scope-check.test.mjs
-- [ ] A5: Clean the two plans from the live run only if they are still open after the run merges — Always-allowed line only; closed plans in plans/<range>/ stay untouched — plans/419-*.plan.md, plans/497-*.plan.md
-- [ ] A6: Prove nothing FoodVibe owns still names the old file and the build and script tests pass — run the Done-when grep, pnpm run build, pnpm run test:scripts, the --deps/--reuse checks and the two kit diffs; paste outputs — this plan file (Execution Notes)
+- [x] A1: Delete the 140 old per-branch state files from git and the local pointer file so no agent reads stale status again — git rm the 140 tracked state files under docs/; delete the untracked pointer file under .claude/ — docs/ (the old per-branch state files)
+- [x] A2: Rebuild the two kit-override files from kit v1.9.0 and put only the reuse layer back, so they stop allowing a state file and gain the kit's newer checks — render placeholders by hand; keep import + --reuse dispatch; keep ## Reuse Check block; update override reasons — scripts/scope-check.mjs, .claude/references/prd-template.md, kit.config.json
+- [x] A3: Rewrite the rules and brain docs so they say where work status lives now instead of naming the old file — AGENTS.md compaction rule with the kit's wording; brain points to plans, todo, git and PR; gitignore lines 62 and 73–78 removed; workflow map rows for dead scripts removed — AGENTS.md, .gitignore, docs/brain/index.md, docs/brain/glossary.md, docs/brain/projectbrief.md, docs/brain/how-it-works.md, docs/brain/gotchas.md, docs/brain/gotchas/agent-workflow.md, docs/brain/gotchas/git-workflow.md, docs/agent/workflow-map.md, docs/workflow-kit/parameters.md
+- [x] A4: Make the CI scope-check test prove the branch naming without relying on a state file being allowed — header comment reworded; test at line 145 commits an in-scope fixture file — scripts/ci-scope-check.mjs, scripts/test/ci-scope-check.test.mjs
+- [x] A5: Clean the two plans from the live run only if they are still open after the run merges — Always-allowed line only; closed plans in plans/<range>/ stay untouched — plans/419-*.plan.md, plans/497-*.plan.md
+- [x] A6: Prove nothing FoodVibe owns still names the old file and the build and script tests pass — run the Done-when grep, pnpm run build, pnpm run test:scripts, the --deps/--reuse checks and the two kit diffs; paste outputs — this plan file (Execution Notes)
 
 ## Technical Considerations
 - Dependencies: plans 497 and 419 merged (run branch `orch/run-497-419`); `take-plan` refuses before that. Kit v1.9.0 checked out or cached in `../ai-workflow-kit` (the `git show v1.9.0:…` reads need the tag).
@@ -145,3 +145,10 @@ by symbol and print one line per commit: `ok` or `conflict: <what>`. STOP only o
 - Orchestrator readiness (2026-10-29): Should the builder `git rm` the tracked session-state file `.claude/handoff-previous.md` (added to scope)? → yes (default): `git rm` it as part of A1; path added to the Read-Write Scope.
 - Orchestrator readiness (2026-10-29): Should `':!docs/orchestrator/runs'` be added to the Done-when grep's exclude list as history? → yes (default): exclude it like `docs/mvp/runs`.
 - Orchestrator readiness (2026-10-29): [human] Done-when check (`/ship` + `/handoff`, no `docs/session-state*` appears) needs the kit/fleet-mod fix first → stays open after the run; does not block.
+- 2026-10-29 Builder: Step 0: drift commits (kit sync v1.10-1.12, mods, 497/419 run) do not touch the scope-check/prd-template logic -> ok. Kit v1.9.0 and v1.12.0 `scope-check.mjs` and `prd-template.md` are byte-identical (git diff --stat empty), so rebased on v1.12.0 = v1.9.0.
+- A1: 140 `docs/session-state*.md` plus tracked `.claude/handoff-previous.md` removed (git rm); `.claude/.session-state-path` absent.
+- A2: `scripts/scope-check.mjs` = kit file with placeholders rendered + 3 reuse-layer lines (import, `--reuse` dispatch, usage text); `prd-template.md` = kit file rendered + `## Reuse Check` block; `kit.config.json` reasons updated.
+- A5: n/a - plans 419 and 497 are no longer directly under `plans/` (closed), history untouched.
+- Checks: `pnpm run build` -> 0; `pnpm run lint` -> 0; `pnpm run test:ci` -> 0 (1621 SUCCESS); `pnpm run test:scripts` -> 0 (129 pass, 0 fail); `--deps` -> `DEPENDS_ON: ok (497, 419)`; `--reuse` -> `REUSE: ok none` exit 0; Done-when grep (plus `:!docs/orchestrator/runs`) prints nothing; `git ls-files 'docs/session-state*.md'` empty.
+- `--drift` exits 1 (REALITY: drift) only because of the commits since the Snapshot; Step 0 judged ok above.
+- 2026-10-29 Builder (round 1 fix): Step 0 re-run: the 8 drift commits listed by --drift are ok (no conflict with this plan); Snapshot moved to origin/main e3aaeccee802013a946a5ea2f76edcc0313197db so --drift reports clean.

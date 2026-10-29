@@ -10,14 +10,25 @@
  *   node scripts/scope-check.mjs --drift [--plan=<path>]
  *   node scripts/scope-check.mjs --arch --plan=<path>                   (BLOCK)
  *   node scripts/scope-check.mjs --arch --diff=<base> [--plan=<path>]   (WARN, exit 0)
+ *   node scripts/scope-check.mjs --deps --plan=<path>
+ *   node scripts/scope-check.mjs --tags --plan=<path>
  *
  * A path matching ownership.upstreamPaths (kit.config.json) is never in scope: --file prints "SCOPE: upstream <path>".
  *
- * --plan defaults to the active slot's .worktree-plan. Exit 1 on a missing
+ * --plan defaults to the active slot's .worktree-plan, else (outside a slot) the plan a numbered branch
+ * names (feat/NNN-<slug>). Exit 1 on a missing
  * plan / scope block, on --file/--diff finding an out-of-scope file, on
  * --overlap finding a shared glob with another active plan, or on --drift
  * finding an in-scope commit since the plan's Snapshot (or, without one, since
  * the commit that added the plan).
+ *
+ * --deps checks the plan declares what it needs first: "DEPENDS_ON: ok" (exit 0) when it has a "Depends-on:" line
+ * ("Depends-on: none" counts), "DEPENDS_ON: missing" (exit 1) when it has none — legacy prose prerequisites are still
+ * read by plan-order and take-plan, but a new plan says it in the header (scripts/lib/plan-deps.mjs).
+ *
+ * --tags is the save-plan shape lint for Done-when tags (scripts/lib/done-when.mjs): "DONE_WHEN_TAGS: ok" (exit 0)
+ * when every Done-when item starts with [auto], [ui] or [human]; else one line per bad item (no tag, an unclosed
+ * "[ui", a wrong spelling such as "[UI]") and exit 1.
  *
  * --arch reads the architecture invariants registry (docs/brain/invariants.md; see
  * scripts/lib/invariants.mjs). With --plan: exit 1 when the plan's scope touches an
@@ -33,9 +44,11 @@ import { execFileSync } from 'child_process'
 import { resolve, dirname, join, relative, isAbsolute } from 'path'
 import { fileURLToPath } from 'url'
 import picomatch from 'picomatch'
-import { activePlanPath } from './lib/slot.mjs'
+import { activePlanPath, branchPlanPath } from './lib/slot.mjs'
 import { extractScopeGlobs } from './lib/plan-scope.mjs'
 import { listOpenPlans, OPEN_PLAN_DIRS } from './lib/plan-paths.mjs'
+import { parseDependsOn, parseProsePrerequisites } from './lib/plan-deps.mjs'
+import { doneWhenTagProblems } from './lib/done-when.mjs'
 import { parseInvariants, checkPlanArch, diffArchWarnings, decisionWithoutAdr, parseAddedLines } from './lib/invariants.mjs'
 import { runReuseCheck } from './lib/reuse-check.mjs'
 
@@ -98,12 +111,8 @@ function normalize(p) {
   return String(p).replace(/\\/g, '/')
 }
 
-function sanitizeBranch(branch) {
-  return branch.replace(/[^a-zA-Z0-9]/g, '-')
-}
-
 function readPlanFile(planPath) {
-  const abs = join(repoRoot, planPath)
+  const abs = isAbsolute(planPath) ? planPath : join(repoRoot, planPath)
   if (!existsSync(abs)) fail(`plan not found: ${planPath}`)
   return readFileSync(abs, 'utf8')
 }
@@ -115,8 +124,9 @@ function extractField(planText, name) {
 
 function resolvePlanPath(args) {
   if (args.plan) return normalize(args.plan)
-  const active = activePlanPath()
-  if (!active) fail('no --plan given and no active plan for this slot (.worktree-plan missing)')
+  // A slot's .worktree-plan; outside a slot, the plan a numbered branch names (feat/NNN-<slug> -> plans/NNN-*.plan.md).
+  const active = activePlanPath() ?? branchPlanPath(git(['branch', '--show-current']))
+  if (!active) fail('no --plan given, no active plan for this slot (.worktree-plan missing) and no plan named by the branch')
   return normalize(active)
 }
 
@@ -125,10 +135,8 @@ function buildMatcher(planPath) {
   const scopeGlobs = extractScopeGlobs(planText)
   if (!scopeGlobs) fail(`${planPath} has no readable scope under "## Read-Write Scope" (need a \`\`\`scope block or a **Scope:** list of \`globs\`)`)
 
-  const branch = sanitizeBranch(git(['branch', '--show-current']))
   const alwaysAllowed = [
     planPath,
-    `docs/session-state-${branch}.md`,
     '.claude/sessions/**',
     '.worktree-*',
     'docs/brain/**', // the merge gate's brain capture appends here
@@ -274,10 +282,10 @@ function cmdArchPlan(args) {
   process.exit(ok ? 0 : 1)
 }
 
-// Added lines (with line numbers) in session-state and plan files since the merge base with <base>.
+// Added lines (with line numbers) in plan files since the merge base with <base>.
 function addedDecisionLines(base) {
   const mergeBase = git(['merge-base', base, 'HEAD']) || base
-  const specs = [':(glob)docs/session-state*.md', ...OPEN_PLAN_DIRS.map(d => `:(glob)${d}/*.plan.md`)]
+  const specs = [...OPEN_PLAN_DIRS.map(d => `:(glob)${d}/*.plan.md`)]
   const added = parseAddedLines(git(['diff', '-U0', '--no-color', mergeBase, '--', ...specs]))
   const untracked = git(['ls-files', '--others', '--exclude-standard', '--', ...specs]).split('\n').filter(Boolean)
   for (const f of untracked) {
@@ -298,14 +306,42 @@ function cmdArchDiff(args) {
   console.log(lines.length ? lines.join('\n') : 'ARCH: ok (diff)')
 }
 
+function cmdDeps(args) {
+  if (!args.plan || args.plan === true) fail('--deps requires --plan=<path>')
+  const planPath = normalize(args.plan)
+  const planText = readPlanFile(planPath)
+  const deps = parseDependsOn(planText)
+  if (deps === null) {
+    const prose = parseProsePrerequisites(planText)
+    console.log('DEPENDS_ON: missing')
+    console.log(`  ${planPath} has no "Depends-on:" header line - add one under Status: (e.g. "Depends-on: 007, 012" or "Depends-on: none")${prose.length ? `; its prose names plan(s) ${prose.join(', ')}` : ''}`)
+    process.exit(1)
+  }
+  console.log(`DEPENDS_ON: ok${deps.length ? ` (${deps.join(', ')})` : ' (none)'}`)
+}
+
+function cmdTags(args) {
+  if (!args.plan || args.plan === true) fail('--tags requires --plan=<path>')
+  const planPath = normalize(args.plan)
+  const problems = doneWhenTagProblems(readPlanFile(planPath))
+  if (problems.length) {
+    console.log('DONE_WHEN_TAGS: bad')
+    for (const p of problems) console.log(`  ${planPath} ${p}`)
+    process.exit(1)
+  }
+  console.log('DONE_WHEN_TAGS: ok')
+}
+
 const args = parseArgs(process.argv.slice(2))
 if (args.reuse) process.exit(runReuseCheck({ args, repoRoot }))
 
 if (args.arch && args.diff) cmdArchDiff(args)
 else if (args.arch && args.plan) cmdArchPlan(args)
 else if (args.arch) fail('--arch needs --plan=<p> or --diff=<base>')
+else if (args.deps) cmdDeps(args)
+else if (args.tags) cmdTags(args)
 else if (args.file) cmdFile(args)
 else if (args.diff) cmdDiff(args)
 else if (args.overlap) cmdOverlap(args)
 else if (args.drift) cmdDrift(args)
-else fail('usage: --file=<p> | --diff=<base> | --overlap --plan=<p> | --drift [--plan=<p>] | --arch --plan=<p> | --arch --diff=<base>')
+else fail('usage: --file=<p> | --diff=<base> | --overlap --plan=<p> | --drift [--plan=<p>] | --arch --plan=<p> | --arch --diff=<base> | --deps --plan=<p> | --tags --plan=<p> | --reuse --plan=<p>')

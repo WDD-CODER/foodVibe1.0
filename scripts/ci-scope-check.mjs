@@ -10,7 +10,7 @@
  * The branch name is untrusted input in CI: the workflow passes it through an env variable, and it only reaches
  * `git` and `node` as an argv element (never a shell line) after it matches `feat/<digits>-...`.
  * --checkout-branch: when HEAD is detached (CI checks out a merge commit), name the checkout after the branch,
- * because scope-check allows `docs/session-state-<branch>.md` by the current branch name.
+ * so `scope-check.mjs` can name the plan from the branch when no `--plan` is given (kit `branchPlanPath`).
  *
  * Exit 0 = in scope or skipped, 1 = a file outside the scope (named in the output) or a usage error.
  * Node built-ins only.

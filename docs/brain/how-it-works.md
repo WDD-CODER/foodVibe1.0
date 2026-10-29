@@ -15,7 +15,7 @@ flowchart TB
 
   subgraph now["📋 Now / in flight"]
     TODO[".claude/todo.md"]
-    STATE["docs/session-state.md"]
+    STATE["open plan Execution Notes"]
     SESS["sessions/YYYY-MM-DD.md"]
     HAND["notes/session-handoffs/"]
   end
@@ -117,7 +117,7 @@ flowchart LR
 
   subgraph NO["❌ Keep elsewhere"]
     N1["Today's checklist → todo.md"]
-    N2["In-flight status → session-state"]
+    N2["In-flight status → plan Execution Notes"]
     N3["Milestone logs → sessions/"]
     N4["Coding rules → AGENTS.md"]
     N5["Chat dumps / noise"]
@@ -207,7 +207,7 @@ flowchart TD
 
 | Path | Job |
 | --- | --- |
-| `docs/session-state.md` | Current work snapshot |
+| Open plan `## Execution Notes` | Current work snapshot |
 | `.claude/todo.md` | Active task checklist |
 | `sessions/` | Per-day execution summaries |
 | `notes/session-handoffs/` | End-of-day handoffs (legacy path) |

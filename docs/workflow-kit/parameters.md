@@ -107,4 +107,4 @@ Values are **npm script names** wherever one exists — core never calls raw `ng
 ## Kit runtime paths the installer must scaffold
 
 Not parameters — constants of the workflow that core files read/write (all excluded from the inventory as runtime data):
-`.claude/todo.md`, `.claude/todo-archive/` (+ legacy `.claude/todo-archive.md`), `.claude/sessions/`, `.claude/reports/`, `.claude/techdebt-reports/`, `plans/`, `docs/session-state.md` (+ per-branch `docs/session-state-<branch>.md`), `notes/github-sync/`, `notes/session-handoffs/`, `.worktree-port` / `.worktree-plan` / `.worktree-root` (slot markers), `.claude/.ship-baseline`, `.claude/.slot-pids`.
+`.claude/todo.md`, `.claude/todo-archive/` (+ legacy `.claude/todo-archive.md`), `.claude/sessions/`, `.claude/reports/`, `.claude/techdebt-reports/`, `plans/`, `notes/github-sync/`, `notes/session-handoffs/`, `.worktree-port` / `.worktree-plan` / `.worktree-root` (slot markers), `.claude/.ship-baseline`, `.claude/.slot-pids`.

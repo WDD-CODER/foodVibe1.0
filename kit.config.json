@@ -174,11 +174,11 @@
     },
     {
       "path": "scripts/scope-check.mjs",
-      "reason": "plan 450 reuse layer: one import + one --reuse dispatch line (logic in FoodVibe-owned scripts/lib/reuse-check.mjs); queued as a kit PR"
+      "reason": "plan 450 reuse layer on top of kit v1.9.0 (rebased by plan 506); queued as a kit PR"
     },
     {
       "path": ".claude/references/prd-template.md",
-      "reason": "plan 450 reuse layer: the ## Reuse Check block; queued as a kit PR"
+      "reason": "plan 450 reuse layer on top of kit v1.9.0 (rebased by plan 506); queued as a kit PR"
     },
     {
       "path": ".claude/skills/save-plan/SKILL.md",

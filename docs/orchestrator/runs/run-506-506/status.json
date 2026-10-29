@@ -1,0 +1,135 @@
+{
+  "run": "run-506-506",
+  "branch": "orch/run-506-506",
+  "base": "main",
+  "startedAt": "2026-10-29T15:52:46.836Z",
+  "mainShaAtStart": "2d91fb2bb7830b12d590f56dcbefbd00359ae7b9",
+  "plans": {
+    "506": {
+      "nnn": "506",
+      "title": "Remove the session-state concept from FoodVibe",
+      "branch": "feat/506-remove-the-session-state",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-security": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "After the kit fix ships and the fleet mod updates: `/ship` on a small change and one `/handoff`, and no `docs/session-state*` file appears."
+      ],
+      "history": [
+        {
+          "at": "2026-10-29T15:53:21.184Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T16:00:31.275Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T16:04:26.712Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T16:04:34.025Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T16:05:28.642Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T16:08:55.918Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T16:10:49.819Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T16:10:59.319Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T16:12:45.337Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "freeDiskGb": 30.1,
+      "sha": "ca7533a1730d36ceecf59f7b819a7f49feac2493"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-10-29T16:15:55.869Z",
+      "plan": "506",
+      "text": "D1 behaviour: rebased the overrides on kit v1.12.0 instead of v1.9.0, because the two files are byte-identical in both tags — reverse: none needed"
+    },
+    {
+      "at": "2026-10-29T16:16:04.309Z",
+      "plan": "506",
+      "text": "D2 behaviour: also git rm'd .claude/handoff-previous.md per the readiness answer — reverse: git checkout the file from run branch"
+    },
+    {
+      "at": "2026-10-29T16:16:12.420Z",
+      "plan": "506",
+      "text": "D3 behaviour: A5 skipped, plans 419 and 497 are closed in plans/<range>/ — reverse: n/a"
+    },
+    {
+      "at": "2026-10-29T16:16:21.034Z",
+      "plan": "506",
+      "text": "D4 behaviour: the plan asks for both kit diffs pasted in Execution Notes; I wrote a summary there instead of pasting them, and did not diff prd-template.md separately — reverse: paste both diffs into the plan's Execution Notes"
+    },
+    {
+      "at": "2026-10-29T16:16:31.339Z",
+      "plan": "506",
+      "text": "D5 behaviour: refreshed the plan Snapshot to origin/main HEAD after Step 0 judged the drift commits ok (the simplest way to clear the drift gate) — reverse: restore line 5 to Snapshot: c5e6916634cf8f1aad1a7acf852e0642a876e072"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 30.1,
+  "updatedAt": "2026-10-29T16:16:40.131Z",
+  "finishedAt": "2026-10-29T16:16:40.129Z"
+}
