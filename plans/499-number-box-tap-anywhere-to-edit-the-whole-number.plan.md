@@ -42,7 +42,7 @@ A box whose only content is an editable number (quantity, price, %, portions, gu
 ## Read-Write Scope
 
 Always allowed regardless of the list below: this plan file itself, its own
-`docs/session-state-<branch>.md`, `.claude/sessions/**`, `.worktree-*`, and the append-only
+`.claude/sessions/**`, `.worktree-*`, and the append-only
 hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
 — add to them, never rewrite or remove an existing entry without escalating).
 

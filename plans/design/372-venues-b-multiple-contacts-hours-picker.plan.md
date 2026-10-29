@@ -28,7 +28,7 @@ The schema is strict (`z.strictObject`, enforced server-side by `server/middlewa
 ## Read-Write Scope
 
 Always allowed regardless of the list below: this plan file itself, its own
-`docs/session-state-<branch>.md`, `.claude/sessions/**`, `.worktree-*`, and the append-only
+`.claude/sessions/**`, `.worktree-*`, and the append-only
 hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
 — add to them, never rewrite or remove an existing entry without escalating).
 
@@ -104,7 +104,7 @@ touching any milestone.
 - [ ] A2: Show opening hours in plain Hebrew — `venue-hours.util` `toDisplay` plus spec (Hebrew range forms, midnight crossing).
 - [ ] A3: Add an interactive days-and-hours picker to the venue form — `HoursEditorComponent` plus spec; wire into the venue form; save structured hours and the generated strings (`shared/hours-editor/**`, `venue-form/**`).
 - [ ] A4: Let the venue form add and list several contacts — Contacts FormArray, detail list (`venue-form/**`, `venue-detail/**`).
-- [ ] A5: Build and test — Build, specs; add one new venue with two contacts and structured hours and check no 400s. Update session-state.
+- [ ] A5: Build and test — Build, specs; add one new venue with two contacts and structured hours and check no 400s.
 
 ## Technical Considerations
 

@@ -25,7 +25,7 @@ Equipment already distinguishes them: `category === 'infrastructure'` (`Equipmen
 ## Read-Write Scope
 
 Always allowed regardless of the list below: this plan file itself, its own
-`docs/session-state-<branch>.md`, `.claude/sessions/**`, `.worktree-*`, and the append-only
+`.claude/sessions/**`, `.worktree-*`, and the append-only
 hotspots (`src/styles.scss`, `public/assets/data/dictionary.json`, `src/app/app.routes.ts`
 — add to them, never rewrite or remove an existing entry without escalating).
 
@@ -85,7 +85,7 @@ As an event chef, I want to record a venue's fixed infrastructure separately fro
 - [ ] A1: Sort venue equipment into infrastructure and regular groups behind the scenes — Computeds and the transient `group` control; hydrate grouping; payload strip (`venue-form/**`).
 - [ ] A2: Show infrastructure and regular equipment as two groups on the venue pages — Two-group template with correct index mapping; detail split (`venue-form/**`, `venue-detail/**`).
 - [ ] A3: Hint in the equipment form which items count as infrastructure — Equipment-form infrastructure hint (`equipment-form/**`).
-- [ ] A4: Build, test and check an existing venue still saves — Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400. Update session-state.
+- [ ] A4: Build, test and check an existing venue still saves — Build, specs (hydrate grouping, payload has no `group`). Edit an existing venue and save, no 400.
 
 ## Technical Considerations
 
