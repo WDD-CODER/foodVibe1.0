@@ -149,7 +149,13 @@
         <span>{{ 'recipe_calculated_by' | translatePipe }} <b>{{ scaledRow.name }}</b>:</span>
       </span>
       <span class="cv-stepper" appNumberBox>
-        <button type="button" (click)="stepScaledBannerAmount(-1)" [attr.aria-label]="'decrease' | translatePipe">
+        <button
+          type="button"
+          appStepHold
+          [stepHoldStop]="getDisplayAmount(scaleByIngredientIndex_()!, scaledRow) <= 0.01"
+          (stepHold)="stepScaledBannerAmount(-1, $event)"
+          [attr.aria-label]="'decrease' | translatePipe"
+        >
           <lucide-icon name="minus" [size]="16"></lucide-icon>
         </button>
         <input
@@ -162,7 +168,12 @@
           (change)="setScaledBannerAmount($any($event.target).valueAsNumber)"
           [attr.aria-label]="'quantity' | translatePipe"
         />
-        <button type="button" (click)="stepScaledBannerAmount(1)" [attr.aria-label]="'increase' | translatePipe">
+        <button
+          type="button"
+          appStepHold
+          (stepHold)="stepScaledBannerAmount(1, $event)"
+          [attr.aria-label]="'increase' | translatePipe"
+        >
           <lucide-icon name="plus" [size]="16"></lucide-icon>
         </button>
       </span>
@@ -376,7 +387,9 @@
                 <span class="cv-stepper" appNumberBox>
                   <button
                     type="button"
-                    (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit))"
+                    appStepHold
+                    [stepHoldStop]="row.amount <= 0"
+                    (stepHold)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit, $event))"
                     [attr.aria-label]="'decrease' | translatePipe"
                   >
                     <lucide-icon name="minus" [size]="16"></lucide-icon>
@@ -394,7 +407,8 @@
                   />
                   <button
                     type="button"
-                    (click)="setIngredientAmount(i, getEditAmountStep(row.amount, 1, row.unit))"
+                    appStepHold
+                    (stepHold)="setIngredientAmount(i, getEditAmountStep(row.amount, 1, row.unit, $event))"
                     [attr.aria-label]="'increase' | translatePipe"
                   >
                     <lucide-icon name="plus" [size]="16"></lucide-icon>

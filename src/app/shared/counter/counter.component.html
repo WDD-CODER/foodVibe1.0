@@ -4,10 +4,9 @@
     class="ctrl-btn"
     tabindex="-1"
     [disabled]="minusDisabled_()"
-    (click)="$event.preventDefault()"
-    (mousedown)="onMinusMouseDown()"
-    (mouseup)="onCtrlMouseUp()"
-    (mouseleave)="onCtrlMouseLeave()"
+    appStepHold
+    [stepHoldStop]="minusDisabled_()"
+    (stepHold)="decrement($event)"
     [attr.aria-label]="'decrease' | translatePipe"
   >
     −
@@ -34,10 +33,9 @@
     class="ctrl-btn"
     tabindex="-1"
     [disabled]="plusDisabled_()"
-    (click)="$event.preventDefault()"
-    (mousedown)="onPlusMouseDown()"
-    (mouseup)="onCtrlMouseUp()"
-    (mouseleave)="onCtrlMouseLeave()"
+    appStepHold
+    [stepHoldStop]="plusDisabled_()"
+    (stepHold)="increment($event)"
     [attr.aria-label]="'increase' | translatePipe"
   >
     +

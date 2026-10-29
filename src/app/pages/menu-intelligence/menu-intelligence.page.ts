@@ -68,6 +68,7 @@ import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { NumberBoxDirective } from '@directives/number-box.directive'
+import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
 
 type MenuItemForm = {
   recipeId: string
@@ -88,6 +89,7 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
   standalone: true,
   imports: [
     NumberBoxDirective,
+    StepHoldDirective,
     SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,
@@ -165,9 +167,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly sectionCategories_ = this.menuSectionCategories.sectionCategories_
 
   /** Guest −/+ press-and-hold repeat (same timing as the shared counter). */
-  private static readonly GUEST_REPEAT_DELAY_MS = 500
-  private static readonly GUEST_REPEAT_INTERVAL_MS = 80
-  private guestHoldTimer_: ReturnType<typeof setTimeout> | null = null
 
   private readonly unsaved_ = useUnsavedChanges({ form: () => this.form_, isSubmitted: () => this.isSubmitted })
   /** For pendingChangesGuard: prevents re-triggering after a successful save */
@@ -275,7 +274,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.closeAllExportOverlays()
     this.heroFab.clearPageActions()
-    this.stopGuestHold()
   }
 
   ngAfterViewInit(): void {
@@ -346,30 +344,12 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   /** Tap steps by 1; holding repeats with the app's tiered hold steps (1…9, then 10s, 100s). */
-  protected startGuestHold(direction: 1 | -1, event: PointerEvent): void {
-    event.preventDefault()
-    this.stopGuestHold()
-    this.stepGuests(direction, false)
-    const tick = (): void => {
-      this.stepGuests(direction, true)
-      this.guestHoldTimer_ = setTimeout(tick, MenuIntelligencePage.GUEST_REPEAT_INTERVAL_MS)
-    }
-    this.guestHoldTimer_ = setTimeout(tick, MenuIntelligencePage.GUEST_REPEAT_DELAY_MS)
-  }
-
-  protected stopGuestHold(): void {
-    if (this.guestHoldTimer_ == null) return
-    clearTimeout(this.guestHoldTimer_)
-    this.guestHoldTimer_ = null
-  }
-
-  private stepGuests(direction: 1 | -1, continuousPress: boolean): void {
+  protected stepGuests(direction: 1 | -1, continuousPress: boolean): void {
     const ctrl = this.form_.get('guestCount')
     const v = Number(ctrl?.value ?? 0)
     const opts = continuousPress ? { continuousPress: true } : { integerOnly: true }
     const next = direction === 1 ? quantityIncrement(v, 0, opts) : quantityDecrement(v, 0, opts)
     ctrl?.setValue(next)
-    if (next <= 0) this.stopGuestHold()
   }
 
   protected getGuestCount(): number {

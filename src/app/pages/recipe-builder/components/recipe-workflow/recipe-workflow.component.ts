@@ -29,12 +29,14 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { quantityIncrement, quantityDecrement } from 'src/app/core/utils/quantity-step.util'
 import { CdkDragDrop, CdkDrag, CdkDropList, CdkDragHandle } from '@angular/cdk/drag-drop'
 import { CounterComponent } from 'src/app/shared/counter/counter.component'
+import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
 
 @Component({
   selector: 'app-recipe-workflow',
   standalone: true,
   imports: [
     CommonModule,
+    StepHoldDirective,
     ReactiveFormsModule,
     LucideAngularModule,
     PreparationSearchComponent,
