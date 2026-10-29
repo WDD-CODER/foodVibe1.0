@@ -37,7 +37,7 @@ Every +/− control around a number should behave the same, but there are five s
 - Hebrew RTL and logical CSS properties only; any new text goes through the dictionary.
 - T1 inventory (before): app-counter — mouse hold, tiered steps, min 0, disabled 0.35 opacity, arrows; menu guest count — pointer hold (own code), integerOnly then tiered, min 0, no disabled; cook-view banner + edit rows — click only, unit/integer steps, min 0.01 / 0; ingredients table — click only, minus disabled at 0; recipe-workflow labor (integer, min 0) and cook time (30 s, min 0) — click only.
 - Design (T3): sibling-free — the hold is one directive `appStepHold` (src/app/shared/counter/step-hold.directive.ts, pointer events); `app-counter` and the four page steppers use it on their own buttons, so the page skins (cook-view ink, menu paper pill) stay as they are, with no copied hold code.
-- scope: no extension needed. Evidence: `pnpm run build` exit 0; `pnpm run lint` exit 0 (0 errors); `pnpm run test:ci` TOTAL 1629 SUCCESS (4 new counter specs: hold repeats, release/leave/cancel stop, minimum stops and disables minus, arrows); reuse-lint --diff=origin/main ok; --check-registry ok (24 families); `node --test scripts/test/reuse-lint.test.mjs` pass 16 fail 0; scope-check --arch and --reuse ok. log-query is run by the gate from main.
+- scope extended: src/app/pages/inventory/components/product-form/product-form.component.spec.ts — test:ci hung on an admin save that opened the master-push scope dialog; the spec now stubs MasterPushService (test-only, no app code). Evidence: `pnpm run build` exit 0; `pnpm run lint` exit 0 (0 errors); `pnpm run test:ci` TOTAL 1629 SUCCESS (4 new counter specs: hold repeats, release/leave/cancel stop, minimum stops and disables minus, arrows); reuse-lint --diff=origin/main ok; --check-registry ok (24 families); `node --test scripts/test/reuse-lint.test.mjs` pass 16 fail 0; scope-check --arch and --reuse ok. log-query: the slot stamp `.claude/.slot-plan-start` is stale (2026-10-28, an earlier plan) and missing in main, so `--since=plan-start` was replaced by the plan-500 start: `node scripts/log-query.mjs --since=2026-10-29T20:16:58Z --level=error` → "no entries", exit 0 (worktree and main). Round 2 rerun: build 0, lint 0 (0 errors), test:ci TOTAL 1629 SUCCESS, reuse-lint diff + registry ok, node --test pass 16 fail 0, scope-check arch + reuse ok.
 
 ## Reuse Check
 - One stepper for all page steppers — family: none — rung: 4 — why: the registry has no stepper family; `app-counter` is extended (or one sibling added) and registered as the new family `stepper`
@@ -70,6 +70,7 @@ scripts/test/reuse-lint.test.mjs
 scripts/test/fixtures/reuse/**
 docs/brain/component-families.md
 src/app/shared/breadcrumbs.md
+src/app/pages/inventory/components/product-form/product-form.component.spec.ts
 ```
 
 ## Read Scope
