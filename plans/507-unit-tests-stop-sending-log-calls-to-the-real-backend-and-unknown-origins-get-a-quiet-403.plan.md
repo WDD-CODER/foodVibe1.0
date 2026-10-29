@@ -127,3 +127,6 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`: re-read `logg
 - Production CORS settings on Render (`ALLOWED_ORIGIN` there is unchanged).
 
 ## Execution Notes
+- Orchestrator readiness (2026-10-29): Start a backend on 3000, or only check one is up? → Never start or stop anything on 3000. If 3000 is up, run the log-query check after test:ci; if it is down, run log-query anyway, note in Execution Notes that 3000 was down, and rely on the new logging spec.
+- Orchestrator readiness (2026-10-29): Create src/app/core/services/logging.service.spec.ts in A3? → Yes, two small cases only: switch off sends no fetch; switch on sends one request to /api/v1/log.
+- Orchestrator readiness (2026-10-29): Server tests (`cd server && pnpm test`) are not an allowed run check → Accepted. The builder still writes server/test/cors-origin.test.js; the run PR's GitHub `server-tests` job is the evidence for that Success item, confirmed by the Planner before merge.
