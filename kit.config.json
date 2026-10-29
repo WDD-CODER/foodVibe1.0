@@ -87,6 +87,10 @@
   "tools": {
     "browser": "gstack /browse"
   },
+  "mods": {
+    "enabled": ["fleet", "guards", "ship-pilot"],
+    "marketplaceRepo": "WDD-CODER/ai-workflow-kit"
+  },
   "docs": {
     "domainStandards": "docs/agent/standards-domain.md",
     "domainSummary": "Ingredient Ledger, Triple-Unit conversion, Recursive Compounding, Waste Factor"

@@ -105,7 +105,19 @@
     "github",
     "context7"
   ],
+  "extraKnownMarketplaces": {
+    "ai-workflow-kit-mods": {
+      "source": {
+        "source": "github",
+        "repo": "WDD-CODER/ai-workflow-kit"
+      },
+      "autoUpdate": true
+    }
+  },
   "enabledPlugins": {
-    "security-guidance@claude-plugins-official": true
+    "security-guidance@claude-plugins-official": true,
+    "fleet@ai-workflow-kit-mods": true,
+    "guards@ai-workflow-kit-mods": true,
+    "ship-pilot@ai-workflow-kit-mods": true
   }
 }
