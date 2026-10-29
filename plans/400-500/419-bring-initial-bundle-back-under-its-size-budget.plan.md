@@ -1,6 +1,6 @@
 # Plan 419 — Bring the initial bundle back under its size budget
 
-Status: active
+Status: done
 Track: code — here (not design)
 Snapshot: c5e6916634cf8f1aad1a7acf852e0642a876e072
 
