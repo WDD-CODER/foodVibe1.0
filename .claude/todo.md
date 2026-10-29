@@ -123,12 +123,6 @@
 - [ ] C7: Schedule it weekly after your go and receive one automatic PR — Create the weekly cloud routine (Dandan's go); receive one scheduled PR — cloud routine
 - [ ] C8: You mark which tips were useful; record that and ship — Dandan marks useful recommendations; manifest note; `/ship` — `docs/workflow-kit/manifest.md`
 
-### Plan 419 — Bring the initial bundle back under its size budget
-- [x] A1: Measure what fills the first download and pick what to cut — stats-json breakdown, top 15 and chosen cuts in Execution Notes — angular.json (read), build output
-- [x] A2: Load the header's click-only parts on first use instead of at startup — @defer / lazy pieces, unused imports removed — src/app/core/components/header/**
-- [x] A3: Trim the other always-on shell parts and unused icons — tab-chips, scroll-rail, hero-fab, Lucide pick — src/app/core/components/tab-chips/**, hero-fab/**, src/app/shared/scroll-rail/**, src/app/app.config.ts
-- [ ] A4: Raise the warning budget on purpose only if trimming was not enough — new value + one-line reason — angular.json
-
 ### Plan 422 — Nightly QA morning report and shorter runs once pages are clean
 - [ ] H1: Review only pages whose code changed so nights get shorter as the app gets cleaner — citedFiles at ingest, due/skipped rule with a 14-day full review, Nothing-to-review queue, tests — scripts/qa/code-qa/rotation.mjs, scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**
 - [ ] H2: Tell the Code QA agent to skip unchanged pages and stop when nothing is due — work only numbered pages, ignore Skipped, Nothing-to-review rule — docs/qa/code-qa-agent.md
@@ -150,16 +144,6 @@
 - [x] S8: Add the suggestion label and make the hint say what the badge now does — append `"ingredient_suggestion": "הצעה מהמלאי"` next to `ingredient_not_ready`; keep `unlinked_ingredient_hint` (it already says «לחץ לחיפוש וקישור») — public/assets/data/dictionary.json
 - [x] S9: Specs for the table, search and matcher as listed in Done-when; update the plan-463 spec "never sends a text-only line to the AI step" to "sends a text-only line for options only and never links it" — recipe-ingredients-table.component.spec.ts, ingredient-search.component.spec.ts, product-name-matcher.service.spec.ts
 - [ ] V1: Build, run every listed test, replay the cards in the browser and write the run file — `npx ng build`, the `ng test` includes, the server tests, the grep, log-query; record evidence, decisions and the five cards — docs/mvp/runs/490.md
-
-### Plan 497 — Run the project rule checks on every pull request and clean up merged branches (`plans/497-run-the-project-rule-checks-on-every-pull-request-and-clean-up-merged-branches.plan.md`)
-
-- [x] S1: Make the three rule checks that fail today pass on main, so they can safely become PR gates — classify the 56 unclassified files in docs/workflow-kit/manifest.json, fix the stale and missing entries in the core services and core models breadcrumbs, replace the native select in the AI product modal with app-custom-select (follow the add-option rule in docs/agent/standards-domain.md) — docs/workflow-kit/manifest.json, src/app/core/services/breadcrumbs.md, src/app/core/models/breadcrumbs.md, src/app/shared/ai-product-modal/*
-- [x] S2: Add a rules workflow that runs the project's own rule checks on every pull request and every push to main — lint:icons, lint:no-native-select, plan-ledger-check, kit-manifest-check, breadcrumbs-check, with picomatch installed via npm ci --prefix scripts — .github/workflows/rules.yml
-- [x] S3: Let CI catch a Worker branch that edited files outside its plan's Read-Write Scope — new wrapper that maps a feat/NNN-* head branch to plans/NNN-*.plan.md and runs scope-check --diff against the PR base, skipping other branch names, plus its node tests — scripts/ci-scope-check.mjs, scripts/test/ci-scope-check.test.mjs
-- [x] S4: Wire that scope check into the rules workflow as its own step on pull requests, passing the branch name through an env variable — .github/workflows/rules.yml
-- [x] S5: Add a weekly workflow that opens or updates a single "Stale branches" issue listing unmerged branches with no commit for 30+ days, without deleting anything — .github/workflows/stale-branches.yml, docs/workflow-kit/manifest.json
-- [ ] S6: Turn on GitHub's automatic deletion of merged pull-request branches — one repo-setting command run by the Human (gh api -X PATCH repos/WDD-CODER/foodVibe1.0 -f delete_branch_on_merge=true), then record the setting and the new checks in docs/agent/standards-git.md
-- [ ] S7: Check the gates fail when they should — open a throwaway PR with a native select in a template and confirm the rules check goes red, then close it — Human check, no files
 
 ### Plan 498 — Protect unsaved work everywhere (`plans/498-protect-unsaved-work-everywhere.plan.md`)
 
@@ -215,7 +199,6 @@
 - [ ] C5: Give every save button one saving state: disabled with a busy label while it runs, enabled again on error — one signal name and one button state; fix the ten screens without a flag — src/styles.scss, the dialogs and tabs in scope
 - [ ] C6: Warn when a native date input, a template `toFixed` or a bare textarea is added, and register the families — `reuse-lint` rules with fixtures; update the `form-field` and `engine-classes` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
 - [ ] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
-
 
 - [ ] A1: Delete the 140 old per-branch state files from git and the local pointer file so no agent reads stale status again — git rm the 140 tracked state files under docs/; delete the untracked pointer file under .claude/ — docs/ (the old per-branch state files)
 - [ ] A2: Rebuild the two kit-override files from kit v1.9.0 and put only the reuse layer back, so they stop allowing a state file and gain the kit's newer checks — render placeholders by hand; keep import + --reuse dispatch; keep ## Reuse Check block; update override reasons — scripts/scope-check.mjs, .claude/references/prd-template.md, kit.config.json

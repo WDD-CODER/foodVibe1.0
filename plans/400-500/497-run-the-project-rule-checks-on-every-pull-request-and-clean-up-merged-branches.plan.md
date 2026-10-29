@@ -1,6 +1,6 @@
 # Plan 497 — Run the project rule checks on every pull request and clean up merged branches
 
-Status: draft
+Status: done
 Track: code
 Depends-on: none (the MVP merge, PR #453, is already on main)
 Snapshot: 73efca9b0d5ba57ad57cc10f845068411d18be9b
