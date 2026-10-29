@@ -1,6 +1,6 @@
 # Plan 507 — Unit tests stop sending log calls to the real backend, and unknown origins get a quiet 403
 
-Status: draft
+Status: done
 Track: code — here (not design)
 Snapshot: 2cf94ac571b6ead55d9794f5a5c458a30971cf91
 
