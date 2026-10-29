@@ -57,7 +57,7 @@ Cursor rule files (10 original + 1 role rule + 10 skill-enforcement rules added 
 | `/refactor` | refactor path | — | product code |
 | `/brief` | see §6 flow F2; syncs parent plan via save-plan Phase 4 | `git diff/log`, `.claude/todo.md` (retroactive mode) | `.claude/sessions/{session-id}/brief.md` |
 | `/review-it` | Reviewer protocol | newest `sessions/*.md`, parent plan in `plans/`, milestone files | verdict in chat only (never `[x]`, never commits) |
-| `/ship` | Phase 0 classifies FAST/ULTRA-TRIVIAL/REGULAR first (`/ship fast`\|`regular` overrides); REGULAR invokes `/review`; runs `scripts/session-manifest-ship.py` (multi-worktree), `scripts/brain-review-check.mjs --scope=full` (feature-complete path) | `.claude/.session-state-path`, brief Done-when | commit; marks `.claude/todo.md` + plan `[x]`; `docs/brain/**` (auto-writes on `Y`, unless `no brain`; skipped by default on FAST/ULTRA-TRIVIAL); session-state file |
+| `/ship` | Phase 0 classifies FAST/ULTRA-TRIVIAL/REGULAR first (`/ship fast`\|`regular` overrides); REGULAR invokes `/review`; runs `scripts/session-manifest-ship.py` (multi-worktree), `scripts/brain-review-check.mjs --scope=full` (feature-complete path) | brief Done-when | commit; marks `.claude/todo.md` + plan `[x]`; `docs/brain/**` (auto-writes on `Y`, unless `no brain`; skipped by default on FAST/ULTRA-TRIVIAL) |
 | `/done` | job-validation Path B close-out | `.claude/todo.md`, parent plan | marks `[x]` on Human confirm (or Tier 1 evidence for all-`[auto]`) |
 | `/review` | standalone review pass (used by `/ship` Phase 2) | session diff | report only |
 | `/end-session` | alias territory of `/ship` ("wrap up") | — | — |
@@ -127,7 +127,7 @@ ranking behind the fix order.
 | PreToolUse (Edit\|Write\|MultiEdit) | `scripts/branch-guard.sh` | **blocks writes on `main`**, except the Planner's `plans/*.plan.md` / `.claude/todo.md` admin-bypass |
 | PreToolUse (Edit\|Write\|MultiEdit) | `scripts/plan-write-guard.sh` | gates **new** `plans/*.plan.md` writes: runs similarity check; denies when similar plans exist unless `.claude/.plan-write-ack` names the target; existing-plan edits always allowed |
 | PreToolUse (Edit\|Write\|MultiEdit) | `scripts/scope-guard.sh` | inside a `wt-N` slot with an active plan, denies a write outside that plan's `## Read-Write Scope` (`SCOPE_GUARD:` message); silent allow outside a slot, in an idle slot, or on an internal check failure — the `/ship` scope gate is the backstop |
-| SessionStart (startup) | `scripts/session-startup.sh` | loads previous session-state; sets `.claude/.session-state-path` save target; injects `PLANNER:` / `WORKER: plan=…` / `IDLE SLOT:` via `scripts/lib/slot.mjs --describe` (see slot model below) |
+| SessionStart (startup) | `scripts/session-startup.sh` | injects `PLANNER:` / `WORKER: plan=…` / `IDLE SLOT:` via `scripts/lib/slot.mjs --describe` (see slot model below) |
 | PostToolUse (Edit\|Write) | `scripts/session-manifest-hook.py` | records this-session file touches (multi-worktree staging safety); refreshes this slot's liveness heartbeat |
 | PreCompact | `scripts/pre-compact-reminder.sh` | reminds the agent to save state before compaction |
 | Stop | `scripts/handoff-check.sh` | handoff completeness check at turn end; releases this slot's liveness lock |
@@ -188,7 +188,6 @@ has no PreToolUse hook of its own.
 | `pre-commit-no-semi.mjs`, `pre-commit-secret-scan.mjs`, `pre-commit-security-grep.mjs` | pre-commit hooks (source of truth for enforcement per `AGENTS.md`) |
 | `prune-merged-worktrees.sh`, `prune-old-sessions.sh` | `/cleanup` |
 | `lib/slot.mjs` | `session-startup.sh` (`--describe`), `scope-check.mjs`, `ship-prep.mjs`, `take-plan.mjs`; `--list` for the Planner protocol |
-| `session-state-path.mjs` | `session-startup.sh`, `handoff-check.sh`, `write-session-state.mjs` — one resolver, no duplicated logic |
 | `scope-check.mjs` | `scope-guard.sh` (`--file`), `ship-prep.mjs` (`--diff`, `--arch --diff` warn), the Planner protocol (`--overlap`), save-plan Shape lint (`--arch --plan` block), `/review-it` step 3 (`--arch --diff`), `take-plan.mjs` + `take-plan.md` (`--drift`) |
 | `lib/invariants.mjs` | `scope-check.mjs --arch` and `take-plan.mjs` (pre-claim architecture gate, judged against the main branch): parses `docs/brain/invariants.md` and a plan's `## Architecture Impact` |
 | `take-plan.mjs` | "execute plan NNN" / "take plan NNN" (`.claude/commands/take-plan.md`) |
@@ -212,7 +211,6 @@ Data-repair scripts (not workflow): `backup-before-repair.mjs`, `diagnose-broken
 | `.claude/todo-archive.md` | `/ship` (archives fully-complete plan sections) | — |
 | `.claude/sessions/{session-id}/brief.md` | `/brief` | `/ship` Done-when check |
 | `sessions/YYYY-MM-DD.md` | Contractor after each milestone | `/review-it` step 1 (handoff) |
-| `docs/session-state*.md` (target in `.claude/.session-state-path`) | `/ship` Phase 5 | `session-startup.sh` on next session |
 | `docs/brain/**` | `/ship` brain capture (auto-write on gate reply, opt out with `no brain`) | session start on unfamiliar work; architectural choices |
 | `.claude/.plan-write-ack` | save-plan (save-as-new after Human confirm) | consumed once by `plan-write-guard.sh` |
 | `notes/github-sync/YYYY-MM-DD.md` | github-sync skill | — |
@@ -266,7 +264,7 @@ Phase 4  approval gate       — REGULAR: visual tree, Human Y = job validation,
          commit-vs-PR judgment: brief Done-when met → PR; else checkpoint (no PR); ad-hoc → ask
 Phase 4.5 Merge Gate         — mandatory after any successful push (standards-git.md); folded into Phase 4's single Y for FAST lane
          replies: merge | later | open-pr-only (brain draft auto-writes; add "no brain" to opt out, "brain edit …" to revise)
-Phase 5  session-state write — target from .claude/.session-state-path
+Phase 5  (no state file — open work: plan checkboxes + Execution Notes)
 Phase 6  (todo sync already done in Phase 4)
 ```
 
@@ -283,12 +281,11 @@ Agent finishes job → MUST print HOW TO VALIDATE cards (first ask only; /ship l
 ### F5 — Session lifecycle (Claude Code)
 
 ```
-SessionStart → session-startup.sh → loads docs/session-state*.md + sets save target
+SessionStart → session-startup.sh → injects PLANNER / WORKER / IDLE SLOT
   → github-sync skill (once per calendar day)
   → work … (branch-guard + plan-write-guard on every write; session-manifest on every edit)
   → context full → PreCompact reminder fires → /compact focus … (or /clear + state reload)
   → Stop → handoff-check.sh
-  → /ship Phase 5 → writes session-state for next session
 ```
 
 ### F6 — PR checks fix loop
@@ -315,7 +312,7 @@ Durable learning in session (decision/gotcha/pattern)
 ```
 /feat        --invokes-->  /plan, /review-it
 /ship        --invokes-->  /review; --runs--> session-manifest-ship.py, brain-review-check.mjs
-/ship        --writes-->   .claude/todo.md, plans/*.plan.md ([x]), docs/brain/**, session-state
+/ship        --writes-->   .claude/todo.md, plans/*.plan.md ([x]), docs/brain/**
 /review-it   --reads-->    sessions/*.md, plans/*
 /brief       --writes-->   .claude/sessions/{id}/brief.md; --reads--> plans/* (parent)
 save-plan    --runs-->     plan-name-similarity.mjs; --writes--> plans/*, .claude/todo.md, .plan-write-ack

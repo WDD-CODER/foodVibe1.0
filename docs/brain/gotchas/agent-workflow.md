@@ -12,7 +12,7 @@ Scope: session/context management, plan persistence and numbering, `.claude/todo
 
 **Why the obvious fix is wrong:** Trusting "the summary will capture it" isn't safe — summarization prioritizes recent/salient content, not necessarily the one decision that turns out to matter later.
 
-**What to do instead:** Persist load-bearing state to disk as it's decided (`docs/session-state.md`, `.claude/todo.md`, plan files under `plans/`) rather than leaving it only in conversation. This is also why `docs/brain/` exists as its own durable layer — see [[0002-file-based-memory-over-tool-memory]].
+**What to do instead:** Persist load-bearing state to disk as it's decided (plan files under `plans/` — checkboxes, `## Execution Notes` — and `.claude/todo.md`) rather than leaving it only in conversation. This is also why `docs/brain/` exists as its own durable layer — see [[0002-file-based-memory-over-tool-memory]].
 
 ---
 
@@ -318,9 +318,9 @@ only the Bash tool's command text triggers it.
 
 ## A Human answer to a mid-execution question can silently override a locked ADR (plan 387)
 
-**What hurt:** During plan 321 P3.4 a Worker asked "shared terms admin-only?". The Human said yes, and the answer went into a session-state "Human decision" line, the commit and the plan tick. It contradicted ADR 0008 D1 (shared master + per-user overrides): regular users lost create/edit/delete on every default list, and nobody noticed until later.
+**What hurt:** During plan 321 P3.4 a Worker asked "shared terms admin-only?". The Human said yes, and the answer went into a chat note, the commit and the plan tick. It contradicted ADR 0008 D1 (shared master + per-user overrides): regular users lost create/edit/delete on every default list, and nobody noticed until later.
 
-**Why the obvious fix is wrong:** "Re-read the ADRs before asking" is the judgment call that failed. The Human answered the narrow question asked, without being shown the rule it broke, and a session-state note is never checked again.
+**Why the obvious fix is wrong:** "Re-read the ADRs before asking" is the judgment call that failed. The Human answered the narrow question asked, without being shown the rule it broke, and a chat note is never checked again.
 
 **What to do instead:** Ask any question that could break an invariant as INV-n · current rule · proposed change · who loses what (`docs/brain/invariants.md`). A yes needs the Human's explicit `approve arch change INV-n`, a superseding ADR and an `Arch-approved:` line in the plan's `## Architecture Impact`. `scope-check.mjs --arch --diff` warns about any "Human decision" note that names no INV/ADR. See [[0017-architecture-invariants-gate]].
 
