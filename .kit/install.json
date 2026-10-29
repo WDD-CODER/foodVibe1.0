@@ -1,9 +1,10 @@
 {
   "kit": {
-    "version": "1.9.0"
+    "version": "1.10.0"
   },
-  "source": "local:../ai-workflow-kit",
-  "commit": "7a5aa7806346ad999749c54f9f487a7d78faeb15",
+  "source": "github:WDD-CODER/ai-workflow-kit",
+  "ref": "v1.10.0",
+  "commit": "d922f7adae224bb58a88b9dc2abcdd8632840c90",
   "packs": [
     "angular",
     "node-express"
@@ -127,7 +128,7 @@
       "source": "core/.claude/commands/orchestrate.md"
     },
     ".claude/commands/plan.md": {
-      "sha256": "e65f6ac0a21285ec814a46d9a2aee6a78c63711345069b355f0c2dd68f4e7bcf",
+      "sha256": "cfe944f01c401f50edb5722e891aae43187f9a87d9c45f823ad99103bfc46c1d",
       "kind": "managed",
       "source": "core/.claude/commands/plan.md"
     },
@@ -152,7 +153,7 @@
       "source": "core/.claude/commands/security.md"
     },
     ".claude/commands/ship.md": {
-      "sha256": "f0d8ab6ee5962775e99b721377be99b052af4bfc784e036360848971c7f36f96",
+      "sha256": "c5babb64f97f805ffa18062e75f007341d914b3a8ed83f61def8c64a8ba16576",
       "kind": "managed",
       "source": "core/.claude/commands/ship.md"
     },
@@ -247,7 +248,7 @@
       "source": "core/.claude/skills/save-plan/reference/mid-flight-sync.md"
     },
     ".claude/skills/worktree-setup/SKILL.md": {
-      "sha256": "a41078fbf144b256b8c8b0fd5de2c1e3743dfeeed1072436224b17a1f06c3f43",
+      "sha256": "718bfd780ce0573590b4f1f455f4a2c08bfedd3046bc16229fb6a314f770e364",
       "kind": "managed",
       "source": "core/.claude/skills/worktree-setup/SKILL.md"
     },
@@ -807,7 +808,7 @@
       "source": "core/scripts/lib/invariants.mjs"
     },
     "scripts/lib/orch-folders.mjs": {
-      "sha256": "f32119ff8b52988309a15a9ac401bbfa60f51c05b9c5dbb1e164d24448968f14",
+      "sha256": "d7d2fdeae213a83e51f47e868e05d49245c66c7baa94738f96e0e43755ec00e8",
       "kind": "managed",
       "source": "core/scripts/lib/orch-folders.mjs"
     },
@@ -967,7 +968,7 @@
       "source": "core/scripts/session-startup.sh"
     },
     "scripts/ship-prep.mjs": {
-      "sha256": "19e6bd5c04610941b63c5ea50c27167ce72411e9aa5bc7c4176cf21c5ec5c2f3",
+      "sha256": "5866731a9ffabd3726a6d911088eb13bd79c361cf4c51620ab63706e5eecc749",
       "kind": "managed",
       "source": "core/scripts/ship-prep.mjs"
     },
