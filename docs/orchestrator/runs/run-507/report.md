@@ -1,7 +1,7 @@
 # Orchestrator run run-507
 
-Run branch: `orch/run-507` (from `origin/main` at a969725) · started 2026-10-29T08:57:58.371Z · finished 2026-10-29T09:18:27.427Z
-Result: 0 merged, 1 parked, skipped or left out, 1 in the run (counted from git and status.json).
+Run branch: `orch/run-507` (from `origin/main` at a969725) · started 2026-10-29T08:57:58.371Z · finished 2026-10-29T09:31:45.537Z
+Result: 1 merged, 0 parked, skipped or left out, 1 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is a969725.
 Stopped: wave 1 parked 507 — later waves not started
 
@@ -9,7 +9,7 @@ Stopped: wave 1 parked 507 — later waves not started
 
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
-| 507 Unit tests stop sending log calls to the real backend, and unknown origins get a quiet 403 | parked | 0 | build |  | environment, again after one retry: merge: Check 5 failed:  node scripts/log-query.mjs --since=15m --event=server.unhandled  exited 1 with  Cannot find module 'mongodb' . The merge worktree has no server dependencies installed (server/node_modules is missing mongodb). Checks 1-4 passed (build, lint, test:ci, scope-check). The merge was aborted. Nothing was committed or pushed. |
+| 507 Unit tests stop sending log calls to the real backend, and unknown origins get a quiet 403 | merged | 0 | build | 0911144 | merge-only retry by Planner (Human: merge-only 507); log checks run from main folder because pnpm server tree does not expose mongodb |
 
 ## Decisions taken
 
@@ -24,6 +24,7 @@ Stopped: wave 1 parked 507 — later waves not started
 - 507: D9 Ran server/test/cors-origin.test.js in the worktree (vitest): 4 of 4 passed.
 - 507: D10 Checked the 403 middleware order in server/app.js. It sits after pino-http, so req.log exists, and after express.static, so static assets with an Origin header are not affected. For a disallowed origin the old cors callback also failed (it called next(err), which gave a 500), so same-origin POSTs from a domain missing from ALLOWED_ORIGIN are not a new regression.
 - 507: notes capped: 12 notes written for plan 507 (orchestrator.maxNotesPerPlan), later notes are dropped
+- Final gate on merged tree (Planner): scope-check exit 0; pnpm run build exit 0 (Initial total 552.14 kB); pnpm run lint exit 0 (0 errors, 67 warnings); pnpm run test:ci exit 0 (TOTAL: 1600 SUCCESS; first run DISCONNECTED at teardown after 1600/1600 SUCCESS, rerun clean). log-query server.unhandled 15m and errors since 09:03:20Z: no entries (run from main folder).
 
 ## Models per agent
 
@@ -40,7 +41,6 @@ Stopped: wave 1 parked 507 — later waves not started
 
 - nothing to validate
 
-- Decide on 507: environment, again after one retry: merge: Check 5 failed:  node scripts/log-query.mjs --since=15m --event=server.unhandled  exited 1 with  Cannot find module 'mongodb' . The merge worktree has no server dependencies installed (server/node_modules is missing mongodb). Checks 1-4 passed (build, lint, test:ci, scope-check). The merge was aborted. Nothing was committed or pushed.
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell

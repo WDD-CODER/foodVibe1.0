@@ -9,7 +9,7 @@
       "nnn": "507",
       "title": "Unit tests stop sending log calls to the real backend, and unknown origins get a quiet 403",
       "branch": "feat/507-unit-tests-stop-sending",
-      "state": "parked",
+      "state": "merged",
       "round": 0,
       "tier": "build",
       "models": {
@@ -102,11 +102,16 @@
           "at": "2026-10-29T09:16:27.874Z",
           "state": "parked",
           "round": 0
+        },
+        {
+          "at": "2026-10-29T09:31:44.235Z",
+          "state": "merged",
+          "round": 0
         }
       ],
-      "freeDiskGb": 34.7,
-      "sha": "2b4e7f83",
-      "reason": "environment, again after one retry: merge: Check 5 failed:  node scripts/log-query.mjs --since=15m --event=server.unhandled  exited 1 with  Cannot find module 'mongodb' . The merge worktree has no server dependencies installed (server/node_modules is missing mongodb). Checks 1-4 passed (build, lint, test:ci, scope-check). The merge was aborted. Nothing was committed or pushed."
+      "freeDiskGb": 34.4,
+      "sha": "09111447dbd6fa79f7391efbfa46cc0aabeab18f",
+      "reason": "merge-only retry by Planner (Human: merge-only 507); log checks run from main folder because pnpm server tree does not expose mongodb"
     }
   },
   "notes": [
@@ -164,12 +169,16 @@
       "at": "2026-10-29T09:18:18.526Z",
       "plan": "507",
       "text": "notes capped: 12 notes written for plan 507 (orchestrator.maxNotesPerPlan), later notes are dropped"
+    },
+    {
+      "at": "2026-10-29T09:31:44.548Z",
+      "text": "Final gate on merged tree (Planner): scope-check exit 0; pnpm run build exit 0 (Initial total 552.14 kB); pnpm run lint exit 0 (0 errors, 67 warnings); pnpm run test:ci exit 0 (TOTAL: 1600 SUCCESS; first run DISCONNECTED at teardown after 1600/1600 SUCCESS, rerun clean). log-query server.unhandled 15m and errors since 09:03:20Z: no entries (run from main folder)."
     }
   ],
   "attempts": 1,
   "phase": "stopped",
-  "freeDiskGb": 34.7,
-  "updatedAt": "2026-10-29T09:18:27.428Z",
+  "freeDiskGb": 34.4,
+  "updatedAt": "2026-10-29T09:31:45.538Z",
   "stopReason": "wave 1 parked 507 — later waves not started",
-  "finishedAt": "2026-10-29T09:18:27.427Z"
+  "finishedAt": "2026-10-29T09:31:45.537Z"
 }
