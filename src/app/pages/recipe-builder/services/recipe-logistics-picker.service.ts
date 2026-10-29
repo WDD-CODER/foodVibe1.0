@@ -1,6 +1,6 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
-import type { FormArray } from '@angular/forms'
+import type { AbstractControl, FormArray } from '@angular/forms'
 import type { Equipment } from '@models/equipment.model'
 import { EquipmentDataService, ERR_DUPLICATE_EQUIPMENT_NAME } from '@services/equipment-data.service'
 import { AddEquipmentModalService } from '@services/add-equipment-modal.service'
@@ -127,6 +127,18 @@ export class RecipeLogisticsPickerService {
 
   removeBaselineRow(index: number): void {
     this.baseline_?.removeAt(index)
+  }
+
+  /** Puts a removed baseline row back at its index (clamped to the list end). */
+  insertBaselineRow(index: number, row: AbstractControl): void {
+    this.baseline_?.insert(Math.min(index, this.baseline_.length), row)
+  }
+
+  /** Removes a baseline row and returns it so the caller can offer an undo. */
+  takeBaselineRow(index: number): AbstractControl | null {
+    const row = this.baseline_?.at(index) ?? null
+    this.baseline_?.removeAt(index)
+    return row
   }
 
   //UPDATE

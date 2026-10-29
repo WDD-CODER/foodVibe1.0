@@ -87,7 +87,14 @@ describe('ProductImportComponent', () => {
         },
         { provide: PermissionService, useValue: { can: () => allowed } },
         { provide: TranslationService, useValue: { translate: (key: string) => key } },
-        { provide: UserMsgService, useValue: { onSetSuccessMsg, onSetErrorMsg: jasmine.createSpy('onSetErrorMsg') } },
+        {
+          provide: UserMsgService,
+          useValue: {
+            onSetSuccessMsg,
+            onSetErrorMsg: jasmine.createSpy('onSetErrorMsg'),
+            onLineRemoved: jasmine.createSpy('onLineRemoved')
+          }
+        },
         { provide: LoggingService, useValue: jasmine.createSpyObj<LoggingService>('LoggingService', ['error']) }
       ]
     })

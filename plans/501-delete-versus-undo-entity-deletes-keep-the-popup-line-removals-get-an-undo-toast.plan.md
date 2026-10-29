@@ -35,6 +35,25 @@ Deleting things behaves differently from screen to screen: some ask in a popup, 
 - `team-tab removeMember`: keep the confirm popup unless the Worker finds a reason to treat it as a line; record the call.
 - Each new toast text goes through the dictionary (Hebrew RTL).
 
+- Handler classification (D1) and result. Helper: `UserMsgService.onLineRemoved(txt, restore, owner?)` (toast with undo; dismissed when `owner` DestroyRef is destroyed, so the undo never acts on a dead view).
+  - `event-notes-log remove(note)` — line (server-saved). Popup dropped; delete at once, undo re-creates via `EventPipelineService.addNote` (same route that added it; new time and author). Spec added.
+  - `event-closing-dialog removePhoto` — line (saved by `commit`). Undo goes through the same `updateRow` / commit path, photo back at its index.
+  - `product-form onDeletePurchaseOption` — line; same FormGroup re-inserted at index (clamped).
+  - `product-import removeRow` — line; row re-inserted at index, deleted counter restored.
+  - `venue-form removeHoursRow` / `removeInfraRow` — line; same control re-inserted.
+  - `recipe-builder removeIngredient`, `deleteStep` (recipe-workflow `removeItem` output), `removeBaselineRow` (new insert/take methods in `recipe-logistics-picker.service.ts`) — line; ingredient placeholder row is dropped on undo; step numbers re-ordered for preparations.
+  - `ai-draft-editor removeIngredient` (single handler for the row delete; the plan said 3, only one remove handler exists), `ai-product-modal removeCategory` / `removeAllergen` — line; restored at index.
+  - `cook-view removeIngredient` — line (local recipe copy); restored at index.
+  - `menu-intelligence.page removeSection` / `removeItem` — line; restore into the same section (skipped if the section was removed since).
+  - `scaling-chip onRemove` — neither: it only emits `remove`; the handler is in `recipe-header` (out of scope, no confirm there, no toast added) — seen.
+  - `prep-sheets` — neither: no remove handler exists.
+  - `team-tab removeMember` — entity (changes someone's access): confirm popup kept, unchanged.
+  - Entity deletes (equipment-list, menu-library-list, supplier-list, venue-list): all already use ConfirmModalService; unchanged.
+  - `custom-multi-select` chip x: neither, no toast.
+- Toast outlives the page: dismissed on owner destroy (decision recorded). Undo on server failure: existing pipeline error toast, line stays removed.
+- Evidence: `pnpm run build` -> 0; `pnpm run lint` -> 0 errors (67 pre-existing warnings); `pnpm run test:ci` -> 1633 SUCCESS; scope-check --arch -> 0, --reuse -> 0.
+- `log-query --since=plan-start --level=error` shows only `CORS origin not allowed` on /api/v1/data/DICTIONARY_OVERRIDES/global from the main-folder server (`C:\coding projects\Cursoroodvibe1.0\server`), not from this worktree or plan 501 code.
+
 ## Reuse Check
 - Remove-with-undo for a line — family: feedback — rung: 2 — why: reuse `onSetSuccessMsgWithUndo` in `user-msg.service.ts`; at most one small shared helper for "remove, toast, restore at the same position"
 - Entity delete popup — family: modal-controller — rung: 1 — why: keep `ConfirmModalService.open(msg, { variant: 'danger' })` as is
@@ -95,13 +114,13 @@ append the path to the scope block above and retry.
 
 ## Atomic Sub-tasks
 
-- [ ] D1: List every remove / delete handler named in the Problem Statement, mark each as entity, line or neither, and record it — include the two open calls (`team-tab removeMember`, `event-notes-log`) — this plan file
-- [ ] D2: Give line removals one shared way to remove at once and show an undo toast that puts the line back in the same place — small helper next to the existing toast service, with its spec — src/app/core/services/user-msg.service.ts
-- [ ] D3: Use it for the form rows in the product form, product import, venue form and recipe builder — purchase options, import rows, hours / infrastructure rows, baseline rows, ingredient and workflow rows — the page folders in scope
-- [ ] D4: Use it for the rows inside the AI modals, the scaling chip, cook-view ingredients, menu sections and prep sheets — src/app/shared/ai-recipe-modal/**, src/app/shared/ai-product-modal/**, src/app/shared/scaling-chip/**, src/app/pages/cook-view/**, src/app/pages/menu-intelligence/**
-- [ ] D5: Make deleting an event note and an event photo undoable, re-creating the saved item on undo, with specs — event-notes-log, event-closing-dialog — src/app/pages/menu-intelligence/components/event-notes-log/**, src/app/pages/menu-intelligence/components/event-closing-dialog/**
-- [ ] D6: Keep the confirm popup for entity deletes and for removing a team member, and fix any entity delete that skips it — src/app/pages/settings/components/team-tab/** and the handlers marked entity in D1
-- [ ] D7: Run the full checks and paste the output — `ng build`, headless `ng test`, scope-check, log-query — Execution Notes
+- [x] D1: List every remove / delete handler named in the Problem Statement, mark each as entity, line or neither, and record it — include the two open calls (`team-tab removeMember`, `event-notes-log`) — this plan file
+- [x] D2: Give line removals one shared way to remove at once and show an undo toast that puts the line back in the same place — small helper next to the existing toast service, with its spec — src/app/core/services/user-msg.service.ts
+- [x] D3: Use it for the form rows in the product form, product import, venue form and recipe builder — purchase options, import rows, hours / infrastructure rows, baseline rows, ingredient and workflow rows — the page folders in scope
+- [x] D4: Use it for the rows inside the AI modals, the scaling chip, cook-view ingredients, menu sections and prep sheets — src/app/shared/ai-recipe-modal/**, src/app/shared/ai-product-modal/**, src/app/shared/scaling-chip/**, src/app/pages/cook-view/**, src/app/pages/menu-intelligence/**
+- [x] D5: Make deleting an event note and an event photo undoable, re-creating the saved item on undo, with specs — event-notes-log, event-closing-dialog — src/app/pages/menu-intelligence/components/event-notes-log/**, src/app/pages/menu-intelligence/components/event-closing-dialog/**
+- [x] D6: Keep the confirm popup for entity deletes and for removing a team member, and fix any entity delete that skips it — src/app/pages/settings/components/team-tab/** and the handlers marked entity in D1
+- [x] D7: Run the full checks and paste the output — `ng build`, headless `ng test`, scope-check, log-query — Execution Notes
 
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).

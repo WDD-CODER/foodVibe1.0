@@ -1060,19 +1060,54 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   //DELETE
 
   removeIngredient(index: number): void {
+    const removed = this.ingredientsArray.at(index)
     this.ingredientsArray.removeAt(index)
+    let placeholder: AbstractControl | null = null
     if (this.ingredientsArray.length === 0) {
       this.addNewIngredientRow()
+      placeholder = this.ingredientsArray.at(0)
     }
+    this.userMsg_.onLineRemoved(
+      this.translation_.translate('line_removed'),
+      () => {
+        if (placeholder && this.ingredientsArray.length === 1 && this.ingredientsArray.at(0) === placeholder) {
+          this.ingredientsArray.removeAt(0)
+        }
+        this.ingredientsArray.insert(Math.min(index, this.ingredientsArray.length), removed)
+      },
+      this.destroyRef
+    )
   }
 
   protected onOpenUnitCreator(): void {
     this.unitRegistry_.openUnitCreator()
   }
 
-  deleteStep(index: number): void {
-    this.workflowArray.removeAt(index)
+  removeBaselineRow(index: number): void {
+    const removed = this.logisticsPicker.takeBaselineRow(index)
+    if (!removed) return
+    this.userMsg_.onLineRemoved(
+      this.translation_.translate('line_removed'),
+      () => this.logisticsPicker.insertBaselineRow(index, removed),
+      this.destroyRef
+    )
+  }
 
+  deleteStep(index: number): void {
+    const removed = this.workflowArray.at(index)
+    this.workflowArray.removeAt(index)
+    this.renumberSteps_()
+    this.userMsg_.onLineRemoved(
+      this.translation_.translate('line_removed'),
+      () => {
+        this.workflowArray.insert(Math.min(index, this.workflowArray.length), removed)
+        this.renumberSteps_()
+      },
+      this.destroyRef
+    )
+  }
+
+  private renumberSteps_(): void {
     if (this.recipeForm_.get('recipe_type')?.value === 'preparation') {
       this.workflowArray.controls.forEach((group, i) => {
         group.get('order')?.setValue(i + 1)

@@ -1,10 +1,22 @@
 // src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.ts
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  input,
+  output,
+  signal
+} from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { UnitRegistryService } from '@services/unit-registry.service'
+import { UserMsgService } from '@services/user-msg.service'
+import { TranslationService } from '@services/translation.service'
 import { FormsModule } from '@angular/forms'
 import { AiRecipeDraft } from '@services/ai-recipe-draft.service'
 import {
@@ -55,6 +67,9 @@ export interface DraftWorkflowItem {
 })
 export class AiDraftEditorComponent {
   private readonly unitRegistry = inject(UnitRegistryService)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly destroyRef = inject(DestroyRef)
   /** Typed name from a unit dropdown's add row, read once by the unit-change handler (rule W). */
   protected readonly pendingAddName_ = signal('')
   private nextId_ = 0
@@ -133,7 +148,19 @@ export class AiDraftEditorComponent {
   }
 
   protected removeIngredient(index: number): void {
+    const removed = this.ingredients()[index]
+    if (!removed) return
     this.ingredients.update((list) => list.filter((_, i) => i !== index))
+    this.userMsg.onLineRemoved(
+      this.translation.translate('line_removed'),
+      () =>
+        this.ingredients.update((list) => {
+          const next = [...list]
+          next.splice(Math.min(index, next.length), 0, removed)
+          return next
+        }),
+      this.destroyRef
+    )
   }
 
   protected onDropIngredient(event: CdkDragDrop<DraftIngredient[]>): void {

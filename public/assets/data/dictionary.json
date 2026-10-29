@@ -1568,6 +1568,9 @@
     "staff_stages_save_error": "שמירת השלבים נכשלה",
     "event_not_available": "האירוע הזה לא זמין לך",
     "pricing_meter_open": "תמחור האירוע",
-    "coefficients_unsaved_hint": "יש שינויים שלא נשמרו"
+    "coefficients_unsaved_hint": "יש שינויים שלא נשמרו",
+    "line_removed": "השורה הוסרה",
+    "note_removed": "ההערה נמחקה",
+    "photo_removed": "התמונה הוסרה"
   }
 }

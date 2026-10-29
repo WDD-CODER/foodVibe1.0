@@ -991,7 +991,16 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   //DELETE
   protected onDeletePurchaseOption(idx: number): void {
+    const removed = this.purchaseOptions_.at(idx)
     this.purchaseOptions_.removeAt(idx)
     this.productForm_.markAsDirty()
+    this.userMsgService.onLineRemoved(
+      this.translationService.translate('line_removed'),
+      () => {
+        this.purchaseOptions_.insert(Math.min(idx, this.purchaseOptions_.length), removed)
+        this.productForm_.markAsDirty()
+      },
+      this.destroyRef
+    )
   }
 }

@@ -394,7 +394,7 @@
                     type="button"
                     class="logistics-chip"
                     [class.logistics-chip--unresolved]="!ctrl.get('equipmentId')?.value"
-                    (click)="logisticsPicker.removeBaselineRow(i)"
+                    (click)="removeBaselineRow(i)"
                     [attr.aria-label]="'remove' | translatePipe"
                   >
                     <span class="logistics-chip-label">
