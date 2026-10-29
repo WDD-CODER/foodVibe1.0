@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
 import { ModalShellComponent, ModalShellSize } from './modal-shell.component'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 
 @Component({
   standalone: true,
@@ -16,6 +17,7 @@ import { ModalShellComponent, ModalShellSize } from './modal-shell.component'
         [titleKey]="'cancel'"
         [dismissible]="dismissible_()"
         [sheet]="sheet_()"
+        [hasChanges]="hasChanges_()"
         (dismissed)="onDismissed()"
       >
         <input id="first" type="text" />
@@ -35,6 +37,7 @@ class HostComponent {
   readonly size_ = signal<ModalShellSize>('sm')
   readonly dismissible_ = signal(true)
   readonly sheet_ = signal(false)
+  readonly hasChanges_ = signal(false)
   readonly dismissed_ = signal(0)
   readonly secondDismissed_ = signal(0)
 
@@ -118,6 +121,58 @@ describe('ModalShellComponent', () => {
     expect(host.dismissed_()).toBe(0)
     query('.c-modal-overlay')!.click()
     expect(host.dismissed_()).toBe(1)
+  })
+
+  describe('hasChanges (plan 498)', () => {
+    let confirmModal: ConfirmModalService
+    let askSpy: jasmine.Spy
+
+    const settle = () => new Promise<void>((resolve) => setTimeout(resolve))
+
+    beforeEach(() => {
+      confirmModal = TestBed.inject(ConfirmModalService)
+      askSpy = spyOn(confirmModal, 'open').and.resolveTo(false)
+      host.hasChanges_.set(true)
+      fixture.detectChanges()
+    })
+
+    it('Escape asks first and stays open when the user keeps editing', async () => {
+      pressEscape()
+      await settle()
+      expect(askSpy).toHaveBeenCalledTimes(1)
+      expect(host.dismissed_()).toBe(0)
+    })
+
+    it('Escape emits dismissed after the user agrees to discard', async () => {
+      askSpy.and.resolveTo(true)
+      pressEscape()
+      await settle()
+      expect(host.dismissed_()).toBe(1)
+    })
+
+    it('a backdrop click asks the same question', async () => {
+      askSpy.and.resolveTo(true)
+      query('.c-modal-overlay')!.click()
+      await settle()
+      expect(askSpy).toHaveBeenCalledTimes(1)
+      expect(host.dismissed_()).toBe(1)
+    })
+
+    it('does not stack a second question while one is open', async () => {
+      pressEscape()
+      pressEscape()
+      await settle()
+      expect(askSpy).toHaveBeenCalledTimes(1)
+    })
+
+    it('without edits Escape closes at once and never asks', async () => {
+      host.hasChanges_.set(false)
+      fixture.detectChanges()
+      pressEscape()
+      await settle()
+      expect(askSpy).not.toHaveBeenCalled()
+      expect(host.dismissed_()).toBe(1)
+    })
   })
 
   it('does nothing on Escape or backdrop click while not dismissible', () => {

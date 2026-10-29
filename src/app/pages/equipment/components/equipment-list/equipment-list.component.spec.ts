@@ -72,7 +72,7 @@ describe('EquipmentListComponent', () => {
         { provide: UserMsgService, useValue: { show: jasmine.createSpy('show') } },
         { provide: TranslationService, useValue: { translate: (k: string) => k || '' } },
         { provide: RequireAuthService, useValue: {} },
-        { provide: LoggingService, useValue: { log: jasmine.createSpy('log') } },
+        { provide: LoggingService, useValue: jasmine.createSpyObj('LoggingService', ['log', 'info', 'warn', 'error']) },
         {
           provide: ConfirmModalService,
           useValue: { open: jasmine.createSpy('open').and.returnValue(Promise.resolve(true)) }
@@ -106,6 +106,56 @@ describe('EquipmentListComponent', () => {
   it('should show list shell and title', () => {
     expect(fixture.nativeElement.querySelector('app-list-shell')).toBeTruthy()
     expect(fixture.nativeElement.querySelector('app-page-header h1.ph-title')).toBeTruthy()
+  })
+
+  describe('row panel unsaved work (plan 498)', () => {
+    interface PanelState {
+      editingId_: { set(id: string | null): void }
+      editForm_: { patchValue(v: object): void }
+      hydrateEditForm(e: object): void
+    }
+    const panel = () => component as unknown as PanelState
+    const item = { _id: 'e1', nameHebrew: 'סיר', category: 'tool', ownedQuantity: 1, isConsumable: false, notes: '' }
+
+    it('has no unsaved changes while no row is open', () => {
+      expect(component.hasRealChanges()).toBeFalse()
+    })
+
+    it('an opened, untouched row panel asks nothing; a changed value does; changing it back stops asking', () => {
+      panel().editingId_.set('e1')
+      panel().hydrateEditForm(item)
+      expect(component.hasRealChanges()).toBeFalse()
+      panel().editForm_.patchValue({ nameHebrew: 'מחבת' })
+      expect(component.hasRealChanges()).toBeTrue()
+      panel().editForm_.patchValue({ nameHebrew: 'סיר' })
+      expect(component.hasRealChanges()).toBeFalse()
+    })
+
+    it('a click outside asks once, keeps the panel open on stay, and ignores the answering tap', async () => {
+      const confirm = TestBed.inject(ConfirmModalService) as unknown as { openTernary: jasmine.Spy }
+      confirm.openTernary = jasmine.createSpy('openTernary').and.resolveTo('cancel')
+      panel().editingId_.set('e1')
+      panel().hydrateEditForm(item)
+      panel().editForm_.patchValue({ nameHebrew: 'מחבת' })
+      const outside = (
+        component as unknown as { onInlinePanelClickOutside(): Promise<void> }
+      ).onInlinePanelClickOutside.bind(component)
+      await Promise.all([outside(), outside()])
+      await outside()
+      expect(confirm.openTernary).toHaveBeenCalledTimes(1)
+      expect(component.hasRealChanges()).toBeTrue()
+      await new Promise((resolve) => setTimeout(resolve))
+      await outside()
+      expect(confirm.openTernary).toHaveBeenCalledTimes(2)
+    })
+
+    it('closing the panel clears the question', () => {
+      panel().editingId_.set('e1')
+      panel().hydrateEditForm(item)
+      panel().editForm_.patchValue({ nameHebrew: 'מחבת' })
+      panel().editingId_.set(null)
+      expect(component.hasRealChanges()).toBeFalse()
+    })
   })
 
   it('titles the list with the equipment key and has no scaling column', () => {

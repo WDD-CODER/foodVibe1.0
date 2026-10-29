@@ -12,6 +12,7 @@ import {
 import { DOCUMENT } from '@angular/common'
 import { TranslatePipe } from '@pipes/translation-pipe.pipe'
 import { isTopModalShell, popModalShell, pushModalShell } from '@services/modal-controller'
+import { ConfirmModalService } from '@services/confirm-modal.service'
 
 export type ModalShellSize = 'sm' | 'md' | 'fluid'
 
@@ -45,6 +46,8 @@ let nextTitleId = 0
 export class ModalShellComponent {
   private readonly document_ = inject(DOCUMENT)
   private readonly destroyRef_ = inject(DestroyRef)
+  private readonly confirmModal_ = inject(ConfirmModalService)
+  private isAsking_ = false
   private readonly shellId_ = pushModalShell()
   private readonly opener_ = this.document_.activeElement as HTMLElement | null
   private readonly card_ = viewChild.required<ElementRef<HTMLElement>>('card')
@@ -65,7 +68,17 @@ export class ModalShellComponent {
   readonly zIndex = input<number | null>(null)
   /** Plan 487: on a phone the popup opens as a bottom sheet (the `.m-sheet` / `.m-sheet-card` helpers). */
   readonly sheet = input(false)
-  /** Escape or a backdrop click, for the top-most dismissible popup only. */
+  /**
+   * Plan 498: true while the popup holds typed edits. Escape or a backdrop click then asks before `dismissed` is
+   * emitted; the popup's own Cancel / X button does not go through the shell and so never asks.
+   */
+  readonly hasChanges = input(false)
+  /**
+   * Optional: saves the popup's edits and resolves true when it worked. With it the discard question gets a third
+   * button (save and close); the popup's owner closes itself on a successful save, so `dismissed` is not emitted then.
+   */
+  readonly saveAndClose = input<(() => Promise<boolean>) | null>(null)
+  /** Escape or a backdrop click, for the top-most dismissible popup (after the discard question, when `hasChanges`). */
   readonly dismissed = output<void>()
 
   protected readonly titleId = `modal-shell-title-${++nextTitleId}`
@@ -81,11 +94,38 @@ export class ModalShellComponent {
   protected onEscape(event: Event): void {
     if (event.defaultPrevented || !this.dismissible() || !isTopModalShell(this.shellId_)) return
     event.preventDefault()
-    this.dismissed.emit()
+    void this.requestDismiss_()
   }
 
   protected onBackdropClick(): void {
     if (!this.dismissible() || !isTopModalShell(this.shellId_)) return
+    void this.requestDismiss_()
+  }
+
+  private async requestDismiss_(): Promise<void> {
+    if (this.hasChanges()) {
+      if (this.isAsking_) return
+      this.isAsking_ = true
+      const save = this.saveAndClose()
+      const answer = save
+        ? await this.confirmModal_.openTernary('unsaved_changes_confirm', {
+            variant: 'warning',
+            saveLabel: 'leave_without_saving',
+            saveButtonLabel: 'save_and_leave'
+          })
+        : (await this.confirmModal_.open('unsaved_changes_confirm', {
+              variant: 'warning',
+              saveLabel: 'leave_without_saving'
+            }))
+          ? 'confirm'
+          : 'cancel'
+      this.isAsking_ = false
+      if (answer === 'cancel') return
+      if (answer === 'save') {
+        await save?.()
+        return
+      }
+    }
     this.dismissed.emit()
   }
 

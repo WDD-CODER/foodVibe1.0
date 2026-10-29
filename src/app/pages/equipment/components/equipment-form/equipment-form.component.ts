@@ -25,6 +25,8 @@ import { TranslationService } from '@services/translation.service'
 import { LoggingService } from '@services/logging.service'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
+import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
 
 const CATEGORIES: EquipmentCategory[] = [
   'heat_source',
@@ -52,7 +54,7 @@ const CATEGORIES: EquipmentCategory[] = [
   styleUrl: './equipment-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EquipmentFormComponent implements OnInit, AfterViewInit {
+export class EquipmentFormComponent implements OnInit, AfterViewInit, PendingChangesComponent {
   private readonly nameInputRef = viewChild<ElementRef<HTMLInputElement>>('nameInput')
 
   private readonly fb = inject(FormBuilder)
@@ -65,6 +67,12 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
   private readonly logging = inject(LoggingService)
 
   protected equipmentForm_!: FormGroup
+  /** Set once saved, so the guard does not ask after a successful save. */
+  isSubmitted = false
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.equipmentForm_,
+    isSubmitted: () => this.isSubmitted
+  })
   protected isEditMode_ = signal(false)
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
@@ -80,7 +88,12 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
         this.isEditMode_.set(true)
         this.hydrateForm(equipment)
       }
+      this.unsaved_.markSaved()
     })
+  }
+
+  hasRealChanges(): boolean {
+    return this.unsaved_.hasChanges()
   }
 
   ngAfterViewInit(): void {
@@ -117,12 +130,22 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
   }
 
   async onSubmit(): Promise<void> {
+    if (await this.save_()) this.router.navigate(['/inventory/equipment'])
+  }
+
+  /** The leave question's «שמור ועזוב»: saves, then lets the pending navigation go on (no second navigation here). */
+  saveAndWait(): Promise<boolean> {
+    return this.save_()
+  }
+
+  private async save_(): Promise<boolean> {
     if (!this.validateForm_()) {
       this.equipmentForm_.markAllAsTouched()
       this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'))
-      return
+      return false
     }
-    if (this.equipmentForm_.invalid) return
+    if (this.equipmentForm_.invalid) return false
+    let saved = false
     await this.saving.withSaving(async () => {
       try {
         const v = this.equipmentForm_.getRawValue()
@@ -150,7 +173,8 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
             updatedAt: now
           })
         }
-        this.router.navigate(['/inventory/equipment'])
+        this.isSubmitted = true
+        saved = true
       } catch (err) {
         this.logging.error({ event: 'equipment.save_error', message: 'Equipment save error', context: { err } })
         const msg =
@@ -160,6 +184,7 @@ export class EquipmentFormComponent implements OnInit, AfterViewInit {
         this.userMsg.onSetErrorMsg(msg)
       }
     })
+    return saved
   }
 
   onCancel(): void {

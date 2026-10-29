@@ -3,6 +3,8 @@
     size="md"
     cardClass="quick-edit-product-modal"
     labelKey="edit_product_title"
+    [hasChanges]="hasChanges()"
+    [saveAndClose]="saveAndClose"
     (dismissed)="onCancelled()"
   >
     <app-quick-edit-product-panel

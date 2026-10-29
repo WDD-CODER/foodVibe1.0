@@ -1,5 +1,5 @@
 @if (isOpen_()) {
-  <app-modal-shell titleKey="add_equipment" (dismissed)="cancel()">
+  <app-modal-shell titleKey="add_equipment" [hasChanges]="hasChanges()" (dismissed)="cancel()">
     <div class="c-modal-body">
       <div class="c-input-stack">
         <label>{{ 'equipment_name' | translatePipe }}</label>

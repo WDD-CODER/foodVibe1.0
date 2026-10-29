@@ -123,7 +123,8 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
   private readonly unsaved_ = useUnsavedChanges({
     form: () => this.recipeForm_,
     snapshot: () => this.getRecipeSnapshotForComparison(),
-    extra: () => this.hasUnsavedAiDraft_
+    extra: () => this.hasUnsavedAiDraft_,
+    isSubmitted: () => this.isSubmitted
   })
   /** True after an AI draft was applied to a new recipe and not yet saved — the draft itself is unsaved work. */
   private hasUnsavedAiDraft_ = false

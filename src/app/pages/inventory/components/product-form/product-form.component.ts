@@ -170,7 +170,8 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected productForm_!: FormGroup
   private readonly unsaved_ = useUnsavedChanges({
     form: () => this.productForm_,
-    snapshot: () => this.getFormSnapshotForComparison()
+    snapshot: () => this.getFormSnapshotForComparison(),
+    isSubmitted: () => this.isSubmitted
   })
   isSubmitted = false
 

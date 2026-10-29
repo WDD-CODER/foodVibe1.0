@@ -90,6 +90,11 @@ export class AddEquipmentModalComponent {
     this.category.set(keyToUse)
   }
 
+  /** Plan 498: a typed name or a changed category (Escape / backdrop then ask). */
+  protected hasChanges(): boolean {
+    return this.name().trim() !== (this.modalService.initialName() ?? '').trim() || this.category() !== 'tool'
+  }
+
   protected save(): void {
     const name = this.name().trim()
     if (!name) return

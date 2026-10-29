@@ -165,4 +165,14 @@ describe('BaselineTabComponent', () => {
       host.remove()
     }
   })
+
+  it('hasRealChanges is false until something is typed, true after, false again after saving (plan 498)', async () => {
+    setup()
+    const tab = fixture.componentInstance
+    expect(tab.hasRealChanges()).toBeFalse()
+    type('inquiriesPerMonth', '12')
+    expect(tab.hasRealChanges()).toBeTrue()
+    await tab.save()
+    expect(tab.hasRealChanges()).toBeFalse()
+  })
 })

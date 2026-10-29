@@ -42,7 +42,7 @@ export const REUSE_RULES = [
     family: 'modal-shell',
     files: ['src/app/**/*.html'],
     exclude: ['src/app/shared/modal-shell/**'],
-    pattern: /class="[^"]*c-modal-overlay/,
+    pattern: /class="[^"]*bc-modal-overlay/,
     hint: 'wrap the popup in app-modal-shell (src/app/shared/modal-shell/) instead of drawing .c-modal-overlay by hand'
   },
   {
@@ -52,5 +52,14 @@ export const REUSE_RULES = [
     exclude: ['**/*.spec.ts'],
     pattern: /^\s*(?:(?:public|private|protected|readonly)\s+)*(?:onClearSearch|onSearchEscape|clearAllFilters)\s*(?:\(|=)/,
     hint: 'list search / clear logic is a shared family (list-logic) — reuse it, do not add another page copy'
+  },
+  {
+    id: 'native-browser-dialog',
+    family: 'modal-shell',
+    files: ['src/app/**/*.ts'],
+    exclude: ['**/*.spec.ts'],
+    pattern: /(?:\bwindow\.|(?<![.\w$]))(?:confirm|alert|prompt)\s*\(/,
+    skip: /^\s*(?:\/\/|\*|\/\*)|^\s*(?:(?:public|private|protected|readonly|async|static)\s+)*(?:confirm|alert|prompt)\s*\([^)]*\)\s*(?::[^{]+)?\{/,
+    hint: 'ask through ConfirmModalService (or app-modal-shell) — never the browser confirm / alert / prompt'
   }
 ]

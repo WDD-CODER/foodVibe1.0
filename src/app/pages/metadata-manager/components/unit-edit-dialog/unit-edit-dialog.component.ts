@@ -35,6 +35,14 @@ export class UnitEditDialogComponent {
   protected readonly key_ = linkedSignal(() => this.unit().key)
   protected readonly gramRate_ = linkedSignal(() => this.unit().gramRate)
 
+  /** Plan 498: a field differs from the unit the dialog opened with (Escape / backdrop then ask). */
+  protected hasChanges(): boolean {
+    const unit = this.unit()
+    return (
+      this.hebrewLabel_() !== unit.hebrewLabel || this.key_() !== unit.key || Number(this.gramRate_()) !== unit.gramRate
+    )
+  }
+
   protected isValid(): boolean {
     const rate = Number(this.gramRate_())
     return !!this.hebrewLabel_().trim() && !!this.key_().trim() && Number.isFinite(rate) && rate > 0

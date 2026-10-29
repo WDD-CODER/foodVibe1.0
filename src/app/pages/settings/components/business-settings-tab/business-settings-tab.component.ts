@@ -1,4 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+  viewChild
+} from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -76,6 +85,7 @@ export class BusinessSettingsTabComponent {
     }
   ]
   protected readonly isSaving_ = signal(false)
+  private readonly nameForm_ = viewChild(BusinessNameFormComponent)
   private readonly value_ = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() })
 
   // 5. COMPUTED
@@ -103,13 +113,31 @@ export class BusinessSettingsTabComponent {
   }
 
   // 6. METHODS (UI handlers)
-  async save(): Promise<void> {
-    if (!this.canSave()) return
+  /** True when a number differs from the stored one, or the business-name box holds an unsaved name. */
+  hasRealChanges(): boolean {
+    const value = this.value_()
+    const stored = this.stored()
+    return this.fields.some((field) => value[field.key] !== stored[field.key]) || !!this.nameForm_()?.hasRealChanges()
+  }
+
+  /** Saves the number fields and the business name (when edited); true when nothing is left unsaved. */
+  async saveAll(): Promise<boolean> {
+    const nameSaved = this.nameForm_()?.hasRealChanges() ? await this.nameForm_()!.save() : true
+    const numbersSaved = this.fields.some((field) => this.value_()[field.key] !== this.stored()[field.key])
+      ? await this.save()
+      : true
+    return nameSaved && numbersSaved
+  }
+
+  /** True when the numbers were saved. */
+  async save(): Promise<boolean> {
+    if (!this.canSave()) return false
     this.isSaving_.set(true)
     try {
       await this.businessService.updateSettings(this.form.getRawValue())
       this.form.reset(this.stored())
       this.userMsg.onSetSuccessMsg(this.translation.translate('settings_saved'))
+      return true
     } catch (err) {
       const status = (err as { status?: number }).status
       // A 403 already got the "no permission" toast from the interceptor.
@@ -120,6 +148,7 @@ export class BusinessSettingsTabComponent {
         this.logging.error('Business settings could not be saved', { status })
         this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
       }
+      return false
     } finally {
       this.isSaving_.set(false)
     }

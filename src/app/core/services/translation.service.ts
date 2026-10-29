@@ -325,24 +325,6 @@ export class TranslationService {
     return Object.values(this.masterDict()).includes(sanitized)
   }
 
-  private async proposeAndSaveTranslation(hebrewLabel: string): Promise<string | null> {
-    const englishKey = prompt(`Enter English ID for "${hebrewLabel}" (e.g., olive_oil):`)
-
-    if (!englishKey || !englishKey.trim()) {
-      this.logging.warn({ event: 'translation.add.cancelled', message: 'Translation addition cancelled by user' })
-      return null
-    }
-
-    const sanitizedKey = englishKey.trim().toLowerCase().replace(/\s+/g, '_')
-    this.updateDictionary(sanitizedKey, hebrewLabel)
-    this.logging.info({
-      event: 'translation.entry.created',
-      message: 'Dictionary entry created',
-      context: { key: sanitizedKey }
-    })
-    return sanitizedKey
-  }
-
   /**
    * When Hebrew input has no matching key, use the app's translation-key modal (unified theme) instead of browser prompt.
    * Callers should use TranslationKeyModalService.open(hebrewLabel, context), then on result call

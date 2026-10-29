@@ -61,13 +61,20 @@ export class BusinessNameFormComponent {
     })
   }
 
-  async save(): Promise<void> {
-    if (!this.canSave()) return
+  /** True while the box holds a name that is not the stored one yet (the settings page asks before a tab switch). */
+  hasRealChanges(): boolean {
+    return this.form.dirty && this.trimmed_() !== this.stored_()
+  }
+
+  /** True when the name was saved. */
+  async save(): Promise<boolean> {
+    if (!this.canSave()) return false
     this.isSaving_.set(true)
     try {
       await this.businessService.updateName(this.trimmed_())
       this.form.reset({ name: this.stored_() })
       this.userMsg.onSetSuccessMsg(this.translation.translate('business_name_saved'))
+      return true
     } catch (err) {
       const status = (err as { status?: number }).status
       // A 403 already got the "no permission" toast from the interceptor.
@@ -78,6 +85,7 @@ export class BusinessNameFormComponent {
         this.logging.error('Business name could not be saved', { status })
         this.userMsg.onSetErrorMsg(this.translation.translate('save_failed'))
       }
+      return false
     } finally {
       this.isSaving_.set(false)
     }

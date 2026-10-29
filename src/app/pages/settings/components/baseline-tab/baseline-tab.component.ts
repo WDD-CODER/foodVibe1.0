@@ -90,9 +90,15 @@ export class BaselineTabComponent {
   }
 
   // 6. METHODS (UI handlers)
+  /** True while the owner has typed something that is not saved yet (the settings page asks before a tab switch). */
+  hasRealChanges(): boolean {
+    return this.form.dirty
+  }
+
   /** Sends only the filled fields. After the first visit's save the owner continues to the dashboard. */
-  async save(): Promise<void> {
-    if (!this.canSave()) return
+  /** True when the numbers were saved. */
+  async save(): Promise<boolean> {
+    if (!this.canSave()) return false
     const raw = this.form.getRawValue()
     const input: BaselineInput = {}
     for (const field of this.fields) {
@@ -103,13 +109,18 @@ export class BaselineTabComponent {
       this.form.markAsPristine()
       this.userMsg.onSetSuccessMsg(this.translation.translate('baseline_saved'))
       if (this.first()) void this.router.navigate(['/dashboard'])
+      return true
     }
+    return false
   }
 
   /** Skip: stores an empty baseline so the screen never opens by itself again, then goes to the dashboard. */
   async skip(): Promise<void> {
     if (this.isSaving_()) return
-    if (await this.send({})) void this.router.navigate(['/dashboard'])
+    if (await this.send({})) {
+      this.form.markAsPristine()
+      void this.router.navigate(['/dashboard'])
+    }
   }
 
   protected hasError(key: BaselineField): boolean {

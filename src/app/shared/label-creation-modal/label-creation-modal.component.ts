@@ -22,6 +22,8 @@ export class LabelCreationModalComponent {
   private readonly metadataRegistry = inject(MetadataRegistryService)
 
   protected englishKey_ = signal('')
+  /** The form as the popup opened with it, to tell typed edits from the prefill. */
+  private readonly openedWith_ = signal('')
   protected validationError_ = signal<string | null>(null)
 
   protected readonly palette = LABEL_COLOR_PALETTE
@@ -33,8 +35,23 @@ export class LabelCreationModalComponent {
       if (this.modal.isOpen_()) {
         this.englishKey_.set(untracked(() => this.modal.englishKey_()))
         this.validationError_.set(null)
+        this.openedWith_.set(untracked(() => this.snapshot_()))
       }
     })
+  }
+
+  private snapshot_(): string {
+    return JSON.stringify([
+      this.englishKey_(),
+      this.modal.hebrewLabel_(),
+      this.modal.selectedColor_(),
+      this.modal.selectedTriggers_()
+    ])
+  }
+
+  /** Plan 498: the form differs from what the popup opened with (Escape / backdrop then ask). */
+  protected hasChanges(): boolean {
+    return this.snapshot_() !== this.openedWith_()
   }
 
   protected triggerOptions_ = computed(() => {

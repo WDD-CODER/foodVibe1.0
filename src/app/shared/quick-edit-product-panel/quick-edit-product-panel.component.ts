@@ -26,6 +26,7 @@ import { Product, ProductSource } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 
 @Component({
   selector: 'app-quick-edit-product-panel',
@@ -40,9 +41,12 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
   ],
   templateUrl: './quick-edit-product-panel.component.html',
   styleUrl: './quick-edit-product-panel.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { '(keydown.escape)': 'onEscape($event)' }
 })
 export class QuickEditProductPanelComponent {
+  /** Set when the panel sits inside a popup: the popup shell owns Escape there. */
+  private readonly insideShell_ = inject(ModalShellComponent, { optional: true }) !== null
   private readonly productData = inject(ProductDataService)
   private readonly unitRegistry = inject(UnitRegistryService)
   private readonly metadataRegistry = inject(MetadataRegistryService)
@@ -207,17 +211,35 @@ export class QuickEditProductPanelComponent {
     }
   }
 
+  /** Explicit Cancel closes without asking (plan 498, D2); only an accidental close (Escape, click outside) asks. */
   protected onCancel(): void {
-    if (this.isDirty_()) {
-      this.shouldShowUnsavedConfirm_.set(true)
-    } else {
-      this.cancelled.emit()
-    }
+    this.cancelled.emit()
+  }
+
+  /** Save from outside (the popup's discard question): true when the product was saved and the panel closed. */
+  async saveAndClose(): Promise<boolean> {
+    let saved = false
+    const sub = this.saved.subscribe(() => (saved = true))
+    await this.onSave()
+    sub.unsubscribe()
+    return saved
+  }
+
+  /** True while a field differs from the product as loaded (the popup shell asks before an Escape discards it). */
+  hasChanges(): boolean {
+    return this.isDirty_()
   }
 
   protected onDiscardAndClose(): void {
     this.shouldShowUnsavedConfirm_.set(false)
     this.cancelled.emit()
+  }
+
+  /** Plan 498: Escape in the inline (recipe) accordion closes it, asking first when a field was changed. */
+  protected onEscape(event: Event): void {
+    if (this.insideShell_ || event.defaultPrevented) return
+    event.preventDefault()
+    this.requestClose()
   }
 
   /** Called by the parent before closing (e.g. clickOutside on the accordion). */

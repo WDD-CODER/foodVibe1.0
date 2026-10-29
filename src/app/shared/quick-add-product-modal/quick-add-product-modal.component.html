@@ -3,6 +3,7 @@
     size="md"
     labelledBy="quick-add-title"
     [dismissible]="!isSubmitting_() && !isAiLoading_()"
+    [hasChanges]="hasChanges()"
     (dismissed)="onCancel()"
   >
     <h3 id="quick-add-title" class="quick-add-product-modal__title">

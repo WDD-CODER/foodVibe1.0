@@ -6,7 +6,8 @@ import {
   computed,
   viewChild,
   effect,
-  ElementRef
+  ElementRef,
+  untracked
 } from '@angular/core'
 import { notifyItemAdded } from 'src/app/core/utils/add-option.util'
 import { CommonModule } from '@angular/common'
@@ -77,6 +78,9 @@ export class QuickAddProductModalComponent {
   protected isAiLoading_ = signal(false)
   protected hasAiError_ = signal(false)
 
+  /** The fields as the popup opened with them, to tell typed edits (or an AI draft) from the prefill. */
+  private readonly openedWith_ = signal('')
+
   protected nameRef = viewChild<ElementRef<HTMLInputElement>>('nameEl')
   protected baseUnitRef = viewChild<ElementRef<HTMLElement>>('baseUnitSelect')
   protected buyPriceRef = viewChild<ElementRef<HTMLInputElement>>('buyPriceEl')
@@ -114,6 +118,7 @@ export class QuickAddProductModalComponent {
         this.isSubmitting_.set(false)
         this.nameError_.set('')
         this.unitError_.set('')
+        this.openedWith_.set(untracked(() => this.snapshot_()))
       }
     })
 
@@ -293,6 +298,24 @@ export class QuickAddProductModalComponent {
     } finally {
       this.isAiLoading_.set(false)
     }
+  }
+
+  private snapshot_(): string {
+    return JSON.stringify([
+      this.name(),
+      this.baseUnit_(),
+      this.buyPrice_(),
+      this.category(),
+      this.yieldFactor_(),
+      [...this.selectedAllergens_()].sort(),
+      this.minStock_(),
+      this.expiryDays_()
+    ])
+  }
+
+  /** Plan 498: a field differs from what the popup opened with (Escape / backdrop then ask). */
+  protected hasChanges(): boolean {
+    return this.snapshot_() !== this.openedWith_()
   }
 
   protected onCancel(): void {

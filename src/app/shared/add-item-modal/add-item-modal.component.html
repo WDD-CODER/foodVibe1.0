@@ -1,5 +1,10 @@
 @if (isOpen_()) {
-  <app-modal-shell [titleKey]="config()?.title ?? null" [zIndex]="1100" (dismissed)="cancel()">
+  <app-modal-shell
+    [titleKey]="config()?.title ?? null"
+    [zIndex]="1100"
+    [hasChanges]="hasChanges()"
+    (dismissed)="cancel()"
+  >
     @if (config(); as cfg) {
       <div class="c-modal-body">
         <div class="c-input-stack full-width">

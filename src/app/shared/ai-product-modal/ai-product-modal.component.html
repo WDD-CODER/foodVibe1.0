@@ -3,6 +3,7 @@
     cardClass="ai-product-modal-card"
     labelledBy="ai-product-modal-title"
     [dismissible]="status_() !== 'sending'"
+    [hasChanges]="hasChanges()"
     (dismissed)="onClose()"
   >
     <div class="ai-product-header">

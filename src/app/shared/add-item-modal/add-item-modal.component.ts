@@ -28,6 +28,11 @@ export class AddItemModalComponent {
     })
   }
 
+  /** Plan 498: the typed text differs from what the popup opened with (Escape / backdrop then ask). */
+  protected hasChanges(): boolean {
+    return this.value_().trim() !== (this.config()?.initialValue ?? '').trim()
+  }
+
   protected save(): void {
     const val = this.value_()
     this.value_.set('')

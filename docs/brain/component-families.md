@@ -59,7 +59,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 ### modal-shell — the popup frame
 - Status: converged (plan 451) for the engine-based popups; 7 hand-drawn dialogs remain (follow-up plan)
 - Use: `src/app/shared/modal-shell/` · `app-modal-shell` (role=dialog, aria-modal, Escape for the top-most
-  popup only, focus in / trap / restore, `dismissible` while busy, `titleKey` / `labelledBy` / `labelKey` for the
+  popup only, focus in / trap / restore, `dismissible` while busy, `[hasChanges]` = Escape / backdrop ask before discarding typed edits (plan 498; the popup's own Cancel / X never asks), `titleKey` / `labelledBy` / `labelKey` for the
   accessible name). It renders the `.c-modal-overlay` / `.c-modal-card` engines from `src/styles.scss`; put
   `.c-modal-body` / `.c-modal-actions` inside it. Simple yes/no: `src/app/shared/confirm-modal/` · `app-confirm-modal`.
   `ConfirmModalService.open(msg, { typedConfirm })` — confirm waits for an exact typed text (plan 486).
@@ -67,7 +67,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Phone bottom sheet: `[sheet]="true"` adds the phone-only `.m-sheet` / `.m-sheet-card` helpers (plan 487, pricing meter); wider screens keep the centred popup.
 - Users (15): auth, confirm, global-specific, restore-choice, add-equipment, add-item, quick-add-product,
   quick-edit-product, translation-key, label-creation, ai-menu, ai-product, ai-recipe, unit-creator, unit-edit-dialog.
-- Lint: `reuse-lint` rule `hand-drawn-modal-overlay` warns on a new `class="… c-modal-overlay"` in a template.
+- Lint: `reuse-lint` rule `hand-drawn-modal-overlay` warns on a new `class="… c-modal-overlay"` in a template; rule `native-browser-dialog` warns on a new `window.confirm` / `alert` / `prompt` (use `ConfirmModalService`).
 - Known copies (hand-drawn `.c-modal-overlay` with their own document Escape listener):
   `src/app/pages/menu-intelligence/components/event-closing-dialog/`,
   `src/app/pages/menu-intelligence/components/not-closed-dialog/`,
@@ -136,8 +136,8 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 
 ### entity-form — name validation and unsaved-changes check
 - Status: stable — plan 455 built one unsaved-changes helper
-- Use: `src/app/core/utils/unsaved-changes.ts` · `useUnsavedChanges({ form, snapshot?, extra? })`; each page keeps `hasRealChanges()` as a one-line
-  delegation; `src/app/core/validators/item.validators.ts` · `duplicateEntityNameValidator` (`duplicateNameValidator` wraps it for products);
+- Use: `src/app/core/utils/unsaved-changes.ts` · `useUnsavedChanges({ form, snapshot?, extra?, isSubmitted? })` (also registers the browser's reload / tab-close dialog, `warnBeforeUnload`); each page keeps `hasRealChanges()` as a one-line
+  delegation; equipment, supplier and settings (tab switch via `?tab=`) are on it too (plan 498); `src/app/core/validators/item.validators.ts` · `duplicateEntityNameValidator` (`duplicateNameValidator` wraps it for products);
   leave-page guard: `src/app/core/guards/pending-changes.guard.ts`.
 - When: a form edits a named entity, or must warn before leaving with unsaved changes.
 - Known copies: none.
