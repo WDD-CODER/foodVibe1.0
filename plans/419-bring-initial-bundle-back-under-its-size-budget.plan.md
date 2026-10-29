@@ -1,8 +1,8 @@
 # Plan 419 — Bring the initial bundle back under its size budget
 
-Status: draft
+Status: active
 Track: code — here (not design)
-Snapshot: 30475411004f92d5b875f8cf66f2bc33d3b45c2b
+Snapshot: c5e6916634cf8f1aad1a7acf852e0642a876e072
 
 ## Problem Statement
 
@@ -40,7 +40,7 @@ All root modals are already behind `@defer` (plan 312), so the remaining wins ar
     "Initial total" line from the build output (target ≤ 550 kB; if only the fallback in A4 was used, say so).
   - [auto] `ng test` passes.
   - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-  - [human] Dashboard and recipe builder load and work as before: header menus, tab chips scroll, the + button, and
+  - [x] [human] Dashboard and recipe builder load and work as before: header menus, tab chips scroll, the + button, and
     opening a recipe all respond as usual.
 
 ## Execution Mode
@@ -116,7 +116,7 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Re-measure be
 - [x] A1: Measure what fills the first download and pick what to cut — stats-json breakdown, top 15 and chosen cuts in Execution Notes — angular.json (read), build output
 - [x] A2: Load the header's click-only parts on first use instead of at startup — @defer / lazy pieces, unused imports removed — src/app/core/components/header/**
 - [x] A3: Trim the other always-on shell parts and unused icons — tab-chips, scroll-rail, hero-fab, Lucide pick — src/app/core/components/tab-chips/**, hero-fab/**, src/app/shared/scroll-rail/**, src/app/app.config.ts
-- [ ] A4: Raise the warning budget on purpose only if trimming was not enough — new value + one-line reason — angular.json
+- [x] A4: Raise the warning budget on purpose only if trimming was not enough — new value + one-line reason — angular.json
 
 ## Out of Scope
 
@@ -135,3 +135,6 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Re-measure be
 - Gate round 1 fixes: (1) `npm run test` -> exit 0, `TOTAL: 1595 SUCCESS` on rerun (the 1 FAILED was the known load-dependent 5 s ProductForm timeout; no code change). (2) Step 0 was already done (re-measure above), so the plan `Snapshot:` moved to `30475411` (no commit touches the plan's scope on origin/main since) -> `node scripts/scope-check.mjs --drift` -> `REALITY: clean`, exit 0. (3) `.claude/.slot-plan-start` was missing in this orchestrator worktree (gitignored, written by take-plan); created it locally -> log-query now stops at `no MongoDB URI in .env` (environment: worktree has no Mongo URI), not a code failure. Rerun: `npm run build` -> exit 0, `Initial total 552.10 kB`, no initial-budget warning; `npm run lint` -> exit 0.
 - Orchestrator readiness (2026-10-29): Re-verify only, or redo the trimming? → Re-check only: re-measure, build, lint, set Status; change no code unless the build shows the budget warning again.
 - Orchestrator readiness (2026-10-29): Apply A4 (raise maximumWarning to measured + 10 kB, rounded up to 10 kB) or keep 560 kB? → Apply A4 only if the re-measured Initial total is over 550 kB; give the one-line reason in the commit and in Execution Notes.
+- Run run-497-419 (2026-10-29), re-check: Step 0 ran (`scope-check --drift` showed only this plan's own commits `caa41bcb`, `6c86105f`, already on main); re-measured with `pnpm run build` -> exit 0, `Initial total 552.10 kB`, no initial-budget warning. Snapshot moved to `c5e69166`. No code changed.
+- A4 applied per the readiness answer (552.10 kB is over the 550 kB target): `angular.json` initial `maximumWarning` 560kB -> 570kB in all three configurations (production, local-prod and the third prod-like one), i.e. 552.10 + 10 = 562.10, rounded up to 570. Reason: the remaining weight is Angular/router/zone and the always-visible shell; cutting more would need a visible change, which the plan forbids.
+- Human validation (2026-10-29): dashboard + recipe builder checks (header menus, tab-chip scroll, + button, confirm popup, opening a recipe) → `done` by the Human on localhost:4200.

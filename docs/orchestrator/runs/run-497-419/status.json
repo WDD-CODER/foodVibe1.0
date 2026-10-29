@@ -1,0 +1,316 @@
+{
+  "run": "run-497-419",
+  "branch": "orch/run-497-419",
+  "base": "main",
+  "startedAt": "2026-10-29T00:00:00Z",
+  "mainShaAtStart": "c5e6916634cf8f1aad1a7acf852e0642a876e072",
+  "plans": {
+    "419": {
+      "nnn": "419",
+      "title": "Bring the initial bundle back under its size budget",
+      "branch": "feat/419-bring-initial-bundle-back",
+      "state": "merged",
+      "round": 0,
+      "tier": "judgment",
+      "models": {
+        "orch-builder": {
+          "model": "claude-opus-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Dashboard and recipe builder load and work as before: header menus, tab chips scroll, the + button, and"
+      ],
+      "history": [
+        {
+          "at": "2026-10-29T06:55:50.736Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:04:12.624Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:08:32.440Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:09:30.131Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:09:39.285Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:10:07.155Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:10:16.754Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:10:46.235Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:24:50.130Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "slot": "C:/coding projects/Cursor/foodVibe1.0-wt-2",
+      "freeDiskGb": 37.2,
+      "sha": "bfaada802e5a4aebd930927dfb1cb88b2053e889",
+      "reason": "merge-only retry by Planner after pnpm install in merge folder"
+    },
+    "497": {
+      "nnn": "497",
+      "title": "Run the project rule checks on every pull request and clean up merged branches",
+      "branch": "feat/497-run-the-project-rule",
+      "state": "merged",
+      "round": 0,
+      "tier": "judgment",
+      "models": {
+        "orch-builder": {
+          "model": "claude-opus-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-security": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "A throwaway PR that adds a native `<select>` to any template shows the `rules` check red with the file named in the log; closing that PR leaves main untouched.",
+        "After the Human runs the repo-setting command (S6), merging any PR removes its branch on GitHub without a manual delete.",
+        "Running the `stale-branches` workflow from the Actions tab (Run workflow) creates or updates one issue titled \"Stale branches\" that lists branches unmerged for 30+ days; nothing is deleted.",
+        "The throwaway-PR, merged-branch-deletes and stale-branches-issue checks in Success Criteria pass."
+      ],
+      "history": [
+        {
+          "at": "2026-10-29T06:55:50.392Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:05:04.847Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:10:04.628Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:11:22.282Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:11:34.727Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:12:08.042Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:12:17.222Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:12:43.512Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T07:24:50.417Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "slot": "C:/coding projects/Cursor/foodVibe1.0-wt-1",
+      "freeDiskGb": 37.2,
+      "sha": "8bdf4c974925108f540b241fd7c40e9f8e908a47",
+      "reason": "merge-only retry by Planner after pnpm install in merge folder"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-10-29T06:55:27.955Z",
+      "plan": "497",
+      "text": "starts on the judgment tier: Architecture Impact names INV-6, INV-1, INV-2, INV-3, INV-4, INV-5"
+    },
+    {
+      "at": "2026-10-29T06:55:28.446Z",
+      "plan": "419",
+      "text": "starts on the judgment tier: Architecture Impact names INV-6"
+    },
+    {
+      "at": "2026-10-29T07:10:37.961Z",
+      "plan": "419",
+      "text": "environment failure (merge:  pnpm run build  failed with exit code 1 because 'ng' is not recognized. The merge worktree has no installed dependencies (node_modules is missing). The merge itself was clean with no conflicts, and I aborted it. The other checks did not run.); the environment check passed, retried once without a fix round"
+    },
+    {
+      "at": "2026-10-29T07:12:34.612Z",
+      "plan": "497",
+      "text": "environment failure (merge: pnpm run build failed with exit code 1: 'ng' is not recognized because node_modules is missing in the merge worktree (no install done). The merge was aborted.); the environment check passed, retried once without a fix round"
+    },
+    {
+      "at": "2026-10-29T07:43:01.294Z",
+      "plan": "419",
+      "text": "D1 A4 applied per the 2026-10-29 readiness answer (apply only if over 550 kB): 552.10 kB -> maximumWarning 570kB in production, local-prod and the third prod-like configuration so all builds behave the same. Reverse: set the three 'initial' maximumWarning values in angular.json back to 560kB."
+    },
+    {
+      "at": "2026-10-29T07:43:01.892Z",
+      "plan": "419",
+      "text": "D2 Plan Status set to 'active', not 'done': the [human] Done-when item (dashboard and recipe builder work as before) is still open. plan-close sets 'done' after the Human validates."
+    },
+    {
+      "at": "2026-10-29T07:43:02.713Z",
+      "plan": "419",
+      "text": "D3 Left the stale .claude/.slot-plan-start (2026-10-20) as it was and did not reset it to hide the log-query hits. The hits come from other folders (wt-1 Gemini key, main-folder CORS on /api/v1/log), dated 2026-10-27, and this diff changes no runtime code. If the gate needs a clean result, it can move the marker to this run's start."
+    },
+    {
+      "at": "2026-10-29T07:43:04.116Z",
+      "plan": "419",
+      "text": "D4 seen: wt-1's server .env has an invalid Gemini API key — log-query 2026-10-27T21:41–21:52 shows 'ai.generate*.gemini_failed ... API key not valid' (foodVibe1.0-wt-1/server)."
+    },
+    {
+      "at": "2026-10-29T07:43:04.895Z",
+      "plan": "419",
+      "text": "D5 seen: the main-folder server rejects POST /api/v1/log with 'CORS origin not allowed' (server/app.js:157), logged as server.unhandled 500 on 2026-10-27."
+    },
+    {
+      "at": "2026-10-29T07:43:06.008Z",
+      "plan": "419",
+      "text": "D6 Ran all five commands in C:/coding projects/Cursor/foodVibe1.0-wt-2 in order, each under a 15 min timeout, with output redirected to files under the OS temp folder (C:\\Users\\danwe\\AppData\\Local\\Temp\\orch-gate-419\\1.log through 5.log). Every command exited 0, so no tails were needed and no reruns occurred."
+    },
+    {
+      "at": "2026-10-29T07:43:06.851Z",
+      "plan": "419",
+      "text": "D7 The user's question about running a parallel session with the planner safely is outside this gate role and was not answered here."
+    },
+    {
+      "at": "2026-10-29T07:43:07.760Z",
+      "plan": "419",
+      "text": "D8 Checked the diff (angular.json: initial maximumWarning 560kB to 570kB in three configurations; plan file: Status, Snapshot, A4 tick, two Execution Notes lines) against AGENTS.md hard rules. No secret, machine path or port, dead code, or installed-copy edit found. angular.json is inside the plan's Read-Write Scope. The raise is the plan's own A4 fallback and the readiness ans"
+    },
+    {
+      "at": "2026-10-29T07:43:08.709Z",
+      "plan": "419",
+      "text": "D9 seen: plans/419-bring-initial-bundle-back-under-its-size-budget.plan.md:132 still reads 'A4 not used: angular.json budget stays 560 kB', while line 139 says A4 was applied (560kB to 570kB). The two Execution Notes lines contradict each other. This is a plan-text inconsistency, not a project-rule violation."
+    },
+    {
+      "at": "2026-10-29T07:43:09.448Z",
+      "plan": "497",
+      "text": "D10 S6: ticked without running the PATCH again. A read-only gh api call shows delete_branch_on_merge is already true (it was set outside this run), and standards-git.md already records it."
+    },
+    {
+      "at": "2026-10-29T07:43:10.518Z",
+      "plan": "497",
+      "text": "D11 S7 and the three [human] GitHub checks (throwaway PR goes red, merged branch is auto-deleted, Run workflow on stale-branches) stay unticked for the Human."
+    },
+    {
+      "at": "2026-10-29T07:43:11.185Z",
+      "plan": "497",
+      "text": "D12 Plan Status line left as 'draft'. Closing the plan belongs to the ledger/merge step, not the builder."
+    },
+    {
+      "at": "2026-10-29T07:43:11.858Z",
+      "plan": "497",
+      "text": "D13 seen: wt-1 worktree — at 2026-10-29 08:57:17, while this build was running its checks, something outside this builder ran 'checkout: moving from feat/497-run-the-project-rule to origin/main' (git reflog), which detached HEAD. My commit 8af7fc32 landed on the detached HEAD. I moved it back with git checkout feat/497-run-the-project-rule plus git merge --ff-only 8af7fc32 and "
+    },
+    {
+      "at": "2026-10-29T07:43:12.458Z",
+      "plan": "497",
+      "text": "D14 Ran all 11 commands in order from C:/coding projects/Cursor/foodVibe1.0-wt-1 with output redirected to files under /tmp/tmp.eKf3mhbWyB/ (out1.log to out11.log); exit codes in /tmp/tmp.eKf3mhbWyB/codes.txt. Every command exited 0, so no tail was needed and no rerun happened."
+    },
+    {
+      "at": "2026-10-29T07:43:13.200Z",
+      "plan": "497",
+      "text": "D15 The diff against origin/orch/run-497-419 changes only the plan file (checkbox ticks plus Execution Notes), so there is no code to hit a logic or runtime bug."
+    },
+    {
+      "at": "2026-10-29T07:43:13.950Z",
+      "plan": "497",
+      "text": "D16 seen: the plan's S6 note cites docs/agent/standards-git.md:56, but the delete_branch_on_merge text is at lines 70-72. The setting is recorded there, so the claim holds and only the line number is off."
+    },
+    {
+      "at": "2026-10-29T07:43:14.269Z",
+      "text": "Workflow stopped by the Human at ~07:18 after an env-failure rebuild loop (merge folder had no packages); see env-loop-report.md. Both merges then done by the Planner, merge step only: 419 bfaada80, 497 8bdf4c97."
+    },
+    {
+      "at": "2026-10-29T07:43:14.746Z",
+      "text": "Final gate on 8bdf4c97 (Planner, merge folder): pnpm run build exit 0 (Initial total 552.10 kB, no initial-budget warning); pnpm run lint exit 0 (0 errors, 67 warnings); pnpm run test:ci exit 0 (TOTAL: 1598 SUCCESS)."
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "lastStartedAt": "2026-10-29T00:00:00Z",
+  "freeDiskGb": 37.2,
+  "updatedAt": "2026-10-29T07:43:16.851Z",
+  "finishedAt": "2026-10-29T07:43:16.849Z"
+}
