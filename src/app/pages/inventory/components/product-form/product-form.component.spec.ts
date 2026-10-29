@@ -18,6 +18,7 @@ import { Product } from '@models/product.model'
 import { TranslationService } from '@services/translation.service'
 import { TranslationKeyModalService } from '@services/translation-key-modal.service'
 import { AddSupplierFlowService } from '@services/add-supplier-flow.service'
+import { MasterPushService } from '@services/master-push.service'
 
 describe('ProductFormComponent', () => {
   let component: ProductFormComponent
@@ -95,6 +96,11 @@ describe('ProductFormComponent', () => {
         { provide: MetadataRegistryService, useValue: mockMetadata },
         { provide: UtilService, useValue: mockUtil },
         { provide: UserMsgService, useValue: {} },
+        // Saving as an admin would open the "just me / everyone" dialog and hang the test.
+        {
+          provide: MasterPushService,
+          useValue: { askScope: () => Promise.resolve('me'), pushProductToMaster: () => undefined }
+        },
         {
           provide: KitchenStateService,
           useValue: {
