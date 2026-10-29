@@ -90,16 +90,36 @@
       "nnn": "500",
       "title": "One stepper (+/−) for every number: same hold-to-repeat, steps and minimum",
       "branch": "feat/500-one-stepper-for-every",
-      "state": "parked",
-      "round": 2,
-      "tier": "judgment",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
       "models": {
         "orch-builder": {
-          "model": "claude-opus-5-5",
+          "model": "claude-sonnet-5-5",
           "effort": "medium"
         },
         "orch-gate": {
           "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
           "effort": "low"
         }
       },
@@ -174,38 +194,311 @@
           "at": "2026-10-29T20:55:46.550Z",
           "state": "parked",
           "round": 2
+        },
+        {
+          "at": "2026-10-29T21:04:09.578Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:04:43.640Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:07:08.938Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:08:37.829Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:08:46.247Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:10:16.548Z",
+          "state": "merged",
+          "round": 0
         }
       ],
-      "freeDiskGb": 29.3,
-      "sha": "2251dbec",
-      "reason": "same reason twice: gate (main folder): node scripts/log-query.mjs --since=plan-start --level=error"
+      "earlier": [
+        {
+          "nnn": "500",
+          "title": "One stepper (+/−) for every number: same hold-to-repeat, steps and minimum",
+          "branch": "feat/500-one-stepper-for-every",
+          "state": "parked",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "orch-builder": {
+              "model": "claude-opus-5-5",
+              "effort": "medium"
+            },
+            "orch-gate": {
+              "model": "claude-haiku-5-5",
+              "effort": "low"
+            }
+          },
+          "freeDiskGb": 29.3,
+          "sha": "2251dbec",
+          "reason": "same reason twice: gate (main folder): node scripts/log-query.mjs --since=plan-start --level=error"
+        }
+      ],
+      "freeDiskGb": 28.8,
+      "sha": "a332a81128e42e9114464e20e98e949e7917faf1"
     },
     "501": {
       "nnn": "501",
-      "round": 0,
-      "models": {},
-      "state": "skipped",
-      "reason": "not started: wave 2 parked 500 — later waves not started",
-      "freeDiskGb": 29.3,
+      "title": "Delete versus undo: entity deletes keep the popup, line removals get an undo toast",
+      "branch": "feat/501-delete-versus-undo-entity",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-security": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Product form: delete a purchase option → it disappears at once, a toast with \"undo\" shows → pressing undo brings it back in the same place.",
+        "Event notes: delete a note → toast with \"undo\" → undo brings the note back and it is still there after a reload.",
+        "Delete a supplier → the confirm popup (unchanged).",
+        "The three `[human]` items under Success Criteria pass."
+      ],
       "history": [
         {
           "at": "2026-10-29T20:56:03.775Z",
           "state": "skipped",
           "round": 0
+        },
+        {
+          "at": "2026-10-29T21:10:57.393Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:28:42.362Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:31:09.248Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:32:28.414Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:32:36.497Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:35:46.429Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:37:57.922Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:39:23.579Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:39:30.565Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:40:59.218Z",
+          "state": "merged",
+          "round": 1
         }
-      ]
+      ],
+      "earlier": [
+        {
+          "nnn": "501",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "not started: wave 2 parked 500 — later waves not started",
+          "freeDiskGb": 29.3
+        }
+      ],
+      "freeDiskGb": 28.8,
+      "sha": "e1e229764ea8c9174e08fe9ed610b8b412f1835f"
     },
     "502": {
       "nnn": "502",
+      "title": "Consistency sweep: one date field, one number format, growing textareas and one save-busy state",
+      "branch": "feat/502-consistency-sweep-one-date",
+      "state": "merged",
       "round": 0,
-      "models": {},
-      "state": "skipped",
-      "reason": "not started: wave 2 parked 500 — later waves not started",
-      "freeDiskGb": 29.3,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Business settings: double-click Save → one save, the button shows busy while it runs.",
+        "Recipe book list: the date filter looks and works like the date field in the event dialogs.",
+        "A notes box grows as you type on any screen that has one.",
+        "The three `[human]` items under Success Criteria pass."
+      ],
       "history": [
         {
           "at": "2026-10-29T20:56:11.962Z",
           "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:41:36.813Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:48:12.070Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:50:48.978Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:52:29.510Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:52:37.757Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:52:46.973Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:52:55.642Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:53:02.857Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:54:39.505Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "502",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "not started: wave 2 parked 500 — later waves not started",
+          "freeDiskGb": 29.3
+        }
+      ],
+      "freeDiskGb": 28.7,
+      "sha": "f9fb510f730223aced6216625712527ff84e5b79",
+      "uiCards": [
+        {
+          "card": "Business settings: double-click Save gives one save and the button shows busy",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4201/settings",
+          "screenshots": [],
+          "round": 0
+        },
+        {
+          "card": "Recipe book list: the date filter looks and works like the date field in the event dialogs",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4201/recipe-book",
+          "screenshots": [],
+          "round": 0
+        },
+        {
+          "card": "A notes box grows as you type (not-closed dialog, inquiry dialog, AI modals)",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4201/menu-library",
+          "screenshots": [],
           "round": 0
         }
       ]
@@ -316,12 +609,101 @@
       "at": "2026-10-29T21:02:03.278Z",
       "plan": "500",
       "text": "notes capped: 12 notes written for plan 500 (orchestrator.maxNotesPerPlan), later notes are dropped"
+    },
+    {
+      "at": "2026-10-29T21:57:01.195Z",
+      "plan": "500",
+      "text": "D21 behaviour: the hold is one shared directive, appStepHold, so the page skins (cook-view ink, menu-intelligence paper) stay as they are and no sibling component was added — reverse: re-inline the hold in each page and revert the directive"
+    },
+    {
+      "at": "2026-10-29T21:57:09.404Z",
+      "plan": "500",
+      "text": "D22 behaviour: product-form.component.spec.ts now stubs MasterPushService because test:ci hung on an admin save (test-only change, scope extended and logged in the plan) — reverse: remove the stub"
+    },
+    {
+      "at": "2026-10-29T21:57:17.909Z",
+      "plan": "500",
+      "text": "D23 seen: .claude/.slot-plan-start is stale (2026-10-28, an earlier plan) and missing in main, so log-query --since=plan-start does not work for this plan"
+    },
+    {
+      "at": "2026-10-29T21:57:26.657Z",
+      "plan": "501",
+      "text": "D24 behaviour: the undo toast is dismissed when the owning component is destroyed (Planner decision applied) — reverse: drop the owner argument at the call sites"
+    },
+    {
+      "at": "2026-10-29T21:57:34.679Z",
+      "plan": "501",
+      "text": "D25 behaviour: event-note undo re-creates the note via addNote, so it gets a new time and author (Planner decision) — reverse: hold the server delete until the toast ends (needs pipeline and server files)"
+    },
+    {
+      "at": "2026-10-29T21:57:44.176Z",
+      "plan": "501",
+      "text": "D26 behaviour: I added dictionary keys line_removed, note_removed and photo_removed, and left the now-unused notes_confirm_delete key (the dictionary is append-only) — reverse: delete the three new keys"
+    },
+    {
+      "at": "2026-10-29T21:57:52.786Z",
+      "plan": "501",
+      "text": "D27 behaviour: recipe-builder ingredient undo removes the placeholder blank row that removeIngredient had auto-added to an empty list — reverse: restore the row without removing the placeholder"
+    },
+    {
+      "at": "2026-10-29T21:58:00.225Z",
+      "plan": "501",
+      "text": "D28 behaviour: a menu item removed from a section is restored only if that section still exists — reverse: drop the includes() guard in menu-intelligence.page removeItem"
+    },
+    {
+      "at": "2026-10-29T21:58:08.749Z",
+      "plan": "501",
+      "text": "D29 seen: src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html:81 - the scaling-chip (remove) output is handled in recipe-header, which is outside this plan's scope, so that removal still gets no undo toast"
+    },
+    {
+      "at": "2026-10-29T21:58:16.968Z",
+      "plan": "501",
+      "text": "D30 seen: ai-draft-editor has one row-delete handler (removeIngredient), not the 3 the plan lists"
+    },
+    {
+      "at": "2026-10-29T21:58:24.386Z",
+      "plan": "501",
+      "text": "D31 seen: server log, CORS origin not allowed on /api/v1/data/DICTIONARY_OVERRIDES/global (HTTP 500) — shows in the log-query check but is not from plan 501"
+    },
+    {
+      "at": "2026-10-29T21:58:32.495Z",
+      "plan": "502",
+      "text": "D32 behaviour: percent display goes through the engine's formatPct1 / formatPctInt, which print the same output as the old toFixed, so no displayed value changes; '| number' and '| formatQuantity' stay as they were (quantity -> formatQuantity pipe) — reverse: restore toFixed in the 3 spots"
+    },
+    {
+      "at": "2026-10-29T21:58:39.596Z",
+      "plan": "502",
+      "text": "D33 behaviour: the menu page date chip is now a plain app-date-field, so the digit-buffer typing, the showPicker call and the Enter/Tab/Arrow focus hop on the date chip are gone — reverse: restore onDateKeydown and the chip markup from git history"
+    },
+    {
+      "at": "2026-10-29T21:58:48.670Z",
+      "plan": "502",
+      "text": "D34 behaviour: the textarea directive selector is now every 'textarea'; boxes in components that do not import it (equipment forms, venue form, event notes log, supplier-orders, search-combobox) stay fixed-height — reverse: set the selector back to textarea[appTextareaAutoGrow]"
+    },
+    {
+      "at": "2026-10-29T21:58:58.930Z",
+      "plan": "502",
+      "text": "D35 behaviour: not-closed, deposit-paid and paste-ingredients dialogs lock their own save button after the first click (the parent closes them); unit-edit and inline-rename take an 'isSaving' input that the parent has to set — reverse: remove the isSaving_ signal or input from each dialog"
+    },
+    {
+      "at": "2026-10-29T21:59:06.936Z",
+      "plan": "502",
+      "text": "D36 behaviour: the legacy saving flag names (isLoading_, isBusy_, isSubmitting_) were not renamed; 'isSaving_' is the name for new code — reverse: n/a, nothing was renamed"
+    },
+    {
+      "at": "2026-10-29T21:59:16.889Z",
+      "plan": "502",
+      "text": "D37 seen: src/app/pages/metadata-manager/metadata-manager.page.component.html:165 — the parent of unit-edit-dialog and inline-rename-field does not bind [isSaving] yet (out of scope), so the busy state there only applies once the parent sets it"
+    },
+    {
+      "at": "2026-10-29T21:59:25.748Z",
+      "plan": "502",
+      "text": "D38 seen: src/app/pages/menu-intelligence/KEYBOARD-FOCUS-REPORT.md:15 — still describes the removed date chip keyboard handling"
     }
   ],
-  "attempts": 1,
-  "phase": "stopped",
-  "freeDiskGb": 29.3,
-  "updatedAt": "2026-10-29T21:02:13.358Z",
-  "stopReason": "wave 2 parked 500 — later waves not started",
-  "finishedAt": "2026-10-29T21:02:13.357Z"
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 28.7,
+  "updatedAt": "2026-10-29T21:59:38.404Z",
+  "finishedAt": "2026-10-29T21:59:38.403Z"
 }

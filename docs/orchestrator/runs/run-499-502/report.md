@@ -1,18 +1,17 @@
 # Orchestrator run run-499-502
 
-Run branch: `orch/run-499-502` (from `origin/main` at 0e5e7f4) · started 2026-10-29T20:01:54.013Z · finished 2026-10-29T21:02:13.357Z
-Result: 1 merged, 3 parked, skipped or left out, 4 in the run (counted from git and status.json).
-`main` untouched: yes — origin/main is 0e5e7f4.
-Stopped: wave 2 parked 500 — later waves not started
+Run branch: `orch/run-499-502` (from `origin/main` at 0e5e7f4) · started 2026-10-29T20:01:54.013Z · finished 2026-10-29T21:59:38.403Z
+Result: 4 merged, 0 parked, skipped or left out, 4 in the run (counted from git and status.json).
+`main` untouched: NO — origin/main is e138dbf.
 
 ## Plans
 
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 499 Number box: tap anywhere on it to edit the whole number | merged | 0 | build | d7e8ec7 |  |
-| 500 One stepper (+/−) for every number: same hold-to-repeat, steps and minimum | parked | 2 | judgment |  | same reason twice: gate (main folder): node scripts/log-query.mjs --since=plan-start --level=error |
-| 501  | skipped | 0 |  |  | not started: wave 2 parked 500 — later waves not started |
-| 502  | skipped | 0 |  |  | not started: wave 2 parked 500 — later waves not started |
+| 500 One stepper (+/−) for every number: same hold-to-repeat, steps and minimum | merged | 0 | build | a332a81 |  |
+| 501 Delete versus undo: entity deletes keep the popup, line removals get an undo toast | merged | 1 | build | e1e2297 |  |
+| 502 Consistency sweep: one date field, one number format, growing textareas and one save-busy state | merged | 0 | build | f9fb510 |  |
 
 ## Decisions taken
 
@@ -37,6 +36,24 @@ Stopped: wave 2 parked 500 — later waves not started
 - 500: D18 seen: C:/coding projects/Cursor/foodVibe1.0/server/app.js:157 (main checkout's server) — 6 'CORS origin not allowed' errors at 2026-10-29T09:03Z on /api/v1/data/DICTIONARY_OVERRIDES/global from an origin not in ALLOWED_ORIGINS; outside plan 500, not fixed
 - 500: D19 seen: plans/500-one-stepper-for-every-number-same-hold-to-repeat-steps-and-minimum.plan.md:21 — the [auto] log-query item uses --since=plan-start, which only resolves inside a slot; it needs an explicit ISO time (e.g. 2026-10-28T12:03:38.160Z) to run as [auto:main]
 - 500: notes capped: 12 notes written for plan 500 (orchestrator.maxNotesPerPlan), later notes are dropped
+- 500: D21 behaviour: the hold is one shared directive, appStepHold, so the page skins (cook-view ink, menu-intelligence paper) stay as they are and no sibling component was added — reverse: re-inline the hold in each page and revert the directive
+- 500: D22 behaviour: product-form.component.spec.ts now stubs MasterPushService because test:ci hung on an admin save (test-only change, scope extended and logged in the plan) — reverse: remove the stub
+- 500: D23 seen: .claude/.slot-plan-start is stale (2026-10-28, an earlier plan) and missing in main, so log-query --since=plan-start does not work for this plan
+- 501: D24 behaviour: the undo toast is dismissed when the owning component is destroyed (Planner decision applied) — reverse: drop the owner argument at the call sites
+- 501: D25 behaviour: event-note undo re-creates the note via addNote, so it gets a new time and author (Planner decision) — reverse: hold the server delete until the toast ends (needs pipeline and server files)
+- 501: D26 behaviour: I added dictionary keys line_removed, note_removed and photo_removed, and left the now-unused notes_confirm_delete key (the dictionary is append-only) — reverse: delete the three new keys
+- 501: D27 behaviour: recipe-builder ingredient undo removes the placeholder blank row that removeIngredient had auto-added to an empty list — reverse: restore the row without removing the placeholder
+- 501: D28 behaviour: a menu item removed from a section is restored only if that section still exists — reverse: drop the includes() guard in menu-intelligence.page removeItem
+- 501: D29 seen: src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html:81 - the scaling-chip (remove) output is handled in recipe-header, which is outside this plan's scope, so that removal still gets no undo toast
+- 501: D30 seen: ai-draft-editor has one row-delete handler (removeIngredient), not the 3 the plan lists
+- 501: D31 seen: server log, CORS origin not allowed on /api/v1/data/DICTIONARY_OVERRIDES/global (HTTP 500) — shows in the log-query check but is not from plan 501
+- 502: D32 behaviour: percent display goes through the engine's formatPct1 / formatPctInt, which print the same output as the old toFixed, so no displayed value changes; '| number' and '| formatQuantity' stay as they were (quantity -> formatQuantity pipe) — reverse: restore toFixed in the 3 spots
+- 502: D33 behaviour: the menu page date chip is now a plain app-date-field, so the digit-buffer typing, the showPicker call and the Enter/Tab/Arrow focus hop on the date chip are gone — reverse: restore onDateKeydown and the chip markup from git history
+- 502: D34 behaviour: the textarea directive selector is now every 'textarea'; boxes in components that do not import it (equipment forms, venue form, event notes log, supplier-orders, search-combobox) stay fixed-height — reverse: set the selector back to textarea[appTextareaAutoGrow]
+- 502: D35 behaviour: not-closed, deposit-paid and paste-ingredients dialogs lock their own save button after the first click (the parent closes them); unit-edit and inline-rename take an 'isSaving' input that the parent has to set — reverse: remove the isSaving_ signal or input from each dialog
+- 502: D36 behaviour: the legacy saving flag names (isLoading_, isBusy_, isSubmitting_) were not renamed; 'isSaving_' is the name for new code — reverse: n/a, nothing was renamed
+- 502: D37 seen: src/app/pages/metadata-manager/metadata-manager.page.component.html:165 — the parent of unit-edit-dialog and inline-rename-field does not bind [isSaving] yet (out of scope), so the busy state there only applies once the parent sets it
+- 502: D38 seen: src/app/pages/menu-intelligence/KEYBOARD-FOCUS-REPORT.md:15 — still describes the removed date chip keyboard handling
 
 ## Models per agent
 
@@ -48,20 +65,52 @@ Stopped: wave 2 parked 500 — later waves not started
 - 499 orch-security: claude-sonnet-5-5 / high
 - 499 orch-verify: claude-sonnet-5-5 / medium
 - 499 orch-merge: claude-sonnet-5-5 / low
-- 500 orch-builder: claude-opus-5-5 / medium
+- 500 orch-builder: claude-sonnet-5-5 / medium
 - 500 orch-gate: claude-haiku-5-5 / low
+- 500 orch-check-plan: claude-sonnet-5-5 / high
+- 500 orch-check-bugs: claude-sonnet-5-5 / high
+- 500 orch-check-rules: claude-sonnet-5-5 / high
+- 500 orch-verify: claude-sonnet-5-5 / medium
+- 500 orch-merge: claude-sonnet-5-5 / low
+- 501 orch-builder: claude-sonnet-5-5 / medium
+- 501 orch-gate: claude-haiku-5-5 / low
+- 501 orch-check-plan: claude-sonnet-5-5 / high
+- 501 orch-check-bugs: claude-sonnet-5-5 / high
+- 501 orch-check-rules: claude-sonnet-5-5 / high
+- 501 orch-security: claude-sonnet-5-5 / high
+- 501 orch-verify: claude-sonnet-5-5 / medium
+- 501 orch-merge: claude-sonnet-5-5 / low
+- 502 orch-builder: claude-sonnet-5-5 / medium
+- 502 orch-gate: claude-haiku-5-5 / low
+- 502 orch-check-plan: claude-sonnet-5-5 / high
+- 502 orch-check-bugs: claude-sonnet-5-5 / high
+- 502 orch-check-rules: claude-sonnet-5-5 / high
+- 502 orch-verify: claude-sonnet-5-5 / medium
+- 502 orch-merge: claude-sonnet-5-5 / low
 
 ## What only the Human can do
 
 ### The plans' [human] items (no UI check ran)
 
-1. 499 Number box: tap anywhere on it to edit the whole number: Phone width: tap the ₪ sign of the price per guest in the pricing meter → the whole number is selected; typing replaces it. Same on the % suffix of waste in the product form.
-2. 499 Number box: tap anywhere on it to edit the whole number: Recipe builder: tap the unit label next to an ingredient quantity → the number is selected; pressing Enter still moves to the next row.
-3. 499 Number box: tap anywhere on it to edit the whole number: The two `[human]` items under Success Criteria pass.
+1. 502: Business settings: double-click Save gives one save and the button shows busy — a [ui] card no script could check and the browser step was off; on http://localhost:4201/settings
+2. 502: Recipe book list: the date filter looks and works like the date field in the event dialogs — a [ui] card no script could check and the browser step was off; on http://localhost:4201/recipe-book
+3. 502: A notes box grows as you type (not-closed dialog, inquiry dialog, AI modals) — a [ui] card no script could check and the browser step was off; on http://localhost:4201/menu-library
+4. 499 Number box: tap anywhere on it to edit the whole number: Phone width: tap the ₪ sign of the price per guest in the pricing meter → the whole number is selected; typing replaces it. Same on the % suffix of waste in the product form.
+5. 499 Number box: tap anywhere on it to edit the whole number: Recipe builder: tap the unit label next to an ingredient quantity → the number is selected; pressing Enter still moves to the next row.
+6. 499 Number box: tap anywhere on it to edit the whole number: The two `[human]` items under Success Criteria pass.
+7. 500 One stepper (+/−) for every number: same hold-to-repeat, steps and minimum: Recipe builder ingredient quantity, cook-view amount and menu guest count: hold − → repeats at the same speed in all three and stops at the minimum.
+8. 500 One stepper (+/−) for every number: same hold-to-repeat, steps and minimum: Phone width: press and hold + on the guest count → it repeats; release stops it.
+9. 500 One stepper (+/−) for every number: same hold-to-repeat, steps and minimum: The cook-view and menu-intelligence steppers still look like their own pages (the ink and paper skins).
+10. 500 One stepper (+/−) for every number: same hold-to-repeat, steps and minimum: The three `[human]` items under Success Criteria pass.
+11. 501 Delete versus undo: entity deletes keep the popup, line removals get an undo toast: Product form: delete a purchase option → it disappears at once, a toast with "undo" shows → pressing undo brings it back in the same place.
+12. 501 Delete versus undo: entity deletes keep the popup, line removals get an undo toast: Event notes: delete a note → toast with "undo" → undo brings the note back and it is still there after a reload.
+13. 501 Delete versus undo: entity deletes keep the popup, line removals get an undo toast: Delete a supplier → the confirm popup (unchanged).
+14. 501 Delete versus undo: entity deletes keep the popup, line removals get an undo toast: The three `[human]` items under Success Criteria pass.
+15. 502 Consistency sweep: one date field, one number format, growing textareas and one save-busy state: Business settings: double-click Save → one save, the button shows busy while it runs.
+16. 502 Consistency sweep: one date field, one number format, growing textareas and one save-busy state: Recipe book list: the date filter looks and works like the date field in the event dialogs.
+17. 502 Consistency sweep: one date field, one number format, growing textareas and one save-busy state: A notes box grows as you type on any screen that has one.
+18. 502 Consistency sweep: one date field, one number format, growing textareas and one save-busy state: The three `[human]` items under Success Criteria pass.
 
-- Decide on 500: same reason twice: gate (main folder): node scripts/log-query.mjs --since=plan-start --level=error
-- Decide on 501: not started: wave 2 parked 500 — later waves not started
-- Decide on 502: not started: wave 2 parked 500 — later waves not started
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
