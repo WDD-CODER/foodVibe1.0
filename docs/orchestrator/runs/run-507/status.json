@@ -1,0 +1,184 @@
+{
+  "run": "run-507",
+  "branch": "orch/run-507",
+  "base": "main",
+  "startedAt": "2026-10-29T08:57:58.371Z",
+  "mainShaAtStart": "a969725b64b128ecf0815d73d6ef2493d4197923",
+  "plans": {
+    "507": {
+      "nnn": "507",
+      "title": "Unit tests stop sending log calls to the real backend, and unknown origins get a quiet 403",
+      "branch": "feat/507-unit-tests-stop-sending",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-security": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-10-29T08:58:33.468Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:06:32.843Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:08:59.147Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:10:19.214Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:10:27.814Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:13:30.501Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:13:40.880Z",
+          "state": "env-paused",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:14:04.161Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:14:12.428Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:16:20.015Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:16:27.874Z",
+          "state": "parked",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T09:31:44.235Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "freeDiskGb": 34.4,
+      "sha": "09111447dbd6fa79f7391efbfa46cc0aabeab18f",
+      "reason": "merge-only retry by Planner (Human: merge-only 507); log checks run from main folder because pnpm server tree does not expose mongodb"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-10-29T09:16:53.982Z",
+      "plan": "507",
+      "text": "D1 behaviour: environment.test.ts also points apiUrl and authApiUrl at http://127.0.0.1:1 (a closed port). With only the log switch, test:ci still produced 3 server.unhandled CORS 500s on /api/v1/data/DICTIONARY_OVERRIDES/global, from specs that use the real TranslationService and HttpStorageAdapter. To reverse it, restore localhost:3000 in environment.test.ts."
+    },
+    {
+      "at": "2026-10-29T09:17:02.916Z",
+      "plan": "507",
+      "text": "D2 behaviour: environment.test.ts also points apiUrl/authApiUrl at the closed port 127.0.0.1:1, beyond the plan's single-switch copy (documented in Execution Notes)."
+    },
+    {
+      "at": "2026-10-29T09:17:11.024Z",
+      "plan": "507",
+      "text": "D3 seen: src/app/core/services/translation.service.ts:73 and src/app/core/services/http-storage.adapter.ts:258 — specs hit the real HttpClient against the backend; now fenced off by the test environment URL."
+    },
+    {
+      "at": "2026-10-29T09:17:19.118Z",
+      "plan": "507",
+      "text": "D4 The plan-start error query cannot return empty because of the 3 entries from my first test:ci run. The Planner should judge that check by entries after 09:03:19Z."
+    },
+    {
+      "at": "2026-10-29T09:17:27.876Z",
+      "plan": "507",
+      "text": "D5 Ran all six commands in C:/coding projects/Cursor/foodVibe1.0-wt-1 (exists) sequentially, one Bash call each, with output redirected to C:/Users/danwe/AppData/Local/Temp/orch-gate-507-{1..6}.log. All exited 0."
+    },
+    {
+      "at": "2026-10-29T09:17:36.128Z",
+      "plan": "507",
+      "text": "D6 A first attempt to chain all six commands in one compound shell call was denied by the permission system; I ran them individually instead. The commands and their arguments were not changed."
+    },
+    {
+      "at": "2026-10-29T09:17:44.018Z",
+      "plan": "507",
+      "text": "D7 No command was rerun and no env-fail occurred."
+    },
+    {
+      "at": "2026-10-29T09:17:53.085Z",
+      "plan": "507",
+      "text": "D8 Verified by rerun:  cd server && pnpm exec vitest run test/cors-origin.test.js  gives 4 passed, matching the Execution Notes."
+    },
+    {
+      "at": "2026-10-29T09:18:01.205Z",
+      "plan": "507",
+      "text": "D9 Ran server/test/cors-origin.test.js in the worktree (vitest): 4 of 4 passed."
+    },
+    {
+      "at": "2026-10-29T09:18:11.272Z",
+      "plan": "507",
+      "text": "D10 Checked the 403 middleware order in server/app.js. It sits after pino-http, so req.log exists, and after express.static, so static assets with an Origin header are not affected. For a disallowed origin the old cors callback also failed (it called next(err), which gave a 500), so same-origin POSTs from a domain missing from ALLOWED_ORIGIN are not a new regression."
+    },
+    {
+      "at": "2026-10-29T09:18:18.526Z",
+      "plan": "507",
+      "text": "notes capped: 12 notes written for plan 507 (orchestrator.maxNotesPerPlan), later notes are dropped"
+    },
+    {
+      "at": "2026-10-29T09:31:44.548Z",
+      "text": "Final gate on merged tree (Planner): scope-check exit 0; pnpm run build exit 0 (Initial total 552.14 kB); pnpm run lint exit 0 (0 errors, 67 warnings); pnpm run test:ci exit 0 (TOTAL: 1600 SUCCESS; first run DISCONNECTED at teardown after 1600/1600 SUCCESS, rerun clean). log-query server.unhandled 15m and errors since 09:03:20Z: no entries (run from main folder)."
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "freeDiskGb": 34.4,
+  "updatedAt": "2026-10-29T09:31:45.538Z",
+  "stopReason": "wave 1 parked 507 — later waves not started",
+  "finishedAt": "2026-10-29T09:31:45.537Z"
+}

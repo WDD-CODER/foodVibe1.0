@@ -3,6 +3,7 @@
 // backend at localhost:3000, real backend auth, auto-login as the dev guest.
 export const environment = {
   production: false,
+  sendLogsToServer: true,
   localDev: true,
   apiUrl: 'http://localhost:3000',
   authApiUrl: 'http://localhost:3000',
