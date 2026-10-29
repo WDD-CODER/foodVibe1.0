@@ -25,6 +25,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class InlineRenameFieldComponent {
+  /** Plan 502: the parent sets this while its save runs; the button is disabled and shows the busy label. */
+  readonly isSaving_ = input(false, { alias: 'isSaving' })
   /** Text the field opens with (selected, so typing replaces it). */
   readonly value = input.required<string>()
   /** Dictionary key of the field's accessible name. */
@@ -57,7 +59,7 @@ export class InlineRenameFieldComponent {
   }
 
   protected onSave(): void {
-    if (!this.canSave_()) return
+    if (!this.canSave_() || this.isSaving_()) return
     this.saved.emit(this.text_().trim())
   }
 

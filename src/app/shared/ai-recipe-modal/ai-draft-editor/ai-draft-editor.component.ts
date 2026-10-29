@@ -1,4 +1,5 @@
 // src/app/shared/ai-recipe-modal/ai-draft-editor/ai-draft-editor.component.ts
+import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import {
   ChangeDetectionStrategy,
   Component,
@@ -49,6 +50,7 @@ export interface DraftWorkflowItem {
   selector: 'app-ai-draft-editor',
   standalone: true,
   imports: [
+    TextareaAutoGrowDirective,
     NumberBoxDirective,
     SelectOnFocusDirective,
     CommonModule,

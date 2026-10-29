@@ -8,6 +8,7 @@ import {
   output,
   signal
 } from '@angular/core'
+import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -36,6 +37,7 @@ const NOTE_MAX = NOTE_MAX_LENGTH
   selector: 'app-new-inquiry-dialog',
   standalone: true,
   imports: [
+    TextareaAutoGrowDirective,
     NumberBoxDirective,
     FormsModule,
     TranslatePipe,

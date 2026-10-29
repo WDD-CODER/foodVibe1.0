@@ -9,6 +9,7 @@ import {
   OnInit,
   signal
 } from '@angular/core'
+import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
@@ -92,6 +93,7 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
     StepHoldDirective,
     SelectOnFocusDirective,
     CommonModule,
+    DateFieldComponent,
     ReactiveFormsModule,
     LucideAngularModule,
     TranslatePipe,
@@ -285,62 +287,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const el = document.getElementById(`menu-focus-${field}`)
     if (el && typeof (el as HTMLInputElement).focus === 'function') {
       ;(el as HTMLInputElement).focus()
-      if (field === 'eventDate' && typeof (el as HTMLInputElement).showPicker === 'function') {
-        ;(el as HTMLInputElement).showPicker()
-      }
     } else if (el) el.focus()
-  }
-
-  /** Open date picker and focus the date input (called from clickable date label). */
-  protected openDatePicker(): void {
-    this.dateDigitBuffer_.set('')
-    this.focusField('eventDate')
-  }
-
-  /** Format eventDate for display (DD/MM/YYYY or placeholder). */
-  protected getEventDateDisplay(): string {
-    const raw = this.form_.get('eventDate')?.value as string | undefined
-    if (!raw) return ''
-    const d = new Date(raw + 'T12:00:00')
-    if (Number.isNaN(d.getTime())) return raw
-    const day = String(d.getDate()).padStart(2, '0')
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const year = d.getFullYear()
-    return `${day}/${month}/${year}`
-  }
-
-  private dateDigitBuffer_ = signal('')
-
-  /** Handle digit-only input for date: first 2 = day, next 2 = month, then 4 = year. */
-  protected onDateKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      this.onMetaKeydown('eventDate', e)
-      return
-    }
-    if (e.key.length === 1 && /\d/.test(e.key)) {
-      const buf = this.dateDigitBuffer_().slice(0, 8) + e.key
-      if (buf.length <= 8) {
-        e.preventDefault()
-        this.dateDigitBuffer_.set(buf)
-        if (buf.length === 8) {
-          const dStr = buf.slice(0, 2)
-          const mStr = buf.slice(2, 4)
-          const yStr = buf.slice(4, 8)
-          const dNum = Math.min(31, Math.max(1, parseInt(dStr, 10) || 1))
-          const mNum = Math.min(12, Math.max(1, parseInt(mStr, 10) || 1))
-          const yNum = Math.max(1900, Math.min(2100, parseInt(yStr, 10) || new Date().getFullYear()))
-          const iso = `${yNum}-${String(mNum).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`
-          this.form_.patchValue({ eventDate: iso })
-          this.dateDigitBuffer_.set('')
-        }
-      }
-    } else if (e.key === 'Backspace') {
-      const current = this.dateDigitBuffer_()
-      if (current.length > 0) {
-        e.preventDefault()
-        this.dateDigitBuffer_.set(current.slice(0, -1))
-      }
-    }
   }
 
   /** Tap steps by 1; holding repeats with the app's tiered hold steps (1…9, then 10s, 100s). */

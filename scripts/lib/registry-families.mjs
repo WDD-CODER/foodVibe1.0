@@ -77,5 +77,20 @@ export const REUSE_RULES = [
     pattern: /\((?:click|mousedown|pointerdown)\)="[^"]*(?:increment|decrement|startHold|startGuestHold|step\w*(?:Amount|Value|Qty|Count))\w*\(/i,
     skip: /appStepHold/,
     hint: 'a minus / plus button next to a number takes appStepHold (src/app/shared/counter/step-hold.directive.ts) or app-counter, so hold-to-repeat, steps and the minimum are the same everywhere'
+  },
+  {
+    id: 'native-date-input',
+    family: 'form-field',
+    files: ['src/app/**/*.html'],
+    exclude: ['src/app/shared/date-field/**'],
+    pattern: /type="date"/,
+    hint: 'a date is picked with app-date-field (src/app/shared/date-field/) so every screen shows and types dd/mm/yyyy'
+  },
+  {
+    id: 'template-to-fixed',
+    family: 'helpers',
+    files: ['src/app/**/*.html'],
+    pattern: /\.toFixed\(/,
+    hint: 'show numbers through core/engine/rounding.ts (formatPct1, formatPctInt, formatMoney) or the formatQuantity pipe, not toFixed in a template'
   }
 ]

@@ -133,6 +133,8 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - When: any form input with a label.
 - Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
   label or content, not a plain label + input).
+- Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input.
+- Multi-line boxes (plan 502): `TextareaAutoGrowDirective` has the selector `textarea`; import it in the component and every box grows. Fixed on purpose: equipment form / list, venue form, event notes log, supplier-orders (read-only), search-combobox.
 
 ### number-box — tap anywhere on a number box to edit the number
 - Status: stable — plan 499 built `appNumberBox`; pricing meter, counter, product form, recipe quantity, cook view, settings, event dialogs and the AI / quick-add / unit modals are on it
@@ -193,6 +195,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Status: stable (plan 458 sweeps the copies)
 - Use: `src/styles.scss` — every `.c-*` class is defined there and only there (`docs/agent/conventions.md`).
 - When: a style used by more than one component (buttons, inputs, modals, chips, empty state).
+- Saving state (plan 502): a save button is `[disabled]` and `[attr.aria-busy]` while it runs, shows the `saving` label, and the signal is named `isSaving_` (`.c-btn-primary[aria-busy='true']` in `src/styles.scss`). Older flags (`isLoading_`, `isBusy_`, `isSubmitting_`) stay on their screens until touched.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ## Logic families

@@ -274,7 +274,7 @@
                 [value]="draft_()!.yieldFactor"
                 (input)="setDraftField('yieldFactor', +$any($event.target).value)"
               />
-              <span class="editor-num-hint">{{ (draft_()!.yieldFactor * 100).toFixed(0) }}%</span>
+              <span class="editor-num-hint">{{ pctInt(draft_()!.yieldFactor * 100) }}</span>
             </div>
           </div>
 

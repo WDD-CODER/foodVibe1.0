@@ -25,6 +25,7 @@ import { TranslationService } from '@services/translation.service'
 import { MetadataRegistryService } from '@services/metadata-registry.service'
 import { UserService } from '@services/user.service'
 import { PermissionService } from '@services/permission.service'
+import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { Recipe } from '@models/recipe.model'
@@ -84,6 +85,7 @@ const INGREDIENT_SEARCH_DEBOUNCE_MS = 250
   selector: 'app-recipe-book-list',
   standalone: true,
   imports: [
+    DateFieldComponent,
     CommonModule,
     FormsModule,
     LucideAngularModule,

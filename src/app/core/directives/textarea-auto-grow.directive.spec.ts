@@ -50,3 +50,26 @@ describe('TextareaAutoGrowDirective', () => {
     expect(parseFloat(box.style.height)).toBeLessThan(tall)
   })
 })
+
+@Component({
+  standalone: true,
+  imports: [TextareaAutoGrowDirective],
+  template: '<textarea #box rows="1" style="width: 200px" [value]="text_()"></textarea>'
+})
+class PlainTextareaHostComponent {
+  readonly box = viewChild.required<ElementRef<HTMLTextAreaElement>>('box')
+  readonly text_ = signal('')
+}
+
+describe('TextareaAutoGrowDirective on a plain textarea', () => {
+  it('grows a textarea that has no attribute, because the selector is every textarea', () => {
+    const fixture = TestBed.createComponent(PlainTextareaHostComponent)
+    fixture.detectChanges()
+    const box = fixture.componentInstance.box().nativeElement
+    expect(box.style.overflowY).toBe('hidden')
+    const before = box.offsetHeight
+    fixture.componentInstance.text_.set(Array.from({ length: 12 }, (_, i) => `line ${i}`).join('\n'))
+    fixture.detectChanges()
+    expect(box.offsetHeight).toBeGreaterThan(before)
+  })
+})

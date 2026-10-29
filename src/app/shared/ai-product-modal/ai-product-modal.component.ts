@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core'
+import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
+import { formatPctInt } from 'src/app/core/engine/rounding'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from '../loader/loader.component'
 import { AiProductModalService } from './ai-product-modal.service'
@@ -43,6 +45,7 @@ const CANONICAL_UNITS = [
   selector: 'app-ai-product-modal',
   standalone: true,
   imports: [
+    TextareaAutoGrowDirective,
     NumberBoxDirective,
     CommonModule,
     FormsModule,
@@ -58,6 +61,9 @@ const CANONICAL_UNITS = [
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AiProductModalComponent implements OnInit {
+  /** Percent display goes through the engine rounding rule. */
+  protected readonly pctInt = formatPctInt
+
   protected readonly modalService = inject(AiProductModalService)
   private readonly gemini_ = inject(GeminiService)
   private readonly userMsg_ = inject(UserMsgService)

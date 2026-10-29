@@ -125,23 +125,12 @@
             {{ 'menu_guests' | translatePipe }}
           </span>
           <span class="event-chip-sep">·</span>
-          <span
-            class="event-meta-chip meta-date-chip"
-            (click)="openDatePicker()"
-            role="button"
-            tabindex="0"
-            (keydown.enter)="openDatePicker()"
-            (keydown.space)="$event.preventDefault(); openDatePicker()"
-            [attr.aria-label]="'menu_set_date' | translatePipe"
-            (keydown)="onDateKeydown($event)"
-          >
-            <span class="meta-date-display">{{ getEventDateDisplay() || ('menu_no_date' | translatePipe) }}</span>
-            <input
-              id="menu-focus-eventDate"
-              type="date"
-              class="meta-date-input"
-              formControlName="eventDate"
-              (keydown)="onDateKeydown($event)"
+          <span class="event-meta-chip meta-date-chip">
+            <app-date-field
+              inputId="menu-focus-eventDate"
+              ariaLabelKey="menu_set_date"
+              [value]="form_.controls.eventDate.value ?? ''"
+              (committed)="form_.patchValue({ eventDate: $event })"
             />
           </span>
           <span class="event-chip-sep">·</span>

@@ -47,6 +47,7 @@ import { matchProductName } from '@utils/product-name-match.util'
 import { ProductNameMatcherService, type NameMatchItem } from '@services/product-name-matcher.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { findProductByName } from 'src/app/core/utils/product-name-error.util'
+import { formatPct1 } from 'src/app/core/engine/rounding'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
 
@@ -450,7 +451,7 @@ export class RecipeIngredientsTableComponent {
     if (rowG === null) return 'n/a'
     const total = this.getTotalWeightG()
     if (total === 0) return '0%'
-    return `${((rowG / total) * 100).toFixed(1)}%`
+    return formatPct1((rowG / total) * 100)
   }
 
   onItemSelected(item: SearchableItem, group: FormGroup) {

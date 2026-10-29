@@ -12,7 +12,13 @@
   autocapitalize="off"
   spellcheck="false"
 />
-<button type="button" class="c-btn-primary irf-btn" [disabled]="!canSave_()" (click)="onSave()">
-  {{ 'save' | translatePipe }}
+<button
+  type="button"
+  class="c-btn-primary irf-btn"
+  [disabled]="!canSave_() || isSaving_()"
+  [attr.aria-busy]="isSaving_() || null"
+  (click)="onSave()"
+>
+  {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}
 </button>
 <button type="button" class="c-btn-ghost--sm irf-btn" (click)="onCancel()">{{ 'cancel' | translatePipe }}</button>
