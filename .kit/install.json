@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "1.11.0"
+    "version": "1.12.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v1.11.0",
-  "commit": "d21d4bcac6b004ea8c99b6695ed13248c5d8c528",
+  "ref": "v1.12.0",
+  "commit": "504cefad6e32decbf0b8db1298012b963fd40eed",
   "packs": [
     "angular",
     "node-express"
@@ -23,7 +23,7 @@
       "source": "core/.claude/agents/kit-prevalidate.md"
     },
     ".claude/agents/kit-runner.md": {
-      "sha256": "c693155d3d7a77f46798efbcab7971b9ebcacbd4ec0557f2116e307e5cce0520",
+      "sha256": "3b75b890c7d071fe1a36bfdca8cdfea677f819defb4291a7496cfca58635772b",
       "kind": "managed",
       "source": "core/.claude/agents/kit-runner.md"
     },
@@ -123,7 +123,7 @@
       "source": "core/.claude/commands/kit-feedback.md"
     },
     ".claude/commands/orchestrate.md": {
-      "sha256": "f6d01aae35437c33c9da916609e7cf5384dbfd0b28ebf5521af692bb3a7de977",
+      "sha256": "1c7c4931dc643a45decd5f665a1c98cde975be0af235f8c681d2bc85972ccc08",
       "kind": "managed",
       "source": "core/.claude/commands/orchestrate.md"
     },
@@ -258,7 +258,7 @@
       "source": "packs/angular/.claude/workflows/deploy.yml"
     },
     ".claude/workflows/orchestrate.js": {
-      "sha256": "b509e44fd11290509fc544baf02ffe1a09ffc92e3f4151f8fdfa4e1a01e22cc0",
+      "sha256": "9626e9008eb5d545277951097f708b5cbcfb2a74ce28c570f3ce8e85d4792fa3",
       "kind": "managed",
       "source": "core/.claude/workflows/orchestrate.js"
     },
@@ -558,7 +558,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "a6f40616c9c21b7886c890e3263335965e21a23614e2bdaa9d4d6f37c2005d4d",
+      "sha256": "2b6ebd75cbf8ddc2479caa6a4f6825969ac59a8052ffbc4632445bd20c0928ef",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },

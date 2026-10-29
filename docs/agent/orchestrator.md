@@ -39,8 +39,8 @@ branch himself.
    start stops the run before any builder). The command
    asks the Human every question in **one batch**, writes each answer into that plan's `## Execution Notes` (a plan
    commit on `main`), and leaves out a plan whose question stays unanswered. Then the Human says `go` —
-   unless there was nothing to ask (`askHuman` false: every plan ready, no question, no environment need, preflight
-   ok), when the run starts at once; `/orchestrate … ask` keeps the pause.
+   unless there was nothing to ask (`askHuman` false: every plan ready, no question, no environment need, no main-folder
+   command, preflight ok), when the run starts at once; `/orchestrate … ask` keeps the pause.
 2. **Start.** `orch-state.mjs init` creates `orch/<run>` from `origin/main` (or reuses it on a
    relaunch), adds the merge folder `<repo>-orch-merge-<run>` beside the main folder, gives the branch an empty first
    commit `orch(<run>): run start` (a builder branch cut from it is then never an ancestor of `origin/main`, so a
@@ -123,6 +123,12 @@ and goes to the builder like any gate failure. The main folder's code is `origin
 branch, so a main check proves the side effects of the plan's own checks (a clean log after its tests ran), never the
 plan's code. The merge step and the final gate never run them.
 
+A main check always waits for `go`. It is the one place in a run where a plan-supplied command touches the Human's
+live environment, so readiness lists every one under `mainApproval` (`<NNN>: <command>`), `askHuman` is true, and
+`/orchestrate` shows them in its list and waits — even when nothing else is open. After `go` the command passes
+`"mainApproved": true` to the run; without it the workflow refuses to start (`stopped: main-approval`, before `init`,
+no state file). A run with no `[auto:main]` item is unchanged and still starts on its own.
+
 ## A dead agent, a loop, and "is it stuck?"
 
 - **Model fallback.** Every agent call goes through one helper in the workflow. An agent that returns nothing (it died
@@ -131,6 +137,14 @@ plan's code. The merge step and the final gate never run them.
   model> → <second>`. A second nothing goes to the caller's park or environment path as before. `inherit` turns the
   retry off. The key refuses a Haiku value: a review agent (the checkers, the verifier, security, UI) never falls back
   to Haiku. Only the orchestrator session's own model is out of reach: the Human switches it with `/model`.
+- **A bad copy of a state line.** Every state command (`orch-state.mjs init / worktree / set / …`) reaches the
+  workflow as a `kit-runner` agent's copy of its `ORCH_JSON` line — the workflow has no file access. A copy that does
+  not parse (a run once parked a plan at `worktree` on a line the command had printed well) is retried once at effort
+  `medium`, and a run note says `runner retry: <label> — first attempt: <error>`; the error carries the parser's
+  message, the first non-ASCII character (`non-ASCII U+201C at 11`) and the raw line, JSON-escaped. A second bad copy
+  parks the plan with that error and `after 2 attempts`. `note` and `finish` are never retried (a note would be written
+  twice; `finish` commits the report); every other command is idempotent — `worktree` reuses the folder or slot the
+  plan already holds. A `\r`, backticks around the line and text after the closing brace parse without a retry.
 - **Limits per plan**, counted in the workflow (it has no clock): at most `maxNotesPerPlan` run notes (every note is
   one runner agent call — a run once wrote about 30 closing notes in 4.5 minutes), then one last `notes capped` note;
   the same failure reason twice in a row at the same step (`gate: …`, `checker: …`, `ui: …`, `merge: …`, trimmed to
