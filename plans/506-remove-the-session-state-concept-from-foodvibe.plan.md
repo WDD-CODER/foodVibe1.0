@@ -2,7 +2,7 @@
 
 Status: draft
 Depends-on: 497, 419
-Snapshot: c5e6916634cf8f1aad1a7acf852e0642a876e072
+Snapshot: e3aaeccee802013a946a5ea2f76edcc0313197db
 
 ## Problem Statement
 
@@ -151,3 +151,4 @@ by symbol and print one line per commit: `ok` or `conflict: <what>`. STOP only o
 - A5: n/a - plans 419 and 497 are no longer directly under `plans/` (closed), history untouched.
 - Checks: `pnpm run build` -> 0; `pnpm run lint` -> 0; `pnpm run test:ci` -> 0 (1621 SUCCESS); `pnpm run test:scripts` -> 0 (129 pass, 0 fail); `--deps` -> `DEPENDS_ON: ok (497, 419)`; `--reuse` -> `REUSE: ok none` exit 0; Done-when grep (plus `:!docs/orchestrator/runs`) prints nothing; `git ls-files 'docs/session-state*.md'` empty.
 - `--drift` exits 1 (REALITY: drift) only because of the commits since the Snapshot; Step 0 judged ok above.
+- 2026-10-29 Builder (round 1 fix): Step 0 re-run: the 8 drift commits listed by --drift are ok (no conflict with this plan); Snapshot moved to origin/main e3aaeccee802013a946a5ea2f76edcc0313197db so --drift reports clean.
