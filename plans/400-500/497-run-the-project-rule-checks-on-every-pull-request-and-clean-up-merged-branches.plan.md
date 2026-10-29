@@ -21,7 +21,7 @@ Snapshot: 73efca9b0d5ba57ad57cc10f845068411d18be9b
   - [x] [auto] `npx ng build` passes and `node scripts/scope-check.mjs --arch --plan=plans/497-run-the-project-rule-checks-on-every-pull-request-and-clean-up-merged-branches.plan.md` exits 0.
   - [x] [auto] On the PR for this plan, the new `rules` check run is green (`gh pr checks <PR>` lists `rules` as pass).
   - [x] [human] A throwaway PR that adds a native `<select>` to any template shows the `rules` check red with the file named in the log; closing that PR leaves main untouched.
-  - [ ] [human] After the Human runs the repo-setting command (S6), merging any PR removes its branch on GitHub without a manual delete.
+  - [x] [human] After the Human runs the repo-setting command (S6), merging any PR removes its branch on GitHub without a manual delete.
   - [x] [human] Running the `stale-branches` workflow from the Actions tab (Run workflow) creates or updates one issue titled "Stale branches" that lists branches unmerged for 30+ days; nothing is deleted.
 
 ## Execution Mode
@@ -115,7 +115,7 @@ append the path to the scope block above and retry.
 - [x] [auto] `node --test scripts/test/ci-scope-check.test.mjs` passes.
 - [x] [auto] `npx ng build` passes; `node scripts/scope-check.mjs --arch --plan=<this plan>` exits 0.
 - [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-- [ ] [human] The throwaway-PR, merged-branch-deletes and stale-branches-issue checks in Success Criteria pass.
+- [x] [human] The throwaway-PR, merged-branch-deletes and stale-branches-issue checks in Success Criteria pass.
 
 ### Builder evidence (orch-builder, 2026-10-27)
 - Re-ran the five checks first on the branch (base 30475411): `lint:icons` exit 0; `lint:no-native-select` exit 1 (ai-product-modal html); `plan-ledger-check` exit 0; `kit-manifest-check` exit 1 (89 unclassified + 2 coupling problems, not 56: the kit v1.7.0/v1.7.1 syncs and plans 4xx added files); `breadcrumbs-check` exit 1 (2 seams).
@@ -133,3 +133,4 @@ append the path to the scope block above and retry.
 - `rules` on the plan's PR: `gh pr checks 464` -> "rules pass 8s" (run 40591303787), all other checks pass.
 - S6: `GITHUB_TOKEN= gh api repos/WDD-CODER/foodVibe1.0 --jq '{delete_branch_on_merge}'` -> `{"delete_branch_on_merge":true}` — the setting is already on (set outside this run), and `docs/agent/standards-git.md:56` records it, so S6 is ticked without running the PATCH again. S7 and the three [human] GitHub checks stay open for the Human.
 - Human validation (2026-10-29): throwaway PR #471 → `rules` red ("Native <select> is not allowed", dashboard.page.html), closed unmerged; stale-branches run 40838648425 success → issue #470 updated (7 branches). Merge-deletes-branch check stays open until the run-branch PR merges.
+- Human validation (2026-10-29): merged run PR #472 (a08223bc) → GitHub auto-deleted orch/run-497-419 (git ls-remote: 0 heads). All checks done.
