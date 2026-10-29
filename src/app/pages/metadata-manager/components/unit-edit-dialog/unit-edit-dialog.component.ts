@@ -24,6 +24,8 @@ export interface UnitEditValue {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UnitEditDialogComponent {
+  /** Plan 502: the parent sets this while its save runs; the button is disabled and shows the busy label. */
+  readonly isSaving_ = input(false, { alias: 'isSaving' })
   //INPUTS
   readonly unit = input.required<UnitEditValue>()
 
@@ -50,7 +52,7 @@ export class UnitEditDialogComponent {
   }
 
   protected onSave(): void {
-    if (!this.isValid()) return
+    if (!this.isValid() || this.isSaving_()) return
     this.saved.emit({
       key: this.key_().trim().toLowerCase(),
       hebrewLabel: this.hebrewLabel_().trim(),

@@ -52,4 +52,15 @@ describe('NotClosedDialogComponent', () => {
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
     expect(cancels).toBe(1)
   })
+
+  it('ignores a second click on save while saving and shows the busy state', () => {
+    el.querySelectorAll<HTMLInputElement>('input[type="radio"]')[0].click()
+    fixture.detectChanges()
+    saveButton().click()
+    saveButton().click()
+    fixture.detectChanges()
+    expect(answers.length).toBe(1)
+    expect(saveButton().disabled).toBeTrue()
+    expect(saveButton().getAttribute('aria-busy')).toBe('true')
+  })
 })

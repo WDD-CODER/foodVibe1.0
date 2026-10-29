@@ -37,6 +37,8 @@ export interface DepositPaidAnswer {
   host: { '(document:keydown.escape)': 'cancelled.emit()' }
 })
 export class DepositPaidDialogComponent {
+  /** Plan 502: true from the first click until the dialog is closed by its parent; a second click does nothing. */
+  protected readonly isSaving_ = signal(false)
   // 1. INJECTED
   private readonly host_ = inject<ElementRef<HTMLElement>>(ElementRef)
 
@@ -81,7 +83,8 @@ export class DepositPaidDialogComponent {
   protected onSave(): void {
     this.isTouched_.set(true)
     const amount = this.amount_()
-    if (!this.valid_() || amount === null) return
+    if (!this.valid_() || amount === null || this.isSaving_()) return
+    this.isSaving_.set(true)
     this.confirmed.emit({ date: this.date_(), amount })
   }
 }

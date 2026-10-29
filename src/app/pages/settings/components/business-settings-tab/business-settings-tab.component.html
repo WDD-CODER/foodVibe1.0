@@ -26,8 +26,14 @@
       </label>
     }
     <div class="c-form-actions">
-      <button type="submit" class="c-btn-primary" data-testid="business-settings-save" [disabled]="!canSave()">
-        {{ 'save' | translatePipe }}
+      <button
+        type="submit"
+        class="c-btn-primary"
+        data-testid="business-settings-save"
+        [disabled]="!canSave()"
+        [attr.aria-busy]="isSaving_() || null"
+      >
+        {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}
       </button>
     </div>
   </form>

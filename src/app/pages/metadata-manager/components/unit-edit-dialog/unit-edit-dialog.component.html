@@ -45,8 +45,14 @@
 
   <div class="c-modal-actions">
     <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
-    <button type="button" class="c-btn-primary" (click)="onSave()" [disabled]="!isValid()">
-      {{ 'save' | translatePipe }}
+    <button
+      type="button"
+      class="c-btn-primary"
+      (click)="onSave()"
+      [disabled]="!isValid() || isSaving_()"
+      [attr.aria-busy]="isSaving_() || null"
+    >
+      {{ (isSaving_() ? 'saving' : 'save') | translatePipe }}
     </button>
   </div>
 </app-modal-shell>

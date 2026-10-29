@@ -136,3 +136,17 @@ test('stepper rule: a hand-built minus / plus click handler warns unless it carr
   assert.match(r.stdout, /^REUSE: warn minus-plus-outside-stepper stepper src\/app\/pages\/orders\/orders\.component\.html:11 — /m)
   assert.equal(r.stdout.trim().split('\n').length, 1, 'the appStepHold line does not warn')
 })
+
+test('patch adding a native date input and a template toFixed warns; app-date-field does not', () => {
+  const r = lint(`--patch=${FIX}/consistency.diff`)
+  assert.equal(r.status, 0, r.stderr)
+  const out = r.stdout.trim().split('\n')
+  assert.equal(out.length, 2, r.stdout)
+  assert.match(out[0], /^REUSE: warn native-date-input form-field src\/app\/pages\/orders\/orders\.component\.html:11 /)
+  assert.match(out[1], /^REUSE: warn template-to-fixed helpers src\/app\/pages\/orders\/orders\.component\.html:12 /)
+})
+
+test('the date field itself may hold a native date input', () => {
+  const warnings = lintAddedLines([line('src/app/shared/date-field/date-field.component.html', '<input type="date" />')])
+  assert.deepEqual(warnings, [])
+})

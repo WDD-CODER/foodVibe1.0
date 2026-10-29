@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
 import { LucideAngularModule } from 'lucide-angular'
+import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { MenuEvent } from '@models/menu-event.model'
@@ -38,6 +39,7 @@ const StageFilterParam: ParamSerializer<string> = {
   selector: 'app-menu-library-list',
   standalone: true,
   imports: [
+    DateFieldComponent,
     CommonModule,
     FormsModule,
     LucideAngularModule,
@@ -278,12 +280,6 @@ export class MenuLibraryListComponent {
 
   protected toggleSortOrder(): void {
     this.sortOrder_.update((o) => (o === 'asc' ? 'desc' : 'asc'))
-  }
-
-  protected onDateWrapClick(input: HTMLInputElement | undefined): void {
-    if (input?.showPicker) {
-      input.showPicker()
-    }
   }
 
   protected onClearSearch(input: HTMLInputElement): void {
