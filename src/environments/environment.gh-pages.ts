@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  sendLogsToServer: true,
   localDev: false,
   apiUrl: 'https://foodvibe1-0-1-frankfurt.onrender.com',
   authApiUrl: 'https://foodvibe1-0-1-frankfurt.onrender.com',

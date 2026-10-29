@@ -113,11 +113,11 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`: re-read `logg
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Add a test-only settings file that turns off sending logs to a server — sendLogsToServer key in every environment file, false in the new environment.test.ts — src/environments/**
-- [ ] A2: Make the unit tests use that test-only settings file — fileReplacements on the Karma test target — angular.json
-- [ ] A3: Stop the logger from sending anything when the switch is off — early return before fetch; specs that test shipping turn it on — src/app/core/services/logging.service.ts, src/app/core/services/logging.service.spec.ts
-- [ ] A4: Answer an unknown origin with a plain 403 logged once, never a 500 with a stack trace — middleware before cors(), Set of seen origins, warn cors.origin_rejected — server/app.js
-- [ ] A5: Prove both fixes with tests and a clean log after a full test run — new server test, pnpm run build, pnpm run test:ci with the backend up, server tests, log-query; paste outputs — server/test/cors-origin.test.js, this plan file
+- [x] A1: Add a test-only settings file that turns off sending logs to a server — sendLogsToServer key in every environment file, false in the new environment.test.ts — src/environments/**
+- [x] A2: Make the unit tests use that test-only settings file — fileReplacements on the Karma test target — angular.json
+- [x] A3: Stop the logger from sending anything when the switch is off — early return before fetch; specs that test shipping turn it on — src/app/core/services/logging.service.ts, src/app/core/services/logging.service.spec.ts
+- [x] A4: Answer an unknown origin with a plain 403 logged once, never a 500 with a stack trace — middleware before cors(), Set of seen origins, warn cors.origin_rejected — server/app.js
+- [x] A5: Prove both fixes with tests and a clean log after a full test run — new server test, pnpm run build, pnpm run test:ci with the backend up, server tests, log-query; paste outputs — server/test/cors-origin.test.js, this plan file
 
 ## Out of Scope
 
@@ -130,3 +130,8 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`: re-read `logg
 - Orchestrator readiness (2026-10-29): Start a backend on 3000, or only check one is up? → Never start or stop anything on 3000. If 3000 is up, run the log-query check after test:ci; if it is down, run log-query anyway, note in Execution Notes that 3000 was down, and rely on the new logging spec.
 - Orchestrator readiness (2026-10-29): Create src/app/core/services/logging.service.spec.ts in A3? → Yes, two small cases only: switch off sends no fetch; switch on sends one request to /api/v1/log.
 - Orchestrator readiness (2026-10-29): Server tests (`cd server && pnpm test`) are not an allowed run check → Accepted. The builder still writes server/test/cors-origin.test.js; the run PR's GitHub `server-tests` job is the evidence for that Success item, confirmed by the Planner before merge.
+- Build evidence (2026-10-29): `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors, 67 warnings, pre-existing); `pnpm run test:ci` -> exit 0, TOTAL 1600 SUCCESS (incl. 2 new logging.service.spec cases).
+- Finding: with only the logging switch, test:ci still produced 3 `server.unhandled` CORS entries (path `/api/v1/data/DICTIONARY_OVERRIDES/global`, at 09:03:18-19Z) from specs using the real TranslationService/HttpStorageAdapter via HttpClient. Fix inside scope: `environment.test.ts` also points `apiUrl`/`authApiUrl` at `http://127.0.0.1:1` (closed port). Second `test:ci` -> exit 0, 1600 SUCCESS; `log-query --since=2m --event=server.unhandled` -> no entries. 3000 was up.
+- `log-query --since=plan-start --level=error` still lists those 3 entries (+ their http.request.failed), all from the first test:ci run before the apiUrl fix; none after 09:03:19Z.
+- Server: `cd server && pnpm exec vitest run test/cors-origin.test.js` -> 4 passed (run locally as an extra; full `server-tests` job is the PR evidence).
+- scope-check --drift -> REALITY: clean.

@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  sendLogsToServer: true,
   localDev: false,
   apiUrl: '',
   authApiUrl: '',

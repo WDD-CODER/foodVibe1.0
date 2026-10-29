@@ -4,6 +4,7 @@ const viaRemote = typeof location !== 'undefined' && !['localhost', '127.0.0.1']
 
 export const environment = {
   production: false,
+  sendLogsToServer: true,
   localDev: true,
   apiUrl: viaRemote ? '' : 'http://localhost:3000',
   authApiUrl: viaRemote ? '' : 'http://localhost:3000',
