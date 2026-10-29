@@ -87,12 +87,15 @@ export const routes: Routes = [
         path: 'equipment',
         loadComponent: () => import('./pages/equipment/components/equipment-list/equipment-list.component').then(m => m.EquipmentListComponent),
         resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },
+        // Plan 498: an open row panel with edited values asks before the user leaves.
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'equipment/add',
         loadComponent: () => import('./pages/equipment/components/equipment-form/equipment-form.component').then(m => m.EquipmentFormComponent),
         resolve: { equipmentLoaded: equipmentEnsureLoadedResolver },
         canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'equipment/edit/:id',
@@ -102,6 +105,7 @@ export const routes: Routes = [
           equipment: equipmentResolver,
         },
         canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
       },
     ],
   },
@@ -194,12 +198,14 @@ export const routes: Routes = [
         path: 'add',
         loadComponent: () => import('./pages/suppliers/components/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
         canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
       },
       {
         path: 'edit/:id',
         loadComponent: () => import('./pages/suppliers/components/supplier-form/supplier-form.component').then(m => m.SupplierFormComponent),
         resolve: { supplier: supplierResolver },
         canActivate: [authGuard],
+        canDeactivate: [pendingChangesGuard],
       },
     ],
   },
@@ -219,6 +225,9 @@ export const routes: Routes = [
     path: 'settings',
     loadComponent: () => import('./pages/settings/settings.page').then(m => m.SettingsPage),
     canActivate: [authGuard],
+    // Plan 498: unsaved values ask before leaving; query-param changes count so a ?tab= switch asks too.
+    canDeactivate: [pendingChangesGuard],
+    runGuardsAndResolvers: 'paramsOrQueryParamsChange',
   },
   {
     path: 'platform',

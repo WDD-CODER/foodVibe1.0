@@ -54,10 +54,14 @@ export class UnitCreatorModal {
           this.newUnitValue_.set(null)
           this.basisUnit_.set(forProduct.baseUnit)
         }
+        this.openedWith_.set(untracked(() => this.snapshot_()))
         setTimeout(() => document.getElementById('unit-creator-name')?.focus(), 0)
       }
     })
   }
+
+  /** The fields as the window opened with them, to tell typed edits from the prefill. */
+  private readonly openedWith_ = signal('')
 
   netUnitCost = input<number>(0)
   unitSaved = output<{ symbol: string; rate: number }>()
@@ -116,6 +120,15 @@ export class UnitCreatorModal {
         this.errorMessage_.set('unit_save_error')
       }
     })
+  }
+
+  private snapshot_(): string {
+    return JSON.stringify([this.newUnitName_(), this.newUnitValue_(), this.basisUnit_()])
+  }
+
+  /** Plan 498: a field differs from what the window opened with (Escape / backdrop then ask). */
+  protected hasChanges(): boolean {
+    return this.snapshot_() !== this.openedWith_()
   }
 
   close() {

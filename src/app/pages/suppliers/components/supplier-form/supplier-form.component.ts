@@ -15,6 +15,8 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { FormFieldComponent } from 'src/app/shared/form-field/form-field.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
+import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
 
 const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fri', 'day_sat']
 
@@ -34,7 +36,7 @@ const DAY_KEYS = ['day_sun', 'day_mon', 'day_tue', 'day_wed', 'day_thu', 'day_fr
   styleUrl: './supplier-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SupplierFormComponent implements OnInit {
+export class SupplierFormComponent implements OnInit, PendingChangesComponent {
   private readonly fb = inject(FormBuilder)
   private readonly route = inject(ActivatedRoute)
   private readonly router = inject(Router)
@@ -46,6 +48,12 @@ export class SupplierFormComponent implements OnInit {
   private readonly requireAuth = inject(RequireAuthService)
 
   protected supplierForm_!: FormGroup
+  /** Set once saved, so the guard does not ask after a successful save. */
+  isSubmitted = false
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.supplierForm_,
+    isSubmitted: () => this.isSubmitted
+  })
   protected isEditMode_ = signal(false)
   private readonly saving = useSavingState()
   protected readonly isSaving_ = this.saving.isSaving_
@@ -64,7 +72,12 @@ export class SupplierFormComponent implements OnInit {
         this.isEditMode_.set(true)
         this.hydrateForm(supplier)
       }
+      this.unsaved_.markSaved()
     })
+  }
+
+  hasRealChanges(): boolean {
+    return this.unsaved_.hasChanges()
   }
 
   private get routeSupplier(): Supplier | undefined {
@@ -122,14 +135,33 @@ export class SupplierFormComponent implements OnInit {
     return Object.keys(errors).length === 0
   }
 
-  protected onSubmit(): void {
-    if (!this.requireAuth.requireAuth()) return
+  protected async onSubmit(): Promise<void> {
+    const payload = await this.persist_()
+    if (!payload) return
+    if (this.isEditMode_()) {
+      this.router.navigate(['/suppliers/list'])
+      return
+    }
+    // The list restores its last filters from sessionStorage, which can hide a brand-new
+    // supplier (no delivery days, no linked products). A URL search wins over them.
+    this.userMsg.onSetSuccessMsg(this.translation.translate('supplier_added').replace('{name}', payload.nameHebrew))
+    this.router.navigate(['/suppliers/list'], { queryParams: { q: payload.nameHebrew } })
+  }
+
+  /** The leave question's «שמור ועזוב»: saves, then lets the pending navigation go on (no second navigation here). */
+  async saveAndWait(): Promise<boolean> {
+    return (await this.persist_()) !== null
+  }
+
+  /** Validates and saves; returns what was saved, or null when nothing was (invalid, no sign-in, failed). */
+  private async persist_(): Promise<{ nameHebrew: string } | null> {
+    if (!this.requireAuth.requireAuth()) return null
     if (!this.validateForm_()) {
       this.supplierForm_.markAllAsTouched()
       this.userMsg.onSetErrorMsg(this.translation.translate('form_has_errors'))
-      return
+      return null
     }
-    if (this.supplierForm_.invalid || this.isSaving_()) return
+    if (this.supplierForm_.invalid || this.isSaving_()) return null
     const raw = this.supplierForm_.getRawValue()
     const deliveryDays: number[] = []
     this.deliveryDaysArray.controls.forEach((c, i) => {
@@ -146,27 +178,22 @@ export class SupplierFormComponent implements OnInit {
     let request: Promise<unknown>
     if (this.isEditMode_()) {
       const supplier = this.routeSupplier
-      if (!supplier) return
+      if (!supplier) return null
       request = this.supplierData.updateSupplier({ ...supplier, ...payload })
     } else {
       request = this.supplierData.addSupplier(payload)
     }
     this.saving.setSaving(true)
-    request
-      .then(() => {
-        if (this.isEditMode_()) {
-          this.router.navigate(['/suppliers/list'])
-          return
-        }
-        // The list restores its last filters from sessionStorage, which can hide a brand-new
-        // supplier (no delivery days, no linked products). A URL search wins over them.
-        this.userMsg.onSetSuccessMsg(this.translation.translate('supplier_added').replace('{name}', payload.nameHebrew))
-        this.router.navigate(['/suppliers/list'], { queryParams: { q: payload.nameHebrew } })
-      })
-      .catch((e) => {
-        this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } })
-      })
-      .finally(() => this.saving.setSaving(false))
+    try {
+      await request
+      this.isSubmitted = true
+      return payload
+    } catch (e) {
+      this.logging.error({ event: 'supplier.save_error', message: 'Supplier save failed', context: { err: e } })
+      return null
+    } finally {
+      this.saving.setSaving(false)
+    }
   }
 
   protected onCancel(): void {

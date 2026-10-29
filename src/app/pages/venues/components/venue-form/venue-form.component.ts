@@ -82,7 +82,8 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   /** Form + photo as loaded (add: empty form; edit: after hydrateForm) — compared by hasRealChanges(). */
   private readonly unsaved_ = useUnsavedChanges({
     form: () => this.venueForm_,
-    snapshot: () => JSON.stringify({ form: this.venueForm_.getRawValue(), photoUrl: this.photoUrl_() })
+    snapshot: () => JSON.stringify({ form: this.venueForm_.getRawValue(), photoUrl: this.photoUrl_() }),
+    isSubmitted: () => this.isSubmitted
   })
 
   protected get infraArray(): FormArray {

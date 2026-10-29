@@ -46,6 +46,19 @@ test('mixed patch: relative core import and page list logic warn; shared bases a
   assert.match(out[1], /^REUSE: warn page-list-logic list-logic src\/app\/pages\/orders\/orders\.component\.ts:42 /)
 })
 
+test('patch adding window.confirm, a bare prompt and alert warns; ConfirmModalService, .confirm( and comments do not', () => {
+  const r = lint(`--patch=${FIX}/native-dialog.diff`)
+  assert.equal(r.status, 0, r.stderr)
+  const out = r.stdout.trim().split('\n')
+  assert.equal(out.length, 3, r.stdout)
+  for (const [i, ln] of [11, 12, 13].entries()) {
+    assert.ok(
+      out[i].startsWith(`REUSE: warn native-browser-dialog modal-shell src/app/pages/orders/orders.component.ts:${ln} `),
+      out[i]
+    )
+  }
+})
+
 test('--diff against HEAD runs on the real repo and exits 0', () => {
   const r = lint('--diff=HEAD')
   assert.equal(r.status, 0, r.stderr)

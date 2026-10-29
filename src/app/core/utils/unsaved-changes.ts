@@ -1,5 +1,6 @@
-import { signal } from '@angular/core'
+import { DestroyRef, inject, signal } from '@angular/core'
 import type { AbstractControl } from '@angular/forms'
+import { warnBeforeUnload } from './leave-warning.util'
 
 export interface UnsavedChangesOptions {
   /** The form to watch. A function because most pages build it in `ngOnInit`. */
@@ -8,6 +9,8 @@ export interface UnsavedChangesOptions {
   snapshot?: () => string
   /** State outside the form (photo, AI draft, a second recipe copy...). When it returns true the page counts as changed. */
   extra?: () => boolean
+  /** True once the page saved and is on its way out: no reload warning then. */
+  isSubmitted?: () => boolean
 }
 
 export interface UnsavedChanges {
@@ -22,6 +25,8 @@ export interface UnsavedChanges {
 /**
  * One "did anything change?" check for entity forms (plan 455). A page keeps
  * `hasRealChanges()` as a one-line `return this.unsaved_.hasChanges()` so `pendingChangesGuard` keeps working.
+ * Called in an injection context (a field initialiser), it also registers `warnBeforeUnload`, so a page that
+ * tracks unsaved changes cannot forget the browser's reload / tab-close dialog.
  */
 export function useUnsavedChanges(options: UnsavedChangesOptions): UnsavedChanges {
   const saved_ = signal<string | null>(null)
@@ -31,15 +36,29 @@ export function useUnsavedChanges(options: UnsavedChangesOptions): UnsavedChange
     return JSON.stringify(options.form()?.getRawValue() ?? null)
   }
 
+  const hasChanges = (): boolean => {
+    if (options.extra?.()) return true
+    const form = options.form()
+    if (!form) return false
+    const saved = saved_()
+    return saved === null ? form.dirty : current() !== saved
+  }
+
+  if (isInInjectionContext_()) warnBeforeUnload(() => !options.isSubmitted?.() && hasChanges())
+
   return {
     markSaved: () => saved_.set(current()),
     reset: () => saved_.set(null),
-    hasChanges: () => {
-      if (options.extra?.()) return true
-      const form = options.form()
-      if (!form) return false
-      const saved = saved_()
-      return saved === null ? form.dirty : current() !== saved
-    }
+    hasChanges
+  }
+}
+
+/** Specs call `useUnsavedChanges` outside Angular; there is no page to attach a reload warning to. */
+function isInInjectionContext_(): boolean {
+  try {
+    inject(DestroyRef)
+    return true
+  } catch {
+    return false
   }
 }

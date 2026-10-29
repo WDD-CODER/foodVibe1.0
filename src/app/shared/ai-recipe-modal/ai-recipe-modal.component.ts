@@ -392,6 +392,11 @@ export class AiRecipeModalComponent implements OnInit {
 
   // ─── Shared ──────────────────────────────────────────────────────
 
+  /** Plan 498: typed input or an unsaved AI draft (Escape / backdrop then ask). */
+  protected hasChanges(): boolean {
+    return !!this.prompt_().trim() || !!this.urlInput_().trim() || !!this.imageFile_() || this.draft_() !== null
+  }
+
   onClose(): void {
     const draft = this.draft_()
     if (draft) {

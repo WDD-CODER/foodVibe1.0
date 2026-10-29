@@ -1,5 +1,5 @@
 @if (modal.isOpen_()) {
-  <app-modal-shell size="md" [titleKey]="titleKey_()" (dismissed)="cancel()">
+  <app-modal-shell size="md" [titleKey]="titleKey_()" [hasChanges]="hasChanges()" (dismissed)="cancel()">
     <div class="c-modal-body">
       <div class="c-input-stack full-width">
         <label>{{ 'label_name_hebrew' | translatePipe }}</label>

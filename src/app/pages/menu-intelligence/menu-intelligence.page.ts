@@ -167,7 +167,7 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   private static readonly GUEST_REPEAT_INTERVAL_MS = 80
   private guestHoldTimer_: ReturnType<typeof setTimeout> | null = null
 
-  private readonly unsaved_ = useUnsavedChanges({ form: () => this.form_ })
+  private readonly unsaved_ = useUnsavedChanges({ form: () => this.form_, isSubmitted: () => this.isSubmitted })
   /** For pendingChangesGuard: prevents re-triggering after a successful save */
   isSubmitted = false
 

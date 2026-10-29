@@ -44,6 +44,8 @@ import { COLUMN_CAROUSEL } from 'src/app/shared/column-carousel'
 import { InputClearComponent } from 'src/app/shared/input-clear/input-clear.component'
 import { useListControls, matchesSearch } from 'src/app/core/utils/list-controls.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { useUnsavedChanges } from 'src/app/core/utils/unsaved-changes'
+import type { PendingChangesComponent } from 'src/app/core/guards/pending-changes.guard'
 
 const ADD_NEW_CATEGORY_VALUE = '__add_new__'
 
@@ -74,7 +76,7 @@ type EquipmentBulkField = 'category' | 'isConsumable'
   styleUrl: './equipment-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class EquipmentListComponent implements OnInit, OnDestroy {
+export class EquipmentListComponent implements OnInit, OnDestroy, PendingChangesComponent {
   protected readonly isLoggedIn = inject(UserService).isLoggedIn
   private readonly requireAuthService = inject(RequireAuthService)
   protected readonly equipmentData = inject(EquipmentDataService)
@@ -181,6 +183,12 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
     }
   ])
   protected editForm_!: FormGroup
+  private isAsking_ = false
+  /** The row panel's fields as loaded: a value changed and put back is not a change (plan 498). Idle while no row is open. */
+  private readonly unsaved_ = useUnsavedChanges({
+    form: () => this.editForm_,
+    isSubmitted: () => this.editingId_() === null
+  })
 
   protected hasActiveFilters_ = computed(() => {
     const cats = this.selectedCategories_()
@@ -269,6 +277,19 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       isConsumable: e.isConsumable ?? false,
       notes: e.notes ?? ''
     })
+    this.unsaved_.markSaved()
+  }
+
+  /** True while a row panel is open and holds a really changed value (the leave guard asks). */
+  hasRealChanges(): boolean {
+    return this.editingId_() !== null && this.unsaved_.hasChanges()
+  }
+
+  /** The leave question's «שמור וצא»: saves the open row panel. */
+  async saveAndWait(): Promise<boolean> {
+    const ok = await this.saveCurrentInlineEdit()
+    if (ok) this.unsaved_.markSaved()
+    return ok
   }
 
   /** Last non-sentinel category used so we can restore when user cancels add-new. */
@@ -354,7 +375,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
       return
     }
     if (this.editingId_() === item._id) {
-      this.closeWithAnimation()
+      void this.onInlinePanelClickOutside()
       return
     }
     void this.onEdit(item)
@@ -362,7 +383,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
 
   protected toggleRowEdit(item: Equipment): void {
     if (this.editingId_() === item._id) {
-      this.closeWithAnimation()
+      void this.onInlinePanelClickOutside()
     } else {
       void this.onEdit(item)
     }
@@ -371,15 +392,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   async onEdit(item: Equipment): Promise<void> {
     if (!this.requireAuthService.requireAuth()) return
     const currentId = this.editingId_()
-    if (currentId !== null && currentId !== item._id && this.editForm_.dirty) {
-      const saveFirst = await this.confirmModal.open(this.translation.translate('unsaved_changes_confirm'), {
-        variant: 'warning',
-        saveLabel: 'save'
-      })
-      if (saveFirst) {
-        await this.saveCurrentInlineEdit()
-      }
-    }
+    if (currentId !== null && currentId !== item._id && !(await this.mayLeaveRowPanel_())) return
     this.editingId_.set(item._id)
     this.hydrateEditForm(item)
   }
@@ -430,7 +443,7 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
   }
 
   protected async onInlineSave(): Promise<void> {
-    const ok = await this.saveCurrentInlineEdit()
+    const ok = await this.saveAndWait()
     if (ok) this.closeWithAnimation()
   }
 
@@ -443,14 +456,36 @@ export class EquipmentListComponent implements OnInit, OnDestroy {
    * split already established in supplier-list.component.ts: a deliberate Cancel
    * click doesn't need re-confirming, only an accidental outside-click does. */
   protected async onInlinePanelClickOutside(): Promise<void> {
-    if (this.editForm_.dirty) {
-      const discard = await this.confirmModal.open(this.translation.translate('unsaved_changes_confirm'), {
-        variant: 'warning',
-        saveLabel: 'leave_without_saving'
-      })
-      if (!discard) return
-    }
+    if (!(await this.mayLeaveRowPanel_())) return
     this.closeWithAnimation()
+  }
+
+  /**
+   * True when the row panel may close: nothing really changed, or the user chose save / leave without saving.
+   * While the question is open the panel stays open and every other accidental way out (a click on the question
+   * itself counts as «outside» the panel) is ignored, so one tap never asks twice or closes the panel behind it.
+   */
+  private async mayLeaveRowPanel_(): Promise<boolean> {
+    if (this.isAsking_) return false
+    if (!this.hasRealChanges()) return true
+    this.isAsking_ = true
+    try {
+      const answer = await this.askAboutChanges_()
+      if (answer === 'cancel') return false
+      return answer === 'confirm' || (await this.saveAndWait())
+    } finally {
+      // The tap that answered the question also reaches the click-outside listener: keep ignoring it one tick.
+      setTimeout(() => (this.isAsking_ = false))
+    }
+  }
+
+  /** Stay / save and leave / leave without saving — the one question for every accidental way out of the row panel. */
+  private askAboutChanges_(): Promise<'cancel' | 'confirm' | 'save'> {
+    return this.confirmModal.openTernary('unsaved_changes_confirm', {
+      variant: 'warning',
+      saveLabel: 'leave_without_saving',
+      saveButtonLabel: 'save_and_leave'
+    })
   }
 
   async onDelete(item: Equipment): Promise<void> {

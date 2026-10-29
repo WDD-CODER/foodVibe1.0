@@ -3,6 +3,7 @@
     cardClass="ai-menu-modal-card"
     labelledBy="ai-menu-modal-title"
     [dismissible]="status_() !== 'sending'"
+    [hasChanges]="hasChanges()"
     (dismissed)="onClose()"
   >
     <div class="ai-menu-header">

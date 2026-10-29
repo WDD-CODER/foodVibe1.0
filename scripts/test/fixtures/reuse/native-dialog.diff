@@ -1,0 +1,10 @@
+diff --git a/src/app/pages/orders/orders.component.ts b/src/app/pages/orders/orders.component.ts
+--- a/src/app/pages/orders/orders.component.ts
++++ b/src/app/pages/orders/orders.component.ts
+@@ -10,0 +11,6 @@
++    if (window.confirm('Delete?')) this.remove()
++    const name = prompt('Name?')
++    alert('Saved')
++    this.confirmModal.open('delete_confirm')
++    await this.dialog.confirm('x')
++    // window.alert is not allowed

@@ -3,6 +3,7 @@
     cardClass="ai-recipe-modal-card"
     labelledBy="ai-recipe-modal-title"
     [dismissible]="status_() !== 'sending'"
+    [hasChanges]="hasChanges()"
     (dismissed)="onClose()"
   >
     <div class="ai-modal-header">

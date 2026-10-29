@@ -1,4 +1,4 @@
-<app-modal-shell size="md" titleKey="unit_edit" (dismissed)="cancelled.emit()">
+<app-modal-shell size="md" titleKey="unit_edit" [hasChanges]="hasChanges()" (dismissed)="cancelled.emit()">
   <div class="c-modal-body">
     <div class="c-input-stack">
       <label for="unit-edit-hebrew">{{ 'unit_name' | translatePipe }}</label>

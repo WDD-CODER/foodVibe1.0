@@ -293,6 +293,11 @@ export class AiProductModalComponent implements OnInit {
 
   // ─── Shared ──────────────────────────────────────────────────────
 
+  /** Plan 498: typed input or an unsaved AI draft (Escape / backdrop then ask). */
+  protected hasChanges(): boolean {
+    return !!this.prompt_().trim() || !!this.imageHint_().trim() || !!this.imageFile_() || this.draft_() !== null
+  }
+
   onClose(): void {
     this.modalService.close()
     this.resetLocalState_()
