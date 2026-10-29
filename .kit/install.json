@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "1.10.0"
+    "version": "1.11.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v1.10.0",
-  "commit": "d922f7adae224bb58a88b9dc2abcdd8632840c90",
+  "ref": "v1.11.0",
+  "commit": "d21d4bcac6b004ea8c99b6695ed13248c5d8c528",
   "packs": [
     "angular",
     "node-express"
@@ -28,7 +28,7 @@
       "source": "core/.claude/agents/kit-runner.md"
     },
     ".claude/agents/orch-builder.md": {
-      "sha256": "e648b456ab85783cd99afec78c07081ec35ada6aacc4dde2ec6860761d069438",
+      "sha256": "7c5b7d17b2b248a933e736bdd0a23e053917807c1a24683b012f8a0a35c8a71d",
       "kind": "managed",
       "source": "core/.claude/agents/orch-builder.md"
     },
@@ -48,22 +48,22 @@
       "source": "core/.claude/agents/orch-check-rules.md"
     },
     ".claude/agents/orch-gate.md": {
-      "sha256": "13464041568ed8671d29b18caed90d2b517fa6203c1bf6d9bc32624d07a3764c",
+      "sha256": "5f2362c0837d547aa3465da00c9e1de741634edd7bb64216db33f7da754f41a1",
       "kind": "managed",
       "source": "core/.claude/agents/orch-gate.md"
     },
     ".claude/agents/orch-merge.md": {
-      "sha256": "1cb5551bc1a781cc8551ff2f4da0e4186e58cb313d191ae09536b2b84138c844",
+      "sha256": "ef6527bd28210cc5ee744567513ac3e2600ac997b868a65814dd3eaf439fae84",
       "kind": "managed",
       "source": "core/.claude/agents/orch-merge.md"
     },
     ".claude/agents/orch-readiness.md": {
-      "sha256": "1ba1f5819e847b64d161c2e7ef13c9f0c3e45383287749423baa6010099f7c6b",
+      "sha256": "6c1cf67c2fbc3362cc5fcdd355ef6136b52f4785ef7e6ea454c28839e2ccc26c",
       "kind": "managed",
       "source": "core/.claude/agents/orch-readiness.md"
     },
     ".claude/agents/orch-report.md": {
-      "sha256": "4ada656b9e3d9bc9ab86accbba7be229559ddaf5f77978e27f5a2dc8fe63112f",
+      "sha256": "c13c048e8ceae7532e5576fcf5245a3562297991185f68c023e1ee1b768ed365",
       "kind": "managed",
       "source": "core/.claude/agents/orch-report.md"
     },
@@ -73,7 +73,7 @@
       "source": "core/.claude/agents/orch-security.md"
     },
     ".claude/agents/orch-ui.md": {
-      "sha256": "2eb740e6b239d820eebfc94725292a6e5b98dce1ea67b6cc42a705ff18817298",
+      "sha256": "aaa5786fc850f79e82f06e56f5c5aa7198481e143af90fbe22bee5d875bd6b76",
       "kind": "managed",
       "source": "core/.claude/agents/orch-ui.md"
     },
@@ -123,7 +123,7 @@
       "source": "core/.claude/commands/kit-feedback.md"
     },
     ".claude/commands/orchestrate.md": {
-      "sha256": "e757aeeadc77210c1e50bd83e4a82ec6f6318ae108598b45c415d4c90ea44df0",
+      "sha256": "f6d01aae35437c33c9da916609e7cf5384dbfd0b28ebf5521af692bb3a7de977",
       "kind": "managed",
       "source": "core/.claude/commands/orchestrate.md"
     },
@@ -258,7 +258,7 @@
       "source": "packs/angular/.claude/workflows/deploy.yml"
     },
     ".claude/workflows/orchestrate.js": {
-      "sha256": "379480d8837ce7ecc6c3c25a58a5d283ff10645def5bb3a89b5efac1737b0154",
+      "sha256": "b509e44fd11290509fc544baf02ffe1a09ffc92e3f4151f8fdfa4e1a01e22cc0",
       "kind": "managed",
       "source": "core/.claude/workflows/orchestrate.js"
     },
@@ -533,7 +533,7 @@
       "source": "core/docs/agent/agent-evals.md"
     },
     "docs/agent/agent-roles.md": {
-      "sha256": "e9a87278d51073de7bfdf39cbcc88a2f975764fb04c9f1e91e6b592266afaa19",
+      "sha256": "fae4716dec46a40ac5bade3e8b78b922e8c667eb4a482e744be41c2c94c76968",
       "kind": "managed",
       "source": "core/docs/agent/agent-roles.md"
     },
@@ -558,7 +558,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "905f88a0061c88a1af9e4803da6b2cfe356a8ff3f504fe0f90ba7ec989cab766",
+      "sha256": "a6f40616c9c21b7886c890e3263335965e21a23614e2bdaa9d4d6f37c2005d4d",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
@@ -788,7 +788,7 @@
       "source": "core/scripts/kit-feedback.mjs"
     },
     "scripts/lib/done-when.mjs": {
-      "sha256": "325a18471b65b4e517538fdd95d4f7ff14f52d62980c2437594b4b57cb1db031",
+      "sha256": "e58aa2c684bea91072591e016849ce35bb771bcd9e2f2c36f44f8a52522f7d94",
       "kind": "managed",
       "source": "core/scripts/lib/done-when.mjs"
     },
@@ -868,7 +868,7 @@
       "source": "core/scripts/orch-preflight.mjs"
     },
     "scripts/orch-state.mjs": {
-      "sha256": "644103f66c839992d8a18b292a32b7c668ac8b7c4b7c8c1efbe2159d5d3702a6",
+      "sha256": "6ac55bc290ae1340761bd445aa5bf5abaa8d6891123e97f46f552f9591e6fe95",
       "kind": "managed",
       "source": "core/scripts/orch-state.mjs"
     },
