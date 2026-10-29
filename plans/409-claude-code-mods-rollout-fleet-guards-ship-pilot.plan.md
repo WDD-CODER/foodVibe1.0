@@ -1,6 +1,6 @@
 # Plan 409 — Claude Code mods rollout: fleet, guards, ship-pilot
 
-Status: draft
+Status: superseded — the mods reached the kit via kit plan 015 (done, kit v1.10.0); installed and enabled here 2026-10-29. Stages 2–4 and Stage 6 human checks and S6a–S6f are not done.
 Snapshot: eb1495e490368f965cccddfaa9d1f5144837e2ee
 
 ## Problem Statement
@@ -156,3 +156,4 @@ Changing the Planner-Worker rules themselves; Cursor-side enforcement; paid feat
 - Orchestrator readiness (2026-10-29): patch route (git am) → superseded by kit v1.10.0 and the kit marketplace; no patch-mode changes.
 - Orchestrator readiness (2026-10-29): dependency of 410 on 409 Stage 6 → none; independent.
 - Orchestrator readiness (2026-10-29): error/leave/cancel behaviour of panel and buttons → simplest behaviour, nothing extra.
+- Orchestrator run run-409-410 (2026-10-29): stopped by the Human. The readiness check list was wrong: `node tools/leak-check.mjs` exists only in the kit repo, so every gate failed. Do not rebuild 409 as a builder plan. K1–K14 and S5 are covered by kit plan 015 (done); the rest is human work. Close or split 409 before any rerun.

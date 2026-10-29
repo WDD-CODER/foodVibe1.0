@@ -118,3 +118,4 @@ The weekly Scout and its HTML page (plan 411); kit-sync itself (plan 392).
 - Orchestrator readiness (2026-10-29): S7 test skill and PR → cssLayer; open the PR only if after > before; keep the 400k cap.
 - Orchestrator readiness (2026-10-29): prerequisite plans 392 and 393 → treated as merged (.kit/install.json shows kit 1.10.0).
 - Orchestrator readiness (2026-10-29): ordering with 409 → 410 runs after 409; do not touch kit files 409 edits.
+- Orchestrator run run-409-410 (2026-10-29): stopped by the Human before S0 produced a result; nothing of 410 is built (the kit has no tools/skill-improver). Plan stays open and unchanged.
