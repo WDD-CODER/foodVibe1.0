@@ -18,7 +18,7 @@ This file split on 2026-08-01 once the single flat file crossed ~280 lines / 21 
 
 When `/ship` or the Post-push Merge Gate proposes a new gotcha, write it (verbatim, per `docs/agent/brain-capture.md`) to the domain file whose scope matches the trap:
 
-- Touches `.claude/`, `plans/`, `.claude/todo.md`, session state, or Claude Code/Cursor tooling itself → `docs/brain/gotchas/agent-workflow.md`
+- Touches `.claude/`, `plans/`, `.claude/todo.md`, plan Execution Notes, or Claude Code/Cursor tooling itself → `docs/brain/gotchas/agent-workflow.md`
 - Touches `server/` → `docs/brain/gotchas/backend.md`
 - Touches `src/app/` → `docs/brain/gotchas/angular.md`
 - Touches CI workflows or the build pipeline → `docs/brain/gotchas/ci.md`

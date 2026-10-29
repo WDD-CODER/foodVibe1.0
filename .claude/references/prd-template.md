@@ -1,14 +1,20 @@
 # Plan XXX — [Feature Name]
 
 Status: draft | active | done
+Depends-on: none | NNN, MMM — the plans that must be merged before this one starts (`scope-check --deps` flags a plan without this line; `take-plan` refuses while one is not merged; `plan-order` computes the run order from it)
 Snapshot: [origin/main SHA the plan was verified against — leave filled in if the author already set it; save-plan only fills this when empty, never overwrites]
 
 ## Problem Statement
 [What problem does this solve for the user?]
 
 ## Goals & Success Criteria
-- Primary: [measurable outcome]
-- Success: [how we know it's done — tag each item `[auto]` or `[human]`]
+**Primary:** [measurable outcome]
+
+[The Done-when items: one bullet each, each starting with its tag — `scope-check --tags` checks them]
+- [auto] [an exact check: a command and its expected output]
+- [ui] [one page, one action, one quoted text or element a script asserts — the builder writes one short e2e test
+  that saves a screenshot; a browser agent looks only if the test fails or none can be written]
+- [human] [what only a person can judge: look and feel, a product decision]
 
 ## Execution Mode
 - Parallel: yes | no — will this run alongside other active plans?
@@ -18,7 +24,7 @@ Snapshot: [origin/main SHA the plan was verified against — leave filled in if 
 ## Read-Write Scope
 
 Always allowed regardless of the list below: this plan file itself, its own
-`docs/session-state-<branch>.md`, `.claude/sessions/**`, `.worktree-*`, and the append-only
+`.claude/sessions/**`, `.worktree-*`, and the append-only
 hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrite or remove an existing entry without escalating).
 
 ```scope
@@ -84,8 +90,11 @@ line or file this plan names was removed, renamed or rewritten).
 - [Which keys are needed in `public/assets/data/dictionary.json`]
 
 ## Atomic Sub-tasks
-- [ ] A1: [First atomic task]
-- [ ] A2: [Second atomic task]
+
+These are the plan's milestones: a Worker does them in order and ticks each one after it is checked.
+
+- [ ] A1: [plain title: what changes and why] — [details] — [target file(s)]
+- [ ] A2: [plain title: what changes and why] — [details] — [target file(s)]
 
 ## Technical Considerations
 - Dependencies: [existing services/components affected]
@@ -104,4 +113,8 @@ Every Atomic Sub-task names its files and is concrete enough for a Worker to run
 [Explicitly list what is NOT included]
 
 ## Critical Questions
-[Q&A format per the `brief-detection` skill — multiple choice, never open-ended]
+[One line per question the Human answers before work starts: `- Q: … A: …`. Offer choices, never an open
+question. An unanswered one is `A: open`. `- none` when there are none.]
+
+## Execution Notes
+[Written while the plan runs: decisions, evidence (exact output lines), and review gaps the Human kept as is.]

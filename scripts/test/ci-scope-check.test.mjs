@@ -96,7 +96,7 @@ test('a branch that is not feat/NNN-* exits 0 with "skipped"', () => {
   const root = repo()
   try {
     commitFile(root, 'src/elsewhere/b.ts')
-    for (const name of ['fix/900-demo', 'chore/session-state', 'feat/no-number', 'main', '']) {
+    for (const name of ['fix/900-demo', 'chore/anything', 'feat/no-number', 'main', '']) {
       const r = run(root, [`--branch=${name}`, '--base=main'])
       assert.equal(r.status, 0, `${name}: ${r.stdout}${r.stderr}`)
       assert.match(r.stdout, /skipped/)
@@ -142,10 +142,10 @@ test('an unknown base fails instead of passing silently', () => {
   }
 })
 
-test('--checkout-branch names a detached checkout after the branch so its session-state file is allowed', () => {
+test('--checkout-branch names a detached checkout after the branch', () => {
   const root = repo()
   try {
-    commitFile(root, 'docs/session-state-feat-900-demo.md')
+    commitFile(root, 'src/in-scope/a.ts')
     git(root, ['checkout', '-q', '--detach'])
     const r = run(root, ['--branch=feat/900-demo', '--base=main', '--checkout-branch'])
     assert.equal(r.status, 0, r.stdout + r.stderr)
