@@ -164,8 +164,3 @@
 - [ ] A4: Make the CI scope-check test prove the branch naming without relying on a state file being allowed — header comment reworded; test at line 145 commits an in-scope fixture file — scripts/ci-scope-check.mjs, scripts/test/ci-scope-check.test.mjs
 - [ ] A5: Clean the two plans from the live run only if they are still open after the run merges — Always-allowed line only; closed plans in plans/<range>/ stay untouched — plans/419-*.plan.md, plans/497-*.plan.md
 - [ ] A6: Prove nothing FoodVibe owns still names the old file and the build and script tests pass — run the Done-when grep, pnpm run build, pnpm run test:scripts, the --deps/--reuse checks and the two kit diffs; paste outputs — this plan file (Execution Notes)
-
-### Plan 508 — log-query loads the Mongo driver through mongoose so it works under pnpm (`plans/508-log-query-loads-the-mongo-driver-through-mongoose-so-it-works-under-pnpm.plan.md`)
-
-- [ ] A1: Load the Mongo driver through mongoose so log-query no longer needs a hoisted package — require('mongoose').mongo.MongoClient in fromMongo(); no new dependency — scripts/log-query.mjs
-- [ ] A2: Prove log-query reads Mongo in a pnpm-installed checkout and the build still passes — the three Success checks; paste outputs — this plan file (Execution Notes)
