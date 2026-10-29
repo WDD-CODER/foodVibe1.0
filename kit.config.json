@@ -97,6 +97,10 @@
   },
   "overrides": [
     {
+      "path": "docs/agent/standards-git.md",
+      "reason": "plan 497 added the FoodVibe-only section on pull-request checks and branch clean-up"
+    },
+    {
       "path": ".claude/commands/commands.md",
       "reason": "lists the FoodVibe-only /remote command"
     },
