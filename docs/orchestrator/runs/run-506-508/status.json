@@ -1,0 +1,116 @@
+{
+  "run": "run-506-508",
+  "branch": "orch/run-506-508",
+  "base": "main",
+  "startedAt": "2026-10-29T13:40:45.899Z",
+  "mainShaAtStart": "88c535c122e4e1274e63e8a13477819dd1f58ae8",
+  "plans": {
+    "506": {
+      "nnn": "506",
+      "title": "Remove the session-state concept from FoodVibe",
+      "branch": "feat/506-remove-the-session-state",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {},
+      "humanItems": [
+        "After the kit fix ships and the fleet mod updates: `/ship` on a small change and one `/handoff`, and no `docs/session-state*` file appears."
+      ],
+      "history": [
+        {
+          "at": "2026-10-29T13:41:40.562Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "reason": "worktree: unreadable ORCH_JSON from: node scripts/orch-state.mjs worktree --run=run-506-508 --plan=506",
+      "freeDiskGb": 31.9
+    },
+    "508": {
+      "nnn": "508",
+      "title": "log-query loads the Mongo driver through mongoose so it works under pnpm",
+      "branch": "feat/508-log-query-loads-the",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-10-29T13:41:40.291Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T13:44:55.901Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T13:47:23.958Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T13:48:42.396Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T13:48:53.400Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T13:50:56.338Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "freeDiskGb": 31.3,
+      "sha": "77296d7955acf8389c0a9e71806e5881770193c2"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-10-29T13:54:41.141Z",
+      "plan": "508",
+      "text": "D1 seen: server/node_modules/mongodb still exists in wt-1 (stale npm leftover, not removed), so the 'mongodb absent' pnpm condition was not tested here — reverse: delete server/node_modules and rerun pnpm install --frozen-lockfile to test it"
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "freeDiskGb": 31.3,
+  "updatedAt": "2026-10-29T13:54:53.525Z",
+  "stopReason": "wave 1 parked 506 — later waves not started",
+  "finishedAt": "2026-10-29T13:54:53.524Z"
+}
