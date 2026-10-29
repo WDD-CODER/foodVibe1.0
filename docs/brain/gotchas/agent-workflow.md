@@ -346,3 +346,15 @@ only the Bash tool's command text triggers it.
 2. After take-plan, check which DB the backend really uses. Start it with a one-shot log of `require('mongoose').connection.name` (db name only, never the URI), or query the DB for a doc you just wrote.
 3. If it's wrong, restart the backend from `server/` with dotenv loaded first and the DB name rewritten in `process.env.MONGO_LOCAL_URI` before `require('./index.js')`. A Claude background task dies at the 2-hour limit (see "Slot dev server goes stale" above).
 4. The real fix belongs in take-plan (load `server/.env` before the override). It is kit-owned, so it goes through `../ai-workflow-kit` first.
+
+### `claude plugin marketplace remove` silently uninstalls every mod from it
+
+**What hurt:** To re-point the mods marketplace from the old local folder to the kit repo, a session advised `claude plugin marketplace remove ai-workflow-kit-mods` then `marketplace add WDD-CODER/ai-workflow-kit` then `plugin update guards@…`. The remove uninstalled fleet, guards and ship-pilot, deleted their `enabledPlugins` entries from `~/.claude/settings.json` and wiped their `pluginConfigs` (push URL, TTL, fail-open). The `update` then had nothing to update. The running session kept its in-memory copy for hours, so the loss only showed in the next session, as "my mods don't work".
+
+**Why the obvious fix is wrong:** `plugin list` after the add looks fine (the marketplace is there), and the old session still shows the status line and buttons. Logs under `.claude/mods-*.log` also keep growing from that old session, which looks like proof they load.
+
+**What to do instead:**
+1. Re-point a marketplace with `marketplace add` of the new source first and only remove the old one after `claude plugin list` shows the mods installed from the new one; or, after a remove, run `claude plugin install <mod>@ai-workflow-kit-mods --scope user` for each mod.
+2. Proof that a mod loads in *this* session: `~/.claude/plugins/store/fleet_*.json` has a row for the session id, or the day's `mods-fleet-*.log` has a `session.start` with it. A row from an older session proves nothing.
+3. Re-set the options afterwards (`/plugin configure <mod>@ai-workflow-kit-mods`); the uninstall does not keep them.
+4. `/health` hits gstack's disabled `health` skill, not fleet. Use `/fleet-health`.
