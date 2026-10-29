@@ -1,6 +1,6 @@
 # Plan 498 — Protect unsaved work everywhere
 
-Status: draft
+Status: active
 Track: code
 Depends-on: none
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
