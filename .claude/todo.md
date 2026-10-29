@@ -115,18 +115,6 @@
 - [x] S9: Specs for the table, search and matcher as listed in Done-when; update the plan-463 spec "never sends a text-only line to the AI step" to "sends a text-only line for options only and never links it" — recipe-ingredients-table.component.spec.ts, ingredient-search.component.spec.ts, product-name-matcher.service.spec.ts
 - [ ] V1: Build, run every listed test, replay the cards in the browser and write the run file — `npx ng build`, the `ng test` includes, the server tests, the grep, log-query; record evidence, decisions and the five cards — docs/mvp/runs/490.md
 
-### Plan 498 — Protect unsaved work everywhere (`plans/498-protect-unsaved-work-everywhere.plan.md`)
-
-- [ ] A1: Check the brief's list of unprotected screens against today's code and record the real list — reality check of every route, tab, page and popup named in the Problem Statement (counts and line numbers drift) — this plan file
-- [ ] A2: Make a popup ask before throwing away typed edits when closed by Escape or a click outside — one input on the shared popup frame; explicit Cancel / X never asks; Escape stack stays correct — src/app/shared/modal-shell/**
-- [ ] A3: Use that question in every popup that holds free edits, and skip the ones that hold none — quick-edit/quick-add product, add-item, add-equipment, unit-creator, label-creation, AI recipe/product/menu modals, unit-edit-dialog, quick-edit product panel — the popup folders in scope
-- [ ] A4: Stop the equipment and supplier forms from silently dropping edits when the user clicks away — `useUnsavedChanges` + `pendingChangesGuard` + the route guard entries; `markSaved` after load and save — src/app/pages/equipment/components/equipment-form/**, src/app/pages/suppliers/components/supplier-form/**, src/app/app.routes.ts
-- [ ] A5: Ask before a settings tab switch drops edits on the baseline, business or business-name form — prove the guard runs on `?tab=` changes like the dashboard — src/app/pages/settings/**
-- [ ] A6: Show the browser's leave-site dialog on reload for every page that tracks unsaved changes — automatic from the guard where possible, else call `warnBeforeUnload` in each page — the page `.ts` files and guard utilities in scope
-- [ ] A7: Remove the native prompt in the translation service, or route it to the translation-key popup if something still calls it — grep and `knip` first — src/app/core/services/translation.service.ts
-- [ ] A8: Warn on any new `window.confirm`, `alert` or `prompt`, and register the changes in the component registry — one `reuse-lint` rule with a fixture test; update the `entity-form` and `modal-shell` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, scripts/test/fixtures/reuse/**, docs/brain/component-families.md
-- [ ] A9: Cover the new behaviour with specs and run the full checks — guard specs, popup discard spec, `ng build`, headless `ng test`, the grep, reuse-lint, log-query; paste the output in Execution Notes — the spec files in scope
-
 ### Plan 499 — Number box: tap anywhere on it to edit the whole number (`plans/499-number-box-tap-anywhere-to-edit-the-whole-number.plan.md`)
 
 - [ ] N1: List every number box where a tap misses the number today and record the list — reality check of the containers named in the Problem Statement, plus any the brief missed — this plan file
