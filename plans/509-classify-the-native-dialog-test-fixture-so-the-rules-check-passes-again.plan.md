@@ -1,6 +1,6 @@
 # Plan 509 — Classify the native-dialog test fixture so the rules check passes again
 
-Status: draft
+Status: active
 Depends-on: none
 Snapshot: c1a54f6f8b43884ce28b668deebce6ee74c0223d
 
@@ -22,7 +22,7 @@ that one path. `docs/workflow-kit/manifest.json` is FoodVibe-owned (not in `kit-
 
 - [auto] `node scripts/kit-manifest-check.mjs` prints `KIT_MANIFEST: ok — 343 classified, 0 unclassified, 0 duplicates, 0 unhandled-coupling` and exits 0.
 - [auto] `node --test scripts/test/reuse-lint.test.mjs` exits 0 (the fixture itself is untouched).
-- [auto] `node scripts/kit-manifest-check.mjs --lessons` exits 0 (the lessons half of the same CI step still passes).
+- [auto] (does not hold — see Execution Notes) `node scripts/kit-manifest-check.mjs --lessons` exits 0 (the lessons half of the same CI step still passes).
 - [auto] `node scripts/scope-check.mjs --arch --plan=plans/509-classify-the-native-dialog-test-fixture-so-the-rules-check-passes-again.plan.md` exits 0 and `node scripts/scope-check.mjs --reuse --plan=<same>` exits 0.
 - [human] After the PR is open: the `rules` check on it is green.
 
@@ -73,7 +73,7 @@ line or file this plan names was removed, renamed or rewritten).
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `docs/workflow-kit/manifest.json` has exactly one entry for `scripts/test/fixtures/reuse/native-dialog.diff`.
+- [x] `docs/workflow-kit/manifest.json` has exactly one entry for `scripts/test/fixtures/reuse/native-dialog.diff`.
 
 ### Should Have (P1)
 - none
@@ -85,8 +85,8 @@ line or file this plan names was removed, renamed or rewritten).
 - none — no app screen or dictionary key is touched.
 
 ## Atomic Sub-tasks
-- [ ] A1: Add the missing manifest entry for the native-dialog test fixture so the rules check stops failing — insert one object after the `mixed.diff` entry (alphabetical, before `registry-broken.md`) with `"path": "scripts/test/fixtures/reuse/native-dialog.diff"`, `"tier": "project"`, `"action": "stay"`, `"params": []`, `"refs": []`, `"notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."` (copy the `clean.diff` entry's shape and wording exactly) — docs/workflow-kit/manifest.json
-- [ ] A2: Prove the manifest check is green and nothing else moved — run the Done-when commands and paste the `KIT_MANIFEST: ok` line in Execution Notes; `git diff --stat` must show only `docs/workflow-kit/manifest.json` (+8 lines)
+- [x] A1: Add the missing manifest entry for the native-dialog test fixture so the rules check stops failing — insert one object after the `mixed.diff` entry (alphabetical, before `registry-broken.md`) with `"path": "scripts/test/fixtures/reuse/native-dialog.diff"`, `"tier": "project"`, `"action": "stay"`, `"params": []`, `"refs": []`, `"notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."` (copy the `clean.diff` entry's shape and wording exactly) — docs/workflow-kit/manifest.json
+- [x] A2: Prove the manifest check is green and nothing else moved — run the Done-when commands and paste the `KIT_MANIFEST: ok` line in Execution Notes; `git diff --stat` must show only `docs/workflow-kit/manifest.json` (+8 lines)
 
 ## Technical Considerations
 - Dependencies: `scripts/kit-manifest-check.mjs` (reads the manifest; an entry's `path` must match the file exactly once).
@@ -106,3 +106,8 @@ line or file this plan names was removed, renamed or rewritten).
 
 ## Critical Questions
 none
+
+## Execution Notes
+- `node scripts/kit-manifest-check.mjs` → `KIT_MANIFEST: ok — 343 classified, 0 unclassified, 0 duplicates, 0 unhandled-coupling`, exit 0.
+- `node --test scripts/test/reuse-lint.test.mjs` → 14 pass, 0 fail. `scope-check.mjs --arch` → `ARCH: ok INV-none`; `--reuse` → `REUSE: ok none`. `git diff --stat`: only `docs/workflow-kit/manifest.json` (+8) besides this plan file.
+- Done-when item 3 is wrong: `kit-manifest-check.mjs --lessons` exits 1 on origin/main (`KIT_LESSONS: FAIL — 115 entries triaged, 13 missing`, rows missing in `docs/workflow-kit/lessons-triage.md`). It does not touch the fixture, and CI's `rules.yml:35` runs the manifest check without `--lessons`, so it does not affect the red check this plan fixes. Left alone (out of scope); needs its own plan.
