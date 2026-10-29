@@ -67,6 +67,7 @@ src/app/pages/inventory/components/product-import/**
 src/app/pages/venues/components/venue-form/**
 src/app/pages/recipe-builder/recipe-builder.page.ts
 src/app/pages/recipe-builder/recipe-builder.page.html
+src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts
 src/app/pages/recipe-builder/components/recipe-ingredients-table/**
 src/app/pages/recipe-builder/components/recipe-workflow/**
 src/app/pages/settings/components/team-tab/**
@@ -105,3 +106,10 @@ append the path to the scope block above and retry.
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
 - [ ] [human] The three `[human]` items under Success Criteria pass.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): scope gap → `src/app/pages/recipe-builder/services/recipe-logistics-picker.service.ts` added to the Read-Write Scope so baseline-row undo can put the row back at its index (an insert method). Why: a clean insert beats wrapping from the page.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): event-note undo → re-create through `addNote`; accept the new time and author. Holding the server delete until the toast is gone needs out-of-scope pipeline/server files — a possible follow-up.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): undo fails on the server → existing pipeline error toast; the line stays removed.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): undo after other edits → back at the original index, clamped to the list end.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): quick removes in a row → the latest remove wins; toast duration unchanged (2 s). Follow-up candidate: a longer undo toast in UserMsgService.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): cancel/leave with the toast showing → dismiss the toast when the owning component is destroyed.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): [human] checks → after the run; 502 proceeds on 501's merge.

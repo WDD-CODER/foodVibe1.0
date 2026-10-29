@@ -116,3 +116,8 @@ append the path to the scope block above and retry.
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
 - [ ] [human] The two `[human]` items under Success Criteria pass.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): tap on label/suffix/padding while the input is already focused → nothing extra; focus+select only when not focused.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): leave (blur/tap outside) → nothing extra; each field's existing blur/commit stays.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): cancel (Escape) → nothing extra; Escape keeps its current meaning; the directive adds no handling.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): error (disabled, locked, read-only, edit-gated, invalid) → nothing extra: no focus, no message; validation unchanged.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): [human] phone-width + recipe-builder checks → after the run; 500–502 proceed on 499's merge.

@@ -121,3 +121,11 @@ append the path to the scope block above and retry.
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
 - [ ] [human] The three `[human]` items under Success Criteria pass.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): save fails → button enabled again, edits kept, existing error handling as is.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): cancel/leave during a save → only the save button is disabled; cancel and close work as now.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): from later than to / one end cleared → keep today's filter logic; only swap the input component.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): `#dateFromRef` → keep behaviour; add a focus/reference hook on app-date-field only if code uses the ref.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): percent display → Worker's logged `behaviour:` decision, as the plan says.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): drift (498, 499–501 in this run) → C1 re-verifies the ten screens against the run branch.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): log-query runs as [auto:main] from the main folder (read-only) → approved.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): [human] checks → at the end of the run.

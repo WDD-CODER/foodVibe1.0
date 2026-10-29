@@ -102,3 +102,11 @@ append the path to the scope block above and retry.
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
 - [ ] [human] The three `[human]` items under Success Criteria pass.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): 500 runs only after 499 is merged into the run branch; if 499 parks, 500 does not start.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): drift since 21a2ffe5 (plan 498, and 499 in this run) → builder re-reads in-scope files before editing.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): leave → stop the repeat on pointerup, pointerleave and pointercancel.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): cancel → no cancel; the value stays where the repeat stopped.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): error → clamp to the minimum each page uses today, no maximum, no new message.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): edit → each step emits a change as today; arrow keys act on the focused stepper element.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): log-query runs as [auto:main] from the main folder (read-only) → approved.
+- Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): three [human] checks → after the run.
