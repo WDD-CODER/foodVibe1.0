@@ -206,3 +206,11 @@
 - [ ] A4: Make the CI scope-check test prove the branch naming without relying on a state file being allowed — header comment reworded; test at line 145 commits an in-scope fixture file — scripts/ci-scope-check.mjs, scripts/test/ci-scope-check.test.mjs
 - [ ] A5: Clean the two plans from the live run only if they are still open after the run merges — Always-allowed line only; closed plans in plans/<range>/ stay untouched — plans/419-*.plan.md, plans/497-*.plan.md
 - [ ] A6: Prove nothing FoodVibe owns still names the old file and the build and script tests pass — run the Done-when grep, pnpm run build, pnpm run test:scripts, the --deps/--reuse checks and the two kit diffs; paste outputs — this plan file (Execution Notes)
+
+### Plan 507 — Unit tests stop sending log calls to the real backend, and unknown origins get a quiet 403 (`plans/507-unit-tests-stop-sending-log-calls-to-the-real-backend-and-unknown-origins-get-a-quiet-403.plan.md`)
+
+- [ ] A1: Add a test-only settings file that turns off sending logs to a server — sendLogsToServer key in every environment file, false in the new environment.test.ts — src/environments/**
+- [ ] A2: Make the unit tests use that test-only settings file — fileReplacements on the Karma test target — angular.json
+- [ ] A3: Stop the logger from sending anything when the switch is off — early return before fetch; specs that test shipping turn it on — src/app/core/services/logging.service.ts, src/app/core/services/logging.service.spec.ts
+- [ ] A4: Answer an unknown origin with a plain 403 logged once, never a 500 with a stack trace — middleware before cors(), Set of seen origins, warn cors.origin_rejected — server/app.js
+- [ ] A5: Prove both fixes with tests and a clean log after a full test run — new server test, pnpm run build, pnpm run test:ci with the backend up, server tests, log-query; paste outputs — server/test/cors-origin.test.js, this plan file
