@@ -5592,6 +5592,30 @@
       "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
     },
     {
+      "path": "scripts/test/fixtures/reuse/consistency.diff",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/number-input.diff",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
+      "path": "scripts/test/fixtures/reuse/stepper.diff",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Test fixture for the reuse-check and reuse-lint script tests; data, not workflow."
+    },
+    {
       "path": "scripts/test/fixtures/reuse/registry-broken.md",
       "tier": "project",
       "action": "stay",
