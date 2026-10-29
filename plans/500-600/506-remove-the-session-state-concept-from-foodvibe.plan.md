@@ -1,6 +1,6 @@
 # Plan 506 — Remove the session-state concept from FoodVibe
 
-Status: draft
+Status: done
 Depends-on: 497, 419
 Snapshot: e3aaeccee802013a946a5ea2f76edcc0313197db
 
