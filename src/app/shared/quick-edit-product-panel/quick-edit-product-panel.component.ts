@@ -27,11 +27,13 @@ import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { isProductNameTaken } from 'src/app/core/utils/product-name-error.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 @Component({
   selector: 'app-quick-edit-product-panel',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     CommonModule,
     FormsModule,
     LucideAngularModule,

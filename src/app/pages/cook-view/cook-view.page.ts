@@ -38,6 +38,7 @@ import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.se
 import { CookTimerService } from './services/cook-timer.service'
 import { CookViewExportService } from './services/cook-view-export.service'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -53,6 +54,7 @@ const MULTIPLIER_CHIPS = [
   host: { '(window:scroll)': 'onWindowScroll()', '(document:pointerdown)': 'onDocumentPointerDown($event)' },
   standalone: true,
   imports: [
+    NumberBoxDirective,
     SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,

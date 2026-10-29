@@ -2,7 +2,7 @@
   <app-business-name-form />
   <form class="business-form c-glass-panel" data-testid="business-settings-form" [formGroup]="form" (ngSubmit)="save()">
     @for (field of fields; track field.key) {
-      <label class="business-field">
+      <label class="business-field" appNumberBox>
         <span class="business-field__label">{{ field.labelKey | translatePipe }}</span>
         <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
           <input

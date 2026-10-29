@@ -122,3 +122,10 @@ test('--diff with a base git cannot resolve is a usage error, not REUSE: ok', ()
   assert.match(r.stderr, /REUSE: bad base no-such-branch-450/)
   assert.doesNotMatch(r.stdout, /REUSE: ok/)
 })
+
+test('number-box rule: a number input line warns unless it carries appNumberBox', () => {
+  const r = lint(`--patch=${FIX}/number-input.diff`)
+  assert.equal(r.status, 0, r.stderr)
+  assert.match(r.stdout, /^REUSE: warn number-input-outside-number-box number-box src\/app\/pages\/orders\/orders\.component\.html:12 — /m)
+  assert.equal(r.stdout.trim().split('\n').length, 1, 'the appNumberBox line does not warn')
+})

@@ -15,6 +15,7 @@ import { formatMoney, formatPct1 } from '../../../../core/engine/rounding'
 import type { MoneyForm } from '../../menu-money-form.util'
 import { MenuPortionsService } from '../../services/menu-portions.service'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 /**
  * Plan 445 — the live pricing meter at the bottom of the menu page. It only displays what
@@ -26,6 +27,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
   selector: 'app-pricing-meter',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     SelectOnFocusDirective,
     NgTemplateOutlet,
     ReactiveFormsModule,

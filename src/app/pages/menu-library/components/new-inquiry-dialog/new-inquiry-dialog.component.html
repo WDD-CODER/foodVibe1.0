@@ -46,7 +46,7 @@
           <label for="inquiry-date">{{ 'date_filter' | translatePipe }}</label>
           <app-date-field inputId="inquiry-date" [(value)]="date_" [(invalid)]="dateInvalid_" />
         </div>
-        <div class="c-input-stack">
+        <div class="c-input-stack" appNumberBox>
           <label for="inquiry-guests">{{ 'menu_guest_count' | translatePipe }}</label>
           <input
             id="inquiry-guests"

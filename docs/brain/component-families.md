@@ -134,6 +134,12 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
   label or content, not a plain label + input).
 
+### number-box — tap anywhere on a number box to edit the number
+- Status: stable — plan 499 built `appNumberBox`; pricing meter, counter, product form, recipe quantity, cook view, settings, event dialogs and the AI / quick-add / unit modals are on it
+- Use: `src/app/core/directives/number-box.directive.ts` · `appNumberBox` on the container of ONE `input[type=number]` (label, suffix, padding); it focuses the number and `SelectOnFocusDirective` selects all. Buttons, chips, other fields, disabled / read-only numbers and an already-focused number are left alone.
+- When: a box whose only content is an editable number. Not for rows that mix free text and numbers.
+- Known copies: none for boxes. Left without it on purpose (outside plan 499 scope): `event-stage-bar` deposit amount, `menu-dish-row` inline prices, equipment / supplier / venue forms (`app-form-field` rows), `product-import` purchase qty (shares a row with a text field), `ai-draft-editor` ingredient rows.
+
 ### entity-form — name validation and unsaved-changes check
 - Status: stable — plan 455 built one unsaved-changes helper
 - Use: `src/app/core/utils/unsaved-changes.ts` · `useUnsavedChanges({ form, snapshot?, extra?, isSubmitted? })` (also registers the browser's reload / tab-close dialog, `warnBeforeUnload`); each page keeps `hasRealChanges()` as a one-line

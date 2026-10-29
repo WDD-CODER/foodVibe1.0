@@ -18,6 +18,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { BUSINESS_SETTINGS_DEFAULTS, type BusinessSettings } from '@schemas/entities'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 type SettingsField = keyof BusinessSettings
 
@@ -32,7 +33,7 @@ interface FieldDef {
 @Component({
   selector: 'app-business-settings-tab',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, BusinessNameFormComponent, SelectOnFocusDirective],
+  imports: [NumberBoxDirective, ReactiveFormsModule, TranslatePipe, BusinessNameFormComponent, SelectOnFocusDirective],
   templateUrl: './business-settings-tab.component.html',
   styleUrl: './business-settings-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

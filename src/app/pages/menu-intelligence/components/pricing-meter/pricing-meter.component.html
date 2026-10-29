@@ -55,7 +55,7 @@
 <ng-template #meterBody>
   <div class="meter-body">
     <div class="meter-inputs">
-      <label class="meter-field">
+      <label class="meter-field" appNumberBox>
         <span class="fin-label">
           {{ 'price_per_guest_client' | translatePipe }}
           @if (result_().revenueIsComputed) {
@@ -82,7 +82,7 @@
         </span>
       </label>
 
-      <label class="meter-field">
+      <label class="meter-field" appNumberBox>
         <span class="fin-label">{{ 'extra_costs' | translatePipe }}</span>
         <span
           class="c-input-wrapper"
@@ -126,7 +126,7 @@
       </div>
 
       @if (targetsOpen_()) {
-        <label class="meter-field">
+        <label class="meter-field" appNumberBox>
           <span class="fin-label">{{ 'profit_target_pct' | translatePipe }}</span>
           <span
             class="c-input-wrapper"
@@ -148,7 +148,7 @@
             <span class="field-error" role="alert">{{ 'target_too_high' | translatePipe }}</span>
           }
         </label>
-        <label class="meter-field">
+        <label class="meter-field" appNumberBox>
           <span class="fin-label">{{ 'safety_margin_pct' | translatePipe }}</span>
           <span
             class="c-input-wrapper"

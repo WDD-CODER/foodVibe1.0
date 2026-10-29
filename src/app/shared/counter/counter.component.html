@@ -13,7 +13,7 @@
     −
   </button>
 
-  <div class="value-cell" [style.--value-width.px]="valueWidthPx_()">
+  <div class="value-cell" appNumberBox [style.--value-width.px]="valueWidthPx_()">
     <span #mirrorSpan class="value-mirror" aria-hidden="true">{{ inputValue_() || displayValue_() }}</span>
     <input
       #valueInput

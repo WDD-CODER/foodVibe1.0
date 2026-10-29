@@ -67,6 +67,7 @@ import { MenuPickerSearchService } from './services/menu-picker-search.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 type MenuItemForm = {
   recipeId: string
@@ -86,6 +87,7 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
   selector: 'app-menu-intelligence-page',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,

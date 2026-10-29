@@ -262,7 +262,7 @@
           </div>
 
           <!-- Yield factor -->
-          <div class="editor-field">
+          <div class="editor-field" appNumberBox>
             <label class="editor-label">{{ 'ai_product_yield_label' | translatePipe }}</label>
             <div class="editor-num-row">
               <input
@@ -280,7 +280,7 @@
 
           <!-- Min stock + expiry -->
           <div class="editor-field-row">
-            <div class="editor-field editor-field--half">
+            <div class="editor-field editor-field--half" appNumberBox>
               <label class="editor-label">{{ 'ai_patch_min_stock' | translatePipe }}</label>
               <input
                 class="c-input editor-num-input"
@@ -290,7 +290,7 @@
                 (input)="setDraftField('minStockLevel', +$any($event.target).value)"
               />
             </div>
-            <div class="editor-field editor-field--half">
+            <div class="editor-field editor-field--half" appNumberBox>
               <label class="editor-label">{{ 'ai_patch_expiry_days' | translatePipe }}</label>
               <input
                 class="c-input editor-num-input"

@@ -63,7 +63,7 @@
       <app-product-price-lock [form]="productForm_" />
 
       <app-form-field label="buy_price" labelStyle="caps">
-        <div class="relative-input">
+        <div class="relative-input" appNumberBox>
           <input
             appSelectOnFocus
             type="number"
@@ -132,6 +132,7 @@
             @if (option.get('unitSymbol')?.value) {
               <div
                 class="input-wrapper row-qty"
+                appNumberBox
                 [class.field-error]="
                   option.get('conversionRate')?.invalid && (option.get('conversionRate')?.dirty || isSubmitted)
                 "
@@ -171,7 +172,7 @@
                 </label>
               </div>
 
-              <div class="price-override-wrapper">
+              <div class="price-override-wrapper" appNumberBox>
                 <label class="c-chip c-chip--toggle">
                   <input type="checkbox" formControlName="show_special_price_" />
                   <span>{{ 'special_purchase_price' | translatePipe }}</span>
@@ -302,7 +303,7 @@
             <span class="label-text">{{ 'waste_yield_logic' | translatePipe }}</span>
           </div>
           <div class="two-col-grid">
-            <div class="product-field yield-logic">
+            <div class="product-field yield-logic" appNumberBox>
               <label>{{ 'waste_percent' | translatePipe }}</label>
               <div class="relative-input">
                 <input
@@ -319,7 +320,7 @@
               <p class="helper-text">{{ 'waste_percent_help_text' | translatePipe }}</p>
             </div>
 
-            <div class="product-field yield-logic">
+            <div class="product-field yield-logic" appNumberBox>
               <label>{{ 'yield_factor' | translatePipe }}</label>
               <div class="relative-input">
                 <input
@@ -359,6 +360,7 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
+          appNumberBox
           [class.collapsible-field__content--hidden]="!isExpandedMinStock_()"
           (appClickOutside)="onMinStockBlur($event)"
         >
@@ -385,6 +387,7 @@
       <div class="product-field collapsible-field">
         <div
           class="collapsible-field__content"
+          appNumberBox
           [class.collapsible-field__content--hidden]="!isExpandedExpiryDays_()"
           (appClickOutside)="onExpiryDaysBlur($event)"
         >

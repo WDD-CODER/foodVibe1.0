@@ -61,5 +61,13 @@ export const REUSE_RULES = [
     pattern: /(?:\bwindow\.|(?<![.\w$]))(?:confirm|alert|prompt)\s*\(/,
     skip: /^\s*(?:\/\/|\*|\/\*)|^\s*(?:(?:public|private|protected|readonly|async|static)\s+)*(?:confirm|alert|prompt)\s*\([^)]*\)\s*(?::[^{]+)?\{/,
     hint: 'ask through ConfirmModalService (or app-modal-shell) — never the browser confirm / alert / prompt'
+  },
+  {
+    id: 'number-input-outside-number-box',
+    family: 'number-box',
+    files: ['src/app/**/*.html'],
+    pattern: /type="number"/,
+    skip: /appNumberBox/,
+    hint: 'wrap a new number input in a box with appNumberBox (src/app/core/directives/number-box.directive.ts) so a tap anywhere on the box edits the number'
   }
 ]
