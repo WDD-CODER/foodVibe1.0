@@ -1,6 +1,6 @@
 # Plan 508 — log-query loads the Mongo driver through mongoose so it works under pnpm
 
-Status: draft
+Status: done
 Track: code — here (not design)
 Depends-on: none
 Snapshot: ac5b606f5fdb3737afb35995793b633a7b81429b
