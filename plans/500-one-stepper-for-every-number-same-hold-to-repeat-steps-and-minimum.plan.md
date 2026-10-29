@@ -110,3 +110,4 @@ append the path to the scope block above and retry.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): edit → each step emits a change as today; arrow keys act on the focused stepper element.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): log-query runs as [auto:main] from the main folder (read-only) → approved.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): three [human] checks → after the run.
+- Orchestrator rerun (2026-10-29, Planner decided): the [auto:main] `log-query --since=plan-start` check is dropped from the run — the main folder has no plan-start stamp, so it parked 500 twice for an environment reason, not the code (run-499-502 D19/D20). Errors are checked in the morning review instead.

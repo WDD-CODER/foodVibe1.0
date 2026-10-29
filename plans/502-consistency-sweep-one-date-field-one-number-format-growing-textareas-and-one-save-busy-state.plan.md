@@ -129,3 +129,4 @@ append the path to the scope block above and retry.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): drift (498, 499–501 in this run) → C1 re-verifies the ten screens against the run branch.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): log-query runs as [auto:main] from the main folder (read-only) → approved.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): [human] checks → at the end of the run.
+- Orchestrator rerun (2026-10-29, Planner decided): the [auto:main] `log-query --since=plan-start` check is dropped from the run — the main folder has no plan-start stamp, so it parked 500 twice for an environment reason, not the code (run-499-502 D19/D20). Errors are checked in the morning review instead.
