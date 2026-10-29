@@ -17,7 +17,7 @@ Reusable standalone components, modals, and list/table primitives used across pa
 | `column-carousel/` | Mobile column carousel for list tables (header + cells, shared index) | ColumnCarouselGroupDirective, ColumnCarouselHeaderComponent, ColumnCarouselCellComponent, ColumnSlideDirective |
 | `chip-search-dropdown/` | Searchable chip-select dropdown | ChipSearchDropdownComponent |
 | `confirm-modal/` | Confirm/cancel | ConfirmModalComponent |
-| `counter/` | Numeric counter control | CounterComponent |
+| `counter/` | Numeric counter control + the shared press-and-hold for any +/- button (plan 500) | CounterComponent, StepHoldDirective |
 | `custom-multi-select/` | Multi-select CVA | CustomMultiSelectComponent |
 | `custom-select/` | Select CVA | CustomSelectComponent |
 | `edit-gate/` | Shows its content only when the user may save the opened document, else a view-only note | EditGateComponent |

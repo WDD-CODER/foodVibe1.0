@@ -129,3 +129,10 @@ test('number-box rule: a number input line warns unless it carries appNumberBox'
   assert.match(r.stdout, /^REUSE: warn number-input-outside-number-box number-box src\/app\/pages\/orders\/orders\.component\.html:12 — /m)
   assert.equal(r.stdout.trim().split('\n').length, 1, 'the appNumberBox line does not warn')
 })
+
+test('stepper rule: a hand-built minus / plus click handler warns unless it carries appStepHold', () => {
+  const r = lint(`--patch=${FIX}/stepper.diff`)
+  assert.equal(r.status, 0, r.stderr)
+  assert.match(r.stdout, /^REUSE: warn minus-plus-outside-stepper stepper src\/app\/pages\/orders\/orders\.component\.html:11 — /m)
+  assert.equal(r.stdout.trim().split('\n').length, 1, 'the appStepHold line does not warn')
+})

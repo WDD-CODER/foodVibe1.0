@@ -140,6 +140,12 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - When: a box whose only content is an editable number. Not for rows that mix free text and numbers.
 - Known copies: none for boxes. Left without it on purpose (outside plan 499 scope): `event-stage-bar` deposit amount, `menu-dish-row` inline prices, equipment / supplier / venue forms (`app-form-field` rows), `product-import` purchase qty (shares a row with a text field), `ai-draft-editor` ingredient rows.
 
+### stepper — the + / − buttons around a number
+- Status: stable — plan 500 built `appStepHold`; counter, menu guest count, cook-view amounts, recipe ingredient quantity and labor / cook time are on it
+- Use: `src/app/shared/counter/step-hold.directive.ts` · `appStepHold` on a minus or plus button: `(stepHold)="step($event)"` (`false` first press, `true` repeat), `[stepHoldStop]` at the minimum; pointer events (touch and mouse), stops on pointerup / pointerleave / pointercancel. Step rules: `src/app/core/utils/quantity-step.util.ts` (`quantityIncrement` / `quantityDecrement`). A whole counter (value box + both buttons): `app-counter` (`src/app/shared/counter/`).
+- When: any +/− button that changes a number. The page keeps its own skin (cook-view ink set, menu paper pill).
+- Known copies: none. Kept on purpose: `scaling-chip` and `recipe-builder.page` use `app-counter` already.
+
 ### entity-form — name validation and unsaved-changes check
 - Status: stable — plan 455 built one unsaved-changes helper
 - Use: `src/app/core/utils/unsaved-changes.ts` · `useUnsavedChanges({ form, snapshot?, extra?, isSubmitted? })` (also registers the browser's reload / tab-close dialog, `warnBeforeUnload`); each page keeps `hasRealChanges()` as a one-line

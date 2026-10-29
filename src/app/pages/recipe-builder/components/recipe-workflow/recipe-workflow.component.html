@@ -73,7 +73,9 @@
                     type="button"
                     class="counter-btn minus"
                     [disabled]="(group.get('labor_time')?.value ?? 0) <= 0"
-                    (click)="decrementLaborTime(group)"
+                    appStepHold
+                    [stepHoldStop]="(group.get('labor_time')?.value ?? 0) <= 0"
+                    (stepHold)="decrementLaborTime(group)"
                     tabindex="-1"
                   >
                     <lucide-icon name="minus" class="wf-icon"></lucide-icon>
@@ -104,7 +106,13 @@
                       >{{ formatMinutesToClock(group.get('labor_time')?.value ?? 0) }}</span
                     >
                   }
-                  <button type="button" class="counter-btn plus" (click)="incrementLaborTime(group)" tabindex="-1">
+                  <button
+                    type="button"
+                    class="counter-btn plus"
+                    appStepHold
+                    (stepHold)="incrementLaborTime(group)"
+                    tabindex="-1"
+                  >
                     <lucide-icon name="plus" class="wf-icon"></lucide-icon>
                   </button>
                 </div>
@@ -120,7 +128,9 @@
                     type="button"
                     class="counter-btn minus"
                     [disabled]="(group.get('cooking_time')?.value ?? 0) <= 0"
-                    (click)="decrementCookTime(group)"
+                    appStepHold
+                    [stepHoldStop]="(group.get('cooking_time')?.value ?? 0) <= 0"
+                    (stepHold)="decrementCookTime(group)"
                     tabindex="-1"
                   >
                     <lucide-icon name="minus" class="wf-icon"></lucide-icon>
@@ -151,7 +161,13 @@
                       >{{ formatSecsToHms(group.get('cooking_time')?.value ?? 0) }}</span
                     >
                   }
-                  <button type="button" class="counter-btn plus" (click)="incrementCookTime(group)" tabindex="-1">
+                  <button
+                    type="button"
+                    class="counter-btn plus"
+                    appStepHold
+                    (stepHold)="incrementCookTime(group)"
+                    tabindex="-1"
+                  >
                     <lucide-icon name="plus" class="wf-icon"></lucide-icon>
                   </button>
                 </div>

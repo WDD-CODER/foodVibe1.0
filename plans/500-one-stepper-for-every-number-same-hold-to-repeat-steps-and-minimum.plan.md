@@ -35,6 +35,9 @@ Every +/− control around a number should behave the same, but there are five s
 - A stepper that sits around a number box (plan 499) must keep the number box tap behaviour; the +/− buttons are the inner buttons that the number box ignores.
 - Risks: `type="number"` refuses `setSelectionRange` — the select-all directive handles it, do not regress plan 482. `appFocusByRow` (Enter to next row) in the recipe tables must keep working. RTL: the minus / plus order flips with the layout, keep today's visual order on each page.
 - Hebrew RTL and logical CSS properties only; any new text goes through the dictionary.
+- T1 inventory (before): app-counter — mouse hold, tiered steps, min 0, disabled 0.35 opacity, arrows; menu guest count — pointer hold (own code), integerOnly then tiered, min 0, no disabled; cook-view banner + edit rows — click only, unit/integer steps, min 0.01 / 0; ingredients table — click only, minus disabled at 0; recipe-workflow labor (integer, min 0) and cook time (30 s, min 0) — click only.
+- Design (T3): sibling-free — the hold is one directive `appStepHold` (src/app/shared/counter/step-hold.directive.ts, pointer events); `app-counter` and the four page steppers use it on their own buttons, so the page skins (cook-view ink, menu paper pill) stay as they are, with no copied hold code.
+- scope: no extension needed. Evidence: `pnpm run build` exit 0; `pnpm run lint` exit 0 (0 errors); `pnpm run test:ci` TOTAL 1629 SUCCESS (4 new counter specs: hold repeats, release/leave/cancel stop, minimum stops and disables minus, arrows); reuse-lint --diff=origin/main ok; --check-registry ok (24 families); `node --test scripts/test/reuse-lint.test.mjs` pass 16 fail 0; scope-check --arch and --reuse ok. log-query is run by the gate from main.
 
 ## Reuse Check
 - One stepper for all page steppers — family: none — rung: 4 — why: the registry has no stepper family; `app-counter` is extended (or one sibling added) and registered as the new family `stepper`
@@ -90,14 +93,14 @@ append the path to the scope block above and retry.
 
 ## Atomic Sub-tasks
 
-- [ ] T1: List every +/− control around a number and what each one does today, and record the list — hold or click only, step size, minimum, disabled look — this plan file
-- [ ] T2: Make the shared counter hold-to-repeat with pointer events so it works on touch and mouse, and add specs — release stops the repeat, the minimum stops it and disables the minus — src/app/shared/counter/**
-- [ ] T3: Decide extend-or-sibling for the counter and add the page skins as variants — cook-view ink set and menu-intelligence paper skin — src/app/shared/counter/**
-- [ ] T4: Move the menu guest count onto the shared stepper and delete its own hold code — src/app/pages/menu-intelligence/**
-- [ ] T5: Move the cook-view amount steppers onto it — src/app/pages/cook-view/**
-- [ ] T6: Move the recipe ingredient quantity and the labor / cook time steppers onto it — src/app/pages/recipe-builder/components/recipe-ingredients-table/**, src/app/pages/recipe-builder/components/recipe-workflow/**
-- [ ] T7: Warn when a minus/plus pair is added next to a number input outside the stepper, and register the family — `reuse-lint` rule with fixtures; new `stepper` family with its remaining copies — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
-- [ ] T8: Run the full checks and paste the output — `ng build`, headless `ng test`, reuse-lint, scope-check, log-query — Execution Notes
+- [x] T1: List every +/− control around a number and what each one does today, and record the list — hold or click only, step size, minimum, disabled look — this plan file
+- [x] T2: Make the shared counter hold-to-repeat with pointer events so it works on touch and mouse, and add specs — release stops the repeat, the minimum stops it and disables the minus — src/app/shared/counter/**
+- [x] T3: Decide extend-or-sibling for the counter and add the page skins as variants — cook-view ink set and menu-intelligence paper skin — src/app/shared/counter/**
+- [x] T4: Move the menu guest count onto the shared stepper and delete its own hold code — src/app/pages/menu-intelligence/**
+- [x] T5: Move the cook-view amount steppers onto it — src/app/pages/cook-view/**
+- [x] T6: Move the recipe ingredient quantity and the labor / cook time steppers onto it — src/app/pages/recipe-builder/components/recipe-ingredients-table/**, src/app/pages/recipe-builder/components/recipe-workflow/**
+- [x] T7: Warn when a minus/plus pair is added next to a number input outside the stepper, and register the family — `reuse-lint` rule with fixtures; new `stepper` family with its remaining copies — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
+- [x] T8: Run the full checks and paste the output — `ng build`, headless `ng test`, reuse-lint, scope-check, log-query — Execution Notes
 
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).

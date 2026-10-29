@@ -8,24 +8,24 @@ import {
   effect,
   viewChild,
   ElementRef,
-  AfterViewChecked,
-  OnDestroy
+  AfterViewChecked
 } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
 import { NumberBoxDirective } from '@directives/number-box.directive'
+import { StepHoldDirective } from './step-hold.directive'
 
 @Component({
   selector: 'app-counter',
   standalone: true,
-  imports: [NumberBoxDirective, CommonModule, SelectOnFocusDirective, TranslatePipe],
+  imports: [NumberBoxDirective, StepHoldDirective, CommonModule, SelectOnFocusDirective, TranslatePipe],
   templateUrl: './counter.component.html',
   styleUrl: './counter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CounterComponent implements AfterViewChecked, OnDestroy {
+export class CounterComponent implements AfterViewChecked {
   // INPUTS
   value = input.required<number>()
   min = input<number>(0)
@@ -76,12 +76,6 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
   readonly mirrorSpan = viewChild<ElementRef<HTMLSpanElement>>('mirrorSpan')
   readonly valueInput = viewChild<ElementRef<HTMLInputElement>>('valueInput')
 
-  private repeatTimeoutId: ReturnType<typeof setTimeout> | null = null
-  private repeatIntervalId: ReturnType<typeof setInterval> | null = null
-
-  private static readonly REPEAT_DELAY_MS = 600
-  private static readonly REPEAT_INTERVAL_MS = 80
-
   constructor() {
     effect(() => {
       this.displayValue_()
@@ -92,49 +86,6 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
 
   ngAfterViewChecked(): void {
     this.measureValueWidth()
-  }
-
-  ngOnDestroy(): void {
-    this.stopRepeat()
-  }
-
-  protected onPlusMouseDown(): void {
-    if (this.plusDisabled_()) return
-    this.stopRepeat()
-    this.increment(false)
-    this.repeatTimeoutId = setTimeout(() => {
-      this.repeatTimeoutId = null
-      this.repeatIntervalId = setInterval(() => this.increment(true), CounterComponent.REPEAT_INTERVAL_MS)
-    }, CounterComponent.REPEAT_DELAY_MS)
-  }
-
-  protected onMinusMouseDown(): void {
-    if (this.minusDisabled_()) return
-    this.stopRepeat()
-    this.decrement(false)
-    this.repeatTimeoutId = setTimeout(() => {
-      this.repeatTimeoutId = null
-      this.repeatIntervalId = setInterval(() => this.decrement(true), CounterComponent.REPEAT_INTERVAL_MS)
-    }, CounterComponent.REPEAT_DELAY_MS)
-  }
-
-  protected onCtrlMouseUp(): void {
-    this.stopRepeat()
-  }
-
-  protected onCtrlMouseLeave(): void {
-    this.stopRepeat()
-  }
-
-  private stopRepeat(): void {
-    if (this.repeatTimeoutId != null) {
-      clearTimeout(this.repeatTimeoutId)
-      this.repeatTimeoutId = null
-    }
-    if (this.repeatIntervalId != null) {
-      clearInterval(this.repeatIntervalId)
-      this.repeatIntervalId = null
-    }
   }
 
   private measureValueWidth(): void {
@@ -187,10 +138,7 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
   }
 
   protected decrement(continuousPress = false): void {
-    if (this.minusDisabled_()) {
-      this.stopRepeat()
-      return
-    }
+    if (this.minusDisabled_()) return
     const current = this.value()
     const minV = this.minVal_()
     const opts = this.stepOptions()
@@ -200,14 +148,10 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     }
     const next = quantityDecrement(current, minV, merged)
     this.emitValue(next)
-    if (next <= this.minVal_()) this.stopRepeat()
   }
 
   protected increment(continuousPress = false): void {
-    if (this.plusDisabled_()) {
-      this.stopRepeat()
-      return
-    }
+    if (this.plusDisabled_()) return
     const current = this.value()
     const minV = this.minVal_()
     const opts = this.stepOptions()
@@ -219,7 +163,6 @@ export class CounterComponent implements AfterViewChecked, OnDestroy {
     const maxV = this.maxVal_()
     if (maxV != null && next > maxV) next = maxV
     this.emitValue(next)
-    if (this.maxVal_() != null && next >= this.maxVal_()!) this.stopRepeat()
   }
 
   private emitValue(v: number): void {

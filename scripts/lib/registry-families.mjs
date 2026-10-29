@@ -69,5 +69,13 @@ export const REUSE_RULES = [
     pattern: /type="number"/,
     skip: /appNumberBox/,
     hint: 'wrap a new number input in a box with appNumberBox (src/app/core/directives/number-box.directive.ts) so a tap anywhere on the box edits the number'
+  },
+  {
+    id: 'minus-plus-outside-stepper',
+    family: 'stepper',
+    files: ['src/app/**/*.html'],
+    pattern: /\((?:click|mousedown|pointerdown)\)="[^"]*(?:increment|decrement|startHold|startGuestHold|step\w*(?:Amount|Value|Qty|Count))\w*\(/i,
+    skip: /appStepHold/,
+    hint: 'a minus / plus button next to a number takes appStepHold (src/app/shared/counter/step-hold.directive.ts) or app-counter, so hold-to-repeat, steps and the minimum are the same everywhere'
   }
 ]
