@@ -65,6 +65,7 @@ scripts/test/ci-scope-check.test.mjs
 kit.config.json
 plans/419-*.plan.md
 plans/497-*.plan.md
+.claude/handoff-previous.md
 ```
 
 `kit.config.json` is in scope only for the two override `reason` strings (A2). `plans/419-*` and `plans/497-*` are in scope
@@ -141,3 +142,6 @@ by symbol and print one line per commit: `ok` or `conflict: <what>`. STOP only o
 
 ## Execution Notes
 - 2026-10-29 Planner: the 10 other open plans (410, 411, 422, 471, 473, 498–502) and design plans 372–374 had `docs/session-state-<branch>.md` removed from their "Always allowed" line, and 372–374's "Update session-state." sub-task text (plus the mirrored `.claude/todo.md` lines) dropped, in the plan-save push on `main`. 419 and 497 were left alone (live run).
+- Orchestrator readiness (2026-10-29): Should the builder `git rm` the tracked session-state file `.claude/handoff-previous.md` (added to scope)? → yes (default): `git rm` it as part of A1; path added to the Read-Write Scope.
+- Orchestrator readiness (2026-10-29): Should `':!docs/orchestrator/runs'` be added to the Done-when grep's exclude list as history? → yes (default): exclude it like `docs/mvp/runs`.
+- Orchestrator readiness (2026-10-29): [human] Done-when check (`/ship` + `/handoff`, no `docs/session-state*` appears) needs the kit/fleet-mod fix first → stays open after the run; does not block.
