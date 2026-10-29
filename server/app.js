@@ -149,6 +149,19 @@ app.use(express.static(STATIC_DIR, {
   }
 }))
 
+// An origin outside the allow-list is a client problem: plain 403, never the global error
+// handler (no stack trace, no 500). Warned once per origin per process.
+const rejectedOrigins = new Set();
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin || ALLOWED_ORIGINS.includes(origin)) return next();
+  if (!rejectedOrigins.has(origin)) {
+    rejectedOrigins.add(origin);
+    req.log.warn({ event: 'cors.origin_rejected', origin }, 'CORS origin not allowed');
+  }
+  return res.status(403).json({ error: 'Origin not allowed' });
+});
+
 const corsOptions = {
   origin(origin, callback) {
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {

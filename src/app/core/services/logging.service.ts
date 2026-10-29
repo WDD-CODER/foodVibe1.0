@@ -37,6 +37,7 @@ export class LoggingService {
     // info is persisted only when the server opts in (LOG_PERSIST_INFO) — not worth the
     // network and rate-limit budget in production.
     if (level === 'info' && environment.production) return
+    if (!environment.sendLogsToServer) return
     if (typeof fetch === 'undefined') return
     const now = Date.now()
     if (now < this.pausedUntil_) return
