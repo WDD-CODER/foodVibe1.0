@@ -15,7 +15,7 @@
         <app-date-field inputId="deposit-paid-date" [(value)]="date_" [(invalid)]="dateInvalid_" />
       </div>
 
-      <div class="c-input-stack">
+      <div class="c-input-stack" appNumberBox>
         <label for="deposit-paid-amount">{{ 'deposit_amount' | translatePipe }}</label>
         <input
           id="deposit-paid-amount"

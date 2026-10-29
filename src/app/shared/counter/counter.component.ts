@@ -15,11 +15,12 @@ import { CommonModule } from '@angular/common'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { quantityIncrement, quantityDecrement, QuantityStepOptions } from 'src/app/core/utils/quantity-step.util'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 @Component({
   selector: 'app-counter',
   standalone: true,
-  imports: [CommonModule, SelectOnFocusDirective, TranslatePipe],
+  imports: [NumberBoxDirective, CommonModule, SelectOnFocusDirective, TranslatePipe],
   templateUrl: './counter.component.html',
   styleUrl: './counter.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

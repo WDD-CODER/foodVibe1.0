@@ -21,6 +21,7 @@ import type { SupplierVariance } from '../../../../core/engine/event-closing'
 import { formatMoney, formatPct1 } from '../../../../core/engine/rounding'
 import { downscaleImage } from '../../../../core/utils/downscale-image.util'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 /** The key of the "no supplier" row (its `supplierId` is null). */
 const NO_SUPPLIER_KEY = '__none__'
@@ -44,7 +45,7 @@ export interface ClosingRowView {
 @Component({
   selector: 'app-event-closing-dialog',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, CustomSelectComponent, SelectOnFocusDirective],
+  imports: [NumberBoxDirective, LucideAngularModule, TranslatePipe, CustomSelectComponent, SelectOnFocusDirective],
   templateUrl: './event-closing-dialog.component.html',
   styleUrl: './event-closing-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

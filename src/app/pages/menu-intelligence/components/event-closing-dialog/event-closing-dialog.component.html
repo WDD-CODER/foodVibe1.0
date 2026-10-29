@@ -52,7 +52,7 @@
                   {{ formatMoney(view.row.planned) }}
                 </span>
 
-                <div class="row-paid c-input-stack">
+                <div class="row-paid c-input-stack" appNumberBox>
                   <label [for]="'paid-' + view.key" class="cell-label">{{
                     'closing_actual_paid' | translatePipe
                   }}</label>
@@ -165,7 +165,7 @@
 
           @if (canMoney_()) {
             <div class="totals">
-              <div class="c-input-stack">
+              <div class="c-input-stack" appNumberBox>
                 <label for="closing-extra">{{ 'closing_actual_extra' | translatePipe }}</label>
                 <input
                   id="closing-extra"
@@ -179,7 +179,7 @@
                   (change)="onExtraChange($any($event.target).value)"
                 />
               </div>
-              <div class="c-input-stack">
+              <div class="c-input-stack" appNumberBox>
                 <label for="closing-revenue">{{ 'closing_actual_revenue' | translatePipe }}</label>
                 <input
                   id="closing-revenue"

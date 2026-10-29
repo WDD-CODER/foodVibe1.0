@@ -2,7 +2,7 @@
   <form class="baseline-form c-glass-panel" data-testid="baseline-form" [formGroup]="form" (ngSubmit)="save()">
     <p class="baseline-intro">{{ 'baseline_intro' | translatePipe }}</p>
     @for (field of fields; track field.key) {
-      <label class="baseline-field">
+      <label class="baseline-field" appNumberBox>
         <span class="baseline-field__label">{{ field.labelKey | translatePipe }}</span>
         <span class="c-input-wrapper" [class.c-input--invalid]="hasError(field.key)">
           <input

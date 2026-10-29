@@ -47,6 +47,7 @@ import { matchProductName } from '@utils/product-name-match.util'
 import { ProductNameMatcherService, type NameMatchItem } from '@services/product-name-matcher.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { findProductByName } from 'src/app/core/utils/product-name-error.util'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 /**
  * Phones get the modal quick-edit instead of the inline accordion — portrait (≤767px) and,
@@ -61,6 +62,7 @@ const MAX_ROW_SUGGESTIONS = 5
   selector: 'app-recipe-ingredients-table',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,

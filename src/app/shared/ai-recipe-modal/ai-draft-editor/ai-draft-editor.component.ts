@@ -16,6 +16,7 @@ import {
   CdkDragPlaceholder
 } from '@angular/cdk/drag-drop'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 export interface DraftIngredient {
   id: number
@@ -36,6 +37,7 @@ export interface DraftWorkflowItem {
   selector: 'app-ai-draft-editor',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     SelectOnFocusDirective,
     CommonModule,
     FormsModule,

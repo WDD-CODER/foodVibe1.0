@@ -21,6 +21,7 @@ import type { AiProductDraft, AiProductPatch } from '@models/ai-product-draft.mo
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
 import { CustomSelectComponent } from '../custom-select/custom-select.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 type InputMode = 'text' | 'image'
@@ -42,6 +43,7 @@ const CANONICAL_UNITS = [
   selector: 'app-ai-product-modal',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     CommonModule,
     FormsModule,
     LucideAngularModule,

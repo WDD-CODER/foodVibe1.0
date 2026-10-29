@@ -20,11 +20,13 @@ import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-selec
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { useSavingState } from 'src/app/core/utils/saving-state.util'
 import { ModalShellComponent } from '../modal-shell/modal-shell.component'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 @Component({
   selector: 'app-unit-creator-modal',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     CommonModule,
     FormsModule,
     LucideAngularModule,

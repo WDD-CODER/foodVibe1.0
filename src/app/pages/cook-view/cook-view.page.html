@@ -148,7 +148,7 @@
         <lucide-icon name="scale" [size]="18"></lucide-icon>
         <span>{{ 'recipe_calculated_by' | translatePipe }} <b>{{ scaledRow.name }}</b>:</span>
       </span>
-      <span class="cv-stepper">
+      <span class="cv-stepper" appNumberBox>
         <button type="button" (click)="stepScaledBannerAmount(-1)" [attr.aria-label]="'decrease' | translatePipe">
           <lucide-icon name="minus" [size]="16"></lucide-icon>
         </button>
@@ -373,7 +373,7 @@
               $index) {
               <div class="cv-ied" [class.is-changed]="ingredientChanged(i)">
                 <span class="cv-ied-name" [class.is-unlinked]="row.isUnlinked">{{ row.name }}</span>
-                <span class="cv-stepper">
+                <span class="cv-stepper" appNumberBox>
                   <button
                     type="button"
                     (click)="setIngredientAmount(i, getEditAmountStep(row.amount, -1, row.unit))"
@@ -502,7 +502,7 @@
                       </button>
                     </div>
                     } @if (settingByIngredientIndex_() === i) {
-                    <div class="cv-scale-form">
+                    <div class="cv-scale-form" appNumberBox>
                       <span class="cv-scale-form-label">
                         <lucide-icon name="scale" [size]="16"></lucide-icon>
                         {{ 'scale_recipe_to_ingredient' | translatePipe }}

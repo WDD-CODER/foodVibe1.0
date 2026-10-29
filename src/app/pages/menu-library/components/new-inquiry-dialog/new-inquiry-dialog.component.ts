@@ -22,6 +22,7 @@ import { NOTE_MAX_LENGTH } from '@schemas/entities'
 import { isValidClientPhone } from 'src/app/core/utils/event-stage-ui.util'
 import type { MenuEvent } from '@models/menu-event.model'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 const NAME_MAX = 200
 const NOTE_MAX = NOTE_MAX_LENGTH
@@ -34,7 +35,14 @@ const NOTE_MAX = NOTE_MAX_LENGTH
 @Component({
   selector: 'app-new-inquiry-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, CustomSelectComponent, DateFieldComponent, SelectOnFocusDirective],
+  imports: [
+    NumberBoxDirective,
+    FormsModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    DateFieldComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './new-inquiry-dialog.component.html',
   styleUrl: './new-inquiry-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

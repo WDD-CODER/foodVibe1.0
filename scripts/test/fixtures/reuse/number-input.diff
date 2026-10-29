@@ -1,0 +1,7 @@
+diff --git a/src/app/pages/orders/orders.component.html b/src/app/pages/orders/orders.component.html
+--- a/src/app/pages/orders/orders.component.html
++++ b/src/app/pages/orders/orders.component.html
+@@ -10,0 +11,3 @@
++<div class="qty-box" appNumberBox>
++<input type="number" [value]="qty()" />
++</div>

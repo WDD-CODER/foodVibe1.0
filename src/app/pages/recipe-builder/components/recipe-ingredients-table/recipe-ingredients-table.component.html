@@ -3,7 +3,7 @@
     <div class="col-drag"></div>
     <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
     <div class="col-unit">{{ 'unit' | translatePipe }}</div>
-    <div class="col-quantity">{{ 'quantity' | translatePipe }}</div>
+    <div class="col-quantity" appNumberBox>{{ 'quantity' | translatePipe }}</div>
     <div class="col-percent">{{ 'percent' | translatePipe }}</div>
     <div class="col-cost">{{ 'cost' | translatePipe }}</div>
     <!-- <div class="col-actions">{{ 'actions' | translatePipe }}</div> -->
@@ -130,7 +130,7 @@
           />
         </div>
 
-        <div class="col-quantity">
+        <div class="col-quantity" appNumberBox>
           <div class="quantity-controls">
             <button
               type="button"

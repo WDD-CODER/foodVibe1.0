@@ -8,7 +8,7 @@
   <h3 class="list-title">{{ 'metadata_event_types_title' | translatePipe }}</h3>
   <ul class="coef-list">
     @for (term of eventTypes_(); track term.key) {
-      <li class="coef-row">
+      <li class="coef-row" appNumberBox>
         <span class="coef-name">{{ term.key | translatePipe }}</span>
         @if (!canEdit(term)) {
           <lucide-icon
@@ -86,7 +86,7 @@
   <h3 class="list-title">{{ 'metadata_serving_types_title' | translatePipe }}</h3>
   <ul class="coef-list">
     @for (term of servingTypes_(); track term.key) {
-      <li class="coef-row">
+      <li class="coef-row" appNumberBox>
         <span class="coef-name">{{ term.key | translatePipe }}</span>
         @if (!canEdit(term)) {
           <lucide-icon
