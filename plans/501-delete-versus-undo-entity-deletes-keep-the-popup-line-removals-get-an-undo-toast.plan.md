@@ -42,7 +42,7 @@ Deleting things behaves differently from screen to screen: some ask in a popup, 
   - `product-import removeRow` — line; row re-inserted at index, deleted counter restored.
   - `venue-form removeHoursRow` / `removeInfraRow` — line; same control re-inserted.
   - `recipe-builder removeIngredient`, `deleteStep` (recipe-workflow `removeItem` output), `removeBaselineRow` (new insert/take methods in `recipe-logistics-picker.service.ts`) — line; ingredient placeholder row is dropped on undo; step numbers re-ordered for preparations.
-  - `ai-draft-editor removeIngredient` (single handler for the row delete; the plan said 3, only one remove handler exists), `ai-product-modal removeCategory` / `removeAllergen` — line; restored at index.
+  - `ai-draft-editor removeIngredient` + `removeWorkflowItem` (the 3 row-delete buttons; round 2 added the workflow handler), `ai-product-modal removeCategory` / `removeAllergen` — line; restored at index.
   - `cook-view removeIngredient` — line (local recipe copy); restored at index.
   - `menu-intelligence.page removeSection` / `removeItem` — line; restore into the same section (skipped if the section was removed since).
   - `scaling-chip onRemove` — neither: it only emits `remove`; the handler is in `recipe-header` (out of scope, no confirm there, no toast added) — seen.
@@ -132,3 +132,4 @@ append the path to the scope block above and retry.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): quick removes in a row → the latest remove wins; toast duration unchanged (2 s). Follow-up candidate: a longer undo toast in UserMsgService.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): cancel/leave with the toast showing → dismiss the toast when the owning component is destroyed.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): [human] checks → after the run; 502 proceeds on 501's merge.
+- round 2: removePhoto undo spec added to event-closing-dialog.component.spec.ts; test:ci 1634 SUCCESS, build 0, lint 0 errors, arch+reuse ok. log-query shows 2 CORS 500 errors from /api/v1/data/DICTIONARY_OVERRIDES (server log, not from this change).

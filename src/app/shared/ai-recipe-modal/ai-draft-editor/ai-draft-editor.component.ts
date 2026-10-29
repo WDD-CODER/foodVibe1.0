@@ -196,7 +196,19 @@ export class AiDraftEditorComponent {
   }
 
   protected removeWorkflowItem(index: number): void {
+    const removed = this.workflowItems_()[index]
+    if (!removed) return
     this.workflowItems_.update((list) => list.filter((_, i) => i !== index))
+    this.userMsg.onLineRemoved(
+      this.translation.translate('line_removed'),
+      () =>
+        this.workflowItems_.update((list) => {
+          const next = [...list]
+          next.splice(Math.min(index, next.length), 0, removed)
+          return next
+        }),
+      this.destroyRef
+    )
   }
 
   protected onDropWorkflow(event: CdkDragDrop<DraftWorkflowItem[]>): void {
