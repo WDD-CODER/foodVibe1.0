@@ -8,6 +8,7 @@ import { EventNotesLogComponent } from './event-notes-log.component'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { UserService } from '@services/user.service'
+import { UserMsgService } from '@services/user-msg.service'
 import type { MenuEvent } from '@models/menu-event.model'
 
 describe('EventNotesLogComponent', () => {
@@ -35,6 +36,7 @@ describe('EventNotesLogComponent', () => {
     store = signal<MenuEvent[]>([event])
     pipeline = jasmine.createSpyObj<EventPipelineService>('EventPipelineService', ['addNote', 'editNote', 'deleteNote'])
     pipeline.addNote.and.resolveTo({ ok: true, event })
+    pipeline.deleteNote.and.resolveTo({ ok: true, event })
     await TestBed.configureTestingModule({
       imports: [EventNotesLogComponent, LucideAngularModule.pick({ ...TEST_LUCIDE_ICONS, MessageSquare })],
       providers: [
@@ -87,5 +89,28 @@ describe('EventNotesLogComponent', () => {
     await fixture.whenStable()
     expect(pipeline.addNote).toHaveBeenCalledWith('e1', 'חדשה')
     expect(el.querySelector<HTMLTextAreaElement>('.notes-add textarea')!.value).toBe('')
+  })
+
+  it('deletes a note at once (no popup) and the undo toast re-creates it through addNote', async () => {
+    const userMsg = TestBed.inject(UserMsgService)
+    // order is newest first: n3 (u2), n2 (u1), n1 (u1) -> second delete button is n2
+    el.querySelectorAll<HTMLButtonElement>('.note-delete')[0].click()
+    // not whenStable(): the 2 s toast timer would keep the zone unstable and clear the toast
+    await new Promise((resolve) => setTimeout(resolve))
+    expect(pipeline.deleteNote).toHaveBeenCalledWith('e1', 'n2')
+    const msg = userMsg.msg_()
+    expect(msg?.undo).toBeDefined()
+    msg!.undo!()
+    await new Promise((resolve) => setTimeout(resolve))
+    expect(pipeline.addNote).toHaveBeenCalledWith('e1', 'השנייה')
+    userMsg.CloseMsg()
+  })
+
+  it('does not show the undo toast when the server refuses the delete', async () => {
+    pipeline.deleteNote.and.resolveTo({ ok: false, errorKey: 'server_error' } as never)
+    const userMsg = TestBed.inject(UserMsgService)
+    el.querySelectorAll<HTMLButtonElement>('.note-delete')[0].click()
+    await fixture.whenStable()
+    expect(userMsg.msg_()).toBeNull()
   })
 })

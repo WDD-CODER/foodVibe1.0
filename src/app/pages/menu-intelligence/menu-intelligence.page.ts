@@ -503,7 +503,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected removeSection(index: number): void {
+    const removed = this.sectionsArray.at(index)
     this.sectionsArray.removeAt(index)
+    this.userMsg.onLineRemoved(
+      this.translation.translate('line_removed'),
+      () => this.sectionsArray.insert(Math.min(index, this.sectionsArray.length), removed),
+      this.destroyRef
+    )
   }
 
   protected getItemsArray(sectionIndex: number): FormArray<FormGroup> {
@@ -534,7 +540,19 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected removeItem(sectionIndex: number, itemIndex: number): void {
-    this.getItemsArray(sectionIndex).removeAt(itemIndex)
+    const items = this.getItemsArray(sectionIndex)
+    const removed = items.at(itemIndex)
+    const section = this.sectionsArray.at(sectionIndex)
+    items.removeAt(itemIndex)
+    this.userMsg.onLineRemoved(
+      this.translation.translate('line_removed'),
+      () => {
+        // The section may have been removed since; restore only into the same section.
+        if (!this.sectionsArray.controls.includes(section)) return
+        items.insert(Math.min(itemIndex, items.length), removed)
+      },
+      this.destroyRef
+    )
   }
 
   protected isRecipeDish(recipe: Recipe): boolean {

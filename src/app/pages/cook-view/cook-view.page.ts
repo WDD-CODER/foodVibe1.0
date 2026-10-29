@@ -831,6 +831,20 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected removeIngredient(index: number): void {
+    const removed = this.recipe_()?.ingredients[index]
+    if (removed) {
+      this.userMsg.onLineRemoved(
+        this.translation.translate('line_removed'),
+        () =>
+          this.recipe_.update((r) => {
+            if (!r) return r
+            const ingredients = [...r.ingredients]
+            ingredients.splice(Math.min(index, ingredients.length), 0, removed)
+            return { ...r, ingredients }
+          }),
+        this.destroyRef
+      )
+    }
     this.recipe_.update((r) => {
       if (!r) return r
       return {

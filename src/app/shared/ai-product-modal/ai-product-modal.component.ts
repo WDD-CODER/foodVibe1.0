@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { HttpErrorResponse } from '@angular/common/http'
@@ -62,6 +62,7 @@ export class AiProductModalComponent implements OnInit {
   private readonly gemini_ = inject(GeminiService)
   private readonly userMsg_ = inject(UserMsgService)
   private readonly translation_ = inject(TranslationService)
+  private readonly destroyRef_ = inject(DestroyRef)
   private readonly metadataRegistry_ = inject(MetadataRegistryService)
 
   /** Fixed list, so the picker has no add-option row. */
@@ -187,7 +188,17 @@ export class AiProductModalComponent implements OnInit {
   }
 
   protected removeCategory(cat: string): void {
+    const index = this.draft_()?.categories.indexOf(cat) ?? -1
     this.draft_.update((d) => (d ? { ...d, categories: d.categories.filter((c) => c !== cat) } : d))
+    if (index < 0) return
+    this.userMsg_.onLineRemoved(
+      this.translation_.translate('line_removed'),
+      () =>
+        this.draft_.update((d) =>
+          d && !d.categories.includes(cat) ? { ...d, categories: this.insertAt_(d.categories, index, cat) } : d
+        ),
+      this.destroyRef_
+    )
   }
 
   protected async addAllergen(): Promise<void> {
@@ -200,7 +211,23 @@ export class AiProductModalComponent implements OnInit {
   }
 
   protected removeAllergen(al: string): void {
+    const index = this.draft_()?.allergens.indexOf(al) ?? -1
     this.draft_.update((d) => (d ? { ...d, allergens: d.allergens.filter((a) => a !== al) } : d))
+    if (index < 0) return
+    this.userMsg_.onLineRemoved(
+      this.translation_.translate('line_removed'),
+      () =>
+        this.draft_.update((d) =>
+          d && !d.allergens.includes(al) ? { ...d, allergens: this.insertAt_(d.allergens, index, al) } : d
+        ),
+      this.destroyRef_
+    )
+  }
+
+  private insertAt_(list: string[], index: number, value: string): string[] {
+    const next = [...list]
+    next.splice(Math.min(index, next.length), 0, value)
+    return next
   }
 
   // ─── Create mode ─────────────────────────────────────────────────

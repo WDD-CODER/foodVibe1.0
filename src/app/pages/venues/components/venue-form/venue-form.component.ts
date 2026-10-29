@@ -214,7 +214,7 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   }
 
   protected removeInfraRow(index: number): void {
-    this.infraArray.removeAt(index)
+    this.removeRowWithUndo_(this.infraArray, index)
   }
 
   protected addHoursRow(): void {
@@ -227,7 +227,17 @@ export class VenueFormComponent implements OnInit, PendingChangesComponent {
   }
 
   protected removeHoursRow(index: number): void {
-    this.hoursArray.removeAt(index)
+    this.removeRowWithUndo_(this.hoursArray, index)
+  }
+
+  private removeRowWithUndo_(array: FormArray, index: number): void {
+    const removed = array.at(index)
+    array.removeAt(index)
+    this.userMsg.onLineRemoved(
+      this.translation.translate('line_removed'),
+      () => array.insert(Math.min(index, array.length), removed),
+      this.destroyRef
+    )
   }
 
   /** Error key under the name field: duplicate name (after leaving the field) or required. */

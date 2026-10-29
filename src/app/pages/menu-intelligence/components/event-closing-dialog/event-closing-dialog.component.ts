@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core'
 import { firstValueFrom } from 'rxjs'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
@@ -63,6 +63,7 @@ export class EventClosingDialogComponent {
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly translation = inject(TranslationService)
   private readonly userMsg = inject(UserMsgService)
+  private readonly destroyRef = inject(DestroyRef)
   private readonly logging = inject(LoggingService)
 
   // 2. INPUTS
@@ -138,7 +139,24 @@ export class EventClosingDialogComponent {
   }
 
   protected removePhoto(key: string, url: string): void {
+    const index =
+      this.closing_()
+        ?.suppliers.find((r) => rowKey(r) === key)
+        ?.photos.indexOf(url) ?? -1
     this.updateRow(key, (row) => ({ ...row, photos: row.photos.filter((p) => p !== url) }))
+    if (index < 0) return
+    // Undo goes through the same updateRow / commit path that saved the removal.
+    this.userMsg.onLineRemoved(
+      this.translation.translate('photo_removed'),
+      () =>
+        this.updateRow(key, (row) => {
+          if (row.photos.includes(url)) return row
+          const photos = [...row.photos]
+          photos.splice(Math.min(index, photos.length), 0, url)
+          return { ...row, photos }
+        }),
+      this.destroyRef
+    )
   }
 
   protected async addPhotos(key: string, files: FileList | null): Promise<void> {
