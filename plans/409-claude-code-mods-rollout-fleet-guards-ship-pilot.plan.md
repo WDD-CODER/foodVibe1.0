@@ -147,3 +147,12 @@ Goal: a glance tells the Human what the agent is doing, what comes next, and whe
 
 ## Out of Scope
 Changing the Planner-Worker rules themselves; Cursor-side enforcement; paid features.
+
+## Execution Notes
+
+- Orchestrator readiness (2026-10-29): human items S2b, S3a, S3b, S4 and all [human] Done-when items → the Human runs them; the builder skips them.
+- Orchestrator readiness (2026-10-29): K1-K14 and S5 live in other repos (kit, deliverable) outside the Read-Write Scope → builder skips them; not ticked here.
+- Orchestrator readiness (2026-10-29): Stage 6 (S6a-S6f) sign-off and Stage 5 kit PR merge not recorded → builder does not start Stage 6.
+- Orchestrator readiness (2026-10-29): patch route (git am) → superseded by kit v1.10.0 and the kit marketplace; no patch-mode changes.
+- Orchestrator readiness (2026-10-29): dependency of 410 on 409 Stage 6 → none; independent.
+- Orchestrator readiness (2026-10-29): error/leave/cancel behaviour of panel and buttons → simplest behaviour, nothing extra.

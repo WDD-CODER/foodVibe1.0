@@ -109,3 +109,12 @@ Expected cost: evidence 0; edit ~30–60k; evals 6 runs × ~20–40k → **~150�
 
 ## Out of Scope
 The weekly Scout and its HTML page (plan 411); kit-sync itself (plan 392).
+
+## Execution Notes
+
+- Orchestrator readiness (2026-10-29): S8 (scheduled task) and S10, and both [human] Done-when items → the nightly job is intentionally not running; stay open, no task registered, plan stays open after the auto items.
+- Orchestrator readiness (2026-10-29): kit checkout dirty and not on main → work only in a fresh worktree of origin/main on branch feat/410-skill-improver; never touch the dirty checkout; log the deviation.
+- Orchestrator readiness (2026-10-29): S0 spike finds no per-turn token usage → stop at S0, record findings in the plan, escalate; do not build S1-S7.
+- Orchestrator readiness (2026-10-29): S7 test skill and PR → cssLayer; open the PR only if after > before; keep the 400k cap.
+- Orchestrator readiness (2026-10-29): prerequisite plans 392 and 393 → treated as merged (.kit/install.json shows kit 1.10.0).
+- Orchestrator readiness (2026-10-29): ordering with 409 → 410 runs after 409; do not touch kit files 409 edits.
