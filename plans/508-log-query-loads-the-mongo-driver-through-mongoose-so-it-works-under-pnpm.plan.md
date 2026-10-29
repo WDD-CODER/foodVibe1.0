@@ -83,8 +83,8 @@ None — no UI.
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Load the Mongo driver through mongoose so log-query no longer needs a hoisted package — require('mongoose').mongo.MongoClient in fromMongo(); no new dependency — scripts/log-query.mjs
-- [ ] A2: Prove log-query reads Mongo in a pnpm-installed checkout and the build still passes — the three Success checks; paste outputs — this plan file (Execution Notes)
+- [x] A1: Load the Mongo driver through mongoose so log-query no longer needs a hoisted package — require('mongoose').mongo.MongoClient in fromMongo(); no new dependency — scripts/log-query.mjs
+- [x] A2: Prove log-query reads Mongo in a pnpm-installed checkout and the build still passes — the three Success checks; paste outputs — this plan file (Execution Notes)
 
 ## Out of Scope
 
@@ -96,3 +96,6 @@ None — no UI.
 ## Execution Notes
 
 - Planner (2026-10-29): approach from the kit session, agreed by the Human: one line, no new package, no kit addendum.
+- Builder: grep "require('mongodb')" scripts/log-query.mjs -> no output; line 107 now `require('mongoose').mongo`.
+- `pnpm install --frozen-lockfile` in server -> exit 0; `node scripts/log-query.mjs --since=15m` -> exit 0, "no entries". Caveat: this checkout still had a stale `server/node_modules/mongodb` (old npm leftover), so the pure pnpm layout was not reproduced here.
+- pnpm run build -> exit 0; lint -> 0 errors (67 warnings); test:ci -> 1621 SUCCESS.

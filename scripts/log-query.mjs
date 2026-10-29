@@ -104,7 +104,7 @@ async function confirmRemote() {
 async function fromMongo() {
   const remote = has('remote')
   const require = createRequire(resolve(ROOT, 'server', 'package.json'))
-  const { MongoClient } = require('mongodb')
+  const { MongoClient } = require('mongoose').mongo
   const { config } = require('dotenv')
   config({ path: resolve(ROOT, 'server', '.env') })
   config({ path: resolve(ROOT, '.env') })
