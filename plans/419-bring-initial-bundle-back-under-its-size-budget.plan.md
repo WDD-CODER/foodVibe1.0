@@ -40,7 +40,7 @@ All root modals are already behind `@defer` (plan 312), so the remaining wins ar
     "Initial total" line from the build output (target ≤ 550 kB; if only the fallback in A4 was used, say so).
   - [auto] `ng test` passes.
   - [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-  - [human] Dashboard and recipe builder load and work as before: header menus, tab chips scroll, the + button, and
+  - [x] [human] Dashboard and recipe builder load and work as before: header menus, tab chips scroll, the + button, and
     opening a recipe all respond as usual.
 
 ## Execution Mode
@@ -137,3 +137,4 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`. Re-measure be
 - Orchestrator readiness (2026-10-29): Apply A4 (raise maximumWarning to measured + 10 kB, rounded up to 10 kB) or keep 560 kB? → Apply A4 only if the re-measured Initial total is over 550 kB; give the one-line reason in the commit and in Execution Notes.
 - Run run-497-419 (2026-10-29), re-check: Step 0 ran (`scope-check --drift` showed only this plan's own commits `caa41bcb`, `6c86105f`, already on main); re-measured with `pnpm run build` -> exit 0, `Initial total 552.10 kB`, no initial-budget warning. Snapshot moved to `c5e69166`. No code changed.
 - A4 applied per the readiness answer (552.10 kB is over the 550 kB target): `angular.json` initial `maximumWarning` 560kB -> 570kB in all three configurations (production, local-prod and the third prod-like one), i.e. 552.10 + 10 = 562.10, rounded up to 570. Reason: the remaining weight is Angular/router/zone and the always-visible shell; cutting more would need a visible change, which the plan forbids.
+- Human validation (2026-10-29): dashboard + recipe builder checks (header menus, tab-chip scroll, + button, confirm popup, opening a recipe) → `done` by the Human on localhost:4200.
