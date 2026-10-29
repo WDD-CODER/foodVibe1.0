@@ -1,6 +1,6 @@
 # Plan 509 — Classify the native-dialog test fixture so the rules check passes again
 
-Status: draft
+Status: active
 Depends-on: none
 Snapshot: c1a54f6f8b43884ce28b668deebce6ee74c0223d
 
