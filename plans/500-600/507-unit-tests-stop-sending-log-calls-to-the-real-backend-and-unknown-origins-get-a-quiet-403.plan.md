@@ -134,4 +134,5 @@ Runs only when `scope-check.mjs --drift` reports `REALITY: drift`: re-read `logg
 - Finding: with only the logging switch, test:ci still produced 3 `server.unhandled` CORS entries (path `/api/v1/data/DICTIONARY_OVERRIDES/global`, at 09:03:18-19Z) from specs using the real TranslationService/HttpStorageAdapter via HttpClient. Fix inside scope: `environment.test.ts` also points `apiUrl`/`authApiUrl` at `http://127.0.0.1:1` (closed port). Second `test:ci` -> exit 0, 1600 SUCCESS; `log-query --since=2m --event=server.unhandled` -> no entries. 3000 was up.
 - `log-query --since=plan-start --level=error` still lists those 3 entries (+ their http.request.failed), all from the first test:ci run before the apiUrl fix; none after 09:03:19Z.
 - Server: `cd server && pnpm exec vitest run test/cors-origin.test.js` -> 4 passed (run locally as an extra; full `server-tests` job is the PR evidence).
+- Planner (2026-10-29): PR #475 GitHub `server-tests` job -> pass (run 40850960282); all 10 PR checks green. Merged as `b806b497`.
 - scope-check --drift -> REALITY: clean.
