@@ -91,48 +91,15 @@
 - [x] S9: Specs for the table, search and matcher as listed in Done-when; update the plan-463 spec "never sends a text-only line to the AI step" to "sends a text-only line for options only and never links it" — recipe-ingredients-table.component.spec.ts, ingredient-search.component.spec.ts, product-name-matcher.service.spec.ts
 - [ ] V1: Build, run every listed test, replay the cards in the browser and write the run file — `npx ng build`, the `ng test` includes, the server tests, the grep, log-query; record evidence, decisions and the five cards — docs/mvp/runs/490.md
 
-### Plan 499 — Number box: tap anywhere on it to edit the whole number (`plans/499-number-box-tap-anywhere-to-edit-the-whole-number.plan.md`)
-
-- [ ] N1: List every number box where a tap misses the number today and record the list — reality check of the containers named in the Problem Statement, plus any the brief missed — this plan file
-- [ ] N2: Build one shared "tap the box, edit the whole number" behaviour that ignores buttons inside the box and disabled boxes — container directive (or label wrapper) next to the select-all directive, with its spec — src/app/core/directives/number-box.directive.ts, src/app/core/directives/number-box.directive.spec.ts
-- [ ] N3: Make the pricing meter and the counter value cell use it, including the lock-icon and suffix cases — pricing-meter, shared/counter — src/app/pages/menu-intelligence/components/pricing-meter/**, src/app/shared/counter/**
-- [ ] N4: Make the product form and the purchase-option row use it — buy price, waste %, yield, purchase options — src/app/pages/inventory/components/product-form/**, src/app/pages/inventory/components/product-import/**
-- [ ] N5: Make the recipe builder quantity and time cells use it without breaking Enter-to-next-row — recipe-ingredients-table, recipe-workflow — src/app/pages/recipe-builder/components/**
-- [ ] N6: Make the cook-view amount and clock boxes and the menu guest chip use it — src/app/pages/cook-view/cook-view.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.html
-- [ ] N7: Make the settings, metadata, event dialogs and AI / quick-add / unit modals' number boxes use it — the remaining containers from N1 — the folders in scope
-- [ ] N8: Warn when a number input is added outside a number box, and register the family — `reuse-lint` rule with fixtures; new `number-box` family with its remaining copies — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
-- [ ] N9: Run the full checks and paste the output — `ng build`, headless `ng test`, reuse-lint, scope-check, log-query — Execution Notes
-
-### Plan 500 — One stepper (+/−) for every number: same hold-to-repeat, steps and minimum (`plans/500-one-stepper-for-every-number-same-hold-to-repeat-steps-and-minimum.plan.md`)
-
-- [ ] T1: List every +/− control around a number and what each one does today, and record the list — hold or click only, step size, minimum, disabled look — this plan file
-- [ ] T2: Make the shared counter hold-to-repeat with pointer events so it works on touch and mouse, and add specs — release stops the repeat, the minimum stops it and disables the minus — src/app/shared/counter/**
-- [ ] T3: Decide extend-or-sibling for the counter and add the page skins as variants — cook-view ink set and menu-intelligence paper skin — src/app/shared/counter/**
-- [ ] T4: Move the menu guest count onto the shared stepper and delete its own hold code — src/app/pages/menu-intelligence/**
-- [ ] T5: Move the cook-view amount steppers onto it — src/app/pages/cook-view/**
-- [ ] T6: Move the recipe ingredient quantity and the labor / cook time steppers onto it — src/app/pages/recipe-builder/components/recipe-ingredients-table/**, src/app/pages/recipe-builder/components/recipe-workflow/**
-- [ ] T7: Warn when a minus/plus pair is added next to a number input outside the stepper, and register the family — `reuse-lint` rule with fixtures; new `stepper` family with its remaining copies — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
-- [ ] T8: Run the full checks and paste the output — `ng build`, headless `ng test`, reuse-lint, scope-check, log-query — Execution Notes
-
-### Plan 501 — Delete versus undo: entity deletes keep the popup, line removals get an undo toast (`plans/501-delete-versus-undo-entity-deletes-keep-the-popup-line-removals-get-an-undo-toast.plan.md`)
-
-- [ ] D1: List every remove / delete handler named in the Problem Statement, mark each as entity, line or neither, and record it — include the two open calls (`team-tab removeMember`, `event-notes-log`) — this plan file
-- [ ] D2: Give line removals one shared way to remove at once and show an undo toast that puts the line back in the same place — small helper next to the existing toast service, with its spec — src/app/core/services/user-msg.service.ts
-- [ ] D3: Use it for the form rows in the product form, product import, venue form and recipe builder — purchase options, import rows, hours / infrastructure rows, baseline rows, ingredient and workflow rows — the page folders in scope
-- [ ] D4: Use it for the rows inside the AI modals, the scaling chip, cook-view ingredients, menu sections and prep sheets — src/app/shared/ai-recipe-modal/**, src/app/shared/ai-product-modal/**, src/app/shared/scaling-chip/**, src/app/pages/cook-view/**, src/app/pages/menu-intelligence/**
-- [ ] D5: Make deleting an event note and an event photo undoable, re-creating the saved item on undo, with specs — event-notes-log, event-closing-dialog — src/app/pages/menu-intelligence/components/event-notes-log/**, src/app/pages/menu-intelligence/components/event-closing-dialog/**
-- [ ] D6: Keep the confirm popup for entity deletes and for removing a team member, and fix any entity delete that skips it — src/app/pages/settings/components/team-tab/** and the handlers marked entity in D1
-- [ ] D7: Run the full checks and paste the output — `ng build`, headless `ng test`, scope-check, log-query — Execution Notes
-
 ### Plan 502 — Consistency sweep: one date field, one number format, growing textareas and one save-busy state (`plans/502-consistency-sweep-one-date-field-one-number-format-growing-textareas-and-one-save-busy-state.plan.md`)
 
-- [ ] C1: Check the four lists in the Problem Statement against today's code and record the real ones — native dates, `| number` and `toFixed` uses, textareas, save buttons without a busy flag — this plan file
-- [ ] C2: Replace the native date inputs with the shared date field and add a from / to variant only if the list filters need it — recipe-book-list, menu-library-list, menu-intelligence page — src/app/shared/date-field/**, the page folders in scope
-- [ ] C3: Show numbers through one rule: pick the pipe for quantity, money and percent, move the other uses onto it and remove `toFixed` in templates — record the rule and any value that changes — src/app/shared/ai-menu-modal/**, src/app/shared/ai-product-modal/**, src/app/pages/recipe-builder/components/recipe-ingredients-table/**
-- [ ] C4: Make every multi-line free-text box grow as the user types, and list the ones that stay fixed — extend the directive's selector so it cannot be forgotten — src/app/core/directives/textarea-auto-grow.directive.ts, the templates in scope
-- [ ] C5: Give every save button one saving state: disabled with a busy label while it runs, enabled again on error — one signal name and one button state; fix the ten screens without a flag — src/styles.scss, the dialogs and tabs in scope
-- [ ] C6: Warn when a native date input, a template `toFixed` or a bare textarea is added, and register the families — `reuse-lint` rules with fixtures; update the `form-field` and `engine-classes` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
-- [ ] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
+- [x] C1: Check the four lists in the Problem Statement against today's code and record the real ones — native dates, `| number` and `toFixed` uses, textareas, save buttons without a busy flag — this plan file
+- [x] C2: Replace the native date inputs with the shared date field and add a from / to variant only if the list filters need it — recipe-book-list, menu-library-list, menu-intelligence page — src/app/shared/date-field/**, the page folders in scope
+- [x] C3: Show numbers through one rule: pick the pipe for quantity, money and percent, move the other uses onto it and remove `toFixed` in templates — record the rule and any value that changes — src/app/shared/ai-menu-modal/**, src/app/shared/ai-product-modal/**, src/app/pages/recipe-builder/components/recipe-ingredients-table/**
+- [x] C4: Make every multi-line free-text box grow as the user types, and list the ones that stay fixed — extend the directive's selector so it cannot be forgotten — src/app/core/directives/textarea-auto-grow.directive.ts, the templates in scope
+- [x] C5: Give every save button one saving state: disabled with a busy label while it runs, enabled again on error — one signal name and one button state; fix the ten screens without a flag — src/styles.scss, the dialogs and tabs in scope
+- [x] C6: Warn when a native date input, a template `toFixed` or a bare textarea is added, and register the families — `reuse-lint` rules with fixtures; update the `form-field` and `engine-classes` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
+- [x] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
 
 - [ ] A1: Delete the 140 old per-branch state files from git and the local pointer file so no agent reads stale status again — git rm the 140 tracked state files under docs/; delete the untracked pointer file under .claude/ — docs/ (the old per-branch state files)
 - [ ] A2: Rebuild the two kit-override files from kit v1.9.0 and put only the reuse layer back, so they stop allowing a state file and gain the kit's newer checks — render placeholders by hand; keep import + --reuse dispatch; keep ## Reuse Check block; update override reasons — scripts/scope-check.mjs, .claude/references/prd-template.md, kit.config.json
