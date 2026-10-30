@@ -3,7 +3,7 @@
 Status: draft
 Track: code
 Depends-on: 499, 500, 501, 502 (PR #487 merged into main)
-Snapshot: e138dbfd00917081f9ae965d0fa711408cefde3a
+Snapshot: 3224c973f7fba595ca50cf92ed58dc8783632e94
 
 ## Prerequisites
 
@@ -135,11 +135,11 @@ the running app (or a spec) before changing code. Read how menu intelligence kee
 
 ## Atomic Sub-tasks
 
-- [ ] A1: Keep the undo toast on screen for 30 seconds so a removed line can still be brought back — UNDO_DURATION_MS for onLineRemoved, spec — src/app/core/services/user-msg.service.ts, src/app/core/services/user-msg.service.spec.ts
-- [ ] A2: Show a restored step or ingredient at once after undo, without needing another click — OnPush lists react to form-array changes; workflow, ingredients table, logistics baseline; specs — src/app/pages/recipe-builder/components/recipe-workflow/**, src/app/pages/recipe-builder/components/recipe-ingredients-table/**, src/app/pages/recipe-builder/recipe-builder.page.ts
-- [ ] A3: Make holding + or − climb by ones, then tens, then hundreds, so any amount is easy to reach — repeat count from StepHoldDirective, count-based tiers with snap, base step per unit, specs — src/app/core/utils/quantity-step.util.ts, src/app/shared/counter/step-hold.directive.ts, src/app/shared/counter/counter.component.ts, src/app/pages/cook-view/cook-view.page.ts, src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/pages/recipe-builder/components/**
-- [ ] A4: Let Enter after tapping the unit text move to the next ingredient row, like it does from the quantity — src/app/pages/recipe-builder/components/recipe-ingredients-table/**
-- [ ] A5: Allow only one empty ingredient row, so Enter or the add button never stacks blank rows — guard in addNewIngredientRow, focus the empty row, spec — src/app/pages/recipe-builder/recipe-builder.page.ts, src/app/pages/recipe-builder/recipe-builder.page.spec.ts
+- [x] A1: Keep the undo toast on screen for 30 seconds so a removed line can still be brought back — UNDO_DURATION_MS for onLineRemoved, spec — src/app/core/services/user-msg.service.ts, src/app/core/services/user-msg.service.spec.ts
+- [x] A2: Show a restored step or ingredient at once after undo, without needing another click — OnPush lists react to form-array changes; workflow, ingredients table, logistics baseline; specs — src/app/pages/recipe-builder/components/recipe-workflow/**, src/app/pages/recipe-builder/components/recipe-ingredients-table/**, src/app/pages/recipe-builder/recipe-builder.page.ts
+- [x] A3: Make holding + or − climb by ones, then tens, then hundreds, so any amount is easy to reach — repeat count from StepHoldDirective, count-based tiers with snap, base step per unit, specs — src/app/core/utils/quantity-step.util.ts, src/app/shared/counter/step-hold.directive.ts, src/app/shared/counter/counter.component.ts, src/app/pages/cook-view/cook-view.page.ts, src/app/pages/menu-intelligence/menu-intelligence.page.ts, src/app/pages/recipe-builder/components/**
+- [x] A4: Let Enter after tapping the unit text move to the next ingredient row, like it does from the quantity — src/app/pages/recipe-builder/components/recipe-ingredients-table/**
+- [x] A5: Allow only one empty ingredient row, so Enter or the add button never stacks blank rows — guard in addNewIngredientRow, focus the empty row, spec — src/app/pages/recipe-builder/recipe-builder.page.ts, src/app/pages/recipe-builder/recipe-builder.page.spec.ts
 
 ## Open Questions
 
@@ -169,3 +169,7 @@ All [auto] items pass and the Human answers the [human] cards.
 - Orchestrator readiness (2026-10-30): pointer leaves the button or pointercancel mid-hold → treat as a release; the repeat count resets to the base step.
 - Orchestrator readiness (2026-10-30): user navigates away while the 30 s toast is open → the toast is dismissed with its owner and the removal stays.
 - Orchestrator readiness (2026-10-30): typed value with extra decimals (100.15 g) then hold + → g/ml base stays 1; the first step snaps to the tier step.
+- 2026-10-30 Builder: build exit 0; lint 0 errors; test:ci 1646 SUCCESS; scope-check --arch/--reuse exit 0; kit-manifest-check exit 0. `--drift` reports only the 499-502 commits this plan depends on (all merged), not a conflict.
+- Builder: StepHoldDirective now emits a number (0 first press, 1.. repeats); callers take `holdRepeat`. A4 is a capture-phase Enter listener on `.col-unit` in the ingredients table (the picker stops Enter itself).
+
+- Step 0 drift: the 4 drift commits (499-502) are the plan's own Depends-on, already merged; Snapshot moved to origin/main 3224c973 -> drift clean.

@@ -136,6 +136,10 @@ export class RecipeWorkflowComponent {
   editingPreparationNameAtRow_ = signal<number | null>(null)
 
   constructor() {
+    effect((onCleanup) => {
+      const sub = this.workflowFormArray().valueChanges.subscribe(() => this.arrayVersion_.update((v) => v + 1))
+      onCleanup(() => sub.unsubscribe())
+    })
     effect(() => {
       const idx = this.focusRowAt()
       if (idx === null || idx === undefined) return
@@ -150,9 +154,13 @@ export class RecipeWorkflowComponent {
     })
   }
 
+  /** Bumped on every change of the form array so rows inserted from outside (undo) are listed at once. */
+  private readonly arrayVersion_ = signal(0)
+
   protected workflowGroups_ = computed(() => {
     this.resetTrigger()
-    return this.workflowFormArray().controls as FormGroup[]
+    this.arrayVersion_()
+    return [...this.workflowFormArray().controls] as FormGroup[]
   })
 
   onDropStep(event: CdkDragDrop<FormGroup[]>): void {

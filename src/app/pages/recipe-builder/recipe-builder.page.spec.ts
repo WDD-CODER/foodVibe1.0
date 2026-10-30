@@ -107,4 +107,28 @@ describe('RecipeBuilderComponent', () => {
       expect(component.hasRealChanges()).toBeTrue()
     })
   })
+
+  describe('one empty ingredient row (plan 511)', () => {
+    it('add-row and Enter add nothing while an empty row exists, and focus it', async () => {
+      await createPage()
+      expect(component.ingredientsArray.length).toBe(1)
+      component.addNewIngredientRow()
+      component.addNewIngredientRow()
+      expect(component.ingredientsArray.length).toBe(1)
+      expect(
+        (
+          component as unknown as { focusIngredientSearchAtRow_: WritableSignal<number | null> }
+        ).focusIngredientSearchAtRow_()
+      ).toBe(0)
+    })
+
+    it('adds a row once the empty one has a name', async () => {
+      await createPage()
+      component.ingredientsArray.at(0).get('nameHebrew')?.setValue('מלח')
+      component.addNewIngredientRow()
+      expect(component.ingredientsArray.length).toBe(2)
+      component.addNewIngredientRow()
+      expect(component.ingredientsArray.length).toBe(2)
+    })
+  })
 })

@@ -137,27 +137,27 @@ export class CounterComponent implements AfterViewChecked {
     this.emitValue(clamped)
   }
 
-  protected decrement(continuousPress = false): void {
+  protected decrement(holdRepeat = 0): void {
     if (this.minusDisabled_()) return
     const current = this.value()
     const minV = this.minVal_()
     const opts = this.stepOptions()
     const merged: QuantityStepOptions = {
       ...(opts ?? {}),
-      ...(continuousPress ? { continuousPress: true } : {})
+      ...(holdRepeat > 0 ? { continuousPress: true, holdRepeat } : {})
     }
     const next = quantityDecrement(current, minV, merged)
     this.emitValue(next)
   }
 
-  protected increment(continuousPress = false): void {
+  protected increment(holdRepeat = 0): void {
     if (this.plusDisabled_()) return
     const current = this.value()
     const minV = this.minVal_()
     const opts = this.stepOptions()
     const merged: QuantityStepOptions = {
       ...(opts ?? {}),
-      ...(continuousPress ? { continuousPress: true } : {})
+      ...(holdRepeat > 0 ? { continuousPress: true, holdRepeat } : {})
     }
     let next = quantityIncrement(current, minV, merged)
     const maxV = this.maxVal_()
