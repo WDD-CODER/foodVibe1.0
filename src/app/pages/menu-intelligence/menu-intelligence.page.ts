@@ -9,6 +9,7 @@ import {
   OnInit,
   signal
 } from '@angular/core'
+import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
@@ -67,6 +68,8 @@ import { MenuPickerSearchService } from './services/menu-picker-search.service'
 import type { AiMenuDraft, MatchedMenu } from '@models/ai-menu-draft.model'
 import { VenueLinkChipComponent } from 'src/app/shared/venue-link-chip/venue-link-chip.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
+import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
 
 type MenuItemForm = {
   recipeId: string
@@ -86,8 +89,11 @@ type MenuSectionFormRaw = { _id?: string; name?: string; items?: MenuItemForm[] 
   selector: 'app-menu-intelligence-page',
   standalone: true,
   imports: [
+    NumberBoxDirective,
+    StepHoldDirective,
     SelectOnFocusDirective,
     CommonModule,
+    DateFieldComponent,
     ReactiveFormsModule,
     LucideAngularModule,
     TranslatePipe,
@@ -163,9 +169,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   protected readonly sectionCategories_ = this.menuSectionCategories.sectionCategories_
 
   /** Guest −/+ press-and-hold repeat (same timing as the shared counter). */
-  private static readonly GUEST_REPEAT_DELAY_MS = 500
-  private static readonly GUEST_REPEAT_INTERVAL_MS = 80
-  private guestHoldTimer_: ReturnType<typeof setTimeout> | null = null
 
   private readonly unsaved_ = useUnsavedChanges({ form: () => this.form_, isSubmitted: () => this.isSubmitted })
   /** For pendingChangesGuard: prevents re-triggering after a successful save */
@@ -273,7 +276,6 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.closeAllExportOverlays()
     this.heroFab.clearPageActions()
-    this.stopGuestHold()
   }
 
   ngAfterViewInit(): void {
@@ -285,89 +287,16 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
     const el = document.getElementById(`menu-focus-${field}`)
     if (el && typeof (el as HTMLInputElement).focus === 'function') {
       ;(el as HTMLInputElement).focus()
-      if (field === 'eventDate' && typeof (el as HTMLInputElement).showPicker === 'function') {
-        ;(el as HTMLInputElement).showPicker()
-      }
     } else if (el) el.focus()
   }
 
-  /** Open date picker and focus the date input (called from clickable date label). */
-  protected openDatePicker(): void {
-    this.dateDigitBuffer_.set('')
-    this.focusField('eventDate')
-  }
-
-  /** Format eventDate for display (DD/MM/YYYY or placeholder). */
-  protected getEventDateDisplay(): string {
-    const raw = this.form_.get('eventDate')?.value as string | undefined
-    if (!raw) return ''
-    const d = new Date(raw + 'T12:00:00')
-    if (Number.isNaN(d.getTime())) return raw
-    const day = String(d.getDate()).padStart(2, '0')
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const year = d.getFullYear()
-    return `${day}/${month}/${year}`
-  }
-
-  private dateDigitBuffer_ = signal('')
-
-  /** Handle digit-only input for date: first 2 = day, next 2 = month, then 4 = year. */
-  protected onDateKeydown(e: KeyboardEvent): void {
-    if (e.key === 'Enter' || e.key === 'Tab' || e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      this.onMetaKeydown('eventDate', e)
-      return
-    }
-    if (e.key.length === 1 && /\d/.test(e.key)) {
-      const buf = this.dateDigitBuffer_().slice(0, 8) + e.key
-      if (buf.length <= 8) {
-        e.preventDefault()
-        this.dateDigitBuffer_.set(buf)
-        if (buf.length === 8) {
-          const dStr = buf.slice(0, 2)
-          const mStr = buf.slice(2, 4)
-          const yStr = buf.slice(4, 8)
-          const dNum = Math.min(31, Math.max(1, parseInt(dStr, 10) || 1))
-          const mNum = Math.min(12, Math.max(1, parseInt(mStr, 10) || 1))
-          const yNum = Math.max(1900, Math.min(2100, parseInt(yStr, 10) || new Date().getFullYear()))
-          const iso = `${yNum}-${String(mNum).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`
-          this.form_.patchValue({ eventDate: iso })
-          this.dateDigitBuffer_.set('')
-        }
-      }
-    } else if (e.key === 'Backspace') {
-      const current = this.dateDigitBuffer_()
-      if (current.length > 0) {
-        e.preventDefault()
-        this.dateDigitBuffer_.set(current.slice(0, -1))
-      }
-    }
-  }
-
   /** Tap steps by 1; holding repeats with the app's tiered hold steps (1…9, then 10s, 100s). */
-  protected startGuestHold(direction: 1 | -1, event: PointerEvent): void {
-    event.preventDefault()
-    this.stopGuestHold()
-    this.stepGuests(direction, false)
-    const tick = (): void => {
-      this.stepGuests(direction, true)
-      this.guestHoldTimer_ = setTimeout(tick, MenuIntelligencePage.GUEST_REPEAT_INTERVAL_MS)
-    }
-    this.guestHoldTimer_ = setTimeout(tick, MenuIntelligencePage.GUEST_REPEAT_DELAY_MS)
-  }
-
-  protected stopGuestHold(): void {
-    if (this.guestHoldTimer_ == null) return
-    clearTimeout(this.guestHoldTimer_)
-    this.guestHoldTimer_ = null
-  }
-
-  private stepGuests(direction: 1 | -1, continuousPress: boolean): void {
+  protected stepGuests(direction: 1 | -1, continuousPress: boolean): void {
     const ctrl = this.form_.get('guestCount')
     const v = Number(ctrl?.value ?? 0)
     const opts = continuousPress ? { continuousPress: true } : { integerOnly: true }
     const next = direction === 1 ? quantityIncrement(v, 0, opts) : quantityDecrement(v, 0, opts)
     ctrl?.setValue(next)
-    if (next <= 0) this.stopGuestHold()
   }
 
   protected getGuestCount(): number {
@@ -521,7 +450,13 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected removeSection(index: number): void {
+    const removed = this.sectionsArray.at(index)
     this.sectionsArray.removeAt(index)
+    this.userMsg.onLineRemoved(
+      this.translation.translate('line_removed'),
+      () => this.sectionsArray.insert(Math.min(index, this.sectionsArray.length), removed),
+      this.destroyRef
+    )
   }
 
   protected getItemsArray(sectionIndex: number): FormArray<FormGroup> {
@@ -552,7 +487,19 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   protected removeItem(sectionIndex: number, itemIndex: number): void {
-    this.getItemsArray(sectionIndex).removeAt(itemIndex)
+    const items = this.getItemsArray(sectionIndex)
+    const removed = items.at(itemIndex)
+    const section = this.sectionsArray.at(sectionIndex)
+    items.removeAt(itemIndex)
+    this.userMsg.onLineRemoved(
+      this.translation.translate('line_removed'),
+      () => {
+        // The section may have been removed since; restore only into the same section.
+        if (!this.sectionsArray.controls.includes(section)) return
+        items.insert(Math.min(itemIndex, items.length), removed)
+      },
+      this.destroyRef
+    )
   }
 
   protected isRecipeDish(recipe: Recipe): boolean {

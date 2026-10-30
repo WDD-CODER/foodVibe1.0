@@ -1,0 +1,709 @@
+{
+  "run": "run-499-502",
+  "branch": "orch/run-499-502",
+  "base": "main",
+  "startedAt": "2026-10-29T20:01:54.013Z",
+  "mainShaAtStart": "0e5e7f48e6451aee42e0148449efb4fe971ee7a2",
+  "plans": {
+    "499": {
+      "nnn": "499",
+      "title": "Number box: tap anywhere on it to edit the whole number",
+      "branch": "feat/499-number-box-tap-anywhere",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-security": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Phone width: tap the ₪ sign of the price per guest in the pricing meter → the whole number is selected; typing replaces it. Same on the % suffix of waste in the product form.",
+        "Recipe builder: tap the unit label next to an ingredient quantity → the number is selected; pressing Enter still moves to the next row.",
+        "The two `[human]` items under Success Criteria pass."
+      ],
+      "history": [
+        {
+          "at": "2026-10-29T20:02:31.377Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T20:11:19.420Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T20:13:49.224Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T20:15:43.868Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T20:15:52.893Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T20:17:56.191Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "freeDiskGb": 28.4,
+      "sha": "d7e8ec76e2e87c900d5392948bbad995d3c893c3"
+    },
+    "500": {
+      "nnn": "500",
+      "title": "One stepper (+/−) for every number: same hold-to-repeat, steps and minimum",
+      "branch": "feat/500-one-stepper-for-every",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Recipe builder ingredient quantity, cook-view amount and menu guest count: hold − → repeats at the same speed in all three and stops at the minimum.",
+        "Phone width: press and hold + on the guest count → it repeats; release stops it.",
+        "The cook-view and menu-intelligence steppers still look like their own pages (the ink and paper skins).",
+        "The three `[human]` items under Success Criteria pass."
+      ],
+      "history": [
+        {
+          "at": "2026-10-29T20:18:33.736Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T20:30:32.702Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T20:33:12.625Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T20:33:21.846Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T20:43:05.883Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T20:45:42.934Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T20:46:10.210Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-10-29T20:48:22.428Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-10-29T20:48:32.818Z",
+          "state": "env-paused",
+          "round": 2
+        },
+        {
+          "at": "2026-10-29T20:49:00.960Z",
+          "state": "fixing",
+          "round": 2
+        },
+        {
+          "at": "2026-10-29T20:52:41.079Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-10-29T20:55:36.796Z",
+          "state": "gate",
+          "round": 2
+        },
+        {
+          "at": "2026-10-29T20:55:46.550Z",
+          "state": "parked",
+          "round": 2
+        },
+        {
+          "at": "2026-10-29T21:04:09.578Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:04:43.640Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:07:08.938Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:08:37.829Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:08:46.247Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:10:16.548Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "500",
+          "title": "One stepper (+/−) for every number: same hold-to-repeat, steps and minimum",
+          "branch": "feat/500-one-stepper-for-every",
+          "state": "parked",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "orch-builder": {
+              "model": "claude-opus-5-5",
+              "effort": "medium"
+            },
+            "orch-gate": {
+              "model": "claude-haiku-5-5",
+              "effort": "low"
+            }
+          },
+          "freeDiskGb": 29.3,
+          "sha": "2251dbec",
+          "reason": "same reason twice: gate (main folder): node scripts/log-query.mjs --since=plan-start --level=error"
+        }
+      ],
+      "freeDiskGb": 28.8,
+      "sha": "a332a81128e42e9114464e20e98e949e7917faf1"
+    },
+    "501": {
+      "nnn": "501",
+      "title": "Delete versus undo: entity deletes keep the popup, line removals get an undo toast",
+      "branch": "feat/501-delete-versus-undo-entity",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-security": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Product form: delete a purchase option → it disappears at once, a toast with \"undo\" shows → pressing undo brings it back in the same place.",
+        "Event notes: delete a note → toast with \"undo\" → undo brings the note back and it is still there after a reload.",
+        "Delete a supplier → the confirm popup (unchanged).",
+        "The three `[human]` items under Success Criteria pass."
+      ],
+      "history": [
+        {
+          "at": "2026-10-29T20:56:03.775Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:10:57.393Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:28:42.362Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:31:09.248Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:32:28.414Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:32:36.497Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:35:46.429Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:37:57.922Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:39:23.579Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:39:30.565Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-10-29T21:40:59.218Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "501",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "not started: wave 2 parked 500 — later waves not started",
+          "freeDiskGb": 29.3
+        }
+      ],
+      "freeDiskGb": 28.8,
+      "sha": "e1e229764ea8c9174e08fe9ed610b8b412f1835f"
+    },
+    "502": {
+      "nnn": "502",
+      "title": "Consistency sweep: one date field, one number format, growing textareas and one save-busy state",
+      "branch": "feat/502-consistency-sweep-one-date",
+      "state": "merged",
+      "round": 0,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Business settings: double-click Save → one save, the button shows busy while it runs.",
+        "Recipe book list: the date filter looks and works like the date field in the event dialogs.",
+        "A notes box grows as you type on any screen that has one.",
+        "The three `[human]` items under Success Criteria pass."
+      ],
+      "history": [
+        {
+          "at": "2026-10-29T20:56:11.962Z",
+          "state": "skipped",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:41:36.813Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:48:12.070Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:50:48.978Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:52:29.510Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:52:37.757Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:52:46.973Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:52:55.642Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:53:02.857Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-10-29T21:54:39.505Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "earlier": [
+        {
+          "nnn": "502",
+          "round": 0,
+          "models": {},
+          "state": "skipped",
+          "reason": "not started: wave 2 parked 500 — later waves not started",
+          "freeDiskGb": 29.3
+        }
+      ],
+      "freeDiskGb": 28.7,
+      "sha": "f9fb510f730223aced6216625712527ff84e5b79",
+      "uiCards": [
+        {
+          "card": "Business settings: double-click Save gives one save and the button shows busy",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4201/settings",
+          "screenshots": [],
+          "round": 0
+        },
+        {
+          "card": "Recipe book list: the date filter looks and works like the date field in the event dialogs",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4201/recipe-book",
+          "screenshots": [],
+          "round": 0
+        },
+        {
+          "card": "A notes box grows as you type (not-closed dialog, inquiry dialog, AI modals)",
+          "status": "unchecked",
+          "via": "none",
+          "page": "http://localhost:4201/menu-library",
+          "screenshots": [],
+          "round": 0
+        }
+      ]
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-10-29T20:46:01.430Z",
+      "plan": "500",
+      "text": "escalated to a fresh judgment-tier builder (round 2): gate (main folder): node scripts/log-query.mjs --since=plan-start --level=error"
+    },
+    {
+      "at": "2026-10-29T20:59:13.646Z",
+      "plan": "499",
+      "text": "D1 behaviour: a tap on the box while the number is already focused does nothing extra, and a disabled, read-only or locked number is not focused (as the readiness answers say) — reverse: remove the activeElement and disabled checks in number-box.directive.ts targetInput_()"
+    },
+    {
+      "at": "2026-10-29T20:59:24.804Z",
+      "plan": "499",
+      "text": "D2 behaviour: the directive ignores presses on buttons, anchors, selects, textareas, other inputs and .c-chip inside the box — reverse: shrink the INTERACTIVE selector in number-box.directive.ts"
+    },
+    {
+      "at": "2026-10-29T20:59:34.219Z",
+      "plan": "499",
+      "text": "D3 behaviour: the directive also cancels mousedown (not only pointerdown) when it focuses the number, so the browser does not move focus away again — reverse: remove the (mousedown) host binding"
+    },
+    {
+      "at": "2026-10-29T20:59:42.882Z",
+      "plan": "499",
+      "text": "D4 behaviour: the reuse-lint rule is line-based — it warns on any added type='number' line in a src/app html that has no appNumberBox on the same line; a new input inside an existing box also warns — reverse: delete the number-input-outside-number-box entry in registry-families.mjs"
+    },
+    {
+      "at": "2026-10-29T20:59:52.698Z",
+      "plan": "499",
+      "text": "D5 behaviour: appNumberBox sits on the existing container (label, c-input-stack, .relative-input, etc.), so no new wrapper markup and no style changes were made — reverse: remove the attribute from the templates"
+    },
+    {
+      "at": "2026-10-29T21:00:00.604Z",
+      "plan": "499",
+      "text": "D6 behaviour: recipe-ingredients-table has it on .col-quantity only; the unit column is a custom-select dropdown and is left alone — reverse: n/a, add the attribute to another container if wanted"
+    },
+    {
+      "at": "2026-10-29T21:00:09.367Z",
+      "plan": "499",
+      "text": "D7 seen: src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.html:114 — the deposit amount number box is not wired because the file is outside the plan scope"
+    },
+    {
+      "at": "2026-10-29T21:00:17.933Z",
+      "plan": "499",
+      "text": "D8 seen: src/app/pages/menu-intelligence/components/menu-dish-row/menu-dish-row.component.html:33 — the inline price boxes are not wired because the file is outside the plan scope"
+    },
+    {
+      "at": "2026-10-29T21:00:25.937Z",
+      "plan": "499",
+      "text": "D9 seen: src/app/pages/recipe-builder/components/recipe-workflow/recipe-workflow.component.html:85 — the time cells are type='text' mm:ss inputs, not type=number, so the number-box rule does not apply"
+    },
+    {
+      "at": "2026-10-29T21:00:33.081Z",
+      "plan": "499",
+      "text": "D10 seen: src/app/pages/inventory/components/product-import/product-import.component.html:215 — the purchase qty shares a row with a text input, so it is not wired"
+    },
+    {
+      "at": "2026-10-29T21:00:42.399Z",
+      "plan": "500",
+      "text": "D11 behaviour: extended the shared counter with a hold directive rather than moving page steppers onto app-counter; each page keeps its own input and skin (cook-view ink, menu paper pill) - reverse: replace the page buttons with app-counter and delete the directive attributes"
+    },
+    {
+      "at": "2026-10-29T21:00:52.438Z",
+      "plan": "500",
+      "text": "D12 behaviour: labor-minutes and cook-time steppers keep their fixed step (1 minute / 30 seconds) while held, and the new repeat does not speed up - reverse: pass continuousPress in the labor and cook-time handlers"
+    },
+    {
+      "at": "2026-10-29T21:01:01.957Z",
+      "plan": "500",
+      "text": "D13 behaviour: a keyboard-activated button (click with detail 0) does one step; pointer clicks are handled on pointerdown only - reverse: remove the click handler from step-hold.directive.ts"
+    },
+    {
+      "at": "2026-10-29T21:01:10.181Z",
+      "plan": "500",
+      "text": "D14 behaviour: the cook-view banner minimum is 0.01 and the edit-row minimum is 0, as today; no maximum and no new messages - reverse: change the [stepHoldStop] bindings in cook-view.page.html"
+    },
+    {
+      "at": "2026-10-29T21:01:18.296Z",
+      "plan": "500",
+      "text": "D15 behaviour: ran log-query from the plan-500 start time (2026-10-29T20:16:58Z) and left the stale, ignored .claude/.slot-plan-start alone, because take-plan owns that stamp — reverse: rewrite the stamp to the plan start and rerun with --since=plan-start"
+    },
+    {
+      "at": "2026-10-29T21:01:26.395Z",
+      "plan": "500",
+      "text": "D16 seen: src/app/pages/cook-view/cook-view.page.ts - onSettingAmountKeydown and onEditAmountKeydown duplicate the step rules of the arrow keys; I left them alone"
+    },
+    {
+      "at": "2026-10-29T21:01:38.058Z",
+      "plan": "500",
+      "text": "D17 seen: src/app/pages/inventory/components/product-form/product-form.component.spec.ts — the real MasterPushService was used in the specs, so tests depended on the signed-in user state; fixed here by stubbing it (in scope as a test hardening). Reverse: remove the MasterPushService provider from the spec."
+    },
+    {
+      "at": "2026-10-29T21:01:46.851Z",
+      "plan": "500",
+      "text": "D18 seen: C:/coding projects/Cursor/foodVibe1.0/server/app.js:157 (main checkout's server) — 6 'CORS origin not allowed' errors at 2026-10-29T09:03Z on /api/v1/data/DICTIONARY_OVERRIDES/global from an origin not in ALLOWED_ORIGINS; outside plan 500, not fixed"
+    },
+    {
+      "at": "2026-10-29T21:01:54.198Z",
+      "plan": "500",
+      "text": "D19 seen: plans/500-one-stepper-for-every-number-same-hold-to-repeat-steps-and-minimum.plan.md:21 — the [auto] log-query item uses --since=plan-start, which only resolves inside a slot; it needs an explicit ISO time (e.g. 2026-10-28T12:03:38.160Z) to run as [auto:main]"
+    },
+    {
+      "at": "2026-10-29T21:02:03.278Z",
+      "plan": "500",
+      "text": "notes capped: 12 notes written for plan 500 (orchestrator.maxNotesPerPlan), later notes are dropped"
+    },
+    {
+      "at": "2026-10-29T21:57:01.195Z",
+      "plan": "500",
+      "text": "D21 behaviour: the hold is one shared directive, appStepHold, so the page skins (cook-view ink, menu-intelligence paper) stay as they are and no sibling component was added — reverse: re-inline the hold in each page and revert the directive"
+    },
+    {
+      "at": "2026-10-29T21:57:09.404Z",
+      "plan": "500",
+      "text": "D22 behaviour: product-form.component.spec.ts now stubs MasterPushService because test:ci hung on an admin save (test-only change, scope extended and logged in the plan) — reverse: remove the stub"
+    },
+    {
+      "at": "2026-10-29T21:57:17.909Z",
+      "plan": "500",
+      "text": "D23 seen: .claude/.slot-plan-start is stale (2026-10-28, an earlier plan) and missing in main, so log-query --since=plan-start does not work for this plan"
+    },
+    {
+      "at": "2026-10-29T21:57:26.657Z",
+      "plan": "501",
+      "text": "D24 behaviour: the undo toast is dismissed when the owning component is destroyed (Planner decision applied) — reverse: drop the owner argument at the call sites"
+    },
+    {
+      "at": "2026-10-29T21:57:34.679Z",
+      "plan": "501",
+      "text": "D25 behaviour: event-note undo re-creates the note via addNote, so it gets a new time and author (Planner decision) — reverse: hold the server delete until the toast ends (needs pipeline and server files)"
+    },
+    {
+      "at": "2026-10-29T21:57:44.176Z",
+      "plan": "501",
+      "text": "D26 behaviour: I added dictionary keys line_removed, note_removed and photo_removed, and left the now-unused notes_confirm_delete key (the dictionary is append-only) — reverse: delete the three new keys"
+    },
+    {
+      "at": "2026-10-29T21:57:52.786Z",
+      "plan": "501",
+      "text": "D27 behaviour: recipe-builder ingredient undo removes the placeholder blank row that removeIngredient had auto-added to an empty list — reverse: restore the row without removing the placeholder"
+    },
+    {
+      "at": "2026-10-29T21:58:00.225Z",
+      "plan": "501",
+      "text": "D28 behaviour: a menu item removed from a section is restored only if that section still exists — reverse: drop the includes() guard in menu-intelligence.page removeItem"
+    },
+    {
+      "at": "2026-10-29T21:58:08.749Z",
+      "plan": "501",
+      "text": "D29 seen: src/app/pages/recipe-builder/components/recipe-header/recipe-header.component.html:81 - the scaling-chip (remove) output is handled in recipe-header, which is outside this plan's scope, so that removal still gets no undo toast"
+    },
+    {
+      "at": "2026-10-29T21:58:16.968Z",
+      "plan": "501",
+      "text": "D30 seen: ai-draft-editor has one row-delete handler (removeIngredient), not the 3 the plan lists"
+    },
+    {
+      "at": "2026-10-29T21:58:24.386Z",
+      "plan": "501",
+      "text": "D31 seen: server log, CORS origin not allowed on /api/v1/data/DICTIONARY_OVERRIDES/global (HTTP 500) — shows in the log-query check but is not from plan 501"
+    },
+    {
+      "at": "2026-10-29T21:58:32.495Z",
+      "plan": "502",
+      "text": "D32 behaviour: percent display goes through the engine's formatPct1 / formatPctInt, which print the same output as the old toFixed, so no displayed value changes; '| number' and '| formatQuantity' stay as they were (quantity -> formatQuantity pipe) — reverse: restore toFixed in the 3 spots"
+    },
+    {
+      "at": "2026-10-29T21:58:39.596Z",
+      "plan": "502",
+      "text": "D33 behaviour: the menu page date chip is now a plain app-date-field, so the digit-buffer typing, the showPicker call and the Enter/Tab/Arrow focus hop on the date chip are gone — reverse: restore onDateKeydown and the chip markup from git history"
+    },
+    {
+      "at": "2026-10-29T21:58:48.670Z",
+      "plan": "502",
+      "text": "D34 behaviour: the textarea directive selector is now every 'textarea'; boxes in components that do not import it (equipment forms, venue form, event notes log, supplier-orders, search-combobox) stay fixed-height — reverse: set the selector back to textarea[appTextareaAutoGrow]"
+    },
+    {
+      "at": "2026-10-29T21:58:58.930Z",
+      "plan": "502",
+      "text": "D35 behaviour: not-closed, deposit-paid and paste-ingredients dialogs lock their own save button after the first click (the parent closes them); unit-edit and inline-rename take an 'isSaving' input that the parent has to set — reverse: remove the isSaving_ signal or input from each dialog"
+    },
+    {
+      "at": "2026-10-29T21:59:06.936Z",
+      "plan": "502",
+      "text": "D36 behaviour: the legacy saving flag names (isLoading_, isBusy_, isSubmitting_) were not renamed; 'isSaving_' is the name for new code — reverse: n/a, nothing was renamed"
+    },
+    {
+      "at": "2026-10-29T21:59:16.889Z",
+      "plan": "502",
+      "text": "D37 seen: src/app/pages/metadata-manager/metadata-manager.page.component.html:165 — the parent of unit-edit-dialog and inline-rename-field does not bind [isSaving] yet (out of scope), so the busy state there only applies once the parent sets it"
+    },
+    {
+      "at": "2026-10-29T21:59:25.748Z",
+      "plan": "502",
+      "text": "D38 seen: src/app/pages/menu-intelligence/KEYBOARD-FOCUS-REPORT.md:15 — still describes the removed date chip keyboard handling"
+    }
+  ],
+  "attempts": 2,
+  "phase": "finished",
+  "freeDiskGb": 28.7,
+  "updatedAt": "2026-10-29T21:59:38.404Z",
+  "finishedAt": "2026-10-29T21:59:38.403Z"
+}

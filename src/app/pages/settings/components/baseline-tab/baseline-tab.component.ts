@@ -10,6 +10,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import type { BaselineInput } from '@schemas/entities'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 type BaselineField = keyof BaselineInput
 
@@ -23,7 +24,7 @@ interface FieldDef {
 @Component({
   selector: 'app-baseline-tab',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, DatePipe, SelectOnFocusDirective],
+  imports: [NumberBoxDirective, ReactiveFormsModule, TranslatePipe, DatePipe, SelectOnFocusDirective],
   templateUrl: './baseline-tab.component.html',
   styleUrl: './baseline-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

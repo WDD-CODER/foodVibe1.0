@@ -446,11 +446,19 @@
             <div class="date-range-inputs">
               <label class="date-range-label">
                 <span>{{ 'date_from' | translatePipe }}</span>
-                <input type="date" [ngModel]="dateFrom_()" (ngModelChange)="dateFrom_.set($event)" />
+                <app-date-field
+                  inputId="recipe-book-date-from"
+                  [value]="dateFrom_() ?? ''"
+                  (valueChange)="dateFrom_.set($event || null)"
+                />
               </label>
               <label class="date-range-label">
                 <span>{{ 'date_to' | translatePipe }}</span>
-                <input type="date" [ngModel]="dateTo_()" (ngModelChange)="dateTo_.set($event)" />
+                <app-date-field
+                  inputId="recipe-book-date-to"
+                  [value]="dateTo_() ?? ''"
+                  (valueChange)="dateTo_.set($event || null)"
+                />
               </label>
             </div>
             <label class="c-chip c-chip--toggle">

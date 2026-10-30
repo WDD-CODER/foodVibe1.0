@@ -51,7 +51,7 @@
                 @if (row.item.kind === 'unpriced') {
                   @if (row.canPrice) {
                     <div class="partial-price">
-                      <label class="partial-price-label">
+                      <label class="partial-price-label" appNumberBox>
                         <span>{{ perUnitLabel(row) }}</span>
                         <input
                           class="c-input partial-price-input"

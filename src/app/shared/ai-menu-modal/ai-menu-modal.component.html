@@ -209,9 +209,7 @@
                                 (change)="onResolve(si + ':' + dish.nameHebrew, candidate.recipeId)"
                               />
                               <span>{{ candidate.name }}</span>
-                              <span class="ai-menu-candidate-score"
-                                >{{ (candidate.confidence * 100).toFixed(0) }}%</span
-                              >
+                              <span class="ai-menu-candidate-score">{{ pctInt(candidate.confidence * 100) }}</span>
                             </label>
                           }
                           <button

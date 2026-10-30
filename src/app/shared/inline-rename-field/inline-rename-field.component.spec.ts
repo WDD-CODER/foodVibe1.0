@@ -80,4 +80,18 @@ describe('InlineRenameFieldComponent', () => {
     expect(saved).toEqual([])
     expect(cancelled).toBe(0)
   })
+
+  it('disables Save with the busy label while the parent is saving, and works again after', () => {
+    type('new')
+    fixture.componentRef.setInput('isSaving', true)
+    fixture.detectChanges()
+    buttons()[0].click()
+    expect(saved).toEqual([])
+    expect(buttons()[0].disabled).toBeTrue()
+    expect(buttons()[0].textContent?.trim()).toBe('saving')
+    fixture.componentRef.setInput('isSaving', false)
+    fixture.detectChanges()
+    buttons()[0].click()
+    expect(saved).toEqual(['new'])
+  })
 })

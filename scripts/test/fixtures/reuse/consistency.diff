@@ -1,0 +1,7 @@
+diff --git a/src/app/pages/orders/orders.component.html b/src/app/pages/orders/orders.component.html
+--- a/src/app/pages/orders/orders.component.html
++++ b/src/app/pages/orders/orders.component.html
+@@ -10,0 +11,3 @@
++<input type="date" [ngModel]="day()" />
++<span>{{ (share() * 100).toFixed(1) }}%</span>
++<app-date-field [(value)]="day" />

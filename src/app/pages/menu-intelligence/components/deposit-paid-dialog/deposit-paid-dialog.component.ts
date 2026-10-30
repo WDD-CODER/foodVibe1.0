@@ -13,6 +13,7 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { todayIso } from 'src/app/core/utils/date-input.util'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 export interface DepositPaidAnswer {
   /** ISO date (`yyyy-mm-dd`) the deposit was paid. */
@@ -29,13 +30,15 @@ export interface DepositPaidAnswer {
 @Component({
   selector: 'app-deposit-paid-dialog',
   standalone: true,
-  imports: [TranslatePipe, DateFieldComponent, SelectOnFocusDirective],
+  imports: [NumberBoxDirective, TranslatePipe, DateFieldComponent, SelectOnFocusDirective],
   templateUrl: './deposit-paid-dialog.component.html',
   styleUrl: './deposit-paid-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(document:keydown.escape)': 'cancelled.emit()' }
 })
 export class DepositPaidDialogComponent {
+  /** Plan 502: true from the first click until the dialog is closed by its parent; a second click does nothing. */
+  protected readonly isSaving_ = signal(false)
   // 1. INJECTED
   private readonly host_ = inject<ElementRef<HTMLElement>>(ElementRef)
 
@@ -80,7 +83,8 @@ export class DepositPaidDialogComponent {
   protected onSave(): void {
     this.isTouched_.set(true)
     const amount = this.amount_()
-    if (!this.valid_() || amount === null) return
+    if (!this.valid_() || amount === null || this.isSaving_()) return
+    this.isSaving_.set(true)
     this.confirmed.emit({ date: this.date_(), amount })
   }
 }

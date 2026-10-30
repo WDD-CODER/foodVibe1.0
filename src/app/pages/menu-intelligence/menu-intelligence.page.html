@@ -90,17 +90,15 @@
         <!-- Meta line: guests · date -->
         <div class="event-meta-line">
           <span class="event-meta-chip event-meta-chip--guests">
-            <span class="counter-pill guest-counter-pill">
+            <span class="counter-pill guest-counter-pill" appNumberBox>
               <button
                 type="button"
                 class="counter-pill-btn"
                 tabindex="-1"
                 [attr.aria-label]="'decrease' | translatePipe"
-                (pointerdown)="startGuestHold(-1, $event)"
-                (pointerup)="stopGuestHold()"
-                (pointerleave)="stopGuestHold()"
-                (pointercancel)="stopGuestHold()"
-                (contextmenu)="$event.preventDefault()"
+                appStepHold
+                [stepHoldStop]="getGuestCount() <= 0"
+                (stepHold)="stepGuests(-1, $event)"
               >
                 <lucide-icon name="minus" [size]="12"></lucide-icon>
               </button>
@@ -118,11 +116,8 @@
                 class="counter-pill-btn"
                 tabindex="-1"
                 [attr.aria-label]="'increase' | translatePipe"
-                (pointerdown)="startGuestHold(1, $event)"
-                (pointerup)="stopGuestHold()"
-                (pointerleave)="stopGuestHold()"
-                (pointercancel)="stopGuestHold()"
-                (contextmenu)="$event.preventDefault()"
+                appStepHold
+                (stepHold)="stepGuests(1, $event)"
               >
                 <lucide-icon name="plus" [size]="12"></lucide-icon>
               </button>
@@ -130,23 +125,12 @@
             {{ 'menu_guests' | translatePipe }}
           </span>
           <span class="event-chip-sep">·</span>
-          <span
-            class="event-meta-chip meta-date-chip"
-            (click)="openDatePicker()"
-            role="button"
-            tabindex="0"
-            (keydown.enter)="openDatePicker()"
-            (keydown.space)="$event.preventDefault(); openDatePicker()"
-            [attr.aria-label]="'menu_set_date' | translatePipe"
-            (keydown)="onDateKeydown($event)"
-          >
-            <span class="meta-date-display">{{ getEventDateDisplay() || ('menu_no_date' | translatePipe) }}</span>
-            <input
-              id="menu-focus-eventDate"
-              type="date"
-              class="meta-date-input"
-              formControlName="eventDate"
-              (keydown)="onDateKeydown($event)"
+          <span class="event-meta-chip meta-date-chip">
+            <app-date-field
+              inputId="menu-focus-eventDate"
+              ariaLabelKey="menu_set_date"
+              [value]="form_.controls.eventDate.value ?? ''"
+              (committed)="form_.patchValue({ eventDate: $event })"
             />
           </span>
           <span class="event-chip-sep">·</span>

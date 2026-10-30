@@ -12,6 +12,7 @@ import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { warnBeforeUnload } from '@utils/leave-warning.util'
 import type { TaxonomyTermOf } from '@models/v2'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 type CoefficientKind = 'eventType' | 'menuType'
 
@@ -44,7 +45,7 @@ const parseCoefficient = (text: string): number => Number(text.trim().replace(',
 @Component({
   selector: 'app-coefficient-manager',
   standalone: true,
-  imports: [LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective],
+  imports: [NumberBoxDirective, LucideAngularModule, TranslatePipe, SelectOnFocusDirective, ClickOutSideDirective],
   templateUrl: './coefficient-manager.component.html',
   styleUrl: './coefficient-manager.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

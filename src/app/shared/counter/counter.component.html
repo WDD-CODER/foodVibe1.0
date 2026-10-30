@@ -4,16 +4,15 @@
     class="ctrl-btn"
     tabindex="-1"
     [disabled]="minusDisabled_()"
-    (click)="$event.preventDefault()"
-    (mousedown)="onMinusMouseDown()"
-    (mouseup)="onCtrlMouseUp()"
-    (mouseleave)="onCtrlMouseLeave()"
+    appStepHold
+    [stepHoldStop]="minusDisabled_()"
+    (stepHold)="decrement($event)"
     [attr.aria-label]="'decrease' | translatePipe"
   >
     −
   </button>
 
-  <div class="value-cell" [style.--value-width.px]="valueWidthPx_()">
+  <div class="value-cell" appNumberBox [style.--value-width.px]="valueWidthPx_()">
     <span #mirrorSpan class="value-mirror" aria-hidden="true">{{ inputValue_() || displayValue_() }}</span>
     <input
       #valueInput
@@ -34,10 +33,9 @@
     class="ctrl-btn"
     tabindex="-1"
     [disabled]="plusDisabled_()"
-    (click)="$event.preventDefault()"
-    (mousedown)="onPlusMouseDown()"
-    (mouseup)="onCtrlMouseUp()"
-    (mouseleave)="onCtrlMouseLeave()"
+    appStepHold
+    [stepHoldStop]="plusDisabled_()"
+    (stepHold)="increment($event)"
     [attr.aria-label]="'increase' | translatePipe"
   >
     +

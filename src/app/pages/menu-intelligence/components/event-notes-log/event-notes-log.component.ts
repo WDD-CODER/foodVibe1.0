@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core'
 import { DatePipe } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
-import { ConfirmModalService } from '@services/confirm-modal.service'
+import { TranslationService } from '@services/translation.service'
+import { UserMsgService } from '@services/user-msg.service'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
@@ -28,7 +29,9 @@ export class EventNotesLogComponent {
   private readonly eventData = inject(MenuEventDataService)
   private readonly pipeline = inject(EventPipelineService)
   private readonly permission = inject(PermissionService)
-  private readonly confirmModal = inject(ConfirmModalService)
+  private readonly userMsg = inject(UserMsgService)
+  private readonly translation = inject(TranslationService)
+  private readonly destroyRef = inject(DestroyRef)
   private readonly userService = inject(UserService)
 
   // 2. INPUTS
@@ -89,10 +92,17 @@ export class EventNotesLogComponent {
   protected async remove(note: EventNote): Promise<void> {
     const id = this.eventId()
     if (!id || this.isBusy_()) return
-    const ok = await this.confirmModal.open('notes_confirm_delete', { saveLabel: 'delete', variant: 'danger' })
-    if (!ok) return
     this.isBusy_.set(true)
-    await this.pipeline.deleteNote(id, note._id)
+    const result = await this.pipeline.deleteNote(id, note._id)
     this.isBusy_.set(false)
+    if (!result.ok) return
+    // Undo re-creates the note through the same pipeline route that added it (new time and author).
+    this.userMsg.onLineRemoved(
+      this.translation.translate('note_removed'),
+      async () => {
+        await this.pipeline.addNote(id, note.text)
+      },
+      this.destroyRef
+    )
   }
 }

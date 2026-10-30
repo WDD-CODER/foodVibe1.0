@@ -64,6 +64,7 @@ import { HeroFabService } from '@services/hero-fab.service'
 import { registerDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
 import { ProductPriceLockComponent } from '../product-price-lock/product-price-lock.component'
 import { ProductNameSuggestionsComponent } from '../product-name-suggestions/product-name-suggestions.component'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 /**
  * Plan 423 — units whose size is a physical constant: choosing one in a purchase row fills the exact amount.
@@ -91,6 +92,7 @@ interface ProductFormValue {
   selector: 'app-product-form',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,
@@ -989,7 +991,16 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
 
   //DELETE
   protected onDeletePurchaseOption(idx: number): void {
+    const removed = this.purchaseOptions_.at(idx)
     this.purchaseOptions_.removeAt(idx)
     this.productForm_.markAsDirty()
+    this.userMsgService.onLineRemoved(
+      this.translationService.translate('line_removed'),
+      () => {
+        this.purchaseOptions_.insert(Math.min(idx, this.purchaseOptions_.length), removed)
+        this.productForm_.markAsDirty()
+      },
+      this.destroyRef
+    )
   }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core'
 import { HttpErrorResponse } from '@angular/common/http'
 import { FormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
@@ -26,6 +26,7 @@ import { incrementGeminiUsage } from '@utils/gemini-usage.util'
 import { registerDraftMetadata, resolveDraftMetadata } from '../../services/ai-draft-metadata.util'
 import { TextareaAutoGrowDirective } from '@directives/textarea-auto-grow.directive'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 /** The base units a product may have (same list as the server). */
 const BASE_UNITS = ['gram', 'ml', 'kg', 'liter', 'unit']
@@ -58,6 +59,7 @@ interface ImportSummary {
   selector: 'app-product-import',
   standalone: true,
   imports: [
+    NumberBoxDirective,
     SelectOnFocusDirective,
     FormsModule,
     RouterLink,
@@ -81,6 +83,7 @@ export class ProductImportComponent {
   private readonly permission_ = inject(PermissionService)
   private readonly translation_ = inject(TranslationService)
   private readonly userMsg_ = inject(UserMsgService)
+  private readonly destroyRef_ = inject(DestroyRef)
   private readonly logging_ = inject(LoggingService)
   private readonly matcher_ = inject(ProductNameMatcherService)
   private readonly unitRegistry_ = inject(UnitRegistryService)
@@ -267,8 +270,24 @@ export class ProductImportComponent {
 
   protected removeRow(id: number): void {
     if (this.isSaving_()) return
+    const index = this.rows_().findIndex((row) => row.id === id)
+    const removed = this.rows_()[index]
+    if (!removed) return
     this.rows_.update((rows) => rows.filter((row) => row.id !== id))
     this.deleted_.update((count) => count + 1)
+    this.userMsg_.onLineRemoved(
+      this.translation_.translate('line_removed'),
+      () => {
+        if (this.isSaving_()) return
+        this.rows_.update((rows) => {
+          const next = [...rows]
+          next.splice(Math.min(index, next.length), 0, removed)
+          return next
+        })
+        this.deleted_.update((count) => Math.max(0, count - 1))
+      },
+      this.destroyRef_
+    )
   }
 
   protected updateRow(id: number, patch: Partial<PreviewRow>): void {

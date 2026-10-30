@@ -118,7 +118,7 @@ describe('EventClosingDialogComponent', () => {
         },
         {
           provide: UserMsgService,
-          useValue: jasmine.createSpyObj('UserMsgService', ['onSetErrorMsg', 'onSetSuccessMsg'])
+          useValue: jasmine.createSpyObj('UserMsgService', ['onSetErrorMsg', 'onSetSuccessMsg', 'onLineRemoved'])
         },
         { provide: LoggingService, useValue: { warn: () => undefined, error: () => undefined, info: () => undefined } }
       ]
@@ -320,6 +320,28 @@ describe('EventClosingDialogComponent', () => {
     }
     await setup({ ...base, closing })
     expect(rows()[0].querySelectorAll('.photo img').length).toBe(1)
+  })
+
+  it('removing a photo saves at once and the undo toast puts it back through the same save', async () => {
+    const url = 'https://res.cloudinary.com/demo/image/upload/n.jpg'
+    const closing: EventClosing = {
+      suppliers: [{ supplierId: 'a', name: 'ירקן', planned: 1000, arrived: true, hasInvoice: false, photos: [url] }]
+    }
+    await setup({ ...base, closing })
+    el.querySelector<HTMLButtonElement>('.photo button')!.click()
+    await fixture.whenStable()
+    const sent = pipeline.saveClosing.calls.mostRecent().args[1] as EventClosing
+    expect(sent.suppliers[0].photos).toEqual([])
+    store.set([{ ...base, closing: sent }])
+    fixture.detectChanges()
+    const userMsg = TestBed.inject(UserMsgService) as jasmine.SpyObj<UserMsgService>
+    expect(userMsg.onLineRemoved).toHaveBeenCalled()
+    const restore = userMsg.onLineRemoved.calls.mostRecent().args[1] as () => void
+    pipeline.saveClosing.calls.reset()
+    restore()
+    await fixture.whenStable()
+    const back = pipeline.saveClosing.calls.mostRecent().args[1] as EventClosing
+    expect(back.suppliers[0].photos).toEqual([url])
   })
 
   it('an event with no saved plan says so and offers a refresh to the owner', async () => {

@@ -26,8 +26,14 @@
 
       <div class="c-modal-actions">
         <button type="button" class="c-btn-ghost" (click)="onClose()">{{ 'cancel' | translatePipe }}</button>
-        <button type="button" class="c-btn-primary" [disabled]="!text_().trim()" (click)="onSubmit()">
-          {{ 'paste_ingredients_add' | translatePipe }}
+        <button
+          type="button"
+          class="c-btn-primary"
+          [disabled]="!text_().trim() || isSaving_()"
+          [attr.aria-busy]="isSaving_() || null"
+          (click)="onSubmit()"
+        >
+          {{ (isSaving_() ? 'saving' : 'paste_ingredients_add') | translatePipe }}
         </button>
       </div>
     </div>

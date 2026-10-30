@@ -30,6 +30,13 @@ Four small jobs behave differently from screen to screen. Measured against `orig
 - Isolated DB: no
 
 ## Execution Notes
+- C1 (re-verified on run branch): native dates left in menu-intelligence page (eventDate chip), menu-library-list (from), recipe-book-list (from, to). `toFixed` in templates: ai-menu-modal, ai-product-modal; in ts: recipe-ingredients-table (conversion.service and export.util are internal maths / export, kept). Save buttons already guarded: partial-cost-badge (savingKey_), business-settings-tab, business-name-form (isSaving_), add-equipment-modal (empty name after first click), quick-edit-product-modal (panel owns saving, out of scope). Fixed: not-closed, deposit-paid, paste-ingredients (local isSaving_, parent closes dialog), unit-edit and inline-rename (isSaving input, alias of isSaving_).
+- C2: all three screens now use app-date-field; the list filters use one field per end (no range variant needed). Menu page: removed the digit-buffer date chip code (openDatePicker, onDateKeydown, getEventDateDisplay). `#dateFromRef` was only used to open the picker, dropped with onDateWrapClick.
+- C3 rule: percent -> engine formatPct1 / formatPctInt (identical output to old toFixed); quantity -> formatQuantity pipe; `| number` uses left untouched (money/other, no value change). No displayed value changes.
+- C4: directive selector is now `textarea`; imported in not-closed, new-inquiry, ai-menu-modal, ai-product-modal, ai-draft-editor (plus the 4 existing). Fixed on purpose: equipment form/list, venue form, event-notes-log, supplier-orders (readonly), search-combobox (outside scope).
+- C5: one name `isSaving_`, state `.c-btn-primary[aria-busy='true']` in styles.scss, label 'saving'. Older flags (isLoading_, isBusy_, isSubmitting_) not renamed (60+ files outside scope).
+- C6: reuse-lint rules native-date-input, template-to-fixed (+ fixture consistency.diff, tests); component-families.md updated. A "bare textarea" rule was not added: a template cannot know whether its component imports the directive.
+- C7: pnpm run build exit 0; pnpm run lint exit 0 (0 errors); pnpm run test:ci TOTAL 1637 SUCCESS; reuse-lint --check-registry exit 0; --diff=origin/main REUSE: ok; scope-check --arch / --reuse exit 0; both greps clean (type="date" only in shared/date-field).
 - Source: Human briefs 00 + 03 parts 2–5 (verified against `origin/main` b6181027). `main` is now 21a2ffe5: re-check every claim before editing. This is plan 03b; delete-vs-undo is plan 501. If the four items do not fit one Worker session, stop after the finished items, say which are left, and offer a follow-up plan — never leave a half-done item.
 - Run order of the batch: 498 → 499 → 500 → 501 → 502, one at a time.
 - Number display: the Worker decides which of `| number` and `| formatQuantity` is the rule for quantity, money and percent, records the decision in Execution Notes, and moves the rest. Anything that changes a displayed value (rounding) must be flagged as a `behaviour:` decision.
@@ -110,13 +117,13 @@ append the path to the scope block above and retry.
 
 ## Atomic Sub-tasks
 
-- [ ] C1: Check the four lists in the Problem Statement against today's code and record the real ones — native dates, `| number` and `toFixed` uses, textareas, save buttons without a busy flag — this plan file
-- [ ] C2: Replace the native date inputs with the shared date field and add a from / to variant only if the list filters need it — recipe-book-list, menu-library-list, menu-intelligence page — src/app/shared/date-field/**, the page folders in scope
-- [ ] C3: Show numbers through one rule: pick the pipe for quantity, money and percent, move the other uses onto it and remove `toFixed` in templates — record the rule and any value that changes — src/app/shared/ai-menu-modal/**, src/app/shared/ai-product-modal/**, src/app/pages/recipe-builder/components/recipe-ingredients-table/**
-- [ ] C4: Make every multi-line free-text box grow as the user types, and list the ones that stay fixed — extend the directive's selector so it cannot be forgotten — src/app/core/directives/textarea-auto-grow.directive.ts, the templates in scope
-- [ ] C5: Give every save button one saving state: disabled with a busy label while it runs, enabled again on error — one signal name and one button state; fix the ten screens without a flag — src/styles.scss, the dialogs and tabs in scope
-- [ ] C6: Warn when a native date input, a template `toFixed` or a bare textarea is added, and register the families — `reuse-lint` rules with fixtures; update the `form-field` and `engine-classes` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
-- [ ] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
+- [x] C1: Check the four lists in the Problem Statement against today's code and record the real ones — native dates, `| number` and `toFixed` uses, textareas, save buttons without a busy flag — this plan file
+- [x] C2: Replace the native date inputs with the shared date field and add a from / to variant only if the list filters need it — recipe-book-list, menu-library-list, menu-intelligence page — src/app/shared/date-field/**, the page folders in scope
+- [x] C3: Show numbers through one rule: pick the pipe for quantity, money and percent, move the other uses onto it and remove `toFixed` in templates — record the rule and any value that changes — src/app/shared/ai-menu-modal/**, src/app/shared/ai-product-modal/**, src/app/pages/recipe-builder/components/recipe-ingredients-table/**
+- [x] C4: Make every multi-line free-text box grow as the user types, and list the ones that stay fixed — extend the directive's selector so it cannot be forgotten — src/app/core/directives/textarea-auto-grow.directive.ts, the templates in scope
+- [x] C5: Give every save button one saving state: disabled with a busy label while it runs, enabled again on error — one signal name and one button state; fix the ten screens without a flag — src/styles.scss, the dialogs and tabs in scope
+- [x] C6: Warn when a native date input, a template `toFixed` or a bare textarea is added, and register the families — `reuse-lint` rules with fixtures; update the `form-field` and `engine-classes` families — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
+- [x] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
 
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).

@@ -73,7 +73,7 @@
               <span class="field-error-msg">{{ unitError_() | translatePipe }}</span>
             }
           </div>
-          <div class="quick-add-product-modal__field">
+          <div class="quick-add-product-modal__field" appNumberBox>
             <label for="quick-add-price">{{ 'buy_price' | translatePipe }}</label>
             <input
               id="quick-add-price"
@@ -123,7 +123,7 @@
         >
           <h4 class="quick-add-product-modal__section-title">{{ 'show_more_details' | translatePipe }}</h4>
           <div class="quick-add-product-modal__grid quick-add-product-modal__grid--dense">
-            <div class="quick-add-product-modal__field">
+            <div class="quick-add-product-modal__field" appNumberBox>
               <label for="quick-add-yield">{{ 'yield_factor' | translatePipe }}</label>
               <input
                 id="quick-add-yield"
@@ -137,7 +137,7 @@
                 (keydown.enter)="advanceFocus(getNextFocusAfterYield()); $event.preventDefault()"
               />
             </div>
-            <div class="quick-add-product-modal__field">
+            <div class="quick-add-product-modal__field" appNumberBox>
               <label for="quick-add-min-stock">{{ 'min_stock_level' | translatePipe }}</label>
               <input
                 id="quick-add-min-stock"
@@ -149,7 +149,7 @@
                 (keydown.enter)="onSave()"
               />
             </div>
-            <div class="quick-add-product-modal__field">
+            <div class="quick-add-product-modal__field" appNumberBox>
               <label for="quick-add-expiry">{{ 'expiry_days_default' | translatePipe }}</label>
               <input
                 id="quick-add-expiry"

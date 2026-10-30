@@ -3,7 +3,7 @@
     <div class="col-drag"></div>
     <div class="col-name">{{ 'ingredient' | translatePipe }}</div>
     <div class="col-unit">{{ 'unit' | translatePipe }}</div>
-    <div class="col-quantity">{{ 'quantity' | translatePipe }}</div>
+    <div class="col-quantity" appNumberBox>{{ 'quantity' | translatePipe }}</div>
     <div class="col-percent">{{ 'percent' | translatePipe }}</div>
     <div class="col-cost">{{ 'cost' | translatePipe }}</div>
     <!-- <div class="col-actions">{{ 'actions' | translatePipe }}</div> -->
@@ -130,14 +130,16 @@
           />
         </div>
 
-        <div class="col-quantity">
+        <div class="col-quantity" appNumberBox>
           <div class="quantity-controls">
             <button
               type="button"
               class="qty-btn minus"
               tabindex="-1"
               [disabled]="(group.get('amount_net')?.value ?? 0) <= 0"
-              (click)="decrementAmount(group, $index)"
+              appStepHold
+              (stepHold)="decrementAmount(group, $index, $event)"
+              [stepHoldStop]="(group.get('amount_net')?.value ?? 0) <= 0"
             >
               <lucide-icon name="minus" [size]="16"></lucide-icon>
             </button>
@@ -156,7 +158,13 @@
               min="0"
               [class.has-error]="group.invalid && group.touched"
             />
-            <button type="button" class="qty-btn plus" tabindex="-1" (click)="incrementAmount(group, $index)">
+            <button
+              type="button"
+              class="qty-btn plus"
+              tabindex="-1"
+              appStepHold
+              (stepHold)="incrementAmount(group, $index, $event)"
+            >
               <lucide-icon name="plus" [size]="16"></lucide-icon>
             </button>
           </div>

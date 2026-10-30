@@ -34,6 +34,9 @@ A box whose only content is an editable number (quantity, price, %, portions, gu
 - Risks: `type="number"` refuses `setSelectionRange` — the existing directive handles it, do not regress plan 482. RTL: the suffix position flips; the hit area must still be the whole box. `appFocusByRow` (Enter to next row) in the recipe tables must keep working after the wrap.
 - Hebrew RTL and logical CSS properties only; any new text goes through the dictionary.
 
+- Builder evidence (N1 inventory): wired appNumberBox on pricing-meter (4 meter-field labels), counter value-cell, product-form (buy price, purchase qty row, special price, waste, yield, min stock, expiry), product-import price cell, deposit-paid / event-closing / new-inquiry dialogs, menu-intelligence guest pill, recipe-ingredients-table col-quantity, cook-view cv-stepper + cv-scale-form, baseline / business settings tabs, coefficient-manager rows, unit-edit-dialog, ai-product-modal (yield, min stock, expiry), ai-draft-editor yield, partial-cost-badge, quick-add (4), quick-edit panel price, unit-creator. Not wired (see docs/brain/component-families.md number-box): event-stage-bar, menu-dish-row (outside scope), recipe-workflow time cells (text mm:ss, not type=number), product-import purchase qty and ai-draft-editor ingredient rows (mixed with text/select).
+- Builder evidence: pnpm run build -> exit 0; pnpm run lint -> 0 errors; pnpm run test:ci -> TOTAL 1625 SUCCESS; node --test scripts/test/reuse-lint.test.mjs -> 15 pass 0 fail; reuse-lint --diff/--check-registry -> ok/exit 0; scope-check --arch/--reuse -> ok. log-query error entries are CORS/500 lines from the main checkout server log (09:03Z, no server run in this worktree) - not from this change.
+
 ## Reuse Check
 - Number box container behaviour — family: none — rung: 4 — why: no shared piece focuses a number from a tap on its container; registered as the new family `number-box` in `docs/brain/component-families.md`
 - Select-all on focus — family: form-field — rung: 1 — why: keep `SelectOnFocusDirective` as is
@@ -103,15 +106,15 @@ append the path to the scope block above and retry.
 
 ## Atomic Sub-tasks
 
-- [ ] N1: List every number box where a tap misses the number today and record the list — reality check of the containers named in the Problem Statement, plus any the brief missed — this plan file
-- [ ] N2: Build one shared "tap the box, edit the whole number" behaviour that ignores buttons inside the box and disabled boxes — container directive (or label wrapper) next to the select-all directive, with its spec — src/app/core/directives/number-box.directive.ts, src/app/core/directives/number-box.directive.spec.ts
-- [ ] N3: Make the pricing meter and the counter value cell use it, including the lock-icon and suffix cases — pricing-meter, shared/counter — src/app/pages/menu-intelligence/components/pricing-meter/**, src/app/shared/counter/**
-- [ ] N4: Make the product form and the purchase-option row use it — buy price, waste %, yield, purchase options — src/app/pages/inventory/components/product-form/**, src/app/pages/inventory/components/product-import/**
-- [ ] N5: Make the recipe builder quantity and time cells use it without breaking Enter-to-next-row — recipe-ingredients-table, recipe-workflow — src/app/pages/recipe-builder/components/**
-- [ ] N6: Make the cook-view amount and clock boxes and the menu guest chip use it — src/app/pages/cook-view/cook-view.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.html
-- [ ] N7: Make the settings, metadata, event dialogs and AI / quick-add / unit modals' number boxes use it — the remaining containers from N1 — the folders in scope
-- [ ] N8: Warn when a number input is added outside a number box, and register the family — `reuse-lint` rule with fixtures; new `number-box` family with its remaining copies — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
-- [ ] N9: Run the full checks and paste the output — `ng build`, headless `ng test`, reuse-lint, scope-check, log-query — Execution Notes
+- [x] N1: List every number box where a tap misses the number today and record the list — reality check of the containers named in the Problem Statement, plus any the brief missed — this plan file
+- [x] N2: Build one shared "tap the box, edit the whole number" behaviour that ignores buttons inside the box and disabled boxes — container directive (or label wrapper) next to the select-all directive, with its spec — src/app/core/directives/number-box.directive.ts, src/app/core/directives/number-box.directive.spec.ts
+- [x] N3: Make the pricing meter and the counter value cell use it, including the lock-icon and suffix cases — pricing-meter, shared/counter — src/app/pages/menu-intelligence/components/pricing-meter/**, src/app/shared/counter/**
+- [x] N4: Make the product form and the purchase-option row use it — buy price, waste %, yield, purchase options — src/app/pages/inventory/components/product-form/**, src/app/pages/inventory/components/product-import/**
+- [x] N5: Make the recipe builder quantity and time cells use it without breaking Enter-to-next-row — recipe-ingredients-table, recipe-workflow — src/app/pages/recipe-builder/components/**
+- [x] N6: Make the cook-view amount and clock boxes and the menu guest chip use it — src/app/pages/cook-view/cook-view.page.html, src/app/pages/menu-intelligence/menu-intelligence.page.html
+- [x] N7: Make the settings, metadata, event dialogs and AI / quick-add / unit modals' number boxes use it — the remaining containers from N1 — the folders in scope
+- [x] N8: Warn when a number input is added outside a number box, and register the family — `reuse-lint` rule with fixtures; new `number-box` family with its remaining copies — scripts/lib/registry-families.mjs, scripts/test/reuse-lint.test.mjs, docs/brain/component-families.md
+- [x] N9: Run the full checks and paste the output — `ng build`, headless `ng test`, reuse-lint, scope-check, log-query — Execution Notes
 
 ## Done when
 - [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).

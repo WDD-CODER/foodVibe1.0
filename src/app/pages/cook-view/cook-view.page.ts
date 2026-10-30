@@ -38,6 +38,8 @@ import { RecipeFormService } from '@pages/recipe-builder/services/recipe-form.se
 import { CookTimerService } from './services/cook-timer.service'
 import { CookViewExportService } from './services/cook-view-export.service'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
+import { StepHoldDirective } from 'src/app/shared/counter/step-hold.directive'
 
 /** Multiplier chip definitions — factor is the multiplier applied to `convertedYieldAmount_()`. */
 const MULTIPLIER_CHIPS = [
@@ -53,6 +55,8 @@ const MULTIPLIER_CHIPS = [
   host: { '(window:scroll)': 'onWindowScroll()', '(document:pointerdown)': 'onDocumentPointerDown($event)' },
   standalone: true,
   imports: [
+    NumberBoxDirective,
+    StepHoldDirective,
     SelectOnFocusDirective,
     CommonModule,
     ReactiveFormsModule,
@@ -534,13 +538,14 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.applyScaleByIngredient(idx, this.toRowUnitAmount(idx, row, displayAmount))
   }
 
-  protected stepScaledBannerAmount(delta: 1 | -1): void {
+  protected stepScaledBannerAmount(delta: 1 | -1, continuousPress = false): void {
     const idx = this.scaleByIngredientIndex_()
     const row = this.scaledViewRow_()
     if (idx === null || !row) return
     const unit = this.getDisplayUnit(idx, row)
     const current = this.getDisplayAmount(idx, row)
-    const opts = this.isDish_() ? { integerOnly: true } : { unit }
+    const base: QuantityStepOptions = this.isDish_() ? { integerOnly: true } : { unit }
+    const opts: QuantityStepOptions = continuousPress ? { ...base, continuousPress: true } : base
     const next = delta > 0 ? quantityIncrement(current, 0.01, opts) : quantityDecrement(current, 0.01, opts)
     this.setScaledBannerAmount(next)
   }
@@ -763,12 +768,13 @@ export class CookViewPage implements OnInit, OnDestroy {
     return this.unsaved_.hasChanges()
   }
 
-  protected getEditAmountStep(currentAmount: number, delta: number, rowUnit?: string): number {
-    const options: QuantityStepOptions | undefined = this.isDish_()
+  protected getEditAmountStep(currentAmount: number, delta: number, rowUnit?: string, continuousPress = false): number {
+    const base: QuantityStepOptions | undefined = this.isDish_()
       ? { integerOnly: true }
       : rowUnit
         ? { unit: rowUnit }
         : undefined
+    const options: QuantityStepOptions | undefined = continuousPress ? { ...(base ?? {}), continuousPress: true } : base
     return delta > 0 ? quantityIncrement(currentAmount, 0, options) : quantityDecrement(currentAmount, 0, options)
   }
 
@@ -825,6 +831,20 @@ export class CookViewPage implements OnInit, OnDestroy {
   }
 
   protected removeIngredient(index: number): void {
+    const removed = this.recipe_()?.ingredients[index]
+    if (removed) {
+      this.userMsg.onLineRemoved(
+        this.translation.translate('line_removed'),
+        () =>
+          this.recipe_.update((r) => {
+            if (!r) return r
+            const ingredients = [...r.ingredients]
+            ingredients.splice(Math.min(index, ingredients.length), 0, removed)
+            return { ...r, ingredients }
+          }),
+        this.destroyRef
+      )
+    }
     this.recipe_.update((r) => {
       if (!r) return r
       return {

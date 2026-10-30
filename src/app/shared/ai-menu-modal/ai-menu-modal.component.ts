@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core'
+import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { CommonModule } from '@angular/common'
 import { HttpErrorResponse } from '@angular/common/http'
 import { LucideAngularModule } from 'lucide-angular'
+import { formatPctInt } from 'src/app/core/engine/rounding'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { LoaderComponent } from '../loader/loader.component'
 import { AiMenuModalService } from './ai-menu-modal.service'
@@ -24,12 +26,22 @@ type GenerationStatus = 'idle' | 'sending' | 'done' | 'error'
 @Component({
   selector: 'app-ai-menu-modal',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, TranslatePipe, LoaderComponent, ModalShellComponent],
+  imports: [
+    TextareaAutoGrowDirective,
+    CommonModule,
+    LucideAngularModule,
+    TranslatePipe,
+    LoaderComponent,
+    ModalShellComponent
+  ],
   templateUrl: './ai-menu-modal.component.html',
   styleUrl: './ai-menu-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AiMenuModalComponent implements OnInit {
+  /** Percent display goes through the engine rounding rule. */
+  protected readonly pctInt = formatPctInt
+
   protected readonly modalService = inject(AiMenuModalService)
   private readonly gemini_ = inject(GeminiService)
   private readonly kitchenState_ = inject(KitchenStateService)

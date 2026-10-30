@@ -1,4 +1,5 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, inject, output, signal } from '@angular/core'
+import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { NOT_CLOSED_REASONS } from '@schemas/entities'
@@ -16,13 +17,15 @@ export interface NotClosedAnswer {
 @Component({
   selector: 'app-not-closed-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [TextareaAutoGrowDirective, FormsModule, TranslatePipe],
   templateUrl: './not-closed-dialog.component.html',
   styleUrl: './not-closed-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '(document:keydown.escape)': 'cancelled.emit()' }
 })
 export class NotClosedDialogComponent {
+  /** Plan 502: true from the first click until the dialog is closed by its parent; a second click does nothing. */
+  protected readonly isSaving_ = signal(false)
   // 1. INJECTED
   private readonly host_ = inject<ElementRef<HTMLElement>>(ElementRef)
 
@@ -43,7 +46,8 @@ export class NotClosedDialogComponent {
   // 6. UI handlers
   protected onSave(): void {
     const reason = this.reason_()
-    if (!reason) return
+    if (!reason || this.isSaving_()) return
+    this.isSaving_.set(true)
     this.confirmed.emit({ reason, reasonText: this.text_().trim() })
   }
 }

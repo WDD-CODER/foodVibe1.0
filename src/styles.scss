@@ -2600,3 +2600,9 @@ input[type='number']::-webkit-outer-spin-button {
 
   -webkit-appearance: none;
 }
+
+/* Plan 502: one saving state — a button whose save is running (set with [disabled] and [attr.aria-busy]). */
+.c-btn-primary[aria-busy='true'] {
+  cursor: progress;
+  opacity: 0.7;
+}

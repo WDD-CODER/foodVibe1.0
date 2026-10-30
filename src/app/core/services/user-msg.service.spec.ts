@@ -1,3 +1,4 @@
+import { DestroyRef } from '@angular/core'
 import { TestBed, fakeAsync, flushMicrotasks, tick } from '@angular/core/testing'
 import { provideHttpClient } from '@angular/common/http'
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing'
@@ -114,5 +115,25 @@ describe('UserMsgService', () => {
     service.onSetSuccessMsg(translation.translate('unit_added_named').replace('{name}', 'jar'))
     expect(service.msg_()?.txt).toBe('היחידה jar נוספה בהצלחה')
     tick(2000)
+  }))
+
+  it('onLineRemoved shows an undo toast that runs restore', fakeAsync(() => {
+    let restored = 0
+    service.onLineRemoved('Row removed', () => {
+      restored++
+    })
+    const msg = service.msg_()
+    expect(msg?.txt).toBe('Row removed')
+    msg?.undo?.()
+    expect(restored).toBe(1)
+    tick(2000)
+  }))
+
+  it('onLineRemoved dismisses its toast when the owner is destroyed', fakeAsync(() => {
+    let destroy: () => void = () => undefined
+    const owner = { onDestroy: (cb: () => void) => (destroy = cb) } as unknown as DestroyRef
+    service.onLineRemoved('Row removed', () => undefined, owner)
+    destroy()
+    expect(service.msg_()).toBeNull()
   }))
 })

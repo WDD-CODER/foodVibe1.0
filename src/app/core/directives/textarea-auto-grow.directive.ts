@@ -6,9 +6,11 @@ const MIN_HEIGHT_PX = 40
  * Sets a textarea's height to fit its content: on input, focus, window resize, and after any view check where
  * the value or width changed (so a programmatic `[value]` / `ngModel` write grows or shrinks it too). The box
  * never scrolls inside itself (`overflow-y: hidden`).
+ * The selector is every `textarea`, so a component that imports this directive cannot forget one; a textarea that
+ * must stay fixed-height is not in a component that imports it (equipment forms, venue form, event notes log).
  */
 @Directive({
-  selector: 'textarea[appTextareaAutoGrow]',
+  selector: 'textarea',
   host: {
     '(input)': 'resize()',
     '(change)': 'resize()',

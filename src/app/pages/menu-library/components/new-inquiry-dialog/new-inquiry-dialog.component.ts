@@ -8,6 +8,7 @@ import {
   output,
   signal
 } from '@angular/core'
+import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { FormsModule } from '@angular/forms'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
@@ -22,6 +23,7 @@ import { NOTE_MAX_LENGTH } from '@schemas/entities'
 import { isValidClientPhone } from 'src/app/core/utils/event-stage-ui.util'
 import type { MenuEvent } from '@models/menu-event.model'
 import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
+import { NumberBoxDirective } from '@directives/number-box.directive'
 
 const NAME_MAX = 200
 const NOTE_MAX = NOTE_MAX_LENGTH
@@ -34,7 +36,15 @@ const NOTE_MAX = NOTE_MAX_LENGTH
 @Component({
   selector: 'app-new-inquiry-dialog',
   standalone: true,
-  imports: [FormsModule, TranslatePipe, CustomSelectComponent, DateFieldComponent, SelectOnFocusDirective],
+  imports: [
+    TextareaAutoGrowDirective,
+    NumberBoxDirective,
+    FormsModule,
+    TranslatePipe,
+    CustomSelectComponent,
+    DateFieldComponent,
+    SelectOnFocusDirective
+  ],
   templateUrl: './new-inquiry-dialog.component.html',
   styleUrl: './new-inquiry-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

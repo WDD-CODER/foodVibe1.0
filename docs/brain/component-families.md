@@ -133,6 +133,20 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - When: any form input with a label.
 - Known copies: none. Kept on purpose: `.product-field` in `product-form.component.scss` (collapsible blocks and purchase rows that hold a custom
   label or content, not a plain label + input).
+- Dates (plan 502): every date is `app-date-field` (`src/app/shared/date-field/`); the only `type="date"` left is its hidden picker. List filters use one field per end (from / to). reuse-lint warns on a new native date input.
+- Multi-line boxes (plan 502): `TextareaAutoGrowDirective` has the selector `textarea`; import it in the component and every box grows. Fixed on purpose: equipment form / list, venue form, event notes log, supplier-orders (read-only), search-combobox.
+
+### number-box — tap anywhere on a number box to edit the number
+- Status: stable — plan 499 built `appNumberBox`; pricing meter, counter, product form, recipe quantity, cook view, settings, event dialogs and the AI / quick-add / unit modals are on it
+- Use: `src/app/core/directives/number-box.directive.ts` · `appNumberBox` on the container of ONE `input[type=number]` (label, suffix, padding); it focuses the number and `SelectOnFocusDirective` selects all. Buttons, chips, other fields, disabled / read-only numbers and an already-focused number are left alone.
+- When: a box whose only content is an editable number. Not for rows that mix free text and numbers.
+- Known copies: none for boxes. Left without it on purpose (outside plan 499 scope): `event-stage-bar` deposit amount, `menu-dish-row` inline prices, equipment / supplier / venue forms (`app-form-field` rows), `product-import` purchase qty (shares a row with a text field), `ai-draft-editor` ingredient rows.
+
+### stepper — the + / − buttons around a number
+- Status: stable — plan 500 built `appStepHold`; counter, menu guest count, cook-view amounts, recipe ingredient quantity and labor / cook time are on it
+- Use: `src/app/shared/counter/step-hold.directive.ts` · `appStepHold` on a minus or plus button: `(stepHold)="step($event)"` (`false` first press, `true` repeat), `[stepHoldStop]` at the minimum; pointer events (touch and mouse), stops on pointerup / pointerleave / pointercancel. Step rules: `src/app/core/utils/quantity-step.util.ts` (`quantityIncrement` / `quantityDecrement`). A whole counter (value box + both buttons): `app-counter` (`src/app/shared/counter/`).
+- When: any +/− button that changes a number. The page keeps its own skin (cook-view ink set, menu paper pill).
+- Known copies: none. Kept on purpose: `scaling-chip` and `recipe-builder.page` use `app-counter` already.
 
 ### entity-form — name validation and unsaved-changes check
 - Status: stable — plan 455 built one unsaved-changes helper
@@ -181,6 +195,7 @@ path · selector or symbol) · `When` · `Inputs / variants` · `Known copies` (
 - Status: stable (plan 458 sweeps the copies)
 - Use: `src/styles.scss` — every `.c-*` class is defined there and only there (`docs/agent/conventions.md`).
 - When: a style used by more than one component (buttons, inputs, modals, chips, empty state).
+- Saving state (plan 502): a save button is `[disabled]` and `[attr.aria-busy]` while it runs, shows the `saving` label, and the signal is named `isSaving_` (`.c-btn-primary[aria-busy='true']` in `src/styles.scss`). Older flags (`isLoading_`, `isBusy_`, `isSubmitting_`) stay on their screens until touched.
 - Known copies: 15 component `.scss` files start a selector with a `.c-*` class (define or restyle an engine locally).
 
 ## Logic families

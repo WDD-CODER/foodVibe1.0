@@ -1,11 +1,11 @@
-import { Injectable, signal } from '@angular/core'
+import { DestroyRef, Injectable, signal } from '@angular/core'
 import { Msg } from '../models/msg.model'
 
 const SUCCESS_DURATION_MS = 2000
 const ERROR_DURATION_MS = 4000
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class UserMsgService {
   private _msg_ = signal<Msg | null>(null)
@@ -91,6 +91,20 @@ export class UserMsgService {
   /** Success message with optional undo action. */
   public onSetSuccessMsgWithUndo(txt: string, undo: () => void): void {
     this._setMsg({ txt, type: 'success', undo })
+  }
+
+  /**
+   * Plan 501: a line the user can re-add was just removed. Shows the undo toast; `restore` puts the line back.
+   * With `owner`, the toast is dismissed when the owning component is destroyed (the undo would act on a dead view).
+   */
+  public onLineRemoved(txt: string, restore: () => void | Promise<void>, owner?: DestroyRef): void {
+    const undo = () => {
+      void restore()
+    }
+    this.onSetSuccessMsgWithUndo(txt, undo)
+    owner?.onDestroy(() => {
+      if (this._msg_()?.undo === undo) this.CloseMsg()
+    })
   }
 
   public onSetErrorMsg(txt: string): void {
