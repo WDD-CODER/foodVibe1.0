@@ -3,6 +3,8 @@ import { Msg } from '../models/msg.model'
 
 const SUCCESS_DURATION_MS = 2000
 const ERROR_DURATION_MS = 4000
+/** Plan 511: a line-removal undo toast stays long enough to change one's mind. */
+const UNDO_DURATION_MS = 30000
 
 @Injectable({
   providedIn: 'root'
@@ -21,8 +23,11 @@ export class UserMsgService {
     }
   }
 
-  private _durationMs(type: string): number {
-    return type === 'error' ? ERROR_DURATION_MS : SUCCESS_DURATION_MS
+  private readonly _lineUndos = new WeakSet<() => void>()
+
+  private _durationMs(msg: Msg): number {
+    if (msg.undo && this._lineUndos.has(msg.undo)) return UNDO_DURATION_MS
+    return msg.type === 'error' ? ERROR_DURATION_MS : SUCCESS_DURATION_MS
   }
 
   private _showNext(): void {
@@ -30,7 +35,7 @@ export class UserMsgService {
     if (this._pending.length > 0) {
       const next = this._pending.shift()!
       this._msg_.set(next)
-      this._timerHandle = setTimeout(() => this._showNext(), this._durationMs(next.type))
+      this._timerHandle = setTimeout(() => this._showNext(), this._durationMs(next))
     } else {
       this._timerHandle = null
     }
@@ -47,12 +52,12 @@ export class UserMsgService {
     if (msg.type === 'success' || msg.type === 'warning') {
       if (current && (current.type === 'success' || current.type === 'warning')) {
         this._msg_.set(msg)
-        this._startTimer(SUCCESS_DURATION_MS)
+        this._startTimer(this._durationMs(msg))
         return
       }
       if (!current) {
         this._msg_.set(msg)
-        this._startTimer(SUCCESS_DURATION_MS)
+        this._startTimer(this._durationMs(msg))
         return
       }
       this._pending.push(msg)
@@ -80,7 +85,7 @@ export class UserMsgService {
     if (this._pending.length > 0) {
       const next = this._pending.shift()!
       this._msg_.set(next)
-      this._timerHandle = setTimeout(() => this._showNext(), this._durationMs(next.type))
+      this._timerHandle = setTimeout(() => this._showNext(), this._durationMs(next))
     }
   }
 
@@ -101,6 +106,7 @@ export class UserMsgService {
     const undo = () => {
       void restore()
     }
+    this._lineUndos.add(undo)
     this.onSetSuccessMsgWithUndo(txt, undo)
     owner?.onDestroy(() => {
       if (this._msg_()?.undo === undo) this.CloseMsg()

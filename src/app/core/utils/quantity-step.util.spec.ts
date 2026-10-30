@@ -1,4 +1,4 @@
-import { getQuantityStep, quantityIncrement, quantityDecrement, QuantityStepOptions } from './quantity-step.util'
+import { getQuantityStep, quantityIncrement, quantityDecrement } from './quantity-step.util'
 
 describe('quantity-step.util', () => {
   describe('getQuantityStep', () => {
@@ -52,15 +52,13 @@ describe('quantity-step.util', () => {
       expect(quantityIncrement(1000)).toBe(1001)
     })
 
-    it('should use tiered steps when continuousPress (hold). Plan 176: 0→9 +1, 10→100 +10, 100→1000 +100, 1000+ +1000', () => {
-      const hold = { continuousPress: true }
-      expect(quantityIncrement(0, undefined, hold)).toBe(1)
-      expect(quantityIncrement(9, undefined, hold)).toBe(10)
-      expect(quantityIncrement(10, undefined, hold)).toBe(20)
-      expect(quantityIncrement(90, undefined, hold)).toBe(100)
-      expect(quantityIncrement(100, undefined, hold)).toBe(200)
-      expect(quantityIncrement(900, undefined, hold)).toBe(1000)
-      expect(quantityIncrement(1000, undefined, hold)).toBe(2000)
+    it('hold on a plain number steps by 1 for repeats 1-9, then 10s, then 100s (plan 511)', () => {
+      expect(quantityIncrement(0, undefined, { continuousPress: true, holdRepeat: 1 })).toBe(1)
+      expect(quantityIncrement(9, undefined, { continuousPress: true, holdRepeat: 9 })).toBe(10)
+      expect(quantityIncrement(9, undefined, { continuousPress: true, holdRepeat: 10 })).toBe(10)
+      expect(quantityIncrement(10, undefined, { continuousPress: true, holdRepeat: 10 })).toBe(20)
+      expect(quantityIncrement(95, undefined, { continuousPress: true, holdRepeat: 19 })).toBe(100)
+      expect(quantityIncrement(100, undefined, { continuousPress: true })).toBe(101)
     })
 
     it('should add precision step for decimals (1.2→1.3, 1.15→1.16)', () => {
@@ -93,16 +91,12 @@ describe('quantity-step.util', () => {
       expect(quantityDecrement(2)).toBe(1)
     })
 
-    it('should use tiered steps when continuousPress (hold). Plan 176: step 1 to mult of 10, then 10/100', () => {
-      const hold = { continuousPress: true }
-      expect(quantityDecrement(99, undefined, hold)).toBe(98)
-      expect(quantityDecrement(91, undefined, hold)).toBe(90)
-      expect(quantityDecrement(90, undefined, hold)).toBe(80)
-      expect(quantityDecrement(100, undefined, hold)).toBe(90)
-      expect(quantityDecrement(10, undefined, hold)).toBe(9)
-      expect(quantityDecrement(1099, undefined, hold)).toBe(1098)
-      expect(quantityDecrement(1090, undefined, hold)).toBe(1080)
-      expect(quantityDecrement(1000, undefined, hold)).toBe(900)
+    it('hold on a plain number mirrors the tiers going down (plan 511)', () => {
+      expect(quantityDecrement(99, undefined, { continuousPress: true, holdRepeat: 1 })).toBe(98)
+      expect(quantityDecrement(91, undefined, { continuousPress: true, holdRepeat: 10 })).toBe(90)
+      expect(quantityDecrement(90, undefined, { continuousPress: true, holdRepeat: 10 })).toBe(80)
+      expect(quantityDecrement(1090, undefined, { continuousPress: true, holdRepeat: 19 })).toBe(1000)
+      expect(quantityDecrement(3, 0, { continuousPress: true, holdRepeat: 19 })).toBe(0)
     })
 
     it('should subtract precision step for decimals (1.3→1.2, 1.16→1.15)', () => {
@@ -129,9 +123,9 @@ describe('quantity-step.util', () => {
 
   describe('unit-aware stepping (Plan 214 — value-range-based)', () => {
     // ── Single click ──────────────────────────────────────────────────────────
-    it('single click on whole number steps +0.1', () => {
+    it('single click on whole number steps +0.1 (kg) or +1 (g)', () => {
       expect(quantityIncrement(1, 0, { unit: 'kg' })).toBe(1.1)
-      expect(quantityIncrement(5, 0, { unit: 'g' })).toBe(5.1)
+      expect(quantityIncrement(5, 0, { unit: 'g' })).toBe(6)
     })
 
     it('single click on 1dp value steps +0.1', () => {
@@ -151,48 +145,71 @@ describe('quantity-step.util', () => {
       expect(quantityDecrement(1.51, 0, { unit: 'kg' })).toBe(1.5)
     })
 
-    // ── Hold — snap to tier boundary first ───────────────────────────────────
-    it('hold incr on dirty value snaps to tier boundary (1.55 → 1.6)', () => {
-      expect(quantityIncrement(1.55, 0, { unit: 'kg', continuousPress: true })).toBe(1.6)
+    // ── Hold: ones, then tens, then hundreds (plan 511) ───────────────────────
+    const holdUp = (start: number, repeats: number, unit: string, min = 0): number[] => {
+      const seen: number[] = []
+      let v = start
+      for (let n = 1; n <= repeats; n++) {
+        v = quantityIncrement(v, min, { unit, continuousPress: true, holdRepeat: n })
+        seen.push(v)
+      }
+      return seen
+    }
+    const holdDown = (start: number, repeats: number, unit: string, min = 0): number[] => {
+      const seen: number[] = []
+      let v = start
+      for (let n = 1; n <= repeats; n++) {
+        v = quantityDecrement(v, min, { unit, continuousPress: true, holdRepeat: n })
+        seen.push(v)
+      }
+      return seen
+    }
+
+    it('hold + from 100 g: 101..109, then 110, 120..190, then 200, 300', () => {
+      const seen = holdUp(100, 21, 'g')
+      expect(seen.slice(0, 9)).toEqual([101, 102, 103, 104, 105, 106, 107, 108, 109])
+      expect(seen.slice(9, 18)).toEqual([110, 120, 130, 140, 150, 160, 170, 180, 190])
+      expect(seen.slice(18)).toEqual([200, 300, 400])
     })
 
-    it('hold incr on tier boundary steps by range (1.9 → 2.0, tier exit)', () => {
-      expect(quantityIncrement(1.9, 0, { unit: 'kg', continuousPress: true })).toBe(2)
+    it('a new press starts at the ones digit again (repeat count restarts)', () => {
+      expect(quantityIncrement(140, 0, { unit: 'g', continuousPress: true, holdRepeat: 1 })).toBe(141)
+      expect(quantityIncrement(140, 0, { unit: 'g' })).toBe(141)
     })
 
-    it('hold incr tier transitions: 2→3, 9→10, 10→20, 90→100', () => {
-      const h = { unit: 'kg', continuousPress: true } as QuantityStepOptions
-      expect(quantityIncrement(2, 0, h)).toBe(3)
-      expect(quantityIncrement(9, 0, h)).toBe(10)
-      expect(quantityIncrement(10, 0, h)).toBe(20)
-      expect(quantityIncrement(90, 0, h)).toBe(100)
+    it('hold + on 100.1 g snaps to a whole gram first', () => {
+      expect(quantityIncrement(100.1, 0, { unit: 'g', continuousPress: true, holdRepeat: 1 })).toBe(101)
+      expect(quantityIncrement(100.15, 0, { unit: 'g', continuousPress: true, holdRepeat: 10 })).toBe(110)
     })
 
-    // ── Hold decrement — fine zone ────────────────────────────────────────────
-    it('hold decr fine zone: 1.0 → 0.99', () => {
-      expect(quantityDecrement(1.0, 0, { unit: 'kg', continuousPress: true })).toBe(0.99)
+    it('hold - from 200 g mirrors the tiers and stops at the minimum', () => {
+      expect(holdDown(205, 3, 'g')).toEqual([204, 203, 202])
+      expect(quantityDecrement(105, 0, { unit: 'g', continuousPress: true, holdRepeat: 10 })).toBe(100)
+      expect(quantityDecrement(200, 0, { unit: 'g', continuousPress: true, holdRepeat: 19 })).toBe(100)
+      expect(holdDown(3, 6, 'g')).toEqual([2, 1, 0, 0, 0, 0])
+      expect(holdDown(3, 4, 'g', 1)).toEqual([2, 1, 1, 1])
     })
 
-    it('hold decr fine zone: 0.91 → 0.90', () => {
-      expect(quantityDecrement(0.91, 0, { unit: 'kg', continuousPress: true })).toBe(0.90)
+    it('kg and l start at 0.1 and grow 1, 10', () => {
+      const seen = holdUp(1, 20, 'kg')
+      expect(seen[0]).toBe(1.1)
+      expect(seen[8]).toBe(1.9)
+      expect(seen[9]).toBe(2)
+      expect(seen[10]).toBe(3)
+      expect(seen[17]).toBe(10)
+      expect(seen[18]).toBe(20)
+      expect(quantityIncrement(0, 0, { unit: 'l', continuousPress: true, holdRepeat: 1 })).toBe(0.1)
+      expect(quantityIncrement(1.55, 0, { unit: 'kg', continuousPress: true, holdRepeat: 1 })).toBe(1.56)
     })
 
-    it('hold decr exits fine zone at 0.90 → 0.80 (back to 0.1 steps)', () => {
-      expect(quantityDecrement(0.9, 0, { unit: 'kg', continuousPress: true })).toBe(0.8)
-    })
-
-    it('hold decr tier transitions: 2.0→1.9, 3→2, 10→9, 20→10', () => {
-      const h = { unit: 'kg', continuousPress: true } as QuantityStepOptions
-      expect(quantityDecrement(2.0, 0, h)).toBe(1.9)
-      expect(quantityDecrement(3, 0, h)).toBe(2)
-      expect(quantityDecrement(10, 0, h)).toBe(9)
-      expect(quantityDecrement(20, 0, h)).toBe(10)
+    it('ml steps like g', () => {
+      expect(quantityIncrement(100, 0, { unit: 'ml', continuousPress: true, holdRepeat: 1 })).toBe(101)
     })
 
     // ── Floor at 0 ───────────────────────────────────────────────────────────
     it('floors at 0 on decrement', () => {
       expect(quantityDecrement(0.01, 0, { unit: 'kg' })).toBe(0)
-      expect(quantityDecrement(0.05, 0, { unit: 'kg', continuousPress: true })).toBe(0)
+      expect(quantityDecrement(0.01, 0, { unit: 'kg', continuousPress: true })).toBe(0)
     })
 
     // ── getQuantityStep ───────────────────────────────────────────────────────

@@ -8,7 +8,9 @@ import {
   viewChildren,
   viewChild,
   effect,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  DestroyRef,
+  ElementRef
 } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
@@ -98,6 +100,7 @@ export class RecipeIngredientsTableComponent {
   private readonly bp = inject(BreakpointObserver)
   private fb = inject(FormBuilder)
   private readonly cdr = inject(ChangeDetectorRef)
+  private readonly host_ = inject<ElementRef<HTMLElement>>(ElementRef)
   private readonly router_ = inject(Router)
   private readonly translation_ = inject(TranslationService)
   private readonly recipeFormService_ = inject(RecipeFormService)
@@ -117,6 +120,20 @@ export class RecipeIngredientsTableComponent {
   private readonly quickEditPanelRef_ = viewChild(QuickEditProductPanelComponent)
 
   constructor() {
+    // Plan 511: Enter in the unit picker moves on like Enter in the quantity (never picks a unit option).
+    // Capture phase, because the picker handles and stops Enter itself before it can bubble.
+    const host = this.host_.nativeElement
+    const onEnter = (e: KeyboardEvent): void => {
+      if (e.key !== 'Enter') return
+      const target = e.target as HTMLElement | null
+      const cell = target?.closest('.col-unit')
+      if (!cell || !host.contains(cell)) return
+      e.preventDefault()
+      e.stopPropagation()
+      this.addIngredient.emit()
+    }
+    host.addEventListener('keydown', onEnter, true)
+    inject(DestroyRef).onDestroy(() => host.removeEventListener('keydown', onEnter, true))
     // OnPush: rows changed from outside (AI patch, history restore) must redraw the table.
     effect((onCleanup) => {
       const sub = this.ingredientsFormArray().valueChanges.subscribe(() => this.cdr.markForCheck())
@@ -406,25 +423,25 @@ export class RecipeIngredientsTableComponent {
     return prod.purchaseOptions?.some((o) => o.unitSymbol === unit) ?? false
   }
 
-  incrementAmount(group: FormGroup, index: number, continuousPress = false): void {
+  incrementAmount(group: FormGroup, index: number, holdRepeat = 0): void {
     const ctrl = group.get('amount_net')
     const current = ctrl?.value ?? 0
     const unit = group.get('unit')?.value as string | undefined
     const stepOpts: QuantityStepOptions = {
       ...(this.isPurchaseUnitRow(group) ? { integerOnly: true } : unit ? { unit } : {}),
-      ...(continuousPress ? { continuousPress: true } : {})
+      ...(holdRepeat > 0 ? { continuousPress: true, holdRepeat } : {})
     }
     ctrl?.setValue(quantityIncrement(current, 0, stepOpts))
     this.updateLineCalculations(index)
   }
 
-  decrementAmount(group: FormGroup, index: number, continuousPress = false): void {
+  decrementAmount(group: FormGroup, index: number, holdRepeat = 0): void {
     const ctrl = group.get('amount_net')
     const current = ctrl?.value ?? 0
     const unit = group.get('unit')?.value as string | undefined
     const stepOpts: QuantityStepOptions = {
       ...(this.isPurchaseUnitRow(group) ? { integerOnly: true } : unit ? { unit } : {}),
-      ...(continuousPress ? { continuousPress: true } : {})
+      ...(holdRepeat > 0 ? { continuousPress: true, holdRepeat } : {})
     }
     ctrl?.setValue(quantityDecrement(current, 0, stepOpts))
     this.updateLineCalculations(index)

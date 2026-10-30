@@ -538,14 +538,14 @@ export class CookViewPage implements OnInit, OnDestroy {
     this.applyScaleByIngredient(idx, this.toRowUnitAmount(idx, row, displayAmount))
   }
 
-  protected stepScaledBannerAmount(delta: 1 | -1, continuousPress = false): void {
+  protected stepScaledBannerAmount(delta: 1 | -1, holdRepeat = 0): void {
     const idx = this.scaleByIngredientIndex_()
     const row = this.scaledViewRow_()
     if (idx === null || !row) return
     const unit = this.getDisplayUnit(idx, row)
     const current = this.getDisplayAmount(idx, row)
     const base: QuantityStepOptions = this.isDish_() ? { integerOnly: true } : { unit }
-    const opts: QuantityStepOptions = continuousPress ? { ...base, continuousPress: true } : base
+    const opts: QuantityStepOptions = holdRepeat > 0 ? { ...base, continuousPress: true, holdRepeat } : base
     const next = delta > 0 ? quantityIncrement(current, 0.01, opts) : quantityDecrement(current, 0.01, opts)
     this.setScaledBannerAmount(next)
   }
@@ -768,13 +768,14 @@ export class CookViewPage implements OnInit, OnDestroy {
     return this.unsaved_.hasChanges()
   }
 
-  protected getEditAmountStep(currentAmount: number, delta: number, rowUnit?: string, continuousPress = false): number {
+  protected getEditAmountStep(currentAmount: number, delta: number, rowUnit?: string, holdRepeat = 0): number {
     const base: QuantityStepOptions | undefined = this.isDish_()
       ? { integerOnly: true }
       : rowUnit
         ? { unit: rowUnit }
         : undefined
-    const options: QuantityStepOptions | undefined = continuousPress ? { ...(base ?? {}), continuousPress: true } : base
+    const options: QuantityStepOptions | undefined =
+      holdRepeat > 0 ? { ...(base ?? {}), continuousPress: true, holdRepeat } : base
     return delta > 0 ? quantityIncrement(currentAmount, 0, options) : quantityDecrement(currentAmount, 0, options)
   }
 

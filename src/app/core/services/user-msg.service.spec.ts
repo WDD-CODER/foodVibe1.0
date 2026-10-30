@@ -126,7 +126,29 @@ describe('UserMsgService', () => {
     expect(msg?.txt).toBe('Row removed')
     msg?.undo?.()
     expect(restored).toBe(1)
+    tick(30000)
+  }))
+
+  it('an undo toast stays 30 000 ms; a plain success toast still goes after 2 000 ms (plan 511)', fakeAsync(() => {
+    service.onLineRemoved('Row removed', () => undefined)
+    tick(29999)
+    expect(service.msg_()?.txt).toBe('Row removed')
+    tick(1)
+    expect(service.msg_()).toBeNull()
+
+    service.onSetSuccessMsg('Saved')
+    tick(1999)
+    expect(service.msg_()?.txt).toBe('Saved')
+    tick(1)
+    expect(service.msg_()).toBeNull()
+  }))
+
+  it('a newer plain toast replaces the undo toast and goes after 2 s', fakeAsync(() => {
+    service.onLineRemoved('Row removed', () => undefined)
+    service.onSetSuccessMsg('Saved')
+    expect(service.msg_()?.txt).toBe('Saved')
     tick(2000)
+    expect(service.msg_()).toBeNull()
   }))
 
   it('onLineRemoved dismisses its toast when the owner is destroyed', fakeAsync(() => {

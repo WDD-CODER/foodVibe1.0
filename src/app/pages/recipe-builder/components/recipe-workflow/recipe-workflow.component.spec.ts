@@ -2,7 +2,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing'
 import { FormBuilder, FormArray, ReactiveFormsModule } from '@angular/forms'
 import { provideHttpClient } from '@angular/common/http'
 import { provideHttpClientTesting } from '@angular/common/http/testing'
-import { LucideAngularModule, Plus, Trash2, Timer, Minus, ArrowUpDown, X, GripVertical, Clock, Watch } from 'lucide-angular'
+import {
+  LucideAngularModule,
+  Plus,
+  Trash2,
+  Timer,
+  Minus,
+  ArrowUpDown,
+  X,
+  GripVertical,
+  Clock,
+  Watch
+} from 'lucide-angular'
 import { RecipeWorkflowComponent } from './recipe-workflow.component'
 
 describe('RecipeWorkflowComponent', () => {
@@ -12,7 +23,11 @@ describe('RecipeWorkflowComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [RecipeWorkflowComponent, ReactiveFormsModule, LucideAngularModule.pick({ Plus, Trash2, Timer, Minus, ArrowUpDown, X, GripVertical, Clock, Watch })],
+      imports: [
+        RecipeWorkflowComponent,
+        ReactiveFormsModule,
+        LucideAngularModule.pick({ Plus, Trash2, Timer, Minus, ArrowUpDown, X, GripVertical, Clock, Watch })
+      ],
       providers: [FormBuilder, provideHttpClient(), provideHttpClientTesting()]
     }).compileComponents()
 
@@ -36,6 +51,17 @@ describe('RecipeWorkflowComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy()
+  })
+
+  it('a step re-inserted from outside the component is listed at once (plan 511)', () => {
+    const arr = component.workflowFormArray()
+    const removed = arr.at(0)
+    arr.removeAt(0)
+    fixture.detectChanges()
+    expect(fixture.nativeElement.querySelectorAll('textarea').length).toBe(0)
+    arr.insert(0, removed)
+    fixture.detectChanges()
+    expect(fixture.nativeElement.querySelectorAll('textarea').length).toBe(1)
   })
 
   it('step form group contains cooking_time control with default value 0', () => {

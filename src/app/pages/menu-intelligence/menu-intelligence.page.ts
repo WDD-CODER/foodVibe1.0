@@ -291,10 +291,10 @@ export class MenuIntelligencePage implements AfterViewInit, OnInit, OnDestroy {
   }
 
   /** Tap steps by 1; holding repeats with the app's tiered hold steps (1…9, then 10s, 100s). */
-  protected stepGuests(direction: 1 | -1, continuousPress: boolean): void {
+  protected stepGuests(direction: 1 | -1, holdRepeat: number): void {
     const ctrl = this.form_.get('guestCount')
     const v = Number(ctrl?.value ?? 0)
-    const opts = continuousPress ? { continuousPress: true } : { integerOnly: true }
+    const opts = holdRepeat > 0 ? { continuousPress: true, holdRepeat } : { integerOnly: true }
     const next = direction === 1 ? quantityIncrement(v, 0, opts) : quantityDecrement(v, 0, opts)
     ctrl?.setValue(next)
   }

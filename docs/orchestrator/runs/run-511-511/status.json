@@ -1,0 +1,145 @@
+{
+  "run": "run-511-511",
+  "branch": "orch/run-511-511",
+  "base": "main",
+  "startedAt": "2026-10-30T07:26:10.621Z",
+  "mainShaAtStart": "3224c973f7fba595ca50cf92ed58dc8783632e94",
+  "plans": {
+    "511": {
+      "nnn": "511",
+      "title": "Validation fixes for run 499-502: longer undo, step undo shows at once, stepper hold climbs digit by digit, one empty ingredient row",
+      "branch": "feat/511-validation-fixes-longer-undo",
+      "state": "merged",
+      "round": 1,
+      "tier": "build",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [
+        "Product form: delete a purchase option → the undo toast stays about 30 seconds and undo still works.",
+        "Recipe builder: delete a workflow step, press undo → the step shows again at once, in its place.",
+        "Cook view: from 100 g hold + → it climbs 101…109, then by tens; let go at 140, tap + five times → 145.",
+        "Recipe builder: tap the unit text of a row, press Enter → the cursor moves to the next row.",
+        "Recipe builder: with an empty ingredient row open, press the add-row button and press Enter in it →"
+      ],
+      "history": [
+        {
+          "at": "2026-10-30T07:26:49.857Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-10-30T07:35:38.438Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-30T07:40:51.014Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-10-30T07:40:58.700Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-10-30T07:43:48.794Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-10-30T07:46:23.223Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-10-30T07:48:26.315Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-10-30T07:48:35.282Z",
+          "state": "merging",
+          "round": 1
+        },
+        {
+          "at": "2026-10-30T07:50:28.565Z",
+          "state": "merged",
+          "round": 1
+        }
+      ],
+      "freeDiskGb": 27.5,
+      "sha": "604f1ab41fce25a436c1c0450f47da7907378948"
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-10-30T07:38:19.941Z",
+      "plan": "511",
+      "text": "gate rerun for 7 missing result(s): pnpm run build, pnpm run lint, pnpm run test:ci, node scripts/scope-check.mjs --drift --plan=plans/511-validation-fixes-longer-undo-step-undo-shows-stepper-steps-by-digit-one-empty-ingredient-row.plan.md, node scripts/scope-check.mjs --arch --plan=plans/511-validation-fixes-longer-undo-step-undo-shows-stepper-steps-by-digit-one-empty-ingredient-row.plan.m"
+    },
+    {
+      "at": "2026-10-30T07:53:44.120Z",
+      "plan": "511",
+      "text": "D1 behaviour: Enter anywhere in the unit column (the picker's filter box or its closed button) now adds or focuses the next row and never picks or opens a unit option - reverse: remove the capture keydown listener in the recipe-ingredients-table constructor"
+    },
+    {
+      "at": "2026-10-30T07:53:52.476Z",
+      "plan": "511",
+      "text": "D2 behaviour: tapping the unit chip still opens the picker, because I could not find a separate 'unit text' inside the quantity box in this table - reverse: n/a, nothing was added"
+    },
+    {
+      "at": "2026-10-30T07:54:01.341Z",
+      "plan": "511",
+      "text": "D3 behaviour: the empty-row rule counts a row as empty when its nameHebrew is blank, even if it has a referenceId - reverse: also test referenceId in the findIndex in addNewIngredientRow"
+    },
+    {
+      "at": "2026-10-30T07:54:11.010Z",
+      "plan": "511",
+      "text": "D4 behaviour: a single tap on a g or ml quantity now steps by 1 instead of 0.1, as the plan says; kg and l keep 0.1 or 0.01 - reverse: restore the old getSingleClickUnitStep"
+    },
+    {
+      "at": "2026-10-30T07:54:17.957Z",
+      "plan": "511",
+      "text": "D5 behaviour: treated the drift as already-merged dependencies and moved Snapshot to 3224c973 instead of re-running Step 0 against code changes — reverse: restore Snapshot e138dbfd in the plan header"
+    },
+    {
+      "at": "2026-10-30T07:54:25.904Z",
+      "plan": "511",
+      "text": "D6 seen: src/app/pages/recipe-builder/components/recipe-ingredients-table/recipe-ingredients-table.component.ts:550 - onUnitKeydown is defined but never wired in the template (dead code)"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 27.5,
+  "updatedAt": "2026-10-30T07:54:40.285Z",
+  "finishedAt": "2026-10-30T07:54:40.284Z"
+}
