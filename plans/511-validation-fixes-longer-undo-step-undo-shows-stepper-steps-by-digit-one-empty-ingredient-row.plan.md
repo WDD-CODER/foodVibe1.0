@@ -165,3 +165,7 @@ All [auto] items pass and the Human answers the [human] cards.
 - 2026-10-30 Planner: from the Human's validation reply to the run-499-502 cards. Passed: ④ ⑤ ⑦ ⑧ ⑨ ⑪ ⑫ ⑬ ⑭ ⑮.
   ② passed with the 30 s change. ③ partly failed (Enter from the unit text). ⑥ failed (hold jumps). ① and ⑩ not
   answered yet. Step undo redraw found by the Human outside the cards.
+- Orchestrator readiness (2026-10-30, Planner decided — Human's standing rule: decide and report): undo restore fails → keep the current onLineRemoved handling, no new message.
+- Orchestrator readiness (2026-10-30): pointer leaves the button or pointercancel mid-hold → treat as a release; the repeat count resets to the base step.
+- Orchestrator readiness (2026-10-30): user navigates away while the 30 s toast is open → the toast is dismissed with its owner and the removal stays.
+- Orchestrator readiness (2026-10-30): typed value with extra decimals (100.15 g) then hold + → g/ml base stays 1; the first step snaps to the tier step.
