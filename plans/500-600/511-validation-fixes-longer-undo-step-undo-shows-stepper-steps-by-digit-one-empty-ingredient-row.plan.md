@@ -37,22 +37,22 @@ The Human validated the run-499-502 cards on 2026-10-30. Most passed. These did 
 
 - Primary: the four validation findings are fixed and the one-empty-row rule holds in the recipe ingredient list.
 - Success:
-  - [ ] [auto] `quantity-step.util.spec.ts` covers the new hold tiers: from 100 g holding + gives 101 … 109, then 110,
+  - [x] [auto] `quantity-step.util.spec.ts` covers the new hold tiers: from 100 g holding + gives 101 … 109, then 110,
     120 … 190, then 200, 300; releasing and holding again starts at the ones digit; holding − mirrors it and stops at the
     minimum; kg starts at 0.1.
-  - [ ] [auto] `step-hold.directive` spec: the emitted repeat count resets on release.
-  - [ ] [auto] `user-msg.service.spec.ts`: an undo toast stays 30 000 ms; a plain success toast still 2 000 ms.
-  - [ ] [auto] `recipe-workflow.component.spec.ts`: a step re-inserted from outside the component is rendered without
+  - [x] [auto] `step-hold.directive` spec: the emitted repeat count resets on release.
+  - [x] [auto] `user-msg.service.spec.ts`: an undo toast stays 30 000 ms; a plain success toast still 2 000 ms.
+  - [x] [auto] `recipe-workflow.component.spec.ts`: a step re-inserted from outside the component is rendered without
     another user action. Same for the ingredients table.
-  - [ ] [auto] A recipe-builder spec: with one empty ingredient row, the add-row button and Enter add no row and focus
+  - [x] [auto] A recipe-builder spec: with one empty ingredient row, the add-row button and Enter add no row and focus
     the empty one.
-  - [ ] [auto] `pnpm run build` and `pnpm run test:ci` pass; `node scripts/scope-check.mjs --arch --plan=<this plan>` and
+  - [x] [auto] `pnpm run build` and `pnpm run test:ci` pass; `node scripts/scope-check.mjs --arch --plan=<this plan>` and
     `--reuse --plan=<this plan>` exit 0; `node scripts/kit-manifest-check.mjs` passes.
-  - [ ] [human] Product form: delete a purchase option → the undo toast stays about 30 seconds and undo still works.
-  - [ ] [human] Recipe builder: delete a workflow step, press undo → the step shows again at once, in its place.
-  - [ ] [human] Cook view: from 100 g hold + → it climbs 101…109, then by tens; let go at 140, tap + five times → 145.
-  - [ ] [human] Recipe builder: tap the unit text of a row, press Enter → the cursor moves to the next row.
-  - [ ] [human] Recipe builder: with an empty ingredient row open, press the add-row button and press Enter in it →
+  - [x] [human] Product form: delete a purchase option → the undo toast stays about 30 seconds and undo still works.
+  - [x] [human] Recipe builder: delete a workflow step, press undo → the step shows again at once, in its place.
+  - [x] [human] Cook view: from 100 g hold + → it climbs 101…109, then by tens; let go at 140, tap + five times → 145.
+  - [x] [human] Recipe builder: tap the unit text of a row, press Enter → the cursor moves to the next row.
+  - [x] [human] Recipe builder: with an empty ingredient row open, press the add-row button and press Enter in it →
     no second empty row appears.
 
 ## Execution Mode
@@ -173,3 +173,4 @@ All [auto] items pass and the Human answers the [human] cards.
 - Builder: StepHoldDirective now emits a number (0 first press, 1.. repeats); callers take `holdRepeat`. A4 is a capture-phase Enter listener on `.col-unit` in the ingredients table (the picker stops Enter itself).
 
 - Step 0 drift: the 4 drift commits (499-502) are the plan's own Depends-on, already merged; Snapshot moved to origin/main 3224c973 -> drift clean.
+- 2026-10-30 Planner: closed. [auto] items passed in the orchestrator gate and final gate; [human] cards answered "done" by the Human (2026-10-30).

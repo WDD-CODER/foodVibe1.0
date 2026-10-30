@@ -1,6 +1,6 @@
 # Plan 502 — Consistency sweep: one date field, one number format, growing textareas and one save-busy state
 
-Status: draft
+Status: done
 Track: code
 Depends-on: 501
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
@@ -15,14 +15,14 @@ Four small jobs behave differently from screen to screen. Measured against `orig
 ## Goals & Success Criteria
 - Primary: one date field, one number-format rule, auto-growing multi-line boxes, and one name and one behaviour for "saving": the save button is disabled with a busy label while saving and enabled again on error.
 - Success:
-  - [ ] [auto] `grep -rn 'type="date"' src/app --include=*.html` → only `shared/date-field/`.
-  - [ ] [auto] `grep -rn "toFixed(" src/app --include=*.html` → no matches.
-  - [ ] [auto] Specs pass for: a save button ignores a second click while saving and recovers on error; the date field range variant (if added); `npx ng test --watch=false --browsers=ChromeHeadless` green.
-  - [ ] [auto] `node scripts/reuse-lint.mjs --check-registry` exits 0, and `--diff=origin/main` warns on a fixture native `type="date"`.
-  - [ ] [auto] `npx ng build` passes; `node scripts/scope-check.mjs --arch --plan=<this plan>` and `--reuse --plan=<this plan>` exit 0; `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
-  - [ ] [human] Business settings: double-click Save → one save, the button shows busy while it runs.
-  - [ ] [human] Recipe book list: the date filter looks and works like the date field in the event dialogs.
-  - [ ] [human] A notes box grows as you type on any screen that has one.
+  - [x] [auto] `grep -rn 'type="date"' src/app --include=*.html` → only `shared/date-field/`.
+  - [x] [auto] `grep -rn "toFixed(" src/app --include=*.html` → no matches.
+  - [x] [auto] Specs pass for: a save button ignores a second click while saving and recovers on error; the date field range variant (if added); `npx ng test --watch=false --browsers=ChromeHeadless` green.
+  - [x] [auto] `node scripts/reuse-lint.mjs --check-registry` exits 0, and `--diff=origin/main` warns on a fixture native `type="date"`.
+  - [x] [auto] `npx ng build` passes; `node scripts/scope-check.mjs --arch --plan=<this plan>` and `--reuse --plan=<this plan>` exit 0; `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+  - [x] [human] Business settings: double-click Save → one save, the button shows busy while it runs.
+  - [x] [human] Recipe book list: the date filter looks and works like the date field in the event dialogs.
+  - [x] [human] A notes box grows as you type on any screen that has one.
 
 ## Execution Mode
 - Parallel: no — four items touch the same dialogs and lists.
@@ -126,8 +126,8 @@ append the path to the scope block above and retry.
 - [x] C7: Add specs for the double-click save guard and run the full checks — `ng build`, headless `ng test`, the two greps, reuse-lint, scope-check, log-query; paste the output in Execution Notes — the spec files in scope
 
 ## Done when
-- [ ] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
-- [ ] [human] The three `[human]` items under Success Criteria pass.
+- [x] [auto] Every `[auto]` item under Success Criteria passes (output pasted in the Worker's report).
+- [x] [human] The three `[human]` items under Success Criteria pass.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): save fails → button enabled again, edits kept, existing error handling as is.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): cancel/leave during a save → only the save button is disabled; cancel and close work as now.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): from later than to / one end cleared → keep today's filter logic; only swap the input component.
@@ -137,3 +137,4 @@ append the path to the scope block above and retry.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): log-query runs as [auto:main] from the main folder (read-only) → approved.
 - Orchestrator readiness (2026-10-29, Planner decided — Human delegated: 'decide yourself'): [human] checks → at the end of the run.
 - Orchestrator rerun (2026-10-29, Planner decided): the [auto:main] `log-query --since=plan-start` check is dropped from the run — the main folder has no plan-start stamp, so it parked 500 twice for an environment reason, not the code (run-499-502 D19/D20). Errors are checked in the morning review instead.
+- 2026-10-30 Planner: closed. [auto] items passed in the orchestrator gate and final gate; [human] cards answered "done" by the Human (2026-10-30).
