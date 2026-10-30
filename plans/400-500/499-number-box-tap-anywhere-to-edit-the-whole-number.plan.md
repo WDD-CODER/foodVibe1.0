@@ -1,6 +1,6 @@
 # Plan 499 — Number box: tap anywhere on it to edit the whole number
 
-Status: draft
+Status: done
 Track: code
 Depends-on: 498
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f

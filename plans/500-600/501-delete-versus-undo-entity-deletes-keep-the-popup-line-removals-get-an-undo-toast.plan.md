@@ -1,6 +1,6 @@
 # Plan 501 — Delete versus undo: entity deletes keep the popup, line removals get an undo toast
 
-Status: draft
+Status: done
 Track: code
 Depends-on: 500
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f

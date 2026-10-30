@@ -1,6 +1,6 @@
 # Plan 500 — One stepper (+/−) for every number: same hold-to-repeat, steps and minimum
 
-Status: draft
+Status: done
 Track: code
 Depends-on: 499
 Snapshot: 21a2ffe5464ca65b4630ac0bdd5894a160a3cb8f
