@@ -3,7 +3,7 @@
 Status: draft
 Track: code
 Depends-on: 499, 500, 501, 502 (PR #487 merged into main)
-Snapshot: e138dbfd00917081f9ae965d0fa711408cefde3a
+Snapshot: 3224c973f7fba595ca50cf92ed58dc8783632e94
 
 ## Prerequisites
 
@@ -171,3 +171,5 @@ All [auto] items pass and the Human answers the [human] cards.
 - Orchestrator readiness (2026-10-30): typed value with extra decimals (100.15 g) then hold + → g/ml base stays 1; the first step snaps to the tier step.
 - 2026-10-30 Builder: build exit 0; lint 0 errors; test:ci 1646 SUCCESS; scope-check --arch/--reuse exit 0; kit-manifest-check exit 0. `--drift` reports only the 499-502 commits this plan depends on (all merged), not a conflict.
 - Builder: StepHoldDirective now emits a number (0 first press, 1.. repeats); callers take `holdRepeat`. A4 is a capture-phase Enter listener on `.col-unit` in the ingredients table (the picker stops Enter itself).
+
+- Step 0 drift: the 4 drift commits (499-502) are the plan's own Depends-on, already merged; Snapshot moved to origin/main 3224c973 -> drift clean.
