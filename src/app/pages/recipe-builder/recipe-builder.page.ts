@@ -813,7 +813,15 @@ export class RecipeBuilderPage implements OnInit, OnDestroy {
     this.recipeImageUrl_.set(url)
   }
 
+  /** Plan 511: at most one empty row (no item name) — an existing one is focused instead of adding another. */
   addNewIngredientRow(): void {
+    const emptyIndex = this.ingredientsArray.controls.findIndex(
+      (g) => !(g.get('nameHebrew')?.value ?? '').toString().trim()
+    )
+    if (emptyIndex !== -1) {
+      this.focusIngredientSearchAtRow_.set(emptyIndex)
+      return
+    }
     const newGroup = this.recipeFormService_.createIngredientGroup()
     this.ingredientsArray.push(newGroup)
     this.ingredientsArray.updateValueAndValidity()

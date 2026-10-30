@@ -49,6 +49,28 @@ describe('RecipeIngredientsTableComponent', () => {
     expect(component).toBeTruthy()
   })
 
+  it('a row re-inserted from outside is rendered without another user action (plan 511)', () => {
+    const arr = component.ingredientsFormArray()
+    const count = (): number => fixture.nativeElement.querySelectorAll('.col-unit app-custom-select').length
+    const removed = arr.at(0)
+    arr.removeAt(0)
+    fixture.detectChanges()
+    expect(count()).toBe(0)
+    arr.insert(0, removed)
+    fixture.detectChanges()
+    expect(count()).toBe(1)
+  })
+
+  it('Enter inside the unit picker asks for the next row instead of picking a unit (plan 511)', () => {
+    let added = 0
+    component.addIngredient.subscribe(() => added++)
+    const cell = fixture.nativeElement.querySelector('.col-unit') as HTMLElement
+    const ev = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
+    cell.dispatchEvent(ev)
+    expect(added).toBe(1)
+    expect(ev.defaultPrevented).toBeTrue()
+  })
+
   // Plan 423 - a unit added from a recipe line weighs what the chef typed for THIS product.
   describe('add unit from a line (plan 423)', () => {
     const product = {
