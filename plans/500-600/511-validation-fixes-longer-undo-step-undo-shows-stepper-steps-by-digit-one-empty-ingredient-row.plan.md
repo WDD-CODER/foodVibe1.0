@@ -1,6 +1,6 @@
 # Plan 511 — Validation fixes for run 499-502: longer undo, step undo shows at once, stepper hold climbs digit by digit, one empty ingredient row
 
-Status: draft
+Status: done
 Track: code
 Depends-on: 499, 500, 501, 502 (PR #487 merged into main)
 Snapshot: 3224c973f7fba595ca50cf92ed58dc8783632e94
