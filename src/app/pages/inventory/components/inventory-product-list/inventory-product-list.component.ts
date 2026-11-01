@@ -400,7 +400,8 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
         statusFields: getProductStatusFields(product),
         category: this.getCategoryDisplay(product.categories),
         supplierNames: this.getProductSupplierNames(product),
-        pricePerUnit: this.getPricePerUnit(product, product.baseUnit)
+        pricePerUnit: this.getPricePerUnit(product, product.baseUnit),
+        priceTip: this.getPriceTip_(product)
       }
     })
   )
@@ -733,8 +734,23 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
     return getPricePerUnit(product, unit, this.unitRegistry)
   }
 
+  /** One line per supplier price, so the chef sees who is cheaper; empty with fewer than two supplier prices. */
+  private getPriceTip_(product: Product): string | null {
+    const rows = (product.sources ?? []).filter((s) => s.supplierId && s.price > 0)
+    if (rows.length < 2) return null
+    return rows.map((s) => `${this.getSupplierName(s.supplierId)}: ${s.price.toFixed(2)} ₪`).join('\n')
+  }
+
+  /** With 2+ suppliers one price would overwrite each supplier's own: the product form is where they are edited. */
+  private opensForm_(product: Product): boolean {
+    if ((product.sources ?? []).filter((s) => s.supplierId).length < 2) return false
+    void this.router.navigate(['/inventory/edit', product._id])
+    return true
+  }
+
   // INLINE UPDATE
   protected onUnitChange(product: Product, newUnit: string): void {
+    if (this.opensForm_(product)) return
     const oldBase = product.baseUnit || 'unit'
     const oldPrice = getEffectivePrice(product)
     let newPrice = oldPrice
@@ -795,8 +811,10 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
       if (field === 'supplierIds_') {
         const currentIds = getSupplierIds(product)
         if (currentIds.length === 1 && currentIds[0] === event.value) continue
-        // Bulk "change supplier" replaces — every selected product ends up with exactly this supplier.
-        const newSource = { supplierId: event.value, price: getEffectivePrice(product), addedAt: Date.now() }
+        // Bulk "change supplier" replaces — every selected product ends up with exactly this supplier:
+        // one it already has keeps its own price, a new one starts at the cheapest price.
+        const kept = (product.sources ?? []).find((s) => s.supplierId === event.value)
+        const newSource = kept ?? { supplierId: event.value, price: getEffectivePrice(product), addedAt: Date.now() }
         updated = { ...product, sources: [newSource] }
       } else if (field === 'categories' || field === 'allergens') {
         const current = (product[field] ?? []) as string[]
@@ -810,6 +828,7 @@ export class InventoryProductListComponent implements OnInit, OnDestroy {
   }
 
   protected onPriceChange(product: Product, displayUnit: string, value: string | number): void {
+    if (this.opensForm_(product)) return
     const pricePerUnit = typeof value === 'string' ? parseFloat(value) || 0 : (value as number)
     const buyPriceGlobal = calcBuyPriceGlobal(product, displayUnit, pricePerUnit, this.unitRegistry)
     const newSources = (product.sources ?? []).map((s) => ({ ...s, price: buyPriceGlobal }))

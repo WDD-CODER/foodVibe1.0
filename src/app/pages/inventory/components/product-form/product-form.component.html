@@ -62,21 +62,33 @@
 
       <app-product-price-lock [form]="productForm_" />
 
-      <app-form-field label="buy_price" labelStyle="caps">
-        <div class="relative-input" appNumberBox>
-          <input
-            appSelectOnFocus
-            type="number"
-            formControlName="buy_price_global_"
-            placeholder="0.00"
-            min="0"
-            class="c-input"
-            [class.c-input--invalid]="validationErrors_()['buy_price_global_']"
-            [attr.aria-invalid]="validationErrors_()['buy_price_global_'] ? true : null"
-          />
-          <span class="prefix">₪</span>
-        </div>
-      </app-form-field>
+      @if (selectedSupplierIds_().length) {
+        <app-supplier-prices
+          [supplierIds]="selectedSupplierIds_()"
+          [displayFn]="supplierDisplayFn"
+          [prices]="formValue_().supplierPrices_ ?? {}"
+          [seed]="productForm_.get('buy_price_global_')?.value || 0"
+          [baseUnit]="productForm_.get('baseUnit')?.value"
+          [disabled]="productForm_.disabled"
+          (pricesChange)="onSupplierPrices($event)"
+        />
+      } @else {
+        <app-form-field label="buy_price" labelStyle="caps">
+          <div class="relative-input" appNumberBox>
+            <input
+              appSelectOnFocus
+              type="number"
+              formControlName="buy_price_global_"
+              placeholder="0.00"
+              min="0"
+              class="c-input"
+              [class.c-input--invalid]="validationErrors_()['buy_price_global_']"
+              [attr.aria-invalid]="validationErrors_()['buy_price_global_'] ? true : null"
+            />
+            <span class="prefix">₪</span>
+          </div>
+        </app-form-field>
+      }
 
       <app-form-field
         label="base_unit"

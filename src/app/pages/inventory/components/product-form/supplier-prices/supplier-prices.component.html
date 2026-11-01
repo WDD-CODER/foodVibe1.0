@@ -1,0 +1,26 @@
+<div class="supplier-prices">
+  <p class="supplier-prices__title">{{ 'price_by_supplier' | translatePipe }}</p>
+  @for (id of supplierIds(); track id) {
+    <app-form-field [label]="displayFn()(id)" [forId]="'supplier-price-' + id" labelStyle="caps">
+      <div class="supplier-prices__row">
+        <div class="relative-input" appNumberBox>
+          <input
+            appSelectOnFocus
+            type="number"
+            min="0"
+            class="c-input"
+            [id]="'supplier-price-' + id"
+            [value]="prices()[id] ?? ''"
+            [placeholder]="'waiting_for_price' | translatePipe"
+            [disabled]="locked_()"
+            (change)="setPrice_(id, $event)"
+          />
+          <span class="prefix">₪</span>
+        </div>
+        @if (baseUnit()) {
+          <span class="supplier-prices__unit">/ {{ baseUnit() | translatePipe }}</span>
+        }
+      </div>
+    </app-form-field>
+  }
+</div>

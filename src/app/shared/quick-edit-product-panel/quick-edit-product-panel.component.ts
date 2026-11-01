@@ -119,6 +119,8 @@ export class QuickEditProductPanelComponent {
       this.isSubmitting_.set(false)
       this.nameError_.set('')
       this.unitError_.set('')
+      // Plan 473: one price box cannot hold two supplier prices; the full form edits them.
+      if (getSupplierIds(p).length > 1) queueMicrotask(() => this.openFullEdit.emit())
     })
 
     // Auto-focus the relevant field based on tier
@@ -176,9 +178,12 @@ export class QuickEditProductPanelComponent {
     const existingSources = this.product().sources ?? []
     let sources: ProductSource[]
     if (supplierIds.length > 0) {
+      // The box is the price of a single supplier: with 2+ saved suppliers each keeps its own, a new one gets the box price.
+      const keepOwn = existingSources.filter((s) => s.supplierId).length > 1
       sources = supplierIds.map((sid) => {
         const existing = existingSources.find((s) => s.supplierId === sid)
-        return { supplierId: sid, price, addedBy: existing?.addedBy, addedAt: existing?.addedAt ?? Date.now() }
+        const own = keepOwn && existing ? existing.price : price
+        return { supplierId: sid, price: own, addedBy: existing?.addedBy, addedAt: existing?.addedAt ?? Date.now() }
       })
     } else {
       sources = price > 0 ? [{ supplierId: '', price, addedAt: Date.now() }] : []

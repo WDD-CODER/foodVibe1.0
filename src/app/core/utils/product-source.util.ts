@@ -1,13 +1,12 @@
 import { Product } from '@models/product.model'
+import { chooseSupplier } from '../engine/supplier-choice'
 
 /**
- * Effective base price per base_unit.
- * Uses the lowest positive source price, falling back to deprecated buy_price_global_.
+ * Effective base price per base_unit: the one price rule (`chooseSupplier`) — the cheapest priced supplier,
+ * else the no-supplier price — then the deprecated buy_price_global_.
  */
 export function getEffectivePrice(product: Product): number {
-  const prices = (product.sources ?? []).map((s) => s.price).filter((p) => p > 0)
-  if (prices.length) return Math.min(...prices)
-  return product.buy_price_global_ ?? 0
+  return chooseSupplier(product).pricePerBaseUnit ?? product.buy_price_global_ ?? 0
 }
 
 /**
