@@ -28,7 +28,7 @@ about exports from later validation cards are appended here.
 
 ## Execution Notes
 - Deferred: excluded from the 459–470 run by the Human (2026-10-21). Do not take this plan in an orchestrator run.
-- Base branch `origin/mvp`; merge back into `mvp` only (never main); executed per `docs/mvp/run-mode.md` when scheduled.
+- Base branch `origin/main` (the `mvp` branch is fully merged into main and retired, Human 2026-11-01); a Worker uses a `feat/471-<slug>` branch and merges via PR to `main`.
 - First step of the dedicated session: walk every export with the Human, collect the wanted output per export, then
   rewrite this plan's sub-tasks.
 
@@ -70,7 +70,7 @@ why; offer `approved: <path>`; then append the path to the scope block above and
 
 ## Step 0 — Reality Check
 In the dedicated session: list every export entry point (recipe builder, cook view, menu export sheet, inventory)
-on `origin/mvp` and print what each produces.
+on `origin/main` and print what each produces.
 
 ## User Stories
 - As a chef, I want printed recipes and Excel files that look professional and are in Hebrew so that I can hand them
