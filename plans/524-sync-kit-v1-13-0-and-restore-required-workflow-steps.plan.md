@@ -1,6 +1,6 @@
 # Plan 524 — Sync kit v1.13.0 and restore required workflow steps
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 4c8397b3
 
