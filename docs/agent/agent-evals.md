@@ -26,7 +26,15 @@ Validating roles are compared on Sonnet and Opus only; Haiku is never a validato
 | `--min-recall x` / `--min-precision y` | Exit 1 when the total is below the threshold (a gate for prompt changes). |
 | `--allow-write` | Run an agent that can edit files. Refused by default: an agent without a `tools:` line, or with `Edit`/`Write` in it. |
 | `--runner <module.mjs>` | Replace the model call (tests use a stub). Default: Claude Code, `claude -p --output-format json`. |
-| `--json` | Print the report as JSON. |
+| `--json` | Print the report as JSON, with the per-run totals (`runTotals`) and the run-to-run spread (`total.spread`). |
+| `--case-list <file>` | Run only the cases the file names, one `<role>/<case>` per line (`#` comments). A named case that is missing is an error. |
+| `--redact` | Show the agent the case `plan.md` without its `## Execution Notes` and tell it to read diffs only. |
+| `--with-gate` | Show the agent the case's `input/gate.json` (what the project checks printed); without the flag the file is not shown. |
+
+`node tools/agent-eval-ab.mjs --before <dir> --after <dir> [--arm name=dir] [--adopt-rule redaction] [--out file.md]`
+compares two folders of `--json` reports and prints a verdict per figure — `improved`, `regressed` or `no real change`
+— from `d = max(0.05, 2 × the larger run-to-run spread)`; never type a verdict by hand. `--adopt-rule redaction` prints
+`ADOPT` for a finder only when recall rises by ≥ d and precision does not drop (two decimals), else `REJECT`.
 
 The default runner spends tokens: one non-interactive Claude Code call per case and run, with the agent body (plus
 `docs/agent/agent-roles.md` when it sits next to it) as the system prompt and the case input inline as the prompt.
@@ -104,6 +112,9 @@ agent's result is compared; an expected failure is one item to find.
    Every `note` starts with where the label comes from: `fixed by <sha>`, `clean:`, `planted:` or, for a decision the
    Human graded wrong, `human-verdict <YYYY-MM-DD>:` (`docs/agent/decision-review.md`). A `human-verdict` case holds
    project code, so it stays in the project's own case set (beside its baseline); only a generic case goes to the kit.
+   A checker miss graded `checker-miss: yes` gets its case scaffolded by `node scripts/decision-log.mjs case --from
+   D<n> --run <name>` in the learning step (no model call): `<date>-<kind>/` under the finder's folder, with
+   `input/plan.md`, `input/diff.patch`, the touched file, `expected.json` and a `README.md`.
 4. Run every candidate model with `--runs 2` or more and record the table in a baseline file next to
    the project's cases (for example a BASELINE.md in its agent-evals docs folder) with the date, the agent file's commit and the model ids.
 5. After that, a prompt edit or a model change reruns the set with `--min-recall` / `--min-precision` set from the
