@@ -1571,6 +1571,9 @@
     "coefficients_unsaved_hint": "יש שינויים שלא נשמרו",
     "line_removed": "השורה הוסרה",
     "note_removed": "ההערה נמחקה",
-    "photo_removed": "התמונה הוסרה"
+    "photo_removed": "התמונה הוסרה",
+    "waiting_for_price": "ממתין למחיר",
+    "cheapest_supplier": "הזול ביותר",
+    "price_by_supplier": "מחיר לפי ספק"
   }
 }

@@ -261,7 +261,7 @@
             {{ row.product.baseUnit | translatePipe }}
           </div>
         </app-column-carousel-cell>
-        <div class="col-price col-price-readonly c-list-body-cell" role="cell">
+        <div class="col-price col-price-readonly c-list-body-cell" role="cell" [attr.title]="row.priceTip">
           <span class="price-value">{{ row.pricePerUnit | number: '1.2-2' }}</span>
           <span class="price-suffix">₪</span>
         </div>

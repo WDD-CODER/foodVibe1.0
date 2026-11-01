@@ -1,0 +1,48 @@
+@layer components.supplier-prices {
+  :host {
+    display: block;
+  }
+
+  .supplier-prices {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .supplier-prices__title {
+    margin: 0;
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+
+  .supplier-prices__row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .relative-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+
+    input {
+      width: 100%;
+      padding-inline-start: 1.2rem;
+    }
+
+    .prefix {
+      position: absolute;
+      inset-inline-end: 0.55rem;
+      color: var(--color-text-muted-light);
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+  }
+
+  .supplier-prices__unit {
+    white-space: nowrap;
+    font-size: 0.8rem;
+    opacity: 0.7;
+  }
+}

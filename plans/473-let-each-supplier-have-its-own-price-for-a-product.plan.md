@@ -1,6 +1,6 @@
 # Plan 473 — Let each supplier have its own price for a product
 
-Status: draft
+Status: active
 Track: code
 Depends-on: none
 Snapshot: 2d91fb2bb7830b12d590f56dcbefbd00359ae7b9
@@ -27,20 +27,20 @@ hint in supplier orders, on top of the one price rule built here.
 ## Goals & Success Criteria
 - Primary: each supplier of a product keeps its own price, entered in the product form, and every cost in the app
   uses the same rule — the cheapest priced supplier.
-- [ ] [human] Onion with suppliers David (4 ₪) and Grocery (5 ₪): both prices save; reopening the form shows both.
-- [ ] [human] Adding a third supplier to that onion pre-fills its price box with 4 ₪ (the first supplier's price); the
+- [x] [human] Onion with suppliers David (4 ₪) and Grocery (5 ₪): both prices save; reopening the form shows both.
+- [x] [human] Adding a third supplier to that onion pre-fills its price box with 4 ₪ (the first supplier's price); the
       chef can change it before saving.
-- [ ] [human] A new product with no price: adding the first supplier shows an empty price box with «ממתין למחיר»
+- [x] [human] A new product with no price: adding the first supplier shows an empty price box with «ממתין למחיר»
       ("waiting for price"); the product still shows the «לא סגור סופית» mark in the inventory list.
-- [ ] [human] A recipe using 1 kg of that onion costs it at 4 ₪ in the recipe builder; the event supplier orders put
+- [x] [human] A recipe using 1 kg of that onion costs it at 4 ₪ in the recipe builder; the event supplier orders put
       the onion on David's card.
-- [ ] [human] Inventory list: hovering the onion's price shows both supplier prices; editing the price inline on a
+- [x] [human] Inventory list: hovering the onion's price shows both supplier prices; editing the price inline on a
       product with 2 suppliers opens the product form instead of overwriting both.
-- [ ] [auto] `npx ng build` passes.
-- [ ] [auto] `npx ng test --watch=false` passes, including the new specs for the price rule and the price rows.
-- [ ] [auto] `git diff --numstat origin/main -- src/app/pages/inventory/components/product-form/product-form.component.ts`
+- [x] [auto] `npx ng build` passes.
+- [x] [auto] `npx ng test --watch=false` passes, including the new specs for the price rule and the price rows.
+- [x] [auto] `git diff --numstat origin/main -- src/app/pages/inventory/components/product-form/product-form.component.ts`
       shows added ≤ removed (growth-frozen file, `_shared/tech-stack.md`).
-- [ ] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
+- [x] [auto] `node scripts/log-query.mjs --since=plan-start --level=error` → no entries.
 
 ## Execution Mode
 - Parallel: no. Do not run alongside 499, 500, 501 or 502 — they share the product form, recipe ingredients table and
@@ -61,6 +61,18 @@ hint in supplier orders, on top of the one price rule built here.
   - Error (empty/zero/negative row, failed save) → an empty row stays «ממתין למחיר» and saves as no price; existing validation and save-error handling apply.
   - Edit (remove and re-add a supplier chip; edit row 1 after later rows were pre-filled) → a re-added supplier copies the first row's price again; rows already filled do not change when row 1 changes.
   - S4 quick-edit panel with 2+ suppliers → open the full product form, no new panel UI.
+
+- S7 evidence (2026-11-01): `npx ng build` → success, no errors. `npx ng test --watch=false --browsers=ChromeHeadless` →
+  `TOTAL: 1667 SUCCESS`. `git diff --numstat origin/main -- …/product-form.component.ts` → `20	20` (added ≤ removed).
+  `node scripts/log-query.mjs --since=plan-start --level=error` → `no entries`.
+- Step 0 readers: `getEffectivePrice` now delegates to `chooseSupplier` (one rule); no reader outside scope changed.
+- Inventory-list inline price (`onPriceChange`) and unit change (`onUnitChange`) are not bound in the current template
+  (price cell is read-only); both now open the product form for 2+ suppliers anyway.
+- decision: behaviour: quick-edit panel opens the full product form on its own when the product has 2+ suppliers (readiness answer S4) — reverse: drop the `queueMicrotask(openFullEdit)` line in the panel's first effect
+- decision: behaviour: quick-edit panel save with 2+ saved suppliers keeps each supplier's own price; a newly added supplier gets the box price — reverse: remove `keepOwn` in `onSave`
+- decision: behaviour: inventory-list price tooltip is a plain `title` (one line per supplier, shown only with 2+ supplier prices) — reverse: remove `priceTip` from `displayRows_`
+- decision: behaviour: supplier price rows are read-only for staff without `editMoney` (same rule as the single price) — reverse: drop `locked_` in `supplier-prices.component.ts`
+- Human review (2026-11-01, after the cards): cards 1–5 ok. Changes asked: (1) no «הזול ביותר» chip on supplier rows — removed (UI note above is retired); (2) the ₪ sign sits at `inset-inline-end`. A third request (no «leave without saving» prompt in the recipe builder's inline quick-edit) was made, then taken back by the Human: the panel's prompt stays as plan 498 built it.
 
 ## Reuse Check
 - One price rule — family: helpers — rung: 2 — why: extend `chooseSupplier` in `src/app/core/engine/supplier-choice.ts`; `getEffectivePrice` becomes a thin wrapper over it so every reader shares one rule
@@ -120,12 +132,12 @@ Notes; readers outside scope keep working because only the helpers' internals ch
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] One price row per selected supplier in the product form (supplier name, price, per base unit).
-- [ ] First supplier gets the product's existing price, or an empty «ממתין למחיר» box; each later supplier copies the
+- [x] One price row per selected supplier in the product form (supplier name, price, per base unit).
+- [x] First supplier gets the product's existing price, or an empty «ממתין למחיר» box; each later supplier copies the
       first row's price; every row is editable; removing a supplier removes its row.
-- [ ] One price rule everywhere: cheapest priced supplier; with no priced supplier, the no-supplier price; else none.
-- [ ] No screen overwrites all suppliers with one price any more.
-- [ ] Inventory list price tooltip lists each supplier's price.
+- [x] One price rule everywhere: cheapest priced supplier; with no priced supplier, the no-supplier price; else none.
+- [x] No screen overwrites all suppliers with one price any more.
+- [x] Inventory list price tooltip lists each supplier's price.
 
 ## UI/UX Notes
 - 0 suppliers: the form keeps today's single price box.
@@ -134,13 +146,13 @@ Notes; readers outside scope keep working because only the helpers' internals ch
 - Hebrew strings via `translatePipe` + `dictionary.json` (append only): «ממתין למחיר», «הזול ביותר», «מחיר לפי ספק».
 
 ## Atomic Sub-tasks
-- [ ] S1: Make one shared rule pick a product's price, so recipes, events and lists never disagree — chooseSupplier stays the cheapest priced supplier; getEffectivePrice returns chooseSupplier's price, then buy_price_global_, then 0; specs for ties, zero prices and the no-supplier source — src/app/core/engine/supplier-choice.ts, src/app/core/utils/product-source.util.ts, their specs
-- [ ] S2: Add a price row for each supplier in the product form, pre-filled from the first supplier — new supplier-prices child component (inputs: suppliers, prices; output: prices changed), with spec; first row = existing price or empty «ממתין למחיר», later rows copy row 1 — src/app/pages/inventory/components/product-form/supplier-prices/**
-- [ ] S3: Save each supplier's own price instead of copying one price to all — wire the child into the form, build sources from the rows, remove the copy-to-all code; product-form.component.ts net lines ≤ 0 — src/app/pages/inventory/components/product-form/**
-- [ ] S4: Stop the quick-edit panel from overwriting every supplier with one price — with 2+ suppliers show the per-supplier rows (reuse S2's component) or open the full form — src/app/shared/quick-edit-product-panel/**
-- [ ] S5: Stop inventory-list edits from wiping per-supplier prices — inline price and unit change edit in place only for 0–1 supplier, else open the form; bulk supplier change keeps each kept supplier's price and gives a new one the cheapest price — src/app/pages/inventory/components/inventory-product-list/**
-- [ ] S6: Show every supplier's price in the inventory list tooltip so the chef sees who is cheaper — src/app/pages/inventory/components/inventory-product-list/**
-- [ ] S7: Run the full checks and paste the output — ng build, headless ng test, the frozen-file numstat, log-query — Execution Notes
+- [x] S1: Make one shared rule pick a product's price, so recipes, events and lists never disagree — chooseSupplier stays the cheapest priced supplier; getEffectivePrice returns chooseSupplier's price, then buy_price_global_, then 0; specs for ties, zero prices and the no-supplier source — src/app/core/engine/supplier-choice.ts, src/app/core/utils/product-source.util.ts, their specs
+- [x] S2: Add a price row for each supplier in the product form, pre-filled from the first supplier — new supplier-prices child component (inputs: suppliers, prices; output: prices changed), with spec; first row = existing price or empty «ממתין למחיר», later rows copy row 1 — src/app/pages/inventory/components/product-form/supplier-prices/**
+- [x] S3: Save each supplier's own price instead of copying one price to all — wire the child into the form, build sources from the rows, remove the copy-to-all code; product-form.component.ts net lines ≤ 0 — src/app/pages/inventory/components/product-form/**
+- [x] S4: Stop the quick-edit panel from overwriting every supplier with one price — with 2+ suppliers show the per-supplier rows (reuse S2's component) or open the full form — src/app/shared/quick-edit-product-panel/**
+- [x] S5: Stop inventory-list edits from wiping per-supplier prices — inline price and unit change edit in place only for 0–1 supplier, else open the form; bulk supplier change keeps each kept supplier's price and gives a new one the cheapest price — src/app/pages/inventory/components/inventory-product-list/**
+- [x] S6: Show every supplier's price in the inventory list tooltip so the chef sees who is cheaper — src/app/pages/inventory/components/inventory-product-list/**
+- [x] S7: Run the full checks and paste the output — ng build, headless ng test, the frozen-file numstat, log-query — Execution Notes
 
 ## Technical Considerations
 - Prices are per base unit (`ProductSource.price`); the rows show the base unit next to each box.

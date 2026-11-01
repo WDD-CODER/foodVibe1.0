@@ -32,7 +32,7 @@ import { ActivatedRoute, Router } from '@angular/router'
 import { ConversionService } from '@services/conversion.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { KitchenStateService } from '@services/kitchen-state.service'
-import { Product, PurchaseOption_, ProductSource } from '@models/product.model'
+import { Product, PurchaseOption_ } from '@models/product.model'
 import { getEffectivePrice, getSupplierIds } from '@utils/product-source.util'
 import { ClickOutSideDirective } from '@directives/click-out-side'
 import { UtilService } from '@services/util.service'
@@ -63,6 +63,13 @@ import { MasterPushService } from '@services/master-push.service'
 import { HeroFabService } from '@services/hero-fab.service'
 import { registerDraftMetadata } from 'src/app/pages/inventory/services/ai-draft-metadata.util'
 import { ProductPriceLockComponent } from '../product-price-lock/product-price-lock.component'
+import { SupplierPricesComponent } from './supplier-prices/supplier-prices.component'
+import {
+  buildSources,
+  cheapestPrice,
+  pricesFromProduct,
+  type SupplierPrices
+} from './supplier-prices/supplier-prices.util'
 import { ProductNameSuggestionsComponent } from '../product-name-suggestions/product-name-suggestions.component'
 import { NumberBoxDirective } from '@directives/number-box.directive'
 
@@ -85,6 +92,7 @@ interface ProductFormValue {
   allergens?: string[]
   categories?: string[]
   supplierIds_?: string[]
+  supplierPrices_?: SupplierPrices
   [key: string]: unknown
 }
 
@@ -104,6 +112,7 @@ interface ProductFormValue {
     CustomSelectComponent,
     ChipSearchDropdownComponent,
     ProductPriceLockComponent,
+    SupplierPricesComponent,
     ProductNameSuggestionsComponent,
     FormFieldComponent
   ],
@@ -168,7 +177,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
   protected validationErrors_ = signal<Record<string, string>>({})
 
   //SIMPLE VALUES
-  private formValue_!: Signal<ProductFormValue>
+  protected formValue_!: Signal<ProductFormValue>
   protected productForm_!: FormGroup
   private readonly unsaved_ = useUnsavedChanges({
     form: () => this.productForm_,
@@ -350,6 +359,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       buy_price_global_: [0, [Validators.min(0)]],
       categories: [[]],
       supplierIds_: [[]],
+      supplierPrices_: [{}],
       minStockLevel: [0, [Validators.min(0)]],
       expiryDaysDefault: [0, [Validators.min(0)]],
       yieldFactor: [1, [Validators.required, Validators.min(0)]],
@@ -615,6 +625,11 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
     }
   }
 
+  protected onSupplierPrices(prices: SupplierPrices): void {
+    this.productForm_.patchValue({ supplierPrices_: prices, buy_price_global_: cheapestPrice(prices) })
+    this.productForm_.get('supplierPrices_')?.markAsDirty()
+  }
+
   protected selectedSupplierIds_(): string[] {
     return (this.productForm_.get('supplierIds_')?.value || []) as string[]
   }
@@ -681,6 +696,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       buy_price_global_: Number(raw?.buy_price_global_) || 0,
       categories: [...((raw?.categories ?? []) as string[])].sort(),
       supplierIds_: [...(raw?.supplierIds_ ?? [])].sort(),
+      supplierPrices_: raw?.supplierPrices_ ?? {},
       minStockLevel: Number(raw?.minStockLevel),
       expiryDaysDefault: Number(raw?.expiryDaysDefault),
       yieldFactor: Number(raw?.yieldFactor),
@@ -863,6 +879,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       buy_price_global_: getEffectivePrice(data),
       categories: withDairy,
       supplierIds_: getSupplierIds(data),
+      supplierPrices_: pricesFromProduct(data),
       minStockLevel: data.minStockLevel ?? 0,
       expiryDaysDefault: data.expiryDaysDefault ?? 0,
       yieldFactor: data.yieldFactor,
@@ -922,24 +939,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       }
     )
 
-    // Build sources from form's flat buy_price_global_ + supplierIds_
-    const formPrice = val.buy_price_global_ ?? 0
-    const formSupplierIds = (val.supplierIds_ ?? []) as string[]
-    const existingSources = this.curProduct_()?.sources ?? []
-    let sources: ProductSource[]
-    if (formSupplierIds.length > 0) {
-      sources = formSupplierIds.map((sid) => {
-        const existing = existingSources.find((s) => s.supplierId === sid)
-        return {
-          supplierId: sid,
-          price: formPrice,
-          addedBy: existing?.addedBy,
-          addedAt: existing?.addedAt ?? Date.now()
-        }
-      })
-    } else {
-      sources = formPrice > 0 ? [{ supplierId: '', price: formPrice, addedAt: Date.now() }] : []
-    }
+    const sources = buildSources(val, this.curProduct_()?.sources ?? [])
 
     const productToSave: Product = {
       ...this.curProduct_()!,
