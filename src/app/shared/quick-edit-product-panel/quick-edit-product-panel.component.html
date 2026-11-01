@@ -1,5 +1,22 @@
 <div class="inline-edit-panel" [class.closing]="closing()" dir="rtl">
-  <h3 class="inline-edit-title">{{ product().nameHebrew }}</h3>
+  <div class="qep__title-row">
+    <h3 class="inline-edit-title">{{ product().nameHebrew }}</h3>
+    <!-- Which supplier's price the box shows (2+ priced suppliers); «all» is the default -->
+    @if (ownPrices_()) {
+      <div class="c-chip-group">
+        <label class="c-chip c-chip--toggle">
+          <input type="radio" name="qep-focus" [checked]="focusId_() === null" (change)="onFocusSupplier(null)" />
+          <span>{{ 'all' | translatePipe }}</span>
+        </label>
+        @for (s of ownSuppliers_(); track s._id) {
+          <label class="c-chip c-chip--toggle">
+            <input type="radio" name="qep-focus" [checked]="focusId_() === s._id" (change)="onFocusSupplier(s._id)" />
+            <span>{{ s.nameHebrew }}</span>
+          </label>
+        }
+      </div>
+    }
+  </div>
 
   <div class="inline-edit-section">
     <div class="inline-edit-grid">
@@ -54,8 +71,10 @@
           [class.input--highlight]="tier() === 'incomplete'"
           min="0"
           step="0.01"
-          [ngModel]="price_()"
-          (ngModelChange)="price_.set($any($event))"
+          [disabled]="priceLocked_()"
+          [ngModel]="priceLocked_() ? null : price_()"
+          [placeholder]="priceLocked_() ? price_().toString() : ''"
+          (ngModelChange)="onPriceInput($any($event))"
           (keydown.enter)="$event.preventDefault(); onSave()"
           name="buy_price_global_"
         />

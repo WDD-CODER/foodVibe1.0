@@ -80,3 +80,11 @@
   color: var(--color-text-muted);
   font-style: italic;
 }
+
+/* Supplier chips sit beside the title */
+.qep__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
