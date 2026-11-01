@@ -55,6 +55,12 @@ hint in supplier orders, on top of the one price rule built here.
   copy-to-all save code is removed from the form.
 - `purchaseOptions[].priceOverride` keeps winning over source prices where it does today; not changed here.
 - The legacy shim (`product-data.service.ts:47-57`, `buy_price_global_` → same price for all suppliers) stays as is.
+- Readiness answers (Human, 2026-11-01, "defaults"; used with /take-plan, not /orchestrate):
+  - Leave (close form with unsaved supplier prices) → nothing extra, same as the form does today.
+  - Cancel → nothing extra: discard edits, keep stored prices.
+  - Error (empty/zero/negative row, failed save) → an empty row stays «ממתין למחיר» and saves as no price; existing validation and save-error handling apply.
+  - Edit (remove and re-add a supplier chip; edit row 1 after later rows were pre-filled) → a re-added supplier copies the first row's price again; rows already filled do not change when row 1 changes.
+  - S4 quick-edit panel with 2+ suppliers → open the full product form, no new panel UI.
 
 ## Reuse Check
 - One price rule — family: helpers — rung: 2 — why: extend `chooseSupplier` in `src/app/core/engine/supplier-choice.ts`; `getEffectivePrice` becomes a thin wrapper over it so every reader shares one rule
