@@ -939,12 +939,7 @@ export class ProductFormComponent implements OnInit, AfterViewInit {
       }
     )
 
-    const sources = buildSources(
-      (val.supplierIds_ ?? []) as string[],
-      (val.supplierPrices_ ?? {}) as SupplierPrices,
-      this.curProduct_()?.sources ?? [],
-      val.buy_price_global_ ?? 0
-    )
+    const sources = buildSources(val, this.curProduct_()?.sources ?? [])
 
     const productToSave: Product = {
       ...this.curProduct_()!,

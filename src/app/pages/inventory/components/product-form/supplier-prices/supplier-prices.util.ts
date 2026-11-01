@@ -37,11 +37,12 @@ export function pricesFromProduct(product: Product): SupplierPrices {
 
 /** Sources to save: each supplier keeps its own price; without suppliers the single price is the product's general price. */
 export function buildSources(
-  ids: string[],
-  prices: SupplierPrices,
-  existing: ProductSource[],
-  generalPrice: number
+  value: { supplierIds_?: string[]; supplierPrices_?: SupplierPrices; buy_price_global_?: number },
+  existing: ProductSource[]
 ): ProductSource[] {
+  const ids = value.supplierIds_ ?? []
+  const prices = value.supplierPrices_ ?? {}
+  const generalPrice = value.buy_price_global_ ?? 0
   if (!ids.length) return generalPrice > 0 ? [{ supplierId: '', price: generalPrice, addedAt: Date.now() }] : []
   return ids.map((supplierId) => {
     const was = existing.find((s) => s.supplierId === supplierId)

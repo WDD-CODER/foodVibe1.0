@@ -53,7 +53,7 @@ describe('pricesFromProduct', () => {
 describe('buildSources', () => {
   it('saves each supplier its own price and keeps who added it', () => {
     const existing = [{ supplierId: 'a', price: 1, addedBy: 'u1', addedAt: 7 }]
-    const out = buildSources(['a', 'b'], { a: 4, b: 5 }, existing, 4)
+    const out = buildSources({ supplierIds_: ['a', 'b'], supplierPrices_: { a: 4, b: 5 } }, existing)
     expect(out.map((s) => [s.supplierId, s.price])).toEqual([
       ['a', 4],
       ['b', 5]
@@ -63,11 +63,11 @@ describe('buildSources', () => {
   })
 
   it('saves an empty row as no price', () => {
-    expect(buildSources(['a'], { a: null }, [], 0)[0].price).toBe(0)
+    expect(buildSources({ supplierIds_: ['a'], supplierPrices_: { a: null } }, [])[0].price).toBe(0)
   })
 
   it('without suppliers keeps the single price as the general price', () => {
-    expect(buildSources([], {}, [], 6).map((s) => [s.supplierId, s.price])).toEqual([['', 6]])
-    expect(buildSources([], {}, [], 0)).toEqual([])
+    expect(buildSources({ buy_price_global_: 6 }, []).map((s) => [s.supplierId, s.price])).toEqual([['', 6]])
+    expect(buildSources({}, [])).toEqual([])
   })
 })
