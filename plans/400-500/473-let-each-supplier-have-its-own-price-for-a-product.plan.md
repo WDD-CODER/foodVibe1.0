@@ -1,6 +1,6 @@
 # Plan 473 — Let each supplier have its own price for a product
 
-Status: active
+Status: done
 Track: code
 Depends-on: none
 Snapshot: 2d91fb2bb7830b12d590f56dcbefbd00359ae7b9
