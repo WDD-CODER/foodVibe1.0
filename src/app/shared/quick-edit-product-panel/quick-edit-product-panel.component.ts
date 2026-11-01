@@ -78,6 +78,17 @@ export class QuickEditProductPanelComponent {
   protected nameError_ = signal('')
   protected unitError_ = signal('')
 
+  /** 2+ suppliers each have their own price: the price box follows the supplier chip picked (none = all, the lowest, read-only). */
+  protected ownPrices_ = computed(() => (this.product().sources ?? []).filter((s) => s.supplierId).length > 1)
+  protected focusId_ = signal<string | null>(null)
+  /** Prices typed per supplier, only those that differ from the saved one. */
+  protected ownEdits_ = signal<Record<string, number>>({})
+  protected priceLocked_ = computed(() => this.ownPrices_() && this.focusId_() === null)
+  protected ownSuppliers_ = computed(() => {
+    const ids = (this.product().sources ?? []).map((s) => s.supplierId).filter(Boolean)
+    return this.suppliers_().filter((s) => ids.includes(s._id))
+  })
+
   protected isDirty_ = computed(() => {
     const p = this.product()
     const suppliersSorted = [...this.selectedSupplierIds_()].sort().join(',')
@@ -86,7 +97,7 @@ export class QuickEditProductPanelComponent {
       this.name() !== (p.nameHebrew ?? '') ||
       this.baseUnit_() !== (p.baseUnit ?? '') ||
       this.category() !== (p.categories?.[0] ?? '') ||
-      this.price_() !== getEffectivePrice(p) ||
+      (this.ownPrices_() ? Object.keys(this.ownEdits_()).length > 0 : this.price_() !== getEffectivePrice(p)) ||
       suppliersSorted !== originalSuppliersSorted
     )
   })
@@ -114,13 +125,13 @@ export class QuickEditProductPanelComponent {
       this.baseUnit_.set(p.baseUnit ?? '')
       this.category.set(p.categories?.[0] ?? '')
       this.price_.set(getEffectivePrice(p))
+      this.focusId_.set(null)
+      this.ownEdits_.set({})
       this.selectedSupplierIds_.set([...getSupplierIds(p)])
       this.error_.set(null)
       this.isSubmitting_.set(false)
       this.nameError_.set('')
       this.unitError_.set('')
-      // Plan 473: one price box cannot hold two supplier prices; the full form edits them.
-      if (getSupplierIds(p).length > 1) queueMicrotask(() => this.openFullEdit.emit())
     })
 
     // Auto-focus the relevant field based on tier
@@ -137,7 +148,25 @@ export class QuickEditProductPanelComponent {
     })
   }
 
+  /** Pick the supplier whose price the box shows; null = «all» (the default). */
+  protected onFocusSupplier(id: string | null): void {
+    const next = id
+    this.focusId_.set(next)
+    const src = (this.product().sources ?? []).find((x) => x.supplierId === next)
+    this.price_.set(next && src ? (this.ownEdits_()[next] ?? src.price) : getEffectivePrice(this.product()))
+  }
+
+  protected onPriceInput(value: number): void {
+    this.price_.set(value)
+    const id = this.focusId_()
+    if (!id) return
+    const saved = (this.product().sources ?? []).find((x) => x.supplierId === id)?.price
+    const { [id]: _drop, ...rest } = this.ownEdits_()
+    this.ownEdits_.set(Number(value) === saved ? rest : { ...rest, [id]: Math.max(0, Number(value) || 0) })
+  }
+
   protected onSupplierChange(val: string): void {
+    if (this.focusId_() === val) this.onFocusSupplier(null)
     const current = this.selectedSupplierIds_()
     if (current.includes(val)) {
       this.selectedSupplierIds_.set(current.filter((id) => id !== val))
@@ -173,7 +202,7 @@ export class QuickEditProductPanelComponent {
     this.error_.set(null)
 
     const category = this.category().trim()
-    const price = Math.max(0, Number(this.price_()) || 0)
+    const price = Math.max(0, Number(this.ownPrices_() ? getEffectivePrice(this.product()) : this.price_()) || 0)
     const supplierIds = this.selectedSupplierIds_()
     const existingSources = this.product().sources ?? []
     let sources: ProductSource[]
@@ -182,7 +211,7 @@ export class QuickEditProductPanelComponent {
       const keepOwn = existingSources.filter((s) => s.supplierId).length > 1
       sources = supplierIds.map((sid) => {
         const existing = existingSources.find((s) => s.supplierId === sid)
-        const own = keepOwn && existing ? existing.price : price
+        const own = keepOwn && existing ? (this.ownEdits_()[sid] ?? existing.price) : price
         return { supplierId: sid, price: own, addedBy: existing?.addedBy, addedAt: existing?.addedAt ?? Date.now() }
       })
     } else {
