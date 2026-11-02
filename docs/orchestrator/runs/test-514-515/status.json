@@ -209,7 +209,7 @@
   "attempts": 1,
   "phase": "finished",
   "freeDiskGb": 15.1,
-  "updatedAt": "2026-11-02T20:53:29.281Z",
+  "updatedAt": "2026-11-02T21:36:33.690Z",
   "noteIds": [
     "1:514-1",
     "1:515-1",
@@ -221,10 +221,10 @@
   ],
   "finishedAt": "2026-11-02T20:53:29.280Z",
   "finalGate": {
-    "ok": false,
-    "command": "node scripts/breadcrumbs-check.mjs",
-    "at": "2026-11-02T20:53:29.281Z",
-    "attempt": 1,
+    "ok": true,
+    "command": null,
+    "at": "2026-11-02T21:36:33.688Z",
+    "attempt": 2,
     "blamed": []
   }
 }

@@ -4,7 +4,7 @@ Run branch: `orch/test-514-515` (from `origin/main` at 80fb02e) · started 2026-
 Result: 1 merged, 1 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 80fb02e.
 
-Final gate: failed: node scripts/breadcrumbs-check.mjs (attempt 1)
+Final gate: ok (attempt 2)
 
 ## Plans
 
@@ -60,6 +60,6 @@ git fetch origin
 gh pr create --base main --head orch/test-514-515 --title "Orchestrator run test-514-515" --body-file .claude\orchestrator-runs\test-514-515.md
 ```
 
-Context added by learning: 662 chars across 2 roles
+Context added by learning: 658 chars across 2 roles
 
 Trend (last 2 runs): ✗ per plan 0.5 → - · fix rounds per plan 0.5 → 1 · parked 0 → 1
