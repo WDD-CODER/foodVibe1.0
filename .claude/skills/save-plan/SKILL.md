@@ -17,7 +17,8 @@ save-plan:
 - [ ] 0 similarity: node scripts/plan-name-similarity.mjs --name="<Display Name>" → no hits, or Human chose rewrite/new/cancel
 - [ ] 1 number (Planner, save-as-new only): node scripts/next-plan-number.mjs → NNN
 - [ ] 1 ledger (Planner): Atomic Sub-tasks appended to .claude/todo.md via todo-query.mjs append
-- [ ] 2 shape: Read-Write Scope parses, exactly one Status:, Snapshot: present, every Done-when tagged [auto]/[human], every Atomic Sub-task opens with a plain explanatory title
+- [ ] 2 shape: Read-Write Scope parses, exactly one Status:, Snapshot: present, Depends-on: present (node scripts/scope-check.mjs --deps --plan=<path> → DEPENDS_ON: ok), every Done-when tagged [auto]/[ui]/[human] (node scripts/scope-check.mjs --tags --plan=<path> → DONE_WHEN_TAGS: ok), every Atomic Sub-task opens with a plain explanatory title
+- [ ] 2 test location: node scripts/scope-check.mjs --tests --plan=<path> → SCOPE_TESTS: ok | skipped (a warn is shown to the Human, never blocks)
 - [ ] 2 arch gate: node scripts/scope-check.mjs --arch --plan=<path> → exit 0
 - [ ] 2 reuse gate: node scripts/scope-check.mjs --reuse --plan=<path> → exit 0
 - [ ] 2 prerequisites (Planner): already true on origin/main, or split into NNN-1
@@ -29,22 +30,23 @@ save-plan:
 ## Plan rules (what a saved plan looks like)
 
 - Path `plans/<NNN>-<slug>.plan.md`. Open plans live directly in one of the open plan folders (plans, plans/design); when `plans/design` is one of them, a plan with `Track: design` or `Track: split` (Claude Design work: mostly style and layout) goes to `plans/design/<NNN>-<slug>.plan.md`. Closed plans always go to the range folder `plans/<range>/`, design or not. H1 `# Plan NNN — <Human Title>` (the title drives similarity — make it describe the work). Refactor variant: `NNN-R`.
-- `## Read-Write Scope` in a shape `scripts/lib/plan-scope.mjs` parses: a fenced ```` ```scope ```` block, one glob per line, **or** a `**Scope:**` line followed by bullets whose first token is a `` `backticked` `` glob. A bare `scope` line or un-backticked bullets are not parsed and `take-plan` refuses the plan.
-- Exactly one `Status:` line (`Status: draft` for new; `take-plan` sets `active`; after the merge the todo-sync workflow's `plan-close.mjs` sets `done` and moves the plan into `plans/<range>/`). One `Snapshot:` line (filled in Phase 3).
+- `## Read-Write Scope` in a shape `scripts/lib/plan-scope.mjs` parses: a fenced ```` ```scope ```` block, one glob per line, **or** a `**Scope:**` line followed by bullets whose first token is a `` `backticked` `` glob. A bare `scope` line or un-backticked bullets are not parsed and `take-plan` refuses the plan. When a step changes or adds code that has tests, a scope line must name the test location itself (a tests folder glob or a single test file); a code-folder glob does not cover the tests under it, and the test-file gate blocks a changed test that no such line lists.
+- Exactly one `Status:` line (`Status: draft` for new; `take-plan` sets `active`; after the merge the todo-sync workflow's `plan-close.mjs` sets `done` and moves the plan into `plans/<range>/`). One `Snapshot:` line (filled in Phase 3). One `Depends-on:` line: the plan numbers that must be merged first (`Depends-on: 007, 012`), or `Depends-on: none`. It is read by `scripts/lib/plan-deps.mjs` — the one parser `plan-order`, `scope-check --deps` and `take-plan` share; legacy prose (`Prerequisite: plan NNN merged`) is still read, but a new plan says it in the header.
+- The shape is `.claude/references/prd-template.md`. Its `## Atomic Sub-tasks` are the milestones: there is no separate milestone list and no per-step Verify field (the checks are the `[auto]` success criteria). `## Execution Notes` collects decisions and evidence while the plan runs.
 - Every Atomic Sub-task is `- [ ] <ID>: <title> — <details> — <target file(s)>` (`<details>` optional). The **title** is the only part the plan panel and progress views show, so it must stand alone:
   - One plain sentence, at most ~90 characters, that says **what changes and why it matters**, written for someone who has not read the plan.
   - No backticks, paths, `--flags`, commands or code names in the title. They go in `<details>` / `<target file(s)>`.
   - Bad: `` `--source github:<owner>/<repo>` + `--ref <tag>` in `tools/install.mjs` `` (raw actions) · `Installed GitHub link` (a label, says nothing).
   - Good: `B1: Let the installer pull the kit straight from a GitHub release instead of a local copy — --source/--ref flags, fetch-to-cache helper — tools/install.mjs, tools/lib/source.mjs`.
   - When the Human's pasted plan has raw-action sub-tasks, write the titles yourself while saving (keep their wording in `<details>`); never ask the Human to rewrite them.
-- Every Done-when item starts with `[auto]` or `[human]`. `[auto]` means the expected output is exact — a string, an exit code, `npm run build` passing, deterministic CLI output. `[human]` is visual/UI judgement, live interaction, product decisions; untagged counts as `[human]`. A UI-touching plan whose only Done-when is `[auto] npm run build` is under-specified — add a `[human]` item. Only the plan author tags; agents never promote to `[auto]`.
+- Every Done-when item starts with `[auto]`, `[ui]` or `[human]` — lower case, closed, exactly so (`[ui` and `[UI]` are rejected). `[auto]` means the expected output is exact — a string, an exit code, `npm run build` passing, deterministic CLI output. `[ui]` is a check a script can do in the running app: open one page, do one action, assert a quoted text or element, save a screenshot (the builder writes one short e2e test per item; a browser agent looks only when it fails — `docs/agent/job-validation.md` Tier 1b). `[human]` is visual judgement, look and feel, product decisions; untagged counts as `[human]`. A UI-touching plan whose only Done-when is `[auto] npm run build` is under-specified — add a `[ui]` or `[human]` item. Only the plan author tags; agents never promote to `[auto]` or `[ui]`.
 - Medium/large plan touching auth or storage → a one-line security-surface note; `scripts/pre-commit-secret-scan.mjs` (pre-commit) and the CI security workflow are the gates, plus any stack pack's pre-commit checks.
 
 ## Phase 0 — similarity gate (always)
 
 1. Extract the display name from the H1 / `name:` / first heading; derive the kebab-case slug.
 2. `node scripts/plan-name-similarity.mjs --name="<Display Name>"`
-3. `no similar plans` → go on, do **not** ask rewrite/new/cancel. `similar plan(s)` → paste the script output and ask exactly:
+3. `no similar plans` → go on, do **not** ask rewrite/new/cancel. `similar plan(s)` → paste the script output and ask exactly (titles are compared by word stem, so "favourites" and "favorite" match):
 
 ```text
 Similar plan(s) found — validate:
@@ -59,16 +61,18 @@ Reply: rewrite existing | save as new | cancel
 - **save as new** → continue; before the Write put the relative path in `.claude/.plan-write-ack` (one line, e.g. `plans/123-example-feature.plan.md`) so the PreToolUse guard allows the create.
 - **cancel** → stop, write nothing, execute nothing.
 
+This gate compares titles only. The wider search (plan text, and open plans' scope) is `/plan`'s Architect + PM review (`--related --scope`); its findings are `open:` lines there, not this question.
+
 ## Phase 1 — number + ledger (Planner only)
 
 A Worker never assigns `NNN` and never touches `.claude/todo.md` (it is Planner-owned; `todo-query.mjs sync --merged` collects the Worker's plan-file changes after merge).
 
-- **Number (save-as-new):** `node scripts/next-plan-number.mjs`. The script's number wins even when the pasted H1 already carries one (a plan drafted in chat cannot see Workers' open branches) — rename the H1 and tell the Human in the completion line. It fetches, then takes the highest number across local plans, `origin/main` plans, the main worktree, and every local/remote `<type>/NNN-*` branch — a Worker's open branch whose plan you cannot see yet — plus 1. Never count `plans/` by hand; that is exactly how a number got reused. Re-run right before the write if anything else saved a plan meanwhile.
+- **Number (save-as-new):** `node scripts/next-plan-number.mjs`. The script's number wins even when the pasted H1 already carries one (a plan drafted in chat cannot see Workers' open branches) — rename the H1 and tell the Human in the completion line. It fetches, then takes the highest number across local plans, `origin/main` plans, the main worktree, every local/remote `<type>/NNN-*` branch — a Worker's open branch whose plan you cannot see yet — and every plan file on any local or remote branch — a `plan/<slug>` branch without a number carries plans too — plus 1. Never count `plans/` by hand; that is exactly how a number got reused. Re-run right before the write if anything else saved a plan meanwhile.
 - **Ledger:** don't read `.claude/todo.md` in full. Extract the Atomic Sub-tasks into a temp file and `node scripts/todo-query.mjs append --from <file>` (it inserts under `### Plan NNN — <Title>` before the footers). Then `node scripts/todo-query.mjs open` — unrelated open items get surfaced, not silently buried.
 
 ## Phase 2 — lint the draft (cheap here, expensive in a slot)
 
-- **Shape:** scope block parses; one `Status:`; a `Snapshot:` line exists (may be empty until Phase 3); Done-when tags present; every Atomic Sub-task has a title per Plan rules (read each title alone: if it does not say what changes and why, rewrite it).
+- **Shape:** scope block parses; one `Status:`; a `Snapshot:` line exists (may be empty until Phase 3); `node scripts/scope-check.mjs --deps --plan=<path>` prints `DEPENDS_ON: ok` (`missing` → add the `Depends-on:` line under `Status:`, `none` when nothing comes first); `node scripts/scope-check.mjs --tags --plan=<path>` prints `DONE_WHEN_TAGS: ok` (`bad` → one line per item with no tag or a misspelt one; fix the tag); `node scripts/scope-check.mjs --tests --plan=<path>` prints `SCOPE_TESTS: ok` or `skipped` (`warn` → show the Human the line it prints and offer to add a test-location line to the scope; it is a warning, so the save goes on if the Human keeps the scope as it is); every Atomic Sub-task has a title per Plan rules (read each title alone: if it does not say what changes and why, rewrite it).
 - **Coverage:** every requirement in the plan has an Atomic Sub-task.
 - **Architecture gate:** `node scripts/scope-check.mjs --arch --plan=<path>` must exit 0 (`ARCH: ok …` or `ARCH: skipped …`). A crash that is environmental (`Cannot find package 'picomatch'` → the workflow scripts' dependencies are missing, run `npm install` inside `scripts/`) is not a gate result — fix the environment and re-run; do not reason the gate out by hand. It fails when the scope touches an invariant in `docs/brain/invariants.md` with no `## Architecture Impact` line, or a `deviation`/`changes` line lacking `Arch-approved: Human YYYY-MM-DD` or a valid ADR. Fix the draft. Only the Human's literal `approve arch change INV-n` in chat allows an `Arch-approved:` line — never write one on your own.
 - **Reuse gate:** `node scripts/scope-check.mjs --reuse --plan=<path>` must exit 0 (`REUSE: ok …` or `REUSE: skipped …`). It fails when `## Reuse Check` is missing or empty, a row has no rung, a rung 1–3 row names no registry family (`docs/brain/component-families.md`), or a rung-4 row has no `why:`. Fix the draft; the ladder is in `docs/agent/standards-reuse.md`.
