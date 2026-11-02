@@ -3,6 +3,7 @@
  * Client view interfaces stay; conformance.ts locks them to these schema types at compile time.
  */
 export type {
+  Client,
   Equipment,
   MenuEvent,
   Product,
