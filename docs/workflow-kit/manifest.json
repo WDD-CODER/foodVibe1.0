@@ -3554,6 +3554,12 @@
           "strings": [
             "3000"
           ]
+        },
+        {
+          "key": "project.repoName",
+          "strings": [
+            "foodvibe"
+          ]
         }
       ],
       "refs": [
@@ -5690,6 +5696,222 @@
         "scripts/ci-scope-check.mjs"
       ],
       "notes": "Plan 497: node tests for scripts/ci-scope-check.mjs (in scope, out of scope, skipped branch)."
+    },
+    {
+      "path": ".claude/agents/orch-triage.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/agents/skill-judge.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/commands/improve-skill.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": ".claude/commands/scout.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/kit-brain.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/builder.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/check-bugs.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/check-plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/check-rules.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/gate.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/planner.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/readiness.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/security.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/ui.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/agent-lessons/verify.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/follow-ups.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/brain/run-log.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/brain.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/branch-autodelete-check.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/brain-doc.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/override-steps.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/redact.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/scope-tests-lint.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/override-check.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/scout/page-template.html",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/scout/pr.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/scout/render.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
     }
   ]
 }
