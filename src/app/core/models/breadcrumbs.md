@@ -17,6 +17,7 @@ TypeScript interfaces, types, and small constants for domain entities and shared
 | `venue.model.ts` | Venue profile / infra | VenueProfile, VenueInfraItem, EnvironmentType |
 | `logistics.model.ts` | Event/dish logistics | EventLogistics, DishLogistics, BaselineEntry, ServiceOverride, etc. |
 | `menu-event.model.ts` | Menu builder event model | MenuEvent, MenuSection, MenuTypeDefinition, ALL_DISH_FIELDS |
+| `client.model.ts` | Client entity (who an event is for), mirror of the client schema | Client, ClientType, CLIENT_TYPES |
 | `user.model.ts` | User/session | User |
 | `msg.model.ts` | User message / toast | Msg |
 | `label.model.ts` | Label definitions for UI | LabelDefinition, LABEL_COLOR_PALETTE |

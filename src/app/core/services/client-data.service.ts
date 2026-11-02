@@ -16,7 +16,11 @@ export class ClientDataService extends BaseEntityDataService<Client> {
 
   constructor() {
     // Deferred: load on ensureLoaded() via the menu-library / menu-intelligence routes.
-    super(ENTITY, false, { errorEvent: 'crud.clients.hydrate_error', errorMessage: 'Failed to load clients' })
+    super(ENTITY, false, {
+      errorEvent: 'crud.clients.hydrate_error',
+      errorMessage: 'Failed to load clients',
+      clearOnReload: true
+    })
   }
 
   /** From the loaded list; no request is made. */
