@@ -13,7 +13,7 @@ branch himself.
 | Command | `.claude/commands/orchestrate.md` | Starts a run from a clean turn: readiness, the batched questions, `go`, the run, the final instructions |
 | Workflow | `.claude/workflows/orchestrate.js` | Readiness, ordering, the per-plan pipeline, the fix loop, the wave gate. No file, git or clock access |
 | State | `scripts/orch-state.mjs` | Every file, git and time step the workflow needs: run branch, merge folder, builder folders, `status.json`, hand-off files, the report |
-| Preflight | `scripts/orch-preflight.mjs` | Environment checks before the run and before a retry: disk, database, packages, dev server, git identity, remote, main folder, settings, a live run; `--ui` before any browser step: the pages' servers, the QA login, the backend from the page's origin |
+| Preflight | `scripts/orch-preflight.mjs` | Environment checks before the run and before a retry: disk, database, packages, dev server (started when missing), backend (started for a plan with an `[auto:main]` item), git identity, remote, main folder, settings, a live run; `--ui` before any browser step: the pages' servers, the QA login, the backend from the page's origin |
 | Role agents | `.claude/agents/orch-*.md` | One job each; shared contract in `docs/agent/agent-roles.md` |
 | Runner | `.claude/agents/kit-runner.md` | Runs the state and preflight commands for the workflow (mechanical tier) |
 
@@ -28,20 +28,28 @@ branch himself.
 | `onPark` | `dependents` | What a parked plan stops: `dependents` = only the later plans that depend on it or share its files (each is `skipped` with the reason), `all` = every later plan, the earlier behaviour |
 | `fallbackModel` | `opus` | The model a dead agent (one that returned nothing: a terminal API error, a blocked model) is retried on, once; `inherit` = no retry. Never Haiku: the retry may be a review agent |
 | `staleMin` | `10` | Minutes without a `status.json` update after which `orch-state.mjs watch` prints `STUCK` |
-| `maxNotesPerPlan` | `12` | Run notes one plan may write (every note is one runner agent call); the last one says `notes capped` |
+| `maxNotesPerPlan` | `12` | Run notes one plan may write (queued notes count; they ride on the plan's next `set`); the last one says `notes capped` |
 | `maxAgentCallsPerPlan` | `60` | Agent calls one plan may make before it is parked (`agent-call limit`) |
 | `triage` | `shadow` | How a run sorts the decisions agents took: `off` = no triage call, `shadow` = one `orch-triage` call recommends a verdict per decision and the Human still sees every decision, `filter` = a kind with enough graded agreement is listed on one line only (`docs/agent/decision-review.md` §5) |
 | `triageMinAgreement` | `0.9` | Agreement with the Human a kind needs before `filter` collapses it (0.5–1) |
 | `triageMinGraded` | `20` | Graded decisions of that kind it needs first (5–500) |
 | `mergeChecks` | `build` | What the merge step runs on the merged tree: `build` = the project build plus the plan's scope check (lint and tests passed in the plan's gate and run once more at the final gate), `full` = the plan's whole check list on every merge |
 | `ciMirror` | `[]` | CI commands (`npm run <script>`, `pnpm run <script>`, `node scripts/…` or `node tools/…`, no write flag) the final gate runs after the project checks and the kit manifest check, so a green run is a green pull request. Install and sync print a `NOTE ci-mirror:` line for each workflow command the final gate does not run; they never write the list |
+| `prepare` | `[]` | Files the gate generates before the tests: a list of `{ "missing": "<repo-relative path>", "script": "<npm script>", "in": "<repo-relative folder, default .>" }`. Each entry is a first gate command of every plan gate and of the final gate (`node scripts/orch-state.mjs prepare --missing <path> --script <name> [--in <folder>]`): it runs `pnpm run <script>` in the folder only when `<path>` is absent, and fails with the last 20 output lines and the entry when the path is still missing. Not in the merge step's `build` list. Install and sync refuse an absolute path, a `..`, a script that is a full command or an unknown field |
 
 ## The run
 
 1. **Readiness.** `plan-order --json` gives the waves. One `orch-readiness` agent per plan reports open questions,
-   environment needs and the commands the plan will run; `orch-preflight.mjs` checks the environment (with
-   `commands.dev` set, the dev server must answer on the base port or start through `scripts/slot-serve.mjs`; a failed
-   start stops the run before any builder). The command
+   environment needs and the commands the plan will run; `orch-preflight.mjs` checks the environment and starts what is
+   missing: with `commands.dev` set, a frontend that does not answer on the base port is started by
+   `scripts/slot-serve.mjs --main --servers fe` (`<pm> run <commands.dev>`, no port arguments); a plan with an open
+   `[auto:main]` item gets the main folder's backend the same way (`--servers be`: `<pm> run <commands.devLocal>` in
+   `server/`, or `commands.devRemote` when the request said `remote`; default scripts `dev:local` / `dev:remote`). A
+   server that answers is never touched; a held port is refused with its holder named, never killed; a failed start
+   stops the run before any builder with the server's own log lines (`fe.log` / `be.log` under `.claude/`) and the
+   exact command. It never asks the Human to start a server. The servers it started stay up after the run, like
+   hand-started ones; `node scripts/slot-stop.mjs --main` stops only those (recorded in `.main-serve-pids` under
+   `.claude/`). The command
    asks the Human every question in **one batch**, writes each answer into that plan's `## Execution Notes` (a plan
    commit on `main`), and leaves out a plan whose question stays unanswered. Then the Human says `go` —
    unless there was nothing to ask (`askHuman` false: every plan ready, no question, no environment need, no main-folder
@@ -63,7 +71,9 @@ branch himself.
      nothing; a folder of its own installs once before the builder starts (with pnpm, quickly: one shared store).
      Packages are never linked in from the main folder: on Windows git follows a junction when it removes a worktree
      and would delete the main folder's packages. At most `orchestrator.concurrency` builders run at once (default 2);
-   - gate (`orch-gate`): the project checks (`commands.build`, `commands.lint`, and `commands.testCi` when set, else
+   - gate (`orch-gate`): first the `orchestrator.prepare` commands (generated files the tests need), then the project
+     checks, then `node scripts/kit-manifest-check.mjs` when the project has a kit manifest (a plan that adds an inventoried
+     file or an ADR is sent back as `unclassified: <path>` until the manifest lists it; the merge step never runs it); the project checks are (`commands.build`, `commands.lint`, and `commands.testCi` when set, else
      `commands.test`; run with `pnpm run`; each stopped after `orchestrator.gateTimeoutMin`
      minutes and reported as a fail, never a hang — a watch-mode test script is the usual cause, and preflight warns about
      it) plus the plan's own check commands from readiness — only `pnpm run
@@ -98,14 +108,21 @@ branch himself.
    are `skipped` with the reason "pilot", the run stops, and the report and the numbered decisions go to the Human.
    `continue` relaunches the same run with `pilot: false`: merged plans are skipped from git, the rest are built with
    the graded decisions and any new rule in `docs/brain/agent-rules.md` in place (`docs/agent/decision-review.md`).
-   **Final gate.** After the last wave, one `orch-gate` runs the project's build, lint and test commands on the run
+   **Final gate.** After the last wave, one `orch-gate` runs the `orchestrator.prepare` commands first, then the project's build, lint and test commands on the run
    branch (the merge folder) once, plus `node scripts/kit-manifest-check.mjs` when the project has a kit manifest
    (the manifest.json under docs/workflow-kit; the pull request's rules job runs the check; a run once finished green and its pull
    request failed on three test fixtures no manifest entry classified), plus every command in `orchestrator.ciMirror`
    (`[]`; deduplicated, in that order; a command that fails the plan-check allowlist is dropped
    with the run note `ci-mirror check dropped, not run: <why>`). A failure is a finding in the report
    (`Stopped: final gate failed: <command> — <output tail>`, and the command's output) and the run branch is not handed
-   over as clean; a merge can break a test no plan's own checks cover.
+   over as clean; a merge can break a test no plan's own checks cover. The result is stored in `status.finalGate`. A lesson
+   about a failure goes only to the roles that could have caught it, by the failing command's kind (`FINAL_GATE_ROLES` in
+   `lib/orch-run.mjs`): `test` to `check-bugs` and `check-plan`, `lint` to `check-rules`, `build` to `check-bugs`, the kit
+   manifest check to `readiness`; a ci-mirror or unknown command teaches nobody and `security` never receives one. After
+   the Human fixes the cause and re-runs the gate, `node scripts/orch-state.mjs final-gate --run <name> --result ok` records
+   the pass: the `final gate …` misses and the final gate's stop reason are removed, and the report (local copy and the run
+   branch's) and the run-log row are rewritten from the stored result in the same call (a run that has no report yet gets
+   it from `finish`). `--result failed [--command …]` records another failure the same way.
 5. **Report.** `orch-state.mjs finish` runs every time the workflow ends — after the last wave, when every plan parked,
    and when a step threw (the run is then stopped with `run stopped with an error: …`). It writes the local copy
    `.claude/orchestrator-runs/<run>.md` in the main folder first (gitignored, opens without a branch switch), then
@@ -213,9 +230,10 @@ input tokens per plan for the Grep and scope calls.
   message, the first non-ASCII character (`non-ASCII U+201C at 11`) and the raw line, JSON-escaped. A second bad copy
   parks the plan with that error and `after 2 attempts`. `note` and `finish` are never retried (a note would be written
   twice; `finish` commits the report); every other command is idempotent — `worktree` reuses the folder or slot the
-  plan already holds. A `\r`, backticks around the line and text after the closing brace parse without a retry.
-- **Limits per plan**, counted in the workflow (it has no clock): at most `maxNotesPerPlan` run notes (every note is
-  one runner agent call — a run once wrote about 30 closing notes in 4.5 minutes), then one last `notes capped` note;
+  plan already holds (`plan-info --with-worktree` makes it in the same call). A `\r`, backticks around the line and text after the closing brace parse without a retry.
+- **Limits per plan**, counted in the workflow (it has no clock): at most `maxNotesPerPlan` run notes (a note makes no
+  agent call of its own — it is queued and rides on the plan's next `set`; a run once wrote about 30
+  closing notes in 4.5 minutes as 30 calls), then one last `notes capped` note;
   the same failure reason twice in a row at the same step (`gate: …`, `checker: …`, `ui: …`, `merge: …`, trimmed to
   120 characters) parks the plan at once as `same reason twice: <why>`; at most `maxAgentCallsPerPlan` agent calls, then
   the plan is parked as `agent-call limit`. A parked plan closes with one state write, not a note per step.
@@ -281,15 +299,18 @@ With the UI step off, a failed script is a finding for the builder, and a card n
 - **Pass is computed, never read.** A role result's own `pass` flag is ignored: the workflow computes it from the
   gate results, the finders' problems and the verifier's verdicts (a kept `blocker` or `major` with confidence ≥ 80
   fails). A finder that says `pass: true` next to a `major` problem is a fail, and the run notes it.
-- **Start tier.** A plan whose `## Architecture Impact` names an invariant other than `INV-none` that it `changes` or
-  is a `deviation` from — or names one without saying which — starts its builder on the `judgment` tier; a plan whose
-  lines only `preserves` invariants starts on `build` (most plans preserve something; a judgment start for every one of
-  them put the main session's model on plans a build-tier builder handles).
-- **Fix loop.** The first problem goes back to a builder on the same tier with the findings (round 1). A persisting
-  failure (round 2 and later), an `ESCALATE` or `blocked` builder, or a second finding starts a **fresh** builder on
-  the `judgment` tier that reads the hand-off file (`.claude/sessions/orch-<run>/handoff-<NNN>.md`), the plan and
-  `git diff` — never the first builder's transcript. A failure on that builder, or a failure when the rounds used
-  reach `maxFixRounds`, parks the plan with its reason.
+- **Start tier (INV-1).** A plan whose `## Architecture Impact` names any invariant other than `INV-none` — `preserves`,
+  `changes`, `deviation`, or one named without saying which — starts its builder on the `judgment` tier, a pinned
+  strong model (`models.judgment`, default `opus`, never `inherit`); a plan with `INV-none` or no Architecture Impact
+  starts on `build` (Sonnet by default).
+- **Fix loop.** The first problem goes back to a builder on the same tier with the findings (round 1). When that fix
+  round fails too — whatever `maxFixRounds` is — or when a builder returns `ESCALATE` or `blocked`, a **fresh** builder
+  on the `judgment` tier takes over. It reads the hand-off file (`.claude/sessions/orch-<run>/handoff-<NNN>.md`), the
+  plan and `git diff` — never the first builder's transcript or receipt. The script writes that file: `Done:` (the
+  sub-task ids ticked in the plan file on the branch, and the branch diff's files) and `Failed:` (the failing checks
+  with their tail and the round's open findings as `id file:line rule`), plus the tried step, output tail and replan
+  verdict. A failure on the judgment-tier builder that took over parks the plan as `needs the Human`; no third
+  builder is started. `maxFixRounds` bounds the build-tier fix rounds only.
 - **Test files are guarded by script.** A changed test file (`*.test.*`, `*.spec.*`, `*_test.*`, `*_spec.*`, `test_*`,
   or under a `test`, `tests`, `spec`, `specs`, `e2e`, `cypress`, `playwright`, `__tests__`, `__snapshots__` or `__mocks__`
   folder at any depth; case-insensitive; a rename counts as a change of the old path too) that no line of the plan's
@@ -315,6 +336,53 @@ With the UI step off, a failed script is a finding for the builder, and a card n
   and retries once when it passes. A failing check or a second environment failure parks the plan with the reason,
   and the wave gate skips what depends on it (the whole run with `onPark` = `all`).
 
+## Runner calls
+
+Every shell command of a run goes through a `kit-runner` agent (a model call), because the workflow script has no file,
+git or clock access and no way to run a script itself (checked against the harness globals). So the count of runner
+calls is the lever. What already saves calls:
+
+- **Notes** are queued, not called: the queued notes of a plan ride on that plan's next `set` (`--notes-b64`, a base64
+  JSON list — the runner re-types a command, and a plain argument is cut at 400 characters), and any still queued go on
+  `stop` and `finish`. A note therefore reaches `status.json` at the plan's next state write, not at once; a run that
+  dies between two writes loses the notes queued since the last one (the `STUCK` check reads the state and `updatedAt`,
+  which every `set` refreshes, so it is not affected).
+- **Decisions** are one call: `orch-state.mjs decisions --run <run> --b64 <base64 of a JSON list>` records every
+  decision and every repeat marker in order, with the rules of `decision` for each item, all-or-nothing (a bad item
+  exits 1 and writes nothing).
+  Every queued note has an id (launch, plan, number) that the script records, so the same note sent twice (a runner
+  rerun, a queue re-sent after a failed call) is written once.
+- **Flakes** are queued like notes and ride on `set` / `stop` / `finish` (`--flakes-b64`). The workflow makes the command
+  one line of at most 300 characters before queueing, and a flake the script cannot record is skipped with a
+  `WARN — flake skipped` line instead of failing the `set` / `stop` / `finish` it rode on.
+- **`plan-info --with-worktree`** answers for the plan's folder too (`wt`, what `worktree` prints) in one call; the
+  separate `worktree` call remains for the retry after an environment failure.
+
+The inventory (every `state(` / `runner(` call site of `orchestrate.js`; a test checks that the `Sites` column adds up
+to the number of sites in the file). `parsed` = the script reads the answer to branch; `write-only` = it only records.
+`done` = already one call; `merge` / `keep` = recommendation for a follow-up.
+
+| Group | Commands | Sites | Parsed or write-only | Recommendation |
+| --- | --- | --- | --- | --- |
+| Learning context | `context` | 1 | parsed | keep: one call per launch |
+| Plan state | `set` (setPlan) | 1 | write-only (the answer is only checked for ok) | merge: the sets that change no state (round, roles, facts, card) could ride on the next state-changing set; the state-changing ones are the `watch` progress signal and stay separate |
+| Stop and report | `stop`, `finish` (one helper) | 1 | stop write-only, finish parsed | done: both carry the queued notes and flakes; a failed call puts the queue back, and note ids make a re-send safe |
+| Plan order | `order` | 2 | parsed | keep: the order decides the waves |
+| Preflight | `orch-preflight.mjs` (run, ui env, env check) | 4 | parsed | keep: the preflight is its own script |
+| Readiness file check | `check-files` | 1 | parsed | keep |
+| Package scripts | `scripts` | 1 | parsed | keep: once per run |
+| Diff | `diff` | 1 | parsed | keep: once per round |
+| Merge folder | `clean` | 1 | parsed | keep |
+| Plan start | `plan-info`, `worktree` (first call, retry) | 3 | parsed | done: `plan-info --with-worktree` is one call; `worktree` stays only as the retry after an environment failure |
+| Hand-off | `handoff` | 1 | parsed | keep: the path comes from the script |
+| Run start | `init` | 1 | parsed | keep |
+| Main tries | `main-tries` | 1 | parsed | merge: into `init` when the run delegates main-folder checks (follow-up) |
+| Slot give-back | `release` | 1 | write-only | merge: into the plan's last `set` (follow-up) |
+| Decisions | `decisions` | 1 | write-only | done: one call for N decisions |
+
+No call is `script-only` yet: until the workflow runtime can run a script without a model, every row that stays needs
+the runner. The one row to watch is `set` — see its recommendation.
+
 ## State rules
 
 - **Git is the ledger.** A plan counts as merged only by the anchored subject
@@ -330,7 +398,8 @@ With the UI step off, a failed script is a finding for the builder, and a card n
   | `roundCauses[]` | `set --round-cause "round 2: <why>"` | the reason a fix round began (`checker: major src/x.ts:12 <rule>`, `gate: <command>`, …) |
   | `escalations[]` | `handoff` | `{ step, check }` of each escalation to a fresh judgment-tier builder |
   | `verify` | `set --candidates --refuted --refuted-rules --verify-by --late-low --reappeared` | the verifier's totals for the plan so far: candidates and refuted, per finder (`byRole`), refuted rule names, problems kept below the threshold that later mattered (`lateLow`) and refuted ones that came back (`reappeared`) |
-  | `misses[]` | `set --miss "<what>"` | a `[ui]` card, or the final gate (when the failure names a file only one plan changed), failed after the checkers passed that plan |
+  | `misses[]` | `set --miss "<what>"` | a `[ui]` card failed after the checkers passed that plan (older runs also hold `final gate …` entries; a passing final gate removes them) |
+  | `finalGate` (run level) | `finish --final-gate ok\|failed [--final-gate-command "<cmd>"] [--final-gate-plans N]`, or by hand `final-gate --run <name> --result ok\|failed [--command "<cmd>"] [--plans N]` | `{ ok, command, at, attempt, blamed[] }`: the final gate's latest result, the failing command and the one plan whose changed file the failure names (none when two plans changed it). `attempt` counts changed outcomes; the same call twice is a retry and changes nothing. The lesson routing, the report and the run-log row all read this one place |
   | `gateEvents[]` | `set --gate-event "<text>"` | `timed out: <command>`, `env-fail rerun: <command>` |
   | `ready`, `asked[]` | `set --ready yes\|no --asked "q1 \|\| q2"` | whether readiness called the plan ready (from `args.asked`), and the questions it had to ask |
   | `uiCards[].regressed` | `set --card …` | the card passed earlier and fails now |

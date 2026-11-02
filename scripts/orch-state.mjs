@@ -10,6 +10,7 @@
  *   node scripts/orch-state.mjs scripts                                      package.json scripts as { name: body } (readiness maps npx checks)
  *   node scripts/orch-state.mjs main-try   --run <name> --plan <NNN> --cmd "<command>"   runs a main-folder check once, records its exit
  *   node scripts/orch-state.mjs main-tries --run <name>                     main-folder checks that exited 0 in the last 2 hours, per plan
+ *   node scripts/orch-state.mjs prepare    --missing <path> --script <name> [--in <folder>] [--pm npm|pnpm]   runs the script when <path> is absent (orchestrator.prepare)
  *   node scripts/orch-state.mjs plan-info  --run <name> --plan <NNN>        path, branch, start tier, [human] and [ui] items
  *   node scripts/orch-state.mjs worktree   --run <name> --plan <NNN>        the builder's folder on its plan branch: an idle
  *                                          wt-N slot first (orchestrator.useSlots), else its own folder; packages installed
@@ -23,8 +24,9 @@
  *                                          [--gate-event "<text>"] [--asked "q1 || q2" --ready yes|no]
  *   node scripts/orch-state.mjs flake     --run <name> [--plan <NNN>] --command "<cmd>" [--round n] --via rerun|same-commit --where gate|main|final [--sha x]
  *                                          records a check that passed only on a rerun (plans[NNN].flakes[], run-level flakes[])
- *   node scripts/orch-state.mjs handoff    --run <name> --plan <NNN> --step s --check c --tail t --tried x [--replan yes|no --replan-why t --not-done t]
- *                                          the hand-off file a fresh judgment-tier builder reads (the escalation is recorded)
+ *   node scripts/orch-state.mjs handoff    --run <name> --plan <NNN> --step s --check c --tail t --tried x [--failed t] [--replan yes|no --replan-why t --not-done t]
+ *                                          the hand-off file a fresh judgment-tier builder reads (the escalation is recorded);
+ *                                          its Done: line is derived here (ticked sub-task ids in the plan + the branch diff)
  *   node scripts/orch-state.mjs context    [--run <name>]                   LESSONS / RULES / RECENT_RUNS for the roles (read-only) and their size
  *   node scripts/orch-state.mjs lessons    --run <name>                     lesson lines from status.json into docs/brain/agent-lessons/ (no model call)
  *   node scripts/orch-state.mjs trend      [--run <name>] [--last n]        ✗ / fix rounds per plan and parked per run from docs/brain/run-log.md
@@ -32,6 +34,7 @@
  *   node scripts/orch-state.mjs decision   --run <name> --plan <NNN> --id D<n> --text "<line>" [--verdict v --kind k --confidence n
  *                                          --rec "<text>" --why "<text>" --forced f]   record one decision (upsert by id), or
  *                                          --plan <NNN> --dup-of D<n> --text "<line>" --role r --round n   a duplicate of one
+ *   node scripts/orch-state.mjs decisions  --run <name> --b64 <base64 of a JSON list of decision objects>   every decision in one call, all-or-nothing
  *   node scripts/orch-state.mjs brain-commit --run <name>                   commit docs/brain in the merge folder, push the run branch
  *   node scripts/orch-state.mjs stop       --run <name> --reason "<why the run stopped>"   (gives every held slot back)
  *   node scripts/orch-state.mjs watch      --run <name> [--stale-min <n>]   one line: RUNNING, FINISHED, STOPPED: <why>
@@ -54,7 +57,7 @@
  */
 import { readFileSync, writeFileSync, mkdirSync, existsSync, statfsSync, openSync, closeSync, statSync, unlinkSync, renameSync, linkSync } from 'fs'
 import { spawnSync } from 'child_process'
-import { resolve, dirname, join } from 'path'
+import { resolve, dirname, join, relative } from 'path'
 import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 import { findOpenPlan } from './lib/plan-paths.mjs'
@@ -99,9 +102,13 @@ const SENSITIVE_CODE_RE = /auth|permission|password|jwt|session[_-]?id|tokens?\b
 // folder is always this script's own project) or a second positional word stops the command.
 const FLAGS = new Set(['run', 'started', 'plans', 'plan', 'state', 'round', 'tier', 'sha', 'role', 'model', 'effort', 'roles', 'reason', 'card', 'card-status', 'page', 'shots', 'via', 'step', 'check', 'tail', 'tried', 'text', 'min', 'stale-min', 'files', 'cmd', 'id', 'verdict', 'kind', 'confidence', 'rec', 'why', 'forced', 'dup-of', 'command', 'where',
   // facts the workflow records for the lessons (docs/agent/orchestrator.md "status.json"), and `trend` / `finish` options
-  'candidates', 'refuted', 'refuted-rules', 'verify-by', 'late-low', 'reappeared', 'miss', 'round-cause', 'gate-event', 'asked', 'ready', 'final-gate', 'last',
+  'candidates', 'refuted', 'refuted-rules', 'verify-by', 'late-low', 'reappeared', 'miss', 'round-cause', 'gate-event', 'asked', 'ready', 'final-gate', 'final-gate-command', 'final-gate-command-b64', 'final-gate-plans', 'result', 'last',
   // the hand-off's replan verdict and the builder's receipt
-  'replan', 'replan-why', 'not-done'])
+  'replan', 'replan-why', 'not-done', 'failed',
+  // queued run notes riding on set / stop / finish, and the one-call decisions list
+  'note', 'notes-b64', 'b64', 'flakes-b64', 'with-worktree',
+  // `prepare`: the generated path, the npm script, the folder it runs in and the package manager
+  'missing', 'script', 'in', 'pm'])
 function parseArgs(argv) {
   const out = { _: [] }
   for (let i = 0; i < argv.length; i++) {
@@ -129,13 +136,128 @@ const repoName = REPO || root.split(/[\\/]/).pop()
 const parent = dirname(root)
 const nowIso = () => new Date().toISOString()
 
+// `plan-info --with-worktree` runs `worktree` inside the same call: while `capture` is set, emit hands the answer back
+// (thrown) instead of printing it and exiting.
+let capture = false
 function emit(result, lines = []) {
+  if (capture) throw Object.assign(new Error('captured'), { captured: { result, lines } })
   for (const l of lines) console.log(l)
   console.log(`ORCH_JSON ${JSON.stringify(result)}`)
   process.exit(result.ok ? 0 : 1)
 }
 const fail = (error, extra = {}) => emit({ ok: false, error, ...extra }, [`ORCH_STATE: FAIL — ${error}`])
 if (parsed.problem) fail(parsed.problem)
+
+// Run notes: pushed to status.notes in order. `--note "a || b"` on set (this plan's), `--notes-b64` on stop / finish (a
+// base64 JSON list of { plan?, text }); a malformed list exits 1 before anything is written.
+function addNotes(status, items) {
+  status.notes ??= []
+  // An item with an id is recorded once: a rerun or a re-sent queue carries the same ids (status.noteIds).
+  const seen = new Set(status.noteIds ?? [])
+  for (const it of items) {
+    const text = String(it.text ?? '').trim()
+    const id = it.id === undefined ? null : String(it.id)
+    if (!text || (id && seen.has(id))) continue
+    if (id) {
+      seen.add(id)
+      ;(status.noteIds ??= []).push(id)
+    }
+    status.notes.push({ at: nowIso(), ...(it.plan ? { plan: it.plan } : {}), text })
+  }
+}
+function notesB64() {
+  if (args['notes-b64'] === undefined) return []
+  let items
+  try {
+    items = JSON.parse(Buffer.from(String(args['notes-b64']), 'base64').toString('utf8'))
+  } catch (e) {
+    fail(`--notes-b64 is not base64 of a JSON list: ${e.message}`)
+  }
+  if (!Array.isArray(items) || items.some((i) => !i || typeof i !== 'object')) fail('--notes-b64 must hold a JSON list of { plan?, text }')
+  return items.map((i) => ({ id: i.id, plan: i.plan ? planNumber(String(i.plan)) : undefined, text: i.text }))
+}
+
+// One flake entry (shared by `flake` and the --flakes-b64 lists on set / stop / finish); `a` has the flags of a `flake`
+// call as keys. Returns { dup, text, flakes }.
+// `soft` (a batch): an invalid entry throws a FlakeSkip the caller turns into a warning line, instead of failing the call.
+class FlakeSkip extends Error {}
+function applyFlake(status, a, soft = false) {
+  const bad = (m) => {
+    if (soft) throw new FlakeSkip(m)
+    return fail(m)
+  }
+  const command = a.command && a.command !== true ? String(a.command).trim() : ''
+  if (!command || /[\r\n]/.test(command) || command.length > 300) bad('--command takes one check command (one line, at most 300 characters)')
+  const via = String(a.via ?? '')
+  if (!['rerun', 'same-commit'].includes(via)) bad(`--via "${via}" — allowed: rerun, same-commit`)
+  const where = String(a.where ?? '')
+  if (!['gate', 'main', 'final'].includes(where)) bad(`--where "${where}" — allowed: gate, main, final`)
+  if (a.round !== undefined && !/^\d+$/.test(String(a.round))) bad('--round takes a whole number')
+  const round = a.round !== undefined ? Number(a.round) : undefined
+  const nnn = a.plan !== undefined ? planNumber(String(a.plan)) : null
+  if (a.plan !== undefined && !nnn) bad('--plan takes a plan number')
+  if (nnn && round === undefined) bad('--round is needed with --plan')
+  const holder = nnn ? (status.plans[nnn] ??= { nnn, round: 0, models: {}, state: 'queued' }) : status
+  holder.flakes ??= []
+  const text = nnn ? `flake: ${command} (plan ${nnn}, round ${round})` : `flake: ${command} (final gate)`
+  const dup = holder.flakes.some((x) => x.command === command && x.round === round)
+  if (!dup) holder.flakes.push({ command, ...(round !== undefined ? { round } : {}), via, where, ...(a.sha && a.sha !== true ? { sha: String(a.sha) } : {}), at: nowIso(), text })
+  return { dup, text, flakes: holder.flakes.length }
+}
+// `--flakes-b64`: a base64 JSON list of flake objects (command, round, via, where, sha, plan?), recorded in order.
+function addFlakes(status, defaultPlan) {
+  if (args['flakes-b64'] === undefined) return
+  let items
+  try {
+    items = JSON.parse(Buffer.from(String(args['flakes-b64']), 'base64').toString('utf8'))
+  } catch (e) {
+    fail(`--flakes-b64 is not base64 of a JSON list: ${e.message}`)
+  }
+  if (!Array.isArray(items) || items.some((i) => !i || typeof i !== 'object')) fail('--flakes-b64 must hold a JSON list of flake objects')
+  // A flake that cannot be recorded is skipped with a warning line; the state it rode on is still written.
+  for (const i of items) {
+    try {
+      applyFlake(status, { ...i, ...(i.plan === undefined && defaultPlan ? { plan: defaultPlan } : {}) }, true)
+    } catch (e) {
+      if (!(e instanceof FlakeSkip)) throw e
+      console.log(`ORCH_STATE: WARN — flake skipped: ${e.message}`)
+    }
+  }
+}
+
+// The rules of one decision (shared by `decision` and `decisions`); `a` has the flags of a `decision` call as keys.
+function applyDecision(status, a, where = '') {
+  const bad = (m) => fail(where + m)
+  const text = typeof a.text === 'string' ? a.text.trim() : ''
+  if (!text) bad('--text is empty')
+  status.decisions ??= []
+  const plan = a.plan ? planNumber(String(a.plan)) : undefined
+  if (a['dup-of']) {
+    const parent = status.decisions.find((d) => d.id === a['dup-of'])
+    if (!parent) bad(`no decision ${a['dup-of']} to attach a duplicate to`)
+    parent.alsoFrom ??= []
+    if (text !== parent.text && !parent.alsoFrom.some((x) => x.text === text)) parent.alsoFrom.push({ text, role: String(a.role ?? 'agent'), round: Number(a.round) || 0 })
+    return { ok: true, id: parent.id, alsoFrom: parent.alsoFrom.length }
+  }
+  if (!/^D\d+$/.test(String(a.id ?? ''))) bad('--id must be D<number>')
+  const at = status.decisions.findIndex((d) => d.id === a.id)
+  const prev = at >= 0 ? status.decisions[at] : null
+  const next = { ...(prev ?? {}), id: a.id, plan: plan ?? prev?.plan, type: decisionType(text), text, alsoFrom: prev?.alsoFrom ?? [], attempt: prev?.attempt ?? status.attempts ?? 1 }
+  if (a.verdict !== undefined || !prev) {
+    const confidence = a.confidence === undefined || a.confidence === '' || a.confidence === null ? null : Number(a.confidence)
+    const forced = triageForce({ type: next.type, text, verdict: a.verdict, confidence })
+    next.verdict = forced.verdict
+    if (forced.forced) next.forced = forced.forced
+    else delete next.forced
+    next.kind = /^[a-z0-9][a-z0-9-]*$/.test(String(a.kind ?? '')) ? a.kind : '-'
+    next.confidence = Number.isFinite(confidence) && confidence >= 0 && confidence <= 100 ? confidence : null
+    next.rec = String(a.rec ?? '').slice(0, 160)
+    next.why = String(a.why ?? '').slice(0, 120)
+  }
+  if (at >= 0) status.decisions[at] = next
+  else status.decisions.push(next)
+  return { ok: true, id: next.id, verdict: next.verdict, forced: next.forced ?? null, decisions: status.decisions.length }
+}
 
 function git(cwd, ...a) {
   const r = spawnSync('git', a, { cwd, encoding: 'utf8', maxBuffer: 512 * 1024 * 1024 })
@@ -266,6 +388,47 @@ function needStatus(run) {
   return s
 }
 
+// ---- the final gate's result (status.finalGate: { ok, command, at, attempt, blamed }) ------------------------------------
+// One writer for the workflow (riding on `finish`) and the Human (`final-gate`): the lesson routing, the report and the run-log
+// row all read this one place. A repeat of the stored outcome (same result, command, blamed plans) is a retry, not a new
+// attempt, so re-sending a call changes nothing.
+const cutText = (s, n) => String(s ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n).replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '')
+const fgWord = (status) => (status.finalGate ? (status.finalGate.ok ? 'ok' : 'failed') : 'none')
+function applyFinalGate(status, result, { command = '', plans = '' } = {}) {
+  const ok = result === 'ok'
+  const cmd = ok ? null : cutText(command, 200) || null
+  const blamed = ok ? [] : [...new Set(String(plans).split(',').map((x) => x.trim()).filter((x) => /^\d+$/.test(x)))].sort()
+  const prev = status.finalGate
+  let changed = false
+  if (!(prev && prev.ok === ok && (prev.command ?? null) === cmd && JSON.stringify(prev.blamed ?? []) === JSON.stringify(blamed))) {
+    status.finalGate = { ok, command: cmd, at: nowIso(), attempt: (Number(prev?.attempt) || 0) + 1, blamed }
+    changed = true
+  }
+  if (ok) {
+    // A pass removes what an earlier failure left: the legacy `final gate …` misses and a stop that was the final gate's.
+    for (const p of Object.values(status.plans ?? {})) {
+      const left = (p.misses ?? []).filter((m) => !/^final gate/.test(String(m)))
+      if (left.length !== (p.misses ?? []).length) {
+        p.misses = left
+        changed = true
+      }
+    }
+    if (/^final gate/.test(String(status.stopReason ?? ''))) {
+      delete status.stopReason
+      status.phase = status.finishedAt ? 'finished' : 'running'
+      changed = true
+    }
+  }
+  return changed
+}
+// The command may come base64-encoded (the workflow's way: any real command, quotes and `*` included, survives the runner's
+// shell); applyFinalGate makes it one line of at most 200 characters.
+const fgArgs = () => ({
+  result: String(args['final-gate'] ?? ''),
+  command: args['final-gate-command-b64'] !== undefined ? Buffer.from(String(args['final-gate-command-b64']), 'base64').toString('utf8') : args['final-gate-command'],
+  plans: args['final-gate-plans'],
+})
+
 function diskGb() {
   if (process.env.ORCH_FREE_GB !== undefined && process.env.ORCH_FREE_GB !== '') return Number(process.env.ORCH_FREE_GB)
   try {
@@ -387,6 +550,52 @@ function lessonsIn(base, files = new Map()) {
   }
   return out
 }
+/**
+ * The kit's own lessons: the live lines `- K<n>: …` (before `## Retired`) of docs/agent/kit-lessons/<role>.md,
+ * without the leading dash, for the injected roles. A missing file is an empty list. The kit owns these files.
+ */
+function kitLessonsIn(base) {
+  const out = {}
+  for (const role of INJECTED_ROLES) {
+    const text = readIf(join(base, 'docs', 'agent', 'kit-lessons', `${role}.md`))
+    if (!text) continue
+    const lines = []
+    for (const l of text.replace(/\r\n/g, '\n').split('\n').slice(2)) {
+      if (l.trim() === '## Retired') break
+      if (/^- K\d+: /.test(l)) lines.push(l.replace(/^-\s+/, ''))
+    }
+    if (lines.length) out[role] = lines
+  }
+  return out
+}
+/** The kit's triage prior (docs/agent/kit-lessons/triage-calibration.md): { kind: { graded, agree, agreement } } from its table. */
+function kitTriagePrior(base) {
+  const out = {}
+  for (const l of (readIf(join(base, 'docs', 'agent', 'kit-lessons', 'triage-calibration.md')) ?? '').split('\n')) {
+    const m = /^\|\s*([^|]+?)\s*\|\s*(\d+)\s*\|\s*(\d+)%\s*\|$/.exec(l)
+    if (!m) continue
+    // Values are clamped: graded and agree are whole numbers >= 0 (agree <= graded), agreement is within 0..1.
+    const graded = Math.max(0, Math.floor(Number(m[2])))
+    const agreement = Math.min(1, Math.max(0, Number(m[3]) / 100))
+    out[m[1]] = { graded, agree: Math.min(graded, Math.max(0, Math.round(graded * agreement))), agreement }
+  }
+  return out
+}
+/**
+ * The project's agreement per kind; a kind it graded fewer than `minGraded` times takes the kit's row when the kit has one —
+ * except that the kit never raises a kind above the project's own graded rows: when the project has graded rows for it with
+ * lower agreement, the project's row stays.
+ */
+function withKitPrior(stats, prior, minGraded) {
+  const kinds = { ...stats.kinds }
+  for (const [kind, row] of Object.entries(prior)) {
+    const own = kinds[kind]
+    if ((own?.graded ?? 0) >= minGraded) continue
+    if (own && own.graded > 0 && own.agreement < row.agreement) continue
+    kinds[kind] = row
+  }
+  return { ...stats, kinds }
+}
 const rulesIn = (base) => {
   const t = readIf(join(base, 'docs', 'brain', 'agent-rules.md')) ?? ''
   return { checkers: ruleLines(t, 'checkers'), readiness: ruleLines(t, 'readiness'), ui: ruleLines(t, 'ui') }
@@ -483,6 +692,7 @@ const commands = {
     const prev = readStatus(run)
     const status = prev ?? { run, branch, base: MAIN, startedAt: args.started || nowIso(), mainShaAtStart: git(root, 'rev-parse', `origin/${MAIN}`).out, plans: {}, notes: [], attempts: 0 }
     status.attempts = (status.attempts ?? 0) + 1
+    delete status.finalGate // per launch: an earlier launch's result must not stand for this one
     status.phase = 'running'
     delete status.stopReason
     if (args.started) status.lastStartedAt = args.started
@@ -563,6 +773,27 @@ const commands = {
     emit({ ok: true, nnn, cmd: command, exit }, [...tail, `MAIN_TRY: ${command} exit ${exit}`])
   },
 
+  // A gate command (orchestrator.prepare): makes a generated file the project can generate. Runs in THIS folder (the
+  // worktree or merge folder the gate runs in), writes only what the project's own script writes, touches no run state.
+  prepare() {
+    const missing = String(args.missing ?? '').trim()
+    const script = String(args.script ?? '').trim()
+    const inDir = String(args.in ?? '.').trim() || '.'
+    const pm = String(args.pm ?? 'npm').trim()
+    const entry = `{ "missing": ${JSON.stringify(missing)}, "script": ${JSON.stringify(script)}, "in": ${JSON.stringify(inDir)} }`
+    const safePath = (p) => p !== '' && !/^([A-Za-z]:|[\\/])/.test(p) && !p.split(/[\\/]/).includes('..') && /^[A-Za-z0-9_./@\\-]+$/.test(p)
+    const allowed = 'a repo-relative path of letters, digits and _ . / @ - only (no absolute path, no "..")'
+    if (!safePath(missing)) fail(`prepare: --missing must be ${allowed}: ${entry}`)
+    if (!safePath(inDir)) fail(`prepare: --in must be ${allowed}: ${entry}`)
+    if (!/^[A-Za-z0-9:_-]+$/.test(script)) fail(`prepare: --script must be one npm script name, not a command: ${entry}`)
+    if (pm !== 'npm' && pm !== 'pnpm') fail(`prepare: --pm must be npm or pnpm: ${entry}`)
+    if (existsSync(join(root, missing))) emit({ ok: true, state: 'present', missing }, ['PREPARE: ok (present)'])
+    const r = spawnSync(pm, ['run', script], { cwd: join(root, inDir), encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, timeout: GATE_TIMEOUT_MIN * 60000, shell: process.platform === 'win32' })
+    if (existsSync(join(root, missing))) emit({ ok: true, state: 'generated', missing }, ['PREPARE: ok (generated)'])
+    const tail = `${r.stdout ?? ''}\n${r.stderr ?? ''}${r.error ? `\n${r.error.message}` : ''}`.split('\n').map((l) => l.trimEnd()).filter((l) => l.trim()).slice(-20)
+    emit({ ok: false, error: `prepare: ${missing} still missing after ${pm} run ${script}`, entry }, [...tail, `PREPARE: FAIL — ${missing} is missing after \`${pm} run ${script}\` in ${inDir} (exit ${r.status ?? 'none'}); repeat by hand: ${entry}`])
+  },
+
   'main-tries'() {
     const run = runName()
     const passed = {}
@@ -592,7 +823,24 @@ const commands = {
       status.plans[nnn] = { nnn, title: info.title, branch: info.branch, state: 'queued', round: 0, tier: tier, models: {}, humanItems: info.humanItems, history: prev?.history ?? [], ...(earlier.length ? { earlier } : {}) }
       writeStatus(run, status)
     }
-    emit(info, [`${nnn} ${info.title}: branch ${info.branch}, starts on ${tier}${invariants.length ? ` (${invariants.join(', ')})` : ''}`])
+    const lines = [`${nnn} ${info.title}: branch ${info.branch}, starts on ${tier}${invariants.length ? ` (${invariants.join(', ')})` : ''}`]
+    // --with-worktree: the plan's folder is made in the same call (one runner call instead of two) when the branch name is
+    // one the run accepts; the answer is `wt` (what a `worktree` call prints). A worktree that fails is `wt.ok: false`
+    // (with envFailure when the environment is to blame): the workflow then goes on with its own `worktree` retry path.
+    if (args['with-worktree'] !== undefined && !planBranchProblem(info.branch)) {
+      capture = true
+      let got
+      try {
+        commands.worktree()
+      } catch (e) {
+        if (!e.captured) throw e
+        got = e.captured
+      } finally {
+        capture = false
+      }
+      emit({ ...info, wt: got.result }, [...lines, ...got.lines, ...(got.result.ok ? [] : [`ORCH_STATE: FAIL — ${got.result.error}`])])
+    }
+    emit(info, lines)
   },
 
   worktree() {
@@ -786,6 +1034,11 @@ const commands = {
       if (!['yes', 'no'].includes(text('ready'))) fail('--ready takes yes or no')
       p.ready = text('ready') === 'yes'
     }
+    // --note "a || b": the run notes the workflow queued for this plan, in order (one call instead of one per note).
+    // --notes-b64 is the same list as on stop / finish (the workflow sends this one: a plain argument is cut at 400 characters).
+    if (args.note !== undefined) addNotes(status, text('note').split(' || ').map((t) => ({ plan: nnn, text: t })))
+    addNotes(status, notesB64().map((i) => ({ id: i.id, plan: nnn, text: i.text })))
+    addFlakes(status, nnn)
     p.freeDiskGb = diskGb()
     status.freeDiskGb = p.freeDiskGb
     p.history ??= []
@@ -798,27 +1051,10 @@ const commands = {
   // plans[NNN].flakes[] (no --plan: the run-level flakes[], the final gate's). The same command and round is one entry.
   flake() {
     const run = runName()
-    const command = args.command && args.command !== true ? String(args.command).trim() : ''
-    if (!command || /[\r\n]/.test(command) || command.length > 300) fail('--command takes one check command (one line, at most 300 characters)')
-    const via = String(args.via ?? '')
-    if (!['rerun', 'same-commit'].includes(via)) fail(`--via "${via}" — allowed: rerun, same-commit`)
-    const where = String(args.where ?? '')
-    if (!['gate', 'main', 'final'].includes(where)) fail(`--where "${where}" — allowed: gate, main, final`)
-    if (args.round !== undefined && !/^\d+$/.test(String(args.round))) fail('--round takes a whole number')
-    const round = args.round !== undefined ? Number(args.round) : undefined
-    const nnn = args.plan !== undefined ? planNumber(String(args.plan)) : null
-    if (args.plan !== undefined && !nnn) fail('--plan takes a plan number')
-    if (nnn && round === undefined) fail('--round is needed with --plan')
     const status = needStatus(run)
-    const holder = nnn ? (status.plans[nnn] ??= { nnn, round: 0, models: {}, state: 'queued' }) : status
-    holder.flakes ??= []
-    const text = nnn ? `flake: ${command} (plan ${nnn}, round ${round})` : `flake: ${command} (final gate)`
-    const dup = holder.flakes.some((x) => x.command === command && x.round === round)
-    if (!dup) {
-      holder.flakes.push({ command, ...(round !== undefined ? { round } : {}), via, where, ...(args.sha && args.sha !== true ? { sha: String(args.sha) } : {}), at: nowIso(), text })
-      writeStatus(run, status)
-    }
-    emit({ ok: true, recorded: !dup, flakes: holder.flakes.length }, [dup ? `${text} (already recorded)` : text])
+    const r = applyFlake(status, args)
+    if (!r.dup) writeStatus(run, status)
+    emit({ ok: true, recorded: !r.dup, flakes: r.flakes }, [r.dup ? `${r.text} (already recorded)` : r.text])
   },
 
   // The hand-off file a fresh builder reads (docs/agent/model-routing.md rule 5), written from the failure facts.
@@ -831,6 +1067,17 @@ const commands = {
     const files = git(root, 'diff', '--name-only', `origin/${runBranch(run)}...${head}`).out.split('\n').filter(Boolean)
     const val = (k) => (args[k] && args[k] !== true ? String(args[k]) : '(not given)')
     const rel = `.claude/sessions/orch-${run}/handoff-${nnn}.md`
+    // Done: derived here from run facts, never from the builder's receipt (Human amendment 1): the sub-task ids ticked
+    // `[x]` in the plan file on the plan branch (the copy on disk when the branch has none) and the files in the branch diff.
+    const planRel = relative(root, resolve(root, planPath(nnn))).replace(/\\/g, '/')
+    const onBranch = git(root, 'show', `${head}:${planRel}`)
+    const planText = onBranch.status === 0 ? onBranch.out : readFileSync(resolve(root, planPath(nnn)), 'utf8')
+    const ticked = []
+    for (const line of planText.replace(/\r\n/g, '\n').split('\n')) {
+      const m = /^\s*[-*]\s*\[x\]\s*([A-Za-z]\d+[A-Za-z]?)\b/i.exec(line)
+      if (m && !ticked.includes(m[1])) ticked.push(m[1])
+    }
+    const done = `sub-tasks ticked: ${ticked.join(', ') || '(none)'}; files changed: ${files.join(', ') || '(none)'}`
     // Does the plan itself have to change? yes | no; anything else is "no".
     const replan = args.replan === 'yes' ? 'yes' : 'no'
     const replanWhy = args['replan-why'] && args['replan-why'] !== true ? String(args['replan-why']) : '(not given)'
@@ -838,6 +1085,8 @@ const commands = {
     writeFileSync(join(root, rel), [
       `Step:            ${val('step')} of plan ${nnn} (run ${run}, branch ${branch})`,
       `Files changed:   ${files.join(', ') || '(none)'}`,
+      `Done:            ${done}`,
+      `Failed:          ${val('failed')}`,
       `Tried:           ${val('tried')}`,
       `Failing check:   ${val('check')}`,
       `Output tail:     ${val('tail')}`,
@@ -861,8 +1110,7 @@ const commands = {
     const run = runName()
     if (!args.text || args.text === true) fail('--text is empty')
     const status = needStatus(run)
-    status.notes ??= []
-    status.notes.push({ at: nowIso(), ...(args.plan ? { plan: planNumber(args.plan) } : {}), text: String(args.text) })
+    addNotes(status, [{ plan: args.plan ? planNumber(args.plan) : undefined, text: String(args.text) }])
     writeStatus(run, status)
     emit({ ok: true, notes: status.notes.length })
   },
@@ -872,38 +1120,28 @@ const commands = {
   // files a differently worded duplicate under the kept decision's alsoFrom.
   decision() {
     const run = runName()
-    const text = typeof args.text === 'string' ? args.text.trim() : ''
-    if (!text) fail('--text is empty')
     const status = needStatus(run)
-    status.decisions ??= []
-    const plan = args.plan ? planNumber(args.plan) : undefined
-    if (args['dup-of']) {
-      const parent = status.decisions.find((d) => d.id === args['dup-of'])
-      if (!parent) fail(`no decision ${args['dup-of']} to attach a duplicate to`)
-      parent.alsoFrom ??= []
-      if (text !== parent.text && !parent.alsoFrom.some((a) => a.text === text)) parent.alsoFrom.push({ text, role: String(args.role ?? 'agent'), round: Number(args.round) || 0 })
-      writeStatus(run, status)
-      emit({ ok: true, id: parent.id, alsoFrom: parent.alsoFrom.length })
-    }
-    if (!/^D\d+$/.test(String(args.id ?? ''))) fail('--id must be D<number>')
-    const at = status.decisions.findIndex((d) => d.id === args.id)
-    const prev = at >= 0 ? status.decisions[at] : null
-    const next = { ...(prev ?? {}), id: args.id, plan: plan ?? prev?.plan, type: decisionType(text), text, alsoFrom: prev?.alsoFrom ?? [], attempt: prev?.attempt ?? status.attempts ?? 1 }
-    if (args.verdict !== undefined || !prev) {
-      const confidence = args.confidence === undefined || args.confidence === '' ? null : Number(args.confidence)
-      const forced = triageForce({ type: next.type, text, verdict: args.verdict, confidence })
-      next.verdict = forced.verdict
-      if (forced.forced) next.forced = forced.forced
-      else delete next.forced
-      next.kind = /^[a-z0-9][a-z0-9-]*$/.test(String(args.kind ?? '')) ? args.kind : '-'
-      next.confidence = Number.isFinite(confidence) && confidence >= 0 && confidence <= 100 ? confidence : null
-      next.rec = String(args.rec ?? '').slice(0, 160)
-      next.why = String(args.why ?? '').slice(0, 120)
-    }
-    if (at >= 0) status.decisions[at] = next
-    else status.decisions.push(next)
+    const r = applyDecision(status, args)
     writeStatus(run, status)
-    emit({ ok: true, id: next.id, verdict: next.verdict, forced: next.forced ?? null, decisions: status.decisions.length })
+    emit(r)
+  },
+
+  // Every decision (and repeat marker) of a run in one call: --b64 is the base64 of a JSON list; each item holds the
+  // flags of one `decision` call as keys (plan, id, text, verdict, kind, confidence, rec, why — or plan, dup-of, text,
+  // role, round). Same rules per item; one bad item exits 1 and writes nothing.
+  decisions() {
+    const run = runName()
+    let items
+    try {
+      items = JSON.parse(Buffer.from(String(args.b64 ?? ''), 'base64').toString('utf8'))
+    } catch (e) {
+      fail(`--b64 is not base64 of a JSON list: ${e.message}`)
+    }
+    if (!Array.isArray(items) || !items.length || items.some((i) => !i || typeof i !== 'object' || Array.isArray(i))) fail('--b64 must hold a non-empty JSON list of objects')
+    const status = needStatus(run)
+    const out = items.map((it, n) => applyDecision(status, it, `item ${n + 1}: `))
+    writeStatus(run, status)
+    emit({ ok: true, count: out.length, decisions: status.decisions.length, ids: out.map((r) => r.id) })
   },
 
   // The run's brain files (docs/brain: grades, calibration, follow-ups, rules) are committed on the run branch in the
@@ -937,7 +1175,9 @@ const commands = {
     const rules = rulesIn(base)
     const recent = recentRunsOf(parseRunLog(readIf(join(base, RUN_LOG_REL)) ?? '').rows)
     const budget = contextBudget({ lessons: all, rules, recent })
-    emit({ ok: true, lessons, rules, recent, chars: budget.total, line: budget.line }, budgetLines(budget))
+    // The kit's lessons come from the main checkout only: the merge folder is a branch a builder can edit.
+    const kitLessons = kitLessonsIn(root)
+    emit({ ok: true, lessons, kitLessons, rules, recent, chars: budget.total, line: budget.line }, budgetLines(budget))
   },
 
   // The lesson lines of the run, derived from status.json by code (no model call), appended to docs/brain/agent-lessons/
@@ -949,7 +1189,10 @@ const commands = {
     if (!existsSync(mergeFolder(run))) fail(`the merge folder ${mergeFolder(run)} of run ${run} is gone (a merged run's folder is removed) — lessons are written on the run branch, never in the main checkout`)
     const base = mergeFolder(run)
     const merged = mergedPlans(run)
-    const learned = learnRun(run, status, base, { merged, finalGate: 'none' })
+    // A `--final-gate ok|failed` argument is recorded first, so the lines are cut from the newest result.
+    const fa = fgArgs()
+    if (['ok', 'failed'].includes(fa.result) && applyFinalGate(status, fa.result, fa)) writeStatus(run, status)
+    const learned = learnRun(run, status, base, { merged, finalGate: fgWord(status) })
     writeLearned(base, learned.files)
     emit({ ok: true, base: base.replace(/\\/g, '/'), added: learned.added, dropped: learned.dropped.length, chars: learned.budget.total, line: learned.budget.line },
       [...learned.added.map((a) => `LESSON ${a.role}: ${a.text}`), ...learned.dropped.map((d) => `DROPPED ${d.role}: ${d.line}`), `lessons: ${learned.added.length} line(s) added`, ...budgetLines(learned.budget)])
@@ -970,6 +1213,8 @@ const commands = {
   stop() {
     const run = runName()
     const status = needStatus(run)
+    addNotes(status, notesB64())
+    addFlakes(status)
     status.phase = 'stopped'
     status.stopReason = String(args.reason ?? 'stopped')
     const slots = giveSlotsBack(run, status)
@@ -1023,10 +1268,42 @@ const commands = {
     fetchOrigin()
     const merged = mergedPlans(run)
     for (const m of merged) if (status.plans[m.nnn]) Object.assign(status.plans[m.nnn], { state: 'merged', sha: m.sha })
+    addNotes(status, notesB64())
+    addFlakes(status)
     if (status.phase === 'running') status.phase = 'finished'
     status.finishedAt = nowIso()
+    // The final gate's result rides on this call (status.finalGate); `none` leaves a stored result alone.
+    const fa = fgArgs()
+    if (['ok', 'failed'].includes(fa.result)) applyFinalGate(status, fa.result, fa)
     const slots = giveSlotsBack(run, status)
     writeStatus(run, status)
+    publishReport(run, status, { merged, slots, message: `orch(${run}): run report`, brain: true })
+  },
+
+  // Records the final gate's result by hand (after a run stopped at the final gate, the Human fixed the cause and re-ran it):
+  //   node scripts/orch-state.mjs final-gate --run <name> --result ok|failed [--command "<failing command>"] [--plans <NNN,NNN>]
+  // On a run that already has its report the report (local copy and the run branch's) and the run-log row are rewritten from
+  // the stored result in the same call; the same call twice changes nothing.
+  'final-gate'() {
+    const run = runName()
+    const result = String(args.result ?? '')
+    if (!['ok', 'failed'].includes(result)) fail('--result takes ok or failed')
+    const status = needStatus(run)
+    const changed = applyFinalGate(status, result, { command: args.command, plans: args.plans })
+    if (changed) writeStatus(run, status)
+    const fg = status.finalGate
+    if (!status.finishedAt || !['finished', 'stopped'].includes(status.phase)) emit({ ok: true, finalGate: fg, changed, rewritten: false }, [`final gate: ${result} (attempt ${fg.attempt}); the run has no report yet, \`finish\` writes it`])
+    fetchOrigin()
+    publishReport(run, status, { merged: mergedPlans(run), slots: { lines: [] }, message: `orch(${run}): final gate ${result}`, brain: false })
+  },
+}
+
+// The report, the lesson lines and the run-log row from status.json, then their commit: the tail of `finish`, and what a
+// recorded final gate rewrites. `slots` is what giveSlotsBack returned (empty when the slots were given back already).
+function publishReport(run, status, { merged, slots, message, brain }) {
+  const branch = runBranch(run)
+  const mf = mergeFolder(run)
+  {
     const mainShaNow = git(root, 'rev-parse', `origin/${MAIN}`).out
     // The files main changed during the run: a commit that touches only plans and the todo list (the Planner's own
     // pushes) does not make main "touched".
@@ -1035,14 +1312,14 @@ const commands = {
     const appErrors = runLogQuery(status.startedAt)
     // The grade rows (docs/brain/decision-grades.jsonl) of the merge folder, else of the main folder: agreement per kind.
     const gradeRows = readGradeRows([join(mf, 'docs', 'brain', 'decision-grades.jsonl'), join(root, 'docs', 'brain', 'decision-grades.jsonl')])
-    const triage = { mode: TRIAGE, stats: agreementStats(gradeRows), minAgreement: TRIAGE_MIN_AGREEMENT, minGraded: TRIAGE_MIN_GRADED }
+    const triage = { mode: TRIAGE, stats: withKitPrior(agreementStats(gradeRows), kitTriagePrior(root), TRIAGE_MIN_GRADED), minAgreement: TRIAGE_MIN_AGREEMENT, minGraded: TRIAGE_MIN_GRADED }
     // What the run teaches the next one: lesson lines from status.json, this run's row of the run log, and the trend line and
     // character budget the report ends with. Computed here in memory (a failure never stops the report); the files are
     // written and committed below, with the report, in the merge folder.
     let learned = null
     let learnError = null
     try {
-      learned = learnRun(run, status, existsSync(mf) ? mf : root, { merged, finalGate: String(args['final-gate'] ?? 'none'), finishedAt: status.finishedAt, runLog: true })
+      learned = learnRun(run, status, existsSync(mf) ? mf : root, { merged, finalGate: fgWord(status), finishedAt: status.finishedAt, runLog: true })
     } catch (e) {
       learnError = e.message
     }
@@ -1056,7 +1333,7 @@ const commands = {
     writeFileSync(local, report)
     // The run's facts go to the kit brain (docs/agent/kit-brain.md): after the local report exists, before the branch commit,
     // so a failed push still sends. It can never change this command's exit code or the report.
-    const brainLine = brainSend(['--run', run, `--final-gate=${String(args['final-gate'] ?? 'none')}`])
+    const brainLine = brain ? brainSend(['--run', run, `--final-gate=${fgWord(status)}`]) : null
     const parked = Object.values(status.plans).filter((x) => x.state === 'parked' || x.state === 'left-run').map((x) => x.nnn)
     const rel = `docs/orchestrator/runs/${run}`
     const learningOut = learned ? { lessonsAdded: learned.added.length, lessonsDropped: learned.dropped.length, budget: learned.budget.line, chars: learned.budget.total, trend: learned.trend.line } : { error: learnError }
@@ -1075,14 +1352,14 @@ const commands = {
     if (learned) writeLearned(mf, learned.files)
     const add = git(mf, 'add', '--', `${rel}/report.md`, `${rel}/status.json`, ...(learned ? [...learned.files.keys()] : []))
     if (add.status !== 0) notCommitted(`git add the report: ${add.err}`)
-    const c = git(mf, 'commit', '--quiet', '-m', `orch(${run}): run report`)
+    const c = git(mf, 'commit', '--quiet', '-m', message)
     if (c.status !== 0 && !/nothing to commit/.test(c.out + c.err)) notCommitted(`git commit the report: ${(c.err || c.out).split('\n').pop()}`)
     const p = git(mf, 'push', '--quiet', 'origin', branch)
     if (p.status !== 0) notCommitted(`git push origin ${branch}: ${p.err.split('\n').pop()}`, { envFailure: true })
     const left = git(mf, 'status', '--porcelain').out
     emit({ ok: !left, ...base, reportCommitted: true, ...(left ? { error: `merge folder not clean: ${left}` } : {}) },
       [...slots.lines, `report: ${rel}/report.md on ${branch}; local copy ${local}`, `merged ${merged.length}: ${merged.map((m) => m.nnn).join(', ') || 'none'}; parked ${parked.length}: ${parked.join(', ') || 'none'}`, ...learningLines, ...(brainLine ? [brainLine] : [])])
-  },
+  }
 }
 
 // The kit brain (docs/agent/kit-brain.md): `node scripts/brain.mjs send …` in a child process that is killed after 15 s

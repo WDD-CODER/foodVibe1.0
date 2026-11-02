@@ -48,6 +48,15 @@
   "git": {
     "mainBranch": "main"
   },
+  "orchestrator": {
+    "prepare": [
+      {
+        "missing": "server/generated/schemas",
+        "script": "build:schemas",
+        "in": "."
+      }
+    ]
+  },
   "ci": {
     "install": "pnpm install --frozen-lockfile"
   },
