@@ -150,10 +150,43 @@
       "nnn": "512",
       "title": "Add the client record, owner-only writes and staff-limited reads on the server",
       "branch": "feat/512-client-entity-foundation-owner",
-      "state": "parked",
+      "state": "merged",
       "round": 0,
       "tier": "judgment",
-      "models": {},
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-security": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
       "humanItems": [],
       "history": [
         {
@@ -190,6 +223,41 @@
           "at": "2026-11-02T09:13:39.909Z",
           "state": "parked",
           "round": 0
+        },
+        {
+          "at": "2026-11-02T09:16:58.498Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T09:24:53.718Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T09:38:43.952Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T09:40:40.643Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T09:40:50.023Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T09:42:17.949Z",
+          "state": "merged",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T09:45:53.280Z",
+          "state": "merged",
+          "round": 0
         }
       ],
       "earlier": [
@@ -222,16 +290,55 @@
             "round 1: checker: blocker server/test/cross-business.test.js:0 test file outside the plan's scope"
           ],
           "reason": "replan needed: The plan's Read-Write Scope forbids server/test/cross-business.test.js, but that test loops over every ALL_USER_ENTITY_TYPES entry and the plan's own sub-task (register 'clients' in collections.js) cannot pass it without a 'clients' body. T"
+        },
+        {
+          "nnn": "512",
+          "title": "Add the client record, owner-only writes and staff-limited reads on the server",
+          "branch": "feat/512-client-entity-foundation-owner",
+          "state": "parked",
+          "round": 0,
+          "tier": "judgment",
+          "models": {},
+          "reason": "worktree: merging origin/orch/test-512-422 into feat/512-client-entity-foundation-owner conflicts: CONFLICT (content): Merge conflict in plans/512-client-entity-foundation-owner-only-writes.plan.md",
+          "asked": [
+            "server test commands denied",
+            "merge order vs 422",
+            "log-query slot-only"
+          ],
+          "ready": false,
+          "freeDiskGb": 18.2
         }
       ],
-      "reason": "worktree: merging origin/orch/test-512-422 into feat/512-client-entity-foundation-owner conflicts: CONFLICT (content): Merge conflict in plans/512-client-entity-foundation-owner-only-writes.plan.md",
       "asked": [
         "server test commands denied",
         "merge order vs 422",
         "log-query slot-only"
       ],
       "ready": false,
-      "freeDiskGb": 18.2
+      "freeDiskGb": 17.7,
+      "sha": "74c16b9e0f060b1c7ac7fb33da788edf99df9d84",
+      "verify": {
+        "candidates": 2,
+        "refuted": 0,
+        "refutedRules": [],
+        "byRole": {
+          "check-bugs": {
+            "candidates": 1,
+            "refuted": 0,
+            "rules": []
+          },
+          "check-rules": {
+            "candidates": 1,
+            "refuted": 0,
+            "rules": []
+          }
+        },
+        "lateLow": [],
+        "reappeared": []
+      },
+      "misses": [
+        "final gate failed: node scripts/kit-manifest-check.mjs"
+      ]
     }
   },
   "notes": [
@@ -258,12 +365,21 @@
       "at": "2026-11-02T09:13:16.720Z",
       "plan": "512",
       "text": "starts on the judgment tier: Architecture Impact names INV-1"
+    },
+    {
+      "at": "2026-11-02T09:16:34.327Z",
+      "plan": "512",
+      "text": "starts on the judgment tier: Architecture Impact names INV-1"
+    },
+    {
+      "at": "2026-11-02T09:45:43.754Z",
+      "text": "final gate failed: node scripts/kit-manifest-check.mjs — unclassified: docs/brain/decisions/0027-client-entity-above-events.md / KIT_MANIFEST: FAIL — 376 classified, 1 unclassified, 0 duplicates, 0 unhandled-coupling (1 problems)"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "stopped",
-  "freeDiskGb": 18.2,
-  "updatedAt": "2026-11-02T09:14:12.688Z",
+  "freeDiskGb": 17.7,
+  "updatedAt": "2026-11-02T09:47:22.378Z",
   "decisions": [
     {
       "id": "D8",
@@ -472,8 +588,75 @@
       "confidence": 78,
       "rec": "Note in plan template that new collections must list cross-business.test.js.",
       "why": "Recurring scope gap for future plans."
+    },
+    {
+      "id": "D17",
+      "plan": "512",
+      "type": "behaviour",
+      "text": "behaviour: derived phoneNormalized from phone just before the schema check, because the strict schema requires the field, and a client-sent value is never kept — reverse: make phoneNormalized optional in the schema and derive it after validation",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "ask",
+      "forced": "keyword",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": "duplicate of D13"
+    },
+    {
+      "id": "D18",
+      "plan": "512",
+      "type": "seen",
+      "text": "seen: server/utils/permissions.js:49 — staff are denied create, edit and delete on the 'clients' type (OWNER_ONLY_TYPE). The check runs after the cross-business check and before the creator check, and generic.js POST, PUT, single DELETE and bulk DELETE all reach it through assertCan or authorizeEdit/authorizeDelete.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "ask",
+      "kind": "owner-only-permission",
+      "confidence": 85,
+      "rec": "Confirm staff are denied create, edit and delete on clients.",
+      "why": "Permissions change: staff lose write access."
+    },
+    {
+      "id": "D19",
+      "plan": "512",
+      "type": "seen",
+      "text": "seen: server/routes/generic.js:83,240,444 — the staff read projection is applied on GET list and GET by id. It is built by exclusion from the strict schema's keys, so only name, phone and the base fields reach a staff member. The count, search, trash and restore routes do not serve clients: clients are not searchable and have no soft delete.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "ask",
+      "kind": "staff-read-projection",
+      "confidence": 80,
+      "rec": "Confirm staff see only name and phone on clients.",
+      "why": "Data visibility and privacy for staff."
+    },
+    {
+      "id": "D20",
+      "plan": "512",
+      "type": "seen",
+      "text": "seen: server/routes/generic.js:1094 — whole-collection replace needs the owner-only 'editSettings' action and is limited to VERSION_HISTORY, so it cannot be used to overwrite clients.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "noise",
+      "kind": "evidence",
+      "confidence": 85,
+      "rec": "",
+      "why": "Confirmation that replace cannot touch clients; no decision."
+    },
+    {
+      "id": "D21",
+      "plan": "512",
+      "type": "seen",
+      "text": "seen: server/routes/generic.js:85,513,636 — phoneNormalized is derived with String(...).replace(//D/g,'') and never taken from the client. The result is validated by the strict schema before it is stored, so there is no query or injection path.",
+      "alsoFrom": [],
+      "attempt": 3,
+      "verdict": "ask",
+      "forced": "keyword",
+      "kind": "-",
+      "confidence": null,
+      "rec": "",
+      "why": "duplicate of D13"
     }
   ],
-  "finishedAt": "2026-11-02T09:14:12.686Z",
-  "stopReason": "wave 1 parked 512 — later waves not started"
+  "finishedAt": "2026-11-02T09:47:22.376Z",
+  "stopReason": "final gate failed: node scripts/kit-manifest-check.mjs — unclassified: docs/brain/decisions/0027-client-entity-above-events.md / KIT_MANIFEST: FAIL — 376 classified, 1 unclassified, 0 duplicates, 0 unhandled-coupling (1 problems)"
 }

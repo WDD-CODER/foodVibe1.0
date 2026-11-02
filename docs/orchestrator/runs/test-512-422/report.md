@@ -1,16 +1,16 @@
 # Orchestrator run test-512-422
 
-Run branch: `orch/test-512-422` (from `origin/main` at 3986b15) · started 2026-11-02T08:23:37.923Z · finished 2026-11-02T09:14:12.686Z
-Result: 1 merged, 1 parked, skipped or left out, 2 in the run (counted from git and status.json).
+Run branch: `orch/test-512-422` (from `origin/main` at 3986b15) · started 2026-11-02T08:23:37.923Z · finished 2026-11-02T09:47:22.376Z
+Result: 2 merged, 0 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 3986b15.
-Stopped: wave 1 parked 512 — later waves not started
+Stopped: final gate failed: node scripts/kit-manifest-check.mjs — unclassified: docs/brain/decisions/0027-client-entity-above-events.md / KIT_MANIFEST: FAIL — 376 classified, 1 unclassified, 0 duplicates, 0 unhandled-coupling (1 problems)
 
 ## Plans
 
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 422 Nightly QA morning report and shorter runs once pages are clean | merged | 1 | build | dcfad4a |  |
-| 512 Add the client record, owner-only writes and staff-limited reads on the server | parked | 0 | judgment |  | worktree: merging origin/orch/test-512-422 into feat/512-client-entity-foundation-owner conflicts: CONFLICT (content): Merge conflict in plans/512-client-entity-foundation-owner-only-writes.plan.md |
+| 512 Add the client record, owner-only writes and staff-limited reads on the server | merged | 0 | judgment | 74c16b9 |  |
 
 ## App errors since the run started
 
@@ -23,10 +23,18 @@ no entries
 
 ## Decisions
 
-triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 7 · follow-ups: 3
+triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 11 · follow-ups: 3
 
 ### To grade
 
+- D17 · 512 · ask (rule: keyword) · behaviour: derived phoneNormalized from phone just before the schema check, because the strict schema requires the field, and a client-sent value is never kept — reverse: make phoneNormalized optional in the schema and derive it after validation
+  why: duplicate of D13
+- D21 · 512 · ask (rule: keyword) · seen: server/routes/generic.js:85,513,636 — phoneNormalized is derived with String(...).replace(//D/g,'') and never taken from the client. The result is validated by the strict schema before it is stored, so there is no query or injection path.
+  why: duplicate of D13
+- D18 · 512 · ask · owner-only-permission · seen: server/utils/permissions.js:49 — staff are denied create, edit and delete on the 'clients' type (OWNER_ONLY_TYPE). The check runs after the cross-business check and before the creator check, and generic.js POST, PUT, single DELETE and bulk DELETE all reach it through assertCan or authorizeEdit/authorizeDelete.
+  recommend: Confirm staff are denied create, edit and delete on clients. — why: Permissions change: staff lose write access.
+- D19 · 512 · ask · staff-read-projection · seen: server/routes/generic.js:83,240,444 — the staff read projection is applied on GET list and GET by id. It is built by exclusion from the strict schema's keys, so only name, phone and the base fields reach a staff member. The count, search, trash and restore routes do not serve clients: clients are not searchable and have no soft delete.
+  recommend: Confirm staff see only name and phone on clients. — why: Data visibility and privacy for staff.
 - D13 · 512 · ask · data-shape-derived-field · behaviour: derived phoneNormalized from phone on the doc just before the schema check (the strict schema requires the field, so 'after validation' is impossible); an invalid phone still fails on the phone regex and a client-sent value is always overwritten — reverse: make phoneNormalized optional in client.schema.ts and derive after checkStoredDoc in generic.js POST/PUT
   recommend: Keep server-derived phoneNormalized before schema check. — why: Touches stored data shape for clients.
 - D15 · 512 · ask · data-lineage · behaviour: clients carry no _masterId/_userModified on POST or PUT (new NO_LINEAGE set in generic.js shared with taxonomyTerms), because the strict schema rejects them and INV-2 says clients never carry _masterId — reverse: remove 'clients' from NO_LINEAGE and allow the two fields in clientSchema
@@ -68,6 +76,8 @@ triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 7
   why: Test result confirmation.
 - D12 · 422 · noise · evidence · seen: morning-report.mjs --root=C:/dev/foodVibe-qa --date=2026-10-20 --out=- -> exit 0, Status: ATTENTION
   why: Run result confirmation.
+- D20 · 512 · noise · evidence · seen: server/routes/generic.js:1094 — whole-collection replace needs the owner-only 'editSettings' action and is limited to VERSION_HISTORY, so it cannot be used to overwrite clients.
+  why: Confirmation that replace cannot touch clients; no decision.
 
 ## Run notes
 
@@ -76,6 +86,8 @@ triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 7
 - 512: builder left undone (round 0): node scripts/log-query.mjs --since=plan-start --level=error not run by the builder: skipped per the Human's readiness answer (the run report's 'App errors since the run started' section replaces it)
 - final gate failed: node scripts/kit-manifest-check.mjs — unclassified: scripts/qa/morning-brief.mjs | unclassified: scripts/qa/morning-report.mjs | unclassified: scripts/test/qa-morning-report.test.mjs | KIT_MANIFEST: FAIL — 373 classified, 3 unclassified, 0 duplicates, 0 unhandled-coupling (3 problems)
 - 512: starts on the judgment tier: Architecture Impact names INV-1
+- 512: starts on the judgment tier: Architecture Impact names INV-1
+- final gate failed: node scripts/kit-manifest-check.mjs — unclassified: docs/brain/decisions/0027-client-entity-above-events.md / KIT_MANIFEST: FAIL — 376 classified, 1 unclassified, 0 duplicates, 0 unhandled-coupling (1 problems)
 
 ## Models per agent
 
@@ -87,6 +99,14 @@ triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 7
 - 422 orch-security: claude-sonnet-5-5 / high
 - 422 orch-verify: claude-sonnet-5-5 / medium
 - 422 orch-merge: claude-sonnet-5-5 / low
+- 512 orch-builder: claude-sonnet-5-5 / medium
+- 512 orch-gate: claude-haiku-5-5 / low
+- 512 orch-check-plan: claude-sonnet-5-5 / high
+- 512 orch-check-bugs: claude-sonnet-5-5 / high
+- 512 orch-check-rules: claude-sonnet-5-5 / high
+- 512 orch-security: claude-sonnet-5-5 / high
+- 512 orch-verify: claude-sonnet-5-5 / medium
+- 512 orch-merge: claude-sonnet-5-5 / low
 
 ## What only the Human can do
 
@@ -95,7 +115,6 @@ triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 7
 1. 422 Nightly QA morning report and shorter runs once pages are clean: The first morning after merge: `C:\dev\foodVibe-qa\bugs\qa-runs\MORNING.md` exists with that night's
 2. 422 Nightly QA morning report and shorter runs once pages are clean: The second night after merge: `queue.md` lists only pages whose code changed under "due" and the rest
 
-- Decide on 512: worktree: merging origin/orch/test-512-422 into feat/512-client-entity-foundation-owner conflicts: CONFLICT (content): Merge conflict in plans/512-client-entity-foundation-owner-only-writes.plan.md
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -103,6 +122,6 @@ git fetch origin
 gh pr create --base main --head orch/test-512-422 --title "Orchestrator run test-512-422" --body-file .claude\orchestrator-runs\test-512-422.md
 ```
 
-Context added by learning: 709 chars across 6 roles
+Context added by learning: 704 chars across 6 roles
 
 Trend: first logged run
