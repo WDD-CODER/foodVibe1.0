@@ -5142,6 +5142,14 @@
       "notes": "FoodVibe ADR 0026 (staff see events only in the stages the owner chose)."
     },
     {
+      "path": "docs/brain/decisions/0027-client-entity-above-events.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0027 (client entity above events; clients owner-only to write)."
+    },
+    {
       "path": "scripts/decision-log.mjs",
       "tier": "project",
       "action": "stay",
