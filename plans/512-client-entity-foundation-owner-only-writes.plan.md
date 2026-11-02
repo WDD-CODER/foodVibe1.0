@@ -195,3 +195,8 @@ Decisions already taken by the Human (do not reopen):
 - scope extended: server/test/cross-business.test.js — it asserts a valid POST body exists for every `ALL_USER_ENTITY_TYPES` entry and loops tenant-isolation checks over each; adding `clients` to `collections.js` fails it without a `clients` body.
 - Plan reading: the Contract says derive `phoneNormalized` "after Zod validation", but `phoneNormalized` is a required field of the strict schema, so a value must exist when `checkStoredDoc` runs. It is derived from `phone` on the doc just before the schema check and never taken from the client; an invalid phone still fails on the `phone` regex.
 - `clientType` default: `checkStoredDoc` only validates, it does not store the parsed output, so a client posted without `clientType` is stored without it (the Zod default applies only when something parses). Nothing added.
+- Scope approval (2026-11-02, Human): approved: server/test/cross-business.test.js — added to Read-Write Scope (the test loops over every entity type and needs a clients body once clients is registered).
+- Decision D14 (2026-11-02, Human ✓): stamp clientType 'private' on a client POST in generic.js when none is sent, so stored clients are consistent.
+- Finding F3 (2026-11-02): readiness missed 512's scope gap (server/test/cross-business.test.js).
+- Finding F4 (2026-11-02): the per-plan gate did not catch the unclassified files; only the final gate did, so 422 merged and broke the run branch.
+- Finding F5 (2026-11-02): preflight does not start the dev server it requires.

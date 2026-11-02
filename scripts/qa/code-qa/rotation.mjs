@@ -4,7 +4,7 @@
  * and writes review-<PAGE>.md files.
  *
  *   node scripts/qa/code-qa/rotation.mjs pick   --date=YYYY-MM-DD [--stop-at=HH:MM]
- *        → bugs/qa-runs/code-qa/<DATE>/queue.md: every page in review order
+ *        → bugs/qa-runs/code-qa/<DATE>/queue.md: due pages in review order, unchanged pages under ## Skipped
  *   node scripts/qa/code-qa/rotation.mjs ingest --date=YYYY-MM-DD
  *        → reads <DATE>/review-*.md, updates ledger.json, adds CODE-AI- findings and Code review blocks to latest.md
  *
@@ -22,6 +22,8 @@ import { loadPlanChecks } from './plan-checks.mjs'
 import { normalizeFinding, writeReports } from './findings.mjs'
 
 export const MARKS = ['code-verified', 'suspect', 'unknown']
+/** A page whose last review is older than this many days is reviewed again even when no code changed. */
+export const FULL_REVIEW_DAYS = 14
 
 // --- ledger ----------------------------------------------------------------------
 
@@ -31,6 +33,39 @@ export function loadLedger(file) {
   if (!existsSync(file)) return emptyLedger()
   const l = JSON.parse(readFileSync(file, 'utf8'))
   return { version: 1, pages: l.pages || {}, ingested: l.ingested || {} }
+}
+
+const daysBetween = (from, to) => Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86400000)
+
+/**
+ * Splits `pageIds` into due and skipped. Due: status partial/never, changed files > 0 (`changed(id)`), or the
+ * last review is more than FULL_REVIEW_DAYS before `date`. Both lists keep the order of `pageIds`.
+ */
+export function splitDue(ledger, pageIds, changed, date) {
+  const due = []
+  const skipped = []
+  for (const id of pageIds) {
+    const p = pageEntry(ledger, id)
+    const old = p.lastReviewed && daysBetween(p.lastReviewed, date) > FULL_REVIEW_DAYS
+    if (p.status !== 'done' || !p.lastReviewed || old || changed(id) > 0) due.push(id)
+    else skipped.push(id)
+  }
+  return { due, skipped }
+}
+
+/**
+ * Code paths a review cites (`path/file.ext:123`), resolved against `tracked` (git ls-files): exact path, else a
+ * unique suffix match; ambiguous or unknown tokens are dropped. Unique, sorted.
+ */
+export function citedPaths(text, tracked) {
+  const found = new Set()
+  for (const m of text.matchAll(/[\w./-]+\.(?:ts|html|scss|js|mjs|json):\d+/g)) {
+    const token = m[0].replace(/:\d+$/, '').replace(/^\.\//, '')
+    if (tracked.includes(token)) { found.add(token); continue }
+    const hits = tracked.filter((f) => f.endsWith(`/${token}`))
+    if (hits.length === 1) found.add(hits[0])
+  }
+  return [...found].sort()
 }
 
 const pageEntry = (ledger, id) => ledger.pages[id] || { id, status: 'never', lastReviewed: null, lastCommit: null, checksDone: [], marks: {}, openFindings: 0, history: [], reviews: 0 }
@@ -61,7 +96,7 @@ export function parseReview(text) {
  * Applies one review to the ledger (returns a new ledger). Idempotent: a file already ingested with the same
  * content changes nothing, and a review older than the page's last review is ignored.
  */
-export function applyReview(ledger, review, date, file, sha) {
+export function applyReview(ledger, review, date, file, sha, citedFiles = []) {
   if (ledger.ingested[file] === sha) return ledger
   const next = structuredClone(ledger)
   next.ingested[file] = sha
@@ -78,6 +113,7 @@ export function applyReview(ledger, review, date, file, sha) {
     checksDone: done ? [] : [...new Set([...(p.status === 'partial' ? p.checksDone : []), ...review.checksDone])].sort(),
     marks,
     openFindings: Object.values(marks).filter((m) => m === 'suspect').length,
+    citedFiles: done ? [...citedFiles].sort() : [...new Set([...(p.citedFiles || []), ...citedFiles])].sort(),
     history: [...new Set([...p.history, date])].sort(),
     reviews: new Set([...p.history, date]).size
   }
@@ -119,7 +155,7 @@ export function changesSince(root, commit, globs) {
   return { count: out ? out.split('\n').length : 0, range: `${commit}..${head}` }
 }
 
-export function renderQueue({ date, commit, stopAt, order, ledger, pageMap, checks, changes }) {
+export function renderQueue({ date, commit, stopAt, order, ledger, pageMap, checks, changes, skipped = [] }) {
   const byId = new Map(pageMap.pages.map((p) => [p.id, p]))
   const out = [
     `# Code review queue — ${date}`,
@@ -130,6 +166,7 @@ export function renderQueue({ date, commit, stopAt, order, ledger, pageMap, chec
     'per page and update its header after every check. Stop at STOP_AT wherever you are.',
     ''
   ]
+  if (!order.length) out.push('Nothing to review tonight — every page is unchanged since its last review.', '')
   order.forEach((id, i) => {
     const p = pageEntry(ledger, id)
     const page = byId.get(id) || { title: id, files: [] }
@@ -144,6 +181,14 @@ export function renderQueue({ date, commit, stopAt, order, ledger, pageMap, chec
     for (const c of checks[id] || []) out.push(`- ${c.id}${done.has(c.id) ? ' (done)' : ''} — ${c.planId} — ${c.text.slice(0, 160)}${c.text.length > 160 ? '…' : ''}`)
     out.push('')
   })
+  if (skipped.length) {
+    out.push('## Skipped (no code change since last review)')
+    for (const id of skipped) {
+      const p = pageEntry(ledger, id)
+      out.push(`- ${id} — last reviewed ${p.lastReviewed} at ${p.lastCommit || '?'}`)
+    }
+    out.push('')
+  }
   return out.join('\n')
 }
 
@@ -154,13 +199,17 @@ export function pick({ root = repoRoot, date, stopAt = '02:40' }) {
   const checks = loadPlanChecks(root)
   const ids = pageMap.pages.map((p) => p.id)
   const changes = {}
-  for (const p of pageMap.pages) changes[p.id] = changesSince(root, pageEntry(ledger, p.id).lastCommit, p.files || [])
-  const order = pickOrder(ledger, ids, (id) => changes[id].count)
+  for (const p of pageMap.pages) {
+    const entry = pageEntry(ledger, p.id)
+    changes[p.id] = changesSince(root, entry.lastCommit, [...(p.files || []), ...(entry.citedFiles || [])])
+  }
+  const { due, skipped } = splitDue(ledger, ids, (id) => changes[id].count, date)
+  const order = pickOrder(ledger, due, (id) => changes[id].count)
   const commit = git(root, ['rev-parse', '--short', 'HEAD']) || '?'
   mkdirSync(join(base, date), { recursive: true })
   const file = join(base, date, 'queue.md')
-  writeFileSync(file, renderQueue({ date, commit, stopAt, order, ledger, pageMap, checks, changes }), 'utf8')
-  return { file, order }
+  writeFileSync(file, renderQueue({ date, commit, stopAt, order, ledger, pageMap, checks, changes, skipped }), 'utf8')
+  return { file, order, skipped }
 }
 
 // --- latest.md blocks ------------------------------------------------------------------------
@@ -191,6 +240,7 @@ export function ingest({ root = repoRoot, date, log = () => {} }) {
   const known = new Set(pageMap.pages.map((p) => p.id))
   const files = existsSync(dir) ? readdirSync(dir).filter((f) => /^review-[A-Z]+\.md$/.test(f)).sort() : []
   const reviews = []
+  const tracked = (git(root, ['ls-files']) || '').split('\n').filter(Boolean)
   for (const f of files) {
     const text = readFileSync(join(dir, f), 'utf8')
     const r = parseReview(text)
@@ -198,7 +248,7 @@ export function ingest({ root = repoRoot, date, log = () => {} }) {
     if (!known.has(r.page)) { log(`ingest skipped ${date}/${f} unknown page ${r.page}`); continue }
     if (`review-${r.page}.md` !== f) { log(`ingest skipped ${date}/${f} Page: ${r.page} does not match the file name`); continue }
     reviews.push({ file: f, review: r })
-    ledger = applyReview(ledger, r, date, `${date}/${f}`, createHash('sha1').update(text).digest('hex'))
+    ledger = applyReview(ledger, r, date, `${date}/${f}`, createHash('sha1').update(text).digest('hex'), citedPaths(text, tracked))
   }
   writeFileSync(ledgerFile, JSON.stringify(ledger, null, 2) + '\n', 'utf8')
 
@@ -233,8 +283,8 @@ export function main(argv = process.argv.slice(2), { root = repoRoot } = {}) {
   }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) { console.error('CODE-QA: --date must be YYYY-MM-DD'); return 1 }
   if (cmd === 'pick') {
-    const { file, order } = pick({ root, date, stopAt: opt['stop-at'] || '02:40' })
-    say(`queue ${date}: ${order.slice(0, 5).join(' ')}${order.length > 5 ? ' …' : ''} — ${file.replace(/\\/g, '/').replace(/^.*\/bugs\//, 'bugs/')}`)
+    const { file, order, skipped } = pick({ root, date, stopAt: opt['stop-at'] || '02:40' })
+    say(`queue ${date}: ${order.length} due, ${skipped.length} skipped${order.length ? ` (${order.slice(0, 5).join(' ')}${order.length > 5 ? ' …' : ''})` : ''} — ${file.replace(/\\/g, '/').replace(/^.*\/bugs\//, 'bugs/')}`)
     return 0
   }
   if (cmd === 'ingest') {

@@ -49,6 +49,11 @@
             "type": "command",
             "command": "\"C:/Program Files/Git/bin/bash.exe\" \"${CLAUDE_PROJECT_DIR}/scripts/session-startup.sh\"",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/qa/morning-brief.mjs\"",
+            "timeout": 10
           }
         ]
       }

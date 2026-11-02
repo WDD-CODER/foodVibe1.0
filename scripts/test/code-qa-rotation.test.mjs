@@ -5,7 +5,7 @@ import { tmpdir } from 'os'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import { planChecks } from '../qa/code-qa/plan-checks.mjs'
-import { applyReview, codeReviewExtras, emptyLedger, ingest, parseReview, pick, pickOrder } from '../qa/code-qa/rotation.mjs'
+import { applyReview, citedPaths, codeReviewExtras, emptyLedger, ingest, parseReview, pick, pickOrder, renderQueue, splitDue } from '../qa/code-qa/rotation.mjs'
 
 const FIX = join(dirname(fileURLToPath(import.meta.url)), 'fixtures', 'code-qa', 'rotation')
 const PAGES = Array.from({ length: 19 }, (_, i) => `PG${String.fromCharCode(65 + i)}`)
@@ -135,4 +135,34 @@ test('code review blocks list the marks per page', () => {
     `Code review: ${day(0)} (done) · commit abc1234 · suspect 1 · unknown 1 · verified 0`,
     '  PGA-C01 suspect · PGA-C02 unknown'
   ])
+})
+
+test('due rule: unchanged young done page is skipped; changed (incl. cited file) or 15-day-old page is due', () => {
+  let l = emptyLedger()
+  l = applyReview(l, review('PGA', 'done'), '2026-10-10', 'a', '1')
+  l = applyReview(l, review('PGB', 'done'), '2026-10-10', 'b', '1')
+  l = applyReview(l, review('PGC', 'done'), '2026-10-01', 'c', '1')
+  const ids = ['PGA', 'PGB', 'PGC']
+  assert.deepEqual(splitDue(l, ids, () => 0, '2026-10-20'), { due: ['PGC'], skipped: ['PGA', 'PGB'] }, '19-day-old PGC is due')
+  assert.deepEqual(splitDue(l, ids, () => 0, '2026-10-24'), { due: ['PGC'], skipped: ['PGA', 'PGB'] }, 'exactly 14 days is not yet due')
+  assert.deepEqual(splitDue(l, ids, (id) => (id === 'PGB' ? 1 : 0), '2026-10-20').due, ['PGB', 'PGC'], 'a change makes it due')
+  assert.deepEqual(splitDue(l, ids, () => 0, '2026-10-25').due, ['PGA', 'PGB', 'PGC'], '15 days makes it due')
+})
+
+test('cited files are resolved to tracked paths; ambiguous and unknown ones are dropped', () => {
+  const tracked = ['src/app/a/x.service.ts', 'src/app/b/y.ts', 'src/app/c/y.ts', 'server/z.js']
+  const text = 'see x.service.ts:12, src/app/b/y.ts:3, y.ts:9, nope.ts:4, server/z.js:1 and src/app/b/y.ts:77'
+  assert.deepEqual(citedPaths(text, tracked), ['server/z.js', 'src/app/a/x.service.ts', 'src/app/b/y.ts'])
+})
+
+test('a page with a changed cited file is due; a queue with nothing due says so and lists Skipped', () => {
+  let l = applyReview(emptyLedger(), review('PGA', 'done'), '2026-10-10', 'a', '1', ['src/app/b/y.ts'])
+  assert.deepEqual(l.pages.PGA.citedFiles, ['src/app/b/y.ts'])
+  const changed = new Set(['src/app/b/y.ts'])
+  const count = (id) => (id === 'PGA' ? [...l.pages.PGA.citedFiles].filter((f) => changed.has(f)).length : 0)
+  assert.deepEqual(splitDue(l, ['PGA'], count, '2026-10-12').due, ['PGA'])
+  const queue = renderQueue({ date: '2026-10-12', commit: 'abc', stopAt: '02:40', order: [], skipped: ['PGA'], ledger: l, pageMap: { pages: [] }, checks: {}, changes: {} })
+  assert.match(queue, /Nothing to review tonight/)
+  assert.match(queue, /## Skipped \(no code change since last review\)\n- PGA — last reviewed 2026-10-10 at abc1234/)
+  assert.doesNotMatch(queue, /^## \d+\./m)
 })
