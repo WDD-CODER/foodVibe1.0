@@ -10,6 +10,26 @@
     gap: var(--space-3);
   }
 
+  .inquiry-client-picked {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .inquiry-more {
+    display: grid;
+    gap: var(--space-3);
+
+    summary {
+      cursor: pointer;
+    }
+  }
+
+  .inquiry-back {
+    justify-self: start;
+  }
+
   textarea {
     inline-size: 100%;
     resize: vertical;
