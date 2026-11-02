@@ -155,3 +155,4 @@ Decisions already taken by the Human (do not reopen):
 
 ## Execution Notes
 - Non-interactive run: no UI. On a failed `addClient`/`updateClient` the service logs and re-throws; callers (Plans D, E) show the toast.
+- Orchestrator readiness (2026-11-02): client-data.service.spec.ts is said to mirror menu-event-data.service.spec.ts, which does not exist → copy the structure of src/app/core/services/product-data.service.spec.ts and cover add/update/401/log as T1 lists; log the difference as seen: (answered by the Human, recommended answer accepted).

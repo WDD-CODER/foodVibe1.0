@@ -15,9 +15,9 @@ Depends-on: 514
   - `[auto]` `npm run build` and `npm run lint` pass.
   - `[auto]` `node scripts/scope-check.mjs --reuse --plan=plans/515-new-inquiry-dialog-client-picker.plan.md` exits 0.
   - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` returns no entries.
-  - `[ui]` Owner, `/menu-library?new=inquiry`, type `052` → combobox lists matching clients as `שם · טלפון · N אירועים`; pick → name/phone shown read-only, save creates the event with that `clientId`.
-  - `[ui]` Owner, type an unknown phone → "+ לקוח חדש" → name/phone inputs and collapsed "עוד פרטים" (client type select, company, email, source, notes) → save creates client then event.
-  - `[ui]` Staff, same dialog → no "+ לקוח חדש"; unknown phone shows `client_ask_owner`; save disabled until a pick.
+  - `[human]` Owner, `/menu-library?new=inquiry`, type `052` → combobox lists matching clients as `שם · טלפון · N אירועים`; pick → name/phone shown read-only, save creates the event with that `clientId`.
+  - `[human]` Owner, type an unknown phone → "+ לקוח חדש" → name/phone inputs and collapsed "עוד פרטים" (client type select, company, email, source, notes) → save creates client then event.
+  - `[human]` Staff, same dialog → no "+ לקוח חדש"; unknown phone shows `client_ask_owner`; save disabled until a pick.
   - `[human]` Escape and the shell's close button both cancel without creating anything.
 
 ## Execution Mode
@@ -159,3 +159,9 @@ Decisions already taken by the Human (do not reopen):
 
 ## Execution Notes
 - Interactive behaviour (declared for readiness): **on edit** of the combobox after a pick → the pick is cleared and the user searches again; **on leave** (route change while open) → dialog closes with no write, same as today's `closeInquiry()`; **on cancel** (Escape / shell close / ביטול) → `cancelled.emit()`, nothing written; **on error** of `addClient` → toast `error_generic`, dialog stays open, no event created; **on error** of `addMenuEvent` after a successful `addClient` → toast `error_generic`, dialog stays open, the created client remains (harmless; shows in the picker on retry).
+- Orchestrator readiness (2026-11-02): PermissionService has no owner-only rule for the clients type (permission.service.ts:47 returns true for staff on any create) → compute canCreateClient_ from permission.isOwner_() (in scope); scope is NOT widened (answered by the Human, recommended answer accepted).
+- Orchestrator readiness (2026-11-02): clientFilter on app-search-combobox is a boolean input (search-combobox.component.ts:101), not a function → set [clientFilter]="false", bind query two-way, pass options already filtered with allClients_().filter(c => matchesClientQuery(c, query_())) (answered by the Human, recommended answer accepted).
+- Orchestrator readiness (2026-11-02): error toast `error_generic` is not in dictionary.json → keep `server_error` with the existing 403 skip for addClient and addMenuEvent failures; add no new key (answered by the Human, recommended answer accepted).
+- Orchestrator readiness (2026-11-02): plan drift — the dialog spec has 7 it() blocks, not 6, and the component scss has no overlay styles (overlay is markup only) → build for what the code has; log both as seen: (answered by the Human, recommended answer accepted).
+- Orchestrator readiness (2026-11-02): the three `[ui]` cards need a backend and a database with an owner, a staff account and a client whose phone starts with 052. Local Mongo requires authentication and no backend is started for this plan, so these could not be confirmed available → the three `[ui]` cards are `[human]` follow-ups for this run (decided by the coordinator under the Human's delegated rule).
+- seen: src/app/core/services/permission.service.ts has no mirror of the server's OWNER_ONLY_TYPES (server/utils/permissions.js:20,49) for the clients entity, so PermissionService.can('create', { type: 'clients' }) is true for staff — follow-up (Q2).
