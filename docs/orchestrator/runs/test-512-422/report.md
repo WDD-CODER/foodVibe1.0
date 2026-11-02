@@ -98,6 +98,7 @@ triage: shadow · agreement (last 50): 52% · collapsed: 0 · ask: 11 · follow-
 - F8 87 of 112 agent calls (~650K of 1.53M tokens) were command runners
 - F9 the builder takeover goes to the judgment tier (the session's own model), not Opus, and only in fix round 2; with the session on Sonnet, 512 (judgment tier) ran on Sonnet
 - F10 one "final gate failed after the checkers" lesson line was written to all four checkers, including security, for a manifest failure none of them could catch; the run-log row stayed stale after the by-hand re-run
+- F11 the final gate and the per-plan gate do not run build:schemas, so server tests fail in a fresh worktree until server/generated/schemas exists
 
 ## Models per agent
 
