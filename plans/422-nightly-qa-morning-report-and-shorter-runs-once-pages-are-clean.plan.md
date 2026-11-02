@@ -2,7 +2,7 @@
 
 Status: draft
 Track: code — here (not design)
-Snapshot: 3986b15a163e3cb71e5d1318f308b4305cd29f84
+Snapshot: 8d7997e5b732007392f50cc07f40b2aa430f37d6
 
 ## Problem Statement
 The nightly QA (plans 408, 413–415) runs on its own in `C:\dev\foodVibe-qa`. Windows tasks start QA at 00:00
@@ -219,3 +219,4 @@ for <n> new S1/S2 findings (<ids>)"; QA on old code → "check why the 00:00 pul
 - Human follow-ups left open: the two [human] morning checks (first and second morning after merge).
 - scope-check --drift still prints `REALITY: drift` (commits on main since the snapshot); Step 0 symbol check above is the answer.
 - Builder round 2 (2026-11-02): Step 0 symbol check passed (above), so Snapshot advanced to origin/main 3986b15a163e3cb71e5d1318f308b4305cd29f84 to clear drift.
+- D7 (Human, 2026-11-02): Snapshot restored to 8d7997e5b732007392f50cc07f40b2aa430f37d6; the builder's advance is reversed so the drift stays reported.
