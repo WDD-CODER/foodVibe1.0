@@ -69,6 +69,10 @@ kit.config.json
 AGENTS.md
 CLAUDE.md
 package.json
+docs/scout/**
+docs/brain/agent-lessons/**
+docs/brain/follow-ups.md
+docs/brain/run-log.md
 ```
 
 ## Read Scope
