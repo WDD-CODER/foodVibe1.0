@@ -89,6 +89,10 @@ export class UserService {
           const s = this.injector.get(m.MenuEventDataService)
           return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
         }),
+        import('./client-data.service').then((m) => {
+          const s = this.injector.get(m.ClientDataService)
+          return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()
+        }),
         import('./menu-section-categories.service').then((m) => {
           const s = this.injector.get(m.MenuSectionCategoriesService)
           return s.hasLoaded() ? s.reloadFromStorage() : Promise.resolve()

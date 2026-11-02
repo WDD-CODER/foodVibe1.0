@@ -14,6 +14,7 @@ import { pendingChangesGuard } from './core/guards/pending-changes.guard'
 import { authGuard } from './core/guards/auth.guard'
 import { recipeBuilderAccessGuard } from './core/guards/recipe-builder-access.guard'
 import { platformAdminGuard } from './core/guards/platform-admin.guard'
+import { clientsEnsureLoadedResolver } from './core/resolvers/clients-ensure-loaded.resolver'
 
 export const routes: Routes = [
   // Plan 338: equipment lives only under /inventory/equipment — old URLs redirect.
@@ -149,6 +150,7 @@ export const routes: Routes = [
       menuEventsLoaded: menuEventsEnsureLoadedResolver,
       // ai-menu-modal (opened from this page) reads recipes_()/dishes_() — plan 304 M2.
       kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
+      clientsLoaded: clientsEnsureLoadedResolver,
     },
   },
   {
@@ -161,6 +163,7 @@ export const routes: Routes = [
       sectionCategoriesLoaded: menuSectionCategoriesEnsureLoadedResolver,
       // Page reads recipes_()/dishes_()/products_() directly for menu authoring — plan 304 M2.
       kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
+      clientsLoaded: clientsEnsureLoadedResolver,
     },
   },
   {
@@ -172,6 +175,7 @@ export const routes: Routes = [
       menuEventsLoaded: menuEventsEnsureLoadedResolver,
       sectionCategoriesLoaded: menuSectionCategoriesEnsureLoadedResolver,
       kitchenDataLoaded: kitchenDataEnsureLoadedResolver,
+      clientsLoaded: clientsEnsureLoadedResolver,
     },
   },
   {
