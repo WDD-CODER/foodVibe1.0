@@ -2,7 +2,7 @@
 
 Status: draft
 Track: code — here (not design)
-Snapshot: 8d7997e5b732007392f50cc07f40b2aa430f37d6
+Snapshot: 3986b15a163e3cb71e5d1318f308b4305cd29f84
 
 ## Problem Statement
 The nightly QA (plans 408, 413–415) runs on its own in `C:\dev\foodVibe-qa`. Windows tasks start QA at 00:00
@@ -218,3 +218,4 @@ for <n> new S1/S2 findings (<ids>)"; QA on old code → "check why the 00:00 pul
 - Evidence: `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors, 67 warnings, none in changed files); `pnpm run test:ci` -> exit 0, 1666 SUCCESS; `npm run test:scripts` -> exit 0, pass 146 fail 0; `node --test scripts/test/code-qa-rotation.test.mjs` -> pass 12 fail 0; `node --test scripts/test/qa-morning-report.test.mjs` -> pass 10 fail 0; `node scripts/qa/morning-report.mjs --root=C:/dev/foodVibe-qa --date=2026-10-20 --out=-` -> exit 0, `Status: ATTENTION`; `node scripts/qa/morning-brief.mjs` in the wt-2 slot -> exit 0, no output (fresh-fixture JSON output covered by the test).
 - Human follow-ups left open: the two [human] morning checks (first and second morning after merge).
 - scope-check --drift still prints `REALITY: drift` (commits on main since the snapshot); Step 0 symbol check above is the answer.
+- Builder round 2 (2026-11-02): Step 0 symbol check passed (above), so Snapshot advanced to origin/main 3986b15a163e3cb71e5d1318f308b4305cd29f84 to clear drift.
