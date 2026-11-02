@@ -151,18 +151,9 @@
       "title": "Add the client record, owner-only writes and staff-limited reads on the server",
       "branch": "feat/512-client-entity-foundation-owner",
       "state": "parked",
-      "round": 1,
+      "round": 0,
       "tier": "judgment",
-      "models": {
-        "orch-builder": {
-          "model": "claude-sonnet-5-5",
-          "effort": "medium"
-        },
-        "orch-gate": {
-          "model": "claude-haiku-5-5",
-          "effort": "low"
-        }
-      },
+      "models": {},
       "humanItems": [],
       "history": [
         {
@@ -194,20 +185,53 @@
           "at": "2026-11-02T08:57:56.219Z",
           "state": "parked",
           "round": 1
+        },
+        {
+          "at": "2026-11-02T09:13:39.909Z",
+          "state": "parked",
+          "round": 0
         }
       ],
+      "earlier": [
+        {
+          "nnn": "512",
+          "title": "Add the client record, owner-only writes and staff-limited reads on the server",
+          "branch": "feat/512-client-entity-foundation-owner",
+          "state": "parked",
+          "round": 1,
+          "tier": "judgment",
+          "models": {
+            "orch-builder": {
+              "model": "claude-sonnet-5-5",
+              "effort": "medium"
+            },
+            "orch-gate": {
+              "model": "claude-haiku-5-5",
+              "effort": "low"
+            }
+          },
+          "asked": [
+            "server test commands denied",
+            "merge order vs 422",
+            "log-query slot-only"
+          ],
+          "ready": false,
+          "freeDiskGb": 18.8,
+          "sha": "12eeeb96eaa3aeca63f4fb5b3c766247d49f3dee",
+          "roundCauses": [
+            "round 1: checker: blocker server/test/cross-business.test.js:0 test file outside the plan's scope"
+          ],
+          "reason": "replan needed: The plan's Read-Write Scope forbids server/test/cross-business.test.js, but that test loops over every ALL_USER_ENTITY_TYPES entry and the plan's own sub-task (register 'clients' in collections.js) cannot pass it without a 'clients' body. T"
+        }
+      ],
+      "reason": "worktree: merging origin/orch/test-512-422 into feat/512-client-entity-foundation-owner conflicts: CONFLICT (content): Merge conflict in plans/512-client-entity-foundation-owner-only-writes.plan.md",
       "asked": [
         "server test commands denied",
         "merge order vs 422",
         "log-query slot-only"
       ],
       "ready": false,
-      "freeDiskGb": 18.8,
-      "sha": "12eeeb96eaa3aeca63f4fb5b3c766247d49f3dee",
-      "roundCauses": [
-        "round 1: checker: blocker server/test/cross-business.test.js:0 test file outside the plan's scope"
-      ],
-      "reason": "replan needed: The plan's Read-Write Scope forbids server/test/cross-business.test.js, but that test loops over every ALL_USER_ENTITY_TYPES entry and the plan's own sub-task (register 'clients' in collections.js) cannot pass it without a 'clients' body. T"
+      "freeDiskGb": 18.2
     }
   },
   "notes": [
@@ -229,13 +253,17 @@
     {
       "at": "2026-11-02T09:02:43.364Z",
       "text": "final gate failed: node scripts/kit-manifest-check.mjs — unclassified: scripts/qa/morning-brief.mjs | unclassified: scripts/qa/morning-report.mjs | unclassified: scripts/test/qa-morning-report.test.mjs | KIT_MANIFEST: FAIL — 373 classified, 3 unclassified, 0 duplicates, 0 unhandled-coupling (3 problems)"
+    },
+    {
+      "at": "2026-11-02T09:13:16.720Z",
+      "plan": "512",
+      "text": "starts on the judgment tier: Architecture Impact names INV-1"
     }
   ],
-  "attempts": 1,
+  "attempts": 2,
   "phase": "stopped",
   "freeDiskGb": 18.2,
-  "updatedAt": "2026-11-02T09:06:22.397Z",
-  "stopReason": "wave 1 parked 512 — later waves not started",
+  "updatedAt": "2026-11-02T09:14:12.688Z",
   "decisions": [
     {
       "id": "D8",
@@ -446,5 +474,6 @@
       "why": "Recurring scope gap for future plans."
     }
   ],
-  "finishedAt": "2026-11-02T09:06:22.396Z"
+  "finishedAt": "2026-11-02T09:14:12.686Z",
+  "stopReason": "wave 1 parked 512 — later waves not started"
 }

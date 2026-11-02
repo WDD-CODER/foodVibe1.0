@@ -1,6 +1,6 @@
 # Orchestrator run test-512-422
 
-Run branch: `orch/test-512-422` (from `origin/main` at 3986b15) · started 2026-11-02T08:23:37.923Z · finished 2026-11-02T09:06:22.396Z
+Run branch: `orch/test-512-422` (from `origin/main` at 3986b15) · started 2026-11-02T08:23:37.923Z · finished 2026-11-02T09:14:12.686Z
 Result: 1 merged, 1 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 3986b15.
 Stopped: wave 1 parked 512 — later waves not started
@@ -10,7 +10,7 @@ Stopped: wave 1 parked 512 — later waves not started
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 422 Nightly QA morning report and shorter runs once pages are clean | merged | 1 | build | dcfad4a |  |
-| 512 Add the client record, owner-only writes and staff-limited reads on the server | parked | 1 | judgment |  | replan needed: The plan's Read-Write Scope forbids server/test/cross-business.test.js, but that test loops over every ALL_USER_ENTITY_TYPES entry and the plan's own sub-task (register 'clients' in collections.js) cannot pass it without a 'clients' body. T |
+| 512 Add the client record, owner-only writes and staff-limited reads on the server | parked | 0 | judgment |  | worktree: merging origin/orch/test-512-422 into feat/512-client-entity-foundation-owner conflicts: CONFLICT (content): Merge conflict in plans/512-client-entity-foundation-owner-only-writes.plan.md |
 
 ## App errors since the run started
 
@@ -75,6 +75,7 @@ triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 7
 - 422: builder left undone (round 0): The two [human] morning checks (first and second morning after merge) are left unticked as Human follow-ups
 - 512: builder left undone (round 0): node scripts/log-query.mjs --since=plan-start --level=error not run by the builder: skipped per the Human's readiness answer (the run report's 'App errors since the run started' section replaces it)
 - final gate failed: node scripts/kit-manifest-check.mjs — unclassified: scripts/qa/morning-brief.mjs | unclassified: scripts/qa/morning-report.mjs | unclassified: scripts/test/qa-morning-report.test.mjs | KIT_MANIFEST: FAIL — 373 classified, 3 unclassified, 0 duplicates, 0 unhandled-coupling (3 problems)
+- 512: starts on the judgment tier: Architecture Impact names INV-1
 
 ## Models per agent
 
@@ -86,8 +87,6 @@ triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 7
 - 422 orch-security: claude-sonnet-5-5 / high
 - 422 orch-verify: claude-sonnet-5-5 / medium
 - 422 orch-merge: claude-sonnet-5-5 / low
-- 512 orch-builder: claude-sonnet-5-5 / medium
-- 512 orch-gate: claude-haiku-5-5 / low
 
 ## What only the Human can do
 
@@ -96,7 +95,7 @@ triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 7
 1. 422 Nightly QA morning report and shorter runs once pages are clean: The first morning after merge: `C:\dev\foodVibe-qa\bugs\qa-runs\MORNING.md` exists with that night's
 2. 422 Nightly QA morning report and shorter runs once pages are clean: The second night after merge: `queue.md` lists only pages whose code changed under "due" and the rest
 
-- Decide on 512: replan needed: The plan's Read-Write Scope forbids server/test/cross-business.test.js, but that test loops over every ALL_USER_ENTITY_TYPES entry and the plan's own sub-task (register 'clients' in collections.js) cannot pass it without a 'clients' body. T
+- Decide on 512: worktree: merging origin/orch/test-512-422 into feat/512-client-entity-foundation-owner conflicts: CONFLICT (content): Merge conflict in plans/512-client-entity-foundation-owner-only-writes.plan.md
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -104,6 +103,6 @@ git fetch origin
 gh pr create --base main --head orch/test-512-422 --title "Orchestrator run test-512-422" --body-file .claude\orchestrator-runs\test-512-422.md
 ```
 
-Context added by learning: 661 chars across 6 roles
+Context added by learning: 709 chars across 6 roles
 
 Trend: first logged run
