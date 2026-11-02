@@ -1,10 +1,10 @@
 {
   "kit": {
-    "version": "1.12.0"
+    "version": "1.13.0"
   },
   "source": "github:WDD-CODER/ai-workflow-kit",
-  "ref": "v1.12.0",
-  "commit": "504cefad6e32decbf0b8db1298012b963fd40eed",
+  "ref": "v1.13.0",
+  "commit": "0f6ae6f37040f23954b51f351600f0b8d30099d6",
   "packs": [
     "angular",
     "node-express"
@@ -28,27 +28,27 @@
       "source": "core/.claude/agents/kit-runner.md"
     },
     ".claude/agents/orch-builder.md": {
-      "sha256": "7c5b7d17b2b248a933e736bdd0a23e053917807c1a24683b012f8a0a35c8a71d",
+      "sha256": "233a7f2faeb6e3341b4e1fb6b6355ae6d58e5c2ae2a349ecf0a769ea116e4a21",
       "kind": "managed",
       "source": "core/.claude/agents/orch-builder.md"
     },
     ".claude/agents/orch-check-bugs.md": {
-      "sha256": "0a3d5fa5c9b62485c0e4e46e2421a7ab14e772b482dedcbb845535090087a60a",
+      "sha256": "cc5ff0be81741b026fcda53f9e23093b5ce1b870a89b977fbc62a28fd6a18021",
       "kind": "managed",
       "source": "core/.claude/agents/orch-check-bugs.md"
     },
     ".claude/agents/orch-check-plan.md": {
-      "sha256": "88aa0edf4ebc6093e04308bbc14c11fc38f968b1ccd0411b66671751759270c6",
+      "sha256": "511f17042c48b0c05e3ebfd28699e2eebbd8f132288dcff1f0b6652f07fdb528",
       "kind": "managed",
       "source": "core/.claude/agents/orch-check-plan.md"
     },
     ".claude/agents/orch-check-rules.md": {
-      "sha256": "e86c137a65007feeb654ba25091c69ccf44c55efc097f88c8daa37c25c1b5a8d",
+      "sha256": "b738900d6072c2275690c4fab290de17897cf26ca51f1c6f1887cdee8bc69933",
       "kind": "managed",
       "source": "core/.claude/agents/orch-check-rules.md"
     },
     ".claude/agents/orch-gate.md": {
-      "sha256": "5f2362c0837d547aa3465da00c9e1de741634edd7bb64216db33f7da754f41a1",
+      "sha256": "4915329cd57c7714d768b84b0f7dadf8ee03bc172253f977f8e4765622bb9caa",
       "kind": "managed",
       "source": "core/.claude/agents/orch-gate.md"
     },
@@ -58,29 +58,39 @@
       "source": "core/.claude/agents/orch-merge.md"
     },
     ".claude/agents/orch-readiness.md": {
-      "sha256": "6c1cf67c2fbc3362cc5fcdd355ef6136b52f4785ef7e6ea454c28839e2ccc26c",
+      "sha256": "df47a6c783ff8efd3d8ba463930ccdaba3edcae3f9f99f87920b027d0818aa09",
       "kind": "managed",
       "source": "core/.claude/agents/orch-readiness.md"
     },
     ".claude/agents/orch-report.md": {
-      "sha256": "c13c048e8ceae7532e5576fcf5245a3562297991185f68c023e1ee1b768ed365",
+      "sha256": "72ddf9445f7701feb288922cfd3b5a5cdb587fff04815581dca6156d8ffb4238",
       "kind": "managed",
       "source": "core/.claude/agents/orch-report.md"
     },
     ".claude/agents/orch-security.md": {
-      "sha256": "9f6619682574e58eaaf7404c06b2d5379934b108ae0587b9fe2a7b20cbbb74e1",
+      "sha256": "fc7616236fc6382116ada620efd9e13910550ebd10d2bc864013da06fc241fdd",
       "kind": "managed",
       "source": "core/.claude/agents/orch-security.md"
     },
+    ".claude/agents/orch-triage.md": {
+      "sha256": "c739305028594786c5d678186e3c3ea6fdea3a85d7b640ca18307da0dae3a939",
+      "kind": "managed",
+      "source": "core/.claude/agents/orch-triage.md"
+    },
     ".claude/agents/orch-ui.md": {
-      "sha256": "aaa5786fc850f79e82f06e56f5c5aa7198481e143af90fbe22bee5d875bd6b76",
+      "sha256": "49f9b6265068378d5895afb18a826ee4b737ca126b800089de42f8de2e7970a1",
       "kind": "managed",
       "source": "core/.claude/agents/orch-ui.md"
     },
     ".claude/agents/orch-verify.md": {
-      "sha256": "21def0fbe34329e36a775b4230bc4a8f66a6dd87d5f18185fe5fbefdddffd7cf",
+      "sha256": "0d29a0fefe68cc21f5f760aac3e6ad855e27752927e946737f07d3677c9167e4",
       "kind": "managed",
       "source": "core/.claude/agents/orch-verify.md"
+    },
+    ".claude/agents/skill-judge.md": {
+      "sha256": "130fb5fa2f3043a3546fee6bed18dc95d759b71a81a88140614f50bb33e86d1b",
+      "kind": "managed",
+      "source": "core/.claude/agents/skill-judge.md"
     },
     ".claude/commands/brief.md": {
       "sha256": "55a830a0aee50eba0660085d550ed0c1b7af2b12bc8c39882aa8eaf0dc2b0383",
@@ -117,18 +127,23 @@
       "kind": "managed",
       "source": "core/.claude/commands/fix-pr-checks.md"
     },
+    ".claude/commands/improve-skill.md": {
+      "sha256": "817f36bc78102b66fa985abb4d91ceb8734c50c9c78b411bf4839120fd62579c",
+      "kind": "managed",
+      "source": "core/.claude/commands/improve-skill.md"
+    },
     ".claude/commands/kit-feedback.md": {
       "sha256": "e3caa30bbca281dea3d63af307959769062d37d8d0b909c298100fd7476105b9",
       "kind": "managed",
       "source": "core/.claude/commands/kit-feedback.md"
     },
     ".claude/commands/orchestrate.md": {
-      "sha256": "1c7c4931dc643a45decd5f665a1c98cde975be0af235f8c681d2bc85972ccc08",
+      "sha256": "dc9b406fb19c5d64036684e7d85606a93116ae34ae66c3c38352c45117e44a82",
       "kind": "managed",
       "source": "core/.claude/commands/orchestrate.md"
     },
     ".claude/commands/plan.md": {
-      "sha256": "cfe944f01c401f50edb5722e891aae43187f9a87d9c45f823ad99103bfc46c1d",
+      "sha256": "cf2776f1714ffb0c698bfe9f790be90a386092e0e4fc341bc48a0b5115e42887",
       "kind": "managed",
       "source": "core/.claude/commands/plan.md"
     },
@@ -147,13 +162,18 @@
       "kind": "managed",
       "source": "core/.claude/commands/review.md"
     },
+    ".claude/commands/scout.md": {
+      "sha256": "1b14c6ace4ba6db132a56391183a9c6a6e2a7da64f33df6518c96bd125500828",
+      "kind": "managed",
+      "source": "core/.claude/commands/scout.md"
+    },
     ".claude/commands/security.md": {
       "sha256": "d7d950ed024003eaf83151a760b79271024cb55b427865717110f37fd7e42206",
       "kind": "managed",
       "source": "core/.claude/commands/security.md"
     },
     ".claude/commands/ship.md": {
-      "sha256": "c5babb64f97f805ffa18062e75f007341d914b3a8ed83f61def8c64a8ba16576",
+      "sha256": "2d7647148f0a3e8c1ced2b9fddd85b75c26fca9d4aabfaf85cb857ab38e2591c",
       "kind": "managed",
       "source": "core/.claude/commands/ship.md"
     },
@@ -168,7 +188,7 @@
       "source": "core/.claude/commands/sweep-stale-todos.md"
     },
     ".claude/commands/take-plan.md": {
-      "sha256": "9c948e34b5de5a94d2e428cc2df56c42fab8ccaa3f75520a09ad3e29b743c6a6",
+      "sha256": "af37212a73fd54badaccfb7ec4d4abac483cf15ed20406ad14c46a59ebda4655",
       "kind": "managed",
       "source": "core/.claude/commands/take-plan.md"
     },
@@ -238,7 +258,7 @@
       "source": "core/.claude/skills/save-plan/SKILL.md"
     },
     ".claude/skills/save-plan/evals/evals.json": {
-      "sha256": "d7deffe10deb21611459fc3bfbd8c78f431a1f0cd3ec5df06eeea322bdecdbef",
+      "sha256": "24193f8deb9483f0f80981d82f97563b3e2a03fbfe5042e46803e7281dd1bbcd",
       "kind": "managed",
       "source": "core/.claude/skills/save-plan/evals/evals.json"
     },
@@ -258,7 +278,7 @@
       "source": "packs/angular/.claude/workflows/deploy.yml"
     },
     ".claude/workflows/orchestrate.js": {
-      "sha256": "9626e9008eb5d545277951097f708b5cbcfb2a74ce28c570f3ce8e85d4792fa3",
+      "sha256": "e6d6bb51f3d5d031afffdc4cefe502baf085c4be87c521d91d827b839d0fbada",
       "kind": "managed",
       "source": "core/.claude/workflows/orchestrate.js"
     },
@@ -528,12 +548,12 @@
       "source": "templates/docs/project/tech-stack.md"
     },
     "docs/agent/agent-evals.md": {
-      "sha256": "0ed2999b53d2c07e08b1e707e6c15b4f14e7885aa4dce4cf01f6db3582d2cb9d",
+      "sha256": "5b784ada9d2a27261070827532495316bd45377be6b89dbc4ada22c09b4014ae",
       "kind": "managed",
       "source": "core/docs/agent/agent-evals.md"
     },
     "docs/agent/agent-roles.md": {
-      "sha256": "fae4716dec46a40ac5bade3e8b78b922e8c667eb4a482e744be41c2c94c76968",
+      "sha256": "8a70b82c0f7c822b823761387e839c97fb10fedf6bdf5d1e0bb60d77ca0794e0",
       "kind": "managed",
       "source": "core/docs/agent/agent-roles.md"
     },
@@ -543,37 +563,42 @@
       "source": "core/docs/agent/brain-capture.md"
     },
     "docs/agent/decision-review.md": {
-      "sha256": "2bac3e9d684fe68eea55726d8ef6a1421135812938b5c5cff79e412952daf437",
+      "sha256": "08a52205b7384654ca7b39e49cfb661dc0847d56e8cf50ef64131e7cafa2f1d4",
       "kind": "managed",
       "source": "core/docs/agent/decision-review.md"
     },
     "docs/agent/job-validation.md": {
-      "sha256": "30a28304291ea4148d1a499cfff4e5ba085c50801487f72e0e875dff11c02bab",
+      "sha256": "3c9db662e56b34aef93c7ea9f422948bd6f2787564eebe4648065e82a074646f",
       "kind": "managed",
       "source": "core/docs/agent/job-validation.md"
     },
+    "docs/agent/kit-brain.md": {
+      "sha256": "ac087959f111366d2b9ac1fbe82ebb568b6e796bbcfbb27f4758a5625d67b717",
+      "kind": "managed",
+      "source": "core/docs/agent/kit-brain.md"
+    },
     "docs/agent/model-routing.md": {
-      "sha256": "f6f0396b63ec5e34c0fce15f677c934df65c184b76c848adbfcecc4539ab3dce",
+      "sha256": "b37374dacc6aa7d24b326dd2ba8d1db2b758a2f79159640831d189fee6141223",
       "kind": "managed",
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "2b6ebd75cbf8ddc2479caa6a4f6825969ac59a8052ffbc4632445bd20c0928ef",
+      "sha256": "2a99ef6bf2f99edd3a1489e05b69564ddca85efd93be4453f0ca911ae2bbe5fc",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },
     "docs/agent/pr-check-fix-loop.md": {
-      "sha256": "c1eadc403ce26946842ba86096aec77a8548e3707667994229afdb3a0b535bcf",
+      "sha256": "6e5b7bc420aafb3f8169774baa0e88dc5a73c032ad42c05b39e6d32dccb6972e",
       "kind": "managed",
       "source": "core/docs/agent/pr-check-fix-loop.md"
     },
     "docs/agent/ship-recovery.md": {
-      "sha256": "9a420f72c1f1ae8d874a6f8f73975f711892549091cb3638d9619ede23c9e161",
+      "sha256": "819c5858034e315cfeb35bea4bbbc11aa0ebe62d717be17186a1a39987672c7c",
       "kind": "managed",
       "source": "core/docs/agent/ship-recovery.md"
     },
     "docs/agent/ship-regular.md": {
-      "sha256": "46606db124ddaf886b39a722735e54e9f39ee04e6bd06bb14ce3a0f32aa7d4a9",
+      "sha256": "5ab10992c49b0ec4587a22c5f78d4926a8d79b392c30ea30d1513b3ad253fba7",
       "kind": "managed",
       "source": "core/docs/agent/ship-regular.md"
     },
@@ -586,6 +611,56 @@
       "sha256": "b4244ecf18f75c46da656ee4dfdeee851eddfaf931c9b3faeda2e12eb3ee04ae",
       "kind": "managed",
       "source": "core/docs/agent/standards-git.md"
+    },
+    "docs/brain/agent-lessons/builder.md": {
+      "sha256": "73bcbe105778217c7322d8d6a50bf40dbe396f0b17822d6fad871309712424fa",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/builder.md"
+    },
+    "docs/brain/agent-lessons/check-bugs.md": {
+      "sha256": "5246d58c0148e904b3d03d6f6bc6f6b0ae0e53c12520eb3b49d072f5ae338829",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/check-bugs.md"
+    },
+    "docs/brain/agent-lessons/check-plan.md": {
+      "sha256": "4fdda319fde5a74a9dc084d239fa4e1fafffc435f2dfd5b4bea8fae28829794a",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/check-plan.md"
+    },
+    "docs/brain/agent-lessons/check-rules.md": {
+      "sha256": "f0b6ba41c743e978f7cad65d0cf6836d6fed94e6cde401bf23ba55205ed55ea8",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/check-rules.md"
+    },
+    "docs/brain/agent-lessons/gate.md": {
+      "sha256": "189d72e7b96ca009625e1e860d1e6318e4c5e2bf534571cecf5acd4e320aa16a",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/gate.md"
+    },
+    "docs/brain/agent-lessons/planner.md": {
+      "sha256": "4ec5d6be75ec3318cdf6a60b385108ee2c4e792f66a7a45a27082b57ef899f21",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/planner.md"
+    },
+    "docs/brain/agent-lessons/readiness.md": {
+      "sha256": "705eb6fe70775108f6d44807694b5c106963307af29921fb0e789274702465e7",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/readiness.md"
+    },
+    "docs/brain/agent-lessons/security.md": {
+      "sha256": "4238c805db5647662219c008094591edc27a6946063e9cca89ba5806739fd08b",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/security.md"
+    },
+    "docs/brain/agent-lessons/ui.md": {
+      "sha256": "dd6dd132d3a5d6b0a5674204ccfcd0e601479d9cbe651548f99f598446f2d655",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/ui.md"
+    },
+    "docs/brain/agent-lessons/verify.md": {
+      "sha256": "5b4cc56ef9e193a02aabf49e0e6e72ba2d7a42a73b707f7ebf602f55559b560f",
+      "kind": "seed",
+      "source": "templates/docs/brain/agent-lessons/verify.md"
     },
     "docs/brain/agent-rules.md": {
       "sha256": "8c6dd9fe074e69ca38354147c64136481081d5789438c623672a351ab48e533e",
@@ -646,6 +721,11 @@
       "sha256": "217597f37f906cbed9b4d798a752900c3a08d3ab77f0c6608a057f73073a64aa",
       "kind": "seed",
       "source": "core/docs/brain/decisions/_TEMPLATE.md"
+    },
+    "docs/brain/follow-ups.md": {
+      "sha256": "642cf3547c996af1362df370aa991540b455e4dd1f58b7dd05d0c4599fe5c4d8",
+      "kind": "seed",
+      "source": "templates/docs/brain/follow-ups.md"
     },
     "docs/brain/glossary.md": {
       "sha256": "06f8c5742d8deb05e08af74f3f7acb535848616f3ec866bef3f508f824dd087c",
@@ -732,6 +812,16 @@
       "kind": "seed",
       "source": "templates/docs/brain/projectbrief.md"
     },
+    "docs/brain/run-log.md": {
+      "sha256": "2a65250cde0675177a2318c3faade756e87eebaeb6c388b8fbde322f600fc59a",
+      "kind": "seed",
+      "source": "templates/docs/brain/run-log.md"
+    },
+    "docs/scout/sources.json": {
+      "sha256": "5230547b992d3d5c0576123aa226bdecfb52240eedba8b7d15b072a714ea801e",
+      "kind": "seed",
+      "source": "templates/docs/scout/sources.json"
+    },
     "eslint.config.mjs": {
       "sha256": "8beda61914aa6c7a8850d597e9ea9239192cd10e2d862752f30b25e2d5908a96",
       "kind": "managed",
@@ -752,6 +842,16 @@
       "kind": "managed",
       "source": "core/scripts/brain-review-check.mjs"
     },
+    "scripts/brain.mjs": {
+      "sha256": "5cee3326e8664d6e405809d1d4831673356066175beee842e74ab4aa18716522",
+      "kind": "managed",
+      "source": "core/scripts/brain.mjs"
+    },
+    "scripts/branch-autodelete-check.mjs": {
+      "sha256": "8985db74f97dc5893a11174eccc4d775d60bf739987a3917dda60b388e337329",
+      "kind": "managed",
+      "source": "core/scripts/branch-autodelete-check.mjs"
+    },
     "scripts/branch-guard.sh": {
       "sha256": "a9a4084cbc49234e560baec8e057c11f713729cdc307afaf6dc2b778d4a1995c",
       "kind": "managed",
@@ -763,12 +863,12 @@
       "source": "packs/angular/scripts/breadcrumbs-check.mjs"
     },
     "scripts/decision-log.mjs": {
-      "sha256": "4de734255230f36f5d237b16993dbf3ed0082b5b8505f2ad6e69b1103ebde307",
+      "sha256": "d7e10e8ab1f6e68e0a09d34bf610110a207a67caebb6a49bdc59bc2fc3e82547",
       "kind": "managed",
       "source": "core/scripts/decision-log.mjs"
     },
     "scripts/free-merged-slots.mjs": {
-      "sha256": "392679d691d64d822e3dc8dc92b651e1a6d4f65c7757f402b3117fd18956ec2d",
+      "sha256": "7c34939260cef14253300b11675398bb30a5bbeb7863ff6d6ef9c57c70b51413",
       "kind": "managed",
       "source": "core/scripts/free-merged-slots.mjs"
     },
@@ -783,12 +883,17 @@
       "source": "core/scripts/handoff-check.sh"
     },
     "scripts/kit-feedback.mjs": {
-      "sha256": "9566af2520c9ab314e34f36c9052474e6d2ef3cda8172d5c69d0564578d9309f",
+      "sha256": "3bb816afc3c1d82a814dcaf55887741274f003b8a18a4e5abaf7950dad583cac",
       "kind": "managed",
       "source": "core/scripts/kit-feedback.mjs"
     },
+    "scripts/lib/brain-doc.mjs": {
+      "sha256": "6c80f96c5d8ed785452eed0bc626c4b33a328d60c36fc270e9e2d70a953f5b1b",
+      "kind": "managed",
+      "source": "core/scripts/lib/brain-doc.mjs"
+    },
     "scripts/lib/done-when.mjs": {
-      "sha256": "e58aa2c684bea91072591e016849ce35bb771bcd9e2f2c36f44f8a52522f7d94",
+      "sha256": "26613270c57bc1282a0ee99afafe555897c26acd45a031319fe3766c931713be",
       "kind": "managed",
       "source": "core/scripts/lib/done-when.mjs"
     },
@@ -808,14 +913,19 @@
       "source": "core/scripts/lib/invariants.mjs"
     },
     "scripts/lib/orch-folders.mjs": {
-      "sha256": "d7d2fdeae213a83e51f47e868e05d49245c66c7baa94738f96e0e43755ec00e8",
+      "sha256": "599f2aaa4862685cdfa1b3eb432d2eac3ba2b075fc1e9de6a74d195212ceabc5",
       "kind": "managed",
       "source": "core/scripts/lib/orch-folders.mjs"
     },
     "scripts/lib/orch-run.mjs": {
-      "sha256": "05ee020ae8ee72ad3d06905cd898e9115489db9052708bef90dc90e3780b635b",
+      "sha256": "b6d0deeb0ef4d81ccbf13364787894246882e58308252b734e76b293da5ac918",
       "kind": "managed",
       "source": "core/scripts/lib/orch-run.mjs"
+    },
+    "scripts/lib/override-steps.mjs": {
+      "sha256": "6681a86349a331646480f26c11e195eb0479eb0ebb149a8a6b69b8cc3ccc0fcf",
+      "kind": "managed",
+      "source": "core/scripts/lib/override-steps.mjs"
     },
     "scripts/lib/plan-deps.mjs": {
       "sha256": "b534e3fd9dd125048b9e130406bb54dc298af10090185e40f15432a7473889ad",
@@ -833,9 +943,19 @@
       "source": "core/scripts/lib/plan-paths.mjs"
     },
     "scripts/lib/plan-scope.mjs": {
-      "sha256": "9329582a2029e085160605893c778570a66d5a0c26b966c3ffd36f92cd161df8",
+      "sha256": "40d2afa5ce27b9c4c1e9a65302d6fdfcc72ff73c6951b7da5cb5acc0856e61a3",
       "kind": "managed",
       "source": "core/scripts/lib/plan-scope.mjs"
+    },
+    "scripts/lib/redact.mjs": {
+      "sha256": "ebbde39de060ebf84644a5e0d6a95f27525d6b84774b37f22ecff6778b4dbc4b",
+      "kind": "managed",
+      "source": "core/scripts/lib/redact.mjs"
+    },
+    "scripts/lib/scope-tests-lint.mjs": {
+      "sha256": "300b7d0efda98b7d343cf1c93be9ee587fc49d3c1789f370a59b452c30af18e3",
+      "kind": "managed",
+      "source": "core/scripts/lib/scope-tests-lint.mjs"
     },
     "scripts/lib/slot-procs.mjs": {
       "sha256": "4606a57ff15202181787f52d84d0845568eedbf6c7f6dc3f58ae5cd82e5b9420",
@@ -843,7 +963,7 @@
       "source": "core/scripts/lib/slot-procs.mjs"
     },
     "scripts/lib/slot.mjs": {
-      "sha256": "f0b8b3550a19b111d40b4c01f3d7bdae722a09210d799a50aff73fd781719867",
+      "sha256": "3bff3989e9e96c9355932146c67706af00431a48e8363b42ffa5da3b860d1f1c",
       "kind": "managed",
       "source": "core/scripts/lib/slot.mjs"
     },
@@ -853,12 +973,12 @@
       "source": "core/scripts/lib/todo-parse.mjs"
     },
     "scripts/local-excludes.mjs": {
-      "sha256": "e0388a9e9dcd544b7dbb80f4902e24a18686a176ee76027954e30c58b218036d",
+      "sha256": "caf19ba89cc7afc02441eee72aac4234e2308f07aa5e10c3a315c14ffc4e9b57",
       "kind": "managed",
       "source": "core/scripts/local-excludes.mjs"
     },
     "scripts/next-plan-number.mjs": {
-      "sha256": "484dd13af43eb456fd723f821ef3792654d474cbd0f379c2453fd7f7523cfc70",
+      "sha256": "0b18f8c04d9a8d5ab1b9ad32a639856547df37605068be2d548eceb8c01cefed",
       "kind": "managed",
       "source": "core/scripts/next-plan-number.mjs"
     },
@@ -868,7 +988,7 @@
       "source": "core/scripts/orch-preflight.mjs"
     },
     "scripts/orch-state.mjs": {
-      "sha256": "6ac55bc290ae1340761bd445aa5bf5abaa8d6891123e97f46f552f9591e6fe95",
+      "sha256": "fea50b40590131cb137937cc79abbb512ae644ea691f82433ab189d98ce37d5b",
       "kind": "managed",
       "source": "core/scripts/orch-state.mjs"
     },
@@ -877,13 +997,18 @@
       "kind": "managed",
       "source": "core/scripts/orphan-sweep.mjs"
     },
+    "scripts/override-check.mjs": {
+      "sha256": "6e9f88234410f809337a034c96ba9690b30b8fe7012422355b36e18c98a9b5e6",
+      "kind": "managed",
+      "source": "core/scripts/override-check.mjs"
+    },
     "scripts/package.json": {
       "sha256": "c7de218d6660669ab396602b24d7633042597fa3b8a96a07d444f049a8484787",
       "kind": "managed",
       "source": "core/scripts/package.json"
     },
     "scripts/plan-close.mjs": {
-      "sha256": "d8a4e6af1aa59068966fdacb4a6a64ab65051a4d8d2e4f3a98202f08b8eb8c83",
+      "sha256": "d46c4e1176f73e9f9365b08f188fda3f79d131660aa394edea75eecbce2b5271",
       "kind": "managed",
       "source": "core/scripts/plan-close.mjs"
     },
@@ -913,7 +1038,7 @@
       "source": "packs/angular/scripts/pre-commit-no-semi.mjs"
     },
     "scripts/pre-commit-secret-scan.mjs": {
-      "sha256": "049ad5376dee0589de3e6512e88d78b09d260d3473f3307b3b7d222157637f7a",
+      "sha256": "25a0e005c3c2e4b093b77fd9cd5ed740be64e4d929925fde4ef98f60df3345eb",
       "kind": "managed",
       "source": "core/scripts/pre-commit-secret-scan.mjs"
     },
@@ -947,6 +1072,21 @@
       "kind": "managed",
       "source": "core/scripts/scope-guard.sh"
     },
+    "scripts/scout/page-template.html": {
+      "sha256": "3af382e4209868e3933a1d256dd070d12f2b507b99ffc32a8376c3acf8d95a6c",
+      "kind": "managed",
+      "source": "core/scripts/scout/page-template.html"
+    },
+    "scripts/scout/pr.mjs": {
+      "sha256": "34ff0260aabe90a989f726e0de34e8df5c4f44e949b0c7fe06986c56e1a51736",
+      "kind": "managed",
+      "source": "core/scripts/scout/pr.mjs"
+    },
+    "scripts/scout/render.mjs": {
+      "sha256": "8cdd9333e4c0eed8d7ed1c5d2c2352b5e8b66971e7c5354443e707f0a4b9911a",
+      "kind": "managed",
+      "source": "core/scripts/scout/render.mjs"
+    },
     "scripts/session-lock.sh": {
       "sha256": "cdb12ee087929b92bbdb7f2151a99c1d4f1697de62cdcbf5d373934db9478d0d",
       "kind": "managed",
@@ -973,17 +1113,17 @@
       "source": "core/scripts/ship-prep.mjs"
     },
     "scripts/slot-serve.mjs": {
-      "sha256": "523dc9090f353b8d5e4958a44bcfbaaa3545b9caa78bf11454bc777363aa39af",
+      "sha256": "87b8441a8e67b4618101461848e6a2f25dd96d75657e22c1af1c19422105c969",
       "kind": "managed",
       "source": "core/scripts/slot-serve.mjs"
     },
     "scripts/slot-stop.mjs": {
-      "sha256": "9e0f600e842ed4d7a2cd752dd53859d456e837afb21b08a24a896f1ab94f8933",
+      "sha256": "d5bd1b721aedb815c91dac2011aa415ca8d8f65a1320cd070710e6195351b523",
       "kind": "managed",
       "source": "core/scripts/slot-stop.mjs"
     },
     "scripts/take-plan.mjs": {
-      "sha256": "b422b0775378b13c689a7ef3c96357f4381548251585a09cc822c6128458a8a9",
+      "sha256": "f317a299fb214295f5f26691768f4101fccb932ab452ec0be9b79b9ff7e64ebd",
       "kind": "managed",
       "source": "core/scripts/take-plan.mjs"
     },
@@ -1002,5 +1142,18 @@
       "kind": "managed",
       "source": "core/scripts/todo-query.mjs"
     }
+  },
+  "required": {
+    ".github/workflows/ci.yml": [
+      "Install workflow script dependencies",
+      "Kit override check",
+      "Workflow script tests",
+      "Secret scan (gitleaks)",
+      "Require quality gates"
+    ],
+    ".github/workflows/security.yml": [
+      "npm audit (workflow scripts, report only)",
+      "Semgrep OWASP Top Ten"
+    ]
   }
 }

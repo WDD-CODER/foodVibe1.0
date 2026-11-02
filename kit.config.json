@@ -174,15 +174,15 @@
     },
     {
       "path": "scripts/scope-check.mjs",
-      "reason": "plan 450 reuse layer on top of kit v1.9.0 (rebased by plan 506); queued as a kit PR"
+      "reason": "plan 450 reuse layer on top of kit v1.13.0 (--reuse gate in scope-check.mjs, rebased by plan 524); queued as a kit PR"
     },
     {
       "path": ".claude/references/prd-template.md",
-      "reason": "plan 450 reuse layer on top of kit v1.9.0 (rebased by plan 506); queued as a kit PR"
+      "reason": "plan 450 reuse layer on top of kit v1.13.0 (## Reuse Check section, rebased by plan 524); queued as a kit PR"
     },
     {
       "path": ".claude/skills/save-plan/SKILL.md",
-      "reason": "plan 450 reuse layer: reuse-gate checklist line + Phase 2 rule; queued as a kit PR"
+      "reason": "plan 450 reuse layer on top of kit v1.13.0: reuse-gate checklist line + Phase 2 rule, rebased by plan 524; queued as a kit PR"
     }
   ]
 }

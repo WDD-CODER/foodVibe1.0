@@ -26,12 +26,27 @@ names. `/review-it` uses the same finders and verifier. Model tiers and escalati
 9. **Seen but not fixed.** A defect you notice outside your job is never free text: add a `decisions` entry that starts
    with `seen:` and names `file:line` (or the page and the steps to see it). The run report lists it with the other
    decisions, so the Human grades it in the same reply (`docs/agent/decision-review.md`). A choice the plan did not
-   settle (behaviour, wording, a new dialog) is logged the same way, starting with `behaviour:`. Those two kinds are
+   settle (behaviour, wording, a new dialog) is logged the same way, starting with `behaviour:`; user-facing behaviour the job takes away is `removes: <what users lose> — reverse:
+   <how>`. Those three kinds are
    the whole of `decisions`: anything else you want to say (evidence, a rerun, "checked X, fine") goes in your
    result's own fields, never in `decisions` — the orchestrator drops it there and only counts it.
 10. **At most 5 items per agent.** An agent that checks a list of items (the UI validator's cards, the verifier's
     candidates) gets at most 5 of them; a longer list goes to further fresh agents, one batch each. Accuracy drops on a
-    long list — the orchestrator splits the UI cards into batches of 5.
+    long list — the orchestrator splits the UI cards into batches of 5. One exception: `orch-triage` sorts a run's whole
+    decision list in one call. It does not prove each item, only orders and labels them; the code re-applies the hard
+    rules to every verdict.
+11. **Lessons from earlier runs.** The orchestrator puts three optional fields in a role's task, each a JSON array of
+    lines on one line (`[]` when the project has none): `LESSONS` (the role's own file under
+    `docs/brain/agent-lessons/` — facts a script wrote from earlier runs of this role: fix-round causes, candidates the
+    verifier refuted, a miss the final gate or a UI card found after clean checkers, a plan parked after readiness
+    called it ready), `RULES` (the matching section of `docs/brain/agent-rules.md`: `checkers` for the finders and the
+    verifier, `readiness`, `ui`; the builder reads its `builder` section itself) and, for readiness only, `RECENT_RUNS`
+    (the last three rows of `docs/brain/run-log.md`). Read `LESSONS` first, as the first numbered step of your agent
+    file says. They never replace the plan or the rules; they tell you where the role was wrong before. The Planner's
+    own file, `agent-lessons/planner.md` (questions readiness had to ask, `[ui]` cards that drifted from the app), is
+    read by `/plan`'s Architect + PM review as text. `orch-merge`, `orch-report` and `orch-triage` get none of it.
+    Everything a script can know is written by a script (`docs/agent/decision-review.md` §0); a role never writes a
+    lesson file.
 
 ### Deny list
 
@@ -46,7 +61,7 @@ Common fields: `role` (the agent name), `model`, `effort`, optional `decisions` 
 
 | Role | Required fields | `pass` computed from |
 | --- | --- | --- |
-| `orch-readiness` | `plans[]`: `{plan, state: ready\|questions\|blocked, questions[], envNeeds[], commands[]}` | — |
+| `orch-readiness` | `plans[]`: `{plan, state: ready\|questions\|blocked, questions[], envNeeds[], commands[], claims[]?: {plan, claim, found, question, default}}` | — |
 | `orch-builder` | `status: built\|blocked\|ESCALATE`, `branch`, `summary`, `evidence[]` (non-empty when built), `blocker` (when not built) | — |
 | `orch-gate` | `results[]`: `{command, status: pass\|fail\|env-fail, tail?}` (`tail` on fail) | every result `pass` |
 | `orch-check-plan`, `-bugs`, `-rules`, `orch-security` | `problems[]`: `{id, file, line, rule, reasoning, severity}` | no `blocker` / `major` problem |
@@ -54,6 +69,7 @@ Common fields: `role` (the agent name), `model`, `effort`, optional `decisions` 
 | `orch-ui` | `cards[]`: `{card, status: pass\|fail\|plan-drift, screenshots[]}` | every card `pass` |
 | `orch-merge` | `merged` (boolean), `sha` when merged, `reason` when not, optional `envFailure` | — |
 | `orch-report` | `report` (the final report text) | — |
+| `orch-triage` | `items[]`: `{id, verdict: accept\|ask\|follow-up\|noise, kind, recommendation ≤160, why ≤120, confidence: 0–100, duplicateOf?}` | — (the code re-applies the hard rules) |
 
 Severity: `blocker` (wrong result, data loss, a security hole, a broken build), `major` (a requirement of the plan not
 met, a real bug on a likely path), `minor` (a real but unlikely or cosmetic defect), `nit` (style). Only `blocker` and
@@ -70,7 +86,8 @@ Used by the orchestrator after the gate passes, and by `/review-it`.
    guards, secrets handling); otherwise it is skipped.
 2. **Verifier** (`orch-verify`) gets every candidate and tries to refute it against the code. It drops a candidate
    only with a concrete refutation (`file:line` or a command result that shows the claim is wrong). A candidate it
-   cannot refute is kept, with a confidence 0–100.
+   cannot refute is kept, with a confidence 0–100. It also gets `GATE` (the round's gate results with a 20-line tail):
+   evidence for keeping or refuting, never a verdict on pass.
 3. **Threshold:** only kept candidates with confidence ≥ 80 are reported.
 4. **Do not report:** issues that existed before the diff; lines the diff did not change; anything lint, typecheck or
    the build already catch; pedantic nits; changes that look intentional (named in the plan or a commit message).

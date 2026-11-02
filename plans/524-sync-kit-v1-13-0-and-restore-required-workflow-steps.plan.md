@@ -1,6 +1,6 @@
 # Plan 524 — Sync kit v1.13.0 and restore required workflow steps
 
-Status: draft
+Status: active
 Track: code
 Snapshot: 4c8397b3
 
@@ -69,6 +69,10 @@ kit.config.json
 AGENTS.md
 CLAUDE.md
 package.json
+docs/scout/**
+docs/brain/agent-lessons/**
+docs/brain/follow-ups.md
+docs/brain/run-log.md
 ```
 
 ## Read Scope
@@ -105,15 +109,15 @@ In the slot: `git rev-parse HEAD` equals `origin/main`; `.kit/install.json` has 
    `## Reuse Check` section in `save-plan/SKILL.md` and in `.claude/references/prd-template.md`.
 
 ## Atomic Sub-tasks
-- [ ] M1a: Take the plan, then check the dry-run of the kit sync and show the Human its summary line — run kit-sync with ref v1.13.0 and no apply flag from the kit folder against the slot — kit folder, slot root
-- [ ] M1b: Apply the kit sync after the Human's word and commit it alone as "sync kit v1.13.0" — kit-sync with the apply flag, then one commit of its output only — whole sync output incl. .kit/install.json
-- [ ] M2a: Run the override check on the real files and report which workflow files fail and why — node scripts/override-check.mjs, full output — no writes
-- [ ] M2b: Show for each failing file the exact required step from the kit template and the diff that adds it, keeping FoodVibe jobs unchanged — kit core/.github/workflows/*.yml vs .github/workflows/ci.yml and security.yml — diffs only, nothing committed
-- [ ] M2c: Tell the Human what ADR 0021 and the kit change loop say about a kit-side fix instead of a local override — docs/brain/decisions/0021-*.md, kit docs/CHANGE-LOOP.md — report only
-- [ ] M3a: Show the proposed merge of the kit version with FoodVibe's Reuse additions in the scope check script — keep the reuse flag and Reuse gate — scripts/scope-check.mjs
-- [ ] M3b: Show the proposed merges of the save-plan skill and the PRD template that keep the Reuse Check section — .claude/skills/save-plan/SKILL.md, .claude/references/prd-template.md
-- [ ] M3c: Show the override declarations FoodVibe's kit config would need, one path and one reason each — kit.config.json overrides
-- [ ] M3d: Stop and wait for the Human's word before any commit beyond the sync commit, and never push — none
+- [x] M1a: Take the plan, then check the dry-run of the kit sync and show the Human its summary line — run kit-sync with ref v1.13.0 and no apply flag from the kit folder against the slot — kit folder, slot root
+- [x] M1b: Apply the kit sync after the Human's word and commit it alone as "sync kit v1.13.0" — kit-sync with the apply flag, then one commit of its output only — whole sync output incl. .kit/install.json
+- [x] M2a: Run the override check on the real files and report which workflow files fail and why — node scripts/override-check.mjs, full output — no writes
+- [x] M2b: Show for each failing file the exact required step from the kit template and the diff that adds it, keeping FoodVibe jobs unchanged — kit core/.github/workflows/*.yml vs .github/workflows/ci.yml and security.yml — diffs only, nothing committed
+- [x] M2c: Tell the Human what ADR 0021 and the kit change loop say about a kit-side fix instead of a local override — docs/brain/decisions/0021-*.md, kit docs/CHANGE-LOOP.md — report only
+- [x] M3a: Show the proposed merge of the kit version with FoodVibe's Reuse additions in the scope check script — keep the reuse flag and Reuse gate — scripts/scope-check.mjs
+- [x] M3b: Show the proposed merges of the save-plan skill and the PRD template that keep the Reuse Check section — .claude/skills/save-plan/SKILL.md, .claude/references/prd-template.md
+- [x] M3c: Show the override declarations FoodVibe's kit config would need, one path and one reason each — kit.config.json overrides
+- [x] M3d: Stop and wait for the Human's word before any commit beyond the sync commit, and never push — none
 
 ## Out of Scope
 - Changing kit files in `../ai-workflow-kit` (a separate kit PR and release if the Human picks the kit-side fix).

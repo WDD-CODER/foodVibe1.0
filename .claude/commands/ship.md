@@ -34,16 +34,17 @@ Run `node scripts/ship-prep.mjs` (`--mode regular` for `/ship regular`) and act 
 
 ## Phase 1 — Build gate (UNCONDITIONAL hard stop)
 
-Hand both commands to the `kit-runner` agent (`.claude/agents/kit-runner.md`), the ledger check marked `[capture]` (its
+Hand the three commands to the `kit-runner` agent (`.claude/agents/kit-runner.md`), the ledger check marked `[capture]` (its
 advisory warnings exit 0), and act on its `RUN` / `OUTPUT` / `FAILED` blocks. In Cursor (no sub-agents) run them inline.
 
 ```bash
 npm run build
 node scripts/plan-ledger-check.mjs   # [capture]
+node scripts/override-check.mjs
 ```
 
-- **Fail** (either command, a `FAILED` block) → stop. Do not commit. Fix from the error lines it copied, then re-run `/ship`.
-- `ESCALATE`, or no `RUN` line for a command, or no `OUTPUT` block for the ledger check → run the two commands inline yourself; a build result you did not see is not a pass.
+- **Fail** (any command, a `FAILED` block) → stop. Do not commit. Fix from the error lines it copied, then re-run `/ship`. An `OVERRIDE_CHECK: FAIL` line names the step an overridden workflow lost: add it back from the kit's template.
+- `ESCALATE`, or no `RUN` line for a command, or no `OUTPUT` block for the ledger check → run the three commands inline yourself; a build result you did not see is not a pass.
 - Never conditional. Ledger exit 1 (missing plan refs) blocks like a failed build; duplicate-NNN / stray-name warnings are advisory only.
 
 ---
@@ -152,7 +153,7 @@ Matching open todos: list *before* Y (still `[ ]`). On **Y**, mark `[x]` and sta
 
 A proposed brain entry: print its **full draft body** fenced below the tree (tree line carries only path + title).
 
-**Decisions to grade (Worker plan only):** when the plan's `## Execution Notes` hold `- decision:` lines and the Human has not graded them in this session, print them under the tree as `D1…Dn` — `behaviour:` first, then `seen:`, one line each (`D2 · behaviour: … — reverse: …`) — and end with the reply format: `decisions: ok` or `D<n> ✗ <what I'd choose>` (several on one line, comma-separated). The grade may ride on the `Y` reply (`Y, D2 ✗ no dialog`). No decisions, or already graded → print nothing.
+**Decisions to grade (Worker plan only):** when the plan's `## Execution Notes` hold `- decision:` lines and the Human has not graded them in this session, print them under the tree as `D1…Dn` — `removes:` first, then `behaviour:`, then `seen:`, one line each (`D2 · behaviour: … — reverse: …`) — and end with the reply format: `decisions: ok` or `D<n> ✗ <what I'd choose>` (several on one line, comma-separated). The grade may ride on the `Y` reply (`Y, D2 ✗ no dialog`). No decisions, or already graded → print nothing.
 
 ### Brain-entry capture (no new gate)
 
@@ -170,7 +171,7 @@ Approve **Y** (or `--yes`) = commit/push consent. It validates `[human]` items o
 
 1. **Todo sync (when items match):** mechanics (wt-N slot vs outside, exact commands, never-invent rule) → `docs/agent/job-validation.md` Path A step 2.
 2. **Write brain drafts** (if proposed, not dropped) — verbatim to `docs/brain/**`.
-   **Learning step (no command from the Human):** run `node scripts/decision-log.mjs learn --reply "<the Human's replies this session>"`. `LEARNING: nothing to record` → one line, no model call, go on. `LEARNING: record` → follow `docs/agent/decision-review.md`: log every `✗` decision and every `failed:` card to `docs/brain/decision-log.md`, add a rule to `docs/brain/agent-rules.md` when the same kind of mistake repeats (`no rule` in the reply skips it), and send each generic lesson to the kit (`scripts/kit-feedback.mjs`). The two `docs/brain` files join the commit in step 3.
+   **Learning step (no command from the Human):** run `node scripts/decision-log.mjs learn --reply "<the Human's replies this session>"`. `LEARNING: nothing to record` → one line, no model call, go on. `LEARNING: record` → follow `docs/agent/decision-review.md` §3: log every `✗` decision and every `failed:` card to `docs/brain/decision-log.md`, start a rule in `docs/brain/agent-rules.md` at the first `✗` of a kind (marked `(pending — seen once)`; the second one promotes it) or an `enforce:` line when a check, a hook or a test could catch the mistake instead (`no rule` in the reply skips it), add a `## checkers` rule and scaffold the eval case (`node scripts/decision-log.mjs case --from D<n> --run <name>`, no model call) for each `checker-miss: yes`, and send each generic lesson to the kit (`scripts/kit-feedback.mjs`). The `docs/brain` files and any new `docs/agent-evals/cases/<checker>/<case>` folder join the commit in step 3; the wrap-up lists new rules, case paths and the enforce candidates.
 3. **`git add` only listed paths** (todo/plan/brain included) — one commit with job + todos (+ brain), never job-then-todos-later. One `git add -- <paths>` call, and **stop on a non-zero exit** before any commit: a path that no longer exists (a deletion `git rm` already staged, a typo) aborts the whole add, and a commit that follows anyway holds only what was staged before. Never relist a path `git rm` staged.
 4. **`git commit`** (Conventional Commit; Cursor trailer `Co-authored-by: Cursor <cursoragent@cursor.com>` when applicable).
 5. Rename branch if approved.
@@ -196,6 +197,8 @@ Then **Phase 4.5 — Merge Gate** (mandatory).
 ## Phase 4.5 — Merge Gate (mandatory after successful push)
 
 `merge` in the `/ship` request: already approved — merge without asking again (any lane), after writing any brain draft unless `no brain` was said.
+
+Merging inside a slot: `docs/agent/standards-git.md` → "Merging from a slot" — delete the merged remote branch only when `node scripts/branch-autodelete-check.mjs` does not print `AUTODELETE: auto`; an already-gone branch is not a loose end.
 
 `fast` passed, or Lane naturally FAST/ULTRA-TRIVIAL: already decided at Phase 4 — merge only if that reply (or the `/ship` request) contained the word `merge`; a plain `Y` / `--yes` leaves the PR open (`Merge: deferred`).
 

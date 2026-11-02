@@ -73,6 +73,8 @@ jobs:
         if: hashFiles('scripts/package-lock.json') != ''
         working-directory: scripts
         run: npm ci --no-audit --no-fund
+      - name: Kit override check
+        run: node scripts/override-check.mjs
       - name: Workflow script tests
         run: pnpm run --if-present test:scripts
 
