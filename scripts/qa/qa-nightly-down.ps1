@@ -15,4 +15,10 @@ $out = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Roo
 $code = $LASTEXITCODE
 foreach ($l in ($out -split "`r?`n" | Where-Object { $_.Trim() })) { Add-Content -Path $log -Value "$(& $stamp) down    $l" -Encoding UTF8 }
 Add-Content -Path $log -Value "$(& $stamp) down  qa-down.ps1 -> exit $code" -Encoding UTF8
+
+# Plan 422: the morning report (MORNING.md + history line), after QA stopped. Its own failure is logged, never fatal.
+$rep = & node.exe (Join-Path $Root 'scripts\qa\morning-report.mjs') "--root=$Root" 2>&1 | Out-String
+$repCode = $LASTEXITCODE
+foreach ($l in ($rep -split "`r?`n" | Where-Object { $_.Trim() })) { Add-Content -Path $log -Value "$(& $stamp) down    $l" -Encoding UTF8 }
+Add-Content -Path $log -Value "$(& $stamp) down  morning-report.mjs -> exit $repCode" -Encoding UTF8
 exit $code

@@ -57,7 +57,9 @@ collection; a record it cannot remove is an S2 finding. Fixtures are checked aga
 | `latest.md` | what the UI agent reads: open findings by page, the `PRE-CHECKED` table, a `Code review:` block per reviewed page, the newest shots |
 | `<DATE>/queue.md` | tonight's code-review order (plan 415), written by `rotation.mjs pick` |
 | `<DATE>/review-<PAGE>.md` | one page's code review, written by the Cowork Code QA agent |
-| `ledger.json` | per page: last review, commit, `done`/`partial`/`never`, checks done, marks — the rotation's memory |
+| `ledger.json` | per page: last review, commit, `done`/`partial`/`never`, checks done, marks, `citedFiles` — the rotation's memory |
+| `../MORNING.md` | the morning report (`scripts/qa/morning-report.mjs`, written after QA stops) — status, Do now, new / fixed / open counts |
+| `../morning-history.md` | one line per morning: `| date | status | new | fixed | open S1/S2/S3/S4 | skipped pages |` |
 
 Layer status: `ok` (finished) · `partial` (the deadline stopped it) · `fail` (it could not run, e.g. no QA login) ·
 `skipped` (blocked build or deadline).
@@ -124,6 +126,12 @@ not fit in one night, so it works down a **rotation queue**; scripts own all sta
   check), then never-reviewed pages in plan order, then the rest by last review, oldest first. Files changed since a
   page's last review only break ties — age always wins, so a busy page cannot starve a quiet one. Every page is
   reviewed at least once every `ceil(19 / pages-per-night)` nights (+1 for a partial page).
+- **Due or skipped.** The queue holds only **due** pages: `partial` or never reviewed, or code changed since the last
+  review in the page's globs **or in a file the last review cited** (`citedFiles`), or a last review more than
+  `FULL_REVIEW_DAYS = 14` days old. The rest are listed under `## Skipped (no code change since last review)`. With
+  nothing due the queue says `Nothing to review tonight` and the agent stops. A clean app means a short, quiet night.
+- **citedFiles.** At ingest every `path/file.ext:123` in a review is resolved with `git ls-files` (exact path, else a
+  unique suffix match; ambiguous or unknown is dropped) and stored on the page in `ledger.json`.
 - **Ingest** (`rotation.mjs ingest --date=<DATE>`): reads only each review's header (`Page`, `Commit`, `Status`,
   `Checks-done`) and its `### <CHECK> · <mark> · …` lines; a malformed file is skipped with
   `CODE-QA: ingest skipped <file> <reason>`. Ingesting the same file twice changes nothing. A `suspect` check
@@ -143,6 +151,7 @@ node scripts/qa/code-qa/rotation.mjs ingest --date=2026-10-20
 - `scripts/qa/code-qa/api-layer.mjs` (guard, runner, cleanup), `api-cases.mjs` (the case rows), `api-fixtures.mjs` (one valid record per entity) — the api layer
 - `docs/qa/code-qa-api-cases.md` — accepted API deviations (allow-list)
 - `scripts/qa/code-qa/rotation.mjs` (ledger, pick, ingest), `plan-checks.mjs` (check ids) — the code-review rotation
+- `scripts/qa/morning-report.mjs`, `morning-brief.mjs` — the morning report and its SessionStart line
 - `docs/qa/code-qa-agent.md` — the Cowork Code QA agent's protocol and kickoff prompt
 - `scripts/qa/qa-code-merge.ps1` — the 02:45 merge task
 - `scripts/qa/code-qa/findings.mjs` — fingerprints, `known.json`, report rendering

@@ -167,3 +167,20 @@ npx playwright install chromium
   finishes.
 - The QA checkout's `bugs/qa-runs/` stays untracked. `git merge --ff-only` is not affected by untracked files. If
   the checkout cannot fast-forward, the run continues on the current tree and the log says so.
+
+## Every morning
+
+The 07:30 down step (`qa-nightly-down.ps1`) runs `node scripts/qa/morning-report.mjs` after QA stops. It writes
+`bugs/qa-runs/MORNING.md` in the QA folder (and one line to `bugs/qa-runs/morning-history.md`). Read the top four
+lines:
+
+| Status | Meaning | Do now |
+| --- | --- | --- |
+| `OK` | the night ran, no new S1/S2 finding | nothing |
+| `ATTENTION` | new S1/S2 findings, QA ran on old code, or the UI run did not run | plan a fix / check the pull |
+| `BLOCKED` | a step exited non-zero, or the Code QA agent did not run | fix the night first |
+
+Opening Claude Code in `C:coding projectsCursoroodVibe1.0` shows `QA <date>: <Status> — <Do now>` (SessionStart
+hook `scripts/qa/morning-brief.mjs`; silent in Worker slots and when the report is older than yesterday; the QA folder
+is `FOODVIBE_QA_ROOT`, default `C:/dev/foodVibe-qa`). `qa-nightly-up.ps1` already fetches and fast-forwards to
+`origin/main` at 00:00, so the night reviews the newest merged code.
