@@ -1,6 +1,6 @@
 # Plan 422 — Nightly QA morning report and shorter runs once pages are clean
 
-Status: draft
+Status: done
 Track: code — here (not design)
 Snapshot: 8d7997e5b732007392f50cc07f40b2aa430f37d6
 
