@@ -163,3 +163,8 @@ Decisions already taken by the Human (do not reopen):
 
 ## Execution Notes
 - Non-interactive run: no UI, so no on-edit/leave/cancel/error behaviour to declare.
+- Orchestrator readiness (2026-11-02): server tests (clients.test.js, invariants.test.js) can't run in the gate → the builder runs them itself from server/ (cd server && npm test -- test/...), pastes the raw output (pass/fail counts per test file) here; the verifier checks it against the main proof (staff blocked, trimmed reads, phone derived) (Human)
+- Orchestrator readiness (2026-11-02): merge order 512 first, 422 last if the workflow can force it; else the workflow's order, no split run → keep the order the workflow gives (Human)
+- Orchestrator readiness (2026-11-02): log-query --since=plan-start → skipped in the gate; the run report's "App errors since the run started" section replaces it (Human)
+- Finding F1 (2026-11-02): preflight requires the dev server even when every plan in the run is ui:false.
+- Finding F2 (2026-11-02): the gate cannot run server tests (cd server && npm test); expected to be fixed by plan 517.

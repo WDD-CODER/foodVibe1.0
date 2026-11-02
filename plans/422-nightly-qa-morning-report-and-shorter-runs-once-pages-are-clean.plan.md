@@ -204,3 +204,12 @@ for <n> new S1/S2 findings (<ids>)"; QA on old code → "check why the 00:00 pul
 - Changing the Windows task times or the Cowork task prompts.
 - Phone push notifications.
 - Fixing any QA finding (plans 420, 421, 407).
+
+## Execution Notes
+- Orchestrator readiness (2026-11-02): the two [human] morning checks → skipped, left unchecked, listed as Human follow-ups (Human)
+- Orchestrator readiness (2026-11-02): .claude/settings.json → add the single SessionStart hook entry, merge to the run branch only, sensitive-path checker flags it (Human)
+- Orchestrator readiness (2026-11-02): scope-check --drift reports drift → run Step 0 and build as planned (Human)
+- Orchestrator readiness (2026-11-02): ng build is not an allowed check → use an allowed build check (pnpm run build) and log the difference as seen: (Human)
+- Orchestrator readiness (2026-11-02): merge 422 last into the run branch if the workflow can force it; else the workflow's order (Human)
+- Finding F1 (2026-11-02): preflight requires the dev server even when every plan in the run is ui:false.
+- Finding F2 (2026-11-02): the gate cannot run server tests (cd server && npm test); expected to be fixed by plan 517.
