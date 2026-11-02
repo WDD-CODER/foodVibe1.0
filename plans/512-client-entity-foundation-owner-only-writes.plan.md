@@ -39,6 +39,7 @@ server/routes/generic.js
 server/utils/permissions.js
 server/test/clients.test.js
 server/test/invariants.test.js
+server/test/cross-business.test.js
 docs/brain/decisions/0027-client-entity-above-events.md
 docs/brain/glossary.md
 docs/agent/standards-backend.md
@@ -168,3 +169,8 @@ Decisions already taken by the Human (do not reopen):
 - Orchestrator readiness (2026-11-02): log-query --since=plan-start → skipped in the gate; the run report's "App errors since the run started" section replaces it (Human)
 - Finding F1 (2026-11-02): preflight requires the dev server even when every plan in the run is ui:false.
 - Finding F2 (2026-11-02): the gate cannot run server tests (cd server && npm test); expected to be fixed by plan 517.
+- Scope approval (2026-11-02, Human): approved: server/test/cross-business.test.js — added to Read-Write Scope (the test loops over every entity type and needs a clients body once clients is registered).
+- Decision D14 (2026-11-02, Human ✓): stamp clientType 'private' on a client POST in generic.js when none is sent, so stored clients are consistent.
+- Finding F3 (2026-11-02): readiness missed 512's scope gap (server/test/cross-business.test.js).
+- Finding F4 (2026-11-02): the per-plan gate did not catch the unclassified files; only the final gate did, so 422 merged and broke the run branch.
+- Finding F5 (2026-11-02): preflight does not start the dev server it requires.
