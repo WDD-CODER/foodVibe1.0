@@ -374,12 +374,52 @@
     {
       "at": "2026-11-02T09:45:43.754Z",
       "text": "final gate failed: node scripts/kit-manifest-check.mjs — unclassified: docs/brain/decisions/0027-client-entity-above-events.md / KIT_MANIFEST: FAIL — 376 classified, 1 unclassified, 0 duplicates, 0 unhandled-coupling (1 problems)"
+    },
+    {
+      "at": "2026-11-02T10:42:35.553Z",
+      "text": "F1 preflight requires the dev server even when every plan in the run is ui:false"
+    },
+    {
+      "at": "2026-11-02T10:42:35.968Z",
+      "text": "F2 the gate cannot run server tests (cd server && npm test); expected fix: plan 517"
+    },
+    {
+      "at": "2026-11-02T10:42:36.443Z",
+      "text": "F3 readiness missed 512's scope gap (server/test/cross-business.test.js)"
+    },
+    {
+      "at": "2026-11-02T10:42:36.914Z",
+      "text": "F4 the per-plan gate did not catch the unclassified files; only the final gate did, so 422 merged and broke the run branch"
+    },
+    {
+      "at": "2026-11-02T10:42:37.383Z",
+      "text": "F5 preflight does not start the dev server it requires"
+    },
+    {
+      "at": "2026-11-02T10:42:37.920Z",
+      "text": "F6 editing a parked plan's file on the run branch conflicts with the builder branch's own plan edits on re-run"
+    },
+    {
+      "at": "2026-11-02T10:42:38.451Z",
+      "text": "F7 512 needed an ADR but nothing told its builder about the manifest; the per-plan gate has no manifest check"
+    },
+    {
+      "at": "2026-11-02T10:42:38.900Z",
+      "text": "F8 87 of 112 agent calls (~650K of 1.53M tokens) were command runners"
+    },
+    {
+      "at": "2026-11-02T10:42:39.965Z",
+      "text": "F9 the builder takeover goes to the judgment tier (the session's own model), not Opus, and only in fix round 2; with the session on Sonnet, 512 (judgment tier) ran on Sonnet"
+    },
+    {
+      "at": "2026-11-02T10:42:40.761Z",
+      "text": "F10 one \"final gate failed after the checkers\" lesson line was written to all four checkers, including security, for a manifest failure none of them could catch; the run-log row stayed stale after the by-hand re-run"
     }
   ],
   "attempts": 3,
   "phase": "stopped",
   "freeDiskGb": 17.7,
-  "updatedAt": "2026-11-02T09:47:22.378Z",
+  "updatedAt": "2026-11-02T10:42:52.829Z",
   "decisions": [
     {
       "id": "D8",
@@ -657,6 +697,6 @@
       "why": "duplicate of D13"
     }
   ],
-  "finishedAt": "2026-11-02T09:47:22.376Z",
-  "stopReason": "final gate failed: node scripts/kit-manifest-check.mjs — unclassified: docs/brain/decisions/0027-client-entity-above-events.md / KIT_MANIFEST: FAIL — 376 classified, 1 unclassified, 0 duplicates, 0 unhandled-coupling (1 problems)"
+  "finishedAt": "2026-11-02T10:42:52.826Z",
+  "stopReason": "run finished; the final gate was re-run by hand on f6cc548a after the manifest fixes and passes (build, lint, test:ci 1666/1666, kit-manifest-check); server tests 801/801"
 }

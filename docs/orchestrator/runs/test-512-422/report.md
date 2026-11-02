@@ -1,9 +1,9 @@
 # Orchestrator run test-512-422
 
-Run branch: `orch/test-512-422` (from `origin/main` at 3986b15) · started 2026-11-02T08:23:37.923Z · finished 2026-11-02T09:47:22.376Z
+Run branch: `orch/test-512-422` (from `origin/main` at 3986b15) · started 2026-11-02T08:23:37.923Z · finished 2026-11-02T10:42:52.826Z
 Result: 2 merged, 0 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 3986b15.
-Stopped: final gate failed: node scripts/kit-manifest-check.mjs — unclassified: docs/brain/decisions/0027-client-entity-above-events.md / KIT_MANIFEST: FAIL — 376 classified, 1 unclassified, 0 duplicates, 0 unhandled-coupling (1 problems)
+Stopped: run finished; the final gate was re-run by hand on f6cc548a after the manifest fixes and passes (build, lint, test:ci 1666/1666, kit-manifest-check); server tests 801/801
 
 ## Plans
 
@@ -23,7 +23,7 @@ no entries
 
 ## Decisions
 
-triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 11 · follow-ups: 3
+triage: shadow · agreement (last 50): 52% · collapsed: 0 · ask: 11 · follow-ups: 3
 
 ### To grade
 
@@ -88,6 +88,16 @@ triage: shadow · agreement (last 50): n/a (first run) · collapsed: 0 · ask: 1
 - 512: starts on the judgment tier: Architecture Impact names INV-1
 - 512: starts on the judgment tier: Architecture Impact names INV-1
 - final gate failed: node scripts/kit-manifest-check.mjs — unclassified: docs/brain/decisions/0027-client-entity-above-events.md / KIT_MANIFEST: FAIL — 376 classified, 1 unclassified, 0 duplicates, 0 unhandled-coupling (1 problems)
+- F1 preflight requires the dev server even when every plan in the run is ui:false
+- F2 the gate cannot run server tests (cd server && npm test); expected fix: plan 517
+- F3 readiness missed 512's scope gap (server/test/cross-business.test.js)
+- F4 the per-plan gate did not catch the unclassified files; only the final gate did, so 422 merged and broke the run branch
+- F5 preflight does not start the dev server it requires
+- F6 editing a parked plan's file on the run branch conflicts with the builder branch's own plan edits on re-run
+- F7 512 needed an ADR but nothing told its builder about the manifest; the per-plan gate has no manifest check
+- F8 87 of 112 agent calls (~650K of 1.53M tokens) were command runners
+- F9 the builder takeover goes to the judgment tier (the session's own model), not Opus, and only in fix round 2; with the session on Sonnet, 512 (judgment tier) ran on Sonnet
+- F10 one "final gate failed after the checkers" lesson line was written to all four checkers, including security, for a manifest failure none of them could catch; the run-log row stayed stale after the by-hand re-run
 
 ## Models per agent
 
@@ -122,18 +132,6 @@ git fetch origin
 gh pr create --base main --head orch/test-512-422 --title "Orchestrator run test-512-422" --body-file .claude\orchestrator-runs\test-512-422.md
 ```
 
-Context added by learning: 704 chars across 6 roles
+Context added by learning: 700 chars across 6 roles
 
 Trend: first logged run
-
-## Findings (Human, first test run)
-
-- F1 preflight requires the dev server even when every plan in the run is ui:false.
-- F2 the gate cannot run server tests (cd server && npm test); expected fix: plan 517.
-- F3 readiness missed 512's scope gap (server/test/cross-business.test.js).
-- F4 the per-plan gate did not catch the unclassified files; only the final gate did, so 422 merged and broke the run branch.
-- F5 preflight does not start the dev server it requires.
-- F6 editing a parked plan's file on the run branch conflicts with the builder branch's own plan edits on re-run.
-- F7 512 needed an ADR but nothing told its builder about the manifest; the per-plan gate has no manifest check.
-- F8 87 of 112 agent calls (~650K of 1.53M tokens) were command runners.
-- Final gate re-run by hand on f6cc548a after the manifest fixes: build, lint, test:ci (1666 of 1666) and kit-manifest-check all exit 0.
