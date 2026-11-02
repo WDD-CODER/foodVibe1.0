@@ -25,7 +25,10 @@ If `queue.md` is missing: write `bugs/qa-runs/code-qa/<DATE>/BLOCKED-review.md` 
 
 ## 2. Work loop
 
-For each page in `queue.md`, in order, until `STOP_AT`:
+Work only the numbered `## N.` pages of `queue.md`, in order, until `STOP_AT`. Ignore the `## Skipped` list (those pages are
+unchanged since their last review). When the queue says `Nothing to review tonight`, write nothing and stop.
+
+For each numbered page:
 
 1. Create `bugs/qa-runs/code-qa/<DATE>/review-<PAGE>.md` with the header below, `Status: partial`, `Checks-done:`
    empty. If the page lists `Already done:` checks, skip those checks (they were reviewed on an earlier night).

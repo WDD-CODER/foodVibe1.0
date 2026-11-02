@@ -182,13 +182,13 @@ for <n> new S1/S2 findings (<ids>)"; QA on old code → "check why the 00:00 pul
 - Committing QA results to git.
 
 ## Atomic Sub-tasks
-- [ ] H1: Review only pages whose code changed so nights get shorter as the app gets cleaner — citedFiles at ingest, due/skipped rule with a 14-day full review, Nothing-to-review queue, tests — scripts/qa/code-qa/rotation.mjs, scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**
-- [ ] H2: Tell the Code QA agent to skip unchanged pages and stop when nothing is due — work only numbered pages, ignore Skipped, Nothing-to-review rule — docs/qa/code-qa-agent.md
-- [ ] H3: Write one morning report that says whether the night needs anything from you — status, Do now, steps, new/fixed/open, history line, tests on fixture folders — scripts/qa/morning-report.mjs, scripts/test/qa-morning-report.test.mjs, scripts/test/fixtures/qa-morning/**
-- [ ] H4: Produce the report every morning after QA stops — call morning-report.mjs from the 07:30 down step and log it — scripts/qa/qa-nightly-down.ps1
-- [ ] H5: Show the morning report's status line when Claude Code opens in the main folder — morning-brief.mjs SessionStart hook, silent in slots and when stale, drift note — scripts/qa/morning-brief.mjs, .claude/settings.json, docs/workflow-kit/drift-classification.md
-- [ ] H6: Explain the morning report and the shorter nights in the QA docs — Every morning section, due/skipped rule, file table — docs/qa/README.md, docs/qa/code-qa.md
-- [ ] H7: Test, run the report on the real QA folder and hand you the two morning checks — npm run test:scripts, morning-report --out=- on C:/dev/foodVibe-qa, ng build; Human checks the first and second mornings — this plan file
+- [x] H1: Review only pages whose code changed so nights get shorter as the app gets cleaner — citedFiles at ingest, due/skipped rule with a 14-day full review, Nothing-to-review queue, tests — scripts/qa/code-qa/rotation.mjs, scripts/test/code-qa-rotation.test.mjs, scripts/test/fixtures/code-qa/**
+- [x] H2: Tell the Code QA agent to skip unchanged pages and stop when nothing is due — work only numbered pages, ignore Skipped, Nothing-to-review rule — docs/qa/code-qa-agent.md
+- [x] H3: Write one morning report that says whether the night needs anything from you — status, Do now, steps, new/fixed/open, history line, tests on fixture folders — scripts/qa/morning-report.mjs, scripts/test/qa-morning-report.test.mjs, scripts/test/fixtures/qa-morning/**
+- [x] H4: Produce the report every morning after QA stops — call morning-report.mjs from the 07:30 down step and log it — scripts/qa/qa-nightly-down.ps1
+- [x] H5: Show the morning report's status line when Claude Code opens in the main folder — morning-brief.mjs SessionStart hook, silent in slots and when stale, drift note — scripts/qa/morning-brief.mjs, .claude/settings.json, docs/workflow-kit/drift-classification.md
+- [x] H6: Explain the morning report and the shorter nights in the QA docs — Every morning section, due/skipped rule, file table — docs/qa/README.md, docs/qa/code-qa.md
+- [x] H7: Test, run the report on the real QA folder and hand you the two morning checks — npm run test:scripts, morning-report --out=- on C:/dev/foodVibe-qa, ng build; Human checks the first and second mornings — this plan file
 
 ## Technical Considerations
 - Dependencies: none new (Node built-ins, `git`).
@@ -213,3 +213,8 @@ for <n> new S1/S2 findings (<ids>)"; QA on old code → "check why the 00:00 pul
 - Orchestrator readiness (2026-11-02): merge 422 last into the run branch if the workflow can force it; else the workflow's order (Human)
 - Finding F1 (2026-11-02): preflight requires the dev server even when every plan in the run is ui:false.
 - Finding F2 (2026-11-02): the gate cannot run server tests (cd server && npm test); expected to be fixed by plan 517.
+- Builder (2026-11-02) Step 0 by symbol: `pick`, `pickOrder`, `changesSince`, `renderQueue`, `applyReview`/`ingest` in rotation.mjs ok; `mergeKnown` status/firstSeen/goneSince ok (findings.mjs:91-104); qa-nightly-up/qa-code-merge/qa-nightly-down steps ok (log lines `qa-up.ps1 -> exit`, `code-qa -> exit`, `merge done (exit)`, `qa-down.ps1 -> exit`); SessionStart block of settings.json ok.
+- seen: `ng build` is not an allowed check; ran `pnpm run build` instead -> exit 0 (same Angular build).
+- Evidence: `pnpm run build` -> exit 0; `pnpm run lint` -> exit 0 (0 errors, 67 warnings, none in changed files); `pnpm run test:ci` -> exit 0, 1666 SUCCESS; `npm run test:scripts` -> exit 0, pass 146 fail 0; `node --test scripts/test/code-qa-rotation.test.mjs` -> pass 12 fail 0; `node --test scripts/test/qa-morning-report.test.mjs` -> pass 10 fail 0; `node scripts/qa/morning-report.mjs --root=C:/dev/foodVibe-qa --date=2026-10-20 --out=-` -> exit 0, `Status: ATTENTION`; `node scripts/qa/morning-brief.mjs` in the wt-2 slot -> exit 0, no output (fresh-fixture JSON output covered by the test).
+- Human follow-ups left open: the two [human] morning checks (first and second morning after merge).
+- scope-check --drift still prints `REALITY: drift` (commits on main since the snapshot); Step 0 symbol check above is the answer.

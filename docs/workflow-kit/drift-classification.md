@@ -33,7 +33,7 @@ Classes: `intended` (placeholder / PACK marker / split), `drift-fixed` (+ which 
 | core/.claude/commands/review-it.md | intended | kit 1.3.0: the Logs check renders from `commands.logQuery`; override dropped, kit wording taken (Architecture line names the Planner; table cell shows the full command) | 30ee30f |
 | core/.claude/commands/ship.md | drift-fixed (FoodVibe right) | `merge` in the `/ship` request pre-approves merge — newer than kit | c708599 |
 | core/.claude/commands/take-plan.md | intended | `{{git.mainBranch}}` | — |
-| core/.claude/settings.json | override | split file: absolute Write/Edit allows and `defaultMode` are per-machine; Playwright MCP allows dropped (kit right) | — |
+| core/.claude/settings.json | override | split file: absolute Write/Edit allows and `defaultMode` are per-machine; Playwright MCP allows dropped (kit right); FoodVibe SessionStart QA morning-brief hook | — |
 | core/.claude/skills/preflight/SKILL.md | override | documents FoodVibe's preflight.mjs (MongoDB 27017, gstack browse binary); kit's is config-driven | — |
 | core/.claude/skills/save-plan/evals/evals.json | intended | example plan number `395` → `NNN` | — |
 | core/.claude/skills/save-plan/SKILL.md | intended | placeholders + `{{plans.openDirs}}` wording (landed in kit PR #9) | 51874c1 |
