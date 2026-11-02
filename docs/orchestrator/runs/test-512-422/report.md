@@ -125,3 +125,15 @@ gh pr create --base main --head orch/test-512-422 --title "Orchestrator run test
 Context added by learning: 704 chars across 6 roles
 
 Trend: first logged run
+
+## Findings (Human, first test run)
+
+- F1 preflight requires the dev server even when every plan in the run is ui:false.
+- F2 the gate cannot run server tests (cd server && npm test); expected fix: plan 517.
+- F3 readiness missed 512's scope gap (server/test/cross-business.test.js).
+- F4 the per-plan gate did not catch the unclassified files; only the final gate did, so 422 merged and broke the run branch.
+- F5 preflight does not start the dev server it requires.
+- F6 editing a parked plan's file on the run branch conflicts with the builder branch's own plan edits on re-run.
+- F7 512 needed an ADR but nothing told its builder about the manifest; the per-plan gate has no manifest check.
+- F8 87 of 112 agent calls (~650K of 1.53M tokens) were command runners.
+- Final gate re-run by hand on f6cc548a after the manifest fixes: build, lint, test:ci (1666 of 1666) and kit-manifest-check all exit 0.
