@@ -25,7 +25,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   const db = testDb();
-  for (const c of ['taxonomyTerms', 'products', 'recipes', 'dishes', 'menuEvents']) await db.collection(c).deleteMany({});
+  for (const c of ['taxonomyTerms', 'products', 'recipes', 'dishes', 'menuEvents', 'clients']) await db.collection(c).deleteMany({});
 });
 
 const MASTER = '__master__';
@@ -54,13 +54,18 @@ const COLLECTIONS = [
   { type: 'dishes', body: () => recipeBody(), edit: { nameHebrew: 'שניצל' } },
   { type: 'menuEvents', body: () => menuEventBody(), edit: { name: 'בר מצווה' } },
   { type: 'taxonomyTerms', body: () => ({ kind: 'allergen', key: 'lupin', sortOrder: 0 }), edit: { sortOrder: 5 } },
+  // Plan 512: owner-only to write (staff create -> 403); no clone lineage, like taxonomyTerms.
+  { type: 'clients', body: () => ({ name: 'דנה', phone: '050-123 4567' }), edit: { notes: 'x' }, ownerOnly: true },
 ];
+
+// Collections whose documents carry no `_masterId` / `_userModified`.
+const NO_LINEAGE = ['taxonomyTerms', 'clients'];
 
 // A stored doc owned by `userId`, inserted straight into Mongo.
 async function seed(type, userId, _id) {
   const body = COLLECTIONS.find((c) => c.type === type).body();
-  const doc = type === 'taxonomyTerms'
-    ? stored(body, { _id, userId })
+  const doc = NO_LINEAGE.includes(type)
+    ? stored(type === 'clients' ? { ...body, phoneNormalized: '0501234567' } : body, { _id, userId })
     : stored(body, { _id, userId, _masterId: _id, _userModified: false });
   await testDb().collection(type).insertOne(doc);
   return doc;
@@ -131,6 +136,14 @@ describe('INV-1 Ownership', () => {
     const pricedBody = () => productBody({ sources: [{ supplierId: 's1', price: 5 }] });
     const seedStaff = async (type, body, _id, createdBy) =>
       testDb().collection(type).insertOne(stored(body, { _id, userId: createdBy, businessId: 'b_userA', createdBy, _masterId: _id, _userModified: false }));
+
+    it('INV-1 staff cannot create an owner-only item (403, nothing stored)', async () => {
+      for (const { type, body } of COLLECTIONS.filter((c) => c.ownerOnly)) {
+        const res = await request(app).post(`/api/v1/data/${type}`).set(as(STAFF_A)).send(body());
+        expect(res.status).toBe(403);
+        expect(await testDb().collection(type).countDocuments()).toBe(0);
+      }
+    });
 
     it('INV-1 staff edits his own item', async () => {
       await seedStaff('recipes', recipeBody(), 'mine', 'staffA');
