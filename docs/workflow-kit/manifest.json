@@ -5254,6 +5254,22 @@
       "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
     },
     {
+      "path": "scripts/qa/morning-brief.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA nightly report tool (plan 422); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/morning-report.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA nightly report tool (plan 422); project script, not part of the kit."
+    },
+    {
       "path": "scripts/qa/code-qa/api-fixtures.mjs",
       "tier": "project",
       "action": "stay",
@@ -5380,6 +5396,14 @@
       "params": [],
       "refs": [],
       "notes": "FoodVibe script test (node --test) for the code-QA tool."
+    },
+    {
+      "path": "scripts/test/qa-morning-report.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe script test (node --test) for the nightly QA morning report (plan 422)."
     },
     {
       "path": "scripts/test/code-qa-static.test.mjs",
