@@ -4227,6 +4227,13 @@
           "strings": [
             "src/environments/environment.local.ts"
           ]
+        },
+        {
+          "key": "slots.fePorts",
+          "strings": [
+            "4200",
+            "3000"
+          ]
         }
       ],
       "refs": [
@@ -4282,7 +4289,8 @@
         {
           "key": "paths.serverRoot",
           "strings": [
-            "server/package.json"
+            "server/package.json",
+            "server/"
           ]
         }
       ],
@@ -5960,6 +5968,102 @@
       "params": [],
       "refs": [],
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.13.0). Classified project/stay here so the kit-owned list stays as is (plan 524 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "docs/agent/kit-lessons/builder.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the builder role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/check-bugs.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the check-bugs role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/check-plan.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the check-plan role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/check-rules.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the check-rules role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/gate.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the gate role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/planner.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the planner role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/readiness.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the readiness role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/security.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the security role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/triage-calibration.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the triage-calibration role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/ui.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the ui role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/agent/kit-lessons/verify.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit v2.0.0 lesson file for the verify role, written by the run learning step (scripts/kit-lessons-extract.mjs); project data, not part of the kit."
+    },
+    {
+      "path": "docs/brain/decisions/0015-ship-fast-picks-the-light-review-except-on-sensitive-paths.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Kit-seeded ADR (kit v2.0.0) on /ship fast review choice; owned by FoodVibe after install."
     }
   ]
 }

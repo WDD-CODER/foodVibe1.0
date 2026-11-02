@@ -28,6 +28,9 @@ their instructions.
 | A graded `✗` | `decision-log.mjs add` → `decision-log.md`; a rule at the first `✗` (`pending — seen once`), promoted by `repeats` | `agent-rules.md`: `## builder` → builder and `/take-plan`; `## checkers` → finders and verifier; `## readiness`; `## ui` | 30 lines / 2,400 characters per section |
 | A mistake a check could catch | `rules --add "enforce: …"` → `## enforce candidates` | nobody (listed in the wrap-up) | 10 lines |
 | A graded `checker-miss: yes` | `decision-log.mjs case` → `docs/agent-evals/cases/<checker>/<date>-<kind>/` | the eval harness | one folder per miss |
+| A problem seen in runs of any project (park, timeout, env-fail, by-hand toil, a lesson several projects sent) | the kit's `/kit-learn` (kit repository only): `kit-learn.mjs collect` → the ledger (`issues`) in the kit brain (`docs/agent/kit-brain.md` "Kit side") | the Human, as at most 5 cards and one reply line | one issue per signature, `proposals` row per card |
+| A lesson true for every project | the kit's `kit-lessons.mjs add`, after the Human's `I<n> lesson <role>` → `docs/agent/kit-lessons/<role>.md` | every role at launch, before its project lessons (`LESSONS`); `/plan`'s review reads `planner.md` from both folders | 2,000 characters of live lines per role; retired only for a positive reason |
+| Per decision kind, the agreement over every project's grades | `kit-learn.mjs triage-prior` → `docs/agent/kit-lessons/triage-calibration.md` | the triage, as a starting point for a kind the project has graded fewer than `orchestrator.triageMinGraded` times (the file is written; `orch-state.mjs` reading it is a separate step) | one row per kind |
 
 ## 1. Agents log what they chose
 
@@ -61,6 +64,9 @@ A `failed:` card reply (`job-validation.md`) is graded the same way; the learnin
 Runs after **Y** in `/ship` (On approval, step 2) and after the decisions reply in `/orchestrate` (step 5). The Human
 runs no command.
 
+0. **Grade first, every reply.** Before the gate below, every grade reply — `decisions: ok` included — is stored by
+   `decision-log.mjs grade` (§5): in `/orchestrate` by the workflow, in `/ship` with `--run ship-<NNN>` on the list
+   `decision-log.mjs pending` wrote and `--mark <plan file>`, which tags the graded plan lines (§5 "In `/ship`").
 1. `node scripts/decision-log.mjs learn --reply "<the Human's replies>"` — no `✗` and no `failed:` prints
    `LEARNING: nothing to record`: one line, **no model call**, stop here.
 2. **Log.** Write the decisions list to a scratch file (`[{ "id": "D1", "plan": "451", "text": "…" }]`; failed cards as
@@ -99,7 +105,15 @@ runs no command.
    code, so it stays in the project's own case set; only a generic one goes to the kit. The wrap-up prints the path;
    `orch-state.mjs brain-commit` commits it on the run branch.
 
-## 5. Triage, grades and follow-ups (orchestrator)
+## 5. Triage, grades and follow-ups (orchestrator and `/ship`)
+
+- **In `/ship`.** A Worker plan's decisions are the `- decision:` lines of its `## Execution Notes`.
+  `decision-log.mjs pending --plan <file> --out <list>` lists the ones with no `[graded D<n> ok|✗ YYYY-MM-DD]` tag,
+  numbered on from the highest graded `D<n>`, so an id never repeats within the plan across sessions and checkpoints.
+  After the reply, `grade --run ship-<NNN> --decisions <list> --mark <file>` stores every item (`ok` ones too) and tags
+  the graded lines. `/ship` has no triage, so the rows carry `triageVerdict: none`: they never count toward the triage
+  agreement (`stats`, the kit's `triage-prior`), but their `seen:` items become follow-ups like the orchestrator's. The
+  grades, the follow-ups and the tagged plan file are committed with the ship.
 
 - **One line per decision.** The workflow merges a differently worded repeat in code: the same type, in the same plan
   (a `seen:` defect in any plan), and either the same `file:line` named or 60 % of the words alike with no different

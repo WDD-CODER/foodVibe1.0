@@ -24,6 +24,9 @@ rules in `docs/agent/agent-roles.md` (non-interactive, evidence, deny list, sche
    drift, run the plan's Step 0 first.
 3. Do the Atomic Sub-tasks in order. Write only inside the plan's `## Read-Write Scope`. A file outside it that is
    truly needed: add it to the scope block and log `scope extended: <path> — <why>` in `## Execution Notes`.
+   **Manifest:** when the project has a kit manifest (the manifest.json under docs/workflow-kit), the per-plan gate runs `node scripts/kit-manifest-check.mjs`;
+   a file you add under the manifest inventory (scripts, agents, commands, skills, `docs/brain/**`, `docs/agent/**`,
+   `.github/workflows`) or an ADR needs its manifest entry in the same branch, or the gate sends it back as `unclassified: <path>`.
    **No invented behaviour:** a behaviour the plan does not describe (what happens on edit, on leave, on cancel, on
    error; a new dialog, a new confirmation, an automatic action) gets the simplest option — do nothing extra — and one
    `decisions` entry that starts with `behaviour:`, says what you chose and ends with one line on how to reverse it.
@@ -55,8 +58,10 @@ rules in `docs/agent/agent-roles.md` (non-interactive, evidence, deny list, sche
 ## When you stop
 
 Return `blocked` when a requirement cannot be met (a missing dependency, a deny-listed command needed, a check that
-keeps failing). Return `ESCALATE` when the task is beyond what you can do reliably. In both cases write the hand-off
-file (`docs/agent/model-routing.md` rule 5) before you return and name it in `evidence`.
+keeps failing). Return `ESCALATE` when the task is beyond what you can do reliably. In both cases fill `notDone` and
+`planChange` in your result: the orchestrator script writes the hand-off file itself (`docs/agent/model-routing.md`
+rule 5). Its `Done:` line is read from the sub-tasks you ticked `[x]` in the plan file (committed on your branch) and
+the branch diff, never from your receipt — tick each sub-task only when it is finished, and commit the plan file.
 
 ## Output (the only thing you return)
 
