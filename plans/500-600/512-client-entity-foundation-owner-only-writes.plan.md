@@ -1,6 +1,6 @@
 # Plan 512 — Add the client record, owner-only writes and staff-limited reads on the server
 
-Status: draft
+Status: done
 Track: code
 Snapshot: 6cfe7dc004ac51bde0aac3da99294b341d76a975
 Depends-on: none
