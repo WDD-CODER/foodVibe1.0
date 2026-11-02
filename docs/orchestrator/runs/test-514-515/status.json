@@ -1,0 +1,230 @@
+{
+  "run": "test-514-515",
+  "branch": "orch/test-514-515",
+  "base": "main",
+  "startedAt": "2026-11-02T19:58:07.244Z",
+  "mainShaAtStart": "80fb02e69901a2921498a1bba8241ff193ec6ec1",
+  "plans": {
+    "514": {
+      "nnn": "514",
+      "title": "Give the app a client model, data service and display helpers",
+      "branch": "feat/514-client-data-layer",
+      "state": "merged",
+      "round": 0,
+      "tier": "judgment",
+      "models": {
+        "orch-builder": {
+          "model": "claude-opus-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        },
+        "orch-check-plan": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-bugs": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-check-rules": {
+          "model": "claude-sonnet-5-5",
+          "effort": "high"
+        },
+        "orch-verify": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-merge": {
+          "model": "claude-sonnet-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-02T19:58:41.707Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T20:07:31.391Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T20:11:03.901Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T20:11:59.680Z",
+          "state": "checking",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T20:12:09.678Z",
+          "state": "merging",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T20:14:20.641Z",
+          "state": "merged",
+          "round": 0
+        }
+      ],
+      "asked": [
+        "spec to mirror menu-event-data.service.spec.ts does not exist"
+      ],
+      "ready": false,
+      "freeDiskGb": 15.9,
+      "sha": "3a70649de3ab7493bc4d05e6db110a37fe2d3760",
+      "verify": {
+        "candidates": 1,
+        "refuted": 0,
+        "refutedRules": [],
+        "byRole": {
+          "check-rules": {
+            "candidates": 1,
+            "refuted": 0,
+            "rules": []
+          }
+        },
+        "lateLow": [],
+        "reappeared": []
+      }
+    },
+    "515": {
+      "nnn": "515",
+      "title": "Let the new-inquiry dialog pick or create a client instead of retyping name and phone",
+      "branch": "feat/515-new-inquiry-dialog-client",
+      "state": "parked",
+      "round": 2,
+      "tier": "judgment",
+      "models": {
+        "orch-builder": {
+          "model": "claude-sonnet-5-5",
+          "effort": "medium"
+        },
+        "orch-gate": {
+          "model": "claude-haiku-5-5",
+          "effort": "low"
+        }
+      },
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-02T20:14:46.389Z",
+          "state": "building",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T20:23:58.708Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T20:28:57.608Z",
+          "state": "gate",
+          "round": 0
+        },
+        {
+          "at": "2026-11-02T20:29:05.853Z",
+          "state": "fixing",
+          "round": 1
+        },
+        {
+          "at": "2026-11-02T20:35:10.483Z",
+          "state": "gate",
+          "round": 1
+        },
+        {
+          "at": "2026-11-02T20:39:38.562Z",
+          "state": "checking",
+          "round": 1
+        },
+        {
+          "at": "2026-11-02T20:43:06.135Z",
+          "state": "parked",
+          "round": 2
+        }
+      ],
+      "asked": [
+        "no owner-only clients rule in PermissionService",
+        "clientFilter is a boolean not a function",
+        "error_generic key missing"
+      ],
+      "ready": false,
+      "freeDiskGb": 15.1,
+      "sha": "e92fee7c",
+      "roundCauses": [
+        "round 1: gate: pnpm run test:ci"
+      ],
+      "escalations": [
+        {
+          "step": "round 2",
+          "check": "checker: blocker src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts:0 test file outside the plan's scope; blocker src/app/pages/menu-library/components/new-inq"
+        }
+      ],
+      "replan": "no — the builder gave no planChange",
+      "reason": "replan needed: The scope block on the run branch ('src/app/pages/menu-library/components/new-inquiry-dialog/**') does not cover the test files under that folder. Sub-task T1 and the [auto] Done-when still require editing new-inquiry-dialog.component.spec."
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-02T19:58:41.705Z",
+      "plan": "514",
+      "text": "starts on the judgment tier: Architecture Impact names INV-1"
+    },
+    {
+      "at": "2026-11-02T20:23:58.705Z",
+      "plan": "515",
+      "text": "builder left undone (round 0): The three [human] UI cards (owner pick, owner create, staff view) are for the Human. No backend or DB is available, per the readiness note."
+    },
+    {
+      "at": "2026-11-02T20:43:06.133Z",
+      "plan": "515",
+      "text": "escalated to a fresh judgment-tier builder (round 2): checker: blocker src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts:0 test file outside the plan's scope; blocker src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts:0 test file outside the plan's scope"
+    },
+    {
+      "at": "2026-11-02T20:53:29.279Z",
+      "plan": "515",
+      "text": "runner retry: state 515 parked — first attempt: no ORCH_JSON line from: node scripts/orch-state.mjs set --run=test-514-515 --plan=515 --state=parked --round=2 --tier=judgment \"--reason=replan needed: The scope block on the run branch ('src/app/pages/menu-library/components/new-inquiry-dialog/**') does not cover the test files under that folder. Sub-task T1 and the [auto] Done-when still require editing new-inquiry-dialog.component.spec.\" --notes-b64=W3siaWQiOiIxOjUxNS0yIiwidGV4dCI6ImVzY2FsYXRlZCB0byBhIGZyZXNoIGp1ZGdtZW50LXRpZXIgYnVpbGRlciAocm91bmQgMik6IGNoZWNrZXI6IGJsb2NrZXIgc3JjL2FwcC9wYWdlcy9tZW51LWxpYnJhcnkvY29tcG9uZW50cy9tZW51LWxpYnJhcnktbGlzdC9tZW51LWxpYnJhcnktbGlzdC5jb21wb25lbnQuc3BlYy50czowIHRlc3QgZmlsZSBvdXRzaWRlIHRoZSBwbGFuJ3Mgc2NvcGU7IGJsb2NrZXIgc3JjL2FwcC9wYWdlcy9tZW51LWxpYnJhcnkvY29tcG9uZW50cy9uZXctaW5xdWlyeS1kaWFsb2cvbmV3LWlucXVpcnktZGlhbG9nLmNvbXBvbmVudC5zcGVjLnRzOjAgdGVzdCBmaWxlIG91dHNpZGUgdGhlIHBsYW4ncyBzY29wZSJ9XQ== (exit 2) — last lines: \"/usr/bin/bash: eval: line 1: unexpected EOF while looking for matching `\\\"' | OUTPUT 1: node scripts/orch-state.mjs set --run=test-514-515 --plan=515 --state=parked --round=2 --tier=judgment \\\"--reason=replan needed: The scope block on the run branch ('src/app/pages/menu-library/components/new-inquiry-dialog/**') does not cover the test files under that folder. Sub-task T1 and the [auto] Done-when still require editing new-inquiry-dialog.component.spec.\\\" --notes-b64=W3siaWQiOiIxOjUxNS0yIiwidGV4dCI6ImVzY2FsYXRlZCB0byBhIGZyZXNoIGp1ZGdtZW50LXRpZXIgYnVpbGRlciAocm91bmQgMik6IGNoZWNrZXI6IGJsb2NrZXIgc3JjL2FwcC9wYWdlcy9tZW51LWxpYnJhcnkvY29tcG9uZW50cy9tZW51LWxpYnJhcnktbGlzdC9tZW51LWxpYnJhcnktbGlzdC5jb21wb25lbnQuc3BlYy50czowIHRlc3QgZmlsZSBvdXRzaWRlIHRoZSBwbGFuJ3Mgc2NvcGU7IGJsb2NrZXIgc3JjL2FwcC9wYWdlcy9tZW51LWxpYnJhcnkvY29tcG9uZW50cy9uZXctaW5xdWlyeS1kaWFsb2cvbmV3LWlucXVpcnktZGlhbG9nLmNvbXBvbmVudC5zcGVjLnRzOjAgdGVzdCBmaWxlIG91dHNpZGUgdGhlIHBsYW4ncyBzY29wZSJ9XQ== | /usr/bin/bash: eval: line 1: unexpected EOF while looking for matching `\\\"'\""
+    },
+    {
+      "at": "2026-11-02T20:53:29.280Z",
+      "text": "database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses"
+    },
+    {
+      "at": "2026-11-02T20:53:29.280Z",
+      "text": "dropped npx checks: 514: npx ng test --watch=false --include=client-data.service.spec/client-display.util.spec: no package.json script runs it (test:ci runs all tests); 515: npx ng test --watch=false --include=new-inquiry-dialog/**: no package.json script runs it (test:ci runs all tests)"
+    },
+    {
+      "at": "2026-11-02T20:53:29.280Z",
+      "text": "final gate failed: node scripts/breadcrumbs-check.mjs —    not mentioned: client-data.service.ts /    not mentioned: client.model.ts / BREADCRUMBS: 2 seam(s) need attention"
+    }
+  ],
+  "attempts": 1,
+  "phase": "finished",
+  "freeDiskGb": 15.1,
+  "updatedAt": "2026-11-02T20:53:29.281Z",
+  "noteIds": [
+    "1:514-1",
+    "1:515-1",
+    "1:515-2",
+    "1:515-3",
+    "1:run-1",
+    "1:run-2",
+    "1:run-3"
+  ],
+  "finishedAt": "2026-11-02T20:53:29.280Z",
+  "finalGate": {
+    "ok": false,
+    "command": "node scripts/breadcrumbs-check.mjs",
+    "at": "2026-11-02T20:53:29.281Z",
+    "attempt": 1,
+    "blamed": []
+  }
+}
