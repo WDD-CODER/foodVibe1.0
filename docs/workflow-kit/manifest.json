@@ -5102,6 +5102,22 @@
       "notes": "Kit seed (.kit/install.json, kit 1.7.1): installed once, then owned by FoodVibe."
     },
     {
+      "path": "docs/brain/decision-grades.jsonl",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Graded orchestrator decisions written by decision-log.mjs grade; project data, not part of the kit."
+    },
+    {
+      "path": "docs/brain/triage-calibration.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Triage calibration written by decision-log.mjs stats --write; project data, not part of the kit."
+    },
+    {
       "path": "docs/brain/decisions/0022-soft-delete-user-prefs.md",
       "tier": "project",
       "action": "stay",
@@ -5140,6 +5156,14 @@
       "params": [],
       "refs": [],
       "notes": "FoodVibe ADR 0026 (staff see events only in the stages the owner chose)."
+    },
+    {
+      "path": "docs/brain/decisions/0027-client-entity-above-events.md",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe ADR 0027 (client entity above events; clients owner-only to write)."
     },
     {
       "path": "scripts/decision-log.mjs",
@@ -5252,6 +5276,22 @@
       "params": [],
       "refs": [],
       "notes": "FoodVibe code-QA tool (static checks, API layer, findings, rotation); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/morning-brief.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA nightly report tool (plan 422); project script, not part of the kit."
+    },
+    {
+      "path": "scripts/qa/morning-report.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe code-QA nightly report tool (plan 422); project script, not part of the kit."
     },
     {
       "path": "scripts/qa/code-qa/api-fixtures.mjs",
@@ -5380,6 +5420,14 @@
       "params": [],
       "refs": [],
       "notes": "FoodVibe script test (node --test) for the code-QA tool."
+    },
+    {
+      "path": "scripts/test/qa-morning-report.test.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "FoodVibe script test (node --test) for the nightly QA morning report (plan 422)."
     },
     {
       "path": "scripts/test/code-qa-static.test.mjs",

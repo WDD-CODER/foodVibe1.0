@@ -69,13 +69,12 @@ Load this standard when a plan or feature involves any of:
 
 When a feature needs a new persisted entity type:
 
-1. Add the TypeScript model to `src/app/core/models/`
-2. Create a data service extending `BaseEntityDataService` (or custom if registry-doc pattern)
-3. Choose an `entityType` key: `SCREAMING_SNAKE_CASE`, domain-prefixed (`KITCHEN_*`, `MENU_*`); if users can delete it, set `softDelete: true` in `server/constants/collections.js` (Trash, plan 407 / ADR 0022)
-4. Add the key to `BACKUP_ENTITY_TYPES` in `async-storage.service.ts`
-5. Add a `reloadFromStorage()` method and wire it into `UserService`'s post-login/logout data-reload flow (`user.service.ts`)
-6. **No server changes needed** — generic routes use native `collection(type)` access (no Mongoose model for entity types; `server/routes/generic.js` calls `mongoose.connection.db.collection(type)` directly)
-7. If the new entity needs a dedicated endpoint beyond generic CRUD, add it to `server/routes/` and document it in this file
+1. Add the Zod schema to `shared/schemas/entities/<name>.schema.ts` (`z.strictObject({ ...baseDocShape, ... })`), import and export it in `shared/schemas/entities/index.ts`, and register it in `SCHEMA_BY_COLLECTION` (INV-4: the server validates every generic write against it). Run `npm run build:schemas`.
+2. Add the entry to `COLLECTIONS` in `server/constants/collections.js`. Every list the server uses derives from its flags: `userData` (reachable through `/api/v1/data/:type`), `cloneable` (copied to a new business; a cloneable doc carries `_masterId` / `_userModified`, a non-cloneable one must not), `backup`, `searchable` (lean `/search` endpoint) and `softDelete` (delete stamps `deletedAt`, Trash lists it; plan 407 / ADR 0022). The key is the camelCase collection name.
+3. Add the TypeScript model to `src/app/core/models/` and a data service extending `BaseEntityDataService`.
+4. **Generic routes need no new code** — `server/routes/generic.js` calls `mongoose.connection.db.collection(type)` directly, scopes every query by `businessId` (`scopeFilter`) and checks permissions with `assertCan`. Add per-type rules only where the type needs them: owner-only writes (`OWNER_ONLY_TYPES` in `server/utils/permissions.js`), a trimmed staff read (`STAFF_READ_FIELDS` in `shared/schemas/staff-fields.ts`), money fields (`shared/schemas/money-fields.ts`).
+5. Add a server test that covers the owner path, the staff path and a second business (`server/test/cross-business.test.js` lists a body for every type).
+6. If the new entity needs a dedicated endpoint beyond generic CRUD, add it to `server/routes/` and document it in this file.
 
 ---
 

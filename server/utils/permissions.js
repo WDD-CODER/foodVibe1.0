@@ -6,6 +6,8 @@
  */
 
 const { MONEY_FIELDS } = require('../generated/schemas/money-fields')
+const { STAFF_READ_FIELDS } = require('../generated/schemas/staff-fields')
+const { SCHEMA_BY_COLLECTION } = require('../generated/schemas/entities')
 const { MASTER_BUSINESS_ID } = require('./business-scope')
 
 const ACTIONS = [
@@ -14,6 +16,10 @@ const ACTIONS = [
 ]
 const OWNER_ONLY_ACTIONS = new Set(['editMoney', 'manageTeam', 'editSettings', 'editTaxonomy'])
 const EVENTS = 'menuEvents'
+/** Plan 512: types only an owner may create, edit or delete (staff read them through `staffProjection`). */
+const OWNER_ONLY_TYPES = new Set(['clients'])
+/** Fields every stored document carries; a staff projection never hides them. */
+const BASE_FIELDS = ['_id', 'schemaVersion', 'userId', 'businessId', 'createdBy', 'createdAt', 'updatedAt', 'deletedAt', 'deletedBy']
 
 /** Taxonomy kinds only an owner may add, change or delete. */
 const LOCKED_TAXONOMY_KINDS = ['eventType', 'menuType', 'station']
@@ -40,6 +46,7 @@ function can(user, action, ctx = {}) {
   if (user?.businessRole !== 'staff') return deny('NO_ROLE')
 
   if (OWNER_ONLY_ACTIONS.has(action)) return deny('OWNER_ONLY')
+  if (OWNER_ONLY_TYPES.has(type) && (action === 'create' || action === 'edit' || action === 'delete')) return deny('OWNER_ONLY_TYPE')
   if (action === 'create') return OK
   const isCreator = !!doc && !!user.userId && doc.createdBy === user.userId
   if (action === 'edit' || action === 'delete') return isCreator ? OK : deny('NOT_CREATOR')
@@ -47,6 +54,20 @@ function can(user, action, ctx = {}) {
   if (type !== undefined && type !== EVENTS) return deny('NOT_AN_EVENT')
   if (action === 'changeStage') return isCreator ? OK : deny('NOT_CREATOR')
   return OK // addNote, markArrival: any event of his business
+}
+
+/**
+ * Plan 512: Mongo projection that hides, from a staff read of `type`, every top-level schema field not listed in
+ * STAFF_READ_FIELDS[type] (base fields stay). `null` when the type has no entry: nothing is trimmed.
+ */
+function staffProjection(type) {
+  const allowed = STAFF_READ_FIELDS[type]
+  const schema = SCHEMA_BY_COLLECTION[type]
+  if (!allowed || !schema) return null
+  const keep = new Set([...allowed, ...BASE_FIELDS])
+  const projection = {}
+  for (const key of Object.keys(schema.shape)) if (!keep.has(key)) projection[key] = 0
+  return projection
 }
 
 /** Sends the 403 and logs when `can` says no. Returns true when the caller may go on. */
@@ -140,4 +161,4 @@ function moneyFieldsChanged(type, before, after) {
   return (MONEY_FIELDS[type] || []).some(path => moneySignature(before, path) !== moneySignature(after, path))
 }
 
-module.exports = { can, assertCan, stripMoneyFields, moneyFieldsChanged, valuesAt, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES, ACTIONS }
+module.exports = { can, assertCan, staffProjection, OWNER_ONLY_TYPES, stripMoneyFields, moneyFieldsChanged, valuesAt, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES, ACTIONS }

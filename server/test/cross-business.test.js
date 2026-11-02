@@ -46,6 +46,7 @@ const BODY = {
   venues: () => venueBody({ nameHebrew: 'אולם X' }),
   menuEvents: () => menuEventBody({ name: 'אירוע X' }),
   taxonomyTerms: () => ({ kind: 'allergen', key: 'lupinx', sortOrder: 0 }),
+  clients: () => ({ name: 'לקוח X', phone: '050-111 2222' }),
   VERSION_HISTORY: () => ({ entityType: 'recipes', entityId: 'entity-X', note: 'x' }),
   activity_log: () => ({ action: 'x', at: 1 }),
   DICTIONARY_OVERRIDES: () => ({ items: { a: 'b' } }),
