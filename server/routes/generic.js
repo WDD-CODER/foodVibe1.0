@@ -16,7 +16,7 @@ const { MASTER_BUSINESS_ID, scopeFilter, readScope, stampNew } = require('../uti
 // Plan 477: staff read events only in the stages the owner allowed (plus their own) — wraps every menuEvents filter below.
 const { withEventVisibility } = require('../utils/event-visibility');
 const { PRODUCT_NAME_TAKEN, findProductNameClash, isRename } = require('../utils/product-name-guard');
-const { assertCan, stripMoneyFields, moneyFieldsChanged, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES } = require('../utils/permissions');
+const { assertCan, staffProjection, stripMoneyFields, moneyFieldsChanged, LOCKED_TAXONOMY_KINDS, SYSTEM_TYPES } = require('../utils/permissions');
 
 const router = Router();
 
@@ -74,6 +74,16 @@ function termWriteOwner(req) {
 const termScope = term => (term.businessId === MASTER ? { $exists: true } : term.businessId);
 
 const EVENTS = 'menuEvents';
+const CLIENTS = 'clients';
+
+/** Plan 512: types whose docs carry no clone lineage (`_masterId`, `_userModified`): the strict schema rejects them. */
+const NO_LINEAGE = new Set([TAXONOMY, CLIENTS]);
+
+/** Plan 512: the Mongo projection that trims a staff member's read of `type`; `undefined` for everyone else. */
+const readProjection = (req, type) => (req.user?.businessRole === 'staff' ? staffProjection(type) : null) || undefined;
+
+/** Plan 512: a client's `phoneNormalized` is always the digits of its `phone`; a client-sent value is ignored. */
+const withPhoneNormalized = doc => ({ ...doc, phoneNormalized: String(doc.phone ?? '').replace(/\D/g, '') });
 
 /** Plan 442: `body` without the event fields only the server writes (stage, history, notes ...). */
 function withoutServerEventFields(body) {
@@ -227,7 +237,7 @@ router.get('/:type', optionalToken, async (req, res) => {
     }
     const findStart = perfLog ? Date.now() : 0;
     const docs = await col(req.params.type)
-      .find(await withEventVisibility(req, req.params.type, filter))
+      .find(await withEventVisibility(req, req.params.type, filter), { projection: readProjection(req, req.params.type) })
       .skip(skip)
       .limit(limit)
       .toArray();
@@ -431,7 +441,7 @@ router.get('/:type/:id', optionalToken, async (req, res) => {
       _id: req.params.id,
       ...readScope(req, req.params.type),
       ...LIVE,
-    }));
+    }), { projection: readProjection(req, req.params.type) });
     if (!doc) {
       return res.status(404).json({ error: `Cannot get, Item ${req.params.id} of type: ${req.params.type} does not exist` });
     }
@@ -483,7 +493,7 @@ router.post('/:type', verifyToken, async (req, res) => {
       ...safeEntity,
       _id,
       userId: shared ? MASTER : req.user.userId,
-      ...(entityType !== TAXONOMY && { _masterId: _id, _userModified: false }),
+      ...(!NO_LINEAGE.has(entityType) && { _masterId: _id, _userModified: false }),
       ...(hasV2Schema(entityType) && {
         schemaVersion: 2,
         // A restored/re-appended doc keeps its original createdAt; a brand-new one gets now.
@@ -499,8 +509,11 @@ router.post('/:type', verifyToken, async (req, res) => {
     // Plan 424: a shared term belongs to the master catalog, not to the admin's own business.
     if (shared) doc.businessId = MASTER_BUSINESS_ID;
 
-    const check = checkStoredDoc(entityType, doc);
+    // Plan 512: derived from `phone` just before the schema check (the schema requires the field), never taken from the client.
+    const toStore = entityType === CLIENTS ? withPhoneNormalized(doc) : doc;
+    const check = checkStoredDoc(entityType, toStore);
     if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
+    if (toStore !== doc) doc.phoneNormalized = toStore.phoneNormalized;
 
     // After validation, so kind/key are known plain strings before they reach a query.
     if (entityType === TAXONOMY && !shared && await masterHasTerm(doc.kind, doc.key)) {
@@ -590,7 +603,7 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
     const filter = await withEventVisibility(req, req.params.type, { _id: req.params.id, ...(isTerm ? termWriteOwner(req) : scopeFilter(req)), ...LIVE });
     const stamps = {
       ...(hasV2Schema(req.params.type) && { schemaVersion: 2, updatedAt: Date.now() }),
-      ...(!isTerm && { _userModified: true }),
+      ...(!NO_LINEAGE.has(req.params.type) && { _userModified: true }),
     };
     // createdAt is server-owned: a client PUT never rewrites it.
     const { createdAt: _ca, ...clientUpdatable } = safeBody;
@@ -613,8 +626,13 @@ router.put('/:type/:id', verifyToken, async (req, res) => {
       // Plan 446: a frozen planning snapshot survives a client save unchanged.
       if (req.params.type === EVENTS) updatable = withSavedSnapshot(updatable, current);
       staleNulls = Object.keys(current).filter(k => current[k] === null && !(k in updatable));
-      const merged = { ...current, ...updatable, ...stamps };
+      let merged = { ...current, ...updatable, ...stamps };
       for (const k of staleNulls) delete merged[k];
+      // Plan 512: re-derived from the merged phone on every client write; a client-sent value is ignored.
+      if (req.params.type === CLIENTS) {
+        merged = withPhoneNormalized(merged);
+        updatable = { ...updatable, phoneNormalized: merged.phoneNormalized };
+      }
       if (!authorizeEdit(req, res, req.params.type, current, merged)) return;
       const check = checkStoredDoc(req.params.type, merged);
       if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });

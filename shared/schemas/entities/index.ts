@@ -1,4 +1,5 @@
 import type { z } from 'zod'
+import { clientSchema } from './client.schema'
 import { equipmentSchema } from './equipment.schema'
 import { menuEventSchema } from './menu-event.schema'
 import { productSchema } from './product.schema'
@@ -8,10 +9,11 @@ import { taxonomyTermSchema } from './taxonomy-term.schema'
 import { venueSchema } from './venue.schema'
 
 export * from './business.schema'
+export * from './client.schema'
 export * from './common.schema'
 export * from './event-stage'
 export * from './taxonomy-term.schema'
-export { equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }
+export { clientSchema, equipmentSchema, menuEventSchema, productSchema, recipeSchema, supplierSchema, venueSchema }
 
 /** v2 collection name -> schema (Plan 321 G2 names). Trash/logs follow in later phases. */
 export const SCHEMA_BY_COLLECTION = {
@@ -22,7 +24,8 @@ export const SCHEMA_BY_COLLECTION = {
   equipment: equipmentSchema,
   venues: venueSchema,
   menuEvents: menuEventSchema,
-  taxonomyTerms: taxonomyTermSchema
+  taxonomyTerms: taxonomyTermSchema,
+  clients: clientSchema
 } as const
 
 export type SchemaCollection = keyof typeof SCHEMA_BY_COLLECTION
@@ -32,3 +35,4 @@ export type Equipment = z.infer<typeof equipmentSchema>
 export type Supplier = z.infer<typeof supplierSchema>
 export type Venue = z.infer<typeof venueSchema>
 export type MenuEvent = z.infer<typeof menuEventSchema>
+export type Client = z.infer<typeof clientSchema>
