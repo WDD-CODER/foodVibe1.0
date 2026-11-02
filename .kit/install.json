@@ -278,7 +278,7 @@
       "source": "packs/angular/.claude/workflows/deploy.yml"
     },
     ".claude/workflows/orchestrate.js": {
-      "sha256": "91d7159e9bd3b0061be7e1572fd30c8d9b022b9d76c5d9b505515f80c576a13a",
+      "sha256": "706158c244945512e73040842332c65d396af17ec2d1db80e103d2f587a94326",
       "kind": "managed",
       "source": "core/.claude/workflows/orchestrate.js"
     },
@@ -638,7 +638,7 @@
       "source": "core/docs/agent/model-routing.md"
     },
     "docs/agent/orchestrator.md": {
-      "sha256": "56b7be22ac107e7f4607a7d8331e2c904197fcbcd2de4c4fdacd9f0413f87aa4",
+      "sha256": "8116f4e463a45a16177bb327d6b9375a0e3b71f1db57ac0e23ec53974e3dc5e5",
       "kind": "managed",
       "source": "core/docs/agent/orchestrator.md"
     },

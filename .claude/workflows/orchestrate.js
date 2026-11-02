@@ -44,7 +44,7 @@ const COUNT = { notes: {}, calls: {} }
 const PROJECT_CHECKS = ["build", "lint", TEST_SCRIPT].filter((s) => typeof s === 'string' && s !== '').map((s) => `${PM} run ${s}`)
 // Files the gate generates before the tests (orchestrator.prepare: { missing, script, in? }). Each entry becomes one command
 // that runs the project's script only when the path is absent; it comes first in every plan gate and in the final gate.
-const PREPARE = []
+const PREPARE = [{"missing":"server/generated/schemas","script":"build:schemas","in":"."}]
 const PREPARE_CHECKS = (Array.isArray(PREPARE) ? PREPARE : [])
   .filter((p) => p && typeof p.missing === 'string' && typeof p.script === 'string')
   .map((p) => `node scripts/orch-state.mjs prepare --missing ${p.missing} --script ${p.script}${typeof p.in === 'string' && p.in !== '' && p.in !== '.' ? ` --in ${p.in}` : ''}${PM === 'pnpm' ? ' --pm pnpm' : ''}`)
@@ -54,7 +54,7 @@ const MANIFEST_CHECK = 'node scripts/kit-manifest-check.mjs'
 let KIT_MANIFEST = false
 // CI commands the Human listed (orchestrator.ciMirror): the final gate runs them after PROJECT_CHECKS and the kit
 // manifest check, so a green run is a green PR. Each one passes checkProblem; a bad one is dropped with a run note.
-const CI_MIRROR = []
+const CI_MIRROR = ["node scripts/override-check.mjs","pnpm run lint:icons","pnpm run lint:no-native-select","node scripts/plan-ledger-check.mjs","node scripts/breadcrumbs-check.mjs"]
 // The merge step's checks (orchestrator.mergeChecks): "build" = the project build plus the plan's own scope check
 // (seconds), lint and tests having passed in the plan's gate and running once more at the final gate on the run branch;
 // "full" = the plan's whole check list on every merge (a merge once cost three full test passes per plan).
