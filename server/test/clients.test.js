@@ -182,10 +182,10 @@ describe('clients: owner writes and the derived phone', () => {
     expect(await testDb().collection('clients').countDocuments()).toBe(0);
   });
 
-  it('a client with only name and phone is accepted (clientType is optional on write)', async () => {
+  it('a client with only name and phone is accepted and stored with clientType private', async () => {
     const res = await request(app).post('/api/v1/data/clients').set(as(OWNER)).send({ name: 'דנה', phone: '050-123 4567' });
     expect(res.status).toBe(201);
-    expect(res.body).toMatchObject({ name: 'דנה', phoneNormalized: '0501234567' });
+    expect(res.body).toMatchObject({ name: 'דנה', phoneNormalized: '0501234567', clientType: 'private' });
   });
 });
 

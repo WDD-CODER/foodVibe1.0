@@ -513,7 +513,11 @@ router.post('/:type', verifyToken, async (req, res) => {
     const toStore = entityType === CLIENTS ? withPhoneNormalized(doc) : doc;
     const check = checkStoredDoc(entityType, toStore);
     if (!check.ok) return res.status(400).json({ error: 'Validation failed', issues: check.issues });
-    if (toStore !== doc) doc.phoneNormalized = toStore.phoneNormalized;
+    if (toStore !== doc) {
+      doc.phoneNormalized = toStore.phoneNormalized;
+      // Plan 512 (D14): checkStoredDoc does not store the parsed default, so stamp it for consistent stored clients.
+      if (!doc.clientType) doc.clientType = 'private';
+    }
 
     // After validation, so kind/key are known plain strings before they reach a query.
     if (entityType === TAXONOMY && !shared && await masterHasTerm(doc.kind, doc.key)) {

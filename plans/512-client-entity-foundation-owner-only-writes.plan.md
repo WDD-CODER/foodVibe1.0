@@ -200,3 +200,11 @@ Decisions already taken by the Human (do not reopen):
 - Finding F3 (2026-11-02): readiness missed 512's scope gap (server/test/cross-business.test.js).
 - Finding F4 (2026-11-02): the per-plan gate did not catch the unclassified files; only the final gate did, so 422 merged and broke the run branch.
 - Finding F5 (2026-11-02): preflight does not start the dev server it requires.
+
+### Builder evidence (orch-builder, round 0 continuation)
+- Decision D14 implemented: `server/routes/generic.js` POST stamps `clientType: 'private'` on a client when none is sent; `server/test/clients.test.js` "a client with only name and phone is accepted and stored with clientType private" asserts it.
+- `npm run build:schemas` -> exit 0 (regenerated `server/generated`, needed before server tests in this worktree).
+- `cd server && npx vitest run test/clients.test.js test/invariants.test.js test/cross-business.test.js test/permissions.test.js test/collections.test.js` -> exit 0, `Test Files  5 passed (5)`, `Tests  109 passed (109)`.
+- `cd server && npx vitest run` -> exit 0, `Test Files  65 passed (65)`, `Tests  801 passed (801)`.
+- `pnpm run build` -> exit 0. `pnpm run lint` -> exit 0. `pnpm run test:ci` -> exit 0, `Executed 1666 of 1666 SUCCESS`.
+- `scope-check --arch` -> exit 0 (`ARCH: ok INV-1, INV-2, INV-3, INV-4`); `--reuse` -> exit 0 (`REUSE: ok none`).
