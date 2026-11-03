@@ -1,6 +1,6 @@
 # Plan 515 — Let the new-inquiry dialog pick or create a client instead of retyping name and phone
 
-Status: draft
+Status: done
 Track: code
 Snapshot: 6cfe7dc004ac51bde0aac3da99294b341d76a975
 Depends-on: 514
