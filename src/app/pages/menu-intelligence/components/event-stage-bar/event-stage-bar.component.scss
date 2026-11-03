@@ -110,6 +110,29 @@
     gap: var(--space-4);
   }
 
+  .client-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .client-row-empty {
+    color: var(--color-text-muted);
+    font-size: var(--fs-sm);
+    opacity: 0.6;
+  }
+
+  .client-picker {
+    min-inline-size: 0;
+    padding: var(--space-2) var(--space-3);
+
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+
+    background: var(--bg-glass);
+  }
+
   .stage-link {
     display: inline-flex;
     align-items: center;
