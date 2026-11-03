@@ -36,6 +36,7 @@ src/app/pages/menu-library/components/new-inquiry-dialog/**
 src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts
 src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts
 public/assets/data/dictionary.json
+.interface-design/system.md
 ```
 
 ## Read Scope
@@ -176,3 +177,4 @@ Decisions already taken by the Human (do not reopen):
 - Round 2 (2026-11-03, checker finding html:24 "Enter in the name input no longer saves"): restored `(keydown.enter)="onSave()"` on `#inquiry-name` (now in the owner's new-client branch); new spec test "pressing Enter in the new client name saves the inquiry". Kept the unpushed round-1 fix e9d333f4 (client valid only on the new-client branch). Evidence: dialog spec -> exit 0, 13 of 13 SUCCESS; `pnpm run test:ci` -> exit 0, 1689 SUCCESS; `pnpm run build` and `npm run build` -> exit 0; `pnpm run lint` and `npm run lint` -> exit 0, 0 errors; kit-manifest-check -> ok; scope-check --reuse -> exit 0; log-query -> exit 0, only 2026-10-27 entries from the main checkout's old log.
 - removes: when picking an existing client, Enter in the client search picks the highlighted client (the combobox's own key handling) and does not save the inquiry, because the plan replaces the old first field (`#inquiry-name`) with the combobox. Reverse: handle `(keydown.enter)` on the picked-client row or add an Enter handler after a pick that calls `onSave()`.
 - Orchestrator (2026-11-03): after the Human's validation the dialog was reworked on the run branch: one-box client field with X, separate add-client view (client saved before the inquiry), own event-name field, Enter moves name→phone and phone saves the client, Escape goes one step back (list, add-client view, dialog). Replaces the read-only block + client_change link and the inline new-client branch; D1 reversed.
+- Orchestrator (2026-11-03): scope widened with the Human's instruction to write the dialog rules R1-R8 to .interface-design/system.md under "Dialog patterns".
