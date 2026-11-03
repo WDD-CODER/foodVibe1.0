@@ -33,6 +33,8 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 
 ```scope
 src/app/pages/menu-library/components/new-inquiry-dialog/**
+src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts
+src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts
 public/assets/data/dictionary.json
 ```
 
@@ -165,3 +167,4 @@ Decisions already taken by the Human (do not reopen):
 - Orchestrator readiness (2026-11-02): plan drift — the dialog spec has 7 it() blocks, not 6, and the component scss has no overlay styles (overlay is markup only) → build for what the code has; log both as seen: (answered by the Human, recommended answer accepted).
 - Orchestrator readiness (2026-11-02): the three `[ui]` cards need a backend and a database with an owner, a staff account and a client whose phone starts with 052. Local Mongo requires authentication and no backend is started for this plan, so these could not be confirmed available → the three `[ui]` cards are `[human]` follow-ups for this run (decided by the coordinator under the Human's delegated rule).
 - seen: src/app/core/services/permission.service.ts has no mirror of the server's OWNER_ONLY_TYPES (server/utils/permissions.js:20,49) for the clients entity, so PermissionService.can('create', { type: 'clients' }) is true for staff — follow-up (Q2).
+- Orchestrator (2026-11-03): scope widened with the Human's approval ('approved: both spec paths, resume 515'): new-inquiry-dialog.component.spec.ts and menu-library-list.component.spec.ts (test-file gate names a test location).
