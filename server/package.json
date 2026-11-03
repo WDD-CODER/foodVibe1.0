@@ -14,6 +14,7 @@
     "dev:remote": "cross-env NODE_ENV=production node --watch index.js",
     "pretest": "pnpm --dir .. run build:schemas",
     "test": "vitest run",
+    "test:migration-0009": "pnpm --dir .. run build:schemas && vitest run test/migration-0009.test.js",
     "lint": "eslint app.js db.js index.js logger.js routes services middleware"
   },
   "dependencies": {
