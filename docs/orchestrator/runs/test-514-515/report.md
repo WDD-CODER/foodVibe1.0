@@ -1,9 +1,9 @@
 # Orchestrator run test-514-515
 
-Run branch: `orch/test-514-515` (from `origin/main` at 80fb02e) · started 2026-11-02T19:58:07.244Z · finished 2026-11-03T06:31:14.328Z
-Result: 1 merged, 1 parked, skipped or left out, 2 in the run (counted from git and status.json).
+Run branch: `orch/test-514-515` (from `origin/main` at 80fb02e) · started 2026-11-02T19:58:07.244Z · finished 2026-11-03T07:09:00.426Z
+Result: 2 merged, 0 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 80fb02e.
-Stopped: wave 1 parked 515 — later waves not started
+
 Final gate: ok (attempt 1)
 
 ## Plans
@@ -11,7 +11,7 @@ Final gate: ok (attempt 1)
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 514 Give the app a client model, data service and display helpers | merged | 0 | judgment | 3a70649 |  |
-| 515 Let the new-inquiry dialog pick or create a client instead of retyping name and phone | parked | 0 | build |  | worktree: merging origin/orch/test-514-515 into feat/515-new-inquiry-dialog-client conflicts: CONFLICT (content): Merge conflict in plans/515-new-inquiry-dialog-client-picker.plan.md |
+| 515 Let the new-inquiry dialog pick or create a client instead of retyping name and phone | merged | 2 | judgment | 9d4efa8 |  |
 
 ## App errors since the run started
 
@@ -24,7 +24,43 @@ no entries
 
 ## Decisions
 
-- none
+triage: shadow · agreement (last 50): 52% · collapsed: 0 · ask: 6 · follow-ups: 1
+
+### To grade
+
+- D12 · 515 · ask (rule: keyword) · seen: new-inquiry-dialog.component.html:1-181 all user text is bound through Angular interpolation or ngModel, which escapes it. No innerHTML, and no secrets or tokens in the changed lines.
+  why: duplicate of D9
+- D8 · 515 · ask · seen: server/utils/permissions.js:20 OWNER_ONLY_TYPES contains 'clients', so the owner-only check in new-inquiry-dialog.component.ts:106 is also enforced on the server and is not a client-only guard
+  why: Evidence/confirmation of server enforcement, not a decision.
+- D1 · 515 · ask · removed-keyboard-path · removes: Enter-in-name-field saves the inquiry (keydown.enter on #inquiry-name) — reverse: re-add (keydown.enter)="onSave()" to the new-client name/phone inputs in new-inquiry-dialog.component.html
+  recommend: Keep Enter-to-save on the new-client name/phone inputs. — why: Users lose a keyboard shortcut.
+- D6 · 515 · ask · permission-gap · seen: src/app/core/services/permission.service.ts:47 has no owner-only rule for the clients type, so staff pass can('create'); canCreateClient_ uses isOwner_ instead
+  recommend: Plan a permission.service owner-only rule for clients. — why: Gap in permission service, outside the plan.
+- D2 · 515 · ask · removed-keyboard-path · removes: when picking an existing client, Enter in the client search picks the highlighted client (the combobox's own key handling) and no longer saves the inquiry, because the plan replaces the old first field #inquiry-name with the combobox — reverse: add an Enter handler on the picked-client row that calls onSave()
+  recommend: Accept Enter picking the client; confirm no save-on-Enter is wanted. — why: Changes keyboard flow for users.
+- D7 · 515 · ask · label-wording · seen: plans/515-new-inquiry-dialog-client-picker.plan.md:119 — the plan says the picked client shows a 'שינוי' link, but the code uses the contract key client_change ('החלף לקוח') (new-inquiry-dialog.component.html); the Human can ask for the shorter label if wanted.
+  recommend: Keep 'החלף לקוח' contract key unless the Human wants the shorter label. — why: User-facing wording differs from plan.
+
+### Accepted by triage
+
+- D3 · 515 · accept · modal-dismiss-wiring · behaviour: Escape and backdrop go through app-modal-shell (dismissed) to cancelled.emit(); the old host keydown.escape binding was removed so cancel does not fire twice — reverse: restore the host binding and drop the shell's (dismissed)
+  recommend: Keep shell-based dismiss; Escape still cancels once. — why: Reversible wiring, same user behaviour.
+- D4 · 515 · accept · prefill-heuristic · behaviour: '+ לקוח חדש' prefills the typed text, phone-like text into phone and anything else into name — reverse: drop the prefill lines in onAddChosen
+  recommend: Keep the prefill of typed text into phone or name. — why: Small reversible convenience default.
+- D5 · 515 · accept · extra-dictionary-key · behaviour: added dictionary key back_to_search beyond the 18 contract keys, for the 'חזרה לחיפוש' link — reverse: remove the key and the link
+  recommend: Keep back_to_search key and link. — why: Minor reversible label.
+
+### Follow-ups
+
+- D10 · 515 · follow-up · sheet-hardcoded · seen: src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.html:5 — [sheet]="true" is hard-coded, while the plan says sheet on narrow screens only. No other dialog in the repo sets [sheet] conditionally, so I did not raise it as a problem.
+  recommend: Decide later whether sheet should apply on narrow screens only. — why: Deviates from plan; product feel.
+
+### Noise
+
+- D9 · 515 · noise · seen: new-inquiry-dialog.component.html binds client fields only through interpolation and ngModel, with no innerHTML and no bypassSecurityTrust
+  why: Security confirmation, no decision.
+- D11 · 515 · noise · seen: plans/515-new-inquiry-dialog-client-picker.plan.md U2 says keep the (document:keydown.escape) host binding, but the diff removes it and relies on app-modal-shell (dismissed); the plan's Execution Notes already log this as a behaviour: entry with a reverse, and the shell handles Escape, so Escape still cancels.
+  why: duplicate of D3
 
 ## Run notes
 
@@ -37,6 +73,10 @@ no entries
 - final gate failed: node scripts/breadcrumbs-check.mjs —    not mentioned: client-data.service.ts /    not mentioned: client.model.ts / BREADCRUMBS: 2 seam(s) need attention
 - database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses
 - database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses
+- 515: builder left undone (round 0): The three [human] UI cards were not run: no backend or DB is available, as the plan's readiness note says
+- 515: escalated to a fresh judgment-tier builder (round 2): checker: major src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.html:24 unlogged removal: pressing Enter in the name input no longer saves the inquiry
+- 515: builder left undone (round 2): The three [human] UI cards are still for the Human; the readiness note says there is no backend or database for this plan, so no uiCards were produced
+- database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses
 
 ## Models per agent
 
@@ -47,12 +87,22 @@ no entries
 - 514 orch-check-rules: claude-sonnet-5-5 / high
 - 514 orch-verify: claude-sonnet-5-5 / medium
 - 514 orch-merge: claude-sonnet-5-5 / low
+- 515 orch-builder: claude-opus-5-5 / medium
+- 515 orch-gate: claude-haiku-5-5 / low
+- 515 orch-check-plan: claude-sonnet-5-5 / high
+- 515 orch-check-bugs: claude-sonnet-5-5 / high
+- 515 orch-check-rules: claude-sonnet-5-5 / high
+- 515 orch-security: claude-sonnet-5-5 / high
+- 515 orch-verify: claude-sonnet-5-5 / medium
+- 515 orch-merge: claude-sonnet-5-5 / low
 
 ## What only the Human can do
 
-- nothing to validate
+### Removed behaviour — check before merging the PR
 
-- Decide on 515: worktree: merging origin/orch/test-514-515 into feat/515-new-inquiry-dialog-client conflicts: CONFLICT (content): Merge conflict in plans/515-new-inquiry-dialog-client-picker.plan.md
+1. 515: D1 removes: Enter-in-name-field saves the inquiry (keydown.enter on #inquiry-name) — reverse: re-add (keydown.enter)="onSave()" to the new-client name/phone inputs in new-inquiry-dialog.component.html — open the screen; accept: decisions: ok · keep it: D1 ✗ restore
+2. 515: D2 removes: when picking an existing client, Enter in the client search picks the highlighted client (the combobox's own key handling) and no longer saves the inquiry, because the plan replaces the old first field #inquiry-name with the combobox — reverse: add an Enter handler on the picked-client row that calls onSave() — open the screen; accept: decisions: ok · keep it: D2 ✗ restore
+
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -60,6 +110,6 @@ git fetch origin
 gh pr create --base main --head orch/test-514-515 --title "Orchestrator run test-514-515" --body-file .claude\orchestrator-runs\test-514-515.md
 ```
 
-Context added by learning: 664 chars across 2 roles
+Context added by learning: 789 chars across 3 roles
 
-Trend (last 2 runs): ✗ per plan 0.5 → - · fix rounds per plan 0.5 → 0 · parked 0 → 1
+Trend (last 2 runs): ✗ per plan 0.5 → - · fix rounds per plan 0.5 → 1 · parked 0 → 0
