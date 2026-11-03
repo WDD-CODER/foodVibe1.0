@@ -270,6 +270,11 @@ describe('NewInquiryDialogComponent', () => {
     }
   })
 
+  it('the event-name field has space above it', () => {
+    const stack = el.querySelector<HTMLElement>('.inquiry-event-name')!
+    expect(parseFloat(getComputedStyle(stack).marginBlockStart)).toBeGreaterThan(0)
+  })
+
   it('a picked client shows only its name, no phone', () => {
     pickExisting()
     const picked = el.querySelector('.inquiry-client-picked')!

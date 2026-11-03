@@ -41,6 +41,10 @@
     overflow-wrap: anywhere;
   }
 
+  .inquiry-event-name {
+    margin-block-start: var(--space-2);
+  }
+
   /* Same pattern as .inquiry-row (R8). */
   .inquiry-more {
     display: grid;
