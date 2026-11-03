@@ -144,8 +144,10 @@ describe('plan / write / verify', () => {
     expect(await testDb().collection('clients').countDocuments({ businessId: 'b_ownerA' })).toBe(1)
   })
 
-  it('verify fails while a linkable event has no clientId and passes after the write', async () => {
+  it('verify fails while an event with a phone or name has no clientId and passes once all are linked', async () => {
     await seed()
+    // Without the name-only events: everything is linkable.
+    await testDb().collection('menuEvents').deleteMany({ _id: { $in: ['a3', 'a4'] } })
     const before = await silently(() => M.verify(testDb()))
     expect(before.value).toMatchObject({ ok: false, failing: 4 })
     expect(before.lines.join('\n')).toContain('verify: fail 4')
@@ -154,8 +156,18 @@ describe('plan / write / verify', () => {
     process.exitCode = undefined
     await run()
     const after = await silently(() => M.verify(testDb()))
-    expect(after.value).toEqual({ ok: true, failing: 0, unlinkable: 2 })
+    expect(after.value).toEqual({ ok: true, failing: 0, unlinkable: 0 })
     expect(after.lines.join('\n')).toContain('verify: ok')
     expect(process.exitCode).toBeUndefined()
+  })
+
+  it('verify does not print ok while name-only events stay unlinked (clientSchema needs a phone)', async () => {
+    await seed()
+    await run()
+    const after = await silently(() => M.verify(testDb()))
+    expect(after.value).toEqual({ ok: false, failing: 2, unlinkable: 2 })
+    expect(after.lines.join('\n')).toContain('verify: fail 2')
+    expect(after.lines.join('\n')).not.toContain('verify: ok')
+    expect(process.exitCode).toBe(1)
   })
 })

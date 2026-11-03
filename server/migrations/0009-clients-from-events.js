@@ -20,8 +20,9 @@
  *                   clients and patches 0 events.
  *   --db=<scratch>  (local only) run against a scratch copy, e.g. a restored Atlas snapshot - the rehearsal;
  *                   a scratch copy needs no --backup-dir.
- *   --verify=yes    (alone: read-only; with --write=yes: after the write) no linkable live event is left without
- *                   a clientId; prints `verify: ok` or `verify: fail <n>` and exits 1 on fail.
+ *   --verify=yes    (alone: read-only; with --write=yes: after the write) no live event with a client (phone or
+ *                   name) is left without a clientId - name-only events that could not be linked count too;
+ *                   prints `verify: ok` or `verify: fail <n>` and exits 1 on fail.
  *
  * Rollback: `db.menuEvents.updateMany({}, {$unset:{clientId:1}}); db.clients.deleteMany({})`
  *   (this also removes clients created by hand after the migration; to keep those, delete only the clients whose
@@ -201,8 +202,9 @@ async function write(db, args, result) {
 }
 
 /**
- * Read-only: live events that carry a client and could be linked but have no clientId. Events whose group has no
- * valid client (listed by the dry run) are counted separately and do not fail the check.
+ * Read-only: every live event that carries a client (phone digits or a non-empty trimmed name) but has no clientId
+ * fails the check - including events whose group has no valid client (a name-only group), so verify never reports
+ * ok while an event is still unlinked. `unlinkable` says how many of the failing events have no valid client.
  */
 async function verify(db) {
   const unlinked = await db.collection('menuEvents').find({
@@ -212,8 +214,8 @@ async function verify(db) {
   }).toArray();
   const r = await plan(db, Date.now());
   const unlinkable = new Set(r.invalid.flatMap(g => g.eventIds));
-  const failing = unlinked.filter(e => groupKey(e) && !unlinkable.has(e._id)).length;
-  if (unlinkable.size) console.log(`[verify] events left for the chef to link (no valid client): ${unlinkable.size}`);
+  const failing = unlinked.filter(e => groupKey(e)).length;
+  if (unlinkable.size) console.log(`[verify] unlinked events with no valid client (see the dry-run list): ${unlinkable.size}`);
   if (failing) {
     console.log(`verify: fail ${failing}`);
     process.exitCode = 1;
