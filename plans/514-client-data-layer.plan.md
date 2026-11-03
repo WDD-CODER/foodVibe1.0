@@ -114,11 +114,11 @@ Decisions already taken by the Human (do not reopen):
 ## Functional Requirements
 
 ### Must Have (P0)
-- [ ] `Client`, `ClientType`, `CLIENT_TYPES` in `client.model.ts`, re-exported from `models/v2/index.ts`; `MenuEvent.clientId?: string`.
-- [ ] `ClientDataService` per the Contract: `super('clients', false, { errorEvent: 'crud.clients.hydrate_error', errorMessage: 'Failed to load clients' })`; `allClients_ = this.all_`; `getClientById(id)` from the loaded list (no network); `addClient(body: Omit<Client,'_id'|'phoneNormalized'>)` → `storage.post` + append; `updateClient(client: Client)` → `storage.put` + map; every method re-throws 401 unchanged and otherwise logs `crud.client.<op>_error` then re-throws, mirroring `menu-event-data.service.ts`.
-- [ ] `clients-ensure-loaded.resolver.ts`; `clientsLoaded:` appended to the `resolve` maps of the `menu-library` route and both `menu-intelligence` routes in `app.routes.ts` (append only).
-- [ ] `user.service.ts` `_reloadDataServices()` reloads `ClientDataService` with the same deferred-import pattern used for `MenuEventDataService`.
-- [ ] `client-display.util.ts`: `normalizePhone(s: string): string` (digits only); `clientLabel(c: Client, eventCount: number, countWord: string): string` → `name · phone` plus ` · ${eventCount} ${countWord}` when `eventCount > 0`; `matchesClientQuery(c: Client, q: string): boolean` → name includes `q` case-insensitively, or `normalizePhone(q)` is a non-empty prefix of `c.phoneNormalized`.
+- [x] `Client`, `ClientType`, `CLIENT_TYPES` in `client.model.ts`, re-exported from `models/v2/index.ts`; `MenuEvent.clientId?: string`.
+- [x] `ClientDataService` per the Contract: `super('clients', false, { errorEvent: 'crud.clients.hydrate_error', errorMessage: 'Failed to load clients' })`; `allClients_ = this.all_`; `getClientById(id)` from the loaded list (no network); `addClient(body: Omit<Client,'_id'|'phoneNormalized'>)` → `storage.post` + append; `updateClient(client: Client)` → `storage.put` + map; every method re-throws 401 unchanged and otherwise logs `crud.client.<op>_error` then re-throws, mirroring `menu-event-data.service.ts`.
+- [x] `clients-ensure-loaded.resolver.ts`; `clientsLoaded:` appended to the `resolve` maps of the `menu-library` route and both `menu-intelligence` routes in `app.routes.ts` (append only).
+- [x] `user.service.ts` `_reloadDataServices()` reloads `ClientDataService` with the same deferred-import pattern used for `MenuEventDataService`.
+- [x] `client-display.util.ts`: `normalizePhone(s: string): string` (digits only); `clientLabel(c: Client, eventCount: number, countWord: string): string` → `name · phone` plus ` · ${eventCount} ${countWord}` when `eventCount > 0`; `matchesClientQuery(c: Client, q: string): boolean` → name includes `q` case-insensitively, or `normalizePhone(q)` is a non-empty prefix of `c.phoneNormalized`.
 
 ### Should Have (P1)
 - [ ] none.
@@ -130,12 +130,12 @@ Decisions already taken by the Human (do not reopen):
 - No UI. No dictionary keys (Plans D and E add them).
 
 ## Atomic Sub-tasks
-- [ ] C1: Give the app a client type and let events carry a client link — `src/app/core/models/client.model.ts` and the re-export in `models/v2/index.ts`; add `clientId?: string` to `MenuEvent` in `menu-event.model.ts` next to `clientName` — files: the three model files.
-- [ ] C2: Add the client data service so the app can list, add and update clients — `src/app/core/services/client-data.service.ts` per P0, copying the structure and error handling of `menu-event-data.service.ts` — files: the service.
-- [ ] C3: Load clients when the menu screens open and reload them when the user changes — `src/app/core/resolvers/clients-ensure-loaded.resolver.ts` (copy of `menu-events-ensure-loaded.resolver.ts`); append `clientsLoaded: clientsEnsureLoadedResolver` to the three route `resolve` maps in `src/app/app.routes.ts` (`menu-library`, `menu-intelligence`, `menu-intelligence/:id`); add the reload entry in `user.service.ts` `_reloadDataServices()` — files: resolver, `app.routes.ts`, `user.service.ts`.
-- [ ] C4: Add small helpers to search clients by name or phone and show them as a label — `src/app/core/utils/client-display.util.ts` per P0 — files: the util.
-- [ ] T1: Cover the data service and the helpers with specs — `client-data.service.spec.ts` mirroring `menu-event-data.service.spec.ts` for add/update/401/log; `client-display.util.spec.ts` with cases: name hit, phone prefix hit, formatted-phone (`052-123`) hit against `phoneNormalized`, miss, label with and without count — files: the two specs.
-- [ ] V1: Run the build, the specs and the gates, then write the evidence in the Execution Notes — Run `npm run build`, the two specs, the reuse gate and the log check; write evidence under `## Execution Notes`.
+- [x] C1: Give the app a client type and let events carry a client link — `src/app/core/models/client.model.ts` and the re-export in `models/v2/index.ts`; add `clientId?: string` to `MenuEvent` in `menu-event.model.ts` next to `clientName` — files: the three model files.
+- [x] C2: Add the client data service so the app can list, add and update clients — `src/app/core/services/client-data.service.ts` per P0, copying the structure and error handling of `menu-event-data.service.ts` — files: the service.
+- [x] C3: Load clients when the menu screens open and reload them when the user changes — `src/app/core/resolvers/clients-ensure-loaded.resolver.ts` (copy of `menu-events-ensure-loaded.resolver.ts`); append `clientsLoaded: clientsEnsureLoadedResolver` to the three route `resolve` maps in `src/app/app.routes.ts` (`menu-library`, `menu-intelligence`, `menu-intelligence/:id`); add the reload entry in `user.service.ts` `_reloadDataServices()` — files: resolver, `app.routes.ts`, `user.service.ts`.
+- [x] C4: Add small helpers to search clients by name or phone and show them as a label — `src/app/core/utils/client-display.util.ts` per P0 — files: the util.
+- [x] T1: Cover the data service and the helpers with specs — `client-data.service.spec.ts` mirroring `menu-event-data.service.spec.ts` for add/update/401/log; `client-display.util.spec.ts` with cases: name hit, phone prefix hit, formatted-phone (`052-123`) hit against `phoneNormalized`, miss, label with and without count — files: the two specs.
+- [x] V1: Run the build, the specs and the gates, then write the evidence in the Execution Notes — Run `npm run build`, the two specs, the reuse gate and the log check; write evidence under `## Execution Notes`.
 
 ## Technical Considerations
 - Dependencies: `BaseEntityDataService`, `HttpStorageAdapter` (`storage.post/put/get`), `LoggingService`, `UserService._reloadDataServices`, `app.routes.ts` resolve maps.
@@ -156,3 +156,14 @@ Decisions already taken by the Human (do not reopen):
 ## Execution Notes
 - Non-interactive run: no UI. On a failed `addClient`/`updateClient` the service logs and re-throws; callers (Plans D, E) show the toast.
 - Orchestrator readiness (2026-11-02): client-data.service.spec.ts is said to mirror menu-event-data.service.spec.ts, which does not exist → copy the structure of src/app/core/services/product-data.service.spec.ts and cover add/update/401/log as T1 lists; log the difference as seen: (answered by the Human, recommended answer accepted).
+- Builder (orch test-514-515, 2026-11-02) evidence:
+  - `npx ng test --watch=false --browsers=ChromeHeadless --include='**/client-data.service.spec.ts' --include='**/client-display.util.spec.ts'` → exit 0, TOTAL: 17 SUCCESS.
+  - `pnpm run build` → exit 0; `npm run build` → exit 0.
+  - `pnpm run lint` → exit 0 (0 errors, 67 pre-existing warnings); eslint on the 8 changed files → exit 0, no output.
+  - `pnpm run test:ci` → exit 0, TOTAL: 1683 SUCCESS.
+  - `node scripts/kit-manifest-check.mjs` → exit 0, 0 unclassified.
+  - `node scripts/scope-check.mjs --reuse --plan=plans/514-client-data-layer.plan.md` → exit 0, REUSE: ok (3 entries); `--diff=orch/test-514-515` → SCOPE: ok.
+  - `node scripts/log-query.mjs --since=2026-11-02T21:56:58+02:00 --level=error` (run start; the gate swaps plan-start for it) → no entries. The literal `--since=plan-start` reads this slot's stale stamp (2026-10-20) and lists old CORS errors from the main server.
+  - `app.routes.ts`: append-only — one import plus `clientsLoaded` in the menu-library, menu-intelligence and menu-intelligence/:id resolve maps.
+- seen: the spec copies product-data.service.spec.ts (menu-event-data.service.spec.ts does not exist), as the readiness answer says.
+- Client view interface: fields other than name/phone/_id are optional because staff receive only name + phone; `matchesClientQuery` falls back to the digits of `phone` when `phoneNormalized` is absent.

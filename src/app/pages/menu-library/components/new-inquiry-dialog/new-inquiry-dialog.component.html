@@ -1,29 +1,28 @@
-<div class="c-modal-overlay" (click)="cancelled.emit()">
-  <div
-    class="c-modal-card c-modal-card--md"
-    dir="rtl"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="inquiry-title"
-    (click)="$event.stopPropagation()"
-  >
-    <h3 id="inquiry-title">{{ 'new_inquiry' | translatePipe }}</h3>
-
+<app-modal-shell
+  size="md"
+  [titleKey]="view_() === 'client' ? 'client_new' : 'new_inquiry'"
+  [dismissible]="!isSaving_() && !isClientSaving_()"
+  [sheet]="true"
+  (dismissed)="onDismissed()"
+>
+  @if (view_() === 'client') {
     <div class="c-modal-body">
       <div class="c-input-stack">
-        <label for="inquiry-name">{{ 'new_inquiry_name' | translatePipe }}</label>
+        <label for="inquiry-name">{{ 'client_name' | translatePipe }}</label>
         <input
           id="inquiry-name"
           type="text"
           autocomplete="off"
           [maxLength]="nameMax"
-          [class.c-input--invalid]="isTouched_() && !nameValid_()"
+          [class.c-input--invalid]="isClientTouched_() && !nameValid_()"
           [ngModel]="name_()"
           (ngModelChange)="name_.set($event)"
-          (keydown.enter)="onSave()"
+          (keydown.enter)="onClientNameEnter($event)"
         />
+        @if (isClientTouched_() && !nameValid_()) {
+          <span class="c-field-error">{{ 'field_required' | translatePipe }}</span>
+        }
       </div>
-
       <div class="c-input-stack">
         <label for="inquiry-phone">{{ 'client_phone' | translatePipe }}</label>
         <input
@@ -32,13 +31,136 @@
           dir="ltr"
           autocomplete="off"
           maxlength="20"
-          [class.c-input--invalid]="!phoneValid_()"
+          [class.c-input--invalid]="(isClientTouched_() || phone_().trim() !== '') && !phoneValid_()"
           [ngModel]="phone_()"
           (ngModelChange)="phone_.set($event)"
+          (keydown.enter)="onClientPhoneEnter($event)"
         />
-        @if (!phoneValid_()) {
+        @if ((isClientTouched_() || phone_().trim() !== '') && !phoneValid_()) {
           <span class="c-field-error">{{ 'client_phone_invalid' | translatePipe }}</span>
         }
+      </div>
+      <button
+        type="button"
+        class="c-chip c-chip--tap inquiry-more-toggle"
+        [attr.aria-expanded]="isMoreOpen_()"
+        (click)="isMoreOpen_.set(!isMoreOpen_())"
+      >
+        {{ 'client_more_details' | translatePipe }}
+      </button>
+      @if (isMoreOpen_()) {
+        <div class="inquiry-more">
+          <div class="c-input-stack">
+            <label>{{ 'client_type' | translatePipe }}</label>
+            <app-custom-select
+              [ngModel]="clientType_()"
+              (ngModelChange)="clientType_.set($event)"
+              [options]="clientTypeOptions"
+              placeholder="client_type"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="inquiry-company">{{ 'client_company_name' | translatePipe }}</label>
+            <input
+              id="inquiry-company"
+              type="text"
+              autocomplete="off"
+              [maxLength]="nameMax"
+              [ngModel]="companyName_()"
+              (ngModelChange)="companyName_.set($event)"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="inquiry-email">{{ 'client_email' | translatePipe }}</label>
+            <input
+              id="inquiry-email"
+              type="email"
+              dir="ltr"
+              autocomplete="off"
+              [maxLength]="nameMax"
+              [ngModel]="email_()"
+              (ngModelChange)="email_.set($event)"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="inquiry-source">{{ 'client_source' | translatePipe }}</label>
+            <input
+              id="inquiry-source"
+              type="text"
+              autocomplete="off"
+              maxlength="100"
+              [ngModel]="source_()"
+              (ngModelChange)="source_.set($event)"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="inquiry-client-notes">{{ 'client_notes' | translatePipe }}</label>
+            <textarea
+              id="inquiry-client-notes"
+              class="c-input"
+              rows="2"
+              maxlength="2000"
+              [ngModel]="clientNotes_()"
+              (ngModelChange)="clientNotes_.set($event)"
+            ></textarea>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="c-modal-actions">
+      <button type="button" class="c-btn-ghost" (click)="onBackToInquiry()">{{ 'cancel' | translatePipe }}</button>
+      <button type="button" class="c-btn-primary" [disabled]="isClientSaving_()" (click)="onSaveClient()">
+        {{ 'save' | translatePipe }}
+      </button>
+    </div>
+  } @else {
+    <div class="c-modal-body">
+      <div class="inquiry-field">
+        <label for="inquiry-client">{{ 'client' | translatePipe }}</label>
+        @if (selectedClient_(); as client) {
+          <div class="c-input-wrapper inquiry-client-picked">
+            <span class="inquiry-client-picked__name">{{ client.name }}</span>
+            <button
+              type="button"
+              class="c-btn-ghost"
+              [attr.aria-label]="'remove' | translatePipe"
+              (click)="onClearClient()"
+            >
+              <lucide-icon name="x" [size]="16"></lucide-icon>
+            </button>
+          </div>
+        } @else {
+          <app-search-combobox
+            variant="box"
+            inputId="inquiry-client"
+            placeholder="client_pick_placeholder"
+            [options]="clientOptions_()"
+            [(query)]="query_"
+            [clientFilter]="false"
+            [labelOf]="labelOf"
+            [keyOf]="keyOf"
+            [minChars]="2"
+            [emptyKey]="canCreateClient_() ? null : 'client_ask_owner'"
+            [addLabelKey]="canCreateClient_() ? 'client_new' : null"
+            (picked)="onPicked($event)"
+            (addChosen)="onAddChosen($event)"
+          />
+        }
+        @if (isTouched_() && !clientValid_()) {
+          <span class="c-field-error">{{ 'client_required' | translatePipe }}</span>
+        }
+      </div>
+
+      <div class="c-input-stack inquiry-event-name">
+        <label for="inquiry-event-name">{{ 'new_inquiry_event_name' | translatePipe }}</label>
+        <input
+          id="inquiry-event-name"
+          type="text"
+          autocomplete="off"
+          [maxLength]="nameMax"
+          [ngModel]="eventName_()"
+          (ngModelChange)="eventName_.set($event)"
+        />
       </div>
 
       <div class="inquiry-row">
@@ -85,12 +207,11 @@
         ></textarea>
       </div>
     </div>
-
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="cancelled.emit()">{{ 'cancel' | translatePipe }}</button>
       <button type="button" class="c-btn-primary" [disabled]="isSaving_()" (click)="onSave()">
         {{ 'save' | translatePipe }}
       </button>
     </div>
-  </div>
-</div>
+  }
+</app-modal-shell>

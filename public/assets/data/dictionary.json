@@ -1574,6 +1574,26 @@
     "photo_removed": "התמונה הוסרה",
     "waiting_for_price": "ממתין למחיר",
     "cheapest_supplier": "הזול ביותר",
-    "price_by_supplier": "מחיר לפי ספק"
+    "price_by_supplier": "מחיר לפי ספק",
+    "client": "לקוח",
+    "client_pick_placeholder": "שם או טלפון",
+    "client_new": "לקוח חדש",
+    "client_change": "החלף לקוח",
+    "client_link": "קשר ללקוח",
+    "client_events_count": "אירועים",
+    "client_type": "סוג לקוח",
+    "client_type_private": "פרטי",
+    "client_type_business": "עסקי",
+    "client_type_production_company": "חברת הפקה",
+    "client_company_name": "שם חברה",
+    "client_email": "אימייל",
+    "client_notes": "הערות לקוח",
+    "client_source": "מקור הגעה",
+    "client_more_details": "עוד פרטים",
+    "deposit_details": "מקדמה",
+    "client_required": "חובה לבחור לקוח",
+    "client_ask_owner": "לקוח חדש? בקשו מבעל העסק להוסיף אותו",
+    "back_to_search": "חזרה לחיפוש",
+    "new_inquiry_event_name": "שם האירוע"
   }
 }

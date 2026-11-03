@@ -10,8 +10,59 @@
     gap: var(--space-3);
   }
 
+  /* The client field is not a .c-input-stack: its rule would give the combobox's inner input a second border. */
+  .inquiry-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+
+  /* A chosen client: only the name, slightly bold; the X at the end (R3, R6). */
+  .inquiry-client-picked {
+    display: grid;
+    grid-template-columns: 2rem 1fr 2rem;
+    align-items: center;
+    justify-content: space-between;
+
+    &::before {
+      content: '';
+    }
+  }
+
+  .inquiry-client-picked__name {
+    text-align: center;
+    font-weight: var(--fw-semibold);
+    overflow-wrap: anywhere;
+  }
+
+  .inquiry-event-name {
+    margin-block-start: var(--space-2);
+  }
+
+  /* Same pattern as .inquiry-row (R8). */
+  .inquiry-more {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-3);
+
+    .c-input-stack:last-child {
+      grid-column: 1 / -1;
+    }
+  }
+
   textarea {
     inline-size: 100%;
     resize: vertical;
   }
+}
+
+/* Outside any @layer so it beats the unlayered button reset (margin: 0) in styles.scss */
+.inquiry-more-toggle {
+  margin-block: var(--space-2);
 }

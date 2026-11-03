@@ -2,22 +2,22 @@
 
 Written by `node scripts/decision-log.mjs stats --write` from `decision-grades.jsonl`. The triage agent reads it; never edit it by hand.
 
-Agreement over the last 21 graded: 52%
+Agreement over the last 26 graded: 50%
 
 | Kind | Graded | Agreement |
 | --- | --- | --- |
 | evidence | 4 | 100% |
 | - | 2 | 0% |
+| removed-keyboard-path | 2 | 50% |
 | build-check-substitute | 1 | 100% |
 | data-lineage | 1 | 0% |
 | data-shape-default | 1 | 0% |
 | data-shape-derived-field | 1 | 0% |
 | exit-code-masking | 1 | 0% |
 | idempotent-history | 1 | 100% |
+| label-wording | 1 | 0% |
 | owner-only-permission | 1 | 0% |
-| plan-snapshot-advance | 1 | 100% |
-| report-status-blocked | 1 | 0% |
-| report-status-wording | 1 | 0% |
+| permission-gap | 1 | 0% |
 
 Where the Human disagreed (newest last):
 - 2026-11-02 report-status-wording: triage ask, Human ok — behaviour: with no UI-run row in INDEX.md, no new S1/S2 findings and QA on current code, the status 
@@ -30,3 +30,6 @@ Where the Human disagreed (newest last):
 - 2026-11-02 owner-only-permission: triage ask, Human ok — seen: server/utils/permissions.js:49 — staff are denied create, edit and delete on the 'clients' typ
 - 2026-11-02 staff-read-projection: triage ask, Human ok — seen: server/routes/generic.js:83,240,444 — the staff read projection is applied on GET list and GET
 - 2026-11-02 -: triage ask, Human ok — seen: server/routes/generic.js:85,513,636 — phoneNormalized is derived with String(...).replace(//D/
+- 2026-11-03 permission-gap: triage ask, Human ok — seen: src/app/core/services/permission.service.ts:47 has no owner-only rule for the clients type, so
+- 2026-11-03 label-wording: triage ask, Human ok — seen: plans/515-new-inquiry-dialog-client-picker.plan.md:119 — the plan says the picked client shows
+- 2026-11-03 removed-keyboard-path: triage ask, Human ok — removes: when picking an existing client, Enter in the client search picks the highlighted client (t

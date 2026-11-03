@@ -170,6 +170,8 @@ export interface MenuEvent {
   /** Plan 446 */
   planSnapshot?: PlanSnapshot
   closing?: EventClosing
+  /** Plan 514: the client record this event is for. clientName / clientPhone stay as a snapshot. */
+  clientId?: string
   clientName?: string
   clientPhone?: string
   deposit?: { amount?: number; date?: string }
