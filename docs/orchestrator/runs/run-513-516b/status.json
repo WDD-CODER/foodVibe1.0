@@ -1,0 +1,80 @@
+{
+  "run": "run-513-516b",
+  "branch": "orch/run-513-516b",
+  "base": "main",
+  "startedAt": "2026-11-03T20:18:31.768Z",
+  "mainShaAtStart": "b54f61e36ffc1a6a38de52a54c47765a24783a9b",
+  "plans": {
+    "513": {
+      "nnn": "513",
+      "title": "Create clients from existing menu events and link each event to its client",
+      "branch": "feat/513-migration-0009-clients-from",
+      "state": "parked",
+      "round": 0,
+      "tier": "judgment",
+      "models": {},
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-03T20:19:21.341Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "reason": "worktree: merging origin/orch/run-513-516b into feat/513-migration-0009-clients-from conflicts: CONFLICT (content): Merge conflict in plans/513-migration-0009-clients-from-events.plan.md",
+      "asked": [
+        "513: phone that passes the event schema but not the client schema — Human: raw phone if it passes the client regex; digi",
+        "513: inserted client _id — default newId() from server/utils/id.js",
+        "513: drop the name/no-phone reuse branch — default"
+      ],
+      "ready": false,
+      "freeDiskGb": 8.3
+    },
+    "516": {
+      "nnn": "516",
+      "title": "Show the event client as a read-only row with owner change and link on the stage bar",
+      "branch": "feat/516-event-stage-bar-client",
+      "state": "parked",
+      "round": 0,
+      "tier": "build",
+      "models": {},
+      "humanItems": [],
+      "history": [
+        {
+          "at": "2026-11-03T20:19:19.009Z",
+          "state": "parked",
+          "round": 0
+        }
+      ],
+      "reason": "worktree: merging origin/orch/run-513-516b into feat/516-event-stage-bar-client conflicts: CONFLICT (content): Merge conflict in plans/516-event-stage-bar-client-row.plan.md",
+      "ready": true,
+      "freeDiskGb": 8.3
+    }
+  },
+  "notes": [
+    {
+      "at": "2026-11-03T20:19:21.339Z",
+      "plan": "513",
+      "text": "starts on the judgment tier: Architecture Impact names INV-2, INV-3, INV-4"
+    },
+    {
+      "at": "2026-11-03T20:19:46.646Z",
+      "text": "database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses"
+    },
+    {
+      "at": "2026-11-03T20:19:46.647Z",
+      "text": "dropped npx checks: 516: npx ng test --watch=false --include='**/event-stage-bar/**/*.spec.ts': no package.json script runs it — add one and write the check as pnpm run <script>"
+    }
+  ],
+  "attempts": 1,
+  "phase": "stopped",
+  "freeDiskGb": 8.3,
+  "updatedAt": "2026-11-03T20:20:05.892Z",
+  "noteIds": [
+    "1:513-1",
+    "1:run-1",
+    "1:run-2"
+  ],
+  "stopReason": "wave 1 parked 513, 516 — later waves not started",
+  "finishedAt": "2026-11-03T20:20:05.890Z"
+}
