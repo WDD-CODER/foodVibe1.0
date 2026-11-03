@@ -253,7 +253,7 @@ describe('EventStageBarComponent', () => {
       allowed['edit'] = false
       await setup({ ...base, clientId: 'c1' })
       expect(changeButton()).toBeNull()
-      expect(chips().length).toBe(3)
+      expect(chips().length).toBe(2)
     })
 
     it('saves clientId, clientName and clientPhone when a client is picked, then closes the picker', async () => {

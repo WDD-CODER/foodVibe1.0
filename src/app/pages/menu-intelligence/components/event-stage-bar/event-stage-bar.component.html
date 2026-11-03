@@ -57,7 +57,7 @@
           @if (client_()?.phone ?? event.clientPhone; as phone) {
             <span class="c-chip--tag client-chip" dir="ltr">{{ phone }}</span>
           }
-          @if (client_() && clientEventCount_() > 0) {
+          @if (canChangeClient_() && client_() && clientEventCount_() > 0) {
             <span class="c-chip--tag client-chip"
               >{{ clientEventCount_() }} {{ 'client_events_count' | translatePipe }}</span
             >
