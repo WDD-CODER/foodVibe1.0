@@ -18,7 +18,6 @@ import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import {
   EVENT_STAGE_ORDER,
   canPickNotClosed,
-  isValidClientPhone,
   needsDateFor,
   stageLabelKey
 } from 'src/app/core/utils/event-stage-ui.util'
@@ -27,12 +26,16 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
+import { ClientDataService } from '@services/client-data.service'
 import { PlanSnapshotService } from '@services/plan-snapshot.service'
 import { TranslationService } from '@services/translation.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
 import { ScrollRailComponent } from 'src/app/shared/scroll-rail/scroll-rail.component'
 import type { EventStage, MenuEvent } from '@models/menu-event.model'
+import type { Client } from '@models/client.model'
+import { clientLabel, matchesClientQuery } from 'src/app/core/utils/client-display.util'
+import { SearchComboboxComponent, SearchPick } from 'src/app/shared/search-combobox/search-combobox.component'
 import { NotClosedAnswer, NotClosedDialogComponent } from '../not-closed-dialog/not-closed-dialog.component'
 import { EventClosingDialogComponent } from '../event-closing-dialog/event-closing-dialog.component'
 import { DepositPaidAnswer, DepositPaidDialogComponent } from '../deposit-paid-dialog/deposit-paid-dialog.component'
@@ -55,6 +58,7 @@ import { SelectOnFocusDirective } from '@directives/select-on-focus.directive'
     TranslatePipe,
     ScrollRailComponent,
     DateFieldComponent,
+    SearchComboboxComponent,
     NotClosedDialogComponent,
     EventClosingDialogComponent,
     DepositPaidDialogComponent
@@ -68,6 +72,7 @@ export class EventStageBarComponent {
   private readonly eventData = inject(MenuEventDataService)
   private readonly pipeline = inject(EventPipelineService)
   private readonly permission = inject(PermissionService)
+  private readonly clientData = inject(ClientDataService)
   private readonly snapshots = inject(PlanSnapshotService)
   private readonly confirmModal = inject(ConfirmModalService)
   private readonly userMsg = inject(UserMsgService)
@@ -92,7 +97,8 @@ export class EventStageBarComponent {
   protected readonly isClosingOpen_ = signal(false)
   protected readonly isDetailsOpen_ = signal(false)
   protected readonly isHistoryOpen_ = signal(false)
-  protected readonly isPhoneInvalid_ = signal(false)
+  protected readonly isPickerOpen_ = signal(false)
+  protected readonly query_ = signal('')
   protected readonly isBusy_ = signal(false)
 
   // 5. COMPUTED
@@ -124,9 +130,23 @@ export class EventStageBarComponent {
   )
   protected readonly history_ = computed(() => [...(this.event_()?.stageHistory ?? [])].sort((a, b) => b.at - a.at))
   protected readonly detailsSummary_ = computed(() => {
-    const event = this.event_()
-    return [event?.clientName, event?.clientPhone].filter(Boolean).join(' · ')
+    const deposit = this.event_()?.deposit
+    return [deposit?.amount, deposit?.date].filter((v) => v !== undefined && v !== '').join(' · ')
   })
+  /** The linked client, or null for an unlinked (legacy) event, which shows its name/phone snapshot. */
+  protected readonly client_ = computed<Client | null>(() => {
+    const id = this.event_()?.clientId
+    return id ? (this.clientData.getClientById(id) ?? null) : null
+  })
+  protected readonly clientEventCount_ = computed(() => {
+    const id = this.event_()?.clientId
+    return id ? this.eventData.allMenuEvents_().filter((e) => e.clientId === id).length : 0
+  })
+  protected readonly canChangeClient_ = computed(() => this.permission.can('edit', { type: 'clients' }))
+  /** Clients matching the typed text; the combobox gets them already filtered (its own filter is off). */
+  protected readonly clientOptions_ = computed(() =>
+    this.clientData.allClients_().filter((c) => matchesClientQuery(c, this.query_()))
+  )
 
   constructor() {
     // On a phone the rail scrolls: bring the current stage to the middle when the screen opens and when the stage changes.
@@ -200,20 +220,29 @@ export class EventStageBarComponent {
     await this.move(event, { stage: 'not_closed', reason: answer.reason, reasonText: answer.reasonText })
   }
 
-  protected onClientNameChange(value: string): void {
-    const event = this.event_()
-    const clientName = value.trim()
-    if (!event || clientName === (event.clientName ?? '')) return
-    void this.saveFields(event, { clientName })
+  protected readonly clientLabelOf = (c: Client): string =>
+    clientLabel(
+      c,
+      this.eventData.allMenuEvents_().filter((e) => e.clientId === c._id).length,
+      this.translation.translate('client_events_count')
+    )
+  protected readonly clientKeyOf = (c: Client): string => c._id
+
+  protected togglePicker(): void {
+    this.query_.set('')
+    this.isPickerOpen_.update((open) => !open)
   }
 
-  protected onClientPhoneChange(value: string): void {
+  protected closePicker(): void {
+    this.isPickerOpen_.set(false)
+  }
+
+  protected async onClientPicked(pick: SearchPick<Client>): Promise<void> {
     const event = this.event_()
-    const clientPhone = value.trim()
+    const c = pick.option
+    this.isPickerOpen_.set(false)
     if (!event) return
-    this.isPhoneInvalid_.set(!isValidClientPhone(clientPhone))
-    if (this.isPhoneInvalid_() || clientPhone === (event.clientPhone ?? '')) return
-    void this.saveFields(event, { clientPhone })
+    await this.saveFields(event, { clientId: c._id, clientName: c.name, clientPhone: c.phone })
   }
 
   protected onDepositAmountChange(value: string): void {
