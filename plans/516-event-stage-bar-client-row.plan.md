@@ -33,6 +33,7 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 
 ```scope
 src/app/pages/menu-intelligence/components/event-stage-bar/**
+src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
 public/assets/data/dictionary.json
 ```
 
@@ -162,3 +163,4 @@ Decisions already taken by the Human (do not reopen):
 - Combobox wired as plan 515 does (pre-filter with matchesClientQuery, `[clientFilter]="false"`, wrapped clientLabel, `$event.option`).
 - UI items not scripted: no e2e file is in the plan scope and the run hands UI checks to the Human.
 - Local dev DB (read-only look): linked events e.g. f8f6ae9c-ded1-4063-857c-5b6ba048160f and 8980c741-a703-4542-a6f6-8eeaa04bbdda (clientId 22ae0ede-7181-4bb9-a990-4202f62ca241). No event with a clientName and no clientId exists there.
+- scope extended: src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts — the plan's own Done-when spec lives there; the checker needs an explicit test-file line (finding scope-1).
