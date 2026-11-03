@@ -157,3 +157,8 @@ node server/migrations/0009-clients-from-events.js --target=atlas --confirm-host
 
 ## Execution Notes
 - Non-interactive run: no UI. On a verify failure the builder reports `verify: fail <n>` and stops; it never retries with `--write` on Atlas.
+- Orchestrator readiness (2026-11-03): the [auto:main] dry-run item cannot run from the main folder (only node scripts/… or tools/…; the script is not on main until 513 merges) → default: kept out of mainCommands; the builder runs the same read-only dry run (no --write) in its slot against the local DB (MONGO_LOCAL_URI); the report lists the main-folder dry run as a Human item (delegated)
+- Orchestrator readiness (2026-11-03): Done-when test command `npm test -- server/test/migration-0009.test.js` runs Karma at the root → `pnpm --dir server test -- test/migration-0009.test.js` (delegated)
+- Orchestrator readiness (2026-11-03): sub-task V1 is cut off mid-sentence → record the fv_scratch dry-run and write+verify output and the two Atlas commands (not run) in these Execution Notes (delegated)
+- Plan errors for the Planner (2026-11-03): (1) wrong test command (root `npm test` is Karma, server tests need `pnpm --dir server test`); (2) V1 sub-task cut off mid-sentence; (3) the [auto:main] item names a script the plan creates, so it cannot run from main before merge. Lesson: check every Done-when command against package.json scripts and the allowed-check list, read each sub-task to its end, and never put a new file's command in an [auto:main] item.
+- Rehearsal data (2026-11-03): fv_scratch is a copy of the local dev DB (`foodvibe`; 16 menuEvents, 5 with a name or phone, 10 clients); clientId was unset on those 5 events in fv_scratch only, so the dry run has real work to show.
