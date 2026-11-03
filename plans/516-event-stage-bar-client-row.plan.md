@@ -11,7 +11,7 @@ The stage bar on the menu screen has editable client name and phone inputs, so t
 ## Goals & Success Criteria
 - Primary: the menu screen shows who the client is without editing client fields; the event's client can be changed or linked by the owner.
 - Success:
-  - `[auto]` `npx ng test --watch=false --include='**/event-stage-bar/**'` passes (updated spec + 3 new: row renders from `ClientDataService` when `clientId` set; falls back to snapshot strings when not; `(picked)` calls `updateMenuEvent` with `clientId`, `clientName`, `clientPhone`).
+  - `[auto]` `npx ng test --watch=false --include='**/event-stage-bar/**/*.spec.ts'` passes (updated spec + 3 new: row renders from `ClientDataService` when `clientId` set; falls back to snapshot strings when not; `(picked)` calls `updateMenuEvent` with `clientId`, `clientName`, `clientPhone`).
   - `[auto]` `npm run build` and `npm run lint` pass.
   - `[auto]` `node scripts/scope-check.mjs --reuse --plan=plans/516-event-stage-bar-client-row.plan.md` exits 0.
   - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` returns no entries.
@@ -33,6 +33,7 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 
 ```scope
 src/app/pages/menu-intelligence/components/event-stage-bar/**
+src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
 public/assets/data/dictionary.json
 ```
 
@@ -128,12 +129,12 @@ Decisions already taken by the Human (do not reopen):
 - Dictionary keys needed: `client`, `client_change`, `client_link`, `client_events_count`, `client_pick_placeholder`, `deposit_details` (append the full Contract list so D and E stay identical).
 
 ## Atomic Sub-tasks
-- [x] U1: Add the same Hebrew client texts so the stage bar and the dialog share one list — the 18 Contract keys under `general` in `public/assets/data/dictionary.json`, append only; skip keys already present — files: dictionary.
-- [x] U2: Remove the editable client name and phone from the stage bar and keep the deposit fields — delete `onClientNameChange`, `onClientPhoneChange`, `isPhoneInvalid_` and the two inputs from `event-stage-bar.component.ts/html`; keep deposit inputs; relabel the toggle `deposit_details`; `detailsSummary_` → deposit summary — files: the component ts/html/scss.
-- [x] U3: Show the event client as a read-only row with name, phone and event count — inject `ClientDataService`; add `client_`, `clientEventCount_`, `canChangeClient_`; render the chips per P0 as the first item in `.stage-links` — files: the component ts/html/scss.
-- [x] U4: Let the owner change or link the event client from the stage bar — `isPickerOpen_` signal, owner-only button, inline `app-search-combobox` pick-only, `(picked)` → `saveFields` with the three fields, close on pick and on Escape — files: the component ts/html.
-- [x] T1: Update the stage bar tests for the removed inputs and the new client row — remove tests for the deleted handlers; add the 3 tests named in Success Criteria with stubbed `ClientDataService`, `MenuEventDataService`, `PermissionService` — files: `event-stage-bar.component.spec.ts`.
-- [x] V1: Run the checks, capture the three UI cards and write the evidence in the Execution Notes — Run `npm run build`, `npm run lint`, the spec, the reuse gate and the log check; produce the three `[ui]` cards; write evidence under `## Execution Notes`.
+- [ ] U1: Add the same Hebrew client texts so the stage bar and the dialog share one list — the 18 Contract keys under `general` in `public/assets/data/dictionary.json`, append only; skip keys already present — files: dictionary.
+- [ ] U2: Remove the editable client name and phone from the stage bar and keep the deposit fields — delete `onClientNameChange`, `onClientPhoneChange`, `isPhoneInvalid_` and the two inputs from `event-stage-bar.component.ts/html`; keep deposit inputs; relabel the toggle `deposit_details`; `detailsSummary_` → deposit summary — files: the component ts/html/scss.
+- [ ] U3: Show the event client as a read-only row with name, phone and event count — inject `ClientDataService`; add `client_`, `clientEventCount_`, `canChangeClient_`; render the chips per P0 as the first item in `.stage-links` — files: the component ts/html/scss.
+- [ ] U4: Let the owner change or link the event client from the stage bar — `isPickerOpen_` signal, owner-only button, inline `app-search-combobox` pick-only, `(picked)` → `saveFields` with the three fields, close on pick and on Escape — files: the component ts/html.
+- [ ] T1: Update the stage bar tests for the removed inputs and the new client row — remove tests for the deleted handlers; add the 3 tests named in Success Criteria with stubbed `ClientDataService`, `MenuEventDataService`, `PermissionService` — files: `event-stage-bar.component.spec.ts`.
+- [ ] V1: Run the checks, capture the three UI cards and write the evidence in the Execution Notes — Run `npm run build`, `npm run lint`, the spec, the reuse gate and the log check; produce the three `[ui]` cards; write evidence under `## Execution Notes`.
 
 ## Technical Considerations
 - Dependencies: `ClientDataService`, `MenuEventDataService.updateMenuEvent` (via existing `saveFields`), `PermissionService.can`, `app-search-combobox`, `clientLabel`, `matchesClientQuery`.
@@ -156,9 +157,5 @@ Decisions already taken by the Human (do not reopen):
 - Orchestrator readiness (2026-11-03): the plan's combobox wiring (clientFilter = matchesClientQuery, labelOf = clientLabel, (picked) → c._id) does not match the code (clientFilter is a boolean; clientLabel takes 3 arguments; picked emits { option, source }) → default: build for what the code has, as plan 515 does (pre-filter with matchesClientQuery, [clientFilter]="false", wrap clientLabel, read $event.option); log the difference as seen: (delegated)
 - Plan error for the Planner (2026-11-03): combobox wiring written from memory, not read from search-combobox.component.ts and client-display.util.ts. Lesson: read the shared component's inputs, outputs and helper signatures before writing wiring into a plan.
 - Validation cards (2026-11-03): the linked event and the legacy event must be given as a ready copy-paste command with a real event id from the local dev DB (five events there already have a clientId; the legacy case is one `` of clientId on a named event), never as "create one by hand".
-
-- Builder evidence (2026-11-03): spec `pnpm exec ng test --watch=false --browsers=ChromeHeadless --include='**/event-stage-bar/**/*.spec.ts'` -> 34 pass, 0 fail (the plan's `--include='**/event-stage-bar/**'` also matches the html/scss and fails to load: plan error, use the `*.spec.ts` glob). `pnpm run build` -> exit 0; `pnpm run lint` -> 0 errors (67 existing warnings); `pnpm run test:ci` -> 1704 pass; `node scripts/kit-manifest-check.mjs` -> ok; `scope-check --reuse` -> ok.
-- U1: the 18 dictionary keys were already present under `general` (plan 515 merged first); nothing appended.
-- Combobox wired as plan 515 does (pre-filter with matchesClientQuery, `[clientFilter]="false"`, wrapped clientLabel, `$event.option`).
-- UI items not scripted: no e2e file is in the plan scope and the run hands UI checks to the Human.
-- Local dev DB (read-only look): linked events e.g. f8f6ae9c-ded1-4063-857c-5b6ba048160f and 8980c741-a703-4542-a6f6-8eeaa04bbdda (clientId 22ae0ede-7181-4bb9-a990-4202f62ca241). No event with a clientName and no clientId exists there.
+- Human decisions (2026-11-03): `approved: src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts` (added to the scope block above). D15: the deposit summary shows the amount with the app's money format `formatMoney` (`src/app/core/engine/rounding.ts:44`, gives `₪1,234.00`), then the date, joined by a middle dot; do not invent a new format. D19: the validation cards use the main folder's port 4200 and ready copy-paste commands (real event ids from the local dev DB), not the Human's port 4203.
+- Plan errors for the Planner (2026-11-03): (a) the scope block named `event-stage-bar/**` but no test file, while a Done-when needs the spec; (b) the test command's `--include='**/event-stage-bar/**'` also matches html and scss and fails to load in Karma (use `**/event-stage-bar/**/*.spec.ts`). Lessons: when a Done-when needs a spec change, name the spec file in the scope; write an `--include` glob that ends in `.spec.ts`.
