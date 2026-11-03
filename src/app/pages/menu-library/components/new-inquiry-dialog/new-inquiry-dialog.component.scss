@@ -10,11 +10,25 @@
     gap: var(--space-3);
   }
 
-  .inquiry-client-picked {
+  /* The client field is not a .c-input-stack: its rule would give the combobox's inner input a second border. */
+  .inquiry-field {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3);
+    flex-direction: column;
+    gap: 0.5rem;
+
+    label {
+      color: var(--color-text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+  }
+
+  .inquiry-client-picked {
+    justify-content: space-between;
+
+    button {
+      margin-inline-start: auto;
+    }
   }
 
   .inquiry-more {
@@ -24,10 +38,6 @@
     summary {
       cursor: pointer;
     }
-  }
-
-  .inquiry-back {
-    justify-self: start;
   }
 
   textarea {

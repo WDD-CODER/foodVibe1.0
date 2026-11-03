@@ -1593,6 +1593,7 @@
     "deposit_details": "מקדמה",
     "client_required": "חובה לבחור לקוח",
     "client_ask_owner": "לקוח חדש? בקשו מבעל העסק להוסיף אותו",
-    "back_to_search": "חזרה לחיפוש"
+    "back_to_search": "חזרה לחיפוש",
+    "new_inquiry_event_name": "שם האירוע"
   }
 }

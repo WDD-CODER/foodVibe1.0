@@ -5,11 +5,13 @@ import {
   computed,
   ElementRef,
   inject,
+  Injector,
   output,
   signal
 } from '@angular/core'
 import { TextareaAutoGrowDirective } from 'src/app/core/directives/textarea-auto-grow.directive'
 import { FormsModule } from '@angular/forms'
+import { LucideAngularModule } from 'lucide-angular'
 import { TranslatePipe } from 'src/app/core/pipes/translation-pipe.pipe'
 import { CustomSelectComponent } from 'src/app/shared/custom-select/custom-select.component'
 import { DateFieldComponent } from 'src/app/shared/date-field/date-field.component'
@@ -55,7 +57,8 @@ const NOTE_MAX = NOTE_MAX_LENGTH
     DateFieldComponent,
     SelectOnFocusDirective,
     ModalShellComponent,
-    SearchComboboxComponent
+    SearchComboboxComponent,
+    LucideAngularModule
   ],
   templateUrl: './new-inquiry-dialog.component.html',
   styleUrl: './new-inquiry-dialog.component.scss',
@@ -64,6 +67,7 @@ const NOTE_MAX = NOTE_MAX_LENGTH
 export class NewInquiryDialogComponent {
   // 1. INJECTED
   private readonly host_ = inject<ElementRef<HTMLElement>>(ElementRef)
+  private readonly injector = inject(Injector)
   private readonly eventData = inject(MenuEventDataService)
   private readonly clientData = inject(ClientDataService)
   private readonly permission = inject(PermissionService)
@@ -83,7 +87,11 @@ export class NewInquiryDialogComponent {
   protected readonly clientTypeOptions = CLIENT_TYPES.map((value) => ({ value, label: 'client_type_' + value }))
   protected readonly query_ = signal('')
   protected readonly selectedClient_ = signal<Client | null>(null)
-  protected readonly isNewClientBranch_ = signal(false)
+  /** 'inquiry' is the form; 'client' is the separate add-client view an owner reaches from the search. */
+  protected readonly view_ = signal<'inquiry' | 'client'>('inquiry')
+  protected readonly isClientSaving_ = signal(false)
+  protected readonly isClientTouched_ = signal(false)
+  protected readonly eventName_ = signal('')
   protected readonly clientType_ = signal<ClientType>('private')
   protected readonly companyName_ = signal('')
   protected readonly email_ = signal('')
@@ -113,11 +121,8 @@ export class NewInquiryDialogComponent {
   )
   /** A client needs a phone (the client schema requires it), so empty is not valid here. */
   protected readonly phoneValid_ = computed(() => this.phone_().trim() !== '' && isValidClientPhone(this.phone_()))
-  protected readonly clientValid_ = computed(
-    () =>
-      this.selectedClient_() !== null ||
-      (this.canCreateClient_() && this.isNewClientBranch_() && this.nameValid_() && this.phoneValid_())
-  )
+  /** A new client is saved in the add-client view first, so the inquiry only needs a selected client. */
+  protected readonly clientValid_ = computed(() => this.selectedClient_() !== null)
   protected readonly guestsValid_ = computed(() => {
     const raw = this.guests_().trim()
     return raw === '' || (/^\d+$/.test(raw) && Number(raw) <= 100000)
@@ -145,22 +150,64 @@ export class NewInquiryDialogComponent {
     this.selectedClient_.set(pick.option)
   }
 
-  protected onChangeClient(): void {
+  protected onClearClient(): void {
     this.selectedClient_.set(null)
     this.query_.set('')
+    afterNextRender(() => this.focus('#inquiry-client'), { injector: this.injector })
   }
 
   protected onAddChosen(pick: SearchAddPick): void {
     if (!this.canCreateClient_()) return
     const typed = pick.typed.trim()
     // What was typed fills the matching field so the owner does not retype it.
-    if (typed && /^[0-9+\-\s()]+$/.test(typed)) this.phone_.set(typed)
+    this.resetClientFields()
+    if (typed && /^[0-9+-s()]+$/.test(typed)) this.phone_.set(typed)
     else if (typed) this.name_.set(typed.slice(0, NAME_MAX))
-    this.isNewClientBranch_.set(true)
+    this.view_.set('client')
+    afterNextRender(() => this.focus('#inquiry-name'), { injector: this.injector })
   }
 
-  protected onBackToSearch(): void {
-    this.isNewClientBranch_.set(false)
+  /** Escape, the backdrop or the shell's close button: one step back, and only the last step closes the dialog. */
+  protected onDismissed(): void {
+    if (this.view_() === 'client') this.onBackToInquiry()
+    else this.cancelled.emit()
+  }
+
+  /** Leaves the add-client view and discards what was typed there. */
+  protected onBackToInquiry(): void {
+    this.resetClientFields()
+    this.view_.set('inquiry')
+    afterNextRender(() => this.focus('#inquiry-client'), { injector: this.injector })
+  }
+
+  protected onClientNameEnter(e: Event): void {
+    e.preventDefault()
+    this.focus('#inquiry-phone')
+  }
+
+  protected onClientPhoneEnter(e: Event): void {
+    e.preventDefault()
+    void this.onSaveClient()
+  }
+
+  /** Saves the client, then returns to the inquiry with it selected. */
+  protected async onSaveClient(): Promise<void> {
+    this.isClientTouched_.set(true)
+    if (!this.nameValid_() || !this.phoneValid_() || this.isClientSaving_()) return
+    this.isClientSaving_.set(true)
+    try {
+      const client = await this.clientData.addClient(this.buildClientBody())
+      this.selectedClient_.set(client)
+      this.query_.set('')
+      this.resetClientFields()
+      this.view_.set('inquiry')
+    } catch (err) {
+      // A 403 already got the "no permission" toast from the interceptor.
+      if ((err as { status?: number }).status !== 403)
+        this.userMsg.onSetErrorMsg(this.translation.translate('server_error'))
+    } finally {
+      this.isClientSaving_.set(false)
+    }
   }
 
   protected async onSave(): Promise<void> {
@@ -168,7 +215,8 @@ export class NewInquiryDialogComponent {
     if (!this.valid_() || this.isSaving_()) return
     this.isSaving_.set(true)
     try {
-      const client = this.selectedClient_() ?? (await this.clientData.addClient(this.buildClientBody()))
+      const client = this.selectedClient_()
+      if (!client) return
       const created = await this.eventData.addMenuEvent(this.buildBody(client))
       const note = this.note_().trim()
       // The event is already saved: a refused first note shows its own message and does not undo the inquiry.
@@ -203,7 +251,7 @@ export class NewInquiryDialogComponent {
 
   private buildBody(client: Client): Omit<MenuEvent, '_id'> {
     const now = Date.now()
-    const name = client.name
+    const name = this.eventName_().trim() || client.name
     const phone = client.phone
     const guests = this.guests_().trim()
     const eventType = this.eventType_()
@@ -211,7 +259,7 @@ export class NewInquiryDialogComponent {
     return {
       name,
       clientId: client._id,
-      clientName: name,
+      clientName: client.name,
       ...(phone && { clientPhone: phone }),
       ...(this.date_() && { eventDate: this.date_() }),
       guestCount: guests ? Number(guests) : 0,
@@ -222,5 +270,20 @@ export class NewInquiryDialogComponent {
       createdAt: now,
       updatedAt: now
     }
+  }
+
+  private focus(selector: string): void {
+    this.host_.nativeElement.querySelector<HTMLInputElement>(selector)?.focus()
+  }
+
+  private resetClientFields(): void {
+    this.name_.set('')
+    this.phone_.set('')
+    this.clientType_.set('private')
+    this.companyName_.set('')
+    this.email_.set('')
+    this.source_.set('')
+    this.clientNotes_.set('')
+    this.isClientTouched_.set(false)
   }
 }

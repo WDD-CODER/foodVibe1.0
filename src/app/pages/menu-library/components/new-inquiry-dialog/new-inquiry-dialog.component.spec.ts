@@ -57,6 +57,18 @@ describe('NewInquiryDialogComponent', () => {
   }
 
   const saveButton = () => el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-primary')!
+  const enter = (selector: string) =>
+    el.querySelector<HTMLInputElement>(selector)!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
+  const escape = () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))
+    fixture.detectChanges()
+  }
+  /** Saves the client in the add-client view and returns to the inquiry. */
+  async function saveClientView(): Promise<void> {
+    saveButton().click()
+    await fixture.whenStable()
+    fixture.detectChanges()
+  }
 
   beforeEach(async () => {
     eventData = jasmine.createSpyObj<MenuEventDataService>('MenuEventDataService', ['addMenuEvent'], {
@@ -134,11 +146,11 @@ describe('NewInquiryDialogComponent', () => {
     expect(pipeline.addNote).not.toHaveBeenCalled()
   })
 
-  it('blocks an invalid phone number', async () => {
+  it('blocks an invalid phone number in the add-client view', async () => {
     startNewClient('דנה', 'abc')
     expect(el.querySelector('.c-field-error')).toBeTruthy()
-    saveButton().click()
-    await fixture.whenStable()
+    await saveClientView()
+    expect(clientData.addClient).not.toHaveBeenCalled()
     expect(eventData.addMenuEvent).not.toHaveBeenCalled()
   })
 
@@ -166,38 +178,87 @@ describe('NewInquiryDialogComponent', () => {
     expect(eventData.addMenuEvent).toHaveBeenCalledTimes(1)
   })
 
-  it('an owner who adds a new client saves the client before the event', async () => {
+  it('an owner who adds a new client saves the client first, returns to the inquiry with it selected, then saves the event', async () => {
     const order: string[] = []
     clientData.addClient.and.callFake(async () => (order.push('client'), addedClient))
     eventData.addMenuEvent.and.callFake(async () => (order.push('event'), created))
     startNewClient()
-    saveButton().click()
-    await fixture.whenStable()
+    await saveClientView()
     expect(clientData.addClient).toHaveBeenCalledTimes(1)
     expect(clientData.addClient.calls.mostRecent().args[0]).toEqual(
       jasmine.objectContaining({ name: 'לקוח חדש', phone: '050-1234567', clientType: 'private' })
     )
+    expect(eventData.addMenuEvent).not.toHaveBeenCalled()
+    expect(el.querySelector('.inquiry-client-picked')?.textContent).toContain('050-1234567')
+    saveButton().click()
+    await fixture.whenStable()
     expect(order).toEqual(['client', 'event'])
     const body = eventData.addMenuEvent.calls.mostRecent().args[0] as Record<string, unknown>
     expect(body['clientId']).toBe('c2')
   })
 
-  it('pressing Enter in the new client name saves the inquiry', async () => {
-    startNewClient()
-    el.querySelector<HTMLInputElement>('#inquiry-name')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
-    await fixture.whenStable()
-    expect(clientData.addClient).toHaveBeenCalledTimes(1)
-    expect(eventData.addMenuEvent).toHaveBeenCalledTimes(1)
+  it('Enter in the new client name moves to the phone field and saves nothing', () => {
+    startNewClient('', '')
+    const phone = el.querySelector<HTMLInputElement>('#inquiry-phone')!
+    enter('#inquiry-name')
+    expect(document.activeElement).toBe(phone)
+    expect(clientData.addClient).not.toHaveBeenCalled()
   })
 
-  it('going back to the search does not save a client from the hidden fields', async () => {
+  it('Enter in the phone field saves the client when the name is filled and the phone is valid', async () => {
     startNewClient()
-    el.querySelector<HTMLButtonElement>('.inquiry-back')!.click()
+    enter('#inquiry-phone')
+    await fixture.whenStable()
     fixture.detectChanges()
+    expect(clientData.addClient).toHaveBeenCalledTimes(1)
+    expect(el.querySelector('.inquiry-client-picked')).toBeTruthy()
+  })
+
+  it('Enter in the phone field with an empty name shows the required error and saves nothing', async () => {
+    startNewClient('', '050-1234567')
+    enter('#inquiry-phone')
+    await fixture.whenStable()
+    fixture.detectChanges()
+    expect(clientData.addClient).not.toHaveBeenCalled()
+    expect(el.querySelector('.c-field-error')?.textContent).toContain('field_required')
+  })
+
+  it('cancelling the add-client view discards the client and returns to the inquiry', async () => {
+    startNewClient()
+    el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-ghost')!.click()
+    fixture.detectChanges()
+    expect(el.querySelector('#inquiry-client')).toBeTruthy()
+    expect(el.querySelector('#inquiry-name')).toBeNull()
     saveButton().click()
     await fixture.whenStable()
     expect(clientData.addClient).not.toHaveBeenCalled()
     expect(eventData.addMenuEvent).not.toHaveBeenCalled()
+  })
+
+  it('Escape goes one step back: add-client view, then the dialog', () => {
+    startNewClient()
+    escape()
+    expect(el.querySelector('#inquiry-name')).toBeNull()
+    expect(cancels).toBe(0)
+    escape()
+    expect(cancels).toBe(1)
+  })
+
+  it('the X removes the picked client so another can be chosen', () => {
+    pickExisting()
+    el.querySelector<HTMLButtonElement>('.inquiry-client-picked button')!.click()
+    fixture.detectChanges()
+    expect(el.querySelector('.inquiry-client-picked')).toBeNull()
+    expect(el.querySelector('#inquiry-client')).toBeTruthy()
+  })
+
+  it('a typed event name is used; empty falls back to the client name', async () => {
+    pickExisting()
+    type('#inquiry-event-name', 'חתונת הקיץ')
+    saveButton().click()
+    await fixture.whenStable()
+    expect((eventData.addMenuEvent.calls.mostRecent().args[0] as Record<string, unknown>)['name']).toBe('חתונת הקיץ')
+    expect((eventData.addMenuEvent.calls.mostRecent().args[0] as Record<string, unknown>)['clientName']).toBe('דנה כהן')
   })
 
   it('staff get no add option and cannot save without a pick', async () => {
