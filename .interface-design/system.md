@@ -247,7 +247,7 @@ Rules from the validation of plan 515 (run test-514-515). No orchestrator agent 
 - R3: A picked value shows inside the same field with an X that clears it, with no separate read-only block or "change" link.
 - R4: Escape goes one step back: close the open list, then leave the sub-view and discard its unsaved input, then close the dialog.
 - R5: In a single-line field Enter moves to the next field; in the last field it submits only that view, and only when valid, otherwise it shows the error on the first invalid field.
-- R6: A picker field that holds a selection shows only the name at the start and the X at the end, slightly bold, so it reads as chosen and not as text still being typed.
+- R6: A picker field that holds a selection shows only the name, centered and slightly bold, with the X at the end, so it reads as chosen and not as text still being typed.
 - R7: A control that reveals more fields is a `c-chip c-chip--tap` button with `aria-expanded`, never a native `details`/`summary`.
 - R8: Form fields in a grid use `grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr))`, the same pattern as `.inquiry-row`, so an input never widens its track.
 
