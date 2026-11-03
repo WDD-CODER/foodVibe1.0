@@ -114,7 +114,9 @@ export class NewInquiryDialogComponent {
   /** A client needs a phone (the client schema requires it), so empty is not valid here. */
   protected readonly phoneValid_ = computed(() => this.phone_().trim() !== '' && isValidClientPhone(this.phone_()))
   protected readonly clientValid_ = computed(
-    () => this.selectedClient_() !== null || (this.canCreateClient_() && this.nameValid_() && this.phoneValid_())
+    () =>
+      this.selectedClient_() !== null ||
+      (this.canCreateClient_() && this.isNewClientBranch_() && this.nameValid_() && this.phoneValid_())
   )
   protected readonly guestsValid_ = computed(() => {
     const raw = this.guests_().trim()

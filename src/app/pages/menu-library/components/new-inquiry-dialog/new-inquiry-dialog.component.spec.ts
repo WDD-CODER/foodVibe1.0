@@ -182,6 +182,16 @@ describe('NewInquiryDialogComponent', () => {
     expect(body['clientId']).toBe('c2')
   })
 
+  it('going back to the search does not save a client from the hidden fields', async () => {
+    startNewClient()
+    el.querySelector<HTMLButtonElement>('.inquiry-back')!.click()
+    fixture.detectChanges()
+    saveButton().click()
+    await fixture.whenStable()
+    expect(clientData.addClient).not.toHaveBeenCalled()
+    expect(eventData.addMenuEvent).not.toHaveBeenCalled()
+  })
+
   it('staff get no add option and cannot save without a pick', async () => {
     isOwner_.set(false)
     fixture.detectChanges()
