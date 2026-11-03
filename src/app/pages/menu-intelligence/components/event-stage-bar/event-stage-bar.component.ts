@@ -26,6 +26,7 @@ import { ConfirmModalService } from '@services/confirm-modal.service'
 import { EventPipelineService } from '@services/event-pipeline.service'
 import { MenuEventDataService } from '@services/menu-event-data.service'
 import { PermissionService } from '@services/permission.service'
+import { formatMoney } from 'src/app/core/engine/rounding'
 import { ClientDataService } from '@services/client-data.service'
 import { PlanSnapshotService } from '@services/plan-snapshot.service'
 import { TranslationService } from '@services/translation.service'
@@ -131,7 +132,8 @@ export class EventStageBarComponent {
   protected readonly history_ = computed(() => [...(this.event_()?.stageHistory ?? [])].sort((a, b) => b.at - a.at))
   protected readonly detailsSummary_ = computed(() => {
     const deposit = this.event_()?.deposit
-    return [deposit?.amount, deposit?.date].filter((v) => v !== undefined && v !== '').join(' · ')
+    const amount = deposit?.amount !== undefined && deposit.amount !== null ? formatMoney(deposit.amount) : ''
+    return [amount, deposit?.date].filter(Boolean).join(' · ')
   })
   /** The linked client, or null for an unlinked (legacy) event, which shows its name/phone snapshot. */
   protected readonly client_ = computed<Client | null>(() => {
