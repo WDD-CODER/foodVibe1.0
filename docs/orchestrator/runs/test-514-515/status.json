@@ -145,6 +145,11 @@
           "at": "2026-11-03T06:22:20.513Z",
           "state": "parked",
           "round": 0
+        },
+        {
+          "at": "2026-11-03T06:28:00.421Z",
+          "state": "parked",
+          "round": 0
         }
       ],
       "earlier": [
@@ -184,6 +189,17 @@
           ],
           "replan": "no — the builder gave no planChange",
           "reason": "replan needed: The scope block on the run branch ('src/app/pages/menu-library/components/new-inquiry-dialog/**') does not cover the test files under that folder. Sub-task T1 and the [auto] Done-when still require editing new-inquiry-dialog.component.spec."
+        },
+        {
+          "nnn": "515",
+          "title": "Let the new-inquiry dialog pick or create a client instead of retyping name and phone",
+          "branch": "feat/515-new-inquiry-dialog-client",
+          "state": "parked",
+          "round": 0,
+          "tier": "build",
+          "models": {},
+          "reason": "worktree: merging origin/orch/test-514-515 into feat/515-new-inquiry-dialog-client conflicts: CONFLICT (content): Merge conflict in plans/515-new-inquiry-dialog-client-picker.plan.md",
+          "freeDiskGb": 13.6
         }
       ],
       "reason": "worktree: merging origin/orch/test-514-515 into feat/515-new-inquiry-dialog-client conflicts: CONFLICT (content): Merge conflict in plans/515-new-inquiry-dialog-client-picker.plan.md",
@@ -226,12 +242,16 @@
     {
       "at": "2026-11-03T06:22:40.159Z",
       "text": "database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses"
+    },
+    {
+      "at": "2026-11-03T06:28:19.520Z",
+      "text": "database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses"
     }
   ],
-  "attempts": 2,
+  "attempts": 3,
   "phase": "stopped",
   "freeDiskGb": 13.6,
-  "updatedAt": "2026-11-03T06:26:07.009Z",
+  "updatedAt": "2026-11-03T06:31:14.330Z",
   "noteIds": [
     "1:514-1",
     "1:515-1",
@@ -240,14 +260,15 @@
     "1:run-1",
     "1:run-2",
     "1:run-3",
-    "2:run-1"
+    "2:run-1",
+    "3:run-1"
   ],
-  "finishedAt": "2026-11-03T06:26:07.007Z",
+  "finishedAt": "2026-11-03T06:31:14.328Z",
   "stopReason": "wave 1 parked 515 — later waves not started",
   "finalGate": {
     "ok": true,
     "command": null,
-    "at": "2026-11-03T06:26:07.009Z",
+    "at": "2026-11-03T06:31:14.330Z",
     "attempt": 1,
     "blamed": []
   }

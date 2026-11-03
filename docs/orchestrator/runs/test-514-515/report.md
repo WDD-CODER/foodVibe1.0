@@ -1,6 +1,6 @@
 # Orchestrator run test-514-515
 
-Run branch: `orch/test-514-515` (from `origin/main` at 80fb02e) · started 2026-11-02T19:58:07.244Z · finished 2026-11-03T06:26:07.007Z
+Run branch: `orch/test-514-515` (from `origin/main` at 80fb02e) · started 2026-11-02T19:58:07.244Z · finished 2026-11-03T06:31:14.328Z
 Result: 1 merged, 1 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 80fb02e.
 Stopped: wave 1 parked 515 — later waves not started
@@ -35,6 +35,7 @@ no entries
 - database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses
 - dropped npx checks: 514: npx ng test --watch=false --include=client-data.service.spec/client-display.util.spec: no package.json script runs it (test:ci runs all tests); 515: npx ng test --watch=false --include=new-inquiry-dialog/**: no package.json script runs it (test:ci runs all tests)
 - final gate failed: node scripts/breadcrumbs-check.mjs —    not mentioned: client-data.service.ts /    not mentioned: client.model.ts / BREADCRUMBS: 2 seam(s) need attention
+- database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses
 - database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses
 
 ## Models per agent
