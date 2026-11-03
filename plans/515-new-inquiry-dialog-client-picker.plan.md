@@ -33,6 +33,8 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 
 ```scope
 src/app/pages/menu-library/components/new-inquiry-dialog/**
+src/app/pages/menu-library/components/new-inquiry-dialog/new-inquiry-dialog.component.spec.ts
+src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts
 public/assets/data/dictionary.json
 ```
 
@@ -170,3 +172,4 @@ Decisions already taken by the Human (do not reopen):
 - behaviour: "+ לקוח חדש" prefills the typed text (digits/phone chars to phone, otherwise name). Reverse: drop the prefill lines in `onAddChosen`.
 - behaviour: new-client phone is required (client schema min 7), so `phoneValid_` is false when empty. Added dictionary key `back_to_search` ("חזרה לחיפוש") for the UI-notes link, beyond the 18 contract keys.
 - seen: the three `[human]` UI cards remain for the Human (no backend/DB available), per the readiness note.
+- Orchestrator (2026-11-03): scope widened with the Human's approval ('approved: both spec paths, resume 515'): new-inquiry-dialog.component.spec.ts and menu-library-list.component.spec.ts (test-file gate names a test location).
