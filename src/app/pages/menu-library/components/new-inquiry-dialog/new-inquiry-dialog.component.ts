@@ -162,7 +162,7 @@ export class NewInquiryDialogComponent {
     const typed = pick.typed.trim()
     // What was typed fills the matching field so the owner does not retype it.
     this.resetClientFields()
-    if (typed && /^[0-9+-s()]+$/.test(typed)) this.phone_.set(typed)
+    if (typed && /^[0-9+\-\s()]+$/.test(typed)) this.phone_.set(typed)
     else if (typed) this.name_.set(typed.slice(0, NAME_MAX))
     this.view_.set('client')
     afterNextRender(() => this.focus('#inquiry-name'), { injector: this.injector })

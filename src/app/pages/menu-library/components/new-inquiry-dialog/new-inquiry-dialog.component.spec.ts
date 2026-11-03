@@ -244,6 +244,32 @@ describe('NewInquiryDialogComponent', () => {
     expect(cancels).toBe(1)
   })
 
+  it('Latin text typed in the search goes to the name field, not the phone field', async () => {
+    for (const typed of ['dana', 'Sarah', 'tzvi', 'zoe', 'dana0521']) {
+      combobox().addChosen.emit({ typed, source: 'pointer' })
+      fixture.detectChanges()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(el.querySelector<HTMLInputElement>('#inquiry-name')!.value).toBe(typed)
+      expect(el.querySelector<HTMLInputElement>('#inquiry-phone')!.value).toBe('')
+      el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-ghost')!.click()
+      fixture.detectChanges()
+    }
+  })
+
+  it('a phone typed in the search, with spaces, dashes, plus and brackets, goes to the phone field', async () => {
+    for (const typed of ['052-123 4567', '+972 (52) 1234567', '0521234567']) {
+      combobox().addChosen.emit({ typed, source: 'pointer' })
+      fixture.detectChanges()
+      await fixture.whenStable()
+      fixture.detectChanges()
+      expect(el.querySelector<HTMLInputElement>('#inquiry-phone')!.value).toBe(typed)
+      expect(el.querySelector<HTMLInputElement>('#inquiry-name')!.value).toBe('')
+      el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-ghost')!.click()
+      fixture.detectChanges()
+    }
+  })
+
   it('a picked client shows only its name, no phone', () => {
     pickExisting()
     const picked = el.querySelector('.inquiry-client-picked')!

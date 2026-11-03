@@ -23,18 +23,22 @@
     }
   }
 
-  /* A chosen client: only the name at the start, slightly bold; the X at the end (R3, R6). */
+  /* A chosen client: only the name, slightly bold; the X at the end (R3, R6). */
   .inquiry-client-picked {
+    display: grid;
+    grid-template-columns: 2rem 1fr 2rem;
+    align-items: center;
     justify-content: space-between;
+
+    &::before {
+      content: '';
+    }
   }
 
   .inquiry-client-picked__name {
+    text-align: center;
     font-weight: var(--fw-semibold);
     overflow-wrap: anywhere;
-  }
-
-  .inquiry-more-toggle {
-    margin-block: var(--space-2);
   }
 
   /* Same pattern as .inquiry-row (R8). */
@@ -52,4 +56,9 @@
     inline-size: 100%;
     resize: vertical;
   }
+}
+
+/* Outside any @layer so it beats the unlayered button reset (margin: 0) in styles.scss */
+.inquiry-more-toggle {
+  margin-block: var(--space-2);
 }

@@ -11,3 +11,4 @@ Facts from earlier runs of the builder role in this project, written by scripts 
 - 2026-11-03 test-514-515: plan 515: a grid of form fields had no column template; use the same minmax(min(100%, 13rem), 1fr) pattern as the other grid in the file
 - 2026-11-03 test-514-515: plan 515: a UI control the plan did not fix (a native details for more fields) was chosen without a decision line; log such a choice
 - 2026-11-03 test-514-515: plan 515: correct choice, reusing the c-chip c-chip--tap button for more fields from the chip family; keep reusing a family control over a native element
+- 2026-11-03 test-514-515: plan 515: a phone-or-name test regex lost its backslashes when written through a shell heredoc and sent Latin letters a to s to the phone field; check a written regex by reading it back and test Latin letters, not only Hebrew and digits
