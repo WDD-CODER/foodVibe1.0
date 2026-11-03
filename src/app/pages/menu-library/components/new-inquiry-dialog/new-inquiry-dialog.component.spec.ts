@@ -182,6 +182,14 @@ describe('NewInquiryDialogComponent', () => {
     expect(body['clientId']).toBe('c2')
   })
 
+  it('pressing Enter in the new client name saves the inquiry', async () => {
+    startNewClient()
+    el.querySelector<HTMLInputElement>('#inquiry-name')!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
+    await fixture.whenStable()
+    expect(clientData.addClient).toHaveBeenCalledTimes(1)
+    expect(eventData.addMenuEvent).toHaveBeenCalledTimes(1)
+  })
+
   it('going back to the search does not save a client from the hidden fields', async () => {
     startNewClient()
     el.querySelector<HTMLButtonElement>('.inquiry-back')!.click()

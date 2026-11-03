@@ -27,6 +27,7 @@
             [class.c-input--invalid]="isTouched_() && !nameValid_()"
             [ngModel]="name_()"
             (ngModelChange)="name_.set($event)"
+            (keydown.enter)="onSave()"
           />
         </div>
         <div class="c-input-stack">
