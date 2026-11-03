@@ -13,3 +13,5 @@ Facts from earlier runs of the builder role in this project, written by scripts 
 - 2026-11-03 test-514-515: plan 515: correct choice, reusing the c-chip c-chip--tap button for more fields from the chip family; keep reusing a family control over a native element
 - 2026-11-03 test-514-515: plan 515: a phone-or-name test regex lost its backslashes when written through a shell heredoc and sent Latin letters a to s to the phone field; check a written regex by reading it back and test Latin letters, not only Hebrew and digits
 - 2026-11-03 test-514-515: plan 515: a component rule in a layer lost to the unlayered button reset (margin: 0) in styles.scss; put a rule that overrides a global reset outside the layer and check it with a computed-style test
+- 2026-11-03 run-513-516: fix round caused by: other rule (js file)
+- 2026-11-03 run-513-516: fix round caused by: another failure
