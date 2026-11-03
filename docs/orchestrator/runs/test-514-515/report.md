@@ -62,6 +62,19 @@ triage: shadow · agreement (last 50): 52% · collapsed: 0 · ask: 6 · follow-u
 - D11 · 515 · noise · seen: plans/515-new-inquiry-dialog-client-picker.plan.md U2 says keep the (document:keydown.escape) host binding, but the diff removes it and relies on app-modal-shell (dismissed); the plan's Execution Notes already log this as a behaviour: entry with a reverse, and the shell handles Escape, so Escape still cancels.
   why: duplicate of D3
 
+### Plan 514 decisions (first pass of this run; the ids restart at D1 for plan 515 above)
+
+- 514 D1 · accept · every field of the Client view except _id, name and phone is optional (staff receive only name + phone).
+- 514 D2 · accept · matchesClientQuery falls back to the digits of phone when phoneNormalized is absent; an empty query never matches.
+- 514 D3 · accept · getClientById is synchronous, from the loaded list.
+- 514 D4 · noise · client-data.service.spec.ts copies product-data.service.spec.ts (menu-event-data.service.spec.ts does not exist), per the readiness answer.
+- 514 D5 · follow-up · the slot's .slot-plan-start stamp is stale (log-query --since=plan-start lists old errors in the slot).
+- 514 D6 · ask · src/app/core/models/v2/conformance.ts has no Client entry (outside the plan's scope) — follow-up plan agreed.
+
+### Human answers after the run (2026-11-03)
+
+- 515 D1 approved, D2 approved, D7: use client_change ("החלף לקוח") and fix the plan wording, D6 stays a follow-up, D10 keep [sheet]="true". Earlier: D9 and D11 of the first pass (phone required, owner gating via isOwner_()) approved.
+
 ## Run notes
 
 - 514: starts on the judgment tier: Architecture Impact names INV-1

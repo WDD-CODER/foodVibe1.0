@@ -116,7 +116,7 @@ Decisions already taken by the Human (do not reopen):
 ### Must Have (P0)
 - [ ] `canCreateClient_ = computed(() => this.permission.can('create', { type: 'clients' }))`.
 - [ ] The `#inquiry-name` and `#inquiry-phone` inputs are replaced by one `app-search-combobox` (`variant="box"`, `options = clientData.allClients_()`, `clientFilter = matchesClientQuery`, `labelOf = c => clientLabel(c, countFor(c), t('client_events_count'))`, `keyOf = c => c._id`, `minChars = 2`, `emptyKey = canCreateClient_() ? undefined : 'client_ask_owner'`, `addLabelKey = canCreateClient_() ? 'client_new' : undefined`, placeholder `client_pick_placeholder`).
-- [ ] `(picked)` sets `selectedClient_` and shows name · phone read-only with a "שינוי" link that clears the pick.
+- [ ] `(picked)` sets `selectedClient_` and shows name · phone read-only with a "החלף לקוח" link (contract key `client_change`) that clears the pick.
 - [ ] `(addChosen)` (owner only) opens the new-client branch: name (`#inquiry-name`, ≤200) and phone (`#inquiry-phone`, `isValidClientPhone`) inputs with the existing validators, plus a collapsed `client_more_details` section: `clientType` (`app-custom-select`, default `private`), `companyName`, `email`, `source`, `notes` (≤2000).
 - [ ] `valid_` = `selectedClient_() !== null || (canCreateClient_() && nameValid_() && phoneValid_())`, and the existing date/guests/note validity; `client_required` shown when touched and no client.
 - [ ] `onSave()`: if no `selectedClient_`, `await clientData.addClient({...})` first; then `buildBody()` adds `clientId: client._id`, `clientName: client.name`, `clientPhone: client.phone`; then the existing `addMenuEvent` → optional `addNote` → toast `new_inquiry_saved` → `saved.emit(created)`.
