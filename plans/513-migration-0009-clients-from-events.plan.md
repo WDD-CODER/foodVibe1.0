@@ -15,7 +15,7 @@ Existing events carry `clientName` / `clientPhone` as free text. After Plan A th
   - `[auto]` `node server/migrations/0009-clients-from-events.js --target=local --db=fv_scratch --write=yes --verify=yes` prints `verify: ok` and exits 0; running it a second time inserts 0 clients and patches 0 events.
   - `[auto]` `npm test -- server/test/migration-0009.test.js` passes: grouping by `phoneNormalized`, fallback grouping by trimmed name, skip when both empty, idempotent re-run, `createdBy` = business owner.
   - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` returns no entries.
-  - `[auto:main]` With the backend started on `dev:local` (its log is `.claude/be.log`, which exists), `node server/migrations/0009-clients-from-events.js --target=local` without `--write` (dry run, read-only, local database) prints `clients: <n>, events: <m>, skipped: <k>` and exits 0.
+  - [ ] [auto:main] With the backend started on `dev:local` (its log is `.claude/be.log`, which exists), `node server/migrations/0009-clients-from-events.js --target=local` without `--write` (dry run, read-only, local database) prints `clients: <n>, events: <m>, skipped: <k>` and exits 0.
   - `[human]` Review the dry-run summary on the scratch DB before the Atlas gate.
 
 ## Execution Mode
