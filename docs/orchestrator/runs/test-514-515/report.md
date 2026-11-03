@@ -1,17 +1,17 @@
 # Orchestrator run test-514-515
 
-Run branch: `orch/test-514-515` (from `origin/main` at 80fb02e) · started 2026-11-02T19:58:07.244Z · finished 2026-11-02T20:53:29.280Z
+Run branch: `orch/test-514-515` (from `origin/main` at 80fb02e) · started 2026-11-02T19:58:07.244Z · finished 2026-11-03T06:26:07.007Z
 Result: 1 merged, 1 parked, skipped or left out, 2 in the run (counted from git and status.json).
 `main` untouched: yes — origin/main is 80fb02e.
-
-Final gate: ok (attempt 2)
+Stopped: wave 1 parked 515 — later waves not started
+Final gate: ok (attempt 1)
 
 ## Plans
 
 | Plan | State | Rounds | Builder tier | Merge | Why |
 | --- | --- | --- | --- | --- | --- |
 | 514 Give the app a client model, data service and display helpers | merged | 0 | judgment | 3a70649 |  |
-| 515 Let the new-inquiry dialog pick or create a client instead of retyping name and phone | parked | 2 | judgment |  | replan needed: The scope block on the run branch ('src/app/pages/menu-library/components/new-inquiry-dialog/**') does not cover the test files under that folder. Sub-task T1 and the [auto] Done-when still require editing new-inquiry-dialog.component.spec. |
+| 515 Let the new-inquiry dialog pick or create a client instead of retyping name and phone | parked | 0 | build |  | worktree: merging origin/orch/test-514-515 into feat/515-new-inquiry-dialog-client conflicts: CONFLICT (content): Merge conflict in plans/515-new-inquiry-dialog-client-picker.plan.md |
 
 ## App errors since the run started
 
@@ -35,6 +35,7 @@ no entries
 - database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses
 - dropped npx checks: 514: npx ng test --watch=false --include=client-data.service.spec/client-display.util.spec: no package.json script runs it (test:ci runs all tests); 515: npx ng test --watch=false --include=new-inquiry-dialog/**: no package.json script runs it (test:ci runs all tests)
 - final gate failed: node scripts/breadcrumbs-check.mjs —    not mentioned: client-data.service.ts /    not mentioned: client.model.ts / BREADCRUMBS: 2 seam(s) need attention
+- database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses
 
 ## Models per agent
 
@@ -45,14 +46,12 @@ no entries
 - 514 orch-check-rules: claude-sonnet-5-5 / high
 - 514 orch-verify: claude-sonnet-5-5 / medium
 - 514 orch-merge: claude-sonnet-5-5 / low
-- 515 orch-builder: claude-sonnet-5-5 / medium
-- 515 orch-gate: claude-haiku-5-5 / low
 
 ## What only the Human can do
 
 - nothing to validate
 
-- Decide on 515: replan needed: The scope block on the run branch ('src/app/pages/menu-library/components/new-inquiry-dialog/**') does not cover the test files under that folder. Sub-task T1 and the [auto] Done-when still require editing new-inquiry-dialog.component.spec.
+- Decide on 515: worktree: merging origin/orch/test-514-515 into feat/515-new-inquiry-dialog-client conflicts: CONFLICT (content): Merge conflict in plans/515-new-inquiry-dialog-client-picker.plan.md
 - Review and merge the run branch (PowerShell, one line each):
 
 ```powershell
@@ -60,6 +59,6 @@ git fetch origin
 gh pr create --base main --head orch/test-514-515 --title "Orchestrator run test-514-515" --body-file .claude\orchestrator-runs\test-514-515.md
 ```
 
-Context added by learning: 658 chars across 2 roles
+Context added by learning: 664 chars across 2 roles
 
-Trend (last 2 runs): ✗ per plan 0.5 → - · fix rounds per plan 0.5 → 1 · parked 0 → 1
+Trend (last 2 runs): ✗ per plan 0.5 → - · fix rounds per plan 0.5 → 0 · parked 0 → 1

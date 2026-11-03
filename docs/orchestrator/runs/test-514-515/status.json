@@ -101,18 +101,9 @@
       "title": "Let the new-inquiry dialog pick or create a client instead of retyping name and phone",
       "branch": "feat/515-new-inquiry-dialog-client",
       "state": "parked",
-      "round": 2,
-      "tier": "judgment",
-      "models": {
-        "orch-builder": {
-          "model": "claude-sonnet-5-5",
-          "effort": "medium"
-        },
-        "orch-gate": {
-          "model": "claude-haiku-5-5",
-          "effort": "low"
-        }
-      },
+      "round": 0,
+      "tier": "build",
+      "models": {},
       "humanItems": [],
       "history": [
         {
@@ -149,27 +140,54 @@
           "at": "2026-11-02T20:43:06.135Z",
           "state": "parked",
           "round": 2
-        }
-      ],
-      "asked": [
-        "no owner-only clients rule in PermissionService",
-        "clientFilter is a boolean not a function",
-        "error_generic key missing"
-      ],
-      "ready": false,
-      "freeDiskGb": 15.1,
-      "sha": "e92fee7c",
-      "roundCauses": [
-        "round 1: gate: pnpm run test:ci"
-      ],
-      "escalations": [
+        },
         {
-          "step": "round 2",
-          "check": "checker: blocker src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts:0 test file outside the plan's scope; blocker src/app/pages/menu-library/components/new-inq"
+          "at": "2026-11-03T06:22:20.513Z",
+          "state": "parked",
+          "round": 0
         }
       ],
-      "replan": "no — the builder gave no planChange",
-      "reason": "replan needed: The scope block on the run branch ('src/app/pages/menu-library/components/new-inquiry-dialog/**') does not cover the test files under that folder. Sub-task T1 and the [auto] Done-when still require editing new-inquiry-dialog.component.spec."
+      "earlier": [
+        {
+          "nnn": "515",
+          "title": "Let the new-inquiry dialog pick or create a client instead of retyping name and phone",
+          "branch": "feat/515-new-inquiry-dialog-client",
+          "state": "parked",
+          "round": 2,
+          "tier": "judgment",
+          "models": {
+            "orch-builder": {
+              "model": "claude-sonnet-5-5",
+              "effort": "medium"
+            },
+            "orch-gate": {
+              "model": "claude-haiku-5-5",
+              "effort": "low"
+            }
+          },
+          "asked": [
+            "no owner-only clients rule in PermissionService",
+            "clientFilter is a boolean not a function",
+            "error_generic key missing"
+          ],
+          "ready": false,
+          "freeDiskGb": 15.1,
+          "sha": "e92fee7c",
+          "roundCauses": [
+            "round 1: gate: pnpm run test:ci"
+          ],
+          "escalations": [
+            {
+              "step": "round 2",
+              "check": "checker: blocker src/app/pages/menu-library/components/menu-library-list/menu-library-list.component.spec.ts:0 test file outside the plan's scope; blocker src/app/pages/menu-library/components/new-inq"
+            }
+          ],
+          "replan": "no — the builder gave no planChange",
+          "reason": "replan needed: The scope block on the run branch ('src/app/pages/menu-library/components/new-inquiry-dialog/**') does not cover the test files under that folder. Sub-task T1 and the [auto] Done-when still require editing new-inquiry-dialog.component.spec."
+        }
+      ],
+      "reason": "worktree: merging origin/orch/test-514-515 into feat/515-new-inquiry-dialog-client conflicts: CONFLICT (content): Merge conflict in plans/515-new-inquiry-dialog-client-picker.plan.md",
+      "freeDiskGb": 13.6
     }
   },
   "notes": [
@@ -204,12 +222,16 @@
     {
       "at": "2026-11-02T20:53:29.280Z",
       "text": "final gate failed: node scripts/breadcrumbs-check.mjs —    not mentioned: client-data.service.ts /    not mentioned: client.model.ts / BREADCRUMBS: 2 seam(s) need attention"
+    },
+    {
+      "at": "2026-11-03T06:22:40.159Z",
+      "text": "database: local — when a plan needs the main folder's backend and none answers, the preflight starts commands.devLocal (the local database); a backend already running is kept on whatever database it uses"
     }
   ],
-  "attempts": 1,
-  "phase": "finished",
-  "freeDiskGb": 15.1,
-  "updatedAt": "2026-11-02T21:36:33.690Z",
+  "attempts": 2,
+  "phase": "stopped",
+  "freeDiskGb": 13.6,
+  "updatedAt": "2026-11-03T06:26:07.009Z",
   "noteIds": [
     "1:514-1",
     "1:515-1",
@@ -217,14 +239,16 @@
     "1:515-3",
     "1:run-1",
     "1:run-2",
-    "1:run-3"
+    "1:run-3",
+    "2:run-1"
   ],
-  "finishedAt": "2026-11-02T20:53:29.280Z",
+  "finishedAt": "2026-11-03T06:26:07.007Z",
+  "stopReason": "wave 1 parked 515 — later waves not started",
   "finalGate": {
     "ok": true,
     "command": null,
-    "at": "2026-11-02T21:36:33.688Z",
-    "attempt": 2,
+    "at": "2026-11-03T06:26:07.009Z",
+    "attempt": 1,
     "blamed": []
   }
 }
