@@ -15,3 +15,4 @@ Short rules every builder reads before it starts, learned from decisions the Hum
 - [layered-css-trap] A diff that puts a rule in @layer components.* to override an unlayered global (e.g. src/styles.scss:413-422 reset) with no computed-style test is a problem.
 - [regex-via-shell] A regex or source written through a shell heredoc or node -e is suspect: report it unless the diff shows it read back correctly and a Latin-letter test.
 - [dialog-patterns] A new or changed dialog/form that departs from "Dialog patterns" in .interface-design/system.md is a problem.
+- [observation-not-ask] Triage: a decision that only reports what the code does (seen: with no choice to make) is not an ask, even when it names a security or permission keyword; give it noise or accept.
