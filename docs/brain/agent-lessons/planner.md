@@ -11,3 +11,8 @@ Gaps earlier plans had, from questions `orch-readiness` had to ask and `[ui]` ca
 - 2026-11-03 test-514-515: plan 515: the plan fixed the selected-client display as name and phone; the Human wanted the name only, centered, slightly bold
 - 2026-11-03 test-514-515: plan 515: the Reuse Check listed no control for revealing more fields, so scope-check --reuse could not catch a native details; list every control the plan adds
 - 2026-11-03 test-514-515: plan 515: correct choice, the more-fields control as a c-chip c-chip--tap button with aria-expanded matched the app and the Human praised it
+- 2026-11-03 run-513-516: plan 513 had to be asked about: an open question
+- 2026-11-03 run-513-516: plan 516 had to be asked about: an open question
+- 2026-11-03 run-513-516: plan 513: goal contradicted the schema (name-only events cannot become valid clients); check success claims against schemas and invariants before saving
+- 2026-11-03 run-513-516: plan 513: Done-when test command with a file after -- ran the whole suite; use cd server && npx vitest run <file>
+- 2026-11-03 run-513-516: plan 516: scope block had no spec file though a Done-when needs the spec; name the spec file in the scope; end an --include glob in .spec.ts
