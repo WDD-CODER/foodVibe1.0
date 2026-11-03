@@ -47,7 +47,7 @@ describe('MenuLibraryListComponent stage filter', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: MenuEventDataService, useValue: { allMenuEvents_: store.asReadonly() } },
-        { provide: UserService, useValue: { isLoggedIn: () => true, user_: signal(null) } }
+        { provide: UserService, useValue: { isLoggedIn: () => true, user_: signal(null), isOwner_: () => false } }
       ]
     }).compileComponents()
     fixture = TestBed.createComponent(MenuLibraryListComponent)
