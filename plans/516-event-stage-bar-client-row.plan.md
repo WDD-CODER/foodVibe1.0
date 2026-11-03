@@ -11,7 +11,7 @@ The stage bar on the menu screen has editable client name and phone inputs, so t
 ## Goals & Success Criteria
 - Primary: the menu screen shows who the client is without editing client fields; the event's client can be changed or linked by the owner.
 - Success:
-  - `[auto]` `npx ng test --watch=false --include='**/event-stage-bar/**'` passes (updated spec + 3 new: row renders from `ClientDataService` when `clientId` set; falls back to snapshot strings when not; `(picked)` calls `updateMenuEvent` with `clientId`, `clientName`, `clientPhone`).
+  - `[auto]` `npx ng test --watch=false --include='**/event-stage-bar/**/*.spec.ts'` passes (updated spec + 3 new: row renders from `ClientDataService` when `clientId` set; falls back to snapshot strings when not; `(picked)` calls `updateMenuEvent` with `clientId`, `clientName`, `clientPhone`).
   - `[auto]` `npm run build` and `npm run lint` pass.
   - `[auto]` `node scripts/scope-check.mjs --reuse --plan=plans/516-event-stage-bar-client-row.plan.md` exits 0.
   - `[auto]` `node scripts/log-query.mjs --since=plan-start --level=error` returns no entries.
@@ -33,6 +33,7 @@ hotspots (`src/styles.scss, src/app/app.routes.ts` — add to them, never rewrit
 
 ```scope
 src/app/pages/menu-intelligence/components/event-stage-bar/**
+src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts
 public/assets/data/dictionary.json
 ```
 
@@ -156,3 +157,5 @@ Decisions already taken by the Human (do not reopen):
 - Orchestrator readiness (2026-11-03): the plan's combobox wiring (clientFilter = matchesClientQuery, labelOf = clientLabel, (picked) → c._id) does not match the code (clientFilter is a boolean; clientLabel takes 3 arguments; picked emits { option, source }) → default: build for what the code has, as plan 515 does (pre-filter with matchesClientQuery, [clientFilter]="false", wrap clientLabel, read $event.option); log the difference as seen: (delegated)
 - Plan error for the Planner (2026-11-03): combobox wiring written from memory, not read from search-combobox.component.ts and client-display.util.ts. Lesson: read the shared component's inputs, outputs and helper signatures before writing wiring into a plan.
 - Validation cards (2026-11-03): the linked event and the legacy event must be given as a ready copy-paste command with a real event id from the local dev DB (five events there already have a clientId; the legacy case is one `` of clientId on a named event), never as "create one by hand".
+- Human decisions (2026-11-03): `approved: src/app/pages/menu-intelligence/components/event-stage-bar/event-stage-bar.component.spec.ts` (added to the scope block above). D15: the deposit summary shows the amount with the app's money format `formatMoney` (`src/app/core/engine/rounding.ts:44`, gives `₪1,234.00`), then the date, joined by a middle dot; do not invent a new format. D19: the validation cards use the main folder's port 4200 and ready copy-paste commands (real event ids from the local dev DB), not the Human's port 4203.
+- Plan errors for the Planner (2026-11-03): (a) the scope block named `event-stage-bar/**` but no test file, while a Done-when needs the spec; (b) the test command's `--include='**/event-stage-bar/**'` also matches html and scss and fails to load in Karma (use `**/event-stage-bar/**/*.spec.ts`). Lessons: when a Done-when needs a spec change, name the spec file in the scope; write an `--include` glob that ends in `.spec.ts`.
