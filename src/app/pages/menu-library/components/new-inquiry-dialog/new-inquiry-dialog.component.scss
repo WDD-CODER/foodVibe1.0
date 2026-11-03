@@ -23,20 +23,35 @@
     }
   }
 
+  /* A chosen client: only the name, centered and slightly bold; the X sits at the end (R3, R6). */
   .inquiry-client-picked {
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 2rem 1fr 2rem;
+    align-items: center;
 
-    button {
-      margin-inline-start: auto;
+    &::before {
+      content: '';
     }
   }
 
+  .inquiry-client-picked__name {
+    text-align: center;
+    font-weight: var(--fw-semibold);
+    overflow-wrap: anywhere;
+  }
+
+  .inquiry-more-toggle {
+    justify-self: start;
+  }
+
+  /* Same pattern as .inquiry-row (R8). */
   .inquiry-more {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
     gap: var(--space-3);
 
-    summary {
-      cursor: pointer;
+    .c-input-stack:last-child {
+      grid-column: 1 / -1;
     }
   }
 

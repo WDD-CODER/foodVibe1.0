@@ -90,6 +90,7 @@ export class NewInquiryDialogComponent {
   /** 'inquiry' is the form; 'client' is the separate add-client view an owner reaches from the search. */
   protected readonly view_ = signal<'inquiry' | 'client'>('inquiry')
   protected readonly isClientSaving_ = signal(false)
+  protected readonly isMoreOpen_ = signal(false)
   protected readonly isClientTouched_ = signal(false)
   protected readonly eventName_ = signal('')
   protected readonly clientType_ = signal<ClientType>('private')
@@ -285,5 +286,6 @@ export class NewInquiryDialogComponent {
     this.source_.set('')
     this.clientNotes_.set('')
     this.isClientTouched_.set(false)
+    this.isMoreOpen_.set(false)
   }
 }

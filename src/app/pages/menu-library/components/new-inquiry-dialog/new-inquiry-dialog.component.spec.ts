@@ -171,7 +171,7 @@ describe('NewInquiryDialogComponent', () => {
 
   it('picking an existing client does not create a client', async () => {
     pickExisting()
-    expect(el.textContent).toContain('052-1111111')
+    expect(el.querySelector('.inquiry-client-picked')?.textContent).toContain('דנה כהן')
     saveButton().click()
     await fixture.whenStable()
     expect(clientData.addClient).not.toHaveBeenCalled()
@@ -189,7 +189,7 @@ describe('NewInquiryDialogComponent', () => {
       jasmine.objectContaining({ name: 'לקוח חדש', phone: '050-1234567', clientType: 'private' })
     )
     expect(eventData.addMenuEvent).not.toHaveBeenCalled()
-    expect(el.querySelector('.inquiry-client-picked')?.textContent).toContain('050-1234567')
+    expect(el.querySelector('.inquiry-client-picked')?.textContent).toContain('לקוח חדש')
     saveButton().click()
     await fixture.whenStable()
     expect(order).toEqual(['client', 'event'])
@@ -242,6 +242,62 @@ describe('NewInquiryDialogComponent', () => {
     expect(cancels).toBe(0)
     escape()
     expect(cancels).toBe(1)
+  })
+
+  it('a picked client shows only its name, no phone', () => {
+    pickExisting()
+    const picked = el.querySelector('.inquiry-client-picked')!
+    expect(picked.textContent).toContain('דנה כהן')
+    expect(picked.textContent).not.toContain('052-1111111')
+  })
+
+  it('the more-details control is a chip button that opens and closes the extra fields', () => {
+    startNewClient()
+    expect(el.querySelector('details')).toBeNull()
+    const toggle = el.querySelector<HTMLButtonElement>('.inquiry-more-toggle')!
+    expect(toggle.classList).toContain('c-chip--tap')
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(el.querySelector('.inquiry-more')).toBeNull()
+    toggle.click()
+    fixture.detectChanges()
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+    expect(el.querySelector('.inquiry-more')).toBeTruthy()
+    toggle.click()
+    fixture.detectChanges()
+    expect(el.querySelector('.inquiry-more')).toBeNull()
+  })
+
+  it('the extra fields stay inside the container when opened', () => {
+    startNewClient()
+    el.querySelector<HTMLButtonElement>('.inquiry-more-toggle')!.click()
+    fixture.detectChanges()
+    const bodyRect = el.querySelector<HTMLElement>('.c-modal-body')!.getBoundingClientRect()
+    const fields = Array.from(el.querySelectorAll<HTMLElement>('.inquiry-more input, .inquiry-more textarea'))
+    expect(fields.length).toBeGreaterThan(0)
+    for (const f of fields) {
+      const r = f.getBoundingClientRect()
+      expect(r.left).toBeGreaterThanOrEqual(bodyRect.left - 1)
+      expect(r.right).toBeLessThanOrEqual(bodyRect.right + 1)
+    }
+  })
+
+  it('text typed in the search goes to the name, digits to the phone, after an earlier client was saved', async () => {
+    startNewClient()
+    await saveClientView()
+    el.querySelector<HTMLButtonElement>('.inquiry-client-picked button')!.click()
+    fixture.detectChanges()
+    combobox().addChosen.emit({ typed: 'אאאא', source: 'pointer' })
+    fixture.detectChanges()
+    await fixture.whenStable()
+    expect(el.querySelector<HTMLInputElement>('#inquiry-name')!.value).toBe('אאאא')
+    expect(el.querySelector<HTMLInputElement>('#inquiry-phone')!.value).toBe('')
+    el.querySelector<HTMLButtonElement>('.c-modal-actions .c-btn-ghost')!.click()
+    fixture.detectChanges()
+    combobox().addChosen.emit({ typed: '0521234567', source: 'pointer' })
+    fixture.detectChanges()
+    await fixture.whenStable()
+    expect(el.querySelector<HTMLInputElement>('#inquiry-phone')!.value).toBe('0521234567')
+    expect(el.querySelector<HTMLInputElement>('#inquiry-name')!.value).toBe('')
   })
 
   it('the X removes the picked client so another can be chosen', () => {

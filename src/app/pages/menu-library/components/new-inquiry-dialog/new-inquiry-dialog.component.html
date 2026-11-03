@@ -40,63 +40,72 @@
           <span class="c-field-error">{{ 'client_phone_invalid' | translatePipe }}</span>
         }
       </div>
-      <details class="inquiry-more">
-        <summary>{{ 'client_more_details' | translatePipe }}</summary>
-        <div class="c-input-stack">
-          <label>{{ 'client_type' | translatePipe }}</label>
-          <app-custom-select
-            [ngModel]="clientType_()"
-            (ngModelChange)="clientType_.set($event)"
-            [options]="clientTypeOptions"
-            placeholder="client_type"
-          />
+      <button
+        type="button"
+        class="c-chip c-chip--tap inquiry-more-toggle"
+        [attr.aria-expanded]="isMoreOpen_()"
+        (click)="isMoreOpen_.set(!isMoreOpen_())"
+      >
+        {{ 'client_more_details' | translatePipe }}
+      </button>
+      @if (isMoreOpen_()) {
+        <div class="inquiry-more">
+          <div class="c-input-stack">
+            <label>{{ 'client_type' | translatePipe }}</label>
+            <app-custom-select
+              [ngModel]="clientType_()"
+              (ngModelChange)="clientType_.set($event)"
+              [options]="clientTypeOptions"
+              placeholder="client_type"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="inquiry-company">{{ 'client_company_name' | translatePipe }}</label>
+            <input
+              id="inquiry-company"
+              type="text"
+              autocomplete="off"
+              [maxLength]="nameMax"
+              [ngModel]="companyName_()"
+              (ngModelChange)="companyName_.set($event)"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="inquiry-email">{{ 'client_email' | translatePipe }}</label>
+            <input
+              id="inquiry-email"
+              type="email"
+              dir="ltr"
+              autocomplete="off"
+              [maxLength]="nameMax"
+              [ngModel]="email_()"
+              (ngModelChange)="email_.set($event)"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="inquiry-source">{{ 'client_source' | translatePipe }}</label>
+            <input
+              id="inquiry-source"
+              type="text"
+              autocomplete="off"
+              maxlength="100"
+              [ngModel]="source_()"
+              (ngModelChange)="source_.set($event)"
+            />
+          </div>
+          <div class="c-input-stack">
+            <label for="inquiry-client-notes">{{ 'client_notes' | translatePipe }}</label>
+            <textarea
+              id="inquiry-client-notes"
+              class="c-input"
+              rows="2"
+              maxlength="2000"
+              [ngModel]="clientNotes_()"
+              (ngModelChange)="clientNotes_.set($event)"
+            ></textarea>
+          </div>
         </div>
-        <div class="c-input-stack">
-          <label for="inquiry-company">{{ 'client_company_name' | translatePipe }}</label>
-          <input
-            id="inquiry-company"
-            type="text"
-            autocomplete="off"
-            [maxLength]="nameMax"
-            [ngModel]="companyName_()"
-            (ngModelChange)="companyName_.set($event)"
-          />
-        </div>
-        <div class="c-input-stack">
-          <label for="inquiry-email">{{ 'client_email' | translatePipe }}</label>
-          <input
-            id="inquiry-email"
-            type="email"
-            dir="ltr"
-            autocomplete="off"
-            [maxLength]="nameMax"
-            [ngModel]="email_()"
-            (ngModelChange)="email_.set($event)"
-          />
-        </div>
-        <div class="c-input-stack">
-          <label for="inquiry-source">{{ 'client_source' | translatePipe }}</label>
-          <input
-            id="inquiry-source"
-            type="text"
-            autocomplete="off"
-            maxlength="100"
-            [ngModel]="source_()"
-            (ngModelChange)="source_.set($event)"
-          />
-        </div>
-        <div class="c-input-stack">
-          <label for="inquiry-client-notes">{{ 'client_notes' | translatePipe }}</label>
-          <textarea
-            id="inquiry-client-notes"
-            class="c-input"
-            rows="2"
-            maxlength="2000"
-            [ngModel]="clientNotes_()"
-            (ngModelChange)="clientNotes_.set($event)"
-          ></textarea>
-        </div>
-      </details>
+      }
     </div>
     <div class="c-modal-actions">
       <button type="button" class="c-btn-ghost" (click)="onBackToInquiry()">{{ 'cancel' | translatePipe }}</button>
@@ -111,7 +120,6 @@
         @if (selectedClient_(); as client) {
           <div class="c-input-wrapper inquiry-client-picked">
             <span class="inquiry-client-picked__name">{{ client.name }}</span>
-            <span class="inquiry-client-picked__phone" dir="ltr">{{ client.phone }}</span>
             <button
               type="button"
               class="c-btn-ghost"

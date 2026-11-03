@@ -8,3 +8,5 @@ Gaps earlier plans had, from questions `orch-readiness` had to ask and `[ui]` ca
 - 2026-11-03 test-514-515: plan 515: a picked value was specified as a read-only block with a change link; the Human wanted the value inside the same field with an X
 - 2026-11-03 test-514-515: plan 515: replacing the only name input dropped the event-name field; a plan that replaces an input says what happens to each thing it carried
 - 2026-11-03 test-514-515: plan 515: Escape was specified as cancel only; the Human wanted one step back per Escape (list, sub-view, dialog)
+- 2026-11-03 test-514-515: plan 515: the plan fixed the selected-client display as name and phone; the Human wanted the name only, centered, slightly bold
+- 2026-11-03 test-514-515: plan 515: the Reuse Check listed no control for revealing more fields, so scope-check --reuse could not catch a native details; list every control the plan adds
