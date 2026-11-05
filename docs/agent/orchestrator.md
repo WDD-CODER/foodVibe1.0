@@ -70,7 +70,12 @@ branch himself.
      or unpushed work stays claimed and the run says why. A slot already has its packages, so a builder in a slot installs
      nothing; a folder of its own installs once before the builder starts (with pnpm, quickly: one shared store).
      Packages are never linked in from the main folder: on Windows git follows a junction when it removes a worktree
-     and would delete the main folder's packages. At most `orchestrator.concurrency` builders run at once (default 2);
+     and would delete the main folder's packages. At most `orchestrator.concurrency` builders run at once (default 2).
+     The plan branch is made with `--no-track` (its upstream is never a run branch; a reused branch whose upstream is
+     anything but its own remote branch, such as this or an earlier run's branch, loses it) and the builder pushes with `git push -u origin <branch>`. A branch from an earlier
+     run is reused and the run branch merged into it; when that merge conflicts in the plan's own file only, the script
+     resolves it — the run branch's text, with the builder's ticked sub-tasks and its own Execution Notes lines put back
+     (`mergePlanFile`) — and any other conflict parks the plan with the conflicted paths;
    - gate (`orch-gate`): first the `orchestrator.prepare` commands (generated files the tests need), then the project
      checks, then `node scripts/kit-manifest-check.mjs` when the project has a kit manifest (a plan that adds an inventoried
      file or an ADR is sent back as `unclassified: <path>` until the manifest lists it; the merge step never runs it); the project checks are (`commands.build`, `commands.lint`, and `commands.testCi` when set, else
@@ -335,6 +340,13 @@ With the UI step off, a failed script is a finding for the builder, and a card n
   a database that is down, a temp folder in use) pauses the plan (`env-paused`), runs `orch-preflight.mjs --env-only`,
   and retries once when it passes. A failing check or a second environment failure parks the plan with the reason,
   and the wave gate skips what depends on it (the whole run with `onPark` = `all`).
+- **A gate env-fail probes the failed command.** When gate commands end `env-fail`, the check also gets
+  `--probe "<command>"` for each one and tests that command's own precondition from its text, never by running it:
+  `node <file>` → the file exists in the root folder; `npm|pnpm run <name>` → the script is in `package.json` and
+  `node_modules` exists. A failed probe parks the plan with its message; when no command has a precondition the check
+  can test, the plan parks at once with `environment: no precondition can be checked for <commands>` — a retry would
+  only repeat the failure. A probe that passes keeps the one retry. Lost gate results and builder or merge environment
+  failures name no command and keep the generic check.
 
 ## Runner calls
 
@@ -378,6 +390,8 @@ to the number of sites in the file). `parsed` = the script reads the answer to b
 | Run start | `init` | 1 | parsed | keep |
 | Main tries | `main-tries` | 1 | parsed | merge: into `init` when the run delegates main-folder checks (follow-up) |
 | Slot give-back | `release` | 1 | write-only | merge: into the plan's last `set` (follow-up) |
+| Park save | `park-save` | 1 | parsed | keep: only when a plan with a folder parks |
+| Merge only | `merge-ready` | 1 | parsed | keep: once per plan in merge mode |
 | Decisions | `decisions` | 1 | write-only | done: one call for N decisions |
 
 No call is `script-only` yet: until the workflow runtime can run a script without a model, every row that stays needs
@@ -396,6 +410,7 @@ the runner. The one row to watch is `set` — see its recommendation.
   | Field (per plan) | Set by | Meaning |
   | --- | --- | --- |
   | `roundCauses[]` | `set --round-cause "round 2: <why>"` | the reason a fix round began (`checker: major src/x.ts:12 <rule>`, `gate: <command>`, …) |
+  | `causeFacts[]`, `diffFiles[]` | `set --causes-b64` (rides on the same `set` as `--round-cause`) | what the code knows about a fix round, stored by the script: for a gate failure the command and the first path of the branch diff the failing output names; for a checker failure each finding's `id`, its `INV-n` rule when `docs/brain/invariants.md` holds it, and its file when it is in the diff. `diffFiles` is git's own list for the plan branch against the run branch (40 paths at most); a path a model wrote is kept only when git lists it |
   | `escalations[]` | `handoff` | `{ step, check }` of each escalation to a fresh judgment-tier builder |
   | `verify` | `set --candidates --refuted --refuted-rules --verify-by --late-low --reappeared` | the verifier's totals for the plan so far: candidates and refuted, per finder (`byRole`), refuted rule names, problems kept below the threshold that later mattered (`lateLow`) and refuted ones that came back (`reappeared`) |
   | `misses[]` | `set --miss "<what>"` | a `[ui]` card failed after the checkers passed that plan (older runs also hold `final gate …` entries; a passing final gate removes them) |
@@ -404,6 +419,15 @@ the runner. The one row to watch is `set` — see its recommendation.
   | `ready`, `asked[]` | `set --ready yes\|no --asked "q1 \|\| q2"` | whether readiness called the plan ready (from `args.asked`), and the questions it had to ask |
   | `uiCards[].regressed` | `set --card …` | the card passed earlier and fails now |
 
+  **A lesson line names a fact the code produced, or there is no line.** Fix-round lines are `fix round caused by: <command
+  kind> failed at <diff file>` (the file left out when no failing file is in the diff) or `fix round caused by: finding <id>
+  (rule INV-n) in <file>`; a parked plan gives `parked: <prefix>` only for the fixed start of the reason that `park()` writes
+  (`same reason twice`, `agent-call limit`, `no progress`, `replan needed`, `hand-off file`, `worktree`, `environment`, `UI
+  environment blocked`, or the ending `— needs the Human`), never the model text after it; the final-gate line is `missed: the
+  final gate failed (<kind>: <file>)`. A cause, reason, rule or question with no such fact gives no line, and no `asked about`
+  line is written (the readiness question is the agent's text). A rule name counts as registered only when it is an `INV-n`
+  id of `docs/brain/invariants.md`.
+
   Not derived from transcripts: a fact is a field the workflow wrote when it happened. The literal "card failed in the
   browser after its script had passed" cannot happen (a passing script card never reaches the browser agent); the `ui`
   lesson is the card that **regressed** (passed in one round, failed in a later one).
@@ -411,6 +435,49 @@ the runner. The one row to watch is `set` — see its recommendation.
 - Every count in a message comes from `status.json` or an anchored git command run in the same turn.
 - A relaunch while a run of that name is live (status `running`, updated in the last 2 hours) is refused; after a
   crash, `node scripts/orch-state.mjs stop --run <run> --reason "<why>"` ends it first.
+
+## A plan that will fail is stopped before its builder
+
+- **Code a commit guard refuses.** The run's preflight (`orch-preflight.mjs --plans`) reads the code each plan
+  *prescribes* — its fenced code blocks (not ```` ```scope ````) and inline code spans, never prose, and none of the
+  sections that only describe the plan (Problem Statement, Goals, Out of Scope, Critical Questions, Execution Notes,
+  Step 0, Architecture Impact, the scope sections) — and runs it through
+  every installed `scripts/pre-commit-*.mjs` guard that exports `scanGuardText(text, file)`
+  (`scripts/lib/plan-guard-scan.mjs`). A hit parks the plan before any builder: `preflight: guard <script> line <n>:
+  <rule> — plan line <n>: <text>`; a plan that depends on it is skipped. The security guard
+  (`pre-commit-security-grep.mjs`) also reports a log call of a variable assigned from a PII-named expression earlier in
+  the file. Its one exception is a comment (`//`, `/*` or `<!--`) on the log line it excuses, `// security-grep-allow:
+  <reason of 10+ characters>`, printed when the guard passes the line; it never excuses an innerHTML hit, and no path,
+  folder or setting turns the guard off.
+- **A [ui] card role with no login.** `ui.logins` in the project config is a list of login recipes, one per role —
+  `[{ "role": "<role>", "url": "<login page>", "userEnv": "<ENV_NAME>", "passEnv": "<ENV_NAME>" }]`, environment
+  variable **names** only, never values. A card names its role as `as the <role> user` (or `role: <role>`); preflight warns `ui login: no recipe
+  for role <role> (plan NNN card <n>)`, and when recipes exist, `no role named` for a card without one. `--ui --role
+  <role>` logs in with that recipe.
+- **Leftovers of earlier runs.** Preflight lists, one warning line each: a `feat/NNN-*` branch (local or on origin) of
+  a plan in the run that is not in the run branch, every `park/*` branch, a slot holding a `.worktree-plan` marker or a
+  branch, and an `<repo>-orch-<run>-<NNN>` builder folder still on disk. They are run notes; the run goes on.
+- **The park branch.** When a plan is parked, the builder's uncommitted work (tracked changes and new files, never an
+  ignored one) is committed as `WIP: park <run> <NNN>` on the fixed branch `park/<run>-<NNN>` — on top of that branch
+  when an earlier park made it — and pushed (`orch-state.mjs park-save`). The plan branch is not touched. Then the
+  folder is cleaned and a slot is given back. Nothing uncommitted makes no branch; a failed push keeps the folder as it
+  was, with a run note.
+- **A database write the plan does not list.** `orch-state.mjs worktree` writes the marker `orch-builder.json` into the
+  builder worktree's own git dir (run, plan, plan path, branch and the run branch's commit). Only there, the scope guard
+  answers a migration, a seed or a raw database-client write (`scripts/lib/db-write.mjs`) that is not a line of the
+  code the plan prescribes — read from that commit, never from the builder's copy — with `ESCALATE: db-write <command>`
+  before it runs. The builder returns `ESCALATE`; the run parks that plan with `ask: …` and records a decision forced to
+  `ask` (`forced: db-write`); the other plans go on. A Human session and a Worker slot have no marker and are judged as
+  before.
+- **Merge only.** `args.mode: "merge"` resumes a run at the merge: for each plan `orch-state.mjs merge-ready` checks
+  that `status.json` recorded the head that passed its gate and checkers (`checkedHead`: the full sha the state
+  script's `diff` read for the checkers, written by `set --checked-head` just before the merge) and that the plan
+  branch on origin is still exactly at it; then that commit is merged with no builder, gate or checker, and the final
+  gate runs. Every merge with a checked head is pinned to it: the merge agent refuses a branch that moved after its
+  checks. Any other plan is refused with the reason and nothing is
+  merged.
+- **Decisions on a relaunch.** The decisions the command shows for grading are this launch's and every earlier
+  launch's that has no grade row for this run yet (`decisionsInView`); `finish` returns those as `earlierDecisions`.
 
 ## Never
 
