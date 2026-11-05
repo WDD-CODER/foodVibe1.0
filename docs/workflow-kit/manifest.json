@@ -5222,6 +5222,22 @@
       "notes": "Installed by kit-sync (.kit/install.json, managed, kit 1.7.1). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
     },
     {
+      "path": "scripts/lib/db-write.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 2.0.0). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
+      "path": "scripts/lib/plan-guard-scan.mjs",
+      "tier": "project",
+      "action": "stay",
+      "params": [],
+      "refs": [],
+      "notes": "Installed by kit-sync (.kit/install.json, managed, kit 2.0.0). Classified project/stay here so the kit-owned list stays as is (plan 497 scope); move it to core with kit-owned.json regenerated in a later kit-sync plan."
+    },
+    {
       "path": "scripts/lib/plan-deps.mjs",
       "tier": "project",
       "action": "stay",
