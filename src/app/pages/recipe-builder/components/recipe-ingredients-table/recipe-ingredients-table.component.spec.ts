@@ -221,6 +221,17 @@ describe('RecipeIngredientsTableComponent', () => {
       expect(matchProductNames).not.toHaveBeenCalled()
     })
 
+    it('marks a pasted row as matching while the AI step runs, and clears it when the answer arrives', async () => {
+      let answer!: (m: { i: number; product: null }[]) => void
+      matchProductNames.and.returnValue(new Promise((resolve) => (answer = resolve)))
+      component.onPasteIngredients('1 צרור פטרוזיליה')
+      const matching = () => (component as unknown as { matchingRows_: () => ReadonlySet<unknown> }).matchingRows_()
+      expect(matching().has(rows()[0])).toBeTrue()
+      answer([{ i: 0, product: null }])
+      await flush()
+      expect(matching().size).toBe(0)
+    })
+
     it('adds an unmatched line unlinked, then links it when the AI answer arrives, keeping the amount', async () => {
       let answer!: (m: { i: number; product: number }[]) => void
       matchProductNames.and.returnValue(new Promise((resolve) => (answer = resolve)))

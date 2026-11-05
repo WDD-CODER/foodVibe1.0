@@ -168,7 +168,7 @@ describe('POST /match-product-names', () => {
     ['empty names', { ...BODY, names: [] }],
     ['no products', { ...BODY, products: [] }],
     ['more than 200 names', { ...BODY, names: Array.from({ length: 201 }, (_, n) => ({ name: `n${n}`, unit: '' })) }],
-    ['more than 1000 products', { ...BODY, products: Array.from({ length: 1001 }, (_, n) => ({ name: `p${n}`, unit: '' })) }],
+    ['more than 3000 products', { ...BODY, products: Array.from({ length: 3001 }, (_, n) => ({ name: `p${n}`, unit: '' })) }],
     ['a name that is not text', { ...BODY, names: [{ name: 5, unit: '' }] }],
   ])('rejects %s with 400', async (_label, body) => {
     const res = await post(body);

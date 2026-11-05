@@ -46,7 +46,11 @@ import { UNIT_ALIASES } from '@utils/recipe-cost.constants'
 import { createUnitWordResolver, parseIngredientLines } from '@utils/ingredient-line-parser.util'
 import { findIngredientMatch } from '@utils/ingredient-match.util'
 import { matchProductName } from '@utils/product-name-match.util'
-import { ProductNameMatcherService, type NameMatchItem } from '@services/product-name-matcher.service'
+import {
+  ProductNameMatcherService,
+  type NameMatchItem,
+  type NameMatchOutcome
+} from '@services/product-name-matcher.service'
 import { UserMsgService } from '@services/user-msg.service'
 import { findProductByName } from 'src/app/core/utils/product-name-error.util'
 import { formatPct1 } from 'src/app/core/engine/rounding'
@@ -194,6 +198,9 @@ export class RecipeIngredientsTableComponent {
   /** Plan 490: per unlinked pasted row, the products it could mean (from the AI step); replaced, never mutated. */
   private readonly rowOptions_ = signal<ReadonlyMap<FormGroup, readonly Product[]>>(new Map())
 
+  /** Pasted rows whose AI matching is still running — their badge reads «מחפש התאמה…» instead of «לא מוכן». */
+  protected readonly matchingRows_ = signal<ReadonlySet<FormGroup>>(new Set())
+
   /** Resolve the product for a form group by referenceId. Returns null for unlinked rows. */
   protected getProductForGroup(group: FormGroup): Product | null {
     const refId = group.get('referenceId')?.value as string | null
@@ -325,10 +332,19 @@ export class RecipeIngredientsTableComponent {
    */
   private async linkPastedByAi_(pending: { group: FormGroup; name: string; item: NameMatchItem }[]): Promise<void> {
     let failure: unknown = null
-    const { linked: matches, options } = await this.nameMatcher_.matchNamesWithOptions(
-      pending.map((p) => p.item),
-      { onAiFailure: (err) => (failure = err) }
-    )
+    this.matchingRows_.update((rows) => new Set([...rows, ...pending.map((p) => p.group)]))
+    const done = (): void =>
+      this.matchingRows_.update((rows) => new Set([...rows].filter((g) => !pending.some((p) => p.group === g))))
+    let outcome: NameMatchOutcome
+    try {
+      outcome = await this.nameMatcher_.matchNamesWithOptions(
+        pending.map((p) => p.item),
+        { onAiFailure: (err) => (failure = err) }
+      )
+    } finally {
+      done()
+    }
+    const { linked: matches, options } = outcome
     // A batch of only amount-less lines was never going to link anything — its rows stay red, no toast.
     const anyLinkable = pending.some((p) => p.item.linkable !== false)
     if (failure !== null && anyLinkable) {

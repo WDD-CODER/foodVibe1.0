@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 /** Plan 463 — AI step that matches pasted ingredient names to existing products. Names and units only. */
 export const PRODUCT_MATCH_MAX_NAMES = 200
-export const PRODUCT_MATCH_MAX_PRODUCTS = 1000
+export const PRODUCT_MATCH_MAX_PRODUCTS = 3000
 
 const matchItemSchema = z.object({
   name: z.string().min(1).max(200),

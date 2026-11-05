@@ -19,9 +19,6 @@
   >
     <ng-template #optionTemplate let-item>
       <span class="item-name">{{ item.nameHebrew }}</span>
-      @if (isSuggestion_(item)) {
-        <span class="c-chip c-chip--tag c-chip--sm c-chip--amber">{{ 'ingredient_suggestion' | translatePipe }}</span>
-      }
       <span
         class="c-chip c-chip--tag c-chip--sm c-chip--square"
         [class.c-chip--green]="item.item_type_ === 'recipe'"
