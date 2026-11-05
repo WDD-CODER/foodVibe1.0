@@ -1,6 +1,6 @@
 # Plan 516 — Show the event client as a read-only row with owner change and link on the stage bar
 
-Status: draft
+Status: done
 Track: code
 Snapshot: 6cfe7dc004ac51bde0aac3da99294b341d76a975
 Depends-on: 514
