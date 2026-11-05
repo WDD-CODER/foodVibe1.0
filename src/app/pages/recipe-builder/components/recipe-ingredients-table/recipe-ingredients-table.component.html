@@ -88,9 +88,12 @@
                   class="unlinked-badge"
                   (click)="$event.stopPropagation(); onUnlinkedBadgeClick(group, $index)"
                   [title]="'unlinked_ingredient_hint' | translatePipe"
+                  [attr.aria-busy]="matchingRows_().has(group) || null"
                 >
                   <lucide-icon name="link" [size]="14"></lucide-icon>
-                  <span class="badge-label">{{ 'ingredient_not_ready' | translatePipe }}</span>
+                  <span class="badge-label">{{
+                    (matchingRows_().has(group) ? 'ingredient_matching' : 'ingredient_not_ready') | translatePipe
+                  }}</span>
                 </button>
               } @else if (group.get('referenceId')?.value) {
                 <button

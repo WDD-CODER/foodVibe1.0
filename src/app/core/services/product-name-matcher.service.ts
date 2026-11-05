@@ -7,7 +7,7 @@ import { LoggingService } from './logging.service'
 
 /** Mirrors PRODUCT_MATCH_MAX_NAMES / PRODUCT_MATCH_MAX_PRODUCTS in shared/schemas/ai-product-match.schema.ts. */
 const MAX_NAMES = 200
-const MAX_PRODUCTS = 1000
+const MAX_PRODUCTS = 3000
 const MAX_NAME_CHARS = 200
 const MAX_UNIT_CHARS = 40
 const PREFIX_LENGTH = 2
@@ -133,12 +133,17 @@ export class ProductNameMatcherService {
     return { linked, options: merged }
   }
 
-  /** The product list the AI may choose from: all of it, or (over 1000) those sharing a name start with a leftover name. */
+  /**
+   * The product list the AI may choose from: all of it, or (over the cap) those sharing a name start with a leftover
+   * name first, then the rest up to the cap. A name in another language ("salt") shares no start with Hebrew products,
+   * so the rest must still be sent or the AI is never asked.
+   */
   private candidates_(products: readonly Product[], asked: readonly NameMatchItem[]): Product[] {
     const named = products.filter((p) => (p.nameHebrew ?? '').trim())
     if (named.length <= MAX_PRODUCTS) return named
     const prefixes = new Set(asked.flatMap((it) => this.prefixes_(it.name)))
-    return named.filter((p) => this.prefixes_(p.nameHebrew).some((x) => prefixes.has(x))).slice(0, MAX_PRODUCTS)
+    const sharesStart = (p: Product): boolean => this.prefixes_(p.nameHebrew).some((x) => prefixes.has(x))
+    return [...named.filter(sharesStart), ...named.filter((p) => !sharesStart(p))].slice(0, MAX_PRODUCTS)
   }
 
   private prefixes_(name: string): string[] {
