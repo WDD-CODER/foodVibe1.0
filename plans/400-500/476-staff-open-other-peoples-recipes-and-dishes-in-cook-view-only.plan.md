@@ -33,7 +33,7 @@ Verified in code on `feb9f3da`:
 - Cook View has its own in-place edit mode (`enterEditMode`, `cook-view.page.ts:577-589`; buttons at
   `cook-view.page.html:9-20` (menu item) and `:238-249` (pill)) that saves through `KitchenStateService.saveRecipe`.
   For staff on someone else's recipe that save is refused by the server; the buttons must not show.
-- The final report notes (`docs/mvp/final-report.md:163`) that the builder's leave-guard save and approve-stamp save
+- The final report notes (`docs/mvp/mvp-final-report.md:163`) that the builder's leave-guard save and approve-stamp save
   are not gated for staff on another member's recipe; keeping staff out of the builder for those items closes that path.
 - `canActivate` runs before the route's resolvers, so a guard must wait for recipes and dishes itself
   (`RecipeDataService.ensureLoaded()`, `DishDataService.ensureLoaded()`, as `kitchen-data-ensure-loaded.resolver.ts` does)
@@ -152,7 +152,7 @@ navigates to the builder — the guard handles it; do not edit the popover.
 - A recipe still loading (deep link after refresh) is handled by awaiting `ensureLoaded()` in the guard — only for staff, so owners see no delay.
 - An item not found by the guard is allowed through; `recipeResolver` then shows its not-found message as today.
 - Growth-frozen `cook-view.page.ts`: expected +3 (import, inject, signal) −4 (`onEdit` block) = −1.
-- Security surface: UI only; the server stays the authority (`permissions.js`). Closes the UI path to the ungated builder leave-guard and approve-stamp saves for staff on others' recipes (`final-report.md:163`).
+- Security surface: UI only; the server stays the authority (`permissions.js`). Closes the UI path to the ungated builder leave-guard and approve-stamp saves for staff on others' recipes (`mvp-final-report.md:163`).
 - Project checks: log-query [auto]; chef-side stories; no new dictionary keys; no server change.
 
 ## Out of Scope
