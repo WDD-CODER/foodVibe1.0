@@ -123,8 +123,8 @@ describe('IngredientSearchComponent', () => {
       open()
       expect(ids()).toEqual(['p1', 'p2', 'p9'])
       const options = root().querySelectorAll('li[role="option"]')
-      expect(options[0].querySelector('.c-chip--amber')).not.toBeNull()
-      expect(options[2].querySelector('.c-chip--amber')).toBeNull()
+      // Human 2026-11-05: every row comes from the inventory, so suggestions carry no extra tag.
+      expect(root().querySelector('.c-chip--amber')).toBeNull()
       expect(options[options.length - 1].textContent).toContain('salt')
     }))
 
