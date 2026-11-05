@@ -1,6 +1,6 @@
 # Plan 524 — Sync kit v1.13.0 and restore required workflow steps
 
-Status: active
+Status: done
 Track: code
 Snapshot: 4c8397b3
 
@@ -135,3 +135,6 @@ must not be removed or weakened). `scripts/pre-commit-secret-scan.mjs` stays act
 - [ ] [auto] `pnpm exec ng build` passes.
 - [ ] [human] The Human has seen the dry-run summary and said apply.
 - [ ] [human] The Human has seen every diff from M2b–M3c and decided what is committed.
+
+## Closed (2026-11-05)
+- Done and overtaken: merged in PR #494 (27da53e5 `sync kit v1.13.0`); main later synced to kit v2.0.0 (`.kit/install.json` ref v2.0.0). `node scripts/override-check.mjs` → `OVERRIDE_CHECK: ok — 2 override(s) checked, 7 required step(s) found`. Only the plan file was never updated.

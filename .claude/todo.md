@@ -6,6 +6,19 @@
 
 ---
 
+## Execution order (Planner review 2026-11-05)
+
+1. **513** clients migration — finish from wt-3 staged work; phones may print (log lines avoid PII names; kit grep untouched)
+2. **517** orchestrator test runners — alone; prerequisite for 518–523
+3. **518** logistics schema → then **519 ∥ 520 ∥ 521** → then **522** → **523** (one run, 4 waves)
+4. **510** preferred supplier — independent; can run in a free slot alongside 2–3
+5. **374** venues infra/equipment → **372** venues contacts + hours
+- Validate and close: **490** (3 human cards, Gemini key replaced)
+- Parked: **373** venue videos/location (after 372, low value) · **471** exports (needs a Human walk-through session)
+- Closed: **524** (done in PR #494, main on kit v2.0.0)
+
+---
+
 ## Tech Debt (from `/nightly-maintenance` 2026-09-27)
 
 > Full plan: `plans/300-400/318-nightly-maintenance-followups-2026-09-27.plan.md`. Full audit: `.claude/techdebt-reports/techdebt-2026-09-27.md`.
