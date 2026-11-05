@@ -208,7 +208,7 @@ HOW TO VALIDATE — 14 checks on 9 pages · reply: done | not yet | failed: <num
 ## 6. Before `mvp-review` can go to `main`
 
 1. **No new Atlas migration.** Every one of the 26 merged run files says "no data, schema or migration change" under "Final gate — Atlas".
-2. **The open migrations from the first MVP run still apply**, because `mvp-review` contains `mvp`: 0006 (business tenant), 0007 (coefficients) and 0008 (event stages), in that order, each with backup → dry run → your `go <number>` → write → verify. The steps are in `docs/mvp/final-report.md` section 2(c).
+2. **The open migrations from the first MVP run still apply**, because `mvp-review` contains `mvp`: 0006 (business tenant), 0007 (coefficients) and 0008 (event stages), in that order, each with backup → dry run → your `go <number>` → write → verify. The steps are in `docs/mvp/mvp-final-report.md` section 2(c).
 3. **Optional read-only check (475):** count purchase units whose unit is not a known unit. The `mongosh` query is in `docs/mvp/runs/475.md` under "Final gate — Atlas". It writes nothing.
 4. **Deferred log checks:** plans 451, 461, 462, 464, 466 and 469 could not run their error-log check because local MongoDB was down. After you walk the cards, run `node scripts/log-query.mjs --since=2h --level=error`; expect no new errors from these pages.
 5. **Known test failures that were already there before this run:** `code-qa-api.test.mjs` (fixture schema), the `v2-types upgradeV1toV2` spec, and flaky `RowActionsMenu`, `ProductForm` and `HeaderComponent` specs. No plan made them worse.
