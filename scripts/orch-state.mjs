@@ -62,12 +62,13 @@ import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 import { findOpenPlan } from './lib/plan-paths.mjs'
 import { extractScopeGlobs, testFilesOutOfScope } from './lib/plan-scope.mjs'
+import { scopeTestsLint } from './lib/scope-tests-lint.mjs'
 import { planNumber, planTitle, mergeSubjectRe } from './lib/plan-deps.mjs'
 import { uiItems } from './lib/done-when.mjs'
 import { listSlots } from './lib/slot.mjs'
 import { ensureDeps, idleSlot, claimSlot, releaseSlot, releaseRunSlots } from './lib/orch-folders.mjs'
 import { agreementStats, addLesson, lessonParts, ruleLines, LESSON_ROLES } from './decision-log.mjs'
-import { triageForce, triageView, decisionType, runNameProblem, PLAN_STATES, planBranch, planBranchProblem, startTier, humanItems, freeGb, formatReport, addedCodeFiles, uiCardProblem, watchLine, logQueryArgs, lessonFacts, runLogRow, updateRunLog, parseRunLog, parseDecisionRows, trendOf, contextBudget, INJECTED_ROLES } from './lib/orch-run.mjs'
+import { triageForce, triageView, decisionsInView, mergePlanFile, decisionType, runNameProblem, PLAN_STATES, planBranch, planBranchProblem, startTier, humanItems, freeGb, formatReport, addedCodeFiles, uiCardProblem, watchLine, logQueryArgs, lessonFacts, commandTag, runLogRow, updateRunLog, parseRunLog, parseDecisionRows, trendOf, contextBudget, INJECTED_ROLES } from './lib/orch-run.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const MAIN = 'main'
@@ -100,13 +101,15 @@ const SENSITIVE_CODE_RE = /auth|permission|password|jwt|session[_-]?id|tokens?\b
 // Every flag takes a value. The workflow passes `--key=value` (one token, so a value can never become a flag); a
 // human may write `--key value`, where a value starting with "-" is refused. An unknown flag (--root among them: the
 // folder is always this script's own project) or a second positional word stops the command.
-const FLAGS = new Set(['run', 'started', 'plans', 'plan', 'state', 'round', 'tier', 'sha', 'role', 'model', 'effort', 'roles', 'reason', 'card', 'card-status', 'page', 'shots', 'via', 'step', 'check', 'tail', 'tried', 'text', 'min', 'stale-min', 'files', 'cmd', 'id', 'verdict', 'kind', 'confidence', 'rec', 'why', 'forced', 'dup-of', 'command', 'where',
+const FLAGS = new Set(['run', 'started', 'plans', 'plan', 'state', 'round', 'tier', 'sha', 'checked-head','role', 'model', 'effort', 'roles', 'reason', 'card', 'card-status', 'page', 'shots', 'via', 'step', 'check', 'tail', 'tried', 'text', 'min', 'stale-min', 'files', 'cmd', 'id', 'verdict', 'kind', 'confidence', 'rec', 'why', 'forced', 'dup-of', 'command', 'where',
   // facts the workflow records for the lessons (docs/agent/orchestrator.md "status.json"), and `trend` / `finish` options
-  'candidates', 'refuted', 'refuted-rules', 'verify-by', 'late-low', 'reappeared', 'miss', 'round-cause', 'gate-event', 'asked', 'ready', 'final-gate', 'final-gate-command', 'final-gate-command-b64', 'final-gate-plans', 'result', 'last',
+  'candidates', 'refuted', 'refuted-rules', 'verify-by', 'late-low', 'reappeared', 'miss', 'round-cause', 'gate-event', 'asked', 'ready', 'final-gate', 'final-gate-command', 'final-gate-command-b64', 'final-gate-tail-b64', 'final-gate-plans', 'causes-b64', 'result', 'last',
   // the hand-off's replan verdict and the builder's receipt
   'replan', 'replan-why', 'not-done', 'failed',
   // queued run notes riding on set / stop / finish, and the one-call decisions list
   'note', 'notes-b64', 'b64', 'flakes-b64', 'with-worktree',
+  // a reason as base64 of its UTF-8 text (the workflow's way: quotes, brackets and $ survive the runner's shell)
+  'reason-b64',
   // `prepare`: the generated path, the npm script, the folder it runs in and the package manager
   'missing', 'script', 'in', 'pm'])
 function parseArgs(argv) {
@@ -130,6 +133,13 @@ function parseArgs(argv) {
 
 const parsed = parseArgs(process.argv.slice(2))
 const args = parsed.args ?? { _: [] }
+// --reason-b64 stands for --reason: decoded here, so every command that reads a reason takes either form.
+if (args['reason-b64'] !== undefined) {
+  const raw = String(args['reason-b64'])
+  const text = Buffer.from(raw, 'base64').toString('utf8')
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(raw) || Buffer.from(text, 'utf8').toString('base64').replace(/=+$/, '') !== raw.replace(/=+$/, '')) parsed.problem ??= '--reason-b64 is not base64 of UTF-8 text'
+  else args.reason = text
+}
 const cmd = args._[0]
 const root = resolve(join(__dirname, '..'))
 const repoName = REPO || root.split(/[\\/]/).pop()
@@ -277,6 +287,15 @@ const runsDir = () => join(root, '.claude', 'orchestrator-runs')
 const statusPath = (run) => join(runsDir(), run, 'status.json')
 const mergeFolder = (run) => join(parent, `${repoName}-orch-merge-${run}`)
 const builderFolder = (run, nnn) => join(parent, `${repoName}-orch-${run}-${nnn}`)
+// The builder marker `worktree` writes (lib/db-write.mjs), removed when the folder is given back. A slot released some
+// other way keeps it, but it names the plan branch, and a released slot is detached: the guard then ignores it.
+const dropBuilderMarker = (folder) => {
+  const gitDir = git(folder, 'rev-parse', '--absolute-git-dir').out
+  if (!gitDir) return
+  try {
+    unlinkSync(join(gitDir, 'orch-builder.json'))
+  } catch { /* none */ }
+}
 
 // Plans of one wave run in parallel, so several orch-state processes can read-modify-write status.json at once.
 // Every read takes the run's lock file (an O_EXCL create, retried; a lock older than LOCK_STALE_MS is taken over, see
@@ -393,15 +412,70 @@ function needStatus(run) {
 // row all read this one place. A repeat of the stored outcome (same result, command, blamed plans) is a retry, not a new
 // attempt, so re-sending a call changes nothing.
 const cutText = (s, n) => String(s ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, n).replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '')
+// ---- the facts the lessons name: written here by the script, from git and from the code's own results ----------
+// Never a model's text: a path is kept only when git lists it in the branch diff, an id only in a strict character class, a
+// rule only when it is an INV-n id that docs/brain/invariants.md holds, a command only in an allowed shape.
+const DIFF_FILES_CAP = 40
+const PATH_RE = /^[\w@.+/-]{1,200}$/
+const ID_RE = /^[\w.-]{1,40}$/
+/** The paths the plan's branch changed against the run branch (git's own list, capped), or null when git cannot say. */
+function branchDiffFiles(status, p) {
+  if (!p.branch || planBranchProblem(p.branch)) return null
+  const pick = (b) => (refExists(`origin/${b}`) ? `origin/${b}` : refExists(`refs/heads/${b}`) ? b : null)
+  const head = pick(p.branch)
+  const base = pick(runBranch(status.run))
+  if (!head || !base) return null
+  const d = git(root, 'diff', '--name-only', `${base}...${head}`)
+  if (d.status !== 0 || d.truncated) return null
+  return d.out.split('\n').map((x) => x.trim()).filter((x) => PATH_RE.test(x)).slice(0, DIFF_FILES_CAP)
+}
+/** The first path of `files` that the text names (a failing test or a lint line names the file it failed in). */
+const firstNamed = (files, text) => (files ?? []).find((f) => String(text ?? '').includes(f)) ?? null
+const registeredRule = (rule) => {
+  const m = /\bINV-\d+\b/.exec(String(rule ?? ''))
+  if (!m) return null
+  return new RegExp(`^## ${m[0]}\\b`, 'm').test(readIf(join(root, 'docs', 'brain', 'invariants.md')) ?? '') ? m[0] : null
+}
+/** The workflow's `--causes-b64` items ([{ round, stage, cmd?, tail?, findings?: [{ id, rule, file }] }]) as plans[N].causeFacts. */
+function applyCauseFacts(status, p, items) {
+  if (!Array.isArray(items) || !items.length) return
+  const files = branchDiffFiles(status, p)
+  if (files) p.diffFiles = files
+  const diff = p.diffFiles ?? []
+  let kept = p.causeFacts ?? []
+  for (const it of items.slice(0, 10)) {
+    const round = Number(it?.round)
+    if (!Number.isInteger(round) || round < 1) continue
+    const fact = { round }
+    if (it.stage === 'gate') {
+      fact.kind = 'gate'
+      if (commandTag(it.cmd) !== 'a check command') fact.cmd = String(it.cmd).trim()
+      const file = firstNamed(diff, it.tail)
+      if (file) fact.file = file
+    } else if (it.stage === 'checker') {
+      fact.kind = 'checker'
+      fact.findings = (Array.isArray(it.findings) ? it.findings : []).filter((f) => ID_RE.test(String(f?.id ?? ''))).slice(0, 5).map((f) => {
+        const inv = registeredRule(f.rule)
+        return { id: String(f.id), ...(inv ? { inv } : {}), ...(diff.includes(String(f.file)) ? { file: String(f.file) } : {}) }
+      })
+    } else continue
+    kept = [...kept.filter((k) => k.round !== round), fact]
+  }
+  p.causeFacts = kept.slice(-20)
+}
 const fgWord = (status) => (status.finalGate ? (status.finalGate.ok ? 'ok' : 'failed') : 'none')
-function applyFinalGate(status, result, { command = '', plans = '' } = {}) {
+function applyFinalGate(status, result, { command = '', plans = '', tail = '' } = {}) {
   const ok = result === 'ok'
   const cmd = ok ? null : cutText(command, 200) || null
   const blamed = ok ? [] : [...new Set(String(plans).split(',').map((x) => x.trim()).filter((x) => /^\d+$/.test(x)))].sort()
+  // The first failing file: a path of the blamed plans' (else any plan's) branch diff that the failing output names.
+  const pool = Object.values(status.plans ?? {}).filter((q) => !blamed.length || blamed.includes(String(q.nnn))).flatMap((q) => q.diffFiles ?? [])
   const prev = status.finalGate
+  // no output given (a repeat, or the Human's call): the stored file of the same command stands
+  const file = ok ? null : tail ? firstNamed(pool, tail) : (prev?.command ?? null) === cmd ? prev?.file ?? null : null
   let changed = false
-  if (!(prev && prev.ok === ok && (prev.command ?? null) === cmd && JSON.stringify(prev.blamed ?? []) === JSON.stringify(blamed))) {
-    status.finalGate = { ok, command: cmd, at: nowIso(), attempt: (Number(prev?.attempt) || 0) + 1, blamed }
+  if (!(prev && prev.ok === ok && (prev.command ?? null) === cmd && (prev.file ?? null) === file && JSON.stringify(prev.blamed ?? []) === JSON.stringify(blamed))) {
+    status.finalGate = { ok, command: cmd, at: nowIso(), attempt: (Number(prev?.attempt) || 0) + 1, blamed, ...(file ? { file } : {}) }
     changed = true
   }
   if (ok) {
@@ -412,6 +486,12 @@ function applyFinalGate(status, result, { command = '', plans = '' } = {}) {
         p.misses = left
         changed = true
       }
+    }
+    // and the run notes an earlier failing gate wrote, so the report does not show a failure next to "ok"
+    const notes = (status.notes ?? []).filter((n) => !/^final gate (failed|could not run)/.test(String(n?.text ?? '')))
+    if (notes.length !== (status.notes ?? []).length) {
+      status.notes = notes
+      changed = true
     }
     if (/^final gate/.test(String(status.stopReason ?? ''))) {
       delete status.stopReason
@@ -427,6 +507,8 @@ const fgArgs = () => ({
   result: String(args['final-gate'] ?? ''),
   command: args['final-gate-command-b64'] !== undefined ? Buffer.from(String(args['final-gate-command-b64']), 'base64').toString('utf8') : args['final-gate-command'],
   plans: args['final-gate-plans'],
+  // the failing output (cut by the workflow); only used to find which path of the branch diff it names, never stored
+  tail: args['final-gate-tail-b64'] !== undefined ? Buffer.from(String(args['final-gate-tail-b64']), 'base64').toString('utf8') : '',
 })
 
 function diskGb() {
@@ -723,8 +805,18 @@ const commands = {
       fail(`plan-order exit ${r.status}: ${(r.stderr || r.stdout).trim().split('\n').pop()}`)
     }
     if (r.status !== 0) fail(`plan-order exit ${r.status}: ${(r.stderr || '').trim().split('\n').join(' | ')}`, { order: j })
-    emit({ ok: true, waves: j.waves, waveLocks: j.waveLocks, edges: (j.edges ?? []).filter((e) => !e.met), plans: j.plans, skipped: j.skipped, done: Object.keys(j.done ?? {}) },
-      j.waves.map((w, i) => `WAVE ${i + 1}: ${w.join(', ')}`))
+    // The test-location check (`scope-check --tests`) for every plan of the run: a plan that changes code and names no
+    // test location is asked about at readiness, before any builder, instead of parking at the test-file gate later.
+    const testLocations = {}
+    for (const nnn of j.waves.flat()) {
+      const rel = j.plans?.[nnn]?.path
+      const text = rel ? readIf(join(root, rel)) : null
+      if (!text) continue
+      const lint = scopeTestsLint(text)
+      if (lint.status === 'warn') testLocations[nnn] = lint.codeGlobs
+    }
+    emit({ ok: true, waves: j.waves, waveLocks: j.waveLocks, edges: (j.edges ?? []).filter((e) => !e.met), plans: j.plans, skipped: j.skipped, done: Object.keys(j.done ?? {}), testLocations },
+      [...j.waves.map((w, i) => `WAVE ${i + 1}: ${w.join(', ')}`), ...Object.entries(testLocations).map(([n, g]) => `plan ${n}: changes code (${g.join(', ')}) and no scope line names a test location`)])
   },
 
   done() {
@@ -869,7 +961,7 @@ const commands = {
         wt = free.path
         lines.push(`claimed slot wt-${free.slot} (${wt}) for plan ${nnn}: ${branch}`)
       } else {
-        const w = exists ? git(root, 'worktree', 'add', '--quiet', own, branch) : git(root, 'worktree', 'add', '--quiet', '-b', branch, own, base)
+        const w = exists ? git(root, 'worktree', 'add', '--quiet', own, branch) : git(root, 'worktree', 'add', '--quiet', '--no-track', '-b', branch, own, base)
         if (w.status !== 0) fail(`git worktree add ${own}: ${w.err}`)
         lines.push(`${exists ? 'reused branch' : 'created'} ${branch} in ${own}${USE_SLOTS ? ' (no idle slot)' : ''}`)
       }
@@ -892,17 +984,76 @@ const commands = {
     }
     const head = git(wt, 'rev-parse', '--abbrev-ref', 'HEAD').out
     if (head !== branch) fail(`${wt} is on ${head || '(no branch)'}, not ${branch}`)
+    // A plan branch tracks only its own remote branch: one an earlier run made with git's default upstream loses it
+    // (a bare push from the builder would go to that run branch — this run's, or an earlier run's after a relaunch under
+    // a new name). An upstream that is its own remote branch is kept.
+    const upstream = git(root, 'config', '--get', `branch.${branch}.merge`).out
+    if (upstream && upstream !== `refs/heads/${branch}`) {
+      git(root, 'config', '--unset', `branch.${branch}.merge`)
+      git(root, 'config', '--unset', `branch.${branch}.remote`)
+      lines.push(`${branch}: upstream ${upstream.replace(/^refs\/heads\//, '')} removed`)
+    }
     const dirty = git(wt, 'status', '--porcelain').out.split('\n').filter(Boolean).map((l) => l.slice(3))
     if (!dirty.length) {
       const m = git(wt, 'merge', '--quiet', '--no-edit', base)
       if (m.status !== 0) {
-        git(wt, 'merge', '--abort')
-        fail(`merging ${base} into ${branch} conflicts: ${m.out.split('\n').filter((l) => /CONFLICT/.test(l)).join(' | ') || m.err}`)
+        // The plan's own file is the one conflict the script resolves: the run branch's text (a later Planner or
+        // readiness edit) with the builder's ticks and its new Execution Notes lines put back (mergePlanFile). Any other
+        // conflicted path aborts the merge and parks as before, naming every conflicted path.
+        const conflicted = git(wt, 'diff', '--name-only', '--diff-filter=U').out.split('\n').map((l) => l.trim()).filter(Boolean)
+        const rel = planFile.replace(/\\/g, '/')
+        if (conflicted.length === 1 && conflicted[0] === rel) {
+          // the two sides untrimmed (git() trims): 2 = this branch, 3 = the run branch
+          const side = (stage) => spawnSync('git', ['show', `:${stage}:${rel}`], { cwd: wt, encoding: 'utf8' })
+          const ours = side(2)
+          const theirs = side(3)
+          if (ours.status === 0 && theirs.status === 0) {
+            writeFileSync(join(wt, rel), mergePlanFile({ ours: ours.stdout, theirs: theirs.stdout }))
+            const a = git(wt, 'add', '--', rel)
+            const c = a.status === 0 ? git(wt, 'commit', '--quiet', '--no-edit') : a
+            if (c.status === 0) lines.push(`merged ${base} into ${branch}: ${rel} conflicted — the run branch's text kept, the builder's ticks and notes put back`)
+            else {
+              git(wt, 'merge', '--abort')
+              fail(`merging ${base} into ${branch}: resolving ${rel} failed: ${c.err || c.out}`)
+            }
+          } else {
+            git(wt, 'merge', '--abort')
+            fail(`merging ${base} into ${branch} conflicts: ${rel} (its two sides could not be read)`)
+          }
+        } else {
+          git(wt, 'merge', '--abort')
+          fail(`merging ${base} into ${branch} conflicts: ${conflicted.length ? conflicted.join(', ') : m.out.split('\n').filter((l) => /CONFLICT/.test(l)).join(' | ') || m.err}`)
+        }
       }
     }
     // Commits the branch already has beyond the run branch: a relaunch or a stopped run continues from them.
     const ahead = Number(git(wt, 'rev-list', '--count', `${base}..HEAD`).out) || 0
+    // The builder marker, in the worktree's own git dir (never in its files): the scope guard asks about a database write
+    // the plan does not list only where this marker names the branch checked out (lib/db-write.mjs).
+    const gitDir = git(wt, 'rev-parse', '--absolute-git-dir').out
+    if (gitDir) writeFileSync(join(gitDir, 'orch-builder.json'), `${JSON.stringify({ run, plan: nnn, planPath: planFile, branch, planRef: git(root, 'rev-parse', base).out })}\n`)
     emit({ ok: true, path: wt.replace(/\\/g, '/'), branch, base, head: git(wt, 'rev-parse', 'HEAD').out, dirty, ...(slot ? { slot: slot.slot } : {}), ...(ahead ? { resumed: ahead } : {}) }, lines)
+  },
+
+  // May a plan be merged on its own (`/orchestrate` merge mode: no builder, gate or checker)?
+  //   node scripts/orch-state.mjs merge-ready --run <name> --plan <NNN>
+  // Only when status.json recorded the head that passed its gate and checkers (checkedHead) and the plan branch on origin
+  // is still at that head. Answers { ready, branch, head, checkedHead, round, tier } or { ready: false, why }.
+  'merge-ready'() {
+    const run = runName()
+    const nnn = planNumber(args.plan ?? '')
+    if (!nnn) fail('--plan takes a plan number')
+    const p = needStatus(run).plans?.[nnn]
+    const no = (why) => emit({ ok: true, ready: false, why }, [`plan ${nnn}: not merged on its own — ${why}`])
+    if (!p) no(`plan ${nnn} is not in run ${run}`)
+    if (p.state === 'merged') no(`plan ${nnn} is already merged (${String(p.sha ?? '').slice(0, 7)})`)
+    if (!p.checkedHead) no(`no checked head recorded for plan ${nnn}: its gate and checkers never passed in this run — relaunch it in a normal run`)
+    const branch = p.branch || branchOf(planPath(nnn), nnn)
+    fetchOrigin()
+    const head = git(root, 'rev-parse', '--verify', '--quiet', `refs/remotes/origin/${branch}`).out
+    if (!head) no(`origin/${branch} not found`)
+    if (head !== p.checkedHead) no(`origin/${branch} is at ${head.slice(0, 7)}, not the checked head ${String(p.checkedHead).slice(0, 7)} — the branch changed after its checks`)
+    emit({ ok: true, ready: true, branch, head, checkedHead: p.checkedHead, round: p.round ?? 0, tier: p.tier ?? '' }, [`plan ${nnn}: ${branch} at the checked head ${head.slice(0, 7)} — ready to merge on its own`])
   },
 
   // Gives the plan's slot back once the plan is merged or parked. Never discards: a slot with uncommitted files or
@@ -919,11 +1070,91 @@ const commands = {
     const target = `origin/${runBranch(run)}`
     const r = releaseSlot({ path: slot.path, branch, target: refExists(target) ? target : `origin/${MAIN}` })
     const st = readStatus(run)
+    if (r.released) dropBuilderMarker(slot.path)
     if (r.released && st?.plans?.[nnn]) {
       delete st.plans[nnn].slot
       writeStatus(run, st)
     }
     emit({ ok: true, ...r, slot: slot.slot }, [r.released ? `plan ${nnn}: slot wt-${slot.slot} released` : `plan ${nnn}: slot wt-${slot.slot} kept — ${r.why}`])
+  },
+
+  // A parked plan's uncommitted work, saved before its folder is given back:
+  //   node scripts/orch-state.mjs park-save --run <name> --plan <NNN>
+  // The plan's folder (its slot, else its own builder folder) is snapshotted — tracked changes and new files, never an
+  // ignored one — as one commit `WIP: park <run> <NNN>` on the fixed branch park/<run>-<NNN> (on top of that branch when
+  // an earlier park made it, else on the folder's HEAD), pushed to origin; the plan branch itself is not touched. Then
+  // the folder is cleaned and a slot is released (detached at the run branch, marker removed): the work is on origin.
+  // Nothing uncommitted → no branch, nothing changed. A push that fails leaves the folder as it was.
+  'park-save'() {
+    const run = runName()
+    const nnn = planNumber(args.plan ?? '')
+    if (!nnn) fail('--plan takes a plan number')
+    const st = readStatus(run)
+    const own = builderFolder(run, nnn)
+    const planFile = planPath(nnn)
+    const slot = USE_SLOTS ? listSlots().find((s) => s.plan === planFile) ?? null : null
+    const folder = slot ? slot.path : existsSync(own) ? own : null
+    if (!folder) emit({ ok: true, saved: false, why: 'the plan has no folder' }, [`plan ${nnn}: no folder to save`])
+    const changed = git(folder, 'status', '--porcelain').out.split('\n').filter((l) => l && !/^\?\? \.worktree-/.test(l))
+    if (!changed.length) emit({ ok: true, saved: false, why: 'nothing uncommitted' }, [`plan ${nnn}: nothing uncommitted to save`])
+    const branch = `park/${run}-${nnn}`
+    fetchOrigin()
+    const head = git(folder, 'rev-parse', 'HEAD').out
+    const local = git(folder, 'rev-parse', '--verify', '--quiet', `refs/heads/${branch}`)
+    const remote = git(folder, 'rev-parse', '--verify', '--quiet', `refs/remotes/origin/${branch}`)
+    const parentSha = local.status === 0 ? local.out : remote.status === 0 ? remote.out : head
+    // A separate index: the folder's own index and branch stay as they are until the commit is safely on origin.
+    const index = join(git(folder, 'rev-parse', '--absolute-git-dir').out || folder, `park-index-${process.pid}`)
+    const gi = (...a) => {
+      const r = spawnSync('git', a, { cwd: folder, encoding: 'utf8', env: { ...process.env, GIT_INDEX_FILE: index } })
+      return { status: r.status ?? 1, out: (r.stdout ?? '').trim(), err: (r.stderr ?? '').trim() }
+    }
+    let commit = ''
+    try {
+      for (const step of [['read-tree', 'HEAD'], ['add', '-A', '--', '.', ':(exclude).worktree-*']]) {
+        const r = gi(...step)
+        if (r.status !== 0) fail(`park-save: git ${step.join(' ')} in ${folder}: ${r.err}`)
+      }
+      const tree = gi('write-tree')
+      if (tree.status !== 0) fail(`park-save: git write-tree in ${folder}: ${tree.err}`)
+      const c = gi('commit-tree', tree.out, '-p', parentSha, '-m', `WIP: park ${run} ${nnn}`, '-m', `The uncommitted work of plan ${nnn} when run ${run} parked it (folder ${folder.replace(/\\/g, '/')}, HEAD ${head.slice(0, 7)}).`)
+      if (c.status !== 0) fail(`park-save: git commit-tree in ${folder}: ${c.err}`)
+      commit = c.out
+    } finally {
+      try {
+        unlinkSync(index)
+      } catch { /* none written */ }
+    }
+    const u = git(folder, 'update-ref', `refs/heads/${branch}`, commit)
+    if (u.status !== 0) fail(`park-save: git update-ref ${branch}: ${u.err}`)
+    const p = git(folder, 'push', '--quiet', 'origin', `${branch}:refs/heads/${branch}`)
+    if (p.status !== 0) emit({ ok: false, saved: true, pushed: false, branch, sha: commit, error: `push of ${branch} failed: ${p.err.split('\n').pop()} — the folder is kept as it was` }, [`plan ${nnn}: saved on ${branch} (${commit.slice(0, 7)}), push failed — folder kept`])
+    // The work is on origin: clean the folder and give a slot back.
+    git(folder, 'reset', '--quiet', '--hard')
+    git(folder, 'clean', '-fdq', '--exclude=.worktree-*')
+    const lines = [`plan ${nnn}: uncommitted work saved on ${branch} (${commit.slice(0, 7)}) and pushed`]
+    let released = false
+    if (slot) {
+      const target = refExists(`origin/${runBranch(run)}`) ? `origin/${runBranch(run)}` : `origin/${MAIN}`
+      const d = git(folder, 'switch', '--quiet', '--detach', target)
+      if (d.status === 0) {
+        try {
+          unlinkSync(join(folder, '.worktree-plan'))
+        } catch { /* no marker */ }
+        dropBuilderMarker(folder)
+        released = true
+        if (st?.plans?.[nnn]) {
+          delete st.plans[nnn].slot
+          st.plans[nnn].parkBranch = branch
+          writeStatus(run, st)
+        }
+        lines.push(`plan ${nnn}: slot wt-${slot.slot} released`)
+      } else lines.push(`plan ${nnn}: slot wt-${slot.slot} kept — git switch --detach ${target}: ${d.err.split('\n').pop()}`)
+    } else if (st?.plans?.[nnn]) {
+      st.plans[nnn].parkBranch = branch
+      writeStatus(run, st)
+    }
+    emit({ ok: true, saved: true, pushed: true, branch, sha: commit, released, ...(slot ? { slot: slot.slot } : {}) }, lines)
   },
 
   diff() {
@@ -975,7 +1206,18 @@ const commands = {
       if (!/^\d+$/.test(String(args.round))) fail('--round takes a whole number')
       p.round = Number(args.round)
     }
+    // Every tier a builder of this plan ran on, in order (a change of tier appends): the report lists them all, not the last.
+    if (args.tier !== undefined && args.tier !== true) {
+      const tiers = p.tiers ?? (p.tier ? [p.tier] : [])
+      if (tiers[tiers.length - 1] !== String(args.tier)) tiers.push(String(args.tier))
+      p.tiers = tiers
+    }
     for (const k of ['tier', 'sha', 'reason']) if (args[k] !== undefined && args[k] !== true) p[k] = String(args[k])
+    // --checked-head <sha>: the branch head that passed the gate and the checkers (what `merge-ready` compares with).
+    if (args['checked-head'] !== undefined && args['checked-head'] !== true) {
+      if (!/^[0-9a-f]{40}$/.test(String(args['checked-head']))) fail('--checked-head takes a full 40-character commit sha')
+      p.checkedHead = String(args['checked-head'])
+    }
     p.models ??= {}
     if (args.role) p.models[String(args.role)] = { model: String(args.model ?? 'unknown'), ...(args.effort ? { effort: String(args.effort) } : {}) }
     // --roles orch-builder=sonnet/medium,orch-gate=haiku/low: the model each agent of this step echoed.
@@ -1028,6 +1270,12 @@ const commands = {
     }
     for (const [flag, field] of [['miss', 'misses'], ['round-cause', 'roundCauses'], ['gate-event', 'gateEvents']]) {
       if (text(flag)) p[field] = [...new Set([...(p[field] ?? []), ...text(flag).split(' || ').map((x) => x.trim().slice(0, 300)).filter(Boolean)])]
+    }
+    // --causes-b64: the failed round's code-made facts, in this same call: no runner call of their own.
+    if (args['causes-b64'] !== undefined && args['causes-b64'] !== true) {
+      let items = []
+      try { items = JSON.parse(Buffer.from(String(args['causes-b64']), 'base64').toString('utf8')) } catch { items = [] }
+      applyCauseFacts(status, p, items)
     }
     if (args.asked !== undefined) p.asked = text('asked').split(' || ').map((x) => x.trim()).filter(Boolean).slice(0, 5)
     if (args.ready !== undefined) {
@@ -1324,8 +1572,11 @@ function publishReport(run, status, { merged, slots, message, brain }) {
       learnError = e.message
     }
     const report = formatReport({ status, merged, mainShaNow, finishedAt: status.finishedAt, runBranch: branch, mainBranch: MAIN, mainChangedFiles, appErrors, decisions: status.decisions ?? [], triage, learning: learned ? { budget: learned.budget.line, trend: learned.trend.line } : null })
-    // What the command prints: this launch's decisions only (the earlier launch's were graded when it ended).
-    const view = triageView({ decisions: (status.decisions ?? []).filter((d) => (d.attempt ?? 1) === (status.attempts ?? 1)), ...triage })
+    // What the command prints: this launch's decisions, and an earlier launch's that has no grade for this run yet.
+    const attempt = status.attempts ?? 1
+    const inView = decisionsInView(status.decisions ?? [], { attempt, run, gradeRows })
+    const earlier = inView.filter((d) => (d.attempt ?? 1) < attempt)
+    const view = triageView({ decisions: inView, ...triage })
     const ids = (list) => list.map((d) => d.id)
     const triageOut = { mode: TRIAGE, line: view.line, ask: ids(view.ask), askMore: ids(view.askMore), accepted: ids(view.accepted), followUps: ids(view.followUps), noise: ids(view.noise), none: ids(view.none), collapsed: ids(view.collapsed) }
     const local = join(runsDir(), `${run}.md`)
@@ -1338,7 +1589,7 @@ function publishReport(run, status, { merged, slots, message, brain }) {
     const rel = `docs/orchestrator/runs/${run}`
     const learningOut = learned ? { lessonsAdded: learned.added.length, lessonsDropped: learned.dropped.length, budget: learned.budget.line, chars: learned.budget.total, trend: learned.trend.line } : { error: learnError }
     const learningLines = learned ? [`lessons: ${learned.added.length} line(s) added, ${learned.dropped.length} dropped`, ...budgetLines(learned.budget), learned.trend.line] : [`lessons: not written (${learnError})`]
-    const base = { triage: triageOut, report: `${rel}/report.md`, local: local.replace(/\\/g, '/'), merged: merged.map((m) => m.nnn), parked, phase: status.phase, slots: slots.lines, learning: learningOut, ...(brainLine ? { brain: brainLine } : {}) }
+    const base = { triage: triageOut, ...(earlier.length ? { earlierDecisions: earlier } : {}), report: `${rel}/report.md`, local: local.replace(/\\/g, '/'), merged: merged.map((m) => m.nnn), parked, phase: status.phase, slots: slots.lines, learning: learningOut, ...(brainLine ? { brain: brainLine } : {}) }
     const notCommitted = (error, extra = {}) => emit({ ok: false, ...base, reportCommitted: false, error: `${error} — the report is in ${local}`, ...extra },
       [...slots.lines, `report: local copy ${local} (not committed to ${branch}: ${error})`, ...learningLines, ...(brainLine ? [brainLine] : [])])
     if (!existsSync(mf)) notCommitted(`no merge folder ${mf}`)

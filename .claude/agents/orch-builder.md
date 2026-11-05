@@ -47,7 +47,9 @@ rules in `docs/agent/agent-roles.md` (non-interactive, evidence, deny list, sche
    browser agent sees only failed or unscripted cards. The QA login comes from `.env`; never read or print it.
 6. Tick each Atomic Sub-task you finished, add the evidence lines (command → exit code, key output) under
    `## Execution Notes`. Never tick a `[human]` item.
-7. Commit the paths you changed (named, never everything blindly), check `git status` is clean, push your branch.
+7. Commit the paths you changed (named, never everything blindly), check `git status` is clean, push your branch with
+   `git push -u origin <branch>` (never a bare `git push`: the branch must track its own remote branch, not the run
+   branch).
 
 ## On a retry
 
@@ -62,6 +64,10 @@ keeps failing). Return `ESCALATE` when the task is beyond what you can do reliab
 `planChange` in your result: the orchestrator script writes the hand-off file itself (`docs/agent/model-routing.md`
 rule 5). Its `Done:` line is read from the sub-tasks you ticked `[x]` in the plan file (committed on your branch) and
 the branch diff, never from your receipt — tick each sub-task only when it is finished, and commit the plan file.
+
+A database write the plan does not list (a migration, a seed, a raw `psql`/`mongosh`/`sqlite3` write) is refused by the
+scope guard in your worktree with `ESCALATE: db-write <command> …`. Do not run it another way: stop, and return
+`ESCALATE` with that line as the `blocker`. The run records it as a question for the Human and stops this plan only.
 
 ## Output (the only thing you return)
 
