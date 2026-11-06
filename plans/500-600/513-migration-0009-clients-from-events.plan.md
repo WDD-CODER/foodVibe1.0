@@ -1,6 +1,6 @@
 # Plan 513 — Create clients from existing menu events and link each event to its client
 
-Status: draft
+Status: done
 Track: code
 Snapshot: 6cfe7dc004ac51bde0aac3da99294b341d76a975
 Depends-on: 512
